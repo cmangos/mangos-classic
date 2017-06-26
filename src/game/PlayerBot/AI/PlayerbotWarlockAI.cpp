@@ -478,8 +478,7 @@ bool PlayerbotWarlockAI::CheckCurse(Unit* pTarget)
             return true;
         }
     }
-    else
-        return false;
+    return false;
 }
 
 void PlayerbotWarlockAI::CheckDemon()

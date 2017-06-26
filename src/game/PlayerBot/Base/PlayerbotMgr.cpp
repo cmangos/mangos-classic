@@ -1168,7 +1168,6 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
             SetSentErrorMessage(true);
             return false;
         }
-
-        return true;
     }
+    return true;
 }

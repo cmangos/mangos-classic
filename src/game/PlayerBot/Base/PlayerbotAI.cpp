@@ -7031,6 +7031,7 @@ void PlayerbotAI::_HandleCommandQuest(std::string &text, Player &fromPlayer)
         PlayerbotChatHandler ch(GetMaster());
         int8 linkStart = text.find("|");
         if (text.find("|") != std::string::npos)
+        {
             if (!ch.dropQuest((char *) text.substr(linkStart).c_str()))
             {
                 ch.sysmessage("ERROR: could not drop quest");
@@ -7040,6 +7041,7 @@ void PlayerbotAI::_HandleCommandQuest(std::string &text, Player &fromPlayer)
                 SetQuestNeedItems();
                 SetQuestNeedCreatures();
             }
+         }
     }
     else if (ExtractCommand("fetch", text, true)) // true -> "quest fetch"
     {
