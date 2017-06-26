@@ -3555,8 +3555,8 @@ void Unit::_UpdateSpells(uint32 time)
 
 void Unit::_UpdateAutoRepeatSpell()
 {
-    // check "realtime" interrupts
-    if (IsNonMeleeSpellCasted(false, false, true))
+    // check "real time" interrupts
+    if (IsMoving() || IsNonMeleeSpellCasted(false, false, true))
     {
         // cancel wand shoot
         if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Category == 351)
@@ -3570,19 +3570,46 @@ void Unit::_UpdateAutoRepeatSpell()
         setAttackTimer(RANGED_ATTACK, 500);
     m_AutoRepeatFirstCast = false;
 
-    // castroutine
+    // cast routine
     if (isAttackReady(RANGED_ATTACK))
     {
-        // Check if able to cast
-        if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckCast(true) != SPELL_CAST_OK)
+        // be sure the unit is stand up
+        if (getStandState() != UNIT_STAND_STATE_STAND)
+            SetStandState(UNIT_STAND_STATE_STAND);
+
+        Unit* currSpellTarget = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_targets.getUnitTarget();
+        Unit* currTarget = nullptr;
+
+        // Check i there is new target
+        ObjectGuid const& currTargetGuid = GetTargetGuid();
+        if (!currTargetGuid.IsEmpty() && currTargetGuid.IsUnit())
         {
+            if (currTargetGuid != currSpellTarget->GetObjectGuid())
+                currTarget = GetMap()->GetUnit(currTargetGuid);
+            else
+                currTarget = currSpellTarget;
+        }
+
+        // some check about new target are necessary
+        if (!currTarget || !currTarget->isTargetableForAttack() || currTarget->IsFriendlyTo(this))
+        {
+            // no valid target
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             return;
         }
 
+        SpellCastTargets targets;
+        targets.setUnitTarget(currTarget);
+
         // we want to shoot
-        Spell* spell = new Spell(this, m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo, true);
-        spell->SpellStart(&(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_targets));
+        Spell* spell = new Spell(this, m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo, TRIGGERED_OLD_TRIGGERED);
+
+        // Check if able to cast
+        if (spell->SpellStart(&targets) != SPELL_CAST_OK)
+        {
+            InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+            return;
+        }
 
         // all went good, reset attack
         resetAttackTimer(RANGED_ATTACK);

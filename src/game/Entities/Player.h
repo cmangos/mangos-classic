@@ -2082,8 +2082,6 @@ class Player : public Unit
         virtual CombatData* GetCombatData() override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); return m_combatData; }
         void ForceHealAndPowerUpdateInZone();
 
-        virtual void _UpdateAutoRepeatSpell() override;
-
 #ifdef BUILD_PLAYERBOT
         // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
         // neither. Code that enables bots must create the playerbotMgr and set it using SetPlayerbotMgr.

@@ -2676,7 +2676,7 @@ void Spell::cancel()
         return;
 
     // channeled spells don't display interrupted message even if they are interrupted, possible other cases with no "Interrupted" message
-    bool sendInterrupt = IsChanneledSpell(m_spellInfo) ? false : true;
+    bool sendInterrupt = (IsChanneledSpell(m_spellInfo) || m_autoRepeat) ? false : true;
 
     m_autoRepeat = false;
     switch (m_spellState)
