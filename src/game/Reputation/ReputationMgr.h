@@ -71,29 +71,20 @@ class ReputationMgr
     public:                                                 // accessors
         FactionStateList const& GetStateList() const { return m_factions; }
 
-        FactionState const* GetState(FactionEntry const* factionEntry) const
-        {
-            return factionEntry->reputationListID >= 0 ? GetState(factionEntry->reputationListID) : nullptr;
-        }
-
-        FactionState const* GetState(RepListID id) const
-        {
-            FactionStateList::const_iterator repItr = m_factions.find(id);
-            return repItr != m_factions.end() ? &repItr->second : nullptr;
-        }
+        FactionState const* GetState(FactionEntry const* factionEntry) const;
+        FactionState const* GetState(RepListID id) const;
 
         int32 GetReputation(uint32 faction_id) const;
         int32 GetReputation(FactionEntry const* factionEntry) const;
         int32 GetBaseReputation(FactionEntry const* factionEntry) const;
 
+        bool IsAtWar(uint32 faction_id) const;
+        bool IsAtWar(FactionEntry const* factionEntry) const;
+
         ReputationRank GetRank(FactionEntry const* factionEntry) const;
         ReputationRank GetBaseRank(FactionEntry const* factionEntry) const;
 
-        ReputationRank const* GetForcedRankIfAny(FactionTemplateEntry const* factionTemplateEntry) const
-        {
-            ForcedReactions::const_iterator forceItr = m_forcedReactions.find(factionTemplateEntry->faction);
-            return forceItr != m_forcedReactions.end() ? &forceItr->second : nullptr;
-        }
+        ReputationRank const* GetForcedRankIfAny(FactionTemplateEntry const* factionTemplateEntry) const;
 
     public:                                                 // modifiers
         bool SetReputation(FactionEntry const* factionEntry, int32 standing)

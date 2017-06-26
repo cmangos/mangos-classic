@@ -1367,7 +1367,7 @@ bool ChatHandler::HandleModifyRepCommand(char* args)
         return false;
     }
 
-    if (factionEntry->reputationListID < 0)
+    if (!factionEntry->HasReputation())
     {
         PSendSysMessage(LANG_COMMAND_FACTION_NOREP_ERROR, factionEntry->name[GetSessionDbcLocale()], factionId);
         SetSentErrorMessage(true);
