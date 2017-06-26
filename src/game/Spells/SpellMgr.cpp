@@ -114,11 +114,15 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
 
     SpellCastTimesEntry const* spellCastTimeEntry = sSpellCastTimesStore.LookupEntry(spellInfo->CastingTimeIndex);
 
-    // not all spells have cast time index and this is all is pasiive abilities
+    // not all spells have cast time index and this is all is passive abilities
     if (!spellCastTimeEntry)
         return 0;
 
     int32 castTime = spellCastTimeEntry->CastTime;
+
+    // Multi shot: Only (alternative set CastingTimeIndex = 3)
+    if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (spellInfo->SpellFamilyFlags & 0x0000000000001000) && (!spell || !spell->IsAutoRepeat()))
+        castTime += 500;
 
     if (spell)
     {
@@ -133,9 +137,6 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
                 castTime = int32(castTime * spell->GetCaster()->m_modAttackSpeedPct[RANGED_ATTACK]);
         }
     }
-
-    if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()))
-        castTime += 500;
 
     // [workaround] holy light need script effect, but 19968 spell for it have 2.5 cast time sec
     // it should be instant instead
