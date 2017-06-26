@@ -334,7 +334,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
             if (!spellInfo)
                 return RETURN_CONTINUE;
 
-            if (m_ai->CheckBotCast(spellInfo) != SPELL_CAST_OK)
+            if (!m_ai->CheckBotCast(spellInfo))
                 m_bot->InterruptNonMeleeSpells(true, AUTO_SHOT);
 
             return RETURN_CONTINUE;
