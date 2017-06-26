@@ -433,7 +433,7 @@ bool PlayerbotClassAI::FleeFromNpcWithAuraIfCan(uint32 NpcEntry, uint32 spellId,
  *
  * return true if bot has found a proper destination, false if none was found
  */
-bool PlayerbotClassAI::PlayerbotClassAI::FleeFromPointIfCan(uint32 radius, Unit* pTarget, float x0, float y0, float z0, float forcedAngle /* = 0.0f */)
+bool PlayerbotClassAI::FleeFromPointIfCan(uint32 radius, Unit* pTarget, float x0, float y0, float z0, float forcedAngle /* = 0.0f */)
 {
     if (!m_bot) return false;
     if (!m_ai) return false;
