@@ -3602,7 +3602,7 @@ void Unit::_UpdateAutoRepeatSpell()
         targets.setUnitTarget(currTarget);
 
         // we want to shoot
-        Spell* spell = new Spell(this, m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo, TRIGGERED_OLD_TRIGGERED);
+        Spell* spell = new Spell(this, m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo, TRIGGERED_AUTOREPEAT);
 
         // Check if able to cast
         if (spell->SpellStart(&targets) != SPELL_CAST_OK)
