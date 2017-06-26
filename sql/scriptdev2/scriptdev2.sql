@@ -583,6 +583,7 @@ UPDATE creature_template SET ScriptName='mob_healing_ward' WHERE entry=14987;
 UPDATE creature_template SET ScriptName='npc_gurubashi_bat_rider' WHERE entry=14750;
 UPDATE creature_template SET ScriptName='npc_hakkari_blood_priest' WHERE entry=11340;
 UPDATE creature_template SET ScriptName='npc_zulian_prowler' WHERE entry=15101;
+UPDATE creature_template SET ScriptName='npc_zulian_panther' WHERE entry=11365;
 
 --
 -- Below contains data for table `script_texts` mainly used in C++ parts.
