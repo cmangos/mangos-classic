@@ -162,70 +162,65 @@ FileSystem::Dir& FileSystem::getContents(const std::string& path, bool forceUpda
         const bool exists = _stat(key.c_str(), &st) != -1;
         const bool isDirectory = (st.st_mode & S_IFDIR) != 0;
 
-        // Does this path exist on the real filesystem?
+        // Does this path exist on the real filesystem and is it actually a directory?
         if (exists && isDirectory) {
-
-            // Is this path actually a directory?
-            if (isDirectory) {
-                dir.exists = true;
-                // Update contents
-#               ifdef G3D_WIN32
-                    const std::string& filespec = FilePath::concat(key, "*");
-                    struct _finddata_t fileinfo;
-                    intptr_t handle = _findfirst(filespec.c_str(), &fileinfo);
-                    debugAssert(handle != -1);
-                    int result = 0;
-                    do {
-                        if ((strcmp(fileinfo.name, ".") != 0) && (strcmp(fileinfo.name, "..") != 0)) {
-                            Entry& e = dir.nodeArray.next();
-                            e.name = fileinfo.name;
-                            if ((fileinfo.attrib & _A_SUBDIR) != 0) {
-                                e.type = DIR_TYPE;
-                            } else {
-                                e.type = FILE_TYPE;
-                            }
+            dir.exists = true;
+            // Update contents
+#           ifdef G3D_WIN32
+                const std::string& filespec = FilePath::concat(key, "*");
+                struct _finddata_t fileinfo;
+                intptr_t handle = _findfirst(filespec.c_str(), &fileinfo);
+                debugAssert(handle != -1);
+                int result = 0;
+                do {
+                    if ((strcmp(fileinfo.name, ".") != 0) && (strcmp(fileinfo.name, "..") != 0)) {
+                        Entry& e = dir.nodeArray.next();
+                        e.name = fileinfo.name;
+                        if ((fileinfo.attrib & _A_SUBDIR) != 0) {
+                            e.type = DIR_TYPE;
+                        } else {
+                            e.type = FILE_TYPE;
                         }
-
-                        result = _findnext(handle, &fileinfo);
-                    } while (result == 0);
-                    _findclose(handle);
-
-#               else
-                    DIR* listing = opendir(key.c_str());
-                    debugAssertM(listing, "opendir failed on '" + key + "'");
-                    struct dirent* entry = readdir(listing);
-                    while (entry != NULL) {
-                        if ((strcmp(entry->d_name, "..") != 0) && (strcmp(entry->d_name, ".") != 0)) {
-                            Entry& e = dir.nodeArray.next();
-                            e.name = entry->d_name;
-
-#                           ifdef _DIRENT_HAVE_D_TYPE
-                                // Not all POSIX systems support this field
-                                // http://www.delorie.com/gnu/docs/glibc/libc_270.html
-                                switch (entry->d_type) {
-                                case DT_DIR:
-                                    e.type = DIR_TYPE;
-                                    break;
-                                    
-                                case DT_REG:
-                                    e.type = FILE_TYPE;
-                                    break;
-                                    
-                                case DT_UNKNOWN:
-                                default:
-                                    e.type = UNKNOWN;
-                                    break;
-                                }
-#                           endif
-                        }
-                        entry = readdir(listing);
                     }
-                    closedir(listing);
-                    listing = NULL;
-                    entry = NULL;
-#               endif
-            }
 
+                    result = _findnext(handle, &fileinfo);
+                } while (result == 0);
+                _findclose(handle);
+
+#           else
+                DIR* listing = opendir(key.c_str());
+                debugAssertM(listing, "opendir failed on '" + key + "'");
+                struct dirent* entry = readdir(listing);
+                while (entry != NULL) {
+                    if ((strcmp(entry->d_name, "..") != 0) && (strcmp(entry->d_name, ".") != 0)) {
+                        Entry& e = dir.nodeArray.next();
+                        e.name = entry->d_name;
+
+#                       ifdef _DIRENT_HAVE_D_TYPE
+                            // Not all POSIX systems support this field
+                            // http://www.delorie.com/gnu/docs/glibc/libc_270.html
+                            switch (entry->d_type) {
+                            case DT_DIR:
+                                e.type = DIR_TYPE;
+                                break;
+
+                            case DT_REG:
+                                e.type = FILE_TYPE;
+                                break;
+
+                            case DT_UNKNOWN:
+                            default:
+                                e.type = UNKNOWN;
+                                break;
+                            }
+#                       endif
+                    }
+                    entry = readdir(listing);
+                }
+                closedir(listing);
+                listing = NULL;
+                entry = NULL;
+#           endif
         } else {
             std::string zip;
 
