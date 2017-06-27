@@ -1304,6 +1304,8 @@ class Player : public Unit
         void Regenerate(Powers power);
         void RegenerateHealth();
         void setRegenTimer(uint32 time) {m_regenTimer = time;}
+
+        uint32 GetWeaponChangeTimer() { return m_weaponChangeTimer; }
         void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
 
         uint32 GetMoney() const { return GetUInt32Value(PLAYER_FIELD_COINAGE); }
