@@ -2220,6 +2220,17 @@ enum ShapeshiftForm
     FORM_SPIRITOFREDEMPTION = 0x20
 };
 
+enum ShapeshiftFormFlags
+{
+    SHAPESHIFT_FORM_FLAG_UNK1               = 0x00000001,
+    SHAPESHIFT_FORM_FLAG_UNK2               = 0x00000002,
+    SHAPESHIFT_FORM_FLAG_UNK3               = 0x00000004,
+    SHAPESHIFT_FORM_FLAG_UNK4               = 0x00000008,
+    SHAPESHIFT_FORM_FLAG_UNK5               = 0x00000010,
+    SHAPESHIFT_FORM_FLAG_UNK6               = 0x00000020,
+    SHAPESHIFT_FORM_FLAG_UNK7               = 0x00000040,
+};
+
 enum ResponseCodes
 {
     RESPONSE_SUCCESS                                       = 0x00,
