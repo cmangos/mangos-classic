@@ -2778,7 +2778,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         {
             charmInfo->SetPetNumber(pet_number, false);
 
-            if (spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE))
+            if (spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
                 charmInfo->SetReactState(REACT_PASSIVE);
             else if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)
                 charmInfo->SetReactState(REACT_DEFENSIVE);
@@ -4729,7 +4729,7 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
     critter->SelectLevel();                                 // some summoned critters have different from 1 DB data for level/hp
     const CreatureInfo* info = critter->GetCreatureInfo();
     // Some companions have additional UNIT_FLAG_NON_ATTACKABLE (0x2), perphaps coming from template, so add template flags
-    critter->SetUInt32Value(UNIT_FIELD_FLAGS, (UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_PASSIVE | info->UnitFlags));
+    critter->SetUInt32Value(UNIT_FIELD_FLAGS, (UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC | info->UnitFlags));
     critter->SetUInt32Value(UNIT_NPC_FLAGS, info->NpcFlags);// some companions may have quests, so they need npc flags
     critter->InitPetCreateSpells();                         // some companions may have spells (e.g. disgusting oozeling)
     if (m_duration > 0)                                     // set timer for unsummon

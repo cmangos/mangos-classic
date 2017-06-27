@@ -352,7 +352,7 @@ struct npc_kroshiusAI : public ScriptedAI
                         m_uiPhaseTimer = 3500;
                         break;
                     case 3:                                 // Attack
-                        m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN |  TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER | TEMPFACTION_TOGGLE_PASSIVE);
+                        m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN |  TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
                         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                         {
                             if (m_creature->IsWithinDistInMap(pPlayer, 30.0f))

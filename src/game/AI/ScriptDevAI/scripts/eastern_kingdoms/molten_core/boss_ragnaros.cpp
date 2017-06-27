@@ -209,7 +209,7 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
                 {
                     m_uiEnterCombatTimer = 0;
                     // If we don't remove this passive flag, he will be unattackable after evading, this way he will enter combat
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                     if (m_pInstance)
                     {
                         if (Player* pPlayer = m_pInstance->GetPlayerInMap(true, false))

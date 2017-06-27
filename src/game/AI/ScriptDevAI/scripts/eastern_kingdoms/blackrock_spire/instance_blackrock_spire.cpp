@@ -222,7 +222,7 @@ void instance_blackrock_spire::SetData(uint32 uiType, uint32 uiData)
                     {
                         if (!pIncarcerator->isAlive())
                             pIncarcerator->Respawn();
-                        pIncarcerator->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                        pIncarcerator->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                     }
                 }
 
@@ -533,7 +533,7 @@ void instance_blackrock_spire::DoProcessEmberseerEvent()
             if (pCreature->isAlive())
             {
                 pCreature->InterruptNonMeleeSpells(false);
-                pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             }
         }
     }

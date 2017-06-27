@@ -1834,7 +1834,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
     if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO)
         return false;
 
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE))
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC))
         return false;
 
     // skip fighting creature
@@ -2441,8 +2441,8 @@ void Creature::SetFactionTemporary(uint32 factionId, uint32 tempFactionFlags)
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER)
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-    if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_PASSIVE)
-        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+    if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_IMMUNE_TO_NPC)
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_PACIFIED)
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NOT_SELECTABLE)
@@ -2462,13 +2462,13 @@ void Creature::ClearTemporaryFaction()
 
     ForceHealthAndPowerUpdate();                            // update health and power for client needed to hide enemy real value
 
-    // Reset UNIT_FLAG_NON_ATTACKABLE, UNIT_FLAG_IMMUNE_TO_PLAYER, UNIT_FLAG_PASSIVE, UNIT_FLAG_PACIFIED or UNIT_FLAG_NOT_SELECTABLE flags
+    // Reset UNIT_FLAG_NON_ATTACKABLE, UNIT_FLAG_IMMUNE_TO_PLAYER, UNIT_FLAG_IMMUNE_TO_NPC, UNIT_FLAG_PACIFIED or UNIT_FLAG_NOT_SELECTABLE flags
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NON_ATTACKABLE && GetCreatureInfo()->UnitFlags & UNIT_FLAG_NON_ATTACKABLE)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER && GetCreatureInfo()->UnitFlags & UNIT_FLAG_IMMUNE_TO_PLAYER)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-    if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_PASSIVE && GetCreatureInfo()->UnitFlags & UNIT_FLAG_PASSIVE)
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+    if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_IMMUNE_TO_NPC && GetCreatureInfo()->UnitFlags & UNIT_FLAG_IMMUNE_TO_NPC)
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_PACIFIED && GetCreatureInfo()->UnitFlags & UNIT_FLAG_PACIFIED)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NOT_SELECTABLE && GetCreatureInfo()->UnitFlags & UNIT_FLAG_NOT_SELECTABLE)

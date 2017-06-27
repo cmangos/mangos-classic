@@ -212,7 +212,7 @@ bool QuestAccept_npc_dalinda_malem(Player* pPlayer, Creature* pCreature, const Q
         if (npc_dalinda_malemAI* pEscortAI = dynamic_cast<npc_dalinda_malemAI*>(pCreature->AI()))
         {
             // TODO This faction change needs confirmation, also possible that we need to drop her PASSIVE flag
-            pCreature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_PASSIVE);
+            pCreature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
             pEscortAI->Start(false, pPlayer, pQuest);
         }
     }
