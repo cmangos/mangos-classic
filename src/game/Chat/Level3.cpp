@@ -4565,6 +4565,37 @@ bool ChatHandler::HandleResetTalentsCommand(char* args)
     return false;
 }
 
+bool ChatHandler::HandleResetTaxiNodesCommand(char* args)
+{
+    Player* target;
+    ObjectGuid target_guid;
+    std::string target_name;
+    if (!ExtractPlayerTarget(&args, &target, &target_guid, &target_name))
+        return false;
+
+    if (target)
+    {
+        target->InitTaxiNodes();
+
+        ChatHandler(target).SendSysMessage("Your taxi nodes have been reset.");
+        if (!m_session || m_session->GetPlayer() != target)
+            PSendSysMessage("Taxi nodes of %s have been reset.", GetNameLink(target).c_str());
+        return true;
+    }
+    else if (target_guid)
+    {
+        uint32 at_flags = AT_LOGIN_RESET_TAXINODES;
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'", at_flags, target_guid.GetCounter());
+        std::string nameLink = playerLink(target_name);
+        PSendSysMessage("Taxi nodes of %s will be reset at next login.", nameLink.c_str());
+        return true;
+    }
+
+    SendSysMessage(LANG_NO_CHAR_SELECTED);
+    SetSentErrorMessage(true);
+    return false;
+}
+
 bool ChatHandler::HandleResetAllCommand(char* args)
 {
     if (!*args)

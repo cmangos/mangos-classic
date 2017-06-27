@@ -464,13 +464,13 @@ class ChatHandler
         bool HandleReloadSpellThreatsCommand(char* args);
         bool HandleReloadSpellPetAurasCommand(char* args);
 
-        bool HandleResetAchievementsCommand(char* args);
         bool HandleResetAllCommand(char* args);
         bool HandleResetHonorCommand(char* args);
         bool HandleResetLevelCommand(char* args);
         bool HandleResetSpellsCommand(char* args);
         bool HandleResetStatsCommand(char* args);
         bool HandleResetTalentsCommand(char* args);
+        bool HandleResetTaxiNodesCommand(char* args);
 
         bool HandleSendItemsCommand(char* args);
         bool HandleSendMailCommand(char* args);
