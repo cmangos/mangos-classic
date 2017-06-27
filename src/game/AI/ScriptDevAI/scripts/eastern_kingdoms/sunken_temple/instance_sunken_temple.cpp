@@ -108,7 +108,7 @@ void instance_sunken_temple::OnCreatureEvade(Creature* pCreature)
             break;
             // Shade of Eranikus: prevent it to become unattackable after a wipe
         case NPC_SHADE_OF_ERANIKUS:
-            pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+            pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
     }
 }
@@ -163,7 +163,7 @@ void instance_sunken_temple::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
             {
                 if (Creature* pEranikus = GetSingleCreatureFromStorage(NPC_SHADE_OF_ERANIKUS))
-                    pEranikus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    pEranikus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             }
             m_auiEncounter[uiType] = uiData;
             break;

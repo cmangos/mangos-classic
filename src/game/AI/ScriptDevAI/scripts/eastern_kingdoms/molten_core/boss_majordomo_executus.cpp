@@ -141,7 +141,7 @@ struct boss_majordomoAI : public ScriptedAI
             m_creature->SetLootRecipient(nullptr);
 
             // Set friendly
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             m_creature->SetFactionTemporary(FACTION_MAJORDOMO_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
 
             // Reset orientation

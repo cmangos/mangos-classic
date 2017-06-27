@@ -63,7 +63,7 @@ void instance_dire_maul::OnCreatureCreate(Creature* pCreature)
             // West
         case NPC_PRINCE_TORTHELDRIN:
             if (m_auiEncounter[TYPE_IMMOLTHAR] == DONE)
-                pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_OOC_NOT_ATTACK);
+                pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER);
             break;
         case NPC_ARCANE_ABERRATION:
         case NPC_MANA_REMNANT:
@@ -224,7 +224,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                 if (Creature* pPrince = GetSingleCreatureFromStorage(NPC_PRINCE_TORTHELDRIN))
                 {
                     DoScriptText(SAY_FREE_IMMOLTHAR, pPrince);
-                    pPrince->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_OOC_NOT_ATTACK);
+                    pPrince->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER);
                     // Despawn Chest-Aura
                     if (GameObject* pChestAura = GetSingleGameObjectFromStorage(GO_PRINCES_CHEST_AURA))
                         pChestAura->Use(pPrince);
