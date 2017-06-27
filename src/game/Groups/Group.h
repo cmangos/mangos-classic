@@ -47,7 +47,7 @@ enum GroupMemberStatus
     MEMBER_STATUS_DEAD      = 0x0004,                       // Lua_UnitIsDead
     MEMBER_STATUS_GHOST     = 0x0008,                       // Lua_UnitIsGhost
     MEMBER_STATUS_PVP_FFA   = 0x0010,                       // Lua_UnitIsPVPFreeForAll
-    MEMBER_STATUS_UNK3      = 0x0020,                       // used in calls from Lua_GetPlayerMapPosition/Lua_GetBattlefieldFlagPosition
+    MEMBER_STATUS_ZONE_OUT  = 0x0020,                       // Lua_GetPlayerMapPosition
     MEMBER_STATUS_AFK       = 0x0040,                       // Lua_UnitIsAFK
     MEMBER_STATUS_DND       = 0x0080,                       // Lua_UnitIsDND
 };
