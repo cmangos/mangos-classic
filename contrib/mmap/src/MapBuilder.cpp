@@ -550,7 +550,7 @@ namespace MMAP
 
         // merge per tile poly and detail meshes
         rcPolyMesh** pmmerge = new rcPolyMesh*[TILES_PER_MAP * TILES_PER_MAP];
-        if (!pmmerge)
+        if (!pmmerge) // <-
         {
             printf("%s alloc pmmerge FIALED!                              \r", tileString);
             return;
