@@ -883,18 +883,11 @@ bool Pet::HasTPForSpell(uint32 spellid) const
 
 int32 Pet::GetTPForSpell(uint32 spellid) const
 {
-    uint32 basetrainp = 0;
+    SkillLineAbilityEntry const* newSpell = sSkillLineAbilityStore.LookupEntry(spellid);
+    if (!newSpell || !newSpell->reqtrainpoints)
+        return 0;
 
-    SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellid);
-    for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
-    {
-        if (!_spell_idx->second->reqtrainpoints)
-            return 0;
-
-        basetrainp = _spell_idx->second->reqtrainpoints;
-        break;
-    }
-
+    uint32 basetrainp = newSpell->reqtrainpoints;
     uint32 spenttrainp = 0;
     uint32 chainstart = sSpellMgr.GetFirstSpellInChain(spellid);
 
@@ -1962,13 +1955,9 @@ void Pet::InitPetCreateSpells()
 
             addSpell(petspellid);
 
-            SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(learn_spellproto->EffectTriggerSpell[0]);
-
-            for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
-            {
-                usedtrainpoints += _spell_idx->second->reqtrainpoints;
-                break;
-            }
+            SkillLineAbilityEntry const* skla = sSkillLineAbilityStore.LookupEntry(learn_spellproto->EffectTriggerSpell[0]);
+            if (skla)
+                usedtrainpoints += skla->reqtrainpoints;
         }
     }
 
