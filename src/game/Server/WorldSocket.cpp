@@ -423,9 +423,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket &recvPacket)
     SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "UPDATE account SET last_ip = ? WHERE username = ?");
     stmt.PExecute(address.c_str(), account.c_str());
 
-    if (!(m_session = new WorldSession(id, this, AccountTypes(security), mutetime, locale)))
-        return false;
-
+    m_session = new WorldSession(id, this, AccountTypes(security), mutetime, locale);
     m_crypt.Init(&K);
 
     m_session->LoadTutorialsData();
