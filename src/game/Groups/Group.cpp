@@ -1118,8 +1118,21 @@ void Group::ResetInstances(InstanceResetMethod method, Player* SendMsgTo)
         bool isEmpty = true;
         // if the map is loaded, reset it
         if (Map* map = sMapMgr.FindMap(state->GetMapId(), state->GetInstanceId()))
+        {
+            // if someone is offline in group, not allow reset instances
+            for (member_citerator mitr = m_memberSlots.begin(); mitr != m_memberSlots.end(); ++mitr)
+            {
+                Player* player = sObjectMgr.GetPlayer(mitr->guid, false);
+                if (!player || GetGroupMemberStatus(player) == MEMBER_STATUS_OFFLINE)
+                {
+                    if (SendMsgTo)
+                        SendMsgTo->SendResetInstanceFailed(1, state->GetMapId());
+                    return;
+                }
+            }
             if (map->IsDungeon() && !(method == INSTANCE_RESET_GROUP_DISBAND && !state->CanReset()))
                 isEmpty = ((DungeonMap*)map)->Reset(method);
+        }
 
         if (SendMsgTo)
         {
