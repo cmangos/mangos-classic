@@ -581,6 +581,7 @@ UPDATE creature_template SET ScriptName='mob_zealot_lorkhan' WHERE entry=11347;
 UPDATE creature_template SET ScriptName='mob_zealot_zath' WHERE entry=11348;
 UPDATE creature_template SET ScriptName='mob_healing_ward' WHERE entry=14987;
 UPDATE creature_template SET ScriptName='npc_gurubashi_bat_rider' WHERE entry=14750;
+UPDATE creature_template SET ScriptName='npc_zulian_prowler' WHERE entry=15101;
 
 --
 -- Below contains data for table `script_texts` mainly used in C++ parts.
