@@ -233,6 +233,7 @@ class Quest
         uint32 GetPointOpt() const { return PointOpt; }
         uint32 GetIncompleteEmote() const { return IncompleteEmote; }
         uint32 GetCompleteEmote() const { return CompleteEmote; }
+        uint32 GetDetailsEmoteCount() const { return m_detailsemotecount; }
         uint32 GetQuestStartScript() const { return QuestStartScript; }
         uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
 
@@ -280,6 +281,7 @@ class Quest
         uint32 m_reqCreatureOrGOcount;
         uint32 m_rewchoiceitemscount;
         uint32 m_rewitemscount;
+        uint32 m_detailsemotecount;                         // actual allowed value 0..4
 
         bool m_isActive;
 
