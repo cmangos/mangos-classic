@@ -119,7 +119,10 @@ void instance_zulgurub::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_ARLOKK:
             m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_FORCEFIELD);
+            if (uiData == IN_PROGRESS)
+                DoUseDoorOrButton(GO_FORCEFIELD);
+            else if (GameObject* pForcefield = GetSingleGameObjectFromStorage(GO_FORCEFIELD))
+                pForcefield->ResetDoorOrButton();
             if (uiData == DONE)
                 DoLowerHakkarHitPoints();
             if (uiData == FAIL)
