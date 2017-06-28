@@ -9527,6 +9527,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
                 else
                 {
                     m_weaponChangeTimer = spellProto->StartRecoveryTime;
+                    GetGlobalCooldownMgr().AddGlobalCooldown(spellProto, m_weaponChangeTimer);
 
                     WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 4 + 4);
                     data << GetObjectGuid();
