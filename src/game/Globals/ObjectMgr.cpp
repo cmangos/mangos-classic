@@ -1285,6 +1285,25 @@ void ObjectMgr::RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data
     cell_guids.gameobjects.erase(guid);
 }
 
+// Get player map id of offline player. Return -1 if not found!
+int32 ObjectMgr::GetPlayerMapIdByGUID(ObjectGuid const& guid) const
+{
+    // prevent DB access for online player
+    if (Player* player = GetPlayer(guid))
+        return int32(player->GetMapId());
+
+    QueryResult* result = CharacterDatabase.PQuery("SELECT map FROM characters WHERE guid = '%u'", guid.GetCounter());
+
+    if (result)
+    {
+        uint32 mapId = (*result)[0].GetUInt32();
+        delete result;
+        return int32(mapId);
+    }
+
+    return -1;
+}
+
 // name must be checked to correctness (if received) before call this function
 ObjectGuid ObjectMgr::GetPlayerGuidByName(std::string name) const
 {

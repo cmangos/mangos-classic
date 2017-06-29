@@ -15667,6 +15667,9 @@ void Player::SendResetInstanceSuccess(uint32 MapId) const
 void Player::SendResetInstanceFailed(uint32 reason, uint32 MapId) const
 {
     // TODO: find what other fail reasons there are besides players in the instance
+    // 0 - at least one player is in the instance
+    // 1 - at least one player is offline
+    // 2 - at least one player try to enter the instance (being teleported in)
     WorldPacket data(SMSG_INSTANCE_RESET_FAILED, 4);
     data << uint32(reason);
     data << uint32(MapId);

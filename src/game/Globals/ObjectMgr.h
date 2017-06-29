@@ -511,6 +511,7 @@ class ObjectMgr
         void GetPlayerLevelInfo(uint32 race, uint32 class_, uint32 level, PlayerLevelInfo* info) const;
 
         ObjectGuid GetPlayerGuidByName(std::string name) const;
+        int32 GetPlayerMapIdByGUID(ObjectGuid const& guid) const;
         bool GetPlayerNameByGUID(ObjectGuid guid, std::string& name) const;
         Team GetPlayerTeamByGUID(ObjectGuid guid) const;
         uint32 GetPlayerAccountIdByGUID(ObjectGuid guid) const;
