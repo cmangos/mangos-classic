@@ -453,10 +453,10 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     {
         ItemPrototype const* IProto;
 
-        uint32 count = pQuest->GetRewChoiceItemsCount();
-        data << uint32(count);
+        uint32 rewChocieItemCount = pQuest->GetRewChoiceItemsCount();
+        data << uint32(rewChocieItemCount);
 
-        for (uint32 i = 0; i < count; ++i)
+        for (uint32 i = 0; i < rewChocieItemCount; ++i)
         {
             data << uint32(pQuest->RewChoiceItemId[i]);
             data << uint32(pQuest->RewChoiceItemCount[i]);
@@ -469,10 +469,10 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
                 data << uint32(0x00);
         }
 
-        count = pQuest->GetRewItemsCount();
-        data << uint32(count);
+        uint32 rewItemCount = pQuest->GetRewItemsCount();
+        data << uint32(rewItemCount);
 
-        for (uint32 i = 0; i < count; ++i)
+        for (uint32 i = 0; i < rewItemCount; ++i)
         {
             data << uint32(pQuest->RewItemId[i]);
             data << uint32(pQuest->RewItemCount[i]);
@@ -490,9 +490,9 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
 
     data << uint32(pQuest->GetRewSpell());
 
-    uint32 count = pQuest->GetDetailsEmoteCount();
-    data << uint32(count);
-    for (uint32 i = 0; i < count; ++i)
+    uint32 detailsEmotesCount = pQuest->GetDetailsEmoteCount();
+    data << uint32(detailsEmotesCount);
+    for (uint32 i = 0; i < detailsEmotesCount; ++i)
     {
         data << uint32(pQuest->DetailsEmote[i]);
         data << uint32(pQuest->DetailsEmoteDelay[i]); // delay between emotes in ms
