@@ -137,7 +137,7 @@ struct ScriptedAI : public CreatureAI
         // == State checks =================================
 
         // Check if unit is visible for MoveInLineOfSight
-        bool IsVisible(Unit* pWho) const override;
+        // bool IsVisible(Unit* pWho) const override;
 
         // Called when victim entered water and creature can not enter water
         bool canReachByRangeAttack(Unit* pWho) override { return CreatureAI::canReachByRangeAttack(pWho); }
@@ -217,6 +217,7 @@ struct ScriptedAI : public CreatureAI
 
     private:
         uint32 m_uiEvadeCheckCooldown;
+
 };
 
 struct Scripted_NoMovementAI : public ScriptedAI

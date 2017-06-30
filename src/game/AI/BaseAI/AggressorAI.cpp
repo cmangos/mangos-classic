@@ -45,9 +45,3 @@ void AggressorAI::UpdateAI(const uint32 /*diff*/)
 
     DoMeleeAttackIfReady();
 }
-
-bool AggressorAI::IsVisible(Unit* pl) const
-{
-    return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_MONSTER))
-           && pl->isVisibleForOrDetect(m_creature, m_creature, true);
-}

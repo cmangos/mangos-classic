@@ -15,12 +15,6 @@ EndScriptData */
 ScriptedPetAI::ScriptedPetAI(Creature* pCreature) : CreatureAI(pCreature)
 {}
 
-bool ScriptedPetAI::IsVisible(Unit* pWho) const
-{
-    return pWho && m_creature->IsWithinDist(pWho, VISIBLE_RANGE)
-           && pWho->isVisibleForOrDetect(m_creature, m_creature, true);
-}
-
 void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
 {
     if (m_creature->getVictim())

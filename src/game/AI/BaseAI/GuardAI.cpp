@@ -63,9 +63,3 @@ void GuardAI::UpdateAI(const uint32 /*diff*/)
 
     DoMeleeAttackIfReady();
 }
-
-bool GuardAI::IsVisible(Unit* pl) const
-{
-    return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER))
-           && pl->isVisibleForOrDetect(m_creature, m_creature, true);
-}

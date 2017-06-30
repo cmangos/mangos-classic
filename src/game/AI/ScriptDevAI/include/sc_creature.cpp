@@ -29,15 +29,6 @@ void ScriptedAI::GetAIInformation(ChatHandler& reader)
     reader.PSendSysMessage("ScriptedAI, combat movement is %s", reader.GetOnOffStr(IsCombatMovement()));
 }
 
-/// Return if the creature can "see" pWho
-bool ScriptedAI::IsVisible(Unit* pWho) const
-{
-    if (!pWho)
-        return false;
-
-    return m_creature->IsWithinDist(pWho, VISIBLE_RANGE) && pWho->isVisibleForOrDetect(m_creature, m_creature, true);
-}
-
 /**
  * This function only calls Aggro, which is to be used for scripting purposes
  */

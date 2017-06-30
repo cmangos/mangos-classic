@@ -37,9 +37,6 @@ class AggressorAI : public CreatureAI
 
         explicit AggressorAI(Creature* c);
 
-        bool IsVisible(Unit*) const override;
-        bool IsControllable() const override { return true; }
-
         void UpdateAI(const uint32) override;
         static int Permissible(const Creature*);
 

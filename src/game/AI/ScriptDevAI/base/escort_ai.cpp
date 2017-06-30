@@ -43,14 +43,6 @@ void npc_escortAI::GetAIInformation(ChatHandler& reader)
     reader.PSendSysMessage("%s", oss.str().c_str());
 }
 
-bool npc_escortAI::IsVisible(Unit* pWho) const
-{
-    if (!pWho)
-        return false;
-
-    return m_creature->IsWithinDist(pWho, VISIBLE_RANGE) && pWho->isVisibleForOrDetect(m_creature, m_creature, true);
-}
-
 void npc_escortAI::Aggro(Unit* /*pEnemy*/) {}
 
 // see followerAI

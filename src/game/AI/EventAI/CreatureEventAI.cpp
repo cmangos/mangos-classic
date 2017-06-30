@@ -1377,6 +1377,8 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
 
     m_EventUpdateTime = EVENT_UPDATE_TIME;
     m_EventDiff = 0;
+
+    CreatureAI::EnterCombat(enemy);
 }
 
 void CreatureEventAI::MoveInLineOfSight(Unit* who)
@@ -1480,16 +1482,9 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
             else
                 SetCombatMovement(true, true);
         }
-        else if (m_meleeEnabled && m_creature->CanReachWithMeleeAttack(victim)
-            && !(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE))
+        else if (m_meleeEnabled && !(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE))
             DoMeleeAttackIfReady();
     }
-}
-
-bool CreatureEventAI::IsVisible(Unit* pl) const
-{
-    return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_MONSTER))
-           && pl->isVisibleForOrDetect(m_creature, m_creature, true);
 }
 
 inline uint32 CreatureEventAI::GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3) const

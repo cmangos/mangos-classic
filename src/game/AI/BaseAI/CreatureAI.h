@@ -133,7 +133,7 @@ class CreatureAI
          * Called for reaction at enter to combat if not in combat yet
          * @param pEnemy Unit* of whom the Creature enters combat with, can be nullptr
          */
-        virtual void EnterCombat(Unit* /*pEnemy*/) {}
+        virtual void EnterCombat(Unit* /*pEnemy*/);
 
         /**
          * Called for reaction at stopping attack at no attackers or targets
@@ -302,10 +302,10 @@ class CreatureAI
          * Note: This check is by default only the state-depending (visibility, range), NOT LineOfSight
          * @param pWho Unit* who is checked if it is visisble for the creature
          */
-        virtual bool IsVisible(Unit* /*pWho*/) const { return false; }
+        virtual bool IsVisible(Unit* /*pWho*/) const;
 
         /// Check if this AI can be replaced in possess case
-        virtual bool IsControllable() const { return false; }
+        // virtual bool IsControllable() const { return false; }
 
         // Called when victim entered water and creature can not enter water
         // TODO: rather unused
@@ -391,6 +391,9 @@ class CreatureAI
         /// How should an enemy be chased
         float m_attackDistance;
         float m_attackAngle;
+
+        // How far a creature can detect in MoveInLineOfSight
+        float m_visibilityDistance;
 
         bool m_meleeEnabled;                              // If we allow melee auto attack
 

@@ -24,6 +24,7 @@
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
+#include "World/World.h"
 
 static_assert(MAXIMAL_AI_EVENT_EVENTAI <= 32, "Maximal 32 AI_EVENTs supported with EventAI");
 
@@ -34,8 +35,13 @@ CreatureAI::CreatureAI(Creature* creature) :
     m_attackDistance(0.0f),
     m_attackAngle(0.0f),
     m_reactState(REACT_AGGRESSIVE),
-    m_meleeEnabled(true)
+    m_meleeEnabled(true),
+    m_visibilityDistance(VISIBLE_RANGE)
 {
+    if (m_creature->IsCivilian())
+        m_reactState = REACT_DEFENSIVE;
+    if(m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
+        m_visibilityDistance = sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER);
 }
 
 CreatureAI::CreatureAI(Unit* unit) :
@@ -45,7 +51,8 @@ CreatureAI::CreatureAI(Unit* unit) :
     m_attackDistance(0.0f),
     m_attackAngle(0.0f),
     m_reactState(REACT_AGGRESSIVE),
-    m_meleeEnabled(true)
+    m_meleeEnabled(true),
+    m_visibilityDistance(VISIBLE_RANGE)
 {
 }
 
@@ -74,6 +81,16 @@ void CreatureAI::MoveInLineOfSight(Unit * who)
         m_creature->IsHostileTo(who) && who->isInAccessablePlaceFor(m_creature))
     {
         DetectOrAttack(who, m_creature);
+    }
+}
+
+void CreatureAI::EnterCombat(Unit *enemy)
+{
+    if ((m_creature->IsGuard() || m_creature->IsCivilian()) && enemy->GetTypeId() == TYPEID_PLAYER)
+    {
+        // Send Zone Under Attack message to the LocalDefense and WorldDefense Channels
+        if (Player* pKiller = enemy->GetBeneficiaryPlayer())
+            m_creature->SendZoneUnderAttackMessage(pKiller);
     }
 }
 
@@ -216,6 +233,10 @@ void CreatureAI::AttackStart(Unit* who)
         m_creature->AddThreat(who);
         m_creature->SetInCombatWith(who);
         who->SetInCombatWith(m_creature);
+
+        // Cast "Spawn Guard" to help Civilian
+        if (m_creature->IsCivilian())
+            m_creature->CastSpell(m_creature, 43783, TRIGGERED_OLD_TRIGGERED);
 
         HandleMovementOnAttackStart(who);
     }
@@ -407,6 +428,11 @@ void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pR
 {
     MANGOS_ASSERT(pReceiver);
     pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker, miscValue);
+}
+
+bool CreatureAI::IsVisible(Unit* pl) const
+{
+    return m_creature->IsWithinDist(pl, m_visibilityDistance) && pl->isVisibleForOrDetect(m_creature, m_creature, true);
 }
 
 Unit* CreatureAI::DoSelectLowestHpFriendly(float range, float minMissing, bool percent)

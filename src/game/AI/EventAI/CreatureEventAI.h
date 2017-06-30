@@ -739,12 +739,10 @@ class CreatureEventAI : public CreatureAI
         void DamageTaken(Unit* done_by, uint32& damage, DamageEffectType damagetype) override;
         void HealedBy(Unit* healer, uint32& healedAmount) override;
         void UpdateAI(const uint32 diff) override;
-        bool IsVisible(Unit*) const override;
         void ReceiveEmote(Player* pPlayer, uint32 text_emote) override;
         void SummonedCreatureJustDied(Creature* unit) override;
         void SummonedCreatureDespawn(Creature* unit) override;
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 miscValue) override;
-        bool IsControllable() const override { return true; }
 
         static int Permissible(const Creature*);
 

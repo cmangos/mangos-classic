@@ -103,11 +103,6 @@ void PetAI::EnterEvadeMode()
 {
 }
 
-bool PetAI::IsVisible(Unit* pl) const
-{
-    return _isVisible(pl);
-}
-
 void PetAI::UpdateAI(const uint32 diff)
 {
     if (!m_unit->isAlive())
@@ -387,12 +382,6 @@ void PetAI::UpdateAI(const uint32 diff)
                 m_unit->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
         }
     }
-}
-
-bool PetAI::_isVisible(Unit* u) const
-{
-    return m_unit->IsWithinDist(u, sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER))
-           && u->isVisibleForOrDetect(m_unit, m_unit, true);
 }
 
 void PetAI::UpdateAllies()

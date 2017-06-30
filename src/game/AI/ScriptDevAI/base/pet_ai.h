@@ -20,8 +20,6 @@ class ScriptedPetAI : public CreatureAI
 
         void AttackedBy(Unit* /*pAttacker*/) override;
 
-        bool IsVisible(Unit* /*pWho*/) const override;
-
         void KilledUnit(Unit* /*pVictim*/) override {}
 
         void OwnerKilledUnit(Unit* /*pVictim*/) override {}

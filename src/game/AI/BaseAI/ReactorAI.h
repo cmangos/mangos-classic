@@ -30,12 +30,6 @@ class ReactorAI : public CreatureAI
 
         explicit ReactorAI(Creature* c) : CreatureAI(c) {}
 
-        void MoveInLineOfSight(Unit*) override;
-        void AttackStart(Unit*) override;
-        void EnterCombat(Unit* enemy) override;
-        bool IsVisible(Unit*) const override;
-        bool IsControllable() const override { return true; }
-
         void UpdateAI(const uint32) override;
         static int Permissible(const Creature*);
 

@@ -30,8 +30,6 @@ struct npc_escortAI : public ScriptedAI
         virtual void Reset() override = 0;
 
         // CreatureAI functions
-        bool IsVisible(Unit*) const override;
-
         void MoveInLineOfSight(Unit*) override;
 
         void JustDied(Unit*) override;
