@@ -178,12 +178,6 @@ struct ScriptedAI : public CreatureAI
         // Stop attack of current victim
         void DoStopAttack();
 
-        // Cast spell by Id
-        void DoCast(Unit* pTarget, uint32 uiSpellId, bool bTriggered = false);
-
-        // Cast spell by spell info
-        void DoCastSpell(Unit* pTarget, SpellEntry const* pSpellInfo, bool bTriggered = false);
-
         // Plays a sound to all nearby players
         void DoPlaySoundToSet(WorldObject* pSource, uint32 uiSoundId);
 

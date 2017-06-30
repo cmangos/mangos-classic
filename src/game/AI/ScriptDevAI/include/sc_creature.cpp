@@ -97,22 +97,6 @@ void ScriptedAI::DoStopAttack()
         m_creature->AttackStop();
 }
 
-void ScriptedAI::DoCast(Unit* pTarget, uint32 uiSpellId, bool bTriggered)
-{
-    if (m_creature->IsNonMeleeSpellCasted(false) && !bTriggered)
-        return;
-
-    m_creature->CastSpell(pTarget, uiSpellId, bTriggered ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
-}
-
-void ScriptedAI::DoCastSpell(Unit* pTarget, SpellEntry const* pSpellInfo, bool bTriggered)
-{
-    if (m_creature->IsNonMeleeSpellCasted(false) && !bTriggered)
-        return;
-
-    m_creature->CastSpell(pTarget, pSpellInfo, bTriggered ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
-}
-
 void ScriptedAI::DoPlaySoundToSet(WorldObject* pSource, uint32 uiSoundId)
 {
     if (!pSource)

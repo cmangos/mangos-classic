@@ -50,7 +50,7 @@ void guardAI::Aggro(Unit* pWho)
     }
 
     if (const SpellEntry* pSpellInfo = m_creature->ReachWithSpellAttack(pWho))
-        DoCastSpell(pWho, pSpellInfo);
+        m_creature->CastSpell(pWho, pSpellInfo, TRIGGERED_NONE);
 }
 
 void guardAI::JustDied(Unit* pKiller)
@@ -79,7 +79,7 @@ void guardAI::UpdateAI(const uint32 uiDiff)
             if (pSpellInfo && !m_uiGlobalCooldown)
             {
                 // Cast the buff spell
-                DoCastSpell(m_creature, pSpellInfo);
+                m_creature->CastSpell(m_creature, pSpellInfo, TRIGGERED_NONE);
 
                 // Set our global cooldown
                 m_uiGlobalCooldown = GENERIC_CREATURE_COOLDOWN;
@@ -122,9 +122,9 @@ void guardAI::UpdateAI(const uint32 uiDiff)
             {
                 // Cast the spell
                 if (bHealing)
-                    DoCastSpell(m_creature, pSpellInfo);
+                    m_creature->CastSpell(m_creature, pSpellInfo, TRIGGERED_NONE);
                 else
-                    DoCastSpell(m_creature->getVictim(), pSpellInfo);
+                    m_creature->CastSpell(m_creature->getVictim(), pSpellInfo, TRIGGERED_NONE);
 
                 // Set our global cooldown
                 m_uiGlobalCooldown = GENERIC_CREATURE_COOLDOWN;
@@ -165,9 +165,9 @@ void guardAI::UpdateAI(const uint32 uiDiff)
 
                 // Cast spell
                 if (bHealing)
-                    DoCastSpell(m_creature, pSpellInfo);
+                    m_creature->CastSpell(m_creature, pSpellInfo, TRIGGERED_NONE);
                 else
-                    DoCastSpell(m_creature->getVictim(), pSpellInfo);
+                    m_creature->CastSpell(m_creature->getVictim(), pSpellInfo, TRIGGERED_NONE);
 
                 // Set our global cooldown
                 m_uiGlobalCooldown = GENERIC_CREATURE_COOLDOWN;
