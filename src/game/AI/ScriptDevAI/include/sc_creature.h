@@ -111,7 +111,7 @@ struct ScriptedAI : public CreatureAI
 
         // Called when the creature is target of hostile action: swing, hostile spell landed, fear/etc)
         /// This will by default result in reattacking, if the creature has no victim
-        void AttackedBy(Unit* pAttacker) override { CreatureAI::AttackedBy(pAttacker); }
+        // void AttackedBy(Unit* pAttacker) override { CreatureAI::AttackedBy(pAttacker); }
 
         // Called when creature is respawned (for reseting variables)
         void JustRespawned() override;
@@ -140,7 +140,7 @@ struct ScriptedAI : public CreatureAI
         // bool IsVisible(Unit* pWho) const override;
 
         // Called when victim entered water and creature can not enter water
-        bool canReachByRangeAttack(Unit* pWho) override { return CreatureAI::canReachByRangeAttack(pWho); }
+        // bool canReachByRangeAttack(Unit* pWho) override { return CreatureAI::canReachByRangeAttack(pWho); }
 
         // *************
         // Variables
