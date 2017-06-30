@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2698_01_mangos_gossip_menu_option` bit(1) DEFAULT NULL
+  `required_z2699_01_mangos_spell_chain_totems` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -10500,6 +10500,10 @@ INSERT INTO `spell_chain` VALUES
 (14202,14201,12880,3,0),
 (14203,14202,12880,4,0),
 (14204,14203,12880,5,0),
+/* Fire Resistance Totem Auras */
+(8185,0,8185,1,0),
+(10534,8182,8185,2,0),
+(10535,10534,8185,3,0),
 /* Flametongue Weapon Proc */
 (8026, 0, 8026, 1, 0),
 (8028, 8026, 8026, 2, 0),
@@ -10525,7 +10529,15 @@ INSERT INTO `spell_chain` VALUES
 (10458,8037,8034,3,0),
 (16352,10458,8034,4,0),
 (16353,16352,8034,5,0),
-/* Healing Stream Totem Spell */
+/* Frost Resistance Totem Auras */
+(8182,0,8182,1,0),
+(10476,8182,8182,2,0),
+(10477,10476,8182,3,0),
+/* Grace of Air Totem Auras */
+(8836,0,8836,1,0),
+(10626,8836,8836,2,0),
+(25360,10626,8836,3,0),
+/* Healing Stream Totem Auras */
 (5672,0,5672, 1,0),
 (6371,5672,5672,2,0),
 (6372,6371,5672,3,0),
@@ -10538,6 +10550,27 @@ INSERT INTO `spell_chain` VALUES
 (11335,8689,8680,4,0),
 (11336,11335,8680,5,0),
 (11337,11336,8680,6,0),
+/* Nature Resistance Totem Auras */
+(10596,0,10596,1,0),
+(10598,10596,10596,2,0),
+(10599,10598,10596,3,0),
+/* Stoneskin Totem Auras */
+(8072,0,8072,1,0),
+(8156,8072,8072,2,0),
+(8157,8156,8072,3,0),
+(10403,8157,8072,4,0),
+(10404,10403,8072,5,0),
+(10405,10404,8072,6,0),
+/* Strength of Earth Totem Auras */
+(8076,0,8076,1,0),
+(8162,8076,8076,2,0),
+(8163,8162,8076,3,0),
+(10441,8163,8076,4,0),
+(25362,10441,8076,5,0),
+/* Windwall Totem Auras */
+(15108,0,15108,1,0),
+(15109,15108,15108,2,0),
+(15110,15109,15108,3,0),
 /* Wound Poison */
 (13218,0,13218,1,0),
 (13222,13218,13218,2,0),
