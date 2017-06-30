@@ -50,6 +50,13 @@ int CreatureEventAI::Permissible(const Creature* creature)
 {
     if (creature->GetAIName() == "EventAI")
         return PERMIT_BASE_SPECIAL;
+
+    if (creature->IsCivilian() || creature->IsNeutralToAll())
+        return PERMIT_BASE_REACTIVE;
+
+    if (!creature->IsCivilian() && !creature->IsNeutralToAll())
+        return PERMIT_BASE_PROACTIVE;
+
     return PERMIT_BASE_NO;
 }
 
