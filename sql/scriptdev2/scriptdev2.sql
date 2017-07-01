@@ -27,10 +27,12 @@ INSERT INTO scripted_areatrigger VALUES
 (3549,'at_childrens_week_spot'), -- The Mor'shan Rampart
 (3550,'at_childrens_week_spot'), -- Ratchet Docks
 (3552,'at_childrens_week_spot'); -- Westfall Lighthouse
-DELETE FROM scripted_areatrigger WHERE entry IN (2026,2046);
+DELETE FROM scripted_areatrigger WHERE entry IN (2026,2046,2066,2067);
 INSERT INTO scripted_areatrigger VALUES
 (2026,'at_blackrock_spire'),
-(2046,'at_blackrock_spire');
+(2046,'at_blackrock_spire'),
+(2066,'at_blackrock_spire'),
+(2067,'at_blackrock_spire');
 DELETE FROM scripted_areatrigger WHERE entry IN (3958,3960);
 INSERT INTO scripted_areatrigger VALUES
 (3958,'at_zulgurub'),

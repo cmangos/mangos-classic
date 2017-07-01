@@ -95,6 +95,13 @@ static const SpawnLocation aStadiumLocs[7] =
     {165.74f, -466.46f, 116.80f},                           // Rend move position
 };
 
+static const SpawnLocation aBeastLocs[3] =
+{
+    {98.09f, -563.45f, 109.86f, 2.37f},                     // Summon points
+    {99.81f, -561.47f, 109.24f, 2.43f},
+    {96.92f, -560.98f, 110.18f, 2.43f},
+};
+
 static const uint32 aStadiumSpectators[12] =
 {
     NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_ELITE, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN,
@@ -177,6 +184,9 @@ class instance_blackrock_spire : public ScriptedInstance, private DialogueHelper
         void StartflamewreathEventIfCan();
 
         void Update(uint32 uiDiff) override;
+
+        bool m_bBeastIntroDone;
+        bool m_bBeastOutOfLair;
 
     private:
         void JustDidDialogueStep(int32 iEntry) override;

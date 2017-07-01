@@ -30,6 +30,8 @@ enum
 {
     AREATRIGGER_ENTER_UBRS      = 2046,
     AREATRIGGER_STADIUM         = 2026,
+    AREATRIGGER_BEAST_AGGRO     = 2066,
+    AREATRIGGER_BEAST_INTRO     = 2067,
 
     // Arena event dialogue - handled by instance
     SAY_NEFARIUS_INTRO_1        = -1229004,
@@ -98,7 +100,9 @@ instance_blackrock_spire::instance_blackrock_spire(Map* pMap) : ScriptedInstance
     m_uiFlamewreathWaveCount(0),
     m_uiStadiumEventTimer(0),
     m_uiStadiumWaves(0),
-    m_uiStadiumMobsAlive(0)
+    m_uiStadiumMobsAlive(0),
+    m_bBeastIntroDone(false),
+    m_bBeastOutOfLair(false)
 {
     Initialize();
 }
@@ -178,6 +182,7 @@ void instance_blackrock_spire::OnCreatureCreate(Creature* pCreature)
         case NPC_GYTH:
         case NPC_REND_BLACKHAND:
         case NPC_SCARSHIELD_INFILTRATOR:
+        case NPC_THE_BEAST:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
@@ -764,6 +769,52 @@ bool AreaTrigger_at_blackrock_spire(Player* pPlayer, AreaTriggerEntry const* pAt
                     pRend->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
 
                 pInstance->SetData(TYPE_STADIUM, IN_PROGRESS);
+            }
+            break;
+
+        // Intro event when players enter The Furnace: three Blackhand Elite are spawned, flee from the Beast and are "killed" by it
+        // The Blackhand Elite scripts are handled in database by waypoints movement
+        case AREATRIGGER_BEAST_INTRO:
+            if (instance_blackrock_spire* pInstance = (instance_blackrock_spire*) pPlayer->GetInstanceData())
+            {
+                if (pInstance->m_bBeastIntroDone)
+                    return false;
+
+                if (Creature* pBeast = pInstance->GetSingleCreatureFromStorage(NPC_THE_BEAST))
+                {
+                    for (uint8 i = 0; i < 3; i++)
+                    {
+                        if (Creature* pTemp = pBeast->SummonCreature(NPC_BLACKHAND_ELITE, aBeastLocs[i].m_fX, aBeastLocs[i].m_fY, aBeastLocs[i].m_fZ, aBeastLocs[i].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                            pTemp->GetMotionMaster()->MoveWaypoint(i);
+                    }
+                    pInstance->m_bBeastIntroDone = true;
+                }
+            }
+            break;
+
+        // Make the Beast move around the room unless it finds some target.
+        case AREATRIGGER_BEAST_AGGRO:
+            if (instance_blackrock_spire* pInstance = (instance_blackrock_spire*) pPlayer->GetInstanceData())
+            {
+                if (pInstance->m_bBeastOutOfLair)
+                    return false;
+
+                if (Creature* pBeast = pInstance->GetSingleCreatureFromStorage(NPC_THE_BEAST))
+                {
+                    pBeast->GetMotionMaster()->MoveWaypoint(0);
+                    pInstance->m_bBeastOutOfLair = true;
+
+                    // Play the intro if not already done
+                    if (!pInstance->m_bBeastIntroDone)
+                    {
+                        for (uint8 i = 0; i < 3; i++)
+                        {
+                            if (Creature* pTemp = pBeast->SummonCreature(NPC_BLACKHAND_ELITE, aBeastLocs[i].m_fX, aBeastLocs[i].m_fY, aBeastLocs[i].m_fZ, aBeastLocs[i].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                                pTemp->GetMotionMaster()->MoveWaypoint(i);
+                        }
+                        pInstance->m_bBeastIntroDone = true;
+                    }
+                }
             }
             break;
     }
