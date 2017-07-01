@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2701_01_mangos_spell_chain_sor` bit(1) DEFAULT NULL
+  `required_z2702_01_mangos_spell_chain_totems_typos` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -10503,7 +10503,7 @@ INSERT INTO `spell_chain` VALUES
 (14204,14203,12880,5,0),
 /* Fire Resistance Totem Auras */
 (8185,0,8185,1,0),
-(10534,8182,8185,2,0),
+(10534,8185,8185,2,0),
 (10535,10534,8185,3,0),
 /* Flametongue Weapon Proc */
 (8026, 0, 8026, 1, 0),
