@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Thekal
-SD%Complete: 95
-SDComment: Almost finished.
+SD%Complete: 90
+SDComment: Needs a good shake-up.
 SDCategory: Zul'Gurub
 EndScriptData
 
@@ -40,19 +40,20 @@ enum
     SPELL_SUMMON_TIGERS     = 24183,
     SPELL_TIGER_FORM        = 24169,
     SPELL_RESURRECT         = 24173,
+    SPELL_THEKAL_TRIGGER    = 24172,        // TODO: Need to find use for this
 
     // Zealot Lor'Khan Spells
-    SPELL_SHIELD            = 25020,
-    SPELL_BLOODLUST         = 24185,
-    SPELL_GREATER_HEAL      = 24208,
-    SPELL_DISARM            = 22691,
+    SPELL_LIGHTNING_SHIELD  = 20545,
+    SPELL_DISPEL_MAGIC      = 17201,
+    SPELL_GREAT_HEAL        = 24208,
+    SPELL_DISARM            = 6713,
 
-    // Zealot Lor'Khan Spells
-    SPELL_SWEEPING_STRIKES  = 18765,
-    SPELL_SINISTER_STRIKE   = 15667,
-    SPELL_GOUGE             = 24698,
+    // Zealot Zath Spells
+    SPELL_SINISTER_STRIKE   = 15581,
+    SPELL_GOUGE             = 12540,
     SPELL_KICK              = 15614,
     SPELL_BLIND             = 21060,
+    SPELL_DUAL_WIELD        = 674,
 
     PHASE_NORMAL            = 1,
     PHASE_FAKE_DEATH        = 2,
@@ -368,19 +369,19 @@ struct mob_zealot_lorkhanAI : public boss_thekalBaseAI
 
     ScriptedInstance* m_pInstance;
 
-    uint32 m_uiShieldTimer;
-    uint32 m_uiBloodLustTimer;
-    uint32 m_uiGreaterHealTimer;
+    uint32 m_uiLightningShieldTimer;
+    uint32 m_uiGreatHealTimer;
     uint32 m_uiDisarmTimer;
+    uint32 m_uiDispelTimer;
     uint32 m_uiResurrectTimer;
 
     void Reset() override
     {
-        m_uiShieldTimer         = 1000;
-        m_uiBloodLustTimer      = 16000;
-        m_uiGreaterHealTimer    = 32000;
-        m_uiDisarmTimer         = 6000;
-        m_uiPhase               = PHASE_NORMAL;
+        m_uiLightningShieldTimer = 1000;
+        m_uiGreatHealTimer       = 32000;
+        m_uiDisarmTimer          = 6000;
+        m_uiDispelTimer          = 0;
+        m_uiPhase                = PHASE_NORMAL;
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_LORKHAN, NOT_STARTED);
@@ -431,28 +432,40 @@ struct mob_zealot_lorkhanAI : public boss_thekalBaseAI
                 return;
 
             case PHASE_NORMAL:
-                // Shield_Timer
-                if (m_uiShieldTimer < uiDiff)
+                if (m_uiDispelTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SHIELD) == CAST_OK)
-                        m_uiShieldTimer = 61000;
+                    std::list<Creature*> pList = DoFindFriendlyCC(30.0f);
+
+                    Creature* dispelTarget = nullptr;
+
+                    if (!pList.empty())
+                        for (std::list<Creature*>::iterator itr = pList.begin(); itr != pList.end(); ++itr)
+                        {
+                            dispelTarget = (*itr);
+                            break;
+                        }
+
+                    if (!dispelTarget && (m_creature->isInRoots() || m_creature->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED)))
+                        dispelTarget = m_creature;
+
+                    if (dispelTarget && (DoCastSpellIfCan(dispelTarget, SPELL_DISPEL_MAGIC) == CAST_OK))
+                        m_uiDispelTimer = urand(15000, 20000);
                 }
                 else
-                    m_uiShieldTimer -= uiDiff;
+                    m_uiDispelTimer -= uiDiff;
 
-                // BloodLust_Timer
-                if (m_uiBloodLustTimer < uiDiff)
+                // Lightning_Shield_Timer
+                if (m_uiLightningShieldTimer < uiDiff)
                 {
-                    // ToDo: research if this should be cast on Thekal or Zath
-                    if (DoCastSpellIfCan(m_creature, SPELL_BLOODLUST) == CAST_OK)
-                        m_uiBloodLustTimer = urand(20000, 28000);
+                    if (DoCastSpellIfCan(m_creature, SPELL_LIGHTNING_SHIELD) == CAST_OK)
+                        m_uiLightningShieldTimer = 61000;
                 }
                 else
-                    m_uiBloodLustTimer -= uiDiff;
+                    m_uiLightningShieldTimer -= uiDiff;
 
-                // Casting Greaterheal to Thekal or Zath if they are in meele range.
+                // Casting Greatheal to Thekal or Zath if they are in meele range.
                 // TODO - why this range check?
-                if (m_uiGreaterHealTimer < uiDiff)
+                if (m_uiGreatHealTimer < uiDiff)
                 {
                     if (m_pInstance)
                     {
@@ -463,19 +476,19 @@ struct mob_zealot_lorkhanAI : public boss_thekalBaseAI
                         {
                             case 0:
                                 if (pThekal && m_creature->IsWithinDistInMap(pThekal, 3 * ATTACK_DISTANCE))
-                                    DoCastSpellIfCan(pThekal, SPELL_GREATER_HEAL);
+                                    DoCastSpellIfCan(pThekal, SPELL_GREAT_HEAL);
                                 break;
                             case 1:
                                 if (pZath && m_creature->IsWithinDistInMap(pZath, 3 * ATTACK_DISTANCE))
-                                    DoCastSpellIfCan(pZath, SPELL_GREATER_HEAL);
+                                    DoCastSpellIfCan(pZath, SPELL_GREAT_HEAL);
                                 break;
                         }
                     }
 
-                    m_uiGreaterHealTimer = urand(15000, 20000);
+                    m_uiGreatHealTimer = urand(15000, 20000);
                 }
                 else
-                    m_uiGreaterHealTimer -= uiDiff;
+                    m_uiGreatHealTimer -= uiDiff;
 
                 // Disarm_Timer
                 if (m_uiDisarmTimer < uiDiff)
@@ -507,7 +520,6 @@ struct mob_zealot_zathAI : public boss_thekalBaseAI
 
     ScriptedInstance* m_pInstance;
 
-    uint32 m_uiSweepingStrikesTimer;
     uint32 m_uiSinisterStrikeTimer;
     uint32 m_uiGougeTimer;
     uint32 m_uiKickTimer;
@@ -516,7 +528,6 @@ struct mob_zealot_zathAI : public boss_thekalBaseAI
 
     void Reset() override
     {
-        m_uiSweepingStrikesTimer    = 13000;
         m_uiSinisterStrikeTimer     = 8000;
         m_uiGougeTimer              = 25000;
         m_uiKickTimer               = 18000;
@@ -533,6 +544,8 @@ struct mob_zealot_zathAI : public boss_thekalBaseAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ZATH, IN_PROGRESS);
+
+        DoCastSpellIfCan(m_creature, SPELL_DUAL_WIELD);
     }
 
     void OnFakeingDeath()
@@ -572,15 +585,6 @@ struct mob_zealot_zathAI : public boss_thekalBaseAI
                 return;
 
             case PHASE_NORMAL:
-                // SweepingStrikes_Timer
-                if (m_uiSweepingStrikesTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SWEEPING_STRIKES) == CAST_OK)
-                        m_uiSweepingStrikesTimer = urand(22000, 26000);
-                }
-                else
-                    m_uiSweepingStrikesTimer -= uiDiff;
-
                 // SinisterStrike_Timer
                 if (m_uiSinisterStrikeTimer < uiDiff)
                 {
