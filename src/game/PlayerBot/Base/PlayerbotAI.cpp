@@ -1086,6 +1086,57 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             return;
         }
 
+        // Handle chat messages here
+    case SMSG_MESSAGECHAT:
+        {
+            WorldPacket p(packet);
+            uint8 msgtype;
+            uint32 language;
+
+            p >> msgtype;           // 1 type
+            p >> language;          // 4 language
+
+            if (language == LANG_ADDON)
+                return;
+
+            switch (msgtype)
+            {
+                case CHAT_MSG_RAID:
+                case CHAT_MSG_RAID_LEADER:
+                case CHAT_MSG_PARTY:
+                case CHAT_MSG_WHISPER:
+                {
+                    ObjectGuid senderGuid;
+                    std::string channelName;
+                    uint32 length;
+                    std::string text;
+                    uint8 chattag;
+
+                    p >> senderGuid;        // 8 player from guid
+                    if (msgtype == CHAT_MSG_PARTY)
+                        p >> senderGuid;        // 8 player from guid needs to be read again if message is from party channel
+
+                    p >> length;            // 4 length of text
+                    p >> text;              // string message
+                    p >> chattag;           // 1 AFK/DND/WHISPER_INFORM
+
+                    Player *sender = sObjectMgr.GetPlayer(senderGuid);
+                    if (!sender)            // couldn't find player that sent message
+                        return;
+
+                    // do not listen to other bots
+                    if (sender != m_bot && sender->GetPlayerbotAI())
+                        return;
+                    HandleCommand(text, *sender);
+                    return;
+                }
+                default:
+                    return;
+            }
+
+            return;
+        }
+
         // If the leader role was given to the bot automatically give it to the master
         // if the master is in the group, otherwise leave group
         case SMSG_GROUP_SET_LEADER:
@@ -3854,11 +3905,15 @@ void PlayerbotAI::TellMaster(const char *fmt, ...) const
 
 void PlayerbotAI::SendWhisper(const std::string& text, Player& player) const
 {
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, text.c_str(),
-        LANG_UNIVERSAL, m_bot->GetChatTag(), m_bot->GetObjectGuid(),
-        m_bot->GetName(), player.GetObjectGuid());
-    player.GetSession()->SendPacket(data);
+    if (player.GetPlayerbotAI())
+        return;
+
+    WorldPacket* const packet = new WorldPacket(CMSG_MESSAGECHAT, 200);
+    *packet << uint32(CHAT_MSG_WHISPER);
+    *packet << uint32(LANG_UNIVERSAL);
+    *packet << player.GetName();
+    *packet << text;
+    m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(packet))); // queue the packet to get around race condition
 }
 
 bool PlayerbotAI::canObeyCommandFrom(const Player& player) const

@@ -35,10 +35,6 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
 
-#ifdef BUILD_PLAYERBOT
-    #include "PlayerBot/Base/PlayerbotAI.h"
-#endif
-
 bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg, uint32 lang)
 {
     if (lang != LANG_ADDON)
@@ -215,20 +211,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 }
             }
 
-#ifdef BUILD_PLAYERBOT
-            // Handle whispered command to bot
-            if (player->GetPlayerbotAI())
-            {
-                player->GetPlayerbotAI()->HandleCommand(msg, *GetPlayer());
-                GetPlayer()->m_speakTime = 0;
-                GetPlayer()->m_speakCount = 0;
-            }
-            else
-                // Unmodded core line code below
-                GetPlayer()->Whisper(msg, lang, player->GetObjectGuid());
-#else
             GetPlayer()->Whisper(msg, lang, player->GetObjectGuid());
-#endif
         } break;
 
         case CHAT_MSG_PARTY:
@@ -256,20 +239,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 if (!group || group->isBGGroup())
                     return;
             }
-
-#ifdef BUILD_PLAYERBOT
-            // Broadcast message to bot members
-            for(GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr=itr->next())
-            {
-                Player* player = itr->getSource();
-                if (player && player->GetPlayerbotAI())
-                {
-                    player->GetPlayerbotAI()->HandleCommand(msg, *GetPlayer());
-                    GetPlayer()->m_speakTime = 0;
-                    GetPlayer()->m_speakCount = 0;
-                }
-            }
-#endif
 
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, ChatMsg(type), msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
