@@ -30,8 +30,6 @@ struct npc_escortAI : public ScriptedAI
         virtual void Reset() override = 0;
 
         // CreatureAI functions
-        void MoveInLineOfSight(Unit*) override;
-
         void JustDied(Unit*) override;
 
         void JustRespawned() override;
@@ -54,13 +52,13 @@ struct npc_escortAI : public ScriptedAI
         // update current point
         void SetCurrentWaypoint(uint32 uiPointId);
 
+        bool AssistPlayerInCombat(Unit* pWho) override;
     protected:
         Player* GetPlayerForEscort() { return m_creature->GetMap()->GetPlayer(m_playerGuid); }
         bool IsSD2EscortMovement(uint32 uiMoveType) const;
         virtual void JustStartedEscort() {}
 
     private:
-        bool AssistPlayerInCombat(Unit* pWho);
         bool IsPlayerOrGroupInRange();
 
         void AddEscortState(uint32 uiEscortState) { m_uiEscortState |= uiEscortState; }

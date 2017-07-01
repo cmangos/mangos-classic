@@ -45,6 +45,9 @@ void FollowerAI::AttackStart(Unit* pWho)
 // It will cause m_creature to attack pWho that are attacking _any_ player (which has been confirmed may happen also on offi)
 bool FollowerAI::AssistPlayerInCombat(Unit* pWho)
 {
+    if (!HasFollowState(STATE_FOLLOW_INPROGRESS))
+        return false;
+
     if (!pWho->getVictim())
         return false;
 
@@ -82,40 +85,6 @@ bool FollowerAI::AssistPlayerInCombat(Unit* pWho)
     }
 
     return false;
-}
-
-void FollowerAI::MoveInLineOfSight(Unit* pWho)
-{
-    if (m_creature->CanAttackOnSight(pWho) && pWho->isInAccessablePlaceFor(m_creature))
-    {
-        // AssistPlayerInCombat can start attack, so return if true
-        if (HasFollowState(STATE_FOLLOW_INPROGRESS) && AssistPlayerInCombat(pWho))
-            return;
-
-        if (!m_creature->CanInitiateAttack())
-            return;
-
-        if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
-            return;
-
-        if (m_creature->IsHostileTo(pWho))
-        {
-            float fAttackRadius = m_creature->GetAttackDistance(pWho);
-            if (m_creature->IsWithinDistInMap(pWho, fAttackRadius) && m_creature->IsWithinLOSInMap(pWho))
-            {
-                if (!m_creature->getVictim())
-                {
-                    pWho->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-                    AttackStart(pWho);
-                }
-                else if (m_creature->GetMap()->IsDungeon())
-                {
-                    pWho->SetInCombatWith(m_creature);
-                    m_creature->AddThreat(pWho);
-                }
-            }
-        }
-    }
 }
 
 void FollowerAI::JustDied(Unit* /*pKiller*/)

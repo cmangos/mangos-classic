@@ -79,10 +79,13 @@ void CreatureAI::MoveInLineOfSight(Unit * who)
     if (who->GetObjectGuid().IsCreature() && who->isInCombat())
         CheckForHelp(who, m_creature, 10.0);
 
-    if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(who) &&
-        m_creature->IsHostileTo(who) && who->isInAccessablePlaceFor(m_creature))
+    if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(who) && who->isInAccessablePlaceFor(m_creature))
     {
-        DetectOrAttack(who, m_creature);
+        if (AssistPlayerInCombat(who))
+            return;
+
+        if (!m_creature->IsHostileTo(who))
+            DetectOrAttack(who, m_creature);
     }
 }
 

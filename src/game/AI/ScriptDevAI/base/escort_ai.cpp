@@ -48,6 +48,9 @@ void npc_escortAI::Aggro(Unit* /*pEnemy*/) {}
 // see followerAI
 bool npc_escortAI::AssistPlayerInCombat(Unit* pWho)
 {
+    if (!HasEscortState(STATE_ESCORT_ESCORTING))
+        return false;
+
     if (!pWho->getVictim())
         return false;
 
@@ -85,40 +88,6 @@ bool npc_escortAI::AssistPlayerInCombat(Unit* pWho)
     }
 
     return false;
-}
-
-void npc_escortAI::MoveInLineOfSight(Unit* pWho)
-{
-    if (m_creature->CanAttackOnSight(pWho) && pWho->isInAccessablePlaceFor(m_creature))
-    {
-        // AssistPlayerInCombat can start attack, so return if true
-        if (HasEscortState(STATE_ESCORT_ESCORTING) && AssistPlayerInCombat(pWho))
-            return;
-
-        if (!m_creature->CanInitiateAttack())
-            return;
-
-        if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
-            return;
-
-        if (m_creature->IsHostileTo(pWho))
-        {
-            float fAttackRadius = m_creature->GetAttackDistance(pWho);
-            if (m_creature->IsWithinDistInMap(pWho, fAttackRadius) && m_creature->IsWithinLOSInMap(pWho))
-            {
-                if (!m_creature->getVictim())
-                {
-                    pWho->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-                    AttackStart(pWho);
-                }
-                else if (m_creature->GetMap()->IsDungeon())
-                {
-                    pWho->SetInCombatWith(m_creature);
-                    m_creature->AddThreat(pWho);
-                }
-            }
-        }
-    }
 }
 
 void npc_escortAI::JustDied(Unit* /*pKiller*/)

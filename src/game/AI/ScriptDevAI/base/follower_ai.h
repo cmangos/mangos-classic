@@ -30,8 +30,6 @@ class FollowerAI : public ScriptedAI
 
         void AttackStart(Unit*) override;
 
-        void MoveInLineOfSight(Unit*) override;
-
         void EnterEvadeMode() override;
 
         void JustDied(Unit*) override;
@@ -48,14 +46,14 @@ class FollowerAI : public ScriptedAI
 
         bool HasFollowState(uint32 uiFollowState) const { return !!(m_uiFollowState & uiFollowState); }
 
+        bool AssistPlayerInCombat(Unit* pWho) override;
+
     protected:
         Player* GetLeaderForFollower();
 
     private:
         void AddFollowState(uint32 uiFollowState) { m_uiFollowState |= uiFollowState; }
         void RemoveFollowState(uint32 uiFollowState) { m_uiFollowState &= ~uiFollowState; }
-
-        bool AssistPlayerInCombat(Unit* pWho);
 
         ObjectGuid m_leaderGuid;
         uint32 m_uiUpdateFollowTimer;

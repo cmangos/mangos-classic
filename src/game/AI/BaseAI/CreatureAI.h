@@ -367,8 +367,18 @@ class CreatureAI
          */
         virtual void OnEventHappened(uint16 /*eventId*/, bool /*activate*/, bool /*resume*/) {}
 
-        void CheckForHelp(Unit* /*who*/, Creature* /*me*/, float /*dist*/);
-        void DetectOrAttack(Unit* /*who*/, Creature* /*me*/);
+        /*
+         * Evaluates conditions and returns true if it is going to assist player
+         */
+        virtual bool AssistPlayerInCombat(Unit* pWho) { return false; }
+
+        void CheckForHelp(Unit* /*pWho*/, Creature* /*pMe*/, float /*pDist*/);
+        void DetectOrAttack(Unit* /*pWho*/, Creature* /*pMe*/);
+
+        virtual void HandleMovementOnAttackStart(Unit* victim) const;
+
+        // TODO: Implement proper casterAI in EAI and remove this from Leotheras script
+        void SetMoveChaseParams(float dist, float angle, bool moveFurther) { m_attackDistance = dist; m_attackAngle = angle; m_moveFurther = moveFurther; }
 
         // Returns friendly unit with the most amount of hp missing from max hp
         Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false);
@@ -377,12 +387,7 @@ class CreatureAI
         ReactStates GetReactState() const { return m_reactState; }
         bool HasReactState(ReactStates state) const { return (m_reactState == state); }
 
-        // TODO: Implement proper casterAI
-        void SetMoveChaseParams(float dist, float angle, bool moveFurther) { m_attackDistance = dist; m_attackAngle = angle; m_moveFurther = moveFurther; }
-
     protected:
-        void HandleMovementOnAttackStart(Unit* victim) const;
-
         ///== Fields =======================================
 
         /// Pointer to the Creature controlled by this AI
