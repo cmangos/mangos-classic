@@ -1482,6 +1482,7 @@ class Unit : public WorldObject
         float CalculateEffectiveCrushChance(const Unit* victim, WeaponAttackType attType) const;
         float CalculateEffectiveGlanceChance(const Unit* victim, WeaponAttackType attType) const;
         float CalculateEffectiveDazeChance(const Unit* victim, WeaponAttackType attType) const;
+        uint32 CalculateGlanceAmount(CalcDamageInfo* meleeInfo) const;
 
         float CalculateAbilityDeflectChance(const Unit* attacker, const SpellEntry* ability) const;
 
