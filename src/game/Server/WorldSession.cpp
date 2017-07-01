@@ -328,11 +328,14 @@ bool WorldSession::Update(PacketFilter& updater)
                 botPlayer->GetPlayerbotAI()->HandleTeleportAck();
             else if (botPlayer->IsInWorld())
             {
-                std::for_each(pBotWorldSession->m_recvQueue.begin(), pBotWorldSession->m_recvQueue.end(), [&pBotWorldSession](std::unique_ptr<WorldPacket>& packet)
+                while(!pBotWorldSession->m_recvQueue.empty())
                 {
-                    OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
-                    (pBotWorldSession->*opHandle.handler)(*packet);
-                });
+                    auto const botpacket = std::move(pBotWorldSession->m_recvQueue.front());
+                    pBotWorldSession->m_recvQueue.pop_front();
+
+                    OpcodeHandler const& opHandle = opcodeTable[botpacket->GetOpcode()];
+                    pBotWorldSession->ExecuteOpcode(opHandle, *botpacket);
+                };
                 pBotWorldSession->m_recvQueue.clear();
             }
         }
