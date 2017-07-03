@@ -32,17 +32,17 @@ class GuardianAI : public CreatureEventAI
 {
 public:
 
-    explicit GuardianAI(Creature* c);
-    static int Permissible(const Creature*);
+    explicit GuardianAI(Creature* creature);
+    static int Permissible(const Creature* creature);
 
     //bool IsControllable() const override { return true; }
     virtual void JustRespawned() override;
     virtual void EnterEvadeMode() override;
-    virtual void UpdateAI(const uint32) override;
+    virtual void UpdateAI(const uint32 diff) override;
     virtual void CombatStop() override;
 
-    virtual bool ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker = nullptr, Creature* pAIEventSender = nullptr) override;
-    virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender) override;
-    Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff, bool onlyInCombat) const;
+    virtual bool ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker = nullptr, Creature* AIEventSender = nullptr) override;
+    virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 eventId, Unit* actionInvoker, Creature* AIEventSender) override;
+    Unit* DoSelectLowestHpFriendly(float range, uint32 minHPDiff, bool onlyInCombat) const;
 };
 #endif

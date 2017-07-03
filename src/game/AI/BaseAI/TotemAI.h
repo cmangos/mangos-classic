@@ -30,15 +30,15 @@ class Totem;
 class TotemAI : public CreatureEventAI
 {
     public:
-        explicit TotemAI(Creature* c);
-        static int Permissible(const Creature*);
+        explicit TotemAI(Creature* creature);
 
-        virtual void MoveInLineOfSight(Unit*) override;
-        virtual void AttackStart(Unit*) override;
-        virtual void EnterEvadeMode() override;
-        virtual bool IsVisible(Unit*) const override;
+        void MoveInLineOfSight(Unit* who) override;
+        void AttackStart(Unit* who) override;
+        void EnterEvadeMode() override;
+        bool IsVisible(Unit* who) const override;
 
-        virtual void UpdateAI(const uint32) override;
+        void UpdateAI(const uint32 diff) override;
+        static int Permissible(const Creature* creature);
     protected:
         Totem& getTotem() const;
 

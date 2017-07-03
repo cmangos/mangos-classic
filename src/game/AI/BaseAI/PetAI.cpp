@@ -35,12 +35,12 @@ int PetAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inCombat(false)
+PetAI::PetAI(Creature* creature) : CreatureAI(creature), inCombat(false)
 {
     m_AllySet.clear();
     UpdateAllies();
 
-    switch (((Pet*)c)->getPetType())
+    switch (((Pet*)creature)->getPetType())
     {
         case HUNTER_PET:    //hunter pets attack from behind
             m_attackAngle = M_PI_F;
@@ -53,13 +53,13 @@ PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inComb
     }
 }
 
-PetAI::PetAI(Unit* unit) : CreatureAI(unit), i_tracker(TIME_INTERVAL_LOOK), inCombat(false)
+PetAI::PetAI(Unit* unit) : CreatureAI(unit), inCombat(false)
 {
     m_AllySet.clear();
     UpdateAllies();
 }
 
-void PetAI::MoveInLineOfSight(Unit* u)
+void PetAI::MoveInLineOfSight(Unit* who)
 {
     if (Unit* victim = m_unit->getVictim())
         if (victim->isAlive())
@@ -69,32 +69,33 @@ void PetAI::MoveInLineOfSight(Unit* u)
 
     if (HasReactState(REACT_AGGRESSIVE)
         && !(pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
-        && m_creature->CanAttackOnSight(u) && u->isInAccessablePlaceFor(m_unit)
-        && m_unit->IsWithinDistInMap(u, m_unit->GetAttackDistance(u))
-        && m_unit->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE
-        && m_unit->IsWithinLOSInMap(u))
+        && (m_unit->IsHostileTo(who) || who->IsHostileTo(m_unit->GetMaster()))
+        && m_creature->CanAttackOnSight(who) && who->isInAccessablePlaceFor(m_unit)
+        && m_unit->IsWithinDistInMap(who, m_unit->GetAttackDistance(who))
+        && m_unit->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE
+        && m_unit->IsWithinLOSInMap(who))
     {
-        AttackStart(u);
+        AttackStart(who);
 
         if (Unit* owner = m_unit->GetOwner())
-            owner->SetInCombatState(true, u);
+            owner->SetInCombatState(true, who);
     }
 }
 
-void PetAI::AttackStart(Unit* u)
+void PetAI::AttackStart(Unit* who)
 {
     Pet* pet = (m_unit->GetTypeId() == TYPEID_UNIT && static_cast<Creature*>(m_unit)->IsPet()) ? static_cast<Pet*>(m_unit) : nullptr;
 
-    if (!u || (pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS))
+    if (!who || (pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS))
         return;
 
-    if (m_unit->Attack(u, true))
+    if (m_unit->Attack(who, true))
     {
         // TMGs call CreatureRelocation which via MoveInLineOfSight can call this function
         // thus with the following clear the original TMG gets invalidated and crash, doh
         // hope it doesn't start to leak memory without this :-/
         // i_pet->Clear();
-        HandleMovementOnAttackStart(u);
+        HandleMovementOnAttackStart(who);
 
         inCombat = true;
     }
@@ -166,8 +167,8 @@ void PetAI::UpdateAI(const uint32 diff)
             if (owner->GetTypeId() == TYPEID_PLAYER)
                 m_unit->SendCreateUpdateToPlayer((Player*)owner);
 
-            uint32 spell_id = charminfo->GetSpellOpener();
-            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
+            uint32 spellId = charminfo->GetSpellOpener();
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
 
             Spell* spell = new Spell(m_unit, spellInfo, TRIGGERED_NONE);
 
@@ -192,11 +193,11 @@ void PetAI::UpdateAI(const uint32 diff)
         {
             for (uint8 i = 0; i < pet->GetPetAutoSpellSize(); ++i)
             {
-                uint32 spellID = pet->GetPetAutoSpellOnPos(i);
-                if (!spellID)
+                uint32 spellId = pet->GetPetAutoSpellOnPos(i);
+                if (!spellId)
                     continue;
 
-                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellID);
+                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
                 if (!spellInfo)
                     continue;
 
@@ -388,30 +389,30 @@ void PetAI::UpdateAI(const uint32 diff)
 void PetAI::UpdateAllies()
 {
     Unit* owner = m_unit->GetMaster();
-    Group* pGroup = nullptr;
+    Group* group = nullptr;
 
     m_updateAlliesTimer = 10 * IN_MILLISECONDS;             // update friendly targets every 10 seconds, fewer checks increase performance
 
     if (!owner)
         return;
     else if (owner->GetTypeId() == TYPEID_PLAYER)
-        pGroup = ((Player*)owner)->GetGroup();
+        group = ((Player*)owner)->GetGroup();
 
     // only pet and owner/not in group->ok
-    if (m_AllySet.size() == 2 && !pGroup)
+    if (m_AllySet.size() == 2 && !group)
         return;
     // owner is in group; group members filled in already (no raid -> subgroupcount = whole count)
-    if (pGroup && !pGroup->isRaidGroup() && m_AllySet.size() == (pGroup->GetMembersCount() + 2))
+    if (group && !group->isRaidGroup() && m_AllySet.size() == (group->GetMembersCount() + 2))
         return;
 
     m_AllySet.clear();
     m_AllySet.insert(m_unit->GetObjectGuid());
-    if (pGroup)                                             // add group
+    if (group)                                             // add group
     {
-        for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
+        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
         {
             Player* target = itr->getSource();
-            if (!target || !pGroup->SameSubGroup((Player*)owner, target))
+            if (!target || !group->SameSubGroup((Player*)owner, target))
                 continue;
 
             if (target->GetObjectGuid() == owner->GetObjectGuid())

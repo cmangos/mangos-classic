@@ -33,11 +33,11 @@ int TotemAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-TotemAI::TotemAI(Creature* c) : CreatureEventAI(c)
+TotemAI::TotemAI(Creature* creature) : CreatureEventAI(creature)
 {
 }
 
-void TotemAI::MoveInLineOfSight(Unit*)
+void TotemAI::MoveInLineOfSight(Unit* /*who*/)
 {
 }
 
@@ -106,7 +106,7 @@ void TotemAI::UpdateAI(const uint32 diff)
 
     // Get spell rangy
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
-    float max_range = GetSpellMaxRange(srange);
+    float maxRange = GetSpellMaxRange(srange);
 
     // SPELLMOD_RANGE not applied in this place just because nonexistent range mods for attacking totems
 
@@ -115,14 +115,14 @@ void TotemAI::UpdateAI(const uint32 diff)
 
     // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
     if (!victim ||
-            !m_creature->CanAttack(victim) || !m_creature->IsWithinDistInMap(victim, max_range) ||
+            !m_creature->CanAttack(victim) || !m_creature->IsWithinDistInMap(victim, maxRange) ||
             m_creature->IsFriendlyTo(victim) || !victim->isVisibleForOrDetect(m_creature, m_creature, false))
     {
         victim = nullptr;
 
-        MaNGOS::NearestAttackableUnitInObjectRangeCheck u_check(m_creature, m_creature, max_range);
+        MaNGOS::NearestAttackableUnitInObjectRangeCheck u_check(m_creature, m_creature, maxRange);
         MaNGOS::UnitLastSearcher<MaNGOS::NearestAttackableUnitInObjectRangeCheck> checker(victim, u_check);
-        Cell::VisitAllObjects(m_creature, checker, max_range);
+        Cell::VisitAllObjects(m_creature, checker, maxRange);
     }
 
     // If have target
@@ -139,12 +139,12 @@ void TotemAI::UpdateAI(const uint32 diff)
         i_victimGuid.Clear();
 }
 
-bool TotemAI::IsVisible(Unit*) const
+bool TotemAI::IsVisible(Unit* /*who*/) const
 {
     return false;
 }
 
-void TotemAI::AttackStart(Unit*)
+void TotemAI::AttackStart(Unit* /*who*/)
 {
 }
 

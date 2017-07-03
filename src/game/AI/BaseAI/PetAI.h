@@ -30,21 +30,20 @@ class PetAI : public CreatureAI
 {
     public:
 
-        explicit PetAI(Creature* c);
+        explicit PetAI(Creature* creature);
         explicit PetAI(Unit* unit);
 
-        void MoveInLineOfSight(Unit*) override;
-        void AttackStart(Unit*) override;
+        void MoveInLineOfSight(Unit* who) override;
+        void AttackStart(Unit* who) override;
         void EnterEvadeMode() override;
-        void AttackedBy(Unit*) override;
+        void AttackedBy(Unit* attacker) override;
 
-        void UpdateAI(const uint32) override;
-        static int Permissible(const Creature*);
+        void UpdateAI(const uint32 diff) override;
+        static int Permissible(const Creature* creature);
 
     private:
         void UpdateAllies();
 
-        TimeTracker i_tracker;
         bool inCombat;
 
         GuidSet m_AllySet;
