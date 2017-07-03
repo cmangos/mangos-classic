@@ -120,7 +120,7 @@ void CreatureAI::AttackedBy(Unit* attacker)
         AttackStart(attacker);
 }
 
-CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, bool isTriggered) const
+CanCastResult CreatureAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo, bool isTriggered) const
 {
     // If not triggered, we check
     if (!isTriggered)
@@ -129,33 +129,33 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
         if (m_unit->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
             return CAST_FAIL_STATE;
 
-        if (pSpell->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
+        if (spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
             return CAST_FAIL_STATE;
 
-        if (pSpell->PreventionType == SPELL_PREVENTION_TYPE_PACIFY && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+        if (spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
             return CAST_FAIL_STATE;
 
         // Check for power (also done by Spell::CheckCast())
-        if (m_unit->GetPower((Powers)pSpell->powerType) < Spell::CalculatePowerCost(pSpell, m_unit))
+        if (m_unit->GetPower((Powers)spellInfo->powerType) < Spell::CalculatePowerCost(spellInfo, m_unit))
             return CAST_FAIL_POWER;
 
-        if (!m_unit->IsWithinLOSInMap(pTarget) && m_unit != pTarget)
+        if (!spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !m_unit->IsWithinLOSInMap(target) && m_unit != target)
             return CAST_FAIL_NOT_IN_LOS;
     }
 
-    if (const SpellRangeEntry* pSpellRange = sSpellRangeStore.LookupEntry(pSpell->rangeIndex))
+    if (const SpellRangeEntry* spellRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex))
     {
-        if (pTarget != m_unit)
+        if (target != m_unit)
         {
             // pTarget is out of range of this spell (also done by Spell::CheckCast())
-            float fDistance = m_unit->GetCombatDistance(pTarget, pSpell->rangeIndex == SPELL_RANGE_IDX_COMBAT);
+            float distance = m_unit->GetCombatDistance(target, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
-            if (fDistance > pSpellRange->maxRange)
+            if (distance > spellRange->maxRange)
                 return CAST_FAIL_TOO_FAR;
 
-            float fMinRange = pSpellRange->minRange;
+            float minRange = spellRange->minRange;
 
-            if (fMinRange && fDistance < fMinRange)
+            if (minRange && distance < minRange)
                 return CAST_FAIL_TOO_CLOSE;
         }
 
@@ -165,62 +165,62 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
         return CAST_FAIL_OTHER;
 }
 
-CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32 uiCastFlags, ObjectGuid uiOriginalCasterGUID) const
+CanCastResult CreatureAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags, ObjectGuid originalCasterGUID) const
 {
-    Unit* pCaster = m_unit;
+    Unit* caster = m_unit;
 
-    if (!pTarget)
+    if (!target)
         return CAST_FAIL_OTHER;
 
-    if (uiCastFlags & CAST_SWITCH_CASTER_TARGET)
-        std::swap(pCaster, pTarget);
+    if (castFlags & CAST_SWITCH_CASTER_TARGET)
+        std::swap(caster, target);
 
-    if (uiCastFlags & CAST_FORCE_TARGET_SELF)
-        pCaster = pTarget;
+    if (castFlags & CAST_FORCE_TARGET_SELF)
+        caster = target;
 
     // Allowed to cast only if not casting (unless we interrupt ourself) or if spell is triggered
-    if (!pCaster->IsNonMeleeSpellCasted(false) || (uiCastFlags & (CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS)))
+    if (!caster->IsNonMeleeSpellCasted(false) || (castFlags & (CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS)))
     {
-        if (const SpellEntry* pSpell = sSpellTemplate.LookupEntry<SpellEntry>(uiSpell))
+        if (const SpellEntry* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId))
         {
             // If cast flag CAST_AURA_NOT_PRESENT is active, check if target already has aura on them
-            if (uiCastFlags & CAST_AURA_NOT_PRESENT)
+            if (castFlags & CAST_AURA_NOT_PRESENT)
             {
-                if (pTarget->HasAura(uiSpell))
+                if (target->HasAura(spellId))
                     return CAST_FAIL_TARGET_AURA;
             }
 
             // Check if cannot cast spell
-            if (!(uiCastFlags & (CAST_FORCE_TARGET_SELF | CAST_FORCE_CAST)))
+            if (!(castFlags & (CAST_FORCE_TARGET_SELF | CAST_FORCE_CAST)))
             {
-                CanCastResult castResult = CanCastSpell(pTarget, pSpell, !!(uiCastFlags & CAST_TRIGGERED));
+                CanCastResult castResult = CanCastSpell(target, spellInfo, !!(castFlags & CAST_TRIGGERED));
 
                 if (castResult != CAST_OK)
                     return castResult;
             }
 
             // Interrupt any previous spell
-            if (uiCastFlags & CAST_INTERRUPT_PREVIOUS && pCaster->IsNonMeleeSpellCasted(false))
-                pCaster->InterruptNonMeleeSpells(false);
+            if (castFlags & CAST_INTERRUPT_PREVIOUS && caster->IsNonMeleeSpellCasted(false))
+                caster->InterruptNonMeleeSpells(false);
 
             // Creature should always stop before it will cast a non-instant spell
-            if (GetSpellCastTime(pSpell) || (IsChanneledSpell(pSpell) && pSpell->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT))
-                pCaster->StopMoving();
+            if (GetSpellCastTime(spellInfo) || (IsChanneledSpell(spellInfo) && spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT))
+                caster->StopMoving();
 
             // Creature should interrupt any current melee spell
-            pCaster->InterruptSpell(CURRENT_MELEE_SPELL);
+            caster->InterruptSpell(CURRENT_MELEE_SPELL);
 
             // Creature should stop wielding weapon while casting
-            pCaster->SetSheath(SHEATH_STATE_UNARMED);
+            caster->SetSheath(SHEATH_STATE_UNARMED);
 
-            uint32 flags = (uiCastFlags & CAST_TRIGGERED ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE) | (uiCastFlags & CAST_IGNORE_UNSELECTABLE_TARGET ? TRIGGERED_IGNORE_UNSELECTABLE_FLAG : TRIGGERED_NONE);
+            uint32 flags = (castFlags & CAST_TRIGGERED ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE) | (castFlags & CAST_IGNORE_UNSELECTABLE_TARGET ? TRIGGERED_IGNORE_UNSELECTABLE_FLAG : TRIGGERED_NONE);
 
-            pCaster->CastSpell(pTarget, pSpell, flags, nullptr, nullptr, uiOriginalCasterGUID);
+            caster->CastSpell(target, spellInfo, flags, nullptr, nullptr, originalCasterGUID);
             return CAST_OK;
         }
         else
         {
-            sLog.outErrorDb("DoCastSpellIfCan by %s attempt to cast spell %u but spell does not exist.", m_unit->GetObjectGuid().GetString().c_str(), uiSpell);
+            sLog.outErrorDb("DoCastSpellIfCan by %s attempt to cast spell %u but spell does not exist.", m_unit->GetObjectGuid().GetString().c_str(), spellId);
             return CAST_FAIL_OTHER;
         }
     }
@@ -404,39 +404,39 @@ class AiDelayEventAround : public BasicEvent
         GuidVector m_receiverGuids;
 };
 
-void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue /*=0*/) const
+void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* invoker, uint32 delay, float radius, uint32 miscValue /*=0*/) const
 {
-    if (fRadius > 0)
+    if (radius > 0)
     {
         std::list<Creature*> receiverList;
 
         // Allow sending custom AI events to all units in range
         if (eventType >= AI_EVENT_CUSTOM_EVENTAI_A && eventType <= AI_EVENT_CUSTOM_EVENTAI_F && eventType != AI_EVENT_GOT_CCED)
         {
-            MaNGOS::AnyUnitInObjectRangeCheck u_check(m_creature, fRadius);
+            MaNGOS::AnyUnitInObjectRangeCheck u_check(m_creature, radius);
             MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(receiverList, u_check);
-            Cell::VisitGridObjects(m_creature, searcher, fRadius);
+            Cell::VisitGridObjects(m_creature, searcher, radius);
         }
         else
         {
             // Use this check here to collect only assitable creatures in case of CALL_ASSISTANCE, else be less strict
-            MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_creature, eventType == AI_EVENT_CALL_ASSISTANCE ? pInvoker : nullptr, fRadius);
+            MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_creature, eventType == AI_EVENT_CALL_ASSISTANCE ? invoker : nullptr, radius);
             MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(receiverList, u_check);
-            Cell::VisitGridObjects(m_creature, searcher, fRadius);
+            Cell::VisitGridObjects(m_creature, searcher, radius);
         }
 
         if (!receiverList.empty())
         {
-            AiDelayEventAround* e = new AiDelayEventAround(eventType, pInvoker ? pInvoker->GetObjectGuid() : ObjectGuid(), *m_creature, receiverList, miscValue);
-            m_creature->m_Events.AddEvent(e, m_creature->m_Events.CalculateTime(uiDelay));
+            AiDelayEventAround* e = new AiDelayEventAround(eventType, invoker ? invoker->GetObjectGuid() : ObjectGuid(), *m_creature, receiverList, miscValue);
+            m_creature->m_Events.AddEvent(e, m_creature->m_Events.CalculateTime(delay));
         }
     }
 }
 
-void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue /*=0*/) const
+void CreatureAI::SendAIEvent(AIEventType eventType, Unit* invoker, Creature* receiver, uint32 miscValue /*=0*/) const
 {
-    MANGOS_ASSERT(pReceiver);
-    pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker, miscValue);
+    MANGOS_ASSERT(receiver);
+    receiver->AI()->ReceiveAIEvent(eventType, m_creature, invoker, miscValue);
 }
 
 bool CreatureAI::IsVisible(Unit* pl) const
