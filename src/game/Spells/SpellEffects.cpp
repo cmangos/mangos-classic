@@ -431,9 +431,20 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (m_CastItem && unitTarget)
                     {
                         // 8345 - Control the machine | 8346 = Malfunction the machine (root) | 8347 = Taunt/enrage the machine
-                        const uint32 spell_list[3] = {8345, 8346, 8347};
+                        const uint32 spell_list[3] = { 8345, 8346, 8347 };
                         m_caster->CastSpell(unitTarget, spell_list[urand(0, 2)], TRIGGERED_OLD_TRIGGERED, m_CastItem);
                     }
+
+                    return;
+                }
+                case 8606: //Summon Cyclonian
+                {
+                    if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
+                        return;
+
+                    float x, y, z;
+                    m_targets.getDestination(x, y, z); // database loaded coordinates due to target type
+                    Creature* pCreature = m_caster->SummonCreature(6239, x, y, z, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30 * IN_MILLISECONDS);
 
                     return;
                 }
