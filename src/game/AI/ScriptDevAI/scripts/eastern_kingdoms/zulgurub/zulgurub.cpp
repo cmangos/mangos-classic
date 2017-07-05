@@ -47,7 +47,10 @@ enum
     SPELL_KNOCKDOWN              = 20276,
     SPELL_FEAR                   = 22678,
     SPELL_FRENZY                 = 28371,
-    SPELL_ENRAGE                 = 8269
+    SPELL_ENRAGE                 = 8269,
+
+    // npc_razzashi_adder
+    SPELL_VENOM_SPIT             = 24011
 };
 
 /*######
@@ -277,6 +280,53 @@ struct npc_soulflayerAI : public ScriptedAI
     }
 };
 
+/*######
+## npc_razzashi_adder
+######*/
+
+struct npc_razzashi_adderAI : public ScriptedAI
+{
+    npc_razzashi_adderAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiExploitWeaknessTimer;
+    uint32 m_uiVenomSpitTimer;
+
+    void Reset() override
+    {
+        m_uiExploitWeaknessTimer = 0;
+        m_uiVenomSpitTimer = urand(3000, 5000);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        // Exploit Weakness when behind an enemy
+        if (m_uiExploitWeaknessTimer < uiDiff)
+        {
+            if (m_creature->IsFacingTargetsBack(m_creature->getVictim()))
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EXPLOIT_WEAKNESS) == CAST_OK)
+                    m_uiExploitWeaknessTimer = urand(5000, 12000);
+            }
+        }
+        else
+            m_uiExploitWeaknessTimer -= uiDiff;
+
+        // Venom Spit
+        if (m_uiVenomSpitTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VENOM_SPIT) == CAST_OK)
+                m_uiVenomSpitTimer = urand(5000, 9000);
+        }
+        else
+            m_uiVenomSpitTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
 CreatureAI* GetAI_npc_hakkari_blood_priest(Creature* pCreature)
 {
     return new npc_hakkari_blood_priestAI(pCreature);
@@ -290,6 +340,11 @@ CreatureAI* GetAI_npc_zulian_panther(Creature* pCreature)
 CreatureAI* GetAI_npc_soulflayer(Creature* pCreature)
 {
     return new npc_soulflayerAI(pCreature);
+}
+
+CreatureAI* GetAI_npc_razzashi_adder(Creature* pCreature)
+{
+    return new npc_razzashi_adderAI(pCreature);
 }
 
 void AddSC_zulgurub()
@@ -309,5 +364,10 @@ void AddSC_zulgurub()
     pNewScript = new Script();
     pNewScript->Name = "npc_soulflayer";
     pNewScript->GetAI = &GetAI_npc_soulflayer;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script();
+    pNewScript->Name = "npc_razzashi_adder";
+    pNewScript->GetAI = &GetAI_npc_razzashi_adder;
     pNewScript->RegisterSelf();
 }
