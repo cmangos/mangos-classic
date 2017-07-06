@@ -120,8 +120,8 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
 
     int32 castTime = spellCastTimeEntry->CastTime;
 
-    // Multi shot: Only (alternative set CastingTimeIndex = 3)
-    if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (spellInfo->SpellFamilyFlags & 0x0000000000001000) && (!spell || !spell->IsAutoRepeat()))
+    // Hunter Ranged spells need cast time + 0.5s to reflect tooltips, excluding Auto Shot
+    if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()))
         castTime += 500;
 
     if (spell)
