@@ -33,21 +33,27 @@ enum
     AREATRIGGER_BEAST_AGGRO     = 2066,
     AREATRIGGER_BEAST_INTRO     = 2067,
 
-    // Arena event dialogue - handled by instance
+    // Arena event dialogue intro and outro - handled by instance
     SAY_NEFARIUS_INTRO_1        = -1229004,
     SAY_NEFARIUS_INTRO_2        = -1229005,
-    SAY_NEFARIUS_ATTACK_1       = -1229006,
-    SAY_REND_JOIN               = -1229007,
-    SAY_NEFARIUS_ATTACK_2       = -1229008,
-    SAY_NEFARIUS_ATTACK_3       = -1229009,
-    SAY_NEFARIUS_ATTACK_4       = -1229010,
-    SAY_REND_LOSE_1             = -1229011,
-    SAY_REND_LOSE_2             = -1229012,
-    SAY_NEFARIUS_LOSE_3         = -1229013,
-    SAY_NEFARIUS_LOSE_4         = -1229014,
+    SAY_NEFARIUS_LOSE1          = -1229014,
     SAY_REND_ATTACK             = -1229015,
     SAY_NEFARIUS_WARCHIEF       = -1229016,
     SAY_NEFARIUS_VICTORY        = -1229018,
+
+    // Arena event random taunt - handled on creature death
+    SAY_NEFARIUS_TAUNT1         = -1229006,
+    SAY_NEFARIUS_TAUNT2         = -1229008,
+    SAY_NEFARIUS_TAUNT3         = -1229009,
+    SAY_NEFARIUS_TAUNT4         = -1229010,
+    SAY_NEFARIUS_TAUNT5         = -1229013,
+    SAY_NEFARIUS_TAUNT6         = -1229021,
+    SAY_NEFARIUS_TAUNT7         = -1229022,
+    SAY_NEFARIUS_TAUNT8         = -1229023,
+    SAY_REND_TAUNT1             = -1229007,
+    SAY_REND_TAUNT2             = -1229011,
+    SAY_REND_TAUNT3             = -1229012,
+    SAY_REND_TAUNT4             = -1229024,
 
     // Emberseer event
     EMOTE_BEGIN                 = -1229000,
@@ -82,7 +88,7 @@ static const DialogueEntry aStadiumDialogue[] =
     {SAY_NEFARIUS_INTRO_1,      NPC_LORD_VICTOR_NEFARIUS,   7000},
     {SAY_NEFARIUS_INTRO_2,      NPC_LORD_VICTOR_NEFARIUS,   5000},
     {NPC_BLACKHAND_HANDLER,     0,                          0},
-    {SAY_NEFARIUS_LOSE_4,       NPC_LORD_VICTOR_NEFARIUS,   3000},
+    {SAY_NEFARIUS_LOSE1 ,       NPC_LORD_VICTOR_NEFARIUS,   3000},
     {SAY_REND_ATTACK,           NPC_REND_BLACKHAND,         2000},
     {SAY_NEFARIUS_WARCHIEF,     NPC_LORD_VICTOR_NEFARIUS,   0},
     {SAY_NEFARIUS_VICTORY,      NPC_LORD_VICTOR_NEFARIUS,   5000},
@@ -392,6 +398,40 @@ void instance_blackrock_spire::OnCreatureDeath(Creature* pCreature)
             // check if it's summoned - some npcs with the same entry are already spawned in the instance
             if (!pCreature->IsTemporarySummon())
                 break;
+
+            // 5% chance for Rend or Lord Victor Nefarius to taunt players when one of the creature is killed (% is guesswork)
+            // Lord Victor Nefarius
+            if (urand(0, 100) < 5)
+            {
+                if (Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
+                {
+                    switch (urand(0, 7))
+                    {
+                        case 0: DoScriptText(SAY_NEFARIUS_TAUNT1, pNefarius); break;
+                        case 1: DoScriptText(SAY_NEFARIUS_TAUNT2, pNefarius); break;
+                        case 2: DoScriptText(SAY_NEFARIUS_TAUNT3, pNefarius); break;
+                        case 3: DoScriptText(SAY_NEFARIUS_TAUNT4, pNefarius); break;
+                        case 4: DoScriptText(SAY_NEFARIUS_TAUNT5, pNefarius); break;
+                        case 5: DoScriptText(SAY_NEFARIUS_TAUNT6, pNefarius); break;
+                        case 6: DoScriptText(SAY_NEFARIUS_TAUNT7, pNefarius); break;
+                        case 7: DoScriptText(SAY_NEFARIUS_TAUNT8, pNefarius); break;
+                    }
+                }
+            }
+            // Warchief Rend Blackhand
+            if (urand(0, 100) < 5)
+            {
+                if (Creature* pRend = GetSingleCreatureFromStorage(NPC_REND_BLACKHAND))
+                {
+                    switch (urand(0, 3))
+                    {
+                        case 0: DoScriptText(SAY_REND_TAUNT1, pRend); break;
+                        case 1: DoScriptText(SAY_REND_TAUNT2, pRend); break;
+                        case 2: DoScriptText(SAY_REND_TAUNT3, pRend); break;
+                        case 3: DoScriptText(SAY_REND_TAUNT4, pRend); break;
+                    }
+                }
+            }
             --m_uiStadiumMobsAlive;
             if (m_uiStadiumMobsAlive == 0)
                 DoSendNextStadiumWave();
@@ -543,13 +583,16 @@ void instance_blackrock_spire::JustDidDialogueStep(int32 iEntry)
             }
             break;
         case SAY_NEFARIUS_WARCHIEF:
-            // Prepare for Gyth - note: Nefarius should be moving around the balcony
+            // Prepare for Gyth
             if (Creature* pRend = GetSingleCreatureFromStorage(NPC_REND_BLACKHAND))
             {
                 pRend->ForcedDespawn(5000);
                 pRend->SetWalk(false);
                 pRend->GetMotionMaster()->MovePoint(0, aStadiumLocs[6].m_fX, aStadiumLocs[6].m_fY, aStadiumLocs[6].m_fZ);
             }
+            // Make Lord Nefarius walk back and forth while Rend is preparing Glyth
+            if (Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
+                pNefarius->GetMotionMaster()->MoveWaypoint(0);
             m_uiStadiumEventTimer = 30000;
             break;
         case SAY_NEFARIUS_VICTORY:
@@ -597,12 +640,16 @@ void instance_blackrock_spire::DoSendNextStadiumWave()
     }
     // All waves are cleared - start Gyth intro
     else if (m_uiStadiumWaves == MAX_STADIUM_WAVES)
-        StartNextDialogueText(SAY_NEFARIUS_LOSE_4);
+        StartNextDialogueText(SAY_NEFARIUS_LOSE1);
     else
     {
         // Send Gyth
         if (Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
         {
+            // Stop Lord Nefarius from moving and put him back in place
+            pNefarius->GetMotionMaster()->MoveIdle();
+            pNefarius->GetMotionMaster()->MovePoint(0, aStadiumLocs[5].m_fX, aStadiumLocs[5].m_fY, aStadiumLocs[5].m_fZ);
+
             if (Creature* pTemp = pNefarius->SummonCreature(NPC_GYTH, aStadiumLocs[1].m_fX, aStadiumLocs[1].m_fY, aStadiumLocs[1].m_fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0))
                 pTemp->GetMotionMaster()->MovePoint(0, aStadiumLocs[2].m_fX, aStadiumLocs[2].m_fY, aStadiumLocs[2].m_fZ);
         }

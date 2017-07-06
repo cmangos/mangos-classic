@@ -1854,15 +1854,15 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1229004,'Excellent... it would appear as if the meddlesome insects have arrived just in time to feed my legion. Welcome, mortals!',0,1,0,1,'nefarius SAY_INTRO_1'),
 (-1229005,'Let not even a drop of their blood remain upon the arena floor, my children. Feast on their souls!',0,1,0,1,'nefarius SAY_INTRO_2'),
-(-1229006,'Foolsss...Kill the one in the dress!',0,1,0,0,'nefarius SAY_ATTACK_1'),
-(-1229007,'Sire, let me join the fray! I shall tear their spines out with my bare hands!',0,1,0,1,'rend SAY_REND_JOIN'),
-(-1229008,'Concentrate your attacks upon the healer!',0,1,0,0,'nefarius SAY_ATTACK_2'),
-(-1229009,'Inconceivable!',0,1,0,0,'nefarius SAY_ATTACK_3'),
-(-1229010,'Do not force my hand, children! I shall use your hides to line my boots.',0,1,0,0,'nefarius SAY_ATTACK_4'),
-(-1229011,'Defilers!',0,1,0,0,'rend SAY_LOSE_1'),
-(-1229012,'Impossible!',0,1,0,0,'rend SAY_LOSE_2'),
-(-1229013,'Your efforts will prove fruitless. None shall stand in our way!',0,1,0,0,'nefarius SAY_LOSE_3'),
-(-1229014,'THIS CANNOT BE!!! Rend, deal with these insects.',0,1,0,1,'nefarius SAY_LOSE_4'),
+(-1229006,'Foolsss...Kill the one in the dress!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT1'),
+(-1229007,'Sire, let me join the fray! I shall tear their spines out with my bare hands!',0,1,0,1,'rend SAY_REND_TAUNT1'),
+(-1229008,'Concentrate your attacks upon the healer!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT2'),
+(-1229009,'Inconceivable!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT3'),
+(-1229010,'Do not force my hand, children! I shall use your hides to line my boots.',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT4'),
+(-1229011,'Defilers!',0,1,0,0,'rend SAY_REND_TAUNT2'),
+(-1229012,'Impossible!',0,1,0,0,'rend SAY_REND_TAUNT3'),
+(-1229013,'Your efforts will prove fruitless. None shall stand in our way!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT5'),
+(-1229014,'THIS CANNOT BE!!! Rend, deal with these insects.',0,1,0,1,'nefarius SAY_NEFARIUS_LOSE1'),
 (-1229015,'With pleasure...',0,1,0,0,'rend SAY_REND_ATTACK'),
 (-1229016,'The Warchief shall make quick work of you, mortals. Prepare yourselves!',0,1,0,25,'nefarius SAY_WARCHIEF'),
 (-1229017,'Taste in my power!',0,1,0,0,'nefarius SAY_BUFF_GYTH'),
@@ -1870,7 +1870,12 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1229019,'%s is knocked off his drake!',0,2,0,0,'rend EMOTE_KNOCKED_OFF'),
 
-(-1229020,'Intruders are destroying our eggs! Stop!!',0,1,0,0,'rookery hatcher - SAY_ROOKERY_EVENT_START');
+(-1229020,'Intruders are destroying our eggs! Stop!!',0,1,0,0,'rookery hatcher - SAY_ROOKERY_EVENT_START'),
+
+(-1229021,'I promise you an eternity of dung clean up duty for this failure!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT6'),
+(-1229022,'Use the freezing breath, imbecile!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT7'),
+(-1229023,'I will wear your skin as a fashion accessory!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT8'),
+(-1229024,'Flee while  you still have chance, mortals. You will pray for a swift death should I enter the arena.',0,1,0,0,'rend SAY_REND_TAUNT3');
 
 -- -1 230 000 BLACKROCK DEPTHS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
