@@ -42,7 +42,7 @@ void instance_razorfen_kraul::OnObjectCreate(GameObject* pGo)
     switch (pGo->GetEntry())
     {
         case GO_AGATHELOS_WARD:
-            m_mGoEntryGuidStore[GO_AGATHELOS_WARD] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[GO_AGATHELOS_WARD] = pGo->GetObjectGuid();
             if (m_auiEncounter[0] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;

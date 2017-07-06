@@ -63,7 +63,7 @@ void instance_zulgurub::OnCreatureCreate(Creature* pCreature)
         case NPC_HAKKAR:
         case NPC_BLOODLORD_MANDOKIR:
         case NPC_MARLI:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_PANTHER_TRIGGER:
             if (pCreature->GetPositionY() < -1626)
@@ -86,7 +86,7 @@ void instance_zulgurub::OnObjectCreate(GameObject* pGo)
             return;
     }
 
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_zulgurub::SetData(uint32 uiType, uint32 uiData)

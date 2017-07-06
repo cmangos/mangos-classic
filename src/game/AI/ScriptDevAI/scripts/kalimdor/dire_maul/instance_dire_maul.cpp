@@ -85,7 +85,7 @@ void instance_dire_maul::OnCreatureCreate(Creature* pCreature)
         default:
             return;
     }
-    m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+    m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 
 void instance_dire_maul::OnObjectCreate(GameObject* pGo)
@@ -164,7 +164,7 @@ void instance_dire_maul::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)

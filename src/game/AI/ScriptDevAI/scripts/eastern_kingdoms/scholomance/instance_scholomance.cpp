@@ -64,7 +64,7 @@ void instance_scholomance::OnCreatureCreate(Creature* pCreature)
                 m_sEntranceRoomGuids.insert(pCreature->GetObjectGuid());
             break;
         case NPC_DARKMASTER_GANDLING:
-            m_mNpcEntryGuidStore[NPC_DARKMASTER_GANDLING] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[NPC_DARKMASTER_GANDLING] = pCreature->GetObjectGuid();
             break;
         case NPC_RISEN_GUARDIAN:
             GandlingEventMap::iterator find = m_mGandlingData.find(m_uiGandlingEvent);
@@ -85,7 +85,7 @@ void instance_scholomance::OnObjectCreate(GameObject* pGo)
         case GO_GATE_KIRTONOS:
         case GO_GATE_RAS:
         case GO_GATE_GANDLING:
-            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
 
         case GO_GATE_MALICIA:  m_mGandlingData[EVENT_ID_MALICIA].m_doorGuid  = pGo->GetObjectGuid(); break;

@@ -47,7 +47,7 @@ void instance_onyxias_lair::OnCreatureCreate(Creature* pCreature)
     switch (pCreature->GetEntry())
     {
         case NPC_ONYXIA_TRIGGER:
-            m_mNpcEntryGuidStore[NPC_ONYXIA_TRIGGER] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[NPC_ONYXIA_TRIGGER] = pCreature->GetObjectGuid();
             break;
     }
 }

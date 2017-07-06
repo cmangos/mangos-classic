@@ -64,7 +64,7 @@ void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
         case NPC_CAPTAIN_DRENN:
         case NPC_CAPTAIN_TUUBID:
         case NPC_CAPTAIN_QEEZ:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_KALDOREI_ELITE:
             m_lKaldoreiGuidList.push_back(pCreature->GetObjectGuid());

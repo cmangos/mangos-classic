@@ -53,7 +53,7 @@ void instance_shadowfang_keep::OnCreatureCreate(Creature* pCreature)
         default:
             return;
     }
-    m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+    m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 
 void instance_shadowfang_keep::OnObjectCreate(GameObject* pGo)
@@ -80,7 +80,7 @@ void instance_shadowfang_keep::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_shadowfang_keep::DoSpeech()

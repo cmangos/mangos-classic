@@ -50,7 +50,7 @@ void instance_wailing_caverns::OnCreatureCreate(Creature* pCreature)
     {
         case NPC_NARALEX:
         case NPC_DISCIPLE:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -58,7 +58,7 @@ void instance_wailing_caverns::OnCreatureCreate(Creature* pCreature)
 void instance_wailing_caverns::OnObjectCreate(GameObject* pGo)
 {
     if (pGo->GetEntry() == GO_MYSTERIOUS_CHEST)
-        m_mGoEntryGuidStore[GO_MYSTERIOUS_CHEST] = pGo->GetObjectGuid();
+        m_goEntryGuidStore[GO_MYSTERIOUS_CHEST] = pGo->GetObjectGuid();
 }
 
 void instance_wailing_caverns::SetData(uint32 uiType, uint32 uiData)

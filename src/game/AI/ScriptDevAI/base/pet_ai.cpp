@@ -12,10 +12,10 @@ EndScriptData */
 #include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "pet_ai.h"
 
-ScriptedPetAI::ScriptedPetAI(Creature* pCreature) : CreatureAI(pCreature)
+ScriptedPetAI::ScriptedPetAI(Creature* creature) : CreatureAI(creature)
 {}
 
-void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
+void ScriptedPetAI::MoveInLineOfSight(Unit* who)
 {
     if (m_creature->getVictim())
         return;
@@ -23,42 +23,42 @@ void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
     if (!HasReactState(REACT_AGGRESSIVE))
         return;
 
-    if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(pWho) &&
-            m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
+    if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(who) &&
+            m_creature->IsHostileTo(who) && who->isInAccessablePlaceFor(m_creature))
     {
-        if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
+        if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
             return;
 
-        if (m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
+        if (m_creature->IsWithinDistInMap(who, m_creature->GetAttackDistance(who)) && m_creature->IsWithinLOSInMap(who))
         {
-            pWho->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            AttackStart(pWho);
+            who->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            AttackStart(who);
         }
     }
 }
 
-void ScriptedPetAI::AttackStart(Unit* pWho)
+void ScriptedPetAI::AttackStart(Unit* who)
 {
-    if (pWho && m_creature->Attack(pWho, true))
-        m_creature->GetMotionMaster()->MoveChase(pWho);
+    if (who && m_creature->Attack(who, true))
+        m_creature->GetMotionMaster()->MoveChase(who);
 }
 
-void ScriptedPetAI::AttackedBy(Unit* pAttacker)
+void ScriptedPetAI::AttackedBy(Unit* attacker)
 {
     if (m_creature->getVictim())
         return;
 
-    if (!HasReactState(REACT_PASSIVE) && m_creature->CanReachWithMeleeAttack(pAttacker))
-        AttackStart(pAttacker);
+    if (!HasReactState(REACT_PASSIVE) && m_creature->CanReachWithMeleeAttack(attacker))
+        AttackStart(attacker);
 }
 
 void ScriptedPetAI::ResetPetCombat()
 {
-    Unit* pOwner = m_creature->GetMaster();
+    Unit* owner = m_creature->GetMaster();
 
-    if (pOwner && m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
+    if (owner && m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
     {
-        m_creature->GetMotionMaster()->MoveFollow(pOwner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+        m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
     }
     else
     {
@@ -72,12 +72,12 @@ void ScriptedPetAI::ResetPetCombat()
     Reset();
 }
 
-void ScriptedPetAI::UpdatePetAI(const uint32 /*uiDiff*/)
+void ScriptedPetAI::UpdatePetAI(const uint32 /*diff*/)
 {
     DoMeleeAttackIfReady();
 }
 
-void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
+void ScriptedPetAI::UpdateAI(const uint32 diff)
 {
     if (!m_creature->isAlive())                             // should not be needed, isAlive is checked in mangos before calling UpdateAI
         return;
@@ -97,29 +97,29 @@ void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
         }
 
         // update when in combat
-        UpdatePetAI(uiDiff);
+        UpdatePetAI(diff);
     }
     else if (m_creature->GetCharmInfo())
     {
-        Unit* pOwner = m_creature->GetMaster();
+        Unit* owner = m_creature->GetMaster();
 
-        if (!pOwner)
+        if (!owner)
             return;
 
-        if (pOwner->isInCombat() && !HasReactState(REACT_PASSIVE))
+        if (owner->isInCombat() && !HasReactState(REACT_PASSIVE))
         {
             // Not correct in all cases.
             // When mob initiate attack by spell, pet should not start attack before spell landed.
-            AttackStart(pOwner->getAttackerForHelper());
+            AttackStart(owner->getAttackerForHelper());
         }
         else if (m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
         {
             // not following, so start follow
             if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
-                m_creature->GetMotionMaster()->MoveFollow(pOwner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 
             // update when not in combat
-            UpdatePetOOCAI(uiDiff);
+            UpdatePetOOCAI(diff);
         }
     }
 }

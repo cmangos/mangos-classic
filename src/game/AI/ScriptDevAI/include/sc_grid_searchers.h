@@ -11,34 +11,34 @@ class Creature;
 
 struct ObjectDistanceOrder : public std::binary_function<const WorldObject, const WorldObject, bool>
 {
-    const Unit* m_pSource;
+    const Unit* m_source;
 
-    ObjectDistanceOrder(const Unit* pSource) : m_pSource(pSource) {};
+    ObjectDistanceOrder(const Unit* source) : m_source(source) {};
 
-    bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const
+    bool operator()(const WorldObject* left, const WorldObject* right) const
     {
-        return m_pSource->GetDistanceOrder(pLeft, pRight);
+        return m_source->GetDistanceOrder(left, right);
     }
 };
 
 struct ObjectDistanceOrderReversed : public std::binary_function<const WorldObject, const WorldObject, bool>
 {
-    const Unit* m_pSource;
+    const Unit* m_source;
 
-    ObjectDistanceOrderReversed(const Unit* pSource) : m_pSource(pSource) {};
+    ObjectDistanceOrderReversed(const Unit* source) : m_source(source) {};
 
-    bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const
+    bool operator()(const WorldObject* left, const WorldObject* right) const
     {
-        return !m_pSource->GetDistanceOrder(pLeft, pRight);
+        return !m_source->GetDistanceOrder(left, right);
     }
 };
 
-GameObject* GetClosestGameObjectWithEntry(WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange);
-Creature* GetClosestCreatureWithEntry(WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange, bool bOnlyAlive = true, bool bOnlyDead = false, bool bExcludeSelf = false);
+GameObject* GetClosestGameObjectWithEntry(WorldObject* source, uint32 entry, float maxSearchRange);
+Creature* GetClosestCreatureWithEntry(WorldObject* source, uint32 entry, float maxSearchRange, bool onlyAlive = true, bool onlyDead = false, bool excludeSelf = false);
 
-void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList , WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange);
-void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange);
-void GetPlayerListWithEntryInWorld(std::list<Player*>& lList, WorldObject* pSource, float fMaxSearchRange);
+void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& goList , WorldObject* source, uint32 entry, float maxSearchRange);
+void GetCreatureListWithEntryInGrid(std::list<Creature*>& creatureList, WorldObject* source, uint32 entry, float maxSearchRange);
+void GetPlayerListWithEntryInWorld(std::list<Player*>& playerList, WorldObject* source, float maxSearchRange);
 
 // Used in: hyjalAI.cpp
 /*

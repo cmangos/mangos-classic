@@ -51,7 +51,7 @@ void instance_razorfen_downs::OnCreatureCreate(Creature* pCreature)
 void instance_razorfen_downs::OnObjectCreate(GameObject* pGo)
 {
     if (pGo->GetEntry() == GO_GONG)
-        m_mGoEntryGuidStore[GO_GONG] = pGo->GetObjectGuid();
+        m_goEntryGuidStore[GO_GONG] = pGo->GetObjectGuid();
 }
 
 void instance_razorfen_downs::SetData(uint32 uiType, uint32 uiData)

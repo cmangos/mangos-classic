@@ -76,7 +76,7 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
         case NPC_DUGHAL:
         case NPC_LOREGRAIN:
         case NPC_RIBBLY_SCREWSPIGGOT:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_WARBRINGER_CONST:
             // Golems not in the Relict Vault?
@@ -119,7 +119,7 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
             if (m_auiEncounter[11] == DONE)
                 pCreature->ForcedDespawn();
             else
-                m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -179,7 +179,7 @@ void instance_blackrock_depths::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)

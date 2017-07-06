@@ -43,7 +43,7 @@ void instance_zulfarrak::OnCreatureCreate(Creature* pCreature)
     {
         case NPC_ANTUSUL:
         case NPC_SERGEANT_BLY:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_SANDFURY_SLAVE:
         case NPC_SANDFURY_DRUDGE:

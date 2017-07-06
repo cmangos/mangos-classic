@@ -76,7 +76,7 @@ void instance_blackwing_lair::OnCreatureCreate(Creature* pCreature)
         case NPC_BLACKWING_ORB_TRIGGER:
         case NPC_VAELASTRASZ:
         case NPC_LORD_VICTOR_NEFARIUS:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -115,7 +115,7 @@ void instance_blackwing_lair::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_blackwing_lair::SetData(uint32 uiType, uint32 uiData)

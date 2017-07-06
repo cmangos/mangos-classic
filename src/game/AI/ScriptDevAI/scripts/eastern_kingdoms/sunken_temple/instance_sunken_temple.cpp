@@ -72,7 +72,7 @@ void instance_sunken_temple::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_sunken_temple::OnCreatureCreate(Creature* pCreature)
@@ -90,7 +90,7 @@ void instance_sunken_temple::OnCreatureCreate(Creature* pCreature)
         case NPC_JAMMALAN:
         case NPC_ATALARION:
         case NPC_SHADE_OF_ERANIKUS:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -220,7 +220,7 @@ void instance_sunken_temple::SetData(uint32 uiType, uint32 uiData)
 
                 if (Creature* pShade = pPlayer->SummonCreature(NPC_SHADE_OF_HAKKAR, aSunkenTempleLocation[1].m_fX, aSunkenTempleLocation[1].m_fY, aSunkenTempleLocation[1].m_fZ, aSunkenTempleLocation[1].m_fO, TEMPSPAWN_MANUAL_DESPAWN, 0))
                 {
-                    m_mNpcEntryGuidStore[NPC_SHADE_OF_HAKKAR] = pShade->GetObjectGuid();
+                    m_npcEntryGuidStore[NPC_SHADE_OF_HAKKAR] = pShade->GetObjectGuid();
                     pShade->SetRespawnDelay(DAY);
                 }
 

@@ -175,7 +175,7 @@ void instance_blackrock_spire::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_blackrock_spire::OnCreatureCreate(Creature* pCreature)
@@ -189,7 +189,7 @@ void instance_blackrock_spire::OnCreatureCreate(Creature* pCreature)
         case NPC_REND_BLACKHAND:
         case NPC_SCARSHIELD_INFILTRATOR:
         case NPC_THE_BEAST:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
         case NPC_BLACKHAND_SUMMONER:

@@ -42,7 +42,8 @@ struct world_map_eastern_kingdoms : public ScriptedMap
             case NPC_BOLVAR:
             case NPC_PRESTOR:
             case NPC_WINDSOR:
-                m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+                break;
         }
     }
 
@@ -81,7 +82,7 @@ struct world_map_kalimdor : public ScriptedMap
     void OnCreatureCreate(Creature* pCreature)
     {
         if (pCreature->GetEntry() == NPC_MURKDEEP)
-            m_mNpcEntryGuidStore[NPC_MURKDEEP] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[NPC_MURKDEEP] = pCreature->GetObjectGuid();
     }
 
     void OnCreatureDeath(Creature* pCreature)
