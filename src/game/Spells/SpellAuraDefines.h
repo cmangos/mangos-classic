@@ -29,7 +29,15 @@
 
 enum AuraFlags
 {
-    AFLAG_MASK              = 0x09
+    AFLAG_NONE                  = 0x00,
+    AFLAG_HELPFUL               = 0x01,
+    AFLAG_HARMFUL               = 0x02,
+    AFLAG_PASSIVE_DEPRECATED    = 0x04,     // Pre-WotLK: debuffs can't be queried using this flag. Unused in UI since 1.10.0, new meaning unknown (still the same?)
+    AFLAG_UNK4                  = 0x08,     // Pre-WotLK: unused in UI
+    AFLAG_CANCELABLE            = 0x10,
+    AFLAG_NOT_CANCELABLE        = 0x20,
+
+    AFLAG_MASK_ALL              = 0xFF
 };
 
 /**

@@ -5511,11 +5511,24 @@ void SpellAuraHolder::SetAuraFlag(uint32 slot, bool add)
     uint32 index    = slot >> 3;
     uint32 byte     = (slot & 7) << 2;
     uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURAFLAGS + index);
+    val &= ~(uint32(AFLAG_MASK_ALL) << byte);
     if (add)
-        val |= ((uint32)AFLAG_MASK << byte);
-    else
-        val &= ~((uint32)AFLAG_MASK << byte);
+    {
+        const Unit* caster = GetCaster();
 
+        uint32 flags = AFLAG_NONE;
+        for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
+            if (!m_auras[i])
+                continue;
+            if ((flags & AFLAG_HARMFUL) && (flags & AFLAG_HELPFUL))
+                break;
+            flags |= (IsPositiveEffectTargetMode(m_spellProto, SpellEffectIndex(i), caster, m_target) ? AFLAG_HELPFUL : AFLAG_HARMFUL);
+        }
+        flags |= ((IsPositive() && !m_spellProto->HasAttribute(SPELL_ATTR_CANT_CANCEL)) ? AFLAG_CANCELABLE : AFLAG_NOT_CANCELABLE);
+
+        val |= (flags << byte);
+    }
     m_target->SetUInt32Value(UNIT_FIELD_AURAFLAGS + index, val);
 }
 
