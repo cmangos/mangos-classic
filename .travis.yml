@@ -16,11 +16,8 @@ before_script:
     - ./piutils/wait-for-ssh
     - sleep 120
     - ./piutils/run-on-pi "cat /etc/os-release"
-    - ./piutils/run-on-pi "df -h"
-    - ./piutils/run-on-pi "free"
     - ./piutils/run-on-pi "sudo apt-get --allow-unauthenticated install -qq -y git"
     - ./piutils/run-on-pi "cd mangos-classic-raspberry-pi && git pull origin master"
-    - ./piutils/run-on-pi "df -h"
 
 script:
     - ./piutils/run-on-pi "cd mangos-classic-raspberry-pi && ./compile.sh"
