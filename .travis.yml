@@ -20,4 +20,4 @@ before_script:
     - ./piutils/run-on-pi "cd mangos-classic-raspberry-pi && git pull origin master"
 
 script:
-    - ./piutils/run-on-pi "cd mangos-classic-raspberry-pi && ./compile.sh"
+    - ./piutils/run-on-pi "cd mangos-classic-raspberry-pi && export ISTRAVIS=Y && ./compile.sh"
