@@ -67,7 +67,6 @@ void PetAI::MoveInLineOfSight(Unit* u)
 
     if (HasReactState(REACT_AGGRESSIVE)
         && !(pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
-        && u && (m_unit->IsHostileTo(u) || u->IsHostileTo(m_unit->GetMaster()))
         && m_creature->CanAttackOnSight(u) && u->isInAccessablePlaceFor(m_unit)
         && m_unit->IsWithinDistInMap(u, m_unit->GetAttackDistance(u))
         && m_unit->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE

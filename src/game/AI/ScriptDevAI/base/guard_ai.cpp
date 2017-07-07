@@ -56,7 +56,7 @@ void guardAI::Aggro(Unit* who)
 void guardAI::JustDied(Unit* killer)
 {
     // Send Zone Under Attack message to the LocalDefense and WorldDefense Channels
-    if (Player* pPlayer = pKiller->GetBeneficiaryPlayer())
+    if (Player* pPlayer = killer->GetBeneficiaryPlayer())
         m_creature->SendZoneUnderAttackMessage(pPlayer);
 }
 
