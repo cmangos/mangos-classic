@@ -3577,14 +3577,14 @@ void Unit::_UpdateAutoRepeatSpell()
         if (getStandState() != UNIT_STAND_STATE_STAND)
             SetStandState(UNIT_STAND_STATE_STAND);
 
-        Unit* currSpellTarget = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_targets.getUnitTarget();
+        Unit* currSpellTarget = GetMap()->GetUnit(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_targets.getUnitTargetGuid());
         Unit* currTarget = nullptr;
 
         // Check i there is new target
         ObjectGuid const& currTargetGuid = GetTargetGuid();
         if (!currTargetGuid.IsEmpty() && currTargetGuid.IsUnit())
         {
-            if (currTargetGuid != currSpellTarget->GetObjectGuid())
+            if (!currSpellTarget || currTargetGuid != currSpellTarget->GetObjectGuid())
                 currTarget = GetMap()->GetUnit(currTargetGuid);
             else
                 currTarget = currSpellTarget;
