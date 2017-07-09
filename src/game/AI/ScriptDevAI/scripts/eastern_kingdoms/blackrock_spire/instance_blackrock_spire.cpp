@@ -889,6 +889,138 @@ bool GOUse_go_father_flame(Player* /*pPlayer*/, GameObject* pGo)
     return true;
 }
 
+enum
+{
+    SPELL_STRIKE            = 15580,
+    SPELL_SUNDER_ARMOR      = 15572,
+    SPELL_DISTURB_EGGS      = 15746,
+};
+
+struct npc_rookery_hatcherAI : public ScriptedAI
+{
+    npc_rookery_hatcherAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_blackrock_spire*) pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_blackrock_spire* m_pInstance;
+
+    uint32 uiStrikeTimer;
+    uint32 uiSunderArmorTimer;
+    uint32 uiDisturbEggsTimer;
+    uint32 uiWaitTimer;
+
+    bool m_bIsMovementActive;
+
+    void Reset() override
+    {
+        uiStrikeTimer           = urand(5000 ,7000);
+        uiSunderArmorTimer      = 5000;
+        uiDisturbEggsTimer      = urand(8000, 10000);
+        uiWaitTimer             = 0;
+
+        m_bIsMovementActive     = false;
+    }
+
+    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+    {
+        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+            return;
+
+        m_creature->GetMotionMaster()->MoveIdle();
+        m_bIsMovementActive  = false;
+        uiWaitTimer = 2000;
+
+        if (DoCastSpellIfCan(m_creature, SPELL_DISTURB_EGGS) == CAST_OK)
+            uiDisturbEggsTimer = urand(7500, 10000);
+    }
+
+    // Function to search for new rookery egg in range
+    void DoFindNewEgg()
+    {
+        std::list<GameObject*> lEggsInRange;
+        GetGameObjectListWithEntryInGrid(lEggsInRange, m_creature, GO_ROOKERY_EGG, 20.0f);
+
+        if (lEggsInRange.empty())   // No GO found
+            return;
+
+        lEggsInRange.sort(ObjectDistanceOrder(m_creature));
+        GameObject* pNearestEgg = nullptr;
+
+        // Always need to find new ones
+        for (std::list<GameObject*>::const_iterator itr = lEggsInRange.begin(); itr != lEggsInRange.end(); ++itr)
+        {
+            if (!((*itr)->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE)))
+            {
+                pNearestEgg = *itr;
+                break;
+            }
+        }
+
+        if (!pNearestEgg)
+            return;
+
+        float fX, fY, fZ;
+        pNearestEgg->GetContactPoint(m_creature, fX, fY, fZ, 1.0f);
+        m_creature->SetWalk(false);
+        m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+        m_bIsMovementActive = true;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // Return since we have no target or are disturbing an egg
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || m_bIsMovementActive)
+            return;
+
+        if (uiWaitTimer)
+        {
+            if (uiWaitTimer < uiDiff)
+            {
+                uiWaitTimer = 0;
+                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            }
+            else
+                uiWaitTimer -= uiDiff;
+        }
+
+        //  Strike Timer
+        if (uiStrikeTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STRIKE) == CAST_OK)
+                uiStrikeTimer = urand(4000, 6000);
+        }
+        else
+            uiStrikeTimer -= uiDiff;
+
+        // Sunder Armor timer
+        if (uiSunderArmorTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUNDER_ARMOR) == CAST_OK)
+                uiSunderArmorTimer = 5000;
+        }
+        else
+            uiSunderArmorTimer -= uiDiff;
+
+        // Disturb Rookery Eggs timer
+        if (uiDisturbEggsTimer < uiDiff)
+        {
+            m_bIsMovementActive = false;
+            DoFindNewEgg();
+        }
+        else
+            uiDisturbEggsTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_rookery_hatcher(Creature* pCreature)
+{
+    return new npc_rookery_hatcherAI(pCreature);
+}
+
 void AddSC_instance_blackrock_spire()
 {
     Script* pNewScript;
@@ -911,5 +1043,10 @@ void AddSC_instance_blackrock_spire()
     pNewScript = new Script;
     pNewScript->Name = "go_father_flame";
     pNewScript->pGOUse = &GOUse_go_father_flame;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_rookery_hatcher";
+    pNewScript->GetAI = &GetAI_npc_rookery_hatcher;
     pNewScript->RegisterSelf();
 }
