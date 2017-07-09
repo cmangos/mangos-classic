@@ -2815,6 +2815,16 @@ void PlayerbotAI::DoLoot()
             m_bot->GetMotionMaster()->MoveIdle();
             return;
         }
+        else if (c->loot && !c->loot->CanLoot(m_bot))
+        {
+            if (GetManager()->m_confDebugWhisper)
+                TellMaster("%s is not lootable by me.", wo->GetName());
+            m_lootCurrent = ObjectGuid();
+            // clear movement target, take next target on next update
+            m_bot->GetMotionMaster()->Clear(false);
+            m_bot->GetMotionMaster()->MoveIdle();
+            return;
+        }
     }
 
     if (m_bot->GetDistance(wo) > CONTACT_DISTANCE + wo->GetObjectBoundingRadius())
