@@ -312,9 +312,12 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=nu
     }
 
     // Load creature equipment
-    if (eventData && eventData->equipment_id)
+    if (eventData)
     {
-        LoadEquipment(eventData->equipment_id);             // use event equipment if any for active event
+        if (eventData->equipment_id)
+            LoadEquipment(eventData->equipment_id);             // use event equipment if any for active event
+        else if (eventData->entry_id)
+            LoadEquipment(cinfo->EquipmentTemplateId, true);     // use changed entry default template
     }
     else if (!data || data->equipmentId == 0)
     {
