@@ -106,7 +106,7 @@ void CreatureAI::EnterEvadeMode()
     m_creature->CombatStop(true);
 
     // only alive creatures that are not on transport can return to home position
-    if (m_creature->isAlive() && !m_creature->IsBoarded())
+    if (GetReactState() != REACT_PASSIVE && m_creature->isAlive() && !m_creature->IsBoarded())
         m_creature->GetMotionMaster()->MoveTargetedHome();
 
     m_creature->SetLootRecipient(nullptr);
