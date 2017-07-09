@@ -535,6 +535,21 @@ inline bool HasAreaAuraEffect(SpellEntry const* spellInfo)
     return false;
 }
 
+inline bool IsPersistentAuraEffect(uint32 effect)
+{
+    if (effect == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+        return true;
+    return false;
+}
+
+inline bool HasPersistentAuraEffect(SpellEntry const* spellInfo)
+{
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (IsPersistentAuraEffect(spellInfo->Effect[i]))
+            return true;
+    return false;
+}
+
 inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
