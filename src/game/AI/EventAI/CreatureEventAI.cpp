@@ -741,14 +741,22 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             break;
         }
         case ACTION_T_QUEST_EVENT:
+        {
             if (Unit* target = GetTargetByType(action.quest_event.target, pActionInvoker, pAIEventSender, reportTargetError))
             {
                 if (target->GetTypeId() == TYPEID_PLAYER)
-                    ((Player*)target)->AreaExploredOrEventHappens(action.quest_event.questId);
+                {
+                    Player* playerTarget = static_cast<Player*>(target);
+                    if (action.quest_event.rewardGroup)
+                        playerTarget->GroupEventHappens(action.quest_event.questId, m_creature);
+                    else
+                        playerTarget->AreaExploredOrEventHappens(action.quest_event.questId);
+                }
             }
             else if (reportTargetError)
                 sLog.outErrorEventAI("Event %u - nullptr target for ACTION_T_QUEST_EVENT(%u), target-type %u", EventId, action.type, action.quest_event.target);
             break;
+        }
         case ACTION_T_CAST_EVENT:
             if (Unit* target = GetTargetByType(action.cast_event.target, pActionInvoker, pAIEventSender, reportTargetError, 0, SELECT_FLAG_PLAYER))
             {

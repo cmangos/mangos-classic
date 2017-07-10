@@ -261,6 +261,7 @@ struct CreatureEventAI_Action
         {
             uint32 questId;
             uint32 target;
+            uint32 rewardGroup;
         } quest_event;
         // ACTION_T_CAST_EVENT                              = 16
         struct

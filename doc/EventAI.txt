@@ -121,7 +121,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 12   ACTION_T_SUMMON                        CreatureID, Target, Duration    Summons a Creature ID (Param1) for (Param3) duration after Evade (In MS) and orders it to attack (Param2) target (specified below). Spawns on top of NPC who summons it.
 13   ACTION_T_THREAT_SINGLE_PCT             Threat%, Target                 Modifies a threat by (Param1) percent on a target (Param2).
 14   ACTION_T_THREAT_ALL_PCT                Threat%                         Modifies a threat by (Param1) on all targets in the threat list (using -100% here will result in full aggro dump).
-15   ACTION_T_QUEST_EVENT                   QuestID, Target                 Calls AreaExploredOrEventHappens with (Param1) for a target in (Param2).
+15   ACTION_T_QUEST_EVENT                   QuestID, Target, RewardGroup    Calls AreaExploredOrEventHappens with (Param1) for a target in (Param2). Param3 decides if award entire group (1 = yes, 0 = no).
 16   ACTION_T_QUEST_CASTCREATUREGO          CreatureID, SpellId, Target     Sends CastCreatureOrGo for a creature specified by CreatureId (Param1) with provided spell id (Param2) for a target in (Param3).
 17   ACTION_T_SET_UNIT_FIELD                Field_Number, Value, Target     Sets a unit field (Param1) to provided value (Param2) on a target in (Param3).
 18   ACTION_T_SET_UNIT_FLAG                 Flags, Target                   Sets flag (flags can be used together to modify multiple flags at once) on a target (Param2).
@@ -616,6 +616,7 @@ This is commonly used to allow an NPC to drop threat for all players to zero.
 --------------------------
 Parameter 1: QuestID - The Quest Template ID. The value here must be a valid quest template ID. Furthermore, the quest should have SpecialFlags | 2 as it would need to be completed by an external event which is the activation of this action.
 Parameter 2: Target - The Target Type defining whom the quest should be completed for. The value in this field needs to be a valid target type as specified in the reference tables below.
+Parameter 3: RewardGroup - Used to decide if entire group should be rewarded (1 = entire group, 0 = single target)
 
 This action will satisfy the external completion requirement for the quest for the specified target defined by the target type.
 NOTE: This action can only be used with player targets so it must be ensured that the target type will point to a player.
