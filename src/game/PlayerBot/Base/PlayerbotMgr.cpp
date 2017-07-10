@@ -404,7 +404,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             return;
         } /* EMOTE ends here */
 
-        case CMSG_GAMEOBJ_USE: // not sure if we still need this one
+        case CMSG_GAMEOBJ_USE: // Used by bots to turn in quest to GameObjects when also used by master
         {
             DEBUG_LOG("PlayerbotMgr: CMSG_GAMEOBJ_USE");
 
@@ -416,6 +416,11 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
                 Player* const bot = it->second;
+
+                // If player and bot are on different maps: then player was teleported by GameObject
+                // let's return and let playerbot summon do its job by teleporting bots
+                if (bot->GetMap() != m_master->GetMap())
+                    return;
 
                 GameObject *obj = m_master->GetMap()->GetGameObject(objGUID);
                 if (!obj)
