@@ -402,13 +402,9 @@ void ObjectMgr::LoadCreatureTemplates()
         if (!cInfo)
             continue;
 
-        FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->FactionAlliance);
+        FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->Faction);
         if (!factionTemplate)
-            sLog.outErrorDb("Creature (Entry: %u) has nonexistent faction_A template (%u)", cInfo->Entry, cInfo->FactionAlliance);
-
-        factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->FactionHorde);
-        if (!factionTemplate)
-            sLog.outErrorDb("Creature (Entry: %u) has nonexistent faction_H template (%u)", cInfo->Entry, cInfo->FactionHorde);
+            sLog.outErrorDb("Creature (Entry: %u) has nonexistent faction template (%u)", cInfo->Entry, cInfo->Faction);
 
         for (int k = 0; k < MAX_KILL_CREDIT; ++k)
         {
@@ -493,11 +489,8 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->DamageSchool = SPELL_SCHOOL_NORMAL;
         }
 
-        if (cInfo->MeleeBaseAttackTime == 0)
-            const_cast<CreatureInfo*>(cInfo)->MeleeBaseAttackTime  = BASE_ATTACK_TIME;
-
-        if (cInfo->RangedBaseAttackTime == 0)
-            const_cast<CreatureInfo*>(cInfo)->RangedBaseAttackTime = BASE_ATTACK_TIME;
+        if (cInfo->BaseAttackTime == 0)
+            const_cast<CreatureInfo*>(cInfo)->BaseAttackTime = BASE_ATTACK_TIME;
 
         if ((cInfo->NpcFlags & UNIT_NPC_FLAG_TRAINER) && cInfo->TrainerType >= MAX_TRAINER_TYPE)
             sLog.outErrorDb("Creature (Entry: %u) has wrong trainer type %u", cInfo->Entry, cInfo->TrainerType);
@@ -696,7 +689,7 @@ void ObjectMgr::LoadCreatureClassLvlStats()
     // initialize data array
     memset(&m_creatureClassLvlStats, 0, sizeof(m_creatureClassLvlStats));
 
-    std::string queryStr = "SELECT Class, Level, BaseMana, BaseMeleeAttackPower, BaseRangedAttackPower, BaseArmor, BaseHealthExp0, BaseDamageExp0 "
+    std::string queryStr = "SELECT Class, Level, BaseMana, BaseAttackPower, BaseArmor, BaseHealthExp0, BaseDamageExp0 "
                            "FROM creature_template_classlevelstats ORDER BY Class, Level";
 
     QueryResult* result = WorldDatabase.Query(queryStr.c_str());
@@ -736,11 +729,10 @@ void ObjectMgr::LoadCreatureClassLvlStats()
         CreatureClassLvlStats& cCLS = m_creatureClassLvlStats[creatureLevel][classToIndex[creatureClass]];
 
         cCLS.BaseMana               = fields[2].GetUInt32();
-        cCLS.BaseMeleeAttackPower   = fields[3].GetFloat();
-        cCLS.BaseRangedAttackPower  = fields[4].GetFloat();
-        cCLS.BaseArmor              = fields[5].GetUInt32();
-        cCLS.BaseHealth             = fields[6].GetUInt32();
-        cCLS.BaseDamage             = fields[7].GetFloat();
+        cCLS.BaseAttackPower        = fields[3].GetFloat();
+        cCLS.BaseArmor              = fields[4].GetUInt32();
+        cCLS.BaseHealth             = fields[5].GetUInt32();
+        cCLS.BaseDamage             = fields[6].GetFloat();
 
         ++storedRow;
     }

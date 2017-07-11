@@ -81,8 +81,7 @@ struct CreatureInfo
     uint32  MinLevel;
     uint32  MaxLevel;
     uint32  ModelId[MAX_CREATURE_MODEL];
-    uint32  FactionAlliance;
-    uint32  FactionHorde;
+    uint32  Faction;
     float   Scale;
     uint32  Family;                                         // enum CreatureFamily values (optional)
     uint32  CreatureType;                                   // enum CreatureType values
@@ -108,15 +107,11 @@ struct CreatureInfo
     uint32  MaxLevelHealth;
     uint32  MinLevelMana;
     uint32  MaxLevelMana;
-    float   MinMeleeDmg;
-    float   MaxMeleeDmg;
-    float   MinRangedDmg;
-    float   MaxRangedDmg;
+    float   MinDmg;
+    float   MaxDmg;
     uint32  Armor;
-    uint32  MeleeAttackPower;
-    uint32  RangedAttackPower;
-    uint32  MeleeBaseAttackTime;
-    uint32  RangedBaseAttackTime;
+    uint32  AttackPower;
+    uint32  BaseAttackTime;
     uint32  DamageSchool;
     uint32  MinLootGold;
     uint32  MaxLootGold;
@@ -241,8 +236,7 @@ struct CreatureClassLvlStats
     uint32  BaseHealth;
     uint32  BaseMana;
     float   BaseDamage;
-    float   BaseMeleeAttackPower;
-    float   BaseRangedAttackPower;
+    float   BaseAttackPower;
     uint32  BaseArmor;
 };
 

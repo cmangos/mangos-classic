@@ -1143,9 +1143,8 @@ void Pet::InitStatsForLevel(uint32 petlevel)
 
     int32 createResistance[MAX_SPELL_SCHOOL] = {0, 0, 0, 0, 0, 0, 0};
 
-    SetAttackTime(BASE_ATTACK, cInfo->MeleeBaseAttackTime);
-    SetAttackTime(OFF_ATTACK, cInfo->MeleeBaseAttackTime);
-    SetAttackTime(RANGED_ATTACK, cInfo->RangedBaseAttackTime);
+    SetAttackTime(BASE_ATTACK, cInfo->BaseAttackTime);
+    SetAttackTime(OFF_ATTACK, cInfo->BaseAttackTime);
 
     if (getPetType() == HUNTER_PET)
         SetMeleeDamageSchool(SpellSchools(SPELL_SCHOOL_NORMAL));
@@ -1249,7 +1248,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
 				CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(petlevel, cInfo->UnitClass);
                 if (cInfo->ArmorMultiplier && cCLS) // Info found in ClassLevelStats
                 {
-                    minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseMeleeAttackPower / 14) * (cInfo->MeleeBaseAttackTime/1000)) * cInfo->DamageMultiplier;
+                    minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseAttackPower / 14) * (cInfo->BaseAttackTime/1000)) * cInfo->DamageMultiplier;
 
                     // Apply custom damage setting (from config)
                     minDmg *= _GetDamageMod(cInfo->Rank);
@@ -1261,8 +1260,8 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 {
                     sLog.outErrorDb("SUMMON_PET creature_template not finished on creature %s! (entry: %u)", GetGuidStr().c_str(), cInfo->Entry);
 
-                    float dMinLevel = cInfo->MinMeleeDmg / cInfo->MinLevel;
-                    float dMaxLevel = cInfo->MaxMeleeDmg / cInfo->MaxLevel;
+                    float dMinLevel = cInfo->MinDmg / cInfo->MinLevel;
+                    float dMaxLevel = cInfo->MaxDmg / cInfo->MaxLevel;
                     float mDmg = (dMaxLevel - ((dMaxLevel - dMinLevel) / 2)) * petlevel;
                     
                     // Set damage
@@ -1299,7 +1298,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 armor = cCLS->BaseArmor;
 
                 // Melee
-                minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseMeleeAttackPower / 14) * (cInfo->MeleeBaseAttackTime/1000)) * cInfo->DamageMultiplier;
+                minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseAttackPower / 14) * (cInfo->BaseAttackTime/1000)) * cInfo->DamageMultiplier;
 
                 // Get custom setting
                 minDmg *= _GetDamageMod(cInfo->Rank);
@@ -1307,15 +1306,6 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 // If the damage value is not passed on as float it will result in damage = 1; but only for guardian type pets, though...
                 SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(minDmg));
                 SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(minDmg * 1.5));
-
-                // Ranged
-                minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseRangedAttackPower / 14) * (cInfo->RangedBaseAttackTime/1000)) * cInfo->DamageMultiplier;
-
-                // Get custom setting
-                minDmg *= _GetDamageMod(cInfo->Rank);
-
-                SetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE, float(minDmg));
-                SetBaseWeaponDamage(RANGED_ATTACK, MAXDAMAGE, float(minDmg * 1.5));
             }
             else // TODO: Remove fallback to creature_template data when DB is ready
             {
@@ -1342,11 +1332,8 @@ void Pet::InitStatsForLevel(uint32 petlevel)
 
                 sLog.outErrorDb("Pet::InitStatsForLevel> Error trying to set stats for creature %s (entry: %u) using ClassLevelStats; not enough data to do it!", GetGuidStr().c_str(), cInfo->Entry);
 
-                SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(cInfo->MinMeleeDmg));
-                SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(cInfo->MaxMeleeDmg));
-
-                SetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE, float(cInfo->MinRangedDmg));
-                SetBaseWeaponDamage(RANGED_ATTACK, MAXDAMAGE, float(cInfo->MaxRangedDmg));
+                SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(cInfo->MinDmg));
+                SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(cInfo->MaxDmg));
             }
 
             break;
