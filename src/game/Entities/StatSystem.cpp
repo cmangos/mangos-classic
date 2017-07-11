@@ -662,7 +662,7 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
     UnitMods unitMod = (attType == BASE_ATTACK ? UNIT_MOD_DAMAGE_MAINHAND : UNIT_MOD_DAMAGE_OFFHAND);
 
     /* difference in AP between current attack power and base value from DB */
-    float att_pwr_change = GetTotalAttackPowerValue(attType) - GetCreatureInfo()->MeleeAttackPower;
+    float att_pwr_change = GetTotalAttackPowerValue(attType) - GetCreatureInfo()->AttackPower;
     float base_value  = GetModifierValue(unitMod, BASE_VALUE) + (att_pwr_change * GetAPMultiplier(attType, false) / 14.0f);
     float base_pct    = GetModifierValue(unitMod, BASE_PCT);
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);

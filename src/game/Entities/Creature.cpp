@@ -374,18 +374,15 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     else
         SelectLevel();
 
-    if (team == HORDE)
-        setFaction(GetCreatureInfo()->FactionHorde);
-    else
-        setFaction(GetCreatureInfo()->FactionAlliance);
+    setFaction(GetCreatureInfo()->Faction);
 
     SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->NpcFlags);
 
-    uint32 attackTimer = GetCreatureInfo()->MeleeBaseAttackTime;
+    uint32 attackTimer = GetCreatureInfo()->BaseAttackTime;
 
     SetAttackTime(BASE_ATTACK,  attackTimer);
     SetAttackTime(OFF_ATTACK,   attackTimer - attackTimer / 4);
-    SetAttackTime(RANGED_ATTACK, GetCreatureInfo()->RangedBaseAttackTime);
+    SetAttackTime(RANGED_ATTACK, attackTimer);
 
     uint32 unitFlags = GetCreatureInfo()->UnitFlags;
 
@@ -416,7 +413,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     UpdateAllStats();
 
     // checked and error show at loading templates
-    if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->FactionAlliance))
+    if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->Faction))
     {
         if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_PVP)
             SetPvP(true);
@@ -1230,16 +1227,13 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     // damage
     float damagemod = _GetDamageMod(rank);
 
-    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cinfo->MinMeleeDmg * damagemod);
-    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cinfo->MaxMeleeDmg * damagemod);
+    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cinfo->MinDmg * damagemod);
+    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cinfo->MaxDmg * damagemod);
 
-    SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, cinfo->MinMeleeDmg * damagemod);
-    SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, cinfo->MaxMeleeDmg * damagemod);
+    SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, cinfo->MinDmg * damagemod);
+    SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, cinfo->MaxDmg * damagemod);
 
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, cinfo->MinRangedDmg * damagemod);
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, cinfo->MaxRangedDmg * damagemod);
-
-    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, cinfo->MeleeAttackPower * damagemod);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, cinfo->AttackPower * damagemod);
 }
 
 float Creature::_GetHealthMod(int32 Rank)
@@ -2451,7 +2445,7 @@ void Creature::ClearTemporaryFaction()
         return;
 
     // Reset to original faction
-    setFaction(GetCreatureInfo()->FactionAlliance);
+    setFaction(GetCreatureInfo()->Faction);
 
     ForceHealthAndPowerUpdate();                            // update health and power for client needed to hide enemy real value
 

@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2702_01_mangos_spell_chain_totems_typos` bit(1) DEFAULT NULL
+  `required_z2703_01_mangos_creature_template_fixup` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1162,8 +1162,7 @@ CREATE TABLE `creature_template` (
   `ModelId2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ModelId3` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ModelId4` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `FactionAlliance` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `FactionHorde` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `Faction` smallint(5) unsigned NOT NULL DEFAULT '0',
   `Scale` float NOT NULL DEFAULT '1',
   `Family` tinyint(4) NOT NULL DEFAULT '0',
   `CreatureType` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -1189,15 +1188,11 @@ CREATE TABLE `creature_template` (
   `MaxLevelHealth` int(10) unsigned NOT NULL DEFAULT '0',
   `MinLevelMana` int(10) unsigned NOT NULL DEFAULT '0',
   `MaxLevelMana` int(10) unsigned NOT NULL DEFAULT '0',
-  `MinMeleeDmg` float NOT NULL DEFAULT '0',
-  `MaxMeleeDmg` float NOT NULL DEFAULT '0',
-  `MinRangedDmg` float NOT NULL DEFAULT '0',
-  `MaxRangedDmg` float NOT NULL DEFAULT '0',
+  `MinDmg` float NOT NULL DEFAULT '0',
+  `MaxDmg` float NOT NULL DEFAULT '0',
   `Armor` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `MeleeAttackPower` int(10) unsigned NOT NULL DEFAULT '0',
-  `RangedAttackPower` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `MeleeBaseAttackTime` int(10) unsigned NOT NULL DEFAULT '2000',
-  `RangedBaseAttackTime` int(10) unsigned NOT NULL DEFAULT '2000',
+  `AttackPower` int(10) unsigned NOT NULL DEFAULT '0',
+  `BaseAttackTime` int(10) unsigned NOT NULL DEFAULT '2000',
   `DamageSchool` tinyint(4) NOT NULL DEFAULT '0',
   `MinLootGold` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `MaxLootGold` mediumint(8) unsigned NOT NULL DEFAULT '0',
