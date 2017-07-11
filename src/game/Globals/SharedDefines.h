@@ -73,8 +73,9 @@ enum Classes
     CLASS_SHAMAN        = 7,
     CLASS_MAGE          = 8,
     CLASS_WARLOCK       = 9,
-    // CLASS_UNK2       = 10,unused
+    // CLASS_MONK       = 10,                               // not listed in DBC, will be in 5.0
     CLASS_DRUID         = 11,
+    // CLASS_DEMON_HUNTER = 12,                             // not listed in DBC, will be in 7.0
 };
 
 // max+1 for player class
