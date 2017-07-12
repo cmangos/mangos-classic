@@ -321,7 +321,7 @@ struct boss_onyxiaAI : public ScriptedAI
                 if (m_uiBellowingRoarTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BELLOWINGROAR) == CAST_OK)
-                        m_uiBellowingRoarTimer = unrand(15000, 45000);
+                        m_uiBellowingRoarTimer = urand(15000, 45000);
                 }
                 else
                     m_uiBellowingRoarTimer -= uiDiff;
