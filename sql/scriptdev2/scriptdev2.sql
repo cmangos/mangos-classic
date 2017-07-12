@@ -1935,7 +1935,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1249001,'Learn your place mortal!',0,1,0,0,'onyxia SAY_KILL'),
 (-1249002,'This meaningless exertion bores me. I\'ll incinerate you all from above!',0,1,0,254,'onyxia SAY_PHASE_2_TRANS'),
 (-1249003,'It seems you\'ll need another lesson, mortals!',0,1,0,293,'onyxia SAY_PHASE_3_TRANS'),
-(-1249004,'%s takes in a deep breath...',0,3,0,0,'onyxia EMOTE_BREATH');
+(-1249004,'%s takes in a deep breath...',0,3,0,0,'onyxia EMOTE_BREATH'),
+(-1249005,'You seek to lure me from my clutch? You shall pay for your insolence!',0,1,0,0,'onyxia SAY_KITE');
 
 -- -1 289 000 SCHOLOMANCE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

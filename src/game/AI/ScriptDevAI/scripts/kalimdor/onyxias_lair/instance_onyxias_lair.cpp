@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Instance_Onyxias_Lair
-SD%Complete: 50%
-SDComment:
+SD%Complete: 80%
+SDComment: Quel'Serrar forging event is missing. Whelp summoning would be improved by GO casting.
 SDCategory: Onyxia's Lair
 EndScriptData
 
@@ -52,6 +52,32 @@ void instance_onyxias_lair::OnCreatureCreate(Creature* pCreature)
     }
 }
 
+void instance_onyxias_lair::OnCreatureDeath(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        // Keep track of all killed Warders to respawn them while Onyxia is in combat
+        case NPC_ONYXIAN_WARDER:
+            m_lWarderGUIDList.push_back(pCreature->GetObjectGuid());
+            break;
+    }
+}
+
+void instance_onyxias_lair::OnObjectCreate(GameObject* pGo)
+{
+    switch (pGo->GetEntry())
+    {
+        case GO_WHELP_SPAWNER:
+            if (Creature* pTrigger = GetSingleCreatureFromStorage(NPC_ONYXIA_TRIGGER))
+            {
+                pTrigger->SummonCreature(NPC_ONYXIA_WHELP, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
+                // TODO when GO spell casting is added in core, replace above code by (or something similar):
+                // pGO->CastSpell(pGO, SPELL_SUMMONWHELP, TRIGGERED_NONE);
+            }
+            break;
+    }
+}
+
 void instance_onyxias_lair::SetData(uint32 uiType, uint32 uiData)
 {
     if (uiType != TYPE_ONYXIA)
@@ -59,8 +85,32 @@ void instance_onyxias_lair::SetData(uint32 uiType, uint32 uiData)
 
     m_uiEncounter = uiData;
 
-    if (uiData == DATA_LIFTOFF)
-        m_tPhaseTwoStart = time(nullptr);
+    switch(uiData)
+    {
+        case DATA_LIFTOFF:
+            m_tPhaseTwoStart = time(nullptr);
+            break;
+        case IN_PROGRESS:
+            // Respawn dead Onyxian Warders
+            for (GuidList::const_iterator itr = m_lWarderGUIDList.begin(); itr != m_lWarderGUIDList.end(); ++itr)
+                {
+                    if (Creature* pWarder = instance->GetCreature(*itr))
+                    {
+                        if (!pWarder->isAlive())
+                            pWarder->Respawn();
+                    }
+                }
+            break;
+        case FAIL:
+        case DONE:
+            // Despawn Onyxian Warders that were respawned during fight
+            for (GuidList::const_iterator itr = m_lWarderGUIDList.begin(); itr != m_lWarderGUIDList.end(); ++itr)
+                {
+                    if (Creature* pWarder = instance->GetCreature(*itr))
+                        pWarder->ForcedDespawn();
+                }
+            break;
+    }
 
     // Currently no reason to save anything
 }
