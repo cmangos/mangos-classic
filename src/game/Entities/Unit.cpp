@@ -5455,8 +5455,7 @@ bool Unit::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
 
 bool Unit::CanAttackOnSight(Unit * target)
 {
-    // TODO: CanAttack remove comment
-    return CanAttack(target) && !hasUnitState(UNIT_STAT_FEIGN_DEATH) /*&& IsEnemy(target)*/;
+    return CanAttack(target) && !hasUnitState(UNIT_STAT_FEIGN_DEATH) && IsEnemy(target);
 }
 
 bool Unit::Attack(Unit* victim, bool meleeAttack)
