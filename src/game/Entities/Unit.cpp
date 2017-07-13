@@ -588,9 +588,12 @@ void Unit::SendHeartBeat()
     SendMessageToSet(data, true);
 }
 
-void Unit::resetAttackTimer(WeaponAttackType type)
+void Unit::resetAttackTimer(WeaponAttackType type /*= BASE_ATTACK*/, bool keepTimer /*= false*/)
 {
-    m_attackTimer[type] = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
+    uint32 newTimer = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
+
+    if (!keepTimer || m_attackTimer[type] > newTimer)
+        m_attackTimer[type] = newTimer;
 }
 
 float Unit::GetCombatReach(Unit const* pVictim, bool forMeleeRange /*=true*/, float flat_mod /*=0.0f*/) const
@@ -9440,6 +9443,9 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply
         ApplyPercentModFloatVar(m_modAttackSpeedPct[att], -val, apply);
         ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME + att, -val, apply);
     }
+
+    // if new haste reduce timer set attack timer to new max timer if need
+    resetAttackTimer(att, true);
 }
 
 void Unit::ApplyCastTimePercentMod(float val, bool apply)
