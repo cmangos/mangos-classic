@@ -1184,9 +1184,8 @@ class Unit : public WorldObject
          * Resets the attack timer to the base value decided by Unit::m_modAttackSpeedPct and
          * Unit::GetAttackTime
          * @param type The weapon attack type to reset the attack timer for.
-         * @param keepTimer The timer will be preserved if it does not past the maximum timer, else it will be set to max timer
          */
-        void resetAttackTimer(WeaponAttackType type = BASE_ATTACK, bool keepTimer = false);
+        void resetAttackTimer(WeaponAttackType type = BASE_ATTACK);
         /**
          * Get's the remaining time until we can do an attack
          * @param type The weapon type to check the remaining time for
