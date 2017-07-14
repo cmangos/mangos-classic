@@ -9439,6 +9439,7 @@ bool Unit::hasNegativeAuraWithInterruptFlag(uint32 flag) const
 
 void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
 {
+    float oldVal = m_modAttackSpeedPct[att];
     if (val > 0)
     {
         ApplyPercentModFloatVar(m_modAttackSpeedPct[att], val, !apply);
@@ -9449,6 +9450,7 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply
         ApplyPercentModFloatVar(m_modAttackSpeedPct[att], -val, apply);
         ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME + att, -val, apply);
     }
+    setAttackTimer(att, getAttackTimer(att) * m_modAttackSpeedPct[att] / oldVal);
 }
 
 void Unit::ApplyCastTimePercentMod(float val, bool apply)
