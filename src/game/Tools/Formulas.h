@@ -235,6 +235,40 @@ namespace MaNGOS
 
     namespace XP
     {
+        inline bool IsTrivialLevelDifference(uint32 unitLvl, uint32 targetLvl)
+        {
+            if (unitLvl > targetLvl)
+            {
+                const uint32 diff = (unitLvl - targetLvl);
+                switch (unitLvl / 5)
+                {
+                    case 0:     // 0-4
+                    case 1:     // 5-9
+                        return (diff > 4);
+                    case 2:     // 10-14
+                    case 3:     // 15-19
+                        return (diff > 5);
+                    case 4:     // 20-24
+                    case 5:     // 25-29
+                        return (diff > 6);
+                    case 6:     // 30-34
+                    case 7:     // 35-39
+                        return (diff > 7);
+                    case 8:     // 40-44
+                        return (diff > 8);
+                    case 9:     // 45-49
+                        return (diff > 9);
+                    case 10:    // 50-54
+                        return (diff > 10);
+                    case 11:    // 55-59
+                        return (diff > 11);
+                    default:    // 60+
+                        return (diff > 12);
+                }
+            }
+            return false;
+        }
+
         enum XPColorChar { RED, ORANGE, YELLOW, GREEN, GRAY };
 
         inline uint32 GetGrayLevel(uint32 pl_level)
