@@ -2054,6 +2054,13 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
 
         if ((selectFlags & SELECT_FLAG_IN_LOS) && !IsWithinLOSInMap(pTarget))
             return false;
+
+        if ((selectFlags & SELECT_FLAG_RANGE_RANGE))
+        {
+            float dist = GetCombatDistance(pTarget, false);
+            if (dist > params.range.maxRange || dist < params.range.minRange)
+                return false;
+        }
     }
 
     if (pSpellInfo)

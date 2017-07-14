@@ -321,6 +321,7 @@ enum SelectFlags
     SELECT_FLAG_NOT_IN_MELEE_RANGE  = 0x080,
     SELECT_FLAG_HAS_AURA            = 0x100,
     SELECT_FLAG_NOT_AURA            = 0x200,
+    SELECT_FLAG_RANGE_RANGE         = 0x400,
 };
 
 enum RegenStatsFlags
