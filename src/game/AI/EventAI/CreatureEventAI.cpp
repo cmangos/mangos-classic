@@ -152,6 +152,7 @@ bool CreatureEventAI::IsTimerBasedEvent(EventAI_Type type) const
         case EVENT_T_TARGET_MISSING_AURA:
         case EVENT_T_RANGE:
         case EVENT_T_ENERGY:
+        case EVENT_T_SELECT_ATTACKING_TARGET:
             return true;
         default:
             return false;
@@ -443,6 +444,20 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             if (perc > event.percent_range.percentMax || perc < event.percent_range.percentMin)
                 return false;
 
+            LOG_PROCESS_EVENT;
+            // Repeat Timers
+            pHolder.UpdateRepeatTimer(m_creature, event.percent_range.repeatMin, event.percent_range.repeatMax);
+            break;
+        }
+        case EVENT_T_SELECT_ATTACKING_TARGET:
+        {
+            SelectAttackingTargetParams parameters;
+            parameters.range.minRange = event.selectTarget.minRange;
+            parameters.range.maxRange = event.selectTarget.maxRange;
+            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_RANGE_RANGE, parameters))
+                m_eventTarget = target;
+            else
+                return false;
             LOG_PROCESS_EVENT;
             // Repeat Timers
             pHolder.UpdateRepeatTimer(m_creature, event.percent_range.repeatMin, event.percent_range.repeatMax);
@@ -1252,6 +1267,11 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
                 if (i->UpdateRepeatTimer(m_creature, event.timer.initialMin, event.timer.initialMax))
                     i->Enabled = true;
                 break;
+            // Reset some special combat timers using repeatMin/Max
+            case EVENT_T_SELECT_ATTACKING_TARGET:
+                if (i->UpdateRepeatTimer(m_creature, event.timer.repeatMin, event.timer.repeatMax))
+                    i->Enabled = true;
+                break;
             default:
                 break;
         }
@@ -1496,6 +1516,10 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoke
                 return nullptr;
             }
         }
+        case TARGET_T_EVENT_SPECIFIC:
+            if (!m_eventTarget)
+                isError = true;
+            return m_eventTarget;
         default:
             isError = true;
             return nullptr;

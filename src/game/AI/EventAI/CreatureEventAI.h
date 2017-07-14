@@ -69,6 +69,7 @@ enum EventAI_Type
     EVENT_T_TIMER_GENERIC           = 29,                   // InitialMin, InitialMax, RepeatMin, RepeatMax
     EVENT_T_RECEIVE_AI_EVENT        = 30,                   // AIEventType, Sender-Entry, unused, unused
     EVENT_T_ENERGY                  = 31,                   // EnergyMax%, EnergyMin%, RepeatMin, RepeatMax
+    EVENT_T_SELECT_ATTACKING_TARGET = 32,                   // MinRange, MaxRange, RepeatMin, RepeatMax
 
     EVENT_T_END,
 };
@@ -155,6 +156,9 @@ enum Target
 
     // Summon targeting
     TARGET_T_SUMMONER                       = 11,           // Owner of unit if exists
+
+    // Event specific targeting
+    TARGET_T_EVENT_SPECIFIC                 = 12,           // Filled by specific event
 };
 
 enum EventFlags
@@ -612,6 +616,14 @@ struct CreatureEventAI_Event
             uint32 unused1;
             uint32 unused2;
         } receiveAIEvent;
+        // EVENT_T_SELECT_ATTACKING_TARGET                  = 32
+        struct
+        {
+            uint32 minRange;
+            uint32 maxRange;
+            uint32 repeatMin;
+            uint32 repeatMax;
+        } selectTarget;
         // RAW
         struct
         {
@@ -727,6 +739,8 @@ class CreatureEventAI : public CreatureAI
         float m_LastSpellMaxRange;                          // Maximum spell range that was cast during dynamic movement
 
         ReactStates m_reactState;                           // Define if creature is passive or aggressive
+
+        Unit* m_eventTarget;                                // Target filled on specific event to be used in action
 };
 
 #endif

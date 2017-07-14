@@ -94,6 +94,7 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 29   EVENT_T_TIMER_GENERIC         InitialMin, InitialMax, RepeatMin, RepeatMax            Expires at first between (Param1) and (Param2) and then will repeat between every (Param3) and (Param4).
 30   EVENT_T_RECEIVE_AI_EVENT      AIEventType, Sender-Entry, unused, unused               Expires when the creature receives an AIEvent of type (Param1), sent by creature (Param2 != 0). If (Param2 = 0) then sent by any creature
 31   EVENT_T_ENERGY                EnergyMax%, EnergyMin%, RepeatMin, RepeatMax            Expires when the NPC's Energy% is between (Param1) and (Param2). Will repeat between every (Param3) and (Param4) If Event Conditions Are Still Met.
+31   EVENT_T_SELECT_ATTACKING_TARGET MinRange, MaxRange, RepeatMin, RepeatMax              Expires when the NPC has a target in threat table further than Param1 and closer than Param2. First time happens after and will repeat after Param3 and Param4.
 
 =========================================
 Action Types
@@ -969,6 +970,7 @@ Target types are used by certain actions and may effect actions differently
 9    TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER  Any Random Player Except Top Threat
 10   TARGET_T_EVENT_SENDER              Creature who sent a received AIEvent - only triggered by EVENT_T_RECEIVE_AI_EVENT
 11   TARGET_T_SUMMONER                  Summoner of given Unit if it has one
+12   TARGET_T_EVENT_SPECIFIC            Filled by Event - EVENT_T_SELECT_ATTACKING_TARGET fills target selected
 
 =========================================
 Cast Flags

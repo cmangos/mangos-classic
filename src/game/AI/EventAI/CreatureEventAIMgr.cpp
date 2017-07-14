@@ -510,6 +510,15 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     }
                     break;
                 }
+                case EVENT_T_SELECT_ATTACKING_TARGET:
+                {
+                    if (temp.event_flags & EFLAG_REPEATABLE && !temp.selectTarget.repeatMin && !temp.selectTarget.repeatMax)
+                    {
+                        sLog.outErrorEventAI("Creature %u has param3 and param4=0 (RepeatMin/RepeatMax) but cannot be repeatable without timers. Removing EFLAG_REPEATABLE for event %u.", temp.creature_id, i);
+                        temp.event_flags &= ~EFLAG_REPEATABLE;
+                    }
+                    break;
+                }
                 default:
                     sLog.outErrorEventAI("Creature %u using not checked at load event (%u) in event %u. Need check code update?", temp.creature_id, temp.event_id, i);
                     break;
