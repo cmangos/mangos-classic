@@ -1679,27 +1679,31 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotCreature(pSource))
                 break;
 
+            Creature* source = ((Creature*)pSource);
+
             // Consider add additional checks for cases where creature should not change movementType
             // (pet? in combat? already using same MMgen as script try to apply?)
 
             switch (m_script->movement.movementType)
             {
                 case IDLE_MOTION_TYPE:
-                    ((Creature*)pSource)->GetMotionMaster()->MoveIdle();
+                    source->GetMotionMaster()->MoveIdle();
                     break;
                 case RANDOM_MOTION_TYPE:
                     if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                        ((Creature*)pSource)->GetMotionMaster()->MoveRandomAroundPoint(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ(), float(m_script->movement.wanderORpathId));
+                        source->GetMotionMaster()->MoveRandomAroundPoint(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ(), float(m_script->movement.wanderORpathId));
                     else
                     {
                         float respX, respY, respZ, respO, wander_distance;
-                        ((Creature*)pSource)->GetRespawnCoord(respX, respY, respZ, &respO, &wander_distance);
+                        source->GetRespawnCoord(respX, respY, respZ, &respO, &wander_distance);
                         wander_distance = m_script->movement.wanderORpathId ? m_script->movement.wanderORpathId : wander_distance;
-                        ((Creature*)pSource)->GetMotionMaster()->MoveRandomAroundPoint(respX, respY, respZ, wander_distance);
+                        source->GetMotionMaster()->MoveRandomAroundPoint(respX, respY, respZ, wander_distance);
                     }
                     break;
                 case WAYPOINT_MOTION_TYPE:
-                    ((Creature*)pSource)->GetMotionMaster()->MoveWaypoint(m_script->movement.wanderORpathId);
+                    source->StopMoving();
+                    source->GetMotionMaster()->Clear(false, true);
+                    source->GetMotionMaster()->MoveWaypoint(m_script->movement.wanderORpathId);
                     break;
             }
 
