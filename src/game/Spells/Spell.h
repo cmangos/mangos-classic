@@ -480,6 +480,7 @@ class Spell
         WorldObject* GetCastingObject() const;
 
         uint32 GetPowerCost() const { return m_powerCost; }
+        float GetSpellSpeed() const { return m_spellInfo->speed; }
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
 
