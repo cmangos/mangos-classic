@@ -7059,7 +7059,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
     if (!isAlive())
         return;
 
-    if (PvP)
+    if (PvP || GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsTotem())
         m_CombatTimer = 5000;
 
     bool creatureNotInCombat = GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
