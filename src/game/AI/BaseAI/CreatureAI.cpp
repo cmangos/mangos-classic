@@ -36,7 +36,8 @@ CreatureAI::CreatureAI(Creature* creature) :
     m_attackAngle(0.0f),
     m_reactState(REACT_AGGRESSIVE),
     m_meleeEnabled(true),
-    m_visibilityDistance(VISIBLE_RANGE)
+    m_visibilityDistance(VISIBLE_RANGE),
+    m_moveFurther(true)
 {
     if (m_creature->IsCivilian())
         m_reactState = REACT_DEFENSIVE;
@@ -52,7 +53,8 @@ CreatureAI::CreatureAI(Unit* unit) :
     m_attackAngle(0.0f),
     m_reactState(REACT_AGGRESSIVE),
     m_meleeEnabled(true),
-    m_visibilityDistance(VISIBLE_RANGE)
+    m_visibilityDistance(VISIBLE_RANGE),
+    m_moveFurther(true)
 {
 }
 
@@ -270,14 +272,18 @@ void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=fals
 
 void CreatureAI::HandleMovementOnAttackStart(Unit* victim) const
 {
-    MotionMaster* creatureMotion = m_unit->GetMotionMaster();
-    if (m_isCombatMovement)
-        creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle);
-    // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
-    else if (creatureMotion->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || creatureMotion->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
+    if (!m_unit->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
     {
-        creatureMotion->MoveIdle();
-        m_unit->StopMoving();
+        MotionMaster* creatureMotion = m_unit->GetMotionMaster();
+
+        if (!m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))
+            creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle, m_moveFurther);
+        // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
+        else if (creatureMotion->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || creatureMotion->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
+        {
+            creatureMotion->MoveIdle();
+            m_unit->StopMoving();
+        }
     }
 }
 
