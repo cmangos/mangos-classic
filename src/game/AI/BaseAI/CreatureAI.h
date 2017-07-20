@@ -363,6 +363,9 @@ class CreatureAI
         void CheckForHelp(Unit* /*who*/, Creature* /*me*/, float /*dist*/);
         void DetectOrAttack(Unit* /*who*/, Creature* /*me*/);
 
+        // Returns friendly unit with the most amount of hp missing from max hp
+        Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false);
+
     protected:
         void HandleMovementOnAttackStart(Unit* victim) const;
 

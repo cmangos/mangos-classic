@@ -193,9 +193,6 @@ struct ScriptedAI : public CreatureAI
         // Teleports a player without dropping threat (only teleports to same map)
         void DoTeleportPlayer(Unit* pUnit, float fX, float fY, float fZ, float fO);
 
-        // Returns friendly unit with the most amount of hp missing from max hp
-        Unit* DoSelectLowestHpFriendly(float fRange, uint32 uiMinHPDiff = 1);
-
         // Returns a list of friendly CC'd units within range
         std::list<Creature*> DoFindFriendlyCC(float fRange);
 

@@ -757,7 +757,6 @@ class CreatureEventAI : public CreatureAI
 
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event) const;
 
-        Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff) const;
         void DoFindFriendlyMissingBuff(std::list<Creature*>& _list, float range, uint32 spellid) const;
         void DoFindFriendlyCC(std::list<Creature*>& _list, float range) const;
 

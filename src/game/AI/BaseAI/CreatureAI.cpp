@@ -350,3 +350,25 @@ void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pR
     MANGOS_ASSERT(pReceiver);
     pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker, miscValue);
 }
+
+Unit* CreatureAI::DoSelectLowestHpFriendly(float range, float minMissing, bool percent)
+{
+    Unit* pUnit = nullptr;
+
+    if (percent)
+    {
+        MaNGOS::MostHPPercentMissingInRangeCheck u_check(m_creature, range, minMissing, true);
+        MaNGOS::UnitLastSearcher<MaNGOS::MostHPPercentMissingInRangeCheck> searcher(pUnit, u_check);
+
+        Cell::VisitGridObjects(m_creature, searcher, range);
+    }
+    else
+    {
+        MaNGOS::MostHPMissingInRangeCheck u_check(m_creature, range, minMissing, true);
+        MaNGOS::UnitLastSearcher<MaNGOS::MostHPMissingInRangeCheck> searcher(pUnit, u_check);
+
+        Cell::VisitGridObjects(m_creature, searcher, range);
+    }
+
+    return pUnit;
+}
