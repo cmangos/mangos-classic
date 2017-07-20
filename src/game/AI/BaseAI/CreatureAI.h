@@ -377,6 +377,9 @@ class CreatureAI
         ReactStates GetReactState() const { return m_reactState; }
         bool HasReactState(ReactStates state) const { return (m_reactState == state); }
 
+        // TODO: Implement proper casterAI
+        void SetMoveChaseParams(float dist, float angle, bool moveFurther) { m_attackDistance = dist; m_attackAngle = angle; m_moveFurther = moveFurther; }
+
     protected:
         void HandleMovementOnAttackStart(Unit* victim) const;
 
