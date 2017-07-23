@@ -590,6 +590,12 @@ class Spell
         SpellInfoList m_TriggerSpells;                      // casted by caster to same targets settings in m_targets at success finish of current spell
         SpellInfoList m_preCastSpells;                      // casted by caster to each target at spell hit before spell effects apply
 
+        //*****************************************
+        // Spell scripting subsystem
+        //*****************************************
+        // persistent value to enable storing in script
+        uint64 m_scriptValue;
+
         uint32 m_spellState;
         uint32 m_timer;
 
