@@ -776,6 +776,28 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spell_list[urand(0, 8)], TRIGGERED_OLD_TRIGGERED);
                   return;
                 }
+                case 22276:                                 // Elemental Shield
+                {
+                    uint32 elemshields[] = { 22277, 22278, 22279, 22280, 22281 };
+
+                    for (uint32 spell : elemshields)
+                        if (m_caster->HasAura(spell))
+                            m_caster->RemoveAurasDueToSpell(spell);
+                    m_caster->CastSpell(m_caster, elemshields[urand(0, 4)], TRIGGERED_OLD_TRIGGERED);
+
+                    return;
+                }
+                case 22282:                                 // Brood Power
+                {
+                    uint32 broodpowers[] = { 22283, 22285, 22286, 22287, 22288 };
+
+                    for (uint32 spell : broodpowers)
+                        if (m_caster->HasAura(spell))
+                            m_caster->RemoveAurasDueToSpell(spell);
+                    m_caster->CastSpell(m_caster, broodpowers[urand(0, 4)], TRIGGERED_OLD_TRIGGERED);
+
+                    return;
+                }
                 case 23019:                                 // Crystal Prison Dummy DND
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->isAlive())

@@ -31,15 +31,6 @@ enum
     EMOTE_GENERIC_FRENZY_KILL   = -1000001,
     EMOTE_SHIMMER               = -1469003,
 
-    // These spells are actually called elemental shield
-    // What they do is decrease all damage by 75% then they increase
-    // One school of damage by 1100%
-    SPELL_FIRE_VULNERABILITY    = 22277,
-    SPELL_FROST_VULNERABILITY   = 22278,
-    SPELL_SHADOW_VULNERABILITY  = 22279,
-    SPELL_NATURE_VULNERABILITY  = 22280,
-    SPELL_ARCANE_VULNERABILITY  = 22281,
-
     MAX_BREATHS                 = 5,
     SPELL_INCINERATE            = 23308,                    // Incinerate 23308,23309
     SPELL_TIME_LAPSE            = 23310,                    // Time lapse 23310, 23311(old threat mod that was removed in 2.01)
@@ -56,7 +47,7 @@ enum
     SPELL_BROODAF_GREEN         = 23169,                    // Brood Affliction Green 23169
 
     SPELL_CHROMATIC_MUT_1       = 23174,                    // Spell cast on player if they get all 5 debuffs
-
+    SPELL_ELEMENTAL_SHIELD      = 22276,
     SPELL_FRENZY                = 28371,                    // The frenzy spell may be wrong
     SPELL_ENRAGE                = 28747
 };
@@ -96,8 +87,6 @@ struct boss_chromaggusAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiCurrentVulnerabilitySpell = 0;                  // We use this to store our last vulnerability spell so we can remove it later
-
         m_uiShimmerTimer    = 0;                            // Time till we change vurlnerabilites
         m_uiBreathOneTimer  = 30000;                        // First breath is 30 seconds
         m_uiBreathTwoTimer  = 60000;                        // Second is 1 minute so that we can alternate
@@ -133,18 +122,8 @@ struct boss_chromaggusAI : public ScriptedAI
         // Shimmer Timer Timer
         if (m_uiShimmerTimer < uiDiff)
         {
-            // Remove old vulnerability spell
-            if (m_uiCurrentVulnerabilitySpell)
-                m_creature->RemoveAurasDueToSpell(m_uiCurrentVulnerabilitySpell);
-
-            // Cast new random vurlnabilty on self
-            uint32 aSpellId[] = {SPELL_FIRE_VULNERABILITY, SPELL_FROST_VULNERABILITY, SPELL_SHADOW_VULNERABILITY, SPELL_NATURE_VULNERABILITY, SPELL_ARCANE_VULNERABILITY};
-            uint32 uiSpell = aSpellId[urand(0, 4)];
-
-            if (DoCastSpellIfCan(m_creature, uiSpell) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, SPELL_ELEMENTAL_SHIELD) == CAST_OK)
             {
-                m_uiCurrentVulnerabilitySpell = uiSpell;
-
                 DoScriptText(EMOTE_SHIMMER, m_creature);
                 m_uiShimmerTimer = 45000;
             }
