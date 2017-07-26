@@ -75,6 +75,9 @@ class InstanceData
         // Called when a player dies inside instance
         virtual void OnPlayerDeath(Player*) {}
 
+        // Called when a player rezzurects inside instance
+        virtual void OnPlayerResurrect(Player*) {}
+
         // Called when a player leaves the instance (before really removed from map (or possibly world))
         virtual void OnPlayerLeave(Player*) {}
 

@@ -4272,6 +4272,10 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     // update visibility of player for nearby cameras
     UpdateObjectVisibility();
 
+    if (IsInWorld())
+        if (InstanceData* data = GetMap()->GetInstanceData())
+            data->OnPlayerResurrect(this);
+
     if (!applySickness)
         return;
 
