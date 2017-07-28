@@ -1476,6 +1476,10 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 p.read_skip<uint32>();  // 4 randomPropertyId
                 p >> lootslot_type;     // 1 LootSlotType
 
+                ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
+                if (!pProto)
+                    continue;
+
                 if (lootslot_type != LOOT_SLOT_NORMAL)
                     continue;
 
@@ -1488,17 +1492,27 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     if (m_bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, itemcount) == EQUIP_ERR_INVENTORY_FULL)
                     {
                         if (GetManager()->m_confDebugWhisper)
-                            TellMaster("I can't take item; my inventory is full.");
+                            TellMaster("I can't take %; my inventory is full.", pProto->Name1);
                         m_inventory_full = true;
                         continue;
                     }
+
+                    if (GetManager()->m_confDebugWhisper)
+                        TellMaster("Store loot item %s", pProto->Name1);
 
                     WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
                     *packet << itemindex;
                     m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(packet)));
                 }
+                else
+                {
+                    if (GetManager()->m_confDebugWhisper)
+                        TellMaster("Skipping loot item %s", pProto->Name1);
+                }
             }
 
+            if (GetManager()->m_confDebugWhisper)
+                TellMaster("Releasing loot");
             // release loot
             m_lootPrev = m_lootCurrent;
             m_lootCurrent = ObjectGuid();
