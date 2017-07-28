@@ -1484,6 +1484,15 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 if (loot_type == LOOT_SKINNING || HasCollectFlag(COLLECT_FLAG_LOOT) ||
                         (loot_type == LOOT_CORPSE && (IsInQuestItemList(itemid) || IsItemUseful(itemid))))
                 {
+                    ItemPosCountVec dest;
+                    if (m_bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, itemcount) == EQUIP_ERR_INVENTORY_FULL)
+                    {
+                        if (GetManager()->m_confDebugWhisper)
+                            TellMaster("I can't take item; my inventory is full.");
+                        m_lootCurrent = ObjectGuid();
+                        continue;
+                    }
+
                     WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
                     *packet << itemindex;
                     m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(packet)));
