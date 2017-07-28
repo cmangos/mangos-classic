@@ -3576,7 +3576,7 @@ void Unit::_UpdateAutoRepeatSpell()
         }
 
         // some check about new target are necessary
-        if (!currTarget || !currTarget->isTargetableForAttack() || currTarget->IsFriendlyTo(this))
+        if (!currTarget || !currTarget->isTargetableForAttack() || IsFriendlyTo(currTarget))
         {
             // no valid target
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
