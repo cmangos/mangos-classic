@@ -2527,7 +2527,7 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
 bool Unit::CanCrush() const
 {
     // Generally, only npcs and npc-controlled players/units are eligible to deal crushing blows
-    if (GetTypeId() == TYPEID_PLAYER || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+    if (GetTypeId() == TYPEID_PLAYER || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         return GetCharmerGuid().IsCreature();
     return !GetMasterGuid().IsPlayer();
 }
@@ -2535,7 +2535,7 @@ bool Unit::CanCrush() const
 bool Unit::CanGlance() const
 {
     // Generally, only players and player-controlled units are eligible to deal glancing blows
-    if (GetTypeId() == TYPEID_PLAYER || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+    if (GetTypeId() == TYPEID_PLAYER || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         return !GetCharmerGuid().IsCreature();
     return false;
 }
@@ -2543,7 +2543,7 @@ bool Unit::CanGlance() const
 bool Unit::CanDaze() const
 {
     // Generally, only npcs are able to daze targets in melee
-    return (GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE));
+    return (GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
 }
 
 void Unit::SetCanDodge(const bool flag)
@@ -2657,12 +2657,12 @@ bool Unit::CanCrushInCombat() const
 
 bool Unit::CanCrushInCombat(const Unit *victim) const
 {
-    return (victim && CanCrushInCombat() && victim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE));
+    return (victim && CanCrushInCombat() && victim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
 }
 
 bool Unit::CanGlanceInCombat(const Unit *victim) const
 {
-    return (victim && CanGlanceInCombat() && !victim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) && victim->GetLevelForTarget(this) > 10);
+    return (victim && CanGlanceInCombat() && !victim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && victim->GetLevelForTarget(this) > 10);
 }
 
 bool Unit::CanDazeInCombat(const Unit *victim) const
@@ -3423,7 +3423,7 @@ float Unit::CalculateEffectiveMagicResistancePercent(const Unit *attacker, Spell
     const uint32 skill = std::max(attacker->GetMaxSkillValueForLevel(this), uint16(100));
     float percent = float(float(resistance) / float(skill)) * 100 * 0.75f;
     // Bonus resistance by level difference when calculating damage hit for NPCs only
-    if (!binary && GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+    if (!binary && GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         percent += (0.4f * std::max(int32(GetMaxSkillValueForLevel(attacker) - skill), 0));
     // Magic resistance percentage cap
     const float cap = 75.0f; // Pre-WotLK: 75%
@@ -9926,7 +9926,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
         player->SetMover(pCreature);                                    // set mover so now we know that creature is "moved" by this unit
         player->SendForcedObjectUpdate();                               // we have to update client data here to avoid problem with the "release spirit" windows reappear.
 
-        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE); // this seem to be needed for controlled creature (else cannot attack neutral creature)
+        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED); // this seem to be needed for controlled creature (else cannot attack neutral creature)
 
                                                                         // player pet is unsumoned while possessing
         player->UnsummonPetTemporaryIfAny();
@@ -9989,7 +9989,7 @@ bool Unit::TakePossessOf(Unit* possessed)
 
         // this seem to be needed for controlled creature (else cannot attack neutral creature)
         if (player)
-            possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+            possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     }
     else if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
@@ -10089,7 +10089,7 @@ bool Unit::TakeCharmOf(Unit* charmed)
         if (charmerPlayer)
         {
             // without this charmed unit will not be able to attack neutral target
-            charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+            charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
             if (getClass() == CLASS_WARLOCK)
             {
@@ -10209,7 +10209,7 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
 
             // we can remove that flag if its set, that is supposed to be only for creature controlled by player
             // however player's pet should keep it
-            possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+            possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
         }
         else
         {

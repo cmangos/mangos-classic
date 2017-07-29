@@ -1261,7 +1261,7 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         // DoT
         case SPELL_AURA_PERIODIC_LEECH:
         case SPELL_AURA_PERIODIC_MANA_LEECH:
-            if (pTarget && pTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+            if (pTarget && pTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                 return false;
             break;
         case SPELL_AURA_PERIODIC_DAMAGE:
