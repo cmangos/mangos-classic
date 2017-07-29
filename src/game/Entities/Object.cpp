@@ -1906,7 +1906,7 @@ bool WorldObject::IsControlledByPlayer() const
             return ((GameObject*)this)->GetOwnerGuid().IsPlayer();
         case TYPEID_UNIT:
         case TYPEID_PLAYER:
-            return ((Unit*)this)->IsCharmerOrOwnerPlayerOrPlayerItself();
+            return ((Unit*)this)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
         case TYPEID_DYNAMICOBJECT:
             return ((DynamicObject*)this)->GetCasterGuid().IsPlayer();
         case TYPEID_CORPSE:

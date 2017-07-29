@@ -588,12 +588,9 @@ class GameObject : public WorldObject
         bool LoadFromDB(uint32 guid, Map* map);
         void DeleteFromDB() const;
 
-        void SetOwnerGuid(ObjectGuid ownerGuid)
-        {
-            m_spawnedByDefault = false;                     // all object with owner is despawned after delay
-            SetGuidValue(OBJECT_FIELD_CREATED_BY, ownerGuid);
-        }
-        ObjectGuid const& GetOwnerGuid() const { return GetGuidValue(OBJECT_FIELD_CREATED_BY); }
+        ObjectGuid const& GetOwnerGuid() const override { return GetGuidValue(OBJECT_FIELD_CREATED_BY); }
+        void SetOwnerGuid(ObjectGuid guid) override;
+
         Unit* GetOwner() const;
 
         void SetSpellId(uint32 id)

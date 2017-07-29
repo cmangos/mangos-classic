@@ -576,7 +576,7 @@ void Spell::FillTargetMap()
             Player* me = (Player*)m_caster;
             for (UnitList::const_iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end(); ++itr)
             {
-                Player* targetOwner = (*itr)->GetCharmerOrOwnerPlayerOrPlayerItself();
+                Player* targetOwner = (*itr)->GetBeneficiaryPlayer();
                 if (targetOwner && targetOwner != me && targetOwner->IsPvP() && !me->IsInDuelWith(targetOwner))
                 {
                     me->UpdatePvP(true);
@@ -995,7 +995,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 unit->SetInCombatWith(real_caster);
                 real_caster->SetInCombatWith(unit);
 
-                if (Player* attackedPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (Player* attackedPlayer = unit->GetBeneficiaryPlayer())
                     real_caster->SetContestedPvP(attackedPlayer);
             }
         }
@@ -1110,7 +1110,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
         // ignore pets or autorepeat/melee casts for speed (not exist quest for spells (hm... )
         if (real_caster && !((Creature*)unit)->IsPet() && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive())
-            if (Player* p = real_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (Player* p = real_caster->GetBeneficiaryPlayer())
                 p->RewardPlayerAndGroupAtCast(unit, m_spellInfo->Id);
 
         if (((Creature*)unit)->AI())
@@ -1153,7 +1153,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
         // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
         if (traveling &&
                 unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) &&
-                unit->GetCharmerOrOwnerGuid() != m_caster->GetObjectGuid())
+                unit->GetMasterGuid() != m_caster->GetObjectGuid())
         {
             ResetEffectDamageAndHeal();
             return;
@@ -1249,7 +1249,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
                 unit->SetInCombatWith(realCaster);
                 realCaster->SetInCombatWith(unit);
 
-                if (Player* attackedPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (Player* attackedPlayer = unit->GetBeneficiaryPlayer())
                     realCaster->SetContestedPvP(attackedPlayer);
             }
         }
@@ -1331,7 +1331,7 @@ void Spell::DoAllEffectOnTarget(GOTargetInfo* target)
     // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
     if (!IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive())
     {
-        if (Player* p = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
+        if (Player* p = m_caster->GetBeneficiaryPlayer())
             p->RewardPlayerAndGroupAtCast(go, m_spellInfo->Id);
     }
 }
@@ -1834,8 +1834,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 // Can only be casted on group's members or its pets
                 Group*  pGroup = nullptr;
 
-                Unit* owner = m_caster->GetCharmerOrOwner();
-                Unit* targetOwner = target->GetCharmerOrOwner();
+                Unit* owner = m_caster->GetMaster();
+                Unit* targetOwner = target->GetMaster();
                 if (owner)
                 {
                     if (owner->GetTypeId() == TYPEID_PLAYER)
@@ -1946,7 +1946,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 AddItemTarget(m_targets.getItemTarget(), effIndex);
             break;
         case TARGET_MASTER:
-            if (Unit* owner = m_caster->GetCharmerOrOwner())
+            if (Unit* owner = m_caster->GetMaster())
                 targetUnitMap.push_back(owner);
             break;
         case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
@@ -1960,7 +1960,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             break;
         case TARGET_AREAEFFECT_PARTY:
         {
-            Unit* owner = m_caster->GetCharmerOrOwner();
+            Unit* owner = m_caster->GetMaster();
             Player* pTarget = nullptr;
 
             if (owner)
@@ -3122,7 +3122,7 @@ void Spell::update(uint32 difftime)
                 // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
                 if (!IsAutoRepeat() && !IsNextMeleeSwingSpell())
                 {
-                    if (Player* p = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    if (Player* p = m_caster->GetBeneficiaryPlayer())
                     {
                         for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
                         {
@@ -4263,7 +4263,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             // TODO: this check can be applied and for player to prevent cheating when IsPositiveSpell will return always correct result.
             // check target for pet/charmed casts (not self targeted), self targeted cast used for area effects and etc
-            if (!explicit_target_mode && m_caster->GetTypeId() == TYPEID_UNIT && m_caster->GetCharmerOrOwnerGuid())
+            if (!explicit_target_mode && m_caster->GetTypeId() == TYPEID_UNIT && m_caster->GetMasterGuid())
             {
                 // check correctness positive/negative cast target (pet cast real check and cheating check)
                 if (IsPositiveSpell(m_spellInfo->Id, m_caster, target))
@@ -4381,7 +4381,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     m_caster->GetZoneAndAreaId(zone, area);
 
     SpellCastResult locRes = sSpellMgr.GetSpellAllowedInLocationError(m_spellInfo, m_caster->GetMapId(), zone, area,
-                             m_caster->GetCharmerOrOwnerPlayerOrPlayerItself());
+                             m_caster->GetBeneficiaryPlayer());
     if (locRes != SPELL_CAST_OK)
         return locRes;
 
@@ -5310,7 +5310,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
     if (m_caster->GetTypeId() == TYPEID_UNIT && (((Creature*)m_caster)->IsPet() || m_caster->isCharmed()))
     {
         // dead owner (pets still alive when owners ressed?)
-        if (m_caster->GetCharmerOrOwner() && !m_caster->GetCharmerOrOwner()->isAlive())
+        if (m_caster->GetMaster() && !m_caster->GetMaster()->isAlive())
             return SPELL_FAILED_CASTER_DEAD;
 
         if (!target && m_targets.getUnitTarget())
@@ -6200,7 +6200,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
     {
         // Check targets for not_selectable unit flag and remove
         // A player can cast spells on his pet (or other controlled unit) though in any state
-        if (target->GetCharmerOrOwnerGuid() != m_caster->GetObjectGuid())
+        if (target->GetMasterGuid() != m_caster->GetObjectGuid())
         {
             // any unattackable target skipped
             if (!m_ignoreUnattackableTarget && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
@@ -6536,7 +6536,7 @@ void Spell::FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPu
 
 void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float radius, bool raid, bool withPets, bool withcaster) const
 {
-    Player* pMember = member->GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player* pMember = member->GetBeneficiaryPlayer();
     Group* pGroup = pMember ? pMember->GetGroup() : nullptr;
 
     if (pGroup)
@@ -6565,7 +6565,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float 
     }
     else
     {
-        Unit* ownerOrSelf = pMember ? pMember : member->GetCharmerOrOwnerOrSelf();
+        Unit* ownerOrSelf = pMember ? pMember : member->GetBeneficiary();
         if (((ownerOrSelf == m_caster) && withcaster) ||
                 ((ownerOrSelf != m_caster) && m_caster->IsWithinDistInMap(ownerOrSelf, radius)))
             targetUnitMap.push_back(ownerOrSelf);

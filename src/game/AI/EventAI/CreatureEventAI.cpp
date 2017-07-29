@@ -239,7 +239,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             break;
         case EVENT_T_DEATH:
             if (event.death.conditionId)
-                if (Player* player = pActionInvoker->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (Player* player = pActionInvoker->GetBeneficiaryPlayer())
                     if (!sObjectMgr.IsPlayerMeetToCondition(event.death.conditionId, player, player->GetMap(), m_creature, CONDITION_FROM_EVENTAI))
                         return false;
             break;
@@ -911,7 +911,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 // if not available, use pActionInvoker
                 if (Unit* pTarget = GetTargetByType(action.killed_monster.target, pActionInvoker, pAIEventSender, reportTargetError, 0, SELECT_FLAG_PLAYER))
                 {
-                    if (Player* pPlayer2 = pTarget->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    if (Player* pPlayer2 = pTarget->GetBeneficiaryPlayer())
                         pPlayer2->RewardPlayerAndGroupAtEvent(action.killed_monster.creatureId, m_creature);
                 }
                 else if (reportTargetError)
@@ -1181,7 +1181,7 @@ void CreatureEventAI::JustDied(Unit* killer)
     if (m_creature->IsGuard())
     {
         // Send Zone Under Attack message to the LocalDefense and WorldDefense Channels
-        if (Player* pKiller = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
+        if (Player* pKiller = killer->GetBeneficiaryPlayer())
             m_creature->SendZoneUnderAttackMessage(pKiller);
     }
 
@@ -1498,7 +1498,7 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoke
                 isError = true;
             return pActionInvoker;
         case TARGET_T_ACTION_INVOKER_OWNER:
-            resTarget = pActionInvoker ? pActionInvoker->GetCharmerOrOwnerOrSelf() : nullptr;
+            resTarget = pActionInvoker ? pActionInvoker->GetBeneficiary() : nullptr;
             if (!resTarget)
                 isError = true;
             return resTarget;

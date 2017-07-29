@@ -397,7 +397,7 @@ void AreaAura::Update(uint32 diff)
 
         if (!caster->hasUnitState(UNIT_STAT_ISOLATED))
         {
-            Unit* owner = caster->GetCharmerOrOwner();
+            Unit* owner = caster->GetMaster();
             if (!owner)
                 owner = caster;
             Spell::UnitList targets;
@@ -558,14 +558,14 @@ void AreaAura::Update(uint32 diff)
         else if (m_areaAuraType == AREA_AURA_PARTY)         // check if in same sub group
         {
             // not check group if target == owner or target == pet
-            if (caster->GetCharmerOrOwnerGuid() != target->GetObjectGuid() && caster->GetObjectGuid() != target->GetCharmerOrOwnerGuid())
+            if (caster->GetMasterGuid() != target->GetObjectGuid() && caster->GetObjectGuid() != target->GetMasterGuid())
             {
-                Player* check = caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                Player* check = caster->GetBeneficiaryPlayer();
 
                 Group* pGroup = check ? check->GetGroup() : nullptr;
                 if (pGroup)
                 {
-                    Player* checkTarget = target->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    Player* checkTarget = target->GetBeneficiaryPlayer();
                     if (!checkTarget || !pGroup->SameSubGroup(check, checkTarget))
                         target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGuid());
                 }
@@ -575,7 +575,7 @@ void AreaAura::Update(uint32 diff)
         }
         else if (m_areaAuraType == AREA_AURA_PET)
         {
-            if (target->GetObjectGuid() != caster->GetCharmerOrOwnerGuid())
+            if (target->GetObjectGuid() != caster->GetMasterGuid())
                 target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGuid());
         }
     }

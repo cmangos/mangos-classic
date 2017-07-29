@@ -306,7 +306,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     InitStatsForLevel(petlevel);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[5].GetUInt32());
-    SetCreatorGuid(owner->GetObjectGuid());
 
     m_charmInfo->SetReactState(ReactStates(fields[6].GetUInt8()));
     m_loyaltyPoints = fields[7].GetInt32();
@@ -587,6 +586,18 @@ void Pet::DeleteFromDB(Unit* owner, PetSaveMode slot)
 
         delete result;
     }
+}
+
+void Pet::SetOwnerGuid(ObjectGuid owner)
+{
+    switch (uint32(m_petType))
+    {
+        case SUMMON_PET:
+        case HUNTER_PET:
+            SetSummonerGuid(owner);
+            break;
+    }
+    Unit::SetOwnerGuid(owner);
 }
 
 void Pet::SetDeathState(DeathState s)                       // overwrite virtual Creature::SetDeathState and Unit::SetDeathState

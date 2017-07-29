@@ -61,7 +61,7 @@ void ScriptedPetAI::AttackedBy(Unit* pAttacker)
 
 void ScriptedPetAI::ResetPetCombat()
 {
-    Unit* pOwner = m_creature->GetCharmerOrOwner();
+    Unit* pOwner = m_creature->GetMaster();
 
     if (pOwner && m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
     {
@@ -108,7 +108,7 @@ void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
     }
     else if (m_creature->GetCharmInfo())
     {
-        Unit* pOwner = m_creature->GetCharmerOrOwner();
+        Unit* pOwner = m_creature->GetMaster();
 
         if (!pOwner)
             return;

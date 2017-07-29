@@ -87,7 +87,7 @@ struct mob_aquementasAI : public ScriptedAI
     {
         DoScriptText(AGGRO_YELL_AQUE, m_creature, pWho);
 
-        Player* pInvokedPlayer = pWho->GetCharmerOrOwnerPlayerOrPlayerItself();
+        Player* pInvokedPlayer = pWho->GetBeneficiaryPlayer();
         if (pInvokedPlayer)
             SendItem(pInvokedPlayer);
     }

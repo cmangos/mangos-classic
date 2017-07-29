@@ -272,7 +272,7 @@ struct boss_mandokirAI : public ScriptedAI
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    if (Player* pPlayer = pTarget->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    if (Player* pPlayer = pTarget->GetBeneficiaryPlayer())
                         m_creature->CastSpell(pPlayer, SPELL_WATCH, TRIGGERED_NONE);
                 }
             }

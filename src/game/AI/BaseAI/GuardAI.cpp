@@ -138,6 +138,6 @@ void GuardAI::AttackStart(Unit* u)
 
 void GuardAI::JustDied(Unit* killer)
 {
-    if (Player* pkiller = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
+    if (Player* pkiller = killer->GetBeneficiaryPlayer())
         m_creature->SendZoneUnderAttackMessage(pkiller);
 }

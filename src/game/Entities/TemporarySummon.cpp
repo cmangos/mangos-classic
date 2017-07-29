@@ -189,7 +189,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
             if (m_linkedToOwnerAura & TEMPSUMMON_LINKED_AURA_OWNER_CHECK)
             {
                 // we have to check if owner still have the required aura
-                Unit* owner = GetCharmerOrOwner();
+                Unit* owner = GetMaster();
                 uint32 const& spellId = GetUInt32Value(UNIT_CREATED_BY_SPELL);
                 if (!owner || !spellId || !owner->HasAura(spellId))
                     UnSummon();

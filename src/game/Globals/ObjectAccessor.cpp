@@ -232,7 +232,7 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
         bones->Relocate(corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetOrientation());
 
         bones->SetUInt32Value(CORPSE_FIELD_FLAGS, CORPSE_FLAG_UNK2 | CORPSE_FLAG_BONES);
-        bones->SetGuidValue(CORPSE_FIELD_OWNER, ObjectGuid());
+        bones->SetOwnerGuid(ObjectGuid());
 
         for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
         {

@@ -58,7 +58,7 @@ void PetAI::MoveInLineOfSight(Unit* u)
     if (CharmInfo* charmInfo = m_unit->GetCharmInfo())
         if (charmInfo->HasReactState(REACT_AGGRESSIVE)
             && !(pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
-            && u && (m_unit->IsHostileTo(u) || u->IsHostileTo(m_unit->GetCharmerOrOwner()))
+            && u && (m_unit->IsHostileTo(u) || u->IsHostileTo(m_unit->GetMaster()))
             && u->isTargetableForAttack() && u->isInAccessablePlaceFor(m_unit)
             && m_unit->IsWithinDistInMap(u, m_unit->GetAttackDistance(u))
             && m_unit->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE
@@ -106,7 +106,7 @@ void PetAI::UpdateAI(const uint32 diff)
     Creature* creature = (m_unit->GetTypeId() == TYPEID_UNIT) ? static_cast<Creature*>(m_unit) : nullptr;
     Pet* pet = (creature && creature->IsPet()) ? static_cast<Pet*>(m_unit) : nullptr;
     
-    Unit* owner = m_unit->GetCharmerOrOwner();
+    Unit* owner = m_unit->GetMaster();
     if (!owner)
         return;
 
@@ -394,7 +394,7 @@ bool PetAI::_isVisible(Unit* u) const
 
 void PetAI::UpdateAllies()
 {
-    Unit* owner = m_unit->GetCharmerOrOwner();
+    Unit* owner = m_unit->GetMaster();
     Group* pGroup = nullptr;
 
     m_updateAlliesTimer = 10 * IN_MILLISECONDS;             // update friendly targets every 10 seconds, lesser checks increase performance

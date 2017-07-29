@@ -518,6 +518,9 @@ class WorldObject : public Object
 
         virtual const char* GetNameForLocaleIdx(int32 /*locale_idx*/) const { return GetName(); }
 
+        virtual ObjectGuid const& GetOwnerGuid() const { return GetGuidValue(OBJECT_FIELD_GUID); }
+        virtual void SetOwnerGuid(ObjectGuid /*guid*/) { }
+
         float GetDistance(const WorldObject* obj) const;
         float GetDistance(float x, float y, float z) const;
         float GetDistance2d(const WorldObject* obj) const;

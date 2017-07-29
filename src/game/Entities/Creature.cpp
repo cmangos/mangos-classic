@@ -630,7 +630,7 @@ void Creature::RegeneratePower()
     {
         case POWER_MANA:
             // Combat and any controlled creature
-            if (isInCombat() || GetCharmerOrOwnerGuid())
+            if (isInCombat() || GetMasterGuid())
             {
                 if (!IsUnderLastManaUseEffect())
                 {
@@ -688,7 +688,7 @@ void Creature::RegenerateHealth()
     uint32 addvalue;
 
     // Not only pet, but any controlled creature
-    if (GetCharmerOrOwnerGuid())
+    if (GetMasterGuid())
     {
         float HealthIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_HEALTH);
         float Spirit = GetStat(STAT_SPIRIT);
@@ -1014,7 +1014,7 @@ void Creature::SetLootRecipient(Unit* unit)
         return;
     }
 
-    Player* player = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player* player = unit->GetBeneficiaryPlayer();
     if (!player)                                            // normal creature, no player involved
         return;
 
@@ -1842,7 +1842,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
         return false;
 
     // only free creature
-    if (GetCharmerOrOwnerGuid())
+    if (GetMasterGuid())
         return false;
 
     // only from same creature faction

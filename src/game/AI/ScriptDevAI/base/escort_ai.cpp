@@ -68,7 +68,7 @@ bool npc_escortAI::AssistPlayerInCombat(Unit* pWho)
         return false;
 
     // victim of pWho is not a player
-    if (!pWho->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
+    if (!pWho->getVictim()->GetBeneficiaryPlayer())
         return false;
 
     // never attack friendly

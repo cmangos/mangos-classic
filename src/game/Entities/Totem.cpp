@@ -152,23 +152,6 @@ void Totem::UnSummon()
     AddObjectToRemoveList();
 }
 
-void Totem::SetOwner(Unit* owner)
-{
-    SetCreatorGuid(owner->GetObjectGuid());
-    SetOwnerGuid(owner->GetObjectGuid());
-    setFaction(owner->getFaction());
-    SetLevel(owner->getLevel());
-}
-
-Unit* Totem::GetOwner() const
-{
-    // Owner is actually creator in our case
-    if (ObjectGuid ownerGuid = GetCreatorGuid())
-        return ObjectAccessor::GetUnit(*this, ownerGuid);
-
-    return nullptr;
-}
-
 void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)
 {
     // Get spell casted by totem
