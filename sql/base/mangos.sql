@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2702_01_mangos_spell_chain_totems_typos` bit(1) DEFAULT NULL
+  `required_z2703_01_mangos_spell_affect_druid_clearcasting` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -10196,7 +10196,7 @@ INSERT INTO `spell_affect` VALUES
 (16720,0,0x000000080001E000),
 (16720,1,0x000000000001E000),
 (16720,2,0x000000000001E000),
-(16870,0,0x001007F100E3FEFF),
+(16870,0,0x0000000101F7BFFF),
 (17123,0,0x0000000000000080),
 (17124,0,0x0000000000000080),
 (17904,0,0x0000000000000000),
