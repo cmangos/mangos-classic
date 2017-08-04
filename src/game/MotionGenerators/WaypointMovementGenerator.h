@@ -129,6 +129,8 @@ class FlightPathMovementGenerator
         void SkipCurrentNode() { ++i_currentNode; }
         bool GetResetPosition(Player&, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const;
 
+        void OnFlightPathEnd(Player& player, uint32 finalNode);
+
         struct TaxiNodeChangeInfo
         {
             uint32 PathIndex;

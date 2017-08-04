@@ -439,14 +439,19 @@ void FlightPathMovementGenerator::Finalize(Player& player)
         if (player.pvpInfo.inHostileArea)
             player.CastSpell(&player, 2479, TRIGGERED_OLD_TRIGGERED);
 
+        TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(player.m_taxi.GetLastNode());
+        player.TeleportTo(player.GetMap()->GetId(), node->x, node->y, node->z, player.GetOrientation());
+
         // update z position to ground and orientation for landing point
         // this prevent cheating with landing  point at lags
         // when client side flight end early in comparison server side
         player.SetFallInformation(0, player.GetPositionZ());
         player.StopMoving(true);
+
+        OnFlightPathEnd(player, player.m_taxi.GetLastNode());
     }
     else
-        sLog.outError("Flight path finalized in non-final point. Investigate causes. Destination: %d. Player name: %d.", player.m_taxi.GetNextTaxiDestination(), player.GetName());
+        sLog.outError("Flight path finalized in non-final point. Investigate causes. Destination: %d. Player name: %s.", player.m_taxi.GetNextTaxiDestination(), player.GetName());
 }
 
 void FlightPathMovementGenerator::Interrupt(Player& player)
@@ -543,4 +548,17 @@ bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, 
     z = node->z;
 
     return true;
+}
+
+/*
+NOTE: Blizzard clearly has some extra scripts on certain fly path ends. Nodes contain extra events, that can be done using dbscript_on_event,
+but these extra scripts have no EventID in the DBC. In future if this place fills up, need to consider moving it to a more generic way of scripting.
+*/
+void FlightPathMovementGenerator::OnFlightPathEnd(Player& player, uint32 finalNode)
+{
+    switch (finalNode)
+    {
+        default:
+            break;
+    }
 }
