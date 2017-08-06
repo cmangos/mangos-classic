@@ -1086,7 +1086,40 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 return;
             }
 
-            m_creature->GetMap()->ScriptsStart(sRelayScripts, action.relayScript.relayId, target, nullptr);
+            if (action.relayScript.relayId < 0)
+            {
+                uint32 relayId = sScriptMgr.GetRandomRelayDbscriptFromTemplate(uint32(-action.relayScript.relayId));
+                if (relayId == 0)
+                    break;
+                m_creature->GetMap()->ScriptsStart(sRelayScripts, relayId, target, nullptr);
+            }
+            else
+                m_creature->GetMap()->ScriptsStart(sRelayScripts, action.relayScript.relayId, target, nullptr);
+            break;
+        }
+        case ACTION_T_TEXT_NEW:
+        {
+            Unit* target = GetTargetByType(action.textNew.target, pActionInvoker, pAIEventSender, reportTargetError);
+            if (!target)
+            {
+                if (reportTargetError)
+                    sLog.outErrorEventAI("Event %d attempt to start relay script but Target == nullptr. Creature %d", EventId, m_creature->GetEntry());
+                return;
+            }
+
+            int32 textId = 0;
+
+            if (action.textNew.templateId)
+            {
+                textId = sScriptMgr.GetRandomScriptStringFromTemplate(action.textNew.templateId);
+                if (textId == 0)
+                    break;
+            }
+            else
+                textId = action.textNew.textId;
+
+            if (!DoDisplayText(m_creature, textId, target))
+                sLog.outErrorEventAI("Error attempting to display text %i, used by script %u", textId, EventId);
             break;
         }
         default:

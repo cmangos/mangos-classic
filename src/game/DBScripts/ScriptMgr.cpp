@@ -869,8 +869,24 @@ void ScriptMgr::LoadRelayScripts()
     // check ids
     for (ScriptMapMap::const_iterator itr = sRelayScripts.second.begin(); itr != sRelayScripts.second.end(); ++itr)
     {
-        if (!sObjectMgr.GetCreatureTemplate(itr->first))
-            sLog.outErrorDb("Table `dbscripts_on_creature_death` has not existing creature (Entry: %u) as script id", itr->first);
+        for (auto& data : itr->second) // need to check after load is complete, because of nesting
+        {
+            if (data.second.command == SCRIPT_COMMAND_START_RELAY_SCRIPT)
+            {
+                bool hasErrored = false;
+                if (data.second.relayScript.relayId)
+                {
+                    if (sRelayScripts.second.find(data.second.relayScript.relayId) == sRelayScripts.second.end())
+                    {
+                        sLog.outErrorDb("Table `dbscripts_on_relay` uses nonexistent relay ID %u in SCRIPT_COMMAND_START_RELAY_SCRIPT for script id %u.", data.second.relayScript.relayId, data.second.id);
+                        hasErrored = true;
+                    }
+                }
+
+                if (hasErrored)
+                    continue;
+            }
+        }
     }
 }
 
@@ -884,7 +900,7 @@ void ScriptMgr::LoadDbScriptStrings()
         if (sObjectMgr.GetMangosStringLocale(i))
             ids.insert(i);
 
-    LoadDbScriptStringTemplates(ids);
+    CheckRandomStringTemplates(ids);
 
     CheckScriptTexts(sQuestEndScripts, ids);
     CheckScriptTexts(sQuestStartScripts, ids);
@@ -903,11 +919,9 @@ void ScriptMgr::LoadDbScriptStrings()
         sLog.outErrorDb("Table `db_script_string` has unused string id %u", *itr);
 }
 
-void ScriptMgr::LoadDbScriptStringTemplates(std::set<int32>& ids)
+void ScriptMgr::LoadDbScriptRandomTemplates()
 {
-    sLog.outString("Loading script string templates");
-
-    QueryResult* result = WorldDatabase.Query("SELECT id, string_id FROM dbscript_string_template");
+    QueryResult* result = WorldDatabase.Query("SELECT id, type, target_id, chance FROM dbscript_random_templates");
 
     if (result)
     {
@@ -916,16 +930,37 @@ void ScriptMgr::LoadDbScriptStringTemplates(std::set<int32>& ids)
             Field* fields = result->Fetch();
 
             uint32 id = fields[0].GetUInt32();
-            int32 stringId = fields[1].GetInt32();
-            m_stringTemplates[id].push_back(stringId);
-
-            if (ids.find(stringId) != ids.end())
-                ids.erase(stringId);
+            int32 type = fields[1].GetUInt32();
+            int32 targetId = fields[2].GetInt32();
+            uint32 chance = fields[3].GetUInt32();
+            if(type < MAX_TYPE)
+                m_scriptTemplates[type][id].push_back({ targetId, chance });
+            else
+                sLog.outErrorDb("Table `dbscript_random_templates` entry (%u) uses invalid type (%u). Won't be used.", id, type);
         }
         while (result->NextRow());
 
         delete result;
     }
+
+    // String templates are checked on string loading
+    CheckRandomRelayTemplates();
+}
+
+void ScriptMgr::CheckRandomStringTemplates(std::set<int32>& ids)
+{
+    for (auto& templateData : m_scriptTemplates[STRING_TEMPLATE])
+        for (auto& data : templateData.second)
+            if (ids.find(data.first) != ids.end())
+                ids.erase(data.first);
+}
+
+void ScriptMgr::CheckRandomRelayTemplates()
+{
+    for (auto& templateData : m_scriptTemplates[RELAY_TEMPLATE])
+        for (auto& data : templateData.second)
+            if (data.first && sRelayScripts.second.find(data.first) == sRelayScripts.second.end())
+                sLog.outErrorDb("Table `dbscript_random_templates` entry (%u) uses nonexistent relay ID (%u).", templateData.first, data.first);
 }
 
 void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32>& ids)
@@ -947,11 +982,11 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32
 
                 if (itrM->second.talk.stringTemplateId)
                 {
-                    std::vector<int32>& vector = m_stringTemplates[itrM->second.talk.stringTemplateId];
-                    for (int32& stringId : vector)
+                    auto& vector = m_scriptTemplates[STRING_TEMPLATE][itrM->second.talk.stringTemplateId];
+                    for (auto& data : vector)
                     {
-                        if(!sObjectMgr.GetMangosStringLocale(stringId))
-                            sLog.outErrorDb("Table `db_script_string` is missing string id %u, used in database script template table dbscript_string_template id %u.", stringId, itrM->second.talk.stringTemplateId);
+                        if(!sObjectMgr.GetMangosStringLocale(data.first))
+                            sLog.outErrorDb("Table `db_script_string` is missing string id %u, used in database script template table dbscript_string_template id %u.", data.first, itrM->second.talk.stringTemplateId);
                     }
                 }
             }
@@ -1220,9 +1255,8 @@ bool ScriptAction::HandleScriptStep()
 
             if (m_script->talk.stringTemplateId)
             {
-                bool includingNone = m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL;
-                textId = sScriptMgr.GetRandomScriptStringFromTemplate(m_script->talk.stringTemplateId, includingNone);
-                if (textId == 0 && includingNone)
+                textId = sScriptMgr.GetRandomScriptStringFromTemplate(m_script->talk.stringTemplateId);
+                if (textId == 0)
                     break;
             }
             else
@@ -2097,7 +2131,15 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotUnit(pSource))
                 return false;
 
-            m_map->ScriptsStart(sRelayScripts, m_script->relayScript.relayId, pSource, pTarget);
+            uint32 chosenId;
+            if (m_script->relayScript.templateId)
+                chosenId = sScriptMgr.GetRandomRelayDbscriptFromTemplate(m_script->relayScript.templateId);
+            else
+                chosenId = m_script->relayScript.relayId;
+
+            if (chosenId)
+                m_map->ScriptsStart(sRelayScripts, chosenId, pSource, pTarget);
+            break;
         }
         default:
             sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u unknown command used.", m_table, m_script->id, m_script->command);
@@ -2105,6 +2147,45 @@ bool ScriptAction::HandleScriptStep()
     }
 
     return false;
+}
+
+int32 ScriptMgr::GetRandomScriptTemplateId(uint32 id, uint8 templateType)
+{
+    auto& scriptTemplate = m_scriptTemplates[templateType][id];
+    if (scriptTemplate.empty())
+        return 0;
+
+    uint32 totalChance = 0;
+    for (auto& data : scriptTemplate)
+        totalChance += data.second;
+
+    if (totalChance == 0)
+    {
+        uint32 random = urand(0, scriptTemplate.size() - 1);
+        return scriptTemplate[random].first;
+    }
+    else
+    {
+        uint32 random = urand(0, totalChance);
+        uint32 cumulativeChance = 0;
+        for (auto& data : scriptTemplate)
+        {
+            cumulativeChance += data.second;
+            if (cumulativeChance >= random)
+                return data.first;
+        }
+        return 0; // should never get here - error suppression
+    }
+}
+
+int32 ScriptMgr::GetRandomScriptStringFromTemplate(uint32 id)
+{
+    return GetRandomScriptTemplateId(id, STRING_TEMPLATE);
+}
+
+int32 ScriptMgr::GetRandomRelayDbscriptFromTemplate(uint32 id)
+{
+    return GetRandomScriptTemplateId(id, RELAY_TEMPLATE);
 }
 
 // /////////////////////////////////////////////////////////

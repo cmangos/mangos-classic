@@ -27,6 +27,7 @@
 #include "Maps/GridDefines.h"
 #include "Spells/SpellMgr.h"
 #include "World/World.h"
+#include "DBScripts/ScriptMgr.h"
 
 INSTANTIATE_SINGLETON_1(CreatureEventAIMgr);
 
@@ -73,11 +74,18 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
                                 idx_set.erase(action.text.TextId[k]);
                         break;
                     }
+                    case ACTION_T_TEXT_NEW:
+                        if (action.textNew.textId)
+                            idx_set.erase(action.textNew.textId);
+                        break;
                     default: break;
                 }
             }
         }
     }
+
+    sScriptMgr.CheckRandomStringTemplates(idx_set);
+
     for (std::set<int32>::const_iterator itr = idx_set.begin(); itr != idx_set.end(); ++itr)
         sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` but not used in EventAI scripts.", *itr);
 }
@@ -910,11 +918,51 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         }
                         break;
                     case ACTION_T_START_RELAY_SCRIPT:
-                        if (sRelayScripts.second.find(action.relayScript.relayId) == sRelayScripts.second.end())
+                        if (action.relayScript.relayId > 0)
                         {
-                            sLog.outErrorEventAI("Event %u Action %u uses invalid dbscript_on_relay id %u", i, j + 1, action.setReactState.reactState, REACT_AGGRESSIVE);
-                            continue;
+                            if (sRelayScripts.second.find(action.relayScript.relayId) == sRelayScripts.second.end())
+                            {
+                                sLog.outErrorEventAI("Event %u Action %u references invalid dbscript_on_relay id %u", i, j + 1, action.relayScript.relayId);
+                                continue;
+                            }
                         }
+                        else
+                        {
+                            if (!sScriptMgr.CheckScriptRelayTemplateId(uint32(-action.relayScript.relayId)))
+                            {
+                                sLog.outErrorEventAI("Event %u Action %u references non-existing entry for relay Id template (%i) in dbscript_random_templates table.", i, j + 1, action.relayScript.relayId);
+                                break;
+                            }
+                        }
+                        break;
+                    case ACTION_T_TEXT_NEW:
+                        if (action.textNew.textId)
+                        {
+                            if (!sObjectMgr.GetMangosStringLocale(action.textNew.textId))
+                            {
+                                sLog.outErrorEventAI("Event %u Action %u references non-existing entry (%i) in texts table.", i, j + 1, action.textNew.textId);
+                                action.textNew.textId = 0;
+                            }
+                            else
+                                usedTextIds.insert(action.textNew.textId);
+                        }
+                        else
+                        {
+                            if (!sScriptMgr.CheckScriptStringTemplateId(action.textNew.templateId))
+                            {
+                                sLog.outErrorEventAI("Event %u Action %u references non-existing entry for text template (%i) in dbscript_random_templates table.", i, j + 1, action.textNew.textId);
+                                break;
+                            }
+                            else
+                            {
+                                ScriptMgr::ScriptTemplateVector templateData;
+                                sScriptMgr.GetScriptStringTemplate(action.textNew.templateId, templateData);
+                                for(auto& data : templateData)
+                                    if(data.first)
+                                        usedTextIds.insert(data.first);
+                            }
+                        }
+
                         break;
                     default:
                         sLog.outErrorEventAI("Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j + 1, temp.action[j].type);

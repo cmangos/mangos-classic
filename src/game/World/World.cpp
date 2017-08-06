@@ -1168,6 +1168,9 @@ void World::SetInitialWorldSettings()
     sLog.outString(">>> Scripts loaded");
     sLog.outString();
 
+    sLog.outString("Loading Scripts random templates...");      // must be before String calls
+    sScriptMgr.LoadDbScriptRandomTemplates();
+
     sLog.outString("Loading Scripts text locales...");      // must be after Load*Scripts calls
     sScriptMgr.LoadDbScriptStrings();
 

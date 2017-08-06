@@ -17,6 +17,7 @@ dbscripts_on_gossip                 DB project self defined id
 dbscripts_on_quest_end              DB project self defined id (generally quest entry)
 dbscripts_on_quest_start            DB project self defined id (generally quest entry)
 dbscripts_on_spell                  Spell id
+dbscripts_on_relay                  DB project self defined id, Id is used in dbscripts, EAI or SD2 to launch it
 
 -- --------------------------
 ## delay
@@ -153,8 +154,8 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 -- --------------------------
 
  0 SCRIPT_COMMAND_TALK                      resultingSource = WorldObject, resultingTarget = Unit/none
-                                            * datalong = dbscript_string_template ID - will randomize between all db_script_strings in given template
-                                            * dataint = text entry from db_script_string -table. dataint2-dataint4 optionally, for random selection of text
+                                            * datalong = dbscript_string_template ID - will randomize between all db_script_strings in given template, ids from template are checked against dbscript_string table
+                                            * dataint = text entry from dbscript_string -table. dataint2-dataint4 optionally, for random selection of text
 
  1 SCRIPT_COMMAND_EMOTE                     resultingSource = Unit, resultingTarget = Unit/none
                                             * datalong = emote_id
@@ -341,3 +342,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * resultingSource = Creature
                                             * datalong = new creature entry. Must be different than the current one
                                             * datalong2 = faction for which the entry is updated. 0 = Alliance, 1 = Horde
+45 SCRIPT_COMMAND_START_RELAY_SCRIPT        Launch dbscripts_on_relay script, either static one, or randomly chosen one from dbscript_random_templates
+                                            * source and target of command define source and target of launched dbscript
+                                            * datalong = dbscripts_on_relay id
+                                            * datalong2 = dbscript_random_templates id

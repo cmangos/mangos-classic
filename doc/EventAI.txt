@@ -107,8 +107,8 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 #    Internal name                          Param usage                     Description
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 0    ACTION_T_NONE                          No Action                       Does nothing.
-1    ACTION_T_TEXT                          -TextId1, -TextId2, -TextId3    Displays the specified -TextId. When -TextId2 and -TextId3 are specified, the selection will be Randomized between 1,2 or 3. Text ID's are defined, along with other options for the text, in creature_ai_texts table. Below is detailed Text Information. All text ID values for EventAI MUST be negative.
-2    ACTION_T_SET_FACTION                   FactionId, Flags                Changes faction for a creature. When param1 is zero, creature will revert to it's default faction. Flags will determine when faction is restored to default (evade, respawn etc)
+1    ACTION_T_TEXT - deprecated use 54      -TextId1, -TextId2, -TextId3    Displays the specified -TextId. When -TextId2 and -TextId3 are specified, the selection will be Randomized between 1,2 or 3. Text ID's are defined, along with other options for the text, in creature_ai_texts table. Below is detailed Text Information. All text ID values for EventAI MUST be negative.
+2    ACTION_T_SET_FACTION                   FactionId, Flags              Changes faction for a creature. When param1 is zero, creature will revert to it's default faction. Flags will determine when faction is restored to default (evade, respawn etc)
 3    ACTION_T_MORPH_TO_ENTRY_OR_MODEL       CreatureEntry, ModelId          Sets either model from creature_template.entry (Param1) OR explicit modelId (Param2) for the NPC. If (Param1) AND (Param2) are both 0, NPC will demorph and revert to the default model (as specified in creature_template).
 4    ACTION_T_SOUND                         SoundId                         NPC Plays a specified Sound ID.
 5    ACTION_T_EMOTE                         EmoteId                         NPC Does a specified Emote ID.
@@ -150,7 +150,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 41   ACTION_T_FORCE_DESPAWN                 Delay                           Despawns the creature, if delay = 0 immediate otherwise will despawn after delay time set in Param1 (in ms).
 42   ACTION_T_SET_INVINCIBILITY_HP_LEVEL    HP_Level, HP_Percent            Set min. health level for creature that can be set at damage as flat value or percent from max health
 43   ACTION_T_MOUNT_TO_ENTRY_OR_MODEL       CreatureEntry, ModelId          Set mount model from creature_template.entry (Param1) OR explicit modelId (Param2). If (Param1) AND (Param2) are both 0, unmount.
-44   ACTION_T_CHANCED_TEXT                  Chance, -TextId1, -TextId2      Displays by Chance (1..100) the specified -TextId. When -TextId2 is specified, the selection will be randomized. Text types are defined, along with other options for the text, in a table below. Param2 and Param3 needs to be negative.
+44   ACTION_T_CHANCED_TEXT  - deprecated use 54 Chance, -TextId1, -TextId2      Displays by Chance (1..100) the specified -TextId. When -TextId2 is specified, the selection will be randomized. Text types are defined, along with other options for the text, in a table below. Param2 and Param3 needs to be negative.
 45   ACTION_T_THROW_AI_EVENT                EventType, Radius               Throws an AIEvent of type (Param1) to nearby friendly Npcs in range of (Param2)
 46   ACTION_T_SET_THROW_MASK                EventTypeMask                   Marks for which AIEvents the npc will throw AIEvents on its own.
 47   ACTION_T_SET_STAND_STATE               StandState                      Set the unit stand state (Param1) of the current creature.
@@ -159,6 +159,8 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 50   ACTION_T_SET_REACT_STATE               ReactState                      Change react state of the creature
 51   ACTION_T_PAUSE_WAYPOINTS               DoPause                         Pause waypoints of creature
 52   ACTION_T_INTERRUPT_SPELL               SpellType - CurrentSpellTypes   Interrupt spell in given slot for creature
+53   ACTION_T_START_RELAY_SCRIPT            RelayIDorTemplate, Target       Launches dbscripts_on_relay script, either static one, or when param1 is < 0 then random one chosen from dbscript_random_templates
+54   ACTION_T_TEXT_NEW                      TextId, Target, TemplateId      Displays text, either static one or when param3 != 0, then random one chosen from dbscript_random_templates
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -949,6 +951,23 @@ CURRENT_AUTOREPEAT_SPELL        = 2
 CURRENT_CHANNELED_SPELL         = 3
 Melee spells, generic spells and autorepeat spells have their interruptability based on interrupt flags, albeit this flag is wrongly missing for some spells.
 Main purpose of this command is to research and find channeled spells, which do not interrupt as a result of not having found an interrupt flag.
+
+---------------------------------
+53 = ACTION_T_START_RELAY_SCRIPT:
+---------------------------------
+Parameter 1: dbscripts_on_relay ID if > 0, if < 0 dbscript_random_template relay template
+Parameter 2: Target which will determine the source of the script
+Launches a dbscripts_on_relay (either static or random one) with selected target as source and creature as target
+
+-----------------------
+54 = ACTION_T_TEXT_NEW:
+-----------------------
+Parameter 1: Text ID that the creature should say
+Parameter 2: Target at which the creature will speak
+Parameter 3: dbscript_random_template text template
+Says a text at given target, deprecates TEXT and CHANCED_TEXT actions, due to superior capabilities. Is a mirror of dbscripts capabilities.
+The text IDs are checked against creature_ai_texts for both Parameter 1 and random template in Parameter 3
+NOTE: if Parameter 3 is set, it always takes precedence over Parameter 1, random template has a higher priority. (as such, only one of them needs to be set)
 
 =========================================
 Target Types

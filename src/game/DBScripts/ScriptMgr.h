@@ -121,7 +121,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_UPDATE_TEMPLATE          = 44,           // resSource = Creature
                                                             // datalong = new Creature entry
                                                             // datalong2 = Alliance(0) Horde(1), other values throw error
-    SCRIPT_COMMAND_START_RELAY_SCRIPT       = 45,           // datalong = dbscript_on_relay id
+    SCRIPT_COMMAND_START_RELAY_SCRIPT       = 45,           // datalong = relayId, datalong2 = random template Id
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -395,6 +395,7 @@ struct ScriptInfo
         struct                                              // SCRIPT_COMMAND_START_RELAY_SCRIPT
         {
             uint32 relayId;                                 // datalong
+            uint32 templateId;                              // datalong2
         } relayScript;
 
         struct
@@ -527,6 +528,13 @@ extern ScriptMapMapName sRelayScripts;
 
 class ScriptMgr
 {
+    enum RandomTemplates
+    {
+        STRING_TEMPLATE = 0,
+        RELAY_TEMPLATE = 1,
+        MAX_TYPE // must always be last
+    };
+
     public:
         ScriptMgr();
         ~ScriptMgr() {};
@@ -543,11 +551,18 @@ class ScriptMgr
         void LoadRelayScripts();
 
         void LoadDbScriptStrings();
-        void LoadDbScriptStringTemplates(std::set<int32>& ids);
+        void LoadDbScriptRandomTemplates();
+        void CheckRandomStringTemplates(std::set<int32>& ids);
+        void CheckRandomRelayTemplates();
 
-        bool CheckScriptStringTemplateId(uint32 id) const { return m_stringTemplates.find(id) != m_stringTemplates.end(); }
-        void GetScriptStringTemplate(uint32 id, std::vector<int32>& stringTemplate) { stringTemplate = m_stringTemplates[id]; }
-        uint32 GetRandomScriptStringFromTemplate(uint32 id, bool includingNone = false);
+        bool CheckScriptStringTemplateId(uint32 id) const { return m_scriptTemplates[STRING_TEMPLATE].find(id) != m_scriptTemplates[STRING_TEMPLATE].end(); }
+        bool CheckScriptRelayTemplateId(uint32 id) const { return m_scriptTemplates[RELAY_TEMPLATE].find(id) != m_scriptTemplates[RELAY_TEMPLATE].end(); }
+        typedef std::vector<std::pair<int32, uint32>> ScriptTemplateVector;
+        void GetScriptStringTemplate(uint32 id, ScriptTemplateVector& stringTemplate) { stringTemplate = m_scriptTemplates[STRING_TEMPLATE][id]; }
+        void GetScriptRelayTemplate(uint32 id, ScriptTemplateVector& stringTemplate) { stringTemplate = m_scriptTemplates[RELAY_TEMPLATE][id]; }
+        int32 GetRandomScriptTemplateId(uint32 id, uint8 templateType);
+        int32 GetRandomScriptStringFromTemplate(uint32 id);
+        int32 GetRandomRelayDbscriptFromTemplate(uint32 id);
 
         uint32 IncreaseScheduledScriptsCount() { return (uint32)++m_scheduledScripts; }
         uint32 DecreaseScheduledScriptCount() { return (uint32)--m_scheduledScripts; }
@@ -564,12 +579,12 @@ class ScriptMgr
         typedef std::vector<std::string> ScriptNameMap;
         typedef std::unordered_map<uint32, uint32> AreaTriggerScriptMap;
         typedef std::unordered_map<uint32, uint32> EventIdScriptMap;
-        typedef std::unordered_map<uint32, std::vector<int32>> ScriptStringTemplateMap;
+        typedef std::unordered_map<uint32, ScriptTemplateVector> ScriptTemplateMap;
 
         AreaTriggerScriptMap    m_AreaTriggerScripts;
         EventIdScriptMap        m_EventIdScripts;
 
-        ScriptStringTemplateMap m_stringTemplates;
+        ScriptTemplateMap       m_scriptTemplates[MAX_TYPE];
         ScriptNameMap           m_scriptNames;
 
         // atomic op counter for active scripts amount

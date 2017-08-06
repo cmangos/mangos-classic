@@ -129,7 +129,8 @@ enum EventAI_ActionType
     ACTION_T_SET_REACT_STATE            = 50,               // React state, unused, unused
     ACTION_T_PAUSE_WAYPOINTS            = 51,               // DoPause 0: unpause waypoint 1: pause waypoint, unused, unused
     ACTION_T_INTERRUPT_SPELL            = 52,               // SpellType enum CurrentSpellTypes, unused, unused
-    ACTION_T_START_RELAY_SCRIPT         = 53,               // Relay script ID, unused, unused
+    ACTION_T_START_RELAY_SCRIPT         = 53,               // Relay script ID, target, unused
+    ACTION_T_TEXT_NEW                   = 54,               // Text ID or template ID, target, template Id
 
     ACTION_T_END,
 };
@@ -460,10 +461,17 @@ struct CreatureEventAI_Action
         // ACTION_T_START_RELAY_SCRIPT                      = 51
         struct
         {
-            uint32 relayId;                                 // dbscript_on_relay id
-            uint32 target;                                  // target
-            uint32 unused2;
+            int32 relayId;                                 // dbscript_on_relay id
+            uint32 target;                                 // target
+            uint32 unused;
         } relayScript;
+        // ACTION_T_TEXT_NEW                                = 54
+        struct
+        {
+            int32 textId;                                  // text id
+            uint32 target;                                 // target
+            uint32 templateId;                             // random template Id
+        } textNew;
         // RAW
         struct
         {
