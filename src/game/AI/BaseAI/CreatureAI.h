@@ -360,6 +360,9 @@ class CreatureAI
          */
         virtual void OnEventHappened(uint16 /*eventId*/, bool /*activate*/, bool /*resume*/) {}
 
+        void CheckForHelp(Unit* /*who*/, Creature* /*me*/, float /*dist*/);
+        void DetectOrAttack(Unit* /*who*/, Creature* /*me*/);
+
     protected:
         void HandleMovementOnAttackStart(Unit* victim) const;
 

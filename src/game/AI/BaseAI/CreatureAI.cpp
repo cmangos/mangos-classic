@@ -202,6 +202,67 @@ void CreatureAI::HandleMovementOnAttackStart(Unit* victim) const
     }
 }
 
+void CreatureAI::CheckForHelp(Unit* who, Creature* me, float distance)
+{
+    Unit* victim = who->getAttackerForHelper();
+
+    if (!victim)
+        return;
+
+    if (me->GetMap()->Instanceable())
+        distance = distance / 2.5f;
+
+    if (me->CanInitiateAttack() && me->CanAttackOnSight(victim) && victim->isInAccessablePlaceFor(me))
+    {
+        if (me->IsWithinDistInMap(who, distance) && me->IsWithinLOSInMap(who))
+        {
+            if (!me->getVictim())
+            {
+                if (me->GetMap()->Instanceable()) // Instanceable case ignore family/faction checks
+                    AttackStart(victim);
+                else // In non-instanceable creature must belong to same family and faction to attack player.
+                {
+                    if (me->GetCreatureInfo()->Family == ((Creature*)who)->GetCreatureInfo()->Family &&
+                        me->GetCreatureInfo()->FactionAlliance == ((Creature*)who)->GetCreatureInfo()->FactionAlliance &&
+                        me->GetCreatureInfo()->FactionHorde == ((Creature*)who)->GetCreatureInfo()->FactionHorde)
+                        AttackStart(victim);
+                }
+            }
+        }
+    }
+}
+
+void CreatureAI::DetectOrAttack(Unit* who, Creature* me)
+{
+    float attackRadius = me->GetAttackDistance(who);
+
+    if (me->IsWithinDistInMap(who, attackRadius) && me->IsWithinLOSInMap(who))
+    {
+        if (!me->getVictim())
+        {
+            if (who->HasStealthAura() || who->HasInvisibilityAura())
+            {
+                if (!me->hasUnitState(UNIT_STAT_DISTRACTED) && !me->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
+                {
+                    me->GetMotionMaster()->MoveDistract(TIME_INTERVAL_LOOK);
+                    me->SetFacingTo(me->GetAngle(who));
+                }
+
+                if (me->IsWithinDistInMap(who, who->GetVisibleDist(me) * 0.7f))
+                    AttackStart(who);
+            }
+            else
+                AttackStart(who);
+        }
+        else if (me->GetMap()->IsDungeon())
+        {
+            me->AddThreat(who);
+            me->SetInCombatWith(who);
+            who->SetInCombatWith(me);
+        }
+    }
+}
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 //                                      Event system
 // ////////////////////////////////////////////////////////////////////////////////////////////////
