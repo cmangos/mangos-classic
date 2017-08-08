@@ -1396,6 +1396,12 @@ class Unit : public WorldObject
         bool IsImmuneToPlayer() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER); }
         void SetImmuneToPlayer(bool state);
 
+        // extensions of CanAttack and CanAssist API needed serverside
+        virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const override;
+        virtual bool CanAssistSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const override;
+
+        virtual bool CanAttackOnSight(Unit* target); // Used in MoveInLineOfSight checks
+
         bool IsPvP() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
         void SetPvP(bool state);
         bool IsPvPFreeForAll() const;

@@ -5418,6 +5418,32 @@ bool Unit::IsNeutralToAll() const
     return my_faction->IsNeutralToAll();
 }
 
+bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo) const
+{
+    if (spellInfo)
+    {
+        // inversealive is needed for some spells which need to be casted at dead targets (aoe)
+        if (!target->isAlive() && !spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD))
+            return false;
+    }
+
+    return CanAttack(target);
+}
+
+bool Unit::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
+{
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
+        return false;
+
+    return true;
+}
+
+bool Unit::CanAttackOnSight(Unit * target)
+{
+    // TODO: CanAttack remove comment
+    return CanAttack(target) && !hasUnitState(UNIT_STAT_FEIGN_DEATH) /*&& IsEnemy(target)*/;
+}
+
 bool Unit::Attack(Unit* victim, bool meleeAttack)
 {
     if (!victim || victim == this)

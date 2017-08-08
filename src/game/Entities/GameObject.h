@@ -696,6 +696,9 @@ class GameObject : public WorldObject
         bool IsEnemy(Unit const* unit) const override;
         bool IsFriend(Unit const* unit) const override;
 
+        bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const override;
+        bool CanAssistSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const override;
+
         void SummonLinkedTrapIfAny() const;
         void TriggerLinkedGameObject(Unit* target) const;
 
