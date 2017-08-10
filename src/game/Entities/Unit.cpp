@@ -4780,6 +4780,22 @@ bool Unit::HasAura(uint32 spellId, SpellEffectIndex effIndex) const
     return false;
 }
 
+uint32 Unit::GetAuraCount(uint32 spellId) const
+{
+    uint32 count = 0;
+    SpellAuraHolderConstBounds spair = GetSpellAuraHolderBounds(spellId);
+
+    for (auto itr = spair.first; itr != spair.second; ++itr)
+    {
+        if (itr->second->GetStackAmount() == 0)
+            ++count;
+        else
+            count += (uint32)itr->second->GetStackAmount();
+    }
+
+    return count;
+}
+
 void Unit::AddDynObject(DynamicObject* dynObj)
 {
     m_dynObjGUIDs.push_back(dynObj->GetObjectGuid());

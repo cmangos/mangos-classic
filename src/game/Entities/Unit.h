@@ -1583,6 +1583,8 @@ class Unit : public WorldObject
             return m_spellAuraHolders.equal_range(spell_id);
         }
 
+        uint32 GetAuraCount(uint32 spellId) const;
+
         bool HasAuraType(AuraType auraType) const;
         bool HasAffectedAura(AuraType auraType, SpellEntry const* spellProto) const;
         bool HasAura(uint32 spellId, SpellEffectIndex effIndex) const;
