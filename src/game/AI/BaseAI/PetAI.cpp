@@ -46,7 +46,7 @@ PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inComb
             m_attackAngle = M_PI_F;
             break;
         case MINI_PET:
-            m_reactState = REACT_PASSIVE;
+            SetReactState(REACT_PASSIVE);
             break;
     }
 }

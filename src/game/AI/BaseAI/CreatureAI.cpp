@@ -40,7 +40,7 @@ CreatureAI::CreatureAI(Creature* creature) :
     m_moveFurther(true)
 {
     if (m_creature->IsCivilian())
-        m_reactState = REACT_DEFENSIVE;
+        SetReactState(REACT_DEFENSIVE);
     if(m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
         m_visibilityDistance = sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER);
 }
