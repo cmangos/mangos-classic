@@ -131,6 +131,8 @@ enum EventAI_ActionType
     ACTION_T_INTERRUPT_SPELL            = 52,               // SpellType enum CurrentSpellTypes, unused, unused
     ACTION_T_START_RELAY_SCRIPT         = 53,               // Relay script ID, target, unused
     ACTION_T_TEXT_NEW                   = 54,               // Text ID or template ID, target, template Id
+    ACTION_T_TEXT_NEW                   = 54,               // Text ID, target, template Id
+    ACTION_T_ATTACK_START               = 55,               // Target, unused, unused
 
     ACTION_T_END,
 };
@@ -472,6 +474,13 @@ struct CreatureEventAI_Action
             uint32 target;                                 // target
             uint32 templateId;                             // random template Id
         } textNew;
+        // ACTION_T_ATTACK_START                            = 55
+        struct
+        {
+            uint32 target;                                 // target
+            uint32 unused;
+            uint32 unused2;
+        } attackStart;
         // RAW
         struct
         {

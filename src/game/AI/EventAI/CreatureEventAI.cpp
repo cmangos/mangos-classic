@@ -1122,6 +1122,18 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 sLog.outErrorEventAI("Error attempting to display text %i, used by script %u", textId, EventId);
             break;
         }
+        case ACTION_T_ATTACK_START:
+        {
+            Unit* target = GetTargetByType(action.attackStart.target, pActionInvoker, pAIEventSender, reportTargetError);
+            if (!target)
+            {
+                if (reportTargetError)
+                    sLog.outErrorEventAI("Event %d attempt to start relay script but Target == nullptr. Creature %d", EventId, m_creature->GetEntry());
+                return;
+            }
+            AttackStart(target);
+            break;
+        }
         default:
             sLog.outError("CreatureEventAi::ProcessAction(): action(%u) not implemented", static_cast<uint32>(action.type));
             break;

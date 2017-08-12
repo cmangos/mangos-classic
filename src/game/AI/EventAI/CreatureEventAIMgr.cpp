@@ -962,7 +962,9 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                                         usedTextIds.insert(data.first);
                             }
                         }
-
+                        break;
+                    case ACTION_T_ATTACK_START:
+                        IsValidTargetType(temp.event_type, action.type, action.attackStart.target, i, j + 1);
                         break;
                     default:
                         sLog.outErrorEventAI("Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j + 1, temp.action[j].type);

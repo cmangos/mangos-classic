@@ -161,6 +161,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 52   ACTION_T_INTERRUPT_SPELL               SpellType - CurrentSpellTypes   Interrupt spell in given slot for creature
 53   ACTION_T_START_RELAY_SCRIPT            RelayIDorTemplate, Target       Launches dbscripts_on_relay script, either static one, or when param1 is < 0 then random one chosen from dbscript_random_templates
 54   ACTION_T_TEXT_NEW                      TextId, Target, TemplateId      Displays text, either static one or when param3 != 0, then random one chosen from dbscript_random_templates
+55   ACTION_T_ATTACK_START                  Target                          Attacks targeted creature
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -968,6 +969,12 @@ Parameter 3: dbscript_random_template text template
 Says a text at given target, deprecates TEXT and CHANCED_TEXT actions, due to superior capabilities. Is a mirror of dbscripts capabilities.
 The text IDs are checked against creature_ai_texts for both Parameter 1 and random template in Parameter 3
 NOTE: if Parameter 3 is set, it always takes precedence over Parameter 1, random template has a higher priority. (as such, only one of them needs to be set)
+
+---------------------------
+55 = ACTION_T_ATTACK_START:
+---------------------------
+Parameter 1: Target at which the creature will attack
+Attacks targeted creature. This has particular use when we want to attack specific target received through ACTION_T_THROW_AI_EVENT for example. Can also be used to attack summoner at spawn for example.
 
 =========================================
 Target Types
