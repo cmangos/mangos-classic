@@ -121,7 +121,7 @@ enum EventAI_ActionType
     ACTION_T_SET_INVINCIBILITY_HP_LEVEL = 42,               // MinHpValue, format(0-flat,1-percent from max health)
     ACTION_T_MOUNT_TO_ENTRY_OR_MODEL    = 43,               // Creature_template entry(param1) OR ModelId (param2) (or 0 for both to unmount)
     ACTION_T_CHANCED_TEXT               = 44,               // Chance to display the text, TextId1, optionally TextId2. If more than just -TextId1 is defined, randomize. Negative values.
-    ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, unused
+    ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, Target
     ACTION_T_SET_THROW_MASK             = 46,               // EventTypeMask, unused, unused
     ACTION_T_SET_STAND_STATE            = 47,               // StandState, unused, unused
     ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance if Movement Type 1 and PathId if Movement Type 2, unused
@@ -410,7 +410,7 @@ struct CreatureEventAI_Action
         {
             uint32 eventType;
             uint32 radius;
-            uint32 unused;
+            uint32 target;
         } throwEvent;
         // ACTION_T_SET_THROW_MASK                          = 46
         struct

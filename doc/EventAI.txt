@@ -151,7 +151,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 42   ACTION_T_SET_INVINCIBILITY_HP_LEVEL    HP_Level, HP_Percent            Set min. health level for creature that can be set at damage as flat value or percent from max health
 43   ACTION_T_MOUNT_TO_ENTRY_OR_MODEL       CreatureEntry, ModelId          Set mount model from creature_template.entry (Param1) OR explicit modelId (Param2). If (Param1) AND (Param2) are both 0, unmount.
 44   ACTION_T_CHANCED_TEXT  - deprecated use 54 Chance, -TextId1, -TextId2      Displays by Chance (1..100) the specified -TextId. When -TextId2 is specified, the selection will be randomized. Text types are defined, along with other options for the text, in a table below. Param2 and Param3 needs to be negative.
-45   ACTION_T_THROW_AI_EVENT                EventType, Radius               Throws an AIEvent of type (Param1) to nearby friendly Npcs in range of (Param2)
+45   ACTION_T_THROW_AI_EVENT                EventType, Radius, Target       Throws an AIEvent of type (Param1) to nearby friendly Npcs in range of (Param2), Invoker of event is Target
 46   ACTION_T_SET_THROW_MASK                EventTypeMask                   Marks for which AIEvents the npc will throw AIEvents on its own.
 47   ACTION_T_SET_STAND_STATE               StandState                      Set the unit stand state (Param1) of the current creature.
 48   ACTION_T_CHANGE_MOVEMENT               MovementType, WanderDistance    Change the unit movement type (Param1). If the movement type is Random Movement (1), the WanderDistance (Param2) must be provided. If the movement type is Waypoint Movement (2), Param2 is PathId.
@@ -901,6 +901,9 @@ Read at bottom for documentation of creature_ai_texts-table.
 -----------------------------
 Parameter 1: EventType - What AIEvent to throw, supported types see CreatureAI.h enum AIEventType
 Parameter 2: Radius    - Throw the AIEvent to nearby friendly creatures within this range
+Parameter 3: Target    - The thrown AIEvent uses selected target as Invoker
+Each event, be it C++ or DB has 3 parties, Sender, Receiver and Invoker. Sender is EAI creature owner, Receiver is creatures found in radius, and Invoker is the one who triggered the event. Invoker can be specified
+regardless of Sender/Receiver and this enables relaying target.
 
 -----------------------------
 46 = ACTION_T_SET_THROW_MASK:

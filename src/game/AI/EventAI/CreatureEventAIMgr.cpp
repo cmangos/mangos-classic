@@ -878,7 +878,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             sLog.outErrorEventAI("Event %u Action %u uses unexpected radius 0 (set to %f of CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS)", i, j + 1, sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
                             action.throwEvent.radius = uint32(sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
                         }
-
+                        IsValidTargetType(temp.event_type, action.type, action.throwEvent.target, i, j + 1);
                         break;
                     case ACTION_T_SET_THROW_MASK:
                         if (action.setThrowMask.eventTypeMask & ~((1 << MAXIMAL_AI_EVENT_EVENTAI) - 1))

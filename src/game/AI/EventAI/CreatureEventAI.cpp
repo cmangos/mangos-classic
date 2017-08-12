@@ -1019,7 +1019,14 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         }
         case ACTION_T_THROW_AI_EVENT:
         {
-            SendAIEventAround(AIEventType(action.throwEvent.eventType), pActionInvoker, 0, action.throwEvent.radius);
+            Unit* target = GetTargetByType(action.throwEvent.target, pActionInvoker, pAIEventSender, reportTargetError);
+            if (!target)
+            {
+                if (reportTargetError)
+                    sLog.outErrorEventAI("Event %d attempt to start relay script but Target == nullptr. Creature %d", EventId, m_creature->GetEntry());
+                return;
+            }
+            SendAIEventAround(AIEventType(action.throwEvent.eventType), target, 0, action.throwEvent.radius);
             break;
         }
         case ACTION_T_SET_THROW_MASK:
