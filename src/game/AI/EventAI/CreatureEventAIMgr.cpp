@@ -966,6 +966,13 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_ATTACK_START:
                         IsValidTargetType(temp.event_type, action.type, action.attackStart.target, i, j + 1);
                         break;
+                    case ACTION_T_DESPAWN_GUARDIANS:
+                        if (action.despawnGuardians.entryId && !sCreatureStorage.LookupEntry<CreatureInfo>(action.despawnGuardians.entryId))
+                        {
+                            sLog.outErrorEventAI("Event %u Action %u uses nonexistent Creature entry %u.", i, j + 1, action.despawnGuardians.entryId);
+                            action.despawnGuardians.entryId = 0;
+                        }
+                        break;
                     default:
                         sLog.outErrorEventAI("Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j + 1, temp.action[j].type);
                         break;

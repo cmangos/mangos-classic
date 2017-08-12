@@ -1134,6 +1134,21 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             AttackStart(target);
             break;
         }
+        case ACTION_T_DESPAWN_GUARDIANS:
+        {
+            if (action.despawnGuardians.entryId)
+            {
+                if (Pet* guardian = m_creature->FindGuardianWithEntry(action.despawnGuardians.entryId))
+                {
+                    guardian->Unsummon(PET_SAVE_AS_DELETED, m_creature); // can remove pet guid from m_guardianPets
+                    m_creature->RemoveGuardian(guardian);
+                }
+                // not throwing error otherwise because guardian might as well be dead
+            }
+            else
+                m_creature->RemoveGuardians();
+            break;
+        }
         default:
             sLog.outError("CreatureEventAi::ProcessAction(): action(%u) not implemented", static_cast<uint32>(action.type));
             break;

@@ -162,6 +162,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 53   ACTION_T_START_RELAY_SCRIPT            RelayIDorTemplate, Target       Launches dbscripts_on_relay script, either static one, or when param1 is < 0 then random one chosen from dbscript_random_templates
 54   ACTION_T_TEXT_NEW                      TextId, Target, TemplateId      Displays text, either static one or when param3 != 0, then random one chosen from dbscript_random_templates
 55   ACTION_T_ATTACK_START                  Target                          Attacks targeted creature
+56   ACTION_T_DESPAWN_GUARDIANS             EntryId                         Despawns guardian with specified entry, or if 0 despawns all guardians
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -975,6 +976,12 @@ NOTE: if Parameter 3 is set, it always takes precedence over Parameter 1, random
 ---------------------------
 Parameter 1: Target at which the creature will attack
 Attacks targeted creature. This has particular use when we want to attack specific target received through ACTION_T_THROW_AI_EVENT for example. Can also be used to attack summoner at spawn for example.
+
+--------------------------------
+56 = ACTION_T_DESPAWN_GUARDIANS:
+--------------------------------
+Parameter 1: Entry ID of guardian to be despawned (can also be 0)
+If a given entry is valid and found, despawns guardian with given entry. If parameter 1 is 0, despawns all guardians (which is the more common script action).
 
 =========================================
 Target Types
