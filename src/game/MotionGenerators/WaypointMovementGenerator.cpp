@@ -556,9 +556,9 @@ but these extra scripts have no EventID in the DBC. In future if this place fill
 */
 void FlightPathMovementGenerator::OnFlightPathEnd(Player& player, uint32 finalNode)
 {
-    switch (finalNode)
+    /*switch (finalNode)
     {
         default:
             break;
-    }
+    }*/
 }
