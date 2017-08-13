@@ -576,16 +576,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         // immediately finishes the cooldown on certain Rogue abilities
-                        const SpellCooldowns& cm = ((Player*)m_caster)->GetSpellCooldownMap();
-                        for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
-                        {
-                            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(itr->first);
-                            if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE &&
-                                    spellInfo->Id != m_spellInfo->Id && GetSpellRecoveryTime(spellInfo) > 0)
-                                ((Player*)m_caster)->RemoveSpellCooldown((itr++)->first, true);
-                            else
-                                ++itr;
-                        }
+                        auto cdCheck = [](SpellEntry const& spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_ROGUE && (spellEntry.SpellFamilyFlags & uint64(0x0000026000000860))); };
+                        static_cast<Player*>(m_caster)->RemoveSomeCooldown(cdCheck);
                     }
 
                     return;
@@ -1012,17 +1004,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         // immediately finishes the cooldown on Frost spells
-                        const SpellCooldowns& cm = ((Player*)m_caster)->GetSpellCooldownMap();
-                        for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
+                        auto cdCheck = [](SpellEntry const& spellEntry) -> bool
                         {
-                            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(itr->first);
-                            if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE
-                                && (GetSpellSchoolMask(spellInfo) & SPELL_SCHOOL_MASK_FROST)
-                                && spellInfo->Id != m_spellInfo->Id && GetSpellRecoveryTime(spellInfo) > 0)
-                                ((Player*)m_caster)->RemoveSpellCooldown((itr++)->first, true);
-                            else
-                                ++itr;
-                        }
+                            if (spellEntry.SpellFamilyName != SPELLFAMILY_MAGE)
+                                return false;
+                            if ((GetSpellSchoolMask(&spellEntry) & SPELL_SCHOOL_MASK_FROST) && GetSpellRecoveryTime(&spellEntry) > 0)
+                                return true;
+                            return false;
+                        };
+                        static_cast<Player*>(m_caster)->RemoveSomeCooldown(cdCheck);
                     }
 
                     return;
@@ -1184,16 +1174,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         // immediately finishes the cooldown for hunter abilities
-                        const SpellCooldowns& cm = ((Player*)m_caster)->GetSpellCooldownMap();
-                        for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
-                        {
-                            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(itr->first);
-
-                            if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->Id != 23989 && GetSpellRecoveryTime(spellInfo) > 0)
-                                ((Player*)m_caster)->RemoveSpellCooldown((itr++)->first, true);
-                            else
-                                ++itr;
-                        }
+                        auto cdCheck = [](SpellEntry const& spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_HUNTER && spellEntry.Id != 23989 && GetSpellRecoveryTime(&spellEntry) > 0); };
+                        static_cast<Player*>(m_caster)->RemoveSomeCooldown(cdCheck);
                     }
 
                     return;
@@ -1359,7 +1341,7 @@ void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
                 return;
 
             // get highest rank of the Stealth spell
-            uint32 spellId = 0;
+            SpellEntry const* stealthSpellEntry = nullptr;
             const PlayerSpellMap& sp_list = ((Player*)unitTarget)->GetSpellMap();
             for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
             {
@@ -1373,20 +1355,20 @@ void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
 
                 if (spellInfo->IsFitToFamily(SPELLFAMILY_ROGUE, uint64(0x0000000000400000)))
                 {
-                    spellId = spellInfo->Id;
+                    stealthSpellEntry = spellInfo;
                     break;
                 }
             }
 
             // no Stealth spell found
-            if (!spellId)
+            if (!stealthSpellEntry)
                 return;
 
             // reset cooldown on it if needed
-            if (((Player*)unitTarget)->HasSpellCooldown(spellId))
-                ((Player*)unitTarget)->RemoveSpellCooldown(spellId);
+            if (!unitTarget->IsSpellReady(*stealthSpellEntry))
+                unitTarget->RemoveSpellCooldown(*stealthSpellEntry);
 
-            m_caster->CastSpell(unitTarget, spellId, TRIGGERED_OLD_TRIGGERED);
+            m_caster->CastSpell(unitTarget, stealthSpellEntry, TRIGGERED_OLD_TRIGGERED);
             return;
         }
         // Terrordale Haunting Spirit #2, special case because chance is set to 101% in DBC while description is 55%
@@ -3398,7 +3380,7 @@ void Spell::EffectInterruptCast(SpellEffectIndex /*eff_idx*/)
             // check if we can interrupt spell
             if ((curSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT) && curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
             {
-                unitTarget->ProhibitSpellSchool(GetSpellSchoolMask(curSpellInfo), GetSpellDuration(m_spellInfo));
+                unitTarget->LockOutSpells(GetSpellSchoolMask(curSpellInfo), GetSpellDuration(m_spellInfo));
                 unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
                 interruptedSpellId = curSpellInfo->Id;
             }

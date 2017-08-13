@@ -4817,7 +4817,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
         if (m_spellProto->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
         {
             Item* castItem = m_castItemGuid ? ((Player*)caster)->GetItemByGuid(m_castItemGuid) : nullptr;
-            ((Player*)caster)->AddSpellAndCategoryCooldowns(m_spellProto, castItem ? castItem->GetEntry() : 0, nullptr, true);
+            caster->AddCooldown(*m_spellProto, castItem ? castItem->GetProto() : nullptr, true);
         }
     }
 
@@ -4934,11 +4934,10 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
         }
 
         // reset cooldown state for spells
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+        if (GetSpellProto()->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
         {
-            if (GetSpellProto()->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
-                // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
-                ((Player*)caster)->SendCooldownEvent(GetSpellProto());
+            // some spells need to start cooldown at aura fade (like stealth)
+            caster->AddCooldown(*GetSpellProto());
         }
     }
 }

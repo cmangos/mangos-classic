@@ -143,9 +143,6 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
         m_spells[i] = 0;
 
-    m_CreatureSpellCooldowns.clear();
-    m_CreatureCategoryCooldowns.clear();
-
     SetWalk(true, true);
 }
 
@@ -2206,46 +2203,6 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
     }
 
     return nullptr;
-}
-
-void Creature::_AddCreatureSpellCooldown(uint32 spell_id, time_t end_time)
-{
-    m_CreatureSpellCooldowns[spell_id] = end_time;
-}
-
-void Creature::_AddCreatureCategoryCooldown(uint32 category, time_t apply_time)
-{
-    m_CreatureCategoryCooldowns[category] = apply_time;
-}
-
-void Creature::AddCreatureSpellCooldown(uint32 spellid)
-{
-    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellid);
-    if (!spellInfo)
-        return;
-
-    uint32 cooldown = GetSpellRecoveryTime(spellInfo);
-    if (cooldown)
-        _AddCreatureSpellCooldown(spellid, time(nullptr) + cooldown / IN_MILLISECONDS);
-
-    if (spellInfo->Category)
-        _AddCreatureCategoryCooldown(spellInfo->Category, time(nullptr));
-}
-
-bool Creature::HasCategoryCooldown(uint32 spell_id) const
-{
-    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
-    if (!spellInfo)
-        return false;
-
-    CreatureSpellCooldowns::const_iterator itr = m_CreatureCategoryCooldowns.find(spellInfo->Category);
-    return (itr != m_CreatureCategoryCooldowns.end() && time_t(itr->second + (spellInfo->CategoryRecoveryTime / IN_MILLISECONDS)) > time(nullptr));
-}
-
-bool Creature::HasSpellCooldown(uint32 spell_id) const
-{
-    CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spell_id);
-    return (itr != m_CreatureSpellCooldowns.end() && itr->second > time(nullptr)) || HasCategoryCooldown(spell_id);
 }
 
 bool Creature::IsInEvadeMode() const

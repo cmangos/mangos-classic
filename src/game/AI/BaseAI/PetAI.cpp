@@ -169,11 +169,7 @@ void PetAI::UpdateAI(const uint32 diff)
             SpellCastResult result = spell->CheckPetCast(victim);
 
             if (result == SPELL_CAST_OK)
-            {
-                if (creature)
-                    creature->AddCreatureSpellCooldown(spell_id);
                 spell->SpellStart(&(spell->m_targets));
-            }
             else
                 delete spell;
 
@@ -199,7 +195,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 if (!spellInfo)
                     continue;
 
-                if (m_unit->GetCharmInfo() && m_unit->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+                if (!m_unit->IsSpellReady(*spellInfo))
                     continue;
 
                 // ignore some combinations of combat state and combat/non combat spells
@@ -284,8 +280,6 @@ void PetAI::UpdateAI(const uint32 diff)
                     m_unit->SendCreateUpdateToPlayer((Player*)owner);
             }
 
-            if (creature)
-                creature->AddCreatureSpellCooldown(spell->m_spellInfo->Id);
             if (pet)
                 pet->CheckLearning(spell->m_spellInfo->Id);
 

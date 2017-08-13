@@ -1439,74 +1439,81 @@ uint32 Pet::GetCurrentFoodBenefitLevel(uint32 itemlevel) const
 
 void Pet::_LoadSpellCooldowns()
 {
-    m_CreatureSpellCooldowns.clear();
-    m_CreatureCategoryCooldowns.clear();
-
     QueryResult* result = CharacterDatabase.PQuery("SELECT spell,time FROM pet_spell_cooldown WHERE guid = '%u'", m_charmInfo->GetPetNumber());
+    ByteBuffer cdData;
+    uint32 cdCount = 0;
 
     if (result)
     {
-        time_t curTime = time(nullptr);
-
-        WorldPacket data(SMSG_SPELL_COOLDOWN, (8 + size_t(result->GetRowCount()) * 8));
-        data << ObjectGuid(GetObjectGuid());
-        //[-ZERO] data << uint8(0x0);                       // flags (0x1, 0x2)
-
+        auto curTime = Clock::now();
         do
         {
             Field* fields = result->Fetch();
 
             uint32 spell_id = fields[0].GetUInt32();
-            time_t db_time  = (time_t)fields[1].GetUInt64();
+            uint64 spell_time = fields[1].GetUInt64();
 
-            if (!sSpellTemplate.LookupEntry<SpellEntry>(spell_id))
+            SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
+            if (!spellEntry)
             {
-                sLog.outError("Pet %u have unknown spell %u in `pet_spell_cooldown`, skipping.", m_charmInfo->GetPetNumber(), spell_id);
+                sLog.outError("%s has unknown spell %u in `character_spell_cooldown`, skipping.", GetGuidStr().c_str(), spell_id);
                 continue;
             }
 
+            TimePoint spellExpireTime = Clock::from_time_t(spell_time);
+            std::chrono::milliseconds spellRecTime = std::chrono::milliseconds::zero();
+            if (spellExpireTime > curTime)
+                spellRecTime = std::chrono::duration_cast<std::chrono::milliseconds>(spellExpireTime - curTime);
+
             // skip outdated cooldown
-            if (db_time <= curTime)
+            if (spellRecTime == std::chrono::milliseconds::zero())
                 continue;
 
-            data << uint32(spell_id);
-            data << uint32(uint32(db_time - curTime)*IN_MILLISECONDS);
+            cdData << uint32(spell_id);
+            cdData << uint32(uint32(spellRecTime.count()));
+            ++cdCount;
 
-            _AddCreatureSpellCooldown(spell_id, db_time);
-
-            DEBUG_LOG("Pet (Number: %u) spell %u cooldown loaded (%u secs).", m_charmInfo->GetPetNumber(), spell_id, uint32(db_time - curTime));
-        }
-        while (result->NextRow());
+            m_cooldownMap.AddCooldown(spell_id, uint32(spellRecTime.count()));
+#ifdef _DEBUG
+            uint32 spellCDDuration = std::chrono::duration_cast<std::chrono::seconds>(spellRecTime).count();
+            sLog.outDebug("Adding spell cooldown to %s, SpellID(%u), recDuration(%us).", GetGuidStr().c_str(), spell_id, spellCDDuration);
+#endif
+        } while (result->NextRow());
 
         delete result;
 
-        if (!m_CreatureSpellCooldowns.empty() && GetOwner())
+        if (cdCount && GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER)
         {
-            ((Player*)GetOwner())->GetSession()->SendPacket(data);
+            WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + cdData.size());
+            data << GetObjectGuid();
+            //data << uint8(0x0);                                     // flags (0x1, 0x2)
+            data.append(cdData);
+            static_cast<Player*>(GetOwner())->GetSession()->SendPacket(data);
         }
     }
 }
 
 void Pet::_SaveSpellCooldowns()
 {
-    static SqlStatementID delSpellCD ;
-    static SqlStatementID insSpellCD ;
+    static SqlStatementID delSpellCD;
+    static SqlStatementID insSpellCD;
 
     SqlStatement stmt = CharacterDatabase.CreateStatement(delSpellCD, "DELETE FROM pet_spell_cooldown WHERE guid = ?");
     stmt.PExecute(m_charmInfo->GetPetNumber());
 
-    time_t curTime = time(nullptr);
+    TimePoint currTime = Clock::now();
 
-    // remove oudated and save active
-    for (CreatureSpellCooldowns::iterator itr = m_CreatureSpellCooldowns.begin(); itr != m_CreatureSpellCooldowns.end();)
+    for (auto& cdItr : m_cooldownMap)
     {
-        if (itr->second <= curTime)
-            m_CreatureSpellCooldowns.erase(itr++);
-        else
+        auto& cdData = cdItr.second;
+        if (!cdData->IsPermanent())
         {
+            TimePoint sTime = currTime;
+            cdData->GetSpellCDExpireTime(sTime);
+            uint64 spellExpireTime = uint64(Clock::to_time_t(sTime));
+
             stmt = CharacterDatabase.CreateStatement(insSpellCD, "INSERT INTO pet_spell_cooldown (guid,spell,time) VALUES (?, ?, ?)");
-            stmt.PExecute(m_charmInfo->GetPetNumber(), itr->first, uint64(itr->second));
-            ++itr;
+            stmt.PExecute(m_charmInfo->GetPetNumber(), cdItr.first, spellExpireTime);
         }
     }
 }

@@ -189,7 +189,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit *pTarget)
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_MELEE);
 
     // Dwarves priests will try to buff with Fear Ward
-    if (FEAR_WARD > 0 && !m_bot->HasSpellCooldown(FEAR_WARD))
+    if (FEAR_WARD > 0 && m_bot->IsSpellReady(FEAR_WARD))
     {
         // Buff tank first
         if (pMainTank)
@@ -209,7 +209,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit *pTarget)
     Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
     if (newTarget && !m_ai->IsNeutralized(newTarget)) // TODO: && party has a tank
     {
-        if (FADE > 0 && !m_bot->HasAura(FADE, EFFECT_INDEX_0) && !m_bot->HasSpellCooldown(FADE))
+        if (FADE > 0 && !m_bot->HasAura(FADE, EFFECT_INDEX_0) && m_bot->IsSpellReady(FADE))
         {
             if (CastSpell(FADE, m_bot))
             {
@@ -238,7 +238,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit *pTarget)
             return RETURN_CONTINUE;
         }
         // Night Elves priest bot can also cast Elune's Grace to improve his/her dodge rating
-        if (ELUNES_GRACE && !m_bot->HasAura(ELUNES_GRACE, EFFECT_INDEX_0) && !m_bot->HasSpellCooldown(ELUNES_GRACE) && CastSpell(ELUNES_GRACE, m_bot))
+        if (ELUNES_GRACE && !m_bot->HasAura(ELUNES_GRACE, EFFECT_INDEX_0) && m_bot->IsSpellReady(ELUNES_GRACE) && CastSpell(ELUNES_GRACE, m_bot))
             return RETURN_CONTINUE;
 
         // If enemy comes in melee reach
@@ -299,7 +299,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 return RETURN_CONTINUE;
             if (SHADOW_WORD_PAIN > 0 && m_ai->In_Reach(pTarget,SHADOW_WORD_PAIN) && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && CastSpell(SHADOW_WORD_PAIN, pTarget))
                 return RETURN_CONTINUE;
-            if (MIND_BLAST > 0 && m_ai->In_Reach(pTarget,MIND_BLAST) && (!m_bot->HasSpellCooldown(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
+            if (MIND_BLAST > 0 && m_ai->In_Reach(pTarget,MIND_BLAST) && (m_bot->IsSpellReady(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
                 return RETURN_CONTINUE;
             if (MIND_FLAY > 0 && m_ai->In_Reach(pTarget,MIND_FLAY) && CastSpell(MIND_FLAY, pTarget))
             {
@@ -321,7 +321,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit *pTarget)
     }
 
     // No spec due to low level OR no spell found yet
-    if (MIND_BLAST > 0 && m_ai->In_Reach(pTarget,MIND_BLAST) && (!m_bot->HasSpellCooldown(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
+    if (MIND_BLAST > 0 && m_ai->In_Reach(pTarget,MIND_BLAST) && (m_bot->IsSpellReady(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
         return RETURN_CONTINUE;
     if (SHADOW_WORD_PAIN > 0 && m_ai->In_Reach(pTarget,SHADOW_WORD_PAIN) && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && CastSpell(SHADOW_WORD_PAIN, pTarget))
         return RETURN_CONTINUE;
@@ -429,7 +429,7 @@ CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
 
     // Get a free and more efficient heal if needed: low mana for bot or average health for target
     if (m_ai->IsInCombat() && (hp < 50 || m_ai->GetManaPercent() < 40))
-        if (INNER_FOCUS > 0 && !m_bot->HasSpellCooldown(INNER_FOCUS) && !m_bot->HasAura(INNER_FOCUS, EFFECT_INDEX_0) && CastSpell(INNER_FOCUS, m_bot))
+        if (INNER_FOCUS > 0 && m_bot->IsSpellReady(INNER_FOCUS) && !m_bot->HasAura(INNER_FOCUS, EFFECT_INDEX_0) && CastSpell(INNER_FOCUS, m_bot))
             return RETURN_CONTINUE;
 
     if (hp < 25 && POWER_WORD_SHIELD > 0 && m_ai->In_Reach(target,POWER_WORD_SHIELD) && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0) && !target->HasAura(WEAKNED_SOUL,EFFECT_INDEX_0) && m_ai->CastSpell(POWER_WORD_SHIELD, *target))

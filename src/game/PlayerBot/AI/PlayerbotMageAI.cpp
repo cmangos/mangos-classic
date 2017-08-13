@@ -200,11 +200,11 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit *pTarget)
                 }
 
                 // Things are getting dire: cast Ice block
-                if (ICE_BLOCK > 0 && !m_bot->HasSpellCooldown(ICE_BLOCK) && m_ai->GetHealthPercent() < 30 && !m_bot->HasAura(ICE_BLOCK, EFFECT_INDEX_0) && m_ai->CastSpell(ICE_BLOCK))
+                if (ICE_BLOCK > 0 && m_bot->IsSpellReady(ICE_BLOCK) && m_ai->GetHealthPercent() < 30 && !m_bot->HasAura(ICE_BLOCK, EFFECT_INDEX_0) && m_ai->CastSpell(ICE_BLOCK))
                     return RETURN_CONTINUE;
 
                 // Cast Ice Barrier if health starts to goes low
-                if (ICE_BARRIER > 0 && !m_bot->HasSpellCooldown(ICE_BARRIER) && m_ai->GetHealthPercent() < 50 && !m_bot->HasAura(ICE_BARRIER) && m_ai->SelfBuff(ICE_BARRIER))
+                if (ICE_BARRIER > 0 && m_bot->IsSpellReady(ICE_BARRIER) && m_ai->GetHealthPercent() < 50 && !m_bot->HasAura(ICE_BARRIER) && m_ai->SelfBuff(ICE_BARRIER))
                     return RETURN_CONTINUE;
 
                 // Have threat, can't quickly lower it. 3 options remain: Stop attacking, lowlevel damage (wand), keep on keeping on.
@@ -220,7 +220,7 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit *pTarget)
     }
 
     // Mana check and replenishment
-    if (EVOCATION && m_ai->GetManaPercent() <= 10 && !m_bot->HasSpellCooldown(EVOCATION) && !newTarget && m_ai->SelfBuff(EVOCATION))
+    if (EVOCATION && m_ai->GetManaPercent() <= 10 && m_bot->IsSpellReady(EVOCATION) && !newTarget && m_ai->SelfBuff(EVOCATION))
         return RETURN_CONTINUE;
     if (m_ai->GetManaPercent() <= 20)
     {
@@ -230,12 +230,12 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit *pTarget)
     }
 
     // If bot has frost/fire resist order use Frost/Fire Ward when available
-    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FROST && FROST_WARD && !m_bot->HasSpellCooldown(FROST_WARD) && m_ai->SelfBuff(FROST_WARD))
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FROST && FROST_WARD && m_bot->IsSpellReady(FROST_WARD) && m_ai->SelfBuff(FROST_WARD))
         return RETURN_CONTINUE;
-    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FIRE && FIRE_WARD && !m_bot->HasSpellCooldown(FIRE_WARD) && m_ai->SelfBuff(FIRE_WARD))
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FIRE && FIRE_WARD && m_bot->IsSpellReady(FIRE_WARD) && m_ai->SelfBuff(FIRE_WARD))
         return RETURN_CONTINUE;
 
-    if (COUNTERSPELL > 0 && !m_bot->HasSpellCooldown(COUNTERSPELL) && pTarget->IsNonMeleeSpellCasted(true) && CastSpell(COUNTERSPELL, pTarget))
+    if (COUNTERSPELL > 0 && m_bot->IsSpellReady(COUNTERSPELL) && pTarget->IsNonMeleeSpellCasted(true) && CastSpell(COUNTERSPELL, pTarget))
         return RETURN_CONTINUE;
 
     // If Clearcasting is active, cast arcane missiles
@@ -250,9 +250,9 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit *pTarget)
     switch (spec)
     {
         case MAGE_SPEC_FROST:
-            if (COLD_SNAP && !m_bot->HasSpellCooldown(COLD_SNAP) && CheckFrostCooldowns() > 2 && m_ai->SelfBuff(COLD_SNAP))  // Clear frost spell cooldowns if bot has more than 2 active
+            if (COLD_SNAP && m_bot->IsSpellReady(COLD_SNAP) && CheckFrostCooldowns() > 2 && m_ai->SelfBuff(COLD_SNAP))  // Clear frost spell cooldowns if bot has more than 2 active
                 return RETURN_CONTINUE;
-            if (CONE_OF_COLD > 0 && !m_bot->HasSpellCooldown(CONE_OF_COLD) && meleeReach)
+            if (CONE_OF_COLD > 0 && m_bot->IsSpellReady(CONE_OF_COLD) && meleeReach)
             {
                 // Cone of Cold does not require a target, so ensure that the bot faces the current one before casting
                 m_ai->FaceTarget(pTarget);
@@ -261,7 +261,7 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit *pTarget)
             }
             if (FROSTBOLT > 0 && m_ai->In_Reach(pTarget,FROSTBOLT) && !pTarget->HasAura(FROSTBOLT, EFFECT_INDEX_0) && CastSpell(FROSTBOLT, pTarget))
                 return RETURN_CONTINUE;
-            if (FROST_NOVA > 0 && !m_bot->HasSpellCooldown(FROST_NOVA) && meleeReach && !pTarget->HasAura(FROST_NOVA, EFFECT_INDEX_0) && CastSpell(FROST_NOVA, pTarget))
+            if (FROST_NOVA > 0 && m_bot->IsSpellReady(FROST_NOVA) && meleeReach && !pTarget->HasAura(FROST_NOVA, EFFECT_INDEX_0) && CastSpell(FROST_NOVA, pTarget))
                 return RETURN_CONTINUE;
             // Default frost spec action
             if (FROSTBOLT > 0 && m_ai->In_Reach(pTarget,FROSTBOLT))
@@ -296,7 +296,7 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit *pTarget)
             if (FIREBALL > 0 && !pTarget->HasAura(FIREBALL, EFFECT_INDEX_1) && CastSpell(FIREBALL, pTarget))
                 return RETURN_CONTINUE;
             // 3 stacks of Scorch and fireball DoT: use fire blast if available
-            if (FIRE_BLAST > 0 && !m_bot->HasSpellCooldown(FIRE_BLAST) && CastSpell(FIRE_BLAST, pTarget))
+            if (FIRE_BLAST > 0 && m_bot->IsSpellReady(FIRE_BLAST) && CastSpell(FIRE_BLAST, pTarget))
                 return RETURN_CONTINUE;
             // All DoTs, cooldowns used, try to maximise scorch stacks (5) to get a even nicer crit% bonus
             if (IMPROVED_SCORCH > 0 && SCORCH > 0)
@@ -315,9 +315,9 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit *pTarget)
             break;
 
         case MAGE_SPEC_ARCANE:
-            if (ARCANE_POWER > 0 && !m_bot->HasSpellCooldown(ARCANE_POWER) && m_ai->IsElite(pTarget) && m_ai->CastSpell(ARCANE_POWER))    // Do not waste Arcane Power on normal NPCs as the bot is likely in a group
+            if (ARCANE_POWER > 0 && m_bot->IsSpellReady(ARCANE_POWER) && m_ai->IsElite(pTarget) && m_ai->CastSpell(ARCANE_POWER))    // Do not waste Arcane Power on normal NPCs as the bot is likely in a group
                 return RETURN_CONTINUE;
-            if (PRESENCE_OF_MIND > 0 && !m_bot->HasAura(PRESENCE_OF_MIND) && !m_bot->HasSpellCooldown(PRESENCE_OF_MIND) && m_ai->IsElite(pTarget) && m_ai->SelfBuff(PRESENCE_OF_MIND))
+            if (PRESENCE_OF_MIND > 0 && !m_bot->HasAura(PRESENCE_OF_MIND) && m_bot->IsSpellReady(PRESENCE_OF_MIND) && m_ai->IsElite(pTarget) && m_ai->SelfBuff(PRESENCE_OF_MIND))
                 return RETURN_CONTINUE;
             // If bot has presence of mind active, cast long casting time spells
             if (PRESENCE_OF_MIND && m_bot->HasAura(PRESENCE_OF_MIND))
@@ -331,7 +331,7 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit *pTarget)
             if (ARCANE_EXPLOSION > 0 && m_ai->GetAttackerCount() >= 3 && meleeReach && CastSpell(ARCANE_EXPLOSION, pTarget))
                 return RETURN_CONTINUE;
             // Default arcane spec actions (yes, two fire spells)
-            if (FIRE_BLAST > 0 && !m_bot->HasSpellCooldown(FIRE_BLAST) && CastSpell(FIRE_BLAST, pTarget))
+            if (FIRE_BLAST > 0 && m_bot->IsSpellReady(FIRE_BLAST) && CastSpell(FIRE_BLAST, pTarget))
                 return RETURN_CONTINUE;
             if (FIREBALL > 0 && m_ai->In_Reach(pTarget,FIREBALL))
                 return CastSpell(FIREBALL, pTarget);
@@ -368,15 +368,15 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVP(Unit* pTarget)
 uint8 PlayerbotMageAI::CheckFrostCooldowns()
 {
     uint8 uiFrostActiveCooldown = 0;
-    if (FROST_NOVA && m_bot->HasSpellCooldown(FROST_NOVA))
+    if (FROST_NOVA && !m_bot->IsSpellReady(FROST_NOVA))
         uiFrostActiveCooldown++;
-    if (ICE_BARRIER && m_bot->HasSpellCooldown(ICE_BARRIER))
+    if (ICE_BARRIER && !m_bot->IsSpellReady(ICE_BARRIER))
         uiFrostActiveCooldown++;
-    if (CONE_OF_COLD && m_bot->HasSpellCooldown(CONE_OF_COLD))
+    if (CONE_OF_COLD && !m_bot->IsSpellReady(CONE_OF_COLD))
         uiFrostActiveCooldown++;
-    if (ICE_BLOCK && m_bot->HasSpellCooldown(ICE_BLOCK))
+    if (ICE_BLOCK && !m_bot->IsSpellReady(ICE_BLOCK))
         uiFrostActiveCooldown++;
-    if (FROST_WARD && m_bot->HasSpellCooldown(FROST_WARD))
+    if (FROST_WARD && !m_bot->IsSpellReady(FROST_WARD))
         uiFrostActiveCooldown++;
 
     return uiFrostActiveCooldown;
@@ -431,7 +431,7 @@ void PlayerbotMageAI::DoNonCombatActions()
             return;
     }
 
-    if (COMBUSTION && !m_bot->HasSpellCooldown(COMBUSTION) && m_ai->SelfBuff(COMBUSTION))
+    if (COMBUSTION && m_bot->IsSpellReady(COMBUSTION) && m_ai->SelfBuff(COMBUSTION))
         return;
 
     // buff group
