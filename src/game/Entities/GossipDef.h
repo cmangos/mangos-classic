@@ -195,9 +195,16 @@ class GossipMenu
             return m_gItems[ Id ];
         }
 
-        GossipMenuItemData const& GetItemData(unsigned int indexId)
+        bool IsItemsDataEmpty() const { return m_gItemsData.empty(); }
+
+        GossipMenuItemData const* GetItemData(unsigned int indexId)
         {
-            return m_gItemsData[indexId];
+            if (indexId >= m_gItemsData.size())
+            {
+                sLog.outError("GossipMenu::GetItemData> indexId is out of bounds!");
+                return nullptr;
+            }
+            return &m_gItemsData[indexId];
         }
 
         uint32 MenuItemSender(unsigned int ItemId);

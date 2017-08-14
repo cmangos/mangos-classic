@@ -11174,21 +11174,24 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
         }
     }
 
-    GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
+    GossipMenuItemData const* pMenuData = gossipmenu.GetItemData(gossipListId);
     switch (gossipOptionId)
     {
         case GOSSIP_OPTION_GOSSIP:
         {
-            if (pMenuData.m_gAction_poi)
-                PlayerTalkClass->SendPointOfInterest(pMenuData.m_gAction_poi);
+            if (!pMenuData)
+                break;
+
+            if (pMenuData->m_gAction_poi)
+                PlayerTalkClass->SendPointOfInterest(pMenuData->m_gAction_poi);
 
             // send new menu || close gossip || stay at current menu
-            if (pMenuData.m_gAction_menu > 0)
+            if (pMenuData->m_gAction_menu > 0)
             {
-                PrepareGossipMenu(pSource, uint32(pMenuData.m_gAction_menu));
+                PrepareGossipMenu(pSource, uint32(pMenuData->m_gAction_menu));
                 SendPreparedGossip(pSource);
             }
-            else if (pMenuData.m_gAction_menu < 0)
+            else if (pMenuData->m_gAction_menu < 0)
             {
                 PlayerTalkClass->CloseGossip();
                 TalkedToCreature(pSource->GetEntry(), pSource->GetObjectGuid());
@@ -11317,12 +11320,12 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
 #endif
     }
 
-    if (pMenuData.m_gAction_script)
+    if (pMenuData && pMenuData->m_gAction_script)
     {
         if (pSource->GetTypeId() == TYPEID_UNIT)
-            GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, pSource, this, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE);
+            GetMap()->ScriptsStart(sGossipScripts, pMenuData->m_gAction_script, pSource, this, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE);
         else if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
-            GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, this, pSource, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET);
+            GetMap()->ScriptsStart(sGossipScripts, pMenuData->m_gAction_script, this, pSource, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET);
     }
 }
 
