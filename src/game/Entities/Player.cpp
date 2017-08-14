@@ -11022,17 +11022,24 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                 case GOSSIP_OPTION_TABARDDESIGNER:
                 case GOSSIP_OPTION_AUCTIONEER:
                     break;                                  // no checks
-#ifdef BUILD_PLAYERBOT
                 case GOSSIP_OPTION_BOT:
                 {
+#ifdef BUILD_PLAYERBOT
+                    if(botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false) && !pCreature->isInnkeeper())
+                    {
+                        ChatHandler(this).PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
+                        hasMenuItem = false;
+                        break;
+                    }
+
                     std::string reqQuestIds = botConfig.GetStringDefault("PlayerbotAI.BotguyQuests","");
                     uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost",0);
                     if((reqQuestIds == "" || requiredQuests(reqQuestIds.c_str())) && !pCreature->isInnkeeper() && this->GetMoney() >= cost)
                         pCreature->LoadBotMenu(this);
+#endif
                     hasMenuItem = false;
                     break;
                 }
-#endif
                 default:
                     sLog.outErrorDb("Creature entry %u have unknown gossip option %u for menu %u", pCreature->GetEntry(), gossipMenu.option_id, gossipMenu.menu_id);
                     hasMenuItem = false;
