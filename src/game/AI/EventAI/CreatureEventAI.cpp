@@ -659,6 +659,8 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 {
                     if (m_DynamicMovement)
                     {
+                        SetCombatMovement(false, true);
+
                         SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
 
                         if (spellInfo && !(spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT || spellInfo->rangeIndex == SPELL_RANGE_IDX_SELF_ONLY) && target != m_creature)
@@ -1236,6 +1238,12 @@ void CreatureEventAI::JustReachedHome()
 
 void CreatureEventAI::EnterEvadeMode()
 {
+    if (m_DynamicMovement)
+    {
+        m_DynamicMovement = false;
+        SetCombatMovement(!m_DynamicMovement);
+    }
+
     m_creature->RemoveAllAurasOnEvade();
     m_creature->DeleteThreatList();
     m_creature->CombatStop(true);
@@ -1489,8 +1497,12 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
         {
             if (m_creature->IsWithinLOSInMap(victim))
             {
-                if (m_LastSpellMaxRange && m_creature->IsInRange(victim, 0, (m_LastSpellMaxRange / 1.5f)))
-                    SetCombatMovement(false, true);
+                if (m_LastSpellMaxRange && m_creature->IsInRange(victim, 0, (m_LastSpellMaxRange / 1.5f)) &&
+                    m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+                {
+                    if(IsCombatMovement())
+                        SetCombatMovement(false, true);
+                }
                 else
                     SetCombatMovement(true, true);
             }
