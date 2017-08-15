@@ -179,10 +179,13 @@ void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=fals
 
     if (stopOrStartMovement && m_unit->getVictim())     // Only change current movement while in combat
     {
-        if (enable)
-            m_unit->GetMotionMaster()->MoveChase(m_unit->getVictim(), m_attackDistance, m_attackAngle);
-        else if (m_unit->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-            m_unit->StopMoving();
+        if (!m_unit->IsIncapacitated())
+        {
+            if (enable)
+                m_unit->GetMotionMaster()->MoveChase(m_unit->getVictim(), m_attackDistance, m_attackAngle, false);
+            else if (m_unit->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+                m_unit->StopMoving();
+        }
     }
 }
 
