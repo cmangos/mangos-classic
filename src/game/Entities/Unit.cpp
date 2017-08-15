@@ -10170,7 +10170,9 @@ bool Unit::TakePossessOf(Unit* possessed)
         player->UnsummonPetTemporaryIfAny();
 
         charmInfo->InitPossessCreateSpells();
-        possessed->AI()->SetReactState(REACT_PASSIVE);
+        // may not always have AI, when posessing a player for example
+        if(possessed->AI())
+            possessed->AI()->SetReactState(REACT_PASSIVE);
         charmInfo->SetCommandState(COMMAND_STAY);
         player->PossessSpellInitialize();
     }
