@@ -149,6 +149,7 @@ void FleeingMovementGenerator<Creature>::Finalize(Creature& owner) const
 {
     owner.SetWalk(!owner.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
     owner.clearUnitState(UNIT_STAT_FLEEING | UNIT_STAT_FLEEING_MOVE);
+    owner.SetFeared(false);
 }
 
 template<class T>
@@ -200,7 +201,7 @@ template bool FleeingMovementGenerator<Creature>::Update(Creature&, const uint32
 
 void TimedFleeingMovementGenerator::Finalize(Unit& owner)
 {
-    owner.clearUnitState(UNIT_STAT_FLEEING | UNIT_STAT_FLEEING_MOVE);
+    FleeingMovementGenerator<Creature>::Finalize((Creature&)owner);
     if (Unit* victim = owner.getVictim())
     {
         if (owner.isAlive())
