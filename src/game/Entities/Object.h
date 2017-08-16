@@ -824,7 +824,7 @@ class WorldObject : public Object
 
         virtual void InspectingLoot() {}
 
-        virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const { return true; }
+        virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const { return true; }
         virtual bool CanAssistSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const { return true; }
 
     protected:

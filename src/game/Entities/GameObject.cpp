@@ -1809,11 +1809,11 @@ bool GameObject::IsFriendlyTo(Unit const* unit) const
     return tester_faction->IsFriendlyTo(*target_faction);
 }
 
-bool GameObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo) const
+bool GameObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
 {
     Unit* owner = GetOwner();
     if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-        return owner->CanAttackSpell(target, spellInfo);
+        return owner->CanAttackSpell(target, spellInfo, isAOE);
 
     return true;
 }

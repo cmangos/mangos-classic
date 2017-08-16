@@ -1386,7 +1386,7 @@ class Unit : public WorldObject
         void SetImmuneToPlayer(bool state);
 
         // extensions of CanAttack and CanAssist API needed serverside
-        virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const override;
+        virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const override;
         virtual bool CanAssistSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const override;
 
         virtual bool CanAttackOnSight(Unit* target); // Used in MoveInLineOfSight checks

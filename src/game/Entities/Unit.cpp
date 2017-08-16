@@ -5449,7 +5449,7 @@ bool Unit::IsNeutralToAll() const
     return my_faction->IsNeutralToAll();
 }
 
-bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo) const
+bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
 {
     if (spellInfo)
     {
@@ -5458,7 +5458,36 @@ bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo) const
             return false;
     }
 
-    return CanAttack(target);
+    if (CanAttack(target))
+    {
+        if (isAOE)
+        {
+            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+            {
+                const Player* thisPlayer = GetBeneficiaryPlayer();
+                if (!thisPlayer)
+                    return true;
+
+                const Player* unitPlayer = target->GetBeneficiaryPlayer();
+                if (!unitPlayer)
+                    return true;
+
+                if (thisPlayer->IsInDuelWith(unitPlayer))
+                    return true;
+
+                if (unitPlayer->IsPvP() && (!isAOE || thisPlayer->IsPvP()))
+                    return true;
+
+                if (thisPlayer->IsPvPFreeForAll() && unitPlayer->IsPvPFreeForAll())
+                    return true;
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+    else return false;
 }
 
 bool Unit::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const

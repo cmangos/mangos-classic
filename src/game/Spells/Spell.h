@@ -807,7 +807,7 @@ namespace MaNGOS
 
                         if (i_playerControlled)
                         {
-                            if (i_originalCaster->IsFriendlyTo(itr->getSource()))
+                            if (!i_originalCaster->CanAttackSpell(itr->getSource(), i_spell.m_spellInfo, true))
                                 continue;
                         }
                         else
