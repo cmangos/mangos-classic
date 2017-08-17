@@ -1401,6 +1401,8 @@ class Unit : public WorldObject
         }
         bool IsPvP() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
         void SetPvP(bool state);
+        bool IsPvPFreeForAll() const;
+        void SetPvPFreeForAll(bool state);
         uint32 GetCreatureType() const;
         uint32 GetCreatureTypeMask() const
         {

@@ -45,7 +45,7 @@ GroupMemberStatus GetGroupMemberStatus(const Player *member = nullptr)
             flags |= MEMBER_STATUS_DEAD;
         if (member->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
             flags |= MEMBER_STATUS_GHOST;
-        if (member->IsFFAPvP())
+        if (member->IsPvPFreeForAll())
             flags |= MEMBER_STATUS_PVP_FFA;
         if (member->isAFK())
             flags |= MEMBER_STATUS_AFK;
@@ -733,7 +733,7 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
                     player->m_InstanceValid = true;
         }
 
-        if (player->IsFFAPvP())
+        if (player->IsPvPFreeForAll())
         {
             player->ForceHealthAndPowerUpdate();
             for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())

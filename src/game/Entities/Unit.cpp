@@ -5270,7 +5270,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
             return false;
 
         // PvP FFA state
-        if (pTester->IsFFAPvP() && pTarget->IsFFAPvP())
+        if (pTester->IsPvPFreeForAll() && pTarget->IsPvPFreeForAll())
             return true;
 
         //= PvP states
@@ -5384,7 +5384,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
             return true;
 
         // PvP FFA state
-        if (pTester->IsFFAPvP() && pTarget->IsFFAPvP())
+        if (pTester->IsPvPFreeForAll() && pTarget->IsPvPFreeForAll())
             return false;
 
         //= PvP states
@@ -9659,6 +9659,32 @@ void Unit::SetPvP(bool state)
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_STATUS);
 
     CallForAllControlledUnits(SetPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+}
+
+bool Unit::IsPvPFreeForAll() const
+{
+    // Pre-WotLK free for all check (query player in charge)
+    if (const Player* thisPlayer = GetBeneficiaryPlayer())
+        return thisPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+    return false;
+}
+
+void Unit::SetPvPFreeForAll(bool state)
+{
+    // Pre-WotLK free for all set (for player only)
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        if (state)
+            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+        else
+            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+
+        Player* thisPlayer = static_cast<Player*>(this);
+        thisPlayer->ForceHealAndPowerUpdateInZone();
+        thisPlayer->ForceHealthAndPowerUpdate();
+        if (thisPlayer->GetGroup())
+            thisPlayer->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_STATUS);
+    }
 }
 
 struct StopAttackFactionHelper
