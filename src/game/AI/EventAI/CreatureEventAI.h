@@ -760,6 +760,7 @@ class CreatureEventAI : public CreatureAI
 
     protected:
         bool IsTimerBasedEvent(EventAI_Type type) const;
+        bool IsRepeatableEvent(EventAI_Type type) const;
 
         uint32 m_EventUpdateTime;                           // Time between event updates
         uint32 m_EventDiff;                                 // Time between the last event call
