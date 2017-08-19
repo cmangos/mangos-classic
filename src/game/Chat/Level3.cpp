@@ -793,9 +793,9 @@ bool ChatHandler::HandleReloadEventAIScriptsCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadDbScriptStringCommand(char* /*args*/)
 {
-    sLog.outString("Re-Loading Script strings from `db_script_string`...");
+    sLog.outString("Re-Loading Script strings from `dbscript_string`...");
     sScriptMgr.LoadDbScriptStrings();
-    SendGlobalSysMessage("DB table `db_script_string` reloaded.");
+    SendGlobalSysMessage("DB table `dbscript_string` reloaded.");
     return true;
 }
 

@@ -33,8 +33,7 @@ const char InstanceTemplatesrcfmt[] = "iiiiiiiffsl";
 const char InstanceTemplatedstfmt[] = "iiiiiiiffil";
 const char WorldTemplatesrcfmt[] = "is";
 const char WorldTemplatedstfmt[] = "ii";
-const char ConditionsSrcFmt[] = "iiii";
-const char ConditionsDstFmt[] = "iiii";
+const char ConditionsFmt[] = "iiiix";
 const char CreatureTemplateSpellsFmt[] = "iiiii";
 const char SpellScriptTargetFmt[] = "iiii";
 const char SpellEntryfmt[] = "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiifffiiiissssssssssssssssiiiiiLiiifffi";
@@ -49,7 +48,7 @@ SQLStorage sItemStorage(ItemPrototypesrcfmt, ItemPrototypedstfmt, "entry", "item
 SQLStorage sPageTextStore(PageTextfmt, "entry", "page_text");
 SQLStorage sInstanceTemplate(InstanceTemplatesrcfmt, InstanceTemplatedstfmt, "map", "instance_template");
 SQLStorage sWorldTemplate(WorldTemplatesrcfmt, WorldTemplatedstfmt, "map", "world_template");
-SQLStorage sConditionStorage(ConditionsSrcFmt, ConditionsDstFmt, "condition_entry", "conditions");
+SQLStorage sConditionStorage(ConditionsFmt, "condition_entry", "conditions");
 SQLStorage sSpellTemplate(SpellEntryfmt, "id", "spell_template");
 SQLStorage sDungeonEncounterStore(DungeonEncounterFmt, "id", "instance_dungeon_encounters");
 

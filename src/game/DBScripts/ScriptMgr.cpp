@@ -892,7 +892,7 @@ void ScriptMgr::LoadRelayScripts()
 
 void ScriptMgr::LoadDbScriptStrings()
 {
-    sObjectMgr.LoadMangosStrings(WorldDatabase, "db_script_string", MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID, true);
+    sObjectMgr.LoadMangosStrings(WorldDatabase, "dbscript_string", MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID, true);
 
     std::set<int32> ids;
 
@@ -916,7 +916,7 @@ void ScriptMgr::LoadDbScriptStrings()
     sWaypointMgr.CheckTextsExistance(ids);
 
     for (std::set<int32>::const_iterator itr = ids.begin(); itr != ids.end(); ++itr)
-        sLog.outErrorDb("Table `db_script_string` has unused string id %u", *itr);
+        sLog.outErrorDb("Table `dbscript_string` has unused string id %u", *itr);
 }
 
 void ScriptMgr::LoadDbScriptRandomTemplates()
@@ -974,7 +974,7 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32
                 for (int i = 0; i < MAX_TEXT_ID; ++i)
                 {
                     if (itrM->second.textId[i] && !sObjectMgr.GetMangosStringLocale(itrM->second.textId[i]))
-                        sLog.outErrorDb("Table `db_script_string` is missing string id %u, used in database script table %s id %u.", itrM->second.textId[i], scripts.first, itrMM->first);
+                        sLog.outErrorDb("Table `dbscript_string` is missing string id %u, used in database script table %s id %u.", itrM->second.textId[i], scripts.first, itrMM->first);
 
                     if (ids.find(itrM->second.textId[i]) != ids.end())
                         ids.erase(itrM->second.textId[i]);
@@ -986,7 +986,7 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32
                     for (auto& data : vector)
                     {
                         if(!sObjectMgr.GetMangosStringLocale(data.first))
-                            sLog.outErrorDb("Table `db_script_string` is missing string id %u, used in database script template table dbscript_string_template id %u.", data.first, itrM->second.talk.stringTemplateId);
+                            sLog.outErrorDb("Table `dbscript_string` is missing string id %u, used in database script template table dbscript_string_template id %u.", data.first, itrM->second.talk.stringTemplateId);
                     }
                 }
             }
