@@ -101,6 +101,8 @@ class WorldSocket : public MaNGOS::Socket
         ClientPktHeader m_existingHeader;
         bool m_useExistingHeader;
 
+        std::mutex m_packetSendLock; // mutex for SendPacket
+
         /// Class used for managing encryption of the headers
         AuthCrypt m_crypt;
 

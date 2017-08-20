@@ -64,6 +64,8 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
     if (IsClosed())
         return;
 
+    std::lock_guard<std::mutex> guard(m_packetSendLock);
+
     // Dump outgoing packet.
     sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct.GetOpcode(), pct.GetOpcodeName(), pct, false);
 
@@ -138,7 +140,7 @@ bool WorldSocket::ProcessIncomingData()
     if ((header.size < 4) || (header.size > 0x2800) || (header.cmd >= NUM_MSG_TYPES))
     {
         sLog.outError("WorldSocket::ProcessIncomingData: client sent malformed packet size = %u , cmd = %u", header.size, header.cmd);
-    
+
         errno = EINVAL;
         return false;
     }
