@@ -77,10 +77,10 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
 
     m_crypt.EncryptSend(reinterpret_cast<uint8 *>(&header), sizeof(header));
 
-    Write(reinterpret_cast<const char *>(&header), sizeof(header));
-
-    if (!!pct.size())
-        Write(reinterpret_cast<const char *>(pct.contents()), pct.size());
+    if (pct.size() > 0)
+        Write(reinterpret_cast<const char *>(&header), sizeof(header), reinterpret_cast<const char *>(pct.contents()), pct.size());
+    else
+        Write(reinterpret_cast<const char *>(&header), sizeof(header));
 
     if (immediate)
         ForceFlushOut();

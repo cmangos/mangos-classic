@@ -101,6 +101,7 @@ namespace MaNGOS
             void ReadSkip(int length) { m_inBuffer->Read(nullptr, length); }
 
             void Write(const char *buffer, int length);
+            void Write(const char *header, int headerSize, const char* content, int contentSize);
 
             boost::asio::ip::tcp::socket &GetAsioSocket() { return m_socket; }
 
