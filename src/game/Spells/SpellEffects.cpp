@@ -2098,18 +2098,6 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
         return;
     }
 
-    // mark item as unlocked
-    if (itemTarget)
-    {
-        itemTarget->SetFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED);
-
-        // only send loot if owner is player, else client sends release anyway
-        if (itemTarget->GetOwnerGuid() == m_caster->GetObjectGuid())
-            SendLoot(guid, LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]));
-    }
-    else
-        SendLoot(guid, LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]));
-
     // not allow use skill grow at item base open
     if (!m_CastItem && skillId != SKILL_NONE)
     {
@@ -2130,6 +2118,18 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
             }
         }
     }
+
+    // mark item as unlocked
+    if (itemTarget)
+    {
+        itemTarget->SetFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED);
+
+        // only send loot if owner is player, else client sends release anyway
+        if (itemTarget->GetOwnerGuid() == m_caster->GetObjectGuid())
+            SendLoot(guid, LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]));
+    }
+    else
+        SendLoot(guid, LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]));
 }
 
 void Spell::EffectSummonChangeItem(SpellEffectIndex eff_idx)
