@@ -507,7 +507,7 @@ bool Unit::UpdateMeleeAttackingState()
     if (GetTypeId() != TYPEID_PLAYER && (!((Creature*)this)->CanInitiateAttack() || !victim->isInAccessablePlaceFor((Creature*)this)))
         return false;
  
-    if (!CanAttack(victim) || !IsHostileTo(victim))
+    if (!CanAttack(victim))
         return false;
  
     if (!isAttackReady(BASE_ATTACK) && !(isAttackReady(OFF_ATTACK) && haveOffhandWeapon()))

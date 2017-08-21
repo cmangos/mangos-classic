@@ -13251,7 +13251,7 @@ void Player::SendQuestGiverStatusMultiple() const
             // need also pet quests case support
             Creature* questgiver = GetMap()->GetAnyTypeCreature(*itr);
 
-            if (!questgiver || questgiver->IsHostileTo(this))
+            if (!questgiver || !questgiver->CanInteract(this))
                 continue;
 
             if (!questgiver->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
@@ -18165,7 +18165,7 @@ Player* Player::GetNextRandomRaidMember(float radius)
 
         // IsHostileTo check duel and controlled by enemy
         if (Target && Target != this && IsWithinDistInMap(Target, radius) &&
-                !Target->HasInvisibilityAura() && !IsHostileTo(Target))
+                !Target->HasInvisibilityAura() && CanAssist(Target))
             nearMembers.push_back(Target);
     }
 

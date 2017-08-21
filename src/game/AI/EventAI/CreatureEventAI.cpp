@@ -1401,8 +1401,8 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
                 float fMaxAllowedRange = (float)itr->Event.ooc_los.maxRange;
 
                 // if friendly event && who is not hostile OR hostile event && who is hostile
-                if ((itr->Event.ooc_los.noHostile && !m_creature->IsHostileTo(who)) ||
-                    ((!itr->Event.ooc_los.noHostile) && m_creature->IsHostileTo(who)))
+                if ((itr->Event.ooc_los.noHostile && !m_creature->IsEnemy(who)) ||
+                    ((!itr->Event.ooc_los.noHostile) && m_creature->IsEnemy(who)))
                 {
                     // if range is ok and we are actually in LOS
                     if (m_creature->IsWithinDistInMap(who, fMaxAllowedRange) && m_creature->IsWithinLOSInMap(who))

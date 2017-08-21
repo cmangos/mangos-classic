@@ -33,22 +33,63 @@ GuardAI::GuardAI(Creature* c) : CreatureAI(c), i_state(STATE_NORMAL), i_tracker(
 {
 }
 
-void GuardAI::MoveInLineOfSight(Unit* u)
+void GuardAI::MoveInLineOfSight(Unit* who)
 {
     // Ignore Z for flying creatures
-    if (!m_creature->CanFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE)
+    if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
         return;
 
-    if (!m_creature->getVictim() && m_creature->CanAttackOnSight(u) &&
-            (u->IsHostileToPlayers() || m_creature->IsHostileTo(u) /*|| u->getVictim() && m_creature->IsFriendlyTo(u->getVictim())*/) &&
-            u->isInAccessablePlaceFor(m_creature))
+    if (m_creature->getVictim())
+        return;
+
+    if (who->IsFriendlyTo(m_creature) && who->isInCombat())
     {
-        float attackRadius = m_creature->GetAttackDistance(u);
-        if (m_creature->IsWithinDistInMap(u, attackRadius))
+        Unit* victim = who->getAttackerForHelper();
+
+        if (!victim)
+            return;
+
+        if (victim->IsFriendlyTo(m_creature))
+            return;
+
+        if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(victim) && victim->isInAccessablePlaceFor(m_creature))
         {
-            // Need add code to let guard support player
-            AttackStart(u);
-            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            if (who->GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() != TYPEID_PLAYER)
+            {
+                if (m_creature->IsWithinDistInMap(who, 5.0) && m_creature->IsWithinDistInMap(victim, 10.0) && m_creature->IsWithinLOSInMap(victim))
+                {
+                    AttackStart(victim);
+                }
+            }
+            else if (who->GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() == TYPEID_PLAYER || victim->GetObjectGuid().IsCreature() && ((Creature*)victim)->IsPet() && ((Creature*)victim)->GetOwnerGuid().IsPlayer())
+            {
+                if (m_creature->IsWithinDistInMap(who, 30.0) && m_creature->IsWithinLOSInMap(who))
+                {
+                    AttackStart(victim);
+                }
+            }
+            else if (who->GetObjectGuid().IsCreature())
+            {
+                if (((Creature*)who)->IsGuard() || ((Creature*)who)->IsCivilian())
+                {
+                    if (m_creature->IsWithinDistInMap(who, 20.0) && m_creature->IsWithinLOSInMap(who))
+                    {
+                        AttackStart(victim);
+                    }
+                }
+
+            }
+        }
+    }
+    else
+    {
+        if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(who) && who->isInAccessablePlaceFor(m_creature))
+        {
+            float attackRadius = m_creature->GetAttackDistance(who);
+            if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->IsWithinLOSInMap(who))
+            {
+                AttackStart(who);
+            }
         }
     }
 }
