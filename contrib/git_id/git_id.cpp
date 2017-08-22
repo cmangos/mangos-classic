@@ -216,7 +216,12 @@ bool fetch_origin()
 
 bool check_fwd()
 {
-    snprintf(cmd, MAX_CMD, "git log -n 1 --pretty=\"format:%%H\" %s/%s", (origins[1][0] ? origins[1] : origins[0]), remote_branch);
+    int i;
+    for (i = 0; i < MAX_REMOTE; i++)
+        if (origins[i][0])
+            break;
+
+    snprintf(cmd, MAX_CMD, "git log -n 1 --pretty=\"format:%%H\" %s/%s", origins[i], remote_branch);
     if ((cmd_pipe = popen(cmd, "r")) == NULL)
         return false;
 
