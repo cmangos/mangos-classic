@@ -805,16 +805,8 @@ namespace MaNGOS
                         if (itr->getSource()->GetTypeId() == TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem())
                             continue;
 
-                        if (i_playerControlled)
-                        {
-                            if (!i_originalCaster->CanAttackSpell(itr->getSource(), i_spell.m_spellInfo, true))
-                                continue;
-                        }
-                        else
-                        {
-                            if (!i_originalCaster->IsHostileTo(itr->getSource()))
-                                continue;
-                        }
+                        if (!i_originalCaster->CanAttackSpell(itr->getSource(), i_spell.m_spellInfo, true))
+                            continue;
                     }
                     break;
                     case SPELL_TARGETS_ALL:

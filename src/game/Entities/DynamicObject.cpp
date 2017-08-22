@@ -218,3 +218,19 @@ bool DynamicObject::IsFriendlyTo(Unit const* unit) const
     else
         return true;
 }
+
+bool DynamicObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
+{
+    if (Unit* owner = GetCaster())
+        return owner->CanAttackSpell(target, spellInfo, isAOE);
+    else
+        return false;
+}
+
+bool DynamicObject::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
+{
+    if (Unit* owner = GetCaster())
+        return owner->CanAttackSpell(target, spellInfo);
+    else
+        return false;
+}

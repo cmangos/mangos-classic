@@ -5459,27 +5459,32 @@ bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE)
     {
         if (isAOE)
         {
-            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
             {
-                const Player* thisPlayer = GetBeneficiaryPlayer();
-                if (!thisPlayer)
-                    return true;
+                if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                {
+                    const Player* thisPlayer = GetBeneficiaryPlayer();
+                    if (!thisPlayer)
+                        return true;
 
-                const Player* unitPlayer = target->GetBeneficiaryPlayer();
-                if (!unitPlayer)
-                    return true;
+                    const Player* unitPlayer = target->GetBeneficiaryPlayer();
+                    if (!unitPlayer)
+                        return true;
 
-                if (thisPlayer->IsInDuelWith(unitPlayer))
-                    return true;
+                    if (thisPlayer->IsInDuelWith(unitPlayer))
+                        return true;
 
-                if (unitPlayer->IsPvP() && (!isAOE || thisPlayer->IsPvP()))
-                    return true;
+                    if (unitPlayer->IsPvP() && (!isAOE || thisPlayer->IsPvP()))
+                        return true;
 
-                if (thisPlayer->IsPvPFreeForAll() && unitPlayer->IsPvPFreeForAll())
-                    return true;
+                    if (thisPlayer->IsPvPFreeForAll() && unitPlayer->IsPvPFreeForAll())
+                        return true;
 
-                return false;
+                    return false;
+                }
             }
+            else
+                return IsEnemy(target); // non player controlled can only hit hostiles with AOE
         }
 
         return true;
