@@ -1324,7 +1324,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
                 realCaster->SetInCombatWithVictim(unit);
             }
         }
-        else if(realCaster->CanAssist(unit))
+        else if(realCaster->CanCooperate(unit))
         {
             // assisting case, healing and resurrection
             if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
