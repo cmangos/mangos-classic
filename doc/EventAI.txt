@@ -1008,6 +1008,8 @@ Target types are used by certain actions and may effect actions differently
 10   TARGET_T_EVENT_SENDER              Creature who sent a received AIEvent - only triggered by EVENT_T_RECEIVE_AI_EVENT
 11   TARGET_T_SUMMONER                  Summoner of given Unit if it has one
 12   TARGET_T_EVENT_SPECIFIC            Filled by Event - EVENT_T_SELECT_ATTACKING_TARGET fills target selected
+13   TARGET_T_PLAYER_INVOKER            Player who initiated hostile contact with this npc
+14   TARGET_T_PLAYER_TAPPED             Player who currently holds the kill credit for the npc
 
 =========================================
 Cast Flags

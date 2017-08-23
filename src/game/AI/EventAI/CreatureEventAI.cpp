@@ -1620,6 +1620,26 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoke
             if (!m_eventTarget)
                 isError = true;
             return m_eventTarget;
+        case TARGET_T_PLAYER_INVOKER:
+        {
+            if (!m_creature->HasLootRecipient())
+            {
+                isError = true;
+                return nullptr;
+            }
+
+            return m_creature->GetOriginalLootRecipient();
+        }
+        case TARGET_T_PLAYER_TAPPED:
+        {
+            if (!m_creature->HasLootRecipient())
+            {
+                isError = true;
+                return nullptr;
+            }
+
+            return m_creature->GetLootRecipient();
+        }
         default:
             isError = true;
             return nullptr;

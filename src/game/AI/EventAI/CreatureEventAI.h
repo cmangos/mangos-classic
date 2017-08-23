@@ -163,6 +163,10 @@ enum Target
 
     // Event specific targeting
     TARGET_T_EVENT_SPECIFIC                 = 12,           // Filled by specific event
+
+    // Player associations
+    TARGET_T_PLAYER_INVOKER                 = 13,           // Player who initiated hostile contact with this npc
+    TARGET_T_PLAYER_TAPPED                  = 14,           // Player who currently holds to score the kill credit from the npc
 };
 
 enum EventFlags
