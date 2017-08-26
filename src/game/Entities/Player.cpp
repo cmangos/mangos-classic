@@ -2080,19 +2080,10 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask)
             return nullptr;
     }
 
-    // if a dead unit should be able to talk - the creature must be alive and have special flags
-    if (!unit->isAlive())
+    if (!CanInteractNow(unit))
         return nullptr;
 
     if (isAlive() && unit->isInvisibleForAlive())
-        return nullptr;
-
-    // not allow interaction under control, but allow with own pets
-    if (unit->GetCharmerGuid())
-        return nullptr;
-
-    // not enemy
-    if (unit->IsHostileTo(this))
         return nullptr;
 
     // not too far
