@@ -950,12 +950,12 @@ bool ChatHandler::HandleReloadDBScriptsOnRelayCommand(char* args)
     }
 
     if (*args != 'a')
-        sLog.outString("Re-Loading Scripts from `dbscripts_on_quest_end`...");
+        sLog.outString("Re-Loading Scripts from `dbscripts_on_relay`...");
 
-    sScriptMgr.LoadQuestEndScripts();
+    sScriptMgr.LoadRelayScripts();
 
     if (*args != 'a')
-        SendGlobalSysMessage("DB table `dbscripts_on_quest_end` reloaded.");
+        SendGlobalSysMessage("DB table `dbscripts_on_relay` reloaded.");
 
     return true;
 }
