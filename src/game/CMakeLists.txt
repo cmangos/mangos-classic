@@ -27,7 +27,7 @@ include_directories(SYSTEM
   ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour
   ${CMAKE_SOURCE_DIR}/dep/recastnavigation
   ${CMAKE_SOURCE_DIR}/dep/include
-  ${CMAKE_SOURCE_DIR}/dep
+  ${ZLIB_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIR}
 )
 

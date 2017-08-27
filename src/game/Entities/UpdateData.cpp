@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <zlib.h>
+
 #include "Common.h"
 #include "Entities/UpdateData.h"
 #include "ByteBuffer.h"
@@ -24,7 +26,6 @@
 #include "Server/Opcodes.h"
 #include "World/World.h"
 #include "Entities/ObjectGuid.h"
-#include <zlib/zlib.h>
 
 UpdateData::UpdateData() : m_blockCount(0)
 {
