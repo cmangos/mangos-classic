@@ -569,7 +569,7 @@ bool ChatHandler::HandleServerLogLevelCommand(char* args)
 
 /// @}
 
-#ifdef linux
+#ifdef __linux__
 // Non-blocking keypress detector, when return pressed, return 1, else always return 0
 int kb_hit_return()
 {
@@ -589,6 +589,13 @@ void CliRunnable::run()
 {
     ///- Init new SQL thread for the world database (one connection call enough)
     WorldDatabase.ThreadStart();                            // let thread do safe mySQL requests
+
+    // Get a timespec for the nanosleep
+#ifdef __linux__
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = 100000;
+#endif
 
     char commandbuf[256];
 
@@ -614,12 +621,15 @@ void CliRunnable::run()
     while (!World::IsStopped())
     {
         fflush(stdout);
-#ifdef linux
+#ifdef __linux__
         while (!kb_hit_return() && !World::IsStopped())
+        {
             // With this, we limit CLI to 10commands/second
-            usleep(100);
-        if (World::IsStopped())
-            break;
+            nanosleep(&ts, &ts);
+            // Check for world stoppage after each sleep interval
+            if (World::IsStopped())
+                break;
+        }
 #endif
         char* command_str = fgets(commandbuf, sizeof(commandbuf), stdin);
         if (command_str != nullptr)
