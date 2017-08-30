@@ -149,21 +149,20 @@ if(WIN32)
   endif()
 
   # Define install rules for provided libs
-  install(
-    FILES
-      ${DEV_PROVIDED_LIBS_FOLDER}/libcrypto-1_1.dll
-      ${DEV_PROVIDED_LIBS_FOLDER}/libmySQL.dll
+  set(BIN_LIBS ${DEV_PROVIDED_LIBS_FOLDER}/libmySQL.dll)
+  if(PLATFORM MATCHES X86)
+    if(MSVC)
+      # Only MSVC. TODO:: check why x64 is not provided
+      set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/dbghelp.dll)
+    endif()
+    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/libcrypto-1_1.dll)
+  else()
+    set(BIN_LIBS ${BIN_LIBS} ${DEV_PROVIDED_LIBS_FOLDER}/libcrypto-1_1-x64.dll)
+  endif()
+  install(FILES
+      ${BIN_LIBS}
     DESTINATION ${LIBS_DIR}
   )
-
-  # TODO:: check why x64 is not provided
-  if(PLATFORM MATCHES X86)
-    install(
-      FILES
-        ${DEV_PROVIDED_LIBS_FOLDER}/dbghelp.dll
-      DESTINATION ${LIBS_DIR}
-    )
-  endif()
 endif()
 
 # For Unix systems set the rpath so that libraries are found
@@ -220,8 +219,8 @@ if(WIN32)
   set(MYSQL_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmySQL.lib")
   set(MYSQL_DEBUG_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmySQL.lib")
   set(OPENSSL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/lib/include")
-  set(OPENSSL_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libcrypto.lib")
-  set(OPENSSL_DEBUG_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libcrypto.lib")
+  set(OPENSSL_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libcrypto.dll.lib")
+  set(OPENSSL_DEBUG_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libcrypto.dll.lib")
   set(ZLIB_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/dep/zlib")
   set(ZLIB_LIBRARIES "z")
   set(BZIP2_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/dep/src/bzip2")
