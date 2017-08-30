@@ -569,7 +569,7 @@ bool ChatHandler::HandleServerLogLevelCommand(char* args)
 
 /// @}
 
-#ifdef linux
+#ifdef __unix__
 // Non-blocking keypress detector, when return pressed, return 1, else always return 0
 int kb_hit_return()
 {
@@ -602,7 +602,7 @@ void CliRunnable::run()
     // later it will be printed after command queue updates
     printf("mangos>");
 
-#ifdef __linux__
+#ifdef __unix__
     //Set stdin IO to nonblocking - prevent Server from hanging in shutdown process till enter is pressed
     int fd = fileno(stdin);  
     int flags = fcntl(fd, F_GETFL, 0); 
@@ -614,12 +614,15 @@ void CliRunnable::run()
     while (!World::IsStopped())
     {
         fflush(stdout);
-#ifdef linux
+#ifdef __unix__
         while (!kb_hit_return() && !World::IsStopped())
+        {
             // With this, we limit CLI to 10commands/second
-            usleep(100);
-        if (World::IsStopped())
-            break;
+            std::this_thread::sleep_for(std::chrono::nanoseconds(100000));
+            // Check for world stoppage after each sleep interval
+            if (World::IsStopped())
+                break;
+        }
 #endif
         char* command_str = fgets(commandbuf, sizeof(commandbuf), stdin);
         if (command_str != nullptr)
