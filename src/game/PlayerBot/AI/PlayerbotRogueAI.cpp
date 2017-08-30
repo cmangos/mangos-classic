@@ -216,18 +216,18 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit *pTarget)
         // Aggroed by an elite
         if (m_ai->IsElite(newTarget))
         {
-            if (VANISH > 0 && m_ai->GetHealthPercent() <= 20 && !m_bot->HasSpellCooldown(VANISH) && !m_bot->HasAura(FEINT, EFFECT_INDEX_0) && m_ai->CastSpell(VANISH))
+            if (VANISH > 0 && m_ai->GetHealthPercent() <= 20 && m_bot->IsSpellReady(VANISH) && !m_bot->HasAura(FEINT, EFFECT_INDEX_0) && m_ai->CastSpell(VANISH))
             {
                 m_ai->SetIgnoreUpdateTime(11);
                 return RETURN_CONTINUE;
             }
             if (BLIND > 0 && m_ai->GetHealthPercent() <= 30 && m_ai->HasSpellReagents(BLIND) && !newTarget->HasAura(BLIND, EFFECT_INDEX_0) && m_ai->CastSpell(BLIND, *newTarget))
                 return RETURN_CONTINUE;
-            if (EVASION > 0 && m_ai->GetHealthPercent() <= 35 && !m_bot->HasSpellCooldown(EVASION) && !m_bot->HasAura(EVASION, EFFECT_INDEX_0) && m_ai->CastSpell(EVASION))
+            if (EVASION > 0 && m_ai->GetHealthPercent() <= 35 && m_bot->IsSpellReady(EVASION) && !m_bot->HasAura(EVASION, EFFECT_INDEX_0) && m_ai->CastSpell(EVASION))
                 return RETURN_CONTINUE;
-            if (FEINT > 0 && !m_bot->HasSpellCooldown(FEINT) && m_ai->CastSpell(FEINT, *newTarget))
+            if (FEINT > 0 && m_bot->IsSpellReady(FEINT) && m_ai->CastSpell(FEINT, *newTarget))
                 return RETURN_CONTINUE;
-            if (PREPARATION > 0 && !m_bot->HasSpellCooldown(PREPARATION) && (m_bot->HasSpellCooldown(EVASION) || m_bot->HasSpellCooldown(VANISH)) && m_ai->CastSpell(PREPARATION))
+            if (PREPARATION > 0 && m_bot->IsSpellReady(PREPARATION) && (!m_bot->IsSpellReady(EVASION) || !m_bot->IsSpellReady(VANISH)) && m_ai->CastSpell(PREPARATION))
                 return RETURN_CONTINUE;
         }
 
@@ -239,7 +239,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit *pTarget)
     // Buff bot with cold blood if available
     // This buff is done after the stealth and aggro management code because we don't want to give starting extra damage (= extra threat) to a bot
     // as it is obviously not soloing his/her target
-    if (COLD_BLOOD > 0 && !m_bot->HasAura(COLD_BLOOD, EFFECT_INDEX_0) && !m_bot->HasSpellCooldown(COLD_BLOOD) && m_ai->CastSpell(COLD_BLOOD, *m_bot))
+    if (COLD_BLOOD > 0 && !m_bot->HasAura(COLD_BLOOD, EFFECT_INDEX_0) && m_bot->IsSpellReady(COLD_BLOOD) && m_ai->CastSpell(COLD_BLOOD, *m_bot))
             return RETURN_CONTINUE;
 
     // Rogue like behaviour ^^
@@ -256,15 +256,15 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit *pTarget)
         return RETURN_CONTINUE;
 
     // If target is elite and wounded: use adrenaline rush to finish it quicker
-    if (ADRENALINE_RUSH > 0 && m_ai->IsElite(pTarget) && pTarget->GetHealthPercent() < 50 && !m_bot->HasAura(ADRENALINE_RUSH, EFFECT_INDEX_0) && !m_bot->HasSpellCooldown(ADRENALINE_RUSH) && m_ai->CastSpell(ADRENALINE_RUSH, *m_bot))
+    if (ADRENALINE_RUSH > 0 && m_ai->IsElite(pTarget) && pTarget->GetHealthPercent() < 50 && !m_bot->HasAura(ADRENALINE_RUSH, EFFECT_INDEX_0) && m_bot->IsSpellReady(ADRENALINE_RUSH) && m_ai->CastSpell(ADRENALINE_RUSH, *m_bot))
         return RETURN_CONTINUE;
 
     // Bot's target is casting a spell: try to interrupt it
     if (pTarget->IsNonMeleeSpellCasted(true))
     {
-        if (KIDNEY_SHOT > 0 && !m_bot->HasSpellCooldown(KIDNEY_SHOT) && m_bot->GetComboPoints() >= 1 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget))
+        if (KIDNEY_SHOT > 0 && m_bot->IsSpellReady(KIDNEY_SHOT) && m_bot->GetComboPoints() >= 1 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget))
             return RETURN_CONTINUE;
-        else if (KICK > 0 && !m_bot->HasSpellCooldown(KICK) && m_ai->CastSpell(KICK, *pTarget))
+        else if (KICK > 0 && m_bot->IsSpellReady(KICK) && m_ai->CastSpell(KICK, *pTarget))
             return RETURN_CONTINUE;
     }
 
@@ -304,7 +304,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit *pTarget)
             return RETURN_CONTINUE;
     if (BACKSTAB > 0 && !pTarget->HasInArc(M_PI_F, m_bot) && m_ai->CastSpell(BACKSTAB, *pTarget))
             return RETURN_CONTINUE;
-    if (GHOSTLY_STRIKE > 0 && !m_bot->HasSpellCooldown(GHOSTLY_STRIKE) && m_ai->CastSpell(GHOSTLY_STRIKE, *pTarget))
+    if (GHOSTLY_STRIKE > 0 && m_bot->IsSpellReady(GHOSTLY_STRIKE) && m_ai->CastSpell(GHOSTLY_STRIKE, *pTarget))
             return RETURN_CONTINUE;
     if (SINISTER_STRIKE > 0 && m_ai->CastSpell(SINISTER_STRIKE, *pTarget))
             return RETURN_CONTINUE;

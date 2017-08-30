@@ -243,7 +243,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 return;
             }
 
-            if (petUnit->GetCharmInfo() && petUnit->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+            if (!petUnit->IsSpellReady(*spellInfo))
                 return;
 
             for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -317,9 +317,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
             if (result == SPELL_CAST_OK)
             {
-                if (creature)
-                    creature->AddCreatureSpellCooldown(spellid);
-
                 unit_target = spell->m_targets.getUnitTarget();
 
                 charmInfo->SetSpellOpener();
@@ -336,7 +333,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                         owner->SendPetCastFail(spellInfo->Id, result);
                 }
 
-                if (creature && !creature->HasSpellCooldown(spellid))
+                if (creature && creature->IsSpellReady(*spellInfo))
                     GetPlayer()->SendClearCooldown(spellid, petUnit);
 
                 charmInfo->SetSpellOpener();
@@ -722,6 +719,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    //TODO: all those typecasting are probably not needed anymore
     Creature* petCreature = petUnit->GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(petUnit) : nullptr;
     Pet* pet = (petCreature && petCreature->IsPet()) ? static_cast<Pet*>(petUnit) : nullptr;
 
@@ -732,7 +730,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (petUnit->GetCharmInfo() && petUnit->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+    if (!petUnit->IsSpellReady(*spellInfo))
         return;
 
 
@@ -752,8 +750,6 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     SpellCastResult result = spell->CheckPetCast(nullptr);
     if (result == SPELL_CAST_OK)
     {
-        if (petCreature)
-            petCreature->AddCreatureSpellCooldown(spellid);
         if (pet)
             pet->CheckLearning(spellid);
 
@@ -762,7 +758,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     else
     {
         petUnit->SendPetCastFail(spellid, result);
-        if (petCreature && !petCreature->HasSpellCooldown(spellid))
+        if (petCreature && petCreature->IsSpellReady(spellid))
             GetPlayer()->SendClearCooldown(spellid, petUnit);
 
         spell->finish(false);

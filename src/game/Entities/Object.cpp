@@ -39,6 +39,7 @@
 #include "Entities/CreatureLinkingMgr.h"
 #include "Chat/Chat.h"
 #include "Loot/LootMgr.h"
+#include "Spells/SpellMgr.h"
 
 Object::Object(): m_updateFlag(0)
 {
@@ -1937,4 +1938,280 @@ void WorldObject::SetActiveObjectState(bool active)
             GetMap()->AddToActive(this);
     }
     m_isActiveObject = active;
+}
+
+void WorldObject::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*= 0*/)
+{
+    int32 gcdRecTime = forcedDuration ? forcedDuration : spellEntry.StartRecoveryTime;
+    if (!gcdRecTime)
+        return;
+
+    m_GCDCatMap.emplace(spellEntry.StartRecoveryCategory, std::chrono::milliseconds(gcdRecTime) + Clock::now());
+}
+
+bool WorldObject::HaveGCD(SpellEntry const* spellEntry) const
+{
+    if (spellEntry)
+    {
+        auto gcdItr = m_GCDCatMap.find(spellEntry->StartRecoveryCategory);
+        if (gcdItr != m_GCDCatMap.end())
+            return true;
+        return false;
+    }
+
+    return !m_GCDCatMap.empty();
+}
+
+void WorldObject::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto /*= nullptr*/, bool permanent /*= false*/, uint32 forcedDuration /*= 0*/)
+{
+    uint32 recTimeDuration = forcedDuration ? forcedDuration : spellEntry.RecoveryTime;
+    m_cooldownMap.AddCooldown(spellEntry.Id, recTimeDuration, spellEntry.Category, spellEntry.CategoryRecoveryTime);
+}
+
+void WorldObject::UpdateCooldowns(TimePoint const& now)
+{
+    // handle GCD
+    auto cdItr = m_GCDCatMap.begin();
+    while (cdItr != m_GCDCatMap.end())
+    {
+        auto& cd = cdItr->second;
+        if (cd <= now)
+            cdItr = m_GCDCatMap.erase(cdItr);
+        else
+            ++cdItr;
+    }
+
+    // handle spell and category cooldowns
+    m_cooldownMap.Update(now);
+
+    // handle spell lockouts
+    auto lockoutCDItr = m_lockoutMap.begin();
+    while (lockoutCDItr != m_lockoutMap.end())
+    {
+        if (lockoutCDItr->second <= now)
+            lockoutCDItr = m_lockoutMap.erase(lockoutCDItr);
+        else
+            ++lockoutCDItr;
+    }
+}
+
+bool WorldObject::CheckLockout(SpellSchoolMask schoolMask) const
+{
+    for (auto& lockoutItr : m_lockoutMap)
+    {
+        SpellSchoolMask lockoutSchoolMask = SpellSchoolMask(1 << lockoutItr.first);
+        if (lockoutSchoolMask & schoolMask)
+            return true;
+    }
+
+    return false;
+}
+
+bool WorldObject::GetExpireTime(SpellEntry const& spellEntry, TimePoint& expireTime, bool& isPermanent)
+{
+    TimePoint resultExpireTime;
+    auto spellItr = m_cooldownMap.FindBySpellId(spellEntry.Id);
+    if (spellItr != m_cooldownMap.end())
+    {
+        auto& cdData = spellItr->second;
+        if (cdData->IsPermanent())
+        {
+            isPermanent = true;
+            return true;
+        }
+
+        TimePoint spellExpireTime = TimePoint();
+        TimePoint catExpireTime = TimePoint();
+        bool foundSpellCD = cdData->GetSpellCDExpireTime(spellExpireTime);
+        bool foundCatCD = cdData->GetSpellCDExpireTime(catExpireTime);
+        if (foundCatCD || foundSpellCD)
+        {
+            expireTime = spellExpireTime > catExpireTime ? spellExpireTime : catExpireTime;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool WorldObject::IsSpellReady(SpellEntry const& spellEntry, ItemPrototype const* itemProto /*= nullptr*/) const
+{
+    uint32 spellCategory = spellEntry.Category;
+
+    // overwrite category by provided category in item prototype during item cast if need
+    if (itemProto)
+    {
+        for (int idx = 0; idx < MAX_ITEM_PROTO_SPELLS; ++idx)
+        {
+            if (itemProto->Spells[idx].SpellId == spellEntry.Id)
+            {
+                spellCategory = itemProto->Spells[idx].SpellCategory;
+                break;
+            }
+        }
+    }
+
+    if (spellEntry.RecoveryTime && m_cooldownMap.FindBySpellId(spellEntry.Id) != m_cooldownMap.end())
+        return false;
+
+    if (spellCategory && m_cooldownMap.FindByCategory(spellCategory) != m_cooldownMap.end())
+        return false;
+
+    if (spellEntry.PreventionType == SPELL_PREVENTION_TYPE_SILENCE && CheckLockout(GetSpellSchoolMask(&spellEntry)))
+        return false;
+
+    return true;
+}
+
+bool WorldObject::IsSpellReady(uint32 spellId, ItemPrototype const* itemProto /*= nullptr*/) const
+{
+    SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+    if (!spellEntry)
+        return false;
+
+    return IsSpellReady(*spellEntry, itemProto);
+}
+
+void WorldObject::LockOutSpells(SpellSchoolMask schoolMask, uint32 duration)
+{
+    for (uint32 i = 0; i < MAX_SPELL_SCHOOL; ++i)
+    {
+        if (schoolMask & (1 << i))
+            m_lockoutMap.emplace(SpellSchools(i), std::chrono::milliseconds(duration) + Clock::now());
+    }
+}
+
+void WorldObject::RemoveSpellCooldown(uint32 spellId, bool updateClient /*= true*/)
+{
+    SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+    if (!spellEntry)
+        return;
+
+    RemoveSpellCooldown(*spellEntry, updateClient);
+}
+
+void WorldObject::RemoveSpellCooldown(SpellEntry const& spellEntry, bool updateClient /*= true*/)
+{
+    m_cooldownMap.RemoveBySpellId(spellEntry.Id);
+}
+
+void WorldObject::RemoveSpellCategoryCooldown(uint32 category, bool updateClient /*= true*/)
+{
+    m_cooldownMap.RemoveByCategory(category);
+}
+
+void WorldObject::ResetGCD(SpellEntry const* spellEntry /*= nullptr*/)
+{
+    if (!spellEntry)
+    {
+        m_GCDCatMap.clear();
+        return;
+    }
+
+    auto gcdItr = m_GCDCatMap.find(spellEntry->StartRecoveryCategory);
+    if (gcdItr != m_GCDCatMap.end())
+        m_GCDCatMap.erase(gcdItr);
+}
+
+void ConvertMillisecondToStr(std::chrono::milliseconds& duration, std::stringstream& durationStr)
+{
+    std::chrono::minutes mm = std::chrono::duration_cast<std::chrono::minutes>(duration % std::chrono::hours(1));
+    std::chrono::seconds ss = std::chrono::duration_cast<std::chrono::seconds>(duration % std::chrono::minutes(1));
+    std::chrono::milliseconds msec = std::chrono::duration_cast<std::chrono::milliseconds>(duration % std::chrono::seconds(1));
+    durationStr << mm.count() << "m " << ss.count() << "s " << msec.count() << "ms";
+}
+
+void WorldObject::PrintCooldownList(ChatHandler& chat) const
+{
+    // print gcd
+    auto now = Clock::now();
+    uint32 cdCount = 0;
+    uint32 permCDCount = 0;
+
+    for (auto& cdItr : m_GCDCatMap)
+    {
+        auto& cdData = cdItr.second;
+        std::stringstream cdLine;
+        std::stringstream durationStr;
+        if (cdData > now)
+        {
+            auto cdDuration = std::chrono::duration_cast<std::chrono::milliseconds>(cdData - now);
+            ConvertMillisecondToStr(cdDuration, durationStr);
+            ++cdCount;
+        }
+        else
+            continue;
+
+        cdLine << "GCD category" << "(" << cdItr.first << ") have " << durationStr.str() << " cd";
+        chat.PSendSysMessage(cdLine.str().c_str());
+    }
+
+    // print spell and category cd
+    for (auto& cdItr : m_cooldownMap)
+    {
+        auto& cdData = cdItr.second;
+        std::stringstream cdLine;
+        std::stringstream durationStr("permanent");
+        std::stringstream spellStr;
+        std::stringstream catStr;
+        if (cdData->IsPermanent())
+            ++permCDCount;
+        else
+        {
+            TimePoint spellExpireTime;
+            TimePoint catExpireTime;
+            bool foundSpellCD = cdData->GetSpellCDExpireTime(spellExpireTime);
+            bool foundcatCD = cdData->GetCatCDExpireTime(catExpireTime);
+
+            if (foundSpellCD && spellExpireTime > now)
+            {
+                auto cdDuration = std::chrono::duration_cast<std::chrono::milliseconds>(spellExpireTime - now);
+                spellStr << "RecTime(";
+                ConvertMillisecondToStr(cdDuration, spellStr);
+                spellStr << ")";
+            }
+
+            if (foundcatCD && catExpireTime > now)
+            {
+                auto cdDuration = std::chrono::duration_cast<std::chrono::milliseconds>(catExpireTime - now);
+                if (foundSpellCD)
+                    catStr << ", ";
+                catStr << "CatRecTime(";
+                ConvertMillisecondToStr(cdDuration, catStr);
+                catStr << ")";
+            }
+
+            if (!foundSpellCD && !foundcatCD)
+                continue;
+
+            durationStr << spellStr.str() << catStr.str();
+            ++cdCount;
+        }
+
+        cdLine << "Spell" << "(" << cdItr.first << ") have " << durationStr.str() << " cd";
+        chat.PSendSysMessage(cdLine.str().c_str());
+    }
+
+    // print spell lockout
+    static std::string schoolName[] = { "SPELL_SCHOOL_NORMAL", "SPELL_SCHOOL_HOLY", "SPELL_SCHOOL_FIRE", "SPELL_SCHOOL_NATURE", "SPELL_SCHOOL_FROST", "SPELL_SCHOOL_SHADOW", "SPELL_SCHOOL_ARCANE" };
+
+    for (auto& lockoutItr : m_lockoutMap)
+    {
+        SpellSchoolMask lockoutSchoolMask = SpellSchoolMask(1 << lockoutItr.first);
+        std::stringstream cdLine;
+        std::stringstream durationStr;
+        auto& cdData = lockoutItr.second;
+        if (cdData > now)
+        {
+            auto cdDuration = std::chrono::duration_cast<std::chrono::milliseconds>(cdData - now);
+            ConvertMillisecondToStr(cdDuration, durationStr);
+            ++cdCount;
+        }
+        else
+            continue;
+        cdLine << "LOCKOUT for " << schoolName[lockoutItr.first] << " with " << durationStr.str() << " remaining time cd";
+        chat.PSendSysMessage(cdLine.str().c_str());
+    }
+
+    chat.PSendSysMessage("Found %u cooldown%s.", cdCount, (cdCount > 1) ? "s" : "");
+    chat.PSendSysMessage("Found %u permanent cooldown%s.", permCDCount, (permCDCount > 1) ? "s" : "");
 }

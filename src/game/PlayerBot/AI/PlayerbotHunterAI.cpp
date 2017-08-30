@@ -235,7 +235,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
             m_ai->CastSpell(ASPECT_OF_THE_MONKEY, *m_bot);
     }
 
-    if (TRANQUILIZING_SHOT > 0 && IsTargetEnraged(pTarget) && !m_bot->HasSpellCooldown(TRANQUILIZING_SHOT) && m_ai->CastSpell(TRANQUILIZING_SHOT, *pTarget))
+    if (TRANQUILIZING_SHOT > 0 && IsTargetEnraged(pTarget) && m_bot->IsSpellReady(TRANQUILIZING_SHOT) && m_ai->CastSpell(TRANQUILIZING_SHOT, *pTarget))
     {
         m_ai->TellMaster("Casting TRANQUILIZING SHOT onto %s", pTarget->GetName());
         return RETURN_CONTINUE;
@@ -250,13 +250,13 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
         if (m_ai->IsElite(newTarget))
         {
             // Try to disengage
-            if (DISENGAGE > 0 && !m_bot->HasSpellCooldown(DISENGAGE) && m_ai->In_Reach(newTarget, DISENGAGE) && m_ai->CastSpell(DISENGAGE, *newTarget))
+            if (DISENGAGE > 0 && m_bot->IsSpellReady(DISENGAGE) && m_ai->In_Reach(newTarget, DISENGAGE) && m_ai->CastSpell(DISENGAGE, *newTarget))
                 return RETURN_CONTINUE;
             // Increase dodge and parry chance
-            if (DETERRENCE > 0 && !m_bot->HasSpellCooldown(DETERRENCE) && !m_bot->HasAura(DETERRENCE, EFFECT_INDEX_0) && m_ai->CastSpell(DETERRENCE, *m_bot))
+            if (DETERRENCE > 0 && m_bot->IsSpellReady(DETERRENCE) && !m_bot->HasAura(DETERRENCE, EFFECT_INDEX_0) && m_ai->CastSpell(DETERRENCE, *m_bot))
                 return RETURN_CONTINUE;
             // Else feign death if low on health or attacked by a worldboss
-            if (FEIGN_DEATH > 0 && (m_ai->GetHealthPercent() <= 20 || m_ai->IsElite(pTarget, true)) && !m_bot->HasSpellCooldown(FEIGN_DEATH) && !m_bot->HasAura(FEIGN_DEATH, EFFECT_INDEX_0) && m_ai->CastSpell(FEIGN_DEATH, *m_bot))
+            if (FEIGN_DEATH > 0 && (m_ai->GetHealthPercent() <= 20 || m_ai->IsElite(pTarget, true)) && m_bot->IsSpellReady(FEIGN_DEATH) && !m_bot->HasAura(FEIGN_DEATH, EFFECT_INDEX_0) && m_ai->CastSpell(FEIGN_DEATH, *m_bot))
                 return RETURN_CONTINUE;
         }
     }
@@ -293,9 +293,9 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
         if (HUNTERS_MARK > 0 && m_ai->In_Reach(pTarget,HUNTERS_MARK) && !pTarget->HasAura(HUNTERS_MARK, EFFECT_INDEX_0) && m_ai->CastSpell(HUNTERS_MARK, *pTarget))
             return RETURN_CONTINUE;
         // Buff self
-        if (RAPID_FIRE > 0 && !m_bot->HasAura(RAPID_FIRE, EFFECT_INDEX_0) && !m_bot->HasSpellCooldown(RAPID_FIRE) && m_ai->CastSpell(RAPID_FIRE, *m_bot))
+        if (RAPID_FIRE > 0 && !m_bot->HasAura(RAPID_FIRE, EFFECT_INDEX_0) && m_bot->IsSpellReady(RAPID_FIRE) && m_ai->CastSpell(RAPID_FIRE, *m_bot))
             return RETURN_CONTINUE;
-        if (ARCANE_SHOT > 0 && !m_bot->HasSpellCooldown(ARCANE_SHOT) && m_ai->In_Range(pTarget,ARCANE_SHOT) && m_ai->CastSpell(ARCANE_SHOT, *pTarget))
+        if (ARCANE_SHOT > 0 && m_bot->IsSpellReady(ARCANE_SHOT) && m_ai->In_Range(pTarget,ARCANE_SHOT) && m_ai->CastSpell(ARCANE_SHOT, *pTarget))
             return RETURN_CONTINUE;
         // Stings: only use Viper and Serpent sting. Stats decrease (Scorpid Sting) is useless in PvE
         // and as the bot is obviously not alone and assisting someone, no need to put the target to sleep (Wyvern Sting)
@@ -315,10 +315,10 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
             return RETURN_CONTINUE;
         if (BLACK_ARROW > 0 && m_ai->In_Range(pTarget,BLACK_ARROW) && !pTarget->HasAura(BLACK_ARROW, EFFECT_INDEX_0) && m_ai->CastSpell(BLACK_ARROW, *pTarget))
             return RETURN_CONTINUE;
-        if (AIMED_SHOT > 0 && !m_bot->HasSpellCooldown(AIMED_SHOT) && m_ai->In_Range(pTarget,AIMED_SHOT) && m_ai->CastSpell(AIMED_SHOT, *pTarget))
+        if (AIMED_SHOT > 0 && m_bot->IsSpellReady(AIMED_SHOT) && m_ai->In_Range(pTarget,AIMED_SHOT) && m_ai->CastSpell(AIMED_SHOT, *pTarget))
             return RETURN_CONTINUE;
 
-//       if (MULTI_SHOT > 0 && !m_bot->HasSpellCooldown(MULTI_SHOT) && m_ai->In_Range(pTarget,MULTI_SHOT) && m_ai->GetAttackerCount() >= 3 && m_ai->CastSpell(MULTI_SHOT, *pTarget))
+//       if (MULTI_SHOT > 0 && m_bot->IsSpellReady(MULTI_SHOT) && m_ai->In_Range(pTarget,MULTI_SHOT) && m_ai->GetAttackerCount() >= 3 && m_ai->CastSpell(MULTI_SHOT, *pTarget))
 //            return RETURN_CONTINUE;
 //       if (VOLLEY > 0 && m_ai->In_Range(pTarget,VOLLEY) && m_ai->GetAttackerCount() >= 3 && m_ai->CastSpell(VOLLEY, *pTarget))
 //           return RETURN_CONTINUE;
@@ -346,11 +346,11 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
     {
         if (MONGOOSE_BITE > 0 && m_bot->RollMeleeOutcomeAgainst(pTarget, BASE_ATTACK, SPELL_SCHOOL_MASK_NORMAL) == MELEE_HIT_DODGE && m_ai->CastSpell(MONGOOSE_BITE, *pTarget))
             return RETURN_CONTINUE;
-        if (RAPTOR_STRIKE > 0 && !m_bot->HasSpellCooldown(RAPTOR_STRIKE) && m_ai->In_Reach(pTarget,RAPTOR_STRIKE) && m_ai->CastSpell(RAPTOR_STRIKE, *pTarget))
+        if (RAPTOR_STRIKE > 0 && m_bot->IsSpellReady(RAPTOR_STRIKE) && m_ai->In_Reach(pTarget,RAPTOR_STRIKE) && m_ai->CastSpell(RAPTOR_STRIKE, *pTarget))
             return RETURN_CONTINUE;
         if (EXPLOSIVE_TRAP > 0 && !pTarget->HasAura(EXPLOSIVE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(IMMOLATION_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(FROST_TRAP, EFFECT_INDEX_0) && m_ai->CastSpell(EXPLOSIVE_TRAP, *pTarget))
             return RETURN_CONTINUE;
-        if (WING_CLIP > 0 && !m_bot->HasSpellCooldown(WING_CLIP) && m_ai->In_Reach(pTarget,WING_CLIP) && !pTarget->HasAura(WING_CLIP, EFFECT_INDEX_0) && m_ai->CastSpell(WING_CLIP, *pTarget))
+        if (WING_CLIP > 0 && m_bot->IsSpellReady(WING_CLIP) && m_ai->In_Reach(pTarget,WING_CLIP) && !pTarget->HasAura(WING_CLIP, EFFECT_INDEX_0) && m_ai->CastSpell(WING_CLIP, *pTarget))
             return RETURN_CONTINUE;
         if (IMMOLATION_TRAP > 0 && !pTarget->HasAura(IMMOLATION_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(EXPLOSIVE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(FROST_TRAP, EFFECT_INDEX_0) && m_ai->CastSpell(IMMOLATION_TRAP, *pTarget))
             return RETURN_CONTINUE;
