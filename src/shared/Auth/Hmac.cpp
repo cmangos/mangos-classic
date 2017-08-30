@@ -25,7 +25,7 @@ HmacHash::HmacHash()
     memcpy(&m_key, &temp, SEED_KEY_SIZE);
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     m_ctx = HMAC_CTX_new();
-    HMAC_Init_ex(m_ctx, &m_key, len, EVP_sha1(), nullptr);
+    HMAC_Init_ex(m_ctx, &m_key, SEED_KEY_SIZE, EVP_sha1(), nullptr);
 #else
     HMAC_CTX_init(&m_ctx);
     HMAC_Init_ex(&m_ctx, &m_key, SEED_KEY_SIZE, EVP_sha1(), NULL);
