@@ -198,6 +198,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
 
     recv_data >> movementInfo;
     recv_data >> Unused<uint32>();                          // unk
+    recv_data >> Unused<uint32>();                          // unk2
 }
 
 void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recv_data)
