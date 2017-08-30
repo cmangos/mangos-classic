@@ -16311,7 +16311,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     for (uint32 i = 1; i < nodes.size(); ++i)
     {
         uint32 path, cost;
-        uint32 lastnode = nodes[i];
+        lastnode = nodes[i];
         sObjectMgr.GetTaxiPath(prevnode, lastnode, path, cost);
 
         if (!path)
