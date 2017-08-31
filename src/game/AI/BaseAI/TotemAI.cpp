@@ -33,7 +33,7 @@ int TotemAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-TotemAI::TotemAI(Creature* c) : CreatureAI(c)
+TotemAI::TotemAI(Creature* c) : CreatureEventAI(c)
 {
 }
 
@@ -44,10 +44,55 @@ void TotemAI::MoveInLineOfSight(Unit*)
 void TotemAI::EnterEvadeMode()
 {
     m_creature->CombatStop(true);
+
+    // Handle Evade events
+    for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
+    {
+        if (i->Event.event_type == EVENT_T_EVADE)
+            ProcessEvent(*i);
+    }
 }
 
-void TotemAI::UpdateAI(const uint32 /*diff*/)
+void TotemAI::UpdateAI(const uint32 diff)
 {
+    // Events are only updated once every EVENT_UPDATE_TIME ms to prevent lag with large amount of events
+    if (m_EventUpdateTime < diff)
+    {
+        m_EventDiff += diff;
+
+        // Check for time based events
+        for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
+        {
+            // Decrement Timers
+            if (i->Time)
+            {
+                // Do not decrement timers if event cannot trigger in this phase
+                if (!(i->Event.event_inverse_phase_mask & (1 << m_Phase)))
+                {
+                    if (i->Time > m_EventDiff)
+                        i->Time -= m_EventDiff;
+                    else
+                        i->Time = 0;
+                }
+            }
+
+            // Skip processing of events that have time remaining or are disabled
+            if (!(i->Enabled) || i->Time)
+                continue;
+
+            if (IsTimerBasedEvent(i->Event.event_type))
+                ProcessEvent(*i);
+        }
+
+        m_EventDiff = 0;
+        m_EventUpdateTime = EVENT_UPDATE_TIME;
+    }
+    else
+    {
+        m_EventDiff += diff;
+        m_EventUpdateTime -= diff;
+    }
+
     if (getTotem().GetTotemType() != TOTEM_ACTIVE)
         return;
 

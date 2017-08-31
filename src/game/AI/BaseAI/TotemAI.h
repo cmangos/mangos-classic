@@ -20,24 +20,25 @@
 #define MANGOS_TOTEMAI_H
 
 #include "CreatureAI.h"
+#include "AI/EventAI/CreatureEventAI.h"
 #include "Entities/ObjectGuid.h"
+#include "Timer.h"
 
 class Creature;
 class Totem;
 
-class TotemAI : public CreatureAI
+class TotemAI : public CreatureEventAI
 {
     public:
-
         explicit TotemAI(Creature* c);
-
-        void MoveInLineOfSight(Unit*) override;
-        void AttackStart(Unit*) override;
-        void EnterEvadeMode() override;
-        bool IsVisible(Unit*) const override;
-
-        void UpdateAI(const uint32) override;
         static int Permissible(const Creature*);
+
+        virtual void MoveInLineOfSight(Unit*) override;
+        virtual void AttackStart(Unit*) override;
+        virtual void EnterEvadeMode() override;
+        virtual bool IsVisible(Unit*) const override;
+
+        virtual void UpdateAI(const uint32) override;
     protected:
         Totem& getTotem() const;
 
