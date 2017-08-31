@@ -569,7 +569,7 @@ bool ChatHandler::HandleServerLogLevelCommand(char* args)
 
 /// @}
 
-#ifdef __linux__
+#ifdef __unix__
 // Non-blocking keypress detector, when return pressed, return 1, else always return 0
 int kb_hit_return()
 {
@@ -590,13 +590,6 @@ void CliRunnable::run()
     ///- Init new SQL thread for the world database (one connection call enough)
     WorldDatabase.ThreadStart();                            // let thread do safe mySQL requests
 
-    // Get a timespec for the nanosleep
-#ifdef __linux__
-    struct timespec ts;
-    ts.tv_sec = 0;
-    ts.tv_nsec = 100000;
-#endif
-
     char commandbuf[256];
 
     ///- Display the list of available CLI functions then beep
@@ -609,7 +602,7 @@ void CliRunnable::run()
     // later it will be printed after command queue updates
     printf("mangos>");
 
-#ifdef __linux__
+#ifdef __unix__
     //Set stdin IO to nonblocking - prevent Server from hanging in shutdown process till enter is pressed
     int fd = fileno(stdin);  
     int flags = fcntl(fd, F_GETFL, 0); 
@@ -621,11 +614,11 @@ void CliRunnable::run()
     while (!World::IsStopped())
     {
         fflush(stdout);
-#ifdef __linux__
+#ifdef __unix__
         while (!kb_hit_return() && !World::IsStopped())
         {
             // With this, we limit CLI to 10commands/second
-            nanosleep(&ts, &ts);
+            std::this_thread::sleep_for(std::chrono::nanoseconds(100000));
             // Check for world stoppage after each sleep interval
             if (World::IsStopped())
                 break;
