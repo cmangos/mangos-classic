@@ -647,6 +647,17 @@ bool ChatHandler::HandleDebugBattlegroundCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleDebugBattlegroundStartCommand(char* /*args*/)
+{
+    if (auto bg = m_session->GetPlayer()->GetBattleGround())
+    {
+        bg->SetStartDelayTime(-1);
+        return true;
+    }
+
+    return false;
+}
+
 bool ChatHandler::HandleDebugSpellCheckCommand(char* /*args*/)
 {
     sLog.outString("Check expected in code spell properties base at table 'spell_check' content...");
