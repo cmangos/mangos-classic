@@ -882,11 +882,6 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
             break;
     }
 
-    // Attributes check first: always negative if forced
-    // Do not move: this check needs to be present there to let override above it happen for spells that need it.
-    if (spellproto->HasAttribute(SPELL_ATTR_NEGATIVE))
-        return false;
-
     // Generic effect check: negative on negative targets, positive on positive targets
     return IsPositiveEffectTargetMode(spellproto, effIndex, caster, target);
 }
