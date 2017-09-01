@@ -23,10 +23,10 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
+/* ContentData
 go_andorhal_tower
 EndContentData */
-
 
 
 /*######

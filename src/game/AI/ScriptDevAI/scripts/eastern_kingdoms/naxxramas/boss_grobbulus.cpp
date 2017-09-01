@@ -123,7 +123,7 @@ struct boss_grobbulusAI : public ScriptedAI
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
         if ((pSpell->Id == SPELL_SLIME_SPRAY) && pTarget->GetTypeId() == TYPEID_PLAYER)
-            m_creature->SummonCreature(NPC_FALLOUT_SLIME, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 10 * IN_MILLISECONDS);
+            m_creature->SummonCreature(NPC_FALLOUT_SLIME, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10 * IN_MILLISECONDS);
     }
 
     void UpdateAI(const uint32 uiDiff) override

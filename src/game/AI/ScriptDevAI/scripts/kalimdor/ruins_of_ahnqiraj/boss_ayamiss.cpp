@@ -167,7 +167,7 @@ struct boss_ayamissAI : public ScriptedAI
 
                 // Summon a larva
                 uint8 uiLoc = urand(0, 1);
-                m_creature->SummonCreature(NPC_LARVA, aAyamissSpawnLocs[uiLoc].m_fX, aAyamissSpawnLocs[uiLoc].m_fY, aAyamissSpawnLocs[uiLoc].m_fZ, 0, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_LARVA, aAyamissSpawnLocs[uiLoc].m_fX, aAyamissSpawnLocs[uiLoc].m_fY, aAyamissSpawnLocs[uiLoc].m_fZ, 0, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 30000);
             }
         }
         else
@@ -183,7 +183,7 @@ struct boss_ayamissAI : public ScriptedAI
             for (uint8 i = 0; i < 2; ++i)
             {
                 m_creature->GetRandomPoint(aAyamissSpawnLocs[2].m_fX, aAyamissSpawnLocs[2].m_fY, aAyamissSpawnLocs[2].m_fZ, 80.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_SWARMER, fX, fY, aAyamissSpawnLocs[2].m_fZ, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_SWARMER, fX, fY, aAyamissSpawnLocs[2].m_fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
             }
             m_uiSummonSwarmerTimer = 5000;
         }

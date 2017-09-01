@@ -71,8 +71,8 @@ struct npc_professor_phizzlethorpeAI : public npc_escortAI
             case 5: DoScriptText(SAY_PROGRESS_3, m_creature, pPlayer); break;
             case 8: DoScriptText(EMOTE_PROGRESS_4, m_creature); break;
             case 9:
-                m_creature->SummonCreature(ENTRY_VENGEFUL_SURGE, -2056.41f, -2144.01f, 20.59f, 5.70f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 600000);
-                m_creature->SummonCreature(ENTRY_VENGEFUL_SURGE, -2050.17f, -2140.02f, 19.54f, 5.17f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 600000);
+                m_creature->SummonCreature(ENTRY_VENGEFUL_SURGE, -2056.41f, -2144.01f, 20.59f, 5.70f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 600000);
+                m_creature->SummonCreature(ENTRY_VENGEFUL_SURGE, -2050.17f, -2140.02f, 19.54f, 5.17f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 600000);
                 break;
             case 10: DoScriptText(SAY_PROGRESS_5, m_creature, pPlayer); break;
             case 11:

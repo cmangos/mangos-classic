@@ -113,7 +113,7 @@ void instance_shadowfang_keep::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
             {
                 if (Creature* pFenrus = GetSingleCreatureFromStorage(NPC_FENRUS))
-                    pFenrus->SummonCreature(NPC_ARCHMAGE_ARUGAL, -136.89f, 2169.17f, 136.58f, 2.794f, TEMPSUMMON_TIMED_DESPAWN, 30000);
+                    pFenrus->SummonCreature(NPC_ARCHMAGE_ARUGAL, -136.89f, 2169.17f, 136.58f, 2.794f, TEMPSPAWN_TIMED_DESPAWN, 30000);
             }
             m_auiEncounter[2] = uiData;
             break;

@@ -218,7 +218,7 @@ struct boss_thermapluggAI : public ScriptedAI
                             fX = 0.35 * m_afSpawnPos[0] + 0.65 * pFace->GetPositionX();
                             fY = 0.35 * m_afSpawnPos[1] + 0.65 * pFace->GetPositionY();
                         }
-                        m_creature->SummonCreature(NPC_WALKING_BOMB, fX, fY, fBombSpawnZ, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_WALKING_BOMB, fX, fY, fBombSpawnZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
                         m_asBombFaces[i].m_uiBombTimer = urand(10000, 25000);   // TODO
                     }
                     else

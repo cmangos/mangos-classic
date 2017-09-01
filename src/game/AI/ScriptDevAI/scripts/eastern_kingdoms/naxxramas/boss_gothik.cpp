@@ -257,7 +257,7 @@ struct boss_gothikAI : public ScriptedAI
         for (GuidList::iterator itr = plSummonPosGuids->begin(); itr != plSummonPosGuids->end(); ++itr)
         {
             if (Creature* pPos = m_creature->GetMap()->GetCreature(*itr))
-                m_creature->SummonCreature(uiSummonEntry, pPos->GetPositionX(), pPos->GetPositionY(), pPos->GetPositionZ(), pPos->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(uiSummonEntry, pPos->GetPositionX(), pPos->GetPositionY(), pPos->GetPositionZ(), pPos->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 
@@ -518,10 +518,10 @@ bool EffectDummyCreature_spell_anchor(Unit* /*pCaster*/, uint32 uiSpellId, Spell
                 else if (uiSpellId == SPELL_C_TO_SKULL)
                     uiNpcEntry = NPC_SPECT_RIDER;
 
-                pGoth->SummonCreature(uiNpcEntry, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                pGoth->SummonCreature(uiNpcEntry, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
 
                 if (uiNpcEntry == NPC_SPECT_RIDER)
-                    pGoth->SummonCreature(NPC_SPECT_HORSE, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                    pGoth->SummonCreature(NPC_SPECT_HORSE, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
             }
             return true;
         }

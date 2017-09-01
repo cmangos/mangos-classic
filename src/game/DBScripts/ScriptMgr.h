@@ -47,7 +47,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_QUEST_EXPLORED           = 7,            // one from source or target must be Player, another GO/Creature, datalong=quest_id, datalong2=distance or 0
     SCRIPT_COMMAND_KILL_CREDIT              = 8,            // source or target with Player, datalong = creature entry (or 0 for target-entry), datalong2 = bool (0=personal credit, 1=group credit)
     SCRIPT_COMMAND_RESPAWN_GAMEOBJECT       = 9,            // source = any, datalong=db_guid, datalong2=despawn_delay
-    SCRIPT_COMMAND_TEMP_SUMMON_CREATURE     = 10,           // source = any, datalong=creature entry, datalong2=despawn_delay, datalong3=pathId
+    SCRIPT_COMMAND_TEMP_SPAWN_CREATURE      = 10,           // source = any, datalong=creature entry, datalong2=despawn_delay, datalong3=pathId
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL = summon active
                                                             // dataint = (bool) setRun; 0 = off (default), 1 = on
     SCRIPT_COMMAND_OPEN_DOOR                = 11,           // datalong=db_guid (or not provided), datalong2=reset_delay
@@ -207,7 +207,7 @@ struct ScriptInfo
             uint32 despawnDelay;                            // datalong2
         } respawnGo;
 
-        struct                                              // SCRIPT_COMMAND_TEMP_SUMMON_CREATURE (10)
+        struct                                              // SCRIPT_COMMAND_TEMP_SPAWN_CREATURE (10)
         {
             uint32 creatureEntry;                           // datalong
             uint32 despawnDelay;                            // datalong2
@@ -453,7 +453,7 @@ struct ScriptInfo
         switch (command)
         {
             case SCRIPT_COMMAND_MOVE_TO:
-            case SCRIPT_COMMAND_TEMP_SUMMON_CREATURE:
+            case SCRIPT_COMMAND_TEMP_SPAWN_CREATURE:
             case SCRIPT_COMMAND_CAST_SPELL:
             case SCRIPT_COMMAND_MOVEMENT:
             case SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL:

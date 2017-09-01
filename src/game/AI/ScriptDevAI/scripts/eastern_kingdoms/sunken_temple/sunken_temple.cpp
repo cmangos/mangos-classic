@@ -52,7 +52,7 @@ bool AreaTrigger_at_shade_of_eranikus(Player* pPlayer, AreaTriggerEntry const* /
         {
             if (pInstance->GetData(TYPE_MALFURION) != DONE)
             {
-                pPlayer->SummonCreature(NPC_MALFURION, aSunkenTempleLocation[2].m_fX, aSunkenTempleLocation[2].m_fY, aSunkenTempleLocation[2].m_fZ, aSunkenTempleLocation[2].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                pPlayer->SummonCreature(NPC_MALFURION, aSunkenTempleLocation[2].m_fX, aSunkenTempleLocation[2].m_fY, aSunkenTempleLocation[2].m_fZ, aSunkenTempleLocation[2].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
                 pInstance->SetData(TYPE_MALFURION, DONE);
             }
         }

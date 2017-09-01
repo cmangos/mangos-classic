@@ -179,7 +179,7 @@ struct boss_vaelastraszAI : public ScriptedAI
                 switch (m_uiIntroPhase)
                 {
                     case 0:
-                        m_creature->SummonCreature(NPC_LORD_VICTOR_NEFARIUS, aNefariusSpawnLoc[0], aNefariusSpawnLoc[1], aNefariusSpawnLoc[2], aNefariusSpawnLoc[3], TEMPSUMMON_TIMED_DESPAWN, 25000);
+                        m_creature->SummonCreature(NPC_LORD_VICTOR_NEFARIUS, aNefariusSpawnLoc[0], aNefariusSpawnLoc[1], aNefariusSpawnLoc[2], aNefariusSpawnLoc[3], TEMPSPAWN_TIMED_DESPAWN, 25000);
                         m_uiIntroTimer = 1000;
                         break;
                     case 1:

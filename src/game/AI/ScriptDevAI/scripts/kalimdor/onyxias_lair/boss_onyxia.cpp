@@ -285,7 +285,7 @@ struct boss_onyxiaAI : public ScriptedAI
         for (uint8 i = 0; i < 2; i++)
         {
             // Should probably make use of SPELL_SUMMON_ONYXIAN_WHELPS instead. Correct caster and removal of the spell is unkown, so make Onyxia do the summoning
-            if (Creature* pWhelp =  m_creature->SummonCreature(NPC_ONYXIA_WHELP, afSpawnLocations[i][0], afSpawnLocations[i][1], afSpawnLocations[i][2], 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 3 * IN_MILLISECONDS))
+            if (Creature* pWhelp =  m_creature->SummonCreature(NPC_ONYXIA_WHELP, afSpawnLocations[i][0], afSpawnLocations[i][1], afSpawnLocations[i][2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3 * IN_MILLISECONDS))
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0))
                     pWhelp->AI()->AttackStart(pTarget);

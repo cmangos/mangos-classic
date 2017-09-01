@@ -23,10 +23,9 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
+/* ContentData
 EndContentData */
-
-
 
 void AddSC_undercity()
 {

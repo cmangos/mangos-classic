@@ -123,8 +123,8 @@ struct boss_overlordwyrmthalakAI : public ScriptedAI
         // Summon two Beserks
         if (!m_bSummoned && m_creature->GetHealthPercent() < 51.0f)
         {
-            Creature* pGuard1 = m_creature->SummonCreature(uSummons[urand(0,2)], afLocations[0][0], afLocations[0][1], afLocations[0][2], afLocations[0][3], TEMPSUMMON_TIMED_DESPAWN, 300000);
-            Creature* pGuard2 = m_creature->SummonCreature(uSummons[urand(0,2)], afLocations[1][0], afLocations[1][1], afLocations[1][2], afLocations[1][3], TEMPSUMMON_TIMED_DESPAWN, 300000);
+            Creature* pGuard1 = m_creature->SummonCreature(uSummons[urand(0,2)], afLocations[0][0], afLocations[0][1], afLocations[0][2], afLocations[0][3], TEMPSPAWN_TIMED_DESPAWN, 300000);
+            Creature* pGuard2 = m_creature->SummonCreature(uSummons[urand(0,2)], afLocations[1][0], afLocations[1][1], afLocations[1][2], afLocations[1][3], TEMPSPAWN_TIMED_DESPAWN, 300000);
             if (pGuard1)
             {
                 pGuard1->SetWalk(false);

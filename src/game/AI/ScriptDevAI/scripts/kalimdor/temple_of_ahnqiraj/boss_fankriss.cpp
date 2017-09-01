@@ -156,7 +156,7 @@ struct boss_fankrissAI : public ScriptedAI
                     for (uint8 i = 0; i < 4; ++i)
                     {
                         m_creature->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 3.0f, fX, fY, fZ);
-                        m_creature->SummonCreature(NPC_VEKNISS_HATCHLING, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 10000);
+                        m_creature->SummonCreature(NPC_VEKNISS_HATCHLING, fX, fY, fZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
                     }
                     m_uiEntangleSummonTimer = 0;
                 }

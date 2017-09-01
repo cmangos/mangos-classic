@@ -161,6 +161,14 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
         if (m_PathOrigin == PATH_FROM_EXTERNAL && m_pathId > 0)
             type = EXTERNAL_WAYPOINT_MOVE + m_pathId;
         creature.AI()->MovementInform(type, i_currentNode);
+
+        if (creature.IsTemporarySummon())
+        {
+            if (creature.GetSpawnerGuid().IsCreatureOrPet())
+                if (Creature* pSummoner = creature.GetMap()->GetAnyTypeCreature(creature.GetSpawnerGuid()))
+                    if (pSummoner->AI())
+                        pSummoner->AI()->SummonedMovementInform(&creature, type, i_currentNode);
+        }
     }
 
     // Wait delay ms

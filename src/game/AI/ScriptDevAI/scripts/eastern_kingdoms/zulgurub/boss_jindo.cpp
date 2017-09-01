@@ -135,7 +135,7 @@ struct boss_jindoAI : public ScriptedAI
             {
                 float fX, fY, fZ;
                 m_creature->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 5.0f, fX, fY, fZ);
-                if (Creature* pSummoned = m_creature->SummonCreature(NPC_SHADE_OF_JINDO, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 15000))
+                if (Creature* pSummoned = m_creature->SummonCreature(NPC_SHADE_OF_JINDO, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 15000))
                     pSummoned->CastSpell(pSummoned, SPELL_SHADE_OF_JINDO_PASSIVE, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiDelusionsTimer = urand(4000, 12000);
@@ -156,7 +156,7 @@ struct boss_jindoAI : public ScriptedAI
                 for (uint8 i = 0; i < MAX_SKELETONS; ++i)
                 {
                     m_creature->GetRandomPoint(aPitTeleportLocs[0], aPitTeleportLocs[1], aPitTeleportLocs[2], 4.0f, fX, fY, fZ);
-                    if (Creature* pSummoned = m_creature->SummonCreature(NPC_SACRIFICED_TROLL, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 15000))
+                    if (Creature* pSummoned = m_creature->SummonCreature(NPC_SACRIFICED_TROLL, fX, fY, fZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 15000))
                         pSummoned->AI()->AttackStart(pTarget);
                 }
 

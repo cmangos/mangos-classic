@@ -125,7 +125,7 @@ bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* 
         if (!pPyromancer)
             return false;
 
-        if (Creature* pMasterGuard = pPyromancer->SummonCreature(NPC_ANVILRAGE_GUARDMAN, aGuardSpawnPositions[0][0], aGuardSpawnPositions[0][1], aGuardSpawnPositions[0][2], aGuardSpawnPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+        if (Creature* pMasterGuard = pPyromancer->SummonCreature(NPC_ANVILRAGE_GUARDMAN, aGuardSpawnPositions[0][0], aGuardSpawnPositions[0][1], aGuardSpawnPositions[0][2], aGuardSpawnPositions[0][3], TEMPSPAWN_DEAD_DESPAWN, 0))
         {
             pMasterGuard->SetWalk(false);
             pMasterGuard->GetMotionMaster()->MoveWaypoint();
@@ -134,7 +134,7 @@ bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* 
             pPlayer->GetContactPoint(pMasterGuard, fX, fY, fZ);
             pMasterGuard->GetMotionMaster()->MovePoint(1,fX, fY, fZ);
 
-            if (Creature* pSlaveGuard = pPyromancer->SummonCreature(NPC_ANVILRAGE_GUARDMAN, aGuardSpawnPositions[1][0], aGuardSpawnPositions[1][1], aGuardSpawnPositions[1][2], aGuardSpawnPositions[1][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* pSlaveGuard = pPyromancer->SummonCreature(NPC_ANVILRAGE_GUARDMAN, aGuardSpawnPositions[1][0], aGuardSpawnPositions[1][1], aGuardSpawnPositions[1][2], aGuardSpawnPositions[1][3], TEMPSPAWN_DEAD_DESPAWN, 0))
             {
                 pSlaveGuard->GetMotionMaster()->MoveFollow(pMasterGuard, 2.0f, 0);
             }
@@ -221,7 +221,7 @@ bool AreaTrigger_at_ring_of_law(Player* pPlayer, AreaTriggerEntry const* pAt)
 
         pInstance->SetData(TYPE_RING_OF_LAW, pInstance->GetData(TYPE_RING_OF_LAW) == DATA_BANNER_BEFORE_EVENT ? SPECIAL : IN_PROGRESS);
 
-        pPlayer->SummonCreature(NPC_GRIMSTONE, aSpawnPositions[POS_GRIMSTONE][0], aSpawnPositions[POS_GRIMSTONE][1], aSpawnPositions[POS_GRIMSTONE][2], aSpawnPositions[POS_GRIMSTONE][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+        pPlayer->SummonCreature(NPC_GRIMSTONE, aSpawnPositions[POS_GRIMSTONE][0], aSpawnPositions[POS_GRIMSTONE][1], aSpawnPositions[POS_GRIMSTONE][2], aSpawnPositions[POS_GRIMSTONE][3], TEMPSPAWN_DEAD_DESPAWN, 0);
         pInstance->SetArenaCenterCoords(pAt->x, pAt->y, pAt->z);
 
         return false;
@@ -336,7 +336,7 @@ struct npc_grimstoneAI : public npc_escortAI
         for (uint8 i = 0; i < uiNpcPerWave; ++i)
         {
             m_creature->GetRandomPoint(aSpawnPositions[uiPosition][0], aSpawnPositions[uiPosition][1], aSpawnPositions[uiPosition][2], 2.0f, fX, fY, fZ);
-            m_creature->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 

@@ -211,10 +211,10 @@ struct boss_maexxnaAI : public ScriptedAI
             return false;
 
         uint8 uiPos1 = urand(0, MAX_WEB_WRAP_POSITIONS - 1);
-        m_creature->SummonCreature(NPC_WEB_WRAP, aWebWrapLoc[uiPos1][0], aWebWrapLoc[uiPos1][1], aWebWrapLoc[uiPos1][2], 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+        m_creature->SummonCreature(NPC_WEB_WRAP, aWebWrapLoc[uiPos1][0], aWebWrapLoc[uiPos1][1], aWebWrapLoc[uiPos1][2], 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
 
         uint8 uiPos2 = (uiPos1 + urand(1, MAX_WEB_WRAP_POSITIONS - 1)) % MAX_WEB_WRAP_POSITIONS;
-        m_creature->SummonCreature(NPC_WEB_WRAP, aWebWrapLoc[uiPos2][0], aWebWrapLoc[uiPos2][1], aWebWrapLoc[uiPos2][2], 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+        m_creature->SummonCreature(NPC_WEB_WRAP, aWebWrapLoc[uiPos2][0], aWebWrapLoc[uiPos2][1], aWebWrapLoc[uiPos2][2], 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
 
         return true;
     }
@@ -223,7 +223,7 @@ struct boss_maexxnaAI : public ScriptedAI
     void SummonSpiderlings()
     {
         for (uint8 i = 0; i < MAX_SPIDERLINGS; ++i)
-            m_creature->SummonCreature(NPC_SPIDERLING, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+            m_creature->SummonCreature(NPC_SPIDERLING, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
     }
 
     void UpdateAI(const uint32 uiDiff) override

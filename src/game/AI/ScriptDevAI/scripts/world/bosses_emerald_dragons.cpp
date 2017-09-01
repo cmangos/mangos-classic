@@ -270,7 +270,7 @@ struct boss_lethonAI : public boss_emerald_dragonAI
             // Summon this way, to be able to cast the shade visual spell with player as original caster
             // This might not be supported currently by core, but this spell's visual should be dependend on the player
             // Also possible that this was no problem due to the special way these NPCs had been summoned in classic times
-            if (Creature* pSummoned = pTarget->SummonCreature(NPC_SPIRIT_SHADE, 0.0f, 0.0f, 0.0f, pTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* pSummoned = pTarget->SummonCreature(NPC_SPIRIT_SHADE, 0.0f, 0.0f, 0.0f, pTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
                 pSummoned->CastSpell(pSummoned, SPELL_SPIRIT_SHAPE_VISUAL, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pTarget->GetObjectGuid());
         }
     }

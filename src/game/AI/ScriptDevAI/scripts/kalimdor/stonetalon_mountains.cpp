@@ -64,9 +64,9 @@ struct npc_kayaAI : public npc_escortAI
                 // apparently NPC say _after_ the ambush is over, and is most likely a bug at you-know-where.
                 // we simplify this, and make say when the ambush actually start.
                 DoScriptText(SAY_AMBUSH, m_creature);
-                m_creature->SummonCreature(NPC_GRIMTOTEM_RUFFIAN, -50.75f, -500.77f, -46.13f, 0.4f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_GRIMTOTEM_BRUTE, -40.05f, -510.89f, -46.05f, 1.7f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_GRIMTOTEM_SORCERER, -32.21f, -499.20f, -45.35f, 2.8f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_GRIMTOTEM_RUFFIAN, -50.75f, -500.77f, -46.13f, 0.4f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_GRIMTOTEM_BRUTE, -40.05f, -510.89f, -46.05f, 1.7f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_GRIMTOTEM_SORCERER, -32.21f, -499.20f, -45.35f, 2.8f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 break;
                 // Award quest credit
             case 18:

@@ -65,7 +65,7 @@ struct boss_general_angerforgeAI : public ScriptedAI
     {
         float fX, fY, fZ;
         m_creature->GetRandomPoint(aAlarmPoint[0], aAlarmPoint[1], aAlarmPoint[2], 1.0f, fX, fY, fZ);
-        m_creature->SummonCreature(uiEntry, fX, fY, fZ, aAlarmPoint[3], TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30 * IN_MILLISECONDS);
+        m_creature->SummonCreature(uiEntry, fX, fY, fZ, aAlarmPoint[3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30 * IN_MILLISECONDS);
     }
 
     void JustSummoned(Creature* pSummoned) override

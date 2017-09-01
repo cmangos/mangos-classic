@@ -70,7 +70,7 @@ void instance_onyxias_lair::OnObjectCreate(GameObject* pGo)
         case GO_WHELP_SPAWNER:
             if (Creature* pTrigger = GetSingleCreatureFromStorage(NPC_ONYXIA_TRIGGER))
             {
-                pTrigger->SummonCreature(NPC_ONYXIA_WHELP, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
+                pTrigger->SummonCreature(NPC_ONYXIA_WHELP, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
                 // TODO when GO spell casting is added in core, replace above code by (or something similar):
                 // pGO->CastSpell(pGO, SPELL_SUMMONWHELP, TRIGGERED_NONE);
             }

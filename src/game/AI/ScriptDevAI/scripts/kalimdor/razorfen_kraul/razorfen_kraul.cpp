@@ -104,8 +104,8 @@ struct npc_willix_the_importerAI : public npc_escortAI
             case 14:
                 DoScriptText(SAY_WILLIX_4, m_creature);
                 // Summon 2 boars on the pathway
-                m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[0][0], aBoarSpawn[0][1], aBoarSpawn[0][2], 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
-                m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[1][0], aBoarSpawn[1][1], aBoarSpawn[1][2], 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[0][0], aBoarSpawn[0][1], aBoarSpawn[0][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[1][0], aBoarSpawn[1][1], aBoarSpawn[1][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
                 break;
             case 25:
                 DoScriptText(SAY_WILLIX_5, m_creature);
@@ -116,8 +116,8 @@ struct npc_willix_the_importerAI : public npc_escortAI
             case 44:
                 DoScriptText(SAY_WILLIX_7, m_creature);
                 // Summon 2 boars at the end
-                m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[2][0], aBoarSpawn[2][1], aBoarSpawn[2][2], 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
-                m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[3][0], aBoarSpawn[3][1], aBoarSpawn[3][2], 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[2][0], aBoarSpawn[2][1], aBoarSpawn[2][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[3][0], aBoarSpawn[3][1], aBoarSpawn[3][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
                 break;
             case 45:
                 DoScriptText(SAY_WILLIX_END, m_creature);

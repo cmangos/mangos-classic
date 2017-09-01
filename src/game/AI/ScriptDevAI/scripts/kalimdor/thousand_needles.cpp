@@ -73,7 +73,7 @@ struct npc_kanatiAI : public npc_escortAI
         for (int i = 0; i < 3; ++i)
             m_creature->SummonCreature(NPC_GALAK_ASS,
                                        m_afGalakLoc[0], m_afGalakLoc[1], m_afGalakLoc[2], 0.0f,
-                                       TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+                                       TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -161,7 +161,7 @@ struct npc_lakota_windsongAI : public npc_escortAI
         for (int i = 0; i < 2; ++i)
             m_creature->SummonCreature(NPC_GRIM_BANDIT,
                                        m_afBanditLoc[i + uiAmbushId][0], m_afBanditLoc[i + uiAmbushId][1], m_afBanditLoc[i + uiAmbushId][2], 0.0f,
-                                       TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                                       TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
     }
 };
 
@@ -233,7 +233,7 @@ struct npc_paoka_swiftmountainAI : public npc_escortAI
         for (int i = 0; i < 3; ++i)
             m_creature->SummonCreature(NPC_WYVERN,
                                        m_afWyvernLoc[i][0], m_afWyvernLoc[i][1], m_afWyvernLoc[i][2], 0.0f,
-                                       TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                                       TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
     }
 };
 

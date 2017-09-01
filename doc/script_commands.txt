@@ -195,7 +195,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * datalong=db_guid (can be skipped for buddy)
                                             * datalong2 = despawn_delay
 
-10 SCRIPT_COMMAND_TEMP_SUMMON_CREATURE      source = any, target = any
+10 SCRIPT_COMMAND_TEMP_SPAWN_CREATURE       source = any, target = any
                                             * datalong = creature entry
                                             * datalong2 = despawn_delay
                                             * datalong3 = pathId - creature_movement_template

@@ -88,7 +88,7 @@ enum EventAI_ActionType
     ACTION_T_RANDOM_SOUND               = 9,                // SoundId1, SoundId2, SoundId3 (-1 in any field means no output if randomed that field)
     ACTION_T_RANDOM_EMOTE               = 10,               // EmoteId1, EmoteId2, EmoteId3 (-1 in any field means no output if randomed that field)
     ACTION_T_CAST                       = 11,               // SpellId, Target, CastFlags
-    ACTION_T_SUMMON                     = 12,               // CreatureID, Target, Duration in ms
+    ACTION_T_SPAWN                      = 12,               // CreatureID, Target, Duration in ms
     ACTION_T_THREAT_SINGLE_PCT          = 13,               // Threat%, Target
     ACTION_T_THREAT_ALL_PCT             = 14,               // Threat%
     ACTION_T_QUEST_EVENT                = 15,               // QuestID, Target
@@ -159,7 +159,7 @@ enum Target
     TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER  = 9,            // Any random player from threat list except top threat
 
     // Summon targeting
-    TARGET_T_SUMMONER                       = 11,           // Owner of unit if exists
+    TARGET_T_SPAWNER                       = 11,           // Owner of unit if exists
 
     // Event specific targeting
     TARGET_T_EVENT_SPECIFIC                 = 12,           // Filled by specific event
@@ -242,7 +242,7 @@ struct CreatureEventAI_Action
             uint32 target;
             uint32 castFlags;
         } cast;
-        // ACTION_T_SUMMON                                  = 12
+        // ACTION_T_SPAWN                                   = 12
         struct
         {
             uint32 creatureId;

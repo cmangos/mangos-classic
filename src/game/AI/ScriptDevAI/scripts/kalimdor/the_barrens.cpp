@@ -305,7 +305,7 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
         m_vAffrayChallengerGuidsVector.reserve(MAX_CHALLENGERS);
 
         for (uint8 i = 0; i < MAX_CHALLENGERS; ++i)
-            m_creature->SummonCreature(NPC_AFFRAY_CHALLENGER, aAffrayChallengerLoc[i][0], aAffrayChallengerLoc[i][1], aAffrayChallengerLoc[i][2], aAffrayChallengerLoc[i][3], TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
+            m_creature->SummonCreature(NPC_AFFRAY_CHALLENGER, aAffrayChallengerLoc[i][0], aAffrayChallengerLoc[i][1], aAffrayChallengerLoc[i][2], aAffrayChallengerLoc[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
     }
 
     void SetChallengerReady(Creature* pChallenger)
@@ -398,7 +398,7 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
                         m_uiEventTimer = 25000;
                     break;
                 case 2:
-                    m_creature->SummonCreature(NPC_BIG_WILL, aAffrayChallengerLoc[6][0], aAffrayChallengerLoc[6][1], aAffrayChallengerLoc[6][2], aAffrayChallengerLoc[6][3], TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 300000);
+                    m_creature->SummonCreature(NPC_BIG_WILL, aAffrayChallengerLoc[6][0], aAffrayChallengerLoc[6][1], aAffrayChallengerLoc[6][2], aAffrayChallengerLoc[6][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 300000);
                     m_uiEventTimer = 15000;
                     ++m_uiStep;
                     break;
@@ -496,10 +496,10 @@ struct npc_wizzlecranks_shredderAI : public npc_escortAI
                 SetRun(false);
                 break;
             case 17:
-                if (Creature* pTemp = m_creature->SummonCreature(NPC_MERCENARY, 1128.489f, -3037.611f, 92.701f, 1.472f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
+                if (Creature* pTemp = m_creature->SummonCreature(NPC_MERCENARY, 1128.489f, -3037.611f, 92.701f, 1.472f, TEMPSPAWN_TIMED_OOC_DESPAWN, 120000))
                 {
                     DoScriptText(SAY_MERCENARY, pTemp);
-                    m_creature->SummonCreature(NPC_MERCENARY, 1160.172f, -2980.168f, 97.313f, 3.690f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000);
+                    m_creature->SummonCreature(NPC_MERCENARY, 1160.172f, -2980.168f, 97.313f, 3.690f, TEMPSPAWN_TIMED_OOC_DESPAWN, 120000);
                 }
                 break;
             case 24:
@@ -556,7 +556,7 @@ struct npc_wizzlecranks_shredderAI : public npc_escortAI
                             if (Player* pPlayer = GetPlayerForEscort())
                             {
                                 pPlayer->GroupEventHappens(QUEST_ESCAPE, m_creature);
-                                m_creature->SummonCreature(NPC_PILOT_WIZZ, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 180000);
+                                m_creature->SummonCreature(NPC_PILOT_WIZZ, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 180000);
                             }
                             break;
                     }

@@ -55,10 +55,10 @@ bool ProcessEventId_event_spells_warlock_dreadsteed(uint32 uiEventId, Object* pS
                 {
                     // start event: summon the dummy infernal controller and set in progress
                     // The dummy infernal is used to check for event == FAIL and stop the script on the DB side
-                    ((Player*)pSource)->SummonCreature(NPC_WARLOCK_DUMMY_INFERNAL, -37.9392f, 812.805f, -29.4525f, 4.81711f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    ((Player*)pSource)->SummonCreature(NPC_WARLOCK_DUMMY_INFERNAL, -37.9392f, 812.805f, -29.4525f, 4.81711f, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                     // start from point 13. Others are for Scholomance event
-                    if (Creature* pImp = ((Player*)pSource)->SummonCreature(NPC_JEEVEES, -37.9392f, 812.805f, -29.4525f, 4.81711f, TEMPSUMMON_DEAD_DESPAWN, 0))
+                    if (Creature* pImp = ((Player*)pSource)->SummonCreature(NPC_JEEVEES, -37.9392f, 812.805f, -29.4525f, 4.81711f, TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
                         pImp->GetMotionMaster()->MoveWaypoint();
                         pImp->GetMotionMaster()->SetNextWaypoint(13);

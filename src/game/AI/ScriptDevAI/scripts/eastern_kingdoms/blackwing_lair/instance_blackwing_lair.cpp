@@ -357,7 +357,7 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
             if (!pGenerator)
                 return;
 
-            pRazorgore->SummonCreature(aRazorgoreSpawns[i], pGenerator->GetPositionX(), pGenerator->GetPositionY(), pGenerator->GetPositionZ(), pGenerator->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+            pRazorgore->SummonCreature(aRazorgoreSpawns[i], pGenerator->GetPositionX(), pGenerator->GetPositionY(), pGenerator->GetPositionZ(), pGenerator->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
         }
 
         m_uiDefenseTimer = 20000;

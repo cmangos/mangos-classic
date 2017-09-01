@@ -66,7 +66,7 @@ struct npc_the_scourge_cauldronAI : public ScriptedAI
                     if (((Player*)who)->GetQuestStatus(5216) == QUEST_STATUS_INCOMPLETE ||
                             ((Player*)who)->GetQuestStatus(5229) == QUEST_STATUS_INCOMPLETE)
                     {
-                        m_creature->SummonCreature(11075, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
+                        m_creature->SummonCreature(11075, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
                         DoDie();
                     }
                     break;
@@ -74,7 +74,7 @@ struct npc_the_scourge_cauldronAI : public ScriptedAI
                     if (((Player*)who)->GetQuestStatus(5219) == QUEST_STATUS_INCOMPLETE ||
                             ((Player*)who)->GetQuestStatus(5231) == QUEST_STATUS_INCOMPLETE)
                     {
-                        m_creature->SummonCreature(11077, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
+                        m_creature->SummonCreature(11077, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
                         DoDie();
                     }
                     break;
@@ -82,7 +82,7 @@ struct npc_the_scourge_cauldronAI : public ScriptedAI
                     if (((Player*)who)->GetQuestStatus(5225) == QUEST_STATUS_INCOMPLETE ||
                             ((Player*)who)->GetQuestStatus(5235) == QUEST_STATUS_INCOMPLETE)
                     {
-                        m_creature->SummonCreature(11078, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
+                        m_creature->SummonCreature(11078, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
                         DoDie();
                     }
                     break;
@@ -90,7 +90,7 @@ struct npc_the_scourge_cauldronAI : public ScriptedAI
                     if (((Player*)who)->GetQuestStatus(5222) == QUEST_STATUS_INCOMPLETE ||
                             ((Player*)who)->GetQuestStatus(5233) == QUEST_STATUS_INCOMPLETE)
                     {
-                        m_creature->SummonCreature(11076, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
+                        m_creature->SummonCreature(11076, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
                         DoDie();
                     }
                     break;
@@ -327,7 +327,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
         else if (eventType == AI_EVENT_CUSTOM_B && pInvoker->GetEntry() == NPC_ISILLIEN)
         {
             StartNextDialogueText(NPC_TIRION_FORDRING);
-            if (Creature* pTirion = m_creature->SummonCreature(NPC_TIRION_FORDRING, 2620.273f, -1920.917f, 74.25f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS))
+            if (Creature* pTirion = m_creature->SummonCreature(NPC_TIRION_FORDRING, 2620.273f, -1920.917f, 74.25f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS))
                 pTirion->SetWalk(false);
         }
     }
@@ -358,9 +358,9 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                 // summon additional crimson elites
                 float fX, fY, fZ;
                 pSummoned->GetNearPoint(pSummoned, fX, fY, fZ, 0, 5.0f, M_PI_F * 1.25f);
-                pSummoned->SummonCreature(NPC_CRIMSON_ELITE, fX, fY, fZ, pSummoned->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS);
+                pSummoned->SummonCreature(NPC_CRIMSON_ELITE, fX, fY, fZ, pSummoned->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS);
                 pSummoned->GetNearPoint(pSummoned, fX, fY, fZ, 0, 5.0f, 0);
-                pSummoned->SummonCreature(NPC_CRIMSON_ELITE, fX, fY, fZ, pSummoned->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS);
+                pSummoned->SummonCreature(NPC_CRIMSON_ELITE, fX, fY, fZ, pSummoned->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS);
                 break;
             case NPC_TIRION_FORDRING:
                 m_tirionGuid = pSummoned->GetObjectGuid();
@@ -454,7 +454,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                 break;
             case SAY_REACH_TOWER:
                 // start fight event
-                m_creature->SummonCreature(NPC_ISILLIEN, 2693.12f, -1943.04f, 72.04f, 2.11f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS);
+                m_creature->SummonCreature(NPC_ISILLIEN, 2693.12f, -1943.04f, 72.04f, 2.11f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS);
                 break;
             case SAY_ISILLIEN_2:
                 m_creature->Unmount();
@@ -465,19 +465,19 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
             {
                 float fX, fY, fZ;
                 // spawn 3 additional elites
-                if (Creature* pElite = m_creature->SummonCreature(NPC_CRIMSON_ELITE, 2711.32f, -1882.67f, 67.89f, 3.2f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS))
+                if (Creature* pElite = m_creature->SummonCreature(NPC_CRIMSON_ELITE, 2711.32f, -1882.67f, 67.89f, 3.2f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS))
                 {
                     pElite->SetWalk(false);
                     m_creature->GetContactPoint(pElite, fX, fY, fZ);
                     pElite->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
                 }
-                if (Creature* pElite = m_creature->SummonCreature(NPC_CRIMSON_ELITE, 2710.93f, -1878.90f, 67.97f, 3.2f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS))
+                if (Creature* pElite = m_creature->SummonCreature(NPC_CRIMSON_ELITE, 2710.93f, -1878.90f, 67.97f, 3.2f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS))
                 {
                     pElite->SetWalk(false);
                     m_creature->GetContactPoint(pElite, fX, fY, fZ);
                     pElite->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
                 }
-                if (Creature* pElite = m_creature->SummonCreature(NPC_CRIMSON_ELITE, 2710.53f, -1875.28f, 67.90f, 3.2f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS))
+                if (Creature* pElite = m_creature->SummonCreature(NPC_CRIMSON_ELITE, 2710.53f, -1875.28f, 67.90f, 3.2f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS))
                 {
                     pElite->SetWalk(false);
                     m_creature->GetContactPoint(pElite, fX, fY, fZ);

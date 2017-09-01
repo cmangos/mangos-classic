@@ -34,7 +34,7 @@
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Maps/ObjectPosSelector.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 #include "Movement/packet_builder.h"
 #include "Entities/CreatureLinkingMgr.h"
 #include "Chat/Chat.h"
@@ -1559,7 +1559,7 @@ void WorldObject::AddObjectToRemoveList()
     GetMap()->AddObjectToRemoveList(this);
 }
 
-Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject/* = false*/, bool setRun/* = false*/, uint32 pathId/* = 0*/)
+Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject/* = false*/, bool setRun/* = false*/, uint32 pathId/* = 0*/)
 {
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(id);
     if (!cinfo)
@@ -1568,7 +1568,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
         return nullptr;
     }
 
-    TemporarySummon* pCreature = new TemporarySummon(GetObjectGuid());
+    TemporarySpawn* pCreature = new TemporarySpawn(GetObjectGuid());
 
     Team team = TEAM_NONE;
     if (GetTypeId() == TYPEID_PLAYER)

@@ -129,9 +129,9 @@ struct boss_arlokkAI : public ScriptedAI
             if (m_pInstance)
             {
                 if (Creature* pTrigger = m_pInstance->SelectRandomPantherTrigger(true))
-                    m_creature->SummonCreature(NPC_ZULIAN_PROWLER, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_ZULIAN_PROWLER, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
                 if (Creature* pTrigger = m_pInstance->SelectRandomPantherTrigger(false))
-                    m_creature->SummonCreature(NPC_ZULIAN_PROWLER, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
+                    m_creature->SummonCreature(NPC_ZULIAN_PROWLER, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
             }
 
             m_uiSummonTimer = 5000;

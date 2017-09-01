@@ -32,7 +32,7 @@
 #include "Spells/SpellAuras.h"
 #include "Globals/ObjectAccessor.h"
 #include "AI/CreatureAISelector.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 #include "Entities/Pet.h"
 #include "Util.h"
 #include "Entities/Totem.h"
@@ -1124,9 +1124,8 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
     Unit* pOwner = victim->GetMaster();
     if (victim->IsTemporarySummon())
     {
-        TemporarySummon* pSummon = (TemporarySummon*)victim;
-        if (pSummon->GetSummonerGuid().IsCreature())
-            if (Creature* pSummoner = victim->GetMap()->GetCreature(pSummon->GetSummonerGuid()))
+        if (victim->GetSpawnerGuid().IsCreature())
+            if (Creature* pSummoner = victim->GetMap()->GetCreature(victim->GetSpawnerGuid()))
                 if (pSummoner->AI())
                     pSummoner->AI()->SummonedCreatureJustDied(victim);
     }
@@ -5738,6 +5737,13 @@ Player* Unit::GetBeneficiaryPlayer()
     return (GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr);
 }
 
+Unit* Unit::GetSpawner() const
+{
+    if (ObjectGuid guid = GetSpawnerGuid())
+        return ObjectAccessor::GetUnit(*this, guid);
+    return nullptr;
+}
+
 Unit* Unit::GetSummoner() const
 {
     if (ObjectGuid const& guid = GetSummonerGuid())
@@ -9858,7 +9864,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
         return nullptr;
     }
 
-    TemporarySummon* pCreature = new TemporarySummon(GetObjectGuid());
+    TemporarySpawn* pCreature = new TemporarySpawn(GetObjectGuid());
 
     CreatureCreatePos pos(GetMap(), x, y, z, ang);
 
@@ -9880,13 +9886,13 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
     pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);          // set flag for client that mean this unit is controlled by a player
     pCreature->addUnitState(UNIT_STAT_CONTROLLED);                      // also set internal unit state flag
     pCreature->SelectLevel(getLevel());                                 // set level to same level than summoner TODO:: not sure its always the case...
-    pCreature->SetLinkedToOwnerAura(TEMPSUMMON_LINKED_AURA_OWNER_CHECK | TEMPSUMMON_LINKED_AURA_REMOVE_OWNER); // set what to do if linked aura is removed or the creature is dead.
+    pCreature->SetLinkedToOwnerAura(TEMPSPAWN_LINKED_AURA_OWNER_CHECK | TEMPSPAWN_LINKED_AURA_REMOVE_OWNER); // set what to do if linked aura is removed or the creature is dead.
     pCreature->SetWalk(IsWalking(), true);                              // sync the walking state with the summoner
 
                                                                         // important before adding to the map!
     SetCharmGuid(pCreature->GetObjectGuid());                           // save guid of charmed creature
 
-    pCreature->SetSummonProperties(TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000); // set 5s corpse decay
+    pCreature->SetSummonProperties(TEMPSPAWN_CORPSE_TIMED_DESPAWN, 5000); // set 5s corpse decay
     GetMap()->Add(static_cast<Creature*>(pCreature));                   // create the creature in the client
     pCreature->AIM_Initialize();                                        // even if this will be replaced it need to be initialized to take care of spawn spells
 

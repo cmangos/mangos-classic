@@ -127,13 +127,13 @@ struct boss_mandokirAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         for (uint8 i = 0; i < countof(aSpirits); ++i)
-            m_creature->SummonCreature(NPC_CHAINED_SPIRIT, aSpirits[i].fX, aSpirits[i].fY, aSpirits[i].fZ, aSpirits[i].fAng, TEMPSUMMON_CORPSE_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_CHAINED_SPIRIT, aSpirits[i].fX, aSpirits[i].fY, aSpirits[i].fZ, aSpirits[i].fAng, TEMPSPAWN_CORPSE_DESPAWN, 0);
 
         // At combat start Mandokir is mounted so we must unmount it first
         m_creature->Unmount();
 
         // And summon his raptor
-        m_creature->SummonCreature(NPC_OHGAN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 35000);
+        m_creature->SummonCreature(NPC_OHGAN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 35000);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_OHGAN, IN_PROGRESS);

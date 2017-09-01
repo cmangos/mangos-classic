@@ -223,7 +223,7 @@ void instance_molten_core::DoSpawnMajordomoIfCan(bool bByPlayerEnter)
     // Summon Majordomo
     // If Majordomo encounter isn't done, summon at encounter place, else near Ragnaros
     uint8 uiSummonPos = m_auiEncounter[TYPE_MAJORDOMO] == DONE ? 1 : 0;
-    if (Creature* pMajordomo = pPlayer->SummonCreature(m_aMajordomoLocations[uiSummonPos].m_uiEntry, m_aMajordomoLocations[uiSummonPos].m_fX, m_aMajordomoLocations[uiSummonPos].m_fY, m_aMajordomoLocations[uiSummonPos].m_fZ, m_aMajordomoLocations[uiSummonPos].m_fO, TEMPSUMMON_MANUAL_DESPAWN, 2 * HOUR * IN_MILLISECONDS))
+    if (Creature* pMajordomo = pPlayer->SummonCreature(m_aMajordomoLocations[uiSummonPos].m_uiEntry, m_aMajordomoLocations[uiSummonPos].m_fX, m_aMajordomoLocations[uiSummonPos].m_fY, m_aMajordomoLocations[uiSummonPos].m_fZ, m_aMajordomoLocations[uiSummonPos].m_fO, TEMPSPAWN_MANUAL_DESPAWN, 2 * HOUR * IN_MILLISECONDS))
     {
         if (uiSummonPos)                                    // Majordomo encounter already done, set faction
         {
@@ -237,7 +237,7 @@ void instance_molten_core::DoSpawnMajordomoIfCan(bool bByPlayerEnter)
                 DoScriptText(SAY_MAJORDOMO_SPAWN, pMajordomo);
 
             for (uint8 i = 0; i < MAX_MAJORDOMO_ADDS; ++i)
-                pMajordomo->SummonCreature(m_aBosspawnLocs[i].m_uiEntry, m_aBosspawnLocs[i].m_fX, m_aBosspawnLocs[i].m_fY, m_aBosspawnLocs[i].m_fZ, m_aBosspawnLocs[i].m_fO, TEMPSUMMON_MANUAL_DESPAWN, DAY * IN_MILLISECONDS);
+                pMajordomo->SummonCreature(m_aBosspawnLocs[i].m_uiEntry, m_aBosspawnLocs[i].m_fX, m_aBosspawnLocs[i].m_fY, m_aBosspawnLocs[i].m_fZ, m_aBosspawnLocs[i].m_fO, TEMPSPAWN_MANUAL_DESPAWN, DAY * IN_MILLISECONDS);
         }
     }
 }

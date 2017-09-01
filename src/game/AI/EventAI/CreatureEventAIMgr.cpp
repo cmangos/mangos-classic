@@ -241,7 +241,7 @@ bool IsValidTargetType(EventAI_Type eventType, EventAI_ActionType actionType, ui
                 return false;
             }
             return true;
-        case TARGET_T_SUMMONER:
+        case TARGET_T_SPAWNER:
         case TARGET_T_EVENT_SPECIFIC:
         case TARGET_T_PLAYER_INVOKER:
         case TARGET_T_PLAYER_TAPPED:
@@ -693,7 +693,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         }
                         break;
                     }
-                    case ACTION_T_SUMMON:
+                    case ACTION_T_SPAWN :
                         if (!sCreatureStorage.LookupEntry<CreatureInfo>(action.summon.creatureId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent creature entry %u.", i, j + 1, action.summon.creatureId);
 

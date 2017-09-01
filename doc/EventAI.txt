@@ -118,7 +118,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 9    ACTION_T_RANDOM_SOUND                  SoundId1, SoundId2, SoundId3    NPC Plays a Random Sound ID (Random Selects Param1, Param2 or Param3) *
 10   ACTION_T_RANDOM_EMOTE                  EmoteId1, EmoteId2, EmoteId3    NPC Emotes a Random Emote ID (Random Selects Param1, Param2 or Param3) *
 11   ACTION_T_CAST                          SpellId, Target, CastFlags      Casts spell (Param1) on a target (Param2) using cast flags (Param3) --> Specified Below
-12   ACTION_T_SUMMON                        CreatureID, Target, Duration    Summons a Creature ID (Param1) for (Param3) duration after Evade (In MS) and orders it to attack (Param2) target (specified below). Spawns on top of NPC who summons it.
+12   ACTION_T_SPAWN                         CreatureID, Target, Duration    Summons a Creature ID (Param1) for (Param3) duration after Evade (In MS) and orders it to attack (Param2) target (specified below). Spawns on top of NPC who summons it.
 13   ACTION_T_THREAT_SINGLE_PCT             Threat%, Target                 Modifies a threat by (Param1) percent on a target (Param2).
 14   ACTION_T_THREAT_ALL_PCT                Threat%                         Modifies a threat by (Param1) on all targets in the threat list (using -100% here will result in full aggro dump).
 15   ACTION_T_QUEST_EVENT                   QuestID, Target, RewardGroup    Calls AreaExploredOrEventHappens with (Param1) for a target in (Param2). Param3 decides if award entire group (1 = yes, 0 = no).
@@ -138,7 +138,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 29   ACTION_T_RANGED_MOVEMENT               Distance, Angle                 Changes the movement generator to a ranged type. (note: default melee type can still be set by using 0 as angle and 0 as distance).
 30   ACTION_T_RANDOM_PHASE                  PhaseId1, PhaseId2, PhaseId3    Sets a phase to a specified id(s)*
 31   ACTION_T_RANDOM_PHASE_RANGE            PhaseMin, PhaseMax              Sets a phase to a random id (Phase = PhaseMin + rnd % PhaseMin-PhaseMax). PhaseMax must be greater than PhaseMin.
-32   ACTION_T_SUMMON                        CreatureID, Target, SummonID    Summons a creature (Param1) to attack target (Param2) at location specified by EventAI_Summons (Param3).
+32   ACTION_T_SUMMON_ID                     CreatureID, Target, SummonID    Summons a creature (Param1) to attack target (Param2) at location specified by EventAI_Summons (Param3).
 33   ACTION_T_KILLED_MONSTER                CreatureID, Target              Calls KilledMonster (Param1) for a target (Param2).
 34   ACTION_T_SET_INST_DATA                 Field, Data                     Calls ScriptedInstance::SetData with field (Param1) and data (Param2).
 35   ACTION_T_SET_INST_DATA64               Field, Target                   Calls ScriptedInstance::SetData64 with field (Param1) and target's GUID (Param2).
@@ -579,7 +579,7 @@ If the spell is normal cast, random target types will select only targets within
 This is commonly used for NPC's who cast spells.
 
 ---------------------
-12 = ACTION_T_SUMMON:
+12 = ACTION_T_SPAWN:
 ---------------------
 Parameter 1: CreatureID - The Creature Template ID to be Summoned. The value here needs to be a valid Creature Template ID.
 Parameter 2: Target - The Target Type defining who the Summoned creature will attack once spawned. The value in this field needs to be a valid Target Type as specified in the reference tables below.
@@ -769,7 +769,7 @@ NOTE 2: PLEASE NOTE THAT EACH OF THE PARAM VALUES ARE ACTUAL PHASE NUMBERS NOT T
 This is commonly used for Spellcasting NPC's who on Aggro may select at random a school of spells to use for the fight. Use this if you have MORE then 3 phases used, otherwise use Action 30.
 
 ---------------------
-32 = ACTION_T_SUMMON:
+32 = ACTION_T_SUMMON_ID:
 ---------------------
 Parameter 1: CreatureID - The creature template ID to be summoned. The value here needs to be a valid creature template ID.
 Parameter 2: Target - The target type defining who the summoned creature will attack. The value in this field needs to be a valid target type as specified in the reference tables below. NOTE: Using target type 0 will cause the summoned creature to not attack anyone.
@@ -1006,7 +1006,7 @@ Target types are used by certain actions and may effect actions differently
 8    TARGET_T_HOSTILE_RANDOM_PLAYER          Random Player on The Threat List
 9    TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER  Any Random Player Except Top Threat
 10   TARGET_T_EVENT_SENDER              Creature who sent a received AIEvent - only triggered by EVENT_T_RECEIVE_AI_EVENT
-11   TARGET_T_SUMMONER                  Summoner of given Unit if it has one
+11   TARGET_T_SPAWNER                   Spawner of given Unit if it has one
 12   TARGET_T_EVENT_SPECIFIC            Filled by Event - EVENT_T_SELECT_ATTACKING_TARGET fills target selected
 13   TARGET_T_PLAYER_INVOKER            Player who initiated hostile contact with this npc
 14   TARGET_T_PLAYER_TAPPED             Player who currently holds the kill credit for the npc

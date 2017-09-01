@@ -89,24 +89,24 @@ struct npc_daphne_stilwellAI : public npc_escortAI
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING_NOSHEATHE);
                 break;
             case 7:
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11450.836f, 1569.755f, 54.267f, 4.230f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.697f, 1569.124f, 54.421f, 4.206f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.237f, 1568.307f, 54.620f, 4.206f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11450.836f, 1569.755f, 54.267f, 4.230f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.697f, 1569.124f, 54.421f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.237f, 1568.307f, 54.620f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
                 break;
             case 8:
                 m_creature->SetSheath(SHEATH_STATE_RANGED);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11450.836f, 1569.755f, 54.267f, 4.230f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.697f, 1569.124f, 54.421f, 4.206f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.237f, 1568.307f, 54.620f, 4.206f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.037f, 1570.213f, 54.961f, 4.283f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11450.836f, 1569.755f, 54.267f, 4.230f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.697f, 1569.124f, 54.421f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.237f, 1568.307f, 54.620f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.037f, 1570.213f, 54.961f, 4.283f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
                 break;
             case 9:
                 m_creature->SetSheath(SHEATH_STATE_RANGED);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11450.836f, 1569.755f, 54.267f, 4.230f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.697f, 1569.124f, 54.421f, 4.206f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.237f, 1568.307f, 54.620f, 4.206f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.037f, 1570.213f, 54.961f, 4.283f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.018f, 1570.738f, 54.828f, 4.220f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11450.836f, 1569.755f, 54.267f, 4.230f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.697f, 1569.124f, 54.421f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.237f, 1568.307f, 54.620f, 4.206f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11448.037f, 1570.213f, 54.961f, 4.283f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_DEFIAS_RAIDER, -11449.018f, 1570.738f, 54.828f, 4.220f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
                 break;
             case 10:
                 SetRun(false);

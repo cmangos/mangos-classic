@@ -16,39 +16,38 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOSSERVER_TEMPSUMMON_H
-#define MANGOSSERVER_TEMPSUMMON_H
+#ifndef MANGOSSERVER_TEMPSPAWN_H
+#define MANGOSSERVER_TEMPSPAWN_H
 
 #include "Entities/Creature.h"
 #include "Globals/ObjectAccessor.h"
 
-class TemporarySummon : public Creature
+class TemporarySpawn : public Creature
 {
     public:
-        explicit TemporarySummon(ObjectGuid summoner = ObjectGuid());
-        virtual ~TemporarySummon() {};
+        explicit TemporarySpawn(ObjectGuid summoner = ObjectGuid());
+        virtual ~TemporarySpawn() {};
 
         void Update(uint32 update_diff, uint32 time) override;
-        void SetSummonProperties(TempSummonType type, uint32 lifetime);
-        void Summon(TempSummonType type, uint32 lifetime);
+        void SetSummonProperties(TempSpawnType type, uint32 lifetime);
+        void Summon(TempSpawnType type, uint32 lifetime);
         void UnSummon();
         void SaveToDB();
-        ObjectGuid const& GetSummonerGuid() const { return m_summoner ; }
-        Unit* GetSummoner() const { return ObjectAccessor::GetUnit(*this, m_summoner); }
+        ObjectGuid const GetSpawnerGuid() const override { return m_spawner ; }
         void SetLinkedToOwnerAura(uint32 flags) { m_linkedToOwnerAura |= flags; };
     private:
         void RemoveAuraFromOwner();
-        TempSummonType m_type;
+        TempSpawnType m_type;
         uint32 m_timer;
         uint32 m_lifetime;
-        ObjectGuid m_summoner;
+        ObjectGuid m_spawner;
         uint32 m_linkedToOwnerAura;
 };
 
-class TemporarySummonWaypoint : public TemporarySummon
+class TemporarySpawnWaypoint : public TemporarySpawn
 {
     public:
-        explicit TemporarySummonWaypoint(ObjectGuid summoner, uint32 waypoint_id, int32 path_id, uint32 pathOrigin);
+        explicit TemporarySpawnWaypoint(ObjectGuid summoner, uint32 waypoint_id, int32 path_id, uint32 pathOrigin);
 
         uint32 GetWaypointId() const { return m_waypoint_id; }
         int32 GetPathId() const { return m_path_id; }

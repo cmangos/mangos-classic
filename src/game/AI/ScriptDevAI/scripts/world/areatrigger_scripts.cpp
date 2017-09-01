@@ -96,7 +96,7 @@ bool AreaTrigger_at_scent_larkorwi(Player* pPlayer, AreaTriggerEntry const* pAt)
     if (pPlayer->isAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_SCENT_OF_LARKORWI) == QUEST_STATUS_INCOMPLETE)
     {
         if (!GetClosestCreatureWithEntry(pPlayer, NPC_LARKORWI_MATE, 25.0f, false, false))
-            pPlayer->SummonCreature(NPC_LARKORWI_MATE, pAt->x, pAt->y, pAt->z, 3.3f, TEMPSUMMON_TIMED_OOC_DESPAWN, 2 * MINUTE * IN_MILLISECONDS);
+            pPlayer->SummonCreature(NPC_LARKORWI_MATE, pAt->x, pAt->y, pAt->z, 3.3f, TEMPSPAWN_TIMED_OOC_DESPAWN, 2 * MINUTE * IN_MILLISECONDS);
     }
 
     return false;
@@ -130,7 +130,7 @@ bool AreaTrigger_at_murkdeep(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
             // Spawn locations are defined in World Maps Scripts.h
             pPlayer->GetRandomPoint(aSpawnLocations[POS_IDX_MURKDEEP_SPAWN][0], aSpawnLocations[POS_IDX_MURKDEEP_SPAWN][1], aSpawnLocations[POS_IDX_MURKDEEP_SPAWN][2], 5.0f, fX, fY, fZ);
 
-            if (Creature* pTemp = pPlayer->SummonCreature(NPC_GREYMIST_COASTRUNNNER, fX, fY, fZ, aSpawnLocations[POS_IDX_MURKDEEP_SPAWN][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* pTemp = pPlayer->SummonCreature(NPC_GREYMIST_COASTRUNNNER, fX, fY, fZ, aSpawnLocations[POS_IDX_MURKDEEP_SPAWN][3], TEMPSPAWN_DEAD_DESPAWN, 0))
             {
                 pTemp->SetWalk(false);
                 pTemp->GetRandomPoint(aSpawnLocations[POS_IDX_MURKDEEP_MOVE][0], aSpawnLocations[POS_IDX_MURKDEEP_MOVE][1], aSpawnLocations[POS_IDX_MURKDEEP_MOVE][2], 5.0f, fX, fY, fZ);
@@ -184,7 +184,7 @@ bool AreaTrigger_at_ancient_leaf(Player* pPlayer, AreaTriggerEntry const* pAt)
             return true;
 
         for (uint8 i = 0; i < MAX_ANCIENTS; ++i)
-            pPlayer->SummonCreature(afSpawnLocations[i].uiEntry, afSpawnLocations[i].fX, afSpawnLocations[i].fY, afSpawnLocations[i].fZ, afSpawnLocations[i].fO, TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+            pPlayer->SummonCreature(afSpawnLocations[i].uiEntry, afSpawnLocations[i].fX, afSpawnLocations[i].fY, afSpawnLocations[i].fZ, afSpawnLocations[i].fO, TEMPSPAWN_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
     }
 
     return false;
@@ -253,7 +253,7 @@ bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*
     else 
     {
         m_huldar
-            ->SummonCreature(NPC_SAEAN, m_miranAmbushSpawns[0].m_fX, m_miranAmbushSpawns[0].m_fY, m_miranAmbushSpawns[0].m_fZ, m_miranAmbushSpawns[0].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000)
+            ->SummonCreature(NPC_SAEAN, m_miranAmbushSpawns[0].m_fX, m_miranAmbushSpawns[0].m_fY, m_miranAmbushSpawns[0].m_fZ, m_miranAmbushSpawns[0].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000)
             ->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
         m_saean = GetClosestCreatureWithEntry(pPlayer, NPC_SAEAN, 60.0f, true);
     }
@@ -261,8 +261,8 @@ bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*
     // Check if any Dark Iron Ambusher are already spawned or dead, if so, do nothing
     if (!GetClosestCreatureWithEntry(pPlayer, NPC_DARK_IRON_AMBUSHER, 60.0f, false, false))
     {
-        m_saean->SummonCreature(NPC_DARK_IRON_AMBUSHER, m_miranAmbushSpawns[1].m_fX, m_miranAmbushSpawns[1].m_fY, m_miranAmbushSpawns[1].m_fZ, m_miranAmbushSpawns[1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000);
-        m_saean->SummonCreature(NPC_DARK_IRON_AMBUSHER, m_miranAmbushSpawns[2].m_fX, m_miranAmbushSpawns[2].m_fY, m_miranAmbushSpawns[2].m_fZ, m_miranAmbushSpawns[2].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000);
+        m_saean->SummonCreature(NPC_DARK_IRON_AMBUSHER, m_miranAmbushSpawns[1].m_fX, m_miranAmbushSpawns[1].m_fY, m_miranAmbushSpawns[1].m_fZ, m_miranAmbushSpawns[1].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
+        m_saean->SummonCreature(NPC_DARK_IRON_AMBUSHER, m_miranAmbushSpawns[2].m_fX, m_miranAmbushSpawns[2].m_fY, m_miranAmbushSpawns[2].m_fZ, m_miranAmbushSpawns[2].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
     }
 
     return true;

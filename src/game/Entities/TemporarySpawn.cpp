@@ -16,22 +16,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 #include "Log.h"
 #include "AI/BaseAI/CreatureAI.h"
 
-TemporarySummon::TemporarySummon(ObjectGuid summoner) :
-    Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_summoner(summoner), m_linkedToOwnerAura(0)
+TemporarySpawn::TemporarySpawn(ObjectGuid summoner) :
+    Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_spawner(summoner), m_linkedToOwnerAura(0)
 {
 }
 
-void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
+void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
 {
     switch (m_type)
     {
-        case TEMPSUMMON_MANUAL_DESPAWN:
+        case TEMPSPAWN_MANUAL_DESPAWN:
             break;
-        case TEMPSUMMON_TIMED_DESPAWN:
+        case TEMPSPAWN_TIMED_DESPAWN:
         {
             if (m_timer <= update_diff)
             {
@@ -42,7 +42,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
             m_timer -= update_diff;
             break;
         }
-        case TEMPSUMMON_TIMED_OOC_DESPAWN:
+        case TEMPSPAWN_TIMED_OOC_DESPAWN:
         {
             if (!isInCombat())
             {
@@ -60,7 +60,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
             break;
         }
 
-        case TEMPSUMMON_CORPSE_TIMED_DESPAWN:
+        case TEMPSPAWN_CORPSE_TIMED_DESPAWN:
         {
             if (IsCorpse())
             {
@@ -79,7 +79,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
             }
             break;
         }
-        case TEMPSUMMON_CORPSE_DESPAWN:
+        case TEMPSPAWN_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
             if (isDead())
@@ -90,7 +90,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
 
             break;
         }
-        case TEMPSUMMON_DEAD_DESPAWN:
+        case TEMPSPAWN_DEAD_DESPAWN:
         {
             if (IsDespawned())
             {
@@ -99,7 +99,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
             }
             break;
         }
-        case TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN:
+        case TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
             if (isDead())
@@ -122,7 +122,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
                 m_timer = m_lifetime;
             break;
         }
-        case TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN:
+        case TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
             if (IsDespawned())
@@ -145,7 +145,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
                 m_timer = m_lifetime;
             break;
         }
-        case TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN:
+        case TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
             if (isDead())
@@ -161,7 +161,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
             m_timer -= update_diff;
             break;
         }
-        case TEMPSUMMON_TIMED_OR_DEAD_DESPAWN:
+        case TEMPSPAWN_TIMED_OR_DEAD_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
             if (IsDespawned())
@@ -186,7 +186,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
     switch (m_deathState)
     {
         case ALIVE:
-            if (m_linkedToOwnerAura & TEMPSUMMON_LINKED_AURA_OWNER_CHECK)
+            if (m_linkedToOwnerAura & TEMPSPAWN_LINKED_AURA_OWNER_CHECK)
             {
                 // we have to check if owner still have the required aura
                 Unit* owner = GetMaster();
@@ -198,7 +198,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
 
         case DEAD:
         case CORPSE:
-            if (m_linkedToOwnerAura & TEMPSUMMON_LINKED_AURA_REMOVE_OWNER)
+            if (m_linkedToOwnerAura & TEMPSPAWN_LINKED_AURA_REMOVE_OWNER)
             {
                 RemoveAuraFromOwner();
                 m_linkedToOwnerAura = 0;                    // we dont need to recheck
@@ -211,14 +211,14 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
     Creature::Update(update_diff, diff);
 }
 
-void TemporarySummon::SetSummonProperties(TempSummonType type, uint32 lifetime)
+void TemporarySpawn::SetSummonProperties(TempSpawnType type, uint32 lifetime)
 {
     m_type = type;
     m_timer = lifetime;
     m_lifetime = lifetime;
 }
 
-void TemporarySummon::Summon(TempSummonType type, uint32 lifetime)
+void TemporarySpawn::Summon(TempSpawnType type, uint32 lifetime)
 {
     SetSummonProperties(type, lifetime);
 
@@ -227,21 +227,21 @@ void TemporarySummon::Summon(TempSummonType type, uint32 lifetime)
     AIM_Initialize();
 }
 
-void TemporarySummon::UnSummon()
+void TemporarySpawn::UnSummon()
 {
     CombatStop();
 
-    if (m_linkedToOwnerAura & TEMPSUMMON_LINKED_AURA_REMOVE_OWNER)
+    if (m_linkedToOwnerAura & TEMPSPAWN_LINKED_AURA_REMOVE_OWNER)
         RemoveAuraFromOwner();
 
-    if (GetSummonerGuid().IsCreature())
+    if (GetSpawnerGuid().IsCreature())
     {
-        if (Creature* sum = GetMap()->GetCreature(GetSummonerGuid()))
+        if (Creature* sum = GetMap()->GetCreature(GetSpawnerGuid()))
             if (sum->AI())
                 sum->AI()->SummonedCreatureDespawn(this);
     }
-    else if (GetSummonerGuid().IsPlayer()) // if player that summoned this creature was MCing it, uncharm
-        if (Player* player = GetMap()->GetPlayer(GetSummonerGuid()))
+    else if (GetSpawnerGuid().IsPlayer()) // if player that summoned this creature was MCing it, uncharm
+        if (Player* player = GetMap()->GetPlayer(GetSpawnerGuid()))
             if (player->GetMover() == this)
                 player->Uncharm();
 
@@ -251,7 +251,7 @@ void TemporarySummon::UnSummon()
     AddObjectToRemoveList();
 }
 
-void TemporarySummon::RemoveAuraFromOwner()
+void TemporarySpawn::RemoveAuraFromOwner()
 {
     // creature is dead and we have to remove the charmer aura if exist
     uint32 const& spellId = GetUInt32Value(UNIT_CREATED_BY_SPELL);
@@ -270,12 +270,12 @@ void TemporarySummon::RemoveAuraFromOwner()
     }
 }
 
-void TemporarySummon::SaveToDB()
+void TemporarySpawn::SaveToDB()
 {
 }
 
-TemporarySummonWaypoint::TemporarySummonWaypoint(ObjectGuid summoner, uint32 waypoint_id, int32 path_id, uint32 pathOrigin) :
-    TemporarySummon(summoner),
+TemporarySpawnWaypoint::TemporarySpawnWaypoint(ObjectGuid summoner, uint32 waypoint_id, int32 path_id, uint32 pathOrigin) :
+    TemporarySpawn(summoner),
     m_waypoint_id(waypoint_id),
     m_path_id(path_id),
     m_pathOrigin(pathOrigin)

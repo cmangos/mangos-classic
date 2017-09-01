@@ -212,7 +212,7 @@ struct boss_yaujAI : public ScriptedAI
         for (int i = 0; i < 10; ++i)
         {
             m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_YAUJ_BROOD, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
+            m_creature->SummonCreature(NPC_YAUJ_BROOD, fX, fY, fZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
         }
 
         if (!m_pInstance)

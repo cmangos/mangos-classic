@@ -315,7 +315,7 @@ struct npc_melizza_brimbuzzleAI : public npc_escortAI, private DialogueHelper
                         // Summon 2 Marauders on each point
                         float fX, fY, fZ;
                         m_creature->GetRandomPoint(aMarauderSpawn[i].m_fX, aMarauderSpawn[i].m_fY, aMarauderSpawn[i].m_fZ, 7.0f, fX, fY, fZ);
-                        m_creature->SummonCreature(NPC_MARAUDINE_MARAUDER, fX, fY, fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_MARAUDINE_MARAUDER, fX, fY, fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
                 }
                 break;
@@ -324,10 +324,10 @@ struct npc_melizza_brimbuzzleAI : public npc_escortAI, private DialogueHelper
                 {
                     float fX, fY, fZ;
                     m_creature->GetRandomPoint(wranglerSpawn.m_fX, wranglerSpawn.m_fY, wranglerSpawn.m_fZ, 10.0f, fX, fY, fZ);
-                    m_creature->SummonCreature(NPC_MARAUDINE_BONEPAW, fX, fY, fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_MARAUDINE_BONEPAW, fX, fY, fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                     m_creature->GetRandomPoint(wranglerSpawn.m_fX, wranglerSpawn.m_fY, wranglerSpawn.m_fZ, 10.0f, fX, fY, fZ);
-                    m_creature->SummonCreature(NPC_MARAUDINE_WRANGLER, fX, fY, fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_MARAUDINE_WRANGLER, fX, fY, fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 break;
             case 12:
@@ -488,7 +488,7 @@ struct npc_cork_gizeltonAI : public ScriptedAI
                 {
                     float fX, fY, fZ;
                     m_creature->GetRandomPoint(aAmbushLocsBodyGuard[i + 4 * uiAmbushPoint].m_fX, aAmbushLocsBodyGuard[i + 4 * uiAmbushPoint].m_fY, aAmbushLocsBodyGuard[i + 4 * uiAmbushPoint].m_fZ, 7.0f, fX, fY, fZ);
-                    m_creature->SummonCreature(AmbushersBodyguard[i], fX, fY, fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(AmbushersBodyguard[i], fX, fY, fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 break;
             case QUEST_GIZELTON_CARAVAN:
@@ -497,7 +497,7 @@ struct npc_cork_gizeltonAI : public ScriptedAI
                 {
                     float fX, fY, fZ;
                     m_creature->GetRandomPoint(aAmbushLocsGizelton[i + 3 * uiAmbushPoint].m_fX, aAmbushLocsGizelton[i + 3 * uiAmbushPoint].m_fY, aAmbushLocsGizelton[i + 3 * uiAmbushPoint].m_fZ, 7.0f, fX, fY, fZ);
-                    m_creature->SummonCreature(AmbushersGizleton[i], fX, fY, fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(AmbushersGizleton[i], fX, fY, fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 break;
         }

@@ -118,7 +118,7 @@ bool GOUse_go_stratholme_postbox(Player* pPlayer, GameObject* pGo)
     for (uint8 i = 0; i < 3; ++i)
     {
         pPlayer->GetRandomPoint(pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), 3.0f, fX, fY, fZ);
-        pPlayer->SummonCreature(NPC_UNDEAD_POSTMAN, fX, fY, fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+        pPlayer->SummonCreature(NPC_UNDEAD_POSTMAN, fX, fY, fZ, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 
     return false;
@@ -192,7 +192,7 @@ struct mob_restless_soulAI : public ScriptedAI
     void JustDied(Unit* /*Killer*/) override
     {
         if (m_bIsTagged)
-            m_creature->SummonCreature(NPC_FREED_SOUL, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 300000);
+            m_creature->SummonCreature(NPC_FREED_SOUL, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 300000);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -256,7 +256,7 @@ struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
                 // 100%, 50%, 33%, 25% chance to spawn
                 uint32 j = urand(0, i);
                 if (j == 0)
-                    m_creature->SummonCreature(NPC_RESTLESS_SOUL, x, y, z, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_RESTLESS_SOUL, x, y, z, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
     }

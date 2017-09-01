@@ -25,7 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "molten_core.h"
-#include "Entities/TemporarySummon.h"
+#include "Entities/TemporarySpawn.h"
 
 enum
 {
@@ -240,7 +240,7 @@ struct boss_majordomoAI : public ScriptedAI
         {
             if (Creature* pAdd = m_creature->GetMap()->GetCreature(*itr))
                 if (pAdd->IsTemporarySummon())
-                    ((TemporarySummon*)pAdd)->UnSummon();
+                    ((TemporarySpawn*)pAdd)->UnSummon();
         }
 
         m_luiMajordomoAddsGUIDs.clear();
@@ -318,7 +318,7 @@ struct boss_majordomoAI : public ScriptedAI
                         // Summon Ragnaros and make sure it faces Majordomo Executus
                         if (m_pInstance)
                             if (GameObject* pGo = m_pInstance->GetSingleGameObjectFromStorage(GO_LAVA_STEAM))
-                                m_creature->SummonCreature(NPC_RAGNAROS, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), fmod(m_creature->GetOrientation() + M_PI, 2 * M_PI), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 2 * HOUR * IN_MILLISECONDS);
+                                m_creature->SummonCreature(NPC_RAGNAROS, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), fmod(m_creature->GetOrientation() + M_PI, 2 * M_PI), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 2 * HOUR * IN_MILLISECONDS);
                         ++m_uiSpeech;
                         m_uiSpeechTimer = 8700;
                         break;

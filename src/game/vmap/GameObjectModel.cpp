@@ -113,7 +113,7 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     for (int i = 0; i < 8; ++i)
     {
         Vector3 pos(iBound.corner(i));
-        if (Creature* c = const_cast<GameObject*>(pGo)->SummonCreature(24440, pos.x, pos.y, pos.z, 0, TEMPSUMMON_MANUAL_DESPAWN, 0))
+        if (Creature* c = const_cast<GameObject*>(pGo)->SummonCreature(24440, pos.x, pos.y, pos.z, 0, TEMPSPAWN_MANUAL_DESPAWN, 0))
         {
             c->setFaction(35);
             c->SetObjectScale(0.1f);

@@ -1683,6 +1683,7 @@ class Unit : public WorldObject
         void SetTargetGuid(ObjectGuid targetGuid) { SetGuidValue(UNIT_FIELD_TARGET, targetGuid); }
         ObjectGuid const& GetChannelObjectGuid() const { return GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT); }
         void SetChannelObjectGuid(ObjectGuid targetGuid) { SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, targetGuid); }
+        virtual ObjectGuid const GetSpawnerGuid() const { return ObjectGuid(); }
 
         Player* GetSpellModOwner() const;
 
@@ -1694,6 +1695,7 @@ class Unit : public WorldObject
         Unit* GetBeneficiary();
         Player const* GetBeneficiaryPlayer() const;
         Player* GetBeneficiaryPlayer();
+        Unit* GetSpawner() const; // serverside only logic used to determine spawner of unit
 
         Unit* GetSummoner() const;
         Unit* GetCreator() const;

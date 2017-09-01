@@ -100,7 +100,7 @@ void instance_blackfathom_deeps::DoSpawnMobs(uint8 uiWaveIndex)
                 if (aWaveSummonInformation[i].m_aCountAndPos[j].m_uiCount > 1)
                     fPosY = fPosY - INTERACTION_DISTANCE / 2 + k * INTERACTION_DISTANCE / aWaveSummonInformation[i].m_aCountAndPos[j].m_uiCount;
 
-                if (Creature* pSummoned = pKelris->SummonCreature(aWaveSummonInformation[i].m_uiNpcEntry, fPosX, fPosY, fPosZ, fPosO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pSummoned = pKelris->SummonCreature(aWaveSummonInformation[i].m_uiNpcEntry, fPosX, fPosY, fPosZ, fPosO, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pSummoned->GetMotionMaster()->MovePoint(0, fX_resp, fY_resp, fZ_resp);
                     m_lWaveMobsGuids[uiWaveIndex].push_back(pSummoned->GetGUIDLow());
@@ -280,7 +280,7 @@ bool GOUse_go_fathom_stone(Player* pPlayer, GameObject* pGo)
 
     if (pInstance->GetData(TYPE_AQUANIS) == NOT_STARTED)
     {
-        pPlayer->SummonCreature(NPC_BARON_AQUANIS, afAquanisPos[0], afAquanisPos[1], afAquanisPos[2], afAquanisPos[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+        pPlayer->SummonCreature(NPC_BARON_AQUANIS, afAquanisPos[0], afAquanisPos[1], afAquanisPos[2], afAquanisPos[3], TEMPSPAWN_DEAD_DESPAWN, 0);
         pInstance->SetData(TYPE_AQUANIS, IN_PROGRESS);
     }
 
