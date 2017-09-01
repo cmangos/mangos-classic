@@ -20,7 +20,7 @@
 #define _MOVE_MAP_SHARED_DEFINES_H
 
 #include "Platform/Define.h"
-#include "../../dep/recastnavigation/Detour/Include/DetourNavMesh.h"
+#include <Detour/Include/DetourNavMesh.h>
 
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
 #define MMAP_VERSION 5

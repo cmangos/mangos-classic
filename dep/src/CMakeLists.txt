@@ -18,14 +18,14 @@
 
 if (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER)
   add_subdirectory(gsoap)
-  set_target_properties(gsoap PROPERTIES FOLDER "Dependencies")
 endif()
 
 add_subdirectory(g3dlite)
+add_subdirectory(utf8cpp)
 
 if(WIN32)
+  add_subdirectory(zlib)
   if(BUILD_EXTRACTORS)
     add_subdirectory(bzip2)
-    set_target_properties(${BZIP2_LIBRARIES} PROPERTIES FOLDER "Dependencies")
   endif()
 endif()

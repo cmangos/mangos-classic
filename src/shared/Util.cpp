@@ -18,7 +18,7 @@
 
 #include "Util.h"
 #include "Timer.h"
-#include "utf8cpp/utf8.h"
+#include <utf8.h>
 #include "TSS.h"
 
 #include <boost/asio.hpp>

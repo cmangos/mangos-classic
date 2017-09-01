@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.0)
 project (MANGOS_VMAP_EXTRACT_IO)
 
 # uncomment next line to disable debug mode
@@ -33,7 +33,5 @@ if (APPLE)
   add_definitions("-Dftell64=ftell")
   add_definitions("-Dftello64=ftello")
 endif()
-
-include_directories(${CMAKE_SOURCE_DIR}/dep/libmpq)
 
 add_subdirectory(vmapextract)

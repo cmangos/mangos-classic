@@ -15,17 +15,32 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-list(APPEND BZIP2_SRCS
-     compress.c
-     crctable.c
-     decompress.c
-     huffman.c
-     randtable.c
-     blocksort.c
-     bzlib.c)
+set(LIBRARY_NAME bzip2)
+
+set(LIBRARY_SRCS
+  compress.c
+  crctable.c
+  decompress.c
+  huffman.c
+  randtable.c
+  blocksort.c
+  bzlib.c
+)
 
 include_directories(
+  ${CMAKE_SOURCE_DIR}/dep/include/bzip2
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_library(bzip2 STATIC ${BZIP2_SRCS})
+add_library(${LIBRARY_NAME} STATIC
+  ${LIBRARY_SRCS}
+)
+
+target_include_directories(${LIBRARY_NAME}
+  INTERFACE ${CMAKE_SOURCE_DIR}/dep/include/bzip2
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+if(MSVC)
+  set_target_properties(${LIBRARY_NAME} PROPERTIES FOLDER "Dependencies")
+endif()

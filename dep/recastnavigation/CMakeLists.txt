@@ -18,11 +18,22 @@
 
 if (BUILD_GAME_SERVER OR BUILD_EXTRACTORS)
   add_subdirectory(Detour)
-
-  set_target_properties(detour PROPERTIES FOLDER "Dependencies")
+  if(MSVC)
+    set_target_properties(detour PROPERTIES FOLDER "Dependencies")
+  endif()
+  target_include_directories(detour
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Detour/Include
+  )
 endif()
 
 if (BUILD_EXTRACTORS)
   add_subdirectory(Recast)
-  set_target_properties(recast PROPERTIES FOLDER "Dependencies")
+  if(MSVC)
+    set_target_properties(recast PROPERTIES FOLDER "Dependencies")
+  endif()
+  target_include_directories(recast
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Recast/Include
+  )
 endif()

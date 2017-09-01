@@ -120,18 +120,21 @@ set(LIBRARY_SRCS
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/include
   ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
-  ${ZLIB_INCLUDE_DIRS}
 )
 
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
 )
 
+if(WIN32)
+  target_link_libraries(${LIBRARY_NAME} PUBLIC z)
+endif()
+
+target_include_directories(${LIBRARY_NAME}
+  INTERFACE ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
+)
+
 if(MSVC)
-  target_link_libraries(${LIBRARY_NAME}
-    ${ZLIB_LIBRARIES}
-  )
   set_target_properties(${LIBRARY_NAME} PROPERTIES FOLDER "Dependencies")
 endif()

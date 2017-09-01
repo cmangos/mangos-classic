@@ -20,9 +20,9 @@
 #define _MOVE_MAP_H
 
 #include "Common.h"
-#include "../../dep/recastnavigation/Detour/Include/DetourAlloc.h"
-#include "../../dep/recastnavigation/Detour/Include/DetourNavMesh.h"
-#include "../../dep/recastnavigation/Detour/Include/DetourNavMeshQuery.h"
+#include <Detour/Include/DetourAlloc.h>
+#include <Detour/Include/DetourNavMesh.h>
+#include <Detour/Include/DetourNavMeshQuery.h>
 
 class Unit;
 

@@ -14,13 +14,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.0)
 set(EXECUTABLE_NAME "vmap_extractor")
 project (${EXECUTABLE_NAME})
 
-add_executable(${EXECUTABLE_NAME} adtfile.cpp  dbcfile.cpp gameobject_extract.cpp model.cpp  mpq_libmpq.cpp  vmapexport.cpp  wdtfile.cpp  wmo.cpp)
+add_executable(${EXECUTABLE_NAME} adtfile.cpp dbcfile.cpp gameobject_extract.cpp model.cpp mpq_libmpq.cpp vmapexport.cpp wdtfile.cpp wmo.cpp)
 
-target_link_libraries(${EXECUTABLE_NAME} mpqlib ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
+target_link_libraries(${EXECUTABLE_NAME} mpqlib)
+
 if(MSVC)
   # Define OutDir to source/bin/(platform)_(configuaration) folder.
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}/Extractors")

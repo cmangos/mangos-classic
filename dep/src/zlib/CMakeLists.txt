@@ -15,15 +15,28 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-set(LIBRARY_NAME gsoap)
+set(LIBRARY_NAME z)
 
 set(LIBRARY_SRCS
-  stdsoap2.cpp
+  adler32.c
+  compress.c
+  crc32.c
+  deflate.c
+  gzclose.c
+  gzlib.c
+  gzread.c
+  gzwrite.c
+  infback.c
+  inffast.c
+  inflate.c
+  inftrees.c
+  trees.c
+  uncompr.c
+  zutil.c
 )
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/include/gsoap
 )
 
 add_library(${LIBRARY_NAME} STATIC
@@ -31,9 +44,10 @@ add_library(${LIBRARY_NAME} STATIC
 )
 
 target_include_directories(${LIBRARY_NAME}
-  INTERFACE ${CMAKE_SOURCE_DIR}/dep/include/gsoap
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 if(MSVC)
+  set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "zlib")
   set_target_properties(${LIBRARY_NAME} PROPERTIES FOLDER "Dependencies")
 endif()

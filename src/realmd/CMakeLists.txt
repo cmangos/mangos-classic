@@ -33,12 +33,8 @@ if(WIN32)
 endif()
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}/src/shared
-  ${CMAKE_SOURCE_DIR}/src/framework
+  ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_BINARY_DIR}
-  ${CMAKE_BINARY_DIR}/src/shared
-  ${MYSQL_INCLUDE_DIR}
-  ${OPENSSL_INCLUDE_DIR}
 )
 
 add_executable(${EXECUTABLE_NAME}
@@ -49,7 +45,6 @@ add_dependencies(${EXECUTABLE_NAME} RevisionGenerator)
 
 target_link_libraries(${EXECUTABLE_NAME}
   shared
-  framework
 )
 
 if(WIN32)
@@ -84,10 +79,15 @@ endif()
 
 if(UNIX)
   target_link_libraries(${EXECUTABLE_NAME}
-    ${MYSQL_LIBRARY}
     ${OPENSSL_LIBRARIES}
     ${OPENSSL_EXTRA_LIBRARIES}
   )
+
+  if(POSTGRESQL AND POSTGRESQL_FOUND)
+    target_link_libraries(${EXECUTABLE_NAME} ${PostgreSQL_LIBRARIES})
+  else()
+    target_link_libraries(${EXECUTABLE_NAME} ${MYSQL_LIBRARY})
+  endif()
 endif()
 
 set(EXECUTABLE_LINK_FLAGS "")

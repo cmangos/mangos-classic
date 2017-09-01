@@ -23,8 +23,8 @@
 #include "Log.h"
 #include "World/World.h"
 
-#include "../recastnavigation/Detour/Include/DetourCommon.h"
-#include "../recastnavigation/Detour/Include/DetourMath.h"
+#include <Detour/Include/DetourCommon.h>
+#include <Detour/Include/DetourMath.h>
 
 ////////////////// PathFinder //////////////////
 PathFinder::PathFinder(const Unit* owner) :

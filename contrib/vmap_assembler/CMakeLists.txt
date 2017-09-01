@@ -23,10 +23,7 @@ if(UNIX)
   ADD_DEFINITIONS("-ggdb")
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/src/shared
-                    ${CMAKE_SOURCE_DIR}/src/game/vmap
-                    ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
-                    ${CMAKE_SOURCE_DIR}/src/framework)
+include_directories(${CMAKE_SOURCE_DIR}/src/game/vmap)
 
 list(APPEND VMAP_ASSEMBLER_SOURCE
     ${CMAKE_SOURCE_DIR}/src/game/vmap/BIH.cpp
@@ -43,7 +40,12 @@ IF(APPLE)
 ENDIF (APPLE)
 
 add_executable(${EXECUTABLE_NAME} ${VMAP_ASSEMBLER_SOURCE})
-target_link_libraries(${EXECUTABLE_NAME} g3dlite ${ZLIB_LIBRARIES} ${EXTRA_LIBS})
+
+target_link_libraries(${EXECUTABLE_NAME}
+  shared
+  g3dlite
+  ${EXTRA_LIBS}
+)
 
 if(MSVC)
   # Define OutDir to source/bin/(platform)_(configuaration) folder.

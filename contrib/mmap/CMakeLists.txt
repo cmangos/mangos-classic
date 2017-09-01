@@ -8,7 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.0)
 
 set(EXECUTABLE_NAME "MoveMapGen")
 project (${EXECUTABLE_NAME})
@@ -26,18 +26,12 @@ endif()
 
 include_directories(
     ../../src
-    ../../src/shared
     ../../src/game
     ../../src/game/vmap
-    ../../dep/include/g3dlite
-    ../../src/framework
-    ../../dep/recastnavigation/Detour/Include
-    ../../dep/recastnavigation/Recast/Include
-    ${ZLIB_INCLUDE_DIRS}
 )
 
 # TODO: Do we still need that vmaplib?
-add_library(vmaplib
+add_library(vmaplib STATIC
     ../../src/game/vmap/BIH.cpp
     ../../src/game/vmap/VMapManager2.cpp
     ../../src/game/vmap/MapTree.cpp
@@ -51,7 +45,13 @@ IF(APPLE)
    SET(EXTRA_LIBS ${CORE_SERVICES})
 ENDIF (APPLE)
 
-target_link_libraries(vmaplib g3dlite ${ZLIB_LIBRARIES} ${EXTRA_LIBS})
+target_link_libraries(vmaplib
+  PUBLIC shared
+  PUBLIC g3dlite
+  PUBLIC detour
+  PUBLIC recast
+  PUBLIC ${EXTRA_LIBS}
+)
 
 set(SOURCES
     ./src/IntermediateValues.cpp
@@ -63,7 +63,11 @@ set(SOURCES
 
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
 
-target_link_libraries(${EXECUTABLE_NAME} g3dlite vmaplib detour recast ${ZLIB_LIBRARIES})
+target_link_libraries(${EXECUTABLE_NAME}
+  vmaplib
+  detour
+  recast
+)
 
 if(MSVC)
   # Define OutDir to source/bin/(platform)_(configuaration) folder.

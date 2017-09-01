@@ -42,31 +42,18 @@ if(WIN32)
 endif()
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}/src/shared
-  ${CMAKE_SOURCE_DIR}/src/framework
-  ${CMAKE_SOURCE_DIR}/src/game
-  ${CMAKE_SOURCE_DIR}/dep/include/gsoap
-  ${MYSQL_INCLUDE_DIR}
-  ${OPENSSL_INCLUDE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_BINARY_DIR}
 )
-
-if(POSTGRESQL)
-  include_directories(${PGSQL_INCLUDE_DIR})
-else()
-  include_directories(${MYSQL_INCLUDE_DIR})
-endif()
 
 add_executable(${EXECUTABLE_NAME}
   ${EXECUTABLE_SRCS}
 )
 
 target_link_libraries(${EXECUTABLE_NAME}
-  game
   shared
-  framework
-  g3dlite
+  game
   gsoap
-  ${ZLIB_LIBRARIES}
 )
 
 if(WIN32)
@@ -101,10 +88,15 @@ endif()
 
 if(UNIX)
   target_link_libraries(${EXECUTABLE_NAME}
-    ${MYSQL_LIBRARY}
     ${OPENSSL_LIBRARIES}
     ${OPENSSL_EXTRA_LIBRARIES}
   )
+
+  if(POSTGRESQL AND POSTGRESQL_FOUND)
+    target_link_libraries(${EXECUTABLE_NAME} ${PostgreSQL_LIBRARIES})
+  else()
+    target_link_libraries(${EXECUTABLE_NAME} ${MYSQL_LIBRARY})
+  endif()
 endif()
 
 set(EXECUTABLE_LINK_FLAGS "")

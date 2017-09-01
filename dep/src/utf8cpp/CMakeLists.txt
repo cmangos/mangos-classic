@@ -15,28 +15,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-set(zlib_SRCS
-  adler32.c
-  compress.c
-  crc32.c
-  deflate.c
-  gzclose.c
-  gzlib.c
-  gzread.c
-  gzwrite.c
-  infback.c
-  inffast.c
-  inflate.c
-  inftrees.c
-  trees.c
-  uncompr.c
-  zutil.c
-)
+set(LIBRARY_NAME utf8cpp)
 
 include_directories(
+  ${CMAKE_SOURCE_DIR}/dep/include/utf8cpp
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_library(z STATIC
-  ${zlib_SRCS}
+# header-only library
+add_library(${LIBRARY_NAME} INTERFACE)
+
+target_include_directories(${LIBRARY_NAME}
+  INTERFACE ${CMAKE_SOURCE_DIR}/dep/include/utf8cpp
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
