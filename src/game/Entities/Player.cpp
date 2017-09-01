@@ -3406,10 +3406,7 @@ void Player::_LoadSpellCooldowns(QueryResult* result)
             uint32 catCDDuration = std::chrono::duration_cast<std::chrono::seconds>(catRecTime).count();
             std::string itemStr = "";
             if (item_id)
-            {
-                itemStr = " caused by item id(" + item_id;
-                itemStr += ") ";
-            }
+                itemStr = " caused by item id(" + std::to_string(item_id) + ") ";
             sLog.outDebug("Adding spell cooldown to %s, SpellID(%u), recDuration(%us), category(%u), catRecDuration(%us)%s.", GetGuidStr().c_str(),
                 spell_id, spellCDDuration, category, catCDDuration, itemStr.c_str());
 #endif
