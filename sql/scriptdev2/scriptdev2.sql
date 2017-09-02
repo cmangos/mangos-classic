@@ -581,6 +581,11 @@ UPDATE creature_template SET ScriptName='mob_zealot_lorkhan' WHERE entry=11347;
 UPDATE creature_template SET ScriptName='mob_zealot_zath' WHERE entry=11348;
 UPDATE creature_template SET ScriptName='mob_healing_ward' WHERE entry=14987;
 UPDATE creature_template SET ScriptName='npc_gurubashi_bat_rider' WHERE entry=14750;
+UPDATE creature_template SET ScriptName='npc_hakkari_blood_priest' WHERE entry=11340;
+UPDATE creature_template SET ScriptName='npc_zulian_prowler' WHERE entry=15101;
+UPDATE creature_template SET ScriptName='npc_zulian_panther' WHERE entry=11365;
+UPDATE creature_template SET ScriptName='npc_soulflayer' WHERE entry=11359;
+UPDATE creature_template SET ScriptName='npc_razzashi_adder' WHERE entry=11372;
 
 --
 -- Below contains data for table `script_texts` mainly used in C++ parts.
@@ -1981,7 +1986,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1309025,'The brood shall not fall!',0,1,0,0,'marli SAY_TRANSFORM_BACK'),
 
 (-1309026,'%s emits a deafening shriek!',0,2,0,0,'jeklik SAY_SHRIEK'),
-(-1309027,'%s begins to cast a Great Heal!',0,2,0,0,'jeklik SAY_HEAL');
+(-1309027,'%s begins to cast a Great Heal!',0,2,0,0,'jeklik SAY_HEAL'),
+
+(-1309028,'%s fully engulfs in flame and a maddened look appears in his eyes!',0,2,0,0,'gurubashi bat rider - SAY_SELF_DETONATE');
 
 -- -1 329 000 STRATHOLME
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

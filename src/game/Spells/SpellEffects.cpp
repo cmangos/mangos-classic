@@ -884,6 +884,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 24019:                                 // Gurubashi Axe Thrower; Axe Flurry.
+                {
+                    if (unitTarget && m_caster->IsWithinLOSInMap(unitTarget))
+                        m_caster->CastSpell(unitTarget, 24020, TRIGGERED_OLD_TRIGGERED);
+
+                    return;
+                }
                 case 24781:                                 // Dream Fog
                 {
                     // TODO Note: Should actually not only AttackStart, but fixate on the target

@@ -33,6 +33,7 @@ enum
     SAY_SHRIEK                  = -1309026,
     SAY_HEAL                    = -1309027,
     SAY_DEATH                   = -1309004,
+    SAY_SELF_DETONATE           = -1309028,
 
     // Bat spells
     SPELL_CHARGE                = 22911,
@@ -54,7 +55,7 @@ enum
     // Batriders Spell
     SPELL_LIQUID_FIRE           = 23968,                    // script effect - triggers 23971,
     SPELL_UNSTABLE_CONCOCTION   = 24024,
-    SPELL_TRASH                 = 8876,
+    SPELL_THRASH                = 8876,
     SPELL_DEMORALIZING_SHOUT    = 23511,
     SPELL_BATTLE_COMMAND        = 5115,
     SPELL_INFECTED_BITE         = 16128,
@@ -326,7 +327,7 @@ struct npc_gurubashi_bat_riderAI : public ScriptedAI
 
         m_bHasDoneConcoction = false;
 
-        DoCastSpellIfCan(m_creature, SPELL_TRASH);
+        DoCastSpellIfCan(m_creature, SPELL_THRASH);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -363,10 +364,13 @@ struct npc_gurubashi_bat_riderAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (!m_bHasDoneConcoction && m_creature->GetHealthPercent() < 50.0f)
+        if (!m_bHasDoneConcoction && m_creature->GetHealthPercent() < 40.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_UNSTABLE_CONCOCTION) == CAST_OK)
+            {
+                DoScriptText(SAY_SELF_DETONATE, m_creature);
                 m_bHasDoneConcoction = true;
+            }
         }
 
         if (m_uiInfectedBiteTimer < uiDiff)

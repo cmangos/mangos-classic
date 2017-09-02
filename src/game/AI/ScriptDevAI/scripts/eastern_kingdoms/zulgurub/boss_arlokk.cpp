@@ -26,6 +26,12 @@ EndScriptData
 #include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "zulgurub.h"
 
+ /* ContentData
+boss_arlokk
+npc_zulian_prowler
+go_gong_of_bethekk
+EndContentData */
+
 enum
 {
     SAY_AGGRO                   = -1309011,
@@ -39,8 +45,9 @@ enum
     SPELL_TRASH                 = 3391,
     SPELL_WHIRLWIND             = 24236,
     SPELL_PANTHER_TRANSFORM     = 24190,
+    SPELL_SUMMON_ZULIAN_PROWLERS = 24247,
 
-    NPC_ZULIAN_PROWLER          = 15101
+    SPELL_SNEAK                  = 22766,
 };
 
 struct boss_arlokkAI : public ScriptedAI
@@ -63,6 +70,10 @@ struct boss_arlokkAI : public ScriptedAI
     uint32 m_uiVisibleTimer;
     uint32 m_uiTransformTimer;
     uint32 m_uiSummonTimer;
+    Creature* m_pTrigger1;
+    Creature* m_pTrigger2;
+
+    GuidList m_lProwlerGUIDList;
 
     bool m_bIsPhaseTwo;
 
@@ -77,7 +88,6 @@ struct boss_arlokkAI : public ScriptedAI
         m_uiTransformTimer  = 30000;
         m_uiVanishTimer     = 5000;
         m_uiVisibleTimer    = 0;
-        m_uiSummonTimer     = 5000;
 
         m_bIsPhaseTwo = false;
 
@@ -89,6 +99,10 @@ struct boss_arlokkAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
+        if (m_pTrigger1 = m_pInstance->SelectRandomPantherTrigger(true))
+            m_pTrigger1->CastSpell(m_pTrigger1, SPELL_SUMMON_ZULIAN_PROWLERS, TRIGGERED_NONE);
+        if (m_pTrigger2 = m_pInstance->SelectRandomPantherTrigger(false))
+            m_pTrigger2->CastSpell(m_pTrigger2, SPELL_SUMMON_ZULIAN_PROWLERS, TRIGGERED_NONE);
     }
 
     void JustReachedHome() override
@@ -98,6 +112,8 @@ struct boss_arlokkAI : public ScriptedAI
 
         // we should be summoned, so despawn
         m_creature->ForcedDespawn();
+
+        DoStopZulianProwlers();
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -107,37 +123,29 @@ struct boss_arlokkAI : public ScriptedAI
         if (m_creature->GetVisibility() != VISIBILITY_ON)
             m_creature->SetVisibility(VISIBILITY_ON);
 
+        DoStopZulianProwlers();
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ARLOKK, DONE);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    // Wrapper to despawn the zulian panthers on evade / death
+    void DoStopZulianProwlers()
     {
-        // Just attack a random target. The Marked player will attract them automatically
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
+        if (m_pInstance)
+        {
+            // Stop summoning Zulian prowlers
+            if (m_pTrigger1)
+                m_pTrigger1->RemoveAurasDueToSpell(SPELL_SUMMON_ZULIAN_PROWLERS);
+            if (m_pTrigger2)
+                m_pTrigger2->RemoveAurasDueToSpell(SPELL_SUMMON_ZULIAN_PROWLERS);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
-
-        // Summon panters every 5 seconds
-        if (m_uiSummonTimer < uiDiff)
-        {
-            if (m_pInstance)
-            {
-                if (Creature* pTrigger = m_pInstance->SelectRandomPantherTrigger(true))
-                    m_creature->SummonCreature(NPC_ZULIAN_PROWLER, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-                if (Creature* pTrigger = m_pInstance->SelectRandomPantherTrigger(false))
-                    m_creature->SummonCreature(NPC_ZULIAN_PROWLER, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000);
-            }
-
-            m_uiSummonTimer = 5000;
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
 
         if (m_uiVisibleTimer)
         {
@@ -265,9 +273,60 @@ struct boss_arlokkAI : public ScriptedAI
     }
 };
 
+struct npc_zulian_prowlerAI : public ScriptedAI
+{
+    npc_zulian_prowlerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_bMoveToAid = m_creature->IsTemporarySummon();
+        Reset();
+    }
+
+    GuidList m_lProwlerGUIDList;
+
+    bool m_bMoveToAid;
+
+    void Reset() override
+    {
+        DoCastSpellIfCan(m_creature, SPELL_SNEAK);
+
+        // Do only once, and only for those summoned by Arlokk
+        if (m_bMoveToAid)
+        {
+            // Add to GUID list to despawn later
+            m_lProwlerGUIDList.push_back(m_creature->GetObjectGuid());
+
+            // Count the number of prowlers alive
+            uint32 count = 0;
+            for (GuidList::const_iterator itr = m_lProwlerGUIDList.begin(); itr != m_lProwlerGUIDList.end(); ++itr)
+            {
+                if (Unit* pProwler = m_creature->GetMap()->GetUnit(*itr))
+                    if (pProwler->isAlive())
+                        count++;
+            }
+
+            // Check if more than 40 are alive, if so, despawn
+            if (count > 40)
+            {
+                m_creature->ForcedDespawn();
+                return;
+            }
+
+            m_creature->GetMotionMaster()->Clear();
+            m_creature->GetMotionMaster()->MovePoint(1, aArlokkWallShieldPos[0], aArlokkWallShieldPos[1], aArlokkWallShieldPos[2]);
+
+            m_bMoveToAid = false;
+        }
+    }
+};
+
 CreatureAI* GetAI_boss_arlokk(Creature* pCreature)
 {
     return new boss_arlokkAI(pCreature);
+}
+
+CreatureAI* GetAI_npc_zulian_prowler(Creature* pCreature)
+{
+    return new npc_zulian_prowlerAI(pCreature);
 }
 
 bool GOUse_go_gong_of_bethekk(Player* /*pPlayer*/, GameObject* pGo)
@@ -290,6 +349,11 @@ void AddSC_boss_arlokk()
     pNewScript = new Script;
     pNewScript->Name = "boss_arlokk";
     pNewScript->GetAI = &GetAI_boss_arlokk;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_zulian_prowler";
+    pNewScript->GetAI = &GetAI_npc_zulian_prowler;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

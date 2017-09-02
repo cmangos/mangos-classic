@@ -42,6 +42,7 @@ enum
 };
 
 static const float aMandokirDownstairsPos[3] = { -12196.30f, -1948.37f, 130.31f};
+static const float aArlokkWallShieldPos[3] = { -11494.76f, -1627.56f, 41.30f};
 
 class instance_zulgurub : public ScriptedInstance
 {
@@ -74,6 +75,7 @@ class instance_zulgurub : public ScriptedInstance
         GuidList m_lRightPantherTriggerGUIDList;
         GuidList m_lLeftPantherTriggerGUIDList;
         GuidList m_lSpiderEggGUIDList;
+        GuidList m_lProwlerGUIDList;
 
         bool m_bHasIntroYelled;
         bool m_bHasAltarYelled;
