@@ -89,6 +89,8 @@ float World::m_VisibleObjectGreyDistance      = 0;
 float  World::m_relocation_lower_limit_sq     = 10.f * 10.f;
 uint32 World::m_relocation_ai_notify_delay    = 1000u;
 
+TimePoint World::m_currentTime = TimePoint();
+
 /// World constructor
 World::World(): mail_timer(0), mail_timer_expires(0)
 {
@@ -1343,6 +1345,8 @@ void World::DetectDBCLang()
 /// Update the World !
 void World::Update(uint32 diff)
 {
+    m_currentTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
+
     ///- Update the different timers
     for (int i = 0; i < WUPDATE_COUNT; ++i)
     {

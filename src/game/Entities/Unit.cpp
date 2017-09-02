@@ -434,7 +434,7 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     // WARNING! Order of execution here is important, do not change.
     // Spells must be processed with event system BEFORE they go to _UpdateSpells.
     // Or else we may have some SPELL_STATE_FINISHED spells stalled in pointers, that is bad.
-    UpdateCooldowns(Clock::now());
+    UpdateCooldowns(GetMap()->GetCurrentClockTime());
     m_spellUpdateHappening = true;
     m_Events.Update(update_diff);
     _UpdateSpells(update_diff);

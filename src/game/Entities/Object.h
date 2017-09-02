@@ -87,19 +87,21 @@ typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
 // cooldown system
 typedef std::chrono::system_clock Clock;
-typedef Clock::time_point TimePoint;
+typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> TimePoint;
 
 class CooldownData
 {
     friend class CooldownContainer;
 public:
-    CooldownData(uint32 spellId, uint32 duration, uint32 spellCategory, uint32 categoryDuration, uint32 itemId = 0, bool isPermanent = false) :
+    CooldownData(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory, uint32 categoryDuration, uint32 itemId = 0, bool isPermanent = false) :
         m_spellId(spellId),
-        m_expireTime(duration ? std::chrono::milliseconds(duration) + Clock::now() : TimePoint()),
+        m_expireTime(duration ? std::chrono::milliseconds(duration) + clockNow : TimePoint()),
         m_category(spellCategory),
-        m_catExpireTime(spellCategory && categoryDuration ? std::chrono::milliseconds(categoryDuration) + Clock::now() : TimePoint()),
+        m_catExpireTime(spellCategory && categoryDuration ? std::chrono::milliseconds(categoryDuration) + clockNow : TimePoint()),
         m_typePermanent(isPermanent),
-        m_itemId(itemId) {}
+        m_itemId(itemId),
+        m_expireLegacy(time(nullptr) + duration / IN_MILLISECONDS)
+    {}
 
     // return false if permanent
     bool GetSpellCDExpireTime(TimePoint& expireTime) const
@@ -126,7 +128,7 @@ public:
         if (m_typePermanent)
             return false;
 
-        if (now > m_expireTime)
+        if (now >= m_expireTime)
             return true;
 
         return false;
@@ -140,7 +142,7 @@ public:
         if (!m_category)
             return true;
 
-        if (now > m_catExpireTime)
+        if (now >= m_catExpireTime)
             return true;
 
         return false;
@@ -158,6 +160,7 @@ private:
     TimePoint         m_catExpireTime;
     bool              m_typePermanent;
     uint32            m_itemId;
+    time_t            m_expireLegacy;
 };
 
 typedef std::unique_ptr<CooldownData> CooldownDataUPTR;
@@ -189,9 +192,9 @@ public:
         }
     }
 
-    bool AddCooldown(uint32 spellId, uint32 duration, uint32 spellCategory = 0, uint32 categoryDuration = 0, uint32 itemId = 0, bool onHold = false)
+    bool AddCooldown(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory = 0, uint32 categoryDuration = 0, uint32 itemId = 0, bool onHold = false)
     {
-        auto resultItr = m_spellIdMap.emplace(spellId, std::unique_ptr<CooldownData>(new CooldownData(spellId, duration, spellCategory, categoryDuration, itemId, onHold)));
+        auto resultItr = m_spellIdMap.emplace(spellId, std::unique_ptr<CooldownData>(new CooldownData(clockNow, spellId, duration, spellCategory, categoryDuration, itemId, onHold)));
         if (resultItr.second && spellCategory && categoryDuration)
             m_categoryMap.emplace(spellCategory, resultItr.first);
 
