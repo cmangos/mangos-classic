@@ -2641,7 +2641,10 @@ void Player::SendInitialSpells() const
             continue;
 
         if (cdData->IsPermanent())
-            catCDDuration |= 0x8000000;
+        {
+            spellCDDuration = uint32(1);                              // cooldown
+            catCDDuration |= 0x80000000;
+        }
 
         data << uint16(cdData->GetSpellId());
         data << uint16(cdData->GetItemId());                // cast item id
