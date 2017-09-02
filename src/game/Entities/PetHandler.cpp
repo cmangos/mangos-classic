@@ -317,8 +317,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
             if (result == SPELL_CAST_OK)
             {
-                unit_target = spell->m_targets.getUnitTarget();
-
                 charmInfo->SetSpellOpener();
                 spell->SpellStart(&(spell->m_targets));
             }
