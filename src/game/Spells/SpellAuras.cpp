@@ -1280,6 +1280,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 if (Unit* caster = GetCaster())
                     caster->ModifyHealth(caster->GetMaxHealth() - caster->GetHealth());
                 return;
+            case 25185:                                     // Itch
+            {
+                GetCaster()->CastSpell(target, 25187, TRIGGERED_OLD_TRIGGERED);
+                return;
+            }
+            case 26077:                                     // Itch
+            {
+                GetCaster()->CastSpell(target, 26078, TRIGGERED_OLD_TRIGGERED);
+                return;
+            }
             case 28169:                                     // Mutating Injection
             {
                 // Mutagen Explosion

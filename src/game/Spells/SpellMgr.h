@@ -981,14 +981,22 @@ inline uint32 GetAffectedTargets(SpellEntry const* spellInfo)
                 case 802:                                   // Mutate Bug (AQ40, Emperor Vek'nilash)
                 case 804:                                   // Explode Bug (AQ40, Emperor Vek'lor)
                 case 23138:                                 // Gate of Shazzrah (MC, Shazzrah)
+                case 24150:                                 // Stinger Charge Primer (AQ20, Hive'Zara Stinger)
                 case 24781:                                 // Dream Fog (Emerald Dragons)
+                case 26080:                                 // Stinger Charge Primer (AQ40, Vekniss Stinger)
                 case 28560:                                 // Summon Blizzard (Naxx, Sapphiron)
                     return 1;
                 case 10258:                                 // Awaken Vault Warder (Uldaman)
                 case 28542:                                 // Life Drain (Naxx, Sapphiron)
                     return 2;
+                case 25676:                                 // Drain Mana (correct number has to be researched)
+                case 25754:
+                    return 6;
                 case 28796:                                 // Poison Bolt Volley (Naxx, Faerlina)
                     return 10;
+                case 26457:                                 // Drain Mana (correct number has to be researched)
+                case 26559:
+                    return 12;
                 case 25991:                                 // Poison Bolt Volley (AQ40, Pincess Huhuran)
                     return 15;
                 default:
