@@ -1940,7 +1940,7 @@ void WorldObject::SetActiveObjectState(bool active)
     m_isActiveObject = active;
 }
 
-void WorldObject::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*= 0*/)
+void WorldObject::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*= 0*/, bool /*updateClient = false*/)
 {
     uint32 gcdRecTime = forcedDuration ? forcedDuration : spellEntry.StartRecoveryTime;
     if (!gcdRecTime)

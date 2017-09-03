@@ -794,7 +794,7 @@ class WorldObject : public Object
         bool PrintCoordinatesError(float x, float y, float z, char const* descr) const;
 
         // cooldown system
-        virtual void AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration = 0);
+        virtual void AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration = 0, bool updateClient = false);
         virtual bool HaveGCD(SpellEntry const* spellEntry) const;
         void ResetGCD(SpellEntry const* spellEntry = nullptr);
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0);

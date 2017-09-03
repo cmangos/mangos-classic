@@ -9544,7 +9544,10 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
                 if (!spellProto)
                     sLog.outError("Weapon switch cooldown spell %u couldn't be found in Spell.dbc", cooldownSpell);
                 else
-                    AddGCD(*spellProto, true);
+                {
+                    m_weaponChangeTimer = spellProto->StartRecoveryTime;
+                    AddGCD(*spellProto, 0, true);
+                }
             }
         }
 
@@ -19004,7 +19007,7 @@ void Player::ForceHealAndPowerUpdateInZone()
     }
 }
 
-void Player::AddGCD(SpellEntry const& spellEntry, bool updateClient)
+void Player::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*= 0*/, bool updateClient /*= false*/)
 {
     int32 gcdDuration = spellEntry.StartRecoveryTime;
     if (!gcdDuration)
