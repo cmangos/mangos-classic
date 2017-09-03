@@ -66,6 +66,9 @@ typedef std::deque<Mail*> PlayerMails;
 #define PLAYER_MAX_SKILLS           127
 #define PLAYER_EXPLORED_ZONES_SIZE  64
 
+// TODO: Maybe this can be implemented in configuration file.
+#define PLAYER_NEW_INSTANCE_LIMIT_PER_HOUR 5
+
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
 {
@@ -1502,6 +1505,10 @@ class Player : public Unit
         int GetGuildIdInvited() { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(ObjectGuid guid);
 
+        bool CanEnterNewInstance(uint32 instanceId);
+        void AddNewInstanceId(uint32 instanceId);
+        void UpdateNewInstanceIdTimers(TimePoint const& now);
+
         bool UpdateSkill(uint32 skill_id, uint32 step);
         bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);
 
@@ -2151,6 +2158,8 @@ class Player : public Unit
         bool _LoadHomeBind(QueryResult* result);
         void _LoadBGData(QueryResult* result);
         void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
+        void _LoadCreatedInstanceTimers();
+        void _SaveNewInstanceIdTimer();
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -2374,6 +2383,9 @@ class Player : public Unit
         ReputationMgr  m_reputationMgr;
 
         int32 m_cannotBeDetectedTimer;
+
+        std::unordered_map<uint32, TimePoint> m_enteredInstances;
+        uint32 m_createdInstanceClearTimer;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

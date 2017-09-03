@@ -1399,6 +1399,9 @@ bool DungeonMap::Add(Player* player)
     m_resetAfterUnload = false;
     m_unloadWhenEmpty = false;
 
+    if (i_mapEntry->IsNonRaidDungeon())
+        player->AddNewInstanceId(GetInstanceId());
+
     // this will acquire the same mutex so it cannot be in the previous block
     Map::Add(player);
 

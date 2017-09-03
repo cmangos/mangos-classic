@@ -544,6 +544,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_lastFallZ = 0;
 
     m_cannotBeDetectedTimer = 0;
+    m_createdInstanceClearTimer = MINUTE * IN_MILLISECONDS;
 }
 
 Player::~Player()
@@ -1331,6 +1332,14 @@ void Player::Update(uint32 update_diff, uint32 p_time)
 
     UpdateEnchantTime(update_diff);
     UpdateHomebindTime(update_diff);
+
+    if (m_createdInstanceClearTimer < update_diff)
+    {
+        m_createdInstanceClearTimer = MINUTE * IN_MILLISECONDS;
+        UpdateNewInstanceIdTimers(std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now()));
+    }
+    else
+        m_createdInstanceClearTimer -= update_diff;
 
     // Group update
     SendUpdateToOutOfRangeGroupMembers();
@@ -13753,6 +13762,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     SetFallInformation(0, GetPositionZ());
 
     _LoadSpellCooldowns(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS));
+    _LoadCreatedInstanceTimers();
 
     // Spell code allow apply any auras to dead character in load time in aura/spell/item loading
     // Do now before stats re-calculation cleanup for ghost state unexpected auras
@@ -14937,6 +14947,7 @@ void Player::SaveToDB()
     _SaveActions();
     _SaveAuras();
     _SaveSkills();
+    _SaveNewInstanceIdTimer();
     m_reputationMgr.SaveToDB();
     _SaveHonorCP();
     GetSession()->SaveTutorialsData();                      // changed only while character in game
@@ -17165,6 +17176,9 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
             if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(mapEntry->MapID))
                 GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM), at->requiredLevel, sObjectMgr.GetItemPrototype(miscRequirement)->Name1);
             break;
+        case AREA_LOCKSTATUS_TOO_MANY_INSTANCE:
+            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_TOO_MANY_INSTANCES);
+            break;
         case AREA_LOCKSTATUS_NOT_ALLOWED:
         case AREA_LOCKSTATUS_RAID_LOCKED:
         case AREA_LOCKSTATUS_UNKNOWN_ERROR:
@@ -18912,6 +18926,13 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, uint32& m
     DungeonPersistentState* state = GetBoundInstanceSaveForSelfOrGroup(at->target_mapId);
     Map* map = sMapMgr.FindMap(at->target_mapId, state ? state->GetInstanceId() : 0);
 
+    // check if this account try to abuse reseting instance 
+    if (mapEntry->IsNonRaidDungeon())
+    {
+        if (!CanEnterNewInstance(state ? state->GetInstanceId() : 0))
+            return AREA_LOCKSTATUS_TOO_MANY_INSTANCE;
+    }
+
     // Map's state check
     if (map && map->IsDungeon())
     {
@@ -19206,5 +19227,78 @@ void Player::RemoveSpellLockout(SpellSchoolMask spellSchoolMask, std::set<uint32
         }
 
         SendClearCooldown(spellEntry->Id, this);
+    }
+}
+
+/* System for limiting instance entering to 5 per hour */
+// check if player can enter new instance
+bool Player::CanEnterNewInstance(uint32 instanceId)
+{
+    if (isGameMaster())
+        return true;
+
+    if (m_enteredInstances.find(instanceId) != m_enteredInstances.end())
+        return true;
+
+    return m_enteredInstances.size() < PLAYER_NEW_INSTANCE_LIMIT_PER_HOUR;
+}
+
+// when instance was entered
+void Player::AddNewInstanceId(uint32 instanceId)
+{
+    if (m_enteredInstances.find(instanceId) == m_enteredInstances.end())
+        m_enteredInstances.emplace(instanceId, std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now() + std::chrono::hours(1)));
+}
+
+void Player::_LoadCreatedInstanceTimers()
+{
+    //                                                     0          1
+    QueryResult* result = CharacterDatabase.PQuery("SELECT ExpireTime, InstanceId FROM account_instances_entered WHERE AccountId = '%u'", m_session->GetAccountId());
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            TimePoint expireTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::from_time_t(fields[0].GetUInt64()));
+            uint32 instanceId = fields[1].GetUInt32();
+
+            if (expireTime > Clock::now())
+                m_enteredInstances.emplace(instanceId, expireTime);
+
+        } while (result->NextRow());
+
+        delete result;
+    }
+}
+
+void Player::_SaveNewInstanceIdTimer()
+{
+    CharacterDatabase.PExecute("DELETE FROM account_instances_entered WHERE AccountId = '%u'", m_session->GetAccountId());
+
+    if (m_enteredInstances.empty())
+        return;
+
+    static SqlStatementID insertInsertTimer;
+    for (auto enterInstItr : m_enteredInstances)
+    {
+        SqlStatement stmt = CharacterDatabase.CreateStatement(insertInsertTimer,
+            "INSERT INTO account_instances_entered (AccountId, ExpireTime, InstanceId) VALUES( ?, ?, ?)");
+
+        stmt.addUInt32(m_session->GetAccountId());
+        stmt.addUInt64(Clock::to_time_t(enterInstItr.second));
+        stmt.addUInt32(enterInstItr.first);
+        stmt.Execute();
+    }
+}
+
+// Clears timers that expired
+void Player::UpdateNewInstanceIdTimers(TimePoint const& now)
+{
+    for (auto iter = m_enteredInstances.begin(); iter != m_enteredInstances.end();)
+    {
+        if ((*iter).second < now)
+            iter = m_enteredInstances.erase(iter);
+        else
+            ++iter;
     }
 }
