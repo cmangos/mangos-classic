@@ -49,7 +49,6 @@
 #include "Threading.h"
 
 // included to use sleep_for()
-#include <chrono>
 #include <thread>
 
 #if COMPILER == COMPILER_MICROSOFT
