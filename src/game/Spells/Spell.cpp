@@ -3089,9 +3089,6 @@ void Spell::_handle_finish_phase()
 
 void Spell::SendSpellCooldown()
 {
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-
     // (1) have infinity cooldown but set at aura apply, (2) passive cooldown at triggering
     if (m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE) || m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
         return;
