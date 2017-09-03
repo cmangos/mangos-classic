@@ -1087,24 +1087,12 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Npc Text Id...");
     sObjectMgr.LoadNpcGossips();                            // must be after load Creature and LoadGossipText
 
-    sLog.outString("Loading Gossip scripts...");
-    sScriptMgr.LoadGossipScripts();                         // must be before gossip menu options
-
-    sObjectMgr.LoadGossipMenus();
-
-    sLog.outString("Loading Vendors...");
-    sObjectMgr.LoadVendorTemplates();                       // must be after load ItemTemplate
-    sObjectMgr.LoadVendors();                               // must be after load CreatureTemplate, VendorTemplate, and ItemTemplate
-
-    sLog.outString("Loading Trainers...");
-    sObjectMgr.LoadTrainerTemplates();                      // must be after load CreatureTemplate
-    sObjectMgr.LoadTrainers();                              // must be after load CreatureTemplate, TrainerTemplate
-
-    sLog.outString("Loading Scripts random templates...");      // must be before String calls
+    sLog.outString("Loading Scripts random templates...");  // must be before String calls
     sScriptMgr.LoadDbScriptRandomTemplates();
                                                             ///- Load and initialize DBScripts Engine
     sLog.outString("Loading DB-Scripts Engine...");
-    sScriptMgr.LoadRelayScripts();
+    sScriptMgr.LoadRelayScripts();                          // must be first in dbscripts loading
+    sScriptMgr.LoadGossipScripts();                         // must be before gossip menu options
     sScriptMgr.LoadQuestStartScripts();                     // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
     sScriptMgr.LoadQuestEndScripts();                       // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
     sScriptMgr.LoadSpellScripts();                          // must be after load Creature/Gameobject(Template/Data)
@@ -1118,6 +1106,17 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Scripts text locales...");      // must be after Load*Scripts calls
     sScriptMgr.LoadDbScriptStrings();
+
+    sLog.outString("Loading Gossip Menus...");
+    sObjectMgr.LoadGossipMenus();
+
+    sLog.outString("Loading Vendors...");
+    sObjectMgr.LoadVendorTemplates();                       // must be after load ItemTemplate
+    sObjectMgr.LoadVendors();                               // must be after load CreatureTemplate, VendorTemplate, and ItemTemplate
+
+    sLog.outString("Loading Trainers...");
+    sObjectMgr.LoadTrainerTemplates();                      // must be after load CreatureTemplate
+    sObjectMgr.LoadTrainers();                              // must be after load CreatureTemplate, TrainerTemplate
 
     sLog.outString("Loading Waypoint scripts...");          
 
