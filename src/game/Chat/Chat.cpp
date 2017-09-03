@@ -218,8 +218,8 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand bgCommandTable[] =
     {
-        { "start",          SEC_GAMEMASTER,     false, &ChatHandler::HandleDebugBattlegroundStartCommand,   "", nullptr },
-        { "",               SEC_GAMEMASTER,     false, &ChatHandler::HandleDebugBattlegroundCommand,        "", nullptr },
+        { "start",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugBattlegroundStartCommand,   "", nullptr },
+        { "",               SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugBattlegroundCommand,        "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
