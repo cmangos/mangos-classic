@@ -710,10 +710,24 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             }
             case SCRIPT_COMMAND_START_RELAY_SCRIPT:         // 45
             {
-                if (sRelayScripts.second.find(tmp.relayScript.relayId) == sRelayScripts.second.end())
+                if (strcmp(scripts.first, "dbscripts_on_relay") != 0) // Relay scripts are done first and checked after load
                 {
-                    sLog.outErrorDb("Table `%s` uses nonexistent relay ID %u in SCRIPT_COMMAND_START_RELAY_SCRIPT for script id %u.", tablename, tmp.relayScript.relayId, tmp.id);
-                    continue;
+                    if (tmp.relayScript.relayId)
+                    {
+                        if (sRelayScripts.second.find(tmp.relayScript.relayId) == sRelayScripts.second.end())
+                        {
+                            sLog.outErrorDb("Table `dbscripts_on_relay` uses nonexistent relay ID %u in SCRIPT_COMMAND_START_RELAY_SCRIPT for script id %u.", tmp.relayScript.relayId, tmp.id);
+                            continue;
+                        }
+                    }
+                }
+                if (tmp.relayScript.templateId)
+                {
+                    if (!sScriptMgr.CheckScriptRelayTemplateId(tmp.relayScript.templateId))
+                    {
+                        sLog.outErrorDb("Table `dbscripts_on_relay` uses nonexistent dbscript_random_template ID %u in SCRIPT_COMMAND_START_RELAY_SCRIPT for script id %u.", tmp.relayScript.relayId, tmp.id);
+                        continue;
+                    }
                 }
                 break;
             }
@@ -888,6 +902,9 @@ void ScriptMgr::LoadRelayScripts()
             }
         }
     }
+
+    // String templates are checked on string loading
+    CheckRandomRelayTemplates();
 }
 
 void ScriptMgr::LoadDbScriptStrings()
@@ -942,9 +959,6 @@ void ScriptMgr::LoadDbScriptRandomTemplates()
 
         delete result;
     }
-
-    // String templates are checked on string loading
-    CheckRandomRelayTemplates();
 }
 
 void ScriptMgr::CheckRandomStringTemplates(std::set<int32>& ids)
