@@ -742,16 +742,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         duel_hasEnded = true;
     }
 
-    // Get in CombatState
-    if (pVictim != this && damagetype != DOT && (!spellProto || (!IsPositiveSpellTargetMode(spellProto, this, pVictim) && !spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))))
-    {
-        SetInCombatWith(pVictim);
-        pVictim->SetInCombatWith(this);
-
-        if (Player* attackedPlayer = pVictim->GetBeneficiaryPlayer())
-            SetContestedPvP(attackedPlayer);
-    }
-
     if (pVictim->GetTypeId() == TYPEID_UNIT && !((Creature*)pVictim)->IsPet() && !((Creature*)pVictim)->HasLootRecipient())
         ((Creature*)pVictim)->SetLootRecipient(this);
 
@@ -1808,6 +1798,12 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         // on weapon hit casts
         if (GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
             ((Player*)this)->CastItemCombatSpell(pVictim, damageInfo->attackType);
+
+        SetInCombatWith(pVictim);
+        pVictim->SetInCombatWith(this);
+
+        if (Player* attackedPlayer = pVictim->GetBeneficiaryPlayer())
+            SetContestedPvP(attackedPlayer);
 
         // If not immune
         if (damageInfo->TargetState != VICTIMSTATE_IS_IMMUNE)
