@@ -1690,11 +1690,15 @@ class Unit : public WorldObject
         Unit* GetOwner(bool recursive = false) const;
         Unit* GetMaster() const;
 
-        // Beneficiary: master or self
+        // Beneficiary: master or self (serverside)
         Unit const* GetBeneficiary() const;
         Unit* GetBeneficiary();
         Player const* GetBeneficiaryPlayer() const;
         Player* GetBeneficiaryPlayer();
+
+        // Controlling player: limited recursive master/beneficiary (clientside)
+        Player const* GetControllingPlayer() const;
+
         Unit* GetSpawner() const; // serverside only logic used to determine spawner of unit
 
         Unit* GetSummoner() const;

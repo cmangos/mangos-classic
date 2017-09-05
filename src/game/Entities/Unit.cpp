@@ -5733,6 +5733,22 @@ Player* Unit::GetBeneficiaryPlayer()
     return (GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr);
 }
 
+Player const* Unit::GetControllingPlayer() const
+{
+    // Classic clientside logic counterpart
+    if (ObjectGuid const& masterGuid = GetMasterGuid())
+    {
+        if (Unit const* master = ObjectAccessor::GetUnit(*this, masterGuid))
+        {
+            if (master->GetTypeId() == TYPEID_PLAYER)
+                return static_cast<Player const*>(master);
+        }
+    }
+    else if (GetTypeId() == TYPEID_PLAYER)
+        return static_cast<Player const*>(this);
+    return nullptr;
+}
+
 Unit* Unit::GetSpawner() const
 {
     if (ObjectGuid guid = GetSpawnerGuid())
