@@ -5463,11 +5463,11 @@ bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE)
             {
                 if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                 {
-                    const Player* thisPlayer = GetBeneficiaryPlayer();
+                    const Player* thisPlayer = GetControllingPlayer();
                     if (!thisPlayer)
                         return true;
 
-                    const Player* unitPlayer = target->GetBeneficiaryPlayer();
+                    const Player* unitPlayer = target->GetControllingPlayer();
                     if (!unitPlayer)
                         return true;
 
