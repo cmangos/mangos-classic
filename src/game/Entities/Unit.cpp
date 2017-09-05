@@ -9654,7 +9654,7 @@ void Unit::SetPvP(bool state)
 bool Unit::IsPvPFreeForAll() const
 {
     // Pre-WotLK free for all check (query player in charge)
-    if (const Player* thisPlayer = GetBeneficiaryPlayer())
+    if (const Player* thisPlayer = GetControllingPlayer())
         return thisPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
     return false;
 }
