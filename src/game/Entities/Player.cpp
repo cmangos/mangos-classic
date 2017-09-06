@@ -2783,8 +2783,9 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         // fix activate state for non-stackable low rank (and find next spell for !active case)
         if (sSpellMgr.IsRankedSpellNonStackableInSpellBook(spellInfo))
         {
+            uint32 tempSpellId = spell_id;
             SpellChainMapNext const& nextMap = sSpellMgr.GetSpellChainNext();
-            for (SpellChainMapNext::const_iterator next_itr = nextMap.lower_bound(spell_id); next_itr != nextMap.upper_bound(spell_id); ++next_itr)
+            for (SpellChainMapNext::const_iterator next_itr = nextMap.lower_bound(tempSpellId); next_itr != nextMap.upper_bound(tempSpellId);)
             {
                 if (HasSpell(next_itr->second))
                 {
@@ -2792,6 +2793,11 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                     active = false;
                     next_active_spell_id = next_itr->second;
                     break;
+                }
+                else
+                {
+                    tempSpellId = next_itr->second;
+                    next_itr = nextMap.lower_bound(next_itr->second);
                 }
             }
         }
