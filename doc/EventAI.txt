@@ -95,6 +95,7 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 30   EVENT_T_RECEIVE_AI_EVENT        AIEventType, Sender-Entry, unused, unused               Expires when the creature receives an AIEvent of type (Param1), sent by creature (Param2 != 0). If (Param2 = 0) then sent by any creature
 31   EVENT_T_ENERGY                  EnergyMax%, EnergyMin%, RepeatMin, RepeatMax            Expires when the NPC's Energy% is between (Param1) and (Param2). Will repeat between every (Param3) and (Param4) If Event Conditions Are Still Met.
 32   EVENT_T_SELECT_ATTACKING_TARGET MinRange, MaxRange, RepeatMin, RepeatMax                Expires when the NPC has a target in threat table further than Param1 and closer than Param2. First time happens after and will repeat after Param3 and Param4.
+33   EVENT_T_FACING_TARGET           BackOrFront, unused, RepeatMin, RepeatMax               Expires when the NPC is in back (Param1=0) or in front (Param1=1) of its current target. Will repeat after Param3 and Param4.
 
 =========================================
 Action Types
@@ -493,6 +494,17 @@ Parameter 4: RepeatMax - Maximum Time used to calculate Random Repeat Event Expi
 
 COMBAT ONLY - Expires when a random hostile target is found in a distance greater than (Param1) and less than (Param2). Will repeat every (Param3) and (Param4).
 Note: this event will fill TARGET_T_EVENT_SPECIFIC with the target found
+
+---------------------------
+33 = EVENT_T_FACING_TARGET:
+---------------------------
+Parameter 1: BackOrFront - Define is the NPC must be in back (Parameter 1=0) or in front (Parameter 1=1) or its current target.
+Parameter 2: Unused
+Parameter 3: RepeatMin - Minimum Time used to calculate Random Repeat Event Expire
+Parameter 4: RepeatMax - Maximum Time used to calculate Random Repeat Event Expire
+
+COMBAT ONLY - Expires when the NPC is facing the back (or front) of its current target. Will repeat every (Param3) and (Param4).
+This is commonly used for events where a NPC needs to use abilities available only when facing its target's back/front (Such as rogues' backstab ability).
 
 =========================================
 Action Types
