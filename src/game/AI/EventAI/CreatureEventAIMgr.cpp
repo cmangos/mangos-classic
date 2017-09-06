@@ -530,6 +530,25 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     }
                     break;
                 }
+                case EVENT_T_FACING_TARGET:
+                {
+                    // Position is invalid (0:in back, 1:in front)
+                    if (temp.facingTarget.backOrFront && temp.facingTarget.backOrFront != 1)
+                    {
+                        sLog.outErrorEventAI("Event %u has unfitting value (%u) for param1 in event EVENT_T_FACING_TARGET (must be 0 or 1), skipping.", i, temp.facingTarget.backOrFront);
+                        continue;
+                    }
+                    // Event has repeatable flag but no timer
+                    if (temp.event_flags & EFLAG_REPEATABLE && !temp.facingTarget.repeatMin && !temp.facingTarget.repeatMax)
+                    {
+                        sLog.outErrorEventAI("Creature %u has param3 and param4=0 (RepeatMin/RepeatMax) but cannot be repeatable without timers. Removing EFLAG_REPEATABLE for event %u.", temp.creature_id, i);
+                        temp.event_flags &= ~EFLAG_REPEATABLE;
+                    }
+                    // Event has repeatable flag but timer is invalid
+                    if (temp.event_flags & EFLAG_REPEATABLE && temp.facingTarget.repeatMax < temp.facingTarget.repeatMin)
+                        sLog.outErrorEventAI("Creature %u is using repeatable event(%u) with param4 < param3 (RepeatMax < RepeatMin). Event will never repeat.", temp.creature_id, i);
+                    break;
+                }
                 default:
                     sLog.outErrorEventAI("Creature %u using not checked at load event (%u) in event %u. Need check code update?", temp.creature_id, temp.event_id, i);
                     break;

@@ -70,6 +70,7 @@ enum EventAI_Type
     EVENT_T_RECEIVE_AI_EVENT        = 30,                   // AIEventType, Sender-Entry, unused, unused
     EVENT_T_ENERGY                  = 31,                   // EnergyMax%, EnergyMin%, RepeatMin, RepeatMax
     EVENT_T_SELECT_ATTACKING_TARGET = 32,                   // MinRange, MaxRange, RepeatMin, RepeatMax
+    EVENT_T_FACING_TARGET           = 33,                   // Position, unused, RepeatMin, RepeatMax
 
     EVENT_T_END,
 };
@@ -446,7 +447,7 @@ struct CreatureEventAI_Action
             uint32 unused2;
         } dynamicMovement;
         // ACTION_T_SET_REACT_STATE                         = 50
-        struct  
+        struct
         {
             uint32 reactState;
             uint32 unused1;
@@ -660,6 +661,14 @@ struct CreatureEventAI_Event
             uint32 repeatMin;
             uint32 repeatMax;
         } selectTarget;
+        // EVENT_T_FACING_TARGET                            = 33
+        struct
+        {
+            uint32 backOrFront;
+            uint32 unused;
+            uint32 repeatMin;
+            uint32 repeatMax;
+        } facingTarget;
         // RAW
         struct
         {
