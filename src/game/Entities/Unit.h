@@ -1812,6 +1812,7 @@ class Unit : public WorldObject
         ShapeshiftForm GetShapeshiftForm() const { return ShapeshiftForm(GetByteValue(UNIT_FIELD_BYTES_1, 2)); }
         void  SetShapeshiftForm(ShapeshiftForm form) { SetByteValue(UNIT_FIELD_BYTES_1, 2, form); }
 
+        bool IsShapeShifted() const;
         bool IsInFeralForm() const
         {
             ShapeshiftForm form = GetShapeshiftForm();
