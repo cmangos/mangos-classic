@@ -432,6 +432,20 @@ bool ChatHandler::HandleReloadGossipMenuCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadQuestgiverGreetingCommand(char* /*args*/)
+{
+    sObjectMgr.LoadQuestgiverGreeting();
+    SendGlobalSysMessage("DB table `questgiver_greeting` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadQuestgiverGreetingLocalesCommand(char* /*args*/)
+{
+    sObjectMgr.LoadQuestgiverGreetingLocales();
+    SendGlobalSysMessage("DB table `locales_questgiver_greeting` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadGOQuestRelationsCommand(char* /*args*/)
 {
     sLog.outString("Loading Quests Relations... (`gameobject_questrelation`)");

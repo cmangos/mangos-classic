@@ -11474,60 +11474,79 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
 
     uint32 status = qmi0.m_qIcon;
 
-    // single element case
-    if (questMenu.MenuItemCount() == 1)
-    {
-        // Auto open -- maybe also should verify there is no greeting
-        uint32 quest_id = qmi0.m_qId;
-        Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest_id);
+    uint32 type;
+    if (guid.IsCreature())
+        type = QUESTGIVER_CREATURE;
+    else if (guid.IsGameObject())
+        type = QUESTGIVER_GAMEOBJECT;
 
-        if (pQuest)
-        {
-            if (status == DIALOG_STATUS_REWARD_REP && !GetQuestRewardStatus(quest_id))
-                PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanRewardQuest(pQuest, false), true);
-            else if (status == DIALOG_STATUS_INCOMPLETE)
-                PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, false, true);
-            // Send completable on repeatable quest if player don't have quest
-            else if (pQuest->IsRepeatable())
-                PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanCompleteRepeatableQuest(pQuest), true);
-            else
-                PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, guid, true);
-        }
-    }
-    // multiply entries
-    else
+    if (QuestgiverGreeting const* data = sObjectMgr.GetQuestgiverGreetingData(guid.GetEntry(), type))
     {
         QEmote qe;
-        qe._Delay = 0;
-        qe._Emote = 0;
-        std::string title = "";
-
-        // need pet case for some quests
-        if (Creature* pCreature = GetMap()->GetAnyTypeCreature(guid))
+        qe._Delay = data->emoteDelay;
+        qe._Emote = data->emoteId;
+        std::string title = data->text;
+        int loc_idx = GetSession()->GetSessionDbLocaleIndex();
+        sObjectMgr.GetQuestgiverGreetingLocales(guid.GetEntry(), type, loc_idx, &title);
+        PlayerTalkClass->SendQuestGiverQuestList(qe, title, guid);
+    }
+    else
+    {
+        // single element case
+        if (questMenu.MenuItemCount() == 1)
         {
-            uint32 textid = GetGossipTextId(pCreature);
+            // Auto open -- maybe also should verify there is no greeting
+            uint32 quest_id = qmi0.m_qId;
+            Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest_id);
 
-            GossipText const* gossiptext = sObjectMgr.GetGossipText(textid);
-            if (!gossiptext)
+            if (pQuest)
             {
-                qe._Delay = 0;                              // TEXTEMOTE_MESSAGE;              // zyg: player emote
-                qe._Emote = 0;                              // TEXTEMOTE_HELLO;                // zyg: NPC emote
-                title.clear();
-            }
-            else
-            {
-                qe = gossiptext->Options[0].Emotes[0];
-
-                int loc_idx = GetSession()->GetSessionDbLocaleIndex();
-
-                std::string title0 = gossiptext->Options[0].Text_0;
-                std::string title1 = gossiptext->Options[0].Text_1;
-                sObjectMgr.GetNpcTextLocaleStrings0(textid, loc_idx, &title0, &title1);
-
-                title = !title0.empty() ? title0 : title1;
+                if (status == DIALOG_STATUS_REWARD_REP && !GetQuestRewardStatus(quest_id))
+                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanRewardQuest(pQuest, false), true);
+                else if (status == DIALOG_STATUS_INCOMPLETE)
+                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, false, true);
+                // Send completable on repeatable quest if player don't have quest
+                else if (pQuest->IsRepeatable())
+                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanCompleteRepeatableQuest(pQuest), true);
+                else
+                    PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, guid, true);
             }
         }
-        PlayerTalkClass->SendQuestGiverQuestList(qe, title, guid);
+        // multiply entries
+        else
+        {
+            QEmote qe;
+            qe._Delay = 0;
+            qe._Emote = 0;
+            std::string title = "";
+
+            // need pet case for some quests
+            if (Creature* pCreature = GetMap()->GetAnyTypeCreature(guid))
+            {
+                uint32 textid = GetGossipTextId(pCreature);
+
+                GossipText const* gossiptext = sObjectMgr.GetGossipText(textid);
+                if (!gossiptext)
+                {
+                    qe._Delay = 0;                              // TEXTEMOTE_MESSAGE;              // zyg: player emote
+                    qe._Emote = 0;                              // TEXTEMOTE_HELLO;                // zyg: NPC emote
+                    title.clear();
+                }
+                else
+                {
+                    qe = gossiptext->Options[0].Emotes[0];
+
+                    int loc_idx = GetSession()->GetSessionDbLocaleIndex();
+
+                    std::string title0 = gossiptext->Options[0].Text_0;
+                    std::string title1 = gossiptext->Options[0].Text_1;
+                    sObjectMgr.GetNpcTextLocaleStrings0(textid, loc_idx, &title0, &title1);
+
+                    title = !title0.empty() ? title0 : title1;
+                }
+            }
+            PlayerTalkClass->SendQuestGiverQuestList(qe, title, guid);
+        }
     }
 }
 

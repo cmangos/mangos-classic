@@ -4511,6 +4511,145 @@ void ObjectMgr::LoadGossipTextLocales()
     sLog.outString();
 }
 
+QuestgiverGreeting const* ObjectMgr::GetQuestgiverGreetingData(uint32 entry, uint32 type) const
+{
+    auto itr = m_questgiverGreetingMap[type].find(entry);
+    if (itr == m_questgiverGreetingMap[type].end()) return nullptr;
+    else return &itr->second;
+}
+
+void ObjectMgr::LoadQuestgiverGreeting()
+{
+    for (uint32 i = 0; i < QUESTGIVER_TYPE_MAX; i++) // Reload Case
+        m_questgiverGreetingMap[i].clear();
+
+    QueryResult* result = WorldDatabase.Query("SELECT Entry, Type, Text, EmoteId, EmoteDelay FROM questgiver_greeting");
+    int count = 0;
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+
+        sLog.outString(">> Loaded %u questgiver greetings", count);
+        sLog.outString();
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+        uint32 type = fields[1].GetUInt32();
+        uint32 emoteId = fields[3].GetUInt32();
+
+        switch (type)
+        {
+            case QUESTGIVER_CREATURE:
+                if (!sCreatureStorage.LookupEntry<CreatureInfo>(entry))
+                {
+                    sLog.outErrorEventAI("Table questgiver_greeting uses nonexistent creature entry %u. Skipping.", entry);
+                    continue;
+                }
+                break;
+            case QUESTGIVER_GAMEOBJECT:
+                if (!sGOStorage.LookupEntry<GameObjectInfo>(entry))
+                {
+                    sLog.outErrorEventAI("Table questgiver_greeting uses nonexistent gameobject entry %u. Skipping.", entry);
+                    continue;
+                }
+                break;
+            default:
+                sLog.outErrorEventAI("Table questgiver_greeting uses questgiver type %u. Skipping.", type);
+                continue;
+        }
+
+        if (!sEmotesStore.LookupEntry(emoteId))
+        {
+            sLog.outErrorEventAI("Table questgiver_greeting entry %u type %u uses invalid emote %u. Skipping.", entry, type, emoteId);
+            continue;
+        }
+
+        QuestgiverGreeting& var = m_questgiverGreetingMap[type][entry];
+        var.text = fields[2].GetString();
+        var.emoteId = emoteId;
+        var.emoteDelay = fields[4].GetUInt32();
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString(">> Loaded " SIZEFMTD " questgiver greetings.", mNpcTextLocaleMap.size());
+    sLog.outString();
+}
+
+void ObjectMgr::LoadQuestgiverGreetingLocales()
+{
+    mNpcTextLocaleMap.clear();                              // need for reload case
+
+    QueryResult* result = WorldDatabase.Query("SELECT Entry, Type, Text_loc1, Text_loc2, Text_loc3, Text_loc4, Text_loc5, Text_loc6, Text_loc7, Text_loc8 FROM locales_questgiver_greeting");
+    int count = 0;
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outString(">> Loaded 0 locales questgiver greetings");
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+        uint32 type = fields[1].GetUInt32();
+
+        switch (type)
+        {
+            case QUESTGIVER_CREATURE:
+                if (!sCreatureStorage.LookupEntry<CreatureInfo>(entry))
+                {
+                    sLog.outErrorEventAI("Table questgiver_greeting uses nonexistent creature entry %u. Skipping.", entry);
+                    continue;
+                }
+                break;
+            case QUESTGIVER_GAMEOBJECT:
+                if (!sGOStorage.LookupEntry<GameObjectInfo>(entry))
+                {
+                    sLog.outErrorEventAI("Table questgiver_greeting uses nonexistent gameobject entry %u. Skipping.", entry);
+                    continue;
+                }
+                break;
+            default:
+                sLog.outErrorEventAI("Table questgiver_greeting uses questgiver type %u. Skipping.", type);
+                continue;
+        }
+
+        QuestgiverGreetingLocale& var = m_questgiverGreetingLocaleMap[type][entry];
+
+        for (int i = 1; i < MAX_LOCALE; ++i)
+        {
+            if (const char* text = fields[1 + i].GetString())
+                var.localeText.push_back(text);
+            else
+                var.localeText.push_back("");
+        }
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString(">> Loaded " SIZEFMTD " locales questgiver greetings.", mNpcTextLocaleMap.size());
+    sLog.outString();
+}
+
 // not very fast function but it is called only once a day, or on starting-up
 /// @param serverUp true if the server is already running, false when the server is started
 void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
@@ -8740,6 +8879,19 @@ void ObjectMgr::GetNpcTextLocaleStrings0(uint32 entry, int32 loc_idx, std::strin
             if (text1_0_Ptr)
                 if (nl->Text_1[0].size() > (size_t)loc_idx && !nl->Text_1[0][loc_idx].empty())
                     *text1_0_Ptr = nl->Text_1[0][loc_idx];
+        }
+    }
+}
+
+void ObjectMgr::GetQuestgiverGreetingLocales(uint32 entry, uint32 type, int32 loc_idx, std::string* titlePtr) const
+{
+    if (loc_idx >= 0)
+    {
+        if (QuestgiverGreetingLocale const* ql = GetQuestgiverGreetingLocale(entry, type))
+        {
+            if (titlePtr)
+                if (ql->localeText.size() > (size_t)loc_idx && !ql->localeText[loc_idx].empty())
+                    *titlePtr = ql->localeText[loc_idx];
         }
     }
 }
