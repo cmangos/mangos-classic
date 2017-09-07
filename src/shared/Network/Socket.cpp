@@ -269,7 +269,7 @@ void Socket::OnWriteComplete(const boost::system::error_code &error, size_t leng
     // if there is data left to write, move it to the start of the buffer
     if (length < m_outBuffer->m_writePosition)
     {
-        std::copy(&m_outBuffer->m_buffer[length], &m_outBuffer->m_buffer[m_outBuffer->m_writePosition], m_outBuffer->m_buffer.begin());
+        memcpy(&(m_outBuffer->m_buffer[0]), &(m_outBuffer->m_buffer[length]), (m_outBuffer->m_writePosition - length) * sizeof(m_outBuffer->m_buffer[0]));
         m_outBuffer->m_writePosition -= length;
     }
     // if not, reset the write pointer
@@ -283,7 +283,7 @@ void Socket::OnWriteComplete(const boost::system::error_code &error, size_t leng
         if (m_outBuffer->m_buffer.size() < (m_outBuffer->m_writePosition + m_secondaryOutBuffer->m_writePosition))
             m_outBuffer->m_buffer.resize(m_outBuffer->m_writePosition + m_secondaryOutBuffer->m_writePosition);
 
-        std::copy(&m_secondaryOutBuffer->m_buffer[0], &m_secondaryOutBuffer->m_buffer[m_secondaryOutBuffer->m_writePosition], &m_outBuffer->m_buffer[m_outBuffer->m_writePosition]);
+        memcpy(&(m_outBuffer->m_buffer[m_outBuffer->m_writePosition]), &(m_secondaryOutBuffer->m_buffer[0]), (m_secondaryOutBuffer->m_writePosition) * sizeof(m_secondaryOutBuffer->m_buffer[0]));
 
         m_outBuffer->m_writePosition += m_secondaryOutBuffer->m_writePosition;
         m_secondaryOutBuffer->m_writePosition = 0;
