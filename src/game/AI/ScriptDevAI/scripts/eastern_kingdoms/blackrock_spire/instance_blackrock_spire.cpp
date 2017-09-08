@@ -534,6 +534,7 @@ void instance_blackrock_spire::DoProcessEmberseerEvent()
             {
                 pCreature->InterruptNonMeleeSpells(false);
                 pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             }
         }
     }
