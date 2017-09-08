@@ -4036,30 +4036,31 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                     continue;
                 }
 
-                bool removed = false;
                 switch (trackedType)
                 {
                     case TRACK_AURA_TYPE_SINGLE_TARGET:
                         if (IsSingleTargetSpells(itr_spellEntry, aurSpellInfo))
                         {
-                            removed = true;
                             // remove from target if target found
                             if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
-                                itr_target->RemoveAurasDueToSpell(itr_spellEntry->Id); // TODO AURA_REMOVE_BY_TRACKING (might require additional work elsewhere)
+                            {
+                                // another target found for this spell remove older one
+                                SpellAuraHolder* targetHolder = itr_target->GetSpellAuraHolder(itr_spellEntry->Id);
+                                if (holder->GetState() == SPELLAURAHOLDER_STATE_READY)      // Check if holder is ready before removing it
+                                    itr_target->RemoveAurasDueToSpell(itr_spellEntry->Id);  // TODO AURA_REMOVE_BY_TRACKING (might require additional work elsewhere)
+                            }
                             else                            // Normally the tracking will be removed by the AuraRemoval
-                                scTargets.erase(itr);
+                            {
+                                itr = scTargets.erase(itr);
+                                continue;
+                            }
+
                         }
                         break;
                     case TRACK_AURA_TYPE_NOT_TRACKED:       // These two can never happen
                     case MAX_TRACKED_AURA_TYPES:
                         MANGOS_ASSERT(false);
                         break;
-                }
-
-                if (removed)
-                {
-                    itr = scTargets.begin();                // list can be chnaged at remove aura
-                    continue;
                 }
 
                 ++itr;
