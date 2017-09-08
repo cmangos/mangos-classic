@@ -15,27 +15,6 @@ EndScriptData */
 ScriptedPetAI::ScriptedPetAI(Creature* creature) : CreatureAI(creature)
 {}
 
-void ScriptedPetAI::MoveInLineOfSight(Unit* who)
-{
-    if (m_creature->getVictim())
-        return;
-
-    if (!HasReactState(REACT_AGGRESSIVE))
-        return;
-
-    if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(who) && who->isInAccessablePlaceFor(m_creature))
-    {
-        if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
-            return;
-
-        if (m_creature->IsWithinDistInMap(who, m_creature->GetAttackDistance(who)) && m_creature->IsWithinLOSInMap(who))
-        {
-            who->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            AttackStart(who);
-        }
-    }
-}
-
 void ScriptedPetAI::AttackStart(Unit* who)
 {
     if (who && m_creature->Attack(who, true))

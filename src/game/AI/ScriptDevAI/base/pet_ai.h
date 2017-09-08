@@ -14,8 +14,6 @@ class ScriptedPetAI : public CreatureAI
         explicit ScriptedPetAI(Creature* creature);
         ~ScriptedPetAI() {}
 
-        void MoveInLineOfSight(Unit* /*who*/) override;
-
         void AttackStart(Unit* /*who*/) override;
 
         void AttackedBy(Unit* /*attacker*/) override;
