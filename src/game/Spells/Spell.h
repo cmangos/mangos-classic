@@ -189,12 +189,14 @@ inline ByteBuffer& operator>> (ByteBuffer& buf, SpellCastTargetsReader const& ta
 
 enum SpellState
 {
-    SPELL_STATE_CREATED   = 0,                              // just created
-    SPELL_STATE_STARTING  = 1,                              // doing initial check
-    SPELL_STATE_PREPARING = 2,                              // cast time delay period, non channeled spell
-    SPELL_STATE_CASTING   = 3,                              // channeled time period spell casting state
-    SPELL_STATE_FINISHED  = 4,                              // cast finished to success or fail
-    SPELL_STATE_DELAYED   = 5                               // spell casted but need time to hit target(s)
+    SPELL_STATE_CREATED    = 0,                             // just created
+    SPELL_STATE_TARGETING  = 1,                             // doing initial check
+    SPELL_STATE_CASTING    = 2,                             // cast time delay period, non channeled spell
+    SPELL_STATE_DELAYED    = 3,                             // spell is delayed (cast time pushed back) TODO: need to be implemented properly
+    SPELL_STATE_TRAVELING  = 4,                             // spell casted but need time to hit target(s)
+    SPELL_STATE_LANDING    = 5,                             // processing the effects
+    SPELL_STATE_CHANNELING = 6,                             // channeled time period spell casting state
+    SPELL_STATE_FINISHED   = 7,                             // cast finished to success or fail
 };
 
 enum SpellTargets
@@ -493,6 +495,8 @@ class Spell
         void ClearCastItem();
 
         void ProcSpellAuraTriggers();
+
+        bool CanBeInterrupted() { return m_spellState <= SPELL_STATE_DELAYED || m_spellState == SPELL_STATE_CHANNELING; }
 
         typedef std::list<Unit*> UnitList;
 
