@@ -83,16 +83,6 @@ void VisibleNotifier::Notify()
                 plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player);
         }
     }
-
-    // Now do operations that required done at object visibility change to visible
-
-    // send data at target visibility change (adding to client)
-    for (std::set<WorldObject*>::const_iterator vItr = i_visibleNow.begin(); vItr != i_visibleNow.end(); ++vItr)
-    {
-        // target aura duration for caster show only if target exist at caster client
-        if ((*vItr) != &player && (*vItr)->isType(TYPEMASK_UNIT))
-            player.SendAuraDurationsForTarget((Unit*)(*vItr));
-    }
 }
 
 void MessageDeliverer::Visit(CameraMapType& m)

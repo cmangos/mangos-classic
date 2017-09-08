@@ -5410,18 +5410,4 @@ void SpellAuraHolder::UpdateAuraDuration()
         data << uint32(GetAuraDuration());
         ((Player*)m_target)->SendDirectMessage(data);
     }
-
-    // not send in case player loading (will not work anyway until player not added to map), sent in visibility change code
-    if (m_target->GetTypeId() == TYPEID_PLAYER && ((Player*)m_target)->GetSession()->PlayerLoading())
-        return;
-
-    Unit* caster = GetCaster();
-
-    if (caster && caster->GetTypeId() == TYPEID_PLAYER && caster != m_target)
-        SendAuraDurationForCaster((Player*)caster);
-}
-
-void SpellAuraHolder::SendAuraDurationForCaster(Player* caster)
-{
-    // [-ZERO] Feature doesn't exist in 1.x.
 }

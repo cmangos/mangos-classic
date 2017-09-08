@@ -1775,8 +1775,6 @@ class Player : public Unit
         void SendUpdateWorldState(uint32 Field, uint32 Value) const;
         void SendDirectMessage(WorldPacket const& data) const;
 
-        void SendAuraDurationsForTarget(Unit* target);
-
         PlayerMenu* PlayerTalkClass;
         std::vector<ItemSetEffect*> ItemSetEff;
 
