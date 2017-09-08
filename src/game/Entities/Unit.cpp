@@ -1187,7 +1187,7 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
 void Unit::PetOwnerKilledUnit(Unit* pVictim)
 {
     // for minipet and guardians (including protector)
-    CallForAllControlledUnits(PetOwnerKilledUnitHelper(pVictim), CONTROLLED_MINIPET | CONTROLLED_GUARDIANS);
+    CallForAllControlledUnits(PetOwnerKilledUnitHelper(pVictim), CONTROLLED_MINIPET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
 void Unit::CastStop(uint32 except_spellid)
