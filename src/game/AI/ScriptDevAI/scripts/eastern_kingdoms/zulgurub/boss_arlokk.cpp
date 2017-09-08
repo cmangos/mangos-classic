@@ -99,9 +99,9 @@ struct boss_arlokkAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
-        if (m_pTrigger1 = m_pInstance->SelectRandomPantherTrigger(true))
+        if ((m_pTrigger1 = m_pInstance->SelectRandomPantherTrigger(true)))
             m_pTrigger1->CastSpell(m_pTrigger1, SPELL_SUMMON_ZULIAN_PROWLERS, TRIGGERED_NONE);
-        if (m_pTrigger2 = m_pInstance->SelectRandomPantherTrigger(false))
+        if ((m_pTrigger2 = m_pInstance->SelectRandomPantherTrigger(false)))
             m_pTrigger2->CastSpell(m_pTrigger2, SPELL_SUMMON_ZULIAN_PROWLERS, TRIGGERED_NONE);
     }
 
