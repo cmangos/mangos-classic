@@ -6875,7 +6875,8 @@ bool Unit::isTargetableForAttack(bool inverseAlive /*=false*/) const
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
         return false;
 
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
+    // This check should be done only for players or players controlled creature
+    if (GetBeneficiaryPlayer() && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
         return false;
 
     // inversealive is needed for some spells which need to be casted at dead targets (aoe)
