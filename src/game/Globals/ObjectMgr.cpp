@@ -6736,6 +6736,20 @@ int ObjectMgr::GetOrNewIndexForLocale(LocaleConstant loc)
     return m_LocalForIndex.size() - 1;
 }
 
+bool ObjectMgr::IsEncounter(uint32 creditEntry, uint32 mapId) const
+{
+    DungeonEncounterMapBounds bounds = GetDungeonEncounterBounds(creditEntry);
+
+    for (auto entryItr = bounds.first; entryItr != bounds.second; ++entryItr)
+    {
+        auto dbcEntry = entryItr->second->dbcEntry;
+
+        if (entryItr->second->creditType == ENCOUNTER_CREDIT_KILL_CREATURE && dbcEntry->mapId == mapId)
+            return true;
+    }
+    return false;
+}
+
 void ObjectMgr::LoadGameObjectForQuests()
 {
     mGameObjectForQuestSet.clear();                         // need for reload case

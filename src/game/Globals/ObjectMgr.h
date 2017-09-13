@@ -1027,6 +1027,9 @@ class ObjectMgr
             return m_DungeonEncounters.equal_range(creditEntry);
         }
 
+        // check if an entry on some map have is an encounter
+        bool IsEncounter(uint32 creditEntry, uint32 mapId) const;
+
         GossipMenusMapBounds GetGossipMenusMapBounds(uint32 uiMenuId) const
         {
             return m_mGossipMenusMap.equal_range(uiMenuId);
