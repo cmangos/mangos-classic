@@ -805,6 +805,8 @@ class WorldObject : public Object
         virtual void LockOutSpells(SpellSchoolMask schoolMask, uint32 duration);
         void PrintCooldownList(ChatHandler& chat) const;
 
+        virtual void InspectingLoot() {}
+
     protected:
         explicit WorldObject();
 

@@ -1335,6 +1335,8 @@ void Loot::ShowContentTo(Player* plr)
 
     GetLootContentFor(plr, data);                           // fill the data with items contained in the loot (may be empty)
     SetPlayerIsLooting(plr);
+    if (m_lootTarget)
+        m_lootTarget->InspectingLoot();
 
     plr->SendDirectMessage(data);
 }

@@ -2671,6 +2671,16 @@ bool Creature::CanCrit(const SpellEntry *entry, SpellSchoolMask schoolMask, Weap
     return Unit::CanCrit(entry, schoolMask, attType);
 }
 
+void Creature::InspectingLoot()
+{
+    // until multiple corpse for creature is not supported
+    // this will not have effect after re spawn delay (corpse will be removed anyway)
+
+    // check if player have enough time to inspect loot
+    if (m_corpseDecayTimer < MINIMUM_LOOTING_TIME)
+        m_corpseDecayTimer = MINIMUM_LOOTING_TIME;
+}
+
 // Set loot status. Also handle remove corpse timer
 void Creature::SetLootStatus(CreatureLootStatus status)
 {
