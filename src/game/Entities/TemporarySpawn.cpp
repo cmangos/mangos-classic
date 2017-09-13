@@ -31,6 +31,7 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
     {
         case TEMPSPAWN_MANUAL_DESPAWN:
             break;
+
         case TEMPSPAWN_TIMED_DESPAWN:
         {
             if (m_timer <= update_diff)
@@ -42,21 +43,29 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
             m_timer -= update_diff;
             break;
         }
+
         case TEMPSPAWN_TIMED_OOC_DESPAWN:
         {
-            if (!isInCombat())
+            if (isAlive())
             {
-                if (m_timer <= update_diff)
+                if (!isInCombat())
                 {
-                    UnSummon();
-                    return;
+                    if (m_timer <= update_diff)
+                    {
+                        UnSummon();
+                        return;
+                    }
+
+                    m_timer -= update_diff;
                 }
-
-                m_timer -= update_diff;
+                else if (m_timer != m_lifetime)
+                    m_timer = m_lifetime;
             }
-            else if (m_timer != m_lifetime)
-                m_timer = m_lifetime;
-
+            else if (IsDespawned())
+            {
+                UnSummon();
+                return;
+            }
             break;
         }
 
@@ -79,6 +88,7 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
             }
             break;
         }
+
         case TEMPSPAWN_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
@@ -90,6 +100,7 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
 
             break;
         }
+
         case TEMPSPAWN_DEAD_DESPAWN:
         {
             if (IsDespawned())
@@ -99,6 +110,7 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
             }
             break;
         }
+
         case TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
@@ -122,6 +134,7 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
                 m_timer = m_lifetime;
             break;
         }
+
         case TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
@@ -145,6 +158,7 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
                 m_timer = m_lifetime;
             break;
         }
+
         case TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
@@ -161,6 +175,7 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
             m_timer -= update_diff;
             break;
         }
+
         case TEMPSPAWN_TIMED_OR_DEAD_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
@@ -177,6 +192,7 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
             m_timer -= update_diff;
             break;
         }
+
         default:
             UnSummon();
             sLog.outError("Temporary summoned creature (entry: %u) have unknown type %u of ", GetEntry(), m_type);
@@ -216,6 +232,9 @@ void TemporarySpawn::SetSummonProperties(TempSpawnType type, uint32 lifetime)
     m_type = type;
     m_timer = lifetime;
     m_lifetime = lifetime;
+
+    // set month as re spawn delay to avoid it
+    m_respawnDelay = MONTH;
 }
 
 void TemporarySpawn::Summon(TempSpawnType type, uint32 lifetime)
