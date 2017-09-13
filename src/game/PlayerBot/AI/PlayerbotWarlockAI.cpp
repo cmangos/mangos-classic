@@ -492,12 +492,12 @@ void PlayerbotWarlockAI::CheckDemon()
     if (pet && pet->GetEntry() != DEMON_IMP)
         return;
 
-    //Assign demon of choice
+    // Assign demon of choice based on spec
     if (spec == WARLOCK_SPEC_AFFLICTION)
         demonOfChoice = DEMON_FELHUNTER;
     else if (spec == WARLOCK_SPEC_DEMONOLOGY)
         demonOfChoice = DEMON_SUCCUBUS;
-    else if (spec == WARLOCK_SPEC_DESTRUCTION)
+    else    // Destruction spec or no spec found
         demonOfChoice = DEMON_IMP;
 
     // Summon demon
