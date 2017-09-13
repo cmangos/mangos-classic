@@ -182,7 +182,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
     // honorless target
-    if (GetPlayer()->pvpInfo.inHostileArea)
+    if (GetPlayer()->pvpInfo.inPvPEnforcedArea)
         GetPlayer()->CastSpell(GetPlayer(), 2479, TRIGGERED_OLD_TRIGGERED);
 
     // resummon pet
@@ -234,7 +234,7 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
     if (old_zone != newzone)
     {
         // honorless target
-        if (plMover->pvpInfo.inHostileArea)
+        if (plMover->pvpInfo.inPvPEnforcedArea)
             plMover->CastSpell(plMover, 2479, TRIGGERED_OLD_TRIGGERED);
     }
 

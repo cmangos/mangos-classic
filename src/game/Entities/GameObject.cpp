@@ -2029,6 +2029,9 @@ void GameObject::TickCapturePoint()
             // new player entered capture point zone
             m_UniqueUsers.insert(guid);
 
+            // update pvp info
+            (*itr)->pvpInfo.inPvPCapturePoint = true;
+
             // send capture point enter packets
             (*itr)->SendUpdateWorldState(info->capturePoint.worldState3, neutralPercent);
             (*itr)->SendUpdateWorldState(info->capturePoint.worldState2, oldValue);
@@ -2039,9 +2042,14 @@ void GameObject::TickCapturePoint()
 
     for (GuidSet::iterator itr = tempUsers.begin(); itr != tempUsers.end(); ++itr)
     {
-        // send capture point leave packet
         if (Player* owner = GetMap()->GetPlayer(*itr))
+        {
+            // update pvp info
+            owner->pvpInfo.inPvPCapturePoint = false;
+
+            // send capture point leave packet
             owner->SendUpdateWorldState(info->capturePoint.worldState1, WORLD_STATE_REMOVE);
+        }
 
         // player left capture point zone
         m_UniqueUsers.erase(*itr);

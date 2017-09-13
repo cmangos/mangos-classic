@@ -2635,14 +2635,21 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
     Unit* target = GetTarget();
 
     // when removing flag aura, handle flag drop
-    if (!apply && target->GetTypeId() == TYPEID_PLAYER
-            && (GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION))
+    if (target->GetTypeId() == TYPEID_PLAYER && (GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION))
     {
-        Player* player = (Player*)target;
-        if (BattleGround* bg = player->GetBattleGround())
-            bg->EventPlayerDroppedFlag(player);
-        else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
-            outdoorPvP->HandleDropFlag(player, GetSpellProto()->Id);
+        Player* player = static_cast<Player*>(target);
+
+        if (apply)
+            player->pvpInfo.isPvPFlagCarrier = true;
+        else
+        {
+            player->pvpInfo.isPvPFlagCarrier = false;
+
+            if (BattleGround* bg = player->GetBattleGround())
+                bg->EventPlayerDroppedFlag(player);
+            else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
+                outdoorPvP->HandleDropFlag(player, GetSpellProto()->Id);
+        }
     }
 
     target->ApplySpellImmune(GetId(), IMMUNITY_EFFECT, m_modifier.m_miscvalue, apply);

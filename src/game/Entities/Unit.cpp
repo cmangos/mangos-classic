@@ -1784,11 +1784,8 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         if (GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
             ((Player*)this)->CastItemCombatSpell(pVictim, damageInfo->attackType);
 
-        SetInCombatWith(pVictim);
-        pVictim->SetInCombatWith(this);
-
-        if (Player* attackedPlayer = pVictim->GetBeneficiaryPlayer())
-            SetContestedPvP(attackedPlayer);
+        SetInCombatWithVictim(pVictim);
+        pVictim->SetInCombatWithAggressor(this);
 
         // If not immune
         if (damageInfo->TargetState != VICTIMSTATE_IS_IMMUNE)
@@ -5247,7 +5244,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
     if (!tester_faction || !target_faction)
         return false;
 
-    if (target->isAttackingPlayer() && tester->IsContestedGuard())
+    if (target->IsPvPContested() && tester->IsContestedGuard())
         return true;
 
     // PvC forced reaction and reputation case
@@ -5361,7 +5358,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     if (!tester_faction || !target_faction)
         return false;
 
-    if (target->isAttackingPlayer() && tester->IsContestedGuard())
+    if (target->IsPvPContested() && tester->IsContestedGuard())
         return false;
 
     // PvC forced reaction and reputation case
@@ -5586,20 +5583,6 @@ void Unit::CombatStopWithPets(bool includingCast)
 {
     CombatStop(includingCast);
     CallForAllControlledUnits(CombatStopWithPetsHelper(includingCast), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
-}
-
-struct IsAttackingPlayerHelper
-{
-    explicit IsAttackingPlayerHelper() {}
-    bool operator()(Unit const* unit) const { return unit->isAttackingPlayer(); }
-};
-
-bool Unit::isAttackingPlayer() const
-{
-    if (hasUnitState(UNIT_STAT_ATTACK_PLAYER))
-        return true;
-
-    return CheckAllControlledUnits(IsAttackingPlayerHelper(), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
 void Unit::RemoveAllAttackers()
@@ -6799,6 +6782,105 @@ void Unit::SetInCombatWith(Unit* enemy)
     SetInCombatState(false, enemy);
 }
 
+void Unit::SetInCombatWithAggressor(Unit* aggressor)
+{
+    // This is a wrapper for SetInCombatWith initially created to improve PvP timers responsiveness. Can be extended in the future for broader use.
+
+    if (!aggressor)
+        return;
+
+    // PvP combat participation pulse: refresh pvp timers on pvp combat (we are the victim)
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        if (aggressor->IsPvP() && aggressor->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        {
+            // Use beneficiary for detecting own player (pet's pets forced into combat is not counted as direct pvp action)
+            if (Player* thisPlayer = GetBeneficiaryPlayer())
+            {
+                // Use controlling for detecting aggressor's player (forced into combat by pet's pets is counted as direct pvp action)
+                if (Player const* aggressorPlayer = aggressor->GetControllingPlayer())
+                {
+                    if (thisPlayer != aggressorPlayer && !thisPlayer->IsInDuelWith(aggressorPlayer))
+                    {
+                        thisPlayer->pvpInfo.inPvPCombat = true;
+                        thisPlayer->UpdatePvP(true);
+                    }
+                }
+            }
+        }
+    }
+
+    SetInCombatWith(aggressor);
+}
+
+void Unit::SetInCombatWithAssisted(Unit* assisted)
+{
+    // This is a wrapper for SetInCombatWith initially created to improve PvP timers responsiveness. Can be extended in the future for broader use.
+
+    if (!assisted)
+        return;
+
+    // PvP combat participation pulse: refresh pvp timers on pvp combat (we are the assister)
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        if (assisted->IsPvP() && assisted->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        {
+            // Use beneficiary for detecting own player (pet's pets entering combat is not counted as assist)
+            if (Player* thisPlayer = GetBeneficiaryPlayer())
+            {
+                // Use controlling for detecting asissted unit's player (entering combat with pet's pets is counted as assist)
+                if (Player const* assistedPlayer = assisted->GetControllingPlayer())
+                {
+                    if (thisPlayer != assistedPlayer)
+                    {
+                        if (assistedPlayer->pvpInfo.inPvPCombat)
+                            thisPlayer->pvpInfo.inPvPCombat = true;
+
+                        thisPlayer->UpdatePvP(true);
+
+                        if (assistedPlayer->IsPvPContested())
+                            thisPlayer->UpdatePvPContested(true);
+                    }
+                }
+            }
+        }
+    }
+
+    SetInCombatState(assisted->GetCombatTimer() > 0);
+}
+
+void Unit::SetInCombatWithVictim(Unit* victim)
+{
+    // This is a wrapper for SetInCombatWith initially created to improve PvP timers responsiveness. Can be extended in the future for broader use.
+
+    if (!victim)
+        return;
+
+    // PvP combat participation pulse: refresh pvp timers on pvp combat (we are the aggressor)
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        if (victim->IsPvP() && victim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        {
+            // Use beneficiary for detecting own player (pet's pets entering combat is not an act of aggression)
+            if (Player* thisPlayer = GetBeneficiaryPlayer())
+            {
+                // Use controlling for detecting victim's player (entering combat with pet's pets is an act of aggression)
+                if (Player const* victimPlayer = victim->GetControllingPlayer())
+                {
+                    if (thisPlayer != victimPlayer && !thisPlayer->IsInDuelWith(victimPlayer))
+                    {
+                        thisPlayer->pvpInfo.inPvPCombat = true;
+                        thisPlayer->UpdatePvP(true);
+                        thisPlayer->UpdatePvPContested(true);
+                    }
+                }
+            }
+        }
+    }
+
+    SetInCombatWith(victim);
+}
+
 void Unit::SetInDummyCombatState(bool state)
 {
     if (state)
@@ -6859,9 +6941,8 @@ void Unit::ClearInCombat()
     if (isCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
-    // Player's state will be cleared in Player::UpdateContestedPvP
-    if (GetTypeId() == TYPEID_UNIT)
-        clearUnitState(UNIT_STAT_ATTACK_PLAYER);
+    if (GetTypeId() == TYPEID_PLAYER)
+        static_cast<Player*>(this)->pvpInfo.inPvPCombat = false;
 }
 
 bool Unit::isTargetableForAttack(bool inverseAlive /*=false*/) const
@@ -9519,31 +9600,6 @@ Aura* Unit::GetDummyAura(uint32 spell_id) const
             return *itr;
 
     return nullptr;
-}
-
-void Unit::SetContestedPvP(Player* attackedPlayer)
-{
-    Player* player = GetBeneficiaryPlayer();
-
-    if (!player || (attackedPlayer && (attackedPlayer == player || player->IsInDuelWith(attackedPlayer))))
-        return;
-
-    player->SetContestedPvPTimer(30000);
-
-    if (!player->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
-    {
-        player->addUnitState(UNIT_STAT_ATTACK_PLAYER);
-        player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
-        // call MoveInLineOfSight for nearby contested guards
-        UpdateVisibilityAndView();
-    }
-
-    if (!hasUnitState(UNIT_STAT_ATTACK_PLAYER))
-    {
-        addUnitState(UNIT_STAT_ATTACK_PLAYER);
-        // call MoveInLineOfSight for nearby contested guards
-        UpdateVisibilityAndView();
-    }
 }
 
 void Unit::AddPetAura(PetAura const* petSpell)

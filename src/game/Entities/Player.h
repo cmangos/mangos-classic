@@ -276,10 +276,14 @@ struct PlayerInfo
 
 struct PvPInfo
 {
-    PvPInfo() : inHostileArea(false), endTimer(0) {}
+    PvPInfo() : inPvPCombat(false), inPvPEnforcedArea(false), inPvPCapturePoint(false), isPvPFlagCarrier(false), timerPvPRemaining(0), timerPvPContestedRemaining(0) {}
 
-    bool inHostileArea;
-    time_t endTimer;
+    bool inPvPCombat;
+    bool inPvPEnforcedArea;
+    bool inPvPCapturePoint;
+    bool isPvPFlagCarrier;
+    uint32 timerPvPRemaining;
+    uint32 timerPvPContestedRemaining;
 };
 
 struct DuelInfo
@@ -387,7 +391,7 @@ enum PlayerFlags
     PLAYER_FLAGS_UNK7                   = 0x00000040,       // admin?
     PLAYER_FLAGS_FFA_PVP                = 0x00000080,
     PLAYER_FLAGS_CONTESTED_PVP          = 0x00000100,       // Player has been involved in a PvP combat and will be attacked by contested guards
-    PLAYER_FLAGS_IN_PVP                 = 0x00000200,
+    PLAYER_FLAGS_PVP_DESIRED            = 0x00000200,       // Stores player's permanent PvP flag preference
     PLAYER_FLAGS_HIDE_HELM              = 0x00000400,
     PLAYER_FLAGS_HIDE_CLOAK             = 0x00000800,
     PLAYER_FLAGS_PARTIAL_PLAY_TIME      = 0x00001000,       // played long time
@@ -1460,7 +1464,8 @@ class Player : public Unit
         void SendInitialActionButtons() const;
 
         PvPInfo pvpInfo;
-        void UpdatePvP(bool state, bool ovrride = false);
+        void UpdatePvP(bool state, bool overriding = false);
+        void UpdatePvPContested(bool state, bool overriding = false);
 
         void UpdateZone(uint32 newZone, uint32 newArea);
         void UpdateArea(uint32 newArea);
@@ -1469,15 +1474,8 @@ class Player : public Unit
         void UpdateZoneDependentAuras();
         void UpdateAreaDependentAuras();                    // subzones
 
-        void UpdatePvPFlag(time_t currTime);
-        void UpdateContestedPvP(uint32 currTime);
-        void SetContestedPvPTimer(uint32 newTime) {m_contestedPvPTimer = newTime;}
-        void ResetContestedPvP()
-        {
-            clearUnitState(UNIT_STAT_ATTACK_PLAYER);
-            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
-            m_contestedPvPTimer = 0;
-        }
+        void UpdatePvPFlagTimer(uint32 diff);
+        void UpdatePvPContestedFlagTimer(uint32 diff);
 
         /** todo: -maybe move UpdateDuelFlag+DuelComplete to independent DuelHandler.. **/
         DuelInfo* duel;
@@ -2107,9 +2105,6 @@ class Player : public Unit
         }
 
     protected:
-
-        uint32 m_contestedPvPTimer;
-
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/

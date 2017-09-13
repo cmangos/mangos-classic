@@ -193,8 +193,7 @@ bool OutdoorPvPSI::HandleGameObjectUse(Player* player, GameObject* go)
     {
         // Also mark player with pvp on
         player->CastSpell(player, SPELL_SILITHYST, TRIGGERED_OLD_TRIGGERED);
-        player->UpdatePvP(true, true);
-        player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
+        player->UpdatePvP(true);
         // Despawn the gameobject (workaround)
         go->SetLootState(GO_JUST_DEACTIVATED);
         return true;

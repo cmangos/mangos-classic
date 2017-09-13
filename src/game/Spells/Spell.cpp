@@ -1068,11 +1068,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                     ((Creature*)unit)->AI()->AttackedBy(real_caster);
 
                 unit->AddThreat(real_caster);
-                unit->SetInCombatWith(real_caster);
-                real_caster->SetInCombatWith(unit);
-
-                if (Player* attackedPlayer = unit->GetBeneficiaryPlayer())
-                    real_caster->SetContestedPvP(attackedPlayer);
+                unit->SetInCombatWithAggressor(real_caster);
+                real_caster->SetInCombatWithVictim(unit);
             }
         }
     }
@@ -1323,22 +1320,16 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
                     unit->AttackedBy(realCaster);
 
                 unit->AddThreat(realCaster);
-                unit->SetInCombatWith(realCaster);
-                realCaster->SetInCombatWith(unit);
-
-                if (Player* attackedPlayer = unit->GetBeneficiaryPlayer())
-                    realCaster->SetContestedPvP(attackedPlayer);
+                unit->SetInCombatWithAggressor(realCaster);
+                realCaster->SetInCombatWithVictim(unit);
             }
         }
         else
         {
             // assisting case, healing and resurrection
-            if (unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
-                realCaster->SetContestedPvP();
-
             if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
             {
-                realCaster->SetInCombatState(unit->GetCombatTimer() > 0);
+                realCaster->SetInCombatWithAssisted(unit);
                 unit->getHostileRefManager().threatAssist(realCaster, 0.0f, m_spellInfo);
             }
         }

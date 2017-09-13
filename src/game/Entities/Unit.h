@@ -385,7 +385,7 @@ enum UnitState
 {
     // persistent state (applied by aura/etc until expire)
     UNIT_STAT_MELEE_ATTACKING = 0x00000001,                 // unit is melee attacking someone Unit::Attack
-    UNIT_STAT_ATTACK_PLAYER   = 0x00000002,                 // unit attack player or player's controlled unit and have contested pvpv timer setup, until timer expire, combat end and etc
+    //UNIT_STAT_ATTACK_PLAYER = 0x00000002,                 // (Deprecated) unit attack player or player's controlled unit and have contested pvpv timer setup, until timer expire, combat end and etc
     UNIT_STAT_DIED            = 0x00000004,                 // Unit::SetFeignDeath
     UNIT_STAT_STUNNED         = 0x00000008,                 // Aura::HandleAuraModStun
     UNIT_STAT_ROOT            = 0x00000010,                 // Aura::HandleAuraModRoot
@@ -1293,8 +1293,6 @@ class Unit : public WorldObject
         /// Returns the Unit::m_attackers, that stores the units that are attacking you
         AttackerSet const& getAttackers() const { return m_attackers; }
 
-        bool isAttackingPlayer() const;                     //< Returns if this unit is attacking a player (or this unit's minions/pets are attacking a player)
-
         Unit* getVictim() const { return m_attacking; }     //< Returns the victim that this unit is currently attacking
         void CombatStop(bool includingCast = false, bool includingCombo = true);        //< Stop this unit from combat, if includingCast==true, also interrupt casting
         void CombatStopWithPets(bool includingCast = false);
@@ -1549,6 +1547,9 @@ class Unit : public WorldObject
         void SetInCombatState(bool PvP, Unit* enemy = nullptr);
         void SetInDummyCombatState(bool state);
         void SetInCombatWith(Unit* enemy);
+        void SetInCombatWithAggressor(Unit* aggressor);
+        void SetInCombatWithAssisted(Unit* assisted);
+        void SetInCombatWithVictim(Unit* victim);
         void ClearInCombat();
         uint32 GetCombatTimer() const { return m_CombatTimer; }
 
