@@ -131,7 +131,7 @@ class CreatureAI
 
         /**
          * Called for reaction at enter to combat if not in combat yet
-         * @param pEnemy Unit* of whom the Creature enters combat with, can be nullptr
+         * @param enemy Unit* of whom the Creature enters combat with, can be nullptr
          */
         virtual void EnterCombat(Unit* /*enemy*/);
 

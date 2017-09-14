@@ -94,7 +94,7 @@ void CreatureAI::MoveInLineOfSight(Unit * who)
 
 void CreatureAI::EnterCombat(Unit *enemy)
 {
-    if ((m_creature->IsGuard() || m_creature->IsCivilian()) && enemy->GetTypeId() == TYPEID_PLAYER)
+    if (enemy && (m_creature->IsGuard() || m_creature->IsCivilian()))
     {
         // Send Zone Under Attack message to the LocalDefense and WorldDefense Channels
         if (Player* pKiller = enemy->GetBeneficiaryPlayer())
