@@ -46,6 +46,7 @@ class MovementGenerator
         virtual bool Update(Unit&, const uint32& time_diff) = 0;
 
         virtual MovementGeneratorType GetMovementGeneratorType() const = 0;
+        virtual Unit* GetCurrentTarget() const { return nullptr; }
 
         virtual void unitSpeedChanged() { }
 

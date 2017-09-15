@@ -1977,7 +1977,7 @@ bool ChatHandler::HandleNpcUnFollowCommand(char* /*args*/)
 
     FollowMovementGenerator<Creature> const* mgen = static_cast<FollowMovementGenerator<Creature> const*>(creatureMotion->top());
 
-    if (mgen->GetTarget() != player)
+    if (mgen->GetCurrentTarget() != player)
     {
         PSendSysMessage(LANG_CREATURE_NOT_FOLLOW_YOU, creature->GetName());
         SetSentErrorMessage(true);

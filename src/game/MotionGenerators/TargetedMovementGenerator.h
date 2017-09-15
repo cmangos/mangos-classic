@@ -55,7 +55,7 @@ class TargetedMovementGeneratorMedium
 
         bool IsReachable() const;
 
-        Unit* GetTarget() const { return i_target.getTarget(); }
+        Unit* GetCurrentTarget() const override { return i_target.getTarget(); }
 
         void unitSpeedChanged() { m_speedChanged = true; }
 
