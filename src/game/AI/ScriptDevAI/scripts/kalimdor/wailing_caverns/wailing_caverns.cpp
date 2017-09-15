@@ -152,6 +152,10 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
             m_creature->SetLootRecipient(nullptr);
             m_creature->DeleteThreatList();
             m_creature->CombatStop(false);
+
+            if (m_creature->isAlive())
+                m_creature->GetMotionMaster()->MovementExpired(true);
+
             Reset();
 
             // Remove running
