@@ -462,10 +462,6 @@ CreatureAI* GetAI_npc_ogron(Creature* pCreature)
 
 enum
 {
-    SAY_PROGRESS_1_TER          = -1000411,
-    SAY_PROGRESS_2_HEN          = -1000412,
-    SAY_PROGRESS_3_TER          = -1000413,
-    SAY_PROGRESS_4_TER          = -1000414,
     EMOTE_SURRENDER             = -1000415,
 
     QUEST_MISSING_DIPLO_PT16    = 1324,
@@ -473,15 +469,48 @@ enum
 
     NPC_SENTRY                  = 5184,                     // helps hendel
     NPC_JAINA                   = 4968,                     // appears once hendel gives up
-    NPC_TERVOSH                 = 4967
+    NPC_TERVOSH                 = 4967,
+    NPC_PAINED                  = 4965,
+
+    SPELL_TELEPORT_VISUAL       = 12980,
+    SPELL_TELEPORT              = 7079
 };
 
-// TODO: develop this further, end event not created
+struct Location
+{
+    float fX, fY, fZ, fO;
+    float fDestX, fDestY, fDestZ;
+    uint32 uiEntry;
+};
+
+const Location lOutroSpawns[] =
+{
+    {
+        -2857.604492f, -3354.784912f, 35.369640f, 3.16604f,
+        -2881.546631f, -3346.477539f, 34.143719f,
+        NPC_TERVOSH
+    },
+    {
+        -2858.120117f, -3358.469971f, 36.086300f, 3.16604f,
+        -2879.697998f, -3347.789063f, 34.772892f,
+        NPC_JAINA
+    },
+    {
+        -2857.379883f, -3351.370117f, 34.178001f, 3.16604f,
+        -2879.959961f, -3344.469971f, 34.670502f,
+        NPC_PAINED
+    }
+};
+
+const float fSentryFleePoint[] {-2917.56f, -3329.90f, 30.37f};
+
 struct npc_private_hendelAI : public ScriptedAI
 {
     npc_private_hendelAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
     void Reset() override {}
+
+    ObjectGuid guidPlayer;
 
     void AttackedBy(Unit* pAttacker) override
     {
@@ -494,25 +523,94 @@ struct npc_private_hendelAI : public ScriptedAI
         AttackStart(pAttacker);
     }
 
+    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    {
+        // If Private Hendel is hit by spell Teleport (from DBScript)
+        // this means it is time to grant quest credit to the player previously stored to this intend
+        if (pSpell->Id == SPELL_TELEPORT)
+        {
+            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(guidPlayer))
+                pPlayer->GroupEventHappens(QUEST_MISSING_DIPLO_PT16, m_creature);
+        }
+    }
+
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (uiDamage > m_creature->GetHealth() || m_creature->GetHealthPercent() < 20.0f)
         {
-            uiDamage = 0;
-
             if (Player* pPlayer = pDoneBy->GetBeneficiaryPlayer())
-                pPlayer->GroupEventHappens(QUEST_MISSING_DIPLO_PT16, m_creature);
+            {
+                if (pPlayer->GetQuestStatus(QUEST_MISSING_DIPLO_PT16) == QUEST_STATUS_INCOMPLETE)
+                    guidPlayer = pPlayer->GetObjectGuid();  // Store the player to give quest credit later
+            }
+
+            uiDamage = 0;
 
             DoScriptText(EMOTE_SURRENDER, m_creature);
             EnterEvadeMode();
+
+            // Make the two sentries flee and despawn
+            std::list<Creature*> lSentryList;
+            GetCreatureListWithEntryInGrid(lSentryList, m_creature, NPC_SENTRY, 40.0f);
+
+            for (std::list<Creature*>::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
+            {
+                if ((*itr)->isAlive())
+                {
+                    (*itr)->RemoveAllAurasOnEvade();
+                    (*itr)->DeleteThreatList();
+                    (*itr)->CombatStop(true);
+                    (*itr)->SetWalk(false);
+                    (*itr)->GetMotionMaster()->MovePoint(0, fSentryFleePoint[0], fSentryFleePoint[1], fSentryFleePoint[2]);
+                    (*itr)->ForcedDespawn(4000);
+                }
+            }
+
+            // Summon Jaina Proudmoore, Archmage Tervosh and Pained
+            for (uint8 i = 0; i<3; i++)
+            {
+                Creature* pCreature = m_creature->SummonCreature(lOutroSpawns[i].uiEntry, lOutroSpawns[i].fX, lOutroSpawns[i].fY, lOutroSpawns[i].fZ, lOutroSpawns[i].fO, TEMPSPAWN_TIMED_DESPAWN, 3 * MINUTE * IN_MILLISECONDS, false, true);
+                if (pCreature)
+                {
+                    pCreature->CastSpell(pCreature, SPELL_TELEPORT_VISUAL, TRIGGERED_NONE);
+                    pCreature->GetMotionMaster()->MovePoint(0, lOutroSpawns[i].fDestX, lOutroSpawns[i].fDestY, lOutroSpawns[i].fDestZ);
+
+                    // Exception case for Archmage Tervosh: the outro event is a simple speech with visual spell cast
+                    // so it will be handled by a DBScript held by NPC Archmage Tervosh
+                    if (pCreature->GetEntry() == NPC_TERVOSH)
+                    {
+                        // Remove Gossip and Quest Giver flag from now, they will be re-added later to Archmage Tervosh in DBScript
+                        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+                        // The DBScript will be done here
+                        pCreature->GetMotionMaster()->MoveWaypoint(0);
+                    }
+                }
+            }
         }
     }
 };
 
-bool QuestAccept_npc_private_hendel(Player* /*pPlayer*/, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_private_hendel(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
     if (pQuest->GetQuestId() == QUEST_MISSING_DIPLO_PT16)
+    {
         pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
+         pCreature->AI()->AttackStart(pPlayer);
+
+        // Find the nearby sentries in order to make them attack
+        // The two sentries are linked to Private Hendel in DB to ensure they respawn together
+        std::list<Creature*> lSentryList;
+        GetCreatureListWithEntryInGrid(lSentryList, pCreature, NPC_SENTRY, 40.0f);
+
+        for (std::list<Creature*>::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
+        {
+            if ((*itr)->isAlive())
+            {
+                (*itr)->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
+                (*itr)->AI()->AttackStart(pPlayer);
+            }
+        }
+    }
 
     return true;
 }
