@@ -501,15 +501,21 @@ bool Unit::UpdateMeleeAttackingState()
     uint8 swingError = 0;
     if (!CanReachWithMeleeAttack(victim))
     {
-        setAttackTimer(BASE_ATTACK, 100);
-        setAttackTimer(OFF_ATTACK, 100);
+        if (isAttackReady(BASE_ATTACK))
+            setAttackTimer(BASE_ATTACK, 100);
+        if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
+            setAttackTimer(OFF_ATTACK, 100);
+
         swingError = 1;
     }
     // 120 degrees of radiant range
     else if (!HasInArc(2 * M_PI_F / 3, victim))
     {
-        setAttackTimer(BASE_ATTACK, 100);
-        setAttackTimer(OFF_ATTACK, 100);
+        if (isAttackReady(BASE_ATTACK))
+            setAttackTimer(BASE_ATTACK, 100);
+        if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
+            setAttackTimer(OFF_ATTACK, 100);
+
         swingError = 2;
     }
     else
