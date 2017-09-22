@@ -19133,7 +19133,7 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
             data << uint32(spellEntry.Id);
             data << GetObjectGuid();
             SendDirectMessage(data);
-            sLog.outString("Sending SMSG_COOLDOWN_EVENT with spell id = %u", spellEntry.Id);
+            sLog.outDebug("Sending SMSG_COOLDOWN_EVENT with spell id = %u", spellEntry.Id);
         }
     }
 }
