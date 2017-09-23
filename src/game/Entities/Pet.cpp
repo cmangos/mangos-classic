@@ -751,7 +751,7 @@ void Pet::ModifyLoyalty(int32 addvalue)
 
     m_loyaltyPoints += addvalue;
 
-    CharmInfo* charminfo = GetCharmInfo();
+    CharmInfo* charmInfo = GetCharmInfo();
 
     if (m_loyaltyPoints < 0)
     {
@@ -780,8 +780,9 @@ void Pet::ModifyLoyalty(int32 addvalue)
                     }
                     case 1: // Turn aggressive
                     {
-                        charminfo->SetIsRetreating();
+                        charmInfo->SetIsRetreating();
                         AI()->SetReactState(ReactStates(REACT_AGGRESSIVE));
+                        SetModeFlags(PetModeFlags(AI()->GetReactState() | charmInfo->GetCommandState() * 0x100));
                         m_loyaltyPoints = 500;
                         break;
                     }
@@ -791,8 +792,9 @@ void Pet::ModifyLoyalty(int32 addvalue)
                         AttackStop();
                         GetMotionMaster()->Clear(false);
                         GetMotionMaster()->MoveIdle();
-                        charminfo->SetCommandState(COMMAND_STAY);
+                        charmInfo->SetCommandState(COMMAND_STAY);
                         AI()->SetReactState(ReactStates(REACT_PASSIVE));
+                        SetModeFlags(PetModeFlags(AI()->GetReactState() | charmInfo->GetCommandState() * 0x100));
                         m_loyaltyPoints = 500;
                         break;
                     }
