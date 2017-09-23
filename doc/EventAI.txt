@@ -99,6 +99,7 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 31  EVENT_T_ENERGY                      EnergyMax%, EnergyMin%, RepeatMin, RepeatMax                            Expires when the NPC's Energy% is between (Param1) and (Param2). Will repeat between every (Param3) and (Param4) If Event Conditions Are Still Met.
 32  EVENT_T_SELECT_ATTACKING_TARGET     MinRange, MaxRange, RepeatMin, RepeatMax                                Deprecated use TARGET_T_NEAREST_AOE_TARGET - Expires when the NPC has a target in threat table further than Param1 and closer than Param2. First time happens after and will repeat after Param3 and Param4.
 33  EVENT_T_FACING_TARGET               BackOrFront, unused, RepeatMin, RepeatMax                               Expires when the NPC is in back (Param1=0) or in front (Param1=1) of its current target. Will repeat after Param3 and Param4.
+34  EVENT_T_SPELLHIT_TARGET             SpellID, Schoolmask, RepeatMin, RepeatMax                               Expires upon Spell Hit of the NPC. When (param1) is set, it is the specific Spell ID used as the trigger. With (param2) specified, the expiration is limited to specific spell schools (-1 for all) and Spell ID value is ignored. Will repeat Event Conditions Check between every (Param3) and (Param4). Only A Spell ID or Spell School may be Specified but NOT both.
 
 =========================================
 Action Types
@@ -518,6 +519,29 @@ Parameter 4: RepeatMax   - Maximum Time used to calculate Random Repeat Event Ex
 
 COMBAT ONLY - Expires when the NPC is facing the back (or front) of its current target. Will repeat every (Param3) and (Param4).
 This is commonly used for events where a NPC needs to use abilities available only when facing its target's back/front (Such as rogues' backstab ability).
+
+---------------------
+34 = EVENT_T_SPELLHIT_TARGET:
+---------------------
+Parameter 1: SpellID - The Spell ID that will trigger the Event to occur (NOTE: If you use Spell School as the trigger ALWAYS set this value to 0)
+Parameter 2: School - Spell School to trigger the Event (NOTE: If you use a SpellID then ALWAYS set this value to -1) - *See Below for Spell School Bitmask Values*
+Parameter 3: RepeatMin - Minimum Time used to calculate Random Repeat Event Expire
+Parameter 4: RepeatMax - Maximum Time used to calculate Random Repeat Event Expire
+
+BOTH - Expires on SpellhitTarget. If (param1) is set it will only expire on that SPECIFIC Spell OR If (param2) is set it will only expire on Spells of that School. Will repeat every (Param3) and (Param4).
+This Event is commonly used for NPC's who can do special things when you cast a spell (Or specific spell) on them.
+NOTE: For Repeat Events the Repeat Timer ONLY Re-Check's Event Conditions to see If another Spellhit has occured. So After Repeat Min/Max expires Spellhit Event can occur again.
+
+(Name ==> School ==> School Bitmask Values)
+-------------------------------------------
+SPELL_SCHOOL_NORMAL = 0 ==> 1
+SPELL_SCHOOL_HOLY   = 1 ==> 2
+SPELL_SCHOOL_FIRE   = 2 ==> 4
+SPELL_SCHOOL_NATURE = 3 ==> 8
+SPELL_SCHOOL_FROST  = 4 ==> 16
+SPELL_SCHOOL_SHADOW = 5 ==> 32
+SPELL_SCHOOL_ARCANE = 6 ==> 64
+Use These Bitmask Values For Schoolmask (Param2) or Any Combinations Of These School Bitmasks for Multiple Schools.
 
 =========================================
 Action Types

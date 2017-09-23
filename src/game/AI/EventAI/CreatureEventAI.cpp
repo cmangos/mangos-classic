@@ -242,6 +242,7 @@ bool CreatureEventAI::IsTimerBasedEvent(EventAI_Type type) const
         case EVENT_T_ENERGY:
         case EVENT_T_SELECT_ATTACKING_TARGET:
         case EVENT_T_FACING_TARGET:
+        case EVENT_T_SPELLHIT_TARGET:
             return true;
         default: return false;
     }
@@ -339,6 +340,7 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
         case EVENT_T_EVADE:
             break;
         case EVENT_T_SPELLHIT:
+        case EVENT_T_SPELLHIT_TARGET:
             break;
         case EVENT_T_RANGE:
             if (!m_creature->isInCombat() || !m_creature->getVictim() || !m_creature->IsInMap(m_creature->getVictim()))
@@ -1624,6 +1626,18 @@ void CreatureEventAI::SpellHit(Unit* unit, const SpellEntry* spellInfo)
                     CheckAndReadyEventForExecution(i, unit);
 
     ProcessEvents(unit);
+}
+
+void CreatureEventAI::SpellHitTarget(Unit* target, const SpellEntry* spellInfo)
+{
+    for (auto& i : m_CreatureEventAIList)
+        if (i.event.event_type == EVENT_T_SPELLHIT_TARGET)
+            // If spell id matches (or no spell id) & if spell school matches (or no spell school)
+            if (!i.event.spell_hit_target.spellId || spellInfo->Id == i.event.spell_hit_target.spellId)
+                if (GetSchoolMask(spellInfo->School) & i.event.spell_hit_target.schoolMask)
+                    CheckAndReadyEventForExecution(i, target);
+
+    ProcessEvents(target);
 }
 
 void CreatureEventAI::UpdateAI(const uint32 diff)
