@@ -55,13 +55,19 @@ enum
     EMOTE_ORB_SHUT_OFF          = -1469035,
     EMOTE_TROOPS_FLEE           = -1469033,                 // emote by Nefarian's Troops npc
 
+    // Spells used by the monster generator in Razorgore encounter
+    // SPELL_SUMMON_LEGIONNAIRES   = 19824,                    // Periodically triggers 19826
+    SPELL_SUMMON_LEGIONNAIRE    = 19826,
+    SPELL_SUMMON_MAGE           = 19827,
+    SPELL_SUMMON_DRAGONSPAWN    = 19828,
+
     MAX_EGGS_DEFENDERS          = 4,
+    MAX_DRAGONSPAWN             = 12,
+    MAX_BLACKWING_DEFENDER      = 40,
 };
 
 // Coords used to spawn Nefarius at the throne
 static const float aNefariusSpawnLoc[4] = { -7466.16f, -1040.80f, 412.053f, 2.14675f};
-
-static const uint32 aRazorgoreSpawns[MAX_EGGS_DEFENDERS] = {NPC_BLACKWING_LEGIONNAIRE, NPC_BLACKWING_MAGE, NPC_DRAGONSPAWN, NPC_DRAGONSPAWN};
 
 class instance_blackwing_lair : public ScriptedInstance
 {
@@ -94,6 +100,8 @@ class instance_blackwing_lair : public ScriptedInstance
 
         uint32 m_uiResetTimer;
         uint32 m_uiDefenseTimer;
+        uint32 m_uiDragonspawnCount;
+        uint32 m_uiBlackwingDefCount;
 
         GuidList m_lTechnicianGuids;
         GuidList m_lDragonEggsGuids;

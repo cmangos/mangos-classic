@@ -28,7 +28,9 @@ EndScriptData
 
 instance_blackwing_lair::instance_blackwing_lair(Map* pMap) : ScriptedInstance(pMap),
     m_uiResetTimer(0),
-    m_uiDefenseTimer(0)
+    m_uiDefenseTimer(0),
+    m_uiDragonspawnCount(0),
+    m_uiBlackwingDefCount(0)
 {
     Initialize();
 }
@@ -63,6 +65,13 @@ void instance_blackwing_lair::OnCreatureCreate(Creature* pCreature)
         case NPC_BLACKWING_LEGIONNAIRE:
         case NPC_BLACKWING_MAGE:
         case NPC_DRAGONSPAWN:
+        	// Increase the NPC counter depending on dragonspawn or not
+            if (pCreature->GetEntry() == NPC_DRAGONSPAWN)
+            	m_uiDragonspawnCount++;
+            else
+            	m_uiBlackwingDefCount++;
+			// Egg room defenders attack players and Razorgore on spawn
+            pCreature->SetInCombatWithZone();
             m_lDefendersGuids.push_back(pCreature->GetObjectGuid());
             break;
         case NPC_RAZORGORE:
@@ -138,6 +147,8 @@ void instance_blackwing_lair::SetData(uint32 uiType, uint32 uiData)
 
                 m_lUsedEggsGuids.clear();
                 m_lDefendersGuids.clear();
+                m_uiBlackwingDefCount = 0;
+                m_uiDragonspawnCount = 0;
             }
             break;
         case TYPE_VAELASTRASZ:
@@ -282,6 +293,8 @@ void instance_blackwing_lair::SetData64(uint32 uiData, uint64 uiGuid)
                     pDefender->ForcedDespawn(10000);
                 }
             }
+            m_uiBlackwingDefCount = 0;
+            m_uiDragonspawnCount = 0;
         }
     }
 }
@@ -297,13 +310,22 @@ void instance_blackwing_lair::OnCreatureEnterCombat(Creature* pCreature)
 
 void instance_blackwing_lair::OnCreatureDeath(Creature* pCreature)
 {
-    if (pCreature->GetEntry() == NPC_GRETHOK_CONTROLLER)
+    switch (pCreature->GetEntry())
     {
-        // Allow orb to be used
-        DoToggleGameObjectFlags(GO_ORB_OF_DOMINATION, GO_FLAG_NO_INTERACT, false);
+        case NPC_GRETHOK_CONTROLLER:
+            // Allow orb to be used
+            DoToggleGameObjectFlags(GO_ORB_OF_DOMINATION, GO_FLAG_NO_INTERACT, false);
 
-        if (Creature* pOrbTrigger = GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
-            pOrbTrigger->InterruptNonMeleeSpells(false);
+            if (Creature* pOrbTrigger = GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
+                pOrbTrigger->InterruptNonMeleeSpells(false);
+            break;
+        case NPC_BLACKWING_LEGIONNAIRE:
+        case NPC_BLACKWING_MAGE:
+            m_uiBlackwingDefCount--;
+            break;
+        case NPC_DRAGONSPAWN:
+            m_uiDragonspawnCount--;
+            break;
     }
 }
 
@@ -342,11 +364,6 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
 
     if (m_uiDefenseTimer < uiDiff)
     {
-        // Allow Razorgore to spawn the defenders
-        Creature* pRazorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE);
-        if (!pRazorgore)
-            return;
-
         // Randomize generators
         std::random_shuffle(m_vGeneratorGuids.begin(), m_vGeneratorGuids.end());
 
@@ -355,12 +372,36 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
         {
             Creature* pGenerator = instance->GetCreature(m_vGeneratorGuids[i]);
             if (!pGenerator)
-                return;
+                continue;
 
-            pRazorgore->SummonCreature(aRazorgoreSpawns[i], pGenerator->GetPositionX(), pGenerator->GetPositionY(), pGenerator->GetPositionZ(), pGenerator->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
+            // Defenders are spawned randomly, 4 at a time
+            // There can be up to 12 Dragonspawns spawned and 40 Orcs (either mage or legionnaire)
+            // If one of the cap is reached, only the remaining type of NPC is spawned until the second cap is also reached
+
+            uint32 uiSpellId = 0;                                                   // Hold the spell summoning the NPC defender for that generator
+            uint8 uiMaxRange = (m_uiDragonspawnCount < MAX_DRAGONSPAWN ? 3 : 1);    // If all dragonspawns are already spawned, don't roll for them below
+
+            switch (urand(0, uiMaxRange))
+            {
+                case 0:
+                    if (m_uiBlackwingDefCount < MAX_BLACKWING_DEFENDER)
+                        uiSpellId = SPELL_SUMMON_LEGIONNAIRE;
+                    break;
+                case 1:
+                    if (m_uiBlackwingDefCount < MAX_BLACKWING_DEFENDER)
+                        uiSpellId = SPELL_SUMMON_MAGE;
+                    break;
+                case 2:
+                case 3:
+                    uiSpellId = SPELL_SUMMON_DRAGONSPAWN;
+                    break;
+            }
+
+            if (uiSpellId != 0)
+                pGenerator->CastSpell(pGenerator, uiSpellId, TRIGGERED_NONE);
         }
 
-        m_uiDefenseTimer = 20000;
+        m_uiDefenseTimer = 15000;
     }
     else
         m_uiDefenseTimer -= uiDiff;

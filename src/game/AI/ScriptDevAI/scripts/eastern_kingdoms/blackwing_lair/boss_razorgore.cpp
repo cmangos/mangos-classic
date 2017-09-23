@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Razorgore
 SD%Complete: 95
-SDComment: Timers may be improved.
+SDComment: When casting spell Explode Orb all triggers are killed by the triggered spell 20038 casted by trigger NPCs 16604 (including some of those): this breaks the event. Triggers should survive/not be targeted. Possibly a core issue.
 SDCategory: Blackwing Lair
 EndScriptData
 
@@ -82,8 +82,6 @@ struct boss_razorgoreAI : public ScriptedAI
 
             m_pInstance->SetData(TYPE_RAZORGORE, DONE);
         }
-
-        DoScriptText(SAY_DEATH, m_creature);
     }
 
     void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
@@ -107,8 +105,9 @@ struct boss_razorgoreAI : public ScriptedAI
             uiDamage = 0;
             m_bEggsExploded = true;
             m_pInstance->SetData(TYPE_RAZORGORE, FAIL);
+            DoScriptText(SAY_DEATH, m_creature);
             DoCastSpellIfCan(m_creature, SPELL_EXPLODE_ORB, CAST_TRIGGERED);
-            m_creature->ForcedDespawn();
+            m_creature->ForcedDespawn(5000);
         }
     }
 
@@ -116,13 +115,6 @@ struct boss_razorgoreAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_RAZORGORE, FAIL);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // Defenders should attack the players and the boss
-        pSummoned->SetInCombatWithZone();
-        pSummoned->AI()->AttackStart(m_creature);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -187,14 +179,22 @@ struct boss_razorgoreAI : public ScriptedAI
         else
             m_uiConflagrationTimer -= uiDiff;
 
-        /* This is obsolete code, not working anymore, keep as reference, should be handled in core though
-        * // Aura Check. If the gamer is affected by confliguration we attack a random gamer.
-        * if (m_creature->getVictim()->HasAura(SPELL_CONFLAGRATION, EFFECT_INDEX_0))
-        * {
-        *     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-        *         m_creature->TauntApply(pTarget);
-        * }
-        */
+        // Aura Check. If Razorgore's target is affected by conflagration, attack next one in aggro list not affected by the spell
+        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_CONFLAGRATION, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
+        {
+            // Target is not current victim, force select and attack it
+            if (pTarget != m_creature->getVictim())
+            {
+                AttackStart(pTarget);
+                m_creature->SetInFront(pTarget);
+            }
+            // Make sure our attack is ready
+            if (m_creature->isAttackReady())
+            {
+                m_creature->AttackerStateUpdate(pTarget);
+                m_creature->resetAttackTimer();
+             }
+         }
 
         DoMeleeAttackIfReady();
     }
