@@ -14,7 +14,6 @@ ALTER TABLE reference_loot_template ADD comments VARCHAR(300) DEFAULT '' AFTER c
 ALTER TABLE disenchant_loot_template ADD comments VARCHAR(300) DEFAULT '' AFTER condition_id;
 ALTER TABLE fishing_loot_template ADD comments VARCHAR(300) DEFAULT '' AFTER condition_id;
 ALTER TABLE item_loot_template ADD comments VARCHAR(300) DEFAULT '' AFTER condition_id;
-ALTER TABLE prospecting_loot_template ADD comments VARCHAR(300) DEFAULT '' AFTER condition_id;
 ALTER TABLE skinning_loot_template ADD comments VARCHAR(300) DEFAULT '' AFTER condition_id;
 
 
