@@ -4682,6 +4682,33 @@ void Aura::HandleInterruptRegen(bool apply, bool Real)
     GetTarget()->SetInDummyCombatState(apply);
 }
 
+inline bool IsRemovedOnShapeshiftLost(SpellEntry const* spellproto, ObjectGuid const& casterGuid, ObjectGuid const& targetGuid)
+{
+    if (casterGuid == targetGuid)
+    {
+        if (spellproto->Stances)
+        {
+            switch (spellproto->Id)
+            {
+                case 11327: // vanish stealth aura improvements are removed on stealth removal
+                case 11329: // but they have attribute SPELL_ATTR_NOT_SHAPESHIFT
+                // maybe relic from when they had Effect1?
+                    return true;
+                default:
+                    break;
+            }
+
+            if (!spellproto->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && !spellproto->HasAttribute(SPELL_ATTR_NOT_SHAPESHIFT))
+                return true;
+        }
+        else if (spellproto->SpellFamilyName == SPELLFAMILY_DRUID && spellproto->EffectApplyAuraName[0] == SPELL_AURA_MOD_DODGE_PERCENT)
+            return true;
+    }
+
+    return false;
+    /*TODO: investigate spellid 24864  or (SpellFamilyName = 7 and EffectApplyAuraName_1 = 49 and stances = 0)*/
+}
+
 SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem, SpellEntry const* triggeredBy) :
     m_spellProto(spellproto), m_triggeredBy(triggeredBy),
     m_target(target), m_castItemGuid(castItem ? castItem->GetObjectGuid() : ObjectGuid()),
@@ -4709,10 +4736,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     m_trackedAuraType = sSpellMgr.IsSingleTargetSpell(spellproto) ? TRACK_AURA_TYPE_SINGLE_TARGET : TRACK_AURA_TYPE_NOT_TRACKED;
     m_procCharges    = spellproto->procCharges;
 
-    m_isRemovedOnShapeLost = (GetCasterGuid() == m_target->GetObjectGuid() &&
-                              m_spellProto->Stances &&
-                              !m_spellProto->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) &&
-                              !m_spellProto->HasAttribute(SPELL_ATTR_NOT_SHAPESHIFT));
+    m_isRemovedOnShapeLost = IsRemovedOnShapeshiftLost(m_spellProto, GetCasterGuid(), target->GetObjectGuid());
 
     Unit* unitCaster = caster && caster->isType(TYPEMASK_UNIT) ? (Unit*)caster : nullptr;
 
