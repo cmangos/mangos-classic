@@ -29,7 +29,6 @@ enum
     NPC_CHROMAGGUS              = 14020,
     NPC_NEFARIAN                = 11583,
     NPC_LORD_VICTOR_NEFARIUS    = 10162,
-    NPC_BLACKWING_TECHNICIAN    = 13996,                    // Flees at Vael intro event
 
     // Razorgore event related
     NPC_GRETHOK_CONTROLLER      = 12557,
@@ -66,8 +65,9 @@ enum
     MAX_BLACKWING_DEFENDER      = 40,
 };
 
-// Coords used to spawn Nefarius at the throne
+// Coords used in intro event for Vaelastrasz to spawn Nefarius at the throne and sort the gobelins
 static const float aNefariusSpawnLoc[4] = { -7466.16f, -1040.80f, 412.053f, 2.14675f};
+static const float fVaelXPos = -7483.0f;
 
 class instance_blackwing_lair : public ScriptedInstance
 {
@@ -103,7 +103,6 @@ class instance_blackwing_lair : public ScriptedInstance
         uint32 m_uiDragonspawnCount;
         uint32 m_uiBlackwingDefCount;
 
-        GuidList m_lTechnicianGuids;
         GuidList m_lDragonEggsGuids;
         GuidList m_lDrakonidBonesGuids;
         GuidList m_lDefendersGuids;

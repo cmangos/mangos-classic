@@ -37,6 +37,8 @@ enum
     SAY_NEFARIUS_CORRUPT_2      = -1469032,
     SAY_TECHNICIAN_RUN          = -1469034,
 
+    NPC_BLACKWING_TECHNICIAN    = 13996,                    // Flees at Vael intro event
+
     SPELL_ESSENCE_OF_THE_RED    = 23513,
     SPELL_FLAME_BREATH          = 23461,
     SPELL_FIRE_NOVA             = 23462,
@@ -45,13 +47,13 @@ enum
     SPELL_CLEAVE                = 20684,                    // Chain cleave is most likely named something different and contains a dummy effect
 
     SPELL_NEFARIUS_CORRUPTION   = 23642,
+    SPELL_RED_LIGHTNING         = 24240,
 
     GOSSIP_ITEM_VAEL_1          = -3469003,
     GOSSIP_ITEM_VAEL_2          = -3469004,
-    // Vael Gossip texts might be 7156 and 7256; At the moment are missing from DB
-    // For the moment add the default values
-    GOSSIP_TEXT_VAEL_1          = 384,
-    GOSSIP_TEXT_VAEL_2          = 384,
+
+    GOSSIP_TEXT_VAEL_1          = 7156,
+    GOSSIP_TEXT_VAEL_2          = 7256,
 
     FACTION_HOSTILE             = 14,
 
@@ -172,6 +174,9 @@ struct boss_vaelastraszAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        bool bHasYelled = false;
+        std::list<Creature*> lTechniciansList;
+
         if (m_uiIntroTimer)
         {
             if (m_uiIntroTimer <= uiDiff)
@@ -179,7 +184,41 @@ struct boss_vaelastraszAI : public ScriptedAI
                 switch (m_uiIntroPhase)
                 {
                     case 0:
+                        // Summon Lord Victor Nefarius in front of the Throne
                         m_creature->SummonCreature(NPC_LORD_VICTOR_NEFARIUS, aNefariusSpawnLoc[0], aNefariusSpawnLoc[1], aNefariusSpawnLoc[2], aNefariusSpawnLoc[3], TEMPSPAWN_TIMED_DESPAWN, 25000);
+
+                        // Search for the Blackwing Technicians tormeting Vaelastrasz to make them flee to the next room above the stairs
+                        GetCreatureListWithEntryInGrid(lTechniciansList, m_creature, NPC_BLACKWING_TECHNICIAN, 40.0f);
+
+                        for (std::list<Creature*>::const_iterator itr = lTechniciansList.begin(); itr != lTechniciansList.end(); ++itr)
+                        {
+                            // The technicians will behave differently depending on they are on the right or left side of
+                            // Vaelastrasz. We compare their X position to Vaelastrasz X position to sort them out
+                            if (Creature* pTechnician = m_creature->GetMap()->GetCreature((*itr)->GetObjectGuid()))
+                            {
+                                // Ignore Blackwing Technicians on upper floors
+                                if (pTechnician->GetPositionZ() > m_creature->GetPositionZ() + 1)
+                                    continue;
+
+                                pTechnician->SetWalk(false);
+
+                                // Check is on left or right side
+                                // Each fleeing part and despawn is handled in DB
+                                if (pTechnician->GetPositionX() > m_creature->GetPositionX())
+                                {
+                                    // Left side
+                                    if (!bHasYelled)
+                                    {
+                                        DoScriptText(SAY_TECHNICIAN_RUN, pTechnician);
+                                        bHasYelled = true;
+                                    }
+                                    pTechnician->GetMotionMaster()->MoveWaypoint(0);
+                                }
+                                else
+                                    // Right side
+                                    pTechnician->GetMotionMaster()->MoveWaypoint(1);
+                            }
+                        }
                         m_uiIntroTimer = 1000;
                         break;
                     case 1:
@@ -197,6 +236,11 @@ struct boss_vaelastraszAI : public ScriptedAI
                         // Set npc flags now
                         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                        m_uiIntroTimer = 7000;
+                        break;
+                    case 3:
+                         if (Creature* pNefarius = m_creature->GetMap()->GetCreature(m_nefariusGuid))
+                            pNefarius->CastSpell(m_creature, SPELL_RED_LIGHTNING, TRIGGERED_NONE);
                         m_uiIntroTimer = 0;
                         break;
                 }

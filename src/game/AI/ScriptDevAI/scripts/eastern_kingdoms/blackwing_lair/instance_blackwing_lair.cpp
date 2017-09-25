@@ -54,23 +54,18 @@ void instance_blackwing_lair::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-        case NPC_BLACKWING_TECHNICIAN:
-            // Sort creatures so we can get only the ones near Vaelastrasz
-            if (pCreature->IsWithinDist2d(aNefariusSpawnLoc[0], aNefariusSpawnLoc[1], 50.0f))
-                m_lTechnicianGuids.push_back(pCreature->GetObjectGuid());
-            break;
         case NPC_MONSTER_GENERATOR:
             m_vGeneratorGuids.push_back(pCreature->GetObjectGuid());
             break;
         case NPC_BLACKWING_LEGIONNAIRE:
         case NPC_BLACKWING_MAGE:
         case NPC_DRAGONSPAWN:
-        	// Increase the NPC counter depending on dragonspawn or not
+            // Increase the NPC counter depending on dragonspawn or not
             if (pCreature->GetEntry() == NPC_DRAGONSPAWN)
-            	m_uiDragonspawnCount++;
+                m_uiDragonspawnCount++;
             else
-            	m_uiBlackwingDefCount++;
-			// Egg room defenders attack players and Razorgore on spawn
+                m_uiBlackwingDefCount++;
+            // Egg room defenders attack players and Razorgore on spawn
             pCreature->SetInCombatWithZone();
             m_lDefendersGuids.push_back(pCreature->GetObjectGuid());
             break;
