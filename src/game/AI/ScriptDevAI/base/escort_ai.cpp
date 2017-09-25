@@ -41,6 +41,8 @@ void npc_escortAI::GetAIInformation(ChatHandler& reader)
     }
 
     reader.PSendSysMessage("%s", oss.str().c_str());
+
+    ScriptedAI::GetAIInformation(reader);
 }
 
 void npc_escortAI::Aggro(Unit* /*enemy*/) {}
@@ -259,19 +261,19 @@ void npc_escortAI::Start(bool run, const Player* player, const Quest* quest, boo
 {
     if (m_creature->getVictim())
     {
-        script_error_log("EscortAI attempt to Start while in combat.");
+        script_error_log("EscortAI attempt to Start while in combat for %s.", m_creature->GetScriptName().data());
         return;
     }
 
     if (HasEscortState(STATE_ESCORT_ESCORTING))
     {
-        script_error_log("EscortAI attempt to Start while already escorting.");
+        script_error_log("EscortAI attempt to Start while already escorting for %s.", m_creature->GetScriptName().data());
         return;
     }
 
     if (!pSystemMgr.GetPathInfo(m_creature->GetEntry(), 1))
     {
-        script_error_log("EscortAI attempt to start escorting for %s, but has no waypoints loaded", m_creature->GetGuidStr().c_str());
+        script_error_log("EscortAI attempt to start escorting for %s, but has no waypoints loaded.", m_creature->GetScriptName().data());
         return;
     }
 
