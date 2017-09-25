@@ -214,6 +214,7 @@ Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type)
 
     // define seperately for sorting purposes - DO NOT CHANGE ORDER!
     std::vector<heal_priority> targets;
+    uint8 uiHealthPercentage;
 
     // First, fill the list of targets
     if (m_bot->GetGroup())
@@ -226,14 +227,20 @@ Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type)
                 continue;
             JOB_TYPE job = GetTargetJob(groupMember);
             if (job & type)
-                targets.push_back( heal_priority(groupMember, (groupMember->GetHealth() * 100 / groupMember->GetMaxHealth()), job) );
+            {
+                uiHealthPercentage = int(groupMember->GetMaxHealth() != 0 ? groupMember->GetHealth() * 100 / groupMember->GetMaxHealth() : 0);
+                targets.push_back( heal_priority(groupMember, uiHealthPercentage, job) );
+            }
         }
     }
     else
     {
         targets.push_back( heal_priority(m_bot, m_bot->GetHealthPercent(), GetTargetJob(m_bot)) );
         if (m_master && !m_master->IsInDuel())
-            targets.push_back( heal_priority(m_master, (m_master->GetHealth() * 100 / m_master->GetMaxHealth()), GetTargetJob(m_master)) );
+        {
+            uiHealthPercentage = int(m_master->GetMaxHealth() != 0 ? m_master->GetHealth() * 100 / m_master->GetMaxHealth() : 0);
+            targets.push_back( heal_priority(m_master, uiHealthPercentage, GetTargetJob(m_master)) );
+        }
     }
 
     // Sorts according to type: Healers first, tanks next, then master followed by DPS, thanks to the order of the TYPE enum
