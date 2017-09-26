@@ -690,6 +690,11 @@ class GameObject : public WorldObject
         bool IsHostileTo(Unit const* unit) const override;
         bool IsFriendlyTo(Unit const* unit) const override;
 
+        ReputationRank GetReactionTo(Unit const* unit) const override;
+
+        bool IsEnemy(Unit const* unit) const override;
+        bool IsFriend(Unit const* unit) const override;
+
         void SummonLinkedTrapIfAny() const;
         void TriggerLinkedGameObject(Unit* target) const;
 

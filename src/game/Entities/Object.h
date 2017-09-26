@@ -755,6 +755,13 @@ class WorldObject : public Object
 
         virtual bool IsHostileTo(Unit const* unit) const = 0;
         virtual bool IsFriendlyTo(Unit const* unit) const = 0;
+
+        virtual ReputationRank GetReactionTo(Unit const* unit) const;
+        virtual ReputationRank GetReactionTo(Corpse const* corpse) const;
+
+        virtual bool IsEnemy(Unit const* unit) const;
+        virtual bool IsFriend(Unit const* unit) const;
+
         bool IsControlledByPlayer() const;
 
         virtual void SaveRespawnTime() {}
