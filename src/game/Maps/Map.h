@@ -167,8 +167,6 @@ class Map : public GridRefManager<NGridType>
 
         bool CreatureRespawnRelocation(Creature* c);        // used only in CreatureRelocation and ObjectGridUnloader
 
-        bool CheckGridIntegrity(Creature* c, bool moved) const;
-
         uint32 GetInstanceId() const { return i_InstanceId; }
         virtual bool CanEnter(Player* player);
         const char* GetMapName() const;

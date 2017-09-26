@@ -718,8 +718,6 @@ Map::PlayerRelocation(Player* player, float x, float y, float z, float orientati
 
 void Map::CreatureRelocation(Creature* creature, float x, float y, float z, float ang)
 {
-    MANGOS_ASSERT(CheckGridIntegrity(creature, false));
-
     Cell new_cell(MaNGOS::ComputeCellPair(x, y));
 
     // do move or do move to respawn or remove creature if previous all fail
@@ -736,8 +734,6 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
         // ... or unload (if respawn grid also not loaded)
         DEBUG_FILTER_LOG(LOG_FILTER_CREATURE_MOVES, "Creature (GUID: %u Entry: %u ) can't be move to unloaded respawn grid.", creature->GetGUIDLow(), creature->GetEntry());
     }
-
-    MANGOS_ASSERT(CheckGridIntegrity(creature, true));
 }
 
 bool Map::CreatureCellRelocation(Creature* c, const Cell& new_cell)
@@ -840,25 +836,6 @@ void Map::UnloadAll(bool pForce)
         ++i;
         UnloadGrid(grid.getX(), grid.getY(), pForce);       // deletes the grid and removes it from the GridRefManager
     }
-}
-
-bool Map::CheckGridIntegrity(Creature* c, bool moved) const
-{
-    Cell const& cur_cell = c->GetCurrentCell();
-
-    CellPair xy_val = MaNGOS::ComputeCellPair(c->GetPositionX(), c->GetPositionY());
-    Cell xy_cell(xy_val);
-    if (xy_cell != cur_cell)
-    {
-        sLog.outError("Creature (GUIDLow: %u) X: %f Y: %f (%s) in grid[%u,%u]cell[%u,%u] instead grid[%u,%u]cell[%u,%u]",
-                      c->GetGUIDLow(),
-                      c->GetPositionX(), c->GetPositionY(), (moved ? "final" : "original"),
-                      cur_cell.GridX(), cur_cell.GridY(), cur_cell.CellX(), cur_cell.CellY(),
-                      xy_cell.GridX(),  xy_cell.GridY(),  xy_cell.CellX(),  xy_cell.CellY());
-        return true;                                        // not crash at error, just output error in debug mode
-    }
-
-    return true;
 }
 
 const char* Map::GetMapName() const
