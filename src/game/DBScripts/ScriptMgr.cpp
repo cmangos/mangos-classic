@@ -178,7 +178,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 sLog.outErrorDb("Table `%s` has invalid data_flags %u in command %u for script id %u, skipping.", tablename, tmp.data_flags, tmp.command, tmp.id);
                 continue;
             }
-            if (tmp.data_flags & SCRIPT_FLAG_BUDDY_AS_TARGET && ! tmp.buddyEntry)
+            if ((tmp.data_flags & SCRIPT_FLAG_BUDDY_AS_TARGET) != 0 && (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_POOL) == 0 && !tmp.buddyEntry)
             {
                 sLog.outErrorDb("Table `%s` has buddy required in data_flags %u in command %u for script id %u, but no buddy defined, skipping.", tablename, tmp.data_flags, tmp.command, tmp.id);
                 continue;
@@ -210,6 +210,27 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                     if (data->id != tmp.buddyEntry)
                     {
                         sLog.outErrorDb("Table `%s` has go-buddy defined by guid (SCRIPT_FLAG_BUDDY_BY_GUID %u set) but spawned go with guid %u has entry %u, expected buddy_entry is %u, skipping.", tablename, SCRIPT_FLAG_BUDDY_BY_GUID,  tmp.searchRadiusOrGuid, data->id, tmp.buddyEntry);
+                        continue;
+                    }
+                }
+            }
+            else if (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_POOL)
+            {
+                if (tmp.IsCreatureBuddy())
+                {
+                    auto pool = sPoolMgr.GetPoolCreatures(tmp.searchRadiusOrGuid);
+                    if (pool.isEmpty())
+                    {
+                        sLog.outErrorDb("Table `%s` has go-buddy defined by pool (SCRIPT_FLAG_BUDDY_BY_POOL %u set) but pool %u is empty, skipping.", tablename, tmp.data_flags, tmp.searchRadiusOrGuid);
+                        continue;
+                    }
+                }
+                else
+                {
+                    auto pool = sPoolMgr.GetPoolGameObjects(tmp.searchRadiusOrGuid);
+                    if (pool.isEmpty())
+                    {
+                        sLog.outErrorDb("Table `%s` has go-buddy defined by pool (SCRIPT_FLAG_BUDDY_BY_POOL %u set) but pool %u is empty, skipping.", tablename, tmp.data_flags, tmp.searchRadiusOrGuid);
                         continue;
                     }
                 }
@@ -1059,12 +1080,12 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
 }
 
 /// Select source and target for a script command
-/// Returns false iff an error happened
+/// Returns false if an error happened
 bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject* pOrigTarget, WorldObject*& pFinalSource, WorldObject*& pFinalTarget) const
 {
     WorldObject* pBuddy = nullptr;
 
-    if (m_script->buddyEntry)
+    if (m_script->buddyEntry || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_POOL) != 0)
     {
         if (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID)
         {
@@ -1088,6 +1109,49 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
             if (!pBuddy)
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u by guid %u not loaded in map %u (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry, m_script->searchRadiusOrGuid, m_map->GetId(), m_script->data_flags);
+                return false;
+            }
+        }
+        else if (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_POOL)
+        {
+            if (m_script->IsCreatureBuddy())
+            {
+                PoolGroup<Creature> const& pool = sPoolMgr.GetPoolCreatures(m_script->searchRadiusOrGuid);
+                auto equalChancedObjectList = pool.GetEqualChanced();
+                for (auto objItr : equalChancedObjectList)
+                {
+                    CreatureData const* cData = sObjectMgr.GetCreatureData(objItr.guid);
+                    if (Creature* buddy = m_map->GetCreature(cData->GetObjectGuid(objItr.guid)))
+                    {
+                        if (buddy->isAlive())
+                        {
+                            pBuddy = buddy;
+                            break;
+                        }
+                    }
+                }
+
+                if (!pBuddy)
+                {
+                    auto explicitlyChancedObjectList = pool.GetExplicitlyChanced();
+                    for (auto objItr : explicitlyChancedObjectList)
+                    {
+                        CreatureData const* cData = sObjectMgr.GetCreatureData(objItr.guid);
+                        if (Creature* buddy = m_map->GetCreature(cData->GetObjectGuid(objItr.guid)))
+                        {
+                            if (buddy->isAlive())
+                            {
+                                pBuddy = buddy;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!pBuddy)
+            {
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u by pool id %u and no creature found in map %u (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry, m_script->searchRadiusOrGuid, m_map->GetId(), m_script->data_flags);
                 return false;
             }
         }

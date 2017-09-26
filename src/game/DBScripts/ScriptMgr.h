@@ -135,9 +135,10 @@ enum ScriptInfoDataFlags
     SCRIPT_FLAG_COMMAND_ADDITIONAL          = 0x08,         // command dependend
     SCRIPT_FLAG_BUDDY_BY_GUID               = 0x10,         // take the buddy by guid
     SCRIPT_FLAG_BUDDY_IS_PET                = 0x20,         // buddy is a pet
-    SCRIPT_FLAG_BUDDY_IS_DESPAWNED          = 0X40,         // buddy is dead or despawned
+    SCRIPT_FLAG_BUDDY_IS_DESPAWNED          = 0x40,         // buddy is dead or despawned
+    SCRIPT_FLAG_BUDDY_BY_POOL               = 0x80          // buddy should be part of a pool
 };
-#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_IS_DESPAWNED - 1)
+#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_BY_POOL - 1)
 
 struct ScriptInfo
 {
