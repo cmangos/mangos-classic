@@ -828,19 +828,19 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                     Player* ownerPlayer = (Player*)owner;
                     if ((GetMap()->IsBattleGround() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
                         (ownerPlayer->IsInDuelWith(u)) ||
-                        (ownerPlayer->GetTeam() != u->GetTeam()))
+                        (!ownerPlayer->CanCooperate(u)))
                         trapNotVisible = true;
                 }
                 else
                 {
-                    if (u->IsFriendlyTo(owner))
+                    if (owner->CanCooperate(u))
                         return true;
                 }
             }
             // handle environment traps (spawned by DB)
             else
             {
-                if (this->IsFriendlyTo(u))
+                if (this->IsFriend(u))
                     return true;
                 else
                     trapNotVisible = true;
