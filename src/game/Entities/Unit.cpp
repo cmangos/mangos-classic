@@ -7142,7 +7142,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 
     // grouped players should always see stealthed party members
     if (GetTypeId() == TYPEID_PLAYER && u->GetTypeId() == TYPEID_PLAYER)
-        if (((Player*)this)->IsGroupVisibleFor(((Player*)u)) && u->IsFriendlyTo(this))
+        if (((Player*)this)->IsGroupVisibleFor(((Player*)u)) && CanCooperate(u))
             return true;
 
     // raw invisibility
