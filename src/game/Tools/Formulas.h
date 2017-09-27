@@ -20,6 +20,8 @@
 #define MANGOS_FORMULAS_H
 
 #include "World/World.h"
+// TODO: Required for classic honor system type HonorStandingList, needs redesign:
+#include "Globals/ObjectMgr.h"
 
 struct HonorScores
 {
