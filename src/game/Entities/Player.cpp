@@ -16902,7 +16902,7 @@ bool Player::IsVisibleInGridForPlayer(Player* pl) const
         return isAlive() || m_deathTimer > 0;
 
     // Ghost see other friendly ghosts, that's for sure
-    if (!(isAlive() || m_deathTimer > 0) && IsFriendlyTo(pl))
+    if (!(isAlive() || m_deathTimer > 0) && CanCooperate(pl))
         return true;
 
     // Dead player see live players near own corpse
