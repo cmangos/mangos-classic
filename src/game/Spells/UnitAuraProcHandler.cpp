@@ -1190,7 +1190,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
     // Quick check for target modes for procs: do not cast offensive procs on friendly targets and in reverse
     else if (!(procEx & PROC_EX_REFLECT))
     {
-        if (IsPositiveSpellTargetMode(triggerEntry, this, target) != IsFriendlyTo(target))
+        if (IsPositiveSpellTargetMode(triggerEntry, this, target) != CanAssist(target))
             return SPELL_AURA_PROC_FAILED;
     }
 
