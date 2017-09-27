@@ -101,15 +101,8 @@ struct npc_calvin_montagueAI : public ScriptedAI
     {
         m_uiPhase = 0;
         m_uiPhaseTimer = 5000;
+        SetReactState(REACT_AGGRESSIVE);
         m_playerGuid.Clear();
-    }
-
-    void AttackedBy(Unit* pAttacker) override
-    {
-        if (m_creature->getVictim() || m_creature->IsFriendlyTo(pAttacker))
-            return;
-
-        AttackStart(pAttacker);
     }
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
@@ -119,6 +112,7 @@ struct npc_calvin_montagueAI : public ScriptedAI
             uiDamage = 0;
 
             m_creature->CombatStop(true);
+            SetReactState(REACT_PASSIVE);
 
             m_uiPhase = 1;
 
