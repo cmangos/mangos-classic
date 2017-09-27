@@ -874,4 +874,155 @@ bool DynamicObject::IsFriend(Unit const* unit) const
 ########            ########
 ##########################*/
 
-// To be implemented...
+/////////////////////////////////////////////////
+/// [Serverside] Opposition: DynamicObject can target a target with a harmful spell
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// Dynamic objects act as serverside proxy casters for units.
+/// It utilizes owners CanAttackSpell if owner exists
+/////////////////////////////////////////////////
+bool DynamicObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
+{
+    if (Unit* owner = GetCaster())
+        return owner->CanAttackSpell(target, spellInfo, isAOE);
+    else
+        return false;
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Assistance: DynamicObject can target a target with a helpful spell
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// Dynamic objects act as serverside proxy casters for units.
+/// It utilizes owners CanAssistSpell if owner exists
+/////////////////////////////////////////////////
+bool DynamicObject::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
+{
+    if (Unit* owner = GetCaster())
+        return owner->CanAttackSpell(target, spellInfo);
+    else
+        return false;
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Opposition: GameObject can target a target with a harmful spell
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// Some gameobjects can be involved in spell casting, so server needs additional API support.
+/// It utilizes owners CanAttackSpell if owner exists
+/////////////////////////////////////////////////
+bool GameObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
+{
+    Unit* owner = GetOwner();
+    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+        return owner->CanAttackSpell(target, spellInfo, isAOE);
+
+    return true;
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Assistance: GameObject can target a target with a helpful spell
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// Some gameobjects can be involved in spell casting, so server needs additional API support.
+/// It utilizes owners CanAssistSpell if owner exists
+/////////////////////////////////////////////////
+bool GameObject::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
+{
+    Unit* owner = GetOwner();
+    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+        return owner->CanAssistSpell(target, spellInfo);
+
+    return true;
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Opposition: Unit can target a target with a harmful spell
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// It utilizes SpellEntry for additional target filtering.
+/// Also an additional fine grained check needs to be done for AOE spells, because they
+/// need to skip PVP enabled targets in some special cases. (Chain spells, AOE)
+/////////////////////////////////////////////////
+bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
+{
+    if (spellInfo)
+    {
+        // inversealive is needed for some spells which need to be casted at dead targets (aoe)
+        if (!target->isAlive() && !spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD))
+            return false;
+    }
+
+    if (CanAttack(target))
+    {
+        if (isAOE)
+        {
+            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+            {
+                if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                {
+                    const Player* thisPlayer = GetControllingPlayer();
+                    if (!thisPlayer)
+                        return true;
+
+                    const Player* unitPlayer = target->GetControllingPlayer();
+                    if (!unitPlayer)
+                        return true;
+
+                    if (thisPlayer->IsInDuelWith(unitPlayer))
+                        return true;
+
+                    if (unitPlayer->IsPvP() && (!isAOE || thisPlayer->IsPvP()))
+                        return true;
+
+                    if (thisPlayer->IsPvPFreeForAll() && unitPlayer->IsPvPFreeForAll())
+                        return true;
+
+                    return false;
+                }
+            }
+            else
+                return IsEnemy(target); // non player controlled can only hit hostiles with AOE
+        }
+
+        return true;
+    }
+    else return false;
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Assistance: Unit can target a target with a helpful spell
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// It utilizes owners CanAssistSpell if owner exists
+/////////////////////////////////////////////////
+bool Unit::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
+{
+    return CanAssist(target);
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Opposition: Unit can attack a target on sight
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// It utilizes CanAttack with a small exclusion for Feign-Death targets and a hostile-only check.
+/// Typically used in AIs in MoveInLineOfSight
+/////////////////////////////////////////////////
+bool Unit::CanAttackOnSight(Unit * target)
+{
+    return CanAttack(target) && !hasUnitState(UNIT_STAT_DIED) && IsEnemy(target);
+}

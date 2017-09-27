@@ -5446,65 +5446,6 @@ bool Unit::IsNeutralToAll() const
     return my_faction->IsNeutralToAll();
 }
 
-bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
-{
-    if (spellInfo)
-    {
-        // inversealive is needed for some spells which need to be casted at dead targets (aoe)
-        if (!target->isAlive() && !spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD))
-            return false;
-    }
-
-    if (CanAttack(target))
-    {
-        if (isAOE)
-        {
-            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-            {
-                if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-                {
-                    const Player* thisPlayer = GetControllingPlayer();
-                    if (!thisPlayer)
-                        return true;
-
-                    const Player* unitPlayer = target->GetControllingPlayer();
-                    if (!unitPlayer)
-                        return true;
-
-                    if (thisPlayer->IsInDuelWith(unitPlayer))
-                        return true;
-
-                    if (unitPlayer->IsPvP() && (!isAOE || thisPlayer->IsPvP()))
-                        return true;
-
-                    if (thisPlayer->IsPvPFreeForAll() && unitPlayer->IsPvPFreeForAll())
-                        return true;
-
-                    return false;
-                }
-            }
-            else
-                return IsEnemy(target); // non player controlled can only hit hostiles with AOE
-        }
-
-        return true;
-    }
-    else return false;
-}
-
-bool Unit::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
-{
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
-        return false;
-
-    return true;
-}
-
-bool Unit::CanAttackOnSight(Unit * target)
-{
-    return CanAttack(target) && !hasUnitState(UNIT_STAT_FEIGN_DEATH) && IsEnemy(target);
-}
-
 bool Unit::Attack(Unit* victim, bool meleeAttack)
 {
     if (!victim || victim == this)

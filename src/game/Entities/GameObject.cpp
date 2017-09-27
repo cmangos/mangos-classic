@@ -1809,24 +1809,6 @@ bool GameObject::IsFriendlyTo(Unit const* unit) const
     return tester_faction->IsFriendlyTo(*target_faction);
 }
 
-bool GameObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
-{
-    Unit* owner = GetOwner();
-    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-        return owner->CanAttackSpell(target, spellInfo, isAOE);
-
-    return true;
-}
-
-bool GameObject::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
-{
-    Unit* owner = GetOwner();
-    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-        return owner->CanAssistSpell(target, spellInfo);
-
-    return true;
-}
-
 void GameObject::SetLootState(LootState state)
 {
     m_lootState = state;
