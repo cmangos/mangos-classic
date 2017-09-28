@@ -299,6 +299,12 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     else if (getPetType() != SUMMON_PET)
         sLog.outError("Pet have incorrect type (%u) for pet loading.", getPetType());
 
+    if (owner->IsImmuneToNPC())
+        SetImmuneToNPC(true);
+
+    if (owner->IsImmuneToPlayer())
+        SetImmuneToPlayer(true);
+
     if (owner->IsPvP())
         SetPvP(true);
 

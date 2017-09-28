@@ -1391,6 +1391,11 @@ class Unit : public WorldObject
 
         bool IsCivilianForTarget(Unit const* pov) const;
 
+        bool IsImmuneToNPC() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC); }
+        void SetImmuneToNPC(bool state);
+        bool IsImmuneToPlayer() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER); }
+        void SetImmuneToPlayer(bool state);
+
         bool IsPvP() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
         void SetPvP(bool state);
         bool IsPvPFreeForAll() const;

@@ -2285,6 +2285,12 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
     if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
+    if (m_caster->IsImmuneToNPC())
+        spawnCreature->SetImmuneToNPC(true);
+
+    if (m_caster->IsImmuneToPlayer())
+        spawnCreature->SetImmuneToPlayer(true);
+
     // Notify Summoner
     if (m_originalCaster && (m_originalCaster != m_caster) && (m_originalCaster->AI()))
         m_originalCaster->AI()->JustSummoned(spawnCreature);
@@ -2776,6 +2782,12 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
             spawnCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
+        if (m_caster->IsImmuneToNPC())
+            spawnCreature->SetImmuneToNPC(true);
+
+        if (m_caster->IsImmuneToPlayer())
+            spawnCreature->SetImmuneToPlayer(true);
+
         if (m_caster->IsPvP())
             spawnCreature->SetPvP(true);
 
@@ -2783,7 +2795,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         {
             charmInfo->SetPetNumber(pet_number, false);
 
-            if (spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
+            if (cInfo->UnitFlags & UNIT_FLAG_IMMUNE_TO_NPC)
                 charmInfo->SetReactState(REACT_PASSIVE);
             else if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)
                 charmInfo->SetReactState(REACT_DEFENSIVE);
@@ -2999,6 +3011,12 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     pet->setFaction(plr->getFaction());
     pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
+    if (plr->IsImmuneToNPC())
+        pet->SetImmuneToNPC(true);
+
+    if (plr->IsImmuneToPlayer())
+        pet->SetImmuneToPlayer(true);
+
     if (plr->IsPvP())
         pet->SetPvP(true);
 
@@ -3139,6 +3157,12 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+    if (m_caster->IsImmuneToNPC())
+        NewSummon->SetImmuneToNPC(true);
+
+    if (m_caster->IsImmuneToPlayer())
+        NewSummon->SetImmuneToPlayer(true);
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -4268,6 +4292,12 @@ void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)
     if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         pTotem->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
+    if (m_caster->IsImmuneToNPC())
+        pTotem->SetImmuneToNPC(true);
+
+    if (m_caster->IsImmuneToPlayer())
+        pTotem->SetImmuneToPlayer(true);
+
     if (m_caster->IsPvP())
         pTotem->SetPvP(true);
 
@@ -4774,7 +4804,7 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
     critter->SelectLevel();                                 // some summoned critters have different from 1 DB data for level/hp
     const CreatureInfo* info = critter->GetCreatureInfo();
     // Some companions have additional UNIT_FLAG_NON_ATTACKABLE (0x2), perphaps coming from template, so add template flags
-    critter->SetUInt32Value(UNIT_FIELD_FLAGS, (UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC | info->UnitFlags));
+    critter->SetUInt32Value(UNIT_FIELD_FLAGS, info->UnitFlags);
     critter->SetUInt32Value(UNIT_NPC_FLAGS, info->NpcFlags);// some companions may have quests, so they need npc flags
     critter->InitPetCreateSpells();                         // some companions may have spells (e.g. disgusting oozeling)
     if (m_duration > 0)                                     // set timer for unsummon
@@ -4786,6 +4816,9 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
         critter->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
     critter->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_UNK5);
+
+    critter->SetImmuneToNPC(true);
+    critter->SetImmuneToPlayer(true);
 
     map->Add((Creature*)critter);
     critter->AIM_Initialize();
