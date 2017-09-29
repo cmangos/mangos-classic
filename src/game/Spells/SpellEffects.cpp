@@ -2283,7 +2283,7 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
     m_caster->SetPet(spawnCreature);
 
     if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-        spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+        spawnCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
     if (m_caster->IsImmuneToNPC())
         spawnCreature->SetImmuneToNPC(true);
@@ -3011,6 +3011,9 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     pet->setFaction(plr->getFaction());
     pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
+    if (plr->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
     if (plr->IsImmuneToNPC())
         pet->SetImmuneToNPC(true);
 
@@ -3164,6 +3167,9 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     if (m_caster->IsImmuneToPlayer())
         NewSummon->SetImmuneToPlayer(true);
 
+    if (m_caster->IsPvP())
+        NewSummon->SetPvP(true);
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
@@ -3174,9 +3180,6 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
         // generate new name for summon pet
         NewSummon->SetName(sObjectMgr.GeneratePetName(petentry));
-
-        if (m_caster->IsPvP())
-            NewSummon->SetPvP(true);
 
         NewSummon->LearnPetPassives();
         NewSummon->CastPetAuras(true);
@@ -3189,8 +3192,8 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     }
     else
     {
+        NewSummon->SetFlag(UNIT_FIELD_FLAGS, cInfo->UnitFlags);
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, cInfo->NpcFlags);
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS, cInfo->UnitFlags);
 
         // Notify Summoner
         if (m_originalCaster && (m_originalCaster != m_caster) && (m_originalCaster->AI()))
@@ -4815,10 +4818,13 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
     if (player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         critter->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
-    critter->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_UNK5);
-
+    // NOTE: All companions should have these (creatureinfo needs to be tuned accordingly before we can remove these two lines):
     critter->SetImmuneToNPC(true);
     critter->SetImmuneToPlayer(true);
+
+    // NOTE: Do not set PvP flags (confirmed) for companions.
+
+    critter->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_UNK5);
 
     map->Add((Creature*)critter);
     critter->AIM_Initialize();
