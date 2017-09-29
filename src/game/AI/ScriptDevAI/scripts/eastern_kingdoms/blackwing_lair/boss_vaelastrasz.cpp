@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Vaelastrasz
-SD%Complete: 75
-SDComment: Burning Adrenaline not correctly implemented in core
+SD%Complete: 90
+SDComment: Final effect of Burning Adrenaline (player explodes) is not supported / Support for quest for Scepter of the Shifting Sands epic quest chain is missing
 SDCategory: Blackwing Lair
 EndScriptData
 
@@ -47,7 +47,7 @@ enum
     SPELL_CLEAVE                = 20684,                    // Chain cleave is most likely named something different and contains a dummy effect
 
     SPELL_NEFARIUS_CORRUPTION   = 23642,
-    SPELL_RED_LIGHTNING         = 24240,
+    SPELL_RED_LIGHTNING         = 19484,
 
     GOSSIP_ITEM_VAEL_1          = -3469003,
     GOSSIP_ITEM_VAEL_2          = -3469004,
@@ -105,7 +105,7 @@ struct boss_vaelastraszAI : public ScriptedAI
         m_uiTailSweepTimer               = 20000;
         m_bHasYelled = false;
 
-        // Creature should have only 1/3 of hp
+        // Creature should have only 30% of hp
         m_creature->SetHealth(uint32(m_creature->GetMaxHealth()*.3));
     }
 
@@ -189,35 +189,30 @@ struct boss_vaelastraszAI : public ScriptedAI
 
                         // Search for the Blackwing Technicians tormeting Vaelastrasz to make them flee to the next room above the stairs
                         GetCreatureListWithEntryInGrid(lTechniciansList, m_creature, NPC_BLACKWING_TECHNICIAN, 40.0f);
-
                         for (std::list<Creature*>::const_iterator itr = lTechniciansList.begin(); itr != lTechniciansList.end(); ++itr)
                         {
+                            // Ignore Blackwing Technicians on upper floors and dead ones
+                            if (!((*itr)->isAlive()) || (*itr)->GetPositionZ() > m_creature->GetPositionZ() + 1)
+                                continue;
+
+                            // Each fleeing part and despawn is handled in DB, we only need to make them run
+                            (*itr)->SetWalk(false);
+
                             // The technicians will behave differently depending on they are on the right or left side of
                             // Vaelastrasz. We compare their X position to Vaelastrasz X position to sort them out
-                            if (Creature* pTechnician = m_creature->GetMap()->GetCreature((*itr)->GetObjectGuid()))
+                            if ((*itr)->GetPositionX() > m_creature->GetPositionX())
                             {
-                                // Ignore Blackwing Technicians on upper floors
-                                if (pTechnician->GetPositionZ() > m_creature->GetPositionZ() + 1)
-                                    continue;
-
-                                pTechnician->SetWalk(false);
-
-                                // Check is on left or right side
-                                // Each fleeing part and despawn is handled in DB
-                                if (pTechnician->GetPositionX() > m_creature->GetPositionX())
+                                // Left side
+                                if (!bHasYelled)
                                 {
-                                    // Left side
-                                    if (!bHasYelled)
-                                    {
-                                        DoScriptText(SAY_TECHNICIAN_RUN, pTechnician);
-                                        bHasYelled = true;
-                                    }
-                                    pTechnician->GetMotionMaster()->MoveWaypoint(0);
+                                    DoScriptText(SAY_TECHNICIAN_RUN, (*itr));
+                                    bHasYelled = true;
                                 }
-                                else
-                                    // Right side
-                                    pTechnician->GetMotionMaster()->MoveWaypoint(1);
+                                (*itr)->GetMotionMaster()->MoveWaypoint(0);
                             }
+                            else
+                                // Right side
+                                (*itr)->GetMotionMaster()->MoveWaypoint(1);
                         }
                         m_uiIntroTimer = 1000;
                         break;
@@ -236,10 +231,10 @@ struct boss_vaelastraszAI : public ScriptedAI
                         // Set npc flags now
                         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                        m_uiIntroTimer = 7000;
+                        m_uiIntroTimer = 6000;
                         break;
                     case 3:
-                         if (Creature* pNefarius = m_creature->GetMap()->GetCreature(m_nefariusGuid))
+                        if (Creature* pNefarius = m_creature->GetMap()->GetCreature(m_nefariusGuid))
                             pNefarius->CastSpell(m_creature, SPELL_RED_LIGHTNING, TRIGGERED_NONE);
                         m_uiIntroTimer = 0;
                         break;
