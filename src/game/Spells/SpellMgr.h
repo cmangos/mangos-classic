@@ -741,24 +741,10 @@ inline bool IsNeutralEffectTargetPositive(uint32 etarget, const WorldObject* cas
         return true; // Early self-cast detection
 
     if (!caster)
-        return true; // TODO: Nice to have additional in-depth research for default value for nullcaster
+        return true;
 
-    const Unit* utarget = (const Unit*)target;
-    switch (caster->GetTypeId())
-    {
-        case TYPEID_UNIT:
-        case TYPEID_PLAYER:
-            return ((const Unit*)caster)->IsFriendlyTo(utarget);
-        case TYPEID_GAMEOBJECT:
-            return ((const GameObject*)caster)->IsFriendlyTo(utarget);
-        case TYPEID_DYNAMICOBJECT:
-            return ((const DynamicObject*)caster)->IsFriendlyTo(utarget);
-        case TYPEID_CORPSE:
-            return ((const Corpse*)caster)->IsFriendlyTo(utarget);
-        default:
-            break;
-    }
-    return true;
+    // TODO: Fix it later
+    return caster->IsFriend(static_cast<const Unit*>(target));
 }
 
 inline bool IsPositiveEffectTargetMode(const SpellEntry* entry, SpellEffectIndex effIndex, const WorldObject* caster = nullptr, const WorldObject* target = nullptr, bool recursive = false)
