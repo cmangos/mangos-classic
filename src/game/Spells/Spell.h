@@ -204,8 +204,8 @@ enum SpellTargets
     SPELL_TARGETS_HOSTILE,
     SPELL_TARGETS_NOT_FRIENDLY,
     SPELL_TARGETS_NOT_HOSTILE,
-    SPELL_TARGETS_FRIENDLY,
-    SPELL_TARGETS_AOE_DAMAGE,
+    SPELL_TARGETS_ASSISTABLE,
+    SPELL_TARGETS_AOE_ATTACKABLE,
     SPELL_TARGETS_ALL
 };
 
@@ -796,11 +796,11 @@ namespace MaNGOS
                         if (i_originalCaster->IsHostileTo(itr->getSource()))
                             continue;
                         break;
-                    case SPELL_TARGETS_FRIENDLY:
-                        if (!i_originalCaster->IsFriendlyTo(itr->getSource()))
+                    case SPELL_TARGETS_ASSISTABLE:
+                        if (!i_originalCaster->CanAssistSpell(itr->getSource(), i_spell.m_spellInfo))
                             continue;
                         break;
-                    case SPELL_TARGETS_AOE_DAMAGE:
+                    case SPELL_TARGETS_AOE_ATTACKABLE:
                     {
                         if (itr->getSource()->GetTypeId() == TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem())
                             continue;
