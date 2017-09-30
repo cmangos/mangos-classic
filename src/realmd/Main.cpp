@@ -44,7 +44,7 @@
 #include <chrono>
 #include <thread>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include "ServiceWin32.h"
 char serviceName[] = "realmd";
 char serviceLongName[] = "MaNGOS realmd service";
@@ -74,7 +74,7 @@ void usage(const char* prog)
     sLog.outString("Usage: \n %s [<options>]\n"
                    "    -v, --version            print version and exist\n\r"
                    "    -c config_file           use config_file as configuration file\n\r"
-#ifdef WIN32
+#ifdef _WIN32
                    "    Running as service functions:\n\r"
                    "    -s run                   run as service\n\r"
                    "    -s install               install service\n\r"
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     desc.add_options()
         ("config,c", boost::program_options::value<std::string>(&configFile)->default_value(_REALMD_CONFIG), "configuration file")
         ("version,v", "print version and exit")
-#ifdef WIN32
+#ifdef _WIN32
         ("s", boost::program_options::value<std::string>(&serviceParameter), "<run, install, uninstall> service");
 #else
         ("s", boost::program_options::value<std::string>(&serviceParameter), "<run, stop> service");
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-#ifdef WIN32                                                // windows service command need execute before config read
+#ifdef _WIN32                                                // windows service command need execute before config read
     if (vm.count("s"))
     {
         switch (::tolower(serviceParameter[0]))
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-#ifndef WIN32                                               // posix daemon commands need apply after config read
+#ifndef _WIN32                                               // posix daemon commands need apply after config read
     if (vm.count("s"))
     {
         switch (::tolower(serviceParameter[0]))
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
     HookSignals();
 
     ///- Handle affinity for multiple processors and process priority on Windows
-#ifdef WIN32
+#ifdef _WIN32
     {
         HANDLE hProcess = GetCurrentProcess();
 
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
     auto const numLoops = sConfig.GetIntDefault("MaxPingTime", 30) * MINUTE * 10;
     uint32 loopCounter = 0;
 
-#ifndef WIN32
+#ifndef _WIN32
     detachDaemon();
 #endif
     ///- Wait for termination signal
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
             LoginDatabase.Ping();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-#ifdef WIN32
+#ifdef _WIN32
         if (m_ServiceStatus == 0) stopEvent = true;
         while (m_ServiceStatus == 2) Sleep(1000);
 #endif

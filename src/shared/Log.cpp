@@ -986,6 +986,11 @@ void Log::setScriptLibraryErrorFile(char const* fname, char const* libName)
     scriptErrLogFile = fopen(fileName.c_str(), "a");
 }
 
+void outstring_log()
+{
+    sLog.outString();
+}
+
 void outstring_log(const char* str, ...)
 {
     if (!str)

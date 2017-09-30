@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-set(EXECUTABLE_NAME realmd)
+set(EXECUTABLE_NAME ${CMANGOS_BINARY_REALMD_NAME})
 
 set(EXECUTABLE_SRCS
     AuthCodes.h
@@ -33,24 +33,18 @@ if(WIN32)
 endif()
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}/src/shared
-  ${CMAKE_SOURCE_DIR}/src/framework
+  ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_BINARY_DIR}
-  ${CMAKE_BINARY_DIR}/src/shared
-  ${MYSQL_INCLUDE_DIR}
-  ${OPENSSL_INCLUDE_DIR}
 )
 
 add_executable(${EXECUTABLE_NAME}
   ${EXECUTABLE_SRCS}
 )
 
-add_dependencies(${EXECUTABLE_NAME} revision.h)
+add_dependencies(${EXECUTABLE_NAME} RevisionGenerator)
 
 target_link_libraries(${EXECUTABLE_NAME}
   shared
-  framework
-  ${Boost_LIBRARIES}
 )
 
 if(WIN32)
@@ -60,17 +54,40 @@ if(WIN32)
     debug ${MYSQL_DEBUG_LIBRARY}
     debug ${OPENSSL_DEBUG_LIBRARIES}
   )
-  if(PLATFORM MATCHES X86)
-    target_link_libraries(${EXECUTABLE_NAME})
+  if(MINGW)
+    target_link_libraries(${EXECUTABLE_NAME}
+      wsock32
+      ws2_32
+    )
   endif()
+
+  # Define OutDir to source/bin/(platform)_(configuaration) folder.
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DEV_BIN_DIR}")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES PROJECT_LABEL "AuthServer")
+
+  # Add provided dependency lib to dev folder
+  string(REGEX REPLACE "/" "\\\\" LibFolder ${DEV_PROVIDED_LIBS_FOLDER})
+  add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND copy \"${LibFolder}\\*.dll\" \"$(OutDir)\")
+
+  # Add conf file to dev folder
+  add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${CMAKE_CURRENT_SOURCE_DIR}/realmd.conf.dist.in\" \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/realmd.conf.dist\")
 endif()
 
 if(UNIX)
   target_link_libraries(${EXECUTABLE_NAME}
-    ${MYSQL_LIBRARY}
     ${OPENSSL_LIBRARIES}
     ${OPENSSL_EXTRA_LIBRARIES}
   )
+
+  if(POSTGRESQL AND POSTGRESQL_FOUND)
+    target_link_libraries(${EXECUTABLE_NAME} ${PostgreSQL_LIBRARIES})
+  else()
+    target_link_libraries(${EXECUTABLE_NAME} ${MYSQL_LIBRARY})
+  endif()
 endif()
 
 set(EXECUTABLE_LINK_FLAGS "")
@@ -90,6 +107,6 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR})
 install(FILES realmd.conf.dist.in DESTINATION ${CONF_DIR} RENAME realmd.conf.dist)
 
-if(WIN32 AND MSVC)
+if(MSVC)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/\${BUILD_TYPE}/${EXECUTABLE_NAME}.pdb DESTINATION ${BIN_DIR} CONFIGURATIONS Debug)
 endif()

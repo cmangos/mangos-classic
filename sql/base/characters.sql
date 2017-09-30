@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_z2694_01_characters_instance` bit(1) DEFAULT NULL
+  `required_z2708_01_characters_account_instances_entered` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -33,6 +33,27 @@ LOCK TABLES `character_db_version` WRITE;
 INSERT INTO `character_db_version` VALUES
 (NULL);
 /*!40000 ALTER TABLE `character_db_version` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `account_instances_entered`
+--
+
+DROP TABLE IF EXISTS `account_instances_entered`;
+CREATE TABLE `account_instances_entered` (
+   `AccountId` INT(11) UNSIGNED NOT NULL COMMENT 'Player account',
+   `ExpireTime` BIGINT(40) NOT NULL COMMENT 'Time when instance was entered',
+   `InstanceId` INT(11) UNSIGNED NOT NULL COMMENT 'ID of instance entered',
+   PRIMARY KEY(`AccountId`,`InstanceId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Instance reset limit system';
+
+--
+-- Dumping data for table `account_instances_entered`
+--
+
+LOCK TABLES `account_instances_entered` WRITE;
+/*!40000 ALTER TABLE `account_instances_entered` DISABLE KEYS */;
+/*!40000 ALTER TABLE `account_instances_entered` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -455,12 +476,14 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_spell_cooldown`;
 CREATE TABLE `character_spell_cooldown` (
-  `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier, Low part',
-  `spell` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell Identifier',
-  `item` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Item Identifier',
-  `time` bigint(20) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`guid`,`spell`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `LowGuid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier, Low part',
+  `SpellId` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell Identifier',
+  `SpellExpireTime` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell cooldown expire time',
+  `Category` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell category',
+  `CategoryExpireTime` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell category cooldown expire time',
+  `ItemId` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Item Identifier',
+  PRIMARY KEY (`LowGuid`,`SpellId`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `character_spell_cooldown`
@@ -934,6 +957,7 @@ CREATE TABLE `instance` (
   `id` int(11) unsigned NOT NULL DEFAULT '0',
   `map` int(11) unsigned NOT NULL DEFAULT '0',
   `resettime` bigint(40) unsigned NOT NULL DEFAULT '0',
+  `encountersMask` int(10) unsigned NOT NULL DEFAULT '0',
   `data` longtext,
   PRIMARY KEY (`id`),
   KEY `map` (`map`),
@@ -1211,6 +1235,22 @@ LOCK TABLES `petition_sign` WRITE;
 /*!40000 ALTER TABLE `petition_sign` DISABLE KEYS */;
 /*!40000 ALTER TABLE `petition_sign` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `playerbot_saved_data`
+--
+
+DROP TABLE IF EXISTS `playerbot_saved_data`;
+CREATE TABLE `playerbot_saved_data` (
+  `guid` int(11) unsigned NOT NULL DEFAULT '0',
+  `combat_order` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `primary_target` int(11) unsigned NOT NULL DEFAULT '0',
+  `secondary_target` int(11) unsigned NOT NULL DEFAULT '0',
+  `pname` varchar(12) NOT NULL DEFAULT '',
+  `sname` varchar(12) NOT NULL DEFAULT '',
+  `combat_delay` INT(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `pvpstats_battlegrounds`

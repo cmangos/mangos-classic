@@ -23,7 +23,7 @@
 #include <set>
 #include <cstdlib>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include "direct.h"
 #else
 #include <sys/stat.h>
@@ -36,7 +36,7 @@
 #include "loadlib/wdt.h"
 #include <fcntl.h>
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <unistd.h>
 #endif
 
@@ -104,7 +104,7 @@ const char* CONF_mpq_list[] =
 
 void CreateDir(const std::string& Path)
 {
-#ifdef WIN32
+#ifdef _WIN32
     _mkdir(Path.c_str());
 #else
     mkdir(Path.c_str(), 0777);
@@ -200,7 +200,7 @@ uint32 ReadMapDBC()
         map_ids[x].id = dbc.getRecord(x).getUInt(0);
         strcpy(map_ids[x].name, dbc.getRecord(x).getString(1));
     }
-    printf("Done! (%u maps loaded)\n", map_count);
+    printf("Done! (%u maps loaded)\n", uint32(map_count));
     return map_count;
 }
 
@@ -225,7 +225,7 @@ void ReadAreaTableDBC()
 
     maxAreaId = dbc.getMaxId();
 
-    printf("Done! (%u areas loaded)\n", area_count);
+    printf("Done! (%u areas loaded)\n", uint32(area_count));
 }
 
 void ReadLiquidTypeTableDBC()
@@ -246,7 +246,7 @@ void ReadLiquidTypeTableDBC()
     for (uint32 x = 0; x < LiqType_count; ++x)
         LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
 
-    printf("Done! (%u LiqTypes loaded)\n", LiqType_count);
+    printf("Done! (%u LiqTypes loaded)\n", uint32(LiqType_count));
 }
 
 //

@@ -18,7 +18,7 @@
 
 #include "Util.h"
 #include "Timer.h"
-#include "utf8cpp/utf8.h"
+#include <utf8.h>
 #include "TSS.h"
 
 #include <boost/asio.hpp>
@@ -56,7 +56,7 @@ uint32 WorldTimer::tick()
 uint32 WorldTimer::getMSTime()
 {
     static auto const start_time = std::chrono::system_clock::now();
-    return static_cast<uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start_time).count());
+    return static_cast<uint32>((std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - std::chrono::duration_cast<std::chrono::milliseconds>(start_time.time_since_epoch())).count());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -271,7 +271,7 @@ uint32 CreatePIDFile(const std::string& filename)
     if (pid_file == nullptr)
         return 0;
 
-#ifdef WIN32
+#ifdef _WIN32
     DWORD pid = GetCurrentProcessId();
 #else
     pid_t pid = getpid();

@@ -162,28 +162,37 @@ bool Socket::Read(char *buffer, int length)
     return true;
 }
 
+void Socket::Write(const char *header, int headerSize, const char* content, int contentSize)
+{
+    std::lock_guard<std::mutex> guard(m_mutex);
+
+    // get the correct buffer depending on the current writing state
+    PacketBuffer* outBuffer = m_writeState == WriteState::Sending ? m_secondaryOutBuffer.get() : m_outBuffer.get();
+
+    // write the header
+    outBuffer->Write(header, headerSize);
+
+    // write the content
+    outBuffer->Write(content, contentSize);
+
+    // flush data if need
+    if (m_writeState == WriteState::Idle)
+        StartWriteFlushTimer();
+}
+
 void Socket::Write(const char *buffer, int length)
 {
     std::lock_guard<std::mutex> guard(m_mutex);
 
-    switch (m_writeState)
-    {
-        case WriteState::Idle:
-            m_outBuffer->Write(buffer, length);
-            StartWriteFlushTimer();
-            break;
+    // get the correct buffer depending on the current writing state
+    PacketBuffer* outBuffer = m_writeState == WriteState::Sending ? m_secondaryOutBuffer.get() : m_outBuffer.get();
 
-        case WriteState::Buffering:
-            m_outBuffer->Write(buffer, length);
-            break;
+    // write the header
+    outBuffer->Write(buffer, length);
 
-        case WriteState::Sending:
-            m_secondaryOutBuffer->Write(buffer, length);
-            break;
-
-        default:
-            assert(false);
-    }
+    // flush data if need
+    if (m_writeState == WriteState::Idle)
+        StartWriteFlushTimer();
 }
 
 // note that this function assumes that the socket mutex is locked
@@ -260,7 +269,7 @@ void Socket::OnWriteComplete(const boost::system::error_code &error, size_t leng
     // if there is data left to write, move it to the start of the buffer
     if (length < m_outBuffer->m_writePosition)
     {
-        std::copy(&m_outBuffer->m_buffer[length], &m_outBuffer->m_buffer[m_outBuffer->m_writePosition], m_outBuffer->m_buffer.begin());
+        memcpy(&(m_outBuffer->m_buffer[0]), &(m_outBuffer->m_buffer[length]), (m_outBuffer->m_writePosition - length) * sizeof(m_outBuffer->m_buffer[0]));
         m_outBuffer->m_writePosition -= length;
     }
     // if not, reset the write pointer
@@ -274,7 +283,7 @@ void Socket::OnWriteComplete(const boost::system::error_code &error, size_t leng
         if (m_outBuffer->m_buffer.size() < (m_outBuffer->m_writePosition + m_secondaryOutBuffer->m_writePosition))
             m_outBuffer->m_buffer.resize(m_outBuffer->m_writePosition + m_secondaryOutBuffer->m_writePosition);
 
-        std::copy(&m_secondaryOutBuffer->m_buffer[0], &m_secondaryOutBuffer->m_buffer[m_secondaryOutBuffer->m_writePosition], &m_outBuffer->m_buffer[m_outBuffer->m_writePosition]);
+        memcpy(&(m_outBuffer->m_buffer[m_outBuffer->m_writePosition]), &(m_secondaryOutBuffer->m_buffer[0]), (m_secondaryOutBuffer->m_writePosition) * sizeof(m_secondaryOutBuffer->m_buffer[0]));
 
         m_outBuffer->m_writePosition += m_secondaryOutBuffer->m_writePosition;
         m_secondaryOutBuffer->m_writePosition = 0;

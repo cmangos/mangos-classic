@@ -16,3 +16,4 @@ debug
 release
 *.ilk
 *.exe
+bin/*.*

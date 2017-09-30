@@ -4,6 +4,7 @@
 #include "../mpq_libmpq.h"
 
 #include <stdio.h>
+#include <string.h>
 
 class MPQFile;
 
@@ -33,13 +34,11 @@ bool FileLoader::loadFile(char* filename, bool log)
     data_size = mf.getSize();
 
     data = new uint8 [data_size];
-    if (data)
-    {
-        mf.read(data, data_size);
-        mf.close();
-        if (prepareLoadedData())
-            return true;
-    }
+    mf.read(data, data_size);
+    mf.close();
+    if (prepareLoadedData())
+        return true;
+
     printf("Error loading %s", filename);
     mf.close();
     free();
@@ -50,7 +49,7 @@ bool FileLoader::prepareLoadedData()
 {
     // Check version
     version = (file_MVER*) data;
-    if (version->fcc != 'MVER')
+    if (!strncmp(version->fcc_txt, "MVER", 4))
         return false;
     if (version->ver != FILE_FORMAT_VERSION)
         return false;

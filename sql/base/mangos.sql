@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2695_01_mangos_instance_template` bit(1) DEFAULT NULL
+  `required_z2710_01_mangos_questgiver_greeting` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -679,6 +679,7 @@ CREATE TABLE `conditions` (
   `type` tinyint(3) NOT NULL DEFAULT '0' COMMENT 'Type of the condition',
   `value1` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'data field one for the condition',
   `value2` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'data field two for the condition',
+  `comments` VARCHAR(500) DEFAULT '',
   PRIMARY KEY (`condition_entry`),
   UNIQUE KEY `unique_conditions` (`type`,`value1`,`value2`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Condition System';
@@ -707,7 +708,8 @@ CREATE TABLE `creature` (
   `position_y` float NOT NULL DEFAULT '0',
   `position_z` float NOT NULL DEFAULT '0',
   `orientation` float NOT NULL DEFAULT '0',
-  `spawntimesecs` int(10) unsigned NOT NULL DEFAULT '120',
+  `spawntimesecsmin` int(10) unsigned NOT NULL DEFAULT '120' COMMENT 'Creature respawn time minimum',
+  `spawntimesecsmax` int(10) unsigned NOT NULL DEFAULT '120' COMMENT 'Creature respawn time maximum',
   `spawndist` float NOT NULL DEFAULT '5',
   `currentwaypoint` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `curhealth` int(10) unsigned NOT NULL DEFAULT '1',
@@ -973,6 +975,7 @@ CREATE TABLE `creature_loot_template` (
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `comments` VARCHAR(300) DEFAULT '',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Loot System';
 
@@ -1069,6 +1072,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_movement_template`;
 CREATE TABLE `creature_movement_template` (
   `entry` mediumint(8) unsigned NOT NULL COMMENT 'Creature entry',
+  `pathId` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Path ID for entry',
   `point` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `position_x` float NOT NULL DEFAULT '0',
   `position_y` float NOT NULL DEFAULT '0',
@@ -1085,7 +1089,7 @@ CREATE TABLE `creature_movement_template` (
   `orientation` float NOT NULL DEFAULT '0',
   `model1` mediumint(9) NOT NULL DEFAULT '0',
   `model2` mediumint(9) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`entry`,`point`)
+  PRIMARY KEY (`entry`,`pathId`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature waypoint system';
 
 --
@@ -1365,6 +1369,7 @@ CREATE TABLE `dbscripts_on_creature_movement` (
   `command` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `datalong` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `datalong2` int(10) unsigned NOT NULL DEFAULT '0',
+  `datalong3` int(11) unsigned NOT NULL DEFAULT '0',
   `buddy_entry` int(10) unsigned NOT NULL DEFAULT '0',
   `search_radius` int(10) unsigned NOT NULL DEFAULT '0',
   `data_flags` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -1410,6 +1415,40 @@ DROP TABLE IF EXISTS dbscripts_on_creature_death;
 CREATE TABLE dbscripts_on_creature_death LIKE dbscripts_on_creature_movement;
 
 --
+-- Table structure for table `dbscript_random_templates`
+--
+
+DROP TABLE IF EXISTS `dbscript_random_templates`;
+CREATE TABLE `dbscript_random_templates` (
+  `id` int(11) unsigned NOT NULL COMMENT 'Id of template',
+  `type` int(11) unsigned NOT NULL COMMENT 'Type of template',
+  `target_id` int(11) NOT NULL DEFAULT '0' COMMENT 'Id of chanced element',
+  `chance` int(11) NOT NULL DEFAULT '0' COMMENT 'Chance for element to occur in %',
+  `comments` VARCHAR(500) DEFAULT '',
+  PRIMARY KEY (`id`,`type`,`target_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='DBScript system';
+
+--
+-- Table structure for table `dbscript_string_template`
+--
+
+DROP TABLE IF EXISTS `dbscript_string_template`;
+CREATE TABLE `dbscript_string_template` (
+  `id` int(11) unsigned NOT NULL COMMENT 'Id of template' AUTO_INCREMENT,
+  `string_id` int(11) NOT NULL DEFAULT '0' COMMENT 'db_script_string id',
+  PRIMARY KEY (`id`,`string_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='DBScript system';
+
+--
+-- Dumping data for table `dbscript_string_template`
+--
+
+LOCK TABLES `dbscript_string_template` WRITE;
+/*!40000 ALTER TABLE `dbscript_string_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `dbscript_string_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `disenchant_loot_template`
 --
 
@@ -1422,6 +1461,7 @@ CREATE TABLE `disenchant_loot_template` (
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `comments` VARCHAR(300) DEFAULT '',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Loot System';
 
@@ -1529,6 +1569,7 @@ CREATE TABLE `fishing_loot_template` (
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `comments` VARCHAR(300) DEFAULT '',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Loot System';
 
@@ -1554,6 +1595,7 @@ CREATE TABLE `game_event` (
   `length` bigint(20) unsigned NOT NULL DEFAULT '43200' COMMENT 'Length in minutes of the event',
   `holiday` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Client side holiday id',
   `linkedTo` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'This event starts only if defined LinkedTo event is started',
+  `EventGroup` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Used for events that are randomized daily/weekly',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of the event displayed in console',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -1769,7 +1811,8 @@ CREATE TABLE `gameobject` (
   `rotation1` float NOT NULL DEFAULT '0',
   `rotation2` float NOT NULL DEFAULT '0',
   `rotation3` float NOT NULL DEFAULT '0',
-  `spawntimesecs` int(11) NOT NULL DEFAULT '0',
+  `spawntimesecsmin` int(11) NOT NULL DEFAULT '0' COMMENT 'GameObject respawn time minimum',
+  `spawntimesecsmax` int(11) NOT NULL DEFAULT '0' COMMENT 'Gameobject respawn time maximum',
   `animprogress` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `state` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`),
@@ -1840,6 +1883,7 @@ CREATE TABLE `gameobject_loot_template` (
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `comments` VARCHAR(300) DEFAULT '',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Loot System';
 
@@ -1992,7 +2036,8 @@ INSERT INTO `gossip_menu_option` VALUES
 (0,12,0,'GOSSIP_OPTION_STABLEPET',14,8192,0,0,0,0,0,NULL,0),
 (0,13,1,'GOSSIP_OPTION_ARMORER',15,16384,0,0,0,0,0,NULL,0),
 (0,14,0,'GOSSIP_OPTION_UNLEARNTALENTS',16,16,0,0,0,0,0,NULL,0),
-(0,15,2,'GOSSIP_OPTION_UNLEARNPETSKILLS',17,16,0,0,0,0,0,NULL,0);
+(0,15,2,'GOSSIP_OPTION_UNLEARNPETSKILLS',17,16,0,0,0,0,0,NULL,0),
+(0,16,0,'GOSSIP_OPTION_BOT',99,1,0,0,0,0,0,NULL,0);
 /*!40000 ALTER TABLE `gossip_menu_option` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2408,6 +2453,7 @@ CREATE TABLE `item_loot_template` (
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `comments` VARCHAR(300) DEFAULT '',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Loot System';
 
@@ -3097,6 +3143,24 @@ LOCK TABLES `locales_quest` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `locales_questgiver_greeting`
+--
+
+DROP TABLE IF EXISTS `locales_questgiver_greeting`;
+CREATE TABLE `locales_questgiver_greeting` (
+   `Entry` INT(11) UNSIGNED NOT NULL COMMENT 'Entry of Questgiver',
+   `Type` INT(11) UNSIGNED NOT NULL COMMENT 'Type of entry',
+   `Text_loc1` LONGTEXT COMMENT 'Text of the greeting locale 1',
+   `Text_loc2` LONGTEXT COMMENT 'Text of the greeting locale 2',
+   `Text_loc3` LONGTEXT COMMENT 'Text of the greeting locale 3',
+   `Text_loc4` LONGTEXT COMMENT 'Text of the greeting locale 4',
+   `Text_loc5` LONGTEXT COMMENT 'Text of the greeting locale 5',
+   `Text_loc6` LONGTEXT COMMENT 'Text of the greeting locale 6',
+   `Text_loc7` LONGTEXT COMMENT 'Text of the greeting locale 7',
+   `Text_loc8` LONGTEXT COMMENT 'Text of the greeting locale 8',
+   PRIMARY KEY(`Entry`,`Type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Quest and Gossip system';
+
 -- Table structure for table `mail_loot_template`
 --
 
@@ -3109,6 +3173,7 @@ CREATE TABLE `mail_loot_template` (
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `comments` VARCHAR(300) DEFAULT '',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Loot System';
 
@@ -4530,6 +4595,7 @@ CREATE TABLE `pickpocketing_loot_template` (
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `comments` VARCHAR(300) DEFAULT '',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Loot System';
 
@@ -9768,6 +9834,20 @@ LOCK TABLES `quest_template` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `questgiver_greeting`
+--
+
+DROP TABLE IF EXISTS `questgiver_greeting`;
+CREATE TABLE `questgiver_greeting` (
+   `Entry` INT(11) UNSIGNED NOT NULL COMMENT 'Entry of Questgiver',
+   `Type` INT(11) UNSIGNED NOT NULL COMMENT 'Type of entry',
+   `Text` LONGTEXT COMMENT 'Text of the greeting',
+   `EmoteId` INT(11) UNSIGNED NOT NULL COMMENT 'Emote ID of greeting',
+   `EmoteDelay` INT(11) UNSIGNED NOT NULL COMMENT 'Emote delay of the greeting',
+   PRIMARY KEY(`Entry`,`Type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Quest and Gossip system';
+
+--
 -- Table structure for table `reference_loot_template`
 --
 
@@ -9780,6 +9860,7 @@ CREATE TABLE `reference_loot_template` (
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `comments` VARCHAR(300) DEFAULT '',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Loot System';
 
@@ -9995,6 +10076,7 @@ CREATE TABLE `skinning_loot_template` (
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `comments` VARCHAR(300) DEFAULT '',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Loot System';
 
@@ -10352,14 +10434,15 @@ INSERT INTO `spell_bonus_data` VALUES
 (116,   0.8143, 0,       0,     0,     'Mage - Frost Bolt'),
 (1463,  0.8053, 0,       0,     0,     'Mage - Mana Shield'),
 /* Paladin */
-(26573, 0,      0.04,    0,  0.04,     'Paladin - Consecration'),
-(879,   0.15,   0,       0.15,  0,     'Paladin - Exorcism'),
-(24275, 0.15,   0,       0.15,  0,     'Paladin - Hammer of Wrath'),
-(20925, 0.09,   0,       0.056, 0,     'Paladin - Holy Shield'),
-(2812,  0.07,   0,       0.07,  0,     'Paladin - Holy Wrath'),
-(20424, 0.25,   0,       0.16,  0,     'Paladin - Seal of Command Proc'),
-(20167, 0.25,   0,       0.16,  0,     'Paladin - Seal of Light Proc'),
-(25742, 0.07,   0,       0.039, 0,     'Paladin - Seal of Righteousness Dummy Proc'),
+(20911, 0,      0,       0,     0,     'Paladin - Blessing of Sanctuary'),
+(25997, 1,      0,       0,     0,     'Paladin - Eye for an Eye'),
+(25899, 0,      0,       0,     0,     'Paladin - Greater Blessing of Sanctuary'),
+(19968, 0.7143, 0,       0,     0,     'Paladin - Holy Light'),
+(20925, 0.05,   0,       0,     0,     'Paladin - Holy Shield'),
+(2812,  0.1905, 0,       0,     0,     'Paladin - Holy Wrath'),
+(20187, 0.5,    0,       0,     0,     'Paladin - Judgement of Righteousness'),
+(20424, 0.2,    0,       0,     0,     'Paladin - Seal of Command Proc'),
+(25742, 0.1,    0,       0,     0,     'Paladin - Seal of Righteousness Proc'),
 /* Priest */
 (2061,  0.6177, 0,       0,     0,     'Priest - Flash Heal'),
 (2060,  1.2353, 0,       0,     0,     'Priest - Greater Heal'),
@@ -10475,6 +10558,10 @@ INSERT INTO `spell_chain` VALUES
 (14202,14201,12880,3,0),
 (14203,14202,12880,4,0),
 (14204,14203,12880,5,0),
+/* Fire Resistance Totem Auras */
+(8185,0,8185,1,0),
+(10534,8185,8185,2,0),
+(10535,10534,8185,3,0),
 /* Flametongue Weapon Proc */
 (8026, 0, 8026, 1, 0),
 (8028, 8026, 8026, 2, 0),
@@ -10500,7 +10587,15 @@ INSERT INTO `spell_chain` VALUES
 (10458,8037,8034,3,0),
 (16352,10458,8034,4,0),
 (16353,16352,8034,5,0),
-/* Healing Stream Totem Spell */
+/* Frost Resistance Totem Auras */
+(8182,0,8182,1,0),
+(10476,8182,8182,2,0),
+(10477,10476,8182,3,0),
+/* Grace of Air Totem Auras */
+(8836,0,8836,1,0),
+(10626,8836,8836,2,0),
+(25360,10626,8836,3,0),
+/* Healing Stream Totem Auras */
 (5672,0,5672, 1,0),
 (6371,5672,5672,2,0),
 (6372,6371,5672,3,0),
@@ -10513,6 +10608,27 @@ INSERT INTO `spell_chain` VALUES
 (11335,8689,8680,4,0),
 (11336,11335,8680,5,0),
 (11337,11336,8680,6,0),
+/* Nature Resistance Totem Auras */
+(10596,0,10596,1,0),
+(10598,10596,10596,2,0),
+(10599,10598,10596,3,0),
+/* Stoneskin Totem Auras */
+(8072,0,8072,1,0),
+(8156,8072,8072,2,0),
+(8157,8156,8072,3,0),
+(10403,8157,8072,4,0),
+(10404,10403,8072,5,0),
+(10405,10404,8072,6,0),
+/* Strength of Earth Totem Auras */
+(8076,0,8076,1,0),
+(8162,8076,8076,2,0),
+(8163,8162,8076,3,0),
+(10441,8163,8076,4,0),
+(25362,10441,8076,5,0),
+/* Windwall Totem Auras */
+(15108,0,15108,1,0),
+(15109,15108,15108,2,0),
+(15110,15109,15108,3,0),
 /* Wound Poison */
 (13218,0,13218,1,0),
 (13222,13218,13218,2,0),
@@ -11708,6 +11824,15 @@ INSERT INTO `spell_chain` VALUES
 /* Holy Wrath */
 (2812,0,2812,1,0),
 (10318,2812,2812,2,0),
+/* Judgement of Righteousness */
+(20187,0,20187,1,0),
+(20280,20187,20187,2,0),
+(20281,20280,20187,3,0),
+(20282,20281,20187,4,0),
+(20283,20282,20187,5,0),
+(20284,20283,20187,6,0),
+(20285,20284,20187,7,0),
+(20286,20285,20187,8,0),
 /* Redemption */
 (7328,0,7328,1,0),
 (10322,7328,7328,2,0),
@@ -11720,13 +11845,23 @@ INSERT INTO `spell_chain` VALUES
 (20348,20347,20165,3,0),
 (20349,20348,20165,4,0),
 /* Seal of Righteousness */
-(20287,21084,20154,3,0),
-(20288,20287,20154,4,0),
-(20289,20288,20154,5,0),
-(20290,20289,20154,6,0),
-(20291,20290,20154,7,0),
-(20292,20291,20154,8,0),
-(20293,20292,20154,9,0),
+(21084,0,21084,1,0),
+(20287,21084,21084,2,0),
+(20288,20287,21084,3,0),
+(20289,20288,21084,4,0),
+(20290,20289,21084,5,0),
+(20291,20290,21084,6,0),
+(20292,20291,21084,7,0),
+(20293,20292,21084,8,0),
+/* Seal of Righteousness Proc */
+(25742,0,25742,1,0),
+(25740,25742,25742,2,0),
+(25739,25740,25742,3,0),
+(25738,25739,25742,4,0),
+(25737,25738,25742,5,0),
+(25736,25737,25742,6,0),
+(25735,25736,25742,7,0),
+(25713,25735,25742,8,0),
 /* Seal of Wisdom */
 (20166,0,20166,1,0),
 (20356,20166,20166,2,0),

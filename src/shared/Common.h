@@ -21,14 +21,6 @@
 
 #include "Platform/Define.h"
 
-#if COMPILER == COMPILER_MICROSOFT
-#  pragma warning(disable:4996)                             // 'function': was declared deprecated
-#ifndef __SHOW_STUPID_WARNINGS__
-#  pragma warning(disable:4244)                             // 'argument' : conversion from 'type1' to 'type2', possible loss of data
-#  pragma warning(disable:4355)                             // 'this' : used in base member initializer list
-#endif                                                      // __SHOW_STUPID_WARNINGS__
-#endif                                                      // __GNUC__
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,9 +43,13 @@
 #include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
+#include <chrono>
 
 #include "Errors.h"
 #include "Threading.h"
+
+// included to use sleep_for()
+#include <thread>
 
 #if COMPILER == COMPILER_MICROSOFT
 

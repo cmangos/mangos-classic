@@ -107,3 +107,7 @@ include_directories(
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
 )
+
+target_include_directories(${LIBRARY_NAME}
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+)

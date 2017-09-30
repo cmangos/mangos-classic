@@ -19,7 +19,7 @@
 #ifndef _DEFINES_
 #define _DEFINES_
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #pragma warning(disable:4996)
 #endif
@@ -36,7 +36,7 @@
 using namespace std;
 
 
-#ifdef WIN32
+#ifdef _WIN32
 typedef unsigned __int64 uint64;
 typedef unsigned int     uint32;
 #else

@@ -27,7 +27,7 @@
 #include <list>
 #include <sstream>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <direct.h>
 #define popen _popen
 #define pclose _pclose
@@ -50,13 +50,14 @@
 
 // config
 
-#define NUM_REMOTES 2
+#define NUM_REMOTES 3
 #define NUM_DATABASES 3
 
 char remotes[NUM_REMOTES][MAX_REMOTE] =
 {
     "git@github.com:cmangos/mangos-classic.git",
-    "git://github.com/cmangos/mangos-classic.git"           // used for fetch if present
+    "git://github.com/cmangos/mangos-classic.git",          // used for fetch if present
+    "https://github.com/cmangos/mangos-classic.git"
 };
 
 char remote_branch[MAX_REMOTE] = "master";
@@ -215,7 +216,12 @@ bool fetch_origin()
 
 bool check_fwd()
 {
-    snprintf(cmd, MAX_CMD, "git log -n 1 --pretty=\"format:%%H\" %s/%s", (origins[1][0] ? origins[1] : origins[0]), remote_branch);
+    int i;
+    for (i = 0; i < MAX_REMOTE; i++)
+        if (origins[i][0])
+            break;
+
+    snprintf(cmd, MAX_CMD, "git log -n 1 --pretty=\"format:%%H\" %s/%s", origins[i], remote_branch);
     if ((cmd_pipe = popen(cmd, "r")) == NULL)
         return false;
 

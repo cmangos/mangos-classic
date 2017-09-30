@@ -22,11 +22,7 @@
 #include <G3D/Matrix3.h>
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
-#include <G3D/Ray.h>
-#include "../DBCStructure.h"
-#include "../GameObject.h"
-
-#include "Platform/Define.h"
+#include "Entities/GameObject.h"
 
 namespace VMAP
 {

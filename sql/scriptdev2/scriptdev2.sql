@@ -12,33 +12,8 @@ UPDATE world_template SET ScriptName='';
 /*  */
 
 /* AREATRIGGER */
-DELETE FROM scripted_areatrigger WHERE entry=3066;
-INSERT INTO scripted_areatrigger VALUES (3066,'at_ravenholdt');
-DELETE FROM scripted_areatrigger WHERE entry IN (4112,4113,4156);
 INSERT INTO scripted_areatrigger VALUES
-(4112,'at_naxxramas'),
-(4113,'at_naxxramas'),
-(4156,'at_naxxramas');
-DELETE FROM scripted_areatrigger WHERE entry IN (3546,3547,3548,3549,3550,3552);
-INSERT INTO scripted_areatrigger VALUES
-(3546,'at_childrens_week_spot'), -- Darnassian bank
-(3547,'at_childrens_week_spot'), -- Undercity - thone room
-(3548,'at_childrens_week_spot'), -- Stonewrought Dam
-(3549,'at_childrens_week_spot'), -- The Mor'shan Rampart
-(3550,'at_childrens_week_spot'), -- Ratchet Docks
-(3552,'at_childrens_week_spot'); -- Westfall Lighthouse
-DELETE FROM scripted_areatrigger WHERE entry IN (2026,2046);
-INSERT INTO scripted_areatrigger VALUES
-(2026,'at_blackrock_spire'),
-(2046,'at_blackrock_spire');
-DELETE FROM scripted_areatrigger WHERE entry IN (3958,3960);
-INSERT INTO scripted_areatrigger VALUES
-(3958,'at_zulgurub'),
-(3960,'at_zulgurub');
-DELETE FROM scripted_areatrigger WHERE entry=3626;
-INSERT INTO scripted_areatrigger VALUES (3626,'at_vaelastrasz');
-DELETE FROM scripted_areatrigger WHERE entry BETWEEN 1726 AND 1740;
-INSERT INTO scripted_areatrigger VALUES
+(171, 'at_huldar_miran'),
 (1726,'at_scent_larkorwi'),
 (1727,'at_scent_larkorwi'),
 (1728,'at_scent_larkorwi'),
@@ -53,16 +28,28 @@ INSERT INTO scripted_areatrigger VALUES
 (1737,'at_scent_larkorwi'),
 (1738,'at_scent_larkorwi'),
 (1739,'at_scent_larkorwi'),
-(1740,'at_scent_larkorwi');
-DELETE FROM scripted_areatrigger WHERE entry=1966;
-INSERT INTO scripted_areatrigger VALUES (1966,'at_murkdeep');
-DELETE FROM scripted_areatrigger WHERE entry IN (4047,4052);
-INSERT INTO scripted_areatrigger VALUES
+(1740,'at_scent_larkorwi'),
+(1966,'at_murkdeep'),
+(2026,'at_blackrock_spire'),
+(2046,'at_blackrock_spire'),
+(2066,'at_blackrock_spire'),
+(2067,'at_blackrock_spire'),
+(3066,'at_ravenholdt'),
+(3546,'at_childrens_week_spot'), -- Darnassian bank
+(3547,'at_childrens_week_spot'), -- Undercity - thone room
+(3548,'at_childrens_week_spot'), -- Stonewrought Dam
+(3549,'at_childrens_week_spot'), -- The Mor'shan Rampart
+(3550,'at_childrens_week_spot'), -- Ratchet Docks
+(3552,'at_childrens_week_spot'), -- Westfall Lighthouse
+(3587,'at_ancient_leaf'),
+(3626,'at_vaelastrasz'),
+(3958,'at_zulgurub'),
+(3960,'at_zulgurub'),
 (4047,'at_temple_ahnqiraj'),
-(4052,'at_temple_ahnqiraj');
-DELETE FROM scripted_areatrigger WHERE entry=3587;
-INSERT INTO scripted_areatrigger VALUES (3587,'at_ancient_leaf');
-
+(4052,'at_temple_ahnqiraj'),
+(4112,'at_naxxramas'),
+(4113,'at_naxxramas'),
+(4156,'at_naxxramas');
 
 /* BATTLEGROUNDS */
 UPDATE creature_template SET ScriptName='npc_spirit_guide' WHERE entry IN (13116, 13117);
@@ -155,8 +142,8 @@ UPDATE creature_template SET ScriptName='npc_felhound_tracker' WHERE entry=8668;
 UPDATE creature_template SET ScriptName='npc_gilthares' WHERE entry=3465;
 UPDATE creature_template SET ScriptName='npc_taskmaster_fizzule' WHERE entry=7233;
 UPDATE creature_template SET ScriptName='npc_twiggy_flathead' WHERE entry=6248;
-DELETE FROM scripted_areatrigger WHERE entry=522;
-INSERT INTO scripted_areatrigger VALUES (522,'at_twiggy_flathead');
+INSERT INTO scripted_areatrigger VALUES
+(522,'at_twiggy_flathead');
 UPDATE creature_template SET ScriptName='npc_wizzlecranks_shredder' WHERE entry=3439;
 UPDATE creature_template SET ScriptName='npc_gallywix' WHERE entry=7288;
 
@@ -166,10 +153,10 @@ UPDATE gameobject_template SET ScriptName='go_fire_of_akumai' WHERE entry IN (21
 UPDATE gameobject_template SET ScriptName='go_fathom_stone' WHERE entry=177964;
 
 /* BLACKROCK DEPTHS */
-DELETE FROM scripted_areatrigger WHERE entry=1526;
-INSERT INTO scripted_areatrigger VALUES (1526,'at_ring_of_law');
-DELETE FROM scripted_areatrigger WHERE entry=1786;
-INSERT INTO scripted_areatrigger VALUES (1786,'at_shadowforge_bridge');
+
+INSERT INTO scripted_areatrigger VALUES 
+(1526,'at_ring_of_law'),
+(1786,'at_shadowforge_bridge');
 UPDATE instance_template SET ScriptName='instance_blackrock_depths' WHERE map =230;
 UPDATE creature_template SET ScriptName='boss_emperor_dagran_thaurissan' WHERE entry=9019;
 UPDATE creature_template SET ScriptName='boss_moira_bronzebeard' WHERE entry=8929;
@@ -198,7 +185,7 @@ UPDATE instance_template SET ScriptName='instance_blackrock_spire' WHERE map=229
 UPDATE creature_template SET ScriptName='boss_overlord_wyrmthalak' WHERE entry=9568;
 UPDATE creature_template SET ScriptName='boss_gyth' WHERE entry=10339;
 UPDATE creature_template SET ScriptName='boss_pyroguard_emberseer' WHERE entry=9816;
-DELETE FROM scripted_event_id WHERE id=4884;
+UPDATE creature_template SET ScriptName='npc_rookery_hatcher' WHERE entry=10683;
 INSERT INTO scripted_event_id VALUES
 (4884,'event_spell_altar_emberseer');
 UPDATE gameobject_template SET ScriptName='go_father_flame' WHERE entry=175245;
@@ -247,10 +234,10 @@ UPDATE creature_template SET ScriptName='npc_dalinda_malem' WHERE entry=5644;
 UPDATE creature_template SET ScriptName='npc_melizza_brimbuzzle' WHERE entry=12277;
 UPDATE creature_template SET ScriptName='npc_cork_gizelton' WHERE entry=11625;
 UPDATE creature_template SET ScriptName='npc_rigger_gizelton' WHERE entry=11626;
+UPDATE creature_template SET ScriptName='npc_magrami_spectre' WHERE entry=11560;
 
 /* DIRE MAUL */
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
-DELETE FROM scripted_event_id WHERE id IN (8420,8428);
 INSERT INTO scripted_event_id VALUES
 (8420,'event_spells_warlock_dreadsteed'),
 (8428,'event_spells_warlock_dreadsteed');
@@ -274,7 +261,6 @@ UPDATE creature_template SET ScriptName='npc_eris_havenfire' WHERE entry=14494;
 /* ELWYNN FOREST */
 
 /* FELWOOD */
-DELETE FROM scripted_event_id WHERE id=8328;
 INSERT INTO scripted_event_id VALUES
 (8328, 'npc_kroshius');
 UPDATE creature_template SET ScriptName='npc_kitten' WHERE entry=9937;
@@ -374,7 +360,6 @@ UPDATE creature_template SET ScriptName='npc_thrall_warchief' WHERE entry=4949;
 /* RAZORFEN DOWNS */
 UPDATE instance_template SET ScriptName='instance_razorfen_downs' WHERE map=129;
 UPDATE creature_template SET ScriptName='npc_belnistrasz' WHERE entry=8516;
-DELETE FROM scripted_event_id WHERE id=3130;
 INSERT INTO scripted_event_id VALUES (3130, 'event_go_tutenkash_gong');
 
 /* RAZORFEN KRAUL */
@@ -412,7 +397,6 @@ UPDATE instance_template SET ScriptName='instance_scholomance' WHERE map=289;
 UPDATE creature_template SET ScriptName='boss_darkmaster_gandling' WHERE entry=1853;
 UPDATE creature_template SET ScriptName='boss_jandice_barov' WHERE entry=10503;
 UPDATE creature_template SET ScriptName='npc_spectral_tutor' WHERE entry=10498;
-DELETE FROM scripted_event_id WHERE id IN (5618, 5619, 5620, 5621, 5622, 5623);
 INSERT INTO scripted_event_id VALUES
 (5618,'event_spell_gandling_shadow_portal'),
 (5619,'event_spell_gandling_shadow_portal'),
@@ -470,10 +454,9 @@ UPDATE gameobject_template SET ScriptName='go_stratholme_postbox' WHERE entry IN
 
 /* SUNKEN TEMPLE */
 UPDATE instance_template SET ScriptName='instance_sunken_temple' WHERE map=109;
-DELETE FROM scripted_areatrigger WHERE entry=4016;
-INSERT INTO scripted_areatrigger VALUES (4016,'at_shade_of_eranikus');
+INSERT INTO scripted_areatrigger VALUES 
+(4016,'at_shade_of_eranikus');
 UPDATE creature_template SET ScriptName='npc_malfurion_stormrage' WHERE entry=15362;
-DELETE FROM scripted_event_id WHERE id IN (3094,3095,3097,3098,3099,3100);
 INSERT INTO scripted_event_id VALUES
 (3094,'event_antalarion_statue_activation'),
 (3095,'event_antalarion_statue_activation'),
@@ -483,7 +466,6 @@ INSERT INTO scripted_event_id VALUES
 (3100,'event_antalarion_statue_activation');
 UPDATE creature_template SET ScriptName='npc_shade_of_hakkar' WHERE entry=8440;
 UPDATE gameobject_template SET ScriptName='go_eternal_flame' WHERE entry IN (148418,148419,148420,148421);
-DELETE FROM scripted_event_id WHERE id=8502;
 INSERT INTO scripted_event_id VALUES
 (8502,'event_avatar_of_hakkar');
 
@@ -519,7 +501,6 @@ UPDATE creature_template SET ScriptName='boss_eye_of_cthun' WHERE entry=15589;
 UPDATE creature_template SET ScriptName='mob_sartura_royal_guard' WHERE entry=15984;
 UPDATE creature_template SET ScriptName='mob_giant_claw_tentacle' WHERE entry=15728;
 UPDATE creature_template SET ScriptName='mob_anubisath_sentinel' WHERE entry=15264;
-DELETE FROM scripted_areatrigger WHERE entry IN (4033,4034);
 INSERT INTO scripted_areatrigger VALUES
 (4033,'at_stomach_cthun'),
 (4034,'at_stomach_cthun');
@@ -538,7 +519,6 @@ UPDATE gameobject_template SET ScriptName='go_mausoleum_door' WHERE entry=176594
 UPDATE creature_template SET ScriptName='npc_calvin_montague' WHERE entry=6784;
 
 /* ULDAMAN */
-DELETE FROM scripted_event_id WHERE id IN (2228,2268);
 INSERT INTO scripted_event_id VALUES
 (2228,'event_spell_altar_boss_aggro'),
 (2268,'event_spell_altar_boss_aggro');
@@ -576,12 +556,11 @@ UPDATE gameobject_template SET ScriptName='go_elune_fire' WHERE entry IN (177417
 
 /* ZUL'FARRAK */
 UPDATE instance_template SET ScriptName='instance_zulfarrak' WHERE map=209;
-DELETE FROM scripted_event_id WHERE id IN (2488,2609);
 INSERT INTO scripted_event_id VALUES
 (2488,'event_go_zulfarrak_gong'),
 (2609,'event_spell_unlocking');
-DELETE FROM scripted_areatrigger WHERE entry=1447;
-INSERT INTO scripted_areatrigger VALUES (1447,'at_zulfarrak');
+INSERT INTO scripted_areatrigger VALUES 
+(1447,'at_zulfarrak');
 UPDATE creature_template SET ScriptName='boss_zumrah' WHERE entry=7271;
 
 /* ZUL'GURUB */
@@ -602,6 +581,8 @@ UPDATE creature_template SET ScriptName='mob_zealot_lorkhan' WHERE entry=11347;
 UPDATE creature_template SET ScriptName='mob_zealot_zath' WHERE entry=11348;
 UPDATE creature_template SET ScriptName='mob_healing_ward' WHERE entry=14987;
 UPDATE creature_template SET ScriptName='npc_gurubashi_bat_rider' WHERE entry=14750;
+UPDATE creature_template SET ScriptName='npc_zulian_prowler' WHERE entry=15101;
+UPDATE creature_template SET ScriptName='npc_soulflayer' WHERE entry=11359;
 
 --
 -- Below contains data for table `script_texts` mainly used in C++ parts.
@@ -1016,10 +997,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1000410,'Here they come! Defend yourself!',0,0,1,5,'kanati SAY_KAN_START'),
 
-(-1000411,'Why don\'t we deal with you now, Hendel? Lady Proudmoore will speak for you back in the tower.',0,0,7,0,'hendel SAY_PROGRESS_1_TER'),
-(-1000412,'Please... please... Miss Proudmore. I didn\'t mean to...',0,0,7,0,'hendel SAY_PROGRESS_2_HEN'),
-(-1000413,'I apologize for taking so long to get here. I wanted Lady Proudmoore to be present also.',0,0,7,0,'hendel SAY_PROGRESS_3_TER'),
-(-1000414,'We can only stay a few moments before returning to the tower. If you wish to speak to us more you may find us there.',0,0,7,0,'hendel SAY_PROGRESS_4_TER'),
+-- REUSE -1000411 TO -1000414
 (-1000415,'%s, too injured, gives up the chase.',0,2,0,0,'hendel EMOTE_SURRENDER'),
 
 (-1000416,'Well, I\'m not sure how far I\'ll make it in this state... I\'m feeling kind of faint...',0,0,0,0,'ringo SAY_RIN_START_1'),
@@ -1642,7 +1620,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001194,'Blast those stupid centaurs! Sigh - well, it seems you kept your bargain. Up the road you shall find Smeed Scrabblescrew, he has your money.',0,0,0,1,'SAY_CORK_END'),
 (-1001195,'Eeck! Demons hungry for the kodos!',0,0,0,0,'SAY_RIGGER_AMBUSH1'),
 (-1001196,'What am I paying you for? The kodos are nearly dead!',0,0,0,0,'SAY_RIGGER_AMBUSH2'),
-(-1001197,'Wow! We did it... not sure why we thought we needed the likes of you. Nevertheless, speak with Smeed Srablescrew; he will give you your earnings!',0,0,0,0,'SAY_RIGGER_END');
+(-1001197,'Wow! We did it... not sure why we thought we needed the likes of you. Nevertheless, speak with Smeed Srablescrew; he will give you your earnings!',0,0,0,0,'SAY_RIGGER_END'),
+-- REUSE_ME -1001198 to -1001225
+(-1001226,'%s is drawn to the ghost magnet...',0,2,0,0,'Magrami Spectre on spawn 1'),
+(-1001227,'%s is angered!',0,2,0,0,'Magrami Spectre on spawn 2');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -1848,15 +1829,15 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1229004,'Excellent... it would appear as if the meddlesome insects have arrived just in time to feed my legion. Welcome, mortals!',0,1,0,1,'nefarius SAY_INTRO_1'),
 (-1229005,'Let not even a drop of their blood remain upon the arena floor, my children. Feast on their souls!',0,1,0,1,'nefarius SAY_INTRO_2'),
-(-1229006,'Foolsss...Kill the one in the dress!',0,1,0,0,'nefarius SAY_ATTACK_1'),
-(-1229007,'Sire, let me join the fray! I shall tear their spines out with my bare hands!',0,1,0,1,'rend SAY_REND_JOIN'),
-(-1229008,'Concentrate your attacks upon the healer!',0,1,0,0,'nefarius SAY_ATTACK_2'),
-(-1229009,'Inconceivable!',0,1,0,0,'nefarius SAY_ATTACK_3'),
-(-1229010,'Do not force my hand, children! I shall use your hides to line my boots.',0,1,0,0,'nefarius SAY_ATTACK_4'),
-(-1229011,'Defilers!',0,1,0,0,'rend SAY_LOSE_1'),
-(-1229012,'Impossible!',0,1,0,0,'rend SAY_LOSE_2'),
-(-1229013,'Your efforts will prove fruitless. None shall stand in our way!',0,1,0,0,'nefarius SAY_LOSE_3'),
-(-1229014,'THIS CANNOT BE!!! Rend, deal with these insects.',0,1,0,1,'nefarius SAY_LOSE_4'),
+(-1229006,'Foolsss...Kill the one in the dress!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT1'),
+(-1229007,'Sire, let me join the fray! I shall tear their spines out with my bare hands!',0,1,0,1,'rend SAY_REND_TAUNT1'),
+(-1229008,'Concentrate your attacks upon the healer!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT2'),
+(-1229009,'Inconceivable!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT3'),
+(-1229010,'Do not force my hand, children! I shall use your hides to line my boots.',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT4'),
+(-1229011,'Defilers!',0,1,0,0,'rend SAY_REND_TAUNT2'),
+(-1229012,'Impossible!',0,1,0,0,'rend SAY_REND_TAUNT3'),
+(-1229013,'Your efforts will prove fruitless. None shall stand in our way!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT5'),
+(-1229014,'THIS CANNOT BE!!! Rend, deal with these insects.',0,1,0,1,'nefarius SAY_NEFARIUS_LOSE1'),
 (-1229015,'With pleasure...',0,1,0,0,'rend SAY_REND_ATTACK'),
 (-1229016,'The Warchief shall make quick work of you, mortals. Prepare yourselves!',0,1,0,25,'nefarius SAY_WARCHIEF'),
 (-1229017,'Taste in my power!',0,1,0,0,'nefarius SAY_BUFF_GYTH'),
@@ -1864,7 +1845,12 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1229019,'%s is knocked off his drake!',0,2,0,0,'rend EMOTE_KNOCKED_OFF'),
 
-(-1229020,'Intruders are destroying our eggs! Stop!!',0,1,0,0,'rookery hatcher - SAY_ROOKERY_EVENT_START');
+(-1229020,'Intruders are destroying our eggs! Stop!!',0,1,0,0,'rookery hatcher - SAY_ROOKERY_EVENT_START'),
+
+(-1229021,'I promise you an eternity of dung clean up duty for this failure!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT6'),
+(-1229022,'Use the freezing breath, imbecile!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT7'),
+(-1229023,'I will wear your skin as a fashion accessory!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT8'),
+(-1229024,'Flee while  you still have chance, mortals. You will pray for a swift death should I enter the arena.',0,1,0,0,'rend SAY_REND_TAUNT3');
 
 -- -1 230 000 BLACKROCK DEPTHS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -1948,7 +1934,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1249001,'Learn your place mortal!',0,1,0,0,'onyxia SAY_KILL'),
 (-1249002,'This meaningless exertion bores me. I\'ll incinerate you all from above!',0,1,0,254,'onyxia SAY_PHASE_2_TRANS'),
 (-1249003,'It seems you\'ll need another lesson, mortals!',0,1,0,293,'onyxia SAY_PHASE_3_TRANS'),
-(-1249004,'%s takes in a deep breath...',0,3,0,0,'onyxia EMOTE_BREATH');
+(-1249004,'%s takes in a deep breath...',0,3,0,0,'onyxia EMOTE_BREATH'),
+(-1249005,'You seek to lure me from my clutch? You shall pay for your insolence!',0,1,0,0,'onyxia SAY_KITE');
 
 -- -1 289 000 SCHOLOMANCE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -1993,7 +1980,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1309025,'The brood shall not fall!',0,1,0,0,'marli SAY_TRANSFORM_BACK'),
 
 (-1309026,'%s emits a deafening shriek!',0,2,0,0,'jeklik SAY_SHRIEK'),
-(-1309027,'%s begins to cast a Great Heal!',0,2,0,0,'jeklik SAY_HEAL');
+(-1309027,'%s begins to cast a Great Heal!',0,2,0,0,'jeklik SAY_HEAL'),
+
+(-1309028,'%s fully engulfs in flame and a maddened look appears in his eyes!',0,2,0,0,'gurubashi bat rider - SAY_SELF_DETONATE');
 
 -- -1 329 000 STRATHOLME
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -2066,7 +2055,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1409021,'I go now to summon the lord whose house this is. Should you seek an audience with him, your paltry lives will surely be forfeit! Nevertheless, seek out his lair, if you dare!',0,1,0,0,'majordomo SAY_DEFEAT_3'),
 (-1409022,'My flame! Please don\'t take away my flame... ',8042,1,0,0,'ragnaros SAY_ARRIVAL4_MAJ'),
 (-1409023,'Very well, $n.',0,0,0,0,'majordomo SAY_SUMMON_0'),
-(-1409024,'Impudent whelps! You\'ve rushed headlong to your own deaths! See now, the master stirs!',0,1,0,0,'majordomo SAY_SUMMON_1');
+(-1409024,'Impudent whelps! You\'ve rushed headlong to your own deaths! See now, the master stirs!',0,1,0,0,'majordomo SAY_SUMMON_1'),
+(-1409025,'%s forces one of his Firesworn minions to erupt!',0,2,0,0,'Garr EMOTE_MASSIVE_ERUPTION');
 
 -- -1 429 000 DIRE MAUL
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -2310,7 +2300,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1533071,'Enough prattling. Let them come! We shall grind their bones to dust.',8842,6,0,0,'mograine SAY_MORG_TAUNT1'),
 (-1533072,'Conserve your anger! Harness your rage! You will all have outlets for your frustration soon enough.',8843,6,0,0,'mograine SAY_MORG_TAUNT2'),
 (-1533073,'Life is meaningless. It is in death that we are truly tested.',8844,6,0,0,'mograine SAY_MORG_TAUNT3'),
-(-1533074,'I...am...released! Perhaps it\'s not too late to â€” noo! I need...more time...',8838,1,0,0,'mograine SAY_MORG_DEATH'),
+(-1533074,'I...am...released! Perhaps it\'s not too late to — noo! I need...more time...',8838,1,0,0,'mograine SAY_MORG_DEATH'),
 
 (-1533075,'Glory to the master!',8845,1,0,0,'noth SAY_AGGRO1'),
 (-1533076,'Your life is forfeit!',8846,1,0,0,'noth SAY_AGGRO2'),
@@ -4342,3 +4332,4 @@ INSERT INTO script_waypoint VALUES
 (9598, 36, 6574.568, -1204.589, 443.216, 0, 'SAY_EXIT_IRONTREE');
 
 -- EOF
+

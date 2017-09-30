@@ -44,12 +44,12 @@
 #define G3D_WINSOCK_MAJOR_VERSION 2
 #define G3D_WINSOCK_MINOR_VERSION 0
 
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) && !defined(__fastcall)
 /// Fast call is a register-based optimized calling convention supported only by Visual C++
 #define __fastcall
 #endif
 
-#ifdef _MSC_VER 
+#if defined (_MSC_VER) || defined(__MINGW32__)
     #define G3D_WIN32
 #elif  defined(__FreeBSD__) || defined(__OpenBSD__)
     #define G3D_FREEBSD
@@ -229,6 +229,30 @@ int WINAPI G3D_WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {\
     return G3D_WinMain(hInst, hPrev, szCmdLine, sw);\
 }
+
+#elif defined(__MINGW32__)
+
+#    ifndef WIN32_LEAN_AND_MEAN
+#       define WIN32_LEAN_AND_MEAN 1
+#    endif
+
+
+#   define NOMINMAX 1
+#   ifndef _WIN32_WINNT
+#       define _WIN32_WINNT 0x0500
+#   endif
+#   include <windows.h>
+#   undef WIN32_LEAN_AND_MEAN
+#   undef NOMINMAX
+
+#   ifdef _G3D_INTERNAL_HIDE_WINSOCK_
+#      undef _G3D_INTERNAL_HIDE_WINSOCK_
+#      undef _WINSOCKAPI_
+#   endif
+
+/** @def G3D_START_AT_MAIN()
+    Defines necessary wrapper around WinMain on Windows to allow transfer of execution to main(). */
+#   define G3D_START_AT_MAIN()
 
 #else
 

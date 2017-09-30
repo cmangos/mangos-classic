@@ -26,7 +26,7 @@
 #include "ace/Guard_T.h"
 #include <stdarg.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #define FD_SETSIZE 1024
 #include <winsock2.h>
 #include <postgre/libpq-fe.h>

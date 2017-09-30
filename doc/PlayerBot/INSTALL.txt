@@ -1,0 +1,28 @@
+Installation:
+=============
+Build CMaNGOS core as usual and add -DBUILD_PLAYERBOT=ON option
+
+Developers:
+===========
+When updating the playerbot.conf version, keep in mind the following locations (YYYYMMDDVV = Year, Month, Day, Version (version starting at 01, counting up as releases happen on the same day)):
+* src/game/PlayerBot/config.h
+define PLAYERBOT_CONF_VERSION    YYYYMMDDVV
+* src/game/PlayerBot/config.h.in
+define PLAYERBOT_CONF_VERSION    YYYYMMDDVV
+* src/game/PlayerBot/playerbot.conf.dist.in
+ConfVersion=YYYYMMDDVV
+* Of course don't forget to update your server's playerbot.conf.
+
+Configuration variables:
+========================
+Also see src/mangosd/mangosd.conf.dist for configuration variables!
+
+    PlayerbotAI.DebugWhisper
+        Enable debug output by whispering master
+        Default: 0 - off
+                 1 - on
+
+    PlayerbotAI.FollowDistanceMin
+    PlayerbotAI.FollowDistanceMax
+        Min. and max. follow distance for bots
+        Default: 0.5 / 1.0

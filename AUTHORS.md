@@ -247,6 +247,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Jolan
 * jorooo
 * jotapdiez
+* jpiolho
 * jsee
 * junta
 * kaelima
@@ -255,6 +256,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * KAPATEJIb (a.k.a. insider42, Insider)
 * kbz
 * kb_z
+* kennumen
 * kid10 (a.k.a. kid 10)
 * killdozer
 * KillerFrca
@@ -266,6 +268,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * kolomati (a.k.a. kolomati2)
 * komdori
 * krofna
+* krullgor
 * ksergik
 * Kubius@getmangos.com
 * kyle1
@@ -318,6 +321,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Naicisum
 * namreeb
 * narma
+* Natsukawa
 * Nay
 * NeatElves
 * Necro
@@ -329,6 +333,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Nick Nitro
 * Nick Templeton
 * Nighoo (a.k.a. DaC, Daggy)
+* Nightterror
 * Nihilus
 * nitka
 * NoFantasy
@@ -391,6 +396,8 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Rockette
 * rowman
 * rozr
+* rrtn
+* Runsttren
 * rsa (a.k.a. C:/Program Files (x86)/git/dev/rsa)
 * Saeba
 * Saeldur
@@ -499,6 +506,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * yavi
 * Yehonal
 * YuruY
+* yyhhrr
 * Zakamurite
 * zerg
 * Zerg2000

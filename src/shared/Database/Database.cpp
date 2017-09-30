@@ -497,8 +497,22 @@ bool Database::CheckRequiredField(char const* table_name, char const* required_n
             sLog.outErrorDb("  [B] You need: --> `%s.sql`", req_sql_update_name);
             sLog.outErrorDb();
             sLog.outErrorDb("You must apply all updates after [A] to [B] to use mangos with this database.");
+#ifdef BUILD_PLAYERBOT
+            if (reqName.find("playerbot") != std::string::npos)
+            {
+                sLog.outErrorDb("These updates are included in the [sql/PlayerBot] folder.");
+                sLog.outErrorDb("Please read the [doc/README.Playerbot] file for instructions on updating.");
+            }
+            else
+            {
+                // Unmodded core code below
+                sLog.outErrorDb("These updates are included in the sql/updates folder.");
+                sLog.outErrorDb("Please read the included [README] in sql/updates for instructions on updating.");
+            }
+#else
             sLog.outErrorDb("These updates are included in the sql/updates folder.");
             sLog.outErrorDb("Please read the included [README] in sql/updates for instructions on updating.");
+#endif
         }
         else
         {
@@ -560,10 +574,12 @@ bool Database::ExecuteStmt(const SqlStatementID& id, SqlStmtParameters* params)
 bool Database::DirectExecuteStmt(const SqlStatementID& id, SqlStmtParameters* params)
 {
     MANGOS_ASSERT(params);
-    std::auto_ptr<SqlStmtParameters> p(params);
+
     // execute statement
     SqlConnection::Lock _guard(getAsyncConnection());
-    return _guard->ExecuteStmt(id.ID(), *params);
+    bool result = _guard->ExecuteStmt(id.ID(), *params);
+    delete params;
+    return result;
 }
 
 SqlStatement Database::CreateStatement(SqlStatementID& index, const char* fmt)

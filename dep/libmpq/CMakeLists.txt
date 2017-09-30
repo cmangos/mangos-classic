@@ -8,12 +8,35 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-cmake_minimum_required (VERSION 2.8)
-project(mpq)
+cmake_minimum_required (VERSION 3.0)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libmpq)
+# disable warnings for dependencies
+DisableWarnings()
+
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/libmpq
+)
 
 file(GLOB mpqfiles libmpq/*.c libmpq/*.h *.h)
 
-add_library(mpq ${mpqfiles})
+add_library(mpqlib STATIC
+  ${mpqfiles}
+)
+
+if(WIN32)
+  target_link_libraries(mpqlib
+    PUBLIC z
+    PUBLIC bzip2
+  )
+endif()
+
+target_include_directories(mpqlib
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+if(MSVC)
+  target_compile_options(mpqlib PRIVATE /wd4103)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/win)
+  set_target_properties(mpqlib PROPERTIES FOLDER "Dependencies")
+endif()

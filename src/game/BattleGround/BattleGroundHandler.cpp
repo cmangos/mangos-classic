@@ -18,19 +18,19 @@
 
 #include "Common.h"
 #include "WorldPacket.h"
-#include "Opcodes.h"
+#include "Server/Opcodes.h"
 #include "Log.h"
-#include "Player.h"
-#include "ObjectMgr.h"
-#include "WorldSession.h"
-#include "Object.h"
-#include "Chat.h"
+#include "Entities/Player.h"
+#include "Globals/ObjectMgr.h"
+#include "Server/WorldSession.h"
+#include "Entities/Object.h"
+#include "Chat/Chat.h"
 #include "BattleGroundMgr.h"
 #include "BattleGroundWS.h"
 #include "BattleGround.h"
-#include "Language.h"
-#include "ScriptMgr.h"
-#include "World.h"
+#include "Tools/Language.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
+#include "World/World.h"
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recv_data)
 {
@@ -542,7 +542,7 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data)
     if (!unit->isSpiritService())                           // it's not spirit service
         return;
 
-    sScriptMgr.OnGossipHello(GetPlayer(), unit);
+    sScriptDevAIMgr.OnGossipHello(GetPlayer(), unit);
 }
 
 void WorldSession::SendBattleGroundJoinError(uint8 err) const

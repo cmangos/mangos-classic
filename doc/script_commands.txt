@@ -17,6 +17,7 @@ dbscripts_on_gossip                 DB project self defined id
 dbscripts_on_quest_end              DB project self defined id (generally quest entry)
 dbscripts_on_quest_start            DB project self defined id (generally quest entry)
 dbscripts_on_spell                  Spell id
+dbscripts_on_relay                  DB project self defined id, Id is used in dbscripts, EAI or SD2 to launch it
 
 -- --------------------------
 ## delay
@@ -35,7 +36,7 @@ The action to execute.
 ## datalong
 -- --------------------------
 
-2 multipurpose fields, store raw data as unsigned values
+3 multipurpose fields, store raw data as unsigned values
 
 -- --------------------------
 ## buddy_entry
@@ -153,7 +154,8 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 -- --------------------------
 
  0 SCRIPT_COMMAND_TALK                      resultingSource = WorldObject, resultingTarget = Unit/none
-                                            * dataint = text entry from db_script_string -table. dataint2-dataint4 optionally, for random selection of text
+                                            * datalong = dbscript_string_template ID - will randomize between all db_script_strings in given template, ids from template are checked against dbscript_string table
+                                            * dataint = text entry from dbscript_string -table. dataint2-dataint4 optionally, for random selection of text
 
  1 SCRIPT_COMMAND_EMOTE                     resultingSource = Unit, resultingTarget = Unit/none
                                             * datalong = emote_id
@@ -193,9 +195,10 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * datalong=db_guid (can be skipped for buddy)
                                             * datalong2 = despawn_delay
 
-10 SCRIPT_COMMAND_TEMP_SUMMON_CREATURE      source = any, target = any
+10 SCRIPT_COMMAND_TEMP_SPAWN_CREATURE       source = any, target = any
                                             * datalong = creature entry
                                             * datalong2 = despawn_delay
+                                            * datalong3 = pathId - creature_movement_template
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: summon as active object
                                             * dataint = (bool) setRun; 0 = off (default), 1 = on
 
@@ -214,8 +217,8 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 
 15 SCRIPT_COMMAND_CAST_SPELL                resultingSource = Unit, cast spell at resultingTarget = Unit
                                             * datalong = spell id
+                                            * datalong2 = TriggerCastFlags
                                             * dataint1-dataint4 optional. If some of these are set to a spell id, a random spell out of datalong, datint1, ..,dataintX is cast.
-                                            * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: cast triggered
 
 16 SCRIPT_COMMAND_PLAY_SOUND                source = any object, target=any/player
                                             * datalong = sound_id
@@ -234,7 +237,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 
 20 SCRIPT_COMMAND_MOVEMENT                  resultingSource = Creature
                                             * datalong = MovementType (0:idle, 1:random or 2:waypoint)
-                                            * datalong2 = wanderDistance (for random movement)
+                                            * datalong2 = wanderDistance (for random movement), pathId (for waypoint movement)
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
 
 21 SCRIPT_COMMAND_SET_ACTIVEOBJECT          resultingSource = Creature
@@ -339,3 +342,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * resultingSource = Creature
                                             * datalong = new creature entry. Must be different than the current one
                                             * datalong2 = faction for which the entry is updated. 0 = Alliance, 1 = Horde
+45 SCRIPT_COMMAND_START_RELAY_SCRIPT        Launch dbscripts_on_relay script, either static one, or randomly chosen one from dbscript_random_templates
+                                            * source and target of command define source and target of launched dbscript
+                                            * datalong = dbscripts_on_relay id
+                                            * datalong2 = dbscript_random_templates id

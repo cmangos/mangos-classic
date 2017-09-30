@@ -10,10 +10,11 @@ platform:
 
 # specify custom environment variables
 environment:
+  CMANGOS_PROJECT_NAME: "CMaNGOS_Classic" # should be same as root CMakeList.txt
   MSVC_DEFAULT_OPTIONS: ON
-  BOOST_ROOT: C:\Libraries\boost_1_59_0
-  BOOST_LIBRARYDIR_WIN32: C:\Libraries\boost_1_59_0\lib32-msvc-14.0
-  BOOST_LIBRARYDIR_WIN64: C:\Libraries\boost_1_59_0\lib64-msvc-14.0
+  BOOST_ROOT: C:\Libraries\boost_1_63_0
+  BOOST_LIBRARYDIR_WIN32: C:\Libraries\boost_1_63_0\lib32-msvc-14.0
+  BOOST_LIBRARYDIR_WIN64: C:\Libraries\boost_1_63_0\lib64-msvc-14.0
   SNAPSHOT_TAG: "Last_$(APPVEYOR_PROJECT_NAME)_PreBuild"
   SEC_ACCESS_TOKEN:
         secure: GXsXxwHSSt1y+ae3C6A0csN+dCQxPW8w98SGwl8cqzqPDhKKbvFJ37eJCCDeNIm2
@@ -67,26 +68,19 @@ skip_tags: true
 before_build:
   - cmd: if "%platform%"=="Win32" set BOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN32%"
   - cmd: if "%platform%"=="x64" set BOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN64%"
+  - cmd: set BUILD_DIR="%APPVEYOR_BUILD_FOLDER%\BuildDir"
+  - cmd: mkdir "%BUILD_DIR%"
+  - cmd: cd "%BUILD_DIR%"
+  - cmd: cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX=/"%APPVEYOR_BUILD_FOLDER%"/installed -DBUILD_EXTRACTORS=ON ..
 
 # build script
 build_script:
-  - ps: |
-        $destinationFolder = "$env:APPVEYOR_BUILD_FOLDER\bin\extractors"
-        $sourceFolder = "$env:APPVEYOR_BUILD_FOLDER\contrib\"
-        Write-Host "Building main $env:APPVEYOR_PROJECT_NAME project ..." -f Yellow
-        msbuild "$env:APPVEYOR_BUILD_FOLDER\win\mangosdVC140.sln" /m /verbosity:quiet /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-        Write-Host "Building extractors ..." -f Yellow;
-        msbuild "$sourceFolder\extractor\VC140_AD.sln" /verbosity:quiet /p:Configuration="Release" /p:Platform="Win32" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-        msbuild "$sourceFolder\mmap\win\MoveMapGen_VC140.sln" /verbosity:quiet /p:Configuration="Release" /p:Platform="Win32" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-        msbuild "$sourceFolder\vmap_assembler\vmap_assemblerVC140.sln" /verbosity:quiet /p:Configuration="Release" /p:Platform="Win32" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-        msbuild "$sourceFolder\vmap_extractor\win\vmapExtractor_VC140.sln" /verbosity:quiet /p:Configuration="Release" /p:Platform="Win32" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-        Write-Host "Copying successfuly builded extractors binaries ..." -f Yellow
-        mkdir -p "$destinationFolder"
-        cp "$sourceFolder\extractor\*.exe" "$destinationFolder"
-        cp "$sourceFolder\mmap\bin\Win32_Release\*.exe" "$destinationFolder"
-        cp "$sourceFolder\vmap_assembler\bin\Win32_Release\*.exe" "$destinationFolder"
-        cp "$sourceFolder\vmap_extractor\bin\Win32_Release\*.exe" "$destinationFolder"
-        cp "$sourceFolder\extractor_scripts\*" "$destinationFolder"
+   - ps: |
+         $buildFolder = "$env:BUILD_DIR"
+         $sourceFolder = "$env:APPVEYOR_BUILD_FOLDER\"
+         $slnFile = "$env:CMANGOS_PROJECT_NAME" + ".sln"
+         Write-Host "Building $env:CMANGOS_PROJECT_NAME project ..." -f Yellow
+         msbuild "$buildFolder\$slnFile" /m /verbosity:quiet /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 # unit test
 test: off
@@ -94,9 +88,6 @@ test: off
 artifacts:
   - path: bin\$(platform)_$(configuration)
     name: $(APPVEYOR_PROJECT_NAME)_$(platform)_$(configuration)
-    
-  - path: bin\extractors
-    name: Extractors
 
 # scripts to run before deployment
 before_deploy:
@@ -108,7 +99,7 @@ deploy:
     auth_token: $(SEC_ACCESS_TOKEN)
     release: $(SNAPSHOT_TAG) # name of the tag used
     description: 'Binaries of commit $(APPVEYOR_REPO_COMMIT) \n$(APPVEYOR_REPO_COMMIT_MESSAGE) \nSnapshot v$(APPVEYOR_BUILD_VERSION)'
-    artifact: $(APPVEYOR_PROJECT_NAME)_$(platform)_$(configuration), Extractors
+    artifact: $(APPVEYOR_PROJECT_NAME)_$(platform)_$(configuration)
     draft: false
     prerelease: true
     on:

@@ -24,12 +24,12 @@
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "RASocket.h"
-#include "World.h"
+#include "World/World.h"
 #include "Config/Config.h"
 #include "Util.h"
-#include "AccountMgr.h"
-#include "Language.h"
-#include "ObjectMgr.h"
+#include "Accounts/AccountMgr.h"
+#include "Tools/Language.h"
+#include "Globals/ObjectMgr.h"
 #include "Policies/Lock.h"
 
 #include <vector>

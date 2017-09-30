@@ -20,15 +20,15 @@
     \ingroup mangosd
 */
 
-#ifndef WIN32
+#ifndef _WIN32
 #include "PosixDaemon.h"
 #endif
 
 #include "Common.h"
 #include "Master.h"
-#include "WorldSocket.h"
+#include "Server/WorldSocket.h"
 #include "WorldRunnable.h"
-#include "World.h"
+#include "World/World.h"
 #include "Log.h"
 #include "Timer.h"
 #include "SystemConfig.h"
@@ -37,8 +37,8 @@
 #include "Util.h"
 #include "revision_sql.h"
 #include "MaNGOSsoap.h"
-#include "MassMailMgr.h"
-#include "DBCStores.h"
+#include "Mails/MassMailMgr.h"
+#include "Server/DBCStores.h"
 
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
@@ -48,7 +48,7 @@
 
 #include <memory>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include "ServiceWin32.h"
 extern int m_ServiceStatus;
 #endif
@@ -125,7 +125,7 @@ int Master::Run()
     ///- Initialize the World
     sWorld.SetInitialWorldSettings();
 
-#ifndef WIN32
+#ifndef _WIN32
     detachDaemon();
 #endif
     // server loaded successfully => enable async DB requests
@@ -150,7 +150,7 @@ int Master::Run()
 
     MaNGOS::Thread* cliThread = nullptr;
 
-#ifdef WIN32
+#ifdef _WIN32
     if (sConfig.GetBoolDefault("Console.Enable", true) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
 #else
     if (sConfig.GetBoolDefault("Console.Enable", true))
@@ -161,7 +161,7 @@ int Master::Run()
     }
 
     ///- Handle affinity for multiple processors and process priority on Windows
-#ifdef WIN32
+#ifdef _WIN32
     {
         HANDLE hProcess = GetCurrentProcess();
 
@@ -263,7 +263,7 @@ int Master::Run()
 
     if (cliThread)
     {
-#ifdef WIN32
+#ifdef _WIN32
 
         // this only way to terminate CLI thread exist at Win32 (alt. way exist only in Windows Vista API)
         //_exit(1);

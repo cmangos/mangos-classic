@@ -20,9 +20,9 @@
 #define AUCTION_HOUSE_BOT_H
 
 #include "Config/Config.h"
-#include "AuctionHouseMgr.h"
-#include "SharedDefines.h"
-#include "Item.h"
+#include "AuctionHouse/AuctionHouseMgr.h"
+#include "Globals/SharedDefines.h"
+#include "Entities/Item.h"
 
 // shadow of ItemQualities with skipped ITEM_QUALITY_HEIRLOOM, anything after ITEM_QUALITY_ARTIFACT(6) in fact
 enum AuctionQuality

@@ -15,12 +15,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-set(zlib_SRCS
+set(LIBRARY_NAME z)
+
+set(LIBRARY_SRCS
   adler32.c
   compress.c
   crc32.c
   deflate.c
-  example.c
+  gzclose.c
+  gzlib.c
+  gzread.c
+  gzwrite.c
   infback.c
   inffast.c
   inflate.c
@@ -34,6 +39,15 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_library(zlib STATIC
-  ${zlib_SRCS}
+add_library(${LIBRARY_NAME} STATIC
+  ${LIBRARY_SRCS}
 )
+
+target_include_directories(${LIBRARY_NAME}
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+if(MSVC)
+  set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "zlib")
+  set_target_properties(${LIBRARY_NAME} PROPERTIES FOLDER "Dependencies")
+endif()

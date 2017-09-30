@@ -274,7 +274,7 @@ Any::Any(double x) : m_type(NUMBER), m_simpleValue(x), m_data(NULL) {
 }
 
 
-#ifdef G3D_32BIT
+#if defined(G3D_32BIT) || defined(__MINGW32__)
 Any::Any(int64 x) : m_type(NUMBER), m_simpleValue((double)x), m_data(NULL) {
 }
 #endif    // G3D_32BIT

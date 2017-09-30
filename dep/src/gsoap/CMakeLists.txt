@@ -18,8 +18,8 @@
 set(LIBRARY_NAME gsoap)
 
 set(LIBRARY_SRCS
-    stdsoap2.cpp
-   )
+  stdsoap2.cpp
+)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -29,3 +29,11 @@ include_directories(
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
 )
+
+target_include_directories(${LIBRARY_NAME}
+  INTERFACE ${CMAKE_SOURCE_DIR}/dep/include/gsoap
+)
+
+if(MSVC)
+  set_target_properties(${LIBRARY_NAME} PROPERTIES FOLDER "Dependencies")
+endif()

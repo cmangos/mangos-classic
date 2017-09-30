@@ -20,7 +20,7 @@
 #define _MMAP_COMMON_H
 
 // stop warning spam from ACE includes
-#ifdef WIN32
+#ifdef _WIN32
 #  pragma warning( disable : 4996 )
 #endif
 
@@ -29,7 +29,7 @@
 
 #include "Platform/Define.h"
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <stddef.h>
 #include <dirent.h>
 #include <errno.h>
@@ -79,7 +79,7 @@ namespace MMAP
 
     inline ListFilesResult getDirContents(vector<string>& fileList, string dirpath = ".", string filter = "*", bool includeSubDirs = false)
     {
-#ifdef WIN32
+#ifdef _WIN32
         HANDLE hFind;
         WIN32_FIND_DATA findFileInfo;
         string directory;
