@@ -351,7 +351,7 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverCat(Unit* pTarge
     if (newTarget && COWER > 0 && m_bot->IsSpellReady(COWER) && CastSpell(COWER, pTarget))
         return RETURN_CONTINUE;
 
-    if (SHRED > 0 && !pTarget->HasInArc(M_PI_F, m_bot) && m_ai->CastSpell(SHRED, *pTarget))
+    if (SHRED > 0 && !pTarget->HasInArc(m_bot) && m_ai->CastSpell(SHRED, *pTarget))
         return RETURN_CONTINUE;
 
     if (FAERIE_FIRE_FERAL > 0 && m_ai->In_Reach(pTarget,FAERIE_FIRE_FERAL) && !pTarget->HasAura(FAERIE_FIRE_FERAL, EFFECT_INDEX_0) && CastSpell(FAERIE_FIRE_FERAL, pTarget))

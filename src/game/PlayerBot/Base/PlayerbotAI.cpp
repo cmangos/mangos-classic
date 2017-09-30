@@ -5168,7 +5168,7 @@ void PlayerbotAI::FaceTarget(Unit* pTarget)
         return;
 
     // Only update orientation if not already facing target
-    if (!m_bot->HasInArc(M_PI_F, pTarget))
+    if (!m_bot->HasInArc(pTarget))
         m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
 
     return;
