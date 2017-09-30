@@ -2774,6 +2774,11 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
     {
         switch (GetId())
         {
+            case 23620:                                     // Burning Adrenaline
+                // On aura removal, the target deals AoE damage to friendlies and kills himself/herself (prevent durability loss)
+                target->CastSpell(target, 23478, TRIGGERED_OLD_TRIGGERED, 0, this);
+                target->CastSpell(target, 23644, TRIGGERED_OLD_TRIGGERED, 0, this);
+                return;
             case 29213:                                     // Curse of the Plaguebringer
                 if (m_removeMode != AURA_REMOVE_BY_DISPEL)
                     // Cast Wrath of the Plaguebringer if not dispelled

@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Vaelastrasz
-SD%Complete: 90
-SDComment: Final effect of Burning Adrenaline (player explodes) is not supported / Support for quest for Scepter of the Shifting Sands epic quest chain is missing
+SD%Complete: 95
+SDComment: Support for quest for Scepter of the Shifting Sands epic quest chain is missing
 SDCategory: Blackwing Lair
 EndScriptData
 
