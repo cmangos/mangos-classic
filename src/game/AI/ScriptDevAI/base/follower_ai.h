@@ -34,7 +34,7 @@ class FollowerAI : public ScriptedAI
 
         void JustDied(Unit*) override;
 
-        void JustRespawned() override;
+        void CorpseRemoved(uint32& /*respawnDelay*/) override;
 
         void UpdateAI(const uint32) override;               // the "internal" update, calls UpdateFollowerAI()
         virtual void UpdateFollowerAI(const uint32);        // used when it's needed to add code in update (abilities, scripted events, etc)

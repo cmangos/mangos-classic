@@ -114,14 +114,12 @@ void FollowerAI::JustDied(Unit* /*pKiller*/)
     }
 }
 
-void FollowerAI::JustRespawned()
+void FollowerAI::CorpseRemoved(uint32& /*respawnDelay*/)
 {
     m_uiFollowState = STATE_FOLLOW_NONE;
 
     if (!IsCombatMovement())
         SetCombatMovement(true);
-
-    Reset();
 }
 
 void FollowerAI::EnterEvadeMode()

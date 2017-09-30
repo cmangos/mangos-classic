@@ -116,14 +116,12 @@ void npc_escortAI::JustDied(Unit* /*pKiller*/)
     }
 }
 
-void npc_escortAI::JustRespawned()
+void npc_escortAI::CorpseRemoved(uint32& /*respawnDelay*/)
 {
     m_uiEscortState = STATE_ESCORT_NONE;
 
     if (!IsCombatMovement())
         SetCombatMovement(true);
-
-    Reset();
 }
 
 bool npc_escortAI::IsPlayerOrGroupInRange()
