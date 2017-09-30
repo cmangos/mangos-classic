@@ -157,6 +157,9 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
 
     if (owner.movespline->Finalized())
     {
+        if (i_angle == 0.f && !owner.HasInArc(i_target.getTarget(), 0.01f))
+            owner.SetInFront(i_target.getTarget());
+
         if (!i_targetReached)
         {
             i_targetReached = true;

@@ -1197,18 +1197,16 @@ float WorldObject::GetAngle(const float x, const float y) const
     return ang;
 }
 
-bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
+bool WorldObject::HasInArc(const WorldObject* target, float arc /*= M_PI*/) const
 {
     // always have self in arc
-    if (obj == this)
+    if (target == this)
         return true;
-
-    float arc = arcangle;
 
     // move arc to range 0.. 2*pi
     arc = MapManager::NormalizeOrientation(arc);
 
-    float angle = GetAngle(obj);
+    float angle = GetAngle(target);
     angle -= m_position.o;
 
     // move angle to range -pi ... +pi
@@ -1227,11 +1225,11 @@ bool WorldObject::IsFacingTargetsBack(const WorldObject* target, float arc /*= M
         return false;
 
     //if target is facing the current object then we know its not possible that the current object would be facing the targets back
-    if (target->HasInArc(arc, this))
+    if (target->HasInArc(this, arc))
         return false;
 
     //if current object is not facing the target then we know the current object is not facing the target at all
-    if (!this->HasInArc(arc, target))
+    if (!this->HasInArc(target, arc))
         return false;
 
     return true;
@@ -1243,34 +1241,34 @@ bool WorldObject::IsFacingTargetsFront(const WorldObject* target, float arc /*= 
         return false;
 
     //if target is not facing the current object then we know its not possible that the current object would be facing the targets front
-    if (!target->HasInArc(arc, this))
+    if (!target->HasInArc(this, arc))
         return false;
 
     //if current object is not facing the target then we know the current object is not facing the target at all
-    if (!this->HasInArc(arc, target))
+    if (!this->HasInArc(target, arc))
         return false;
 
     return true;
 }
 
-bool WorldObject::isInFrontInMap(WorldObject const* target, float distance,  float arc) const
+bool WorldObject::isInFrontInMap(WorldObject const* target, float distance,  float arc /*= M_PI_F*/) const
 {
-    return IsWithinDistInMap(target, distance) && HasInArc(arc, target);
+    return IsWithinDistInMap(target, distance) && HasInArc(target, arc);
 }
 
-bool WorldObject::isInBackInMap(WorldObject const* target, float distance, float arc) const
+bool WorldObject::isInBackInMap(WorldObject const* target, float distance, float arc /*= M_PI_F*/) const
 {
-    return IsWithinDistInMap(target, distance) && !HasInArc(2 * M_PI_F - arc, target);
+    return IsWithinDistInMap(target, distance) && !HasInArc(target, 2 * M_PI_F - arc);
 }
 
-bool WorldObject::isInFront(WorldObject const* target, float distance,  float arc) const
+bool WorldObject::isInFront(WorldObject const* target, float distance,  float arc /*= M_PI_F*/) const
 {
-    return IsWithinDist(target, distance) && HasInArc(arc, target);
+    return IsWithinDist(target, distance) && HasInArc(target, arc);
 }
 
-bool WorldObject::isInBack(WorldObject const* target, float distance, float arc) const
+bool WorldObject::isInBack(WorldObject const* target, float distance, float arc /*= M_PI_F*/) const
 {
-    return IsWithinDist(target, distance) && !HasInArc(2 * M_PI_F - arc, target);
+    return IsWithinDist(target, distance) && !HasInArc(target, 2 * M_PI_F - arc);
 }
 
 void WorldObject::GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist /*=0.0f*/, float const* ori /*=nullptr*/) const
