@@ -15715,6 +15715,12 @@ void Player::SendAutoRepeatCancel() const
     GetSession()->SendPacket(data);
 }
 
+void Player::SendFeignDeathResisted() const
+{
+    WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 0);
+    GetSession()->SendPacket(data);
+}
+
 void Player::SendExplorationExperience(uint32 Area, uint32 Experience) const
 {
     WorldPacket data(SMSG_EXPLORATION_EXPERIENCE, 8);

@@ -2206,10 +2206,30 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
 
     Unit* target = GetTarget();
 
-    if (apply)
+    bool disengage = true;
+    if (apply && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        const SpellEntry* entry = GetSpellProto();
+        const SpellSchoolMask schoolMask = GetSpellSchoolMask(entry);
+        const Unit::AttackerSet& attackers = target->getAttackers();
+        for (Unit::AttackerSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+        {
+            Unit* opponent = (*itr);
+            if (opponent && !opponent->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+            {
+                if (target->MagicSpellHitResult(opponent, entry, schoolMask) != SPELL_MISS_NONE)
+                {
+                    disengage = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (apply && disengage)
         target->InterruptSpellsCastedOnMe();
 
-    target->SetFeignDeath(apply, GetCasterGuid());
+    target->SetFeignDeath(apply, GetCasterGuid(), disengage);
 }
 
 void Aura::HandleAuraModDisarm(bool apply, bool Real)

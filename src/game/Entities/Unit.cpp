@@ -5548,12 +5548,13 @@ bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= fals
 
 void Unit::CombatStop(bool includingCast, bool includingCombo)
 {
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
+
     AttackStop(true, includingCast, includingCombo);
     RemoveAllAttackers();
 
-    if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
-    else
+    if (GetTypeId() != TYPEID_PLAYER)
     {
         ((Creature*)this)->SetNoCallAssistance(false);
 
@@ -9385,51 +9386,46 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
     }
 }
 
-void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/)
+void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, bool disengage /*= true*/)
 {
     if (apply)
     {
-        /*
-        WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
-        data<<GetGUID();
-        data<<uint8(0);
-        SendMessageToSet(data,true);
-        */
-
         if (GetTypeId() != TYPEID_PLAYER)
             StopMoving();
         else
             ((Player*)this)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
 
+        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
+
+        if (disengage)
+        {
+            addUnitState(UNIT_STAT_FEIGN_DEATH);
+            CombatStop();
+            getHostileRefManager().deleteReferences();
+        }
+        else
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+            {
+                static_cast<Player*>(this)->SendFeignDeathResisted();
+                static_cast<Player*>(this)->SendAttackSwingCancelAttack();
+            }
+            AttackStop(true, false, true);
+        }
 
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
-        // blizz like 2.0.x
-        // SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);  [-ZERO] remove/replace ?
 
         SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-
-        addUnitState(UNIT_STAT_FEIGN_DEATH);
-        CombatStop();
-        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
         // prevent interrupt message
         if (casterGuid == GetObjectGuid())
             FinishSpell(CURRENT_GENERIC_SPELL, false);
         InterruptNonMeleeSpells(true);
-        getHostileRefManager().deleteReferences();
     }
     else
     {
-        /*
-        WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
-        data<<GetGUID();
-        data<<uint8(1);
-        SendMessageToSet(data,true);
-        */
 
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
-        // blizz like 2.0.x
-        // SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH); [-ZERO] remove/replace ?
 
         RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
 

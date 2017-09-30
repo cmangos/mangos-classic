@@ -388,7 +388,7 @@ enum UnitState
     // persistent state (applied by aura/etc until expire)
     UNIT_STAT_MELEE_ATTACKING = 0x00000001,                 // unit is melee attacking someone Unit::Attack
     //UNIT_STAT_ATTACK_PLAYER = 0x00000002,                 // (Deprecated) unit attack player or player's controlled unit and have contested pvpv timer setup, until timer expire, combat end and etc
-    UNIT_STAT_FEIGN_DEATH     = 0x00000004,                 // Unit::SetFeignDeath
+    UNIT_STAT_FEIGN_DEATH     = 0x00000004,                 // Unit::SetFeignDeath - a successful feign death is currently active
     UNIT_STAT_STUNNED         = 0x00000008,                 // Aura::HandleAuraModStun
     UNIT_STAT_ROOT            = 0x00000010,                 // Aura::HandleAuraModRoot
     UNIT_STAT_ISOLATED        = 0x00000020,                 // area auras do not affect other players, Aura::HandleAuraModSchoolImmunity
@@ -2073,7 +2073,7 @@ class Unit : public WorldObject
         void SetIncapacitatedState(bool apply, uint32 state = 0, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, uint32 time = 0);
         ///----------End of crowd control methods----------
 
-        void SetFeignDeath(bool apply, ObjectGuid casterGuid = ObjectGuid());
+        void SetFeignDeath(bool apply, ObjectGuid casterGuid = ObjectGuid(), bool disengage = true);
         void InterruptSpellsCastedOnMe(bool killDelayed = false);
 
         void AddComboPointHolder(uint32 lowguid) { m_ComboPointHolders.insert(lowguid); }
