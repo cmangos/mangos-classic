@@ -5480,13 +5480,6 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
         // remove old target data
         AttackStop(true);
     }
-    // new battle
-    else
-    {
-        // set position before any AI calls/assistance
-        if (GetTypeId() == TYPEID_UNIT)
-            ((Creature*)this)->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ());
-    }
 
     // Set our target
     SetTargetGuid(victim->GetObjectGuid());
@@ -10579,7 +10572,7 @@ void Unit::Uncharm(Unit* charmed)
                 if (attacker->GetTypeId() != TYPEID_UNIT)
                     continue;
 
-                if (!factionEntry->IsHostileTo(*attacker->getFactionTemplateEntry()))
+                if (charmed->CanAttack(attacker))
                     friendlyTargets.insert(attacker);
             }
 
@@ -10599,11 +10592,17 @@ void Unit::Uncharm(Unit* charmed)
 
             if (charmed->isAlive())
             {
-                charmedCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
-
-                // TODO:: iam not sure we need that faction check
-                if (!factionEntry->IsFriendlyTo(*getFactionTemplateEntry()))
+                if (charmed->CanAttack(this))
+                {
+                    if (!charmed->isInCombat())
+                        charmed->SetInCombatWithAggressor(this);
+                    else
+                    {
+                        charmedCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
+                        sLog.outError("Charmed/possessed creature entry %u attacked its owner and set combat start position. Recheck flags, possibly should despawn on evade.");
+                    }
                     charmed->getThreatManager().addThreat(this, GetMaxHealth());     // generating threat by max life amount best way i found to make it realistic
+                }
             }
             else
                 charmed->GetCombatData()->threatManager.clearReferences();

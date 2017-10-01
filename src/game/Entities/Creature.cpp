@@ -1991,9 +1991,11 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     float AttackDist = GetAttackDistance(pVictim);
     float ThreatRadius = sWorld.getConfig(CONFIG_FLOAT_THREAT_RADIUS);
 
+    float x, y, z, ori;
+    GetCombatStartPosition(x, y, z, ori);
+
     // Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
-    return !pVictim->IsWithinDist3d(m_combatStartX, m_combatStartY, m_combatStartZ,
-                                    ThreatRadius > AttackDist ? ThreatRadius : AttackDist);
+    return !pVictim->IsWithinDist3d(x, y, z, ThreatRadius > AttackDist ? ThreatRadius : AttackDist);
 }
 
 CreatureDataAddon const* Creature::GetCreatureAddon() const
