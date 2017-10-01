@@ -704,7 +704,7 @@ namespace MaNGOS
                 if (!pPlayer->isAlive() || pPlayer->IsTaxiFlying())
                     continue;
 
-                if (i_originalCaster->IsFriendlyTo(pPlayer))
+                if (!i_originalCaster->CanAttack(pPlayer))
                     continue;
 
                 if (pPlayer->IsWithinDist3d(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ, i_radius))

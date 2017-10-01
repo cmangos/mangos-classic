@@ -1364,7 +1364,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
             return;
         }
 
-        if (!realCaster->IsFriendlyTo(unit))
+        if (realCaster->CanAttack(unit))
         {
             // for delayed spells ignore not visible explicit target
             if (traveling && unit == m_targets.getUnitTarget() &&
@@ -2101,8 +2101,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         }
         case TARGET_SINGLE_FRIEND:
         case TARGET_SINGLE_FRIEND_2:
-            if (m_targets.getUnitTarget())
-                targetUnitMap.push_back(m_targets.getUnitTarget());
+            if (Unit* unitTarget = m_targets.getUnitTarget())
+                targetUnitMap.push_back(unitTarget);
             break;
         case TARGET_CASTER_COORDINATES:
         {
@@ -2298,8 +2298,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 {
                     Player* Target = itr->getSource();
 
-                    // IsHostileTo check duel and controlled by enemy
-                    if (Target && Target->GetSubGroup() == subgroup && !m_caster->IsHostileTo(Target))
+                    // CanAssist check duel and controlled by enemy
+                    if (Target && Target->GetSubGroup() == subgroup && m_caster->CanAssist(Target))
                     {
                         if (pTarget->IsWithinDistInMap(Target, radius))
                             targetUnitMap.push_back(Target);
@@ -2422,10 +2422,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 {
                     Player* Target = itr->getSource();
 
-                    // IsHostileTo check duel and controlled by enemy
+                    // CanAssist check duel and controlled by enemy
                     if (Target && targetPlayer->IsWithinDistInMap(Target, radius) &&
                             targetPlayer->getClass() == Target->getClass() &&
-                            !m_caster->IsHostileTo(Target))
+                            m_caster->CanAssist(Target))
                     {
                         targetUnitMap.push_back(Target);
                     }
@@ -5432,7 +5432,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
                 // can be casted at non-friendly unit or own pet/charm
-                if (m_caster->IsFriendlyTo(expectedTarget))
+                if (!m_caster->CanAttack(expectedTarget))
                     return SPELL_FAILED_TARGET_FRIENDLY;
 
                 break;
@@ -6775,9 +6775,9 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float 
         {
             Player* Target = itr->getSource();
 
-            // IsHostileTo check duel and controlled by enemy
+            // CanAssist check duel and controlled by enemy
             if (Target && (raid || subgroup == Target->GetSubGroup())
-                    && !m_caster->IsHostileTo(Target))
+                    && m_caster->CanAssist(Target))
             {
                 if (((Target == m_caster) && withcaster) ||
                         ((Target != m_caster) && m_caster->IsWithinDistInMap(Target, radius)))
