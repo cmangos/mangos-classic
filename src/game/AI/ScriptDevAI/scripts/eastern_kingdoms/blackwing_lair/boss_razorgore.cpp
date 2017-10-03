@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Razorgore
 SD%Complete: 95
-SDComment: When casting spell Explode Orb all triggers are killed by the triggered spell 20038 casted by trigger NPCs 16604 (including some of those): this breaks the event. Triggers should survive/not be targeted. Possibly a core issue.
+SDComment: Threat management after Mind Control is released needs core support (boss should have aggro on its previous controller and its previous victim should have threat transfered from boss to controlling player)
 SDCategory: Blackwing Lair
 EndScriptData
 
@@ -31,11 +31,9 @@ enum
     SAY_EGGS_BROKEN_1           = -1469022,
     SAY_EGGS_BROKEN_2           = -1469023,
     SAY_EGGS_BROKEN_3           = -1469024,
-    SAY_DEATH                   = -1469025,
 
-    SPELL_POSSESS               = 23014,                    // visual effect and increase the damage taken
+    SPELL_POSSESS_VISUAL        = 23014,                    // visual effect and increase the damage taken
     SPELL_DESTROY_EGG           = 19873,
-    SPELL_EXPLODE_ORB           = 20037,                    // used if attacked without destroying the eggs - triggers 20038
 
     SPELL_CLEAVE                = 19632,
     SPELL_WARSTOMP              = 24375,
@@ -53,7 +51,6 @@ struct boss_razorgoreAI : public ScriptedAI
 
     instance_blackwing_lair* m_pInstance;
 
-    uint32 m_uiIntroVisualTimer;
     uint32 m_uiCleaveTimer;
     uint32 m_uiWarStompTimer;
     uint32 m_uiFireballVolleyTimer;
@@ -63,25 +60,12 @@ struct boss_razorgoreAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiIntroVisualTimer    = 5000;
         m_bEggsExploded         = false;
 
         m_uiCleaveTimer         = urand(4000, 8000);
         m_uiWarStompTimer       = 30000;
         m_uiConflagrationTimer  = urand(10000, 15000);
         m_uiFireballVolleyTimer = urand(15000, 20000);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-        {
-            // Don't set instance data unless all eggs are destroyed
-            if (m_pInstance->GetData(TYPE_RAZORGORE) != SPECIAL)
-                return;
-
-            m_pInstance->SetData(TYPE_RAZORGORE, DONE);
-        }
     }
 
     void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
@@ -105,8 +89,8 @@ struct boss_razorgoreAI : public ScriptedAI
             uiDamage = 0;
             m_bEggsExploded = true;
             m_pInstance->SetData(TYPE_RAZORGORE, FAIL);
-            DoScriptText(SAY_DEATH, m_creature);
-            DoCastSpellIfCan(m_creature, SPELL_EXPLODE_ORB, CAST_TRIGGERED);
+            DoScriptText(SAY_RAZORGORE_DEATH, m_creature);
+            m_creature->CastSpell(m_creature, SPELL_FIREBALL, TRIGGERED_OLD_TRIGGERED);
             m_creature->ForcedDespawn(5000);
         }
     }
@@ -120,28 +104,7 @@ struct boss_razorgoreAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        {
-            // Set visual only on OOC timer
-            if (m_uiIntroVisualTimer)
-            {
-                if (m_uiIntroVisualTimer <= uiDiff)
-                {
-                    if (!m_pInstance)
-                    {
-                        script_error_log("Instance Blackwing Lair: ERROR Failed to load instance data for this instace.");
-                        return;
-                    }
-
-                    if (Creature* pOrbTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
-                        pOrbTrigger->CastSpell(m_creature, SPELL_POSSESS, TRIGGERED_NONE);
-                    m_uiIntroVisualTimer = 0;
-                }
-                else
-                    m_uiIntroVisualTimer -= uiDiff;
-            }
-
             return;
-        }
 
         // Cleave
         if (m_uiCleaveTimer < uiDiff)
@@ -205,6 +168,77 @@ CreatureAI* GetAI_boss_razorgore(Creature* pCreature)
     return new boss_razorgoreAI(pCreature);
 }
 
+struct npc_blackwing_orbAI : public ScriptedAI
+{
+    npc_blackwing_orbAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_blackwing_lair*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_blackwing_lair* m_pInstance;
+
+    uint32 m_uiIntroVisualTimer;
+
+    void Reset() override
+    {
+        m_uiIntroVisualTimer = 4000;
+    }
+
+    void SpellHit(Unit* /* pCaster */, const SpellEntry* pSpell) override
+    {
+        // If hit by Razorgore's fireball: explodes everything in the room
+        if (pSpell->Id == SPELL_FIREBALL)
+            m_creature->CastSpell(m_creature, SPELL_EXPLODE_ORB, TRIGGERED_IGNORE_UNATTACKABLE_FLAG);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // Set visual only on OOC timer
+        if (m_uiIntroVisualTimer)
+        {
+            if (m_uiIntroVisualTimer <= uiDiff)
+            {
+                if (!m_pInstance)
+                {
+                    script_error_log("Instance Blackwing Lair: ERROR Failed to load instance data for this instace.");
+                    return;
+                }
+
+                // If Razorgore is not respawned yet: wait
+                if (Creature* pRazorgore = m_pInstance->GetSingleCreatureFromStorage(NPC_RAZORGORE))
+                {
+                    if (!(pRazorgore->isAlive()))
+                    {
+                        m_uiIntroVisualTimer = 2000;
+                        return;
+                    }
+                }
+
+                // If Grethok the Controller is here and spawned, start the visual, else wait for him
+                if (Creature* pGrethok = GetClosestCreatureWithEntry(m_creature, NPC_GRETHOK_CONTROLLER, 2.0f))
+                {
+                    if (pGrethok->isAlive())
+                    {
+                        m_creature->CastSpell(m_creature, SPELL_POSSESS_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                        pGrethok->CastSpell(pGrethok, SPELL_CONTROL_ORB, TRIGGERED_OLD_TRIGGERED);
+                        m_uiIntroVisualTimer = 0;
+                    }
+                }
+                else
+                    m_uiIntroVisualTimer = 2000;
+            }
+            else
+                m_uiIntroVisualTimer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_blackwing_orb(Creature* pCreature)
+{
+    return new npc_blackwing_orbAI(pCreature);
+}
+
 bool EffectDummyGameObj_go_black_dragon_egg(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, GameObject* pGOTarget, ObjectGuid /*originalCasterGuid*/)
 {
     if (uiSpellId == SPELL_DESTROY_EGG && uiEffIndex == EFFECT_INDEX_1)
@@ -241,6 +275,11 @@ void AddSC_boss_razorgore()
     pNewScript = new Script;
     pNewScript->Name = "boss_razorgore";
     pNewScript->GetAI = &GetAI_boss_razorgore;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_blackwing_orb";
+    pNewScript->GetAI = &GetAI_npc_blackwing_orb;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

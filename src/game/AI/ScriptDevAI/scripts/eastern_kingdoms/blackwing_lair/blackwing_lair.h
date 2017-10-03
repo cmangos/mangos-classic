@@ -53,12 +53,17 @@ enum
 
     EMOTE_ORB_SHUT_OFF          = -1469035,
     EMOTE_TROOPS_FLEE           = -1469033,                 // emote by Nefarian's Troops npc
+    SAY_RAZORGORE_DEATH         = -1469025,
 
     // Spells used by the monster generator in Razorgore encounter
     // SPELL_SUMMON_LEGIONNAIRES   = 19824,                    // Periodically triggers 19826
     SPELL_SUMMON_LEGIONNAIRE    = 19826,
     SPELL_SUMMON_MAGE           = 19827,
     SPELL_SUMMON_DRAGONSPAWN    = 19828,
+    SPELL_WARMING_FLAMES        = 23040,                    // Used by Razorgore to fully heal in in phase 1 to 2 transition
+    SPELL_CONTROL_ORB           = 23018,                    // Visual used by Grethok the Controller
+    SPELL_FIREBALL              = 23024,                    // Used by Razorgore to reset the event (and kill everyone like a badass)
+    SPELL_EXPLODE_ORB           = 20037,                    // used if attacked without destroying the eggs - triggers 20038
 
     MAX_EGGS_DEFENDERS          = 4,
     MAX_DRAGONSPAWN             = 12,

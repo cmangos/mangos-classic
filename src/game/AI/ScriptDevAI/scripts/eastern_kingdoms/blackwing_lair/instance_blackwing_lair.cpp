@@ -132,6 +132,11 @@ void instance_blackwing_lair::SetData(uint32 uiType, uint32 uiData)
 
                 // Reset the Orb of Domination and the eggs
                 DoToggleGameObjectFlags(GO_ORB_OF_DOMINATION, GO_FLAG_NO_INTERACT, true);
+                if (Creature* pOrb = GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
+                {
+                    if (pOrb->isAlive())
+                        pOrb->AI()->EnterEvadeMode();
+                }
 
                 // Reset defenders
                 for (GuidList::const_iterator itr = m_lDefendersGuids.begin(); itr != m_lDefendersGuids.end(); ++itr)
@@ -276,7 +281,7 @@ void instance_blackwing_lair::SetData64(uint32 uiData, uint64 uiGuid)
             if (Creature* pRazorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
             {
                 pRazorgore->RemoveAllAuras();
-                pRazorgore->SetHealth(pRazorgore->GetMaxHealth());
+                pRazorgore->CastSpell(pRazorgore, SPELL_WARMING_FLAMES, TRIGGERED_OLD_TRIGGERED);
             }
 
             // All defenders evade and despawn
@@ -313,6 +318,30 @@ void instance_blackwing_lair::OnCreatureDeath(Creature* pCreature)
 
             if (Creature* pOrbTrigger = GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
                 pOrbTrigger->InterruptNonMeleeSpells(false);
+            break;
+        case NPC_RAZORGORE:
+            // Only set the event as done if Razorgore dies in last phase
+            if (GetData(TYPE_RAZORGORE) == SPECIAL)
+            {
+                SetData(TYPE_RAZORGORE, DONE);
+                break;
+            }
+
+            // If the event is not already failed in Razorgore script, then force group wipe by making the boss trigger an AoE
+            // this is basically a duplicate of what is in Razorgore script because when the boss is Mind Controlled the AI is overriden
+            // So we have to handle it in the instance script instead to prevent the event to be stucked or exploited
+            if (GetData(TYPE_RAZORGORE) != FAIL)
+            {
+                if (Creature* pRazorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
+                {
+                    pRazorgore->CastSpell(pRazorgore, SPELL_FIREBALL, TRIGGERED_OLD_TRIGGERED);
+                    SetData(TYPE_RAZORGORE, FAIL);
+                    DoScriptText(SAY_RAZORGORE_DEATH, pRazorgore);
+                    pRazorgore->ForcedDespawn();
+                }
+                if (Creature* pOrbTrigger = GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
+                    pOrbTrigger->CastSpell(pOrbTrigger, SPELL_EXPLODE_ORB, TRIGGERED_IGNORE_UNATTACKABLE_FLAG);
+            }
             break;
         case NPC_BLACKWING_LEGIONNAIRE:
         case NPC_BLACKWING_MAGE:
