@@ -4577,18 +4577,21 @@ void ObjectMgr::LoadQuestgiverGreeting()
         var.text = fields[2].GetString();
         var.emoteId = emoteId;
         var.emoteDelay = fields[4].GetUInt32();
+
+        ++count;
     }
     while (result->NextRow());
 
     delete result;
 
-    sLog.outString(">> Loaded " SIZEFMTD " questgiver greetings.", mNpcTextLocaleMap.size());
+    sLog.outString(">> Loaded %u questgiver greetings.", count);
     sLog.outString();
 }
 
 void ObjectMgr::LoadQuestgiverGreetingLocales()
 {
-    mNpcTextLocaleMap.clear();                              // need for reload case
+    for (uint32 i = 0; i < QUESTGIVER_TYPE_MAX; i++)        // need for reload case
+        m_questgiverGreetingLocaleMap[i].clear();
 
     QueryResult* result = WorldDatabase.Query("SELECT Entry, Type, Text_loc1, Text_loc2, Text_loc3, Text_loc4, Text_loc5, Text_loc6, Text_loc7, Text_loc8 FROM locales_questgiver_greeting");
     int count = 0;
@@ -4641,12 +4644,14 @@ void ObjectMgr::LoadQuestgiverGreetingLocales()
             else
                 var.localeText.push_back("");
         }
+
+        ++count;
     }
     while (result->NextRow());
 
     delete result;
 
-    sLog.outString(">> Loaded " SIZEFMTD " locales questgiver greetings.", mNpcTextLocaleMap.size());
+    sLog.outString(">> Loaded %u locales questgiver greetings.", count);
     sLog.outString();
 }
 
