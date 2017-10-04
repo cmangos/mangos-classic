@@ -1079,6 +1079,7 @@ void GameObject::Use(Unit* user)
     Unit* spellCaster = user;
     uint32 spellId = 0;
     uint32 triggeredFlags = 0;
+    bool originalCaster = true;
 
     // test only for exist cooldown data (cooldown timer used for door/buttons reset that not have use cooldown)
     if (uint32 cooldown = GetGOInfo()->GetCooldown())
@@ -1592,6 +1593,8 @@ void GameObject::Use(Unit* user)
 
             spellId = 23598;
 
+            originalCaster = false; // the spell is cast by player even in sniff
+
             break;
         }
         case GAMEOBJECT_TYPE_FLAGSTAND:                     // 24
@@ -1684,7 +1687,7 @@ void GameObject::Use(Unit* user)
         return;
     }
 
-    Spell* spell = new Spell(spellCaster, spellInfo, triggeredFlags, GetObjectGuid());
+    Spell* spell = new Spell(spellCaster, spellInfo, triggeredFlags, originalCaster ? GetObjectGuid() : ObjectGuid());
 
     // spell target is user of GO
     SpellCastTargets targets;
