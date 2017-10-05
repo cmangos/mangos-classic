@@ -4639,10 +4639,18 @@ void ObjectMgr::LoadQuestgiverGreetingLocales()
 
         for (int i = 1; i < MAX_LOCALE; ++i)
         {
-            if (const char* text = fields[1 + i].GetString())
-                var.localeText.push_back(text);
-            else
-                var.localeText.push_back("");
+            std::string str = fields[1 + i].GetCppString();
+            if (!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if (idx >= 0)
+                {
+                    if (var.localeText.size() <= static_cast<size_t>(idx))
+                        var.localeText.resize(idx + 1);
+
+                    var.localeText[idx] = str;
+                }
+            }
         }
 
         ++count;
