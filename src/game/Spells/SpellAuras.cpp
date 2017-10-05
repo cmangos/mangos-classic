@@ -2755,7 +2755,8 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
     {
         switch (GetId())
         {
-            case 23620:                                     // Burning Adrenaline
+            case 18173:                                     // Burning Adrenaline (Main Target version)
+            case 23620:                                     // Burning Adrenaline (Caster version)
                 // On aura removal, the target deals AoE damage to friendlies and kills himself/herself (prevent durability loss)
                 target->CastSpell(target, 23478, TRIGGERED_OLD_TRIGGERED, 0, this);
                 target->CastSpell(target, 23644, TRIGGERED_OLD_TRIGGERED, 0, this);

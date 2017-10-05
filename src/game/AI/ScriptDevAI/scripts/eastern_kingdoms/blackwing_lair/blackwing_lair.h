@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 8,
+    MAX_ENCOUNTER               = 9,
 
     TYPE_RAZORGORE              = 0,
     TYPE_VAELASTRASZ            = 1,
@@ -17,6 +17,7 @@ enum
     TYPE_FLAMEGOR               = 5,
     TYPE_CHROMAGGUS             = 6,
     TYPE_NEFARIAN               = 7,
+    TYPE_QUEST_SCEPTER          = 8,
 
     DATA_DRAGON_EGG             = 1,                        // track the used eggs
 
@@ -68,6 +69,17 @@ enum
     MAX_EGGS_DEFENDERS          = 4,
     MAX_DRAGONSPAWN             = 12,
     MAX_BLACKWING_DEFENDER      = 40,
+
+    // Yells by Nefarian during the epic quest Nefarius' Corruption
+    YELL_REDSHARD_TAUNT_1       = -1469036,
+    YELL_REDSHARD_TAUNT_2       = -1469037,
+    YELL_REDSHARD_TAUNT_3       = -1469039,
+    YELL_REDSHARD_TAUNT_4       = -1469040,
+    YELL_REDSHARD_TAUNT_5       = -1469041,
+    YELL_REDSHARD_TAUNT_6       = -1469042,
+    YELL_REDSHARD_TAUNT_7       = -1469043,
+    EMOTE_REDSHARD_TAUNT_1      = -1469038,
+    EMOTE_REDSHARD_TAUNT_2      = -1469044,
 };
 
 // Coords used in intro event for Vaelastrasz to spawn Nefarius at the throne and sort the gobelins
@@ -99,12 +111,16 @@ class instance_blackwing_lair : public ScriptedInstance
 
         void Update(uint32 uiDiff) override;
 
+        bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
+
     protected:
         std::string m_strInstData;
         uint32 m_auiEncounter[MAX_ENCOUNTER];
 
         uint32 m_uiResetTimer;
         uint32 m_uiDefenseTimer;
+        uint32 m_uiScepterEpicTimer;
+        uint8 m_uiScepterQuestStep;
         uint32 m_uiDragonspawnCount;
         uint32 m_uiBlackwingDefCount;
 

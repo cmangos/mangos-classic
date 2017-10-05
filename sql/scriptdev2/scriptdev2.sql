@@ -154,7 +154,7 @@ UPDATE gameobject_template SET ScriptName='go_fathom_stone' WHERE entry=177964;
 
 /* BLACKROCK DEPTHS */
 
-INSERT INTO scripted_areatrigger VALUES 
+INSERT INTO scripted_areatrigger VALUES
 (1526,'at_ring_of_law'),
 (1786,'at_shadowforge_bridge');
 UPDATE instance_template SET ScriptName='instance_blackrock_depths' WHERE map =230;
@@ -455,7 +455,7 @@ UPDATE gameobject_template SET ScriptName='go_stratholme_postbox' WHERE entry IN
 
 /* SUNKEN TEMPLE */
 UPDATE instance_template SET ScriptName='instance_sunken_temple' WHERE map=109;
-INSERT INTO scripted_areatrigger VALUES 
+INSERT INTO scripted_areatrigger VALUES
 (4016,'at_shade_of_eranikus');
 UPDATE creature_template SET ScriptName='npc_malfurion_stormrage' WHERE entry=15362;
 INSERT INTO scripted_event_id VALUES
@@ -560,7 +560,7 @@ UPDATE instance_template SET ScriptName='instance_zulfarrak' WHERE map=209;
 INSERT INTO scripted_event_id VALUES
 (2488,'event_go_zulfarrak_gong'),
 (2609,'event_spell_unlocking');
-INSERT INTO scripted_areatrigger VALUES 
+INSERT INTO scripted_areatrigger VALUES
 (1447,'at_zulfarrak');
 UPDATE creature_template SET ScriptName='boss_zumrah' WHERE entry=7271;
 
@@ -2115,7 +2115,17 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1469034,'Run! They are coming.',0,1,0,0,'blackwing technician SAY_TECHNICIAN_RUN'),
 
-(-1469035,'Orb of Domination loses power and shuts off!',0,2,0,0,'razorgore EMOTE_ORB_SHUT_OFF');
+(-1469035,'Orb of Domination loses power and shuts off!',0,2,0,0,'razorgore EMOTE_ORB_SHUT_OFF'),
+
+(-1469036,'Looking for this: [Red Scepter Shard]? Come and get it...',0,6,0,0,'nefarius YELL_REDSHARD_TAUNT_1'),
+(-1469037,'I wonder, heroes, what will you do when I manage to destroy this shard? Will the world be beyond Salvation?',0,6,0,0,'nefarius YELL_REDSHARD_TAUNT_2'),
+(-1469038,'%s\'s laughter echoes through the halls of Blackwing.',0,3,0,0,'nefarius EMOTE_REDSHARD_TAUNT_1'),
+(-1469039,'What\'s this? A chip in the shard? Finally, a weakness exposed... It won\'t be long now.',0,6,0,0,'nefarius YELL_REDSHARD_TAUNT_3'),
+(-1469040,'Not even my father could have planned such tragedy... such chaos. You will never make it! Time is running out!',0,6,0,0,'nefarius YELL_REDSHARD_TAUNT_4'),
+(-1469041,'Would it not be glorious if you somehow managed to defeat me but not before I could destroy the only hope Kalimdor may have? I am giddy with anticipation. Soon... Soon it will be dust.',0,6,0,0,'nefarius YELL_REDSHARD_TAUNT_5'),
+(-1469042,'Ah, the protective layer is nearly gone. Do you hear that, heroes? That... That is the sound of inevitability. Of your hopes and dreams being crushed under the weight of my being.',0,6,0,0,'nefarius YELL_REDSHARD_TAUNT_6'),
+(-1469044,'%s\'laughter can once more be heard through the halls of Blackwing.',0,3,0,0,'nefarius EMOTE_REDSHARD_TAUNT_2'),
+(-1469043,'The scepter shard is no more! Your beloved Kalimdor shall soon be a desolate wasteland. I will, of course, turn the Eastern Kingdoms into an ashen, lifeless void...',0,6,0,0,'nefarius YELL_REDSHARD_TAUNT_7');
 
 -- -1 509 000 RUINS OF AHN'QIRAJ
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
