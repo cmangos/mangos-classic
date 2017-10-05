@@ -317,6 +317,8 @@ enum TriggerCastFlags : uint32
     TRIGGERED_INSTANT_CAST                      = 0x00000008,   // Will ignore any cast time set in spell entry
     TRIGGERED_AUTOREPEAT                        = 0x00000010,   // Will signal spell system that this is internal autorepeat call
     TRIGGERED_IGNORE_UNATTACKABLE_FLAG          = 0x00000020,   // Ignores UNIT_FLAG_NOT_ATTACKABLE in CheckTarget
+    TRIGGERED_DO_NOT_PROC						= 0x00000040,   // Spells from scripts should not proc - DBScripts for example
+    TRIGGERED_PET_CAST                          = 0x00000080,   // Spell that should report error through pet opcode
     TRIGGERED_FULL_MASK                         = 0xFFFFFFFF
 };
 

@@ -262,7 +262,11 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
             petUnit->clearUnitState(UNIT_STAT_MOVING);
 
-            Spell* spell = new Spell(petUnit, spellInfo, false);
+            uint32 flags = TRIGGERED_NONE;
+            if (!petUnit->hasUnitState(UNIT_STAT_POSSESSED))
+                flags |= TRIGGERED_PET_CAST;
+
+            Spell* spell = new Spell(petUnit, spellInfo, flags);
 
             SpellCastResult result = spell->CheckPetCast(unit_target);
 
@@ -322,15 +326,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             }
             else
             {
-                if (petUnit->hasUnitState(UNIT_STAT_POSSESSED))
-                    Spell::SendCastResult(GetPlayer(), spellInfo, result);
-                else
-                {
-                    Unit* owner = petUnit->GetMaster();
-                    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                        owner->SendPetCastFail(spellInfo->Id, result);
-                }
-
                 if (creature && creature->IsSpellReady(*spellInfo))
                     GetPlayer()->SendClearCooldown(spellid, petUnit);
 
@@ -742,7 +737,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     petUnit->clearUnitState(UNIT_STAT_MOVING);
 
-    Spell* spell = new Spell(petUnit, spellInfo, false);
+    Spell* spell = new Spell(petUnit, spellInfo, TRIGGERED_PET_CAST);
     spell->m_targets = targets;
 
     SpellCastResult result = spell->CheckPetCast(nullptr);
