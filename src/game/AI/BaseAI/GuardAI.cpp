@@ -61,7 +61,7 @@ void GuardAI::MoveInLineOfSight(Unit* who)
                     AttackStart(victim);
                 }
             }
-            else if (who->GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() == TYPEID_PLAYER || victim->GetObjectGuid().IsCreature() && ((Creature*)victim)->IsPet() && ((Creature*)victim)->GetOwnerGuid().IsPlayer())
+            else if ((who->GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() == TYPEID_PLAYER) || (victim->GetObjectGuid().IsCreature() && ((Creature*)victim)->IsPet() && ((Creature*)victim)->GetOwnerGuid().IsPlayer()))
             {
                 if (m_creature->IsWithinDistInMap(who, 30.0) && m_creature->IsWithinLOSInMap(who))
                 {
@@ -77,7 +77,6 @@ void GuardAI::MoveInLineOfSight(Unit* who)
                         AttackStart(victim);
                     }
                 }
-
             }
         }
     }
