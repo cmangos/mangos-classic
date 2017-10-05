@@ -295,13 +295,13 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle, bool moveFur
         if (m_owner->GetTypeId() == TYPEID_PLAYER)
         {
             auto gen = (ChaseMovementGenerator<Player>*)top();
-            gen->SetOffsetAndAngle(dist,angle,moveFurther);
+            gen->SetMovementParameters(dist,angle,moveFurther);
             gen->SetNewTarget(*target);
         }
         else
         {
             auto gen = (ChaseMovementGenerator<Creature>*)top();
-            gen->SetOffsetAndAngle(dist, angle, moveFurther);
+            gen->SetMovementParameters(dist, angle, moveFurther);
             gen->SetNewTarget(*target);
         }
         top()->Reset(*m_owner);

@@ -185,6 +185,13 @@ bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float 
         return !i_target->IsWithinDist2d(x, y, this->GetDynamicTargetDistance(owner, true));
 }
 
+template<class T, typename D>
+void TargetedMovementGeneratorMedium<T,D>::SetOffsetAndAngle(float offset, float angle)
+{
+    i_offset = offset;
+    i_angle = angle;
+}
+
 //-----------------------------------------------//
 template<class T>
 void ChaseMovementGenerator<T>::_clearUnitStateMove(T& u) { u.clearUnitState(UNIT_STAT_CHASE_MOVE); }
@@ -243,10 +250,9 @@ void ChaseMovementGenerator<T>::Reset(T& owner)
 }
 
 template<class T>
-void ChaseMovementGenerator<T>::SetOffsetAndAngle(float offset, float angle, bool moveFurther)
+void ChaseMovementGenerator<T>::SetMovementParameters(float offset, float angle, bool moveFurther)
 {
-    i_offset = offset;
-    i_angle = angle;
+    TargetedMovementGeneratorMedium<T, ChaseMovementGenerator>::SetOffsetAndAngle(offset, angle);
     m_moveFurther = moveFurther;
 }
 
@@ -398,8 +404,8 @@ template void ChaseMovementGenerator<Player>::Reset(Player&);
 template void ChaseMovementGenerator<Creature>::Reset(Creature&);
 template float ChaseMovementGenerator<Creature>::GetDynamicTargetDistance(Creature&, bool) const;
 template float ChaseMovementGenerator<Player>::GetDynamicTargetDistance(Player&, bool) const;
-template void ChaseMovementGenerator<Creature>::SetOffsetAndAngle(float, float, bool);
-template void ChaseMovementGenerator<Player>::SetOffsetAndAngle(float, float, bool);
+template void ChaseMovementGenerator<Creature>::SetMovementParameters(float, float, bool);
+template void ChaseMovementGenerator<Player>::SetMovementParameters(float, float, bool);
 
 template void FollowMovementGenerator<Player>::_clearUnitStateMove(Player& u);
 template void FollowMovementGenerator<Creature>::_addUnitStateMove(Creature& u);
