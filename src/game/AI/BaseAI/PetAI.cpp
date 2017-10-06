@@ -48,6 +48,8 @@ PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inComb
         case MINI_PET:
             SetReactState(REACT_PASSIVE);
             break;
+        default:
+            break;
     }
 }
 
