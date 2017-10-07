@@ -738,79 +738,82 @@ void Spell::prepareDataForTriggerSystem()
         }
     }
 
-    // Get data for type of attack and fill base info for trigger
-    switch (m_spellInfo->DmgClass)
-    {
-        case SPELL_DAMAGE_CLASS_MELEE:
-            m_procAttacker = PROC_FLAG_SUCCESSFUL_MELEE_SPELL_HIT;
-            if (m_attackType == OFF_ATTACK)
-                m_procAttacker |= PROC_FLAG_SUCCESSFUL_OFFHAND_HIT;
-            m_procVictim   = PROC_FLAG_TAKEN_MELEE_SPELL_HIT;
-            break;
-        case SPELL_DAMAGE_CLASS_RANGED:
-            // Auto attack
-            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))
-            {
-                m_procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_HIT;
-                m_procVictim   = PROC_FLAG_TAKEN_RANGED_HIT;
-            }
-            else // Ranged spell attack
-            {
-                m_procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_SPELL_HIT;
-                m_procVictim   = PROC_FLAG_TAKEN_RANGED_SPELL_HIT;
-            }
-            break;
-        default:
-            if (IsPositiveSpell(m_spellInfo->Id))           // Check for positive spell
-            {
-                if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE) // if dmg class none
-                {
-                    m_procAttacker = PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS;
-                    m_procVictim = PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS;
-                }
-                else
-                {
-                    m_procAttacker = PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS;
-                    m_procVictim = PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS;
-                }
-            }
-            else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))   // Wands auto attack
-            {
-                m_procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_HIT;
-                m_procVictim   = PROC_FLAG_TAKEN_RANGED_HIT;
-            }
-            else                                           // Negative spell
-            {
-                if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE) // if dmg class none
-                {
-                    m_procAttacker = PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG;
-                    m_procVictim = PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG;
-                }
-                else
-                {
-                    m_procAttacker = PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG;
-                    m_procVictim = PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG;
-                }
-            }
-            break;
-    }
-
     // some negative spells have positive effects to another or same targets
     // avoid triggering negative hit for only positive targets
     m_negativeEffectMask = 0x0;
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (!IsPositiveEffect(m_spellInfo, SpellEffectIndex(i)))
             m_negativeEffectMask |= (1 << i);
+}
+
+void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32 &procAttacker, uint32 &procVictim, WorldObject* caster, WorldObject* target)
+{
+    // Get data for type of attack and fill base info for trigger
+    switch (m_spellInfo->DmgClass)
+    {
+        case SPELL_DAMAGE_CLASS_MELEE:
+            procAttacker = PROC_FLAG_SUCCESSFUL_MELEE_SPELL_HIT;
+            if (m_attackType == OFF_ATTACK)
+                procAttacker |= PROC_FLAG_SUCCESSFUL_OFFHAND_HIT;
+            procVictim = PROC_FLAG_TAKEN_MELEE_SPELL_HIT;
+            break;
+        case SPELL_DAMAGE_CLASS_RANGED:
+            // Auto attack
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))
+            {
+                procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_HIT;
+                procVictim = PROC_FLAG_TAKEN_RANGED_HIT;
+            }
+            else // Ranged spell attack
+            {
+                procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_SPELL_HIT;
+                procVictim = PROC_FLAG_TAKEN_RANGED_SPELL_HIT;
+            }
+            break;
+        default:
+            if (IsPositiveEffectMask(m_spellInfo, effectMask, caster, target))           // Check for positive spell
+            {
+                if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE) // if dmg class none
+                {
+                    procAttacker = PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS;
+                    procVictim = PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS;
+                }
+                else
+                {
+                    procAttacker = PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS;
+                    procVictim = PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS;
+                }
+            }
+            else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))   // Wands auto attack
+            {
+                procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_HIT;
+                procVictim = PROC_FLAG_TAKEN_RANGED_HIT;
+            }
+            else                                           // Negative spell
+            {
+                if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE) // if dmg class none
+                {
+                    procAttacker = PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG;
+                    procVictim = PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG;
+                }
+                else
+                {
+                    procAttacker = PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG;
+                    procVictim = PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG;
+                }
+            }
+            break;
+    }
 
     // Hunter traps spells (for Entrapment trigger)
     // Gives your Immolation Trap, Frost Trap, Explosive Trap, and Snake Trap ....
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags & uint64(0x000020000000001C))
-        m_procAttacker |= PROC_FLAG_ON_TRAP_ACTIVATION;
+        procAttacker |= PROC_FLAG_ON_TRAP_ACTIVATION;
 
     if (IsNextMeleeSwingSpell())
     {
-        m_procAttacker |= PROC_FLAG_SUCCESSFUL_MELEE_HIT;
-        m_procVictim |= PROC_FLAG_TAKEN_MELEE_HIT;
+        procAttacker |= PROC_FLAG_SUCCESSFUL_MELEE_HIT;
+        procVictim |= PROC_FLAG_TAKEN_MELEE_HIT;
     }
 }
 
@@ -997,7 +1000,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     target->processed = true;                               // Target checked in apply effects procedure
 
     // Get mask of effects for target
-    uint32 mask = target->effectMask;
+    uint32 effectMask = target->effectMask;
 
     Unit* unit = m_caster->GetObjectGuid() == target->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, target->targetGUID);
     if (!unit)
@@ -1017,9 +1020,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     ResetEffectDamageAndHeal();
 
     // Fill base trigger info
-    uint32 procAttacker = m_procAttacker;
-    uint32 procVictim   = m_procVictim;
+    uint32 procAttacker;
+    uint32 procVictim;
     uint32 procEx       = PROC_EX_NONE;
+    PrepareMasksForProcSystem(effectMask, procAttacker, procVictim, caster, unitTarget);
 
     // drop proc flags in case target not affected negative effects in negative spell
     // for example caster bonus or animation,
@@ -1037,21 +1041,21 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // mark effects that were already handled in Spell::HandleDelayedSpellLaunch on spell launch as processed
         for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
             if (IsEffectHandledOnDelayedSpellLaunch(m_spellInfo, SpellEffectIndex(i)))
-                mask &= ~(1 << i);
+                effectMask &= ~(1 << i);
 
         // maybe used in effects that are handled on hit
         m_damage += target->damage;
     }
 
     if (missInfo == SPELL_MISS_NONE)                        // In case spell hit target, do all effect on that target
-        DoSpellHitOnUnit(unit, mask);
+        DoSpellHitOnUnit(unit, effectMask);
     else if (missInfo != SPELL_MISS_EVADE)
     {
         if (missInfo == SPELL_MISS_REFLECT)                // In case spell reflect from target, do all effect on caster (if hit)
         {
             if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
             {
-                DoSpellHitOnUnit(m_caster, mask, true);
+                DoSpellHitOnUnit(m_caster, effectMask, true);
                 unitTarget = m_caster;
             }
         }

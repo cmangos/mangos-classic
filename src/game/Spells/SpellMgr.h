@@ -926,6 +926,19 @@ inline bool IsPositiveSpell(const SpellEntry* entry, const WorldObject* caster =
     return true;
 }
 
+// this is propably the correct check for most positivity/negativity decisions
+inline bool IsPositiveEffectMask(const SpellEntry* entry, uint8 effectMask, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
+{
+    if (!entry)
+        return false;
+    // spells with at least one negative effect are considered negative
+    // some self-applied spells have negative effects but in self casting case negative check ignored.
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (entry->Effect[i] && (effectMask & (1 << i)) && !IsPositiveEffect(entry, SpellEffectIndex(i), caster, target))
+            return false;
+    return true;
+}
+
 inline bool IsPositiveSpell(uint32 spellId, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
 {
     if (!spellId)

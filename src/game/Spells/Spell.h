@@ -562,9 +562,8 @@ class Spell
         //******************************************
         bool   m_canTrigger;                                // Can start trigger (m_IsTriggeredSpell can`t use for this)
         uint8  m_negativeEffectMask;                        // Use for avoid sent negative spell procs for additional positive effects only targets
-        uint32 m_procAttacker;                              // Attacker trigger flags
-        uint32 m_procVictim;                                // Victim   trigger flags
-        void   prepareDataForTriggerSystem();
+        void prepareDataForTriggerSystem();
+        void PrepareMasksForProcSystem(uint8 effectMask, uint32 &procAttacker, uint32 &procVictim, WorldObject* caster, WorldObject* target);
 
         //*****************************************
         // Spell target filling
