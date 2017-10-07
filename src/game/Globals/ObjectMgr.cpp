@@ -5374,6 +5374,7 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
 
 /**
  * Searches for the areatrigger which teleports players to the given map
+ * TODO: Requirements should be propably Map bound not Areatrigger bound
  */
 AreaTrigger const* ObjectMgr::GetMapEntranceTrigger(uint32 Map) const
 {

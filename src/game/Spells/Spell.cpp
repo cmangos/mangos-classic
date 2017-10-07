@@ -5031,23 +5031,38 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
                     return SPELL_FAILED_BAD_TARGETS;
-                if (!((Player*)m_caster)->GetSelectionGuid())
+                Player* caster = static_cast<Player*>(m_caster);
+                if (!caster->GetSelectionGuid())
                     return SPELL_FAILED_BAD_TARGETS;
 
-                Player* target = sObjectMgr.GetPlayer(((Player*)m_caster)->GetSelectionGuid());
-                if (!target || ((Player*)m_caster) == target || !target->IsInSameRaidWith((Player*)m_caster))
+                Player* target = sObjectMgr.GetPlayer(caster->GetSelectionGuid());
+                if (!target || caster == target || !target->IsInSameRaidWith((Player*)m_caster))
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // check if our map is dungeon
-                if (sMapStore.LookupEntry(m_caster->GetMapId())->IsDungeon())
+                uint32 mapId = m_caster->GetMapId();
+                const MapEntry* map = sMapStore.LookupEntry(mapId);
+                if (map->IsDungeon())
                 {
-                    InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(m_caster->GetMapId());
+                    InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(mapId);
                     if (!instance)
                         return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
                     if (instance->levelMin > target->getLevel())
                         return SPELL_FAILED_LOWLEVEL;
                     if (instance->levelMax && instance->levelMax < target->getLevel())
                         return SPELL_FAILED_HIGHLEVEL;
+
+                    if (InstancePlayerBind* targetBind = target->GetBoundInstance(mapId))
+                        if (InstancePlayerBind* casterBind = caster->GetBoundInstance(mapId))
+                            if (targetBind->perm && targetBind->state != casterBind->state)
+                                return SPELL_FAILED_UNKNOWN; // TODO: Error was added in TBC maybe wrong
+
+                    if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(mapId))
+                    {
+                        uint32 miscRequirement;
+                        if (AREA_LOCKSTATUS_OK != target->GetAreaTriggerLockStatus(at, miscRequirement))
+                            return SPELL_FAILED_BAD_TARGETS; // TODO: Verify this result
+                    }
                 }
                 break;
             }
