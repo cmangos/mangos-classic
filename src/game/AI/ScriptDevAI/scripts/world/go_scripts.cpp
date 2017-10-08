@@ -24,6 +24,7 @@ EndScriptData
 */
 
 #include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "Entities/Object.h"
 /* ContentData
 go_andorhal_tower
 EndContentData */
@@ -86,24 +87,28 @@ enum BellHourlySoundFX
 
 enum BellHourlySoundAreas
 {
-    UNDERCITY_AREA = 1497,
+    // Local areas
+    TARREN_MILL_AREA = 272,
+    KARAZHAN_MAPID   = 532,
     IRONFORGE_1_AREA = 809,
+    BRILL_AREA       = 2118,
+
+    // Global areas (both zone and area)
+    UNDERCITY_AREA   = 1497,
+    STORMWIND_AREA   = 1519,
     IRONFORGE_2_AREA = 1537,
-    DARNASSUS_AREA = 1657,
-    TELDRASSIL_ZONE = 141,
-    BRILL_AREA = 2118,
-    TARREN_MILL_AREA = 272
+    DARNASSUS_AREA   = 1657,
 };
 
 enum BellHourlyObjects
 {
-    GO_HORDE_BELL = 175885,
+    GO_HORDE_BELL    = 175885,
     GO_ALLIANCE_BELL = 176573
 };
 
 struct go_ai_bell : public GameObjectAI
 {
-    go_ai_bell(GameObject* go) : GameObjectAI(go), m_uiBellTolls(0), m_uiBellSound(GetBellSound(go)), m_uiBellTimer(0)
+    go_ai_bell(GameObject* go) : GameObjectAI(go), m_uiBellTolls(0), m_uiBellSound(GetBellSound(go)), m_uiBellTimer(0), m_playTo(GetBellZoneOrArea(go))
     {
         m_go->SetNotifyOnEventState(true);
         m_go->SetActiveObjectState(true);
@@ -112,6 +117,7 @@ struct go_ai_bell : public GameObjectAI
     uint32 m_uiBellTolls;
     uint32 m_uiBellSound;
     uint32 m_uiBellTimer;
+    PlayPacketSettings m_playTo;
 
     uint32 GetBellSound(GameObject* pGo)
     {
@@ -152,6 +158,34 @@ struct go_ai_bell : public GameObjectAI
         return soundId;
     }
 
+    PlayPacketSettings GetBellZoneOrArea(GameObject* pGo)
+    {
+        PlayPacketSettings playTo = PLAY_AREA;
+        switch (pGo->GetEntry())
+        {
+            case GO_HORDE_BELL:
+                switch (pGo->GetAreaId())
+                {
+                    case UNDERCITY_AREA:
+                        playTo = PLAY_ZONE;
+                        break;
+                }
+                break;
+            case GO_ALLIANCE_BELL:
+            {
+                switch (pGo->GetAreaId())
+                {
+                    case DARNASSUS_AREA:
+                    case IRONFORGE_2_AREA:
+                        playTo = PLAY_ZONE;
+                        break;
+                }
+                break;
+            }
+        }
+        return playTo;
+    }
+
     void OnEventHappened(uint16 event_id, bool activate, bool resume) override
     {
         if (event_id == EVENT_ID_BELLS && activate && !resume)
@@ -163,7 +197,7 @@ struct go_ai_bell : public GameObjectAI
             if (m_uiBellTolls)
                 m_uiBellTimer = 3000;
 
-            m_go->GetMap()->PlayDirectSoundToMap(m_uiBellSound, m_go->GetZoneId());
+            m_go->GetMap()->PlayDirectSoundToMap(m_uiBellSound, m_go->GetAreaId());
         }
     }
 
@@ -173,7 +207,7 @@ struct go_ai_bell : public GameObjectAI
         {
             if (m_uiBellTimer <= uiDiff)
             {
-                m_go->GetMap()->PlayDirectSoundToMap(m_uiBellSound, m_go->GetZoneId());
+                m_go->PlayDirectSound(m_uiBellSound, PlayPacketParameters(PLAY_AREA, m_go->GetAreaId()));
 
                 m_uiBellTolls--;
                 if (m_uiBellTolls)

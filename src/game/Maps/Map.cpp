@@ -443,6 +443,73 @@ void Map::MessageDistBroadcast(WorldObject const* obj, WorldPacket const& msg, f
     cell.Visit(p, message, *this, *obj, dist);
 }
 
+void Map::MessageMapBroadcast(WorldObject const* obj, WorldPacket const& msg)
+{
+    Map::PlayerList const& pList = GetPlayers();
+    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+        itr->getSource()->SendDirectMessage(msg);
+}
+
+void Map::MessageMapBroadcastZone(WorldObject const* obj, WorldPacket const& msg, uint32 zoneId)
+{
+    Map::PlayerList const& pList = GetPlayers();
+    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+        if (itr->getSource()->GetZoneId() == zoneId)
+            itr->getSource()->SendDirectMessage(msg);
+}
+
+void Map::MessageMapBroadcastArea(WorldObject const* obj, WorldPacket const& msg, uint32 areaId)
+{
+    Map::PlayerList const& pList = GetPlayers();
+    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+        if (itr->getSource()->GetAreaId() == areaId)
+            itr->getSource()->SendDirectMessage(msg);
+}
+
+void Map::ExecuteDistWorker(WorldObject const* obj, float dist, std::function<void(Player*)> const& worker)
+{
+    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+
+    if (p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
+    {
+        sLog.outError("Map::ExecuteDistWorker: Object (GUID: %u TypeId: %u) have invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUIDLow(), obj->GetTypeId(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        return;
+    }
+
+    Cell cell(p);
+    cell.SetNoCreate();
+
+    if (!loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)))
+        return;
+
+    MaNGOS::CameraDistLambdaWorker searcher(obj, dist, worker);
+    TypeContainerVisitor<MaNGOS::CameraDistLambdaWorker, WorldTypeMapContainer > message(searcher);
+    cell.Visit(p, message, *this, *obj, dist);
+}
+
+void Map::ExecuteMapWorker(std::function<void(Player*)> const& worker)
+{
+    Map::PlayerList const& pList = GetPlayers();
+    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+        worker(itr->getSource());
+}
+
+void Map::ExecuteMapWorkerZone(uint32 zoneId, std::function<void(Player*)> const& worker)
+{
+    Map::PlayerList const& pList = GetPlayers();
+    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+        if (itr->getSource()->GetZoneId() == zoneId)
+            worker(itr->getSource());
+}
+
+void Map::ExecuteMapWorkerArea(uint32 areaId, std::function<void(Player*)> const& worker)
+{
+    Map::PlayerList const& pList = GetPlayers();
+    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+        if (itr->getSource()->GetAreaId() == areaId)
+            worker(itr->getSource());
+}
+
 bool Map::loaded(const GridPair& p) const
 {
     return (getNGrid(p.x_coord, p.y_coord) && isGridObjectDataLoaded(p.x_coord, p.y_coord));

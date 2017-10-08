@@ -480,6 +480,27 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
+    struct CameraDistLambdaWorker
+    {
+        WorldObject const* i_searcher;
+        float i_dist;
+        std::function<void(Player*)> const& i_do;
+
+        CameraDistLambdaWorker(WorldObject const* searcher, float _dist, std::function<void(Player*)> const& _do)
+            : i_searcher(searcher), i_dist(_dist), i_do(_do) {}
+
+        void Visit(CameraMapType& m)
+        {
+            for (CameraMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+            {
+                Camera* camera = itr->getSource();
+                if (camera->GetBody()->IsWithinDist(i_searcher, i_dist))
+                    i_do(camera->GetOwner());
+            }
+        }
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
+    };
+
     // CHECKS && DO classes
 
     /* Model Check class:

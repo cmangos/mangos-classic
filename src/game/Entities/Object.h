@@ -68,6 +68,35 @@ enum TempSpawnLinkedAura
     TEMPSPAWN_LINKED_AURA_REMOVE_OWNER = 0x00000002
 };
 
+enum PlayPacketSettings
+{
+    PLAY_SET,
+    PLAY_TARGET,
+    PLAY_MAP,
+    PLAY_ZONE,
+    PLAY_AREA,
+};
+
+struct PlayPacketParameters
+{
+    PlayPacketParameters(PlayPacketSettings setting) : setting(setting) {}
+    PlayPacketParameters(PlayPacketSettings setting, Player const* target) : setting(setting) { this->target.target = target; }
+    PlayPacketParameters(PlayPacketSettings setting, uint32 id) : setting(setting) { this->areaOrZone.id = id; }
+    PlayPacketSettings setting;
+    union
+    {
+        struct
+        {
+            Player const* target;
+        } target;
+
+        struct
+        {
+            uint32 id;
+        } areaOrZone;
+    };
+};
+
 class WorldPacket;
 class UpdateData;
 class WorldSession;
@@ -748,10 +777,11 @@ class WorldObject : public Object
         void MonsterWhisper(const char* text, Unit const* target, bool IsBossWhisper = false) const;
         void MonsterText(MangosStringLocale const* textData, Unit const* target) const;
 
-        void PlayDistanceSound(uint32 sound_id, Player const* target = nullptr) const;
-        void PlayDirectSound(uint32 sound_id, Player const* target = nullptr) const;
+        void PlayDistanceSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
+        void PlayDirectSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
+        void PlayMusic(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
+        void HandlePlayPacketSettings(WorldPacket & msg, PlayPacketParameters& parameters) const;
 
-        void PlayMusic(uint32 sound_id, Player const* target = nullptr) const;
         void SendObjectDeSpawnAnim(ObjectGuid guid) const;
         void SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId = 0) const;
 

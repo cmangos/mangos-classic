@@ -124,6 +124,14 @@ class Map : public GridRefManager<NGridType>
         void MessageBroadcast(WorldObject const*, WorldPacket const&);
         void MessageDistBroadcast(Player const*, WorldPacket const&, float dist, bool to_self, bool own_team_only = false);
         void MessageDistBroadcast(WorldObject const*, WorldPacket const&, float dist);
+        void MessageMapBroadcast(WorldObject const * obj, WorldPacket const & msg);
+        void MessageMapBroadcastZone(WorldObject const * obj, WorldPacket const & msg, uint32 zoneId);
+        void MessageMapBroadcastArea(WorldObject const * obj, WorldPacket const & msg, uint32 areaId);
+
+        void ExecuteDistWorker(WorldObject const * obj, float dist, std::function<void(Player*)> const& worker);
+        void ExecuteMapWorker(std::function<void(Player*)> const& worker);
+        void ExecuteMapWorkerZone(uint32 zoneId, std::function<void(Player*)> const& worker);
+        void ExecuteMapWorkerArea(uint32 areaId, std::function<void(Player*)> const& worker);
 
         float GetVisibilityDistance() const { return m_VisibleDistance; }
         // function for setting up visibility distance for maps on per-type/per-Id basis

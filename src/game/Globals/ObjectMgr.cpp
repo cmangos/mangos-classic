@@ -9098,7 +9098,7 @@ bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=nullp
         {
             // An error will be displayed for the text
             if (target && target->GetTypeId() == TYPEID_PLAYER)
-                source->PlayDirectSound(data->SoundId, (Player const*)target);
+                source->PlayDirectSound(data->SoundId, PlayPacketParameters(PLAY_TARGET, (Player const*)target));
         }
         else
             source->PlayDirectSound(data->SoundId);

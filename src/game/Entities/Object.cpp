@@ -1824,35 +1824,52 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         UpdateGroundPositionZ(x, y, z);
 }
 
-void WorldObject::PlayDistanceSound(uint32 sound_id, Player const* target /*= nullptr*/) const
+void WorldObject::PlayDistanceSound(uint32 sound_id, PlayPacketParameters parameters /*= PlayPacketParameters(PLAY_SET)*/) const
 {
     WorldPacket data(SMSG_PLAY_OBJECT_SOUND, 4 + 8);
     data << uint32(sound_id);
     data << GetObjectGuid();
-    if (target)
-        target->SendDirectMessage(data);
-    else
-        SendMessageToSet(data, true);
+    HandlePlayPacketSettings(data, parameters);
 }
 
-void WorldObject::PlayDirectSound(uint32 sound_id, Player const* target /*= nullptr*/) const
+void WorldObject::PlayDirectSound(uint32 sound_id, PlayPacketParameters parameters /*= PlayPacketParameters(PLAY_SET)*/) const
 {
     WorldPacket data(SMSG_PLAY_SOUND, 4);
     data << uint32(sound_id);
-    if (target)
-        target->SendDirectMessage(data);
-    else
-        SendMessageToSet(data, true);
+    HandlePlayPacketSettings(data, parameters);
 }
 
-void WorldObject::PlayMusic(uint32 sound_id, Player const* target /*= nullptr*/) const
+void WorldObject::PlayMusic(uint32 sound_id, PlayPacketParameters parameters /*= PlayPacketParameters(PLAY_SET)*/) const
 {
     WorldPacket data(SMSG_PLAY_MUSIC, 4);
     data << uint32(sound_id);
-    if (target)
-        target->SendDirectMessage(data);
-    else
-        SendMessageToSet(data, true);
+    HandlePlayPacketSettings(data, parameters);
+}
+
+void WorldObject::HandlePlayPacketSettings(WorldPacket& msg, PlayPacketParameters& parameters) const
+{
+    switch (parameters.setting)
+    {
+        case PLAY_SET:
+            SendMessageToSet(msg, true);
+            break;
+        case PLAY_TARGET:
+            if (Player const* target = parameters.target.target)
+                target->SendDirectMessage(msg);
+            break;
+        case PLAY_MAP:
+            if (IsInWorld())
+                GetMap()->MessageMapBroadcast(this, msg);
+            break;
+        case PLAY_ZONE:
+            if (IsInWorld())
+                GetMap()->MessageMapBroadcastZone(this, msg, parameters.areaOrZone.id);
+            break;
+        case PLAY_AREA:
+            if (IsInWorld())
+                GetMap()->MessageMapBroadcastArea(this, msg, parameters.areaOrZone.id);
+            break;
+    } 
 }
 
 void WorldObject::UpdateVisibilityAndView()
