@@ -2250,6 +2250,9 @@ class Unit : public WorldObject
 
         // Need to safeguard aura application in Unit::Update
         bool m_spellUpdateHappening;
+
+        // guard to prevent chaining extra attacks
+        bool m_extraAttacksExecuting;
     private:                                                // Error traps for some wrong args using
         // this will catch and prevent build for any cases when all optional args skipped and instead triggered used non boolean type
         // no bodies expected for this declarations
