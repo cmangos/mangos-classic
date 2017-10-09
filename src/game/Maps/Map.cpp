@@ -2294,3 +2294,18 @@ void Map::OnEventHappened(uint16 event_id, bool activate, bool resume)
         if ((*m_onEventNotifiedIter)->IsInWorld())
             (*m_onEventNotifiedIter)->OnEventHappened(event_id, activate, resume);
 }
+
+uint32 Map::SpawnedCountForEntry(uint32 entry)
+{
+    return m_spawnedCount[entry].size();
+}
+
+void Map::AddToSpawnCount(const ObjectGuid& guid)
+{
+    m_spawnedCount[guid.GetEntry()].insert(guid);
+}
+
+void Map::RemoveFromSpawnCount(const ObjectGuid& guid)
+{
+    m_spawnedCount[guid.GetEntry()].erase(guid);
+}

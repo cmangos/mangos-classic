@@ -292,6 +292,10 @@ class Map : public GridRefManager<NGridType>
         bool GetRandomPointInTheAir(float& x, float& y, float& z, float radius) const;
         bool GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status) const;
 
+        uint32 SpawnedCountForEntry(uint32 entry);
+        void AddToSpawnCount(const ObjectGuid & guid);
+        void RemoveFromSpawnCount(const ObjectGuid & guid);
+
         TimePoint GetCurrentClockTime();
     private:
         void LoadMapAndVMap(int gx, int gy);
@@ -386,6 +390,8 @@ class Map : public GridRefManager<NGridType>
 
         // WeatherSystem
         WeatherSystem* m_weatherSystem;
+
+        std::unordered_map<uint32, std::set<ObjectGuid>> m_spawnedCount;
 };
 
 class WorldMap : public Map
