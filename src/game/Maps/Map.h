@@ -217,6 +217,11 @@ class Map : public GridRefManager<NGridType>
         // must called with RemoveFromWorld
         void RemoveFromActive(WorldObject* obj);
 
+        // Game Event notification system
+        void AddToOnEventNotified(WorldObject * obj);
+        void RemoveFromOnEventNotified(WorldObject * obj);
+        void OnEventHappened(uint16 event_id, bool activate, bool resume);
+
         Player* GetPlayer(ObjectGuid guid);
         Creature* GetCreature(ObjectGuid guid);
         Pet* GetPet(ObjectGuid guid);
@@ -338,6 +343,9 @@ class Map : public GridRefManager<NGridType>
         ActiveNonPlayers m_activeNonPlayers;
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
         MapStoredObjectTypesContainer m_objectsStore;
+
+        std::set<WorldObject*> m_onEventNotifiedObjects;
+        std::set<WorldObject*>::iterator m_onEventNotifiedIter;
 
     private:
         time_t i_gridExpiry;

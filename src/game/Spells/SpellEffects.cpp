@@ -3455,6 +3455,7 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
 
     // Wild object not have owner and check clickable by players
     map->Add(pGameObj);
+    pGameObj->AIM_Initialize();
 
     if (pGameObj->GetGoType() == GAMEOBJECT_TYPE_FLAGDROP && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -4055,6 +4056,8 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
 
     m_caster->AddGameObject(pGameObj);
     map->Add(pGameObj);
+    pGameObj->AIM_Initialize();
+
     // END
 
     // Send request
@@ -4548,6 +4551,8 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
     m_caster->AddGameObject(pGameObj);
 
     map->Add(pGameObj);
+    pGameObj->AIM_Initialize();
+
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
     data << ObjectGuid(pGameObj->GetObjectGuid());
     m_caster->SendMessageToSet(data, true);
@@ -5145,6 +5150,7 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
     // m_ObjToDel.push_back(pGameObj);
 
     cMap->Add(pGameObj);
+    pGameObj->AIM_Initialize();
 
     pGameObj->SummonLinkedTrapIfAny();
 

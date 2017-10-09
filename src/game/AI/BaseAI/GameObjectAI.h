@@ -13,6 +13,8 @@ public:
 
     virtual void UpdateAI(const uint32 /*diff*/) {}
 
+    virtual void OnEventHappened(uint16 /*eventId*/, bool /*activate*/, bool /*resume*/) {}
+
 protected:
     GameObject* m_go;
 };

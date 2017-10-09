@@ -1132,6 +1132,24 @@ void Map::RemoveFromActive(WorldObject* obj)
     }
 }
 
+void Map::AddToOnEventNotified(WorldObject* obj)
+{
+    m_onEventNotifiedObjects.insert(obj);
+}
+
+void Map::RemoveFromOnEventNotified(WorldObject* obj)
+{
+    if (m_onEventNotifiedIter != m_onEventNotifiedObjects.end())
+    {
+        auto itr = m_onEventNotifiedObjects.find(obj);
+        if (itr == m_onEventNotifiedIter)
+            ++m_onEventNotifiedIter;
+        m_onEventNotifiedObjects.erase(obj);
+    }
+    else
+        m_onEventNotifiedObjects.erase(obj);
+}
+
 void Map::CreateInstanceData(bool load)
 {
     if (i_data != nullptr)
@@ -2265,4 +2283,14 @@ bool Map::IsMountAllowed() const
         return data->mountAllowed;
 
     return true;
+}
+
+void Map::OnEventHappened(uint16 event_id, bool activate, bool resume)
+{
+    if (i_data)
+        i_data->OnEventHappened(event_id, activate, resume);
+
+    for (m_onEventNotifiedIter = m_onEventNotifiedObjects.begin(); m_onEventNotifiedIter != m_onEventNotifiedObjects.end(); ++m_onEventNotifiedIter)
+        if ((*m_onEventNotifiedIter)->IsInWorld())
+            (*m_onEventNotifiedIter)->OnEventHappened(event_id, activate, resume);
 }

@@ -152,6 +152,12 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         template<typename Do>
         void DoForAllMapsWithMapId(uint32 mapId, Do& _do);
 
+        void DoForAllMaps(std::function<void(Map*)> worker)
+        {
+            for (MapMapType::const_iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
+                worker(itr->second);
+        }
+
     private:
 
         // debugging code, should be deleted some day

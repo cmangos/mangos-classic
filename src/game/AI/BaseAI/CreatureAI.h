@@ -352,6 +352,14 @@ class CreatureAI
          */
         virtual void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*miscValue*/) {}
 
+        /**
+         * Called when a Game Event starts or ends
+         * @param eventId to specify id of event from database
+         * @param activate to specify if it started or stopped
+         * @param resume to specify whether it launched normally or was resumed after a restart
+         */
+        virtual void OnEventHappened(uint16 /*eventId*/, bool /*activate*/, bool /*resume*/) {}
+
     protected:
         void HandleMovementOnAttackStart(Unit* victim) const;
 

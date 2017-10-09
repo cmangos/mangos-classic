@@ -798,6 +798,14 @@ class WorldObject : public Object
         // ASSERT print helper
         bool PrintCoordinatesError(float x, float y, float z, char const* descr) const;
 
+        // Game Event Notification system
+        virtual bool IsNotifyOnEventObject() { return m_isOnEventNotified; }
+        virtual void OnEventHappened(uint16 event_id, bool activate, bool resume) {}
+        void SetNotifyOnEventState(bool state);
+
+        virtual void AddToWorld() override;
+        virtual void RemoveFromWorld() override;
+
         // cooldown system
         virtual void AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration = 0, bool updateClient = false);
         virtual bool HaveGCD(SpellEntry const* spellEntry) const;
@@ -834,6 +842,7 @@ class WorldObject : public Object
 
         std::string m_name;
 
+        bool m_isOnEventNotified;
     private:
         Map* m_currMap;                                     // current object's Map location
 
