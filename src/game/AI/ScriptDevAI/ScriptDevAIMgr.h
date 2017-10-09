@@ -23,6 +23,7 @@ class WorldObject;
 class Aura;
 class Object;
 class ObjectGuid;
+class GameObjectAI;
 
 // *********************************************************
 // ************** Some defines used globally ***************
@@ -67,7 +68,7 @@ struct Script
         pQuestRewardedNPC(nullptr), pQuestRewardedGO(nullptr),
         pGOUse(nullptr), pItemUse(nullptr), pAreaTrigger(nullptr), pProcessEventId(nullptr),
         pEffectDummyNPC(nullptr), pEffectDummyGO(nullptr), pEffectDummyItem(nullptr), pEffectScriptEffectNPC(nullptr),
-        pEffectAuraDummy(nullptr), GetAI(nullptr), GetInstanceData(nullptr)
+        pEffectAuraDummy(nullptr), GetGameObjectAI(nullptr), GetAI(nullptr), GetInstanceData(nullptr)
     {}
 
     std::string Name;
@@ -95,6 +96,7 @@ struct Script
     bool (*pEffectScriptEffectNPC)(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
     bool (*pEffectAuraDummy)(const Aura*, bool);
 
+    GameObjectAI* (*GetGameObjectAI)(GameObject*);
     CreatureAI* (*GetAI)(Creature*);
     InstanceData* (*GetInstanceData)(Map*);
 
@@ -140,6 +142,7 @@ public:
     uint32 GetScriptIdsCount() const { return m_scriptNames.size(); }
 
     CreatureAI* GetCreatureAI(Creature* creature);
+    GameObjectAI* GetGameObjectAI(GameObject* gameobject);
 
     InstanceData* CreateInstanceData(Map* pMap);
     uint32 GetAreaTriggerScriptId(uint32 triggerId) const;

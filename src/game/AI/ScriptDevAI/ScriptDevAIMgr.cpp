@@ -335,6 +335,16 @@ CreatureAI* ScriptDevAIMgr::GetCreatureAI(Creature* pCreature)
     return pTempScript->GetAI(pCreature);
 }
 
+GameObjectAI * ScriptDevAIMgr::GetGameObjectAI(GameObject * gameobject)
+{
+    Script* pTempScript = GetScript(gameobject->GetScriptId());
+
+    if (!pTempScript || !pTempScript->GetGameObjectAI)
+        return nullptr;
+
+    return pTempScript->GetGameObjectAI(gameobject);
+}
+
 bool ScriptDevAIMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
     Script* pTempScript = GetScript(pItem->GetProto()->ScriptId);

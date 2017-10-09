@@ -44,7 +44,8 @@
 
 GameObject::GameObject() : WorldObject(),
     m_model(nullptr),
-    m_goInfo(nullptr)
+    m_goInfo(nullptr),
+    m_AI(nullptr)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -530,6 +531,9 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
             break;
         }
     }
+
+    if (m_AI)
+        m_AI->UpdateAI(update_diff);
 }
 
 void GameObject::Refresh()
@@ -2207,4 +2211,14 @@ void GameObject::SetInUse(bool use)
         SetGoState(GO_STATE_ACTIVE);
     else
         SetGoState(GO_STATE_READY);
+}
+
+uint32 GameObject::GetScriptId() const
+{
+    return ObjectMgr::GetGameObjectInfo(GetEntry())->ScriptId;
+}
+
+void GameObject::AIM_Initialize()
+{
+    m_AI.reset(sScriptDevAIMgr.GetGameObjectAI(this));
 }
