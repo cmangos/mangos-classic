@@ -192,6 +192,41 @@ GameObjectAI* GetAI_go_bells(GameObject* go)
     return new go_ai_bell(go);
 }
 
+/*####
+## go_darkmoon_faire_music
+####*/
+
+enum
+{
+    MUSIC_DARKMOON_FAIRE_MUSIC = 8440
+};
+
+struct go_ai_dmf_music : public GameObjectAI
+{
+    go_ai_dmf_music(GameObject* go) : GameObjectAI(go)
+    {
+        m_uiMusicTimer = 5000;
+    }
+
+    uint32 m_uiMusicTimer;
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiMusicTimer <= uiDiff)
+        {
+            m_go->PlayMusic(MUSIC_DARKMOON_FAIRE_MUSIC);
+            m_uiMusicTimer = 5000;
+        }
+        else
+            m_uiMusicTimer -= uiDiff;
+    }
+};
+
+GameObjectAI* GetAI_go_darkmoon_faire_music(GameObject* go)
+{
+    return new go_ai_dmf_music(go);
+}
+
 void AddSC_go_scripts()
 {
     Script* pNewScript;
@@ -204,5 +239,10 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_bells";
     pNewScript->GetGameObjectAI = &GetAI_go_bells;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_darkmoon_faire_music";
+    pNewScript->GetGameObjectAI = &GetAI_go_darkmoon_faire_music;
     pNewScript->RegisterSelf();
 }
