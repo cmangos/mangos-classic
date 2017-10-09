@@ -65,6 +65,7 @@ UPDATE creature_template SET ScriptName='npc_spirit_shade' WHERE entry=15261;
 /* GO */
 UPDATE gameobject_template SET ScriptName='go_andorhal_tower' WHERE entry IN (176094,176095,176096,176097);
 UPDATE gameobject_template SET ScriptName='go_veil_skith_cage' WHERE entry IN (185202,185203,185204,185205);
+UPDATE gameobject_template SET ScriptName='go_bells' WHERE entry IN(175885,176573);
 
 /* GUARD */
 UPDATE creature_template SET ScriptName='guard_orgrimmar' WHERE entry=3296;
