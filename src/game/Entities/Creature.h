@@ -57,7 +57,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE      = 0x00002000,       // creature is forced to use MMaps
     CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE     = 0x00004000,       // creature is forced to NOT use MMaps
     CREATURE_EXTRA_FLAG_WALK_IN_WATER          = 0x00008000,       // creature is forced to walk in water even it can swim
-    CREATURE_EXTRA_FLAG_HAVE_NO_SWIM_ANIMATION = 0x00010000,       // we have to not set "swim" animation or creature will have "no animation"
+    // CREATURE_EXTRA_FLAG_EMPTY                   = 0x00010000,       // fill
     CREATURE_EXTRA_FLAG_NO_MELEE               = 0x00020000,       // creature can't melee
     // reserved by Killerwife - 0x00080000 is free
     CREATURE_EXTRA_FLAG_COUNT_SPAWNS           = 0x00200000,       // count creature spawns in Map*

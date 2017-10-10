@@ -399,7 +399,8 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT))
         unitFlags |= UNIT_FLAG_IN_COMBAT;
 
-    if (m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING) && (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_HAVE_NO_SWIM_ANIMATION) == 0)
+    // TODO: Get rid of this by fixing DB data, seems to be static
+    if (m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING))
         unitFlags |= UNIT_FLAG_SWIMMING;
 
     SetUInt32Value(UNIT_FIELD_FLAGS, unitFlags);
