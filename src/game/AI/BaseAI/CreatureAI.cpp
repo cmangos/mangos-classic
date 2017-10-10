@@ -40,6 +40,8 @@ CreatureAI::CreatureAI(Creature* creature) :
     m_visibilityDistance(VISIBLE_RANGE),
     m_moveFurther(true)
 {
+    m_dismountOnAggro = !(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT);
+
     if (m_creature->IsCivilian())
         SetReactState(REACT_DEFENSIVE);
     if(m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
@@ -278,6 +280,9 @@ void CreatureAI::HandleMovementOnAttackStart(Unit* victim) const
 {
     if (!m_unit->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
     {
+    	if (m_dismountOnAggro)
+            m_unit->Unmount(); // all ais should unmount here
+    	
         MotionMaster* creatureMotion = m_unit->GetMotionMaster();
 
         if (!m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))

@@ -403,6 +403,8 @@ class CreatureAI
 
         // How far a creature can detect in MoveInLineOfSight
         float m_visibilityDistance;
+        
+        bool m_dismountOnAggro;
 
         bool m_meleeEnabled;                              // If we allow melee auto attack
 
