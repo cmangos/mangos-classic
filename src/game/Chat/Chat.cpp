@@ -547,6 +547,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "locales_points_of_interest",  SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadLocalesPointsOfInterestCommand, "", nullptr },
         { "locales_quest",               SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadLocalesQuestCommand,            "", nullptr },
         { "locales_questgiver_greeting", SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadQuestgiverGreetingLocalesCommand, "", nullptr },
+        { "locales_areatrigger_teleport", SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadLocalesAreaTriggerCommand,     "", nullptr },
         { "mail_loot_template",          SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadLootTemplatesMailCommand,       "", nullptr },
         { "mangos_string",               SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadMangosStringCommand,            "", nullptr },
         { "npc_gossip",                  SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadNpcGossipCommand,               "", nullptr },

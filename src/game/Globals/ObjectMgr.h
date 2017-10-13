@@ -53,6 +53,7 @@ typedef std::unordered_map<uint32, GameTele > GameTeleMap;
 
 struct AreaTrigger
 {
+    uint32 entry;
     uint8  requiredLevel;
     uint32 requiredItem;
     uint32 requiredItem2;
@@ -63,6 +64,7 @@ struct AreaTrigger
     float  target_Z;
     float  target_Orientation;
     uint32 conditionId;
+    std::string status_failed_text;
 
     // Operators
     bool IsMinimal() const
@@ -165,6 +167,7 @@ typedef std::unordered_map<uint32, PageTextLocale> PageTextLocaleMap;
 typedef std::unordered_map<int32, MangosStringLocale> MangosStringLocaleMap;
 typedef std::unordered_map<uint32, GossipMenuItemsLocale> GossipMenuItemsLocaleMap;
 typedef std::unordered_map<uint32, PointOfInterestLocale> PointOfInterestLocaleMap;
+typedef std::unordered_map<uint32, AreaTriggerLocale> AreaTriggerLocaleMap;
 
 typedef std::multimap<int32, uint32> ExclusiveQuestGroupsMap;
 typedef std::multimap<uint32, ItemRequiredTarget> ItemRequiredTargetMap;
@@ -684,6 +687,7 @@ class ObjectMgr
         void LoadInstanceTemplate();
         void LoadWorldTemplate();
         void LoadConditions();
+        void LoadAreatriggerLocales();
 
         void LoadGossipText();
 
@@ -858,6 +862,15 @@ class ObjectMgr
         {
             auto itr = m_questgiverGreetingLocaleMap[type].find(entry);
             if (itr == m_questgiverGreetingLocaleMap[type].end()) return nullptr;
+            return &itr->second;
+        }
+
+        void GetAreaTriggerLocales(uint32 entry, int32 loc_idx, std::string* titlePtr) const;
+
+        AreaTriggerLocale const* GetAreaTriggerLocale(uint32 entry) const
+        {
+            auto itr = m_areaTriggerLocaleMap.find(entry);
+            if (itr == m_areaTriggerLocaleMap.end()) return nullptr;
             return &itr->second;
         }
 
@@ -1208,6 +1221,8 @@ class ObjectMgr
         std::map<int32 /*minEntryOfBracket*/, uint32 /*count*/> m_loadedStringCount;
         GossipMenuItemsLocaleMap mGossipMenuItemsLocaleMap;
         PointOfInterestLocaleMap mPointOfInterestLocaleMap;
+        AreaTriggerLocaleMap m_areaTriggerLocaleMap;
+
         DungeonEncounterMap m_DungeonEncounters;
 
         QuestgiverGreetingMap m_questgiverGreetingMap[QUESTGIVER_TYPE_MAX];

@@ -1103,6 +1103,7 @@ void World::SetInitialWorldSettings()
     sScriptMgr.LoadEventScripts();                          // must be after load Creature/Gameobject(Template/Data)
     sScriptMgr.LoadCreatureDeathScripts();                  // must be after load Creature/Gameobject(Template/Data)
     sScriptMgr.LoadCreatureMovementScripts();               // before loading from creature_movement
+    sObjectMgr.LoadAreatriggerLocales();
     sLog.outString(">>> Scripts loaded");
     sLog.outString();
 

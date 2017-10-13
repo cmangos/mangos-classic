@@ -386,6 +386,14 @@ bool ChatHandler::HandleReloadAreaTriggerTeleportCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadLocalesAreaTriggerCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading AreaTrigger teleport locales definitions...");
+    sObjectMgr.LoadAreatriggerLocales();
+    SendGlobalSysMessage("DB table `locales_areatrigger_teleport` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadCommandCommand(char* /*args*/)
 {
     load_command_table = true;

@@ -1598,7 +1598,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         AreaLockStatus lockStatus = GetAreaTriggerLockStatus(at, miscRequirement);
         if (lockStatus != AREA_LOCKSTATUS_OK)
         {
-            SendTransferAbortedByLockStatus(mEntry, lockStatus, miscRequirement);
+            SendTransferAbortedByLockStatus(mEntry, at, lockStatus, miscRequirement);
             return false;
         }
     }
@@ -17195,11 +17195,25 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
         pet->ResetAuraUpdateMask();
 }
 
-void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockStatus lockStatus, uint32 miscRequirement) const
+void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaTrigger const* at, AreaLockStatus lockStatus, uint32 miscRequirement) const
 {
     MANGOS_ASSERT(mapEntry);
 
     DEBUG_LOG("SendTransferAbortedByLockStatus: Called for %s on map %u, LockAreaStatus %u, miscRequirement %u)", GetGuidStr().c_str(), mapEntry->MapID, lockStatus, miscRequirement);
+
+    if (!at->status_failed_text.empty())
+    {
+        switch (lockStatus)
+        {
+            case AREA_LOCKSTATUS_TOO_LOW_LEVEL:
+            case AREA_LOCKSTATUS_QUEST_NOT_COMPLETED:
+            case AREA_LOCKSTATUS_RAID_LOCKED:
+                std::string message = at->status_failed_text;
+                sObjectMgr.GetAreaTriggerLocales(at->entry, GetSession()->GetSessionDbLocaleIndex(), &message);
+                GetSession()->SendAreaTriggerMessage(message.data(), miscRequirement);
+                return;
+        }
+    }
 
     switch (lockStatus)
     {

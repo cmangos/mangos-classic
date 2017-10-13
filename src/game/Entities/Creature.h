@@ -283,6 +283,11 @@ struct PointOfInterestLocale
     std::vector<std::string> IconName;
 };
 
+struct AreaTriggerLocale
+{
+    std::vector<std::string> StatusFailed;
+};
+
 enum InhabitTypeValues
 {
     INHABIT_GROUND = 1,
