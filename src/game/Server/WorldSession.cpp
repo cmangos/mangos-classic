@@ -473,12 +473,15 @@ void WorldSession::LogoutPlayer(bool save)
         static SqlStatementID id;
 
 #ifdef BUILD_PLAYERBOT
-        if (! _player->GetPlayerbotAI())
+        if (!_player->GetPlayerbotAI())
         {
             // Unmodded core code below
             SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
             stmt.PExecute(uint32(0), GetAccountId());
         }
+#else
+        SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
+        stmt.PExecute(uint32(0), GetAccountId());
 #endif
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
@@ -553,8 +556,14 @@ void WorldSession::LogoutPlayer(bool save)
 
 #ifdef BUILD_PLAYERBOT
         // Set for only character instead of accountid
+        // Different characters can be alive as bots
         SqlStatement stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE guid = ?");
         stmt.PExecute(guid);
+#else
+        ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
+        // No SQL injection as AccountId is uint32
+        stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE account = ?");
+        stmt.PExecute(GetAccountId());
 #endif
 
         DEBUG_LOG("SESSION: Sent SMSG_LOGOUT_COMPLETE Message");
