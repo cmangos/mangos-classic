@@ -29,22 +29,6 @@ enum WaypointPathOrigin
     PATH_FROM_EXTERNAL      = 3,
 };
 
-// Obsolete structure
-#define MAX_WAYPOINT_TEXT 5
-struct WaypointBehavior
-{
-    uint32 emote;
-    uint32 spell;
-    int32  textid[MAX_WAYPOINT_TEXT];
-    uint32 model1;
-    uint32 model2;
-
-    bool isEmpty();
-    WaypointBehavior(): emote(0), spell(0), model1(0), model2(0)
-    {}
-    WaypointBehavior(const WaypointBehavior& b);
-};
-
 struct WaypointNode
 {
     float x;
@@ -53,10 +37,9 @@ struct WaypointNode
     float orientation;
     uint32 delay;
     uint32 script_id;                                       // Added may 2010. WaypointBehavior w/DB data should in time be removed.
-    WaypointBehavior* behavior;
-    WaypointNode() : x(0.0f), y(0.0f), z(0.0f), orientation(0.0f), delay(0), script_id(0), behavior(nullptr) {}
-    WaypointNode(float _x, float _y, float _z, float _o, uint32 _delay, uint32 _script_id, WaypointBehavior* _behavior)
-        : x(_x), y(_y), z(_z), orientation(_o), delay(_delay), script_id(_script_id), behavior(_behavior) {}
+    WaypointNode() : x(0.0f), y(0.0f), z(0.0f), orientation(0.0f), delay(0), script_id(0) {}
+    WaypointNode(float _x, float _y, float _z, float _o, uint32 _delay, uint32 _script_id)
+        : x(_x), y(_y), z(_z), orientation(_o), delay(_delay), script_id(_script_id) {}
 };
 
 typedef std::map<uint32 /*pointId*/, WaypointNode> WaypointPath;
@@ -65,10 +48,9 @@ class WaypointManager
 {
     public:
         WaypointManager() : m_externalTable("external.waypointTable") {}
-        ~WaypointManager() { Unload(); }
+        ~WaypointManager() {}
 
         void Load();
-        void Unload();
 
         // We may get a path for several occasions:
 
@@ -131,7 +113,6 @@ class WaypointManager
         }
 
         void DeletePath(uint32 id);
-        void CheckTextsExistance(std::set<int32>& ids);
 
         /// Set external source table
         void SetExternalWPTable(char const* tableName) { m_externalTable = std::string(tableName); }
@@ -189,8 +170,6 @@ class WaypointManager
                 default:                    return nullptr;
             }
         }
-
-        void _clearPath(WaypointPath& path);
 
         WaypointPathMap m_pathMap;
         WaypointPathMap m_pathTemplateMap;

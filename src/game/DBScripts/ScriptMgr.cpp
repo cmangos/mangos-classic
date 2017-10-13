@@ -930,8 +930,6 @@ void ScriptMgr::LoadDbScriptStrings()
     CheckScriptTexts(sCreatureMovementScripts, ids);
     CheckScriptTexts(sRelayScripts, ids);
 
-    sWaypointMgr.CheckTextsExistance(ids);
-
     for (std::set<int32>::const_iterator itr = ids.begin(); itr != ids.end(); ++itr)
         sLog.outErrorDb("Table `dbscript_string` has unused string id %u", *itr);
 }
