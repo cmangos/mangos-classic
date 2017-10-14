@@ -294,7 +294,8 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=nu
         display_id = modelid_tmp ? modelid_tmp : display_id;
     }
 
-    // normally the same as native, see above for the exeption
+    // normally the same as native, but some has exceptions (Spell::DoSummonTotem)
+    // also recalculates speed since speed is based on Model and/or template
     SetDisplayId(display_id);
 
     SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
@@ -339,10 +340,6 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=nu
     SetName(normalInfo->Name);                              // at normal entry always
 
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
-
-    // update speed for the new CreatureInfo base speed mods
-    UpdateSpeed(MOVE_WALK, false);
-    UpdateSpeed(MOVE_RUN,  false);
 
     SetLevitate(!!(cinfo->InhabitType & INHABIT_AIR)); // TODO: may not be correct to send opcode at this point (already handled by UPDATE_OBJECT createObject)
 
@@ -2771,3 +2768,30 @@ bool Creature::IsTappedBy(Player* plr) const
     }
     return false;
 }
+
+void Creature::SetBaseWalkSpeed(float speed)
+{
+    float newSpeed = speed;
+    if (m_creatureInfo->SpeedWalk) // Creature template should still override
+        newSpeed = m_creatureInfo->SpeedWalk;
+
+    if (newSpeed != m_baseSpeedWalk)
+    {
+        m_baseSpeedWalk = newSpeed;
+        UpdateSpeed(MOVE_WALK, false);
+    }
+}
+
+void Creature::SetBaseRunSpeed(float speed)
+{
+    float newSpeed = speed;
+    if (m_creatureInfo->SpeedRun) // Creature template should still override
+        newSpeed = m_creatureInfo->SpeedRun;
+
+    if (newSpeed != m_baseSpeedWalk)
+    {
+        m_baseSpeedRun = newSpeed;
+        UpdateSpeed(MOVE_RUN, false);
+    }
+}
+
