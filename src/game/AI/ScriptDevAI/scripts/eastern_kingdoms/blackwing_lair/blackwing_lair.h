@@ -51,6 +51,7 @@ enum
     GO_ORB_OF_DOMINATION        = 177808,                   // trigger 19832 on Razorgore
     GO_BLACK_DRAGON_EGG         = 177807,
     GO_DRAKONID_BONES           = 179804,
+    GO_SUPPRESSION_DEVICE       = 179784,                   // Traps in Suppression Room
 
     EMOTE_ORB_SHUT_OFF          = -1469035,
     EMOTE_TROOPS_FLEE           = -1469033,                 // emote by Nefarian's Troops npc
