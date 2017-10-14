@@ -10406,7 +10406,9 @@ float Unit::GetAttackDistance(Unit const* pl) const
         leveldif = -25;
 
     // "The aggro radius of a mob having the same level as the player is roughly 20 yards"
-    float RetDistance = 20;
+    float RetDistance = GetDetectionRange();
+    if (RetDistance == 0.f)
+        return 0.0f;
 
     // "Aggro Radius varies with level difference at a rate of roughly 1 yard/level"
     // radius grow if playlevel < creaturelevel

@@ -99,6 +99,11 @@ struct CreatureInfo
     uint32  CreatureTypeFlags;                              // enum CreatureTypeFlags mask values
     float   SpeedWalk;
     float   SpeedRun;
+    uint32  Detection;                                      // Detection Range for Line of Sight aggro
+    uint32  CallForHelp;
+    uint32  Pursuit;
+    uint32  Leash;
+    uint32  Timeout;
     uint32  UnitClass;                                      // enum Classes. Note only 4 classes are known for creatures.
     uint32  Rank;
     float   HealthMultiplier;
@@ -778,6 +783,8 @@ class Creature : public Unit
         void SetVirtualItem(VirtualItemSlot slot, uint32 item_id);
         
         void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
+
+        uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 

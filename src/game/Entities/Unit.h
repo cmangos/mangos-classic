@@ -2148,6 +2148,7 @@ class Unit : public WorldObject
         void ResetControlState(bool attackCharmer = true);
 
         float GetAttackDistance(Unit const* pl) const;
+        virtual uint32 GetDetectionRange() const { return 20.f; }
 
         virtual CreatureAI* AI() { return nullptr; }
         virtual CombatData* GetCombatData() { return m_combatData; }
