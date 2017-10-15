@@ -32,7 +32,8 @@ instance_blackwing_lair::instance_blackwing_lair(Map* pMap) : ScriptedInstance(p
     m_uiScepterEpicTimer(0),
     m_uiScepterQuestStep(0),
     m_uiDragonspawnCount(0),
-    m_uiBlackwingDefCount(0)
+    m_uiBlackwingDefCount(0),
+    m_bIsMainGateOpen(true)
 {
     Initialize();
 }
@@ -125,12 +126,33 @@ void instance_blackwing_lair::OnObjectCreate(GameObject* pGo)
 
 void instance_blackwing_lair::SetData(uint32 uiType, uint32 uiData)
 {
+    // Close de the main gate whenever an event starts (if it is not already open)
+    if (m_bIsMainGateOpen && (uiData == IN_PROGRESS || uiData == SPECIAL))
+    {
+        DoUseDoorOrButton(GO_DOOR_RAZORGORE_ENTER);
+        m_bIsMainGateOpen = false;
+    }
+    // If an encounter is failed or won, open the main gate only if it is currently closed and no other event is in progress
+    else if (!m_bIsMainGateOpen && (uiData == FAIL || uiData == DONE))
+    {
+        bool ShouldKeepGateClosed = false;
+        for (uint8 i = 0; i < TYPE_NEFARIAN; i++)
+        {
+            if (uiType != i && (m_auiEncounter[i] == IN_PROGRESS || m_auiEncounter[i] == SPECIAL))
+                ShouldKeepGateClosed = true;
+        }
+
+        if (!ShouldKeepGateClosed)
+        {
+            DoUseDoorOrButton(GO_DOOR_RAZORGORE_ENTER);
+            m_bIsMainGateOpen = true;
+        }
+    }
+
     switch (uiType)
     {
         case TYPE_RAZORGORE:
             m_auiEncounter[uiType] = uiData;
-            if (uiData != SPECIAL)
-                DoUseDoorOrButton(GO_DOOR_RAZORGORE_ENTER);
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_DOOR_RAZORGORE_EXIT);
             else if (uiData == FAIL)
@@ -365,7 +387,11 @@ void instance_blackwing_lair::OnCreatureDeath(Creature* pCreature)
                     pRazorgore->ForcedDespawn();
                 }
                 if (Creature* pOrbTrigger = GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
+                {
+                    if (Creature* pTemp = pOrbTrigger->SummonCreature(NPC_ORB_DOMINATION, pOrbTrigger->GetPositionX(), pOrbTrigger->GetPositionY(), pOrbTrigger->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 5 * IN_MILLISECONDS))
+                        DoScriptText(EMOTE_ORB_SHUT_OFF, pTemp);
                     pOrbTrigger->CastSpell(pOrbTrigger, SPELL_EXPLODE_ORB, TRIGGERED_IGNORE_UNATTACKABLE_FLAG);
+                }
             }
             break;
         case NPC_BLACKWING_LEGIONNAIRE:

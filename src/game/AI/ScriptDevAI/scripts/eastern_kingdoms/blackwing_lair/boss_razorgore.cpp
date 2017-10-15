@@ -189,7 +189,11 @@ struct npc_blackwing_orbAI : public ScriptedAI
     {
         // If hit by Razorgore's fireball: explodes everything in the room
         if (pSpell->Id == SPELL_FIREBALL)
+        {
+            if (Creature* pTemp = m_creature->SummonCreature(NPC_ORB_DOMINATION, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 5 * IN_MILLISECONDS))
+                DoScriptText(EMOTE_ORB_SHUT_OFF, pTemp);
             m_creature->CastSpell(m_creature, SPELL_EXPLODE_ORB, TRIGGERED_IGNORE_UNATTACKABLE_FLAG);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override

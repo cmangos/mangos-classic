@@ -36,6 +36,7 @@ enum
     NPC_BLACKWING_ORB_TRIGGER   = 14449,
     NPC_NEFARIANS_TROOPS        = 14459,
     NPC_MONSTER_GENERATOR       = 12434,
+    NPC_ORB_DOMINATION          = 14453,
     NPC_BLACKWING_LEGIONNAIRE   = 12416,                    // one spawn per turn
     NPC_BLACKWING_MAGE          = 12420,                    // one spawn per turn
     NPC_DRAGONSPAWN             = 12422,                    // two spawns per turn
@@ -124,6 +125,8 @@ class instance_blackwing_lair : public ScriptedInstance
         uint8 m_uiScepterQuestStep;
         uint32 m_uiDragonspawnCount;
         uint32 m_uiBlackwingDefCount;
+
+        bool m_bIsMainGateOpen;
 
         GuidList m_lDragonEggsGuids;
         GuidList m_lDrakonidBonesGuids;
