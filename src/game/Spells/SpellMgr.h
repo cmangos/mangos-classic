@@ -594,40 +594,6 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
     return true;
 }
 
-inline bool IsSingleTargetSpell(SpellEntry const* spellInfo)
-{
-    // Not AoE
-    if (IsAreaOfEffectSpell(spellInfo))
-        return false;
-
-    // Mechanics
-    switch (spellInfo->Mechanic)
-    {
-        case MECHANIC_FEAR:         // Includes: Warlock's Fear, Scare Beast
-        case MECHANIC_TURN:         // Turn Undead
-            // Always single-target in classic
-            return true;
-        case MECHANIC_ROOT:
-        case MECHANIC_SLEEP:        // Includes: Hibernate, Wyvern Sting
-        case MECHANIC_KNOCKOUT:     // Includes: Sap, Gouge
-        case MECHANIC_POLYMORPH:
-        case MECHANIC_BANISH:
-        case MECHANIC_SHACKLE:
-            // Only spells used by players seem to be subjects to single target mechanics in classic
-            return (spellInfo->SpellFamilyName && spellInfo->SpellFamilyFlags.Flags);
-    }
-    // Hunter's Mark mechanics (Mind Vision also uses this spell, but it has no practical side effects)
-    if (IsSpellHaveAura(spellInfo, SPELL_AURA_MOD_STALKED))
-        return true;
-
-    return false;
-}
-
-inline bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2)
-{
-    return (IsSingleTargetSpell(spellInfo1) && (spellInfo1->Id == spellInfo2->Id || (spellInfo1->SpellFamilyFlags == spellInfo2->SpellFamilyFlags && IsSingleTargetSpell(spellInfo2))));
-}
-
 inline bool IsScriptTarget(uint32 target)
 {
     switch (target)
@@ -2072,6 +2038,52 @@ class SpellMgr
 
         bool IsRankSpellDueToSpell(SpellEntry const* spellInfo_1, uint32 spellId_2) const;
         bool IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const;
+        bool IsSingleTargetSpell(SpellEntry const* entry)
+        {
+            // Pre-TBC: SPELL_ATTR_EX5_SINGLE_TARGET_SPELL substitute code
+            // Not AoE
+            if (IsAreaOfEffectSpell(entry))
+                return false;
+
+            // Mechanics
+            switch (entry->Mechanic)
+            {
+                case MECHANIC_FEAR:         // Includes: Warlock's Fear, Scare Beast
+                case MECHANIC_TURN:         // Turn Undead
+                    // Always single-target in classic
+                    return true;
+                case MECHANIC_ROOT:
+                case MECHANIC_SLEEP:        // Includes: Hibernate, Wyvern Sting
+                case MECHANIC_KNOCKOUT:     // Includes: Sap, Gouge
+                case MECHANIC_POLYMORPH:
+                case MECHANIC_BANISH:
+                case MECHANIC_SHACKLE:
+                    // Only spells used by players seem to be subjects to single target mechanics in classic
+                    return (entry->SpellFamilyName && entry->SpellFamilyFlags.Flags);
+            }
+
+            // Hunter's Mark mechanics
+            if (entry->SpellFamilyName == SPELLFAMILY_HUNTER && IsSpellHaveAura(entry, SPELL_AURA_MOD_STALKED))
+               return true;
+
+            return false;
+        }
+
+        bool IsSingleTargetSpells(SpellEntry const* entry1, SpellEntry const* entry2)
+        {
+            if (!IsSingleTargetSpell(entry1) || !IsSingleTargetSpell(entry2))
+                return false;
+
+            // Early instance of same spell check
+            if (entry1 == entry2)
+                return true;
+
+            // One spell is a rank of another spell (same spell chain)
+            if (GetFirstSpellInChain(entry1->Id) == GetFirstSpellInChain(entry2->Id))
+                return true;
+
+            return false;
+        }
         bool canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const;
         bool IsRankedSpellNonStackableInSpellBook(SpellEntry const* spellInfo) const
         {

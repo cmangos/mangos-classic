@@ -4080,7 +4080,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     // following code block is supposed to be applied to single target spell
     // TODO: above assumption need to be verified
     Unit* singleTarget = m_targets.getUnitTarget();
-    if (singleTarget && IsSingleTargetSpell(m_spellInfo))
+    if (singleTarget && sSpellMgr.IsSingleTargetSpell(m_spellInfo))
     {
         // Swiftmend
         if (m_spellInfo->Id == 18562)                       // future versions have special aura state for this
