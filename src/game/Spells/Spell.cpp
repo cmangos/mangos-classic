@@ -1755,7 +1755,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 case TARGET_RANDOM_ENEMY_CHAIN_IN_AREA:
                 {
-                    MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, max_range);
+                    MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, m_spellInfo, max_range);
                     MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
                     Cell::VisitAllObjects(m_caster, searcher, max_range);
                     break;
@@ -1763,7 +1763,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case TARGET_RANDOM_UNIT_CHAIN_IN_AREA: // TODO: Rename TARGET_RANDOM_UNIT_CHAIN_IN_AREA to something better and find real difference with TARGET_RANDOM_FRIEND_CHAIN_IN_AREA.
                 case TARGET_RANDOM_FRIEND_CHAIN_IN_AREA:
                 {
-                    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, max_range);
+                    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, m_spellInfo, max_range);
                     MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
                     Cell::VisitAllObjects(m_caster, searcher, max_range);
                     break;

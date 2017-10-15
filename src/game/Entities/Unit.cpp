@@ -9648,7 +9648,7 @@ Unit* Unit::SelectRandomFriendlyTarget(Unit* except /*= nullptr*/, float radius 
 {
     std::list<Unit*> targets;
 
-    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, radius);
+    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, nullptr, radius);
     MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
 
     Cell::VisitAllObjects(this, searcher, radius);
