@@ -748,6 +748,9 @@ class GameObject : public WorldObject
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
 
+        // Used for trap type
+        time_t m_rearmTimer;                                // timer to rearm the trap once disarmed
+
         // Used for chest type
         bool m_isInUse;                                     // only one player at time are allowed to open chest
         time_t m_reStockTimer;                              // timer to refill the chest
