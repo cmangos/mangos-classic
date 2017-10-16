@@ -66,6 +66,7 @@ GameObject::GameObject() : WorldObject(),
 
     m_isInUse = false;
     m_reStockTimer = 0;
+    m_rearmTimer = 0;
     m_despawnTimer = 0;
 }
 
@@ -409,6 +410,20 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
                         loot->Update();
                     }
+                    break;
+                case GAMEOBJECT_TYPE_TRAP:
+                    if (m_rearmTimer == 0)
+                    {
+                        m_rearmTimer = time(nullptr) + GetRespawnDelay();
+                        SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                    }
+
+                    if (m_rearmTimer < time(nullptr))
+                    {
+                        SetGoState(GO_STATE_READY);
+                        m_lootState = GO_READY;
+                        m_rearmTimer = 0;
+                    };
                     break;
                 case GAMEOBJECT_TYPE_GOOBER:
                     if (m_cooldownTime < time(nullptr))

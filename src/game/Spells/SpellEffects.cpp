@@ -1986,9 +1986,9 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
                         break;
 
                     case GAMEOBJECT_TYPE_TRAP:
-                        if (lockType == LOCKTYPE_DISARM_TRAP)
+                        if (lockType == LOCKTYPE_DISARM_TRAP || lockType == LOCKTYPE_NONE)
                         {
-                            gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
+                            gameObjTarget->SetLootState(GO_ACTIVATED);
                             return;
                         }
                         sLog.outError("Spell::SendLoot unhandled locktype %u for GameObject trap (entry %u) for spell %u.", lockType, gameObjTarget->GetEntry(), m_spellInfo->Id);
@@ -4111,7 +4111,7 @@ void Spell::EffectStuck(SpellEffectIndex /*eff_idx*/)
     }
     else
     {
-        // If the player is alive, but their hearthstone is either not in their inventory (e.g. in the bank) or 
+        // If the player is alive, but their hearthstone is either not in their inventory (e.g. in the bank) or
         // their hearthstone is on cooldown, then the game will try to "nudge" the player in a seemingly random direction.
         // @todo This check could possibly more accurately find a safe position to port to, has the potential for porting underground.
         float x, y, z;
