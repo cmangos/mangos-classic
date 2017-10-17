@@ -1705,6 +1705,9 @@ class Unit : public WorldObject
         // Controlling player: limited recursive master/beneficiary (clientside)
         Player const* GetControllingPlayer() const;
 
+        // Controlling client: movement control owner at the moment (serverside)
+        Player const* GetControllingClientPlayer() const;
+
         Unit* GetSpawner() const; // serverside only logic used to determine spawner of unit
 
         Unit* GetSummoner() const;

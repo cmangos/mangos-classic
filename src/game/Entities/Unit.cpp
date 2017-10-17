@@ -5732,6 +5732,34 @@ Player const* Unit::GetControllingPlayer() const
     return nullptr;
 }
 
+Player const* Unit::GetControllingClientPlayer() const
+{
+    // Serverside reverse "mover" deduction logic at controlled unit
+    // Applies only to player controlled units
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        // Charm always removes control from original client...
+        if (ObjectGuid const& charmerGuid = GetCharmerGuid())
+        {
+            // ... but if it is a possessing charm, some other client may have control
+            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED))
+            {
+                Unit const* charmer = ObjectAccessor::GetUnit(*this, charmerGuid);
+                if (charmer && charmer->GetTypeId() == TYPEID_PLAYER)
+                    return static_cast<Player const*>(charmer);
+            }
+        }
+        else if(GetTypeId() == TYPEID_PLAYER)
+        {
+            // Check if anything prevents original client from controlling
+            Player const* player = static_cast<Player const*>(this);
+            if (player->IsClientControl(player))
+                return player;
+        }
+    }
+    return nullptr;
+}
+
 Unit* Unit::GetSpawner() const
 {
     if (ObjectGuid guid = GetSpawnerGuid())
@@ -9139,11 +9167,9 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
     if (!state || !(state & filter) || (state & ~filter))
         return;
 
-    Player* controller = GetBeneficiaryPlayer();
-    const bool control = controller ? controller->IsClientControl(this) : false;
     const bool movement = (state != UNIT_FLAG_STUNNED);
-    const bool stun = !!(state & UNIT_FLAG_STUNNED);
-    const bool fleeing = !!(state & UNIT_FLAG_FLEEING);
+    const bool stun = (state & UNIT_FLAG_STUNNED);
+    const bool fleeing = (state & UNIT_FLAG_FLEEING);
 
     if (apply)
     {
@@ -9154,10 +9180,27 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
             else
                 state &= ~UNIT_FLAG_FLEEING;
         }
+
+        // Apply confusion or fleeing: update client control state before altering flags
+        if (state & (UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING))
+        {
+            if (const Player* controllingClientPlayer = GetControllingClientPlayer())
+                controllingClientPlayer->UpdateClientControl(this, false);
+        }
+
         SetFlag(UNIT_FIELD_FLAGS, state);
     }
     else
+    {
         RemoveFlag(UNIT_FIELD_FLAGS, state);
+
+        // Remove confusion or fleeing: update client control state after altering flags
+        if (state & (UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING))
+        {
+            if (const Player* controllingClientPlayer = GetControllingClientPlayer())
+                controllingClientPlayer->UpdateClientControl(this, true);
+        }
+    }
 
     if (movement)
         GetMotionMaster()->MovementExpired(false);
@@ -9197,16 +9240,6 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
 
     if (!movement)
         return;
-
-    // Check if we should return or remove player control after change
-    if (controller)
-    {
-        const bool remove = !controller->IsClientControl(this);
-        if (control && remove)
-            controller->SetClientControl(this, 0);
-        else if (!control && !remove)
-            controller->SetClientControl(this, 1);
-    }
 
     // Update incapacitated movement if required:
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
@@ -10034,7 +10067,8 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
     if (player)
     {
         player->GetCamera().SetView(pCreature);                         // modify camera view to the creature view
-        player->SetClientControl(pCreature, 1);                         // transfer client control to the creature
+        // Force client control (required to function propely)
+        player->UpdateClientControl(pCreature, true, true);             // transfer client control to the creature after altering flags
         player->SetMover(pCreature);                                    // set mover so now we know that creature is "moved" by this unit
         player->SendForcedObjectUpdate();                               // we have to update client data here to avoid problem with the "release spirit" windows reappear.
 
@@ -10056,6 +10090,10 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
         if (CharmInfo* charmInfo = pCreature->InitCharmInfo(pCreature))
             charmInfo->InitPossessCreateSpells();
         player->PossessSpellInitialize();
+
+        // Take away client control immediately if we are not supposed to have control at the moment
+        if (!player->IsClientControl(pCreature))
+            player->UpdateClientControl(pCreature, false);
     }
 
     // Creature Linking, Initial load is handled like respawn
@@ -10071,6 +10109,10 @@ bool Unit::TakePossessOf(Unit* possessed)
     Player* player = nullptr;
     if (GetTypeId() == TYPEID_PLAYER)
         player = static_cast<Player *>(this);
+
+    // Update possessed's client control status before altering flags
+    if (const Player* controllingClientPlayer = possessed->GetControllingClientPlayer())
+        controllingClientPlayer->UpdateClientControl(possessed, false);
 
     // stop combat but keep threat list
     possessed->AttackStop(true, true);
@@ -10116,7 +10158,8 @@ bool Unit::TakePossessOf(Unit* possessed)
     if (player)
     {
         player->GetCamera().SetView(possessed);
-        player->SetClientControl(possessed, player->IsClientControl(possessed));
+        // Force client control (required to function propely)
+        player->UpdateClientControl(possessed, true, true);
         player->SetMover(possessed);
         player->SendForcedObjectUpdate();
 
@@ -10138,10 +10181,11 @@ bool Unit::TakePossessOf(Unit* possessed)
             possessed->AI()->SetReactState(REACT_PASSIVE);
         charmInfo->SetCommandState(COMMAND_STAY);
         player->PossessSpellInitialize();
-    }
 
-    if (possessedPlayer)
-        possessedPlayer->SetClientControl(possessed, 0);
+        // Take away client control immediately if we are not supposed to have control at the moment
+        if (!player->IsClientControl(possessed))
+            player->UpdateClientControl(possessed, false);
+    }
 
     return true;
 }
@@ -10157,6 +10201,10 @@ bool Unit::TakeCharmOf(Unit* charmed)
         // player pet is unsmumoned while possessing
         charmerPlayer->UnsummonPetTemporaryIfAny();
     }
+
+    // Update charmed's client control status before altering flags
+    if (const Player* controllingClientPlayer = charmed->GetControllingClientPlayer())
+        controllingClientPlayer->UpdateClientControl(charmed, false);
 
     // stop combat but keep threat list
     charmed->AttackStop(true, true);
@@ -10184,7 +10232,6 @@ bool Unit::TakeCharmOf(Unit* charmed)
         charmInfo->SetCommandState(COMMAND_FOLLOW);
         charmInfo->SetIsRetreating(true);
 
-        charmedPlayer->SetClientControl(charmedPlayer, 0);
         charmedPlayer->ForceHealAndPowerUpdateInZone();
     }
     else if (charmed->GetTypeId() == TYPEID_UNIT)
@@ -10249,7 +10296,7 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         if (player)
         {
             player->GetCamera().ResetView();
-            player->SetClientControl(player, player->IsClientControl(player));
+            player->UpdateClientControl(player, true);
             player->SetMover(nullptr);
             player->ForceHealAndPowerUpdateInZone();
         }
@@ -10346,7 +10393,6 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         else
             possessedPlayer->setFactionForRace(possessedPlayer->getRace());
 
-        possessedPlayer->SetClientControl(possessedPlayer, possessedPlayer->IsClientControl(possessedPlayer));
         charmInfo->ResetCharmState();
         possessedPlayer->DeleteCharmInfo();
 
@@ -10356,9 +10402,13 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
             possessedPlayer->GetMotionMaster()->MovementExpired(true);
     }
 
+    // Update possessed's client control status after altering flags
+    if (const Player* controllingClientPlayer = possessed->GetControllingClientPlayer())
+        controllingClientPlayer->UpdateClientControl(possessed, true);
+
     if (player)
     {
-        player->SetClientControl(possessed, 0);
+        player->UpdateClientControl(possessed, false);
         player->SetMover(nullptr);
         player->GetCamera().ResetView();
 

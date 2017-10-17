@@ -1936,11 +1936,13 @@ class Player : public Unit
         bool IsFlying() const { return false; }
         bool IsFreeFlying() const { return false; }
 
-        bool IsClientControl(Unit* target) const;
-        void SetClientControl(Unit* target, uint8 allowMove) const;
+        bool IsClientControl(Unit const* target) const;
+        void UpdateClientControl(Unit const* target, bool enabled, bool forced = false) const;
+
         void SetMover(Unit* target) { m_mover = target ? target : this; }
         Unit* GetMover() const { return m_mover; }
         bool IsSelfMover() const { return m_mover == this; }// normal case for player not controlling other unit
+
         void Uncharm() override;
 
         ObjectGuid const& GetFarSightGuid() const { return GetGuidValue(PLAYER_FARSIGHT); }

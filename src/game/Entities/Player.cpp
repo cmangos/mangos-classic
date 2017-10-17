@@ -18015,20 +18015,58 @@ void Player::ResurectUsingRequestData()
     SpawnCorpseBones();
 }
 
-bool Player::IsClientControl(Unit* target) const
+bool Player::IsClientControl(Unit const* target) const
 {
-    return (target && !target->IsFleeing() && !target->IsConfused() && !target->IsTaxiFlying() &&
-            (target->GetTypeId() != TYPEID_PLAYER ||
-            !((Player*)target)->InBattleGround() || ((Player*)target)->GetBattleGround()->GetStatus() != STATUS_WAIT_LEAVE) &&
-            (target == this || target->GetMasterGuid() == GetObjectGuid()));
+    if (!target)
+        return false;
+
+    // Applies only to player controlled units
+    if (!target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        return false;
+
+    // These flags are meant to be used with client control taken away (4/5 confirmed by data)
+    if (target->HasFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_UNK_0 | UNIT_FLAG_NON_MOVING_DEPRECATED | UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING | UNIT_FLAG_TAXI_FLIGHT)))
+        return false;
+
+    // Player in completed battleground during "score screen"
+    // TODO: research if its actually done serverside with any of flags listed above;
+    // It would make perfect sense and clean this implementation up a bit
+    if (target->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player const* player = static_cast<Player const*>(target);
+        if (player->InBattleGround())
+        {
+            if (const BattleGround* bg = player->GetBattleGround())
+            {
+                if (bg->GetStatus() == STATUS_WAIT_LEAVE)
+                    return false;
+            }
+        }
+    }
+
+    // If unit is possessed, it must be charmed by the player
+    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED))
+        return (target->GetCharmerGuid() == GetObjectGuid());
+
+    // Players only have control over self by default
+    return (target == this);
 }
 
-void Player::SetClientControl(Unit* target, uint8 allowMove) const
+void Player::UpdateClientControl(Unit const* target, bool enabled, bool forced) const
 {
-    WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, target->GetPackGUID().size() + 1);
-    data << target->GetPackGUID();
-    data << uint8(allowMove);
-    GetSession()->SendPacket(data);
+    if (target)
+    {
+        // Sending disabled control multiple times for the same unit is harmless (seen in data all the time)
+        // Do a double-check if we should enable it only
+        if (forced || !enabled || IsClientControl(target))
+        {
+            const PackedGuid &packedGuid = target->GetPackGUID();
+            WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, packedGuid.size() + 1);
+            data << packedGuid;
+            data << uint8(enabled);
+            GetSession()->SendPacket(data);
+        }
+    }
 }
 
 void Player::Uncharm()
