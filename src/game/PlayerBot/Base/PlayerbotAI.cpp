@@ -7137,11 +7137,11 @@ void PlayerbotAI::_HandleCommandPet(std::string &text, Player &fromPlayer)
     if (ExtractCommand("react", text))
     {
         if (ExtractCommand("aggressive", text, true))
-            pet->GetCharmInfo()->GetAI()->SetReactState(REACT_AGGRESSIVE);
+            pet->AI()->SetReactState(REACT_AGGRESSIVE);
         else if (ExtractCommand("defensive", text, true))
-            pet->GetCharmInfo()->GetAI()->SetReactState(REACT_DEFENSIVE);
+            pet->AI()->SetReactState(REACT_DEFENSIVE);
         else if (ExtractCommand("passive", text, true))
-            pet->GetCharmInfo()->GetAI()->SetReactState(REACT_PASSIVE);
+            pet->AI()->SetReactState(REACT_PASSIVE);
         else
             _HandleCommandHelp("pet react", fromPlayer);
     }
