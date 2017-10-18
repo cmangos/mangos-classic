@@ -729,6 +729,7 @@ class WorldObject : public Object
 
         float GetDistance(const WorldObject* obj) const;
         float GetDistance(float x, float y, float z) const;
+        float GetDistanceNoBoundingRadius(float x, float y, float z) const;
         float GetCombatDistance(const WorldObject* obj, bool forMeleeRange) const;
         float GetDistance2d(const WorldObject* obj) const;
         float GetDistance2d(float x, float y) const;
