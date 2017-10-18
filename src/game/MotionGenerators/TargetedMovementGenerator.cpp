@@ -267,17 +267,17 @@ float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRang
     if (m_moveFurther)
     {
         if (!forRangeCheck)
-            return this->i_offset + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombatReach(&owner);
+            return this->i_offset + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner);
 
-        return CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
+        return CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
     }
     else
     {
         if (!forRangeCheck) // move slightly closer than setting to prevent jittery movement
-            return this->i_offset * CHASE_MOVE_CLOSER_FACTOR + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombatReach(&owner);
+            return this->i_offset * CHASE_MOVE_CLOSER_FACTOR + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner);
 
         // check against actual max range setting
-        return this->i_offset + CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombatReach(&owner) - this->i_target->GetObjectBoundingRadius(); 
+        return this->i_offset + CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
     }
 }
 

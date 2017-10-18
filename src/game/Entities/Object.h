@@ -701,6 +701,8 @@ class WorldObject : public Object
         }
 
         virtual float GetObjectBoundingRadius() const { return DEFAULT_WORLD_OBJECT_SIZE; }
+        virtual float GetCombatReach() const { return 0.f; }
+        float GetCombinedCombatReach(WorldObject const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;
 
         bool IsPositionValid() const;
         void UpdateGroundPositionZ(float x, float y, float& z) const;
@@ -727,6 +729,7 @@ class WorldObject : public Object
 
         float GetDistance(const WorldObject* obj) const;
         float GetDistance(float x, float y, float z) const;
+        float GetCombatDistance(const WorldObject* obj, bool forMeleeRange) const;
         float GetDistance2d(const WorldObject* obj) const;
         float GetDistance2d(float x, float y) const;
         float GetDistanceZ(const WorldObject* obj) const;
@@ -734,9 +737,18 @@ class WorldObject : public Object
         {
             return obj && IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap());
         }
+        bool IsWithinCombatDist(WorldObject const* obj, float dist2compare, bool is3D = true) const
+        {
+            return obj && _IsWithinCombatDist(obj, dist2compare, is3D);
+        }
+        bool IsWithinCombatDistInMap(WorldObject const* obj, float dist2compare, bool is3D = true) const
+        {
+            return obj && IsInMap(obj) && _IsWithinCombatDist(obj, dist2compare, is3D);
+        }
         bool IsWithinDist3d(float x, float y, float z, float dist2compare) const;
         bool IsWithinDist2d(float x, float y, float dist2compare) const;
         bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const;
+        bool _IsWithinCombatDist(WorldObject const* obj, float dist2compare, bool is3D) const;
 
         // use only if you will sure about placing both object at same map
         bool IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D = true) const

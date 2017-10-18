@@ -1094,10 +1094,8 @@ class Unit : public WorldObject
 
         void CleanupsBeforeDelete() override;               // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
 
-        float GetObjectBoundingRadius() const override      // overwrite WorldObject version
-        {
-            return m_floatValues[UNIT_FIELD_BOUNDINGRADIUS];
-        }
+        float GetObjectBoundingRadius() const override { return m_floatValues[UNIT_FIELD_BOUNDINGRADIUS]; } // overwrite WorldObject version
+        float GetCombatReach() const override { return m_floatValues[UNIT_FIELD_COMBATREACH]; } // overwrite WorldObject version
 
         /**
          * Gets the current DiminishingLevels for the given group
@@ -1196,23 +1194,6 @@ class Unit : public WorldObject
                     return true;
             }
         }
-        /** Returns the combined combat reach of two mobs
-         *
-         * @param pVictim The other unit to combine with
-         * @param forMeleeRange Whether we should return the combined reach for melee or not (if true, range will at least return ATTACK_DISTANCE)
-         * @param flat_mod Increases the returned reach by this value.
-         * @return the combined values of UNIT_FIELD_COMBATREACH for both this unit and the pVictim.
-         * \see EUnitFields
-         * \see GetFloatValue
-         */
-        float GetCombatReach(Unit const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;
-        /** Returns the remaining combat distance between two mobs (after CombatReach substracted)
-         *
-         * @param target The target to check against
-         * @param forMeleeRange If we want to get the distance for melee combat (if true, CombatReach will at least return ATTACK_DISTANCE)
-         * @return the distance that needs to be considered for all combat related actions (spell-range and similar)
-         */
-        float GetCombatDistance(Unit const* target, bool forMeleeRange) const;
         /** Returns if the Unit can reach a victim with Melee Attack
          *
          * @param pVictim Who we want to reach with a melee attack

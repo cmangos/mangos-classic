@@ -601,35 +601,11 @@ void Unit::resetAttackTimer(WeaponAttackType type)
     m_attackTimer[type] = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
 }
 
-float Unit::GetCombatReach(Unit const* pVictim, bool forMeleeRange /*=true*/, float flat_mod /*=0.0f*/) const
-{
-    // The measured values show BASE_MELEE_OFFSET in (1.3224, 1.342)
-    float reach = GetFloatValue(UNIT_FIELD_COMBATREACH) + pVictim->GetFloatValue(UNIT_FIELD_COMBATREACH) +
-                  BASE_MELEERANGE_OFFSET + flat_mod;
-
-    if (forMeleeRange && reach < ATTACK_DISTANCE)
-        reach = ATTACK_DISTANCE;
-
-    return reach;
-}
-
-float Unit::GetCombatDistance(Unit const* target, bool forMeleeRange) const
-{
-    float radius = GetCombatReach(target, forMeleeRange);
-
-    float dx = GetPositionX() - target->GetPositionX();
-    float dy = GetPositionY() - target->GetPositionY();
-    float dz = GetPositionZ() - target->GetPositionZ();
-    float dist = sqrt((dx * dx) + (dy * dy) + (dz * dz)) - radius;
-
-    return (dist > 0.0f ? dist : 0.0f);
-}
-
 bool Unit::CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod /*= 0.0f*/) const
 {
     MANGOS_ASSERT(pVictim);
 
-    float reach = GetCombatReach(pVictim, true, flat_mod);
+    float reach = GetCombinedCombatReach(pVictim, true, flat_mod);
 
     // This check is not related to bounding radius
     float dx = GetPositionX() - pVictim->GetPositionX();

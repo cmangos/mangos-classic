@@ -1009,6 +1009,18 @@ float WorldObject::GetDistance(float x, float y, float z) const
     return (dist > 0 ? dist : 0);
 }
 
+float WorldObject::GetCombatDistance(const WorldObject * obj, bool forMeleeRange) const
+{
+    float radius = GetCombinedCombatReach(obj, forMeleeRange);
+
+    float dx = GetPositionX() - obj->GetPositionX();
+    float dy = GetPositionY() - obj->GetPositionY();
+    float dz = GetPositionZ() - obj->GetPositionZ();
+    float dist = sqrt((dx * dx) + (dy * dy) + (dz * dz)) - radius;
+
+    return (dist > 0.0f ? dist : 0.0f);
+}
+
 float WorldObject::GetDistance2d(const WorldObject* obj) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
@@ -1062,6 +1074,22 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
         distsq += dz * dz;
     }
     float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
+    float maxdist = dist2compare + sizefactor;
+
+    return distsq < maxdist * maxdist;
+}
+
+bool WorldObject::_IsWithinCombatDist(WorldObject const * obj, float dist2compare, bool is3D) const
+{
+    float dx = GetPositionX() - obj->GetPositionX();
+    float dy = GetPositionY() - obj->GetPositionY();
+    float distsq = dx * dx + dy * dy;
+    if (is3D)
+    {
+        float dz = GetPositionZ() - obj->GetPositionZ();
+        distsq += dz * dz;
+    }
+    float sizefactor = GetCombatReach() + obj->GetCombatReach();
     float maxdist = dist2compare + sizefactor;
 
     return distsq < maxdist * maxdist;
@@ -1368,6 +1396,18 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
             break;
         }
     }
+}
+
+float WorldObject::GetCombinedCombatReach(WorldObject const* pVictim, bool forMeleeRange, float flat_mod) const
+{
+    // The measured values show BASE_MELEE_OFFSET in (1.3224, 1.342)
+    float reach = GetCombatReach() + pVictim->GetCombatReach() +
+        BASE_MELEERANGE_OFFSET + flat_mod;
+
+    if (forMeleeRange && reach < ATTACK_DISTANCE)
+        reach = ATTACK_DISTANCE;
+
+    return reach;
 }
 
 bool WorldObject::IsPositionValid() const
