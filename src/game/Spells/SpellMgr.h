@@ -1630,12 +1630,13 @@ typedef std::map<uint32, SpellThreatEntry> SpellThreatMap;
 // Spell script target related declarations (accessed using SpellMgr functions)
 enum SpellTargetType
 {
-    SPELL_TARGET_TYPE_GAMEOBJECT = 0,
-    SPELL_TARGET_TYPE_CREATURE   = 1,
-    SPELL_TARGET_TYPE_DEAD       = 2
+    SPELL_TARGET_TYPE_GAMEOBJECT    = 0,
+    SPELL_TARGET_TYPE_CREATURE      = 1,
+    SPELL_TARGET_TYPE_DEAD          = 2,
+    SPELL_TARGET_TYPE_CREATURE_GUID = 3,
 };
 
-#define MAX_SPELL_TARGET_TYPE 3
+#define MAX_SPELL_TARGET_TYPE 4
 
 // pre-defined targeting for spells
 struct SpellTargetEntry

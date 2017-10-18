@@ -407,6 +407,7 @@ class Spell
 
         template<typename T> WorldObject* FindCorpseUsing();
 
+        bool CheckTargetScript(Unit * target, SpellEffectIndex eff) const;
         bool CheckTarget(Unit* target, SpellEffectIndex eff) const;
         bool CanAutoCast(Unit* target);
 
