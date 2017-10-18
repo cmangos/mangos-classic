@@ -314,6 +314,7 @@ enum ChatType
     CHAT_TYPE_BOSS_WHISPER      = 5,
     CHAT_TYPE_ZONE_YELL         = 6,
     CHAT_TYPE_ZONE_EMOTE        = 7,
+    CHAT_TYPE_MAX
 };
 
 // Selection method used by SelectAttackingTarget
