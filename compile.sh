@@ -10,7 +10,7 @@ if [ $CC = "gcc" ] ; then export CC=gcc-4.8 CXX=g++-4.8 ; fi
 mkdir _build
 mkdir _install
 cd _build
-if [ "$ISTRAVIS = "Y" ];
+if [ "$ISTRAVIS" = "Y" ];
 then
   cmake -DCMAKE_INSTALL_PREFIX=../_install -BUILD_PLAYERBOT=OFF -DBUILD_SCRIPTDEV=OFF -DBUILD_GAME_SERVER=OFF -BUILD_LOGIN_SERVER=ON -DPCH=OFF ..
 else
