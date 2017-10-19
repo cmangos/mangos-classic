@@ -10514,6 +10514,24 @@ void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
     }
 }
 
+uint32 Player::GetMaxKeyringSize() const 
+{ 
+	int playerLevel = getLevel();
+	if ( playerLevel <= PLAYER_KEYRING_SIZE_STEP1_LVLMAX )
+	{
+		return PLAYER_KEYRING_SIZE_STEP1_SIZE;
+	}
+	else if ( playerLevel <= PLAYER_KEYRING_SIZE_STEP2_LVLMAX )
+	{
+		return PLAYER_KEYRING_SIZE_STEP2_SIZE;
+	}
+	else if ( playerLevel <= PLAYER_KEYRING_SIZE_STEP3_LVLMAX )
+	{
+		return PLAYER_KEYRING_SIZE_STEP3_SIZE;
+	}
+	return KEYRING_SLOT_END - KEYRING_SLOT_START; 
+}
+
 void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint32 itemid /*= 0*/) const
 {
     DEBUG_LOG("WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE (%u)", msg);
