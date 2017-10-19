@@ -583,7 +583,18 @@ void WorldSession::KickPlayer()
         m_Socket->Close();
 }
 
-/// Cancel channeling handler
+void WorldSession::SendExpectedSpamRecords()
+{
+    std::vector<std::string> spamRecords = sWorld.GetSpamRecords();
+
+    WorldPacket data(SMSG_EXPECTED_SPAM_RECORDS, 4);
+
+    data << (uint32) spamRecords.size();
+    for (std::string record : spamRecords)
+        data << record;
+
+    SendPacket(data);
+}
 
 void WorldSession::SendAreaTriggerMessage(const char* Text, ...) const
 {

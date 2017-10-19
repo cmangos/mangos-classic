@@ -467,6 +467,7 @@ class World
 
         void SetInitialWorldSettings();
         void LoadConfigSettings(bool reload = false);
+        void LoadSpamRecords(bool reload = false);
 
         void SendWorldText(int32 string_id, ...);
         void SendGlobalMessage(WorldPacket const& packet) const;
@@ -549,6 +550,7 @@ class World
         char const* GetDBVersion() const { return m_DBVersion.c_str(); }
         char const* GetCreatureEventAIVersion() const { return m_CreatureEventAIVersion.c_str(); }
 
+        std::vector<std::string> GetSpamRecords() { return m_spamRecords; }
 
         /**
         * \brief: force all client to request player data
@@ -648,6 +650,8 @@ class World
 
         // List of Maps that should be force-loaded on startup
         std::set<uint32> m_configForceLoadMapIds;
+
+        std::vector<std::string> m_spamRecords;
 
         static TimePoint m_currentTime;
 };

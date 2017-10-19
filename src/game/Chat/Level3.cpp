@@ -1068,6 +1068,14 @@ bool ChatHandler::HandleReloadLocalesQuestCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadExpectedSpamRecords(char* /*args*/)
+{
+    sLog.outString("Reloading expected spam records...");
+    sWorld.LoadSpamRecords(true);
+    SendGlobalSysMessage("Reloaded expected spam records.");
+    return true;
+}
+
 bool ChatHandler::HandleLoadScriptsCommand(char* args)
 {
     if (!*args)

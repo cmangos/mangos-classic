@@ -1272,6 +1272,10 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Honor Standing list...");
     sObjectMgr.LoadStandingList();
 
+    sLog.outString("Loading Spam records...");
+    LoadSpamRecords();
+    sLog.outString();
+
     sLog.outString("Starting Game Event system...");
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    // depend on next event
@@ -1933,6 +1937,27 @@ void World::_UpdateRealmCharCount(QueryResult* resultCharCount, uint32 accountId
         LoginDatabase.PExecute("DELETE FROM realmcharacters WHERE acctid= '%u' AND realmid = '%u'", accountId, realmID);
         LoginDatabase.PExecute("INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (%u, %u, %u)", charCount, accountId, realmID);
         LoginDatabase.CommitTransaction();
+    }
+}
+
+void World::LoadSpamRecords(bool reload)
+{
+    QueryResult* result = WorldDatabase.Query("SELECT record FROM spam_records");
+
+    if (result)
+    {
+        if (reload)
+            m_spamRecords.clear();
+
+        while (result->NextRow())
+        {
+            Field* fields = result->Fetch();
+            std::string record = fields[0].GetCppString();
+
+            m_spamRecords.push_back(record);
+        }
+
+        delete result;
     }
 }
 

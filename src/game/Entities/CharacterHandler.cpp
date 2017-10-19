@@ -515,6 +515,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     for (int i = 0; i < 32; ++i)
         data << uint32(0);
     SendPacket(data);
+    
+    // Send Spam records
+    SendExpectedSpamRecords();
 
     // Send MOTD (1.12.1 not have SMSG_MOTD, so do it in another way)
     {
