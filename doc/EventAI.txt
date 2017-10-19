@@ -1114,6 +1114,7 @@ Below is the list of current Text types that texts tables can handle. These were
 4    CHAT_TYPE_WHISPER             This type sets the text to be displayed as a whisper to the player in the chat log.
 5    CHAT_TYPE_BOSS_WHISPER        This type sets the text to be displayed as a whisper to the player in the chat log (Used only for specific Bosses).
 6    CHAT_TYPE_ZONE_YELL           Same as CHAT_TYPE_YELL but will display to all players in current zone.
+7    CHAT_TYPE_ZONE_EMOTE          Same as CHAT_TYPE_TEXT_EMOTE but will display to all players in current zone.
 
 =========================================
 Language Types (language)
