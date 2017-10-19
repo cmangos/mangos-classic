@@ -206,6 +206,7 @@ class ThreatManager
         void tauntFadeOut(Unit* pTaunter);
 
         void setCurrentVictim(HostileReference* pHostileReference);
+        void setCurrentVictimByTarget(Unit* target); // Used in SPELL_EFFECT_ATTACK_ME to set the current target to the taunter
 
         void setDirty(bool pDirty) { iThreatContainer.setDirty(pDirty); }
 
