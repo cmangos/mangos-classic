@@ -197,11 +197,11 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit *pTarget)
             return RETURN_CONTINUE;
         if (PREMEDITATION > 0 && m_ai->CastSpell(PREMEDITATION, *pTarget))
             return RETURN_CONTINUE;
-        if (AMBUSH > 0 && !pTarget->HasInArc(m_bot) && m_ai->CastSpell(AMBUSH, *pTarget))
+        if (AMBUSH > 0 && pTarget->isInBackInMap(m_bot, 5.0f) && m_ai->CastSpell(AMBUSH, *pTarget))
             return RETURN_CONTINUE;
         if (CHEAP_SHOT > 0 && !pTarget->HasAura(CHEAP_SHOT, EFFECT_INDEX_0) && m_ai->CastSpell(CHEAP_SHOT, *pTarget))
             return RETURN_CONTINUE;
-        if (GARROTE > 0 && !pTarget->HasInArc(m_bot) && m_ai->CastSpell(GARROTE, *pTarget))
+        if (GARROTE > 0 && pTarget->isInBackInMap(m_bot, 5.0f) && m_ai->CastSpell(GARROTE, *pTarget))
             return RETURN_CONTINUE;
 
         // No appropriate action found, remove stealth
@@ -232,7 +232,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit *pTarget)
         }
 
         // Default: Gouge the target
-        if (GOUGE > 0 && !pTarget->HasAura(GOUGE, EFFECT_INDEX_0) && m_ai->CastSpell(GOUGE, *newTarget))
+        if (GOUGE > 0 && pTarget->isInFrontInMap(m_bot, 5.0f) && !pTarget->HasAura(GOUGE, EFFECT_INDEX_0) && m_ai->CastSpell(GOUGE, *newTarget))
             return RETURN_CONTINUE;
     }
 
@@ -302,7 +302,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit *pTarget)
     // Combo generating or damage increasing attacks
     if (HEMORRHAGE > 0 && !pTarget->HasAura(HEMORRHAGE, EFFECT_INDEX_2) && m_ai->CastSpell(HEMORRHAGE, *pTarget))
             return RETURN_CONTINUE;
-    if (BACKSTAB > 0 && !pTarget->HasInArc(m_bot) && m_ai->CastSpell(BACKSTAB, *pTarget))
+    if (BACKSTAB > 0 && pTarget->isInBackInMap(m_bot, 5.0f) && m_ai->CastSpell(BACKSTAB, *pTarget))
             return RETURN_CONTINUE;
     if (GHOSTLY_STRIKE > 0 && m_bot->IsSpellReady(GHOSTLY_STRIKE) && m_ai->CastSpell(GHOSTLY_STRIKE, *pTarget))
             return RETURN_CONTINUE;
