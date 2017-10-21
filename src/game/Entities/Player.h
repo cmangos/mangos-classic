@@ -66,19 +66,6 @@ typedef std::deque<Mail*> PlayerMails;
 #define PLAYER_MAX_SKILLS           127
 #define PLAYER_EXPLORED_ZONES_SIZE  64
 
-
-//number of slots of the keyring depending on the player's level
-// 1  -> 39 : 4 slots
-// 40 -> 49 : 8 slots
-// 50 -> 60 : 12 slots
-#define PLAYER_KEYRING_SIZE_STEP1_SIZE    4
-#define PLAYER_KEYRING_SIZE_STEP1_LVLMAX  39
-#define PLAYER_KEYRING_SIZE_STEP2_SIZE    8
-#define PLAYER_KEYRING_SIZE_STEP2_LVLMAX  49
-#define PLAYER_KEYRING_SIZE_STEP3_SIZE    12
-#define PLAYER_KEYRING_SIZE_STEP3_LVLMAX  60
-
-
 // TODO: Maybe this can be implemented in configuration file.
 #define PLAYER_NEW_INSTANCE_LIMIT_PER_HOUR 5
 
@@ -1119,7 +1106,7 @@ class Player : public Unit
         Item* GetItemFromBuyBackSlot(uint32 slot);
         void RemoveItemFromBuyBackSlot(uint32 slot, bool del);
 
-        uint32 GetMaxKeyringSize() const ; // number of slots available depending on the Player's level
+        uint32 GetMaxKeyringClientSize() const ; // number of slots available depending on the Player's level - limited by Client GUI
         void SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2 = nullptr, uint32 itemid = 0) const;
         void SendBuyError(BuyResult msg, Creature* pCreature, uint32 item, uint32 param) const;
         void SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemGuid, uint32 param) const;
