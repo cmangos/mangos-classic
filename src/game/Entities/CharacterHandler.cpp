@@ -518,33 +518,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     
     // Send Spam records
     SendExpectedSpamRecords();
-
-    // Send MOTD (1.12.1 not have SMSG_MOTD, so do it in another way)
-    {
-        uint32 linecount = 0;
-        std::string str_motd = sWorld.GetMotd();
-        std::string::size_type pos, nextpos;
-        std::string motd;
-
-        pos = 0;
-        while ((nextpos = str_motd.find('@', pos)) != std::string::npos)
-        {
-            if (nextpos != pos)
-            {
-                ChatHandler(pCurrChar).PSendSysMessage("%s", str_motd.substr(pos, nextpos - pos).c_str());
-                ++linecount;
-            }
-            pos = nextpos + 1;
-        }
-
-        if (pos < str_motd.length())
-        {
-            ChatHandler(pCurrChar).PSendSysMessage("%s", str_motd.substr(pos).c_str());
-            ++linecount;
-        }
-
-        DEBUG_LOG("WORLD: Sent motd (SMSG_MOTD)");
-    }
+    SendMotd(pCurrChar);
 
     // QueryResult *result = CharacterDatabase.PQuery("SELECT guildid,rank FROM guild_member WHERE guid = '%u'",pCurrChar->GetGUIDLow());
     QueryResult* resultGuild = holder->GetResult(PLAYER_LOGIN_QUERY_LOADGUILD);

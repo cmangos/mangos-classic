@@ -596,6 +596,34 @@ void WorldSession::SendExpectedSpamRecords()
     SendPacket(data);
 }
 
+void WorldSession::SendMotd(Player* currChar)
+{
+    // Send MOTD (1.12.1 not have SMSG_MOTD, so do it in another way)
+    uint32 linecount = 0;
+    std::string str_motd = sWorld.GetMotd();
+    std::string::size_type pos, nextpos;
+    std::string motd;
+
+    pos = 0;
+    while ((nextpos = str_motd.find('@', pos)) != std::string::npos)
+    {
+        if (nextpos != pos)
+        {
+            ChatHandler(currChar).PSendSysMessage("%s", str_motd.substr(pos, nextpos - pos).c_str());
+            ++linecount;
+        }
+        pos = nextpos + 1;
+    }
+
+    if (pos < str_motd.length())
+    {
+        ChatHandler(currChar).PSendSysMessage("%s", str_motd.substr(pos).c_str());
+        ++linecount;
+    }
+
+    DEBUG_LOG("WORLD: Sent motd (SMSG_MOTD)");
+}
+
 void WorldSession::SendAreaTriggerMessage(const char* Text, ...) const
 {
     va_list ap;
