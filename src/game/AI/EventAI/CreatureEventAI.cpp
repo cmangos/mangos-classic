@@ -170,6 +170,10 @@ bool CreatureEventAI::IsRepeatableEvent(EventAI_Type type) const
     switch (type)
     {
         case EVENT_T_SPAWNED: // Only happens once per spawn - repeatable doesnt make sense
+        case EVENT_T_DEATH: // as previous
+        case EVENT_T_AGGRO:
+        case EVENT_T_EVADE:
+        case EVENT_T_REACHED_HOME:
             return false;
         default:
             return true;
