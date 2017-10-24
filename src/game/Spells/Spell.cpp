@@ -4179,7 +4179,16 @@ SpellCastResult Spell::CheckCast(bool strict)
         {
             // Not allow casting on flying player
             if (singleTarget->IsTaxiFlying())
-                return SPELL_FAILED_BAD_TARGETS;
+            {
+                switch (m_spellInfo->Id)
+                {
+                    // Except some spells from Taxi Flying cast
+                    case 7720:                              // Ritual of Summoning Effect
+                        break;
+                    default:
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+            }
 
             if (!IsIgnoreLosSpell(m_spellInfo) && !m_IsTriggeredSpell && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(singleTarget))
                 return SPELL_FAILED_LINE_OF_SIGHT;
