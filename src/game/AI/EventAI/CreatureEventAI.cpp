@@ -151,6 +151,7 @@ bool CreatureEventAI::IsTimerBasedEvent(EventAI_Type type) const
         case EVENT_T_TARGET_CASTING:
         case EVENT_T_FRIENDLY_HP:
         case EVENT_T_FRIENDLY_IS_CC:
+        case EVENT_T_TARGET_MANA:
         case EVENT_T_AURA:
         case EVENT_T_TARGET_AURA:
         case EVENT_T_MISSING_AURA:
