@@ -576,7 +576,8 @@ class Creature : public Unit
         void ReduceCorpseDecayTimer();
         uint32 GetCorpseDecayTimer() const { return m_corpseDecayTimer; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
-        bool IsCivilian() const { return !!GetCreatureInfo()->civilian; }
+        bool IsCivilian() const { return !!(GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO); }
+        bool IsPvPCivilian() const { return !!GetCreatureInfo()->civilian; }
         bool IsGuard() const { return !!(GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_GUARD); }
 
         bool CanWalk() const { return !!(GetCreatureInfo()->InhabitType & INHABIT_GROUND); }
@@ -784,7 +785,7 @@ class Creature : public Unit
         void SendAreaSpiritHealerQueryOpcode(Player* pl);
 
         void SetVirtualItem(VirtualItemSlot slot, uint32 item_id);
-        
+
         void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
 
         uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }
