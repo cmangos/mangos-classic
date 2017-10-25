@@ -350,7 +350,7 @@ void FlightPathMovementGenerator::LoadPath(Player& player)
     for (uint32 src = 0, dst = 1; dst < taxi.size(); src = dst++)
     {
         uint32 path, cost;
-        sObjectMgr.GetTaxiPath(taxi[src], taxi[dst], path, cost);
+        sObjectMgr.GetTaxiPath(taxi[src], taxi[dst], path, cost); // Need to add support for reputation cost discount
         if (path > sTaxiPathNodesByPath.size())
             return;
 
