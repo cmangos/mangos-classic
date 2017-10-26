@@ -1804,7 +1804,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1189013,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1189014,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 
-(-1189015,'The monster got what he deserved.',0,0,1,0,'vishas SAY_TRIGGER_VORREL'),
+(-1189015,'The bastard got what he deserved.',0,0,1,0,'vishas SAY_TRIGGER_VORREL'),
 
 (-1189016,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1189017,'REUSE_ME',0,0,0,0,'REUSE_ME'),
