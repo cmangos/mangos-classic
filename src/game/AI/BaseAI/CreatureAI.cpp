@@ -42,7 +42,7 @@ CreatureAI::CreatureAI(Creature* creature) :
 {
     m_dismountOnAggro = !(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT);
 
-    if (m_creature->IsCivilian())
+    if (m_creature->IsNoAggroOnSight())
         SetReactState(REACT_DEFENSIVE);
     if(m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
         m_visibilityDistance = sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER);
@@ -76,7 +76,7 @@ void CreatureAI::MoveInLineOfSight(Unit * who)
     if (m_creature->getVictim() && !m_creature->GetMap()->IsDungeon())
         return;
 
-    if (m_creature->IsCivilian() || m_creature->IsNeutralToAll())
+    if (m_creature->IsNoAggroOnSight() || m_creature->IsNeutralToAll())
         return;
 
     if (who->GetObjectGuid().IsCreature() && who->isInCombat())

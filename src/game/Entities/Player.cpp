@@ -6153,7 +6153,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize)
     if (uVictim->GetTypeId() == TYPEID_UNIT)
     {
         Creature* cVictim = (Creature*)uVictim;
-        if (cVictim->IsCivilian())
+        if (cVictim->IsCivilianForTarget(this))
         {
             AddHonorCP(MaNGOS::Honor::DishonorableKillPoints(getLevel()), DISHONORABLE, cVictim);
             return true;

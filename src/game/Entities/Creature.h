@@ -42,7 +42,7 @@ struct GameEventCreatureData;
 enum CreatureFlagsExtra
 {
     CREATURE_EXTRA_FLAG_INSTANCE_BIND          = 0x00000001,       // creature kill bind instance with killer and killer's group
-    CREATURE_EXTRA_FLAG_NO_AGGRO               = 0x00000002,       // not aggro (ignore faction/reputation hostility)
+    CREATURE_EXTRA_FLAG_NO_AGGRO_ON_SIGHT      = 0x00000002,       // no aggro (ignore faction/reputation hostility)
     CREATURE_EXTRA_FLAG_NO_PARRY               = 0x00000004,       // creature can't parry
     CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN        = 0x00000008,       // creature can't counter-attack at parry
     CREATURE_EXTRA_FLAG_NO_BLOCK               = 0x00000010,       // creature can't block
@@ -57,7 +57,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE      = 0x00002000,       // creature is forced to use MMaps
     CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE     = 0x00004000,       // creature is forced to NOT use MMaps
     CREATURE_EXTRA_FLAG_WALK_IN_WATER          = 0x00008000,       // creature is forced to walk in water even it can swim
-    // CREATURE_EXTRA_FLAG_EMPTY                   = 0x00010000,       // fill
+    CREATURE_EXTRA_FLAG_CIVILIAN               = 0x00010000,       // CreatureInfo->civilian substitute (for new expansions)
     CREATURE_EXTRA_FLAG_NO_MELEE               = 0x00020000,       // creature can't melee
     // reserved by Killerwife - 0x00080000 is free
     CREATURE_EXTRA_FLAG_COUNT_SPAWNS           = 0x00200000,       // count creature spawns in Map*
@@ -577,6 +577,7 @@ class Creature : public Unit
         uint32 GetCorpseDecayTimer() const { return m_corpseDecayTimer; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool IsCivilian() const { return !!GetCreatureInfo()->civilian; }
+        bool IsNoAggroOnSight() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO_ON_SIGHT); }
         bool IsGuard() const { return !!(GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_GUARD); }
 
         bool CanWalk() const { return !!(GetCreatureInfo()->InhabitType & INHABIT_GROUND); }
