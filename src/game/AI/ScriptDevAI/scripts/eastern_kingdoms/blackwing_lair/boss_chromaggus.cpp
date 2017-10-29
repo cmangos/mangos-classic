@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Chromaggus
 SD%Complete: 95
-SDComment: Chromatic Mutation disabled due to lack of core support
+SDComment: Breaths and Afflictions spell mechanics may need some polish
 SDCategory: Blackwing Lair
 EndScriptData
 
@@ -48,8 +48,8 @@ enum
 
     SPELL_CHROMATIC_MUT_1       = 23174,                    // Spell cast on player if they get all 5 debuffs
     SPELL_ELEMENTAL_SHIELD      = 22276,
-    SPELL_FRENZY                = 28371,                    // The frenzy spell may be wrong
-    SPELL_ENRAGE                = 28747
+    SPELL_FRENZY                = 23128,
+    SPELL_ENRAGE                = 23537
 };
 
 static const uint32 aPossibleBreaths[MAX_BREATHS] = {SPELL_INCINERATE, SPELL_TIME_LAPSE, SPELL_CORROSIVE_ACID, SPELL_IGNITE_FLESH, SPELL_FROST_BURN};
@@ -181,16 +181,8 @@ struct boss_chromaggusAI : public ScriptedAI
                             && pUnit->HasAura(SPELL_BROODAF_BRONZE, EFFECT_INDEX_0)
                             && pUnit->HasAura(SPELL_BROODAF_GREEN, EFFECT_INDEX_0))
                     {
-                        // target->RemoveAllAuras();
-                        // DoCastSpellIfCan(target,SPELL_CHROMATIC_MUT_1);
-
-                        // Chromatic mutation is causing issues
-                        // Assuming it is caused by a lack of core support for Charm
-                        // So instead we instant kill our target
-
-                        // WORKAROUND
-                        if (pUnit->GetTypeId() == TYPEID_PLAYER)
-                            m_creature->CastSpell(pUnit, 5, TRIGGERED_NONE);
+                        pUnit->RemoveAllAuras();
+                        DoCastSpellIfCan(pUnit, SPELL_CHROMATIC_MUT_1, CAST_TRIGGERED);
                     }
                 }
             }
