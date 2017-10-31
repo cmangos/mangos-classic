@@ -224,7 +224,7 @@ int Master::Run()
 
         std::unique_ptr<SOAPThread> soapThread;
         if (sConfig.GetBoolDefault("SOAP.Enabled", false))
-            soapThread.reset(new SOAPThread("0.0.0.0", sConfig.GetIntDefault("SOAP.Port", 7878)));
+            soapThread.reset(new SOAPThread(sConfig.GetStringDefault("SOAP.IP", "127.0.0.1"), sConfig.GetIntDefault("SOAP.Port", 7878)));
 
         // wait for shut down and then let things go out of scope to close them down
         while (!World::IsStopped())
