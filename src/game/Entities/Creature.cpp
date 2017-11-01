@@ -224,7 +224,13 @@ void Creature::RemoveCorpse(bool inPlace)
 
     // script can set time (in seconds) explicit, override the original
     if (respawnDelay)
-        m_respawnTime = time(nullptr) + respawnDelay;
+    {
+        m_respawnTime = time(nullptr) + respawnDelay; // if we set a custom respawn time, we need to save it as well
+
+        // always save boss respawn time at death to prevent crash cheating
+        if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY) || IsWorldBoss())
+            SaveRespawnTime();
+    }
 
     InterruptMoving();
 
