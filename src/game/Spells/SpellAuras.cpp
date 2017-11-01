@@ -1016,6 +1016,19 @@ void Aura::TriggerSpell()
             // interesting 2 cases: periodic aura at caster of channeled spell
             if (target->GetObjectGuid() == casterGUID)
                 triggerCaster = target;
+
+            switch (triggeredSpellInfo->EffectImplicitTargetA[0])
+            {
+                case TARGET_CHAIN_DAMAGE:
+                case TARGET_DUELVSPLAYER:
+                    triggerCaster = GetCaster();
+                    triggerTarget = target;
+                    break;
+                case TARGET_SELF:
+                    triggerCaster = target;
+                    triggerTarget = target;
+                    break;
+            }
         }
 
         // Spell exist but require custom code
