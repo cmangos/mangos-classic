@@ -76,7 +76,7 @@
 # Boost::system will be automatically detected and satisfied, even
 # if system is not specified when using find_package and if
 # Boost::system is not added to target_link_libraries.  If using
-# Boost::thread, then Thread::Thread will also be added automatically.
+# Boost::thread, then Threads::Threads will also be added automatically.
 #
 # It is important to note that the imported targets behave differently
 # than variables created by this module: multiple calls to
@@ -107,6 +107,10 @@
 # Users or projects may tell this module which variant to find by
 # setting variables::
 #
+#   Boost_USE_DEBUG_LIBS     - Set to ON or OFF to specify whether to search
+#                              and use the debug libraries.  Default is ON.
+#   Boost_USE_RELEASE_LIBS   - Set to ON or OFF to specify whether to search
+#                              and use the release libraries.  Default is ON.
 #   Boost_USE_MULTITHREADED  - Set to OFF to use the non-multithreaded
 #                              libraries ('mt' tag).  Default is ON.
 #   Boost_USE_STATIC_LIBS    - Set to ON to force the use of the static
@@ -183,9 +187,11 @@
 #   target_link_libraries(foo Boost::date_time Boost::filesystem
 #                             Boost::iostreams)
 #
-# Example to find Boost headers and some *static* libraries::
+# Example to find Boost headers and some *static* (release only) libraries::
 #
-#   set(Boost_USE_STATIC_LIBS        ON) # only find static libs
+#   set(Boost_USE_STATIC_LIBS        ON)  # only find static libs
+#   set(Boost_USE_DEBUG_LIBS         OFF) # ignore debug libs and
+#   set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 #   set(Boost_USE_MULTITHREADED      ON)
 #   set(Boost_USE_STATIC_RUNTIME    OFF)
 #   find_package(Boost 1.36.0 COMPONENTS date_time filesystem system ...)
@@ -207,6 +213,10 @@
 # the Boost CMake package configuration for details on what it provides.
 #
 # Set Boost_NO_BOOST_CMAKE to ON to disable the search for boost-cmake.
+
+# Save project's policies
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 #-------------------------------------------------------------------------------
 # Before we go searching, check whether boost-cmake is available, unless the
@@ -235,11 +245,12 @@ if (NOT Boost_NO_BOOST_CMAKE)
   # If we found boost-cmake, then we're done.  Print out what we found.
   # Otherwise let the rest of the module try to find it.
   if (Boost_FOUND)
-    message("Boost ${Boost_FIND_VERSION} found.")
+    message(STATUS "Boost ${Boost_FIND_VERSION} found.")
     if (Boost_FIND_COMPONENTS)
-      message("Found Boost components:")
-      message("   ${Boost_FIND_COMPONENTS}")
+      message(STATUS "Found Boost components:\n   ${Boost_FIND_COMPONENTS}")
     endif()
+    # Restore project's policies
+    cmake_policy(POP)
     return()
   endif()
 endif()
@@ -292,13 +303,17 @@ macro(_Boost_ADJUST_LIB_VARS basename)
     endif()
 
     # If the debug & release library ends up being the same, omit the keywords
-    if(${Boost_${basename}_LIBRARY_RELEASE} STREQUAL ${Boost_${basename}_LIBRARY_DEBUG})
+    if("${Boost_${basename}_LIBRARY_RELEASE}" STREQUAL "${Boost_${basename}_LIBRARY_DEBUG}")
       set(Boost_${basename}_LIBRARY   ${Boost_${basename}_LIBRARY_RELEASE} )
       set(Boost_${basename}_LIBRARIES ${Boost_${basename}_LIBRARY_RELEASE} )
     endif()
 
     if(Boost_${basename}_LIBRARY AND Boost_${basename}_HEADER)
       set(Boost_${basename}_FOUND ON)
+      if("x${basename}" STREQUAL "xTHREAD" AND NOT TARGET Threads::Threads)
+        string(APPEND Boost_ERROR_REASON_THREAD " (missing dependency: Threads)")
+        set(Boost_THREAD_FOUND OFF)
+      endif()
     endif()
 
   endif()
@@ -548,7 +563,10 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
   # The addition of a new release should only require it to be run
   # against the new release.
   set(_Boost_IMPORTED_TARGETS TRUE)
-  if(NOT Boost_VERSION VERSION_LESS 103300 AND Boost_VERSION VERSION_LESS 103500)
+  if(Boost_VERSION VERSION_LESS 103300)
+    message(WARNING "Imported targets and dependency information not available for Boost version ${Boost_VERSION} (all versions older than 1.33)")
+    set(_Boost_IMPORTED_TARGETS FALSE)
+  elseif(NOT Boost_VERSION VERSION_LESS 103300 AND Boost_VERSION VERSION_LESS 103500)
     set(_Boost_IOSTREAMS_DEPENDENCIES regex thread)
     set(_Boost_REGEX_DEPENDENCIES thread)
     set(_Boost_WAVE_DEPENDENCIES filesystem thread)
@@ -762,8 +780,27 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
     set(_Boost_WAVE_DEPENDENCIES filesystem system serialization thread chrono date_time atomic)
     set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
   else()
-    message(WARNING "Imported targets not available for Boost version ${Boost_VERSION}")
-    set(_Boost_IMPORTED_TARGETS FALSE)
+    if(NOT Boost_VERSION VERSION_LESS 106500)
+      set(_Boost_CHRONO_DEPENDENCIES system)
+      set(_Boost_CONTEXT_DEPENDENCIES thread chrono system date_time)
+      set(_Boost_COROUTINE_DEPENDENCIES context system)
+      set(_Boost_FIBER_DEPENDENCIES context thread chrono system date_time)
+      set(_Boost_FILESYSTEM_DEPENDENCIES system)
+      set(_Boost_IOSTREAMS_DEPENDENCIES regex)
+      set(_Boost_LOG_DEPENDENCIES date_time log_setup system filesystem thread regex chrono atomic)
+      set(_Boost_MATH_DEPENDENCIES math_c99 math_c99f math_c99l math_tr1 math_tr1f math_tr1l atomic)
+      set(_Boost_MPI_DEPENDENCIES serialization)
+      set(_Boost_MPI_PYTHON_DEPENDENCIES python mpi serialization)
+      set(_Boost_NUMPY_DEPENDENCIES python)
+      set(_Boost_RANDOM_DEPENDENCIES system)
+      set(_Boost_THREAD_DEPENDENCIES chrono system date_time atomic)
+      set(_Boost_WAVE_DEPENDENCIES filesystem system serialization thread chrono date_time atomic)
+      set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
+    endif()
+    if(NOT Boost_VERSION VERSION_LESS 106600)
+      message(WARNING "New Boost version may have incorrect or missing dependencies and imported targets")
+      set(_Boost_IMPORTED_TARGETS FALSE)
+    endif()
   endif()
 
   string(TOUPPER ${component} uppercomponent)
@@ -813,6 +850,7 @@ function(_Boost_COMPONENT_HEADERS component _hdrs)
   set(_Boost_MATH_TR1L_HEADERS           "boost/math/tr1.hpp")
   set(_Boost_MPI_HEADERS                 "boost/mpi.hpp")
   set(_Boost_MPI_PYTHON_HEADERS          "boost/mpi/python/config.hpp")
+  set(_Boost_NUMPY_HEADERS               "boost/python/numpy.hpp")
   set(_Boost_PRG_EXEC_MONITOR_HEADERS    "boost/test/prg_exec_monitor.hpp")
   set(_Boost_PROGRAM_OPTIONS_HEADERS     "boost/program_options.hpp")
   set(_Boost_PYTHON_HEADERS              "boost/python.hpp")
@@ -865,14 +903,12 @@ function(_Boost_MISSING_DEPENDENCIES componentvar extravar)
     list(APPEND _boost_processed_components ${_boost_unprocessed_components})
     foreach(component ${_boost_unprocessed_components})
       string(TOUPPER ${component} uppercomponent)
-  set(${_ret} ${_Boost_${uppercomponent}_DEPENDENCIES} PARENT_SCOPE)
+      set(${_ret} ${_Boost_${uppercomponent}_DEPENDENCIES} PARENT_SCOPE)
       _Boost_COMPONENT_DEPENDENCIES("${component}" _Boost_${uppercomponent}_DEPENDENCIES)
       set(_Boost_${uppercomponent}_DEPENDENCIES ${_Boost_${uppercomponent}_DEPENDENCIES} PARENT_SCOPE)
       set(_Boost_IMPORTED_TARGETS ${_Boost_IMPORTED_TARGETS} PARENT_SCOPE)
       foreach(componentdep ${_Boost_${uppercomponent}_DEPENDENCIES})
-        list(FIND _boost_processed_components "${componentdep}" _boost_component_found)
-        list(FIND _boost_new_components "${componentdep}" _boost_component_new)
-        if (_boost_component_found EQUAL -1 AND _boost_component_new EQUAL -1)
+        if (NOT ("${componentdep}" IN_LIST _boost_processed_components OR "${componentdep}" IN_LIST _boost_new_components))
           list(APPEND _boost_new_components ${componentdep})
         endif()
       endforeach()
@@ -886,6 +922,33 @@ function(_Boost_MISSING_DEPENDENCIES componentvar extravar)
   endif()
   set(${componentvar} ${_boost_processed_components} PARENT_SCOPE)
   set(${extravar} ${_boost_extra_components} PARENT_SCOPE)
+endfunction()
+
+#
+# Some boost libraries may require particular set of compler features.
+# The very first one was `boost::fiber` introduced in Boost 1.62.
+# One can check required compiler features of it in
+# `${Boost_ROOT}/libs/fiber/build/Jamfile.v2`.
+#
+function(_Boost_COMPILER_FEATURES component _ret)
+  # Boost >= 1.62 and < 1.65
+  if(NOT Boost_VERSION VERSION_LESS 106200 AND Boost_VERSION VERSION_LESS 106500)
+    set(_Boost_FIBER_COMPILER_FEATURES
+        cxx_alias_templates
+        cxx_auto_type
+        cxx_constexpr
+        cxx_defaulted_functions
+        cxx_final
+        cxx_lambdas
+        cxx_noexcept
+        cxx_nullptr
+        cxx_rvalue_references
+        cxx_thread_local
+        cxx_variadic_templates
+    )
+  endif()
+  string(TOUPPER ${component} uppercomponent)
+  set(${_ret} ${_Boost_${uppercomponent}_COMPILER_FEATURES} PARENT_SCOPE)
 endfunction()
 
 #
@@ -942,8 +1005,14 @@ if(NOT Boost_LIBRARY_DIR_DEBUG AND Boost_LIBRARY_DIR)
   set(Boost_LIBRARY_DIR_DEBUG   "${Boost_LIBRARY_DIR}")
 endif()
 
+if(NOT DEFINED Boost_USE_DEBUG_LIBS)
+  set(Boost_USE_DEBUG_LIBS TRUE)
+endif()
+if(NOT DEFINED Boost_USE_RELEASE_LIBS)
+  set(Boost_USE_RELEASE_LIBS TRUE)
+endif()
 if(NOT DEFINED Boost_USE_MULTITHREADED)
-    set(Boost_USE_MULTITHREADED TRUE)
+  set(Boost_USE_MULTITHREADED TRUE)
 endif()
 if(NOT DEFINED Boost_USE_DEBUG_RUNTIME)
   set(Boost_USE_DEBUG_RUNTIME TRUE)
@@ -969,6 +1038,7 @@ else()
   # _Boost_COMPONENT_HEADERS.  See the instructions at the top of
   # _Boost_COMPONENT_DEPENDENCIES.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
+    "1.65.1" "1.65.0" "1.65"
     "1.64.0" "1.64" "1.63.0" "1.63" "1.62.0" "1.62" "1.61.0" "1.61" "1.60.0" "1.60"
     "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55"
     "1.54.0" "1.54" "1.53.0" "1.53" "1.52.0" "1.52" "1.51.0" "1.51"
@@ -1472,10 +1542,14 @@ endif()
 _Boost_MISSING_DEPENDENCIES(Boost_FIND_COMPONENTS _Boost_EXTRA_FIND_COMPONENTS)
 
 # If thread is required, get the thread libs as a dependency
-list(FIND Boost_FIND_COMPONENTS thread _Boost_THREAD_DEPENDENCY_LIBS)
-if(NOT _Boost_THREAD_DEPENDENCY_LIBS EQUAL -1)
-  include(CMakeFindDependencyMacro)
-  find_dependency(Threads)
+if("thread" IN_LIST Boost_FIND_COMPONENTS)
+  if(Boost_FIND_QUIETLY)
+    set(_Boost_find_quiet QUIET)
+  else()
+    set(_Boost_find_quiet "")
+  endif()
+  find_package(Threads ${_Boost_find_quiet})
+  unset(_Boost_find_quiet)
 endif()
 
 # If the user changed any of our control inputs flush previous results.
@@ -1577,12 +1651,14 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   # Avoid passing backslashes to _Boost_FIND_LIBRARY due to macro re-parsing.
   string(REPLACE "\\" "/" _boost_LIBRARY_SEARCH_DIRS_tmp "${_boost_LIBRARY_SEARCH_DIRS_RELEASE}")
 
-  _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE RELEASE
-    NAMES ${_boost_RELEASE_NAMES}
-    HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
-    NAMES_PER_DIR
-    DOC "${_boost_docstring_release}"
-    )
+  if(Boost_USE_RELEASE_LIBS)
+    _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE RELEASE
+      NAMES ${_boost_RELEASE_NAMES}
+      HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
+      NAMES_PER_DIR
+      DOC "${_boost_docstring_release}"
+      )
+  endif()
 
   #
   # Find DEBUG libraries
@@ -1626,12 +1702,14 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   # Avoid passing backslashes to _Boost_FIND_LIBRARY due to macro re-parsing.
   string(REPLACE "\\" "/" _boost_LIBRARY_SEARCH_DIRS_tmp "${_boost_LIBRARY_SEARCH_DIRS_DEBUG}")
 
-  _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG DEBUG
-    NAMES ${_boost_DEBUG_NAMES}
-    HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
-    NAMES_PER_DIR
-    DOC "${_boost_docstring_debug}"
-    )
+  if(Boost_USE_DEBUG_LIBS)
+    _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG DEBUG
+      NAMES ${_boost_DEBUG_NAMES}
+      HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
+      NAMES_PER_DIR
+      DOC "${_boost_docstring_debug}"
+      )
+  endif ()
 
   if(Boost_REALPATH)
     _Boost_SWAP_WITH_REALPATH(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE "${_boost_docstring_release}")
@@ -1639,6 +1717,9 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   endif()
 
   _Boost_ADJUST_LIB_VARS(${UPPERCOMPONENT})
+
+  # Check if component requires some compiler features
+  _Boost_COMPILER_FEATURES(${COMPONENT} _Boost_${UPPERCOMPONENT}_COMPILER_FEATURES)
 
 endforeach()
 
@@ -1698,8 +1779,9 @@ if(Boost_FOUND)
     string(APPEND Boost_ERROR_REASON
       " Boost libraries:\n")
     foreach(COMPONENT ${_Boost_MISSING_COMPONENTS})
+      string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
       string(APPEND Boost_ERROR_REASON
-        "        ${Boost_NAMESPACE}_${COMPONENT}\n")
+        "        ${Boost_NAMESPACE}_${COMPONENT}${Boost_ERROR_REASON_${UPPERCOMPONENT}}\n")
     endforeach()
 
     list(LENGTH Boost_FIND_COMPONENTS Boost_NUM_COMPONENTS_WANTED)
@@ -1811,6 +1893,10 @@ if(Boost_FOUND)
           set_target_properties(Boost::${COMPONENT} PROPERTIES
             INTERFACE_LINK_LIBRARIES "${_Boost_${UPPERCOMPONENT}_TARGET_DEPENDENCIES}")
         endif()
+        if(_Boost_${UPPERCOMPONENT}_COMPILER_FEATURES)
+          set_target_properties(Boost::${COMPONENT} PROPERTIES
+            INTERFACE_COMPILE_FEATURES "${_Boost_${UPPERCOMPONENT}_COMPILER_FEATURES}")
+        endif()
       endif()
     endif()
   endforeach()
@@ -1891,3 +1977,6 @@ list(REMOVE_DUPLICATES _Boost_COMPONENTS_SEARCHED)
 list(SORT _Boost_COMPONENTS_SEARCHED)
 set(_Boost_COMPONENTS_SEARCHED "${_Boost_COMPONENTS_SEARCHED}"
   CACHE INTERNAL "Components requested for this build tree.")
+
+# Restore project's policies
+cmake_policy(POP)
