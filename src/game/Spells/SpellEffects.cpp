@@ -51,6 +51,7 @@
 #include "Grids/CellImpl.h"
 #include "G3D/Vector3.h"
 #include "Loot/LootMgr.h"
+#include "Movement/MoveSpline.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
 {
@@ -5002,11 +5003,14 @@ void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    float dist = unitTarget->GetDistance2d(m_caster);
+    float dist = unitTarget->GetCombatDistance(m_caster, false);
     if (damage && dist > damage)
         dist = float(damage);
 
-    ((Player*)unitTarget)->KnockBackFrom(m_caster, -dist, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10);
+    float speedXY = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.1f;
+    float speedZ = dist / speedXY * 0.5f * Movement::gravity;
+
+    ((Player*)unitTarget)->KnockBackFrom(m_caster, -speedXY, speedZ);
 }
 
 void Spell::EffectDispelMechanic(SpellEffectIndex eff_idx)
