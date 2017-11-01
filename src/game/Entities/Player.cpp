@@ -1388,6 +1388,8 @@ void Player::SetDeathState(DeathState s)
         if (!ressSpellId)
             ressSpellId = GetResurrectionSpellId();
 
+        FailQuestsOnDeath(); // TODO: Order needs to be verified
+
         if (InstanceData* mapInstance = GetInstanceData())
             mapInstance->OnPlayerDeath(this);
     }
@@ -12123,29 +12125,47 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
 
 void Player::FailQuest(uint32 questId)
 {
-    if (Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId))
+    if (Quest const* quest = sObjectMgr.GetQuestTemplate(questId))
+        FailQuest(quest);
+}
+
+void Player::FailQuest(Quest const* quest)
+{
+    uint32 questId = quest->GetQuestId();
+
+    SetQuestStatus(questId, QUEST_STATUS_FAILED);
+
+    uint16 log_slot = FindQuestSlot(questId);
+
+    if (log_slot < MAX_QUEST_LOG_SIZE)
     {
-        SetQuestStatus(questId, QUEST_STATUS_FAILED);
+        SetQuestSlotTimer(log_slot, 1);
+        SetQuestSlotState(log_slot, QUEST_STATE_FAIL);
+    }
 
-        uint16 log_slot = FindQuestSlot(questId);
+    if (quest->HasSpecialFlag(QUEST_SPECIAL_FLAG_TIMED))
+    {
+        QuestStatusData& q_status = mQuestStatus[questId];
 
-        if (log_slot < MAX_QUEST_LOG_SIZE)
-        {
-            SetQuestSlotTimer(log_slot, 1);
-            SetQuestSlotState(log_slot, QUEST_STATE_FAIL);
-        }
+        RemoveTimedQuest(questId);
+        q_status.m_timer = 0;
 
-        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAG_TIMED))
-        {
-            QuestStatusData& q_status = mQuestStatus[questId];
+        SendQuestTimerFailed(questId);
+    }
+    else
+        SendQuestFailed(questId);
+}
 
-            RemoveTimedQuest(questId);
-            q_status.m_timer = 0;
+void Player::FailQuestsOnDeath()
+{
+    for (auto& data : mQuestStatus)
+    {
+        if (data.second.m_status != QUEST_STATUS_INCOMPLETE)
+            continue;
 
-            SendQuestTimerFailed(questId);
-        }
-        else
-            SendQuestFailed(questId);
+        if (Quest const* quest = sObjectMgr.GetQuestTemplate(data.first))
+            if (quest->HasQuestFlag(QUEST_FLAGS_STAY_ALIVE) && !CanRewardQuest(quest, false))
+                FailQuest(quest);
     }
 }
 

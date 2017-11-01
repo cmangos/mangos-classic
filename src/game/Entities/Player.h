@@ -1187,6 +1187,8 @@ class Player : public Unit
         void RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver, bool announce = true);
 
         void FailQuest(uint32 quest_id);
+        void FailQuest(Quest const* quest);
+        void FailQuestsOnDeath();
         bool SatisfyQuestSkill(Quest const* qInfo, bool msg) const;
         bool SatisfyQuestCondition(Quest const* qInfo, bool msg) const;
         bool SatisfyQuestLevel(Quest const* qInfo, bool msg) const;
