@@ -38,13 +38,7 @@ enum
     SPELL_IGNITE_FLESH          = 23315,                    // Ignite Flesh 23315,23316
     SPELL_FROST_BURN            = 23187,                    // Frost burn 23187, 23189
 
-    // Brood Affliction 23173 - Scripted Spell that cycles through all targets within 100 yards and has a chance to cast one of the afflictions on them
-    // Since Scripted spells arn't coded I'll just write a function that does the same thing
-    SPELL_BROODAF_BLUE          = 23153,                    // Blue affliction 23153
-    SPELL_BROODAF_BLACK         = 23154,                    // Black affliction 23154
-    SPELL_BROODAF_RED           = 23155,                    // Red affliction 23155 (23168 on death)
-    SPELL_BROODAF_BRONZE        = 23170,                    // Bronze Affliction  23170
-    SPELL_BROODAF_GREEN         = 23169,                    // Brood Affliction Green 23169
+    SPELL_BROOD_AFFLICTION      = 23173,
 
     SPELL_CHROMATIC_MUT_1       = 23174,                    // Spell cast on player if they get all 5 debuffs
     SPELL_ELEMENTAL_SHIELD      = 22276,
@@ -152,42 +146,8 @@ struct boss_chromaggusAI : public ScriptedAI
         // Affliction Timer
         if (m_uiAfflictionTimer < uiDiff)
         {
-            uint32 m_uiSpellAfflict = 0;
-
-            switch (urand(0, 4))
-            {
-                case 0: m_uiSpellAfflict = SPELL_BROODAF_BLUE; break;
-                case 1: m_uiSpellAfflict = SPELL_BROODAF_BLACK; break;
-                case 2: m_uiSpellAfflict = SPELL_BROODAF_RED; break;
-                case 3: m_uiSpellAfflict = SPELL_BROODAF_BRONZE; break;
-                case 4: m_uiSpellAfflict = SPELL_BROODAF_GREEN; break;
-            }
-
-            GuidVector vGuids;
-            m_creature->FillGuidsListFromThreatList(vGuids);
-            for (GuidVector::const_iterator i = vGuids.begin(); i != vGuids.end(); ++i)
-            {
-                Unit* pUnit = m_creature->GetMap()->GetUnit(*i);
-
-                if (pUnit)
-                {
-                    // Cast affliction
-                    DoCastSpellIfCan(pUnit, m_uiSpellAfflict, CAST_TRIGGERED);
-
-                    // Chromatic mutation if target is effected by all afflictions
-                    if (pUnit->HasAura(SPELL_BROODAF_BLUE, EFFECT_INDEX_0)
-                            && pUnit->HasAura(SPELL_BROODAF_BLACK, EFFECT_INDEX_0)
-                            && pUnit->HasAura(SPELL_BROODAF_RED, EFFECT_INDEX_0)
-                            && pUnit->HasAura(SPELL_BROODAF_BRONZE, EFFECT_INDEX_0)
-                            && pUnit->HasAura(SPELL_BROODAF_GREEN, EFFECT_INDEX_0))
-                    {
-                        pUnit->RemoveAllAuras();
-                        DoCastSpellIfCan(pUnit, SPELL_CHROMATIC_MUT_1, CAST_TRIGGERED);
-                    }
-                }
-            }
-
-            m_uiAfflictionTimer = 10000;
+            if (DoCastSpellIfCan(m_creature, SPELL_BROOD_AFFLICTION) == CAST_OK)
+                m_uiAfflictionTimer = 7000;
         }
         else
             m_uiAfflictionTimer -= uiDiff;

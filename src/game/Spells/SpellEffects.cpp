@@ -853,6 +853,66 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 23173:                                 // Brood Affliction
+                {
+                    // This spell selects one brood affliction amongst five and apply it onto 15 targets
+                    // If there are less than 15 targets, then the spell loops over the targets again
+                    // until there are 15 appliance of the chosen brood affliction
+
+                    // Brood Affliction selection
+                    uint32 spellAfflict = 0;
+                    switch (urand(0, 4))
+                    {
+                        case 0: spellAfflict = 23153; break;            // Brood Affliction: Blue
+                        case 1: spellAfflict = 23154; break;            // Brood Affliction: Black
+                        case 2: spellAfflict = 23155; break;            // Brood Affliction: Red
+                        case 3: spellAfflict = 23170; break;            // Brood Affliction: Bronze
+                        case 4: spellAfflict = 23169; break;            // Brood Affliction: Green
+                    }
+
+                    // Get the fifteen (potentially duplicate) targets from threat list
+                    GuidVector vGuids;
+                    ((Creature*)m_caster)->FillGuidsListFromThreatList(vGuids);
+
+                    std::vector<Unit*> fifteenTargets;
+                    uint8 targetsCount = 0;
+                    while (targetsCount < 15)
+                    {
+                        for (GuidVector::const_iterator i = vGuids.begin(); i != vGuids.end(); ++i)
+                        {
+                            Unit* unit = m_caster->GetMap()->GetUnit(*i);
+                            if (unit && targetsCount < 15 && unit->GetTypeId() == TYPEID_PLAYER && unit->isAlive())
+                            {
+                                fifteenTargets.push_back(unit);
+                                targetsCount++;
+                            }
+                            else break;
+                        }
+                        // Prevent infinite loop: if fifteenTargets is still empty after first iteration: return
+                        if (targetsCount == 0)
+                        {
+                            return;
+                        }
+                    }
+
+                    for (auto unit : fifteenTargets)
+                    {
+                            // Cast Brood Affliction
+                            m_caster->CastSpell(unit, spellAfflict, TRIGGERED_OLD_TRIGGERED);
+
+                            // Cast Chromatic Mutation (23174) if target is now affected by all five brood afflictions
+                            if (unit->HasAura(23153, EFFECT_INDEX_0)
+                                    && unit->HasAura(23154, EFFECT_INDEX_0)
+                                    && unit->HasAura(23155, EFFECT_INDEX_0)
+                                    && unit->HasAura(23170, EFFECT_INDEX_0)
+                                    && unit->HasAura(23169, EFFECT_INDEX_0))
+                            {
+                                unit->RemoveAllAuras();
+                                m_caster->CastSpell(unit, 23174, TRIGGERED_OLD_TRIGGERED);
+                            }
+                    }
+                    return;
+                }
                 case 23450:                                 // Transporter Arrival - (Gadgetzan + Everlook)
                 {
                     uint32 rand = urand(0, 5);              // Roll for minor malfunctions:
