@@ -1932,12 +1932,12 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
     }
     else
     {
-        if (!IsFriendlyTo(u))
+        if (CanAttack(u))
             return false;
     }
 
     // skip non hostile to caster enemy creatures
-    if (enemy && !IsHostileTo(enemy))
+    if (enemy && CanAttack(enemy) && !IsEnemy(enemy))
         return false;
 
     return true;
@@ -2099,7 +2099,7 @@ void Creature::SetInCombatWithZone()
             if (pPlayer->isGameMaster())
                 continue;
 
-            if (pPlayer->isAlive() && !IsFriendlyTo(pPlayer))
+            if (pPlayer->isAlive() && CanAttack(pPlayer))
             {
                 pPlayer->SetInCombatWith(this);
                 AddThreat(pPlayer);

@@ -7267,7 +7267,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // special cases for always overwrite invisibility/stealth
     if (invisible || m_Visibility == VISIBILITY_GROUP_STEALTH)
     {
-        if (u->IsHostileTo(this))
+        if (u->CanAttack(this))
         {
             // Hunter mark functionality
             AuraList const& auras = GetAurasByType(SPELL_AURA_MOD_STALKED);
@@ -7689,9 +7689,7 @@ bool Unit::IsTargetUnderControl(Unit const& target) const
     // also check if this unit is controlled by another creature from friendly faction
     if (Unit const* charmer = GetMap()->GetUnit(charmerGuid))
     {
-        FactionTemplateEntry const* charmerFactionEntry = charmer->getFactionTemplateEntry();
-        FactionTemplateEntry const* controllerFactionEntry = target.getFactionTemplateEntry();
-        if (controllerFactionEntry && charmerFactionEntry && !controllerFactionEntry->IsHostileTo(*controllerFactionEntry))
+        if (target.IsEnemy(charmer))
             return true;
     }
 
