@@ -4347,6 +4347,13 @@ void Unit::RemoveAurasTriggeredBySpell(uint32 spellId, ObjectGuid casterGuid /*=
     }
 }
 
+void Unit::RemoveAuraStack(uint32 spellId)
+{
+    if (SpellAuraHolder* holder = GetSpellAuraHolder(spellId))
+        if (holder->ModStackAmount(-1)) // Remove aura on return true
+            RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DEFAULT);
+}
+
 void Unit::RemoveAurasWithDispelType(DispelType type, ObjectGuid casterGuid)
 {
     // Create dispel mask by dispel type

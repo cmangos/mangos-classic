@@ -414,7 +414,7 @@ class Spell
         void SendSpellGo();
         void SendSpellCooldown();
         void SendInterrupted(uint8 result) const;
-        void SendChannelUpdate(uint32 time, bool properEnding = false) const;
+        void SendChannelUpdate(uint32 time, uint32 lastTick = 0) const;
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target) const;
 

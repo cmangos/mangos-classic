@@ -3243,7 +3243,7 @@ void Spell::update(uint32 difftime)
 
             if (m_timer == 0)
             {
-                SendChannelUpdate(0, true);
+                SendChannelUpdate(0, difftime);
 
                 // channeled spell processed independently for quest targeting
                 // cast at creature (or GO) quest objectives update at successful cast channel finished
@@ -3646,20 +3646,40 @@ void Spell::SendInterrupted(uint8 result) const
     m_caster->SendMessageToSet(data, true);
 }
 
-void Spell::SendChannelUpdate(uint32 time, bool properEnding) const
+void Spell::SendChannelUpdate(uint32 time, uint32 lastTick) const
 {
     if (time == 0)
     {
-        // Channel aura is removed during its update when channel ends properly
-        // If infinite channel remove aura right away
-        if (!properEnding || m_spellInfo->DurationIndex == 21)
+        if (lastTick)
         {
+            if (SpellAuraHolder* holder = m_caster->GetSpellAuraHolder(m_spellInfo->Id, m_caster->GetObjectGuid()))
+                holder->UpdateHolder(lastTick);
+        }
+
+        bool stackable = m_spellInfo->StackAmount > 0;
+
+        // Channel aura is removed during its update when channel ends properly
+        if (stackable)
+            m_caster->RemoveAuraStack(m_spellInfo->Id);
+        else
             m_caster->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
 
-            ObjectGuid target_guid = m_caster->GetChannelObjectGuid();
-            if (target_guid != m_caster->GetObjectGuid() && target_guid.IsUnit())
-                if (Unit* target = ObjectAccessor::GetUnit(*m_caster, target_guid))
+        ObjectGuid target_guid = m_caster->GetChannelObjectGuid();
+        if (target_guid != m_caster->GetObjectGuid() && target_guid.IsUnit())
+        {
+            if (Unit* target = ObjectAccessor::GetUnit(*m_caster, target_guid))
+            {
+                if (lastTick)
+                {
+                    if(SpellAuraHolder* holder = target->GetSpellAuraHolder(m_spellInfo->Id, m_caster->GetObjectGuid()))
+                        holder->UpdateHolder(lastTick);
+                }
+
+                if (stackable)
+                    target->RemoveAuraStack(m_spellInfo->Id);
+                else
                     target->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
+            }
         }
 
         // Only finish channeling when latest channeled spell finishes
