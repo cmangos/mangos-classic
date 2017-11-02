@@ -34,6 +34,8 @@
 
 #include <functional>
 
+#define HMAC_RES_SIZE 20
+
 class AuthSocket : public MaNGOS::Socket
 {
     public:
@@ -43,6 +45,7 @@ class AuthSocket : public MaNGOS::Socket
 
         void SendProof(Sha1Hash sha);
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
+        int32 generateToken(char const* b32key);
 
         bool _HandleLogonChallenge();
         bool _HandleLogonProof();
@@ -77,6 +80,7 @@ class AuthSocket : public MaNGOS::Socket
 
         std::string _login;
         std::string _safelogin;
+        std::string _token;
 
         // Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ
         // between enUS and enGB, which is important for the patch system

@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `realmd_db_version`;
 CREATE TABLE `realmd_db_version` (
-  `required_z2678_01_realmd` bit(1) DEFAULT NULL
+  `required_z2716_01_realmd_totp` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -58,6 +58,7 @@ CREATE TABLE `account` (
   `expansion` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mutetime` bigint(40) unsigned NOT NULL DEFAULT '0',
   `locale` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `token` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_username` (`username`),
   KEY `idx_gmlevel` (`gmlevel`)
