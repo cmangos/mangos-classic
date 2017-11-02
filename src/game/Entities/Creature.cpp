@@ -2794,7 +2794,7 @@ void Creature::SetBaseRunSpeed(float speed)
     if (m_creatureInfo->SpeedRun) // Creature template should still override
         newSpeed = m_creatureInfo->SpeedRun;
 
-    if (newSpeed != m_baseSpeedWalk)
+    if (newSpeed != m_baseSpeedRun)
     {
         m_baseSpeedRun = newSpeed;
         UpdateSpeed(MOVE_RUN, false);

@@ -395,8 +395,8 @@ Unit::Unit() :
 
     m_extraAttacksExecuting = false;
 
-    m_baseSpeedWalk = 0.f;
-    m_baseSpeedRun = 0.f;
+    m_baseSpeedWalk = 1.f;
+    m_baseSpeedRun = 1.f;
 }
 
 Unit::~Unit()
