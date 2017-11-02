@@ -522,7 +522,7 @@ struct npc_private_hendelAI : public ScriptedAI
         if (m_creature->getVictim())
             return;
 
-        if (m_creature->IsFriendlyTo(pAttacker))
+        if (!m_creature->CanAttackNow(pAttacker))
             return;
 
         AttackStart(pAttacker);
