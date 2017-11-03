@@ -19119,6 +19119,17 @@ void Player::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*= 0*/,
     else if (gcdDuration > 1500)
         gcdDuration = 1500;
 
+    // TODO: Remove this once spells are queuable and GCD is checked on execute
+    if (uint32 latency = GetSession()->GetLatency())
+    {
+        if (latency > 300)
+            gcdDuration -= 300;
+        else
+            gcdDuration -= latency;
+
+        gcdDuration -= GetMap()->GetCurrentDiff() > 200 ? 200 : GetMap()->GetCurrentDiff();
+    }
+
     WorldObject::AddGCD(spellEntry, gcdDuration);
 
     if (!updateClient)

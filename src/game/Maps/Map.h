@@ -307,6 +307,8 @@ class Map : public GridRefManager<NGridType>
         void RemoveFromSpawnCount(const ObjectGuid& guid);
 
         TimePoint GetCurrentClockTime();
+        uint32 GetCurrentDiff();
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 

@@ -68,6 +68,11 @@ TimePoint Map::GetCurrentClockTime()
     return World::GetCurrentClockTime();
 }
 
+uint32 Map::GetCurrentDiff()
+{
+    return World::GetCurrentDiff();
+}
+
 void Map::LoadMapAndVMap(int gx, int gy)
 {
     if (m_bLoadedGrids[gx][gy])

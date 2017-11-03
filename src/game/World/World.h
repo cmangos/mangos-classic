@@ -565,6 +565,7 @@ class World
         void InvalidatePlayerDataToAllClient(ObjectGuid guid) const;
 
         static TimePoint GetCurrentClockTime() { return m_currentTime; }
+        static uint32 GetCurrentDiff() { return m_currentDiff; }
 
     protected:
         void _UpdateGameTime();
@@ -655,6 +656,7 @@ class World
         std::vector<std::string> m_spamRecords;
 
         static TimePoint m_currentTime;
+        static uint32 m_currentDiff;
 };
 
 extern uint32 realmID;
