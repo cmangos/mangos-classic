@@ -5120,13 +5120,11 @@ void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool de
     uint32 plevel = getLevel();                             // if defense than pVictim == attacker
     uint32 greylevel = MaNGOS::XP::GetGrayLevel(plevel);
     uint32 moblevel = pVictim->GetLevelForTarget(this);
-    if (moblevel < greylevel)
-        return;
 
     if (moblevel > plevel + 5)
         moblevel = plevel + 5;
 
-    uint32 lvldif = moblevel - greylevel;
+    uint32 lvldif = std::abs(int32(moblevel - greylevel));
     if (lvldif < 3)
         lvldif = 3;
 
