@@ -2252,9 +2252,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     case TARGET_DYNAMIC_OBJECT_RIGHT_SIDE:  angle -= M_PI_F / 2;  break;
                 }
 
-                float x, y;
+                float x, y, z = m_caster->GetPositionZ();
                 m_caster->GetNearPoint2D(x, y, radius + m_caster->GetObjectBoundingRadius(), angle);
-                m_targets.setDestination(x, y, m_caster->GetPositionZ());
+                m_caster->UpdateGroundPositionZ(x, y, z);
+                m_targets.setDestination(x, y, z);
             }
 
             targetUnitMap.push_back(m_caster);
