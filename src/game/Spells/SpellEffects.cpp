@@ -897,8 +897,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     for (auto unit : fifteenTargets)
                     {
-                            // Cast Brood Affliction
-                            m_caster->CastSpell(unit, spellAfflict, TRIGGERED_OLD_TRIGGERED);
+                            // Cast Brood Affliction if not mutated
+                            if (!(unit->HasAura(23174, EFFECT_INDEX_0)))
+                                m_caster->CastSpell(unit, spellAfflict, TRIGGERED_OLD_TRIGGERED);
 
                             // Cast Chromatic Mutation (23174) if target is now affected by all five brood afflictions
                             if (unit->HasAura(23153, EFFECT_INDEX_0)
@@ -911,6 +912,41 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                                 m_caster->CastSpell(unit, 23174, TRIGGERED_OLD_TRIGGERED);
                             }
                     }
+                    return;
+                }
+                case 23195:                                 // Dragondog Breath Selection
+                {
+                    // This spell selects two breaths for Chromaggus amongst five and send them to BWL instance script through events
+
+                    // Breaths selection
+                    // 5 possiblities for the first breath, 4 for the second: 20 total possiblites
+                    uint8 rightBreath = urand(0, 4);
+                    uint8 leftBreath = (rightBreath + urand(1, 4)) % 5;
+
+                    // Sending left breath to instance script
+                    uint32 breathSpellId = 0;
+                    switch (leftBreath)
+                    {
+                        case 0: breathSpellId = 23317; break;
+                        case 1: breathSpellId = 23318; break;
+                        case 2: breathSpellId = 23319; break;
+                        case 3: breathSpellId = 23320; break;
+                        case 4: breathSpellId = 23321; break;
+                    }
+                    m_caster->CastSpell(m_caster, breathSpellId, TRIGGERED_OLD_TRIGGERED);
+
+                    // Sending right breath to instance script
+                    breathSpellId = 0;
+                    switch (rightBreath)
+                    {
+                        case 0: breathSpellId = 23322; break;
+                        case 1: breathSpellId = 23323; break;
+                        case 2: breathSpellId = 23324; break;
+                        case 3: breathSpellId = 23325; break;
+                        case 4: breathSpellId = 23326; break;
+                    }
+                    m_caster->CastSpell(m_caster, breathSpellId, TRIGGERED_OLD_TRIGGERED);
+
                     return;
                 }
                 case 23450:                                 // Transporter Arrival - (Gadgetzan + Everlook)

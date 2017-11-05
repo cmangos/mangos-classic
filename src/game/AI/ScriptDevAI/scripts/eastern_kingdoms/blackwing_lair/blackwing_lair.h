@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 9,
+    MAX_ENCOUNTER               = 11,
 
     TYPE_RAZORGORE              = 0,
     TYPE_VAELASTRASZ            = 1,
@@ -18,6 +18,8 @@ enum
     TYPE_CHROMAGGUS             = 6,
     TYPE_NEFARIAN               = 7,
     TYPE_QUEST_SCEPTER          = 8,
+    TYPE_CHROMA_LBREATH         = 9,                        // Not real events: used to store the two random Chromaggus breaths for the instance lifetime
+    TYPE_CHROMA_RBREATH         = 10,
 
     DATA_DRAGON_EGG             = 1,                        // track the used eggs
 
@@ -112,6 +114,8 @@ class instance_blackwing_lair : public ScriptedInstance
         void Load(const char* chrIn) override;
 
         void Update(uint32 uiDiff) override;
+
+        void InitiateBreath(uint32 uiEventId);
 
         bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
 

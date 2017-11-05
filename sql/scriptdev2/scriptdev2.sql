@@ -206,6 +206,17 @@ UPDATE creature_template SET ScriptName='boss_flamegor' WHERE entry=11981;
 UPDATE creature_template SET ScriptName='boss_chromaggus' WHERE entry=14020;
 UPDATE creature_template SET ScriptName='boss_victor_nefarius' WHERE entry=10162;
 UPDATE creature_template SET ScriptName='boss_nefarian' WHERE entry=11583;
+INSERT INTO scripted_event_id VALUES
+(8446, 'event_weekly_chromatic_selection'),
+(8447, 'event_weekly_chromatic_selection'),
+(8448, 'event_weekly_chromatic_selection'),
+(8449, 'event_weekly_chromatic_selection'),
+(8450, 'event_weekly_chromatic_selection'),
+(8451, 'event_weekly_chromatic_selection'),
+(8452, 'event_weekly_chromatic_selection'),
+(8453, 'event_weekly_chromatic_selection'),
+(8454, 'event_weekly_chromatic_selection'),
+(8455, 'event_weekly_chromatic_selection');
 
 /* BLASTED LANDS */
 UPDATE creature_template SET ScriptName='npc_fallen_hero_of_horde' WHERE entry=7572;

@@ -254,16 +254,21 @@ void instance_blackwing_lair::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
                 m_uiScepterEpicTimer = 0;
             break;
+        case TYPE_CHROMA_LBREATH:
+        case TYPE_CHROMA_RBREATH:
+            m_auiEncounter[uiType] = uiData;    // Store the spell IDs of the two breaths used by Chromaggus for all the instance lifetime. Breaths are picked randomly in Chromaggus script
+            break;
     }
 
-    if (uiData == DONE)
+    if (uiData >= DONE)
     {
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
         saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
-                   << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8];
+                   << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
+                   << m_auiEncounter[9] << " " << m_auiEncounter[10];
 
         m_strInstData = saveStream.str();
 
@@ -285,7 +290,7 @@ void instance_blackwing_lair::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
-               >> m_auiEncounter[8];
+               >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
@@ -414,7 +419,7 @@ bool instance_blackwing_lair::CheckConditionCriteriaMeet(Player const* pPlayer, 
             return (GetData(TYPE_QUEST_SCEPTER) == DONE);
     }
 
-    script_error_log("instance_dire_maul::CheckConditionCriteriaMeet called with unsupported Id %u. Called with param plr %s, src %s, condition source type %u",
+    script_error_log("instance_blackwing_lair::CheckConditionCriteriaMeet called with unsupported Id %u. Called with param plr %s, src %s, condition source type %u",
                      uiInstanceConditionId, pPlayer ? pPlayer->GetGuidStr().c_str() : "NULL", pConditionSource ? pConditionSource->GetGuidStr().c_str() : "NULL", conditionSourceType);
     return false;
 }
@@ -555,6 +560,43 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
         m_uiDefenseTimer -= uiDiff;
 }
 
+void instance_blackwing_lair::InitiateBreath(uint32 uiEventId)
+{
+    uint32 leftBreath = 0;
+    uint32 rightBreath = 0;
+    switch (uiEventId)
+    {
+        // Left Chromaggus breath
+        case 8446: leftBreath = 23187; break;  // Frost Burn
+        case 8447: leftBreath = 23308; break;  // Incinerate
+        case 8448: leftBreath = 23310; break;  // Time Lapse
+        case 8449: leftBreath = 23313; break;  // Corrosive Acid
+        case 8450: leftBreath = 23315; break;  // Ignite Flesh
+        // Right Chromaggus breath
+        case 8451: rightBreath = 23189; break;  // Frost Burn
+        case 8452: rightBreath = 23309; break;  // Incinerate
+        case 8453: rightBreath = 23312; break;  // Time Lapse
+        case 8454: rightBreath = 23314; break;  // Corrosive Acid
+        case 8455: rightBreath = 23316; break;  // Ignite Flesh
+    }
+    if (leftBreath)
+    {
+        debug_log("SD2 Instance Blackwing Lair: initiating Chromaggus' left breath");
+        if (GetData(TYPE_CHROMA_LBREATH) == NOT_STARTED)
+            SetData(TYPE_CHROMA_LBREATH, leftBreath);
+        debug_log("SD2 Instance Blackwing Lair: Chromaggus' left breath set to spell %u", GetData(TYPE_CHROMA_LBREATH));
+    }
+    if (rightBreath)
+    {
+        debug_log("SD2 Instance Blackwing Lair: initiating Chromaggus' right breath");
+        if (GetData(TYPE_CHROMA_RBREATH) == NOT_STARTED)
+            SetData(TYPE_CHROMA_RBREATH, rightBreath);
+        debug_log("SD2 Instance Blackwing Lair: Chromaggus' right breath set to spell %u", GetData(TYPE_CHROMA_RBREATH));
+    }
+
+    return;
+}
+
 InstanceData* GetInstanceData_instance_blackwing_lair(Map* pMap)
 {
     return new instance_blackwing_lair(pMap);
@@ -590,9 +632,42 @@ struct go_ai_suppression : public GameObjectAI
     }
 };
 
+
 GameObjectAI* GetAI_go_suppression(GameObject* go)
 {
     return new go_ai_suppression (go);
+}
+
+/*##############################
+## Chromaggus' breaths selection
+###############################*/
+
+bool ProcessEventId_event_weekly_chromatic_selection(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+{
+    if (pSource->GetTypeId() == TYPEID_UNIT)
+    {
+        if (instance_blackwing_lair* pInstance = (instance_blackwing_lair*)((Creature*)pSource)->GetInstanceData())
+        {
+            switch (uiEventId)
+            {
+                // Left Chromaggus breath
+                case 8446:
+                case 8447:
+                case 8448:
+                case 8449:
+                case 8450:
+                // Right Chromaggus breath
+                case 8451:
+                case 8452:
+                case 8453:
+                case 8454:
+                case 8455:
+                    pInstance->InitiateBreath(uiEventId);
+                    break;
+            }
+        }
+    }
+    return false;
 }
 
 void AddSC_instance_blackwing_lair()
@@ -607,5 +682,10 @@ void AddSC_instance_blackwing_lair()
     pNewScript = new Script;
     pNewScript->Name = "go_suppression";
     pNewScript->GetGameObjectAI = &GetAI_go_suppression;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "event_weekly_chromatic_selection";
+    pNewScript->pProcessEventId = &ProcessEventId_event_weekly_chromatic_selection;
     pNewScript->RegisterSelf();
 }
