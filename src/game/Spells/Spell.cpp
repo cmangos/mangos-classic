@@ -2345,6 +2345,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             if (!pUnitTarget)
                 break;
 
+            if (!m_caster->CanAssistSpell(pUnitTarget, m_spellInfo))
+                break;
+
             if (EffectChainTarget <= 1)
                 targetUnitMap.push_back(pUnitTarget);
             else
