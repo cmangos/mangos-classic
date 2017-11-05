@@ -813,6 +813,9 @@ void Aura::TriggerSpell()
                         return;
                     case 23170:                             // Brood Affliction: Bronze
                     {
+                        // Only 10% chance of triggering spell, return for the remaining 90%
+                        if (urand(0, 9) >= 1)
+                            return;
                         target->CastSpell(target, 23171, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
                     }
