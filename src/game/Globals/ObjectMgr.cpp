@@ -7889,6 +7889,15 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
                 return false;
             }
         }
+        case CONDITION_SPAWN_COUNT:
+        {
+            if (!sCreatureStorage.LookupEntry<CreatureInfo>(value1))
+            {
+                sLog.outErrorDb("Spawn count condition (entry %u, type %u) has an invalid value in value1. (Creature %u does not exist in the database), skipping.", entry, condition, value1);
+                return false;
+            }
+            break;
+        }
         case CONDITION_NONE:
             break;
         default:
