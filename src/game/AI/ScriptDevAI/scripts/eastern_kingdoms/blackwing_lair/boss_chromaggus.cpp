@@ -29,6 +29,7 @@ EndScriptData
 enum
 {
     EMOTE_GENERIC_FRENZY_KILL   = -1000001,
+    EMOTE_GENERIC_FRENZY        = -1000002,
     EMOTE_SHIMMER               = -1469003,
 
     SPELL_BREATH_SELECTION      = 23195,
@@ -73,7 +74,7 @@ struct boss_chromaggusAI : public ScriptedAI
             m_uiBreathLeftTimer  = 30000;                                       // Left breath is 30 seconds
             m_uiBreathRightTimer  = 60000;                                      // Right is 1 minute so that we can alternate
         }
-        m_uiAfflictionTimer = 10000;
+        m_uiAfflictionTimer = 7 * IN_MILLISECONDS;
         m_uiFrenzyTimer     = 15000;
         m_bEnraged          = false;
     }
@@ -135,7 +136,7 @@ struct boss_chromaggusAI : public ScriptedAI
         if (m_uiAfflictionTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BROOD_AFFLICTION) == CAST_OK)
-                m_uiAfflictionTimer = 7000;
+                m_uiAfflictionTimer = 7 * IN_MILLISECONDS;
         }
         else
             m_uiAfflictionTimer -= uiDiff;
@@ -156,6 +157,7 @@ struct boss_chromaggusAI : public ScriptedAI
         if (!m_bEnraged && m_creature->GetHealthPercent() < 20.0f)
         {
             DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
+            DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
             m_bEnraged = true;
         }
 

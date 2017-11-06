@@ -860,15 +860,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     // until there are 15 appliance of the chosen brood affliction
 
                     // Brood Affliction selection
-                    uint32 spellAfflict = 0;
-                    switch (urand(0, 4))
-                    {
-                        case 0: spellAfflict = 23153; break;            // Brood Affliction: Blue
-                        case 1: spellAfflict = 23154; break;            // Brood Affliction: Black
-                        case 2: spellAfflict = 23155; break;            // Brood Affliction: Red
-                        case 3: spellAfflict = 23170; break;            // Brood Affliction: Bronze
-                        case 4: spellAfflict = 23169; break;            // Brood Affliction: Green
-                    }
+                    uint32 afflictions[] = { 23153, 23154, 23155, 23170, 23169 };   // Blue / Black / Red / Bronze / Green
+                    uint32 spellAfflict = afflictions[urand(0, 4)];
 
                     // Get the fifteen (potentially duplicate) targets from threat list
                     GuidVector vGuids;
@@ -910,6 +903,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             {
                                 unit->RemoveAllAuras();
                                 m_caster->CastSpell(unit, 23174, TRIGGERED_OLD_TRIGGERED);
+                                unit->CastSpell(unit, 23175, TRIGGERED_OLD_TRIGGERED);
+                                unit->CastSpell(unit, 23177, TRIGGERED_OLD_TRIGGERED);
                             }
                     }
                     return;
@@ -924,28 +919,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     uint8 leftBreath = (rightBreath + urand(1, 4)) % 5;
 
                     // Sending left breath to instance script
-                    uint32 breathSpellId = 0;
-                    switch (leftBreath)
-                    {
-                        case 0: breathSpellId = 23317; break;
-                        case 1: breathSpellId = 23318; break;
-                        case 2: breathSpellId = 23319; break;
-                        case 3: breathSpellId = 23320; break;
-                        case 4: breathSpellId = 23321; break;
-                    }
-                    m_caster->CastSpell(m_caster, breathSpellId, TRIGGERED_OLD_TRIGGERED);
+                    uint32 leftBreaths[] = { 23317, 23318, 23319, 23320, 23321 };
+                    m_caster->CastSpell(m_caster, leftBreaths[leftBreath], TRIGGERED_OLD_TRIGGERED);
 
                     // Sending right breath to instance script
-                    breathSpellId = 0;
-                    switch (rightBreath)
-                    {
-                        case 0: breathSpellId = 23322; break;
-                        case 1: breathSpellId = 23323; break;
-                        case 2: breathSpellId = 23324; break;
-                        case 3: breathSpellId = 23325; break;
-                        case 4: breathSpellId = 23326; break;
-                    }
-                    m_caster->CastSpell(m_caster, breathSpellId, TRIGGERED_OLD_TRIGGERED);
+                    uint32 rightBreaths[] = { 23322, 23323, 23324, 23325, 23326 };
+                    m_caster->CastSpell(m_caster, rightBreaths[rightBreath], TRIGGERED_OLD_TRIGGERED);
 
                     return;
                 }

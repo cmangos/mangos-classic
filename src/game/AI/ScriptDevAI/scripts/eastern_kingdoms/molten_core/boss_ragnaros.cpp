@@ -49,7 +49,7 @@ enum
     SPELL_LAVA_BURST            = 21908,                    // Randomly trigger one of spells 21886, 21900 - 21907 which summons Go 178088
     SPELL_SUMMON_SONS_FLAME     = 21108,                    // Trigger the eight spells summoning the Son of Flame adds
 
-    MAX_ADDS_IN_SUBMERGE        = 8,
+    NB_ADDS_IN_SUBMERGE         = 8,
     NPC_SON_OF_FLAME            = 12143,
     NPC_FLAME_OF_RAGNAROS       = 13148,
 };
@@ -303,7 +303,7 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
 
             // Summon 8 elementals around the boss
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SONS_FLAME) == CAST_OK)
-                m_uiAddCount = 8;
+                m_uiAddCount = NB_ADDS_IN_SUBMERGE;
 
             return;
         }
