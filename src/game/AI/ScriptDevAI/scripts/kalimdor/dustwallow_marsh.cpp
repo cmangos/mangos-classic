@@ -40,13 +40,15 @@ EndContentData */
 
 enum
 {
-    SAY_MOR_CHALLENGE               = -1000499,
-    SAY_MOR_SCARED                  = -1000500,
+    SAY_MOR_CHALLENGE       = -1000499,
+    SAY_MOR_SCARED          = -1000500,
 
-    QUEST_CHALLENGE_MOROKK          = 1173,
+    NPC_MOROKK              = 4500,
+    QUEST_CHALLENGE_MOROKK  = 1173,
 
-    FACTION_MOR_HOSTILE             = 168,
-    FACTION_MOR_RUNNING             = 35
+    FACTION_MOR_HOSTILE     = 168,
+    FACTION_MOR_RUNNING     = 35,
+    FACTION_MOR_SPAWN       = 29
 };
 
 struct npc_morokkAI : public npc_escortAI
@@ -61,42 +63,31 @@ struct npc_morokkAI : public npc_escortAI
 
     void Reset() override {}
 
+    void JustRespawned() override
+    {
+        npc_escortAI::JustRespawned();
+        m_creature->setFaction(FACTION_MOR_SPAWN);
+    }
+
+    void JustReachedHome() override
+    {
+        if (HasEscortState(STATE_ESCORT_ESCORTING))
+        {
+            if (!m_bIsSuccess)
+            {
+                FailQuestForPlayerAndGroup();
+                m_creature->ForcedDespawn();
+            }
+        }
+    }
+
     void WaypointReached(uint32 uiPointId) override
     {
         switch (uiPointId)
         {
-            case 0:
-                SetEscortPaused(true);
-                break;
-            case 1:
-                if (m_bIsSuccess)
-                    DoScriptText(SAY_MOR_SCARED, m_creature);
-                else
-                {
-                    m_creature->SetDeathState(JUST_DIED);
-                    m_creature->Respawn();
-                }
-                break;
-        }
-    }
-
-
-    virtual void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
-    {
-        if (HasEscortState(STATE_ESCORT_ESCORTING))
-        {
-            if (m_creature->GetHealthPercent() < 30.0f)
-            {
-                if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_CHALLENGE_MOROKK, m_creature);
-
-                m_creature->setFaction(FACTION_MOR_RUNNING);
-
-                m_bIsSuccess = true;
-                EnterEvadeMode();
-
-                uiDamage = 0;
-            }
+        case 0:
+            SetEscortPaused(true);
+            break;
         }
     }
 
@@ -108,16 +99,40 @@ struct npc_morokkAI : public npc_escortAI
             {
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
-                    m_bIsSuccess = false;
-                    DoScriptText(SAY_MOR_CHALLENGE, m_creature, pPlayer);
-                    m_creature->setFaction(FACTION_MOR_HOSTILE);
-                    AttackStart(pPlayer);
+                    if (pPlayer->isAlive() && pPlayer->IsInRange(m_creature, 0, 70))
+                    {
+                        m_bIsSuccess = false;
+                        DoScriptText(SAY_MOR_CHALLENGE, m_creature, pPlayer);
+                        SetReactState(REACT_AGGRESSIVE);
+                        m_creature->setFaction(FACTION_MOR_HOSTILE);
+                        AttackStart(pPlayer);
+                    }
+                    else
+                        SetEscortPaused(false);
                 }
-
-                SetEscortPaused(false);
+                else
+                    SetEscortPaused(false);
             }
-
             return;
+        }
+        if (m_creature->GetHealthPercent() <= 30.0f)
+        {
+            if (HasEscortState(STATE_ESCORT_PAUSED))
+            {
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    pPlayer->GroupEventHappens(QUEST_CHALLENGE_MOROKK, m_creature);
+                    m_creature->setFaction(FACTION_MOR_RUNNING);
+                    m_bIsSuccess = true;
+                    m_creature->RemoveAllAurasOnEvade();
+                    m_creature->DeleteThreatList();
+                    m_creature->CombatStop(true);
+                    SetEscortPaused(false);
+                    SetReactState(REACT_PASSIVE);
+                    DoScriptText(SAY_MOR_SCARED, m_creature);
+                    m_creature->GetMotionMaster()->Clear(false); // TODO: make whole EscortAI work like this
+                }
+            }
         }
 
         DoMeleeAttackIfReady();
