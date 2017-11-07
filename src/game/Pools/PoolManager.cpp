@@ -404,7 +404,6 @@ void PoolGroup<Creature>::Spawn1Object(MapPersistentState& mapState, PoolObject*
                         if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY) || pCreature->IsWorldBoss())
                             pCreature->SaveRespawnTime();
                     }
-                    dataMap->Add(pCreature);
                 }
             }
             // for not loaded grid just update respawn time (avoid work for instances until implemented support)
