@@ -1317,7 +1317,8 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
                 // caster can be detected but have stealth aura
                 m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
-                if (!unit->IsStandState() && !unit->hasUnitState(UNIT_STAT_STUNNED))
+                // Since patch 1.5.0 sitting characters always stand up on attack (even if stunned)
+                if (!unit->IsStandState() && (unit->GetTypeId() == TYPEID_PLAYER || !unit->hasUnitState(UNIT_STAT_STUNNED)))
                     unit->SetStandState(UNIT_STAND_STATE_STAND);
 
                 // TODO:: why testing AI here???

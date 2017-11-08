@@ -692,7 +692,8 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-        if (pVictim->GetTypeId() == TYPEID_PLAYER && !pVictim->IsStandState() && !pVictim->hasUnitState(UNIT_STAT_STUNNED))
+        // Since patch 1.5.0 sitting characters always stand up on attack (even if stunned)
+        if (!pVictim->IsStandState() && (pVictim->GetTypeId() == TYPEID_PLAYER || !pVictim->hasUnitState(UNIT_STAT_STUNNED)))
             pVictim->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
@@ -9138,8 +9139,6 @@ void Unit::SetImmobilizedState(bool apply, bool stun)
         {
             // Clear unit movement flags
             m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
-            if (stun)
-                SetStandState(UNIT_STAND_STATE_STAND); // in 1.5 client
             SetRoot(true);
         }
     }
