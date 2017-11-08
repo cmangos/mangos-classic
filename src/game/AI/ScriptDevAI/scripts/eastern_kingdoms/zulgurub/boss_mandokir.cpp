@@ -240,7 +240,7 @@ struct boss_mandokirAI : public ScriptedAI
 
         if (uiPointId == POINT_DOWNSTAIRS)
         {
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             m_creature->SetInCombatWithZone();
         }
     }
