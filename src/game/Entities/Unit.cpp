@@ -5546,7 +5546,7 @@ bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= fals
         InterruptNonMeleeSpells(false);
 
     // Clear our target only if targetSwitch == true
-    if (targetSwitch && !(GetTypeId() == TYPEID_PLAYER))
+    if (targetSwitch && GetTypeId() != TYPEID_PLAYER)
         SetTargetGuid(ObjectGuid());
 
     clearUnitState(UNIT_STAT_MELEE_ATTACKING);
