@@ -109,6 +109,7 @@ struct boss_thaddiusAI : public Scripted_NoMovementAI
         m_uiBerserkTimer = 6 * MINUTE * IN_MILLISECONDS;
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+        DoCastSpellIfCan(m_creature, SPELL_THADIUS_SPAWN);
     }
 
     void Aggro(Unit* /*pWho*/) override
