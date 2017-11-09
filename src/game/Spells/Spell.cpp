@@ -4432,6 +4432,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
 
             // simple cases
+            // TODO: To function properly, need to extend to pos/neutral/neg
             bool explicit_target_mode = false;
             bool target_hostile = false;
             bool target_hostile_checked = false;
@@ -4476,7 +4477,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!target_hostile_checked)
                     {
                         target_hostile_checked = true;
-                        target_hostile = !m_caster->CanAssist(target);
+                        target_hostile = m_caster->CanAttack(target) && m_caster->IsEnemy(target);
                     }
 
                     if (target_hostile)
@@ -4487,7 +4488,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!target_friendly_checked)
                     {
                         target_friendly_checked = true;
-                        target_friendly = !m_caster->CanAttack(target);
+                        target_friendly = m_caster->CanAssist(target) && m_caster->IsFriend(target);
                     }
 
                     if (target_friendly)
