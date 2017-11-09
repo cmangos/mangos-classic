@@ -46,6 +46,7 @@
 #include "Tools/Language.h"
 #include "Maps/MapManager.h"
 #include "Loot/LootMgr.h"
+#include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -1091,6 +1092,24 @@ void Aura::TriggerSpell()
                 triggerTarget->CastCustomSpell(triggerTarget, 19698, &damageForTick[GetAuraTicks() - 1], nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
                 return;
             }
+            case 28059:                                     // Positive Charge
+            case 28084:                                     // Negative Charge
+            {
+                uint32 buffAuraId = auraId == 28059 ? 29659 : 29660;
+                uint32 curCount = 0;
+                std::list<Player*> playerList;
+                GetPlayerListWithEntryInWorld(playerList, target, 10.0f);
+                for (Player* player : playerList)
+                    if (target != player && player->HasAura(auraId))
+                        curCount++;
+
+                target->RemoveAurasDueToSpell(buffAuraId);
+                if (curCount)
+                    for (uint32 i = 0; i < curCount; i++)
+                        target->CastSpell(target, buffAuraId, TRIGGERED_OLD_TRIGGERED);
+
+                break;
+            }
         }
     }
 
@@ -1287,6 +1306,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 GetCaster()->CastSpell(target, 26078, TRIGGERED_OLD_TRIGGERED);
                 return;
             }
+            case 28059:                                     // Positive Charge
+                target->RemoveAurasDueToSpell(29659);
+                return;
+            case 28084:                                     // Negative Charge
+                target->RemoveAurasDueToSpell(29660);
+                return;
             case 28169:                                     // Mutating Injection
             {
                 // Mutagen Explosion
