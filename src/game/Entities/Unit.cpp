@@ -6295,6 +6295,10 @@ uint32 Unit::SpellDamageBonusTaken(Unit* pCaster, SpellEntry const* spellProto, 
     if (!spellProto || !pCaster || damagetype == DIRECT_DAMAGE)
         return pdamage;
 
+    // Some spells don't benefit from taken mods
+    if (spellProto->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
+        return pdamage;
+
     uint32 schoolMask = GetSpellSchoolMask(spellProto);
 
     // Taken total percent damage auras
@@ -6626,6 +6630,10 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
     if (!pVictim || pdamage == 0)
         return pdamage;
 
+    // Some spells don't benefit from done mods
+    if (spellProto && spellProto->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
+        return pdamage;
+
     // differentiate for weapon damage based spells
     bool isWeaponDamageBasedSpell = !(spellProto && (damagetype == DOT || IsSpellHaveEffect(spellProto, SPELL_EFFECT_SCHOOL_DAMAGE)));
     Item*  pWeapon          = GetTypeId() == TYPEID_PLAYER ? ((Player*)this)->GetWeaponForAttack(attType, true, false) : nullptr;
@@ -6760,10 +6768,11 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
  */
 uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackType attType, SpellEntry const* spellProto, DamageEffectType damagetype, uint32 stack, bool flat)
 {
-    if (!pCaster)
+    if (!pCaster || pdamage == 0)
         return pdamage;
 
-    if (pdamage == 0)
+    // Some spells don't benefit from taken mods
+    if (spellProto && spellProto->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
         return pdamage;
 
     // differentiate for weapon damage based spells
