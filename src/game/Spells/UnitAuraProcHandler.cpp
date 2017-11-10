@@ -1141,7 +1141,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
     }
 
     // not allow proc extra attack spell at extra attack
-    if (m_extraAttacks && IsSpellHaveEffect(triggerEntry, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
+    if (m_extraAttacksExecuting && IsSpellHaveEffect(triggerEntry, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
         return SPELL_AURA_PROC_FAILED;
 
     // Custom basepoints/target for exist spell
@@ -1194,22 +1194,14 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
             return SPELL_AURA_PROC_FAILED;
     }
 
-    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(trigger_spell_id);
-    if (m_extraAttacksExecuting && spellInfo) // prevent executing extra attack spells when executing extra attacks
-    {
-        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
-            if (spellInfo->Effect[i] == SPELL_EFFECT_ADD_EXTRA_ATTACKS)
-                return SPELL_AURA_PROC_FAILED;
-    }
-
     if (basepoints[EFFECT_INDEX_0] || basepoints[EFFECT_INDEX_1] || basepoints[EFFECT_INDEX_2])
-        CastCustomSpell(target, spellInfo,
+        CastCustomSpell(target, triggerEntry,
                         basepoints[EFFECT_INDEX_0] ? &basepoints[EFFECT_INDEX_0] : nullptr,
                         basepoints[EFFECT_INDEX_1] ? &basepoints[EFFECT_INDEX_1] : nullptr,
                         basepoints[EFFECT_INDEX_2] ? &basepoints[EFFECT_INDEX_2] : nullptr,
                         TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
     else
-        CastSpell(target, spellInfo, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
+        CastSpell(target, triggerEntry, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
 
     if (cooldown)
         AddCooldown(*triggerEntry, nullptr, false, cooldown * IN_MILLISECONDS);
