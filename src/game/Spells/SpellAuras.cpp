@@ -1095,10 +1095,22 @@ void Aura::TriggerSpell()
             case 28059:                                     // Positive Charge
             case 28084:                                     // Negative Charge
             {
-                uint32 buffAuraId = auraId == 28059 ? 29659 : 29660;
+                uint32 buffAuraId;
+                float range;
+                switch (auraId)
+                {
+                    case 28059:
+                        buffAuraId = 29659;
+                        range = 13.f;
+                        break;
+                    case 28084:
+                        buffAuraId = 29660;
+                        range = 13.f;
+                        break;
+                }
                 uint32 curCount = 0;
                 std::list<Player*> playerList;
-                GetPlayerListWithEntryInWorld(playerList, target, 10.0f);
+                GetPlayerListWithEntryInWorld(playerList, target, range); // official range
                 for (Player* player : playerList)
                     if (target != player && player->HasAura(auraId))
                         curCount++;

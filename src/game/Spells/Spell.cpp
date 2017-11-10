@@ -6282,6 +6282,14 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             if (target->GetPowerType() != POWER_MANA)
                 return false;
             break;
+        case 28062:                                         // Positive Charge
+            if (!target->HasAura(29660))                    // Only deal damage if target has Negative Charge
+                return false;
+            break;
+        case 28085:                                         // Negative Charge
+            if (!target->HasAura(29659))                    // Only deal damage if target has Positive Charge
+                return false;
+            break;
         default:
             break;
     }
