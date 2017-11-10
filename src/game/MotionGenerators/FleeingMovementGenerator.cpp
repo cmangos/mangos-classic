@@ -201,6 +201,8 @@ template bool FleeingMovementGenerator<Creature>::Update(Creature&, const uint32
 void TimedFleeingMovementGenerator::Finalize(Unit& owner)
 {
     owner.clearUnitState(UNIT_STAT_FLEEING | UNIT_STAT_FLEEING_MOVE);
+    if (owner.GetTypeId() == TYPEID_UNIT) // temporary hack to fix creature only fleeing on low hp
+        owner.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
     if (Unit* victim = owner.getVictim())
     {
         if (owner.isAlive())
