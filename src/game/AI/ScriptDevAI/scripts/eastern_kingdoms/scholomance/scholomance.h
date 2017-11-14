@@ -61,6 +61,9 @@ enum
     EVENT_ID_RAVENIAN       = 5623,
 
     SAY_GANDLING_SPAWN      = -1289000,
+    
+	GANDLING_STANDARD_MODEL_ID = 11070,
+    GANDLING_CHRISTMAS_MODEL_ID = 15732
 };
 
 struct SpawnLocation
