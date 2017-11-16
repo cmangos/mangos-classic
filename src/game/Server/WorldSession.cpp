@@ -591,7 +591,7 @@ void WorldSession::SendExpectedSpamRecords()
     WorldPacket data(SMSG_EXPECTED_SPAM_RECORDS, 4);
 
     data << (uint32) spamRecords.size();
-    for (std::string record : spamRecords)
+    for (const std::string& record : spamRecords)
         data << record;
 
     SendPacket(data);
