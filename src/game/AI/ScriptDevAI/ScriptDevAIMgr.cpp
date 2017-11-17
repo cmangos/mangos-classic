@@ -357,6 +357,16 @@ bool ScriptDevAIMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets co
     return pTempScript->pItemUse(pPlayer, pItem, targets);
 }
 
+bool ScriptDevAIMgr::OnItemLoot(Player* pPlayer, Item* pItem, bool apply)
+{
+    Script* pTempScript = GetScript(pItem->GetProto()->ScriptId);
+
+    if (!pTempScript || !pTempScript->pItemLoot)
+        return false;
+
+    return pTempScript->pItemLoot(pPlayer, pItem, apply);
+}
+
 bool ScriptDevAIMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
 {
     Script* pTempScript = GetScript(pTarget->GetScriptId());

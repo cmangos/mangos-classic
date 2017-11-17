@@ -9478,6 +9478,7 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
 
         AddEnchantmentDurations(pItem);
         AddItemDurations(pItem);
+        sScriptDevAIMgr.OnItemLoot(this, pItem, true);
 
         return pItem;
     }
@@ -9804,6 +9805,8 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
 
         RemoveEnchantmentDurations(pItem);
         RemoveItemDurations(pItem);
+
+        sScriptDevAIMgr.OnItemLoot(this, pItem, false);
 
         ItemRemovedQuestCheck(pItem->GetEntry(), pItem->GetCount());
 
