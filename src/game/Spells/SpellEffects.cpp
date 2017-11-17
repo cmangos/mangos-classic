@@ -3877,245 +3877,205 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 26663:                                 // Valentine - Orgrimmar Grunt
+                case 26663:    // Valentine - Orgrimmar Grunt
+		{
+		        if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+		                return;
+		        uint32 PledgeGiftOrHeartbroken = 27247; // Cast Pledge of Friendship by default
+		        uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
+
+		        if (!urand(0, RewardToHeartbrokenRatio))
+			        PledgeGiftOrHeartbroken = 26898;	// Heartbroken
+		        else if (!unitTarget->HasAura(26680))
+		        {
+			        PledgeGiftOrHeartbroken = 27507;	// Pledge of Adoration
+			        m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
+		        }
+		        m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
+		        ((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
+		        return;
+		}
+		case 26678:                                 // Create Heart Candy
+		{
+
+		        uint32 spellId = 0;
+
+		        switch (urand(0, 7))
+		        {
+		                case 0: spellId = 26668; break;
+		                case 1: spellId = 26670; break;
+		                case 2: spellId = 26671; break;
+		                case 3: spellId = 26672; break;
+		                case 4: spellId = 26673; break;
+		                case 5: spellId = 26674; break;
+		                case 6: spellId = 26675; break;
+		                case 7: spellId = 26676; break;
+		        }
+
+		        m_caster->CastSpell(m_caster, spellId, TRIGGERED_OLD_TRIGGERED);
+		        return;
+		}
+		case 26923:   // Valentine - Thunderbluff Watcher
+		{
+		        if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+			        return;
+		        uint32 PledgeGiftOrHeartbroken = 27248; // Cast Pledge of Friendship by default
+		        uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
+
+	                if (!urand(0, RewardToHeartbrokenRatio))
+		                PledgeGiftOrHeartbroken = 26898;	// Heartbroken
+		        else if (!unitTarget->HasAura(26680))
+		        {
+			        PledgeGiftOrHeartbroken = 27513;	// Pledge of Adoration
+			        m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
+		        }
+		        m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
+		        ((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
+		        return;
+		}
+		case 26924:                                 // Valentine - Undercity Guardian
+		{
+			if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+				return;
+			uint32 PledgeGiftOrHeartbroken = 27246; // Cast Pledge of Friendship by default
+			uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
+
+			if (!urand(0, RewardToHeartbrokenRatio))
+				PledgeGiftOrHeartbroken = 26898;	// Heartbroken
+			else if (!unitTarget->HasAura(26680))
+			{
+				PledgeGiftOrHeartbroken = 27515;	// Pledge of Adoration
+				m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
+			}
+			m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
+			((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
+			return;
+		}
+		case 27541:                                 // Valentine - Darnassus Sentinel
+		{
+			if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+				return;
+			uint32 PledgeGiftOrHeartbroken = 27245; // Cast Pledge of Friendship by default
+			uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
+
+			if (!urand(0, RewardToHeartbrokenRatio))
+				PledgeGiftOrHeartbroken = 26898;	// Heartbroken
+			else if (!unitTarget->HasAura(26680))
+			{
+				PledgeGiftOrHeartbroken = 27504;	// Pledge of Adoration
+				m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
+			}
+			m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
+			((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
+			return;
+		}
+		case 27547:                                 // Valentine - Ironforge Guard
+		{
+			if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+				return;
+			uint32 PledgeGiftOrHeartbroken = 27244; // Cast Pledge of Friendship(IF) by default
+			uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
+
+			if (!urand(0, RewardToHeartbrokenRatio))
+				PledgeGiftOrHeartbroken = 26898;	// Heartbroken
+			else if (!unitTarget->HasAura(26680))
+			{
+			PledgeGiftOrHeartbroken = 27506;	// Pledge of Adoration(IF)
+			m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
+			}
+			m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
+			((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
+			return;
+		}
+		case 27548:                                 // Valentine - Stormwind City Guard
+		{
+			if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+				return;
+			uint32 PledgeGiftOrHeartbroken = 27242; // Cast Pledge of Friendship by default
+			uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
+
+			if (!urand(0, RewardToHeartbrokenRatio))
+				PledgeGiftOrHeartbroken = 26898;	// Heartbroken
+			else if (!unitTarget->HasAura(26680))
+			{
+				PledgeGiftOrHeartbroken = 27510;	// Pledge of Adoration
+				m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
+			}
+			m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
+			((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
+			return;
+		}
+		case 27549:                                 // Valentine - Horde Civilian
+		{
+			if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+				return;
+
+			uint32 PledgeGiftOrHeartbroken;
+			uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
+
+			switch (m_caster->getFaction())
+			{
+				case 29:  PledgeGiftOrHeartbroken = 27523; break; // GoF Org
+				case 104: PledgeGiftOrHeartbroken = 27524; break; // GoF TB
+				case 68:  PledgeGiftOrHeartbroken = 27529; break; // GoF UC	
+				default:
+				return;
+			}
+			if (!urand(0, RewardToHeartbrokenRatio))
+				PledgeGiftOrHeartbroken = 26898;	// Heartbroken
+			else if (!unitTarget->HasAura(26680))
+			{
+				switch (m_caster->getFaction())
 				{
-					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-						return;
-					uint32 PledgeGiftOrHeartbroken = 27247; // Cast Pledge of Friendship by default
-					uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
-
-					if (!urand(0, RewardToHeartbrokenRatio))
-						PledgeGiftOrHeartbroken = 26898;	// Heartbroken
-					else if (!unitTarget->HasAura(26680))
-					{
-						PledgeGiftOrHeartbroken = 27507;	// Pledge of Adoration
-						m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
-					}
-					m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
-					((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
-					return;
-				}
-				case 26678:                                 // Create Heart Candy
-				{
-
-					uint32 spellId = 0;
-
-					switch (urand(0, 7))
-					{
-					case 0:
-						spellId = 26668;
-						break;
-					case 1:
-						spellId = 26670;
-						break;
-					case 2:
-						spellId = 26671;
-						break;
-					case 3:
-						spellId = 26672;
-						break;
-					case 4:
-						spellId = 26673;
-						break;
-					case 5:
-						spellId = 26674;
-						break;
-					case 6:
-						spellId = 26675;
-						break;
-					case 7:
-						spellId = 26676;
-						break;
-					}
-
-					m_caster->CastSpell(m_caster, spellId, TRIGGERED_OLD_TRIGGERED);
-					return;
-				}
-				case 26923:                                 // Valentine - Thunderbluff Watcher
-				{
-					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-						return;
-					uint32 PledgeGiftOrHeartbroken = 27248; // Cast Pledge of Friendship by default
-					uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
-
-					if (!urand(0, RewardToHeartbrokenRatio))
-						PledgeGiftOrHeartbroken = 26898;	// Heartbroken
-					else if (!unitTarget->HasAura(26680))
-					{
-						PledgeGiftOrHeartbroken = 27513;	// Pledge of Adoration
-						m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
-					}
-					m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
-					((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
-					return;
-				}
-				case 26924:                                 // Valentine - Undercity Guardian
-				{
-					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-						return;
-					uint32 PledgeGiftOrHeartbroken = 27246; // Cast Pledge of Friendship by default
-					uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
-
-					if (!urand(0, RewardToHeartbrokenRatio))
-						PledgeGiftOrHeartbroken = 26898;	// Heartbroken
-					else if (!unitTarget->HasAura(26680))
-					{
-						PledgeGiftOrHeartbroken = 27515;	// Pledge of Adoration
-						m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
-					}
-					m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
-					((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
-					return;
-				}
-				case 27541:                                 // Valentine - Darnassus Sentinel
-				{
-					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-						return;
-					uint32 PledgeGiftOrHeartbroken = 27245; // Cast Pledge of Friendship by default
-					uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
-
-					if (!urand(0, RewardToHeartbrokenRatio))
-						PledgeGiftOrHeartbroken = 26898;	// Heartbroken
-					else if (!unitTarget->HasAura(26680))
-					{
-						PledgeGiftOrHeartbroken = 27504;	// Pledge of Adoration
-						m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
-					}
-					m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
-					((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
-					return;
-				}
-				case 27547:                                 // Valentine - Ironforge Guard
-				{
-					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-						return;
-					uint32 PledgeGiftOrHeartbroken = 27244; // Cast Pledge of Friendship(IF) by default
-					uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
-
-					if (!urand(0, RewardToHeartbrokenRatio))
-						PledgeGiftOrHeartbroken = 26898;	// Heartbroken
-					else if (!unitTarget->HasAura(26680))
-					{
-						PledgeGiftOrHeartbroken = 27506;	// Pledge of Adoration(IF)
-						m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
-					}
-					m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
-					((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
-					return;
-				}
-				case 27548:                                 // Valentine - Stormwind City Guard
-				{
-					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-						return;
-					uint32 PledgeGiftOrHeartbroken = 27242; // Cast Pledge of Friendship by default
-					uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
-
-					if (!urand(0, RewardToHeartbrokenRatio))
-						PledgeGiftOrHeartbroken = 26898;	// Heartbroken
-					else if (!unitTarget->HasAura(26680))
-					{
-						PledgeGiftOrHeartbroken = 27510;	// Pledge of Adoration
-						m_caster->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
-					}
-					m_caster->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
-					((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
-					return;
-				}
-				case 27549:                                 // Valentine - Horde Civilian
-				{
-					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-						return;
-
-					uint32 PledgeGiftOrHeartbroken;
-					uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
-
-					switch (m_caster->getFaction())
-					{
-					case 29:
-						PledgeGiftOrHeartbroken = 27523; // GoF Org
-						break;
-					case 104:
-						PledgeGiftOrHeartbroken = 27524; // GoF TB
-						break;
-					case 68:
-						PledgeGiftOrHeartbroken = 27529; // GoF UC
-						break;
+					case 29:  PledgeGiftOrHeartbroken = 27505; break; // GoA Org	
+					case 104: PledgeGiftOrHeartbroken = 27511; break; // GoA TB
+					case 68:  PledgeGiftOrHeartbroken = 27512; break; // GoA UC	
 					default:
-						return;
-					}
-					if (!urand(0, RewardToHeartbrokenRatio))
-						PledgeGiftOrHeartbroken = 26898;	// Heartbroken
-					else if (!unitTarget->HasAura(26680))
-					{
-						switch (m_caster->getFaction())
-						{
-						case 29:
-							PledgeGiftOrHeartbroken = 27505; // GoA Org
-							break;
-						case 104:
-							PledgeGiftOrHeartbroken = 27511; // GoA TB
-							break;
-						case 68:
-							PledgeGiftOrHeartbroken = 27512; // GoA UC
-							break;
-						default:
-							return;
-						}
-						unitTarget->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
-					}
-					unitTarget->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
-					((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
-					break;
-
+					return;
 				}
-				case 27550:                                 // Valentine - Alliance Civilian
+				unitTarget->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
+			}
+			unitTarget->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
+			((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
+			return;
+
+		}
+		case 27550:                                 // Valentine - Alliance Civilian
+		{
+			if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+				return;
+
+			uint32 PledgeGiftOrHeartbroken;
+			uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
+
+			switch (m_caster->getFaction())
+			{
+				case 12: PledgeGiftOrHeartbroken = 27525; break; // GoF SW
+				case 55: PledgeGiftOrHeartbroken = 27520; break; // GoF IF
+				case 80: PledgeGiftOrHeartbroken = 27519; break; // GoF Darnassus
+				default:
+				return;
+			}
+			if (!urand(0, RewardToHeartbrokenRatio))
+				PledgeGiftOrHeartbroken = 26898;	// Heartbroken
+			else if (!unitTarget->HasAura(26680))
+			{
+				PledgeGiftOrHeartbroken = 26901;
+				switch (m_caster->getFaction())
 				{
-					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-						return;
-
-					uint32 PledgeGiftOrHeartbroken;
-					uint16 RewardToHeartbrokenRatio = 5;    // Sets 1 in 6 chance to cast Heartbroken
-
-					switch (m_caster->getFaction())
-					{
-					case 12:
-						PledgeGiftOrHeartbroken = 27525; // GoF SW
-						break;
-					case 55:
-						PledgeGiftOrHeartbroken = 27520; // GoF IF
-						break;
-					case 80:
-						PledgeGiftOrHeartbroken = 27519; // GoF Darnassus
-						break;
+                                        case 12: PledgeGiftOrHeartbroken = 27509; break; // GoA SW
+					case 55: PledgeGiftOrHeartbroken = 27503; break; // GoA IF
+					case 80: PledgeGiftOrHeartbroken = 26901; break; // GoA Darnassus
 					default:
-						return;
-					}
-					if (!urand(0, RewardToHeartbrokenRatio))
-						PledgeGiftOrHeartbroken = 26898;	// Heartbroken
-					else if (!unitTarget->HasAura(26680))
-					{
-						PledgeGiftOrHeartbroken = 26901;
-						switch (m_caster->getFaction())
-						{
-						case 12:
-							PledgeGiftOrHeartbroken = 27509; // GoA SW
-							break;
-						case 55:
-							PledgeGiftOrHeartbroken = 27503; // GoA IF
-							break;
-						case 80:
-							PledgeGiftOrHeartbroken = 26901; // GoA Darnassus
-							break;
-						default:
-							return;
-						}
-						unitTarget->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
-					}
-					unitTarget->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
-					((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
-					break;
-
+					return;
 				}
+				unitTarget->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);
+			}
+			unitTarget->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
+			((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);  // remove 1 love token on cast from inventory
+			return;
+
+		}
                 case 27687:                                 // Summon Bone Minions
                 {
                     if (!unitTarget)
