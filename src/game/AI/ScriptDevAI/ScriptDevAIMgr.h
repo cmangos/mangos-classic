@@ -96,6 +96,7 @@ struct Script
     bool (*pEffectDummyItem)(Unit*, uint32, SpellEffectIndex, Item*, ObjectGuid);
     bool (*pEffectScriptEffectNPC)(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
     bool (*pEffectAuraDummy)(const Aura*, bool);
+    std::function<bool(Unit*)>* pTrapSearching;
 
     GameObjectAI* (*GetGameObjectAI)(GameObject*);
     CreatureAI* (*GetAI)(Creature*);
@@ -127,6 +128,7 @@ class ScriptDevAIMgr
         uint32 GetDialogStatus(const Player* pPlayer, const Creature* pCreature) const;
         uint32 GetDialogStatus(const Player* pPlayer, const GameObject* pGameObject) const;
         bool OnGameObjectUse(Player* pPlayer, GameObject* pGameObject);
+        std::function<bool(Unit*)>* OnTrapSearch(GameObject* go);
         bool OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets);
         bool OnItemLoot(Player* pPlayer, Item* pItem, bool apply);
         bool OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry);

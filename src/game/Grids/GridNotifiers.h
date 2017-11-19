@@ -827,7 +827,8 @@ namespace MaNGOS
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
-                if (u->isAlive() && i_obj->CanAttackSpell(u) && i_obj->IsWithinDistInMap(u, i_range))
+                if (u->isAlive() && (i_controlledByPlayer ? !i_obj->IsFriendlyTo(u) && i_obj->CanAttackSpell(u) : i_obj->IsHostileTo(u))
+                    && i_obj->IsWithinDistInMap(u, i_range))
                     return true;
                 else
                     return false;
@@ -870,6 +871,24 @@ namespace MaNGOS
             }
         private:
             WorldObject const* i_obj;
+            float i_range;
+    };
+
+    class AnyUnitFulfillingConditionInRangeCheck
+    {
+        public:
+            AnyUnitFulfillingConditionInRangeCheck(WorldObject const* obj, std::function<bool(Unit*)>& functor, float radius) : i_obj(obj), i_functor(functor), i_range(radius) {}
+            WorldObject const& GetFocusObject() const { return *i_obj; }
+            bool operator()(Unit* u)
+            {
+                if (i_functor(u) && i_obj->IsWithinDistInMap(u, i_range))
+                    return true;
+
+                return false;
+            }
+        private:
+            WorldObject const* i_obj;
+            std::function<bool(Unit*)>& i_functor;
             float i_range;
     };
 

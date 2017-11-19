@@ -354,30 +354,41 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
                     // Should trap trigger?
                     Unit* target = nullptr;                     // pointer to appropriate target if found any
-                    switch (goInfo->trapCustom.triggerOn)
+
+                    if (std::function<bool(Unit*)>* functor = sScriptDevAIMgr.OnTrapSearch(this))
                     {
-                        case 1: // friendly
+                        MaNGOS::AnyUnitFulfillingConditionInRangeCheck u_check(this, *functor, radius);
+                        MaNGOS::UnitSearcher<MaNGOS::AnyUnitFulfillingConditionInRangeCheck> checker(target, u_check);
+                        Cell::VisitAllObjects(this, checker, radius);
+                    }
+                    else
+                    {
+                        switch (goInfo->trapCustom.triggerOn)
                         {
-                            MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, nullptr, radius);
-                            MaNGOS::UnitSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> checker(target, u_check);
-                            Cell::VisitAllObjects(this, checker, radius);
-                            break;
-                        }
-                        case 2: // all
-                        {
-                            MaNGOS::AnyUnitInObjectRangeCheck u_check(this, radius);
-                            MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck> checker(target, u_check);
-                            Cell::VisitAllObjects(this, checker, radius);
-                            break;
-                        }
-                        default: // unfriendly
-                        {
-                            MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
-                            MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(target, u_check);
-                            Cell::VisitAllObjects(this, checker, radius);
-                            break;
+                            case 1: // friendly
+                            {
+                                MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, nullptr, radius);
+                                MaNGOS::UnitSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> checker(target, u_check);
+                                Cell::VisitAllObjects(this, checker, radius);
+                                break;
+                            }
+                            case 2: // all
+                            {
+                                MaNGOS::AnyUnitInObjectRangeCheck u_check(this, radius);
+                                MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck> checker(target, u_check);
+                                Cell::VisitAllObjects(this, checker, radius);
+                                break;
+                            }
+                            default: // unfriendly
+                            {
+                                MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
+                                MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(target, u_check);
+                                Cell::VisitAllObjects(this, checker, radius);
+                                break;
+                            }
                         }
                     }
+                    
                     if (target && (!goInfo->trapCustom.triggerOn || !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))) // do not trigger on hostile traps if not selectable
                         Use(target);
                 }

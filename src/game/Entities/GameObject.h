@@ -724,7 +724,8 @@ class GameObject : public WorldObject
 
         uint32 GetScriptId() const;
         void AIM_Initialize();
-        void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return m_AI->OnEventHappened(eventId, activate, resume); }
+        void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
+        GameObjectAI* AI() { return m_AI.get(); }
 
         GameObjectModel* m_model;
 
