@@ -468,6 +468,7 @@ UPDATE creature_template SET ScriptName='npc_reginald_windsor' WHERE entry =1258
 
 /* STRANGLETHORN VALE */
 UPDATE creature_template SET ScriptName='mob_yenniku' WHERE entry=2530;
+UPDATE gameobject_template SET ScriptName='go_transpolyporter_bb' WHERE entry IN(142172);
 
 /* STRATHOLME */
 UPDATE instance_template SET ScriptName='instance_stratholme' WHERE map=329;
