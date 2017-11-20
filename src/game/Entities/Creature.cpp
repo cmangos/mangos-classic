@@ -2142,6 +2142,13 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
             if (dist > params.range.maxRange || dist < params.range.minRange)
                 return false;
         }
+
+        if ((selectFlags & SELECT_FLAG_RANGE_AOE_RANGE))
+        {
+            float dist = pTarget->GetDistance(GetPositionX(), GetPositionY(), GetPositionZ());
+            if (dist > params.range.maxRange || dist < params.range.minRange)
+                return false;
+        }
     }
 
     if (pSpellInfo)

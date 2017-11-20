@@ -338,7 +338,8 @@ enum SelectFlags
     SELECT_FLAG_NOT_IN_MELEE_RANGE  = 0x080,
     SELECT_FLAG_HAS_AURA            = 0x100,
     SELECT_FLAG_NOT_AURA            = 0x200,
-    SELECT_FLAG_RANGE_RANGE         = 0x400,
+    SELECT_FLAG_RANGE_RANGE         = 0x400,                // For direct targeted abilities like charge or frostbolt
+    SELECT_FLAG_RANGE_AOE_RANGE     = 0x800,                // For AOE targeted abilities like frost nova
 };
 
 enum RegenStatsFlags
