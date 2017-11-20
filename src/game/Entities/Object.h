@@ -779,7 +779,9 @@ class WorldObject : public Object
         bool HasInArc(const WorldObject* target, const float arcangle = M_PI) const;
         bool isInFrontInMap(WorldObject const* target, float distance, float arc = M_PI) const;
         bool isInBackInMap(WorldObject const* target, float distance, float arc = M_PI) const;
+        // Used in AOE - meant to ignore bounding radius of source
         bool isInFront(WorldObject const* target, float distance, float arc = M_PI) const;
+        // Used in AOE - meant to ignore bounding radius of source
         bool isInBack(WorldObject const* target, float distance, float arc = M_PI) const;
         bool IsFacingTargetsBack(const WorldObject* target, float arc = M_PI_F) const;
         bool IsFacingTargetsFront(const WorldObject* target, float arc = M_PI_F) const;
