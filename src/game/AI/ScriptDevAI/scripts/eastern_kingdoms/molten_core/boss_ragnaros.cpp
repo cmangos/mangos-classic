@@ -277,7 +277,7 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
                         m_uiHammerTimer = urand(11000, 30000);
                 }
                 else
-                    m_uiHammerTimer -= uiDiff;*/
+                    m_uiHammerTimer -= uiDiff;
 
                 // Submerge Timer
                 if (m_uiNextPhaseTimer < uiDiff)
