@@ -369,6 +369,234 @@ bool EffectDummyCreature_spell_capture_grark(Unit* /*pCaster*/, uint32 uiSpellId
     return false;
 }
 
+enum
+{
+    SPELL_FOOLS_PLIGHT          = 23504,
+
+    SPELL_DEMONIC_FRENZY        = 23257,
+    SPELL_ENTROPIC_STING        = 23260,
+
+    EMOTE_FRENZY                = -1000001,
+
+    NPC_NELSON_THE_NICE         = 14529,
+    NPC_KLINFRAN_THE_CRAZED     = 14534,
+    NPC_THE_CLEANER             = 14503,
+
+    QUEST_STAVE_OF_THE_ANCIENTS = 7636
+};
+
+#define GOSSIP_ITEM                 "Show me your real face, demon."
+
+/*######
+## npc_franklin_the_friendly
+######*/
+
+/*######
+## npc_klinfran_the_crazed
+######*/
+
+struct npc_klinfranAI : public ScriptedAI
+{
+    npc_klinfranAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_bTransform = false;
+        m_uiDespawn_Timer = 0;
+        Reset();
+    }
+
+    uint32 m_uiTransform_Timer;
+    uint32 m_uiTransformEmote_Timer;
+    bool m_bTransform;
+
+    ObjectGuid m_hunterGuid;
+    uint32 m_uiDemonic_Frenzy_Timer;
+    uint32 m_uiDespawn_Timer;
+
+    void Reset() override
+    {
+        switch (m_creature->GetEntry())
+        {
+            case NPC_NELSON_THE_NICE:
+                m_creature->SetRespawnDelay(35 * MINUTE);
+                m_creature->SetRespawnTime(35 * MINUTE);
+                m_creature->NearTeleportTo(-8318.19f, -993.662f, 176.956f, 5.65024f);
+                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != WAYPOINT_MOTION_TYPE)
+                {
+                    m_creature->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
+                    m_creature->GetMotionMaster()->Initialize();
+                }
+
+                m_creature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+                m_uiTransform_Timer = 10000;
+                m_uiTransformEmote_Timer = 5000;
+                m_bTransform = false;
+                m_uiDespawn_Timer = 0;
+                break;
+            case NPC_KLINFRAN_THE_CRAZED:
+                if (!m_uiDespawn_Timer)
+                    m_uiDespawn_Timer = 20 * MINUTE*IN_MILLISECONDS;
+
+                m_hunterGuid.Clear();
+                m_uiDemonic_Frenzy_Timer = 5000;
+                break;
+        }
+    }
+
+    /** Franklin the Friendly */
+    void Transform()
+    {
+        m_creature->UpdateEntry(NPC_KLINFRAN_THE_CRAZED);
+        Reset();
+    }
+
+    void BeginEvent(ObjectGuid playerGuid)
+    {
+        m_hunterGuid = playerGuid;
+        m_creature->GetMotionMaster()->Clear(false);
+        m_creature->GetMotionMaster()->MoveIdle();
+        m_creature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+        m_bTransform = true;
+    }
+
+    /** Klinfran the Crazed */
+    void Aggro(Unit* pWho) override
+    {
+        if (pWho->getClass() == CLASS_HUNTER && (m_hunterGuid.IsEmpty() || m_hunterGuid == pWho->GetObjectGuid()))
+        {
+            m_hunterGuid = pWho->GetObjectGuid();
+        }
+        else
+            DemonDespawn();
+    }
+
+    void JustDied(Unit* /*pKiller*/) override
+    {
+        uint32 m_respawn_delay_Timer = 2 * HOUR;
+        m_creature->SetRespawnDelay(m_respawn_delay_Timer);
+        m_creature->SetRespawnTime(m_respawn_delay_Timer);
+        m_creature->SaveRespawnTime();
+    }
+
+    void DemonDespawn(bool triggered = true)
+    {
+        m_creature->SetRespawnDelay(15 * MINUTE);
+        m_creature->SetRespawnTime(15 * MINUTE);
+        m_creature->SaveRespawnTime();
+
+        if (triggered)
+        {
+            Creature* pCleaner = m_creature->SummonCreature(NPC_THE_CLEANER, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetAngle(m_creature), TEMPSPAWN_DEAD_DESPAWN, 20 * MINUTE*IN_MILLISECONDS);
+            if (pCleaner)
+            {
+                ThreatList const& tList = m_creature->getThreatManager().getThreatList();
+
+                for (ThreatList::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
+                {
+                    if (Unit* pUnit = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                    {
+                        if (pUnit->isAlive())
+                        {
+                            pCleaner->SetInCombatWith(pUnit);
+                            pCleaner->AddThreat(pUnit);
+                            pCleaner->AI()->AttackStart(pUnit);
+                        }
+                    }
+                }
+            }
+        }
+
+        m_creature->ForcedDespawn();
+    }
+
+    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+    {
+        if (pSpell && pSpell->Id == 14277)   // Scorpid Sting (Rank 4)
+        {
+            m_creature->RemoveAurasDueToSpell(SPELL_DEMONIC_FRENZY);
+            DoCastSpellIfCan(m_creature, SPELL_ENTROPIC_STING, CAST_TRIGGERED);
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        /** Franklin the Friendly */
+        if (m_bTransform)
+        {
+            if (m_uiTransformEmote_Timer)
+            {
+                if (m_uiTransformEmote_Timer <= uiDiff)
+                {
+                    m_creature->HandleEmote(EMOTE_ONESHOT_POINT);
+                    m_uiTransformEmote_Timer = 0;
+                }
+                else
+                    m_uiTransformEmote_Timer -= uiDiff;
+            }
+
+            if (m_uiTransform_Timer < uiDiff)
+            {
+                m_bTransform = false;
+                Transform();
+            }
+            else
+                m_uiTransform_Timer -= uiDiff;
+        }
+
+        /** Klinfran the Crazed */
+        if (m_uiDespawn_Timer)
+        {
+            if (m_uiDespawn_Timer <= uiDiff)
+            {
+                if (m_creature->isAlive() && !m_creature->isInCombat())
+                    DemonDespawn(false);
+            }
+            else
+                m_uiDespawn_Timer -= uiDiff;
+        }
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_creature->getThreatManager().getThreatList().size() > 1 /*|| pHunter->isDead()*/)
+            DemonDespawn();
+
+        if (m_uiDemonic_Frenzy_Timer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_DEMONIC_FRENZY) == CAST_OK)
+            {
+                DoScriptText(EMOTE_FRENZY, m_creature);
+                m_uiDemonic_Frenzy_Timer = 15000;
+            }
+        }
+        else
+            m_uiDemonic_Frenzy_Timer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+bool GossipHello_npc_klinfran(Player* pPlayer, Creature* pCreature)
+{
+    if (pPlayer->GetQuestStatus(QUEST_STAVE_OF_THE_ANCIENTS) == QUEST_STATUS_INCOMPLETE)
+        pPlayer->ADD_GOSSIP_ITEM(0, GOSSIP_ITEM, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+
+    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+    return true;
+}
+
+bool GossipSelect_npc_klinfran(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+{
+    pPlayer->CLOSE_GOSSIP_MENU();
+    ((npc_klinfranAI*)pCreature->AI())->BeginEvent(pPlayer->GetObjectGuid());
+    return true;
+}
+
+CreatureAI* GetAI_npc_klinfran(Creature* pCreature)
+{
+    return new npc_klinfranAI(pCreature);
+}
+
 void AddSC_burning_steppes()
 {
     Script* pNewScript;
@@ -383,5 +611,12 @@ void AddSC_burning_steppes()
     pNewScript->GetAI = &GetAI_npc_grark_lorkrub;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_grark_lorkrub;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_capture_grark;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_klinfran";
+    pNewScript->GetAI = &GetAI_npc_klinfran;
+    pNewScript->pGossipHello = &GossipHello_npc_klinfran;
+    pNewScript->pGossipSelect = &GossipSelect_npc_klinfran;
     pNewScript->RegisterSelf();
 }

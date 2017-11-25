@@ -100,6 +100,11 @@ UPDATE creature_template SET ScriptName='npc_prof_leather' WHERE entry IN (7866,
 -- UPDATE creature_template SET ScriptName='' WHERE npcflag!=npcflag|65536 AND ScriptName='npc_innkeeper';
 -- UPDATE creature_template SET ScriptName='npc_innkeeper' WHERE npcflag=npcflag|65536;
 UPDATE creature_template SET ScriptName='npc_redemption_target' WHERE entry IN (6172,6177,17542,17768);
+<<<<<<< HEAD
+=======
+UPDATE creature_template SET ScriptName='npc_burster_worm' WHERE entry IN (16844,16857,16968,21380,21849,22038,22466,22482,23285);
+UPDATE creature_template SET ScriptName='npc_the_cleaner' WHERE entry=14503;
+>>>>>>> e1e796eb89... Implement q.7636 Stave of the Ancients
 
 /* SPELL */
 UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
@@ -236,6 +241,7 @@ UPDATE creature_template SET ScriptName='boss_kazzak' WHERE entry=12397;
 /* BURNING STEPPES */
 UPDATE creature_template SET ScriptName='npc_ragged_john' WHERE entry=9563;
 UPDATE creature_template SET ScriptName='npc_grark_lorkrub' WHERE entry=9520;
+UPDATE creature_template SET ScriptName='npc_klinfran' WHERE entry IN (14529,14534);
 
 /* DARKSHORE */
 UPDATE creature_template SET ScriptName='npc_kerlonian' WHERE entry=11218;
@@ -449,6 +455,8 @@ UPDATE creature_template SET ScriptName='boss_arugal' WHERE entry=4275;
 /* SILITHUS */
 UPDATE creature_template SET ScriptName='npc_anachronos_the_ancient' WHERE entry=15381;
 UPDATE gameobject_template SET ScriptName='go_crystalline_tear' WHERE entry=180633;
+UPDATE creature_template SET ScriptName='npc_solenor' WHERE entry IN (14530,14536);
+UPDATE creature_template SET ScriptName='npc_creeping_doom' WHERE entry=14761;
 
 /* SILVERPINE FOREST */
 UPDATE creature_template SET ScriptName='npc_deathstalker_erland' WHERE entry=1978;
@@ -560,6 +568,9 @@ UPDATE instance_template SET ScriptName='instance_uldaman' WHERE map=70;
 /* UN'GORO CRATER */
 UPDATE creature_template SET ScriptName='npc_ame01' WHERE entry=9623;
 UPDATE creature_template SET ScriptName='npc_ringo' WHERE entry=9999;
+UPDATE creature_template SET ScriptName='npc_simone_seductress' WHERE entry=14533;
+UPDATE creature_template SET ScriptName='npc_simone_the_inconspicuous' WHERE entry=14527;
+UPDATE creature_template SET ScriptName='npc_precious_the_devourer' WHERE entry=14538;
 
 /* UNDERCITY */
 
@@ -584,6 +595,7 @@ UPDATE creature_template SET ScriptName='npc_mikhail' WHERE entry=4963;
 /* WINTERSPRING */
 UPDATE creature_template SET ScriptName='npc_ranshalla' WHERE entry=10300;
 UPDATE gameobject_template SET ScriptName='go_elune_fire' WHERE entry IN (177417, 177404);
+UPDATE creature_template SET ScriptName='npc_artorius' WHERE entry IN (14531,14535);
 
 /* ZUL'FARRAK */
 UPDATE instance_template SET ScriptName='instance_zulfarrak' WHERE map=209;
@@ -1654,7 +1666,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001197,'Wow! We did it... not sure why we thought we needed the likes of you. Nevertheless, speak with Smeed Srablescrew; he will give you your earnings!',0,0,0,0,'SAY_RIGGER_END'),
 -- REUSE_ME -1001198 to -1001225
 (-1001226,'%s is drawn to the ghost magnet...',0,2,0,0,'Magrami Spectre on spawn 1'),
-(-1001227,'%s is angered!',0,2,0,0,'Magrami Spectre on spawn 2');
+(-1001227,'%s is angered!',0,2,0,0,'Magrami Spectre on spawn 2'),
+-- used in TBC
+(-1001250,'%s is silenced by the venemous sting.',0,2,0,0,'npc_simone EMOTE_SILENCE'),
+(-1001251,'%s is stricken by a virulent poison.',0,2,0,0,'npc_artorius EMOTE_POISON'),
+(-1001252,'%s is immobilized.',0,2,0,0,'npc_solenor EMOTE_IMMOBILIZED'),
+(-1001253,'You dare interfere with this being''s testing? The battle must be fought alone! You shall all pay for this interference!',0,0,0,0,'the_cleaner SAY_CLEANER_AGGRO');
+-- used in TBC core
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
