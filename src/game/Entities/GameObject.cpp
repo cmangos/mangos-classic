@@ -1560,8 +1560,6 @@ void GameObject::Use(Unit* user)
         }
         case GAMEOBJECT_TYPE_SPELLCASTER:                   // 22
         {
-            SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
-
             GameObjectInfo const* info = GetGOInfo();
             if (!info)
                 return;
@@ -1579,6 +1577,12 @@ void GameObject::Use(Unit* user)
             spellId = info->spellcaster.spellId;
 
             AddUse();
+
+            // Previously we locked all spellcasters on use with no real indication why
+            // or timeout of the locking. Now only doing it on it being consumed to prevent further use.
+            // spellcaster GOs like city portals should never be locked
+            if (info->spellcaster.charges && !GetUseCount())
+                SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
             break;
         }
         case GAMEOBJECT_TYPE_MEETINGSTONE:                  // 23
