@@ -3426,7 +3426,7 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDieCommand(char* /*args*/)
+bool ChatHandler::HandleDieCommand(char* args)
 {
     Player* player = m_session->GetPlayer();
     Unit* target = getSelectedUnit();
@@ -3444,9 +3444,25 @@ bool ChatHandler::HandleDieCommand(char* /*args*/)
             return false;
     }
 
-    if (target->isAlive())
+    uint32 param;
+    ExtractOptUInt32(&args, param, 0);
+    if (param != 0)
     {
-        player->DealDamage(target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+        if (target->isAlive())
+        {
+            DamageEffectType damageType = DIRECT_DAMAGE;
+            uint32 absorb = 0;
+            uint32 damage = target->GetHealth();
+            player->DealDamageMods(target, damage, &absorb, damageType);
+            player->DealDamage(target, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+        }
+    }
+    else
+    {
+        if (target->isAlive())
+        {
+            player->DealDamage(target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+        }
     }
 
     return true;
