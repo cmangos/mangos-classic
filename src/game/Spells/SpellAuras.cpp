@@ -1374,7 +1374,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 {
                     if (apply)
                     {
-                        target->SetStandState(UNIT_STAND_STATE_DEAD);
+                        target->SetStandState(UNIT_STAND_STATE_SLEEP);
                         target->addUnitState(UNIT_STAT_ROOT);
                     }
                     else
