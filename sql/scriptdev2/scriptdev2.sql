@@ -456,7 +456,6 @@ UPDATE creature_template SET ScriptName='boss_arugal' WHERE entry=4275;
 UPDATE creature_template SET ScriptName='npc_anachronos_the_ancient' WHERE entry=15381;
 UPDATE gameobject_template SET ScriptName='go_crystalline_tear' WHERE entry=180633;
 UPDATE creature_template SET ScriptName='npc_solenor' WHERE entry IN (14530,14536);
-UPDATE creature_template SET ScriptName='npc_creeping_doom' WHERE entry=14761;
 
 /* SILVERPINE FOREST */
 UPDATE creature_template SET ScriptName='npc_deathstalker_erland' WHERE entry=1978;
