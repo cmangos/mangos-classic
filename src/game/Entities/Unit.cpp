@@ -3576,7 +3576,12 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
         case CURRENT_GENERIC_SPELL:
         {
             // generic spells always break channeled not delayed spells
-            InterruptSpell(CURRENT_CHANNELED_SPELL, false);
+            // Unless they have this attribute
+            if (Spell* spell = m_currentSpells[CURRENT_CHANNELED_SPELL])
+            {
+                if(!pSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
+                    InterruptSpell(CURRENT_CHANNELED_SPELL, false);
+            }            
 
             // autorepeat breaking
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
@@ -3591,13 +3596,18 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
         case CURRENT_CHANNELED_SPELL:
         {
             // channel spells always break generic non-delayed and any channeled spells
-            InterruptSpell(CURRENT_GENERIC_SPELL, false);
             InterruptSpell(CURRENT_CHANNELED_SPELL);
 
-            // it also does break autorepeat if not Auto Shot
-            if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] &&
+            // Channeled spell can only be one
+            // Spells with this attribute can be cast in parallel with generic spells
+            if (!pSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
+            {
+                InterruptSpell(CURRENT_GENERIC_SPELL, false);
+                // it also does break autorepeat if not Auto Shot
+                if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] &&
                     m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Category == 351)
-                InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+                    InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+            }
         } break;
 
         case CURRENT_AUTOREPEAT_SPELL:
@@ -3607,7 +3617,11 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
             {
                 // generic autorepeats break generic non-delayed and channeled non-delayed spells
                 InterruptSpell(CURRENT_GENERIC_SPELL, false);
-                InterruptSpell(CURRENT_CHANNELED_SPELL, false);
+                if (Spell* spell = m_currentSpells[CURRENT_CHANNELED_SPELL])
+                {
+                    if (!pSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
+                        InterruptSpell(CURRENT_CHANNELED_SPELL, false);
+                }
             }
             // special action: set first cast flag
             m_AutoRepeatFirstCast = true;
