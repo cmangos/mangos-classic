@@ -231,6 +231,7 @@ class CreatureAI
          * @param pTarget Target that we hit with the spell
          * @param pSpell Spell with which we hit pTarget
          */
+        virtual void SpellHitTarget(Unit* target, const SpellEntry* spellInfo, SpellMissInfo missInfo) { SpellHitTarget(target, spellInfo); }
         virtual void SpellHitTarget(Unit* /*target*/, const SpellEntry* /*spellInfo*/) {}
 
         /**

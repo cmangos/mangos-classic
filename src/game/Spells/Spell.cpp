@@ -1318,9 +1318,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
     // Call scripted function for AI if this spell is casted by a creature
     if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
-        ((Creature*)m_caster)->AI()->SpellHitTarget(unit, m_spellInfo);
+        ((Creature*)m_caster)->AI()->SpellHitTarget(unit, m_spellInfo, missInfo);
     if (real_caster && real_caster != m_caster && real_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)real_caster)->AI())
-        ((Creature*)real_caster)->AI()->SpellHitTarget(unit, m_spellInfo);
+        ((Creature*)real_caster)->AI()->SpellHitTarget(unit, m_spellInfo, missInfo);
 
     if (m_spellAuraHolder)
         m_spellAuraHolder->SetState(SPELLAURAHOLDER_STATE_READY);
