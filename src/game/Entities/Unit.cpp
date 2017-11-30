@@ -6988,7 +6988,7 @@ void Unit::Unmount(bool from_aura)
 void Unit::SetInCombatWith(Unit* enemy)
 {
     Unit* eOwner = enemy->GetBeneficiary();
-    if (eOwner->IsPvP())
+    if (eOwner->IsPvP() || eOwner->IsPvPFreeForAll())
     {
         SetInCombatState(true, enemy);
         return;
