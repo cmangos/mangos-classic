@@ -1120,7 +1120,7 @@ bool WorldObject::_IsWithinCombatDist(WorldObject const* obj, float dist2compare
         float dz = GetPositionZ() - obj->GetPositionZ();
         distsq += dz * dz;
     }
-    float sizefactor = GetCombatReach() + obj->GetCombatReach();
+    float sizefactor = GetCombinedCombatReach(obj);
     float maxdist = dist2compare + sizefactor;
 
     return distsq < maxdist * maxdist;
