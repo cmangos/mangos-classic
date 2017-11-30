@@ -5435,11 +5435,11 @@ void Spell::EffectSkill(SpellEffectIndex /*eff_idx*/)
 
 void Spell::EffectSummonDemon(SpellEffectIndex eff_idx)
 {
-    float px = m_targets.m_destX;
-    float py = m_targets.m_destY;
-    float pz = m_targets.m_destZ;
+    float x = m_targets.m_destX;
+    float y = m_targets.m_destY;
+    float z = m_targets.m_destZ;
 
-    Creature* Charmed = m_caster->SummonCreature(m_spellInfo->EffectMiscValue[eff_idx], px, py, pz, m_caster->GetOrientation(), TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 3600000);
+    Creature* Charmed = m_caster->SummonCreature(m_spellInfo->EffectMiscValue[eff_idx], x, y, z, m_caster->GetOrientation(), TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 3600000);
     if (!Charmed)
         return;
 
@@ -5448,13 +5448,18 @@ void Spell::EffectSummonDemon(SpellEffectIndex eff_idx)
 
     // TODO: Add damage/mana/hp according to level
 
-    if (m_spellInfo->EffectMiscValue[eff_idx] == 89)        // Inferno summon
+    switch (m_spellInfo->Id)
     {
-        // Enslave demon effect, without mana cost and cooldown
-        m_caster->CastSpell(Charmed, 20882, TRIGGERED_OLD_TRIGGERED);          // FIXME: enslave does not scale with level, level 62+ minions cannot be enslaved
-
-        // Inferno effect
-        Charmed->CastSpell(Charmed, 22703, TRIGGERED_OLD_TRIGGERED);
+        case 1122: // Warlock Infernal - requires custom code - generalized in WOTLK
+        {
+            Charmed->SelectLevel(m_caster->getLevel()); // needs to have casters level
+            // Enslave demon effect, without mana cost and cooldown
+            Charmed->CastSpell(Charmed, 22707, TRIGGERED_OLD_TRIGGERED);  // short root spell on infernal from sniffs
+            m_caster->CastSpell(Charmed, 20882, TRIGGERED_OLD_TRIGGERED);
+            Charmed->CastSpell(nullptr, 22699, TRIGGERED_NONE);  // Inferno effect
+            Charmed->CastSpell(x, y, z, 20310, TRIGGERED_NONE);  // Stun
+            break;
+        }
     }
 }
 
