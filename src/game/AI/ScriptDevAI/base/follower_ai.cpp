@@ -30,7 +30,7 @@ void FollowerAI::AttackStart(Unit* who)
     if (!who)
         return;
 
-    if (m_creature->Attack(who, true))
+    if (m_creature->Attack(who, m_meleeEnabled))
     {
         m_creature->AddThreat(who);
         m_creature->SetInCombatWith(who);

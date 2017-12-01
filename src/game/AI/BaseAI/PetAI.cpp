@@ -88,7 +88,7 @@ void PetAI::AttackStart(Unit* who)
     if (!who || (pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS))
         return;
 
-    if (m_unit->Attack(who, true))
+    if (m_unit->Attack(who, m_meleeEnabled))
     {
         // TMGs call CreatureRelocation which via MoveInLineOfSight can call this function
         // thus with the following clear the original TMG gets invalidated and crash, doh
@@ -317,7 +317,7 @@ void PetAI::UpdateAI(const uint32 diff)
         }
 
         // if pet misses its target, it will also be the first in threat list
-        if ((!creature || !(creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE))
+        if ((!creature || m_meleeEnabled)
                 && m_unit->CanReachWithMeleeAttack(victim))
         {
             if (!m_unit->HasInArc(victim, 2 * M_PI_F / 3))

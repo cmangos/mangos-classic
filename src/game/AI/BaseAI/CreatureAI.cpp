@@ -36,7 +36,7 @@ CreatureAI::CreatureAI(Creature* creature) :
     m_attackDistance(0.0f),
     m_attackAngle(0.0f),
     m_reactState(REACT_AGGRESSIVE),
-    m_meleeEnabled(true),
+    m_meleeEnabled(!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)),
     m_visibilityDistance(VISIBLE_RANGE),
     m_moveFurther(false),
     m_combatScriptHappening(false)

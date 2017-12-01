@@ -17,7 +17,7 @@ ScriptedPetAI::ScriptedPetAI(Creature* creature) : CreatureAI(creature)
 
 void ScriptedPetAI::AttackStart(Unit* who)
 {
-    if (who && m_creature->Attack(who, true))
+    if (who && m_creature->Attack(who, m_meleeEnabled))
         m_creature->GetMotionMaster()->MoveChase(who);
 }
 

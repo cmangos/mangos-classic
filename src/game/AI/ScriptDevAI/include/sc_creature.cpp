@@ -442,7 +442,7 @@ void Scripted_NoMovementAI::GetAIInformation(ChatHandler& reader)
 
 void Scripted_NoMovementAI::AttackStart(Unit* who)
 {
-    if (who && m_creature->Attack(who, true))
+    if (who && m_creature->Attack(who, m_meleeEnabled))
     {
         m_creature->AddThreat(who);
         m_creature->SetInCombatWith(who);
