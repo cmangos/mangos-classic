@@ -73,6 +73,8 @@ struct boss_zumrahAI : public ScriptedAI
         m_uiWardOfZumrahTimer       = urand(7000, 20000);
         m_uHealingWaveTimer         = urand(10000, 15000);
         m_uiSpawnZombieTimer        = 1000;
+
+        m_attackDistance = 10.0f;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -83,17 +85,6 @@ struct boss_zumrahAI : public ScriptedAI
     void KilledUnit(Unit* /*pVictim*/) override
     {
         DoScriptText(SAY_KILL, m_creature);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 10.0f);
-        }
     }
 
     void MoveInLineOfSight(Unit* pWho) override

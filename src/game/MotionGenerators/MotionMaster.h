@@ -103,7 +103,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void MoveRandomAroundPoint(float x, float y, float z, float radius, float verticalZ = 0.0f);
         void MoveTargetedHome(bool runHome = true);
         void MoveFollow(Unit* target, float dist, float angle);
-        void MoveChase(Unit* target, float dist = 0.0f, float angle = 0.0f, bool moveFurther = true);
+        void MoveChase(Unit* target, float dist = 0.0f, float angle = 0.0f, bool moveFurther = false);
         void MoveConfused();
         void MoveFleeing(Unit* enemy, uint32 timeLimit = 0);
         void MovePoint(uint32 id, float x, float y, float z, bool generatePath = true);
