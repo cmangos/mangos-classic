@@ -146,7 +146,7 @@ static const uint32 LevelUpKeyringSize[DEFAULT_MAX_LEVEL / 10 + 1] =
 
 //== PlayerTaxi ================================================
 
-PlayerTaxi::PlayerTaxi()
+PlayerTaxi::PlayerTaxi() : m_flightMasterFactionId(0)
 {
     // Taxi nodes
     memset(m_taximask, 0, sizeof(m_taximask));
@@ -249,11 +249,16 @@ uint32 PlayerTaxi::GetCurrentTaxiPath() const
     return path;
 }
 
-std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
+std::ostringstream& operator<<(std::ostringstream& ss, PlayerTaxi const& taxi)
 {
     for (int i = 0; i < TaxiMaskSize; ++i)
         ss << taxi.m_taximask[i] << " ";
     return ss;
+}
+
+FactionTemplateEntry const* PlayerTaxi::GetFlightMasterFactionTemplate() const
+{
+    return sFactionTemplateStore.LookupEntry(m_flightMasterFactionId);
 }
 
 SpellModifier::SpellModifier(SpellModOp _op, SpellModType _type, int32 _value, SpellEntry const* spellEntry, SpellEffectIndex eff, int16 _charges /*= 0*/) : op(_op), type(_type), charges(_charges), value(_value), spellId(spellEntry->Id), lastAffected(nullptr)
@@ -16445,9 +16450,12 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     if (npc)
     {
         float discount = GetReputationPriceDiscount(npc);
-        totalcost = (uint32)ceil(totalcost * discount);
-        firstcost = (uint32)ceil(firstcost * discount);
+        totalcost = uint32(ceil(totalcost * discount));
+        firstcost = uint32(ceil(firstcost * discount));
+        m_taxi.SetFlightMasterFactionTemplateId(npc->getFaction());
     }
+    else
+        m_taxi.SetFlightMasterFactionTemplateId(0);
 
     if (money < totalcost)
     {
@@ -17585,9 +17593,13 @@ BattleGroundBracketId Player::GetBattleGroundBracketIdFromLevel(BattleGroundType
     return BattleGroundBracketId(bracket_id);
 }
 
-float Player::GetReputationPriceDiscount(Creature const* pCreature) const
+float Player::GetReputationPriceDiscount(Creature const* creature) const
 {
-    FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
+    return GetReputationPriceDiscount(creature->getFactionTemplateEntry());
+}
+
+float Player::GetReputationPriceDiscount(FactionTemplateEntry const* vendor_faction) const
+{
     if (!vendor_faction || !vendor_faction->faction)
         return 1.0f;
 

@@ -134,7 +134,7 @@ class FlightPathMovementGenerator
         struct TaxiNodeChangeInfo
         {
             uint32 PathIndex;
-            int32 Cost;
+            int64  Cost;
         };
 
         std::deque<TaxiNodeChangeInfo> _pointsForPathSwitch;    //! node indexes and costs where TaxiPath changes
