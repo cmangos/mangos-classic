@@ -80,8 +80,8 @@ template<class T>
 class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >
 {
     public:
-        ChaseMovementGenerator(Unit& target, float offset, float angle, bool moveFurther = true)
-            : TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >(target, offset, angle), m_moveFurther(moveFurther) {}
+        ChaseMovementGenerator(Unit& target, float offset, float angle, bool moveFurther = true, bool walk = false)
+            : TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >(target, offset, angle), m_moveFurther(moveFurther), m_walk(walk) {}
         ~ChaseMovementGenerator() {}
 
         MovementGeneratorType GetMovementGeneratorType() const override { return CHASE_MOTION_TYPE; }
@@ -94,7 +94,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMo
 
         static void _clearUnitStateMove(T& u);
         static void _addUnitStateMove(T& u);
-        bool EnableWalking() const { return false;}
+        bool EnableWalking() const { return m_walk;}
         bool _lostTarget(T& u) const;
         void _reachTarget(T&);
 
@@ -103,6 +103,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMo
 
     private:
         bool m_moveFurther;
+        bool m_walk;
 };
 
 template<class T>
