@@ -2837,6 +2837,7 @@ void Spell::Prepare()
 
     // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
     m_casttime = GetSpellCastTime(m_spellInfo, this);
+        m_casttime = GetSpellCastTime(m_spellInfo, this);
     m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
     // set timer base at cast time
