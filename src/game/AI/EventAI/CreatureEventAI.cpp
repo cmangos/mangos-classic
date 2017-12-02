@@ -674,7 +674,11 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             if (!(action.cast.castFlags & (CAST_TRIGGERED | CAST_FORCE_CAST | CAST_FORCE_TARGET_SELF)))
             {
                 spellId = action.cast.spellId;
-                selectFlags = SELECT_FLAG_IN_LOS;
+                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+                if (!spellInfo)
+                    return;
+                if (!IsIgnoreLosSpell(spellInfo))
+                    selectFlags = SELECT_FLAG_IN_LOS;
             }
 
             Unit* target = GetTargetByType(action.cast.target, actionInvoker, AIEventSender, reportTargetError, spellId, selectFlags);

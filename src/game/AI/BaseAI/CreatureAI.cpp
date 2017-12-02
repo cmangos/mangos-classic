@@ -144,7 +144,7 @@ CanCastResult CreatureAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo
         if (m_unit->GetPower((Powers)spellInfo->powerType) < Spell::CalculatePowerCost(spellInfo, m_unit))
             return CAST_FAIL_POWER;
 
-        if (!spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !m_unit->IsWithinLOSInMap(target) && m_unit != target)
+        if (!IsIgnoreLosSpell(spellInfo) && !m_unit->IsWithinLOSInMap(target) && m_unit != target)
             return CAST_FAIL_NOT_IN_LOS;
     }
 
