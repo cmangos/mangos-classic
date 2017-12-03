@@ -56,7 +56,7 @@ class ScriptedInstance : public InstanceData
         // Get a Player from map
         Player* GetPlayerInMap(bool onlyAlive = false, bool canBeGamemaster = true);
 
-        /// Wrapper for simulating map-wide text in this instance. It is expected that the Creature is stored in m_npcEntryGuidStore if loaded.
+        // Wrapper for simulating map-wide text in this instance. It is expected that the Creature is stored in m_npcEntryGuidStore if loaded.
         void DoOrSimulateScriptTextForThisInstance(int32 textEntry, uint32 creatureEntry)
         {
             // Prevent debug output in GetSingleCreatureFromStorage
@@ -65,10 +65,10 @@ class ScriptedInstance : public InstanceData
 
     protected:
         // Storage for GO-Guids and NPC-Guids
-        EntryGuidMap m_goEntryGuidStore;                   ///< Store unique GO-Guids by entry
-        EntryGuidMap m_npcEntryGuidStore;                  ///< Store unique NPC-Guids by entry
-        EntryGuidCollection m_npcEntryGuidCollection;      ///< Store all Guids by entry
-        EntryGuidCollection m_goEntryGuidCollection;       ///< Store all Guids by entry
+        EntryGuidMap m_goEntryGuidStore;                   // Store unique GO-Guids by entry
+        EntryGuidMap m_npcEntryGuidStore;                  // Store unique NPC-Guids by entry
+        EntryGuidCollection m_npcEntryGuidCollection;      // Store all Guids by entry
+        EntryGuidCollection m_goEntryGuidCollection;       // Store all Guids by entry
 };
 
 // Class for world maps (May need additional zone-wide functions later on)
