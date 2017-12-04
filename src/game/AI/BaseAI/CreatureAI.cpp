@@ -514,6 +514,26 @@ Unit* CreatureAI::DoSelectLowestHpFriendly(float range, float minMissing, bool p
     return pUnit;
 }
 
+void CreatureAI::DoFakeDeath(uint32 spellId)
+{
+    m_creature->InterruptNonMeleeSpells(false);
+    m_creature->SetHealth(1);
+    m_creature->StopMoving();
+    m_creature->ClearComboPointHolders();
+    m_creature->RemoveAllAurasOnDeath();
+    m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
+    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    m_creature->ClearAllReactives();
+    m_creature->SetTarget(nullptr);
+    m_creature->GetMotionMaster()->Clear();
+    m_creature->GetMotionMaster()->MoveIdle();
+
+    if (spellId == 0)
+        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+    else
+        DoCastSpellIfCan(m_creature, spellId, CAST_INTERRUPT_PREVIOUS);
+}
+
 bool CreatureAI::CanExecuteCombatAction()
 {
     return m_unit->CanReactInCombat() && !m_unit->hasUnitState(UNIT_STAT_DONT_TURN | UNIT_STAT_SEEKING_ASSISTANCE | UNIT_STAT_CHANNELING) && !m_combatScriptHappening;

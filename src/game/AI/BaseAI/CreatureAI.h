@@ -389,6 +389,8 @@ class CreatureAI
         // Returns friendly unit with the most amount of hp missing from max hp
         Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false);
 
+        void DoFakeDeath(uint32 spellId = 0);
+
         void SetReactState(ReactStates st) { m_reactState = st; }
         ReactStates GetReactState() const { return m_reactState; }
         bool HasReactState(ReactStates state) const { return (m_reactState == state); }
