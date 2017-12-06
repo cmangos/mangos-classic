@@ -119,7 +119,7 @@ class BIH
         size_t primCount() const { return objects.size(); }
 
         template<typename RayCallback>
-        void intersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist, bool stopAtFirst = false, bool checkLOS = false) const
+        void intersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist, bool stopAtFirst = false, bool ignoreM2Model = false) const
         {
             float intervalMin = -1.f;
             float intervalMax = -1.f;
@@ -131,7 +131,7 @@ class BIH
                 invDir[i] = 1.f / dir[i];
                 if (G3D::fuzzyNe(dir[i], 0.0f))
                 {
-                    float t1 = (bounds.low()[i]  - org[i]) * invDir[i];
+                    float t1 = (bounds.low()[i] - org[i]) * invDir[i];
                     float t2 = (bounds.high()[i] - org[i]) * invDir[i];
                     if (t1 > t2)
                         std::swap(t1, t2);
@@ -200,7 +200,7 @@ class BIH
                                 continue;
                             }
                             node = offset + offsetFront3[axis]; // front
-                            // ray passes through near node only
+                                                                // ray passes through near node only
                             if (tb > intervalMax)
                             {
                                 intervalMax = (tf <= intervalMax) ? tf : intervalMax;
@@ -222,7 +222,7 @@ class BIH
                             int n = tree[node + 1];
                             while (n > 0)
                             {
-                                bool hit = intersectCallback(r, objects[offset], maxDist, stopAtFirst, checkLOS);
+                                bool hit = intersectCallback(r, objects[offset], maxDist, stopAtFirst, ignoreM2Model);
                                 if (stopAtFirst && hit) return;
                                 --n;
                                 ++offset;
@@ -257,8 +257,7 @@ class BIH
                     node = stack[stackPos].node;
                     intervalMax = stack[stackPos].tfar;
                     break;
-                }
-                while (true);
+                } while (true);
             }
         }
 

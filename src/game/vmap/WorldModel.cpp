@@ -352,7 +352,7 @@ namespace VMAP
     {
         GModelRayCallback(const std::vector<MeshTriangle>& tris, const std::vector<Vector3>& vert):
             vertices(vert.begin()), triangles(tris.begin()), hit(false) {}
-        bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool /*pStopAtFirstHit*/, bool /*checkLOS*/)
+        bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool /*pStopAtFirstHit*/, bool /*ignoreM2Model*/)
         {
             bool result = IntersectTriangle(triangles[entry], vertices, ray, distance);
             if (result)  hit = true;
@@ -363,12 +363,12 @@ namespace VMAP
         bool hit;
     };
 
-    bool GroupModel::IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit, bool checkLOS) const
+    bool GroupModel::IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit, bool ignoreM2Model) const
     {
         if (triangles.empty())
             return false;
         GModelRayCallback callback(triangles, vertices);
-        meshTree.intersectRay(ray, callback, distance, stopAtFirstHit, checkLOS);
+        meshTree.intersectRay(ray, callback, distance, stopAtFirstHit, ignoreM2Model);
         return callback.hit;
     }
 
@@ -411,9 +411,9 @@ namespace VMAP
     struct WModelRayCallBack
     {
         WModelRayCallBack(const std::vector<GroupModel>& mod): models(mod.begin()), hit(false) {}
-        bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool pStopAtFirstHit, bool pCheckLOS)
+        bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool pStopAtFirstHit, bool ignoreM2Model)
         {
-            bool result = models[entry].IntersectRay(ray, distance, pStopAtFirstHit, pCheckLOS);
+            bool result = models[entry].IntersectRay(ray, distance, pStopAtFirstHit, ignoreM2Model);
             if (result)  hit = true;
             return hit;
         }
@@ -421,18 +421,18 @@ namespace VMAP
         bool hit;
     };
 
-    bool WorldModel::IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit, bool checkLOS) const
+    bool WorldModel::IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit, bool ignoreM2Model) const
     {
-        if (checkLOS && (modelFlags & MOD_M2))
+        if (ignoreM2Model && (modelFlags & MOD_M2))
             return false;
 
         // small M2 workaround, maybe better make separate class with virtual intersection funcs
         // in any case, there's no need to use a bound tree if we only have one submodel
         if (groupModels.size() == 1)
-            return groupModels[0].IntersectRay(ray, distance, stopAtFirstHit, checkLOS);
+            return groupModels[0].IntersectRay(ray, distance, stopAtFirstHit, ignoreM2Model);
 
         WModelRayCallBack isc(groupModels);
-        groupTree.intersectRay(ray, isc, distance, stopAtFirstHit, checkLOS);
+        groupTree.intersectRay(ray, isc, distance, stopAtFirstHit, ignoreM2Model);
         return isc.hit;
     }
 

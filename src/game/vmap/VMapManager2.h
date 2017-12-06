@@ -85,7 +85,7 @@ namespace VMAP
             void unloadMap(unsigned int pMapId, int x, int y) override;
             void unloadMap(unsigned int pMapId) override;
 
-            bool isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2) override;
+            bool isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreM2Model) override;
             /**
             fill the hit pos and return true, if an object was hit
             */

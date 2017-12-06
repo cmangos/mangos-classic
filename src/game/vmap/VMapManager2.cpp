@@ -141,7 +141,7 @@ namespace VMAP
 
     //==========================================================
 
-    bool VMapManager2::isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2)
+    bool VMapManager2::isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreM2Model)
     {
         if (!isLineOfSightCalcEnabled()) return true;
         bool result = true;
@@ -152,7 +152,7 @@ namespace VMAP
             Vector3 pos2 = convertPositionToInternalRep(x2, y2, z2);
             if (pos1 != pos2)
             {
-                result = instanceTree->second->isInLineOfSight(pos1, pos2);
+                result = instanceTree->second->isInLineOfSight(pos1, pos2, ignoreM2Model);
             }
         }
         return result;
