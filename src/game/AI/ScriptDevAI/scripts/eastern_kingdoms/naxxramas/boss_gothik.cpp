@@ -101,7 +101,7 @@ struct boss_gothikAI : public ScriptedAI
     void Reset() override
     {
         // Remove immunity
-        m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
 
         m_uiPhase = PHASE_SPEECH;
         m_uiSpeech = 1;
@@ -137,7 +137,7 @@ struct boss_gothikAI : public ScriptedAI
         m_pInstance->SetData(TYPE_GOTHIK, IN_PROGRESS);
 
         // Make immune
-        m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
 
         m_pInstance->SetGothTriggers();
         PrepareSummonPlaces();
@@ -357,7 +357,7 @@ struct boss_gothikAI : public ScriptedAI
                         DoScriptText(EMOTE_TO_FRAY, m_creature);
 
                         // Remove Immunity
-                        m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
+                        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
 
                         DoResetThreat();
                         m_creature->SetInCombatWithZone();
