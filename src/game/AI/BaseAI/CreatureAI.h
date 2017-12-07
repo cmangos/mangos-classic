@@ -379,6 +379,12 @@ class CreatureAI
         virtual bool AssistPlayerInCombat(Unit* who) { return false; }
 
         /*
+        * Called when a spell is interrupted
+        * @param spellInfo to specify which spell was interrupted
+        */
+        virtual void OnSpellInterrupt(SpellEntry const* spellInfo) {}
+
+        /*
         * Notifies AI on channel state update
         */
         virtual void OnChannelStateChange(SpellEntry const* spellInfo, bool state, WorldObject* target = nullptr);
