@@ -46,5 +46,6 @@ class HomeMovementGenerator<Creature>
         void _setTargetLocation(Creature&);
         bool arrived;
         bool runHome;
+        bool wasActive;
 };
 #endif

@@ -147,6 +147,11 @@ class CreatureAI
         virtual void JustReachedHome() {}
 
         /**
+        * Called at reaching home after MoveTargetedHome
+        */
+        virtual void SummonedJustReachedHome(Creature* summoned) {}
+
+        /**
          * Called at any Heal received from any Unit
          * @param pHealer Unit* which deals the heal
          * @param uiHealedAmount Amount of healing received

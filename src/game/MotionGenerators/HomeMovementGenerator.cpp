@@ -24,6 +24,10 @@
 
 void HomeMovementGenerator<Creature>::Initialize(Creature& owner)
 {
+    wasActive = owner.isActiveObject();
+    if (!wasActive)
+        owner.SetActiveObjectState(true);
+
     _setTargetLocation(owner);
 }
 
@@ -67,5 +71,16 @@ void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
         owner.SetWalk(!owner.hasUnitState(UNIT_STAT_RUNNING_STATE) && !owner.IsLevitating(), false);
         owner.LoadCreatureAddon(true);
         owner.AI()->JustReachedHome();
+
+        if (owner.IsTemporarySummon())
+        {
+            if (owner.GetSpawnerGuid().IsCreatureOrPet())
+                if (Creature* pSummoner = owner.GetMap()->GetAnyTypeCreature(owner.GetSpawnerGuid()))
+                    if (pSummoner->AI())
+                        pSummoner->AI()->SummonedJustReachedHome(&owner);
+        }
+
+        if (!wasActive)
+            owner.SetActiveObjectState(false);
     }
 }
