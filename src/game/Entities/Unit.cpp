@@ -10704,23 +10704,6 @@ void Unit::Uncharm(Unit* charmed)
             // we have to restore initial MotionMaster
             while (charmed->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
                 charmed->GetMotionMaster()->MovementExpired(true);
-
-            if (charmed->isAlive())
-            {
-                if (charmed->CanAttack(this))
-                {
-                    if (!charmed->isInCombat())
-                        charmed->SetInCombatWithAggressor(this);
-                    else
-                    {
-                        charmedCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
-                        sLog.outError("Charmed/possessed creature entry %u attacked its owner and set combat start position. Recheck flags, possibly should despawn on evade.");
-                    }
-                    charmed->getThreatManager().addThreat(this, GetMaxHealth());     // generating threat by max life amount best way i found to make it realistic
-                }
-            }
-            else
-                charmed->GetCombatData()->threatManager.clearReferences();
         }
         else
         {

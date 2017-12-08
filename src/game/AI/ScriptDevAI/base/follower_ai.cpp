@@ -125,9 +125,7 @@ void FollowerAI::CorpseRemoved(uint32& /*respawnDelay*/)
 void FollowerAI::EnterEvadeMode()
 {
     m_creature->RemoveAllAurasOnEvade();
-    m_creature->DeleteThreatList();
     m_creature->CombatStop(true);
-    m_creature->SetLootRecipient(nullptr);
 
     if (HasFollowState(STATE_FOLLOW_INPROGRESS))
     {
@@ -135,16 +133,18 @@ void FollowerAI::EnterEvadeMode()
 
         if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
         {
-            float posX, posY, posZ, ori;
-            m_creature->GetCombatStartPosition(posX, posY, posZ, ori);
+            float posX, posY, posZ, posO;
+            m_creature->GetCombatStartPosition(posX, posY, posZ, posO);
             m_creature->GetMotionMaster()->MovePoint(POINT_COMBAT_START, posX, posY, posZ);
         }
     }
     else
     {
-        if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+        if (m_creature->isAlive())
             m_creature->GetMotionMaster()->MoveTargetedHome();
     }
+
+    m_creature->SetLootRecipient(nullptr);
 
     Reset();
 }
