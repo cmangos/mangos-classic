@@ -1193,6 +1193,7 @@ class Player : public Unit
 
         void FailQuest(uint32 quest_id);
         void FailQuest(Quest const* quest);
+        void FailQuestForGroup(uint32 questId);
         void FailQuestsOnDeath();
         bool SatisfyQuestSkill(Quest const* qInfo, bool msg) const;
         bool SatisfyQuestCondition(Quest const* qInfo, bool msg) const;

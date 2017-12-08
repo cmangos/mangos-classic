@@ -12103,6 +12103,26 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     SendQuestGiverStatusMultiple();
 }
 
+void Player::FailQuestForGroup(uint32 questId)
+{
+    if (Group* group = GetGroup())
+    {
+        for (GroupReference* ref = group->GetFirstMember(); ref != nullptr; ref = ref->next())
+        {
+            if (Player* member = ref->getSource())
+            {
+                if (member->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
+                    member->FailQuest(questId);
+            }
+        }
+    }
+    else
+    {
+        if (GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
+            FailQuest(questId);
+    }
+}
+
 void Player::FailQuest(uint32 questId)
 {
     if (Quest const* quest = sObjectMgr.GetQuestTemplate(questId))
