@@ -2094,9 +2094,9 @@ void Creature::SetInCombatWithZone()
             if (pPlayer->isGameMaster())
                 continue;
 
-            if (pPlayer->isAlive() && CanAttack(pPlayer))
+            if (pPlayer->isAlive())
             {
-                pPlayer->SetInCombatWith(this);
+                SetInCombatWith(pPlayer);
                 AddThreat(pPlayer);
             }
         }
