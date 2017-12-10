@@ -6917,6 +6917,10 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
             continue;
         }
 
+        // check if spell is under CD. TODO : this may be fixed in better way using TRIGGERED_ITEM_TRIGGERED enum for castspell
+        if (!IsSpellReady(*spellInfo, proto))
+            return;
+
         // not allow proc extra attack spell at extra attack
         if (m_extraAttacks && IsSpellHaveEffect(spellInfo, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
             return;
