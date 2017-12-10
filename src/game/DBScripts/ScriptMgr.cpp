@@ -948,7 +948,7 @@ void ScriptMgr::LoadDbScriptRandomTemplates()
             int32 type = fields[1].GetUInt32();
             int32 targetId = fields[2].GetInt32();
             uint32 chance = fields[3].GetUInt32();
-            if(type < MAX_TYPE)
+            if (type < MAX_TYPE)
                 m_scriptTemplates[type][id].push_back({ targetId, chance });
             else
                 sLog.outErrorDb("Table `dbscript_random_templates` entry (%u) uses invalid type (%u). Won't be used.", id, type);
@@ -997,7 +997,7 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32
                     auto& vector = m_scriptTemplates[STRING_TEMPLATE][itrM->second.talk.stringTemplateId];
                     for (auto& data : vector)
                     {
-                        if(!sObjectMgr.GetMangosStringLocale(data.first))
+                        if (!sObjectMgr.GetMangosStringLocale(data.first))
                             sLog.outErrorDb("Table `dbscript_string` is missing string id %u, used in database script template table dbscript_string_template id %u.", data.first, itrM->second.talk.stringTemplateId);
                     }
                 }

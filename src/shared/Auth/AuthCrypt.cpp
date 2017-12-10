@@ -52,7 +52,7 @@ void AuthCrypt::EncryptSend(uint8* data, size_t len)
     }
 }
 
-void AuthCrypt::Init(BigNumber *bn)
+void AuthCrypt::Init(BigNumber* bn)
 {
     _send_i = _send_j = _recv_i = _recv_j = 0;
 

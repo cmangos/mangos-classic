@@ -637,26 +637,26 @@ namespace MaNGOS
     // Success at go in range
     class AllGameObjectEntriesListInObjectRangeCheck
     {
-    public:
-        AllGameObjectEntriesListInObjectRangeCheck(WorldObject const& obj, std::set<uint32>& entries, float range, bool is3D = true) : i_obj(obj), i_entries(entries), i_range(range), i_is3D(is3D) {}
-        WorldObject const& GetFocusObject() const { return i_obj; }
-        bool operator()(GameObject* go)
-        {
-            if (i_entries.find(go->GetEntry()) != i_entries.end() && i_obj.IsWithinDistInMap(go, i_range, i_is3D))
-                return true;
+        public:
+            AllGameObjectEntriesListInObjectRangeCheck(WorldObject const& obj, std::set<uint32>& entries, float range, bool is3D = true) : i_obj(obj), i_entries(entries), i_range(range), i_is3D(is3D) {}
+            WorldObject const& GetFocusObject() const { return i_obj; }
+            bool operator()(GameObject* go)
+            {
+                if (i_entries.find(go->GetEntry()) != i_entries.end() && i_obj.IsWithinDistInMap(go, i_range, i_is3D))
+                    return true;
 
-            return false;
-        }
+                return false;
+            }
 
-        std::vector<uint32> i_ranges;
-    private:
-        WorldObject const& i_obj;
-        std::set<uint32>& i_entries;
-        float  i_range;
-        bool   i_is3D;
+            std::vector<uint32> i_ranges;
+        private:
+            WorldObject const& i_obj;
+            std::set<uint32>& i_entries;
+            float  i_range;
+            bool   i_is3D;
 
-        // prevent clone this object
-        AllGameObjectEntriesListInObjectRangeCheck(AllGameObjectEntriesListInObjectRangeCheck const&);
+            // prevent clone this object
+            AllGameObjectEntriesListInObjectRangeCheck(AllGameObjectEntriesListInObjectRangeCheck const&);
     };
 
     // Success at gameobject in range of xyz, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO)
@@ -752,29 +752,29 @@ namespace MaNGOS
 
     class MostHPPercentMissingInRangeCheck
     {
-    public:
-        MostHPPercentMissingInRangeCheck(Unit const* obj, float range, float hp, bool onlyInCombat = true) : i_obj(obj), i_range(range), i_hp(hp), i_onlyInCombat(onlyInCombat) {}
-        WorldObject const& GetFocusObject() const { return *i_obj; }
-        bool operator()(Unit* u)
-        {
-            if (!u->isAlive() || (i_onlyInCombat && !u->isInCombat()))
-                return false;
-
-            if (!i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range))
+        public:
+            MostHPPercentMissingInRangeCheck(Unit const* obj, float range, float hp, bool onlyInCombat = true) : i_obj(obj), i_range(range), i_hp(hp), i_onlyInCombat(onlyInCombat) {}
+            WorldObject const& GetFocusObject() const { return *i_obj; }
+            bool operator()(Unit* u)
             {
-                if (100.f - u->GetHealthPercent() > i_hp)
+                if (!u->isAlive() || (i_onlyInCombat && !u->isInCombat()))
+                    return false;
+
+                if (!i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range))
                 {
-                    i_hp = 100.f - u->GetHealthPercent();
-                    return true;
+                    if (100.f - u->GetHealthPercent() > i_hp)
+                    {
+                        i_hp = 100.f - u->GetHealthPercent();
+                        return true;
+                    }
                 }
+                return false;
             }
-            return false;
-        }
-    private:
-        Unit const* i_obj;
-        float i_range;
-        float i_hp;
-        bool i_onlyInCombat;
+        private:
+            Unit const* i_obj;
+            float i_range;
+            float i_hp;
+            bool i_onlyInCombat;
     };
 
     class FriendlyCCedInRangeCheck
@@ -1125,34 +1125,34 @@ namespace MaNGOS
     // Success at unit in range, range update for next check (this can be used with CreatureListSearcher to find creatures with given entry)
     class AllCreatureEntriesWithLiveStateInObjectRangeCheck
     {
-    public:
-        AllCreatureEntriesWithLiveStateInObjectRangeCheck(WorldObject const& obj, std::set<uint32>& entries, bool alive, float range, bool guids = false, bool excludeSelf = false, bool is3D = true)
-            : i_obj(obj), i_entries(entries), i_range(range), i_guids(guids), i_alive(alive), i_excludeSelf(excludeSelf), i_is3D(is3D), i_foundOutOfRange(false) {}
-        WorldObject const& GetFocusObject() const { return i_obj; }
-        bool operator()(Creature* u)
-        {
-            if (i_entries.find(i_guids ? u->GetGUIDLow() : u->GetEntry()) != i_entries.end() && ((i_alive && u->isAlive()) || (!i_alive && u->IsCorpse())) && (!i_excludeSelf || (&i_obj != u)))
+        public:
+            AllCreatureEntriesWithLiveStateInObjectRangeCheck(WorldObject const& obj, std::set<uint32>& entries, bool alive, float range, bool guids = false, bool excludeSelf = false, bool is3D = true)
+                : i_obj(obj), i_entries(entries), i_range(range), i_guids(guids), i_alive(alive), i_excludeSelf(excludeSelf), i_is3D(is3D), i_foundOutOfRange(false) {}
+            WorldObject const& GetFocusObject() const { return i_obj; }
+            bool operator()(Creature* u)
             {
-                if (i_obj.IsWithinCombatDistInMap(u, i_range, i_is3D))
-                    return true;
-                else
-                    i_foundOutOfRange = true;
+                if (i_entries.find(i_guids ? u->GetGUIDLow() : u->GetEntry()) != i_entries.end() && ((i_alive && u->isAlive()) || (!i_alive && u->IsCorpse())) && (!i_excludeSelf || (&i_obj != u)))
+                {
+                    if (i_obj.IsWithinCombatDistInMap(u, i_range, i_is3D))
+                        return true;
+                    else
+                        i_foundOutOfRange = true;
+                }
+                return false;
             }
-            return false;
-        }
-        bool FoundOutOfRange() const { return i_foundOutOfRange; }
-    private:
-        WorldObject const& i_obj;
-        std::set<uint32>& i_entries;
-        float  i_range;
-        bool   i_guids;
-        bool   i_alive;
-        bool   i_excludeSelf;
-        bool   i_is3D;
-        bool   i_foundOutOfRange;
+            bool FoundOutOfRange() const { return i_foundOutOfRange; }
+        private:
+            WorldObject const& i_obj;
+            std::set<uint32>& i_entries;
+            float  i_range;
+            bool   i_guids;
+            bool   i_alive;
+            bool   i_excludeSelf;
+            bool   i_is3D;
+            bool   i_foundOutOfRange;
 
-        // prevent clone this object
-        AllCreatureEntriesWithLiveStateInObjectRangeCheck(AllCreatureEntriesWithLiveStateInObjectRangeCheck const&);
+            // prevent clone this object
+            AllCreatureEntriesWithLiveStateInObjectRangeCheck(AllCreatureEntriesWithLiveStateInObjectRangeCheck const&);
     };
 
     class AllCreaturesOfEntryInRangeCheck

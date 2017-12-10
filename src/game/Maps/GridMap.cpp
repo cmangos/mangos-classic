@@ -1045,7 +1045,7 @@ bool TerrainInfo::IsSwimmable(float x, float y, float pZ, float radius /*= 1.5f*
         if (getLiquidStatus(x, y, pZ, MAP_ALL_LIQUIDS, liquid_ptr))
         {
             if (liquid_ptr->level - liquid_ptr->depth_level > radius) // is unit have enough space to swim
-            return true;
+                return true;
         }
     }
     return false;

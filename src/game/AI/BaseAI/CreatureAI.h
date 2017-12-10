@@ -382,7 +382,7 @@ class CreatureAI
 
         // Returns friendly unit with the most amount of hp missing from max hp
         Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false);
-        
+
         void SetReactState(ReactStates st) { m_reactState = st; }
         ReactStates GetReactState() const { return m_reactState; }
         bool HasReactState(ReactStates state) const { return (m_reactState == state); }
@@ -403,7 +403,7 @@ class CreatureAI
 
         // How far a creature can detect in MoveInLineOfSight
         float m_visibilityDistance;
-        
+
         bool m_dismountOnAggro;
 
         bool m_meleeEnabled;                              // If we allow melee auto attack

@@ -425,8 +425,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                         m_caster->CastSpell(m_caster, (urand(0, 1)
-                        ? (m_caster->getGender() == GENDER_MALE ? 8219 : 8220)                      // Flip Out - ninja
-                        : (m_caster->getGender() == GENDER_MALE ? 8221 : 8222)), TRIGGERED_OLD_TRIGGERED, nullptr);    // Yaaarrrr - pirate
+                                                       ? (m_caster->getGender() == GENDER_MALE ? 8219 : 8220)                      // Flip Out - ninja
+                                                       : (m_caster->getGender() == GENDER_MALE ? 8221 : 8222)), TRIGGERED_OLD_TRIGGERED, nullptr);    // Yaaarrrr - pirate
 
                     return;
                 }
@@ -577,7 +577,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         // immediately finishes the cooldown on certain Rogue abilities
-                        auto cdCheck = [](SpellEntry const& spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_ROGUE && (spellEntry.SpellFamilyFlags & uint64(0x0000026000000860))); };
+                        auto cdCheck = [](SpellEntry const & spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_ROGUE && (spellEntry.SpellFamilyFlags & uint64(0x0000026000000860))); };
                         static_cast<Player*>(m_caster)->RemoveSomeCooldown(cdCheck);
                     }
 
@@ -685,7 +685,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             {
                                 SpellEntry const* spell = itr->second->GetSpellProto();
                                 if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN
-                                    && spell->SpellFamilyFlags & uint64(0x0000000000000400))
+                                        && spell->SpellFamilyFlags & uint64(0x0000000000000400))
                                     return;
                             }
 
@@ -747,7 +747,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     // Trigger the eight summoning spells for the adds in Ragnaros encounter
                     for (const uint32 spell : {21110, 21111, 21112, 21113, 21114, 21115, 21116, 21117})
-                        m_caster->CastSpell(m_caster, spell, TRIGGERED_OLD_TRIGGERED, nullptr);
+                    m_caster->CastSpell(m_caster, spell, TRIGGERED_OLD_TRIGGERED, nullptr);
                     return;
                 }
                 case 21147:                                 // Arcane Vacuum
@@ -770,7 +770,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     // randomly cast one of the nine Lava Burst spell A to I in Ragnaros encounter
                     const uint32 spell_list[9] = {21886, 21900, 21901, 21902, 21903, 21904, 21905, 21906, 21907};
                     m_caster->CastSpell(m_caster, spell_list[urand(0, 8)], TRIGGERED_OLD_TRIGGERED);
-                  return;
+                    return;
                 }
                 case 22276:                                 // Elemental Shield
                 {
@@ -891,22 +891,22 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     for (auto unit : fifteenTargets)
                     {
-                            // Cast Brood Affliction if not mutated
-                            if (!(unit->HasAura(23174, EFFECT_INDEX_0)))
-                                m_caster->CastSpell(unit, spellAfflict, TRIGGERED_OLD_TRIGGERED);
+                        // Cast Brood Affliction if not mutated
+                        if (!(unit->HasAura(23174, EFFECT_INDEX_0)))
+                            m_caster->CastSpell(unit, spellAfflict, TRIGGERED_OLD_TRIGGERED);
 
-                            // Cast Chromatic Mutation (23174) if target is now affected by all five brood afflictions
-                            if (unit->HasAura(23153, EFFECT_INDEX_0)
-                                    && unit->HasAura(23154, EFFECT_INDEX_0)
-                                    && unit->HasAura(23155, EFFECT_INDEX_0)
-                                    && unit->HasAura(23170, EFFECT_INDEX_0)
-                                    && unit->HasAura(23169, EFFECT_INDEX_0))
-                            {
-                                unit->RemoveAllAuras();
-                                m_caster->CastSpell(unit, 23174, TRIGGERED_OLD_TRIGGERED);
-                                unit->CastSpell(unit, 23175, TRIGGERED_OLD_TRIGGERED);
-                                unit->CastSpell(unit, 23177, TRIGGERED_OLD_TRIGGERED);
-                            }
+                        // Cast Chromatic Mutation (23174) if target is now affected by all five brood afflictions
+                        if (unit->HasAura(23153, EFFECT_INDEX_0)
+                                && unit->HasAura(23154, EFFECT_INDEX_0)
+                                && unit->HasAura(23155, EFFECT_INDEX_0)
+                                && unit->HasAura(23170, EFFECT_INDEX_0)
+                                && unit->HasAura(23169, EFFECT_INDEX_0))
+                        {
+                            unit->RemoveAllAuras();
+                            m_caster->CastSpell(unit, 23174, TRIGGERED_OLD_TRIGGERED);
+                            unit->CastSpell(unit, 23175, TRIGGERED_OLD_TRIGGERED);
+                            unit->CastSpell(unit, 23177, TRIGGERED_OLD_TRIGGERED);
+                        }
                     }
                     return;
                 }
@@ -1145,7 +1145,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         // immediately finishes the cooldown on Frost spells
-                        auto cdCheck = [](SpellEntry const& spellEntry) -> bool
+                        auto cdCheck = [](SpellEntry const & spellEntry) -> bool
                         {
                             if (spellEntry.SpellFamilyName != SPELLFAMILY_MAGE)
                                 return false;
@@ -1274,7 +1274,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     default: break;
                 }
                 if (spellid != 0)
-                m_caster->CastSpell(unitTarget, spellid, TRIGGERED_OLD_TRIGGERED, nullptr);
+                    m_caster->CastSpell(unitTarget, spellid, TRIGGERED_OLD_TRIGGERED, nullptr);
             }
 
             break;
@@ -1315,7 +1315,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         // immediately finishes the cooldown for hunter abilities
-                        auto cdCheck = [](SpellEntry const& spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_HUNTER && spellEntry.Id != 23989 && GetSpellRecoveryTime(&spellEntry) > 0); };
+                        auto cdCheck = [](SpellEntry const & spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_HUNTER && spellEntry.Id != 23989 && GetSpellRecoveryTime(&spellEntry) > 0); };
                         static_cast<Player*>(m_caster)->RemoveSomeCooldown(cdCheck);
                     }
 
@@ -1386,7 +1386,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 if (m_CastItem)
                 {
                     int32 bonusDamage = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo))
-                        + unitTarget->SpellBaseDamageBonusTaken(GetSpellSchoolMask(m_spellInfo));
+                                        + unitTarget->SpellBaseDamageBonusTaken(GetSpellSchoolMask(m_spellInfo));
                     // Does Amplify Magic/Dampen Magic influence flametongue? If not, the above addition must be removed.
                     float weaponSpeed = float(m_CastItem->GetProto()->Delay) / IN_MILLISECONDS;
                     bonusDamage = m_caster->SpellBonusWithCoeffs(m_spellInfo, bonusDamage, 0, 0, SPELL_DIRECT_DAMAGE, false); // apply spell coeff
@@ -3192,7 +3192,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        switch(m_caster->getClass())
+        switch (m_caster->getClass())
         {
             case CLASS_HUNTER:
             {
@@ -4546,9 +4546,9 @@ void Spell::EffectEnchantHeldItem(SpellEffectIndex eff_idx)
         if (m_spellInfo->IsFitToFamilyMask(0x0000000004000000)) // Flametongue totem
         {
             SpellAuraHolder* holder = m_caster->GetOwner()->GetSpellAuraHolder(29192);
-            if(!holder)
+            if (!holder)
                 holder = m_caster->GetOwner()->GetSpellAuraHolder(29193);
-            if(holder && holder->m_auras[0] && holder->GetSpellProto())
+            if (holder && holder->m_auras[0] && holder->GetSpellProto())
                 item->SetEnchantmentModifier(new SpellModifier(SPELLMOD_ATTACK_POWER, SPELLMOD_PCT, holder->m_auras[1]->GetModifier()->m_amount, holder->GetId(), uint64(0x00400000000)));
         }
         if (m_spellInfo->IsFitToFamilyMask(0x0000000200000000)) // Windfury totem
@@ -5039,7 +5039,7 @@ void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
     // Projectile motion
     float speedXY = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.1f;
     float time = dist / speedXY;
-    float speedZ = ((m_caster->GetPositionZ() - unitTarget->GetPositionZ()) + 0.5f*time*time*Movement::gravity) / time;
+    float speedZ = ((m_caster->GetPositionZ() - unitTarget->GetPositionZ()) + 0.5f * time * time * Movement::gravity) / time;
 
     ((Player*)unitTarget)->KnockBackFrom(m_caster, -speedXY, speedZ);
 }

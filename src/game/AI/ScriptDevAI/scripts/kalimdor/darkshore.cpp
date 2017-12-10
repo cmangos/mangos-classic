@@ -544,7 +544,7 @@ struct npc_volcorAI : public npc_escortAI
                 SetEscortPaused(true);
                 m_creature->ForcedDespawn(10000);
                 break;
-                // Quest 995 waypoints
+            // Quest 995 waypoints
             case 16:
                 m_creature->HandleEmote(EMOTE_ONESHOT_BOW);
                 break;

@@ -156,8 +156,8 @@ struct boss_razorgoreAI : public ScriptedAI
             {
                 m_creature->AttackerStateUpdate(pTarget);
                 m_creature->resetAttackTimer();
-             }
-         }
+            }
+        }
 
         DoMeleeAttackIfReady();
     }

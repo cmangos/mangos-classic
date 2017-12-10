@@ -259,7 +259,7 @@ enum
     GO_AZSHARITE_2      = 152621,
     GO_AZSHARITE_3      = 152622,
     GO_AZSHARITE_4      = 152631,
-    
+
     SOUND_GROWL         = 1249
 };
 

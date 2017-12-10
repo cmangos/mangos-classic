@@ -31,7 +31,7 @@
 #include "Groups/Group.h"
 
 #ifdef BUILD_PLAYERBOT
-    #include "PlayerBot/Base/PlayerbotAI.h"
+#include "PlayerBot/Base/PlayerbotAI.h"
 #endif
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recv_data)
@@ -468,7 +468,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
 
 #ifdef BUILD_PLAYERBOT
                 if (pPlayer->GetPlayerbotAI())
-                    pPlayer->GetPlayerbotAI()->AcceptQuest( pQuest, _player );
+                    pPlayer->GetPlayerbotAI()->AcceptQuest(pQuest, _player);
                 else
                 {
                     pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, _player->GetObjectGuid(), true);

@@ -206,7 +206,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVE(Unit* pTarget
 }
 
 // TODO: blatant copy of PVE for now, please PVP-port it
-CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVP(Unit *pTarget)
+CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVP(Unit* pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -266,7 +266,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVP(Unit *pTarget
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit* pTarget)
 {
     // Face enemy, make sure bot is attacking
     m_ai->FaceTarget(pTarget);
@@ -289,7 +289,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget)
     return RETURN_NO_ACTION_ERROR;
 }
 
-CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
+CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit* pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -297,7 +297,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
     //float fTargetDist = m_bot->GetCombatDistance(pTarget, true);
 
     //Used to determine if this bot is highest on threat
-    Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
+    Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE)(PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
     Unit* pVictim = pTarget->getVictim();
 
     // do shouts, berserker rage, etc...
@@ -306,7 +306,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
     else if (BLOODRAGE > 0 && m_ai->GetRageAmount() <= 10)
         m_ai->CastSpell(BLOODRAGE);
 
-    Creature * pCreature = (Creature*) pTarget;
+    Creature* pCreature = (Creature*) pTarget;
 
     // Prevent low health humanoid from fleeing with Hamstring
     if ((m_bot->HasAura(BATTLE_STANCE, EFFECT_INDEX_0) || m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0)) && pTarget->GetHealthPercent() < 20 && !m_ai->IsElite(pTarget, true))
@@ -365,7 +365,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit *pTarget)
             uint8 off = pTarget->RollMeleeOutcomeAgainst(m_bot, OFF_ATTACK, SPELL_SCHOOL_MASK_NORMAL);
             if (base == MELEE_HIT_DODGE || off == MELEE_HIT_DODGE)
             {
-                if ( m_bot->IsSpellReady(OVERPOWER) && m_ai->CastSpell(OVERPOWER, *pTarget))
+                if (m_bot->IsSpellReady(OVERPOWER) && m_ai->CastSpell(OVERPOWER, *pTarget))
                     return RETURN_CONTINUE;
             }
         }
@@ -522,7 +522,7 @@ void PlayerbotWarriorAI::DoNonCombatActions()
 
     // Search and apply stones to weapons
     // Mainhand ...
-    Item * stone, * weapon;
+    Item* stone, * weapon;
     weapon = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
     if (weapon && weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
     {
@@ -536,7 +536,7 @@ void PlayerbotWarriorAI::DoNonCombatActions()
     //... and offhand (we add a check to avoid trying to apply stone if the warrior is wielding a shield)
     weapon = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
     if (weapon && (weapon->GetProto()->InventoryType == INVTYPE_WEAPONOFFHAND || weapon->GetProto()->InventoryType == INVTYPE_WEAPONMAINHAND)
-        && weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
+            && weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
     {
         stone = m_ai->FindStoneFor(weapon);
         if (stone)

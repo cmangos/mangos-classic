@@ -49,7 +49,7 @@ class SOAPThread
         static const AccountTypes MinLevel = AccountTypes::SEC_ADMINISTRATOR;
         static const int CommandOutputBufferSize = 256;
 
-        SOAPThread(const std::string &host, int port);
+        SOAPThread(const std::string& host, int port);
         ~SOAPThread();
 };
 

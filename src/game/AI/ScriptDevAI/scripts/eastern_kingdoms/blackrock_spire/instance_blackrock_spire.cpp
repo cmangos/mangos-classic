@@ -88,7 +88,7 @@ static const DialogueEntry aStadiumDialogue[] =
     {SAY_NEFARIUS_INTRO_1,      NPC_LORD_VICTOR_NEFARIUS,   7000},
     {SAY_NEFARIUS_INTRO_2,      NPC_LORD_VICTOR_NEFARIUS,   5000},
     {NPC_BLACKHAND_HANDLER,     0,                          0},
-    {SAY_NEFARIUS_LOSE1 ,       NPC_LORD_VICTOR_NEFARIUS,   3000},
+    {SAY_NEFARIUS_LOSE1,       NPC_LORD_VICTOR_NEFARIUS,   3000},
     {SAY_REND_ATTACK,           NPC_REND_BLACKHAND,         2000},
     {SAY_NEFARIUS_WARCHIEF,     NPC_LORD_VICTOR_NEFARIUS,   0},
     {SAY_NEFARIUS_VICTORY,      NPC_LORD_VICTOR_NEFARIUS,   5000},
@@ -449,7 +449,7 @@ void instance_blackrock_spire::OnCreatureEvade(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-            // Emberseer should evade if the incarcerators evade
+        // Emberseer should evade if the incarcerators evade
         case NPC_BLACKHAND_INCARCERATOR:
             if (Creature* pEmberseer = GetSingleCreatureFromStorage(NPC_PYROGUARD_EMBERSEER))
                 pEmberseer->AI()->EnterEvadeMode();
@@ -477,7 +477,7 @@ void instance_blackrock_spire::OnCreatureEnterCombat(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-            // Once one of the Incarcerators gets Aggro, the door should close
+        // Once one of the Incarcerators gets Aggro, the door should close
         case NPC_BLACKHAND_INCARCERATOR:
             SetData(TYPE_EMBERSEER, IN_PROGRESS);
             break;
@@ -570,7 +570,7 @@ void instance_blackrock_spire::JustDidDialogueStep(int32 iEntry)
             {
                 pNefarius->GetMotionMaster()->MovePoint(0, aStadiumLocs[5].m_fX, aStadiumLocs[5].m_fY, aStadiumLocs[5].m_fZ);
                 // Summon the spectators and move them to the western balcony
-                for (uint8 i = 0; i <12; i++)
+                for (uint8 i = 0; i < 12; i++)
                 {
                     Creature* pSpectator = pNefarius->SummonCreature(aStadiumSpectators[i], aSpectatorsSpawnLocs[i].m_fX, aSpectatorsSpawnLocs[i].m_fY, aSpectatorsSpawnLocs[i].m_fZ, aSpectatorsSpawnLocs[i].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
                     if (pSpectator)
@@ -916,7 +916,7 @@ struct npc_rookery_hatcherAI : public ScriptedAI
 
     void Reset() override
     {
-        uiStrikeTimer           = urand(5000 ,7000);
+        uiStrikeTimer           = urand(5000, 7000);
         uiSunderArmorTimer      = 5000;
         uiDisturbEggsTimer      = urand(8000, 10000);
         uiWaitTimer             = 0;

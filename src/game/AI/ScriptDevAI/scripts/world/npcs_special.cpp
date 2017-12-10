@@ -281,7 +281,7 @@ struct npc_injured_patientAI : public ScriptedAI
 
         switch (m_creature->GetEntry())
         {
-                // lower max health
+            // lower max health
             case 12923:
             case 12938:                                     // Injured Soldier
                 m_creature->SetHealth(uint32(m_creature->GetMaxHealth()*.75));

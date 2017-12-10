@@ -59,7 +59,7 @@ namespace VMAP
             int iRefCount;
     };
 
-    typedef std::unordered_map<uint32 , StaticMapTree*> InstanceTreeMap;
+    typedef std::unordered_map<uint32, StaticMapTree*> InstanceTreeMap;
     typedef std::unordered_map<std::string, ManagedModel> ModelFileMap;
 
     class VMapManager2 : public IVMapManager

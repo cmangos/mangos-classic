@@ -4070,7 +4070,7 @@ bool ChatHandler::HandleLevelUpCommand(char* args)
                     return true;
                 }
             }
- 
+
             return false;
         }
     }
@@ -6813,7 +6813,7 @@ bool ChatHandler::HandleLinkEditCommand(char* args)
     if (QueryResult* result = WorldDatabase.PQuery("SELECT flag FROM creature_linking WHERE guid = '%u' AND master_guid = '%u'", player->GetSelectionGuid().GetCounter(), masterCounter))
     {
         delete result;
-            
+
         if (flags)
         {
             WorldDatabase.PExecute("UPDATE creature_linking SET flags = flags | '%u' WHERE guid = '%u' AND master_guid = '%u'", flags, player->GetSelectionGuid().GetCounter(), masterCounter);

@@ -262,7 +262,7 @@ class WorldSession
         void SendSaveGuildEmblem(uint32 msg) const;
         void SendBattleGroundJoinError(uint8 err) const;
 
-    static void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
+        static void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
 
         // Account mute time
         time_t m_muteTime;
@@ -664,7 +664,7 @@ class WorldSession
         void LogUnprocessedTail(WorldPacket const& packet) const;
 
         std::mutex m_logoutMutex;                           // this mutex is necessary to avoid two simultaneous logouts due to a valid logout request and socket error
-        Player * _player;
+        Player* _player;
         std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it
 
         AccountTypes _security;

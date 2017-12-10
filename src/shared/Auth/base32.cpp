@@ -28,7 +28,7 @@ int base32_decode(char const* encoded, char* result, int bufSize)
     int buffer = 0;
     int bitsLeft = 0;
     int count = 0;
-    for (const char *ptr = encoded; count < bufSize && *ptr; ++ptr)
+    for (const char* ptr = encoded; count < bufSize && *ptr; ++ptr)
     {
         char ch = *ptr;
         if (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n' || ch == '-')

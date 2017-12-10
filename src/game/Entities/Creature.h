@@ -382,7 +382,7 @@ struct VendorItemData
     void Clear()
     {
         for (VendorItemList::const_iterator itr = m_items.begin(); itr != m_items.end(); ++itr)
-            delete(*itr);
+            delete (*itr);
         m_items.clear();
     }
 };
@@ -567,7 +567,7 @@ class Creature : public Unit
 
 #ifdef BUILD_PLAYERBOT
         // Adds functionality to load/unload bots from NPC, also need to apply SQL scripts
-        void LoadBotMenu(Player *pPlayer);
+        void LoadBotMenu(Player* pPlayer);
 #endif
 
         bool IsCorpse() const { return getDeathState() ==  CORPSE; }
@@ -785,7 +785,7 @@ class Creature : public Unit
         void SendAreaSpiritHealerQueryOpcode(Player* pl);
 
         void SetVirtualItem(VirtualItemSlot slot, uint32 item_id);
-        
+
         void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
 
         uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }

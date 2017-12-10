@@ -137,7 +137,7 @@ void instance_scholomance::DoRespawnEntranceRoom(Player* pSummoner)
         std::random_shuffle(uiMobList.begin(), uiMobList.end());
 
         for (uint8 j = 0; j < MAX_NPC_PER_GROUP; ++j)
-            pSummoner->SummonCreature(uiMobList[j], aEntranceRoomSpawnLocs[4*i+j].m_fX, aEntranceRoomSpawnLocs[4*i+j].m_fY, aEntranceRoomSpawnLocs[4*i+j].m_fZ, aEntranceRoomSpawnLocs[4*i+j].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+            pSummoner->SummonCreature(uiMobList[j], aEntranceRoomSpawnLocs[4 * i + j].m_fX, aEntranceRoomSpawnLocs[4 * i + j].m_fY, aEntranceRoomSpawnLocs[4 * i + j].m_fZ, aEntranceRoomSpawnLocs[4 * i + j].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
     }
     // spawn also a patrolling necrofiend
     // the waypoints are handled in DB creature_movement_template table (shared with the other necrofiend in the room)

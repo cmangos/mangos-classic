@@ -546,7 +546,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
 
     for (auto i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
     {
-        auto const &spell = pProto->Spells[i];
+        auto const& spell = pProto->Spells[i];
 
         // if spell charges for this item are negative, it means that the item should be destroyed once the charges are consumed.
         // it also means that the value of this item is relative to how many charges are remaining.

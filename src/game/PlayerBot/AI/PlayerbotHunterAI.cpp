@@ -91,15 +91,15 @@ PlayerbotHunterAI::~PlayerbotHunterAI() {}
 
 CombatManeuverReturns PlayerbotHunterAI::DoFirstCombatManeuver(Unit* pTarget)
 {
-    Player *m_bot = GetPlayerBot();
-    m_has_ammo = m_bot->HasItemCount( m_bot->GetUInt32Value(PLAYER_AMMO_ID), 1 );
-    DEBUG_LOG("current ammo (%u)",m_bot->GetUInt32Value(PLAYER_AMMO_ID));
-    m_bot->setAttackTimer(RANGED_ATTACK,0);
+    Player* m_bot = GetPlayerBot();
+    m_has_ammo = m_bot->HasItemCount(m_bot->GetUInt32Value(PLAYER_AMMO_ID), 1);
+    DEBUG_LOG("current ammo (%u)", m_bot->GetUInt32Value(PLAYER_AMMO_ID));
+    m_bot->setAttackTimer(RANGED_ATTACK, 0);
     if (!m_has_ammo)
     {
-       m_ai->FindAmmo();
-       //DEBUG_LOG("new ammo (%u)",m_bot->GetUInt32Value(PLAYER_AMMO_ID));
-       m_has_ammo = m_bot->HasItemCount( m_bot->GetUInt32Value(PLAYER_AMMO_ID), 1 );
+        m_ai->FindAmmo();
+        //DEBUG_LOG("new ammo (%u)",m_bot->GetUInt32Value(PLAYER_AMMO_ID));
+        m_has_ammo = m_bot->HasItemCount(m_bot->GetUInt32Value(PLAYER_AMMO_ID), 1);
     }
     // There are NPCs in BGs and Open World PvP, so don't filter this on PvP scenarios (of course if PvP targets anyone but tank, all bets are off anyway)
     // Wait until the tank says so, until any non-tank gains aggro or X seconds - whichever is shortest
@@ -161,7 +161,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoFirstCombatManeuverPVP(Unit* /*pTarge
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuver(Unit* pTarget)
 {
     // Face enemy, make sure bot is attacking
     m_ai->FaceTarget(pTarget);
@@ -184,7 +184,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
     return RETURN_NO_ACTION_ERROR;
 }
 
-CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
+CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit* pTarget)
 {
     if (!m_ai)    return RETURN_NO_ACTION_ERROR;
     if (!m_bot)   return RETURN_NO_ACTION_ERROR;
@@ -193,7 +193,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
     Unit* pVictim = pTarget->getVictim();
 
     // check for pet and heal if neccessary
-    Pet *pet = m_bot->GetPet();
+    Pet* pet = m_bot->GetPet();
     // TODO: clarify/simplify: !pet->getDeathState() != ALIVE
     if (pet && PET_MEND > 0 && pet->isAlive() && pet->GetHealthPercent() < 50 && pVictim != m_bot && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && m_ai->CastSpell(PET_MEND, *m_bot))
     {
@@ -203,12 +203,12 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
     else if (pet && INTIMIDATION > 0 && pVictim == pet && !pet->HasAura(INTIMIDATION, EFFECT_INDEX_0) && m_ai->CastSpell(INTIMIDATION, *m_bot))
         return RETURN_CONTINUE;
 
-/*    // racial traits
-    if (m_bot->getRace() == RACE_ORC && !m_bot->HasAura(BLOOD_FURY, EFFECT_INDEX_0))
-        m_ai->CastSpell(BLOOD_FURY, *m_bot);
-    else if (m_bot->getRace() == RACE_TROLL && !m_bot->HasAura(BERSERKING, EFFECT_INDEX_0))
-        m_ai->CastSpell(BERSERKING, *m_bot);
-*/
+    /*    // racial traits
+        if (m_bot->getRace() == RACE_ORC && !m_bot->HasAura(BLOOD_FURY, EFFECT_INDEX_0))
+            m_ai->CastSpell(BLOOD_FURY, *m_bot);
+        else if (m_bot->getRace() == RACE_TROLL && !m_bot->HasAura(BERSERKING, EFFECT_INDEX_0))
+            m_ai->CastSpell(BERSERKING, *m_bot);
+    */
     // check if ranged combat is possible: by default chose ranged combat
     bool meleeReach = m_bot->CanReachWithMeleeAttack(pTarget);
 
@@ -242,7 +242,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
     }
 
     //Used to determine if this bot has highest threat
-    Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
+    Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE)(PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
     // Aggro management
     if (newTarget && !m_ai->IsNeutralized(newTarget)) // TODO: && party has a tank
     {
@@ -265,8 +265,8 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
     // If not in range: come closer
     // Do not do it if passive or stay orders.
     if (pTarget && !m_ai->In_Reach(pTarget, AUTO_SHOT) &&
-        !(m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_PASSIVE) &&
-        (m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY))
+            !(m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_PASSIVE) &&
+            (m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY))
     {
         m_ai->InterruptCurrentCastingSpell();
         m_bot->GetMotionMaster()->MoveFollow(pTarget, 39.0f, m_bot->GetOrientation());
@@ -276,8 +276,8 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
     // make it flee from target for a few seconds to get in ranged distance again
     // Do not do it if passive or stay orders.
     if (pVictim != m_bot && m_bot->GetCombatDistance(pTarget, true) <= 8.0f &&
-        !(m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_PASSIVE) &&
-        (m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY))
+            !(m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_PASSIVE) &&
+            (m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY))
     {
         m_ai->InterruptCurrentCastingSpell();
         m_ai->SetIgnoreUpdateTime(2);
@@ -290,32 +290,32 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
     if (m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED)
     {
         // Debuff target
-        if (HUNTERS_MARK > 0 && m_ai->In_Reach(pTarget,HUNTERS_MARK) && !pTarget->HasAura(HUNTERS_MARK, EFFECT_INDEX_0) && m_ai->CastSpell(HUNTERS_MARK, *pTarget))
+        if (HUNTERS_MARK > 0 && m_ai->In_Reach(pTarget, HUNTERS_MARK) && !pTarget->HasAura(HUNTERS_MARK, EFFECT_INDEX_0) && m_ai->CastSpell(HUNTERS_MARK, *pTarget))
             return RETURN_CONTINUE;
         // Buff self
         if (RAPID_FIRE > 0 && !m_bot->HasAura(RAPID_FIRE, EFFECT_INDEX_0) && m_bot->IsSpellReady(RAPID_FIRE) && m_ai->CastSpell(RAPID_FIRE, *m_bot))
             return RETURN_CONTINUE;
-        if (ARCANE_SHOT > 0 && m_bot->IsSpellReady(ARCANE_SHOT) && m_ai->In_Range(pTarget,ARCANE_SHOT) && m_ai->CastSpell(ARCANE_SHOT, *pTarget))
+        if (ARCANE_SHOT > 0 && m_bot->IsSpellReady(ARCANE_SHOT) && m_ai->In_Range(pTarget, ARCANE_SHOT) && m_ai->CastSpell(ARCANE_SHOT, *pTarget))
             return RETURN_CONTINUE;
         // Stings: only use Viper and Serpent sting. Stats decrease (Scorpid Sting) is useless in PvE
         // and as the bot is obviously not alone and assisting someone, no need to put the target to sleep (Wyvern Sting)
         // Viper sting for non-worldboss mana users
         if (pTarget->GetPower(POWER_MANA) > 0 && !m_ai->IsElite(pTarget, true))
         {
-            if (VIPER_STING > 0 && m_ai->In_Range(pTarget,VIPER_STING) && !pTarget->HasAura(VIPER_STING, EFFECT_INDEX_0) && m_ai->CastSpell(VIPER_STING, *pTarget))
+            if (VIPER_STING > 0 && m_ai->In_Range(pTarget, VIPER_STING) && !pTarget->HasAura(VIPER_STING, EFFECT_INDEX_0) && m_ai->CastSpell(VIPER_STING, *pTarget))
                 return RETURN_CONTINUE;
         }
         // Serpent sting for everyone else
         else
         {
-            if (SERPENT_STING > 0 && m_ai->In_Range(pTarget,SERPENT_STING) && !pTarget->HasAura(SERPENT_STING, EFFECT_INDEX_0) && m_ai->CastSpell(SERPENT_STING, *pTarget))
+            if (SERPENT_STING > 0 && m_ai->In_Range(pTarget, SERPENT_STING) && !pTarget->HasAura(SERPENT_STING, EFFECT_INDEX_0) && m_ai->CastSpell(SERPENT_STING, *pTarget))
                 return RETURN_CONTINUE;
         }
-        if (CONCUSSIVE_SHOT > 0 && m_ai->In_Range(pTarget,CONCUSSIVE_SHOT) && !pTarget->HasAura(CONCUSSIVE_SHOT, EFFECT_INDEX_0) && m_ai->CastSpell(CONCUSSIVE_SHOT, *pTarget))
+        if (CONCUSSIVE_SHOT > 0 && m_ai->In_Range(pTarget, CONCUSSIVE_SHOT) && !pTarget->HasAura(CONCUSSIVE_SHOT, EFFECT_INDEX_0) && m_ai->CastSpell(CONCUSSIVE_SHOT, *pTarget))
             return RETURN_CONTINUE;
-        if (BLACK_ARROW > 0 && m_ai->In_Range(pTarget,BLACK_ARROW) && !pTarget->HasAura(BLACK_ARROW, EFFECT_INDEX_0) && m_ai->CastSpell(BLACK_ARROW, *pTarget))
+        if (BLACK_ARROW > 0 && m_ai->In_Range(pTarget, BLACK_ARROW) && !pTarget->HasAura(BLACK_ARROW, EFFECT_INDEX_0) && m_ai->CastSpell(BLACK_ARROW, *pTarget))
             return RETURN_CONTINUE;
-        if (AIMED_SHOT > 0 && m_bot->IsSpellReady(AIMED_SHOT) && m_ai->In_Range(pTarget,AIMED_SHOT) && m_ai->CastSpell(AIMED_SHOT, *pTarget))
+        if (AIMED_SHOT > 0 && m_bot->IsSpellReady(AIMED_SHOT) && m_ai->In_Range(pTarget, AIMED_SHOT) && m_ai->CastSpell(AIMED_SHOT, *pTarget))
             return RETURN_CONTINUE;
 
 //       if (MULTI_SHOT > 0 && m_bot->IsSpellReady(MULTI_SHOT) && m_ai->In_Range(pTarget,MULTI_SHOT) && m_ai->GetAttackerCount() >= 3 && m_ai->CastSpell(MULTI_SHOT, *pTarget))
@@ -346,11 +346,11 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit *pTarget)
     {
         if (MONGOOSE_BITE > 0 && m_bot->RollMeleeOutcomeAgainst(pTarget, BASE_ATTACK, SPELL_SCHOOL_MASK_NORMAL) == MELEE_HIT_DODGE && m_ai->CastSpell(MONGOOSE_BITE, *pTarget))
             return RETURN_CONTINUE;
-        if (RAPTOR_STRIKE > 0 && m_bot->IsSpellReady(RAPTOR_STRIKE) && m_ai->In_Reach(pTarget,RAPTOR_STRIKE) && m_ai->CastSpell(RAPTOR_STRIKE, *pTarget))
+        if (RAPTOR_STRIKE > 0 && m_bot->IsSpellReady(RAPTOR_STRIKE) && m_ai->In_Reach(pTarget, RAPTOR_STRIKE) && m_ai->CastSpell(RAPTOR_STRIKE, *pTarget))
             return RETURN_CONTINUE;
         if (EXPLOSIVE_TRAP > 0 && !pTarget->HasAura(EXPLOSIVE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(IMMOLATION_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(FROST_TRAP, EFFECT_INDEX_0) && m_ai->CastSpell(EXPLOSIVE_TRAP, *pTarget))
             return RETURN_CONTINUE;
-        if (WING_CLIP > 0 && m_bot->IsSpellReady(WING_CLIP) && m_ai->In_Reach(pTarget,WING_CLIP) && !pTarget->HasAura(WING_CLIP, EFFECT_INDEX_0) && m_ai->CastSpell(WING_CLIP, *pTarget))
+        if (WING_CLIP > 0 && m_bot->IsSpellReady(WING_CLIP) && m_ai->In_Reach(pTarget, WING_CLIP) && !pTarget->HasAura(WING_CLIP, EFFECT_INDEX_0) && m_ai->CastSpell(WING_CLIP, *pTarget))
             return RETURN_CONTINUE;
         if (IMMOLATION_TRAP > 0 && !pTarget->HasAura(IMMOLATION_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(EXPLOSIVE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(FROST_TRAP, EFFECT_INDEX_0) && m_ai->CastSpell(IMMOLATION_TRAP, *pTarget))
             return RETURN_CONTINUE;
@@ -387,7 +387,7 @@ bool PlayerbotHunterAI::IsTargetEnraged(Unit* pTarget)
     Unit::SpellAuraHolderMap const& auras = pTarget->GetSpellAuraHolderMap();
     for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        SpellAuraHolder *holder = itr->second;
+        SpellAuraHolder* holder = itr->second;
         // Return true is target unit has aura with DISPEL_ENRAGE dispel type
         if ((1 << holder->GetSpellProto()->Dispel) & GetDispellMask(DISPEL_ENRAGE))
             return true;
@@ -423,7 +423,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
     if (PET_SUMMON > 0 && !m_petSummonFailed && HasPet(m_bot))
     {
         // we can summon pet, and no critical summon errors before
-        Pet *pet = m_bot->GetPet();
+        Pet* pet = m_bot->GetPet();
         if (!pet)
         {
             // summon pet
@@ -447,7 +447,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
         }
         else if (pet->GetHappinessState() != HAPPY) // if pet is hungry
         {
-            Unit *caster = (Unit *) m_bot;
+            Unit* caster = (Unit*) m_bot;
             // list out items in main backpack
             for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
             {
@@ -475,7 +475,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
             // list out items in other removable backpacks
             for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
             {
-                const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+                const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
                 if (pBag)
                     for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
                     {

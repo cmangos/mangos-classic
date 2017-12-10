@@ -279,9 +279,9 @@ struct boss_gothikAI : public ScriptedAI
         {
             switch (pSummoned->GetEntry())
             {
-                    // Wrong caster, it expected to be pSummoned.
-                    // Mangos deletes the spell event at caster death, so for delayed spell like this
-                    // it's just a workaround. Does not affect other than the visual though (+ spell takes longer to "travel")
+                // Wrong caster, it expected to be pSummoned.
+                // Mangos deletes the spell event at caster death, so for delayed spell like this
+                // it's just a workaround. Does not affect other than the visual though (+ spell takes longer to "travel")
                 case NPC_UNREL_TRAINEE:         m_creature->CastSpell(pAnchor, SPELL_A_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
                 case NPC_UNREL_DEATH_KNIGHT:    m_creature->CastSpell(pAnchor, SPELL_B_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
                 case NPC_UNREL_RIDER:           m_creature->CastSpell(pAnchor, SPELL_C_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
@@ -311,7 +311,7 @@ struct boss_gothikAI : public ScriptedAI
                 else
                     m_uiSpeechTimer -= uiDiff;
 
-                // No break here
+            // No break here
 
             case PHASE_BALCONY:                            // Do summoning
                 if (m_uiTraineeTimer < uiDiff)
@@ -388,7 +388,7 @@ struct boss_gothikAI : public ScriptedAI
                     // as the doors now open, recheck whether mobs are standing around
                     m_uiControlZoneTimer = 1;
                 }
-                // no break here
+            // no break here
 
             case PHASE_STOP_TELEPORTING:
                 if (m_uiHarvestSoulTimer < uiDiff)

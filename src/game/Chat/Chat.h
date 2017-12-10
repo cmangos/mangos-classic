@@ -432,7 +432,7 @@ class ChatHandler
         bool HandleReloadLocalesPageTextCommand(char* args);
         bool HandleReloadLocalesPointsOfInterestCommand(char* args);
         bool HandleReloadLocalesQuestCommand(char* args);
-        bool HandleReloadLocalesAreaTriggerCommand(char *);
+        bool HandleReloadLocalesAreaTriggerCommand(char*);
         bool HandleReloadQuestgiverGreetingLocalesCommand(char* args);
         bool HandleReloadLootTemplatesCreatureCommand(char* args);
         bool HandleReloadLootTemplatesDisenchantCommand(char* args);
@@ -597,11 +597,11 @@ class ChatHandler
         bool HandleMmapTestArea(char* args);
         bool HandleMmapTestHeight(char* args);
 
-        bool HandleLinkAddCommand(char * args);
-        bool HandleLinkRemoveCommand(char * args);
-        bool HandleLinkEditCommand(char * args);
-        bool HandleLinkToggleCommand(char * args);
-        bool HandleLinkCheckCommand(char * args);
+        bool HandleLinkAddCommand(char* args);
+        bool HandleLinkRemoveCommand(char* args);
+        bool HandleLinkEditCommand(char* args);
+        bool HandleLinkToggleCommand(char* args);
+        bool HandleLinkCheckCommand(char* args);
 
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
@@ -712,7 +712,7 @@ class ChatHandler
 class CliHandler : public ChatHandler
 {
     private:
-        typedef std::function<void(const char *)> Print;
+        typedef std::function<void(const char*)> Print;
         uint32 m_accountId;
         AccountTypes m_loginAccessLevel;
         Print m_print;

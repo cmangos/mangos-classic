@@ -111,7 +111,7 @@ void SqlResultQueue::Update()
     }
 }
 
-void SqlResultQueue::Add(MaNGOS::IQueryCallback *callback)
+void SqlResultQueue::Add(MaNGOS::IQueryCallback* callback)
 {
     std::lock_guard<std::mutex> guard(m_mutex);
     m_queue.push(std::unique_ptr<MaNGOS::IQueryCallback>(callback));

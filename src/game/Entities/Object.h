@@ -122,74 +122,74 @@ typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::millisec
 
 class CooldownData
 {
-    friend class CooldownContainer;
-public:
-    CooldownData(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory, uint32 categoryDuration, uint32 itemId = 0, bool isPermanent = false) :
-        m_spellId(spellId),
-        m_expireTime(duration ? std::chrono::milliseconds(duration) + clockNow : TimePoint()),
-        m_category(spellCategory),
-        m_catExpireTime(spellCategory && categoryDuration ? std::chrono::milliseconds(categoryDuration) + clockNow : TimePoint()),
-        m_typePermanent(isPermanent),
-        m_itemId(itemId)
-    {}
+        friend class CooldownContainer;
+    public:
+        CooldownData(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory, uint32 categoryDuration, uint32 itemId = 0, bool isPermanent = false) :
+            m_spellId(spellId),
+            m_expireTime(duration ? std::chrono::milliseconds(duration) + clockNow : TimePoint()),
+            m_category(spellCategory),
+            m_catExpireTime(spellCategory && categoryDuration ? std::chrono::milliseconds(categoryDuration) + clockNow : TimePoint()),
+            m_typePermanent(isPermanent),
+            m_itemId(itemId)
+        {}
 
-    // return false if permanent
-    bool GetSpellCDExpireTime(TimePoint& expireTime) const
-    {
-        if (m_typePermanent)
-            return false;
+        // return false if permanent
+        bool GetSpellCDExpireTime(TimePoint& expireTime) const
+        {
+            if (m_typePermanent)
+                return false;
 
-        expireTime = m_expireTime;
-        return true;
-    }
-
-    // return false if permanent
-    bool GetCatCDExpireTime(TimePoint& expireTime) const
-    {
-        if (m_typePermanent)
-            return false;
-
-        expireTime = m_catExpireTime;
-        return true;
-    }
-
-    bool IsSpellCDExpired(TimePoint const& now) const
-    {
-        if (m_typePermanent)
-            return false;
-
-        if (now >= m_expireTime)
+            expireTime = m_expireTime;
             return true;
+        }
 
-        return false;
-    }
+        // return false if permanent
+        bool GetCatCDExpireTime(TimePoint& expireTime) const
+        {
+            if (m_typePermanent)
+                return false;
 
-    bool IsCatCDExpired(TimePoint const& now) const
-    {
-        if (m_typePermanent)
+            expireTime = m_catExpireTime;
+            return true;
+        }
+
+        bool IsSpellCDExpired(TimePoint const& now) const
+        {
+            if (m_typePermanent)
+                return false;
+
+            if (now >= m_expireTime)
+                return true;
+
             return false;
+        }
 
-        if (!m_category)
-            return true;
+        bool IsCatCDExpired(TimePoint const& now) const
+        {
+            if (m_typePermanent)
+                return false;
 
-        if (now >= m_catExpireTime)
-            return true;
+            if (!m_category)
+                return true;
 
-        return false;
-    }
+            if (now >= m_catExpireTime)
+                return true;
 
-    bool IsPermanent() const { return m_typePermanent; }
-    uint32 GetItemId() const { return m_itemId; }
-    uint32 GetSpellId() const { return m_spellId; }
-    uint32 GetCategory() const { return m_category; }
+            return false;
+        }
 
-private:
-    uint32            m_spellId;
-    uint32            m_category;
-    TimePoint         m_expireTime;
-    TimePoint         m_catExpireTime;
-    bool              m_typePermanent;
-    uint32            m_itemId;
+        bool IsPermanent() const { return m_typePermanent; }
+        uint32 GetItemId() const { return m_itemId; }
+        uint32 GetSpellId() const { return m_spellId; }
+        uint32 GetCategory() const { return m_category; }
+
+    private:
+        uint32            m_spellId;
+        uint32            m_category;
+        TimePoint         m_expireTime;
+        TimePoint         m_catExpireTime;
+        bool              m_typePermanent;
+        uint32            m_itemId;
 };
 
 typedef std::unique_ptr<CooldownData> CooldownDataUPTR;
@@ -198,42 +198,62 @@ typedef std::map<SpellSchools, TimePoint> LockoutMap;
 
 class CooldownContainer
 {
-public:
-    typedef std::map<uint32, CooldownDataUPTR> spellIdMap;
-    typedef spellIdMap::const_iterator ConstIterator;
-    typedef spellIdMap::iterator Iterator;
-    typedef std::map<uint32, ConstIterator> categoryMap;
+    public:
+        typedef std::map<uint32, CooldownDataUPTR> spellIdMap;
+        typedef spellIdMap::const_iterator ConstIterator;
+        typedef spellIdMap::iterator Iterator;
+        typedef std::map<uint32, ConstIterator> categoryMap;
 
-    void Update(TimePoint const& now)
-    {
-        auto spellCDItr = m_spellIdMap.begin();
-        while (spellCDItr != m_spellIdMap.end())
+        void Update(TimePoint const& now)
         {
-            auto& cd = spellCDItr->second;
-            if (cd->IsSpellCDExpired(now) && cd->IsCatCDExpired(now)) // will not remove permanent CD
-                spellCDItr = erase(spellCDItr);
-            else
+            auto spellCDItr = m_spellIdMap.begin();
+            while (spellCDItr != m_spellIdMap.end())
             {
-                if (cd->m_category && cd->IsCatCDExpired(now))
-                    m_categoryMap.erase(cd->m_category);
-                ++spellCDItr;
+                auto& cd = spellCDItr->second;
+                if (cd->IsSpellCDExpired(now) && cd->IsCatCDExpired(now)) // will not remove permanent CD
+                    spellCDItr = erase(spellCDItr);
+                else
+                {
+                    if (cd->m_category && cd->IsCatCDExpired(now))
+                        m_categoryMap.erase(cd->m_category);
+                    ++spellCDItr;
+                }
             }
         }
-    }
 
-    bool AddCooldown(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory = 0, uint32 categoryDuration = 0, uint32 itemId = 0, bool onHold = false)
-    {
-        auto resultItr = m_spellIdMap.emplace(spellId, std::unique_ptr<CooldownData>(new CooldownData(clockNow, spellId, duration, spellCategory, categoryDuration, itemId, onHold)));
-        if (resultItr.second && spellCategory && categoryDuration)
-            m_categoryMap.emplace(spellCategory, resultItr.first);
+        bool AddCooldown(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory = 0, uint32 categoryDuration = 0, uint32 itemId = 0, bool onHold = false)
+        {
+            auto resultItr = m_spellIdMap.emplace(spellId, std::unique_ptr<CooldownData>(new CooldownData(clockNow, spellId, duration, spellCategory, categoryDuration, itemId, onHold)));
+            if (resultItr.second && spellCategory && categoryDuration)
+                m_categoryMap.emplace(spellCategory, resultItr.first);
 
-        return resultItr.second;
-    }
+            return resultItr.second;
+        }
 
-    void RemoveBySpellId(uint32 spellId)
-    {
-        auto spellCDItr = m_spellIdMap.find(spellId);
-        if (spellCDItr != m_spellIdMap.end())
+        void RemoveBySpellId(uint32 spellId)
+        {
+            auto spellCDItr = m_spellIdMap.find(spellId);
+            if (spellCDItr != m_spellIdMap.end())
+            {
+                auto& cdData = spellCDItr->second;
+                if (cdData->m_category)
+                {
+                    auto catCDItr = m_categoryMap.find(cdData->m_category);
+                    if (catCDItr != m_categoryMap.end())
+                        m_categoryMap.erase(catCDItr);
+                }
+                m_spellIdMap.erase(spellCDItr);
+            }
+        }
+
+        void RemoveByCategory(uint32 category)
+        {
+            auto spellCDItr = m_categoryMap.find(category);
+            if (spellCDItr != m_categoryMap.end())
+                m_categoryMap.erase(spellCDItr);
+        }
+
+        Iterator erase(ConstIterator spellCDItr)
         {
             auto& cdData = spellCDItr->second;
             if (cdData->m_category)
@@ -242,47 +262,27 @@ public:
                 if (catCDItr != m_categoryMap.end())
                     m_categoryMap.erase(catCDItr);
             }
-            m_spellIdMap.erase(spellCDItr);
+            return m_spellIdMap.erase(spellCDItr);
         }
-    }
 
-    void RemoveByCategory(uint32 category)
-    {
-        auto spellCDItr = m_categoryMap.find(category);
-        if (spellCDItr != m_categoryMap.end())
-            m_categoryMap.erase(spellCDItr);
-    }
+        ConstIterator FindBySpellId(uint32 id) const { return m_spellIdMap.find(id); }
 
-    Iterator erase(ConstIterator spellCDItr)
-    {
-        auto& cdData = spellCDItr->second;
-        if (cdData->m_category)
+        ConstIterator FindByCategory(uint32 category) const
         {
-            auto catCDItr = m_categoryMap.find(cdData->m_category);
-            if (catCDItr != m_categoryMap.end())
-                m_categoryMap.erase(catCDItr);
+            auto itr = m_categoryMap.find(category);
+            return itr != m_categoryMap.end() ? itr->second : end();
         }
-        return m_spellIdMap.erase(spellCDItr);
-    }
 
-    ConstIterator FindBySpellId(uint32 id) const { return m_spellIdMap.find(id); }
+        void clear() { m_spellIdMap.clear(); m_categoryMap.clear(); }
 
-    ConstIterator FindByCategory(uint32 category) const
-    {
-        auto itr = m_categoryMap.find(category);
-        return itr != m_categoryMap.end() ? itr->second : end();
-    }
+        ConstIterator begin() const { return m_spellIdMap.begin(); }
+        ConstIterator end() const { return m_spellIdMap.end(); }
+        bool IsEmpty() const { return m_spellIdMap.empty(); }
+        size_t size() const { return m_spellIdMap.size(); }
 
-    void clear() { m_spellIdMap.clear(); m_categoryMap.clear(); }
-
-    ConstIterator begin() const { return m_spellIdMap.begin(); }
-    ConstIterator end() const { return m_spellIdMap.end(); }
-    bool IsEmpty() const { return m_spellIdMap.empty(); }
-    size_t size() const { return m_spellIdMap.size(); }
-
-private:
-    spellIdMap m_spellIdMap;
-    categoryMap m_categoryMap;
+    private:
+        spellIdMap m_spellIdMap;
+        categoryMap m_categoryMap;
 };
 
 struct Position
@@ -386,38 +386,38 @@ class Object
 
         const int32& GetInt32Value(uint16 index) const
         {
-            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index , false));
+            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             return m_int32Values[ index ];
         }
 
         const uint32& GetUInt32Value(uint16 index) const
         {
-            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index , false));
+            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             return m_uint32Values[ index ];
         }
 
         const uint64& GetUInt64Value(uint16 index) const
         {
-            MANGOS_ASSERT(index + 1 < m_valuesCount || PrintIndexError(index , false));
+            MANGOS_ASSERT(index + 1 < m_valuesCount || PrintIndexError(index, false));
             return *((uint64*) & (m_uint32Values[ index ]));
         }
 
         const float& GetFloatValue(uint16 index) const
         {
-            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index , false));
+            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             return m_floatValues[ index ];
         }
 
         uint8 GetByteValue(uint16 index, uint8 offset) const
         {
-            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index , false));
+            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             MANGOS_ASSERT(offset < 4);
             return *(((uint8*)&m_uint32Values[ index ]) + offset);
         }
 
         uint16 GetUInt16Value(uint16 index, uint8 offset) const
         {
-            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index , false));
+            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             MANGOS_ASSERT(offset < 2);
             return *(((uint16*)&m_uint32Values[ index ]) + offset);
         }
@@ -460,7 +460,7 @@ class Object
 
         bool HasFlag(uint16 index, uint32 flag) const
         {
-            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index , false));
+            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             return (m_uint32Values[ index ] & flag) != 0;
         }
 
@@ -485,7 +485,7 @@ class Object
 
         bool HasByteFlag(uint16 index, uint8 offset, uint8 flag) const
         {
-            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index , false));
+            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             MANGOS_ASSERT(offset < 4);
             return (((uint8*)&m_uint32Values[index])[offset] & flag) != 0;
         }
@@ -511,7 +511,7 @@ class Object
 
         bool HasShortFlag(uint16 index, bool highpart, uint8 flag) const
         {
-            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index , false));
+            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             return (((uint16*)&m_uint32Values[index])[highpart ? 1 : 0] & flag) != 0;
         }
 
@@ -547,7 +547,7 @@ class Object
 
         bool HasFlag64(uint16 index, uint64 flag) const
         {
-            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index , false));
+            MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, false));
             return (GetUInt64Value(index) & flag) != 0;
         }
 
@@ -793,7 +793,7 @@ class WorldObject : public Object
         void PlayDistanceSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
         void PlayDirectSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
         void PlayMusic(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
-        void HandlePlayPacketSettings(WorldPacket & msg, PlayPacketParameters& parameters) const;
+        void HandlePlayPacketSettings(WorldPacket& msg, PlayPacketParameters& parameters) const;
 
         void SendObjectDeSpawnAnim(ObjectGuid guid) const;
         void SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId = 0) const;

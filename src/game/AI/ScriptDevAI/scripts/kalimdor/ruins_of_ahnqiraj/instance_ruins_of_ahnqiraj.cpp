@@ -96,7 +96,7 @@ void instance_ruins_of_ahnqiraj::OnCreatureEvade(Creature* pCreature)
         case NPC_RAJAXX:
             // Rajaxx yells on evade
             DoScriptText(SAY_DEAGGRO, pCreature);
-            // no break;
+        // no break;
         case NPC_COLONEL_ZERRAN:
         case NPC_MAJOR_PAKKON:
         case NPC_MAJOR_YEGGETH:

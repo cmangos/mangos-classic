@@ -319,89 +319,89 @@ void AuctionBotConfig::GetConfigFromFile()
     if (m_AhBotCfg.GetIntDefault("ConfVersion", 0) != AUCTIONHOUSEBOT_CONF_VERSION)
         sLog.outError("AHBot: Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
 
-    setConfigMax(CONFIG_UINT32_AHBOT_ALLIANCE_ITEM_AMOUNT_RATIO , "AuctionHouseBot.Alliance.Items.Amount.Ratio" , 100, 10000);
-    setConfigMax(CONFIG_UINT32_AHBOT_HORDE_ITEM_AMOUNT_RATIO    , "AuctionHouseBot.Horde.Items.Amount.Ratio"    , 100, 10000);
-    setConfigMax(CONFIG_UINT32_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO  , "AuctionHouseBot.Neutral.Items.Amount.Ratio"  , 100, 10000);
+    setConfigMax(CONFIG_UINT32_AHBOT_ALLIANCE_ITEM_AMOUNT_RATIO, "AuctionHouseBot.Alliance.Items.Amount.Ratio", 100, 10000);
+    setConfigMax(CONFIG_UINT32_AHBOT_HORDE_ITEM_AMOUNT_RATIO, "AuctionHouseBot.Horde.Items.Amount.Ratio", 100, 10000);
+    setConfigMax(CONFIG_UINT32_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO, "AuctionHouseBot.Neutral.Items.Amount.Ratio", 100, 10000);
 
     SetAHBotIncludes(m_AhBotCfg.GetStringDefault("AuctionHouseBot.forceIncludeItems"));
     SetAHBotExcludes(m_AhBotCfg.GetStringDefault("AuctionHouseBot.forceExcludeItems"));
 
-    setConfig(CONFIG_BOOL_AHBOT_BUYER_ALLIANCE_ENABLED       , "AuctionHouseBot.Buyer.Alliance.Enabled"      , false);
-    setConfig(CONFIG_BOOL_AHBOT_BUYER_HORDE_ENABLED          , "AuctionHouseBot.Buyer.Horde.Enabled"         , false);
-    setConfig(CONFIG_BOOL_AHBOT_BUYER_NEUTRAL_ENABLED        , "AuctionHouseBot.Buyer.Neutral.Enabled"       , false);
+    setConfig(CONFIG_BOOL_AHBOT_BUYER_ALLIANCE_ENABLED, "AuctionHouseBot.Buyer.Alliance.Enabled", false);
+    setConfig(CONFIG_BOOL_AHBOT_BUYER_HORDE_ENABLED, "AuctionHouseBot.Buyer.Horde.Enabled", false);
+    setConfig(CONFIG_BOOL_AHBOT_BUYER_NEUTRAL_ENABLED, "AuctionHouseBot.Buyer.Neutral.Enabled", false);
 
-    setConfig(CONFIG_BOOL_AHBOT_ITEMS_VENDOR                 , "AuctionHouseBot.Items.Vendor"                , false);
-    setConfig(CONFIG_BOOL_AHBOT_ITEMS_LOOT                   , "AuctionHouseBot.Items.Loot"                  , true);
-    setConfig(CONFIG_BOOL_AHBOT_ITEMS_MISC                   , "AuctionHouseBot.Items.Misc"                  , false);
+    setConfig(CONFIG_BOOL_AHBOT_ITEMS_VENDOR, "AuctionHouseBot.Items.Vendor", false);
+    setConfig(CONFIG_BOOL_AHBOT_ITEMS_LOOT, "AuctionHouseBot.Items.Loot", true);
+    setConfig(CONFIG_BOOL_AHBOT_ITEMS_MISC, "AuctionHouseBot.Items.Misc", false);
 
-    setConfig(CONFIG_BOOL_AHBOT_BIND_NO                      , "AuctionHouseBot.Bind.No"                     , true);
-    setConfig(CONFIG_BOOL_AHBOT_BIND_PICKUP                  , "AuctionHouseBot.Bind.Pickup"                 , false);
-    setConfig(CONFIG_BOOL_AHBOT_BIND_EQUIP                   , "AuctionHouseBot.Bind.Equip"                  , true);
-    setConfig(CONFIG_BOOL_AHBOT_BIND_USE                     , "AuctionHouseBot.Bind.Use"                    , true);
-    setConfig(CONFIG_BOOL_AHBOT_BIND_QUEST                   , "AuctionHouseBot.Bind.Quest"                  , false);
-    setConfig(CONFIG_BOOL_AHBOT_LOCKBOX_ENABLED              , "AuctionHouseBot.LockBox.Enabled"             , false);
+    setConfig(CONFIG_BOOL_AHBOT_BIND_NO, "AuctionHouseBot.Bind.No", true);
+    setConfig(CONFIG_BOOL_AHBOT_BIND_PICKUP, "AuctionHouseBot.Bind.Pickup", false);
+    setConfig(CONFIG_BOOL_AHBOT_BIND_EQUIP, "AuctionHouseBot.Bind.Equip", true);
+    setConfig(CONFIG_BOOL_AHBOT_BIND_USE, "AuctionHouseBot.Bind.Use", true);
+    setConfig(CONFIG_BOOL_AHBOT_BIND_QUEST, "AuctionHouseBot.Bind.Quest", false);
+    setConfig(CONFIG_BOOL_AHBOT_LOCKBOX_ENABLED, "AuctionHouseBot.LockBox.Enabled", false);
 
-    setConfig(CONFIG_BOOL_AHBOT_BUYPRICE_SELLER              , "AuctionHouseBot.BuyPrice.Seller"             , true);
+    setConfig(CONFIG_BOOL_AHBOT_BUYPRICE_SELLER, "AuctionHouseBot.BuyPrice.Seller", true);
 
-    setConfig(CONFIG_UINT32_AHBOT_ITEMS_PER_CYCLE_BOOST      , "AuctionHouseBot.ItemsPerCycle.Boost"         , 75);
-    setConfig(CONFIG_UINT32_AHBOT_ITEMS_PER_CYCLE_NORMAL     , "AuctionHouseBot.ItemsPerCycle.Normal"        , 20);
+    setConfig(CONFIG_UINT32_AHBOT_ITEMS_PER_CYCLE_BOOST, "AuctionHouseBot.ItemsPerCycle.Boost", 75);
+    setConfig(CONFIG_UINT32_AHBOT_ITEMS_PER_CYCLE_NORMAL, "AuctionHouseBot.ItemsPerCycle.Normal", 20);
 
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_ITEM_LEVEL        , "AuctionHouseBot.Items.ItemLevel.Min"         , 0);
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_ITEM_LEVEL        , "AuctionHouseBot.Items.ItemLevel.Max"         , 0);
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_REQ_LEVEL         , "AuctionHouseBot.Items.ReqLevel.Min"          , 0);
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_REQ_LEVEL         , "AuctionHouseBot.Items.ReqLevel.Max"          , 0);
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_SKILL_RANK        , "AuctionHouseBot.Items.ReqSkill.Min"          , 0);
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_SKILL_RANK        , "AuctionHouseBot.Items.ReqSkill.Max"          , 0);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_ITEM_LEVEL, "AuctionHouseBot.Items.ItemLevel.Min", 0);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_ITEM_LEVEL, "AuctionHouseBot.Items.ItemLevel.Max", 0);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_REQ_LEVEL, "AuctionHouseBot.Items.ReqLevel.Min", 0);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_REQ_LEVEL, "AuctionHouseBot.Items.ReqLevel.Max", 0);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_SKILL_RANK, "AuctionHouseBot.Items.ReqSkill.Min", 0);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_SKILL_RANK, "AuctionHouseBot.Items.ReqSkill.Max", 0);
 
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_GREY_AMOUNT           , "AuctionHouseBot.Items.Amount.Grey"           , 0);
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_WHITE_AMOUNT          , "AuctionHouseBot.Items.Amount.White"          , 2000);
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_GREEN_AMOUNT          , "AuctionHouseBot.Items.Amount.Green"          , 2500);
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_BLUE_AMOUNT           , "AuctionHouseBot.Items.Amount.Blue"           , 1500);
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_PURPLE_AMOUNT         , "AuctionHouseBot.Items.Amount.Purple"         , 500);
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_ORANGE_AMOUNT         , "AuctionHouseBot.Items.Amount.Orange"         , 0);
-    setConfig(CONFIG_UINT32_AHBOT_ITEM_YELLOW_AMOUNT         , "AuctionHouseBot.Items.Amount.Yellow"         , 0);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_GREY_AMOUNT, "AuctionHouseBot.Items.Amount.Grey", 0);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_WHITE_AMOUNT, "AuctionHouseBot.Items.Amount.White", 2000);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_GREEN_AMOUNT, "AuctionHouseBot.Items.Amount.Green", 2500);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_BLUE_AMOUNT, "AuctionHouseBot.Items.Amount.Blue", 1500);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_PURPLE_AMOUNT, "AuctionHouseBot.Items.Amount.Purple", 500);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_ORANGE_AMOUNT, "AuctionHouseBot.Items.Amount.Orange", 0);
+    setConfig(CONFIG_UINT32_AHBOT_ITEM_YELLOW_AMOUNT, "AuctionHouseBot.Items.Amount.Yellow", 0);
 
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_CONSUMABLE_AMOUNT , "AuctionHouseBot.Class.Consumable"            ,  6, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_CONTAINER_AMOUNT  , "AuctionHouseBot.Class.Container"             ,  4, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_WEAPON_AMOUNT     , "AuctionHouseBot.Class.Weapon"                ,  8, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_GEM_AMOUNT        , "AuctionHouseBot.Class.Gem"                   ,  3, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_ARMOR_AMOUNT      , "AuctionHouseBot.Class.Armor"                 ,  8, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_REAGENT_AMOUNT    , "AuctionHouseBot.Class.Reagent"               ,  1, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_PROJECTILE_AMOUNT , "AuctionHouseBot.Class.Projectile"            ,  2, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_TRADEGOOD_AMOUNT  , "AuctionHouseBot.Class.TradeGood"             , 10, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_GENERIC_AMOUNT    , "AuctionHouseBot.Class.Generic"               ,  1, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_RECIPE_AMOUNT     , "AuctionHouseBot.Class.Recipe"                ,  6, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_QUIVER_AMOUNT     , "AuctionHouseBot.Class.Quiver"                ,  1, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_QUEST_AMOUNT      , "AuctionHouseBot.Class.Quest"                 ,  1, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_KEY_AMOUNT        , "AuctionHouseBot.Class.Key"                   ,  1, 10);
-    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_MISC_AMOUNT       , "AuctionHouseBot.Class.Misc"                  ,  5, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_CONSUMABLE_AMOUNT, "AuctionHouseBot.Class.Consumable",  6, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_CONTAINER_AMOUNT, "AuctionHouseBot.Class.Container",  4, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_WEAPON_AMOUNT, "AuctionHouseBot.Class.Weapon",  8, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_GEM_AMOUNT, "AuctionHouseBot.Class.Gem",  3, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_ARMOR_AMOUNT, "AuctionHouseBot.Class.Armor",  8, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_REAGENT_AMOUNT, "AuctionHouseBot.Class.Reagent",  1, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_PROJECTILE_AMOUNT, "AuctionHouseBot.Class.Projectile",  2, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_TRADEGOOD_AMOUNT, "AuctionHouseBot.Class.TradeGood", 10, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_GENERIC_AMOUNT, "AuctionHouseBot.Class.Generic",  1, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_RECIPE_AMOUNT, "AuctionHouseBot.Class.Recipe",  6, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_QUIVER_AMOUNT, "AuctionHouseBot.Class.Quiver",  1, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_QUEST_AMOUNT, "AuctionHouseBot.Class.Quest",  1, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_KEY_AMOUNT, "AuctionHouseBot.Class.Key",  1, 10);
+    setConfigMax(CONFIG_UINT32_AHBOT_CLASS_MISC_AMOUNT, "AuctionHouseBot.Class.Misc",  5, 10);
 
-    setConfig(CONFIG_UINT32_AHBOT_ALLIANCE_PRICE_RATIO       , "AuctionHouseBot.Alliance.Price.Ratio"        , 200);
-    setConfig(CONFIG_UINT32_AHBOT_HORDE_PRICE_RATIO          , "AuctionHouseBot.Horde.Price.Ratio"           , 200);
-    setConfig(CONFIG_UINT32_AHBOT_NEUTRAL_PRICE_RATIO        , "AuctionHouseBot.Neutral.Price.Ratio"         , 200);
+    setConfig(CONFIG_UINT32_AHBOT_ALLIANCE_PRICE_RATIO, "AuctionHouseBot.Alliance.Price.Ratio", 200);
+    setConfig(CONFIG_UINT32_AHBOT_HORDE_PRICE_RATIO, "AuctionHouseBot.Horde.Price.Ratio", 200);
+    setConfig(CONFIG_UINT32_AHBOT_NEUTRAL_PRICE_RATIO, "AuctionHouseBot.Neutral.Price.Ratio", 200);
 
-    setConfig(CONFIG_UINT32_AHBOT_MINTIME                    , "AuctionHouseBot.MinTime"                     , 1);
-    setConfig(CONFIG_UINT32_AHBOT_MAXTIME                    , "AuctionHouseBot.MaxTime"                     , 72);
+    setConfig(CONFIG_UINT32_AHBOT_MINTIME, "AuctionHouseBot.MinTime", 1);
+    setConfig(CONFIG_UINT32_AHBOT_MAXTIME, "AuctionHouseBot.MaxTime", 72);
 
     setConfigMinMax(CONFIG_UINT32_AHBOT_BUYER_CHANCE_RATIO_ALLIANCE, "AuctionHouseBot.Buyer.Alliance.Chance.Ratio", 3, 1, 100);
-    setConfigMinMax(CONFIG_UINT32_AHBOT_BUYER_CHANCE_RATIO_HORDE   , "AuctionHouseBot.Buyer.Horde.Chance.Ratio"   , 3, 1, 100);
-    setConfigMinMax(CONFIG_UINT32_AHBOT_BUYER_CHANCE_RATIO_NEUTRAL , "AuctionHouseBot.Buyer.Neutral.Chance.Ratio" , 3, 1, 100);
-    setConfigMinMax(CONFIG_UINT32_AHBOT_BUYER_RECHECK_INTERVAL     , "AuctionHouseBot.Buyer.Recheck.Interval"     , 20, 1, DAY / MINUTE);
+    setConfigMinMax(CONFIG_UINT32_AHBOT_BUYER_CHANCE_RATIO_HORDE, "AuctionHouseBot.Buyer.Horde.Chance.Ratio", 3, 1, 100);
+    setConfigMinMax(CONFIG_UINT32_AHBOT_BUYER_CHANCE_RATIO_NEUTRAL, "AuctionHouseBot.Buyer.Neutral.Chance.Ratio", 3, 1, 100);
+    setConfigMinMax(CONFIG_UINT32_AHBOT_BUYER_RECHECK_INTERVAL, "AuctionHouseBot.Buyer.Recheck.Interval", 20, 1, DAY / MINUTE);
 
-    setConfig(CONFIG_BOOL_AHBOT_DEBUG_SELLER                 , "AuctionHouseBot.DEBUG.Seller"               , false);
-    setConfig(CONFIG_BOOL_AHBOT_DEBUG_BUYER                  , "AuctionHouseBot.DEBUG.Buyer"                , false);
-    setConfig(CONFIG_BOOL_AHBOT_SELLER_ENABLED               , "AuctionHouseBot.Seller.Enabled"             , false);
-    setConfig(CONFIG_BOOL_AHBOT_BUYER_ENABLED                , "AuctionHouseBot.Buyer.Enabled"              , false);
-    setConfig(CONFIG_BOOL_AHBOT_BUYPRICE_BUYER               , "AuctionHouseBot.Buyer.BuyPrice"             , false);
+    setConfig(CONFIG_BOOL_AHBOT_DEBUG_SELLER, "AuctionHouseBot.DEBUG.Seller", false);
+    setConfig(CONFIG_BOOL_AHBOT_DEBUG_BUYER, "AuctionHouseBot.DEBUG.Buyer", false);
+    setConfig(CONFIG_BOOL_AHBOT_SELLER_ENABLED, "AuctionHouseBot.Seller.Enabled", false);
+    setConfig(CONFIG_BOOL_AHBOT_BUYER_ENABLED, "AuctionHouseBot.Buyer.Enabled", false);
+    setConfig(CONFIG_BOOL_AHBOT_BUYPRICE_BUYER, "AuctionHouseBot.Buyer.BuyPrice", false);
 
-    setConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MIN_REQ_LEVEL   , "AuctionHouseBot.Class.Misc.Mount.ReqLevel.Min" , 0);
-    setConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MAX_REQ_LEVEL   , "AuctionHouseBot.Class.Misc.Mount.ReqLevel.Max" , 0);
-    setConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MIN_SKILL_RANK  , "AuctionHouseBot.Class.Misc.Mount.ReqSkill.Min" , 0);
-    setConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MAX_SKILL_RANK  , "AuctionHouseBot.Class.Misc.Mount.ReqSkill.Max" , 0);
-    setConfig(CONFIG_UINT32_AHBOT_CLASS_TRADEGOOD_MIN_ITEM_LEVEL   , "AuctionHouseBot.Class.TradeGood.ItemLevel.Min" , 0);
-    setConfig(CONFIG_UINT32_AHBOT_CLASS_TRADEGOOD_MAX_ITEM_LEVEL   , "AuctionHouseBot.Class.TradeGood.ItemLevel.Max" , 0);
-    setConfig(CONFIG_UINT32_AHBOT_CLASS_CONTAINER_MIN_ITEM_LEVEL   , "AuctionHouseBot.Class.Container.ItemLevel.Min" , 0);
-    setConfig(CONFIG_UINT32_AHBOT_CLASS_CONTAINER_MAX_ITEM_LEVEL   , "AuctionHouseBot.Class.Container.ItemLevel.Max" , 0);
+    setConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MIN_REQ_LEVEL, "AuctionHouseBot.Class.Misc.Mount.ReqLevel.Min", 0);
+    setConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MAX_REQ_LEVEL, "AuctionHouseBot.Class.Misc.Mount.ReqLevel.Max", 0);
+    setConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MIN_SKILL_RANK, "AuctionHouseBot.Class.Misc.Mount.ReqSkill.Min", 0);
+    setConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MAX_SKILL_RANK, "AuctionHouseBot.Class.Misc.Mount.ReqSkill.Max", 0);
+    setConfig(CONFIG_UINT32_AHBOT_CLASS_TRADEGOOD_MIN_ITEM_LEVEL, "AuctionHouseBot.Class.TradeGood.ItemLevel.Min", 0);
+    setConfig(CONFIG_UINT32_AHBOT_CLASS_TRADEGOOD_MAX_ITEM_LEVEL, "AuctionHouseBot.Class.TradeGood.ItemLevel.Max", 0);
+    setConfig(CONFIG_UINT32_AHBOT_CLASS_CONTAINER_MIN_ITEM_LEVEL, "AuctionHouseBot.Class.Container.ItemLevel.Min", 0);
+    setConfig(CONFIG_UINT32_AHBOT_CLASS_CONTAINER_MAX_ITEM_LEVEL, "AuctionHouseBot.Class.Container.ItemLevel.Max", 0);
 }
 
 bool AuctionBotConfig::Reload()

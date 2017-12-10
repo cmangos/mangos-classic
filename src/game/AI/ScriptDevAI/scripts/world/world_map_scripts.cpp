@@ -147,7 +147,7 @@ struct world_map_kalimdor : public ScriptedMap
         switch (pGo->GetEntry())
         {
             case GO_GHOST_MAGNET:
-                m_vGOEvents.push_back({ pGo->GetObjectGuid(),0,0 }); // insert new event with 0 timer
+                m_vGOEvents.push_back({ pGo->GetObjectGuid(), 0, 0 }); // insert new event with 0 timer
                 pGo->SetActiveObjectState(true);
                 break;
         }
@@ -167,7 +167,7 @@ struct world_map_kalimdor : public ScriptedMap
 
             return false;
         }
-            
+
 
         if (GameObject* go = instance->GetGameObject(eventData.guid))
         {
@@ -197,7 +197,7 @@ struct world_map_kalimdor : public ScriptedMap
             for (auto iter = m_vGOEvents.begin(); iter != m_vGOEvents.end();)
             {
                 iter->despawnTimer += diff;
-                if (!GhostOPlasmEventStep((*iter)))                
+                if (!GhostOPlasmEventStep((*iter)))
                     iter = m_vGOEvents.erase(iter);
                 else
                     ++iter;

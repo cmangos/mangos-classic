@@ -186,7 +186,7 @@ bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float 
 }
 
 template<class T, typename D>
-void TargetedMovementGeneratorMedium<T,D>::SetOffsetAndAngle(float offset, float angle)
+void TargetedMovementGeneratorMedium<T, D>::SetOffsetAndAngle(float offset, float angle)
 {
     i_offset = offset;
     i_angle = angle;

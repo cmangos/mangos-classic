@@ -54,7 +54,7 @@ bool ItemUse_item_orb_of_draconic_energy(Player* pPlayer, Item* pItem, const Spe
             Spell::SendCastResult(pPlayer, pSpellInfo, SPELL_FAILED_TARGET_AURASTATE);
 
         return true;
-     }
+    }
 
     return false;
 }

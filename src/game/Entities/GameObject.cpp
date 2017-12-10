@@ -827,8 +827,8 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                 {
                     Player* ownerPlayer = (Player*)owner;
                     if ((GetMap()->IsBattleGround() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
-                        (ownerPlayer->IsInDuelWith(u)) ||
-                        (!ownerPlayer->CanCooperate(u)))
+                            (ownerPlayer->IsInDuelWith(u)) ||
+                            (!ownerPlayer->CanCooperate(u)))
                         trapNotVisible = true;
                 }
                 else
@@ -1347,7 +1347,7 @@ void GameObject::Use(Unit* user)
             if (!scriptReturnValue)
                 GetMap()->ScriptsStart(sGameObjectScripts, GetGUIDLow(), spellCaster, this);
             else
-               return;
+                return;
 
             // cast this spell later if provided
             spellId = info->goober.spellId;

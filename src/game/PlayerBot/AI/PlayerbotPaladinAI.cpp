@@ -107,7 +107,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuver(Unit* pTarget)
                 }
             }
             else if (PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder())
-               return HealPlayer(GetHealTarget());
+                return HealPlayer(GetHealTarget());
             else
                 return RETURN_NO_ACTION_OK; // wait it out
         }
@@ -157,7 +157,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuverPVP(Unit* /*pTarg
     return RETURN_NO_ACTION_OK;
 }
 
-CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
+CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit* pTarget)
 {
     // Face enemy, make sure bot is attacking
     m_ai->FaceTarget(pTarget);
@@ -180,7 +180,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit *pTarget)
     return RETURN_NO_ACTION_ERROR;
 }
 
-CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
+CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -227,7 +227,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
     }
 
     //Used to determine if this bot has highest threat
-    Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE) (PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
+    Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE)(PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
     if (newTarget && !(m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK) && !m_ai->IsNeutralized(newTarget)) // TODO: && party has a tank
     {
         if (HealPlayer(m_bot) == RETURN_CONTINUE)
@@ -261,12 +261,12 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit *pTarget)
         case PALADIN_SPEC_HOLY:
             if (m_ai->IsHealer())
                 return RETURN_NO_ACTION_OK;
-            // else: DPS (retribution, NEVER protection)
+        // else: DPS (retribution, NEVER protection)
 
         case PALADIN_SPEC_RETRIBUTION:
-            if (HAMMER_OF_WRATH > 0 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && m_ai->CastSpell (HAMMER_OF_WRATH, *pTarget))
+            if (HAMMER_OF_WRATH > 0 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && m_ai->CastSpell(HAMMER_OF_WRATH, *pTarget))
                 return RETURN_CONTINUE;
-                return RETURN_CONTINUE;
+            return RETURN_CONTINUE;
             /*if (HAMMER_OF_JUSTICE > 0 && !pTarget->HasAura(HAMMER_OF_JUSTICE, EFFECT_INDEX_0) && m_ai->CastSpell (HAMMER_OF_JUSTICE, *pTarget))
                 return RETURN_CONTINUE;*/
             /*if (HOLY_WRATH > 0 && m_ai->GetAttackerCount() >= 3 && meleeReach && m_ai->CastSpell (HOLY_WRATH, *pTarget))
@@ -327,7 +327,7 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
     // Remove poison on group members if orders allow bot to do so
     if (Player* pPoisonedTarget = GetDispelTarget(DISPEL_POISON))
     {
-        m_ai->TellMaster("Has poison %s :",pPoisonedTarget->GetName());
+        m_ai->TellMaster("Has poison %s :", pPoisonedTarget->GetName());
         if (dispel > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && m_ai->CastSpell(dispel, *pPoisonedTarget))
             return RETURN_CONTINUE;
     }
@@ -358,30 +358,30 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
     if (hp >= 90)
         return RETURN_NO_ACTION_OK;
 
-    if (hp < 10 && LAY_ON_HANDS && m_bot->IsSpellReady(LAY_ON_HANDS) && m_ai->In_Reach(target,LAY_ON_HANDS) && m_ai->CastSpell(LAY_ON_HANDS, *target))
+    if (hp < 10 && LAY_ON_HANDS && m_bot->IsSpellReady(LAY_ON_HANDS) && m_ai->In_Reach(target, LAY_ON_HANDS) && m_ai->CastSpell(LAY_ON_HANDS, *target))
         return RETURN_CONTINUE;
 
     // Target is a moderately wounded healer or a badly wounded not tank? Blessing of Protection!
     if (BLESSING_OF_PROTECTION > 0
-        && ((hp < 25 && (GetTargetJob(target) & JOB_HEAL)) || (hp < 15 && !(GetTargetJob(target) & JOB_TANK)))
-        && m_bot->IsSpellReady(BLESSING_OF_PROTECTION) && m_ai->In_Reach(target,BLESSING_OF_PROTECTION)
-        && !target->HasAura(FORBEARANCE, EFFECT_INDEX_0)
-        && !target->HasAura(BLESSING_OF_PROTECTION, EFFECT_INDEX_0) && !target->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0)
-        && !target->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0)
-        && m_ai->CastSpell(BLESSING_OF_PROTECTION, *target))
+            && ((hp < 25 && (GetTargetJob(target) & JOB_HEAL)) || (hp < 15 && !(GetTargetJob(target) & JOB_TANK)))
+            && m_bot->IsSpellReady(BLESSING_OF_PROTECTION) && m_ai->In_Reach(target, BLESSING_OF_PROTECTION)
+            && !target->HasAura(FORBEARANCE, EFFECT_INDEX_0)
+            && !target->HasAura(BLESSING_OF_PROTECTION, EFFECT_INDEX_0) && !target->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0)
+            && !target->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0)
+            && m_ai->CastSpell(BLESSING_OF_PROTECTION, *target))
         return RETURN_CONTINUE;
 
     // Low HP : activate Divine Favor to make next heal a critical heal
-    if (hp < 25 && DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && m_bot->IsSpellReady(DIVINE_FAVOR) && m_ai->CastSpell (DIVINE_FAVOR, *m_bot))
+    if (hp < 25 && DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && m_bot->IsSpellReady(DIVINE_FAVOR) && m_ai->CastSpell(DIVINE_FAVOR, *m_bot))
         return RETURN_CONTINUE;
 
-    if (hp < 40 && FLASH_OF_LIGHT && m_ai->In_Reach(target,FLASH_OF_LIGHT) && m_ai->CastSpell(FLASH_OF_LIGHT, *target))
+    if (hp < 40 && FLASH_OF_LIGHT && m_ai->In_Reach(target, FLASH_OF_LIGHT) && m_ai->CastSpell(FLASH_OF_LIGHT, *target))
         return RETURN_CONTINUE;
 
-    if (hp < 60 && HOLY_SHOCK && m_ai->In_Reach(target,HOLY_SHOCK) && m_ai->CastSpell(HOLY_SHOCK, *target))
+    if (hp < 60 && HOLY_SHOCK && m_ai->In_Reach(target, HOLY_SHOCK) && m_ai->CastSpell(HOLY_SHOCK, *target))
         return RETURN_CONTINUE;
 
-    if (hp < 90 && HOLY_LIGHT && m_ai->In_Reach(target,HOLY_LIGHT) && m_ai->CastSpell(HOLY_LIGHT, *target))
+    if (hp < 90 && HOLY_LIGHT && m_ai->In_Reach(target, HOLY_LIGHT) && m_ai->CastSpell(HOLY_LIGHT, *target))
         return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
@@ -422,7 +422,7 @@ void PlayerbotPaladinAI::CheckAuras()
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
-            Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
             if (!groupMember)
                 continue;
 
@@ -465,7 +465,7 @@ bool PlayerbotPaladinAI::CheckSealAndJudgement(Unit* pTarget)
     if (!m_bot)     return false;
     if (!pTarget)   return false;
 
-    Creature * pCreature = (Creature*) pTarget;
+    Creature* pCreature = (Creature*) pTarget;
 
     // Prevent low health humanoid from fleeing by judging them with Seal of Justice
     if (pCreature && pCreature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_HUMANOID && pTarget->GetHealthPercent() < 20 && !pCreature->IsWorldBoss())
@@ -602,7 +602,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
 
     // Search and apply stones to weapons
     // Mainhand ...
-    Item * stone, * weapon;
+    Item* stone, * weapon;
     weapon = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
     if (weapon && weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
     {
@@ -622,7 +622,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
  *
  * Return bool - returns true if a buff took place.
  */
-bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target)
+bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target)
 {
     if (!ai)          return false;
     if (spellId == 0) return false;

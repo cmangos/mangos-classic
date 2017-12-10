@@ -133,7 +133,7 @@ CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
         if (aiName == "EventAI") // don't show error on GuardiansAI
         {
             sLog.outErrorEventAI("EventMap for Creature Id: %u, %s is empty but creature is using CreatureEventAI: '%s'.",
-                m_creature->GetEntry(), m_creature->GetGuidStr().c_str(), aiName.c_str());
+                                 m_creature->GetEntry(), m_creature->GetGuidStr().c_str(), aiName.c_str());
         }
     }
 }
@@ -717,16 +717,16 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                         {
                             switch (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType())
                             {
-                            case CHASE_MOTION_TYPE:
-                            case FOLLOW_MOTION_TYPE:
-                                m_attackDistance = 0.0f;
-                                m_attackAngle = 0.0f;
+                                case CHASE_MOTION_TYPE:
+                                case FOLLOW_MOTION_TYPE:
+                                    m_attackDistance = 0.0f;
+                                    m_attackAngle = 0.0f;
 
-                                m_creature->GetMotionMaster()->Clear(false);
-                                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle);
-                                break;
-                            default:
-                                break;
+                                    m_creature->GetMotionMaster()->Clear(false);
+                                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle);
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                     }
@@ -1419,7 +1419,7 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
 
                 // if friendly event && who is not hostile OR hostile event && who is hostile
                 if ((itr->Event.ooc_los.noHostile && !m_creature->IsEnemy(who)) ||
-                    ((!itr->Event.ooc_los.noHostile) && m_creature->IsEnemy(who)))
+                        ((!itr->Event.ooc_los.noHostile) && m_creature->IsEnemy(who)))
                 {
                     // if range is ok and we are actually in LOS
                     if (m_creature->IsWithinDistInMap(who, fMaxAllowedRange) && m_creature->IsWithinLOSInMap(who))
@@ -1495,9 +1495,9 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
             if (m_creature->IsWithinLOSInMap(victim))
             {
                 if (m_LastSpellMaxRange && m_creature->IsInRange(victim, 0, (m_LastSpellMaxRange / 1.5f)) &&
-                    m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+                        m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
                 {
-                    if(IsCombatMovement())
+                    if (IsCombatMovement())
                         SetCombatMovement(false, true);
                 }
                 else

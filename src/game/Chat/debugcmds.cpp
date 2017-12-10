@@ -734,7 +734,7 @@ bool ChatHandler::HandleSetValueHelper(Object* target, uint32 field, char* typeS
             return false;
 
         DEBUG_LOG(GetMangosString(LANG_SET_UINT), guid.GetString().c_str(), field, iValue);
-        target->SetUInt32Value(field , iValue);
+        target->SetUInt32Value(field, iValue);
         PSendSysMessage(LANG_SET_UINT_FIELD, guid.GetString().c_str(), field, iValue);
     }
     else
@@ -744,7 +744,7 @@ bool ChatHandler::HandleSetValueHelper(Object* target, uint32 field, char* typeS
             return false;
 
         DEBUG_LOG(GetMangosString(LANG_SET_FLOAT), guid.GetString().c_str(), field, fValue);
-        target->SetFloatValue(field , fValue);
+        target->SetFloatValue(field, fValue);
         PSendSysMessage(LANG_SET_FLOAT_FIELD, guid.GetString().c_str(), field, fValue);
     }
 

@@ -165,7 +165,7 @@ struct boss_faerlinaAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
             {
-                switch (urand(0,2))
+                switch (urand(0, 2))
                 {
                     case 0: DoScriptText(SAY_ENRAGE_1, m_creature); break;
                     case 1: DoScriptText(SAY_ENRAGE_2, m_creature); break;

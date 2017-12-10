@@ -687,7 +687,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
 
         switch (iEntry)
         {
-                // Set orientation and prepare the npcs for the next event
+            // Set orientation and prepare the npcs for the next event
             case SAY_WINDSOR_GET_READY:
                 m_creature->SetFacingTo(0.6f);
                 break;

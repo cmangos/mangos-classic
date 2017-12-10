@@ -22,7 +22,7 @@
 
 #include "../../dep/tbb/include/tbb/scalable_allocator.h"
 
-void* operator new(size_t sz)
+void* operator new (size_t sz)
 {
     void* res = scalable_malloc(sz);
 
@@ -42,7 +42,7 @@ void* operator new[](size_t sz)
     return res;
 }
 
-void operator delete(void* ptr) throw()
+void operator delete (void* ptr) throw()
 {
     scalable_free(ptr);
 }
@@ -52,7 +52,7 @@ void operator delete[](void* ptr) throw()
     scalable_free(ptr);
 }
 
-void* operator new(size_t sz, const std::nothrow_t&) throw()
+void* operator new (size_t sz, const std::nothrow_t&) throw()
 {
     return scalable_malloc(sz);
 }
@@ -62,7 +62,7 @@ void* operator new[](size_t sz, const std::nothrow_t&) throw()
     return scalable_malloc(sz);
 }
 
-void operator delete(void* ptr, const std::nothrow_t&) throw()
+void operator delete (void* ptr, const std::nothrow_t&) throw()
 {
     scalable_free(ptr);
 }

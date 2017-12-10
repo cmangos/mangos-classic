@@ -98,7 +98,7 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
     uint32 m_uiMarkTimer;
     uint32 m_uiVoidZoneTimer;
     uint32 m_uiMarkCounter;
-    
+
     float m_fHealthCheck;
 
     void Reset() override
@@ -106,7 +106,7 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
         m_uiMarkTimer       = 20000;
         m_uiVoidZoneTimer   = 15000;
         m_uiMarkCounter     = 0;
-        
+
         m_fHealthCheck      = 50.0f;
     }
 
@@ -195,7 +195,7 @@ struct boss_alexandros_mograineAI : public ScriptedAI
     uint32 m_uiMarkTimer;
     uint32 m_uiRighteousFireTimer;
     uint32 m_uiMarkCounter;
-    
+
     float m_fHealthCheck;
 
     void Reset() override
@@ -203,7 +203,7 @@ struct boss_alexandros_mograineAI : public ScriptedAI
         m_uiMarkTimer          = 20000;
         m_uiRighteousFireTimer = 15000;
         m_uiMarkCounter        = 0;
-        
+
         m_fHealthCheck         = 50.0f;
     }
 
@@ -297,7 +297,7 @@ struct boss_thane_korthazzAI : public ScriptedAI
     uint32 m_uiMarkTimer;
     uint32 m_uiMeteorTimer;
     uint32 m_uiMarkCounter;
-    
+
     float m_fHealthCheck;
 
     void Reset() override
@@ -305,7 +305,7 @@ struct boss_thane_korthazzAI : public ScriptedAI
         m_uiMarkTimer       = 20000;
         m_uiMeteorTimer     = 30000;
         m_uiMarkCounter     = 0;
-        
+
         m_fHealthCheck      = 50.0f;
     }
 
@@ -394,7 +394,7 @@ struct boss_sir_zeliekAI : public ScriptedAI
     uint32 m_uiMarkTimer;
     uint32 m_uiHolyWrathTimer;
     uint32 m_uiMarkCounter;
-    
+
     float m_fHealthCheck;
 
     void Reset() override
@@ -402,7 +402,7 @@ struct boss_sir_zeliekAI : public ScriptedAI
         m_uiMarkTimer       = 20000;
         m_uiHolyWrathTimer  = 12000;
         m_uiMarkCounter     = 0;
-        
+
         m_fHealthCheck      = 50.0f;
     }
 
@@ -464,7 +464,7 @@ struct boss_sir_zeliekAI : public ScriptedAI
                     m_uiHolyWrathTimer = 15000;
                 else
                     m_uiHolyWrathTimer = 1000;
-             }
+            }
         }
         else
             m_uiHolyWrathTimer -= uiDiff;

@@ -102,7 +102,7 @@ template<class Side, Side Default, uint8 Sides>
 struct Die
 {
     // MSVC++13-friendly initialization, switch to {0} when we end support for it
-    explicit Die() { for(uint8 i = 0; i < Sides; ++i) chance[i] = 0; }
+    explicit Die() { for (uint8 i = 0; i < Sides; ++i) chance[i] = 0; }
     Side roll(uint32 random)
     {
         uint32 rolling = 0;

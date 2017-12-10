@@ -351,7 +351,7 @@ enum ConditionType
     CONDITION_RESERVED_4            = 34,                   // reserved for 3.x and later
     CONDITION_GENDER                = 35,                   // 0=male, 1=female, 2=none (see enum Gender)
     CONDITION_DEAD_OR_AWAY          = 36,                   // value1: 0=player dead, 1=player is dead (with group dead), 2=player in instance are dead, 3=creature is dead
-                                                            // value2: if != 0 only consider players in range of this value
+    // value2: if != 0 only consider players in range of this value
     CONDITION_CREATURE_IN_RANGE     = 37,                   // value1: creature entry; value2: range; returns only alive creatures
     CONDITION_SPAWN_COUNT           = 39,                   // value1: creatureId; value2: count;
 };
@@ -749,7 +749,7 @@ class ObjectMgr
         uint32 GetHonorStandingPositionByGUID(uint32 guid, uint32 side);
         void UpdateHonorStandingByGuid(uint32 guid, HonorStanding standing, uint32 side) ;
         void FlushRankPoints(uint32 dateTop);
-        void DistributeRankPoints(uint32 team, uint32 dateBegin , bool flush = false);
+        void DistributeRankPoints(uint32 team, uint32 dateBegin, bool flush = false);
         void LoadStandingList(uint32 dateBegin);
         void LoadStandingList();
 
@@ -1227,7 +1227,7 @@ class ObjectMgr
 
         QuestgiverGreetingMap m_questgiverGreetingMap[QUESTGIVER_TYPE_MAX];
         QuestgiverGreetingLocaleMap m_questgiverGreetingLocaleMap[QUESTGIVER_TYPE_MAX];
-        
+
         CacheNpcTextIdMap m_mCacheNpcTextIdMap;
         CacheVendorItemMap m_mCacheVendorTemplateItemMap;
         CacheVendorItemMap m_mCacheVendorItemMap;

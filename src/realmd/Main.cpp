@@ -88,18 +88,18 @@ void usage(const char* prog)
 }
 
 /// Launch the realm server
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     std::string configFile, serviceParameter;
 
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
-        ("config,c", boost::program_options::value<std::string>(&configFile)->default_value(_REALMD_CONFIG), "configuration file")
-        ("version,v", "print version and exit")
+    ("config,c", boost::program_options::value<std::string>(&configFile)->default_value(_REALMD_CONFIG), "configuration file")
+    ("version,v", "print version and exit")
 #ifdef _WIN32
-        ("s", boost::program_options::value<std::string>(&serviceParameter), "<run, install, uninstall> service");
+    ("s", boost::program_options::value<std::string>(&serviceParameter), "<run, install, uninstall> service");
 #else
-        ("s", boost::program_options::value<std::string>(&serviceParameter), "<run, stop> service");
+    ("s", boost::program_options::value<std::string>(&serviceParameter), "<run, stop> service");
 #endif
 
     boost::program_options::variables_map vm;
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
         boost::program_options::notify(vm);
     }
-    catch (boost::program_options::error const &e)
+    catch (boost::program_options::error const& e)
     {
         std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
         std::cerr << desc << std::endl;

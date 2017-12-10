@@ -578,7 +578,7 @@ struct ClassFamilyMask
     bool Empty() const { return Flags == 0; }
     bool operator!() const { return Empty(); }
     operator void const* () const { return Empty() ? nullptr : this; } // for allow normal use in if(mask)
-    bool operator== (const ClassFamilyMask &another) const { return (Flags == another.Flags); }
+    bool operator== (const ClassFamilyMask& another) const { return (Flags == another.Flags); }
 
     bool IsFitToFamilyMask(uint64 familyFlags) const { return !!(Flags & familyFlags); }
     bool IsFitToFamilyMask(ClassFamilyMask const& mask) const { return !!(Flags & mask.Flags); }
@@ -934,7 +934,7 @@ struct ItemCategorySpellPair
     uint32 spellId;
     uint32 itemId;
     ItemCategorySpellPair(uint32 _spellId, uint32 _itemId) : spellId(_spellId), itemId(_itemId) {}
-    bool operator <(ItemCategorySpellPair const &pair) const { return spellId == pair.spellId ? itemId < pair.itemId : spellId < pair.spellId; }
+    bool operator <(ItemCategorySpellPair const& pair) const { return spellId == pair.spellId ? itemId < pair.itemId : spellId < pair.spellId; }
 };
 
 typedef std::set<ItemCategorySpellPair> ItemSpellCategorySet;

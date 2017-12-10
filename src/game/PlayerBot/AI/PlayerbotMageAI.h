@@ -95,89 +95,89 @@ static const uint32 uiImprovedScorch[3] =
 
 class MANGOS_DLL_SPEC PlayerbotMageAI : PlayerbotClassAI
 {
-public:
-    PlayerbotMageAI(Player * const master, Player * const bot, PlayerbotAI * const ai);
-    virtual ~PlayerbotMageAI();
+    public:
+        PlayerbotMageAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        virtual ~PlayerbotMageAI();
 
-    // all combat actions go here
-    CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
-    uint32 Neutralize(uint8 creatureType);
+        // all combat actions go here
+        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
+        uint32 Neutralize(uint8 creatureType);
 
-    // all non combat actions go here, ex buffs, heals, rezzes
-    void DoNonCombatActions();
+        // all non combat actions go here, ex buffs, heals, rezzes
+        void DoNonCombatActions();
 
-private:
-    CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
-    Item* FindManaGem() const;
+    private:
+        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
+        Item* FindManaGem() const;
 
-    CombatManeuverReturns CastSpell(uint32 nextAction, Unit *pTarget = nullptr) { return CastSpellWand(nextAction, pTarget, SHOOT); }
+        CombatManeuverReturns CastSpell(uint32 nextAction, Unit* pTarget = nullptr) { return CastSpellWand(nextAction, pTarget, SHOOT); }
 
-    static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target);
+        static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target);
 
-    uint8 CheckFrostCooldowns();
+        uint8 CheckFrostCooldowns();
 
-    // ARCANE
-    uint32 ARCANE_MISSILES,
-           ARCANE_EXPLOSION,
-           COUNTERSPELL,
-           EVOCATION,
-           POLYMORPH,
-           PRESENCE_OF_MIND,
-           ARCANE_POWER;
+        // ARCANE
+        uint32 ARCANE_MISSILES,
+               ARCANE_EXPLOSION,
+               COUNTERSPELL,
+               EVOCATION,
+               POLYMORPH,
+               PRESENCE_OF_MIND,
+               ARCANE_POWER;
 
-    // RANGED
-    uint32 SHOOT;
+        // RANGED
+        uint32 SHOOT;
 
-    // FIRE
-    uint32 FIREBALL,
-           FIRE_BLAST,
-           FLAMESTRIKE,
-           SCORCH,
-           FIRE_VULNERABILITY,
-           IMPROVED_SCORCH,
-           PYROBLAST,
-           BLAST_WAVE,
-           COMBUSTION,
-           FIRE_WARD;
+        // FIRE
+        uint32 FIREBALL,
+               FIRE_BLAST,
+               FLAMESTRIKE,
+               SCORCH,
+               FIRE_VULNERABILITY,
+               IMPROVED_SCORCH,
+               PYROBLAST,
+               BLAST_WAVE,
+               COMBUSTION,
+               FIRE_WARD;
 
-    // FROST
-    uint32 FROSTBOLT,
-           FROST_NOVA,
-           BLIZZARD,
-           CONE_OF_COLD,
-           ICE_BARRIER,
-           FROST_WARD,
-           ICE_BLOCK,
-           COLD_SNAP;
+        // FROST
+        uint32 FROSTBOLT,
+               FROST_NOVA,
+               BLIZZARD,
+               CONE_OF_COLD,
+               ICE_BARRIER,
+               FROST_WARD,
+               ICE_BLOCK,
+               COLD_SNAP;
 
-    // buffs
-    uint32 FROST_ARMOR,
-           ICE_ARMOR,
-           MAGE_ARMOR,
-           ARCANE_INTELLECT,
-           ARCANE_BRILLIANCE,
-           MANA_SHIELD,
-           DAMPEN_MAGIC,
-           AMPLIFY_MAGIC,
-           MAGE_REMOVE_CURSE;
+        // buffs
+        uint32 FROST_ARMOR,
+               ICE_ARMOR,
+               MAGE_ARMOR,
+               ARCANE_INTELLECT,
+               ARCANE_BRILLIANCE,
+               MANA_SHIELD,
+               DAMPEN_MAGIC,
+               AMPLIFY_MAGIC,
+               MAGE_REMOVE_CURSE;
 
-    // racial
-    uint32 STONEFORM,
-           ESCAPE_ARTIST,
-           PERCEPTION,
-           SHADOWMELD,
-           BLOOD_FURY,
-           WAR_STOMP,
-           BERSERKING,
-           WILL_OF_THE_FORSAKEN;
+        // racial
+        uint32 STONEFORM,
+               ESCAPE_ARTIST,
+               PERCEPTION,
+               SHADOWMELD,
+               BLOOD_FURY,
+               WAR_STOMP,
+               BERSERKING,
+               WILL_OF_THE_FORSAKEN;
 
-    uint32 CONJURE_WATER,
-           CONJURE_FOOD,
-           CONJURE_MANA_GEM;
+        uint32 CONJURE_WATER,
+               CONJURE_FOOD,
+               CONJURE_MANA_GEM;
 };
 
 #endif

@@ -27,7 +27,7 @@ using namespace MaNGOS;
 
 PacketBuffer::PacketBuffer(int initialSize) : m_writePosition(0), m_readPosition(0), m_buffer(initialSize, 0) {}
 
-void PacketBuffer::Read(char *buffer, int length)
+void PacketBuffer::Read(char* buffer, int length)
 {
     assert(ReadLengthRemaining() >= length);
 
@@ -37,7 +37,7 @@ void PacketBuffer::Read(char *buffer, int length)
     m_readPosition += length;
 }
 
-void PacketBuffer::Write(const char *buffer, int length)
+void PacketBuffer::Write(const char* buffer, int length)
 {
     assert(!!buffer && !!length);
 

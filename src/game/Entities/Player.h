@@ -55,8 +55,8 @@ class Spell;
 class Item;
 
 #ifdef BUILD_PLAYERBOT
-    #include "PlayerBot/Base/PlayerbotMgr.h"
-    #include "PlayerBot/Base/PlayerbotAI.h"
+#include "PlayerBot/Base/PlayerbotMgr.h"
+#include "PlayerBot/Base/PlayerbotAI.h"
 #endif
 
 struct AreaTrigger;
@@ -1011,7 +1011,7 @@ class Player : public Unit
 
         void SetVirtualItemSlot(uint8 i, Item* item);
         void SetSheath(SheathState sheathed) override;      // overwrite Unit version
-        bool ViableEquipSlots(ItemPrototype const* proto, uint8 *viable_slots) const;
+        bool ViableEquipSlots(ItemPrototype const* proto, uint8* viable_slots) const;
         uint8 FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) const;
         uint32 GetItemCount(uint32 item, bool inBankAlso = false, Item* skipItem = nullptr) const;
         Item* GetItemByGuid(ObjectGuid guid) const;
@@ -2071,9 +2071,9 @@ class Player : public Unit
 #ifdef BUILD_PLAYERBOT
         // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
         // neither. Code that enables bots must create the playerbotMgr and set it using SetPlayerbotMgr.
-        void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI=ai; }
+        void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI = ai; }
         PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI; }
-        void SetPlayerbotMgr(PlayerbotMgr* mgr) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotMgr=mgr; }
+        void SetPlayerbotMgr(PlayerbotMgr* mgr) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotMgr = mgr; }
         PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
         void SetBotDeathTimer() { m_deathTimer = 0; }
         bool IsInDuel() const { return duel && duel->startTime != 0; }

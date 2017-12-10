@@ -178,7 +178,7 @@ typedef struct AuthHandler
 #endif
 
 /// Constructor - set the N and g values for SRP6
-AuthSocket::AuthSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
+AuthSocket::AuthSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
     : Socket(service, closeHandler), _status(STATUS_CHALLENGE), _build(0), _accountSecurityLevel(SEC_PLAYER)
 {
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
@@ -333,7 +333,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
     Read((char*)&buf[0], 4);
     void* pVoid = static_cast<void*>(&buf[0]);
-    uint16* pUint16 = static_cast<uint16 *>(pVoid);
+    uint16* pUint16 = static_cast<uint16*>(pVoid);
     EndianConvert(*pUint16);
     uint16 remaining = ((sAuthLogonChallenge_C*)&buf[0])->size;
     DEBUG_LOG("[AuthChallenge] got header, body is %#04x bytes", remaining);
@@ -386,8 +386,8 @@ bool AuthSocket::_HandleLogonChallenge()
             "WHERE (unbandate = bandate OR unbandate > UNIX_TIMESTAMP()) AND ip = '%s'", m_address.c_str()));
 
     std::unique_ptr<QueryResult> account_banned_result(LoginDatabase.PQuery(
-            "SELECT ab.unbandate FROM account_banned ab LEFT JOIN account a ON a.id = ab.id "
-                    "WHERE active = 1 AND a.username = '%s' AND (ab.unbandate = ab.bandate OR ab.unbandate > UNIX_TIMESTAMP())", _safelogin.c_str()));
+                "SELECT ab.unbandate FROM account_banned ab LEFT JOIN account a ON a.id = ab.id "
+                "WHERE active = 1 AND a.username = '%s' AND (ab.unbandate = ab.bandate OR ab.unbandate > UNIX_TIMESTAMP())", _safelogin.c_str()));
 
     if (ip_banned_result || account_banned_result)
     {
@@ -532,7 +532,7 @@ bool AuthSocket::_HandleLogonChallenge()
             pkt << (uint8) WOW_FAIL_UNKNOWN_ACCOUNT;
     }
 
-    Write((const char *)pkt.contents(), pkt.size());
+    Write((const char*)pkt.contents(), pkt.size());
     return true;
 }
 
@@ -557,7 +557,7 @@ bool AuthSocket::_HandleLogonProof()
         pkt << (uint8) 0x00;
         pkt << (uint8) WOW_FAIL_VERSION_INVALID;
         DEBUG_LOG("[AuthChallenge] %u is not a valid client version!", _build);
-        Write((const char *)pkt.contents(), pkt.size());
+        Write((const char*)pkt.contents(), pkt.size());
         return true;
     }
     /// </ul>
@@ -751,7 +751,7 @@ bool AuthSocket::_HandleReconnectChallenge()
     Read((char*)&buf[0], 4);
 
     void* pVoid = static_cast<void*>(&buf[0]);
-    uint16* pUint16 = static_cast<uint16 *>(pVoid);
+    uint16* pUint16 = static_cast<uint16*>(pVoid);
     EndianConvert(*pUint16);
     uint16 remaining = ((sAuthLogonChallenge_C*)&buf[0])->size;
     DEBUG_LOG("[ReconnectChallenge] got header, body is %#04x bytes", remaining);
@@ -804,7 +804,7 @@ bool AuthSocket::_HandleReconnectChallenge()
     _reconnectProof.SetRand(16 * 8);
     pkt.append(_reconnectProof.AsByteArray(16), 16);        // 16 bytes random
     pkt << (uint64) 0x00 << (uint64) 0x00;                  // 16 bytes zeros
-    Write((const char *)pkt.contents(), pkt.size());
+    Write((const char*)pkt.contents(), pkt.size());
     return true;
 }
 
@@ -839,7 +839,7 @@ bool AuthSocket::_HandleReconnectProof()
         pkt << (uint8)  CMD_AUTH_RECONNECT_PROOF;
         pkt << (uint8)  0x00;
         pkt << (uint16) 0x00;                               // 2 bytes zeros
-        Write((const char *)pkt.contents(), pkt.size());
+        Write((const char*)pkt.contents(), pkt.size());
 
         ///- Set _status to authed!
         _status = STATUS_AUTHED;
@@ -890,7 +890,7 @@ bool AuthSocket::_HandleRealmList()
     hdr << (uint16)pkt.size();
     hdr.append(pkt);
 
-    Write((const char *)hdr.contents(), hdr.size());
+    Write((const char*)hdr.contents(), hdr.size());
     return true;
 }
 
@@ -1065,7 +1065,7 @@ int32 AuthSocket::generateToken(char const* b32key)
     memset(encoded, 0, bufSize);
     unsigned int hmac_result_size = HMAC_RES_SIZE;
     unsigned char hmac_result[HMAC_RES_SIZE];
-    unsigned long timestamp = time(nullptr)/30;
+    unsigned long timestamp = time(nullptr) / 30;
     unsigned char challenge[8];
 
     for (int i = 8; i--; timestamp >>= 8)
@@ -1074,7 +1074,7 @@ int32 AuthSocket::generateToken(char const* b32key)
     base32_decode(b32key, encoded, bufSize);
     HMAC(EVP_sha1(), encoded, bufSize, challenge, 8, hmac_result, &hmac_result_size);
     unsigned int offset = hmac_result[19] & 0xF;
-    unsigned int truncHash = (hmac_result[offset] << 24) | (hmac_result[offset + 1] << 16 ) | (hmac_result[offset + 2] << 8) | (hmac_result[offset + 3]);
+    unsigned int truncHash = (hmac_result[offset] << 24) | (hmac_result[offset + 1] << 16) | (hmac_result[offset + 2] << 8) | (hmac_result[offset + 3]);
     truncHash &= 0x7FFFFFFF;
 
     delete[] encoded;

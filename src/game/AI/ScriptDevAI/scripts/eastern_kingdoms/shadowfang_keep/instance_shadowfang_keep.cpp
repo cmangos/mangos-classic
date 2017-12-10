@@ -64,8 +64,8 @@ void instance_shadowfang_keep::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[0] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
-            // For this we ignore voidwalkers, because if the server restarts
-            // They won't be there, but Fenrus is dead so the door can't be opened!
+        // For this we ignore voidwalkers, because if the server restarts
+        // They won't be there, but Fenrus is dead so the door can't be opened!
         case GO_SORCERER_DOOR:
             if (m_auiEncounter[2] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);

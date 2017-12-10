@@ -77,7 +77,7 @@ namespace MMAP
 
             // always use mmaps for pets of players (can still be disabled by extra-flag for pet creature)
             if (unit->GetTypeId() == TYPEID_UNIT && ((Creature*)unit)->IsPet() && unit->GetOwner() &&
-                unit->GetOwner()->GetTypeId() == TYPEID_PLAYER)
+                    unit->GetOwner()->GetTypeId() == TYPEID_PLAYER)
                 return true;
         }
 

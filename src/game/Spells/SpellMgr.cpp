@@ -414,8 +414,8 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
     // Tracking spells (exclude Well Fed, some other always allowed cases)
     if (IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_CREATURES) ||
-        IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_STEALTHED) ||
-        (IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_RESOURCES) && !spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !spellInfo->HasAttribute(SPELL_ATTR_CANT_CANCEL)))
+            IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_STEALTHED) ||
+            (IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_RESOURCES) && !spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !spellInfo->HasAttribute(SPELL_ATTR_CANT_CANCEL)))
         return SPELL_TRACKER;
 
     // Elixirs can have different families, but potions mostly

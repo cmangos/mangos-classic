@@ -365,7 +365,7 @@ void FlightPathMovementGenerator::LoadPath(Player& player)
                 if (passedPreviousSegmentProximityCheck || !src || i_path.empty() || IsNodeIncludedInShortenedPath(i_path[i_path.size() - 1], nodes[i]))
                 {
                     if ((!src || (IsNodeIncludedInShortenedPath(start, nodes[i]) && i >= 2)) &&
-                        (dst == taxi.size() - 1 || (IsNodeIncludedInShortenedPath(end, nodes[i]) && i < nodes.size() - 1)))
+                            (dst == taxi.size() - 1 || (IsNodeIncludedInShortenedPath(end, nodes[i]) && i < nodes.size() - 1)))
                     {
                         passedPreviousSegmentProximityCheck = true;
                         i_path.push_back(nodes[i]);

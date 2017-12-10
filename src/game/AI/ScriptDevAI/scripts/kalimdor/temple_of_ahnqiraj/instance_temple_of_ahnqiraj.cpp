@@ -174,7 +174,7 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                     // Respawn the Ouro spawner on fail
                     if (Creature* pSpawner = GetSingleCreatureFromStorage(NPC_OURO_SPAWNER))
                         pSpawner->Respawn();
-                    // no break;
+                // no break;
                 case DONE:
                     // Despawn the sandworm base on Done or Fail
                     if (GameObject* pBase = GetSingleGameObjectFromStorage(GO_SANDWORM_BASE))

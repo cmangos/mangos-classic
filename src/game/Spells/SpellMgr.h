@@ -407,8 +407,8 @@ inline bool IsBinarySpell(SpellEntry const* spellInfo)
             {
                 // If effect is extra mechanic on the same target as damage effect
                 if ((mechmask & (1 << e)) &&
-                    spellInfo->EffectImplicitTargetA[i] == spellInfo->EffectImplicitTargetA[e] &&
-                    spellInfo->EffectImplicitTargetB[i] == spellInfo->EffectImplicitTargetB[e])
+                        spellInfo->EffectImplicitTargetA[i] == spellInfo->EffectImplicitTargetA[e] &&
+                        spellInfo->EffectImplicitTargetB[i] == spellInfo->EffectImplicitTargetB[e])
                 {
                     return true; // Pre-2.3: if such effect exists
                 }
@@ -1021,8 +1021,8 @@ inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
 inline bool IsReflectableSpell(SpellEntry const* spellInfo)
 {
     return spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !spellInfo->HasAttribute(SPELL_ATTR_ABILITY)
-        && !spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REFLECTED) && !spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
-        && !spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !IsPositiveSpell(spellInfo);
+           && !spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REFLECTED) && !spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
+           && !spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !IsPositiveSpell(spellInfo);
 }
 
 // Mostly required by spells that target a creature inside GO
@@ -2073,7 +2073,7 @@ class SpellMgr
 
             // Hunter's Mark mechanics
             if (entry->SpellFamilyName == SPELLFAMILY_HUNTER && IsSpellHaveAura(entry, SPELL_AURA_MOD_STALKED))
-               return true;
+                return true;
 
             return false;
         }

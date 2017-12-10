@@ -143,7 +143,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
         sLog.outError("WorldSession::HandleLootMasterGiveOpcode> Cannot retrieve loot for player %s", _player->GetGuidStr().c_str());
         return;
     }
-    
+
     if (_player->GetObjectGuid() != pLoot->GetMasterLootGuid())
     {
         sLog.outError("WorldSession::HandleLootMasterGiveOpcode> player %s is not the loot master!", _player->GetGuidStr().c_str());

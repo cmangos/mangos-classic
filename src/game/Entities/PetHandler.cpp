@@ -249,8 +249,8 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
                 if (spellInfo->EffectImplicitTargetA[i] == TARGET_ALL_ENEMY_IN_AREA
-                    || spellInfo->EffectImplicitTargetA[i] == TARGET_ALL_ENEMY_IN_AREA_INSTANT
-                    || spellInfo->EffectImplicitTargetA[i] == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
+                        || spellInfo->EffectImplicitTargetA[i] == TARGET_ALL_ENEMY_IN_AREA_INSTANT
+                        || spellInfo->EffectImplicitTargetA[i] == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
                     return;
             }
 
@@ -273,7 +273,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             const SpellRangeEntry* sRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
 
             if (unit_target && !(petUnit->IsWithinDistInMap(unit_target, sRange->maxRange) && petUnit->IsWithinLOSInMap(unit_target))
-                && !(GetPlayer()->IsFriendlyTo(unit_target) || petUnit->HasAuraType(SPELL_AURA_MOD_POSSESS)))
+                    && !(GetPlayer()->IsFriendlyTo(unit_target) || petUnit->HasAuraType(SPELL_AURA_MOD_POSSESS)))
             {
                 charmInfo->SetSpellOpener(spellid, sRange->minRange, sRange->maxRange);
                 spell->finish(false);

@@ -256,7 +256,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
             }
         }
     }
-    
+
     // Loop over all Scourge Archer NPCs to pick a target and attack it
     void DoAttackArchersTarget()
     {

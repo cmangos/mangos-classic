@@ -425,7 +425,7 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
     // Not quest only drop (check quest starting items for already accepted non-repeatable quests)
     if (itemProto->StartQuest && player->GetQuestStatus(itemProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemId))
         return false;
-	
+
     return true;
 }
 
@@ -1502,7 +1502,8 @@ void Loot::SetGroupLootRight(Player* player)
                     m_maxEnchantSkill = enchantSkill;
             }
 
-        } while (itr != currentLooterItr);
+        }
+        while (itr != currentLooterItr);
 
         if (m_lootMethod == MASTER_LOOT)
         {
@@ -1658,8 +1659,8 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
     // not check distance for GO in case owned GO (fishing bobber case, for example)
     // And permit out of range GO with no owner in case fishing hole
     if ((type != LOOT_FISHINGHOLE &&
-        ((type != LOOT_FISHING && type != LOOT_FISHING_FAIL) || gameObject->GetOwnerGuid() != player->GetObjectGuid()) &&
-        !gameObject->IsWithinDistInMap(player, INTERACTION_DISTANCE)))
+            ((type != LOOT_FISHING && type != LOOT_FISHING_FAIL) || gameObject->GetOwnerGuid() != player->GetObjectGuid()) &&
+            !gameObject->IsWithinDistInMap(player, INTERACTION_DISTANCE)))
     {
         sLog.outError("Loot::CreateLoot> cannot create game object loot, basic check failed!");
         return;
@@ -1933,9 +1934,8 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
                     go->SetLootState(GO_JUST_DEACTIVATED);
             }
         }
-        else
-            if (IsLootedFor(target))
-                SendReleaseFor(target);
+        else if (IsLootedFor(target))
+            SendReleaseFor(target);
         ForceLootAnimationCLientUpdate();
     }
     return msg;
@@ -2216,7 +2216,7 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
             if (loot.IsItemAlreadyIn(lsi->itemid))
             {
                 // the item is already looted, let's give a 50%  chance to pick another one
-                uint32 chance = urand(0,1);
+                uint32 chance = urand(0, 1);
 
                 if (chance)
                     continue;                               // pass this item

@@ -68,12 +68,12 @@ void PetAI::MoveInLineOfSight(Unit* who)
     Pet* pet = (m_unit->GetTypeId() == TYPEID_UNIT && static_cast<Creature*>(m_unit)->IsPet()) ? static_cast<Pet*>(m_unit) : nullptr;
 
     if (HasReactState(REACT_AGGRESSIVE)
-        && !(pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
-        && (m_unit->IsHostileTo(who) || who->IsHostileTo(m_unit->GetMaster()))
-        && m_creature->CanAttackOnSight(who) && who->isInAccessablePlaceFor(m_unit)
-        && m_unit->IsWithinDistInMap(who, m_unit->GetAttackDistance(who))
-        && m_unit->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE
-        && m_unit->IsWithinLOSInMap(who))
+            && !(pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+            && (m_unit->IsHostileTo(who) || who->IsHostileTo(m_unit->GetMaster()))
+            && m_creature->CanAttackOnSight(who) && who->isInAccessablePlaceFor(m_unit)
+            && m_unit->IsWithinDistInMap(who, m_unit->GetAttackDistance(who))
+            && m_unit->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE
+            && m_unit->IsWithinLOSInMap(who))
     {
         AttackStart(who);
 
@@ -111,7 +111,7 @@ void PetAI::UpdateAI(const uint32 diff)
         return;
     Creature* creature = (m_unit->GetTypeId() == TYPEID_UNIT) ? static_cast<Creature*>(m_unit) : nullptr;
     Pet* pet = (creature && creature->IsPet()) ? static_cast<Pet*>(m_unit) : nullptr;
-    
+
     Unit* owner = m_unit->GetMaster();
     if (!owner)
         return;
@@ -150,10 +150,10 @@ void PetAI::UpdateAI(const uint32 diff)
         uint32 minRange = charminfo->GetSpellOpenerMinRange();
 
         if (!(victim = m_unit->getVictim())
-            || (minRange != 0 && m_unit->IsWithinDistInMap(victim, minRange)))
+                || (minRange != 0 && m_unit->IsWithinDistInMap(victim, minRange)))
             charminfo->SetSpellOpener();
         else if (m_unit->IsWithinDistInMap(victim, charminfo->GetSpellOpenerMaxRange())
-                && m_unit->IsWithinLOSInMap(victim))
+                 && m_unit->IsWithinLOSInMap(victim))
         {
             // stop moving
             m_unit->clearUnitState(UNIT_STAT_MOVING);
@@ -313,13 +313,13 @@ void PetAI::UpdateAI(const uint32 diff)
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "PetAI (guid = %u) is stopping attack.", m_unit->GetGUIDLow());
             m_unit->CombatStop();
             inCombat = false;
-            
+
             return;
         }
 
         // if pet misses its target, it will also be the first in threat list
         if ((!creature || !(creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE))
-            && m_unit->CanReachWithMeleeAttack(victim))
+                && m_unit->CanReachWithMeleeAttack(victim))
         {
             if (!m_unit->HasInArc(victim, 2 * M_PI_F / 3))
             {
@@ -355,8 +355,8 @@ void PetAI::UpdateAI(const uint32 diff)
                 float stayPosZ = charminfo->GetStayPosZ();
 
                 if (m_unit->GetPositionX() == stayPosX
-                    && m_unit->GetPositionY() == stayPosY
-                    && m_unit->GetPositionZ() == stayPosZ)
+                        && m_unit->GetPositionY() == stayPosY
+                        && m_unit->GetPositionZ() == stayPosZ)
                 {
                     float StayPosO = charminfo->GetStayPosO();
 
@@ -380,7 +380,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 }
             }
             else if (charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW)
-                && !owner->IsWithinDistInMap(m_unit, (PET_FOLLOW_DIST * 2)))
+                     && !owner->IsWithinDistInMap(m_unit, (PET_FOLLOW_DIST * 2)))
                 m_unit->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
         }
     }

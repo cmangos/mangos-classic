@@ -189,7 +189,7 @@ ChatCommand* ChatHandler::getCommandTable()
     {
         { "list",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleCooldownListCommand,             "", nullptr },
         { "clear",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleCooldownClearCommand,            "", nullptr },
-        { "clearclientside",SEC_ADMINISTRATOR,  false, &ChatHandler::HandleCooldownClearClientSideCommand,  "", nullptr },
+        { "clearclientside", SEC_ADMINISTRATOR,  false, &ChatHandler::HandleCooldownClearClientSideCommand,  "", nullptr },
         { nullptr,             0,                  false, nullptr,                                          "", nullptr }
     };
 
@@ -616,28 +616,28 @@ ChatCommand* ChatHandler::getCommandTable()
     static ChatCommand serverIdleRestartCommandTable[] =
     {
         { "cancel",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerShutDownCancelCommand, "", nullptr },
-        { ""   ,            SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerIdleRestartCommand,   "", nullptr },
+        { "",            SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerIdleRestartCommand,   "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
     static ChatCommand serverIdleShutdownCommandTable[] =
     {
         { "cancel",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerShutDownCancelCommand, "", nullptr },
-        { ""   ,            SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerIdleShutDownCommand,  "", nullptr },
+        { "",            SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerIdleShutDownCommand,  "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
     static ChatCommand serverRestartCommandTable[] =
     {
         { "cancel",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerShutDownCancelCommand, "", nullptr },
-        { ""   ,            SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerRestartCommand,       "", nullptr },
+        { "",            SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerRestartCommand,       "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
     static ChatCommand serverShutdownCommandTable[] =
     {
         { "cancel",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerShutDownCancelCommand, "", nullptr },
-        { ""   ,            SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerShutDownCommand,      "", nullptr },
+        { "",            SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerShutDownCommand,      "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 

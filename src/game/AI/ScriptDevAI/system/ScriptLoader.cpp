@@ -215,7 +215,7 @@ void AddScripts()
     AddSC_example_escort();
     AddSC_example_gossip_codebox();
     AddSC_example_misc();
-    
+
     // world
     AddSC_areatrigger_scripts();
     AddSC_bosses_emerald_dragons();
@@ -227,7 +227,7 @@ void AddScripts()
     AddSC_npcs_special();
     AddSC_spell_scripts();
     AddSC_world_map_scripts();
-    
+
     // eastern kingdoms
     AddSC_blackrock_depths();                               // blackrock_depths
     AddSC_boss_ambassador_flamelash();
@@ -317,7 +317,7 @@ void AddScripts()
     AddSC_boss_venoxis();
     AddSC_instance_zulgurub();
     AddSC_zulgurub();
-    
+
     AddSC_alterac_mountains();
     AddSC_arathi_highlands();
     AddSC_blasted_lands();
@@ -340,7 +340,7 @@ void AddScripts()
     AddSC_western_plaguelands();
     AddSC_westfall();
     AddSC_wetlands();
-    
+
     // kalimdor
     AddSC_instance_blackfathom_deeps();                     // blackfathom deeps
     AddSC_dire_maul();                                      // dire_maul
@@ -375,7 +375,7 @@ void AddScripts()
     AddSC_boss_zumrah();                                    // zulfarrak
     AddSC_zulfarrak();
     AddSC_instance_zulfarrak();
-    
+
     AddSC_ashenvale();
     AddSC_azshara();
     AddSC_boss_azuregos();
@@ -397,10 +397,10 @@ void AddScripts()
     AddSC_thunder_bluff();
     AddSC_ungoro_crater();
     AddSC_winterspring();
-    
+
     // northrend
     // removed
-    
+
     // outland
     // removed
 }

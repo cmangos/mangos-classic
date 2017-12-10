@@ -201,7 +201,7 @@ class DungeonPersistentState : public MapPersistentState
            this is cached for the case when those players are offline */
         bool CanReset() const { return m_canReset; }
         void SetCanReset(bool canReset) { m_canReset = canReset; }
-        
+
         // DBC encounter state update at kill/spell cast
         void UpdateEncounterState(EncounterCreditType type, uint32 creditEntry);
 

@@ -85,9 +85,9 @@ struct npc_morokkAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-        case 0:
-            SetEscortPaused(true);
-            break;
+            case 0:
+                SetEscortPaused(true);
+                break;
         }
     }
 
@@ -572,7 +572,7 @@ struct npc_private_hendelAI : public ScriptedAI
             }
 
             // Summon Jaina Proudmoore, Archmage Tervosh and Pained
-            for (uint8 i = 0; i<3; i++)
+            for (uint8 i = 0; i < 3; i++)
             {
                 Creature* pCreature = m_creature->SummonCreature(lOutroSpawns[i].uiEntry, lOutroSpawns[i].fX, lOutroSpawns[i].fY, lOutroSpawns[i].fZ, lOutroSpawns[i].fO, TEMPSPAWN_TIMED_DESPAWN, 3 * MINUTE * IN_MILLISECONDS, false, true);
                 if (pCreature)
@@ -600,7 +600,7 @@ bool QuestAccept_npc_private_hendel(Player* pPlayer, Creature* pCreature, const 
     if (pQuest->GetQuestId() == QUEST_MISSING_DIPLO_PT16)
     {
         pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
-         pCreature->AI()->AttackStart(pPlayer);
+        pCreature->AI()->AttackStart(pPlayer);
 
         // Find the nearby sentries in order to make them attack
         // The two sentries are linked to Private Hendel in DB to ensure they respawn together

@@ -164,7 +164,7 @@ void GuardianAI::ProcessAction(CreatureEventAI_Action const& action, uint32 rnd,
         return;
 
     DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "GuardianAI: Process action %u (script %u) triggered for %s (invoked by %s)",
-        action.type, EventId, m_creature->GetGuidStr().c_str(), actionInvoker ? actionInvoker->GetGuidStr().c_str() : "<no invoker>");
+                     action.type, EventId, m_creature->GetGuidStr().c_str(), actionInvoker ? actionInvoker->GetGuidStr().c_str() : "<no invoker>");
 
     CreatureEventAI::ProcessAction(action, rnd, EventId, actionInvoker, AIEventSender);
 }

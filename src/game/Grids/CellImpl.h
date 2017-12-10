@@ -225,7 +225,7 @@ inline void Cell::VisitWorldObjects(float x, float y, Map* map, T& visitor, floa
     if (dont_load)
         cell.SetNoCreate();
     TypeContainerVisitor<T, WorldTypeMapContainer > gnotifier(visitor);
-    cell.Visit(p , gnotifier, *map, x, y, radius);
+    cell.Visit(p, gnotifier, *map, x, y, radius);
 }
 
 template<class T>

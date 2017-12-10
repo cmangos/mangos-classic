@@ -321,7 +321,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 if (target != this && m_objectTypeId == TYPEID_PLAYER)
                 {
                     if (static_cast<Player const*>(this)->GetTeam() != static_cast<Player const*>(target)->GetTeam() ||
-                        !target->IsFriendlyTo(static_cast<Unit const*>(this)))
+                            !target->IsFriendlyTo(static_cast<Unit const*>(this)))
                     {
                         // not same faction or not friendly
                         sendPercent = true;
@@ -382,7 +382,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                             if (target->getClass() != CLASS_HUNTER)
                                 appendValue &= ~UNIT_NPC_FLAG_STABLEMASTER;
                         }
-                        
+
                         if (appendValue & UNIT_NPC_FLAG_FLIGHTMASTER)
                         {
                             QuestRelationsMapBounds bounds = sObjectMgr.GetCreatureQuestRelationsMapBounds(((Creature*)this)->GetEntry());
@@ -1018,7 +1018,7 @@ float WorldObject::GetDistanceNoBoundingRadius(float x, float y, float z) const
     return dist;
 }
 
-float WorldObject::GetCombatDistance(const WorldObject * obj, bool forMeleeRange) const
+float WorldObject::GetCombatDistance(const WorldObject* obj, bool forMeleeRange) const
 {
     float radius = GetCombinedCombatReach(obj, forMeleeRange);
 
@@ -1088,7 +1088,7 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
     return distsq < maxdist * maxdist;
 }
 
-bool WorldObject::_IsWithinCombatDist(WorldObject const * obj, float dist2compare, bool is3D) const
+bool WorldObject::_IsWithinCombatDist(WorldObject const* obj, float dist2compare, bool is3D) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
@@ -1411,7 +1411,7 @@ float WorldObject::GetCombinedCombatReach(WorldObject const* pVictim, bool forMe
 {
     // The measured values show BASE_MELEE_OFFSET in (1.3224, 1.342)
     float reach = GetCombatReach() + pVictim->GetCombatReach() +
-        BASE_MELEERANGE_OFFSET + flat_mod;
+                  BASE_MELEERANGE_OFFSET + flat_mod;
 
     if (forMeleeRange && reach < ATTACK_DISTANCE)
         reach = ATTACK_DISTANCE;
@@ -1923,7 +1923,7 @@ void WorldObject::HandlePlayPacketSettings(WorldPacket& msg, PlayPacketParameter
             if (IsInWorld())
                 GetMap()->MessageMapBroadcastArea(this, msg, parameters.areaOrZone.id);
             break;
-    } 
+    }
 }
 
 void WorldObject::UpdateVisibilityAndView()

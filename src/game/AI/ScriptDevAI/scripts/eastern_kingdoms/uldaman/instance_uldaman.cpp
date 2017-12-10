@@ -152,7 +152,7 @@ void instance_uldaman::SetData64(uint32 uiData, uint64 uiGuid)
 {
     switch (uiData)
     {
-            // ToDo: check if this one is used in ACID. Otherwise it can be dropped
+        // ToDo: check if this one is used in ACID. Otherwise it can be dropped
         case DATA_EVENT_STARTER:
             m_playerGuid = ObjectGuid(uiGuid);
             break;

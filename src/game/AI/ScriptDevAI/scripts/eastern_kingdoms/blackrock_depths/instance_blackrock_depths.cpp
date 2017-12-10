@@ -58,7 +58,7 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
             // replace the princess if required
             if (CanReplacePrincess())
                 pCreature->UpdateEntry(NPC_PRIESTESS);
-            // no break;
+        // no break;
         case NPC_EMPEROR:
         case NPC_PHALANX:
         case NPC_PLUGGER_SPAZZRING:
@@ -84,11 +84,11 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
                 break;
             // Golems in Relict Vault need to have a stoned aura, set manually to prevent reapply when reached home
             pCreature->CastSpell(pCreature, SPELL_STONED, TRIGGERED_OLD_TRIGGERED);
-            // Store the Relict Vault Golems into m_sVaultNpcGuids
+        // Store the Relict Vault Golems into m_sVaultNpcGuids
         case NPC_WATCHER_DOOMGRIP:
             m_sVaultNpcGuids.insert(pCreature->GetObjectGuid());
             break;
-            // Arena crowd
+        // Arena crowd
         case NPC_ARENA_SPECTATOR:
         case NPC_SHADOWFORGE_PEASANT:
         case NPC_SHADOWFORGE_CITIZEN:
@@ -103,7 +103,7 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
             if (m_auiEncounter[0] == DONE)
                 pCreature->SetFactionTemporary(FACTION_ARENA_NEUTRAL, TEMPFACTION_RESTORE_RESPAWN);
             break;
-            // Grim Guzzler bar crowd
+        // Grim Guzzler bar crowd
         case NPC_GRIM_PATRON:
         case NPC_GUZZLING_PATRON:
         case NPC_HAMMERED_PATRON:
@@ -477,7 +477,7 @@ void instance_blackrock_depths::OnCreatureEvade(Creature* pCreature)
 
     switch (pCreature->GetEntry())
     {
-            // Handle Tomb of the Seven reset in case of wipe
+        // Handle Tomb of the Seven reset in case of wipe
         case NPC_HATEREL:
         case NPC_ANGERREL:
         case NPC_VILEREL:
@@ -515,7 +515,7 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
             if (GetData(TYPE_QUEST_JAIL_BREAK) == IN_PROGRESS)
                 SetData(TYPE_QUEST_JAIL_BREAK, SPECIAL);
             break;
-            // Handle Tomb of the Seven dwarf death event
+        // Handle Tomb of the Seven dwarf death event
         case NPC_HATEREL:
         case NPC_ANGERREL:
         case NPC_VILEREL:
@@ -619,7 +619,7 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
 
             for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
             {
-                 // About 5% of patrons do emote at a given time
+                // About 5% of patrons do emote at a given time
                 // So avoid executing follow up code for the 95% others
                 if (urand(0, 100) < 4)
                 {
@@ -627,7 +627,7 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
                     // the last one appearing the least and the first one appearing the most
                     // emotes are stored in a table and frequency is handled there
                     if (Creature* pPatron = instance->GetCreature(*itr))
-                       pPatron->HandleEmote(aPatronsEmotes[urand(0, 5)]);
+                        pPatron->HandleEmote(aPatronsEmotes[urand(0, 5)]);
                 }
             }
             return;
@@ -713,7 +713,7 @@ void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
                         // move them to the Grim Guzzler
                         pPlugger->GetRandomPoint(aBarPatrolPositions[1][0], aBarPatrolPositions[1][1], aBarPatrolPositions[1][2], 2.0f, fX, fY, fZ);
                         pSummoned->GetMotionMaster()->MoveIdle();
-                        pSummoned->GetMotionMaster()->MovePoint(0,fX, fY, fZ);
+                        pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
                     }
                 }
                 // start timer to handle the yells
@@ -795,7 +795,7 @@ void instance_blackrock_depths::Update(uint32 uiDiff)
     {
         if (m_uiPatrolTimer <= uiDiff)
         {
-            switch(GetData(TYPE_BAR))
+            switch (GetData(TYPE_BAR))
             {
                 case IN_PROGRESS:
                     HandleBarPatrol(1);

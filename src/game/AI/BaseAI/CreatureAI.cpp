@@ -44,7 +44,7 @@ CreatureAI::CreatureAI(Creature* creature) :
 
     if (m_creature->IsNoAggroOnSight())
         SetReactState(REACT_DEFENSIVE);
-    if(m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
+    if (m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
         m_visibilityDistance = sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER);
 }
 
@@ -65,7 +65,7 @@ CreatureAI::~CreatureAI()
 {
 }
 
-void CreatureAI::MoveInLineOfSight(Unit * who)
+void CreatureAI::MoveInLineOfSight(Unit* who)
 {
     if (!HasReactState(REACT_AGGRESSIVE))
         return;
@@ -92,7 +92,7 @@ void CreatureAI::MoveInLineOfSight(Unit * who)
     }
 }
 
-void CreatureAI::EnterCombat(Unit *enemy)
+void CreatureAI::EnterCombat(Unit* enemy)
 {
     if (enemy && (m_creature->IsGuard() || m_creature->IsCivilian()))
     {
@@ -280,9 +280,9 @@ void CreatureAI::HandleMovementOnAttackStart(Unit* victim) const
 {
     if (!m_unit->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
     {
-    	if (m_dismountOnAggro)
+        if (m_dismountOnAggro)
             m_unit->Unmount(); // all ais should unmount here
-    	
+
         MotionMaster* creatureMotion = m_unit->GetMotionMaster();
 
         if (!m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))
@@ -317,8 +317,8 @@ void CreatureAI::CheckForHelp(Unit* who, Creature* me, float distance)
                 else // In non-instanceable creature must belong to same family and faction to attack player.
                 {
                     if (me->GetCreatureInfo()->Family == ((Creature*)who)->GetCreatureInfo()->Family &&
-                        me->GetCreatureInfo()->FactionAlliance == ((Creature*)who)->GetCreatureInfo()->FactionAlliance &&
-                        me->GetCreatureInfo()->FactionHorde == ((Creature*)who)->GetCreatureInfo()->FactionHorde)
+                            me->GetCreatureInfo()->FactionAlliance == ((Creature*)who)->GetCreatureInfo()->FactionAlliance &&
+                            me->GetCreatureInfo()->FactionHorde == ((Creature*)who)->GetCreatureInfo()->FactionHorde)
                         AttackStart(victim);
                 }
             }

@@ -24,16 +24,16 @@ class GameObject;
 
 class GameObjectAI
 {
-public:
-    explicit GameObjectAI(GameObject* go);
-    virtual ~GameObjectAI();
+    public:
+        explicit GameObjectAI(GameObject* go);
+        virtual ~GameObjectAI();
 
-    virtual void UpdateAI(const uint32 /*diff*/) {}
+        virtual void UpdateAI(const uint32 /*diff*/) {}
 
-    virtual void OnEventHappened(uint16 /*eventId*/, bool /*activate*/, bool /*resume*/) {}
+        virtual void OnEventHappened(uint16 /*eventId*/, bool /*activate*/, bool /*resume*/) {}
 
-protected:
-    GameObject* m_go;
+    protected:
+        GameObject* m_go;
 };
 
 #endif

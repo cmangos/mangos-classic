@@ -447,7 +447,7 @@ void BattleGroundAV::ChangeMineOwner(uint8 mine, BattleGroundAVTeamIndex teamIdx
     {
         PlaySoundToAll((teamIdx == BG_AV_TEAM_ALLIANCE) ? BG_AV_SOUND_ALLIANCE_GOOD : BG_AV_SOUND_HORDE_GOOD);
         m_Mine_Reclaim_Timer[mine] = BG_AV_MINE_RECLAIM_TIMER;
-        SendYell2ToAll(LANG_BG_AV_MINE_TAKEN , LANG_UNIVERSAL, GetSingleCreatureGuid(BG_AV_HERALD, 0),
+        SendYell2ToAll(LANG_BG_AV_MINE_TAKEN, LANG_UNIVERSAL, GetSingleCreatureGuid(BG_AV_HERALD, 0),
                        (teamIdx == BG_AV_TEAM_ALLIANCE) ? LANG_BG_ALLY : LANG_BG_HORDE,
                        (mine == BG_AV_NORTH_MINE) ? LANG_BG_AV_MINE_NORTH : LANG_BG_AV_MINE_SOUTH);
     }

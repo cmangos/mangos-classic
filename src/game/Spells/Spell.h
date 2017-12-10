@@ -211,52 +211,52 @@ typedef std::multimap<uint64, uint64> SpellTargetTimeMap;
 // SpellLog class to manage spells logs that have to be sent to clients
 class SpellLog
 {
-public:
-    SpellLog(Spell* spell) :
-        m_spell(spell), m_spellLogDataEffectsCounter(0), m_spellLogDataEffectsCounterPos(0),
-        m_spellLogDataTargetsCounter(0), m_spellLogDataTargetsCounterPos(0), m_currentEffect(TOTAL_SPELL_EFFECTS) {}
-    SpellLog() = delete;
-    SpellLog(const SpellLog&) = delete;
+    public:
+        SpellLog(Spell* spell) :
+            m_spell(spell), m_spellLogDataEffectsCounter(0), m_spellLogDataEffectsCounterPos(0),
+            m_spellLogDataTargetsCounter(0), m_spellLogDataTargetsCounterPos(0), m_currentEffect(TOTAL_SPELL_EFFECTS) {}
+        SpellLog() = delete;
+        SpellLog(const SpellLog&) = delete;
 
-    void Initialize();
+        void Initialize();
 
-    // Variadic template to add log data (warnings, devs should respect the correct packet structure)
-    template<typename... Args>
-    void AddLog(uint32 spellEffect, Args... args)
-    {
-        SetCurrentEffect(spellEffect);
-        AddLogData(args...);
-        ++m_spellLogDataEffectsCounter;
-    }
+        // Variadic template to add log data (warnings, devs should respect the correct packet structure)
+        template<typename... Args>
+        void AddLog(uint32 spellEffect, Args... args)
+        {
+            SetCurrentEffect(spellEffect);
+            AddLogData(args...);
+            ++m_spellLogDataEffectsCounter;
+        }
 
-    // Send collected logs
-    void SendToSet();
+        // Send collected logs
+        void SendToSet();
 
-private:
-    // Finalize previous log if need by setting total targets amount
-    void FinalizePrevious();
+    private:
+        // Finalize previous log if need by setting total targets amount
+        void FinalizePrevious();
 
-    // Handle multi targets cases by adjusting targets counter if need
-    void SetCurrentEffect(uint32 effect);
+        // Handle multi targets cases by adjusting targets counter if need
+        void SetCurrentEffect(uint32 effect);
 
-    // Variadic template to method to handle multi arguments passed with different types
-    template<typename T>
-    void AddLogData(T const& data) { m_spellLogData << data; }
+        // Variadic template to method to handle multi arguments passed with different types
+        template<typename T>
+        void AddLogData(T const& data) { m_spellLogData << data; }
 
-    template<typename T, typename... Args>
-    void AddLogData(T const& data, Args const&... args)
-    {
-        AddLogData(data);
-        AddLogData(args...);
-    }
+        template<typename T, typename... Args>
+        void AddLogData(T const& data, Args const& ... args)
+        {
+            AddLogData(data);
+            AddLogData(args...);
+        }
 
-    Spell* m_spell;
-    WorldPacket m_spellLogData;
-    size_t m_spellLogDataEffectsCounterPos;
-    uint32 m_spellLogDataEffectsCounter;
-    size_t m_spellLogDataTargetsCounterPos;
-    uint32 m_spellLogDataTargetsCounter;
-    uint32 m_currentEffect;
+        Spell* m_spell;
+        WorldPacket m_spellLogData;
+        size_t m_spellLogDataEffectsCounterPos;
+        uint32 m_spellLogDataEffectsCounter;
+        size_t m_spellLogDataTargetsCounterPos;
+        uint32 m_spellLogDataTargetsCounter;
+        uint32 m_currentEffect;
 };
 
 class Spell
@@ -404,7 +404,7 @@ class Spell
 
         template<typename T> WorldObject* FindCorpseUsing();
 
-        bool CheckTargetScript(Unit * target, SpellEffectIndex eff) const;
+        bool CheckTargetScript(Unit* target, SpellEffectIndex eff) const;
         bool CheckTarget(Unit* target, SpellEffectIndex eff) const;
         bool CanAutoCast(Unit* target);
 
@@ -430,7 +430,7 @@ class Spell
         Item* m_CastItem;
 
         SpellCastTargets m_targets;
-        
+
         // Trigger flag system
         bool m_ignoreHitResult;
         bool m_ignoreUnselectableTarget;
@@ -563,14 +563,14 @@ class Spell
         bool   m_canTrigger;                                // Can start trigger (m_IsTriggeredSpell can`t use for this)
         uint8  m_negativeEffectMask;                        // Use for avoid sent negative spell procs for additional positive effects only targets
         void prepareDataForTriggerSystem();
-        void PrepareMasksForProcSystem(uint8 effectMask, uint32 &procAttacker, uint32 &procVictim, WorldObject* caster, WorldObject* target);
+        void PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, uint32& procVictim, WorldObject* caster, WorldObject* target);
 
         //*****************************************
         // Spell target filling
         //*****************************************
         void FillTargetMap();
         void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap);
-        static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> &bounds, UnitList &tempTargetUnitMap, UnitList &targetUnitMap, SpellEffectIndex effIndex);
+        static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex);
 
         void FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = nullptr);
         void FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float radius, bool raid, bool withPets, bool withcaster) const;

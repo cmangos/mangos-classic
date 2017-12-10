@@ -235,7 +235,7 @@ Item::~Item()
 {
     if (m_enchantEffectModifier)
     {
-        if (Player * owner = GetOwner())
+        if (Player* owner = GetOwner())
             owner->AddSpellMod(m_enchantEffectModifier, false);
         else
             delete m_enchantEffectModifier; // on logout/DC player is mid deletion and will be nullptr
@@ -911,9 +911,9 @@ bool Item::IsLimitedToAnotherMapOrZone(uint32 cur_mapId, uint32 cur_zoneId) cons
     return proto && ((proto->Map && proto->Map != cur_mapId) || (proto->Area && proto->Area != cur_zoneId));
 }
 
-void Item::SetEnchantmentModifier(SpellModifier * mod)
+void Item::SetEnchantmentModifier(SpellModifier* mod)
 {
-    if(m_enchantEffectModifier)
+    if (m_enchantEffectModifier)
         GetOwner()->AddSpellMod(m_enchantEffectModifier, false);
     m_enchantEffectModifier = mod;
 }

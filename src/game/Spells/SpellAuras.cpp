@@ -3558,8 +3558,8 @@ void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
                 target->m_modSpellCritChance[school] += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
             else
                 ((Player*)target)->UpdateSpellCritChance(school);
-         }
-     }
+        }
+    }
 }
 
 /********************************/
@@ -4362,7 +4362,7 @@ void Aura::PeriodicTick()
                 pdamage = target->SpellHealingBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
 
                 DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health inflicted by %u",
-                    GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
+                                  GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
 
                 int32 gain = target->ModifyHealth(pdamage);
                 SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
@@ -4700,7 +4700,7 @@ void Aura::HandlePreventFleeing(bool apply, bool Real)
     Unit::AuraList const& fearAuras = GetTarget()->GetAurasByType(SPELL_AURA_MOD_FEAR);
     if (!fearAuras.empty())
     {
-        const Aura *first = fearAuras.front();
+        const Aura* first = fearAuras.front();
         if (apply)
             GetTarget()->SetFeared(false, first->GetCasterGuid());
         else
@@ -4770,7 +4770,7 @@ inline bool IsRemovedOnShapeshiftLost(SpellEntry const* spellproto, ObjectGuid c
             {
                 case 11327: // vanish stealth aura improvements are removed on stealth removal
                 case 11329: // but they have attribute SPELL_ATTR_NOT_SHAPESHIFT
-                // maybe relic from when they had Effect1?
+                    // maybe relic from when they had Effect1?
                     return true;
                 default:
                     break;

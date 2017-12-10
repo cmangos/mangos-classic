@@ -605,7 +605,7 @@ struct npc_gallywixAI : public ScriptedAI
     void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (spellInfo && spellInfo->IsFitToFamilyMask(0x0000000000800200)) // on Ambush
-            uiDamage = (m_creature->GetHealth()*0.5); // Ambush should do 50% health in damage to this creature
+            uiDamage = (m_creature->GetHealth() * 0.5); // Ambush should do 50% health in damage to this creature
     }
 };
 

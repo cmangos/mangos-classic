@@ -58,20 +58,20 @@ enum Wave
     THIRD
 };
 
-float RaiderCoords[15][3] = 
+float RaiderCoords[15][3] =
 {
     {-11428.520f, 1612.757f, 72.241f}, // Spawn1
     {-11422.998f, 1616.106f, 74.153f}, // Spawn2
     {-11430.354f, 1618.334f, 72.632f}, // Spawn3
     {-11423.307f, 1621.033f, 74.224f}, // Spawn4
     {-11427.141f, 1623.220f, 73.168f}, // Spawn5
-    
+
     {-11453.118f, 1554.380f, 53.100f}, // WP1a
     {-11449.692f, 1554.672f, 53.598f}, // WP2a
     {-11454.533f, 1558.679f, 52.497f}, // WP3a
     {-11449.488f, 1557.817f, 53.443f}, // WP4a
     {-11452.123f, 1559.800f, 52.890f}, // WP5a
-                                 
+
     {-11475.067f, 1534.259f, 50.199f}, // WP1b
     {-11470.306f, 1533.835f, 50.267f}, // WP2b
     {-11471.954f, 1539.599f, 50.273f}, // WP3b
@@ -103,9 +103,9 @@ struct npc_daphne_stilwellAI : public npc_escortAI
             {
                 case 7: DoScriptText(SAY_DS_DOWN_1, m_creature); break;
                 case 8: DoScriptText(SAY_DS_DOWN_2, m_creature); break;
-                case 9: 
+                case 9:
                     if (m_lSummonedRaidersGUIDs.size() == 0)
-                        DoScriptText(SAY_DS_DOWN_3, m_creature); 
+                        DoScriptText(SAY_DS_DOWN_3, m_creature);
                     break;
             }
         }
@@ -199,16 +199,16 @@ struct npc_daphne_stilwellAI : public npc_escortAI
                     pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset][0], RaiderCoords[uiSecondWPOffset][1], RaiderCoords[uiSecondWPOffset][2]);
                     break;
                 case 1:
-                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset+1][0], RaiderCoords[uiSecondWPOffset+1][1], RaiderCoords[uiSecondWPOffset+1][2]);
+                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset + 1][0], RaiderCoords[uiSecondWPOffset + 1][1], RaiderCoords[uiSecondWPOffset + 1][2]);
                     break;
                 case 2:
-                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset+2][0], RaiderCoords[uiSecondWPOffset+2][1], RaiderCoords[uiSecondWPOffset+2][2]);
+                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset + 2][0], RaiderCoords[uiSecondWPOffset + 2][1], RaiderCoords[uiSecondWPOffset + 2][2]);
                     break;
                 case 3:
-                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset+3][0], RaiderCoords[uiSecondWPOffset+3][1], RaiderCoords[uiSecondWPOffset+3][2]);
+                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset + 3][0], RaiderCoords[uiSecondWPOffset + 3][1], RaiderCoords[uiSecondWPOffset + 3][2]);
                     break;
                 case 4:
-                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset+4][0], RaiderCoords[uiSecondWPOffset+4][1], RaiderCoords[uiSecondWPOffset+4][2]);
+                    pSummoned->GetMotionMaster()->MovePoint(5, RaiderCoords[uiSecondWPOffset + 4][0], RaiderCoords[uiSecondWPOffset + 4][1], RaiderCoords[uiSecondWPOffset + 4][2]);
                     break;
                 default:
                     pSummoned->GetMotionMaster()->MoveIdle();
@@ -236,7 +236,7 @@ struct npc_daphne_stilwellAI : public npc_escortAI
         }
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override 
+    void SummonedCreatureJustDied(Creature* pSummoned) override
     {
         m_lSummonedRaidersGUIDs.remove(pSummoned->GetObjectGuid());
 

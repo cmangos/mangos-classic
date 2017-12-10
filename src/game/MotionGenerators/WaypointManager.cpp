@@ -334,7 +334,8 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
             std::swap(temp, find->second);
             ++find;
             ++nextPoint;
-        } while (find != path.end() && find->first == nextPoint);
+        }
+        while (find != path.end() && find->first == nextPoint);
         // After this, we have:
         // pointId, pointId+1, ..., nextPoint [ Can be == path.end ]]
     }
@@ -349,7 +350,7 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
     {
         if (rItr->first <= nextPoint)
         {
-            if(wpDest == PATH_FROM_ENTRY)
+            if (wpDest == PATH_FROM_ENTRY)
                 WorldDatabase.PExecuteLog("UPDATE %s SET point=point+1 WHERE %s=%u AND point=%u AND pathId=%u", table, key_field, key, rItr->first - 1, pathId);
             else
                 WorldDatabase.PExecuteLog("UPDATE %s SET point=point+1 WHERE %s=%u AND point=%u", table, key_field, key, rItr->first - 1);

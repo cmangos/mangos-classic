@@ -75,99 +75,99 @@ enum WarriorSpells
     THUNDER_CLAP_1                  = 6343,
     WHIRLWIND_1                     = 1680
 
-    //Procs
+                                      //Procs
 };
 
 //class Player;
 
 class MANGOS_DLL_SPEC PlayerbotWarriorAI : PlayerbotClassAI
 {
-public:
-    PlayerbotWarriorAI(Player * const master, Player * const bot, PlayerbotAI * const ai);
-    virtual ~PlayerbotWarriorAI();
+    public:
+        PlayerbotWarriorAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        virtual ~PlayerbotWarriorAI();
 
-    // all combat actions go here
-    CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
-    bool Pull();
+        // all combat actions go here
+        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
+        bool Pull();
 
-    // all non combat actions go here, ex buffs, heals, rezzes
-    void DoNonCombatActions();
+        // all non combat actions go here, ex buffs, heals, rezzes
+        void DoNonCombatActions();
 
-    //Buff/rebuff shouts
-    void CheckShouts();
+        //Buff/rebuff shouts
+        void CheckShouts();
 
-    // Utility Functions
-    bool CanPull();
+        // Utility Functions
+        bool CanPull();
 
-private:
-    CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
+    private:
+        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
 
-    // ARMS
-    uint32 BATTLE_STANCE,
-        CHARGE,
-        HEROIC_STRIKE,
-        REND,
-        THUNDER_CLAP,
-        HAMSTRING,
-        MOCKING_BLOW,
-        RETALIATION,
-        SWEEPING_STRIKES,
-        MORTAL_STRIKE;
+        // ARMS
+        uint32 BATTLE_STANCE,
+               CHARGE,
+               HEROIC_STRIKE,
+               REND,
+               THUNDER_CLAP,
+               HAMSTRING,
+               MOCKING_BLOW,
+               RETALIATION,
+               SWEEPING_STRIKES,
+               MORTAL_STRIKE;
 
-    // PROTECTION
-    uint32 DEFENSIVE_STANCE,
-        BLOODRAGE,
-        SUNDER_ARMOR,
-        TAUNT,
-        SHIELD_BASH,
-        REVENGE,
-        SHIELD_BLOCK,
-        DISARM,
-        SHIELD_WALL,
-        SHIELD_SLAM,
-        CONCUSSION_BLOW,
-        LAST_STAND;
+        // PROTECTION
+        uint32 DEFENSIVE_STANCE,
+               BLOODRAGE,
+               SUNDER_ARMOR,
+               TAUNT,
+               SHIELD_BASH,
+               REVENGE,
+               SHIELD_BLOCK,
+               DISARM,
+               SHIELD_WALL,
+               SHIELD_SLAM,
+               CONCUSSION_BLOW,
+               LAST_STAND;
 
-    // FURY
-    uint32 BERSERKER_STANCE,
-        BATTLE_SHOUT,
-        DEMORALIZING_SHOUT,
-        OVERPOWER,
-        CLEAVE,
-        INTIMIDATING_SHOUT,
-        EXECUTE,
-        CHALLENGING_SHOUT,
-        SLAM,
-        INTERCEPT,
-        DEATH_WISH,
-        BERSERKER_RAGE,
-        WHIRLWIND,
-        PUMMEL,
-        BLOODTHIRST,
-        RECKLESSNESS,
-        PIERCING_HOWL;
+        // FURY
+        uint32 BERSERKER_STANCE,
+               BATTLE_SHOUT,
+               DEMORALIZING_SHOUT,
+               OVERPOWER,
+               CLEAVE,
+               INTIMIDATING_SHOUT,
+               EXECUTE,
+               CHALLENGING_SHOUT,
+               SLAM,
+               INTERCEPT,
+               DEATH_WISH,
+               BERSERKER_RAGE,
+               WHIRLWIND,
+               PUMMEL,
+               BLOODTHIRST,
+               RECKLESSNESS,
+               PIERCING_HOWL;
 
-    // racial
-    uint32 STONEFORM,
-        ESCAPE_ARTIST,
-        PERCEPTION,
-        SHADOWMELD,
-        BLOOD_FURY,
-        WAR_STOMP,
-        BERSERKING,
-        WILL_OF_THE_FORSAKEN;
+        // racial
+        uint32 STONEFORM,
+               ESCAPE_ARTIST,
+               PERCEPTION,
+               SHADOWMELD,
+               BLOOD_FURY,
+               WAR_STOMP,
+               BERSERKING,
+               WILL_OF_THE_FORSAKEN;
 
-    // general
-    uint32 SHOOT,
-        SHOOT_BOW,
-        SHOOT_GUN,
-        SHOOT_XBOW;
+        // general
+        uint32 SHOOT,
+               SHOOT_BOW,
+               SHOOT_GUN,
+               SHOOT_XBOW;
 
-    uint32 SpellSequence;
+        uint32 SpellSequence;
 };
 
 #endif

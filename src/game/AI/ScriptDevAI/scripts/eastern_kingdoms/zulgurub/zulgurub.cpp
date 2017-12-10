@@ -13,8 +13,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
- 
- /* ScriptData
+
+/* ScriptData
 SDName: Zul'Gurub
 SD%Complete: 0
 SDComment:
@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/PreCompiledHeader.h"
 
- /* ContentData
+/* ContentData
 EndContentData */
 
 enum
@@ -44,7 +44,7 @@ enum
 
 struct npc_soulflayerAI : public ScriptedAI
 {
-    npc_soulflayerAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiRandomBuffAbility(0){ Reset(); }
+    npc_soulflayerAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiRandomBuffAbility(0) { Reset(); }
 
     uint32 m_uiSoulTapTimer;
     uint32 m_uiLightingBreathTimer;

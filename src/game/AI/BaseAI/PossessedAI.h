@@ -28,18 +28,18 @@ class Spell;
 
 class PossessedAI : public CreatureAI
 {
-public:
+    public:
 
-    explicit PossessedAI(Creature* creature) : CreatureAI(creature) {}
-    explicit PossessedAI(Unit* unit) : CreatureAI(unit) {}
+        explicit PossessedAI(Creature* creature) : CreatureAI(creature) {}
+        explicit PossessedAI(Unit* unit) : CreatureAI(unit) {}
 
-    static int Permissible(const Creature* /*creature*/) { return PERMIT_BASE_NO; }
+        static int Permissible(const Creature* /*creature*/) { return PERMIT_BASE_NO; }
 
-    //void GetAIInformation(ChatHandler& reader) override;
+        //void GetAIInformation(ChatHandler& reader) override;
 
-    void UpdateAI(const uint32 diff) override
-    {
-        DoMeleeAttackIfReady();
-    }
+        void UpdateAI(const uint32 diff) override
+        {
+            DoMeleeAttackIfReady();
+        }
 };
 #endif

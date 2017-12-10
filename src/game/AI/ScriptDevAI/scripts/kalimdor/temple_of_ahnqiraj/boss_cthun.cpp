@@ -165,7 +165,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
         {
             case NPC_EYE_TENTACLE:
                 m_lEyeTentaclesList.push_back(pSummoned->GetObjectGuid());
-                // no break;
+            // no break;
             case NPC_CLAW_TENTACLE:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     pSummoned->AI()->AttackStart(pTarget);
@@ -453,7 +453,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
     {
         switch (pSummoned->GetEntry())
         {
-                // Handle portal despawn on tentacle kill
+            // Handle portal despawn on tentacle kill
             case NPC_EYE_TENTACLE:
                 if (Creature* pPortal = GetClosestCreatureWithEntry(pSummoned, NPC_TENTACLE_PORTAL, 5.0f))
                     pPortal->ForcedDespawn();
@@ -463,7 +463,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                 if (Creature* pPortal = GetClosestCreatureWithEntry(pSummoned, NPC_GIANT_TENTACLE_PORTAL, 5.0f))
                     pPortal->ForcedDespawn();
                 break;
-                // Handle the stomach tentacles kill
+            // Handle the stomach tentacles kill
             case NPC_FLESH_TENTACLE:
                 ++m_uiFleshTentaclesKilled;
                 if (m_uiFleshTentaclesKilled == MAX_FLESH_TENTACLES)

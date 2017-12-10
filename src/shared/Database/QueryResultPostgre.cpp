@@ -109,12 +109,12 @@ enum Field::DataTypes QueryResultPostgre::ConvertNativeType(Oid  pOid) const
             return Field::DB_TYPE_INTEGER;
         case BOOLOID:
             return Field::DB_TYPE_BOOL;                     // Bool
-            /*
-                    case BOXOID:    Rect;
-                    case LINEOID:   Rect;
-                    case VARBITOID: BitArray;
-                    case BYTEAOID:  ByteArray;
-            */
+        /*
+                case BOXOID:    Rect;
+                case LINEOID:   Rect;
+                case VARBITOID: BitArray;
+                case BYTEAOID:  ByteArray;
+        */
         case LSEGOID:
         case OIDVECTOROID:
         case PATHOID:

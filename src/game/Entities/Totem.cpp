@@ -182,7 +182,7 @@ float Totem::GetCritChance(SpellSchoolMask schoolMask) const
     return Creature::GetCritChance(schoolMask);
 }
 
-float Totem::GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureTypeMask, const SpellEntry *spell, bool heal) const
+float Totem::GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureTypeMask, const SpellEntry* spell, bool heal) const
 {
     // Totems use owner's crit multiplier
     if (const Unit* owner = GetOwner())

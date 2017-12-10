@@ -418,7 +418,7 @@ void Map::MessageDistBroadcast(Player const* player, WorldPacket const& msg, flo
         return;
 
     MaNGOS::MessageDistDeliverer post_man(*player, msg, dist, to_self, own_team_only);
-    TypeContainerVisitor<MaNGOS::MessageDistDeliverer , WorldTypeMapContainer > message(post_man);
+    TypeContainerVisitor<MaNGOS::MessageDistDeliverer, WorldTypeMapContainer > message(post_man);
     cell.Visit(p, message, *this, *player, dist);
 }
 
@@ -1974,7 +1974,7 @@ class StaticMonsterChatBuilder
             sObjectMgr.GetCreatureLocaleStrings(i_cInfo->Entry, loc_idx, &nameForLocale);
 
             ChatHandler::BuildChatPacket(data, i_msgtype, text, i_language, CHAT_TAG_NONE, i_senderGuid, nameForLocale, i_target ? i_target->GetObjectGuid() : ObjectGuid(),
-                i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
+                                         i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
         }
 
     private:
