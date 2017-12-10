@@ -331,6 +331,7 @@ struct ScriptInfo
         {
             uint32 npcEntry;                                // datalong
             uint32 searchDist;                              // datalong2
+            uint32 poolId;                                  // datalong3
             // changeWaypointWaitTime                       // dataint
         } terminateScript;
 

@@ -650,7 +650,12 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             {
                 if (tmp.terminateScript.npcEntry && !ObjectMgr::GetCreatureTemplate(tmp.terminateScript.npcEntry))
                 {
-                    sLog.outErrorDb("Table `%s` has datalong = %u in SCRIPT_COMMAND_TERMINATE_SCRIPT for script id %u, but this npc entry does not exist.", tablename, tmp.sendTaxiPath.taxiPathId, tmp.id);
+                    sLog.outErrorDb("Table `%s` has npc entry = '%u' in SCRIPT_COMMAND_TERMINATE_SCRIPT for script id %u, but this npc entry does not exist.", tablename, tmp.terminateScript.npcEntry, tmp.id);
+                    continue;
+                }
+                else if (tmp.terminateScript.poolId && tmp.terminateScript.poolId > sPoolMgr.GetMaxPoolId())
+                {
+                    sLog.outErrorDb("Table `%s` has pool id = '%u' in SCRIPT_COMMAND_TERMINATE_SCRIPT for script id %u, but this pool id does not exist.", tablename, tmp.terminateScript.poolId, tmp.id);
                     continue;
                 }
                 break;
@@ -1937,25 +1942,75 @@ bool ScriptAction::HandleScriptStep()
         case SCRIPT_COMMAND_TERMINATE_SCRIPT:               // 31
         {
             bool result = false;
-            if (m_script->terminateScript.npcEntry)
+            if (m_script->terminateScript.npcEntry || m_script->terminateScript.poolId)
             {
-                WorldObject* pSearcher = pSource ? pSource : pTarget;
-                if (pSearcher->GetTypeId() == TYPEID_PLAYER && pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
-                    pSearcher = pTarget;
-
                 Creature* pCreatureBuddy = nullptr;
-                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, true, false, m_script->terminateScript.searchDist, true);
-                MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
-                Cell::VisitGridObjects(pSearcher, searcher, m_script->terminateScript.searchDist);
+                if (m_script->terminateScript.npcEntry)
+                {
+                    // npc entry is provided
+                    WorldObject* pSearcher = pSource ? pSource : pTarget;
+                    if (pSearcher->GetTypeId() == TYPEID_PLAYER && pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
+                        pSearcher = pTarget;
+                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, true, false, m_script->terminateScript.searchDist, true);
+                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
+                    Cell::VisitGridObjects(pSearcher, searcher, m_script->terminateScript.searchDist);
+                }
+                else
+                {
+                    // poolId is provided
+                    // this is supposed to work only on situation where only one of the provided creature in pool can be alive at a time
+                    PoolGroup<Creature> const& pool = sPoolMgr.GetPoolCreatures(m_script->terminateScript.poolId);
+
+                    // fist try to find buddy npc in equal chanced list
+                    auto equalChancedObjectList = pool.GetEqualChanced();
+                    for (auto objItr : equalChancedObjectList)
+                    {
+                        CreatureData const* cData = sObjectMgr.GetCreatureData(objItr.guid);
+                        if (Creature* buddy = m_map->GetCreature(cData->GetObjectGuid(objItr.guid)))
+                        {
+                            // buddy should be alive
+                            if (buddy->isAlive())
+                            {
+                                pCreatureBuddy = buddy;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!pCreatureBuddy)
+                    {
+                        // buddy was not found so try explicitly chanced list
+                        auto explicitlyChancedObjectList = pool.GetExplicitlyChanced();
+                        for (auto objItr : explicitlyChancedObjectList)
+                        {
+                            CreatureData const* cData = sObjectMgr.GetCreatureData(objItr.guid);
+                            if (Creature* buddy = m_map->GetCreature(cData->GetObjectGuid(objItr.guid)))
+                            {
+                                // buddy should be alive
+                                if (buddy->isAlive())
+                                {
+                                    pCreatureBuddy = buddy;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
 
                 if (!(m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) && !pCreatureBuddy)
                 {
-                    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched other npc %u was not found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
+                    if (m_script->terminateScript.npcEntry)
+                        DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc entry(%u) was not found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
+                    else
+                        DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as no npc in pool id(%u) was found alive)", m_table, m_script->id, m_script->terminateScript.poolId);
                     result = true;
                 }
                 else if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && pCreatureBuddy)
                 {
-                    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched other npc %u was found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
+                    if (m_script->terminateScript.npcEntry)
+                        DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc entry(%u) was found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
+                    else
+                        DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc in pool id(%u) was found alive)", m_table, m_script->id, m_script->terminateScript.poolId);
                     result = true;
                 }
             }
