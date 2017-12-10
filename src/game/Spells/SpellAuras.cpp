@@ -370,6 +370,7 @@ void Aura::SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue)
 {
     m_modifier.m_auraname = t;
     m_modifier.m_amount = a;
+    m_modifier.m_baseAmount = a;
     m_modifier.m_miscvalue = miscValue;
     m_modifier.periodictime = pt;
 }
@@ -5142,7 +5143,7 @@ void SpellAuraHolder::CleanupTriggeredSpells()
     }
 }
 
-bool SpellAuraHolder::ModStackAmount(int32 num)
+bool SpellAuraHolder::ModStackAmount(int32 num, Unit* newCaster)
 {
     uint32 protoStackAmount = m_spellProto->StackAmount;
 
@@ -5161,43 +5162,53 @@ bool SpellAuraHolder::ModStackAmount(int32 num)
     }
 
     // Update stack amount
-    SetStackAmount(stackAmount);
+    SetStackAmount(stackAmount, newCaster);
     return false;
 }
 
-void SpellAuraHolder::SetStackAmount(uint32 stackAmount)
+void SpellAuraHolder::SetStackAmount(uint32 stackAmount, Unit* newCaster)
 {
     Unit* target = GetTarget();
-    Unit* caster = GetCaster();
-    if (!target || !caster)
+    if (!target)
         return;
 
-    bool refresh = stackAmount >= m_stackAmount;
+    if (stackAmount >= m_stackAmount)
+    {
+        // Change caster
+        Unit* oldCaster = GetCaster();
+        if (oldCaster != newCaster)
+        {
+            m_casterGuid = newCaster->GetObjectGuid();
+            // New caster duration sent for owner in RefreshHolder
+        }
+        // Stack increased refresh duration
+        RefreshHolder();
+    }
+
+    int32 oldStackAmount = m_stackAmount;
     if (stackAmount != m_stackAmount)
     {
         m_stackAmount = stackAmount;
         UpdateAuraApplication();
+    }
 
-        for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (Aura* aur = m_auras[i])
         {
-            if (Aura* aur = m_auras[i])
+            int32 bp = aur->GetBasePoints();
+            int32 baseAmount = aur->GetModifier()->m_baseAmount;
+            int32 amount = m_stackAmount * baseAmount;
+            // Reapply if amount change
+            if (amount != aur->GetModifier()->m_amount)
             {
-                int32 bp = aur->GetBasePoints();
-                int32 amount = m_stackAmount * caster->CalculateSpellDamage(target, m_spellProto, SpellEffectIndex(i), &bp);
-                // Reapply if amount change
-                if (amount != aur->GetModifier()->m_amount)
-                {
-                    aur->ApplyModifier(false, true);
-                    aur->GetModifier()->m_amount = amount;
-                    aur->ApplyModifier(true, true);
-                }
+                aur->ApplyModifier(false, true);
+                aur->GetModifier()->m_amount = amount;
+                aur->GetModifier()->m_recentAmount = baseAmount * (stackAmount - oldStackAmount);
+                aur->ApplyModifier(true, true);
             }
         }
     }
-
-    if (refresh)
-        // Stack increased refresh duration
-        RefreshHolder();
 }
 
 Unit* SpellAuraHolder::GetCaster() const

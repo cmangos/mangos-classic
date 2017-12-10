@@ -4015,7 +4015,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 if (aurSpellInfo->StackAmount)
                 {
                     // can be created with >1 stack by some spell mods
-                    foundHolder->ModStackAmount(holder->GetStackAmount());
+                    foundHolder->ModStackAmount(holder->GetStackAmount(), holder->GetCaster());
                     return false;
                 }
 
@@ -4032,7 +4032,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 //any stackable case with amount should mod existing stack amount
                 if (aurSpellInfo->StackAmount && aurSpellInfo->rangeIndex != SPELL_RANGE_IDX_SELF_ONLY && !aurSpellInfo->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
                 {
-                    foundHolder->ModStackAmount(holder->GetStackAmount());
+                    foundHolder->ModStackAmount(holder->GetStackAmount(), holder->GetCaster());
                     return false;
                 }
                 else if (!IsStackableSpell(aurSpellInfo, foundHolder->GetSpellProto(), holder->GetTarget()))
@@ -4348,7 +4348,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, U
         new_holder->AddAura(new_aur, new_aur->GetEffIndex());
     }
 
-    if (holder->ModStackAmount(-1))
+    if (holder->ModStackAmount(-1, nullptr))
         // Remove aura as dispel
         RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DISPEL);
 
@@ -4392,7 +4392,7 @@ void Unit::RemoveAurasTriggeredBySpell(uint32 spellId, ObjectGuid casterGuid /*=
 void Unit::RemoveAuraStack(uint32 spellId)
 {
     if (SpellAuraHolder* holder = GetSpellAuraHolder(spellId))
-        if (holder->ModStackAmount(-1)) // Remove aura on return true
+        if (holder->ModStackAmount(-1, nullptr)) // Remove aura on return true
             RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DEFAULT);
 }
 
@@ -4423,7 +4423,7 @@ void Unit::RemoveAuraHolderFromStack(uint32 spellId, uint32 stackAmount, ObjectG
     {
         if (!casterGuid || iter->second->GetCasterGuid() == casterGuid)
         {
-            if (iter->second->ModStackAmount(-int32(stackAmount)))
+            if (iter->second->ModStackAmount(-int32(stackAmount), nullptr))
             {
                 RemoveSpellAuraHolder(iter->second, mode);
                 break;
