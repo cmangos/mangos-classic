@@ -2780,7 +2780,7 @@ void Creature::ReduceCorpseDecayTimer()
             isDungeonEncounter = true;
     }
 
-    if (!isDungeonEncounter)
+    if (!isDungeonEncounter && m_corpseDecayTimer > 2 * MINUTE * IN_MILLISECONDS)
         m_corpseDecayTimer = 2 * MINUTE * IN_MILLISECONDS;  // 2 minutes for a creature
 }
 
