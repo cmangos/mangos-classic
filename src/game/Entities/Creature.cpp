@@ -1164,22 +1164,53 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     // Calculate level dependent stats
     //////////////////////////////////////////////////////////////////////////
 
-    uint32 health;
-    uint32 mana;
+    uint32 health = -1;
+    uint32 mana = -1;
+    float armor = -1.f;
+    float mainMinDmg = 0.f;
+    float mainMaxDmg = 0.f;
+    float offMinDmg = 0.f;
+    float offMaxDmg = 0.f;
+    float minRangedDmg = 0.f;
+    float maxRangedDmg = 0.f;
+    float meleeAttackPwr = 0.f;
+    float rangedAttackPwr = 0.f;
+    bool usedDamageMulti = false;
 
-    // TODO: Remove cinfo->ArmorMultiplier test workaround to disable classlevelstats when DB is ready
-    CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass);
-    if (cinfo->ArmorMultiplier > 0 && cCLS)
+    if (CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass))
     {
         // Use Creature Stats to calculate stat values
 
         // health
-        health = cCLS->BaseHealth * cinfo->HealthMultiplier;
+        if (cinfo->HealthMultiplier >= 0)
+            health = cCLS->BaseHealth * cinfo->HealthMultiplier;
 
         // mana
-        mana = cCLS->BaseMana * cinfo->PowerMultiplier;
+        if (cinfo->PowerMultiplier >= 0)
+            mana = cCLS->BaseMana * cinfo->PowerMultiplier;
+
+        // armor
+        if (cinfo->ArmorMultiplier >= 0)
+            armor = cCLS->BaseArmor * cinfo->ArmorMultiplier;
+
+        // damage
+        if (cinfo->DamageMultiplier >= 0)
+        {
+            usedDamageMulti = true;
+            mainMinDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseMeleeAttackPower / 14.0f)) * (cinfo->MeleeBaseAttackTime / 1000.0f) * cinfo->DamageMultiplier;
+            mainMaxDmg = ((cCLS->BaseDamage * cinfo->DamageVariance *1.5f) + (cCLS->BaseMeleeAttackPower / 14.0f)) * (cinfo->MeleeBaseAttackTime / 1000.0f) * cinfo->DamageMultiplier;
+            offMinDmg = mainMinDmg / 2.0f;
+            offMaxDmg = mainMinDmg / 2.0f;
+            minRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseRangedAttackPower / 14.0f)) * (cinfo->RangedBaseAttackTime / 1000.0f) * cinfo->DamageMultiplier;
+            maxRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance * 1.5f) + (cCLS->BaseRangedAttackPower / 14.0f)) * (cinfo->RangedBaseAttackTime / 1000.0f) * cinfo->DamageMultiplier;
+
+            // attack power (not sure about the next line)
+            meleeAttackPwr = cCLS->BaseMeleeAttackPower;
+            rangedAttackPwr = cCLS->BaseRangedAttackPower;
+        }
     }
-    else
+
+    if (!usedDamageMulti || health == -1 || mana == -1 || armor == -1.f) // some field needs to default to old db fields
     {
         if (forcedLevel == USE_DEFAULT_DATABASE_LEVEL || (forcedLevel >= minlevel && forcedLevel <= maxlevel))
         {
@@ -1187,14 +1218,40 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
             float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
 
             // health
-            uint32 minhealth = std::min(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
-            uint32 maxhealth = std::max(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
-            health = uint32(minhealth + uint32(rellevel * (maxhealth - minhealth)));
+            if (health == -1.f)
+            {
+                uint32 minhealth = std::min(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
+                uint32 maxhealth = std::max(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
+                health = uint32(minhealth + uint32(rellevel * (maxhealth - minhealth)));
+            }
 
             // mana
-            uint32 minmana = std::min(cinfo->MaxLevelMana, cinfo->MinLevelMana);
-            uint32 maxmana = std::max(cinfo->MaxLevelMana, cinfo->MinLevelMana);
-            mana = minmana + uint32(rellevel * (maxmana - minmana));
+            if (mana == -1.f)
+            {
+                uint32 minmana = std::min(cinfo->MaxLevelMana, cinfo->MinLevelMana);
+                uint32 maxmana = std::max(cinfo->MaxLevelMana, cinfo->MinLevelMana);
+                mana = minmana + uint32(rellevel * (maxmana - minmana));
+            }
+
+            // armor
+            if (armor == -1.f)
+                armor = cinfo->Armor;
+
+            // damage
+            if (!usedDamageMulti)
+            {
+                float damagemod = _GetDamageMod(rank);
+                mainMinDmg = cinfo->MinMeleeDmg * damagemod;
+                mainMaxDmg = cinfo->MaxMeleeDmg * damagemod;
+                offMinDmg = cinfo->MinMeleeDmg * damagemod;
+                offMaxDmg = cinfo->MaxMeleeDmg * damagemod;
+                minRangedDmg = cinfo->MinRangedDmg * damagemod;
+                maxRangedDmg = cinfo->MaxRangedDmg * damagemod;
+
+                // attack power
+                meleeAttackPwr = cinfo->MeleeAttackPower * damagemod;
+                rangedAttackPwr = cinfo->RangedAttackPower * damagemod;
+            }
         }
         else
         {
@@ -1202,6 +1259,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
             // probably wrong
             health = (cinfo->MaxLevelHealth / cinfo->MaxLevel) * level;
             mana = (cinfo->MaxLevelMana / cinfo->MaxLevel) * level;
+            armor = 0;
         }
     }
 
@@ -1223,7 +1281,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     // all power types
     for (int i = POWER_MANA; i <= POWER_HAPPINESS; ++i)
     {
-        uint32 maxValue;
+        uint32 maxValue = 0;
 
         switch (i)
         {
@@ -1249,19 +1307,20 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
         SetModifierValue(UnitMods(UNIT_MOD_POWER_START + i), BASE_VALUE, float(value));
     }
 
+    // Armor
+    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, armor);
+
     // damage
-    float damagemod = _GetDamageMod(rank);
+    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, mainMinDmg);
+    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, mainMaxDmg);
+    SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, offMinDmg);
+    SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, offMaxDmg);
+    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minRangedDmg);
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, maxRangedDmg);
 
-    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cinfo->MinMeleeDmg * damagemod);
-    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cinfo->MaxMeleeDmg * damagemod);
-
-    SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, cinfo->MinMeleeDmg * damagemod);
-    SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, cinfo->MaxMeleeDmg * damagemod);
-
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, cinfo->MinRangedDmg * damagemod);
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, cinfo->MaxRangedDmg * damagemod);
-
-    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, cinfo->MeleeAttackPower * damagemod);
+    // attack power
+    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, meleeAttackPwr);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, rangedAttackPwr);
 }
 
 float Creature::_GetHealthMod(int32 Rank)
