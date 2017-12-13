@@ -2127,7 +2127,8 @@ bool WorldObject::HaveGCD(SpellEntry const* spellEntry) const
 void WorldObject::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto /*= nullptr*/, bool permanent /*= false*/, uint32 forcedDuration /*= 0*/)
 {
     uint32 recTimeDuration = forcedDuration ? forcedDuration : spellEntry.RecoveryTime;
-    m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTimeDuration, spellEntry.Category, spellEntry.CategoryRecoveryTime);
+    if (recTimeDuration || spellEntry.CategoryRecoveryTime)
+        m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTimeDuration, spellEntry.Category, spellEntry.CategoryRecoveryTime);
 }
 
 void WorldObject::UpdateCooldowns(TimePoint const& now)
