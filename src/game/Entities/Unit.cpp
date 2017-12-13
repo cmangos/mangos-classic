@@ -3546,7 +3546,8 @@ void Unit::_UpdateAutoRepeatSpell()
     m_AutoRepeatFirstCast = false;
 
     // cast routine
-    if (isAttackReady(RANGED_ATTACK))
+    // TODO: in the future remove RANGED_ATTACK and fully utilize cooldown
+    if (isAttackReady(RANGED_ATTACK) && IsSpellReady(*m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo))
     {
         // be sure the unit is stand up
         if (getStandState() != UNIT_STAND_STATE_STAND)
