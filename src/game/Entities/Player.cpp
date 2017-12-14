@@ -2135,7 +2135,7 @@ void Player::SetGameMaster(bool on)
         SetPvPFreeForAll(false);
         UpdatePvPContested(false, true);
 
-        getHostileRefManager().updateOnlineOfflineState(false);
+        getHostileRefManager().deleteReferences();
         CombatStopWithPets();
     }
     else
@@ -2154,8 +2154,6 @@ void Player::SetGameMaster(bool on)
 
         // restore FFA PvP area state, remove not allowed for GM mounts
         UpdateArea(m_areaUpdateId);
-
-        getHostileRefManager().updateOnlineOfflineState(true);
     }
 
     m_camera.UpdateVisibilityForOwner();
