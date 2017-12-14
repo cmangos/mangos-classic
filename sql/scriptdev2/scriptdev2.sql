@@ -216,7 +216,18 @@ INSERT INTO scripted_event_id VALUES
 (8452, 'event_weekly_chromatic_selection'),
 (8453, 'event_weekly_chromatic_selection'),
 (8454, 'event_weekly_chromatic_selection'),
-(8455, 'event_weekly_chromatic_selection');
+(8455, 'event_weekly_chromatic_selection'),
+(8520, 'event_weekly_chromatic_selection'),
+(8521, 'event_weekly_chromatic_selection'),
+(8522, 'event_weekly_chromatic_selection'),
+(8523, 'event_weekly_chromatic_selection'),
+(8524, 'event_weekly_chromatic_selection'),
+(8525, 'event_weekly_chromatic_selection'),
+(8526, 'event_weekly_chromatic_selection'),
+(8527, 'event_weekly_chromatic_selection'),
+(8528, 'event_weekly_chromatic_selection'),
+(8529, 'event_weekly_chromatic_selection');
+
 
 /* BLASTED LANDS */
 UPDATE creature_template SET ScriptName='npc_fallen_hero_of_horde' WHERE entry=7572;
@@ -2094,9 +2105,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1469005,'Let the games begin!',8280,1,0,22,'victor_nefarius SAY_GAMESBEGIN_2'),
 (-1469006,'Ah...the heroes. You are persistent, aren\'t you? Your ally here attempted to match his power against mine - and paid the price. Now he shall serve me...by slaughtering you.',8279,1,0,23,'victor_nefarius SAY_NEFARIUS_CORRUPT'),
 
-(-1469007,'Well done, my minions. The mortals\' courage begins to wane! Now, let\'s see how they contend with the true Lord of Blackrock Spire!',8288,1,0,0,'nefarian SAY_AGGRO'),
+(-1469007,'Well done, my minions. The mortals\' courage begins to wane! Now, let\'s see how they contend with the true Lord of Blackrock Spire!',8288,6,0,0,'nefarian SAY_AGGRO'),
 (-1469008,'Enough! Now you vermin shall feel the force of my birthright, the fury of the earth itself.',8289,1,0,0,'nefarian SAY_XHEALTH'),
-(-1469009,'BURN! You wretches! BURN!',8290,1,0,0,'nefarian SAY_SHADOWFLAME'),
+(-1469009,'BURN! You wretches! BURN!',8290,6,0,0,'nefarian SAY_SHADOWFLAME'),
 (-1469010,'Impossible! Rise my minions! Serve your master once more!',8291,1,0,0,'nefarian SAY_RAISE_SKELETONS'),
 (-1469011,'Worthless $N! Your friends will join you soon enough!',8293,1,0,0,'nefarian SAY_SLAY'),
 (-1469012,'This cannot be!  I am the master here!  You mortals are nothing to my kind!  Do you hear me? Nothing!',8292,1,0,0,'nefarian SAY_DEATH'),

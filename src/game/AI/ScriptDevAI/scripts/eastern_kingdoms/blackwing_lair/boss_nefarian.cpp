@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Nefarian
-SD%Complete: 80
-SDComment: Some issues with class calls effecting more than one class
+SD%Complete: 100
+SDComment:
 SDCategory: Blackwing Lair
 EndScriptData
 
@@ -29,8 +29,9 @@ EndScriptData
 
 enum
 {
+    SAY_AGGRO                   = -1469007,
     SAY_XHEALTH                 = -1469008,             // at 5% hp
-    SAY_AGGRO                   = -1469009,
+    SAY_SHADOW_FLAME            = -1469009,
     SAY_RAISE_SKELETONS         = -1469010,
     SAY_SLAY                    = -1469011,
     SAY_DEATH                   = -1469012,
@@ -46,13 +47,12 @@ enum
     SAY_ROGUE                   = -1469021,
     SAY_DEATH_KNIGHT            = -1469031,             // spell unk for the moment
 
-    SPELL_SHADOWFLAME_INITIAL   = 22992,                // old spell id 22972 -> wrong
     SPELL_SHADOWFLAME           = 22539,
     SPELL_BELLOWING_ROAR        = 22686,
-    SPELL_VEIL_OF_SHADOW        = 22687,                // old spell id 7068 -> wrong
+    SPELL_VEIL_OF_SHADOW        = 22687,
     SPELL_CLEAVE                = 20691,
     SPELL_TAIL_LASH             = 23364,
-    // SPELL_BONE_CONTRUST       = 23363,                // 23362, 23361   Missing from DBC!
+    SPELL_RAISE_DRAKONID        = 23362,
 
     SPELL_MAGE                  = 23410,                // wild magic
     SPELL_WARRIOR               = 23397,                // beserk
@@ -81,6 +81,7 @@ struct boss_nefarianAI : public ScriptedAI
     uint32 m_uiCleaveTimer;
     uint32 m_uiTailLashTimer;
     uint32 m_uiClassCallTimer;
+    uint32 m_uiInitialYellTimer;
     bool m_bPhase3;
     bool m_bHasEndYell;
 
@@ -92,6 +93,7 @@ struct boss_nefarianAI : public ScriptedAI
         m_uiCleaveTimer         = 7000;
         m_uiTailLashTimer       = 10000;
         m_uiClassCallTimer      = 35000;                    // 35-40 seconds
+        m_uiInitialYellTimer    = 0;
         m_bPhase3               = false;
         m_bHasEndYell           = false;
     }
@@ -118,33 +120,50 @@ struct boss_nefarianAI : public ScriptedAI
         {
             m_pInstance->SetData(TYPE_NEFARIAN, FAIL);
 
-            // Cleanup encounter
-            if (m_creature->IsTemporarySummon())
-            {
-                if (Creature* pNefarius = m_creature->GetMap()->GetCreature(m_creature->GetSpawnerGuid()))
-                    pNefarius->AI()->EnterEvadeMode();
-            }
-
             m_creature->ForcedDespawn();
         }
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        if (uiType != WAYPOINT_MOTION_TYPE)
+            return;
 
-        // Remove flying in case Nefarian aggroes before his combat point was reached
-        if (m_creature->IsLevitating())
+        switch (uiPointId)
         {
-            m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
-            m_creature->SetLevitate(false);
+            case 1:
+                m_uiInitialYellTimer = 10 * IN_MILLISECONDS;
+                DoScriptText(SAY_AGGRO, m_creature);
+                break;
+            case 9:
+                // Stop flying and land
+                m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
+                m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
+                m_creature->SetLevitate(false);
+                m_creature->SetInCombatWithZone();
+                // Make attackable and attack
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    m_creature->AI()->AttackStart(pTarget);
+                break;
         }
-
-        DoCastSpellIfCan(m_creature, SPELL_SHADOWFLAME_INITIAL);
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        // Yell when casting initial Shadow Flame (AoE) and speed change
+        if (m_uiInitialYellTimer)
+        {
+            if (m_uiInitialYellTimer < uiDiff)
+            {
+                DoScriptText(SAY_SHADOW_FLAME, m_creature);
+                m_creature->UpdateSpeed(MOVE_RUN, false, 0.5f);
+                m_uiInitialYellTimer = 0;
+            }
+            else
+                m_uiInitialYellTimer -= uiDiff;
+        }
+
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
@@ -196,48 +215,48 @@ struct boss_nefarianAI : public ScriptedAI
         // ClassCall_Timer
         if (m_uiClassCallTimer < uiDiff)
         {
-            // Cast a random class call
-            // On official it is based on what classes are currently on the hostil list
-            // but we can't do that yet so just randomly call one
-
-            switch (urand(0, 8))
+            // Cast a random class call based on what classes are currently on the hostile list
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER))
             {
-                case 0:
-                    DoScriptText(SAY_MAGE, m_creature);
-                    DoCastSpellIfCan(m_creature, SPELL_MAGE);
-                    break;
-                case 1:
-                    DoScriptText(SAY_WARRIOR, m_creature);
-                    DoCastSpellIfCan(m_creature, SPELL_WARRIOR);
-                    break;
-                case 2:
-                    DoScriptText(SAY_DRUID, m_creature);
-                    DoCastSpellIfCan(m_creature, SPELL_DRUID);
-                    break;
-                case 3:
-                    DoScriptText(SAY_PRIEST, m_creature);
-                    DoCastSpellIfCan(m_creature, SPELL_PRIEST);
-                    break;
-                case 4:
-                    DoScriptText(SAY_PALADIN, m_creature);
-                    DoCastSpellIfCan(m_creature, SPELL_PALADIN);
-                    break;
-                case 5:
-                    DoScriptText(SAY_SHAMAN, m_creature);
-                    DoCastSpellIfCan(m_creature, SPELL_SHAMAN);
-                    break;
-                case 6:
-                    DoScriptText(SAY_WARLOCK, m_creature);
-                    DoCastSpellIfCan(m_creature, SPELL_WARLOCK);
-                    break;
-                case 7:
-                    DoScriptText(SAY_HUNTER, m_creature);
-                    DoCastSpellIfCan(m_creature, SPELL_HUNTER);
-                    break;
-                case 8:
-                    DoScriptText(SAY_ROGUE, m_creature);
-                    DoCastSpellIfCan(m_creature, SPELL_ROGUE);
-                    break;
+                switch (pTarget->getClass())
+                {
+                    case 1:
+                        DoScriptText(SAY_WARRIOR, m_creature);
+                        DoCastSpellIfCan(m_creature, SPELL_WARRIOR);
+                        break;
+                    case 2:
+                        DoScriptText(SAY_PALADIN, m_creature);
+                        DoCastSpellIfCan(m_creature, SPELL_PALADIN);
+                        break;
+                    case 3:
+                        DoScriptText(SAY_HUNTER, m_creature);
+                        DoCastSpellIfCan(m_creature, SPELL_HUNTER);
+                        break;
+                    case 4:
+                        DoScriptText(SAY_ROGUE, m_creature);
+                        DoCastSpellIfCan(m_creature, SPELL_ROGUE);
+                        break;
+                    case 5:
+                        DoScriptText(SAY_PRIEST, m_creature);
+                        DoCastSpellIfCan(m_creature, SPELL_PRIEST);
+                        break;
+                    case 7:
+                        DoScriptText(SAY_SHAMAN, m_creature);
+                        DoCastSpellIfCan(m_creature, SPELL_SHAMAN);
+                        break;
+                    case 8:
+                        DoScriptText(SAY_MAGE, m_creature);
+                        DoCastSpellIfCan(m_creature, SPELL_MAGE);
+                        break;
+                    case 9:
+                        DoScriptText(SAY_WARLOCK, m_creature);
+                        DoCastSpellIfCan(m_creature, SPELL_WARLOCK);
+                        break;
+                    case 11:
+                        DoScriptText(SAY_DRUID, m_creature);
+                        DoCastSpellIfCan(m_creature, SPELL_DRUID);
+                        break;
+                }
             }
 
             m_uiClassCallTimer = urand(35000, 40000);
@@ -245,11 +264,10 @@ struct boss_nefarianAI : public ScriptedAI
         else
             m_uiClassCallTimer -= uiDiff;
 
-        // Phase3 begins when we are below X health
+        // Phase3 begins when we are below 20% health
         if (!m_bPhase3 && m_creature->GetHealthPercent() < 20.0f)
         {
-            if (m_pInstance)
-                m_pInstance->SetData(TYPE_NEFARIAN, SPECIAL);
+            DoCastSpellIfCan(m_creature, SPELL_RAISE_DRAKONID);
             m_bPhase3 = true;
             DoScriptText(SAY_RAISE_SKELETONS, m_creature);
         }

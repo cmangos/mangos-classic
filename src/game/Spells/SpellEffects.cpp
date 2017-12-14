@@ -794,6 +794,32 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 22659:                                 // Spawn Drakonid
+                {
+                    // Spawn drakonids depending on caster color (spawner type)
+                    uint32 spellSummonDrakonid = 0;
+                    switch (m_caster->GetEntry())
+                    {
+                        case 14312: spellSummonDrakonid = 22658; break; // Blue
+                        case 14310: spellSummonDrakonid = 22656; break; // Green
+                        case 14311: spellSummonDrakonid = 22657; break; // Bronze
+                        case 14309: spellSummonDrakonid = 22655; break; // Red
+                        case 14307: spellSummonDrakonid = 22654; break; // Black
+                        default: return;
+                    }
+                    m_caster->CastSpell(m_caster, spellSummonDrakonid, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 22664:                                 // Shadowblink
+                {
+                    if (eff_idx == EFFECT_INDEX_1)
+                    {
+                        // randomly cast one of the nine Shadowblink spell in Nefarian encounter (phase 1)
+                        const uint32 spell_list[9] = {22668, 22669, 22670, 22671, 22672, 22673, 22674, 22675, 22676};
+                        m_caster->CastSpell(m_caster, spell_list[urand(0, 8)], TRIGGERED_OLD_TRIGGERED);
+                    }
+                    return;
+                }
                 case 23019:                                 // Crystal Prison Dummy DND
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->isAlive())
@@ -926,6 +952,25 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     // Sending right breath to instance script
                     uint32 rightBreaths[] = { 23322, 23323, 23324, 23325, 23326 };
                     m_caster->CastSpell(m_caster, rightBreaths[rightBreath], TRIGGERED_OLD_TRIGGERED);
+
+                    return;
+                }
+                case 23343:                                 // Nefarian Tunnel Selection
+                {
+                    // This spell selects two kinds of drakonids amongst five and send them to BWL instance script through events
+
+                    // Drakonids selection
+                    // 5 possiblities for the first kind, 4 for the second: 20 total possiblites
+                    uint8 rightDrakonid = urand(0, 4);
+                    uint8 leftDrakonid = (rightDrakonid + urand(1, 4)) % 5;
+
+                    // Sending left tunnel selection to instance script
+                    uint32 leftDrakonids[] = { 23344, 23345, 23346, 23347, 23348 };
+                    m_caster->CastSpell(m_caster, leftDrakonids[leftDrakonid], TRIGGERED_OLD_TRIGGERED);
+
+                    // Sending right tunnel selection to instance script
+                    uint32 rightDrakonids[] = { 23349, 23350, 23351, 23352, 23353 };
+                    m_caster->CastSpell(m_caster, rightDrakonids[rightDrakonid], TRIGGERED_OLD_TRIGGERED);
 
                     return;
                 }

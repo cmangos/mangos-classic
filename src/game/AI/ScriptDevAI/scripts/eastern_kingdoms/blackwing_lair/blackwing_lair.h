@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 11,
+    MAX_ENCOUNTER               = 13,
 
     TYPE_RAZORGORE              = 0,
     TYPE_VAELASTRASZ            = 1,
@@ -20,6 +20,8 @@ enum
     TYPE_QUEST_SCEPTER          = 8,
     TYPE_CHROMA_LBREATH         = 9,                        // Not real events: used to store the two random Chromaggus breaths for the instance lifetime
     TYPE_CHROMA_RBREATH         = 10,
+    TYPE_NEFA_LTUNNEL           = 11,                       // Not real events: used to store the two random drakonids selection for the instance lifetime
+    TYPE_NEFA_RTUNNEL           = 12,
 
     DATA_DRAGON_EGG             = 1,                        // track the used eggs
 
@@ -74,6 +76,24 @@ enum
     MAX_DRAGONSPAWN             = 12,
     MAX_BLACKWING_DEFENDER      = 40,
 
+    // Nefarian encounter
+    NPC_BLACK_SPAWNER           = 14307,
+    NPC_RED_SPAWNER             = 14309,
+    NPC_GREEN_SPAWNER           = 14310,
+    NPC_BRONZE_SPAWNER          = 14311,
+    NPC_BLUE_SPAWNER            = 14312,
+
+    NPC_BLUE_DRAKONID           = 14261,
+    NPC_GREEN_DRAKONID          = 14262,
+    NPC_BRONZE_DRAKONID         = 14263,
+    NPC_RED_DRAKONID            = 14264,
+    NPC_BLACK_DRAKONID          = 14265,
+    NPC_CHROMATIC_DRAKONID      = 14302,
+
+    MAX_DRAKONID_SUMMONS        = 42,
+
+    SPELL_SHADOWBLINK_OUTRO     = 22681,
+
     // Yells by Nefarian during the epic quest Nefarius' Corruption
     YELL_REDSHARD_TAUNT_1       = -1469036,
     YELL_REDSHARD_TAUNT_2       = -1469037,
@@ -84,6 +104,18 @@ enum
     YELL_REDSHARD_TAUNT_7       = -1469043,
     EMOTE_REDSHARD_TAUNT_1      = -1469038,
     EMOTE_REDSHARD_TAUNT_2      = -1469044,
+};
+
+struct SpawnLocation
+{
+    float m_fX, m_fY, m_fZ;
+};
+
+static const SpawnLocation aNefarianLocs[3] =
+{
+    { -7599.32f, -1191.72f, 475.545f},                      // opening where red/blue/black darknid spawner appear (ori 3.05433)
+    { -7526.27f, -1135.04f, 473.445f},                      // same as above, closest to door (ori 5.75959)
+    { -7348.849f, -1495.134f, 552.5152f},                   // nefarian spawn location (ori 1.798)
 };
 
 // Coords used in intro event for Vaelastrasz to spawn Nefarius at the throne and sort the gobelins
@@ -116,6 +148,7 @@ class instance_blackwing_lair : public ScriptedInstance
         void Update(uint32 uiDiff) override;
 
         void InitiateBreath(uint32 uiEventId);
+        void InitiateDrakonid(uint32 uiEventId);
 
         bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
 
@@ -123,12 +156,16 @@ class instance_blackwing_lair : public ScriptedInstance
         std::string m_strInstData;
         uint32 m_auiEncounter[MAX_ENCOUNTER];
 
+        void CleanupNefarianStage(bool fullCleanup);
+
         uint32 m_uiResetTimer;
         uint32 m_uiDefenseTimer;
         uint32 m_uiScepterEpicTimer;
+        uint32 m_uiNefarianSpawnTimer;
         uint8 m_uiScepterQuestStep;
-        uint32 m_uiDragonspawnCount;
-        uint32 m_uiBlackwingDefCount;
+        uint8 m_uiDragonspawnCount;
+        uint8 m_uiBlackwingDefCount;
+        uint8 m_uiDeadDrakonidsCount;
 
         bool m_bIsMainGateOpen;
 
@@ -136,6 +173,7 @@ class instance_blackwing_lair : public ScriptedInstance
         GuidList m_lDrakonidBonesGuids;
         GuidList m_lDefendersGuids;
         GuidList m_lUsedEggsGuids;
+        GuidList m_lDrakonidSpawnerGuids;
         GuidVector m_vGeneratorGuids;
 };
 
