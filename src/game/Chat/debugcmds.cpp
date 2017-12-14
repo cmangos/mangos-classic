@@ -1155,7 +1155,10 @@ bool ChatHandler::HandleDebugWaypoint(char* args)
 
     uint32 pathId;
     if (!ExtractUInt32(&args, pathId) || pathId >= 256)
-        return false;
+    {
+        PSendSysMessage("Current target path ID: %d", target->GetMotionMaster()->GetPathId());
+        return true;
+    }
 
     target->GetMotionMaster()->MoveWaypoint(pathId, 2);
 
