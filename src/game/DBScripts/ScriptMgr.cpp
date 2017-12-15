@@ -1945,12 +1945,19 @@ bool ScriptAction::HandleScriptStep()
             if (m_script->terminateScript.npcEntry || m_script->terminateScript.poolId)
             {
                 Creature* pCreatureBuddy = nullptr;
+                WorldObject* pSearcher = pSource ? pSource : pTarget;
+                if (!pSearcher)
+                {
+                    sLog.outError("DB - SCRIPTS: Process table `%s` id %u, command %u no pSource provided", m_table, m_script->id, m_script->command);
+                    return false;
+                }
+
+                if (pSearcher->GetTypeId() == TYPEID_PLAYER && pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
+                    pSearcher = pTarget;
+
                 if (m_script->terminateScript.npcEntry)
                 {
                     // npc entry is provided
-                    WorldObject* pSearcher = pSource ? pSource : pTarget;
-                    if (pSearcher->GetTypeId() == TYPEID_PLAYER && pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
-                        pSearcher = pTarget;
                     MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, true, false, m_script->terminateScript.searchDist, true);
                     MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
                     Cell::VisitGridObjects(pSearcher, searcher, m_script->terminateScript.searchDist);
@@ -1968,8 +1975,9 @@ bool ScriptAction::HandleScriptStep()
                         CreatureData const* cData = sObjectMgr.GetCreatureData(objItr.guid);
                         if (Creature* buddy = m_map->GetCreature(cData->GetObjectGuid(objItr.guid)))
                         {
-                            // buddy should be alive
-                            if (buddy->isAlive())
+                            // buddy should be alive and in search dist range
+                            if (buddy->isAlive() &&
+                                (!m_script->terminateScript.searchDist || pSearcher->IsWithinDist3d(buddy->GetPositionX(), buddy->GetPositionY(), buddy->GetPositionZ(), m_script->terminateScript.searchDist)))
                             {
                                 pCreatureBuddy = buddy;
                                 break;
@@ -1986,8 +1994,9 @@ bool ScriptAction::HandleScriptStep()
                             CreatureData const* cData = sObjectMgr.GetCreatureData(objItr.guid);
                             if (Creature* buddy = m_map->GetCreature(cData->GetObjectGuid(objItr.guid)))
                             {
-                                // buddy should be alive
-                                if (buddy->isAlive())
+                                // buddy should be alive and in search dist range
+                                if (buddy->isAlive() &&
+                                    (!m_script->terminateScript.searchDist || pSearcher->IsWithinDist3d(buddy->GetPositionX(), buddy->GetPositionY(), buddy->GetPositionZ(), m_script->terminateScript.searchDist)))
                                 {
                                     pCreatureBuddy = buddy;
                                     break;
