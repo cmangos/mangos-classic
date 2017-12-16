@@ -1176,6 +1176,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     float meleeAttackPwr = 0.f;
     float rangedAttackPwr = 0.f;
     bool usedDamageMulti = false;
+    float damagemod = _GetDamageMod(rank);
 
     if (CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass))
     {
@@ -1240,17 +1241,16 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
             // damage
             if (!usedDamageMulti)
             {
-                float damagemod = _GetDamageMod(rank);
-                mainMinDmg = cinfo->MinMeleeDmg * damagemod;
-                mainMaxDmg = cinfo->MaxMeleeDmg * damagemod;
-                offMinDmg = cinfo->MinMeleeDmg * damagemod;
-                offMaxDmg = cinfo->MaxMeleeDmg * damagemod;
-                minRangedDmg = cinfo->MinRangedDmg * damagemod;
-                maxRangedDmg = cinfo->MaxRangedDmg * damagemod;
+                mainMinDmg = cinfo->MinMeleeDmg;
+                mainMaxDmg = cinfo->MaxMeleeDmg;
+                offMinDmg = cinfo->MinMeleeDmg;
+                offMaxDmg = cinfo->MaxMeleeDmg;
+                minRangedDmg = cinfo->MinRangedDmg;
+                maxRangedDmg = cinfo->MaxRangedDmg;
 
                 // attack power
-                meleeAttackPwr = cinfo->MeleeAttackPower * damagemod;
-                rangedAttackPwr = cinfo->RangedAttackPower * damagemod;
+                meleeAttackPwr = cinfo->MeleeAttackPower;
+                rangedAttackPwr = cinfo->RangedAttackPower;
             }
         }
         else
@@ -1311,16 +1311,16 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, armor);
 
     // damage
-    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, mainMinDmg);
-    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, mainMaxDmg);
-    SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, offMinDmg);
-    SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, offMaxDmg);
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minRangedDmg);
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, maxRangedDmg);
+    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, mainMinDmg * damagemod);
+    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, mainMaxDmg * damagemod);
+    SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, offMinDmg * damagemod);
+    SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, offMaxDmg * damagemod);
+    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minRangedDmg * damagemod);
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, maxRangedDmg * damagemod);
 
     // attack power
-    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, meleeAttackPwr);
-    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, rangedAttackPwr);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, meleeAttackPwr * damagemod);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, rangedAttackPwr * damagemod);
 }
 
 float Creature::_GetHealthMod(int32 Rank)
