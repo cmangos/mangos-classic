@@ -174,8 +174,6 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
         m_destX = caster->GetPositionX();
         m_destY = caster->GetPositionY();
         m_destZ = caster->GetPositionZ();
-        m_unitTarget = caster;
-        m_unitTargetGUID = caster->GetObjectGuid();
         return;
     }
 
