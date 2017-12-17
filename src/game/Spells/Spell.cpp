@@ -2766,6 +2766,15 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
             }
         }
+
+        for (std::list<GameObject*>::iterator iter = tempTargetGOList.begin(); iter != tempTargetGOList.end();)
+        {
+            if (CheckTargetGOScript(*iter, SpellEffectIndex(effIndex)))
+                ++iter;
+            else
+                iter = tempTargetGOList.erase(iter);
+        }
+
         // Add resulting GOs as GOTargets
         for (std::list<GameObject*>::iterator iter = tempTargetGOList.begin(); iter != tempTargetGOList.end(); ++iter)
             AddGOTarget(*iter, effIndex);
@@ -6495,6 +6504,15 @@ CurrentSpellTypes Spell::GetCurrentContainer() const
         return (CURRENT_CHANNELED_SPELL);
     else
         return (CURRENT_GENERIC_SPELL);
+}
+
+bool Spell::CheckTargetGOScript(GameObject* target, SpellEffectIndex eff) const
+{
+    switch (m_spellInfo->Id)
+    {
+        default: break;
+    }
+    return true;
 }
 
 bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
