@@ -1175,6 +1175,9 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     float maxRangedDmg = 0.f;
     float meleeAttackPwr = 0.f;
     float rangedAttackPwr = 0.f;
+
+    float damageMod = _GetDamageMod(rank);
+    float damageMulti = cinfo->DamageMultiplier * damageMod;
     bool usedDamageMulti = false;
 
     if (CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass))
@@ -1197,12 +1200,12 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
         if (cinfo->DamageMultiplier >= 0)
         {
             usedDamageMulti = true;
-            mainMinDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseMeleeAttackPower / 14.0f)) * (cinfo->MeleeBaseAttackTime / 1000.0f) * cinfo->DamageMultiplier;
-            mainMaxDmg = ((cCLS->BaseDamage * cinfo->DamageVariance *1.5f) + (cCLS->BaseMeleeAttackPower / 14.0f)) * (cinfo->MeleeBaseAttackTime / 1000.0f) * cinfo->DamageMultiplier;
+            mainMinDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseMeleeAttackPower / 14.0f)) * (cinfo->MeleeBaseAttackTime / 1000.0f) * damageMulti;
+            mainMaxDmg = ((cCLS->BaseDamage * cinfo->DamageVariance *1.5f) + (cCLS->BaseMeleeAttackPower / 14.0f)) * (cinfo->MeleeBaseAttackTime / 1000.0f) * damageMulti;
             offMinDmg = mainMinDmg / 2.0f;
             offMaxDmg = mainMinDmg / 2.0f;
-            minRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseRangedAttackPower / 14.0f)) * (cinfo->RangedBaseAttackTime / 1000.0f) * cinfo->DamageMultiplier;
-            maxRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance * 1.5f) + (cCLS->BaseRangedAttackPower / 14.0f)) * (cinfo->RangedBaseAttackTime / 1000.0f) * cinfo->DamageMultiplier;
+            minRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseRangedAttackPower / 14.0f)) * (cinfo->RangedBaseAttackTime / 1000.0f) * damageMulti;
+            maxRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance * 1.5f) + (cCLS->BaseRangedAttackPower / 14.0f)) * (cinfo->RangedBaseAttackTime / 1000.0f) * damageMulti;
 
             // attack power (not sure about the next line)
             meleeAttackPwr = cCLS->BaseMeleeAttackPower;
@@ -1240,12 +1243,12 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
             // damage
             if (!usedDamageMulti)
             {
-                mainMinDmg = cinfo->MinMeleeDmg;
-                mainMaxDmg = cinfo->MaxMeleeDmg;
-                offMinDmg = cinfo->MinMeleeDmg;
-                offMaxDmg = cinfo->MaxMeleeDmg;
-                minRangedDmg = cinfo->MinRangedDmg;
-                maxRangedDmg = cinfo->MaxRangedDmg;
+                mainMinDmg = cinfo->MinMeleeDmg * damageMulti;
+                mainMaxDmg = cinfo->MaxMeleeDmg * damageMulti;
+                offMinDmg = cinfo->MinMeleeDmg * damageMulti;
+                offMaxDmg = cinfo->MaxMeleeDmg * damageMulti;
+                minRangedDmg = cinfo->MinRangedDmg * damageMulti;
+                maxRangedDmg = cinfo->MaxRangedDmg * damageMulti;
 
                 // attack power
                 meleeAttackPwr = cinfo->MeleeAttackPower;
@@ -1310,18 +1313,16 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, armor);
 
     // damage
-    float damagemod = _GetDamageMod(rank);
-
-    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, mainMinDmg * damagemod);
-    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, mainMaxDmg * damagemod);
-    SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, offMinDmg * damagemod);
-    SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, offMaxDmg * damagemod);
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minRangedDmg * damagemod);
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, maxRangedDmg * damagemod);
+    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, mainMinDmg);
+    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, mainMaxDmg);
+    SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, offMinDmg);
+    SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, offMaxDmg);
+    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minRangedDmg);
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, maxRangedDmg);
 
     // attack power
-    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, meleeAttackPwr * damagemod);
-    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, rangedAttackPwr * damagemod);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, meleeAttackPwr * damageMod);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, rangedAttackPwr * damageMod);
 }
 
 float Creature::_GetHealthMod(int32 Rank)
