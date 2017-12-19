@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER)
+if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS)
   add_subdirectory(framework)
   add_subdirectory(shared)
 endif()
