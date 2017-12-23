@@ -327,7 +327,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    DEBUG_LOG("WORLD: got cast spell packet, spellId - %u, data length = " SIZEFMTD,
+    DEBUG_LOG("WORLD: CMSG_CAST_SPELL, spellId - %u, data length = " SIZEFMTD,
               spellId, recvPacket.size());
 
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
