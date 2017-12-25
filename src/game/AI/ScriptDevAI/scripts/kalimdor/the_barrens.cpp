@@ -282,7 +282,22 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
 
         m_playerGuid.Clear();
         m_bigWillGuid.Clear();
+
         m_vAffrayChallengerGuidsVector.clear();
+    }
+
+    void FailEvent()
+    {
+        if (Creature* bigWill = m_creature->GetMap()->GetCreature(m_bigWillGuid))
+            if (bigWill->isAlive())
+                bigWill->ForcedDespawn();
+
+        for (ObjectGuid guid : m_vAffrayChallengerGuidsVector)
+            if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
+                if (creature->isAlive())
+                    creature->ForcedDespawn();
+
+        Reset();
     }
 
     bool CanStartEvent(Player* pPlayer)
@@ -354,7 +369,7 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_BIG_WILL)
         {
             DoScriptText(SAY_TWIGGY_OVER, m_creature);
-            EnterEvadeMode();
+            Reset();
         }
         else
         {
@@ -373,7 +388,10 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
             Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
             if (!pPlayer || !pPlayer->isAlive())
-                EnterEvadeMode();
+            {
+                FailEvent();
+                return;
+            }
 
             switch (m_uiStep)
             {
@@ -387,7 +405,10 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
                     if (Creature* pChallenger = m_creature->GetMap()->GetCreature(m_vAffrayChallengerGuidsVector[m_uiChallengerCount]))
                         SetChallengerReady(pChallenger);
                     else
-                        EnterEvadeMode();
+                    {
+                        FailEvent(); // this should never happen
+                        return;
+                    }
 
                     if (m_uiChallengerCount == MAX_CHALLENGERS)
                     {
