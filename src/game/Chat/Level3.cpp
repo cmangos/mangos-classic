@@ -5805,14 +5805,7 @@ bool ChatHandler::HandleCastCommand(char* args)
     if (!*args)
         return false;
 
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
+    Unit* target = getSelectedUnit(false);
 
     // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
     uint32 spell = ExtractSpellIdFromLink(&args);

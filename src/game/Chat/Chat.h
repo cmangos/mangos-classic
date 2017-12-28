@@ -612,7 +612,7 @@ class ChatHandler
 
         Player*   getSelectedPlayer() const;
         Creature* getSelectedCreature() const;
-        Unit*     getSelectedUnit() const;
+        Unit*     getSelectedUnit(bool self = true) const;
 
         // extraction different type params from args string, all functions update (char** args) to first unparsed tail symbol at return
         static void  SkipWhiteSpaces(char** args);
