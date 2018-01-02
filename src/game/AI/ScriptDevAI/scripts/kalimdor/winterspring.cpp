@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Winterspring
-SD%Complete: 90
+SD%Complete: 100
 SDComment: Quest support: 4901.
 SDCategory: Winterspring
 EndScriptData
@@ -75,6 +75,8 @@ enum
     EMOTE_CHANT_SPELL           = -1000738,
 
     SPELL_LIGHT_TORCH           = 18953,        // channeled spell by Ranshalla while waiting for the torches / altar
+    SPELL_RANSHALLA_DESPAWN     = 18954,
+    SPELL_BIND_WILDKIN          = 18994,
 
     NPC_RANSHALLA               = 10300,
     NPC_PRIESTESS_ELUNE         = 12116,
@@ -155,6 +157,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
     }
 
     uint32 m_uiDelayTimer;
+    uint32 m_uiCurrentWaypoint;
 
     ObjectGuid m_firstPriestessGuid;
     ObjectGuid m_secondPriestessGuid;
@@ -165,6 +168,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
     void Reset() override
     {
         m_uiDelayTimer = 0;
+        m_uiCurrentWaypoint = 0;
     }
 
     // Called when the player activates the torch / altar
@@ -182,6 +186,16 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
         }
 
         m_uiDelayTimer = 2000;
+    }
+
+    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    {
+        // If Ranshalla cast the torch lightening spell for too long she will trigger SPELL_RANSHALLA_DESPAWN (quest failed and despawn)
+        if (pSpell->Id == SPELL_RANSHALLA_DESPAWN)
+        {
+            FailQuestForPlayerAndGroup();
+            m_creature->ForcedDespawn();
+        }
     }
 
     // Called when Ranshalla starts to channel on a torch / altar
@@ -253,9 +267,11 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
             case 20: // Cavern 3
             case 25: // Cavern 4
             case 36: // Cavern 5
+                m_uiCurrentWaypoint = uiPointId;
                 DoChannelTorchSpell();
                 break;
             case 39:
+                m_uiCurrentWaypoint = uiPointId;
                 StartNextDialogueText(SAY_REACH_ALTAR_1);
                 SetEscortPaused(true);
                 break;
@@ -348,6 +364,9 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                     DoScriptText(SAY_PRIESTESS_ALTAR_14, pPriestess);
                     pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[7].m_fX, aWingThicketLocations[7].m_fY, aWingThicketLocations[7].m_fZ);
                 }
+                // make the voice of elune cast Bind Wildkin
+                if (Creature* pGuard = m_creature->GetMap()->GetCreature(m_guardEluneGuid))
+                    pGuard->CastSpell(pGuard, SPELL_BIND_WILDKIN, TRIGGERED_NONE);
                 break;
             case SAY_PRIESTESS_ALTAR_19:
                 // make the voice of elune leave
@@ -388,6 +407,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->GroupEventHappens(QUEST_GUARDIANS_ALTAR, m_creature);
+                m_creature->ForcedDespawn(1 * MINUTE * IN_MILLISECONDS);
                 break;
         }
     }
@@ -416,6 +436,9 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
             {
                 m_creature->InterruptNonMeleeSpells(false);
                 SetEscortPaused(false);
+                // Spell Ranshalla Waiting applies a root aura that triggers an internal timer in the waypoint movement manager
+                // We need to manually set the movement manager to the next waypoint in order to reset the timer unless the NPC will wait 3 min before moving again
+                m_creature->GetMotionMaster()->SetNextWaypoint(m_uiCurrentWaypoint + 1);
                 m_uiDelayTimer = 0;
             }
             else
