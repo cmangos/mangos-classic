@@ -338,6 +338,9 @@ uint32 PlayerbotAI::initSpell(uint32 spellId)
     if (next == 0)
     {
         const SpellEntry* const pSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+        if (!pSpellInfo)
+            return spellId;
+
         DEBUG_LOG("[PlayerbotAI]: initSpell - Playerbot spell init: %s is %u", pSpellInfo->SpellName[0], spellId);
 
         // Add spell to spellrange map
