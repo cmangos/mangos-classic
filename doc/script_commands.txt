@@ -356,3 +356,8 @@ Defining a buddy could be done in several way:
                                             * source and target of command define source and target of launched dbscript
                                             * datalong = dbscripts_on_relay id
                                             * datalong2 = dbscript_random_templates id
+
+46 SCRIPT_COMMAND_CAST_CUSTOM_SPELL         resultingSource = Unit, cast spell at resultingTarget = Unit
+                                            * datalong = spell id
+                                            * datalong2 = TriggerCastFlags
+                                            * dataint1-dataint3 define the &bp for the spell. At least one field is required.

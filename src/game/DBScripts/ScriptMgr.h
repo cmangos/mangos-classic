@@ -122,6 +122,10 @@ enum ScriptCommand                                          // resSource, resTar
     // datalong = new Creature entry
     // datalong2 = Alliance(0) Horde(1), other values throw error
     SCRIPT_COMMAND_START_RELAY_SCRIPT       = 45,           // datalong = relayId, datalong2 = random template Id
+    SCRIPT_COMMAND_CAST_CUSTOM_SPELL        = 46,           // resSource = Unit, cast spell at resTarget = Unit
+    // datalong=spellid
+    // datalong2=castFlags, enum TriggerCastFlags
+    // dataint1-3 define the &bp value for the spell. At least one field is required.
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -399,6 +403,12 @@ struct ScriptInfo
             uint32 relayId;                                 // datalong
             uint32 templateId;                              // datalong2
         } relayScript;
+
+        struct                                              // SCRIPT_COMMAND_CAST_CUSTOM_SPELL (46)
+        {
+            uint32 spellId;                                 // datalong
+            uint32 castFlags;                               // datalong2
+        } castCustomSpell;
 
         struct
         {

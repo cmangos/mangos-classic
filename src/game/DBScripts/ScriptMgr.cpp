@@ -757,6 +757,21 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_CAST_CUSTOM_SPELL:          // 46
+            {
+                if (!sSpellTemplate.LookupEntry<SpellEntry>(tmp.castSpell.spellId))
+                {
+                    sLog.outErrorDb("Table `%s` using nonexistent spell (id: %u) in SCRIPT_COMMAND_CAST_CUSTOM_SPELL for script id %u",
+                        tablename, tmp.castSpell.spellId, tmp.id);
+                    continue;
+                }
+                if (tmp.textId[0] == 0 && tmp.textId[1] == 0 && tmp.textId[2] == 0)
+                {
+                    sLog.outErrorDb("Table `%s` has invalid BP values (dataint = %u, dataint2 = %u, dataint3 = %u) in SCRIPT_COMMAND_CAST_CUSTOM_SPELL for script id %u. At least one field has to be populated.", tablename, tmp.textId[0], tmp.textId[1], tmp.textId[2], tmp.id);
+                    continue;
+                }
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -2291,6 +2306,16 @@ bool ScriptAction::HandleScriptStep()
 
             if (chosenId)
                 m_map->ScriptsStart(sRelayScripts, chosenId, pSource, pTarget);
+            break;
+        }
+        case SCRIPT_COMMAND_CAST_CUSTOM_SPELL:              // 46
+        {
+            if (LogIfNotUnit(pTarget))
+                break;
+            if (LogIfNotUnit(pSource))
+                break;
+
+            ((Unit*)pSource)->CastCustomSpell((Unit*)pTarget, m_script->castCustomSpell.spellId, &m_script->textId[0], &m_script->textId[1], &m_script->textId[2], m_script->castCustomSpell.castFlags);
             break;
         }
         default:
