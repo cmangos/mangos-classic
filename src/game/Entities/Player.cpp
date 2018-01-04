@@ -11795,11 +11795,11 @@ bool Player::CanRewardQuest(Quest const* pQuest, uint32 reward, bool msg) const
     if (!CanRewardQuest(pQuest, msg))
         return false;
 
+    ItemPosCountVec dest;
     if (pQuest->GetRewChoiceItemsCount() > 0)
     {
         if (pQuest->RewChoiceItemId[reward])
         {
-            ItemPosCountVec dest;
             InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, pQuest->RewChoiceItemId[reward], pQuest->RewChoiceItemCount[reward]);
             if (res != EQUIP_ERR_OK)
             {
@@ -11815,7 +11815,6 @@ bool Player::CanRewardQuest(Quest const* pQuest, uint32 reward, bool msg) const
         {
             if (pQuest->RewItemId[i])
             {
-                ItemPosCountVec dest;
                 InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, pQuest->RewItemId[i], pQuest->RewItemCount[i]);
                 if (res != EQUIP_ERR_OK)
                 {
