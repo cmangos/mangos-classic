@@ -13,7 +13,7 @@ Development of this project dates back to 2004, and was developed under various 
 * WoW Daemon Team, 2004
 * MaNGOS project, 2005-2008, located at http://www.mangosproject.org
 * MaNGOS project, 2008-2012, located at http://getmangos.com
-* CMaNGOS project, 2012-2016, located at http://cmangos.net
+* CMaNGOS project, 2012-2018, located at http://cmangos.net
 
 ## Authorship of the code
 Authorship is assigned for each commit within the git history, which is stored in these git repositories:
