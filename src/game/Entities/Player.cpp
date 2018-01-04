@@ -851,13 +851,15 @@ Item* Player::StoreNewItemInInventorySlot(uint32 itemEntry, uint32 amount)
 {
     ItemPosCountVec vDest;
 
-    uint8 msg = CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, vDest, itemEntry, amount);
+    InventoryResult msg = CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, vDest, itemEntry, amount);
 
     if (msg == EQUIP_ERR_OK)
     {
         if (Item* pItem = StoreNewItem(vDest, itemEntry, true, Item::GenerateItemRandomPropertyId(itemEntry)))
             return pItem;
     }
+    else
+        SendEquipError(msg, nullptr, nullptr, itemEntry);
 
     return nullptr;
 }
