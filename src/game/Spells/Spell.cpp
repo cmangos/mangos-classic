@@ -3442,14 +3442,16 @@ void Spell::finish(bool ok)
             modOwner->ResetSpellModsDueToCanceledSpell(this);
     }
 
+    bool channeledChannel = m_spellState == SPELL_STATE_CHANNELING;
+
     m_spellState = SPELL_STATE_FINISHED;
 
     // other code related only to successfully finished spells
     if (!ok)
         return;
 
-    // Normal spells proc on finish, channeled spells proc on start
-    if (!IsChanneledSpell(m_spellInfo))
+    // Normal spells proc on finish, channeled spells proc on start when they have duration, thats when channeledChannel is true
+    if (!IsChanneledSpell(m_spellInfo) && !channeledChannel)
         ProcSpellAuraTriggers();
 
     // Heal caster for all health leech from all targets
