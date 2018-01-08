@@ -1403,16 +1403,22 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage
     return damageInfo.damage;
 }
 
-void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, SpellEntry const* spellInfo, WeaponAttackType attackType)
+void Unit::CalculateSpellDamage(SpellNonMeleeDamage* spellDamageInfo, int32 damage, SpellEntry const* spellInfo, WeaponAttackType attackType)
 {
-    SpellSchoolMask damageSchoolMask = GetSchoolMask(damageInfo->school);
-    Unit* pVictim = damageInfo->target;
+    SpellSchoolMask damageSchoolMask = GetSchoolMask(spellDamageInfo->school);
+    Unit* pVictim = spellDamageInfo->target;
 
     if (damage < 0)
         return;
 
     if (!pVictim)
         return;
+
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
+    {
+        spellDamageInfo->damage = damage;
+        return;
+    }
 
     // Check spell crit chance
     bool crit = RollSpellCritOutcome(pVictim, damageSchoolMask, spellInfo);
@@ -1443,7 +1449,7 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
     // if crit add critical bonus
     if (crit)
     {
-        damageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT;
+        spellDamageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT;
         damage = CalculateCritAmount(pVictim, damage, spellInfo);
     }
 
@@ -1456,7 +1462,7 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
     }
     else
         damage = 0;
-    damageInfo->damage = damage;
+    spellDamageInfo->damage = damage;
 }
 
 void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
