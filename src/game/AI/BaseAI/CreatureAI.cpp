@@ -144,13 +144,13 @@ CanCastResult CreatureAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo
         if (m_unit->GetPower((Powers)spellInfo->powerType) < Spell::CalculatePowerCost(spellInfo, m_unit))
             return CAST_FAIL_POWER;
 
-        if (!IsIgnoreLosSpell(spellInfo) && !m_unit->IsWithinLOSInMap(target) && m_unit != target)
+        if (target && !IsIgnoreLosSpellCast(spellInfo) && !m_unit->IsWithinLOSInMap(target, true) && m_unit != target)
             return CAST_FAIL_NOT_IN_LOS;
     }
 
     if (const SpellRangeEntry* spellRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex))
     {
-        if (target != m_unit)
+        if (target && target != m_unit)
         {
             // pTarget is out of range of this spell (also done by Spell::CheckCast())
             float distance = m_unit->GetDistance(target, true, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT ? DIST_CALC_COMBAT_REACH_WITH_MELEE : DIST_CALC_COMBAT_REACH);
@@ -174,14 +174,16 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 
 {
     Unit* caster = m_unit;
 
-    if (!target)
+    if (target)
+    {
+        if (castFlags & CAST_SWITCH_CASTER_TARGET)
+            std::swap(caster, target);
+
+        if (castFlags & CAST_FORCE_TARGET_SELF)
+            caster = target;
+    }
+    else if (castFlags & (CAST_FORCE_TARGET_SELF | CAST_SWITCH_CASTER_TARGET))
         return CAST_FAIL_OTHER;
-
-    if (castFlags & CAST_SWITCH_CASTER_TARGET)
-        std::swap(caster, target);
-
-    if (castFlags & CAST_FORCE_TARGET_SELF)
-        caster = target;
 
     // Allowed to cast only if not casting (unless we interrupt ourself) or if spell is triggered
     if (!caster->IsNonMeleeSpellCasted(false) || (castFlags & (CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS)))
@@ -191,7 +193,12 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 
             // If cast flag CAST_AURA_NOT_PRESENT is active, check if target already has aura on them
             if (castFlags & CAST_AURA_NOT_PRESENT)
             {
-                if (target->HasAura(spellId))
+                if (!target)
+                {
+                    if (caster->HasAura(spellId))
+                        return CAST_FAIL_TARGET_AURA;
+                }
+                else if (target->HasAura(spellId))
                     return CAST_FAIL_TARGET_AURA;
             }
 
