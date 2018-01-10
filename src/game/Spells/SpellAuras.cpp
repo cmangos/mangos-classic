@@ -1032,6 +1032,9 @@ void Aura::TriggerSpell()
                     triggerCaster = target;
                     triggerTarget = target;
                     break;
+                case TARGET_CASTER_COORDINATES: // TODO: this needs to be done whenever target isnt important, doing it per case for safety
+                    triggerTarget = nullptr;
+                    break;
             }
         }
 
