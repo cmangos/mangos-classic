@@ -222,7 +222,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
             // Set victim to old target (if not while Dark Glare)
             if (pOldTarget && pOldTarget->isAlive() && m_Phase == PHASE_EYE_NORMAL)
             {
-                m_creature->SetTargetGuid(pOldTarget->GetObjectGuid());
+                m_creature->SetTarget(pOldTarget);
                 m_creature->SetInFront(pOldTarget);
             }
 
@@ -248,7 +248,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_EYE_BEAM) == CAST_OK)
                         {
-                            m_creature->SetTargetGuid(pTarget->GetObjectGuid());
+                            m_creature->SetTarget(pTarget);
                             m_uiBeamTimer = 3000;
                         }
                     }
@@ -262,7 +262,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
                     if (DoCastSpellIfCan(m_creature, SPELL_ROTATE_TRIGGER) == CAST_OK)
                     {
                         // Remove the target focus but allow the boss to face the current victim
-                        m_creature->SetTargetGuid(ObjectGuid());
+                        m_creature->SetTarget(nullptr);
                         m_creature->SetFacingToObject(m_creature->getVictim());
 
                         // Switch to Dark Glare phase
@@ -525,7 +525,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
             // Set victim to old target
             if (pOldTarget && pOldTarget->isAlive())
             {
-                m_creature->SetTargetGuid(pOldTarget->GetObjectGuid());
+                m_creature->SetTarget(pOldTarget);
                 m_creature->SetInFront(pOldTarget);
             }
 

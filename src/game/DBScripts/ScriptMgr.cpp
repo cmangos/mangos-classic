@@ -2142,13 +2142,13 @@ bool ScriptAction::HandleScriptStep()
                 pCSource->SetFacingTo(o);
 
                 if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && !pCSource->isInCombat())
-                    pCSource->SetTargetGuid(ObjectGuid());
+                    pCSource->SetTarget(nullptr);
             }
             else
             {
                 pCSource->SetFacingToObject(pTarget);
                 if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && !LogIfNotUnit(pTarget) && !pCSource->isInCombat())
-                    pCSource->SetTargetGuid(pTarget->GetObjectGuid());
+                    pCSource->SetTarget(pTarget);
             }
             break;
         }

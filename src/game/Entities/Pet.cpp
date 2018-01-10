@@ -605,6 +605,14 @@ void Pet::SetOwnerGuid(ObjectGuid owner)
     Unit::SetOwnerGuid(owner);
 }
 
+Player* Pet::GetSpellModOwner() const
+{
+    Unit* owner = GetOwner();
+    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+        return static_cast<Player*>(owner);
+    return nullptr;
+}
+
 void Pet::SetDeathState(DeathState s)                       // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
 {
     Creature::SetDeathState(s);
@@ -658,7 +666,7 @@ void Pet::Update(uint32 update_diff, uint32 diff)
             // unsummon pet that lost owner
             Unit* owner = GetOwner();
             if (!owner ||
-                    (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGuid() && (owner->GetCharmGuid() != GetObjectGuid()))) ||
+                    (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->HasCharm() && !owner->HasCharm(GetObjectGuid()))) ||
                     (isControlled() && !owner->GetPetGuid()))
             {
                 Unsummon(PET_SAVE_REAGENTS);
@@ -1022,7 +1030,7 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
         {
             case MINI_PET:
                 if (p_owner)
-                    p_owner->_SetMiniPet(nullptr);
+                    p_owner->SetMiniPet(nullptr);
                 break;
             case GUARDIAN_PET:
                 owner->RemoveGuardian(this);

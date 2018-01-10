@@ -968,6 +968,8 @@ class Player : public Unit
         uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; }
         uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; }
 
+        Player* GetSpellModOwner() const override { return const_cast<Player*>(this); }
+
         void SetDeathState(DeathState s) override;          // overwrite Unit::SetDeathState
 
         float GetRestBonus() const { return m_rest_bonus; }
@@ -994,11 +996,6 @@ class Player : public Unit
         void UpdateInnerTime(time_t time) { time_inn_enter = time; }
 
         void RemovePet(PetSaveMode mode);
-        void RemoveMiniPet();
-        Pet* GetMiniPet() const;
-
-        // use only in Pet::Unsummon/Spell::DoSummon
-        void _SetMiniPet(Pet* pet) { m_miniPetGuid = pet ? pet->GetObjectGuid() : ObjectGuid(); }
 
         void Say(const std::string& text, const uint32 language) const;
         void Yell(const std::string& text, const uint32 language) const;
@@ -1339,8 +1336,8 @@ class Player : public Unit
         QuestStatusMap& getQuestStatusMap() { return mQuestStatus; };
         const QuestStatusMap& getQuestStatusMap() const { return mQuestStatus; };
 
-        ObjectGuid const& GetSelectionGuid() const { return m_curSelectionGuid; }
-        void SetSelectionGuid(ObjectGuid guid) { m_curSelectionGuid = guid; SetTargetGuid(guid); }
+        ObjectGuid const& GetSelectionGuid() const override { return m_curSelectionGuid; }
+        void SetSelectionGuid(ObjectGuid guid) override { m_curSelectionGuid = guid; SetTargetGuid(guid); }
 
         uint8 GetComboPoints() const { return m_comboPoints; }
         ObjectGuid const& GetComboTargetGuid() const { return m_comboTargetGuid; }
@@ -2293,8 +2290,6 @@ class Player : public Unit
         Group* m_groupInvite;
         uint32 m_groupUpdateMask;
         uint64 m_auraUpdateMask;
-
-        ObjectGuid m_miniPetGuid;
 
         // Player summoning
         time_t m_summon_expire;

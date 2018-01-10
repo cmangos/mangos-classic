@@ -341,7 +341,7 @@ SingleEnemyTargetAura::SingleEnemyTargetAura(SpellEntry const* spellproto, Spell
         Unit* caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, holder, target, caster, castItem)
 {
     if (caster)
-        m_castersTargetGuid = caster->GetTypeId() == TYPEID_PLAYER ? ((Player*)caster)->GetSelectionGuid() : caster->GetTargetGuid();
+        m_castersTargetGuid = caster->GetSelectionGuid();
 }
 
 SingleEnemyTargetAura::~SingleEnemyTargetAura()
@@ -5332,7 +5332,7 @@ void SpellAuraHolder::Update(uint32 diff)
                 }
 
                 // need check distance for channeled target only
-                if (caster->GetChannelObjectGuid() == m_target->GetObjectGuid())
+                if (caster->HasChannelObject(m_target->GetObjectGuid()))
                 {
                     // Get spell range
                     float max_range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellProto->rangeIndex));

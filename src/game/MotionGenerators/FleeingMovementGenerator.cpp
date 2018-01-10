@@ -131,7 +131,7 @@ void FleeingMovementGenerator<T>::Initialize(T& owner)
     if (owner.GetTypeId() == TYPEID_UNIT)
     {
         ((Creature&) owner).SetWalk(false, false);
-        owner.SetTargetGuid(ObjectGuid());
+        owner.SetTarget(nullptr);
     }
 
     _setTargetLocation(owner);

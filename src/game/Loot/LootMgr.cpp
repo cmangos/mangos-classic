@@ -2721,7 +2721,7 @@ Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid) const
 
         if (lguid.IsEmpty())
         {
-            lguid = player->GetTargetGuid();
+            lguid = player->GetSelectionGuid();
             if (lguid.IsEmpty())
                 return nullptr;
         }
