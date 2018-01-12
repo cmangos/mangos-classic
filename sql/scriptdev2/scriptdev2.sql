@@ -320,7 +320,9 @@ UPDATE creature_template SET ScriptName='npc_mountaineer_pebblebitty' WHERE entr
 UPDATE creature_template SET ScriptName='npc_miran' WHERE entry=1379;
 
 /* MARAUDON */
+UPDATE instance_template SET ScriptName="instance_maraudon" WHERE map=349;
 UPDATE creature_template SET ScriptName='boss_noxxion' WHERE entry=13282;
+UPDATE gameobject_template SET ScriptName="go_larva_spewer" WHERE entry=178559;
 
 /* MOLTEN CORE */
 UPDATE instance_template SET ScriptName='instance_molten_core' WHERE map=409;
