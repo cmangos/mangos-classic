@@ -1831,6 +1831,10 @@ void GameObject::SetLootState(LootState state)
 {
     m_lootState = state;
     UpdateCollisionState();
+
+    // Call for GameObjectAI script
+    if (m_AI)
+        m_AI->OnStateChange();
 }
 
 void GameObject::SetGoState(GOState state)

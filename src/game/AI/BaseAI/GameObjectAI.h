@@ -28,9 +28,27 @@ class GameObjectAI
         explicit GameObjectAI(GameObject* go);
         virtual ~GameObjectAI();
 
+        /**
+        * Called at World update tick, by default every 100ms
+        * This setting is dependend on CONFIG_UINT32_INTERVAL_MAPUPDATE
+        * Note: Use this function to handle Timers
+        * @param uiDiff Passed time since last call
+        */
         virtual void UpdateAI(const uint32 /*diff*/) {}
 
+        /**
+        * Called when a Game Event starts or ends
+        * @param eventId to specify id of event from database
+        * @param activate to specify if it started or stopped
+        * @param resume to specify whether it launched normally or was resumed after a restart
+        */
         virtual void OnEventHappened(uint16 /*eventId*/, bool /*activate*/, bool /*resume*/) {}
+
+        /**
+        * Called when the GO has its state changed in GameObject::SetLootState (whatever the reason is)
+        * No params as LootState to which the GO is changed to is accessible in the GameObjectAI through getLootState()
+        */
+        virtual void OnStateChange() {}
 
     protected:
         GameObject* m_go;
