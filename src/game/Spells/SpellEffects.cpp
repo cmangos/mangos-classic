@@ -2168,13 +2168,17 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
                         break;
 
                     case GAMEOBJECT_TYPE_TRAP:
-                        if (lockType == LOCKTYPE_DISARM_TRAP || lockType == LOCKTYPE_NONE)
+                        switch (lockType)
                         {
-                            gameObjTarget->SetLootState(GO_ACTIVATED);
-                            return;
+                            case LOCKTYPE_NONE:
+                            case LOCKTYPE_DISARM_TRAP:
+                            case LOCKTYPE_OPEN_ATTACKING:
+                                gameObjTarget->SetLootState(GO_ACTIVATED);
+                                return;
+                            default:
+                                sLog.outError("Spell::SendLoot unhandled locktype %u for GameObject trap (entry %u) for spell %u.", lockType, gameObjTarget->GetEntry(), m_spellInfo->Id);
+                                return;
                         }
-                        sLog.outError("Spell::SendLoot unhandled locktype %u for GameObject trap (entry %u) for spell %u.", lockType, gameObjTarget->GetEntry(), m_spellInfo->Id);
-                        return;
                     default:
                         sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u) for spell %u.", gameObjTarget->GetGoType(), gameObjTarget->GetEntry(), m_spellInfo->Id);
                         return;
