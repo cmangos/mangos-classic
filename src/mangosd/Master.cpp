@@ -215,12 +215,11 @@ int Master::Run()
     }
 
     {
-        //auto const listenIP = sConfig.GetStringDefault("BindIP", "0.0.0.0");
-        MaNGOS::Listener<WorldSocket> listener(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD), 8);
+        MaNGOS::Listener<WorldSocket> listener(sConfig.GetStringDefault("BindIP", "0.0.0.0"), int32(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD)), 8);
 
         std::unique_ptr<MaNGOS::Listener<RASocket>> raListener;
         if (sConfig.GetBoolDefault("Ra.Enable", false))
-            raListener.reset(new MaNGOS::Listener<RASocket>(sConfig.GetIntDefault("Ra.Port", 3443), 1));
+            raListener.reset(new MaNGOS::Listener<RASocket>(sConfig.GetStringDefault("Ra.IP", "0.0.0.0"), sConfig.GetIntDefault("Ra.Port", 3443), 1));
 
         std::unique_ptr<SOAPThread> soapThread;
         if (sConfig.GetBoolDefault("SOAP.Enabled", false))

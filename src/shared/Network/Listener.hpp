@@ -65,13 +65,13 @@ namespace MaNGOS
             void OnAccept(NetworkThread<SocketType> *worker, std::shared_ptr<SocketType> const& socket, const boost::system::error_code &ec);
 
         public:
-            Listener(int port, int workerThreads);
+            Listener(std::string const& address, int port, int workerThreads);
             ~Listener();
     };
 
     template <typename SocketType>
-    Listener<SocketType>::Listener(int port, int workerThreads)
-        : m_service(new boost::asio::io_service()), m_acceptor(new boost::asio::ip::tcp::acceptor(*m_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)))
+    Listener<SocketType>::Listener(std::string const& address, int port, int workerThreads)
+        : m_service(new boost::asio::io_service()), m_acceptor(new boost::asio::ip::tcp::acceptor(*m_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(address), port)))
     {
         m_workerThreads.reserve(workerThreads);
         for (auto i = 0; i < workerThreads; ++i)
