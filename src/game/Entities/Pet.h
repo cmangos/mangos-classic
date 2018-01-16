@@ -171,6 +171,7 @@ class Pet : public Creature
         bool CreateBaseAtCreature(Creature* creature);
         bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, uint32 healthPercentage = 0, bool permanentOnly = false);
         void SavePetToDB(PetSaveMode mode);
+        bool isLoading() const { return m_loading; }
         void Unsummon(PetSaveMode mode, Unit* owner = nullptr);
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
         static void DeleteFromDB(Unit* owner, PetSaveMode slot);
