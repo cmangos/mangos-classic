@@ -1164,3 +1164,17 @@ bool ChatHandler::HandleDebugWaypoint(char* args)
 
     return true;
 }
+
+bool ChatHandler::HandleDebugSpellVisual(char* args)
+{
+    Unit* target = getSelectedUnit();
+    if (!target)
+        return false;
+
+    uint32 spellVisualID;
+    if (!ExtractUInt32(&args, spellVisualID))
+        return false;
+
+    target->SendPlaySpellVisual(spellVisualID);
+    return true;
+}
