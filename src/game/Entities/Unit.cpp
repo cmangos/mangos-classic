@@ -9802,19 +9802,19 @@ void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, 
 
 void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool casting /*= false*/)
 {
-    DisableSpline();
-
     if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->TeleportTo(GetMapId(), x, y, z, orientation, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (casting ? TELE_TO_SPELL : 0));
+        static_cast<Player*>(this)->TeleportTo(GetMapId(), x, y, z, orientation, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (casting ? TELE_TO_SPELL : 0));
     else
     {
-        Creature* c = (Creature*)this;
+        DisableSpline();
+
+        Creature* c = static_cast<Creature*>(this);
         // Creature relocation acts like instant movement generator, so current generator expects interrupt/reset calls to react properly
         if (!c->GetMotionMaster()->empty())
             if (MovementGenerator* movgen = c->GetMotionMaster()->top())
                 movgen->Interrupt(*c);
 
-        GetMap()->CreatureRelocation((Creature*)this, x, y, z, orientation);
+        GetMap()->CreatureRelocation(c, x, y, z, orientation);
 
         SendHeartBeat();
 
