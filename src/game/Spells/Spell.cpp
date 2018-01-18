@@ -4767,6 +4767,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                         {
                             for (Creature* creatureScriptTarget : foundScriptCreatureTargets)
                                 AddUnitTarget(creatureScriptTarget, SpellEffectIndex(j));
+
+                            // Need to fill unittarget for SMSG_SPELL_START - makes some visuals work
+                            if (foundScriptCreatureTargets.size() >= 1)
+                                m_targets.setUnitTarget(foundScriptCreatureTargets.front());
                         }
                     }
                 }
