@@ -245,6 +245,10 @@ void instance_scholomance::DoSpawnGandlingIfCan(bool bByPlayerEnter)
     {
         if (Creature* pGandling = pPlayer->SummonCreature(NPC_DARKMASTER_GANDLING, aGandlingSpawnLocs[0].m_fX, aGandlingSpawnLocs[0].m_fY, aGandlingSpawnLocs[0].m_fZ, aGandlingSpawnLocs[0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
         {
+            if (IsHolidayActive(HOLIDAY_FEAST_OF_WINTER_VEIL) && (pGandling->GetDisplayId() == GANDLING_STANDARD_MODEL_ID))
+            {
+                pGandling->SetDisplayId(GANDLING_CHRISTMAS_MODEL_ID);
+            }
             if (!bByPlayerEnter)
                 DoScriptText(SAY_GANDLING_SPAWN, pGandling);
         }
