@@ -10276,24 +10276,19 @@ bool Unit::TakePossessOf(Unit* possessed)
         player->SetMover(possessed);
         player->SendForcedObjectUpdate();
 
-        if (possessedCreature)
+        // Unsummon existing pet and initialize pet bar only when not possessing own pet
+        if (possessedCreature && !(possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid()))
         {
-            if (possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
-            {
-                // possessing own pet, pet bar already initialized
-                return true;
-            }
+            // player pet is unsmumoned while possessing
+            player->UnsummonPetTemporaryIfAny();
+
+            charmInfo->InitPossessCreateSpells();
+            // may not always have AI, when posessing a player for example
+            if (possessed->AI())
+                possessed->AI()->SetReactState(REACT_PASSIVE);
+            charmInfo->SetCommandState(COMMAND_STAY);
+            player->PossessSpellInitialize();
         }
-
-        // player pet is unsmumoned while possessing
-        player->UnsummonPetTemporaryIfAny();
-
-        charmInfo->InitPossessCreateSpells();
-        // may not always have AI, when posessing a player for example
-        if (possessed->AI())
-            possessed->AI()->SetReactState(REACT_PASSIVE);
-        charmInfo->SetCommandState(COMMAND_STAY);
-        player->PossessSpellInitialize();
 
         // Take away client control immediately if we are not supposed to have control at the moment
         if (!player->IsClientControl(possessed))
