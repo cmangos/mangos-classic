@@ -59,7 +59,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_WALK_IN_WATER          = 0x00008000,       // creature is forced to walk in water even it can swim
     CREATURE_EXTRA_FLAG_CIVILIAN               = 0x00010000,       // CreatureInfo->civilian substitute (for new expansions)
     CREATURE_EXTRA_FLAG_NO_MELEE               = 0x00020000,       // creature can't melee
-    // reserved by Killerwife - 0x00080000 is free
+    CREATURE_EXTRA_FLAG_FORCE_ATTACKING_CAPABILITY = 0x00080000, // 524288 SetForceAttackingCapability(true); for nonattackable, nontargetable creatures that should be able to attack nontheless
     CREATURE_EXTRA_FLAG_COUNT_SPAWNS           = 0x00200000,       // count creature spawns in Map*
 };
 
@@ -795,6 +795,9 @@ class Creature : public Unit
 
         void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
 
+        void SetForceAttackingCapability(bool state) { m_forceAttackingCapability = state; }
+        bool GetForceAttackingCapability() { return m_forceAttackingCapability; }
+
         void SetIgnoreRangedTargets(bool state) { m_ignoreRangedTargets = state; }
         bool IsIgnoringRangedTargets() override { return m_ignoreRangedTargets; }
 
@@ -845,6 +848,7 @@ class Creature : public Unit
         std::unique_ptr<CreatureAI> m_ai;
         bool m_isInvisible;
         bool m_ignoreMMAP;
+        bool m_forceAttackingCapability;                    // can attack even if not selectable/not attackable
 
         void SetBaseWalkSpeed(float speed) override;
         void SetBaseRunSpeed(float speed) override;
