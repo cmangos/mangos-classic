@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include "Entities/ObjectGuid.h"
+#include "ByteBuffer.h"
 
 class Map;
 class Unit;
@@ -121,17 +122,17 @@ class InstanceData
         // See ObjectMgr.h enum ConditionSource for possible values of conditionSourceType
         virtual bool CheckConditionCriteriaMeet(Player const* source, uint32 instance_condition_id, WorldObject const* conditionSource, uint32 conditionSourceType) const;
 
-        virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/, uint32 /*zoneId*/, uint32 /*areaId*/) {}
+        virtual void FillInitialWorldStates(ByteBuffer& /*data*/, uint32& /*count*/, uint32 /*zoneId*/, uint32 /*areaId*/) {}
 
         // helper functions for world state list fill
-        inline void FillInitialWorldStateData(WorldPacket& data, uint32& count, uint32 state, uint32 value)
+        inline void FillInitialWorldStateData(ByteBuffer& data, uint32& count, uint32 state, uint32 value)
         {
             data << uint32(state);
             data << uint32(value);
             ++count;
         }
 
-        inline void FillInitialWorldStateData(WorldPacket& data, uint32& count, uint32 state, int32 value)
+        inline void FillInitialWorldStateData(ByteBuffer& data, uint32& count, uint32 state, int32 value)
         {
             data << uint32(state);
             data << int32(value);
