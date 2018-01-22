@@ -51,7 +51,7 @@ class ScriptedInstance : public InstanceData
         void DoToggleGameObjectFlags(uint32 entry, uint32 GOflags, bool apply);
 
         // Sends world state update to all players in instance
-        void DoUpdateWorldState(uint32 stateId, uint32 stateData);
+        virtual void DoUpdateWorldState(uint32 stateId, uint32 stateData);
 
         // Get a Player from map
         Player* GetPlayerInMap(bool onlyAlive = false, bool canBeGamemaster = true);
