@@ -112,7 +112,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     break;
                 }
                 case COMMAND_DISMISS:
-                    _player->Uncharm();
+                    _player->BreakCharmOutgoing(petUnit);
                     break;
                 default:
                     sLog.outError("PetHandler: Not allowed action %i and spellid %i. Pet %s owner is %s", uint32(flag), spellid, petUnit->GetGuidStr().c_str(), _player->GetGuidStr().c_str());
@@ -200,7 +200,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                         if (creature && creature->IsTemporarySummon())
                             petUnit->SetDeathState(CORPSE);
                         else
-                            _player->Uncharm();
+                            _player->BreakCharmOutgoing(petUnit);
                     }
 
                     charmInfo->SetStayPosition();
@@ -591,10 +591,8 @@ void WorldSession::HandlePetAbandon(WorldPacket& recv_data)
             else
                 petUnit->SetDeathState(CORPSE);
         }
-        else if (_player->HasCharm(petUnit->GetObjectGuid()))
-        {
-            _player->Uncharm();
-        }
+        else
+            _player->BreakCharmOutgoing(petUnit);
     }
 }
 

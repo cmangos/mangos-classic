@@ -1630,7 +1630,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (Unit* charm = GetCharm())
             {
                 if (!charm->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityDistance()))
-                    Uncharm();
+                    BreakCharmOutgoing(charm);
             }
 
             if (Pet* pet = GetPet())
@@ -1643,7 +1643,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         else
         {
             if (Unit* charm = GetCharm())
-                Uncharm();
+                BreakCharmOutgoing(charm);
 
             if (Pet* pet = GetPet())
                 UnsummonPetTemporaryIfAny();
@@ -18093,23 +18093,6 @@ void Player::UpdateClientControl(Unit const* target, bool enabled, bool forced) 
             data << uint8(enabled);
             GetSession()->SendPacket(data);
         }
-    }
-}
-
-void Player::Uncharm()
-{
-    if (Unit* charm = GetCharm())
-    {
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET);
-    }
-
-    if (Unit* charm = GetCharm())
-    {
-        // try remove charm by spellid
-        if (uint32 spellid = charm->GetUInt32Value(UNIT_CREATED_BY_SPELL))
-            RemoveAurasDueToSpell(spellid);
     }
 }
 

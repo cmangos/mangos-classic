@@ -5922,16 +5922,6 @@ Unit* Unit::GetSpawner(WorldObject const* pov /*= nullptr*/) const
     return nullptr;
 }
 
-void Unit::Uncharm()
-{
-    if (Unit* charm = GetCharm())
-    {
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET);
-    }
-}
-
 Pet* Unit::GetPet() const
 {
     if (ObjectGuid pet_guid = GetPetGuid())
@@ -7654,6 +7644,8 @@ void Unit::SetDeathState(DeathState s)
     if (s == JUST_DIED)
     {
         RemoveAllAurasOnDeath();
+        BreakCharmOutgoing();
+        BreakCharmIncoming();
         RemoveGuardians();
         RemoveMiniPet();
         UnsummonAllTotems();
@@ -8602,8 +8594,9 @@ void Unit::RemoveFromWorld()
     // cleanup
     if (IsInWorld())
     {
-        Uncharm();
         RemoveNotOwnTrackedTargetAuras();
+        BreakCharmOutgoing();
+        BreakCharmIncoming();
         RemoveGuardians();
         RemoveMiniPet();
         RemoveAllGameObjects();
@@ -10391,6 +10384,42 @@ bool Unit::TakeCharmOf(Unit* charmed)
     return true;
 }
 
+void Unit::BreakCharmOutgoing(Unit* charmed /*=nullptr*/)
+{
+    // If no pointer was provided, probe own charm field
+    charmed = (charmed ? charmed : GetCharm());
+
+    // Cache our own guid
+    const ObjectGuid &guid = GetObjectGuid();
+
+    // Verify charmed with self as a charmer
+    if (charmed && charmed->HasCharmer(guid))
+    {
+        // Break any aura-based charm spells on the charmed unit placed by self
+        charmed->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS, guid);
+        charmed->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM, guid);
+        charmed->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET, guid);
+        charmed->RemoveSpellsCausingAura(SPELL_AURA_AOE_CHARM, guid);
+
+        // Re-check: if still charmed after aura removal attempt - likely non-aura charm (summon charmed for example)
+        if (charmed->HasCharmer(guid))
+            ResetControlState();
+
+        if (charmed->GetSpawnerGuid() == guid)
+        {
+            // Looks like a charmed temporary summon, possibly summoned by a linked specific aura, try removing
+            if (uint32 spellid = charmed->GetUInt32Value(UNIT_CREATED_BY_SPELL))
+                RemoveAurasDueToSpell(spellid);
+        }
+    }
+}
+
+void Unit::BreakCharmIncoming()
+{
+    if (Unit* charmer = GetCharmer())
+        charmer->BreakCharmOutgoing(this);
+}
+
 void Unit::ResetControlState(bool attackCharmer /*= true*/)
 {
     Player* player = nullptr;
@@ -10401,11 +10430,12 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
 
     if (!possessed)
     {
+        SetCharmGuid(ObjectGuid());
         if (player)
         {
             player->GetCamera().ResetView();
             player->UpdateClientControl(player, true);
-            player->SetMover(nullptr);
+            player->SetMover(player);
             player->ForceHealAndPowerUpdateInZone();
         }
         return;
@@ -10517,7 +10547,7 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     if (player)
     {
         player->UpdateClientControl(possessed, false);
-        player->SetMover(nullptr);
+        player->SetMover(player);
         player->GetCamera().ResetView();
 
         // player pet can be re summoned here
