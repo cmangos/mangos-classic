@@ -5135,7 +5135,7 @@ void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool de
     if (lvldif < 3)
         lvldif = 3;
 
-    int32 skilldif = 5 * plevel - (defence ? GetBaseDefenseSkillValue() : GetBaseWeaponSkillValue(attType));
+    int32 skilldif = 5 * plevel - (defence ? GetPureDefenseSkillValue() : GetPureWeaponSkillValue(attType));
 
     // Max skill reached for level.
     // Can in some cases be less than 0: having max skill and then .level -1 as example.
@@ -17994,6 +17994,19 @@ uint32 Player::GetBaseWeaponSkillValue(WeaponAttackType attType) const
     // weapon skill or (unarmed for base attack)
     uint32  skill = item ? item->GetSkill() : uint32(SKILL_UNARMED);
     return GetBaseSkillValue(skill);
+}
+
+uint32 Player::GetPureWeaponSkillValue(WeaponAttackType attType) const
+{
+	Item* item = GetWeaponForAttack(attType, true, true);
+
+	// unarmed only with base attack
+	if (attType != BASE_ATTACK && !item)
+		return 0;
+
+	// weapon skill or (unarmed for base attack)
+	uint32  skill = item ? item->GetSkill() : uint32(SKILL_UNARMED);
+	return GetPureSkillValue(skill);
 }
 
 void Player::ResurectUsingRequestData()
