@@ -2136,8 +2136,8 @@ class Unit : public WorldObject
         // Break charm spells from current charmer
         void BreakCharmIncoming();
 
-        // Reset control to player
-        void ResetControlState(bool attackCharmer = true);
+        // Uncharm (physically revert the charm effect) the unit and reset player control if required
+        void Uncharm(Unit* charmed);
 
         float GetAttackDistance(Unit const* pl) const;
         virtual uint32 GetDetectionRange() const { return 20.f; }

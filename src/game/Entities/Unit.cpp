@@ -10403,7 +10403,7 @@ void Unit::BreakCharmOutgoing(Unit* charmed /*=nullptr*/)
 
         // Re-check: if still charmed after aura removal attempt - likely non-aura charm (summon charmed for example)
         if (charmed->HasCharmer(guid))
-            ResetControlState();
+            Uncharm(charmed);
 
         if (charmed->GetSpawnerGuid() == guid)
         {
@@ -10420,52 +10420,48 @@ void Unit::BreakCharmIncoming()
         charmer->BreakCharmOutgoing(this);
 }
 
-void Unit::ResetControlState(bool attackCharmer /*= true*/)
+void Unit::Uncharm(Unit* charmed)
 {
-    Player* player = nullptr;
-    if (GetTypeId() == TYPEID_PLAYER)
-        player = static_cast<Player*>(this);
+    Player* player = (GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr);
 
-    Unit* possessed = GetCharm();
-
-    if (!possessed)
-    {
-        SetCharmGuid(ObjectGuid());
-        if (player)
-        {
-            player->GetCamera().ResetView();
-            player->UpdateClientControl(player, true);
-            player->SetMover(player);
-            player->ForceHealAndPowerUpdateInZone();
-        }
+    // Charmed unit should exist and be charmed by us
+    if (!charmed || !charmed->HasCharmer(GetObjectGuid()))
         return;
-    }
 
-    possessed->clearUnitState(UNIT_STAT_POSSESSED);
-    possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
-    possessed->SetCharmerGuid(ObjectGuid());
+    // Detect if the charm is the possessing charm
+    const bool possess = charmed->hasUnitState(UNIT_STAT_POSSESSED);
+
+    if (possess)
+    {
+        charmed->clearUnitState(UNIT_STAT_POSSESSED);
+        charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
+            player->ForceHealAndPowerUpdateInZone();
+    }
+    charmed->SetCharmerGuid(ObjectGuid());
+    // Detect if this charm is advertised in own charm field and then clear it
+    if (GetCharmGuid() == charmed->GetObjectGuid())
+        SetCharmGuid(ObjectGuid());
 
     // may be not correct we have to remove only some generator taking account of the current situation
-    possessed->StopMoving(true);
-    possessed->GetMotionMaster()->Clear();
+    charmed->StopMoving(true);
+    charmed->GetMotionMaster()->Clear();
 
-    SetCharmGuid(ObjectGuid());
-    Creature* possessedCreature = nullptr;
-    CharmInfo* charmInfo = possessed->GetCharmInfo();
+    Creature* charmedCreature = nullptr;
+    CharmInfo* charmInfo = charmed->GetCharmInfo();
 
-    if (possessed->GetTypeId() == TYPEID_UNIT)
+    if (charmed->GetTypeId() == TYPEID_UNIT)
     {
         // now we have to clean threat list to be able to restore normal creature behavior
-        FactionTemplateEntry const* factionEntry = possessed->getFactionTemplateEntry();
+        FactionTemplateEntry const* factionEntry = charmed->getFactionTemplateEntry();
 
-        possessedCreature = static_cast<Creature*>(possessed);
-        if (!possessedCreature->IsPet())
+        charmedCreature = static_cast<Creature*>(charmed);
+        if (!charmedCreature->IsPet())
         {
-            possessedCreature->ClearTemporaryFaction();
+            charmedCreature->ClearTemporaryFaction();
 
             // first find friendly target (stopping combat here is not recommended because m_attackers will be modified)
             AttackerSet friendlyTargets;
-            for (Unit::AttackerSet::const_iterator itr = possessed->getAttackers().begin(); itr != possessed->getAttackers().end(); ++itr)
+            for (Unit::AttackerSet::const_iterator itr = charmed->getAttackers().begin(); itr != charmed->getAttackers().end(); ++itr)
             {
                 Unit* attacker = (*itr);
                 if (attacker->GetTypeId() != TYPEID_UNIT)
@@ -10481,74 +10477,77 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
                 Unit* attacker = (*itr);
                 attacker->AttackStop(true, true);
                 attacker->m_Events.KillAllEvents(true);
-                attacker->getThreatManager().modifyThreatPercent(possessed, -101);     // only remove the possessed creature from threat list because it can be filled by other players
+                attacker->getThreatManager().modifyThreatPercent(charmed, -101);     // only remove the possessed creature from threat list because it can be filled by other players
                 attacker->AddThreat(this);
             }
 
-            possessed->AttackStop(true, true);
-            possessed->m_Events.KillAllEvents(true);
+            charmed->AttackStop(true, true);
+            charmed->m_Events.KillAllEvents(true);
 
             charmInfo->ResetCharmState();
-            possessed->DeleteCharmInfo();
+            charmed->DeleteCharmInfo();
 
             // we have to restore initial MotionMaster
-            while (possessed->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
-                possessed->GetMotionMaster()->MovementExpired(true);
+            while (charmed->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+                charmed->GetMotionMaster()->MovementExpired(true);
 
-            if (possessed->isAlive())
+            if (charmed->isAlive())
             {
-                possessedCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
+                charmedCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
 
                 // TODO:: iam not sure we need that faction check
                 if (!factionEntry->IsFriendlyTo(*getFactionTemplateEntry()))
-                    possessed->getThreatManager().addThreat(this, GetMaxHealth());     // generating threat by max life amount best way i found to make it realistic
+                    charmed->getThreatManager().addThreat(this, GetMaxHealth());     // generating threat by max life amount best way i found to make it realistic
             }
             else
-                possessed->GetCombatData()->threatManager.clearReferences();
+                charmed->GetCombatData()->threatManager.clearReferences();
 
             // we can remove that flag if its set, that is supposed to be only for creature controlled by player
             // however player's pet should keep it
-            possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
         }
         else
         {
-            possessed->setFaction(possessedCreature->GetOwner()->getFaction());
+            charmed->setFaction(charmedCreature->GetOwner()->getFaction());
 
             charmInfo->ResetCharmState();
 
             // as possessed is a pet we have to restore original charminfo so Pet::DeleteCharmInfo will take care of that
-            possessed->DeleteCharmInfo();
+            charmed->DeleteCharmInfo();
         }
     }
-    else if (possessed->GetTypeId() == TYPEID_PLAYER)
+    else if (charmed->GetTypeId() == TYPEID_PLAYER)
     {
-        possessed->AttackStop(true, true);
+        charmed->AttackStop(true, true);
 
-        Player* possessedPlayer = static_cast<Player*>(possessed);
+        Player* charmedPlayer = static_cast<Player*>(charmed);
 
-        if (player && player->IsInDuelWith(possessedPlayer))
-            possessedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, player->GetUInt32Value(PLAYER_DUEL_TEAM) == 1 ? 2 : 1);
+        if (player && player->IsInDuelWith(charmedPlayer))
+            charmedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, player->GetUInt32Value(PLAYER_DUEL_TEAM) == 1 ? 2 : 1);
         else
-            possessedPlayer->setFactionForRace(possessedPlayer->getRace());
+            charmedPlayer->setFactionForRace(charmedPlayer->getRace());
 
         charmInfo->ResetCharmState();
-        possessedPlayer->DeleteCharmInfo();
+        charmedPlayer->DeleteCharmInfo();
 
-        possessedPlayer->ForceHealAndPowerUpdateInZone();
+        charmedPlayer->ForceHealAndPowerUpdateInZone();
 
-        while (possessedPlayer->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
-            possessedPlayer->GetMotionMaster()->MovementExpired(true);
+        while (charmedPlayer->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+            charmedPlayer->GetMotionMaster()->MovementExpired(true);
     }
 
     // Update possessed's client control status after altering flags
-    if (const Player* controllingClientPlayer = possessed->GetControllingClientPlayer())
-        controllingClientPlayer->UpdateClientControl(possessed, true);
+    if (const Player* controllingClientPlayer = charmed->GetControllingClientPlayer())
+        controllingClientPlayer->UpdateClientControl(charmed, true);
 
     if (player)
     {
-        player->UpdateClientControl(possessed, false);
-        player->SetMover(player);
-        player->GetCamera().ResetView();
+        if (possess)
+        {
+            player->GetCamera().ResetView();
+            player->UpdateClientControl(charmed, false);
+            player->SetMover(player);
+        }
 
         // player pet can be re summoned here
         player->ResummonPetTemporaryUnSummonedIfAny();

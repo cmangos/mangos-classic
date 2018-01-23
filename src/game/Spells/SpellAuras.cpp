@@ -2100,7 +2100,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
         caster->TakePossessOf(target);
     }
     else
-        caster->ResetControlState();
+        caster->Uncharm(target);
 }
 
 void Aura::HandleModPossessPet(bool apply, bool Real)
@@ -2132,7 +2132,7 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
         caster->TakePossessOf(target);
     }
     else
-        caster->ResetControlState();
+        caster->Uncharm(target);
 }
 
 void Aura::HandleModCharm(bool apply, bool Real)
@@ -2162,7 +2162,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
         caster->TakeCharmOf(target);
     }
     else
-        caster->ResetControlState();
+        caster->Uncharm(target);
 }
 
 void Aura::HandleModConfuse(bool apply, bool Real)
