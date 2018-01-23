@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "scholomance.h"
+#include "GameEvents/GameEventMgr.h"
 
 instance_scholomance::instance_scholomance(Map* pMap) : ScriptedInstance(pMap),
     m_uiGandlingEvent(0),
