@@ -233,7 +233,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleModSpellDamagePercentFromStat,             // 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT  implemented in Unit::SpellBaseDamageBonusDone (in 1.12.* only spirit)
     &Aura::HandleModSpellHealingPercentFromStat,            // 175 SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT implemented in Unit::SpellBaseHealingBonusDone (in 1.12.* only spirit)
     &Aura::HandleSpiritOfRedemption,                        // 176 SPELL_AURA_SPIRIT_OF_REDEMPTION   only for Spirit of Redemption spell, die at aura end
-    &Aura::HandleNULL,                                      // 177 SPELL_AURA_AOE_CHARM
+    &Aura::HandleAoECharm,                                  // 177 SPELL_AURA_AOE_CHARM
     &Aura::HandleNoImmediateEffect,                         // 178 SPELL_AURA_MOD_DEBUFF_RESISTANCE          implemented in Unit::MagicSpellHitResult
     &Aura::HandleNoImmediateEffect,                         // 179 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE implemented in Unit::SpellCriticalBonus
     &Aura::HandleNoImmediateEffect,                         // 180 SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS   implemented in Unit::SpellDamageBonusDone
@@ -2086,16 +2086,10 @@ void Aura::HandleModPossess(bool apply, bool Real)
     if (!caster || caster->GetTypeId() != TYPEID_PLAYER) // TODO:: well i know some bosses can take control of player???
         return;
 
-    Player* p_caster = (Player*)caster;
-    Camera& camera = p_caster->GetCamera();
-
     if (apply)
     {
-        if (caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            //remove any existing charm just in case
-            caster->BreakCharmOutgoing();
-        }
+        // Possess: advertised type of charm (unique) - remove existing advertised charm
+        caster->BreakCharmOutgoing(true);
 
         caster->TakePossessOf(target);
     }
@@ -2113,21 +2107,13 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
         return;
 
     Unit* target = GetTarget();
-    if (target->GetTypeId() != TYPEID_UNIT || !((Creature*)target)->IsPet())
+    if (target->GetTypeId() != TYPEID_UNIT || !static_cast<Creature*>(target)->IsPet())
         return;
-
-    Pet* pet = (Pet*)target;
-
-    Player* p_caster = (Player*)caster;
-    Camera& camera = p_caster->GetCamera();
 
     if (apply)
     {
-        if (caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            //remove any existing charm just in case
-            caster->BreakCharmOutgoing();
-        }
+        // Possess pet: advertised type of charm (unique) - remove existing advertised charm
+        caster->BreakCharmOutgoing(true);
 
         caster->TakePossessOf(target);
     }
@@ -2154,13 +2140,37 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
     if (apply)
     {
+        // Charm: normally advertised type of charm (unique), but with notable exceptions:
+        // * Seems to be non-unique for NPCs - allows overwriting advertised charm by offloading existing one (e.g. Chromatic Mutation)
+        // * Seems to be always unique for players - remove player's existing advertised charm (no evidence against this found yet)
         if (playerCaster)
-        {
-            //remove any existing charm just in case
-            playerCaster->BreakCharmOutgoing();
-        }
+            caster->BreakCharmOutgoing(true);
+
         caster->TakeCharmOf(target);
     }
+    else
+        caster->Uncharm(target);
+}
+
+
+void Aura::HandleAoECharm(bool apply, bool Real)
+{
+    if (!Real)
+        return;
+
+    Unit* target = GetTarget();
+
+    // not charm yourself
+    if (GetCasterGuid() == target->GetObjectGuid())
+        return;
+
+    Unit* caster = GetCaster();
+    if (!caster)
+        return;
+
+    if (apply)
+        // AoE charm: non-advertised type of charm - co-exists with other charms
+        caster->TakeCharmOf(target, false);
     else
         caster->Uncharm(target);
 }

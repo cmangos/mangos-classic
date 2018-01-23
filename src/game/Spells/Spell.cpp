@@ -5205,7 +5205,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (expectedTarget == m_caster)
                     return SPELL_FAILED_BAD_TARGETS;
 
-                if (m_caster->HasCharm())
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->HasCharm())
                     return SPELL_FAILED_ALREADY_HAVE_CHARM;
 
                 if (m_caster->HasCharmer())
@@ -5238,6 +5238,13 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_NO_PET;
 
                 if (pet->HasCharmer())
+                    return SPELL_FAILED_CHARMED;
+
+                break;
+            }
+            case SPELL_AURA_AOE_CHARM:
+            {
+                if (m_caster->HasCharmer())
                     return SPELL_FAILED_CHARMED;
 
                 break;
