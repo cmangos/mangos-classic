@@ -412,6 +412,11 @@ class CreatureAI
 
         void SetMeleeEnabled(bool state);
 
+        // Rough prototype, we might not need such fidelity
+        virtual void JustRootedTarget(SpellEntry const* spellInfo, Unit* victim) { JustStoppedMovementOfTarget(spellInfo, victim); }
+        virtual void JustStunnedTarget(SpellEntry const* spellInfo, Unit* victim) { JustStoppedMovementOfTarget(spellInfo, victim); }
+        virtual void JustStoppedMovementOfTarget(SpellEntry const* spellInfo, Unit* victim) {}
+
     protected:
         ///== Fields =======================================
 
