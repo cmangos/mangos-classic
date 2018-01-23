@@ -7846,8 +7846,7 @@ void Unit::SetDeathState(DeathState s)
         DeleteThreatList();
         ClearComboPointHolders();                           // any combo points pointed to unit lost at it death
 
-        if (IsNonMeleeSpellCasted(false))
-            InterruptNonMeleeSpells(false);
+        InterruptNonMeleeSpells(false);
     }
 
     // TODO:: what is/was that?
