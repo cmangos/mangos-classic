@@ -327,20 +327,20 @@ WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo)
     switch (spellInfo->DmgClass)
     {
         case SPELL_DAMAGE_CLASS_MELEE:
-        {
             if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQ_OFFHAND))
                 return OFF_ATTACK;
             return BASE_ATTACK;
-        }
         case SPELL_DAMAGE_CLASS_RANGED:
             return RANGED_ATTACK;
         default:
-        {
             // Wands
             if (spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))
                 return RANGED_ATTACK;
-            return BASE_ATTACK;
-        }
+            else if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQ_OFFHAND))
+                return OFF_ATTACK;
+            else
+                return BASE_ATTACK;
+            break;
     }
 }
 
