@@ -8646,7 +8646,7 @@ CharmInfo::CharmInfo(Unit* unit) :
     m_petnumber(0), m_retreating(false), m_stayPosSet(false),
     m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
     m_opener(0), m_openerMinRange(0), m_openerMaxRange(0),
-    m_unitFieldBytes2_1(0)
+    m_unitFieldFlags(0), m_unitFieldBytes2_1(0)
 {
     for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
         m_charmspells[i].SetActionAndType(0, ACT_DISABLED);
@@ -8668,12 +8668,22 @@ void CharmInfo::SetCharmState(std::string const& ainame /*= "PetAI"*/, bool with
     if (withNewThreatList)
         m_combatData = new CombatData(m_unit);
 
+    // Save specific pre-charm flags
+    // Save entire bytes2_1
     m_unitFieldBytes2_1 = m_unit->GetByteValue(UNIT_FIELD_BYTES_2, 1);
+    // Save select unit flags
+    const uint32 flags = (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_PVP);
+    m_unitFieldFlags = (m_unit->GetUInt32Value(UNIT_FIELD_FLAGS) & flags);
 }
 
 void CharmInfo::ResetCharmState()
 {
+    // Restore specific pre-charm flags
+    // Restore entire bytes2_1
     m_unit->SetByteValue(UNIT_FIELD_BYTES_2, 1, m_unitFieldBytes2_1);
+    // Restore select unit flags
+    const uint32 flags = (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_PVP);
+    m_unit->SetUInt32Value(UNIT_FIELD_FLAGS, ((m_unit->GetUInt32Value(UNIT_FIELD_FLAGS) & ~flags) | m_unitFieldFlags));
 }
 
 void CharmInfo::InitPetActionBar()
@@ -9848,8 +9858,9 @@ void Unit::SetImmuneToNPC(bool state)
     else
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
-    // NOTE: Do not propagate on charmed units (intentional for now), charm/uncharm do not handle this
-    CallForAllControlledUnits(SetImmuneToNPCHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS);
+    // Do not propagate during charm
+    if (!HasCharmer())
+        CallForAllControlledUnits(SetImmuneToNPCHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
 struct SetImmuneToPlayerHelper
@@ -9866,8 +9877,9 @@ void Unit::SetImmuneToPlayer(bool state)
     else
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
 
-    // NOTE: Do not propagate on charmed units (intentional for now), charm/uncharm do not handle this
-    CallForAllControlledUnits(SetImmuneToPlayerHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS);
+    // Do not propagate during charm
+    if (!HasCharmer())
+        CallForAllControlledUnits(SetImmuneToPlayerHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
 struct SetPvPHelper
@@ -9884,10 +9896,14 @@ void Unit::SetPvP(bool state)
     else
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
 
-    if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetGroup())
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_STATUS);
+    // Do not propagate during charm
+    if (!HasCharmer())
+    {
+        if (GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(this)->GetGroup())
+            static_cast<Player*>(this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_STATUS);
 
-    CallForAllControlledUnits(SetPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+        CallForAllControlledUnits(SetPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+    }
 }
 
 bool Unit::IsPvPFreeForAll() const
@@ -10190,8 +10206,6 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
         player->UpdateClientControl(pCreature, true, true);             // transfer client control to the creature after altering flags
         player->SetMover(pCreature);                                    // set mover so now we know that creature is "moved" by this unit
         player->SendForcedObjectUpdate();                               // we have to update client data here to avoid problem with the "release spirit" windows reappear.
-
-        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED); // this seem to be needed for controlled creature (else cannot attack neutral creature)
     }
 
     // init CharmInfo class that will hold charm data
@@ -10199,6 +10213,18 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
 
     // set temp possess ai (creature will not be able to react by itself)
     charmInfo->SetCharmState("PossessedAI");
+
+    // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+    const bool immunePC = IsImmuneToPlayer();
+    if (pCreature->IsImmuneToPlayer() != immunePC)
+        pCreature->SetImmuneToPlayer(immunePC);
+
+    const bool immuneNPC = IsImmuneToNPC();
+    if (pCreature->IsImmuneToNPC() != immuneNPC)
+        pCreature->SetImmuneToNPC(immuneNPC);
 
     if (player)
     {
@@ -10261,10 +10287,6 @@ bool Unit::TakePossessOf(Unit* possessed)
         possessedCreature->SetWalk(IsWalking(), true);
         charmInfo->SetCharmState("PossessedAI");
         getHostileRefManager().deleteReference(possessedCreature);
-
-        // this seem to be needed for controlled creature (else cannot attack neutral creature)
-        if (player)
-            possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     }
     else if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
@@ -10275,6 +10297,18 @@ bool Unit::TakePossessOf(Unit* possessed)
         else
             possessedPlayer->setFaction(getFaction());
     }
+
+    // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+    const bool immunePC = IsImmuneToPlayer();
+    if (possessed->IsImmuneToPlayer() != immunePC)
+        possessed->SetImmuneToPlayer(immunePC);
+
+    const bool immuneNPC = IsImmuneToNPC();
+    if (possessed->IsImmuneToNPC() != immuneNPC)
+        possessed->SetImmuneToNPC(immuneNPC);
 
     if (player)
     {
@@ -10343,7 +10377,7 @@ bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
             charmedPlayer->setFaction(getFaction());
 
         charmInfo->SetCharmState("PetAI");
-        charmed->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS); // important have to be after charminfo initialization
+
         //charmedPlayer->SetWalk(IsWalking(), true);
 
         charmInfo->InitCharmCreateSpells();
@@ -10366,15 +10400,8 @@ bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
         charmInfo->SetCommandState(COMMAND_FOLLOW);
         charmInfo->SetIsRetreating(true);
 
-        if (charmerPlayer)
+        if (charmerPlayer && advertised)
         {
-            // without this charmed unit will not be able to attack neutral target
-            charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-
-            // Skip all remaining actions if this is a private charm (no ui or bars whatsoever)
-            if (!advertised)
-                return true;
-
             if (getClass() == CLASS_WARLOCK)
             {
                 CreatureInfo const* cinfo = charmedCreature->GetCreatureInfo();
@@ -10399,6 +10426,18 @@ bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
             }
         }
     }
+
+    // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+    const bool immunePC = IsImmuneToPlayer();
+    if (charmed->IsImmuneToPlayer() != immunePC)
+        charmed->SetImmuneToPlayer(immunePC);
+
+    const bool immuneNPC = IsImmuneToNPC();
+    if (charmed->IsImmuneToNPC() != immuneNPC)
+        charmed->SetImmuneToNPC(immuneNPC);
 
     if (charmerPlayer && advertised)
         charmerPlayer->CharmSpellInitialize();
@@ -10511,6 +10550,12 @@ void Unit::Uncharm(Unit* charmed)
         {
             charmedCreature->ClearTemporaryFaction();
 
+            charmed->AttackStop(true, true);
+            charmed->m_Events.KillAllEvents(true);
+
+            charmInfo->ResetCharmState();
+            charmed->DeleteCharmInfo();
+
             // first find friendly target (stopping combat here is not recommended because m_attackers will be modified)
             AttackerSet friendlyTargets;
             for (Unit::AttackerSet::const_iterator itr = charmed->getAttackers().begin(); itr != charmed->getAttackers().end(); ++itr)
@@ -10533,12 +10578,6 @@ void Unit::Uncharm(Unit* charmed)
                 attacker->AddThreat(this);
             }
 
-            charmed->AttackStop(true, true);
-            charmed->m_Events.KillAllEvents(true);
-
-            charmInfo->ResetCharmState();
-            charmed->DeleteCharmInfo();
-
             // we have to restore initial MotionMaster
             while (charmed->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
                 charmed->GetMotionMaster()->MovementExpired(true);
@@ -10553,10 +10592,6 @@ void Unit::Uncharm(Unit* charmed)
             }
             else
                 charmed->GetCombatData()->threatManager.clearReferences();
-
-            // we can remove that flag if its set, that is supposed to be only for creature controlled by player
-            // however player's pet should keep it
-            charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
         }
         else
         {

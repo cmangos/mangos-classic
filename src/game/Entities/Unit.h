@@ -1024,6 +1024,7 @@ class CharmInfo
         uint32              m_opener;
         uint32              m_openerMinRange;
         uint32              m_openerMaxRange;
+        uint32              m_unitFieldFlags;
         uint8               m_unitFieldBytes2_1;
         bool                m_retreating;
         bool                m_stayPosSet;
