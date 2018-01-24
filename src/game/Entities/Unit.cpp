@@ -5205,9 +5205,9 @@ bool Unit::IsHostileTo(Unit const* unit) const
 
     // test pet/charm masters instead pers/charmeds
     const Unit* testerCharmer = GetCharmer();
-    const Unit* testerOwner = testerCharmer ? testerCharmer : GetOwner(true);
+    const Unit* testerOwner = testerCharmer ? testerCharmer : GetOwner(nullptr, true);
     const Unit* targetCharmer = unit->GetCharmer();
-    const Unit* targetOwner = targetCharmer ? targetCharmer : unit->GetOwner(true);
+    const Unit* targetOwner = targetCharmer ? targetCharmer : unit->GetOwner(nullptr, true);
 
     // always hostile to owner's enemy
     if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
@@ -5319,9 +5319,9 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
 
     // test pet/charm masters instead pers/charmeds
     const Unit* testerCharmer = GetCharmer();
-    const Unit* testerOwner = testerCharmer ? testerCharmer : GetOwner(true);
+    const Unit* testerOwner = testerCharmer ? testerCharmer : GetOwner(nullptr, true);
     const Unit* targetCharmer = unit->GetCharmer();
-    const Unit* targetOwner = targetCharmer ? targetCharmer : unit->GetOwner(true);
+    const Unit* targetOwner = targetCharmer ? targetCharmer : unit->GetOwner(nullptr, true);
 
     // always non-friendly to owner's enemy
     if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
@@ -5875,14 +5875,14 @@ Unit* Unit::GetChannelObject(WorldObject const* pov /*= nullptr*/) const
     return nullptr;
 }
 
-Unit* Unit::GetOwner(bool recursive /*= false*/, WorldObject const* pov /*= nullptr*/) const
+Unit* Unit::GetOwner(WorldObject const* pov /*= nullptr*/, bool recursive /*= false*/) const
 {
     // Default, creator field as owner is present in everything: totems, pets, guardians, etc
     Unit* owner = GetCreator(pov);
     // Query owner recursively (ascending)
     if (recursive)
     {
-        while (Unit* grandowner = (owner ? owner->GetOwner(pov) : nullptr))
+        while (Unit* grandowner = (owner ? owner->GetOwner(pov, recursive) : nullptr))
             owner = grandowner;
     }
     return owner;

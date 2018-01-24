@@ -1703,7 +1703,7 @@ class Unit : public WorldObject
         virtual ObjectGuid const GetSpawnerGuid() const { return ObjectGuid(); }
 
         // Convenience unit getters for some of the logical guid constructs above
-        Unit* GetOwner(bool recursive = false, WorldObject const* pov = nullptr) const;
+        Unit* GetOwner(WorldObject const* pov = nullptr, bool recursive = false) const;
         Unit* GetMaster(WorldObject const* pov = nullptr) const;
         Unit* GetSpawner(WorldObject const* pov = nullptr) const;
 
