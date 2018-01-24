@@ -51,6 +51,14 @@ PetAI::PetAI(Creature* creature) : CreatureAI(creature), inCombat(false)
         default:
             break;
     }
+
+    switch (creature->GetUInt32Value(UNIT_CREATED_BY_SPELL))
+    {
+        case 688: // imp
+            m_attackDistance = 25.f;
+            m_meleeEnabled = false;
+            break;
+    }
 }
 
 PetAI::PetAI(Unit* unit) : CreatureAI(unit), inCombat(false)
