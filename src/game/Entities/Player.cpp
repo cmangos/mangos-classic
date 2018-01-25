@@ -131,6 +131,19 @@ enum CharacterFlags
 
 static const uint32 corpseReclaimDelay[MAX_DEATH_COUNT] = {30, 60, 120};
 
+// Number of slots in keyring depending on the player's level
+static const uint32 LevelUpKeyringSize[7] =
+{
+	//numbers from Vanilla 1.11 / 1.12 Client :
+	4, // level 1 -> 9
+	4, // level 10 -> 19
+	4, // level 20 -> 29
+	4, // level 30 -> 39
+	8, // level 40 -> 49
+	12, // level 50 -> 59
+	12, // level 60 -> 69
+};
+
 //== PlayerTaxi ================================================
 
 PlayerTaxi::PlayerTaxi()
@@ -8099,7 +8112,7 @@ InventoryResult Player::_CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, Item
         if (bag == INVENTORY_SLOT_BAG_0)
         {
             // keyring case
-            if (slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_START + GetMaxKeyringSize() && !(pProto->BagFamily == BAG_FAMILY_KEYS))
+            if (slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_START + GetMaxKeyringClientSize() && !(pProto->BagFamily == BAG_FAMILY_KEYS))
                 return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
 
             // prevent cheating
@@ -8407,7 +8420,7 @@ InventoryResult Player::_CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& de
             // search free slot - keyring case
             if (pProto->BagFamily == BAG_FAMILY_KEYS)
             {
-                uint32 keyringSize = GetMaxKeyringSize();
+                uint32 keyringSize = GetMaxKeyringClientSize();
                 res = _CanStoreItem_InInventorySlots(KEYRING_SLOT_START, KEYRING_SLOT_START + keyringSize, dest, pProto, count, false, pItem, bag, slot);
                 if (res != EQUIP_ERR_OK)
                 {
@@ -8554,7 +8567,7 @@ InventoryResult Player::_CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& de
     {
         if (pProto->BagFamily == BAG_FAMILY_KEYS)
         {
-            uint32 keyringSize = GetMaxKeyringSize();
+            uint32 keyringSize = GetMaxKeyringClientSize();
             res = _CanStoreItem_InInventorySlots(KEYRING_SLOT_START, KEYRING_SLOT_START + keyringSize, dest, pProto, count, false, pItem, bag, slot);
             if (res != EQUIP_ERR_OK)
             {
@@ -8773,7 +8786,7 @@ InventoryResult Player::CanStoreItems(Item** pItems, int count) const
             bool b_found = false;
             if (pProto->BagFamily == BAG_FAMILY_KEYS)
             {
-                uint32 keyringSize = GetMaxKeyringSize();
+                uint32 keyringSize = GetMaxKeyringClientSize();
                 for (uint32 t = KEYRING_SLOT_START; t < KEYRING_SLOT_START + keyringSize; ++t)
                 {
                     if (inv_keys[t - KEYRING_SLOT_START] == 0)
@@ -10523,6 +10536,18 @@ void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
         if (m_items[m_currentBuybackSlot])
             m_currentBuybackSlot = slot;
     }
+}
+
+uint32 Player::GetMaxKeyringClientSize() const 
+{ 
+	const int playerLevel = getLevel();
+	const int indexSize = (const int)(playerLevel / 10);
+
+	if ( indexSize < sizeof(LevelUpKeyringSize) / sizeof(LevelUpKeyringSize[0]) ) 
+	{  
+		return LevelUpKeyringSize[indexSize];
+	}
+	return KEYRING_SLOT_END - KEYRING_SLOT_START;
 }
 
 void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint32 itemid /*= 0*/) const
