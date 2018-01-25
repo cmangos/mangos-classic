@@ -46,7 +46,8 @@ enum
 
     SPELL_CLEAVE                = 19983,
     SPELL_TAIL_SWEEP            = 15847,
-    SPELL_ICEBOLT               = 28526,
+    //SPELL_ICEBOLT               = 28526,
+    SPELL_ICEBOLT               = 28522,
     SPELL_FROST_BREATH_DUMMY    = 30101,
     SPELL_FROST_BREATH          = 28524,            // triggers 29318
     SPELL_FROST_AURA            = 28531,
@@ -238,10 +239,14 @@ struct boss_sapphironAI : public ScriptedAI
                 {
                     if (m_uiIceboltTimer < uiDiff)
                     {
-                        DoCastSpellIfCan(m_creature, SPELL_ICEBOLT);
-
-                        ++m_uiIceboltCount;
-                        m_uiIceboltTimer = 4000;
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER))
+                        {
+                            if (DoCastSpellIfCan(pTarget, SPELL_ICEBOLT) == CAST_OK)
+                            {
+                                ++m_uiIceboltCount;
+                                m_uiIceboltTimer = 4000;
+                            }
+                        }
                     }
                     else
                         m_uiIceboltTimer -= uiDiff;

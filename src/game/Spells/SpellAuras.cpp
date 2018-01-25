@@ -920,8 +920,20 @@ void Aura::TriggerSpell()
                         }
                         return;
                     }
-//                    // Icebolt
-//                    case 28522: break;
+                    // Icebolt
+                    case 28522:
+                    {
+                        if (target && target->isAlive() && !target->HasAura(31800))
+                        {
+                            target->CastSpell(target, 31800, TRIGGERED_OLD_TRIGGERED); // Icebolt which causes immunity to frost dmg
+                            trigger_spell_id = 28535; // summon ice block
+                            break;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
 //                    // Guardian of Icecrown Passive
 //                    case 29897: break;
 //                    // Mind Exhaustion Passive
