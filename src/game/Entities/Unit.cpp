@@ -2408,12 +2408,28 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
     if (IsPositiveSpell(spell, this, pVictim))
+    {
+        if (pVictim->IsImmuneToSpell(spell, (this == pVictim)))
+            return SPELL_MISS_IMMUNE;
+
         return SPELL_MISS_NONE;
+    }
+    // !!!UNHACKME: Self-resists suppression hack for channeled spells until spell execution is modernized with effectmasks: Drain Soul, Blizzard, RoF
+    if (pVictim == this && IsChanneledSpell(spell))
+    {
+        for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
+        {
+            if (IsCasterSourceTarget(spell->EffectImplicitTargetA[i]) || IsCasterSourceTarget(spell->EffectImplicitTargetB[i]))
+                return SPELL_MISS_NONE;
+        }
+    }
+    // !!!
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
     // wand case
     bool wand = spell->Id == 5019;
     if (wand && !!(getClassMask() & CLASSMASK_WAND_USERS) && GetTypeId() == TYPEID_PLAYER)
         schoolMask = GetSchoolMask(GetWeaponDamageSchool(RANGED_ATTACK));
+
     // Reflect (when available)
     if (reflectable)
     {
@@ -6708,12 +6724,11 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool /*castOnSelf*/)
         if (itr->type == spellInfo->Dispel)
             return true;
 
-    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE) &&          // unaffected by school immunity
-            !spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))           // can remove immune (by dispell or immune it)
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))           // can remove immune (by dispell or immune it)
     {
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
-            if (!(itr->aura && IsPositiveSpell(itr->aura->GetSpellProto()) && IsPositiveSpell(spellInfo->Id)) &&
+            if (!(itr->aura && IsPositiveSpell(itr->aura->GetSpellProto()) && IsPositiveSpell(spellInfo->Id) && !itr->aura->GetSpellProto()->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE)) &&
                     (itr->type & GetSpellSchoolMask(spellInfo)))
                 return true;
     }
