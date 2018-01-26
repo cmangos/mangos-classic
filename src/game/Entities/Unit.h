@@ -472,6 +472,8 @@ enum UnitMoveType
 
 #define MAX_MOVE_TYPE     6
 
+#define BASE_CHARGE_SPEED 27.0f
+
 /// internal used flags for marking special auras - for example some dummy-auras
 enum UnitAuraFlags
 {

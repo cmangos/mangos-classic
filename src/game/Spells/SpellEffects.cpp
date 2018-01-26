@@ -5065,19 +5065,28 @@ void Spell::EffectSkinning(SpellEffectIndex /*eff_idx*/)
 
 void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
 {
-    if (!unitTarget)
+    if (!unitTarget || !m_caster)
         return;
 
-    // TODO: research more ContactPoint/attack distance.
-    // 3.666666 instead of ATTACK_DISTANCE(5.0f) in below seem to give more accurate result.
-    float x, y, z;
-    unitTarget->GetContactPoint(m_caster, x, y, z, 3.666666f);
+    float angle = unitTarget->GetAngle(m_caster) - unitTarget->GetOrientation();
+
+    WorldLocation pos;
+    unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetCombatReach(), unitTarget->GetAngle(m_caster));
 
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature*)unitTarget)->StopMoving();
 
+    // charge changes fall time
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        static_cast<Player*>(m_caster)->SetFallInformation(0, m_caster->GetPositionZ());
+
+    float speed = m_spellInfo->speed ? m_spellInfo->speed : BASE_CHARGE_SPEED;
+
     // Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
-    m_caster->MonsterMoveWithSpeed(x, y, z, 24.f, true, true);
+    if (m_caster->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)) && (pos.coord_z < m_caster->GetPositionZ()) && (fabs(pos.coord_z - m_caster->GetPositionZ()) > 3.0f))
+        m_caster->MonsterMoveWithSpeed(pos.coord_x, pos.coord_y, (pos.coord_z + unitTarget->GetObjectScale()), speed, false, false);
+    else
+        m_caster->MonsterMoveWithSpeed(pos.coord_x, pos.coord_y, (pos.coord_z + unitTarget->GetObjectScale()), speed, true, true);
 
     // not all charge effects used in negative spells
     if (unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id, m_caster, unitTarget))
