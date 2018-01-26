@@ -1810,7 +1810,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         {
             SpellEntry const* spellInfo = (*itr).second->GetSpellProto();
             if (spellInfo->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) && spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && ((*itr).second->GetCasterGuid() == GetObjectGuid()))
-                (*itr).second->RefreshHolder();
+                (*itr).second->RefreshHolder(); // TODO: Judgement - make this into a cast which should consume grounding totem
         }
     }
 
