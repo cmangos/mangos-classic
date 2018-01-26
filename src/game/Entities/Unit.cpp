@@ -7087,27 +7087,7 @@ void Unit::Unmount(bool from_aura)
 
 void Unit::SetInCombatWith(Unit* enemy)
 {
-    Unit* eOwner = enemy->GetBeneficiary();
-    if (eOwner->IsPvP() || eOwner->IsPvPFreeForAll())
-    {
-        SetInCombatState(true, enemy);
-        return;
-    }
-
-    // check for duel
-    if (eOwner->GetTypeId() == TYPEID_PLAYER && ((Player*)eOwner)->duel)
-    {
-        if (Player const* myOwner = GetBeneficiaryPlayer())
-        {
-            if (myOwner->IsInDuelWith((Player const*)eOwner))
-            {
-                SetInCombatState(true, enemy);
-                return;
-            }
-        }
-    }
-
-    SetInCombatState(false, enemy);
+    SetInCombatState(enemy->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED), enemy);
 }
 
 void Unit::SetInCombatWithAggressor(Unit* aggressor)
