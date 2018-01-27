@@ -458,6 +458,7 @@ class Spell
         bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != 0; }
         bool IsMeleeAttackResetSpell() const { return !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK);  }
         bool IsRangedAttackResetSpell() const { return !m_IsTriggeredSpell && IsRangedSpell() && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK); }
+        bool IsEffectWithImplementedMultiplier(uint32 effectId) const;
 
         bool IsDeletable() const { return !m_referencedFromCurrentSpell && !m_executedCurrently; }
         void SetReferencedFromCurrent(bool yes) { m_referencedFromCurrentSpell = yes; }
@@ -559,8 +560,10 @@ class Spell
         GameObject* focusObject;
 
         // Damage and healing in effects need just calculate
-        int32 m_damage;                                     // Damage   in effects count here
+        int32 m_damage;                                     // Damage in effects count here
+        int32 m_damagePerEffect[MAX_EFFECT_INDEX];
         int32 m_healing;                                    // Healing in effects count here
+        int32 m_healingPerEffect[MAX_EFFECT_INDEX];
         int32 m_healthLeech;                                // Health leech in effects for all targets count here
 
         //******************************************

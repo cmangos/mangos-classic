@@ -4156,7 +4156,14 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
 
     uint8 eff = m_spellInfo->Effect[i];
 
-    damage = int32(CalculateDamage(i, unitTarget) * DamageMultiplier);
+    if (IsEffectWithImplementedMultiplier(eff))
+    {
+        m_healingPerEffect[i] = 0;
+        m_damagePerEffect[i] = 0;
+        damage = CalculateDamage(i, unitTarget);
+    }
+    else
+        damage = int32(CalculateDamage(i, unitTarget) * DamageMultiplier);
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u Effect%d : %u Targets: %s, %s, %s",
                      m_spellInfo->Id, i, eff,
@@ -4165,12 +4172,16 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
                      gameObjTarget ? gameObjTarget->GetGuidStr().c_str() : "-");
 
     if (eff < TOTAL_SPELL_EFFECTS)
-    {
         (*this.*SpellEffects[eff])(i);
-    }
     else
-    {
         sLog.outError("WORLD: Spell FX %d > TOTAL_SPELL_EFFECTS ", eff);
+
+    if (IsEffectWithImplementedMultiplier(eff))
+    {
+        if (m_healingPerEffect[i])
+            m_healing = int32(m_healingPerEffect[i] * DamageMultiplier);
+        else if (m_damagePerEffect[i])
+            m_damage = int32(m_damagePerEffect[i] * DamageMultiplier);
     }
 }
 
@@ -6989,5 +7000,18 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
         }
         default:
             break;
+    }
+}
+
+bool Spell::IsEffectWithImplementedMultiplier(uint32 effectId) const
+{
+    // TODO: extend this for all effects that do damage and healing
+    switch (effectId)
+    {
+        case SPELL_EFFECT_SCHOOL_DAMAGE:
+        case SPELL_EFFECT_HEAL:
+            return true;
+        default:
+            return false;
     }
 }

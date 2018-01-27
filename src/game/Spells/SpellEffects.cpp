@@ -281,7 +281,7 @@ void Spell::EffectEnvironmentalDMG(SpellEffectIndex eff_idx)
         ((Player*)m_caster)->EnvironmentalDamage(DAMAGE_FIRE, damage);
 }
 
-void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
+void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
 {
     if (unitTarget && unitTarget->isAlive())
     {
@@ -297,7 +297,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     {
                         uint32 count = 0;
                         for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                            if (ihit->effectMask & (1 << effect_idx))
+                            if (ihit->effectMask & (1 << eff_idx))
                                 ++count;
 
                         damage /= count;                    // divide to all targets
@@ -354,9 +354,8 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                 // Ferocious Bite
                 if ((m_spellInfo->SpellFamilyFlags & uint64(0x000800000)) && m_spellInfo->SpellVisual == 6587)
                 {
-                    // converts each extra point of energy into ($f1+$AP/630) additional damage
-                    float multiple = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 630 + m_spellInfo->DmgMultiplier[effect_idx];
-                    damage += int32(m_caster->GetPower(POWER_ENERGY) * multiple);
+                    // converts each extra point of energy into additional damage
+                    damage += int32(m_caster->GetPower(POWER_ENERGY) * m_spellInfo->DmgMultiplier[eff_idx]);
                     m_caster->SetPower(POWER_ENERGY, 0);
                 }
                 break;
@@ -380,7 +379,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
         }
 
         if (damage >= 0)
-            m_damage += damage;
+            m_damagePerEffect[eff_idx] = damage;
     }
 }
 
@@ -1914,7 +1913,7 @@ void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
     m_spellLog.AddLog(uint32(SPELL_EFFECT_POWER_DRAIN), unitTarget->GetObjectGuid(), new_damage, uint32(powertype), multiplier);
 }
 
-void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
+void Spell::EffectHeal(SpellEffectIndex eff_idx)
 {
     if (unitTarget && unitTarget->isAlive() && damage >= 0)
     {
@@ -1966,7 +1965,7 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
         addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
         addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
 
-        m_healing += addhealth;
+        m_healingPerEffect[eff_idx] = addhealth;
     }
 }
 
