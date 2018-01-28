@@ -4444,68 +4444,66 @@ void Aura::PeriodicTick()
             if (!pCaster)
                 return;
 
-            bool canApplyHealthPart = true;
-
             // don't heal target if max health or if not alive, mostly death persistent effects from items
             if (!target->isAlive() || (target->GetHealth() == target->GetMaxHealth()))
-                canApplyHealthPart = false;
+                return;
 
             // heal for caster damage (must be alive)
             if (target != pCaster && spellProto->SpellVisual == 163 && !pCaster->isAlive())
-                canApplyHealthPart = false;
+                return;
 
-            if (canApplyHealthPart)
+            if (target->IsImmuneToSchool(spellProto))
+                return;
+
+            // ignore non positive values (can be result apply spellmods to aura damage
+            uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
+
+            uint32 pdamage;
+
+            if (m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
+                pdamage = uint32(target->GetMaxHealth() * amount / 100);
+            else
+                pdamage = amount;
+
+            pdamage = target->SpellHealingBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
+
+            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health inflicted by %u",
+                GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
+
+            int32 gain = target->ModifyHealth(pdamage);
+            SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
+            target->SendPeriodicAuraLog(&pInfo);
+
+            // Set trigger flag
+            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;
+            uint32 procVictim = PROC_FLAG_ON_TAKE_PERIODIC;
+            uint32 procEx = PROC_EX_NORMAL_HIT | PROC_EX_INTERNAL_HOT;
+            pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, gain, BASE_ATTACK, spellProto);
+
+            if (pCaster->isInCombat())
+                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
+
+            // apply damage part to caster if needed (ex. health funnel)
+            if (target != pCaster && spellProto->SpellVisual == 163)
             {
-                // ignore non positive values (can be result apply spellmods to aura damage
-                uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
+                uint32 damage = spellProto->manaPerSecond;
+                uint32 absorb = 0;
 
-                uint32 pdamage;
-
-                if (m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
-                    pdamage = uint32(target->GetMaxHealth() * amount / 100);
-                else
-                    pdamage = amount;
-
-                pdamage = target->SpellHealingBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
-
-                DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health inflicted by %u",
-                                  GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
-
-                int32 gain = target->ModifyHealth(pdamage);
-                SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
-                target->SendPeriodicAuraLog(&pInfo);
-
-                // Set trigger flag
-                uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;
-                uint32 procVictim = PROC_FLAG_ON_TAKE_PERIODIC;
-                uint32 procEx = PROC_EX_NORMAL_HIT | PROC_EX_INTERNAL_HOT;
-                pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, gain, BASE_ATTACK, spellProto);
-
-                if (pCaster->isInCombat())
-                    target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
-
-                // apply damage part to caster if needed (ex. health funnel)
-                if (target != pCaster && spellProto->SpellVisual == 163)
+                pCaster->DealDamageMods(pCaster, damage, &absorb, NODAMAGE, spellProto);
+                if (pCaster->GetHealth() > damage)
                 {
-                    uint32 damage = spellProto->manaPerSecond;
-                    uint32 absorb = 0;
+                    pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(spellProto), absorb, 0, false, 0, false);
+                    CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
+                    pCaster->DealDamage(pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
+                }
+                else
+                {
+                    // cannot apply damage part so we have to cancel responsible aura
+                    pCaster->RemoveAurasDueToSpell(GetId());
 
-                    pCaster->DealDamageMods(pCaster, damage, &absorb, NODAMAGE, spellProto);
-                    if (pCaster->GetHealth() > damage)
-                    {
-                        pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(spellProto), absorb, 0, false, 0, false);
-                        CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
-                        pCaster->DealDamage(pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
-                    }
-                    else
-                    {
-                        // cannot apply damage part so we have to cancel responsible aura
-                        pCaster->RemoveAurasDueToSpell(GetId());
-
-                        // finish current generic/channeling spells, don't affect autorepeat
-                        pCaster->FinishSpell(CURRENT_GENERIC_SPELL);
-                        pCaster->FinishSpell(CURRENT_CHANNELED_SPELL);
-                    }
+                    // finish current generic/channeling spells, don't affect autorepeat
+                    pCaster->FinishSpell(CURRENT_GENERIC_SPELL);
+                    pCaster->FinishSpell(CURRENT_CHANNELED_SPELL);
                 }
             }
             break;

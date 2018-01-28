@@ -6781,6 +6781,20 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
     return false;
 }
 
+bool Unit::IsImmuneToSchool(SpellEntry const* spellInfo) const
+{
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))           // can remove immune (by dispell or immune it)
+    {
+        SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
+        for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+            if (!(itr->aura && IsPositiveSpell(itr->aura->GetSpellProto()) && IsPositiveSpell(spellInfo->Id) && !itr->aura->GetSpellProto()->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE)) &&
+                (itr->type & GetSpellSchoolMask(spellInfo)))
+                return true;
+    }
+
+    return false;
+}
+
 /**
  * Calculates caster part of melee damage bonuses,
  * also includes different bonuses dependent from target auras
