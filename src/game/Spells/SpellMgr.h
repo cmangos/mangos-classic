@@ -483,6 +483,22 @@ inline bool IsCasterSourceTarget(uint32 target)
     return false;
 }
 
+inline bool IsSpellWithScriptUnitTarget(SpellEntry const* spellInfo)
+{
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (!spellInfo->Effect[i])
+            continue;
+        switch (spellInfo->EffectImplicitTargetA[i])
+        {
+            case TARGET_SCRIPT:
+                return true;
+        }
+    }
+
+    return false;
+}
+
 inline bool IsSpellWithCasterSourceTargetsOnly(SpellEntry const* spellInfo)
 {
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
