@@ -261,7 +261,7 @@ void Spell::EffectInstaKill(SpellEffectIndex /*eff_idx*/)
 
     m_spellLog.AddLog(uint32(SPELL_EFFECT_INSTAKILL), unitTarget->GetObjectGuid());
 
-    m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, m_spellInfo, false);
+    m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), nullptr, INSTAKILL, SPELL_SCHOOL_MASK_NORMAL, m_spellInfo, false);
 }
 
 void Spell::EffectEnvironmentalDMG(SpellEffectIndex eff_idx)

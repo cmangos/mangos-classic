@@ -1025,7 +1025,8 @@ enum DamageEffectType
     HEAL                    = 3,
     NODAMAGE                = 4,                            //< used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
     SELF_DAMAGE_ROGUE_FALL  = 5,                            //< used to avoid rogue losing stealth on falling damage
-    SELF_DAMAGE             = 6
+    SELF_DAMAGE             = 6,
+    INSTAKILL               = 7,                            //< used to instakill - no message
 };
 
 enum GameobjectTypes
