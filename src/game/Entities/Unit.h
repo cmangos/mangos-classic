@@ -1791,6 +1791,7 @@ class Unit : public WorldObject
         void RemoveAurasDueToSpellByCancel(uint32 spellId);
         void RemoveAurasTriggeredBySpell(uint32 spellId, ObjectGuid casterGuid = ObjectGuid());
         void RemoveAuraStack(uint32 spellId);
+        void RemoveAuraCharge(uint32 spellId);
 
         // removing unknown aura stacks by diff reasons and selections
         void RemoveNotOwnTrackedTargetAuras();
