@@ -10254,7 +10254,7 @@ bool Unit::TakePossessOf(Unit* possessed)
 
     Player* player = (GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr);
 
-    if (player)
+    if (player && possessed->GetObjectGuid() != GetPetGuid())
         player->UnsummonPetTemporaryIfAny();
 
     // Update possessed's client control status before altering flags
