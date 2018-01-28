@@ -63,6 +63,12 @@ enum SpellNotifyPushType
     PUSH_TARGET_CENTER
 };
 
+enum CheckException
+{
+    EXCEPTION_NONE,
+    EXCEPTION_MAGNET,
+};
+
 bool IsQuestTameSpell(uint32 spellId);
 
 namespace MaNGOS
@@ -407,7 +413,7 @@ class Spell
 
         bool CheckTargetGOScript(GameObject* target, SpellEffectIndex eff) const;
         bool CheckTargetScript(Unit* target, SpellEffectIndex eff) const;
-        bool CheckTarget(Unit* target, SpellEffectIndex eff) const;
+        bool CheckTarget(Unit* target, SpellEffectIndex eff, CheckException exception = EXCEPTION_NONE) const;
         bool CanAutoCast(Unit* target);
 
         static void SendCastResult(Player const* caster, SpellEntry const* spellInfo, SpellCastResult result, bool isPetCastResult = false);
@@ -578,8 +584,8 @@ class Spell
         // Spell target filling
         //*****************************************
         void FillTargetMap();
-        bool CheckAndAddMagnetTarget(Unit* unitTarget, SpellEffectIndex effIndex, UnitList& targetUnitMap);
-        void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap);
+        void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap, CheckException& exception);
+        bool CheckAndAddMagnetTarget(Unit* unitTarget, SpellEffectIndex effIndex, UnitList& targetUnitMap, CheckException& exception);
         static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex);
 
         void FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = nullptr);
