@@ -440,7 +440,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 8606:                                  //Summon Cyclonian
+                case 8606:                                  // Summon Cyclonian
                 {
                     if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
                         return;
