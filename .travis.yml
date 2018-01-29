@@ -7,7 +7,7 @@ before_install:
     - sudo apt-get install qemu-system-arm wget xz-utils sshpass ansible
 
 install:
-    - wget "http://www.devandgames.net/2015-11-21-raspbian-jessie-lite.img.xz"
+    - curl -L -o 2015-11-21-raspbian-jessie-lite.img.xz "https://dl.dropbox.com/s/7jjl85t2rc1g9td/2015-11-21-raspbian-jessie-lite.img.xz?dl=1"
     - unxz "2015-11-21-raspbian-jessie-lite.img.xz"
     - git clone https://github.com/polaco1782/raspberry-qemu.git
 
