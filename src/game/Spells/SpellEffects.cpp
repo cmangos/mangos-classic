@@ -4376,6 +4376,9 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
 
     switch (misc_value)
     {
+        case 3:                     // GO custom anim - found mostly in Lunar Fireworks spells
+            gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
+            // no break: the GO is then used;
         case 1:                     // GO simple use
         case 2:                     // unk - 2 spells
         case 4:                     // unk - 1 spell
@@ -4391,9 +4394,6 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
             gameObjTarget->GetMap()->ScriptCommandStart(activateCommand, delay_secs, m_caster, gameObjTarget);
             break;
         }
-        case 3:                     // GO custom anim - found mostly in Lunar Fireworks spells
-            gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
-            break;
         case 12:                    // GO state active alternative - found mostly in Simon Game spells
             gameObjTarget->UseDoorOrButton(0, true);
             break;
