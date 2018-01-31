@@ -58,7 +58,7 @@ struct npc_kayaAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-                // Ambush
+            // Ambush
             case 16:
                 // note about event here:
                 // apparently NPC say _after_ the ambush is over, and is most likely a bug at you-know-where.
@@ -68,7 +68,7 @@ struct npc_kayaAI : public npc_escortAI
                 m_creature->SummonCreature(NPC_GRIMTOTEM_BRUTE, -40.05f, -510.89f, -46.05f, 1.7f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_GRIMTOTEM_SORCERER, -32.21f, -499.20f, -45.35f, 2.8f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 break;
-                // Award quest credit
+            // Award quest credit
             case 18:
                 DoScriptText(SAY_END, m_creature);
 

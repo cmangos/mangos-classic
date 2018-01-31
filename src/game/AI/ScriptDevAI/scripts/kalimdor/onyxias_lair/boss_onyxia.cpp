@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Onyxia
-SD%Complete: 80
-SDComment: Some visual improvements needed in phase 2: first part of lift off, flying animation while hoovering, visual when landing. Quel'Serrar event is missing.
+SD%Complete: 85
+SDComment: Visual improvement needed in phase 2: flying animation while hovering. Quel'Serrar event is missing.
 SDCategory: Onyxia's Lair
 EndScriptData
 
@@ -250,10 +250,12 @@ struct boss_onyxiaAI : public ScriptedAI
                 // undo flying
                 m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
                 m_creature->SetLevitate(false);
+                m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
                 m_uiPhaseTimer = 500;                           // Start PHASE_END shortly delayed
                 return;
             case POINT_ID_LIFTOFF:
                 m_uiPhaseTimer = 500;                           // Start Flying shortly delayed
+                m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
                 break;
             case POINT_ID_INIT_NORTH:                           // Start PHASE_BREATH
                 m_uiPhase = PHASE_BREATH;
@@ -388,7 +390,7 @@ struct boss_onyxiaAI : public ScriptedAI
                     DoScriptText(SAY_PHASE_2_TRANS, m_creature);
                     SetCombatMovement(false);
                     m_creature->GetMotionMaster()->MoveIdle();
-                    m_creature->SetTargetGuid(ObjectGuid());
+                    m_creature->SetTarget(nullptr);
 
                     float fGroundZ = m_creature->GetMap()->GetHeight(aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, aMoveData[POINT_ID_SOUTH].fZ);
                     m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFTOFF, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, fGroundZ);
@@ -474,7 +476,7 @@ struct boss_onyxiaAI : public ScriptedAI
                             break;
                         case PHASE_BREATH_POST:
                             m_uiPhase = PHASE_END;
-                            m_creature->SetTargetGuid(m_creature->getVictim()->GetObjectGuid());
+                            m_creature->SetTarget(m_creature->getVictim());
                             SetCombatMovement(true, true);
                             DoCastSpellIfCan(m_creature, SPELL_BELLOWINGROAR);
                             break;

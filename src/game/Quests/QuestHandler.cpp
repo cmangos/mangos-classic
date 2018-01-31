@@ -31,7 +31,7 @@
 #include "Groups/Group.h"
 
 #ifdef BUILD_PLAYERBOT
-    #include "PlayerBot/Base/PlayerbotAI.h"
+#include "PlayerBot/Base/PlayerbotAI.h"
 #endif
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recv_data)
@@ -55,7 +55,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recv_data)
         {
             Creature* cr_questgiver = (Creature*)questgiver;
 
-            if (!cr_questgiver->IsHostileTo(_player))       // not show quest status to enemies
+            if (_player->CanInteract(static_cast<Unit*>(questgiver)))       // not show quest status to enemies
             {
                 dialogStatus = sScriptDevAIMgr.GetDialogStatus(_player, cr_questgiver);
 
@@ -67,11 +67,14 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recv_data)
         case TYPEID_GAMEOBJECT:
         {
             GameObject* go_questgiver = (GameObject*)questgiver;
-            dialogStatus = sScriptDevAIMgr.GetDialogStatus(_player, go_questgiver);
 
-            if (dialogStatus == DIALOG_STATUS_UNDEFINED)
-                dialogStatus = getDialogStatus(_player, go_questgiver, DIALOG_STATUS_NONE);
+            if (_player->CanInteract(go_questgiver))
+            {
+                dialogStatus = sScriptDevAIMgr.GetDialogStatus(_player, go_questgiver);
 
+                if (dialogStatus == DIALOG_STATUS_UNDEFINED)
+                    dialogStatus = getDialogStatus(_player, go_questgiver, DIALOG_STATUS_NONE);
+            }
             break;
         }
         default:
@@ -465,7 +468,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
 
 #ifdef BUILD_PLAYERBOT
                 if (pPlayer->GetPlayerbotAI())
-                    pPlayer->GetPlayerbotAI()->AcceptQuest( pQuest, _player );
+                    pPlayer->GetPlayerbotAI()->AcceptQuest(pQuest, _player);
                 else
                 {
                     pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, _player->GetObjectGuid(), true);

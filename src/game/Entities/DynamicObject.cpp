@@ -40,7 +40,7 @@ void DynamicObject::AddToWorld()
     if (!IsInWorld())
         GetMap()->GetObjectsStore().insert<DynamicObject>(GetObjectGuid(), (DynamicObject*)this);
 
-    Object::AddToWorld();
+    WorldObject::AddToWorld();
 }
 
 void DynamicObject::RemoveFromWorld()
@@ -218,3 +218,4 @@ bool DynamicObject::IsFriendlyTo(Unit const* unit) const
     else
         return true;
 }
+

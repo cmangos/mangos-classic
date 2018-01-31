@@ -75,6 +75,9 @@ class InstanceData
         // Called when a player dies inside instance
         virtual void OnPlayerDeath(Player*) {}
 
+        // Called when a player rezzurects inside instance
+        virtual void OnPlayerResurrect(Player*) {}
+
         // Called when a player leaves the instance (before really removed from map (or possibly world))
         virtual void OnPlayerLeave(Player*) {}
 
@@ -95,6 +98,9 @@ class InstanceData
 
         // called on creature despawn
         virtual void OnCreatureDespawn(Creature* /*creature*/) {}
+
+        // called on game event
+        virtual void OnEventHappened(uint16 /*event_id*/, bool /*activate*/, bool /*resume*/) {}
 
         // All-purpose data storage 64 bit
         virtual uint64 GetData64(uint32 /*Data*/) const { return 0; }

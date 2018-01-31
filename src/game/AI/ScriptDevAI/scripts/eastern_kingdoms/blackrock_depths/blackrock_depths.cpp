@@ -132,7 +132,7 @@ bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* 
             DoDisplayText(pMasterGuard, SAY_GUARD_AGGRO, pPlayer);
             float fX, fY, fZ;
             pPlayer->GetContactPoint(pMasterGuard, fX, fY, fZ);
-            pMasterGuard->GetMotionMaster()->MovePoint(1,fX, fY, fZ);
+            pMasterGuard->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
 
             if (Creature* pSlaveGuard = pPyromancer->SummonCreature(NPC_ANVILRAGE_GUARDMAN, aGuardSpawnPositions[1][0], aGuardSpawnPositions[1][1], aGuardSpawnPositions[1][2], aGuardSpawnPositions[1][3], TEMPSPAWN_DEAD_DESPAWN, 0))
             {
@@ -744,7 +744,7 @@ struct npc_mistress_nagmaraAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (m_uiPhaseTimer)
-       {
+        {
             if (m_uiPhaseTimer <= uiDiff)
                 m_uiPhaseTimer = 0;
             else
@@ -1871,13 +1871,13 @@ struct npc_ironhand_guardianAI : public ScriptedAI
                     m_uiPhase = 1;
                 break;
             case 1:
-                    if (m_uiGoutOfFlameTimer < uiDiff)
-                    {
-                        if (DoCastSpellIfCan(m_creature, SPELL_GOUT_OF_FLAME) == CAST_OK)
-                            m_uiGoutOfFlameTimer = urand(13, 18) * 1000;
-                    }
-                    else
-                        m_uiGoutOfFlameTimer -= uiDiff;
+                if (m_uiGoutOfFlameTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_GOUT_OF_FLAME) == CAST_OK)
+                        m_uiGoutOfFlameTimer = urand(13, 18) * 1000;
+                }
+                else
+                    m_uiGoutOfFlameTimer -= uiDiff;
                 break;
         }
     }

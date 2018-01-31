@@ -248,7 +248,7 @@ void WINAPI ServiceMain(DWORD argc, char* argv[])
 
         m_ServiceStatus = 1;
         argc = 1;
-        main(argc , argv);
+        main(argc, argv);
 
         // service was stopped
         serviceStatus.dwCurrentState = SERVICE_STOP_PENDING;

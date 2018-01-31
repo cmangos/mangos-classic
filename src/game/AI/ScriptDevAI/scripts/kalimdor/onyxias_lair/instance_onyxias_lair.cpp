@@ -47,7 +47,7 @@ void instance_onyxias_lair::OnCreatureCreate(Creature* pCreature)
     switch (pCreature->GetEntry())
     {
         case NPC_ONYXIA_TRIGGER:
-            m_mNpcEntryGuidStore[NPC_ONYXIA_TRIGGER] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[NPC_ONYXIA_TRIGGER] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -85,7 +85,7 @@ void instance_onyxias_lair::SetData(uint32 uiType, uint32 uiData)
 
     m_uiEncounter = uiData;
 
-    switch(uiData)
+    switch (uiData)
     {
         case DATA_LIFTOFF:
             m_tPhaseTwoStart = time(nullptr);
@@ -93,22 +93,22 @@ void instance_onyxias_lair::SetData(uint32 uiType, uint32 uiData)
         case IN_PROGRESS:
             // Respawn dead Onyxian Warders
             for (GuidList::const_iterator itr = m_lWarderGUIDList.begin(); itr != m_lWarderGUIDList.end(); ++itr)
+            {
+                if (Creature* pWarder = instance->GetCreature(*itr))
                 {
-                    if (Creature* pWarder = instance->GetCreature(*itr))
-                    {
-                        if (!pWarder->isAlive())
-                            pWarder->Respawn();
-                    }
+                    if (!pWarder->isAlive())
+                        pWarder->Respawn();
                 }
+            }
             break;
         case FAIL:
         case DONE:
             // Despawn Onyxian Warders that were respawned during fight
             for (GuidList::const_iterator itr = m_lWarderGUIDList.begin(); itr != m_lWarderGUIDList.end(); ++itr)
-                {
-                    if (Creature* pWarder = instance->GetCreature(*itr))
-                        pWarder->ForcedDespawn();
-                }
+            {
+                if (Creature* pWarder = instance->GetCreature(*itr))
+                    pWarder->ForcedDespawn();
+            }
             break;
     }
 

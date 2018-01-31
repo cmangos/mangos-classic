@@ -61,6 +61,8 @@ enum
     EVENT_ID_RAVENIAN       = 5623,
 
     SAY_GANDLING_SPAWN      = -1289000,
+
+    SPELL_XMAS_GANDLING     = 26199,
 };
 
 struct SpawnLocation

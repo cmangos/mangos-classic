@@ -327,7 +327,7 @@ struct npc_gurubashi_bat_riderAI : public ScriptedAI
 
         m_bHasDoneConcoction = false;
 
-        DoCastSpellIfCan(m_creature, SPELL_THRASH);
+        DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void Aggro(Unit* /*pWho*/) override

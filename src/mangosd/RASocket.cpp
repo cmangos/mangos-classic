@@ -36,7 +36,7 @@
 #include <string>
 
 /// RASocket constructor
-RASocket::RASocket(boost::asio::io_service &service, std::function<void(Socket *)> closeHandler) :
+RASocket::RASocket(boost::asio::io_service& service, std::function<void(Socket*)> closeHandler) :
     m_secure(sConfig.GetBoolDefault("RA.Secure", true)), MaNGOS::Socket(service, closeHandler),
     m_authLevel(AuthLevel::None), m_accountId(0), m_accountLevel(AccountTypes::SEC_PLAYER)
 {
@@ -188,8 +188,8 @@ bool RASocket::HandleInput()
                     return false;
 
                 sWorld.QueueCliCommand(new CliCommandHolder(m_accountId, m_accountLevel, m_input.c_str(),
-                    [this] (const char *buffer) { this->Send(buffer); },
-                    [this] (bool) { this->Send("mangos>"); }));
+                [this](const char* buffer) { this->Send(buffer); },
+                [this](bool) { this->Send("mangos>"); }));
             }
             else
                 Send("mangos>");
@@ -207,7 +207,7 @@ bool RASocket::HandleInput()
     return true;
 }
 
-void RASocket::Send(const std::string &message)
+void RASocket::Send(const std::string& message)
 {
     Write(message.c_str(), message.length());
 }

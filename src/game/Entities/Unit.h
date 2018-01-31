@@ -317,6 +317,8 @@ enum TriggerCastFlags : uint32
     TRIGGERED_INSTANT_CAST                      = 0x00000008,   // Will ignore any cast time set in spell entry
     TRIGGERED_AUTOREPEAT                        = 0x00000010,   // Will signal spell system that this is internal autorepeat call
     TRIGGERED_IGNORE_UNATTACKABLE_FLAG          = 0x00000020,   // Ignores UNIT_FLAG_NOT_ATTACKABLE in CheckTarget
+    TRIGGERED_DO_NOT_PROC                       = 0x00000040,   // Spells from scripts should not proc - DBScripts for example
+    TRIGGERED_PET_CAST                          = 0x00000080,   // Spell that should report error through pet opcode
     TRIGGERED_FULL_MASK                         = 0xFFFFFFFF
 };
 
@@ -500,7 +502,7 @@ enum UnitFlags
     UNIT_FLAG_PVP                   = 0x00001000,
     UNIT_FLAG_SILENCED              = 0x00002000,           // silenced, 2.1.1
     UNIT_FLAG_PERSUADED             = 0x00004000,           // persuaded, 2.0.8
-    UNIT_FLAG_UNK_15                = 0x00008000,           // related to jerky movement in water?
+    UNIT_FLAG_SWIMMING              = 0x00008000,           // related to jerky movement in water?
     UNIT_FLAG_UNK_16                = 0x00010000,           // removes attackable icon
     UNIT_FLAG_PACIFIED              = 0x00020000,
     UNIT_FLAG_DISABLE_ROTATE        = 0x00040000,
@@ -894,13 +896,6 @@ enum ActiveStates
     ACT_DECIDE   = 0x00                                     // custom
 };
 
-enum ReactStates
-{
-    REACT_PASSIVE    = 0,
-    REACT_DEFENSIVE  = 1,
-    REACT_AGGRESSIVE = 2
-};
-
 enum CommandStates
 {
     COMMAND_STAY    = 0,
@@ -963,7 +958,7 @@ class CharmInfo
         explicit CharmInfo(Unit* unit);
         ~CharmInfo();
 
-        void SetCharmState(std::string const & ainame = "PetAI", bool withNewThreatList = true);
+        void SetCharmState(std::string const& ainame = "PetAI", bool withNewThreatList = true);
         void ResetCharmState();
         uint32 GetPetNumber() const { return m_petnumber; }
         void SetPetNumber(uint32 petnumber, bool statwindow);
@@ -971,9 +966,6 @@ class CharmInfo
         void SetCommandState(CommandStates st);
         CommandStates GetCommandState() { return m_CommandState; }
         bool HasCommandState(CommandStates state) { return (m_CommandState == state); }
-        void SetReactState(ReactStates st) { m_reactState = st; }
-        ReactStates GetReactState() const { return m_reactState; }
-        bool HasReactState(ReactStates state) const { return (m_reactState == state); }
 
         void InitPossessCreateSpells();
         void InitCharmCreateSpells();
@@ -1028,11 +1020,11 @@ class CharmInfo
         UnitActionBarEntry  PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
         CharmSpellEntry     m_charmspells[CREATURE_MAX_SPELLS];
         CommandStates       m_CommandState;
-        ReactStates         m_reactState;
         uint32              m_petnumber;
         uint32              m_opener;
         uint32              m_openerMinRange;
         uint32              m_openerMaxRange;
+        uint32              m_unitFieldFlags;
         uint8               m_unitFieldBytes2_1;
         bool                m_retreating;
         bool                m_stayPosSet;
@@ -1105,10 +1097,8 @@ class Unit : public WorldObject
 
         void CleanupsBeforeDelete() override;               // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
 
-        float GetObjectBoundingRadius() const override      // overwrite WorldObject version
-        {
-            return m_floatValues[UNIT_FIELD_BOUNDINGRADIUS];
-        }
+        float GetObjectBoundingRadius() const override { return m_floatValues[UNIT_FIELD_BOUNDINGRADIUS]; } // overwrite WorldObject version
+        float GetCombatReach() const override { return m_floatValues[UNIT_FIELD_COMBATREACH]; } // overwrite WorldObject version
 
         /**
          * Gets the current DiminishingLevels for the given group
@@ -1207,23 +1197,6 @@ class Unit : public WorldObject
                     return true;
             }
         }
-        /** Returns the combined combat reach of two mobs
-         *
-         * @param pVictim The other unit to combine with
-         * @param forMeleeRange Whether we should return the combined reach for melee or not (if true, range will at least return ATTACK_DISTANCE)
-         * @param flat_mod Increases the returned reach by this value.
-         * @return the combined values of UNIT_FIELD_COMBATREACH for both this unit and the pVictim.
-         * \see EUnitFields
-         * \see GetFloatValue
-         */
-        float GetCombatReach(Unit const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;
-        /** Returns the remaining combat distance between two mobs (after CombatReach substracted)
-         *
-         * @param target The target to check against
-         * @param forMeleeRange If we want to get the distance for melee combat (if true, CombatReach will at least return ATTACK_DISTANCE)
-         * @return the distance that needs to be considered for all combat related actions (spell-range and similar)
-         */
-        float GetCombatDistance(Unit const* target, bool forMeleeRange) const;
         /** Returns if the Unit can reach a victim with Melee Attack
          *
          * @param pVictim Who we want to reach with a melee attack
@@ -1396,6 +1369,12 @@ class Unit : public WorldObject
         bool IsImmuneToPlayer() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER); }
         void SetImmuneToPlayer(bool state);
 
+        // extensions of CanAttack and CanAssist API needed serverside
+        virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const override;
+        virtual bool CanAssistSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const override;
+
+        virtual bool CanAttackOnSight(Unit* target); // Used in MoveInLineOfSight checks
+
         bool IsPvP() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
         void SetPvP(bool state);
         bool IsPvPFreeForAll() const;
@@ -1520,8 +1499,8 @@ class Unit : public WorldObject
         virtual float GetMissChance(SpellSchoolMask schoolMask) const;
         virtual float GetMissChance(const SpellEntry* entry, SpellSchoolMask schoolMask) const;
 
-        float CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType attType, const SpellEntry *ability = nullptr) const;
-        float CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType attType, const SpellEntry *ability = nullptr) const;
+        float CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType attType, const SpellEntry* ability = nullptr) const;
+        float CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType attType, const SpellEntry* ability = nullptr) const;
 
         float CalculateSpellCritChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
         float CalculateSpellMissChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
@@ -1588,6 +1567,8 @@ class Unit : public WorldObject
             return m_spellAuraHolders.equal_range(spell_id);
         }
 
+        uint32 GetAuraCount(uint32 spellId) const;
+
         bool HasAuraType(AuraType auraType) const;
         bool HasAffectedAura(AuraType auraType, SpellEntry const* spellProto) const;
         bool HasAura(uint32 spellId, SpellEffectIndex effIndex) const;
@@ -1605,9 +1586,6 @@ class Unit : public WorldObject
         bool IsPolymorphed() const;
 
         bool isFrozen() const;
-
-        bool isTargetableForAttack(bool inversAlive = false) const;
-        bool isPassiveToHostile() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC); }
 
         virtual bool IsInWater() const;
         virtual bool IsUnderWater() const;
@@ -1692,64 +1670,66 @@ class Unit : public WorldObject
 
         bool IsTargetUnderControl(Unit const& target) const;
 
-        // Owner: creator by default, summoner for pets
+        // Convenience checkers/getters/setters counterparts for some of the protected Unit guid fields
+        // See the comments next to protected methods for meanings
+        bool HasCharm(ObjectGuid const& exactGuid = ObjectGuid()) const { return (exactGuid.IsEmpty() ? GetCharmGuid().IsUnit() : (GetCharmGuid() == exactGuid)); }
+        bool HasCharmer(ObjectGuid const& exactGuid = ObjectGuid()) const { return (exactGuid.IsEmpty() ? GetCharmerGuid().IsUnit() : (GetCharmerGuid() == exactGuid)); }
+        bool HasTarget(ObjectGuid const& exactGuid = ObjectGuid()) const { return (exactGuid.IsEmpty() ? GetTargetGuid().IsUnit() : (GetTargetGuid() == exactGuid)); }
+        bool HasChannelObject(ObjectGuid const& exactGuid = ObjectGuid()) const { return (exactGuid.IsEmpty() ? !(GetChannelObjectGuid().IsEmpty()) : (GetChannelObjectGuid() == exactGuid)); }
+
+        Unit* GetCharm(WorldObject const* pov = nullptr) const;
+        Unit* GetCharmer(WorldObject const* pov = nullptr) const;
+        Unit* GetCreator(WorldObject const* pov = nullptr) const;
+        Unit* GetTarget(WorldObject const* pov = nullptr) const;
+        Unit* GetChannelObject(WorldObject const* pov = nullptr) const;
+
+        void SetCharm(Unit* charmed) { SetCharmGuid(charmed ? charmed->GetObjectGuid() : ObjectGuid()); }
+        void SetCharmer(Unit* charmer) { SetCharmerGuid(charmer ? charmer->GetObjectGuid() : ObjectGuid()); }
+        void SetTarget(WorldObject* target) { SetTargetGuid(target ? target->GetObjectGuid() : ObjectGuid()); }
+        void SetChannelObject(WorldObject* object) { SetChannelObjectGuid(object ? object->GetObjectGuid() : ObjectGuid()); }
+
+        // Purely logical guid constructs getters/setters
+        // Owner: automatically resolves to creator guid and additionally to summoner guid
         ObjectGuid const& GetOwnerGuid() const override { return GetCreatorGuid(); }
         void SetOwnerGuid(ObjectGuid owner) override { SetCreatorGuid(owner); }
-        // Master: charmer or owner
-        ObjectGuid const& GetMasterGuid() const;
-
-        ObjectGuid const& GetSummonerGuid() const { return GetGuidValue(UNIT_FIELD_SUMMONEDBY); }
-        void SetSummonerGuid(ObjectGuid owner) { SetGuidValue(UNIT_FIELD_SUMMONEDBY, owner); }
-        ObjectGuid const& GetCreatorGuid() const { return GetGuidValue(UNIT_FIELD_CREATEDBY); }
-        void SetCreatorGuid(ObjectGuid creator) { SetGuidValue(UNIT_FIELD_CREATEDBY, creator); }
-        ObjectGuid const& GetPetGuid() const { return GetGuidValue(UNIT_FIELD_SUMMON); }
-        void SetPetGuid(ObjectGuid pet) { SetGuidValue(UNIT_FIELD_SUMMON, pet); }
-        ObjectGuid const& GetCharmerGuid() const { return GetGuidValue(UNIT_FIELD_CHARMEDBY); }
-        void SetCharmerGuid(ObjectGuid owner) { SetGuidValue(UNIT_FIELD_CHARMEDBY, owner); }
-        ObjectGuid const& GetCharmGuid() const { return GetGuidValue(UNIT_FIELD_CHARM); }
-        void SetCharmGuid(ObjectGuid charm) { SetGuidValue(UNIT_FIELD_CHARM, charm); }
-        ObjectGuid const& GetTargetGuid() const { return GetGuidValue(UNIT_FIELD_TARGET); }
-        void SetTargetGuid(ObjectGuid targetGuid) { SetGuidValue(UNIT_FIELD_TARGET, targetGuid); }
-        ObjectGuid const& GetPersuadedGuid() const { return GetGuidValue(UNIT_FIELD_PERSUADED); }
-        void SetPersuadedGuid(ObjectGuid persuaded) { SetGuidValue(UNIT_FIELD_PERSUADED, persuaded); }
-        ObjectGuid const& GetChannelObjectGuid() const { return GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT); }
-        void SetChannelObjectGuid(ObjectGuid targetGuid) { SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, targetGuid); }
+        // Pet: automatically resolves to summon guid (permanent pet)
+        ObjectGuid const& GetPetGuid() const { return GetSummonGuid(); }
+        void SetPetGuid(ObjectGuid pet) { SetSummonGuid(pet); }
+        // Selection: by default resolves to target, overriden in Player
+        virtual ObjectGuid const& GetSelectionGuid() const { return GetTargetGuid(); }
+        virtual void SetSelectionGuid(ObjectGuid guid) { SetTargetGuid(guid); }
+        // Master: automatically resolves to charmer or owner guid
+        ObjectGuid const& GetMasterGuid() const { ObjectGuid const& guid = GetCharmerGuid(); return (guid ? guid : GetOwnerGuid()); }
+        // Spawner: guid of a unit, who is reponsible for starting this unit's parent script (only for script-spawned units within Unit hierarchy)
         virtual ObjectGuid const GetSpawnerGuid() const { return ObjectGuid(); }
 
-        Player* GetSpellModOwner() const;
+        // Convenience unit getters for some of the logical guid constructs above
+        Unit* GetOwner(WorldObject const* pov = nullptr, bool recursive = false) const;
+        Unit* GetMaster(WorldObject const* pov = nullptr) const;
+        Unit* GetSpawner(WorldObject const* pov = nullptr) const;
 
-        Unit* GetOwner(bool recursive = false) const;
-        Unit* GetMaster() const;
-
-        // Beneficiary: master or self (serverside)
-        Unit const* GetBeneficiary() const;
-        Unit* GetBeneficiary();
-        Player const* GetBeneficiaryPlayer() const;
-        Player* GetBeneficiaryPlayer();
-
-        // Controlling player: limited recursive master/beneficiary (clientside)
+        // Additional related server-side and client-side ownership-related methods
+        // Spell mod owner: static player whose spell mods apply to this unit (server-side)
+        virtual Player* GetSpellModOwner() const { return nullptr; }
+        // Beneficiary: owner of the xp/loot/etc credit, master or self (server-side)
+        Unit* GetBeneficiary() const;
+        Player* GetBeneficiaryPlayer() const;
+        // Controlling player: official client PoV and term on which player is the "master" of the unit at the moment, limited recursive master/beneficiary logic (client-side)
         Player const* GetControllingPlayer() const;
+        // Controlling client: server PoV on which client (player) controls movement of the unit at the moment, obtain "mover" (server-side)
+        Player const* GetControllingClientPlayer() const;
 
-        Unit* GetSpawner() const; // serverside only logic used to determine spawner of unit
-
-        Unit* GetSummoner() const;
-        Unit* GetCreator() const;
-        Unit* GetCharmer() const;
-        Unit* GetCharm() const;
-        virtual void Uncharm();
-
-        virtual Pet* GetMiniPet() const { return nullptr; }    // overwritten in Player
         Pet* GetPet() const;
+        void SetPet(Unit* pet) { SetPetGuid(pet ? pet->GetObjectGuid() : ObjectGuid()); }
 
-        void SetPet(Pet* pet);
-        void SetCharm(Unit* pet);
+        Pet* GetMiniPet() const;
+        void SetMiniPet(Unit* pet) { SetCritterGuid(pet ? pet->GetObjectGuid() : ObjectGuid()); }
+        void RemoveMiniPet();
 
         void AddGuardian(Pet* pet);
         void RemoveGuardian(Pet* pet);
         void RemoveGuardians();
         Pet* FindGuardianWithEntry(uint32 entry);
-
-        bool isCharmed() const { return !GetCharmerGuid().IsEmpty(); }
 
         CharmInfo* GetCharmInfo() { return m_charmInfo; }
         virtual CharmInfo* InitCharmInfo(Unit* charm);
@@ -1784,6 +1764,7 @@ class Unit : public WorldObject
         void RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, Unit* stealer);
         void RemoveAurasDueToSpellByCancel(uint32 spellId);
         void RemoveAurasTriggeredBySpell(uint32 spellId, ObjectGuid casterGuid = ObjectGuid());
+        void RemoveAuraStack(uint32 spellId);
 
         // removing unknown aura stacks by diff reasons and selections
         void RemoveNotOwnTrackedTargetAuras();
@@ -1906,6 +1887,7 @@ class Unit : public WorldObject
         // common function for visibility checks for player/creatures with detection code
         bool isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true) const;
         bool canDetectInvisibilityOf(Unit const* u) const;
+        float GetVisibleDist(Unit const* u);
 
         // virtual functions for all world objects types
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
@@ -2138,6 +2120,8 @@ class Unit : public WorldObject
 
         void ForceHealthAndPowerUpdate();   // force server to send new value for hp and power (including max)
 
+        void TriggerEvadeEvents();
+
         // Take possession of an unit (pet, creature, ...)
         bool TakePossessOf(Unit* possessed);
 
@@ -2145,12 +2129,22 @@ class Unit : public WorldObject
         Unit* TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, float y, float z, float ang);
 
         // Take charm of an unit
-        bool TakeCharmOf(Unit* charmed);
+        bool TakeCharmOf(Unit* charmed, bool advertised = true);
 
-        // Reset control to player
-        void ResetControlState(bool attackCharmer = true);
+        // Break own charm effects on a specific charmed unit
+        void BreakCharmOutgoing(Unit* charmed);
+
+        // Break own charm effects on all charmed units or advertised charm field only
+        void BreakCharmOutgoing(bool advertisedOnly = false);
+
+        // Break charm effects from current charmer
+        void BreakCharmIncoming();
+
+        // Uncharm (physically revert the charm effect) the unit and reset player control if required
+        void Uncharm(Unit* charmed);
 
         float GetAttackDistance(Unit const* pl) const;
+        virtual uint32 GetDetectionRange() const { return 20.f; }
 
         virtual CreatureAI* AI() { return nullptr; }
         virtual CombatData* GetCombatData() { return m_combatData; }
@@ -2217,12 +2211,51 @@ class Unit : public WorldObject
         CombatData* m_combatData;
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
 
+        virtual void SetBaseWalkSpeed(float speed) { m_baseSpeedWalk = speed; }
+        virtual void SetBaseRunSpeed(float speed) { m_baseSpeedRun = speed; }
+
+        // base speeds set by model/template
+        float m_baseSpeedWalk;
+        float m_baseSpeedRun;
+
+        // Protected unit guid fields getters/setters
+        // Charm: temporary pet unit guid
+        ObjectGuid const& GetCharmGuid() const { return GetGuidValue(UNIT_FIELD_CHARM); }
+        void SetCharmGuid(ObjectGuid const& charm) { SetGuidValue(UNIT_FIELD_CHARM, charm); }
+        // Summon: permanent pet unit guid (do not use: managed by SetPetGuid/GetPetGuid)
+        ObjectGuid const& GetSummonGuid() const { return GetGuidValue(UNIT_FIELD_SUMMON); }
+        void SetSummonGuid(ObjectGuid const& summon) { SetGuidValue(UNIT_FIELD_SUMMON, summon); }
+        // Charmer: temporary owner unit guid [nameplate]
+        ObjectGuid const& GetCharmerGuid() const { return GetGuidValue(UNIT_FIELD_CHARMEDBY); }
+        void SetCharmerGuid(ObjectGuid const& owner) { SetGuidValue(UNIT_FIELD_CHARMEDBY, owner); }
+        // Summoner: permanent owner unit guid for player pets [nameplate] (do not use: managed by SetOwnerGuid/GetOwnerGuid)
+        ObjectGuid const& GetSummonerGuid() const { return GetGuidValue(UNIT_FIELD_SUMMONEDBY); }
+        void SetSummonerGuid(ObjectGuid const& owner) { SetGuidValue(UNIT_FIELD_SUMMONEDBY, owner); }
+        // Creator: permanent owner unit guid for npc pets or non-pet units [nameplate] (do not use: managed by SetOwnerGuid/GetOwnerGuid)
+        ObjectGuid const& GetCreatorGuid() const { return GetGuidValue(UNIT_FIELD_CREATEDBY); }
+        void SetCreatorGuid(ObjectGuid const& creator) { SetGuidValue(UNIT_FIELD_CREATEDBY, creator); }
+        // Target: current target guid as advertised on unit frames (also known as selection)
+        ObjectGuid const& GetTargetGuid() const { return GetGuidValue(UNIT_FIELD_TARGET); }
+        void SetTargetGuid(ObjectGuid const& targetGuid) { SetGuidValue(UNIT_FIELD_TARGET, targetGuid); }
+        // Persuation target: temporarily increased reputation unit guid (pre-WotLK relations)
+        ObjectGuid const& GetPersuadedGuid() const { return GetGuidValue(UNIT_FIELD_PERSUADED); }
+        void SetPersuadedGuid(ObjectGuid const& persuaded) { SetGuidValue(UNIT_FIELD_PERSUADED, persuaded); }
+        // Channel target: current channeling spell's target worldobject guid
+        ObjectGuid const& GetChannelObjectGuid() const { return GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT); }
+        void SetChannelObjectGuid(ObjectGuid const& targetGuid) { SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, targetGuid); }
+
+        // Additional server-side guid fields getters/setters
+        // Critter: permanent mini-pet unit guid (pre-WotLK compatibility replacement for critter guid field)
+        ObjectGuid const& GetCritterGuid() const { return m_critterGuid; }
+        void SetCritterGuid(ObjectGuid critterGuid) { m_critterGuid = critterGuid; }
+
     private:
         void CleanupDeletedAuras();
         void UpdateSplineMovement(uint32 t_diff);
 
         Unit* _GetTotem(TotemSlot slot) const;              // for templated function without include need
         Pet* _GetPet(ObjectGuid guid) const;                // for templated function without include need
+        Unit* _GetUnit(ObjectGuid guid) const;              // for templated function without include need
 
         // Wrapper called by DealDamage when a creature is killed
         void JustKilledCreature(Creature* victim, Player* responsiblePlayer);
@@ -2245,7 +2278,11 @@ class Unit : public WorldObject
 
         ComboPointHolderSet m_ComboPointHolders;
 
+        ObjectGuid m_critterGuid;                           // pre-WotLK critter compatibility field
+
         GuidSet m_guardianPets;
+
+        GuidSet m_charmedUnitsPrivate;                      // stores non-advertised active charmed unit guids (e.g. aoe charms)
 
         ObjectGuid m_TotemSlot[MAX_TOTEM_SLOT];
 
@@ -2253,6 +2290,9 @@ class Unit : public WorldObject
 
         // Need to safeguard aura application in Unit::Update
         bool m_spellUpdateHappening;
+
+        // guard to prevent chaining extra attacks
+        bool m_extraAttacksExecuting;
     private:                                                // Error traps for some wrong args using
         // this will catch and prevent build for any cases when all optional args skipped and instead triggered used non boolean type
         // no bodies expected for this declarations
@@ -2296,8 +2336,14 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
     }
 
     if (controlledMask & CONTROLLED_CHARM)
+    {
         if (Unit* charm = GetCharm())
             func(charm);
+
+        for (GuidSet::const_iterator itr = m_charmedUnitsPrivate.begin(); itr != m_charmedUnitsPrivate.end();)
+            if (Unit* charmed = _GetUnit(*(itr++)))
+                func(charmed);
+    }
 }
 
 
@@ -2331,9 +2377,16 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
     }
 
     if (controlledMask & CONTROLLED_CHARM)
+    {
         if (Unit const* charm = GetCharm())
             if (func(charm))
                 return true;
+
+        for (GuidSet::const_iterator itr = m_charmedUnitsPrivate.begin(); itr != m_charmedUnitsPrivate.end();)
+            if (Unit const* charmed = _GetUnit(*(itr++)))
+                if (func(charmed))
+                    return true;
+    }
 
     return false;
 }
@@ -2361,6 +2414,20 @@ struct TargetDistanceOrderFarAway : public std::binary_function<Unit const, Unit
     bool operator()(Unit const* _Left, Unit const* _Right) const
     {
         return !m_mainTarget->GetDistanceOrder(_Left, _Right);
+    }
+};
+
+struct LowestHPNearestOrder : public std::binary_function<Unit const, Unit const, bool>
+{
+    Unit const* m_mainTarget;
+    LowestHPNearestOrder(Unit const* target) : m_mainTarget(target) {}
+    // functor for operator ">"
+    bool operator()(Unit const* _Left, Unit const* _Right) const
+    {
+        if (_Left->GetHealthPercent() == _Right->GetHealthPercent())
+            return m_mainTarget->GetDistanceOrder(_Left, _Right);
+        else
+            return _Left->GetHealthPercent() < _Right->GetHealthPercent();
     }
 };
 

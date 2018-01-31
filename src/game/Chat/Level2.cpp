@@ -1977,7 +1977,7 @@ bool ChatHandler::HandleNpcUnFollowCommand(char* /*args*/)
 
     FollowMovementGenerator<Creature> const* mgen = static_cast<FollowMovementGenerator<Creature> const*>(creatureMotion->top());
 
-    if (mgen->GetTarget() != player)
+    if (mgen->GetCurrentTarget() != player)
     {
         PSendSysMessage(LANG_CREATURE_NOT_FOLLOW_YOU, creature->GetName());
         SetSentErrorMessage(true);
@@ -3155,15 +3155,6 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         PSendSysMessage(LANG_WAYPOINT_INFO_SCRIPTID, point->second.script_id);
         if (wpOrigin == PATH_FROM_EXTERNAL)
             PSendSysMessage(LANG_WAYPOINT_INFO_AISCRIPT, wpOwner->GetScriptName().c_str());
-        if (WaypointBehavior* behaviour = point->second.behavior)
-        {
-            PSendSysMessage(" ModelId1: %u", behaviour->model1);
-            PSendSysMessage(" ModelId2: %u", behaviour->model2);
-            PSendSysMessage(" Emote: %u", behaviour->emote);
-            PSendSysMessage(" Spell: %u", behaviour->spell);
-            for (int i = 0;  i < MAX_WAYPOINT_TEXT; ++i)
-                PSendSysMessage(" TextId%i: %i \'%s\'", i + 1, behaviour->textid[i], (behaviour->textid[i] ? GetMangosString(behaviour->textid[i]) : ""));
-        }
 
         return true;
     }

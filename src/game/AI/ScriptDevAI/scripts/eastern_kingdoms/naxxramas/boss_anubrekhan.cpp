@@ -232,7 +232,7 @@ bool GOUse_go_anub_door(Player* pPlayer, GameObject* pGo)
             if (Creature* pAnub = pInstance->GetSingleCreatureFromStorage(NPC_ANUB_REKHAN))
             {
                 if (boss_anubrekhanAI* pAnubAI = dynamic_cast<boss_anubrekhanAI*>(pAnub->AI()))
-                        pAnubAI->SendAIEvent(AI_EVENT_START_EVENT, pAnub, pAnub);
+                    pAnubAI->SendAIEvent(AI_EVENT_START_EVENT, pAnub, pAnub);
             }
         }
     }

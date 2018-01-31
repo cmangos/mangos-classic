@@ -21,9 +21,11 @@
 #include "Server/DBCStores.h"
 #include "Spells/Spell.h"
 #include "Spells/SpellMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
+#include "World/World.h"
 
 static_assert(MAXIMAL_AI_EVENT_EVENTAI <= 32, "Maximal 32 AI_EVENTs supported with EventAI");
 
@@ -32,8 +34,18 @@ CreatureAI::CreatureAI(Creature* creature) :
     m_unit(creature),
     m_isCombatMovement(true),
     m_attackDistance(0.0f),
-    m_attackAngle(0.0f)
+    m_attackAngle(0.0f),
+    m_reactState(REACT_AGGRESSIVE),
+    m_meleeEnabled(true),
+    m_visibilityDistance(VISIBLE_RANGE),
+    m_moveFurther(true)
 {
+    m_dismountOnAggro = !(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT);
+
+    if (m_creature->IsNoAggroOnSight())
+        SetReactState(REACT_DEFENSIVE);
+    if (m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
+        m_visibilityDistance = sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER);
 }
 
 CreatureAI::CreatureAI(Unit* unit) :
@@ -41,12 +53,68 @@ CreatureAI::CreatureAI(Unit* unit) :
     m_unit(unit),
     m_isCombatMovement(true),
     m_attackDistance(0.0f),
-    m_attackAngle(0.0f)
+    m_attackAngle(0.0f),
+    m_reactState(REACT_AGGRESSIVE),
+    m_meleeEnabled(true),
+    m_visibilityDistance(VISIBLE_RANGE),
+    m_moveFurther(true)
 {
 }
 
 CreatureAI::~CreatureAI()
 {
+}
+
+void CreatureAI::MoveInLineOfSight(Unit* who)
+{
+    if (!HasReactState(REACT_AGGRESSIVE))
+        return;
+
+    if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+        return;
+
+    if (m_creature->getVictim() && !m_creature->GetMap()->IsDungeon())
+        return;
+
+    if (m_creature->IsNoAggroOnSight() || m_creature->IsNeutralToAll())
+        return;
+
+    if (who->GetObjectGuid().IsCreature() && who->isInCombat())
+        CheckForHelp(who, m_creature, 10.0);
+
+    if (m_creature->CanInitiateAttack() && who->isInAccessablePlaceFor(m_creature))
+    {
+        if (AssistPlayerInCombat(who))
+            return;
+
+        if (m_creature->CanAttackOnSight(who))
+            DetectOrAttack(who, m_creature);
+    }
+}
+
+void CreatureAI::EnterCombat(Unit* enemy)
+{
+    if (enemy && (m_creature->IsGuard() || m_creature->IsCivilian()))
+    {
+        // Send Zone Under Attack message to the LocalDefense and WorldDefense Channels
+        if (Player* pKiller = enemy->GetBeneficiaryPlayer())
+            m_creature->SendZoneUnderAttackMessage(pKiller);
+    }
+}
+
+void CreatureAI::EnterEvadeMode()
+{
+    m_creature->RemoveAllAurasOnEvade();
+    m_creature->DeleteThreatList();
+    m_creature->CombatStop(true);
+
+    // only alive creatures that are not on transport can return to home position
+    if (GetReactState() != REACT_PASSIVE && m_creature->isAlive())
+        m_creature->GetMotionMaster()->MoveTargetedHome();
+
+    m_creature->SetLootRecipient(nullptr);
+
+    m_creature->TriggerEvadeEvents();
 }
 
 void CreatureAI::AttackedBy(Unit* attacker)
@@ -55,7 +123,7 @@ void CreatureAI::AttackedBy(Unit* attacker)
         AttackStart(attacker);
 }
 
-CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, bool isTriggered) const
+CanCastResult CreatureAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo, bool isTriggered) const
 {
     // If not triggered, we check
     if (!isTriggered)
@@ -64,33 +132,33 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
         if (m_unit->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
             return CAST_FAIL_STATE;
 
-        if (pSpell->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
+        if (spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
             return CAST_FAIL_STATE;
 
-        if (pSpell->PreventionType == SPELL_PREVENTION_TYPE_PACIFY && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+        if (spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
             return CAST_FAIL_STATE;
 
         // Check for power (also done by Spell::CheckCast())
-        if (m_unit->GetPower((Powers)pSpell->powerType) < Spell::CalculatePowerCost(pSpell, m_unit))
+        if (m_unit->GetPower((Powers)spellInfo->powerType) < Spell::CalculatePowerCost(spellInfo, m_unit))
             return CAST_FAIL_POWER;
 
-        if (!m_unit->IsWithinLOSInMap(pTarget) && m_unit != pTarget)
+        if (!spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !m_unit->IsWithinLOSInMap(target) && m_unit != target)
             return CAST_FAIL_NOT_IN_LOS;
     }
 
-    if (const SpellRangeEntry* pSpellRange = sSpellRangeStore.LookupEntry(pSpell->rangeIndex))
+    if (const SpellRangeEntry* spellRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex))
     {
-        if (pTarget != m_unit)
+        if (target != m_unit)
         {
             // pTarget is out of range of this spell (also done by Spell::CheckCast())
-            float fDistance = m_unit->GetCombatDistance(pTarget, pSpell->rangeIndex == SPELL_RANGE_IDX_COMBAT);
+            float distance = m_unit->GetCombatDistance(target, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
-            if (fDistance > pSpellRange->maxRange)
+            if (distance > spellRange->maxRange)
                 return CAST_FAIL_TOO_FAR;
 
-            float fMinRange = pSpellRange->minRange;
+            float minRange = spellRange->minRange;
 
-            if (fMinRange && fDistance < fMinRange)
+            if (minRange && distance < minRange)
                 return CAST_FAIL_TOO_CLOSE;
         }
 
@@ -100,67 +168,86 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
         return CAST_FAIL_OTHER;
 }
 
-CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32 uiCastFlags, ObjectGuid uiOriginalCasterGUID) const
+CanCastResult CreatureAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags, ObjectGuid originalCasterGUID) const
 {
-    Unit* pCaster = m_unit;
+    Unit* caster = m_unit;
 
-    if (!pTarget)
+    if (!target)
         return CAST_FAIL_OTHER;
 
-    if (uiCastFlags & CAST_SWITCH_CASTER_TARGET)
-        std::swap(pCaster, pTarget);
+    if (castFlags & CAST_SWITCH_CASTER_TARGET)
+        std::swap(caster, target);
 
-    if (uiCastFlags & CAST_FORCE_TARGET_SELF)
-        pCaster = pTarget;
+    if (castFlags & CAST_FORCE_TARGET_SELF)
+        caster = target;
 
     // Allowed to cast only if not casting (unless we interrupt ourself) or if spell is triggered
-    if (!pCaster->IsNonMeleeSpellCasted(false) || (uiCastFlags & (CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS)))
+    if (!caster->IsNonMeleeSpellCasted(false) || (castFlags & (CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS)))
     {
-        if (const SpellEntry* pSpell = sSpellTemplate.LookupEntry<SpellEntry>(uiSpell))
+        if (const SpellEntry* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId))
         {
             // If cast flag CAST_AURA_NOT_PRESENT is active, check if target already has aura on them
-            if (uiCastFlags & CAST_AURA_NOT_PRESENT)
+            if (castFlags & CAST_AURA_NOT_PRESENT)
             {
-                if (pTarget->HasAura(uiSpell))
+                if (target->HasAura(spellId))
                     return CAST_FAIL_TARGET_AURA;
             }
 
             // Check if cannot cast spell
-            if (!(uiCastFlags & (CAST_FORCE_TARGET_SELF | CAST_FORCE_CAST)))
+            if (!(castFlags & (CAST_FORCE_TARGET_SELF | CAST_FORCE_CAST)))
             {
-                CanCastResult castResult = CanCastSpell(pTarget, pSpell, !!(uiCastFlags & CAST_TRIGGERED));
+                CanCastResult castResult = CanCastSpell(target, spellInfo, !!(castFlags & CAST_TRIGGERED));
 
                 if (castResult != CAST_OK)
                     return castResult;
             }
 
             // Interrupt any previous spell
-            if (uiCastFlags & CAST_INTERRUPT_PREVIOUS && pCaster->IsNonMeleeSpellCasted(false))
-                pCaster->InterruptNonMeleeSpells(false);
+            if (castFlags & CAST_INTERRUPT_PREVIOUS && caster->IsNonMeleeSpellCasted(false))
+                caster->InterruptNonMeleeSpells(false);
 
             // Creature should always stop before it will cast a non-instant spell
-            if (GetSpellCastTime(pSpell) || (IsChanneledSpell(pSpell) && pSpell->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT))
-                pCaster->StopMoving();
+            if (GetSpellCastTime(spellInfo) || (IsChanneledSpell(spellInfo) && spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT))
+                caster->StopMoving();
 
             // Creature should interrupt any current melee spell
-            pCaster->InterruptSpell(CURRENT_MELEE_SPELL);
+            caster->InterruptSpell(CURRENT_MELEE_SPELL);
 
             // Creature should stop wielding weapon while casting
-            pCaster->SetSheath(SHEATH_STATE_UNARMED);
+            caster->SetSheath(SHEATH_STATE_UNARMED);
 
-            uint32 flags = (uiCastFlags & CAST_TRIGGERED ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE) | (uiCastFlags & CAST_IGNORE_UNSELECTABLE_TARGET ? TRIGGERED_IGNORE_UNSELECTABLE_FLAG : TRIGGERED_NONE);
+            uint32 flags = (castFlags & CAST_TRIGGERED ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE) | (castFlags & CAST_IGNORE_UNSELECTABLE_TARGET ? TRIGGERED_IGNORE_UNSELECTABLE_FLAG : TRIGGERED_NONE);
 
-            pCaster->CastSpell(pTarget, pSpell, flags, nullptr, nullptr, uiOriginalCasterGUID);
+            caster->CastSpell(target, spellInfo, flags, nullptr, nullptr, originalCasterGUID);
             return CAST_OK;
         }
         else
         {
-            sLog.outErrorDb("DoCastSpellIfCan by %s attempt to cast spell %u but spell does not exist.", m_unit->GetObjectGuid().GetString().c_str(), uiSpell);
+            sLog.outErrorDb("DoCastSpellIfCan by %s attempt to cast spell %u but spell does not exist.", m_unit->GetObjectGuid().GetString().c_str(), spellId);
             return CAST_FAIL_OTHER;
         }
     }
     else
         return CAST_FAIL_IS_CASTING;
+}
+
+void CreatureAI::AttackStart(Unit* who)
+{
+    if (!who || HasReactState(REACT_PASSIVE))
+        return;
+
+    if (m_creature->Attack(who, m_meleeEnabled))
+    {
+        m_creature->AddThreat(who);
+        m_creature->SetInCombatWith(who);
+        who->SetInCombatWith(m_creature);
+
+        // Cast "Spawn Guard" to help Civilian
+        if (m_creature->IsCivilian())
+            m_creature->CastSpell(m_creature, 43783, TRIGGERED_OLD_TRIGGERED);
+
+        HandleMovementOnAttackStart(who);
+    }
 }
 
 bool CreatureAI::DoMeleeAttackIfReady() const
@@ -191,14 +278,82 @@ void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=fals
 
 void CreatureAI::HandleMovementOnAttackStart(Unit* victim) const
 {
-    MotionMaster* creatureMotion = m_unit->GetMotionMaster();
-    if (m_isCombatMovement)
-        creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle);
-    // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
-    else if (creatureMotion->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || creatureMotion->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
+    if (!m_unit->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
     {
-        creatureMotion->MoveIdle();
-        m_unit->StopMoving();
+        if (m_dismountOnAggro)
+            m_unit->Unmount(); // all ais should unmount here
+
+        MotionMaster* creatureMotion = m_unit->GetMotionMaster();
+
+        if (!m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))
+            creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle, m_moveFurther);
+        // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
+        else if (creatureMotion->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || creatureMotion->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
+        {
+            creatureMotion->MoveIdle();
+            m_unit->StopMoving();
+        }
+    }
+}
+
+void CreatureAI::CheckForHelp(Unit* who, Creature* me, float distance)
+{
+    Unit* victim = who->getAttackerForHelper();
+
+    if (!victim)
+        return;
+
+    if (me->GetMap()->Instanceable())
+        distance = distance / 2.5f;
+
+    if (me->CanInitiateAttack() && me->CanAttackOnSight(victim) && victim->isInAccessablePlaceFor(me))
+    {
+        if (me->IsWithinDistInMap(who, distance) && me->IsWithinLOSInMap(who))
+        {
+            if (!me->getVictim())
+            {
+                if (me->GetMap()->Instanceable()) // Instanceable case ignore family/faction checks
+                    AttackStart(victim);
+                else // In non-instanceable creature must belong to same family and faction to attack player.
+                {
+                    if (me->GetCreatureInfo()->Family == ((Creature*)who)->GetCreatureInfo()->Family &&
+                            me->GetCreatureInfo()->FactionAlliance == ((Creature*)who)->GetCreatureInfo()->FactionAlliance &&
+                            me->GetCreatureInfo()->FactionHorde == ((Creature*)who)->GetCreatureInfo()->FactionHorde)
+                        AttackStart(victim);
+                }
+            }
+        }
+    }
+}
+
+void CreatureAI::DetectOrAttack(Unit* who, Creature* me)
+{
+    float attackRadius = me->GetAttackDistance(who);
+
+    if (me->IsWithinDistInMap(who, attackRadius) && me->IsWithinLOSInMap(who))
+    {
+        if (!me->getVictim())
+        {
+            if (who->HasStealthAura() || who->HasInvisibilityAura())
+            {
+                if (!me->hasUnitState(UNIT_STAT_DISTRACTED) && !me->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
+                {
+                    me->GetMotionMaster()->MoveDistract(TIME_INTERVAL_LOOK);
+                    me->SetFacingTo(me->GetAngle(who));
+                }
+
+                if (me->IsWithinDistInMap(who, who->GetVisibleDist(me) * 0.7f))
+                    AttackStart(who);
+            }
+            else
+                AttackStart(who);
+        }
+        else if (me->GetMap()->IsDungeon())
+        {
+            me->AddThreat(who);
+            me->SetInCombatWith(who);
+            who->SetInCombatWith(me);
+        }
     }
 }
 
@@ -255,37 +410,64 @@ class AiDelayEventAround : public BasicEvent
         GuidVector m_receiverGuids;
 };
 
-void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue /*=0*/) const
+void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* invoker, uint32 delay, float radius, uint32 miscValue /*=0*/) const
 {
-    if (fRadius > 0)
+    if (radius > 0)
     {
         std::list<Creature*> receiverList;
 
         // Allow sending custom AI events to all units in range
         if (eventType >= AI_EVENT_CUSTOM_EVENTAI_A && eventType <= AI_EVENT_CUSTOM_EVENTAI_F && eventType != AI_EVENT_GOT_CCED)
         {
-            MaNGOS::AnyUnitInObjectRangeCheck u_check(m_creature, fRadius);
+            MaNGOS::AnyUnitInObjectRangeCheck u_check(m_creature, radius);
             MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(receiverList, u_check);
-            Cell::VisitGridObjects(m_creature, searcher, fRadius);
+            Cell::VisitGridObjects(m_creature, searcher, radius);
         }
         else
         {
             // Use this check here to collect only assitable creatures in case of CALL_ASSISTANCE, else be less strict
-            MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_creature, eventType == AI_EVENT_CALL_ASSISTANCE ? pInvoker : nullptr, fRadius);
+            MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_creature, eventType == AI_EVENT_CALL_ASSISTANCE ? invoker : nullptr, radius);
             MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(receiverList, u_check);
-            Cell::VisitGridObjects(m_creature, searcher, fRadius);
+            Cell::VisitGridObjects(m_creature, searcher, radius);
         }
 
         if (!receiverList.empty())
         {
-            AiDelayEventAround* e = new AiDelayEventAround(eventType, pInvoker ? pInvoker->GetObjectGuid() : ObjectGuid(), *m_creature, receiverList, miscValue);
-            m_creature->m_Events.AddEvent(e, m_creature->m_Events.CalculateTime(uiDelay));
+            AiDelayEventAround* e = new AiDelayEventAround(eventType, invoker ? invoker->GetObjectGuid() : ObjectGuid(), *m_creature, receiverList, miscValue);
+            m_creature->m_Events.AddEvent(e, m_creature->m_Events.CalculateTime(delay));
         }
     }
 }
 
-void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue /*=0*/) const
+void CreatureAI::SendAIEvent(AIEventType eventType, Unit* invoker, Creature* receiver, uint32 miscValue /*=0*/) const
 {
-    MANGOS_ASSERT(pReceiver);
-    pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker, miscValue);
+    MANGOS_ASSERT(receiver);
+    receiver->AI()->ReceiveAIEvent(eventType, m_creature, invoker, miscValue);
+}
+
+bool CreatureAI::IsVisible(Unit* pl) const
+{
+    return m_creature->IsWithinDist(pl, m_visibilityDistance) && pl->isVisibleForOrDetect(m_creature, m_creature, true);
+}
+
+Unit* CreatureAI::DoSelectLowestHpFriendly(float range, float minMissing, bool percent)
+{
+    Unit* pUnit = nullptr;
+
+    if (percent)
+    {
+        MaNGOS::MostHPPercentMissingInRangeCheck u_check(m_creature, range, minMissing, true);
+        MaNGOS::UnitLastSearcher<MaNGOS::MostHPPercentMissingInRangeCheck> searcher(pUnit, u_check);
+
+        Cell::VisitGridObjects(m_creature, searcher, range);
+    }
+    else
+    {
+        MaNGOS::MostHPMissingInRangeCheck u_check(m_creature, range, minMissing, true);
+        MaNGOS::UnitLastSearcher<MaNGOS::MostHPMissingInRangeCheck> searcher(pUnit, u_check);
+
+        Cell::VisitGridObjects(m_creature, searcher, range);
+    }
+
+    return pUnit;
 }

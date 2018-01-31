@@ -125,7 +125,7 @@ struct npc_belnistraszAI : public npc_escortAI
         {
             uint32 uiEntry = 0;
 
-            // ref TARGET_RANDOM_CIRCUMFERENCE_POINT
+            // ref
             float angle = 2.0f * M_PI_F * rand_norm_f();
             float fX, fZ, fY;
             pSummoner->GetClosePoint(fX, fZ, fY, 0.0f, 2.0f, angle);

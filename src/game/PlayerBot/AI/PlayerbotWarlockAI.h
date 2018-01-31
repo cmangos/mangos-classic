@@ -133,117 +133,117 @@ enum WarlockSpells
 //class Player;
 class MANGOS_DLL_SPEC PlayerbotWarlockAI : PlayerbotClassAI
 {
-public:
-    PlayerbotWarlockAI(Player * const master, Player * const bot, PlayerbotAI * const ai);
-    virtual ~PlayerbotWarlockAI();
+    public:
+        PlayerbotWarlockAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        virtual ~PlayerbotWarlockAI();
 
-    // all combat actions go here
-    CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
-    uint32 Neutralize(uint8 creatureType);
+        // all combat actions go here
+        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
+        uint32 Neutralize(uint8 creatureType);
 
-    // all non combat actions go here, ex buffs, heals, rezzes
-    void DoNonCombatActions();
+        // all non combat actions go here, ex buffs, heals, rezzes
+        void DoNonCombatActions();
 
-    // buff a specific player, usually a real PC who is not in group
-    //void BuffPlayer(Player *target);
+        // buff a specific player, usually a real PC who is not in group
+        //void BuffPlayer(Player *target);
 
-private:
-    CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
+    private:
+        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
 
-    CombatManeuverReturns CastSpell(uint32 nextAction, Unit *pTarget = nullptr) { return CastSpellWand(nextAction, pTarget, SHOOT); }
+        CombatManeuverReturns CastSpell(uint32 nextAction, Unit* pTarget = nullptr) { return CastSpellWand(nextAction, pTarget, SHOOT); }
 
-    bool CheckCurse(Unit* pTarget);
-    void CheckDemon();
+        bool CheckCurse(Unit* pTarget);
+        void CheckDemon();
 
-    // CURSES
-    uint32 CURSE_OF_WEAKNESS,
-           CURSE_OF_AGONY,
-           CURSE_OF_EXHAUSTION,
-           CURSE_OF_RECKLESSNESS,
-           CURSE_OF_SHADOW,
-           CURSE_OF_TONGUES,
-           CURSE_OF_THE_ELEMENTS,
-           CURSE_OF_DOOM;
+        // CURSES
+        uint32 CURSE_OF_WEAKNESS,
+               CURSE_OF_AGONY,
+               CURSE_OF_EXHAUSTION,
+               CURSE_OF_RECKLESSNESS,
+               CURSE_OF_SHADOW,
+               CURSE_OF_TONGUES,
+               CURSE_OF_THE_ELEMENTS,
+               CURSE_OF_DOOM;
 
-    // RANGED
-    uint32 SHOOT;
+        // RANGED
+        uint32 SHOOT;
 
-    // AFFLICTION
-    uint32 AMPLIFY_CURSE,
-           CORRUPTION,
-           DRAIN_SOUL,
-           DRAIN_LIFE,
-           DRAIN_MANA,
-           LIFE_TAP,
-           DARK_PACT,
-           HOWL_OF_TERROR,
-           FEAR,
-           SIPHON_LIFE;
+        // AFFLICTION
+        uint32 AMPLIFY_CURSE,
+               CORRUPTION,
+               DRAIN_SOUL,
+               DRAIN_LIFE,
+               DRAIN_MANA,
+               LIFE_TAP,
+               DARK_PACT,
+               HOWL_OF_TERROR,
+               FEAR,
+               SIPHON_LIFE;
 
-    // DESTRUCTION
-    uint32 SHADOW_BOLT,
-           IMMOLATE,
-           SEARING_PAIN,
-           CONFLAGRATE,
-           SOUL_FIRE,
-           HELLFIRE,
-           RAIN_OF_FIRE,
-           SHADOWBURN;
+        // DESTRUCTION
+        uint32 SHADOW_BOLT,
+               IMMOLATE,
+               SEARING_PAIN,
+               CONFLAGRATE,
+               SOUL_FIRE,
+               HELLFIRE,
+               RAIN_OF_FIRE,
+               SHADOWBURN;
 
-    // DEMONOLOGY
-    uint32 BANISH,
-           DEMON_SKIN,
-           DEMON_ARMOR,
-           SHADOW_WARD,
-           ENSLAVE_DEMON,
-           SOUL_LINK,
-           SOUL_LINK_AURA,
-           HEALTH_FUNNEL,
-           DETECT_INVISIBILITY,
-           CREATE_FIRESTONE,
-           CREATE_SOULSTONE,
-           CREATE_HEALTHSTONE,
-           CREATE_SPELLSTONE;
+        // DEMONOLOGY
+        uint32 BANISH,
+               DEMON_SKIN,
+               DEMON_ARMOR,
+               SHADOW_WARD,
+               ENSLAVE_DEMON,
+               SOUL_LINK,
+               SOUL_LINK_AURA,
+               HEALTH_FUNNEL,
+               DETECT_INVISIBILITY,
+               CREATE_FIRESTONE,
+               CREATE_SOULSTONE,
+               CREATE_HEALTHSTONE,
+               CREATE_SPELLSTONE;
 
-    // DEMON SUMMON
-    uint32 SUMMON_IMP,
-           SUMMON_VOIDWALKER,
-           SUMMON_SUCCUBUS,
-           SUMMON_FELHUNTER;
+        // DEMON SUMMON
+        uint32 SUMMON_IMP,
+               SUMMON_VOIDWALKER,
+               SUMMON_SUCCUBUS,
+               SUMMON_FELHUNTER;
 
-    // DEMON SKILLS
-    uint32 BLOOD_PACT,
-           FIREBOLT,
-           FIRE_SHIELD,
-           ANGUISH,
-           INTERCEPT,
-           DEVOUR_MAGIC,
-           SPELL_LOCK,
-           LASH_OF_PAIN,
-           SEDUCTION,
-           SOOTHING_KISS,
-           CONSUME_SHADOWS,
-           SACRIFICE,
-           SUFFERING,
-           TORMENT;
+        // DEMON SKILLS
+        uint32 BLOOD_PACT,
+               FIREBOLT,
+               FIRE_SHIELD,
+               ANGUISH,
+               INTERCEPT,
+               DEVOUR_MAGIC,
+               SPELL_LOCK,
+               LASH_OF_PAIN,
+               SEDUCTION,
+               SOOTHING_KISS,
+               CONSUME_SHADOWS,
+               SACRIFICE,
+               SUFFERING,
+               TORMENT;
 
-    // racial
-    uint32 STONEFORM,
-           ESCAPE_ARTIST,
-           PERCEPTION,
-           SHADOWMELD,
-           BLOOD_FURY,
-           WAR_STOMP,
-           BERSERKING,
-           WILL_OF_THE_FORSAKEN;
+        // racial
+        uint32 STONEFORM,
+               ESCAPE_ARTIST,
+               PERCEPTION,
+               SHADOWMELD,
+               BLOOD_FURY,
+               WAR_STOMP,
+               BERSERKING,
+               WILL_OF_THE_FORSAKEN;
 
-    uint32 m_lastDemon;      // Last demon entry used for spell initialization
-    bool m_isTempImp;        // True if imp summoned temporarily until soul shard acquired for demon of choice.
-    uint32 m_CurrentCurse;   // Curse currently active on bot's target
+        uint32 m_lastDemon;      // Last demon entry used for spell initialization
+        bool m_isTempImp;        // True if imp summoned temporarily until soul shard acquired for demon of choice.
+        uint32 m_CurrentCurse;   // Curse currently active on bot's target
 };
 
 #endif

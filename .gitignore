@@ -25,6 +25,7 @@ bin
 build
 tags
 TAGS
+win
 !.gitignore
 !.gitattributes
 !.travis.yml

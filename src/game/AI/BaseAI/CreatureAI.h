@@ -95,6 +95,13 @@ enum AIEventType
     AI_EVENT_CUSTOM_F           = 1005,
 };
 
+enum ReactStates
+{
+    REACT_PASSIVE    = 0,
+    REACT_DEFENSIVE  = 1,
+    REACT_AGGRESSIVE = 2
+};
+
 class CreatureAI
 {
     public:
@@ -120,19 +127,19 @@ class CreatureAI
          * Note: This function is not called for creatures who are in evade mode
          * @param pWho Unit* who moved in the visibility range and is visisble
          */
-        virtual void MoveInLineOfSight(Unit* /*pWho*/) {}
+        virtual void MoveInLineOfSight(Unit* /*who*/);
 
         /**
          * Called for reaction at enter to combat if not in combat yet
-         * @param pEnemy Unit* of whom the Creature enters combat with, can be nullptr
+         * @param enemy Unit* of whom the Creature enters combat with, can be nullptr
          */
-        virtual void EnterCombat(Unit* /*pEnemy*/) {}
+        virtual void EnterCombat(Unit* /*enemy*/);
 
         /**
          * Called for reaction at stopping attack at no attackers or targets
          * This is called usually in Unit::SelectHostileTarget, if no more target exists
          */
-        virtual void EnterEvadeMode() {}
+        virtual void EnterEvadeMode();
 
         /**
          * Called at reaching home after MoveTargetedHome
@@ -144,15 +151,15 @@ class CreatureAI
          * @param pHealer Unit* which deals the heal
          * @param uiHealedAmount Amount of healing received
          */
-        virtual void HealedBy(Unit* /*pHealer*/, uint32& /*uiHealedAmount*/) {}
+        virtual void HealedBy(Unit* /*healer*/, uint32& /*healedAmount*/) {}
 
         /**
          * Called at any Damage to any victim (before damage apply)
          * @param pDoneTo Unit* to whom Damage of amount uiDamage will be dealt
          * @param uiDamage Amount of Damage that will be dealt, can be changed here
          */
-        virtual void DamageDeal(Unit* pDoneTo, uint32& uiDamage, DamageEffectType damagetype, SpellEntry const* spellInfo) { DamageDeal(pDoneTo, uiDamage, damagetype); }
-        virtual void DamageDeal(Unit* /*pDoneTo*/, uint32& /*uiDamage*/, DamageEffectType damagetype) {}
+        virtual void DamageDeal(Unit* doneTo, uint32& damage, DamageEffectType damageType, SpellEntry const* spellInfo) { DamageDeal(doneTo, damage, damageType); }
+        virtual void DamageDeal(Unit* /*doneTo*/, uint32& /*damage*/, DamageEffectType damageType) {}
 
         /**
          * Called at any Damage from any attacker (before damage apply)
@@ -161,76 +168,76 @@ class CreatureAI
          * @param pDealer Unit* who will deal Damage to the creature
          * @param uiDamage Amount of Damage that will be dealt, can be changed here
          */
-        virtual void DamageTaken(Unit* pDealer, uint32& uiDamage, DamageEffectType damagetype, SpellEntry const* spellInfo) { DamageTaken(pDealer, uiDamage, damagetype); }
-        virtual void DamageTaken(Unit* /*pDealer*/, uint32& /*uiDamage*/, DamageEffectType damagetype) {}
+        virtual void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damageType, SpellEntry const* spellInfo) { DamageTaken(dealer, damage, damageType); }
+        virtual void DamageTaken(Unit* /*dealer*/, uint32& /*damage*/, DamageEffectType damageType) {}
 
         /**
          * Called when the creature is killed
          * @param pKiller Unit* who killed the creature
          */
-        virtual void JustDied(Unit* /*pKiller*/) {}
+        virtual void JustDied(Unit* /*killer*/) {}
 
         /**
          * Called when the corpse of this creature gets removed
          * @param uiRespawnDelay Delay (in seconds). If != 0, then this is the time after which the creature will respawn, if = 0 the default respawn-delay will be used
          */
-        virtual void CorpseRemoved(uint32& /*uiRespawnDelay*/) {}
+        virtual void CorpseRemoved(uint32& /*respawnDelay*/) {}
 
         /**
          * Called when a summoned creature is killed
          * @param pSummoned Summoned Creature* that got killed
          */
-        virtual void SummonedCreatureJustDied(Creature* /*pSummoned*/) {}
+        virtual void SummonedCreatureJustDied(Creature* /*summoned*/) {}
 
         /**
          * Called when the creature kills a unit
          * @param pVictim Victim that got killed
          */
-        virtual void KilledUnit(Unit* /*pVictim*/) {}
+        virtual void KilledUnit(Unit* /*victim*/) {}
 
         /**
          * Called when owner of m_creature (if m_creature is PROTECTOR_PET) kills a unit
          * @param pVictim Victim that got killed (by owner of creature)
          */
-        virtual void OwnerKilledUnit(Unit* /*pVictim*/) {}
+        virtual void OwnerKilledUnit(Unit* /*victim*/) {}
 
         /**
          * Called when the creature summon successfully other creature
          * @param pSummoned Creature that got summoned
          */
-        virtual void JustSummoned(Creature* /*pSummoned*/) {}
+        virtual void JustSummoned(Creature* /*summoned*/) {}
 
         /**
          * Called when the creature summon successfully a gameobject
          * @param pGo GameObject that was summoned
          */
-        virtual void JustSummoned(GameObject* /*pGo*/) {}
+        virtual void JustSummoned(GameObject* /*go*/) {}
 
         /**
          * Called when a summoned creature gets TemporarySummon::UnSummon ed
          * @param pSummoned Summoned creature that despawned
          */
-        virtual void SummonedCreatureDespawn(Creature* /*pSummoned*/) {}
+        virtual void SummonedCreatureDespawn(Creature* /*summoned*/) {}
 
         /**
          * Called when hit by a spell
          * @param pCaster Caster who casted the spell
          * @param pSpell The spell that hit the creature
          */
-        virtual void SpellHit(Unit* /*pCaster*/, const SpellEntry* /*pSpell*/) {}
+        virtual void SpellHit(Unit* /*caster*/, const SpellEntry* /*spellInfo*/) {}
 
         /**
          * Called when spell hits creature's target
          * @param pTarget Target that we hit with the spell
          * @param pSpell Spell with which we hit pTarget
          */
-        virtual void SpellHitTarget(Unit* /*pTarget*/, const SpellEntry* /*pSpell*/) {}
+        virtual void SpellHitTarget(Unit* /*target*/, const SpellEntry* /*spellInfo*/) {}
 
         /**
          * Called when the creature is target of hostile action: swing, hostile spell landed, fear/etc)
          * @param pAttacker Unit* who attacked the creature
          */
-        virtual void AttackedBy(Unit* pAttacker);
+        virtual void AttackedBy(Unit* attacker);
 
         /**
          * Called when creature is respawned (for reseting variables)
@@ -242,7 +249,7 @@ class CreatureAI
          * @param uiMovementType Type of the movement (enum MovementGeneratorType)
          * @param uiData Data related to the finished movement (ie point-id)
          */
-        virtual void MovementInform(uint32 /*uiMovementType*/, uint32 /*uiData*/) {}
+        virtual void MovementInform(uint32 /*movementType*/, uint32 /*data*/) {}
 
         /**
          * Called if a temporary summoned of m_creature reach a move point
@@ -250,14 +257,14 @@ class CreatureAI
          * @param uiMotionType Type of the movement (enum MovementGeneratorType)
          * @param uiData Data related to the finished movement (ie point-id)
          */
-        virtual void SummonedMovementInform(Creature* /*pSummoned*/, uint32 /*uiMotionType*/, uint32 /*uiData*/) {}
+        virtual void SummonedMovementInform(Creature* /*summoned*/, uint32 /*motionType*/, uint32 /*data*/) {}
 
         /**
          * Called at text emote receive from player
          * @param pPlayer Player* who sent the emote
          * @param uiEmote ID of the emote the player used with the creature as target
          */
-        virtual void ReceiveEmote(Player* /*pPlayer*/, uint32 /*uiEmote*/) {}
+        virtual void ReceiveEmote(Player* /*player*/, uint32 /*emote*/) {}
 
         ///== Data Fetch bind ==============================
 
@@ -271,7 +278,7 @@ class CreatureAI
          * Note: Usually called by MoveInLineOfSight, in Unit::SelectHostileTarget or when the AI is forced to attack an enemy
          * @param pWho Unit* who is possible target
          */
-        virtual void AttackStart(Unit* /*pWho*/) {}
+        virtual void AttackStart(Unit* /*who*/);
 
         /**
         * Called when creature stop attack expected
@@ -286,7 +293,7 @@ class CreatureAI
          * Note: Use this function to handle Timers, Threat-Management and MeleeAttacking
          * @param uiDiff Passed time since last call
          */
-        virtual void UpdateAI(const uint32 /*uiDiff*/) {}
+        virtual void UpdateAI(const uint32 /*diff*/) {}
 
         ///== State checks =================================
 
@@ -295,10 +302,10 @@ class CreatureAI
          * Note: This check is by default only the state-depending (visibility, range), NOT LineOfSight
          * @param pWho Unit* who is checked if it is visisble for the creature
          */
-        virtual bool IsVisible(Unit* /*pWho*/) const { return false; }
+        virtual bool IsVisible(Unit* /*who*/) const;
 
         /// Check if this AI can be replaced in possess case
-        virtual bool IsControllable() const { return false; }
+        // virtual bool IsControllable() const { return false; }
 
         // Called when victim entered water and creature can not enter water
         // TODO: rather unused
@@ -310,7 +317,7 @@ class CreatureAI
         bool DoMeleeAttackIfReady() const;
 
         /// Internal helper function, to check if a spell can be cast
-        CanCastResult CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, bool isTriggered) const;
+        CanCastResult CanCastSpell(Unit* target, const SpellEntry* spellInfo, bool isTriggered) const;
 
         /**
          * Function to cast a spell if possible
@@ -319,7 +326,7 @@ class CreatureAI
          * @param uiCastFlags Some flags to define how to cast, see enum CastFlags
          * @param OriginalCasterGuid the original caster of the spell if required, empty by default
          */
-        CanCastResult DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32 uiCastFlags = 0, ObjectGuid OriginalCasterGuid = ObjectGuid()) const;
+        CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0, ObjectGuid originalCasterGuid = ObjectGuid()) const;
 
         /// Set combat movement (on/off), also sets UNIT_STAT_NO_COMBAT_MOVEMENT
         void SetCombatMovement(bool enable, bool stopOrStartMovement = false);
@@ -334,7 +341,7 @@ class CreatureAI
          * @param uiDelay  delay time until the Event will be triggered
          * @param fRadius  range in which for receiver is searched
          */
-        void SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue = 0) const;
+        void SendAIEventAround(AIEventType eventType, Unit* invoker, uint32 delay, float radius, uint32 miscValue = 0) const;
 
         /**
          * Send an AI Event to a Creature
@@ -342,7 +349,7 @@ class CreatureAI
          * @param pInvoker Unit that triggered this event (like an attacker)
          * @param pReceiver Creature to receive this event
          */
-        void SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue = 0) const;
+        void SendAIEvent(AIEventType eventType, Unit* invoker, Creature* receiver, uint32 miscValue = 0) const;
 
         /**
          * Called when an AI Event is received
@@ -350,11 +357,37 @@ class CreatureAI
          * @param pSender Creature that sent this event
          * @param pInvoker Unit that triggered this event (like an attacker)
          */
-        virtual void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*miscValue*/) {}
+        virtual void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) {}
+
+        /**
+         * Called when a Game Event starts or ends
+         * @param eventId to specify id of event from database
+         * @param activate to specify if it started or stopped
+         * @param resume to specify whether it launched normally or was resumed after a restart
+         */
+        virtual void OnEventHappened(uint16 /*eventId*/, bool /*activate*/, bool /*resume*/) {}
+
+        /*
+         * Evaluates conditions and returns true if it is going to assist player
+         */
+        virtual bool AssistPlayerInCombat(Unit* who) { return false; }
+
+        void CheckForHelp(Unit* /*who*/, Creature* /*me*/, float /*dist*/);
+        void DetectOrAttack(Unit* /*who*/, Creature* /*me*/);
+
+        virtual void HandleMovementOnAttackStart(Unit* victim) const;
+
+        // TODO: Implement proper casterAI in EAI and remove this from Leotheras script
+        void SetMoveChaseParams(float dist, float angle, bool moveFurther) { m_attackDistance = dist; m_attackAngle = angle; m_moveFurther = moveFurther; }
+
+        // Returns friendly unit with the most amount of hp missing from max hp
+        Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false);
+
+        void SetReactState(ReactStates st) { m_reactState = st; }
+        ReactStates GetReactState() const { return m_reactState; }
+        bool HasReactState(ReactStates state) const { return (m_reactState == state); }
 
     protected:
-        void HandleMovementOnAttackStart(Unit* victim) const;
-
         ///== Fields =======================================
 
         /// Pointer to the Creature controlled by this AI
@@ -366,6 +399,16 @@ class CreatureAI
         /// How should an enemy be chased
         float m_attackDistance;
         float m_attackAngle;
+        bool m_moveFurther;
+
+        // How far a creature can detect in MoveInLineOfSight
+        float m_visibilityDistance;
+
+        bool m_dismountOnAggro;
+
+        bool m_meleeEnabled;                              // If we allow melee auto attack
+
+        ReactStates m_reactState;
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>

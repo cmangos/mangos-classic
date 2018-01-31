@@ -166,6 +166,14 @@ void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)
         m_type = TOTEM_STATUE;                              // Jewelery statue
 }
 
+Player* Totem::GetSpellModOwner() const
+{
+    Unit* owner = GetOwner();
+    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+        return static_cast<Player*>(owner);
+    return nullptr;
+}
+
 float Totem::GetCritChance(WeaponAttackType attackType) const
 {
     // Totems use owner's crit chance (when owner is available)
@@ -182,7 +190,7 @@ float Totem::GetCritChance(SpellSchoolMask schoolMask) const
     return Creature::GetCritChance(schoolMask);
 }
 
-float Totem::GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureTypeMask, const SpellEntry *spell, bool heal) const
+float Totem::GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureTypeMask, const SpellEntry* spell, bool heal) const
 {
     // Totems use owner's crit multiplier
     if (const Unit* owner = GetOwner())

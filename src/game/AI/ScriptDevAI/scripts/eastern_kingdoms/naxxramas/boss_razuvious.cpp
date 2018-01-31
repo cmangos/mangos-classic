@@ -60,7 +60,7 @@ struct boss_razuviousAI : public ScriptedAI
     void Reset() override
     {
         m_uiUnbalancingStrikeTimer = 30000;                 // 30 seconds
-        m_uiDisruptingShoutTimer   = 25000;                 // 25 seconds               
+        m_uiDisruptingShoutTimer   = 25000;                 // 25 seconds
     }
 
     void KilledUnit(Unit* /*Victim*/) override

@@ -53,6 +53,7 @@ typedef std::unordered_map<uint32, GameTele > GameTeleMap;
 
 struct AreaTrigger
 {
+    uint32 entry;
     uint8  requiredLevel;
     uint32 requiredItem;
     uint32 requiredItem2;
@@ -63,6 +64,7 @@ struct AreaTrigger
     float  target_Z;
     float  target_Orientation;
     uint32 conditionId;
+    std::string status_failed_text;
 
     // Operators
     bool IsMinimal() const
@@ -165,6 +167,7 @@ typedef std::unordered_map<uint32, PageTextLocale> PageTextLocaleMap;
 typedef std::unordered_map<int32, MangosStringLocale> MangosStringLocaleMap;
 typedef std::unordered_map<uint32, GossipMenuItemsLocale> GossipMenuItemsLocaleMap;
 typedef std::unordered_map<uint32, PointOfInterestLocale> PointOfInterestLocaleMap;
+typedef std::unordered_map<uint32, AreaTriggerLocale> AreaTriggerLocaleMap;
 
 typedef std::multimap<int32, uint32> ExclusiveQuestGroupsMap;
 typedef std::multimap<uint32, ItemRequiredTarget> ItemRequiredTargetMap;
@@ -348,8 +351,9 @@ enum ConditionType
     CONDITION_RESERVED_4            = 34,                   // reserved for 3.x and later
     CONDITION_GENDER                = 35,                   // 0=male, 1=female, 2=none (see enum Gender)
     CONDITION_DEAD_OR_AWAY          = 36,                   // value1: 0=player dead, 1=player is dead (with group dead), 2=player in instance are dead, 3=creature is dead
-                                                            // value2: if != 0 only consider players in range of this value
+    // value2: if != 0 only consider players in range of this value
     CONDITION_CREATURE_IN_RANGE     = 37,                   // value1: creature entry; value2: range; returns only alive creatures
+    CONDITION_SPAWN_COUNT           = 39,                   // value1: creatureId; value2: count;
 };
 
 enum ConditionSource                                        // From where was the condition called?
@@ -683,6 +687,7 @@ class ObjectMgr
         void LoadInstanceTemplate();
         void LoadWorldTemplate();
         void LoadConditions();
+        void LoadAreatriggerLocales();
 
         void LoadGossipText();
 
@@ -744,7 +749,7 @@ class ObjectMgr
         uint32 GetHonorStandingPositionByGUID(uint32 guid, uint32 side);
         void UpdateHonorStandingByGuid(uint32 guid, HonorStanding standing, uint32 side) ;
         void FlushRankPoints(uint32 dateTop);
-        void DistributeRankPoints(uint32 team, uint32 dateBegin , bool flush = false);
+        void DistributeRankPoints(uint32 team, uint32 dateBegin, bool flush = false);
         void LoadStandingList(uint32 dateBegin);
         void LoadStandingList();
 
@@ -767,7 +772,7 @@ class ObjectMgr
         uint32 GenerateAuctionID() { return m_AuctionIds.Generate(); }
         uint32 GenerateGuildId() { return m_GuildIds.Generate(); }
         uint32 GenerateGroupId() { return m_GroupIds.Generate(); }
-        uint32 GenerateItemTextID() { return m_ItemGuids.Generate(); }
+        uint32 GenerateItemTextID() { return m_ItemTextIds.Generate(); }
         uint32 GenerateMailID() { return m_MailIds.Generate(); }
         uint32 GeneratePetNumber() { return m_PetNumbers.Generate(); }
 
@@ -857,6 +862,15 @@ class ObjectMgr
         {
             auto itr = m_questgiverGreetingLocaleMap[type].find(entry);
             if (itr == m_questgiverGreetingLocaleMap[type].end()) return nullptr;
+            return &itr->second;
+        }
+
+        void GetAreaTriggerLocales(uint32 entry, int32 loc_idx, std::string* titlePtr) const;
+
+        AreaTriggerLocale const* GetAreaTriggerLocale(uint32 entry) const
+        {
+            auto itr = m_areaTriggerLocaleMap.find(entry);
+            if (itr == m_areaTriggerLocaleMap.end()) return nullptr;
             return &itr->second;
         }
 
@@ -1207,11 +1221,13 @@ class ObjectMgr
         std::map<int32 /*minEntryOfBracket*/, uint32 /*count*/> m_loadedStringCount;
         GossipMenuItemsLocaleMap mGossipMenuItemsLocaleMap;
         PointOfInterestLocaleMap mPointOfInterestLocaleMap;
+        AreaTriggerLocaleMap m_areaTriggerLocaleMap;
+
         DungeonEncounterMap m_DungeonEncounters;
 
         QuestgiverGreetingMap m_questgiverGreetingMap[QUESTGIVER_TYPE_MAX];
         QuestgiverGreetingLocaleMap m_questgiverGreetingLocaleMap[QUESTGIVER_TYPE_MAX];
-        
+
         CacheNpcTextIdMap m_mCacheNpcTextIdMap;
         CacheVendorItemMap m_mCacheVendorTemplateItemMap;
         CacheVendorItemMap m_mCacheVendorItemMap;

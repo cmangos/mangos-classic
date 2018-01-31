@@ -42,7 +42,8 @@ struct world_map_eastern_kingdoms : public ScriptedMap
             case NPC_BOLVAR:
             case NPC_PRESTOR:
             case NPC_WINDSOR:
-                m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+                break;
         }
     }
 
@@ -81,7 +82,7 @@ struct world_map_kalimdor : public ScriptedMap
     void OnCreatureCreate(Creature* pCreature)
     {
         if (pCreature->GetEntry() == NPC_MURKDEEP)
-            m_mNpcEntryGuidStore[NPC_MURKDEEP] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[NPC_MURKDEEP] = pCreature->GetObjectGuid();
     }
 
     void OnCreatureDeath(Creature* pCreature)
@@ -146,7 +147,7 @@ struct world_map_kalimdor : public ScriptedMap
         switch (pGo->GetEntry())
         {
             case GO_GHOST_MAGNET:
-                m_vGOEvents.push_back({ pGo->GetObjectGuid(),0,0 }); // insert new event with 0 timer
+                m_vGOEvents.push_back({ pGo->GetObjectGuid(), 0, 0 }); // insert new event with 0 timer
                 pGo->SetActiveObjectState(true);
                 break;
         }
@@ -166,7 +167,7 @@ struct world_map_kalimdor : public ScriptedMap
 
             return false;
         }
-            
+
 
         if (GameObject* go = instance->GetGameObject(eventData.guid))
         {
@@ -196,7 +197,7 @@ struct world_map_kalimdor : public ScriptedMap
             for (auto iter = m_vGOEvents.begin(); iter != m_vGOEvents.end();)
             {
                 iter->despawnTimer += diff;
-                if (!GhostOPlasmEventStep((*iter)))                
+                if (!GhostOPlasmEventStep((*iter)))
                     iter = m_vGOEvents.erase(iter);
                 else
                     ++iter;

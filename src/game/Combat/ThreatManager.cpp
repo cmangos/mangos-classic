@@ -215,7 +215,7 @@ void ThreatContainer::clearReferences()
     for (ThreatList::const_iterator i = iThreatList.begin(); i != iThreatList.end(); ++i)
     {
         (*i)->unlink();
-        delete(*i);
+        delete (*i);
     }
     iThreatList.clear();
 }
@@ -516,6 +516,12 @@ void ThreatManager::tauntFadeOut(Unit* pTaunter)
 void ThreatManager::setCurrentVictim(HostileReference* pHostileReference)
 {
     iCurrentVictim = pHostileReference;
+}
+
+void ThreatManager::setCurrentVictimByTarget(Unit* target)
+{
+    if (HostileReference* ref = iThreatContainer.getReferenceByTarget(target))
+        setCurrentVictim(ref);
 }
 
 //============================================================

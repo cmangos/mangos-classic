@@ -66,8 +66,8 @@ enum
     GO_PORT_ELDERS              = 175377,                   // Port at elders square
     GO_YSIDA_CAGE               = 181071,                   // Cage to open after baron event is done
     GO_PORT_TRAP_GATE_1         = 175351,                   // Portcullis used in the gate traps (rats trap)
-    GO_PORT_TRAP_GATE_2         = 175350,					// Scarlet side
-    GO_PORT_TRAP_GATE_3         = 175355,					// Undead side
+    GO_PORT_TRAP_GATE_2         = 175350,                   // Scarlet side
+    GO_PORT_TRAP_GATE_3         = 175355,                   // Undead side
     GO_PORT_TRAP_GATE_4         = 175354,
 
     QUEST_DEAD_MAN_PLEA         = 8945,

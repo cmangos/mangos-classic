@@ -54,17 +54,6 @@ struct npc_bartlebyAI : public ScriptedAI
 
     void Reset() override {}
 
-    void AttackedBy(Unit* pAttacker) override
-    {
-        if (m_creature->getVictim())
-            return;
-
-        if (m_creature->IsFriendlyTo(pAttacker))
-            return;
-
-        AttackStart(pAttacker);
-    }
-
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (uiDamage > m_creature->GetHealth() || ((m_creature->GetHealth() - uiDamage) * 100 / m_creature->GetMaxHealth() < 15))
@@ -112,17 +101,6 @@ struct npc_dashel_stonefistAI : public ScriptedAI
     }
 
     void Reset() override {}
-
-    void AttackedBy(Unit* pAttacker) override
-    {
-        if (m_creature->getVictim())
-            return;
-
-        if (m_creature->IsFriendlyTo(pAttacker))
-            return;
-
-        AttackStart(pAttacker);
-    }
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
@@ -709,7 +687,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
 
         switch (iEntry)
         {
-                // Set orientation and prepare the npcs for the next event
+            // Set orientation and prepare the npcs for the next event
             case SAY_WINDSOR_GET_READY:
                 m_creature->SetFacingTo(0.6f);
                 break;

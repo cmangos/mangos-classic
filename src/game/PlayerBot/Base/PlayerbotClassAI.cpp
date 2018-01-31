@@ -39,13 +39,13 @@ PlayerbotClassAI::PlayerbotClassAI(Player* const master, Player* const bot, Play
 }
 PlayerbotClassAI::~PlayerbotClassAI() {}
 
-CombatManeuverReturns PlayerbotClassAI::DoFirstCombatManeuver(Unit *) { return RETURN_NO_ACTION_OK; }
-CombatManeuverReturns PlayerbotClassAI::DoNextCombatManeuver(Unit *) { return RETURN_NO_ACTION_OK; }
+CombatManeuverReturns PlayerbotClassAI::DoFirstCombatManeuver(Unit*) { return RETURN_NO_ACTION_OK; }
+CombatManeuverReturns PlayerbotClassAI::DoNextCombatManeuver(Unit*) { return RETURN_NO_ACTION_OK; }
 
-CombatManeuverReturns PlayerbotClassAI::DoFirstCombatManeuverPVE(Unit *) { return RETURN_NO_ACTION_OK; }
-CombatManeuverReturns PlayerbotClassAI::DoNextCombatManeuverPVE(Unit *) { return RETURN_NO_ACTION_OK; }
-CombatManeuverReturns PlayerbotClassAI::DoFirstCombatManeuverPVP(Unit *) { return RETURN_NO_ACTION_OK; }
-CombatManeuverReturns PlayerbotClassAI::DoNextCombatManeuverPVP(Unit *) { return RETURN_NO_ACTION_OK; }
+CombatManeuverReturns PlayerbotClassAI::DoFirstCombatManeuverPVE(Unit*) { return RETURN_NO_ACTION_OK; }
+CombatManeuverReturns PlayerbotClassAI::DoNextCombatManeuverPVE(Unit*) { return RETURN_NO_ACTION_OK; }
+CombatManeuverReturns PlayerbotClassAI::DoFirstCombatManeuverPVP(Unit*) { return RETURN_NO_ACTION_OK; }
+CombatManeuverReturns PlayerbotClassAI::DoNextCombatManeuverPVP(Unit*) { return RETURN_NO_ACTION_OK; }
 
 void PlayerbotClassAI::DoNonCombatActions()
 {
@@ -101,7 +101,8 @@ bool PlayerbotClassAI::CastHoTOnTank()
     return false;
 }
 
-CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target) {
+CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target)
+{
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
@@ -127,7 +128,7 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
-            Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
             if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel())
                 continue;
             JOB_TYPE job = GetTargetJob(groupMember);
@@ -141,7 +142,7 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
     else
     {
         if (m_master && !m_master->IsInDuel()
-            && (!(GetTargetJob(m_master) & JOB_MANAONLY) || m_master->getClass() == CLASS_DRUID || m_master->GetPowerType() == POWER_MANA))
+                && (!(GetTargetJob(m_master) & JOB_MANAONLY) || m_master->getClass() == CLASS_DRUID || m_master->GetPowerType() == POWER_MANA))
             if (BuffHelper(m_ai, spellId, m_master))
                 return RETURN_CONTINUE;
         // Do not check job or power type - any buff you have is always useful to self
@@ -173,14 +174,14 @@ bool PlayerbotClassAI::NeedGroupBuff(uint32 groupBuffSpellId, uint32 singleBuffS
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
-            Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
             if (!groupMember || !groupMember->isAlive())
                 continue;
             // Check if group member needs buff
             if (!groupMember->HasAura(groupBuffSpellId, EFFECT_INDEX_0) && !groupMember->HasAura(singleBuffSpellId, EFFECT_INDEX_0))
                 numberOfGroupTargets++;
             // Don't forget about pet
-            Pet * pet = groupMember->GetPet();
+            Pet* pet = groupMember->GetPet();
             if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && (pet->HasAura(groupBuffSpellId, EFFECT_INDEX_0) || pet->HasAura(singleBuffSpellId, EFFECT_INDEX_0)))
                 numberOfGroupTargets++;
         }
@@ -222,31 +223,31 @@ Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type)
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
-            Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
             if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel())
                 continue;
             JOB_TYPE job = GetTargetJob(groupMember);
             if (job & type)
             {
                 uiHealthPercentage = int(groupMember->GetMaxHealth() != 0 ? groupMember->GetHealth() * 100 / groupMember->GetMaxHealth() : 0);
-                targets.push_back( heal_priority(groupMember, uiHealthPercentage, job) );
+                targets.push_back(heal_priority(groupMember, uiHealthPercentage, job));
             }
         }
     }
     else
     {
-        targets.push_back( heal_priority(m_bot, m_bot->GetHealthPercent(), GetTargetJob(m_bot)) );
+        targets.push_back(heal_priority(m_bot, m_bot->GetHealthPercent(), GetTargetJob(m_bot)));
         if (m_master && !m_master->IsInDuel())
         {
             uiHealthPercentage = int(m_master->GetMaxHealth() != 0 ? m_master->GetHealth() * 100 / m_master->GetMaxHealth() : 0);
-            targets.push_back( heal_priority(m_master, uiHealthPercentage, GetTargetJob(m_master)) );
+            targets.push_back(heal_priority(m_master, uiHealthPercentage, GetTargetJob(m_master)));
         }
     }
 
     // Sorts according to type: Healers first, tanks next, then master followed by DPS, thanks to the order of the TYPE enum
     std::sort(targets.begin(), targets.end());
 
-    uint8 uCount = 0,i = 0;
+    uint8 uCount = 0, i = 0;
     // x is used as 'target found' variable; i is used as the targets iterator throughout all 4 types.
     int16 x = -1;
 
@@ -535,7 +536,7 @@ Player* PlayerbotClassAI::GetDispelTarget(DispelType dispelType, JOB_TYPE type, 
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
-            Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
             if (!groupMember || !groupMember->isAlive())
                 continue;
             JOB_TYPE job = GetTargetJob(groupMember);
@@ -545,13 +546,13 @@ Player* PlayerbotClassAI::GetDispelTarget(DispelType dispelType, JOB_TYPE type, 
                 Unit::SpellAuraHolderMap const& auras = groupMember->GetSpellAuraHolderMap();
                 for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                 {
-                    SpellAuraHolder *holder = itr->second;
+                    SpellAuraHolder* holder = itr->second;
                     // Only return group members with negative magic effect
                     if (dispelType == DISPEL_MAGIC && holder->IsPositive())
                         continue;
                     // poison, disease and curse are always negative: return everyone
                     if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
-                        targets.push_back( heal_priority(groupMember, 0, job) );
+                        targets.push_back(heal_priority(groupMember, 0, job));
                 }
             }
         }
@@ -582,12 +583,12 @@ Player* PlayerbotClassAI::GetResurrectionTarget(JOB_TYPE type, bool bMustBeOOC)
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
-            Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
             if (!groupMember || groupMember->isAlive())
                 continue;
             JOB_TYPE job = GetTargetJob(groupMember);
             if (job & type)
-                targets.push_back( heal_priority(groupMember, 0, job) );
+                targets.push_back(heal_priority(groupMember, 0, job));
         }
 
         // Sorts according to type: Healers first, tanks next, then master followed by DPS, thanks to the order of the TYPE enum
@@ -653,7 +654,7 @@ JOB_TYPE PlayerbotClassAI::GetTargetJob(Player* target)
     }
 }
 
-CombatManeuverReturns PlayerbotClassAI::CastSpellNoRanged(uint32 nextAction, Unit *pTarget)
+CombatManeuverReturns PlayerbotClassAI::CastSpellNoRanged(uint32 nextAction, Unit* pTarget)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
@@ -667,7 +668,7 @@ CombatManeuverReturns PlayerbotClassAI::CastSpellNoRanged(uint32 nextAction, Uni
         return (m_ai->CastSpell(nextAction) ? RETURN_CONTINUE : RETURN_NO_ACTION_ERROR);
 }
 
-CombatManeuverReturns PlayerbotClassAI::CastSpellWand(uint32 nextAction, Unit *pTarget, uint32 SHOOT)
+CombatManeuverReturns PlayerbotClassAI::CastSpellWand(uint32 nextAction, Unit* pTarget, uint32 SHOOT)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;

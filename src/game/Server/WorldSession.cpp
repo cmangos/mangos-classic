@@ -44,8 +44,8 @@
 #include <cstdarg>
 
 #ifdef BUILD_PLAYERBOT
-    #include "PlayerBot/Base/PlayerbotMgr.h"
-    #include "PlayerBot/Base/PlayerbotAI.h"
+#include "PlayerBot/Base/PlayerbotMgr.h"
+#include "PlayerBot/Base/PlayerbotAI.h"
 #endif
 
 // select opcodes appropriate for processing in Map::Update context for current session state
@@ -318,7 +318,8 @@ bool WorldSession::Update(PacketFilter& updater)
     // The PlayerbotAI class adds to the packet queue to simulate a real player
     // since Playerbots are known to the World obj only by its master's WorldSession object
     // we need to process all master's bot's packets.
-    if (GetPlayer() && GetPlayer()->GetPlayerbotMgr()) {
+    if (GetPlayer() && GetPlayer()->GetPlayerbotMgr())
+    {
         for (PlayerBotMap::const_iterator itr = GetPlayer()->GetPlayerbotMgr()->GetPlayerBotsBegin();
                 itr != GetPlayer()->GetPlayerbotMgr()->GetPlayerBotsEnd(); ++itr)
         {
@@ -328,7 +329,7 @@ bool WorldSession::Update(PacketFilter& updater)
                 botPlayer->GetPlayerbotAI()->HandleTeleportAck();
             else if (botPlayer->IsInWorld())
             {
-                while(!pBotWorldSession->m_recvQueue.empty())
+                while (!pBotWorldSession->m_recvQueue.empty())
                 {
                     auto const botpacket = std::move(pBotWorldSession->m_recvQueue.front());
                     pBotWorldSession->m_recvQueue.pop_front();
@@ -384,7 +385,7 @@ void WorldSession::LogoutPlayer(bool save)
             _player->GetPlayerbotMgr()->LogoutAllBots();
 #endif
 
-        sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() , _player->GetGUIDLow());
+        sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName(), _player->GetGUIDLow());
 
         if (Loot* loot = sLootMgr.GetLoot(_player))
             loot->Release(_player);
@@ -473,12 +474,15 @@ void WorldSession::LogoutPlayer(bool save)
         static SqlStatementID id;
 
 #ifdef BUILD_PLAYERBOT
-        if (! _player->GetPlayerbotAI())
+        if (!_player->GetPlayerbotAI())
         {
             // Unmodded core code below
             SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
             stmt.PExecute(uint32(0), GetAccountId());
         }
+#else
+        SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
+        stmt.PExecute(uint32(0), GetAccountId());
 #endif
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
@@ -553,8 +557,14 @@ void WorldSession::LogoutPlayer(bool save)
 
 #ifdef BUILD_PLAYERBOT
         // Set for only character instead of accountid
+        // Different characters can be alive as bots
         SqlStatement stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE guid = ?");
         stmt.PExecute(guid);
+#else
+        ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
+        // No SQL injection as AccountId is uint32
+        stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE account = ?");
+        stmt.PExecute(GetAccountId());
 #endif
 
         DEBUG_LOG("SESSION: Sent SMSG_LOGOUT_COMPLETE Message");
@@ -574,7 +584,46 @@ void WorldSession::KickPlayer()
         m_Socket->Close();
 }
 
-/// Cancel channeling handler
+void WorldSession::SendExpectedSpamRecords()
+{
+    std::vector<std::string> spamRecords = sWorld.GetSpamRecords();
+
+    WorldPacket data(SMSG_EXPECTED_SPAM_RECORDS, 4);
+
+    data << (uint32) spamRecords.size();
+    for (std::string record : spamRecords)
+        data << record;
+
+    SendPacket(data);
+}
+
+void WorldSession::SendMotd(Player* currChar)
+{
+    // Send MOTD (1.12.1 not have SMSG_MOTD, so do it in another way)
+    uint32 linecount = 0;
+    std::string str_motd = sWorld.GetMotd();
+    std::string::size_type pos, nextpos;
+    std::string motd;
+
+    pos = 0;
+    while ((nextpos = str_motd.find('@', pos)) != std::string::npos)
+    {
+        if (nextpos != pos)
+        {
+            ChatHandler(currChar).PSendSysMessage("%s", str_motd.substr(pos, nextpos - pos).c_str());
+            ++linecount;
+        }
+        pos = nextpos + 1;
+    }
+
+    if (pos < str_motd.length())
+    {
+        ChatHandler(currChar).PSendSysMessage("%s", str_motd.substr(pos).c_str());
+        ++linecount;
+    }
+
+    DEBUG_LOG("WORLD: Sent motd (SMSG_MOTD)");
+}
 
 void WorldSession::SendAreaTriggerMessage(const char* Text, ...) const
 {
@@ -759,7 +808,7 @@ void WorldSession::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg) co
     SendPacket(data);
 }
 
-void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket &packet)
+void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket& packet)
 {
     // need prevent do internal far teleports in handlers because some handlers do lot steps
     // or call code that can do far teleports in some conditions unexpectedly for generic way work code

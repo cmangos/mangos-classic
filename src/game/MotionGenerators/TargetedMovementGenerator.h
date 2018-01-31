@@ -30,6 +30,7 @@ class TargetedMovementGeneratorBase
     public:
         TargetedMovementGeneratorBase(Unit& target) { i_target.link(&target, this); }
         void stopFollowing() { }
+        void SetNewTarget(Unit& target) { i_target.link(&target, this); }
     protected:
         FollowerReference i_target;
 };
@@ -54,9 +55,11 @@ class TargetedMovementGeneratorMedium
 
         bool IsReachable() const;
 
-        Unit* GetTarget() const { return i_target.getTarget(); }
+        Unit* GetCurrentTarget() const override { return i_target.getTarget(); }
 
         void unitSpeedChanged() { m_speedChanged = true; }
+
+        void SetOffsetAndAngle(float offset, float angle);
 
     protected:
         void _setTargetLocation(T&, bool updateDestination);
@@ -87,6 +90,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMo
         void Finalize(T&);
         void Interrupt(T&);
         void Reset(T&);
+        void SetMovementParameters(float offset, float angle, bool moveFurther);
 
         static void _clearUnitStateMove(T& u);
         static void _addUnitStateMove(T& u);

@@ -42,7 +42,7 @@ struct GameEventCreatureData;
 enum CreatureFlagsExtra
 {
     CREATURE_EXTRA_FLAG_INSTANCE_BIND          = 0x00000001,       // creature kill bind instance with killer and killer's group
-    CREATURE_EXTRA_FLAG_NO_AGGRO               = 0x00000002,       // not aggro (ignore faction/reputation hostility)
+    CREATURE_EXTRA_FLAG_NO_AGGRO_ON_SIGHT      = 0x00000002,       // no aggro (ignore faction/reputation hostility)
     CREATURE_EXTRA_FLAG_NO_PARRY               = 0x00000004,       // creature can't parry
     CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN        = 0x00000008,       // creature can't counter-attack at parry
     CREATURE_EXTRA_FLAG_NO_BLOCK               = 0x00000010,       // creature can't block
@@ -57,8 +57,10 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE      = 0x00002000,       // creature is forced to use MMaps
     CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE     = 0x00004000,       // creature is forced to NOT use MMaps
     CREATURE_EXTRA_FLAG_WALK_IN_WATER          = 0x00008000,       // creature is forced to walk in water even it can swim
-    CREATURE_EXTRA_FLAG_HAVE_NO_SWIM_ANIMATION = 0x00010000,       // we have to not set "swim" animation or creature will have "no animation"
+    CREATURE_EXTRA_FLAG_CIVILIAN               = 0x00010000,       // CreatureInfo->civilian substitute (for new expansions)
     CREATURE_EXTRA_FLAG_NO_MELEE               = 0x00020000,       // creature can't melee
+    // reserved by Killerwife - 0x00080000 is free
+    CREATURE_EXTRA_FLAG_COUNT_SPAWNS           = 0x00200000,       // count creature spawns in Map*
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -97,6 +99,11 @@ struct CreatureInfo
     uint32  CreatureTypeFlags;                              // enum CreatureTypeFlags mask values
     float   SpeedWalk;
     float   SpeedRun;
+    uint32  Detection;                                      // Detection Range for Line of Sight aggro
+    uint32  CallForHelp;
+    uint32  Pursuit;
+    uint32  Leash;
+    uint32  Timeout;
     uint32  UnitClass;                                      // enum Classes. Note only 4 classes are known for creatures.
     uint32  Rank;
     float   HealthMultiplier;
@@ -252,6 +259,8 @@ struct CreatureModelInfo
     uint32 modelid;
     float bounding_radius;
     float combat_reach;
+    float SpeedWalk;
+    float SpeedRun;
     uint8 gender;
     uint32 modelid_other_gender;                            // The oposite gender for this modelid (male/female)
     uint32 modelid_other_team;                              // The oposite team. Generally for alliance totem
@@ -281,6 +290,11 @@ struct PointOfInterestLocale
     std::vector<std::string> IconName;
 };
 
+struct AreaTriggerLocale
+{
+    std::vector<std::string> StatusFailed;
+};
+
 enum InhabitTypeValues
 {
     INHABIT_GROUND = 1,
@@ -298,7 +312,9 @@ enum ChatType
     CHAT_TYPE_BOSS_EMOTE        = 3,
     CHAT_TYPE_WHISPER           = 4,
     CHAT_TYPE_BOSS_WHISPER      = 5,
-    CHAT_TYPE_ZONE_YELL         = 6
+    CHAT_TYPE_ZONE_YELL         = 6,
+    CHAT_TYPE_ZONE_EMOTE        = 7,
+    CHAT_TYPE_MAX
 };
 
 // Selection method used by SelectAttackingTarget
@@ -366,7 +382,7 @@ struct VendorItemData
     void Clear()
     {
         for (VendorItemList::const_iterator itr = m_items.begin(); itr != m_items.end(); ++itr)
-            delete(*itr);
+            delete (*itr);
         m_items.clear();
     }
 };
@@ -495,7 +511,7 @@ enum TemporaryFactionFlags                                  // Used at real fact
     TEMPFACTION_RESTORE_REACH_HOME      = 0x04,             // ... at reaching home in home movement (evade), if not already done at CombatStop()
     TEMPFACTION_TOGGLE_NON_ATTACKABLE   = 0x08,             // Remove UNIT_FLAG_NON_ATTACKABLE(0x02) when faction is changed (reapply when temp-faction is removed)
     TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER = 0x10,             // Remove UNIT_FLAG_IMMUNE_TO_PLAYER(0x100) when faction is changed (reapply when temp-faction is removed)
-    TEMPFACTION_TOGGLE_IMMUNE_TO_NPC          = 0x20,             // Remove UNIT_FLAG_IMMUNE_TO_NPC(0x200) when faction is changed (reapply when temp-faction is removed)
+    TEMPFACTION_TOGGLE_IMMUNE_TO_NPC    = 0x20,             // Remove UNIT_FLAG_IMMUNE_TO_NPC(0x200) when faction is changed (reapply when temp-faction is removed)
     TEMPFACTION_TOGGLE_PACIFIED         = 0x40,             // Remove UNIT_FLAG_PACIFIED(0x20000) when faction is changed (reapply when temp-faction is removed)
     TEMPFACTION_TOGGLE_NOT_SELECTABLE   = 0x80,             // Remove UNIT_FLAG_NOT_SELECTABLE(0x2000000) when faction is changed (reapply when temp-faction is removed)
     TEMPFACTION_ALL,
@@ -551,7 +567,7 @@ class Creature : public Unit
 
 #ifdef BUILD_PLAYERBOT
         // Adds functionality to load/unload bots from NPC, also need to apply SQL scripts
-        void LoadBotMenu(Player *pPlayer);
+        void LoadBotMenu(Player* pPlayer);
 #endif
 
         bool IsCorpse() const { return getDeathState() ==  CORPSE; }
@@ -561,6 +577,7 @@ class Creature : public Unit
         uint32 GetCorpseDecayTimer() const { return m_corpseDecayTimer; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool IsCivilian() const { return !!GetCreatureInfo()->civilian; }
+        bool IsNoAggroOnSight() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO_ON_SIGHT); }
         bool IsGuard() const { return !!(GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_GUARD); }
 
         bool CanWalk() const { return !!(GetCreatureInfo()->InhabitType & INHABIT_GROUND); }
@@ -768,6 +785,10 @@ class Creature : public Unit
         void SendAreaSpiritHealerQueryOpcode(Player* pl);
 
         void SetVirtualItem(VirtualItemSlot slot, uint32 item_id);
+
+        void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
+
+        uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 
@@ -814,6 +835,8 @@ class Creature : public Unit
 
         std::unique_ptr<CreatureAI> m_ai;
 
+        void SetBaseWalkSpeed(float speed) override;
+        void SetBaseRunSpeed(float speed) override;
     private:
         GridReference<Creature> m_gridRef;
         CreatureInfo const* m_creatureInfo;

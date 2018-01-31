@@ -40,7 +40,7 @@
 #include "Spells/SpellMgr.h"
 
 #ifdef BUILD_PLAYERBOT
-    #include "PlayerBot/Base/PlayerbotMgr.h"
+#include "PlayerBot/Base/PlayerbotMgr.h"
 #endif
 
 // config option SkipCinematics supported values
@@ -123,7 +123,7 @@ class CharacterHandler
         // This callback is different from the normal HandlePlayerLoginCallback in that it
         // sets up the bot's world session and also stores the pointer to the bot player in the master's
         // world session m_playerBots map
-        void HandlePlayerBotLoginCallback(QueryResult * /*dummy*/, SqlQueryHolder * holder)
+        void HandlePlayerBotLoginCallback(QueryResult* /*dummy*/, SqlQueryHolder* holder)
         {
             if (!holder)
                 return;
@@ -140,7 +140,7 @@ class CharacterHandler
 
             // The bot's WorldSession is owned by the bot's Player object
             // The bot's WorldSession is deleted by PlayerbotMgr::LogoutPlayerBot
-            WorldSession *botSession = new WorldSession(lqh->GetAccountId(), nullptr, SEC_PLAYER, 0, LOCALE_enUS);
+            WorldSession* botSession = new WorldSession(lqh->GetAccountId(), nullptr, SEC_PLAYER, 0, LOCALE_enUS);
             botSession->HandlePlayerLogin(lqh); // will delete lqh
             masterSession->GetPlayer()->GetPlayerbotMgr()->OnBotLogin(botSession->GetPlayer());
         }
@@ -375,7 +375,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     data << (uint8)CHAR_CREATE_SUCCESS;
     SendPacket(data);
 
-    const std::string &IP_str = GetRemoteAddress();
+    const std::string& IP_str = GetRemoteAddress();
     BASIC_LOG("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
     sLog.outChar("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
 
@@ -474,8 +474,8 @@ void PlayerbotMgr::LoginPlayerBot(ObjectGuid playerGuid)
     if (accountId == 0)
         return;
 
-    LoginQueryHolder *holder = new LoginQueryHolder(accountId, playerGuid);
-    if(!holder->Initialize())
+    LoginQueryHolder* holder = new LoginQueryHolder(accountId, playerGuid);
+    if (!holder->Initialize())
     {
         delete holder;                                      // delete all unprocessed queries
         return;
@@ -516,32 +516,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         data << uint32(0);
     SendPacket(data);
 
-    // Send MOTD (1.12.1 not have SMSG_MOTD, so do it in another way)
-    {
-        uint32 linecount = 0;
-        std::string str_motd = sWorld.GetMotd();
-        std::string::size_type pos, nextpos;
-        std::string motd;
-
-        pos = 0;
-        while ((nextpos = str_motd.find('@', pos)) != std::string::npos)
-        {
-            if (nextpos != pos)
-            {
-                ChatHandler(pCurrChar).PSendSysMessage("%s", str_motd.substr(pos, nextpos - pos).c_str());
-                ++linecount;
-            }
-            pos = nextpos + 1;
-        }
-
-        if (pos < str_motd.length())
-        {
-            ChatHandler(pCurrChar).PSendSysMessage("%s", str_motd.substr(pos).c_str());
-            ++linecount;
-        }
-
-        DEBUG_LOG("WORLD: Sent motd (SMSG_MOTD)");
-    }
+    // Send Spam records
+    SendExpectedSpamRecords();
+    SendMotd(pCurrChar);
 
     // QueryResult *result = CharacterDatabase.PQuery("SELECT guildid,rank FROM guild_member WHERE guid = '%u'",pCurrChar->GetGUIDLow());
     QueryResult* resultGuild = holder->GetResult(PLAYER_LOGIN_QUERY_LOADGUILD);

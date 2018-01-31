@@ -29,78 +29,70 @@ int GuardAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-GuardAI::GuardAI(Creature* c) : CreatureAI(c), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
+GuardAI::GuardAI(Creature* creature) : CreatureAI(creature)
 {
 }
 
-void GuardAI::MoveInLineOfSight(Unit* u)
+void GuardAI::MoveInLineOfSight(Unit* who)
 {
     // Ignore Z for flying creatures
-    if (!m_creature->CanFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE)
+    if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
         return;
 
-    if (!m_creature->getVictim() && u->isTargetableForAttack() &&
-            (u->IsHostileToPlayers() || m_creature->IsHostileTo(u) /*|| u->getVictim() && m_creature->IsFriendlyTo(u->getVictim())*/) &&
-            u->isInAccessablePlaceFor(m_creature))
+    if (m_creature->getVictim())
+        return;
+
+    if (who->IsFriendlyTo(m_creature) && who->isInCombat())
     {
-        float attackRadius = m_creature->GetAttackDistance(u);
-        if (m_creature->IsWithinDistInMap(u, attackRadius))
+        Unit* victim = who->getAttackerForHelper();
+
+        if (!victim)
+            return;
+
+        if (victim->IsFriendlyTo(m_creature))
+            return;
+
+        if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(victim) && victim->isInAccessablePlaceFor(m_creature))
         {
-            // Need add code to let guard support player
-            AttackStart(u);
-            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            if (who->GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() != TYPEID_PLAYER)
+            {
+                if (m_creature->IsWithinDistInMap(who, 5.0) && m_creature->IsWithinDistInMap(victim, 10.0) && m_creature->IsWithinLOSInMap(victim))
+                {
+                    AttackStart(victim);
+                }
+            }
+            else if (who->GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() == TYPEID_PLAYER || victim->GetObjectGuid().IsCreature() && ((Creature*)victim)->IsPet() && ((Creature*)victim)->GetOwnerGuid().IsPlayer())
+            {
+                if (m_creature->IsWithinDistInMap(who, 30.0) && m_creature->IsWithinLOSInMap(who))
+                {
+                    AttackStart(victim);
+                }
+            }
+            else if (who->GetObjectGuid().IsCreature())
+            {
+                if (((Creature*)who)->IsGuard() || ((Creature*)who)->IsCivilian())
+                {
+                    if (m_creature->IsWithinDistInMap(who, 20.0) && m_creature->IsWithinLOSInMap(who))
+                    {
+                        AttackStart(victim);
+                    }
+                }
+
+            }
         }
-    }
-}
-
-void GuardAI::EnterEvadeMode()
-{
-    if (!m_creature->isAlive())
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking because he's dead [guid=%u]", m_creature->GetGUIDLow());
-        m_creature->StopMoving();
-        m_creature->GetMotionMaster()->MoveIdle();
-
-        i_state = STATE_NORMAL;
-
-        i_victimGuid.Clear();
-        m_creature->CombatStop(true);
-        m_creature->DeleteThreatList();
-        return;
-    }
-
-    Unit* victim = m_creature->GetMap()->GetUnit(i_victimGuid);
-
-    if (!victim)
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, no victim [guid=%u]", m_creature->GetGUIDLow());
-    }
-    else if (!victim->isAlive())
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim is dead [guid=%u]", m_creature->GetGUIDLow());
-    }
-    else if (victim->HasStealthAura())
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim is in stealth [guid=%u]", m_creature->GetGUIDLow());
-    }
-    else if (victim->IsTaxiFlying())
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim is in flight [guid=%u]", m_creature->GetGUIDLow());
     }
     else
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim out run him [guid=%u]", m_creature->GetGUIDLow());
+        if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(who) &&
+                (who->IsHostileToPlayers() || m_creature->IsHostileTo(who)) && who->isInAccessablePlaceFor(m_creature))
+        {
+            float attackRadius = m_creature->GetAttackDistance(who);
+            if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->IsWithinLOSInMap(who))
+            {
+                AttackStart(who);
+            }
+        }
     }
-
-    m_creature->RemoveAllAurasOnEvade();
-    m_creature->DeleteThreatList();
-    i_victimGuid.Clear();
-    m_creature->CombatStop(true);
-    i_state = STATE_NORMAL;
-
-    // Remove ChaseMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-    if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-        m_creature->GetMotionMaster()->MoveTargetedHome();
 }
 
 void GuardAI::UpdateAI(const uint32 /*diff*/)
@@ -109,35 +101,5 @@ void GuardAI::UpdateAI(const uint32 /*diff*/)
     if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
         return;
 
-    i_victimGuid = m_creature->getVictim()->GetObjectGuid();
-
     DoMeleeAttackIfReady();
-}
-
-bool GuardAI::IsVisible(Unit* pl) const
-{
-    return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER))
-           && pl->isVisibleForOrDetect(m_creature, m_creature, true);
-}
-
-void GuardAI::AttackStart(Unit* u)
-{
-    if (!u)
-        return;
-
-    if (m_creature->Attack(u, true))
-    {
-        i_victimGuid = u->GetObjectGuid();
-        m_creature->AddThreat(u);
-        m_creature->SetInCombatWith(u);
-        u->SetInCombatWith(m_creature);
-
-        HandleMovementOnAttackStart(u);
-    }
-}
-
-void GuardAI::JustDied(Unit* killer)
-{
-    if (Player* pkiller = killer->GetBeneficiaryPlayer())
-        m_creature->SendZoneUnderAttackMessage(pkiller);
 }

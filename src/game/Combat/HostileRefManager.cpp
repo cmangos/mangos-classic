@@ -32,7 +32,7 @@ HostileRefManager::~HostileRefManager()
 }
 
 //=================================================
-// send threat to all my hateres for the pVictim
+// send threat to all my haters for the pVictim
 // The pVictim is hated than by them as well
 // use for buffs and healing threat functionality
 
@@ -43,7 +43,8 @@ void HostileRefManager::threatAssist(Unit* pVictim, float pThreat, SpellEntry co
     HostileReference* ref = getFirst();
     while (ref)
     {
-        ref->getSource()->addThreat(pVictim, threat, false, (pThreatSpell ? GetSpellSchoolMask(pThreatSpell) : SPELL_SCHOOL_MASK_NORMAL), pThreatSpell);
+        if (!ref->getSource()->getOwner()->IsIncapacitated())
+            ref->getSource()->addThreat(pVictim, threat, false, (pThreatSpell ? GetSpellSchoolMask(pThreatSpell) : SPELL_SCHOOL_MASK_NORMAL), pThreatSpell);
 
         ref = ref->next();
     }

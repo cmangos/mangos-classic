@@ -102,11 +102,11 @@ void instance_stratholme::OnCreatureCreate(Creature* pCreature)
         case NPC_AURIUS:
             if (m_auiEncounter[TYPE_AURIUS] == DONE)
                 pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-            // no break here
+        // no break here
         case NPC_BARON:
         case NPC_YSIDA:
         case NPC_BARTHILAS:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
         case NPC_CRYSTAL:
@@ -203,7 +203,7 @@ void instance_stratholme::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
@@ -568,7 +568,7 @@ void instance_stratholme::DoSortZiggurats()
     {
         // Sort the acolytes by height, and the one with the biggest height is the announcer (a bit outside the map)
         lAcolytes.sort(sortByHeight);
-        m_mNpcEntryGuidStore[NPC_THUZADIN_ACOLYTE] = (*lAcolytes.begin())->GetObjectGuid();
+        m_npcEntryGuidStore[NPC_THUZADIN_ACOLYTE] = (*lAcolytes.begin())->GetObjectGuid();
         lAcolytes.erase(lAcolytes.begin());
     }
 
@@ -955,7 +955,7 @@ void instance_stratholme::DoSpawnPlaguedCritters(uint8 uiGate, Player* pPlayer)
     if (!pPlayer)
         return;
 
-    uint32 uiEntry = aPlaguedCritters[urand(0,2)];
+    uint32 uiEntry = aPlaguedCritters[urand(0, 2)];
     for (uint8 i = 0; i < 30; ++i)
     {
         float fX, fY, fZ;

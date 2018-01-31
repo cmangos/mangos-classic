@@ -49,7 +49,7 @@ void instance_deadmines::OnPlayerEnter(Player* pPlayer)
 void instance_deadmines::OnCreatureCreate(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_MR_SMITE)
-        m_mNpcEntryGuidStore[NPC_MR_SMITE] = pCreature->GetObjectGuid();
+        m_npcEntryGuidStore[NPC_MR_SMITE] = pCreature->GetObjectGuid();
 }
 
 void instance_deadmines::OnObjectCreate(GameObject* pGo)
@@ -85,7 +85,7 @@ void instance_deadmines::OnObjectCreate(GameObject* pGo)
             return;
     }
 
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_deadmines::OnCreatureDeath(Creature* pCreature)

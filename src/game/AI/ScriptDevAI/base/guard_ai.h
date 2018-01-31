@@ -21,36 +21,36 @@ enum
 struct guardAI : public ScriptedAI
 {
     public:
-        explicit guardAI(Creature* pCreature);
+        explicit guardAI(Creature* creature);
         ~guardAI() {}
 
-        uint32 m_uiGlobalCooldown;                          // This variable acts like the global cooldown that players have (1.5 seconds)
-        uint32 m_uiBuffTimer;                               // This variable keeps track of buffs
+        uint32 m_globalCooldown;                          // This variable acts like the global cooldown that players have (1.5 seconds)
+        uint32 m_buffTimer;                               // This variable keeps track of buffs
 
         void Reset() override;
 
-        void Aggro(Unit* pWho) override;
+        void Aggro(Unit* who) override;
 
-        void JustDied(Unit* /*pKiller*/) override;
+        void JustDied(Unit* /*killer*/) override;
 
-        void UpdateAI(const uint32 uiDiff) override;
+        void UpdateAI(const uint32 diff) override;
 
         // Commonly used for guards in main cities
-        void DoReplyToTextEmote(uint32 uiTextEmote);
+        void DoReplyToTextEmote(uint32 textEmote);
 };
 
 struct guardAI_orgrimmar : public guardAI
 {
-    guardAI_orgrimmar(Creature* pCreature) : guardAI(pCreature) {}
+    guardAI_orgrimmar(Creature* creature) : guardAI(creature) {}
 
-    void ReceiveEmote(Player* pPlayer, uint32 uiTextEmote) override;
+    void ReceiveEmote(Player* player, uint32 textEmote) override;
 };
 
 struct guardAI_stormwind : public guardAI
 {
-    guardAI_stormwind(Creature* pCreature) : guardAI(pCreature) {}
+    guardAI_stormwind(Creature* creature) : guardAI(creature) {}
 
-    void ReceiveEmote(Player* pPlayer, uint32 uiTextEmote) override;
+    void ReceiveEmote(Player* player, uint32 textEmote) override;
 };
 
 #endif

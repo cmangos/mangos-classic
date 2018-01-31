@@ -257,9 +257,9 @@ bool ChatHandler::HandleDebugPlaySoundCommand(char* args)
     }
 
     if (m_session->GetPlayer()->GetSelectionGuid())
-        unit->PlayDistanceSound(dwSoundId, m_session->GetPlayer());
+        unit->PlayDistanceSound(dwSoundId, PlayPacketParameters(PLAY_TARGET, m_session->GetPlayer()));
     else
-        unit->PlayDirectSound(dwSoundId, m_session->GetPlayer());
+        unit->PlayDirectSound(dwSoundId, PlayPacketParameters(PLAY_TARGET, m_session->GetPlayer()));
 
     PSendSysMessage(LANG_YOU_HEAR_SOUND, dwSoundId);
     return true;
@@ -281,7 +281,7 @@ bool ChatHandler::HandleDebugPlayMusicCommand(char* args)
         return false;
     }
 
-    m_session->GetPlayer()->PlayMusic(dwMusicId, dynamic_cast<Player*>(getSelectedUnit()));
+    m_session->GetPlayer()->PlayMusic(dwMusicId, PlayPacketParameters(PLAY_TARGET, dynamic_cast<Player*>(getSelectedUnit())));
 
     PSendSysMessage(LANG_YOU_HEAR_SOUND, dwMusicId);
     return true;
@@ -734,7 +734,7 @@ bool ChatHandler::HandleSetValueHelper(Object* target, uint32 field, char* typeS
             return false;
 
         DEBUG_LOG(GetMangosString(LANG_SET_UINT), guid.GetString().c_str(), field, iValue);
-        target->SetUInt32Value(field , iValue);
+        target->SetUInt32Value(field, iValue);
         PSendSysMessage(LANG_SET_UINT_FIELD, guid.GetString().c_str(), field, iValue);
     }
     else
@@ -744,7 +744,7 @@ bool ChatHandler::HandleSetValueHelper(Object* target, uint32 field, char* typeS
             return false;
 
         DEBUG_LOG(GetMangosString(LANG_SET_FLOAT), guid.GetString().c_str(), field, fValue);
-        target->SetFloatValue(field , fValue);
+        target->SetFloatValue(field, fValue);
         PSendSysMessage(LANG_SET_FLOAT_FIELD, guid.GetString().c_str(), field, fValue);
     }
 

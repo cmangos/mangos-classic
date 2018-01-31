@@ -66,6 +66,9 @@ class DynamicObject : public WorldObject
         bool IsEnemy(Unit const* unit) const override;
         bool IsFriend(Unit const* unit) const override;
 
+        bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const override;
+        bool CanAssistSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const override;
+
         float GetObjectBoundingRadius() const override      // overwrite WorldObject version
         {
             return 0.0f;                                    // dynamic object not have real interact size

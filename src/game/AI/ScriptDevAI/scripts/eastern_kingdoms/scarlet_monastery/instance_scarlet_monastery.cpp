@@ -43,7 +43,7 @@ void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)
         case NPC_MOGRAINE:
         case NPC_WHITEMANE:
         case NPC_VORREL:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -61,7 +61,7 @@ void instance_scarlet_monastery::OnCreatureDeath(Creature* pCreature)
 void instance_scarlet_monastery::OnObjectCreate(GameObject* pGo)
 {
     if (pGo->GetEntry() == GO_WHITEMANE_DOOR)
-        m_mGoEntryGuidStore[GO_WHITEMANE_DOOR] = pGo->GetObjectGuid();
+        m_goEntryGuidStore[GO_WHITEMANE_DOOR] = pGo->GetObjectGuid();
 }
 
 void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)

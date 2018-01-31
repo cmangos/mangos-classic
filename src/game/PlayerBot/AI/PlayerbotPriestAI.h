@@ -79,89 +79,89 @@ enum PriestSpells
 
 class MANGOS_DLL_SPEC PlayerbotPriestAI : PlayerbotClassAI
 {
-public:
-    PlayerbotPriestAI(Player * const master, Player * const bot, PlayerbotAI * const ai);
-    virtual ~PlayerbotPriestAI();
+    public:
+        PlayerbotPriestAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        virtual ~PlayerbotPriestAI();
 
-    // all combat actions go here
-    CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
-    uint32 Neutralize(uint8 creatureType);
+        // all combat actions go here
+        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
+        uint32 Neutralize(uint8 creatureType);
 
-    // all non combat actions go here, ex buffs, heals, rezzes
-    void DoNonCombatActions();
+        // all non combat actions go here, ex buffs, heals, rezzes
+        void DoNonCombatActions();
 
-    // Utility Functions
-    bool CastHoTOnTank();
+        // Utility Functions
+        bool CastHoTOnTank();
 
-private:
-    CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
-    CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
-    CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
+    private:
+        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
+        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
 
-    CombatManeuverReturns CastSpell(uint32 nextAction, Unit *pTarget = nullptr) { return CastSpellWand(nextAction, pTarget, SHOOT); }
+        CombatManeuverReturns CastSpell(uint32 nextAction, Unit* pTarget = nullptr) { return CastSpellWand(nextAction, pTarget, SHOOT); }
 
-    // Heals the target based off its hps
-    CombatManeuverReturns HealPlayer(Player* target);
+        // Heals the target based off its hps
+        CombatManeuverReturns HealPlayer(Player* target);
 
-    static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit *target);
+        static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target);
 
-    // holy
-    uint32 CLEARCASTING,
-           DESPERATE_PRAYER,
-           FLASH_HEAL,
-           GREATER_HEAL,
-           HEAL,
-           HOLY_FIRE,
-           HOLY_NOVA,
-           LESSER_HEAL,
-           MANA_BURN,
-           PRAYER_OF_HEALING,
-           RENEW,
-           RESURRECTION,
-           SHACKLE_UNDEAD,
-           SMITE,
-           CURE_DISEASE,
-           ABOLISH_DISEASE,
-           PRIEST_DISPEL_MAGIC;
+        // holy
+        uint32 CLEARCASTING,
+               DESPERATE_PRAYER,
+               FLASH_HEAL,
+               GREATER_HEAL,
+               HEAL,
+               HOLY_FIRE,
+               HOLY_NOVA,
+               LESSER_HEAL,
+               MANA_BURN,
+               PRAYER_OF_HEALING,
+               RENEW,
+               RESURRECTION,
+               SHACKLE_UNDEAD,
+               SMITE,
+               CURE_DISEASE,
+               ABOLISH_DISEASE,
+               PRIEST_DISPEL_MAGIC;
 
-    // ranged
-    uint32 SHOOT;
+        // ranged
+        uint32 SHOOT;
 
-    // shadowmagic
-    uint32 FADE,
-           SHADOW_WORD_PAIN,
-           MIND_BLAST,
-           SCREAM,
-           MIND_FLAY,
-           DEVOURING_PLAGUE,
-           SHADOW_PROTECTION,
-           PRAYER_OF_SHADOW_PROTECTION,
-           SHADOWFORM,
-           VAMPIRIC_EMBRACE;
+        // shadowmagic
+        uint32 FADE,
+               SHADOW_WORD_PAIN,
+               MIND_BLAST,
+               SCREAM,
+               MIND_FLAY,
+               DEVOURING_PLAGUE,
+               SHADOW_PROTECTION,
+               PRAYER_OF_SHADOW_PROTECTION,
+               SHADOWFORM,
+               VAMPIRIC_EMBRACE;
 
-    // discipline
-    uint32 POWER_WORD_SHIELD,
-           INNER_FIRE,
-           POWER_WORD_FORTITUDE,
-           PRAYER_OF_FORTITUDE,
-           FEAR_WARD,
-           POWER_INFUSION,
-           MASS_DISPEL,
-           DIVINE_SPIRIT,
-           PRAYER_OF_SPIRIT,
-           INNER_FOCUS;
+        // discipline
+        uint32 POWER_WORD_SHIELD,
+               INNER_FIRE,
+               POWER_WORD_FORTITUDE,
+               PRAYER_OF_FORTITUDE,
+               FEAR_WARD,
+               POWER_INFUSION,
+               MASS_DISPEL,
+               DIVINE_SPIRIT,
+               PRAYER_OF_SPIRIT,
+               INNER_FOCUS;
 
-    // racial
-    uint32 STONEFORM,
-           ELUNES_GRACE,
-           ESCAPE_ARTIST,
-           PERCEPTION,
-           SHADOWMELD,
-           WAR_STOMP,
-           BERSERKING,
-           WILL_OF_THE_FORSAKEN;
+        // racial
+        uint32 STONEFORM,
+               ELUNES_GRACE,
+               ESCAPE_ARTIST,
+               PERCEPTION,
+               SHADOWMELD,
+               WAR_STOMP,
+               BERSERKING,
+               WILL_OF_THE_FORSAKEN;
 };
 
 #endif

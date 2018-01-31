@@ -56,7 +56,7 @@ void instance_uldaman::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_uldaman::OnCreatureCreate(Creature* pCreature)
@@ -71,7 +71,7 @@ void instance_uldaman::OnCreatureCreate(Creature* pCreature)
             m_lKeepers.push_back(pCreature->GetObjectGuid());
             break;
         case NPC_ARCHAEDAS:
-            m_mNpcEntryGuidStore[NPC_ARCHAEDAS] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[NPC_ARCHAEDAS] = pCreature->GetObjectGuid();
             break;
         default:
             break;
@@ -152,7 +152,7 @@ void instance_uldaman::SetData64(uint32 uiData, uint64 uiGuid)
 {
     switch (uiData)
     {
-            // ToDo: check if this one is used in ACID. Otherwise it can be dropped
+        // ToDo: check if this one is used in ACID. Otherwise it can be dropped
         case DATA_EVENT_STARTER:
             m_playerGuid = ObjectGuid(uiGuid);
             break;

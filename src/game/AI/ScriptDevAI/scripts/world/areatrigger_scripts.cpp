@@ -51,7 +51,7 @@ bool AreaTrigger_at_childrens_week_spot(Player* pPlayer, AreaTriggerEntry const*
         if (pPlayer->IsCurrentQuest(TriggerOrphanSpell[i][2]))
         {
             if (pAt->id == TriggerOrphanSpell[i][0] &&
-                pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == TriggerOrphanSpell[i][1])
+                    pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == TriggerOrphanSpell[i][1])
             {
                 pPlayer->SendQuestCompleteEvent(TriggerOrphanSpell[i][2]);
                 pPlayer->CompleteQuest(TriggerOrphanSpell[i][2]);
@@ -214,7 +214,7 @@ struct Location
 
 static const Location m_miranAmbushSpawns[] =
 {
-    { -5760.73f, -3437.71f, 305.54f, 2.41f },   // Saean 
+    { -5760.73f, -3437.71f, 305.54f, 2.41f },   // Saean
     { -5759.85f, -3441.29f, 305.57f, 2.24f },   // Dark Iron Ambusher 1
     { -5757.75f, -3437.61f, 304.32f, 2.56f },   // Dark Iron Ambusher 2
 };
@@ -223,8 +223,8 @@ bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*
 {
     // Player is deaed, a GM, quest complete or no quest, do nothing
     if (!pPlayer->isAlive() || pPlayer->isGameMaster() ||
-        pPlayer->GetQuestStatus(QUEST_RESUPPLYING_THE_EXCAVATION) == QUEST_STATUS_COMPLETE ||
-        pPlayer->GetQuestStatus(QUEST_RESUPPLYING_THE_EXCAVATION) == QUEST_STATUS_NONE)
+            pPlayer->GetQuestStatus(QUEST_RESUPPLYING_THE_EXCAVATION) == QUEST_STATUS_COMPLETE ||
+            pPlayer->GetQuestStatus(QUEST_RESUPPLYING_THE_EXCAVATION) == QUEST_STATUS_NONE)
         return false;
 
     ScriptedMap* pScriptedMap = (ScriptedMap*)pPlayer->GetInstanceData();
@@ -244,20 +244,19 @@ bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*
     pPlayer->SendQuestCompleteEvent(QUEST_RESUPPLYING_THE_EXCAVATION);
 
     // Quest NPCs in combat, skip the rest, prevent double spawns
-    if (m_miran->isInCombat() || m_huldar->isInCombat()) 
+    if (m_miran->isInCombat() || m_huldar->isInCombat())
         return true;
 
     // Check if Saean is spawned and set his faction to hostile - summon him if not spawned
     if (m_saean)
         m_saean->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
-    else 
+    else
     {
-        m_huldar
-            ->SummonCreature(NPC_SAEAN, m_miranAmbushSpawns[0].m_fX, m_miranAmbushSpawns[0].m_fY, m_miranAmbushSpawns[0].m_fZ, m_miranAmbushSpawns[0].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000)
-            ->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
-        m_saean = GetClosestCreatureWithEntry(pPlayer, NPC_SAEAN, 60.0f, true);
+        m_saean = m_huldar->SummonCreature(NPC_SAEAN, m_miranAmbushSpawns[0].m_fX, m_miranAmbushSpawns[0].m_fY, m_miranAmbushSpawns[0].m_fZ, m_miranAmbushSpawns[0].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
+        if (m_saean)
+            m_saean->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
     }
-   
+
     // Check if any Dark Iron Ambusher are already spawned or dead, if so, do nothing
     if (!GetClosestCreatureWithEntry(pPlayer, NPC_DARK_IRON_AMBUSHER, 60.0f, false, false))
     {

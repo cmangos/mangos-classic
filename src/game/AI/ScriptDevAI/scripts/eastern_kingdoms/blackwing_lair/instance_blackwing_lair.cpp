@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Instance_Blackwing_Lair
-SD%Complete: 90
+SD%Complete: 100
 SDComment:
 SDCategory: Blackwing Lair
 EndScriptData
@@ -29,8 +29,13 @@ EndScriptData
 instance_blackwing_lair::instance_blackwing_lair(Map* pMap) : ScriptedInstance(pMap),
     m_uiResetTimer(0),
     m_uiDefenseTimer(0),
+    m_uiScepterEpicTimer(0),
+    m_uiNefarianSpawnTimer(0),
+    m_uiScepterQuestStep(0),
     m_uiDragonspawnCount(0),
-    m_uiBlackwingDefCount(0)
+    m_uiBlackwingDefCount(0),
+    m_uiDeadDrakonidsCount(0),
+    m_bIsMainGateOpen(true)
 {
     Initialize();
 }
@@ -69,12 +74,28 @@ void instance_blackwing_lair::OnCreatureCreate(Creature* pCreature)
             pCreature->SetInCombatWithZone();
             m_lDefendersGuids.push_back(pCreature->GetObjectGuid());
             break;
+        // Nefarian encounter
+        case NPC_BLACK_SPAWNER:
+        case NPC_RED_SPAWNER:
+        case NPC_GREEN_SPAWNER:
+        case NPC_BRONZE_SPAWNER:
+        case NPC_BLUE_SPAWNER:
+            m_lDrakonidSpawnerGuids.push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_BLACK_DRAKONID:
+        case NPC_RED_DRAKONID:
+        case NPC_GREEN_DRAKONID:
+        case NPC_BLUE_DRAKONID:
+        case NPC_BRONZE_DRAKONID:
+        case NPC_CHROMATIC_DRAKONID:
+            pCreature->SetInCombatWithZone();
+            break;
         case NPC_RAZORGORE:
         case NPC_NEFARIANS_TROOPS:
         case NPC_BLACKWING_ORB_TRIGGER:
         case NPC_VAELASTRASZ:
         case NPC_LORD_VICTOR_NEFARIUS:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -109,21 +130,47 @@ void instance_blackwing_lair::OnObjectCreate(GameObject* pGo)
         case GO_DRAKONID_BONES:
             m_lDrakonidBonesGuids.push_back(pGo->GetObjectGuid());
             return;
+        case GO_SUPPRESSION_DEVICE:
+            // Do not spawn the Suppression Device GOs if Broodlord Lashlayer is dead
+            if (GetData(TYPE_LASHLAYER) == DONE)
+                pGo->SetLootState(GO_JUST_DEACTIVATED);
+            return;
 
         default:
             return;
     }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
 void instance_blackwing_lair::SetData(uint32 uiType, uint32 uiData)
 {
+    // Close de the main gate whenever an event starts (if it is not already open)
+    if (m_bIsMainGateOpen && (uiData == IN_PROGRESS || uiData == SPECIAL))
+    {
+        DoUseDoorOrButton(GO_DOOR_RAZORGORE_ENTER);
+        m_bIsMainGateOpen = false;
+    }
+    // If an encounter is failed or won, open the main gate only if it is currently closed and no other event is in progress
+    else if (!m_bIsMainGateOpen && (uiData == FAIL || uiData == DONE))
+    {
+        bool ShouldKeepGateClosed = false;
+        for (uint8 i = 0; i < TYPE_NEFARIAN; i++)
+        {
+            if (uiType != i && (m_auiEncounter[i] == IN_PROGRESS || m_auiEncounter[i] == SPECIAL))
+                ShouldKeepGateClosed = true;
+        }
+
+        if (!ShouldKeepGateClosed)
+        {
+            DoUseDoorOrButton(GO_DOOR_RAZORGORE_ENTER);
+            m_bIsMainGateOpen = true;
+        }
+    }
+
     switch (uiType)
     {
         case TYPE_RAZORGORE:
             m_auiEncounter[uiType] = uiData;
-            if (uiData != SPECIAL)
-                DoUseDoorOrButton(GO_DOOR_RAZORGORE_ENTER);
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_DOOR_RAZORGORE_EXIT);
             else if (uiData == FAIL)
@@ -132,6 +179,11 @@ void instance_blackwing_lair::SetData(uint32 uiType, uint32 uiData)
 
                 // Reset the Orb of Domination and the eggs
                 DoToggleGameObjectFlags(GO_ORB_OF_DOMINATION, GO_FLAG_NO_INTERACT, true);
+                if (Creature* pOrb = GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
+                {
+                    if (pOrb->isAlive())
+                        pOrb->AI()->EnterEvadeMode();
+                }
 
                 // Reset defenders
                 for (GuidList::const_iterator itr = m_lDefendersGuids.begin(); itr != m_lDefendersGuids.end(); ++itr)
@@ -170,49 +222,58 @@ void instance_blackwing_lair::SetData(uint32 uiType, uint32 uiData)
                 DoUseDoorOrButton(GO_DOOR_CHROMAGGUS_EXIT);
             break;
         case TYPE_NEFARIAN:
+            // If epic quest for Scepter of the Shifting Sands is in progress when Nefarian is defeated mark it as complete
+            if (uiData == DONE && GetData(TYPE_QUEST_SCEPTER) == IN_PROGRESS)
+                SetData(TYPE_QUEST_SCEPTER, DONE);
+
             // Don't store the same thing twice
             if (m_auiEncounter[uiType] == uiData)
                 break;
+
             if (uiData == SPECIAL)
             {
-                // handle missing spell 23362
-                Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS);
-                if (!pNefarius)
-                    break;
+                m_auiEncounter[uiType] = uiData;
+                m_uiNefarianSpawnTimer = 5 * IN_MILLISECONDS;   // End of phase 1: spawn Nefarian 5 seconds later
 
-                for (GuidList::const_iterator itr = m_lDrakonidBonesGuids.begin(); itr != m_lDrakonidBonesGuids.end(); ++itr)
-                {
-                    // The Go script will handle the missing spell 23361
-                    if (GameObject* pGo = instance->GetGameObject(*itr))
-                        pGo->Use(pNefarius);
-                }
-                // Don't store special data
+                // Remove drakonids spawners and Lord Victor Nefarius
+                CleanupNefarianStage(false);
                 break;
             }
+            if (uiData == FAIL)
+                CleanupNefarianStage(true); // Cleanup the drakonid bones, dead drakonids count and spawners
             m_auiEncounter[uiType] = uiData;
             DoUseDoorOrButton(GO_DOOR_NEFARIAN);
-            // Cleanup the drakonid bones
-            if (uiData == FAIL)
+            break;
+        case TYPE_QUEST_SCEPTER:
+            m_auiEncounter[uiType] = uiData;
+            // Start 5 hours timer (various steps are handled in Update()
+            if (uiData == IN_PROGRESS)
             {
-                for (GuidList::const_iterator itr = m_lDrakonidBonesGuids.begin(); itr != m_lDrakonidBonesGuids.end(); ++itr)
-                {
-                    if (GameObject* pGo = instance->GetGameObject(*itr))
-                        pGo->SetLootState(GO_JUST_DEACTIVATED);
-                }
-
-                m_lDrakonidBonesGuids.clear();
+                m_uiScepterEpicTimer = 2000;
+                m_uiScepterQuestStep = 0;
             }
+            // Stop timer
+            if (uiData == DONE)
+                m_uiScepterEpicTimer = 0;
+            break;
+        case TYPE_CHROMA_LBREATH:
+        case TYPE_CHROMA_RBREATH:
+        case TYPE_NEFA_LTUNNEL:
+        case TYPE_NEFA_RTUNNEL:
+            m_auiEncounter[uiType] = uiData;    // Store the spell IDs/NPC entries of the two breaths/drakonids used by Chromaggus/Nefarian for all the instance lifetime. Breaths/Drakonids are picked randomly in Chromaggus/Nefarian script
             break;
     }
 
-    if (uiData == DONE)
+    if (uiData >= DONE)
     {
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
         saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
-                   << m_auiEncounter[6] << " " << m_auiEncounter[7];
+                   << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
+                   << m_auiEncounter[9] << " " << m_auiEncounter[10]<< " " << m_auiEncounter[11] << " "
+                   << m_auiEncounter[12];
 
         m_strInstData = saveStream.str();
 
@@ -233,7 +294,9 @@ void instance_blackwing_lair::Load(const char* chrIn)
 
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
-               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7];
+               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
+               >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10]>> m_auiEncounter[11]
+               >> m_auiEncounter[12];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
@@ -276,7 +339,7 @@ void instance_blackwing_lair::SetData64(uint32 uiData, uint64 uiGuid)
             if (Creature* pRazorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
             {
                 pRazorgore->RemoveAllAuras();
-                pRazorgore->SetHealth(pRazorgore->GetMaxHealth());
+                pRazorgore->CastSpell(pRazorgore, SPELL_WARMING_FLAMES, TRIGGERED_OLD_TRIGGERED);
             }
 
             // All defenders evade and despawn
@@ -314,6 +377,34 @@ void instance_blackwing_lair::OnCreatureDeath(Creature* pCreature)
             if (Creature* pOrbTrigger = GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
                 pOrbTrigger->InterruptNonMeleeSpells(false);
             break;
+        case NPC_RAZORGORE:
+            // Only set the event as done if Razorgore dies in last phase
+            if (GetData(TYPE_RAZORGORE) == SPECIAL)
+            {
+                SetData(TYPE_RAZORGORE, DONE);
+                break;
+            }
+
+            // If the event is not already failed in Razorgore script, then force group wipe by making the boss trigger an AoE
+            // this is basically a duplicate of what is in Razorgore script because when the boss is Mind Controlled the AI is overriden
+            // So we have to handle it in the instance script instead to prevent the event to be stucked or exploited
+            if (GetData(TYPE_RAZORGORE) != FAIL)
+            {
+                if (Creature* pRazorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
+                {
+                    pRazorgore->CastSpell(pRazorgore, SPELL_FIREBALL, TRIGGERED_OLD_TRIGGERED);
+                    SetData(TYPE_RAZORGORE, FAIL);
+                    DoScriptText(SAY_RAZORGORE_DEATH, pRazorgore);
+                    pRazorgore->ForcedDespawn();
+                }
+                if (Creature* pOrbTrigger = GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
+                {
+                    if (Creature* pTemp = pOrbTrigger->SummonCreature(NPC_ORB_DOMINATION, pOrbTrigger->GetPositionX(), pOrbTrigger->GetPositionY(), pOrbTrigger->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 5 * IN_MILLISECONDS))
+                        DoScriptText(EMOTE_ORB_SHUT_OFF, pTemp);
+                    pOrbTrigger->CastSpell(pOrbTrigger, SPELL_EXPLODE_ORB, TRIGGERED_IGNORE_UNATTACKABLE_FLAG);
+                }
+            }
+            break;
         case NPC_BLACKWING_LEGIONNAIRE:
         case NPC_BLACKWING_MAGE:
             m_uiBlackwingDefCount--;
@@ -321,11 +412,117 @@ void instance_blackwing_lair::OnCreatureDeath(Creature* pCreature)
         case NPC_DRAGONSPAWN:
             m_uiDragonspawnCount--;
             break;
+        case NPC_BLUE_DRAKONID:
+        case NPC_GREEN_DRAKONID:
+        case NPC_BRONZE_DRAKONID:
+        case NPC_RED_DRAKONID:
+        case NPC_BLACK_DRAKONID:
+        case NPC_CHROMATIC_DRAKONID:
+            m_uiDeadDrakonidsCount++;
+            // If the requiered amount of drakonids are killed, start phase 2
+            if (m_uiDeadDrakonidsCount >= MAX_DRAKONID_SUMMONS && GetData(TYPE_NEFARIAN) == IN_PROGRESS)
+                SetData(TYPE_NEFARIAN, SPECIAL);
+            break;
     }
+}
+
+bool instance_blackwing_lair::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const
+{
+    switch (uiInstanceConditionId)
+    {
+        case INSTANCE_CONDITION_ID_HARD_MODE:               // Event failed
+            return (GetData(TYPE_QUEST_SCEPTER) == FAIL);
+        case INSTANCE_CONDITION_ID_HARD_MODE_2:             // Event succeeded
+            return (GetData(TYPE_QUEST_SCEPTER) == DONE);
+    }
+
+    script_error_log("instance_blackwing_lair::CheckConditionCriteriaMeet called with unsupported Id %u. Called with param plr %s, src %s, condition source type %u",
+                     uiInstanceConditionId, pPlayer ? pPlayer->GetGuidStr().c_str() : "NULL", pConditionSource ? pConditionSource->GetGuidStr().c_str() : "NULL", conditionSourceType);
+    return false;
 }
 
 void instance_blackwing_lair::Update(uint32 uiDiff)
 {
+    // Scepter of the Shifting Sand epic quest line
+    if (m_uiScepterEpicTimer)
+    {
+        if (m_uiScepterEpicTimer <= uiDiff)
+        {
+            switch (m_uiScepterQuestStep)
+            {
+                case 0:     // On quest acceptance
+                    DoOrSimulateScriptTextForThisInstance(YELL_REDSHARD_TAUNT_1, NPC_LORD_VICTOR_NEFARIUS);
+                    m_uiScepterEpicTimer = 2 * HOUR * IN_MILLISECONDS;
+                    break;
+                case 1:     // 2 hours time mark
+                    switch (urand(0, 1))
+                    {
+                        case 0:
+                            DoOrSimulateScriptTextForThisInstance(YELL_REDSHARD_TAUNT_2, NPC_LORD_VICTOR_NEFARIUS);
+                            DoOrSimulateScriptTextForThisInstance(EMOTE_REDSHARD_TAUNT_1, NPC_LORD_VICTOR_NEFARIUS);
+                            break;
+                        case 1:
+                            DoOrSimulateScriptTextForThisInstance(YELL_REDSHARD_TAUNT_3, NPC_LORD_VICTOR_NEFARIUS);
+                            break;
+                    }
+                    m_uiScepterEpicTimer = 2 * HOUR * IN_MILLISECONDS;
+                    break;
+                case 2:     // 1 hour left
+                    switch (urand(0, 1))
+                    {
+                        case 0:
+                            DoOrSimulateScriptTextForThisInstance(YELL_REDSHARD_TAUNT_4, NPC_LORD_VICTOR_NEFARIUS);
+                            break;
+                        case 1:
+                            DoOrSimulateScriptTextForThisInstance(YELL_REDSHARD_TAUNT_5, NPC_LORD_VICTOR_NEFARIUS);
+                            break;
+                    }
+                    m_uiScepterEpicTimer = 30 * MINUTE * IN_MILLISECONDS;
+                    break;
+                case 3:     // 30 min left
+                    DoOrSimulateScriptTextForThisInstance(YELL_REDSHARD_TAUNT_6, NPC_LORD_VICTOR_NEFARIUS);
+                    m_uiScepterEpicTimer = 30 * MINUTE * IN_MILLISECONDS;
+                    break;
+                case 4:     // Failure
+                    SetData(TYPE_QUEST_SCEPTER, FAIL);
+                    if (GetData(TYPE_NEFARIAN) == NOT_STARTED)
+                    {
+                        DoOrSimulateScriptTextForThisInstance(EMOTE_REDSHARD_TAUNT_2, NPC_LORD_VICTOR_NEFARIUS);
+                        DoOrSimulateScriptTextForThisInstance(YELL_REDSHARD_TAUNT_7, NPC_LORD_VICTOR_NEFARIUS);
+                    }
+                default:    // Something weird happened: stop timer and fail the event
+                    m_uiScepterEpicTimer = 0;
+                    SetData(TYPE_QUEST_SCEPTER, FAIL);
+                    break;
+            }
+            m_uiScepterQuestStep++;
+        }
+        else
+            m_uiScepterEpicTimer -= uiDiff;
+    }
+    // Spawn Nefarian
+    if (m_uiNefarianSpawnTimer)
+    {
+        if (m_uiNefarianSpawnTimer <= uiDiff)
+        {
+            if (Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
+            {
+                if (Creature* pNefarian = pNefarius->SummonCreature(NPC_NEFARIAN, aNefarianLocs[2].m_fX, aNefarianLocs[2].m_fY, aNefarianLocs[2].m_fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0, true))
+                {
+                    pNefarian->SetWalk(false);
+
+                    // see boss_onyxia (also note the removal of this in boss_nefarian)
+                    pNefarian->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                    pNefarian->SetLevitate(true);
+                    pNefarian->GetMotionMaster()->MoveWaypoint(0);
+                }
+            }
+            m_uiNefarianSpawnTimer = 0;
+        }
+        else
+            m_uiNefarianSpawnTimer -= uiDiff;
+    }
+
     // Reset Razorgore in case of wipe
     if (m_uiResetTimer)
     {
@@ -402,9 +599,204 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
         m_uiDefenseTimer -= uiDiff;
 }
 
+void instance_blackwing_lair::InitiateBreath(uint32 uiEventId)
+{
+    uint32 leftBreath = 0;
+    uint32 rightBreath = 0;
+    switch (uiEventId)
+    {
+        // Left Chromaggus breath
+        case 8446: leftBreath = 23187; break;  // Frost Burn
+        case 8447: leftBreath = 23308; break;  // Incinerate
+        case 8448: leftBreath = 23310; break;  // Time Lapse
+        case 8449: leftBreath = 23313; break;  // Corrosive Acid
+        case 8450: leftBreath = 23315; break;  // Ignite Flesh
+        // Right Chromaggus breath
+        case 8451: rightBreath = 23189; break;  // Frost Burn
+        case 8452: rightBreath = 23309; break;  // Incinerate
+        case 8453: rightBreath = 23312; break;  // Time Lapse
+        case 8454: rightBreath = 23314; break;  // Corrosive Acid
+        case 8455: rightBreath = 23316; break;  // Ignite Flesh
+    }
+    if (leftBreath)
+    {
+        debug_log("SD2 Instance Blackwing Lair: initiating Chromaggus' left breath");
+        if (GetData(TYPE_CHROMA_LBREATH) == NOT_STARTED)
+            SetData(TYPE_CHROMA_LBREATH, leftBreath);
+        debug_log("SD2 Instance Blackwing Lair: Chromaggus' left breath set to spell %u", GetData(TYPE_CHROMA_LBREATH));
+    }
+    if (rightBreath)
+    {
+        debug_log("SD2 Instance Blackwing Lair: initiating Chromaggus' right breath");
+        if (GetData(TYPE_CHROMA_RBREATH) == NOT_STARTED)
+            SetData(TYPE_CHROMA_RBREATH, rightBreath);
+        debug_log("SD2 Instance Blackwing Lair: Chromaggus' right breath set to spell %u", GetData(TYPE_CHROMA_RBREATH));
+    }
+
+    return;
+}
+
+void instance_blackwing_lair::InitiateDrakonid(uint32 uiEventId)
+{
+    uint32 leftTunnel = 0;
+    uint32 rightTunnel = 0;
+    switch (uiEventId)
+    {
+        // Left tunnel
+        case 8520: leftTunnel = NPC_BLACK_SPAWNER; break;
+        case 8521: leftTunnel = NPC_RED_SPAWNER; break;
+        case 8522: leftTunnel = NPC_GREEN_SPAWNER; break;
+        case 8523: leftTunnel = NPC_BRONZE_SPAWNER; break;
+        case 8524: leftTunnel = NPC_BLUE_SPAWNER; break;
+        // Right tunnel
+        case 8525: rightTunnel = NPC_BLACK_SPAWNER; break;
+        case 8526: rightTunnel = NPC_RED_SPAWNER; break;
+        case 8527: rightTunnel = NPC_GREEN_SPAWNER; break;
+        case 8528: rightTunnel = NPC_BRONZE_SPAWNER; break;
+        case 8529: rightTunnel = NPC_BLUE_SPAWNER; break;
+    }
+    if (leftTunnel)
+    {
+        debug_log("SD2 Instance Blackwing Lair: initiating drakonid for left tunnel in Nefarian's lair");
+        if (GetData(TYPE_NEFA_LTUNNEL) == NOT_STARTED)
+            SetData(TYPE_NEFA_LTUNNEL, leftTunnel);
+        debug_log("SD2 Instance Blackwing Lair: Nefarian's lair left tunnel set with drakonid spawner %u", GetData(TYPE_NEFA_LTUNNEL));
+    }
+    if (rightTunnel)
+    {
+        debug_log("SD2 Instance Blackwing Lair: initiating drakonid for right tunnel in Nefarian's lair");
+        if (GetData(TYPE_NEFA_RTUNNEL) == NOT_STARTED)
+            SetData(TYPE_NEFA_RTUNNEL, rightTunnel);
+        debug_log("SD2 Instance Blackwing Lair: Nefarian's lair left tunnel set with drakonid spawner %u", GetData(TYPE_NEFA_RTUNNEL));
+    }
+
+    return;
+}
+
+void instance_blackwing_lair::CleanupNefarianStage(bool fullCleanup)
+{
+    for (GuidList::const_iterator itr = m_lDrakonidSpawnerGuids.begin(); itr != m_lDrakonidSpawnerGuids.end(); ++itr)
+    {
+        if (Creature* pTemp = instance->GetCreature(*itr))
+            pTemp->ForcedDespawn();
+    }
+    m_lDrakonidSpawnerGuids.clear();
+
+    if (Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
+    {
+        // Despawn Nefarius if phase 2 is started
+        if (!pNefarius->IsDespawned() && GetData(TYPE_NEFARIAN) == SPECIAL)
+        {
+            pNefarius->CastSpell(pNefarius, SPELL_SHADOWBLINK_OUTRO, TRIGGERED_OLD_TRIGGERED);
+            pNefarius->ForcedDespawn(2000);
+        }
+    }
+    // Stop the cleanup here if we are only moving from P1 to P2
+    if (!fullCleanup)
+        return;
+
+    m_uiDeadDrakonidsCount = 0;
+
+    for (GuidList::const_iterator itr = m_lDrakonidBonesGuids.begin(); itr != m_lDrakonidBonesGuids.end(); ++itr)
+    {
+        if (GameObject* pGo = instance->GetGameObject(*itr))
+            pGo->SetLootState(GO_JUST_DEACTIVATED);
+    }
+    m_lDrakonidBonesGuids.clear();
+
+    if (Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
+    {
+        // Respawn Nefarius if wipe in Phase 2
+        if (pNefarius->IsDespawned())
+            pNefarius->Respawn();
+    }
+}
+
 InstanceData* GetInstanceData_instance_blackwing_lair(Map* pMap)
 {
     return new instance_blackwing_lair(pMap);
+}
+
+/*###############
+## go_suppression
+################*/
+
+struct go_ai_suppression : public GameObjectAI
+{
+    go_ai_suppression(GameObject* go) : GameObjectAI(go), m_uiFumeTimer(urand(0, 5 * IN_MILLISECONDS)) {}
+
+    uint32 m_uiFumeTimer;
+
+    // Visual effects for each GO is played on a 5 seconds timer. Sniff show that the GO should also be used (trap spell is cast)
+    // but we need core support for GO casting for that
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiFumeTimer)
+        {
+            if (m_uiFumeTimer <= uiDiff)
+            {
+                // TODO replace by go->Use(go) or go->Use(nullptr) once GO casting is added in core
+                // The loot state check may be removed in that case because it should probably be handled in the Gameobject::Use() code
+                if (m_go->getLootState() == GO_READY)
+                    m_go->SendGameObjectCustomAnim(m_go->GetObjectGuid());
+                m_uiFumeTimer = 5 * IN_MILLISECONDS;
+            }
+            else
+                m_uiFumeTimer -= uiDiff;
+        }
+    }
+};
+
+
+GameObjectAI* GetAI_go_suppression(GameObject* go)
+{
+    return new go_ai_suppression(go);
+}
+
+/*###################################################
+## Chromaggus' breaths and Nefarian tunnels selection
+####################################################*/
+
+bool ProcessEventId_event_weekly_chromatic_selection(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+{
+    if (pSource->GetTypeId() == TYPEID_UNIT)
+    {
+        if (instance_blackwing_lair* pInstance = (instance_blackwing_lair*)((Creature*)pSource)->GetInstanceData())
+        {
+            switch (uiEventId)
+            {
+                // Left Chromaggus breath
+                case 8446:
+                case 8447:
+                case 8448:
+                case 8449:
+                case 8450:
+                // Right Chromaggus breath
+                case 8451:
+                case 8452:
+                case 8453:
+                case 8454:
+                case 8455:
+                    pInstance->InitiateBreath(uiEventId);
+                    break;
+                // Left tunnel in Nefarian's lair
+                case 8520:
+                case 8521:
+                case 8522:
+                case 8523:
+                case 8524:
+                // Right tunnel in Nefarian's lair
+                case 8525:
+                case 8526:
+                case 8527:
+                case 8528:
+                case 8529:
+                    pInstance->InitiateDrakonid(uiEventId);
+                    break;
+            }
+        }
+    }
+    return false;
 }
 
 void AddSC_instance_blackwing_lair()
@@ -414,5 +806,15 @@ void AddSC_instance_blackwing_lair()
     pNewScript = new Script;
     pNewScript->Name = "instance_blackwing_lair";
     pNewScript->GetInstanceData = &GetInstanceData_instance_blackwing_lair;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_suppression";
+    pNewScript->GetGameObjectAI = &GetAI_go_suppression;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "event_weekly_chromatic_selection";
+    pNewScript->pProcessEventId = &ProcessEventId_event_weekly_chromatic_selection;
     pNewScript->RegisterSelf();
 }

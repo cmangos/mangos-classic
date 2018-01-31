@@ -40,13 +40,15 @@ EndContentData */
 
 enum
 {
-    SAY_MOR_CHALLENGE               = -1000499,
-    SAY_MOR_SCARED                  = -1000500,
+    SAY_MOR_CHALLENGE       = -1000499,
+    SAY_MOR_SCARED          = -1000500,
 
-    QUEST_CHALLENGE_MOROKK          = 1173,
+    NPC_MOROKK              = 4500,
+    QUEST_CHALLENGE_MOROKK  = 1173,
 
-    FACTION_MOR_HOSTILE             = 168,
-    FACTION_MOR_RUNNING             = 35
+    FACTION_MOR_HOSTILE     = 168,
+    FACTION_MOR_RUNNING     = 35,
+    FACTION_MOR_SPAWN       = 29
 };
 
 struct npc_morokkAI : public npc_escortAI
@@ -61,6 +63,24 @@ struct npc_morokkAI : public npc_escortAI
 
     void Reset() override {}
 
+    void JustRespawned() override
+    {
+        npc_escortAI::JustRespawned();
+        m_creature->setFaction(FACTION_MOR_SPAWN);
+    }
+
+    void JustReachedHome() override
+    {
+        if (HasEscortState(STATE_ESCORT_ESCORTING))
+        {
+            if (!m_bIsSuccess)
+            {
+                FailQuestForPlayerAndGroup();
+                m_creature->ForcedDespawn();
+            }
+        }
+    }
+
     void WaypointReached(uint32 uiPointId) override
     {
         switch (uiPointId)
@@ -68,45 +88,6 @@ struct npc_morokkAI : public npc_escortAI
             case 0:
                 SetEscortPaused(true);
                 break;
-            case 1:
-                if (m_bIsSuccess)
-                    DoScriptText(SAY_MOR_SCARED, m_creature);
-                else
-                {
-                    m_creature->SetDeathState(JUST_DIED);
-                    m_creature->Respawn();
-                }
-                break;
-        }
-    }
-
-    void AttackedBy(Unit* pAttacker) override
-    {
-        if (m_creature->getVictim())
-            return;
-
-        if (m_creature->IsFriendlyTo(pAttacker))
-            return;
-
-        AttackStart(pAttacker);
-    }
-
-    virtual void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
-    {
-        if (HasEscortState(STATE_ESCORT_ESCORTING))
-        {
-            if (m_creature->GetHealthPercent() < 30.0f)
-            {
-                if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_CHALLENGE_MOROKK, m_creature);
-
-                m_creature->setFaction(FACTION_MOR_RUNNING);
-
-                m_bIsSuccess = true;
-                EnterEvadeMode();
-
-                uiDamage = 0;
-            }
         }
     }
 
@@ -118,16 +99,40 @@ struct npc_morokkAI : public npc_escortAI
             {
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
-                    m_bIsSuccess = false;
-                    DoScriptText(SAY_MOR_CHALLENGE, m_creature, pPlayer);
-                    m_creature->setFaction(FACTION_MOR_HOSTILE);
-                    AttackStart(pPlayer);
+                    if (pPlayer->isAlive() && pPlayer->IsInRange(m_creature, 0, 70))
+                    {
+                        m_bIsSuccess = false;
+                        DoScriptText(SAY_MOR_CHALLENGE, m_creature, pPlayer);
+                        SetReactState(REACT_AGGRESSIVE);
+                        m_creature->setFaction(FACTION_MOR_HOSTILE);
+                        AttackStart(pPlayer);
+                    }
+                    else
+                        SetEscortPaused(false);
                 }
-
-                SetEscortPaused(false);
+                else
+                    SetEscortPaused(false);
             }
-
             return;
+        }
+        if (m_creature->GetHealthPercent() <= 30.0f)
+        {
+            if (HasEscortState(STATE_ESCORT_PAUSED))
+            {
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    pPlayer->GroupEventHappens(QUEST_CHALLENGE_MOROKK, m_creature);
+                    m_creature->setFaction(FACTION_MOR_RUNNING);
+                    m_bIsSuccess = true;
+                    m_creature->RemoveAllAurasOnEvade();
+                    m_creature->DeleteThreatList();
+                    m_creature->CombatStop(true);
+                    SetEscortPaused(false);
+                    SetReactState(REACT_PASSIVE);
+                    DoScriptText(SAY_MOR_SCARED, m_creature);
+                    m_creature->GetMotionMaster()->Clear(false); // TODO: make whole EscortAI work like this
+                }
+            }
         }
 
         DoMeleeAttackIfReady();
@@ -517,7 +522,7 @@ struct npc_private_hendelAI : public ScriptedAI
         if (m_creature->getVictim())
             return;
 
-        if (m_creature->IsFriendlyTo(pAttacker))
+        if (!m_creature->CanAttackNow(pAttacker))
             return;
 
         AttackStart(pAttacker);
@@ -567,7 +572,7 @@ struct npc_private_hendelAI : public ScriptedAI
             }
 
             // Summon Jaina Proudmoore, Archmage Tervosh and Pained
-            for (uint8 i = 0; i<3; i++)
+            for (uint8 i = 0; i < 3; i++)
             {
                 Creature* pCreature = m_creature->SummonCreature(lOutroSpawns[i].uiEntry, lOutroSpawns[i].fX, lOutroSpawns[i].fY, lOutroSpawns[i].fZ, lOutroSpawns[i].fO, TEMPSPAWN_TIMED_DESPAWN, 3 * MINUTE * IN_MILLISECONDS, false, true);
                 if (pCreature)
@@ -595,7 +600,7 @@ bool QuestAccept_npc_private_hendel(Player* pPlayer, Creature* pCreature, const 
     if (pQuest->GetQuestId() == QUEST_MISSING_DIPLO_PT16)
     {
         pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
-         pCreature->AI()->AttackStart(pPlayer);
+        pCreature->AI()->AttackStart(pPlayer);
 
         // Find the nearby sentries in order to make them attack
         // The two sentries are linked to Private Hendel in DB to ensure they respawn together

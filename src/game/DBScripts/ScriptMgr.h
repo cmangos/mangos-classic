@@ -35,12 +35,12 @@ struct SpellEntry;
 enum ScriptCommand                                          // resSource, resTarget are the resulting Source/ Target after buddy search is done
 {
     SCRIPT_COMMAND_TALK                     = 0,            // resSource = WorldObject, resTarget = Unit/none
-                                                            // dataint = text entry from dbscript_string -table. dataint2-4 optional for random selected texts.
+    // dataint = text entry from dbscript_string -table. dataint2-4 optional for random selected texts.
     SCRIPT_COMMAND_EMOTE                    = 1,            // resSource = Unit, resTarget = Unit/none
-                                                            // datalong1 = emote_id, dataint1-4 optional for random selected emotes
+    // datalong1 = emote_id, dataint1-4 optional for random selected emotes
     SCRIPT_COMMAND_FIELD_SET                = 2,            // source = any, datalong = field_id, datalong2 = value
     SCRIPT_COMMAND_MOVE_TO                  = 3,            // resSource = Creature, datalong2 = travel_speed*100, x/y/z
-                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
+    // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
     SCRIPT_COMMAND_FLAG_SET                 = 4,            // source = any, datalong = field_id, datalong2 = bitmask
     SCRIPT_COMMAND_FLAG_REMOVE              = 5,            // source = any, datalong = field_id, datalong2 = bitmask
     SCRIPT_COMMAND_TELEPORT_TO              = 6,            // source or target with Player, datalong2 = map_id, x/y/z
@@ -48,80 +48,84 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_KILL_CREDIT              = 8,            // source or target with Player, datalong = creature entry (or 0 for target-entry), datalong2 = bool (0=personal credit, 1=group credit)
     SCRIPT_COMMAND_RESPAWN_GAMEOBJECT       = 9,            // source = any, datalong=db_guid, datalong2=despawn_delay
     SCRIPT_COMMAND_TEMP_SPAWN_CREATURE      = 10,           // source = any, datalong=creature entry, datalong2=despawn_delay, datalong3=pathId
-                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL = summon active
-                                                            // dataint = (bool) setRun; 0 = off (default), 1 = on
+    // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL = summon active
+    // dataint = (bool) setRun; 0 = off (default), 1 = on
     SCRIPT_COMMAND_OPEN_DOOR                = 11,           // datalong=db_guid (or not provided), datalong2=reset_delay
     SCRIPT_COMMAND_CLOSE_DOOR               = 12,           // datalong=db_guid (or not provided), datalong2=reset_delay
     SCRIPT_COMMAND_ACTIVATE_OBJECT          = 13,           // source = unit, target=GO
     SCRIPT_COMMAND_REMOVE_AURA              = 14,           // resSource = Unit, datalong = spell_id
     SCRIPT_COMMAND_CAST_SPELL               = 15,           // resSource = Unit, cast spell at resTarget = Unit
-                                                            // datalong=spellid
-                                                            // datalong2=castFlags, enum TriggerCastFlags
-                                                            // dataint1-4 optional for random selected spell
+    // datalong=spellid
+    // datalong2=castFlags, enum TriggerCastFlags
+    // dataint1-4 optional for random selected spell
     SCRIPT_COMMAND_PLAY_SOUND               = 16,           // resSource = WorldObject, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide; so 1|2 = 3 is target with distance dependent)
     SCRIPT_COMMAND_CREATE_ITEM              = 17,           // source or target must be player, datalong = item entry, datalong2 = amount
     SCRIPT_COMMAND_DESPAWN_SELF             = 18,           // resSource = Creature, datalong = despawn delay
     SCRIPT_COMMAND_PLAY_MOVIE               = 19,           // target can only be a player, datalog = movie id
     SCRIPT_COMMAND_MOVEMENT                 = 20,           // resSource = Creature. datalong = MovementType (0:idle, 1:random or 2:waypoint), datalong2 = wander-distance/pathId
-                                                            // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = Random-movement around current position
+    // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = Random-movement around current position
     SCRIPT_COMMAND_SET_ACTIVEOBJECT         = 21,           // resSource = Creature
-                                                            // datalong=bool 0=off, 1=on
+    // datalong=bool 0=off, 1=on
     SCRIPT_COMMAND_SET_FACTION              = 22,           // resSource = Creature
-                                                            // datalong=factionId, datalong2=faction_flags
+    // datalong=factionId, datalong2=faction_flags
     SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL  = 23,           // resSource = Creature, datalong=creature entry/modelid
-                                                            // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = use datalong value as modelid explicit
+    // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = use datalong value as modelid explicit
     SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL  = 24,           // resSource = Creature, datalong=creature entry/modelid
-                                                            // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = use datalong value as modelid explicit
+    // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = use datalong value as modelid explicit
     SCRIPT_COMMAND_SET_RUN                  = 25,           // resSource = Creature
-                                                            // datalong= bool 0=off, 1=on
+    // datalong= bool 0=off, 1=on
     SCRIPT_COMMAND_ATTACK_START             = 26,           // resSource = Creature, resTarget = Unit
     SCRIPT_COMMAND_GO_LOCK_STATE            = 27,           // resSource = GameObject
-                                                            // datalong= 1=lock, 2=unlock, 4=set not-interactable, 8=set interactable
+    // datalong= 1=lock, 2=unlock, 4=set not-interactable, 8=set interactable
     SCRIPT_COMMAND_STAND_STATE              = 28,           // resSource = Creature
-                                                            // datalong = stand state (enum UnitStandStateType)
+    // datalong = stand state (enum UnitStandStateType)
     SCRIPT_COMMAND_MODIFY_NPC_FLAGS         = 29,           // resSource = Creature
-                                                            // datalong=NPCFlags
-                                                            // datalong2:0x00=toggle, 0x01=add, 0x02=remove
+    // datalong=NPCFlags
+    // datalong2:0x00=toggle, 0x01=add, 0x02=remove
     SCRIPT_COMMAND_SEND_TAXI_PATH           = 30,           // datalong = taxi path id (source or target must be player)
     SCRIPT_COMMAND_TERMINATE_SCRIPT         = 31,           // datalong = search for npc entry if provided
-                                                            // datalong2= search distance
-                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: terminate steps of this script if npc found
-                                                            //                                        ELSE: terminate steps of this script if npc not found
-                                                            // dataint=diff to change a waittime of current Waypoint Movement
+    // datalong2= search distance
+    // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: terminate steps of this script if npc found
+    //                                        ELSE: terminate steps of this script if npc not found
+    // dataint=diff to change a waittime of current Waypoint Movement
     SCRIPT_COMMAND_PAUSE_WAYPOINTS          = 32,           // resSource = Creature
-                                                            // datalong = 0: unpause waypoint 1: pause waypoint
+    // datalong = 0: unpause waypoint 1: pause waypoint
     SCRIPT_COMMAND_RESERVED_1               = 33,           // reserved for 3.x and later
     SCRIPT_COMMAND_TERMINATE_COND           = 34,           // datalong = condition_id, datalong2 = if != 0 then quest_id of quest that will be failed for player's group if the script is terminated
-                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL terminate when condition is false ELSE terminate when condition is true
+    // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL terminate when condition is false ELSE terminate when condition is true
     SCRIPT_COMMAND_SEND_AI_EVENT            = 35,           // resSource = Creature, resTarget = Unit
-                                                            // datalong = AIEventType
-                                                            // datalong2 = radius. If radius isn't provided and the target is a creature, then send AIEvent to target
+    // datalong = AIEventType
+    // datalong2 = radius. If radius isn't provided and the target is a creature, then send AIEvent to target
     SCRIPT_COMMAND_SET_FACING               = 36,           // resSource = Creature, resTarget WorldObject. Turn resSource towards Taget
-                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL also set TargetGuid of resSource to resTarget. In this case resTarget MUST be Creature/ Player
-                                                            // datalong != 0 Reset TargetGuid, Reset orientation
+    // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL also set TargetGuid of resSource to resTarget. In this case resTarget MUST be Creature/ Player
+    // datalong != 0 Reset TargetGuid, Reset orientation
     SCRIPT_COMMAND_MOVE_DYNAMIC             = 37,           // resSource = Creature, resTarget Worldobject.
-                                                            // datalong = 0: Move resSource towards resTarget
-                                                            // datalong != 0: Move resSource to a random point between datalong2..datalong around resTarget.
-                                                            //      orientation != 0: Obtain a random point around resTarget in direction of orientation
-                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL Obtain a random point around resTarget in direction of resTarget->GetOrientation + orientation
-                                                            // for resTarget == resSource and orientation == 0 this will mean resSource moving forward
+    // datalong = 0: Move resSource towards resTarget
+    // datalong != 0: Move resSource to a random point between datalong2..datalong around resTarget.
+    //      orientation != 0: Obtain a random point around resTarget in direction of orientation
+    // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL Obtain a random point around resTarget in direction of resTarget->GetOrientation + orientation
+    // for resTarget == resSource and orientation == 0 this will mean resSource moving forward
     SCRIPT_COMMAND_SEND_MAIL                = 38,           // resSource WorldObject, can be nullptr, resTarget Player
-                                                            // datalong: Send mailTemplateId from resSource (if provided) to player resTarget
-                                                            // datalong2: AlternativeSenderEntry. Use as sender-Entry
-                                                            // dataint1: Delay (>= 0) in Seconds
+    // datalong: Send mailTemplateId from resSource (if provided) to player resTarget
+    // datalong2: AlternativeSenderEntry. Use as sender-Entry
+    // dataint1: Delay (>= 0) in Seconds
     SCRIPT_COMMAND_SET_FLY                  = 39,           // resSource = Creature
-                                                            // datalong = bool 0=off, 1=on
-                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL set/unset byte flag UNIT_BYTE1_FLAG_ALWAYS_STAND
+    // datalong = bool 0=off, 1=on
+    // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL set/unset byte flag UNIT_BYTE1_FLAG_ALWAYS_STAND
     SCRIPT_COMMAND_DESPAWN_GO               = 40,           // resTarget = GameObject
     SCRIPT_COMMAND_RESPAWN                  = 41,           // resSource = Creature. Requires SCRIPT_FLAG_BUDDY_IS_DESPAWNED to find dead or despawned targets
     SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS      = 42,           // resSource = Creature
-                                                            // datalong = resetDefault: bool 0=false, 1=true
-                                                            // dataint = main hand slot; dataint2 = off hand slot; dataint3 = ranged slot
+    // datalong = resetDefault: bool 0=false, 1=true
+    // dataint = main hand slot; dataint2 = off hand slot; dataint3 = ranged slot
     SCRIPT_COMMAND_RESET_GO                 = 43,           // resTarget = GameObject
     SCRIPT_COMMAND_UPDATE_TEMPLATE          = 44,           // resSource = Creature
-                                                            // datalong = new Creature entry
-                                                            // datalong2 = Alliance(0) Horde(1), other values throw error
+    // datalong = new Creature entry
+    // datalong2 = Alliance(0) Horde(1), other values throw error
     SCRIPT_COMMAND_START_RELAY_SCRIPT       = 45,           // datalong = relayId, datalong2 = random template Id
+    SCRIPT_COMMAND_CAST_CUSTOM_SPELL        = 46,           // resSource = Unit, cast spell at resTarget = Unit
+    // datalong=spellid
+    // datalong2=castFlags, enum TriggerCastFlags
+    // dataint1-3 define the &bp value for the spell. At least one field is required.
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -135,9 +139,10 @@ enum ScriptInfoDataFlags
     SCRIPT_FLAG_COMMAND_ADDITIONAL          = 0x08,         // command dependend
     SCRIPT_FLAG_BUDDY_BY_GUID               = 0x10,         // take the buddy by guid
     SCRIPT_FLAG_BUDDY_IS_PET                = 0x20,         // buddy is a pet
-    SCRIPT_FLAG_BUDDY_IS_DESPAWNED          = 0X40,         // buddy is dead or despawned
+    SCRIPT_FLAG_BUDDY_IS_DESPAWNED          = 0x40,         // buddy is dead or despawned
+    SCRIPT_FLAG_BUDDY_BY_POOL               = 0x80          // buddy should be part of a pool
 };
-#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_IS_DESPAWNED - 1)
+#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_BY_POOL - 1)
 
 struct ScriptInfo
 {
@@ -330,6 +335,7 @@ struct ScriptInfo
         {
             uint32 npcEntry;                                // datalong
             uint32 searchDist;                              // datalong2
+            uint32 poolId;                                  // datalong3
             // changeWaypointWaitTime                       // dataint
         } terminateScript;
 
@@ -397,6 +403,12 @@ struct ScriptInfo
             uint32 relayId;                                 // datalong
             uint32 templateId;                              // datalong2
         } relayScript;
+
+        struct                                              // SCRIPT_COMMAND_CAST_CUSTOM_SPELL (46)
+        {
+            uint32 spellId;                                 // datalong
+            uint32 castFlags;                               // datalong2
+        } castCustomSpell;
 
         struct
         {
@@ -528,12 +540,12 @@ extern ScriptMapMapName sRelayScripts;
 
 class ScriptMgr
 {
-    enum RandomTemplates
-    {
-        STRING_TEMPLATE = 0,
-        RELAY_TEMPLATE = 1,
-        MAX_TYPE // must always be last
-    };
+        enum RandomTemplates
+        {
+            STRING_TEMPLATE = 0,
+            RELAY_TEMPLATE = 1,
+            MAX_TYPE // must always be last
+        };
 
     public:
         ScriptMgr();

@@ -22,9 +22,9 @@
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 
-GuardianAI::GuardianAI(Creature* c) : CreatureEventAI(c)
+GuardianAI::GuardianAI(Creature* creature) : CreatureEventAI(creature)
 {
-    Unit* owner = c->GetOwner();
+    Unit* owner = creature->GetOwner();
     MANGOS_ASSERT(owner);
 }
 
@@ -69,23 +69,23 @@ int GuardianAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-bool GuardianAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker, Creature* pAIEventSender /*=nullptr*/)
+bool GuardianAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker, Creature* AIEventSender /*=nullptr*/)
 {
-    if (!pHolder.Enabled || pHolder.Time)
+    if (!holder.Enabled || holder.Time)
         return false;
 
     // Check the inverse phase mask (event doesn't trigger if current phase bit is set in mask)
-    if (pHolder.Event.event_inverse_phase_mask & (1 << m_Phase))
+    if (holder.Event.event_inverse_phase_mask & (1 << m_Phase))
     {
-        if (!IsTimerBasedEvent(pHolder.Event.event_type))
-            DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "CreatureEventAI: Event %u skipped because of phasemask %u. Current phase %u", pHolder.Event.event_id, pHolder.Event.event_inverse_phase_mask, m_Phase);
+        if (!IsTimerBasedEvent(holder.Event.event_type))
+            DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "CreatureEventAI: Event %u skipped because of phasemask %u. Current phase %u", holder.Event.event_id, holder.Event.event_inverse_phase_mask, m_Phase);
         return false;
     }
 
-    if (!IsTimerBasedEvent(pHolder.Event.event_type))
+    if (!IsTimerBasedEvent(holder.Event.event_type))
         LOG_PROCESS_EVENT;
 
-    CreatureEventAI_Event const& event = pHolder.Event;
+    CreatureEventAI_Event const& event = holder.Event;
 
     // Check event conditions based on the event type, also reset events
     switch (event.event_type)
@@ -96,33 +96,33 @@ bool GuardianAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvok
             if (!pUnit)
                 return false;
 
-            pActionInvoker = pUnit;
+            actionInvoker = pUnit;
 
             LOG_PROCESS_EVENT;
             // Repeat Timers
-            pHolder.UpdateRepeatTimer(m_creature, event.friendly_hp.repeatMin, event.friendly_hp.repeatMax);
+            holder.UpdateRepeatTimer(m_creature, event.friendly_hp.repeatMin, event.friendly_hp.repeatMax);
             break;
         }
         default:
-            return CreatureEventAI::ProcessEvent(pHolder, pActionInvoker, pAIEventSender);
+            return CreatureEventAI::ProcessEvent(holder, actionInvoker, AIEventSender);
     }
 
     // Disable non-repeatable events
-    if (!(pHolder.Event.event_flags & EFLAG_REPEATABLE))
-        pHolder.Enabled = false;
+    if (!(holder.Event.event_flags & EFLAG_REPEATABLE))
+        holder.Enabled = false;
 
     // Store random here so that all random actions match up
     uint32 rnd = urand();
 
     // Return if chance for event is not met
-    if (pHolder.Event.event_chance <= rnd % 100)
+    if (holder.Event.event_chance <= rnd % 100)
         return false;
 
     // Process actions, normal case
-    if (!(pHolder.Event.event_flags & EFLAG_RANDOM_ACTION))
+    if (!(holder.Event.event_flags & EFLAG_RANDOM_ACTION))
     {
         for (uint32 j = 0; j < MAX_ACTIONS; ++j)
-            ProcessAction(pHolder.Event.action[j], rnd, pHolder.Event.event_id, pActionInvoker, pAIEventSender);
+            ProcessAction(holder.Event.action[j], rnd, holder.Event.event_id, actionInvoker, AIEventSender);
     }
     // Process actions, random case
     else
@@ -130,7 +130,7 @@ bool GuardianAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvok
         // amount of real actions
         uint32 count = 0;
         for (uint32 j = 0; j < MAX_ACTIONS; ++j)
-            if (pHolder.Event.action[j].type != ACTION_T_NONE)
+            if (holder.Event.action[j].type != ACTION_T_NONE)
                 ++count;
 
         if (count)
@@ -142,7 +142,7 @@ bool GuardianAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvok
             uint32 j = 0;
             for (; ; ++j)
             {
-                if (pHolder.Event.action[j].type != ACTION_T_NONE)
+                if (holder.Event.action[j].type != ACTION_T_NONE)
                 {
                     if (!idx)
                         break;
@@ -152,21 +152,21 @@ bool GuardianAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvok
 
             rnd = urand(); // need to randomize again to prevent always same result when both event and action are randomized
 
-            ProcessAction(pHolder.Event.action[j], rnd, pHolder.Event.event_id, pActionInvoker, pAIEventSender);
+            ProcessAction(holder.Event.action[j], rnd, holder.Event.event_id, actionInvoker, AIEventSender);
         }
     }
     return true;
 }
 
-void GuardianAI::ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender)
+void GuardianAI::ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* actionInvoker, Creature* AIEventSender)
 {
     if (action.type == ACTION_T_NONE)
         return;
 
     DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "GuardianAI: Process action %u (script %u) triggered for %s (invoked by %s)",
-        action.type, EventId, m_creature->GetGuidStr().c_str(), pActionInvoker ? pActionInvoker->GetGuidStr().c_str() : "<no invoker>");
+                     action.type, EventId, m_creature->GetGuidStr().c_str(), actionInvoker ? actionInvoker->GetGuidStr().c_str() : "<no invoker>");
 
-    CreatureEventAI::ProcessAction(action, rnd, EventId, pActionInvoker, pAIEventSender);
+    CreatureEventAI::ProcessAction(action, rnd, EventId, actionInvoker, AIEventSender);
 }
 
 void GuardianAI::CombatStop()
@@ -186,6 +186,8 @@ void GuardianAI::EnterEvadeMode()
     m_creature->RemoveAllAurasOnEvade();
     m_creature->DeleteThreatList();
     m_creature->CombatStop(true);
+
+    m_creature->TriggerEvadeEvents();
 
     // Handle Evade events
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)

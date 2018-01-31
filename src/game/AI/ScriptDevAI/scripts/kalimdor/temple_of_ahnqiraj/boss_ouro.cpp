@@ -126,7 +126,7 @@ struct boss_ouroAI : public Scripted_NoMovementAI
         {
             case NPC_OURO_TRIGGER:
                 m_ouroTriggerGuid = pSummoned->GetObjectGuid();
-                // no break;
+            // no break;
             case NPC_DIRT_MOUND:
                 pSummoned->GetMotionMaster()->MoveRandomAroundPoint(pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 40.0f);
                 break;

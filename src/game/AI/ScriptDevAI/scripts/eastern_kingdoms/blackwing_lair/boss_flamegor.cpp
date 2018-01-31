@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Flamegor
-SD%Complete: 90
-SDComment: Thrash is missing
+SD%Complete: 100
+SDComment:
 SDCategory: Blackwing Lair
 EndScriptData
 
@@ -33,7 +33,7 @@ enum
     SPELL_SHADOW_FLAME          = 22539,
     SPELL_WING_BUFFET           = 23339,
     SPELL_FRENZY                = 23342,                    // This spell periodically triggers fire nova
-    SPELL_THRASH                = 3391,                     // TODO missing
+    SPELL_THRASH                = 3391,
 };
 
 struct boss_flamegorAI : public ScriptedAI
@@ -48,13 +48,15 @@ struct boss_flamegorAI : public ScriptedAI
 
     uint32 m_uiShadowFlameTimer;
     uint32 m_uiWingBuffetTimer;
+    uint32 m_uiThrashTimer;
     uint32 m_uiFrenzyTimer;
 
     void Reset() override
     {
-        m_uiShadowFlameTimer = 21000;                       // These times are probably wrong
-        m_uiWingBuffetTimer = 35000;
-        m_uiFrenzyTimer = 10000;
+        m_uiShadowFlameTimer        = 18 * IN_MILLISECONDS;
+        m_uiWingBuffetTimer         = 30 * IN_MILLISECONDS;
+        m_uiThrashTimer             = 6 * IN_MILLISECONDS;
+        m_uiFrenzyTimer             = 10000;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -84,7 +86,7 @@ struct boss_flamegorAI : public ScriptedAI
         if (m_uiShadowFlameTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_FLAME) == CAST_OK)
-                m_uiShadowFlameTimer = urand(15000, 22000);
+                m_uiShadowFlameTimer = urand(15 * IN_MILLISECONDS, 18 * IN_MILLISECONDS);
         }
         else
             m_uiShadowFlameTimer -= uiDiff;
@@ -95,13 +97,24 @@ struct boss_flamegorAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_WING_BUFFET) == CAST_OK)
             {
                 if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                    m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -75);
+                    m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -50);
 
-                m_uiWingBuffetTimer = 25000;
+                m_uiWingBuffetTimer = urand(30 * IN_MILLISECONDS, 35 * IN_MILLISECONDS);
             }
         }
         else
             m_uiWingBuffetTimer -= uiDiff;
+
+        // Thrash Timer
+        if (m_uiThrashTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_THRASH) == CAST_OK)
+            {
+                m_uiThrashTimer = urand(2 * IN_MILLISECONDS, 6 * IN_MILLISECONDS);
+            }
+        }
+        else
+            m_uiThrashTimer -= uiDiff;
 
         // Frenzy Timer
         if (m_uiFrenzyTimer < uiDiff)
@@ -109,7 +122,7 @@ struct boss_flamegorAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
             {
                 DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
-                m_uiFrenzyTimer = urand(8000, 10000);
+                m_uiFrenzyTimer = urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
             }
         }
         else

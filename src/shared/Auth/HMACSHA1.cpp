@@ -16,23 +16,33 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Auth/Hmac.h"
+#include "Auth/HMACSHA1.h"
 #include "BigNumber.h"
 
-HmacHash::HmacHash()
+HMACSHA1::HMACSHA1(uint32 len, uint8* seed)
 {
-    uint8 temp[SEED_KEY_SIZE] = { 0x38, 0xA7, 0x83, 0x15, 0xF8, 0x92, 0x25, 0x30, 0x71, 0x98, 0x67, 0xB1, 0x8C, 0x4, 0xE2, 0xAA };
-    memcpy(&m_key, &temp, SEED_KEY_SIZE);
+    memcpy(&m_key, seed, len);
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     m_ctx = HMAC_CTX_new();
-    HMAC_Init_ex(m_ctx, &m_key, SEED_KEY_SIZE, EVP_sha1(), nullptr);
+    HMAC_Init_ex(m_ctx, &m_key, len, EVP_sha1(), nullptr);
 #else
     HMAC_CTX_init(&m_ctx);
-    HMAC_Init_ex(&m_ctx, &m_key, SEED_KEY_SIZE, EVP_sha1(), NULL);
+    HMAC_Init_ex(&m_ctx, &m_key, len, EVP_sha1(), nullptr);
 #endif
 }
 
-HmacHash::~HmacHash()
+HMACSHA1::HMACSHA1(uint32 len, uint8* seed, bool) // to get over the default constructor
+{
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+    m_ctx = HMAC_CTX_new();
+    HMAC_Init_ex(m_ctx, seed, len, EVP_sha1(), nullptr);
+#else
+    HMAC_CTX_init(&m_ctx);
+    HMAC_Init_ex(&m_ctx, seed, len, EVP_sha1(), nullptr);
+#endif
+}
+
+HMACSHA1::~HMACSHA1()
 {
     memset(&m_key, 0x00, SEED_KEY_SIZE);
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -42,12 +52,12 @@ HmacHash::~HmacHash()
 #endif
 }
 
-void HmacHash::UpdateBigNumber(BigNumber* bn)
+void HMACSHA1::UpdateBigNumber(BigNumber* bn)
 {
     UpdateData(bn->AsByteArray(), bn->GetNumBytes());
 }
 
-void HmacHash::UpdateData(const uint8* data, int length)
+void HMACSHA1::UpdateData(const uint8* data, int length)
 {
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     HMAC_Update(m_ctx, data, length);
@@ -56,7 +66,7 @@ void HmacHash::UpdateData(const uint8* data, int length)
 #endif
 }
 
-void HmacHash::Initialize()
+void HMACSHA1::Initialize()
 {
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     HMAC_Init_ex(m_ctx, &m_key, SEED_KEY_SIZE, EVP_sha1(), NULL);
@@ -65,7 +75,7 @@ void HmacHash::Initialize()
 #endif
 }
 
-void HmacHash::Finalize()
+void HMACSHA1::Finalize()
 {
     uint32 length = 0;
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L

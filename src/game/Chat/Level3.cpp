@@ -386,6 +386,14 @@ bool ChatHandler::HandleReloadAreaTriggerTeleportCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadLocalesAreaTriggerCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading AreaTrigger teleport locales definitions...");
+    sObjectMgr.LoadAreatriggerLocales();
+    SendGlobalSysMessage("DB table `locales_areatrigger_teleport` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadCommandCommand(char* /*args*/)
 {
     load_command_table = true;
@@ -1057,6 +1065,14 @@ bool ChatHandler::HandleReloadLocalesQuestCommand(char* /*args*/)
     sLog.outString("Re-Loading Locales Quest ... ");
     sObjectMgr.LoadQuestLocales();
     SendGlobalSysMessage("DB table `locales_quest` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadExpectedSpamRecords(char* /*args*/)
+{
+    sLog.outString("Reloading expected spam records...");
+    sWorld.LoadSpamRecords(true);
+    SendGlobalSysMessage("Reloaded expected spam records.");
     return true;
 }
 
@@ -4054,7 +4070,7 @@ bool ChatHandler::HandleLevelUpCommand(char* args)
                     return true;
                 }
             }
- 
+
             return false;
         }
     }
@@ -4412,7 +4428,7 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
                                 aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
                                 ss_name.str().c_str(),
                                 (holder->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
-                                holder->GetCasterGuid().GetString().c_str());
+                                holder->GetCasterGuid().GetString().c_str(), holder->GetStackAmount());
             }
             else
             {
@@ -4420,7 +4436,7 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
                                 aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
                                 name,
                                 (holder->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
-                                holder->GetCasterGuid().GetString().c_str());
+                                holder->GetCasterGuid().GetString().c_str(), holder->GetStackAmount());
             }
         }
     }
@@ -5653,9 +5669,9 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
             {
                 Unit* target;
                 if (unit->GetTypeId() == TYPEID_PLAYER)
-                    target = static_cast<ChaseMovementGenerator<Player> const*>(*itr)->GetTarget();
+                    target = static_cast<ChaseMovementGenerator<Player> const*>(*itr)->GetCurrentTarget();
                 else
-                    target = static_cast<ChaseMovementGenerator<Creature> const*>(*itr)->GetTarget();
+                    target = static_cast<ChaseMovementGenerator<Creature> const*>(*itr)->GetCurrentTarget();
 
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_CHASE_NULL);
@@ -5669,9 +5685,9 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
             {
                 Unit* target;
                 if (unit->GetTypeId() == TYPEID_PLAYER)
-                    target = static_cast<FollowMovementGenerator<Player> const*>(*itr)->GetTarget();
+                    target = static_cast<FollowMovementGenerator<Player> const*>(*itr)->GetCurrentTarget();
                 else
-                    target = static_cast<FollowMovementGenerator<Creature> const*>(*itr)->GetTarget();
+                    target = static_cast<FollowMovementGenerator<Creature> const*>(*itr)->GetCurrentTarget();
 
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_FOLLOW_NULL);
@@ -6797,7 +6813,7 @@ bool ChatHandler::HandleLinkEditCommand(char* args)
     if (QueryResult* result = WorldDatabase.PQuery("SELECT flag FROM creature_linking WHERE guid = '%u' AND master_guid = '%u'", player->GetSelectionGuid().GetCounter(), masterCounter))
     {
         delete result;
-            
+
         if (flags)
         {
             WorldDatabase.PExecute("UPDATE creature_linking SET flags = flags | '%u' WHERE guid = '%u' AND master_guid = '%u'", flags, player->GetSelectionGuid().GetCounter(), masterCounter);

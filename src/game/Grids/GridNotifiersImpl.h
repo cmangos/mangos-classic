@@ -138,27 +138,9 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (target->GetTypeId() == TYPEID_PLAYER && target != i_check && (((Player*)target)->isGameMaster() || ((Player*)target)->GetVisibility() == VISIBILITY_OFF))
         return;
 
-    // for player casts use less strict negative and more stricted positive targeting
-    if (i_check->GetTypeId() == TYPEID_PLAYER)
-    {
-        if (i_check->IsFriendlyTo(target) != i_positive)
-            return;
-    }
-    else
-    {
-        if (i_check->IsHostileTo(target) == i_positive)
-            return;
-    }
-
-    if (i_dynobject.IsAffecting(target))
-        return;
-
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(i_dynobject.GetSpellId());
     SpellEffectIndex eff_index  = i_dynobject.GetEffIndex();
-
-    // Check target immune to spell or aura
-    if (target->IsImmuneToSpell(spellInfo, false) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
-        return;
+    Unit* caster = i_dynobject.GetCaster();
 
     SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(spellInfo->Id);
     if (bounds.first != bounds.second)
@@ -187,6 +169,25 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         if (!found)
             return;
     }
+    else
+    {
+        // for player casts use less strict negative and more stricted positive targeting
+        if (i_positive)
+        {
+            if (!caster->CanAssistSpell(target, spellInfo))
+                return;
+        }
+        else
+        {
+            if (!caster->CanAttackSpell(target, spellInfo, true))
+                return;
+        }
+    }
+
+
+    // Check target immune to spell or aura
+    if (target->IsImmuneToSpell(spellInfo, false) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
+        return;
 
     // Apply PersistentAreaAura on target
     // in case 2 dynobject overlap areas for same spell, same holder is selected, so dynobjects share holder

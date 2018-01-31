@@ -325,6 +325,24 @@ inline bool IsSpellSetRun(SpellEntry const* spellInfo)
     }
 }
 
+inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
+{
+    //TODO: search correct case for classic
+    return true;
+
+    /*if (IsSpellHaveAura(spellInfo, SPELL_AURA_FLY))
+        return false;
+
+    switch (spellInfo->Id)
+    {
+        case 39918:         // visual auras in Soulgrinder script
+        case 39920:
+            return false;
+        default:
+            return true;
+    }*/
+}
+
 bool IsExplicitPositiveTarget(uint32 targetA);
 bool IsExplicitNegativeTarget(uint32 targetA);
 
@@ -389,8 +407,8 @@ inline bool IsBinarySpell(SpellEntry const* spellInfo)
             {
                 // If effect is extra mechanic on the same target as damage effect
                 if ((mechmask & (1 << e)) &&
-                    spellInfo->EffectImplicitTargetA[i] == spellInfo->EffectImplicitTargetA[e] &&
-                    spellInfo->EffectImplicitTargetB[i] == spellInfo->EffectImplicitTargetB[e])
+                        spellInfo->EffectImplicitTargetA[i] == spellInfo->EffectImplicitTargetA[e] &&
+                        spellInfo->EffectImplicitTargetB[i] == spellInfo->EffectImplicitTargetB[e])
                 {
                     return true; // Pre-2.3: if such effect exists
                 }
@@ -576,40 +594,6 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
     return true;
 }
 
-inline bool IsSingleTargetSpell(SpellEntry const* spellInfo)
-{
-    // Not AoE
-    if (IsAreaOfEffectSpell(spellInfo))
-        return false;
-
-    // Mechanics
-    switch (spellInfo->Mechanic)
-    {
-        case MECHANIC_FEAR:         // Includes: Warlock's Fear, Scare Beast
-        case MECHANIC_TURN:         // Turn Undead
-            // Always single-target in classic
-            return true;
-        case MECHANIC_ROOT:
-        case MECHANIC_SLEEP:        // Includes: Hibernate, Wyvern Sting
-        case MECHANIC_KNOCKOUT:     // Includes: Sap, Gouge
-        case MECHANIC_POLYMORPH:
-        case MECHANIC_BANISH:
-        case MECHANIC_SHACKLE:
-            // Only spells used by players seem to be subjects to single target mechanics in classic
-            return (spellInfo->SpellFamilyName && spellInfo->SpellFamilyFlags.Flags);
-    }
-    // Hunter's Mark mechanics (Mind Vision also uses this spell, but it has no practical side effects)
-    if (IsSpellHaveAura(spellInfo, SPELL_AURA_MOD_STALKED))
-        return true;
-
-    return false;
-}
-
-inline bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2)
-{
-    return (IsSingleTargetSpell(spellInfo1) && (spellInfo1->Id == spellInfo2->Id || (spellInfo1->SpellFamilyFlags == spellInfo2->SpellFamilyFlags && IsSingleTargetSpell(spellInfo2))));
-}
-
 inline bool IsScriptTarget(uint32 target)
 {
     switch (target)
@@ -757,24 +741,10 @@ inline bool IsNeutralEffectTargetPositive(uint32 etarget, const WorldObject* cas
         return true; // Early self-cast detection
 
     if (!caster)
-        return true; // TODO: Nice to have additional in-depth research for default value for nullcaster
+        return true;
 
-    const Unit* utarget = (const Unit*)target;
-    switch (caster->GetTypeId())
-    {
-        case TYPEID_UNIT:
-        case TYPEID_PLAYER:
-            return ((const Unit*)caster)->IsFriendlyTo(utarget);
-        case TYPEID_GAMEOBJECT:
-            return ((const GameObject*)caster)->IsFriendlyTo(utarget);
-        case TYPEID_DYNAMICOBJECT:
-            return ((const DynamicObject*)caster)->IsFriendlyTo(utarget);
-        case TYPEID_CORPSE:
-            return ((const Corpse*)caster)->IsFriendlyTo(utarget);
-        default:
-            break;
-    }
-    return true;
+    // TODO: Fix it later
+    return caster->IsFriend(static_cast<const Unit*>(target));
 }
 
 inline bool IsPositiveEffectTargetMode(const SpellEntry* entry, SpellEffectIndex effIndex, const WorldObject* caster = nullptr, const WorldObject* target = nullptr, bool recursive = false)
@@ -942,6 +912,19 @@ inline bool IsPositiveSpell(const SpellEntry* entry, const WorldObject* caster =
     return true;
 }
 
+// this is propably the correct check for most positivity/negativity decisions
+inline bool IsPositiveEffectMask(const SpellEntry* entry, uint8 effectMask, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
+{
+    if (!entry)
+        return false;
+    // spells with at least one negative effect are considered negative
+    // some self-applied spells have negative effects but in self casting case negative check ignored.
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (entry->Effect[i] && (effectMask & (1 << i)) && !IsPositiveEffect(entry, SpellEffectIndex(i), caster, target))
+            return false;
+    return true;
+}
+
 inline bool IsPositiveSpell(uint32 spellId, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
 {
     if (!spellId)
@@ -981,14 +964,23 @@ inline uint32 GetAffectedTargets(SpellEntry const* spellInfo)
                 case 802:                                   // Mutate Bug (AQ40, Emperor Vek'nilash)
                 case 804:                                   // Explode Bug (AQ40, Emperor Vek'lor)
                 case 23138:                                 // Gate of Shazzrah (MC, Shazzrah)
+                case 23173:                                 // Brood Affliction (BWL, Chromaggus)
+                case 24150:                                 // Stinger Charge Primer (AQ20, Hive'Zara Stinger)
                 case 24781:                                 // Dream Fog (Emerald Dragons)
+                case 26080:                                 // Stinger Charge Primer (AQ40, Vekniss Stinger)
                 case 28560:                                 // Summon Blizzard (Naxx, Sapphiron)
                     return 1;
                 case 10258:                                 // Awaken Vault Warder (Uldaman)
                 case 28542:                                 // Life Drain (Naxx, Sapphiron)
                     return 2;
+                case 25676:                                 // Drain Mana (correct number has to be researched)
+                case 25754:
+                    return 6;
                 case 28796:                                 // Poison Bolt Volley (Naxx, Faerlina)
                     return 10;
+                case 26457:                                 // Drain Mana (correct number has to be researched)
+                case 26559:
+                    return 12;
                 case 25991:                                 // Poison Bolt Volley (AQ40, Pincess Huhuran)
                     return 15;
                 default:
@@ -1029,8 +1021,8 @@ inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
 inline bool IsReflectableSpell(SpellEntry const* spellInfo)
 {
     return spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !spellInfo->HasAttribute(SPELL_ATTR_ABILITY)
-        && !spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REFLECTED) && !spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
-        && !spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !IsPositiveSpell(spellInfo);
+           && !spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REFLECTED) && !spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
+           && !spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !IsPositiveSpell(spellInfo);
 }
 
 // Mostly required by spells that target a creature inside GO
@@ -1633,12 +1625,13 @@ typedef std::map<uint32, SpellThreatEntry> SpellThreatMap;
 // Spell script target related declarations (accessed using SpellMgr functions)
 enum SpellTargetType
 {
-    SPELL_TARGET_TYPE_GAMEOBJECT = 0,
-    SPELL_TARGET_TYPE_CREATURE   = 1,
-    SPELL_TARGET_TYPE_DEAD       = 2
+    SPELL_TARGET_TYPE_GAMEOBJECT    = 0,
+    SPELL_TARGET_TYPE_CREATURE      = 1,
+    SPELL_TARGET_TYPE_DEAD          = 2,
+    SPELL_TARGET_TYPE_CREATURE_GUID = 3,
 };
 
-#define MAX_SPELL_TARGET_TYPE 3
+#define MAX_SPELL_TARGET_TYPE 4
 
 // pre-defined targeting for spells
 struct SpellTargetEntry
@@ -2054,6 +2047,52 @@ class SpellMgr
 
         bool IsRankSpellDueToSpell(SpellEntry const* spellInfo_1, uint32 spellId_2) const;
         bool IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const;
+        bool IsSingleTargetSpell(SpellEntry const* entry)
+        {
+            // Pre-TBC: SPELL_ATTR_EX5_SINGLE_TARGET_SPELL substitute code
+            // Not AoE
+            if (IsAreaOfEffectSpell(entry))
+                return false;
+
+            // Mechanics
+            switch (entry->Mechanic)
+            {
+                case MECHANIC_FEAR:         // Includes: Warlock's Fear, Scare Beast
+                case MECHANIC_TURN:         // Turn Undead
+                    // Always single-target in classic
+                    return true;
+                case MECHANIC_ROOT:
+                case MECHANIC_SLEEP:        // Includes: Hibernate, Wyvern Sting
+                case MECHANIC_KNOCKOUT:     // Includes: Sap, Gouge
+                case MECHANIC_POLYMORPH:
+                case MECHANIC_BANISH:
+                case MECHANIC_SHACKLE:
+                    // Only spells used by players seem to be subjects to single target mechanics in classic
+                    return (entry->SpellFamilyName && entry->SpellFamilyFlags.Flags);
+            }
+
+            // Hunter's Mark mechanics
+            if (entry->SpellFamilyName == SPELLFAMILY_HUNTER && IsSpellHaveAura(entry, SPELL_AURA_MOD_STALKED))
+                return true;
+
+            return false;
+        }
+
+        bool IsSingleTargetSpells(SpellEntry const* entry1, SpellEntry const* entry2)
+        {
+            if (!IsSingleTargetSpell(entry1) || !IsSingleTargetSpell(entry2))
+                return false;
+
+            // Early instance of same spell check
+            if (entry1 == entry2)
+                return true;
+
+            // One spell is a rank of another spell (same spell chain)
+            if (GetFirstSpellInChain(entry1->Id) == GetFirstSpellInChain(entry2->Id))
+                return true;
+
+            return false;
+        }
         bool canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const;
         bool IsRankedSpellNonStackableInSpellBook(SpellEntry const* spellInfo) const
         {

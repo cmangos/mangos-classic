@@ -59,7 +59,7 @@ struct ScriptedAI : public CreatureAI
         // == Reactions At =================================
 
         // Called if IsVisible(Unit* pWho) is true at each relative pWho move
-        void MoveInLineOfSight(Unit* pWho) override;
+        // void MoveInLineOfSight(Unit* pWho) override;
 
         // Called for reaction at enter to combat if not in combat yet (enemy can be nullptr)
         void EnterCombat(Unit* pEnemy) override;
@@ -68,79 +68,79 @@ struct ScriptedAI : public CreatureAI
         void EnterEvadeMode() override;
 
         // Called when reached home after MoveTargetHome (in evade)
-        void JustReachedHome() override {}
+        // void JustReachedHome() override {}
 
         // Called at any Heal received
-        void HealedBy(Unit* /*pHealer*/, uint32& /*uiHealedAmount*/) override {}
+        // void HealedBy(Unit* /*healer*/, uint32& /*healedAmount*/) override {}
 
         // Called at any Damage to any victim (before damage apply)
-        void DamageDeal(Unit* /*pDoneTo*/, uint32& /*uiDamage*/, DamageEffectType damagetype) override {}
+        // void DamageDeal(Unit* /*doneTo*/, uint32& /*damage*/, DamageEffectType damagetype) override {}
 
         // Called at any Damage from any attacker (before damage apply)
-        void DamageTaken(Unit* /*pDealer*/, uint32& /*uiDamage*/, DamageEffectType damagetype) override {}
+        // void DamageTaken(Unit* /*dealer*/, uint32& /*damage*/, DamageEffectType damagetype) override {}
 
         // Called at creature death
-        void JustDied(Unit* /*pKiller*/) override {}
+        // void JustDied(Unit* /*killer*/) override {}
 
         // Called when the corpse of this creature gets removed
-        void CorpseRemoved(uint32& /*uiRespawnDelay*/) override {}
+        // void CorpseRemoved(uint32& /*respawnDelay*/) override {}
 
         // Called when a summoned creature is killed
-        void SummonedCreatureJustDied(Creature* /*pSummoned*/) override {}
+        // void SummonedCreatureJustDied(Creature* /*summoned*/) override {}
 
         // Called at creature killing another unit
-        void KilledUnit(Unit* /*pVictim*/) override {}
+        // void KilledUnit(Unit* /*victim*/) override {}
 
         // Called when owner of m_creature (if m_creature is PROTECTOR_PET) kills a unit
-        void OwnerKilledUnit(Unit* /*pVictim*/) override {}
+        // void OwnerKilledUnit(Unit* /*victim*/) override {}
 
         // Called when the creature successfully summons a creature
-        void JustSummoned(Creature* /*pSummoned*/) override {}
+        // void JustSummoned(Creature* /*summoned*/) override {}
 
         // Called when the creature successfully summons a gameobject
-        void JustSummoned(GameObject* /*pGo*/) override {}
+        // void JustSummoned(GameObject* /*go*/) override {}
 
         // Called when a summoned creature gets TemporarySummon::UnSummon ed
-        void SummonedCreatureDespawn(Creature* /*pSummoned*/) override {}
+        // void SummonedCreatureDespawn(Creature* /*summoned*/) override {}
 
         // Called when hit by a spell
-        void SpellHit(Unit* /*pCaster*/, const SpellEntry* /*pSpell*/) override {}
+        // void SpellHit(Unit* /*caster*/, const SpellEntry* /*spell*/) override {}
 
         // Called when spell hits creature's target
-        void SpellHitTarget(Unit* /*pTarget*/, const SpellEntry* /*pSpell*/) override {}
+        // void SpellHitTarget(Unit* /*target*/, const SpellEntry* /*spell*/) override {}
 
         // Called when the creature is target of hostile action: swing, hostile spell landed, fear/etc)
         /// This will by default result in reattacking, if the creature has no victim
-        void AttackedBy(Unit* pAttacker) override { CreatureAI::AttackedBy(pAttacker); }
+        // void AttackedBy(Unit* pAttacker) override { CreatureAI::AttackedBy(pAttacker); }
 
         // Called when creature is respawned (for reseting variables)
         void JustRespawned() override;
 
         // Called at waypoint reached or point movement finished
-        void MovementInform(uint32 /*uiMovementType*/, uint32 /*uiData*/) override {}
+        // void MovementInform(uint32 /*movementType*/, uint32 /*data*/) override {}
 
         // Called if a temporary summoned of m_creature reach a move point
-        void SummonedMovementInform(Creature* /*pSummoned*/, uint32 /*uiMotionType*/, uint32 /*uiData*/) override {}
+        // void SummonedMovementInform(Creature* /*summoned*/, uint32 /*motionType*/, uint32 /*data*/) override {}
 
         // Called at text emote receive from player
-        void ReceiveEmote(Player* /*pPlayer*/, uint32 /*uiEmote*/) override {}
+        // void ReceiveEmote(Player* /*player*/, uint32 /*emote*/) override {}
 
         // Called at each attack of m_creature by any victim
-        void AttackStart(Unit* pWho) override;
+        // void AttackStart(Unit* who) override;
 
         // Called at World update tick
-        void UpdateAI(const uint32) override;
+        void UpdateAI(const uint32 diff) override;
 
         // Called when an AI Event is received
-        void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override {}
+        void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override {}
 
         // == State checks =================================
 
         // Check if unit is visible for MoveInLineOfSight
-        bool IsVisible(Unit* pWho) const override;
+        // bool IsVisible(Unit* who) const override;
 
         // Called when victim entered water and creature can not enter water
-        bool canReachByRangeAttack(Unit* pWho) override { return CreatureAI::canReachByRangeAttack(pWho); }
+        // bool canReachByRangeAttack(Unit* who) override { return CreatureAI::canReachByRangeAttack(pWho); }
 
         // *************
         // Variables
@@ -163,68 +163,57 @@ struct ScriptedAI : public CreatureAI
          * This is a SD2 internal function
          * Called by default on creature EnterCombat with an enemy
          */
-        virtual void Aggro(Unit* /*pWho*/) {}
+        virtual void Aggro(Unit* /*who*/) {}
 
         // *************
         // AI Helper Functions
         // *************
 
         // Start movement toward victim
-        void DoStartMovement(Unit* pVictim, float fDistance = 0, float fAngle = 0);
+        void DoStartMovement(Unit* victim, float distance = 0, float angle = 0);
 
         // Start no movement on victim
-        void DoStartNoMovement(Unit* pVictim);
+        void DoStartNoMovement(Unit* victim);
 
         // Stop attack of current victim
         void DoStopAttack();
 
-        // Cast spell by Id
-        void DoCast(Unit* pTarget, uint32 uiSpellId, bool bTriggered = false);
-
-        // Cast spell by spell info
-        void DoCastSpell(Unit* pTarget, SpellEntry const* pSpellInfo, bool bTriggered = false);
-
         // Plays a sound to all nearby players
-        void DoPlaySoundToSet(WorldObject* pSource, uint32 uiSoundId);
+        void DoPlaySoundToSet(WorldObject* source, uint32 soundId);
 
         // Drops all threat to 0%. Does not remove enemies from the threat list
         void DoResetThreat();
 
         // Teleports a player without dropping threat (only teleports to same map)
-        void DoTeleportPlayer(Unit* pUnit, float fX, float fY, float fZ, float fO);
-
-        // Returns friendly unit with the most amount of hp missing from max hp
-        Unit* DoSelectLowestHpFriendly(float fRange, uint32 uiMinHPDiff = 1);
+        void DoTeleportPlayer(Unit* unit, float x, float y, float z, float ori);
 
         // Returns a list of friendly CC'd units within range
-        std::list<Creature*> DoFindFriendlyCC(float fRange);
+        std::list<Creature*> DoFindFriendlyCC(float range);
 
         // Returns a list of all friendly units missing a specific buff within range
-        std::list<Creature*> DoFindFriendlyMissingBuff(float fRange, uint32 uiSpellId);
+        std::list<Creature*> DoFindFriendlyMissingBuff(float range, uint32 spellId);
 
         // Return a player with at least minimumRange from m_creature
-        Player* GetPlayerAtMinimumRange(float fMinimumRange);
-
-        // Spawns a creature relative to m_creature
-        Creature* DoSpawnCreature(uint32 uiId, float fX, float fY, float fZ, float fAngle, uint32 uiType, uint32 uiDespawntime);
+        Player* GetPlayerAtMinimumRange(float minimumRange);
 
         // Returns spells that meet the specified criteria from the creatures spell list
-        SpellEntry const* SelectSpell(Unit* pTarget, int32 uiSchool, int32 iMechanic, SelectTarget selectTargets, uint32 uiPowerCostMin, uint32 uiPowerCostMax, float fRangeMin, float fRangeMax, SelectEffect selectEffect);
+        SpellEntry const* SelectSpell(Unit* target, int32 school, int32 mechanic, SelectTarget selectTargets, uint32 powerCostMin, uint32 powerCostMax, float rangeMin, float rangeMax, SelectEffect selectEffect);
 
         // Checks if you can cast the specified spell
-        bool CanCast(Unit* pTarget, SpellEntry const* pSpell, bool bTriggered = false);
+        bool CanCast(Unit* target, SpellEntry const* spell, bool triggered = false);
 
-        void SetEquipmentSlots(bool bLoadDefault, int32 iMainHand = EQUIP_NO_CHANGE, int32 iOffHand = EQUIP_NO_CHANGE, int32 iRanged = EQUIP_NO_CHANGE);
+        void SetEquipmentSlots(bool loadDefault, int32 mainHand = EQUIP_NO_CHANGE, int32 offHand = EQUIP_NO_CHANGE, int32 ranged = EQUIP_NO_CHANGE);
 
-        bool EnterEvadeIfOutOfCombatArea(const uint32 uiDiff);
+        bool EnterEvadeIfOutOfCombatArea(const uint32 diff);
 
     private:
         uint32 m_uiEvadeCheckCooldown;
+
 };
 
 struct Scripted_NoMovementAI : public ScriptedAI
 {
-    Scripted_NoMovementAI(Creature* pCreature) : ScriptedAI(pCreature)
+    Scripted_NoMovementAI(Creature* creature) : ScriptedAI(creature)
     {
         SetCombatMovement(false);
     }
@@ -232,7 +221,7 @@ struct Scripted_NoMovementAI : public ScriptedAI
     void GetAIInformation(ChatHandler& reader) override;
 
     // Called at each attack of m_creature by any victim
-    void AttackStart(Unit* pWho) override;
+    void AttackStart(Unit* who) override;
 };
 
 #endif

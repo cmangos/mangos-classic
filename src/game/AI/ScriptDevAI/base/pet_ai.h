@@ -11,28 +11,24 @@
 class ScriptedPetAI : public CreatureAI
 {
     public:
-        explicit ScriptedPetAI(Creature* pCreature);
+        explicit ScriptedPetAI(Creature* creature);
         ~ScriptedPetAI() {}
 
-        void MoveInLineOfSight(Unit* /*pWho*/) override;
+        void AttackStart(Unit* /*who*/) override;
 
-        void AttackStart(Unit* /*pWho*/) override;
+        void AttackedBy(Unit* /*attacker*/) override;
 
-        void AttackedBy(Unit* /*pAttacker*/) override;
+        void KilledUnit(Unit* /*victim*/) override {}
 
-        bool IsVisible(Unit* /*pWho*/) const override;
+        void OwnerKilledUnit(Unit* /*victim*/) override {}
 
-        void KilledUnit(Unit* /*pVictim*/) override {}
-
-        void OwnerKilledUnit(Unit* /*pVictim*/) override {}
-
-        void UpdateAI(const uint32 uiDiff) override;
+        void UpdateAI(const uint32 diff) override;
 
         virtual void Reset() {}
 
-        virtual void UpdatePetAI(const uint32 uiDiff);      // while in combat
+        virtual void UpdatePetAI(const uint32 diff);      // while in combat
 
-        virtual void UpdatePetOOCAI(const uint32 /*uiDiff*/) {} // when not in combat
+        virtual void UpdatePetOOCAI(const uint32 /*diff*/) {} // when not in combat
 
     protected:
         void ResetPetCombat();

@@ -123,8 +123,6 @@ enum
     GOSSIP_SENDER_SEC_STABLEMASTER = 10
 };
 
-extern uint32 GetSkillLevel(Player* pPlayer, uint32 uiSkill);
-
 // Defined fuctions to use with player.
 
 // This fuction add's a menu item,
@@ -135,24 +133,24 @@ extern uint32 GetSkillLevel(Player* pPlayer, uint32 uiSkill);
 // Text to be displayed in pop up box
 // Money value in pop up box
 // Coded
-#define ADD_GOSSIP_ITEM(uiIcon, chrText, uiSender, uiOptionId)   PlayerTalkClass->GetGossipMenu().AddMenuItem(uiIcon, chrText, uiSender, uiOptionId, "", 0)
-#define ADD_GOSSIP_ITEM_ID(uiIcon, iTextId, uiSender, uiOptionId)   PlayerTalkClass->GetGossipMenu().AddMenuItem(uiIcon, iTextId, uiSender, uiOptionId, 0, 0)
-#define ADD_GOSSIP_ITEM_EXTENDED(uiIcon, chrText, uiSender, uiOptionId, chrBoxMessage, uiBoxMoney, bCode)   PlayerTalkClass->GetGossipMenu().AddMenuItem(uiIcon, chrText, uiSender, uiOptionId, chrBoxMessage, /*uiBoxMoney,*/ bCode)
+#define ADD_GOSSIP_ITEM(icon, text, sender, optionId)   PlayerTalkClass->GetGossipMenu().AddMenuItem(icon, text, sender, optionId, "", 0)
+#define ADD_GOSSIP_ITEM_ID(icon, textId, sender, optionId)   PlayerTalkClass->GetGossipMenu().AddMenuItem(icon, textId, sender, optionId, 0, 0)
+#define ADD_GOSSIP_ITEM_EXTENDED(icon, text, sender, optionId, boxMessage, boxMoney, code)   PlayerTalkClass->GetGossipMenu().AddMenuItem(icon, text, sender, optionId, boxMessage, code)
 
 // This fuction Sends the current menu to show to client
 // uiTextId - NPCTEXTID (uint32)
 // guid - npc guid (ObjectGuid)
-#define SEND_GOSSIP_MENU(uiTextId, guid)      PlayerTalkClass->SendGossipMenu(uiTextId, guid)
+#define SEND_GOSSIP_MENU(textId, guid)      PlayerTalkClass->SendGossipMenu(textId, guid)
 
 // Closes the Menu
 #define CLOSE_GOSSIP_MENU()        PlayerTalkClass->CloseGossip()
 
 // Fuctions to send NPC lists
-// a - is always the npc guid (ObjectGuid)
-#define SEND_VENDORLIST(a)         GetSession()->SendListInventory(a)
-#define SEND_TRAINERLIST(a)        GetSession()->SendTrainerList(a)
-#define SEND_BANKERLIST(a)         GetSession()->SendShowBank(a)
-#define SEND_TABARDLIST(a)         GetSession()->SendTabardVendorActivate(a)
-#define SEND_TAXILIST(a)           GetSession()->SendTaxiStatus(a)
+// guid - is always the npc guid (ObjectGuid)
+#define SEND_VENDORLIST(guid)         GetSession()->SendListInventory(guid)
+#define SEND_TRAINERLIST(guid)        GetSession()->SendTrainerList(guid)
+#define SEND_BANKERLIST(guid)         GetSession()->SendShowBank(guid)
+#define SEND_TABARDLIST(guid)         GetSession()->SendTabardVendorActivate(guid)
+#define SEND_TAXILIST(guid)           GetSession()->SendTaxiStatus(guid)
 
 #endif

@@ -69,7 +69,7 @@ namespace MaNGOS
             static T* Create()
             {
                 static MaxAlign si_localStatic;
-                return new(&si_localStatic) T;
+                return new (&si_localStatic) T;
             }
 
             static void Destroy(T* obj)
@@ -93,7 +93,7 @@ namespace MaNGOS
                 if (!p)
                     return nullptr;
 
-                return new(p) T;
+                return new (p) T;
             }
 
             static void Destroy(T* p)

@@ -22,7 +22,7 @@
 void ByteBufferException::PrintPosError() const
 {
     sLog.outError("Attempted to %s in ByteBuffer (pos: " SIZEFMTD " size: " SIZEFMTD ") value with size: " SIZEFMTD,
-        (add ? "put" : "get"), pos, size, esize);
+                  (add ? "put" : "get"), pos, size, esize);
 }
 
 void ByteBuffer::print_storage() const

@@ -21,47 +21,45 @@ enum FollowState
 class FollowerAI : public ScriptedAI
 {
     public:
-        explicit FollowerAI(Creature* pCreature);
+        explicit FollowerAI(Creature* creature);
         ~FollowerAI() {}
 
-        // virtual void WaypointReached(uint32 uiPointId) = 0;
+        // virtual void WaypointReached(uint32 pointId) = 0;
 
-        void MovementInform(uint32 uiMotionType, uint32 uiPointId) override;
+        void MovementInform(uint32 motionType, uint32 pointId) override;
 
-        void AttackStart(Unit*) override;
-
-        void MoveInLineOfSight(Unit*) override;
+        void AttackStart(Unit* who) override;
 
         void EnterEvadeMode() override;
 
-        void JustDied(Unit*) override;
+        void JustDied(Unit* killer) override;
 
-        void JustRespawned() override;
+        void CorpseRemoved(uint32& /*respawnDelay*/) override;
 
-        void UpdateAI(const uint32) override;               // the "internal" update, calls UpdateFollowerAI()
-        virtual void UpdateFollowerAI(const uint32);        // used when it's needed to add code in update (abilities, scripted events, etc)
+        void UpdateAI(const uint32 diff) override;               // the "internal" update, calls UpdateFollowerAI()
+        virtual void UpdateFollowerAI(const uint32 diff);        // used when it's needed to add code in update (abilities, scripted events, etc)
 
-        void StartFollow(Player* pPlayer, uint32 uiFactionForFollower = 0, const Quest* pQuest = nullptr);
+        void StartFollow(Player* player, uint32 factionForFollower = 0, const Quest* quest = nullptr);
 
-        void SetFollowPaused(bool bPaused);                 // if special event require follow mode to hold/resume during the follow
-        void SetFollowComplete(bool bWithEndEvent = false);
+        void SetFollowPaused(bool paused);                 // if special event require follow mode to hold/resume during the follow
+        void SetFollowComplete(bool withEndEvent = false);
 
-        bool HasFollowState(uint32 uiFollowState) const { return !!(m_uiFollowState & uiFollowState); }
+        bool HasFollowState(uint32 followState) const { return !!(m_followState & followState); }
+
+        bool AssistPlayerInCombat(Unit* who) override;
 
     protected:
         Player* GetLeaderForFollower();
 
     private:
-        void AddFollowState(uint32 uiFollowState) { m_uiFollowState |= uiFollowState; }
-        void RemoveFollowState(uint32 uiFollowState) { m_uiFollowState &= ~uiFollowState; }
-
-        bool AssistPlayerInCombat(Unit* pWho);
+        void AddFollowState(uint32 uiFollowState) { m_followState |= uiFollowState; }
+        void RemoveFollowState(uint32 uiFollowState) { m_followState &= ~uiFollowState; }
 
         ObjectGuid m_leaderGuid;
-        uint32 m_uiUpdateFollowTimer;
-        uint32 m_uiFollowState;
+        uint32 m_updateFollowTimer;
+        uint32 m_followState;
 
-        const Quest* m_pQuestForFollow;                     // normally we have a quest
+        const Quest* m_questForFollow;                     // normally we have a quest
 };
 
 #endif

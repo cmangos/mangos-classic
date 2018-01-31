@@ -38,29 +38,10 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recv_data)
 
     Unit* pEnemy = _player->GetMap()->GetUnit(guid);
 
-    if (!pEnemy)
+    if (!_player->CanAttackNow(pEnemy))
     {
-        sLog.outError("WORLD: Enemy %s not found", guid.GetString().c_str());
-
         // stop attack state at client
         SendAttackStop(nullptr);
-        return;
-    }
-
-    if (_player->IsFriendlyTo(pEnemy) || pEnemy->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
-    {
-        sLog.outError("WORLD: Enemy %s is friendly", guid.GetString().c_str());
-
-        // stop attack state at client
-        SendAttackStop(pEnemy);
-        return;
-    }
-
-    if (!pEnemy->isAlive())
-    {
-        // client can generate swing to known dead target if autoswitch between autoshot and autohit is enabled in client options
-        // stop attack state at client
-        SendAttackStop(pEnemy);
         return;
     }
 

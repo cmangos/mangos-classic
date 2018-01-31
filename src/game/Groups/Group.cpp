@@ -30,10 +30,10 @@
 #include "Maps/MapManager.h"
 #include "Maps/MapPersistentStateMgr.h"
 #ifdef BUILD_PLAYERBOT
-    #include "PlayerBot/Base/PlayerbotMgr.h"
+#include "PlayerBot/Base/PlayerbotMgr.h"
 #endif
 
-GroupMemberStatus GetGroupMemberStatus(const Player *member = nullptr)
+GroupMemberStatus GetGroupMemberStatus(const Player* member = nullptr)
 {
     uint8 flags = MEMBER_STATUS_OFFLINE;
     if (member && member->GetSession() && !member->GetSession()->PlayerLogout())

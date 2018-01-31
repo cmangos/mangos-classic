@@ -43,6 +43,8 @@ class Totem : public Creature
         void SetTypeBySummonSpell(SpellEntry const* spellProto);
         void SetDuration(uint32 dur) { m_duration = dur; }
 
+        Player* GetSpellModOwner() const override;
+
         float GetCritChance(WeaponAttackType attackType) const override;
         float GetCritChance(SpellSchoolMask schoolMask) const override;
         float GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureTypeMask, const SpellEntry* spell = nullptr, bool heal = false) const override;

@@ -134,7 +134,7 @@ enum
     YELL_PATROL_1           = -1230048,
     YELL_PATROL_2           = -1230049,
     SPELL_NAGMARA_VANISH    = 15341,
-    
+
     // Emperor Dagran Thaurissan
     YELL_SENATOR_1          = -1230060,
     YELL_SENATOR_2          = -1230061,
@@ -204,7 +204,8 @@ static const float aVaultPositions[4] = {821.905f, -338.382f, -50.134f, 3.78736f
 static const float aHurleyPositions[4] = {856.0867f, -149.7469f, -49.6719f, 0.05949629f};
 
 // Used to summon the patrol in Grim Guzzler
-static const float aBarPatrolPositions[2][4] = {
+static const float aBarPatrolPositions[2][4] =
+{
     {872.7059f, -232.5491f, -43.7525f, 2.069044f},
     {865.5645f, -219.7471f, -43.7033f, 2.033881f}
 };

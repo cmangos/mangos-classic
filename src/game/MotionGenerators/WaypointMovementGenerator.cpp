@@ -118,42 +118,6 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
         creature.GetMap()->ScriptsStart(sCreatureMovementScripts, node.script_id, &creature, &creature);
     }
 
-    // We have reached the destination and can process behavior
-    if (WaypointBehavior* behavior = node.behavior)
-    {
-        if (behavior->emote != 0)
-            creature.HandleEmote(behavior->emote);
-
-        if (behavior->spell != 0)
-            creature.CastSpell(&creature, behavior->spell, TRIGGERED_NONE);
-
-        if (behavior->model1 != 0)
-            creature.SetDisplayId(behavior->model1);
-
-        if (behavior->textid[0])
-        {
-            int32 textId = behavior->textid[0];
-            // Not only one text is set
-            if (behavior->textid[1])
-            {
-                // Select one from max 5 texts (0 and 1 already checked)
-                int i = 2;
-                for (; i < MAX_WAYPOINT_TEXT; ++i)
-                {
-                    if (!behavior->textid[i])
-                        break;
-                }
-
-                textId = behavior->textid[urand(0, i - 1)];
-            }
-
-            if (MangosStringLocale const* textData = sObjectMgr.GetMangosStringLocale(textId))
-                creature.MonsterText(textData, nullptr);
-            else
-                sLog.outErrorDb("%s reached waypoint %u, attempted to do text %i, but required text-data could not be found", creature.GetGuidStr().c_str(), i_currentNode, textId);
-        }
-    }
-
     // Inform script
     if (creature.AI())
     {
@@ -188,13 +152,6 @@ void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
 
     WaypointPath::const_iterator currPoint = i_path->find(i_currentNode);
     MANGOS_ASSERT(currPoint != i_path->end());
-
-    if (WaypointBehavior* behavior = currPoint->second.behavior)
-    {
-        if (behavior->model2 != 0)
-            creature.SetDisplayId(behavior->model2);
-        creature.SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-    }
 
     if (m_isArrivalDone)
     {
@@ -408,7 +365,7 @@ void FlightPathMovementGenerator::LoadPath(Player& player)
                 if (passedPreviousSegmentProximityCheck || !src || i_path.empty() || IsNodeIncludedInShortenedPath(i_path[i_path.size() - 1], nodes[i]))
                 {
                     if ((!src || (IsNodeIncludedInShortenedPath(start, nodes[i]) && i >= 2)) &&
-                        (dst == taxi.size() - 1 || (IsNodeIncludedInShortenedPath(end, nodes[i]) && i < nodes.size() - 1)))
+                            (dst == taxi.size() - 1 || (IsNodeIncludedInShortenedPath(end, nodes[i]) && i < nodes.size() - 1)))
                     {
                         passedPreviousSegmentProximityCheck = true;
                         i_path.push_back(nodes[i]);
@@ -438,7 +395,7 @@ void FlightPathMovementGenerator::Finalize(Player& player)
 
     player.Unmount();
     player.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_MOVING_DEPRECATED | UNIT_FLAG_TAXI_FLIGHT);
-    player.SetClientControl(&player, 1);
+    player.UpdateClientControl(&player, true);
 
     if (player.m_taxi.GetLastNode() == player.m_taxi.GetFinalTaxiDestination())
     {
@@ -473,8 +430,8 @@ void FlightPathMovementGenerator::Reset(Player& player)
 {
     player.getHostileRefManager().setOnlineOfflineState(false);
     player.addUnitState(UNIT_STAT_TAXI_FLIGHT);
+    player.UpdateClientControl(&player, false);
     player.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_MOVING_DEPRECATED | UNIT_FLAG_TAXI_FLIGHT);
-    player.SetClientControl(&player, 0);
 
     Movement::MoveSplineInit init(player);
     uint32 end = GetPathAtMapEnd();

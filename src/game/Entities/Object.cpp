@@ -321,7 +321,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 if (target != this && m_objectTypeId == TYPEID_PLAYER)
                 {
                     if (static_cast<Player const*>(this)->GetTeam() != static_cast<Player const*>(target)->GetTeam() ||
-                        !target->IsFriendlyTo(static_cast<Unit const*>(this)))
+                            !target->IsFriendlyTo(static_cast<Unit const*>(this)))
                     {
                         // not same faction or not friendly
                         sendPercent = true;
@@ -382,7 +382,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                             if (target->getClass() != CLASS_HUNTER)
                                 appendValue &= ~UNIT_NPC_FLAG_STABLEMASTER;
                         }
-                        
+
                         if (appendValue & UNIT_NPC_FLAG_FLIGHTMASTER)
                         {
                             QuestRelationsMapBounds bounds = sObjectMgr.GetCreatureQuestRelationsMapBounds(((Creature*)this)->GetEntry());
@@ -914,9 +914,9 @@ void Object::ForceValuesUpdateAtIndex(uint32 index)
 }
 
 WorldObject::WorldObject() :
-    m_currMap(nullptr),
-    m_mapId(0), m_InstanceId(0),
-    m_isActiveObject(false)
+    m_isOnEventNotified(false),
+    m_currMap(nullptr), m_mapId(0),
+    m_InstanceId(0), m_isActiveObject(false)
 {
 }
 
@@ -1009,6 +1009,27 @@ float WorldObject::GetDistance(float x, float y, float z) const
     return (dist > 0 ? dist : 0);
 }
 
+float WorldObject::GetDistanceNoBoundingRadius(float x, float y, float z) const
+{
+    float dx = GetPositionX() - x;
+    float dy = GetPositionY() - y;
+    float dz = GetPositionZ() - z;
+    float dist = sqrt((dx * dx) + (dy * dy) + (dz * dz));
+    return dist;
+}
+
+float WorldObject::GetCombatDistance(const WorldObject* obj, bool forMeleeRange) const
+{
+    float radius = GetCombinedCombatReach(obj, forMeleeRange);
+
+    float dx = GetPositionX() - obj->GetPositionX();
+    float dy = GetPositionY() - obj->GetPositionY();
+    float dz = GetPositionZ() - obj->GetPositionZ();
+    float dist = sqrt((dx * dx) + (dy * dy) + (dz * dz)) - radius;
+
+    return (dist > 0.0f ? dist : 0.0f);
+}
+
 float WorldObject::GetDistance2d(const WorldObject* obj) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
@@ -1062,6 +1083,22 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
         distsq += dz * dz;
     }
     float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
+    float maxdist = dist2compare + sizefactor;
+
+    return distsq < maxdist * maxdist;
+}
+
+bool WorldObject::_IsWithinCombatDist(WorldObject const* obj, float dist2compare, bool is3D) const
+{
+    float dx = GetPositionX() - obj->GetPositionX();
+    float dy = GetPositionY() - obj->GetPositionY();
+    float distsq = dx * dx + dy * dy;
+    if (is3D)
+    {
+        float dz = GetPositionZ() - obj->GetPositionZ();
+        distsq += dz * dz;
+    }
+    float sizefactor = GetCombatReach() + obj->GetCombatReach();
     float maxdist = dist2compare + sizefactor;
 
     return distsq < maxdist * maxdist;
@@ -1370,6 +1407,18 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
     }
 }
 
+float WorldObject::GetCombinedCombatReach(WorldObject const* pVictim, bool forMeleeRange, float flat_mod) const
+{
+    // The measured values show BASE_MELEE_OFFSET in (1.3224, 1.342)
+    float reach = GetCombatReach() + pVictim->GetCombatReach() +
+                  BASE_MELEERANGE_OFFSET + flat_mod;
+
+    if (forMeleeRange && reach < ATTACK_DISTANCE)
+        reach = ATTACK_DISTANCE;
+
+    return reach;
+}
+
 bool WorldObject::IsPositionValid() const
 {
     return MaNGOS::IsValidMapCoord(m_position.x, m_position.y, m_position.z, m_position.o);
@@ -1488,11 +1537,16 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
         {
             MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, textData, textData->LanguageId, target);
             MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
-            uint32 zoneid = GetZoneId();
-            Map::PlayerList const& pList = GetMap()->GetPlayers();
-            for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-                if (itr->getSource()->GetZoneId() == zoneid)
-                    say_do(itr->getSource());
+            uint32 zoneId = GetZoneId();
+            GetMap()->ExecuteMapWorkerZone(zoneId, std::bind(&MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder>::operator(), &say_do, std::placeholders::_1));
+            break;
+        }
+        case CHAT_TYPE_ZONE_EMOTE:
+        {
+            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_EMOTE, textData, textData->LanguageId, target);
+            MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
+            uint32 zoneId = GetZoneId();
+            GetMap()->ExecuteMapWorkerZone(zoneId, std::bind(&MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder>::operator(), &say_do, std::placeholders::_1));
             break;
         }
     }
@@ -1544,6 +1598,22 @@ void WorldObject::SetMap(Map* map)
     // lets save current map's Id/instanceId
     m_mapId = map->GetId();
     m_InstanceId = map->GetInstanceId();
+}
+
+void WorldObject::AddToWorld()
+{
+    if (m_isOnEventNotified)
+        m_currMap->AddToOnEventNotified(this);
+
+    Object::AddToWorld();
+}
+
+void WorldObject::RemoveFromWorld()
+{
+    if (m_isOnEventNotified)
+        m_currMap->RemoveFromOnEventNotified(this);
+
+    Object::RemoveFromWorld();
 }
 
 TerrainInfo const* WorldObject::GetTerrain() const
@@ -1808,35 +1878,52 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         UpdateGroundPositionZ(x, y, z);
 }
 
-void WorldObject::PlayDistanceSound(uint32 sound_id, Player const* target /*= nullptr*/) const
+void WorldObject::PlayDistanceSound(uint32 sound_id, PlayPacketParameters parameters /*= PlayPacketParameters(PLAY_SET)*/) const
 {
     WorldPacket data(SMSG_PLAY_OBJECT_SOUND, 4 + 8);
     data << uint32(sound_id);
     data << GetObjectGuid();
-    if (target)
-        target->SendDirectMessage(data);
-    else
-        SendMessageToSet(data, true);
+    HandlePlayPacketSettings(data, parameters);
 }
 
-void WorldObject::PlayDirectSound(uint32 sound_id, Player const* target /*= nullptr*/) const
+void WorldObject::PlayDirectSound(uint32 sound_id, PlayPacketParameters parameters /*= PlayPacketParameters(PLAY_SET)*/) const
 {
     WorldPacket data(SMSG_PLAY_SOUND, 4);
     data << uint32(sound_id);
-    if (target)
-        target->SendDirectMessage(data);
-    else
-        SendMessageToSet(data, true);
+    HandlePlayPacketSettings(data, parameters);
 }
 
-void WorldObject::PlayMusic(uint32 sound_id, Player const* target /*= nullptr*/) const
+void WorldObject::PlayMusic(uint32 sound_id, PlayPacketParameters parameters /*= PlayPacketParameters(PLAY_SET)*/) const
 {
     WorldPacket data(SMSG_PLAY_MUSIC, 4);
     data << uint32(sound_id);
-    if (target)
-        target->SendDirectMessage(data);
-    else
-        SendMessageToSet(data, true);
+    HandlePlayPacketSettings(data, parameters);
+}
+
+void WorldObject::HandlePlayPacketSettings(WorldPacket& msg, PlayPacketParameters& parameters) const
+{
+    switch (parameters.setting)
+    {
+        case PLAY_SET:
+            SendMessageToSet(msg, true);
+            break;
+        case PLAY_TARGET:
+            if (Player const* target = parameters.target.target)
+                target->SendDirectMessage(msg);
+            break;
+        case PLAY_MAP:
+            if (IsInWorld())
+                GetMap()->MessageMapBroadcast(this, msg);
+            break;
+        case PLAY_ZONE:
+            if (IsInWorld())
+                GetMap()->MessageMapBroadcastZone(this, msg, parameters.areaOrZone.id);
+            break;
+        case PLAY_AREA:
+            if (IsInWorld())
+                GetMap()->MessageMapBroadcastArea(this, msg, parameters.areaOrZone.id);
+            break;
+    }
 }
 
 void WorldObject::UpdateVisibilityAndView()
@@ -1936,6 +2023,22 @@ void WorldObject::SetActiveObjectState(bool active)
             GetMap()->AddToActive(this);
     }
     m_isActiveObject = active;
+}
+
+void WorldObject::SetNotifyOnEventState(bool state)
+{
+    if (state == m_isOnEventNotified)
+        return;
+
+    m_isOnEventNotified = state;
+
+    if (!IsInWorld())
+        return;
+
+    if (state)
+        GetMap()->AddToOnEventNotified(this);
+    else
+        GetMap()->RemoveFromOnEventNotified(this);
 }
 
 void WorldObject::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*= 0*/, bool /*updateClient = false*/)

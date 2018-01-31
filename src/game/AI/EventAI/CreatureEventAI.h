@@ -33,7 +33,7 @@ class WorldObject;
 
 #define LOG_PROCESS_EVENT                                                                                                       \
     DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "CreatureEventAI: Event type %u (script %u) triggered for %s (invoked by %s)",    \
-                     pHolder.Event.event_type, pHolder.Event.event_id, m_creature->GetGuidStr().c_str(), pActionInvoker ? pActionInvoker->GetGuidStr().c_str() : "<no invoker>")
+                     holder.Event.event_type, holder.Event.event_id, m_creature->GetGuidStr().c_str(), actionInvoker ? actionInvoker->GetGuidStr().c_str() : "<no invoker>")
 
 enum EventAI_Type
 {
@@ -732,37 +732,36 @@ class CreatureEventAI : public CreatureAI
         void EnterEvadeMode() override;
         void JustDied(Unit* killer) override;
         void KilledUnit(Unit* victim) override;
-        void JustSummoned(Creature* pUnit) override;
-        void AttackStart(Unit* who) override;
+        void JustSummoned(Creature* summoned) override;
+        // void AttackStart(Unit* who) override;
         void MoveInLineOfSight(Unit* who) override;
-        void SpellHit(Unit* pUnit, const SpellEntry* pSpell) override;
-        void DamageTaken(Unit* done_by, uint32& damage, DamageEffectType damagetype) override;
+        void SpellHit(Unit* unit, const SpellEntry* spellInfo) override;
+        void DamageTaken(Unit* doneBy, uint32& damage, DamageEffectType damagetype) override;
         void HealedBy(Unit* healer, uint32& healedAmount) override;
         void UpdateAI(const uint32 diff) override;
-        bool IsVisible(Unit*) const override;
-        void ReceiveEmote(Player* pPlayer, uint32 text_emote) override;
-        void SummonedCreatureJustDied(Creature* unit) override;
-        void SummonedCreatureDespawn(Creature* unit) override;
-        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 miscValue) override;
-        bool IsControllable() const override { return true; }
+        void ReceiveEmote(Player* player, uint32 textEmote) override;
+        void SummonedCreatureJustDied(Creature* summoned) override;
+        void SummonedCreatureDespawn(Creature* summoned) override;
+        void ReceiveAIEvent(AIEventType eventType, Creature* sender, Unit* invoker, uint32 miscValue) override;
+        // bool IsControllable() const override { return true; }
 
-        static int Permissible(const Creature*);
+        static int Permissible(const Creature* creature);
 
-        virtual bool ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker = nullptr, Creature* pAIEventSender = nullptr);
-        virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender);
+        virtual bool ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker = nullptr, Creature* AIEventSender = nullptr);
+        virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 eventId, Unit* actionInvoker, Creature* AIEventSender);
         inline uint32 GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3) const;
         inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3) const;
         /// If the bool& param is true, an error should be reported
-        inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, bool& isError, uint32 forSpellId = 0, uint32 selectFlags = 0) const;
+        inline Unit* GetTargetByType(uint32 target, Unit* actionInvoker, Creature* AIEventSender, bool& isError, uint32 forSpellId = 0, uint32 selectFlags = 0) const;
 
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event) const;
 
-        Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff) const;
-        void DoFindFriendlyMissingBuff(std::list<Creature*>& _list, float range, uint32 spellid) const;
-        void DoFindFriendlyCC(std::list<Creature*>& _list, float range) const;
+        void DoFindFriendlyMissingBuff(std::list<Creature*>& list, float range, uint32 spellid) const;
+        void DoFindFriendlyCC(std::list<Creature*>& list, float range) const;
 
     protected:
         bool IsTimerBasedEvent(EventAI_Type type) const;
+        bool IsRepeatableEvent(EventAI_Type type) const;
 
         uint32 m_EventUpdateTime;                           // Time between event updates
         uint32 m_EventDiff;                                 // Time between the last event call
@@ -772,7 +771,6 @@ class CreatureEventAI : public CreatureAI
         CreatureEventAIList m_CreatureEventAIList;          // Holder for events (stores enabled, time, and eventid)
 
         uint8  m_Phase;                                     // Current phase, max 32 phases
-        bool   m_MeleeEnabled;                              // If we allow melee auto attack
         bool   m_DynamicMovement;                           // Core will control creatures movement if this is enabled
         bool   m_HasOOCLoSEvent;                            // Cache if a OOC-LoS Event exists
         uint32 m_InvinceabilityHpLevel;                     // Minimal health level allowed at damage apply
@@ -782,8 +780,6 @@ class CreatureEventAI : public CreatureAI
         // Steps 0..2 correspond to AI_EVENT_LOST_SOME_HEALTH(90%), AI_EVENT_LOST_HEALTH(50%), AI_EVENT_CRITICAL_HEALTH(10%)
         uint32 m_throwAIEventStep;                          // Used for damage taken/ received heal
         float m_LastSpellMaxRange;                          // Maximum spell range that was cast during dynamic movement
-
-        ReactStates m_reactState;                           // Define if creature is passive or aggressive
 
         Unit* m_eventTarget;                                // Target filled on specific event to be used in action
 };

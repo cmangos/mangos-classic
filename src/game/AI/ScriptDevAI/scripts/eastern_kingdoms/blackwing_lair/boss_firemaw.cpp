@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Firemaw
-SD%Complete: 80
-SDComment: Thrash missing
+SD%Complete: 100
+SDComment:
 SDCategory: Blackwing Lair
 EndScriptData
 
@@ -31,7 +31,7 @@ enum
     SPELL_SHADOW_FLAME          = 22539,
     SPELL_WING_BUFFET           = 23339,
     SPELL_FLAME_BUFFET          = 23341,
-    SPELL_THRASH                = 3391,                     // TODO, missing
+    SPELL_THRASH                = 3391,
 };
 
 struct boss_firemawAI : public ScriptedAI
@@ -46,13 +46,15 @@ struct boss_firemawAI : public ScriptedAI
 
     uint32 m_uiShadowFlameTimer;
     uint32 m_uiWingBuffetTimer;
+    uint32 m_uiThrashTimer;
     uint32 m_uiFlameBuffetTimer;
 
     void Reset() override
     {
-        m_uiShadowFlameTimer = 30000;                       // These times are probably wrong
-        m_uiWingBuffetTimer = 24000;
-        m_uiFlameBuffetTimer = 5000;
+        m_uiShadowFlameTimer        = 18 * IN_MILLISECONDS;
+        m_uiWingBuffetTimer         = 30 * IN_MILLISECONDS;
+        m_uiThrashTimer             = 6 * IN_MILLISECONDS;
+        m_uiFlameBuffetTimer        = 5000;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -82,7 +84,7 @@ struct boss_firemawAI : public ScriptedAI
         if (m_uiShadowFlameTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_FLAME) == CAST_OK)
-                m_uiShadowFlameTimer = urand(15000, 18000);
+                m_uiShadowFlameTimer = urand(15 * IN_MILLISECONDS, 18 * IN_MILLISECONDS);
         }
         else
             m_uiShadowFlameTimer -= uiDiff;
@@ -93,13 +95,24 @@ struct boss_firemawAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_WING_BUFFET) == CAST_OK)
             {
                 if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                    m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -75);
+                    m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -50);
 
-                m_uiWingBuffetTimer = 25000;
+                m_uiWingBuffetTimer = urand(30 * IN_MILLISECONDS, 35 * IN_MILLISECONDS);
             }
         }
         else
             m_uiWingBuffetTimer -= uiDiff;
+
+        // Thrash Timer
+        if (m_uiThrashTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_THRASH) == CAST_OK)
+            {
+                m_uiThrashTimer = urand(2 * IN_MILLISECONDS, 6 * IN_MILLISECONDS);
+            }
+        }
+        else
+            m_uiThrashTimer -= uiDiff;
 
         // Flame Buffet Timer
         if (m_uiFlameBuffetTimer < uiDiff)

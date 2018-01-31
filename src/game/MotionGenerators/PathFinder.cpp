@@ -73,7 +73,7 @@ bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest
     // make sure navMesh works - we can run on map w/o mmap
     // check if the start and end point have a .mmtile loaded (can we pass via not loaded tile on the way?)
     if (!m_navMesh || !m_navMeshQuery || m_sourceUnit->hasUnitState(UNIT_STAT_IGNORE_PATHFINDING) ||
-        !HaveTile(start) || !HaveTile(dest))
+            !HaveTile(start) || !HaveTile(dest))
     {
         BuildShortcut();
         m_type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
@@ -267,9 +267,9 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
             if (m_pathPolyRefs[pathStartIndex] == INVALID_POLYREF)
             {
                 sLog.outError("Invalid poly ref in BuildPolyPath. polyLength: %u, pathStartIndex: %u,"
-                    " startPos: %s, endPos: %s, mapId: %u",
-                    m_polyLength, pathStartIndex, startPos.toString().c_str(), endPos.toString().c_str(),
-                    m_sourceUnit->GetMapId());
+                              " startPos: %s, endPos: %s, mapId: %u",
+                              m_polyLength, pathStartIndex, startPos.toString().c_str(), endPos.toString().c_str(),
+                              m_sourceUnit->GetMapId());
                 break;
             }
 
@@ -521,7 +521,7 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 
     // force the given destination, if needed
     if (m_forceDestination &&
-        (!(m_type & PATHFIND_NORMAL) || !inRange(getEndPosition(), getActualEndPosition(), 1.0f, 1.0f)))
+            (!(m_type & PATHFIND_NORMAL) || !inRange(getEndPosition(), getActualEndPosition(), 1.0f, 1.0f)))
     {
         // we may want to keep partial subpath
         if (dist3DSqr(getActualEndPosition(), getEndPosition()) < 0.3f * dist3DSqr(getStartPosition(), getEndPosition()))

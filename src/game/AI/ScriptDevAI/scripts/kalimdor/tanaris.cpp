@@ -166,14 +166,14 @@ struct npc_oox17tnAI : public npc_escortAI
 
         switch (i)
         {
-                // 1. Ambush: 3 scorpions
+            // 1. Ambush: 3 scorpions
             case 22:
                 DoScriptText(SAY_OOX_AMBUSH, m_creature);
                 m_creature->SummonCreature(NPC_SCORPION, -8340.70f, -4448.17f, 9.17f, 3.10f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_SCORPION, -8343.18f, -4444.35f, 9.44f, 2.35f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_SCORPION, -8348.70f, -4457.80f, 9.58f, 2.02f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 break;
-                // 2. Ambush: 2 Rogues & 1 Shadow Mage
+            // 2. Ambush: 2 Rogues & 1 Shadow Mage
             case 28:
                 DoScriptText(SAY_OOX_AMBUSH, m_creature);
 

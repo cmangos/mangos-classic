@@ -17,23 +17,11 @@
  */
 
 #include "AuthCrypt.h"
-#include "Hmac.h"
+#include "HMACSHA1.h"
+#include "Log.h"
 #include "BigNumber.h"
 
 AuthCrypt::AuthCrypt() : _initialized(false) {}
-
-void AuthCrypt::Init(BigNumber *bn)
-{
-    _send_i = _send_j = _recv_i = _recv_j = 0;
-
-    const size_t len = 40;
-
-    _key.resize(len);
-    auto const key = bn->AsByteArray();
-    std::copy(key, key + len, _key.begin());
-
-    _initialized = true;
-}
 
 void AuthCrypt::DecryptRecv(uint8* data, size_t len)
 {
@@ -62,4 +50,17 @@ void AuthCrypt::EncryptSend(uint8* data, size_t len)
         ++_send_i;
         data[t] = _send_j = x;
     }
+}
+
+void AuthCrypt::Init(BigNumber* bn)
+{
+    _send_i = _send_j = _recv_i = _recv_j = 0;
+
+    const size_t len = 40;
+
+    _key.resize(len);
+    auto const key = bn->AsByteArray();
+    std::copy(key, key + len, _key.begin());
+
+    _initialized = true;
 }

@@ -96,19 +96,19 @@ class SqlResultQueue
 
     public:
         void Update();
-        void Add(MaNGOS::IQueryCallback *);
+        void Add(MaNGOS::IQueryCallback*);
 };
 
 class SqlQuery : public SqlOperation
 {
     private:
         std::vector<char> m_sql;
-        MaNGOS::IQueryCallback * const m_callback;
-        SqlResultQueue * const m_queue;
+        MaNGOS::IQueryCallback* const m_callback;
+        SqlResultQueue* const m_queue;
 
     public:
         SqlQuery(const char* sql, MaNGOS::IQueryCallback* callback, SqlResultQueue* queue)
-            : m_sql(strlen(sql)+1), m_callback(callback), m_queue(queue)
+            : m_sql(strlen(sql) + 1), m_callback(callback), m_queue(queue)
         {
             memcpy(&m_sql[0], sql, m_sql.size());
         }

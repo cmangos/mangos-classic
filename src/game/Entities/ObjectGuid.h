@@ -242,16 +242,17 @@ ByteBuffer& operator>> (ByteBuffer& buf, PackedGuidReader const& guid);
 
 inline PackedGuid ObjectGuid::WriteAsPacked() const { return PackedGuid(*this); }
 
-namespace std {
+namespace std
+{
     template<>
     class hash<ObjectGuid>
     {
-    public:
+        public:
 
-        size_t operator()(ObjectGuid const& key) const
-        {
-            return hash<uint64>()(key.GetRawValue());
-        }
+            size_t operator()(ObjectGuid const& key) const
+            {
+                return hash<uint64>()(key.GetRawValue());
+            }
     };
 }
 

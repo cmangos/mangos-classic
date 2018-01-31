@@ -64,7 +64,7 @@ struct InstanceTemplate
 {
     uint32 map;                                             // instance map
     uint32 parent;                                          // non-continent parent instance (for instance with entrance in another instances)
-                                                            // or 0 (not related to continent 0 map id)
+    // or 0 (not related to continent 0 map id)
     uint32 levelMin;
     uint32 levelMax;
     uint32 maxPlayers;
@@ -124,6 +124,14 @@ class Map : public GridRefManager<NGridType>
         void MessageBroadcast(WorldObject const*, WorldPacket const&);
         void MessageDistBroadcast(Player const*, WorldPacket const&, float dist, bool to_self, bool own_team_only = false);
         void MessageDistBroadcast(WorldObject const*, WorldPacket const&, float dist);
+        void MessageMapBroadcast(WorldObject const* obj, WorldPacket const& msg);
+        void MessageMapBroadcastZone(WorldObject const* obj, WorldPacket const& msg, uint32 zoneId);
+        void MessageMapBroadcastArea(WorldObject const* obj, WorldPacket const& msg, uint32 areaId);
+
+        void ExecuteDistWorker(WorldObject const* obj, float dist, std::function<void(Player*)> const& worker);
+        void ExecuteMapWorker(std::function<void(Player*)> const& worker);
+        void ExecuteMapWorkerZone(uint32 zoneId, std::function<void(Player*)> const& worker);
+        void ExecuteMapWorkerArea(uint32 areaId, std::function<void(Player*)> const& worker);
 
         float GetVisibilityDistance() const { return m_VisibleDistance; }
         // function for setting up visibility distance for maps on per-type/per-Id basis
@@ -217,6 +225,11 @@ class Map : public GridRefManager<NGridType>
         // must called with RemoveFromWorld
         void RemoveFromActive(WorldObject* obj);
 
+        // Game Event notification system
+        void AddToOnEventNotified(WorldObject* obj);
+        void RemoveFromOnEventNotified(WorldObject* obj);
+        void OnEventHappened(uint16 event_id, bool activate, bool resume);
+
         Player* GetPlayer(ObjectGuid guid);
         Creature* GetCreature(ObjectGuid guid);
         Pet* GetPet(ObjectGuid guid);
@@ -250,8 +263,8 @@ class Map : public GridRefManager<NGridType>
         InstanceData* GetInstanceData() const { return i_data; }
         uint32 GetScriptId() const { return i_script_id; }
 
-        void MonsterYellToMap(ObjectGuid guid, int32 textId, Language language, Unit const* target) const;
-        void MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, Language language, Unit const* target, uint32 senderLowGuid = 0) const;
+        void MonsterYellToMap(ObjectGuid guid, int32 textId, ChatMsg chatMsg, Language language, Unit const* target) const;
+        void MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, ChatMsg chatMsg, Language language, Unit const* target, uint32 senderLowGuid = 0) const;
         void PlayDirectSoundToMap(uint32 soundId, uint32 zoneId = 0) const;
 
         // Dynamic VMaps
@@ -286,6 +299,10 @@ class Map : public GridRefManager<NGridType>
         bool GetReachableRandomPointOnGround(float& x, float& y, float& z, float radius) const;
         bool GetRandomPointInTheAir(float& x, float& y, float& z, float radius) const;
         bool GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status) const;
+
+        uint32 SpawnedCountForEntry(uint32 entry);
+        void AddToSpawnCount(const ObjectGuid& guid);
+        void RemoveFromSpawnCount(const ObjectGuid& guid);
 
         TimePoint GetCurrentClockTime();
     private:
@@ -339,6 +356,9 @@ class Map : public GridRefManager<NGridType>
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
         MapStoredObjectTypesContainer m_objectsStore;
 
+        std::set<WorldObject*> m_onEventNotifiedObjects;
+        std::set<WorldObject*>::iterator m_onEventNotifiedIter;
+
     private:
         time_t i_gridExpiry;
 
@@ -378,6 +398,8 @@ class Map : public GridRefManager<NGridType>
 
         // WeatherSystem
         WeatherSystem* m_weatherSystem;
+
+        std::unordered_map<uint32, std::set<ObjectGuid>> m_spawnedCount;
 };
 
 class WorldMap : public Map

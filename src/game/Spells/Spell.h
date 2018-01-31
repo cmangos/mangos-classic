@@ -201,11 +201,8 @@ enum SpellState
 
 enum SpellTargets
 {
-    SPELL_TARGETS_HOSTILE,
-    SPELL_TARGETS_NOT_FRIENDLY,
-    SPELL_TARGETS_NOT_HOSTILE,
-    SPELL_TARGETS_FRIENDLY,
-    SPELL_TARGETS_AOE_DAMAGE,
+    SPELL_TARGETS_ASSISTABLE,
+    SPELL_TARGETS_AOE_ATTACKABLE,
     SPELL_TARGETS_ALL
 };
 
@@ -214,52 +211,52 @@ typedef std::multimap<uint64, uint64> SpellTargetTimeMap;
 // SpellLog class to manage spells logs that have to be sent to clients
 class SpellLog
 {
-public:
-    SpellLog(Spell* spell) :
-        m_spell(spell), m_spellLogDataEffectsCounter(0), m_spellLogDataEffectsCounterPos(0),
-        m_spellLogDataTargetsCounter(0), m_spellLogDataTargetsCounterPos(0), m_currentEffect(TOTAL_SPELL_EFFECTS) {}
-    SpellLog() = delete;
-    SpellLog(const SpellLog&) = delete;
+    public:
+        SpellLog(Spell* spell) :
+            m_spell(spell), m_spellLogDataEffectsCounter(0), m_spellLogDataEffectsCounterPos(0),
+            m_spellLogDataTargetsCounter(0), m_spellLogDataTargetsCounterPos(0), m_currentEffect(TOTAL_SPELL_EFFECTS) {}
+        SpellLog() = delete;
+        SpellLog(const SpellLog&) = delete;
 
-    void Initialize();
+        void Initialize();
 
-    // Variadic template to add log data (warnings, devs should respect the correct packet structure)
-    template<typename... Args>
-    void AddLog(uint32 spellEffect, Args... args)
-    {
-        SetCurrentEffect(spellEffect);
-        AddLogData(args...);
-        ++m_spellLogDataEffectsCounter;
-    }
+        // Variadic template to add log data (warnings, devs should respect the correct packet structure)
+        template<typename... Args>
+        void AddLog(uint32 spellEffect, Args... args)
+        {
+            SetCurrentEffect(spellEffect);
+            AddLogData(args...);
+            ++m_spellLogDataEffectsCounter;
+        }
 
-    // Send collected logs
-    void SendToSet();
+        // Send collected logs
+        void SendToSet();
 
-private:
-    // Finalize previous log if need by setting total targets amount
-    void FinalizePrevious();
+    private:
+        // Finalize previous log if need by setting total targets amount
+        void FinalizePrevious();
 
-    // Handle multi targets cases by adjusting targets counter if need
-    void SetCurrentEffect(uint32 effect);
+        // Handle multi targets cases by adjusting targets counter if need
+        void SetCurrentEffect(uint32 effect);
 
-    // Variadic template to method to handle multi arguments passed with different types
-    template<typename T>
-    void AddLogData(T const& data) { m_spellLogData << data; }
+        // Variadic template to method to handle multi arguments passed with different types
+        template<typename T>
+        void AddLogData(T const& data) { m_spellLogData << data; }
 
-    template<typename T, typename... Args>
-    void AddLogData(T const& data, Args const&... args)
-    {
-        AddLogData(data);
-        AddLogData(args...);
-    }
+        template<typename T, typename... Args>
+        void AddLogData(T const& data, Args const& ... args)
+        {
+            AddLogData(data);
+            AddLogData(args...);
+        }
 
-    Spell* m_spell;
-    WorldPacket m_spellLogData;
-    size_t m_spellLogDataEffectsCounterPos;
-    uint32 m_spellLogDataEffectsCounter;
-    size_t m_spellLogDataTargetsCounterPos;
-    uint32 m_spellLogDataTargetsCounter;
-    uint32 m_currentEffect;
+        Spell* m_spell;
+        WorldPacket m_spellLogData;
+        size_t m_spellLogDataEffectsCounterPos;
+        uint32 m_spellLogDataEffectsCounter;
+        size_t m_spellLogDataTargetsCounterPos;
+        uint32 m_spellLogDataTargetsCounter;
+        uint32 m_currentEffect;
 };
 
 class Spell
@@ -407,16 +404,17 @@ class Spell
 
         template<typename T> WorldObject* FindCorpseUsing();
 
+        bool CheckTargetScript(Unit* target, SpellEffectIndex eff) const;
         bool CheckTarget(Unit* target, SpellEffectIndex eff) const;
         bool CanAutoCast(Unit* target);
 
-        static void SendCastResult(Player* caster, SpellEntry const* spellInfo, SpellCastResult result);
+        static void SendCastResult(Player const* caster, SpellEntry const* spellInfo, SpellCastResult result, bool isPetCastResult = false);
         void SendCastResult(SpellCastResult result) const;
         void SendSpellStart() const;
         void SendSpellGo();
         void SendSpellCooldown();
         void SendInterrupted(uint8 result) const;
-        void SendChannelUpdate(uint32 time, bool properEnding = false) const;
+        void SendChannelUpdate(uint32 time, uint32 lastTick = 0) const;
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target) const;
 
@@ -432,12 +430,14 @@ class Spell
         Item* m_CastItem;
 
         SpellCastTargets m_targets;
-        
+
         // Trigger flag system
         bool m_ignoreHitResult;
         bool m_ignoreUnselectableTarget;
         bool m_ignoreUnattackableTarget;
         bool m_triggerAutorepeat;
+        bool m_doNotProc;
+        bool m_petCast;
 
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() const { return m_timer; }
@@ -562,16 +562,15 @@ class Spell
         //******************************************
         bool   m_canTrigger;                                // Can start trigger (m_IsTriggeredSpell can`t use for this)
         uint8  m_negativeEffectMask;                        // Use for avoid sent negative spell procs for additional positive effects only targets
-        uint32 m_procAttacker;                              // Attacker trigger flags
-        uint32 m_procVictim;                                // Victim   trigger flags
-        void   prepareDataForTriggerSystem();
+        void prepareDataForTriggerSystem();
+        void PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, uint32& procVictim, WorldObject* caster, WorldObject* target);
 
         //*****************************************
         // Spell target filling
         //*****************************************
         void FillTargetMap();
         void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap);
-        static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> &bounds, UnitList &tempTargetUnitMap, UnitList &targetUnitMap, SpellEffectIndex effIndex);
+        static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex);
 
         void FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = nullptr);
         void FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float radius, bool raid, bool withPets, bool withcaster) const;
@@ -728,7 +727,7 @@ namespace MaNGOS
         float GetCenterY() const { return i_centerY; }
 
         SpellNotifierCreatureAndPlayer(Spell& spell, Spell::UnitList& data, float radius, SpellNotifyPushType type,
-                                       SpellTargets TargetType = SPELL_TARGETS_NOT_FRIENDLY, WorldObject* originalCaster = nullptr)
+                                       SpellTargets TargetType = SPELL_TARGETS_AOE_ATTACKABLE, WorldObject* originalCaster = nullptr)
             : i_data(&data), i_spell(spell), i_push_type(type), i_radius(radius), i_TargetType(TargetType),
               i_originalCaster(originalCaster), i_castingObject(i_spell.GetCastingObject())
         {
@@ -784,37 +783,17 @@ namespace MaNGOS
 
                 switch (i_TargetType)
                 {
-                    case SPELL_TARGETS_HOSTILE:
-                        if (!i_originalCaster->IsHostileTo(itr->getSource()))
+                    case SPELL_TARGETS_ASSISTABLE:
+                        if (!i_originalCaster->CanAssistSpell(itr->getSource(), i_spell.m_spellInfo))
                             continue;
                         break;
-                    case SPELL_TARGETS_NOT_FRIENDLY:
-                        if (i_originalCaster->IsFriendlyTo(itr->getSource()))
-                            continue;
-                        break;
-                    case SPELL_TARGETS_NOT_HOSTILE:
-                        if (i_originalCaster->IsHostileTo(itr->getSource()))
-                            continue;
-                        break;
-                    case SPELL_TARGETS_FRIENDLY:
-                        if (!i_originalCaster->IsFriendlyTo(itr->getSource()))
-                            continue;
-                        break;
-                    case SPELL_TARGETS_AOE_DAMAGE:
+                    case SPELL_TARGETS_AOE_ATTACKABLE:
                     {
                         if (itr->getSource()->GetTypeId() == TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem())
                             continue;
 
-                        if (i_playerControlled)
-                        {
-                            if (i_originalCaster->IsFriendlyTo(itr->getSource()))
-                                continue;
-                        }
-                        else
-                        {
-                            if (!i_originalCaster->IsHostileTo(itr->getSource()))
-                                continue;
-                        }
+                        if (!i_originalCaster->CanAttackSpell(itr->getSource(), i_spell.m_spellInfo, true))
+                            continue;
                     }
                     break;
                     case SPELL_TARGETS_ALL:
@@ -838,7 +817,7 @@ namespace MaNGOS
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_IN_BACK:
-                        if (i_castingObject->isInBack((Unit*)(itr->getSource()), i_radius, 2 * M_PI_F / 3))
+                        if (i_castingObject->isInBack((Unit*)(itr->getSource()), i_radius, M_PI_F / 2))  //only used for tail swipe in TBC afaik, and that should be 90 degrees in the back
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_SELF_CENTER:

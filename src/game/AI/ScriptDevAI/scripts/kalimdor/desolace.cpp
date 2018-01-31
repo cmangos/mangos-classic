@@ -554,19 +554,19 @@ struct npc_cork_gizeltonAI : public ScriptedAI
             {
                 case 209:
                     uiQuestStatus = 2;
-                    // First Ambush
+                // First Ambush
                 case 218:
                     if (Creature* pRigger = GetClosestCreatureWithEntry(m_creature, NPC_RIGGER_GIZELTON, 100.0f))
                         DoScriptText(SAY_RIGGER_AMBUSH1, pRigger);
                     DoAmbush(QUEST_GIZELTON_CARAVAN, 1);
                     break;
-                    // Second Ambush
+                // Second Ambush
                 case 225:
                     if (Creature* pRigger = GetClosestCreatureWithEntry(m_creature, NPC_RIGGER_GIZELTON, 100.0f))
                         DoScriptText(SAY_RIGGER_AMBUSH2, pRigger);
                     DoAmbush(QUEST_GIZELTON_CARAVAN, 2);
                     break;
-                    // Third Ambush
+                // Third Ambush
                 case 235:
                     if (Creature* pRigger = GetClosestCreatureWithEntry(m_creature, NPC_RIGGER_GIZELTON, 100.0f))
                         DoScriptText(SAY_RIGGER_AMBUSH1, pRigger);
@@ -707,7 +707,7 @@ struct npc_magrami_spectre : public ScriptedAI
     void JustRespawned() override
     {
         m_creature->CastSpell(m_creature, SPELL_GHOST_SPAWN_IN, TRIGGERED_NONE);
-        m_creature->CastSpell(m_creature, SPELL_BLUE_AURA,TRIGGERED_NONE);
+        m_creature->CastSpell(m_creature, SPELL_BLUE_AURA, TRIGGERED_NONE);
 
         switch (urand(0, 1))
         {

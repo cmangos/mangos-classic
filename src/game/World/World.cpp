@@ -1091,7 +1091,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Scripts random templates...");  // must be before String calls
     sScriptMgr.LoadDbScriptRandomTemplates();
-                                                            ///- Load and initialize DBScripts Engine
+    ///- Load and initialize DBScripts Engine
     sLog.outString("Loading DB-Scripts Engine...");
     sScriptMgr.LoadRelayScripts();                          // must be first in dbscripts loading
     sScriptMgr.LoadGossipScripts();                         // must be before gossip menu options
@@ -1103,6 +1103,7 @@ void World::SetInitialWorldSettings()
     sScriptMgr.LoadEventScripts();                          // must be after load Creature/Gameobject(Template/Data)
     sScriptMgr.LoadCreatureDeathScripts();                  // must be after load Creature/Gameobject(Template/Data)
     sScriptMgr.LoadCreatureMovementScripts();               // before loading from creature_movement
+    sObjectMgr.LoadAreatriggerLocales();
     sLog.outString(">>> Scripts loaded");
     sLog.outString();
 
@@ -1120,7 +1121,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadTrainerTemplates();                      // must be after load CreatureTemplate
     sObjectMgr.LoadTrainers();                              // must be after load CreatureTemplate, TrainerTemplate
 
-    sLog.outString("Loading Waypoint scripts...");          
+    sLog.outString("Loading Waypoint scripts...");
 
     sLog.outString("Loading Waypoints...");
     sWaypointMgr.Load();
@@ -1188,18 +1189,18 @@ void World::SetInitialWorldSettings()
 
     ///- Load and initialize scripting library
     sLog.outString("Initializing Scripting Library...");
-   /* switch (sScriptMgr.LoadScriptLibrary(MANGOS_SCRIPT_NAME))
-    {
-        case SCRIPT_LOAD_OK:
-            sLog.outString("Scripting library loaded.");
-            break;
-        case SCRIPT_LOAD_ERR_NOT_FOUND:
-            sLog.outError("Scripting library not found or not accessible.");
-            break;
-        case SCRIPT_LOAD_ERR_WRONG_API:
-            sLog.outError("Scripting library has wrong list functions (outdated?).");
-            break;
-    }*/
+    /* switch (sScriptMgr.LoadScriptLibrary(MANGOS_SCRIPT_NAME))
+     {
+         case SCRIPT_LOAD_OK:
+             sLog.outString("Scripting library loaded.");
+             break;
+         case SCRIPT_LOAD_ERR_NOT_FOUND:
+             sLog.outError("Scripting library not found or not accessible.");
+             break;
+         case SCRIPT_LOAD_ERR_WRONG_API:
+             sLog.outError("Scripting library has wrong list functions (outdated?).");
+             break;
+     }*/
 
     sScriptDevAIMgr.Initialize();
     sLog.outString();
@@ -1270,6 +1271,10 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Honor Standing list...");
     sObjectMgr.LoadStandingList();
+
+    sLog.outString("Loading Spam records...");
+    LoadSpamRecords();
+    sLog.outString();
 
     sLog.outString("Starting Game Event system...");
     uint32 nextGameEvent = sGameEventMgr.Initialize();
@@ -1814,14 +1819,14 @@ void World::UpdateSessions(uint32 /*diff*/)
     {
         std::lock_guard<std::mutex> guard(m_sessionAddQueueLock);
 
-        for (auto const &session : m_sessionAddQueue)
+        for (auto const& session : m_sessionAddQueue)
             AddSession_(session);
 
         m_sessionAddQueue.clear();
     }
 
     ///- Then send an update signal to remaining ones
-    for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); )
+    for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end();)
     {
         ///- and remove not active sessions from the list
         WorldSession* pSession = itr->second;
@@ -1932,6 +1937,27 @@ void World::_UpdateRealmCharCount(QueryResult* resultCharCount, uint32 accountId
         LoginDatabase.PExecute("DELETE FROM realmcharacters WHERE acctid= '%u' AND realmid = '%u'", accountId, realmID);
         LoginDatabase.PExecute("INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (%u, %u, %u)", charCount, accountId, realmID);
         LoginDatabase.CommitTransaction();
+    }
+}
+
+void World::LoadSpamRecords(bool reload)
+{
+    QueryResult* result = WorldDatabase.Query("SELECT record FROM spam_records");
+
+    if (result)
+    {
+        if (reload)
+            m_spamRecords.clear();
+
+        while (result->NextRow())
+        {
+            Field* fields = result->Fetch();
+            std::string record = fields[0].GetCppString();
+
+            m_spamRecords.push_back(record);
+        }
+
+        delete result;
     }
 }
 

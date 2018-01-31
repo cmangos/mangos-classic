@@ -20,7 +20,7 @@
 
 #include <string>
 
-SOAPThread::SOAPThread(const std::string &host, int port) : m_host(host), m_port(port), m_workerThread(&SOAPThread::Work, this) {}
+SOAPThread::SOAPThread(const std::string& host, int port) : m_host(host), m_port(port), m_workerThread(&SOAPThread::Work, this) {}
 
 SOAPThread::~SOAPThread()
 {
@@ -111,18 +111,18 @@ int ns1__executeCommand(soap* soap, char* command, char** result)
 
     // commands are executed in the world thread. We have to wait for them to be completed
     sWorld.QueueCliCommand(new CliCommandHolder(accountId, SEC_CONSOLE, command,
-        [&buffer] (const char *output)
-        {
-            assert(output);
+                           [&buffer](const char* output)
+    {
+        assert(output);
 
-            for (auto p = output; *p; ++p)
-                buffer.push_back(*p);
-        },
-        [soap, &commandExecuted, &commandSucceeded] (bool success)
-        {
-            commandExecuted = true;
-            commandSucceeded = success;
-        }));
+        for (auto p = output; *p; ++p)
+            buffer.push_back(*p);
+    },
+    [soap, &commandExecuted, &commandSucceeded](bool success)
+    {
+        commandExecuted = true;
+        commandSucceeded = success;
+    }));
 
     while (!commandExecuted)
         std::this_thread::sleep_for(std::chrono::milliseconds(50));

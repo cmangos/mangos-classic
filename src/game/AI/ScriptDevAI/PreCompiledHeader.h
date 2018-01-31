@@ -4,7 +4,7 @@
 #define PRECOMPILED_H
 
 #ifndef MSVC
-  #include "pchdef.h"
+#include "pchdef.h"
 #endif
 
 #include "AI/ScriptDevAI/include/sc_creature.h"

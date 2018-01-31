@@ -13,8 +13,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
- 
- /* ScriptData
+
+/* ScriptData
 SDName: Zul'Gurub
 SD%Complete: 0
 SDComment:
@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/PreCompiledHeader.h"
 
- /* ContentData
+/* ContentData
 EndContentData */
 
 enum
@@ -44,7 +44,7 @@ enum
 
 struct npc_soulflayerAI : public ScriptedAI
 {
-    npc_soulflayerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_soulflayerAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiRandomBuffAbility(0) { Reset(); }
 
     uint32 m_uiSoulTapTimer;
     uint32 m_uiLightingBreathTimer;
@@ -65,7 +65,7 @@ struct npc_soulflayerAI : public ScriptedAI
 
         // Cast Thrash on spawn, since a passive ability
         if (m_uiRandomBuffAbility == SPELL_THRASH)
-            DoCastSpellIfCan(m_creature, m_uiRandomBuffAbility);
+            DoCastSpellIfCan(m_creature, m_uiRandomBuffAbility, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void Reset() override
@@ -73,6 +73,9 @@ struct npc_soulflayerAI : public ScriptedAI
         m_uiRandomCcAbilityTimer = urand(2000, 5000);
         m_uiSoulTapTimer = urand(m_uiRandomCcAbilityTimer, 7000);
         m_uiLightingBreathTimer = urand(m_uiSoulTapTimer, 9000);
+
+        if (m_uiRandomBuffAbility == SPELL_THRASH)
+            DoCastSpellIfCan(m_creature, m_uiRandomBuffAbility, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void UpdateAI(const uint32 uiDiff) override

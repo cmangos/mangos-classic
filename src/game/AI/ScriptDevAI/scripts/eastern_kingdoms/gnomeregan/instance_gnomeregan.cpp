@@ -45,7 +45,7 @@ void instance_gnomeregan::Initialize()
 void instance_gnomeregan::OnCreatureCreate(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_BLASTMASTER_SHORTFUSE)
-        m_mNpcEntryGuidStore[NPC_BLASTMASTER_SHORTFUSE] = pCreature->GetObjectGuid();
+        m_npcEntryGuidStore[NPC_BLASTMASTER_SHORTFUSE] = pCreature->GetObjectGuid();
 }
 
 void instance_gnomeregan::OnObjectCreate(GameObject* pGo)
@@ -55,7 +55,7 @@ void instance_gnomeregan::OnObjectCreate(GameObject* pGo)
         case GO_CAVE_IN_NORTH:
         case GO_CAVE_IN_SOUTH:
         case GO_THE_FINAL_CHAMBER:
-            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
 
         case GO_RED_ROCKET:         m_lRedRocketGUIDs.push_back(pGo->GetObjectGuid());         return;

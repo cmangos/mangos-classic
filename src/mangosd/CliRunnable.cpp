@@ -604,9 +604,9 @@ void CliRunnable::run()
 
 #ifdef __unix__
     //Set stdin IO to nonblocking - prevent Server from hanging in shutdown process till enter is pressed
-    int fd = fileno(stdin);  
-    int flags = fcntl(fd, F_GETFL, 0); 
-    flags |= O_NONBLOCK; 
+    int fd = fileno(stdin);
+    int flags = fcntl(fd, F_GETFL, 0);
+    flags |= O_NONBLOCK;
     fcntl(fd, F_SETFL, flags);
 #endif
 

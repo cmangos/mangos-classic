@@ -24,6 +24,8 @@
 
 namespace Movement
 {
+    extern float gravity;
+
     enum MonsterMoveType
     {
         MonsterMoveNormal = 0,

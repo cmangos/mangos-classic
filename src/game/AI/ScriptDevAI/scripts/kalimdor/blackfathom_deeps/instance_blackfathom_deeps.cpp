@@ -47,7 +47,7 @@ void instance_blackfathom_deeps::Initialize()
 void instance_blackfathom_deeps::OnCreatureCreate(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_KELRIS)
-        m_mNpcEntryGuidStore[NPC_KELRIS] = pCreature->GetObjectGuid();
+        m_npcEntryGuidStore[NPC_KELRIS] = pCreature->GetObjectGuid();
 }
 
 void instance_blackfathom_deeps::OnObjectCreate(GameObject* pGo)
@@ -58,7 +58,7 @@ void instance_blackfathom_deeps::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[1] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
 
-            m_mGoEntryGuidStore[GO_PORTAL_DOOR] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[GO_PORTAL_DOOR] = pGo->GetObjectGuid();
             break;
         case GO_SHRINE_1:
         case GO_SHRINE_2:

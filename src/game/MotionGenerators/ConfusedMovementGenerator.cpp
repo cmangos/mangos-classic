@@ -106,7 +106,6 @@ template<>
 void ConfusedMovementGenerator<Player>::Finalize(Player& unit) const
 {
     unit.clearUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
-    unit.SetConfused(false);
     unit.StopMoving(true);
 }
 
@@ -114,7 +113,6 @@ template<>
 void ConfusedMovementGenerator<Creature>::Finalize(Creature& unit) const
 {
     unit.clearUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
-    unit.SetConfused(false);
 }
 
 template void ConfusedMovementGenerator<Player>::Initialize(Player& player);

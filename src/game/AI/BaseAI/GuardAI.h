@@ -34,22 +34,11 @@ class GuardAI : public CreatureAI
         };
 
     public:
+        explicit GuardAI(Creature* creature);
 
-        explicit GuardAI(Creature* c);
+        void MoveInLineOfSight(Unit* who) override;
 
-        void MoveInLineOfSight(Unit*) override;
-        void AttackStart(Unit*) override;
-        void EnterEvadeMode() override;
-        void JustDied(Unit*) override;
-        bool IsVisible(Unit*) const override;
-        bool IsControllable() const override { return true; }
-
-        void UpdateAI(const uint32) override;
-        static int Permissible(const Creature*);
-
-    private:
-        ObjectGuid i_victimGuid;
-        GuardState i_state;
-        TimeTracker i_tracker;
+        void UpdateAI(const uint32 diff) override;
+        static int Permissible(const Creature* creature);
 };
 #endif

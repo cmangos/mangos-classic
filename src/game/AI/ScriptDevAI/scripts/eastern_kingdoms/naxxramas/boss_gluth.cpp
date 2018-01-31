@@ -189,7 +189,7 @@ struct boss_gluthAI : public ScriptedAI
             {
                 DoScriptText(EMOTE_DECIMATE, m_creature);
                 DoCallAllZombieChow();
-                m_uiDecimateTimer = urand(100000,110000);
+                m_uiDecimateTimer = urand(100000, 110000);
             }
         }
         else
