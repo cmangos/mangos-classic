@@ -678,21 +678,43 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 18350:                                 // Dummy Trigger
                 {
-                    if (unitTarget)
+                    if (m_triggeredByAuraSpell && unitTarget)
                     {
-                        if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                        switch (m_triggeredByAuraSpell->Id)
                         {
-                            // Need remove self if Lightning Shield not active
-                            Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
-                            for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                            case 13810: // Frost Trap Aura
                             {
-                                SpellEntry const* spell = itr->second->GetSpellProto();
-                                if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN
-                                        && spell->SpellFamilyFlags & uint64(0x0000000000000400))
-                                    return;
-                            }
+                                // Need to check casting of entrapment on every pulse
+                                // Chose this route so that whole proc system doesnt have to run
+                                // IDs are in reverse order because its more likely someone will have max rank
+                                float chance = 0.f;
+                                uint32 entrapmentIDs[] = { 19388 , 19387, 19184 };
+                                for (uint32 spellId : entrapmentIDs)
+                                    if (SpellAuraHolder* holder = m_caster->GetSpellAuraHolder(spellId))
+                                    {
+                                        chance = holder->GetSpellProto()->procChance;
+                                        break;
+                                    }
 
-                            unitTarget->RemoveAurasDueToSpell(28820);
+                                if (roll_chance_f(chance))
+                                    m_caster->CastSpell(unitTarget, 19185, TRIGGERED_OLD_TRIGGERED);
+                                break;
+                            }
+                            case 28821: // Lightning Shield
+                            {
+                                // Need remove self if Lightning Shield not active
+                                Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
+                                for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                                {
+                                    SpellEntry const* spell = itr->second->GetSpellProto();
+                                    if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN
+                                        && spell->SpellFamilyFlags & uint64(0x0000000000000400))
+                                        return;
+                                }
+
+                                unitTarget->RemoveAurasDueToSpell(28820);
+                                break;
+                            }
                         }
                     }
 
