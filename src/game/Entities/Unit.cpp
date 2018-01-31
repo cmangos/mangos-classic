@@ -650,7 +650,9 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType)
 {
     for (AuraList::const_iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
     {
-        RemoveAurasDueToSpell((*iter)->GetId());
+        Aura* aura = (*iter);
+        SpellAuraHolder* holder = aura->GetHolder();
+        RemoveSpellAuraHolder(holder);
         iter = m_modAuras[auraType].begin();
     }
 }
