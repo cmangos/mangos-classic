@@ -2873,8 +2873,15 @@ void Spell::Prepare()
             cast();
     }
     // execute triggered without cast time explicitly in call point
-    else if (m_timer == 0)
-        cast(true);
+    else
+    {
+        // Channeled spell is always one per caster and needs to be tracked and removed on death
+        if (IsChanneledSpell(m_spellInfo))
+            m_caster->SetCurrentCastedSpell(this);
+
+        if (m_timer == 0)
+            cast(true);
+    }
     // else triggered with cast time will execute execute at next tick or later
     // without adding to cast type slot
     // will not show cast bar but will show effects at casting time etc
@@ -4853,6 +4860,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
+    if (!m_IsTriggeredSpell)
     {
         SpellCastResult castResult = CheckPower();
         if (castResult != SPELL_CAST_OK)
