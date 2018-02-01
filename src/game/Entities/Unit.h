@@ -2187,6 +2187,7 @@ class Unit : public WorldObject
 
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0) override;
 
+        bool IsSpellProccingHappening() const { return m_spellProcsHappening; }
     protected:
         explicit Unit();
 
@@ -2328,6 +2329,8 @@ class Unit : public WorldObject
 
         // Need to safeguard aura application in Unit::Update
         bool m_spellUpdateHappening;
+        // Need to safeguard aura proccing in Unit::ProcDamageAndSpell
+        bool m_spellProcsHappening;
 
         // guard to prevent chaining extra attacks
         bool m_extraAttacksExecuting;

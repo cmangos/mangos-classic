@@ -293,7 +293,8 @@ Unit::Unit() :
     i_motionMaster(this),
     m_regenTimer(0),
     m_combatData(new CombatData(this)),
-    m_spellUpdateHappening(false)
+    m_spellUpdateHappening(false),
+    m_spellProcsHappening(false)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -5156,6 +5157,7 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo) const
 
 void Unit::ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType, SpellEntry const* procSpell, bool dontTriggerSpecial)
 {
+    m_spellProcsHappening = true;
     // Not much to do if no flags are set.
     if (procAttacker)
         ProcDamageAndSpellFor(false, pVictim, procAttacker, procExtra, attType, procSpell, amount, dontTriggerSpecial);
@@ -5163,6 +5165,15 @@ void Unit::ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVic
     // Not much to do if no flags are set or there is no victim
     if (pVictim && pVictim->isAlive() && procVictim)
         pVictim->ProcDamageAndSpellFor(true, this, procVictim, procExtra, attType, procSpell, amount, dontTriggerSpecial);
+    m_spellProcsHappening = false;
+
+    // Mark auras created during proccing as ready
+    for (SpellAuraHolderMap::const_iterator itr = GetSpellAuraHolderMap().begin(); itr != GetSpellAuraHolderMap().end(); ++itr)
+        if (itr->second->GetState() == SPELLAURAHOLDER_STATE_CREATED)
+            itr->second->SetState(SPELLAURAHOLDER_STATE_READY);
+    for (SpellAuraHolderMap::const_iterator itr = pVictim->GetSpellAuraHolderMap().begin(); itr != pVictim->GetSpellAuraHolderMap().end(); ++itr)
+        if (itr->second->GetState() == SPELLAURAHOLDER_STATE_CREATED)
+            itr->second->SetState(SPELLAURAHOLDER_STATE_READY);
 }
 
 void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo) const

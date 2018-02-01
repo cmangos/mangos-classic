@@ -1325,7 +1325,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     if (real_caster && real_caster != m_caster && real_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)real_caster)->AI())
         ((Creature*)real_caster)->AI()->SpellHitTarget(unit, m_spellInfo, missInfo);
 
-    if (m_spellAuraHolder)
+    if (m_spellAuraHolder && !m_caster->IsSpellProccingHappening())
         m_spellAuraHolder->SetState(SPELLAURAHOLDER_STATE_READY);
 }
 
