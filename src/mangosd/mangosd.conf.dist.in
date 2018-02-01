@@ -52,7 +52,7 @@ ConfVersion=2016101401
 #        Port on which the server will listen
 #
 #    BindIP
-#        Bind World Server to IP/hostname
+#        Bind World Server to specific IP address
 #        This option is useful for running multiple worldd/realmd instances
 #        on different IP addresses using default ports.
 #        DO NOT CHANGE THIS UNLESS YOU _REALLY_ KNOW WHAT YOU'RE DOING
