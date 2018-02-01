@@ -6824,7 +6824,7 @@ void Player::UpdateEquipSpellsAtFormChange()
     }
 }
 
-void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
+void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType, bool spellProc)
 {
     Item* item = GetWeaponForAttack(attType, true, true);
     if (!item)
@@ -6903,6 +6903,11 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
             // not allow proc extra attack spell at extra attack
             if (m_extraAttacks && IsSpellHaveEffect(spellInfo, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
                 continue;
+
+            // some weapon enchantments have proc flags which need to be checked
+            if (spellInfo->procFlags)
+                if (!(spellInfo->procFlags & PROC_FLAG_SUCCESSFUL_MELEE_SPELL_HIT) && spellProc)
+                    continue;
 
             // Use first rank to access spell item enchant procs
             float ppmRate = sSpellMgr.GetItemEnchantProcChance(spellInfo->Id);

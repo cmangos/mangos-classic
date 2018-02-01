@@ -2154,36 +2154,36 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     }
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MELEE_ATTACK);
-    CalcDamageInfo damageInfo;
-    CalculateMeleeDamage(pVictim, &damageInfo, attType);
+    CalcDamageInfo meleeDamageInfo;
+    CalculateMeleeDamage(pVictim, &meleeDamageInfo, attType);
 
     // Send log damage message to client
     for (uint8 i = 0; i < m_weaponDamageCount[attType]; i++)
     {
-        damageInfo.totalDamage -= damageInfo.subDamage[i].damage;
-        DealDamageMods(pVictim, damageInfo.subDamage[i].damage, &damageInfo.subDamage[i].absorb, DIRECT_DAMAGE);
-        damageInfo.totalDamage += damageInfo.subDamage[i].damage;
+        meleeDamageInfo.totalDamage -= meleeDamageInfo.subDamage[i].damage;
+        DealDamageMods(pVictim, meleeDamageInfo.subDamage[i].damage, &meleeDamageInfo.subDamage[i].absorb, DIRECT_DAMAGE);
+        meleeDamageInfo.totalDamage += meleeDamageInfo.subDamage[i].damage;
     }
 
-    SendAttackStateUpdate(&damageInfo);
-    ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.totalDamage, damageInfo.attackType);
-    DealMeleeDamage(&damageInfo, true);
+    SendAttackStateUpdate(&meleeDamageInfo);
+    DealMeleeDamage(&meleeDamageInfo, true);
+    ProcDamageAndSpell(meleeDamageInfo.target, meleeDamageInfo.procAttacker, meleeDamageInfo.procVictim, meleeDamageInfo.procEx, meleeDamageInfo.totalDamage, meleeDamageInfo.attackType);
 
     uint32 totalAbsorb = 0;
     uint32 totalResist = 0;
 
     for (uint8 i = 0; i < m_weaponDamageCount[attType]; i++)
     {
-        totalAbsorb += damageInfo.subDamage[i].absorb;
-        totalResist += damageInfo.subDamage[i].resist;
+        totalAbsorb += meleeDamageInfo.subDamage[i].absorb;
+        totalResist += meleeDamageInfo.subDamage[i].resist;
     }
 
     if (GetTypeId() == TYPEID_PLAYER)
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "AttackerStateUpdate: (Player) %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
-                         GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damageInfo.totalDamage, totalAbsorb, damageInfo.blocked_amount, totalResist);
+                         GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), meleeDamageInfo.totalDamage, totalAbsorb, meleeDamageInfo.blocked_amount, totalResist);
     else
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
-                         GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damageInfo.totalDamage, totalAbsorb, damageInfo.blocked_amount, totalResist);
+                         GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), meleeDamageInfo.totalDamage, totalAbsorb, meleeDamageInfo.blocked_amount, totalResist);
 
     if (Unit* owner = GetOwner())
         if (owner->GetTypeId() == TYPEID_UNIT)
