@@ -2188,6 +2188,7 @@ class Unit : public WorldObject
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0) override;
 
         bool IsSpellProccingHappening() const { return m_spellProcsHappening; }
+        void AddDelayedHolderDueToProc(SpellAuraHolder* holder) { m_delayedSpellAuraHolders.push_back(holder); }
     protected:
         explicit Unit();
 
@@ -2331,6 +2332,7 @@ class Unit : public WorldObject
         bool m_spellUpdateHappening;
         // Need to safeguard aura proccing in Unit::ProcDamageAndSpell
         bool m_spellProcsHappening;
+        std::vector<SpellAuraHolder*> m_delayedSpellAuraHolders;
 
         // guard to prevent chaining extra attacks
         bool m_extraAttacksExecuting;

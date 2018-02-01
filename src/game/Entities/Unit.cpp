@@ -5168,12 +5168,11 @@ void Unit::ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVic
     m_spellProcsHappening = false;
 
     // Mark auras created during proccing as ready
-    for (SpellAuraHolderMap::const_iterator itr = GetSpellAuraHolderMap().begin(); itr != GetSpellAuraHolderMap().end(); ++itr)
-        if (itr->second->GetState() == SPELLAURAHOLDER_STATE_CREATED)
-            itr->second->SetState(SPELLAURAHOLDER_STATE_READY);
-    for (SpellAuraHolderMap::const_iterator itr = pVictim->GetSpellAuraHolderMap().begin(); itr != pVictim->GetSpellAuraHolderMap().end(); ++itr)
-        if (itr->second->GetState() == SPELLAURAHOLDER_STATE_CREATED)
-            itr->second->SetState(SPELLAURAHOLDER_STATE_READY);
+    for (SpellAuraHolder* holder : m_delayedSpellAuraHolders)
+        if (holder->GetState() == SPELLAURAHOLDER_STATE_CREATED) // if deleted by some unknown circumstance
+            holder->SetState(SPELLAURAHOLDER_STATE_READY);
+
+    m_delayedSpellAuraHolders.clear();
 }
 
 void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo) const
