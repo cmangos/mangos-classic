@@ -4015,7 +4015,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
 			switch (m_caster->getFaction())
 			{
-				case 29:  PledgeGiftOrHeartbroken = 27523; break; // GoF Org
+				case 29:
+				case 126: PledgeGiftOrHeartbroken = 27523; break; // GoF Org
 				case 104: PledgeGiftOrHeartbroken = 27524; break; // GoF TB
 				case 68:  PledgeGiftOrHeartbroken = 27529; break; // GoF UC	
 				default:
@@ -4027,7 +4028,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 			{
 				switch (m_caster->getFaction())
 				{
-					case 29:  PledgeGiftOrHeartbroken = 27505; break; // GoA Org	
+					case 29:
+					case 126: PledgeGiftOrHeartbroken = 27505; break; // GoA Org	
 					case 104: PledgeGiftOrHeartbroken = 27511; break; // GoA TB
 					case 68:  PledgeGiftOrHeartbroken = 27512; break; // GoA UC	
 					default:
@@ -4050,9 +4052,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
 			switch (m_caster->getFaction())
 			{
-				case 12: PledgeGiftOrHeartbroken = 27525; break; // GoF SW
-				case 55: PledgeGiftOrHeartbroken = 27520; break; // GoF IF
-				case 80: PledgeGiftOrHeartbroken = 27519; break; // GoF Darnassus
+				case 12:  PledgeGiftOrHeartbroken = 27525; break; // GoF SW
+				case 55:
+				case 875: PledgeGiftOrHeartbroken = 27520; break; // GoF IF
+				case 80:  PledgeGiftOrHeartbroken = 27519; break; // GoF Darnassus
 				default:
 				return;
 			}
@@ -4063,9 +4066,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 				PledgeGiftOrHeartbroken = 26901;
 				switch (m_caster->getFaction())
 				{
-                                        case 12: PledgeGiftOrHeartbroken = 27509; break; // GoA SW
-					case 55: PledgeGiftOrHeartbroken = 27503; break; // GoA IF
-					case 80: PledgeGiftOrHeartbroken = 26901; break; // GoA Darnassus
+                                        case 12:  PledgeGiftOrHeartbroken = 27509; break; // GoA SW
+					case 55:
+					case 875: PledgeGiftOrHeartbroken = 27503; break; // GoA IF
+					case 80:  PledgeGiftOrHeartbroken = 26901; break; // GoA Darnassus
 					default:
 					return;
 				}
