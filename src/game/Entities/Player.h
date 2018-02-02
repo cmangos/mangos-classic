@@ -1778,7 +1778,7 @@ class Player : public Unit
         void ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply, bool form_change = false);
         void UpdateEquipSpellsAtFormChange();
         void CastItemCombatSpell(Unit* Target, WeaponAttackType attType, bool spellProc = false);
-        void CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 cast_count, uint8 spell_index);
+        void CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 spell_index);
 
         void SendInitWorldStates(uint32 zone) const;
         void SendUpdateWorldState(uint32 Field, uint32 Value) const;

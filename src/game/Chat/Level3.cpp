@@ -3432,6 +3432,17 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
 
     PSendSysMessage(LANG_DISTANCE, player->GetDistance(obj), player->GetDistance(obj, false), sqrt(dx * dx + dy * dy + dz * dz));
 
+    Unit* target = dynamic_cast<Unit*>(obj);
+
+    PSendSysMessage("P -> T Attack distance: %.2f", player->GetAttackDistance(target));
+    PSendSysMessage("P -> T Visible distance: %.2f", player->GetVisibleDistance(target));
+    PSendSysMessage("P -> T Visible distance (Alert): %.2f", player->GetVisibleDistance(target, true));
+    PSendSysMessage("P -> T Can trigger alert: %s", !player->IsWithinDistInMap(target, target->GetVisibleDistance(player)) ? "true" : "false");
+    PSendSysMessage("T -> P Attack distance: %.2f", target->GetAttackDistance(player));
+    PSendSysMessage("T -> P Visible distance: %.2f", target->GetVisibleDistance(player));
+    PSendSysMessage("T -> P Visible distance (Alert): %.2f", target->GetVisibleDistance(player, true));
+    PSendSysMessage("T -> P Can trigger alert: %s", !target->IsWithinDistInMap(player, player->GetVisibleDistance(target)) ? "true" : "false");
+
     return true;
 }
 

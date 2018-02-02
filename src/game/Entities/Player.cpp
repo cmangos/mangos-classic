@@ -6930,7 +6930,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType, bool sp
     }
 }
 
-void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets)
+void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 spell_index)
 {
     ItemPrototype const* proto = item->GetProto();
 
@@ -6948,6 +6948,9 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets)
 
         // wrong triggering type
         if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE && spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_NO_DELAY_USE)
+            continue;
+
+        if (i != spell_index)
             continue;
 
         SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellData.SpellId);

@@ -90,7 +90,7 @@ void CreatureAI::MoveInLineOfSight(Unit* who)
             return;
 
         if (m_creature->CanAttackOnSight(who))
-            DetectOrAttack(who, m_creature);
+            DetectOrAttack(who);
     }
 }
 
@@ -375,35 +375,48 @@ void CreatureAI::CheckForHelp(Unit* who, Creature* me, float distance)
     }
 }
 
-void CreatureAI::DetectOrAttack(Unit* who, Creature* me)
+void CreatureAI::DetectOrAttack(Unit* who)
 {
-    float attackRadius = me->GetAttackDistance(who);
+    float attackRadius = m_creature->GetAttackDistance(who);
+    if (!m_creature->IsWithinLOSInMap(who))
+        return;
 
-    if (me->IsWithinDistInMap(who, attackRadius) && me->IsWithinLOSInMap(who))
+    if (!m_creature->IsWithinDistInMap(who, attackRadius))
+        return;
+
+    if (!m_creature->getVictim())
     {
-        if (!me->getVictim())
+        if (CanTriggerStealthAlert(who, attackRadius))
         {
-            if (who->HasStealthAura() || who->HasInvisibilityAura())
-            {
-                if (!me->hasUnitState(UNIT_STAT_DISTRACTED) && !me->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
-                {
-                    me->GetMotionMaster()->MoveDistract(TIME_INTERVAL_LOOK);
-                    me->SetFacingTo(me->GetAngle(who));
-                }
+            m_creature->SendAIReaction(AI_REACTION_ALERT);
+            m_creature->SetFacingTo(m_creature->GetAngle(who));
+            m_creature->GetMotionMaster()->MoveDistract(TIME_INTERVAL_LOOK);
 
-                if (me->IsWithinDistInMap(who, who->GetVisibleDist(me) * 0.7f))
-                    AttackStart(who);
-            }
-            else
-                AttackStart(who);
+            return;
         }
-        else if (me->GetMap()->IsDungeon())
-        {
-            me->AddThreat(who);
-            me->SetInCombatWith(who);
-            who->SetInCombatWith(me);
-        }
+
+        AttackStart(who);
     }
+    else if (m_creature->GetMap()->IsDungeon())
+    {
+        m_creature->AddThreat(who);
+        m_creature->SetInCombatWith(who);
+        who->SetInCombatWith(m_creature);
+    }
+}
+
+bool CreatureAI::CanTriggerStealthAlert(Unit* who, float attackRadius)
+{
+    if (who->GetTypeId() != TYPEID_PLAYER)
+        return false;
+    if (m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
+        return false;
+
+    if (m_creature->hasUnitState(UNIT_STAT_DISTRACTED))
+        return false;
+
+    return who->HasStealthAura() &&
+        !m_creature->IsWithinDistInMap(who, who->GetVisibleDistance(m_creature));
 }
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////

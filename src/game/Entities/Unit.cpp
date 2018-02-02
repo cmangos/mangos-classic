@@ -7523,10 +7523,6 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (!getAttackers().empty())
         return true;
 
-    // If there is collision rogue is seen regardless of level difference
-    if (IsWithinDist(u, 0.24f))
-        return true;
-
     // If a mob or player is stunned he will not be able to detect stealth
     if (u->hasUnitState(UNIT_STAT_STUNNED) && (u != this))
         return false;
@@ -7539,24 +7535,8 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (!isInFront)
         return false;
 
-    // Calculation if target is in front
-
-    // Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
-    visibleDistance = 10.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH) / 100.0f);
-
-    // Visible distance is modified by
-    //-Level Diff (every level diff = 1.0f in visible distance)
-    visibleDistance += int32(u->GetLevelForTarget(this)) - int32(GetLevelForTarget(u));
-
-    // This allows to check talent tree and will add addition stealth dependent on used points)
-    int32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
-    if (stealthMod < 0)
-        stealthMod = 0;
-
-    //-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
-    // based on wowwiki every 5 mod we have 1 more level diff in calculation
-    visibleDistance += (int32(u->GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_DETECT)) - stealthMod) / 5.0f;
-    visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_RANGE ? MAX_PLAYER_STEALTH_DETECT_RANGE : visibleDistance;
+    // In TBC+ this is safeguarded by 228 aura
+    visibleDistance = GetVisibleDistance(u, !u->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
 
     // recheck new distance
     if (visibleDistance <= 0 || !IsWithinDist(viewPoint, visibleDistance))
@@ -7568,19 +7548,14 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     return IsWithinLOS(ox, oy, oz);
 }
 
-float Unit::GetVisibleDist(Unit const* u)
+float Unit::GetVisibleDistance(Unit const* target, bool alert) const
 {
-    // set max ditance
-    float visibleDistance = (u->GetTypeId() == TYPEID_PLAYER) ? MAX_PLAYER_STEALTH_DETECT_RANGE : ((Creature const*)u)->GetAttackDistance(this);
-
-    // Calculation if target is in front
-
     // Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
-    visibleDistance = 10.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH) / 100.0f);
+    float visibleDistance = 10.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH) / 100.0f);
 
     // Visible distance is modified by
     //-Level Diff (every level diff = 1.0f in visible distance)
-    visibleDistance += int32(u->GetLevelForTarget(this)) - int32(GetLevelForTarget(u));
+    visibleDistance += int32(target->GetLevelForTarget(this)) - int32(GetLevelForTarget(target));
 
     // This allows to check talent tree and will add addition stealth dependent on used points)
     int32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
@@ -7589,8 +7564,14 @@ float Unit::GetVisibleDist(Unit const* u)
 
     //-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
     // based on wowwiki every 5 mod we have 1 more level diff in calculation
-    visibleDistance += (int32(u->GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_DETECT)) - stealthMod) / 5.0f;
+    visibleDistance += (int32(target->GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_DETECT)) - stealthMod) / 5.0f;
     visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_RANGE ? MAX_PLAYER_STEALTH_DETECT_RANGE : visibleDistance;
+
+    if (visibleDistance < 1.5f)
+        visibleDistance = 1.5f;
+
+    if (alert)
+        return visibleDistance * 1.08f + 1.5f;
 
     return visibleDistance;
 }
