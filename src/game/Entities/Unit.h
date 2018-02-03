@@ -2117,6 +2117,7 @@ class Unit : public WorldObject
         void SendPetActionFeedback(uint8 msg) const;
         void SendPetTalk(uint32 pettalk) const;
         void SendPetAIReaction() const;
+        void SendPetDismiss(uint32 soundId) const;
         ///----------End of Pet responses methods----------
 
         void propagateSpeedChange() { GetMotionMaster()->propagateSpeedChange(); }

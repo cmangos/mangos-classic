@@ -176,6 +176,7 @@ class Pet : public Creature
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
         static void DeleteFromDB(Unit* owner, PetSaveMode slot);
         static SpellCastResult TryLoadFromDB(Unit* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, PetType mandatoryPetType = MAX_PET_TYPE);
+        void PlayDismissSound();
 
         ObjectGuid const GetSpawnerGuid() const override { return GetOwnerGuid(); }
 

@@ -1422,6 +1422,30 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     return;
 }
 
+void Pet::PlayDismissSound()
+{
+    uint32 soundId = 0;
+    switch (GetUInt32Value(UNIT_CREATED_BY_SPELL))
+    {
+        case 688: // Imp - Warlock
+            soundId = urand(0, 1) ? 11 : 371;
+            break;
+        //case 691: // Felhunter
+        //    soundId = 11;
+        //    break;
+        case 697: // Voidwalker
+            soundId = 162;
+            break;
+        case 712: // Succubus
+            soundId = 37;
+            break;
+        case 22865: // Doomguard
+            soundId = 68;
+            break;
+    }
+    SendPetDismiss(soundId);
+}
+
 bool Pet::HaveInDiet(ItemPrototype const* item) const
 {
     if (!item->FoodType)

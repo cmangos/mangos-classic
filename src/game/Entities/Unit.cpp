@@ -9432,6 +9432,14 @@ void Unit::SendPetAIReaction() const
     ((Player*)owner)->GetSession()->SendPacket(data);
 }
 
+void Unit::SendPetDismiss(uint32 soundId) const
+{
+    WorldPacket data(SMSG_PET_DISMISS_SOUND, 4 + 4 + 4 + 4);
+    data << soundId;
+    data << GetPositionX() << GetPositionY() << GetPositionZ();
+    SendMessageToSet(data, true);
+}
+
 ///----------End of Pet responses methods----------
 
 void Unit::StopMoving(bool forceSendStop /*=false*/)

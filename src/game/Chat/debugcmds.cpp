@@ -287,6 +287,18 @@ bool ChatHandler::HandleDebugPlayMusicCommand(char* args)
     return true;
 }
 
+// Play pet dismiss sound
+bool ChatHandler::HandleDebugPetDismissSound(char* args)
+{
+    uint32 petDismissSound;
+    if (!ExtractUInt32(&args, petDismissSound))
+        return false;
+
+    m_session->GetPlayer()->SendPetDismiss(petDismissSound);
+    PSendSysMessage(LANG_YOU_HEAR_SOUND, petDismissSound);
+    return true;
+}
+
 // Send notification in channel
 bool ChatHandler::HandleDebugSendChannelNotifyCommand(char* args)
 {
