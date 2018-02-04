@@ -246,6 +246,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "taxi",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugTaxiCommand,                "", nullptr },
         { "uws",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugUpdateWorldStateCommand,    "", nullptr },
         { "waypoint",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugWaypoint,                   "", nullptr },
+        { "moveflag",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugMoveflags,                  "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 

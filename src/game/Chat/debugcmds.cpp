@@ -1190,3 +1190,13 @@ bool ChatHandler::HandleDebugSpellVisual(char* args)
     target->PlaySpellVisual(spellVisualID);
     return true;
 }
+
+bool ChatHandler::HandleDebugMoveflags(char* args)
+{
+    Unit* target = getSelectedUnit();
+    if (!target)
+        return false;
+
+    PSendSysMessage("Moveflags on target %u", target->m_movementInfo.GetMovementFlags());
+    return true;
+}
