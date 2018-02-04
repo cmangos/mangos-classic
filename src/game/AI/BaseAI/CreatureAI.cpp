@@ -384,7 +384,7 @@ void CreatureAI::DetectOrAttack(Unit* who)
     if (!m_creature->IsWithinDistInMap(who, attackRadius))
         return;
 
-    if (!m_creature->getVictim())
+    if (!m_creature->getVictim() && !m_creature->isInCombat())
     {
         if (CanTriggerStealthAlert(who, attackRadius))
         {
