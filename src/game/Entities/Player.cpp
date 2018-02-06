@@ -10734,13 +10734,6 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                     break;
                 case ITEM_ENCHANTMENT_TYPE_DAMAGE:
                     // processed in Player::_ApplyWeaponDependentAuraMods
-                    //if (item->GetSlot() == EQUIPMENT_SLOT_MAINHAND)
-                    //    HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, float(enchant_amount), apply);
-                    //else if (item->GetSlot() == EQUIPMENT_SLOT_OFFHAND)
-                    //    HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_VALUE, float(enchant_amount), apply);
-                    //else if (item->GetSlot() == EQUIPMENT_SLOT_RANGED)
-                    //    HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
-                    //UpdateDamagePhysical
                     if (item->GetSlot() == EQUIPMENT_SLOT_MAINHAND)
                     {
                         SetEnchantmentModifier(enchant_amount, BASE_ATTACK, apply);
