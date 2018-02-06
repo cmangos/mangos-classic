@@ -1453,21 +1453,21 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
 }
 
 // TODO for melee need create structure as in
-void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, WeaponAttackType attackType /*= BASE_ATTACK*/)
+void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, WeaponAttackType attackType /*= BASE_ATTACK*/)
 {
-    damageInfo->attacker         = this;
-    damageInfo->target           = pVictim;
-    damageInfo->attackType       = attackType;
-    damageInfo->totalDamage      = 0;
-    damageInfo->cleanDamage      = 0;
-    damageInfo->blocked_amount   = 0;
+    calcDamageInfo->attacker         = this;
+    calcDamageInfo->target           = pVictim;
+    calcDamageInfo->attackType       = attackType;
+    calcDamageInfo->totalDamage      = 0;
+    calcDamageInfo->cleanDamage      = 0;
+    calcDamageInfo->blocked_amount   = 0;
 
-    damageInfo->TargetState      = VICTIMSTATE_UNAFFECTED;
-    damageInfo->HitInfo          = HITINFO_NORMALSWING;
-    damageInfo->procAttacker     = PROC_FLAG_NONE;
-    damageInfo->procVictim       = PROC_FLAG_NONE;
-    damageInfo->procEx           = PROC_EX_NONE;
-    damageInfo->hitOutCome       = MELEE_HIT_EVADE;
+    calcDamageInfo->TargetState      = VICTIMSTATE_UNAFFECTED;
+    calcDamageInfo->HitInfo          = HITINFO_NORMALSWING;
+    calcDamageInfo->procAttacker     = PROC_FLAG_NONE;
+    calcDamageInfo->procVictim       = PROC_FLAG_NONE;
+    calcDamageInfo->procEx           = PROC_EX_NONE;
+    calcDamageInfo->hitOutCome       = MELEE_HIT_EVADE;
 
     if (!pVictim)
         return;
@@ -1478,19 +1478,19 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
     switch (attackType)
     {
         case BASE_ATTACK:
-            damageInfo->procAttacker = PROC_FLAG_SUCCESSFUL_MELEE_HIT;
-            damageInfo->procVictim   = PROC_FLAG_TAKEN_MELEE_HIT;
-            damageInfo->HitInfo      = HITINFO_NORMALSWING2;
+            calcDamageInfo->procAttacker = PROC_FLAG_SUCCESSFUL_MELEE_HIT;
+            calcDamageInfo->procVictim   = PROC_FLAG_TAKEN_MELEE_HIT;
+            calcDamageInfo->HitInfo      = HITINFO_NORMALSWING2;
             break;
         case OFF_ATTACK:
-            damageInfo->procAttacker = PROC_FLAG_SUCCESSFUL_MELEE_HIT | PROC_FLAG_SUCCESSFUL_OFFHAND_HIT;
-            damageInfo->procVictim   = PROC_FLAG_TAKEN_MELEE_HIT;//|PROC_FLAG_TAKEN_OFFHAND_HIT // not used
-            damageInfo->HitInfo = HITINFO_LEFTSWING;
+            calcDamageInfo->procAttacker = PROC_FLAG_SUCCESSFUL_MELEE_HIT | PROC_FLAG_SUCCESSFUL_OFFHAND_HIT;
+            calcDamageInfo->procVictim   = PROC_FLAG_TAKEN_MELEE_HIT;//|PROC_FLAG_TAKEN_OFFHAND_HIT // not used
+            calcDamageInfo->HitInfo = HITINFO_LEFTSWING;
             break;
         case RANGED_ATTACK:
-            damageInfo->procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_HIT;
-            damageInfo->procVictim   = PROC_FLAG_TAKEN_RANGED_HIT;
-            damageInfo->HitInfo = HITINFO_UNK3;             // test (dev note: test what? HitInfo flag possibly not confirmed.)
+            calcDamageInfo->procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_HIT;
+            calcDamageInfo->procVictim   = PROC_FLAG_TAKEN_RANGED_HIT;
+            calcDamageInfo->HitInfo = HITINFO_UNK3;             // test (dev note: test what? HitInfo flag possibly not confirmed.)
             break;
         default:
             break;
@@ -1498,15 +1498,15 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
 
     bool immune = true;
 
-    for (uint8 i = 0; i < m_weaponDamageCount[damageInfo->attackType]; i++)
+    for (uint8 i = 0; i < m_weaponDamageCount[calcDamageInfo->attackType]; i++)
     {
-        SubDamageInfo* subDamage = &damageInfo->subDamage[i];
+        SubDamageInfo* subDamage = &calcDamageInfo->subDamage[i];
 
         subDamage->damageSchoolMask = GetTypeId() == TYPEID_PLAYER
-                                      ? GetSchoolMask(GetWeaponDamageSchool(damageInfo->attackType, i))
+                                      ? GetSchoolMask(GetWeaponDamageSchool(calcDamageInfo->attackType, i))
                                       : GetMeleeDamageSchoolMask();
 
-        if (damageInfo->target->IsImmuneToDamage(subDamage->damageSchoolMask))
+        if (calcDamageInfo->target->IsImmuneToDamage(subDamage->damageSchoolMask))
         {
             subDamage->damage = 0;
             continue;
@@ -1514,156 +1514,156 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
         else
             immune = false;
 
-        subDamage->damage = CalculateDamage(damageInfo->attackType, false, i);
+        subDamage->damage = CalculateDamage(calcDamageInfo->attackType, false, i);
         // Add melee damage bonus
-        subDamage->damage = MeleeDamageBonusDone(damageInfo->target, subDamage->damage, damageInfo->attackType, nullptr, DIRECT_DAMAGE, 1, i == 0);
-        subDamage->damage = damageInfo->target->MeleeDamageBonusTaken(this, subDamage->damage, damageInfo->attackType, nullptr, DIRECT_DAMAGE, 1, i == 0);
+        subDamage->damage = MeleeDamageBonusDone(calcDamageInfo->target, subDamage->damage, calcDamageInfo->attackType, nullptr, DIRECT_DAMAGE, 1, i == 0);
+        subDamage->damage = calcDamageInfo->target->MeleeDamageBonusTaken(this, subDamage->damage, calcDamageInfo->attackType, nullptr, DIRECT_DAMAGE, 1, i == 0);
 
         // Calculate armor reduction
         if (subDamage->damageSchoolMask == SPELL_SCHOOL_MASK_NORMAL)
         {
-            damageInfo->cleanDamage += subDamage->damage;
-            subDamage->damage = CalcArmorReducedDamage(damageInfo->target, subDamage->damage);
-            damageInfo->cleanDamage -= subDamage->damage;
+            calcDamageInfo->cleanDamage += subDamage->damage;
+            subDamage->damage = CalcArmorReducedDamage(calcDamageInfo->target, subDamage->damage);
+            calcDamageInfo->cleanDamage -= subDamage->damage;
         }
 
-        damageInfo->totalDamage += subDamage->damage;
+        calcDamageInfo->totalDamage += subDamage->damage;
     }
 
     // Physical Immune check
     if (immune)
     {
-        damageInfo->HitInfo |= HITINFO_NORMALSWING;
-        damageInfo->TargetState = VICTIMSTATE_IS_IMMUNE;
+        calcDamageInfo->HitInfo |= HITINFO_NORMALSWING;
+        calcDamageInfo->TargetState = VICTIMSTATE_IS_IMMUNE;
 
-        damageInfo->procEx |= PROC_EX_IMMUNE;
-        damageInfo->totalDamage = 0;
-        damageInfo->cleanDamage = 0;
+        calcDamageInfo->procEx |= PROC_EX_IMMUNE;
+        calcDamageInfo->totalDamage = 0;
+        calcDamageInfo->cleanDamage = 0;
         return;
     }
 
     // FIXME: Fix individual school results later when appropriate API is ready
     uint32 mask = SPELL_SCHOOL_MASK_NORMAL;
-    for (uint8 i = 0; i < m_weaponDamageCount[damageInfo->attackType]; ++i)
+    for (uint8 i = 0; i < m_weaponDamageCount[calcDamageInfo->attackType]; ++i)
     {
-        SubDamageInfo& subDamage = damageInfo->subDamage[i];
+        SubDamageInfo& subDamage = calcDamageInfo->subDamage[i];
         mask |= subDamage.damageSchoolMask;
     }
-    damageInfo->hitOutCome = RollMeleeOutcomeAgainst(damageInfo->target, damageInfo->attackType, SpellSchoolMask(mask));
+    calcDamageInfo->hitOutCome = RollMeleeOutcomeAgainst(calcDamageInfo->target, calcDamageInfo->attackType, SpellSchoolMask(mask));
 
     // Disable parry or dodge for ranged attack
-    if (damageInfo->attackType == RANGED_ATTACK)
+    if (calcDamageInfo->attackType == RANGED_ATTACK)
     {
-        if (damageInfo->hitOutCome == MELEE_HIT_PARRY) damageInfo->hitOutCome = MELEE_HIT_NORMAL;
-        if (damageInfo->hitOutCome == MELEE_HIT_DODGE) damageInfo->hitOutCome = MELEE_HIT_MISS;
+        if (calcDamageInfo->hitOutCome == MELEE_HIT_PARRY) calcDamageInfo->hitOutCome = MELEE_HIT_NORMAL;
+        if (calcDamageInfo->hitOutCome == MELEE_HIT_DODGE) calcDamageInfo->hitOutCome = MELEE_HIT_MISS;
     }
 
-    switch (damageInfo->hitOutCome)
+    switch (calcDamageInfo->hitOutCome)
     {
         case MELEE_HIT_EVADE:
         {
-            damageInfo->HitInfo |= HITINFO_MISS | HITINFO_SWINGNOHITSOUND;
-            damageInfo->TargetState = VICTIMSTATE_EVADES;
+            calcDamageInfo->HitInfo |= HITINFO_MISS | HITINFO_SWINGNOHITSOUND;
+            calcDamageInfo->TargetState = VICTIMSTATE_EVADES;
 
-            damageInfo->procEx |= PROC_EX_EVADE;
-            damageInfo->totalDamage = 0;
-            damageInfo->cleanDamage = 0;
+            calcDamageInfo->procEx |= PROC_EX_EVADE;
+            calcDamageInfo->totalDamage = 0;
+            calcDamageInfo->cleanDamage = 0;
 
-            for (uint8 i = 0; i < m_weaponDamageCount[damageInfo->attackType]; i++)
-                damageInfo->subDamage[i].damage = 0;
+            for (uint8 i = 0; i < m_weaponDamageCount[calcDamageInfo->attackType]; i++)
+                calcDamageInfo->subDamage[i].damage = 0;
 
             return;
         }
         case MELEE_HIT_MISS:
         {
-            damageInfo->HitInfo |= HITINFO_MISS;
-            damageInfo->TargetState = VICTIMSTATE_UNAFFECTED;
+            calcDamageInfo->HitInfo |= HITINFO_MISS;
+            calcDamageInfo->TargetState = VICTIMSTATE_UNAFFECTED;
 
-            damageInfo->procEx |= PROC_EX_MISS;
-            damageInfo->totalDamage = 0;
-            damageInfo->cleanDamage = 0;
+            calcDamageInfo->procEx |= PROC_EX_MISS;
+            calcDamageInfo->totalDamage = 0;
+            calcDamageInfo->cleanDamage = 0;
 
-            for (uint8 i = 0; i < m_weaponDamageCount[damageInfo->attackType]; i++)
-                damageInfo->subDamage[i].damage = 0;
+            for (uint8 i = 0; i < m_weaponDamageCount[calcDamageInfo->attackType]; i++)
+                calcDamageInfo->subDamage[i].damage = 0;
 
             break;
         }
         case MELEE_HIT_NORMAL:
         {
-            damageInfo->TargetState = VICTIMSTATE_NORMAL;
-            damageInfo->procEx |= PROC_EX_NORMAL_HIT;
+            calcDamageInfo->TargetState = VICTIMSTATE_NORMAL;
+            calcDamageInfo->procEx |= PROC_EX_NORMAL_HIT;
             break;
         }
         case MELEE_HIT_CRIT:
         {
-            damageInfo->HitInfo |= HITINFO_CRITICALHIT;
-            damageInfo->TargetState = VICTIMSTATE_NORMAL;
-            damageInfo->procEx |= PROC_EX_CRITICAL_HIT;
-            damageInfo->totalDamage = CalculateCritAmount(damageInfo);
+            calcDamageInfo->HitInfo |= HITINFO_CRITICALHIT;
+            calcDamageInfo->TargetState = VICTIMSTATE_NORMAL;
+            calcDamageInfo->procEx |= PROC_EX_CRITICAL_HIT;
+            calcDamageInfo->totalDamage = CalculateCritAmount(calcDamageInfo);
             break;
         }
         case MELEE_HIT_PARRY:
         {
-            damageInfo->TargetState = VICTIMSTATE_PARRY;
-            damageInfo->procEx |= PROC_EX_PARRY;
-            damageInfo->cleanDamage += damageInfo->totalDamage;
-            damageInfo->totalDamage = 0;
+            calcDamageInfo->TargetState = VICTIMSTATE_PARRY;
+            calcDamageInfo->procEx |= PROC_EX_PARRY;
+            calcDamageInfo->cleanDamage += calcDamageInfo->totalDamage;
+            calcDamageInfo->totalDamage = 0;
 
-            for (uint8 i = 0; i < m_weaponDamageCount[damageInfo->attackType]; i++)
-                damageInfo->subDamage[i].damage = 0;
+            for (uint8 i = 0; i < m_weaponDamageCount[calcDamageInfo->attackType]; i++)
+                calcDamageInfo->subDamage[i].damage = 0;
 
             break;
         }
         case MELEE_HIT_DODGE:
         {
-            damageInfo->TargetState = VICTIMSTATE_DODGE;
-            damageInfo->procEx |= PROC_EX_DODGE;
-            damageInfo->cleanDamage += damageInfo->totalDamage;
-            damageInfo->totalDamage = 0;
+            calcDamageInfo->TargetState = VICTIMSTATE_DODGE;
+            calcDamageInfo->procEx |= PROC_EX_DODGE;
+            calcDamageInfo->cleanDamage += calcDamageInfo->totalDamage;
+            calcDamageInfo->totalDamage = 0;
 
-            for (uint8 i = 0; i < m_weaponDamageCount[damageInfo->attackType]; i++)
-                damageInfo->subDamage[i].damage = 0;
+            for (uint8 i = 0; i < m_weaponDamageCount[calcDamageInfo->attackType]; i++)
+                calcDamageInfo->subDamage[i].damage = 0;
 
             break;
         }
         case MELEE_HIT_BLOCK:
         {
-            damageInfo->TargetState = VICTIMSTATE_NORMAL;
-            damageInfo->procEx |= PROC_EX_BLOCK;
-            damageInfo->blocked_amount = damageInfo->target->GetShieldBlockValue();
+            calcDamageInfo->TargetState = VICTIMSTATE_NORMAL;
+            calcDamageInfo->procEx |= PROC_EX_BLOCK;
+            calcDamageInfo->blocked_amount = calcDamageInfo->target->GetShieldBlockValue();
 
-            if (damageInfo->blocked_amount >= damageInfo->subDamage[0].damage)
+            if (calcDamageInfo->blocked_amount >= calcDamageInfo->subDamage[0].damage)
             {
-                damageInfo->TargetState = VICTIMSTATE_BLOCKS;
-                damageInfo->blocked_amount = damageInfo->subDamage[0].damage;
+                calcDamageInfo->TargetState = VICTIMSTATE_BLOCKS;
+                calcDamageInfo->blocked_amount = calcDamageInfo->subDamage[0].damage;
             }
             else
-                damageInfo->procEx |= PROC_EX_NORMAL_HIT;   // Partial blocks can still cause attacker procs
+                calcDamageInfo->procEx |= PROC_EX_NORMAL_HIT;   // Partial blocks can still cause attacker procs
 
-            damageInfo->totalDamage -= damageInfo->blocked_amount;
-            damageInfo->subDamage[0].damage -= damageInfo->blocked_amount;
-            damageInfo->cleanDamage += damageInfo->blocked_amount;
+            calcDamageInfo->totalDamage -= calcDamageInfo->blocked_amount;
+            calcDamageInfo->subDamage[0].damage -= calcDamageInfo->blocked_amount;
+            calcDamageInfo->cleanDamage += calcDamageInfo->blocked_amount;
             break;
         }
         case MELEE_HIT_GLANCING:
         {
-            damageInfo->HitInfo |= HITINFO_GLANCING;
-            damageInfo->TargetState = VICTIMSTATE_NORMAL;
-            damageInfo->procEx |= PROC_EX_NORMAL_HIT;
-            CalculateGlanceAmount(damageInfo);
+            calcDamageInfo->HitInfo |= HITINFO_GLANCING;
+            calcDamageInfo->TargetState = VICTIMSTATE_NORMAL;
+            calcDamageInfo->procEx |= PROC_EX_NORMAL_HIT;
+            CalculateGlanceAmount(calcDamageInfo);
             break;
         }
         case MELEE_HIT_CRUSHING:
         {
-            damageInfo->HitInfo |= HITINFO_CRUSHING;
-            damageInfo->TargetState = VICTIMSTATE_NORMAL;
-            damageInfo->procEx |= PROC_EX_NORMAL_HIT;
+            calcDamageInfo->HitInfo |= HITINFO_CRUSHING;
+            calcDamageInfo->TargetState = VICTIMSTATE_NORMAL;
+            calcDamageInfo->procEx |= PROC_EX_NORMAL_HIT;
 
             // 150% of normal damage
-            damageInfo->totalDamage += damageInfo->totalDamage / 2;
+            calcDamageInfo->totalDamage += calcDamageInfo->totalDamage / 2;
 
-            for (uint8 i = 0; i < m_weaponDamageCount[damageInfo->attackType]; i++)
-                damageInfo->subDamage[i].damage += damageInfo->subDamage[i].damage / 2;
+            for (uint8 i = 0; i < m_weaponDamageCount[calcDamageInfo->attackType]; i++)
+                calcDamageInfo->subDamage[i].damage += calcDamageInfo->subDamage[i].damage / 2;
 
             break;
         }
@@ -1672,31 +1672,31 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
     }
 
     // Calculate absorb resist
-    if (int32(damageInfo->totalDamage) > 0)
+    if (int32(calcDamageInfo->totalDamage) > 0)
     {
-        damageInfo->procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
+        calcDamageInfo->procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
         // Calculate absorb & resists
-        for (uint8 i = 0; i < m_weaponDamageCount[damageInfo->attackType]; i++)
+        for (uint8 i = 0; i < m_weaponDamageCount[calcDamageInfo->attackType]; i++)
         {
-            SubDamageInfo* subDamage = &damageInfo->subDamage[i];
+            SubDamageInfo* subDamage = &calcDamageInfo->subDamage[i];
 
-            damageInfo->target->CalculateDamageAbsorbAndResist(this, subDamage->damageSchoolMask, DIRECT_DAMAGE, subDamage->damage, &subDamage->absorb, &subDamage->resist, true);
-            damageInfo->totalDamage -= subDamage->absorb + subDamage->resist;
+            calcDamageInfo->target->CalculateDamageAbsorbAndResist(this, subDamage->damageSchoolMask, DIRECT_DAMAGE, subDamage->damage, &subDamage->absorb, &subDamage->resist, true);
+            calcDamageInfo->totalDamage -= subDamage->absorb + subDamage->resist;
             subDamage->damage -= subDamage->absorb + subDamage->resist;
 
             if (subDamage->absorb)
             {
-                damageInfo->HitInfo |= HITINFO_ABSORB;
-                damageInfo->procEx |= PROC_EX_ABSORB;
+                calcDamageInfo->HitInfo |= HITINFO_ABSORB;
+                calcDamageInfo->procEx |= PROC_EX_ABSORB;
             }
 
             if (subDamage->resist)
-                damageInfo->HitInfo |= HITINFO_RESIST;
+                calcDamageInfo->HitInfo |= HITINFO_RESIST;
         }
     }
     else
-        damageInfo->totalDamage = 0;
+        calcDamageInfo->totalDamage = 0;
 }
 
 void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
