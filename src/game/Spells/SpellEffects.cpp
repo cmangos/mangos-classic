@@ -1077,6 +1077,19 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     // implemented at client side
                     return;
                 }
+                case 26374:                                 // Elune's Candle
+                {
+                    if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->GetEntry() == 15467)  // Omen
+                    {
+                        uint32 eluneCandle[5] = { 26622, 26623, 26624, 26625, 26649 };
+                        m_caster->CastSpell(unitTarget, eluneCandle[urand(0, 4)], TRIGGERED_OLD_TRIGGERED); // Damage (random visual)
+                        return;
+                    }
+                    // Default harmless spell
+                    m_caster->CastSpell(unitTarget, 26636, TRIGGERED_OLD_TRIGGERED);
+
+                    return;
+                }
                 case 26626:                                 // Mana Burn Area
                 {
                     if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->GetPowerType() == POWER_MANA)
