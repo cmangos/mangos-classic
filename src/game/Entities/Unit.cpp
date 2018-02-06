@@ -2111,16 +2111,14 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     if (!pVictim->isAlive())
         return;
 
-    if (IsNonMeleeSpellCasted(false))
+    if (!extra && IsNonMeleeSpellCasted(false))
         return;
 
     if (attType == RANGED_ATTACK)
         return;                                             // ignore ranged case
 
-    uint32 extraAttacks = m_extraAttacks;
-
-    // melee attack spell casted at main hand attack only
-    if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL])
+    // melee attack spell casted at main hand attack only - but only if its not already being executed
+    if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !m_currentSpells[CURRENT_MELEE_SPELL]->IsExecutedCurrently())
     {
         m_currentSpells[CURRENT_MELEE_SPELL]->cast();
         return;
