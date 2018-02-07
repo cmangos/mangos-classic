@@ -920,30 +920,19 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 
         pVictim->ModifyHealth(- (int32)damage);
 
-        if (damagetype != DOT)
+        if (CanAttack(pVictim) && (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
+            !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT)))
         {
-            if (!getVictim())
+            SetInCombatWith(pVictim);
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
             {
-                // if not have main target then attack state with target (including AI call)
-                // start melee attacks only after melee hit
-                Attack(pVictim, (damagetype == DIRECT_DAMAGE));
+                float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
+                pVictim->AddThreat(this, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
             }
-
-            // if damage pVictim call AI reaction
-            pVictim->AttackedBy(this);
+            pVictim->SetInCombatWith(this);
         }
 
-        if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
-        {
-            if (!spellProto || !(spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DIRECT_DAMAGE))
-                pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE);
-        }
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-        {
-            float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
-            pVictim->AddThreat(this, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
-        }
-        else                                                // victim is a player
+        if (pVictim->GetTypeId() == TYPEID_PLAYER)                               // victim is a player
         {
             // Rage from damage received
             if (this != pVictim && pVictim->GetPowerType() == POWER_RAGE)
