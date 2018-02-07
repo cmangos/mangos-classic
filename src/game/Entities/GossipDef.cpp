@@ -742,10 +742,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
         data << pQuest->GetIncompleteEmote();
 
     // Close Window after cancel
-    if (CloseOnCancel)
-        data << uint32(0x01);                               // auto finish
-    else
-        data << uint32(0x00);
+    data << uint32(CloseOnCancel);                          // auto finish
 
     // Required Money
     data << uint32(pQuest->GetRewOrReqMoney() < 0 ? -pQuest->GetRewOrReqMoney() : 0);
