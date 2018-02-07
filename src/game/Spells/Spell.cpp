@@ -376,6 +376,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
     m_casttime = 0;                                         // setup to correct value in Spell::prepare, don't must be used before.
     m_timer = 0;                                            // will set to cast time in prepare
     m_duration = 0;
+    m_maxRange = 0.f;
 
     m_needAliveTargetMask = 0;
 
@@ -3255,15 +3256,7 @@ void Spell::update(uint32 difftime)
     // update pointers based at it's GUIDs
     UpdatePointers();
 
-    uint32 time = m_timer;
-
     if (m_targets.getUnitTargetGuid() && !m_targets.getUnitTarget())
-    {
-        cancel();
-        return;
-    }
-
-    if (m_CastItemGuid && !m_CastItem)
     {
         cancel();
         return;
@@ -3275,7 +3268,7 @@ void Spell::update(uint32 difftime)
             (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_caster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)))
     {
         // always cancel for channeled spells
-        if (m_spellState == SPELL_STATE_CHANNELING)
+        if (m_spellState == SPELL_STATE_CHANNELING && m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT)
             cancel();
         // don't cancel for melee, autorepeat, triggered and instant spells
         else if (!IsNextMeleeSwingSpell() && !IsAutoRepeat() && !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT))
@@ -3315,9 +3308,50 @@ void Spell::update(uint32 difftime)
                             cancel();
                     }
 
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET) && m_UniqueTargetInfo.begin() != m_UniqueTargetInfo.end())
+                    {
+                        if (Unit* target = m_caster->GetChannelObject())
+                        {
+                            if (target != m_caster)
+                            {
+                                float orientation = m_caster->GetAngle(target);
+                                if (m_caster->GetTypeId() == TYPEID_UNIT)
+                                {
+                                    m_caster->SetOrientation(orientation);
+                                    m_caster->SetFacingTo(orientation);
+                                }
+                                m_castOrientation = orientation; // need to update cast orientation due to the attribute
+                            }
+                        }
+                    }
+
                     // check if player has turned if flag is set
-                    if (m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING && m_castOrientation != m_caster->GetOrientation())
-                        cancel();
+                    if (m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING)
+                    {
+                        switch (m_caster->GetTypeId())
+                        {
+                            case TYPEID_UNIT:
+                                if (m_castOrientation != m_caster->GetOrientation())
+                                    cancel();
+                                break;
+                            case TYPEID_PLAYER:
+                                if ((M_PI_F - std::abs(std::abs(m_castOrientation - m_caster->GetOrientation()) - M_PI_F)) > 0.15f)
+                                    cancel();
+                        }
+                    }
+                }
+
+                // need check distance for channeled target only - but only when its set
+                if (m_maxRange && !m_caster->HasChannelObject(m_caster->GetObjectGuid()))
+                {
+                    if (Unit* channelTarget = m_caster->GetChannelObject())
+                    {
+                        if (!m_caster->IsWithinCombatDistInMap(channelTarget, m_maxRange * 1.5f))
+                        {
+                            SendChannelUpdate(0);
+                            finish();
+                        }
+                    }
                 }
 
                 // check if there are alive targets left
@@ -5705,7 +5739,7 @@ bool Spell::CanAutoCast(Unit* target)
     return false;                                           // target invalid
 }
 
-SpellCastResult Spell::CheckRange(bool strict) const
+SpellCastResult Spell::CheckRange(bool strict)
 {
     Unit* target = m_targets.getUnitTarget();
 
@@ -5764,6 +5798,8 @@ SpellCastResult Spell::CheckRange(bool strict) const
         if (!m_caster->IsWithinLOS(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ))
             return SPELL_FAILED_LINE_OF_SIGHT;
     }
+
+    m_maxRange = max_range; // need to save max range for some calculations
 
     return SPELL_CAST_OK;
 }
