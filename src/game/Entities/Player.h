@@ -2397,7 +2397,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellInfo) return 0;
     int32 totalpct = 0;
-    int32 totalflat = 0;
+    int32 addedFlat = 0;
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
         SpellModifier* mod = *itr;
@@ -2405,7 +2405,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
             continue;
         if (mod->type == SPELLMOD_FLAT)
-            totalflat += mod->value;
+            addedFlat += mod->value;
         else if (mod->type == SPELLMOD_PCT)
         {
             // skip percent mods for null basevalue (most important for spell mods with charges )
@@ -2440,8 +2440,8 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
         }
     }
 
-    float diff = (float)basevalue * (float)totalpct / 100.0f + (float)totalflat;
-    basevalue = T((float)basevalue + diff);
+    T diff = basevalue * totalpct / 100 + addedFlat * (100 + totalpct) / 100;
+    basevalue = T(basevalue + diff);
     return T(diff);
 }
 
