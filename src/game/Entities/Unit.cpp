@@ -8062,11 +8062,39 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
 
     if (spellProto->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION) && spellProto->spellLevel)
     {
-        if (spellProto->EffectApplyAuraName[effect_index])
+        // TODO: Drastically beter than before, but still needs some additional aura scaling research
+        bool damage = false;
+        if (uint32 aura = spellProto->EffectApplyAuraName[effect_index])
+        {
+            // TODO: to be incorporated into the main per level calculation after research
             value += int32(std::max(0, int32(getLevel() - spellProto->maxLevel)) * basePointsPerLevel);
-        else if (spellProto->Effect[effect_index] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
-                 spellProto->Effect[effect_index] != SPELL_EFFECT_KNOCK_BACK &&
-                 !IsControlledByPlayer())
+
+            switch (aura)
+            {
+                case SPELL_AURA_PERIODIC_DAMAGE:
+                case SPELL_AURA_PERIODIC_LEECH:
+                    //   SPELL_AURA_PERIODIC_DAMAGE_PERCENT: excluded, abs values only
+                case SPELL_AURA_POWER_BURN_MANA:
+                    damage = true;
+            }
+        }
+        else if (uint32 effect = spellProto->Effect[effect_index])
+        {
+            switch (effect)
+            {
+                case SPELL_EFFECT_SCHOOL_DAMAGE:
+                case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+                case SPELL_EFFECT_HEALTH_LEECH:
+                case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                    //   SPELL_EFFECT_WEAPON_PERCENT_DAMAGE: excluded, abs values only
+                case SPELL_EFFECT_WEAPON_DAMAGE:
+                case SPELL_EFFECT_POWER_BURN:
+                case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                    damage = true;
+            }
+        }
+
+        if (damage)
         {
             value = int32(value * 0.25f * exp(getLevel() * (70 - spellProto->spellLevel) / 1000.0f));
         }
