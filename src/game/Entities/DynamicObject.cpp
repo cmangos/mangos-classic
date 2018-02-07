@@ -162,7 +162,7 @@ void DynamicObject::Delay(int32 delaytime)
             SpellAuraHolder* holder = target->GetSpellAuraHolder(m_spellId, GetCasterGuid());
             if (!holder)
             {
-                ++iter;
+                m_affected.erase(iter++);
                 continue;
             }
 
@@ -176,9 +176,9 @@ void DynamicObject::Delay(int32 delaytime)
                 }
             }
 
-            if (foundAura)
+            if (!foundAura)
             {
-                ++iter;
+                m_affected.erase(iter++);
                 continue;
             }
 
