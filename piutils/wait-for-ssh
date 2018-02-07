@@ -8,11 +8,11 @@ while true; do
 
     echo $SSHOUTPUT
 
-    if nc -z localhost 10022 ; then
+    if $SSHOUTOUT -gt 0; then
         echo "Found something on port 10022!"
         exit
     else
         echo "Nothing found on port 10022, sleeping..."
-        sleep 10
+        sleep 1
     fi
 done

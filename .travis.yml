@@ -14,7 +14,6 @@ install:
 before_script:
     - qemu-system-arm -kernel raspberry-qemu/kernel-qemu -cpu arm1176 -m 256 -M versatilepb -no-reboot -serial stdio -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" -net user,hostfwd=tcp::10022-:22 -net nic -display none -hda 2015-11-21-raspbian-jessie-lite.img &
     - ./piutils/wait-for-ssh
-    - sleep 120
     - ./piutils/run-on-pi "cat /etc/os-release"
     - ./piutils/run-on-pi "sudo apt-get --allow-unauthenticated install -qq -y git"
     - ./piutils/run-on-pi "cd mangos-classic-raspberry-pi && git pull origin master"
