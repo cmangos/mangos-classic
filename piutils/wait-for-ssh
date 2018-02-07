@@ -2,7 +2,9 @@
 
 while true; do 
 
-    SSHOUTPUT=$(run-on-pi "cat /etc/os-release" | wc -l)
+    pwd
+
+    SSHOUTPUT=$(./piutils/run-on-pi "cat /etc/os-release" | wc -l)
 
     echo $SSHOUTPUT
 
