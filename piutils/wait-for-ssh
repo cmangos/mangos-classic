@@ -8,7 +8,7 @@ while true; do
 
     echo $SSHOUTPUT
 
-    if $SSHOUTOUT -gt 0; then
+    if [$SSHOUTOUT -gt 0]; then
         echo "Found something on port 10022!"
         exit
     else
