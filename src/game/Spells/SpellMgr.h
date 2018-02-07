@@ -945,6 +945,49 @@ inline bool IsPositiveSpell(uint32 spellId, const WorldObject* caster = nullptr,
     return IsPositiveSpell(sSpellTemplate.LookupEntry<SpellEntry>(spellId), caster, target);
 }
 
+inline void GetChainJumpRange(SpellEntry const* spellInfo, SpellEffectIndex effIdx, float& minSearchRangeCaster, float& maxSearchRangeTarget, float& jumpRadius)
+{
+    const SpellRangeEntry* range = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
+    if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
+        maxSearchRangeTarget = range->maxRange;
+    else
+        // FIXME: This very like horrible hack and wrong for most spells
+        maxSearchRangeTarget = spellInfo->EffectChainTarget[effIdx] * CHAIN_SPELL_JUMP_RADIUS;
+
+    if (range->ID == 114)   // Hunter Search range
+        minSearchRangeCaster = 5;
+
+    switch (spellInfo->Id)
+    {
+        case 2643:  // Multi-shot
+        case 14288:
+        case 14289:
+        case 14290:
+        case 25294:
+        case 27021:
+            maxSearchRangeTarget = 8.f;
+            break;
+        default:   // default jump radius
+            break;
+    }
+}
+
+inline bool IsChainAOESpell(SpellEntry const* spellInfo)
+{
+    switch (spellInfo->Id)
+    {
+        case 2643:  // Multi-shot
+        case 14288:
+        case 14289:
+        case 14290:
+        case 25294:
+        case 27021:
+            return true;
+        default:
+            return false;
+    }
+}
+
 inline bool IsDispelSpell(SpellEntry const* spellInfo)
 {
     return IsSpellHaveEffect(spellInfo, SPELL_EFFECT_DISPEL);
@@ -1047,7 +1090,17 @@ inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
     //        break;
     //}
 
-    return spellInfo->rangeIndex == 13 || spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS);
+    return spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS);
+}
+
+inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex effIdx)
+{
+    return spellInfo->EffectRadiusIndex[effIdx] == 13 || IsIgnoreLosSpell(spellInfo);
+}
+
+inline bool IsIgnoreLosSpellCast(SpellEntry const* spellInfo)
+{
+    return spellInfo->rangeIndex == 13 || IsIgnoreLosSpell(spellInfo);
 }
 
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)

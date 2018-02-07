@@ -55,8 +55,9 @@ enum SpellNotifyPushType
 {
     PUSH_IN_FRONT,
     PUSH_IN_FRONT_90,
+    PUSH_IN_FRONT_60,
     PUSH_IN_FRONT_15,
-    PUSH_IN_BACK,
+    PUSH_IN_BACK_90,
     PUSH_SELF_CENTER,
     PUSH_DEST_CENTER,
     PUSH_TARGET_CENTER
@@ -571,6 +572,7 @@ class Spell
         // Spell target filling
         //*****************************************
         void FillTargetMap();
+        bool CheckAndAddMagnetTarget(Unit* unitTarget, SpellEffectIndex effIndex, UnitList& targetUnitMap);
         void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap);
         static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex);
 
@@ -735,14 +737,15 @@ namespace MaNGOS
         {
             if (!i_originalCaster)
                 i_originalCaster = i_spell.GetAffectiveCasterObject();
-            i_playerControlled = i_originalCaster  ? i_originalCaster->IsControlledByPlayer() : false;
+            i_playerControlled = i_originalCaster ? i_originalCaster->IsControlledByPlayer() : false;
 
             switch (i_push_type)
             {
                 case PUSH_IN_FRONT:
                 case PUSH_IN_FRONT_90:
+                case PUSH_IN_FRONT_60:
                 case PUSH_IN_FRONT_15:
-                case PUSH_IN_BACK:
+                case PUSH_IN_BACK_90:
                 case PUSH_SELF_CENTER:
                     if (i_castingObject)
                     {
@@ -780,12 +783,15 @@ namespace MaNGOS
                 // there are still more spells which can be casted on dead, but
                 // they are no AOE and don't have such a nice SPELL_ATTR flag
                 // mostly phase check
-                if (!itr->getSource()->IsInMap(i_originalCaster))
+                if (!itr->getSource()->IsInMap(i_originalCaster) || itr->getSource()->IsTaxiFlying())
                     continue;
 
                 switch (i_TargetType)
                 {
                     case SPELL_TARGETS_ASSISTABLE:
+                        if (itr->getSource()->GetTypeId() == TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem())
+                            continue;
+
                         if (!i_originalCaster->CanAssistSpell(itr->getSource(), i_spell.m_spellInfo))
                             continue;
                         break;
@@ -807,23 +813,27 @@ namespace MaNGOS
                 switch (i_push_type)
                 {
                     case PUSH_IN_FRONT:
-                        if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, 2 * M_PI_F / 3))
+                        if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F)) //should only be 180 degrees NOT 120 degrees
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_IN_FRONT_90:
                         if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 2))
                             i_data->push_back(itr->getSource());
                         break;
+                    case PUSH_IN_FRONT_60:
+                        if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 3))
+                            i_data->push_back(itr->getSource());
+                        break;
                     case PUSH_IN_FRONT_15:
                         if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 12))
                             i_data->push_back(itr->getSource());
                         break;
-                    case PUSH_IN_BACK:
+                    case PUSH_IN_BACK_90:
                         if (i_castingObject->isInBack((Unit*)(itr->getSource()), i_radius, M_PI_F / 2))  //only used for tail swipe in TBC afaik, and that should be 90 degrees in the back
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_SELF_CENTER:
-                        if (i_castingObject->IsWithinDist((Unit*)(itr->getSource()), i_radius))
+                        if (itr->getSource()->IsWithinDist2d(i_centerX, i_centerY, i_radius))
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_DEST_CENTER:
