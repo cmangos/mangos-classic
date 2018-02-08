@@ -4834,10 +4834,17 @@ SpellCastResult Spell::CheckCast(bool strict)
                 else if (m_spellInfo->SpellIconID == 156)   // Holy Shock
                 {
                     Unit* target = m_targets.getUnitTarget();
-                    // spell different for friends and enemies
-                    // hart version required facing
-                    if (target && !(m_caster->IsFriendlyTo(target) || m_caster->HasInArc(target)))
-                        return SPELL_FAILED_UNIT_NOT_INFRONT;
+                    if (!target)
+                        return SPELL_FAILED_BAD_TARGETS;
+
+                    // Prevents usage when cant neither attack or assist and not in front for shock attack
+                    if (m_caster->CanAttack(target))
+                    {
+                        if (!m_caster->HasInArc(target))
+                            return SPELL_FAILED_UNIT_NOT_INFRONT;
+                    }
+                    else if (!m_caster->CanAssist(target))
+                        return SPELL_FAILED_BAD_TARGETS;
                 }
                 break;
             }
