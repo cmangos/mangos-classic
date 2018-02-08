@@ -7061,6 +7061,8 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
     {
         Creature* pCreature = (Creature*)this;
 
+        pCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+
         if (pCreature->AI())
             pCreature->AI()->EnterCombat(enemy);
 
