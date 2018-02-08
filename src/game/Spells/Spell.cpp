@@ -614,7 +614,7 @@ void Spell::FillTargetMap()
                             {
                                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                                     if (Unit* target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelectionGuid()))
-                                        if (!m_caster->IsFriendlyTo(target))
+                                        if (m_caster->CanAttack(target))
                                             tmpUnitLists[i /*==effToIndex[i]*/].push_back(target);
                             }
                             else
