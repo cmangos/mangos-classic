@@ -42,14 +42,14 @@ void GuardAI::MoveInLineOfSight(Unit* who)
     if (m_creature->getVictim())
         return;
 
-    if (who->IsFriendlyTo(m_creature) && who->isInCombat())
+    if (who->isInCombat() && m_creature->CanAssist(who))
     {
         Unit* victim = who->getAttackerForHelper();
 
         if (!victim)
             return;
 
-        if (victim->IsFriendlyTo(m_creature))
+        if (!victim->CanAttack(m_creature))
             return;
 
         if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(victim) && victim->isInAccessablePlaceFor(m_creature))
