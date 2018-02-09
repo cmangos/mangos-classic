@@ -4760,10 +4760,14 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                             for (auto iter = foundScriptCreatureTargets.begin(); iter != foundScriptCreatureTargets.end();)
                             {
-                                if (CheckTargetScript(*iter, SpellEffectIndex(j)))
-                                    ++iter;
-                                else
+                                bool failed = false;
+                                if (!CheckTargetScript(*iter, SpellEffectIndex(j)))
+                                    failed = true;
+                                else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF) && m_caster == (*iter))
+                                    failed = true;
+                                if (failed)
                                     iter = foundScriptCreatureTargets.erase(iter);
+                                ++iter;
                             }
 
                             foundScriptCreatureTargets.sort([ = ](const Creature * a, const Creature * b) -> bool
