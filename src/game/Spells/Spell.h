@@ -610,6 +610,7 @@ class Spell
             SpellMissInfo reflectResult: 8;
             uint8  effectMask: 8;
             bool   processed: 1;
+            bool   magnet: 1;
         };
         uint8 m_needAliveTargetMask;                        // Mask req. alive targets
 
@@ -635,7 +636,7 @@ class Spell
         GOTargetList   m_UniqueGOTargetInfo;
         ItemTargetList m_UniqueItemInfo;
 
-        void AddUnitTarget(Unit* target, SpellEffectIndex effIndex);
+        void AddUnitTarget(Unit* target, SpellEffectIndex effIndex, CheckException exception = EXCEPTION_NONE);
         void AddUnitTarget(ObjectGuid unitGuid, SpellEffectIndex effIndex);
         void AddGOTarget(GameObject* target, SpellEffectIndex effIndex);
         void AddGOTarget(ObjectGuid goGuid, SpellEffectIndex effIndex);

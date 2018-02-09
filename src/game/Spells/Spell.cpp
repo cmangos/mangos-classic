@@ -943,7 +943,7 @@ void Spell::CleanupTargetList()
     m_delayMoment = 0;
 }
 
-void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
+void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex, CheckException exception)
 {
     if (m_spellInfo->Effect[effIndex] == 0)
         return;
@@ -971,6 +971,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
     target.targetGUID = targetGUID;                         // Store target GUID
     target.effectMask = immuned ? 0 : (1 << effIndex);      // Store index of effect if not immuned
     target.processed  = false;                              // Effects not applied on target
+    target.magnet = (exception == EXCEPTION_MAGNET);
 
     // Calculate hit result
     if (IsDestinationOnlyEffect(m_spellInfo, effIndex) && pVictim == m_caster) // TODO: research and unhack
@@ -1148,6 +1149,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     uint32 procVictim;
     uint32 procEx       = PROC_EX_NONE;
     PrepareMasksForProcSystem(effectMask, procAttacker, procVictim, caster, unitTarget);
+    if (target->magnet)
+        procEx |= PROC_EX_MAGNET;
 
     // drop proc flags in case target not affected negative effects in negative spell
     // for example caster bonus or animation,
@@ -1262,7 +1265,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // Send log damage message to client
         caster->SendSpellNonMeleeDamageLog(&damageInfo);
 
-        procEx = createProcExtendMask(&damageInfo, missInfo);
+        procEx |= createProcExtendMask(&damageInfo, missInfo);
         procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
         caster->DealSpellDamage(&damageInfo, true);
@@ -1715,17 +1718,17 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 case TARGET_RANDOM_ENEMY_CHAIN_IN_AREA:
                 {
-                    MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, m_spellInfo, max_range);
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
-                    Cell::VisitAllObjects(m_caster, searcher, max_range);
+                    FillAreaTargets(tempTargetUnitMap, max_range, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_ATTACKABLE);
                     break;
                 }
                 case TARGET_RANDOM_UNIT_CHAIN_IN_AREA: // TODO: Rename TARGET_RANDOM_UNIT_CHAIN_IN_AREA to something better and find real difference with TARGET_RANDOM_FRIEND_CHAIN_IN_AREA.
+                {
+                    FillAreaTargets(tempTargetUnitMap, max_range, PUSH_SELF_CENTER, SPELL_TARGETS_ALL);
+                    break;
+                }
                 case TARGET_RANDOM_FRIEND_CHAIN_IN_AREA:
                 {
-                    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, m_spellInfo, max_range);
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
-                    Cell::VisitAllObjects(m_caster, searcher, max_range);
+                    FillAreaTargets(tempTargetUnitMap, max_range, PUSH_SELF_CENTER, SPELL_TARGETS_ASSISTABLE);
                     break;
                 }
             }
@@ -1835,9 +1838,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 // Filling target map
                 UnitList unsteadyTargetMap;
                 {
-                    MaNGOS::AnyUnitInObjectRangeCheck u_check(newUnitTarget, maxRadiusTarget);
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(unsteadyTargetMap, u_check);
-                    Cell::VisitAllObjects(newUnitTarget, searcher, maxRadiusTarget);
+                    FillAreaTargets(unsteadyTargetMap, maxRadiusTarget, PUSH_TARGET_CENTER, SPELL_TARGETS_AOE_ATTACKABLE);
                     unsteadyTargetMap.remove(m_caster);
                     unsteadyTargetMap.remove(newUnitTarget);
                 }
@@ -1901,12 +1902,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 {
                     // Fill TargetUnitMap
                     for (UnitList::iterator activeUnit = unsteadyTargetMap.begin(); t && activeUnit != unsteadyTargetMap.end(); ++activeUnit, --t)
-                    {
-                        // Adding magnet target instead real target( case when target have grounding totem aura )
-                        // Can't do this earlier bacause it could waste magnet aura for free
-                        if (!CheckAndAddMagnetTarget((*activeUnit), effIndex, targetUnitMap, exception))
-                            targetUnitMap.push_back((*activeUnit));
-                    }
+                        targetUnitMap.push_back((*activeUnit));
                 }
                 else // spell like Chain Lightning
                 {
@@ -1924,8 +1920,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                             continue;
                         }
                         prev = *next;
-                        if (!CheckAndAddMagnetTarget(prev, effIndex, targetUnitMap, exception))
-                            targetUnitMap.push_back(prev);
+                        targetUnitMap.push_back(prev);
                         unsteadyTargetMap.erase(next);
                         unsteadyTargetMap.sort(TargetDistanceOrderNear(prev));
                         next = unsteadyTargetMap.begin();
