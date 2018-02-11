@@ -970,13 +970,13 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         if (CanAttack(pVictim) && (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
             !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT)))
         {
-            SetInCombatWith(pVictim);
-            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
+            pVictim->AddThreat(this, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto, damageInfo.m_consumedMods);
+            if (damagetype != DOT) // DOTs dont put in combat but still cause threat
             {
-                float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
-                pVictim->AddThreat(this, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
+                SetInCombatWith(pVictim);
+                pVictim->SetInCombatWith(this);
             }
-            pVictim->SetInCombatWith(this);
         }
 
         if (pVictim->GetTypeId() == TYPEID_PLAYER)                               // victim is a player
