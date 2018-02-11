@@ -6297,7 +6297,10 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
             if (Unit* magnet = (*itr)->GetCaster())
             {
                 if (magnet->isAlive() && magnet->IsWithinLOSInMap(this) && CanAttack(magnet))
+                {
+                    (*itr)->UseMagnet();
                     return magnet;
+                }
             }
         }
     }

@@ -1349,7 +1349,7 @@ SpellAuraProcResult Unit::HandleMechanicImmuneResistanceAuraProc(Unit* /*pVictim
 
 SpellAuraProcResult Unit::HandleMagnetAuraProc(Unit* /*pVictim*/, uint32 /*damage*/, Aura* triggeredByAura, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 procEx, uint32 /*cooldown*/)
 {
-    return procEx & PROC_EX_MAGNET ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED;
+    return procEx & PROC_EX_MAGNET && triggeredByAura->IsMagnetUsed() ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED;
 }
 
 SpellAuraProcResult Unit::HandleModResistanceAuraProc(Unit* /*pVictim*/, uint32 damage, Aura* triggeredByAura, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
