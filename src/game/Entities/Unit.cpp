@@ -4222,6 +4222,26 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
     }
 }
 
+void Unit::RemoveAllGroupBuffsFromCaster(ObjectGuid casterGuid)
+{
+    SpellAuraHolderMap::const_iterator i, next;
+    for (i = m_spellAuraHolders.begin(); i != m_spellAuraHolders.end(); i = next)
+    {
+        next = i;
+        ++next;
+        SpellAuraHolder* holder = (*i).second;
+        if (holder->GetCasterGuid() == casterGuid && IsGroupBuff(holder->GetSpellProto()))
+        {
+            RemoveAurasDueToSpell((*i).first);
+
+            if (m_spellAuraHolders.empty())
+                break;
+            else
+                next = m_spellAuraHolders.begin();
+        }
+    }
+}
+
 bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 {
     if (!holder)
