@@ -260,7 +260,7 @@ int main(int argc, char** argv)
         if (argv[k][0] != '-')
         {
             path = argv[k];
-            if (path.size() > 0 && (path[path.size() - 1] != '/' || path[path.size() - 1] != '\\'))
+            if (path.size() > 0 && (path[path.size() - 1] != '/' && path[path.size() - 1] != '\\'))
                 path += '/';
             break;
         }

@@ -544,6 +544,9 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
         m_auraBaseMod[i][PCT_MOD] = 1.0f;
     }
 
+    for (int i = 0; i < MAX_ATTACK; ++i)
+        m_enchantmentFlatMod[i] = 0;
+
     // Player summoning
     m_summon_expire = 0;
     m_summon_mapid = 0;
@@ -6977,6 +6980,10 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
                 continue;
             }
 
+            // not allow proc extra attack spell at extra attack
+            if (m_extraAttacks && IsSpellHaveEffect(spellInfo, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
+                continue;
+
             // Use first rank to access spell item enchant procs
             float ppmRate = sSpellMgr.GetItemEnchantProcChance(spellInfo->Id);
 
@@ -10792,12 +10799,29 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                     // processed in Player::CastItemCombatSpell
                     break;
                 case ITEM_ENCHANTMENT_TYPE_DAMAGE:
+                    // processed in Player::_ApplyWeaponDependentAuraMods
+                    //if (item->GetSlot() == EQUIPMENT_SLOT_MAINHAND)
+                    //    HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, float(enchant_amount), apply);
+                    //else if (item->GetSlot() == EQUIPMENT_SLOT_OFFHAND)
+                    //    HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_VALUE, float(enchant_amount), apply);
+                    //else if (item->GetSlot() == EQUIPMENT_SLOT_RANGED)
+                    //    HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
+                    //UpdateDamagePhysical
                     if (item->GetSlot() == EQUIPMENT_SLOT_MAINHAND)
-                        HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, float(enchant_amount), apply);
+                    {
+                        SetEnchantmentModifier(enchant_amount, BASE_ATTACK, apply);
+                        UpdateDamagePhysical(BASE_ATTACK);
+                    }
                     else if (item->GetSlot() == EQUIPMENT_SLOT_OFFHAND)
-                        HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_VALUE, float(enchant_amount), apply);
+                    {
+                        SetEnchantmentModifier(enchant_amount, OFF_ATTACK, apply);
+                        UpdateDamagePhysical(OFF_ATTACK);
+                    }
                     else if (item->GetSlot() == EQUIPMENT_SLOT_RANGED)
-                        HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
+                    {
+                        SetEnchantmentModifier(enchant_amount, RANGED_ATTACK, apply);
+                        UpdateDamagePhysical(RANGED_ATTACK);
+                    }
                     break;
                 case ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL:
                 {
@@ -17992,7 +18016,7 @@ void Player::RewardPlayerAndGroupAtCast(WorldObject* pRewardSource, uint32 spell
 
 bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
 {
-    if (pRewardSource->IsWithinDistInMap(this, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE)))
+    if (IsInWorld() && pRewardSource->GetMap() == GetMap() && pRewardSource->IsWithinDistInMap(this, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE)))
         return true;
 
     if (isAlive())
@@ -18002,7 +18026,7 @@ bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
     if (!corpse)
         return false;
 
-    return pRewardSource->IsWithinDistInMap(corpse, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE));
+    return corpse->IsInWorld() && pRewardSource->GetMap() == corpse->GetMap() && pRewardSource->IsWithinDistInMap(corpse, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE));
 }
 
 uint32 Player::GetBaseWeaponSkillValue(WeaponAttackType attType) const
@@ -18223,32 +18247,6 @@ void Player::SendCorpseReclaimDelay(bool load) const
     WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);
     data << uint32(delay * IN_MILLISECONDS);
     GetSession()->SendPacket(data);
-}
-
-Player* Player::GetNextRandomRaidMember(float radius)
-{
-    Group* pGroup = GetGroup();
-    if (!pGroup)
-        return nullptr;
-
-    std::vector<Player*> nearMembers;
-    nearMembers.reserve(pGroup->GetMembersCount());
-
-    for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
-    {
-        Player* Target = itr->getSource();
-
-        // IsHostileTo check duel and controlled by enemy
-        if (Target && Target != this && IsWithinDistInMap(Target, radius) &&
-                !Target->HasInvisibilityAura() && CanAssist(Target))
-            nearMembers.push_back(Target);
-    }
-
-    if (nearMembers.empty())
-        return nullptr;
-
-    uint32 randTarget = urand(0, nearMembers.size() - 1);
-    return nearMembers[randTarget];
 }
 
 PartyResult Player::CanUninviteFromGroup() const
@@ -19108,6 +19106,15 @@ void Player::DoInteraction(ObjectGuid const& interactObjGuid)
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_USE);
     }
     SendForcedObjectUpdate();
+}
+
+void Player::SendLootError(ObjectGuid guid, LootError error) const
+{
+    WorldPacket data(SMSG_LOOT_RESPONSE, 10);
+    data << uint64(guid);
+    data << uint8(0);
+    data << uint8(error);
+    SendDirectMessage(data);
 }
 
 void Player::ForceHealAndPowerUpdateInZone()

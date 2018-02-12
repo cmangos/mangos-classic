@@ -38,6 +38,7 @@
 #include "Globals/SharedDefines.h"
 #include "Chat/Chat.h"
 #include "Server/SQLStorages.h"
+#include "Loot/LootMgr.h"
 
 #include<vector>
 
@@ -1753,6 +1754,8 @@ class Player : public Unit
         float GetTotalPercentageModValue(BaseModGroup modGroup) const { return m_auraBaseMod[modGroup][FLAT_MOD] + m_auraBaseMod[modGroup][PCT_MOD]; }
         void _ApplyAllStatBonuses();
         void _RemoveAllStatBonuses();
+        void SetEnchantmentModifier(uint32 value, WeaponAttackType attType, bool apply);
+        uint32 GetEnchantmentModifier(WeaponAttackType attType);
 
         void _ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackType, bool apply);
         void _ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attackType, Aura* aura, bool apply);
@@ -2048,7 +2051,6 @@ class Player : public Unit
         void SetGroupUpdateFlag(uint32 flag) { m_groupUpdateMask |= flag; }
         const uint64& GetAuraUpdateMask() const { return m_auraUpdateMask; }
         void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
-        Player* GetNextRandomRaidMember(float radius);
         PartyResult CanUninviteFromGroup() const;
         void UpdateGroupLeaderFlag(const bool remove = false);
         // BattleGround Group System
@@ -2076,6 +2078,8 @@ class Player : public Unit
         void SetBotDeathTimer() { m_deathTimer = 0; }
         bool IsInDuel() const { return duel && duel->startTime != 0; }
 #endif
+
+        void SendLootError(ObjectGuid guid, LootError error) const;
 
         // cooldown system
         virtual void AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration = 0, bool updateClient = 0) override;
@@ -2228,6 +2232,8 @@ class Player : public Unit
         ActionButtonList m_actionButtons;
 
         float m_auraBaseMod[BASEMOD_END][MOD_END];
+
+        uint32 m_enchantmentFlatMod[MAX_ATTACK]; // TODO: Stat system - incorporate generically, exposes a required hidden weapon stat that does not apply when unarmed
 
         SpellModList m_spellMods[MAX_SPELLMOD];
         int32 m_SpellModRemoveCount;
@@ -2390,7 +2396,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellInfo) return 0;
     int32 totalpct = 0;
-    int32 totalflat = 0;
+    int32 addedFlat = 0;
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
         SpellModifier* mod = *itr;
@@ -2398,7 +2404,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
             continue;
         if (mod->type == SPELLMOD_FLAT)
-            totalflat += mod->value;
+            addedFlat += mod->value;
         else if (mod->type == SPELLMOD_PCT)
         {
             // skip percent mods for null basevalue (most important for spell mods with charges )
@@ -2433,8 +2439,8 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& bas
         }
     }
 
-    float diff = (float)basevalue * (float)totalpct / 100.0f + (float)totalflat;
-    basevalue = T((float)basevalue + diff);
+    T diff = basevalue * totalpct / 100 + addedFlat * (100 + totalpct) / 100;
+    basevalue = T(basevalue + diff);
     return T(diff);
 }
 

@@ -1138,3 +1138,18 @@ bool ChatHandler::HandleDebugSpellModsCommand(char* args)
 
     return true;
 }
+
+bool ChatHandler::HandleDebugWaypoint(char* args)
+{
+    Creature* target = getSelectedCreature();
+    if (!target)
+        return false;
+
+    uint32 pathId;
+    if (!ExtractUInt32(&args, pathId) || pathId >= 256)
+        return false;
+
+    target->GetMotionMaster()->MoveWaypoint(pathId, 2);
+
+    return true;
+}

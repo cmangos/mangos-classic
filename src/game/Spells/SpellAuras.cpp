@@ -2204,7 +2204,12 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
     if (!Real)
         return;
 
-    GetTarget()->SetFeignDeath(apply, GetCasterGuid());
+    Unit* target = GetTarget();
+
+    if (apply)
+        target->InterruptSpellsCastedOnMe();
+
+    target->SetFeignDeath(apply, GetCasterGuid());
 }
 
 void Aura::HandleAuraModDisarm(bool apply, bool Real)
@@ -5327,33 +5332,6 @@ void SpellAuraHolder::Update(uint32 diff)
                             caster->ModifyHealth(-manaPerSecond);
                         else
                             caster->ModifyPower(powertype, -manaPerSecond);
-                    }
-                }
-            }
-
-            // Channeled aura required check distance from caster
-            if (IsChanneledSpell(m_spellProto) && GetCasterGuid() != m_target->GetObjectGuid())
-            {
-                Unit* caster = GetCaster();
-                if (!caster)
-                {
-                    m_target->RemoveAurasByCasterSpell(GetId(), GetCasterGuid());
-                    return;
-                }
-
-                // need check distance for channeled target only
-                if (caster->HasChannelObject(m_target->GetObjectGuid()))
-                {
-                    // Get spell range
-                    float max_range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellProto->rangeIndex));
-
-                    if (Player* modOwner = caster->GetSpellModOwner())
-                        modOwner->ApplySpellMod(GetId(), SPELLMOD_RANGE, max_range, nullptr);
-
-                    if (!caster->IsWithinDistInMap(m_target, max_range))
-                    {
-                        caster->InterruptSpell(CURRENT_CHANNELED_SPELL);
-                        return;
                     }
                 }
             }

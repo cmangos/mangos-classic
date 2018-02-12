@@ -866,7 +866,7 @@ bool AuthSocket::_HandleRealmList()
     ///- Get the user id (else close the connection)
     // No SQL injection (escaped user name)
 
-    QueryResult* result = LoginDatabase.PQuery("SELECT id,sha_pass_hash FROM account WHERE username = '%s'", _safelogin.c_str());
+    QueryResult* result = LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", _safelogin.c_str());
     if (!result)
     {
         sLog.outError("[ERROR] user %s tried to login and we cannot find him in the database.", _login.c_str());
@@ -875,7 +875,6 @@ bool AuthSocket::_HandleRealmList()
     }
 
     uint32 id = (*result)[0].GetUInt32();
-    std::string rI = (*result)[1].GetCppString();
     delete result;
 
     ///- Update realm list if need
@@ -995,8 +994,8 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid)
                 if (!ok_build)
                     realmFlags = RealmFlags(realmFlags | REALM_FLAG_OFFLINE);
 
-                if (!buildInfo)
-                    realmFlags = RealmFlags(realmFlags & ~REALM_FLAG_SPECIFYBUILD);
+                //if (!buildInfo) // always false since updated 10 lines above if null. ToDo: fix
+                //    realmFlags = RealmFlags(realmFlags & ~REALM_FLAG_SPECIFYBUILD);
 
                 pkt << uint8(i->second.icon);               // realm type (this is second column in Cfg_Configs.dbc)
                 pkt << uint8(lock);                         // flags, if 0x01, then realm locked

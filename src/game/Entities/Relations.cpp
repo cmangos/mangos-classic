@@ -920,10 +920,10 @@ bool DynamicObject::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) co
 bool GameObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE) const
 {
     Unit* owner = GetOwner();
-    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+    if (owner)
         return owner->CanAttackSpell(target, spellInfo, isAOE);
 
-    return true;
+    return IsEnemy(target);
 }
 
 /////////////////////////////////////////////////
@@ -938,10 +938,10 @@ bool GameObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool 
 bool GameObject::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
 {
     Unit* owner = GetOwner();
-    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+    if (owner)
         return owner->CanAssistSpell(target, spellInfo);
 
-    return true;
+    return IsFriend(target);
 }
 
 /////////////////////////////////////////////////
@@ -1024,5 +1024,5 @@ bool Unit::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
 /////////////////////////////////////////////////
 bool Unit::CanAttackOnSight(Unit* target)
 {
-    return CanAttack(target) && !hasUnitState(UNIT_STAT_FEIGN_DEATH) && IsEnemy(target);
+    return CanAttack(target) && !target->hasUnitState(UNIT_STAT_FEIGN_DEATH) && IsEnemy(target);
 }

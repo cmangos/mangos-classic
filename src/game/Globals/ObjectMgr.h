@@ -178,8 +178,7 @@ typedef std::pair<QuestRelationsMap::const_iterator, QuestRelationsMap::const_it
 
 struct PetLevelInfo
 {
-    PetLevelInfo() : health(0), mana(0), armor(0)
-    { for (int i = 0; i < MAX_STATS; ++i) stats[i] = 0; }
+    PetLevelInfo() : health(0), mana(0), armor(0) { for (int i = 0; i < MAX_STATS; ++i) stats[i] = 0; }
 
     uint16 stats[MAX_STATS];
     uint16 health;
@@ -777,7 +776,7 @@ class ObjectMgr
         uint32 GeneratePetNumber() { return m_PetNumbers.Generate(); }
 
         uint32 CreateItemText(std::string text);
-        void AddItemText(uint32 itemTextId, std::string text) { mItemTexts[itemTextId] = text; }
+        void AddItemText(uint32 itemTextId, const std::string& text) { mItemTexts[itemTextId] = text; }
         std::string GetItemText(uint32 id)
         {
             ItemTextMap::const_iterator itr = mItemTexts.find(id);

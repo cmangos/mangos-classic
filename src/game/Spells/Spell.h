@@ -55,8 +55,9 @@ enum SpellNotifyPushType
 {
     PUSH_IN_FRONT,
     PUSH_IN_FRONT_90,
+    PUSH_IN_FRONT_60,
     PUSH_IN_FRONT_15,
-    PUSH_IN_BACK,
+    PUSH_IN_BACK_90,
     PUSH_SELF_CENTER,
     PUSH_DEST_CENTER,
     PUSH_TARGET_CENTER
@@ -384,7 +385,7 @@ class Spell
         void _handle_finish_phase();
 
         SpellCastResult CheckItems();
-        SpellCastResult CheckRange(bool strict) const;
+        SpellCastResult CheckRange(bool strict);
         SpellCastResult CheckPower();
         SpellCastResult CheckCasterAuras() const;
 
@@ -459,6 +460,7 @@ class Spell
         bool IsDeletable() const { return !m_referencedFromCurrentSpell && !m_executedCurrently; }
         void SetReferencedFromCurrent(bool yes) { m_referencedFromCurrentSpell = yes; }
         void SetExecutedCurrently(bool yes) { m_executedCurrently = yes; }
+        bool IsExecutedCurrently() { return m_executedCurrently; }
         uint64 GetDelayStart() const { return m_delayStart; }
         void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
         uint64 GetDelayMoment() const { return m_delayMoment; }
@@ -479,6 +481,7 @@ class Spell
         WorldObject* GetCastingObject() const;
 
         uint32 GetPowerCost() const { return m_powerCost; }
+        float GetSpellSpeed() const { return m_spellInfo->speed; }
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
 
@@ -522,6 +525,7 @@ class Spell
         int32 m_duration;
         bool m_reflectable;                                  // can reflect this spell?
         bool m_autoRepeat;
+        float m_maxRange;                                   // For channeled spell check
 
         uint8 m_delayAtDamageCount;
         int32 GetNextDelayAtDamageMsTime() { return m_delayAtDamageCount < 5 ? 1000 - (m_delayAtDamageCount++) * 200 : 200; }
@@ -569,6 +573,7 @@ class Spell
         // Spell target filling
         //*****************************************
         void FillTargetMap();
+        bool CheckAndAddMagnetTarget(Unit* unitTarget, SpellEffectIndex effIndex, UnitList& targetUnitMap);
         void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap);
         static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex);
 
@@ -699,7 +704,7 @@ namespace MaNGOS
                 if (!pPlayer->isAlive() || pPlayer->IsTaxiFlying())
                     continue;
 
-                if (i_originalCaster->IsFriendlyTo(pPlayer))
+                if (!i_originalCaster->CanAttackSpell(pPlayer, i_spell.m_spellInfo))
                     continue;
 
                 if (pPlayer->IsWithinDist3d(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ, i_radius))
@@ -733,14 +738,15 @@ namespace MaNGOS
         {
             if (!i_originalCaster)
                 i_originalCaster = i_spell.GetAffectiveCasterObject();
-            i_playerControlled = i_originalCaster  ? i_originalCaster->IsControlledByPlayer() : false;
+            i_playerControlled = i_originalCaster ? i_originalCaster->IsControlledByPlayer() : false;
 
             switch (i_push_type)
             {
                 case PUSH_IN_FRONT:
                 case PUSH_IN_FRONT_90:
+                case PUSH_IN_FRONT_60:
                 case PUSH_IN_FRONT_15:
-                case PUSH_IN_BACK:
+                case PUSH_IN_BACK_90:
                 case PUSH_SELF_CENTER:
                     if (i_castingObject)
                     {
@@ -778,12 +784,15 @@ namespace MaNGOS
                 // there are still more spells which can be casted on dead, but
                 // they are no AOE and don't have such a nice SPELL_ATTR flag
                 // mostly phase check
-                if (!itr->getSource()->IsInMap(i_originalCaster))
+                if (!itr->getSource()->IsInMap(i_originalCaster) || itr->getSource()->IsTaxiFlying())
                     continue;
 
                 switch (i_TargetType)
                 {
                     case SPELL_TARGETS_ASSISTABLE:
+                        if (itr->getSource()->GetTypeId() == TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem())
+                            continue;
+
                         if (!i_originalCaster->CanAssistSpell(itr->getSource(), i_spell.m_spellInfo))
                             continue;
                         break;
@@ -805,23 +814,27 @@ namespace MaNGOS
                 switch (i_push_type)
                 {
                     case PUSH_IN_FRONT:
-                        if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, 2 * M_PI_F / 3))
+                        if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F)) //should only be 180 degrees NOT 120 degrees
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_IN_FRONT_90:
                         if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 2))
                             i_data->push_back(itr->getSource());
                         break;
+                    case PUSH_IN_FRONT_60:
+                        if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 3))
+                            i_data->push_back(itr->getSource());
+                        break;
                     case PUSH_IN_FRONT_15:
                         if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 12))
                             i_data->push_back(itr->getSource());
                         break;
-                    case PUSH_IN_BACK:
+                    case PUSH_IN_BACK_90:
                         if (i_castingObject->isInBack((Unit*)(itr->getSource()), i_radius, M_PI_F / 2))  //only used for tail swipe in TBC afaik, and that should be 90 degrees in the back
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_SELF_CENTER:
-                        if (i_castingObject->IsWithinDist((Unit*)(itr->getSource()), i_radius))
+                        if (itr->getSource()->IsWithinDist2d(i_centerX, i_centerY, i_radius))
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_DEST_CENTER:
@@ -863,6 +876,8 @@ class SpellEvent : public BasicEvent
         virtual bool Execute(uint64 e_time, uint32 p_time) override;
         virtual void Abort(uint64 e_time) override;
         virtual bool IsDeletable() const override;
+
+        Spell* GetSpell() { return m_Spell; }
     protected:
         Spell* m_Spell;
 };

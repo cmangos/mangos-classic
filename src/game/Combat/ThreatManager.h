@@ -192,6 +192,8 @@ class ThreatManager
 
         float getThreat(Unit* pVictim, bool pAlsoSearchOfflineList = false);
 
+        bool HasThreat(Unit* pVictim, bool pAlsoSearchOfflineList = false);
+
         bool isThreatListEmpty() const { return iThreatContainer.empty(); }
 
         void processThreatEvent(ThreatRefStatusChangeEvent* threatRefStatusChangeEvent);

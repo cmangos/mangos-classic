@@ -446,13 +446,16 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
         {
             Creature* pMaster = nullptr;
             if (pInfo->mapId != INVALID_MAP_ID)             // entry case
-            {
+            { 
                 BossGuidMapBounds finds = m_masterGuid.equal_range(pInfo->masterId);
                 for (BossGuidMap::const_iterator itr = finds.first; itr != finds.second; ++itr)
                 {
-                    pMaster = pSource->GetMap()->GetCreature(itr->second);
-                    if (pMaster && IsSlaveInRangeOfBoss(pSource, pMaster, pInfo->searchRange))
+                    Creature* master = pSource->GetMap()->GetCreature(itr->second);
+                    if (master && IsSlaveInRangeOfMaster(pSource, master, pInfo->searchRange))
+                    {
+                        pMaster = master;
                         break;
+                    }
                 }
             }
             else                                            // guid case
@@ -515,7 +518,7 @@ void CreatureLinkingHolder::ProcessSlaveGuidList(CreatureLinkingEvent eventType,
             continue;
 
         // Handle single slave
-        if (IsSlaveInRangeOfBoss(pSlave, pSource, searchRange))
+        if (IsSlaveInRangeOfMaster(pSlave, pSource, searchRange))
             ProcessSlave(eventType, pSource, flag, pSlave, pEnemy);
     }
 }
@@ -601,13 +604,13 @@ void CreatureLinkingHolder::SetFollowing(Creature* pWho, Creature* pWhom) const
 }
 
 // Function to check if a slave belongs to a boss by range-issue
-bool CreatureLinkingHolder::IsSlaveInRangeOfBoss(Creature const* pSlave, Creature const* pBoss, uint16 searchRange) const
+bool CreatureLinkingHolder::IsSlaveInRangeOfMaster(Creature const* pSlave, Creature const* pBoss, uint16 searchRange) const
 {
     float sX, sY, sZ;
     pSlave->GetRespawnCoord(sX, sY, sZ);
-    return IsSlaveInRangeOfBoss(pBoss, sX, sY, searchRange);
+    return IsSlaveInRangeOfMaster(pBoss, sX, sY, searchRange);
 }
-bool CreatureLinkingHolder::IsSlaveInRangeOfBoss(Creature const* pBoss, float sX, float sY, uint16 searchRange) const
+bool CreatureLinkingHolder::IsSlaveInRangeOfMaster(Creature const* pBoss, float sX, float sY, uint16 searchRange) const
 {
     if (!searchRange)
         return true;
@@ -687,7 +690,7 @@ bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingI
     for (BossGuidMap::const_iterator itr = finds.first; itr != finds.second; ++itr)
     {
         Creature* pMaster = _map->GetCreature(itr->second);
-        if (pMaster && IsSlaveInRangeOfBoss(pMaster, sx, sy, pInfo->searchRange))
+        if (pMaster && IsSlaveInRangeOfMaster(pMaster, sx, sy, pInfo->searchRange))
         {
             if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_DEAD)
                 return pMaster->isAlive();
@@ -715,7 +718,7 @@ bool CreatureLinkingHolder::TryFollowMaster(Creature* pCreature)
         for (BossGuidMap::const_iterator itr = finds.first; itr != finds.second; ++itr)
         {
             pMaster = pCreature->GetMap()->GetCreature(itr->second);
-            if (pMaster && IsSlaveInRangeOfBoss(pCreature, pMaster, pInfo->searchRange))
+            if (pMaster && IsSlaveInRangeOfMaster(pCreature, pMaster, pInfo->searchRange))
                 break;
         }
     }

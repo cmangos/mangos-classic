@@ -90,7 +90,7 @@ bool findnth(std::string& str, int n, std::string::size_type& s, std::string::si
 
     do
     {
-        e = str.find("'", s);
+        e = str.find('\'', s);
         if (e == std::string::npos)
             return false;
     }
@@ -101,7 +101,7 @@ bool findnth(std::string& str, int n, std::string::size_type& s, std::string::si
         do
         {
             s = e + 4;
-            e = str.find("'", s);
+            e = str.find('\'', s);
             if (e == std::string::npos)
                 return false;
         }
@@ -606,7 +606,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
             {
                 // store a map of old pet id to new inserted pet id for use by type 5 tables
                 snprintf(currpetid, 20, "%s", getnth(line, 1).c_str());
-                if (strlen(lastpetid) == 0)
+                if (lastpetid[0] == '\0')
                     snprintf(lastpetid, 20, "%s", currpetid);
 
                 if (strcmp(lastpetid, currpetid) != 0)

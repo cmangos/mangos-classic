@@ -468,7 +468,7 @@ void BattleGround::SendPacketToTeam(Team teamId, WorldPacket const& packet, Play
             continue;
 
         Team team = itr->second.PlayerTeam;
-        if (!team) team = plr->GetTeam();
+        if (team != ALLIANCE && team != HORDE) team = plr->GetTeam();
 
         if (team == teamId)
             plr->GetSession()->SendPacket(packet);
@@ -499,7 +499,7 @@ void BattleGround::PlaySoundToTeam(uint32 SoundID, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) team = plr->GetTeam();
+        if (team != ALLIANCE && team != HORDE) team = plr->GetTeam();
 
         if (team == teamId)
         {
@@ -525,7 +525,7 @@ void BattleGround::CastSpellOnTeam(uint32 SpellID, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) team = plr->GetTeam();
+        if (team != ALLIANCE && team != HORDE) team = plr->GetTeam();
 
         if (team == teamId)
             plr->CastSpell(plr, SpellID, TRIGGERED_OLD_TRIGGERED);
@@ -548,7 +548,7 @@ void BattleGround::RewardHonorToTeam(uint32 Honor, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) team = plr->GetTeam();
+        if (team != ALLIANCE && team != HORDE) team = plr->GetTeam();
 
         if (team == teamId)
             UpdatePlayerScore(plr, SCORE_BONUS_HONOR, Honor);
@@ -576,7 +576,7 @@ void BattleGround::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, 
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) team = plr->GetTeam();
+        if (team != ALLIANCE && team != HORDE) team = plr->GetTeam();
 
         if (team == teamId)
             plr->GetReputationMgr().ModifyReputation(factionEntry, Reputation);
@@ -697,17 +697,18 @@ void BattleGround::EndBattleGround(Team winner)
 
             stmt.addUInt32(battleground_id);
             stmt.addUInt32(plr->GetGUIDLow());
-            stmt.addUInt32(score->second->GetKillingBlows());
-            stmt.addUInt32(score->second->GetDeaths());
-            stmt.addUInt32(score->second->GetHonorableKills());
-            stmt.addUInt32(score->second->GetBonusHonor());
-            stmt.addUInt32(score->second->GetDamageDone());
-            stmt.addUInt32(score->second->GetHealingDone());
-            stmt.addUInt32(score->second->GetAttr1());
-            stmt.addUInt32(score->second->GetAttr2());
-            stmt.addUInt32(score->second->GetAttr3());
-            stmt.addUInt32(score->second->GetAttr4());
-            stmt.addUInt32(score->second->GetAttr5());
+            BattleGroundScore *pScore = score->second;
+            stmt.addUInt32(pScore->GetKillingBlows());
+            stmt.addUInt32(pScore->GetDeaths());
+            stmt.addUInt32(pScore->GetHonorableKills());
+            stmt.addUInt32(pScore->GetBonusHonor());
+            stmt.addUInt32(pScore->GetDamageDone());
+            stmt.addUInt32(pScore->GetHealingDone());
+            stmt.addUInt32(pScore->GetAttr1());
+            stmt.addUInt32(pScore->GetAttr2());
+            stmt.addUInt32(pScore->GetAttr3());
+            stmt.addUInt32(pScore->GetAttr4());
+            stmt.addUInt32(pScore->GetAttr5());
 
             stmt.Execute();
         }
@@ -919,7 +920,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
         BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID());
         if (plr)
         {
-            if (!team) team = plr->GetTeam();
+            if (team != ALLIANCE && team != HORDE) team = plr->GetTeam();
 
             if (SendPacket)
             {

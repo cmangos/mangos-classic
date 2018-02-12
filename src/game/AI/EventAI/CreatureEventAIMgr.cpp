@@ -265,7 +265,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                           "action1_type, action1_param1, action1_param2, action1_param3, "
                           "action2_type, action2_param1, action2_param2, action2_param3, "
                           "action3_type, action3_param1, action3_param2, action3_param3 "
-                          "FROM creature_ai_scripts");
+                          "FROM creature_ai_scripts ORDER BY id");
     if (result)
     {
         BarGoLink bar(result->GetRowCount());
@@ -892,7 +892,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             sLog.outErrorEventAI("Event %u Action %u uses invalid event type %u (must be less than %u), skipping", i, j + 1, action.throwEvent.eventType, MAXIMAL_AI_EVENT_EVENTAI);
                             continue;
                         }
-                        if (action.throwEvent.radius > SIZE_OF_GRIDS)
+                        if (action.throwEvent.radius > (uint32)SIZE_OF_GRIDS)
                             sLog.outErrorEventAI("Event %u Action %u uses unexpectedly huge radius %u (expected to be less than %f)", i, j + 1, action.throwEvent.radius, SIZE_OF_GRIDS);
 
                         if (action.throwEvent.radius == 0)

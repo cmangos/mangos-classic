@@ -130,6 +130,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     Player* target = ObjectAccessor::FindPlayer(targetGuid);
     if (!target)
     {
+        _player->SendLootError(lootguid, LOOT_ERROR_PLAYER_NOT_FOUND);
         sLog.outError("WorldSession::HandleLootMasterGiveOpcode> Cannot retrieve target %s", targetGuid.GetString().c_str());
         return;
     }
@@ -146,7 +147,15 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 
     if (_player->GetObjectGuid() != pLoot->GetMasterLootGuid())
     {
+        _player->SendLootError(lootguid, LOOT_ERROR_DIDNT_KILL);
         sLog.outError("WorldSession::HandleLootMasterGiveOpcode> player %s is not the loot master!", _player->GetGuidStr().c_str());
+        return;
+    }
+
+    if (!_player->IsInSameRaidWith(target) || !_player->IsInMap(target))
+    {
+        _player->SendLootError(lootguid, LOOT_ERROR_MASTER_OTHER);
+        sLog.outError("WorldSession::HandleLootMasterGiveOpcode> Player %s tried to give an item to ineligible player %s !", _player->GetGuidStr().c_str(), target->GetGuidStr().c_str());
         return;
     }
 
@@ -165,12 +174,22 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
         return;
     }
 
+    if (!lootItem->AllowedForPlayer(target, pLoot->GetLootTarget()))
+    {
+        _player->SendEquipError(EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, nullptr, nullptr);
+        return;
+    }
+    
     InventoryResult result = pLoot->SendItem(target, lootItem);
-
     if (result != EQUIP_ERR_OK)
     {
-        // send duplicate of error massage to master looter
-        _player->SendEquipError(result, nullptr, nullptr, lootItem->itemId);
+        if (result == EQUIP_ERR_CANT_CARRY_MORE_OF_THIS)
+            _player->SendLootError(lootguid, LOOT_ERROR_MASTER_UNIQUE_ITEM);
+        else if (result == EQUIP_ERR_INVENTORY_FULL)
+            _player->SendLootError(lootguid, LOOT_ERROR_MASTER_INV_FULL);
+        else
+            _player->SendLootError(lootguid, LOOT_ERROR_MASTER_OTHER);
+        return;
     }
 }
 

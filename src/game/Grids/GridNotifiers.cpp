@@ -168,7 +168,7 @@ bool CannibalizeObjectCheck::operator()(Corpse* u)
 
     Player* owner = ObjectAccessor::FindPlayer(u->GetOwnerGuid());
 
-    if (!owner || i_fobj->IsFriendlyTo(owner))
+    if (!owner || i_fobj->CanAssist(owner))
         return false;
 
     if (i_fobj->IsWithinDistInMap(u, i_range))
@@ -210,7 +210,7 @@ void MaNGOS::CallOfHelpCreatureInRangeDo::operator()(Creature* u)
     if (u == i_funit)
         return;
 
-    if (!u->CanAssistTo(i_funit, i_enemy, false))
+    if (!u->CanAssist(i_funit) || !u->CanAttack(i_enemy))
         return;
 
     // too far
@@ -230,7 +230,7 @@ bool MaNGOS::AnyAssistCreatureInRangeCheck::operator()(Creature* u)
     if (u == i_funit)
         return false;
 
-    if (!u->CanAssistTo(i_funit, i_enemy))
+    if (!u->CanAssist(i_funit) || !u->CanAttack(i_enemy))
         return false;
 
     // too far

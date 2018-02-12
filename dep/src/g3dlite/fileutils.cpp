@@ -821,15 +821,15 @@ void getDirs(
 
 
 std::string filenameBaseExt(const std::string& filename) {
-    int i = filename.rfind("/");
-    int j = filename.rfind("\\");
+    int i = (int)filename.rfind('/');
+    int j = (int)filename.rfind('\\');
 
     if ((j > i) && (j >= 0)) {
         i = j;
     }
 
 #   ifdef G3D_WIN32
-        j = filename.rfind(":");
+        j = (int)filename.rfind(':');
         if ((i == -1) && (j >= 0)) {
             i = j;
         }
@@ -855,7 +855,7 @@ std::string filenameBase(const std::string& s) {
 
 
 std::string filenameExt(const std::string& filename) {
-    int i = filename.rfind(".");
+    int i = (int)filename.rfind('.');
     if (i >= 0) {
         return filename.substr(i + 1, filename.length() - i);
     } else {
@@ -865,15 +865,15 @@ std::string filenameExt(const std::string& filename) {
 
 
 std::string filenamePath(const std::string& filename) {
-    int i = filename.rfind("/");
-    int j = filename.rfind("\\");
+    int i = (int)filename.rfind('/');
+    int j = (int)filename.rfind('\\');
 
     if ((j > i) && (j >= 0)) {
         i = j;
     }
 
 #   ifdef G3D_WIN32
-        j = filename.rfind(":");
+        j = (int)filename.rfind(':');
         if ((i == -1) && (j >= 0)) {
             i = j;
         }

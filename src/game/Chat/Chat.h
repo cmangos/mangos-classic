@@ -220,6 +220,7 @@ class ChatHandler
         bool HandleDebugSpellCoefsCommand(char* args);
         bool HandleDebugSpellModsCommand(char* args);
         bool HandleDebugUpdateWorldStateCommand(char* args);
+        bool HandleDebugWaypoint(char* args);
 
         bool HandleDebugPlayCinematicCommand(char* args);
         bool HandleDebugPlaySoundCommand(char* args);

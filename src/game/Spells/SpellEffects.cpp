@@ -1408,7 +1408,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             return;
                     }
 
-                    if (m_caster->IsFriendlyTo(unitTarget))
+                    if (m_caster->CanAssist(unitTarget))
                         m_caster->CastSpell(unitTarget, heal, TRIGGERED_OLD_TRIGGERED);
                     else
                         m_caster->CastSpell(unitTarget, hurt, TRIGGERED_OLD_TRIGGERED);
@@ -4191,8 +4191,8 @@ void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
 {
     if (!unitTarget)
         return;
-    // unitTarget->CombatStop();
 
+    unitTarget->InterruptSpellsCastedOnMe(true);
     unitTarget->CombatStop(false, false);
     unitTarget->getHostileRefManager().deleteReferences();  // stop all fighting
 

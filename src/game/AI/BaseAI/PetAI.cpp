@@ -69,7 +69,6 @@ void PetAI::MoveInLineOfSight(Unit* who)
 
     if (HasReactState(REACT_AGGRESSIVE)
             && !(pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
-            && (m_unit->IsHostileTo(who) || who->IsHostileTo(m_unit->GetMaster()))
             && m_creature->CanAttackOnSight(who) && who->isInAccessablePlaceFor(m_unit)
             && m_unit->IsWithinDistInMap(who, m_unit->GetAttackDistance(who))
             && m_unit->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE
@@ -336,7 +335,7 @@ void PetAI::UpdateAI(const uint32 diff)
         else if (!m_unit->hasUnitState(UNIT_STAT_MOVING))
             AttackStart(victim);
     }
-    else if (owner)
+    else
     {
         CharmInfo* charmInfo = m_unit->GetCharmInfo();
 

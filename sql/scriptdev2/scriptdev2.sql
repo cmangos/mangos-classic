@@ -344,6 +344,7 @@ UPDATE gameobject_template SET ScriptName='go_molten_core_rune' WHERE entry IN (
 /* MOONGLADE */
 UPDATE creature_template SET ScriptName='npc_keeper_remulos' WHERE entry=11832;
 UPDATE creature_template SET ScriptName='boss_eranikus' WHERE entry=15491;
+UPDATE gameobject_template SET ScriptName='go_omen_cluster' WHERE entry=180859;
 
 /* MULGORE */
 
@@ -1124,7 +1125,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000500,'Me scared! Me run now!',0,1,0,0,'morokk SAY_MOR_SCARED'),
 
 (-1000501,'Are you sure that you are ready? If we do not have a group of your allies to aid us, we will surely fail.',0,0,1,0,'muglash SAY_MUG_START1'),
-(-1000502,'This will be a though fight, $n. Follow me closely.',0,0,1,0,'muglash SAY_MUG_START2'),
+(-1000502,'This will be a tough fight, $n. Follow me closely.',0,0,1,0,'muglash SAY_MUG_START2'),
 (-1000503,'This is the brazier, $n. Put it out. Vorsha is a beast, worthy of praise from no one!',0,0,1,0,'muglash SAY_MUG_BRAZIER'),
 (-1000504,'Now we must wait. It won\'t be long before the naga realize what we have done.',0,0,1,0,'muglash SAY_MUG_BRAZIER_WAIT'),
 (-1000505,'Be on your guard, $n!',0,0,1,0,'muglash SAY_MUG_ON_GUARD'),
@@ -1167,7 +1168,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000540,'So you have defeated the Crimson Sigil. You now seek to challenge my rule? Not even Arthas could defeat me, yet you dare to even harbor such thoughts? Then I say to you, come! Come $N! The Black Temple awaits...',0,1,0,0,'lordillidan EVENT_COMPLETED'),
 
 (-1000541,'%s jumps into the moonwell and goes underwater...',0,2,0,0,'kitten EMOTE_SAB_JUMP'),
-(-1000542,'%s follows $n obediertly.',0,2,0,0,'kitten EMOTE_SAB_FOLLOW'),
+(-1000542,'%s follows $n obediently.',0,2,0,0,'kitten EMOTE_SAB_FOLLOW'),
 
 (-1000543,'Why have you come here, outsider? You will only find pain! Our fate will be yours...',0,0,0,25,'restless app SAY_RAND_1'),
 (-1000544,'It was ... terrible... the demon...',0,0,0,25,'restless app SAY_RAND_2'),

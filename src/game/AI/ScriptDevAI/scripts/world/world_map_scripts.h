@@ -24,6 +24,15 @@ enum
     NPC_BOLVAR                  = 1748,
     NPC_PRESTOR                 = 1749,
     NPC_WINDSOR                 = 12580,
+
+    // Quest 8868
+    TYPE_OMEN                   = 0,
+    MAX_ENCOUNTER               = 1,
+    NPC_MINION_OMEN             = 15466,
+    NPC_OMEN                    = 15467,
+    GO_ROCKET_CLUSTER           = 180875,
+    SPELL_OMEN_MOONLIGHT        = 26392,
+    MAX_ROCKETS                 = 30,
 };
 
 enum SpawnIndexes
@@ -31,14 +40,27 @@ enum SpawnIndexes
     POS_IDX_EMISSARY_SPAWN      = 0,                        // Not used in Classic, but keep here for code change simplification
     POS_IDX_MURKDEEP_SPAWN      = 1,
     POS_IDX_MURKDEEP_MOVE       = 2,
-    POS_IDX_MAX                 = 3
+    POS_IDX_OMEN_SPAWN          = 3,
+    POS_IDX_OMEN_MOVE           = 4,
+    POS_IDX_MINION_OMEN_START   = 5,
+    POS_IDX_MINION_OMEN_STOP    = 11,
+    POS_IDX_MAX                 = 12
 };
 
 static const float aSpawnLocations[POS_IDX_MAX][4] =
 {
-    {12583.019f, -6916.194f,  4.601f, 6.18f},           // Emissary of Hate, guesswork
-    {4981.031f,    597.955f, -1.361f, 4.82f},           // Murkdeep spawn, guesswork
-    {4988.970f,    547.002f,  5.379f, 0.0f},            // Murkdeep move, guesswork
+    {12583.019f, -6916.194f,    4.601f, 6.18f},         // Emissary of Hate, guesswork
+    {4981.031f,    597.955f,   -1.361f, 4.82f},         // Murkdeep spawn, guesswork
+    {4988.970f,    547.002f,    5.379f,  0.0f},         // Murkdeep move, guesswork
+    {7564.098f,  -2835.687f,  447.374f, 3.98f},         // Omen spawn, guesswork
+    {7528.430f,  -2889.838f,  459.365f,  0.0f},         // Omen move, guesswork
+    {7669.430f,  -2869.980f,  464.904f, 2.60f},         // Minions of Omen
+    {7621.790f,  -2861.740f,  459.043f, 4.15f},
+    {7597.130f,  -2885.880f,  464.898f, 2.88f},
+    {7594.170f,  -2856.490f,  459.403f, 3.17f},
+    {7477.750f,  -2849.020f,  464.466f, 0.14f},
+    {7507.560f,  -2818.230f,  459.486f, 4.63f},
+    {7558.880f,  -2856.770f,  457.684f, 4.31f},
 };
 
 #endif

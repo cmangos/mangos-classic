@@ -306,6 +306,19 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     }
 }
 
+void Player::SetEnchantmentModifier(uint32 value, WeaponAttackType attType, bool apply)
+{
+    if (apply)
+        m_enchantmentFlatMod[attType] += value;
+    else
+        m_enchantmentFlatMod[attType] -= value;
+}
+
+uint32 Player::GetEnchantmentModifier(WeaponAttackType attType)
+{
+    return m_enchantmentFlatMod[attType];
+}
+
 void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage, uint8 index)
 {
     UnitMods unitMod;
@@ -348,10 +361,14 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, fl
         weapon_mindamage = BASE_MINDAMAGE;
         weapon_maxdamage = BASE_MAXDAMAGE;
     }
-    else if (attType == RANGED_ATTACK)                      // add ammo DPS to ranged damage
+    else
     {
-        weapon_mindamage += GetAmmoDPS() * att_speed;
-        weapon_maxdamage += GetAmmoDPS() * att_speed;
+        total_value += GetEnchantmentModifier(attType);
+        if (attType == RANGED_ATTACK)                      // add ammo DPS to ranged damage
+        {
+            weapon_mindamage += GetAmmoDPS() * att_speed;
+            weapon_maxdamage += GetAmmoDPS() * att_speed;
+        }
     }
 
     if (index != 0)

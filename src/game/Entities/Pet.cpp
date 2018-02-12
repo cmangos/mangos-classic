@@ -1411,6 +1411,10 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     // Need to set Health to full
     SetHealth(GetMaxHealth());
 
+    // Need to set Mana to full
+    if (GetPowerType() == POWER_MANA)
+        SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+
     // Remove rage bar from pets (By setting rage = 0, and ensuring it stays that way by setting max rage = 0 as well)
     SetMaxPower(POWER_RAGE, 0);
     SetPower(POWER_RAGE, 0);

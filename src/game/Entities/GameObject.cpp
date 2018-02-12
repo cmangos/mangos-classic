@@ -356,7 +356,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     {
                         case 1: // friendly
                         {
-                            MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, radius);
+                            MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, nullptr, radius);
                             MaNGOS::UnitSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> checker(target, u_check);
                             Cell::VisitAllObjects(this, checker, radius);
                             break;
@@ -1983,8 +1983,7 @@ struct SpawnGameObjectInMapsWorker
             }
             else
             {
-                if (pGameobject->isSpawnedByDefault())
-                    map->Add(pGameobject);
+                map->Add(pGameobject);
             }
         }
     }

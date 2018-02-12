@@ -275,8 +275,6 @@ static HKEY getRootKeyFromString(const char* str, size_t length) {
             return HKEY_PERFORMANCE_NLSTEXT;
         } else if  ( strncmp(str, "HKEY_PERFORMANCE_TEXT", length) == 0 ) {
             return HKEY_PERFORMANCE_TEXT;
-        } else if  ( strncmp(str, "HKEY_CLASSES_ROOT", length) == 0 ) {
-            return HKEY_CLASSES_ROOT;
         } else {
             return NULL;
         }

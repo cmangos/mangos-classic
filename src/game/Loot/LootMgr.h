@@ -103,6 +103,23 @@ enum LootStatus
     LOOT_STATUS_CONTAIN_GOLD     = 0x04
 };
 
+enum LootError
+{
+    LOOT_ERROR_DIDNT_KILL               = 0,    // You don't have permission to loot that corpse.
+    LOOT_ERROR_TOO_FAR                  = 4,    // You are too far away to loot that corpse.
+    LOOT_ERROR_BAD_FACING               = 5,    // You must be facing the corpse to loot it.
+    LOOT_ERROR_LOCKED                   = 6,    // Someone is already looting that corpse.
+    LOOT_ERROR_NOTSTANDING              = 8,    // You need to be standing up to loot something!
+    LOOT_ERROR_STUNNED                  = 9,    // You can't loot anything while stunned!
+    LOOT_ERROR_PLAYER_NOT_FOUND         = 10,   // Player not found
+    LOOT_ERROR_PLAY_TIME_EXCEEDED       = 11,   // Maximum play time exceeded
+    LOOT_ERROR_MASTER_INV_FULL          = 12,   // That player's inventory is full
+    LOOT_ERROR_MASTER_UNIQUE_ITEM       = 13,   // Player has too many of that item already
+    LOOT_ERROR_MASTER_OTHER             = 14,   // Can't assign item to that player
+    LOOT_ERROR_ALREADY_PICKPOCKETED     = 15,   // Your target has already had its pockets picked
+    LOOT_ERROR_NOT_WHILE_SHAPESHIFTED   = 16    // You can't do that while shapeshifted.
+};
+
 struct PlayerRollVote
 {
     PlayerRollVote() : vote(ROLL_NOT_VALID), number(0) {}
@@ -248,6 +265,8 @@ class LootTemplate
         bool HasQuestDrop(LootTemplateMap const& store, uint8 GroupId = 0) const;
         // True if template includes at least 1 quest drop for an active quest of the player
         bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const* player, uint8 GroupId = 0) const;
+        // True if at least one player fulfils loot condition
+        static bool PlayerOrGroupFulfilsCondition(const Loot& loot, Player const* lootOwner, uint16 conditionId);
 
         // Checks integrity of the template
         void Verify(LootStore const& store, uint32 Id) const;
@@ -298,6 +317,7 @@ class Loot
         WorldObject const* GetLootTarget() const { return m_lootTarget; }
         ObjectGuid const& GetLootGuid() const { return m_guidTarget; }
         ObjectGuid const& GetMasterLootGuid() const { return m_masterOwnerGuid; }
+        GuidSet const& GetOwnerSet() const { return m_ownerSet; }
 
     private:
         Loot(): m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(), m_clientLootType(), m_lootMethod(), m_threshold(), m_maxEnchantSkill(0), m_isReleased(false), m_haveItemOverThreshold(false), m_isChecked(false), m_isChest(false), m_isChanged(false)

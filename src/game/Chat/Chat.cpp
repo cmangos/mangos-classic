@@ -242,6 +242,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "spellcoefs",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugSpellCoefsCommand,          "", nullptr },
         { "spellmods",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSpellModsCommand,           "", nullptr },
         { "uws",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugUpdateWorldStateCommand,    "", nullptr },
+        { "waypoint",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugWaypoint,                   "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
@@ -1007,7 +1008,7 @@ void ChatHandler::CheckIntegrity(ChatCommand* table, ChatCommand* parentCommand)
             sLog.outError("Subcommand '%s' of command '%s' have less access level (%u) that parent (%u)",
                           command->Name, parentCommand->Name, command->SecurityLevel, parentCommand->SecurityLevel);
 
-        if (!parentCommand && strlen(command->Name) == 0)
+        if (!parentCommand && command->Name[0] == '\0')
             sLog.outError("Subcommand '' at top level");
 
         if (command->ChildCommands)
@@ -1022,7 +1023,7 @@ void ChatHandler::CheckIntegrity(ChatCommand* table, ChatCommand* parentCommand)
                                   command->Name);
             }
 
-            if (parentCommand && strlen(command->Name) == 0)
+            if (parentCommand && command->Name[0] == '\0')
                 sLog.outError("Subcommand '' of command '%s' have subcommands", parentCommand->Name);
 
             CheckIntegrity(command->ChildCommands, command);
@@ -1127,7 +1128,7 @@ ChatCommandSearchResult ChatHandler::FindCommand(ChatCommand* table, char const*
                         *parentCommand = parentSubcommand ? parentSubcommand : &table[i];
 
                     // Name == "" is special case: restore original command text for next level "" (where parentSubcommand==nullptr)
-                    if (strlen(command->Name) == 0 && !parentSubcommand)
+                    if (command->Name[0] == '\0' && !parentSubcommand)
                         text = oldchildtext;
 
                     return CHAT_COMMAND_OK;
@@ -1221,7 +1222,7 @@ void ChatHandler::ExecuteCommand(const char* text)
                 else
                     SendSysMessage(LANG_CMD_SYNTAX);
 
-                if (ChatCommand* showCommand = (strlen(command->Name) == 0 && parentCommand ? parentCommand : command))
+                if (ChatCommand* showCommand = (command->Name[0] == '\0' && parentCommand ? parentCommand : command))
                     if (ChatCommand* childs = showCommand->ChildCommands)
                         ShowHelpForSubCommands(childs, showCommand->Name);
 
@@ -1381,7 +1382,7 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand* table, const char* cmd)
         case CHAT_COMMAND_OK:
         {
             // for "" subcommand use parent command if any for subcommands list output
-            if (strlen(command->Name) == 0 && parentCommand)
+            if (command->Name[0] == '\0' && parentCommand)
             {
                 showCommand = parentCommand;
                 cmd = "";
@@ -1398,7 +1399,7 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand* table, const char* cmd)
             break;
         case CHAT_COMMAND_UNKNOWN:
             // not show command list at error in first level command find fail
-            childCommands = table != getCommandTable() || strlen(oldCmd) == 0 ? table : nullptr;
+            childCommands = table != getCommandTable() || oldCmd[0] == '\0' ? table : nullptr;
             command = nullptr;
             break;
     }

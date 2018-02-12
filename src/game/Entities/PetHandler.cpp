@@ -273,7 +273,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             const SpellRangeEntry* sRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
 
             if (unit_target && !(petUnit->IsWithinDistInMap(unit_target, sRange->maxRange) && petUnit->IsWithinLOSInMap(unit_target))
-                    && !(GetPlayer()->IsFriendlyTo(unit_target) || petUnit->HasAuraType(SPELL_AURA_MOD_POSSESS)))
+                    && petUnit->CanAttackNow(unit_target))
             {
                 charmInfo->SetSpellOpener(spellid, sRange->minRange, sRange->maxRange);
                 spell->finish(false);

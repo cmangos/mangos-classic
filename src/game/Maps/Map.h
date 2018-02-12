@@ -300,6 +300,8 @@ class Map : public GridRefManager<NGridType>
         bool GetRandomPointInTheAir(float& x, float& y, float& z, float radius) const;
         bool GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status) const;
 
+        void AddMessage(std::function<void(Map*)> message);
+
         uint32 SpawnedCountForEntry(uint32 entry);
         void AddToSpawnCount(const ObjectGuid& guid);
         void RemoveFromSpawnCount(const ObjectGuid& guid);
@@ -355,6 +357,9 @@ class Map : public GridRefManager<NGridType>
         ActiveNonPlayers m_activeNonPlayers;
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
         MapStoredObjectTypesContainer m_objectsStore;
+
+        std::vector<std::function<void(Map*)>> m_messageVector;
+        std::mutex m_messageMutex;
 
         std::set<WorldObject*> m_onEventNotifiedObjects;
         std::set<WorldObject*>::iterator m_onEventNotifiedIter;

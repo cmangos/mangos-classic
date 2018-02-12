@@ -1688,15 +1688,13 @@ bool ScriptAction::HandleScriptStep()
             // TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
             if (pSource && pSource->GetTypeId() == TYPEID_GAMEOBJECT)
             {
-                ((Unit*)pTarget)->CastSpell(((Unit*)pTarget), spell, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pSource->GetObjectGuid());
+                ((Unit*)pTarget)->CastSpell(((Unit*)pTarget), spell, TRIGGERED_OLD_TRIGGERED | TRIGGERED_DO_NOT_PROC, nullptr, nullptr, pSource->GetObjectGuid());
                 break;
             }
 
             if (LogIfNotUnit(pSource))
                 break;
-
-            ((Unit*)pSource)->CastSpell(((Unit*)pTarget), spell, m_script->castSpell.castFlags);
-
+            ((Unit*)pSource)->CastSpell(((Unit*)pTarget), spell, m_script->castSpell.castFlags | TRIGGERED_DO_NOT_PROC);
             break;
         }
         case SCRIPT_COMMAND_PLAY_SOUND:                     // 16

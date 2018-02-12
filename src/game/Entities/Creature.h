@@ -768,8 +768,8 @@ class Creature : public Unit
                 return m_charmInfo->GetCharmSpell(pos)->GetAction();
         }
 
-        void SetCombatStartPosition(float x, float y, float z) { m_combatStartX = x; m_combatStartY = y; m_combatStartZ = z; }
-        void GetCombatStartPosition(float& x, float& y, float& z) const { x = m_combatStartX; y = m_combatStartY; z = m_combatStartZ; }
+        void SetCombatStartPosition(float x, float y, float z, float o) { m_combatStartPos.x = x; m_combatStartPos.y = y; m_combatStartPos.z = z; m_combatStartPos.o = o; }
+        void GetCombatStartPosition(float& x, float& y, float& z, float& o) const { x = m_combatStartPos.x; y = m_combatStartPos.y; z = m_combatStartPos.z; o = m_combatStartPos.o; }
 
         void SetRespawnCoord(CreatureCreatePos const& pos) { m_respawnPos = pos.m_pos; }
         void SetRespawnCoord(float x, float y, float z, float ori) { m_respawnPos.x = x; m_respawnPos.y = y; m_respawnPos.z = z; m_respawnPos.o = ori; }
@@ -827,10 +827,7 @@ class Creature : public Unit
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;
 
-        float m_combatStartX;
-        float m_combatStartY;
-        float m_combatStartZ;
-
+        Position m_combatStartPos;                          // after combat contains last position
         Position m_respawnPos;
 
         std::unique_ptr<CreatureAI> m_ai;

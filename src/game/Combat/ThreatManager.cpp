@@ -484,6 +484,14 @@ float ThreatManager::getThreat(Unit* pVictim, bool pAlsoSearchOfflineList)
     return threat;
 }
 
+bool ThreatManager::HasThreat(Unit * pVictim, bool pAlsoSearchOfflineList)
+{
+    HostileReference* ref = iThreatContainer.getReferenceByTarget(pVictim);
+    if (!ref && pAlsoSearchOfflineList)
+        ref = iThreatOfflineContainer.getReferenceByTarget(pVictim);
+    return bool(ref);
+}
+
 //============================================================
 
 void ThreatManager::tauntApply(Unit* pTaunter)

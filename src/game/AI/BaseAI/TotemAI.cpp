@@ -116,13 +116,18 @@ void TotemAI::UpdateAI(const uint32 diff)
     // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
     if (!victim ||
             !m_creature->CanAttack(victim) || !m_creature->IsWithinDistInMap(victim, maxRange) ||
-            m_creature->IsFriendlyTo(victim) || !victim->isVisibleForOrDetect(m_creature, m_creature, false))
+            m_creature->CanAssist(victim) || !victim->isVisibleForOrDetect(m_creature, m_creature, false))
     {
         victim = nullptr;
-
-        MaNGOS::NearestAttackableUnitInObjectRangeCheck u_check(m_creature, m_creature, maxRange);
-        MaNGOS::UnitLastSearcher<MaNGOS::NearestAttackableUnitInObjectRangeCheck> checker(victim, u_check);
-        Cell::VisitAllObjects(m_creature, checker, maxRange);
+        
+        if (maxRange != 0.0f)
+        {
+            MaNGOS::NearestAttackableUnitInObjectRangeCheck u_check(m_creature, maxRange);
+            MaNGOS::UnitLastSearcher<MaNGOS::NearestAttackableUnitInObjectRangeCheck> checker(victim, u_check);
+            Cell::VisitAllObjects(m_creature, checker, maxRange);
+        }
+        else
+            victim = m_creature;
     }
 
     // If have target
