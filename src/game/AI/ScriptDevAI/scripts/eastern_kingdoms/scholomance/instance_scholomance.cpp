@@ -29,6 +29,7 @@ EndScriptData
 
 instance_scholomance::instance_scholomance(Map* pMap) : ScriptedInstance(pMap),
     m_uiGandlingEvent(0),
+    m_uiGambitTransformTimer(0),
     m_bIsRoomReset(false)
 {
     Initialize();
@@ -64,8 +65,13 @@ void instance_scholomance::OnCreatureCreate(Creature* pCreature)
             if (GetData(TYPE_RATTLEGORE) != DONE && (pCreature->GetPositionZ() > aEntranceRoom->m_fCenterZ) && (pCreature->GetPositionX() - aEntranceRoom->m_fCornerX < aEntranceRoom->m_uiLength) && (pCreature->GetPositionY() - aEntranceRoom->m_fCornerY < aEntranceRoom->m_uiWidth))
                 m_sEntranceRoomGuids.insert(pCreature->GetObjectGuid());
             break;
+        case NPC_SCHOLOMANCE_STUDENT:
+            m_sViewingRoomGuids.insert(pCreature->GetObjectGuid());
+            break;
+        case NPC_VECTUS:
+        case NPC_MARDUK_BLACKPOOL:
         case NPC_DARKMASTER_GANDLING:
-            m_npcEntryGuidStore[NPC_DARKMASTER_GANDLING] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_RISEN_GUARDIAN:
             GandlingEventMap::iterator find = m_mGandlingData.find(m_uiGandlingEvent);
@@ -421,6 +427,49 @@ void instance_scholomance::OnCreatureDeath(Creature* pCreature)
     }
 }
 
+void instance_scholomance::Update(uint32 uiDiff)
+{
+    if (m_uiGambitTransformTimer)
+    {
+        if (m_uiGambitTransformTimer < uiDiff)
+            HandleDawnGambitEvent();
+        else
+            m_uiGambitTransformTimer -= uiDiff;
+    }
+}
+
+void instance_scholomance::HandleDawnGambitEvent()
+{
+    if (m_uiGambitTransformTimer == 0)
+    {
+        m_uiGambitTransformTimer = 12 * IN_MILLISECONDS;
+        return;
+    }
+    else
+        m_uiGambitTransformTimer = 0;
+
+    // Make each of the Scholomance Student cast "Viewing Room Student Transform - Effect" on himself
+    // Change faction to hostile and roam in the room
+    for (GuidSet::const_iterator itr = m_sViewingRoomGuids.begin(); itr != m_sViewingRoomGuids.end(); ++itr)
+    {
+        if (Creature* pStudent = instance->GetCreature(*itr))
+        {
+            pStudent->SetFactionTemporary(FACTION_SCOURGE, TEMPFACTION_RESTORE_RESPAWN);
+            pStudent->SetStandState(UNIT_STAND_STATE_STAND);
+            pStudent->GetMotionMaster()->MoveRandomAroundPoint(pStudent->GetPositionX(), pStudent->GetPositionY(), pStudent->GetPositionZ(), 2.0f);
+            pStudent->CastSpell(pStudent, SPELL_STUDENT_TRANSFORM, TRIGGERED_NONE);
+        }
+    }
+    // Change faction to hostile for Marduk and Vectus
+    if (Creature* pMarduk = GetSingleCreatureFromStorage(NPC_MARDUK_BLACKPOOL))
+        pMarduk->SetFactionTemporary(FACTION_SCOURGE, TEMPFACTION_RESTORE_RESPAWN);
+    if (Creature* pVectus = GetSingleCreatureFromStorage(NPC_VECTUS))
+    {
+        pVectus->SetFactionTemporary(FACTION_SCOURGE, TEMPFACTION_RESTORE_RESPAWN);
+        DoScriptText(YELL_VECTUS_GAMBIT, pVectus);
+    }
+}
+
 InstanceData* GetInstanceData_instance_scholomance(Map* pMap)
 {
     return new instance_scholomance(pMap);
@@ -448,6 +497,19 @@ bool ProcessEventId_event_spell_gandling_shadow_portal(uint32 uiEventId, Object*
     return false;
 }
 
+bool ProcessEventId_dawn_gambit(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+{
+    if (instance_scholomance* pInstance = (instance_scholomance*)((Creature*)pSource)->GetInstanceData())
+    {
+        if (uiEventId == EVENT_ID_DAWN_GAMBIT)
+        {
+            pInstance->HandleDawnGambitEvent();
+            return true;
+        }
+    }
+    return false;
+}
+
 void AddSC_instance_scholomance()
 {
     Script* pNewScript;
@@ -460,5 +522,10 @@ void AddSC_instance_scholomance()
     pNewScript = new Script;
     pNewScript->Name = "event_spell_gandling_shadow_portal";
     pNewScript->pProcessEventId = &ProcessEventId_event_spell_gandling_shadow_portal;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "event_dawn_gambit";
+    pNewScript->pProcessEventId = &ProcessEventId_dawn_gambit;
     pNewScript->RegisterSelf();
 }

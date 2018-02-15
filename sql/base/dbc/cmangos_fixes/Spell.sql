@@ -18,3 +18,6 @@ UPDATE spell_template SET EffectRadiusIndex1=7 WHERE id IN (22654, 22655, 22656,
 -- Fixes spell 13166 (Gnomish Battle Chicken): the summoning type was wrong
 UPDATE spell_template SET Effect1=42, EffectBasePoints1=0 WHERE id=13166;
 
+-- Fixes InterruptFlags for spell 18115 (Viewing Room Student Transform - Effect): it should not cancel on movement
+UPDATE spell_template SET InterruptFlags=0 WHERE id=18115;
+

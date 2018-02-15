@@ -27,6 +27,7 @@ enum
     NPC_RISEN_ABERRATION    = 10485,
     NPC_DISEASED_GHOUL      = 10495,
     NPC_REANIMATED_CORPSE   = 10481,
+    NPC_SCHOLOMANCE_STUDENT = 10475,
 
     NPC_KIRTONOS            = 10506,
     NPC_RATTLEGORE          = 11622,
@@ -37,6 +38,8 @@ enum
     NPC_ILLUCIA_BAROV       = 10502,
     NPC_ALEXEI_BAROV        = 10504,
     NPC_INSTRUCTOR_MALICIA  = 10505,
+    NPC_VECTUS              = 10432,
+    NPC_MARDUK_BLACKPOOL    = 10433,
     NPC_DARKMASTER_GANDLING = 1853,
     NPC_RISEN_GUARDIAN      = 11598,                        // summoned in random rooms by gandling
 
@@ -60,8 +63,14 @@ enum
     EVENT_ID_BAROV          = 5622,
     EVENT_ID_RAVENIAN       = 5623,
 
-    SAY_GANDLING_SPAWN      = -1289000,
+    EVENT_ID_DAWN_GAMBIT    = 5140,
 
+    FACTION_SCOURGE         = 233,
+
+    SAY_GANDLING_SPAWN      = -1289000,
+    YELL_VECTUS_GAMBIT      = -1289001,
+
+    SPELL_STUDENT_TRANSFORM = 18115,
     SPELL_XMAS_GANDLING     = 26199,
 };
 
@@ -138,9 +147,12 @@ class instance_scholomance : public ScriptedInstance
         void OnPlayerEnter(Player* pPlayer) override;
 
         void HandlePortalEvent(uint32 uiEventId, uint32 uiData);
+        void HandleDawnGambitEvent();
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
+
+        void Update(uint32 uiDiff) override;
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
@@ -149,6 +161,7 @@ class instance_scholomance : public ScriptedInstance
         void DoSpawnGandlingIfCan(bool bByPlayerEnter);
         void DoRespawnEntranceRoom(Player* pSummoner);
 
+        uint32 m_uiGambitTransformTimer;
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
@@ -157,6 +170,7 @@ class instance_scholomance : public ScriptedInstance
 
         bool m_bIsRoomReset;
         GuidSet m_sEntranceRoomGuids;
+        GuidSet m_sViewingRoomGuids;
 };
 
 #endif

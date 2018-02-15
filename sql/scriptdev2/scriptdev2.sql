@@ -1968,7 +1968,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 289 000 SCHOLOMANCE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1289000,'School is in session!',0,1,0,0,'gandling SAY_GANDLING_SPAWN');
+(-1289000,'School is in session!',0,1,0,0,'gandling SAY_GANDLING_SPAWN'),
+(-1289001,'What is this?! How dare you!',0,1,0,0,'vectus YELL_VECTUS_GAMBIT');
+INSERT INTO scripted_event_id VALUES
+(5140, 'event_dawn_gambit');
 
 -- -1 309 000 ZUL'GURUB
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
