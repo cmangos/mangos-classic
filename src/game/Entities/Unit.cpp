@@ -856,9 +856,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 
         // proc only once for victim
         if (Unit* owner = GetOwner())
-            owner->ProcDamageAndSpell(pVictim, PROC_FLAG_KILL, PROC_FLAG_NONE, PROC_EX_NONE, 0);
+            owner->ProcDamageAndSpell(ProcSystemArguments(pVictim, PROC_FLAG_KILL, PROC_FLAG_NONE, PROC_EX_NONE, 0));
         
-        ProcDamageAndSpell(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0);
+        ProcDamageAndSpell(ProcSystemArguments(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0));
 
         // Reward player, his pets, and group/raid members
         if (pTapper != pVictim)
@@ -971,7 +971,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT)))
         {
             float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
-            pVictim->AddThreat(this, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto, damageInfo.m_consumedMods);
+            pVictim->AddThreat(this, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
             if (damagetype != DOT) // DOTs dont put in combat but still cause threat
             {
                 SetInCombatWith(pVictim);
@@ -2168,7 +2168,7 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
 
     SendAttackStateUpdate(&meleeDamageInfo);
     DealMeleeDamage(&meleeDamageInfo, true);
-    ProcDamageAndSpell(meleeDamageInfo.target, meleeDamageInfo.procAttacker, meleeDamageInfo.procVictim, meleeDamageInfo.procEx, meleeDamageInfo.totalDamage, meleeDamageInfo.attackType);
+    ProcDamageAndSpell(ProcSystemArguments(meleeDamageInfo.target, meleeDamageInfo.procAttacker, meleeDamageInfo.procVictim, meleeDamageInfo.procEx, meleeDamageInfo.totalDamage, meleeDamageInfo.attackType));
 
     uint32 totalAbsorb = 0;
     uint32 totalResist = 0;
@@ -5175,26 +5175,6 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo) const
     }
 
     aura->GetTarget()->SendMessageToSet(data, true);
-}
-
-void Unit::ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType, SpellEntry const* procSpell, bool dontTriggerSpecial)
-{
-    m_spellProcsHappening = true;
-    // Not much to do if no flags are set.
-    if (procAttacker)
-        ProcDamageAndSpellFor(false, pVictim, procAttacker, procExtra, attType, procSpell, amount, dontTriggerSpecial);
-    // Now go on with a victim's events'n'auras
-    // Not much to do if no flags are set or there is no victim
-    if (pVictim && pVictim->isAlive() && procVictim)
-        pVictim->ProcDamageAndSpellFor(true, this, procVictim, procExtra, attType, procSpell, amount, dontTriggerSpecial);
-    m_spellProcsHappening = false;
-
-    // Mark auras created during proccing as ready
-    for (SpellAuraHolder* holder : m_delayedSpellAuraHolders)
-        if (holder->GetState() == SPELLAURAHOLDER_STATE_CREATED) // if deleted by some unknown circumstance
-            holder->SetState(SPELLAURAHOLDER_STATE_READY);
-
-    m_delayedSpellAuraHolders.clear();
 }
 
 void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo) const
@@ -9157,222 +9137,6 @@ void CharmInfo::SetStayPosition(bool stay)
 bool Unit::isFrozen() const
 {
     return HasAuraState(AURA_STATE_FROZEN);
-}
-
-struct ProcTriggeredData
-{
-    ProcTriggeredData(SpellProcEventEntry const* _spellProcEvent, SpellAuraHolder* _triggeredByHolder)
-        : spellProcEvent(_spellProcEvent), triggeredByHolder(_triggeredByHolder)
-    {}
-    SpellProcEventEntry const* spellProcEvent;
-    SpellAuraHolder* triggeredByHolder;
-};
-
-typedef std::list< ProcTriggeredData > ProcTriggeredList;
-typedef std::list< uint32> RemoveSpellList;
-
-uint32 createProcExtendMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missCondition)
-{
-    uint32 procEx = PROC_EX_NONE;
-    // Check victim state
-    if (missCondition != SPELL_MISS_NONE)
-        switch (missCondition)
-        {
-            case SPELL_MISS_MISS:    procEx |= PROC_EX_MISS;   break;
-            case SPELL_MISS_RESIST:  procEx |= PROC_EX_RESIST; break;
-            case SPELL_MISS_DODGE:   procEx |= PROC_EX_DODGE;  break;
-            case SPELL_MISS_PARRY:   procEx |= PROC_EX_PARRY;  break;
-            case SPELL_MISS_BLOCK:   procEx |= PROC_EX_BLOCK;  break;
-            case SPELL_MISS_EVADE:   procEx |= PROC_EX_EVADE;  break;
-            case SPELL_MISS_IMMUNE:  procEx |= PROC_EX_IMMUNE; break;
-            case SPELL_MISS_IMMUNE2: procEx |= PROC_EX_IMMUNE; break;
-            case SPELL_MISS_DEFLECT: procEx |= PROC_EX_DEFLECT; break;
-            case SPELL_MISS_ABSORB:  procEx |= PROC_EX_ABSORB; break;
-            case SPELL_MISS_REFLECT: procEx |= PROC_EX_REFLECT; break;
-            default:
-                break;
-        }
-    else
-    {
-        // On block
-        if (damageInfo->blocked)
-            procEx |= PROC_EX_BLOCK;
-        // On absorb
-        if (damageInfo->absorb)
-            procEx |= PROC_EX_ABSORB;
-        // On crit
-        if (damageInfo->HitInfo & SPELL_HIT_TYPE_CRIT)
-            procEx |= PROC_EX_CRITICAL_HIT;
-        else
-            procEx |= PROC_EX_NORMAL_HIT;
-    }
-    return procEx;
-}
-
-void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellEntry const* procSpell, uint32 damage, bool dontTriggerSpecial)
-{
-    // For melee/ranged based attack need update skills and set some Aura states
-    if (procFlag & MELEE_BASED_TRIGGER_MASK)
-    {
-        // Update skills here for players
-        if (GetTypeId() == TYPEID_PLAYER)
-        {
-            // On melee based hit/miss/resist need update skill (for victim and attacker)
-            if (procExtra & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT | PROC_EX_MISS | PROC_EX_DODGE | PROC_EX_PARRY | PROC_EX_BLOCK))
-            {
-                if (pTarget->GetTypeId() != TYPEID_PLAYER && pTarget->GetCreatureType() != CREATURE_TYPE_CRITTER)
-                    ((Player*)this)->UpdateCombatSkills(pTarget, attType, isVictim);
-            }
-            // Update defence if player is victim and parry/dodge/block
-            if (isVictim && procExtra & (PROC_EX_DODGE | PROC_EX_PARRY | PROC_EX_BLOCK))
-                ((Player*)this)->UpdateDefense();
-        }
-        // If exist crit/parry/dodge/block need update aura state (for victim and attacker)
-        if (procExtra & (PROC_EX_CRITICAL_HIT | PROC_EX_PARRY | PROC_EX_DODGE | PROC_EX_BLOCK))
-        {
-            // for victim
-            if (isVictim)
-            {
-                // if victim and dodge attack
-                if (procExtra & PROC_EX_DODGE)
-                {
-                    // Update AURA_STATE on dodge
-                    if (getClass() != CLASS_ROGUE) // skip Rogue Riposte
-                    {
-                        ModifyAuraState(AURA_STATE_DEFENSE, true);
-                        StartReactiveTimer(REACTIVE_DEFENSE);
-                    }
-                }
-                // if victim and parry attack
-                if (procExtra & PROC_EX_PARRY)
-                {
-                    // For Hunters only Counterattack (skip Mongoose bite)
-                    if (getClass() == CLASS_HUNTER)
-                    {
-                        ModifyAuraState(AURA_STATE_HUNTER_PARRY, true);
-                        StartReactiveTimer(REACTIVE_HUNTER_PARRY);
-                    }
-                    else
-                    {
-                        ModifyAuraState(AURA_STATE_DEFENSE, true);
-                        StartReactiveTimer(REACTIVE_DEFENSE);
-                    }
-                }
-                // if and victim block attack
-                if (procExtra & PROC_EX_BLOCK)
-                {
-                    ModifyAuraState(AURA_STATE_DEFENSE, true);
-                    StartReactiveTimer(REACTIVE_DEFENSE);
-                }
-            }
-            else // For attacker
-            {
-                // Overpower on victim dodge
-                if (procExtra & PROC_EX_DODGE && GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_WARRIOR)
-                {
-                    ((Player*)this)->AddComboPoints(pTarget, 1);
-                    StartReactiveTimer(REACTIVE_OVERPOWER);
-                }
-            }
-        }
-    }
-
-    RemoveSpellList removedSpells;
-    ProcTriggeredList procTriggered;
-    // Fill procTriggered list
-    for (SpellAuraHolderMap::const_iterator itr = GetSpellAuraHolderMap().begin(); itr != GetSpellAuraHolderMap().end(); ++itr)
-    {
-        // skip deleted auras (possible at recursive triggered call
-        if (itr->second->GetState() != SPELLAURAHOLDER_STATE_READY || itr->second->IsDeleted())
-            continue;
-
-        SpellProcEventEntry const* spellProcEvent = nullptr;
-        if (!IsTriggeredAtSpellProcEvent(pTarget, itr->second, procSpell, procFlag, procExtra, attType, isVictim, spellProcEvent, dontTriggerSpecial))
-            continue;
-
-        procTriggered.push_back(ProcTriggeredData(spellProcEvent, itr->second));
-    }
-
-    // Nothing found
-    if (procTriggered.empty())
-        return;
-
-    // Handle effects proceed this time
-    for (ProcTriggeredList::const_iterator itr = procTriggered.begin(); itr != procTriggered.end(); ++itr)
-    {
-        // Some auras can be deleted in function called in this loop (except first, ofc)
-        SpellAuraHolder* triggeredByHolder = itr->triggeredByHolder;
-        if (triggeredByHolder->IsDeleted())
-            continue;
-
-        SpellProcEventEntry const* spellProcEvent = itr->spellProcEvent;
-        bool useCharges = triggeredByHolder->GetAuraCharges() > 0;
-        bool procSuccess = true;
-        bool anyAuraProc = false;
-
-        // For players set spell cooldown if need
-        uint32 cooldown = 0;
-        if (GetTypeId() == TYPEID_PLAYER && spellProcEvent && spellProcEvent->cooldown)
-            cooldown = spellProcEvent->cooldown;
-
-        for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        {
-            Aura* triggeredByAura = triggeredByHolder->GetAuraByEffectIndex(SpellEffectIndex(i));
-            if (!triggeredByAura)
-                continue;
-
-            Modifier* auraModifier = triggeredByAura->GetModifier();
-
-            if (procSpell)
-            {
-                if (spellProcEvent)
-                {
-                    if (spellProcEvent->spellFamilyMask[i])
-                    {
-                        if (!procSpell->IsFitToFamilyMask(spellProcEvent->spellFamilyMask[i]))
-                            continue;
-                    }
-                    // don't check dbc FamilyFlags if schoolMask exists
-                    else if (!triggeredByAura->CanProcFrom(procSpell, spellProcEvent->procEx, procExtra, damage != 0, !spellProcEvent->schoolMask))
-                        continue;
-                }
-                else if (!triggeredByAura->CanProcFrom(procSpell, PROC_EX_NONE, procExtra, damage != 0, true))
-                    continue;
-            }
-
-            SpellAuraProcResult procResult = (*this.*AuraProcHandler[auraModifier->m_auraname])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
-            switch (procResult)
-            {
-                case SPELL_AURA_PROC_CANT_TRIGGER:
-                    continue;
-                case SPELL_AURA_PROC_FAILED:
-                    procSuccess = false;
-                    break;
-                case SPELL_AURA_PROC_OK:
-                    break;
-            }
-
-            anyAuraProc = true;
-        }
-
-        // Remove charge (aura can be removed by triggers)
-        if (useCharges && procSuccess && anyAuraProc && !triggeredByHolder->IsDeleted())
-        {
-            // If last charge dropped add spell to remove list
-            if (triggeredByHolder->DropAuraCharge())
-                removedSpells.push_back(triggeredByHolder->GetId());
-        }
-    }
-
-    if (!removedSpells.empty())
-    {
-        // Sort spells and remove duplicates
-        removedSpells.sort();
-        removedSpells.unique();
-        // Remove auras from removedAuras
-        for (RemoveSpellList::const_iterator i = removedSpells.begin(); i != removedSpells.end(); ++i)
-            RemoveAurasDueToSpell(*i);
-    }
 }
 
 SpellSchoolMask Unit::GetMeleeDamageSchoolMask() const
