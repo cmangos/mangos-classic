@@ -6647,7 +6647,7 @@ bool Spell::IsNeedSendToClient() const
            m_spellInfo->speed > 0.0f || (!m_triggeredByAuraSpell && !m_IsTriggeredSpell);
 }
 
-bool Spell::IsTriggeredSpellWithRedundentCastTime() const
+bool Spell::IsTriggeredSpellWithRedundantCastTime() const
 {
     return m_IsTriggeredSpell && (m_spellInfo->manaCost || m_spellInfo->ManaCostPercentage);
 }

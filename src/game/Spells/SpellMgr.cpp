@@ -118,7 +118,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
         }
 
         // some triggered spells have data only usable for client
-        if (spell->IsTriggeredSpellWithRedundentCastTime())
+        if (spell->IsTriggeredSpellWithRedundantCastTime())
             return 0;
 
         // spell targeted to non-trading trade slot item instant at trade success apply

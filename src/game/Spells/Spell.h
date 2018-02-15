@@ -476,7 +476,7 @@ class Spell
         uint64 GetDelayMoment() const { return m_delayMoment; }
 
         bool IsNeedSendToClient() const;                    // use for hide spell cast for client in case when cast not have client side affect (animation or log entries)
-        bool IsTriggeredSpellWithRedundentCastTime() const; // use for ignore some spell data for triggered spells like cast time, some triggered spells have redundent copy data from main spell for client use purpose
+        bool IsTriggeredSpellWithRedundantCastTime() const; // use for ignore some spell data for triggered spells like cast time, some triggered spells have redundent copy data from main spell for client use purpose
 
         CurrentSpellTypes GetCurrentContainer() const;
 
