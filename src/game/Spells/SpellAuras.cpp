@@ -4482,9 +4482,7 @@ void Aura::PeriodicTick()
             if (pCaster->isInCombat())
                 target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
 
-            ProcSystemArguments healProcData(target, procAttacker, procVictim, procEx, gain, BASE_ATTACK, spellProto);
-            healProcData.healthGain = gain;
-            pCaster->ProcDamageAndSpell(healProcData);
+            pCaster->ProcDamageAndSpell(ProcSystemArguments(target, procAttacker, procVictim, procEx, gain, BASE_ATTACK, spellProto, nullptr, gain));
 
             // apply damage part to caster if needed (ex. health funnel)
             if (target != pCaster && spellProto->SpellVisual == 163)

@@ -343,7 +343,7 @@ void Unit::ProcSkillsAndReactives(bool isVictim, Unit* target, uint32 procFlags,
     }
 }
 
-void Unit::ProcDamageAndSpell(ProcSystemArguments& data)
+void Unit::ProcDamageAndSpell(ProcSystemArguments&& data)
 {
     m_spellProcsHappening = true;
     data.attacker = this;

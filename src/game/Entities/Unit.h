@@ -898,9 +898,9 @@ struct ProcSystemArguments
     uint32 healthGain;
 
     explicit ProcSystemArguments(Unit* victim, uint32 procFlagsAttacker, uint32 procFlagsVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType = BASE_ATTACK,
-        SpellEntry const* procSpell = nullptr, Spell const* spell = nullptr)
+        SpellEntry const* procSpell = nullptr, Spell const* spell = nullptr, uint32 healthGain = 0)
         : victim(victim), procFlagsAttacker(procFlagsAttacker), procFlagsVictim(procFlagsVictim), procExtra(procExtra), damage(amount),
-            attType(attType), procSpell(procSpell), spell(spell)
+            attType(attType), procSpell(procSpell), spell(spell), healthGain(healthGain)
     {}
 };
 
@@ -1480,7 +1480,7 @@ class Unit : public WorldObject
 
         void PetOwnerKilledUnit(Unit* pVictim);
 
-        void ProcDamageAndSpell(ProcSystemArguments& data);
+        void ProcDamageAndSpell(ProcSystemArguments&& data);
         void ProcDamageAndSpellFor(ProcSystemArguments& data, bool isVictim);
         void ProcSkillsAndReactives(bool isVictim, Unit* target, uint32 procFlags, uint32 procEx, WeaponAttackType attType);
 
