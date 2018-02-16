@@ -377,15 +377,15 @@ ProcExecutionData::ProcExecutionData(ProcSystemArguments& data, bool isVictim) :
 {
     if (isVictim)
     {
-        attacker = data.attacker;
-        victim = data.victim;
-        procFlags = data.procFlagsAttacker;
-    }
-    else
-    {
         attacker = data.victim;
         victim = data.attacker;
         procFlags = data.procFlagsVictim;
+    }
+    else
+    {
+        attacker = data.attacker;
+        victim = data.victim;
+        procFlags = data.procFlagsAttacker;
     }
 }
 
