@@ -877,3 +877,44 @@ void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recv_data)
     if (unkn != 0)
         sLog.outError("CMSG_GROUP_PASS_ON_LOOT: activation not implemented!");
 }
+
+void WorldSession::HandleGroupSwapSubGroupOpcode(WorldPacket& recv_data)
+{
+    std::string playerName1, playerName2;
+
+    recv_data >> playerName1;
+    recv_data >> playerName2;
+
+    Group* group = GetPlayer()->GetGroup();
+    if (!group || !group->isRaidGroup())
+        return;
+
+    if (!group->IsLeader(GetPlayer()->GetObjectGuid()) &&
+        !group->IsAssistant(GetPlayer()->GetObjectGuid()))
+        return;
+
+    auto getGuid = [&group](std::string const& playerName)
+    {
+        if (Player* player = sObjectMgr.GetPlayer(playerName.c_str()))
+            return player->GetObjectGuid();
+        else
+        {
+            if (ObjectGuid guid = sObjectMgr.GetPlayerGuidByName(playerName))
+                return guid;
+            else
+                return ObjectGuid();
+        }
+    };
+
+    ObjectGuid guid1 = getGuid(playerName1);
+    ObjectGuid guid2 = getGuid(playerName2);
+
+    uint8 groupId1 = group->GetMemberGroup(guid1);
+    uint8 groupId2 = group->GetMemberGroup(guid2);
+
+    if (groupId1 == MAX_RAID_SUBGROUPS + 1 || groupId2 == MAX_RAID_SUBGROUPS + 1)
+        return;
+
+    group->ChangeMembersGroup(guid1, groupId2);
+    group->ChangeMembersGroup(guid2, groupId1);
+}
