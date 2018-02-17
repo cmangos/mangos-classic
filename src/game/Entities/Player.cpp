@@ -1781,34 +1781,13 @@ void Player::ProcessDelayedOperations()
         return;
 
     if (m_DelayedOperations & DELAYED_RESURRECT_PLAYER)
-    {
-        ResurrectPlayer(0.0f, false);
-
-        if (GetMaxHealth() > m_resurrectHealth)
-            SetHealth(m_resurrectHealth);
-        else
-            SetHealth(GetMaxHealth());
-
-        if (GetMaxPower(POWER_MANA) > m_resurrectMana)
-            SetPower(POWER_MANA, m_resurrectMana);
-        else
-            SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
-
-        SetPower(POWER_RAGE, 0);
-        SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-
-        SpawnCorpseBones();
-    }
+        ResurrectUsingRequestDataFinish();
 
     if (m_DelayedOperations & DELAYED_SAVE_PLAYER)
-    {
         SaveToDB();
-    }
 
     if (m_DelayedOperations & DELAYED_SPELL_CAST_DESERTER)
-    {
         CastSpell(this, 26013, TRIGGERED_OLD_TRIGGERED);               // Deserter
-    }
 
     // we have executed ALL delayed ops, so clear the flag
     m_DelayedOperations = 0;
@@ -18119,7 +18098,7 @@ uint32 Player::GetPureWeaponSkillValue(WeaponAttackType attType) const
     return GetPureSkillValue(skill);
 }
 
-void Player::ResurectUsingRequestData()
+void Player::ResurrectUsingRequestDataInit()
 {
     /// Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
     if (m_resurrectGuid.IsPlayer())
@@ -18127,12 +18106,18 @@ void Player::ResurectUsingRequestData()
 
     // we cannot resurrect player when we triggered far teleport
     // player will be resurrected upon teleportation
-    if (IsBeingTeleportedFar())
+    if (IsBeingTeleported())
     {
         ScheduleDelayedOperation(DELAYED_RESURRECT_PLAYER);
         return;
     }
 
+    // Redundant unless at some point we dont teleport on rezzurect
+    ResurrectUsingRequestDataFinish();
+}
+
+void Player::ResurrectUsingRequestDataFinish()
+{
     ResurrectPlayer(0.0f, false);
 
     if (GetMaxHealth() > m_resurrectHealth)

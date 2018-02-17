@@ -647,7 +647,7 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recv_data)
     if (!GetPlayer()->isRessurectRequestedBy(guid))
         return;
 
-    GetPlayer()->ResurectUsingRequestData();                // will call spawncorpsebones
+    GetPlayer()->ResurrectUsingRequestDataInit();                // will call spawncorpsebones
 }
 
 void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)

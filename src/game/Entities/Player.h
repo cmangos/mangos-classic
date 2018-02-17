@@ -1461,7 +1461,8 @@ class Player : public Unit
         void clearResurrectRequestData() { setResurrectRequestData(ObjectGuid(), 0, 0.0f, 0.0f, 0.0f, 0, 0); }
         bool isRessurectRequestedBy(ObjectGuid guid) const { return m_resurrectGuid == guid; }
         bool isRessurectRequested() const { return !m_resurrectGuid.IsEmpty(); }
-        void ResurectUsingRequestData();
+        void ResurrectUsingRequestDataInit(); // Initializes motion and schedules rest / executes it
+        void ResurrectUsingRequestDataFinish(); // Finalizes resurrection
 
         uint32 getCinematic() const { return m_cinematic; }
         void setCinematic(uint32 cine) { m_cinematic = cine; }
