@@ -571,6 +571,12 @@ class Object
 
         Loot* loot;
 
+        inline bool IsPlayer() const { return GetTypeId() == TYPEID_PLAYER; }
+        inline bool IsCreature() const { return GetTypeId() == TYPEID_UNIT; }
+        inline bool IsUnit() const { return isType(TYPEMASK_UNIT); }
+        inline bool IsGameObject() const { return GetTypeId() == TYPEID_GAMEOBJECT; }
+        inline bool IsCorpse() const { return GetTypeId() == TYPEID_CORPSE; }
+
     protected:
         Object();
 
