@@ -166,7 +166,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
     SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
 
     if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+    {
         SetFlag(GAMEOBJECT_FLAGS, (GO_FLAG_TRANSPORT | GO_FLAG_NODESPAWN));
+        m_updateFlag |= UPDATEFLAG_TRANSPORT;
+    }
 
     SetEntry(goinfo->id);
     SetDisplayId(goinfo->displayId);
