@@ -885,36 +885,40 @@ void WorldSession::HandleGroupSwapSubGroupOpcode(WorldPacket& recv_data)
     recv_data >> playerName1;
     recv_data >> playerName2;
 
-    Group* group = GetPlayer()->GetGroup();
+    Player* player = GetPlayer();
+
+    Group* group = player->GetGroup();
     if (!group || !group->isRaidGroup())
         return;
 
-    if (!group->IsLeader(GetPlayer()->GetObjectGuid()) &&
-        !group->IsAssistant(GetPlayer()->GetObjectGuid()))
+    ObjectGuid const& guid = player->GetObjectGuid();
+    if (!group->IsLeader(guid) && !group->IsAssistant(guid))
         return;
 
-    auto getGuid = [&group](std::string const& playerName)
+    auto getMemberSlotInfo = [&group](std::string const& playerName, uint8& subgroup, ObjectGuid& guid)
     {
-        if (Player* player = sObjectMgr.GetPlayer(playerName.c_str()))
-            return player->GetObjectGuid();
-        else
+        auto slots = group->GetMemberSlots();
+        for (auto i = slots.begin(); i != slots.end(); ++i)
         {
-            if (ObjectGuid guid = sObjectMgr.GetPlayerGuidByName(playerName))
-                return guid;
-            else
-                return ObjectGuid();
+            if ((*i).guid && (*i).name == playerName)
+            {
+                subgroup = (*i).group;
+                guid = (*i).guid;
+                return true;
+            }
         }
+        return false;
     };
 
-    ObjectGuid guid1 = getGuid(playerName1);
-    ObjectGuid guid2 = getGuid(playerName2);
+    ObjectGuid guid1, guid2;
+    uint8 subgroup1, subgroup2;
 
-    uint8 groupId1 = group->GetMemberGroup(guid1);
-    uint8 groupId2 = group->GetMemberGroup(guid2);
-
-    if (groupId1 == MAX_RAID_SUBGROUPS + 1 || groupId2 == MAX_RAID_SUBGROUPS + 1)
+    if (!getMemberSlotInfo(playerName1, subgroup1, guid1) || !getMemberSlotInfo(playerName2, subgroup2, guid2))
         return;
 
-    group->ChangeMembersGroup(guid1, groupId2);
-    group->ChangeMembersGroup(guid2, groupId1);
+    if (subgroup1 == subgroup2)
+        return;
+
+    group->ChangeMembersGroup(guid1, subgroup2);
+    group->ChangeMembersGroup(guid2, subgroup1);
 }
