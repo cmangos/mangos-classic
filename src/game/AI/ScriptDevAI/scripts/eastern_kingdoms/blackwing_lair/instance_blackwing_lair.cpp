@@ -727,6 +727,23 @@ struct go_ai_suppression : public GameObjectAI
 
     uint32 m_uiFumeTimer;
 
+    void OnLootStateChange() override
+    {
+        ScriptedInstance* pInstance = (ScriptedInstance*)m_go->GetMap()->GetInstanceData();
+        if (!pInstance)
+            return;
+
+        // As long as Broodlord Lashlayer is alive, the GO will rearm on a random timer from 30 sec to 2 min
+        // It will not rearm for the instance lifetime after Broodlord Lashlayer death
+        if (m_go->getLootState() == GO_ACTIVATED)
+        {
+            if (pInstance->GetData(TYPE_LASHLAYER) != DONE)
+                m_go->SetRespawnTime(urand(30, 2 * MINUTE));
+            else
+                m_go->SetRespawnTime(7 * 24 * HOUR);
+        }
+    }
+
     // Visual effects for each GO is played on a 5 seconds timer. Sniff show that the GO should also be used (trap spell is cast)
     // but we need core support for GO casting for that
     void UpdateAI(const uint32 uiDiff) override
