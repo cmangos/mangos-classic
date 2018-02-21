@@ -93,10 +93,8 @@ struct world_map_kalimdor : public ScriptedMap
         switch (pCreature->GetEntry())
         {
             case NPC_MURKDEEP:
-                m_npcEntryGuidStore[NPC_MURKDEEP] = pCreature->GetObjectGuid();
-                break;
             case NPC_OMEN:
-                m_npcEntryGuidStore[NPC_OMEN] = pCreature->GetObjectGuid();
+                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
         }
     }

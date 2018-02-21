@@ -427,6 +427,7 @@ UPDATE creature_template SET ScriptName='boss_darkmaster_gandling' WHERE entry=1
 UPDATE creature_template SET ScriptName='boss_jandice_barov' WHERE entry=10503;
 UPDATE creature_template SET ScriptName='npc_spectral_tutor' WHERE entry=10498;
 INSERT INTO scripted_event_id VALUES
+(5140,'event_dawn_gambit'),
 (5618,'event_spell_gandling_shadow_portal'),
 (5619,'event_spell_gandling_shadow_portal'),
 (5620,'event_spell_gandling_shadow_portal'),
@@ -1968,7 +1969,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 289 000 SCHOLOMANCE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1289000,'School is in session!',0,1,0,0,'gandling SAY_GANDLING_SPAWN');
+(-1289000,'School is in session!',0,1,0,0,'gandling SAY_GANDLING_SPAWN'),
+(-1289001,'What is this?! How dare you!',0,1,0,0,'vectus YELL_VECTUS_GAMBIT');
 
 -- -1 309 000 ZUL'GURUB
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

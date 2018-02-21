@@ -272,7 +272,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     for (PlayerBotMap::iterator itr = m_playerBots.begin(); itr != m_playerBots.end(); ++itr)
                     {
                         bot = itr->second;
-                        if (!bot->IsFriendlyTo(thingToAttack))
+                        if (bot->CanAttack(thingToAttack))
                         {
                             if (!bot->IsWithinLOSInMap(thingToAttack))
                                 bot->GetPlayerbotAI()->DoTeleport(*m_master);

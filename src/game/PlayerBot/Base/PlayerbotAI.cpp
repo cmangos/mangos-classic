@@ -2162,7 +2162,7 @@ void PlayerbotAI::DoNextCombatManeuver()
         Attack();
 
     // clear orders if current target for attacks doesn't make sense anymore
-    if (!m_targetCombat || m_targetCombat->isDead() || !m_targetCombat->IsInWorld() || !m_bot->IsHostileTo(m_targetCombat) || !m_bot->IsInMap(m_targetCombat))
+    if (!m_targetCombat || m_targetCombat->isDead() || !m_targetCombat->IsInWorld() || !m_bot->CanAttack(m_targetCombat) || !m_bot->IsInMap(m_targetCombat))
     {
         m_bot->AttackStop();
         m_bot->SetSelectionGuid(ObjectGuid());
@@ -4035,12 +4035,12 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
 
     if (IsPositiveSpell(spellId))
     {
-        if (pTarget && !m_bot->IsFriendlyTo(pTarget))
+        if (pTarget && m_bot->CanAttack(pTarget))
             pTarget = m_bot;
     }
     else
     {
-        if (pTarget && m_bot->IsFriendlyTo(pTarget))
+        if (pTarget && m_bot->CanAssist(pTarget))
             return false;
 
         m_bot->SetInFront(pTarget);
@@ -4168,12 +4168,12 @@ bool PlayerbotAI::CastPetSpell(uint32 spellId, Unit* target)
 
     if (IsPositiveSpell(spellId))
     {
-        if (pTarget && !m_bot->IsFriendlyTo(pTarget))
+        if (pTarget && m_bot->CanAttack(pTarget))
             pTarget = m_bot;
     }
     else
     {
-        if (pTarget && m_bot->IsFriendlyTo(pTarget))
+        if (pTarget && m_bot->CanAssist(pTarget))
             return false;
 
         if (!pet->isInFrontInMap(pTarget, 10)) // distance probably should be calculated
@@ -6528,7 +6528,7 @@ void PlayerbotAI::_HandleCommandAttack(std::string& text, Player& fromPlayer)
     {
         if (Unit* thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid))
         {
-            if (!m_bot->IsFriendlyTo(thingToAttack))
+            if (m_bot->CanAttack(thingToAttack))
             {
                 if (!m_bot->IsWithinLOSInMap(thingToAttack))
                     DoTeleport(*m_followTarget);
@@ -6586,7 +6586,7 @@ void PlayerbotAI::_HandleCommandPull(std::string& text, Player& fromPlayer)
         return;
     }
 
-    if (m_bot->IsFriendlyTo(thingToAttack))
+    if (m_bot->CanAssist(thingToAttack))
     {
         SendWhisper("Where I come from we don't attack our friends.", fromPlayer);
         return;
@@ -6681,7 +6681,7 @@ void PlayerbotAI::_HandleCommandNeutralize(std::string& text, Player& fromPlayer
         return;
     }
 
-    if (m_bot->IsFriendlyTo(thingToNeutralize))
+    if (m_bot->CanAssist(thingToNeutralize))
     {
         SendWhisper("I can't neutralize that target: this is a friend to me.", fromPlayer);
         return;

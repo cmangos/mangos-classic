@@ -860,8 +860,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 23133:                                 // Gnomish Battle Chicken
                 {
-                    // THIS CASE IS BROKEN! - SUMMON_TOTEM for a guardian pet?
-                    // Our SUMMON_TOTEM doesn't seem to be able to handle it anyway.
                     if (m_CastItem)
                         m_caster->CastSpell(m_caster, 13166, TRIGGERED_OLD_TRIGGERED, m_CastItem);
 
@@ -5061,6 +5059,10 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
 
     map->Add((Creature*)critter);
     critter->AIM_Initialize();
+
+    //for MINI_PET we ensure to set a passive react
+    if (CreatureAI* critterAI = critter->AI())
+        critterAI->SetReactState(REACT_PASSIVE);
 
     // Notify Summoner
     if (m_originalCaster && (m_originalCaster != m_caster) && (m_originalCaster->AI()))
