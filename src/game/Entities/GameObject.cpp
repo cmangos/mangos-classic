@@ -68,6 +68,8 @@ GameObject::GameObject() : WorldObject(),
     m_reStockTimer = 0;
     m_rearmTimer = 0;
     m_despawnTimer = 0;
+
+    m_delayedActionTimer = 0;
 }
 
 GameObject::~GameObject()
@@ -545,6 +547,17 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
             break;
         }
+    }
+
+    if (m_delayedActionTimer)
+    {
+        if (m_delayedActionTimer <= update_diff)
+        {
+            m_delayedActionTimer = 0;
+            TriggerDelayedAction();
+        }
+        else
+            m_delayedActionTimer -= update_diff;
     }
 
     if (m_AI)
@@ -1482,6 +1495,9 @@ void GameObject::Use(Unit* user)
             if (user->GetTypeId() != TYPEID_PLAYER)
                 return;
 
+            if (m_delayedActionTimer)
+                return;
+
             Player* player = (Player*)user;
 
             Unit* owner = GetOwner();
@@ -1500,9 +1516,6 @@ void GameObject::Use(Unit* user)
                 // expect owner to already be channeling, so if not...
                 if (!owner->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                     return;
-
-                // in case summoning ritual caster is GO creator
-                spellCaster = owner;
             }
             else
             {
@@ -1516,48 +1529,23 @@ void GameObject::Use(Unit* user)
                     else
                         return;
                 }
-
-                spellCaster = player;
             }
 
             AddUniqueUse(player);
 
             if (info->summoningRitual.animSpell)
-            {
-                player->CastSpell(player, info->summoningRitual.animSpell, TRIGGERED_OLD_TRIGGERED);
-
-                // for this case, summoningRitual.spellId is always triggered
-                triggeredFlags = TRIGGERED_OLD_TRIGGERED;
-            }
+                player->CastSpell(player, info->summoningRitual.animSpell, TRIGGERED_NONE);
 
             // full amount unique participants including original summoner, need more
             if (GetUniqueUseCount() < info->summoningRitual.reqParticipants)
                 return;
 
-            // owner is first user for non-wild GO objects, if it offline value already set to current user
-            if (!GetOwnerGuid())
-                if (Player* firstUser = GetMap()->GetPlayer(m_firstUser))
-                    spellCaster = firstUser;
-
-            spellId = info->summoningRitual.spellId;
-
-            // spell have reagent and mana cost but it not expected use its
-            // it triggered spell in fact casted at currently channeled GO
-            triggeredFlags = TRIGGERED_OLD_TRIGGERED;
-
-            // finish owners spell
-            if (owner)
-                owner->FinishSpell(CURRENT_CHANNELED_SPELL);
-
-            // can be deleted now, if
-            if (!info->summoningRitual.ritualPersistent)
-                SetLootState(GO_JUST_DEACTIVATED);
-            // reset ritual for this GO
+            if (info->summoningRitualCustom.delay)
+                m_delayedActionTimer = info->summoningRitualCustom.delay;
             else
-                ClearAllUsesData();
+                TriggerSummoningRitual();
 
-            // go to end function to spell casting
-            break;
+            return;
         }
         case GAMEOBJECT_TYPE_SPELLCASTER:                   // 22
         {
@@ -2235,6 +2223,57 @@ void GameObject::SetInUse(bool use)
         SetGoState(GO_STATE_ACTIVE);
     else
         SetGoState(GO_STATE_READY);
+}
+
+void GameObject::TriggerSummoningRitual()
+{
+    const GameObjectInfo* info = GetGOInfo();
+
+    Unit* owner = GetOwner();
+    Unit* caster = owner;
+
+    if (!owner)
+    {
+        if (Player* firstUser = GetMap()->GetPlayer(m_firstUser))
+            caster = firstUser;
+    }
+    else
+        // finish owners spell
+        owner->FinishSpell(CURRENT_CHANNELED_SPELL);
+
+    if (caster) // two caster checks to maintain order
+    {
+        for (GuidSet::const_iterator itr = m_UniqueUsers.begin(); itr != m_UniqueUsers.end(); ++itr)
+        {
+            if (*itr == caster->GetObjectGuid())
+                continue;
+
+            if (Player* pUnique = GetMap()->GetPlayer(*itr))
+                pUnique->FinishSpell(CURRENT_CHANNELED_SPELL);
+        }
+    }
+
+    // can be deleted now, if
+    if (!info->summoningRitual.ritualPersistent)
+        SetLootState(GO_JUST_DEACTIVATED);
+    // reset ritual for this GO
+    else
+        ClearAllUsesData();
+
+    if (caster)
+        caster->CastSpell(sObjectMgr.GetPlayer(m_actionTarget), info->summoningRitual.spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid());
+}
+
+void GameObject::TriggerDelayedAction()
+{
+    switch (GetGoType())
+    {
+        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:
+            TriggerSummoningRitual();
+            break;
+        default:
+            break;
+    }
 }
 
 uint32 GameObject::GetScriptId() const

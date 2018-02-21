@@ -350,6 +350,12 @@ struct GameObjectInfo
             uint32 triggerOn;
         } trapCustom;
 
+        //18 GAMEOBJECT_TYPE_SUMMONING_RITUAL
+        struct
+        {
+            uint32 delay;
+        } summoningRitualCustom;
+
         struct
         {
             uint32 data[1];
@@ -661,6 +667,7 @@ class GameObject : public WorldObject
             m_UniqueUsers.clear();
         }
 
+        void SetActionTarget(ObjectGuid guid) { m_actionTarget = guid; };
         void AddUniqueUse(Player* player);
         void AddUse() { ++m_useTimes; }
         bool IsInUse() const { return m_isInUse; }
@@ -755,6 +762,13 @@ class GameObject : public WorldObject
         bool m_isInUse;                                     // only one player at time are allowed to open chest
         time_t m_reStockTimer;                              // timer to refill the chest
         time_t m_despawnTimer;                              // timer to despawn the chest if something changed in it
+
+        void TriggerSummoningRitual();
+        void TriggerDelayedAction();
+
+        uint32 m_delayedActionTimer;                        // used for delayed GO actions
+
+        ObjectGuid m_actionTarget;                          // used for setting target of Summoning rituals
 
         std::unique_ptr<GameObjectAI> m_AI;
 
