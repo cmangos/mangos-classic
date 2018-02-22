@@ -6847,7 +6847,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
     int32 APbonus   = 0;
 
     // ..done flat, already included in weapon damage based spells
-    if (!isWeaponDamageBasedSpell)
+    if (!isWeaponDamageBasedSpell || spellProto && schoolMask &~ SPELL_SCHOOL_MASK_NORMAL)
     {
         AuraList const& mModDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
         for (AuraList::const_iterator i = mModDamageDone.begin(); i != mModDamageDone.end(); ++i)
@@ -6918,13 +6918,13 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
     float DoneTotal = 0.0f;
 
     // scaling of non weapon based spells
-    if (!isWeaponDamageBasedSpell)
+    if (!isWeaponDamageBasedSpell || spellProto && schoolMask &~ SPELL_SCHOOL_MASK_NORMAL)
     {
         // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
         DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneFlat, APbonus, damagetype, true);
     }
     // weapon damage based spells
-    else if (APbonus || DoneFlat)
+    if (isWeaponDamageBasedSpell && (APbonus || DoneFlat))
     {
         bool normalized = spellProto ? IsSpellHaveEffect(spellProto, SPELL_EFFECT_NORMALIZED_WEAPON_DMG) : false;
         DoneTotal += int32(APbonus / 14.0f * GetAPMultiplier(attType, normalized));
@@ -6990,7 +6990,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackTy
         TakenFlat += GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN);
 
     // ..taken flat (by school mask)
-    TakenFlat += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_DAMAGE_TAKEN, schoolMask);
+    int32 TakenAdvertisedBenefit = GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_DAMAGE_TAKEN, schoolMask);
 
     // PERCENT damage auras
     // ====================
@@ -7009,16 +7009,16 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackTy
     // =================
 
     // scaling of non weapon based spells
-    if (!isWeaponDamageBasedSpell)
+    if (!isWeaponDamageBasedSpell || spellProto && schoolMask &~ SPELL_SCHOOL_MASK_NORMAL)
     {
         // apply benefit affected by spell power implicit coeffs and spell level penalties
-        TakenFlat = pCaster->SpellBonusWithCoeffs(spellProto, 0, TakenFlat, 0, damagetype, false);
+        TakenAdvertisedBenefit = pCaster->SpellBonusWithCoeffs(spellProto, 0, TakenAdvertisedBenefit, 0, damagetype, false);
     }
 
     if (!flat)
         TakenFlat = 0.0f;
 
-    float tmpDamage = float(int32(pdamage) + TakenFlat * int32(stack)) * TakenPercent;
+    float tmpDamage = (pdamage + (TakenFlat + TakenAdvertisedBenefit) * int32(stack)) * TakenPercent;
 
     // bonus result can be negative
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;

@@ -3556,12 +3556,6 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_PALADIN:
         {
-            // Seal of Command - receive benefit from Spell Damage and Healing
-            if (m_spellInfo->SpellFamilyFlags & uint64(0x00000002000000))
-            {
-                spell_bonus += int32(0.20f * m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo)));
-                spell_bonus += int32(0.29f * unitTarget->SpellBaseDamageBonusTaken(GetSpellSchoolMask(m_spellInfo)));
-            }
             break;
         }
     }
