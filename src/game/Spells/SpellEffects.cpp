@@ -5288,9 +5288,7 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
     pet->clearUnitState(UNIT_STAT_ALL_STATE);
     pet->SetHealth(uint32(pet->GetMaxHealth() * (float(damage) / 100)));
 
-    pet->AIM_Initialize();
-
-    // _player->PetSpellInitialize(); -- action bar not removed at death and not required send at revive
+    // _player->PetSpellInitialize(); // action bar not removed at death and not required send at revive
     pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 
