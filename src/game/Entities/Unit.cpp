@@ -6433,6 +6433,9 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
     if (!owner)
         owner = this;
 
+    // Done fixed damage bonus auras
+    int32 DoneAdvertisedBenefit = SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto));
+
     AuraList const& mOverrideClassScript = owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
     for (AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
     {
@@ -6444,7 +6447,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
             case 4418: // Increased Shock Damage
             case 4554: // Increased Lightning Damage
             {
-                DoneTotal += (*i)->GetModifier()->m_amount;
+                DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
                 break;
             }
             case 4555: // Improved Moonfire
@@ -6454,9 +6457,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
             }
         }
     }
-
-    // Done fixed damage bonus auras
-    int32 DoneAdvertisedBenefit = SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto));
 
     // Pets just add their bonus damage to their spell damage
     // note that their spell damage is just gain of their own auras
