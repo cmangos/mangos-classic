@@ -606,10 +606,13 @@ void PersistentAreaAura::Update(uint32 diff)
     else
         remove = true;
 
-    Aura::Update(diff);
-
     if (remove)
+    {
         GetTarget()->RemoveAura(GetId(), GetEffIndex());
+        return;
+    }
+
+    Aura::Update(diff);
 }
 
 void Aura::ApplyModifier(bool apply, bool Real)
