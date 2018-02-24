@@ -243,6 +243,20 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 return;
             }
 
+            //issue/1513
+            //for Consume Shadows, we want to be sure to have a null target, otherwise, the Walker will attack the target
+            if (    spellInfo->Id == 17767 // Consume Shadows Rank 1
+                ||  spellInfo->Id == 17850 // Consume Shadows Rank 2
+                ||  spellInfo->Id == 17851 // Consume Shadows Rank 3
+                ||  spellInfo->Id == 17852 // Consume Shadows Rank 4
+                ||  spellInfo->Id == 17853 // Consume Shadows Rank 5
+                ||  spellInfo->Id == 17854 // Consume Shadows Rank 6
+                
+                )
+            {
+                unit_target = nullptr;
+            }
+
             if (!petUnit->IsSpellReady(*spellInfo))
                 return;
 
