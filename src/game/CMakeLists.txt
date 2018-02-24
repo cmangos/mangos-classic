@@ -65,6 +65,11 @@ set(SRC_GRP_LUAENGINE
   ${SRC_FILES_LUAENGINE}
 )
 
+file(GLOB SRC_FILES_LUAENGINE LuaEngine/*.cpp LuaEngine/*.h)
+set(SRC_GRP_LUAENGINE
+  ${SRC_FILES_LUAENGINE}
+)
+
 set(SRC_GRP_CHAT_COMMANDS
     debugcmds.cpp
     Level0.cpp

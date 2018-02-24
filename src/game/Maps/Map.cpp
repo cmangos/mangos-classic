@@ -1229,24 +1229,6 @@ void Map::AddToOnEventNotified(WorldObject* obj)
     m_onEventNotifiedObjects.insert(obj);
 }
 
-void Map::RemoveFromOnEventNotified(WorldObject* obj)
-{
-    if (m_onEventNotifiedIter != m_onEventNotifiedObjects.end())
-    {
-        auto itr = m_onEventNotifiedObjects.find(obj);
-        if (itr == m_onEventNotifiedIter)
-            ++m_onEventNotifiedIter;
-        m_onEventNotifiedObjects.erase(obj);
-    }
-    else
-        m_onEventNotifiedObjects.erase(obj);
-}
-
-void Map::CreateInstanceData(bool load)
-{
-    if (i_data != nullptr)
-        return;
-
     i_data = sEluna->GetInstanceData(this);
 
     if (!i_data)
@@ -1261,6 +1243,14 @@ void Map::CreateInstanceData(bool load)
             if (WorldTemplate const* mInstance = ObjectMgr::GetWorldTemplate(GetId()))
                 i_script_id = mInstance->script_id;
         }
+
+        if (!i_script_id)
+            return;
+
+        i_data = sScriptMgr.CreateInstanceData(this);
+        if (!i_data)
+            return;
+    }
 
         if (!i_script_id)
             return;
