@@ -27,7 +27,8 @@
 #include "AuctionHouse/AuctionHouseMgr.h"
 #include "Mails/Mail.h"
 #include "Util.h"
-#include "Chat/Chat.h"
+#include "Chat.h"
+#include "LuaEngine.h"
 
 // please DO NOT use iterator++, because it is slower than ++iterator!!!
 // post-incrementation is always slower than pre-incrementation !
@@ -315,6 +316,8 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
                itemGuid.GetString().c_str(), auctioneerGuid.GetString().c_str(), bid, buyout, etime, auctionHouseEntry->houseId);
 
     SendAuctionCommandResult(AH, AUCTION_STARTED, AUCTION_OK);
+
+    sEluna->OnAdd(auctionHouse, AH);
 }
 
 // this function is called when client bids or buys out auction
@@ -456,6 +459,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recv_data)
     pl->SaveInventoryAndGoldToDB();
     CharacterDatabase.CommitTransaction();
     sAuctionMgr.RemoveAItem(auction->itemGuidLow);
+    sEluna->OnRemove(auctionHouse, auction);
     auctionHouse->RemoveAuction(auction->Id);
     delete auction;
 }

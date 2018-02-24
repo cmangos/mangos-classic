@@ -29,10 +29,20 @@ class DBCStorage
         explicit DBCStorage(const char* f) : nCount(0), fieldCount(0), fmt(f), indexTable(nullptr), m_dataTable(nullptr) { }
         ~DBCStorage() { Clear(); }
 
-        T const* LookupEntry(uint32 id) const { return (id >= nCount) ? nullptr : indexTable[id]; }
-        uint32  GetNumRows() const { return nCount; }
+        uint32  GetNumRows() const { return loaded ? data.size() : nCount; }
         char const* GetFormat() const { return fmt; }
         uint32 GetFieldCount() const { return fieldCount; }
+
+        T const* LookupEntry(uint32 id) const
+        {
+            if (loaded)
+            {
+                typename std::map<uint32, T const*>::const_iterator it = data.find(id);
+                if (it != data.end())
+                    return it->second;
+            }
+            return (id >= nCount) ? nullptr : indexTable[id];
+        }
 
         bool Load(char const* fn)
         {
@@ -51,6 +61,22 @@ class DBCStorage
 
             // error in dbc file at loading if nullptr
             return indexTable != nullptr;
+        }
+
+        void SetEntry(uint32 id, T* t) // Cryptic they say..
+        {
+            if (!loaded)
+            {
+                for (uint32 i = 0; i < nCount; ++i)
+                {
+                    T const* node = LookupEntry(i);
+                    if (!node)
+                        continue;
+                    data[i] = node;
+                }
+                loaded = true;
+            }
+            data[id] = t;
         }
 
         bool LoadStringsFrom(char const* fn)
@@ -72,6 +98,12 @@ class DBCStorage
 
         void Clear()
         {
+            if (loaded)
+            {
+                data.clear();
+                loaded = false;
+            }
+
             if (!indexTable)
                 return;
 
@@ -97,6 +129,8 @@ class DBCStorage
         char const* fmt;
         T** indexTable;
         T* m_dataTable;
+        std::map<uint32, T const*> data;
+        bool loaded;
         StringPoolList m_stringPoolList;
 };
 

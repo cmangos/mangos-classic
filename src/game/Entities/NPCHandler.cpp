@@ -23,17 +23,19 @@
 #include "Server/WorldSession.h"
 #include "Server/Opcodes.h"
 #include "Log.h"
-#include "Globals/ObjectMgr.h"
-#include "Spells/SpellMgr.h"
-#include "Entities/Player.h"
-#include "Entities/GossipDef.h"
-#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
-#include "Entities/Creature.h"
-#include "Entities/Pet.h"
-#include "Guilds/Guild.h"
-#include "Spells/Spell.h"
-#include "Guilds/GuildMgr.h"
-#include "Chat/Chat.h"
+#include "ObjectMgr.h"
+#include "SpellMgr.h"
+#include "Player.h"
+#include "GossipDef.h"
+#include "ScriptMgr.h"
+#include "Creature.h"
+#include "Pet.h"
+#include "Guild.h"
+#include "Spell.h"
+#include "GuildMgr.h"
+#include "Chat.h"
+#include "Item.h"
+#include "LuaEngine.h"
 
 enum StableResultCode
 {
@@ -378,6 +380,29 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
 
         if (!sScriptDevAIMgr.OnGossipSelect(_player, pGo, sender, action, code.empty() ? nullptr : code.c_str()))
             _player->OnGossipSelect(pGo, gossipListId);
+    }
+    else if (guid.IsItem())
+    {
+        Item* item = GetPlayer()->GetItemByGuid(guid);
+        if (!item)
+        {
+            DEBUG_LOG("WORLD: HandleGossipSelectOptionOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
+            return;
+        }
+
+        // used by eluna
+        sEluna->HandleGossipSelectOption(GetPlayer(), item, GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
+    }
+    else if (guid.IsPlayer())
+    {
+        if (GetPlayer()->GetGUIDLow() != guid)
+        {
+            DEBUG_LOG("WORLD: HandleGossipSelectOptionOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
+            return;
+        }
+
+        // used by eluna
+        sEluna->HandleGossipSelectOption(GetPlayer(), GetPlayer()->PlayerTalkClass->GetGossipMenu().GetMenuId(), GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
     }
 }
 

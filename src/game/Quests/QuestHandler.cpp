@@ -19,16 +19,17 @@
 #include "Common.h"
 #include "Log.h"
 #include "WorldPacket.h"
-#include "Server/WorldSession.h"
-#include "Server/Opcodes.h"
-#include "World/World.h"
-#include "Globals/ObjectMgr.h"
-#include "Entities/Player.h"
-#include "Entities/GossipDef.h"
-#include "Quests/QuestDef.h"
-#include "Globals/ObjectAccessor.h"
-#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
-#include "Groups/Group.h"
+#include "WorldSession.h"
+#include "Opcodes.h"
+#include "World.h"
+#include "ObjectMgr.h"
+#include "Player.h"
+#include "GossipDef.h"
+#include "QuestDef.h"
+#include "ObjectAccessor.h"
+#include "ScriptMgr.h"
+#include "Group.h"
+#include "LuaEngine.h"
 
 #ifdef BUILD_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotAI.h"
@@ -333,6 +334,9 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
             }
 
             _player->SetQuestStatus(quest, QUEST_STATUS_NONE);
+
+            // used by eluna
+            sEluna->OnQuestAbandon(_player, quest);
         }
 
         _player->SetQuestSlot(slot, 0);

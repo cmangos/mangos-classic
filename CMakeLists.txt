@@ -192,7 +192,7 @@ if(MSVC)
 endif()
 
 # Find needed packages and if necessery abort if something important is missing
-find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
+find_package(Boost REQUIRED COMPONENTS system program_options thread filesystem)
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})

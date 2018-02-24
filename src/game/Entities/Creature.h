@@ -573,8 +573,7 @@ class Creature : public Unit
         bool IsCorpse() const { return getDeathState() ==  CORPSE; }
         bool IsDespawned() const { return getDeathState() ==  DEAD; }
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
-        void ReduceCorpseDecayTimer();
-        uint32 GetCorpseDecayTimer() const { return m_corpseDecayTimer; }
+        uint32 GetCorpseDelay() const { return m_corpseDelay; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool IsCivilian() const { return !!GetCreatureInfo()->civilian; }
         bool IsNoAggroOnSight() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO_ON_SIGHT); }
@@ -637,6 +636,13 @@ class Creature : public Unit
 
         SpellSchoolMask GetMeleeDamageSchoolMask() const override { return m_meleeDamageSchoolMask; }
         void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchoolMask = GetSchoolMask(school); }
+
+        void _AddCreatureSpellCooldown(uint32 spell_id, time_t end_time);
+        void _AddCreatureCategoryCooldown(uint32 category, time_t apply_time);
+        void AddCreatureSpellCooldown(uint32 spellid);
+        bool HasSpellCooldown(uint32 spell_id) const;
+        bool HasCategoryCooldown(uint32 spell_id) const;
+        uint32 GetCreatureSpellCooldownDelay(uint32 spellId) const;
 
         bool HasSpell(uint32 spellID) const override;
 
@@ -785,10 +791,11 @@ class Creature : public Unit
         void SendAreaSpiritHealerQueryOpcode(Player* pl);
 
         void SetVirtualItem(VirtualItemSlot slot, uint32 item_id);
+        void SetVirtualItemRaw(VirtualItemSlot slot, uint32 display_id, uint32 info0, uint32 info1);
 
-        void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
+        void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
+        bool IsReputationGainDisabled() { return DisableReputationGain; }
 
-        uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 
@@ -830,6 +837,7 @@ class Creature : public Unit
         Position m_combatStartPos;                          // after combat contains last position
         Position m_respawnPos;
 
+        bool DisableReputationGain;
         std::unique_ptr<CreatureAI> m_ai;
 
         void SetBaseWalkSpeed(float speed) override;

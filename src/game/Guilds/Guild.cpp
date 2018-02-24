@@ -27,8 +27,9 @@
 #include "Chat/Chat.h"
 #include "Social/SocialMgr.h"
 #include "Util.h"
-#include "Tools/Language.h"
-#include "World/World.h"
+#include "Language.h"
+#include "World.h"
+#include "LuaEngine.h"
 
 //// MemberSlot ////////////////////////////////////////////
 void MemberSlot::SetMemberStats(Player* player)
@@ -142,6 +143,9 @@ bool Guild::Create(Player* leader, std::string gname)
 
     CreateDefaultGuildRanks(lSession->GetSessionDbLocaleIndex());
 
+    // used by eluna
+    sEluna->OnCreate(this, leader, gname.c_str());
+
     return AddMember(m_LeaderGuid, (uint32)GR_GUILDMASTER);
 }
 
@@ -236,6 +240,9 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
 
     UpdateAccountsNumber();
 
+    // used by eluna
+    sEluna->OnAddMember(this, pl, newmember.RankId);
+
     return true;
 }
 
@@ -246,6 +253,9 @@ void Guild::SetMOTD(std::string motd)
     // motd now can be used for encoding to DB
     CharacterDatabase.escape_string(motd);
     CharacterDatabase.PExecute("UPDATE guild SET motd='%s' WHERE guildid='%u'", motd.c_str(), m_Id);
+
+    // used by eluna
+    sEluna->OnMOTDChanged(this, motd);
 }
 
 void Guild::SetGINFO(std::string ginfo)
@@ -255,6 +265,9 @@ void Guild::SetGINFO(std::string ginfo)
     // ginfo now can be used for encoding to DB
     CharacterDatabase.escape_string(ginfo);
     CharacterDatabase.PExecute("UPDATE guild SET info='%s' WHERE guildid='%u'", ginfo.c_str(), m_Id);
+
+    // used by eluna
+    sEluna->OnInfoChanged(this, ginfo);
 }
 
 bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
@@ -542,7 +555,21 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
     if (!isDisbanding)
         UpdateAccountsNumber();
 
+    // used by eluna
+    sEluna->OnRemoveMember(this, player, isDisbanding); // IsKicked not a part of Mangos, implement?
+
     return members.empty();
+}
+
+bool Guild::ChangeMemberRank(ObjectGuid guid, uint8 newRank)
+{
+    if (newRank <= GetLowestRank())                    // Validate rank (allow only existing ranks)
+        if (MemberSlot* member = GetMemberSlot(guid))
+        {
+            member->ChangeRank(newRank);
+            return true;
+        }
+    return false;
 }
 
 void Guild::BroadcastToGuild(WorldSession* session, const std::string& msg, uint32 language)
@@ -701,6 +728,10 @@ void Guild::Disband()
     CharacterDatabase.PExecute("DELETE FROM guild_rank WHERE guildid = '%u'", m_Id);
     CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid = '%u'", m_Id);
     CharacterDatabase.CommitTransaction();
+
+    // used by eluna
+    sEluna->OnDisband(this);
+
     sGuildMgr.RemoveGuild(m_Id);
 }
 

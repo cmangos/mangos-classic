@@ -27,8 +27,11 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/vmap
   ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
   ${CMAKE_CURRENT_SOURCE_DIR}/BattleGround
+  ${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine
   ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
-  ${CMAKE_CURRENT_SOURCE_DIR}/PlayerBot
+  ${CMAKE_SOURCE_DIR}/dep/lualib
+  ${CMAKE_SOURCE_DIR}/src/shared
+  ${CMAKE_SOURCE_DIR}/src/framework
   ${CMAKE_BINARY_DIR}
 )
 
@@ -57,12 +60,18 @@ if(NOT BUILD_PLAYERBOT)
   endforeach()
 endif()
 
-# Create visual studio groups using folder structure
-foreach(source ${LIBRARY_SRCS})
-    get_filename_component(source_path "${source}" PATH)
-    string(REPLACE "/" "\\" source_path_msvc "${source_path}")
-    source_group("${source_path_msvc}" FILES "${source}")
-endforeach()
+file(GLOB SRC_FILES_LUAENGINE LuaEngine/*.cpp LuaEngine/*.h)
+set(SRC_GRP_LUAENGINE
+  ${SRC_FILES_LUAENGINE}
+)
+
+set(SRC_GRP_CHAT_COMMANDS
+    debugcmds.cpp
+    Level0.cpp
+    Level1.cpp
+    Level2.cpp
+    Level3.cpp
+)
 
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
@@ -74,15 +83,342 @@ target_link_libraries(${LIBRARY_NAME}
   PRIVATE detour
 )
 
-if(WIN32)
-  target_link_libraries(${LIBRARY_NAME} PUBLIC z)
+set(SRC_GRP_OBJECT
+    AuctionHouseMgr.cpp
+    AuctionHouseMgr.h
+    Bag.cpp
+    Bag.h
+    Camera.cpp
+    Camera.h
+    Corpse.cpp
+    Corpse.h
+    Creature.cpp
+    Creature.h
+    DynamicObject.cpp
+    DynamicObject.h
+    Formulas.h
+    GameObject.cpp
+    GameObject.h
+    GMTicketMgr.cpp
+    GMTicketMgr.h
+    Guild.cpp
+    Guild.h
+    Item.cpp
+    Item.h
+    ItemEnchantmentMgr.cpp
+    ItemEnchantmentMgr.h
+    ItemPrototype.h
+    LootMgr.cpp
+    LootMgr.h
+    Object.cpp
+    Object.h
+    ObjectAccessor.cpp
+    ObjectAccessor.h
+    ObjectGuid.cpp
+    ObjectGuid.h
+    ObjectMgr.cpp
+    ObjectMgr.h
+    ObjectPosSelector.cpp
+    ObjectPosSelector.h
+    Pet.cpp
+    Pet.h
+    Player.cpp
+    Player.h
+    ReputationMgr.cpp
+    ReputationMgr.h
+    SocialMgr.cpp
+    SocialMgr.h
+    SpellMgr.cpp
+    SpellMgr.h
+    StatSystem.cpp
+    TemporarySummon.cpp
+    TemporarySummon.h
+    Totem.cpp
+    Totem.h
+    Unit.cpp
+    Unit.h
+    UnitEvents.h
+    UpdateFields.h
+    UpdateMask.h
+)
+
+set(SRC_GRP_OUTDOOR_PVP
+    OutdoorPvP/OutdoorPvP.cpp
+    OutdoorPvP/OutdoorPvP.h
+    OutdoorPvP/OutdoorPvPEP.cpp
+    OutdoorPvP/OutdoorPvPEP.h
+    OutdoorPvP/OutdoorPvPMgr.cpp
+    OutdoorPvP/OutdoorPvPMgr.h
+    OutdoorPvP/OutdoorPvPSI.cpp
+    OutdoorPvP/OutdoorPvPSI.h
+)
+
+set(SRC_GRP_REFERENCES
+    FollowerReference.cpp
+    FollowerReference.h
+    FollowerRefManager.h
+    GroupReference.cpp
+    GroupReference.h
+    GroupRefManager.h
+    HostileRefManager.cpp
+    HostileRefManager.h
+    MapReference.h
+    MapRefManager.h
+    ThreatManager.cpp
+    ThreatManager.h
+)
+
+set(SRC_GRP_SERVER
+    DBCEnums.h
+    DBCfmt.h
+    DBCStores.cpp
+    DBCStores.h
+    DBCStructure.h
+    Opcodes.cpp
+    Opcodes.h
+    SharedDefines.h
+    SQLStorages.cpp
+    SQLStorages.h
+    WorldSession.cpp
+    WorldSession.h
+    WorldSocket.cpp
+    WorldSocket.h
+)
+
+set(SRC_GRP_TOOL
+    CharacterDatabaseCleaner.cpp
+    CharacterDatabaseCleaner.h
+    Language.h
+    PlayerDump.cpp
+    PlayerDump.h
+)
+
+set(SRC_GRP_VMAPS
+    vmap/BIH.cpp
+    vmap/BIH.h
+    vmap/BIHWrap.h
+    vmap/DynamicTree.cpp
+    vmap/DynamicTree.h
+    vmap/GameObjectModel.cpp
+    vmap/GameObjectModel.h
+    vmap/IVMapManager.h
+    vmap/MapTree.cpp
+    vmap/MapTree.h
+    vmap/ModelInstance.cpp
+    vmap/ModelInstance.h
+    vmap/RegularGrid.h
+    vmap/TileAssembler.cpp
+    vmap/TileAssembler.h
+    vmap/VMapDefinitions.h
+    vmap/VMapFactory.cpp
+    vmap/VMapFactory.h
+    vmap/VMapManager2.cpp
+    vmap/VMapManager2.h
+    vmap/VMapTools.h
+    vmap/WorldModel.cpp
+    vmap/WorldModel.h
+)
+
+set(SRC_GRP_WORLD_HANDLERS
+    AccountMgr.cpp
+    AccountMgr.h
+    AddonHandler.cpp
+    AddonHandler.h
+    AuctionHouseHandler.cpp
+    Cell.h
+    CellImpl.h
+    Channel.cpp
+    Channel.h
+    ChannelHandler.cpp
+    ChannelMgr.cpp
+    ChannelMgr.h
+    CharacterHandler.cpp
+    Chat.cpp
+    Chat.h
+    ChatHandler.cpp
+    CombatHandler.cpp
+    CreatureLinkingMgr.cpp
+    CreatureLinkingMgr.h
+    DuelHandler.cpp
+    GameEventMgr.cpp
+    GameEventMgr.h
+    GMTicketHandler.cpp
+    GossipDef.cpp
+    GossipDef.h
+    GridDefines.h
+    GridMap.cpp
+    GridMap.h
+    GridNotifiers.cpp
+    GridNotifiers.h
+    GridNotifiersImpl.h
+    GridStates.cpp
+    GridStates.h
+    Group.cpp
+    Group.h
+    GroupHandler.cpp
+    GuildHandler.cpp
+    GuildMgr.cpp
+    GuildMgr.h
+    InstanceData.cpp
+    InstanceData.h
+    ItemHandler.cpp
+    LootHandler.cpp
+    Mail.cpp
+    Mail.h
+    MailHandler.cpp
+    Map.cpp
+    Map.h
+    MapManager.cpp
+    MapManager.h
+    MapPersistentStateMgr.cpp
+    MapPersistentStateMgr.h
+    MassMailMgr.cpp
+    MassMailMgr.h
+    MiscHandler.cpp
+    MoveMap.cpp
+    MoveMap.h
+    MoveMapSharedDefines.h
+    MovementHandler.cpp
+    NPCHandler.cpp
+    NPCHandler.h
+    ObjectGridLoader.cpp
+    ObjectGridLoader.h
+    Path.h
+    PetHandler.cpp
+    PetitionsHandler.cpp
+    PoolManager.cpp
+    PoolManager.h
+    QueryHandler.cpp
+    QuestDef.cpp
+    QuestDef.h
+    QuestHandler.cpp
+    ScriptMgr.cpp
+    ScriptMgr.h
+    SkillHandler.cpp
+    Spell.cpp
+    Spell.h
+    SpellAuraDefines.h
+    SpellAuras.cpp
+    SpellAuras.h
+    SpellEffects.cpp
+    SpellHandler.cpp
+    TaxiHandler.cpp
+    TradeHandler.cpp
+    Transports.cpp
+    Transports.h
+    UnitAuraProcHandler.cpp
+    UpdateData.cpp
+    UpdateData.h
+    WaypointManager.cpp
+    WaypointManager.h
+    Weather.cpp
+    Weather.h
+    World.cpp
+    World.h
+)
+
+set(LIBRARY_SRCS
+    ${SRC_GRP_AI}
+    ${SRC_GRP_AHBOT}
+    ${SRC_GRP_BATTLEGROUND}
+    ${SRC_GRP_LUAENGINE}
+    ${SRC_GRP_CHAT_COMMANDS}
+    ${SRC_GRP_MOTION_GEN}
+    ${SRC_GRP_MOVEMENT}
+    ${SRC_GRP_OBJECT}
+    ${SRC_GRP_OUTDOOR_PVP}
+    ${SRC_GRP_REFERENCES}
+    ${SRC_GRP_SERVER}
+    ${SRC_GRP_TOOL}
+    ${SRC_GRP_VMAPS}
+    ${SRC_GRP_WORLD_HANDLERS}
+    pchdef.cpp
+    pchdef.h
+)
+
+source_group("AI"
+  FILES
+    ${SRC_GRP_AI}
+)
+
+source_group("AhBot"
+  FILES
+    ${SRC_GRP_AHBOT}
+)
+
+source_group("BattleGround"
+  FILES
+    ${SRC_GRP_BATTLEGROUND}
+)
+
+source_group("LuaEngine"
+  FILES
+    ${SRC_GRP_LUAENGINE}
+)
+
+source_group("Chat Commands"
+  FILES
+    ${SRC_GRP_CHAT_COMMANDS}
+)
+
+source_group("Motion generators"
+  FILES
+    ${SRC_GRP_MOTION_GEN}
+)
+
+source_group("Movement"
+  FILES
+    ${SRC_GRP_MOVEMENT}
+)
+
+source_group("Object"
+  FILES
+    ${SRC_GRP_OBJECT}
+)
+
+source_group("Outdoor PvP"
+  FILES
+    ${SRC_GRP_OUTDOOR_PVP}
+)
+
+source_group("References"
+  FILES
+    ${SRC_GRP_REFERENCES}
+)
+
+source_group("Server"
+  FILES
+    ${SRC_GRP_SERVER}
+)
+
+source_group("Tool"
+  FILES
+    ${SRC_GRP_TOOL}
+)
+
+source_group("vmaps"
+  FILES
+    ${SRC_GRP_VMAPS}
+)
+
+source_group("World/Handlers"
+  FILES
+    ${SRC_GRP_WORLD_HANDLERS}
+)
+
+if(PCH)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 target_include_directories(${LIBRARY_NAME}
   INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_dependencies(${LIBRARY_NAME} RevisionGenerator)
+target_link_libraries(${LIBRARY_NAME}
+  shared
+  detour
+  lualib
+)
 
 if(UNIX)
   # Both systems don't have libdl and don't need them
@@ -91,10 +427,8 @@ if(UNIX)
   endif()
 endif()
 
-# Define BUILD_SCRIPTDEV if need
-if (BUILD_SCRIPTDEV)
-  add_definitions(-DBUILD_SCRIPTDEV)
-endif()
+add_dependencies(${LIBRARY_NAME} revision.h)
+add_dependencies(${LIBRARY_NAME} lualib)
 
 # Define BUILD_PLAYERBOT if need
 if (BUILD_PLAYERBOT)
@@ -120,4 +454,4 @@ if(PCH)
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/PlayerBot/playerbot.conf.dist.in DESTINATION ${CONF_DIR} RENAME playerbot.conf.dist)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine/extensions DESTINATION ${BIN_DIR}/lua_scripts/)
