@@ -29,6 +29,7 @@
 #include "Log.h"
 #include "Util.h"
 #include "ProgressBar.h"
+#include "LuaEngine.h"
 
 /// Weather sound defines ( only for 1.12 )
 enum WeatherSounds
@@ -237,6 +238,8 @@ bool Weather::SendWeatherForPlayersInZone(Map const* _map)
 
     ///- Log the event
     LogWeatherState(GetWeatherState());
+
+    sEluna->OnChange(this, m_zone, GetWeatherState(), m_grade);
     return true;
 }
 

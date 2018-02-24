@@ -41,10 +41,9 @@
 #include "VMapFactory.h"
 #include "BattleGround/BattleGround.h"
 #include "Util.h"
-#include "Chat/Chat.h"
-#include "Server/SQLStorages.h"
-#include "MotionGenerators/PathFinder.h"
-#include "Entities/ObjectGuid.h"
+#include "Chat.h"
+#include "SQLStorages.h"
+#include "LuaEngine.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -3063,6 +3062,10 @@ void Spell::cast(bool skipCheck)
     // traded items have trade slot instead of guid in m_itemTargetGUID
     // set to real guid to be sent later to the client
     m_targets.updateTradeSlotItem();
+
+    // used by eluna
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        sEluna->OnSpellCast(m_caster->ToPlayer(), this, skipCheck);
 
     FillTargetMap();
 

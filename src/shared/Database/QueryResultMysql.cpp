@@ -29,7 +29,7 @@ QueryResultMysql::QueryResultMysql(MYSQL_RES* result, MYSQL_FIELD* fields, uint6
     MANGOS_ASSERT(mCurrentRow);
 
     for (uint32 i = 0; i < mFieldCount; ++i)
-        mCurrentRow[i].SetType(ConvertNativeType(fields[i].type));
+        mCurrentRow[i].SetType(fields[i].type);
 }
 
 QueryResultMysql::~QueryResultMysql()
@@ -69,9 +69,9 @@ void QueryResultMysql::EndQuery()
     }
 }
 
-enum Field::DataTypes QueryResultMysql::ConvertNativeType(enum_field_types mysqlType) const
+Field::SimpleDataTypes QueryResultMysql::GetSimpleType(enum_field_types type)
 {
-    switch (mysqlType)
+    switch (type)
     {
         case FIELD_TYPE_TIMESTAMP:
         case FIELD_TYPE_DATE:
