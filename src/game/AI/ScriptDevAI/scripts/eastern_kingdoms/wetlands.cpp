@@ -73,6 +73,9 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
 
     void Reset() override
     {
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        SetReactState(REACT_PASSIVE);
+
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
         {
             m_bFriendSummoned = false;
@@ -100,6 +103,8 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
                 SetRun();
                 m_creature->RemoveAurasDueToSpell(SPELL_STEALTH);
                 m_creature->SetFactionTemporary(FACTION_ENEMY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                SetReactState(REACT_AGGRESSIVE);
                 break;
             case 6:
                 // fail the quest if he escapes
@@ -135,8 +140,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
 
         if (m_creature->GetHealthPercent() < 20.0f || uiDamage > m_creature->GetHealth())
         {
-            // despawn friend - Note: may not work on guardian pets
-            if (Creature* pFriend = GetClosestCreatureWithEntry(m_creature, NPC_SLIMS_FRIEND, 10.0f))
+            if (Pet* pFriend = m_creature->FindGuardianWithEntry(NPC_SLIMS_FRIEND))
             {
                 DoScriptText(SAY_FRIEND_DEFEAT, pFriend);
                 pFriend->ForcedDespawn(1000);
