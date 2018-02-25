@@ -90,7 +90,12 @@ CreatureAI* GetAI_npc_bartleby(Creature* pCreature)
 enum
 {
     QUEST_MISSING_DIPLO_PT8     = 1447,
-    FACTION_HOSTILE             = 168
+    FACTION_HOSTILE             = 168,
+    NPC_OLD_TOWN_THUG           = 4969,
+
+    SAY_STONEFIST_1             = -1001274,
+    SAY_STONEFIST_2             = -1001275,
+    SAY_STONEFIST_3             = -1001276,
 };
 
 struct npc_dashel_stonefistAI : public ScriptedAI
@@ -100,19 +105,73 @@ struct npc_dashel_stonefistAI : public ScriptedAI
         Reset();
     }
 
-    void Reset() override {}
+    uint32 m_uiStartEventTimer;
+    uint32 m_uiEndEventTimer;
+    ObjectGuid m_playerGuid;
+
+    void Reset() override
+   {
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+    }
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (uiDamage > m_creature->GetHealth() || ((m_creature->GetHealth() - uiDamage) * 100 / m_creature->GetMaxHealth() < 15))
         {
             uiDamage = 0;
-
-            if (pDoneBy->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)pDoneBy)->AreaExploredOrEventHappens(QUEST_MISSING_DIPLO_PT8);
-
+            DoScriptText(SAY_STONEFIST_2, m_creature);
+            m_uiEndEventTimer = 5000;
             EnterEvadeMode();
         }
+    }
+
+    void StartEvent(ObjectGuid pGuid)
+    {
+        m_playerGuid = pGuid;
+        m_uiStartEventTimer = 3000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiStartEventTimer)
+        {
+            if (m_uiStartEventTimer < uiDiff)
+            {
+                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                {
+                    AttackStart(pPlayer);
+
+                    if (Creature* pThug = m_creature->SummonCreature(NPC_OLD_TOWN_THUG, -8672.33f, 442.88f, 99.98f, 3.5f, TEMPSPAWN_DEAD_DESPAWN, 300000))
+                        pThug->AI()->AttackStart(pPlayer);
+
+                    if (Creature* pThug = m_creature->SummonCreature(NPC_OLD_TOWN_THUG, -8691.59f, 441.66f, 99.41f, 6.1f, TEMPSPAWN_DEAD_DESPAWN, 300000))
+                        pThug->AI()->AttackStart(pPlayer);
+                }
+
+                m_uiStartEventTimer = 0;
+            }
+            else
+                m_uiStartEventTimer -= uiDiff;
+        }
+
+        if (m_uiEndEventTimer)
+        {
+            if (m_uiEndEventTimer < uiDiff)
+            {
+                DoScriptText(SAY_STONEFIST_3, m_creature);
+
+                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                    pPlayer->AreaExploredOrEventHappens(QUEST_MISSING_DIPLO_PT8);
+
+                m_uiEndEventTimer = 0;
+            }
+            else
+                m_uiEndEventTimer -= uiDiff;
+        }
+
+        DoMeleeAttackIfReady();
     }
 };
 
@@ -121,7 +180,13 @@ bool QuestAccept_npc_dashel_stonefist(Player* pPlayer, Creature* pCreature, cons
     if (pQuest->GetQuestId() == QUEST_MISSING_DIPLO_PT8)
     {
         pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
-        pCreature->AI()->AttackStart(pPlayer);
+        pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        pCreature->AI()->SetReactState(REACT_AGGRESSIVE);
+        DoScriptText(SAY_STONEFIST_1, pCreature, pPlayer);
+
+        if (npc_dashel_stonefistAI* pStonefistAI = dynamic_cast<npc_dashel_stonefistAI*>(pCreature->AI()))
+           pStonefistAI->StartEvent(pPlayer->GetObjectGuid());
     }
     return true;
 }

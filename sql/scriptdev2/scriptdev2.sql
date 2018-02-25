@@ -1671,6 +1671,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001252,'%s is immobilized.',0,2,0,0,'npc_solenor EMOTE_IMMOBILIZED'),
 (-1001253,'You dare interfere with this being''s testing? The battle must be fought alone! You shall all pay for this interference!',0,0,0,0,'the_cleaner SAY_CLEANER_AGGRO');
 -- used in TBC core
+(-1001274,'Now you''re gonna get it good, $n!', '0', '0', '0', '0','dashel stonefist SAY_STONEFIST_1'),
+(-1001275,'Okay, okay! Enough fighting. No one else needs to get hurt.', '0', '0', '0', '0','dashel stonefist SAY_STONEFIST_2'),
+(-1001276,'It''s okay, boys. Back off. You''ve done enough. I''ll meet up with you later.', '0', '0', '0', '0','dashel stonefist SAY_STONEFIST_3');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
