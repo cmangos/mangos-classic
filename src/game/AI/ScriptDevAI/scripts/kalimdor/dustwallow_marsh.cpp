@@ -749,6 +749,40 @@ bool QuestAccept_npc_stinky_ignatz(Player* pPlayer, Creature* pCreature, const Q
     return true;
 }
 
+/*######
+## at_sentry_point
+######*/
+
+enum SentryPoint
+{
+    QUEST_MISSING_DIPLO_PT14    = 1265,
+    SPELL_TELEPORT_VISUAL_2     = 799,  // TODO Find the correct spell
+    NPC_SENTRY_POINT_GUARD      = 5085
+};
+
+bool AreaTrigger_at_sentry_point(Player* pPlayer, const AreaTriggerEntry* /*pAt*/)
+{
+    QuestStatus quest_status = pPlayer->GetQuestStatus(QUEST_MISSING_DIPLO_PT14);
+    if (pPlayer->isDead() || quest_status == QUEST_STATUS_NONE || quest_status == QUEST_STATUS_COMPLETE)
+        return false;
+
+    if (!GetClosestCreatureWithEntry(pPlayer, NPC_TERVOSH, 100.0f))
+    {
+        if (Creature* pTervosh = pPlayer->SummonCreature(NPC_TERVOSH, -3476.51f, -4105.94f, 17.1f, 5.3816f, TEMPSPAWN_TIMED_DESPAWN, 60000))
+        {
+            pTervosh->CastSpell(pTervosh, SPELL_TELEPORT_VISUAL_2, TRIGGERED_OLD_TRIGGERED);
+
+            if (Creature* pGuard = GetClosestCreatureWithEntry(pTervosh, NPC_SENTRY_POINT_GUARD, 15.0f))
+            {
+                pGuard->SetFacingToObject(pTervosh);
+                pGuard->HandleEmote(EMOTE_ONESHOT_SALUTE);
+            }
+        }
+    }
+
+    return true;
+};
+
 void AddSC_dustwallow_marsh()
 {
     Script* pNewScript;
@@ -775,5 +809,10 @@ void AddSC_dustwallow_marsh()
     pNewScript->Name = "npc_stinky_ignatz";
     pNewScript->GetAI = &GetAI_npc_stinky_ignatz;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_stinky_ignatz;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_sentry_point";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_sentry_point;
     pNewScript->RegisterSelf();
 }
