@@ -10304,6 +10304,8 @@ bool Unit::TakePossessOf(Unit* possessed)
             possessedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, player->GetUInt32Value(PLAYER_DUEL_TEAM));
         else
             possessedPlayer->setFaction(getFaction());
+
+        charmInfo->SetCharmState("PossessedAI");
     }
 
     // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
