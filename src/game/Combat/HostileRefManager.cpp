@@ -64,6 +64,25 @@ void HostileRefManager::addThreatPercent(int32 pValue)
     }
 }
 
+void HostileRefManager::threatTemporaryFade(Unit* pVictim, float pThreat, bool apply)
+{
+    HostileReference* ref = getFirst();
+
+    while (ref)
+    {
+        if (apply)
+        {
+            float curThreat = ref->getThreat();
+            float reducedThreat = std::max(-curThreat, pThreat);
+            ref->setFadeoutThreatReduction(reducedThreat);
+        }
+        else
+            ref->resetFadeoutThreatReduction();
+
+        ref = ref->next();
+    }
+}
+
 //=================================================
 // The online / offline status is given to the method. The calculation has to be done before
 
