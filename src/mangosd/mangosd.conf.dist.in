@@ -331,6 +331,10 @@ MaxWhoListReturns = 49
 #        Log file of DB errors detected at server run
 #        Default: "DBErrors.log"
 #
+#    ElunaErrorLogFile
+#        Log file of Eluna errors detected at server run
+#        Default: "ElunaErrors.log"
+#
 #    EventAIErrorLogFile
 #        Log file of EventAI errors detected at server run
 #        Default: "EventAIErrors.log"
@@ -408,6 +412,7 @@ LogFilter_SpellCast = 0
 WorldLogFile = ""
 WorldLogTimestamp = 0
 DBErrorLogFile = "DBErrors.log"
+ElunaErrorLogFile = "ElunaErrors.log"
 EventAIErrorLogFile = "EventAIErrors.log"
 CharLogFile = "Char.log"
 CharLogTimestamp = 0
@@ -1574,3 +1579,28 @@ SOAP.Port = 7878
 CharDelete.Method = 0
 CharDelete.MinLevel = 0
 CharDelete.KeepDays = 30
+
+###################################################################################################################
+#  ELUNA SETTINGS
+#
+#    Eluna.Enabled
+#        Enable Eluna LuaEngine
+#        Default: 1 (Enabled)
+#                 0 (Disabled)
+#
+#   Eluna.TraceBack
+#       Description: Sets whether to use debug.traceback function on a lua error or not.
+#                    Notice that you can redefine the function.
+#       Default:    false - (use default error output)
+#                   true  - (use debug.traceback function)
+#
+#   Eluna.ScriptPath
+#       Description: Sets the location of the script folder to load scripts from
+#                    The path can be relative or absolute.
+#       Default:    "lua_scripts"
+#
+###################################################################################################################
+
+Eluna.Enabled = 1
+Eluna.TraceBack = false
+Eluna.ScriptPath = "lua_scripts"

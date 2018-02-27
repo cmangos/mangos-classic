@@ -16,7 +16,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 # disable warnings for dependencies
-DisableWarnings()
+add_compile_options(-w)
+
+add_subdirectory(lualib)
 add_subdirectory(recastnavigation)
 add_subdirectory(src)
 if (BUILD_EXTRACTORS)

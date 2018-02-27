@@ -69,8 +69,9 @@ addons:
       - libboost-system1.55-dev
       - libboost-program-options1.55-dev
       - libboost-thread1.55-dev
-      - libboost-regex1.55-dev
-
+      - libboost-filesystem1.55-dev
+  
+>>>>>>> Eluna/master
 # overwrite GCC version for GCC build only
 before_install:
   - if [ $CC = "gcc" ] ; then export CC=gcc-4.8 CXX=g++-4.8 ; fi

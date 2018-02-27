@@ -31,9 +31,10 @@
 #include "Globals/ObjectAccessor.h"
 #include "Mails/Mail.h"
 #include "WorldPacket.h"
-#include "Tools/Formulas.h"
-#include "Grids/GridNotifiersImpl.h"
-#include "Chat/Chat.h"
+#include "Formulas.h"
+#include "GridNotifiersImpl.h"
+#include "Chat.h"
+#include "LuaEngine.h"
 
 #include <cstdarg>
 
@@ -230,6 +231,8 @@ BattleGround::BattleGround(): m_BuffChange(false), m_StartDelayTime(0), m_startM
 
 BattleGround::~BattleGround()
 {
+    //sEluna->OnBGDestroy(this, GetTypeID(), GetInstanceID());
+
     // remove objects and creatures
     // (this is done automatically in mapmanager update, when the instance is reset after the reset time)
     sBattleGroundMgr.RemoveBattleGround(GetInstanceID(), GetTypeID());
@@ -599,6 +602,8 @@ void BattleGround::UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player*
 
 void BattleGround::EndBattleGround(Team winner)
 {
+    sEluna->OnBGEnd(this, GetTypeID(), GetInstanceID(), winner);
+
     this->RemoveFromBGFreeSlotQueue();
 
     uint32 loser_rating = 0;
@@ -1011,6 +1016,8 @@ void BattleGround::StartBattleGround()
     // This must be done here, because we need to have already invited some players when first BG::Update() method is executed
     // and it doesn't matter if we call StartBattleGround() more times, because m_BattleGrounds is a map and instance id never changes
     sBattleGroundMgr.AddBattleGround(GetInstanceID(), GetTypeID(), this);
+
+    sEluna->OnBGStart(this, GetTypeID(), GetInstanceID());
 }
 
 void BattleGround::AddPlayer(Player* plr)

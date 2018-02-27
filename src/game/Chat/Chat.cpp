@@ -35,6 +35,7 @@
 #include "Pools/PoolManager.h"
 #include "GameEvents/GameEventMgr.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
+#include "LuaEngine.h"
 
 #include <cstdarg>
 
@@ -1232,6 +1233,8 @@ void ChatHandler::ExecuteCommand(const char* text)
         }
         case CHAT_COMMAND_UNKNOWN_SUBCOMMAND:
         {
+            if (!sEluna->OnCommand(m_session ? m_session->GetPlayer() : NULL, fullcmd.c_str()))
+                return;
             SendSysMessage(LANG_NO_SUBCMD);
             ShowHelpForCommand(command->ChildCommands, text);
             SetSentErrorMessage(true);
@@ -1239,6 +1242,8 @@ void ChatHandler::ExecuteCommand(const char* text)
         }
         case CHAT_COMMAND_UNKNOWN:
         {
+            if (!sEluna->OnCommand(m_session ? m_session->GetPlayer() : NULL, fullcmd.c_str()))
+                return;
             SendSysMessage(LANG_NO_CMD);
             SetSentErrorMessage(true);
             break;

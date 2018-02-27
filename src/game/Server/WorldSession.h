@@ -140,6 +140,7 @@ class WorldSession
         void SendNotification(int32 string_id, ...) const;
         void SendPetNameInvalid(uint32 error, const std::string& name) const;
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res) const;
+        void SendGuildInvite(Player* player, bool alreadyInGuild = false);
         void SendAreaTriggerMessage(const char* Text, ...) const ATTR_PRINTF(2, 3);
         void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0) const;
         void SendQueryTimeResponse() const;
