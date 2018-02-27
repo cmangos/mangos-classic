@@ -5689,12 +5689,12 @@ Player const* Unit::GetControllingClientPlayer() const
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
         // Charm always removes control from original client...
-        if (ObjectGuid const& charmerGuid = GetCharmerGuid())
+        if (HasCharmer())
         {
             // ... but if it is a possessing charm, some other client may have control
             if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED))
             {
-                Unit const* charmer = ObjectAccessor::GetUnit(*this, charmerGuid);
+                Unit const* charmer = GetCharmer();
                 if (charmer && charmer->GetTypeId() == TYPEID_PLAYER)
                     return static_cast<Player const*>(charmer);
             }
