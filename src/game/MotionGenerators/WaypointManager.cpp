@@ -84,10 +84,8 @@ void WaypointManager::Load()
         while (result->NextRow());
         delete result;
 
-        //                                   0   1      2           3           4           5         6
-        result = WorldDatabase.Query("SELECT id, point, position_x, position_y, position_z, waittime, script_id,"
-                                     //   7
-                                     "orientation FROM creature_movement");
+        //                                   0   1      2           3           4           5            6         7
+        result = WorldDatabase.Query("SELECT id, point, position_x, position_y, position_z, orientation, waittime, script_id FROM creature_movement");
 
         BarGoLink bar(result->GetRowCount());
 
@@ -119,9 +117,9 @@ void WaypointManager::Load()
             node.x              = fields[2].GetFloat();
             node.y              = fields[3].GetFloat();
             node.z              = fields[4].GetFloat();
-            node.orientation    = fields[7].GetFloat();
-            node.delay          = fields[5].GetUInt32();
-            node.script_id      = fields[6].GetUInt32();
+            node.orientation    = fields[5].GetFloat();
+            node.delay          = fields[6].GetUInt32();
+            node.script_id      = fields[7].GetUInt32();
 
             // prevent using invalid coordinates
             if (!MaNGOS::IsValidMapCoord(node.x, node.y, node.z, node.orientation))
@@ -210,10 +208,8 @@ void WaypointManager::Load()
         while (result->NextRow());
         delete result;
 
-        //                                   0      1       2           3           4           5         6       7
-        result = WorldDatabase.Query("SELECT entry, pathId, point, position_x, position_y, position_z, waittime, script_id,"
-                                     //   8
-                                     "orientation FROM creature_movement_template");
+        //                                   0      1       2      3           4           5           6            7
+        result = WorldDatabase.Query("SELECT entry, pathId, point, position_x, position_y, position_z, orientation, waittime, script_id FROM creature_movement_template");
 
         BarGoLink bar(result->GetRowCount());
 
@@ -240,9 +236,9 @@ void WaypointManager::Load()
             node.x              = fields[3].GetFloat();
             node.y              = fields[4].GetFloat();
             node.z              = fields[5].GetFloat();
-            node.orientation    = fields[8].GetFloat();
-            node.delay          = fields[6].GetUInt32();
-            node.script_id      = fields[7].GetUInt32();
+            node.orientation    = fields[6].GetFloat();
+            node.delay          = fields[7].GetUInt32();
+            node.script_id      = fields[8].GetUInt32();
 
             // prevent using invalid coordinates
             if (!MaNGOS::IsValidMapCoord(node.x, node.y, node.z, node.orientation))
@@ -287,7 +283,7 @@ void WaypointManager::Load()
 }
 
 /// Insert a node into the storage for external access
-bool WaypointManager::AddExternalNode(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime)
+bool WaypointManager::AddExternalNode(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime, uint32 scriptId)
 {
     if (pathId < 0 || pathId >= 0xFF)
     {
@@ -301,7 +297,7 @@ bool WaypointManager::AddExternalNode(uint32 entry, int32 pathId, uint32 pointId
         return false;
     }
 
-    m_externalPathTemplateMap[(entry << 8) + pathId][pointId] = WaypointNode(x, y, z, o, waittime, 0);
+    m_externalPathTemplateMap[(entry << 8) + pathId][pointId] = WaypointNode(x, y, z, o, waittime, scriptId);
     return true;
 }
 

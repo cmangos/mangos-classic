@@ -10,8 +10,9 @@ SDCategory: Npc
 EndScriptData */
 
 #include "AI/ScriptDevAI/PreCompiledHeader.h"
-#include "escort_ai.h"
-#include "../system/system.h"
+#include "AI/ScriptDevAI/base/escort_ai.h"
+#include "AI/ScriptDevAI/system/system.h"
+#include "MotionGenerators/WaypointManager.h"
 
 const float MAX_PLAYER_DISTANCE = 66.0f;
 
@@ -21,7 +22,8 @@ npc_escortAI::npc_escortAI(Creature* creature) : ScriptedAI(creature),
     m_questForEscort(nullptr),
     m_isRunning(false),
     m_canInstantRespawn(false),
-    m_canReturnToStart(false)
+    m_canReturnToStart(false),
+    m_waypointPathID(0)
 {}
 
 void npc_escortAI::GetAIInformation(ChatHandler& reader)
@@ -271,7 +273,7 @@ void npc_escortAI::Start(bool run, const Player* player, const Quest* quest, boo
         return;
     }
 
-    if (!pSystemMgr.GetPathInfo(m_creature->GetEntry(), 1))
+    if (!sWaypointMgr.GetPathFromOrigin(m_creature->GetEntry(), m_creature->GetGUIDLow(), m_waypointPathID, PATH_FROM_EXTERNAL))
     {
         script_error_log("EscortAI attempt to start escorting for %s, but has no waypoints loaded.", m_creature->GetScriptName().data());
         return;
@@ -301,7 +303,7 @@ void npc_escortAI::Start(bool run, const Player* player, const Quest* quest, boo
 
     // Start moving along the path with 2500ms delay
     m_creature->GetMotionMaster()->Clear(false, true);
-    m_creature->GetMotionMaster()->MoveWaypoint(1, 3, 2500);
+    m_creature->GetMotionMaster()->MoveWaypoint(m_waypointPathID, PATH_FROM_EXTERNAL, 2500);
 
     JustStartedEscort();
 }
@@ -321,4 +323,9 @@ void npc_escortAI::SetEscortPaused(bool paused)
         RemoveEscortState(STATE_ESCORT_PAUSED);
         m_creature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
     }
+}
+
+void npc_escortAI::SetEscortWaypoints(uint32 pathId)
+{
+    m_waypointPathID = pathId;
 }

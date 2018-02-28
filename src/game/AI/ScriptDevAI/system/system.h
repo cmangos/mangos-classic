@@ -41,21 +41,6 @@ class SystemMgr
         void LoadScriptTextsCustom();
         void LoadScriptGossipTexts();
         void LoadScriptWaypoints();
-
-        PathInformation const* GetPathInfo(uint32 entry, int32 pathId) const
-        {
-            EntryPathInfo::const_iterator findEntry = m_pathInfo.find(entry);
-            if (findEntry == m_pathInfo.end())
-                return nullptr;
-            std::map<int32, PathInformation>::const_iterator findPath = findEntry->second.find(pathId);
-            if (findPath == findEntry->second.end())
-                return nullptr;
-
-            return &(findPath->second);
-        }
-
-    private:
-        EntryPathInfo m_pathInfo;
 };
 
 #endif

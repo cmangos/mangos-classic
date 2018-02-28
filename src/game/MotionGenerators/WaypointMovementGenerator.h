@@ -93,6 +93,7 @@ class WaypointMovementGenerator<Creature>
 
         void OnArrived(Creature&);
         void StartMove(Creature&);
+        void InformAI(Creature& creature, uint32 type, uint32 data);
 
         ShortTimeTracker i_nextMoveTime;
         bool m_isArrivalDone;

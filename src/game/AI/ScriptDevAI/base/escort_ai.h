@@ -60,6 +60,7 @@ struct npc_escortAI : public ScriptedAI
         bool IsSD2EscortMovement(uint32 moveType) const;
         virtual void JustStartedEscort() {}
 
+        void SetEscortWaypoints(uint32 pathId);
     private:
         bool IsPlayerOrGroupInRange();
 
@@ -75,6 +76,8 @@ struct npc_escortAI : public ScriptedAI
         bool m_isRunning;                                  // all creatures are walking by default (has flag SPLINEFLAG_WALKMODE)
         bool m_canInstantRespawn;                          // if creature should respawn instantly after escort over (if not, database respawntime are used)
         bool m_canReturnToStart;                           // if creature can walk same path (loop) without despawn. Not for regular escort quests.
+
+        uint32 m_waypointPathID;
 };
 
 #endif

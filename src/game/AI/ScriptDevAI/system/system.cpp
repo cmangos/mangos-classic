@@ -9,7 +9,7 @@
 #include "Database/DatabaseEnv.h"
 #include "MotionGenerators/WaypointManager.h"
 
-std::string  strSD2Version;
+std::string strSD2Version;
 
 SystemMgr::SystemMgr()
 {
@@ -24,15 +24,14 @@ SystemMgr& SystemMgr::Instance()
 void SystemMgr::LoadVersion()
 {
     // Get Version information
-    QueryResult* pResult = WorldDatabase.PQuery("SELECT version FROM sd2_db_version LIMIT 1");
+    QueryResult* result = WorldDatabase.PQuery("SELECT version FROM sd2_db_version LIMIT 1");
 
-    if (pResult)
+    if (result)
     {
-        Field* pFields = pResult->Fetch();
+        Field* fields = result->Fetch();
 
-        strSD2Version = pFields[0].GetCppString();
-
-        delete pResult;
+        strSD2Version = fields[0].GetCppString();
+        delete result;
     }
     else
         script_error_log("Missing `sd2_db_version` information.");
@@ -65,54 +64,58 @@ void SystemMgr::LoadScriptGossipTexts()
 
 void SystemMgr::LoadScriptWaypoints()
 {
-    uint64 uiCreatureCount = 0;
+    uint64 creatureCount = 0;
 
     // Load Waypoints
-    QueryResult* pResult = WorldDatabase.PQuery("SELECT COUNT(entry) FROM script_waypoint GROUP BY entry");
-    if (pResult)
+    QueryResult* result = WorldDatabase.PQuery("SELECT COUNT(entry) FROM script_waypoint GROUP BY entry");
+    if (result)
     {
-        uiCreatureCount = pResult->GetRowCount();
-        delete pResult;
+        creatureCount = result->GetRowCount();
+        delete result;
     }
 
-    outstring_log("SD2: Loading Script Waypoints for " UI64FMTD " creature(s)...", uiCreatureCount);
+    outstring_log("SD2: Loading Script Waypoints for " UI64FMTD " creature(s)...", creatureCount);
 
-    pResult = WorldDatabase.PQuery("SELECT entry, pointid, location_x, location_y, location_z, waittime FROM script_waypoint ORDER BY entry, pointid");
+    result = WorldDatabase.PQuery("SELECT entry, pathId, pointid, position_x, position_y, position_z, orientation, waittime, script_id FROM script_waypoint ORDER BY entry, pathId, pointid");
 
-    if (pResult)
+    if (result)
     {
-        BarGoLink bar(pResult->GetRowCount());
-        uint32 uiNodeCount = 0;
+        BarGoLink bar(result->GetRowCount());
+        uint32 nodeCount = 0;
 
         do
         {
             bar.step();
-            Field* pFields = pResult->Fetch();
+            Field* fields = result->Fetch();
 
-            uint32 uiEntry  = pFields[0].GetUInt32();
-            uint32 pathId   = 1; // pFields[X].GetUInt32();
-            uint32 pointId  = pFields[1].GetUInt32();
-            uint32 delay    = pFields[5].GetUInt32();
+            uint32 entry  = fields[0].GetUInt32();
 
-            CreatureInfo const* pCInfo = GetCreatureTemplateStore(uiEntry);
-            if (!pCInfo)
+            CreatureInfo const* info = GetCreatureTemplateStore(entry);
+            if (!info)
             {
-                error_db_log("SD2: DB table script_waypoint has waypoint for nonexistent creature entry %u", uiEntry);
+                error_db_log("SD2: DB table script_waypoint has waypoint for nonexistent creature entry %u", entry);
                 continue;
             }
 
+            uint32 pathId       = fields[1].GetUInt32();
+            uint32 pointId      = fields[2].GetUInt32();
+            float position_x    = fields[3].GetFloat();
+            float position_y    = fields[4].GetFloat();
+            float position_z    = fields[5].GetFloat();
+            float orientation   = fields[6].GetFloat();
+            uint32 waitTime     = fields[7].GetUInt32();
+            uint32 scriptId     = fields[8].GetUInt32();
 
-            if (sWaypointMgr.AddExternalNode(uiEntry, pathId, pointId, pFields[2].GetFloat(), pFields[3].GetFloat(), pFields[4].GetFloat(), 100, delay))
-                m_pathInfo[uiEntry][pathId].lastWaypoint = pointId;
+            sWaypointMgr.AddExternalNode(entry, pathId, pointId, position_x, position_y, position_z, orientation, waitTime, scriptId);
 
-            ++uiNodeCount;
+            ++nodeCount;
         }
-        while (pResult->NextRow());
+        while (result->NextRow());
 
-        delete pResult;
+        delete result;
 
-        outstring_log();
-        outstring_log(">> Loaded %u Script Waypoint nodes.", uiNodeCount);
+        outstring_log("");
+        outstring_log(">> Loaded %u Script Waypoint nodes.", nodeCount);
     }
     else
     {
