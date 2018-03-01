@@ -2073,7 +2073,10 @@ class Unit : public WorldObject
         void SetIncapacitatedState(bool apply, uint32 state = 0, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, uint32 time = 0);
         ///----------End of crowd control methods----------
 
-        void SetFeignDeath(bool apply, ObjectGuid casterGuid = ObjectGuid(), bool disengage = true);
+        bool IsFeigningDeath() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29); }
+        bool IsFeigningDeathSuccessfully() const { return hasUnitState(UNIT_STAT_FEIGN_DEATH); }
+        void SetFeignDeath(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, bool dynamic = true, bool success = true);
+
         void InterruptSpellsCastedOnMe(bool killDelayed = false);
 
         void AddComboPointHolder(uint32 lowguid) { m_ComboPointHolders.insert(lowguid); }
