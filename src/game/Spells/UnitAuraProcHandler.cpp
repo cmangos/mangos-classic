@@ -809,7 +809,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
             // Master of Elements
             if (dummySpell->SpellIconID == 1920)
             {
-                if (!procSpell)
+                if (!procSpell || data.spell->GetScriptValue() == 1)
                     return SPELL_AURA_PROC_FAILED;
 
                 // mana cost save
@@ -820,6 +820,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
 
                 target = this;
                 triggered_spell_id = 29077;
+                data.spell->SetScriptValue(1); // can only happen once per spell
                 break;
             }
 
