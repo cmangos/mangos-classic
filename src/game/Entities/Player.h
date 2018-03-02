@@ -1942,7 +1942,6 @@ class Player : public Unit
         bool IsFlying() const { return false; }
         bool IsFreeFlying() const { return false; }
 
-        bool IsClientControl(Unit const* target) const;
         void UpdateClientControl(Unit const* target, bool enabled, bool forced = false) const;
 
         void SetMover(Unit* target) { m_mover = target ? target : this; }
