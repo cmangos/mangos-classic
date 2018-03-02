@@ -616,9 +616,12 @@ class ChatHandler
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
 
+        bool HandlePetLevelLoyaltyCommand(char* args);
+
         Player*   getSelectedPlayer() const;
-        Creature* getSelectedCreature() const;
         Unit*     getSelectedUnit(bool self = true) const;
+        Creature* getSelectedCreature() const;
+        Pet*      getSelectedPet() const;
 
         // extraction different type params from args string, all functions update (char** args) to first unparsed tail symbol at return
         static void  SkipWhiteSpaces(char** args);

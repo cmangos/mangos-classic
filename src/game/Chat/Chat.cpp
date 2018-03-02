@@ -479,6 +479,12 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
+    static ChatCommand petCommandTable[] =
+    {
+        { "levelloyalty",   SEC_GAMEMASTER,     true,  &ChatHandler::HandlePetLevelLoyaltyCommand,   "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                        "", nullptr }
+    };
+
     static ChatCommand poolCommandTable[] =
     {
         { "list",           SEC_GAMEMASTER,     false, &ChatHandler::HandlePoolListCommand,            "", nullptr },
@@ -736,6 +742,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "lookup",         SEC_MODERATOR,      true,  nullptr,                                           "", lookupCommandTable   },
         { "modify",         SEC_MODERATOR,      false, nullptr,                                           "", modifyCommandTable   },
         { "npc",            SEC_MODERATOR,      false, nullptr,                                           "", npcCommandTable      },
+        { "pet",            SEC_GAMEMASTER,     true,  nullptr,                                           "", petCommandTable      },
         { "pool",           SEC_GAMEMASTER,     true,  nullptr,                                           "", poolCommandTable     },
         { "pdump",          SEC_ADMINISTRATOR,  true,  nullptr,                                           "", pdumpCommandTable    },
         { "quest",          SEC_ADMINISTRATOR,  false, nullptr,                                           "", questCommandTable    },
@@ -1947,6 +1954,14 @@ Creature* ChatHandler::getSelectedCreature() const
         return nullptr;
 
     return m_session->GetPlayer()->GetMap()->GetAnyTypeCreature(m_session->GetPlayer()->GetSelectionGuid());
+}
+
+Pet* ChatHandler::getSelectedPet() const
+{
+    if (!m_session)
+        return nullptr;
+
+    return m_session->GetPlayer()->GetMap()->GetPet(m_session->GetPlayer()->GetSelectionGuid());
 }
 
 /**
