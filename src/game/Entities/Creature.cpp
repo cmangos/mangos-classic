@@ -378,10 +378,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     else
         SelectLevel();
 
-    if (team == HORDE)
-        setFaction(GetCreatureInfo()->FactionHorde);
-    else
-        setFaction(GetCreatureInfo()->FactionAlliance);
+    setFaction(GetCreatureInfo()->Faction);
 
     SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->NpcFlags);
 
@@ -419,7 +416,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     UpdateAllStats();
 
     // checked and error show at loading templates
-    if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->FactionAlliance))
+    if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->Faction))
     {
         if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_PVP)
             SetPvP(true);
@@ -2499,7 +2496,7 @@ void Creature::ClearTemporaryFaction()
         return;
 
     // Reset to original faction
-    setFaction(GetCreatureInfo()->FactionAlliance);
+    setFaction(GetCreatureInfo()->Faction);
 
     ForceHealthAndPowerUpdate();                            // update health and power for client needed to hide enemy real value
 

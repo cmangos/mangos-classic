@@ -317,8 +317,7 @@ void CreatureAI::CheckForHelp(Unit* who, Creature* me, float distance)
                 else // In non-instanceable creature must belong to same family and faction to attack player.
                 {
                     if (me->GetCreatureInfo()->Family == ((Creature*)who)->GetCreatureInfo()->Family &&
-                            me->GetCreatureInfo()->FactionAlliance == ((Creature*)who)->GetCreatureInfo()->FactionAlliance &&
-                            me->GetCreatureInfo()->FactionHorde == ((Creature*)who)->GetCreatureInfo()->FactionHorde)
+                            me->GetCreatureInfo()->Faction == ((Creature*)who)->GetCreatureInfo()->Faction)
                         AttackStart(victim);
                 }
             }
