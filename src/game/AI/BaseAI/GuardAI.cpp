@@ -49,9 +49,6 @@ void GuardAI::MoveInLineOfSight(Unit* who)
         if (!victim)
             return;
 
-        if (!victim->CanAttack(m_creature))
-            return;
-
         if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(victim) && victim->isInAccessablePlaceFor(m_creature))
         {
             if (who->GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() != TYPEID_PLAYER)

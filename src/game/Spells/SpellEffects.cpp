@@ -5348,6 +5348,13 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
             m_caster->AddGameObject(pGameObj);
             break;
         }
+        // Other GO types have startOpen attribute but only GAMEOBJECT_TYPE_BUTTON is used by spells
+        case GAMEOBJECT_TYPE_BUTTON:
+        {
+            // Change GO state if it is supposed to be already activated at summoning
+            pGameObj->SetGoState((goinfo->button.startOpen ? GO_STATE_ACTIVE : GO_STATE_READY));
+            break;
+        }
         case GAMEOBJECT_TYPE_FISHINGHOLE:
         case GAMEOBJECT_TYPE_CHEST:
         default:

@@ -1575,6 +1575,7 @@ class Player : public Unit
         void SendAttackSwingNotInRange() const;
         void SendAttackSwingBadFacingAttack() const;
         void SendAutoRepeatCancel() const;
+        void SendFeignDeathResisted() const;
         void SendExplorationExperience(uint32 Area, uint32 Experience) const;
 
         void ResetInstances(InstanceResetMethod method);
@@ -1941,7 +1942,6 @@ class Player : public Unit
         bool IsFlying() const { return false; }
         bool IsFreeFlying() const { return false; }
 
-        bool IsClientControl(Unit const* target) const;
         void UpdateClientControl(Unit const* target, bool enabled, bool forced = false) const;
 
         void SetMover(Unit* target) { m_mover = target ? target : this; }

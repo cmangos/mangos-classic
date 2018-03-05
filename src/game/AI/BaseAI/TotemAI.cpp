@@ -115,7 +115,7 @@ void TotemAI::UpdateAI(const uint32 diff)
 
     // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
     if (!victim ||
-            !m_creature->CanAttack(victim) || !m_creature->IsWithinDistInMap(victim, maxRange) ||
+            !m_creature->CanAttackOnSight(victim) || !m_creature->IsWithinDistInMap(victim, maxRange) ||
             m_creature->CanAssist(victim) || !victim->isVisibleForOrDetect(m_creature, m_creature, false))
     {
         victim = nullptr;

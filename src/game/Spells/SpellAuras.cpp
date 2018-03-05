@@ -1420,7 +1420,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     // Some appear to be used depending on creature location, in water, at solid ground, in air/suspended, etc
                     // For now, just handle all the same way
                     if (target->GetTypeId() == TYPEID_UNIT)
-                        target->SetFeignDeath(apply);
+                        target->SetFeignDeath(apply, GetCasterGuid(), GetId());
 
                     return;
                 }
@@ -2206,10 +2206,40 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
 
     Unit* target = GetTarget();
 
-    if (apply)
-        target->InterruptSpellsCastedOnMe();
+    // Do not remove it yet if more effects are up, do it for the last effect
+    if (!apply && target->HasAuraType(SPELL_AURA_FEIGN_DEATH))
+        return;
 
-    target->SetFeignDeath(apply, GetCasterGuid());
+    if (apply)
+    {
+        bool success = true;
+
+        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        {
+            // Players and player-controlled units do an additional success roll for this aura on application
+            const SpellEntry* entry = GetSpellProto();
+            const SpellSchoolMask schoolMask = GetSpellSchoolMask(entry);
+            auto attackers = target->getAttackers();
+            for (auto i = attackers.begin(); i != attackers.end(); ++i)
+            {
+                if ((*i) && !(*i)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                {
+                    if (target->MagicSpellHitResult((*i), entry, schoolMask) != SPELL_MISS_NONE)
+                    {
+                        success = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (success)
+            target->InterruptSpellsCastedOnMe();
+
+        target->SetFeignDeath(apply, GetCasterGuid(), GetId(), true, success);
+    }
+    else
+        target->SetFeignDeath(false);
 }
 
 void Aura::HandleAuraModDisarm(bool apply, bool Real)

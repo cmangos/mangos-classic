@@ -2575,7 +2575,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // cleanup unit flags (will be re-applied if need at aura load).
     RemoveFlag(UNIT_FIELD_FLAGS,
-               UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NON_MOVING_DEPRECATED | UNIT_FLAG_NOT_ATTACKABLE_1 |
+               UNIT_FLAG_UNK_0 | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_NOT_ATTACKABLE_1 |
                UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC    | UNIT_FLAG_LOOTING          |
                UNIT_FLAG_PET_IN_COMBAT  | UNIT_FLAG_SILENCED     | UNIT_FLAG_PACIFIED         |
                UNIT_FLAG_STUNNED        | UNIT_FLAG_IN_COMBAT    | UNIT_FLAG_DISARMED         |
@@ -15715,6 +15715,12 @@ void Player::SendAutoRepeatCancel() const
     GetSession()->SendPacket(data);
 }
 
+void Player::SendFeignDeathResisted() const
+{
+    WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 0);
+    GetSession()->SendPacket(data);
+}
+
 void Player::SendExplorationExperience(uint32 Area, uint32 Experience) const
 {
     WorldPacket data(SMSG_EXPLORATION_EXPERIENCE, 8);
@@ -16293,7 +16299,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
         return false;
     }
 
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_MOVING_DEPRECATED))
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST))
         return false;
 
     // taximaster case
@@ -18088,50 +18094,13 @@ void Player::ResurectUsingRequestData()
     SpawnCorpseBones();
 }
 
-bool Player::IsClientControl(Unit const* target) const
-{
-    if (!target)
-        return false;
-
-    // Applies only to player controlled units
-    if (!target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-        return false;
-
-    // These flags are meant to be used with client control taken away (4/5 confirmed by data)
-    if (target->HasFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_UNK_0 | UNIT_FLAG_NON_MOVING_DEPRECATED | UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING | UNIT_FLAG_TAXI_FLIGHT)))
-        return false;
-
-    // Player in completed battleground during "score screen"
-    // TODO: research if its actually done serverside with any of flags listed above;
-    // It would make perfect sense and clean this implementation up a bit
-    if (target->GetTypeId() == TYPEID_PLAYER)
-    {
-        Player const* player = static_cast<Player const*>(target);
-        if (player->InBattleGround())
-        {
-            if (const BattleGround* bg = player->GetBattleGround())
-            {
-                if (bg->GetStatus() == STATUS_WAIT_LEAVE)
-                    return false;
-            }
-        }
-    }
-
-    // If unit is possessed, it must be charmed by the player
-    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED))
-        return target->HasCharmer(GetObjectGuid());
-
-    // Players only have control over self by default
-    return (target == this);
-}
-
 void Player::UpdateClientControl(Unit const* target, bool enabled, bool forced) const
 {
     if (target)
     {
         // Sending disabled control multiple times for the same unit is harmless (seen in data all the time)
         // Do a double-check if we should enable it only
-        if (forced || !enabled || IsClientControl(target))
+        if (forced || !enabled || target->IsClientControlled(this))
         {
             const PackedGuid& packedGuid = target->GetPackGUID();
             WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, packedGuid.size() + 1);

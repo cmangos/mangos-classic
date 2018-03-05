@@ -5548,12 +5548,13 @@ bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= fals
 
 void Unit::CombatStop(bool includingCast, bool includingCombo)
 {
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
+
     AttackStop(true, includingCast, includingCombo);
     RemoveAllAttackers();
 
-    if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
-    else
+    if (GetTypeId() != TYPEID_PLAYER)
     {
         ((Creature*)this)->SetNoCallAssistance(false);
 
@@ -5682,19 +5683,47 @@ Player const* Unit::GetControllingPlayer() const
     return nullptr;
 }
 
-Player const* Unit::GetControllingClientPlayer() const
+bool Unit::IsClientControlled(Player const* exactClient /*= nullptr*/) const
+{
+    // Severvide method to check if unit is client controlled (optionally check for specific client in control)
+
+    // Applies only to player controlled units
+    if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        return false;
+
+    // These flags are meant to be used when server controls this unit, client control is taken away
+    if (HasFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_UNK_0 | UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING)))
+        return false;
+
+    // If unit is possessed, it has lost original control...
+    if (ObjectGuid const &guid = GetCharmerGuid())
+    {
+        // ... but if it is a possessing charm, then we have to check if some other player controls it
+        if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED) && guid.IsPlayer())
+            return (exactClient ? (exactClient->GetObjectGuid() == guid) : true);
+        return false;
+    }
+
+    // By default: players have client control over themselves
+    if (GetTypeId() == TYPEID_PLAYER)
+        return (exactClient ? (exactClient == this) : true);
+    return false;
+}
+
+Player const* Unit::GetClientControlling() const
 {
     // Serverside reverse "mover" deduction logic at controlled unit
+
     // Applies only to player controlled units
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
         // Charm always removes control from original client...
-        if (ObjectGuid const& charmerGuid = GetCharmerGuid())
+        if (HasCharmer())
         {
             // ... but if it is a possessing charm, some other client may have control
             if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED))
             {
-                Unit const* charmer = ObjectAccessor::GetUnit(*this, charmerGuid);
+                Unit const* charmer = GetCharmer();
                 if (charmer && charmer->GetTypeId() == TYPEID_PLAYER)
                     return static_cast<Player const*>(charmer);
             }
@@ -5702,9 +5731,8 @@ Player const* Unit::GetControllingClientPlayer() const
         else if (GetTypeId() == TYPEID_PLAYER)
         {
             // Check if anything prevents original client from controlling
-            Player const* player = static_cast<Player const*>(this);
-            if (player->IsClientControl(player))
-                return player;
+            if (IsClientControlled(static_cast<Player const*>(this)))
+                return static_cast<Player const*>(this);
         }
     }
     return nullptr;
@@ -9315,7 +9343,7 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
         // Apply confusion or fleeing: update client control state before altering flags
         if (state & (UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING))
         {
-            if (const Player* controllingClientPlayer = GetControllingClientPlayer())
+            if (const Player* controllingClientPlayer = GetClientControlling())
                 controllingClientPlayer->UpdateClientControl(this, false);
         }
 
@@ -9328,7 +9356,7 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
         // Remove confusion or fleeing: update client control state after altering flags
         if (state & (UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING))
         {
-            if (const Player* controllingClientPlayer = GetControllingClientPlayer())
+            if (const Player* controllingClientPlayer = GetClientControlling())
                 controllingClientPlayer->UpdateClientControl(this, true);
         }
     }
@@ -9385,64 +9413,57 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
     }
 }
 
-void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/)
+void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, uint32 spellID /*= 0*/, bool dynamic /*= true*/, bool success /*= true*/)
 {
     if (apply)
     {
-        /*
-        WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
-        data<<GetGUID();
-        data<<uint8(0);
-        SendMessageToSet(data,true);
-        */
-
-        if (GetTypeId() != TYPEID_PLAYER)
-            StopMoving();
-        else
-            ((Player*)this)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
-
-
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
-        // blizz like 2.0.x
-        // SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);  [-ZERO] remove/replace ?
-
-        SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-
-        addUnitState(UNIT_STAT_FEIGN_DEATH);
-        CombatStop();
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
+        if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        {
+            if (success)
+            {
+                // Successful FD: set state, stop attack (+clear target for player-controlled npcs) and clear combat
+                addUnitState(UNIT_STAT_FEIGN_DEATH);
+                CombatStop();
+                getHostileRefManager().deleteReferences();
+            }
+            else
+            {
+                // Unsuccessful FD: do not set UNIT_STAT_FEIGN_DEATH, send resist message and stop attack (+clear target for player-controlled npcs)
+                if (GetTypeId() == TYPEID_PLAYER)
+                {
+                    static_cast<Player*>(this)->SendFeignDeathResisted();
+                    static_cast<Player*>(this)->SendAttackSwingCancelAttack();
+                }
+                AttackStop(true, false, true);
+            }
+        }
+        else
+        {
+            // NPC FD is always successful, but never observed to disengage from combat
+            addUnitState(UNIT_STAT_FEIGN_DEATH);
+            AttackStop(true, false, true);
+        }
+
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
+        if (dynamic)
+            SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+
         // prevent interrupt message
-        if (casterGuid == GetObjectGuid())
-            FinishSpell(CURRENT_GENERIC_SPELL, false);
+        if (spellID && casterGuid == GetObjectGuid())
+        {
+            if (m_currentSpells[CURRENT_GENERIC_SPELL] && m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Id == spellID)
+                FinishSpell(CURRENT_GENERIC_SPELL, false);
+        }
         InterruptNonMeleeSpells(true);
-        getHostileRefManager().deleteReferences();
     }
-    else
+    else if (IsFeigningDeath())
     {
-        /*
-        WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 9);
-        data<<GetGUID();
-        data<<uint8(1);
-        SendMessageToSet(data,true);
-        */
-
-        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
-        // blizz like 2.0.x
-        // SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH); [-ZERO] remove/replace ?
-
-        RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-
         clearUnitState(UNIT_STAT_FEIGN_DEATH);
 
-        if (GetTypeId() != TYPEID_PLAYER && isAlive())
-        {
-            // restore appropriate movement generator
-            if (getVictim())
-                GetMotionMaster()->MoveChase(getVictim());
-            else
-                GetMotionMaster()->Initialize();
-        }
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
+        RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
     }
 }
 
@@ -10242,7 +10263,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
         player->PossessSpellInitialize();
 
         // Take away client control immediately if we are not supposed to have control at the moment
-        if (!player->IsClientControl(pCreature))
+        if (!pCreature->IsClientControlled(player))
             player->UpdateClientControl(pCreature, false);
     }
 
@@ -10266,7 +10287,7 @@ bool Unit::TakePossessOf(Unit* possessed)
         player->UnsummonPetTemporaryIfAny();
 
     // Update possessed's client control status before altering flags
-    if (const Player* controllingClientPlayer = possessed->GetControllingClientPlayer())
+    if (const Player* controllingClientPlayer = possessed->GetClientControlling())
         controllingClientPlayer->UpdateClientControl(possessed, false);
 
     // stop combat but keep threat list
@@ -10304,6 +10325,8 @@ bool Unit::TakePossessOf(Unit* possessed)
             possessedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, player->GetUInt32Value(PLAYER_DUEL_TEAM));
         else
             possessedPlayer->setFaction(getFaction());
+
+        charmInfo->SetCharmState("PossessedAI");
     }
 
     // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
@@ -10341,7 +10364,7 @@ bool Unit::TakePossessOf(Unit* possessed)
         }
 
         // Take away client control immediately if we are not supposed to have control at the moment
-        if (!player->IsClientControl(possessed))
+        if (!possessed->IsClientControlled(player))
             player->UpdateClientControl(possessed, false);
     }
 
@@ -10356,7 +10379,7 @@ bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
         charmerPlayer->UnsummonPetTemporaryIfAny();
 
     // Update charmed's client control status before altering flags
-    if (const Player* controllingClientPlayer = charmed->GetControllingClientPlayer())
+    if (const Player* controllingClientPlayer = charmed->GetClientControlling())
         controllingClientPlayer->UpdateClientControl(charmed, false);
 
     // stop combat but keep threat list
@@ -10638,7 +10661,7 @@ void Unit::Uncharm(Unit* charmed)
     }
 
     // Update possessed's client control status after altering flags
-    if (const Player* controllingClientPlayer = charmed->GetControllingClientPlayer())
+    if (const Player* controllingClientPlayer = charmed->GetClientControlling())
         controllingClientPlayer->UpdateClientControl(charmed, true);
 
     if (player)
