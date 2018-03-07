@@ -95,9 +95,9 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
 
     char const* full;
     if (m_session)
-        full = _FULLVERSION(REVISION_DATE, REVISION_TIME, "|cffffffff|Hurl:" REVISION_ID "|h" REVISION_ID "|h|r");
+        full = _FULLVERSION(REVISION_DATE, "|cffffffff|Hurl:" REVISION_ID "|h" REVISION_ID "|h|r");
     else
-        full = _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID);
+        full = _FULLVERSION(REVISION_DATE, REVISION_ID);
     SendSysMessage(full);
 
     PSendSysMessage(LANG_USING_WORLD_DB, sWorld.GetDBVersion());

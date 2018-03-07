@@ -1,0 +1,6 @@
+#ifndef __REVISION_H__
+#define __REVISION_H__
+ #cmakedefine REVISION_ID "@REVISION_ID@"
+ #cmakedefine REVISION_DATE @REVISION_DATE@
+ #define VERSION "0.18"
+#endif // __REVISION_H__
