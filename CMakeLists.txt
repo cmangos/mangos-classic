@@ -275,17 +275,36 @@ if(GIT_EXECUTABLE)
   execute_process(
     COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    OUTPUT_VARIABLE GIT_REVISION
+    OUTPUT_VARIABLE REVISION_ID
     RESULT_VARIABLE GIT_RESULT
     ERROR_QUIET
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
   if(GIT_RESULT)
-    set(GIT_REVISION "Git repository not found")
+    set(REVISION_ID "Git repository not found")
+  else()
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} show --quiet --date=iso-strict --format="%ad" ${REVISION_ID}
+      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+      OUTPUT_VARIABLE REVISION_DATE
+      RESULT_VARIABLE GIT_RESULT
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(GIT_RESULT)
+      set(REVISION_DATE "0000-00-00T00:00:00+00:00")
+    endif()
   endif()
 else()
-  set(GIT_REVISION "Git not found")
+  set(REVISION_ID "Git not found")
+  set(REVISION_DATE "0000-00-00T00:00:00+00:00")
 endif()
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/src/shared/revision.h.in
+  ${CMAKE_SOURCE_DIR}/src/shared/revision.h
+  @ONLY
+)
 
 set(DEFINITIONS_RELEASE NDEBUG)
 set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
@@ -342,15 +361,6 @@ if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS)
   if(MSVC AND BUILD_GAME_SERVER)
     set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_SERVER_NAME})
   endif()
-
-  # Generate revision-extractor
-  set(GENREV_SRC
-    src/tools/genrevision/genrevision.cpp
-  )
-
-  add_executable(RevisionGenerator
-    ${GENREV_SRC}
-  )
 endif()
 
 if(BUILD_EXTRACTORS)

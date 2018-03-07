@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
 
     sLog.Initialize();
 
-    sLog.outString("%s [realm-daemon]", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID));
+    sLog.outString("%s [realm-daemon]", _FULLVERSION(REVISION_DATE, REVISION_ID));
     sLog.outString("<Ctrl-C> to stop.\n");
     sLog.outString("Using configuration file %s.", configFile.c_str());
 

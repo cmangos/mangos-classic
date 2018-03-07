@@ -82,8 +82,6 @@ target_include_directories(${LIBRARY_NAME}
   INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_dependencies(${LIBRARY_NAME} RevisionGenerator)
-
 if(UNIX)
   # Both systems don't have libdl and don't need them
   if (NOT (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR CMAKE_SYSTEM_NAME STREQUAL "NetBSD"))

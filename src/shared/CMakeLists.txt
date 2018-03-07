@@ -202,11 +202,6 @@ else()
   target_include_directories(${LIBRARY_NAME} PUBLIC ${MYSQL_INCLUDE_DIR})
 endif()
 
-add_custom_command(TARGET ${LIBRARY_NAME} PRE_BUILD
-      COMMAND RevisionGenerator ${CMAKE_SOURCE_DIR}
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src/shared
-      DEPENDS RevisionGenerator)
-
 # Mark the revision header as being generated.
 set_source_files_properties(${CMAKE_SOURCE_DIR}/src/shared/revision.h
   PROPERTIES GENERATED TRUE
