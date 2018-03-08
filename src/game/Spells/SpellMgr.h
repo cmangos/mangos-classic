@@ -1140,6 +1140,13 @@ inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
 
 inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex effIdx)
 {
+    // TODO: Move this to target logic
+    switch (spellInfo->EffectImplicitTargetA[effIdx])
+    {
+        case TARGET_AREAEFFECT_PARTY_AND_CLASS: return true;
+        default: break;
+    }
+
     return spellInfo->EffectRadiusIndex[effIdx] == 13 || IsIgnoreLosSpell(spellInfo);
 }
 
