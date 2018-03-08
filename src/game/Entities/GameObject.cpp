@@ -1579,7 +1579,8 @@ void GameObject::Use(Unit* user)
                     return;
             }
 
-            spellId = info->spellcaster.spellId;
+            if (spellCaster->CastSpell(user, info->spellcaster.spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid()) != SPELL_CAST_OK)
+                return;
 
             AddUse();
 
@@ -1588,7 +1589,7 @@ void GameObject::Use(Unit* user)
             // spellcaster GOs like city portals should never be locked
             if (info->spellcaster.charges && !GetUseCount())
                 SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
-            break;
+            return;
         }
         case GAMEOBJECT_TYPE_MEETINGSTONE:                  // 23
         {
