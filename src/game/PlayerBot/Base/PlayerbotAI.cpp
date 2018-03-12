@@ -3303,14 +3303,14 @@ Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit* victim)
 {
     // list empty? why are we here?
     if (m_attackerInfo.empty())
-        return 0;
+        return nullptr;
 
     // not searching something specific - return first in list
     if (!ait)
         return (m_attackerInfo.begin())->second.attacker;
 
     float t = ((ait & AIT_HIGHESTTHREAT) ? 0.00 : 9999.00);
-    Unit* a = 0;
+    Unit* a = nullptr;
     AttackerInfoList::iterator itr = m_attackerInfo.begin();
     for (; itr != m_attackerInfo.end(); ++itr)
     {
@@ -3324,10 +3324,7 @@ Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit* victim)
             continue;
 
         if (!(ait & (AIT_LOWESTTHREAT | AIT_HIGHESTTHREAT)))
-        {
-            a = itr->second.attacker;
-            itr = m_attackerInfo.end(); // == break;
-        }
+            return itr->second.attacker;
         else
         {
             if ((ait & AIT_HIGHESTTHREAT) && /*(itr->second.victim==m_bot) &&*/ itr->second.threat >= t)
