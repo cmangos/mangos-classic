@@ -50,7 +50,10 @@ enum
     SPELL_DOMINATEMIND           = 14515,
     SPELL_HOLYSMITE              = 9481,
     SPELL_HEAL                   = 12039,
-    SPELL_POWERWORDSHIELD        = 22187
+    SPELL_POWERWORDSHIELD        = 22187,
+
+    ASHBRINGER_RELAY_SCRIPT_ID   = 9001,
+    ITEM_CORRUPTED_ASHBRINGER    = 22691,
 };
 
 struct boss_scarlet_commander_mograineAI : public ScriptedAI
@@ -83,6 +86,24 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (!m_pInstance)
+            return;
+
+        if (m_pInstance->GetData(TYPE_ASHBRINGER_EVENT) == IN_PROGRESS)
+        {
+            if (Player* pPlayer = (Player*)pWho)
+            {
+                if (pPlayer->HasItemOrGemWithIdEquipped(ITEM_CORRUPTED_ASHBRINGER, 1) && m_creature->IsWithinDist(pPlayer, 20.0f))
+                {
+                    pPlayer->GetMap()->ScriptsStart(sRelayScripts, ASHBRINGER_RELAY_SCRIPT_ID, m_creature, pPlayer);
+                    m_pInstance->SetData(TYPE_ASHBRINGER_EVENT, DONE);
+                }
+            }
+        }
     }
 
     void Aggro(Unit* /*pWho*/) override

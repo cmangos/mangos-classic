@@ -7,9 +7,10 @@
 
 enum
 {
-    MAX_ENCOUNTER                   = 1,
+    MAX_ENCOUNTER                   = 2,
 
     TYPE_MOGRAINE_AND_WHITE_EVENT   = 1,
+    TYPE_ASHBRINGER_EVENT           = 2,
 
     NPC_MOGRAINE                    = 3976,
     NPC_WHITEMANE                   = 3977,
@@ -17,8 +18,12 @@ enum
     NPC_INTERROGATOR_VISHAS         = 3983,
 
     GO_WHITEMANE_DOOR               = 104600,
+    GO_CHAPEL_DOOR                  = 104591,
 
     SAY_TRIGGER_VORREL              = -1189015,
+
+    ITEM_CORRUPTED_ASHRBRINGER      = 22691,
+    SAY_ASHBRINGER_ENTRANCE         = -1189036,
 };
 
 class instance_scarlet_monastery : public ScriptedInstance
@@ -31,6 +36,8 @@ class instance_scarlet_monastery : public ScriptedInstance
         void OnCreatureCreate(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+
+        void OnPlayerEnter(Player* pPlayer) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiData) const override;
