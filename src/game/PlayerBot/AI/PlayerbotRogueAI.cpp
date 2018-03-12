@@ -82,7 +82,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoFirstCombatManeuver(Unit* pTarget)
 
     if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_OOC)
     {
-        if (m_WaitUntil > m_ai->CurrentTime() && !m_ai->IsGroupInCombat())
+        if (m_WaitUntil > m_ai->CurrentTime() && m_ai->IsGroupReady())
             return RETURN_NO_ACTION_OK; // wait it out
         else
             m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_OOC);
