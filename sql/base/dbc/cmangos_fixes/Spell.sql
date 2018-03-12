@@ -21,3 +21,6 @@ UPDATE spell_template SET Effect1=42, EffectBasePoints1=0 WHERE id=13166;
 -- Fixes InterruptFlags for spell 18115 (Viewing Room Student Transform - Effect): it should not cancel on movement
 UPDATE spell_template SET InterruptFlags=0 WHERE id=18115;
 
+-- Fixes Well Fed buff for some seasonal food like Winter Veil cookies
+UPDATE spell_template SET Effect2=6, EffectDieSides2=1, EffectBaseDice2=1, EffectImplicitTargetA2=1, EffectApplyAuraName2=23, EffectAmplitude2=10000, EffectTriggerSpell2=24870 WHERE Id=24869;
+UPDATE spell_template SET EffectRealPointsPerLevel1=0.25, EffectRealPointsPerLevel2=0.25, EffectBaseDice1=0, EffectBaseDice2=0, EffectBasePoints2=0 WHERE id=24870;
