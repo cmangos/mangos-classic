@@ -6898,6 +6898,9 @@ void PlayerbotAI::_HandleCommandFind(std::string& text, Player& /*fromPlayer*/)
 {
     extractGOinfo(text, m_lootTargets);
 
+    if (m_lootTargets.empty())
+        return;
+
     m_lootCurrent = m_lootTargets.front();
     m_lootTargets.pop_front();
 
