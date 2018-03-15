@@ -282,6 +282,7 @@ if(GIT_EXECUTABLE)
   )
   if(GIT_RESULT)
     set(REVISION_ID "Git repository not found")
+    set(REVISION_DATE "\"0000-00-00T00:00:00+00:00\"")
   else()
     execute_process(
       COMMAND ${GIT_EXECUTABLE} show --quiet --date=iso-strict --format="%ad" ${REVISION_ID}
@@ -292,12 +293,12 @@ if(GIT_EXECUTABLE)
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     if(GIT_RESULT)
-      set(REVISION_DATE "0000-00-00T00:00:00+00:00")
+      set(REVISION_DATE "\"0000-00-00T00:00:00+00:00\"")
     endif()
   endif()
 else()
   set(REVISION_ID "Git not found")
-  set(REVISION_DATE "0000-00-00T00:00:00+00:00")
+  set(REVISION_DATE "\"0000-00-00T00:00:00+00:00\"")
 endif()
 
 configure_file(
