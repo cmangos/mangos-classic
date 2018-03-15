@@ -1129,11 +1129,14 @@ inline bool IsReflectableSpell(SpellEntry const* spellInfo)
 // Mostly required by spells that target a creature inside GO
 inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
 {
-    //switch (spellInfo->Id)
-    //{
-    //    default:
-    //        break;
-    //}
+    switch (spellInfo->Id)
+    {
+        case 24742:                                 // Magic Wings
+        // case 42867:                              // both need LOS, likely TARGET_DUELVSPLAYER should use LOS ignore from normal radius, not per-effect radius WIP
+            return true;
+        default:
+            break;
+    }
 
     return spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS);
 }
