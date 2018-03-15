@@ -1744,12 +1744,12 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
         calcDamageInfo->totalDamage = 0;
 }
 
-void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
+void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
 {
-    if (!damageInfo)
+    if (!calcDamageInfo)
         return;
 
-    Unit* pVictim = damageInfo->target;
+    Unit* pVictim = calcDamageInfo->target;
     if (!pVictim)
         return;
 
@@ -1757,12 +1757,12 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         return;
 
     // Hmmmm dont like this emotes client must by self do all animations
-    if (damageInfo->HitInfo & HITINFO_CRITICALHIT)
+    if (calcDamageInfo->HitInfo & HITINFO_CRITICALHIT)
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
-    if (damageInfo->blocked_amount && damageInfo->TargetState != VICTIMSTATE_BLOCKS)
+    if (calcDamageInfo->blocked_amount && calcDamageInfo->TargetState != VICTIMSTATE_BLOCKS)
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
 
-    if (damageInfo->TargetState == VICTIMSTATE_PARRY)
+    if (calcDamageInfo->TargetState == VICTIMSTATE_PARRY)
     {
         if (pVictim->GetTypeId() != TYPEID_UNIT ||
                 !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN))
@@ -1803,15 +1803,15 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     }
 
     // Call default DealDamage
-    CleanDamage cleanDamage(damageInfo->cleanDamage, damageInfo->attackType, damageInfo->hitOutCome);
-    DealDamage(pVictim, damageInfo->totalDamage, &cleanDamage, DIRECT_DAMAGE, SpellSchoolMask(damageInfo->subDamage[0].damageSchoolMask), nullptr, durabilityLoss);
+    CleanDamage cleanDamage(calcDamageInfo->cleanDamage, calcDamageInfo->attackType, calcDamageInfo->hitOutCome);
+    DealDamage(pVictim, calcDamageInfo->totalDamage, &cleanDamage, DIRECT_DAMAGE, SpellSchoolMask(calcDamageInfo->subDamage[0].damageSchoolMask), nullptr, durabilityLoss);
 
     // If this attack by an NPC dealt some damage from behind to a player, it has a chance to daze victim
-    if (damageInfo->totalDamage && CanDazeInCombat(pVictim) && roll_chance_f(CalculateEffectiveDazeChance(pVictim, damageInfo->attackType)))
+    if (calcDamageInfo->totalDamage && CanDazeInCombat(pVictim) && roll_chance_f(CalculateEffectiveDazeChance(pVictim, calcDamageInfo->attackType)))
         CastSpell(pVictim, 1604, TRIGGERED_OLD_TRIGGERED);
 
     // update at damage Judgement aura duration that applied by attacker at victim
-    if (damageInfo->totalDamage)
+    if (calcDamageInfo->totalDamage)
     {
         SpellAuraHolderMap const& vAuras = pVictim->GetSpellAuraHolderMap();
         for (SpellAuraHolderMap::const_iterator itr = vAuras.begin(); itr != vAuras.end(); ++itr)
@@ -1823,18 +1823,18 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     }
 
     // If not miss
-    if (!(damageInfo->HitInfo & HITINFO_MISS))
+    if (!(calcDamageInfo->HitInfo & HITINFO_MISS))
     {
-        // on weapon hit casts
-        if (GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
-            ((Player*)this)->CastItemCombatSpell(pVictim, damageInfo->attackType);
-
-        SetInCombatWithVictim(pVictim);
-        pVictim->SetInCombatWithAggressor(this);
-
         // If not immune
-        if (damageInfo->TargetState != VICTIMSTATE_IS_IMMUNE)
+        if (calcDamageInfo->TargetState != VICTIMSTATE_IS_IMMUNE)
         {
+            // on weapon hit casts
+            if (GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
+                ((Player*)this)->CastItemCombatSpell(pVictim, calcDamageInfo->attackType);
+
+            SetInCombatWithVictim(pVictim);
+            pVictim->SetInCombatWithAggressor(this);
+
             // victim's damage shield
             std::set<Aura*> alreadyDone;
             AuraList const& vDamageShields = pVictim->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
