@@ -120,7 +120,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuver(Unit* pTarget)
 
     if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TEMP_WAIT_OOC)
     {
-        if (m_WaitUntil > m_ai->CurrentTime() && !m_ai->IsGroupInCombat())
+        if (m_WaitUntil > m_ai->CurrentTime() && m_ai->IsGroupReady())
             return RETURN_NO_ACTION_OK; // wait it out
         else
             m_ai->ClearGroupCombatOrder(PlayerbotAI::ORDERS_TEMP_WAIT_OOC);
@@ -577,13 +577,13 @@ bool PlayerbotWarriorAI::Pull()
     if (!m_bot) return false;
     if (!m_ai)  return false;
 
-    // In Classic, Warriors had 3 differents spells for shooting with range weapons
+    // In Classic, Warriors had 3 different spells for shooting with ranged weapons
     // So we need to determine which one to use
-    // First step: look for the item equiped in range slot
+    // First step: look for the item equiped in ranged slot
     Item* pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
     if (!pItem)
     {
-        m_ai->TellMaster("I don't have ranged weapon equiped.");
+        m_ai->TellMaster("I don't have a ranged weapon equiped.");
         return false;
     }
 
@@ -602,7 +602,7 @@ bool PlayerbotWarriorAI::Pull()
                 SHOOT = SHOOT_XBOW;
                 break;
             default:
-                m_ai->TellMaster("Can't pull: equiped range item is neither a gun, bow or crossbow.");
+                m_ai->TellMaster("Can't pull: equiped range item is neither a gun, a bow nor a crossbow.");
                 return false;
         }
     }
@@ -616,9 +616,13 @@ bool PlayerbotWarriorAI::Pull()
             m_ai->TellMaster("I'm out of range.");
             return false;
         }
+        if (!m_bot->IsWithinLOSInMap(m_ai->GetCurrentTarget()))
+        {
+            m_ai->TellMaster("Target is out of sight.");
+            return false;
+        }
 
         // shoot at the target
-//        if (m_ai->CastSpell(SHOOT, m_ai->GetCurrentTarget()))
         m_ai->FaceTarget(m_ai->GetCurrentTarget());
         m_bot->CastSpell(m_ai->GetCurrentTarget(), SHOOT, TRIGGERED_OLD_TRIGGERED);
         m_ai->TellMaster("I'm PULLING %s.", m_ai->GetCurrentTarget()->GetName());

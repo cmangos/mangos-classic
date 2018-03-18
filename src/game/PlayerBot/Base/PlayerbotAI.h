@@ -534,7 +534,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
 
         bool IsInCombat();
         bool IsRegenerating();
-        bool IsGroupInCombat();
+        bool IsGroupReady();
         Player* GetGroupTank(); // TODO: didn't want to pollute non-playerbot code but this should really go in group.cpp
         void SetGroupCombatOrder(CombatOrderType co);
         void ClearGroupCombatOrder(CombatOrderType co);

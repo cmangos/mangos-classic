@@ -1445,7 +1445,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                                                       (HasCollectFlag(COLLECT_FLAG_SKIN) && reqSkill == SKILL_SKINNING)))
                     {
                         // calculate skill requirement
-                        uint32 skillValue = m_bot->GetPureSkillValue(reqSkill);
+                        uint32 skillValue = m_bot->GetSkillValue(reqSkill);
                         uint32 targetLevel = c->getLevel();
                         uint32 reqSkillValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel - 10) * 10 : targetLevel * 5;
                         if (skillValue >= reqSkillValue)
@@ -2250,15 +2250,16 @@ void PlayerbotAI::DoCombatMovement()
 }
 
 /*
- * IsGroupInCombat()
+ * IsGroupReady()
  *
- * return true if any member of the group is in combat or (error handling only) occupied in some way
+ * return false if any member of the group is in combat or (error handling only) occupied in some way
+ * return true otherwise
  */
-bool PlayerbotAI::IsGroupInCombat()
+bool PlayerbotAI::IsGroupReady()
 {
-    if (!m_bot) return false;
-    if (!m_bot->isAlive() || m_bot->IsInDuel()) return true; // Let's just say you're otherwise occupied
-    if (m_bot->isInCombat()) return true;
+    if (!m_bot) return true;
+    if (!m_bot->isAlive() || m_bot->IsInDuel()) return false; // Let's just say you're otherwise occupied
+    if (m_bot->isInCombat()) return false;
 
     if (m_bot->GetGroup())
     {
@@ -2266,12 +2267,15 @@ bool PlayerbotAI::IsGroupInCombat()
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel() || groupMember->isInCombat()) // all occupied in some way
-                return true;
+            if (groupMember && groupMember->isAlive())
+            {
+                if (groupMember->IsInDuel() || groupMember->isInCombat())            // all occupied in some way
+                    return false;
+            }
         }
     }
 
-    return false;
+    return true;
 }
 
 Player* PlayerbotAI::GetGroupTank()
@@ -2403,9 +2407,9 @@ bool PlayerbotAI::CanPull(Player& fromPlayer)
         return false;
     }
 
-    if (IsGroupInCombat()) // TODO: add raid support
+    if (!IsGroupReady()) // TODO: add raid support
     {
-        SendWhisper("Unable to pull - the group is already in combat", fromPlayer);
+        SendWhisper("Unable to pull - the group or one of its member is somehow busy.", fromPlayer);
         return false;
     }
 
@@ -2832,7 +2836,7 @@ void PlayerbotAI::DoLoot()
 
         // determine bot's skill value for object's required skill
         if (skillId != SKILL_NONE)
-            SkillValue = uint32(m_bot->GetPureSkillValue(skillId));
+            SkillValue = uint32(m_bot->GetSkillValue(skillId));
 
         // bot has the specific skill or object requires no skill at all
         if ((m_bot->HasSkill(skillId) && skillId != SKILL_NONE) || (skillId == SKILL_NONE && go))
@@ -3299,14 +3303,14 @@ Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit* victim)
 {
     // list empty? why are we here?
     if (m_attackerInfo.empty())
-        return 0;
+        return nullptr;
 
     // not searching something specific - return first in list
     if (!ait)
         return (m_attackerInfo.begin())->second.attacker;
 
     float t = ((ait & AIT_HIGHESTTHREAT) ? 0.00 : 9999.00);
-    Unit* a = 0;
+    Unit* a = nullptr;
     AttackerInfoList::iterator itr = m_attackerInfo.begin();
     for (; itr != m_attackerInfo.end(); ++itr)
     {
@@ -3320,10 +3324,7 @@ Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit* victim)
             continue;
 
         if (!(ait & (AIT_LOWESTTHREAT | AIT_HIGHESTTHREAT)))
-        {
-            a = itr->second.attacker;
-            itr = m_attackerInfo.end(); // == break;
-        }
+            return itr->second.attacker;
         else
         {
             if ((ait & AIT_HIGHESTTHREAT) && /*(itr->second.victim==m_bot) &&*/ itr->second.threat >= t)
@@ -3374,7 +3375,7 @@ void PlayerbotAI::BotDataRestore()
 
 void PlayerbotAI::CombatOrderRestore()
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT combat_order,primary_target,secondary_target,pname,sname,combat_delay,auto_follow FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT combat_order,primary_target,secondary_target,pname,sname,combat_delay FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
 
     if (!result)
     {
@@ -3490,12 +3491,17 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit* target)
         m_combatOrder = (CombatOrderType)(((uint32) m_combatOrder & (uint32) ORDERS_SECONDARY) | (uint32) co);
         if (target)
             CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', primary_target = '%u', pname = '%s' WHERE guid = '%u'", (m_combatOrder & ~ORDERS_TEMP), gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
+        else
+            CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u' WHERE guid = '%u'", (m_combatOrder & ~ORDERS_TEMP), m_bot->GetGUIDLow());
+
     }
     else
     {
         m_combatOrder = (CombatOrderType)((uint32)m_combatOrder | (uint32)co);
         if (target)
             CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u', secondary_target = '%u', sname = '%s' WHERE guid = '%u'", (m_combatOrder & ~ORDERS_TEMP), gTempTarget, gname.c_str(), m_bot->GetGUIDLow());
+        else
+            CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = '%u' WHERE guid = '%u'", (m_combatOrder & ~ORDERS_TEMP), m_bot->GetGUIDLow());
     }
 }
 
@@ -6440,11 +6446,15 @@ void PlayerbotAI::_HandleCommandOrders(std::string& text, Player& fromPlayer)
     }
     else if (ExtractCommand("resume", text))
         CombatOrderRestore();
-    else if (ExtractCommand("resume", text))
-        CombatOrderRestore();
     else if (ExtractCommand("combat", text, true))
     {
         Unit* target = nullptr;
+
+        if (text == "")
+        {
+            SendWhisper("|cffff0000Syntax error:|cffffffff orders combat <botName> <reset | tank | heal | passive><assist | protect [targetPlayer]>", fromPlayer);
+            return;
+        }
 
         QueryResult* resultlvl = CharacterDatabase.PQuery("SELECT guid FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetObjectGuid().GetCounter());
         if (!resultlvl)
@@ -6454,13 +6464,6 @@ void PlayerbotAI::_HandleCommandOrders(std::string& text, Player& fromPlayer)
 
         size_t protect = text.find("protect");
         size_t assist = text.find("assist");
-
-
-        if (text == "")
-        {
-            SendWhisper("|cffff0000Syntax error:|cffffffff orders combat <botName> <reset | tank | heal | passive><assist | protect [targetPlayer]>", fromPlayer);
-            return;
-        }
 
         if (ExtractCommand("protect", text) || ExtractCommand("assist", text))
         {
@@ -6894,6 +6897,9 @@ void PlayerbotAI::_HandleCommandEquip(std::string& text, Player& /*fromPlayer*/)
 void PlayerbotAI::_HandleCommandFind(std::string& text, Player& /*fromPlayer*/)
 {
     extractGOinfo(text, m_lootTargets);
+
+    if (m_lootTargets.empty())
+        return;
 
     m_lootCurrent = m_lootTargets.front();
     m_lootTargets.pop_front();

@@ -2465,7 +2465,7 @@ bool LootTemplate::PlayerOrGroupFulfilsCondition(const Loot& loot, Player const*
 {
     auto& ownerSet = loot.GetOwnerSet();
     // optimization - no need to look up when player is solo
-    if (ownerSet.size() == 1)
+    if (ownerSet.size() <= 1)
         return sObjectMgr.IsPlayerMeetToCondition(conditionId, lootOwner, lootOwner->GetMap(), loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT);
 
     for (const ObjectGuid& guid : ownerSet)
