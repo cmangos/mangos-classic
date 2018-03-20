@@ -3674,6 +3674,19 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
         m_caster->AI()->JustSummoned(pGameObj);
 }
 
+static ScriptInfo generateCastSpellCommand(uint32 spellId, bool isTriggered = false)
+{
+    ScriptInfo si;
+    si.command = SCRIPT_COMMAND_CAST_SPELL;
+    si.id = 0;
+    si.castSpell.spellId = spellId;
+    si.buddyEntry = 0;
+    si.searchRadiusOrGuid = 0;
+    si.data_flags = isTriggered ? 0x08 : 0x00;
+    memset(si.textId, 0, MAX_TEXT_ID * sizeof(int32));
+    return si;
+}
+
 void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 {
     // TODO: we must implement hunter pet summon at login there (spell 6962)
@@ -3884,6 +3897,19 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, spellId, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 24731:                                    // Cannon Fire
+                {
+                    if(!unitTarget)
+                        return;
+
+                    static ScriptInfo activateCommand = generateCastSpellCommand(24742, true);    // Cast Magic Wings
+
+                    int32 delay_secs = 1;
+
+                    m_caster->GetMap()->ScriptCommandStart(activateCommand, delay_secs, unitTarget, m_caster);
+
+                    return;
+                }
                 case 24737:                                 // Ghost Costume
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -3891,6 +3917,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // Ghost Costume (male or female)
                     m_caster->CastSpell(unitTarget, unitTarget->getGender() == GENDER_MALE ? 24735 : 24736, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 24742:                                 // Magic Wings
+                {
+                    if(!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(24754);   // Darkmoon Faire Cannon root aura
                     return;
                 }
                 case 24751:                                 // Trick or Treat
@@ -4398,6 +4432,14 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
         case 8:                     // GO usage with TargetB = none or random
         case 10:                    // unk - 2 spells
         {
+            // Specific case for Darkmoon Faire Cannon (this is probably a hint that our logic about GO use / activation is not accurate)
+            switch (m_spellInfo->Id)
+            {
+            case 24731:
+                gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
+                return;
+            }
+
             static ScriptInfo activateCommand = generateActivateCommand();
 
             int32 delay_secs = m_spellInfo->CalculateSimpleValue(eff_idx);
