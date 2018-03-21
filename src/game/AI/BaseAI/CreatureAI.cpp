@@ -216,7 +216,7 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 
             caster->InterruptSpell(CURRENT_MELEE_SPELL);
 
             // Creature should stop wielding weapon while casting
-            caster->SetSheath(SHEATH_STATE_UNARMED);
+            // caster->SetSheath(SHEATH_STATE_UNARMED);
 
             uint32 flags = (castFlags & CAST_TRIGGERED ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE) | (castFlags & CAST_IGNORE_UNSELECTABLE_TARGET ? TRIGGERED_IGNORE_UNSELECTABLE_FLAG : TRIGGERED_NONE);
 
