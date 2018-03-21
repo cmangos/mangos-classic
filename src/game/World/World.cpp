@@ -212,6 +212,8 @@ World::AddSession_(WorldSession* s)
             // prevent decrease sessions count if session queued
             if (RemoveQueuedSession(old->second))
                 decrease_session = false;
+            // do not remove replaced session from queue if listed
+            delete old->second;
         }
     }
 
