@@ -7951,6 +7951,18 @@ bool Unit::SelectHostileTarget()
     if (!AI())
         return false;
 
+    if (!AI()->CanExecuteCombatAction())
+    {
+        if (hasUnitState(UNIT_STAT_CHANNELING) && !hasUnitState(UNIT_STAT_DONT_TURN))
+            if (Unit* target = GetMap()->GetUnit(GetTargetGuid()))
+                SetInFront(target);
+
+        if (AI()->GetCombatScriptStatus() && getThreatManager().isThreatListEmpty())
+            return false;
+
+        return true;
+    }
+
     Unit* target = nullptr;
     Unit* oldTarget = getVictim();
 
@@ -7992,37 +8004,34 @@ bool Unit::SelectHostileTarget()
 
     if (target)
     {
-        if (CanReactInCombat() && !hasUnitState(UNIT_STAT_DONT_TURN | UNIT_STAT_SEEKING_ASSISTANCE))
+        SetInFront(target);
+        if (oldTarget != target)
+            AI()->AttackStart(target);
+
+        // check if currently selected target is reachable
+        // NOTE: path alrteady generated from AttackStart()
+        if (!GetMotionMaster()->GetCurrent()->IsReachable())
         {
-            SetInFront(target);
-            if (oldTarget != target)
-                AI()->AttackStart(target);
+            // remove all taunts
+            RemoveSpellsCausingAura(SPELL_AURA_MOD_TAUNT);
 
-            // check if currently selected target is reachable
-            // NOTE: path alrteady generated from AttackStart()
-            if (!GetMotionMaster()->GetCurrent()->IsReachable())
+            if (getThreatManager().getThreatList().size() < 2)
             {
-                // remove all taunts
-                RemoveSpellsCausingAura(SPELL_AURA_MOD_TAUNT);
-
-                if (getThreatManager().getThreatList().size() < 2)
-                {
-                    // only one target in list, we have to evade after timer
-                    // TODO: make timer - inside Creature class
-                    AI()->EnterEvadeMode();
-                }
-                else
-                {
-                    // remove unreachable target from our threat list
-                    // next iteration we will select next possible target
-                    getHostileRefManager().deleteReference(target);
-                    getThreatManager().modifyThreatPercent(target, -101);
-                    // remove target from current attacker, do not exit combat settings
-                    AttackStop(true);
-                }
-
-                return false;
+                // only one target in list, we have to evade after timer
+                // TODO: make timer - inside Creature class
+                AI()->EnterEvadeMode();
             }
+            else
+            {
+                // remove unreachable target from our threat list
+                // next iteration we will select next possible target
+                getHostileRefManager().deleteReference(target);
+                getThreatManager().modifyThreatPercent(target, -101);
+                // remove target from current attacker, do not exit combat settings
+                AttackStop(true);
+            }
+
+            return false;
         }
         return true;
     }

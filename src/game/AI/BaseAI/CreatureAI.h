@@ -392,6 +392,9 @@ class CreatureAI
         ReactStates GetReactState() const { return m_reactState; }
         bool HasReactState(ReactStates state) const { return (m_reactState == state); }
 
+        virtual bool CanExecuteCombatAction();
+        void SetCombatScriptStatus(bool state) { m_combatScriptHappening = state; };
+        bool GetCombatScriptStatus() { return m_combatScriptHappening; }
 
         void SetMeleeEnabled(bool state);
 
@@ -417,6 +420,8 @@ class CreatureAI
         bool m_meleeEnabled;                              // If we allow melee auto attack
 
         ReactStates m_reactState;
+
+        bool m_combatScriptHappening;                    // disables normal combat functions without leaving combat
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>
