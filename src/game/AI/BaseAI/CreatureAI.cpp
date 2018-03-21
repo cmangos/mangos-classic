@@ -296,6 +296,46 @@ void CreatureAI::HandleMovementOnAttackStart(Unit* victim) const
     }
 }
 
+void CreatureAI::OnChannelStateChange(SpellEntry const * spellInfo, bool state, WorldObject* target)
+{
+    // TODO: Determine if CHANNEL_FLAG_MOVEMENT is worth implementing
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET))
+    {
+        if (spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
+            return;
+    }
+
+    if (state)
+    {
+        if (spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING && !spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET)) // 30166 changes target to none
+        {
+            m_unit->SetTurningOff(true);
+            m_unit->SetFacingTo(m_creature->GetOrientation());
+            m_unit->SetTarget(nullptr);
+        }
+        else if (target && m_creature != target)
+        {
+            m_unit->SetTarget(target);
+            m_unit->SetOrientation(m_unit->GetAngle(target));
+        }
+        else
+        {
+            m_unit->SetFacingTo(m_creature->GetOrientation());
+            m_unit->SetTarget(nullptr);
+        }
+    }
+    else
+    {
+        if (spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING)
+            m_unit->SetTurningOff(false);
+
+        if (m_unit->getVictim())
+            m_unit->SetTarget(m_unit->getVictim());
+        else
+            m_unit->SetTarget(nullptr);
+    }
+}
+
 void CreatureAI::CheckForHelp(Unit* who, Creature* me, float distance)
 {
     Unit* victim = who->getAttackerForHelper();

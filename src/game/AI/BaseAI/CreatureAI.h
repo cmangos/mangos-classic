@@ -372,6 +372,11 @@ class CreatureAI
          */
         virtual bool AssistPlayerInCombat(Unit* who) { return false; }
 
+        /*
+        * Notifies AI on channel state update
+        */
+        virtual void OnChannelStateChange(SpellEntry const* spellInfo, bool state, WorldObject* target = nullptr);
+
         void CheckForHelp(Unit* /*who*/, Creature* /*me*/, float /*dist*/);
         void DetectOrAttack(Unit* /*who*/, Creature* /*me*/);
 

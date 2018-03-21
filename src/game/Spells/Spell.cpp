@@ -3823,6 +3823,9 @@ void Spell::SendChannelUpdate(uint32 time, uint32 lastTick) const
 
         m_caster->SetChannelObject(nullptr);
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
+        m_caster->clearUnitState(UNIT_STAT_CHANNELING);
+        if (m_caster->AI())
+            m_caster->AI()->OnChannelStateChange(m_spellInfo, false);
     }
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -3879,6 +3882,10 @@ void Spell::SendChannelStart(uint32 duration)
         m_caster->SetChannelObject(target);
 
     m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, m_spellInfo->Id);
+    m_caster->addUnitState(UNIT_STAT_CHANNELING);
+
+    if (m_caster->AI())
+        m_caster->AI()->OnChannelStateChange(m_spellInfo, true, target);
 }
 
 void Spell::SendResurrectRequest(Player* target) const

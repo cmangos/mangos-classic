@@ -413,6 +413,7 @@ enum UnitState
     UNIT_STAT_FLEEING_MOVE    = 0x00040000,
     UNIT_STAT_SEEKING_ASSISTANCE = 0x00080000,
     UNIT_STAT_DONT_TURN       = 0x00100000,                 // Creature will not turn and acquire new target
+    UNIT_STAT_CHANNELING      = 0x00200000,
     // More room for other MMGens
 
     // High-Level states (usually only with Creatures)
@@ -2149,6 +2150,8 @@ class Unit : public WorldObject
 
         // Uncharm (physically revert the charm effect) the unit and reset player control if required
         void Uncharm(Unit* charmed);
+
+        void SetTurningOff(bool apply);
 
         float GetAttackDistance(Unit const* pl) const;
         virtual uint32 GetDetectionRange() const { return 20.f; }
