@@ -1207,11 +1207,16 @@ class Unit : public WorldObject
         uint32 m_extraAttacks;
         void DoExtraAttacks(Unit* pVictim);
 
-        void _addAttacker(Unit* pAttacker)                  //< (Internal Use) must be called only from Unit::Attack(Unit*)
+        bool _addAttacker(Unit* pAttacker)                  //< (Internal Use) must be called only from Unit::Attack(Unit*)
         {
             AttackerSet::const_iterator itr = m_attackers.find(pAttacker);
             if (itr == m_attackers.end())
+            {
                 m_attackers.insert(pAttacker);
+                return true;
+            }
+            else
+                return false;
         }
         void _removeAttacker(Unit* pAttacker)               //< (Internal Use) must be called only from Unit::AttackStop()
         {
@@ -1262,6 +1267,9 @@ class Unit : public WorldObject
          * \see Unit::AttackStop
          */
         void RemoveAllAttackers();
+
+        void MeleeAttackStart(Unit* victim);
+        void MeleeAttackStop(Unit* victim);
 
         /// Returns the Unit::m_attackers, that stores the units that are attacking you
         AttackerSet const& getAttackers() const { return m_attackers; }

@@ -252,7 +252,7 @@ void CreatureAI::AttackStart(Unit* who)
 
 bool CreatureAI::DoMeleeAttackIfReady() const
 {
-    return m_unit->UpdateMeleeAttackingState();
+    return m_unit->hasUnitState(UNIT_STAT_MELEE_ATTACKING) && m_unit->UpdateMeleeAttackingState();
 }
 
 void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=false*/)
@@ -510,4 +510,22 @@ Unit* CreatureAI::DoSelectLowestHpFriendly(float range, float minMissing, bool p
     }
 
     return pUnit;
+}
+
+void CreatureAI::SetMeleeEnabled(bool state)
+{
+    if (state == m_meleeEnabled)
+        return;
+
+    m_meleeEnabled = state;
+    if (m_creature->isInCombat())
+    {
+        if (m_meleeEnabled)
+        {
+            if (m_creature->getVictim())
+                m_creature->MeleeAttackStart(m_creature->getVictim());
+        }
+        else
+            m_creature->MeleeAttackStop(m_creature->getVictim());
+    }
 }

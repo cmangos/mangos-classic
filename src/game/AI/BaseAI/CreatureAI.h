@@ -392,6 +392,9 @@ class CreatureAI
         ReactStates GetReactState() const { return m_reactState; }
         bool HasReactState(ReactStates state) const { return (m_reactState == state); }
 
+
+        void SetMeleeEnabled(bool state);
+
     protected:
         ///== Fields =======================================
 

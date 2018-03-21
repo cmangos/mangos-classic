@@ -5447,6 +5447,21 @@ bool Unit::IsNeutralToAll() const
     return my_faction->IsNeutralToAll();
 }
 
+void Unit::AttackedBy(Unit* attacker)
+{
+    // trigger AI reaction
+    if (AI())
+        AI()->AttackedBy(attacker);
+
+    // do not pet reaction for self inflicted damage (like environmental)
+    if (attacker == this)
+        return;
+
+    // trigger pet AI reaction
+    if (Pet* pet = GetPet())
+        pet->AttackedBy(attacker);
+}
+
 bool Unit::Attack(Unit* victim, bool meleeAttack)
 {
     if (!victim || victim == this)
@@ -5484,11 +5499,7 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
             // switch to melee attack from ranged/magic
             if (meleeAttack)
             {
-                if (!hasUnitState(UNIT_STAT_MELEE_ATTACKING))
-                {
-                    addUnitState(UNIT_STAT_MELEE_ATTACKING);
-                    SendMeleeAttackStart(victim);
-                }
+                MeleeAttackStart(m_attacking);
                 return true;
             }
             return false;
@@ -5498,14 +5509,15 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
         AttackStop(true);
     }
 
-    // Set our target
-    SetTargetGuid(victim->GetObjectGuid());
+    // Do not set new target, creatures automatically turn to target clientside if target is set, leading to desync
+    if (AI() && AI()->CanExecuteCombatAction())
+        SetTargetGuid(victim->GetObjectGuid());
 
-    if (meleeAttack)
-        addUnitState(UNIT_STAT_MELEE_ATTACKING);
+    // If attacker was already added, it means we have m_attacking cleared due to some other
+    if (!victim->_addAttacker(this))
+        return false;
 
     m_attacking = victim;
-    m_attacking->_addAttacker(this);
 
     if (GetTypeId() == TYPEID_UNIT)
     {
@@ -5518,24 +5530,9 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
         resetAttackTimer(OFF_ATTACK);
 
     if (meleeAttack)
-        SendMeleeAttackStart(victim);
+        MeleeAttackStart(m_attacking);
 
     return true;
-}
-
-void Unit::AttackedBy(Unit* attacker)
-{
-    // trigger AI reaction
-    if (AI())
-        AI()->AttackedBy(attacker);
-
-    // do not pet reaction for self inflicted damage (like environmental)
-    if (attacker == this)
-        return;
-
-    // trigger pet AI reaction
-    if (Pet* pet = GetPet())
-        pet->AttackedBy(attacker);
 }
 
 bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= false*/, bool includingCombo /*= false*/)
@@ -5548,14 +5545,10 @@ bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= fals
     if (targetSwitch && GetTypeId() != TYPEID_PLAYER)
         SetTargetGuid(ObjectGuid());
 
-    clearUnitState(UNIT_STAT_MELEE_ATTACKING);
-
-    InterruptSpell(CURRENT_MELEE_SPELL);
+    MeleeAttackStop(m_attacking);
 
     if (m_attacking)
     {
-        SendMeleeAttackStop(m_attacking);
-
         m_attacking->_removeAttacker(this);
         m_attacking = nullptr;
         return true;
@@ -5589,6 +5582,27 @@ void Unit::CombatStop(bool includingCast, bool includingCombo)
         AI()->CombatStop();
 
     ClearInCombat();
+}
+
+void Unit::MeleeAttackStart(Unit* victim)
+{
+    if (!hasUnitState(UNIT_STAT_MELEE_ATTACKING))
+    {
+        addUnitState(UNIT_STAT_MELEE_ATTACKING);
+        if (victim)
+            SendMeleeAttackStart(victim);
+    }
+}
+
+void Unit::MeleeAttackStop(Unit* victim)
+{
+    if (hasUnitState(UNIT_STAT_MELEE_ATTACKING))
+    {
+        clearUnitState(UNIT_STAT_MELEE_ATTACKING);
+        InterruptSpell(CURRENT_MELEE_SPELL);
+        if (victim)
+            SendMeleeAttackStop(victim);
+    }
 }
 
 struct CombatStopWithPetsHelper
