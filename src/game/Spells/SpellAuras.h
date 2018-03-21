@@ -393,6 +393,8 @@ class Aura
 
         SpellEffectIndex GetEffIndex() const { return m_effIndex; }
         int32 GetBasePoints() const { return m_currentBasePoints; }
+        int32 GetAmount() const { return m_modifier.m_amount; }
+        void SetAmount(int32 amount) { m_modifier.m_amount = amount; }
 
         int32 GetAuraMaxDuration() const { return GetHolder()->GetAuraMaxDuration(); }
         int32 GetAuraDuration() const { return GetHolder()->GetAuraDuration(); }
