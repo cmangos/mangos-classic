@@ -7846,16 +7846,6 @@ void Unit::TauntApply(Unit* taunter)
     if (target && target == taunter)
         return;
 
-    // Only attack taunter if this is a valid target
-    if (CanReactInCombat() && !IsSecondChoiceTarget(taunter, true, true))
-    {
-        if (GetTargetGuid() || !target)
-            SetInFront(taunter);
-
-        if (AI())
-            AI()->AttackStart(taunter);
-    }
-
     getThreatManager().tauntApply(taunter);
 }
 
@@ -7876,33 +7866,7 @@ void Unit::TauntFadeOut(Unit* taunter)
     if (!target || target != taunter)
         return;
 
-    if (getThreatManager().isThreatListEmpty())
-    {
-        m_fixateTargetGuid.Clear();
-
-        if (AI())
-            AI()->EnterEvadeMode();
-
-        if (InstanceData* mapInstance = GetInstanceData())
-            mapInstance->OnCreatureEvade((Creature*)this);
-
-        if (m_isCreatureLinkingTrigger)
-            GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_EVADE, (Creature*)this);
-
-        return;
-    }
-
     getThreatManager().tauntFadeOut(taunter);
-    target = getThreatManager().getHostileTarget();
-
-    if (target && target != taunter)
-    {
-        if (GetTargetGuid())
-            SetInFront(target);
-
-        if (AI())
-            AI()->AttackStart(target);
-    }
 }
 
 //======================================================================
@@ -8056,12 +8020,6 @@ bool Unit::SelectHostileTarget()
     // enter in evade mode in other case
     m_fixateTargetGuid.Clear();
     AI()->EnterEvadeMode();
-
-    if (InstanceData* mapInstance = GetInstanceData())
-        mapInstance->OnCreatureEvade((Creature*)this);
-
-    if (m_isCreatureLinkingTrigger)
-        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_EVADE, (Creature*)this);
 
     return false;
 }
