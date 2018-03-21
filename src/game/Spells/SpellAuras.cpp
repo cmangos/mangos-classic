@@ -834,8 +834,12 @@ void Aura::TriggerSpell()
                     }
 //                    // Restoration
 //                    case 24379: break;
-//                    // Cannon Prep
-//                    case 24832: break;
+                    // Cannon Prep
+                    case 24832:                              // Darkmoon Canon - Mulgore
+                    case 24743:                              // Darkmoon Canon - Elwynn
+                        triggerTarget->RemoveAurasDueToSpell(24754);
+                        trigger_spell_id = 24742;
+                        break;
                     case 24834:                             // Shadow Bolt Whirl
                     {
                         uint32 spellForTick[8] = { 24820, 24821, 24822, 24823, 24835, 24836, 24837, 24838 };

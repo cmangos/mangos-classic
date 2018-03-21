@@ -4079,6 +4079,23 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK, 30918, true);
                     break;
                 }
+                    
+                case 24742:                           // Magic wings
+                {
+                   if (!unitTarget)
+                      return;
+                   // Orientation
+                   if (unitTarget->GetZoneId() == 12)
+                   {
+                      unitTarget->SetOrientation(271.94f);
+                      break;
+                   }
+                   else if (unitTarget->GetZoneId() == 1638)
+                   {
+                      unitTarget->SetOrientation(0.341480f);
+                      break;
+                   }
+                }
             }
             break;
         }
@@ -4425,6 +4442,12 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
             gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
             // no break: the GO is then used;
         case 1:                     // GO simple use
+            switch (m_spellInfo->Id)
+            {
+                case 24731:                        // Cannon Shoot
+                    gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
+                    break;
+            }
         case 2:                     // unk - 2 spells
         case 4:                     // unk - 1 spell
         case 5:                     // GO trap usage
@@ -5119,6 +5142,23 @@ void Spell::EffectKnockBack(SpellEffectIndex eff_idx)
         return;
 
     ((Player*)unitTarget)->KnockBackFrom(m_caster, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10, float(damage) / 10);
+    switch (m_spellInfo->Id)
+    {
+        case 24742:                           // Magic wings
+            {
+                // Orientation
+                if (unitTarget->GetZoneId() == 12)
+                {
+                    unitTarget->SetOrientation(4.90124f);
+                    break;
+                }
+                else if (unitTarget->GetZoneId() == 1638)
+                {
+                    unitTarget->SetOrientation(3.50977f);
+                    break;
+                }
+            }
+    }
 }
 
 void Spell::EffectSendTaxi(SpellEffectIndex eff_idx)
