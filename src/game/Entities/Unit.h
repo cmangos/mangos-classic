@@ -2160,6 +2160,7 @@ class Unit : public WorldObject
         void Uncharm(Unit* charmed);
 
         void SetTurningOff(bool apply);
+        virtual bool IsIgnoringRangedTargets() { return false; }
 
         float GetAttackDistance(Unit const* pl) const;
         virtual uint32 GetDetectionRange() const { return 20.f; }

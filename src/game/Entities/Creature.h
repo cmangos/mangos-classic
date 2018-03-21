@@ -789,6 +789,9 @@ class Creature : public Unit
 
         void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
 
+        void SetIgnoreRangedTargets(bool state) { m_ignoreRangedTargets = state; }
+        bool IsIgnoringRangedTargets() override { return m_ignoreRangedTargets; }
+
         uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
@@ -835,6 +838,9 @@ class Creature : public Unit
 
         void SetBaseWalkSpeed(float speed) override;
         void SetBaseRunSpeed(float speed) override;
+
+        // Script logic
+        bool m_ignoreRangedTargets;                         // Ignores ranged targets when picking someone to attack
     private:
         GridReference<Creature> m_gridRef;
         CreatureInfo const* m_creatureInfo;

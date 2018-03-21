@@ -7938,12 +7938,53 @@ bool Unit::SelectHostileTarget()
         else
         {
             Unit* pFixateTarget = GetMap()->GetUnit(m_fixateTargetGuid);
-            if (pFixateTarget && pFixateTarget->isAlive() && !IsSecondChoiceTarget(pFixateTarget, false, true))
+            if (pFixateTarget && pFixateTarget->isAlive() && !IsSecondChoiceTarget(pFixateTarget, false, true) && (!IsIgnoringRangedTargets() || CanReachWithMeleeAttack(target)))
                 target = pFixateTarget;
         }
     }
+
     // then checking if we have some taunt on us
     if (!target)
+    {
+        const AuraList& tauntAuras = GetAurasByType(SPELL_AURA_MOD_TAUNT);
+        Unit* caster;
+
+        // Find first available taunter target
+        // Auras are pushed_back, last caster will be on the end
+        for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
+        {
+            if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
+                CanAttack(caster) && caster->isInAccessablePlaceFor((Creature*)this) &&
+                !IsSecondChoiceTarget(caster, true, true) && (!IsIgnoringRangedTargets() || CanReachWithMeleeAttack(caster)))
+            {
+                target = caster;
+                break;
+            }
+        }
+    }
+
+    // No valid fixate target, taunt aura or taunt aura caster is dead, standard target selection
+    if (!target && !getThreatManager().isThreatListEmpty())
+        target = getThreatManager().getHostileTarget();
+
+    if (!target && oldTarget)
+    {
+        if (IsIgnoringRangedTargets())
+        {
+            if (CanReachWithMeleeAttack(oldTarget))
+                target = oldTarget;
+            else
+            {
+                m_attacking = nullptr;
+                SetTargetGuid(ObjectGuid());
+                oldTarget->_removeAttacker(this);
+            }
+        }
+        else
+            target = oldTarget;
+    }
+
+    if (target)
     {
         const AuraList& tauntAuras = GetAurasByType(SPELL_AURA_MOD_TAUNT);
         Unit* caster;
@@ -7999,6 +8040,8 @@ bool Unit::SelectHostileTarget()
         }
         return true;
     }
+    else if (IsIgnoringRangedTargets() && !getThreatManager().isThreatListEmpty())
+        return true; // return true but no target
 
     // no target but something prevent go to evade mode
     if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT))
