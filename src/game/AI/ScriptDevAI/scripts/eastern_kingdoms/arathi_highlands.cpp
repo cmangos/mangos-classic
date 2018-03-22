@@ -178,6 +178,7 @@ struct npc_kineloryAI : public npc_escortAI
                 break;
             case 33:
                 DoScriptText(SAY_FINISH, m_creature);
+                m_creature->SetImmuneToNPC(true);
                 if (Creature* pQuae = GetClosestCreatureWithEntry(m_creature, NPC_QUAE, 10.0f))
                 {
                     DoScriptText(EMOTE_HAND_PACK, m_creature, pQuae);
@@ -202,7 +203,8 @@ struct npc_kineloryAI : public npc_escortAI
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
-        {
+        {   
+            m_creature->SetImmuneToNPC(false);
             DoScriptText(SAY_START, m_creature);
             Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue), true);
         }
