@@ -287,7 +287,7 @@ std::function<bool(Unit*)>* ScriptDevAIMgr::OnTrapSearch(GameObject* go)
     Script* pTempScript = GetScript(go->GetGOInfo()->ScriptId);
 
     if (!pTempScript)
-        return false;
+        return nullptr;
 
     return pTempScript->pTrapSearching;
 }
