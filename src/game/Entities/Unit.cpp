@@ -7986,29 +7986,6 @@ bool Unit::SelectHostileTarget()
 
     if (target)
     {
-        const AuraList& tauntAuras = GetAurasByType(SPELL_AURA_MOD_TAUNT);
-        Unit* caster;
-
-        // Find first available taunter target
-        // Auras are pushed_back, last caster will be on the end
-        for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
-        {
-            if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
-                    CanAttack(caster) && caster->isInAccessablePlaceFor((Creature*)this) &&
-                    !IsSecondChoiceTarget(caster, true, true))
-            {
-                target = caster;
-                break;
-            }
-        }
-    }
-
-    // No valid fixate target, taunt aura or taunt aura caster is dead, standard target selection
-    if (!target && !getThreatManager().isThreatListEmpty())
-        target = getThreatManager().getHostileTarget();
-
-    if (target)
-    {
         SetInFront(target);
         if (oldTarget != target)
             AI()->AttackStart(target);
