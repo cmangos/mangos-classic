@@ -1440,8 +1440,8 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     // Some has effect1 that makes the difference, however not all.
                     // Some appear to be used depending on creature location, in water, at solid ground, in air/suspended, etc
                     // For now, just handle all the same way
-                    if (target->GetTypeId() == TYPEID_UNIT)
-                        target->SetFeignDeath(apply, GetCasterGuid(), GetId());
+                    //if (target->GetTypeId() == TYPEID_UNIT)
+                    target->SetFeignDeath(apply, GetCasterGuid(), GetId());
 
                     return;
                 }
