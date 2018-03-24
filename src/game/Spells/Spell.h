@@ -612,7 +612,8 @@ class Spell
             uint32 damage;
             SpellMissInfo missCondition: 8;
             SpellMissInfo reflectResult: 8;
-            uint8  effectMask: 8;
+            uint8  effectHitMask : 8; // Used for all effects which actually hit a target
+            uint8  effectMask: 8; // Used for all effects a certain target was evaluated for
             bool   processed: 1;
             bool   magnet: 1;
         };

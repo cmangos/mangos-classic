@@ -297,7 +297,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                     {
                         uint32 count = 0;
                         for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                            if (ihit->effectMask & (1 << eff_idx))
+                            if (ihit->effectHitMask & (1 << eff_idx))
                                 ++count;
 
                         damage /= count;                    // divide to all targets
