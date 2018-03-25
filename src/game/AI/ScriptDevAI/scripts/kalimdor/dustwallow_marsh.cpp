@@ -103,6 +103,7 @@ struct npc_morokkAI : public npc_escortAI
                     {
                         m_bIsSuccess = false;
                         DoScriptText(SAY_MOR_CHALLENGE, m_creature, pPlayer);
+                        m_creature->SetImmuneToPlayer(false);
                         SetReactState(REACT_AGGRESSIVE);
                         m_creature->setFaction(FACTION_MOR_HOSTILE);
                         AttackStart(pPlayer);
@@ -127,6 +128,7 @@ struct npc_morokkAI : public npc_escortAI
                     m_creature->RemoveAllAurasOnEvade();
                     m_creature->DeleteThreatList();
                     m_creature->CombatStop(true);
+                    m_creature->SetImmuneToPlayer(true);
                     SetEscortPaused(false);
                     SetReactState(REACT_PASSIVE);
                     DoScriptText(SAY_MOR_SCARED, m_creature);
