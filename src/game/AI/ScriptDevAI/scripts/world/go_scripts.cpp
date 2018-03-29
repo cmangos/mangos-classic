@@ -278,6 +278,82 @@ bool TrapTargetSearch(Unit* unit)
     return false;
 }
 
+/*##################
+## go_elemental_rift
+##################*/
+
+enum
+{
+    // Elemental invasions
+    NPC_WHIRLING_INVADER        = 14455,
+    NPC_WATERY_INVADER          = 14458,
+    NPC_BLAZING_INVADER         = 14460,
+    NPC_THUNDERING_INVADER      = 14462,
+
+    GO_EARTH_ELEMENTAL_RIFT     = 179664,
+    GO_WATER_ELEMENTAL_RIFT     = 179665,
+    GO_FIRE_ELEMENTAL_RIFT      = 179666,
+    GO_AIR_ELEMENTAL_RIFT       = 179667,
+};
+
+struct go_elemental_rift : public GameObjectAI
+{
+    go_elemental_rift(GameObject* go) : GameObjectAI(go), m_uiElementalTimer(urand(0, 30 * IN_MILLISECONDS)) {}
+
+    uint32 m_uiElementalTimer;
+
+    void DoRespawnElementalsIfCan()
+    {
+        uint32 elementalEntry;
+        switch (m_go->GetEntry())
+        {
+            case GO_EARTH_ELEMENTAL_RIFT:
+                elementalEntry = NPC_THUNDERING_INVADER;
+                break;
+            case GO_WATER_ELEMENTAL_RIFT:
+                elementalEntry = NPC_WATERY_INVADER;
+                break;
+            case GO_AIR_ELEMENTAL_RIFT:
+                elementalEntry = NPC_WHIRLING_INVADER;
+                break;
+            case GO_FIRE_ELEMENTAL_RIFT:
+                elementalEntry = NPC_BLAZING_INVADER;
+                break;
+        }
+
+        std::list<Creature*> lElementalList;
+        GetCreatureListWithEntryInGrid(lElementalList, m_go, elementalEntry, 35.0f);
+        // Do nothing if at least three elementals are found nearby
+        if (lElementalList.size() >= 3)
+            return;
+
+        // Spawn an elemental at a random point
+        float fX, fY, fZ;
+        m_go->GetRandomPoint(m_go->GetPositionX(), m_go->GetPositionY(), m_go->GetPositionZ(), 25.0f, fX, fY, fZ);
+        m_go->SummonCreature(elementalEntry, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // Do nothing if not spawned
+        if (!m_go->isSpawned())
+            return;
+
+        if (m_uiElementalTimer <= uiDiff)
+        {
+            DoRespawnElementalsIfCan();
+            m_uiElementalTimer = 30 * IN_MILLISECONDS;
+        }
+        else
+            m_uiElementalTimer -= uiDiff;
+    }
+};
+
+GameObjectAI* GetAI_go_elemental_rift(GameObject* go)
+{
+    return new go_elemental_rift(go);
+}
+
 std::function<bool(Unit*)> function = &TrapTargetSearch;
 
 void AddSC_go_scripts()
@@ -302,5 +378,10 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_transpolyporter_bb";
     pNewScript->pTrapSearching = &function;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_elemental_rift";
+    pNewScript->GetGameObjectAI = &GetAI_go_elemental_rift;
     pNewScript->RegisterSelf();
 }

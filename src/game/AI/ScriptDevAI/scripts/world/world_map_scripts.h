@@ -33,6 +33,25 @@ enum
     GO_ROCKET_CLUSTER           = 180875,
     SPELL_OMEN_MOONLIGHT        = 26392,
     MAX_ROCKETS                 = 30,
+
+    // Elemental invasions
+    NPC_THE_WINDREAVER          = 14454,
+    NPC_PRINCESS_TEMPESTRIA     = 14457,
+    NPC_BARON_CHARR             = 14461,
+    NPC_AVALANCHION             = 14464,
+
+    GO_EARTH_ELEMENTAL_RIFT     = 179664,
+    GO_WATER_ELEMENTAL_RIFT     = 179665,
+    GO_FIRE_ELEMENTAL_RIFT      = 179666,
+    GO_AIR_ELEMENTAL_RIFT       = 179667,
+};
+
+enum ElementalInvasionIndexes
+{
+    ELEMENTAL_EARTH             = 0,
+    ELEMENTAL_AIR               = 1,
+    ELEMENTAL_FIRE              = 2,
+    ELEMENTAL_WATER             = 3
 };
 
 enum SpawnIndexes
