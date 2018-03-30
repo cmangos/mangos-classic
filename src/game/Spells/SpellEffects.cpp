@@ -3682,19 +3682,6 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
         m_caster->AI()->JustSummoned(pGameObj);
 }
 
-static ScriptInfo generateCastSpellCommand(uint32 spellId, bool isTriggered = false)
-{
-    ScriptInfo si;
-    si.command = SCRIPT_COMMAND_CAST_SPELL;
-    si.id = 0;
-    si.castSpell.spellId = spellId;
-    si.buddyEntry = 0;
-    si.searchRadiusOrGuid = 0;
-    si.data_flags = isTriggered ? 0x08 : 0x00;
-    memset(si.textId, 0, MAX_TEXT_ID * sizeof(int32));
-    return si;
-}
-
 void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 {
     // TODO: we must implement hunter pet summon at login there (spell 6962)
@@ -3907,15 +3894,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 24731:                                    // Cannon Fire
                 {
-                    if(!unitTarget)
+                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    static ScriptInfo activateCommand = generateCastSpellCommand(24742, true);    // Cast Magic Wings
-
-                    int32 delay_secs = 1;
-
-                    m_caster->GetMap()->ScriptCommandStart(activateCommand, delay_secs, unitTarget, m_caster);
-
+                    unitTarget->CastSpell(m_caster, 24742, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 24737:                                 // Ghost Costume
