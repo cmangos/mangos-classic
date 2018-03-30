@@ -25,7 +25,5 @@ UPDATE spell_template SET InterruptFlags=0 WHERE id=18115;
 UPDATE spell_template SET Effect2=6, EffectDieSides2=1, EffectBaseDice2=1, EffectImplicitTargetA2=1, EffectApplyAuraName2=23, EffectAmplitude2=10000, EffectTriggerSpell2=24870 WHERE Id=24869;
 UPDATE spell_template SET EffectRealPointsPerLevel1=0.25, EffectRealPointsPerLevel2=0.25, EffectBaseDice1=0, EffectBaseDice2=0, EffectBasePoints2=0 WHERE id=24870;
 
--- Added missing triggered spell for spells Cannon Prep
-UPDATE spell_template SET EffectTriggerSpell3=24731 WHERE id IN (24743, 24832);
 -- Added Ignore LoS attribute for Magic Wings spell (trigger NPC is not always in LoS of player)
 UPDATE spell_template SET AttributesEx2=AttributesEx2|0x00000004 WHERE id=24742;
