@@ -6607,6 +6607,20 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
         }
     }
 
+    AuraList const& auraDummy = GetAurasByType(SPELL_AURA_DUMMY);
+    for (AuraList::const_iterator i = auraDummy.begin(); i != auraDummy.end(); ++i)
+    {
+        if (!(*i)->isAffectedOnSpell(spellProto))
+            continue;
+        switch ((*i)->GetSpellProto()->Id)
+        {
+            case 28851: // Flash of Light - need to create generic container for this and the above
+            case 28853:
+                DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
+                break;
+        }
+    }
+
     // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
     DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
 
