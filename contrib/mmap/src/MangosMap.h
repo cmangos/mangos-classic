@@ -58,13 +58,14 @@ namespace MaNGOS
         float gridMaxHeight;
     };
 
-#define MAP_LIQUID_NO_TYPE    0x0001
-#define MAP_LIQUID_NO_HEIGHT  0x0002
+#define MAP_LIQUID_NO_TYPE    0x01
+#define MAP_LIQUID_NO_HEIGHT  0x02
 
     struct GridMapLiquidHeader
     {
         uint32 fourcc;
-        uint16 flags;
+        uint8 flags;
+        uint8 liquidFlags;
         uint16 liquidType;
         uint8 offsetX;
         uint8 offsetY;
