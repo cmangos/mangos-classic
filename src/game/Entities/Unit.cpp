@@ -8855,10 +8855,10 @@ CharmInfo* Unit::InitCharmInfo(Unit* charm)
 CharmInfo::CharmInfo(Unit* unit) :
     m_unit(unit), m_ai(nullptr), m_combatData(nullptr),
     m_CommandState(COMMAND_FOLLOW),
-    m_petnumber(0), m_retreating(false), m_stayPosSet(false),
-    m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
-    m_opener(0), m_openerMinRange(0), m_openerMaxRange(0),
-    m_unitFieldFlags(0), m_unitFieldBytes2_1(0)
+    m_petnumber(0), m_opener(0), m_openerMinRange(0),
+    m_openerMaxRange(0), m_unitFieldFlags(0), m_unitFieldBytes2_1(0), m_retreating(false), m_stayPosSet(false),
+    m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0),
+    m_stayPosO(0), m_unitFlagSave(0)
 {
     for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
         m_charmspells[i].SetActionAndType(0, ACT_DISABLED);
@@ -10290,15 +10290,16 @@ bool Unit::TakePossessOf(Unit* possessed)
     possessed->AttackStop(true, true);
     possessed->ClearInCombat();
 
+    Creature* possessedCreature = nullptr;
+    Player* possessedPlayer = nullptr;
+    CharmInfo* charmInfo = possessed->InitCharmInfo(possessed);
+    charmInfo->SetUnitFlagSave(possessed->GetUInt32Value(UNIT_FIELD_FLAGS));
+
     possessed->addUnitState(UNIT_STAT_POSSESSED);
     possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
     possessed->SetCharmerGuid(GetObjectGuid());
 
     SetCharm(possessed);
-
-    Creature* possessedCreature = nullptr;
-    Player* possessedPlayer = nullptr;
-    CharmInfo* charmInfo = possessed->InitCharmInfo(possessed);
 
     // stop any generated movement TODO:: this may not be correct! what about possessing a feared creature?
     possessed->GetMotionMaster()->Clear();
@@ -10328,14 +10329,16 @@ bool Unit::TakePossessOf(Unit* possessed)
     // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    else
+        possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
     const bool immunePC = IsImmuneToPlayer();
-    if (possessed->IsImmuneToPlayer() != immunePC)
-        possessed->SetImmuneToPlayer(immunePC);
+    if (possessed->IsImmuneToPlayer() != immunePC) // Do not propagate immunity flag to pets
+        possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
 
     const bool immuneNPC = IsImmuneToNPC();
     if (possessed->IsImmuneToNPC() != immuneNPC)
-        possessed->SetImmuneToNPC(immuneNPC);
+        possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
     if (player)
     {
@@ -10394,6 +10397,7 @@ bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
         m_charmedUnitsPrivate.insert(charmed->GetObjectGuid());
 
     CharmInfo* charmInfo = charmed->InitCharmInfo(charmed);
+    charmInfo->SetUnitFlagSave(charmed->GetUInt32Value(UNIT_FIELD_FLAGS));
 
     if (charmed->GetTypeId() == TYPEID_PLAYER)
     {
@@ -10457,14 +10461,16 @@ bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
     // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    else
+        charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
     const bool immunePC = IsImmuneToPlayer();
-    if (charmed->IsImmuneToPlayer() != immunePC)
-        charmed->SetImmuneToPlayer(immunePC);
+    if (charmed->IsImmuneToPlayer() != immunePC) // Do not propagate immunity flag to pets
+        charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
 
     const bool immuneNPC = IsImmuneToNPC();
     if (charmed->IsImmuneToNPC() != immuneNPC)
-        charmed->SetImmuneToNPC(immuneNPC);
+        charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
     if (charmerPlayer && advertised)
         charmerPlayer->CharmSpellInitialize();
@@ -10650,6 +10656,24 @@ void Unit::Uncharm(Unit* charmed)
     // Update possessed's client control status after altering flags
     if (const Player* controllingClientPlayer = charmed->GetClientControlling())
         controllingClientPlayer->UpdateClientControl(charmed, true);
+
+    uint32 savedUnitFlags = charmInfo->GetUnitFlagSave();
+    if (savedUnitFlags & UNIT_FLAG_PLAYER_CONTROLLED)
+        charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    else
+        charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+    if (savedUnitFlags & UNIT_FLAG_IMMUNE_TO_PLAYER)
+        charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+    else
+        charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+
+    if (savedUnitFlags & UNIT_FLAG_IMMUNE_TO_NPC)
+        charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+    else
+        charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+
+    charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     if (player)
     {
