@@ -3142,6 +3142,7 @@ void SpellMgr::LoadSpellAffects()
         }
 
         if (spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA || (
+                    spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_DUMMY &&
                     spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
                     spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
                     spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER &&
