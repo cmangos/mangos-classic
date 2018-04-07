@@ -6607,7 +6607,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
         }
     }
 
-    AuraList const& auraDummy = GetAurasByType(SPELL_AURA_DUMMY);
+    AuraList const& auraDummy = owner->GetAurasByType(SPELL_AURA_DUMMY);
     for (AuraList::const_iterator i = auraDummy.begin(); i != auraDummy.end(); ++i)
     {
         if (!(*i)->isAffectedOnSpell(spellProto))
