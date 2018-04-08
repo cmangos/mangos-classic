@@ -512,7 +512,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
             }
 
             // Remove wild summoned after use
-            if (!HasStaticDBSpawnData() && (!GetSpellId() || GetGOInfo()->GetDespawnPossibility()))
+            if (!HasStaticDBSpawnData() && (!GetSpellId() || GetGOInfo()->GetDespawnPossibility() || GetGOInfo()->IsDespawnAtAction()))
             {
                 if (Unit* owner = GetOwner())
                     owner->RemoveGameObject(this, false);
