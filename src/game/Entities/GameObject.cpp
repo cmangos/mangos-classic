@@ -1031,9 +1031,6 @@ void GameObject::TriggerLinkedGameObject(Unit* target) const
     // so it appears that using range from spell is obsolete.
     float range = 0.5f;
 
-    if (trapSpell)                                          // checked at load already
-        range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(trapSpell->rangeIndex));
-
     // search nearest linked GO
     GameObject* trapGO = nullptr;
 
