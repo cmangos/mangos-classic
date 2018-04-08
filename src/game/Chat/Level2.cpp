@@ -1200,7 +1200,37 @@ bool ChatHandler::HandleGameObjectActivateCommand(char* args) {
     obj->UseDoorOrButton(autoCloseTime, false);
 
     PSendSysMessage("GameObject entry: %u guid: %u activated!", obj->GetEntry(), lowguid);
+    return true;
+}
 
+bool ChatHandler::HandleGameObjectNearSpawnedCommand(char* args)
+{
+    float distance;
+    if (!ExtractOptFloat(&args, distance, 10.0f))
+        return false;
+
+    std::list<GameObject*> gameobjects;
+    Player* player = m_session->GetPlayer();
+
+    MaNGOS::GameObjectInPosRangeCheck go_check(*player, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), distance);
+    MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectInPosRangeCheck> checker(gameobjects, go_check);
+    Cell::VisitGridObjects(player, checker, distance);
+
+    for (GameObject* go : gameobjects)
+    {
+        uint32 entry = go->GetEntry();
+        GameObjectInfo const* goInfo = ObjectMgr::GetGameObjectInfo(entry);
+
+        if (!goInfo)
+            continue;
+
+        float x, y, z;
+        go->GetPosition(x, y, z);
+        ObjectGuid guid = go->GetObjectGuid();
+        PSendSysMessage(LANG_GO_MIXED_LIST_CHAT, guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(guid).c_str(), entry, guid, goInfo->name, x, y, z, go->GetMapId());
+    }
+
+    PSendSysMessage(LANG_COMMAND_NEAROBJMESSAGE, distance, gameobjects.size());
     return true;
 }
 
