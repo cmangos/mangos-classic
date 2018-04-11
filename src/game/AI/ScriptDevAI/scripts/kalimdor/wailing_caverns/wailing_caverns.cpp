@@ -150,7 +150,6 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
         if (m_uiPoint == 15 || m_uiPoint == 32)
         {
             m_creature->SetLootRecipient(nullptr);
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(false);
 
             if (m_creature->isAlive())

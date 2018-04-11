@@ -169,7 +169,6 @@ struct npc_general_andorovAI : public ScriptedAI, private DialogueHelper
             return;
 
         m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
 
         if (m_creature->isAlive())
@@ -323,7 +322,6 @@ struct npc_kaldorei_eliteAI : public ScriptedAI
             return;
 
         m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
 
         // reset only to the last position

@@ -541,7 +541,6 @@ struct boss_eranikusAI : public ScriptedAI
         if (m_creature->GetHealthPercent() < 20.0f)
         {
             m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
             m_creature->LoadCreatureAddon(true);
 

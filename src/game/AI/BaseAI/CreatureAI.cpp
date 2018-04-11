@@ -107,7 +107,6 @@ void CreatureAI::EnterCombat(Unit* enemy)
 void CreatureAI::EnterEvadeMode()
 {
     m_creature->RemoveAllAurasOnEvade();
-    m_creature->DeleteThreatList();
     m_creature->CombatStop(true);
 
     // only alive creatures that are not on transport can return to home position

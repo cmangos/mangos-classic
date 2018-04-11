@@ -682,7 +682,6 @@ void BattleGround::EndBattleGround(Team winner)
         {
             // needed cause else in av some creatures will kill the players at the end
             plr->CombatStop();
-            plr->getHostileRefManager().deleteReferences();
         }
 
         // this line is obsolete - team is set ALWAYS

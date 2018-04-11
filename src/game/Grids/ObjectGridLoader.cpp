@@ -293,7 +293,6 @@ ObjectGridStoper::Visit(CreatureMapType& m)
     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
         iter->getSource()->CombatStop();
-        iter->getSource()->DeleteThreatList();
         iter->getSource()->RemoveAllDynObjects();
     }
 }

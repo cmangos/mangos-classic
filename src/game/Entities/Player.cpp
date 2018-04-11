@@ -2114,7 +2114,6 @@ void Player::SetGameMaster(bool on)
         SetPvPFreeForAll(false);
         UpdatePvPContested(false, true);
 
-        getHostileRefManager().deleteReferences();
         CombatStopWithPets();
     }
     else

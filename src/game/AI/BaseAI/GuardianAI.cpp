@@ -184,7 +184,6 @@ void GuardianAI::CombatStop()
 void GuardianAI::EnterEvadeMode()
 {
     m_creature->RemoveAllAurasOnEvade();
-    m_creature->DeleteThreatList();
     m_creature->CombatStop(true);
 
     m_creature->TriggerEvadeEvents();

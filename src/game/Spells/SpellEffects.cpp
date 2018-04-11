@@ -1215,7 +1215,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         {
                             // "Evade"
                             unitTarget->RemoveAurasDueToSpell(m_spellInfo->Id == 28098 ? 28097 : 28109);
-                            unitTarget->DeleteThreatList();
                             unitTarget->CombatStop(true);
                             // Recast chain (Stalagg Chain or Feugen Chain
                             unitTarget->CastSpell(m_caster, m_spellInfo->Id == 28098 ? 28096 : 28111, TRIGGERED_NONE);
@@ -4315,7 +4314,6 @@ void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
 
     unitTarget->InterruptSpellsCastedOnMe(true);
     unitTarget->CombatStop(false, false);
-    unitTarget->getHostileRefManager().deleteReferences();  // stop all fighting
 
     // Vanish allows to remove all threat and cast regular stealth so other spells can be used
     if (m_spellInfo->IsFitToFamily(SPELLFAMILY_ROGUE, uint64(0x0000000000000800)))

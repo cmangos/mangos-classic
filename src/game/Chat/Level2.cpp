@@ -3931,7 +3931,6 @@ bool ChatHandler::HandleCombatStopCommand(char* args)
         return false;
 
     target->CombatStop();
-    target->getHostileRefManager().deleteReferences();
     return true;
 }
 

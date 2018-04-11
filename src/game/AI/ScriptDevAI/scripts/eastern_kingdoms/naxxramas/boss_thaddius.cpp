@@ -300,7 +300,6 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     // * To not remove the Passive spells when evading after ie killed a player
     void EnterEvadeMode() override
     {
-        m_creature->DeleteThreatList();
         m_creature->CombatStop();
     }
 

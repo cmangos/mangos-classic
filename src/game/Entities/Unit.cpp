@@ -959,7 +959,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         // stop combat
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAttackStop");
         pVictim->CombatStop();
-        pVictim->getHostileRefManager().deleteReferences();
     }
     else                                                    // if (health <= damage)
     {
@@ -5728,6 +5727,7 @@ void Unit::CombatStop(bool includingCast, bool includingCombo)
 
     AttackStop(true, includingCast, includingCombo);
     RemoveAllAttackers();
+    DeleteThreatList();
 
     if (GetTypeId() != TYPEID_PLAYER)
     {
@@ -7876,7 +7876,6 @@ void Unit::SetDeathState(DeathState s)
     if (s != ALIVE && s != JUST_ALIVED)
     {
         CombatStop();
-        DeleteThreatList();
         ClearComboPointHolders();                           // any combo points pointed to unit lost at it death
 
         InterruptNonMeleeSpells(false);
@@ -7978,6 +7977,7 @@ void Unit::AddThreat(Unit* pVictim, float threat /*= 0.0f*/, bool crit /*= false
 void Unit::DeleteThreatList()
 {
     getThreatManager().clearReferences();
+    getHostileRefManager().deleteReferences();
 }
 
 //======================================================================
@@ -8834,11 +8834,6 @@ void Unit::CleanupsBeforeDelete()
         m_Events.KillAllEvents(false);                      // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map::RemoveAllObjectsInRemoveList
         CombatStop();
         ClearComboPointHolders();
-        DeleteThreatList();
-        if (GetTypeId() == TYPEID_PLAYER)
-            getHostileRefManager().updateOnlineOfflineState(false);
-        else
-            getHostileRefManager().deleteReferences();
         RemoveAllAuras(AURA_REMOVE_BY_DELETE);
     }
     WorldObject::CleanupsBeforeDelete();
@@ -9417,7 +9412,6 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, u
                 else
                 {
                     CombatStop();
-                    getHostileRefManager().deleteReferences();
                 }
             }
             else
