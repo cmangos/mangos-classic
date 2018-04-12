@@ -302,7 +302,7 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
                 return false;
             break;
         case EVENT_T_TIMER_OOC:
-            if (m_creature->isInCombat() || m_creature->IsInEvadeMode())
+            if (m_creature->isInCombat() || m_creature->GetCombatManager().IsInEvadeMode())
                 return false;
             break;
         case EVENT_T_TIMER_GENERIC:

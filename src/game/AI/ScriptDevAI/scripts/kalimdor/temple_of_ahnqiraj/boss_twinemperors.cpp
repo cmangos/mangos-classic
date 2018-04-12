@@ -315,6 +315,9 @@ struct boss_veklorAI : public boss_twin_emperorsAI
         m_uiShadowBoltTimer    = 1000;
         m_uiBlizzardTimer      = urand(15000, 20000);
         m_uiArcaneBurstTimer   = 1000;
+
+        m_meleeEnabled = false;
+        m_attackDistance = 20.f;
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -350,18 +353,7 @@ struct boss_veklorAI : public boss_twin_emperorsAI
         DoScriptText(SAY_VEKLOR_DEATH, m_creature);
     }
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, false))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            m_creature->GetMotionMaster()->MoveChase(pWho, 20.0f);
-        }
-    }
-
-    bool DoHandleBugAbility()
+    bool DoHandleBugAbility() override
     {
         return DoCastSpellIfCan(m_creature, SPELL_EXPLODE_BUG) == CAST_OK;
     }

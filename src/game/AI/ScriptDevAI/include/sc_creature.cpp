@@ -400,7 +400,7 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
         return false;
     }
 
-    if (m_creature->IsInEvadeMode() || !m_creature->getVictim())
+    if (m_creature->GetCombatManager().IsInEvadeMode() || !m_creature->getVictim())
         return false;
 
     float x = m_creature->GetPositionX();
@@ -413,7 +413,6 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
             if (z > 448.60f)
                 return false;
             break;
-
         default:
             script_error_log("EnterEvadeIfOutOfCombatArea used for creature entry %u, but does not have any definition.", m_creature->GetEntry());
             return false;

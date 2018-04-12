@@ -17509,6 +17509,8 @@ inline void BeforeVisibilityDestroy(T* /*t*/, Player* /*p*/)
 template<>
 inline void BeforeVisibilityDestroy<Creature>(Creature* t, Player* p)
 {
+    if (!t->GetMap()->IsDungeon() && t->isInCombat() && p->isInCombat() && t->getThreatManager().HasThreat(p, true))
+        p->getHostileRefManager().deleteReference(t);
     if (p->GetPetGuid() == t->GetObjectGuid() && ((Creature*)t)->IsPet())
         ((Pet*)t)->Unsummon(PET_SAVE_REAGENTS);
 }

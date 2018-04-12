@@ -49,7 +49,7 @@ inline void MaNGOS::ObjectUpdater::Visit(CreatureMapType& m)
 inline void UnitVisitObjectsNotifierWorker(Unit* unitA, Unit* unitB)
 {
     if (unitA->hasUnitState(UNIT_STAT_LOST_CONTROL) ||
-        unitA->IsInEvadeMode() ||
+        unitA->GetCombatManager().IsInEvadeMode() ||
         !unitA->AI()->IsVisible(unitB))
         return;
 
@@ -60,13 +60,13 @@ inline void PlayerVisitCreatureWorker(Player* pl, Creature* c)
 {
     if (!c->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (c->AI() && c->AI()->IsVisible(pl) && !c->IsInEvadeMode())
+        if (c->AI() && c->AI()->IsVisible(pl) && !c->GetCombatManager().IsInEvadeMode())
             c->AI()->MoveInLineOfSight(pl);
     }
 
     if (!pl->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (pl->AI() && pl->AI()->IsVisible(c) && !pl->IsInEvadeMode())
+        if (pl->AI() && pl->AI()->IsVisible(c) && !pl->GetCombatManager().IsInEvadeMode())
             pl->AI()->MoveInLineOfSight(c);
     }
 }
@@ -75,13 +75,13 @@ inline void PlayerVisitPlayerWorker(Player* p1, Player* p2)
 {
     if (!p2->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (p2->AI() && p2->AI()->IsVisible(p1) && !p2->IsInEvadeMode())
+        if (p2->AI() && p2->AI()->IsVisible(p1) && !p2->GetCombatManager().IsInEvadeMode())
             p2->AI()->MoveInLineOfSight(p1);
     }
 
     if (!p1->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (p1->AI() && p1->AI()->IsVisible(p2) && !p1->IsInEvadeMode())
+        if (p1->AI() && p1->AI()->IsVisible(p2) && !p1->GetCombatManager().IsInEvadeMode())
             p1->AI()->MoveInLineOfSight(p2);
     }
 }
@@ -90,13 +90,13 @@ inline void CreatureVisitCreatureWorker(Creature* c1, Creature* c2)
 {
     if (!c1->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (c1->AI() && c1->AI()->IsVisible(c2) && !c1->IsInEvadeMode())
+        if (c1->AI() && c1->AI()->IsVisible(c2) && !c1->GetCombatManager().IsInEvadeMode())
             c1->AI()->MoveInLineOfSight(c2);
     }
 
     if (!c2->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (c2->AI() && c2->AI()->IsVisible(c1) && !c2->IsInEvadeMode())
+        if (c2->AI() && c2->AI()->IsVisible(c1) && !c2->GetCombatManager().IsInEvadeMode())
             c2->AI()->MoveInLineOfSight(c1);
     }
 }
@@ -193,7 +193,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         return;
 
     // Evade target
-    if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsInEvadeMode())
+    if (target->GetCombatManager().IsInEvadeMode())
         return;
 
     // Check player targets and remove if in GM mode or GM invisibility (for not self casting case)

@@ -668,6 +668,11 @@ void Creature::Update(const uint32 diff)
 
             Unit::Update(diff);
 
+            // creature can be dead after Unit::Update call
+            // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
+            if (!isAlive())
+                break;
+
             // Creature can be dead after unit update
             if (isAlive())
                 RegenerateAll(diff);
@@ -691,7 +696,7 @@ void Creature::RegenerateAll(uint32 update_diff)
     if (m_regenTimer != 0)
         return;
 
-    if (!isInCombat() || IsEvadeRegen())
+    if (!isInCombat() || GetCombatManager().IsEvadeRegen())
         RegenerateHealth();
 
     RegeneratePower();

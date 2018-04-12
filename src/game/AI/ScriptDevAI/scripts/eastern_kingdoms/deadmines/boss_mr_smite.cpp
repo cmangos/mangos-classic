@@ -86,14 +86,7 @@ struct boss_mr_smiteAI : public ScriptedAI
         if (m_uiPhase > PHASE_3)
             return;
 
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-
-            m_creature->GetMotionMaster()->MoveChase(pWho);
-        }
+        ScriptedAI::AttackStart(pWho);
     }
 
     void JustReachedHome() override

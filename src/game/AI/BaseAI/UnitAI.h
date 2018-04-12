@@ -390,6 +390,11 @@ class UnitAI
          */
         virtual void OnStealthAlert(Unit* who) {}
 
+        /*
+         * Notifies AI on evade from combat due to leash
+         */
+        virtual void OnLeash() {}
+
         void CheckForHelp(Unit* /*who*/, Unit* /*me*/, float /*dist*/);
         void DetectOrAttack(Unit* who);
         bool CanTriggerStealthAlert(Unit* who, float attackRadius) const;

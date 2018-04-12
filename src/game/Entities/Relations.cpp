@@ -1144,7 +1144,7 @@ bool Unit::CanAttackOnSight(Unit const* target) const
     MANGOS_ASSERT(target)
 
     // Do not aggro on a unit which is moving home at the moment
-    if (target->GetEvade() == EVADE_HOME)
+    if (target->GetCombatManager().IsEvadingHome())
         return false;
 
     // Do not aggro while a successful feign death is active

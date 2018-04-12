@@ -97,7 +97,7 @@ void PetAI::AttackStart(Unit* who)
         return;
 
     // Do not start attack if target is moving home
-    if (who->IsEvadingHome())
+    if (who->GetCombatManager().IsEvadingHome())
         return;
 
     if (m_unit->Attack(who, m_meleeEnabled))
@@ -136,7 +136,7 @@ void PetAI::UpdateAI(const uint32 diff)
     Unit* victim = (pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS) ? nullptr : m_unit->getVictim();
 
     // Do not continue attacking if victim is moving home
-    if (victim && victim->IsEvadingHome())
+    if (victim && victim->GetCombatManager().IsEvadingHome())
         victim = nullptr;
 
     // Stop auto attack and chase if victim was dropped
