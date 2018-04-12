@@ -36,18 +36,25 @@ HostileRefManager::~HostileRefManager()
 // The pVictim is hated than by them as well
 // use for buffs and healing threat functionality
 
-void HostileRefManager::threatAssist(Unit* pVictim, float pThreat, SpellEntry const* pThreatSpell, bool pSingleTarget)
+void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry const* threatSpell, bool singleTarget, std::set<SpellModifierPair>* consumedMods)
 {
-    uint32 size = pSingleTarget ? 1 : getSize();            // if pSingleTarget do not devide threat
-    float threat = pThreat / size;
     HostileReference* ref = getFirst();
+    if (!ref)
+        return;
+
+    std::vector<HostileReference*> validRefs;
     while (ref)
     {
-        if (!ref->getSource()->getOwner()->IsIncapacitated())
-            ref->getSource()->addThreat(pVictim, threat, false, (pThreatSpell ? GetSpellSchoolMask(pThreatSpell) : SPELL_SCHOOL_MASK_NORMAL), pThreatSpell);
-
+        Unit* owner = ref->getSource()->getOwner();
+        if (!owner->IsIncapacitated() && owner != victim)
+            validRefs.push_back(ref);
         ref = ref->next();
     }
+
+    uint32 size = singleTarget ? 1 : validRefs.size();            // if singleTarget do not devide threat
+    float threatPerTarget = threat / size;
+    for (HostileReference* ref : validRefs)
+        ref->getSource()->addThreat(victim, threatPerTarget, false, (threatSpell ? GetSpellSchoolMask(threatSpell) : SPELL_SCHOOL_MASK_NORMAL), threatSpell, consumedMods);
 }
 
 //=================================================

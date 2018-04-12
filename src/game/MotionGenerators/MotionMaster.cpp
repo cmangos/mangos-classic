@@ -247,27 +247,20 @@ void MotionMaster::MoveTargetedHome(bool runHome)
 
     Clear(false);
 
-    if (m_owner->GetTypeId() == TYPEID_UNIT && !((Creature*)m_owner)->GetMasterGuid())
+    if (m_owner->GetTypeId() == TYPEID_UNIT)
     {
+        if (Unit* target = m_owner->GetMaster())
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
+            Mutate(new FollowMovementGenerator<Creature>(*target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE));
+        }
         // Manual exception for linked mobs
-        if (m_owner->IsLinkingEventTrigger() && m_owner->GetMap()->GetCreatureLinkingHolder()->TryFollowMaster((Creature*)m_owner))
+        else if (m_owner->IsLinkingEventTrigger() && m_owner->GetMap()->GetCreatureLinkingHolder()->TryFollowMaster((Creature*)m_owner))
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s refollowed linked master", m_owner->GetGuidStr().c_str());
         else
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted home", m_owner->GetGuidStr().c_str());
             Mutate(new HomeMovementGenerator<Creature>(runHome));
-        }
-    }
-    else if (m_owner->GetTypeId() == TYPEID_UNIT && ((Creature*)m_owner)->GetMasterGuid())
-    {
-        if (Unit* target = ((Creature*)m_owner)->GetMaster())
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
-            Mutate(new FollowMovementGenerator<Creature>(*target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE));
-        }
-        else
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s attempt but fail to follow owner", m_owner->GetGuidStr().c_str());
         }
     }
     else

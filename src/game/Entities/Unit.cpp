@@ -399,6 +399,9 @@ Unit::Unit() :
 
     m_baseSpeedWalk = 1.f;
     m_baseSpeedRun = 1.f;
+
+    m_evadeTimer = 0;
+    m_evadeMode = false;
 }
 
 Unit::~Unit()
@@ -492,6 +495,17 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     if (AI() && isAlive())
         AI()->UpdateAI(p_time);   // AI not react good at real update delays (while freeze in non-active part of map)
 
+    if (m_evadeTimer)
+    {
+        if (m_evadeTimer <= update_diff)
+        {
+            EvadeTimerExpired();
+            m_evadeTimer = 0;
+        }
+        else
+            m_evadeTimer -= update_diff;
+    }
+
     if (isAlive())
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth() * 0.20f);
 }
@@ -527,6 +541,36 @@ void Unit::TriggerEvadeEvents()
 
     if (m_isCreatureLinkingTrigger)
         GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_EVADE, (Creature*)this);
+}
+
+void Unit::EvadeTimerExpired()
+{
+    // Can happen for any unit with an AI
+    if (!AI())
+        return;
+
+    // When there is no target to switch to, leave combat
+    if (getThreatManager().getThreatList().size() == 1)
+    {
+        if (GetMap()->IsDungeon())
+            SetEvade(true);
+        else
+            AI()->EnterEvadeMode();
+        return;
+    }
+
+    getThreatManager().SetTargetNotAccessible(getVictim());
+    SelectHostileTarget();
+}
+
+void Unit::StopEvade()
+{
+    if (m_evadeTimer)
+    {
+        m_evadeTimer = 0;
+        return;
+    }
+    SetEvade(false);
 }
 
 bool Unit::UpdateMeleeAttackingState()
@@ -705,7 +749,7 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType, ObjectGuid casterGuid)
 
 void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb, DamageEffectType damagetype, SpellEntry const* spellProto)
 {
-    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
+    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || pVictim->IsInEvadeMode())
     {
         if (absorb)
             *absorb += damage;
@@ -1481,7 +1525,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
     if (!pVictim)
         return;
 
-    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
+    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || pVictim->IsInEvadeMode())
         return;
 
     SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(damageInfo->SpellID);
@@ -1752,7 +1796,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
     if (!pVictim)
         return;
 
-    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
+    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || pVictim->IsInEvadeMode())
         return;
 
     // Hmmmm dont like this emotes client must by self do all animations
@@ -2219,7 +2263,7 @@ void Unit::DoExtraAttacks(Unit* pVictim)
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType, SpellSchoolMask schoolMask) const
 {
-    if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
+    if (pVictim->IsInEvadeMode())
         return MELEE_HIT_EVADE;
 
     Die<UnitCombatDieSide, UNIT_COMBAT_DIE_HIT, NUM_UNIT_COMBAT_DIE_SIDES> die;
@@ -2410,7 +2454,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
     if (!pVictim->isAlive())
         return SPELL_MISS_NONE;
     // Return evade for units in evade mode
-    if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
+    if (pVictim->IsInEvadeMode())
         return SPELL_MISS_EVADE;
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
@@ -7318,10 +7362,9 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 void Unit::ClearInCombat()
 {
     m_CombatTimer = 0;
+    m_evadeTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
-
-    if (HasCharmer() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
-        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     if (GetTypeId() == TYPEID_PLAYER)
         static_cast<Player*>(this)->pvpInfo.inPvPCombat = false;
@@ -7863,6 +7906,9 @@ void Unit::SetDeathState(DeathState s)
         i_motionMaster.Clear(false, true);
         i_motionMaster.MoveIdle();
 
+        m_evadeTimer = 0;
+        m_evadeMode = false;
+
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         // remove aurastates allowing special moves
         ClearAllReactives();
@@ -8028,9 +8074,6 @@ void Unit::FixateTarget(Unit* pVictim)
         m_fixateTargetGuid.Clear();
     else if (CanAttack(pVictim))                            // Apply Fixation
         m_fixateTargetGuid = pVictim->GetObjectGuid();
-
-    // Start attacking the fixated target or the next proper one
-    SelectHostileTarget();
 }
 
 //======================================================================
@@ -8056,8 +8099,6 @@ bool Unit::SelectHostileTarget()
     // function provides main threat functionality
     // next-victim-selection algorithm and evade mode are called
     // threat list sorting etc.
-
-    MANGOS_ASSERT(GetTypeId() == TYPEID_UNIT);
 
     if (!this->isAlive())
         return false;
@@ -8104,9 +8145,8 @@ bool Unit::SelectHostileTarget()
         // Auras are pushed_back, last caster will be on the end
         for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
         {
-            if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
-                CanAttack(caster) && caster->isInAccessablePlaceFor((Creature*)this) &&
-                !IsSecondChoiceTarget(caster, true, true) && (!IsIgnoringRangedTargets() || CanReachWithMeleeAttack(caster)))
+            if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) && caster->isInAccessablePlaceFor(this) &&
+                    CanAttack(caster) && !IsSecondChoiceTarget(caster, true, true) && (!IsIgnoringRangedTargets() || CanReachWithMeleeAttack(caster)))
             {
                 target = caster;
                 break;
@@ -8135,34 +8175,23 @@ bool Unit::SelectHostileTarget()
 
     if (target)
     {
+        // needs a much better check, seems to cause quite a bit of trouble
         SetInFront(target);
+
         if (oldTarget != target)
             AI()->AttackStart(target);
 
         // check if currently selected target is reachable
         // NOTE: path alrteady generated from AttackStart()
-        if (!GetMotionMaster()->GetCurrent()->IsReachable())
+        if (AI()->IsCombatMovement())
         {
-            // remove all taunts
-            RemoveSpellsCausingAura(SPELL_AURA_MOD_TAUNT);
-
-            if (getThreatManager().getThreatList().size() < 2)
+            if (!GetMotionMaster()->GetCurrent()->IsReachable() || !target->isInAccessablePlaceFor(this))
             {
-                // only one target in list, we have to evade after timer
-                // TODO: make timer - inside Creature class
-                AI()->EnterEvadeMode();
+                if (!IsInEvadeMode())
+                    StartEvadeTimer();
             }
-            else
-            {
-                // remove unreachable target from our threat list
-                // next iteration we will select next possible target
-                getHostileRefManager().deleteReference(target);
-                getThreatManager().modifyThreatPercent(target, -101);
-                // remove target from current attacker, do not exit combat settings
-                AttackStop(true);
-            }
-
-            return false;
+            else if (m_evadeTimer)
+                StopEvade();
         }
         return true;
     }
@@ -8181,7 +8210,7 @@ bool Unit::SelectHostileTarget()
     {
         for (AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
         {
-            if ((*itr)->IsInMap(this) && CanAttack((*itr)) && (*itr)->isInAccessablePlaceFor((Creature*)this))
+            if ((*itr)->IsInMap(this) && CanAttack((*itr)) && (*itr)->isInAccessablePlaceFor(this))
                 return false;
         }
     }
@@ -9923,6 +9952,24 @@ void Unit::SetPvP(bool state)
 
         CallForAllControlledUnits(SetPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
     }
+}
+
+struct SetEvadeHelper
+{
+    explicit SetEvadeHelper(bool _state) : state(_state) {}
+    void operator()(Unit* unit) const { unit->SetEvade(state); }
+    bool state;
+};
+
+void Unit::SetEvade(bool state)
+{
+    if (m_evadeMode == state)
+        return;
+
+    m_evadeMode = state;
+    // Do not propagate during charm
+    if (!HasCharmer())
+        CallForAllControlledUnits(SetEvadeHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
 bool Unit::IsPvPFreeForAll() const

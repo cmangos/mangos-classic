@@ -118,9 +118,14 @@ void HostileReference::addThreat(float pMod)
 
     if (isValid() && pMod >= 0)
     {
-        Unit* victim_owner = getTarget()->GetOwner();
+        Unit* target = getTarget();
+        Unit* victim_owner = target->GetOwner();
         if (victim_owner && victim_owner->isAlive())
             getSource()->addThreat(victim_owner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
+
+        // First threat add after leaving evade mode causes it to reset
+        if (!iAccessible && !target->IsInEvadeMode())
+            setAccessibleState(true);
     }
 }
 
@@ -320,7 +325,7 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* pAttacker, Hostile
         // some units are prefered in comparison to others
         // if (checkThreatArea) consider IsOutOfThreatArea - expected to be only set for pCurrentVictim
         //     This prevents dropping valid targets due to 1.1 or 1.3 threat rule vs invalid current target
-        if (!onlySecondChoiceTargetsFound && pAttacker->IsSecondChoiceTarget(pTarget, false, pCurrentRef == pCurrentVictim))
+        if (!onlySecondChoiceTargetsFound && (pAttacker->IsSecondChoiceTarget(pTarget, false, pCurrentRef == pCurrentVictim) || !pCurrentRef->isAccessable()))
         {
             if (iter != lastRef)
                 ++iter;
@@ -591,6 +596,12 @@ void ThreatManager::processThreatEvent(ThreatRefStatusChangeEvent* threatRefStat
                 iThreatOfflineContainer.remove(hostileReference);
             break;
     }
+}
+
+void ThreatManager::SetTargetNotAccessible(Unit* target)
+{
+    if (HostileReference* ref = iThreatContainer.getReferenceByTarget(target))
+        ref->setAccessibleState(false);
 }
 
 void HostileReference::setFadeoutThreatReduction(float value)

@@ -2216,6 +2216,12 @@ class Unit : public WorldObject
         void ForceHealthAndPowerUpdate();   // force server to send new value for hp and power (including max)
 
         void TriggerEvadeEvents();
+        void EvadeTimerExpired();
+        bool IsInEvadeMode() const { return m_evadeTimer > 0 || m_evadeMode; }
+        bool IsEvadeRegen() const { return m_evadeTimer > 0 && m_evadeTimer <= 5000 || m_evadeMode; } // Only regen after 5 seconds, or when in permanent evade
+        void StartEvadeTimer() { m_evadeTimer = 10000; } // 10 seconds after which action is taken
+        void StopEvade(); // Stops either timer or evade state
+        void SetEvade(bool state); // Propagated to pets
 
         // Take possession of an unit (pet, creature, ...)
         bool TakePossessOf(Unit* possessed);
@@ -2398,6 +2404,10 @@ class Unit : public WorldObject
 
         // guard to prevent chaining extra attacks
         bool m_extraAttacksExecuting;
+
+        uint32 m_evadeTimer; // Used for evade during combat when mob is not running home and target isnt reachable
+        bool m_evadeMode; // Used for evade during running home
+
     private:                                                // Error traps for some wrong args using
         // this will catch and prevent build for any cases when all optional args skipped and instead triggered used non boolean type
         // no bodies expected for this declarations
