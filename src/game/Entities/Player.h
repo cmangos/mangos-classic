@@ -1657,6 +1657,7 @@ class Player : public Unit
         void SetSemaphoreTeleportNear(bool semphsetting) { mSemaphoreTeleport_Near = semphsetting; }
         void SetSemaphoreTeleportFar(bool semphsetting) { mSemaphoreTeleport_Far = semphsetting; }
         void ProcessDelayedOperations();
+        void SetDelayedZoneUpdate(bool state, uint32 newZone) { m_needsZoneUpdate = state; m_newZone = newZone; }
 
         void CheckAreaExploreAndOutdoor();
 
@@ -2381,6 +2382,9 @@ class Player : public Unit
         bool m_bCanDelayTeleport;
         bool m_bHasDelayedTeleport;
         bool m_bHasBeenAliveAtDelayedTeleport;
+
+        bool m_needsZoneUpdate;
+        uint32 m_newZone;
 
         uint32 m_DetectInvTimer;
 

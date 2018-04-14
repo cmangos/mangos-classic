@@ -665,6 +665,16 @@ bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredT
     return (itemEntry->categoryMask & reqEntry->categoryMask)==reqEntry->categoryMask;
 }
 */
+
+bool MapCoordinateVsZoneCheck(float x, float y, uint32 mapid, uint32 zone)
+{
+    WorldMapAreaEntry const* WmaEntry = sWorldMapAreaStore.LookupEntry(zone);
+    if (WmaEntry && mapid == WmaEntry->map_id &&
+            x >= WmaEntry->x2 && x <= WmaEntry->x1 && y >= WmaEntry->y2 && y <= WmaEntry->y1)
+        return true;
+    return false;
+}
+
 bool Zone2MapCoordinates(float& x, float& y, uint32 zone)
 {
     WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);

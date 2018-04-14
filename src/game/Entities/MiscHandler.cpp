@@ -360,10 +360,7 @@ void WorldSession::HandleZoneUpdateOpcode(WorldPacket& recv_data)
 
     DETAIL_LOG("WORLD: Received opcode CMSG_ZONEUPDATE: newzone is %u", newZone);
 
-    // use server side data
-    uint32 newzone, newarea;
-    GetPlayer()->GetZoneAndAreaId(newzone, newarea);
-    GetPlayer()->UpdateZone(newzone, newarea);
+    GetPlayer()->SetDelayedZoneUpdate(true, newZone);
 }
 
 void WorldSession::HandleSetTargetOpcode(WorldPacket& recv_data)
