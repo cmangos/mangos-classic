@@ -100,8 +100,7 @@ struct boss_zumrahAI : public ScriptedAI
     {
         if (!m_bHasTurnedHostile && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 9.0f) && m_creature->IsWithinLOSInMap(pWho))
         {
-            m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_NONE);
-            m_creature->SetImmuneToPlayer(false);
+            m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER);
             DoScriptText(SAY_INTRO, m_creature);
             m_bHasTurnedHostile = true;
             AttackStart(pWho);
