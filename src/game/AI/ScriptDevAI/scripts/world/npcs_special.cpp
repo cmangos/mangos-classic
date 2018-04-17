@@ -273,6 +273,8 @@ struct npc_injured_patientAI : public ScriptedAI
         m_doctorGuid.Clear();
         m_pCoord = nullptr;
 
+       //make sure the corps disappears quickly to free the bed's place
+        m_creature->SetCorpseDelay(1);
         // no select
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         // no regen health
@@ -465,7 +467,7 @@ void npc_doctorAI::PatientSaved(Creature* /*soldier*/, Player* pPlayer, Location
 
 void npc_doctorAI::UpdateAI(const uint32 uiDiff)
 {
-    if (m_bIsEventInProgress && m_uiSummonPatientCount >= 20)
+    if (m_bIsEventInProgress && m_uiSummonPatientCount >= 21)  // worst case scenario : 5 deads + 15 saved
     {
         Reset();
         return;
