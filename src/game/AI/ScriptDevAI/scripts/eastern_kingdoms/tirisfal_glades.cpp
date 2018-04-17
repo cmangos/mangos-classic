@@ -102,6 +102,7 @@ struct npc_calvin_montagueAI : public ScriptedAI
         m_uiPhase = 0;
         m_uiPhaseTimer = 5000;
         SetReactState(REACT_AGGRESSIVE);
+        m_creature->SetImmuneToPlayer(true);
         m_playerGuid.Clear();
     }
 
@@ -170,6 +171,7 @@ bool QuestAccept_npc_calvin_montague(Player* pPlayer, Creature* pCreature, const
 {
     if (pQuest->GetQuestId() == QUEST_590)
     {
+        pCreature->SetImmuneToPlayer(false);
         pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
         pCreature->AI()->AttackStart(pPlayer);
     }
