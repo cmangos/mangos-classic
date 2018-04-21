@@ -126,10 +126,6 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (!i_dynobject.IsWithinDistInMap(target, i_dynobject.GetRadius()))
         return;
 
-    // Check targets for not_selectable unit flag and remove
-    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER))
-        return;
-
     // Evade target
     if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsInEvadeMode())
         return;
@@ -169,7 +165,8 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         if (!found)
             return;
     }
-    else
+    // This condition is only needed due to missing neutral spell type
+    else if(i_dynobject.GetTarget() != TARGET_AREAEFFECT_CUSTOM)
     {
         // for player casts use less strict negative and more stricted positive targeting
         if (i_positive)

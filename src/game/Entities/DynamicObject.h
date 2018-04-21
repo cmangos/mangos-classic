@@ -40,7 +40,7 @@ class DynamicObject : public WorldObject
         void AddToWorld() override;
         void RemoveFromWorld() override;
 
-        bool Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEffectIndex effIndex, float x, float y, float z, int32 duration, float radius, DynamicObjectType type);
+        bool Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEffectIndex effIndex, float x, float y, float z, int32 duration, float radius, DynamicObjectType type, Targets target);
         void Update(uint32 update_diff, uint32 p_time) override;
         void Delete();
         uint32 GetSpellId() const { return m_spellId; }
@@ -77,6 +77,7 @@ class DynamicObject : public WorldObject
         }
 
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
+        Targets GetTarget() { return m_target; }
 
         GridReference<DynamicObject>& GetGridRef() { return m_gridRef; }
 
@@ -87,6 +88,7 @@ class DynamicObject : public WorldObject
         float m_radius;                                     // radius apply persistent effect, 0 = no persistent effect
         bool m_positive;
         GuidSet m_affected;
+        Targets m_target;
     private:
         GridReference<DynamicObject> m_gridRef;
 };
