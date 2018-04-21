@@ -402,7 +402,6 @@ struct GameObjectInfo
         {
             case GAMEOBJECT_TYPE_DOOR:       return !!door.noDamageImmune;
             case GAMEOBJECT_TYPE_BUTTON:     return !!button.noDamageImmune;
-            case GAMEOBJECT_TYPE_QUESTGIVER: return !!questgiver.noDamageImmune;
             case GAMEOBJECT_TYPE_GOOBER:     return !!goober.noDamageImmune;
             case GAMEOBJECT_TYPE_FLAGSTAND:  return !!flagstand.noDamageImmune;
             case GAMEOBJECT_TYPE_FLAGDROP:   return !!flagdrop.noDamageImmune;
