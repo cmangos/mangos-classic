@@ -5525,6 +5525,13 @@ void SpellAuraHolder::SetAuraFlag(uint32 slot, bool add)
                 break;
             flags |= (IsPositiveEffectTargetMode(m_spellProto, SpellEffectIndex(i), caster, m_target) ? AFLAG_HELPFUL : AFLAG_HARMFUL);
         }
+
+        if (m_spellProto->HasAttribute(SPELL_ATTR_PASSIVE))
+            flags |= AFLAG_PASSIVE_DEPRECATED;
+
+        if (flags & AFLAG_HELPFUL)
+            flags |= AFLAG_HELPFUL_REVEALED;
+
         flags |= ((IsPositive() && !m_spellProto->HasAttribute(SPELL_ATTR_CANT_CANCEL)) ? AFLAG_CANCELABLE : AFLAG_NOT_CANCELABLE);
 
         val |= (flags << byte);
