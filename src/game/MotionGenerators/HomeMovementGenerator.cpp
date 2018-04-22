@@ -68,10 +68,9 @@ bool HomeMovementGenerator<Creature>::Update(Creature& owner, const uint32& /*ti
 
 void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
 {
+    owner.SetEvade(false);
     if (arrived)
     {
-        owner.SetEvade(false);
-
         if (owner.GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_REACH_HOME)
             owner.ClearTemporaryFaction();
 
