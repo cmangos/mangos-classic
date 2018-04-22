@@ -1869,30 +1869,15 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
     return (newdamage > 1) ? newdamage : 1;
 }
 
-void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, uint32* resist, bool canReflect, bool ignoreResists, bool binary)
+void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, uint32* resist, bool canReflect, bool canResist, bool binary)
 {
     if (!pCaster || !isAlive() || !damage)
         return;
 
     // Magic damage, check for resists
-    if (!ignoreResists && (schoolMask & SPELL_SCHOOL_MASK_MAGIC) && (!binary || damagetype == DOT))
-    {
-        const float percent = CalculateEffectiveMagicResistancePercent(pCaster, schoolMask);
-        const SpellPartialResistChanceEntry& chances = SPELL_PARTIAL_RESIST_DISTRIBUTION.at(uint32(percent * 100));
-        // We choose which portion of damage is resisted below, none by default
-        uint8 portion = SPELL_PARTIAL_RESIST_NONE;
-        // If we got to this point, we already rolled for full resist on hit
-        // We do a roll between remaining chances
-        const uint8 outcomes = (NUM_SPELL_PARTIAL_RESISTS - 1);
-        const uint32 roll = urand(1, (10000 - chances.at(SPELL_PARTIAL_RESIST_PCT_100)));
-        Die<SpellPartialResist, SPELL_PARTIAL_RESIST_NONE, outcomes> die;
-        for (uint8 outcome = SPELL_PARTIAL_RESIST_NONE; outcome < outcomes; ++outcome)
-            die.chance[outcome] = chances.at(outcome);
-        portion = die.roll(roll);
-        const uint32 amount = uint32(damage * (portion * (1.0f / float(outcomes))));
-        // We already rolled for full resist on hit, so we need to deal at least *some* amount of damage...
-        *resist = (amount >= damage) ? (damage - 1) : amount;
-    }
+    if (canResist && (schoolMask & SPELL_SCHOOL_MASK_MAGIC) && (!binary || damagetype == DOT))
+        // We already rolled for possible full resist on hit, so we need to deal at least *some* amount of damage...
+        *resist = std::min((damage - 1), uint32(damage * pCaster->RollMagicPartialResistRatioAgainst(this, schoolMask, damagetype, binary)));
     else
         *resist = 0;
 
@@ -2091,7 +2076,7 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
         damageInfo->damage -= damageInfo->blocked;
     }
 
-    CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, IsReflectableSpell(spellProto), spellProto->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES), IsBinarySpell(spellProto));
+    CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto), IsBinarySpell(spellProto));
     damageInfo->damage -= damageInfo->absorb + damageInfo->resist;
 }
 
@@ -3226,6 +3211,16 @@ float Unit::CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType at
     chance += (difference * factor);
     // Victim's auras affecting attacker's hit contribution:
     chance -= victim->GetTotalAuraModifier(ranged ? SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE : SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
+    // For elemental melee auto-attacks: full resist outcome converted into miss chance (original research on combat logs)
+    if (!ranged && !ability)
+    {
+        const float resistance = victim->CalculateEffectiveMagicResistancePercent(this, GetMeleeDamageSchoolMask());
+        if (const uint32 uindex = uint32(resistance * 100))
+        {
+            const SpellPartialResistChanceEntry &chances = SPELL_PARTIAL_RESIST_DISTRIBUTION.at(uindex);
+            chance += float(chances.at(SPELL_PARTIAL_RESIST_PCT_100) / 100);
+        }
+    }
     // Finally, take hit chance
     chance -= (ability ? GetHitChance(ability, SPELL_SCHOOL_MASK_NORMAL) : GetHitChance(attType));
     return std::max(0.0f, std::min(chance, 100.0f));
@@ -3331,7 +3326,7 @@ int32 Unit::GetResistancePenetration(SpellSchools school) const
 float Unit::CalculateEffectiveMagicResistancePercent(const Unit* attacker, SpellSchoolMask schoolMask, bool binary) const
 {
     // Non-magical or contains Physical as a component (such as Chaos) - ignores resistances completely
-    if (schoolMask & SPELL_SCHOOL_MASK_NORMAL)
+    if (!schoolMask || (schoolMask & SPELL_SCHOOL_MASK_NORMAL))
         return 0.0f;
     // Completely ignore holy resistance value (since beta stages)
     uint32 schools = uint32(schoolMask & ~uint32(SPELL_SCHOOL_MASK_HOLY));
@@ -3363,9 +3358,30 @@ float Unit::CalculateEffectiveMagicResistancePercent(const Unit* attacker, Spell
     // Bonus resistance by level difference when calculating damage hit for NPCs only
     if (!binary && GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         percent += (0.4f * std::max(int32(GetMaxSkillValueForLevel(attacker) - skill), 0));
-    // Magic resistance percentage cap
-    const float cap = 75.0f; // Pre-WotLK: 75%
-    return std::max(0.0f, std::min(percent, cap));
+    // Magic resistance percentage cap (same as armor cap)
+    return std::max(0.0f, std::min(percent, 75.0f));
+}
+
+float Unit::RollMagicPartialResistRatioAgainst(const Unit *victim, SpellSchoolMask schoolMask, DamageEffectType dmgType, bool binary) const
+{
+    // Returns a ratio portion of resisted damage, range of returned values: 0.0f-1.0f
+    const float k = (dmgType == DOT && binary) ? 0.1f : 1.0f; // Pre-TBC: reduced mitigation against DoTs originating from binary spells
+    const float percent = (victim->CalculateEffectiveMagicResistancePercent(this, schoolMask) * k);
+    const uint32 index = uint32(percent * 100);
+    if (!index)
+        return 0.0f;
+    const SpellPartialResistChanceEntry &chances = SPELL_PARTIAL_RESIST_DISTRIBUTION.at(index);
+    Die<SpellPartialResist, SPELL_PARTIAL_RESIST_NONE, NUM_SPELL_PARTIAL_RESISTS> die;
+    for (uint8 outcome = SPELL_PARTIAL_RESIST_NONE; outcome < NUM_SPELL_PARTIAL_RESISTS; ++outcome)
+        die.chance[outcome] = chances.at(outcome);
+    const uint32 random = urand(1, 10000);
+    // We must exclude full resist chance from it, we already rolled for it as miss type in attack table (so n-1)
+    uint8 portion = std::min(uint8(die.roll(random)), uint8(NUM_SPELL_PARTIAL_RESISTS - 1));
+    // Simulate old retail rouding error (full hit cut-off) for: NPC non-binary spells; environmental damage (e.g. lava); elemental attacks
+    if (portion == SPELL_PARTIAL_RESIST_NONE && !binary && percent > 54.0f && (dmgType == DIRECT_DAMAGE || !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)))
+        ++portion;
+    // To get resisted part ratio, we exclude zero outcome (it is n-1 anyway, so we reuse local var)
+    return (float(portion) / float(NUM_SPELL_PARTIAL_RESISTS));
 }
 
 float Unit::CalculateSpellResistChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const
@@ -3377,13 +3393,14 @@ float Unit::CalculateSpellResistChance(const Unit* victim, SpellSchoolMask schoo
         chance += CalculateSpellMissChance(victim, schoolMask, spell);
 
     // Chance to fully resist a spell by magic resistance
-    if (spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !spell->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES))
+    if (IsResistableSpell(spell) && spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
     {
         const bool binary = IsBinarySpell(spell);
         const float percent = victim->CalculateEffectiveMagicResistancePercent(this, schoolMask, binary);
         if (binary)
             chance += percent;
-        else
+        // Only non-binary spells used by players and pets can be fully resisted by magic resistance, NPC spells can be cut-off
+        else if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
             chance += float(SPELL_PARTIAL_RESIST_DISTRIBUTION.at(uint32(percent * 100)).at(SPELL_PARTIAL_RESIST_PCT_100)) * 0.01f;
     }
     // Chance to fully resist entire spell by it's dispel type
