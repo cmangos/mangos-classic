@@ -5511,7 +5511,7 @@ void SpellAuraHolder::SetAuraFlag(uint32 slot, bool add)
     uint32 index    = slot >> 3;
     uint32 byte     = (slot & 7) << 2;
     uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURAFLAGS + index);
-    val &= ~(uint32(AFLAG_MASK_ALL) << byte);
+    val &= (~uint32(AFLAG_MASK_ALL) << byte);
     if (add)
     {
         const Unit* caster = GetCaster();
