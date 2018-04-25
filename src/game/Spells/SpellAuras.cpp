@@ -5511,28 +5511,19 @@ void SpellAuraHolder::SetAuraFlag(uint32 slot, bool add)
     uint32 index    = slot >> 3;
     uint32 byte     = (slot & 7) << 2;
     uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURAFLAGS + index);
-    val &= (~uint32(AFLAG_MASK_ALL) << byte);
+    val &= ~(uint32(AFLAG_MASK_ALL) << byte);
     if (add)
     {
-        const Unit* caster = GetCaster();
-
         uint32 flags = AFLAG_NONE;
-        for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+
+        if (IsPositive())
         {
-            if (!m_auras[i])
-                continue;
-            if ((flags & AFLAG_HARMFUL) && (flags & AFLAG_HELPFUL))
-                break;
-            flags |= (IsPositiveEffectTargetMode(m_spellProto, SpellEffectIndex(i), caster, m_target) ? AFLAG_HELPFUL : AFLAG_HARMFUL);
+            if (!m_spellProto->HasAttribute(SPELL_ATTR_CANT_CANCEL))
+                flags |= AFLAG_CANCELABLE;
+            flags |= AFLAG_UNK3;
         }
-
-        if (m_spellProto->HasAttribute(SPELL_ATTR_PASSIVE))
-            flags |= AFLAG_PASSIVE_DEPRECATED;
-
-        if (flags & AFLAG_HELPFUL)
-            flags |= AFLAG_HELPFUL_REVEALED;
-
-        flags |= ((IsPositive() && !m_spellProto->HasAttribute(SPELL_ATTR_CANT_CANCEL)) ? AFLAG_CANCELABLE : AFLAG_NOT_CANCELABLE);
+        else
+            flags |= AFLAG_UNK4;
 
         val |= (flags << byte);
     }
