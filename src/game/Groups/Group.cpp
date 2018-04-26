@@ -35,23 +35,24 @@
 
 GroupMemberStatus GetGroupMemberStatus(const Player* member = nullptr)
 {
-    uint8 flags = MEMBER_STATUS_OFFLINE;
-    if (member && member->GetSession() && !member->GetSession()->PlayerLogout())
-    {
-        flags |= MEMBER_STATUS_ONLINE;
-        if (member->IsPvP())
-            flags |= MEMBER_STATUS_PVP;
-        if (member->isDead())
-            flags |= MEMBER_STATUS_DEAD;
-        if (member->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-            flags |= MEMBER_STATUS_GHOST;
-        if (member->IsPvPFreeForAll())
-            flags |= MEMBER_STATUS_PVP_FFA;
-        if (member->isAFK())
-            flags |= MEMBER_STATUS_AFK;
-        if (member->isDND())
-            flags |= MEMBER_STATUS_DND;
-    }
+    if (!member || !member->GetSession() || (!member->IsInWorld() && !member->IsBeingTeleportedFar()))
+        return MEMBER_STATUS_OFFLINE;
+
+    uint8 flags = MEMBER_STATUS_ONLINE;
+    if (member->IsPvP())
+        flags |= MEMBER_STATUS_PVP;
+    if (member->isDead())
+        flags |= MEMBER_STATUS_DEAD;
+    if (member->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        flags |= MEMBER_STATUS_GHOST;
+    if (member->IsPvPFreeForAll())
+        flags |= MEMBER_STATUS_PVP_FFA;
+    if (!member->IsInWorld())
+        flags |= MEMBER_STATUS_ZONE_OUT;
+    if (member->isAFK())
+        flags |= MEMBER_STATUS_AFK;
+    if (member->isDND())
+        flags |= MEMBER_STATUS_DND;
     return GroupMemberStatus(flags);
 }
 
