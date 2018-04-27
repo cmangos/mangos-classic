@@ -119,21 +119,25 @@ namespace MaNGOS
         void Visit(CreatureMapType&);
     };
 
-    struct PlayerRelocationNotifier
+    struct PlayerVisitObjectsNotifier
     {
         Player& i_player;
-        PlayerRelocationNotifier(Player& pl) : i_player(pl) {}
-        template<class T> void Visit(GridRefManager<T>&) {}
-        void Visit(CreatureMapType&);
-    };
-
-    struct CreatureRelocationNotifier
-    {
-        Creature& i_creature;
-        CreatureRelocationNotifier(Creature& c) : i_creature(c) {}
+        PlayerVisitObjectsNotifier(Player& pl) : i_player(pl) {}
         template<class T> void Visit(GridRefManager<T>&) {}
 #ifdef _MSC_VER
         template<> void Visit(PlayerMapType&);
+        template<> void Visit(CreatureMapType&);
+#endif
+    };
+
+    struct CreatureVisitObjectsNotifier
+    {
+        Creature& i_creature;
+        CreatureVisitObjectsNotifier(Creature& c) : i_creature(c) {}
+        template<class T> void Visit(GridRefManager<T>&) {}
+#ifdef _MSC_VER
+        template<> void Visit(PlayerMapType&);
+        template<> void Visit(CreatureMapType&);
 #endif
     };
 
@@ -876,7 +880,7 @@ namespace MaNGOS
                 i_controlledByPlayer = obj->IsControlledByPlayer();
             }
             WorldObject const& GetFocusObject() const { return *i_obj; }
-            bool operator()(Unit* u)
+            bool operator()(Unit* u) const
             {
                 if (u->isAlive() && (i_controlledByPlayer ? !i_obj->IsFriendlyTo(u) && i_obj->CanAttackSpell(u) : i_obj->IsHostileTo(u))
                     && i_obj->IsWithinDistInMap(u, i_range))

@@ -133,13 +133,14 @@ bool CreatureCreatePos::Relocate(Creature* cr) const
 Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_lootMoney(0), m_lootGroupRecipientId(0),
     m_lootStatus(CREATURE_LOOT_STATUS_NONE),
-    m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_aggroDelay(0), m_respawnradius(5.0f),
+    m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(5.0f),
     m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
     m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
     m_isDeadByDefault(false), m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0),
     m_ai(nullptr), m_isInvisible(false),
-    m_ignoreMMAP(false), m_creatureInfo(nullptr), m_forceAttackingCapability(false), m_ignoreRangedTargets(false), m_countSpawns(false)
+    m_ignoreMMAP(false), m_creatureInfo(nullptr), m_forceAttackingCapability(false), m_ignoreRangedTargets(false), m_countSpawns(false),
+    m_canAggro(false)
 {
     m_regenTimer = 200;
     m_valuesCount = UNIT_END;
@@ -515,7 +516,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
             {
                 DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Respawning...");
                 m_respawnTime = 0;
-                m_aggroDelay = sWorld.getConfig(CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY);
+                SetCanAggro(false);
                 delete loot;
                 loot = nullptr;
 
@@ -578,11 +579,6 @@ void Creature::Update(uint32 update_diff, uint32 diff)
         }
         case ALIVE:
         {
-            if (m_aggroDelay <= update_diff)
-                m_aggroDelay = 0;
-            else
-                m_aggroDelay -= update_diff;
-
             if (m_isDeadByDefault)
             {
                 if (m_corpseDecayTimer <= update_diff)
@@ -1965,7 +1961,7 @@ bool Creature::CanInitiateAttack() const
     if (!m_forceAttackingCapability && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
         return false;
 
-    if (m_aggroDelay != 0)
+    if (!CanAggro())
         return false;
 
     return true;

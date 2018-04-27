@@ -49,17 +49,47 @@ inline void MaNGOS::ObjectUpdater::Visit(CreatureMapType& m)
     }
 }
 
-inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
+inline void UnitVisitObjectsNotifierWorker(Unit* unitA, Unit* unitB)
 {
-    // Creature AI reaction
+    if (unitA->hasUnitState(UNIT_STAT_LOST_CONTROL) ||
+        unitA->IsInEvadeMode() ||
+        !unitA->AI()->IsVisible(unitB))
+        return;
+
+    unitA->AI()->MoveInLineOfSight(unitB);
+}
+
+inline void PlayerVisitCreatureWorker(Player* pl, Creature* c)
+{
     if (!c->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
         if (c->AI() && c->AI()->IsVisible(pl) && !c->IsInEvadeMode())
             c->AI()->MoveInLineOfSight(pl);
     }
+
+    if (!pl->hasUnitState(UNIT_STAT_LOST_CONTROL))
+    {
+        if (pl->AI() && pl->AI()->IsVisible(c) && !pl->IsInEvadeMode())
+            pl->AI()->MoveInLineOfSight(c);
+    }
 }
 
-inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
+inline void PlayerVisitPlayerWorker(Player* p1, Player* p2)
+{
+    if (!p2->hasUnitState(UNIT_STAT_LOST_CONTROL))
+    {
+        if (p2->AI() && p2->AI()->IsVisible(p1) && !p2->IsInEvadeMode())
+            p2->AI()->MoveInLineOfSight(p1);
+    }
+
+    if (!p1->hasUnitState(UNIT_STAT_LOST_CONTROL))
+    {
+        if (p1->AI() && p1->AI()->IsVisible(p2) && !p1->IsInEvadeMode())
+            p1->AI()->MoveInLineOfSight(p2);
+    }
+}
+
+inline void CreatureVisitCreatureWorker(Creature* c1, Creature* c2)
 {
     if (!c1->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
@@ -74,21 +104,51 @@ inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
     }
 }
 
-inline void MaNGOS::PlayerRelocationNotifier::Visit(CreatureMapType& m)
+template<>
+inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(CreatureMapType& m)
 {
     if (!i_player.isAlive() || i_player.IsTaxiFlying())
         return;
 
+    bool playerHasAI = i_player.AI();
+
     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
-        Creature* c = iter->getSource();
-        if (c->isAlive())
-            PlayerCreatureRelocationWorker(&i_player, c);
+        Creature* creature = iter->getSource();
+        if (!creature->isAlive())
+            continue;
+
+        UnitVisitObjectsNotifierWorker(creature, &i_player);
+
+        if (playerHasAI)
+            UnitVisitObjectsNotifierWorker(&i_player, creature);
     }
 }
 
 template<>
-inline void MaNGOS::CreatureRelocationNotifier::Visit(PlayerMapType& m)
+inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(PlayerMapType& m)
+{
+    if (!i_player.isAlive() || i_player.IsTaxiFlying())
+        return;
+
+    bool playerHasAI = i_player.AI();
+
+    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    {
+        Player* player = iter->getSource();
+        if (player->isAlive() && !player->IsTaxiFlying())
+            continue;
+
+        if (player->AI())
+            UnitVisitObjectsNotifierWorker(player, &i_player);
+
+        if (playerHasAI)
+            UnitVisitObjectsNotifierWorker(&i_player, player);
+    }
+}
+
+template<>
+inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(PlayerMapType& m)
 {
     if (!i_creature.isAlive())
         return;
@@ -97,21 +157,30 @@ inline void MaNGOS::CreatureRelocationNotifier::Visit(PlayerMapType& m)
     {
         Player* player = iter->getSource();
         if (player->isAlive() && !player->IsTaxiFlying())
-            PlayerCreatureRelocationWorker(player, &i_creature);
+            continue;
+
+        if (player->AI())
+            UnitVisitObjectsNotifierWorker(player, &i_creature);
+
+        UnitVisitObjectsNotifierWorker(&i_creature, player);
     }
 }
 
 template<>
-inline void MaNGOS::CreatureRelocationNotifier::Visit(CreatureMapType& m)
+inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(CreatureMapType& m)
 {
     if (!i_creature.isAlive())
         return;
 
     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
-        Creature* c = iter->getSource();
-        if (c != &i_creature && c->isAlive())
-            CreatureCreatureRelocationWorker(c, &i_creature);
+        Creature* creature = iter->getSource();
+        if (creature == &i_creature || !creature->isAlive())
+            continue;
+
+        UnitVisitObjectsNotifierWorker(creature, &i_creature);
+
+        UnitVisitObjectsNotifierWorker(&i_creature, creature);
     }
 }
 

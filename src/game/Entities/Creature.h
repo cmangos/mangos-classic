@@ -807,6 +807,9 @@ class Creature : public Unit
         uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }
 
         void LockOutSpells(SpellSchoolMask schoolMask, uint32 duration) override;
+
+        bool CanAggro() const { return m_canAggro; }
+        void SetCanAggro(bool canAggro) { m_canAggro = canAggro; }
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 
@@ -826,7 +829,7 @@ class Creature : public Unit
         time_t m_respawnTime;                               // (secs) time of next respawn
         uint32 m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
         uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
-        uint32 m_aggroDelay;                                // (msecs)delay between respawn and aggro due to movement
+        bool m_canAggro;                                    // controls response of creature to attacks
         float m_respawnradius;
 
         CreatureSubtype m_subtype;                          // set in Creatures subclasses for fast it detect without dynamic_cast use
