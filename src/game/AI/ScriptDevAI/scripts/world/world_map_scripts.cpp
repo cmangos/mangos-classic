@@ -77,7 +77,7 @@ struct world_map_kalimdor : public ScriptedMap
     uint8 m_uiRocketsCounter;
     uint32 m_encounter[MAX_ENCOUNTER];
     bool b_isOmenSpellCreditDone;
-    GuidList m_luiElementalRiftGUIDs[4];
+    std::array<std::vector<ObjectGuid>, MAX_ELEMENTS> m_aElementalRiftGUIDs;
 
     void Initialize()
     {
@@ -87,6 +87,8 @@ struct world_map_kalimdor : public ScriptedMap
         m_uiOmenMoonlightTimer = 0;
         m_uiRocketsCounter = 0;
         b_isOmenSpellCreditDone = false;
+        for (auto riftList : m_aElementalRiftGUIDs)
+            riftList.clear();
     }
 
     void OnCreatureCreate(Creature* pCreature)
@@ -187,32 +189,30 @@ struct world_map_kalimdor : public ScriptedMap
             case GO_ROCKET_CLUSTER:
                 m_goEntryGuidStore[GO_ROCKET_CLUSTER] = pGo->GetObjectGuid();
                 break;
-            case GO_EARTH_ELEMENTAL_RIFT:
-                m_luiElementalRiftGUIDs[ELEMENTAL_EARTH].push_back(pGo->GetObjectGuid());
+            case GO_EARTH_RIFT:
+                m_aElementalRiftGUIDs[ELEMENTAL_EARTH].push_back(pGo->GetObjectGuid());
                 break;
-            case GO_WATER_ELEMENTAL_RIFT:
-                m_luiElementalRiftGUIDs[ELEMENTAL_WATER].push_back(pGo->GetObjectGuid());
+            case GO_WATER_RIFT:
+                m_aElementalRiftGUIDs[ELEMENTAL_WATER].push_back(pGo->GetObjectGuid());
                 break;
-            case GO_FIRE_ELEMENTAL_RIFT:
-                m_luiElementalRiftGUIDs[ELEMENTAL_FIRE].push_back(pGo->GetObjectGuid());
+            case GO_FIRE_RIFT:
+                m_aElementalRiftGUIDs[ELEMENTAL_FIRE].push_back(pGo->GetObjectGuid());
                 break;
-            case GO_AIR_ELEMENTAL_RIFT:
-                m_luiElementalRiftGUIDs[ELEMENTAL_AIR].push_back(pGo->GetObjectGuid());
+            case GO_AIR_RIFT:
+                m_aElementalRiftGUIDs[ELEMENTAL_AIR].push_back(pGo->GetObjectGuid());
                 break;
         }
     }
 
-    void DoDespawnElementalRifts(uint8 uiIndex)
+    void DoDespawnElementalRifts(uint8 index)
     {
         // Despawn all GO rifts for a given element type, erase the GUIDs for the GOs
-        for (GuidList::const_iterator itr = m_luiElementalRiftGUIDs[uiIndex].begin(); itr != m_luiElementalRiftGUIDs[uiIndex].end(); ++itr)
+        for (auto guid : m_aElementalRiftGUIDs[index])
         {
-            if (GameObject* pRift = instance->GetGameObject(*itr))
-            {
-                m_luiElementalRiftGUIDs[uiIndex].remove(*itr);
+            if (GameObject* pRift = instance->GetGameObject(guid))
                 pRift->SetLootState(GO_JUST_DEACTIVATED);
-            }
         }
+        m_aElementalRiftGUIDs[index].clear();
     }
 
     bool GhostOPlasmEventStep(GhostOPlasmEvent& eventData)
