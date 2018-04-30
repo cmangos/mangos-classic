@@ -87,7 +87,7 @@ struct world_map_kalimdor : public ScriptedMap
         m_uiOmenMoonlightTimer = 0;
         m_uiRocketsCounter = 0;
         b_isOmenSpellCreditDone = false;
-        for (auto riftList : m_aElementalRiftGUIDs)
+        for (auto& riftList : m_aElementalRiftGUIDs)
             riftList.clear();
     }
 
