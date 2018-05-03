@@ -582,6 +582,10 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
     // register guild and add guildmaster
     sGuildMgr.AddGuild(guild);
 
+    // Send result to GM
+    if (WorldSession* session = _player->GetSession())
+        session->SendGuildCommandResult(GUILD_CREATE_S, name, 0);
+
     // add members
     for (uint8 i = 0; i < signs; ++i)
     {
@@ -592,6 +596,17 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
             continue;
 
         guild->AddMember(signGuid, guild->GetLowestRank());
+
+        // Put record into guild log
+        guild->LogGuildEvent(GUILD_EVENT_LOG_JOIN_GUILD, signGuid);
+
+        // Send result to online signees
+        if (Player* signee = sObjectMgr.GetPlayer(signGuid))
+        {
+            if (WorldSession* session = signee->GetSession())
+                session->SendGuildCommandResult(GUILD_FOUNDER_S, name, 0);
+        }
+
         result->NextRow();
     }
 
