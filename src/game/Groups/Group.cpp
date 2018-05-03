@@ -610,12 +610,14 @@ void Group::UpdateOfflineLeader(time_t time, uint32 delay)
         return;
 
     // Check leader presence
-    // TODO: Add a list of loading players or online/offline counter?
-    // FIXME: If player is loading a new map longer than delay, the leadership is going to be transfered
-    if (sObjectMgr.GetPlayer(m_leaderGuid))
+    if (const Player* leader = sObjectMgr.GetPlayer(m_leaderGuid))
     {
-        m_leaderLastOnline = time;
-        return;
+        // Consider loading a new map as being online as well until session finally times out
+        if (leader->IsInWorld() || (leader->GetSession() && leader->IsBeingTeleportedFar()))
+        {
+            m_leaderLastOnline = time;
+            return;
+        }
     }
 
     // Check for delay
