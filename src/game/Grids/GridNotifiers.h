@@ -1319,9 +1319,10 @@ namespace MaNGOS
     };
 
 #ifndef _MSC_VER
-    template<> void PlayerRelocationNotifier::Visit<Creature>(CreatureMapType&);
-    template<> void CreatureRelocationNotifier::Visit<Player>(PlayerMapType&);
-    template<> void CreatureRelocationNotifier::Visit<Creature>(CreatureMapType&);
+    template<> void PlayerVisitObjectsNotifier::Visit<Player>(PlayerMapType&);
+    template<> void PlayerVisitObjectsNotifier::Visit<Creature>(CreatureMapType&);
+    template<> void CreatureVisitObjectsNotifier::Visit<Player>(PlayerMapType&);
+    template<> void CreatureVisitObjectsNotifier::Visit<Creature>(CreatureMapType&);
     template<> inline void DynamicObjectUpdater::Visit<Creature>(CreatureMapType&);
     template<> inline void DynamicObjectUpdater::Visit<Player>(PlayerMapType&);
 #endif
