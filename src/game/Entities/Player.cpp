@@ -230,7 +230,7 @@ std::string PlayerTaxi::SaveTaxiDestinationsToString()
 
     std::ostringstream ss;
 
-    for (size_t i = 0; i < m_TaxiDestinations.size(); ++i)
+    for (size_t i = 0; i < (sWorld.getConfig(CONFIG_BOOL_LONG_TAXI_PATHS_PERSISTENCE) ? m_TaxiDestinations.size() : 2); ++i)
         ss << m_TaxiDestinations[i] << " ";
 
     return ss.str();
