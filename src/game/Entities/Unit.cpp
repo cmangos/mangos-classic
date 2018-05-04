@@ -4944,6 +4944,15 @@ bool Unit::HasAura(uint32 spellId, SpellEffectIndex effIndex) const
     return false;
 }
 
+bool Unit::HasAuraTypeWithCaster(AuraType auratype, ObjectGuid caster) const
+{
+    AuraList const& auras = GetAurasByType(auratype);
+    for (AuraList::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
+        if ((*iter)->GetCasterGuid() == caster)
+            return true;
+    return false;
+}
+
 uint32 Unit::GetAuraCount(uint32 spellId) const
 {
     uint32 count = 0;
@@ -8028,57 +8037,25 @@ void Unit::DeleteThreatList()
 
 //======================================================================
 
-void Unit::TauntApply(Unit* taunter)
+void Unit::TauntUpdate()
 {
-    MANGOS_ASSERT(GetTypeId() == TYPEID_UNIT);
-
-    if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && ((Player*)taunter)->isGameMaster()))
-        return;
-
     if (!CanHaveThreatList())
         return;
 
-    Unit* target = getVictim();
-
-    if (target && target == taunter)
-        return;
-
-    getThreatManager().tauntApply(taunter);
+    getThreatManager().TauntUpdate();
 }
 
-//======================================================================
-
-void Unit::TauntFadeOut(Unit* taunter)
+void Unit::FixateTarget(Unit* taunter)
 {
-    MANGOS_ASSERT(GetTypeId() == TYPEID_UNIT);
-
-    if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && ((Player*)taunter)->isGameMaster()))
-        return;
-
     if (!CanHaveThreatList())
         return;
 
-    Unit* target = getVictim();
-
-    if (!target || target != taunter)
-        return;
-
-    getThreatManager().tauntFadeOut(taunter);
-}
-
-//======================================================================
-/// if pVictim is given, the npc will fixate onto pVictim, if nullptr it will remove current fixation
-void Unit::FixateTarget(Unit* pVictim)
-{
-    if (!pVictim)                                           // Remove Fixation
-        m_fixateTargetGuid.Clear();
-    else if (CanAttack(pVictim))                            // Apply Fixation
-        m_fixateTargetGuid = pVictim->GetObjectGuid();
+    getThreatManager().FixateTarget(taunter);
 }
 
 //======================================================================
 
-bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool taunt, bool checkThreatArea)
+bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea)
 {
     MANGOS_ASSERT(pTarget);
 
@@ -8087,7 +8064,7 @@ bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool taunt, bool checkThreatArea)
 
     return
         pTarget->IsTargetUnderControl(*this) ||
-        (!taunt && pTarget->IsImmuneToDamage(GetMeleeDamageSchoolMask())) || pTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED) ||
+        pTarget->IsImmuneToDamage(GetMeleeDamageSchoolMask()) || pTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED) ||
         pTarget->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) ||
         (thisCreature && checkThreatArea && thisCreature->IsOutOfThreatArea(pTarget));
 }
@@ -8121,38 +8098,6 @@ bool Unit::SelectHostileTarget()
 
     Unit* target = nullptr;
     Unit* oldTarget = getVictim();
-
-    // first check if we should fixate a target
-    if (m_fixateTargetGuid)
-    {
-        if (oldTarget && oldTarget->GetObjectGuid() == m_fixateTargetGuid)
-            target = oldTarget;
-        else
-        {
-            Unit* pFixateTarget = GetMap()->GetUnit(m_fixateTargetGuid);
-            if (pFixateTarget && pFixateTarget->isAlive() && !IsSecondChoiceTarget(pFixateTarget, false, true) && (!IsIgnoringRangedTargets() || CanReachWithMeleeAttack(target)))
-                target = pFixateTarget;
-        }
-    }
-
-    // then checking if we have some taunt on us
-    if (!target)
-    {
-        const AuraList& tauntAuras = GetAurasByType(SPELL_AURA_MOD_TAUNT);
-        Unit* caster;
-
-        // Find first available taunter target
-        // Auras are pushed_back, last caster will be on the end
-        for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
-        {
-            if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) && caster->isInAccessablePlaceFor(this) &&
-                    CanAttack(caster) && !IsSecondChoiceTarget(caster, true, true) && (!IsIgnoringRangedTargets() || CanReachWithMeleeAttack(caster)))
-            {
-                target = caster;
-                break;
-            }
-        }
-    }
 
     // No valid fixate target, taunt aura or taunt aura caster is dead, standard target selection
     if (!target && !getThreatManager().isThreatListEmpty())

@@ -1036,6 +1036,8 @@ enum MangosStrings
     LANG_OPVP_SI_CAPTURE_A              = 1636,
 
     // FREE IDS                           1700-9999
+    LANG_NPC_THREAT_PLAYER              = 1702,
+    LANG_NPC_THREAT_SELECTED_CREATURE   = 1703,
 
     // Use for not-in-official-sources patches
     //                                    10000-10999

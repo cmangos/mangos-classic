@@ -21,9 +21,11 @@
 #include "Entities/Creature.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "Maps/Map.h"
+#include "Entities/Unit.h"
 #include "Entities/Player.h"
 #include "Globals/ObjectAccessor.h"
 #include "Entities/UnitEvents.h"
+#include "Spells/SpellAuras.h"
 
 //==============================================================
 //================= ThreatCalcHelper ===========================
@@ -56,10 +58,10 @@ float ThreatCalcHelper::CalcThreat(Unit* pHatedUnit, Unit* /*pHatingUnit*/, floa
 //================= HostileReference ==========================
 //============================================================
 
-HostileReference::HostileReference(Unit* pUnit, ThreatManager* pThreatManager, float pThreat)
+HostileReference::HostileReference(Unit* pUnit, ThreatManager* pThreatManager, float pThreat) : 
+    m_tauntState(STATE_NONE)
 {
     iThreat = pThreat;
-    iTempThreatModifier = 0.f;
     iFadeoutThreadReduction = 0.f;
     link(pUnit, pThreatManager);
     iUnitGuid = pUnit->GetObjectGuid();
@@ -278,6 +280,8 @@ void ThreatContainer::modifyThreatPercent(Unit* pVictim, int32 pPercent)
 bool HostileReferenceSortPredicate(const HostileReference* lhs, const HostileReference* rhs)
 {
     // std::list::sort ordering predicate must be: (Pred(x,y)&&Pred(y,x))==false
+    if (lhs->GetTauntState() != rhs->GetTauntState())
+        return lhs->GetTauntState() > rhs->GetTauntState();
     return lhs->getThreat() > rhs->getThreat();             // reverse sorting
 }
 
@@ -325,7 +329,7 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* pAttacker, Hostile
         // some units are prefered in comparison to others
         // if (checkThreatArea) consider IsOutOfThreatArea - expected to be only set for pCurrentVictim
         //     This prevents dropping valid targets due to 1.1 or 1.3 threat rule vs invalid current target
-        if (!onlySecondChoiceTargetsFound && (pAttacker->IsSecondChoiceTarget(pTarget, false, pCurrentRef == pCurrentVictim) || !pCurrentRef->isAccessable()))
+        if (!onlySecondChoiceTargetsFound && (pAttacker->IsSecondChoiceTarget(pTarget, pCurrentRef == pCurrentVictim) || !pCurrentRef->isAccessable()))
         {
             if (iter != lastRef)
                 ++iter;
@@ -361,13 +365,19 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* pAttacker, Hostile
                 {
                     Unit* pCurrentTarget = pCurrentVictim->getTarget();
                     MANGOS_ASSERT(pCurrentTarget);
-                    if (pAttacker->IsSecondChoiceTarget(pCurrentTarget, false, true))
+                    if (pAttacker->IsSecondChoiceTarget(pCurrentTarget, true))
                     {
                         // CurrentVictim is invalid, so return CurrentRef
                         found = true;
                         break;
                     }
                     checkedCurrentVictim = true;
+                }
+
+                if (pCurrentRef->GetTauntState() > pCurrentVictim->GetTauntState())
+                {
+                    found = true;
+                    break;
                 }
 
                 // list sorted and and we check current target, then this is best case
@@ -508,32 +518,40 @@ bool ThreatManager::HasThreat(Unit * pVictim, bool pAlsoSearchOfflineList)
 
 //============================================================
 
-void ThreatManager::tauntApply(Unit* pTaunter)
+void ThreatManager::TauntUpdate()
 {
-    if (HostileReference* ref = iThreatContainer.getReferenceByTarget(pTaunter))
+    HostileReference* taunterRef = nullptr;
+    const Unit::AuraList& tauntAuras = iOwner->GetAurasByType(SPELL_AURA_MOD_TAUNT);
+    std::unordered_map<ObjectGuid, TauntState> tauntStates;
+    uint32 state = STATE_TAUNTED;
+    for (Unit::AuraList::const_iterator aura = tauntAuras.begin(); aura != tauntAuras.end(); ++aura)
+        tauntStates[(*aura)->GetCasterGuid()] = TauntState(state++);
+
+    for (auto& ref : iThreatContainer.getThreatList())
     {
-        if (getCurrentVictim() && (ref->getThreat() < getCurrentVictim()->getThreat()))
-        {
-            // Ok, temp threat is unused
-            if (ref->getTempThreatModifier() == 0.0f)
-            {
-                ref->setTempThreat(getCurrentVictim()->getThreat());
-            }
-        }
+        if (ref->GetTauntState() == STATE_FIXATED)
+            continue;
+        auto iter = tauntStates.find(ref->getTarget()->GetObjectGuid());
+        if (iter != tauntStates.end())
+            ref->SetTauntState((*iter).second);
+        else
+            ref->SetTauntState(STATE_NONE);
     }
+    setDirty(true);
 }
 
-//============================================================
-
-void ThreatManager::tauntFadeOut(Unit* pTaunter)
+void ThreatManager::FixateTarget(Unit* victim)
 {
-    if (HostileReference* ref = iThreatContainer.getReferenceByTarget(pTaunter))
-    {
-        ref->resetTempThreat();
-    }
-}
+    HostileReference* fixateRef = iThreatContainer.getReferenceByTarget(victim);
+    if (fixateRef)
+        fixateRef->SetTauntState(STATE_FIXATED);
 
-//============================================================
+    for (auto& ref : iThreatContainer.getThreatList())
+        if (ref != fixateRef && ref->GetTauntState() == STATE_FIXATED)
+            ref->SetTauntState(STATE_NONE);
+
+    TauntUpdate();
+}
 
 void ThreatManager::setCurrentVictim(HostileReference* pHostileReference)
 {

@@ -3850,6 +3850,33 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleNpcThreatCommand(char* /*args*/)
+{
+    Unit* target = getSelectedUnit();
+
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    // Showing threat for %s [Entry %u]
+    PSendSysMessage(LANG_NPC_THREAT_SELECTED_CREATURE, target->GetName(), target->GetEntry());
+
+    ThreatList const& tList = target->getThreatManager().getThreatList();
+    for (ThreatList::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
+    {
+        Unit* pUnit = (*itr)->getTarget();
+
+        if (pUnit)
+            // Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat and taunt state %u
+            PSendSysMessage(LANG_NPC_THREAT_PLAYER, pUnit->GetName(), pUnit->GetGUIDLow(), target->getThreatManager().getThreat(pUnit), (*itr)->GetTauntState());
+    }
+    
+    return true;
+}
+
 // play npc emote
 bool ChatHandler::HandleNpcPlayEmoteCommand(char* args)
 {
