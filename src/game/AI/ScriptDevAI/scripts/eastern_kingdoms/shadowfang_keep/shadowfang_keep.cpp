@@ -168,11 +168,6 @@ bool GossipSelect_npc_shadowfang_prisoner(Player* pPlayer, Creature* pCreature, 
 ## mob_arugal_voidwalker
 ######*/
 
-struct Waypoint
-{
-    float fX, fY, fZ;
-};
-
 // Cordinates for voidwalker spawns
 static const Waypoint VWWaypoints[] =
 {
