@@ -1978,36 +1978,6 @@ void Creature::SaveRespawnTime()
         GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), time(nullptr) + m_respawnDelay + m_corpseDecayTimer / IN_MILLISECONDS);
 }
 
-bool Creature::IsOutOfThreatArea(Unit* pVictim) const
-{
-    if (!pVictim)
-        return true;
-
-    if (!pVictim->IsInMap(this))
-        return true;
-
-    if (!CanAttack(pVictim))
-        return true;
-
-    if (!pVictim->isInAccessablePlaceFor(this))
-        return true;
-
-    if (!pVictim->isVisibleForOrDetect(this, this, true))
-        return true;
-
-    if (sMapStore.LookupEntry(GetMapId())->IsDungeon())
-        return false;
-
-    float AttackDist = GetAttackDistance(pVictim);
-    float ThreatRadius = sWorld.getConfig(CONFIG_FLOAT_THREAT_RADIUS);
-
-    float x, y, z, ori;
-    GetCombatStartPosition(x, y, z, ori);
-
-    // Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
-    return !pVictim->IsWithinDist3d(x, y, z, ThreatRadius > AttackDist ? ThreatRadius : AttackDist);
-}
-
 CreatureDataAddon const* Creature::GetCreatureAddon() const
 {
     if (!(GetObjectGuid().GetHigh() == HIGHGUID_PET)) // pets have guidlow that is conflicting with normal guidlows hence GetGUIDLow() gives wrong info

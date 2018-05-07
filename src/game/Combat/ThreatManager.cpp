@@ -146,17 +146,16 @@ void HostileReference::updateOnlineStatus()
     }
     // only check for online status if
     // ref is valid
-    // target is no player or not gamemaster
+    // target is not gamemaster
     // target is not in flight
-    if (isValid() &&
-            ((getTarget()->GetTypeId() != TYPEID_PLAYER || !((Player*)getTarget())->isGameMaster()) ||
-             !getTarget()->IsTaxiFlying()))
+    bool validTarget = getTarget() && (getTarget()->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(getTarget())->isGameMaster() || !getTarget()->IsTaxiFlying());
+    if (isValid() && validTarget)
     {
-        Creature* creature = (Creature*) getSourceUnit();
-        online = getTarget()->isInAccessablePlaceFor(creature);
+        Unit* unit = getSourceUnit();
+        online = getTarget()->isInAccessablePlaceFor(unit);
         if (!online)
         {
-            if (creature->AI()->canReachByRangeAttack(getTarget()))
+            if (unit->AI() && unit->AI()->canReachByRangeAttack(getTarget()))
                 online = true;                              // not accessable but stays online
         }
         else
@@ -301,7 +300,7 @@ void ThreatContainer::update()
 // return the next best victim
 // could be the current victim
 
-HostileReference* ThreatContainer::selectNextVictim(Creature* pAttacker, HostileReference* pCurrentVictim)
+HostileReference* ThreatContainer::selectNextVictim(Unit* pAttacker, HostileReference* pCurrentVictim)
 {
     HostileReference* pCurrentRef = nullptr;
     bool found = false;
@@ -442,15 +441,13 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, bool crit, SpellScho
         return;
 
     // not to GM
-    if (!pVictim || (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->isGameMaster()))
+    if (!pVictim || (pVictim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(pVictim)->isGameMaster()))
         return;
 
     // not to dead and not for dead
     if (!pVictim->isAlive() || !getOwner()->isAlive())
         return;
-
-    MANGOS_ASSERT(getOwner()->GetTypeId() == TYPEID_UNIT);
-
+ 
     float threat = ThreatCalcHelper::CalcThreat(pVictim, iOwner, pThreat, crit, schoolMask, pThreatSpell);
 
     addThreatDirectly(pVictim, threat);
@@ -469,7 +466,7 @@ void ThreatManager::addThreatDirectly(Unit* pVictim, float threat)
         HostileReference* hostileReference = new HostileReference(pVictim, this, 0);
         iThreatContainer.addReference(hostileReference);
         hostileReference->addThreat(threat);                // now we add the real threat
-        if (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->isGameMaster())
+        if (pVictim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(pVictim)->isGameMaster())
             hostileReference->setOnlineOfflineState(false); // GM is always offline
     }
 }
@@ -486,7 +483,7 @@ void ThreatManager::modifyThreatPercent(Unit* pVictim, int32 pPercent)
 Unit* ThreatManager::getHostileTarget()
 {
     iThreatContainer.update();
-    HostileReference* nextVictim = iThreatContainer.selectNextVictim((Creature*) getOwner(), getCurrentVictim());
+    HostileReference* nextVictim = iThreatContainer.selectNextVictim(getOwner(), getCurrentVictim());
     setCurrentVictim(nextVictim);
     return getCurrentVictim() != nullptr ? getCurrentVictim()->getTarget() : nullptr;
 }

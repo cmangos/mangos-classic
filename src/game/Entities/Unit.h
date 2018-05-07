@@ -1995,6 +1995,7 @@ class Unit : public WorldObject
         void DeleteThreatList();
         bool IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea);
         bool SelectHostileTarget();
+        bool IsOutOfThreatArea(Unit* victim) const;
         void TauntUpdate();
         void FixateTarget(Unit* taunter);
         ObjectGuid GetFixateTargetGuid() const { return m_fixateTargetGuid; }

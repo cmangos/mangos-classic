@@ -8358,6 +8358,41 @@ bool Unit::isInvisibleForAlive() const
     return isSpiritService();
 }
 
+bool Unit::IsOutOfThreatArea(Unit* victim) const
+{
+    if (!victim)
+        return true;
+
+    if (!victim->IsInMap(this))
+        return true;
+
+    if (!CanAttack(victim))
+        return true;
+
+    if (!victim->isInAccessablePlaceFor(this))
+        return true;
+
+    // Todo make vanish to reset combat state/threat/whatever we need to do.
+    // This is just workaround here
+    if (!victim->isVisibleForOrDetect(this, this, true))
+        return true;
+
+    if (sMapStore.LookupEntry(GetMapId())->IsDungeon())
+        return false;
+
+    float AttackDist = GetAttackDistance(victim);
+    float ThreatRadius = sWorld.getConfig(CONFIG_FLOAT_THREAT_RADIUS);
+
+    float x, y, z, ori;
+    if (GetTypeId() == TYPEID_UNIT)
+        static_cast<Creature const*>(this)->GetCombatStartPosition(x, y, z, ori);
+    else
+        GetPosition(x, y, z);
+
+    // Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
+    return !victim->IsWithinDist3d(x, y, z, ThreatRadius > AttackDist ? ThreatRadius : AttackDist);
+}
+
 uint32 Unit::GetCreatureType() const
 {
     if (GetTypeId() == TYPEID_PLAYER)

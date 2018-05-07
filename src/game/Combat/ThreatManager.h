@@ -29,7 +29,6 @@
 //==============================================================
 
 class Unit;
-class Creature;
 class ThreatManager;
 struct SpellEntry;
 
@@ -99,7 +98,7 @@ class HostileReference : public Reference<Unit, ThreatManager>
 
         //=================================================
 
-        HostileReference* next() { return ((HostileReference*) Reference<Unit, ThreatManager>::next()); }
+        HostileReference* next() { return static_cast<HostileReference*>(Reference<Unit, ThreatManager>::next()); }
 
         //=================================================
 
@@ -144,7 +143,7 @@ class ThreatContainer
 
         void modifyThreatPercent(Unit* pVictim, int32 percent);
 
-        HostileReference* selectNextVictim(Creature* pAttacker, HostileReference* pCurrentVictim);
+        HostileReference* selectNextVictim(Unit* pAttacker, HostileReference* pCurrentVictim);
 
         void setDirty(bool pDirty) { iDirty = pDirty; }
 
