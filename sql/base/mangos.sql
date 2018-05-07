@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2718_01_mangos_spell_affect` bit(1) DEFAULT NULL
+  `required_z2719_01_mangos_taxi_system_update` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -442,6 +442,7 @@ INSERT INTO `command` VALUES
 ('debug setvalue',3,'Syntax: .debug setvalue #field [int|hex|bit|float] #value\r\n\r\nSet the field #field of the selected target to value #value. If no target is selected, set the content of your field.\r\n\r\nUse type arg for set input format: int (decimal number), hex (hex value), bit (bitstring), float. By default expect integer input format.'),
 ('debug spellcoefs',3,'Syntax: .debug spellcoefs #spellid\r\n\r\nShow default calculated and DB stored coefficients for direct/dot heal/damage.'),
 ('debug spellmods',3,'Syntax: .debug spellmods (flat|pct) #spellMaskBitIndex #spellModOp #value\r\n\r\nSet at client side spellmod affect for spell that have bit set with index #spellMaskBitIndex in spell family mask for values dependent from spellmod #spellModOp to #value.'),
+('debug taxi',3,'Syntax: .debug taxi\r\n\r\nToggle debug mode for taxi flights. In debug mode GM receive additional on-screen information during taxi flights.'),
 ('delticket',2,'Syntax: .delticket all\r\n        .delticket #num\r\n        .delticket $character_name\r\n\rall to dalete all tickets at server, $character_name to delete ticket of this character, #num to delete ticket #num.'),
 ('demorph',2,'Syntax: .demorph\r\n\r\nDemorph the selected player.'),
 ('die',3,'Syntax: .die\r\n\r\nKill the selected player. If no player is selected, it will kill you.'),
@@ -3933,6 +3934,10 @@ INSERT INTO `mangos_string` VALUES
 (1191,'Items ratio for %s is set to %u.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1194,'Current State Information: GOState %u, LootState %u. Collision %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1195,'Current State Information: GOState %u, LootState %u. Collision %s, (door %s by default)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1196,'Debug output for taxi flights is now %s.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1197,'[Taxi]: Progress at node: [%u][%u], next: [%u][%u].',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1198,'[Taxi]: Progress at final node: [%u][%u].',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1199,'[Taxi]: Changing route to [%u].',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1200,'You try to view cinemitic %u but it doesn\'t exist.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1202,'Spell %u %s = %f (*1.88 = %f) DB = %f AP = %f',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1203,'direct heal',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -13543,6 +13548,28 @@ INSERT INTO `spell_threat` VALUES
 (25286, 175, 1, 0),
 (25288, 355, 1, 0);
 /*!40000 ALTER TABLE `spell_threat` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `taxi_shortcuts`
+--
+
+DROP TABLE IF EXISTS `taxi_shortcuts`;
+CREATE TABLE `taxi_shortcuts` (
+  `pathid` int unsigned NOT NULL COMMENT 'Flight path entry id',
+  `takeoff` int unsigned NOT NULL COMMENT 'Amount of waypoints to skip in the beginning of the flight',
+  `landing` int unsigned NOT NULL COMMENT 'Amount of waypoints to skip at the end of the flight',
+  `comments` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`pathid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Taxi System';
+
+--
+-- Dumping data for table `taxi_shortcuts`
+--
+
+LOCK TABLES `taxi_shortcuts` WRITE;
+/*!40000 ALTER TABLE `taxi_shortcuts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `taxi_shortcuts` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

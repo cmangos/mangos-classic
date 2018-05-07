@@ -110,7 +110,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void MoveSeekAssistance(float x, float y, float z);
         void MoveSeekAssistanceDistract(uint32 timer);
         void MoveWaypoint(uint32 pathId = 0, uint32 source = 0, uint32 initialDelay = 0, uint32 overwriteEntry = 0);
-        void MoveTaxiFlight(uint32 path, uint32 pathnode);
+        void MoveTaxiFlight();
         void MoveDistract(uint32 timeLimit);
         void MoveFall();
         void MoveFlyOrLand(uint32 id, float x, float y, float z, bool liftOff);

@@ -1139,6 +1139,14 @@ bool ChatHandler::HandleDebugSpellModsCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleDebugTaxiCommand(char* /*args*/)
+{
+    Player* player = m_session->GetPlayer();
+    player->ToggleTaxiDebug();
+    PSendSysMessage(LANG_COMMAND_TAXI_DEBUG, (player->IsTaxiDebug() ? GetMangosString(LANG_ON) : GetMangosString(LANG_OFF)));
+    return true;
+}
+
 bool ChatHandler::HandleDebugWaypoint(char* args)
 {
     Creature* target = getSelectedCreature();

@@ -943,7 +943,10 @@ enum MangosStrings
     //                                    1193 used in master branch
     LANG_COMMAND_GO_STATUS              = 1194,
     LANG_COMMAND_GO_STATUS_DOOR         = 1195,
-    // Room for more level 3              1196-1199 not used
+    LANG_COMMAND_TAXI_DEBUG             = 1196,
+    LANG_TAXI_DEBUG_NODE                = 1197,
+    LANG_TAXI_DEBUG_NODE_FINAL          = 1198,
+    LANG_TAXI_DEBUG_PATH                = 1199,
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,

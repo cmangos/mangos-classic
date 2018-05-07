@@ -414,28 +414,18 @@ void MotionMaster::MoveWaypoint(uint32 pathId /*=0*/, uint32 source /*=0==PATH_N
     }
 }
 
-void MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
+void MotionMaster::MoveTaxiFlight()
 {
+    while (m_owner->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
+        m_owner->GetMotionMaster()->MovementExpired(false);
+
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
     {
-        if (path < sTaxiPathNodesByPath.size())
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s taxi to (Path %u node %u)", m_owner->GetGuidStr().c_str(), path, pathnode);
-            FlightPathMovementGenerator* mgen = new FlightPathMovementGenerator(pathnode);
-            mgen->LoadPath(*(Player*)m_owner);
-            Mutate(mgen);
-        }
-        else
-        {
-            sLog.outError("%s attempt taxi to (nonexistent Path %u node %u)",
-                          m_owner->GetGuidStr().c_str(), path, pathnode);
-        }
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s is now in taxi flight", m_owner->GetGuidStr().c_str());
+        Mutate(new FlightPathMovementGenerator());
     }
     else
-    {
-        sLog.outError("%s attempt taxi to (Path %u node %u)",
-                      m_owner->GetGuidStr().c_str(), path, pathnode);
-    }
+        sLog.outError("%s can't be in taxi flight", m_owner->GetGuidStr().c_str());
 }
 
 void MotionMaster::MoveDistract(uint32 timer)

@@ -153,20 +153,10 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->SendInitialPacketsAfterAddToMap();
 
     // flight fast teleport case
-    if (GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
-    {
-        if (!_player->InBattleGround())
-        {
-            // short preparations to continue flight
-            FlightPathMovementGenerator* flight = (FlightPathMovementGenerator*)(GetPlayer()->GetMotionMaster()->top());
-            flight->Reset(*GetPlayer());
-            return;
-        }
-
-        // battleground state prepare, stop flight
-        GetPlayer()->GetMotionMaster()->MovementExpired();
-        GetPlayer()->m_taxi.ClearTaxiDestinations();
-    }
+    if (_player->InBattleGround())
+        _player->TaxiFlightInterrupt();
+    else
+        _player->TaxiFlightResume();
 
     if (mEntry->IsRaid() && mInstance)
     {

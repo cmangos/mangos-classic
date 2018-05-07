@@ -1047,6 +1047,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Graveyard-zone links...");
     sObjectMgr.LoadGraveyardZones();
 
+    sLog.outString("Loading taxi flight shortcuts...");
+    sObjectMgr.LoadTaxiShortcuts();
+
     sLog.outString("Loading spell target destination coordinates...");
     sSpellMgr.LoadSpellTargetPositions();
 

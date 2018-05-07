@@ -250,6 +250,7 @@ bool ChatHandler::HandleReloadAllAreaCommand(char* /*args*/)
     HandleReloadAreaTriggerTeleportCommand((char*)"");
     HandleReloadAreaTriggerTavernCommand((char*)"");
     HandleReloadGameGraveyardZoneCommand((char*)"");
+    HandleReloadTaxiShortcuts((char*)"");
     return true;
 }
 
@@ -745,6 +746,14 @@ bool ChatHandler::HandleReloadSpellThreatsCommand(char* /*args*/)
     sLog.outString("Re-Loading Aggro Spells Definitions...");
     sSpellMgr.LoadSpellThreats();
     SendGlobalSysMessage("DB table `spell_threat` (spell aggro definitions) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadTaxiShortcuts(char* /*args*/)
+{
+    sLog.outString("Re-Loading taxi flight shortcuts...");
+    sObjectMgr.LoadTaxiShortcuts();
+    SendGlobalSysMessage("DB table `taxi_shortcuts` (taxi flight shortcuts information) reloaded.");
     return true;
 }
 

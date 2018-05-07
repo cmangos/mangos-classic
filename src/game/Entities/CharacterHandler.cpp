@@ -632,7 +632,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         pCurrChar->SetWaterWalk(true);
     }
 
-    pCurrChar->ContinueTaxiFlight();
+    pCurrChar->TaxiFlightResume();
 
     // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)
     pCurrChar->LoadPet();

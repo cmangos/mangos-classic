@@ -106,38 +106,15 @@ class WaypointMovementGenerator<Creature>
  * and hence generates ground and activities for the player.
  */
 class FlightPathMovementGenerator
-    : public MovementGeneratorMedium< Player, FlightPathMovementGenerator >,
-      public PathMovementBase<Player, TaxiPathNodeList>
+    : public MovementGeneratorMedium< Player, FlightPathMovementGenerator >
 {
     public:
-        explicit FlightPathMovementGenerator(uint32 startNode = 0)
-        {
-            i_currentNode = startNode;
-        }
-        void LoadPath(Player&);
         void Initialize(Player&);
         void Finalize(Player&);
         void Interrupt(Player&);
         void Reset(Player&);
         bool Update(Player&, const uint32&);
         MovementGeneratorType GetMovementGeneratorType() const override { return FLIGHT_MOTION_TYPE; }
-
-        TaxiPathNodeList const& GetPath() { return i_path; }
-        uint32 GetPathAtMapEnd() const;
-        bool HasArrived() const { return (i_currentNode >= i_path.size()); }
-        void SetCurrentNodeAfterTeleport();
-        void SkipCurrentNode() { ++i_currentNode; }
-        bool GetResetPosition(Player&, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const;
-
-        void OnFlightPathEnd(Player& player, uint32 finalNode);
-
-        struct TaxiNodeChangeInfo
-        {
-            uint32 PathIndex;
-            int64  Cost;
-        };
-
-        std::deque<TaxiNodeChangeInfo> _pointsForPathSwitch;    //! node indexes and costs where TaxiPath changes
 };
 
 #endif

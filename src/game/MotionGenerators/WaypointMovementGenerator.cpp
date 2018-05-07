@@ -320,211 +320,69 @@ bool WaypointMovementGenerator<Creature>::SetNextWaypoint(uint32 pointId)
 }
 
 //----------------------------------------------------//
-uint32 FlightPathMovementGenerator::GetPathAtMapEnd() const
-{
-    if (i_currentNode >= i_path.size())
-        return i_path.size();
-
-    uint32 curMapId = i_path[i_currentNode]->mapid;
-
-    for (uint32 i = i_currentNode; i < i_path.size(); ++i)
-    {
-        if (i_path[i]->mapid != curMapId)
-            return i;
-    }
-
-    return i_path.size();
-}
-
-#define SKIP_SPLINE_POINT_DISTANCE_SQ (40.0f * 40.0f)
-
-bool IsNodeIncludedInShortenedPath(TaxiPathNodeEntry const* p1, TaxiPathNodeEntry const* p2)
-{
-    return p1->mapid != p2->mapid || std::pow(p1->x - p2->x, 2) + std::pow(p1->y - p2->y, 2) > SKIP_SPLINE_POINT_DISTANCE_SQ;
-}
-
-void FlightPathMovementGenerator::LoadPath(Player& player)
-{
-    _pointsForPathSwitch.clear();
-    std::deque<uint32> const& taxi = player.m_taxi.GetPath();
-    float discount = player.GetReputationPriceDiscount(player.m_taxi.GetFlightMasterFactionTemplate());
-    for (uint32 src = 0, dst = 1; dst < taxi.size(); src = dst++)
-    {
-        uint32 path, cost;
-        sObjectMgr.GetTaxiPath(taxi[src], taxi[dst], path, cost); // Need to add support for reputation cost discount
-        if (path > sTaxiPathNodesByPath.size())
-            return;
-
-        TaxiPathNodeList const& nodes = sTaxiPathNodesByPath[path];
-        if (!nodes.empty())
-        {
-            TaxiPathNodeEntry const* start = nodes[0];
-            TaxiPathNodeEntry const* end = nodes[nodes.size() - 1];
-            bool passedPreviousSegmentProximityCheck = false;
-            for (uint32 i = 0; i < nodes.size(); ++i)
-            {
-                if (passedPreviousSegmentProximityCheck || !src || i_path.empty() || IsNodeIncludedInShortenedPath(i_path[i_path.size() - 1], nodes[i]))
-                {
-                    if ((!src || (IsNodeIncludedInShortenedPath(start, nodes[i]) && i >= 2)) &&
-                            (dst == taxi.size() - 1 || (IsNodeIncludedInShortenedPath(end, nodes[i]) && i < nodes.size() - 1)))
-                    {
-                        passedPreviousSegmentProximityCheck = true;
-                        i_path.push_back(nodes[i]);
-                    }
-                }
-                else
-                {
-                    i_path.pop_back();
-                    --_pointsForPathSwitch.back().PathIndex;
-                }
-            }
-        }
-
-        _pointsForPathSwitch.push_back({ uint32(i_path.size() - 1), int64(ceil(cost * discount)) });
-    }
-}
 
 void FlightPathMovementGenerator::Initialize(Player& player)
 {
-    Reset(player);
+    player.InterruptMoving();
+    player.addUnitState(UNIT_STAT_TAXI_FLIGHT);
+    player.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_TAXI_FLIGHT);
+    player.UpdateClientControl(&player, false);
 }
 
 void FlightPathMovementGenerator::Finalize(Player& player)
 {
-    // remove flag to prevent send object build movement packets for flight state and crash (movement generator already not at top of stack)
+    player.InterruptMoving();
     player.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
-
-    player.Unmount();
     player.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_TAXI_FLIGHT);
     player.UpdateClientControl(&player, true);
-
-    if (player.m_taxi.GetLastNode() == player.m_taxi.GetFinalTaxiDestination())
-    {
-        player.m_taxi.NextTaxiDestination(); // successfully reached end and pop final point
-        player.getHostileRefManager().setOnlineOfflineState(true);
-        if (player.pvpInfo.inPvPEnforcedArea)
-            player.CastSpell(&player, 2479, TRIGGERED_OLD_TRIGGERED);
-
-        TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(player.m_taxi.GetLastNode());
-        player.TeleportTo(player.GetMap()->GetId(), node->x, node->y, node->z, player.GetOrientation());
-
-        // update z position to ground and orientation for landing point
-        // this prevent cheating with landing  point at lags
-        // when client side flight end early in comparison server side
-        player.SetFallInformation(0, player.GetPositionZ());
-        player.StopMoving(true);
-
-        OnFlightPathEnd(player, player.m_taxi.GetLastNode());
-    }
-    else
-        sLog.outError("Flight path finalized in non-final point. Investigate causes. Destination: %d. Player name: %s.", player.m_taxi.GetNextTaxiDestination(), player.GetName());
 }
 
 void FlightPathMovementGenerator::Interrupt(Player& player)
 {
+    player.InterruptMoving();
     player.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
+}
+
+void FlightPathMovementGenerator::Reset(Player& player)
+{
+    Initialize(player);
 }
 
 #define PLAYER_FLIGHT_SPEED        32.0f
 
-void FlightPathMovementGenerator::Reset(Player& player)
-{
-    player.getHostileRefManager().setOnlineOfflineState(false);
-    player.addUnitState(UNIT_STAT_TAXI_FLIGHT);
-    player.UpdateClientControl(&player, false);
-    player.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_TAXI_FLIGHT);
-
-    Movement::MoveSplineInit init(player);
-    uint32 end = GetPathAtMapEnd();
-    for (uint32 i = GetCurrentNode(); i != end; ++i)
-    {
-        G3D::Vector3 vertice(i_path[i]->x, i_path[i]->y, i_path[i]->z);
-        init.Path().push_back(vertice);
-    }
-    init.SetFirstPointId(GetCurrentNode());
-    init.SetFly();
-    init.SetVelocity(PLAYER_FLIGHT_SPEED);
-    init.Launch();
-}
-
 bool FlightPathMovementGenerator::Update(Player& player, const uint32& /*diff*/)
 {
-    uint32 pointId = (uint32)player.movespline->currentPathIdx();
-    if (pointId > i_currentNode)
+    Movement::MoveSpline* spline = player.movespline;
+    const bool movement = (!spline->Finalized());
+
+    if (!player.OnTaxiFlightUpdate(size_t(spline->currentPathIdx()), movement))
     {
-        bool departureEvent = true;
-        do
+        // Some other code messed with our spline before it was completed. Have it your way, no taxi for you!
+        player.OnTaxiFlightEject();
+        return false;
+    }
+
+    // We are waiting for spline to complete at this point
+    if (movement)
+        return true;
+
+    // Load and execute the spline
+    if (player.OnTaxiFlightSplineUpdate())
+    {
+        auto nodes = player.GetTaxiPathSpline();
+        auto offset = player.GetTaxiSplinePathOffset();
+        Movement::MoveSplineInit init(player);
+        Movement::PointsArray& path = init.Path();
+        for (auto i = offset; i < nodes.size(); ++i)
         {
-            while (!_pointsForPathSwitch.empty() && _pointsForPathSwitch.front().PathIndex <= i_currentNode)
-            {
-                _pointsForPathSwitch.pop_front();
-                player.m_taxi.NextTaxiDestination();
-                if (!_pointsForPathSwitch.empty())
-                {
-                    player.ModifyMoney(-_pointsForPathSwitch.front().Cost);
-                }
-            }
-
-            if (pointId == i_currentNode)
-                break;
-            i_currentNode += (uint32)departureEvent;
-            departureEvent = !departureEvent;
+            auto node = nodes.at(i);
+            path.push_back({ node->x, node->y, node->z });
         }
-        while (true);
+        init.SetFirstPointId(int32(offset));
+        init.SetFly();
+        init.SetVelocity(PLAYER_FLIGHT_SPEED);
+        init.Launch();
+        return true;
     }
-
-    const bool flying = (i_currentNode < (i_path.size() - 1));
-
-    // Multi-map flight paths
-    if (flying && i_path[i_currentNode + 1]->mapid != player.GetMapId())
-    {
-        // short preparations to continue flight
-        Interrupt(player);                // will reset at map landing
-        SetCurrentNodeAfterTeleport();
-        TaxiPathNodeEntry const* node = i_path[i_currentNode];
-        SkipCurrentNode();
-        player.TeleportTo(node->mapid, node->x, node->y, node->z, player.GetOrientation());
-    }
-
-    return flying;
-}
-
-void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
-{
-    if (i_path.empty())
-        return;
-
-    uint32 map0 = i_path[0]->mapid;
-
-    for (size_t i = 1; i < i_path.size(); ++i)
-    {
-        if (i_path[i]->mapid != map0)
-        {
-            i_currentNode = i;
-            return;
-        }
-    }
-}
-
-bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z, float& o) const
-{
-    const TaxiPathNodeEntry* node = i_path[i_currentNode];
-    x = node->x;
-    y = node->y;
-    z = node->z;
-
-    return true;
-}
-
-/*
-NOTE: Blizzard clearly has some extra scripts on certain fly path ends. Nodes contain extra events, that can be done using dbscript_on_event,
-but these extra scripts have no EventID in the DBC. In future if this place fills up, need to consider moving it to a more generic way of scripting.
-*/
-void FlightPathMovementGenerator::OnFlightPathEnd(Player& player, uint32 finalNode)
-{
-    /*switch (finalNode)
-    {
-        default:
-            break;
-    }*/
+    return false;
 }

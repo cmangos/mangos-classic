@@ -272,6 +272,14 @@ struct DungeonEncounter
 typedef std::multimap<uint32, DungeonEncounter const*> DungeonEncounterMap;
 typedef std::pair<DungeonEncounterMap::const_iterator, DungeonEncounterMap::const_iterator> DungeonEncounterMapBounds;
 
+struct TaxiShortcutData
+{
+    uint32 lengthTakeoff;
+    uint32 lengthLanding;
+};
+
+typedef std::unordered_multimap <uint32 /*nodeid*/, TaxiShortcutData> TaxiShortcutMap;
+
 struct GraveYardData
 {
     uint32 safeLocId;
@@ -542,6 +550,9 @@ class ObjectMgr
         uint32 GetPlayerAccountIdByGUID(ObjectGuid guid) const;
         uint32 GetPlayerAccountIdByPlayerName(const std::string& name) const;
 
+        bool AddTaxiShortcut(const TaxiPathEntry* path, uint32 lengthTakeoff, uint32 lengthLanding);
+        bool GetTaxiShortcut(uint32 pathid, TaxiShortcutData& data);
+        void LoadTaxiShortcuts();
         uint32 GetNearestTaxiNode(float x, float y, float z, uint32 mapid, Team team) const;
         void GetTaxiPath(uint32 source, uint32 destination, uint32& path, uint32& cost) const;
         uint32 GetTaxiMountDisplayId(uint32 id, Team team, bool allowed_alt_team = false) const;
@@ -1146,6 +1157,8 @@ class ObjectMgr
         // character reserved names
         typedef std::set<std::wstring> ReservedNamesMap;
         ReservedNamesMap    m_ReservedNames;
+
+        TaxiShortcutMap     m_TaxiShortcutMap;
 
         GraveYardMap        mGraveYardMap;
 

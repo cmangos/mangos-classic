@@ -384,12 +384,8 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
                 _player->ResurrectPlayer(1.0f);
                 _player->SpawnCorpseBones();
             }
-            // stop taxi flight at port
-            if (_player->IsTaxiFlying())
-            {
-                _player->GetMotionMaster()->MovementExpired();
-                _player->m_taxi.ClearTaxiDestinations();
-            }
+
+            _player->TaxiFlightInterrupt();
 
             sBattleGroundMgr.BuildBattleGroundStatusPacket(data, bg, queueSlot, STATUS_IN_PROGRESS, 0, bg->GetStartTime());
             _player->GetSession()->SendPacket(data);
