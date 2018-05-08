@@ -244,6 +244,10 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 return;
             }
 
+            // do not cast not learned spells
+            if (IsPassiveSpell(spellInfo) || !petUnit->HasSpell(spellid))
+                return;
+
             if (!petUnit->IsSpellReady(*spellInfo))
                 return;
 
@@ -254,10 +258,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                         || spellInfo->EffectImplicitTargetA[i] == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
                     return;
             }
-
-            // do not cast not learned spells
-            if (!petUnit->HasSpell(spellid) || IsPassiveSpell(spellInfo))
-                return;
 
             _player->SetInCombatState(true, unit_target);
 
