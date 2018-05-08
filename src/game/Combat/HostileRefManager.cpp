@@ -203,4 +203,9 @@ void HostileRefManager::setOnlineOfflineState(Unit* victim, bool isOnline)
     }
 }
 
+HostileReference* HostileRefManager::getFirst()
+{
+    return static_cast<HostileReference*>(RefManager<Unit, ThreatManager>::getFirst());
+}
+
 //=================================================

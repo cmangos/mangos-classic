@@ -52,7 +52,7 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
         // Remove specific faction references
         void deleteReferencesForFaction(uint32 faction);
 
-        HostileReference* getFirst() { return static_cast<HostileReference*>(RefManager<Unit, ThreatManager>::getFirst()); }
+        HostileReference* getFirst();
 
         void updateThreatTables();
 
