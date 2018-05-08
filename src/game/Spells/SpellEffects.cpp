@@ -5370,7 +5370,9 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
         {
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                pGameObj->AddUniqueUse((Player*)m_caster);
+                Player* player = (Player*)m_caster;
+                pGameObj->AddUniqueUse(player);
+                pGameObj->SetActionTarget(player->GetSelectionGuid());
                 m_caster->AddGameObject(pGameObj);          // will removed at spell cancel
             }
             break;
