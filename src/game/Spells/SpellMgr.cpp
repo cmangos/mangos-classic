@@ -2079,6 +2079,16 @@ void SpellMgr::LoadSpellScriptTarget()
                 }
                 break;
             }
+            case SPELL_TARGET_TYPE_CREATURE_GUID:
+            {
+                if (!sObjectMgr.GetCreatureData(itr->targetEntry))
+                {
+                    sLog.outErrorDb("Table `spell_script_target`: creature entry %u does not exist.", itr->targetEntry);
+                    sSpellScriptTargetStorage.EraseEntry(itr->spellId);
+                    continue;
+                }
+                break;
+            }
             default:
                 if (!itr->targetEntry)
                 {
