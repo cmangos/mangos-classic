@@ -48,7 +48,7 @@ enum MageSpells
     BLINK_1                         = 1953,
     BLIZZARD_1                      = 10,
     CLEARCASTING_1                  = 12536,
-    COLD_SNAP_1                     = 12472,
+    COLD_SNAP_1                     = 11958,
     COMBUSTION_1                    = 11129,
     CONE_OF_COLD_1                  = 120,
     CONJURE_FOOD_1                  = 587,
