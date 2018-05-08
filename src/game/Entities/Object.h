@@ -874,7 +874,7 @@ class WorldObject : public Object
 
         // cooldown system
         virtual void AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration = 0, bool updateClient = false);
-        virtual bool HaveGCD(SpellEntry const* spellEntry) const;
+        virtual bool HasGCD(SpellEntry const* spellEntry) const;
         void ResetGCD(SpellEntry const* spellEntry = nullptr);
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0);
         virtual void RemoveSpellCooldown(SpellEntry const& spellEntry, bool updateClient = true);

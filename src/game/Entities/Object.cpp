@@ -2126,7 +2126,7 @@ void WorldObject::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*=
     m_GCDCatMap.emplace(spellEntry.StartRecoveryCategory, std::chrono::milliseconds(gcdRecTime) + GetMap()->GetCurrentClockTime());
 }
 
-bool WorldObject::HaveGCD(SpellEntry const* spellEntry) const
+bool WorldObject::HasGCD(SpellEntry const* spellEntry) const
 {
     if (spellEntry)
     {
