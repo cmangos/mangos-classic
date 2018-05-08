@@ -2157,6 +2157,25 @@ class SpellMgr
             return 0;
         }
 
+        uint32 GetNextSpellInChain(uint32 spell_id) const
+        {
+            SpellChainMapNext const& nextMap = GetSpellChainNext();
+
+            for (SpellChainMapNext::const_iterator itr = nextMap.lower_bound(spell_id); itr != nextMap.upper_bound(spell_id); ++itr)
+            {
+                SpellChainNode const* node = GetSpellChainNode(itr->second);
+
+                // If next spell is a requirement for this one then skip it
+                if (node->req == spell_id)
+                    continue;
+
+                if (node->prev == spell_id)
+                    return itr->second;
+            }
+
+            return 0;
+        }
+
         SpellChainMapNext const& GetSpellChainNext() const { return mSpellChainsNext; }
 
         template<typename Worker>
