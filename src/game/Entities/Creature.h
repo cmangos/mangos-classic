@@ -704,8 +704,6 @@ class Creature : public Unit
 
         uint32 m_spells[CREATURE_MAX_SPELLS];
 
-        void SendAIReaction(AiReaction reactionType);
-
         void DoFleeToGetAssistance();
         void CallForHelp(float fRadius);
         void CallAssistance();

@@ -5296,35 +5296,62 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
     }
 }
 
-void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo) const
+void Unit::SendAIReaction(AiReaction reactionType)
+{
+    WorldPacket data(SMSG_AI_REACTION, 12);
+
+    data << GetObjectGuid();
+    data << uint32(reactionType);
+
+    SendMessageToSet(data, true);
+
+    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "WORLD: Sent SMSG_AI_REACTION, type %u.", reactionType);
+}
+
+bool Unit::CanInitiateAttack() const
+{
+    if (hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+        return false;
+
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
+        if (GetTypeId() != TYPEID_UNIT || (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->GetForceAttackingCapability()))
+            return false;
+           
+    if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->CanAggro())
+        return false;
+
+    return true;
+}
+
+void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
 {
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
 
     WorldPacket data(SMSG_ATTACKERSTATEUPDATE, (16 + 45));  // we guess size
 
-    data << uint32(damageInfo->HitInfo);
+    data << uint32(calcDamageInfo->HitInfo);
     data << GetPackGUID();
-    data << damageInfo->target->GetPackGUID();
-    data << uint32(damageInfo->totalDamage);    // Total damage
+    data << calcDamageInfo->target->GetPackGUID();
+    data << uint32(calcDamageInfo->totalDamage);    // Total damage
 
-    data << uint8(m_weaponDamageCount[damageInfo->attackType]);         // Sub damage count
+    data << uint8(m_weaponDamageCount[calcDamageInfo->attackType]);         // Sub damage count
 
     // Sub damage description
-    for (uint8 i = 0; i < m_weaponDamageCount[damageInfo->attackType]; i++)
+    for (uint8 i = 0; i < m_weaponDamageCount[calcDamageInfo->attackType]; i++)
     {
-        SubDamageInfo* subDamage = &damageInfo->subDamage[i];
+        SubDamageInfo* subDamage = &calcDamageInfo->subDamage[i];
 
         data << uint32(GetFirstSchoolInMask(subDamage->damageSchoolMask));
-        data << float(subDamage->damage) / float(damageInfo->totalDamage);       // Float coefficient of sub damage
+        data << float(subDamage->damage) / float(calcDamageInfo->totalDamage);       // Float coefficient of sub damage
         data << uint32(subDamage->damage);
         data << uint32(subDamage->absorb);
         data << uint32(subDamage->resist);
     }
-    data << uint32(damageInfo->TargetState);
+    data << uint32(calcDamageInfo->TargetState);
     data << uint32(0);
     data << uint32(0);                                      // spell id, seen with heroic strike and disarm as examples.
     // HITINFO_NOACTION normally set if spell
-    data << uint32(damageInfo->blocked_amount);
+    data << uint32(calcDamageInfo->blocked_amount);
 
     SendMessageToSet(data, true);
 }

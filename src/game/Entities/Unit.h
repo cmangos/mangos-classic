@@ -1715,6 +1715,7 @@ class Unit : public WorldObject
 
         void DeMorph();
 
+        void SendAIReaction(AiReaction reactionType);
         void SendAttackStateUpdate(CalcDamageInfo* damageInfo) const;
         void SendAttackStateUpdate(uint32 HitInfo, Unit* target, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount);
         void SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log) const;
@@ -1722,6 +1723,7 @@ class Unit : public WorldObject
         void SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo) const;
         void SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo) const;
         void CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo);
+        bool CanInitiateAttack() const;
 
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
         void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);

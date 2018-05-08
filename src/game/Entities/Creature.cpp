@@ -1876,18 +1876,6 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     return false;
 }
 
-void Creature::SendAIReaction(AiReaction reactionType)
-{
-    WorldPacket data(SMSG_AI_REACTION, 12);
-
-    data << GetObjectGuid();
-    data << uint32(reactionType);
-
-    ((WorldObject*)this)->SendMessageToSet(data, true);
-
-    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "WORLD: Sent SMSG_AI_REACTION, type %u.", reactionType);
-}
-
 void Creature::CallAssistance()
 {
     // FIXME: should player pets call for assistance?
