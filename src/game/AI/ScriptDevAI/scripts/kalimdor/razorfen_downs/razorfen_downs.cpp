@@ -55,11 +55,15 @@ enum
     NPC_PLAGUEMAW_THE_ROTTING       = 7356,
 
     GO_BELNISTRASZ_BRAZIER          = 152097,
+    GO_IDOL_OVEN_FIRE               = 151951,
+    GO_IDOL_CUP_FIRE                = 151952,
+    GO_IDOL_MOUTH_FIRE              = 151973,
 
     SPELL_ARCANE_INTELLECT          = 13326,                // use this somewhere (he has it as default)
     SPELL_FIREBALL                  = 9053,
     SPELL_FROST_NOVA                = 11831,
     SPELL_IDOL_SHUTDOWN             = 12774,
+    SPELL_IDOL_ROOM_SHAKE           = 12816,
 
     // summon spells only exist in 1.x
     // SPELL_SUMMON_1                  = 12694,             // NPC_WITHERED_BATTLE_BOAR
@@ -73,6 +77,8 @@ static float m_fSpawnerCoord[3][4] =
     {2569.42f, 956.380f, 52.2732f, 5.42797f},
     {2570.62f, 942.393f, 53.7433f, 0.71558f}
 };
+
+static const uint32 aGOList[] = {GO_IDOL_OVEN_FIRE, GO_IDOL_CUP_FIRE, GO_IDOL_MOUTH_FIRE};
 
 struct npc_belnistraszAI : public npc_escortAI
 {
@@ -234,6 +240,18 @@ struct npc_belnistraszAI : public npc_escortAI
 
                         m_creature->RemoveAurasDueToSpell(SPELL_IDOL_SHUTDOWN);
                         SetEscortPaused(false);
+
+                        // Desactivate the fires on the idol now it is extinguished
+                        DoCastSpellIfCan(m_creature, SPELL_IDOL_ROOM_SHAKE);
+                        std::list<GameObject*> lOventFires;
+                        for (uint8 i = 0; i < 3; i++)
+                            GetGameObjectListWithEntryInGrid(lOventFires, m_creature, aGOList[i], 40.0f);
+
+                        if (!lOventFires.empty())
+                        {
+                            for (std::list<GameObject*>::const_iterator itr = lOventFires.begin(); itr != lOventFires.end(); ++itr)
+                                (*itr)->SetLootState(GO_JUST_DEACTIVATED);
+                        }
                         break;
                     }
                 }
