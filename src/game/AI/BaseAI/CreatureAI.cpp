@@ -508,7 +508,7 @@ void CreatureAI::SendAIEvent(AIEventType eventType, Unit* invoker, Creature* rec
 
 bool CreatureAI::IsVisible(Unit* pl) const
 {
-    return m_creature->IsWithinDist(pl, m_visibilityDistance) && pl->isVisibleForOrDetect(m_creature, m_creature, true);
+    return m_unit->IsWithinDist(pl, m_visibilityDistance) && pl->isVisibleForOrDetect(m_unit, m_unit, true);
 }
 
 Unit* CreatureAI::DoSelectLowestHpFriendly(float range, float minMissing, bool percent)
