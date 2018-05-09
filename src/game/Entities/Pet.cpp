@@ -909,11 +909,19 @@ bool Pet::HasTPForSpell(uint32 spellid) const
 
 int32 Pet::GetTPForSpell(uint32 spellid) const
 {
-    SkillLineAbilityEntry const* newSpell = sSkillLineAbilityStore.LookupEntry(spellid);
-    if (!newSpell || !newSpell->reqtrainpoints)
-        return 0;
+    uint32 basetrainp = 0;
 
-    uint32 basetrainp = newSpell->reqtrainpoints;
+    SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellid);
+
+    for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
+    {
+        if (!_spell_idx->second->reqtrainpoints)
+            return 0;
+
+        basetrainp = _spell_idx->second->reqtrainpoints;
+        break;
+    }
+
     uint32 spenttrainp = 0;
     uint32 chainstart = sSpellMgr.GetFirstSpellInChain(spellid);
 
