@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackrock_depths.h"
 
 enum eEmperor
@@ -123,7 +123,7 @@ struct boss_emperor_dagran_thaurissanAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_emperor_dagran_thaurissan(Creature* pCreature)
+UnitAI* GetAI_boss_emperor_dagran_thaurissan(Creature* pCreature)
 {
     return new boss_emperor_dagran_thaurissanAI(pCreature);
 }
@@ -235,7 +235,7 @@ struct boss_moira_bronzebeardAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_moira_bronzebeard(Creature* pCreature)
+UnitAI* GetAI_boss_moira_bronzebeard(Creature* pCreature)
 {
     return new boss_moira_bronzebeardAI(pCreature);
 }

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "naxxramas.h"
 
 enum
@@ -243,7 +243,7 @@ struct boss_gluthAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_gluth(Creature* pCreature)
+UnitAI* GetAI_boss_gluth(Creature* pCreature)
 {
     return new boss_gluthAI(pCreature);
 }

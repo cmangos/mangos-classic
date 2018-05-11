@@ -34,11 +34,11 @@ INSTANTIATE_SINGLETON_1(MovementGeneratorRegistry);
 
 namespace FactorySelector
 {
-    CreatureAI* selectAI(Creature* creature)
+    UnitAI* selectAI(Creature* creature)
     {
         // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)
         if ((!creature->IsPet() || !static_cast<Pet*>(creature)->isControlled()) && !creature->HasCharmer())
-            if (CreatureAI* scriptedAI = sScriptDevAIMgr.GetCreatureAI(creature))
+            if (UnitAI* scriptedAI = sScriptDevAIMgr.GetCreatureAI(creature))
                 return scriptedAI;
 
         CreatureAIRegistry& ai_registry(CreatureAIRepository::Instance());
@@ -89,7 +89,7 @@ namespace FactorySelector
         return (ai_factory == nullptr ? new NullCreatureAI(creature) : ai_factory->Create(creature));
     }
 
-    CreatureAI* GetSpecificAI(Unit* unit, std::string const& ainame)
+    UnitAI* GetSpecificAI(Unit* unit, std::string const& ainame)
     {
         // little hack to not have to change all AI to use Unit instead of Creature
         Creature* creature = unit->GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(unit) : nullptr;

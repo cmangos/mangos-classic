@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 
 enum
@@ -138,7 +138,7 @@ struct boss_magmadarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_magmadar(Creature* pCreature)
+UnitAI* GetAI_boss_magmadar(Creature* pCreature)
 {
     return new boss_magmadarAI(pCreature);
 }

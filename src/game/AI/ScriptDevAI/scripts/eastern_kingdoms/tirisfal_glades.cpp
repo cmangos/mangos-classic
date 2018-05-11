@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 go_mausoleum_door
 go_mausoleum_trigger
 npc_calvin_montague
@@ -162,7 +162,7 @@ struct npc_calvin_montagueAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_calvin_montague(Creature* pCreature)
+UnitAI* GetAI_npc_calvin_montague(Creature* pCreature)
 {
     return new npc_calvin_montagueAI(pCreature);
 }

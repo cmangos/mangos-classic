@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 
 enum
@@ -218,12 +218,12 @@ struct mob_flamewaker_priestAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_sulfuron(Creature* pCreature)
+UnitAI* GetAI_boss_sulfuron(Creature* pCreature)
 {
     return new boss_sulfuronAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_flamewaker_priest(Creature* pCreature)
+UnitAI* GetAI_mob_flamewaker_priest(Creature* pCreature)
 {
     return new mob_flamewaker_priestAI(pCreature);
 }

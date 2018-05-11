@@ -6,7 +6,7 @@
 #define SC_CREATURE_H
 
 #include "Chat/Chat.h"
-#include "Server/DBCStores.h"                                      // Mostly only used the Lookup acces, but a few cases really do use the DBC-Stores
+#include "Server/DBCStores.h"                               // Mostly only used the Lookup acces, but a few cases really do use the DBC-Stores
 #include "AI/BaseAI/CreatureAI.h"
 
 // Spell targets used by SelectSpell
@@ -40,7 +40,7 @@ enum SCEquip
     EQUIP_UNEQUIP   = 0
 };
 
-/// Documentation of CreatureAI functions can be found in MaNGOS source
+/// Documentation of UnitAI functions can be found in MaNGOS source
 // Only list them here again to ensure that the interface between SD2 and the core is not changed unnoticed
 struct ScriptedAI : public CreatureAI
 {
@@ -49,7 +49,7 @@ struct ScriptedAI : public CreatureAI
         ~ScriptedAI() {}
 
         // *************
-        // CreatureAI Functions
+        // UnitAI Functions
         // *************
 
         // == Information about AI ========================
@@ -111,7 +111,7 @@ struct ScriptedAI : public CreatureAI
 
         // Called when the creature is target of hostile action: swing, hostile spell landed, fear/etc)
         /// This will by default result in reattacking, if the creature has no victim
-        // void AttackedBy(Unit* pAttacker) override { CreatureAI::AttackedBy(pAttacker); }
+        // void AttackedBy(Unit* pAttacker) override { UnitAI::AttackedBy(pAttacker); }
 
         // Called when creature is respawned (for reseting variables)
         void JustRespawned() override;
@@ -132,7 +132,7 @@ struct ScriptedAI : public CreatureAI
         void UpdateAI(const uint32 diff) override;
 
         // Called when an AI Event is received
-        void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override {}
+        void ReceiveAIEvent(AIEventType /*eventType*/, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override {}
 
         // == State checks =================================
 
@@ -140,7 +140,7 @@ struct ScriptedAI : public CreatureAI
         // bool IsVisible(Unit* who) const override;
 
         // Called when victim entered water and creature can not enter water
-        // bool canReachByRangeAttack(Unit* who) override { return CreatureAI::canReachByRangeAttack(pWho); }
+        // bool canReachByRangeAttack(Unit* who) override { return UnitAI::canReachByRangeAttack(pWho); }
 
         // *************
         // Variables

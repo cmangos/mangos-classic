@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "deadmines.h"
 
 enum
@@ -261,7 +261,7 @@ struct boss_mr_smiteAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_mr_smite(Creature* pCreature)
+UnitAI* GetAI_boss_mr_smite(Creature* pCreature)
 {
     return new boss_mr_smiteAI(pCreature);
 }

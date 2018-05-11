@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "wailing_caverns.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
@@ -486,7 +486,7 @@ bool GossipSelect_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature, 
     return true;
 }
 
-CreatureAI* GetAI_npc_disciple_of_naralex(Creature* pCreature)
+UnitAI* GetAI_npc_disciple_of_naralex(Creature* pCreature)
 {
     return new npc_disciple_of_naralexAI(pCreature);
 }

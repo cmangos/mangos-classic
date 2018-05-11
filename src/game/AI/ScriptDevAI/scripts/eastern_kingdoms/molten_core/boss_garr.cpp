@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 
 enum
@@ -160,12 +160,12 @@ struct mob_fireswornAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_garr(Creature* pCreature)
+UnitAI* GetAI_boss_garr(Creature* pCreature)
 {
     return new boss_garrAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_firesworn(Creature* pCreature)
+UnitAI* GetAI_mob_firesworn(Creature* pCreature)
 {
     return new mob_fireswornAI(pCreature);
 }

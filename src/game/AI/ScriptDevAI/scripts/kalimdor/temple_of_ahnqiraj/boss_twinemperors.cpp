@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "temple_of_ahnqiraj.h"
 
 enum
@@ -416,12 +416,12 @@ struct boss_veklorAI : public boss_twin_emperorsAI
     }
 };
 
-CreatureAI* GetAI_boss_veknilash(Creature* pCreature)
+UnitAI* GetAI_boss_veknilash(Creature* pCreature)
 {
     return new boss_veknilashAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_veklor(Creature* pCreature)
+UnitAI* GetAI_boss_veklor(Creature* pCreature)
 {
     return new boss_veklorAI(pCreature);
 }

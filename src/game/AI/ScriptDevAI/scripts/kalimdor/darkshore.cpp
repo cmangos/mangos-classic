@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_kerlonian
 npc_prospector_remtravel
 npc_threshwackonator
@@ -105,7 +105,7 @@ struct npc_kerlonianAI : public FollowerAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -174,7 +174,7 @@ struct npc_kerlonianAI : public FollowerAI
     }
 };
 
-CreatureAI* GetAI_npc_kerlonian(Creature* pCreature)
+UnitAI* GetAI_npc_kerlonian(Creature* pCreature)
 {
     return new npc_kerlonianAI(pCreature);
 }
@@ -314,7 +314,7 @@ struct npc_prospector_remtravelAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_prospector_remtravel(Creature* pCreature)
+UnitAI* GetAI_npc_prospector_remtravel(Creature* pCreature)
 {
     return new npc_prospector_remtravelAI(pCreature);
 }
@@ -381,7 +381,7 @@ struct npc_threshwackonatorAI : public FollowerAI
     }
 };
 
-CreatureAI* GetAI_npc_threshwackonator(Creature* pCreature)
+UnitAI* GetAI_npc_threshwackonator(Creature* pCreature)
 {
     return new npc_threshwackonatorAI(pCreature);
 }
@@ -563,7 +563,7 @@ struct npc_volcorAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_volcor(Creature* pCreature)
+UnitAI* GetAI_npc_volcor(Creature* pCreature)
 {
     return new npc_volcorAI(pCreature);
 }
@@ -617,7 +617,7 @@ struct npc_theryluneAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_therylune(Creature* pCreature)
+UnitAI* GetAI_npc_therylune(Creature* pCreature)
 {
     return new npc_theryluneAI(pCreature);
 }
@@ -745,7 +745,7 @@ struct npc_rabid_bearAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_rabid_bear(Creature* pCreature)
+UnitAI* GetAI_npc_rabid_bear(Creature* pCreature)
 {
     return new npc_rabid_bearAI(pCreature);
 }

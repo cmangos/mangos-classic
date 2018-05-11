@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_lazy_peon
 EndContentData */
 
@@ -224,7 +224,7 @@ struct npc_lazy_peonAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_lazy_peon(Creature* pCreature)
+UnitAI* GetAI_npc_lazy_peon(Creature* pCreature)
 {
     return new npc_lazy_peonAI(pCreature);
 }

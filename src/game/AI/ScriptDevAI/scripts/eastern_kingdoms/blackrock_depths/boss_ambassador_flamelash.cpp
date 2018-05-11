@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackrock_depths.h"
 
 enum
@@ -126,7 +126,7 @@ struct boss_ambassador_flamelashAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ambassador_flamelash(Creature* pCreature)
+UnitAI* GetAI_boss_ambassador_flamelash(Creature* pCreature)
 {
     return new boss_ambassador_flamelashAI(pCreature);
 }

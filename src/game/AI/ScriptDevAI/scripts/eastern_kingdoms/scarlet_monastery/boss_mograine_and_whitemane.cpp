@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "scarlet_monastery.h"
 
 enum
@@ -97,7 +97,7 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
         {
             if (Player* pPlayer = (Player*)pWho)
             {
-                if (pPlayer->HasItemOrGemWithIdEquipped(ITEM_CORRUPTED_ASHBRINGER, 1) && m_creature->IsWithinDist(pPlayer, 20.0f))
+                if (pPlayer->HasItemWithIdEquipped(ITEM_CORRUPTED_ASHBRINGER, 1) && m_creature->IsWithinDist(pPlayer, 20.0f))
                 {
                     pPlayer->GetMap()->ScriptsStart(sRelayScripts, ASHBRINGER_RELAY_SCRIPT_ID, m_creature, pPlayer);
                     m_pInstance->SetData(TYPE_ASHBRINGER_EVENT, DONE);
@@ -378,12 +378,12 @@ struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_scarlet_commander_mograine(Creature* pCreature)
+UnitAI* GetAI_boss_scarlet_commander_mograine(Creature* pCreature)
 {
     return new boss_scarlet_commander_mograineAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_high_inquisitor_whitemane(Creature* pCreature)
+UnitAI* GetAI_boss_high_inquisitor_whitemane(Creature* pCreature)
 {
     return new boss_high_inquisitor_whitemaneAI(pCreature);
 }

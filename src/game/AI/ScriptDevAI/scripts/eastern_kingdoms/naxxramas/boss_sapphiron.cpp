@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* Additional comments:
+#include "AI/ScriptDevAI/include/precompiled.h"/* Additional comments:
  * Bugged spells:   28560 (needs maxTarget = 1, Summon of 16474 implementation, TODO, 30s duration)
  *                  28526 (needs ScriptEffect to cast 28522 onto random target)
  *
@@ -302,7 +302,7 @@ struct boss_sapphironAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_sapphiron(Creature* pCreature)
+UnitAI* GetAI_boss_sapphiron(Creature* pCreature)
 {
     return new boss_sapphironAI(pCreature);
 }

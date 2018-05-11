@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackrock_spire.h"
 
 enum
@@ -1018,7 +1018,7 @@ struct npc_rookery_hatcherAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_rookery_hatcher(Creature* pCreature)
+UnitAI* GetAI_npc_rookery_hatcher(Creature* pCreature)
 {
     return new npc_rookery_hatcherAI(pCreature);
 }

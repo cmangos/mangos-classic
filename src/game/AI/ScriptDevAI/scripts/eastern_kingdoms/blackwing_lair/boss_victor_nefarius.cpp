@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackwing_lair.h"
 
 enum
@@ -218,7 +218,7 @@ struct boss_victor_nefariusAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_boss_victor_nefarius(Creature* pCreature)
+UnitAI* GetAI_boss_victor_nefarius(Creature* pCreature)
 {
     return new boss_victor_nefariusAI(pCreature);
 }

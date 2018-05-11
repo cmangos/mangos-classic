@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_corporal_keeshan */
 
 
@@ -60,7 +60,7 @@ struct npc_corporal_keeshan_escortAI : public npc_escortAI
         m_uiShieldBashTimer  = 8000;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -126,7 +126,7 @@ struct npc_corporal_keeshan_escortAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_corporal_keeshan(Creature* pCreature)
+UnitAI* GetAI_npc_corporal_keeshan(Creature* pCreature)
 {
     return new npc_corporal_keeshan_escortAI(pCreature);
 }

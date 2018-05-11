@@ -23,12 +23,11 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 mobs_spitelashes
 npc_loramus_thalipedes
 npc_felhound_tracker
 EndContentData */
-
 
 #include "AI/ScriptDevAI/base/pet_ai.h"
 
@@ -185,7 +184,7 @@ struct mobs_spitelashesAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mobs_spitelashes(Creature* pCreature)
+UnitAI* GetAI_mobs_spitelashes(Creature* pCreature)
 {
     return new mobs_spitelashesAI(pCreature);
 }
@@ -366,7 +365,7 @@ struct npc_felhound_trackerAI : public ScriptedPetAI
     }
 };
 
-CreatureAI* GetAI_npc_felhound_tracker(Creature* pCreature)
+UnitAI* GetAI_npc_felhound_tracker(Creature* pCreature)
 {
     return new npc_felhound_trackerAI(pCreature);
 }

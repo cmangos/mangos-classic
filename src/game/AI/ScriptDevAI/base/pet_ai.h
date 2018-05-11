@@ -5,9 +5,7 @@
 #ifndef SC_PET_H
 #define SC_PET_H
 
-#include "AI/ScriptDevAI/include/sc_creature.h"
-
-// Using CreatureAI for now. Might change later and use PetAI (need to export for dll first)
+// Using UnitAI for now. Might change later and use PetAI (need to export for dll first)
 class ScriptedPetAI : public CreatureAI
 {
     public:

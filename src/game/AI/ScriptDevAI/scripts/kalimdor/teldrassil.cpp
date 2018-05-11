@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_mist
 EndContentData */
 
@@ -87,7 +87,7 @@ struct npc_mistAI : public FollowerAI
     }*/
 };
 
-CreatureAI* GetAI_npc_mist(Creature* pCreature)
+UnitAI* GetAI_npc_mist(Creature* pCreature)
 {
     return new npc_mistAI(pCreature);
 }

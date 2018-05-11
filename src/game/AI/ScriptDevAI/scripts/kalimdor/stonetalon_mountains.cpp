@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######
@@ -79,7 +79,7 @@ struct npc_kayaAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_kaya(Creature* pCreature)
+UnitAI* GetAI_npc_kaya(Creature* pCreature)
 {
     return new npc_kayaAI(pCreature);
 }

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_bartleby
 npc_dashel_stonefist
 npc_lady_katrana_prestor
@@ -78,7 +78,7 @@ bool QuestAccept_npc_bartleby(Player* pPlayer, Creature* pCreature, const Quest*
     return true;
 }
 
-CreatureAI* GetAI_npc_bartleby(Creature* pCreature)
+UnitAI* GetAI_npc_bartleby(Creature* pCreature)
 {
     return new npc_bartlebyAI(pCreature);
 }
@@ -191,7 +191,7 @@ bool QuestAccept_npc_dashel_stonefist(Player* pPlayer, Creature* pCreature, cons
     return true;
 }
 
-CreatureAI* GetAI_npc_dashel_stonefist(Creature* pCreature)
+UnitAI* GetAI_npc_dashel_stonefist(Creature* pCreature)
 {
     return new npc_dashel_stonefistAI(pCreature);
 }
@@ -407,7 +407,7 @@ struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
     void UpdateEscortAI(const uint32 uiDiff) { DialogueUpdate(uiDiff); }
 };
 
-CreatureAI* GetAI_npc_squire_rowe(Creature* pCreature)
+UnitAI* GetAI_npc_squire_rowe(Creature* pCreature)
 {
     return new npc_squire_roweAI(pCreature);
 }
@@ -1041,7 +1041,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_reginald_windsor(Creature* pCreature)
+UnitAI* GetAI_npc_reginald_windsor(Creature* pCreature)
 {
     return new npc_reginald_windsorAI(pCreature);
 }

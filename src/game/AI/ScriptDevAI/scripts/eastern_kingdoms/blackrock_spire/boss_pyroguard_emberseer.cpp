@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackrock_spire.h"
 
 enum
@@ -188,7 +188,7 @@ struct boss_pyroguard_emberseerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_pyroguard_emberseer(Creature* pCreature)
+UnitAI* GetAI_boss_pyroguard_emberseer(Creature* pCreature)
 {
     return new boss_pyroguard_emberseerAI(pCreature);
 }

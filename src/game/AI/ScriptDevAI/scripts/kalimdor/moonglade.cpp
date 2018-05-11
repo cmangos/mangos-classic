@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_keeper_remulos
 boss_eranikus
 EndContentData */
@@ -447,7 +447,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_keeper_remulos(Creature* pCreature)
+UnitAI* GetAI_npc_keeper_remulos(Creature* pCreature)
 {
     return new npc_keeper_remulosAI(pCreature);
 }
@@ -825,7 +825,7 @@ struct boss_eranikusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_eranikus(Creature* pCreature)
+UnitAI* GetAI_boss_eranikus(Creature* pCreature)
 {
     return new boss_eranikusAI(pCreature);
 }

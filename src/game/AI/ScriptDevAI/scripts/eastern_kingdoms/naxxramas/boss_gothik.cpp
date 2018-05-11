@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "naxxramas.h"
 
 enum
@@ -443,7 +443,7 @@ struct boss_gothikAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_gothik(Creature* pCreature)
+UnitAI* GetAI_boss_gothik(Creature* pCreature)
 {
     return new boss_gothikAI(pCreature);
 }

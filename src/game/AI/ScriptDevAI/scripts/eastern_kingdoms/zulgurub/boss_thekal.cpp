@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulgurub.h"
 
 enum
@@ -648,17 +648,17 @@ bool EffectDummyCreature_thekal_resurrection(Unit* /*pCaster*/, uint32 uiSpellId
     return false;
 }
 
-CreatureAI* GetAI_boss_thekal(Creature* pCreature)
+UnitAI* GetAI_boss_thekal(Creature* pCreature)
 {
     return new boss_thekalAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_zealot_lorkhan(Creature* pCreature)
+UnitAI* GetAI_mob_zealot_lorkhan(Creature* pCreature)
 {
     return new mob_zealot_lorkhanAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_zealot_zath(Creature* pCreature)
+UnitAI* GetAI_mob_zealot_zath(Creature* pCreature)
 {
     return new mob_zealot_zathAI(pCreature);
 }

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "razorfen_downs.h"
 
 instance_razorfen_downs::instance_razorfen_downs(Map* pMap) : ScriptedInstance(pMap),

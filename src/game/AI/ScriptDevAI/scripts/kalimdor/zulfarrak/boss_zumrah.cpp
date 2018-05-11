@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulfarrak.h"
 
 enum
@@ -202,7 +202,7 @@ struct boss_zumrahAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_zumrah(Creature* pCreature)
+UnitAI* GetAI_boss_zumrah(Creature* pCreature)
 {
     return new boss_zumrahAI(pCreature);
 }

@@ -19,19 +19,19 @@
 #ifndef MANGOS_POSSESSEDAI_H
 #define MANGOS_POSSESSEDAI_H
 
-#include "CreatureAI.h"
+#include "UnitAI.h"
 #include "Entities/ObjectGuid.h"
 #include "Timer.h"
 
 class Creature;
 class Spell;
 
-class PossessedAI : public CreatureAI
+class PossessedAI : public UnitAI
 {
     public:
 
-        explicit PossessedAI(Creature* creature) : CreatureAI(creature) {}
-        explicit PossessedAI(Unit* unit) : CreatureAI(unit) {}
+        explicit PossessedAI(Creature* creature) : UnitAI(creature) {}
+        explicit PossessedAI(Unit* unit) : UnitAI(unit) {}
 
         static int Permissible(const Creature* /*creature*/) { return PERMIT_BASE_NO; }
 

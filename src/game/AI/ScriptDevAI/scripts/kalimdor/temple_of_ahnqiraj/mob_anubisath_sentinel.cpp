@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {
@@ -190,7 +190,7 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_anubisath_sentinel(Creature* pCreature)
+UnitAI* GetAI_npc_anubisath_sentinel(Creature* pCreature)
 {
     return new npc_anubisath_sentinelAI(pCreature);
 }

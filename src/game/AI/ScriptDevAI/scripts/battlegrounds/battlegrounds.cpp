@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 // **** Script Info ****
 // Spiritguides in battlegrounds resurrecting many players at once
@@ -91,7 +91,7 @@ bool GossipHello_npc_spirit_guide(Player* pPlayer, Creature* /*pCreature*/)
     return true;
 }
 
-CreatureAI* GetAI_npc_spirit_guide(Creature* pCreature)
+UnitAI* GetAI_npc_spirit_guide(Creature* pCreature)
 {
     return new npc_spirit_guideAI(pCreature);
 }

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 #include "Entities/TemporarySpawn.h"
 
@@ -420,7 +420,7 @@ struct boss_majordomoAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_majordomo(Creature* pCreature)
+UnitAI* GetAI_boss_majordomo(Creature* pCreature)
 {
     return new boss_majordomoAI(pCreature);
 }

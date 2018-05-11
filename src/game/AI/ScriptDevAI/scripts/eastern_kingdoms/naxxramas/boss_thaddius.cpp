@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 boss_thaddius
 npc_tesla_coil
 boss_stalagg
@@ -231,7 +231,7 @@ struct boss_thaddiusAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_thaddius(Creature* pCreature)
+UnitAI* GetAI_boss_thaddius(Creature* pCreature)
 {
     return new boss_thaddiusAI(pCreature);
 }
@@ -391,7 +391,7 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_tesla_coil(Creature* pCreature)
+UnitAI* GetAI_npc_tesla_coil(Creature* pCreature)
 {
     return new npc_tesla_coilAI(pCreature);
 }
@@ -669,7 +669,7 @@ struct boss_stalaggAI : public boss_thaddiusAddsAI
     }
 };
 
-CreatureAI* GetAI_boss_stalagg(Creature* pCreature)
+UnitAI* GetAI_boss_stalagg(Creature* pCreature)
 {
     return new boss_stalaggAI(pCreature);
 }
@@ -723,7 +723,7 @@ struct boss_feugenAI : public boss_thaddiusAddsAI
     }
 };
 
-CreatureAI* GetAI_boss_feugen(Creature* pCreature)
+UnitAI* GetAI_boss_feugen(Creature* pCreature)
 {
     return new boss_feugenAI(pCreature);
 }

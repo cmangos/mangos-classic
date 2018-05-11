@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "stratholme.h"
 
 instance_stratholme::instance_stratholme(Map* pMap) : ScriptedInstance(pMap),

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackwing_lair.h"
 
 enum
@@ -163,7 +163,7 @@ struct boss_razorgoreAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_razorgore(Creature* pCreature)
+UnitAI* GetAI_boss_razorgore(Creature* pCreature)
 {
     return new boss_razorgoreAI(pCreature);
 }
@@ -238,7 +238,7 @@ struct npc_blackwing_orbAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_blackwing_orb(Creature* pCreature)
+UnitAI* GetAI_npc_blackwing_orb(Creature* pCreature)
 {
     return new npc_blackwing_orbAI(pCreature);
 }

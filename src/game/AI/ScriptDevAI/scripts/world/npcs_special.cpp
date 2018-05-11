@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Globals/ObjectMgr.h"
 #include "GameEvents/GameEventMgr.h"
@@ -117,7 +117,7 @@ struct npc_chicken_cluckAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_chicken_cluck(Creature* pCreature)
+UnitAI* GetAI_npc_chicken_cluck(Creature* pCreature)
 {
     return new npc_chicken_cluckAI(pCreature);
 }
@@ -373,7 +373,7 @@ struct npc_injured_patientAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_injured_patient(Creature* pCreature)
+UnitAI* GetAI_npc_injured_patient(Creature* pCreature)
 {
     return new npc_injured_patientAI(pCreature);
 }
@@ -520,7 +520,7 @@ bool QuestAccept_npc_doctor(Player* pPlayer, Creature* pCreature, const Quest* p
     return true;
 }
 
-CreatureAI* GetAI_npc_doctor(Creature* pCreature)
+UnitAI* GetAI_npc_doctor(Creature* pCreature)
 {
     return new npc_doctorAI(pCreature);
 }
@@ -733,7 +733,7 @@ struct npc_garments_of_questsAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_garments_of_quests(Creature* pCreature)
+UnitAI* GetAI_npc_garments_of_quests(Creature* pCreature)
 {
     return new npc_garments_of_questsAI(pCreature);
 }
@@ -766,7 +766,7 @@ struct npc_guardianAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_guardian(Creature* pCreature)
+UnitAI* GetAI_npc_guardian(Creature* pCreature)
 {
     return new npc_guardianAI(pCreature);
 }
@@ -916,7 +916,7 @@ struct npc_redemption_targetAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_redemption_target(Creature* pCreature)
+UnitAI* GetAI_npc_redemption_target(Creature* pCreature)
 {
     return new npc_redemption_targetAI(pCreature);
 }
@@ -986,7 +986,7 @@ struct npc_the_cleanerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_the_cleaner(Creature* pCreature)
+UnitAI* GetAI_npc_the_cleaner(Creature* pCreature)
 {
     return new npc_the_cleanerAI(pCreature);
 }

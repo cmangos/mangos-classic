@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 mob_anubisath_guardian
 EndContentData */
 
@@ -157,7 +157,7 @@ struct mob_anubisath_guardianAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_anubisath_guardian(Creature* pCreature)
+UnitAI* GetAI_mob_anubisath_guardian(Creature* pCreature)
 {
     return new mob_anubisath_guardianAI(pCreature);
 }

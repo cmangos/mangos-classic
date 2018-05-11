@@ -2,7 +2,7 @@
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Grids/Cell.h"
 #include "Grids/CellImpl.h"
 #include "Grids/GridNotifiers.h"

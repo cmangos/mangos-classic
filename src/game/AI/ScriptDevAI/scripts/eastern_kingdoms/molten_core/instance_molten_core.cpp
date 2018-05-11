@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 
 static sSpawnLocation m_aBosspawnLocs[MAX_MAJORDOMO_ADDS] =

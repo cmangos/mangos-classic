@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_muglash
 npc_ruul_snowhoof
 npc_torek
@@ -221,7 +221,7 @@ bool QuestAccept_npc_muglash(Player* pPlayer, Creature* pCreature, const Quest* 
     return true;
 }
 
-CreatureAI* GetAI_npc_muglash(Creature* pCreature)
+UnitAI* GetAI_npc_muglash(Creature* pCreature)
 {
     return new npc_muglashAI(pCreature);
 }
@@ -300,7 +300,7 @@ bool QuestAccept_npc_ruul_snowhoof(Player* pPlayer, Creature* pCreature, const Q
     return true;
 }
 
-CreatureAI* GetAI_npc_ruul_snowhoofAI(Creature* pCreature)
+UnitAI* GetAI_npc_ruul_snowhoofAI(Creature* pCreature)
 {
     return new npc_ruul_snowhoofAI(pCreature);
 }
@@ -416,7 +416,7 @@ bool QuestAccept_npc_torek(Player* pPlayer, Creature* pCreature, const Quest* pQ
     return true;
 }
 
-CreatureAI* GetAI_npc_torek(Creature* pCreature)
+UnitAI* GetAI_npc_torek(Creature* pCreature)
 {
     return new npc_torekAI(pCreature);
 }
@@ -579,7 +579,7 @@ struct npc_feero_ironhandAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_feero_ironhand(Creature* pCreature)
+UnitAI* GetAI_npc_feero_ironhand(Creature* pCreature)
 {
     return new npc_feero_ironhandAI(pCreature);
 }

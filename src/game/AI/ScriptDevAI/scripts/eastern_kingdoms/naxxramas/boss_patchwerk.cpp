@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "naxxramas.h"
 
 enum
@@ -194,7 +194,7 @@ struct boss_patchwerkAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_patchwerk(Creature* pCreature)
+UnitAI* GetAI_boss_patchwerk(Creature* pCreature)
 {
     return new boss_patchwerkAI(pCreature);
 }

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "gnomeregan.h"
 
 enum
@@ -231,7 +231,7 @@ struct boss_thermapluggAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_thermaplugg(Creature* pCreature)
+UnitAI* GetAI_boss_thermaplugg(Creature* pCreature)
 {
     return new boss_thermapluggAI(pCreature);
 }

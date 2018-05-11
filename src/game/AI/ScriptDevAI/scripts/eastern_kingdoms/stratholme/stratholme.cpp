@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 go_service_gate
 go_gauntlet_gate
 go_stratholme_postbox
@@ -210,7 +210,7 @@ struct mob_restless_soulAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_restless_soul(Creature* pCreature)
+UnitAI* GetAI_mob_restless_soul(Creature* pCreature)
 {
     return new mob_restless_soulAI(pCreature);
 }
@@ -305,7 +305,7 @@ struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mobs_spectral_ghostly_citizen(Creature* pCreature)
+UnitAI* GetAI_mobs_spectral_ghostly_citizen(Creature* pCreature)
 {
     return new mobs_spectral_ghostly_citizenAI(pCreature);
 }

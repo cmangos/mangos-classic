@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 
 enum
@@ -142,7 +142,7 @@ struct boss_shazzrahAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_shazzrah(Creature* pCreature)
+UnitAI* GetAI_boss_shazzrah(Creature* pCreature)
 {
     return new boss_shazzrahAI(pCreature);
 }

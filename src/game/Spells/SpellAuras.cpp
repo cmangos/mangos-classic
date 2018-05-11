@@ -2328,7 +2328,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         target->SetStunned(true, (caster ? caster->GetObjectGuid() : ObjectGuid()), GetSpellProto()->Id);
 
         if (Unit* caster = GetCaster())
-            if (CreatureAI* ai = caster->AI())
+            if (UnitAI* ai = caster->AI())
                 ai->JustStunnedTarget(GetSpellProto(), target);
     }
     else
@@ -2546,7 +2546,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
 
         if (Unit* caster = GetCaster())
-            if (CreatureAI* ai = caster->AI())
+            if (UnitAI* ai = caster->AI())
                 ai->JustRootedTarget(GetSpellProto(), target);
     }
     else
@@ -3385,6 +3385,14 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool /*Real*/)
 
     m_periodicTimer = m_modifier.periodictime;
     m_isPeriodic = apply;
+
+    if (GetId() == 30024 && !apply && m_removeMode == AURA_REMOVE_BY_DEFAULT) // Shade of Aran drink on interrupt
+    {
+        Unit* target = GetTarget();
+        UnitAI* ai = GetTarget()->AI();
+        if (ai && target->GetTypeId() == TYPEID_UNIT)
+            ai->SendAIEvent(AI_EVENT_CUSTOM_A, target, static_cast<Creature*>(target));
+    }
 }
 
 void Aura::HandleModRegen(bool apply, bool /*Real*/)        // eating

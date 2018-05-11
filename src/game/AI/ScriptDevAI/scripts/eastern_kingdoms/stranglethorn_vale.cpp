@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 mob_yenniku
 EndContentData */
 
@@ -100,7 +100,7 @@ struct mob_yennikuAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_yenniku(Creature* _Creature)
+UnitAI* GetAI_mob_yenniku(Creature* _Creature)
 {
     return new mob_yennikuAI(_Creature);
 }

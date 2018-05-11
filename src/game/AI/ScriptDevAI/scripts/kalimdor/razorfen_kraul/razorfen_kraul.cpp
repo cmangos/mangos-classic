@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 quest_willix_the_importer
 EndContentData */
 
@@ -131,7 +131,7 @@ struct npc_willix_the_importerAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_willix_the_importer(Creature* pCreature)
+UnitAI* GetAI_npc_willix_the_importer(Creature* pCreature)
 {
     return new npc_willix_the_importerAI(pCreature);
 }
@@ -231,7 +231,7 @@ struct npc_snufflenose_gopherAI : public ScriptedPetAI
     }
 };
 
-CreatureAI* GetAI_npc_snufflenose_gopher(Creature* pCreature)
+UnitAI* GetAI_npc_snufflenose_gopher(Creature* pCreature)
 {
     return new npc_snufflenose_gopherAI(pCreature);
 }

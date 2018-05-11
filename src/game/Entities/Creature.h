@@ -31,7 +31,7 @@
 
 struct SpellEntry;
 
-class CreatureAI;
+class UnitAI;
 class Group;
 class Quest;
 class Player;
@@ -568,6 +568,7 @@ class Creature : public Unit
         bool IsPet() const { return m_subtype == CREATURE_SUBTYPE_PET; }
         bool IsTotem() const { return m_subtype == CREATURE_SUBTYPE_TOTEM; }
         bool IsTemporarySummon() const { return m_subtype == CREATURE_SUBTYPE_TEMPORARY_SUMMON; }
+        bool IsCritter() const { return m_creatureInfo->CreatureType == CREATURE_TYPE_CRITTER; }
 
 #ifdef BUILD_PLAYERBOT
         // Adds functionality to load/unload bots from NPC, also need to apply SQL scripts
@@ -619,7 +620,8 @@ class Creature : public Unit
         uint32 GetLevelForTarget(Unit const* target) const override; // overwrite Unit::GetLevelForTarget for boss level support
 
         bool AIM_Initialize();
-        virtual CreatureAI* AI() override { if (m_charmInfo && m_charmInfo->GetAI()) return m_charmInfo->GetAI(); else return m_ai.get(); }
+
+        virtual UnitAI* AI() override { if (m_charmInfo && m_charmInfo->GetAI()) return m_charmInfo->GetAI(); else return m_ai.get(); }
         virtual CombatData* GetCombatData() override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); else return m_combatData; }
 
         void SetWalk(bool enable, bool asDefault = true);
@@ -848,7 +850,7 @@ class Creature : public Unit
         Position m_combatStartPos;                          // after combat contains last position
         Position m_respawnPos;
 
-        std::unique_ptr<CreatureAI> m_ai;
+        std::unique_ptr<UnitAI> m_ai;
         bool m_isInvisible;
         bool m_ignoreMMAP;
         bool m_forceAttackingCapability;                    // can attack even if not selectable/not attackable

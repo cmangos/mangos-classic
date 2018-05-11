@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_daphne_stilwell
 npc_defias_traitor
 EndContentData */
@@ -298,7 +298,7 @@ bool QuestAccept_npc_daphne_stilwell(Player* pPlayer, Creature* pCreature, const
     return true;
 }
 
-CreatureAI* GetAI_npc_daphne_stilwell(Creature* pCreature)
+UnitAI* GetAI_npc_daphne_stilwell(Creature* pCreature)
 {
     return new npc_daphne_stilwellAI(pCreature);
 }
@@ -364,7 +364,7 @@ bool QuestAccept_npc_defias_traitor(Player* pPlayer, Creature* pCreature, const 
     return true;
 }
 
-CreatureAI* GetAI_npc_defias_traitor(Creature* pCreature)
+UnitAI* GetAI_npc_defias_traitor(Creature* pCreature)
 {
     return new npc_defias_traitorAI(pCreature);
 }

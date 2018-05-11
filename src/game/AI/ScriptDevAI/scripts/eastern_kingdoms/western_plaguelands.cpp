@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_the_scourge_cauldron
 npc_taelan_fordring
 npc_isillien
@@ -99,7 +99,7 @@ struct npc_the_scourge_cauldronAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_the_scourge_cauldron(Creature* pCreature)
+UnitAI* GetAI_npc_the_scourge_cauldron(Creature* pCreature)
 {
     return new npc_the_scourge_cauldronAI(pCreature);
 }
@@ -313,7 +313,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -618,7 +618,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_taelan_fordring(Creature* pCreature)
+UnitAI* GetAI_npc_taelan_fordring(Creature* pCreature)
 {
     return new npc_taelan_fordringAI(pCreature);
 }
@@ -714,7 +714,7 @@ struct npc_isillienAI: public npc_escortAI
             npc_escortAI::EnterEvadeMode();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (pSender->GetEntry() != NPC_TAELAN_FORDRING)
             return;
@@ -819,7 +819,7 @@ struct npc_isillienAI: public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_isillien(Creature* pCreature)
+UnitAI* GetAI_npc_isillien(Creature* pCreature)
 {
     return new npc_isillienAI(pCreature);
 }
@@ -872,7 +872,7 @@ struct npc_tirion_fordringAI: public npc_escortAI
         Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (pSender->GetEntry() != NPC_TAELAN_FORDRING)
             return;
@@ -946,7 +946,7 @@ struct npc_tirion_fordringAI: public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_tirion_fordring(Creature* pCreature)
+UnitAI* GetAI_npc_tirion_fordring(Creature* pCreature)
 {
     return new npc_tirion_fordringAI(pCreature);
 }

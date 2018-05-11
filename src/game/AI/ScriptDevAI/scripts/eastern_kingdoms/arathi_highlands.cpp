@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_professor_phizzlethorpe
 npc_kinelory
 EndContentData */
@@ -112,7 +112,7 @@ bool QuestAccept_npc_professor_phizzlethorpe(Player* pPlayer, Creature* pCreatur
     return true;
 }
 
-CreatureAI* GetAI_npc_professor_phizzlethorpe(Creature* pCreature)
+UnitAI* GetAI_npc_professor_phizzlethorpe(Creature* pCreature)
 {
     return new npc_professor_phizzlethorpeAI(pCreature);
 }
@@ -200,7 +200,7 @@ struct npc_kineloryAI : public npc_escortAI
             DoScriptText(SAY_AGGRO_KINELORY, m_creature);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {   
@@ -238,7 +238,7 @@ struct npc_kineloryAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_kinelory(Creature* pCreature)
+UnitAI* GetAI_npc_kinelory(Creature* pCreature)
 {
     return new npc_kineloryAI(pCreature);
 }

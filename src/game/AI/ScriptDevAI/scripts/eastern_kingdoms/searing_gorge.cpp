@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_dorius_stonetender
 EndContentData */
 
@@ -56,7 +56,7 @@ struct npc_dorius_stonetenderAI : public npc_escortAI
         DoScriptText(urand(0, 1) ? SAY_DORIUS_AGGRO_1 : SAY_DORIUS_AGGRO_2, m_creature, pWho);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -104,7 +104,7 @@ struct npc_dorius_stonetenderAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_dorius_stonetender(Creature* pCreature)
+UnitAI* GetAI_npc_dorius_stonetender(Creature* pCreature)
 {
     return new npc_dorius_stonetenderAI(pCreature);
 }

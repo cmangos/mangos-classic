@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "scarlet_monastery.h"
 
 instance_scarlet_monastery::instance_scarlet_monastery(Map* pMap) : ScriptedInstance(pMap)
@@ -70,7 +70,7 @@ void instance_scarlet_monastery::OnObjectCreate(GameObject* pGo)
 
 void instance_scarlet_monastery::OnPlayerEnter(Player* pPlayer)
 {
-    if (pPlayer->HasItemOrGemWithIdEquipped(ITEM_CORRUPTED_ASHRBRINGER, 1) && GetData(TYPE_ASHBRINGER_EVENT) == NOT_STARTED)
+    if (pPlayer->HasItemWithIdEquipped(ITEM_CORRUPTED_ASHRBRINGER, 1) && GetData(TYPE_ASHBRINGER_EVENT) == NOT_STARTED)
         SetData(TYPE_ASHBRINGER_EVENT, IN_PROGRESS);
 }
 

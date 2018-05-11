@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {
@@ -98,7 +98,7 @@ struct boss_jandicebarovAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_jandicebarov(Creature* pCreature)
+UnitAI* GetAI_boss_jandicebarov(Creature* pCreature)
 {
     return new boss_jandicebarovAI(pCreature);
 }

@@ -648,7 +648,7 @@ struct CreatureEventAI_Event
         // EVENT_T_RECEIVE_AI_EVENT                         = 30
         struct
         {
-            uint32 eventType;                               // See CreatureAI.h enum AIEventType - Receive only events of this type
+            uint32 eventType;                               // See UnitAI.h enum AIEventType - Receive only events of this type
             uint32 senderEntry;                             // Optional npc from only whom this event can be received
             uint32 unused1;
             uint32 unused2;
@@ -742,17 +742,17 @@ class CreatureEventAI : public CreatureAI
         void ReceiveEmote(Player* player, uint32 textEmote) override;
         void SummonedCreatureJustDied(Creature* summoned) override;
         void SummonedCreatureDespawn(Creature* summoned) override;
-        void ReceiveAIEvent(AIEventType eventType, Creature* sender, Unit* invoker, uint32 miscValue) override;
+        void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* invoker, uint32 miscValue) override;
         // bool IsControllable() const override { return true; }
 
         static int Permissible(const Creature* creature);
 
-        virtual bool ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker = nullptr, Creature* AIEventSender = nullptr);
-        virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 eventId, Unit* actionInvoker, Creature* AIEventSender);
+        virtual bool ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker = nullptr, Unit* AIEventSender = nullptr);
+        virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 eventId, Unit* actionInvoker, Unit* AIEventSender);
         inline uint32 GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3) const;
         inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3) const;
         /// If the bool& param is true, an error should be reported
-        inline Unit* GetTargetByType(uint32 target, Unit* actionInvoker, Creature* AIEventSender, bool& isError, uint32 forSpellId = 0, uint32 selectFlags = 0) const;
+        inline Unit* GetTargetByType(uint32 target, Unit* actionInvoker, Unit* AIEventSender, bool& isError, uint32 forSpellId = 0, uint32 selectFlags = 0) const;
 
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event) const;
 

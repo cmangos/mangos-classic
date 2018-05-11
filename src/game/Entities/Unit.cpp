@@ -536,6 +536,8 @@ void Unit::AddCooldown(SpellEntry const & spellEntry, ItemPrototype const * item
 
 void Unit::TriggerEvadeEvents()
 {
+    static_cast<Creature*>(this)->SetLootRecipient(nullptr);
+
     if (InstanceData* mapInstance = GetInstanceData())
         mapInstance->OnCreatureEvade((Creature*)this);
 

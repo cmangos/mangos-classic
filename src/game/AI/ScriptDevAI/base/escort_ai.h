@@ -29,7 +29,7 @@ struct npc_escortAI : public ScriptedAI
 
         virtual void Reset() override = 0;
 
-        // CreatureAI functions
+        // UnitAI functions
         void JustDied(Unit* killer) override;
 
         void CorpseRemoved(uint32& /*respawnDelay*/) override;

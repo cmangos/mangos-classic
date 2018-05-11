@@ -24,8 +24,7 @@
 class NullCreatureAI : public CreatureAI
 {
     public:
-
-        explicit NullCreatureAI(Creature* creature) : CreatureAI(creature) {}
+        explicit NullCreatureAI(Creature* creature);
         ~NullCreatureAI();
 
         void MoveInLineOfSight(Unit*) override {}

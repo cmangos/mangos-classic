@@ -35,7 +35,7 @@ int PetAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-PetAI::PetAI(Creature* creature) : CreatureAI(creature), inCombat(false)
+PetAI::PetAI(Creature* creature) : UnitAI(creature), m_creature(creature), inCombat(false), m_followAngle(M_PI_F / 2), m_followDist(1.5f)
 {
     m_AllySet.clear();
     UpdateAllies();
@@ -59,9 +59,16 @@ PetAI::PetAI(Creature* creature) : CreatureAI(creature), inCombat(false)
             m_meleeEnabled = false;
             break;
     }
+
+    // TODO: Remove this when unit support is removed
+    SetMeleeEnabled(!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE));
+    if (m_creature->IsNoAggroOnSight())
+        SetReactState(REACT_DEFENSIVE);
+    if (m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
+        m_visibilityDistance = sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER);
 }
 
-PetAI::PetAI(Unit* unit) : CreatureAI(unit), inCombat(false)
+PetAI::PetAI(Unit* unit) : UnitAI(unit), inCombat(false), m_followAngle(PET_FOLLOW_ANGLE), m_followDist(PET_FOLLOW_DIST)
 {
     m_AllySet.clear();
     UpdateAllies();
@@ -145,7 +152,7 @@ void PetAI::UpdateAI(const uint32 diff)
         if (!owner->IsWithinDistInMap(m_unit, (PET_FOLLOW_DIST * 2)))
         {
             if (!m_unit->hasUnitState(UNIT_STAT_FOLLOW))
-                m_unit->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                m_unit->GetMotionMaster()->MoveFollow(owner, m_followDist, m_followAngle);
 
             return;
         }
@@ -391,7 +398,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 if (following)
                 {
                     m_unit->GetMotionMaster()->Clear(false);
-                    m_unit->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                    m_unit->GetMotionMaster()->MoveFollow(owner, m_followDist, m_followAngle);
                 }
             }
         }

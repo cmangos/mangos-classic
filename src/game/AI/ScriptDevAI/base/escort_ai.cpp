@@ -9,7 +9,7 @@ SDComment:
 SDCategory: Npc
 EndScriptData */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/system/system.h"
 #include "MotionGenerators/WaypointManager.h"

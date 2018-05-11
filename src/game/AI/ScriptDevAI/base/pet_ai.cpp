@@ -9,7 +9,7 @@ SDComment: Intended to be used with Guardian/Protector/Minipets. Little/no contr
 SDCategory: Npc
 EndScriptData */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "pet_ai.h"
 
 ScriptedPetAI::ScriptedPetAI(Creature* creature) : CreatureAI(creature)

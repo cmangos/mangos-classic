@@ -50,9 +50,9 @@ enum MovementGeneratorType
     FOLLOW_MOTION_TYPE              = 14,                   // TargetedMovementGenerator.h
     EFFECT_MOTION_TYPE              = 15,
 
-    EXTERNAL_WAYPOINT_MOVE          = 16,                   // Only used in CreatureAI::MovementInform when a waypoint is reached. The pathId >= 0 is added as additonal value
-    EXTERNAL_WAYPOINT_MOVE_START    = 17,                   // Only used in CreatureAI::MovementInform when a waypoint is started. The pathId >= 0 is added as additional value
-    EXTERNAL_WAYPOINT_FINISHED_LAST = 18,                   // Only used in CreatureAI::MovementInform when the waittime of the last wp is finished The pathId >= 0 is added as additional value
+    EXTERNAL_WAYPOINT_MOVE          = 16,                   // Only used in UnitAI::MovementInform when a waypoint is reached. The pathId >= 0 is added as additonal value
+    EXTERNAL_WAYPOINT_MOVE_START    = 17,                   // Only used in UnitAI::MovementInform when a waypoint is started. The pathId >= 0 is added as additional value
+    EXTERNAL_WAYPOINT_FINISHED_LAST = 18,                   // Only used in UnitAI::MovementInform when the waittime of the last wp is finished The pathId >= 0 is added as additional value
 };
 
 enum MMCleanFlag

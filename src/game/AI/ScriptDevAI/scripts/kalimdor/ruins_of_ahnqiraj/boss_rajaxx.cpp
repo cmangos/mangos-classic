@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "ruins_of_ahnqiraj.h"
 
 enum
@@ -259,7 +259,7 @@ struct npc_general_andorovAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_general_andorov(Creature* pCreature)
+UnitAI* GetAI_npc_general_andorov(Creature* pCreature)
 {
     return new npc_general_andorovAI(pCreature);
 }
@@ -364,7 +364,7 @@ struct npc_kaldorei_eliteAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_kaldorei_elite(Creature* pCreature)
+UnitAI* GetAI_npc_kaldorei_elite(Creature* pCreature)
 {
     return new npc_kaldorei_eliteAI(pCreature);
 }

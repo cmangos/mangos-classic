@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "maraudon.h"
 
 instance_maraudon::instance_maraudon(Map* map) : ScriptedInstance(map),

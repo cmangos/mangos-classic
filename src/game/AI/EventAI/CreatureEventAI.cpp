@@ -182,7 +182,7 @@ bool CreatureEventAI::IsRepeatableEvent(EventAI_Type type) const
     }
 }
 
-bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker, Creature* AIEventSender /*=nullptr*/)
+bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker, Unit* AIEventSender /*=nullptr*/)
 {
     if (!holder.Enabled || holder.Time)
         return false;
@@ -553,7 +553,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionIn
     return true;
 }
 
-void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 eventId, Unit* actionInvoker, Creature* AIEventSender)
+void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 eventId, Unit* actionInvoker, Unit* AIEventSender)
 {
     if (action.type == ACTION_T_NONE)
         return;
@@ -835,17 +835,21 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_meleeEnabled = action.auto_attack.state != 0;
             break;
         case ACTION_T_COMBAT_MOVEMENT:
+        {
+            bool hasCombatMovement = !m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
+
             // ignore no affect case
-            if (m_isCombatMovement == (action.combat_movement.state != 0) || m_creature->IsNonMeleeSpellCasted(false))
+            if (hasCombatMovement == (action.combat_movement.state != 0) || m_creature->IsNonMeleeSpellCasted(false))
                 return;
 
             SetCombatMovement(action.combat_movement.state != 0, true);
 
-            if (m_isCombatMovement && action.combat_movement.melee && m_creature->isInCombat() && m_creature->getVictim())
+            if (hasCombatMovement && action.combat_movement.melee && m_creature->isInCombat() && m_creature->getVictim())
                 m_creature->SendMeleeAttackStart(m_creature->getVictim());
             else if (action.combat_movement.melee && m_creature->isInCombat() && m_creature->getVictim())
                 m_creature->SendMeleeAttackStop(m_creature->getVictim());
             break;
+        }
         case ACTION_T_SET_PHASE:
             m_Phase = action.set_phase.phase;
             DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "CreatureEventAI: ACTION_T_SET_PHASE - script %u for %s, phase is now %u", eventId, m_creature->GetGuidStr().c_str(), m_Phase);
@@ -904,7 +908,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_attackDistance = (float)action.ranged_movement.distance;
             m_attackAngle = action.ranged_movement.angle / 180.0f * M_PI_F;
 
-            if (m_isCombatMovement)
+            if (!m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT | UNIT_STAT_CAN_NOT_REACT))
             {
                 if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
                 {
@@ -1291,7 +1295,7 @@ void CreatureEventAI::EnterEvadeMode()
         SetCombatMovement(!m_DynamicMovement);
     }
 
-    CreatureAI::EnterEvadeMode();
+    UnitAI::EnterEvadeMode();
 
     // Handle Evade events
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
@@ -1365,7 +1369,7 @@ void CreatureEventAI::SummonedCreatureDespawn(Creature* summoned)
     }
 }
 
-void CreatureEventAI::ReceiveAIEvent(AIEventType eventType, Creature* sender, Unit* invoker, uint32 /*miscValue*/)
+void CreatureEventAI::ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* invoker, uint32 /*miscValue*/)
 {
     MANGOS_ASSERT(sender);
 
@@ -1407,7 +1411,7 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
     m_EventUpdateTime = EVENT_UPDATE_TIME;
     m_EventDiff = 0;
 
-    CreatureAI::EnterCombat(enemy);
+    UnitAI::EnterCombat(enemy);
 }
 
 void CreatureEventAI::MoveInLineOfSight(Unit* who)
@@ -1434,7 +1438,7 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
         }
     }
 
-    CreatureAI::MoveInLineOfSight(who);
+    UnitAI::MoveInLineOfSight(who);
 }
 
 void CreatureEventAI::SpellHit(Unit* pUnit, const SpellEntry* spellInfo)
@@ -1538,7 +1542,7 @@ inline int32 CreatureEventAI::GetRandActionParam(uint32 rnd, int32 param1, int32
     return 0;
 }
 
-inline Unit* CreatureEventAI::GetTargetByType(uint32 target, Unit* actionInvoker, Creature* AIEventSender, bool& isError, uint32 forSpellId, uint32 selectFlags) const
+inline Unit* CreatureEventAI::GetTargetByType(uint32 target, Unit* actionInvoker, Unit* AIEventSender, bool& isError, uint32 forSpellId, uint32 selectFlags) const
 {
     Unit* resTarget;
     switch (target)

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_deathstalker_erland
 npc_deathstalker_faerleia
 EndContentData */
@@ -124,7 +124,7 @@ bool QuestAccept_npc_deathstalker_erland(Player* pPlayer, Creature* pCreature, c
     return true;
 }
 
-CreatureAI* GetAI_npc_deathstalker_erland(Creature* pCreature)
+UnitAI* GetAI_npc_deathstalker_erland(Creature* pCreature)
 {
     return new npc_deathstalker_erlandAI(pCreature);
 }
@@ -299,7 +299,7 @@ bool QuestAccept_npc_deathstalker_faerleia(Player* pPlayer, Creature* pCreature,
     return true;
 }
 
-CreatureAI* GetAI_npc_deathstalker_faerleia(Creature* pCreature)
+UnitAI* GetAI_npc_deathstalker_faerleia(Creature* pCreature)
 {
     return new npc_deathstalker_faerleiaAI(pCreature);
 }

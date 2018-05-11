@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "deadmines.h"
 
 instance_deadmines::instance_deadmines(Map* pMap) : ScriptedInstance(pMap),

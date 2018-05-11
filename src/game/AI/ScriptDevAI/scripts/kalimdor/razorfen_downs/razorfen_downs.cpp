@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_belnistrasz
 EndContentData */
 
@@ -285,7 +285,7 @@ struct npc_belnistraszAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_belnistrasz(Creature* pCreature)
+UnitAI* GetAI_npc_belnistrasz(Creature* pCreature)
 {
     return new npc_belnistraszAI(pCreature);
 }

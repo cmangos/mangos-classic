@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_oox22fe
 npc_shay_leafrunner
 EndContentData */
@@ -129,7 +129,7 @@ struct npc_oox22feAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_oox22fe(Creature* pCreature)
+UnitAI* GetAI_npc_oox22fe(Creature* pCreature)
 {
     return new npc_oox22feAI(pCreature);
 }
@@ -229,7 +229,7 @@ struct npc_shay_leafrunnerAI : public FollowerAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         // start following
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
@@ -281,7 +281,7 @@ struct npc_shay_leafrunnerAI : public FollowerAI
     }
 };
 
-CreatureAI* GetAI_npc_shay_leafrunner(Creature* pCreature)
+UnitAI* GetAI_npc_shay_leafrunner(Creature* pCreature)
 {
     return new npc_shay_leafrunnerAI(pCreature);
 }

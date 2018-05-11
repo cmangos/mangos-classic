@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 // **** This script is designed as an example for others to build on ****
 // **** Please modify whatever you'd like to as this script is only for developement ****
@@ -248,7 +248,7 @@ struct example_creatureAI : public ScriptedAI
 
 // This is the GetAI method used by all scripts that involve AI
 // It is called every time a new creature using this script is created
-CreatureAI* GetAI_example_creature(Creature* pCreature)
+UnitAI* GetAI_example_creature(Creature* pCreature)
 {
     return new example_creatureAI(pCreature);
 }

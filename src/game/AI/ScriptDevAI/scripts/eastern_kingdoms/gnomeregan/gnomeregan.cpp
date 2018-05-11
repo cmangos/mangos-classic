@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_blastmaster_emi_shortfuse
 npc_kernobee
 EndContentData */
@@ -593,7 +593,7 @@ struct npc_blastmaster_emi_shortfuseAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_blastmaster_emi_shortfuse(Creature* pCreature)
+UnitAI* GetAI_npc_blastmaster_emi_shortfuse(Creature* pCreature)
 {
     return new npc_blastmaster_emi_shortfuseAI(pCreature);
 }
@@ -658,7 +658,7 @@ struct npc_kernobeeAI : public FollowerAI
 
     void Reset() override {}
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -692,7 +692,7 @@ struct npc_kernobeeAI : public FollowerAI
     }
 };
 
-CreatureAI* GetAI_npc_kernobee(Creature* pCreature)
+UnitAI* GetAI_npc_kernobee(Creature* pCreature)
 {
     return new npc_kernobeeAI(pCreature);
 }

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_kanati
 npc_lakota_windsong
 npc_paoka_swiftmountain
@@ -82,7 +82,7 @@ struct npc_kanatiAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_kanati(Creature* pCreature)
+UnitAI* GetAI_npc_kanati(Creature* pCreature)
 {
     return new npc_kanatiAI(pCreature);
 }
@@ -165,7 +165,7 @@ struct npc_lakota_windsongAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_lakota_windsong(Creature* pCreature)
+UnitAI* GetAI_npc_lakota_windsong(Creature* pCreature)
 {
     return new npc_lakota_windsongAI(pCreature);
 }
@@ -237,7 +237,7 @@ struct npc_paoka_swiftmountainAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_paoka_swiftmountain(Creature* pCreature)
+UnitAI* GetAI_npc_paoka_swiftmountain(Creature* pCreature)
 {
     return new npc_paoka_swiftmountainAI(pCreature);
 }
@@ -338,7 +338,7 @@ struct npc_plucky_johnsonAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_plucky_johnson(Creature* pCreature)
+UnitAI* GetAI_npc_plucky_johnson(Creature* pCreature)
 {
     return new npc_plucky_johnsonAI(pCreature);
 }

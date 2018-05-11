@@ -41,8 +41,8 @@ class GuardianAI : public CreatureEventAI
         virtual void UpdateAI(const uint32 diff) override;
         virtual void CombatStop() override;
 
-        virtual bool ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker = nullptr, Creature* AIEventSender = nullptr) override;
-        virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 eventId, Unit* actionInvoker, Creature* AIEventSender) override;
+        virtual bool ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker = nullptr, Unit* AIEventSender = nullptr) override;
+        virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 eventId, Unit* actionInvoker, Unit* AIEventSender) override;
         Unit* DoSelectLowestHpFriendly(float range, uint32 minHPDiff, bool onlyInCombat) const;
 };
 #endif

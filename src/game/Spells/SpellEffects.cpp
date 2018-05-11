@@ -5201,7 +5201,7 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
     critter->AIM_Initialize();
 
     //for MINI_PET we ensure to set a passive react
-    if (CreatureAI* critterAI = critter->AI())
+    if (UnitAI* critterAI = critter->AI())
         critterAI->SetReactState(REACT_PASSIVE);
 
     // Notify Summoner

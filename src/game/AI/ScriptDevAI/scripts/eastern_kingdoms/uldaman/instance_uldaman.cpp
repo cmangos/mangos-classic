@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "uldaman.h"
 
 instance_uldaman::instance_uldaman(Map* pMap) : ScriptedInstance(pMap),

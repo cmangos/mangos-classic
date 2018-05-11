@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackwing_lair.h"
 
 enum
@@ -127,7 +127,7 @@ struct boss_broodlordAI : public ScriptedAI
             DoScriptText(SAY_LEASH, m_creature);
     }
 };
-CreatureAI* GetAI_boss_broodlord(Creature* pCreature)
+UnitAI* GetAI_boss_broodlord(Creature* pCreature)
 {
     return new boss_broodlordAI(pCreature);
 }

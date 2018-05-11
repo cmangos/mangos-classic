@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "dire_maul.h"
 
 instance_dire_maul::instance_dire_maul(Map* pMap) : ScriptedInstance(pMap),

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 at_shade_of_eranikus
 npc_malfurion_stormrage
 event_antalarion_statue_activation
@@ -141,7 +141,7 @@ struct npc_malfurionAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_malfurion(Creature* pCreature)
+UnitAI* GetAI_npc_malfurion(Creature* pCreature)
 {
     return new npc_malfurionAI(pCreature);
 }

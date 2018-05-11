@@ -2,7 +2,7 @@
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Entities/Item.h"
 #include "Spells/Spell.h"
 #include "WorldPacket.h"
@@ -65,7 +65,7 @@ void ScriptedAI::UpdateAI(const uint32 /*diff*/)
  */
 void ScriptedAI::EnterEvadeMode()
 {
-    CreatureAI::EnterEvadeMode();
+    UnitAI::EnterEvadeMode();
 
     Reset();
 }

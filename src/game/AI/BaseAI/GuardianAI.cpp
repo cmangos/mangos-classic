@@ -69,7 +69,7 @@ int GuardianAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-bool GuardianAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker, Creature* AIEventSender /*=nullptr*/)
+bool GuardianAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker, Unit* AIEventSender /*=nullptr*/)
 {
     if (!holder.Enabled || holder.Time)
         return false;
@@ -158,7 +158,7 @@ bool GuardianAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker
     return true;
 }
 
-void GuardianAI::ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* actionInvoker, Creature* AIEventSender)
+void GuardianAI::ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* actionInvoker, Unit* AIEventSender)
 {
     if (action.type == ACTION_T_NONE)
         return;

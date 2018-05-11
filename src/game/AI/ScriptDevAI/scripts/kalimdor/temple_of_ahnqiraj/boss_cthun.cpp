@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "temple_of_ahnqiraj.h"
 
 enum
@@ -792,17 +792,17 @@ bool AreaTrigger_at_stomach_cthun(Player* pPlayer, AreaTriggerEntry const* pAt)
     return false;
 }
 
-CreatureAI* GetAI_boss_eye_of_cthun(Creature* pCreature)
+UnitAI* GetAI_boss_eye_of_cthun(Creature* pCreature)
 {
     return new boss_eye_of_cthunAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_cthun(Creature* pCreature)
+UnitAI* GetAI_boss_cthun(Creature* pCreature)
 {
     return new boss_cthunAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_giant_claw_tentacle(Creature* pCreature)
+UnitAI* GetAI_npc_giant_claw_tentacle(Creature* pCreature)
 {
     return new npc_giant_claw_tentacleAI(pCreature);
 }

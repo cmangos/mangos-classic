@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulgurub.h"
 
 instance_zulgurub::instance_zulgurub(Map* pMap) : ScriptedInstance(pMap),

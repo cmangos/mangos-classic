@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulgurub.h"
 
 enum
@@ -382,12 +382,12 @@ struct mob_ohganAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_mandokir(Creature* pCreature)
+UnitAI* GetAI_boss_mandokir(Creature* pCreature)
 {
     return new boss_mandokirAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_ohgan(Creature* pCreature)
+UnitAI* GetAI_mob_ohgan(Creature* pCreature)
 {
     return new mob_ohganAI(pCreature);
 }

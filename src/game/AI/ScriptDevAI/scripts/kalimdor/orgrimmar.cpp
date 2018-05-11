@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_shenthul
 npc_thrall_warchief
 EndContentData */
@@ -109,7 +109,7 @@ struct npc_shenthulAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_shenthul(Creature* pCreature)
+UnitAI* GetAI_npc_shenthul(Creature* pCreature)
 {
     return new npc_shenthulAI(pCreature);
 }

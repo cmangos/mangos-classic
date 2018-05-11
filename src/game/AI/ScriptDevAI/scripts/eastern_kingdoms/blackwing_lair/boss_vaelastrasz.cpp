@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackwing_lair.h"
 
 enum
@@ -398,7 +398,7 @@ bool QuestAccept_boss_vaelastrasz(Player* pPlayer, Creature* pCreature, const Qu
     return true;
 }
 
-CreatureAI* GetAI_boss_vaelastrasz(Creature* pCreature)
+UnitAI* GetAI_boss_vaelastrasz(Creature* pCreature)
 {
     return new boss_vaelastraszAI(pCreature);
 }

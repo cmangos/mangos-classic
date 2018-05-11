@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulgurub.h"
 
 enum
@@ -230,7 +230,7 @@ struct boss_hakkarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_hakkar(Creature* pCreature)
+UnitAI* GetAI_boss_hakkar(Creature* pCreature)
 {
     return new boss_hakkarAI(pCreature);
 }

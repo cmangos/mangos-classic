@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_gilthares
 npc_taskmaster_fizzule
 npc_twiggy_flathead
@@ -114,7 +114,7 @@ struct npc_giltharesAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_gilthares(Creature* pCreature)
+UnitAI* GetAI_npc_gilthares(Creature* pCreature)
 {
     return new npc_giltharesAI(pCreature);
 }
@@ -215,7 +215,7 @@ struct npc_taskmaster_fizzuleAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_taskmaster_fizzule(Creature* pCreature)
+UnitAI* GetAI_npc_taskmaster_fizzule(Creature* pCreature)
 {
     return new npc_taskmaster_fizzuleAI(pCreature);
 }
@@ -432,7 +432,7 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_twiggy_flathead(Creature* pCreature)
+UnitAI* GetAI_npc_twiggy_flathead(Creature* pCreature)
 {
     return new npc_twiggy_flatheadAI(pCreature);
 }
@@ -608,7 +608,7 @@ bool QuestAccept_npc_wizzlecranks_shredder(Player* pPlayer, Creature* pCreature,
     return true;
 }
 
-CreatureAI* GetAI_npc_wizzlecranks_shredder(Creature* pCreature)
+UnitAI* GetAI_npc_wizzlecranks_shredder(Creature* pCreature)
 {
     return new npc_wizzlecranks_shredderAI(pCreature);
 }
@@ -629,7 +629,7 @@ struct npc_gallywixAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_gallywix(Creature* pCreature)
+UnitAI* GetAI_npc_gallywix(Creature* pCreature)
 {
     return new npc_gallywixAI(pCreature);
 }

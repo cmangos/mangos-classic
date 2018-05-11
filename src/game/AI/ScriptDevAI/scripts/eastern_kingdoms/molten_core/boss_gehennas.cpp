@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 
 enum
@@ -120,7 +120,7 @@ struct boss_gehennasAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_gehennas(Creature* pCreature)
+UnitAI* GetAI_boss_gehennas(Creature* pCreature)
 {
     return new boss_gehennasAI(pCreature);
 }
