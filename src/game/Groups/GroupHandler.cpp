@@ -259,6 +259,13 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recv_data)
     if (!grp)
         return;
 
+    // raid assistant cannot kick leader
+    if (grp->IsLeader(guid))
+    {
+        SendPartyResult(PARTY_OP_LEAVE, "", ERR_NOT_LEADER);
+        return;
+    }
+
     if (grp->IsMember(guid))
     {
         Player::RemoveFromGroup(grp, guid);
@@ -300,6 +307,13 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recv_data)
     Group* grp = GetPlayer()->GetGroup();
     if (!grp)
         return;
+
+    // raid assistant cannot kick leader
+    if (grp->GetLeaderName() == membername)
+    {
+        SendPartyResult(PARTY_OP_LEAVE, "", ERR_NOT_LEADER);
+        return;
+    }
 
     if (ObjectGuid guid = grp->GetMemberGuid(membername))
     {
