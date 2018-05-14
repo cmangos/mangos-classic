@@ -243,15 +243,13 @@ struct npc_belnistraszAI : public npc_escortAI
 
                         // Desactivate the fires on the idol now it is extinguished
                         DoCastSpellIfCan(m_creature, SPELL_IDOL_ROOM_SHAKE);
-                        std::list<GameObject*> lOventFires;
-                        for (uint8 i = 0; i < 3; i++)
-                            GetGameObjectListWithEntryInGrid(lOventFires, m_creature, aGOList[i], 40.0f);
+                        std::list<GameObject*> lOvenFires;
+                        for ( auto&& gameObjectEntry : aGOList )
+                            GetGameObjectListWithEntryInGrid(lOvenFires, m_creature, gameObjectEntry, 40.0f);
 
-                        if (!lOventFires.empty())
-                        {
-                            for (std::list<GameObject*>::const_iterator itr = lOventFires.begin(); itr != lOventFires.end(); ++itr)
-                                (*itr)->SetLootState(GO_JUST_DEACTIVATED);
-                        }
+                        for ( auto&& gameObject : lOvenFires )
+                            gameObject->SetLootState(GO_JUST_DEACTIVATED);
+
                         break;
                     }
                 }
