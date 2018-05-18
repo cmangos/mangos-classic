@@ -1045,7 +1045,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 24781:                                 // Dream Fog
                 {
-                    // TODO Note: Should actually not only AttackStart, but fixate on the target
+                    // Let the current target be and move to the new one
+                    if (m_caster->getVictim())
+                    {
+                        m_caster->DeleteThreatList();
+                        m_caster->AttackStop(true, false, false);
+                    }
                     if (unitTarget && m_caster->AI())
                         m_caster->AI()->AttackStart(unitTarget);
 
