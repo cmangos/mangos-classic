@@ -613,7 +613,7 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
                     case 2:
                         // Complete quest and despawn gate
                         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                            pPlayer->GroupEventHappens(QUEST_A_PAWN_ON_THE_ETERNAL_BOARD, m_creature);
+                            pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_A_PAWN_ON_THE_ETERNAL_BOARD, m_creature);
                         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                         m_uiEventTimer = 4000;
                         break;

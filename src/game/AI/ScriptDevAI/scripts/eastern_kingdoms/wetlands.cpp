@@ -168,7 +168,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
         {
             // complete quest
             if (Player* pPlayer = GetPlayerForEscort())
-                pPlayer->GroupEventHappens(QUEST_MISSING_DIPLOMAT11, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_MISSING_DIPLOMAT11, m_creature);
 
             // despawn and respawn at inn
             m_creature->ForcedDespawn(1000);

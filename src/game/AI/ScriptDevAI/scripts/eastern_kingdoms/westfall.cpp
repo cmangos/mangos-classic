@@ -155,7 +155,7 @@ struct npc_daphne_stilwellAI : public npc_escortAI
                 break;
             case 17:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_TOME_VALOR, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TOME_VALOR, m_creature);
                 break;
             case 18:
                 DoEndEscort();
@@ -337,7 +337,7 @@ struct npc_defias_traitorAI : public npc_escortAI
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_END, m_creature, pPlayer);
-                    pPlayer->GroupEventHappens(QUEST_DEFIAS_BROTHERHOOD, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_DEFIAS_BROTHERHOOD, m_creature);
                 }
                 break;
         }

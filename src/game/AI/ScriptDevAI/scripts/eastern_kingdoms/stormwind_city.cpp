@@ -948,7 +948,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 DoScriptText(EMOTE_WINDSOR_DIE, m_creature);
 
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                    pPlayer->GroupEventHappens(QUEST_THE_GREAT_MASQUERADE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_THE_GREAT_MASQUERADE, m_creature);
                 break;
             case NPC_GUARD_PATROLLER:
                 // Reset Bolvar and Wrynn

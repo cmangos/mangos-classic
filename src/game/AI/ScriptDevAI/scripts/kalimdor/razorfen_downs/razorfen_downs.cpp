@@ -226,7 +226,7 @@ struct npc_belnistraszAI : public npc_escortAI
                     {
                         if (Player* pPlayer = GetPlayerForEscort())
                         {
-                            pPlayer->GroupEventHappens(QUEST_EXTINGUISHING_THE_IDOL, m_creature);
+                            pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_EXTINGUISHING_THE_IDOL, m_creature);
 
                             if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_BELNISTRASZ_BRAZIER, 10.0f))
                             {

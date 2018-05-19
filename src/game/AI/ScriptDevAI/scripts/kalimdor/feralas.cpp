@@ -90,7 +90,7 @@ struct npc_oox22feAI : public npc_escortAI
                 DoScriptText(SAY_OOX_END, m_creature);
                 // Award quest credit
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_RESCUE_OOX22FE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_RESCUE_OOX22FE, m_creature);
                 break;
         }
     }
@@ -204,7 +204,7 @@ struct npc_shay_leafrunnerAI : public FollowerAI
             DoScriptText(SAY_EVENT_COMPLETE_2, pWho);
 
             // complete quest
-            pPlayer->GroupEventHappens(QUEST_ID_WANDERING_SHAY, m_creature);
+            pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_WANDERING_SHAY, m_creature);
             SetFollowComplete(true);
             m_creature->ForcedDespawn(30000);
             m_bIsComplete = true;

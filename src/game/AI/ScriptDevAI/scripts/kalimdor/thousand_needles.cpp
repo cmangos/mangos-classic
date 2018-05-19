@@ -63,7 +63,7 @@ struct npc_kanatiAI : public npc_escortAI
                 break;
             case 1:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_PROTECT_KANATI, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_PROTECT_KANATI, m_creature);
                 break;
         }
     }
@@ -151,7 +151,7 @@ struct npc_lakota_windsongAI : public npc_escortAI
                 break;
             case 45:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_FREE_AT_LAST, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_FREE_AT_LAST, m_creature);
                 break;
         }
     }
@@ -223,7 +223,7 @@ struct npc_paoka_swiftmountainAI : public npc_escortAI
                 break;
             case 27:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_HOMEWARD, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_HOMEWARD, m_creature);
                 break;
         }
     }

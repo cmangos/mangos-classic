@@ -189,7 +189,7 @@ struct npc_oox17tnAI : public npc_escortAI
             case 34:
                 DoScriptText(SAY_OOX_END, m_creature);
                 // Award quest credit
-                pPlayer->GroupEventHappens(QUEST_RESCUE_OOX_17TN, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_RESCUE_OOX_17TN, m_creature);
                 break;
         }
     }
@@ -357,7 +357,7 @@ struct npc_toogaAI : public FollowerAI
                 if (Player* pPlayer = GetLeaderForFollower())
                 {
                     if (pPlayer->GetQuestStatus(QUEST_TOOGA) == QUEST_STATUS_INCOMPLETE)
-                        pPlayer->GroupEventHappens(QUEST_TOOGA, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TOOGA, m_creature);
                 }
 
                 pTorta = pWho;

@@ -83,7 +83,7 @@ struct npc_dorius_stonetenderAI : public npc_escortAI
             case 33:
                 // ToDo: research if there is any event and text here!
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_SUNTARA_STONES, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_SUNTARA_STONES, m_creature);
                 m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
                 break;
         }

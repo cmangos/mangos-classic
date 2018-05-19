@@ -95,7 +95,7 @@ struct npc_corporal_keeshan_escortAI : public npc_escortAI
             case 53:                                        // quest_complete
                 DoScriptText(SAY_CORPORAL_KEESHAN_4, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_MISSING_IN_ACTION, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_MISSING_IN_ACTION, m_creature);
                 break;
         }
     }

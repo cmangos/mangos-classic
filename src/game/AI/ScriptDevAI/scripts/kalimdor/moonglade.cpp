@@ -323,7 +323,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
     void DoHandleOutro(Creature* pTarget)
     {
         if (Player* pPlayer = GetPlayerForEscort())
-            pPlayer->GroupEventHappens(QUEST_NIGHTMARE_MANIFESTS, pTarget);
+            pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_NIGHTMARE_MANIFESTS, pTarget);
 
         m_uiOutroTimer = 3000;
     }

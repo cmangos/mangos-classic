@@ -531,7 +531,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                 {
                     if (Player* pPlayer = GetPlayerForEscort())
                     {
-                        pPlayer->GroupEventHappens(QUEST_ID_IN_DREAMS, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_IN_DREAMS, m_creature);
                         pTirion->SetFacingToObject(pPlayer);
                     }
 

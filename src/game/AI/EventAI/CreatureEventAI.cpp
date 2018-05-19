@@ -786,7 +786,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 {
                     Player* playerTarget = static_cast<Player*>(target);
                     if (action.quest_event.rewardGroup)
-                        playerTarget->GroupEventHappens(action.quest_event.questId, m_creature);
+                        playerTarget->RewardPlayerAndGroupAtEventExplored(action.quest_event.questId, m_creature);
                     else
                         playerTarget->AreaExploredOrEventHappens(action.quest_event.questId);
                 }
@@ -885,10 +885,10 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
                 for (ThreatList::const_iterator i = threatList.begin(); i != threatList.end(); ++i)
                     if (Player* temp = m_creature->GetMap()->GetPlayer((*i)->getUnitGuid()))
-                        temp->GroupEventHappens(action.quest_event_all.questId, m_creature);
+                        temp->RewardPlayerAndGroupAtEventExplored(action.quest_event_all.questId, m_creature);
             }
             else if (actionInvoker && actionInvoker->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)actionInvoker)->GroupEventHappens(action.quest_event_all.questId, m_creature);
+                ((Player*)actionInvoker)->RewardPlayerAndGroupAtEventExplored(action.quest_event_all.questId, m_creature);
             break;
         case ACTION_T_CAST_EVENT_ALL:
         {
@@ -958,14 +958,14 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         case ACTION_T_KILLED_MONSTER:
             // first attempt player/group who tapped creature
             if (Player* pPlayer = m_creature->GetLootRecipient())
-                pPlayer->RewardPlayerAndGroupAtEvent(action.killed_monster.creatureId, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventCredit(action.killed_monster.creatureId, m_creature);
             else
             {
                 // if not available, use pActionInvoker
                 if (Unit* pTarget = GetTargetByType(action.killed_monster.target, actionInvoker, AIEventSender, reportTargetError, 0, SELECT_FLAG_PLAYER))
                 {
                     if (Player* pPlayer2 = pTarget->GetBeneficiaryPlayer())
-                        pPlayer2->RewardPlayerAndGroupAtEvent(action.killed_monster.creatureId, m_creature);
+                        pPlayer2->RewardPlayerAndGroupAtEventCredit(action.killed_monster.creatureId, m_creature);
                 }
                 else if (reportTargetError)
                     sLog.outErrorEventAI("Event %u - nullptr target for ACTION_T_KILLED_MONSTER(%u), target-type %u", eventId, action.type, action.killed_monster.target);

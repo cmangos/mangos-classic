@@ -137,7 +137,7 @@ struct npc_miranAI: public npc_escortAI
             case 23:
                 DoScriptText(SAY_MIRAN_3, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_PROTECTING_THE_SHIPMENT, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_PROTECTING_THE_SHIPMENT, m_creature);
                 break;
         }
     }

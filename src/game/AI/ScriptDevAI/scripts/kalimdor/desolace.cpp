@@ -195,7 +195,7 @@ struct npc_dalinda_malemAI : public npc_escortAI
         if (uiPointId == 18)
         {
             if (Player* pPlayer = GetPlayerForEscort())
-                pPlayer->GroupEventHappens(QUEST_RETURN_TO_VAHLARRIEL, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_RETURN_TO_VAHLARRIEL, m_creature);
         }
     }
 };
@@ -350,7 +350,7 @@ struct npc_melizza_brimbuzzleAI : public npc_escortAI, private DialogueHelper
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_MELIZZA_FINISH, m_creature, pPlayer);
-                    pPlayer->GroupEventHappens(QUEST_GET_ME_OUT_OF_HERE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_GET_ME_OUT_OF_HERE, m_creature);
                 }
 
                 m_creature->ClearTemporaryFaction();
@@ -540,7 +540,7 @@ struct npc_cork_gizeltonAI : public ScriptedAI
                     DoScriptText(SAY_CORK_END, m_creature);
                     // Award quest credit
                     if (pPlayer)
-                        pPlayer->GroupEventHappens(QUEST_BODYGUARD_TO_HIRE, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_BODYGUARD_TO_HIRE, m_creature);
                     // Remove player to avoid adds being spawned again next turn
                     m_playerGuid.Clear();
                     uiQuestStatus = 0;
@@ -577,7 +577,7 @@ struct npc_cork_gizeltonAI : public ScriptedAI
                         DoScriptText(SAY_RIGGER_END, pRigger);
                     // Award quest credit
                     if (pPlayer)
-                        pPlayer->GroupEventHappens(QUEST_GIZELTON_CARAVAN, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_GIZELTON_CARAVAN, m_creature);
                     // Remove player to avoid adds being spawned again next turn
                     m_playerGuid.Clear();
                     uiQuestStatus = 0;

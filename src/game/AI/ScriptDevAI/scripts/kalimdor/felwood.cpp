@@ -547,7 +547,7 @@ struct npc_captured_arkonarinAI : public npc_escortAI
                 break;
             case 109:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_RESCUE_JAEDENAR, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_RESCUE_JAEDENAR, m_creature);
                 SetRun();
                 break;
         }
@@ -740,7 +740,7 @@ struct npc_areiAI : public npc_escortAI, private DialogueHelper
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_AREI_ESCORT_COMPLETE, m_creature, pPlayer);
-                    pPlayer->GroupEventHappens(QUEST_ID_ANCIENT_SPIRIT, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_ANCIENT_SPIRIT, m_creature);
                     m_creature->ForcedDespawn(10000);
                 }
                 break;

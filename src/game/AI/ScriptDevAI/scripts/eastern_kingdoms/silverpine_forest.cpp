@@ -74,7 +74,7 @@ struct npc_deathstalker_erlandAI : public npc_escortAI
                 break;
             case 13:
                 DoScriptText(SAY_END, m_creature, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_ERLAND, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ERLAND, m_creature);
                 break;
             case 14:
                 if (Creature* pRane = GetClosestCreatureWithEntry(m_creature, NPC_RANE, 45.0f))
@@ -237,7 +237,7 @@ struct npc_deathstalker_faerleiaAI : public ScriptedAI
                 DoScriptText(SAY_COMPLETED, m_creature);
 
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                    pPlayer->GroupEventHappens(QUEST_PYREWOOD_AMBUSH, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_PYREWOOD_AMBUSH, m_creature);
 
                 FinishEvent();
             }

@@ -83,7 +83,7 @@ struct npc_professor_phizzlethorpeAI : public npc_escortAI
             case 20:
                 DoScriptText(EMOTE_PROGRESS_8, m_creature);
                 DoScriptText(SAY_PROGRESS_9, m_creature, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_SUNKEN_TREASURE, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_SUNKEN_TREASURE, m_creature);
                 break;
         }
     }
@@ -187,7 +187,7 @@ struct npc_kineloryAI : public npc_escortAI
                 break;
             case 34:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_HINTS_NEW_PLAGUE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_HINTS_NEW_PLAGUE, m_creature);
                 break;
         }
     }

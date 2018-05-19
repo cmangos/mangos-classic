@@ -122,7 +122,7 @@ struct npc_morokkAI : public npc_escortAI
             {
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
-                    pPlayer->GroupEventHappens(QUEST_CHALLENGE_MOROKK, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_CHALLENGE_MOROKK, m_creature);
                     m_creature->setFaction(FACTION_MOR_RUNNING);
                     m_bIsSuccess = true;
                     m_creature->RemoveAllAurasOnEvade();
@@ -410,7 +410,7 @@ struct npc_ogronAI : public npc_escortAI
                             {
                                 case 12:
                                     if (Player* pPlayer = GetPlayerForEscort())
-                                        pPlayer->GroupEventHappens(QUEST_QUESTIONING, m_creature);
+                                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_QUESTIONING, m_creature);
 
                                     DoScriptText(SAY_OGR_SURVIVE, m_creature);
                                     break;
@@ -536,7 +536,7 @@ struct npc_private_hendelAI : public ScriptedAI
         if (pSpell->Id == SPELL_TELEPORT)
         {
             if (Player* pPlayer = m_creature->GetMap()->GetPlayer(guidPlayer))
-                pPlayer->GroupEventHappens(QUEST_MISSING_DIPLO_PT16, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_MISSING_DIPLO_PT16, m_creature);
         }
     }
 
@@ -715,7 +715,7 @@ struct npc_stinky_ignatzAI : public npc_escortAI
             case 39:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
-                    pPlayer->GroupEventHappens(pPlayer->GetTeam() == ALLIANCE ? QUEST_ID_STINKYS_ESCAPE_ALLIANCE : QUEST_ID_STINKYS_ESCAPE_HORDE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(pPlayer->GetTeam() == ALLIANCE ? QUEST_ID_STINKYS_ESCAPE_ALLIANCE : QUEST_ID_STINKYS_ESCAPE_HORDE, m_creature);
                     DoScriptText(SAY_STINKY_END, m_creature, pPlayer);
                 }
                 break;

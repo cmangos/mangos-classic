@@ -142,7 +142,7 @@ struct npc_muglashAI : public npc_escortAI
                 DoScriptText(SAY_MUG_GRATITUDE, m_creature);
 
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_VORSHA, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_VORSHA, m_creature);
                 break;
             case 26:
                 DoScriptText(SAY_MUG_PATROL, m_creature);
@@ -276,7 +276,7 @@ struct npc_ruul_snowhoofAI : public npc_escortAI
                 break;
             case 21:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_FREEDOM_TO_RUUL, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_FREEDOM_TO_RUUL, m_creature);
                 break;
         }
     }
@@ -364,7 +364,7 @@ struct npc_torekAI : public npc_escortAI
                 break;
             case 20:
                 DoScriptText(SAY_WIN, m_creature, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_TOREK_ASSULT, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TOREK_ASSULT, m_creature);
                 break;
             case 21:
                 DoScriptText(SAY_END, m_creature, pPlayer);
@@ -513,7 +513,7 @@ struct npc_feero_ironhandAI : public npc_escortAI
             case 30:
                 // Complete the quest
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_SUPPLIES_TO_AUBERDINE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_SUPPLIES_TO_AUBERDINE, m_creature);
                 break;
         }
     }

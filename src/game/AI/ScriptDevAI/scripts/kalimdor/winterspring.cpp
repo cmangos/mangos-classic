@@ -406,7 +406,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                     m_creature->SetFacingToObject(pAltar);
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_GUARDIANS_ALTAR, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_GUARDIANS_ALTAR, m_creature);
                 m_creature->ForcedDespawn(1 * MINUTE * IN_MILLISECONDS);
                 break;
         }

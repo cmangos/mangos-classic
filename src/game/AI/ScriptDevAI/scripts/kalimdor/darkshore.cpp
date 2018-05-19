@@ -95,7 +95,7 @@ struct npc_kerlonianAI : public FollowerAI
                 if (Player* pPlayer = GetLeaderForFollower())
                 {
                     if (pPlayer->GetQuestStatus(QUEST_SLEEPER_AWAKENED) == QUEST_STATUS_INCOMPLETE)
-                        pPlayer->GroupEventHappens(QUEST_SLEEPER_AWAKENED, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_SLEEPER_AWAKENED, m_creature);
 
                     DoScriptText(SAY_KER_END, m_creature);
                 }
@@ -294,7 +294,7 @@ struct npc_prospector_remtravelAI : public npc_escortAI
                 break;
             case 42:
                 DoScriptText(EMOTE_REM_END, m_creature, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_ABSENT_MINDED_PT2, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ABSENT_MINDED_PT2, m_creature);
                 break;
         }
     }
@@ -540,7 +540,7 @@ struct npc_volcorAI : public npc_escortAI
             case 15:
                 DoScriptText(SAY_END, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ESCAPE_THROUGH_FORCE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_THROUGH_FORCE, m_creature);
                 SetEscortPaused(true);
                 m_creature->ForcedDespawn(10000);
                 break;
@@ -557,7 +557,7 @@ struct npc_volcorAI : public npc_escortAI
                 break;
             case 24:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ESCAPE_THROUGH_STEALTH, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_THROUGH_STEALTH, m_creature);
                 break;
         }
     }
@@ -606,7 +606,7 @@ struct npc_theryluneAI : public npc_escortAI
         {
             case 17:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_THERYLUNE_ESCAPE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_THERYLUNE_ESCAPE, m_creature);
                 break;
             case 19:
                 if (Player* pPlayer = GetPlayerForEscort())

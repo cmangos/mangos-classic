@@ -70,7 +70,7 @@ struct npc_mistAI : public FollowerAI
         if (Player* pPlayer = GetLeaderForFollower())
         {
             if (pPlayer->GetQuestStatus(QUEST_MIST) == QUEST_STATUS_INCOMPLETE)
-                pPlayer->GroupEventHappens(QUEST_MIST, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_MIST, m_creature);
         }
 
         // The follow is over (and for later development, run off to the woods before really end)
