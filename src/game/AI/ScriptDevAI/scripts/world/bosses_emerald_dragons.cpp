@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: bosses_emerald_dragons
 SD%Complete: 95
-SDComment: Missing correct behaviour of used trigger NPCs, some spell issues
+SDComment: Correct models used by Spirit Shade for each race/gender combination are missing (Lethon) / Demented Druid Spirit summon needs improvement (Ysondre)
 SDCategory: Emerald Dragon Bosses
 EndScriptData
 
@@ -42,14 +42,11 @@ enum
 {
     SPELL_MARK_OF_NATURE_PLAYER     = 25040,
     SPELL_MARK_OF_NATURE_AURA       = 25041,
-    SPELL_SEEPING_FOG_R             = 24813,                // Summons 15224 'Dream Fog'
+    SPELL_SEEPING_FOG_R             = 24813,                // Summons NPC 15224 (Dream Fog) that cast auras 24777 and 24780 on spawn
     SPELL_SEEPING_FOG_L             = 24814,
-    SPELL_DREAM_FOG                 = 24777,                // Used by summoned Adds
     SPELL_NOXIOUS_BREATH            = 24818,
     SPELL_TAILSWEEP                 = 15847,
-    SPELL_SUMMON_PLAYER             = 24776,                // NYI
-
-    NPC_DREAM_FOG                   = 15224,
+    // SPELL_SUMMON_PLAYER             = 24776,                // Not used in Classic
 };
 
 struct boss_emerald_dragonAI : public ScriptedAI
@@ -151,7 +148,7 @@ enum
 
     SPELL_VOLATILE_INFECTION    = 24928,
     SPELL_CORRUPTION_OF_EARTH   = 24910,
-    SPELL_PUTRID_MUSHROOM       = 24904,                    // Summons a mushroom on killing a player
+    SPELL_PUTRID_MUSHROOM       = 24904,                    // Summons a Putrid Mushroom (GO 180517 with trap spell 24871) on killing a player
 };
 
 struct boss_emerissAI : public boss_emerald_dragonAI
@@ -227,7 +224,8 @@ enum
 
     SPELL_SHADOW_BOLT_WIRL      = 24834,                    // Periodic aura
     SPELL_DRAW_SPIRIT           = 24811,
-    SPELL_SUMMON_SPIRIT_SHADE   = 24810,                    // Summon spell was removed, was SPELL_EFFECT_SUMMON_DEMON
+    // SPELL_SUMMON_SPIRIT_SHADE   = 24810,                    // Summon spell was removed in TBC, was using SPELL_EFFECT_SUMMON_DEMON
+                                                               // Classic uses same code than TBC and WotLK for consistency
 
     NPC_LETHON                  = 14888,
     NPC_SPIRIT_SHADE            = 15261,                    // Add summoned by Lethon
@@ -258,14 +256,14 @@ struct boss_lethonAI : public boss_emerald_dragonAI
         return false;
     }
 
-    // Need this code here, as SPELL_DRAW_SPIRIT has no Script- or Dummyeffect
+    // Need this code here, as SPELL_DRAW_SPIRIT has no Script - or Dummy Effect
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
         // Summon a shade for each player hit
         if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_DRAW_SPIRIT)
         {
-            // Summon this way, to be able to cast the shade visual spell with player as original caster
-            // This might not be supported currently by core, but this spell's visual should be dependend on the player
+            // Summon this way to be able to cast the shade visual spell with player as original caster
+            // This is not currently supported by core but this spell's visual should be dependent on player
             // Also possible that this was no problem due to the special way these NPCs had been summoned in classic times
             if (Creature* pSummoned = pTarget->SummonCreature(NPC_SPIRIT_SHADE, 0.0f, 0.0f, 0.0f, pTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
                 pSummoned->CastSpell(pSummoned, SPELL_SPIRIT_SHAPE_VISUAL, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pTarget->GetObjectGuid());
@@ -328,14 +326,12 @@ enum
     SPELL_ARCANE_BLAST      = 24857,
     SPELL_BELLOWING_ROAR    = 22686,
 
-    SPELL_SUMMON_SHADE_1    = 24841,
+    SPELL_SUMMON_SHADE_1    = 24841,                        // Summon one NPC 15302 (Shade of Taerar) that cast spells 24839 & 24840
     SPELL_SUMMON_SHADE_2    = 24842,
     SPELL_SUMMON_SHADE_3    = 24843,
-    SPELL_SELF_STUN         = 24883,                        // Stunns the main boss until the shades are dead or timer expires
+    SPELL_SELF_STUN         = 24883,                        // Stuns the main boss until the shades are dead or timer expires
 
     NPC_SHADE_OF_TAERAR     = 15302,
-    SPELL_POSIONCLOUD       = 24840,
-    SPELL_POSIONBREATH      = 20667
 };
 
 struct boss_taerarAI : public boss_emerald_dragonAI
@@ -461,10 +457,7 @@ enum
     SAY_SUMMON_DRUIDS       = -1000361,
 
     SPELL_LIGHTNING_WAVE    = 24819,
-    SPELL_SUMMON_DRUIDS     = 24795,
-
-    // druid spells
-    SPELL_MOONFIRE          = 21669
+    SPELL_SUMMON_DRUIDS     = 24795,    // Summon NPC 15260 (Demented Druid Spirit) that uses spells 6726, 16247 & 24957
 };
 
 // Ysondre script
