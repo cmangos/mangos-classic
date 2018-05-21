@@ -271,15 +271,6 @@ struct boss_lethonAI : public boss_emerald_dragonAI
                 pSummoned->CastSpell(pSummoned, SPELL_SPIRIT_SHAPE_VISUAL, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pTarget->GetObjectGuid());
         }
     }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // Move the shade to lethon
-        if (pSummoned->GetEntry() == NPC_SPIRIT_SHADE)
-            pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0.0f, 0.0f);
-        else
-            boss_emerald_dragonAI::JustSummoned(pSummoned);
-    }
 };
 
 struct npc_spirit_shadeAI : public ScriptedAI
@@ -295,13 +286,18 @@ struct npc_spirit_shadeAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (!m_bHasHealed && pWho->GetEntry() == NPC_LETHON && pWho->IsWithinDistInMap(m_creature, 3.0f))
+        if (pWho->GetEntry() == NPC_LETHON)
         {
-            if (DoCastSpellIfCan(pWho, SPELL_DARK_OFFERING) == CAST_OK)
+            if (!m_bHasHealed && pWho->IsWithinDistInMap(m_creature, 3.0f))
             {
-                m_bHasHealed = true;
-                m_creature->ForcedDespawn(1000);
+                if (DoCastSpellIfCan(pWho, SPELL_DARK_OFFERING) == CAST_OK)
+                {
+                    m_bHasHealed = true;
+                    m_creature->ForcedDespawn(1000);
+                }
             }
+            else
+                m_creature->GetMotionMaster()->MovePoint(0, pWho->GetPositionX(), pWho->GetPositionY(), pWho->GetPositionZ());
         }
     }
 
