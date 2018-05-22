@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: bosses_emerald_dragons
-SD%Complete: 95
-SDComment: Correct models used by Spirit Shade for each race/gender combination are missing (Lethon) / Demented Druid Spirit summon needs improvement (Ysondre)
+SD%Complete: 98
+SDComment: Correct models used by Spirit Shade for each race/gender combination are missing (Lethon)
 SDCategory: Emerald Dragon Bosses
 EndScriptData
 
@@ -479,13 +479,21 @@ struct boss_ysondreAI : public boss_emerald_dragonAI
         DoScriptText(SAY_YSONDRE_AGGRO, m_creature);
     }
 
-    // Summon Druids - TODO FIXME (spell not understood)
+    // Summon Druids, one druid per player engaged in combat
     bool DoSpecialDragonAbility()
     {
         DoScriptText(SAY_SUMMON_DRUIDS, m_creature);
 
-        for (int i = 0; i < 10; ++i)
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_DRUIDS, CAST_TRIGGERED);
+        ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+
+        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+        {
+            if (Unit* target = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_DRUIDS, CAST_TRIGGERED);
+            }
+        }
 
         return true;
     }
