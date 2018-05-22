@@ -1664,9 +1664,9 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
             m_ownerSet.insert(player->GetObjectGuid());
             m_lootMethod = NOT_GROUP_TYPE_LOOT;
 
-            if (!creatureInfo->LootId || !FillLoot(creatureInfo->PickpocketLootId, LootTemplates_Pickpocketing, player, false))
+            if (!creatureInfo->PickpocketLootId || !FillLoot(creatureInfo->PickpocketLootId, LootTemplates_Pickpocketing, player, false))
             {
-                sLog.outError("Loot::CreateLoot> cannot create pickpocket loot, FillLoot failed with loot id(%u)!", creatureInfo->LootId);
+                sLog.outError("Loot::CreateLoot> cannot create pickpocket loot, FillLoot failed with loot id(%u)!", creatureInfo->PickpocketLootId);
                 return;
             }
 
