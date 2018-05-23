@@ -2012,7 +2012,6 @@ class Unit : public WorldObject
         bool IsOutOfThreatArea(Unit* victim) const;
         void TauntUpdate();
         void FixateTarget(Unit* taunter);
-        ObjectGuid GetFixateTargetGuid() const { return m_fixateTargetGuid; }
         ThreatManager& getThreatManager() { return GetCombatData()->threatManager; }
         ThreatManager const& getThreatManager() const { return const_cast<Unit*>(this)->GetCombatData()->threatManager; }
         void addHatedBy(HostileReference* pHostileReference) { GetCombatData()->hostileRefManager.insertFirst(pHostileReference); };
