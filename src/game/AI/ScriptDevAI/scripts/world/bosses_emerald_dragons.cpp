@@ -457,7 +457,7 @@ enum
     SAY_SUMMON_DRUIDS       = -1000361,
 
     SPELL_LIGHTNING_WAVE    = 24819,
-    SPELL_SUMMON_DRUIDS     = 24795,    // Summon NPC 15260 (Demented Druid Spirit) that uses spells 6726, 16247 & 24957
+    SPELL_SUMMON_DRUIDS     = 24796,    // Summon NPC 15260 (Demented Druid Spirit) that uses spells 6726, 16247 & 24957
 };
 
 // Ysondre script
@@ -479,23 +479,16 @@ struct boss_ysondreAI : public boss_emerald_dragonAI
         DoScriptText(SAY_YSONDRE_AGGRO, m_creature);
     }
 
-    // Summon Druids, one druid per player engaged in combat
+    // Summon Druids, one druid per player engaged in combat (actual summon handled in child spell 24795)
     bool DoSpecialDragonAbility()
     {
-        DoScriptText(SAY_SUMMON_DRUIDS, m_creature);
-
-        ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-
-        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+        if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_DRUIDS, CAST_TRIGGERED) == CAST_OK)
         {
-            if (Unit* target = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
-            {
-                if (target->GetTypeId() == TYPEID_PLAYER)
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_DRUIDS, CAST_TRIGGERED);
-            }
+            DoScriptText(SAY_SUMMON_DRUIDS, m_creature);
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     bool UpdateDragonAI(const uint32 uiDiff)
