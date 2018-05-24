@@ -149,6 +149,7 @@ enum
     SPELL_VOLATILE_INFECTION    = 24928,
     SPELL_CORRUPTION_OF_EARTH   = 24910,
     SPELL_PUTRID_MUSHROOM       = 24904,                    // Summons a Putrid Mushroom (GO 180517 with trap spell 24871) on killing a player
+    SPELL_DESPAWN_MUSHROOMS     = 24958,                    // Removes all Putrid Mushrooms in case of raid wipe
 };
 
 struct boss_emerissAI : public boss_emerald_dragonAI
@@ -162,6 +163,7 @@ struct boss_emerissAI : public boss_emerald_dragonAI
         boss_emerald_dragonAI::Reset();
 
         m_uiVolatileInfectionTimer = 12000;
+        DoCastSpellIfCan(m_creature, SPELL_DESPAWN_MUSHROOMS, CAST_TRIGGERED);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -240,7 +242,7 @@ struct boss_lethonAI : public boss_emerald_dragonAI
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_LETHON_AGGRO, m_creature);
-        // Shadow bolt wirl is a periodic aura which triggers a set of shadowbolts every 2 secs; may need some core tunning
+        // Shadow bolt wirl is a periodic aura which triggers a set of shadowbolts every 2 secs
         DoCastSpellIfCan(m_creature, SPELL_SHADOW_BOLT_WIRL, CAST_TRIGGERED);
     }
 
