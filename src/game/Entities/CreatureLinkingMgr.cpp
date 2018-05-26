@@ -474,7 +474,11 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
                             return;
 
                         if (pMaster->isInCombat())
-                            pMaster->SetInCombatWith(pEnemy);
+                        {
+                            pMaster->AddThreat(pEnemy);
+                            pEnemy->AddThreat(pMaster);
+                            pEnemy->SetInCombatWith(pMaster);
+                        }                            
                         else
                             pMaster->AI()->AttackStart(pEnemy);
                         break;
@@ -535,7 +539,11 @@ void CreatureLinkingHolder::ProcessSlave(CreatureLinkingEvent eventType, Creatur
                     return;
 
                 if (pSlave->isInCombat())
-                    pSlave->SetInCombatWith(pEnemy);
+                {
+                    pSlave->AddThreat(pEnemy);
+                    pEnemy->AddThreat(pSlave);
+                    pEnemy->SetInCombatWith(pSlave);
+                }
                 else
                     pSlave->AI()->AttackStart(pEnemy);
             }
