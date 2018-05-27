@@ -975,13 +975,33 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
             {
                 uint32 liquidFlagType = 0;
                 if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(liquid_type))
-                    liquidFlagType = 1 << liq->Type;
+                    liquidFlagType = liq->Type;
+
+                if (liquid_type && liquid_type < 21)
+                {
+                    if (AreaTableEntry const* area = GetAreaEntryByAreaFlagAndMap(GetAreaFlag(x, y, z), GetMapId()))
+                    {
+                        uint32 overrideLiquid = area->LiquidTypeOverride;
+                        if (!overrideLiquid && area->zone)
+                        {
+                            area = GetAreaEntryByAreaID(area->zone);
+                            if (area)
+                                overrideLiquid = area->LiquidTypeOverride;
+                        }
+
+                        if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
+                        {
+                            liquid_type = overrideLiquid;
+                            liquidFlagType = liq->Type;
+                        }
+                    }
+                }
 
                 data->level = liquid_level;
                 data->depth_level = ground_level;
 
                 data->entry = liquid_type;
-                data->type_flags = liquidFlagType;
+                data->type_flags = 1 << liquidFlagType;
             }
 
             // For speed check as int values
