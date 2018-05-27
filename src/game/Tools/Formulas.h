@@ -332,23 +332,26 @@ namespace MaNGOS
             return 0;
         }
 
-        inline uint32 Gain(Player* pl, Unit* u)
+        inline uint32 Gain(Player* player, Creature* target)
         {
-            if (Creature* creatureUnit = dynamic_cast<Creature*>(u))
+            if (target->IsTotem() || target->IsPet() || target->IsNoXp() || target->IsCritter())
+                return 0;
+
+            uint32 xp_gain = BaseGain(player->getLevel(), target->getLevel());
+            if (xp_gain == 0)
+                return 0;
+
+            if (target->IsElite())
             {
-                uint32 xp_gain = 1;
-
-                if (creatureUnit->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_XP_AT_KILL)
-                    return 0;
-                if (creatureUnit->IsElite())
+                if (target->GetMap()->IsNoRaid())
+                    xp_gain *= 2.5;
+                else
                     xp_gain *= 2;
-
-                xp_gain *= BaseGain(pl->getLevel(), u->getLevel());
-                xp_gain *= creatureUnit->GetCreatureInfo()->ExperienceMultiplier;
-
-                return (uint32)(xp_gain * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL));
             }
-            return 0;
+
+            xp_gain *= target->GetCreatureInfo()->ExperienceMultiplier;
+
+            return (uint32)(xp_gain * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL));
         }
 
         inline float xp_in_group_rate(uint32 count, bool isRaid)

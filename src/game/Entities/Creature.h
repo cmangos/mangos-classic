@@ -830,6 +830,15 @@ class Creature : public Unit
 
         bool CanAggro() const { return m_canAggro; }
         void SetCanAggro(bool canAggro) { m_canAggro = canAggro; }
+
+        void SetNoRewards() { m_noXP = true; m_noLoot = true; m_noReputation = true; }
+        bool IsNoXp() { return m_noXP; }
+        void SetNoXP(bool state) { m_noXP = state; }
+        bool IsNoLoot() { return m_noLoot; }
+        void SetNoLoot(bool state) { m_noLoot = state; }
+        bool IsNoReputation() { return m_noReputation; }
+        void SetNoReputation(bool state) { m_noReputation = state; }
+
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 
@@ -874,10 +883,15 @@ class Creature : public Unit
         Position m_combatStartPos;                          // after combat contains last position
         Position m_respawnPos;
 
+        uint32 m_gameEventVendorId;                         // game event creature data vendor id override
+
         std::unique_ptr<UnitAI> m_ai;
         bool m_isInvisible;
         bool m_ignoreMMAP;
         bool m_forceAttackingCapability;                    // can attack even if not selectable/not attackable
+        bool m_noXP;
+        bool m_noLoot;
+        bool m_noReputation;
 
         void SetBaseWalkSpeed(float speed) override;
         void SetBaseRunSpeed(float speed) override;

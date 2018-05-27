@@ -140,7 +140,8 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_originalEntry(0), m_ai(nullptr),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false), m_ignoreRangedTargets(false), m_countSpawns(false),
-    m_creatureInfo(nullptr)
+    m_creatureInfo(nullptr),
+    m_noXP(false), m_noLoot(false), m_noReputation(false)
 {
     m_regenTimer = 200;
     m_valuesCount = UNIT_END;
@@ -366,6 +367,9 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=nu
     SetCanParry(!(cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_PARRY));
     SetCanBlock(!(cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_BLOCK));
     SetForceAttackingCapability((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_FORCE_ATTACKING_CAPABILITY) != 0);
+    SetNoXP(cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_XP_AT_KILL);
+    SetNoLoot(false);
+    SetNoReputation(false);
 
     return true;
 }
@@ -954,10 +958,15 @@ void Creature::PrepareBodyLootState()
     delete loot;
     loot = nullptr;
 
-    Player* killer = GetLootRecipient();
+    if (IsNoLoot())
+        SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
+    else
+    {
+        Player* killer = GetLootRecipient();
 
-    if (killer)
-        loot = new Loot(killer, this, LOOT_CORPSE);
+        if (killer)
+            loot = new Loot(killer, this, LOOT_CORPSE);
+    }
 
     if (m_lootStatus == CREATURE_LOOT_STATUS_LOOTED && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
     {

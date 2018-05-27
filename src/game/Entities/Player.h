@@ -931,7 +931,7 @@ class Player : public Unit
         }
 
 
-        void GiveXP(uint32 xp, Unit* victim);
+        void GiveXP(uint32 xp, Creature* victim);
         void GiveLevel(uint32 level);
 
         void InitStatsForLevel(bool reapplyMods = false);
@@ -1684,8 +1684,8 @@ class Player : public Unit
 
         ReputationMgr&       GetReputationMgr()       { return m_reputationMgr; }
         ReputationMgr const& GetReputationMgr() const { return m_reputationMgr; }
-        ReputationRank GetReputationRank(uint32 faction) const;
-        void RewardReputation(Unit* pVictim, float rate);
+        ReputationRank GetReputationRank(uint32 faction_id) const;
+        void RewardReputation(Creature* victim, float rate);
         void RewardReputation(Quest const* pQuest);
         int32 CalculateReputationGain(ReputationSource source, int32 rep, int32 faction, uint32 creatureOrQuestLevel = 0, bool noAuraBonus = false) const;
 
