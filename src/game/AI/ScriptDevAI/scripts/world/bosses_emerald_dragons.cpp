@@ -332,6 +332,7 @@ enum
     SPELL_SUMMON_SHADE_2    = 24842,
     SPELL_SUMMON_SHADE_3    = 24843,
     SPELL_SELF_STUN         = 24883,                        // Stuns the main boss until the shades are dead or timer expires
+    SPELL_DESPAWN_SHADES    = 24886,
 
     NPC_SHADE_OF_TAERAR     = 15302,
 };
@@ -357,6 +358,9 @@ struct boss_taerarAI : public boss_emerald_dragonAI
         // Remove Unselectable if needed
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+        // Despawn all remaining summoned NPCs in case of raid wipe
+        DoCastSpellIfCan(m_creature, SPELL_DESPAWN_SHADES, CAST_TRIGGERED);
     }
 
     void Aggro(Unit* /*pWho*/) override
