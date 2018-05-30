@@ -14,6 +14,9 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <functional>
+#include "Platform/Define.h"
+
 /*
 Timer data class used for execution of TimerAI events
 */
