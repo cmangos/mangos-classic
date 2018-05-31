@@ -400,8 +400,9 @@ bool Tracker::Trim(Route& first, Route& second)
         const TaxiPathNodeEntry* last1 = nullptr;
         const TaxiPathNodeEntry* last2 = nullptr;
         const double refdistsq = double(64.0f * 64.0f);
+        auto i1 = (waypoints1.rbegin() + lengthLanding);
         auto i2 = (waypoints2.begin() + lengthTakeoff);
-        for (auto i1 = (waypoints1.rbegin() - lengthLanding); (i1 != waypoints1.rend() && i2 != waypoints2.end()); ++i1)
+        for (; (i1 != waypoints1.rend() && i2 != waypoints2.end()); (++i1, ++i2))
         {
             // Verify that both paths are on the same map
             if ((*i1)->mapid != (*i2)->mapid)
@@ -421,7 +422,6 @@ bool Tracker::Trim(Route& first, Route& second)
             }
             last1 = (*i1);
             last2 = (*i2);
-            ++i2;
         }
     }
     return false;
