@@ -200,7 +200,7 @@ ReputationRank Unit::GetReactionTo(Unit const* unit) const
             }
 
             // Pre-WotLK group check: always, replaced with faction template check in WotLK
-            if (thisPlayer->IsInSameRaidWith(unitPlayer))
+            if (thisPlayer->IsInGroup(unitPlayer))
                 return REP_FRIENDLY;
 
             // Pre-WotLK FFA check, known limitation: FFA doesn't work with totem elementals both client-side and server-side
@@ -696,6 +696,45 @@ bool Unit::IsCivilianForTarget(Unit const* pov) const
     // PvP-enabled enemy npcs with civilian flag
     if (IsPvP() && GetTypeId() == TYPEID_UNIT && static_cast<const Creature*>(this)->IsCivilian())
         return (IsTrivialForTarget(pov) && IsEnemy(pov));
+
+    return false;
+}
+
+/////////////////////////////////////////////////
+/// Group: Unit counts as being placed in the same group (party or raid) with another unit (for gameplay purposes)
+///
+/// @note Relations API Tier 1
+///
+/// Based on client-side counterpart: <tt>static CGUnit_C::IsUnitInGroup(const CGUnit_C *this, const CGUnit_C *unit)</tt>
+/// Points of view are swapped to fit in with the rest of API, logic is preserved.
+/////////////////////////////////////////////////
+bool Unit::IsInGroup(Unit const* other, bool party /*= false*/) const
+{
+    // Simple sanity check
+    if (!other)
+        return false;
+
+    // Original logic adaptation for server (original function was operating as a local player PoV only)
+
+    // Same unit is always in group with itself
+    if (this == other)
+        return true;
+
+    // Only player controlled
+    if (this->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && other->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        // Check if controlling players are in the same group (same logic as client)
+        if (const Player* thisPlayer = GetControllingPlayer())
+        {
+            if (const Group* group = thisPlayer->GetGroup())
+            {
+                if (const Player* otherPlayer = other->GetControllingPlayer())
+                    return (group == otherPlayer->GetGroup() && (!party || group->SameSubGroup(thisPlayer, otherPlayer)));
+            }
+        }
+    }
+
+    // NOTE: For future reference: server uses additional gameplay grouping logic for mobs (in combat and out of combat) - requires research for Tier 2 implementation
 
     return false;
 }

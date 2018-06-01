@@ -1656,8 +1656,7 @@ struct ChainHealingOrder : public std::binary_function<const Unit*, const Unit*,
     {
         if (Target == MainTarget)
             return 0;
-        else if (Target->GetTypeId() == TYPEID_PLAYER && MainTarget->GetTypeId() == TYPEID_PLAYER &&
-                 ((Player const*)Target)->IsInSameRaidWith((Player const*)MainTarget))
+        else if (Target->IsInGroup(MainTarget))
         {
             if (Target->GetHealth() == Target->GetMaxHealth())
                 return 40000;
@@ -5252,7 +5251,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_BAD_TARGETS;
 
                 Player* target = sObjectMgr.GetPlayer(caster->GetSelectionGuid());
-                if (!target || caster == target || !target->IsInSameRaidWith((Player*)m_caster))
+                if (!target || caster == target || !target->IsInGroup(m_caster))
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // check if our map is dungeon

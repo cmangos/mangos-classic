@@ -1372,6 +1372,9 @@ class Unit : public WorldObject
 
         bool IsCivilianForTarget(Unit const* pov) const;
 
+        bool IsInGroup(Unit const* other, bool party = false) const;
+        bool IsInParty(Unit const* other) const { return IsInGroup(other, true); }
+
         bool IsImmuneToNPC() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC); }
         void SetImmuneToNPC(bool state);
         bool IsImmuneToPlayer() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER); }

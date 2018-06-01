@@ -852,7 +852,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                     Player* ownerPlayer = (Player*)owner;
                     if ((GetMap()->IsBattleGround() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
                             (ownerPlayer->IsInDuelWith(u)) ||
-                            (!ownerPlayer->IsInSameRaidWith(u)))
+                            (!ownerPlayer->IsInGroup(u)))
                         trapNotVisible = true;
                 }
                 else
@@ -1521,7 +1521,7 @@ void GameObject::Use(Unit* user)
                     return;
 
                 // accept only use by player from same group as owner, excluding owner itself (unique use already added in spell effect)
-                if (player == (Player*)owner || (info->summoningRitual.castersGrouped && !player->IsInSameRaidWith(((Player*)owner))))
+                if (player == (Player*)owner || (info->summoningRitual.castersGrouped && !player->IsInGroup(owner)))
                     return;
 
                 // expect owner to already be channeling, so if not...
@@ -1570,7 +1570,7 @@ void GameObject::Use(Unit* user)
                 if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                if (user->GetTypeId() != TYPEID_PLAYER || !((Player*)user)->IsInSameRaidWith((Player*)caster))
+                if (user->GetTypeId() != TYPEID_PLAYER || !user->IsInGroup(caster))
                     return;
             }
 
@@ -1597,7 +1597,7 @@ void GameObject::Use(Unit* user)
             Player* targetPlayer = ObjectAccessor::FindPlayer(player->GetSelectionGuid());
 
             // accept only use by player from same group for caster except caster itself
-            if (!targetPlayer || targetPlayer == player || !targetPlayer->IsInSameRaidWith(player))
+            if (!targetPlayer || targetPlayer == player || !targetPlayer->IsInGroup(player))
                 return;
 
             // required lvl checks!

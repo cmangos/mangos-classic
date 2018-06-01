@@ -1493,8 +1493,6 @@ class Player : public Unit
         void SendDuelCountdown(uint32 counter) const;
 
         bool IsGroupVisibleFor(Player* p) const;
-        bool IsInSameGroupWith(Player const* p) const;
-        bool IsInSameRaidWith(Player const* p) const { return p == this || (GetGroup() != nullptr && GetGroup() == p->GetGroup()); }
         void UninviteFromGroup();
         static void RemoveFromGroup(Group* group, ObjectGuid guid);
         void RemoveFromGroup() { RemoveFromGroup(GetGroup(), GetObjectGuid()); }

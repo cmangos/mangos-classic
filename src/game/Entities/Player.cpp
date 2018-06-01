@@ -2192,16 +2192,10 @@ bool Player::IsGroupVisibleFor(Player* p) const
 {
     switch (sWorld.getConfig(CONFIG_UINT32_GROUP_VISIBILITY))
     {
-        default: return IsInSameGroupWith(p);
-        case 1:  return IsInSameRaidWith(p);
+        default: return IsInParty(p);
+        case 1:  return IsInGroup(p);
         case 2:  return GetTeam() == p->GetTeam();
     }
-}
-
-bool Player::IsInSameGroupWith(Player const* p) const
-{
-    return (p == this || (GetGroup() != nullptr &&
-                          GetGroup()->SameSubGroup(this, p)));
 }
 
 ///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
@@ -16995,7 +16989,7 @@ bool Player::IsVisibleInGridForPlayer(Player* pl) const
         return true;
 
     // player see dead player/ghost from own group/raid
-    if (IsInSameRaidWith(pl))
+    if (IsInGroup(pl))
         return true;
 
     // Live player see live player or dead player with not realized corpse
