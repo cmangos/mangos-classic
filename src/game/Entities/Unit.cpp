@@ -770,6 +770,11 @@ void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb, DamageE
         *absorb += (originalDamage - damage);
 }
 
+void Unit::Suicide()
+{
+    DealDamage(this, this->GetHealth(), nullptr, INSTAKILL, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+}
+
 uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss)
 {
     // remove affects from attacker at any non-DoT damage (including 0 damage)
