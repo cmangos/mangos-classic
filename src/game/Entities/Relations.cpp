@@ -726,10 +726,10 @@ bool Unit::IsInGroup(Unit const* other, bool party /*= false*/) const
         // Check if controlling players are in the same group (same logic as client)
         if (const Player* thisPlayer = GetControllingPlayer())
         {
-            if (const Group* group = thisPlayer->GetGroup())
+            if (const Player* otherPlayer = other->GetControllingPlayer())
             {
-                if (const Player* otherPlayer = other->GetControllingPlayer())
-                    return (group == otherPlayer->GetGroup() && (!party || group->SameSubGroup(thisPlayer, otherPlayer)));
+                const Group* group = thisPlayer->GetGroup();
+                return (thisPlayer == otherPlayer || (group && group == otherPlayer->GetGroup() && (!party || group->SameSubGroup(thisPlayer, otherPlayer))));
             }
         }
     }
@@ -1062,4 +1062,69 @@ bool Unit::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) const
 bool Unit::CanAttackOnSight(Unit* target)
 {
     return CanAttack(target) && !target->IsFeigningDeathSuccessfully() && IsEnemy(target);
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Fog of War: Unit can be seen by other unit through invisibility effects
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// A helper function to determine if unit is always visible to another unit.
+/////////////////////////////////////////////////
+bool Unit::IsFogOfWarVisibleStealth(Unit const* other) const
+{
+    // Gamemasters can see through invisibility
+    if (other->GetTypeId() == TYPEID_PLAYER && static_cast<Player const*>(other)->isGameMaster())
+        return true;
+
+    switch (sWorld.getConfig(CONFIG_UINT32_FOGOFWAR_STEALTH))
+    {
+        default: return IsInGroup(other);
+        case 1:  return CanCooperate(other);
+    }
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Fog of War: Unit's health values can be seen by other unit
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// A helper function to determine if unit's health values are always visible to another unit.
+/////////////////////////////////////////////////
+bool Unit::IsFogOfWarVisibleHealth(Unit const* other) const
+{
+    // Gamemasters can see health values
+    if (other->GetTypeId() == TYPEID_PLAYER && static_cast<Player const*>(other)->isGameMaster())
+        return true;
+
+    switch (sWorld.getConfig(CONFIG_UINT32_FOGOFWAR_HEALTH))
+    {
+        default: return IsInGroup(other);
+        case 1:  return CanCooperate(other);
+        case 2:  return true;
+    }
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Fog of War: Unit's stat values can be seen by other unit
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// A helper function to determine if unit's stat values are always visible to another unit.
+/////////////////////////////////////////////////
+bool Unit::IsFogOfWarVisibleStats(Unit const* other) const
+{
+    // Gamemasters can see stat values
+    if (other->GetTypeId() == TYPEID_PLAYER && static_cast<Player const*>(other)->isGameMaster())
+        return true;
+
+    switch (sWorld.getConfig(CONFIG_UINT32_FOGOFWAR_STATS))
+    {
+        default: return (this == other || other->GetSummonerGuid() == GetObjectGuid());
+        case 1:  return CanCooperate(other);
+        case 2:  return true;
+    }
 }

@@ -439,6 +439,28 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     *data << uint32(m_floatValues[index]);
                 }
 
+                // Fog of War: replace absolute health values with percentages for non-allied units according to settings
+                else if ((index == UNIT_FIELD_HEALTH || index == UNIT_FIELD_MAXHEALTH) &&
+                         !(static_cast<const Unit*>(this))->IsFogOfWarVisibleHealth(target))
+                {
+                    *data << uint32(index == UNIT_FIELD_MAXHEALTH ? 100 : ceil(100.0 * m_uint32Values[UNIT_FIELD_HEALTH] / m_uint32Values[UNIT_FIELD_MAXHEALTH]));
+                }
+
+                // Fog of War: hide stat values for non-allied units according to settings
+                else if ((index == UNIT_FIELD_RANGEDATTACKTIME ||
+                          index == UNIT_FIELD_MINDAMAGE || index == UNIT_FIELD_MAXDAMAGE ||
+                          index == UNIT_FIELD_MINOFFHANDDAMAGE || index == UNIT_FIELD_MAXOFFHANDDAMAGE ||
+                          index == UNIT_FIELD_MINOFFHANDDAMAGE || (index >= UNIT_FIELD_STAT0 && index < UNIT_FIELD_BASE_MANA) ||
+                          index == UNIT_FIELD_BASE_HEALTH || index == UNIT_FIELD_ATTACK_POWER ||
+                          index == UNIT_FIELD_ATTACK_POWER_MODS || index == UNIT_FIELD_ATTACK_POWER_MULTIPLIER ||
+                          index == UNIT_FIELD_RANGED_ATTACK_POWER || index == UNIT_FIELD_RANGED_ATTACK_POWER_MODS ||
+                          index == UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER || index == UNIT_FIELD_MINRANGEDDAMAGE ||
+                          index == UNIT_FIELD_MAXRANGEDDAMAGE || (index >= UNIT_FIELD_POWER_COST_MODIFIER && index <= UNIT_FIELD_POWER_COST_MULTIPLIER_06)) &&
+                          !(static_cast<const Unit*>(this))->IsFogOfWarVisibleStats(target))
+                {
+                    *data << uint32(0);
+                }
+
                 // Gamemasters should be always able to select units - remove not selectable flag
                 else if (index == UNIT_FIELD_FLAGS && target->isGameMaster())
                 {

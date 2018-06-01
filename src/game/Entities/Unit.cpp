@@ -7323,10 +7323,9 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (m_Visibility == VISIBILITY_OFF)
         return false;
 
-    // grouped players should always see stealthed party members
-    if (GetTypeId() == TYPEID_PLAYER && u->GetTypeId() == TYPEID_PLAYER)
-        if (((Player*)this)->IsGroupVisibleFor(((Player*)u)) && CanCooperate(u))
-            return true;
+    // check group settings
+    if (IsFogOfWarVisibleStealth(u))
+        return true;
 
     // raw invisibility
     bool invisible = (m_invisibilityMask != 0 || u->m_invisibilityMask != 0);

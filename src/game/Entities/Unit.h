@@ -1375,16 +1375,21 @@ class Unit : public WorldObject
         bool IsInGroup(Unit const* other, bool party = false) const;
         bool IsInParty(Unit const* other) const { return IsInGroup(other, true); }
 
-        bool IsImmuneToNPC() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC); }
-        void SetImmuneToNPC(bool state);
-        bool IsImmuneToPlayer() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER); }
-        void SetImmuneToPlayer(bool state);
-
         // extensions of CanAttack and CanAssist API needed serverside
         virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const override;
         virtual bool CanAssistSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const override;
 
         virtual bool CanAttackOnSight(Unit* target); // Used in MoveInLineOfSight checks
+
+        // Serverside fog of war settings
+        bool IsFogOfWarVisibleStealth(Unit const* other) const;
+        bool IsFogOfWarVisibleHealth(Unit const* other) const;
+        bool IsFogOfWarVisibleStats(Unit const* other) const;
+
+        bool IsImmuneToNPC() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC); }
+        void SetImmuneToNPC(bool state);
+        bool IsImmuneToPlayer() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER); }
+        void SetImmuneToPlayer(bool state);
 
         bool IsPvP() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
         void SetPvP(bool state);

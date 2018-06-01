@@ -2188,16 +2188,6 @@ void Player::SetGMVisible(bool on)
     }
 }
 
-bool Player::IsGroupVisibleFor(Player* p) const
-{
-    switch (sWorld.getConfig(CONFIG_UINT32_GROUP_VISIBILITY))
-    {
-        default: return IsInParty(p);
-        case 1:  return IsInGroup(p);
-        case 2:  return GetTeam() == p->GetTeam();
-    }
-}
-
 ///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
 void Player::UninviteFromGroup()
 {

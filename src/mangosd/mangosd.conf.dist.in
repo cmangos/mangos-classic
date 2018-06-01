@@ -1126,11 +1126,22 @@ GM.InvisibleAura         = 31748
 ###################################################################################################################
 # VISIBILITY AND RADIUSES
 #
-#    Visibility.GroupMode
-#        Group visibility modes
-#        Default: 0 (standard setting: only members from same group can 100% auto detect invisible player)
-#                 1 (raid members 100% auto detect invisible player from same raid)
-#                 2 (players from same team can 100% auto detect invisible player)
+#    Visibility.FogOfWar.Stealth
+#        Sets visibility mode for invisible units. Fog Of War settings are not applied to GMs.
+#        Default: 0 (standard setting: players can see invisibile units in their own group)
+#                 1 (players can see same faction invisibile units)
+#
+#    Visibility.FogOfWar.Health
+#        Sets visibility mode for absolute health values. Fog Of War settings are not applied to GMs.
+#        Default: 0 (Pre-3.0 standard setting: players can see health values of units in their own group)
+#                 1 (players can see health values of same faction units)
+#                 2 (Post-3.0 standard setting: players can see health values of all units)
+#
+#    Visibility.FogOfWar.Stats
+#        Sets visibility mode for values of character attributes and attack stats. Fog Of War settings are not applied to GMs.
+#        Default: 0 (standard setting: players can see own values and values of their pets)
+#                 1 (players can see values of same faction units)
+#                 2 (players can see values of all units)
 #
 #    Visibility.Distance.Continents
 #    Visibility.Distance.Instances
@@ -1166,7 +1177,9 @@ GM.InvisibleAura         = 31748
 #
 ###################################################################################################################
 
-Visibility.GroupMode = 0
+Visibility.FogOfWar.Stealth = 0
+Visibility.FogOfWar.Health  = 0
+Visibility.FogOfWar.Stats   = 0
 Visibility.Distance.Continents    = 90
 Visibility.Distance.Instances     = 120
 Visibility.Distance.BG            = 180
