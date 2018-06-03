@@ -1311,7 +1311,7 @@ void WorldObject::GetRandomPoint(float x, float y, float z, float distance, floa
 
     MaNGOS::NormalizeMapCoord(rand_x);
     MaNGOS::NormalizeMapCoord(rand_y);
-    UpdateGroundPositionZ(rand_x, rand_y, rand_z);          // update to LOS height if available
+    UpdateAllowedPositionZ(rand_x, rand_y, rand_z);          // update to LOS height if available
 }
 
 void WorldObject::UpdateGroundPositionZ(float x, float y, float& z) const
