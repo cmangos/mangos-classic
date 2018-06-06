@@ -2105,7 +2105,7 @@ struct SetGameMasterOnHelper
     void operator()(Unit* unit) const
     {
         unit->setFaction(35);
-        unit->getHostileRefManager().setOnlineOfflineState(false);
+        unit->getHostileRefManager().updateOnlineOfflineState(false);
     }
 };
 
@@ -2115,7 +2115,7 @@ struct SetGameMasterOffHelper
     void operator()(Unit* unit) const
     {
         unit->setFaction(faction);
-        unit->getHostileRefManager().setOnlineOfflineState(true);
+        unit->getHostileRefManager().updateOnlineOfflineState(true);
     }
     uint32 faction;
 };
@@ -2135,7 +2135,7 @@ void Player::SetGameMaster(bool on)
         SetPvPFreeForAll(false);
         UpdatePvPContested(false, true);
 
-        getHostileRefManager().setOnlineOfflineState(false);
+        getHostileRefManager().updateOnlineOfflineState(false);
         CombatStopWithPets();
     }
     else
@@ -2155,7 +2155,7 @@ void Player::SetGameMaster(bool on)
         // restore FFA PvP area state, remove not allowed for GM mounts
         UpdateArea(m_areaUpdateId);
 
-        getHostileRefManager().setOnlineOfflineState(true);
+        getHostileRefManager().updateOnlineOfflineState(true);
     }
 
     m_camera.UpdateVisibilityForOwner();
@@ -16470,7 +16470,7 @@ void Player::OnTaxiFlightSplineStart(const TaxiPathNodeEntry* node)
     if (const TaxiPathEntry* path = sTaxiPathStore.LookupEntry(node->path))
         Mount(m_taxiTracker.GetMountDisplayId());
 
-    getHostileRefManager().setOnlineOfflineState(false);
+    getHostileRefManager().updateOnlineOfflineState(false);
 
     // Bugcheck: container continuity error
     MANGOS_ASSERT(m_taxiTracker.SetState(Taxi::TRACKER_FLIGHT));
@@ -16480,7 +16480,7 @@ void Player::OnTaxiFlightSplineEnd()
 {
     Unmount();
 
-    getHostileRefManager().setOnlineOfflineState(true);
+    getHostileRefManager().updateOnlineOfflineState(true);
 
     // Note: only gets set by itself when container does not end up empty
     m_taxiTracker.SetState(Taxi::TRACKER_TRANSFER);

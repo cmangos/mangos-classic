@@ -79,6 +79,24 @@ void HostileRefManager::setOnlineOfflineState(bool pIsOnline)
     }
 }
 
+void HostileRefManager::updateOnlineOfflineState(bool pIsOnline)
+{
+    if (pIsOnline && iOwner)
+    {
+        // Check for causes which prevent setting online state
+
+        // Do not set online while feigning death in combat
+        if (iOwner->IsFeigningDeathSuccessfully() && iOwner->isInCombat())
+            return;
+
+        // Do not set online if player is in GM mode or on taxi path
+        const Player* player = iOwner->GetControllingPlayer();
+        if (player && (player->IsTaxiFlying() || !player->isGameMaster()))
+            return;
+    }
+    setOnlineOfflineState(pIsOnline);
+}
+
 //=================================================
 // The online / offline status is calculated and set
 

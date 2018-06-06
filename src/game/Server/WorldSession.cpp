@@ -401,7 +401,7 @@ void WorldSession::LogoutPlayer(bool save)
         else if (!_player->getAttackers().empty())
         {
             _player->CombatStop();
-            _player->getHostileRefManager().setOnlineOfflineState(false);
+            _player->getHostileRefManager().updateOnlineOfflineState(false);
             _player->RemoveAllAurasOnDeath();
 
             // build set of player who attack _player or who have pet attacking of _player

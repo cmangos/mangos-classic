@@ -56,6 +56,7 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
         void updateThreatTables();
 
         void setOnlineOfflineState(bool pIsOnline);
+        void updateOnlineOfflineState(bool pIsOnline);
 
         // set state for one reference, defined by Unit
         void setOnlineOfflineState(Unit* pCreature, bool pIsOnline);
