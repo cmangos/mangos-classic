@@ -5721,18 +5721,30 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
 
             case CHASE_MOTION_TYPE:
             {
-                Unit* target;
+                Unit* target = nullptr;
+                float distance = 0.f;
+                float angle = 0.f;
                 if (unit->GetTypeId() == TYPEID_PLAYER)
-                    target = static_cast<ChaseMovementGenerator<Player> const*>(*itr)->GetCurrentTarget();
+                {
+                    ChaseMovementGenerator<Player> const* movegen = static_cast<ChaseMovementGenerator<Player> const*>(*itr);
+                    target = movegen->GetCurrentTarget();
+                    distance = movegen->GetOffset();
+                    angle = movegen->GetAngle();
+                }
                 else
-                    target = static_cast<ChaseMovementGenerator<Creature> const*>(*itr)->GetCurrentTarget();
+                {
+                    ChaseMovementGenerator<Creature> const* movegen = static_cast<ChaseMovementGenerator<Creature> const*>(*itr);
+                    target = movegen->GetCurrentTarget();
+                    distance = movegen->GetOffset();
+                    angle = movegen->GetAngle();
+                }
 
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_CHASE_NULL);
                 else if (target->GetTypeId() == TYPEID_PLAYER)
-                    PSendSysMessage(LANG_MOVEGENS_CHASE_PLAYER, target->GetName(), target->GetGUIDLow());
+                    PSendSysMessage(LANG_MOVEGENS_CHASE_PLAYER, target->GetName(), target->GetGUIDLow(), distance, angle);
                 else
-                    PSendSysMessage(LANG_MOVEGENS_CHASE_CREATURE, target->GetName(), target->GetGUIDLow());
+                    PSendSysMessage(LANG_MOVEGENS_CHASE_CREATURE, target->GetName(), target->GetGUIDLow(), distance, angle);
                 break;
             }
             case FOLLOW_MOTION_TYPE:

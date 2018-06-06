@@ -56,6 +56,8 @@ class TargetedMovementGeneratorMedium
         bool IsReachable() const;
 
         Unit* GetCurrentTarget() const override { return i_target.getTarget(); }
+        float GetOffset() const { return i_offset; }
+        float GetAngle() const { return i_angle; }
 
         void unitSpeedChanged() { m_speedChanged = true; }
 
