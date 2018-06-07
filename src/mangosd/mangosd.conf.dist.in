@@ -641,7 +641,7 @@ LogColors = ""
 #                 1 (allowed)
 #
 #    Group.OfflineLeaderDelay
-#        A grace period for an offline group leader to reconnect before tranfering leadership to a next suitable member of the group (in secs) 
+#        A grace period for an offline group leader to reconnect before tranfering leadership to a next suitable member of the group (in secs)
 #        Default: 300 (5 minutes)
 #                   0 (Do not transfer group leadership)
 #
@@ -778,6 +778,7 @@ MaxSpellCastsInChain = 20
 RabbitDay = 0
 Instance.IgnoreLevel = 0
 Instance.IgnoreRaid = 0
+Instance.StrictCombatLockdown = 0
 Instance.ResetTimeHour = 4
 Instance.UnloadDelay = 1800000
 Quests.LowLevelHideDiff = 4
