@@ -2985,6 +2985,16 @@ DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
     return DRTYPE_NONE;
 }
 
+bool IsCreatureDRSpell(SpellEntry const* spellInfo)
+{
+    switch (spellInfo->Id)
+    {
+        case 36924: // Harbinger Skyriss - Mind Rend
+        case 31480: return true; // Kazrogal War Stomp - confirmed via video
+        default: return false;
+    }
+}
+
 bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32 newArea) const
 {
     if (conditionId)
