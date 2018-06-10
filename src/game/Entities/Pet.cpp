@@ -651,7 +651,7 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
     CastOwnerTalentAuras();
 }
 
-void Pet::Update(uint32 update_diff, uint32 diff)
+void Pet::Update(const uint32 diff)
 {
     if (m_removed)                                          // pet already removed, just wait in remove queue, no updates
         return;
@@ -660,7 +660,7 @@ void Pet::Update(uint32 update_diff, uint32 diff)
     {
         case CORPSE:
         {
-            if (m_corpseDecayTimer <= update_diff)
+            if (m_corpseDecayTimer <= diff)
             {
                 // pet is dead so it doesn't have to be shown at character login
                 Unsummon(PET_SAVE_NOT_IN_SLOT);
@@ -691,8 +691,8 @@ void Pet::Update(uint32 update_diff, uint32 diff)
 
             if (m_duration > 0)
             {
-                if (m_duration > (int32)update_diff)
-                    m_duration -= (int32)update_diff;
+                if (m_duration > (int32)diff)
+                    m_duration -= (int32)diff;
                 else
                 {
                     Unsummon(getPetType() != SUMMON_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT, owner);
@@ -705,7 +705,7 @@ void Pet::Update(uint32 update_diff, uint32 diff)
             break;
     }
 
-    Creature::Update(update_diff, diff);
+    Creature::Update(diff);
 }
 
 void Pet::RegenerateAll(uint32 update_diff)

@@ -429,7 +429,7 @@ Unit::~Unit()
     MANGOS_ASSERT(m_deletedHolders.empty());
 }
 
-void Unit::Update(uint32 update_diff, uint32 p_time)
+void Unit::Update(const uint32 diff)
 {
     if (!IsInWorld())
         return;
@@ -444,20 +444,21 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     // WARNING! Order of execution here is important, do not change.
     // Spells must be processed with event system BEFORE they go to _UpdateSpells.
     // Or else we may have some SPELL_STATE_FINISHED spells stalled in pointers, that is bad.
-    UpdateCooldowns(GetMap()->GetCurrentClockTime());
     m_spellUpdateHappening = true;
-    m_Events.Update(update_diff);
-    _UpdateSpells(update_diff);
+
+    UpdateCooldowns(GetMap()->GetCurrentClockTime());
+    m_Events.Update(diff);
+    _UpdateSpells(diff);
     m_spellUpdateHappening = false;
 
     CleanupDeletedAuras();
 
     if (m_lastManaUseTimer)
     {
-        if (update_diff >= m_lastManaUseTimer)
+        if (diff >= m_lastManaUseTimer)
             m_lastManaUseTimer = 0;
         else
-            m_lastManaUseTimer -= update_diff;
+            m_lastManaUseTimer -= diff;
     }
 
     if (!CanHaveThreatList() && isInCombat())
@@ -469,41 +470,41 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
         if (getHostileRefManager().isEmpty())
         {
             // m_CombatTimer set at aura start and it will be freeze until aura removing
-            if (m_CombatTimer <= update_diff)
+            if (m_CombatTimer <= diff)
                 CombatStop();
             else
-                m_CombatTimer -= update_diff;
+                m_CombatTimer -= diff;
         }
     }
 
     if (uint32 base_att = getAttackTimer(BASE_ATTACK))
     {
-        setAttackTimer(BASE_ATTACK, (update_diff >= base_att ? 0 : base_att - update_diff));
+        setAttackTimer(BASE_ATTACK, (diff >= base_att ? 0 : base_att - diff));
     }
 
     if (uint32 base_att = getAttackTimer(OFF_ATTACK))
     {
-        setAttackTimer(OFF_ATTACK, (update_diff >= base_att ? 0 : base_att - update_diff));
+        setAttackTimer(OFF_ATTACK, (diff >= base_att ? 0 : base_att - diff));
     }
 
     // update abilities available only for fraction of time
-    UpdateReactives(update_diff);
+    UpdateReactives(diff);
 
-    UpdateSplineMovement(p_time);
-    i_motionMaster.UpdateMotion(p_time);
+    UpdateSplineMovement(diff);
+    i_motionMaster.UpdateMotion(diff);
 
     if (AI() && isAlive())
-        AI()->UpdateAI(p_time);   // AI not react good at real update delays (while freeze in non-active part of map)
+        AI()->UpdateAI(diff);   // AI not react good at real update delays (while freeze in non-active part of map)
 
     if (m_evadeTimer)
     {
-        if (m_evadeTimer <= update_diff)
+        if (m_evadeTimer <= diff)
         {
             EvadeTimerExpired();
             m_evadeTimer = 0;
         }
         else
-            m_evadeTimer -= update_diff;
+            m_evadeTimer -= diff;
     }
 
     if (isAlive())

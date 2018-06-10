@@ -31,7 +31,7 @@ class Transport : public GameObject
 
         bool Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress);
         bool GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids);
-        void Update(uint32 update_diff, uint32 p_time) override;
+        void Update(const uint32 diff) override;
         bool AddPassenger(Player* passenger);
         bool RemovePassenger(Player* passenger);
 

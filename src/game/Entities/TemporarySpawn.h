@@ -28,7 +28,7 @@ class TemporarySpawn : public Creature
         explicit TemporarySpawn(ObjectGuid summoner = ObjectGuid());
         virtual ~TemporarySpawn() {};
 
-        void Update(uint32 update_diff, uint32 diff) override;
+        void Update(const uint32 diff) override;
         void SetSummonProperties(TempSpawnType type, uint32 lifetime);
         void Summon(TempSpawnType type, uint32 lifetime);
         void UnSummon();

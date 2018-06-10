@@ -515,7 +515,7 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
     return display_id;
 }
 
-void Creature::Update(uint32 update_diff, uint32 diff)
+void Creature::Update(const uint32 diff)
 {
     switch (m_deathState)
     {
@@ -575,17 +575,17 @@ void Creature::Update(uint32 update_diff, uint32 diff)
         }
         case CORPSE:
         {
-            Unit::Update(update_diff, diff);
+            Unit::Update(diff);
 
             if (loot)
                 loot->Update();
 
             if (!m_isDeadByDefault)
             {
-                if (m_corpseDecayTimer <= update_diff)
+                if (m_corpseDecayTimer <= diff)
                     RemoveCorpse();
                 else
-                    m_corpseDecayTimer -= update_diff;
+                    m_corpseDecayTimer -= diff;
             }
 
             break;
@@ -594,19 +594,20 @@ void Creature::Update(uint32 update_diff, uint32 diff)
         {
             if (m_isDeadByDefault)
             {
-                if (m_corpseDecayTimer <= update_diff)
+                if (m_corpseDecayTimer <= diff)
                 {
                     RemoveCorpse();
                     break;
                 }
-                m_corpseDecayTimer -= update_diff;
+                else
+                    m_corpseDecayTimer -= diff;
             }
 
-            Unit::Update(update_diff, diff);
+            Unit::Update(diff);
 
             // Creature can be dead after unit update
             if (isAlive())
-                RegenerateAll(update_diff);
+                RegenerateAll(diff);
 
             break;
         }

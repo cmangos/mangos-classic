@@ -633,31 +633,9 @@ class WorldObject : public Object
         friend struct WorldObjectChangeAccumulator;
 
     public:
-
-        // class is used to manipulate with WorldUpdateCounter
-        // it is needed in order to get time diff between two object's Update() calls
-        class UpdateHelper
-        {
-            public:
-                explicit UpdateHelper(WorldObject* obj) : m_obj(obj) {}
-                ~UpdateHelper() { }
-
-                void Update(uint32 time_diff)
-                {
-                    m_obj->Update(m_obj->m_updateTracker.timeElapsed(), time_diff);
-                    m_obj->m_updateTracker.Reset();
-                }
-
-            private:
-                UpdateHelper(const UpdateHelper&);
-                UpdateHelper& operator=(const UpdateHelper&);
-
-                WorldObject* const m_obj;
-        };
-
         virtual ~WorldObject() {}
 
-        virtual void Update(uint32 /*update_diff*/, uint32 /*time_diff*/) {}
+        virtual void Update(const uint32 /*diff*/) {}
 
         void _Create(uint32 guidlow, HighGuid guidhigh);
 
@@ -911,7 +889,6 @@ class WorldObject : public Object
 
         Position m_position;
         ViewPoint m_viewPoint;
-        WorldUpdateCounter m_updateTracker;
         bool m_isActiveObject;
 };
 

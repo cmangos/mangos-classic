@@ -194,11 +194,8 @@ void MapManager::Update(uint32 diff)
     for (auto& i_map : i_maps)
         i_map.second->Update((uint32)i_timer.GetCurrent());
 
-    for (auto m_Transport : m_Transports)
-    {
-        WorldObject::UpdateHelper helper(m_Transport);
-        helper.Update((uint32)i_timer.GetCurrent());
-    }
+    for (Transport* m_Transport : m_Transports)
+        m_Transport->Update((uint32)i_timer.GetCurrent());
 
     // remove all maps which can be unloaded
     MapMapType::iterator iter = i_maps.begin();

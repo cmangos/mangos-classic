@@ -485,7 +485,7 @@ bool Transport::RemovePassenger(Player* passenger)
     return true;
 }
 
-void Transport::Update(uint32 /*update_diff*/, uint32 /*p_time*/)
+void Transport::Update(const uint32 /*diff*/)
 {
     if (m_WayPoints.size() <= 1)
         return;
