@@ -328,8 +328,19 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
             if (isSpawned())
             {
-                // traps can have time and can not have
+                // Check if all charges were consumed
                 GameObjectInfo const* goInfo = GetGOInfo();
+                if (uint32 max_charges = goInfo->GetCharges())
+                {
+                    if (m_useTimes >= max_charges)
+                    {
+                        m_useTimes = 0;
+                        SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
+                        break;
+                    }
+                }
+
+                // Handle traps cooldown
                 if (goInfo->type == GAMEOBJECT_TYPE_TRAP)   // traps
                 {
                     if (m_cooldownTime >= time(nullptr))
@@ -388,18 +399,9 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                             }
                         }
                     }
-                    
+
                     if (target && (!goInfo->trapCustom.triggerOn || !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))) // do not trigger on hostile traps if not selectable
                         Use(target);
-                }
-
-                if (uint32 max_charges = goInfo->GetCharges())
-                {
-                    if (m_useTimes >= max_charges)
-                    {
-                        m_useTimes = 0;
-                        SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
-                    }
                 }
             }
             break;
