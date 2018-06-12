@@ -338,7 +338,8 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                                 pSummoned->SetWalk(false);
                                 // The cronies should not engage anyone until their boss does so
                                 // the linking is done by DB
-                                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                                pSummoned->SetImmuneToNPC(true);
+                                pSummoned->SetImmuneToPlayer(true);
                                 // The movement toward the kegs is handled by Hurley EscortAI
                                 // and we want the cronies to follow him there
                                 pSummoned->GetMotionMaster()->MoveFollow(pHurley, 1.0f, 0);
