@@ -36,6 +36,7 @@
 #include "vmap/DynamicTree.h"
 
 #include <bitset>
+#include <functional>
 
 struct CreatureInfo;
 class Creature;
