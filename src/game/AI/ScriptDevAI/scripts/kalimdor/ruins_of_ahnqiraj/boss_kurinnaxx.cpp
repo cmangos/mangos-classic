@@ -30,7 +30,7 @@ enum
     SPELL_TRASH             = 3391,
     SPELL_WIDE_SLASH        = 25814,
     SPELL_MORTAL_WOUND      = 25646,
-    SPELL_SANDTRAP          = 25648,        // summons gameobject 180647
+    SPELL_SANDTRAP          = 26524,        // summons gameobject 180647
     SPELL_ENRAGE            = 26527,
     SPELL_SUMMON_PLAYER     = 26446,
 
@@ -65,7 +65,7 @@ struct boss_kurinnaxxAI : public ScriptedAI
     {
         if (pGo->GetEntry() == GO_SAND_TRAP)
         {
-            m_uiTrapTriggerTimer = 3000;
+            m_uiTrapTriggerTimer = 4000;
             m_sandtrapGuid = pGo->GetObjectGuid();
         }
     }
@@ -94,12 +94,8 @@ struct boss_kurinnaxxAI : public ScriptedAI
         // Sand Trap
         if (m_uiSandTrapTimer < uiDiff)
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
-            if (!pTarget)
-                pTarget = m_creature->getVictim();
-
-            pTarget->CastSpell(pTarget, SPELL_SANDTRAP, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-            m_uiSandTrapTimer = urand(10000, 15000);
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SANDTRAP) == CAST_OK)
+                m_uiSandTrapTimer = urand(10000, 15000);
         }
         else
             m_uiSandTrapTimer -= uiDiff;
