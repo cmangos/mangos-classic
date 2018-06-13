@@ -211,7 +211,7 @@ namespace MaNGOS
         m_writeState = WriteState::Buffering;
 
         std::shared_ptr<Socket> ptr = shared<Socket>();
-        m_outBufferFlushTimer.expires_from_now(boost::posix_time::milliseconds(BufferTimeout));
+        m_outBufferFlushTimer.expires_from_now(boost::posix_time::milliseconds(int(BufferTimeout)));
         m_outBufferFlushTimer.async_wait([ptr](const boost::system::error_code & error) { ptr->FlushOut(); });
     }
 
