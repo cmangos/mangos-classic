@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 17,
+    MAX_ENCOUNTER               = 19,
     MAX_GENERATORS              = 5,
 
     // East
@@ -31,9 +31,11 @@ enum
     TYPE_FENGUS                 = 13,
     TYPE_SLIPKIK                = 14,
     TYPE_KROMCRUSH              = 15,
+    TYPE_CHORUSH                = 16,
+    TYPE_STOMPER_KREEG          = 17,
 
     // Other
-    TYPE_DREADSTEED             = 16,
+    TYPE_DREADSTEED             = 18,
 
     // East
     GO_CRUMBLE_WALL             = 177220,
