@@ -16,37 +16,25 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _AUTH_HMACSHA1_H
-#define _AUTH_HMACSHA1_H
+#ifndef _WARDEN_MAC_H
+#define _WARDEN_MAC_H
 
-#include "Common.h"
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+#include "Warden.h"
 
-class BigNumber;
+class WorldSession;
 
-#define SEED_KEY_SIZE 16
-
-class HMACSHA1
+class WardenMac : public Warden
 {
     public:
-        HMACSHA1(uint32 len, uint8* seed);
-        HMACSHA1(uint32 len, uint8* seed, bool);
-        ~HMACSHA1();
-        void UpdateBigNumber(BigNumber* bn);
-        void UpdateData(const uint8* data, int length);
-        void UpdateData(const std::string &str);
-        void Initialize();
-        void Finalize();
-        uint8* GetDigest() { return m_digest; };
-        static int GetLength() { return SHA_DIGEST_LENGTH; };
-    private:
-#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
-        HMAC_CTX* m_ctx;
-#else
-        HMAC_CTX m_ctx;
-#endif
-        uint8 m_key[SEED_KEY_SIZE];
-        uint8 m_digest[SHA_DIGEST_LENGTH];
+        WardenMac();
+        ~WardenMac();
+
+        void Init(WorldSession* session, BigNumber* k) override;
+        ClientWardenModule* GetModuleForClient() override;
+        void InitializeModule() override;
+        void HandleHashResult(ByteBuffer& buff) override;
+        void RequestData() override;
+        void HandleData(ByteBuffer& buff) override;
 };
+
 #endif

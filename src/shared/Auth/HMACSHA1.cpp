@@ -66,6 +66,10 @@ void HMACSHA1::UpdateData(const uint8* data, int length)
 #endif
 }
 
+void HMACSHA1::UpdateData(const std::string &str) {
+    UpdateData((uint8 const*)str.c_str(), str.length());
+}
+
 void HMACSHA1::Initialize()
 {
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L

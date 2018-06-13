@@ -65,7 +65,7 @@ enum LogType
 const int LogType_count = int(LogError) + 1;
 
 Log::Log() :
-    raLogfile(nullptr), logfile(nullptr), gmLogfile(nullptr), charLogfile(nullptr), customLogFile(nullptr),
+    raLogfile(nullptr), logfile(nullptr), gmLogfile(nullptr), charLogfile(nullptr), customLogFile(nullptr), wardenLogFile(nullptr),
     dberLogfile(nullptr), eventAiErLogfile(nullptr), scriptErrLogFile(nullptr), worldLogfile(nullptr), m_colored(false), m_includeTime(false), m_gmlog_per_account(false), m_scriptLibName(nullptr)
 {
     Initialize();
@@ -266,6 +266,7 @@ void Log::Initialize()
     raLogfile = openLogFile("RaLogFile", nullptr, "a");
     worldLogfile = openLogFile("WorldLogFile", "WorldLogTimestamp", "a");
     customLogFile = openLogFile("CustomLogFile", nullptr, "a");
+    wardenLogFile = openLogFile("WardenLogFile", nullptr, "a");
 
     // Main log file settings
     m_includeTime  = sConfig.GetBoolDefault("LogTime", false);
@@ -961,6 +962,26 @@ void Log::outCustomLog(const char* str, ...)
         fprintf(customLogFile, "\n");
         va_end(ap);
         fflush(customLogFile);
+    }
+
+    fflush(stdout);
+}
+
+void Log::outWardenLog(const char* str, ...)
+{
+    if (!str)
+        return;
+
+    std::lock_guard<std::mutex> guard(m_worldLogMtx);
+    if (wardenLogFile)
+    {
+        va_list ap;
+        outTimestamp(wardenLogFile);
+        va_start(ap, str);
+        vfprintf(wardenLogFile, str, ap);
+        fprintf(wardenLogFile, "\n");
+        va_end(ap);
+        fflush(wardenLogFile);
     }
 
     fflush(stdout);

@@ -30,6 +30,9 @@ set(SRC_GRP_AUTH
     Auth/Sha1.h
     Auth/base32.cpp
     Auth/base32.h
+    Auth/ARC4.cpp
+    Auth/ARC4.h
+    Auth/WardenKeyGen.h
 )
 
 set(SRC_GRP_CONFIG

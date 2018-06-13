@@ -244,6 +244,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     std::string account;
     Sha1Hash sha1;
     BigNumber v, s, g, N, K;
+    std::string os;
     WorldPacket packet, SendAddonPacked;
 
     // Read the content of the packet
@@ -285,7 +286,8 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
                              "v, "                       //5
                              "s, "                       //6
                              "mutetime, "                //7
-                             "locale "                   //8
+                             "locale, "                  //8
+                             "os "                       //9
                              "FROM account "
                              "WHERE username = '%s'",
                              safe_account.c_str());
@@ -351,6 +353,8 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     else
         locale = LocaleConstant(tempLoc);
 
+    os = fields[9].GetString();
+
     delete result;
 
     // Re-check account ban (same check as in realmd)
@@ -383,6 +387,19 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         SendPacket(packet);
 
         BASIC_LOG("WorldSocket::HandleAuthSession: User tries to login but his security level is not enough");
+        return false;
+    }
+
+    bool wardenActive = (sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED) || sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED));
+
+    // Must be done before WorldSession is created
+    if (wardenActive && os != "Win" && os != "OSX") {
+        WorldPacket Packet(SMSG_AUTH_RESPONSE, 1);
+        Packet << uint8(AUTH_REJECT);
+
+        SendPacket(packet);
+
+        BASIC_LOG("WorldSocket::HandleAuthSession: Client %s attempted to log in using invalid client OS (%s).", GetRemoteAddress().c_str(), os.c_str());
         return false;
     }
 
@@ -427,6 +444,10 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     m_crypt.Init(&K);
 
     m_session->LoadTutorialsData();
+
+    // Initialize Warden system only if it is enabled by config
+    if (wardenActive)
+        m_session->InitWarden(uint16(ClientBuild), &K, os);
 
     sWorld.AddSession(m_session);
 

@@ -133,6 +133,10 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, std::m
             if (customLogFile != nullptr)
                 fclose(customLogFile);
             customLogFile = nullptr;
+
+            if (wardenLogFile != nullptr)
+                fclose(wardenLogFile);
+            wardenLogFile = nullptr;
         }
     public:
         void Initialize();
@@ -170,6 +174,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, std::m
         void outCharDump(const char* str, uint32 account_id, uint32 guid, const char* name);
         void outRALog(const char* str, ...)       ATTR_PRINTF(2, 3);
         void outCustomLog(const char* str, ...)       ATTR_PRINTF(2, 3);
+        void outWardenLog(const char* str, ...)       ATTR_PRINTF(2, 3);
         uint32 GetLogLevel() const { return m_logLevel; }
         void SetLogLevel(char* Level);
         void SetLogFileLevel(char* Level);
@@ -202,6 +207,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, std::m
         FILE* scriptErrLogFile;
         FILE* worldLogfile;
         FILE* customLogFile;
+        FILE* wardenLogFile;
         std::mutex m_worldLogMtx;
 
         // log/console control

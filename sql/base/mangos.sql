@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2719_01_mangos_taxi_system_update` bit(1) DEFAULT NULL
+  `required_z2720_01_mangos_warden_system` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -13591,6 +13591,34 @@ CREATE TABLE `transports` (
 LOCK TABLES `transports` WRITE;
 /*!40000 ALTER TABLE `transports` DISABLE KEYS */;
 /*!40000 ALTER TABLE `transports` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `warden`
+--
+
+DROP TABLE IF EXISTS `warden`;
+CREATE TABLE `warden` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Check ID from warden_checks',
+  `groupid` smallint(5) unsigned NOT NULL COMMENT 'The Grouping ID of the warden_checks',
+  `build` smallint(5) unsigned NOT NULL COMMENT 'Client build',
+  `type` tinyint(3) unsigned DEFAULT NULL COMMENT 'Check Type',
+  `data` varchar(48) NOT NULL DEFAULT '',
+  `str` varchar(20) NOT NULL DEFAULT '',
+  `address` int(10) unsigned NOT NULL DEFAULT '0',
+  `length` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `result` varchar(24) NOT NULL DEFAULT '',
+  `comment` varchar(50) DEFAULT '' COMMENT 'Description of what the check is',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1571 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `warden`
+--
+
+LOCK TABLES `warden` WRITE;
+/*!40000 ALTER TABLE `warden` DISABLE KEYS */;
+/*!40000 ALTER TABLE `warden` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

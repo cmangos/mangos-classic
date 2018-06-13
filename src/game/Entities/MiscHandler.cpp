@@ -937,16 +937,6 @@ void WorldSession::HandleSetActionBarTogglesOpcode(WorldPacket& recv_data)
     GetPlayer()->SetByteValue(PLAYER_FIELD_BYTES, 2, ActionBar);
 }
 
-void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
-{
-    recv_data.read_skip<uint8>();
-    /*
-        uint8 tmp;
-        recv_data >> tmp;
-        DEBUG_LOG("Received opcode CMSG_WARDEN_DATA, not resolve.uint8 = %u", tmp);
-    */
-}
-
 void WorldSession::HandlePlayedTime(WorldPacket& /*recv_data*/)
 {
     WorldPacket data(SMSG_PLAYED_TIME, 4 + 4);

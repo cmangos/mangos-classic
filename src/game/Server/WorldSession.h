@@ -26,9 +26,9 @@
 #include "Common.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/ObjectGuid.h"
+#include "Server/WorldSocket.h"
 #include "AuctionHouse/AuctionHouseMgr.h"
 #include "Entities/Item.h"
-#include "Server/WorldSocket.h"
 
 #include <deque>
 #include <mutex>
@@ -45,6 +45,7 @@ class Item;
 class Object;
 class Player;
 class Unit;
+class Warden;
 class WorldPacket;
 class QueryResult;
 class LoginQueryHolder;
@@ -156,6 +157,9 @@ class WorldSession
         const std::string GetRemoteAddress() const { return m_Socket->GetRemoteAddress(); }
 #endif
         void SetPlayer(Player* plr) { _player = plr; }
+
+        // Warden
+        void InitWarden(uint16 build, BigNumber* k, std::string const& os);
 
         /// Session in auth.queue currently
         void SetInQueue(bool state) { m_inQueue = state; }
@@ -650,6 +654,9 @@ class WorldSession
 
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
+        // for Warden
+        uint16 GetClientBuild() const { return _build; }
+
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);
@@ -669,6 +676,10 @@ class WorldSession
 
         AccountTypes _security;
         uint32 _accountId;
+
+        // Warden
+        Warden* _warden;                                    // Remains NULL if Warden system is not enabled by config
+        uint16 _build;
 
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue

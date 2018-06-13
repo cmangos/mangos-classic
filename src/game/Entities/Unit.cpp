@@ -10689,7 +10689,7 @@ void Unit::Uncharm(Unit* charmed)
                     else
                     {
                         charmedCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
-                        sLog.outError("Charmed/possessed creature entry %u attacked its owner and set combat start position. Recheck flags, possibly should despawn on evade.");
+                        sLog.outError("Charmed/possessed creature entry attacked its owner and set combat start position. Recheck flags, possibly should despawn on evade.");
                     }
                     charmed->getThreatManager().addThreat(this, GetMaxHealth());     // generating threat by max life amount best way i found to make it realistic
                 }
