@@ -45,6 +45,8 @@ enum
     SPELL_TELEPORT_TARGET    = 20534,                       // Teleport Victim
     SPELL_IMMUNE_POLY        = 21087,                       // Cast onto Flamewaker Healers when half the adds are dead
     SPELL_SEPARATION_ANXIETY = 21094,                       // Aura cast on himself by Majordomo Executus, if adds move out of range, they will cast spell 21095 on themselves
+    SPELL_ENCOURAGEMENT      = 21086,                       // Cast onto all remaining adds every time one is killed
+    SPELL_CHAMPION           = 21090,                       // Cast onto the last remaining add
 
     // Ragnaros summoning event
     GOSSIP_ITEM_SUMMON_1     = -3409000,
@@ -220,16 +222,22 @@ struct boss_majordomoAI : public ScriptedAI
             if (m_uiAddsKilled >= MAX_MAJORDOMO_ADDS / 2)
                 DoCastSpellIfCan(m_creature, SPELL_IMMUNE_POLY);
 
-            // Yell if only one Add alive
+            // Yell if only one add is alive and buff it
             if (m_uiAddsKilled == m_luiMajordomoAddsGUIDs.size() - 1)
+            {
                 DoScriptText(SAY_LAST_ADD, m_creature);
-
+                DoCastSpellIfCan(m_creature, SPELL_CHAMPION);
+            }
             // All adds are killed, retreat
             else if (m_uiAddsKilled == m_luiMajordomoAddsGUIDs.size())
             {
                 m_bHasEncounterFinished = true;
                 m_creature->GetMotionMaster()->MoveTargetedHome();
+                return;
             }
+
+            // Buff the remaining adds
+            DoCastSpellIfCan(m_creature, SPELL_ENCOURAGEMENT);
         }
     }
 
