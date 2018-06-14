@@ -37,6 +37,8 @@ enum InstanceConditionIDs                                   // Suggested values 
     INSTANCE_CONDITION_ID_HARD_MODE_2       = 2,
     INSTANCE_CONDITION_ID_HARD_MODE_3       = 3,
     INSTANCE_CONDITION_ID_HARD_MODE_4       = 4,
+    INSTANCE_CONDITION_ID_HARD_MODE_5       = 5,
+    INSTANCE_CONDITION_ID_HARD_MODE_6       = 6,
 
     // to check for which team the instance is doing scripts
     INSTANCE_CONDITION_ID_TEAM_HORDE        = 67,

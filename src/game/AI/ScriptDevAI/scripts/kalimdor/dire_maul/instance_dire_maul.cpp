@@ -316,6 +316,8 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
         case TYPE_FENGUS:
         case TYPE_SLIPKIK:
         case TYPE_KROMCRUSH:
+        case TYPE_CHORUSH:
+        case TYPE_STOMPER_KREEG:
             m_auiEncounter[uiType] = uiData;
             break;
     }
@@ -330,7 +332,8 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                       << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
                       << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11] << " "
                       << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14] << " "
-                      << m_auiEncounter[15] << " " << m_auiEncounter[16];
+                      << m_auiEncounter[15] << " " << m_auiEncounter[16] << " " << m_auiEncounter[17] << " "
+                      << m_auiEncounter[18];
 
         m_strInstData = saveStream.str();
 
@@ -409,6 +412,12 @@ void instance_dire_maul::OnCreatureDeath(Creature* pCreature)
         case NPC_CAPTAIN_KROMCRUSH:
             SetData(TYPE_KROMCRUSH, DONE);
             break;
+        case NPC_CHORUSH:
+            SetData(TYPE_CHORUSH, DONE);
+            break;
+        case NPC_STOMPER_KREEG:
+            SetData(TYPE_STOMPER_KREEG, DONE);
+            break;
     }
 }
 
@@ -428,7 +437,8 @@ void instance_dire_maul::Load(const char* chrIn)
                m_auiEncounter[6] >> m_auiEncounter[7] >> m_auiEncounter[8] >>
                m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11] >>
                m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >>
-               m_auiEncounter[15] >> m_auiEncounter[16];
+               m_auiEncounter[15] >> m_auiEncounter[16] >> m_auiEncounter[17] >>
+               m_auiEncounter[18];
 
     if (m_auiEncounter[TYPE_ALZZIN] >= DONE)
         m_bWallDestroyed = true;
@@ -450,10 +460,12 @@ bool instance_dire_maul::CheckConditionCriteriaMeet(Player const* pPlayer, uint3
         case INSTANCE_CONDITION_ID_HARD_MODE:               // One guard alive
         case INSTANCE_CONDITION_ID_HARD_MODE_2:             // Two guards alive
         case INSTANCE_CONDITION_ID_HARD_MODE_3:             // Three guards alive
-        case INSTANCE_CONDITION_ID_HARD_MODE_4:             // All guards alive
+        case INSTANCE_CONDITION_ID_HARD_MODE_4:             // Four guards alive
+        case INSTANCE_CONDITION_ID_HARD_MODE_5:             // Five guards alive
+        case INSTANCE_CONDITION_ID_HARD_MODE_6:             // Six guards alive
         {
             uint8 uiTributeRunAliveBosses = (GetData(TYPE_MOLDAR) != DONE ? 1 : 0) + (GetData(TYPE_FENGUS) != DONE ? 1 : 0) + (GetData(TYPE_SLIPKIK) != DONE ? 1 : 0)
-                                            + (GetData(TYPE_KROMCRUSH) != DONE ? 1 : 0);
+                                            + (GetData(TYPE_KROMCRUSH) != DONE ? 1 : 0) + (GetData(TYPE_CHORUSH) != DONE ? 1 : 0) + (GetData(TYPE_STOMPER_KREEG) != DONE ? 1 : 0);
 
             return uiInstanceConditionId == uiTributeRunAliveBosses;
         }
