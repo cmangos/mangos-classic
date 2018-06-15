@@ -3662,24 +3662,39 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
     // non-weapon damage
     int32 bonus = spell_bonus + fixed_bonus;
 
-    // apply to non-weapon bonus weapon total pct effect, weapon total flat effect included in weapon damage
-    if (bonus)
+    bool addDamage = false; // hack in place until effect handler is split up
+    switch (m_spellInfo->DmgClass)
     {
-        UnitMods unitMod;
-        switch (m_attackType)
-        {
-            default:
-            case BASE_ATTACK:   unitMod = UNIT_MOD_DAMAGE_MAINHAND; break;
-            case OFF_ATTACK:    unitMod = UNIT_MOD_DAMAGE_OFFHAND;  break;
-            case RANGED_ATTACK: unitMod = UNIT_MOD_DAMAGE_RANGED;   break;
-        }
-
-        float weapon_total_pct  = m_caster->GetModifierValue(unitMod, TOTAL_PCT);
-        bonus = int32(bonus * weapon_total_pct);
+        case SPELL_DAMAGE_CLASS_MELEE:
+        case SPELL_DAMAGE_CLASS_RANGED: addDamage = true; break;
+        case SPELL_DAMAGE_CLASS_MAGIC: break; // TODO: Add behaviour for spell behaviour
+        case SPELL_DAMAGE_CLASS_NONE: break; // do nothing
     }
 
-    // + weapon damage with applied weapon% dmg to base weapon damage in call
-    bonus += int32(m_caster->CalculateDamage(m_attackType, normalized) * weaponDamagePercentMod);
+    if (m_spellInfo->Effect[eff_idx] == SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL)
+        addDamage = true;
+
+    if (addDamage)
+    {
+        // apply to non-weapon bonus weapon total pct effect, weapon total flat effect included in weapon damage
+        if (bonus)
+        {
+            UnitMods unitMod;
+            switch (m_attackType)
+            {
+                default:
+                case BASE_ATTACK:   unitMod = UNIT_MOD_DAMAGE_MAINHAND; break;
+                case OFF_ATTACK:    unitMod = UNIT_MOD_DAMAGE_OFFHAND;  break;
+                case RANGED_ATTACK: unitMod = UNIT_MOD_DAMAGE_RANGED;   break;
+            }
+
+            float weapon_total_pct = m_caster->GetModifierValue(unitMod, TOTAL_PCT);
+            bonus = int32(bonus * weapon_total_pct);
+        }
+
+        // + weapon damage with applied weapon% dmg to base weapon damage in call
+        bonus += int32(m_caster->CalculateDamage(m_attackType, normalized) * weaponDamagePercentMod);
+    }
 
     // total damage
     bonus = int32(bonus * totalDamagePercentMod);
