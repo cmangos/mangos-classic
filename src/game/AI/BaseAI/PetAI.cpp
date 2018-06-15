@@ -341,7 +341,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
         if (owner->isInCombat() && !HasReactState(REACT_PASSIVE))
             AttackStart(owner->getAttackerForHelper());
-        else
+        else if (!owner->IsIncapacitated())
         {
             if (charmInfo && charmInfo->HasCommandState(COMMAND_STAY))
             {
@@ -370,17 +370,19 @@ void PetAI::UpdateAI(const uint32 diff)
                 else
                     m_unit->GetMotionMaster()->MovePoint(0, stayPosX, stayPosY, stayPosZ, false);
             }
-            else if (m_unit->hasUnitState(UNIT_STAT_FOLLOW))
+            else if (m_unit->hasUnitState(UNIT_STAT_FOLLOW) && owner->IsWithinDistInMap(m_unit, PET_FOLLOW_DIST))
             {
-                if (owner->IsWithinDistInMap(m_unit, PET_FOLLOW_DIST))
+                m_unit->GetMotionMaster()->Clear(false);
+                m_unit->GetMotionMaster()->MoveIdle();
+            }
+            else if (!m_unit->hasUnitState(UNIT_STAT_FOLLOW_MOVE) && !owner->IsWithinDistInMap(m_unit, (PET_FOLLOW_DIST * 2)))
+            {
+                if (charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW))
                 {
                     m_unit->GetMotionMaster()->Clear(false);
-                    m_unit->GetMotionMaster()->MoveIdle();
+                    m_unit->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
                 }
             }
-            else if (charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW)
-                     && !owner->IsWithinDistInMap(m_unit, (PET_FOLLOW_DIST * 2)))
-                m_unit->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
         }
     }
 }
