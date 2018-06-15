@@ -49,7 +49,7 @@ To be able to accomplish these goals, we support and promote:
 -- The C(ontinued)-MaNGOS Team!
 
 ## ScriptDev2
-  ScriptDev2 is a script library, an extention of the scripting capabilities
+  ScriptDev2 is a script library, an extension of the scripting capabilities
   that comes with cMaNGOS ( http://cmangos.net/ ), written in C++ and is
   compatible with Windows and Linux. SQL needed for database support both
   MySQL and PostgreSQL.
