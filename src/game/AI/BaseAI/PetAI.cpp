@@ -335,15 +335,18 @@ void PetAI::UpdateAI(const uint32 diff)
         else if (!m_unit->hasUnitState(UNIT_STAT_MOVING))
             AttackStart(victim);
     }
-    else
+    else if (!owner->IsIncapacitated())
     {
         CharmInfo* charmInfo = m_unit->GetCharmInfo();
 
-        if (owner->isInCombat() && !HasReactState(REACT_PASSIVE))
+        const bool staying = (charmInfo && charmInfo->HasCommandState(COMMAND_STAY));
+        const bool following = (!staying && charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW));
+
+        if (owner->isInCombat() && !HasReactState(REACT_PASSIVE) && !staying)
             AttackStart(owner->getAttackerForHelper());
-        else if (!owner->IsIncapacitated())
+        else
         {
-            if (charmInfo && charmInfo->HasCommandState(COMMAND_STAY))
+            if (staying)
             {
                 //if stay command is set but we don't have stay pos set then we need to establish current pos as stay position
                 if (!charminfo->IsStayPosSet())
@@ -353,9 +356,9 @@ void PetAI::UpdateAI(const uint32 diff)
                 float stayPosY = charminfo->GetStayPosY();
                 float stayPosZ = charminfo->GetStayPosZ();
 
-                if (m_unit->GetPositionX() == stayPosX
-                        && m_unit->GetPositionY() == stayPosY
-                        && m_unit->GetPositionZ() == stayPosZ)
+                if (int32(m_unit->GetPositionX()) == int32(stayPosX)
+                        && int32(m_unit->GetPositionY()) == int32(stayPosY)
+                        && int32(m_unit->GetPositionZ()) == int32(stayPosZ))
                 {
                     float StayPosO = charminfo->GetStayPosO();
 
@@ -364,7 +367,7 @@ void PetAI::UpdateAI(const uint32 diff)
                         m_unit->GetMotionMaster()->Clear(false);
                         m_unit->GetMotionMaster()->MoveIdle();
                     }
-                    else if (m_unit->GetOrientation() != StayPosO)
+                    else if (int32(m_unit->GetOrientation()) != int32(StayPosO))
                         m_unit->SetOrientation(StayPosO);
                 }
                 else
@@ -377,7 +380,7 @@ void PetAI::UpdateAI(const uint32 diff)
             }
             else if (!m_unit->hasUnitState(UNIT_STAT_FOLLOW_MOVE) && !owner->IsWithinDistInMap(m_unit, (PET_FOLLOW_DIST * 2)))
             {
-                if (charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW))
+                if (following)
                 {
                     m_unit->GetMotionMaster()->Clear(false);
                     m_unit->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
