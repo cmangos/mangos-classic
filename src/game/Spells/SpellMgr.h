@@ -364,6 +364,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
     switch (spellInfo->Id)
     {
         case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
+        case 22735:         // Spirit of Runn Tum
             return false;
         default:
             return true;
