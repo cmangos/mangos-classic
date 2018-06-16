@@ -1123,7 +1123,7 @@ bool Unit::IsFogOfWarVisibleStats(Unit const* other) const
 
     switch (sWorld.getConfig(CONFIG_UINT32_FOGOFWAR_STATS))
     {
-        default: return (this == other || other->GetSummonerGuid() == GetObjectGuid());
+        default: return (this == other || GetSummonerGuid() == other->GetObjectGuid());
         case 1:  return CanCooperate(other);
         case 2:  return true;
     }
