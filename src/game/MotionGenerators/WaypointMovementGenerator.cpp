@@ -372,6 +372,8 @@ bool FlightPathMovementGenerator::Update(Player& player, const uint32& /*diff*/)
     // We are waiting for spline to complete at this point
     if (movement)
         return true;
+    else if (player.IsMounted())
+        player.OnTaxiFlightSplineEnd();
 
     // Load and execute the spline
     if (player.OnTaxiFlightSplineUpdate())
