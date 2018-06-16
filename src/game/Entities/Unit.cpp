@@ -7170,8 +7170,27 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
-    if (HasCharmer() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
+    if (HasCharmer() || !GetOwnerGuid().IsEmpty())
+    {
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+        if (enemy)
+        {
+            Unit* controller = HasCharmer() ? GetCharmer() : GetOwner();
+            if (controller)
+            {
+                if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                    controller->SetInCombatWith(enemy); // player only enters combat
+                else if (controller->isInCombat())
+                {
+                    controller->AddThreat(enemy);
+                    enemy->AddThreat(controller);
+                    enemy->SetInCombatWith(controller);
+                }
+                else
+                    controller->AI()->AttackStart(enemy);
+            }
+        }
+    }
 
     // interrupt all delayed non-combat casts
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)

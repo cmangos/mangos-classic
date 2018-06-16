@@ -259,8 +259,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     return;
             }
 
-            _player->SetInCombatState(true, unit_target);
-
             petUnit->clearUnitState(UNIT_STAT_MOVING);
 
             uint32 flags = TRIGGERED_NONE;
