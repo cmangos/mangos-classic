@@ -1372,8 +1372,8 @@ class Unit : public WorldObject
 
         bool IsCivilianForTarget(Unit const* pov) const;
 
-        bool IsInGroup(Unit const* other, bool party = false) const;
-        bool IsInParty(Unit const* other) const { return IsInGroup(other, true); }
+        bool IsInGroup(Unit const* other, bool party = false, bool UI = false) const;
+        bool IsInParty(Unit const* other, bool UI = false) const { return IsInGroup(other, true, UI); }
 
         // extensions of CanAttack and CanAssist API needed serverside
         virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const override;
