@@ -480,6 +480,13 @@ void MotionMaster::Mutate(MovementGenerator* m)
     push(m);
 }
 
+void MotionMaster::InterruptFlee()
+{
+    if (!empty())
+        if (top()->GetMovementGeneratorType() == TIMED_FLEEING_MOTION_TYPE)
+            MovementExpired(false);
+}
+
 void MotionMaster::propagateSpeedChange()
 {
     Impl::container_type::iterator it = Impl::c.begin();

@@ -714,7 +714,7 @@ void Creature::RegenerateHealth()
     ModifyHealth(addvalue);
 }
 
-void Creature::DoFleeToGetAssistance()
+void Creature::DoFleeToGetAssistance() // TODO: split this into flee and assistance
 {
     if (!getVictim())
         return;

@@ -55,6 +55,7 @@ class TimedFleeingMovementGenerator
 
         MovementGeneratorType GetMovementGeneratorType() const override { return TIMED_FLEEING_MOTION_TYPE; }
         bool Update(Unit&, const uint32&) override;
+        void Interrupt(Unit&) override;
         void Finalize(Unit&) override;
 
     private:

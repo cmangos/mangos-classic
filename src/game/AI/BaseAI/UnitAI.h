@@ -110,6 +110,14 @@ enum ReactStates
     REACT_AGGRESSIVE = 2
 };
 
+enum AIOrders
+{
+    ORDER_NONE,
+    ORDER_DISTANCING,
+    ORDER_FLEEING,
+    ORDER_CUSTOM,
+};
+
 class UnitAI
 {
     public:
@@ -401,6 +409,8 @@ class UnitAI
          */
         virtual void OnChannelStateChange(SpellEntry const* spellInfo, bool state, WorldObject* target = nullptr);
 
+        virtual void TimedFleeingEnded();
+
         void CheckForHelp(Unit* /*who*/, Unit* /*me*/, float /*dist*/);
         void DetectOrAttack(Unit* who);
         bool CanTriggerStealthAlert(Unit* who, float attackRadius) const;
@@ -424,6 +434,14 @@ class UnitAI
         virtual bool CanExecuteCombatAction();
         void SetCombatScriptStatus(bool state) { m_combatScriptHappening = state; };
         bool GetCombatScriptStatus() const { return m_combatScriptHappening; }
+
+        void SetAIOrder(AIOrders order) { m_currentAIOrder = order; }
+        AIOrders GetAIOrder() const { return m_currentAIOrder; }
+
+        void DoFlee();
+        void DoDistance(); // TODO
+        void DoCallForHelp(); // TODO
+        void DoSeekAssistance(); // TODO
 
         void SetMeleeEnabled(bool state);
 
@@ -458,6 +476,7 @@ class UnitAI
         ReactStates m_reactState;
 
         bool m_combatScriptHappening;                    // disables normal combat functions without leaving combat
+        AIOrders m_currentAIOrder;
 };
 
 struct SelectableAI : public FactoryHolder<UnitAI>, public Permissible<Creature>

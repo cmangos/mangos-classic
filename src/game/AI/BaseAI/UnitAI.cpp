@@ -231,7 +231,7 @@ void UnitAI::AttackStart(Unit* who)
 
 bool UnitAI::DoMeleeAttackIfReady() const
 {
-    return m_unit->hasUnitState(UNIT_STAT_MELEE_ATTACKING) && m_unit->UpdateMeleeAttackingState();
+    return m_unit->hasUnitState(UNIT_STAT_MELEE_ATTACKING) && GetAIOrder() == ORDER_NONE && m_unit->UpdateMeleeAttackingState();
 }
 
 void UnitAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=false*/)
@@ -374,6 +374,8 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
             if (me->CanAssistInCombatAgainst(who, victim))
             {
                 AttackStart(victim);
+                if (who->AI() && who->AI()->GetAIOrder() == ORDER_FLEEING)
+                    who->GetMotionMaster()->InterruptFlee();
             }
         }
     }
@@ -565,4 +567,22 @@ void UnitAI::DoStartMovement(Unit* victim)
 {
     if (victim)
         m_unit->GetMotionMaster()->MoveChase(victim, m_attackDistance, m_attackAngle, m_moveFurther, !m_chaseRun);
+}
+
+void UnitAI::TimedFleeingEnded()
+{
+    SetAIOrder(ORDER_NONE);
+    SetCombatScriptStatus(false);
+    DoStartMovement(m_unit->getVictim());
+}
+
+void UnitAI::DoFlee()
+{
+    Unit* victim = m_unit->getVictim();
+    if (!victim)
+        return;
+
+    SetAIOrder(ORDER_FLEEING);
+    SetCombatScriptStatus(true);
+    m_unit->SetFeared(true, victim->GetObjectGuid(), 0, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
 }

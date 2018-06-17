@@ -127,6 +127,8 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void SetPathId(uint32 pathId) { m_defaultPathId = pathId; }
         uint32 GetPathId() const { return m_defaultPathId; }
 
+        void InterruptFlee();
+
     private:
         void Mutate(MovementGenerator* m);                  // use Move* functions instead
 
