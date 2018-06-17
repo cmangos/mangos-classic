@@ -399,7 +399,7 @@ bool Tracker::Trim(Route& first, Route& second)
         // Linear complexity for better performance
         const TaxiPathNodeEntry* last1 = nullptr;
         const TaxiPathNodeEntry* last2 = nullptr;
-        const double refdistsq = double(64.0f * 64.0f);
+        const double refdistsq = double(48.0f * 48.0f);
         auto i1 = (waypoints1.rbegin() + lengthLanding);
         auto i2 = (waypoints2.begin() + lengthTakeoff);
         for (; (i1 != waypoints1.rend() && i2 != waypoints2.end()); (++i1, ++i2))
