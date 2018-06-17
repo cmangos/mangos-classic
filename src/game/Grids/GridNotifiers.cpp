@@ -224,7 +224,7 @@ bool MaNGOS::AnyAssistCreatureInRangeCheck::operator()(Creature* u)
     if (u == i_funit)
         return false;
 
-    if (!u->CanAssist(i_funit) || !u->CanAttack(i_enemy))
+    if (!u->CanAssistInCombatAgainst(i_funit, i_enemy))
         return false;
 
     // too far

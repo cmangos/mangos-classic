@@ -371,17 +371,9 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
     {
         if (me->IsWithinDistInMap(who, distance) && me->IsWithinLOSInMap(who))
         {
-            if (!me->getVictim())
+            if (me->CanAssistInCombatAgainst(who, victim))
             {
-                if (me->GetMap()->Instanceable()) // Instanceable case ignore family/faction checks
-                    AttackStart(victim);
-                else // In non-instanceable creature must belong to same family and faction to attack player.
-                {
-                    if (me->GetTypeId() == TYPEID_UNIT && who->GetTypeId() == TYPEID_UNIT
-                            && me->getFaction() == who->getFaction()
-                            && static_cast<Creature*>(me)->GetCreatureInfo()->Family == static_cast<Creature*>(who)->GetCreatureInfo()->Family)
-                        AttackStart(victim);
-                }
+                AttackStart(victim);
             }
         }
     }

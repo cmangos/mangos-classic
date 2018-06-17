@@ -1441,10 +1441,11 @@ class Unit : public WorldObject
         bool IsInParty(Unit const* other, bool UI = false) const { return IsInGroup(other, true, UI); }
 
         // extensions of CanAttack and CanAssist API needed serverside
-        virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const override;
-        virtual bool CanAssistSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const override;
+        virtual bool CanAttackSpell(Unit const* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const override;
+        virtual bool CanAssistSpell(Unit const* target, SpellEntry const* spellInfo = nullptr) const override;
 
-        virtual bool CanAttackOnSight(Unit* target); // Used in MoveInLineOfSight checks
+        bool CanAttackOnSight(Unit const* target) const; // Used in MoveInLineOfSight checks
+        bool CanAssistInCombatAgainst(Unit const* who, Unit const* enemy) const;
 
         // Serverside fog of war settings
         bool IsFogOfWarVisibleStealth(Unit const* other) const;
