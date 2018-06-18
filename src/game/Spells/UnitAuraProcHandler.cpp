@@ -1199,9 +1199,9 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                         basepoints[EFFECT_INDEX_0] ? &basepoints[EFFECT_INDEX_0] : nullptr,
                         basepoints[EFFECT_INDEX_1] ? &basepoints[EFFECT_INDEX_1] : nullptr,
                         basepoints[EFFECT_INDEX_2] ? &basepoints[EFFECT_INDEX_2] : nullptr,
-                        TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
+                        TRIGGERED_OLD_TRIGGERED | TRIGGERED_INSTANT_CAST, castItem, triggeredByAura);
     else
-        CastSpell(target, triggerEntry, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
+        CastSpell(target, triggerEntry, TRIGGERED_OLD_TRIGGERED | TRIGGERED_INSTANT_CAST, castItem, triggeredByAura);
 
     if (cooldown)
         AddCooldown(*triggerEntry, nullptr, false, cooldown * IN_MILLISECONDS);

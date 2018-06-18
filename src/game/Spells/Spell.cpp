@@ -382,6 +382,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
 
     m_ignoreHitResult = !!(triggeredFlags & TRIGGERED_IGNORE_HIT_CALCULATION);
     m_ignoreUnselectableTarget = (m_IsTriggeredSpell | !!(triggeredFlags & TRIGGERED_IGNORE_UNSELECTABLE_FLAG));
+    m_ignoreCastTime = !!(triggeredFlags & TRIGGERED_INSTANT_CAST);
     m_ignoreUnattackableTarget = !!(triggeredFlags & TRIGGERED_IGNORE_UNATTACKABLE_FLAG);
     m_triggerAutorepeat = !!(triggeredFlags & TRIGGERED_AUTOREPEAT);
     m_doNotProc = triggeredFlags & TRIGGERED_DO_NOT_PROC;
@@ -2836,8 +2837,9 @@ void Spell::Prepare()
     prepareDataForTriggerSystem();
 
     // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
-    m_casttime = GetSpellCastTime(m_spellInfo, this);
+    if (!m_ignoreCastTime)
         m_casttime = GetSpellCastTime(m_spellInfo, this);
+
     m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
     // set timer base at cast time
