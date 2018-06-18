@@ -271,7 +271,7 @@ class Map : public GridRefManager<NGridType>
         // Dynamic VMaps
         float GetHeight(float x, float y, float z) const;
         bool GetHeightInRange(float x, float y, float& z, float maxSearchDist = 4.0f) const;
-        bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2) const;
+        bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreM2Model) const;
         bool GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, float modifyDist) const;
 
         // Object Model insertion/remove/test for dynamic vmaps use

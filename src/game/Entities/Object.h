@@ -77,6 +77,14 @@ enum PlayPacketSettings
     PLAY_AREA,
 };
 
+enum DistanceCalculation
+{
+    DIST_CALC_NONE,
+    DIST_CALC_BOUNDING_RADIUS,
+    DIST_CALC_COMBAT_REACH,
+    DIST_CALC_COMBAT_REACH_WITH_MELEE,
+};
+
 struct PlayPacketParameters
 {
     PlayPacketParameters(PlayPacketSettings setting) : setting(setting) {}
@@ -709,11 +717,18 @@ class WorldObject : public Object
         virtual float GetObjectBoundingRadius() const { return DEFAULT_WORLD_OBJECT_SIZE; }
         virtual float GetCombatReach() const { return 0.f; }
         float GetCombinedCombatReach(WorldObject const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;
+        float GetCombinedCombatReach(bool forMeleeRange = true, float flat_mod = 0.0f) const;
 
         bool IsPositionValid() const;
         void UpdateGroundPositionZ(float x, float y, float& z) const;
         void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const;
 
+        void MovePositionToFirstCollision(WorldLocation &pos, float dist, float angle);
+        void GetFirstCollisionPosition(WorldLocation &pos, float dist, float angle)
+        {
+            GetPosition(pos);
+            MovePositionToFirstCollision(pos, dist, angle);
+        }
         void GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist = 0.0f, float const* ori = nullptr) const;
 
         uint32 GetMapId() const { return m_mapId; }
@@ -733,12 +748,9 @@ class WorldObject : public Object
         virtual ObjectGuid const& GetOwnerGuid() const { return GetGuidValue(OBJECT_FIELD_GUID); }
         virtual void SetOwnerGuid(ObjectGuid /*guid*/) { }
 
-        float GetDistance(const WorldObject* obj) const;
-        float GetDistance(float x, float y, float z) const;
-        float GetDistanceNoBoundingRadius(float x, float y, float z) const;
-        float GetCombatDistance(const WorldObject* obj, bool forMeleeRange) const;
-        float GetDistance2d(const WorldObject* obj) const;
-        float GetDistance2d(float x, float y) const;
+        float GetDistance(const WorldObject* obj, bool is3D = true, DistanceCalculation calcdifftype = DIST_CALC_BOUNDING_RADIUS) const;
+        float GetDistance(float x, float y, float z, DistanceCalculation calcdifftype = DIST_CALC_BOUNDING_RADIUS) const;
+        float GetDistance2d(float x, float y, DistanceCalculation calcdifftype = DIST_CALC_BOUNDING_RADIUS) const;
         float GetDistanceZ(const WorldObject* obj) const;
         bool IsInMap(const WorldObject* obj) const
         {
@@ -767,12 +779,12 @@ class WorldObject : public Object
         {
             return obj && IsInMap(obj) && _IsWithinDist(obj, dist2compare, is3D);
         }
-        bool IsWithinLOS(float x, float y, float z) const;
-        bool IsWithinLOSInMap(const WorldObject* obj) const;
-        bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true) const;
-        bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true) const;
-        bool IsInRange2d(float x, float y, float minRange, float maxRange) const;
-        bool IsInRange3d(float x, float y, float z, float minRange, float maxRange) const;
+        bool IsWithinLOS(float x, float y, float z, bool ignoreM2Model = false) const;
+        bool IsWithinLOSInMap(const WorldObject* obj, bool ignoreM2Model = false) const;
+        bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true, DistanceCalculation calcdifftype = DIST_CALC_NONE) const;
+        bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true, bool combat = false) const;
+        bool IsInRange2d(float x, float y, float minRange, float maxRange, bool combat = false) const;
+        bool IsInRange3d(float x, float y, float z, float minRange, float maxRange, bool combat = false) const;
 
         float GetAngle(const WorldObject* obj) const;
         float GetAngle(const float x, const float y) const;

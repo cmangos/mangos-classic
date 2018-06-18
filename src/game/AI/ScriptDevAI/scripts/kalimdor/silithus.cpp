@@ -912,7 +912,7 @@ struct npc_solenorAI : public ScriptedAI
         {
             if (Unit* pUnit = m_creature->getVictim())
             {
-                if (m_creature->GetDistance2d(pUnit) > 5.0f)
+                if (m_creature->GetDistance(pUnit, false) > 5.0f)
                 {
                     if (DoCastSpellIfCan(pUnit, SPELL_DREADFUL_FRIGHT) == CAST_OK)
                         m_uiDreadfulFright_Timer = urand(15000, 20000);

@@ -881,6 +881,65 @@ namespace MaNGOS
             float i_range;
     };
 
+    class AnyFriendlyOrGroupMemberUnitInUnitRangeCheck
+    {
+        public:
+            AnyFriendlyOrGroupMemberUnitInUnitRangeCheck(Unit const* obj, Group const* group, SpellEntry const* spellInfo, float range)
+                : i_obj(obj), i_group(group), i_spellInfo(spellInfo), i_range(range) {}
+            Unit const& GetFocusObject() const { return *i_obj; }
+            bool operator()(Unit* u)
+            {
+                if (!u->isAlive() || !i_obj->IsWithinDistInMap(u, i_range) || !i_obj->CanAssistSpell(u, i_spellInfo))
+                    return false;
+
+                //if group is defined then we apply group members only filtering
+                if (i_group)
+                {
+                    switch (u->GetTypeId())
+                    {
+                        case TYPEID_PLAYER:
+                        {
+                            if (i_group != static_cast<Player*>(u)->GetGroup())
+                                return false;
+
+                            break;
+                        }
+                        case TYPEID_UNIT:
+                        {
+                            Creature* creature = static_cast<Creature*>(u);
+
+                            //the only other possible group members besides players are pets, we exclude anyone else
+                            if (!creature->IsPet())
+                                return false;
+
+                            Group* group = nullptr;
+
+                            if (Unit* owner = creature->GetOwner(nullptr, true))
+                            {
+                                if (owner->GetTypeId() == TYPEID_PLAYER)
+                                {
+                                    group = static_cast<Player*>(owner)->GetGroup();
+                                }
+                            }
+
+                            if (i_group != group)
+                                return false;
+
+                            break;
+                        }
+                        default: return false;
+                    }
+                }
+
+                return true;
+            }
+        private:
+            Group const* i_group;
+            Unit const* i_obj;
+            SpellEntry const* i_spellInfo;
+            float i_range;
+    };
+ 
     class AnyUnitInObjectRangeCheck
     {
         public:

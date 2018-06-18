@@ -659,7 +659,7 @@ struct boss_arugalAI : public ScriptedAI
 
     inline float GetVictimDistance()
     {
-        return (m_creature->getVictim() ? m_creature->GetDistance2d(m_creature->getVictim()) : 999.9f);
+        return (m_creature->getVictim() ? m_creature->GetDistance(m_creature->getVictim(), false) : 999.9f);
     }
 
     void StopAttacking()

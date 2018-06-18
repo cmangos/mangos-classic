@@ -2425,11 +2425,13 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
 struct TargetDistanceOrderNear : public std::binary_function<Unit const, Unit const, bool>
 {
     Unit const* m_mainTarget;
-    TargetDistanceOrderNear(Unit const* target) : m_mainTarget(target) {}
+    DistanceCalculation m_distcalc;
+
+    TargetDistanceOrderNear(Unit const* target, DistanceCalculation distcalc = DIST_CALC_NONE) : m_mainTarget(target), m_distcalc(distcalc) {}
     // functor for operator ">"
     bool operator()(Unit const* _Left, Unit const* _Right) const
     {
-        return m_mainTarget->GetDistanceOrder(_Left, _Right);
+        return m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc);
     }
 };
 
@@ -2438,23 +2440,26 @@ struct TargetDistanceOrderNear : public std::binary_function<Unit const, Unit co
 struct TargetDistanceOrderFarAway : public std::binary_function<Unit const, Unit const, bool>
 {
     Unit const* m_mainTarget;
-    TargetDistanceOrderFarAway(Unit const* target) : m_mainTarget(target) {}
+    DistanceCalculation m_distcalc;
+    TargetDistanceOrderFarAway(Unit const* target, DistanceCalculation distcalc = DIST_CALC_NONE) : m_mainTarget(target), m_distcalc(distcalc) {}
     // functor for operator "<"
     bool operator()(Unit const* _Left, Unit const* _Right) const
     {
-        return !m_mainTarget->GetDistanceOrder(_Left, _Right);
+        return !m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc);
     }
 };
 
 struct LowestHPNearestOrder : public std::binary_function<Unit const, Unit const, bool>
 {
     Unit const* m_mainTarget;
-    LowestHPNearestOrder(Unit const* target) : m_mainTarget(target) {}
+    DistanceCalculation m_distcalc;
+
+    LowestHPNearestOrder(Unit const* target, DistanceCalculation distcalc = DIST_CALC_NONE) : m_mainTarget(target), m_distcalc(distcalc) {}
     // functor for operator ">"
     bool operator()(Unit const* _Left, Unit const* _Right) const
     {
         if (_Left->GetHealthPercent() == _Right->GetHealthPercent())
-            return m_mainTarget->GetDistanceOrder(_Left, _Right);
+            return m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc);
         else
             return _Left->GetHealthPercent() < _Right->GetHealthPercent();
     }

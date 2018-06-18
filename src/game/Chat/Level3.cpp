@@ -3430,7 +3430,7 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
     dy = player->GetPositionY() - obj->GetPositionY();
     dz = player->GetPositionZ() - obj->GetPositionZ();
 
-    PSendSysMessage(LANG_DISTANCE, player->GetDistance(obj), player->GetDistance2d(obj), sqrt(dx * dx + dy * dy + dz * dz));
+    PSendSysMessage(LANG_DISTANCE, player->GetDistance(obj), player->GetDistance(obj, false), sqrt(dx * dx + dy * dy + dz * dz));
 
     return true;
 }

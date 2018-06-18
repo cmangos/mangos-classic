@@ -717,7 +717,7 @@ namespace MaNGOS
 
     struct SpellNotifierCreatureAndPlayer
     {
-        Spell::UnitList* i_data;
+        Spell::UnitList& i_data;
         Spell& i_spell;
         SpellNotifyPushType i_push_type;
         float i_radius;
@@ -734,12 +734,12 @@ namespace MaNGOS
 
         SpellNotifierCreatureAndPlayer(Spell& spell, Spell::UnitList& data, float radius, SpellNotifyPushType type,
                                        SpellTargets TargetType = SPELL_TARGETS_AOE_ATTACKABLE, WorldObject* originalCaster = nullptr)
-            : i_data(&data), i_spell(spell), i_push_type(type), i_radius(radius), i_TargetType(TargetType),
+            : i_data(data), i_spell(spell), i_push_type(type), i_radius(radius), i_TargetType(TargetType),
               i_originalCaster(originalCaster), i_castingObject(i_spell.GetCastingObject())
         {
             if (!i_originalCaster)
                 i_originalCaster = i_spell.GetAffectiveCasterObject();
-            i_playerControlled = i_originalCaster ? i_originalCaster->IsControlledByPlayer() : false;
+            i_playerControlled = i_originalCaster  ? i_originalCaster->IsControlledByPlayer() : false;
 
             switch (i_push_type)
             {
@@ -766,6 +766,7 @@ namespace MaNGOS
                     {
                         i_centerX = target->GetPositionX();
                         i_centerY = target->GetPositionY();
+                        i_centerZ = target->GetPositionZ();
                     }
                     break;
                 default:
@@ -775,8 +776,6 @@ namespace MaNGOS
 
         template<class T> inline void Visit(GridRefManager<T>&  m)
         {
-            MANGOS_ASSERT(i_data);
-
             if (!i_originalCaster || !i_castingObject)
                 return;
 
@@ -816,35 +815,32 @@ namespace MaNGOS
                 {
                     case PUSH_IN_FRONT:
                         if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F)) //should only be 180 degrees NOT 120 degrees
-                            i_data->push_back(itr->getSource());
+                            i_data.push_back(itr->getSource());
                         break;
                     case PUSH_IN_FRONT_90:
                         if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 2))
-                            i_data->push_back(itr->getSource());
+                            i_data.push_back(itr->getSource());
                         break;
                     case PUSH_IN_FRONT_60:
                         if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 3))
-                            i_data->push_back(itr->getSource());
+                            i_data.push_back(itr->getSource());
                         break;
                     case PUSH_IN_FRONT_15:
                         if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 12))
-                            i_data->push_back(itr->getSource());
+                            i_data.push_back(itr->getSource());
                         break;
                     case PUSH_IN_BACK_90:
                         if (i_castingObject->isInBack((Unit*)(itr->getSource()), i_radius, M_PI_F / 2))  //only used for tail swipe in TBC afaik, and that should be 90 degrees in the back
-                            i_data->push_back(itr->getSource());
+                            i_data.push_back(itr->getSource());
                         break;
                     case PUSH_SELF_CENTER:
                         if (itr->getSource()->IsWithinDist2d(i_centerX, i_centerY, i_radius))
-                            i_data->push_back(itr->getSource());
+                            i_data.push_back(itr->getSource());
                         break;
                     case PUSH_DEST_CENTER:
-                        if (itr->getSource()->IsWithinDist3d(i_centerX, i_centerY, i_centerZ, i_radius))
-                            i_data->push_back(itr->getSource());
-                        break;
                     case PUSH_TARGET_CENTER:
-                        if (i_spell.m_targets.getUnitTarget() && i_spell.m_targets.getUnitTarget()->IsWithinDist((Unit*)(itr->getSource()), i_radius))
-                            i_data->push_back(itr->getSource());
+                        if (itr->getSource()->IsWithinDist3d(i_centerX, i_centerY, i_centerZ, i_radius))
+                            i_data.push_back(itr->getSource());
                         break;
                 }
             }

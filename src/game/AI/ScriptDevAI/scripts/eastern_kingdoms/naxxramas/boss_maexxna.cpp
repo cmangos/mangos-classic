@@ -86,7 +86,7 @@ struct npc_web_wrapAI : public ScriptedAI
 
             // NOTE: This implementation may not be 100% correct, but it gets very close to the expected result
 
-            float fDist = m_creature->GetDistance2d(pVictim);
+            float fDist = m_creature->GetDistance(pVictim, false);
             // Switch the speed multiplier based on the distance from the web wrap
             uint32 uiEffectMiscValue = 500;
             if (fDist < 25.0f)

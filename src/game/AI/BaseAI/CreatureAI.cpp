@@ -153,7 +153,7 @@ CanCastResult CreatureAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo
         if (target != m_unit)
         {
             // pTarget is out of range of this spell (also done by Spell::CheckCast())
-            float distance = m_unit->GetCombatDistance(target, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
+            float distance = m_unit->GetDistance(target, true, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT ? DIST_CALC_COMBAT_REACH_WITH_MELEE : DIST_CALC_COMBAT_REACH);
 
             if (distance > spellRange->maxRange)
                 return CAST_FAIL_TOO_FAR;

@@ -92,7 +92,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuver(Unit* pTarget)
         {
             if (PlayerbotAI::ORDERS_TANK & m_ai->GetCombatOrder())
             {
-                if (m_bot->GetCombatDistance(pTarget, true) <= ATTACK_DISTANCE)
+                if (m_bot->GetDistance(pTarget, true, DIST_CALC_COMBAT_REACH_WITH_MELEE) <= ATTACK_DISTANCE)
                 {
                     // Set everyone's UpdateAI() waiting to 2 seconds
                     m_ai->SetGroupIgnoreUpdateTime(2);
@@ -149,7 +149,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVE(Unit* pTarget
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    float fTargetDist = m_bot->GetCombatDistance(pTarget, true);
+    float fTargetDist = m_bot->GetDistance(pTarget, true, DIST_CALC_COMBAT_REACH_WITH_MELEE);
 
     // Get bot spec. If bot has tank orders, force spec to protection
     uint32 spec = ((m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK) ? WARRIOR_SPEC_PROTECTION : m_bot->GetSpec());
@@ -211,7 +211,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVP(Unit* pTarget
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    float fTargetDist = m_bot->GetCombatDistance(pTarget, true);
+    float fTargetDist = m_bot->GetDistance(pTarget, true, DIST_CALC_COMBAT_REACH_WITH_MELEE);
 
     if (DEFENSIVE_STANCE && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK))
     {
@@ -609,7 +609,7 @@ bool PlayerbotWarriorAI::Pull()
     else
         return false;
 
-    if (m_bot->GetCombatDistance(m_ai->GetCurrentTarget(), true) > ATTACK_DISTANCE)
+    if (m_bot->GetDistance(m_ai->GetCurrentTarget(), true, DIST_CALC_COMBAT_REACH_WITH_MELEE) > ATTACK_DISTANCE)
     {
         if (!m_ai->In_Reach(m_ai->GetCurrentTarget(), SHOOT))
         {

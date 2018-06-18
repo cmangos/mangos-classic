@@ -275,7 +275,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // If below ranged combat distance and bot is not attacked by target
     // make it flee from target for a few seconds to get in ranged distance again
     // Do not do it if passive or stay orders.
-    if (pVictim != m_bot && m_bot->GetCombatDistance(pTarget, true) <= 8.0f &&
+    if (pVictim != m_bot && m_bot->GetDistance(pTarget, true, DIST_CALC_COMBAT_REACH_WITH_MELEE) <= 8.0f &&
             !(m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_PASSIVE) &&
             (m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY))
     {
