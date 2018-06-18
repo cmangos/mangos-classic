@@ -215,7 +215,7 @@ namespace MMAP
                 if (!(lheader.flags & MAP_LIQUID_NO_TYPE))
                 {
                     if (fread(liquid_entry, sizeof(liquid_entry), 1, mapFile) == 1 &&
-                        fread(liquid_flags, sizeof(liquid_flags), 1, mapFile) == 1)
+                            fread(liquid_flags, sizeof(liquid_flags), 1, mapFile) == 1)
                         liquid_type_loaded = true;
                 }
                 else

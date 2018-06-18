@@ -26,26 +26,44 @@
 #include "DetourCommon.h"
 
 #include <climits>
+#include <fstream>
 
 using namespace VMAP;
 
+void from_json(const json& j, rcConfig& config)
+{
+    config.tileSize = MMAP::VERTEX_PER_TILE;
+    config.borderSize = j["borderSize"].get<int>();
+    config.cs = MMAP::BASE_UNIT_DIM;
+    config.ch = MMAP::BASE_UNIT_DIM;
+    config.walkableSlopeAngle = j["walkableSlopeAngle"].get<float>();
+    config.walkableHeight = j["walkableHeight"].get<int>();
+    config.walkableClimb = j["walkableClimb"].get<int>();
+    config.walkableRadius = j["walkableRadius"].get<int>();
+    config.maxEdgeLen = j["maxEdgeLen"].get<int>();
+    config.maxSimplificationError = j["maxSimplificationError"].get<float>();
+    config.minRegionArea = rcSqr(j["minRegionArea"].get<int>());
+    config.mergeRegionArea = rcSqr(j["mergeRegionArea"].get<int>());
+    config.maxVertsPerPoly = DT_VERTS_PER_POLYGON;
+    config.detailSampleDist = j["detailSampleDist"].get<float>();
+    config.detailSampleMaxError = j["detailSampleMaxError"].get<float>();
+}
+
 namespace MMAP
 {
-    MapBuilder::MapBuilder(float maxWalkableAngle, bool skipLiquid,
-                           bool skipContinents, bool skipJunkMaps, bool skipBattlegrounds,
-                           bool debugOutput, bool bigBaseUnit, const char* offMeshFilePath) :
-        m_terrainBuilder(NULL),
-        m_debugOutput(debugOutput),
+    MapBuilder::MapBuilder(const char* configInputPath, bool skipLiquid, bool skipContinents, bool skipJunkMaps,
+                           bool skipBattlegrounds, bool debug, const char* offMeshFilePath) :
+        m_debug(debug),
         m_skipContinents(skipContinents),
         m_skipJunkMaps(skipJunkMaps),
         m_skipBattlegrounds(skipBattlegrounds),
-        m_maxWalkableAngle(maxWalkableAngle),
-        m_bigBaseUnit(bigBaseUnit),
-        m_rcContext(NULL),
         m_offMeshFilePath(offMeshFilePath)
     {
-        m_terrainBuilder = new TerrainBuilder(skipLiquid);
+        std::ifstream jsonConfig(configInputPath);
+        if (jsonConfig)
+            m_config = json::parse(jsonConfig);
 
+        m_terrainBuilder = new TerrainBuilder(skipLiquid);
         m_rcContext = new rcContext(false);
 
         discoverTiles();
@@ -402,38 +420,12 @@ namespace MMAP
         int lTriCount = meshData.liquidTris.size() / 3;
         uint8* lTriFlags = meshData.liquidType.getCArray();
 
-        // these are WORLD UNIT based metrics
-        // this are basic unit dimentions
-        // value have to divide GRID_SIZE(533.33333f) ( aka: 0.5333, 0.2666, 0.3333, 0.1333, etc )
-        const static float BASE_UNIT_DIM = m_bigBaseUnit ? 0.533333f : 0.266666f;
-
-        // All are in UNIT metrics!
-        const static int VERTEX_PER_MAP = int(GRID_SIZE / BASE_UNIT_DIM + 0.5f);
-        const static int VERTEX_PER_TILE = m_bigBaseUnit ? 40 : 80; // must divide VERTEX_PER_MAP
-        const static int TILES_PER_MAP = VERTEX_PER_MAP / VERTEX_PER_TILE;
-
         rcConfig config;
         memset(&config, 0, sizeof(rcConfig));
+        config = getTileConfig(mapID, tileX, tileY);
 
         rcVcopy(config.bmin, bmin);
         rcVcopy(config.bmax, bmax);
-
-        config.maxVertsPerPoly = DT_VERTS_PER_POLYGON;
-        config.cs = BASE_UNIT_DIM;
-        config.ch = BASE_UNIT_DIM;
-        config.walkableSlopeAngle = m_maxWalkableAngle;
-        config.tileSize = VERTEX_PER_TILE;
-        config.walkableRadius = m_bigBaseUnit ? 1 : 2;
-        config.borderSize = config.walkableRadius + 3;
-        config.maxEdgeLen = VERTEX_PER_TILE + 1;          // anything bigger than tileSize
-        config.walkableHeight = m_bigBaseUnit ? 3 : 6;
-        // a value >= 3|6 allows npcs to walk over some fences
-        config.walkableClimb = m_bigBaseUnit ? 3 : 6;
-        config.minRegionArea = rcSqr(60);
-        config.mergeRegionArea = rcSqr(50);
-        config.maxSimplificationError = 2.0f;       // eliminates most jagged edges (tinny polygons)
-        config.detailSampleDist = config.cs * 64;
-        config.detailSampleMaxError = config.ch * 2;
 
         // this sets the dimensions of the heightfield - should maybe happen before border padding
         rcCalcGridSize(config.bmin, config.bmax, config.cs, &config.width, &config.height);
@@ -455,10 +447,10 @@ namespace MMAP
                 Tile& tile = tiles[x + y * TILES_PER_MAP];
 
                 // Calculate the per tile bounding box.
-                tileCfg.bmin[0] = config.bmin[0] + float(x*config.tileSize - config.borderSize)*config.cs;
-                tileCfg.bmin[2] = config.bmin[2] + float(y*config.tileSize - config.borderSize)*config.cs;
-                tileCfg.bmax[0] = config.bmin[0] + float((x+1)*config.tileSize + config.borderSize)*config.cs;
-                tileCfg.bmax[2] = config.bmin[2] + float((y+1)*config.tileSize + config.borderSize)*config.cs;
+                tileCfg.bmin[0] = config.bmin[0] + float(x * config.tileSize - config.borderSize) * config.cs;
+                tileCfg.bmin[2] = config.bmin[2] + float(y * config.tileSize - config.borderSize) * config.cs;
+                tileCfg.bmax[0] = config.bmin[0] + float((x + 1) * config.tileSize + config.borderSize) * config.cs;
+                tileCfg.bmax[2] = config.bmin[2] + float((y + 1) * config.tileSize + config.borderSize) * config.cs;
 
                 float tbmin[2], tbmax[2];
                 tbmin[0] = tileCfg.bmin[0];
@@ -466,7 +458,7 @@ namespace MMAP
                 tbmax[0] = tileCfg.bmax[0];
                 tbmax[1] = tileCfg.bmax[2];
 
-                // build heightfield
+                // Build heightfield for walkable area
                 tile.solid = rcAllocHeightfield();
                 if (!tile.solid || !rcCreateHeightfield(m_rcContext, *tile.solid, tileCfg.width, tileCfg.height, tileCfg.bmin, tileCfg.bmax, tileCfg.cs, tileCfg.ch))
                 {
@@ -484,7 +476,6 @@ namespace MMAP
                 rcFilterLowHangingWalkableObstacles(m_rcContext, config.walkableClimb, *tile.solid);
                 rcFilterLedgeSpans(m_rcContext, tileCfg.walkableHeight, tileCfg.walkableClimb, *tile.solid);
                 rcFilterWalkableLowHeightSpans(m_rcContext, tileCfg.walkableHeight, *tile.solid);
-
                 rcRasterizeTriangles(m_rcContext, lVerts, lVertCount, lTris, lTriFlags, lTriCount, *tile.solid, config.walkableClimb);
 
                 // compact heightfield spans
@@ -592,7 +583,6 @@ namespace MMAP
         // free things up
         delete [] pmmerge;
         delete [] dmmerge;
-
         delete [] tiles;
 
         // set polygons as walkable
@@ -624,9 +614,10 @@ namespace MMAP
         params.offMeshConAreas = meshData.offMeshConnectionsAreas.getCArray();
         params.offMeshConFlags = meshData.offMeshConnectionsFlags.getCArray();
 
-        params.walkableHeight = BASE_UNIT_DIM * config.walkableHeight;  // agent height
-        params.walkableRadius = BASE_UNIT_DIM * config.walkableRadius;  // agent radius
-        params.walkableClimb = BASE_UNIT_DIM * config.walkableClimb;    // keep less that walkableHeight (aka agent height)!
+        params.walkableHeight = BASE_UNIT_DIM * config.walkableHeight;
+        params.walkableRadius = BASE_UNIT_DIM * config.walkableRadius;
+        params.walkableClimb = BASE_UNIT_DIM * config.walkableClimb;
+
         params.tileX = (((bmin[0] + bmax[0]) / 2) - navMesh->getParams()->orig[0]) / GRID_SIZE;
         params.tileY = (((bmin[2] + bmax[2]) / 2) - navMesh->getParams()->orig[2]) / GRID_SIZE;
         rcVcopy(params.bmin, bmin);
@@ -726,7 +717,7 @@ namespace MMAP
         }
         while (0);
 
-        if (m_debugOutput)
+        if (m_debug)
         {
             // restore padding so that the debug visualization is correct
             for (int i = 0; i < iv.polyMesh->nverts; ++i)
@@ -840,4 +831,49 @@ namespace MMAP
         return true;
     }
 
+    json MapBuilder::getDefaultConfig()
+    {
+        return {
+            {"borderSize", 5},
+            {"detailSampleDist", 2.0f},
+            {"detailSampleMaxError", BASE_UNIT_DIM * 2},
+            {"maxEdgeLen", VERTEX_PER_TILE + 1},
+            {"maxSimplificationError", 1.8f},
+            {"mergeRegionArea", 10},
+            {"minRegionArea", 30},
+            {"walkableClimb", 8},
+            {"walkableHeight", 6},
+            {"walkableRadius", 2},
+            {"walkableSlopeAngle", 70.0f},
+        };
+    }
+
+    json MapBuilder::getMapIdConfig(uint32 mapId)
+    {
+        std::string key = std::to_string(mapId);
+
+        json config = getDefaultConfig();
+        if (m_config.find(key) != m_config.end())
+            config.merge_patch(m_config.at(key));
+
+        return config;
+    }
+
+    json MapBuilder::getTileConfig(uint32 mapId, uint32 tileX, uint32 tileY)
+    {
+        std::string key = std::to_string(tileX) + std::to_string(tileY);
+
+        json config = getMapIdConfig(mapId);
+        if (config.find(key) != config.end())
+            config.merge_patch(config.at(key));
+
+        for (json::iterator it = config.begin(); it != config.end();) {
+            if ((*it).is_object())
+                it = config.erase(it);
+            else
+                ++it;
+        }
+
+        return config;
+    }
 }

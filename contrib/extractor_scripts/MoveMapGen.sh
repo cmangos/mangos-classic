@@ -16,7 +16,7 @@
 ## Third param can be an addition filename for storing detailed log
 
 ## Additional Parameters to be forwarded to MoveMapGen, see mmaps/readme for instructions
-PARAMS="--silent"
+PARAMS="--silent --configInputPath config.json"
 
 ## Already a few map extracted, and don't care anymore
 EXCLUDE_MAPS=""
