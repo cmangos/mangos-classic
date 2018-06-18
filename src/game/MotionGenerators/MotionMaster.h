@@ -125,6 +125,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
         bool GetDestination(float& x, float& y, float& z) const;
 
         void SetPathId(uint32 pathId) { m_defaultPathId = pathId; }
+        uint32 GetPathId() { return m_defaultPathId; }
 
     private:
         void Mutate(MovementGenerator* m);                  // use Move* functions instead
