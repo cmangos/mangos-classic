@@ -1419,49 +1419,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
     }
 
     if (realCaster && realCaster != unit)
-    {
-        if (realCaster->CanAttack(unit))
-        {
-            // not break stealth by cast targeting
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
-                unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-
-            // Hostile spell hits count as attack made against target (if detected), stealth removed at Spell::cast if spell break it
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
-                    !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) &&
-                    !IsPositiveSpell(m_spellInfo->Id, realCaster, unit) &&
-                    m_caster->isVisibleForOrDetect(unit, unit, false))
-            {
-                // use speedup check to avoid re-remove after above lines
-                if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
-                    unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-
-                // caster can be detected but have stealth aura
-                m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-
-                // Since patch 1.5.0 sitting characters always stand up on attack (even if stunned)
-                if (!unit->IsStandState() && (unit->GetTypeId() == TYPEID_PLAYER || !unit->hasUnitState(UNIT_STAT_STUNNED)))
-                    unit->SetStandState(UNIT_STAND_STATE_STAND);
-
-                // TODO:: why testing AI here???
-                if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
-                    unit->AttackedBy(realCaster);
-
-                unit->AddThreat(realCaster);
-                unit->SetInCombatWithAggressor(realCaster);
-                realCaster->SetInCombatWithVictim(unit);
-            }
-        }
-        else if (realCaster->CanCooperate(unit))
-        {
-            // assisting case, healing and resurrection
-            if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
-            {
-                realCaster->SetInCombatWithAssisted(unit);
-                unit->getHostileRefManager().threatAssist(realCaster, 0.0f, m_spellInfo);
-            }
-        }
-    }
+        m_caster->CasterHitTargetWithSpell(realCaster, unit, m_spellInfo);
 
     // now apply all created auras
     if (m_spellAuraHolder)

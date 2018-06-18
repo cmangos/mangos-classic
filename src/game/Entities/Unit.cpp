@@ -5143,6 +5143,56 @@ void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo) c
     SendMessageToSet(data, true);
 }
 
+void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo)
+{
+    if (realCaster->CanAttack(target))
+    {
+        if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
+        {
+            // not break stealth by cast targeting
+            if (!spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
+                target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
+            // Hostile spell hits count as attack made against target (if detected), stealth removed at Spell::cast if spell break it
+            if (!IsPositiveSpell(spellInfo->Id, realCaster, target) &&
+                isVisibleForOrDetect(target, target, false))
+            {
+                // Since patch 1.5.0 sitting characters always stand up on attack (even if stunned)
+                if (!target->IsStandState() && target->GetTypeId() == TYPEID_PLAYER)
+                    target->SetStandState(UNIT_STAND_STATE_STAND);
+
+                if (!spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
+                {
+                    target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
+                    // use speedup check to avoid re-remove after above lines - TODO: move to proc
+                    if (spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
+                        target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
+                    // caster can be detected but have stealth aura
+                    RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
+                    target->AddThreat(realCaster);
+                    target->SetInCombatWithAggressor(realCaster);
+                    realCaster->SetInCombatWithVictim(target);
+
+                    target->AttackedBy(realCaster);
+                }
+            }
+        }
+    }
+    else if (realCaster->CanAssist(target))
+    {
+        // assisting case, healing and resurrection
+        if (target->isInCombat() &&
+            !spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
+            !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
+        {
+            realCaster->SetInCombatWithAssisted(target);
+            target->getHostileRefManager().threatAssist(realCaster, 0.0f, spellInfo, false);
+        }
+    }
+}
+
 void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo) const
 {
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
