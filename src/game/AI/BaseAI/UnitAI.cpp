@@ -40,7 +40,8 @@ UnitAI::UnitAI(Unit* unit) :
     m_dismountOnAggro(true),
     m_meleeEnabled(true),
     m_reactState(REACT_AGGRESSIVE),
-    m_combatScriptHappening(false)
+    m_combatScriptHappening(false),
+    m_currentAIOrder(ORDER_NONE)
 {
 }
 
