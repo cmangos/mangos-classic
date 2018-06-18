@@ -3149,15 +3149,6 @@ void Aura::HandleAuraModResistance(bool apply, bool /*Real*/)
                 ((Player*)target)->ApplyResistanceBuffModsMod(SpellSchools(x), m_positive, float(m_modifier.m_amount), apply);
         }
     }
-
-    // Faerie Fire (druid versions)
-    if (spellProto->SpellIconID == 109 &&
-            spellProto->SpellFamilyName == SPELLFAMILY_DRUID &&
-            spellProto->SpellFamilyFlags & uint64(0x0000000000000400))
-    {
-        target->ApplySpellDispelImmunity(spellProto, DISPEL_STEALTH, apply);
-        target->ApplySpellDispelImmunity(spellProto, DISPEL_INVISIBILITY, apply);
-    }
 }
 
 void Aura::HandleAuraModBaseResistancePCT(bool apply, bool /*Real*/)

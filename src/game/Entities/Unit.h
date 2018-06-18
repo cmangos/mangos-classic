@@ -2178,6 +2178,8 @@ class Unit : public WorldObject
         virtual CreatureAI* AI() { return nullptr; }
         virtual CombatData* GetCombatData() { return m_combatData; }
 
+        virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0) override;
+
     protected:
         explicit Unit();
 

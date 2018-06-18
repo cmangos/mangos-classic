@@ -2,6 +2,8 @@
 -- Confirmed on later version of the spell
 UPDATE spell_template SET Attributes = Attributes | 0x040 WHERE Id = 24148;
 
+ALTER TABLE spell_template ADD COLUMN `AttributesServerside` int(11) unsigned NOT NULL DEFAULT '0';
+
 -- Removes aura interrupt flag by sitting for spells that do not make a creature sit, all seem to be copypasted for unknown reasons
 UPDATE spell_template SET AuraInterruptFlags=AuraInterruptFlags&~0x00040000 WHERE Id IN(6606,14915,16093);
 
