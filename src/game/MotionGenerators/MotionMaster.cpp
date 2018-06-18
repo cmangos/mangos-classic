@@ -316,12 +316,15 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle, bool moveFur
         Mutate(new ChaseMovementGenerator<Creature>(*target, dist, angle, moveFurther, walk));
 }
 
-void MotionMaster::MoveFollow(Unit* target, float dist, float angle)
+void MotionMaster::MoveFollow(Unit* target, float dist, float angle, bool asMain)
 {
     if (m_owner->hasUnitState(UNIT_STAT_LOST_CONTROL))
         return;
 
-    Clear();
+    if (asMain)
+        Clear(false, true);
+    else
+        Clear();
 
     // ignore movement request if target not exist
     if (!target)
