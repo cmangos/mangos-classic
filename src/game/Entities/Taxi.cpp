@@ -155,7 +155,9 @@ bool Tracker::AddRoute(DestID start, DestID end, float discountMulti /*= 0.0f*/,
     if (requireModel && !displayId)
         return false;
 
-    m_displayId = displayId;
+    // Use first route's mount appearance for the entirety of the flight
+    if (!m_displayId)
+        m_displayId = displayId;
 
     if (commercial)
     {
