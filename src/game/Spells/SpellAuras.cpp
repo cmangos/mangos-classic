@@ -2496,10 +2496,9 @@ void Aura::HandleInvisibility(bool apply, bool Real)
 {
     Unit* target = GetTarget();
 
+    target->SetInvisibilityMask(m_modifier.m_miscvalue, apply);
     if (apply)
     {
-        target->m_invisibilityMask |= (1 << m_modifier.m_miscvalue);
-
         target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
         if (Real && target->GetTypeId() == TYPEID_PLAYER)
@@ -2525,13 +2524,12 @@ void Aura::HandleInvisibility(bool apply, bool Real)
     else
     {
         // recalculate value at modifier remove (current aura already removed)
-        target->m_invisibilityMask = 0;
         Unit::AuraList const& auras = target->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
-        for (auto aura : auras)
-            target->m_invisibilityMask |= (1 << aura->GetModifier()->m_miscvalue);
+        for (Aura* aura : auras)
+            target->SetInvisibilityMask(aura->GetModifier()->m_miscvalue, apply);
 
         // only at real aura remove and if not have different invisibility auras.
-        if (Real && target->m_invisibilityMask == 0)
+        if (Real && target->GetInvisibilityMask() == 0)
         {
             // remove glow vision
             if (target->GetTypeId() == TYPEID_PLAYER)
@@ -2552,17 +2550,12 @@ void Aura::HandleInvisibilityDetect(bool apply, bool Real)
 {
     Unit* target = GetTarget();
 
-    if (apply)
+    target->SetInvisibilityDetectMask(m_modifier.m_miscvalue, apply);
+    if (!apply)
     {
-        target->m_detectInvisibilityMask |= (1 << m_modifier.m_miscvalue);
-    }
-    else
-    {
-        // recalculate value at modifier remove (current aura already removed)
-        target->m_detectInvisibilityMask = 0;
         Unit::AuraList const& auras = target->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
-        for (auto aura : auras)
-            target->m_detectInvisibilityMask |= (1 << aura->GetModifier()->m_miscvalue);
+        for (Aura* aura : auras)
+            target->SetInvisibilityDetectMask(aura->GetModifier()->m_miscvalue, true);
     }
     if (Real && target->GetTypeId() == TYPEID_PLAYER)
         ((Player*)target)->GetCamera().UpdateVisibilityForOwner();

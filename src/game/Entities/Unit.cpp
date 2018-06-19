@@ -5285,7 +5285,7 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
             return;
 
         // Hostile spell hits count as attack made against target (if detected), stealth removed at Spell::cast if spell break it
-        const bool attack = (!IsPositiveSpell(spellInfo->Id, realCaster, target) && isVisibleForOrDetect(target, target, false));
+        const bool attack = (!IsPositiveSpell(spellInfo->Id, realCaster, target) && IsVisibleForOrDetect(target, target, false));
 
         if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
         {
@@ -7292,7 +7292,7 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
     return gain;
 }
 
-bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList, bool is3dDistance) const
+bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList, bool is3dDistance) const
 {
     if (!u || !IsInMap(u))
         return false;
@@ -7399,7 +7399,9 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
                 // Invisible units, always are visible for units under same invisibility type
                 (m_invisibilityMask & u->m_invisibilityMask) != 0 ||
                 // Invisible units, always are visible for unit that can detect this invisibility (have appropriate level for detect)
-                u->canDetectInvisibilityOf(this)))
+                u->CanDetectInvisibilityOf(this) ||
+                // Units that can detect invisibility always are visible for units that can be detected
+                CanDetectInvisibilityOf(u)))
     {
         invisible = false;
     }
@@ -7506,7 +7508,7 @@ void Unit::UpdateVisibilityAndView()
             Aura* aura = (*it);
             Unit* owner = aura->GetCaster();
 
-            if (!owner || !isVisibleForOrDetect(owner, this, false))
+            if (!owner || !IsVisibleForOrDetect(owner, this, false))
             {
                 alist.erase(it);
                 RemoveAura(aura);
@@ -7531,9 +7533,9 @@ void Unit::SetVisibility(UnitVisibility x)
         UpdateVisibilityAndView();
 }
 
-bool Unit::canDetectInvisibilityOf(Unit const* u) const
+bool Unit::CanDetectInvisibilityOf(Unit const* u) const
 {
-    if (uint32 mask = (m_detectInvisibilityMask & u->m_invisibilityMask))
+    if (uint32 mask = (GetInvisibilityDetectMask() & u->GetInvisibilityMask()))
     {
         for (int32 i = 0; i < 32; ++i)
         {
@@ -7547,9 +7549,14 @@ bool Unit::canDetectInvisibilityOf(Unit const* u) const
                 if (iAura->GetModifier()->m_miscvalue == i && invLevel < iAura->GetModifier()->m_amount)
                     invLevel = iAura->GetModifier()->m_amount;
 
-            // find invisibility detect level
+            Unit const* owner = this;
+            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                if (Player const* controller = GetControllingPlayer())
+                    owner = controller;
+
+            // find invisibility detect level - this is taken from controlling player or self
             int32 detectLevel = 0;
-            Unit::AuraList const& dAuras = GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
+            Unit::AuraList const& dAuras = owner->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
             for (auto dAura : dAuras)
                 if (dAura->GetModifier()->m_miscvalue == i && detectLevel < dAura->GetModifier()->m_amount)
                     detectLevel = dAura->GetModifier()->m_amount;
@@ -7563,6 +7570,38 @@ bool Unit::canDetectInvisibilityOf(Unit const* u) const
     }
 
     return false;
+}
+
+uint32 Unit::GetInvisibilityDetectMask() const
+{
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        Player const* controller = GetControllingPlayer();
+        if (controller)
+            return controller->m_detectInvisibilityMask; // directly access value without bypass
+    }
+    return m_detectInvisibilityMask;
+}
+
+void Unit::SetInvisibilityDetectMask(uint32 index, bool apply)
+{
+    if (apply)
+        m_detectInvisibilityMask |= (1 << index);
+    else
+        m_detectInvisibilityMask &= ~(1 << index);
+}
+
+uint32 Unit::GetInvisibilityMask() const
+{
+    return m_invisibilityMask;
+}
+
+void Unit::SetInvisibilityMask(uint32 index, bool apply)
+{
+    if (apply)
+        m_invisibilityMask |= (1 << index);
+    else
+        m_invisibilityMask &= ~(1 << index);
 }
 
 void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
@@ -8191,7 +8230,7 @@ void Unit::ApplyDiminishingAura(DiminishingGroup group, bool apply)
 
 bool Unit::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
 {
-    return isVisibleForOrDetect(u, viewPoint, false, inVisibleList, false);
+    return IsVisibleForOrDetect(u, viewPoint, false, inVisibleList, false);
 }
 
 /// returns true if creature can't be seen by alive units
@@ -8219,7 +8258,7 @@ bool Unit::IsOutOfThreatArea(Unit* victim) const
 
     // Todo make vanish to reset combat state/threat/whatever we need to do.
     // This is just workaround here
-    if (!victim->isVisibleForOrDetect(this, this, true))
+    if (!victim->IsVisibleForOrDetect(this, this, true))
         return true;
 
     if (sMapStore.LookupEntry(GetMapId())->IsDungeon())

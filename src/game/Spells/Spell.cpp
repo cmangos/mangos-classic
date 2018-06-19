@@ -1197,7 +1197,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             if (combat || touch)
             {
                 // Failed hostile spell hits count as attack made against target (if detected)
-                if (const bool attack = (!IsPositiveSpell(m_spellInfo->Id, real_caster, unit) && m_caster->isVisibleForOrDetect(unit, unit, false)))
+                if (const bool attack = (!IsPositiveSpell(m_spellInfo->Id, real_caster, unit) && m_caster->IsVisibleForOrDetect(unit, unit, false)))
                 {
                     if (combat)
                     {
@@ -1385,7 +1385,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
         if (realCaster->CanAttack(unit))
         {
             // for delayed spells ignore not visible explicit target
-            if (unit == m_targets.getUnitTarget() && !unit->isVisibleForOrDetect(m_caster, m_caster, false))
+            if (unit == m_targets.getUnitTarget() && !unit->IsVisibleForOrDetect(m_caster, m_caster, false))
             {
                 // Workaround: do not send evade if caster/unit are dead to prevent combat log errors
                 // TODO: Visibility check clearly lackluster if we end up here like this, to be fixed later

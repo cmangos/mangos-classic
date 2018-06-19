@@ -516,7 +516,7 @@ void UnitAI::SendAIEvent(AIEventType eventType, Unit* invoker, Unit* receiver, u
 
 bool UnitAI::IsVisible(Unit* pl) const
 {
-    return m_unit->IsWithinDist(pl, m_visibilityDistance) && pl->isVisibleForOrDetect(m_unit, m_unit, true);
+    return m_unit->IsWithinDist(pl, m_visibilityDistance) && pl->IsVisibleForOrDetect(m_unit, m_unit, true);
 }
 
 Unit* UnitAI::DoSelectLowestHpFriendly(float range, float minMissing, bool percent)

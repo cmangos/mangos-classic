@@ -989,7 +989,7 @@ namespace MaNGOS
             {
                 if (currUnit->isAlive() && (m_source->IsAttackedBy(currUnit) || (m_owner && m_owner->IsAttackedBy(currUnit)) || m_source->IsEnemy(currUnit))
                     && m_source->CanAttack(currUnit)
-                    && currUnit->isVisibleForOrDetect(m_source, m_source, false)
+                    && currUnit->IsVisibleForOrDetect(m_source, m_source, false)
                     && m_source->IsWithinDistInMap(currUnit, m_range))
                 {
                     m_range = m_source->GetDistance(currUnit);        // use found unit range as new range limit for next check
