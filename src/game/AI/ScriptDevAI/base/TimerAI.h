@@ -17,6 +17,8 @@
 #include <functional>
 #include "Platform/Define.h"
 
+class ChatHandler;
+
 /*
 Timer data class used for execution of TimerAI events
 */
@@ -58,6 +60,8 @@ class TimerAI
             auto data = m_timers.find(index);
             (*data).second.timer = 0; (*data).second.disabled = true;
         }
+
+        void GetAIInformation(ChatHandler& reader);
 
     private:
         std::map<uint32, Timer> m_timers;

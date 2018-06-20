@@ -15,6 +15,8 @@
 */
 
 #include "TimerAI.h"
+#include "Chat/Chat.h"
+#include <string>
 
 bool Timer::UpdateTimer(const uint32 diff)
 {
@@ -50,4 +52,16 @@ void TimerAI::UpdateTimers(const uint32 diff)
             timer.functor();
         else ++itr;
     }
+}
+
+void TimerAI::GetAIInformation(ChatHandler& reader)
+{
+    reader.PSendSysMessage("TimerAI: Timers:");
+    std::string output = "";
+    for (auto itr = m_timers.begin(); itr != m_timers.end(); ++itr)
+    {
+        Timer& timer = (*itr).second;
+        output += "Timer ID: " + std::to_string(timer.id) + " Timer: " + std::to_string(timer.timer), + " Disabled: " + std::to_string(timer.disabled) + "\n";
+    }
+    reader.PSendSysMessage("%s", output.data());
 }
