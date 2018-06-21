@@ -1575,7 +1575,7 @@ bool ScriptAction::HandleScriptStep()
                 break;
             }
 
-            if (pGo->isSpawned())
+            if (pGo->IsSpawned())
                 break;                                      // gameobject already spawned
 
             uint32 time_to_despawn = m_script->respawnGo.despawnDelay < 5 ? 5 : m_script->respawnGo.despawnDelay;

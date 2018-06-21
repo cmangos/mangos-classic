@@ -282,7 +282,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                 GetGameObjectListWithEntryInGrid(m_lEluneLights, m_creature, GO_ELUNE_LIGHT, 20.0f);
                 for (std::list<GameObject*>::const_iterator itr = m_lEluneLights.begin(); itr != m_lEluneLights.end(); ++itr)
                 {
-                    if ((*itr)->isSpawned())
+                    if ((*itr)->IsSpawned())
                         continue;
 
                     (*itr)->SetRespawnTime(115);
@@ -323,7 +323,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                 // make the gem and its aura respawn
                 if (GameObject* pGem = GetClosestGameObjectWithEntry(m_creature, GO_ELUNE_GEM, 10.0f))
                 {
-                    if (pGem->isSpawned())
+                    if (pGem->IsSpawned())
                         break;
 
                     pGem->SetRespawnTime(90);
@@ -331,7 +331,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                 }
                 if (GameObject* pAura = GetClosestGameObjectWithEntry(m_creature, GO_ELUNE_AURA, 10.0f))
                 {
-                    if (pAura->isSpawned())
+                    if (pAura->IsSpawned())
                         break;
 
                     pAura->SetRespawnTime(90);

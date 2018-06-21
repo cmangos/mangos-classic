@@ -171,7 +171,7 @@ void instance_gnomeregan::SetData(uint32 uiType, uint32 uiData)
                 if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_THE_FINAL_CHAMBER))
                 {
                     pDoor->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
-                    if (pDoor->getLootState() == GO_ACTIVATED)
+                    if (pDoor->GetLootState() == GO_ACTIVATED)
                         pDoor->ResetDoorOrButton();
                 }
 
@@ -184,7 +184,7 @@ void instance_gnomeregan::SetData(uint32 uiType, uint32 uiData)
                 if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_THE_FINAL_CHAMBER))
                 {
                     pDoor->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
-                    if (pDoor->getLootState() == GO_READY)
+                    if (pDoor->GetLootState() == GO_READY)
                         pDoor->UseDoorOrButton();
                 }
 

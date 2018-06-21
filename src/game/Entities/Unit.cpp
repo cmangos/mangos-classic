@@ -3539,7 +3539,7 @@ void Unit::_UpdateSpells(uint32 time)
         {
             dnext1 = ite1;
             //(*i)->Update( difftime );
-            if (!(*ite1)->isSpawned())
+            if (!(*ite1)->IsSpawned())
             {
                 (*ite1)->SetOwnerGuid(ObjectGuid());
                 (*ite1)->SetRespawnTime(0);

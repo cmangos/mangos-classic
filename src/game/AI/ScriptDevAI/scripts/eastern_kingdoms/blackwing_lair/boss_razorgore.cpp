@@ -247,7 +247,7 @@ bool EffectDummyGameObj_go_black_dragon_egg(Unit* pCaster, uint32 uiSpellId, Spe
 {
     if (uiSpellId == SPELL_DESTROY_EGG && uiEffIndex == EFFECT_INDEX_1)
     {
-        if (!pGOTarget->isSpawned())
+        if (!pGOTarget->IsSpawned())
             return true;
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pGOTarget->GetInstanceData())

@@ -20,9 +20,9 @@ void ScriptedInstance::DoUseDoorOrButton(ObjectGuid guid, uint32 withRestoreTime
     {
         if (pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR || pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
         {
-            if (pGo->getLootState() == GO_READY)
+            if (pGo->GetLootState() == GO_READY)
                 pGo->UseDoorOrButton(withRestoreTime, useAlternativeState);
-            else if (pGo->getLootState() == GO_ACTIVATED)
+            else if (pGo->GetLootState() == GO_ACTIVATED)
                 pGo->ResetDoorOrButton();
         }
         else
@@ -59,7 +59,7 @@ void ScriptedInstance::DoRespawnGameObject(ObjectGuid guid, uint32 timeToDespawn
                 pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON || pGo->GetGoType() == GAMEOBJECT_TYPE_TRAP)
             return;
 
-        if (pGo->isSpawned())
+        if (pGo->IsSpawned())
             return;
 
         pGo->SetRespawnTime(timeToDespawn);

@@ -1677,7 +1677,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
     }
 
     // generate loot only if ready for open and spawned in world
-    if (gameObject->getLootState() == GO_READY && gameObject->isSpawned())
+    if (gameObject->GetLootState() == GO_READY && gameObject->IsSpawned())
     {
         if ((gameObject->GetEntry() == BG_AV_OBJECTID_MINE_N || gameObject->GetEntry() == BG_AV_OBJECTID_MINE_S))
         {

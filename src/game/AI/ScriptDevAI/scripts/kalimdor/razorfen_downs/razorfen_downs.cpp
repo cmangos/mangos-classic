@@ -230,7 +230,7 @@ struct npc_belnistraszAI : public npc_escortAI
 
                             if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_BELNISTRASZ_BRAZIER, 10.0f))
                             {
-                                if (!pGo->isSpawned())
+                                if (!pGo->IsSpawned())
                                 {
                                     pGo->SetRespawnTime(HOUR * IN_MILLISECONDS);
                                     pGo->Refresh();

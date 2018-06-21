@@ -120,7 +120,7 @@ struct boss_zumrahAI : public ScriptedAI
         {
             GameObject* pGo = m_creature->GetMap()->GetGameObject(*itr);
             // Go spawned and no looting in process
-            if (pGo && pGo->isSpawned() && pGo->getLootState() == GO_READY)
+            if (pGo && pGo->IsSpawned() && pGo->GetLootState() == GO_READY)
                 lGravesInRange.push_back(pGo);
         }
 

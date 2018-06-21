@@ -265,7 +265,7 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
         return;
 
     // Additional check preventing exploits (ie loot despawned chests)
-    if (!obj->isSpawned())
+    if (!obj->IsSpawned())
     {
         sLog.outError("HandleGameObjectUseOpcode: CMSG_GAMEOBJ_USE for despawned GameObject (Entry %u), didn't expect this to happen.", obj->GetEntry());
         return;

@@ -336,7 +336,7 @@ struct go_elemental_rift : public GameObjectAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Do nothing if not spawned
-        if (!m_go->isSpawned())
+        if (!m_go->IsSpawned())
             return;
 
         if (m_uiElementalTimer <= uiDiff)

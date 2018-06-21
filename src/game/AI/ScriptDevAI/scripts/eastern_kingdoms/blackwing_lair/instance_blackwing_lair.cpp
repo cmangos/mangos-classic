@@ -540,7 +540,7 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
             {
                 if (GameObject* pEgg = instance->GetGameObject(*itr))
                 {
-                    if (!pEgg->isSpawned())
+                    if (!pEgg->IsSpawned())
                         pEgg->Respawn();
                 }
             }
@@ -735,7 +735,7 @@ struct go_ai_suppression : public GameObjectAI
 
         // As long as Broodlord Lashlayer is alive, the GO will rearm on a random timer from 30 sec to 2 min
         // It will not rearm for the instance lifetime after Broodlord Lashlayer death
-        if (m_go->getLootState() == GO_ACTIVATED)
+        if (m_go->GetLootState() == GO_ACTIVATED)
         {
             if (pInstance->GetData(TYPE_LASHLAYER) != DONE)
                 m_go->SetRespawnTime(urand(30, 2 * MINUTE));
@@ -754,7 +754,7 @@ struct go_ai_suppression : public GameObjectAI
             {
                 // TODO replace by go->Use(go) or go->Use(nullptr) once GO casting is added in core
                 // The loot state check may be removed in that case because it should probably be handled in the Gameobject::Use() code
-                if (m_go->getLootState() == GO_READY)
+                if (m_go->GetLootState() == GO_READY)
                     m_go->SendGameObjectCustomAnim(m_go->GetObjectGuid());
                 m_uiFumeTimer = 5 * IN_MILLISECONDS;
             }

@@ -623,13 +623,13 @@ class GameObject : public WorldObject
             m_respawnDelayTime = respawn > 0 ? uint32(respawn) : 0;
         }
         void Respawn();
-        bool isSpawned() const
+        bool IsSpawned() const
         {
             return m_respawnDelayTime == 0 ||
                    (m_respawnTime > 0 && !m_spawnedByDefault) ||
                    (m_respawnTime == 0 && m_spawnedByDefault);
         }
-        bool isSpawnedByDefault() const { return m_spawnedByDefault; }
+        bool IsSpawnedByDefault() const { return m_spawnedByDefault; }
         uint32 GetRespawnDelay() const { return m_respawnDelayTime; }
         void Refresh();
         void Delete();
@@ -653,7 +653,7 @@ class GameObject : public WorldObject
 
         void Use(Unit* user);
 
-        LootState getLootState() const { return m_lootState; }
+        LootState GetLootState() const { return m_lootState; }
         void SetLootState(LootState s);
 
         void AddToSkillupList(Player* player);
