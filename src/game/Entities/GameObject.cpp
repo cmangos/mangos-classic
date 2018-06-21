@@ -352,7 +352,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     if (!radius)
                     {
                         if (goInfo->trap.cooldown != 3)     // cast in other case (at some triggering/linked go/etc explicit call)
-                            return;
+                            break;
                         else
                         {
                             if (m_respawnTime > 0)
