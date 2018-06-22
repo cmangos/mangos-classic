@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: instance_dire_maul
-SD%Complete: 30
-SDComment: Basic Support - Most events and quest-related stuff missing
+SD%Complete: 70
+SDComment: Ogre costume suit missing for Tribute Run, Cho'Rush spells randomisation is not handled properly, Warpwood pods are not implemented, the Maul event is not handled
 SDCategory: Dire Maul
 EndScriptData
 
@@ -80,6 +80,7 @@ void instance_dire_maul::OnCreatureCreate(Creature* pCreature)
         case NPC_CHORUSH:
         case NPC_KING_GORDOK:
         case NPC_CAPTAIN_KROMCRUSH:
+        case NPC_GUARD_SLIPKIK:
             break;
 
         default:
@@ -586,6 +587,58 @@ InstanceData* GetInstanceData_instance_dire_maul(Map* pMap)
     return new instance_dire_maul(pMap);
 }
 
+/*###############
+## go_fixed_trap
+################*/
+
+struct go_ai_fixed_trap : public GameObjectAI
+{
+    go_ai_fixed_trap(GameObject* go) : GameObjectAI(go) {}
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_go->IsSpawned())
+        {
+            // Sniffs show that trap should only react to Guard Slip'kik
+            // He then enters evade mode and becomes an invalid target to hostile actions from players
+            // Faction is changed to 14 and restored by spell 22799 (King of the Gordok)
+            // Additionnaly, Guard Slip'kik should get UnitFlags 16 but purpose is unknown so we skip it for now
+            if (Creature* slipkik = GetClosestCreatureWithEntry(m_go, NPC_GUARD_SLIPKIK, 0.5f))
+            {
+                m_go->Use(slipkik);
+                slipkik->AI()->EnterEvadeMode();
+                slipkik->SetImmuneToPlayer(true);
+                slipkik->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
+                m_go->SetLootState(GO_JUST_DEACTIVATED);    // Despawn the trap
+            }
+        }
+    }
+};
+
+GameObjectAI* GetAI_go_fixed_trap(GameObject* go)
+{
+    return new go_ai_fixed_trap(go);
+}
+
+/*####################################
+## Guard Slip'kik Trigger dummy effect
+####################################*/
+
+bool EffectDummyCreature_spell_guard_slip_kik(Unit* /* pCaster */, uint32 uiSpellId, SpellEffectIndex /* uiEffIndex */, Creature* /* pCreatureTarget */, ObjectGuid /*originalCasterGuid*/)
+{
+    if (uiSpellId == SPELL_GUARD_SLIPKIK_TRIGGER)
+    {
+        instance_dire_maul* pInstance = (instance_dire_maul*)pCaster->GetInstanceData();
+        if (pInstance)
+        {
+            if (Creature* slipkik = pInstance->GetSingleCreatureFromStorage(NPC_GUARD_SLIPKIK))
+                slipkik->setFaction(FACTION_OGRE);
+            return true;
+        }
+    }
+    return false;
+}
+
 void AddSC_instance_dire_maul()
 {
     Script* pNewScript;
@@ -593,5 +646,15 @@ void AddSC_instance_dire_maul()
     pNewScript = new Script;
     pNewScript->Name = "instance_dire_maul";
     pNewScript->GetInstanceData = &GetInstanceData_instance_dire_maul;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_fixed_trap";
+    pNewScript->GetGameObjectAI = &GetAI_go_fixed_trap;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_mizzle_crafty";
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_guard_slip_kik;
     pNewScript->RegisterSelf();
 }

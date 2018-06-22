@@ -340,20 +340,17 @@ inline bool IsSpellSetRun(SpellEntry const* spellInfo)
 
 inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
 {
-    //TODO: search correct case for classic
-    return true;
-
+    //TODO: search for potential correct case for Classic
     /*if (IsSpellHaveAura(spellInfo, SPELL_AURA_FLY))
-        return false;
+        return false; */
 
     switch (spellInfo->Id)
     {
-        case 39918:         // visual auras in Soulgrinder script
-        case 39920:
+        case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
             return false;
         default:
             return true;
-    }*/
+    }
 }
 
 bool IsExplicitPositiveTarget(uint32 targetA);

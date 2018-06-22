@@ -267,6 +267,8 @@ UPDATE creature_template SET ScriptName='npc_magrami_spectre' WHERE entry=11560;
 
 /* DIRE MAUL */
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
+UPDATE gameobject_template SET ScriptName='go_fixed_trap' WHERE entry=179512;
+UPDATE creature_template SET ScriptName='npc_mizzle_crafty' WHERE entry=14353;
 INSERT INTO scripted_event_id VALUES
 (8420,'event_spells_warlock_dreadsteed'),
 (8428,'event_spells_warlock_dreadsteed');
