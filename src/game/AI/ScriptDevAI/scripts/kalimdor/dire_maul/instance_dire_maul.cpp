@@ -625,7 +625,7 @@ GameObjectAI* GetAI_go_fixed_trap(GameObject* go)
 ## Guard Slip'kik Trigger dummy effect
 ####################################*/
 
-bool EffectDummyCreature_spell_guard_slip_kik(Unit* /* pCaster */, uint32 uiSpellId, SpellEffectIndex /* uiEffIndex */, Creature* /* pCreatureTarget */, ObjectGuid /*originalCasterGuid*/)
+bool EffectDummyCreature_spell_guard_slip_kik(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex /* uiEffIndex */, Creature* /* pCreatureTarget */, ObjectGuid /*originalCasterGuid*/)
 {
     if (uiSpellId == SPELL_GUARD_SLIPKIK_TRIGGER)
     {
