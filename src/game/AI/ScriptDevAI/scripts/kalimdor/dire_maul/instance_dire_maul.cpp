@@ -606,6 +606,7 @@ struct go_ai_fixed_trap : public GameObjectAI
             if (Creature* slipkik = GetClosestCreatureWithEntry(m_go, NPC_GUARD_SLIPKIK, 0.5f))
             {
                 m_go->Use(slipkik);
+                DoScriptText(SAY_SLIPKIK_TRAP, slipkik);
                 slipkik->AI()->EnterEvadeMode();
                 slipkik->SetImmuneToPlayer(true);
                 slipkik->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);

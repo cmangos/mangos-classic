@@ -88,6 +88,7 @@ enum
     SAY_KILL_IMMOLTHAR          = -1429001,
     SAY_IRONBARK_REDEEM         = -1429002,
     SAY_CHORUSH_KING_DEAD       = -1429003,
+    SAY_SLIPKIK_TRAP            = -1429004,
 
     FACTION_HOSTILE             = 14,
     FACTION_FRIENDLY            = 35,
