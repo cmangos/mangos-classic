@@ -772,6 +772,15 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_INTERRUPT_SPELL:            // 47
+            {
+                if (tmp.interruptSpell.currentSpellType >= CURRENT_MAX_SPELL)
+                {
+                    sLog.outErrorDb("Table `%s` uses invalid current spell type %u (must be smaller or equal to %u) for script id %u.", tablename, tmp.interruptSpell.currentSpellType, CURRENT_MAX_SPELL - 1, tmp.id);
+                    continue;
+                }
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -2314,6 +2323,16 @@ bool ScriptAction::HandleScriptStep()
                 break;
 
             ((Unit*)pSource)->CastCustomSpell((Unit*)pTarget, m_script->castCustomSpell.spellId, &m_script->textId[0], &m_script->textId[1], &m_script->textId[2], m_script->castCustomSpell.castFlags);
+            break;
+        }
+        case SCRIPT_COMMAND_INTERRUPT_SPELL:                // 47
+        {
+            if (LogIfNotUnit(pSource))
+                return false;
+
+            Unit* unitSource = static_cast<Unit*>(pSource);
+
+            unitSource->InterruptSpell((CurrentSpellTypes)m_script->interruptSpell.currentSpellType);
             break;
         }
         default:

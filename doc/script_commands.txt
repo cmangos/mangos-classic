@@ -361,3 +361,7 @@ Defining a buddy could be done in several way:
                                             * datalong = spell id
                                             * datalong2 = TriggerCastFlags
                                             * dataint1-dataint3 define the &bp for the spell. At least one field is required.
+
+47 SCRIPT_COMMAND_INTERRUPT_SPELL           Interrupt spell in specific slot
+                                            * source must be unit
+                                            * datalong = SpellType enum CurrentSpellTypes
