@@ -3347,8 +3347,13 @@ void Spell::update(uint32 difftime)
                                     cancel();
                                 break;
                             case TYPEID_PLAYER:
-                                if ((M_PI_F - std::abs(std::abs(m_castOrientation - m_caster->GetOrientation()) - M_PI_F)) > 0.15f)
+                            {
+                                float targetOrientationDiff = 0.10f; // Diff due to client server mismatch
+                                if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET)) // On start, client turns player to face object, need leeway so that we dont break unnecessarily
+                                    targetOrientationDiff += float(500 - std::min(uint32(500), m_duration - m_timer)) / 500 * 0.6f;
+                                if ((M_PI_F - std::abs(std::abs(m_castOrientation - m_caster->GetOrientation()) - M_PI_F)) > targetOrientationDiff)
                                     cancel();
+                            }
                         }
                     }
                 }
