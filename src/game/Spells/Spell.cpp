@@ -6579,7 +6579,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
             // Get GO cast coordinates if original caster -> GO
             if (!IsIgnoreLosSpellEffect(m_spellInfo, eff) && target != m_caster)
                 if (WorldObject* caster = GetCastingObject())
-                    if (!target->IsWithinLOSInMap(caster))
+                    if (!target->IsWithinLOSInMap(caster, true))
                         return false;
             break;
     }
