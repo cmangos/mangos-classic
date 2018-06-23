@@ -1175,6 +1175,6 @@ bool ChatHandler::HandleDebugSpellVisual(char* args)
     if (!ExtractUInt32(&args, spellVisualID))
         return false;
 
-    target->SendPlaySpellVisual(spellVisualID);
+    target->PlaySpellVisual(spellVisualID);
     return true;
 }

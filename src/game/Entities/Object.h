@@ -813,6 +813,7 @@ class WorldObject : public Object
         void PlayDistanceSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
         void PlayDirectSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
         void PlayMusic(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
+        void PlaySpellVisual(uint32 artKitId, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
         void HandlePlayPacketSettings(WorldPacket& msg, PlayPacketParameters& parameters) const;
 
         void SendObjectDeSpawnAnim(ObjectGuid guid) const;

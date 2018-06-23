@@ -1961,6 +1961,14 @@ void WorldObject::PlayMusic(uint32 sound_id, PlayPacketParameters parameters /*=
     HandlePlayPacketSettings(data, parameters);
 }
 
+void WorldObject::PlaySpellVisual(uint32 artKitId, PlayPacketParameters parameters /*= PlayPacketParameters(PLAY_SET)*/) const
+{
+    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 4);
+    data << GetObjectGuid();
+    data << artKitId; // index from SpellVisualKit.dbc
+    HandlePlayPacketSettings(data, parameters);
+}
+
 void WorldObject::HandlePlayPacketSettings(WorldPacket& msg, PlayPacketParameters& parameters) const
 {
     switch (parameters.setting)
