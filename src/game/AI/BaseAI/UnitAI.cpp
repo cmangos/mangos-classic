@@ -118,7 +118,7 @@ CanCastResult UnitAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo, bo
         if (m_unit->GetPower((Powers)spellInfo->powerType) < Spell::CalculatePowerCost(spellInfo, m_unit))
             return CAST_FAIL_POWER;
 
-        if (target && !IsIgnoreLosSpellCast(spellInfo) && !m_unit->IsWithinLOSInMap(target) && m_unit != target)
+        if (target && !IsIgnoreLosSpellCast(spellInfo) && !m_unit->IsWithinLOSInMap(target, true) && m_unit != target)
             return CAST_FAIL_NOT_IN_LOS;
 
         if (!m_unit->IsSpellReady(*spellInfo))
