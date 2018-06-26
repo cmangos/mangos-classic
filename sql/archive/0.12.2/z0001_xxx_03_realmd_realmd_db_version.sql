@@ -1,1 +1,0 @@
-ALTER TABLE realmd_db_version CHANGE COLUMN required_077_8728_01_realmd_account required_z0001_xxx_03_realmd_realmd_db_version bit;
