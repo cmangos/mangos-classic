@@ -1,6 +1,7 @@
 #!/bin/bash
 
 sudo apt-get --allow-unauthenticated install -qq -y build-essential git m4 sudo python gcc-4.8 g++-4.8 make cmake libboost1.55-dev libboost-system1.55-dev libboost-program-options1.55-dev libboost-thread1.55-dev libboost-regex1.55-dev
+git apply MangosPI.patch
 export DEBIAN_FRONTEND=noninteractive
 export BUILD_TYPE=Release
 export CXX=g++
