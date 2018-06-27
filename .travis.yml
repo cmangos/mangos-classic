@@ -15,7 +15,7 @@ before_script:
     - qemu-system-arm -kernel raspberry-qemu/kernel-qemu -cpu arm1176 -m 256 -M versatilepb -no-reboot -serial stdio -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" -net user,hostfwd=tcp::10022-:22 -net nic -display none -hda 2015-11-21-raspbian-jessie-lite.img &
     - ./piutils/wait-for-ssh
     - ./piutils/run-on-pi "cat /etc/os-release"
-    - -/piitils/run-on-pi "ls -lrt"
+    - ./piutils/run-on-pi "ls -lrt"
     - ./piutils/run-on-pi "sudo apt-get --allow-unauthenticated install -qq -y git rsync"
     - ./piutils/run-on-pi "rm -rf mangos-classic-raspberry-pi"
     - ./piutils/run-on-pi "git clone https://github.com/cmangos/mangos-classic.git"
