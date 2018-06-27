@@ -17,6 +17,7 @@ before_script:
     - ./piutils/run-on-pi "cat /etc/os-release"
     - ./piutils/run-on-pi "sudo apt-get --allow-unauthenticated install -qq -y git rsync"
     - ./piutils/run-on-pi "git clone https://github.com/cmangos/mangos-classic.git"
+    - ./piutils/run-on-pi "git clone -b $TRAVIS_BRANCH https://github.com/Morlackx/mangos-classic-raspberry-pi.git"
     - ./piutils/run-on-pi "rsync --exclude=.git* -axv mangos-classic-raspberry-pi/ mangos-classic/"
 
 script:
