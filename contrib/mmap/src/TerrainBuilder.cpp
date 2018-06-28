@@ -24,6 +24,7 @@
 #include "VMapManager2.h"
 #include "MapTree.h"
 #include "ModelInstance.h"
+#include "Maps/GridMapDefines.h"
 
 
 namespace MMAP
@@ -207,7 +208,7 @@ namespace MMAP
             GridMapLiquidHeader lheader;
             fseek(mapFile, fheader.liquidMapOffset, SEEK_SET);
 
-            float* liquid_map = NULL;
+            float* liquid_map = nullptr;
 
             if (fread(&lheader, sizeof(GridMapLiquidHeader), 1, mapFile) == 1)
             {
@@ -252,7 +253,7 @@ namespace MMAP
                     col = i % V9_SIZE;
 
                     if (row < lheader.offsetY || row >= lheader.offsetY + lheader.height ||
-                            col < lheader.offsetX || col >= lheader.offsetX + lheader.width)
+                        col < lheader.offsetX || col >= lheader.offsetX + lheader.width)
                     {
                         // dummy vert using invalid height
                         meshData.liquidVerts.append((xoffset + col * GRID_PART_SIZE) * -1, INVALID_MAP_LIQ_HEIGHT, (yoffset + row * GRID_PART_SIZE) * -1);
@@ -311,7 +312,7 @@ namespace MMAP
 
         // make a copy of liquid vertices
         // used to pad right-bottom frame due to lost vertex data at extraction
-        float* lverts_copy = NULL;
+        float* lverts_copy = nullptr;
         if (meshData.liquidVerts.size())
         {
             lverts_copy = new float[meshData.liquidVerts.size()];
@@ -446,7 +447,7 @@ namespace MMAP
         }
 
         if (lverts_copy)
-            delete [] lverts_copy;
+            delete[] lverts_copy;
 
         return meshData.solidTris.size() || meshData.liquidTris.size();
     }

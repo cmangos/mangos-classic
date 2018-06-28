@@ -55,6 +55,8 @@
 #else
 #define OPEN_FLAGS (O_RDONLY | O_BINARY)
 #endif
+
+#include "Maps/GridMapDefines.h"
 extern ArchiveSet gOpenArchives;
 
 typedef struct
@@ -261,66 +263,6 @@ static char const* MAP_AREA_MAGIC    = "AREA";
 static char const* MAP_HEIGHT_MAGIC  = "MHGT";
 static char const* MAP_LIQUID_MAGIC  = "MLIQ";
 
-struct map_fileheader
-{
-    uint32 mapMagic;
-    uint32 versionMagic;
-    uint32 areaMapOffset;
-    uint32 areaMapSize;
-    uint32 heightMapOffset;
-    uint32 heightMapSize;
-    uint32 liquidMapOffset;
-    uint32 liquidMapSize;
-    uint32 holesOffset;
-    uint32 holesSize;
-};
-
-#define MAP_AREA_NO_AREA      0x0001
-
-struct map_areaHeader
-{
-    uint32 fourcc;
-    uint16 flags;
-    uint16 gridArea;
-};
-
-#define MAP_HEIGHT_NO_HEIGHT  0x0001
-#define MAP_HEIGHT_AS_INT16   0x0002
-#define MAP_HEIGHT_AS_INT8    0x0004
-
-struct map_heightHeader
-{
-    uint32 fourcc;
-    uint32 flags;
-    float  gridHeight;
-    float  gridMaxHeight;
-};
-
-#define MAP_LIQUID_TYPE_NO_WATER    0x00
-#define MAP_LIQUID_TYPE_MAGMA       0x01
-#define MAP_LIQUID_TYPE_OCEAN       0x02
-#define MAP_LIQUID_TYPE_SLIME       0x04
-#define MAP_LIQUID_TYPE_WATER       0x08
-
-#define MAP_LIQUID_TYPE_DARK_WATER  0x10
-#define MAP_LIQUID_TYPE_WMO_WATER   0x20
-
-#define MAP_LIQUID_NO_TYPE    0x01
-#define MAP_LIQUID_NO_HEIGHT  0x02
-
-struct map_liquidHeader
-{
-    uint32 fourcc;
-    uint8 flags;
-    uint8 liquidFlags;
-    uint16 liquidType;
-    uint8  offsetX;
-    uint8  offsetY;
-    uint8  width;
-    uint8  height;
-    float  liquidLevel;
-};
-
 float selectUInt8StepStore(float maxDiff)
 {
     return 255 / maxDiff;
@@ -364,7 +306,7 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x)
     memset(liquid_entry, 0, sizeof(liquid_entry));
 
     // Prepare map header
-    map_fileheader map;
+    GridMapFileHeader map;
     map.mapMagic = *(uint32 const*)MAP_MAGIC;
     map.versionMagic = *(uint32 const*)MAP_VERSION_MAGIC;
 
@@ -405,9 +347,9 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x)
     }
 
     map.areaMapOffset = sizeof(map);
-    map.areaMapSize   = sizeof(map_areaHeader);
+    map.areaMapSize   = sizeof(GridMapAreaHeader);
 
-    map_areaHeader areaHeader;
+    GridMapAreaHeader areaHeader;
     areaHeader.fourcc = *(uint32 const*)MAP_AREA_MAGIC;
     areaHeader.flags = 0;
     if (fullAreaData)
@@ -534,9 +476,9 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x)
     }
 
     map.heightMapOffset = map.areaMapOffset + map.areaMapSize;
-    map.heightMapSize = sizeof(map_heightHeader);
+    map.heightMapSize = sizeof(GridMapHeightHeader);
 
-    map_heightHeader heightHeader;
+    GridMapHeightHeader heightHeader;
     heightHeader.fourcc = *(uint32 const*)MAP_HEIGHT_MAGIC;
     heightHeader.flags = 0;
     heightHeader.gridHeight    = minHeight;
@@ -744,7 +686,7 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x)
         }
     }
 
-    map_liquidHeader liquidHeader;
+    GridMapLiquidHeader liquidHeader;
 
     // no water data (if all grid have 0 liquid type)
     if (firstLiquidFlag == 0 && !fullType)
@@ -778,9 +720,10 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x)
             }
         }
         map.liquidMapOffset = map.heightMapOffset + map.heightMapSize;
-        map.liquidMapSize = sizeof(map_liquidHeader);
+        map.liquidMapSize = sizeof(GridMapLiquidHeader);
         liquidHeader.fourcc = *(uint32 const*)MAP_LIQUID_MAGIC;
         liquidHeader.flags = 0;
+        liquidHeader.liquidFlags = 0;
         liquidHeader.liquidType = 0;
         liquidHeader.offsetX = minX;
         liquidHeader.offsetY = minY;
