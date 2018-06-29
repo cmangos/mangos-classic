@@ -728,10 +728,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 19411:                                 // Lava Bomb
-                case 20474:                                 // Lava Bomb
                 {
                     if (unitTarget)
                         unitTarget->CastSpell(unitTarget, 20494, TRIGGERED_OLD_TRIGGERED);
+
+                    return;
+                }
+                case 20474:                                 // Lava Bomb
+                {
+                    if (unitTarget)
+                        unitTarget->CastSpell(unitTarget, 20495, TRIGGERED_OLD_TRIGGERED);
 
                     return;
                 }

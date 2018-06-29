@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Magmadar
-SD%Complete: 100
-SDComment: Complete
+SD%Complete: 99
+SDComment: Lava bomb timers may need some adjustements
 SDCategory: Molten Core
 EndScriptData
 
@@ -34,7 +34,8 @@ enum
     SPELL_FRENZY                = 19451,
     SPELL_MAGMASPIT             = 19449,                    // This is actually a buff he gives himself
     SPELL_PANIC                 = 19408,
-    SPELL_LAVABOMB              = 19411,                    // This calls a dummy server side effect that cast spell 20494 to spawn GO 177704
+    SPELL_LAVABOMB              = 19411,                    // This calls a dummy server side effect that cast spell 20494 to spawn GO 177704 for 30s
+    SPELL_LAVABOMB_MANA         = 20474,                    // This calls a dummy server side effect that cast spell 20495 to spawn GO 177704 for 60s
     // SPELL_CONFLAGRATION         = 19428                     // Trap spell for GO 177704
 };
 
@@ -51,12 +52,14 @@ struct boss_magmadarAI : public ScriptedAI
     uint32 m_uiFrenzyTimer;
     uint32 m_uiPanicTimer;
     uint32 m_uiLavabombTimer;
+    uint32 m_uiLavabombManaTimer;
 
     void Reset() override
     {
         m_uiFrenzyTimer = 30000;
         m_uiPanicTimer = 7000;
         m_uiLavabombTimer = 12000;
+        m_uiLavabombManaTimer = 18000;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -105,17 +108,31 @@ struct boss_magmadarAI : public ScriptedAI
         else
             m_uiPanicTimer -= uiDiff;
 
-        // Lavabomb_Timer
+        // Lavabomb_Timer - non mana users
         if (m_uiLavabombTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_LAVABOMB, SELECT_FLAG_POWER_NOT_MANA))
             {
+                debug_log("SD2 casting NO MANA user lava bombe onto %s", pTarget->GetName());
                 if (DoCastSpellIfCan(pTarget, SPELL_LAVABOMB) == CAST_OK)
                     m_uiLavabombTimer = urand(12000, 15000);
             }
         }
         else
             m_uiLavabombTimer -= uiDiff;
+
+        // Lavabomb_Timer - mana users
+        if (m_uiLavabombManaTimer < uiDiff)
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_LAVABOMB_MANA, SELECT_FLAG_POWER_MANA))
+            {
+                                debug_log("SD2 casting MANA user lava bombe onto %s", pTarget->GetName());
+                if (DoCastSpellIfCan(pTarget, SPELL_LAVABOMB_MANA) == CAST_OK)
+                    m_uiLavabombManaTimer = urand(12000, 15000);
+            }
+        }
+        else
+            m_uiLavabombManaTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
