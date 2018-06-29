@@ -5186,6 +5186,27 @@ void PlayerbotAI::FaceTarget(Unit* pTarget)
     return;
 }
 
+/**
+ * IsImmuneToSchool()
+ * Playerbot wrapper to know if a target is immune or not to a specific damage school. This is used by the AI to prevent using an ability the target is immuned to
+ * return bool Returns true if bot's target is a creature with immunity to specified damage school
+ *
+ * params:target Unit* the target to check if it is immune
+ * params:schoolMask the school mask to be checked against the creature template or current spell immunity
+ * return false if the target is not immune, also return false by default
+ *
+ */
+bool PlayerbotAI::IsImmuneToSchool(Unit* target, SpellSchoolMask schoolMask)
+{
+    if (!target)
+        return false;
+
+    if (Creature* creature = (Creature*) target)
+            return creature->IsImmuneToDamage(schoolMask);
+
+    return false;
+}
+
 bool PlayerbotAI::CanStore()
 {
     uint32 totalused = 0;
