@@ -331,17 +331,18 @@ enum AttackingTarget
 
 enum SelectFlags
 {
-    SELECT_FLAG_IN_LOS              = 0x001,                // Default Selection Requirement for Spell-targets
-    SELECT_FLAG_PLAYER              = 0x002,
-    SELECT_FLAG_POWER_MANA          = 0x004,                // For Energy based spells, like manaburn
-    SELECT_FLAG_POWER_RAGE          = 0x008,
-    SELECT_FLAG_POWER_ENERGY        = 0x010,
-    SELECT_FLAG_IN_MELEE_RANGE      = 0x040,
-    SELECT_FLAG_NOT_IN_MELEE_RANGE  = 0x080,
-    SELECT_FLAG_HAS_AURA            = 0x100,
-    SELECT_FLAG_NOT_AURA            = 0x200,
-    SELECT_FLAG_RANGE_RANGE         = 0x400,                // For direct targeted abilities like charge or frostbolt
-    SELECT_FLAG_RANGE_AOE_RANGE     = 0x800,                // For AOE targeted abilities like frost nova
+    SELECT_FLAG_IN_LOS              = 0x0001,               // Default Selection Requirement for Spell-targets
+    SELECT_FLAG_PLAYER              = 0x0002,
+    SELECT_FLAG_POWER_MANA          = 0x0004,               // For mana based spells, like manaburn
+    SELECT_FLAG_POWER_RAGE          = 0x0008,
+    SELECT_FLAG_POWER_ENERGY        = 0x0010,
+    SELECT_FLAG_IN_MELEE_RANGE      = 0x0040,
+    SELECT_FLAG_NOT_IN_MELEE_RANGE  = 0x0080,
+    SELECT_FLAG_HAS_AURA            = 0x0100,
+    SELECT_FLAG_NOT_AURA            = 0x0200,
+    SELECT_FLAG_RANGE_RANGE         = 0x0400,               // For direct targeted abilities like charge or frostbolt
+    SELECT_FLAG_RANGE_AOE_RANGE     = 0x0800,               // For AOE targeted abilities like frost nova
+    SELECT_FLAG_POWER_NOT_MANA      = 0x1000,               // Used in some dungeon encounters
 };
 
 enum RegenStatsFlags

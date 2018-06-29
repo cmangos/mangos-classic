@@ -2163,6 +2163,9 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
             if (dist > params.range.maxRange || dist < params.range.minRange)
                 return false;
         }
+
+        if ((selectFlags & SELECT_FLAG_POWER_NOT_MANA) && pTarget->GetPowerType() == POWER_MANA)
+            return false;
     }
 
     if (pSpellInfo)
