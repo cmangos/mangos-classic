@@ -4447,7 +4447,7 @@ bool ChatHandler::HandleTeleDelCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleListAurasCommand(char* /*args*/)
+bool ChatHandler::HandleListAurasCommand(char* args)
 {
     Unit* unit = getSelectedUnit();
     if (!unit)
@@ -4457,46 +4457,54 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
         return false;
     }
 
+    uint32 auraNameId;
+    ExtractOptUInt32(&args, auraNameId, 0);
+
     char const* talentStr = GetMangosString(LANG_TALENT);
     char const* passiveStr = GetMangosString(LANG_PASSIVE);
 
-    Unit::SpellAuraHolderMap const& uAuras = unit->GetSpellAuraHolderMap();
-    PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, uAuras.size());
-    for (const auto& uAura : uAuras)
+    if (!auraNameId)
     {
-        bool talent = GetTalentSpellCost(uAura.second->GetId()) > 0;
-
-        SpellAuraHolder* holder = uAura.second;
-        char const* name = holder->GetSpellProto()->SpellName[GetSessionDbcLocale()];
-
-        for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        Unit::SpellAuraHolderMap const& uAuras = unit->GetSpellAuraHolderMap();
+        PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, uAuras.size());
+        for (Unit::SpellAuraHolderMap::const_iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
         {
-            Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i));
-            if (!aur)
-                continue;
+            bool talent = GetTalentSpellCost(itr->second->GetId()) > 0;
 
-            if (m_session)
-            {
-                std::ostringstream ss_name;
-                ss_name << "|cffffffff|Hspell:" << uAura.second->GetId() << "|h[" << name << "]|h|r";
+            SpellAuraHolder* holder = itr->second;
+            char const* name = holder->GetSpellProto()->SpellName[GetSessionDbcLocale()];
 
-                PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, holder->GetId(), aur->GetEffIndex(),
-                                aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
-                                ss_name.str().c_str(),
-                                (holder->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
-                                holder->GetCasterGuid().GetString().c_str(), holder->GetStackAmount());
-            }
-            else
+            for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
-                PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, holder->GetId(), aur->GetEffIndex(),
-                                aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
-                                name,
-                                (holder->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
-                                holder->GetCasterGuid().GetString().c_str(), holder->GetStackAmount());
+                Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i));
+                if (!aur)
+                    continue;
+
+                if (m_session)
+                {
+                    std::ostringstream ss_name;
+                    ss_name << "|cffffffff|Hspell:" << itr->second->GetId() << "|h[" << name << "]|h|r";
+
+                    PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, holder->GetId(), aur->GetEffIndex(),
+                        aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
+                        ss_name.str().c_str(),
+                        (holder->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
+                        holder->GetCasterGuid().GetString().c_str(), holder->GetStackAmount());
+                }
+                else
+                {
+                    PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, holder->GetId(), aur->GetEffIndex(),
+                        aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
+                        name,
+                        (holder->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
+                        holder->GetCasterGuid().GetString().c_str(), holder->GetStackAmount());
+                }
             }
         }
     }
-    for (int i = 0; i < TOTAL_AURAS; ++i)
+    uint32 i = auraNameId ? auraNameId : 0;
+    uint32 max = auraNameId ? auraNameId + 1 : TOTAL_AURAS;
+    for (; i < max; ++i)
     {
         Unit::AuraList const& uAuraList = unit->GetAurasByType(AuraType(i));
         if (uAuraList.empty()) continue;
