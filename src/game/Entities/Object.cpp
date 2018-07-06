@@ -1824,13 +1824,13 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     // prepare selector for work
     ObjectPosSelector selector(GetPositionX(), GetPositionY(), distance2d, searcher_bounding_radius, searcher);
 
-    // adding used positions around object
-    {
-        MaNGOS::NearUsedPosDo u_do(*this, searcher, absAngle, selector);
-        MaNGOS::WorldObjectWorker<MaNGOS::NearUsedPosDo> worker(u_do);
+    // adding used positions around object - unused because its not blizzlike
+    //{
+    //    MaNGOS::NearUsedPosDo u_do(*this, searcher, absAngle, selector);
+    //    MaNGOS::WorldObjectWorker<MaNGOS::NearUsedPosDo> worker(u_do);
 
-        Cell::VisitAllObjects(this, worker, dist);
-    }
+    //    Cell::VisitAllObjects(this, worker, dist);
+    //}
 
     // maybe can just place in primary position
     if (selector.CheckOriginalAngle())

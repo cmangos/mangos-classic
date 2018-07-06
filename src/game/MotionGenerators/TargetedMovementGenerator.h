@@ -78,6 +78,7 @@ class TargetedMovementGeneratorMedium
         PathFinder* i_path;
 };
 
+// TODO: need collision detection, but not on approaching but after being at target for 1-2 seconds
 template<class T>
 class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >
 {
