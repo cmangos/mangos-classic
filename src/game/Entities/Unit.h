@@ -1134,6 +1134,13 @@ enum PowerDefaults
     POWER_HAPPINESS_DEFAULT         = 1000000,
 };
 
+enum EvadeState
+{
+    EVADE_NONE,
+    EVADE_COMBAT, // In a dungeon in combat evades all hits until target becomes reachable
+    EVADE_HOME, // When running home evades all hits and disables some AI actions
+};
+
 struct SpellProcEventEntry;                                 // used only privately
 
 class Unit : public WorldObject
@@ -2240,7 +2247,7 @@ class Unit : public WorldObject
         bool IsEvadeRegen() const { return (m_evadeTimer > 0 && m_evadeTimer <= 5000) || m_evadeMode; } // Only regen after 5 seconds, or when in permanent evade
         void StartEvadeTimer() { m_evadeTimer = 10000; } // 10 seconds after which action is taken
         void StopEvade(); // Stops either timer or evade state
-        void SetEvade(bool state); // Propagated to pets
+        void SetEvade(EvadeState state); // Propagated to pets
 
         // Take possession of an unit (pet, creature, ...)
         bool TakePossessOf(Unit* possessed);
@@ -2424,7 +2431,7 @@ class Unit : public WorldObject
         bool m_extraAttacksExecuting;
 
         uint32 m_evadeTimer; // Used for evade during combat when mob is not running home and target isnt reachable
-        bool m_evadeMode; // Used for evade during running home
+        EvadeState m_evadeMode; // Used for evade during running home
 
         // invisibility data
         uint32 m_invisibilityMask;

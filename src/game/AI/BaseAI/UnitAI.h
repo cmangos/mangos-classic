@@ -50,6 +50,7 @@ enum CanCastResult
     CAST_FAIL_TARGET_AURA       = 7,
     CAST_FAIL_NOT_IN_LOS        = 8,
     CAST_FAIL_COOLDOWN          = 9,
+    CAST_FAIL_EVADE             = 10,
 };
 
 enum CastFlags
@@ -115,6 +116,7 @@ enum AIOrders
     ORDER_NONE,
     ORDER_DISTANCING,
     ORDER_FLEEING,
+    ORDER_EVADE,
     ORDER_CUSTOM,
 };
 

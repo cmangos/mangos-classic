@@ -161,6 +161,9 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
     else if (castFlags & (CAST_FORCE_TARGET_SELF | CAST_SWITCH_CASTER_TARGET))
         return CAST_FAIL_OTHER;
 
+    if (GetAIOrder() == ORDER_EVADE && !(castFlags & CAST_TRIGGERED))
+        return CAST_FAIL_EVADE;
+
     // Allowed to cast only if not casting (unless we interrupt ourself) or if spell is triggered
     if (!caster->IsNonMeleeSpellCasted(false) || (castFlags & (CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS)))
     {
