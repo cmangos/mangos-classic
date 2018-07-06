@@ -118,7 +118,7 @@ struct GameObjectInfo
         {
             uint32 lockId;                                  // 0 -> Lock.dbc
             uint32 level;                                   // 1
-            uint32 radius;                                  // 2 radius for trap activation
+            uint32 diameter;                                // 2 diameter for trap activation
             uint32 spellId;                                 // 3
             uint32 charges;                                 // 4 need respawn (if > 0)
             uint32 cooldown;                                // 5 time in secs
