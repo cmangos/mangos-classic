@@ -528,6 +528,13 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                         }
                     }
 
+                    if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Unit* unit = (Unit*)this; // hunters mark effects should only be visible to owners and not all players
+                        if (!unit->HasAuraTypeWithCaster(SPELL_AURA_MOD_STALKED, target->GetObjectGuid()))
+                            dynflagsValue &= ~UNIT_DYNFLAG_TRACK_UNIT;
+                    }
+
                     *data << dynflagsValue;
                 }
                 else                                        // Unhandled index, just send

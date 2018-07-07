@@ -7557,14 +7557,9 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // special cases for always overwrite invisibility/stealth
     if (invisible || m_Visibility == VISIBILITY_GROUP_STEALTH)
     {
-        if (u->CanAttack(this))
-        {
-            // Hunter mark functionality
-            AuraList const& auras = GetAurasByType(SPELL_AURA_MOD_STALKED);
-            for (AuraList::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
-                if ((*iter)->GetCasterGuid() == u->GetObjectGuid())
-                    return true;
-        }
+        if (u->CanAttack(this)) // Hunter mark functionality
+            if (HasAuraTypeWithCaster(SPELL_AURA_MOD_STALKED, u->GetObjectGuid()))
+                return true;
 
         // none other cases for detect invisibility, so invisible
         if (invisible)
