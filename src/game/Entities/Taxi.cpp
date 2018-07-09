@@ -221,10 +221,10 @@ bool Tracker::Prepare(Index nodeResume /*= 0*/)
     // Open a new map in the atlas
     m_atlas.push_back(Map());
     // Start populating map(s)
+    const TaxiPathNodeEntry* prev = nullptr;
     for (auto i = m_routes.begin(); i != m_routes.end(); ++i)
     {
         const TaxiPathNodeList& nodes = sTaxiPathNodesByPath[(*i).pathID];
-        const TaxiPathNodeEntry* prev = nullptr;
         for (auto j = nodes.begin(); j != nodes.end(); ++j)
         {
             // Abide route trimmed routes when building a spline
