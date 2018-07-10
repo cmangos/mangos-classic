@@ -2290,6 +2290,8 @@ class Unit : public WorldObject
         virtual void _UpdateAutoRepeatSpell();
         bool m_AutoRepeatFirstCast;
 
+        EvadeState GetEvade() const { return m_evadeMode; }
+
         uint32 m_attackTimer[MAX_ATTACK];
 
         float m_createStats[MAX_STATS];

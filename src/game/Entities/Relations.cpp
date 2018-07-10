@@ -1102,7 +1102,7 @@ bool Unit::CanAssistSpell(Unit const* target, SpellEntry const* spellInfo) const
 /////////////////////////////////////////////////
 bool Unit::CanAttackOnSight(Unit const* target) const
 {
-    return CanAttack(target) && !target->IsFeigningDeathSuccessfully() && IsEnemy(target);
+    return CanAttack(target) && !target->IsFeigningDeathSuccessfully() && target->GetEvade() != EVADE_HOME && IsEnemy(target);
 }
 
 /////////////////////////////////////////////////
