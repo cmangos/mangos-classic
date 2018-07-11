@@ -680,7 +680,7 @@ void GameEventMgr::ApplyNewEvent(uint16 event_id, bool resume)
     sLog.outString("GameEvent %u \"%s\" started.", event_id, mGameEvent[event_id].description.c_str());
     if (event_id == 987) // daily restart event
     {
-        sWorld.ShutdownServ(mGameEvent[event_id].length * 60, SHUTDOWN_MASK_RESTART, 0);
+        sWorld.ShutdownServ(mGameEvent[event_id].length * 60, SHUTDOWN_MASK_RESTART, RESTART_EXIT_CODE);
         return;
     }
     CharacterDatabase.PExecute("INSERT INTO game_event_status (event) VALUES (%u)", event_id);
