@@ -2875,11 +2875,15 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                     break;
                 }
             }
-            // We do not learn previous rank if its owned by a talent we don't know
-            if (!IsInWorld() || disabled || talent)        // at spells loading, no output, but allow save
-                addSpell(prev_spell, active, true, true, disabled);
-            else                                            // at normal learning
-                learnSpell(prev_spell, true);
+
+            if (!talent)
+            {
+                // We do not learn previous rank if its owned by a talent we don't know
+                if (!IsInWorld() || disabled)        // at spells loading, no output, but allow save
+                    addSpell(prev_spell, active, true, true, disabled);
+                else                                            // at normal learning
+                    learnSpell(prev_spell, true);
+            }
         }
 
         PlayerSpell newspell;
@@ -14485,15 +14489,24 @@ void Player::_LoadSpells(QueryResult* result)
 
     if (result)
     {
+        std::vector<std::tuple<uint32, bool, bool>> spells;
         do
         {
             Field* fields = result->Fetch();
 
             uint32 spell_id = fields[0].GetUInt32();
-
-            addSpell(spell_id, fields[1].GetBool(), false, false, fields[2].GetBool());
+            bool active = fields[1].GetBool();
+            bool disabled = fields[2].GetBool();
+            TalentSpellPos const* talentPos = GetTalentSpellPos(spell_id);
+            if (!talentPos)
+                spells.push_back(std::tuple<uint32, bool, bool>{ spell_id, active, disabled });
+            else
+                addSpell(spell_id, active, false, false, disabled);
         }
         while (result->NextRow());
+
+        for (auto& data : spells)
+            addSpell(std::get<0>(data), std::get<1>(data), false, false, std::get<2>(data));
 
         delete result;
     }
