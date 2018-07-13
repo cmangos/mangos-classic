@@ -16451,7 +16451,6 @@ bool Player::OnTaxiFlightUpdate(const size_t waypointIndex, const bool movement)
                 Taxi::Map map = m_taxiTracker.GetMap();
                 for (size_t next = (start ? current : current + 1); next <= waypointIndex; ++next)
                 {
-
                     const TaxiPathNodeEntry* entry = map.at(next);
                     const bool last = (entry == map.back());
                     Taxi::PathID startID = 0;
