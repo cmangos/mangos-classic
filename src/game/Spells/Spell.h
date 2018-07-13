@@ -448,6 +448,7 @@ class Spell
         bool m_triggerAutorepeat;
         bool m_doNotProc;
         bool m_petCast;
+        bool m_notifyAI;
 
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() const { return m_timer; }

@@ -197,6 +197,9 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
 
             uint32 flags = (castFlags & CAST_TRIGGERED ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE) | (castFlags & CAST_IGNORE_UNSELECTABLE_TARGET ? TRIGGERED_IGNORE_UNSELECTABLE_FLAG : TRIGGERED_NONE);
 
+            if (flags == TRIGGERED_NONE)
+                flags |= TRIGGERED_NORMAL_COMBAT_CAST;
+
             caster->CastSpell(target, spellInfo, flags, nullptr, nullptr, originalCasterGUID);
             return CAST_OK;
         }
@@ -274,7 +277,7 @@ void UnitAI::HandleMovementOnAttackStart(Unit* victim) const
     }
 }
 
-void UnitAI::OnSpellCastStateChange(SpellEntry const * spellInfo, bool state, WorldObject * target)
+void UnitAI::OnSpellCastStateChange(SpellEntry const* spellInfo, bool state, WorldObject* target)
 {
     if (spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_1) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_2))
         return;
@@ -313,7 +316,7 @@ void UnitAI::OnSpellCastStateChange(SpellEntry const * spellInfo, bool state, Wo
     }
 }
 
-void UnitAI::OnChannelStateChange(SpellEntry const * spellInfo, bool state, WorldObject* target)
+void UnitAI::OnChannelStateChange(SpellEntry const* spellInfo, bool state, WorldObject* target)
 {
     // TODO: Determine if CHANNEL_FLAG_MOVEMENT is worth implementing
     if (!spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET))
