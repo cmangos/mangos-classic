@@ -17,6 +17,7 @@
 */
 
 #include "Chat/Chat.h"
+#include "Entities/Pet.h"
 
 bool ChatHandler::HandlePetLevelLoyaltyCommand(char* args)
 {

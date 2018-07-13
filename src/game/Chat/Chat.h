@@ -41,6 +41,7 @@ class MailDraft;
 class Object;
 class GameObject;
 class Creature;
+class Pet;
 class Player;
 class Unit;
 
