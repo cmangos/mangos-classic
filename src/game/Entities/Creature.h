@@ -595,7 +595,7 @@ class Creature : public Unit
         bool IsDespawned() const { return getDeathState() ==  DEAD; }
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         void ReduceCorpseDecayTimer();
-        uint32 GetCorpseDecayTimer() const { return m_corpseDecayTimer; }
+        TimePoint GetCorpseDecayTimer() const { return m_corpseExpirationTime; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool IsCivilian() const { return GetCreatureInfo()->civilian != 0; }
         bool IsNoAggroOnSight() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO_ON_SIGHT) != 0; }
@@ -849,6 +849,8 @@ class Creature : public Unit
 
         void UnsummonCleanup(); // cleans up data before unsummon of various creatures
 
+        bool IsCorpseExpired() const;
+
         // vendor items
         VendorItemCounts m_vendorItemCounts;
 
@@ -858,7 +860,7 @@ class Creature : public Unit
         CreatureLootStatus m_lootStatus;                    // loot status (used to know when we could loot, pickpocket or skin)
 
         /// Timers
-        uint32 m_corpseDecayTimer;                          // (msecs)timer for death or corpse disappearance
+        TimePoint m_corpseExpirationTime;                   // (msecs) time point of corpse decay
         time_t m_respawnTime;                               // (secs) time of next respawn
         uint32 m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
         uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance

@@ -21,7 +21,7 @@
 #include "AI/BaseAI/CreatureAI.h"
 
 TemporarySpawn::TemporarySpawn(ObjectGuid summoner) :
-    Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_spawner(summoner), m_linkedToOwnerAura(0)
+    Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN), m_lifetime(0), m_spawner(summoner), m_linkedToOwnerAura(0)
 {
 }
 
@@ -34,13 +34,11 @@ void TemporarySpawn::Update(const uint32 diff)
 
         case TEMPSPAWN_TIMED_DESPAWN:
         {
-            if (m_timer <= diff)
+            if (IsExpired())
             {
                 UnSummon();
                 return;
             }
-
-            m_timer -= diff;
             break;
         }
 
@@ -50,16 +48,13 @@ void TemporarySpawn::Update(const uint32 diff)
             {
                 if (!isInCombat())
                 {
-                    if (m_timer <= diff)
+                    if (IsExpired())
                     {
                         UnSummon();
                         return;
                     }
-
-                    m_timer -= diff;
                 }
-                else if (m_timer != m_lifetime)
-                    m_timer = m_lifetime;
+                else m_expirationTimestamp = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_lifetime);
             }
             else if (IsDespawned())
             {
@@ -73,13 +68,11 @@ void TemporarySpawn::Update(const uint32 diff)
         {
             if (IsCorpse())
             {
-                if (m_timer <= diff)
+                if (IsExpired())
                 {
                     UnSummon();
                     return;
                 }
-
-                m_timer -= diff;
             }
             if (IsDespawned())
             {
@@ -122,16 +115,14 @@ void TemporarySpawn::Update(const uint32 diff)
 
             if (!isInCombat())
             {
-                if (m_timer <= diff)
+                if (IsExpired())
                 {
                     UnSummon();
                     return;
                 }
-                else
-                    m_timer -= diff;
             }
-            else if (m_timer != m_lifetime)
-                m_timer = m_lifetime;
+            else m_expirationTimestamp = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_lifetime);
+
             break;
         }
 
@@ -146,16 +137,14 @@ void TemporarySpawn::Update(const uint32 diff)
 
             if (!isInCombat() && isAlive() && !GetCharmerGuid())
             {
-                if (m_timer <= diff)
+                if (IsExpired())
                 {
                     UnSummon();
                     return;
                 }
-                else
-                    m_timer -= diff;
             }
-            else if (m_timer != m_lifetime)
-                m_timer = m_lifetime;
+            else m_expirationTimestamp = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_lifetime);
+
             break;
         }
 
@@ -167,12 +156,11 @@ void TemporarySpawn::Update(const uint32 diff)
                 UnSummon();
                 return;
             }
-            if (m_timer <= diff)
+            if (IsExpired())
             {
                 UnSummon();
                 return;
             }
-            m_timer -= diff;
             break;
         }
 
@@ -186,13 +174,12 @@ void TemporarySpawn::Update(const uint32 diff)
             }
             if (!GetCharmerGuid())
             {
-                if (m_timer <= diff)
+                if (IsExpired())
                 {
                     UnSummon();
                     return;
                 }
             }
-            m_timer -= diff;
             break;
         }
 
@@ -230,7 +217,7 @@ void TemporarySpawn::Update(const uint32 diff)
 void TemporarySpawn::SetSummonProperties(TempSpawnType type, uint32 lifetime)
 {
     m_type = type;
-    m_timer = lifetime;
+    m_expirationTimestamp = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(lifetime);
     m_lifetime = lifetime;
 
     // set month as re spawn delay to avoid it
@@ -287,6 +274,14 @@ void TemporarySpawn::RemoveAuraFromOwner()
 
 void TemporarySpawn::SaveToDB()
 {
+}
+
+bool TemporarySpawn::IsExpired() const
+{
+    auto now = GetMap()->GetCurrentClockTime();
+    if (now >= m_expirationTimestamp)
+        return true;
+    return false;
 }
 
 TemporarySpawnWaypoint::TemporarySpawnWaypoint(ObjectGuid summoner, uint32 waypoint_id, int32 path_id, uint32 pathOrigin) :

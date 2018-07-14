@@ -133,7 +133,7 @@ bool CreatureCreatePos::Relocate(Creature* cr) const
 Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_lootMoney(0), m_lootGroupRecipientId(0),
     m_lootStatus(CREATURE_LOOT_STATUS_NONE),
-    m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_canAggro(false),
+    m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_canAggro(false),
     m_respawnradius(5.0f), m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE),
     m_equipmentId(0), m_AlreadyCallAssistance(false),
     m_AlreadySearchedAssistance(false), m_isDeadByDefault(false),
@@ -204,7 +204,7 @@ void Creature::RemoveCorpse(bool inPlace)
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Removing corpse of %s ", GetGuidStr().c_str());
 
-    m_corpseDecayTimer = 0;
+    m_corpseExpirationTime = TimePoint();
     SetDeathState(DEAD);
     UpdateObjectVisibility();
 
@@ -581,12 +581,8 @@ void Creature::Update(const uint32 diff)
                 loot->Update();
 
             if (!m_isDeadByDefault)
-            {
-                if (m_corpseDecayTimer <= diff)
+                if (IsCorpseExpired())
                     RemoveCorpse();
-                else
-                    m_corpseDecayTimer -= diff;
-            }
 
             break;
         }
@@ -594,13 +590,11 @@ void Creature::Update(const uint32 diff)
         {
             if (m_isDeadByDefault)
             {
-                if (m_corpseDecayTimer <= diff)
+                if (IsCorpseExpired())
                 {
                     RemoveCorpse();
                     break;
                 }
-                else
-                    m_corpseDecayTimer -= diff;
             }
 
             Unit::Update(diff);
@@ -1584,7 +1578,7 @@ void Creature::SetDeathState(DeathState s)
         if (CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow()))
             m_respawnDelay = data->GetRandomRespawnTime();
 
-        m_corpseDecayTimer = m_corpseDelay * IN_MILLISECONDS; // the max/default time for corpse decay (before creature is looted/AllLootRemovedFromCorpse() is called)
+        m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_corpseDelay * IN_MILLISECONDS); // the max/default time for corpse decay (before creature is looted/AllLootRemovedFromCorpse() is called)
         m_respawnTime = time(nullptr) + m_respawnDelay; // respawn delay (spawntimesecs)
 
         // always save boss respawn time at death to prevent crash cheating
@@ -1848,7 +1842,7 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     // Live player (or with not release body see live creatures or death creatures with corpse disappearing time > 0
     if (pl->isAlive() || !pl->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
     {
-        return (isAlive() || m_corpseDecayTimer > 0 || (m_isDeadByDefault && m_deathState == CORPSE));
+        return (isAlive() || !IsCorpseExpired() || (m_isDeadByDefault && m_deathState == CORPSE));
     }
 
     // Dead player see live creatures near own corpse
@@ -1957,8 +1951,8 @@ void Creature::SaveRespawnTime()
 
     if (m_respawnTime > time(nullptr))                         // dead (no corpse)
         GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), m_respawnTime);
-    else if (m_corpseDecayTimer > 0)                        // dead (corpse)
-        GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), time(nullptr) + m_respawnDelay + m_corpseDecayTimer / IN_MILLISECONDS);
+    else if (!IsCorpseExpired())                               // dead (corpse)
+        GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), std::chrono::system_clock::to_time_t(m_corpseExpirationTime));
 }
 
 CreatureDataAddon const* Creature::GetCreatureAddon() const
@@ -2335,11 +2329,11 @@ time_t Creature::GetRespawnTimeEx() const
     time_t now = time(nullptr);
     if (m_respawnTime > now)                                // dead (no corpse)
         return m_respawnTime;
-    if (m_corpseDecayTimer > 0)                        // dead (corpse)
-        return now + m_respawnDelay + m_corpseDecayTimer / IN_MILLISECONDS;
-    return now;
+    else if (!IsCorpseExpired())                        // dead (corpse)
+        return std::chrono::system_clock::to_time_t(m_corpseExpirationTime);
+    else
+        return now;
 }
-
 void Creature::GetRespawnCoord(float& x, float& y, float& z, float* ori, float* dist) const
 {
     x = m_respawnPos.x;
@@ -2779,8 +2773,8 @@ void Creature::InspectingLoot()
     // this will not have effect after re spawn delay (corpse will be removed anyway)
 
     // check if player have enough time to inspect loot
-    if (m_corpseDecayTimer < MINIMUM_LOOTING_TIME)
-        m_corpseDecayTimer = MINIMUM_LOOTING_TIME;
+    if (m_corpseExpirationTime < GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(MINIMUM_LOOTING_TIME))
+        m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(MINIMUM_LOOTING_TIME);
 }
 
 // reduce decay timer for corpse if need (for a corpse without loot)
@@ -2796,8 +2790,8 @@ void Creature::ReduceCorpseDecayTimer()
             isDungeonEncounter = true;
     }
 
-    if (!isDungeonEncounter && m_corpseDecayTimer > 2 * MINUTE * IN_MILLISECONDS)
-        m_corpseDecayTimer = 2 * MINUTE * IN_MILLISECONDS;  // 2 minutes for a creature
+    if (!isDungeonEncounter && m_corpseExpirationTime > GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(2 * MINUTE * IN_MILLISECONDS))
+        m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(2 * MINUTE * IN_MILLISECONDS);  // 2 minutes for a creature
 }
 
 // Set loot status. Also handle remove corpse timer
@@ -2820,7 +2814,7 @@ void Creature::SetLootStatus(CreatureLootStatus status)
             }
             break;
         case CREATURE_LOOT_STATUS_SKINNED:
-            m_corpseDecayTimer = 0; // remove corpse at next update
+            m_corpseExpirationTime = TimePoint(); // remove corpse at next update
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
             RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             break;
@@ -2887,6 +2881,14 @@ void Creature::LockOutSpells(SpellSchoolMask schoolMask, uint32 duration)
         return;
 
     WorldObject::LockOutSpells(schoolMask, duration);
+}
+
+bool Creature::IsCorpseExpired() const
+{
+    auto now = GetMap()->GetCurrentClockTime();
+    if (now >= m_corpseExpirationTime)
+        return true;
+    return false;
 }
 
 void Creature::UnsummonCleanup()
