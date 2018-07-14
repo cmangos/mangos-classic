@@ -600,6 +600,12 @@ struct npc_theryluneAI : public npc_escortAI
 
     void Reset() override {}
 
+    void JustRespawned() override
+    {
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+        npc_escortAI::JustRespawned();
+    }
+
     void WaypointReached(uint32 uiPointId) override
     {
         switch (uiPointId)
@@ -629,6 +635,7 @@ bool QuestAccept_npc_therylune(Player* pPlayer, Creature* pCreature, const Quest
         if (npc_theryluneAI* pEscortAI = dynamic_cast<npc_theryluneAI*>(pCreature->AI()))
         {
             pEscortAI->Start(false, pPlayer, pQuest);
+            pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             DoScriptText(SAY_THERYLUNE_START, pCreature, pPlayer);
         }
     }
