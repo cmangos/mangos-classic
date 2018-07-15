@@ -482,7 +482,7 @@ static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32
 
 void Group::GetDataForXPAtKill(Unit const* victim, uint32& count, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level, Player* additional)
 {
-    for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
+    for (GroupReference const* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
     {
         Player* member = itr->getSource();
         if (!member || !member->isAlive())                  // only for alive
@@ -1307,7 +1307,7 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
             {
                 uint32 itr_xp = (member_with_max_level == not_gray_member_with_max_level) ? uint32(xp * rate) : uint32((xp * rate / 2) + 1);
 
-                pGroupGuy->GiveXP(itr_xp, creatureVictim);
+                pGroupGuy->GiveXP(itr_xp, creatureVictim, group_rate);
                 if (Pet* pet = pGroupGuy->GetPet())
                     // TODO: Pets need to get exp based on their level diff to the target, not the owners.
                     // the whole RewardGroupAtKill needs a rewrite to match up with this anyways:
