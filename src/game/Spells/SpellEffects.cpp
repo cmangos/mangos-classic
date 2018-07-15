@@ -3323,6 +3323,8 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     pet->InitTamedPetPassives(m_caster);
     pet->UpdateAllStats();
 
+    pet->SetRequiredXpForNextLoyaltyLevel();
+
     // caster have pet now
     plr->SetPet(pet);
 
