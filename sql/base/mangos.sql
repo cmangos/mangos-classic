@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2726_01_mangos_creature_conditional_spawn` bit(1) DEFAULT NULL
+  `required_z2727_01_mangos_event_ai` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -774,6 +774,8 @@ CREATE TABLE `creature_ai_scripts` (
   `event_param2` int(11) NOT NULL DEFAULT '0',
   `event_param3` int(11) NOT NULL DEFAULT '0',
   `event_param4` int(11) NOT NULL DEFAULT '0',
+  `event_param5` int(11) NOT NULL DEFAULT '0',
+  `event_param6` int(11) NOT NULL DEFAULT '0',
   `action1_type` tinyint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Action Type',
   `action1_param1` int(11) NOT NULL DEFAULT '0',
   `action1_param2` int(11) NOT NULL DEFAULT '0',

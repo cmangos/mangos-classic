@@ -206,6 +206,9 @@ struct ScriptedAI : public CreatureAI
 
         bool EnterEvadeIfOutOfCombatArea(const uint32 diff);
 
+    protected:
+        std::string GetAIName() override { return m_creature->GetAIName(); }
+
     private:
         uint32 m_uiEvadeCheckCooldown;
 

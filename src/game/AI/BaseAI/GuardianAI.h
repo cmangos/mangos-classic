@@ -40,9 +40,7 @@ class GuardianAI : public CreatureEventAI
         virtual void EnterEvadeMode() override;
         virtual void UpdateAI(const uint32 diff) override;
         virtual void CombatStop() override;
-
-        virtual bool ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker = nullptr, Unit* AIEventSender = nullptr) override;
-        virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* actionInvoker, Unit* AIEventSender) override;
-        Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff, bool onlyInCombat) const;
+    protected:
+        std::string GetAIName() override { return "GuardianAI"; }
 };
 #endif

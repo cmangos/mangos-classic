@@ -41,5 +41,8 @@ class PossessedAI : public UnitAI
         {
             DoMeleeAttackIfReady();
         }
+
+    protected:
+        std::string GetAIName() override { return "PossessedAI"; }
 };
 #endif

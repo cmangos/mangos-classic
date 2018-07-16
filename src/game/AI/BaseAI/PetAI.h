@@ -42,6 +42,7 @@ class PetAI : public UnitAI
         static int Permissible(const Creature* creature);
 
     protected:
+        std::string GetAIName() override { return "PetAI"; }
         Creature* m_creature; // TODO: Make PetAI only available for creatures
 
     private:

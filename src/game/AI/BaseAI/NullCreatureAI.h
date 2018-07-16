@@ -36,5 +36,7 @@ class NullCreatureAI : public CreatureAI
 
         void UpdateAI(const uint32) override {}
         static int Permissible(const Creature*) { return PERMIT_BASE_IDLE;  }
+    protected:
+        std::string GetAIName() override { return "NullAI"; }
 };
 #endif

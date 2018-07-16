@@ -32,5 +32,7 @@ class CritterAI : public CreatureAI
         void UpdateAI(const uint32 /*diff*/) override;
 
         static int Permissible(const Creature* creature);
+    protected:
+        std::string GetAIName() override { return "CritterAI"; }
 };
 #endif

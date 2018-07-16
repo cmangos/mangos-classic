@@ -36,6 +36,7 @@ class Spell;
 
 #define TIME_INTERVAL_LOOK   5000
 #define VISIBILITY_RANGE    10000
+#define DISTANCING_CONSTANT 1.f
 
 enum CanCastResult
 {
@@ -432,6 +433,7 @@ class UnitAI
         virtual void JustStoppedMovementOfTarget(SpellEntry const* spellInfo, Unit* victim) {}
 
     protected:
+        virtual std::string GetAIName() { return "UnitAI"; }
 
         ///== Fields =======================================
 
