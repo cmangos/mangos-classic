@@ -5289,15 +5289,12 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
 
         if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
         {
-            // not break stealth by cast targeting
-            if (!spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
-                target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-
             if (attack)
             {
                 // Since patch 1.5.0 sitting characters always stand up on attack (even if stunned)
-                if (success && !target->IsStandState() && target->GetTypeId() == TYPEID_PLAYER)
-                    target->SetStandState(UNIT_STAND_STATE_STAND);
+                if (!spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_SITTING))
+                    if (success && !target->IsStandState() && target->GetTypeId() == TYPEID_PLAYER)
+                        target->SetStandState(UNIT_STAND_STATE_STAND);
 
                 if (!spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
                 {
