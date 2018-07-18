@@ -2779,10 +2779,6 @@ void Spell::CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTa
 
 SpellCastResult Spell::PreCastCheck(Aura* triggeredByAura /*= nullptr*/)
 {
-    // Prevent casting at cast another spell (ServerSide check)
-    if (!m_IsTriggeredSpell && m_caster->IsNonMeleeSpellCasted(false, true, true) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
-        return SPELL_FAILED_SPELL_IN_PROGRESS;
-
     SpellCastResult result = CheckCast(true);
     if (result != SPELL_CAST_OK && !IsAutoRepeat())         // always cast autorepeat dummy for triggering
     {
