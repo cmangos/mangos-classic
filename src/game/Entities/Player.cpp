@@ -1267,7 +1267,7 @@ void Player::Update(const uint32 diff)
         if (diff >= m_DetectInvTimer)
         {
             HandleStealthedUnitsDetection();
-            m_DetectInvTimer = 3000;
+            m_DetectInvTimer = GetMap()->IsBattleGround() ? 1000 : 3000;
         }
         else
             m_DetectInvTimer -= diff;
