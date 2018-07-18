@@ -63,7 +63,7 @@ struct boss_ambassador_flamelashAI : public ScriptedAI
             return;
 
         if (GameObject* pRune = m_pInstance->GetSingleGameObjectFromStorage(GO_DWARFRUNE_A01 + uiIndex))
-            m_creature->SummonCreature(NPC_BURNING_SPIRIT, pRune->GetPositionX(), pRune->GetPositionY(), pRune->GetPositionZ(), m_creature->GetAngle(m_creature), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+            m_creature->SummonCreature(NPC_BURNING_SPIRIT, pRune->GetPositionX(), pRune->GetPositionY(), pRune->GetPositionZ(), pRune->GetAngle(m_creature), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
     }
 
     void MoveInLineOfSight(Unit* pWho) override
