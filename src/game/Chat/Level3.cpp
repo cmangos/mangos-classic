@@ -3441,6 +3441,24 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleGetLosCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+    Unit* target = getSelectedUnit();
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return false;
+    }
+
+    float x, y, z;
+    target->GetPosition(x, y, z);
+    bool normalLos = player->IsWithinLOS(x, y, z, false);
+    bool m2Los = player->IsWithinLOS(x, y, z, true);
+    PSendSysMessage("Los check: Normal: %s M2: %s", normalLos ? "true" : "false", m2Los ? "true" : "false");
+    return true;
+}
+
 bool ChatHandler::HandleDieCommand(char* args)
 {
     Player* player = m_session->GetPlayer();

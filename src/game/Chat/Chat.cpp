@@ -774,6 +774,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "cooldown",       SEC_ADMINISTRATOR,  false, nullptr,                                        "", cooldownCommandTable },
         { "unlearn",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleUnLearnCommand,             "", nullptr },
         { "distance",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleGetDistanceCommand,         "", nullptr },
+        { "los",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleGetLosCommand,              "", nullptr },
         { "recall",         SEC_MODERATOR,      false, &ChatHandler::HandleRecallCommand,              "", nullptr },
         { "save",           SEC_PLAYER,         false, &ChatHandler::HandleSaveCommand,                "", nullptr },
         { "saveall",        SEC_MODERATOR,      true,  &ChatHandler::HandleSaveAllCommand,             "", nullptr },

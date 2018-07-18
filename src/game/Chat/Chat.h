@@ -569,6 +569,7 @@ class ChatHandler
         bool HandleCooldownClearClientSideCommand(char* args);
         bool HandleUnLearnCommand(char* args);
         bool HandleGetDistanceCommand(char* args);
+        bool HandleGetLosCommand(char* args);
         bool HandleModifyStandStateCommand(char* args);
         bool HandleDieCommand(char* args);
         bool HandleDamageCommand(char* args);
