@@ -948,6 +948,9 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex, CheckExcepti
     if (m_spellInfo->Effect[effIndex] == 0)
         return;
 
+    if (m_caster != pVictim || !IsDestinationOnlyEffect(m_spellInfo, effIndex))
+        m_targets.m_targetMask |= TARGET_FLAG_UNIT; // all spells with unit target must have this flag TODO: do this based on target type
+
     // Check for effect immune skip if immuned
     bool immuned = pVictim->IsImmuneToSpellEffect(m_spellInfo, effIndex, pVictim == m_caster);
 
