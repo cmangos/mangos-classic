@@ -1052,6 +1052,8 @@ void Spell::AddGOTarget(GameObject* pVictim, SpellEffectIndex effIndex)
     if (m_spellInfo->Effect[effIndex] == 0)
         return;
 
+    m_targets.m_targetMask |= TARGET_FLAG_OBJECT; // all spells with unit target must have this flag TODO: do this based on target type
+
     ObjectGuid targetGUID = pVictim->GetObjectGuid();
 
     // Lookup target in already in list
