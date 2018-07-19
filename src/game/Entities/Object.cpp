@@ -123,9 +123,12 @@ void Object::SendForcedObjectUpdate()
     WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
     for (auto& update_player : update_players)
     {
-        update_player.second.BuildPacket(packet);
-        update_player.first->GetSession()->SendPacket(packet);
-        packet.clear();                                     // clean the string
+        for (size_t i = 0; i < update_player.second.GetPacketCount(); ++i)
+        {
+            update_player.second.BuildPacket(packet, i);
+            update_player.first->GetSession()->SendPacket(packet);
+            packet.clear(); // clean the string
+        }
     }
 }
 
@@ -188,12 +191,16 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
 void Object::SendCreateUpdateToPlayer(Player* player) const
 {
     // send create update to player
-    UpdateData upd;
-    WorldPacket packet;
+    UpdateData updateData;
+    BuildCreateUpdateBlockForPlayer(&updateData, player);
 
-    BuildCreateUpdateBlockForPlayer(&upd, player);
-    upd.BuildPacket(packet);
-    player->GetSession()->SendPacket(packet);
+    WorldPacket packet;
+    for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
+    {
+        updateData.BuildPacket(packet, i);
+        player->GetSession()->SendPacket(packet);
+        packet.clear();
+    }
 }
 
 void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const
