@@ -1127,9 +1127,10 @@ namespace MaNGOS
             {
                 if (u->GetEntry() == i_entry && ((i_onlyAlive && u->isAlive()) || (i_onlyDead && u->IsCorpse()) || (!i_onlyAlive && !i_onlyDead)) && (!i_excludeSelf || (&i_obj != u)))
                 {
-                    if (i_obj.IsWithinDistInMap(u, i_range))
+                    float dist = i_obj.GetDistance(u, true, DIST_CALC_NONE);
+                    if (dist < i_range * i_range)
                     {
-                        i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
+                        i_range = dist;         // use found unit range as new range limit for next check
                         return true;
                     }
                     i_foundOutOfRange = true;
