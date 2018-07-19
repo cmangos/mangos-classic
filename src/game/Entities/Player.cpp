@@ -18154,24 +18154,17 @@ void Player::UpdateEverything()
     if (m_clientGUIDs.empty())
         return;
 
-    UpdateData updateDataCreature;
-    UpdateData updateDataRest;
+    UpdateData updateData;
+    for (const auto guid : m_clientGUIDs)
+        if (WorldObject* obj = GetMap()->GetWorldObject(guid))
+            obj->BuildForcedValuesUpdateBlockForPlayer(&updateData, this);
     WorldPacket packet;
-    for (GuidSet::const_iterator itr = m_clientGUIDs.begin(); itr != m_clientGUIDs.end(); ++itr)
+    for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
     {
-        if (WorldObject* obj = GetMap()->GetWorldObject(*itr))
-        {
-            if (obj->GetTypeId() == TYPEID_UNIT)
-                obj->BuildForcedValuesUpdateBlockForPlayer(&updateDataCreature, this);
-            else
-                obj->BuildValuesUpdateBlockForPlayer(&updateDataRest, this);
-        }
+        updateData.BuildPacket(packet, i);
+        GetSession()->SendPacket(packet);
+        packet.clear();
     }
-    updateDataCreature.BuildPacket(packet, 0); // protection against too big packets - TODO: extend to all
-    GetSession()->SendPacket(packet);
-    packet.clear();
-    updateDataRest.BuildPacket(packet, 0);
-    GetSession()->SendPacket(packet);
 }
 
 void Player::SummonIfPossible(bool agree)
