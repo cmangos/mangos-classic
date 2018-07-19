@@ -202,6 +202,22 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) c
     data->AddUpdateBlock(buf);
 }
 
+void Object::BuildForcedValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const
+{
+    ByteBuffer buf(500);
+
+    buf << uint8(UPDATETYPE_VALUES);
+    buf << GetPackGUID();
+
+    UpdateMask updateMask;
+    updateMask.SetCount(m_valuesCount);
+
+    _SetCreateBits(&updateMask, target);
+    BuildValuesUpdate(UPDATETYPE_VALUES, &buf, &updateMask, target);
+
+    data->AddUpdateBlock(buf);
+}
+
 void Object::BuildOutOfRangeUpdateBlock(UpdateData* data) const
 {
     data->AddOutOfRangeGUID(GetObjectGuid());
