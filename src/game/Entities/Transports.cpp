@@ -535,20 +535,20 @@ void Transport::UpdateForMap(Map const* targetMap)
         {
             if (this != itr.getSource()->GetTransport())
             {
-                UpdateData transData;
-                BuildCreateUpdateBlockForPlayer(&transData, itr.getSource());
+                UpdateData updateData;
+                BuildCreateUpdateBlockForPlayer(&updateData, itr.getSource());
                 WorldPacket packet;
-                transData.BuildPacket(packet, true);
+                updateData.BuildPacket(packet, 0, true); // always only one packet
                 itr.getSource()->SendDirectMessage(packet);
             }
         }
     }
     else
     {
-        UpdateData transData;
-        BuildOutOfRangeUpdateBlock(&transData);
+        UpdateData updateData;
+        BuildOutOfRangeUpdateBlock(&updateData);
         WorldPacket out_packet;
-        transData.BuildPacket(out_packet, true);
+        updateData.BuildPacket(out_packet, 0, true); // always only one packet
 
         for (const auto& itr : pl)
             if (this != itr.getSource()->GetTransport())
