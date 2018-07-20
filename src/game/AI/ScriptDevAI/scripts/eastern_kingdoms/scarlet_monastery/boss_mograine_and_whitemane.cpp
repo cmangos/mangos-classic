@@ -95,11 +95,12 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 
         if (m_pInstance->GetData(TYPE_ASHBRINGER_EVENT) == IN_PROGRESS)
         {
-            if (Player* pPlayer = (Player*)pWho)
+            if (pWho->GetTypeId() == TYPEID_PLAYER)
             {
-                if (pPlayer->HasItemWithIdEquipped(ITEM_CORRUPTED_ASHBRINGER, 1) && m_creature->IsWithinDist(pPlayer, 20.0f))
+                Player* player = static_cast<Player*>(pWho);
+                if (player->HasItemWithIdEquipped(ITEM_CORRUPTED_ASHBRINGER, 1) && m_creature->IsWithinDist(player, 20.0f))
                 {
-                    pPlayer->GetMap()->ScriptsStart(sRelayScripts, ASHBRINGER_RELAY_SCRIPT_ID, m_creature, pPlayer);
+                    player->GetMap()->ScriptsStart(sRelayScripts, ASHBRINGER_RELAY_SCRIPT_ID, m_creature, player);
                     m_pInstance->SetData(TYPE_ASHBRINGER_EVENT, DONE);
                 }
             }
