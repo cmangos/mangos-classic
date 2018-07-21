@@ -5594,6 +5594,7 @@ void Spell::EffectSummonDemon(SpellEffectIndex eff_idx)
                 m_caster->CastSpell(Charmed, 20882, TRIGGERED_OLD_TRIGGERED);
                 Charmed->CastSpell(nullptr, 22699, TRIGGERED_NONE);  // Inferno effect
                 Charmed->CastSpell(x, y, z, 20310, TRIGGERED_NONE);  // Stun
+                Charmed->CastSpell(nullptr, 19483, TRIGGERED_NONE);  // Immolation - needs to be cast after level update
                 break;
             }
         }
