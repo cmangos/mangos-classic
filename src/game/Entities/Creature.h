@@ -815,6 +815,9 @@ class Creature : public Unit
         bool CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, Team team, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 entry, Team team = ALLIANCE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
 
+
+        void UnsummonCleanup(); // cleans up data before unsummon of various creatures
+
         // vendor items
         VendorItemCounts m_vendorItemCounts;
 

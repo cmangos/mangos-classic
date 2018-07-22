@@ -248,7 +248,7 @@ void TemporarySpawn::Summon(TempSpawnType type, uint32 lifetime)
 
 void TemporarySpawn::UnSummon()
 {
-    CombatStop();
+    UnsummonCleanup();
 
     if (m_linkedToOwnerAura & TEMPSPAWN_LINKED_AURA_REMOVE_OWNER)
         RemoveAuraFromOwner();
