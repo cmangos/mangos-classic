@@ -437,7 +437,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
             SetPvP(false);
     }
 
-    // Try difficulty dependend version before falling back to base entry
+    // Try difficulty dependent version before falling back to base entry
     CreatureTemplateSpells const* templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(GetCreatureInfo()->Entry);
     if (!templateSpells)
         templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(GetEntry());
@@ -523,12 +523,9 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 // Clear possible auras having IsDeathPersistent() attribute
                 RemoveAllAuras();
 
-                if (m_originalEntry != GetEntry())
-                {
-                    // need preserver gameevent state
-                    GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetGUIDLow());
-                    UpdateEntry(m_originalEntry, TEAM_NONE, nullptr, eventData);
-                }
+                // need to preserve gameevent state
+                GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetGUIDLow());
+                UpdateEntry(m_originalEntry, TEAM_NONE, nullptr, eventData);
 
                 CreatureInfo const* cinfo = GetCreatureInfo();
 
