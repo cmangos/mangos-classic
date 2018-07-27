@@ -430,6 +430,14 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
     return true;
 }
 
+void ScriptedAI::DespawnGuids(GuidVector& spawns)
+{
+    for (ObjectGuid& guid : spawns)
+        if (Creature* spawn = m_creature->GetMap()->GetCreature(guid))
+            spawn->ForcedDespawn();
+    spawns.clear();
+}
+
 void Scripted_NoMovementAI::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage("Subclass of Scripted_NoMovementAI");
