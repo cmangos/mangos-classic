@@ -5421,7 +5421,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     return;
                 }
                 default:
-                    return;
+                    break;
             }
             break;
         }
@@ -5446,6 +5446,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         default:
             return;
     }
+
+    if (GetSpellProto()->Mechanic == MECHANIC_POLYMORPH)
+        spellId4 = 12939; // Just so that this doesnt conflict with others
 
     if (apply)
     {

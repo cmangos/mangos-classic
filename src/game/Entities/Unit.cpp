@@ -9444,7 +9444,7 @@ void Unit::SetStandState(uint8 state)
 
 bool Unit::IsPolymorphed() const
 {
-    return IsSpellMagePolymorph(getTransForm());
+    return HasAura(12939); // Polymorph heal effect common for all polys
 }
 
 void Unit::SetDisplayId(uint32 modelId)

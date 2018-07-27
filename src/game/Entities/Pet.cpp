@@ -713,7 +713,7 @@ void Pet::RegenerateAll(uint32 update_diff)
     // regenerate focus
     if (m_regenTimer <= update_diff)
     {
-        if (!isInCombat() || IsPolymorphed())
+        if (!isInCombat())
             RegenerateHealth();
 
         RegeneratePower();

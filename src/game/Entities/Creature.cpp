@@ -622,7 +622,7 @@ void Creature::RegenerateAll(uint32 update_diff)
     if (m_regenTimer != 0)
         return;
 
-    if (!isInCombat() || IsPolymorphed() || IsEvadeRegen())
+    if (!isInCombat() || IsEvadeRegen())
         RegenerateHealth();
 
     RegeneratePower();
