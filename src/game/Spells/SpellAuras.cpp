@@ -1644,7 +1644,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         return;
     }
 
-    uint32 modelid = 0;
     Powers PowerType = POWER_MANA;
     Unit* target = GetTarget();
 
@@ -1655,43 +1654,43 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     {
         case FORM_CAT:
             if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                modelid = 892;
+                m_modifier.m_amount = 892;
             else
-                modelid = 8571;
+                m_modifier.m_amount = 8571;
             PowerType = POWER_ENERGY;
             break;
         case FORM_TRAVEL:
-            modelid = 632;
+            m_modifier.m_amount = 632;
             break;
         case FORM_AQUA:
             if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                modelid = 2428;
+                m_modifier.m_amount = 2428;
             else
-                modelid = 2428;
+                m_modifier.m_amount = 2428;
             break;
         case FORM_BEAR:
             if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                modelid = 2281;
+                m_modifier.m_amount = 2281;
             else
-                modelid = 2289;
+                m_modifier.m_amount = 2289;
             PowerType = POWER_RAGE;
             break;
         case FORM_GHOUL:
             if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                modelid = 10045;
+                m_modifier.m_amount = 10045;
             break;
         case FORM_DIREBEAR:
             if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                modelid = 2281;
+                m_modifier.m_amount = 2281;
             else
-                modelid = 2289;
+                m_modifier.m_amount = 2289;
             PowerType = POWER_RAGE;
             break;
         case FORM_CREATUREBEAR:
-            modelid = 902;
+            m_modifier.m_amount = 902;
             break;
         case FORM_GHOSTWOLF:
-            modelid = 4613;
+            m_modifier.m_amount = 4613;
             break;
         case FORM_MOONKIN:
             if (GetId() == 24809)       // Specific case for spell Spirit Shade Visual in Lethon encounter (spell use moonkin form value for some reason)
@@ -1700,14 +1699,14 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                modelid = caster->GetNativeDisplayId();
+                m_modifier.m_amount = caster->GetNativeDisplayId();
             }
             else
             {
                 if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                    modelid = 15374;
+                    m_modifier.m_amount = 15374;
                 else
-                    modelid = 15375;
+                    m_modifier.m_amount = 15375;
             }
             break;
         case FORM_AMBIENT:
@@ -1715,7 +1714,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_STEALTH:
             break;
         case FORM_TREE:
-            modelid = 864;
+            m_modifier.m_amount = 864;
             break;
         case FORM_BATTLESTANCE:
         case FORM_BERSERKERSTANCE:
@@ -1723,7 +1722,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             PowerType = POWER_RAGE;
             break;
         case FORM_SPIRITOFREDEMPTION:
-            modelid = 16031;
+            m_modifier.m_amount = 16031;
             break;
         default:
             break;
@@ -1764,10 +1763,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 iter = slowingAuras.begin();
             }
 
-            // and polymorphic affects
-            if (target->IsPolymorphed())
-                target->RemoveAurasDueToSpell(target->getTransForm());
-
             //no break here
         }
         case FORM_GHOSTWOLF:
@@ -1786,10 +1781,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         // remove other shapeshift before applying a new one
         target->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT, GetHolder());
 
-        if (modelid > 0)
+        if (m_modifier.m_amount > 0)
         {
             target->SetObjectScale(DEFAULT_OBJECT_SCALE * target->GetObjectScaleMod());
-            target->SetDisplayId(modelid);
+            target->SetDisplayId(m_modifier.m_amount);
         }
 
         if (PowerType != POWER_MANA)
@@ -1891,7 +1886,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     }
     else
     {
-        if (modelid > 0)
+        if (m_modifier.m_amount > 0)
         {
             // workaround for tauren scale appear too big
             if (target->getRace() == RACE_TAUREN)
@@ -1900,10 +1895,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                     target->SetObjectScale(DEFAULT_TAUREN_MALE_SCALE * target->GetObjectScaleMod());
                 else
                     target->SetObjectScale(DEFAULT_TAUREN_FEMALE_SCALE * target->GetObjectScaleMod());
-            }
-
-            target->SetDisplayId(target->GetNativeDisplayId());
+            }            
         }
+
+        target->RestoreDisplayId();
 
         if (target->getClass() == CLASS_DRUID)
             target->SetPowerType(POWER_MANA);
@@ -1935,37 +1930,37 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                     switch (orb_model)
                     {
                         // Troll Female
-                        case 1479: target->SetDisplayId(10134); break;
+                        case 1479: m_modifier.m_amount = 10134; break;
                         // Troll Male
-                        case 1478: target->SetDisplayId(10135); break;
+                        case 1478: m_modifier.m_amount = 10135; break;
                         // Tauren Male
-                        case 59:   target->SetDisplayId(10136); break;
+                        case 59:   m_modifier.m_amount = 10136; break;
                         // Human Male
-                        case 49:   target->SetDisplayId(10137); break;
+                        case 49:   m_modifier.m_amount = 10137; break;
                         // Human Female
-                        case 50:   target->SetDisplayId(10138); break;
+                        case 50:   m_modifier.m_amount = 10138; break;
                         // Orc Male
-                        case 51:   target->SetDisplayId(10139); break;
+                        case 51:   m_modifier.m_amount = 10139; break;
                         // Orc Female
-                        case 52:   target->SetDisplayId(10140); break;
+                        case 52:   m_modifier.m_amount = 10140; break;
                         // Dwarf Male
-                        case 53:   target->SetDisplayId(10141); break;
+                        case 53:   m_modifier.m_amount = 10141; break;
                         // Dwarf Female
-                        case 54:   target->SetDisplayId(10142); break;
+                        case 54:   m_modifier.m_amount = 10142; break;
                         // NightElf Male
-                        case 55:   target->SetDisplayId(10143); break;
+                        case 55:   m_modifier.m_amount = 10143; break;
                         // NightElf Female
-                        case 56:   target->SetDisplayId(10144); break;
+                        case 56:   m_modifier.m_amount = 10144; break;
                         // Undead Female
-                        case 58:   target->SetDisplayId(10145); break;
+                        case 58:   m_modifier.m_amount = 10145; break;
                         // Undead Male
-                        case 57:   target->SetDisplayId(10146); break;
+                        case 57:   m_modifier.m_amount = 10146; break;
                         // Tauren Female
-                        case 60:   target->SetDisplayId(10147); break;
+                        case 60:   m_modifier.m_amount = 10147; break;
                         // Gnome Male
-                        case 1563: target->SetDisplayId(10148); break;
+                        case 1563: m_modifier.m_amount = 10148; break;
                         // Gnome Female
-                        case 1564: target->SetDisplayId(10149); break;
+                        case 1564: m_modifier.m_amount = 10149; break;
                         default: break;
                     }
                     break;
@@ -1977,55 +1972,30 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
         }
         else                                                // m_modifier.m_miscvalue != 0
         {
-            uint32 model_id;
-
             CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
             if (!ci)
             {
-                model_id = 16358;                           // pig pink ^_^
+                m_modifier.m_amount = 16358;                           // pig pink ^_^
                 sLog.outError("Auras: unknown creature id = %d (only need its modelid) Form Spell Aura Transform in Spell ID = %d", m_modifier.m_miscvalue, GetId());
             }
             else
-                model_id = Creature::ChooseDisplayId(ci);   // Will use the default model here
-
-            target->SetDisplayId(model_id);
+                m_modifier.m_amount = Creature::ChooseDisplayId(ci);   // Will use the default model here
 
             // creature case, need to update equipment if additional provided
             if (ci && target->GetTypeId() == TYPEID_UNIT)
                 ((Creature*)target)->LoadEquipment(ci->EquipmentTemplateId, false);
         }
 
-        // update active transform spell only not set or not overwriting negative by positive case
-        if (!target->getTransForm() || !IsPositiveSpell(GetId(), GetCaster(), target) || IsPositiveSpell(target->getTransForm(), GetCaster(), target))
-            target->setTransForm(GetId());
+        target->SetDisplayId(m_modifier.m_amount);
     }
     else                                                    // !apply
     {
         // ApplyModifier(true) will reapply it if need
-        target->setTransForm(0);
-        target->SetDisplayId(target->GetNativeDisplayId());
+        target->RestoreDisplayId();
 
         // apply default equipment for creature case
         if (target->GetTypeId() == TYPEID_UNIT)
             ((Creature*)target)->LoadEquipment(((Creature*)target)->GetCreatureInfo()->EquipmentTemplateId, true);
-
-        // re-apply some from still active with preference negative cases
-        Unit::AuraList const& otherTransforms = target->GetAurasByType(SPELL_AURA_TRANSFORM);
-        if (!otherTransforms.empty())
-        {
-            // look for other transform auras
-            Aura* handledAura = *otherTransforms.begin();
-            for (auto otherTransform : otherTransforms)
-            {
-                // negative auras are preferred
-                if (!otherTransform->IsPositive())
-                {
-                    handledAura = otherTransform;
-                    break;
-                }
-            }
-            handledAura->ApplyModifier(true);
-        }
     }
 }
 
