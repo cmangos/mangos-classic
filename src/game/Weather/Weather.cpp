@@ -392,10 +392,10 @@ uint32 Weather::GetSound()
     switch (m_type)
     {
         case WEATHER_TYPE_RAIN:                             // rain
-			// A minimum grade value of 0.27 is required for rain to be seen on all weather intensity settings.
-			// Rain without sound is better than sound without rain so we pick this value.
-			if (m_grade < 0.27f)
-				sound = WEATHER_NOSOUND;
+            // A minimum grade value of 0.27 is required for rain to be seen on all weather intensity settings.
+            // Rain without sound is better than sound without rain so we pick this value.
+            if (m_grade < 0.27f)
+                sound = WEATHER_NOSOUND;
             else if (m_grade < 0.40f)
                 sound = WEATHER_RAINLIGHT;
             else if (m_grade < 0.70f)
