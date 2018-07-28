@@ -9495,7 +9495,8 @@ void Unit::RestoreDisplayId()
     AuraList const& shapeshiftAura = GetAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
     if (!shapeshiftAura.empty()) // we've found shapeshift
     {
-        SetDisplayId(shapeshiftAura.front()->GetModifier()->m_amount);
+        if (uint32 displayId = shapeshiftAura.front()->GetModifier()->m_amount) // can be zero
+            SetDisplayId(displayId);
         return;
     }
 
