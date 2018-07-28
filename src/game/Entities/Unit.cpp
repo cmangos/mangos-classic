@@ -7995,9 +7995,8 @@ bool Unit::SelectHostileTarget()
 
     if (!AI()->CanExecuteCombatAction())
     {
-        if (hasUnitState(UNIT_STAT_CHANNELING) && !hasUnitState(UNIT_STAT_DONT_TURN))
-            if (Unit* target = GetMap()->GetUnit(GetTargetGuid()))
-                SetInFront(target);
+        if (Unit* target = GetMap()->GetUnit(GetTargetGuid()))
+            SetInFront(target);
 
         return !(AI()->GetCombatScriptStatus() && getThreatManager().isThreatListEmpty());
     }

@@ -293,6 +293,7 @@ void UnitAI::OnSpellCastStateChange(SpellEntry const* spellInfo, bool state, Wor
     switch (spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])
     {
         case TARGET_UNIT_ENEMY: forceTarget = true; break;
+        case TARGET_UNIT_SCRIPT_NEAR_CASTER:
         default: break;
     }
 
@@ -330,11 +331,20 @@ void UnitAI::OnChannelStateChange(SpellEntry const* spellInfo, bool state, World
             return;
     }
 
+    bool forceTarget = true; // Different default than normal cast
+
+    // Targeting seems to be directly affected by eff index 0 targets, client does the same thing
+    switch (spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])
+    {
+        case TARGET_UNIT_SCRIPT_NEAR_CASTER: forceTarget = false; break;
+        case TARGET_UNIT_ENEMY:
+        default: break;
+    }
+
     if (state)
     {
-        if (spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING && !spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET)) // 30166 changes target to none
+        if (spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING && !spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET) || !forceTarget)
         {
-            m_unit->SetTurningOff(true);
             m_unit->SetFacingTo(m_unit->GetOrientation());
             m_unit->SetTarget(nullptr);
         }
@@ -351,9 +361,6 @@ void UnitAI::OnChannelStateChange(SpellEntry const* spellInfo, bool state, World
     }
     else
     {
-        if (spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING)
-            m_unit->SetTurningOff(false);
-
         if (m_unit->getVictim())
             m_unit->SetTarget(m_unit->getVictim());
         else
