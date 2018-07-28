@@ -1972,8 +1972,21 @@ void ObjectMgr::LoadPetLevelInfo()
         {
             if (pInfo[level].health == 0)
             {
-                sLog.outErrorDb("Creature %u has no data for Level %i pet stats data, using data of Level %i.", itr->first, level + 1, level);
-                pInfo[level] = pInfo[level - 1];
+                if (level > 1)
+                {
+                    sLog.outErrorDb("Creature %u has no data for Level %i pet stats data, using data extrapolated from Level %i and Level %i.",
+                        itr->first, level + 1, level - 1, level);
+                    pInfo[level].health = pInfo[level - 1].health * 2 - pInfo[level - 2].health;
+                    pInfo[level].mana = pInfo[level - 1].mana * 2 - pInfo[level - 2].mana;
+                    pInfo[level].armor = pInfo[level - 1].armor * 2 - pInfo[level - 2].armor;
+                    for (int i = 0; i < MAX_STATS; ++i)
+                        pInfo[level].stats[i] = pInfo[level - 1].stats[i] * 2 - pInfo[level - 2].stats[i];
+                }
+                else
+                {
+                    sLog.outErrorDb("Creature %u has no data for Level %i pet stats data, using data of Level %i.", itr->first, level + 1, level);
+                    pInfo[level] = pInfo[level - 1];
+                }
             }
         }
     }
@@ -2368,8 +2381,18 @@ void ObjectMgr::LoadPlayerInfo()
         {
             if (pClassInfo->levelInfo[level].basehealth == 0)
             {
-                sLog.outErrorDb("Class %i Level %i does not have health/mana data. Using stats data of level %i.", class_, level + 1, level);
-                pClassInfo->levelInfo[level] = pClassInfo->levelInfo[level - 1];
+                if (level > 1)
+                {
+                    sLog.outErrorDb("Class %i Level %i does not have health/mana data. Using stats data extrapolated from level %i and level %i.",
+                        class_, level + 1, level - 1, level);
+                    pClassInfo->levelInfo[level].basehealth = pClassInfo->levelInfo[level - 1].basehealth * 2 - pClassInfo->levelInfo[level - 2].basehealth;
+                    pClassInfo->levelInfo[level].basemana = pClassInfo->levelInfo[level - 1].basemana * 2 - pClassInfo->levelInfo[level - 2].basemana;
+                }
+                else
+                {
+                    sLog.outErrorDb("Class %i Level %i does not have health/mana data. Using stats data of level %i.", class_, level + 1, level);
+                    pClassInfo->levelInfo[level] = pClassInfo->levelInfo[level - 1];
+                }
             }
         }
     }
@@ -2481,8 +2504,18 @@ void ObjectMgr::LoadPlayerInfo()
             {
                 if (pInfo->levelInfo[level].stats[0] == 0)
                 {
-                    sLog.outErrorDb("Race %i Class %i Level %i does not have stats data. Using stats data of level %i.", race, class_, level + 1, level);
-                    pInfo->levelInfo[level] = pInfo->levelInfo[level - 1];
+                    if (level > 1)
+                    {
+                        sLog.outErrorDb("Race %i Class %i Level %i does not have stats data. Using stats data extrapolated from level %i and level %i.",
+                            race, class_, level + 1, level - 1, level);
+                        for (int i = 0; i < MAX_STATS; ++i)
+                            pInfo->levelInfo[level].stats[i] = pInfo->levelInfo[level - 1].stats[i] * 2 - pInfo->levelInfo[level - 2].stats[i];
+                    }
+                    else
+                    {
+                        sLog.outErrorDb("Race %i Class %i Level %i does not have stats data. Using stats data of level %i.", race, class_, level + 1, level);
+                        pInfo->levelInfo[level] = pInfo->levelInfo[level - 1];
+                    }
                 }
             }
         }
@@ -2548,8 +2581,17 @@ void ObjectMgr::LoadPlayerInfo()
     {
         if (mPlayerXPperLevel[level] == 0)
         {
-            sLog.outErrorDb("Level %i does not have XP for level data. Using data of level [%i] + 100.", level + 1, level);
-            mPlayerXPperLevel[level] = mPlayerXPperLevel[level - 1] + 100;
+            if (level > 1)
+            {
+                sLog.outErrorDb("Level %i does not have XP for level data. Using data extrapolated from level %i and level %i.",
+                    level + 1, level - 1, level);
+                mPlayerXPperLevel[level] = mPlayerXPperLevel[level - 1] * 2 - mPlayerXPperLevel[level - 2];
+            }
+            else
+            {
+                sLog.outErrorDb("Level %i does not have XP for level data. Using data of level [%i] + 100.", level + 1, level);
+                mPlayerXPperLevel[level] = mPlayerXPperLevel[level - 1] + 100;
+            }
         }
     }
 }
