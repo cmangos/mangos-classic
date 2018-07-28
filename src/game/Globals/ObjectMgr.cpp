@@ -4664,6 +4664,110 @@ void ObjectMgr::LoadQuestgiverGreetingLocales()
     sLog.outString();
 }
 
+TrainerGreeting const* ObjectMgr::GetTrainerGreetingData(uint32 entry) const
+{
+    auto itr = m_trainerGreetingMap.find(entry);
+    if (itr == m_trainerGreetingMap.end()) return nullptr;
+    return &itr->second;
+}
+
+void ObjectMgr::LoadTrainerGreetings()
+{
+    m_trainerGreetingMap.clear();                           // need for reload case
+
+    QueryResult* result = WorldDatabase.Query("SELECT Entry, Text FROM trainer_greeting");
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+
+        sLog.outString(">> Loaded 0 trainer greetings. DB table `trainer_greeting` is empty!");
+        sLog.outString();
+
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+
+        if (!sCreatureStorage.LookupEntry<CreatureInfo>(entry))
+        {
+            sLog.outErrorDb("Table trainer_greeting uses nonexistent creature entry %u. Skipping.", entry);
+            continue;
+        }
+
+        TrainerGreeting& var = m_trainerGreetingMap[entry];
+        var.text = fields[1].GetString();
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString(">> Loaded %u trainer greetings.", uint32(m_trainerGreetingMap.size()));
+    sLog.outString();
+}
+
+void ObjectMgr::LoadTrainerGreetingLocales()
+{
+    m_trainerGreetingLocaleMap.clear();                     // need for reload case
+
+    QueryResult* result = WorldDatabase.Query("SELECT Entry, Text_loc1, Text_loc2, Text_loc3, Text_loc4, Text_loc5, Text_loc6, Text_loc7, Text_loc8 FROM locales_trainer_greeting");
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+
+        sLog.outString(">> Loaded 0 locales trainer greetings.");
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+
+        if (!sCreatureStorage.LookupEntry<CreatureInfo>(entry))
+        {
+            sLog.outErrorDb("Table locales_trainer_greeting uses nonexistent creature entry %u. Skipping.", entry);
+            continue;
+        }
+
+        TrainerGreetingLocale& var = m_trainerGreetingLocaleMap[entry];
+
+        for (int i = 1; i < MAX_LOCALE; ++i)
+        {
+            std::string str = fields[i].GetCppString();
+            if (!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if (idx >= 0)
+                {
+                    if (var.localeText.size() <= static_cast<size_t>(idx))
+                        var.localeText.resize(idx + 1);
+
+                    var.localeText[idx] = str;
+                }
+            }
+        }
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString(">> Loaded %u locales trainer greetings.", uint32(m_trainerGreetingLocaleMap.size()));
+    sLog.outString();
+}
+
 void ObjectMgr::LoadAreatriggerLocales()
 {
     for (uint32 i = 0; i < QUESTGIVER_TYPE_MAX; i++)        // need for reload case
@@ -9074,6 +9178,19 @@ void ObjectMgr::GetQuestgiverGreetingLocales(uint32 entry, uint32 type, int32 lo
             if (titlePtr)
                 if (ql->localeText.size() > (size_t)loc_idx && !ql->localeText[loc_idx].empty())
                     *titlePtr = ql->localeText[loc_idx];
+        }
+    }
+}
+
+void ObjectMgr::GetTrainerGreetingLocales(uint32 entry, int32 loc_idx, std::string* titlePtr) const
+{
+    if (loc_idx >= 0)
+    {
+        if (TrainerGreetingLocale const* tL = GetTrainerGreetingLocale(entry))
+        {
+            if (titlePtr)
+                if (tL->localeText.size() > (size_t)loc_idx && !tL->localeText[loc_idx].empty())
+                    *titlePtr = tL->localeText[loc_idx];
         }
     }
 }

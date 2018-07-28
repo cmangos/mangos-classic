@@ -455,6 +455,22 @@ bool ChatHandler::HandleReloadQuestgiverGreetingLocalesCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadTrainerGreetingCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading Trainer Greetings...");
+    sObjectMgr.LoadTrainerGreetings();
+    SendGlobalSysMessage("DB table `trainer_greeting` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLocalesTrainerGreetingCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading Trainer Greeting Locales...");
+    sObjectMgr.LoadTrainerGreetingLocales();
+    SendGlobalSysMessage("DB table `locales_trainer_greeting` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadGOQuestRelationsCommand(char* /*args*/)
 {
     sLog.outString("Loading Quests Relations... (`gameobject_questrelation`)");

@@ -430,6 +430,7 @@ class ChatHandler
         bool HandleReloadGameTeleCommand(char* args);
         bool HandleReloadGossipMenuCommand(char* args);
         bool HandleReloadQuestgiverGreetingCommand(char* args);
+        bool HandleReloadTrainerGreetingCommand(char* args);
         bool HandleReloadGOQuestRelationsCommand(char* args);
         bool HandleReloadGOQuestInvRelationsCommand(char* args);
         bool HandleReloadItemEnchantementsCommand(char* args);
@@ -444,6 +445,7 @@ class ChatHandler
         bool HandleReloadLocalesQuestCommand(char* args);
         bool HandleReloadLocalesAreaTriggerCommand(char*);
         bool HandleReloadQuestgiverGreetingLocalesCommand(char* args);
+        bool HandleReloadLocalesTrainerGreetingCommand(char* args);
         bool HandleReloadLootTemplatesCreatureCommand(char* args);
         bool HandleReloadLootTemplatesDisenchantCommand(char* args);
         bool HandleReloadLootTemplatesFishingCommand(char* args);

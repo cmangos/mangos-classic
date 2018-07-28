@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2722_01_mangos_creature_waypoint_refurbishing` bit(1) DEFAULT NULL
+  `required_z2725_01_mangos_trainer_greeting` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -3157,6 +3157,24 @@ CREATE TABLE `locales_questgiver_greeting` (
    `Text_loc8` LONGTEXT COMMENT 'Text of the greeting locale 8',
    PRIMARY KEY(`Entry`,`Type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Quest and Gossip system';
+
+--
+-- Table structure for table `locales_trainer_greeting`
+--
+
+DROP TABLE IF EXISTS `locales_trainer_greeting`;
+CREATE TABLE `locales_trainer_greeting` (
+   `Entry` INT(11) UNSIGNED NOT NULL COMMENT 'Entry of Trainer',
+   `Text_loc1` LONGTEXT COMMENT 'Text of the greeting locale 1',
+   `Text_loc2` LONGTEXT COMMENT 'Text of the greeting locale 2',
+   `Text_loc3` LONGTEXT COMMENT 'Text of the greeting locale 3',
+   `Text_loc4` LONGTEXT COMMENT 'Text of the greeting locale 4',
+   `Text_loc5` LONGTEXT COMMENT 'Text of the greeting locale 5',
+   `Text_loc6` LONGTEXT COMMENT 'Text of the greeting locale 6',
+   `Text_loc7` LONGTEXT COMMENT 'Text of the greeting locale 7',
+   `Text_loc8` LONGTEXT COMMENT 'Text of the greeting locale 8',
+   PRIMARY KEY(`Entry`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Trainer system';
 
 -- Table structure for table `mail_loot_template`
 --
@@ -13582,6 +13600,17 @@ LOCK TABLES `taxi_shortcuts` WRITE;
 /*!40000 ALTER TABLE `taxi_shortcuts` DISABLE KEYS */;
 /*!40000 ALTER TABLE `taxi_shortcuts` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `trainer_greeeting`
+--
+
+DROP TABLE IF EXISTS `trainer_greeting`;
+CREATE TABLE `trainer_greeting` (
+   `Entry` INT(11) UNSIGNED NOT NULL COMMENT 'Entry of Trainer',
+   `Text` LONGTEXT COMMENT 'Text of the greeting',
+   PRIMARY KEY(`Entry`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Trainer system';
 
 --
 -- Table structure for table `transports`
