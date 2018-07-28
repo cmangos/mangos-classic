@@ -2282,6 +2282,9 @@ class Unit : public WorldObject
 
         bool IsSpellProccingHappening() const { return m_spellProcsHappening; }
         void AddDelayedHolderDueToProc(SpellAuraHolder* holder) { m_delayedSpellAuraHolders.push_back(holder); }
+
+        void ResetAutoRepeatSpells() { m_AutoRepeatFirstCast = true; }
+
     protected:
         explicit Unit();
 

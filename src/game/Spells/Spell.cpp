@@ -3107,6 +3107,9 @@ void Spell::cast(bool skipCheck)
 
     InitializeDamageMultipliers();
 
+    // process immediate effects (items, ground, etc.) also initialize some variables
+    _handle_immediate_phase();
+
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
     if (GetSpellSpeed() > 0.0f)
     {
@@ -3119,7 +3122,6 @@ void Spell::cast(bool skipCheck)
             HandleDelayedSpellLaunch(&ihit);
 
         // Okay, maps created, now prepare flags
-        m_immediateHandled = false;
         m_spellState = SPELL_STATE_TRAVELING;
         SetDelayStart(0);
     }
@@ -3136,9 +3138,6 @@ void Spell::cast(bool skipCheck)
 void Spell::handle_immediate()
 {
     m_spellState = SPELL_STATE_LANDING;
-
-    // process immediate effects (items, ground, etc.) also initialize some variables
-    _handle_immediate_phase();
 
     // start channeling if applicable (after _handle_immediate_phase for get persistent effect dynamic object for channel target
     if (IsChanneledSpell(m_spellInfo) && m_duration)
@@ -3169,12 +3168,6 @@ void Spell::handle_immediate()
 uint64 Spell::handle_delayed(uint64 t_offset)
 {
     uint64 next_time = 0;
-
-    if (!m_immediateHandled)
-    {
-        _handle_immediate_phase();
-        m_immediateHandled = true;
-    }
 
     // now recheck units targeting correctness (need before any effects apply to prevent adding immunity at first effect not allow apply second spell effect and similar cases)
     for (auto& ihit : m_UniqueTargetInfo)
@@ -3216,6 +3209,20 @@ uint64 Spell::handle_delayed(uint64 t_offset)
 
 void Spell::_handle_immediate_phase()
 {
+    if (IsMeleeAttackResetSpell())
+    {
+        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS))
+        {
+            m_caster->resetAttackTimer(BASE_ATTACK);
+            if (m_caster->haveOffhandWeapon())
+                m_caster->resetAttackTimer(OFF_ATTACK);
+        }
+    }
+
+    if (IsRangedSpell() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))
+        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS))
+            m_caster->resetAttackTimer(RANGED_ATTACK);
+
     // handle some immediate features of the spell here
     HandleThreatSpells();
 
@@ -3471,13 +3478,6 @@ void Spell::finish(bool ok)
     // Heal caster for all health leech from all targets
     if (m_healthLeech)
         m_caster->DealHeal(m_caster, uint32(m_healthLeech), m_spellInfo);
-
-    if (IsMeleeAttackResetSpell())
-    {
-        m_caster->resetAttackTimer(BASE_ATTACK);
-        if (m_caster->haveOffhandWeapon())
-            m_caster->resetAttackTimer(OFF_ATTACK);
-    }
 
     if (m_spellInfo->AttributesEx & SPELL_ATTR_EX_REFUND_POWER)
     {
@@ -5615,7 +5615,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NOT_TRADING;
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_UNK16))
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TAME_BEAST))
     {
         Player* player = (Player*)m_caster;
         if (player->GetPetGuid() || player->HasCharm())
