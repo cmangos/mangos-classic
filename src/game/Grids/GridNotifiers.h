@@ -1127,8 +1127,8 @@ namespace MaNGOS
             {
                 if (u->GetEntry() == i_entry && ((i_onlyAlive && u->isAlive()) || (i_onlyDead && u->IsCorpse()) || (!i_onlyAlive && !i_onlyDead)) && (!i_excludeSelf || (&i_obj != u)))
                 {
-                    float dist = i_obj.GetDistance(u, true, DIST_CALC_NONE);
-                    if (dist < i_range * i_range)
+                    float dist = sqrt(i_obj.GetDistance(u, true, DIST_CALC_NONE));
+                    if (dist < i_range)
                     {
                         i_range = dist;         // use found unit range as new range limit for next check
                         return true;
@@ -1138,7 +1138,6 @@ namespace MaNGOS
                 return false;
             }
             float GetLastRange() const { return i_range; }
-            bool FoundOutOfRange() const { return i_foundOutOfRange; }
         private:
             WorldObject const& i_obj;
             uint32 i_entry;
