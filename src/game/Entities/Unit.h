@@ -1072,9 +1072,6 @@ class CharmInfo
         UnitAI* GetAI() { return m_ai; }
         CombatData* GetCombatData() { return m_combatData; };
 
-        void SetUnitFlagSave(uint32 save) { m_unitFlagSave = save; }
-        uint32 GetUnitFlagSave() { return m_unitFlagSave; }
-
     private:
         Unit*               m_unit;
         UnitAI*             m_ai;
@@ -1094,8 +1091,6 @@ class CharmInfo
         float               m_stayPosY;
         float               m_stayPosZ;
         float               m_stayPosO;
-
-        uint32              m_unitFlagSave;
 };
 
 // used in CallForAllControlledUnits/CheckAllControlledUnits
