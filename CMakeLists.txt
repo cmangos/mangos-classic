@@ -15,13 +15,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+# Minimum required cmake version to run the build
+cmake_minimum_required(VERSION 3.0)
+
+# Will cache object files if ccache is available
+# Must be set at top of cmake outside of project header
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+endif()
+
 project(CMaNGOS_Classic)
 
 # Define here name of the binaries
 set(CMANGOS_BINARY_SERVER_NAME "mangosd")
 set(CMANGOS_BINARY_REALMD_NAME "realmd")
-
-cmake_minimum_required(VERSION 3.0)
 
 # Function to remove duplicate entries in provided string
 function(RemoveDuplicateSubstring stringIn stringOut)
