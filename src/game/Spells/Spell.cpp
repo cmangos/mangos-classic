@@ -3141,7 +3141,8 @@ void Spell::cast(bool skipCheck)
 
 void Spell::handle_immediate()
 {
-    m_spellState = SPELL_STATE_LANDING;
+    if (m_spellState != SPELL_STATE_CHANNELING)
+        m_spellState = SPELL_STATE_LANDING;
 
     for (TargetList::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
         DoAllEffectOnTarget(&(*ihit));
