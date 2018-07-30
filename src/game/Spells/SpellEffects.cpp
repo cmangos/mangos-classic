@@ -1347,24 +1347,27 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                 if (int32(m_caster->GetHealth()) > dmg)
                 {
+                    int32 mana = dmg;
+
+                    Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                    for (Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
+                    {
+                        if ((*itr)->isAffectedOnSpell(m_spellInfo))
+                        {
+                            switch ((*itr)->GetSpellProto()->Id)
+                            {
+                                case 28830: // Plagueheart Rainment - reduce hp cost
+                                    dmg += dmg * (*itr)->GetModifier()->m_amount / 100; break;
+                                    // Improved Life Tap
+                                default: mana = ((*itr)->GetModifier()->m_amount + 100) * mana / 100; break;
+                            }
+                        }
+                    }
+
                     // Shouldn't Appear in Combat Log
                     m_caster->ModifyHealth(-dmg);
 
-                    int32 mana = dmg;
-
-                    // Improved Life Tap mod
-                    Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                    for (Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
-                        if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 208)
-                            mana = ((*itr)->GetModifier()->m_amount + 100) * mana / 100;
-
                     m_caster->CastCustomSpell(m_caster, 31818, &mana, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-                    // Mana Feed
-                    int32 manaFeedVal = m_caster->CalculateSpellDamage(m_caster, m_spellInfo, EFFECT_INDEX_1);
-                    manaFeedVal = manaFeedVal * mana / 100;
-                    if (manaFeedVal > 0)
-                        m_caster->CastCustomSpell(m_caster, 32553, &manaFeedVal, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
                 }
                 else
                     SendCastResult(SPELL_FAILED_FIZZLE);
