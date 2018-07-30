@@ -94,6 +94,7 @@ void EventProcessor::KillEvent(BasicEvent* event)
             delete iter->second;
             iter = m_events.erase(iter);
         }
+        else ++iter;
     }
 }
 
