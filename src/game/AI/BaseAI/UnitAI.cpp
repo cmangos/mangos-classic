@@ -341,6 +341,9 @@ void UnitAI::OnChannelStateChange(SpellEntry const* spellInfo, bool state, World
         default: break;
     }
 
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET))
+        forceTarget = true;
+
     if (state)
     {
         if (spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING && !spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET) || !forceTarget)
