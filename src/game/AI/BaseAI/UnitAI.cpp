@@ -572,10 +572,12 @@ void UnitAI::DoStartMovement(Unit* victim)
 
 void UnitAI::TimedFleeingEnded()
 {
-    if (GetAIOrder() != ORDER_FLEEING || !m_unit->isAlive())
+    if (GetAIOrder() != ORDER_FLEEING)
         return; // prevent stack overflow by cyclic calls - TODO: remove once Motion Master is human again
     SetAIOrder(ORDER_NONE);
     SetCombatScriptStatus(false);
+    if (!m_unit->isAlive())
+        return;
     DoStartMovement(m_unit->getVictim());
 }
 
