@@ -513,7 +513,7 @@ void UnitAI::SendAIEventAround(AIEventType eventType, Unit* invoker, uint32 dela
         if (!receiverList.empty())
         {
             AiDelayEventAround* e = new AiDelayEventAround(eventType, invoker ? invoker->GetObjectGuid() : ObjectGuid(), *m_unit, receiverList, miscValue);
-            m_unit->m_Events.AddEvent(e, m_unit->m_Events.CalculateTime(delay));
+            m_unit->m_events.AddEvent(e, m_unit->m_events.CalculateTime(delay));
         }
     }
 }
