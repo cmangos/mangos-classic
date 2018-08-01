@@ -9497,8 +9497,10 @@ void Unit::RestoreDisplayId()
     if (!shapeshiftAura.empty()) // we've found shapeshift
     {
         if (uint32 displayId = shapeshiftAura.front()->GetModifier()->m_amount) // can be zero
+        {
             SetDisplayId(displayId);
-        return;
+            return;
+        }
     }
 
     // no auras found - set modelid to default
