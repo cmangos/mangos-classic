@@ -2204,6 +2204,14 @@ void Spell::EffectPersistentAA(SpellEffectIndex eff_idx)
 
     pCaster->AddDynObject(dynObj);
     pCaster->GetMap()->Add(dynObj);
+
+    // Potential Hack - at the time of channel start Dynamic Object is not created yet, so have to do it here
+    // Sent in next Object Update so for client its the same
+    if (eff_idx == EFFECT_INDEX_0 && IsChanneledSpell(m_spellInfo))
+    {
+        m_caster->SetChannelObject(dynObj);
+        m_caster->SendForcedObjectUpdate();
+    }
 }
 
 void Spell::EffectEnergize(SpellEffectIndex eff_idx)
