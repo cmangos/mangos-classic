@@ -739,6 +739,10 @@ inline bool IsPositiveEffectTargetMode(const SpellEntry* entry, SpellEffectIndex
     if (!entry)
         return false;
 
+    // Forces positive targets to be negative TODO: Find out if this is true for neutral targets
+    if (entry->HasAttribute(SPELL_ATTR_NEGATIVE))
+        return false;
+
     // Triggered spells case: prefer child spell via IsPositiveSpell()-like scan for triggered spell
     if (IsSpellEffectTriggerSpell(entry, effIndex))
     {
