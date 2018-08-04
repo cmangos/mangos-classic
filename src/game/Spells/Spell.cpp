@@ -456,7 +456,7 @@ void Spell::FillTargetMap()
         {
             // Check if same target, but handle i.e. AreaAuras different
             if (m_spellInfo->EffectImplicitTargetA[i] == m_spellInfo->EffectImplicitTargetA[j] && m_spellInfo->EffectImplicitTargetB[i] == m_spellInfo->EffectImplicitTargetB[j]
-                    && m_spellInfo->Effect[j] != SPELL_EFFECT_NONE
+                    && m_spellInfo->Effect[j] != SPELL_EFFECT_NONE && m_spellInfo->Effect[j] != SPELL_EFFECT_PERSISTENT_AREA_AURA
                     && !IsAreaAuraEffect(m_spellInfo->Effect[i]) && !IsAreaAuraEffect(m_spellInfo->Effect[j]))
                 // Add further conditions here if required
             {
@@ -719,8 +719,6 @@ void Spell::FillTargetMap()
                         case TARGET_NONE:
                         case TARGET_LOCATION_CASTER_DEST:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
-                            if (Unit* currentTarget = m_targets.getUnitTarget())
-                                tmpUnitLists[i /*==effToIndex[i]*/].push_back(currentTarget);
                             break;
                         default:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
