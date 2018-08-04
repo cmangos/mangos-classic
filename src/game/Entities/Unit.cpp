@@ -3630,25 +3630,6 @@ void Unit::_UpdateSpells(uint32 time)
         else
             ++iter;
     }
-
-    if (!m_gameObj.empty())
-    {
-        GameObjectList::iterator dnext1;
-        for (GameObjectList::iterator ite1 = m_gameObj.begin(); ite1 != m_gameObj.end(); ite1 = dnext1)
-        {
-            dnext1 = ite1;
-            //(*i)->Update( difftime );
-            if (!(*ite1)->IsSpawned())
-            {
-                (*ite1)->SetOwnerGuid(ObjectGuid());
-                (*ite1)->SetRespawnTime(0);
-                (*ite1)->Delete();
-                dnext1 = m_gameObj.erase(ite1);
-            }
-            else
-                ++dnext1;
-        }
-    }
 }
 
 void Unit::_UpdateAutoRepeatSpell()
@@ -5165,16 +5146,8 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
 
 void Unit::RemoveAllGameObjects()
 {
-    // remove references to unit
-    for (GameObjectList::iterator i = m_gameObj.begin(); i != m_gameObj.end();)
-    {
-        (*i)->SetOwnerGuid(ObjectGuid());
-        (*i)->SetRespawnTime(0);
-        (*i)->Delete();
-        i = m_gameObj.erase(i);
-    }
-
     // wild summoned GOs - only remove references, do not remove GOs
+    m_gameObj.clear();
     m_wildGameObjs.clear();
 }
 
