@@ -33,7 +33,7 @@
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
     uint8 bagIndex, slot;
-    uint8 spell_index;                                      // number of spells at item, not used
+    uint8 spell_index;                                      // item spell index which should be used
 
     recvPacket >> bagIndex >> slot >> spell_index;
 
