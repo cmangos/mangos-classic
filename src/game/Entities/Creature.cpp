@@ -2109,6 +2109,9 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
 
         if ((selectFlags & SELECT_FLAG_POWER_NOT_MANA) && pTarget->GetPowerType() == POWER_MANA)
             return false;
+
+        if ((selectFlags & SELECT_FLAG_SKIP_TANK) && pTarget == getVictim())
+            return false;
     }
 
     if (pSpellInfo)
