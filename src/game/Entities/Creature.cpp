@@ -1697,33 +1697,36 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
     if (!castOnSelf && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->EffectMechanic[index] - 1)))
         return true;
 
-    switch (spellInfo->Effect[index])
+    if (!spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)) // spells like 37017 bypass these invulnerabilities
     {
-        case SPELL_EFFECT_APPLY_AURA:
+        switch (spellInfo->Effect[index])
         {
-            switch (spellInfo->EffectApplyAuraName[index])
+            case SPELL_EFFECT_APPLY_AURA:
             {
-                case SPELL_AURA_MOD_TAUNT: // Taunt immunity special flag check
-                    if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NOT_TAUNTABLE)
-                        return true;
-                    break;
-                case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK: // Haste spell aura immunity
-                    if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_HASTE_SPELL_IMMUNITY)
-                        return true;
-                    break;
-                case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
-                    if (IsWorldBoss()) // All bosses are immune to vindication in 2.4.3, needs to be setting in future
-                        return true;
-                    break;
-                default: break;
+                switch (spellInfo->EffectApplyAuraName[index])
+                {
+                    case SPELL_AURA_MOD_TAUNT: // Taunt immunity special flag check
+                        if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NOT_TAUNTABLE)
+                            return true;
+                        break;
+                    case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK: // Haste spell aura immunity
+                        if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_HASTE_SPELL_IMMUNITY)
+                            return true;
+                        break;
+                    case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
+                        if (IsWorldBoss()) // All bosses are immune to vindication in 2.4.3, needs to be setting in future
+                            return true;
+                        break;
+                    default: break;
+                }
+                break;
             }
-            break;
+            case SPELL_EFFECT_ATTACK_ME: // Taunt immunity special flag check
+                if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NOT_TAUNTABLE)
+                    return true;
+                break;
+            default: break;
         }
-        case SPELL_EFFECT_ATTACK_ME: // Taunt immunity special flag check
-            if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NOT_TAUNTABLE)
-                return true;
-            break;
-        default: break;
     }
 
     return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
