@@ -1588,22 +1588,40 @@ bool Spell::IsAliveUnitPresentInTargetList()
     if (m_needAliveTargetMask == 0)
         return true;
 
-    uint8 needAliveTargetMask = m_needAliveTargetMask;
+    uint8 channelTargetEffectMask = m_needAliveTargetMask;
+    uint8 channelAuraMask = 0;
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA)
+            channelAuraMask |= 1 << i;
+
+    channelAuraMask &= channelTargetEffectMask;
 
     for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
-        if (ihit->missCondition == SPELL_MISS_NONE && (needAliveTargetMask & ihit->effectHitMask))
+        if (ihit->missCondition == SPELL_MISS_NONE && (channelAuraMask & ihit->effectHitMask))
         {
             Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID);
 
+            if (!unit)
+                continue;
+
             // either unit is alive and normal spell, or unit dead and deathonly-spell
-            if (unit && (unit->isAlive() != IsDeathOnlySpell(m_spellInfo)))
-                needAliveTargetMask &= ~ihit->effectHitMask;   // remove from need alive mask effect that have alive target
+            if (IsValidDeadOrAliveTarget(unit))
+                channelAuraMask &= ~ihit->effectHitMask;   // remove from need alive mask effect that have alive target
         }
     }
 
     // is all effects from m_needAliveTargetMask have alive targets
-    return needAliveTargetMask == 0;
+    return channelAuraMask == 0;
+}
+
+bool Spell::IsValidDeadOrAliveTarget(Unit const* target) const
+{
+    if (target->isAlive())
+        return !IsDeathOnlySpell(m_spellInfo);
+    if (IsAllowingDeadTarget(m_spellInfo))
+        return true;
+    return false;
 }
 
 // Helper for Chain Healing
