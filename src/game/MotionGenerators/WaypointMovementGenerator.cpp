@@ -332,7 +332,7 @@ void FlightPathMovementGenerator::Initialize(Player& player)
 {
     player.InterruptMoving();
     player.addUnitState(UNIT_STAT_TAXI_FLIGHT);
-    player.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_TAXI_FLIGHT);
+    player.SetFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_TAXI_FLIGHT));
     player.UpdateClientControl(&player, false);
 }
 
@@ -340,7 +340,7 @@ void FlightPathMovementGenerator::Finalize(Player& player)
 {
     player.InterruptMoving();
     player.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
-    player.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_TAXI_FLIGHT);
+    player.RemoveFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_TAXI_FLIGHT));
     player.UpdateClientControl(&player, true);
 }
 

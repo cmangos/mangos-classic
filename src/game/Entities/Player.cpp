@@ -16370,10 +16370,17 @@ bool Player::ActivateTaxiPathTo(uint32 path_id, uint32 spellid /*= 0*/)
 
 void Player::TaxiFlightResume()
 {
-    if (m_taxiTracker.GetState() < Taxi::TRACKER_STANDBY || hasUnitState(UNIT_STAT_TAXI_FLIGHT))
+    if (m_taxiTracker.GetState() < Taxi::TRACKER_STANDBY)
         return;
 
     DEBUG_LOG("WORLD: Resuming taxi flight for character %u", GetGUIDLow());
+
+    // Already in flight: just make sure client control is updated
+    if (hasUnitState(UNIT_STAT_TAXI_FLIGHT))
+    {
+        UpdateClientControl(this, IsClientControlled(this));
+        return;
+    }
 
     GetMotionMaster()->MoveTaxiFlight();
 }
