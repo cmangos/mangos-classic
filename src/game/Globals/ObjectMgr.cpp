@@ -1043,12 +1043,6 @@ void ObjectMgr::LoadCreatures()
             }
         }
 
-        if (cInfo->RegenerateStats & REGEN_FLAG_HEALTH && data.curhealth < cInfo->MinLevelHealth)
-        {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenerateStats` & REGEN_FLAG_HEALTH and low current health (%u), `creature_template`.`MinLevelHealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
-            data.curhealth = cInfo->MinLevelHealth;
-        }
-
         if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_INSTANCE_BIND)
         {
             if (!mapEntry || !mapEntry->IsDungeon())
@@ -1061,12 +1055,6 @@ void ObjectMgr::LoadCreatures()
             if (!mapEntry || !mapEntry->IsDungeon())
                 sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_AGGRO_ZONE (%u) but creature are not in instance.",
                                 guid, data.id, CREATURE_EXTRA_FLAG_AGGRO_ZONE);
-        }
-
-        if (cInfo->RegenerateStats & REGEN_FLAG_POWER && data.curmana < cInfo->MinLevelMana)
-        {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenerateStats` & REGEN_FLAG_POWER and low current mana (%u), `creature_template`.`MinLevelMana`=%u.", guid, data.id, data.curmana, cInfo->MinLevelMana);
-            data.curmana = cInfo->MinLevelMana;
         }
 
         if (data.spawndist < 0.0f)
