@@ -51,7 +51,7 @@ Pet::Pet(PetType type) :
     Creature(CREATURE_SUBTYPE_PET),
     m_TrainingPoints(0), m_resetTalentsCost(0), m_resetTalentsTime(0),
     m_removed(false), m_happinessTimer(7500), m_loyaltyTimer(12000), m_petType(type), m_duration(0),
-    m_loyaltyPoints(0), m_bonusdamage(0), m_auraUpdateMask(0), m_loading(false),
+    m_loyaltyPoints(0), m_bonusdamage(0), m_loading(false),
     m_xpRequiredForNextLoyaltyLevel(0),
     m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr)
 {

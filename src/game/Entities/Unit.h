@@ -2284,6 +2284,11 @@ class Unit : public WorldObject
         void AddDelayedHolderDueToProc(SpellAuraHolder* holder) { m_delayedSpellAuraHolders.push_back(holder); }
 
         void ResetAutoRepeatSpells() { m_AutoRepeatFirstCast = true; }
+
+        const uint64& GetAuraUpdateMask() const { return m_auraUpdateMask; }
+        void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
+        void ResetAuraUpdateMask() { m_auraUpdateMask = 0; }
+
     protected:
         explicit Unit();
 
@@ -2439,6 +2444,8 @@ class Unit : public WorldObject
         // invisibility data
         uint32 m_invisibilityMask;
         uint32 m_detectInvisibilityMask; // is inherited from controller in PC case
+
+        uint64 m_auraUpdateMask;
 
     private:                                                // Error traps for some wrong args using
         // this will catch and prevent build for any cases when all optional args skipped and instead triggered used non boolean type

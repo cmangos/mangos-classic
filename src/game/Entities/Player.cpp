@@ -390,7 +390,6 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     // group is initialized in the reference constructor
     SetGroupInvite(nullptr);
     m_groupUpdateMask = 0;
-    m_auraUpdateMask = 0;
 
     ClearHonorInfo();
 
@@ -17321,9 +17320,9 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
         group->UpdatePlayerOutOfRange(this);
 
     m_groupUpdateMask = GROUP_UPDATE_FLAG_NONE;
-    m_auraUpdateMask = 0;
-    if (Pet* pet = GetPet())
-        pet->ResetAuraUpdateMask();
+    ResetAuraUpdateMask();
+    if (Unit* charm = GetCharm())
+        charm->ResetAuraUpdateMask();
 }
 
 void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaTrigger const* at, AreaLockStatus lockStatus, uint32 miscRequirement) const
