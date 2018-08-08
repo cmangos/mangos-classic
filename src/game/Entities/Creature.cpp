@@ -395,9 +395,16 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
         if (data)
         {
             uint32 curhealth = data->curhealth ? data->curhealth : GetMaxHealth();
-            uint32 curmana = data->curmana ? data->curmana : GetMaxPower(POWER_MANA);
             SetHealth(m_deathState == ALIVE ? curhealth : 0);
-            SetPower(POWER_MANA, curmana);
+            if (GetPowerType() == POWER_MANA)
+            {
+                uint32 curmana;
+                if (IsRegeneratingPower()) // bypass so that 0 mana is possible TODO: change this to -1 in DB
+                    curmana = data->curmana ? data->curmana : GetMaxPower(POWER_MANA);
+                else
+                    curmana = data->curmana;
+                SetPower(POWER_MANA, curmana);
+            }
         }
     }
 
