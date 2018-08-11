@@ -2905,8 +2905,7 @@ void Spell::cancel()
         //(no break)
         case SPELL_STATE_TRAVELING:
         {
-            SendInterrupted(0);
-
+            SendInterrupted(SPELL_FAILED_INTERRUPTED);
             if (sendInterrupt)
                 SendCastResult(SPELL_FAILED_INTERRUPTED);
         } break;
@@ -2928,8 +2927,7 @@ void Spell::cancel()
             }
 
             SendChannelUpdate(0);
-            SendInterrupted(0);
-
+            SendInterrupted(SPELL_FAILED_INTERRUPTED);
             if (sendInterrupt)
                 SendCastResult(SPELL_FAILED_INTERRUPTED);
         } break;
@@ -2981,6 +2979,7 @@ void Spell::cast(bool skipCheck)
     if (castResult != SPELL_CAST_OK)
     {
         SendCastResult(castResult);
+        SendInterrupted(castResult);
         finish(false);
         m_caster->DecreaseCastCounter();
         SetExecutedCurrently(false);
@@ -2994,6 +2993,7 @@ void Spell::cast(bool skipCheck)
         if (castResult != SPELL_CAST_OK)
         {
             SendCastResult(castResult);
+            SendInterrupted(castResult);
             finish(false);
             m_caster->DecreaseCastCounter();
             SetExecutedCurrently(false);
@@ -3798,12 +3798,12 @@ void Spell::WriteSpellGoTargets(WorldPacket& data)
         m_needAliveTargetMask = 0;
 }
 
-void Spell::SendInterrupted(uint8 result) const
+void Spell::SendInterrupted(SpellCastResult result) const
 {
     WorldPacket data(SMSG_SPELL_FAILURE, (8 + 4 + 1));
     data << m_caster->GetPackGUID();
     data << m_spellInfo->Id;
-    data << result;
+    data << uint8(result);
     m_caster->SendMessageToSet(data, true);
 
     data.Initialize(SMSG_SPELL_FAILED_OTHER, (8 + 4));
@@ -4548,20 +4548,14 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 // Exclusion for Pounce: Facing Limitation was removed in 2.0.1, but it still uses the same, old Ex-Flags
                 if (!m_spellInfo->IsFitToFamily(SPELLFAMILY_DRUID, uint64(0x0000000000020000)))
-                {
-                    SendInterrupted(2);
                     return SPELL_FAILED_NOT_BEHIND;
-                }
             }
 
             // Caster must be facing the targets front
             if (((m_spellInfo->Attributes == (SPELL_ATTR_ABILITY | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR_STOP_ATTACK_TARGET)) && !m_caster->IsFacingTargetsFront(target))
                 // Caster must be facing the target!
                 || (m_spellInfo->HasAttribute(SPELL_ATTR_EX_FACING_TARGET) && !m_caster->HasInArc(target)))
-            {
-                SendInterrupted(2);
                 return SPELL_FAILED_NOT_INFRONT;
-            }
 
             // check if target is in combat
             if (non_caster_target && m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET) && target->isInCombat())
