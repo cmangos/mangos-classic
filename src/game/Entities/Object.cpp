@@ -1264,22 +1264,22 @@ bool WorldObject::IsFacingTargetsFront(const WorldObject* target, float arc /*= 
 
 bool WorldObject::isInFrontInMap(WorldObject const* target, float distance,  float arc /*= M_PI_F*/) const
 {
-    return IsWithinDistInMap(target, distance) && HasInArc(target, arc);
+    return IsInMap(target) && isInFront(target, distance, arc);
 }
 
 bool WorldObject::isInBackInMap(WorldObject const* target, float distance, float arc /*= M_PI_F*/) const
 {
-    return IsWithinDistInMap(target, distance) && !HasInArc(target, 2 * M_PI_F - arc);
+    return IsInMap(target) && isInBack(target, distance, arc);
 }
 
 bool WorldObject::isInFront(WorldObject const* target, float distance,  float arc /*= M_PI_F*/) const
 {
-    return target->IsWithinDist3d(GetPositionX(), GetPositionY(), GetPositionZ(), distance) && HasInArc(target, arc);
+    return target->GetDistance(GetPositionX(), GetPositionY(), GetPositionZ(), DIST_CALC_COMBAT_REACH) <= distance && HasInArc(target, arc);
 }
 
 bool WorldObject::isInBack(WorldObject const* target, float distance, float arc /*= M_PI_F*/) const
 {
-    return target->IsWithinDist3d(GetPositionX(), GetPositionY(), GetPositionZ(), distance) && !HasInArc(target, 2 * M_PI_F - arc);
+    return target->GetDistance(GetPositionX(), GetPositionY(), GetPositionZ(), DIST_CALC_COMBAT_REACH) <= distance && !HasInArc(target, 2 * M_PI_F - arc);
 }
 
 void WorldObject::GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist /*=0.0f*/, float const* ori /*=nullptr*/) const

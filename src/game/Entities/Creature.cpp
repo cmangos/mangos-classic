@@ -2112,7 +2112,7 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
 
         if ((selectFlags & SELECT_FLAG_RANGE_AOE_RANGE))
         {
-            float dist = pTarget->GetDistance(GetPositionX(), GetPositionY(), GetPositionZ());
+            float dist = pTarget->GetDistance(GetPositionX(), GetPositionY(), GetPositionZ(), DIST_CALC_COMBAT_REACH);
             if (dist > params.range.maxRange || dist < params.range.minRange)
                 return false;
         }
@@ -2153,7 +2153,7 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
         {
             SpellRadiusEntry const* srange = sSpellRadiusStore.LookupEntry(pSpellInfo->EffectRadiusIndex[0]);
             float max_range = GetSpellRadius(srange);
-            float dist = pTarget->GetDistance(GetPositionX(), GetPositionY(), GetPositionZ());
+            float dist = pTarget->GetDistance(GetPositionX(), GetPositionY(), GetPositionZ(), DIST_CALC_COMBAT_REACH);
             return dist < max_range;
         }
         else

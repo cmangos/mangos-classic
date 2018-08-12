@@ -670,7 +670,7 @@ namespace MaNGOS
         AllGameObjectEntriesListInPosRangeCheck(float x, float y, float z, std::set<uint32>& entries, float range, bool is3D = true) : i_x(x), i_y(y), i_z(z), i_entries(entries), i_range(range), i_is3D(is3D) {}
         bool operator()(GameObject* go)
         {
-            if (go->IsSpawned() && i_entries.find(go->GetEntry()) != i_entries.end() && go->IsWithinDist3d(i_x, i_y, i_z, i_range))
+            if (go->IsSpawned() && i_entries.find(go->GetEntry()) != i_entries.end() && go->GetDistance(i_x, i_y, i_z, DIST_CALC_COMBAT_REACH) < i_range)
                 return true;
 
             return false;

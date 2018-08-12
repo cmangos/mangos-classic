@@ -851,12 +851,12 @@ namespace MaNGOS
                             i_data.push_back(itr->getSource());
                         break;
                     case PUSH_SELF_CENTER:
-                        if (itr->getSource()->IsWithinDist2d(i_centerX, i_centerY, i_radius))
+                        if (itr->getSource()->GetDistance2d(i_centerX, i_centerY, DIST_CALC_COMBAT_REACH) <= i_radius)
                             i_data.push_back(itr->getSource());
                         break;
                     case PUSH_DEST_CENTER:
                     case PUSH_TARGET_CENTER:
-                        if (itr->getSource()->IsWithinDist3d(i_centerX, i_centerY, i_centerZ, i_radius))
+                        if (itr->getSource()->GetDistance(i_centerX, i_centerY, i_centerZ, DIST_CALC_COMBAT_REACH) <= i_radius)
                             i_data.push_back(itr->getSource());
                         break;
                 }
