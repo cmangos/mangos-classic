@@ -36,7 +36,7 @@ npc_injured_patient     100%    patients for triage-quests (6622 and 6624)
 npc_doctor              100%    Gustaf Vanhowzen and Gregory Victor, quest 6622 and 6624 (Triage)
 npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
 npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
-npc_aoe_damage_trigger   75%    Used for passive aoe damage triggers in various encounters with overlapping usage of entries: 16697, 17471, 20570
+npc_aoe_damage_trigger   75%    Used for passive aoe damage triggers in various encounters with overlapping usage of entries: 16697
 EndContentData */
 
 /*########
@@ -949,8 +949,6 @@ enum npc_aoe_damage_trigger
 {
     // trigger npcs
     NPC_VOID_ZONE = 16697,
-    NPC_LESSER_SHADOW_FISSURE = 17471,
-    NPC_LESSER_SHADOW_FISSURE_H = 20570,
 
     // m_uiAuraPassive
     SPELL_CONSUMPTION_NPC_16697 = 28874,
@@ -970,12 +968,8 @@ struct npc_aoe_damage_triggerAI : public Scripted_NoMovementAI
         {
             case NPC_VOID_ZONE:
                 return SPELL_CONSUMPTION_NPC_16697;
-            case NPC_LESSER_SHADOW_FISSURE:
-                return SPELL_CONSUMPTION_NPC_17471;
-            case NPC_LESSER_SHADOW_FISSURE_H:
-                return SPELL_CONSUMPTION_NPC_20570;
             default:
-                return SPELL_CONSUMPTION_NPC_17471;
+                return SPELL_CONSUMPTION_NPC_16697;
         }
     }
 

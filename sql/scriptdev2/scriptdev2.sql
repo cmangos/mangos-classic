@@ -101,6 +101,7 @@ UPDATE creature_template SET ScriptName='npc_prof_leather' WHERE entry IN (7866,
 -- UPDATE creature_template SET ScriptName='' WHERE npcflag!=npcflag|65536 AND ScriptName='npc_innkeeper';
 -- UPDATE creature_template SET ScriptName='npc_innkeeper' WHERE npcflag=npcflag|65536;
 UPDATE creature_template SET ScriptName='npc_redemption_target' WHERE entry IN (6172,6177,17542,17768);
+UPDATE creature_template SET ScriptName='npc_aoe_damage_trigger' WHERE entry IN (16697);
 UPDATE creature_template SET ScriptName='npc_the_cleaner' WHERE entry=14503;
 
 /* SPELL */
