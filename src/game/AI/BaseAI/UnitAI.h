@@ -444,6 +444,7 @@ class UnitAI
         float m_attackDistance;
         float m_attackAngle;
         bool m_moveFurther;
+        bool m_chaseRun;
 
         // How far a creature can detect in MoveInLineOfSight
         float m_visibilityDistance;

@@ -167,7 +167,8 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 54  ACTION_T_TEXT_NEW                       TextId, Target, TemplateId          Displays text, either static one or when param3 != 0, then random one chosen from dbscript_random_templates
 55  ACTION_T_ATTACK_START                   Target                              Attacks targeted creature
 56  ACTION_T_DESPAWN_GUARDIANS              EntryId                             Despawns guardian with specified entry, or if 0 despawns all guardians
-57  ACTION_T_SET_RANGED_MODE                RangeModeType,chaseDistance         Enables RangeModeType AI (0 off, 1 = caster, 2 = hunter), distance to chase at                
+57  ACTION_T_SET_RANGED_MODE                RangeModeType,chaseDistance         Enables RangeModeType AI (0 off, 1 = caster, 2 = hunter), distance to chase at
+58  ACTION_T_SET_WALK                       WalkSetting                         Enables Walk (0 off, 1 on) or enables chase walk (2 off, 3 on)
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -1049,6 +1050,15 @@ TYPE_NONE - Basic melee mode and setting it also forcibly turns off ranged mode.
 TYPE_FULL_CASTER - Creature will use spells and not melee, until going OOM, interrupted or silenced. When one of those conditions is valid, creature will come into melee mode and attack until enough mana for spells.
 TYPE_PROXIMITY - Creature will use spells and not melee until target comes within 8 yards, OOM, interrupted or silenced.
 TYPE_NO_MELEE_MODE - Creature will never melee. If OOM, interrupted or silenced, it will stand there and do nothing.
+
+--------------------------------
+57 = ACTION_T_SET_WALK:
+--------------------------------
+Parameter1: Type of walking.
+RUN_DEFAULT  - sets running by default (default)
+WALK_DEFAULT - sets walking by default
+RUN_CHASE    - sets running during chasing (default)
+WALK_CHASE   - sets walking during chasing
 
 =========================================
 Target Types

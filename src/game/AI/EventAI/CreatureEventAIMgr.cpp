@@ -1006,10 +1006,24 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent ranged mode type %u. Setting to 0.", i, j + 1, action.rangedMode.type);
                             action.rangedMode.type = 0;
                         }
-                        if(action.rangedMode.chaseDistance > 200)
+                        if (action.rangedMode.chaseDistance > 200)
                         {
                             sLog.outErrorEventAI("Event %u Action %u uses too large chase distance %u. Setting to 30.", i, j + 1, action.rangedMode.chaseDistance);
                             action.rangedMode.chaseDistance = 30;
+                        }
+                        break;
+                    case ACTION_T_SET_WALK:
+                        switch (action.walkSetting.type)
+                        {
+                            case WALK_DEFAULT:
+                            case RUN_DEFAULT:
+                            case WALK_CHASE:
+                            case RUN_CHASE:
+                                break; // correct values
+                            default:
+                                sLog.outErrorEventAI("Event %u Action %u uses invalid walking mode %u. Setting to RUN_DEFAULT.", i, j + 1, action.walkSetting.type);
+                                action.walkSetting.type = RUN_DEFAULT;
+                                break;
                         }
                         break;
                     default:

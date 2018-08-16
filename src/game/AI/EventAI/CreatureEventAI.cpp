@@ -1327,6 +1327,15 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             SetRangedMode(action.rangedMode.type != TYPE_NONE, float(action.rangedMode.chaseDistance), RangeModeType(action.rangedMode.type));
             break;
         }
+        case ACTION_T_SET_WALK:
+            switch (action.walkSetting.type)
+            {
+                case WALK_DEFAULT: m_creature->SetWalk(false, true); break;
+                case RUN_DEFAULT: m_creature->SetWalk(true, true); break;
+                case WALK_CHASE: m_chaseRun = false; break;
+                case RUN_CHASE: m_chaseRun = true; break;
+            }
+            break;
         default:
             sLog.outError("%s::ProcessAction(): action(%u) not implemented", GetAIName().data(), static_cast<uint32>(action.type));
             return false;

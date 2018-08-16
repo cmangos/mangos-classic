@@ -34,6 +34,7 @@ UnitAI::UnitAI(Unit* unit) :
     m_attackDistance(0.0f),
     m_attackAngle(0.0f),
     m_moveFurther(false),
+    m_chaseRun(true),
     m_visibilityDistance(VISIBLE_RANGE),
     m_combatMovementStarted(false),
     m_dismountOnAggro(true),
@@ -245,7 +246,7 @@ void UnitAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=false*/)
         if (!m_unit->IsIncapacitated())
         {
             if (enable)
-                m_unit->GetMotionMaster()->MoveChase(m_unit->getVictim(), m_attackDistance, m_attackAngle, false);
+                DoStartMovement(m_unit->getVictim());
             else if (m_unit->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
                 m_unit->StopMoving();
         }
@@ -571,5 +572,5 @@ void UnitAI::SetMeleeEnabled(bool state)
 void UnitAI::DoStartMovement(Unit* victim)
 {
     if (victim)
-        m_unit->GetMotionMaster()->MoveChase(victim, m_attackDistance, m_attackAngle, m_moveFurther);
+        m_unit->GetMotionMaster()->MoveChase(victim, m_attackDistance, m_attackAngle, m_moveFurther, !m_chaseRun);
 }
