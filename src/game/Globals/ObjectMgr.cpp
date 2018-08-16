@@ -6687,8 +6687,40 @@ void ObjectMgr::LoadSpellTemplate()
 #endif
     }
 
-    sLog.outString(">> Loaded %u spell_dbc records", sSpellTemplate.GetRecordCount());
+    sLog.outString(">> Loaded %u spell_template records", sSpellTemplate.GetRecordCount());
     sLog.outString();
+
+    sSpellCones.Load();
+    sLog.outString(">> Loaded %u spell_cone records", sSpellCones.GetRecordCount());
+    sLog.outString();
+}
+
+void ObjectMgr::CheckSpellCones()
+{
+    for (uint32 i = 1; i < sSpellTemplate.GetMaxEntry(); ++i)
+    {
+        SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(i);
+        SpellCone const* spellCone = sSpellCones.LookupEntry<SpellCone>(i);
+        if (spell)
+        {
+            if (uint32 firstRankId = sSpellMgr.GetFirstSpellInChain(i))
+            {
+                SpellCone const* spellConeFirst = sSpellCones.LookupEntry<SpellCone>(firstRankId);
+                if (!spellConeFirst && !spellCone || !spellCone)
+                    continue;
+
+                if (!spellConeFirst && spellCone)
+                {
+                    if (spellCone)
+                        sLog.outErrorDb("Table spell_cone is missing entry for spell %u - angle %d for its first rank %u. But has cone for this one.", i, spellCone->coneAngle, firstRankId);
+                    else
+                        sLog.outErrorDb("Table spell_cone is missing entry for spell %u for its first rank %u, no cone even for this rank.", i, spellCone->coneAngle, firstRankId);
+                }
+                else if (spellCone->coneAngle != spellConeFirst->coneAngle)
+                    sLog.outErrorDb("Table spell_cone has different cone angle for spell Id %u - angle %d and first rank %u - angle %d", i, spellCone->coneAngle, firstRankId, spellConeFirst->coneAngle);
+            }
+        }
+    }
 }
 
 void ObjectMgr::DeleteCreatureData(uint32 guid)

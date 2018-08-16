@@ -902,6 +902,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Spell Chain Data...");
     sSpellMgr.LoadSpellChains();
 
+    sLog.outString("Checking Spell Cone Data...");
+    sObjectMgr.CheckSpellCones();
+
     sLog.outString("Loading Spell Elixir types...");
     sSpellMgr.LoadSpellElixirs();
 

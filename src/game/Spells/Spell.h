@@ -53,11 +53,7 @@ enum SpellCastFlags
 
 enum SpellNotifyPushType
 {
-    PUSH_IN_FRONT,
-    PUSH_IN_FRONT_90,
-    PUSH_IN_FRONT_60,
-    PUSH_IN_FRONT_15,
-    PUSH_IN_BACK_90,
+    PUSH_CONE,
     PUSH_SELF_CENTER,
     PUSH_DEST_CENTER,
     PUSH_TARGET_CENTER
@@ -592,12 +588,13 @@ class Spell
         Unit* GetUnitTarget(SpellEffectIndex effIdx); // SetTargetMap wrapper for bad client fill
         static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex);
 
-        void FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = nullptr);
+        void FillAreaTargets(UnitList& targetUnitMap, float radius, float cone, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = nullptr);
         void FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float radius, bool raid, bool withPets, bool withcaster) const;
 
         // Returns a target that was filled by SPELL_SCRIPT_TARGET (or selected victim) Can return nullptr
         Unit* GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const;
         void GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uint32& EffectChainTarget) const;
+        float GetCone();
 
         //*****************************************
         // Spell target subsystem
@@ -738,6 +735,7 @@ namespace MaNGOS
         Spell& i_spell;
         SpellNotifyPushType i_push_type;
         float i_radius;
+        float i_cone;
         SpellTargets i_TargetType;
         WorldObject* i_originalCaster;
         WorldObject* i_castingObject;
@@ -749,9 +747,9 @@ namespace MaNGOS
         float GetCenterX() const { return i_centerX; }
         float GetCenterY() const { return i_centerY; }
 
-        SpellNotifierCreatureAndPlayer(Spell& spell, UnitList& data, float radius, SpellNotifyPushType type,
+        SpellNotifierCreatureAndPlayer(Spell& spell, UnitList& data, float radius, float cone, SpellNotifyPushType type,
                                        SpellTargets TargetType = SPELL_TARGETS_AOE_ATTACKABLE, WorldObject* originalCaster = nullptr)
-            : i_data(data), i_spell(spell), i_push_type(type), i_radius(radius), i_TargetType(TargetType),
+            : i_data(data), i_spell(spell), i_push_type(type), i_radius(radius), i_cone(cone), i_TargetType(TargetType),
               i_originalCaster(originalCaster), i_castingObject(i_spell.GetCastingObject())
         {
             if (!i_originalCaster)
@@ -760,11 +758,7 @@ namespace MaNGOS
 
             switch (i_push_type)
             {
-                case PUSH_IN_FRONT:
-                case PUSH_IN_FRONT_90:
-                case PUSH_IN_FRONT_60:
-                case PUSH_IN_FRONT_15:
-                case PUSH_IN_BACK_90:
+                case PUSH_CONE:
                 case PUSH_SELF_CENTER:
                     if (i_castingObject)
                     {
@@ -830,25 +824,17 @@ namespace MaNGOS
                 // we don't need to check InMap here, it's already done some lines above
                 switch (i_push_type)
                 {
-                    case PUSH_IN_FRONT:
-                        if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F)) //should only be 180 degrees NOT 120 degrees
-                            i_data.push_back(itr->getSource());
-                        break;
-                    case PUSH_IN_FRONT_90:
-                        if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 2))
-                            i_data.push_back(itr->getSource());
-                        break;
-                    case PUSH_IN_FRONT_60:
-                        if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 3))
-                            i_data.push_back(itr->getSource());
-                        break;
-                    case PUSH_IN_FRONT_15:
-                        if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 12))
-                            i_data.push_back(itr->getSource());
-                        break;
-                    case PUSH_IN_BACK_90:
-                        if (i_castingObject->isInBack((Unit*)(itr->getSource()), i_radius, M_PI_F / 2))  //only used for tail swipe in TBC afaik, and that should be 90 degrees in the back
-                            i_data.push_back(itr->getSource());
+                    case PUSH_CONE:
+                        if (i_cone >= 0.f)
+                        {
+                            if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, i_cone))
+                                i_data.push_back(itr->getSource());
+                        }
+                        else
+                        {
+                            if (i_castingObject->isInBack((Unit*)(itr->getSource()), i_radius, -i_cone))
+                                i_data.push_back(itr->getSource());
+                        }
                         break;
                     case PUSH_SELF_CENTER:
                         if (itr->getSource()->GetDistance2d(i_centerX, i_centerY, DIST_CALC_COMBAT_REACH) <= i_radius)

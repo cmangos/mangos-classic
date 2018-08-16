@@ -1750,6 +1750,12 @@ struct SpellTargetPosition
     float  target_Orientation;
 };
 
+struct SpellCone
+{
+    uint32 spellId;
+    int32 coneAngle;
+};
+
 typedef std::unordered_map<uint32, SpellTargetPosition> SpellTargetPositionMap;
 
 // Spell pet auras
