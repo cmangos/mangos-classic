@@ -782,10 +782,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
     // remove affects from attacker at any non-DoT damage (including 0 damage)
     if (damagetype != DOT && damagetype != INSTAKILL)
     {
-        if (damagetype != SELF_DAMAGE_ROGUE_FALL)
-            RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-        RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-
         // Since patch 1.5.0 sitting characters always stand up on attack (even if stunned)
         if (!pVictim->IsStandState() && (pVictim->GetTypeId() == TYPEID_PLAYER || !pVictim->hasUnitState(UNIT_STAT_STUNNED)))
             pVictim->SetStandState(UNIT_STAND_STATE_STAND);
@@ -5276,9 +5272,10 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
                     if (success)
                     {
                         target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
-                        // use speedup check to avoid re-remove after above lines - TODO: move to proc
-                        if (spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
-                            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
+                        // caster can be detected but have stealth aura
+                        if (!spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
+                            RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
                     }
 
                     target->AddThreat(realCaster);

@@ -2829,7 +2829,7 @@ void Spell::EffectPickPocket(SpellEffectIndex /*eff_idx*/)
         else
         {
             // Reveal action + get attack
-            m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
             unitTarget->AttackedBy(m_caster);
         }
     }

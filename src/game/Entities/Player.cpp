@@ -16353,7 +16353,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
         return false;
 
     // prevent stealth flight
-    RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+    // RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
 
     GetSession()->SendActivateTaxiReply(ERR_TAXIOK);
 
