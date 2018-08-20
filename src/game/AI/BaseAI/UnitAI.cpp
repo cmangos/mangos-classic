@@ -336,6 +336,7 @@ void UnitAI::OnChannelStateChange(SpellEntry const* spellInfo, bool state, World
     // Targeting seems to be directly affected by eff index 0 targets, client does the same thing
     switch (spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])
     {
+        case TARGET_UNIT:
         case TARGET_UNIT_SCRIPT_NEAR_CASTER: forceTarget = false; break;
         case TARGET_UNIT_ENEMY:
         default: break;
