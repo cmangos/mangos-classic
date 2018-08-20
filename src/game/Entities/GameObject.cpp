@@ -2236,7 +2236,7 @@ void GameObject::TriggerSummoningRitual()
         ClearAllUsesData();
 
     if (caster)
-        caster->CastSpell(sObjectMgr.GetPlayer(m_actionTarget), info->summoningRitual.spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid());
+        caster->CastSpell(sObjectMgr.GetPlayer(m_actionTarget), info->summoningRitual.spellId, TRIGGERED_OLD_TRIGGERED | TRIGGERED_INSTANT_CAST, nullptr, nullptr, GetObjectGuid());
 }
 
 void GameObject::TriggerDelayedAction()
