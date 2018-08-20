@@ -2427,8 +2427,6 @@ class Unit : public WorldObject
 
         ObjectGuid m_TotemSlot[MAX_TOTEM_SLOT];
 
-        ObjectGuid m_fixateTargetGuid;                      //< Stores the Guid of a fixated target
-
         // Need to safeguard aura application in Unit::Update
         bool m_spellUpdateHappening;
         // Need to safeguard aura proccing in Unit::ProcDamageAndSpell
