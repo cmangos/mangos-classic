@@ -1736,7 +1736,15 @@ void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
         }
     }
 
-    caster->CastSpell(unitTarget, spellInfo, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
+    SpellCastTargets targets;
+
+    switch (m_spellInfo->EffectImplicitTargetA[eff_idx])
+    {
+        case TARGET_LOCATION_UNIT_MINION_POSITION: break; // confirmed by 31348 nothing is forwarded
+        default: targets.setUnitTarget(unitTarget);
+    }
+
+    caster->CastSpell(targets, spellInfo, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
 }
 
 void Spell::EffectTriggerMissileSpell(SpellEffectIndex effect_idx)
