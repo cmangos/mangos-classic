@@ -2271,6 +2271,10 @@ class Unit : public WorldObject
         // Uncharm (physically revert the charm effect) the unit and reset player control if required
         void Uncharm(Unit* charmed);
 
+        // Combat prevention
+        bool CanEnterCombat() { return m_canEnterCombat && m_evadeMode != EVADE_HOME; }
+        void SetCanEnterCombat(bool can) { m_canEnterCombat = can; }
+
         void SetTurningOff(bool apply);
         virtual bool IsIgnoringRangedTargets() { return false; }
 
@@ -2428,6 +2432,8 @@ class Unit : public WorldObject
         GuidSet m_charmedUnitsPrivate;                      // stores non-advertised active charmed unit guids (e.g. aoe charms)
 
         ObjectGuid m_TotemSlot[MAX_TOTEM_SLOT];
+
+        bool m_canEnterCombat;
 
         // Need to safeguard aura application in Unit::Update
         bool m_spellUpdateHappening;
