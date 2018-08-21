@@ -379,6 +379,9 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
     if (!victim)
         return;
 
+    if (me->isInCombat())
+        return;
+
     if (me->GetMap()->Instanceable())
         distance = distance / 2.5f;
 
