@@ -846,45 +846,60 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
             return false;
 
         // special invisibility cases
-        if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed)
+        switch (GetGOInfo()->type)
         {
-            bool trapNotVisible = false;
-
-            // handle summoned traps, usually by players
-            if (Unit* owner = GetOwner())
+            case GAMEOBJECT_TYPE_TRAP:
             {
-                if (owner->GetTypeId() == TYPEID_PLAYER)
+                if (GetGOInfo()->trap.stealthed == 0)
+                    break;
+
+                bool trapNotVisible = false;
+
+                // handle summoned traps, usually by players
+                if (Unit* owner = GetOwner())
                 {
-                    Player* ownerPlayer = (Player*)owner;
-                    if ((GetMap()->IsBattleGround() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
+                    if (owner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Player* ownerPlayer = (Player*)owner;
+                        if ((GetMap()->IsBattleGround() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
                             (ownerPlayer->IsInDuelWith(u)) ||
                             (!ownerPlayer->IsInGroup(u)))
-                        trapNotVisible = true;
+                            trapNotVisible = true;
+                    }
+                    else
+                    {
+                        if (owner->CanCooperate(u))
+                            return true;
+                    }
                 }
+                // handle environment traps (spawned by DB)
                 else
                 {
-                    if (owner->CanCooperate(u))
+                    if (this->IsFriend(u))
+                        return true;
+                    else
+                        trapNotVisible = true;
+                }
+
+                // only rogue have skill for traps detection
+                if (Aura* aura = ((Player*)u)->GetAura(2836, EFFECT_INDEX_0))
+                {
+                    if (roll_chance_i(aura->GetModifier()->m_amount) && u->isInFront(this, 15.0f))
                         return true;
                 }
-            }
-            // handle environment traps (spawned by DB)
-            else
-            {
-                if (this->IsFriend(u))
-                    return true;
-                else
-                    trapNotVisible = true;
-            }
 
-            // only rogue have skill for traps detection
-            if (Aura* aura = ((Player*)u)->GetAura(2836, EFFECT_INDEX_0))
-            {
-                if (roll_chance_i(aura->GetModifier()->m_amount) && u->isInFront(this, 15.0f))
-                    return true;
-            }
+                if (trapNotVisible)
+                    return false;
 
-            if (trapNotVisible)
-                return false;
+                break;
+            }
+            case GAMEOBJECT_TYPE_SPELL_FOCUS:
+            {
+                if (GetGOInfo()->spellFocus.serverOnly == 1)
+                    return false;
+
+                break;
+            }
         }
 
         // Smuggled Mana Cell required 10 invisibility type detection/state
