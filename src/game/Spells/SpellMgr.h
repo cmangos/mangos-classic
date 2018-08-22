@@ -135,6 +135,19 @@ inline bool IsDestinationOnlyEffect(SpellEntry const* spellInfo, SpellEffectInde
 {
     switch (spellInfo->Effect[effIdx])
     {
+        case SPELL_EFFECT_TRIGGER_SPELL:
+        case SPELL_EFFECT_DUMMY: // special - can be either
+            if (spellInfo->EffectImplicitTargetB[effIdx] == 0)
+            {
+                switch (spellInfo->EffectImplicitTargetA[effIdx])
+                {
+                    case TARGET_AREAEFFECT_CUSTOM:
+                    case TARGET_CURRENT_ENEMY_COORDINATES:
+                        return true;
+                }
+            }
+            return false;
+        case SPELL_EFFECT_TRIGGER_MISSILE:
         case SPELL_EFFECT_PERSISTENT_AREA_AURA:
         case SPELL_EFFECT_TRANS_DOOR:
         case SPELL_EFFECT_SUMMON:

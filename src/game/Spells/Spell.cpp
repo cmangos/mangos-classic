@@ -2416,8 +2416,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             Unit* currentTarget = m_targets.getUnitTarget();
             if (currentTarget)
             {
-                targetUnitMap.push_back(currentTarget);
                 m_targets.setDestination(currentTarget->GetPositionX(), currentTarget->GetPositionY(), currentTarget->GetPositionZ());
+                if (IsDestinationOnlyEffect(m_spellInfo, effIndex))
+                    targetUnitMap.push_back(m_caster); // effect should only fill destination - TODO: remove this line
             }
             break;
         }
@@ -2684,7 +2685,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     // remove caster from the list if required by attribute
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
     {
-        if (targetMode != TARGET_SELF && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_SUMMON)
+        if (targetMode != TARGET_SELF && !IsDestinationOnlyEffect(m_spellInfo, effIndex))
             targetUnitMap.remove(m_caster);
     }
 
