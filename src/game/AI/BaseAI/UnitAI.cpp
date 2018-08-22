@@ -473,10 +473,15 @@ class AiDelayEventAround : public BasicEvent
                 {
                     pReceiver->AI()->ReceiveAIEvent(m_eventType, &m_owner, pInvoker, m_miscValue);
                     // Special case for type 0 (call-assistance)
-                    if (m_eventType == AI_EVENT_CALL_ASSISTANCE && pInvoker && pReceiver->CanAssist(&m_owner) && pReceiver->CanAttackOnSight(pInvoker))
+                    if (m_eventType == AI_EVENT_CALL_ASSISTANCE)
                     {
-                        pReceiver->SetNoCallAssistance(true);
-                        pReceiver->AI()->AttackStart(pInvoker);
+                        if (pReceiver->isInCombat() || !pInvoker)
+                            continue;
+                        if (pReceiver->CanAssist(&m_owner) && pReceiver->CanAttackOnSight(pInvoker))
+                        {
+                            pReceiver->SetNoCallAssistance(true);
+                            pReceiver->AI()->AttackStart(pInvoker);
+                        }
                     }
                 }
             }
