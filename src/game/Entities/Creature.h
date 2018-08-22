@@ -267,6 +267,14 @@ struct CreatureModelInfo
     uint32 modelid_other_team;                              // The oposite team. Generally for alliance totem
 };
 
+struct CreatureConditionalSpawn
+{
+    uint32 Guid;
+    uint32 EntryAlliance;
+    uint32 EntryHorde;
+    // Note: future condition flags to be added
+};
+
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
 #pragma pack()
@@ -815,6 +823,7 @@ class Creature : public Unit
         bool CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, Team team, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 entry, Team team = ALLIANCE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
 
+        uint32 GetCreatureConditionalSpawnEntry(uint32 guidlow, Map* map);
 
         void UnsummonCleanup(); // cleans up data before unsummon of various creatures
 

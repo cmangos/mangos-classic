@@ -439,6 +439,8 @@ class DungeonMap : public Map
         void SetResetSchedule(bool on);
         uint32 GetMaxPlayers() const;
 
+        Team GetInstanceTeam() { return m_team; };
+
         // can't be nullptr for loaded map
         DungeonPersistentState* GetPersistanceState() const;
 
@@ -446,6 +448,7 @@ class DungeonMap : public Map
     private:
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
+        Team m_team;
 };
 
 class BattleGroundMap : public Map

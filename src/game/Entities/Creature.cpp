@@ -1408,10 +1408,19 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
         return false;
     }
 
-    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(data->id);
+    uint32 entry = data->id;
+
+    // get data for dual spawn instances
+    if (entry == 0)
+        entry = GetCreatureConditionalSpawnEntry(guidlow, map);
+
+    if (!entry)
+        return false;
+
+    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(entry);
     if (!cinfo)
     {
-        sLog.outErrorDb("Creature (Entry: %u) not found in table `creature_template`, can't load. ", data->id);
+        sLog.outErrorDb("Creature (Entry: %u) not found in table `creature_template`, can't load. ", entry);
         return false;
     }
 
@@ -2878,4 +2887,32 @@ void Creature::UnsummonCleanup()
     RemoveMiniPet();
     UnsummonAllTotems();
     InterruptNonMeleeSpells(false);
+}
+
+uint32 Creature::GetCreatureConditionalSpawnEntry(uint32 guidlow, Map* map)
+{
+    uint32 entry = 0;
+
+    /* ToDo: check for Battlefield or Outdoor pvp in the future */
+    if (map->IsDungeon())
+    {
+        DungeonMap* dungeon = (DungeonMap*)map;
+        if (!dungeon)
+            return 0;
+
+        Team currentTeam = dungeon->GetInstanceTeam();
+        if (currentTeam != ALLIANCE && currentTeam != HORDE)
+            return 0;
+
+        CreatureConditionalSpawn const* spawn = ObjectMgr::GetCreatureConditionalSpawn(guidlow);
+        if (!spawn)
+            return 0;
+
+        if (currentTeam == ALLIANCE)
+            entry = spawn->EntryAlliance;
+        else if (currentTeam == HORDE)
+            entry = spawn->EntryHorde;
+    }
+
+    return entry;
 }

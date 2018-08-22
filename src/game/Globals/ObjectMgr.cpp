@@ -948,6 +948,32 @@ void ObjectMgr::LoadCreatureModelInfo()
     sLog.outString();
 }
 
+void ObjectMgr::LoadCreatureConditionalSpawn()
+{
+    sCreatureConditionalSpawnStore.Load();
+
+    // post processing
+    for (uint32 i = 1; i < sCreatureConditionalSpawnStore.GetMaxEntry(); ++i)
+    {
+        CreatureConditionalSpawn const* spawn = sCreatureConditionalSpawnStore.LookupEntry<CreatureConditionalSpawn>(i);
+        if (!spawn)
+            continue;
+
+        CreatureInfo const* cInfoAlliance = GetCreatureTemplate(spawn->EntryAlliance);
+        CreatureInfo const* cInfoHorde = GetCreatureTemplate(spawn->EntryHorde);
+
+        // check if both alliance and horde entries are missing; one faction spawn is allowed
+        if (!cInfoAlliance && !cInfoHorde)
+        {
+            sLog.outErrorDb("Table `creature_conditional_spawn` has creature (GUID: %u) with non existing alliance creature entry %u and horde creature entry %u, skipped.", spawn->Guid, spawn->EntryAlliance, spawn->EntryHorde);
+            continue;
+        }
+    }
+
+    sLog.outString(">> Loaded %u creature_conditional_spawn entries", sCreatureConditionalSpawnStore.GetRecordCount());
+    sLog.outString();
+}
+
 void ObjectMgr::LoadCreatures()
 {
     uint32 count = 0;
@@ -984,6 +1010,22 @@ void ObjectMgr::LoadCreatures()
 
         uint32 guid         = fields[ 0].GetUInt32();
         uint32 entry        = fields[ 1].GetUInt32();
+
+        // validate creature dual spawn template
+        bool isConditional  = false;
+        if (entry == 0)
+        {
+            CreatureConditionalSpawn const* cSpawn = GetCreatureConditionalSpawn(guid);
+            if (!cSpawn)
+            {
+                sLog.outErrorDb("Table `creature` has creature (GUID: %u) with non existing link to creature dual spawn, skipped.", guid);
+                continue;
+            }
+
+            isConditional = true;
+            // set a default entry to validate the record; will be reset back to 0 afterwards
+            entry = cSpawn->EntryAlliance != 0 ? cSpawn->EntryAlliance : cSpawn->EntryHorde;
+        }
 
         CreatureInfo const* cInfo = GetCreatureTemplate(entry);
         if (!cInfo)
@@ -1086,6 +1128,10 @@ void ObjectMgr::LoadCreatures()
             if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE)
                 m_activeCreatures.insert(ActiveCreatureGuidsOnMap::value_type(data.mapid, guid));
         }
+
+        // reset the entry to 0; this will be processed by Creature::GetCreatureConditionalSpawnEntry
+        if (isConditional)
+            data.id = 0;
 
         ++count;
     }
@@ -2889,6 +2935,7 @@ CreatureDataAddon const* ObjectMgr::GetCreatureTemplateAddon(uint32 entry) { ret
 ItemPrototype const* ObjectMgr::GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
 InstanceTemplate const* ObjectMgr::GetInstanceTemplate(uint32 map) { return sInstanceTemplate.LookupEntry<InstanceTemplate>(map); }
 WorldTemplate const* ObjectMgr::GetWorldTemplate(uint32 map) { return sWorldTemplate.LookupEntry<WorldTemplate>(map); }
+CreatureConditionalSpawn const* ObjectMgr::GetCreatureConditionalSpawn(uint32 lowguid) { return sCreatureConditionalSpawnStore.LookupEntry<CreatureConditionalSpawn>(lowguid); }
 
 /* ********************************************************************************************* */
 /* *                                Loading Functions                                            */

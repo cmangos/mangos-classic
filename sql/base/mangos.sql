@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2725_01_mangos_trainer_greeting` bit(1) DEFAULT NULL
+  `required_z2726_01_mangos_creature_conditional_spawn` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -876,6 +876,28 @@ CREATE TABLE `creature_battleground` (
 LOCK TABLES `creature_battleground` WRITE;
 /*!40000 ALTER TABLE `creature_battleground` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_battleground` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_conditional_spawn`
+--
+
+DROP TABLE IF EXISTS `creature_conditional_spawn`;
+CREATE TABLE `creature_conditional_spawn` (
+  `Guid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Global Unique Identifier',
+  `EntryAlliance` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Alliance Creature Identifier',
+  `EntryHorde` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Horde Creature Identifier',
+  `Comments` varchar(255) NOT NULL,
+  PRIMARY KEY (`Guid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System (Conditional Spawn)';
+
+--
+-- Dumping data for table `creature_conditional_spawn`
+--
+
+LOCK TABLES `creature_conditional_spawn` WRITE;
+/*!40000 ALTER TABLE `creature_conditional_spawn` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_conditional_spawn` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

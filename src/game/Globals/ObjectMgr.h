@@ -670,6 +670,7 @@ class ObjectMgr
         static ItemPrototype const* GetItemPrototype(uint32 id);                    ///< Wrapper for sItemStorage.LookupEntry
         static InstanceTemplate const* GetInstanceTemplate(uint32 map);             ///< Wrapper for sInstanceTemplate.LookupEntry
         static WorldTemplate const* GetWorldTemplate(uint32 map);                   ///< Wrapper for sWorldTemplate.LookupEntry
+        static CreatureConditionalSpawn const* GetCreatureConditionalSpawn(uint32 lowguid); ///< Wrapper for sCreatureConditionalSpawnStore.LookupEntry
 
         void LoadGroups();
         void LoadQuests();
@@ -693,6 +694,7 @@ class ObjectMgr
         void LoadCreatures();
         void LoadCreatureAddons();
         void LoadCreatureClassLvlStats();
+        void LoadCreatureConditionalSpawn();
         void LoadCreatureModelInfo();
         void LoadEquipmentTemplates();
         void LoadGameObjectLocales();
