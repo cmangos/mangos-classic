@@ -841,270 +841,276 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         ((Creature*)pVictim)->SetLootRecipient(this);
 
     if (health <= damage)
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage %s Killed %s", GetGuidStr().c_str(), pVictim->GetGuidStr().c_str());
-
-        /*
-         *                      Preparation: Who gets credit for killing whom, invoke SpiritOfRedemtion?
-         */
-        // for loot will be used only if group_tap == nullptr
-        Player* pKiller = GetBeneficiaryPlayer();
-        Player* pTapper = pKiller;
-        Group* pTapperGroup = nullptr;
-
-        // in creature kill case group/player tap stored for creature
-        if (pVictim->GetTypeId() == TYPEID_UNIT)
-        {
-            if (Player* recipient = ((Creature*)pVictim)->GetOriginalLootRecipient())
-                pTapper = recipient;
-
-            pTapperGroup = ((Creature*)pVictim)->GetGroupLootRecipient();
-        }
-        else
-        {
-            if (pTapper)
-                pTapperGroup = pTapper->GetGroup();
-        }
-
-        // Spirit of Redemtion Talent
-        bool damageFromSpiritOfRedemtionTalent = spellProto && spellProto->Id == 27795;
-        // if talent known but not triggered (check priest class for speedup check)
-        Aura* spiritOfRedemtionTalentReady = nullptr;
-        if (!damageFromSpiritOfRedemtionTalent &&           // not called from SPELL_AURA_SPIRIT_OF_REDEMPTION
-                pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->getClass() == CLASS_PRIEST)
-        {
-            AuraList const& vDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
-            for (auto vDummyAura : vDummyAuras)
-            {
-                if (vDummyAura->GetSpellProto()->SpellIconID == 1654)
-                {
-                    spiritOfRedemtionTalentReady = vDummyAura;
-                    break;
-                }
-            }
-        }
-
-        /*
-         *                      Generic Actions (ProcEvents, Combat-Log, Kill Rewards, Stop Combat)
-         */
-        // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
-        if (damagetype != INSTAKILL)
-        {
-            if (pKiller && pKiller != pVictim && (pKiller == pTapper || (pTapperGroup &&  pKiller->GetGroup() == pTapperGroup)))
-            {
-                WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL
-                data << pKiller->GetObjectGuid();            // player with killing blow
-                data << pVictim->GetObjectGuid();               // victim
-
-                if (pTapperGroup)
-                    pTapperGroup->BroadcastPacket(data, false, pTapperGroup->GetMemberGroup(pKiller->GetObjectGuid()), pKiller->GetObjectGuid());
-
-                pKiller->SendDirectMessage(data);
-            }
-        }
-
-        // proc only once for victim
-        if (Unit* owner = GetOwner())
-            owner->ProcDamageAndSpell(ProcSystemArguments(pVictim, PROC_FLAG_KILL, PROC_FLAG_NONE, PROC_EX_NONE, 0));
-
-        ProcDamageAndSpell(ProcSystemArguments(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0));
-
-        // Reward player, his pets, and group/raid members
-        if (pTapper != pVictim)
-        {
-            if (pTapperGroup)
-                pTapperGroup->RewardGroupAtKill(pVictim, pTapper);
-            else if (pTapper)
-                pTapper->RewardSinglePlayerAtKill(pVictim);
-        }
-
-        /*
-         *                      Actions for the killer
-         */
-        if (spiritOfRedemtionTalentReady)
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage: Spirit of Redemtion ready");
-
-            // save value before aura remove
-            uint32 ressSpellId = pVictim->GetUInt32Value(PLAYER_SELF_RES_SPELL);
-            if (!ressSpellId)
-                ressSpellId = ((Player*)pVictim)->GetResurrectionSpellId();
-
-            // Remove all expected to remove at death auras (most important negative case like DoT or periodic triggers)
-            pVictim->RemoveAllAurasOnDeath();
-
-            // restore for use at real death
-            pVictim->SetUInt32Value(PLAYER_SELF_RES_SPELL, ressSpellId);
-
-            // FORM_SPIRITOFREDEMPTION and related auras
-            pVictim->CastSpell(pVictim, 27827, TRIGGERED_OLD_TRIGGERED, nullptr, spiritOfRedemtionTalentReady);
-        }
-        else
-            pVictim->SetHealth(0);
-
-        // Call KilledUnit for creatures
-        if (AI())
-            AI()->KilledUnit(pVictim);
-
-        // Call AI OwnerKilledUnit (for any current summoned minipet/guardian/protector)
-        PetOwnerKilledUnit(pVictim);
-
-        /*
-         *                      Actions for the victim
-         */
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)          // Killed player
-        {
-            Player* playerVictim = (Player*)pVictim;
-
-            // remember victim PvP death for corpse type and corpse reclaim delay
-            // at original death (not at SpiritOfRedemtionTalent timeout)
-            if (!damageFromSpiritOfRedemtionTalent)
-                playerVictim->SetPvPDeath(pKiller != nullptr);
-
-            // 10% durability loss on death
-            // only if not player and not controlled by player pet. And not at BG
-            if (durabilityLoss && !pKiller && !playerVictim->InBattleGround())
-            {
-                DEBUG_LOG("DealDamage: Killed %s, looing 10 percents durability", pVictim->GetGuidStr().c_str());
-                playerVictim->DurabilityLossAll(0.10f, false);
-                // durability lost message
-                WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
-                playerVictim->GetSession()->SendPacket(data);
-            }
-
-            if (!spiritOfRedemtionTalentReady)              // Before informing Battleground
-            {
-                DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "SET JUST_DIED");
-                pVictim->SetDeathState(JUST_DIED);
-            }
-
-            // playerVictim was in duel, duel must be interrupted
-            // last damage from non duel opponent or non opponent controlled creature
-            if (duel_hasEnded)
-            {
-                playerVictim->duel->opponent->CombatStopWithPets(true);
-                playerVictim->CombatStopWithPets(true);
-
-                playerVictim->DuelComplete(DUEL_INTERRUPTED);
-            }
-
-            if (pKiller)                                 // PvP kill
-            {
-                if (BattleGround* bg = playerVictim->GetBattleGround())
-                {
-                    bg->HandleKillPlayer(playerVictim, pKiller);
-                }
-                else if (pVictim != this)
-                {
-                    // selfkills are not handled in outdoor pvp scripts
-                    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(playerVictim->GetCachedZoneId()))
-                        outdoorPvP->HandlePlayerKill(pKiller, playerVictim);
-                }
-            }
-        }
-        else                                                // Killed creature
-            JustKilledCreature((Creature*)pVictim, pKiller);
-
-        // stop combat
-        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAttackStop");
-        pVictim->CombatStop();
-    }
+        Kill(pVictim, damagetype, spellProto, durabilityLoss, duel_hasEnded);
     else                                                    // if (health <= damage)
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAlive");
-
-        pVictim->ModifyHealth(- (int32)damage);
-
-        if (CanAttack(pVictim) && (!spellProto || (!spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
-            !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))) && CanEnterCombat() && pVictim->CanEnterCombat())
-        {
-            float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
-            pVictim->AddThreat(this, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
-            if (damagetype != DOT) // DOTs dont put in combat but still cause threat
-            {
-                SetInCombatWith(pVictim);
-                pVictim->SetInCombatWith(this);
-            }
-        }
-
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)                               // victim is a player
-        {
-            // Rage from damage received
-            if (this != pVictim && pVictim->GetPowerType() == POWER_RAGE)
-            {
-                uint32 rage_damage = damage + (cleanDamage ? cleanDamage->damage : 0);
-                ((Player*)pVictim)->RewardRage(rage_damage, false);
-            }
-
-            // random durability for items (HIT TAKEN)
-            if (roll_chance_f(sWorld.getConfig(CONFIG_FLOAT_RATE_DURABILITY_LOSS_DAMAGE)))
-            {
-                EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END - 1));
-                ((Player*)pVictim)->DurabilityPointLossForEquipSlot(slot);
-            }
-        }
-
-        if (GetTypeId() == TYPEID_PLAYER)
-        {
-            // random durability for items (HIT DONE)
-            if (roll_chance_f(sWorld.getConfig(CONFIG_FLOAT_RATE_DURABILITY_LOSS_DAMAGE)))
-            {
-                EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END - 1));
-                ((Player*)this)->DurabilityPointLossForEquipSlot(slot);
-            }
-        }
-
-        if ((damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE || damagetype == DOT)
-                && !(spellProto && spellProto->HasAttribute(SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS)))
-        {
-            int32 auraInterruptFlags = AURA_INTERRUPT_FLAG_DAMAGE;
-            if (damagetype != DOT)
-                auraInterruptFlags = (auraInterruptFlags | AURA_INTERRUPT_FLAG_DIRECT_DAMAGE);
-
-            SpellAuraHolderMap& vInterrupts = pVictim->GetSpellAuraHolderMap();
-            std::vector<uint32> cleanupHolder;
-
-            for (auto aura : vInterrupts)
-            {
-                if (spellProto && spellProto->Id == aura.second->GetId()) // Not drop auras added by self
-                    continue;
-
-                const SpellEntry* se = aura.second->GetSpellProto();
-
-                if (!se)
-                    continue;
-
-                if (se->AuraInterruptFlags & auraInterruptFlags)
-                    cleanupHolder.push_back(aura.second->GetId());
-            }
-
-            for (auto aura : cleanupHolder)
-                pVictim->RemoveAurasDueToSpell(aura);
-        }
-
-        InterruptOrDelaySpell(pVictim, damagetype);
-
-        // last damage from duel opponent
-        if (duel_hasEnded)
-        {
-            MANGOS_ASSERT(pVictim->GetTypeId() == TYPEID_PLAYER);
-            Player* he = (Player*)pVictim;
-
-            MANGOS_ASSERT(he->duel);
-
-            he->SetHealth(1);
-
-            he->duel->opponent->CombatStopWithPets(true);
-            he->CombatStopWithPets(true);
-
-            he->CastSpell(he, 7267, TRIGGERED_OLD_TRIGGERED);                  // beg
-            he->DuelComplete(DUEL_WON);
-        }
-    }
+        HandleDamageDealt(pVictim, damage, cleanDamage, damagetype, damageSchoolMask, spellProto, duel_hasEnded);
 
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageEnd returned %d damage", damage);
 
     return damage;
+}
+
+void Unit::Kill(Unit* victim, DamageEffectType damagetype, SpellEntry const* spellProto, bool durabilityLoss, bool duel_hasEnded)
+{
+    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage %s Killed %s", GetGuidStr().c_str(), victim->GetGuidStr().c_str());
+
+    /*
+    *                      Preparation: Who gets credit for killing whom, invoke SpiritOfRedemtion?
+    */
+    // for loot will be used only if group_tap == nullptr
+    Player* killer = GetBeneficiaryPlayer();
+    Player* tapper = killer;
+    Group* tapperGroup = nullptr;
+
+    // in creature kill case group/player tap stored for creature
+    if (victim->GetTypeId() == TYPEID_UNIT)
+    {
+        if (Player* recipient = ((Creature*)victim)->GetOriginalLootRecipient())
+            tapper = recipient;
+
+        tapperGroup = ((Creature*)victim)->GetGroupLootRecipient();
+    }
+    else
+    {
+        if (tapper)
+            tapperGroup = tapper->GetGroup();
+    }
+
+    // Spirit of Redemtion Talent
+    bool damageFromSpiritOfRedemtionTalent = spellProto && spellProto->Id == 27795;
+    // if talent known but not triggered (check priest class for speedup check)
+    Aura* spiritOfRedemtionTalentReady = nullptr;
+    if (!damageFromSpiritOfRedemtionTalent &&           // not called from SPELL_AURA_SPIRIT_OF_REDEMPTION
+        victim->GetTypeId() == TYPEID_PLAYER && victim->getClass() == CLASS_PRIEST)
+    {
+        AuraList const& vDummyAuras = victim->GetAurasByType(SPELL_AURA_DUMMY);
+        for (AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
+        {
+            if ((*itr)->GetSpellProto()->SpellIconID == 1654)
+            {
+                spiritOfRedemtionTalentReady = *itr;
+                break;
+            }
+        }
+    }
+
+    /*
+    *                      Generic Actions (ProcEvents, Combat-Log, Kill Rewards, Stop Combat)
+    */
+    // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
+    if (damagetype != INSTAKILL)
+    {
+        if (killer && killer != victim && (killer == tapper || killer->GetGroup() == tapperGroup && tapperGroup))
+        {
+            WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL
+            data << killer->GetObjectGuid();                // player with killing blow
+            data << victim->GetObjectGuid();                // victim
+
+            if (tapperGroup)
+                tapperGroup->BroadcastPacket(data, false, tapperGroup->GetMemberGroup(killer->GetObjectGuid()), killer->GetObjectGuid());
+
+            killer->SendDirectMessage(data);
+        }
+    }
+
+    // proc only once for victim
+    if (Unit* owner = GetOwner())
+        owner->ProcDamageAndSpell(ProcSystemArguments(victim, PROC_FLAG_KILL, PROC_FLAG_NONE, PROC_EX_NONE, 0));
+
+    ProcDamageAndSpell(ProcSystemArguments(victim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0));
+
+    // Reward player, his pets, and group/raid members
+    if (tapper != victim)
+    {
+        if (tapperGroup)
+            tapperGroup->RewardGroupAtKill(victim, tapper);
+        else if (tapper)
+            tapper->RewardSinglePlayerAtKill(victim);
+    }
+
+    /*
+    *                      Actions for the killer
+    */
+    if (spiritOfRedemtionTalentReady)
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage: Spirit of Redemtion ready");
+
+        // save value before aura remove
+        uint32 ressSpellId = victim->GetUInt32Value(PLAYER_SELF_RES_SPELL);
+        if (!ressSpellId)
+            ressSpellId = ((Player*)victim)->GetResurrectionSpellId();
+
+        // Remove all expected to remove at death auras (most important negative case like DoT or periodic triggers)
+        victim->RemoveAllAurasOnDeath();
+
+        // restore for use at real death
+        victim->SetUInt32Value(PLAYER_SELF_RES_SPELL, ressSpellId);
+
+        // FORM_SPIRITOFREDEMPTION and related auras
+        victim->CastSpell(victim, 27827, TRIGGERED_OLD_TRIGGERED, nullptr, spiritOfRedemtionTalentReady);
+    }
+    else
+        victim->SetHealth(0);
+
+    // Call KilledUnit for creatures
+    if (AI())
+        AI()->KilledUnit(victim);
+
+    // Call AI OwnerKilledUnit (for any current summoned minipet/guardian/protector)
+    PetOwnerKilledUnit(victim);
+
+    /*
+    *                      Actions for the victim
+    */
+    if (victim->GetTypeId() == TYPEID_PLAYER)          // Killed player
+    {
+        Player* playerVictim = (Player*)victim;
+
+        // remember victim PvP death for corpse type and corpse reclaim delay
+        // at original death (not at SpiritOfRedemtionTalent timeout)
+        if (!damageFromSpiritOfRedemtionTalent)
+            playerVictim->SetPvPDeath(killer != nullptr);
+
+        // 10% durability loss on death
+        // only if not player and not controlled by player pet. And not at BG
+        if (durabilityLoss && !killer && !playerVictim->InBattleGround())
+        {
+            DEBUG_LOG("DealDamage: Killed %s, looing 10 percents durability", victim->GetGuidStr().c_str());
+            playerVictim->DurabilityLossAll(0.10f, false);
+            // durability lost message
+            WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
+            playerVictim->GetSession()->SendPacket(data);
+        }
+
+        if (!spiritOfRedemtionTalentReady)              // Before informing Battleground
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "SET JUST_DIED");
+            victim->SetDeathState(JUST_DIED);
+        }
+
+        // playerVictim was in duel, duel must be interrupted
+        // last damage from non duel opponent or non opponent controlled creature
+        if (duel_hasEnded)
+        {
+            playerVictim->duel->opponent->CombatStopWithPets(true);
+            playerVictim->CombatStopWithPets(true);
+
+            playerVictim->DuelComplete(DUEL_INTERRUPTED);
+        }
+
+        if (killer)                                 // PvP kill
+        {
+            if (BattleGround* bg = playerVictim->GetBattleGround())
+            {
+                bg->HandleKillPlayer(playerVictim, killer);
+            }
+            else if (victim != this)
+            {
+                // selfkills are not handled in outdoor pvp scripts
+                if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(playerVictim->GetCachedZoneId()))
+                    outdoorPvP->HandlePlayerKill(killer, playerVictim);
+            }
+        }
+    }
+    else                                                // Killed creature
+        JustKilledCreature((Creature*)victim, killer);
+
+    // stop combat
+    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAttackStop");
+    victim->CombatStop();
+}
+
+void Unit::HandleDamageDealt(Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool duel_hasEnded)
+{
+    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAlive");
+
+    victim->ModifyHealth(-(int32)damage);
+
+    if (CanAttack(victim) && (!spellProto || (!spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
+        !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))) && CanEnterCombat() && victim->CanEnterCombat())
+    {
+        float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
+        victim->AddThreat(this, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
+        if (damagetype != DOT) // DOTs dont put in combat but still cause threat
+        {
+            SetInCombatWith(victim);
+            victim->SetInCombatWith(this);
+        }
+    }
+
+    if (victim->GetTypeId() == TYPEID_PLAYER)                               // victim is a player
+    {
+        // Rage from damage received
+        if (this != victim && victim->GetPowerType() == POWER_RAGE)
+        {
+            uint32 rage_damage = damage + (cleanDamage ? cleanDamage->damage : 0);
+            ((Player*)victim)->RewardRage(rage_damage, false);
+        }
+
+        // random durability for items (HIT TAKEN)
+        if (roll_chance_f(sWorld.getConfig(CONFIG_FLOAT_RATE_DURABILITY_LOSS_DAMAGE)))
+        {
+            EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END - 1));
+            ((Player*)victim)->DurabilityPointLossForEquipSlot(slot);
+        }
+    }
+
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        // random durability for items (HIT DONE)
+        if (roll_chance_f(sWorld.getConfig(CONFIG_FLOAT_RATE_DURABILITY_LOSS_DAMAGE)))
+        {
+            EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END - 1));
+            ((Player*)this)->DurabilityPointLossForEquipSlot(slot);
+        }
+    }
+
+    if ((damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE || damagetype == DOT)
+        && !(spellProto && spellProto->HasAttribute(SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS)))
+    {
+        int32 auraInterruptFlags = AURA_INTERRUPT_FLAG_DAMAGE;
+        if (damagetype != DOT)
+            auraInterruptFlags = (auraInterruptFlags | AURA_INTERRUPT_FLAG_DIRECT_DAMAGE);
+
+        SpellAuraHolderMap& vInterrupts = victim->GetSpellAuraHolderMap();
+        std::vector<uint32> cleanupHolder;
+
+        for (auto aura : vInterrupts)
+        {
+            if (spellProto && spellProto->Id == aura.second->GetId()) // Not drop auras added by self
+                continue;
+
+            const SpellEntry* se = aura.second->GetSpellProto();
+
+            if (!se)
+                continue;
+
+            if (se->AuraInterruptFlags & auraInterruptFlags)
+                cleanupHolder.push_back(aura.second->GetId());
+        }
+
+        for (auto aura : cleanupHolder)
+            victim->RemoveAurasDueToSpell(aura);
+    }
+
+    InterruptOrDelaySpell(victim, damagetype);
+
+    // last damage from duel opponent
+    if (duel_hasEnded)
+    {
+        MANGOS_ASSERT(victim->GetTypeId() == TYPEID_PLAYER);
+        Player* he = (Player*)victim;
+
+        MANGOS_ASSERT(he->duel);
+
+        he->SetHealth(1);
+
+        he->duel->opponent->CombatStopWithPets(true);
+        he->CombatStopWithPets(true);
+
+        he->CastSpell(he, 7267, TRIGGERED_OLD_TRIGGERED);                  // beg
+        he->DuelComplete(DUEL_WON);
+    }
 }
 
 void Unit::InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype)
