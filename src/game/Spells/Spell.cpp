@@ -1362,8 +1362,9 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
 
         if (realCaster->CanAttack(unit))
         {
-            // for delayed spells ignore not visible explicit target
-            if (unit == m_targets.getUnitTarget() && !unit->IsVisibleForOrDetect(m_caster, m_caster, false))
+            // for delayed spells ignore not visible explicit target, if caster is dead, nothing is visible for him
+            if (traveling && unit == m_targets.getUnitTarget() &&
+                !unit->IsVisibleForOrDetect(m_caster, m_caster, false) && m_caster->isAlive())
             {
                 // Workaround: do not send evade if caster/unit are dead to prevent combat log errors
                 // TODO: Visibility check clearly lackluster if we end up here like this, to be fixed later
