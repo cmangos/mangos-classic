@@ -497,8 +497,7 @@ void DungeonResetScheduler::ScheduleReset(bool add, time_t time, DungeonResetEve
     {
         // find the event in the queue and remove it
         ResetTimeQueue::iterator itr;
-        std::pair<ResetTimeQueue::iterator, ResetTimeQueue::iterator> range;
-        range = m_resetTimeQueue.equal_range(time);
+        std::pair<ResetTimeQueue::iterator, ResetTimeQueue::iterator> range = m_resetTimeQueue.equal_range(time);
         for (itr = range.first; itr != range.second; ++itr)
         {
             if (itr->second == event)

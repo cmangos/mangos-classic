@@ -106,9 +106,7 @@ InstanceData* GetInstanceData_instance_scarlet_monastery(Map* pMap)
 
 void AddSC_instance_scarlet_monastery()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_scarlet_monastery";
     pNewScript->GetInstanceData = &GetInstanceData_instance_scarlet_monastery;
     pNewScript->RegisterSelf();

@@ -288,9 +288,7 @@ bool GOUse_go_ossirian_crystal(Player* /*pPlayer*/, GameObject* pGo)
 
 void AddSC_boss_ossirian()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ossirian";
     pNewScript->GetAI = &GetAI_boss_ossirian;
     pNewScript->RegisterSelf();

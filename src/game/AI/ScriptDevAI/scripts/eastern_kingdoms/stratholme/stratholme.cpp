@@ -363,9 +363,7 @@ bool GossipHello_npc_aurius(Player* pPlayer, Creature* pCreature)
 
 void AddSC_stratholme()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "go_service_gate";
     pNewScript->pGOUse = &GOUse_go_service_gate;
     pNewScript->RegisterSelf();

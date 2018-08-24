@@ -761,9 +761,7 @@ UnitAI* GetAI_npc_magrami_spectre(Creature* pCreature)
 
 void AddSC_desolace()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_aged_dying_ancient_kodo";
     pNewScript->GetAI = &GetAI_npc_aged_dying_ancient_kodo;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_aged_dying_ancient_kodo;

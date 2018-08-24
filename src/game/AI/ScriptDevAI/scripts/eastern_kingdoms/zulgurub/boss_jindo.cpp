@@ -210,9 +210,7 @@ UnitAI* GetAI_mob_healing_ward(Creature* pCreature)
 
 void AddSC_boss_jindo()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_jindo";
     pNewScript->GetAI = &GetAI_boss_jindo;
     pNewScript->RegisterSelf();

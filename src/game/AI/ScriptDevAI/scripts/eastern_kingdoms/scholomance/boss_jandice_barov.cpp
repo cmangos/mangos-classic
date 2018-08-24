@@ -105,9 +105,7 @@ UnitAI* GetAI_boss_jandicebarov(Creature* pCreature)
 
 void AddSC_boss_jandicebarov()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_jandice_barov";
     pNewScript->GetAI = &GetAI_boss_jandicebarov;
     pNewScript->RegisterSelf();

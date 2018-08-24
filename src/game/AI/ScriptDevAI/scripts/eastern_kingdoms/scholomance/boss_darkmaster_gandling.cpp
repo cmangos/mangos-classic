@@ -122,9 +122,7 @@ UnitAI* GetAI_boss_darkmaster_gandling(Creature* pCreature)
 
 void AddSC_boss_darkmaster_gandling()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_darkmaster_gandling";
     pNewScript->GetAI = &GetAI_boss_darkmaster_gandling;
     pNewScript->RegisterSelf();

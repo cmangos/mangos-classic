@@ -953,9 +953,7 @@ UnitAI* GetAI_npc_tirion_fordring(Creature* pCreature)
 
 void AddSC_western_plaguelands()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_the_scourge_cauldron";
     pNewScript->GetAI = &GetAI_npc_the_scourge_cauldron;
     pNewScript->RegisterSelf();

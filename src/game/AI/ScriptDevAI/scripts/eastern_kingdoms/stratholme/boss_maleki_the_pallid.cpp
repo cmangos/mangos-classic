@@ -114,9 +114,7 @@ UnitAI* GetAI_boss_maleki_the_pallid(Creature* pCreature)
 
 void AddSC_boss_maleki_the_pallid()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_maleki_the_pallid";
     pNewScript->GetAI = &GetAI_boss_maleki_the_pallid;
     pNewScript->RegisterSelf();

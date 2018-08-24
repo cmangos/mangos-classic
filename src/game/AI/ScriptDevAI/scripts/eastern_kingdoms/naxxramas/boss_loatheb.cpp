@@ -171,9 +171,7 @@ UnitAI* GetAI_boss_loatheb(Creature* pCreature)
 
 void AddSC_boss_loatheb()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_loatheb";
     pNewScript->GetAI = &GetAI_boss_loatheb;
     pNewScript->RegisterSelf();

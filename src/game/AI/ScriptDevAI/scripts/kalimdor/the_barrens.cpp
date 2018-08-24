@@ -636,9 +636,7 @@ UnitAI* GetAI_npc_gallywix(Creature* pCreature)
 
 void AddSC_the_barrens()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_gilthares";
     pNewScript->GetAI = &GetAI_npc_gilthares;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_gilthares;

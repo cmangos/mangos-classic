@@ -197,9 +197,7 @@ UnitAI* GetAI_npc_anubisath_sentinel(Creature* pCreature)
 
 void AddSC_mob_anubisath_sentinel()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mob_anubisath_sentinel";
     pNewScript->GetAI = &GetAI_npc_anubisath_sentinel;
     pNewScript->RegisterSelf();

@@ -220,9 +220,7 @@ UnitAI* GetAI_boss_venoxis(Creature* pCreature)
 
 void AddSC_boss_venoxis()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_venoxis";
     pNewScript->GetAI = &GetAI_boss_venoxis;
     pNewScript->RegisterSelf();

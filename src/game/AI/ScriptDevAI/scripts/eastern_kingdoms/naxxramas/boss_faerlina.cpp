@@ -188,9 +188,7 @@ UnitAI* GetAI_boss_faerlina(Creature* pCreature)
 
 void AddSC_boss_faerlina()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_faerlina";
     pNewScript->GetAI = &GetAI_boss_faerlina;
     pNewScript->RegisterSelf();

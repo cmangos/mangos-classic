@@ -473,9 +473,7 @@ bool EffectDummyCreature_spell_boss_majordomo(Unit* /*pCaster*/, uint32 uiSpellI
 
 void AddSC_boss_majordomo()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_majordomo";
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_boss_majordomo;
     pNewScript->pGossipHello = &GossipHello_boss_majordomo;

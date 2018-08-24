@@ -344,9 +344,7 @@ bool GOUse_go_gong_of_bethekk(Player* /*pPlayer*/, GameObject* pGo)
 
 void AddSC_boss_arlokk()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_arlokk";
     pNewScript->GetAI = &GetAI_boss_arlokk;
     pNewScript->RegisterSelf();

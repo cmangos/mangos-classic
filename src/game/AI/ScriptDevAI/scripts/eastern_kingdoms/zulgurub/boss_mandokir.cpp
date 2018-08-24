@@ -394,9 +394,7 @@ UnitAI* GetAI_mob_ohgan(Creature* pCreature)
 
 void AddSC_boss_mandokir()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_mandokir";
     pNewScript->GetAI = &GetAI_boss_mandokir;
     pNewScript->RegisterSelf();

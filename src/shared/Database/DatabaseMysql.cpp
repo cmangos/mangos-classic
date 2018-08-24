@@ -85,13 +85,11 @@ bool MySQLConnection::Initialize(const char* infoString)
 
     Tokens tokens = StrSplit(infoString, ";");
 
-    Tokens::iterator iter;
-
     std::string host, port_or_socket, user, password, database;
     int port;
     char const* unix_socket;
 
-    iter = tokens.begin();
+    Tokens::iterator iter = tokens.begin();
 
     if (iter != tokens.end())
         host = *iter++;
@@ -177,7 +175,7 @@ bool MySQLConnection::Initialize(const char* infoString)
 bool MySQLConnection::_Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD** pFields, uint64* pRowCount, uint32* pFieldCount)
 {
     if (!mMysql)
-        return 0;
+        return false;
 
     uint32 _s = WorldTimer::getMSTime();
 

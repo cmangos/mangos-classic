@@ -203,9 +203,7 @@ UnitAI* GetAI_boss_dathrohan_balnazzar(Creature* pCreature)
 
 void AddSC_boss_dathrohan_balnazzar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_dathrohan_balnazzar";
     pNewScript->GetAI = &GetAI_boss_dathrohan_balnazzar;
     pNewScript->RegisterSelf();

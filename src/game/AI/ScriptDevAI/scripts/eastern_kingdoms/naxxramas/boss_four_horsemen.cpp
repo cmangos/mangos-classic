@@ -480,9 +480,7 @@ UnitAI* GetAI_boss_sir_zeliek(Creature* pCreature)
 
 void AddSC_boss_four_horsemen()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_lady_blaumeux";
     pNewScript->GetAI = &GetAI_boss_lady_blaumeux;
     pNewScript->RegisterSelf();

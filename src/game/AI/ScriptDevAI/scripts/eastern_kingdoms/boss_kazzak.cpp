@@ -188,10 +188,8 @@ UnitAI* GetAI_boss_kazzak(Creature* pCreature)
 
 void AddSC_boss_kazzakAI()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
-    pNewScript->Name = "boss_kazzak";
+    Script* pNewScript = new Script;
+    pNewScript->Name = "boss_doomlord_kazzak";
     pNewScript->GetAI = &GetAI_boss_kazzak;
     pNewScript->RegisterSelf();
 }

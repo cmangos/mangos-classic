@@ -282,9 +282,7 @@ bool GossipSelect_example_creature(Player* pPlayer, Creature* pCreature, uint32 
 // It must define all handled functions that are to be run in this script
 void AddSC_example_creature()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "example_creature";
     pNewScript->GetAI = &GetAI_example_creature;
     pNewScript->pGossipHello = &GossipHello_example_creature;

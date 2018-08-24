@@ -465,9 +465,7 @@ bool QuestAccept_npc_tooga(Player* pPlayer, Creature* pCreature, const Quest* pQ
 
 void AddSC_tanaris()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mob_aquementas";
     pNewScript->GetAI = &GetAI_mob_aquementas;
     pNewScript->RegisterSelf();

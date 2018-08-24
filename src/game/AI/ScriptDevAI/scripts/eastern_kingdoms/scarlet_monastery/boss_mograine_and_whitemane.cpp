@@ -390,9 +390,7 @@ UnitAI* GetAI_boss_high_inquisitor_whitemane(Creature* pCreature)
 
 void AddSC_boss_mograine_and_whitemane()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_scarlet_commander_mograine";
     pNewScript->GetAI = &GetAI_boss_scarlet_commander_mograine;
     pNewScript->RegisterSelf();

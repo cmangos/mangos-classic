@@ -600,9 +600,7 @@ bool QuestAccept_npc_feero_ironhand(Player* pPlayer, Creature* pCreature, const 
 
 void AddSC_ashenvale()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_muglash";
     pNewScript->GetAI = &GetAI_npc_muglash;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_muglash;

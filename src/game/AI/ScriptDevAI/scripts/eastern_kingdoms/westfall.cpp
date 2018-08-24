@@ -371,9 +371,7 @@ UnitAI* GetAI_npc_defias_traitor(Creature* pCreature)
 
 void AddSC_westfall()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_daphne_stilwell";
     pNewScript->GetAI = &GetAI_npc_daphne_stilwell;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_daphne_stilwell;

@@ -309,9 +309,7 @@ UnitAI* GetAI_mob_sartura_royal_guard(Creature* pCreature)
 
 void AddSC_boss_sartura()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_sartura";
     pNewScript->GetAI = &GetAI_boss_sartura;
     pNewScript->RegisterSelf();

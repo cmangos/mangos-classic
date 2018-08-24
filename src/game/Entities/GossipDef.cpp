@@ -107,7 +107,7 @@ uint32 GossipMenu::MenuItemAction(unsigned int ItemId)
 bool GossipMenu::MenuItemCoded(unsigned int ItemId)
 {
     if (ItemId >= m_gItems.size())
-        return 0;
+        return false;
 
     return m_gItems[ ItemId ].m_gCoded;
 }
@@ -506,12 +506,11 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
 // send only static data in this packet!
 void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest) const
 {
-    std::string Title, Details, Objectives, EndText;
     std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
-    Title = pQuest->GetTitle();
-    Details = pQuest->GetDetails();
-    Objectives = pQuest->GetObjectives();
-    EndText = pQuest->GetEndText();
+    std::string Title = pQuest->GetTitle();
+    std::string Details = pQuest->GetDetails();
+    std::string Objectives = pQuest->GetObjectives();
+    std::string EndText = pQuest->GetEndText();
 
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
         ObjectiveText[i] = pQuest->ObjectiveText[i];
@@ -748,12 +747,11 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
     data << uint32(pQuest->GetRewOrReqMoney() < 0 ? -pQuest->GetRewOrReqMoney() : 0);
 
     data << uint32(pQuest->GetReqItemsCount());
-    ItemPrototype const* pItem;
     for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
     {
         if (!pQuest->ReqItemId[i])
             continue;
-        pItem = ObjectMgr::GetItemPrototype(pQuest->ReqItemId[i]);
+        ItemPrototype const* pItem = ObjectMgr::GetItemPrototype(pQuest->ReqItemId[i]);
         data << uint32(pQuest->ReqItemId[i]);
         data << uint32(pQuest->ReqItemCount[i]);
 

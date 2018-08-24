@@ -877,9 +877,7 @@ UnitAI* GetAI_npc_deathstalker_vincent(Creature* pCreature)
 
 void AddSC_shadowfang_keep()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_shadowfang_prisoner";
     pNewScript->pGossipHello =  &GossipHello_npc_shadowfang_prisoner;
     pNewScript->pGossipSelect = &GossipSelect_npc_shadowfang_prisoner;

@@ -189,10 +189,9 @@ namespace Movement
                 MAX_OFFSET = (1 << 11) / 2,
             };
             Vector3 middle = (path.front() + path.back()) / 2;
-            Vector3 offset;
             for (uint32 i = 1; i < path.size() - 1; ++i)
             {
-                offset = path[i] - middle;
+                Vector3 offset = path[i] - middle;
                 if (fabs(offset.x) >= MAX_OFFSET || fabs(offset.y) >= MAX_OFFSET || fabs(offset.z) >= MAX_OFFSET)
                 {
                     sLog.outError("MoveSplineInitArgs::_checkPathBounds check failed");

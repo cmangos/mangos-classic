@@ -599,9 +599,7 @@ UnitAI* GetAI_npc_klinfran(Creature* pCreature)
 
 void AddSC_burning_steppes()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_ragged_john";
     pNewScript->GetAI = &GetAI_npc_ragged_john;
     pNewScript->RegisterSelf();

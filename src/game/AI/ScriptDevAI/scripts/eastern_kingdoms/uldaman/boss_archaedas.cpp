@@ -235,9 +235,7 @@ bool EffectAuraDummy_spell_aura_dummy_awaken_dwarf(const Aura* pAura, bool bAppl
 
 void AddSC_boss_archaedas()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_archaedas";
     pNewScript->GetAI = &GetAI_boss_archaedas;
     pNewScript->RegisterSelf();

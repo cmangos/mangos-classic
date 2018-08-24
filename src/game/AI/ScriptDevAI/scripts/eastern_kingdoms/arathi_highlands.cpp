@@ -253,9 +253,7 @@ bool QuestAccept_npc_kinelory(Player* pPlayer, Creature* pCreature, const Quest*
 
 void AddSC_arathi_highlands()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_professor_phizzlethorpe";
     pNewScript->GetAI = &GetAI_npc_professor_phizzlethorpe;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_professor_phizzlethorpe;

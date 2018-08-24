@@ -250,9 +250,7 @@ InstanceData* GetInstanceData_instance_zulfarrak(Map* pMap)
 
 void AddSC_instance_zulfarrak()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_zulfarrak";
     pNewScript->GetInstanceData = &GetInstanceData_instance_zulfarrak;
     pNewScript->RegisterSelf();

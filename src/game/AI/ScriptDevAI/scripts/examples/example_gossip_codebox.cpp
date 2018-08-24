@@ -91,9 +91,7 @@ bool GossipSelectWithCode_example_gossip_codebox(Player* pPlayer, Creature* pCre
 
 void AddSC_example_gossip_codebox()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "example_gossip_codebox";
     pNewScript->pGossipHello = &GossipHello_example_gossip_codebox;
     pNewScript->pGossipSelect = &GossipSelect_example_gossip_codebox;

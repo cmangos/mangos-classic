@@ -520,9 +520,7 @@ UnitAI* GetAI_boss_ysondre(Creature* pCreature)
 
 void AddSC_bosses_emerald_dragons()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_emeriss";
     pNewScript->GetAI = &GetAI_boss_emeriss;
     pNewScript->RegisterSelf();

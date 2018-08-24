@@ -493,9 +493,7 @@ UnitAI* GetAI_npc_disciple_of_naralex(Creature* pCreature)
 
 void AddSC_wailing_caverns()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_disciple_of_naralex";
     pNewScript->GetAI = &GetAI_npc_disciple_of_naralex;
     pNewScript->pGossipHello =  &GossipHello_npc_disciple_of_naralex;

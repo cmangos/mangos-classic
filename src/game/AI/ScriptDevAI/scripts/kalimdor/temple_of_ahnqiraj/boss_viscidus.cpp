@@ -385,9 +385,7 @@ UnitAI* GetAI_npc_glob_of_viscidus(Creature* pCreature)
 
 void AddSC_boss_viscidus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_viscidus";
     pNewScript->GetAI = &GetAI_boss_viscidus;
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_viscidus_freeze;

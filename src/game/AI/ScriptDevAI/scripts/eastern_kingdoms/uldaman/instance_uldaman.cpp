@@ -317,9 +317,7 @@ bool ProcessEventId_event_spell_altar_boss_aggro(uint32 uiEventId, Object* pSour
 
 void AddSC_instance_uldaman()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_uldaman";
     pNewScript->GetInstanceData = &GetInstanceData_instance_uldaman;
     pNewScript->RegisterSelf();

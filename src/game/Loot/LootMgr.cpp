@@ -1260,8 +1260,7 @@ void Loot::Release(Player* player)
                         {
                             // we need to fill m_ownerSet with player who have access to the loot
                             Group::MemberSlotList const& memberList = grp->GetMemberSlots();
-                            Group::MemberSlotList::const_iterator memberItr;
-                            for (memberItr = memberList.begin(); memberItr != memberList.end(); ++memberItr)
+                            for (Group::MemberSlotList::const_iterator memberItr = memberList.begin(); memberItr != memberList.end(); ++memberItr)
                                 m_ownerSet.insert(memberItr->guid);
                         }
                         else

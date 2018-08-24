@@ -111,9 +111,7 @@ UnitAI* GetAI_mob_yenniku(Creature* _Creature)
 
 void AddSC_stranglethorn_vale()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mob_yenniku";
     pNewScript->GetAI = &GetAI_mob_yenniku;
     pNewScript->RegisterSelf();

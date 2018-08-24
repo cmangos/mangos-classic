@@ -707,9 +707,7 @@ bool QuestAccept_npc_kernobee(Player* pPlayer, Creature* pCreature, const Quest*
 
 void AddSC_gnomeregan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_blastmaster_emi_shortfuse";
     pNewScript->GetAI = &GetAI_npc_blastmaster_emi_shortfuse;
     pNewScript->pGossipHello = &GossipHello_npc_blastmaster_emi_shortfuse;

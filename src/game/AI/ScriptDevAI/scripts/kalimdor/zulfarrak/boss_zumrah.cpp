@@ -209,9 +209,7 @@ UnitAI* GetAI_boss_zumrah(Creature* pCreature)
 
 void AddSC_boss_zumrah()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_zumrah";
     pNewScript->GetAI = &GetAI_boss_zumrah;
     pNewScript->RegisterSelf();

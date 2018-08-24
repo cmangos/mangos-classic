@@ -251,9 +251,7 @@ bool EffectDummyCreature_summon_hakkar(Unit* pCaster, uint32 uiSpellId, SpellEff
 
 void AddSC_sunken_temple()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "at_shade_of_eranikus";
     pNewScript->pAreaTrigger = &AreaTrigger_at_shade_of_eranikus;
     pNewScript->RegisterSelf();

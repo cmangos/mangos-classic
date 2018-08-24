@@ -283,9 +283,7 @@ UnitAI* GetAI_boss_kri(Creature* pCreature)
 
 void AddSC_bug_trio()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_kri";
     pNewScript->GetAI = &GetAI_boss_kri;
     pNewScript->RegisterSelf();

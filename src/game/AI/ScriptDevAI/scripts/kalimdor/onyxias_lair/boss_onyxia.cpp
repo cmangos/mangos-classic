@@ -497,9 +497,7 @@ UnitAI* GetAI_boss_onyxia(Creature* pCreature)
 
 void AddSC_boss_onyxia()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_onyxia";
     pNewScript->GetAI = &GetAI_boss_onyxia;
     pNewScript->RegisterSelf();

@@ -154,9 +154,7 @@ UnitAI* GetAI_boss_huhuran(Creature* pCreature)
 
 void AddSC_boss_huhuran()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_huhuran";
     pNewScript->GetAI = &GetAI_boss_huhuran;
     pNewScript->RegisterSelf();

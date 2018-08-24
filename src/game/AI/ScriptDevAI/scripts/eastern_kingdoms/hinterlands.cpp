@@ -357,9 +357,7 @@ UnitAI* GetAI_npc_rinji(Creature* pCreature)
 
 void AddSC_hinterlands()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_00x09hl";
     pNewScript->GetAI = &GetAI_npc_00x09hl;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_00x09hl;

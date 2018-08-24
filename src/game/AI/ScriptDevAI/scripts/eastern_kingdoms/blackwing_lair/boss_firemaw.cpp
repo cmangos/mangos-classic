@@ -133,9 +133,7 @@ UnitAI* GetAI_boss_firemaw(Creature* pCreature)
 
 void AddSC_boss_firemaw()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_firemaw";
     pNewScript->GetAI = &GetAI_boss_firemaw;
     pNewScript->RegisterSelf();

@@ -557,9 +557,7 @@ UnitAI* GetAI_boss_kelthuzad(Creature* pCreature)
 
 void AddSC_boss_kelthuzad()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_kelthuzad";
     pNewScript->GetAI = &GetAI_boss_kelthuzad;
     pNewScript->RegisterSelf();

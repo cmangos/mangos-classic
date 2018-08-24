@@ -371,9 +371,7 @@ UnitAI* GetAI_npc_kaldorei_elite(Creature* pCreature)
 
 void AddSC_boss_rajaxx()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_general_andorov";
     pNewScript->GetAI = &GetAI_npc_general_andorov;
     pNewScript->pGossipHello = &GossipHello_npc_general_andorov;

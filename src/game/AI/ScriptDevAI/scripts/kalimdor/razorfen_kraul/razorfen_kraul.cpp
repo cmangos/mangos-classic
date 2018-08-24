@@ -256,9 +256,7 @@ bool EffectDummyCreature_npc_snufflenose_gopher(Unit* pCaster, uint32 uiSpellId,
 
 void AddSC_razorfen_kraul()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_willix_the_importer";
     pNewScript->GetAI = &GetAI_npc_willix_the_importer;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_willix_the_importer;

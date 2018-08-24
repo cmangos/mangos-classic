@@ -207,9 +207,7 @@ bool EffectDummyCreature_pyroguard_emberseer(Unit* /*pCaster*/, uint32 uiSpellId
 
 void AddSC_boss_pyroguard_emberseer()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_pyroguard_emberseer";
     pNewScript->GetAI = &GetAI_boss_pyroguard_emberseer;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_pyroguard_emberseer;

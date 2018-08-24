@@ -511,9 +511,7 @@ bool ProcessEventId_dawn_gambit(uint32 uiEventId, Object* pSource, Object* /*pTa
 
 void AddSC_instance_scholomance()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_scholomance";
     pNewScript->GetInstanceData = &GetInstanceData_instance_scholomance;
     pNewScript->RegisterSelf();

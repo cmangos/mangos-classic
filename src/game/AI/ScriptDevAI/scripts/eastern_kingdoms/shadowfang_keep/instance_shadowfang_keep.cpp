@@ -233,9 +233,7 @@ InstanceData* GetInstanceData_instance_shadowfang_keep(Map* pMap)
 
 void AddSC_instance_shadowfang_keep()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_shadowfang_keep";
     pNewScript->GetInstanceData = &GetInstanceData_instance_shadowfang_keep;
     pNewScript->RegisterSelf();

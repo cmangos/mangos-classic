@@ -665,9 +665,7 @@ UnitAI* GetAI_mob_zealot_zath(Creature* pCreature)
 
 void AddSC_boss_thekal()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_thekal";
     pNewScript->GetAI = &GetAI_boss_thekal;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_thekal_resurrection;

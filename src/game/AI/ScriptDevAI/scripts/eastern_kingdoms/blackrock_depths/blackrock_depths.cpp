@@ -1901,9 +1901,7 @@ UnitAI* GetAI_npc_ironhand_guardian(Creature* pCreature)
 
 void AddSC_blackrock_depths()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "go_bar_beer_keg";
     pNewScript->pGOUse = &GOUse_go_bar_beer_keg;
     pNewScript->RegisterSelf();

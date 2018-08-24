@@ -180,10 +180,9 @@ bool EquippedOk(Player* pPlayer, uint32 spellId)
         if (!reqSpell)
             continue;
 
-        Item* pItem;
         for (int j = EQUIPMENT_SLOT_START; j < EQUIPMENT_SLOT_END; ++j)
         {
-            pItem = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, j);
+            Item* pItem = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, j);
             if (pItem)
                 if (pItem->GetProto()->RequiredSpell == reqSpell)
                 {
@@ -745,9 +744,7 @@ bool GossipSelect_npc_prof_leather(Player* pPlayer, Creature* pCreature, uint32 
 
 void AddSC_npc_professions()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_prof_blacksmith";
     pNewScript->pGossipHello =  &GossipHello_npc_prof_blacksmith;
     pNewScript->pGossipSelect = &GossipSelect_npc_prof_blacksmith;

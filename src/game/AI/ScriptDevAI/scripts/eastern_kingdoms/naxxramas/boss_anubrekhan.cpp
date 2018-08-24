@@ -241,9 +241,7 @@ bool GOUse_go_anub_door(Player* pPlayer, GameObject* pGo)
 
 void AddSC_boss_anubrekhan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_anubrekhan";
     pNewScript->GetAI = &GetAI_boss_anubrekhan;
     pNewScript->RegisterSelf();

@@ -181,9 +181,7 @@ UnitAI* GetAI_npc_miran(Creature* pCreature)
 
 void AddSC_loch_modan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_mountaineer_pebblebitty";
     pNewScript->pGossipHello =  &GossipHello_npc_mountaineer_pebblebitty;
     pNewScript->pGossipSelect = &GossipSelect_npc_mountaineer_pebblebitty;

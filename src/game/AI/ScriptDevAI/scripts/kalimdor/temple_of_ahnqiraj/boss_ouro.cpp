@@ -299,9 +299,7 @@ UnitAI* GetAI_npc_ouro_spawner(Creature* pCreature)
 
 void AddSC_boss_ouro()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ouro";
     pNewScript->GetAI = &GetAI_boss_ouro;
     pNewScript->RegisterSelf();

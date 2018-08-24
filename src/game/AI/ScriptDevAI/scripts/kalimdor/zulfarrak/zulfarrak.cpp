@@ -107,9 +107,7 @@ bool AreaTrigger_at_zulfarrak(Player* pPlayer, AreaTriggerEntry const* pAt)
 
 void AddSC_zulfarrak()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "event_go_zulfarrak_gong";
     pNewScript->pProcessEventId = &ProcessEventId_event_go_zulfarrak_gong;
     pNewScript->RegisterSelf();

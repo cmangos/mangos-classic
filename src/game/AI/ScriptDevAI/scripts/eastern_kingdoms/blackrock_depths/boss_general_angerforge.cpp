@@ -118,9 +118,7 @@ UnitAI* GetAI_boss_general_angerforge(Creature* pCreature)
 
 void AddSC_boss_general_angerforge()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_general_angerforge";
     pNewScript->GetAI = &GetAI_boss_general_angerforge;
     pNewScript->RegisterSelf();

@@ -584,10 +584,9 @@ void CreatureLinkingHolder::SetFollowing(Creature* pWho, Creature* pWhom) const
     pWho->GetRespawnCoord(sX, sY, sZ);
     pWhom->GetRespawnCoord(mX, mY, mZ, &mO);
 
-    float dx, dy, dz;
-    dx = sX - mX;
-    dy = sY - mY;
-    dz = sZ - mZ;
+    float dx = sX - mX;
+    float dy = sY - mY;
+    float dz = sZ - mZ;
 
     float dist = sqrt(dx * dx + dy * dy + dz * dz);
     // REMARK: This code needs the same distance calculation that is used for following
@@ -616,11 +615,11 @@ bool CreatureLinkingHolder::IsSlaveInRangeOfMaster(Creature const* pBoss, float 
         return true;
 
     // Do some calculations
-    float mX, mY, mZ, dx, dy;
+    float mX, mY, mZ;
     pBoss->GetRespawnCoord(mX, mY, mZ);
 
-    dx = sX - mX;
-    dy = sY - mY;
+    float dx = sX - mX;
+    float dy = sY - mY;
 
     return dx * dx + dy * dy < searchRange * searchRange;
 }

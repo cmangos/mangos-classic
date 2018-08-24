@@ -120,9 +120,8 @@ BOOL WheatyExceptionReport::_GetProcessorName(TCHAR* sProcessorName, DWORD maxco
         return FALSE;
 
     HKEY hKey;
-    LONG lRet;
-    lRet = ::RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"),
-                          0, KEY_QUERY_VALUE, &hKey);
+    LONG lRet = ::RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"),
+        0, KEY_QUERY_VALUE, &hKey);
     if (lRet != ERROR_SUCCESS)
         return FALSE;
     TCHAR szTmp[2048];
@@ -147,8 +146,7 @@ BOOL WheatyExceptionReport::_GetWindowsVersion(TCHAR* szVersion, DWORD cntMax)
     // If that fails, try using the OSVERSIONINFO structure.
     OSVERSIONINFOEX osvi = { 0 };
     osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-    BOOL bOsVersionInfoEx;
-    bOsVersionInfoEx = ::GetVersionEx((LPOSVERSIONINFO)(&osvi));
+    BOOL bOsVersionInfoEx = ::GetVersionEx((LPOSVERSIONINFO)(&osvi));
     if (!bOsVersionInfoEx)
     {
         osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
@@ -548,7 +546,7 @@ void WheatyExceptionReport::WriteStackDetails(
     dwMachineType = IMAGE_FILE_MACHINE_AMD64;
 #endif
 
-    while (1)
+    while (true)
     {
         // Get the next stack frame
         if (! StackWalk64(dwMachineType,
@@ -910,12 +908,11 @@ WheatyExceptionReport::GetBasicType(DWORD typeIndex, DWORD64 modBase)
 int __cdecl WheatyExceptionReport::_tprintf(const TCHAR* format, ...)
 {
     TCHAR szBuff[1024];
-    int retValue;
     DWORD cbWritten;
     va_list argptr;
 
     va_start(argptr, format);
-    retValue = vsprintf(szBuff, format, argptr);
+    int retValue = vsprintf(szBuff, format, argptr);
     va_end(argptr);
 
     WriteFile(m_hReportFile, szBuff, retValue * sizeof(TCHAR), &cbWritten, nullptr);

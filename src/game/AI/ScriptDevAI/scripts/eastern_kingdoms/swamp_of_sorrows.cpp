@@ -154,9 +154,7 @@ UnitAI* GetAI_npc_galen_goodward(Creature* pCreature)
 
 void AddSC_swamp_of_sorrows()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_galen_goodward";
     pNewScript->GetAI = &GetAI_npc_galen_goodward;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_galen_goodward;

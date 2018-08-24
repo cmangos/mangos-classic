@@ -252,9 +252,7 @@ bool AreaTrigger_at_zulgurub(Player* pPlayer, AreaTriggerEntry const* pAt)
 
 void AddSC_instance_zulgurub()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_zulgurub";
     pNewScript->GetInstanceData = &GetInstanceData_instance_zulgurub;
     pNewScript->RegisterSelf();

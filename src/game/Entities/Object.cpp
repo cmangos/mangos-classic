@@ -1420,13 +1420,11 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
 
 void WorldObject::MovePositionToFirstCollision(WorldLocation &pos, float dist, float angle)
 {
-    float destX, destY, destZ, ground, floor;
-
-    destX = pos.coord_x + dist * cos(angle);
-    destY = pos.coord_y + dist * sin(angle);
-    ground = GetMap()->GetTerrain()->GetHeightStatic(destX, destY, MAX_HEIGHT, true);
-    floor = GetMap()->GetTerrain()->GetHeightStatic(destX, destY, pos.coord_z, true);
-    destZ = fabs(ground - pos.coord_z) <= fabs(floor - pos.coord_z) ? ground : floor;
+    float destX = pos.coord_x + dist * cos(angle);
+    float destY = pos.coord_y + dist * sin(angle);
+    float ground = GetMap()->GetTerrain()->GetHeightStatic(destX, destY, MAX_HEIGHT, true);
+    float floor = GetMap()->GetTerrain()->GetHeightStatic(destX, destY, pos.coord_z, true);
+    float destZ = fabs(ground - pos.coord_z) <= fabs(floor - pos.coord_z) ? ground : floor;
 
     bool colPoint = GetMap()->GetHitPosition(pos.coord_x, pos.coord_y, pos.coord_z + 0.5f, destX, destY, destZ, -0.5f);
 
@@ -1782,10 +1780,8 @@ namespace MaNGOS
                 if (u == i_searcher || u == &i_object)
                     return;
 
-                float x, y;
-
-                x = u->GetPositionX();
-                y = u->GetPositionY();
+                float x = u->GetPositionX();
+                float y = u->GetPositionY();
 
                 add(u, x, y);
             }

@@ -145,9 +145,7 @@ UnitAI* GetAI_boss_magmadar(Creature* pCreature)
 
 void AddSC_boss_magmadar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_magmadar";
     pNewScript->GetAI = &GetAI_boss_magmadar;
     pNewScript->RegisterSelf();

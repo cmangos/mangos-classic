@@ -308,9 +308,7 @@ UnitAI* GetAI_boss_maexxna(Creature* pCreature)
 
 void AddSC_boss_maexxna()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_maexxna";
     pNewScript->GetAI = &GetAI_boss_maexxna;
     pNewScript->RegisterSelf();

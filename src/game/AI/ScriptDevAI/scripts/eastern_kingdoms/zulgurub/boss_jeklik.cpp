@@ -405,9 +405,7 @@ UnitAI* GetAI_npc_gurubashi_bat_rider(Creature* pCreature)
 
 void AddSC_boss_jeklik()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_jeklik";
     pNewScript->GetAI = &GetAI_boss_jeklik;
     pNewScript->RegisterSelf();

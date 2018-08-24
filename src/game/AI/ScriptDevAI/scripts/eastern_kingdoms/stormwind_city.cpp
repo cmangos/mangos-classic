@@ -1096,9 +1096,7 @@ bool GossipSelect_npc_reginald_windsor(Player* pPlayer, Creature* pCreature, uin
 
 void AddSC_stormwind_city()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_bartleby";
     pNewScript->GetAI = &GetAI_npc_bartleby;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_bartleby;

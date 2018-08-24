@@ -365,9 +365,7 @@ bool GossipSelect_npc_plucky_johnson(Player* pPlayer, Creature* pCreature, uint3
 
 void AddSC_thousand_needles()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_kanati";
     pNewScript->GetAI = &GetAI_npc_kanati;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_kanati;

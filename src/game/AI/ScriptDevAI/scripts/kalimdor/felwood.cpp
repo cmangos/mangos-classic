@@ -781,9 +781,7 @@ bool QuestAccept_npc_arei(Player* pPlayer, Creature* pCreature, const Quest* pQu
 
 void AddSC_felwood()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_kitten";
     pNewScript->GetAI = &GetAI_npc_kitten;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_kitten;

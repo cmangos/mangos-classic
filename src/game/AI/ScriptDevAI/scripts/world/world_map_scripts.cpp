@@ -364,9 +364,7 @@ InstanceData* GetInstanceData_world_map_kalimdor(Map* pMap)
 
 void AddSC_world_map_scripts()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "world_map_eastern_kingdoms";
     pNewScript->GetInstanceData = &GetInstanceData_world_map_eastern_kingdoms;
     pNewScript->RegisterSelf();

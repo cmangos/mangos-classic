@@ -133,10 +133,8 @@ struct boss_thermapluggAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_WALKING_BOMB)
         {
             m_lSummonedBombGUIDs.push_back(pSummoned->GetObjectGuid());
-            // calculate point for falling down
-            float fX, fY;
-            fX = 0.2 * m_afSpawnPos[0] + 0.8 * pSummoned->GetPositionX();
-            fY = 0.2 * m_afSpawnPos[1] + 0.8 * pSummoned->GetPositionY();
+            float fX = 0.2 * m_afSpawnPos[0] + 0.8 * pSummoned->GetPositionX();
+            float fY = 0.2 * m_afSpawnPos[1] + 0.8 * pSummoned->GetPositionY();
             pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, m_afSpawnPos[2] - 2.0f);
         }
     }
@@ -270,9 +268,7 @@ bool GOUse_go_gnomeface_button(Player* pPlayer, GameObject* pGo)
 
 void AddSC_boss_thermaplugg()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_thermaplugg";
     pNewScript->GetAI = &GetAI_boss_thermaplugg;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_boss_thermaplugg;

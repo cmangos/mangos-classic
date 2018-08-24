@@ -73,11 +73,11 @@ void BarGoLink::step()
     if (!m_showOutput)
         return;
 
-    int i, n;
+    int i;
 
     if (num_rec == 0) return;
     ++rec_no;
-    n = rec_no * indic_len / num_rec;
+    int n = rec_no * indic_len / num_rec;
     if (n != rec_pos)
     {
 #ifdef _WIN32

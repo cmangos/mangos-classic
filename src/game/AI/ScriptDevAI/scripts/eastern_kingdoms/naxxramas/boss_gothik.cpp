@@ -117,7 +117,7 @@ struct boss_gothikAI : public ScriptedAI
         m_uiSpeechTimer = 1 * IN_MILLISECONDS;
 
         // Despawn Adds
-        for (GuidList::const_iterator itr = m_lSummonedAddGuids.begin(); itr != m_lSummonedAddGuids.end(); itr++)
+        for (GuidList::const_iterator itr = m_lSummonedAddGuids.begin(); itr != m_lSummonedAddGuids.end(); ++itr)
         {
             if (Creature* pCreature = m_creature->GetMap()->GetCreature(*itr))
                 pCreature->ForcedDespawn();
@@ -427,7 +427,7 @@ struct boss_gothikAI : public ScriptedAI
                 if (m_pInstance && !HasPlayersInLeftSide())
                 {
                     ProcessCentralDoor();
-                    for (GuidList::const_iterator itr = m_lSummonedAddGuids.begin(); itr != m_lSummonedAddGuids.end(); itr++)
+                    for (GuidList::const_iterator itr = m_lSummonedAddGuids.begin(); itr != m_lSummonedAddGuids.end(); ++itr)
                     {
                         if (Creature* pCreature = m_pInstance->instance->GetCreature(*itr))
                         {
@@ -532,9 +532,7 @@ bool EffectDummyCreature_spell_anchor(Unit* /*pCaster*/, uint32 uiSpellId, Spell
 
 void AddSC_boss_gothik()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_gothik";
     pNewScript->GetAI = &GetAI_boss_gothik;
     pNewScript->RegisterSelf();

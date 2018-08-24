@@ -306,9 +306,7 @@ UnitAI* GetAI_npc_deathstalker_faerleia(Creature* pCreature)
 
 void AddSC_silverpine_forest()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_deathstalker_erland";
     pNewScript->GetAI = &GetAI_npc_deathstalker_erland;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_deathstalker_erland;

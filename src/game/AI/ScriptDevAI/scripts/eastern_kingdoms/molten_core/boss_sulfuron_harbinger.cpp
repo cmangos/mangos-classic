@@ -230,9 +230,7 @@ UnitAI* GetAI_mob_flamewaker_priest(Creature* pCreature)
 
 void AddSC_boss_sulfuron()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_sulfuron";
     pNewScript->GetAI = &GetAI_boss_sulfuron;
     pNewScript->RegisterSelf();

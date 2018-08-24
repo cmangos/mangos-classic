@@ -228,9 +228,7 @@ bool QuestAccept_npc_mikhail(Player* pPlayer, Creature* pCreature, const Quest* 
 
 void AddSC_wetlands()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_tapoke_slim_jahn";
     pNewScript->GetAI = &GetAI_npc_tapoke_slim_jahn;
     pNewScript->RegisterSelf();

@@ -814,9 +814,7 @@ bool ProcessEventId_event_weekly_chromatic_selection(uint32 uiEventId, Object* p
 
 void AddSC_instance_blackwing_lair()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_blackwing_lair";
     pNewScript->GetInstanceData = &GetInstanceData_instance_blackwing_lair;
     pNewScript->RegisterSelf();

@@ -184,9 +184,7 @@ bool GossipSelect_npc_thrall_warchief(Player* pPlayer, Creature* pCreature, uint
 
 void AddSC_orgrimmar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_shenthul";
     pNewScript->GetAI = &GetAI_npc_shenthul;
     pNewScript->pQuestAcceptNPC =  &QuestAccept_npc_shenthul;

@@ -822,7 +822,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
     bool found = false;
     float x, y, z, o;
     uint32 lowguid, id;
-    uint16 mapid, pool_id;
+    uint16 mapid;
 
     do
     {
@@ -834,7 +834,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         z =       fields[4].GetFloat();
         o =       fields[5].GetFloat();
         mapid =   fields[6].GetUInt16();
-        pool_id = sPoolMgr.IsPartOfAPool<GameObject>(lowguid);
+        uint16 pool_id = sPoolMgr.IsPartOfAPool<GameObject>(lowguid);
         if (!pool_id || pl->GetMap()->GetPersistentState()->IsSpawnedPoolObject<GameObject>(lowguid))
             found = true;
     }
@@ -2206,7 +2206,6 @@ bool ChatHandler::HandleItemMoveCommand(char* args)
 {
     if (!*args)
         return false;
-    uint8 srcslot, dstslot;
 
     char* pParam1 = strtok(args, " ");
     if (!pParam1)
@@ -2216,8 +2215,8 @@ bool ChatHandler::HandleItemMoveCommand(char* args)
     if (!pParam2)
         return false;
 
-    srcslot = (uint8)atoi(pParam1);
-    dstslot = (uint8)atoi(pParam2);
+    uint8 srcslot = (uint8)atoi(pParam1);
+    uint8 dstslot = (uint8)atoi(pParam2);
 
     if (srcslot == dstslot)
         return true;

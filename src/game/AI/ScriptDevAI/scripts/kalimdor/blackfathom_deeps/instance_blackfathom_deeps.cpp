@@ -289,9 +289,7 @@ bool GOUse_go_fathom_stone(Player* pPlayer, GameObject* pGo)
 
 void AddSC_instance_blackfathom_deeps()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_blackfathom_deeps";
     pNewScript->GetInstanceData = &GetInstanceData_instance_blackfathom_deeps;
     pNewScript->RegisterSelf();

@@ -112,9 +112,7 @@ UnitAI* GetAI_boss_cannon_master_willey(Creature* pCreature)
 
 void AddSC_boss_cannon_master_willey()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_cannon_master_willey";
     pNewScript->GetAI = &GetAI_boss_cannon_master_willey;
     pNewScript->RegisterSelf();

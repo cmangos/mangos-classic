@@ -122,9 +122,7 @@ bool QuestAccept_npc_dorius_stonetender(Player* pPlayer, Creature* pCreature, co
 
 void AddSC_searing_gorge()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_dorius_stonetender";
     pNewScript->GetAI = &GetAI_npc_dorius_stonetender;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dorius_stonetender;

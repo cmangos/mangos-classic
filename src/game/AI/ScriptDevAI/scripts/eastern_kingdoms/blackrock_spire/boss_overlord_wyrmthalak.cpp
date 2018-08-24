@@ -150,9 +150,7 @@ UnitAI* GetAI_boss_overlordwyrmthalak(Creature* pCreature)
 
 void AddSC_boss_overlordwyrmthalak()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_overlord_wyrmthalak";
     pNewScript->GetAI = &GetAI_boss_overlordwyrmthalak;
     pNewScript->RegisterSelf();

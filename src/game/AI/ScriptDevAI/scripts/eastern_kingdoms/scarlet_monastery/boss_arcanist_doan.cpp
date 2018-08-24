@@ -134,9 +134,7 @@ UnitAI* GetAI_boss_arcanist_doan(Creature* pCreature)
 
 void AddSC_boss_arcanist_doan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_arcanist_doan";
     pNewScript->GetAI = &GetAI_boss_arcanist_doan;
     pNewScript->RegisterSelf();

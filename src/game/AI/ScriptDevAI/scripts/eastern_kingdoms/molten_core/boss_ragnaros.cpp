@@ -378,9 +378,7 @@ UnitAI* GetAI_boss_ragnaros(Creature* pCreature)
 
 void AddSC_boss_ragnaros()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ragnaros";
     pNewScript->GetAI = &GetAI_boss_ragnaros;
     pNewScript->RegisterSelf();

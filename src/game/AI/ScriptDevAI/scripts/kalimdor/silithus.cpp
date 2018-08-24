@@ -949,9 +949,7 @@ UnitAI* GetAI_npc_solenor(Creature* pCreature)
 
 void AddSC_silithus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_anachronos_the_ancient";
     pNewScript->GetAI = &GetAI_npc_anachronos_the_ancient;
     pNewScript->RegisterSelf();

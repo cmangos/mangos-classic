@@ -270,9 +270,9 @@ struct boss_veknilashAI : public boss_twin_emperorsAI
 
         if (Creature* pVeklor = m_pInstance->GetSingleCreatureFromStorage(NPC_VEKLOR))
         {
-            float fTargetX, fTargetY, fTargetZ, fTargetOrient;
+            float fTargetX, fTargetY, fTargetZ;
             pVeklor->GetPosition(fTargetX, fTargetY, fTargetZ);
-            fTargetOrient = pVeklor->GetOrientation();
+            float fTargetOrient = pVeklor->GetOrientation();
 
             pVeklor->NearTeleportTo(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), true);
             m_creature->NearTeleportTo(fTargetX, fTargetY, fTargetZ, fTargetOrient, true);
@@ -428,9 +428,7 @@ UnitAI* GetAI_boss_veklor(Creature* pCreature)
 
 void AddSC_boss_twinemperors()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_veknilash";
     pNewScript->GetAI = &GetAI_boss_veknilash;
     pNewScript->RegisterSelf();

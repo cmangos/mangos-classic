@@ -234,9 +234,7 @@ UnitAI* GetAI_npc_buru_egg(Creature* pCreature)
 
 void AddSC_boss_buru()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_buru";
     pNewScript->GetAI = &GetAI_boss_buru;
     pNewScript->RegisterSelf();

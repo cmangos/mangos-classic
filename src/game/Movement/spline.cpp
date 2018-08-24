@@ -162,9 +162,9 @@ namespace Movement
     {
         MANGOS_ASSERT(index >= index_lo && index < index_hi);
 
-        Vector3 curPos, nextPos;
+        Vector3 nextPos;
         const Vector3* p = &points[index - 1];
-        curPos = nextPos = p[1];
+        Vector3 curPos = nextPos = p[1];
 
         index_type i = 1;
         double length = 0;
@@ -183,11 +183,11 @@ namespace Movement
         index *= 3u;
         MANGOS_ASSERT(index >= index_lo && index < index_hi);
 
-        Vector3 curPos, nextPos;
+        Vector3 nextPos;
         const Vector3* p = &points[index];
 
         C_Evaluate(p, 0.f, s_Bezier3Coeffs, nextPos);
-        curPos = nextPos;
+        Vector3 curPos = nextPos;
 
         index_type i = 1;
         double length = 0;

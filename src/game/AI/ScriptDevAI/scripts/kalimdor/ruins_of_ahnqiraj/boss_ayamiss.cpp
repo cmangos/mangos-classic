@@ -316,9 +316,7 @@ UnitAI* GetAI_npc_hive_zara_larva(Creature* pCreature)
 
 void AddSC_boss_ayamiss()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ayamiss";
     pNewScript->GetAI = &GetAI_boss_ayamiss;
     pNewScript->RegisterSelf();

@@ -809,9 +809,7 @@ UnitAI* GetAI_npc_simone_the_inconspicuous(Creature* pCreature)
 
 void AddSC_ungoro_crater()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_ame01";
     pNewScript->GetAI = &GetAI_npc_ame01;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_ame01;

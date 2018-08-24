@@ -191,9 +191,7 @@ GameObjectAI* GetAI_go_larva_spewer(GameObject* go)
 
 void AddSC_instance_maraudon()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_maraudon";
     pNewScript->GetInstanceData = &GetInstanceData_instance_maraudon;
     pNewScript->RegisterSelf();

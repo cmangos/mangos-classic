@@ -272,9 +272,7 @@ bool EffectDummyCreature_prophet_skeram(Unit* /*pCaster*/, uint32 uiSpellId, Spe
 
 void AddSC_boss_skeram()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_skeram";
     pNewScript->GetAI = &GetAI_boss_skeram;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_prophet_skeram;

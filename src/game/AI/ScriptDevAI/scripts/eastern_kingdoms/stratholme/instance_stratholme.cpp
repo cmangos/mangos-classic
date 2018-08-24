@@ -1214,9 +1214,7 @@ InstanceData* GetInstanceData_instance_stratholme(Map* pMap)
 
 void AddSC_instance_stratholme()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_stratholme";
     pNewScript->GetInstanceData = &GetInstanceData_instance_stratholme;
     pNewScript->RegisterSelf();

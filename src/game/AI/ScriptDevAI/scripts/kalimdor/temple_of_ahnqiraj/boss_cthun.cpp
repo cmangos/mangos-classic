@@ -809,9 +809,7 @@ UnitAI* GetAI_npc_giant_claw_tentacle(Creature* pCreature)
 
 void AddSC_boss_cthun()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_eye_of_cthun";
     pNewScript->GetAI = &GetAI_boss_eye_of_cthun;
     pNewScript->RegisterSelf();

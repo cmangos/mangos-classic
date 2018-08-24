@@ -95,8 +95,7 @@ class UpdateMask
         {
             MANGOS_ASSERT(mask.mCount <= mCount);
 
-            UpdateMask newmask;
-            newmask = *this;
+            UpdateMask newmask = *this;
             newmask &= mask;
 
             return newmask;
@@ -106,8 +105,7 @@ class UpdateMask
         {
             MANGOS_ASSERT(mask.mCount <= mCount);
 
-            UpdateMask newmask;
-            newmask = *this;
+            UpdateMask newmask = *this;
             newmask |= mask;
 
             return newmask;

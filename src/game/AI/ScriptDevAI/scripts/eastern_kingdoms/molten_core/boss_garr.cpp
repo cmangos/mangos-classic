@@ -172,9 +172,7 @@ UnitAI* GetAI_mob_firesworn(Creature* pCreature)
 
 void AddSC_boss_garr()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_garr";
     pNewScript->GetAI = &GetAI_boss_garr;
     pNewScript->RegisterSelf();

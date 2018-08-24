@@ -217,14 +217,12 @@ SOAP_FMAC3 void* SOAP_FMAC4 soap_getelement(struct soap* soap, int* type)
             return soap_in_PointerTostring(soap, nullptr, nullptr, "xsd:string");
         case SOAP_TYPE__QName:
         {
-            char** s;
-            s = soap_in__QName(soap, nullptr, nullptr, "xsd:QName");
+            char** s = soap_in__QName(soap, nullptr, nullptr, "xsd:QName");
             return s ? *s : nullptr;
         }
         case SOAP_TYPE_string:
         {
-            char** s;
-            s = soap_in_string(soap, nullptr, nullptr, "xsd:string");
+            char** s = soap_in_string(soap, nullptr, nullptr, "xsd:string");
             return s ? *s : nullptr;
         }
         default:
@@ -257,16 +255,14 @@ SOAP_FMAC3 void* SOAP_FMAC4 soap_getelement(struct soap* soap, int* type)
                 }
                 if (!soap_match_tag(soap, t, "xsd:QName"))
                 {
-                    char** s;
                     *type = SOAP_TYPE__QName;
-                    s = soap_in__QName(soap, nullptr, nullptr, nullptr);
+                    char** s = soap_in__QName(soap, nullptr, nullptr, nullptr);
                     return s ? *s : nullptr;
                 }
                 if (!soap_match_tag(soap, t, "xsd:string"))
                 {
-                    char** s;
                     *type = SOAP_TYPE_string;
-                    s = soap_in_string(soap, nullptr, nullptr, nullptr);
+                    char** s = soap_in_string(soap, nullptr, nullptr, nullptr);
                     return s ? *s : nullptr;
                 }
                 t = soap->tag;
@@ -313,11 +309,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_ignore_element(struct soap* soap)
 #ifndef WITH_NOIDREF
 SOAP_FMAC3 int SOAP_FMAC4 soap_putindependent(struct soap* soap)
 {
-    int i;
-    struct soap_plist* pp;
     if (soap->version == 1 && soap->encodingStyle && !(soap->mode & (SOAP_XML_TREE | SOAP_XML_GRAPH)))
-        for (i = 0; i < SOAP_PTRHASH; i++)
-            for (pp = soap->pht[i]; pp; pp = pp->next)
+        for (int i = 0; i < SOAP_PTRHASH; i++)
+            for (struct soap_plist* pp = soap->pht[i]; pp; pp = pp->next)
                 if (pp->mark1 == 2 || pp->mark2 == 2)
                     if (soap_putelement(soap, pp->ptr, SOAP_MULTIREFTAG, pp->id, pp->type))
                         return soap->error;

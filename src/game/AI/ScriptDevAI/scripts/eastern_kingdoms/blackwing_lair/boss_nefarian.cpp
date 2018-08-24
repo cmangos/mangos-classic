@@ -290,9 +290,7 @@ UnitAI* GetAI_boss_nefarian(Creature* pCreature)
 
 void AddSC_boss_nefarian()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_nefarian";
     pNewScript->GetAI = &GetAI_boss_nefarian;
     pNewScript->RegisterSelf();

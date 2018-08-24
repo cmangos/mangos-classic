@@ -133,9 +133,7 @@ UnitAI* GetAI_boss_ambassador_flamelash(Creature* pCreature)
 
 void AddSC_boss_ambassador_flamelash()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ambassador_flamelash";
     pNewScript->GetAI = &GetAI_boss_ambassador_flamelash;
     pNewScript->RegisterSelf();

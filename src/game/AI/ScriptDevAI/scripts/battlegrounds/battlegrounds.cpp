@@ -98,9 +98,7 @@ UnitAI* GetAI_npc_spirit_guide(Creature* pCreature)
 
 void AddSC_battleground()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_spirit_guide";
     pNewScript->GetAI = &GetAI_npc_spirit_guide;
     pNewScript->pGossipHello = &GossipHello_npc_spirit_guide;

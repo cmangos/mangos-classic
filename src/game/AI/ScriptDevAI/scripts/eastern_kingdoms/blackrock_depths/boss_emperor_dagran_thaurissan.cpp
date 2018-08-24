@@ -242,9 +242,7 @@ UnitAI* GetAI_boss_moira_bronzebeard(Creature* pCreature)
 
 void AddSC_boss_draganthaurissan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_emperor_dagran_thaurissan";
     pNewScript->GetAI = &GetAI_boss_emperor_dagran_thaurissan;
     pNewScript->RegisterSelf();

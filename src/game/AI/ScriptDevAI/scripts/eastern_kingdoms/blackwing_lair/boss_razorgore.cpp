@@ -274,9 +274,7 @@ bool EffectDummyGameObj_go_black_dragon_egg(Unit* pCaster, uint32 uiSpellId, Spe
 
 void AddSC_boss_razorgore()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_razorgore";
     pNewScript->GetAI = &GetAI_boss_razorgore;
     pNewScript->RegisterSelf();

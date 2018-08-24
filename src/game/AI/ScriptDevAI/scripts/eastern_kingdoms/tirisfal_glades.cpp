@@ -180,9 +180,7 @@ bool QuestAccept_npc_calvin_montague(Player* pPlayer, Creature* pCreature, const
 
 void AddSC_tirisfal_glades()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "go_mausoleum_door";
     pNewScript->pGOUse = &GOUse_go_mausoleum_door;
     pNewScript->RegisterSelf();

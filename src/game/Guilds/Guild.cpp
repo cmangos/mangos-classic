@@ -321,7 +321,6 @@ bool Guild::LoadRanksFromDB(QueryResult* guildRanksResult)
         return true;
     }
 
-    Field* fields;
     bool broken_ranks = false;
 
     // GUILD RANKS are sequence starting from 0 = GUILD_MASTER (ALL PRIVILEGES) to max 9 (lowest privileges)
@@ -331,7 +330,7 @@ bool Guild::LoadRanksFromDB(QueryResult* guildRanksResult)
 
     do
     {
-        fields = guildRanksResult->Fetch();
+        Field* fields = guildRanksResult->Fetch();
         // condition that would be true when all ranks in QueryResult will be processed and guild without ranks is being processed
         if (!fields)
             break;

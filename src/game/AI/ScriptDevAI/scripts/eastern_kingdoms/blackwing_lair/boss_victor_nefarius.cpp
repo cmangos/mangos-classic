@@ -263,9 +263,7 @@ bool GossipSelect_boss_victor_nefarius(Player* pPlayer, Creature* pCreature, uin
 
 void AddSC_boss_victor_nefarius()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_victor_nefarius";
     pNewScript->GetAI = &GetAI_boss_victor_nefarius;
     pNewScript->pGossipHello = &GossipHello_boss_victor_nefarius;

@@ -642,9 +642,7 @@ bool EffectDummyCreature_spell_guard_slip_kik(Unit* pCaster, uint32 uiSpellId, S
 
 void AddSC_instance_dire_maul()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_dire_maul";
     pNewScript->GetInstanceData = &GetInstanceData_instance_dire_maul;
     pNewScript->RegisterSelf();

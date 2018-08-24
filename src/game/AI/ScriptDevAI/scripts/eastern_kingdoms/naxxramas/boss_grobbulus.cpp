@@ -208,9 +208,7 @@ UnitAI* GetAI_boss_grobbulus(Creature* pCreature)
 
 void AddSC_boss_grobbulus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_grobbulus";
     pNewScript->GetAI = &GetAI_boss_grobbulus;
     pNewScript->RegisterSelf();

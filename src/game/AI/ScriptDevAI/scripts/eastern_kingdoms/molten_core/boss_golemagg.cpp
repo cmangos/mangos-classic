@@ -220,9 +220,7 @@ UnitAI* GetAI_mob_core_rager(Creature* pCreature)
 
 void AddSC_boss_golemagg()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_golemagg";
     pNewScript->GetAI = &GetAI_boss_golemagg;
     pNewScript->RegisterSelf();

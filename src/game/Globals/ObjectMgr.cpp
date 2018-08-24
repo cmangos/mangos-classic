@@ -566,9 +566,9 @@ void ObjectMgr::LoadCreatureTemplates()
 void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr)
 {
     // Now add the auras, format "spell1 spell2 ..."
-    char* p, *s;
+    char* p;
     std::vector<int> val;
-    s = p = (char*)reinterpret_cast<char const*>(addon->auras);
+    char* s = p = (char*)reinterpret_cast<char const*>(addon->auras);
     if (p)
     {
         while (p[0] != 0)
@@ -4879,13 +4879,12 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
 
     BarGoLink bar(result->GetRowCount());
     uint32 count = 0;
-    Field* fields;
 
     do
     {
         bar.step();
 
-        fields = result->Fetch();
+        Field* fields = result->Fetch();
         Mail* m = new Mail;
         m->messageID = fields[0].GetUInt32();
         m->messageType = fields[1].GetUInt8();
@@ -6825,11 +6824,10 @@ void ObjectMgr::LoadReservedPlayersNames()
 
     BarGoLink bar(result->GetRowCount());
 
-    Field* fields;
     do
     {
         bar.step();
-        fields = result->Fetch();
+        Field* fields = result->Fetch();
         std::string name = fields[0].GetCppString();
 
         std::wstring wstr;
@@ -8655,15 +8653,14 @@ void ObjectMgr::LoadNpcGossips()
     BarGoLink bar(result->GetRowCount());
 
     uint32 count = 0;
-    uint32 guid, textid;
     do
     {
         bar.step();
 
         Field* fields = result->Fetch();
 
-        guid   = fields[0].GetUInt32();
-        textid = fields[1].GetUInt32();
+        uint32 guid = fields[0].GetUInt32();
+        uint32 textid = fields[1].GetUInt32();
 
         if (!GetCreatureData(guid))
         {

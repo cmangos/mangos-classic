@@ -196,9 +196,7 @@ bool ProcessEventId_event_go_tutenkash_gong(uint32 /*uiEventId*/, Object* pSourc
 
 void AddSC_instance_razorfen_downs()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_razorfen_downs";
     pNewScript->GetInstanceData = &GetInstanceData_instance_razorfen_downs;
     pNewScript->RegisterSelf();

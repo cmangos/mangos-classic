@@ -125,9 +125,7 @@ UnitAI* GetAI_npc_spectral_tutor(Creature* pCreature)
 
 void AddSC_scholomance()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_spectral_tutor";
     pNewScript->GetAI = &GetAI_npc_spectral_tutor;
     pNewScript->RegisterSelf();

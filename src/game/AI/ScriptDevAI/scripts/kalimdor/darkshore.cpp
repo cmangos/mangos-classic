@@ -752,9 +752,7 @@ UnitAI* GetAI_npc_rabid_bear(Creature* pCreature)
 
 void AddSC_darkshore()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_kerlonian";
     pNewScript->GetAI = &GetAI_npc_kerlonian;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_kerlonian;

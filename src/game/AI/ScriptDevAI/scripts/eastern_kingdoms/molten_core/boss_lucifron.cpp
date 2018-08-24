@@ -115,9 +115,7 @@ UnitAI* GetAI_boss_lucifron(Creature* pCreature)
 
 void AddSC_boss_lucifron()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_lucifron";
     pNewScript->GetAI = &GetAI_boss_lucifron;
     pNewScript->RegisterSelf();

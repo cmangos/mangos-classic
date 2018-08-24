@@ -134,9 +134,7 @@ UnitAI* GetAI_boss_ebonroc(Creature* pCreature)
 
 void AddSC_boss_ebonroc()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ebonroc";
     pNewScript->GetAI = &GetAI_boss_ebonroc;
     pNewScript->RegisterSelf();

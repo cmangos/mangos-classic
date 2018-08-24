@@ -119,9 +119,7 @@ UnitAI* GetAI_boss_hazzarah(Creature* pCreature)
 
 void AddSC_boss_hazzarah()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_hazzarah";
     pNewScript->GetAI = &GetAI_boss_hazzarah;
     pNewScript->RegisterSelf();

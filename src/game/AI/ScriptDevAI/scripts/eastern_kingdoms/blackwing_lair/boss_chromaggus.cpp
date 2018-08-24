@@ -172,9 +172,7 @@ UnitAI* GetAI_boss_chromaggus(Creature* pCreature)
 
 void AddSC_boss_chromaggus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_chromaggus";
     pNewScript->GetAI = &GetAI_boss_chromaggus;
     pNewScript->RegisterSelf();
