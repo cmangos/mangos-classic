@@ -70,7 +70,7 @@ LONG WINAPI WheatyExceptionReport::WheatyUnhandledExceptionFilter(
     PEXCEPTION_POINTERS pExceptionInfo)
 {
     TCHAR module_folder_name[MAX_PATH];
-    GetModuleFileName(0, module_folder_name, MAX_PATH);
+    GetModuleFileName(nullptr, module_folder_name, MAX_PATH);
     TCHAR* pos = _tcsrchr(module_folder_name, '\\');
     if (!pos)
         return 0;
@@ -93,19 +93,19 @@ LONG WINAPI WheatyExceptionReport::WheatyUnhandledExceptionFilter(
     m_hReportFile = CreateFile(m_szLogFileName,
                                GENERIC_WRITE,
                                0,
-                               0,
+                               nullptr,
                                OPEN_ALWAYS,
                                FILE_FLAG_WRITE_THROUGH,
-                               0);
+                               nullptr);
 
     if (m_hReportFile)
     {
-        SetFilePointer(m_hReportFile, 0, 0, FILE_END);
+        SetFilePointer(m_hReportFile, 0, nullptr, FILE_END);
 
         GenerateExceptionReport(pExceptionInfo);
 
         CloseHandle(m_hReportFile);
-        m_hReportFile = 0;
+        m_hReportFile = nullptr;
     }
 
     if (m_previousFilter)
@@ -364,7 +364,7 @@ void WheatyExceptionReport::GenerateExceptionReport(
     SymSetOptions(SYMOPT_DEFERRED_LOADS);
 
     // Initialize DbgHelp
-    if (!SymInitialize(GetCurrentProcess(), 0, TRUE))
+    if (!SymInitialize(GetCurrentProcess(), nullptr, TRUE))
     {
         _tprintf(_T("\n\rCRITICAL ERROR.\n\r Couldn't initialize the symbol handler for process.\n\rError [%s].\n\r\n\r"),
                  ErrorMessage(GetLastError()));
@@ -388,7 +388,7 @@ void WheatyExceptionReport::GenerateExceptionReport(
 
     SymEnumSymbols(GetCurrentProcess(),
                    (DWORD64)GetModuleHandle(szFaultingModule),
-                   0, EnumerateSymbolsCallback, 0);
+                   nullptr, EnumerateSymbolsCallback, nullptr);
     //  #endif                                              // X86 Only!
 
     SymCleanup(GetCurrentProcess());
@@ -437,7 +437,7 @@ LPTSTR WheatyExceptionReport::GetExceptionString(DWORD dwCode)
 
     FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_HMODULE,
                   GetModuleHandle(_T("NTDLL.DLL")),
-                  dwCode, 0, szBuffer, sizeof(szBuffer), 0);
+                  dwCode, 0, szBuffer, sizeof(szBuffer), nullptr);
 
     return szBuffer;
 }
@@ -556,10 +556,10 @@ void WheatyExceptionReport::WriteStackDetails(
                           pThreadHandle != nullptr ? pThreadHandle : GetCurrentThread(),
                           &sf,
                           pContext,
-                          0,
+                          nullptr,
                           SymFunctionTableAccess64,
                           SymGetModuleBase64,
-                          0))
+                          nullptr))
             break;
         if (0 == sf.AddrFrame.Offset)                       // Basic sanity check to make sure
             break;                                          // the frame is OK.  Bail if not.
@@ -616,10 +616,10 @@ void WheatyExceptionReport::WriteStackDetails(
             // Use SymSetContext to get just the locals/params for this frame
             IMAGEHLP_STACK_FRAME imagehlpStackFrame;
             imagehlpStackFrame.InstructionOffset = sf.AddrPC.Offset;
-            SymSetContext(m_hProcess, &imagehlpStackFrame, 0);
+            SymSetContext(m_hProcess, &imagehlpStackFrame, nullptr);
 
             // Enumerate the locals/parameters
-            SymEnumSymbols(m_hProcess, 0, 0, EnumerateSymbolsCallback, &sf);
+            SymEnumSymbols(m_hProcess, 0, nullptr, EnumerateSymbolsCallback, &sf);
 
             _tprintf(_T("\r\n"));
         }
@@ -918,7 +918,7 @@ int __cdecl WheatyExceptionReport::_tprintf(const TCHAR* format, ...)
     retValue = vsprintf(szBuff, format, argptr);
     va_end(argptr);
 
-    WriteFile(m_hReportFile, szBuff, retValue * sizeof(TCHAR), &cbWritten, 0);
+    WriteFile(m_hReportFile, szBuff, retValue * sizeof(TCHAR), &cbWritten, nullptr);
 
     return retValue;
 }

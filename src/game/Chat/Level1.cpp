@@ -1996,9 +1996,9 @@ bool ChatHandler::HandleGoXYZCommand(char* args)
     Player* _player = m_session->GetPlayer();
 
     char* px = strtok((char*)args, " ");
-    char* py = strtok(NULL, " ");
-    char* pz = strtok(NULL, " ");
-    char* pmapid = strtok(NULL, " ");
+    char* py = strtok(nullptr, " ");
+    char* pz = strtok(nullptr, " ");
+    char* pmapid = strtok(nullptr, " ");
 
     if (!px || !py || !pz)
         return false;

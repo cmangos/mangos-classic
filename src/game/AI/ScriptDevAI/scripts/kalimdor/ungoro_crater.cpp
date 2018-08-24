@@ -704,7 +704,7 @@ struct npc_simone_the_inconspicuousAI : public ScriptedAI
     {
         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
         {
-            Creature* pPreciousDevourer = NULL;
+            Creature* pPreciousDevourer = nullptr;
             Creature* pDemon = m_creature->SummonCreature(NPC_SIMONE_THE_SEDUCTRESS,
                 m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetAngle(m_creature), TEMPSPAWN_DEAD_DESPAWN, 0);
             Creature* pPrecious = GetClosestCreatureWithEntry(m_creature, NPC_PRECIOUS, 100.0f);

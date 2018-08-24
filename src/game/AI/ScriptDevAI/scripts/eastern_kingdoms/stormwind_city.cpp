@@ -444,7 +444,7 @@ bool GossipSelect_npc_squire_rowe(Player* pPlayer, Creature* pCreature, uint32 /
     if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
     {
         if (npc_squire_roweAI* pRoweAI = dynamic_cast<npc_squire_roweAI*>(pCreature->AI()))
-            pRoweAI->Start(true, pPlayer, 0, true, false);
+            pRoweAI->Start(true, pPlayer, nullptr, true, false);
 
         pPlayer->CLOSE_GOSSIP_MENU();
     }
