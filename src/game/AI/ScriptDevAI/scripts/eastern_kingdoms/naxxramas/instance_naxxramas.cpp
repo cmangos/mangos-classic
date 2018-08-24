@@ -53,9 +53,9 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_uiSapphSpawnTimer(0),
     m_uiTauntTimer(0),
     m_uiHorseMenKilled(0),
-    m_dialogueHelper(aNaxxDialogue),
     m_uiLivingPoisonTimer(5000),
-    m_uiScreamsTimer(2 * MINUTE * IN_MILLISECONDS)
+    m_uiScreamsTimer(2 * MINUTE * IN_MILLISECONDS),
+    m_dialogueHelper(aNaxxDialogue)
 {
     Initialize();
 }

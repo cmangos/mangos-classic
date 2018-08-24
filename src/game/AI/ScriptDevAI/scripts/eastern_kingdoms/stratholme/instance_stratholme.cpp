@@ -33,11 +33,11 @@ instance_stratholme::instance_stratholme(Map* pMap) : ScriptedInstance(pMap),
     m_uiSlaugtherSquareTimer(0),
     m_uiSlaughterDoorTimer(0),
     m_uiBlackGuardsTimer(0),
+    m_uiAuriusSummonTimer(0),
+    m_bIsSlaughterDoorOpen(false),
     m_uiYellCounter(0),
     m_uiMindlessCount(0),
     m_uiPostboxesUsed(0),
-    m_uiAuriusSummonTimer(0),
-    m_bIsSlaughterDoorOpen(false)
 {
     Initialize();
 }

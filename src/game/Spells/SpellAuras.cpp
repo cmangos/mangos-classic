@@ -255,7 +255,7 @@ static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_
 Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem) :
     m_spellmod(nullptr), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
     m_effIndex(eff), m_positive(false), m_isPeriodic(false), m_isAreaAura(false),
-    m_isPersistent(false), m_spellAuraHolder(holder), m_magnetUsed(false)
+    m_isPersistent(false), m_magnetUsed(false), m_spellAuraHolder(holder)
 {
     MANGOS_ASSERT(target);
     MANGOS_ASSERT(spellproto && spellproto == sSpellTemplate.LookupEntry<SpellEntry>(spellproto->Id) && "`info` must be pointer to sSpellTemplate element");
@@ -4893,13 +4893,14 @@ inline bool IsRemovedOnShapeshiftLost(SpellEntry const* spellproto, ObjectGuid c
 }
 
 SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem, SpellEntry const* triggeredBy) :
-    m_spellProto(spellproto), m_triggeredBy(triggeredBy),
-    m_target(target), m_castItemGuid(castItem ? castItem->GetObjectGuid() : ObjectGuid()),
-    m_auraSlot(MAX_AURAS), m_auraLevel(1),
-    m_procCharges(0), m_stackAmount(1),
-    m_timeCla(1000), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_AuraDRGroup(DIMINISHING_NONE),
-    m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false),
-    m_spellAuraHolderState(SPELLAURAHOLDER_STATE_CREATED), m_skipUpdate(false)
+    m_spellProto(spellproto), m_target(target),
+    m_castItemGuid(castItem ? castItem->GetObjectGuid() : ObjectGuid()), m_triggeredBy(triggeredBy),
+    m_spellAuraHolderState(SPELLAURAHOLDER_STATE_CREATED), m_auraSlot(MAX_AURAS),
+    m_auraLevel(1), m_procCharges(0),
+    m_stackAmount(1), m_timeCla(1000), m_removeMode(AURA_REMOVE_BY_DEFAULT),
+    m_AuraDRGroup(DIMINISHING_NONE), m_permanent(false), m_isRemovedOnShapeLost(true),
+    m_deleted(false), m_skipUpdate(false)
+
 {
     MANGOS_ASSERT(target);
     MANGOS_ASSERT(spellproto && spellproto == sSpellTemplate.LookupEntry<SpellEntry>(spellproto->Id) && "`info` must be pointer to sSpellTemplate element");

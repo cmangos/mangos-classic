@@ -34,11 +34,11 @@ UnitAI::UnitAI(Unit* unit) :
     m_attackDistance(0.0f),
     m_attackAngle(0.0f),
     m_moveFurther(false),
+    m_visibilityDistance(VISIBLE_RANGE),
     m_combatMovementStarted(false),
     m_dismountOnAggro(true),
-    m_reactState(REACT_AGGRESSIVE),
     m_meleeEnabled(true),
-    m_visibilityDistance(VISIBLE_RANGE),
+    m_reactState(REACT_AGGRESSIVE),
     m_combatScriptHappening(false)
 {
 }

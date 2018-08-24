@@ -28,8 +28,8 @@ EndScriptData
 
 instance_dire_maul::instance_dire_maul(Map* pMap) : ScriptedInstance(pMap),
     m_bWallDestroyed(false),
-    m_bDoNorthBeforeWest(false),
-    m_uiDreadsteedEventTimer(0)
+    m_uiDreadsteedEventTimer(0),
+    m_bDoNorthBeforeWest(false)
 {
     Initialize();
 }

@@ -27,20 +27,20 @@ EndScriptData
 #include "blackrock_depths.h"
 
 instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstance(pMap),
+    m_bIsBarDoorOpen(false),
     m_uiBarAleCount(0),
-    m_uiBrokenKegs(0),
-    m_uiCofferDoorsOpened(0),
-    m_uiDwarfRound(0),
-    m_uiDwarfFightTimer(0),
     m_uiPatronEmoteTimer(2000),
+    m_uiBrokenKegs(0),
     m_uiPatrolTimer(0),
     m_uiStolenAles(0),
     m_uiDagranTimer(0),
+    m_uiCofferDoorsOpened(0),
+    m_uiDwarfRound(0),
 
+    m_uiDwarfFightTimer(0),
     m_fArenaCenterX(0.0f),
     m_fArenaCenterY(0.0f),
-    m_fArenaCenterZ(0.0f),
-    m_bIsBarDoorOpen(false)
+    m_fArenaCenterZ(0.0f)
 {
     Initialize();
 }

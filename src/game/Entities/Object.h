@@ -134,8 +134,8 @@ class CooldownData
     public:
         CooldownData(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory, uint32 categoryDuration, uint32 itemId = 0, bool isPermanent = false) :
             m_spellId(spellId),
-            m_expireTime(duration ? std::chrono::milliseconds(duration) + clockNow : TimePoint()),
             m_category(spellCategory),
+            m_expireTime(duration ? std::chrono::milliseconds(duration) + clockNow : TimePoint()),
             m_catExpireTime(spellCategory && categoryDuration ? std::chrono::milliseconds(categoryDuration) + clockNow : TimePoint()),
             m_typePermanent(isPermanent),
             m_itemId(itemId)

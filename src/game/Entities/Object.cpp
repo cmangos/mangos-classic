@@ -1472,7 +1472,7 @@ float WorldObject::GetCombinedCombatReach(WorldObject const* pVictim, bool forMe
 float WorldObject::GetCombinedCombatReach(bool forMeleeRange, float flat_mod) const
 {
     // The measured values show BASE_MELEE_OFFSET in (1.3224, 1.342)
-    float reach = GetCombatReach() + 
+    float reach = GetCombatReach() +
         BASE_MELEERANGE_OFFSET + flat_mod;
 
     if (forMeleeRange && reach < ATTACK_DISTANCE)

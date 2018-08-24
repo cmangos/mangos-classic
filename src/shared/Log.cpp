@@ -65,8 +65,8 @@ enum LogType
 const int LogType_count = int(LogError) + 1;
 
 Log::Log() :
-    raLogfile(nullptr), logfile(nullptr), gmLogfile(nullptr), charLogfile(nullptr), customLogFile(nullptr),
-    dberLogfile(nullptr), eventAiErLogfile(nullptr), scriptErrLogFile(nullptr), worldLogfile(nullptr), m_colored(false), m_includeTime(false), m_gmlog_per_account(false), m_scriptLibName(nullptr)
+    raLogfile(nullptr), logfile(nullptr), gmLogfile(nullptr), charLogfile(nullptr), dberLogfile(nullptr),
+    eventAiErLogfile(nullptr), scriptErrLogFile(nullptr), worldLogfile(nullptr), customLogFile(nullptr), m_colored(false), m_includeTime(false), m_gmlog_per_account(false), m_scriptLibName(nullptr)
 {
     Initialize();
 }

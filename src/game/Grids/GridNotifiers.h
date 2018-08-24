@@ -916,7 +916,7 @@ namespace MaNGOS
     {
         public:
             AnyFriendlyOrGroupMemberUnitInUnitRangeCheck(Unit const* obj, Group const* group, SpellEntry const* spellInfo, float range)
-                : i_obj(obj), i_group(group), i_spellInfo(spellInfo), i_range(range) {}
+                : i_group(group), i_obj(obj), i_spellInfo(spellInfo), i_range(range) {}
             Unit const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
@@ -970,7 +970,7 @@ namespace MaNGOS
             SpellEntry const* i_spellInfo;
             float i_range;
     };
- 
+
     class AnyUnitInObjectRangeCheck
     {
         public:

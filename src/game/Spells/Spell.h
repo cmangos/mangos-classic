@@ -220,8 +220,8 @@ class SpellLog
 {
     public:
         SpellLog(Spell* spell) :
-            m_spell(spell), m_spellLogDataEffectsCounter(0), m_spellLogDataEffectsCounterPos(0),
-            m_spellLogDataTargetsCounter(0), m_spellLogDataTargetsCounterPos(0), m_currentEffect(TOTAL_SPELL_EFFECTS) {}
+            m_spell(spell), m_spellLogDataEffectsCounterPos(0), m_spellLogDataEffectsCounter(0),
+            m_spellLogDataTargetsCounterPos(0), m_spellLogDataTargetsCounter(0), m_currentEffect(TOTAL_SPELL_EFFECTS) {}
         SpellLog() = delete;
         SpellLog(const SpellLog&) = delete;
 

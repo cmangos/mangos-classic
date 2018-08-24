@@ -28,8 +28,8 @@ EndScriptData
 #include "GameEvents/GameEventMgr.h"
 
 instance_scholomance::instance_scholomance(Map* pMap) : ScriptedInstance(pMap),
-    m_uiGandlingEvent(0),
     m_uiGambitTransformTimer(0),
+    m_uiGandlingEvent(0),
     m_bIsRoomReset(false)
 {
     Initialize();

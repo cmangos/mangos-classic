@@ -102,13 +102,13 @@ instance_blackrock_spire::instance_blackrock_spire(Map* pMap) : ScriptedInstance
     m_bUpperDoorOpened(false),
     m_uiDragonspineDoorTimer(0),
     m_uiDragonspineGoCount(0),
+    m_bBeastIntroDone(false),
+    m_bBeastOutOfLair(false),
     m_uiFlamewreathEventTimer(0),
     m_uiFlamewreathWaveCount(0),
     m_uiStadiumEventTimer(0),
     m_uiStadiumWaves(0),
-    m_uiStadiumMobsAlive(0),
-    m_bBeastIntroDone(false),
-    m_bBeastOutOfLair(false)
+    m_uiStadiumMobsAlive(0)
 {
     Initialize();
 }

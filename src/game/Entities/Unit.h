@@ -902,7 +902,7 @@ struct ProcSystemArguments
     explicit ProcSystemArguments(Unit* victim, uint32 procFlagsAttacker, uint32 procFlagsVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType = BASE_ATTACK,
         SpellEntry const* procSpell = nullptr, Spell* spell = nullptr, uint32 healthGain = 0)
         : victim(victim), procFlagsAttacker(procFlagsAttacker), procFlagsVictim(procFlagsVictim), procExtra(procExtra), damage(amount),
-            attType(attType), procSpell(procSpell), spell(spell), healthGain(healthGain)
+            procSpell(procSpell), attType(attType), spell(spell), healthGain(healthGain)
     {}
 };
 
