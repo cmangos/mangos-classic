@@ -54,7 +54,7 @@ class ScriptedInstance : public InstanceData
         virtual void DoUpdateWorldState(uint32 stateId, uint32 stateData);
 
         // Get a Player from map
-        Player* GetPlayerInMap(bool onlyAlive = false, bool canBeGamemaster = true);
+        Player* GetPlayerInMap(bool onlyAlive = false, bool canBeGamemaster = true) const;
 
         // Wrapper for simulating map-wide text in this instance. It is expected that the Creature is stored in m_npcEntryGuidStore if loaded.
         void DoOrSimulateScriptTextForThisInstance(int32 textEntry, uint32 creatureEntry)

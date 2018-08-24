@@ -133,7 +133,7 @@ void ScriptedInstance::DoUpdateWorldState(uint32 stateId, uint32 stateData)
 }
 
 /// Get the first found Player* (with requested properties) in the map. Can return nullptr.
-Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBeGamemaster /*=true*/)
+Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBeGamemaster /*=true*/) const
 {
     Map::PlayerList const& lPlayers = instance->GetPlayers();
 

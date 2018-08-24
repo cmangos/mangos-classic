@@ -365,7 +365,7 @@ std::list<Creature*> ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 s
     return creatureList;
 }
 
-Player* ScriptedAI::GetPlayerAtMinimumRange(float minimumRange)
+Player* ScriptedAI::GetPlayerAtMinimumRange(float minimumRange) const
 {
     Player* player = nullptr;
 

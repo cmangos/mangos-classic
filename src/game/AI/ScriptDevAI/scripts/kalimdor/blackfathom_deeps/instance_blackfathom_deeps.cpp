@@ -211,7 +211,7 @@ void instance_blackfathom_deeps::OnCreatureDeath(Creature* pCreature)
 }
 
 // Check if all the summoned event mobs are dead
-bool instance_blackfathom_deeps::IsWaveEventFinished()
+bool instance_blackfathom_deeps::IsWaveEventFinished() const
 {
     // If not all fires are lighted return
     if (m_uiWaveCounter < MAX_FIRES)

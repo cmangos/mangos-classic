@@ -416,7 +416,7 @@ void UnitAI::DetectOrAttack(Unit* who)
     }
 }
 
-bool UnitAI::CanTriggerStealthAlert(Unit* who, float attackRadius)
+bool UnitAI::CanTriggerStealthAlert(Unit* who, float attackRadius) const
 {
     if (who->GetTypeId() != TYPEID_PLAYER)
         return false;

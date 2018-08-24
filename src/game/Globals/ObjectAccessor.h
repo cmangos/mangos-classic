@@ -100,7 +100,7 @@ class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLev
         static Player* FindPlayerByName(const char* name);
         static void KickPlayer(ObjectGuid guid);
 
-        HashMapHolder<Player>::MapType& GetPlayers()
+        HashMapHolder<Player>::MapType& GetPlayers() const
         {
             return HashMapHolder<Player>::GetContainer();
         }

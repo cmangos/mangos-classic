@@ -711,7 +711,7 @@ class ChatHandler
         };
 
         typedef std::list<DeletedInfo> DeletedInfoList;
-        bool GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::string searchString = "");
+        bool GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::string searchString = "") const;
         std::string GenerateDeletedCharacterGUIDsWhereStr(DeletedInfoList::const_iterator& itr, DeletedInfoList::const_iterator const& itr_end);
         void HandleCharacterDeletedListHelper(DeletedInfoList const& foundList);
         void HandleCharacterDeletedRestoreHelper(DeletedInfo const& delInfo);

@@ -194,7 +194,7 @@ struct ScriptedAI : public CreatureAI
         std::list<Creature*> DoFindFriendlyMissingBuff(float range, uint32 spellId);
 
         // Return a player with at least minimumRange from m_creature
-        Player* GetPlayerAtMinimumRange(float minimumRange);
+        Player* GetPlayerAtMinimumRange(float minimumRange) const;
 
         // Returns spells that meet the specified criteria from the creatures spell list
         SpellEntry const* SelectSpell(Unit* target, int32 school, int32 mechanic, SelectTarget selectTargets, uint32 powerCostMin, uint32 powerCostMax, float rangeMin, float rangeMax, SelectEffect selectEffect);

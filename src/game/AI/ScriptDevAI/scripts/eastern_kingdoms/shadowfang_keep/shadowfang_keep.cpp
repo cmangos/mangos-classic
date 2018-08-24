@@ -343,7 +343,7 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
         Reset();
     }
 
-    uint8 GetPosition()
+    uint8 GetPosition() const
     {
         return m_uiPosition;
     }
@@ -652,12 +652,12 @@ struct boss_arugalAI : public ScriptedAI
     }
 
     // Make the code nice and pleasing to the eye
-    inline float GetManaPercent()
+    inline float GetManaPercent() const
     {
         return (((float)m_creature->GetPower(POWER_MANA) / (float)m_creature->GetMaxPower(POWER_MANA)) * 100);
     }
 
-    inline float GetVictimDistance()
+    inline float GetVictimDistance() const
     {
         return (m_creature->getVictim() ? m_creature->GetDistance(m_creature->getVictim(), false) : 999.9f);
     }

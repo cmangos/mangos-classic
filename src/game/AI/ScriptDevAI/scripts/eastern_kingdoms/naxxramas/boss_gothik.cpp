@@ -143,7 +143,7 @@ struct boss_gothikAI : public ScriptedAI
         PrepareSummonPlaces();
     }
 
-    bool IsCentralDoorClosed()
+    bool IsCentralDoorClosed() const
     {
         return m_pInstance && m_pInstance->GetData(TYPE_GOTHIK) != SPECIAL;
     }
@@ -157,7 +157,7 @@ struct boss_gothikAI : public ScriptedAI
         }
     }
 
-    bool HasPlayersInLeftSide()
+    bool HasPlayersInLeftSide() const
     {
         Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
 

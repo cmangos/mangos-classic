@@ -451,7 +451,7 @@ class Aura
         SpellModifier* GetSpellModifier() { return m_spellmod; }
 
         void UseMagnet() { m_magnetUsed = true; }
-        bool IsMagnetUsed() { return m_magnetUsed; }
+        bool IsMagnetUsed() const { return m_magnetUsed; }
     protected:
         Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
 

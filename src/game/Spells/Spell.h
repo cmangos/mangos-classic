@@ -471,7 +471,7 @@ class Spell
         bool IsDeletable() const { return !m_referencedFromCurrentSpell && !m_executedCurrently; }
         void SetReferencedFromCurrent(bool yes) { m_referencedFromCurrentSpell = yes; }
         void SetExecutedCurrently(bool yes) { m_executedCurrently = yes; }
-        bool IsExecutedCurrently() { return m_executedCurrently; }
+        bool IsExecutedCurrently() const { return m_executedCurrently; }
         uint64 GetDelayStart() const { return m_delayStart; }
         void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
         uint64 GetDelayMoment() const { return m_delayMoment; }
@@ -511,7 +511,7 @@ class Spell
 
         void ProcSpellAuraTriggers();
 
-        bool CanBeInterrupted() { return m_spellState <= SPELL_STATE_DELAYED || m_spellState == SPELL_STATE_CHANNELING; }
+        bool CanBeInterrupted() const { return m_spellState <= SPELL_STATE_DELAYED || m_spellState == SPELL_STATE_CHANNELING; }
 
         typedef std::list<Unit*> UnitList;
 
@@ -892,7 +892,7 @@ class SpellEvent : public BasicEvent
         virtual void Abort(uint64 e_time) override;
         virtual bool IsDeletable() const override;
 
-        Spell* GetSpell() { return m_Spell; }
+        Spell* GetSpell() const { return m_Spell; }
     protected:
         Spell* m_Spell;
 };

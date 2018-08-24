@@ -402,7 +402,7 @@ struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
     }
 
     // Check if the event is already running
-    bool IsStormwindQuestActive() { return m_bIsEventInProgress; }
+    bool IsStormwindQuestActive() const { return m_bIsEventInProgress; }
 
     void UpdateEscortAI(const uint32 uiDiff) { DialogueUpdate(uiDiff); }
 };
@@ -986,7 +986,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
         m_playerGuid = pPlayer->GetObjectGuid();
     }
 
-    bool IsKeepEventReady() { return m_bIsKeepReady; }
+    bool IsKeepEventReady() const { return m_bIsKeepReady; }
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {

@@ -179,7 +179,7 @@ class instance_blackrock_spire : public ScriptedInstance, private DialogueHelper
 
         void DoOpenUpperDoorIfCan(Player* pPlayer);
         void DoSortRoomEventMobs();
-        void GetIncarceratorGUIDList(GuidList& lList) { lList = m_lIncarceratorGUIDList; }
+        void GetIncarceratorGUIDList(GuidList& lList) const { lList = m_lIncarceratorGUIDList; }
 
         void StartflamewreathEventIfCan();
 

@@ -1048,19 +1048,19 @@ class CharmInfo
         CharmSpellEntry* GetCharmSpell(uint8 index) { return &(m_charmspells[index]); }
 
         void SetIsRetreating(bool retreating = false) { m_retreating = retreating; }
-        bool GetIsRetreating() { return m_retreating; }
+        bool GetIsRetreating() const { return m_retreating; }
 
         void SetStayPosition(bool stay = false);
-        bool IsStayPosSet() { return m_stayPosSet; }
+        bool IsStayPosSet() const { return m_stayPosSet; }
 
-        float GetStayPosX() { return m_stayPosX; }
-        float GetStayPosY() { return m_stayPosY; }
-        float GetStayPosZ() { return m_stayPosZ; }
-        float GetStayPosO() { return m_stayPosO; }
+        float GetStayPosX() const { return m_stayPosX; }
+        float GetStayPosY() const { return m_stayPosY; }
+        float GetStayPosZ() const { return m_stayPosZ; }
+        float GetStayPosO() const { return m_stayPosO; }
 
-        uint32 GetSpellOpener() { return m_opener; }
-        uint32 GetSpellOpenerMinRange() { return m_openerMinRange; }
-        uint32 GetSpellOpenerMaxRange() { return m_openerMaxRange; }
+        uint32 GetSpellOpener() const { return m_opener; }
+        uint32 GetSpellOpenerMinRange() const { return m_openerMinRange; }
+        uint32 GetSpellOpenerMaxRange() const { return m_openerMaxRange; }
 
         void SetSpellOpener(uint32 spellId = 0, uint32 minRange = 0, uint32 maxRange = 0)
         {
@@ -1069,8 +1069,8 @@ class CharmInfo
             m_openerMaxRange = maxRange;
         }
 
-        UnitAI* GetAI() { return m_ai; }
-        CombatData* GetCombatData() { return m_combatData; };
+        UnitAI* GetAI() const { return m_ai; }
+        CombatData* GetCombatData() const { return m_combatData; };
 
     private:
         Unit*               m_unit;
@@ -1816,7 +1816,7 @@ class Unit : public WorldObject
         void RemoveGuardians();
         Pet* FindGuardianWithEntry(uint32 entry);
 
-        CharmInfo* GetCharmInfo() { return m_charmInfo; }
+        CharmInfo* GetCharmInfo() const { return m_charmInfo; }
         virtual CharmInfo* InitCharmInfo(Unit* charm);
         virtual void DeleteCharmInfo() { delete m_charmInfo; m_charmInfo = nullptr; }
 
@@ -1992,7 +1992,7 @@ class Unit : public WorldObject
         void AddThreat(Unit* pVictim, float threat = 0.0f, bool crit = false, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NONE, SpellEntry const* threatSpell = nullptr);
         float ApplyTotalThreatModifier(float threat, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NORMAL);
         void DeleteThreatList();
-        bool IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea);
+        bool IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const;
         bool SelectHostileTarget();
         bool IsOutOfThreatArea(Unit* victim) const;
         void TauntUpdate();

@@ -804,7 +804,7 @@ class Creature : public Unit
         void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
 
         void SetForceAttackingCapability(bool state) { m_forceAttackingCapability = state; }
-        bool GetForceAttackingCapability() { return m_forceAttackingCapability; }
+        bool GetForceAttackingCapability() const { return m_forceAttackingCapability; }
 
         void SetIgnoreRangedTargets(bool state) { m_ignoreRangedTargets = state; }
         bool IsIgnoringRangedTargets() override { return m_ignoreRangedTargets; }
@@ -823,7 +823,7 @@ class Creature : public Unit
         bool CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, Team team, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 entry, Team team = ALLIANCE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
 
-        uint32 GetCreatureConditionalSpawnEntry(uint32 guidlow, Map* map);
+        uint32 GetCreatureConditionalSpawnEntry(uint32 guidlow, Map* map) const;
 
         void UnsummonCleanup(); // cleans up data before unsummon of various creatures
 

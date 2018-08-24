@@ -228,11 +228,12 @@ class instance_naxxramas : public ScriptedInstance
         bool IsInRightSideGothArea(Unit* pUnit);
 
         // thaddius
-        void GetThadTeslaCreatures(GuidList& lList) { lList = m_lThadTeslaCoilList; };
+        void GetThadTeslaCreatures(GuidList& lList) const { lList = m_lThadTeslaCoilList; };
 
         // kel
         void SetChamberCenterCoords(float fX, float fY, float fZ);
-        void GetChamberCenterCoords(float& fX, float& fY, float& fZ) { fX = m_fChamberCenterX; fY = m_fChamberCenterY; fZ = m_fChamberCenterZ; }
+        void GetChamberCenterCoords(float& fX, float& fY, float& fZ) const
+        { fX = m_fChamberCenterX; fY = m_fChamberCenterY; fZ = m_fChamberCenterZ; }
         void DoTaunt();
 
     protected:

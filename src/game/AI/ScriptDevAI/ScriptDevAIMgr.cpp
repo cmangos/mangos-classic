@@ -337,7 +337,7 @@ bool ScriptDevAIMgr::OnProcessEvent(uint32 uiEventId, Object* pSource, Object* p
     return pTempScript->pProcessEventId(uiEventId, pSource, pTarget, bIsStart);
 }
 
-UnitAI* ScriptDevAIMgr::GetCreatureAI(Creature* pCreature)
+UnitAI* ScriptDevAIMgr::GetCreatureAI(Creature* pCreature) const
 {
     Script* pTempScript = GetScript(pCreature->GetScriptId());
 
@@ -347,7 +347,7 @@ UnitAI* ScriptDevAIMgr::GetCreatureAI(Creature* pCreature)
     return pTempScript->GetAI(pCreature);
 }
 
-GameObjectAI* ScriptDevAIMgr::GetGameObjectAI(GameObject* gameobject)
+GameObjectAI* ScriptDevAIMgr::GetGameObjectAI(GameObject* gameobject) const
 {
     Script* pTempScript = GetScript(gameobject->GetScriptId());
 

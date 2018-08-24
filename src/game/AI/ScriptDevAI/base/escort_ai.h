@@ -56,7 +56,7 @@ struct npc_escortAI : public ScriptedAI
 
         bool AssistPlayerInCombat(Unit* who) override;
     protected:
-        Player* GetPlayerForEscort() { return m_creature->GetMap()->GetPlayer(m_playerGuid); }
+        Player* GetPlayerForEscort() const { return m_creature->GetMap()->GetPlayer(m_playerGuid); }
         bool IsSD2EscortMovement(uint32 moveType) const;
         virtual void JustStartedEscort() {}
 

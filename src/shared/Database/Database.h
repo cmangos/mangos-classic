@@ -78,7 +78,7 @@ class SqlConnection
         };
 
         // get DB object
-        Database& DB() { return m_db; }
+        Database& DB() const { return m_db; }
 
     protected:
         SqlConnection(Database& db) : m_db(db) {}

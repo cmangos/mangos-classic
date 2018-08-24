@@ -1234,7 +1234,7 @@ struct DoSpellThreat
         }
         ++count;
     }
-    bool HasEntry(uint32 spellId) { return threatMap.count(spellId) > 0; }
+    bool HasEntry(uint32 spellId) const { return threatMap.count(spellId) > 0; }
     bool SetStateToEntry(uint32 spellId) { return (state = threatMap.find(spellId)) != threatMap.end(); }
 
     SpellThreatMap& threatMap;

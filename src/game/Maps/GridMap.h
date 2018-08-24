@@ -177,7 +177,8 @@ class GridMap
         static bool ExistVMap(uint32 mapid, int gx, int gy);
 
         uint16 getArea(float x, float y) const;
-        float getHeight(float x, float y) const { return (this->*m_gridGetHeight)(x, y); }
+
+        inline float getHeight(float x, float y) const { return (this->*m_gridGetHeight)(x, y); }
         float getLiquidLevel(float x, float y) const;
         uint8 getTerrainType(float x, float y) const;
         GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr);

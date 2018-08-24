@@ -145,8 +145,8 @@ class ScriptDevAIMgr
         uint32 GetScriptId(const char* name) const;
         uint32 GetScriptIdsCount() const { return m_scriptNames.size(); }
 
-        UnitAI* GetCreatureAI(Creature* creature);
-        GameObjectAI* GetGameObjectAI(GameObject* gameobject);
+        UnitAI* GetCreatureAI(Creature* creature) const;
+        GameObjectAI* GetGameObjectAI(GameObject* gameobject) const;
 
         InstanceData* CreateInstanceData(Map* pMap);
         uint32 GetAreaTriggerScriptId(uint32 triggerId) const;

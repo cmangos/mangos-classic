@@ -402,7 +402,7 @@ class UnitAI
 
         void CheckForHelp(Unit* /*who*/, Unit* /*me*/, float /*dist*/);
         void DetectOrAttack(Unit* who);
-        bool CanTriggerStealthAlert(Unit* who, float attackRadius);
+        bool CanTriggerStealthAlert(Unit* who, float attackRadius) const;
 
         virtual void HandleMovementOnAttackStart(Unit* victim) const;
 
@@ -422,7 +422,7 @@ class UnitAI
 
         virtual bool CanExecuteCombatAction();
         void SetCombatScriptStatus(bool state) { m_combatScriptHappening = state; };
-        bool GetCombatScriptStatus() { return m_combatScriptHappening; }
+        bool GetCombatScriptStatus() const { return m_combatScriptHappening; }
 
         void SetMeleeEnabled(bool state);
 

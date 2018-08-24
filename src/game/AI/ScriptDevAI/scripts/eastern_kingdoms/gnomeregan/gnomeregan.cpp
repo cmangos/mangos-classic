@@ -208,7 +208,7 @@ struct npc_blastmaster_emi_shortfuseAI : public npc_escortAI
         m_luiSummonedMobGUIDs.remove(pSummoned->GetObjectGuid());
     }
 
-    bool IsPreparingExplosiveCharge()
+    bool IsPreparingExplosiveCharge() const
     {
         return m_uiPhase == 11 || m_uiPhase == 13 || m_uiPhase == 26 || m_uiPhase == 28;
     }

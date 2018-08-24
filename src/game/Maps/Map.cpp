@@ -63,12 +63,12 @@ Map::~Map()
     m_weatherSystem = nullptr;
 }
 
-TimePoint Map::GetCurrentClockTime()
+TimePoint Map::GetCurrentClockTime() const
 {
     return World::GetCurrentClockTime();
 }
 
-uint32 Map::GetCurrentDiff()
+uint32 Map::GetCurrentDiff() const
 {
     return World::GetCurrentDiff();
 }

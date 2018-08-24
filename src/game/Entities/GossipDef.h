@@ -175,7 +175,7 @@ class GossipMenu
 
         // used to avoid opening gossip menu at node discover
         void SetDiscoveredNode() { m_discoveredNode = true; }
-        bool IsJustDiscoveredNode() { return m_discoveredNode; }
+        bool IsJustDiscoveredNode() const { return m_discoveredNode; }
 
         void AddGossipMenuItemData(int32 action_menu, uint32 action_poi, uint32 action_script);
 

@@ -2889,7 +2889,7 @@ void Creature::UnsummonCleanup()
     InterruptNonMeleeSpells(false);
 }
 
-uint32 Creature::GetCreatureConditionalSpawnEntry(uint32 guidlow, Map* map)
+uint32 Creature::GetCreatureConditionalSpawnEntry(uint32 guidlow, Map* map) const
 {
     uint32 entry = 0;
 

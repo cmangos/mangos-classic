@@ -903,7 +903,7 @@ class WorldObject : public Object
         // cooldown system
         void UpdateCooldowns(TimePoint const& now);
         bool CheckLockout(SpellSchoolMask schoolMask) const;
-        bool GetExpireTime(SpellEntry const& spellEntry, TimePoint& expireTime, bool& isPermanent);
+        bool GetExpireTime(SpellEntry const& spellEntry, TimePoint& expireTime, bool& isPermanent) const;
 
         GCDMap            m_GCDCatMap;
         LockoutMap        m_lockoutMap;

@@ -8079,7 +8079,7 @@ void Unit::FixateTarget(Unit* taunter)
 
 //======================================================================
 
-bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea)
+bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const
 {
     MANGOS_ASSERT(pTarget);
 

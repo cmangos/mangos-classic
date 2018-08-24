@@ -206,7 +206,7 @@ struct boss_thekalAI : public boss_thekalBaseAI
     }
 
     // Only call in context where m_pInstance is valid
-    bool CanPreventAddsResurrect()
+    bool CanPreventAddsResurrect() const
     {
         // If any add is alive, return false
         if (m_pInstance->GetData(TYPE_ZATH) != SPECIAL || m_pInstance->GetData(TYPE_LORKHAN) != SPECIAL)

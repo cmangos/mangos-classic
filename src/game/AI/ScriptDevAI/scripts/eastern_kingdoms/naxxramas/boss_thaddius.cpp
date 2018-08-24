@@ -432,7 +432,8 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
-    Creature* GetOtherAdd()                                 // For Stalagg returns pFeugen, for Feugen returns pStalagg
+    Creature* GetOtherAdd() const
+    // For Stalagg returns pFeugen, for Feugen returns pStalagg
     {
         switch (m_creature->GetEntry())
         {
@@ -510,7 +511,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         Reset();
     }
 
-    bool IsCountingDead()
+    bool IsCountingDead() const
     {
         return m_bFakeDeath || m_creature->isDead();
     }

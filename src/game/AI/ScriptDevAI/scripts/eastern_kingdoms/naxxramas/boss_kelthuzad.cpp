@@ -218,7 +218,7 @@ struct boss_kelthuzadAI : public ScriptedAI
         m_lAddsSet.clear();
     }
 
-    float GetLocationAngle(uint32 uiId)
+    float GetLocationAngle(uint32 uiId) const
     {
         switch (uiId)
         {

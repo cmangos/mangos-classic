@@ -201,7 +201,7 @@ namespace VMAP
         return true;
     }
 
-    uint32 WmoLiquid::GetFileSize()
+    uint32 WmoLiquid::GetFileSize() const
     {
         return 2 * sizeof(uint32) +
                sizeof(Vector3) +
