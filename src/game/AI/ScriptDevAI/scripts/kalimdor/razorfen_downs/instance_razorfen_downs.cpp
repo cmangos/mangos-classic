@@ -44,7 +44,6 @@ void instance_razorfen_downs::OnCreatureCreate(Creature* pCreature)
         case NPC_TOMB_FIEND:
         case NPC_TOMB_REAVER:
             m_lSpawnedMobsList.push_back(pCreature->GetObjectGuid());
-            return;
     }
 }
 

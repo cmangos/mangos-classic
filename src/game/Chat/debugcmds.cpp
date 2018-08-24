@@ -595,14 +595,14 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
                             PSendSysMessage("%s in bag %u at slot %u has a queuepos (%d) that points to %s in the queue (bag %u slot %u)",
                                             item2->GetGuidStr().c_str(), uint32(bag->GetSlot()), uint32(item2->GetSlot()), uint32(qp),
                                             updateQueue[qp]->GetGuidStr().c_str(), uint32(updateQueue[qp]->GetBagSlot()), uint32(updateQueue[qp]->GetSlot()));
-                            error = true; continue;
+                            error = true;
                         }
                     }
                     else if (item2->GetState() != ITEM_UNCHANGED)
                     {
                         PSendSysMessage("%s in bag %u at slot %u is not in queue but should be (state: %d)!",
                                         item2->GetGuidStr().c_str(), uint32(bag->GetSlot()), uint32(item2->GetSlot()), item2->GetState());
-                        error = true; continue;
+                        error = true;
                     }
                 }
             }
@@ -643,7 +643,7 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
                 PSendSysMessage("queue(" SIZEFMTD "): %s has incorrect (bag %u slot %u) values, the %s is there instead!",
                                 i, item->GetGuidStr().c_str(), uint32(item->GetBagSlot()), uint32(item->GetSlot()),
                                 test->GetGuidStr().c_str());
-                error = true; continue;
+                error = true;
             }
         }
         if (!error)

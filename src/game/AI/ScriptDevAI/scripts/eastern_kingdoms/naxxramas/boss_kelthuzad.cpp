@@ -390,7 +390,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                         case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
                         case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
                         case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
-                    };
+                    }
                 }
                 else
                     m_uiPhase1Timer -= uiDiff;

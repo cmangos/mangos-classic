@@ -36,7 +36,7 @@ namespace MaNGOS
             GeneralLock(MUTEX& m)
                 : i_mutex(m)
             {
-                i_mutex.lock();;
+                i_mutex.lock();
             }
 
             ~GeneralLock()

@@ -218,7 +218,6 @@ void npc_escortAI::SetCurrentWaypoint(uint32 pointId)
     if (!m_creature->GetMotionMaster()->SetNextWaypoint(pointId))
     {
         script_error_log("EscortAI for %s current waypoint tried to set to id %u, but doesn't exist in this path", m_creature->GetGuidStr().c_str(), pointId);
-        return;
     }
 }
 

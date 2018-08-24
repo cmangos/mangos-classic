@@ -529,7 +529,7 @@ void Spell::FillTargetMap()
                                 case SPELL_EFFECT_SUMMON_PLAYER: // guessed based on 7720 sniff data
                                     SetTargetMap(SpellEffectIndex(i), TARGET_DUELVSPLAYER, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                                     break;
-                                case SPELL_EFFECT_LEARN_PET_SPELL: // Always targets pet supplied from client             
+                                case SPELL_EFFECT_LEARN_PET_SPELL: // Always targets pet supplied from client
                                     SetTargetMap(SpellEffectIndex(i), TARGET_PET, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]); // No spell like this exists, guesswork
                                     break;
                                 case SPELL_EFFECT_DUMMY:
@@ -778,7 +778,6 @@ void Spell::FillTargetMap()
             if (!CheckTarget(*itr, SpellEffectIndex(i), effException[effToIndex[i]]))
             {
                 itr = tmpUnitLists[effToIndex[i]].erase(itr);
-                continue;
             }
             else
                 ++itr;
@@ -1337,7 +1336,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             m_caster->AddDelayedHolderDueToProc(m_spellAuraHolder);
         else
             m_spellAuraHolder->SetState(SPELLAURAHOLDER_STATE_READY);
-    }        
+    }
 }
 
 void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
@@ -2329,7 +2328,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                 //if target and caster are members in the same group then apply member only filtering
                 //in regards to mc by player concerns the mc'ed player has simple toolbar thus chain heal not available
-                //TODO: in regards to mc by npc concerns this is something that needs to be answered 
+                //TODO: in regards to mc by npc concerns this is something that needs to be answered
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 {
                     if (Group* casterGroup = static_cast<Player*>(m_caster)->GetGroup())
@@ -2371,7 +2370,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 if (tempTargetUnitMap.empty())
                     break;
 
-                //remove root target unit since it already defaults to the first target 
+                //remove root target unit since it already defaults to the first target
                 tempTargetUnitMap.remove(pUnitTarget);
 
                 targetUnitMap.push_back(pUnitTarget);
@@ -3236,7 +3235,6 @@ void Spell::_handle_immediate_phase()
         if (m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT && !HaveTargetsForEffect(SpellEffectIndex(j)))
         {
             HandleEffects(nullptr, nullptr, nullptr, SpellEffectIndex(j));
-            continue;
         }
     }
 
@@ -5660,7 +5658,6 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
             else if (m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT_COORDINATES)
             {
                 script = true;
-                continue;
             }
         }
         if (need)
@@ -6090,7 +6087,6 @@ SpellCastResult Spell::CheckItems()
                     if (m_targets.getUnitTarget()->GetPower(power) == m_targets.getUnitTarget()->GetMaxPower(power))
                     {
                         failReason = SPELL_FAILED_ALREADY_AT_FULL_POWER;
-                        continue;
                     }
                     else
                     {
@@ -6185,7 +6181,6 @@ SpellCastResult Spell::CheckItems()
                 if (p_caster->HasItemCount(m_spellInfo->Totem[i], 1))
                 {
                     totems -= 1;
-                    continue;
                 }
             }
             else
@@ -6205,7 +6200,6 @@ SpellCastResult Spell::CheckItems()
                 if (p_caster->HasItemTotemCategory(m_spellInfo->TotemCategory[i]))
                 {
                     TotemCategory -= 1;
-                    continue;
                 }
             }
             else
@@ -6311,7 +6305,8 @@ SpellCastResult Spell::CheckItems()
                         uint32 ammo = pItem->GetEntry();
                         if (!((Player*)m_caster)->HasItemCount(ammo, 1))
                             return SPELL_FAILED_NO_AMMO;
-                    };  break;
+                    }
+                    break;
                     case ITEM_SUBCLASS_WEAPON_GUN:
                     case ITEM_SUBCLASS_WEAPON_BOW:
                     case ITEM_SUBCLASS_WEAPON_CROSSBOW:
@@ -6351,7 +6346,8 @@ SpellCastResult Spell::CheckItems()
 
                         if (!((Player*)m_caster)->HasItemCount(ammo, 1))
                             return SPELL_FAILED_NO_AMMO;
-                    };  break;
+                    }
+                        break;
                     case ITEM_SUBCLASS_WEAPON_WAND:
                         break;
                     default:

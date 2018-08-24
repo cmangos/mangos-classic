@@ -68,7 +68,6 @@ void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
             break;
         case NPC_KALDOREI_ELITE:
             m_lKaldoreiGuidList.push_back(pCreature->GetObjectGuid());
-            return;
     }
 }
 

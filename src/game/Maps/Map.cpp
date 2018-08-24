@@ -125,7 +125,7 @@ void Map::InitVisibilityDistance()
 template<class T>
 void Map::AddToGrid(T* obj, NGridType* grid, Cell const& cell)
 {
-    (*grid)(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj);
+    (*grid)(cell.CellX(), cell.CellY()).AddGridObject<T>(obj);
 }
 
 template<>
@@ -169,7 +169,7 @@ void Map::AddToGrid(Creature* obj, NGridType* grid, Cell const& cell)
 template<class T>
 void Map::RemoveFromGrid(T* obj, NGridType* grid, Cell const& cell)
 {
-    (*grid)(cell.CellX(), cell.CellY()).template RemoveGridObject<T>(obj);
+    (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject<T>(obj);
 }
 
 template<>
@@ -2025,7 +2025,6 @@ void Map::MonsterYellToMap(ObjectGuid guid, int32 textId, ChatMsg chatMsg, Langu
     else
     {
         sLog.outError("Map::MonsterYellToMap: Called for non creature guid: %s", guid.GetString().c_str());
-        return;
     }
 }
 

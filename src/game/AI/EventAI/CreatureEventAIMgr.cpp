@@ -906,28 +906,24 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         if (action.setThrowMask.eventTypeMask & ~((1 << MAXIMAL_AI_EVENT_EVENTAI) - 1))
                         {
                             sLog.outErrorEventAI("Event %u Action %u uses invalid AIEvent-typemask %u (must be smaller than %u)", i, j + 1, action.setThrowMask.eventTypeMask, MAXIMAL_AI_EVENT_EVENTAI << 1);
-                            continue;
                         }
                         break;
                     case ACTION_T_SET_STAND_STATE:
                         if (action.setStandState.standState >= MAX_UNIT_STAND_STATE)
                         {
                             sLog.outErrorEventAI("Event %u Action %u uses invalid unit stand state %u (must be smaller than %u)", i, j + 1, action.setStandState.standState, MAX_UNIT_STAND_STATE);
-                            continue;
                         }
                         break;
                     case ACTION_T_CHANGE_MOVEMENT:
                         if (action.changeMovement.movementType >= MAX_DB_MOTION_TYPE)
                         {
                             sLog.outErrorEventAI("Event %u Action %u uses invalid movement type %u (must be smaller than %u)", i, j + 1, action.changeMovement.movementType, MAX_DB_MOTION_TYPE);
-                            continue;
                         }
                         break;
                     case ACTION_T_SET_REACT_STATE:
                         if (action.setReactState.reactState > REACT_AGGRESSIVE)
                         {
                             sLog.outErrorEventAI("Event %u Action %u uses invalid react state %u (must be smaller than %u)", i, j + 1, action.setReactState.reactState, REACT_AGGRESSIVE);
-                            continue;
                         }
                         break;
                     case ACTION_T_PAUSE_WAYPOINTS:
@@ -936,7 +932,6 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         if (action.interruptSpell.currentSpellType >= CURRENT_MAX_SPELL)
                         {
                             sLog.outErrorEventAI("Event %u Action %u uses invalid current spell type %u (must be smaller or equal to %u)", i, j + 1, action.interruptSpell.currentSpellType, CURRENT_MAX_SPELL - 1);
-                            continue;
                         }
                         break;
                     case ACTION_T_START_RELAY_SCRIPT:
@@ -945,7 +940,6 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             if (sRelayScripts.second.find(action.relayScript.relayId) == sRelayScripts.second.end())
                             {
                                 sLog.outErrorEventAI("Event %u Action %u references invalid dbscript_on_relay id %u", i, j + 1, action.relayScript.relayId);
-                                continue;
                             }
                         }
                         else

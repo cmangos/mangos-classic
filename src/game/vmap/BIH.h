@@ -214,7 +214,6 @@ class BIH
                             ++stackPos;
                             // update ray interval for front node
                             intervalMax = (tf <= intervalMax) ? tf : intervalMax;
-                            continue;
                         }
                         else
                         {
@@ -241,7 +240,6 @@ class BIH
                         intervalMax = (tb <= intervalMax) ? tb : intervalMax;
                         if (intervalMin > intervalMax)
                             break;
-                        continue;
                     }
                 } // traversal loop
                 do
@@ -306,7 +304,6 @@ class BIH
                             // push back right node
                             stack[stackPos].node = right;
                             ++stackPos;
-                            continue;
                         }
                         else
                         {
@@ -330,7 +327,6 @@ class BIH
                         node = offset;
                         if (tl > p[axis] || tr < p[axis])
                             break;
-                        continue;
                     }
                 } // traversal loop
 

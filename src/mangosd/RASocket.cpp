@@ -200,7 +200,7 @@ bool RASocket::HandleInput()
         default:
             return false;
             ///</ul>
-    };
+    }
 
     m_input.clear();
 

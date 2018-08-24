@@ -177,7 +177,7 @@ void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
 
     creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
 
-    WaypointNode const& nextNode = currPoint->second;;
+    WaypointNode const& nextNode = currPoint->second;
     Movement::MoveSplineInit init(creature);
     init.MoveTo(nextNode.x, nextNode.y, nextNode.z, true);
 

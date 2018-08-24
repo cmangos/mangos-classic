@@ -1632,7 +1632,7 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 target, Unit* actionInvoker
         default:
             isError = true;
             return nullptr;
-    };
+    }
 }
 
 void CreatureEventAI::DoFindFriendlyCC(std::list<Creature*>& list, float range) const

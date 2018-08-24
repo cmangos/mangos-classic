@@ -2386,7 +2386,6 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                 return;
 
             caster->CastSpell(target, spellInfo, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-            return;
         }
     }
 }
@@ -3536,7 +3535,7 @@ void Aura::HandleAuraModParryPercent(bool apply, bool /*Real*/)
     {
         target->m_modParryChance += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
         return;
-    };
+    }
 
     ((Player*)target)->UpdateParryPercentage();
 }

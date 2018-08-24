@@ -251,7 +251,6 @@ void PetAI::UpdateAI(const uint32 diff)
                 if (inCombat && spell->CanAutoCast(victim))
                 {
                     targetSpellStore.push_back(TargetSpellList::value_type(victim, spell));
-                    continue;
                 }
                 else
                 {

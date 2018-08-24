@@ -442,7 +442,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                         SetGoState(GO_STATE_READY);
                         m_lootState = GO_READY;
                         m_rearmTimer = 0;
-                    };
+                    }
                     break;
                 case GAMEOBJECT_TYPE_GOOBER:
                     if (m_cooldownTime < time(nullptr))

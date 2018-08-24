@@ -626,7 +626,6 @@ void WorldSession::HandleBuybackItem(WorldPacket& recv_data)
         }
         else
             _player->SendEquipError(msg, pItem, nullptr);
-        return;
     }
     else
         _player->SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, 0, 0);
@@ -1047,7 +1046,6 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket& recv_data)
         data << name;
         data << uint32(pProto->InventoryType);
         SendPacket(data);
-        return;
     }
     else
         sLog.outError("WORLD: CMSG_ITEM_NAME_QUERY for item %u failed (unknown item)", itemid);

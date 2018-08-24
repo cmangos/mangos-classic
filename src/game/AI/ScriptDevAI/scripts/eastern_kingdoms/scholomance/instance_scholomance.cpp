@@ -155,7 +155,6 @@ void instance_scholomance::DoRespawnEntranceRoom(Player* pSummoner)
     m_bIsRoomReset = true;
 
     debug_log("SD2: Entrance room in Scholomance reset after Rattlegore's death");
-    return;
 }
 
 void instance_scholomance::SetData(uint32 uiType, uint32 uiData)

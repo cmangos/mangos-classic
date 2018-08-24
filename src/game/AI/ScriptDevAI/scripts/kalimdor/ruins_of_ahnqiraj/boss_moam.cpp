@@ -125,7 +125,6 @@ struct boss_moamAI : public ScriptedAI
                         DoCastSpellIfCan(m_creature, SPELL_ARCANE_ERUPTION);
                         DoScriptText(EMOTE_MANA_FULL, m_creature);
                         m_uiPhase = PHASE_ATTACKING;
-                        return;
                     }
                 }
                 else

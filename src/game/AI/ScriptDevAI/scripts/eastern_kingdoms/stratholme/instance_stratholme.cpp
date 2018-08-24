@@ -801,8 +801,6 @@ void instance_stratholme::DoSpawnScarletGuards(uint8 uiStep, Player* pSummoner)
             pTemp->GetMotionMaster()->MovePoint(0, aScarletGuards[uiIndex + i + 1].m_fX, aScarletGuards[uiIndex + i + 1].m_fY, aScarletGuards[uiIndex + i + 1].m_fZ);
         }
     }
-
-    return;
 }
 
 void instance_stratholme::DoSpawnScourgeInvaders(uint8 uiStep, Player* pSummoner)
@@ -851,8 +849,6 @@ void instance_stratholme::DoSpawnScourgeInvaders(uint8 uiStep, Player* pSummoner
             pTemp->GetMotionMaster()->MovePoint(0, fTargetPosX, fTargetPosY, fTargetPosZ);
         }
     }
-
-    return;
 }
 
 void instance_stratholme::DoMoveBackDefenders(uint8 uiStep, Creature* pCreature)
@@ -894,8 +890,6 @@ void instance_stratholme::DoMoveBackDefenders(uint8 uiStep, Creature* pCreature)
         if (uiFoundGuards == 3)
             return;
     }
-
-    return;
 }
 
 void instance_stratholme::DoScarletBastionDefense(uint8 uiStep, Creature* pCreature)
@@ -926,9 +920,7 @@ void instance_stratholme::DoScarletBastionDefense(uint8 uiStep, Creature* pCreat
         case CRIMSON_THRONE:
             if (Player* pPlayer = GetPlayerInMap())
                 DoSpawnScourgeInvaders(uiStep, pPlayer);
-            return;
     }
-    return;
 }
 
 void instance_stratholme::DoGateTrap(uint8 uiGate)

@@ -96,7 +96,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns1__executeCommand(struct soap* soap)
                 || soap_body_end_out(soap)
                 || soap_envelope_end_out(soap))
             return soap->error;
-    };
+    }
     if (soap_end_count(soap)
             || soap_response(soap, SOAP_OK)
             || soap_envelope_begin_out(soap)

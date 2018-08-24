@@ -632,8 +632,6 @@ void instance_blackwing_lair::InitiateBreath(uint32 uiEventId)
             SetData(TYPE_CHROMA_RBREATH, rightBreath);
         debug_log("SD2 Instance Blackwing Lair: Chromaggus' right breath set to spell %u", GetData(TYPE_CHROMA_RBREATH));
     }
-
-    return;
 }
 
 void instance_blackwing_lair::InitiateDrakonid(uint32 uiEventId)
@@ -669,8 +667,6 @@ void instance_blackwing_lair::InitiateDrakonid(uint32 uiEventId)
             SetData(TYPE_NEFA_RTUNNEL, rightTunnel);
         debug_log("SD2 Instance Blackwing Lair: Nefarian's lair left tunnel set with drakonid spawner %u", GetData(TYPE_NEFA_RTUNNEL));
     }
-
-    return;
 }
 
 void instance_blackwing_lair::CleanupNefarianStage(bool fullCleanup)

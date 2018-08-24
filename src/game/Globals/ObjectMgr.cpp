@@ -966,7 +966,6 @@ void ObjectMgr::LoadCreatureConditionalSpawn()
         if (!cInfoAlliance && !cInfoHorde)
         {
             sLog.outErrorDb("Table `creature_conditional_spawn` has creature (GUID: %u) with non existing alliance creature entry %u and horde creature entry %u, skipped.", spawn->Guid, spawn->EntryAlliance, spawn->EntryHorde);
-            continue;
         }
     }
 
@@ -4289,7 +4288,6 @@ void ObjectMgr::LoadInstanceTemplate()
                 sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: parent point to continent map id %u for instance template %d template, ignored, need be set only for non-continent parents!",
                                 parentEntry->MapID, temp->map);
                 const_cast<InstanceTemplate*>(temp)->parent = 0;
-                continue;
             }
         }
 
@@ -4360,7 +4358,6 @@ void ObjectMgr::LoadWorldTemplate()
         {
             sLog.outErrorDb("ObjectMgr::LoadWorldTemplate: instanceable mapid %d for template!", temp->map);
             sWorldTemplate.EraseEntry(i);
-            continue;
         }
     }
 
@@ -4383,7 +4380,6 @@ void ObjectMgr::LoadConditions()
         {
             sLog.outErrorDb("ObjectMgr::LoadConditions: invalid condition_entry %u, skip", i);
             sConditionStorage.EraseEntry(i);
-            continue;
         }
     }
 
@@ -6552,7 +6548,6 @@ void ObjectMgr::LoadReputationSpilloverTemplate()
                 if (repTemplate.faction_rank[i] >= MAX_REPUTATION_RANK)
                 {
                     sLog.outErrorDb("Rank %u used in `reputation_spillover_template` for spillover faction %u is not valid, skipping", repTemplate.faction_rank[i], repTemplate.faction[i]);
-                    continue;
                 }
             }
         }

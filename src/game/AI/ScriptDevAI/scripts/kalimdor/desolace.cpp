@@ -501,8 +501,6 @@ struct npc_cork_gizeltonAI : public ScriptedAI
                 }
                 break;
         }
-
-        return;
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
