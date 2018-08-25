@@ -518,7 +518,7 @@ bool ThreatManager::HasThreat(Unit * victim, bool alsoSearchOfflineList)
     HostileReference* ref = iThreatContainer.getReferenceByTarget(victim);
     if (!ref && alsoSearchOfflineList)
         ref = iThreatOfflineContainer.getReferenceByTarget(victim);
-    return bool(ref);
+    return ref != nullptr;
 }
 
 //============================================================

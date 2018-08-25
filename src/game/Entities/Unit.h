@@ -2516,7 +2516,7 @@ struct TargetDistanceOrderNear : public std::binary_function<Unit const, Unit co
     // functor for operator ">"
     bool operator()(Unit const* _Left, Unit const* _Right) const
     {
-        return m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc);
+        return m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc != 0);
     }
 };
 
@@ -2530,7 +2530,7 @@ struct TargetDistanceOrderFarAway : public std::binary_function<Unit const, Unit
     // functor for operator "<"
     bool operator()(Unit const* _Left, Unit const* _Right) const
     {
-        return !m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc);
+        return !m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc != 0);
     }
 };
 
@@ -2544,7 +2544,7 @@ struct LowestHPNearestOrder : public std::binary_function<Unit const, Unit const
     bool operator()(Unit const* _Left, Unit const* _Right) const
     {
         if (_Left->GetHealthPercent() == _Right->GetHealthPercent())
-            return m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc);
+            return m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc != 0);
         return _Left->GetHealthPercent() < _Right->GetHealthPercent();
     }
 };

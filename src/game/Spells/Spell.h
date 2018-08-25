@@ -478,7 +478,7 @@ class Spell
 
         bool IsNeedSendToClient() const;                    // use for hide spell cast for client in case when cast not have client side affect (animation or log entries)
         bool IsTriggeredSpellWithRedundantCastTime() const; // use for ignore some spell data for triggered spells like cast time, some triggered spells have redundent copy data from main spell for client use purpose
-        bool IsTriggeredByAura() const { return m_triggeredByAuraSpell; }
+        bool IsTriggeredByAura() const { return m_triggeredByAuraSpell != nullptr; }
 
         CurrentSpellTypes GetCurrentContainer() const;
 

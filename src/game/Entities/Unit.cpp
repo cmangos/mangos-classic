@@ -2905,7 +2905,7 @@ uint32 Unit::CalculateGlanceAmount(CalcDamageInfo* meleeInfo) const
     if (difference < 0)
         return meleeInfo->totalDamage;
     // calculate base values and mods
-    const bool caster = (getClassMask() & CLASSMASK_WAND_USERS);
+    const bool caster = (getClassMask() & CLASSMASK_WAND_USERS) != 0;
     const float baseHighEnd = (caster ? 0.9f : 1.2f);
     const float baseLowEnd = (caster ? 0.6f : 1.3f);
     const float maxLowEnd = (caster ? 0.6f : 0.91f);
@@ -9334,8 +9334,8 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
         return;
 
     const bool movement = (state != UNIT_FLAG_STUNNED);
-    const bool stun = (state & UNIT_FLAG_STUNNED);
-    const bool fleeing = (state & UNIT_FLAG_FLEEING);
+    const bool stun = (state & UNIT_FLAG_STUNNED) != 0;
+    const bool fleeing = (state & UNIT_FLAG_FLEEING) != 0;
 
     if (apply)
     {
