@@ -685,11 +685,11 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
 
     if (petUnit->HasCharmer())
         // state can be used as boolean
-        petUnit->GetCharmInfo()->ToggleCreatureAutocast(spellid, !!state);
+        petUnit->GetCharmInfo()->ToggleCreatureAutocast(spellid, state != 0);
     else if (pet)
-        pet->ToggleAutocast(spellid, !!state);
+        pet->ToggleAutocast(spellid, state != 0);
 
-    charmInfo->SetSpellAutocast(spellid, !!state);
+    charmInfo->SetSpellAutocast(spellid, state != 0);
 }
 
 void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)

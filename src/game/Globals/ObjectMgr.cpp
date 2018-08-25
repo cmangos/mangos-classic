@@ -7589,7 +7589,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                 sLog.outErrorDb("CONDITION_COMPLETED_ENCOUNTER (entry %u, DungeonEncounterEntry %u) is used on wrong map (used on Map %u) by %s", m_entry, m_value1, player->GetMapId(), player->GetGuidStr().c_str());
                 return false;
             }
-            return !!(completedEncounterMask & ((dbcEntry1 ? 1 << dbcEntry1->encounterIndex : 0) | (dbcEntry2 ? 1 << dbcEntry2->encounterIndex : 0)));
+            return (completedEncounterMask & ((dbcEntry1 ? 1 << dbcEntry1->encounterIndex : 0) | (dbcEntry2 ? 1 << dbcEntry2->encounterIndex : 0))) != 0;
         }
         case CONDITION_SOURCE_AURA:
         {
@@ -7656,7 +7656,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(creature, creature_check);
             Cell::VisitGridObjects(player, searcher, m_value2);
 
-            return !!creature;
+            return creature != nullptr;
         }
         case CONDITION_SPAWN_COUNT:
             return source->GetMap()->SpawnedCountForEntry(m_value1) >= m_value2;

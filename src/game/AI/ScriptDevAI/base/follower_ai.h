@@ -44,7 +44,7 @@ class FollowerAI : public ScriptedAI
         void SetFollowPaused(bool paused);                 // if special event require follow mode to hold/resume during the follow
         void SetFollowComplete(bool withEndEvent = false);
 
-        bool HasFollowState(uint32 followState) const { return !!(m_followState & followState); }
+        bool HasFollowState(uint32 followState) const { return (m_followState & followState) != 0; }
 
         bool AssistPlayerInCombat(Unit* who) override;
 

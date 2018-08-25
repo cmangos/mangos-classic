@@ -130,21 +130,21 @@ class Channel
             ObjectGuid player;
             uint8 flags;
 
-            bool HasFlag(uint8 flag) const { return !!(flags & flag); }
+            bool HasFlag(uint8 flag) const { return (flags & flag) != 0; }
             void SetFlag(uint8 flag) { if (!HasFlag(flag)) flags |= flag; }
-            bool IsOwner() { return flags & MEMBER_FLAG_OWNER; }
+            bool IsOwner() const { return (flags & MEMBER_FLAG_OWNER) != 0; }
             void SetOwner(bool state)
             {
                 if (state) flags |= MEMBER_FLAG_OWNER;
                 else flags &= ~MEMBER_FLAG_OWNER;
             }
-            bool IsModerator() const { return !!(flags & MEMBER_FLAG_MODERATOR); }
+            bool IsModerator() const { return (flags & MEMBER_FLAG_MODERATOR) != 0; }
             void SetModerator(bool state)
             {
                 if (state) flags |= MEMBER_FLAG_MODERATOR;
                 else flags &= ~MEMBER_FLAG_MODERATOR;
             }
-            bool IsMuted() const { return !!(flags & MEMBER_FLAG_MUTED); }
+            bool IsMuted() const { return (flags & MEMBER_FLAG_MUTED) != 0; }
             void SetMuted(bool state)
             {
                 if (state) flags |= MEMBER_FLAG_MUTED;
@@ -158,13 +158,13 @@ class Channel
         uint32 GetChannelId() const { return m_channelId; }
         bool IsConstant() const { return m_channelId != 0; }
         bool IsAnnounce() const { return m_announce; }
-        bool IsLFG() const { return !!(GetFlags() & CHANNEL_FLAG_LFG); }
+        bool IsLFG() const { return (GetFlags() & CHANNEL_FLAG_LFG) != 0; }
         std::string GetPassword() const { return m_password; }
         void SetPassword(const std::string& npassword) { m_password = npassword; }
         void SetAnnounce(bool nannounce) { m_announce = nannounce; }
         uint32 GetNumPlayers() const { return m_players.size(); }
         uint8 GetFlags() const { return m_flags; }
-        bool HasFlag(uint8 flag) const { return !!(m_flags & flag); }
+        bool HasFlag(uint8 flag) const { return (m_flags & flag) != 0; }
 
         void Join(Player* player, const char* password);
         void Leave(Player* player, bool send = true);

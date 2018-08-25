@@ -612,7 +612,7 @@ class MovementInfo
         // Movement flags manipulations
         void AddMovementFlag(MovementFlags f) { moveFlags |= f; }
         void RemoveMovementFlag(MovementFlags f) { moveFlags &= ~f; }
-        bool HasMovementFlag(MovementFlags f) const { return !!(moveFlags & f); }
+        bool HasMovementFlag(MovementFlags f) const { return (moveFlags & f) != 0; }
         MovementFlags GetMovementFlags() const { return MovementFlags(moveFlags); }
         void SetMovementFlags(MovementFlags f) { moveFlags = f; }
 
@@ -1343,7 +1343,7 @@ class Unit : public WorldObject
         void SendMeleeAttackStart(Unit* pVictim) const;
 
         void addUnitState(uint32 f) { m_state |= f; }
-        bool hasUnitState(uint32 f) const { return !!(m_state & f); }
+        bool hasUnitState(uint32 f) const { return (m_state & f) != 0; }
         void clearUnitState(uint32 f) { m_state &= ~f; }
         bool CanFreeMove() const { return !hasUnitState(UNIT_STAT_NO_FREE_MOVE) && !GetOwnerGuid(); }
 
@@ -2106,7 +2106,7 @@ class Unit : public WorldObject
         {
             m_lastManaUseTimer = 5000;
         }
-        bool IsUnderLastManaUseEffect() const { return !!m_lastManaUseTimer; }
+        bool IsUnderLastManaUseEffect() const { return m_lastManaUseTimer != 0; }
 
         void SetContestedPvP(Player* attackedPlayer = nullptr);
 

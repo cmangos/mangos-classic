@@ -645,7 +645,7 @@ bool Unit::UpdateMeleeAttackingState()
         player->SwingErrorMsg(swingError);
     }
 
-    return !!swingError;
+    return swingError != 0;
 }
 
 bool Unit::haveOffhandWeapon() const
@@ -654,7 +654,7 @@ bool Unit::haveOffhandWeapon() const
         return false;
 
     if (GetTypeId() == TYPEID_PLAYER)
-        return !!((Player*)this)->GetWeaponForAttack(OFF_ATTACK, true, true);
+        return ((Player*)this)->GetWeaponForAttack(OFF_ATTACK, true, true) != 0;
 
     uint8 itemClass = GetByteValue(UNIT_VIRTUAL_ITEM_INFO + (1 * 2) + 0, VIRTUAL_ITEM_INFO_0_OFFSET_CLASS);
     if (itemClass == ITEM_CLASS_WEAPON)
@@ -5520,7 +5520,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
             // if faction have reputation then hostile state for tester at 100% dependent from at_war state
             if (FactionEntry const* raw_target_faction = sFactionStore.LookupEntry(target_faction->faction))
                 if (FactionState const* factionState = ((Player*)tester)->GetReputationMgr().GetState(raw_target_faction))
-                    return !!(factionState->Flags & FACTION_FLAG_AT_WAR);
+                    return (factionState->Flags & FACTION_FLAG_AT_WAR) != 0;
         }
     }
     // CvP forced reaction and reputation case

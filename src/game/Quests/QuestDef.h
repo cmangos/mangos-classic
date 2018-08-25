@@ -237,8 +237,8 @@ class Quest
         uint32 GetQuestStartScript() const { return QuestStartScript; }
         uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
 
-        bool   IsRepeatable() const { return m_SpecialFlags & QUEST_SPECIAL_FLAG_REPEATABLE; }
-        bool   IsAutoComplete() const { return QuestMethod ? false : true; }
+        bool   IsRepeatable() const { return (m_SpecialFlags & QUEST_SPECIAL_FLAG_REPEATABLE) != 0; }
+        bool   IsAutoComplete() const { return !QuestMethod; }
         bool   IsAllowedInRaid() const;
 
         // quest can be fully deactivated and will not be available for any player

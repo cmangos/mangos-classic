@@ -84,8 +84,8 @@ namespace Movement
 
             // Constant interface
 
-            bool isSmooth() const { return !!(raw() & Mask_CatmullRom); }
-            bool isFacing() const { return !!(raw() & Mask_Final_Facing); }
+            bool isSmooth() const { return (raw() & Mask_CatmullRom) != 0;}
+            bool isFacing() const { return (raw() & Mask_Final_Facing) != 0;}
 
             bool hasAllFlags(uint32 f) const { return (raw() & f) == f;}
             uint32 operator & (uint32 f) const { return (raw() & f);}

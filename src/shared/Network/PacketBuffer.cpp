@@ -31,7 +31,7 @@ void PacketBuffer::Read(char* buffer, int length)
 {
     assert(ReadLengthRemaining() >= length);
 
-    if (!!buffer)
+    if (buffer)
         memcpy(buffer, &m_buffer[m_readPosition], length);
 
     m_readPosition += length;
@@ -39,7 +39,7 @@ void PacketBuffer::Read(char* buffer, int length)
 
 void PacketBuffer::Write(const char* buffer, int length)
 {
-    assert(!!buffer && !!length);
+    assert(buffer != nullptr && length != 0);
 
     const size_t newLength = m_writePosition + length;
 

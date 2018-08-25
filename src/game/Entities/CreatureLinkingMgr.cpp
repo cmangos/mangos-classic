@@ -283,7 +283,7 @@ bool CreatureLinkingMgr::IsLinkedEventTrigger(Creature* pCreature) const
 
     // Also return true for npcs that trigger reverse actions, or for followers(needed in respawn)
     if (CreatureLinkingInfo const* pInfo = GetLinkedTriggerInformation(pCreature))
-        return !!(pInfo->linkingFlag & EVENT_MASK_TRIGGER_TO);
+        return (pInfo->linkingFlag & EVENT_MASK_TRIGGER_TO) != 0;
 
     return false;
 }

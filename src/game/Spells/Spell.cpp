@@ -378,14 +378,14 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
 
     m_needAliveTargetMask = 0;
 
-    m_ignoreHitResult = !!(triggeredFlags & TRIGGERED_IGNORE_HIT_CALCULATION);
-    m_ignoreUnselectableTarget = (m_IsTriggeredSpell | !!(triggeredFlags & TRIGGERED_IGNORE_UNSELECTABLE_FLAG));
-    m_ignoreCastTime = !!(triggeredFlags & TRIGGERED_INSTANT_CAST);
-    m_ignoreUnattackableTarget = !!(triggeredFlags & TRIGGERED_IGNORE_UNATTACKABLE_FLAG);
-    m_triggerAutorepeat = !!(triggeredFlags & TRIGGERED_AUTOREPEAT);
+    m_ignoreHitResult = (triggeredFlags & TRIGGERED_IGNORE_HIT_CALCULATION) != 0;
+    m_ignoreUnselectableTarget = (m_IsTriggeredSpell | (triggeredFlags & TRIGGERED_IGNORE_UNSELECTABLE_FLAG) != 0);
+    m_ignoreCastTime = (triggeredFlags & TRIGGERED_INSTANT_CAST) != 0;
+    m_ignoreUnattackableTarget = (triggeredFlags & TRIGGERED_IGNORE_UNATTACKABLE_FLAG) != 0;
+    m_triggerAutorepeat = (triggeredFlags & TRIGGERED_AUTOREPEAT) != 0;
     m_doNotProc = triggeredFlags & TRIGGERED_DO_NOT_PROC;
-    m_petCast = !!(triggeredFlags & TRIGGERED_PET_CAST);
-    m_notifyAI = !!(triggeredFlags & TRIGGERED_NORMAL_COMBAT_CAST);
+    m_petCast = (triggeredFlags & TRIGGERED_PET_CAST) != 0;
+    m_notifyAI = (triggeredFlags & TRIGGERED_NORMAL_COMBAT_CAST) != 0;
 
     m_reflectable = IsReflectableSpell(m_spellInfo);
 
@@ -1393,7 +1393,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
     }
 
     // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
-    m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, !!m_triggeredByAuraSpell || (m_IsTriggeredSpell && m_CastItem));
+    m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell != nullptr || (m_IsTriggeredSpell && m_CastItem));
     m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
     // Increase Diminishing on unit, current informations for actually casts will use values above
     if ((GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) ||

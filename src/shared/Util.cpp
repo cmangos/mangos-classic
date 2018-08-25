@@ -261,7 +261,7 @@ bool IsIPAddress(char const* ipaddress)
     // Drawback: all valid ip address formats are recognized e.g.: 12.23,121234,0xABCD)
     boost::system::error_code ec;
     boost::asio::ip::address::from_string(ipaddress, ec);
-    return !!ec;
+    return ec != nullptr;
 }
 
 /// create PID file

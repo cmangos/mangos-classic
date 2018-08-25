@@ -1110,10 +1110,10 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         }
         case ACTION_T_DYNAMIC_MOVEMENT:
         {
-            if ((!!action.dynamicMovement.state) == m_DynamicMovement)
+            if ((action.dynamicMovement.state != 0) == m_DynamicMovement)
                 break;
 
-            m_DynamicMovement = !!action.dynamicMovement.state;
+            m_DynamicMovement = action.dynamicMovement.state != 0;
             SetCombatMovement(!m_DynamicMovement, true);
             break;
         }

@@ -719,14 +719,14 @@ struct SpellEntry
             return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(mask);
         }
 
-        bool HasAttribute(SpellAttributes attribute) const { return !!(Attributes & attribute); }
-        bool HasAttribute(SpellAttributesEx attribute) const { return !!(AttributesEx & attribute); }
-        bool HasAttribute(SpellAttributesEx2 attribute) const { return !!(AttributesEx2 & attribute); }
-        bool HasAttribute(SpellAttributesEx3 attribute) const { return !!(AttributesEx3 & attribute); }
-        bool HasAttribute(SpellAttributesEx4 attribute) const { return !!(AttributesEx4 & attribute); }
+        inline bool HasAttribute(SpellAttributes attribute) const { return (Attributes & attribute) != 0; }
+        inline bool HasAttribute(SpellAttributesEx attribute) const { return (AttributesEx & attribute) != 0; }
+        inline bool HasAttribute(SpellAttributesEx2 attribute) const { return (AttributesEx2 & attribute) != 0; }
+        inline bool HasAttribute(SpellAttributesEx3 attribute) const { return (AttributesEx3 & attribute) != 0; }
+        inline bool HasAttribute(SpellAttributesEx4 attribute) const { return (AttributesEx4 & attribute) != 0; }
 
         // custom
-        bool HasAttribute(SpellAttributesServerside attribute) const { return !!(AttributesServerside & attribute); }
+        bool HasAttribute(SpellAttributesServerside attribute) const { return (AttributesServerside & attribute) != 0; }
 
     private:
         // prevent creating custom entries (copy data from original in fact)

@@ -47,7 +47,7 @@ struct npc_escortAI : public ScriptedAI
         void SetRun(bool run = true);
         void SetEscortPaused(bool paused);
 
-        bool HasEscortState(uint32 escortState) const { return !!(m_escortState & escortState); }
+        bool HasEscortState(uint32 escortState) const { return (m_escortState & escortState) != 0; }
 
         // update current point
         void SetCurrentWaypoint(uint32 pointId);

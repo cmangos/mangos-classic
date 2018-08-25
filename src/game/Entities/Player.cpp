@@ -10372,7 +10372,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
 
 void Player::AddItemToBuyBackSlot(Item* pItem, uint32 money)
 {
-    MANGOS_ASSERT(!!pItem);
+    MANGOS_ASSERT(pItem != nullptr);
 
     uint32 slot = m_currentBuybackSlot;
     // if current back slot non-empty search oldest or free
@@ -18175,7 +18175,7 @@ uint32 Player::GetCorpseReclaimDelay(bool pvp) const
 
 void Player::UpdateCorpseReclaimDelay()
 {
-    const bool pvp = !!(m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH);
+    const bool pvp = (m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH) != 0;
 
     if ((pvp && !sWorld.getConfig(CONFIG_BOOL_DEATH_CORPSE_RECLAIM_DELAY_PVP)) ||
             (!pvp && !sWorld.getConfig(CONFIG_BOOL_DEATH_CORPSE_RECLAIM_DELAY_PVE)))

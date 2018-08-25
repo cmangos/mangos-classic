@@ -97,13 +97,13 @@ void Thread::setPriority(Priority priority)
 
     switch (priority)
     {
-        case Priority_Realtime: _ok = !!SetThreadPriority(handle, THREAD_PRIORITY_TIME_CRITICAL); break;
-        case Priority_Highest: _ok = !!SetThreadPriority(handle, THREAD_PRIORITY_HIGHEST);       break;
-        case Priority_High: _ok = !!SetThreadPriority(handle, THREAD_PRIORITY_ABOVE_NORMAL);  break;
-        case Priority_Normal: _ok = !!SetThreadPriority(handle, THREAD_PRIORITY_NORMAL);        break;
-        case Priority_Low: _ok = !!SetThreadPriority(handle, THREAD_PRIORITY_BELOW_NORMAL);  break;
-        case Priority_Lowest: _ok = !!SetThreadPriority(handle, THREAD_PRIORITY_LOWEST);        break;
-        case Priority_Idle: _ok = !!SetThreadPriority(handle, THREAD_PRIORITY_IDLE);          break;
+        case Priority_Realtime: _ok = SetThreadPriority(handle, THREAD_PRIORITY_TIME_CRITICAL) != 0; break;
+        case Priority_Highest: _ok = SetThreadPriority(handle, THREAD_PRIORITY_HIGHEST) != 0; break;
+        case Priority_High: _ok = SetThreadPriority(handle, THREAD_PRIORITY_ABOVE_NORMAL) != 0; break;
+        case Priority_Normal: _ok = SetThreadPriority(handle, THREAD_PRIORITY_NORMAL) != 0; break;
+        case Priority_Low: _ok = SetThreadPriority(handle, THREAD_PRIORITY_BELOW_NORMAL) != 0; break;
+        case Priority_Lowest: _ok = SetThreadPriority(handle, THREAD_PRIORITY_LOWEST) != 0; break;
+        case Priority_Idle: _ok = SetThreadPriority(handle, THREAD_PRIORITY_IDLE) != 0; break;
     }
 
     /* MaNGOS use priority for Windows case only

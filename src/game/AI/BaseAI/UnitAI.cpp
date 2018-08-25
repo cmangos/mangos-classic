@@ -174,7 +174,7 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
             // Check if cannot cast spell
             if (!(castFlags & (CAST_FORCE_TARGET_SELF | CAST_FORCE_CAST)))
             {
-                CanCastResult castResult = CanCastSpell(target, spellInfo, !!(castFlags & CAST_TRIGGERED));
+                CanCastResult castResult = CanCastSpell(target, spellInfo, (castFlags & CAST_TRIGGERED) != 0);
 
                 if (castResult != CAST_OK)
                     return castResult;

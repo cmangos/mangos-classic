@@ -1802,7 +1802,7 @@ struct SpellTargetEntry
     uint32 targetEntry;
     uint32 inverseEffectMask;
 
-    bool CanNotHitWithSpellEffect(SpellEffectIndex effect) const { return !!(inverseEffectMask & (1 << effect)); }
+    bool CanNotHitWithSpellEffect(SpellEffectIndex effect) const { return (inverseEffectMask & (1 << effect)) != 0; }
 };
 
 // coordinates for spells (accessed using SpellMgr functions)
