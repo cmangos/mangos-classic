@@ -77,7 +77,7 @@ bool Tracker::Load(std::string& string, DestID &destOrphan)
     std::deque<PathID> numbers;
 
     for (auto i = tokens.begin(); i != tokens.end(); ++i)
-        numbers.push_back(uint32(std::stoi(i->c_str())));
+        numbers.push_back(uint32(std::stoi(*i)));
 
     // Try to parse as robustly as possible
     switch (numbers.size())

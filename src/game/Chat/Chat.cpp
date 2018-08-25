@@ -1104,7 +1104,7 @@ ChatCommand const* ChatHandler::FindCommand(char const* text)
  */
 ChatCommandSearchResult ChatHandler::FindCommand(ChatCommand* table, char const*& text, ChatCommand*& command, ChatCommand** parentCommand /*= nullptr*/, std::string* cmdNamePtr /*= nullptr*/, bool allAvailable /*= false*/, bool exactlyName /*= false*/) const
 {
-    std::string cmd = "";
+    std::string cmd;
 
     // skip whitespaces
     while (*text != ' ' && *text != '\0')
@@ -3327,7 +3327,7 @@ void ChatHandler::ShowNpcOrGoSpawnInformation(uint32 guid)
 template <typename T>
 std::string ChatHandler::PrepareStringNpcOrGoSpawnInformation(uint32 guid) const
 {
-    std::string str = "";
+    std::string str;
     if (uint16 pool_id = sPoolMgr.IsPartOfAPool<T>(guid))
     {
         uint16 top_pool_id = sPoolMgr.IsPartOfTopPool<T>(guid);

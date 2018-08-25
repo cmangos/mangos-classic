@@ -587,7 +587,7 @@ class GameObject : public WorldObject
         void UpdateRotationFields(float rotation2 = 0.0f, float rotation3 = 0.0f);
 
         // overwrite WorldObject function for proper name localization
-        const char* GetNameForLocaleIdx(int32 locale_idx) const override;
+        const char* GetNameForLocaleIdx(int32 loc_idx) const override;
 
         void SaveToDB() const;
         void SaveToDB(uint32 mapid) const;
@@ -653,7 +653,7 @@ class GameObject : public WorldObject
         void Use(Unit* user);
 
         LootState GetLootState() const { return m_lootState; }
-        void SetLootState(LootState s);
+        void SetLootState(LootState state);
 
         void AddToSkillupList(Player* player);
         bool IsInSkillupList(Player* player) const;

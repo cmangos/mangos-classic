@@ -248,18 +248,12 @@ struct boss_veknilashAI : public boss_twin_emperorsAI
 
     bool DoHandleBugAbility()
     {
-        if (DoCastSpellIfCan(m_creature, SPELL_MUTATE_BUG) == CAST_OK)
-            return true;
-
-        return false;
+        return DoCastSpellIfCan(m_creature, SPELL_MUTATE_BUG) == CAST_OK;
     }
 
     bool DoHandleBerserk()
     {
-        if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-            return true;
-
-        return false;
+        return DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK;
     }
 
     // Only Vek'nilash handles the teleport for both of them
@@ -369,18 +363,12 @@ struct boss_veklorAI : public boss_twin_emperorsAI
 
     bool DoHandleBugAbility()
     {
-        if (DoCastSpellIfCan(m_creature, SPELL_EXPLODE_BUG) == CAST_OK)
-            return true;
-
-        return false;
+        return DoCastSpellIfCan(m_creature, SPELL_EXPLODE_BUG) == CAST_OK;
     }
 
     bool DoHandleBerserk()
     {
-        if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
-            return true;
-
-        return false;
+        return DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK;
     }
 
     bool UpdateEmperorAI(const uint32 uiDiff)

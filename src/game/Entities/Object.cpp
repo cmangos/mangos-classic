@@ -628,7 +628,7 @@ bool Object::LoadValues(const char* data)
     int index;
     for (iter = tokens.begin(), index = 0; index < m_valuesCount; ++iter, ++index)
     {
-        m_uint32Values[index] = std::stoul((*iter).c_str());
+        m_uint32Values[index] = std::stoul(*iter);
     }
 
     return true;
@@ -2127,9 +2127,7 @@ bool WorldObject::HasGCD(SpellEntry const* spellEntry) const
     if (spellEntry)
     {
         auto gcdItr = m_GCDCatMap.find(spellEntry->StartRecoveryCategory);
-        if (gcdItr != m_GCDCatMap.end())
-            return true;
-        return false;
+        return gcdItr != m_GCDCatMap.end();
     }
 
     return !m_GCDCatMap.empty();

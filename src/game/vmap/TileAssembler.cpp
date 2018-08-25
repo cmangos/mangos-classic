@@ -304,7 +304,7 @@ namespace VMAP
         // write WorldModel
         WorldModel model;
         model.setRootWmoID(raw_model.RootWMOID);
-        if (raw_model.groupsArray.size())
+        if (!raw_model.groupsArray.empty())
         {
             std::vector<GroupModel> groupsArray;
 

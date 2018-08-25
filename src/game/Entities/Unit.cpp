@@ -423,10 +423,10 @@ Unit::~Unit()
     delete movespline;
 
     // those should be already removed at "RemoveFromWorld()" call
-    MANGOS_ASSERT(m_gameObj.size() == 0);
-    MANGOS_ASSERT(m_dynObjGUIDs.size() == 0);
-    MANGOS_ASSERT(m_deletedAuras.size() == 0);
-    MANGOS_ASSERT(m_deletedHolders.size() == 0);
+    MANGOS_ASSERT(m_gameObj.empty());
+    MANGOS_ASSERT(m_dynObjGUIDs.empty());
+    MANGOS_ASSERT(m_deletedAuras.empty());
+    MANGOS_ASSERT(m_deletedHolders.empty());
 }
 
 void Unit::Update(uint32 update_diff, uint32 p_time)
@@ -903,7 +903,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         // proc only once for victim
         if (Unit* owner = GetOwner())
             owner->ProcDamageAndSpell(ProcSystemArguments(pVictim, PROC_FLAG_KILL, PROC_FLAG_NONE, PROC_EX_NONE, 0));
-        
+
         ProcDamageAndSpell(ProcSystemArguments(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0));
 
         // Reward player, his pets, and group/raid members
@@ -3716,7 +3716,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
             {
                 if(!pSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
                     InterruptSpell(CURRENT_CHANNELED_SPELL, false);
-            }            
+            }
 
             // autorepeat breaking
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
@@ -5318,7 +5318,7 @@ bool Unit::CanInitiateAttack() const
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
         if (GetTypeId() != TYPEID_UNIT || (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->GetForceAttackingCapability()))
             return false;
-           
+
     if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->CanAggro())
         return false;
 
@@ -8114,10 +8114,7 @@ bool Unit::SelectHostileTarget()
             if (Unit* target = GetMap()->GetUnit(GetTargetGuid()))
                 SetInFront(target);
 
-        if (AI()->GetCombatScriptStatus() && getThreatManager().isThreatListEmpty())
-            return false;
-
-        return true;
+        return !(AI()->GetCombatScriptStatus() && getThreatManager().isThreatListEmpty());
     }
 
     Unit* target = nullptr;
@@ -9145,9 +9142,9 @@ void CharmInfo::LoadPetActionBar(const std::string& data)
     for (iter = tokens.begin(), index = ACTION_BAR_INDEX_START; index < ACTION_BAR_INDEX_END; ++iter, ++index)
     {
         // use unsigned cast to avoid sign negative format use at long-> ActiveStates (int) conversion
-        uint8 type  = (uint8)std::stoul((*iter).c_str());
+        uint8 type  = (uint8)std::stoul(*iter);
         ++iter;
-        uint32 action = std::stoul((*iter).c_str());
+        uint32 action = std::stoul(*iter);
 
         PetActionBar[index].SetActionAndType(action, ActiveStates(type));
 

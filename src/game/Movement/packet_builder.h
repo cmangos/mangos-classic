@@ -27,11 +27,11 @@ namespace Movement
     class MoveSpline;
     class PacketBuilder
     {
-            static void WriteCommonMonsterMovePart(const MoveSpline& mov, WorldPacket& data);
+            static void WriteCommonMonsterMovePart(const MoveSpline& move_spline, WorldPacket& data);
         public:
 
-            static void WriteMonsterMove(const MoveSpline& mov, WorldPacket& data);
-            static void WriteCreate(const MoveSpline& mov, ByteBuffer& data);
+            static void WriteMonsterMove(const MoveSpline& move_spline, WorldPacket& data);
+            static void WriteCreate(const MoveSpline& move_spline, ByteBuffer& data);
     };
 }
 #endif // MANGOSSERVER_PACKET_BUILDER_H

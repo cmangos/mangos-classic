@@ -28,7 +28,7 @@ static const Locations spawnLocation = {937.213f, -377.967f, -50.346f, 2.578f};
 class instance_maraudon : public ScriptedInstance
 {
     public:
-        instance_maraudon(Map* pMap);
+        instance_maraudon(Map* map);
         ~instance_maraudon() {}
 
         void Initialize() override;

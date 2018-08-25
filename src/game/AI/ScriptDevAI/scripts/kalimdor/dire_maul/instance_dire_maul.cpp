@@ -479,10 +479,7 @@ bool instance_dire_maul::CheckConditionCriteriaMeet(Player const* pPlayer, uint3
 
 bool instance_dire_maul::CheckAllGeneratorsDestroyed()
 {
-    if (m_auiEncounter[TYPE_PYLON_1] != DONE || m_auiEncounter[TYPE_PYLON_2] != DONE || m_auiEncounter[TYPE_PYLON_3] != DONE || m_auiEncounter[TYPE_PYLON_4] != DONE || m_auiEncounter[TYPE_PYLON_5] != DONE)
-        return false;
-
-    return true;
+    return !(m_auiEncounter[TYPE_PYLON_1] != DONE || m_auiEncounter[TYPE_PYLON_2] != DONE || m_auiEncounter[TYPE_PYLON_3] != DONE || m_auiEncounter[TYPE_PYLON_4] != DONE || m_auiEncounter[TYPE_PYLON_5] != DONE);
 }
 
 void instance_dire_maul::ProcessForceFieldOpening()

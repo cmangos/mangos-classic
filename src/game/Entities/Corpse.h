@@ -59,7 +59,7 @@ class Corpse : public WorldObject
         bool Create(uint32 guidlow, Player* owner);
 
         void SaveToDB();
-        bool LoadFromDB(uint32 guid, Field* fields);
+        bool LoadFromDB(uint32 lowguid, Field* fields);
 
         void DeleteBonesFromWorld();
         void DeleteFromDB() const;

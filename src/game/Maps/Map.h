@@ -117,7 +117,7 @@ class Map : public GridRefManager<NGridType>
         template<class T> void Add(T*);
         template<class T> void Remove(T*, bool);
 
-        static void DeleteFromWorld(Player* player);        // player object will deleted at call
+        static void DeleteFromWorld(Player* pl);        // player object will deleted at call
 
         virtual void Update(const uint32&);
 
@@ -138,8 +138,8 @@ class Map : public GridRefManager<NGridType>
         // function for setting up visibility distance for maps on per-type/per-Id basis
         virtual void InitVisibilityDistance();
 
-        void PlayerRelocation(Player*, float x, float y, float z, float angl);
-        void CreatureRelocation(Creature* creature, float x, float y, float z, float orientation);
+        void PlayerRelocation(Player*, float x, float y, float z, float orientation);
+        void CreatureRelocation(Creature* creature, float x, float y, float z, float ang);
 
         template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor);
 
@@ -320,7 +320,7 @@ class Map : public GridRefManager<NGridType>
         void SendInitTransports(Player* player) const;
         void SendRemoveTransports(Player* player) const;
 
-        bool CreatureCellRelocation(Creature* creature, const Cell& new_cell);
+        bool CreatureCellRelocation(Creature* c, const Cell& new_cell);
 
         bool loaded(const GridPair&) const;
         void EnsureGridCreated(const GridPair&);

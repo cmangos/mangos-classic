@@ -567,7 +567,7 @@ class Creature : public Unit
 
         char const* GetSubName() const { return GetCreatureInfo()->SubName; }
 
-        void Update(uint32 update_diff, uint32 time) override;  // overwrite Unit::Update
+        void Update(uint32 update_diff, uint32 diff) override;  // overwrite Unit::Update
 
         virtual void RegenerateAll(uint32 update_diff);
         uint32 GetEquipmentId() const { return m_equipmentId; }
@@ -598,8 +598,8 @@ class Creature : public Unit
         bool IsSwimming() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING); }
         bool CanFly() const override { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_LEVITATING | MOVEFLAG_HOVER | MOVEFLAG_CAN_FLY)); }
         bool IsFlying() const { return m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_FLYING | MOVEFLAG_HOVER | MOVEFLAG_LEVITATING)); }
-        bool IsTrainerOf(Player* player, bool msg) const;
-        bool CanInteractWithBattleMaster(Player* player, bool msg) const;
+        bool IsTrainerOf(Player* pPlayer, bool msg) const;
+        bool CanInteractWithBattleMaster(Player* pPlayer, bool msg) const;
         bool CanTrainAndResetTalentsOf(Player* pPlayer) const;
 
         void FillGuidsListFromThreatList(GuidVector& guids, uint32 maxamount = 0);
@@ -649,7 +649,7 @@ class Creature : public Unit
 
         bool HasSpell(uint32 spellID) const override;
 
-        bool UpdateEntry(uint32 entry, Team team = ALLIANCE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true);
+        bool UpdateEntry(uint32 Entry, Team team = ALLIANCE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true);
 
         void ApplyGameEventSpells(GameEventCreatureData const* eventData, bool activated);
         bool UpdateStats(Stats stat) override;
@@ -684,11 +684,11 @@ class Creature : public Unit
         uint32 GetScriptId() const;
 
         // overwrite WorldObject function for proper name localization
-        const char* GetNameForLocaleIdx(int32 locale_idx) const override;
+        const char* GetNameForLocaleIdx(int32 loc_idx) const override;
 
         void SetDeathState(DeathState s) override;          // overwrite virtual Unit::SetDeathState
 
-        bool LoadFromDB(uint32 guid, Map* map);
+        bool LoadFromDB(uint32 guidlow, Map* map);
         virtual void SaveToDB();
         // overwrited in Pet
         virtual void SaveToDB(uint32 mapid);
@@ -821,7 +821,7 @@ class Creature : public Unit
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 
         bool CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, Team team, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
-        bool InitEntry(uint32 entry, Team team = ALLIANCE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
+        bool InitEntry(uint32 Entry, Team team = ALLIANCE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
 
         uint32 GetCreatureConditionalSpawnEntry(uint32 guidlow, Map* map) const;
 

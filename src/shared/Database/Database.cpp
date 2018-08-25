@@ -484,7 +484,7 @@ bool Database::CheckRequiredField(char const* table_name, char const* required_n
 
         delete result2;
 
-        std::string cur_sql_update_name = reqName.substr(strlen("required_"), reqName.npos);
+        std::string cur_sql_update_name = reqName.substr(strlen("required_"), std::string::npos);
 
         if (!reqName.empty())
         {

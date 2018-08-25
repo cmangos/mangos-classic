@@ -170,7 +170,7 @@ class GridMap
         GridMap();
         ~GridMap();
 
-        bool loadData(char* filaname);
+        bool loadData(char const* filename);
         void unloadData();
 
         static bool ExistMap(uint32 mapid, int gx, int gy);
@@ -222,7 +222,7 @@ class TerrainInfo : public Referencable<std::atomic_long>
         float GetHeightStatic(float x, float y, float z, bool checkVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
         float GetWaterLevel(float x, float y, float z, float* pGround = nullptr) const;
         float GetWaterOrGroundLevel(float x, float y, float z, float* pGround = nullptr, bool swim = false) const;
-        bool IsInWater(float x, float y, float z, GridMapLiquidData* data = nullptr) const;
+        bool IsInWater(float x, float y, float pZ, GridMapLiquidData* data = nullptr) const;
         bool IsSwimmable(float x, float y, float pZ, float radius = 1.5f, GridMapLiquidData* data = nullptr) const;
         bool IsUnderWater(float x, float y, float z) const;
 
@@ -235,7 +235,7 @@ class TerrainInfo : public Referencable<std::atomic_long>
         uint32 GetZoneId(float x, float y, float z) const;
         void GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, float y, float z) const;
 
-        bool GetAreaInfo(float x, float y, float z, uint32& mogpflags, int32& adtId, int32& rootId, int32& groupId) const;
+        bool GetAreaInfo(float x, float y, float z, uint32& flags, int32& adtId, int32& rootId, int32& groupId) const;
         bool IsOutdoors(float x, float y, float z) const;
 
 

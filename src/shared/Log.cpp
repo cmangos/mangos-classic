@@ -241,7 +241,7 @@ void Log::Initialize()
             bool m_gmlog_timestamp = sConfig.GetBoolDefault("GmLogTimestamp", false);
 
             size_t dot_pos = m_gmlog_filename_format.find_last_of('.');
-            if (dot_pos != m_gmlog_filename_format.npos)
+            if (dot_pos != std::string::npos)
             {
                 if (m_gmlog_timestamp)
                     m_gmlog_filename_format.insert(dot_pos, m_logsTimestamp);
@@ -292,7 +292,7 @@ FILE* Log::openLogFile(char const* configFileName, char const* configTimeStampFl
     if (configTimeStampFlag && sConfig.GetBoolDefault(configTimeStampFlag, false))
     {
         size_t dot_pos = logfn.find_last_of('.');
-        if (dot_pos != logfn.npos)
+        if (dot_pos != std::string::npos)
             logfn.insert(dot_pos, m_logsTimestamp);
         else
             logfn += m_logsTimestamp;

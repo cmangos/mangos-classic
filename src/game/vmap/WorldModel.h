@@ -57,7 +57,7 @@ namespace VMAP
             uint8* GetFlagsStorage() const { return iFlags; }
             uint32 GetFileSize() const;
             bool writeToFile(FILE* wf);
-            static bool readFromFile(FILE* rf, WmoLiquid*& liquid);
+            static bool readFromFile(FILE* rf, WmoLiquid*& out);
         private:
             WmoLiquid() : iTilesX(0), iTilesY(0), iType(0), iHeight(nullptr), iFlags(nullptr) {};
             uint32 iTilesX;  //!< number of tiles in x direction, each

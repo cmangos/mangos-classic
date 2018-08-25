@@ -642,11 +642,11 @@ class Spell
         GOTargetList   m_UniqueGOTargetInfo;
         ItemTargetList m_UniqueItemInfo;
 
-        void AddUnitTarget(Unit* target, SpellEffectIndex effIndex, CheckException exception = EXCEPTION_NONE);
+        void AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex, CheckException exception = EXCEPTION_NONE);
         void AddUnitTarget(ObjectGuid unitGuid, SpellEffectIndex effIndex);
-        void AddGOTarget(GameObject* target, SpellEffectIndex effIndex);
+        void AddGOTarget(GameObject* pVictim, SpellEffectIndex effIndex);
         void AddGOTarget(ObjectGuid goGuid, SpellEffectIndex effIndex);
-        void AddItemTarget(Item* target, SpellEffectIndex effIndex);
+        void AddItemTarget(Item* pitem, SpellEffectIndex effIndex);
         void DoAllEffectOnTarget(TargetInfo* target);
         void HandleDelayedSpellLaunch(TargetInfo* target);
         void InitializeDamageMultipliers();
@@ -655,7 +655,7 @@ class Spell
         void DoAllEffectOnTarget(GOTargetInfo* target);
         void DoAllEffectOnTarget(ItemTargetInfo* target);
         bool IsAliveUnitPresentInTargetList();
-        SpellCastResult CanOpenLock(SpellEffectIndex effIndex, uint32 lockid, SkillType& skillid, int32& reqSkillValue, int32& skillValue);
+        SpellCastResult CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, SkillType& skillId, int32& reqSkillValue, int32& skillValue);
         // -------------------------------------------
 
         // List For Triggered Spells

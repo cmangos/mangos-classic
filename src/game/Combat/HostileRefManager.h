@@ -43,7 +43,7 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
         void threatAssist(Unit* victim, float threat, SpellEntry const* threatSpell = nullptr, bool singleTarget = false);
         void threatTemporaryFade(Unit* victim, float threat, bool apply);
 
-        void addThreatPercent(int32 value);
+        void addThreatPercent(int32 threatPercent);
 
         // The references are not needed anymore
         // tell the source to remove them from the list and free the mem

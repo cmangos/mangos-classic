@@ -751,7 +751,7 @@ struct DoSpellProcEvent
         if (!spe.schoolMask && !spe.procFlags &&
                 !spe.procEx && !spe.ppmRate && !spe.customChance && !spe.cooldown)
         {
-            bool empty = !spe.spellFamilyName ? true : false;
+            bool empty = spe.spellFamilyName == 0;
             for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
                 if (spe.spellFamilyMask[i])

@@ -58,7 +58,7 @@ namespace FactorySelector
         else if (creature->IsTotem())
             ai_factory = ai_registry.GetRegistryItem("TotemAI");
         else if (!ainame.empty())           // select by script name
-            ai_factory = ai_registry.GetRegistryItem(ainame.c_str());
+            ai_factory = ai_registry.GetRegistryItem(ainame);
         else if (creature->IsGuard())
             ai_factory = ai_registry.GetRegistryItem("GuardAI");
         else if (creature->IsCritter())

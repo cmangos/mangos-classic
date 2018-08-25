@@ -71,7 +71,7 @@ GridMap::~GridMap()
     unloadData();
 }
 
-bool GridMap::loadData(char* filename)
+bool GridMap::loadData(char const* filename)
 {
     // Unload old data if exist
     unloadData();
@@ -1220,7 +1220,7 @@ void TerrainManager::UnloadTerrain(const uint32 mapId)
     {
         TerrainInfo* ptr = (*iter).second;
         // lets check if this object can be actually freed
-        if (ptr->IsReferenced() == false)
+        if (!ptr->IsReferenced())
         {
             i_TerrainMap.erase(iter);
             delete ptr;

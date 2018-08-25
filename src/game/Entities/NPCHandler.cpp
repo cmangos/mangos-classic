@@ -657,7 +657,7 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
     }
     else
     {
-        SpellCastResult loadResult = Pet::TryLoadFromDB(_player, 0, 0, _player->GetTemporaryUnsummonedPetNumber() ? true : false, HUNTER_PET);
+        SpellCastResult loadResult = Pet::TryLoadFromDB(_player, 0, 0, _player->GetTemporaryUnsummonedPetNumber() != 0, HUNTER_PET);
         if (loadResult != SPELL_CAST_OK)
         {
             if (loadResult == SPELL_FAILED_TARGETS_DEAD)
@@ -791,7 +791,7 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
     else
     {
         // try to find if pet is actually temporary unsummoned
-        SpellCastResult loadResult = Pet::TryLoadFromDB(_player, 0, 0, _player->GetTemporaryUnsummonedPetNumber() ? true : false, HUNTER_PET);
+        SpellCastResult loadResult = Pet::TryLoadFromDB(_player, 0, 0, _player->GetTemporaryUnsummonedPetNumber() != 0, HUNTER_PET);
         if (loadResult != SPELL_CAST_OK)
         {
             if (loadResult == SPELL_FAILED_TARGETS_DEAD)
@@ -911,7 +911,7 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
     }
     else
     {
-        SpellCastResult loadResult = Pet::TryLoadFromDB(_player, 0, 0, _player->GetTemporaryUnsummonedPetNumber() ? true : false, HUNTER_PET);
+        SpellCastResult loadResult = Pet::TryLoadFromDB(_player, 0, 0, _player->GetTemporaryUnsummonedPetNumber() != 0, HUNTER_PET);
         if (loadResult != SPELL_CAST_OK)
         {
             if (loadResult == SPELL_FAILED_TARGETS_DEAD)

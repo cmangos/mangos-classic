@@ -46,7 +46,7 @@ class DynamicMapTree
         int size() const;
 
         void balance();
-        void update(uint32 diff);
+        void update(uint32 t_diff);
     private:
         struct DynTreeImpl& impl;
 };

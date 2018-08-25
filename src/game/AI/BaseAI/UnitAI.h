@@ -338,7 +338,7 @@ class UnitAI
          * @param uiCastFlags Some flags to define how to cast, see enum CastFlags
          * @param OriginalCasterGuid the original caster of the spell if required, empty by default
          */
-        CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0, ObjectGuid originalCasterGuid = ObjectGuid()) const;
+        CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0, ObjectGuid originalCasterGUID = ObjectGuid()) const;
 
         /// Set combat movement (on/off), also sets UNIT_STAT_NO_COMBAT_MOVEMENT
         void SetCombatMovement(bool enable, bool stopOrStartMovement = false);

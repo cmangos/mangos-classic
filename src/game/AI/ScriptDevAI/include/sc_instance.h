@@ -54,7 +54,7 @@ class ScriptedInstance : public InstanceData
         virtual void DoUpdateWorldState(uint32 stateId, uint32 stateData);
 
         // Get a Player from map
-        Player* GetPlayerInMap(bool onlyAlive = false, bool canBeGamemaster = true) const;
+        Player* GetPlayerInMap(bool bOnlyAlive = false, bool bCanBeGamemaster = true) const;
 
         // Wrapper for simulating map-wide text in this instance. It is expected that the Creature is stored in m_npcEntryGuidStore if loaded.
         void DoOrSimulateScriptTextForThisInstance(int32 textEntry, uint32 creatureEntry)
@@ -103,7 +103,7 @@ class DialogueHelper
         // The array MUST be terminated by {0,0,0}
         DialogueHelper(DialogueEntry const* dialogueArray);
         // The array MUST be terminated by {0,0,0,0,0}
-        DialogueHelper(DialogueEntryTwoSide const* dialogueTwoSide);
+        DialogueHelper(DialogueEntryTwoSide const* dialogueTwoSideArray);
 
         /// Function to initialize the dialogue helper for instances. If not used with instances, GetSpeakerByEntry MUST be overwritten to obtain the speakers
         void InitializeDialogueHelper(ScriptedInstance* instance, bool canSimulateText = false) { m_instance = instance; m_canSimulate = canSimulateText; }

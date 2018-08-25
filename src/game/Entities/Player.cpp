@@ -170,7 +170,7 @@ void PlayerTaxi::LoadTaxiMask(const char* data)
             (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
     {
         // load and set bits only for existing taxi nodes
-        m_taximask[index] = sTaxiNodesMask[index] & uint32(std::stoul((*iter).c_str()));
+        m_taximask[index] = sTaxiNodesMask[index] & uint32(std::stoul(*iter));
     }
 }
 
@@ -11493,7 +11493,7 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
             QEmote qe;
             qe._Delay = 0;
             qe._Emote = 0;
-            std::string title = "";
+            std::string title;
 
             // need pet case for some quests
             if (Creature* pCreature = GetMap()->GetAnyTypeCreature(guid))
@@ -11649,11 +11649,7 @@ bool Player::CanCompleteQuest(uint32 quest_id) const
     if (qInfo->HasQuestFlag(QUEST_FLAGS_AUTO_REWARDED))
     {
         // a few checks, not all "satisfy" is needed
-        if (SatisfyQuestPreviousQuest(qInfo, false) && SatisfyQuestLevel(qInfo, false) &&
-                SatisfyQuestSkill(qInfo, false) && SatisfyQuestCondition(qInfo, false) && SatisfyQuestRace(qInfo, false) && SatisfyQuestClass(qInfo, false))
-            return true;
-
-        return false;
+        return SatisfyQuestPreviousQuest(qInfo, false) && SatisfyQuestLevel(qInfo, false) && SatisfyQuestSkill(qInfo, false) && SatisfyQuestCondition(qInfo, false) && SatisfyQuestRace(qInfo, false) && SatisfyQuestClass(qInfo, false);
     }
 
     // auto complete quest
@@ -11700,10 +11696,7 @@ bool Player::CanCompleteQuest(uint32 quest_id) const
     }
 
     uint32 repFacId = qInfo->GetRepObjectiveFaction();
-    if (repFacId && GetReputationMgr().GetReputation(repFacId) < qInfo->GetRepObjectiveValue())
-        return false;
-
-    return true;
+    return !(repFacId && GetReputationMgr().GetReputation(repFacId) < qInfo->GetRepObjectiveValue());
 }
 
 bool Player::CanCompleteRepeatableQuest(Quest const* pQuest) const
@@ -13346,7 +13339,7 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
     uint32 index;
     for (iter = tokens.begin(), index = 0; index < count; ++iter, ++index)
     {
-        m_uint32Values[startOffset + index] = std::stoul((*iter).c_str());
+        m_uint32Values[startOffset + index] = std::stoul(*iter);
     }
 }
 

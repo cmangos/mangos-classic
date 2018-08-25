@@ -508,7 +508,7 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recv_data)
         group->ChangeMembersGroup(player, groupNr);
     else
     {
-        if (ObjectGuid guid = sObjectMgr.GetPlayerGuidByName(name.c_str()))
+        if (ObjectGuid guid = sObjectMgr.GetPlayerGuidByName(name))
             group->ChangeMembersGroup(guid, groupNr);
     }
 }
@@ -530,7 +530,7 @@ void WorldSession::HandleGroupAssistantLeaderOpcode(WorldPacket& recv_data)
     /********************/
 
     // everything is fine, do it
-    group->SetAssistant(guid, (flag == 0 ? false : true));
+    group->SetAssistant(guid, (flag != 0));
 }
 
 void WorldSession::HandlePartyAssignmentOpcode(WorldPacket& recv_data)

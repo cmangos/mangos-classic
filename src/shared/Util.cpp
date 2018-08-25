@@ -448,10 +448,7 @@ bool Utf8FitTo(const std::string& str, const std::wstring& search)
     // converting to lower case
     wstrToLower(temp);
 
-    if (temp.find(search) == std::wstring::npos)
-        return false;
-
-    return true;
+    return temp.find(search) != std::wstring::npos;
 }
 
 void utf8printf(FILE* out, const char* str, ...)

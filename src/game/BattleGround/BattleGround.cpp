@@ -1469,9 +1469,7 @@ Team BattleGround::GetPlayerTeam(ObjectGuid guid)
 bool BattleGround::IsPlayerInBattleGround(ObjectGuid guid)
 {
     BattleGroundPlayerMap::const_iterator itr = m_Players.find(guid);
-    if (itr != m_Players.end())
-        return true;
-    return false;
+    return itr != m_Players.end();
 }
 
 void BattleGround::PlayerAddedToBGCheckIfBGIsRunning(Player* plr)

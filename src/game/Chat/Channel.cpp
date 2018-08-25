@@ -106,7 +106,7 @@ void Channel::Join(Player* player, const char* password)
     // if no owner first logged will become
     if (!IsConstant() && !m_ownerGuid)
     {
-        SetOwner(guid, (m_players.size() > 1 ? true : false));
+        SetOwner(guid, (m_players.size() > 1));
         m_players[guid].SetModerator(true);
     }
 }
@@ -768,7 +768,7 @@ void Channel::MakeNotOwner(WorldPacket& data) const
 
 void Channel::MakeChannelOwner(WorldPacket& data) const
 {
-    std::string name = "";
+    std::string name;
 
     if (!sObjectMgr.GetPlayerNameByGUID(m_ownerGuid, name) || name.empty())
         name = "PLAYER_NOT_FOUND";

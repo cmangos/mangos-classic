@@ -45,7 +45,7 @@ enum SCEquip
 struct ScriptedAI : public CreatureAI
 {
     public:
-        explicit ScriptedAI(Creature* pCreature);
+        explicit ScriptedAI(Creature* creature);
         ~ScriptedAI() {}
 
         // *************
@@ -62,7 +62,7 @@ struct ScriptedAI : public CreatureAI
         // void MoveInLineOfSight(Unit* pWho) override;
 
         // Called for reaction at enter to combat if not in combat yet (enemy can be nullptr)
-        void EnterCombat(Unit* pEnemy) override;
+        void EnterCombat(Unit* enemy) override;
 
         // Called at stoping attack by any attacker
         void EnterEvadeMode() override;
@@ -197,10 +197,10 @@ struct ScriptedAI : public CreatureAI
         Player* GetPlayerAtMinimumRange(float minimumRange) const;
 
         // Returns spells that meet the specified criteria from the creatures spell list
-        SpellEntry const* SelectSpell(Unit* target, int32 school, int32 mechanic, SelectTarget selectTargets, uint32 powerCostMin, uint32 powerCostMax, float rangeMin, float rangeMax, SelectEffect selectEffect);
+        SpellEntry const* SelectSpell(Unit* target, int32 school, int32 mechanic, SelectTarget selectTargets, uint32 powerCostMin, uint32 powerCostMax, float rangeMin, float rangeMax, SelectEffect selectEffects);
 
         // Checks if you can cast the specified spell
-        bool CanCast(Unit* target, SpellEntry const* spell, bool triggered = false);
+        bool CanCast(Unit* target, SpellEntry const* spellInfo, bool triggered = false);
 
         void SetEquipmentSlots(bool loadDefault, int32 mainHand = EQUIP_NO_CHANGE, int32 offHand = EQUIP_NO_CHANGE, int32 ranged = EQUIP_NO_CHANGE);
 

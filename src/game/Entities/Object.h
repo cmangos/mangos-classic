@@ -166,10 +166,7 @@ class CooldownData
             if (m_typePermanent)
                 return false;
 
-            if (now >= m_expireTime)
-                return true;
-
-            return false;
+            return now >= m_expireTime;
         }
 
         bool IsCatCDExpired(TimePoint const& now) const
@@ -481,7 +478,7 @@ class Object
         }
 
         void SetByteFlag(uint16 index, uint8 offset, uint8 newFlag);
-        void RemoveByteFlag(uint16 index, uint8 offset, uint8 newFlag);
+        void RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag);
 
         void ToggleByteFlag(uint16 index, uint8 offset, uint8 flag)
         {
@@ -748,9 +745,9 @@ class WorldObject : public Object
         virtual ObjectGuid const& GetOwnerGuid() const { return GetGuidValue(OBJECT_FIELD_GUID); }
         virtual void SetOwnerGuid(ObjectGuid /*guid*/) { }
 
-        float GetDistance(const WorldObject* obj, bool is3D = true, DistanceCalculation calcdifftype = DIST_CALC_BOUNDING_RADIUS) const;
-        float GetDistance(float x, float y, float z, DistanceCalculation calcdifftype = DIST_CALC_BOUNDING_RADIUS) const;
-        float GetDistance2d(float x, float y, DistanceCalculation calcdifftype = DIST_CALC_BOUNDING_RADIUS) const;
+        float GetDistance(const WorldObject* obj, bool is3D = true, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS) const;
+        float GetDistance(float x, float y, float z, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS) const;
+        float GetDistance2d(float x, float y, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS) const;
         float GetDistanceZ(const WorldObject* obj) const;
         bool IsInMap(const WorldObject* obj) const
         {
@@ -779,16 +776,16 @@ class WorldObject : public Object
         {
             return obj && IsInMap(obj) && _IsWithinDist(obj, dist2compare, is3D);
         }
-        bool IsWithinLOS(float x, float y, float z, bool ignoreM2Model = false) const;
+        bool IsWithinLOS(float ox, float oy, float oz, bool ignoreM2Model = false) const;
         bool IsWithinLOSInMap(const WorldObject* obj, bool ignoreM2Model = false) const;
-        bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true, DistanceCalculation calcdifftype = DIST_CALC_NONE) const;
+        bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true, DistanceCalculation distcalc = DIST_CALC_NONE) const;
         bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true, bool combat = false) const;
         bool IsInRange2d(float x, float y, float minRange, float maxRange, bool combat = false) const;
         bool IsInRange3d(float x, float y, float z, float minRange, float maxRange, bool combat = false) const;
 
         float GetAngle(const WorldObject* obj) const;
         float GetAngle(const float x, const float y) const;
-        bool HasInArc(const WorldObject* target, const float arcangle = M_PI) const;
+        bool HasInArc(const WorldObject* target, const float arc = M_PI) const;
         bool isInFrontInMap(WorldObject const* target, float distance, float arc = M_PI) const;
         bool isInBackInMap(WorldObject const* target, float distance, float arc = M_PI) const;
         // Used in AOE - meant to ignore bounding radius of source

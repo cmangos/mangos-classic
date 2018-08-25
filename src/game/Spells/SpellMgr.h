@@ -624,9 +624,7 @@ inline bool HasAreaAuraEffect(SpellEntry const* spellInfo)
 
 inline bool IsPersistentAuraEffect(uint32 effect)
 {
-    if (effect == SPELL_EFFECT_PERSISTENT_AREA_AURA)
-        return true;
-    return false;
+    return effect == SPELL_EFFECT_PERSISTENT_AREA_AURA;
 }
 
 inline bool HasPersistentAuraEffect(SpellEntry const* spellInfo)
@@ -851,9 +849,7 @@ inline bool IsPositiveEffectTargetMode(const SpellEntry* entry, SpellEffectIndex
     {
         // Workaround: Passive talents with negative target modes are getting removed by ice block and similar effects
         // TODO: Fix removal of passives in appropriate places and remove the check below afterwards
-        if (entry->HasAttribute(SPELL_ATTR_PASSIVE))
-            return true;
-        return false;
+        return entry->HasAttribute(SPELL_ATTR_PASSIVE);
     }
     else if (IsEffectTargetNeutral(a, b))
         return (IsPointEffectTarget(Targets(b ? b : a)) || IsNeutralEffectTargetPositive((b ? b : a), caster, target));
@@ -2287,7 +2283,7 @@ class SpellMgr
         // return true if spell1 can affect spell2
         bool IsSpellCanAffectSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const;
 
-        SpellEntry const* SelectAuraRankForLevel(SpellEntry const* spellInfo, uint32 Level) const;
+        SpellEntry const* SelectAuraRankForLevel(SpellEntry const* spellInfo, uint32 level) const;
 
         // Spell learning
         SpellLearnSkillNode const* GetSpellLearnSkill(uint32 spell_id) const

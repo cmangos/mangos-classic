@@ -137,7 +137,7 @@ class GroupLootRoll
         ~GroupLootRoll();
 
         bool TryToStart(Loot& loot, uint32 itemSlot);
-        bool PlayerVote(Player* playerGuid, RollVote vote);
+        bool PlayerVote(Player* player, RollVote vote);
         bool UpdateRoll();
 
     private:
@@ -204,7 +204,7 @@ struct LootItem
     // Should be called for non-reference LootStoreItem entries only (mincountOrRef > 0)
     explicit LootItem(LootStoreItem const& li, uint32 _lootSlot, uint32 threshold);
 
-    LootItem(uint32 _itemid, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId, uint32 _lootSlot);
+    LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId, uint32 _lootSlot);
 
     // Basic checks for player/item compatibility - if false no chance to see the item in the loot
     bool AllowedForPlayer(Player const* player, WorldObject const* lootTarget) const;
@@ -259,17 +259,17 @@ class LootTemplate
         // Adds an entry to the group (at loading stage)
         void AddEntry(LootStoreItem& item);
         // Rolls for every item in the template and adds the rolled items the the loot
-        void Process(Loot& loot, Player const* lootOwner, LootStore const& store, bool rate, uint8 GroupId = 0) const;
+        void Process(Loot& loot, Player const* lootOwner, LootStore const& store, bool rate, uint8 groupId = 0) const;
 
         // True if template includes at least 1 quest drop entry
-        bool HasQuestDrop(LootTemplateMap const& store, uint8 GroupId = 0) const;
+        bool HasQuestDrop(LootTemplateMap const& store, uint8 groupId = 0) const;
         // True if template includes at least 1 quest drop for an active quest of the player
-        bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const* player, uint8 GroupId = 0) const;
+        bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const* player, uint8 groupId = 0) const;
         // True if at least one player fulfils loot condition
         static bool PlayerOrGroupFulfilsCondition(const Loot& loot, Player const* lootOwner, uint16 conditionId);
 
         // Checks integrity of the template
-        void Verify(LootStore const& store, uint32 Id) const;
+        void Verify(LootStore const& lootstore, uint32 id) const;
         void CheckLootRefs(LootIdSet* ref_set) const;
     private:
         LootStoreItemList Entries;                          // not grouped only
@@ -297,7 +297,7 @@ class Loot
 
         // Inserts the item into the loot (called by LootTemplate processors)
         void AddItem(LootStoreItem const& item);
-        void AddItem(uint32 _itemid, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId);             // used in item.cpp to explicitly load a saved item
+        void AddItem(uint32 itemid, uint32 count, uint32 randomSuffix, int32 randomPropertyId);             // used in item.cpp to explicitly load a saved item
         bool AutoStore(Player* player, bool broadcast = false, uint32 bag = NULL_BAG, uint32 slot = NULL_SLOT);
         bool CanLoot(Player const* player);
         void ShowContentTo(Player* plr);
@@ -336,7 +336,7 @@ class Loot
         void CheckIfRollIsNeeded(Player const* plr);
         void SetGroupLootRight(Player* player);
         void GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount);
-        bool FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, bool personal, bool noEmptyError = false);
+        bool FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false);
         void ForceLootAnimationCLientUpdate() const;
         void SetPlayerIsLooting(Player* player);
         void SetPlayerIsNotLooting(Player* player);

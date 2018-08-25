@@ -30,7 +30,7 @@ Tokens StrSplit(const std::string& src, const std::string& sep);
 uint32 GetUInt32ValueFromArray(Tokens const& data, uint16 index);
 float GetFloatValueFromArray(Tokens const& data, uint16 index);
 
-void stripLineInvisibleChars(std::string& src);
+void stripLineInvisibleChars(std::string& str);
 
 std::string secsToTimeString(time_t timeInSecs, bool shortText = false, bool hoursOnly = false);
 uint32 TimeStringToSecs(const std::string& timestring);

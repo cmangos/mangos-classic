@@ -184,7 +184,7 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
         // check dest->src move possibility
         ItemPosCountVec sSrc;
         uint16 eSrc = 0;
-        if (_player->IsInventoryPos(src))
+        if (Player::IsInventoryPos(src))
         {
             msg = _player->CanStoreItem(srcbag, srcslot, sSrc, pDstItem, true);
             if (msg != EQUIP_ERR_OK)
@@ -192,7 +192,7 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
             if (msg != EQUIP_ERR_OK)
                 msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, sSrc, pDstItem, true);
         }
-        else if (_player->IsBankPos(src))
+        else if (Player::IsBankPos(src))
         {
             msg = _player->CanBankItem(srcbag, srcslot, sSrc, pDstItem, true);
             if (msg != EQUIP_ERR_OK)
@@ -200,7 +200,7 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
             if (msg != EQUIP_ERR_OK)
                 msg = _player->CanBankItem(NULL_BAG, NULL_SLOT, sSrc, pDstItem, true);
         }
-        else if (_player->IsEquipmentPos(src))
+        else if (Player::IsEquipmentPos(src))
         {
             msg = _player->CanEquipItem(srcslot, eSrc, pDstItem, true);
             if (msg == EQUIP_ERR_OK)
@@ -221,11 +221,11 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
         _player->EquipItem(dest, pSrcItem, true);
 
         // add to src
-        if (_player->IsInventoryPos(src))
+        if (Player::IsInventoryPos(src))
             _player->StoreItem(sSrc, pDstItem, true);
-        else if (_player->IsBankPos(src))
+        else if (Player::IsBankPos(src))
             _player->BankItem(sSrc, pDstItem, true);
-        else if (_player->IsEquipmentPos(src))
+        else if (Player::IsEquipmentPos(src))
             _player->EquipItem(eSrc, pDstItem, true);
 
         _player->AutoUnequipOffhandIfNeed();
@@ -243,7 +243,7 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket& recv_data)
     uint16 pos = (bag << 8) | slot;
 
     // prevent drop unequipable items (in combat, for example) and non-empty bags
-    if (_player->IsEquipmentPos(pos) || _player->IsBagPos(pos))
+    if (Player::IsEquipmentPos(pos) || Player::IsBagPos(pos))
     {
         InventoryResult msg = _player->CanUnequipItem(pos, false);
         if (msg != EQUIP_ERR_OK)
@@ -813,9 +813,9 @@ void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recv_data)
     uint16 src = pItem->GetPos();
 
     // check unequip potability for equipped items and bank bags
-    if (_player->IsEquipmentPos(src) || _player->IsBagPos(src))
+    if (Player::IsEquipmentPos(src) || Player::IsBagPos(src))
     {
-        InventoryResult msg = _player->CanUnequipItem(src, !_player->IsBagPos(src));
+        InventoryResult msg = _player->CanUnequipItem(src, !Player::IsBagPos(src));
         if (msg != EQUIP_ERR_OK)
         {
             _player->SendEquipError(msg, pItem, nullptr);
@@ -957,7 +957,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
     if (!pItem)
         return;
 
-    if (_player->IsBankPos(srcbag, srcslot))                // moving from bank to inventory
+    if (Player::IsBankPos(srcbag, srcslot))                // moving from bank to inventory
     {
         ItemPosCountVec dest;
         InventoryResult msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItem, false);

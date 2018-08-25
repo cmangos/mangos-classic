@@ -318,10 +318,7 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
 
         m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
 
-        if (DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN) == CAST_OK)
-            return true;
-
-        return false;
+        return DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN) == CAST_OK;
     }
 
     void ReApplyChain(uint32 uiEntry)

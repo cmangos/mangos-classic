@@ -93,7 +93,7 @@ class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLev
 
         // Search player at any map in world and other objects at same map with `obj`
         // Note: recommended use Map::GetUnit version if player also expected at same map only
-        static Unit* GetUnit(WorldObject const& obj, ObjectGuid guid);
+        static Unit* GetUnit(WorldObject const& u, ObjectGuid guid);
 
         // Player access
         static Player* FindPlayer(ObjectGuid guid, bool inWorld = true);// if need player at specific map better use Map::GetPlayer

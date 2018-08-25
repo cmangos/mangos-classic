@@ -35,11 +35,7 @@ INSTANTIATE_SINGLETON_1(GameEventMgr);
 bool GameEventMgr::CheckOneGameEvent(uint16 entry, time_t currenttime) const
 {
     // Get the event information
-    if (mGameEvent[entry].start < currenttime && currenttime < mGameEvent[entry].end &&
-            ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE)) < (mGameEvent[entry].length * MINUTE))
-        return true;
-    else
-        return false;
+    return mGameEvent[entry].start < currenttime && currenttime < mGameEvent[entry].end && ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE)) < (mGameEvent[entry].length * MINUTE);
 }
 
 uint32 GameEventMgr::NextCheck(uint16 entry) const

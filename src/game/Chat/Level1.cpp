@@ -1680,7 +1680,7 @@ bool ChatHandler::HandleTeleNameCommand(char* args)
 
         std::string chrNameLink = playerLink(target_name);
 
-        if (target->IsBeingTeleported() == true)
+        if (target->IsBeingTeleported())
         {
             PSendSysMessage(LANG_IS_TELEPORTED, chrNameLink.c_str());
             SetSentErrorMessage(true);
@@ -1830,7 +1830,7 @@ bool ChatHandler::HandleGroupgoCommand(char* args)
 
         std::string plNameLink = GetNameLink(pl);
 
-        if (pl->IsBeingTeleported() == true)
+        if (pl->IsBeingTeleported())
         {
             PSendSysMessage(LANG_IS_TELEPORTED, plNameLink.c_str());
             SetSentErrorMessage(true);

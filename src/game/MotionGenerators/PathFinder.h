@@ -137,7 +137,7 @@ class PathFinder
                             unsigned char& steerPosFlag, dtPolyRef& steerPosRef) const;
         dtStatus findSmoothPath(const float* startPos, const float* endPos,
                                 const dtPolyRef* polyPath, uint32 polyPathSize,
-                                float* smoothPath, int* smoothPathSize, uint32 smoothPathMaxSize);
+                                float* smoothPath, int* smoothPathSize, uint32 maxSmoothPathSize);
 };
 
 #endif

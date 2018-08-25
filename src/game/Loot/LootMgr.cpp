@@ -423,10 +423,7 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
     }
 
     // Not quest only drop (check quest starting items for already accepted non-repeatable quests)
-    if (itemProto->StartQuest && player->GetQuestStatus(itemProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemId))
-        return false;
-
-    return true;
+    return !(itemProto->StartQuest && player->GetQuestStatus(itemProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemId));
 }
 
 LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const* loot) const

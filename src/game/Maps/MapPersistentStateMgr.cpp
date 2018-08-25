@@ -727,7 +727,7 @@ void MapPersistentStateManager::RemovePersistentState(uint32 mapId, uint32 insta
 void MapPersistentStateManager::_DelHelper(DatabaseType& db, const char* fields, const char* table, const char* queryTail, ...) const
 {
     Tokens fieldTokens = StrSplit(fields, ", ");
-    MANGOS_ASSERT(fieldTokens.size() != 0);
+    MANGOS_ASSERT(!fieldTokens.empty());
 
     va_list ap;
     char szQueryTail [MAX_QUERY_LEN];

@@ -171,10 +171,7 @@ bool CannibalizeObjectCheck::operator()(Corpse* u)
     if (!owner || i_fobj->CanAssist(owner))
         return false;
 
-    if (i_fobj->IsWithinDistInMap(u, i_range))
-        return true;
-
-    return false;
+    return i_fobj->IsWithinDistInMap(u, i_range);
 }
 
 void MaNGOS::RespawnDo::operator()(Creature* u) const

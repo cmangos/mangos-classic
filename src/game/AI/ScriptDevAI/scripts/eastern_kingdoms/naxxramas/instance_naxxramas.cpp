@@ -277,10 +277,7 @@ bool instance_naxxramas::IsEncounterInProgress() const
     }
 
     // Some Encounters use SPECIAL while in progress
-    if (m_auiEncounter[TYPE_GOTHIK] == SPECIAL)
-        return true;
-
-    return false;
+    return m_auiEncounter[TYPE_GOTHIK] == SPECIAL;
 }
 
 void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)

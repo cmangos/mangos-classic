@@ -952,7 +952,7 @@ bool Group::_setAssistantFlag(ObjectGuid guid, const bool& state)
 
     slot->assistant = state;
     if (!isBGGroup())
-        CharacterDatabase.PExecute("UPDATE group_member SET assistant='%u' WHERE memberGuid='%u'", (state == true) ? 1 : 0, guid.GetCounter());
+        CharacterDatabase.PExecute("UPDATE group_member SET assistant='%u' WHERE memberGuid='%u'", (state) ? 1 : 0, guid.GetCounter());
     return true;
 }
 
@@ -1113,7 +1113,7 @@ bool Group::InCombatToInstance(uint32 instanceId)
     for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
     {
         Player* pPlayer = itr->getSource();
-        if (pPlayer->getAttackers().size() && pPlayer->GetInstanceId() == instanceId)
+        if (!pPlayer->getAttackers().empty() && pPlayer->GetInstanceId() == instanceId)
             return true;
     }
     return false;

@@ -69,10 +69,7 @@ bool normalizePlayerName(std::string& name)
     for (size_t i = 1; i < wstr_len; ++i)
         wstr_buf[i] = wcharToLower(wstr_buf[i]);
 
-    if (!WStrToUtf8(wstr_buf, wstr_len, name))
-        return false;
-
-    return true;
+    return WStrToUtf8(wstr_buf, wstr_len, name);
 }
 
 LanguageDesc lang_description[LANGUAGES_COUNT] =
@@ -7505,9 +7502,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             return false;
         case CONDITION_QUEST_NONE:
         {
-            if (!player->IsCurrentQuest(m_value1) && !player->GetQuestRewardStatus(m_value1))
-                return true;
-            return false;
+            return !player->IsCurrentQuest(m_value1) && !player->GetQuestRewardStatus(m_value1);
         }
         case CONDITION_ITEM_WITH_BANK:
             return player->HasItemCount(m_value1, m_value2, true);
@@ -7566,10 +7561,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                 break;
             }
 
-            if (isSkillOk)
-                return true;
-
-            return false;
+            return isSkillOk;
         }
         case CONDITION_SKILL_BELOW:
         {

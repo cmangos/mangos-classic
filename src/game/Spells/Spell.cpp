@@ -2893,7 +2893,7 @@ void Spell::cancel()
         return;
 
     // channeled spells don't display interrupted message even if they are interrupted, possible other cases with no "Interrupted" message
-    bool sendInterrupt = (IsChanneledSpell(m_spellInfo) || m_autoRepeat) ? false : true;
+    bool sendInterrupt = !(IsChanneledSpell(m_spellInfo) || m_autoRepeat);
 
     m_autoRepeat = false;
     switch (m_spellState)
@@ -4795,7 +4795,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         break;
                 }
 
-                if (foundScriptCreatureTargets.size())
+                if (!foundScriptCreatureTargets.empty())
                 {
                     // store coordinates for TARGET_SCRIPT_COORDINATES
                     if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES ||
@@ -4816,12 +4816,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                                 AddUnitTarget(creatureScriptTarget, SpellEffectIndex(j));
 
                             // Need to fill unittarget for SMSG_SPELL_START - makes some visuals work
-                            if (foundScriptCreatureTargets.size() >= 1)
+                            if (!foundScriptCreatureTargets.empty())
                                 m_targets.setUnitTarget(foundScriptCreatureTargets.front());
                         }
                     }
                 }
-                else if (foundScriptGOTargets.size())
+                else if (!foundScriptGOTargets.empty())
                 {
                     // store coordinates for TARGET_SCRIPT_COORDINATES
                     if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES ||
@@ -5662,7 +5662,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         }
         if (need)
             m_targets.setUnitTarget(target);
-        else if (script == true)
+        else if (script)
             return CheckCast(true);
 
         if (Unit* _target = m_targets.getUnitTarget())      // for target dead/target not valid
@@ -6010,10 +6010,7 @@ bool Spell::IgnoreItemRequirements() const
 
         /// Some triggered spells have same reagents that have master spell
         /// expected in test: master spell have reagents in first slot then triggered don't must use own
-        if (m_triggeredBySpellInfo && !m_triggeredBySpellInfo->Reagent[0])
-            return false;
-
-        return true;
+        return !(m_triggeredBySpellInfo && !m_triggeredBySpellInfo->Reagent[0]);
     }
 
     return false;

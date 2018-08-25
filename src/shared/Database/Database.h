@@ -196,7 +196,7 @@ class Database
         // get prepared statement format string
         std::string GetStmtString(const int stmtId) const;
 
-        operator bool () const { return m_pQueryConnections.size() && m_pAsyncConn; }
+        operator bool () const { return !m_pQueryConnections.empty() && m_pAsyncConn; }
 
         // escape string generation
         void escape_string(std::string& str);

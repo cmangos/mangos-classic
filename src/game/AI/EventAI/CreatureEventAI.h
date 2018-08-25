@@ -717,7 +717,7 @@ struct CreatureEventAIHolder
 class CreatureEventAI : public CreatureAI
 {
     public:
-        explicit CreatureEventAI(Creature* c);
+        explicit CreatureEventAI(Creature* creature);
         ~CreatureEventAI()
         {
             m_CreatureEventAIList.clear();
@@ -735,8 +735,8 @@ class CreatureEventAI : public CreatureAI
         void JustSummoned(Creature* summoned) override;
         // void AttackStart(Unit* who) override;
         void MoveInLineOfSight(Unit* who) override;
-        void SpellHit(Unit* unit, const SpellEntry* spellInfo) override;
-        void DamageTaken(Unit* doneBy, uint32& damage, DamageEffectType damagetype) override;
+        void SpellHit(Unit* pUnit, const SpellEntry* spellInfo) override;
+        void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damagetype) override;
         void HealedBy(Unit* healer, uint32& healedAmount) override;
         void UpdateAI(const uint32 diff) override;
         void ReceiveEmote(Player* player, uint32 textEmote) override;
@@ -756,7 +756,7 @@ class CreatureEventAI : public CreatureAI
 
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event) const;
 
-        void DoFindFriendlyMissingBuff(std::list<Creature*>& list, float range, uint32 spellid) const;
+        void DoFindFriendlyMissingBuff(std::list<Creature*>& list, float range, uint32 spellId) const;
         void DoFindFriendlyCC(std::list<Creature*>& list, float range) const;
 
     protected:

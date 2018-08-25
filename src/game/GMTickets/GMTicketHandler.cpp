@@ -93,7 +93,7 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recv_data)
 {
     uint32 map;
     float x, y, z;
-    std::string ticketText = "";
+    std::string ticketText;
 
     recv_data >> map >> x >> y >> z;                        // last check 2.4.3
     recv_data >> ticketText;

@@ -294,9 +294,7 @@ void ProfessionUnlearnSpells(Player* pPlayer, uint32 type)
 
 bool HasWeaponSub(Player* pPlayer)
 {
-    if (pPlayer->HasSpell(S_HAMMER) || pPlayer->HasSpell(S_AXE) || pPlayer->HasSpell(S_SWORD))
-        return true;
-    return false;
+    return pPlayer->HasSpell(S_HAMMER) || pPlayer->HasSpell(S_AXE) || pPlayer->HasSpell(S_SWORD);
 }
 
 bool GossipHello_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature)

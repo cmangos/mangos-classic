@@ -270,7 +270,7 @@ void AuthSocket::_SetVSFields(const std::string& rI)
     sha.UpdateData(mDigest, SHA_DIGEST_LENGTH);
     sha.Finalize();
     BigNumber x;
-    x.SetBinary(sha.GetDigest(), sha.GetLength());
+    x.SetBinary(sha.GetDigest(), Sha1Hash::GetLength());
     v = g.ModExp(x, N);
     const char* v_hex = v.AsHexStr();
     const char* s_hex = s.AsHexStr();
