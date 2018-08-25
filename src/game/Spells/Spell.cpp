@@ -379,7 +379,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
     m_needAliveTargetMask = 0;
 
     m_ignoreHitResult = (triggeredFlags & TRIGGERED_IGNORE_HIT_CALCULATION) != 0;
-    m_ignoreUnselectableTarget = (m_IsTriggeredSpell | (triggeredFlags & TRIGGERED_IGNORE_UNSELECTABLE_FLAG) != 0);
+    m_ignoreUnselectableTarget = m_IsTriggeredSpell | ((triggeredFlags & TRIGGERED_IGNORE_UNSELECTABLE_FLAG) != 0);
     m_ignoreCastTime = (triggeredFlags & TRIGGERED_INSTANT_CAST) != 0;
     m_ignoreUnattackableTarget = (triggeredFlags & TRIGGERED_IGNORE_UNATTACKABLE_FLAG) != 0;
     m_triggerAutorepeat = (triggeredFlags & TRIGGERED_AUTOREPEAT) != 0;
