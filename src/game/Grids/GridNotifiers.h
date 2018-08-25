@@ -868,8 +868,7 @@ namespace MaNGOS
                 if (u->isAlive() && (i_controlledByPlayer ? !i_obj->IsFriendlyTo(u) && i_obj->CanAttackSpell(u) : i_obj->IsHostileTo(u))
                     && i_obj->IsWithinDistInMap(u, i_range))
                     return true;
-                else
-                    return false;
+                return false;
             }
         private:
             WorldObject const* i_obj;
@@ -886,8 +885,7 @@ namespace MaNGOS
             {
                 if (u->isAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_obj->CanAssistSpell(u, i_spellInfo))
                     return true;
-                else
-                    return false;
+                return false;
             }
         private:
             WorldObject const* i_obj;
@@ -1134,8 +1132,7 @@ namespace MaNGOS
                         i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
                         return true;
                     }
-                    else
-                        i_foundOutOfRange = true;
+                    i_foundOutOfRange = true;
                 }
                 return false;
             }
@@ -1167,8 +1164,7 @@ namespace MaNGOS
                 {
                     if (i_obj.IsWithinCombatDistInMap(u, i_range, i_is3D))
                         return true;
-                    else
-                        i_foundOutOfRange = true;
+                    i_foundOutOfRange = true;
                 }
                 return false;
             }

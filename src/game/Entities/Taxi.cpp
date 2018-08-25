@@ -368,7 +368,7 @@ bool Tracker::UpdateRoute(const TaxiPathNodeEntry* entry, PathID& start, PathID&
         }
         return true;
     }
-    else if (entry->index == route.nodeStart)
+    if (entry->index == route.nodeStart)
     {
         // Acknowledge the start of the current route to other systems
         start = route.pathID;

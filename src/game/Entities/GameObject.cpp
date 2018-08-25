@@ -268,8 +268,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
                         return;
                     }
-                    else
-                        m_lootState = GO_READY;
+                    m_lootState = GO_READY;
                 }
                 default:
                     break;
@@ -349,7 +348,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                             {
                                 if (m_respawnTime > 0)
                                     valid = false;
-                                else // battlegrounds gameobjects has data2 == 0 && data5 == 3                                
+                                else // battlegrounds gameobjects has data2 == 0 && data5 == 3
                                     radius = float(goInfo->trap.cooldown);
                             }
                         }

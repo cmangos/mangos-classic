@@ -127,8 +127,7 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
                     UnSummon();
                     return;
                 }
-                else
-                    m_timer -= update_diff;
+                m_timer -= update_diff;
             }
             else if (m_timer != m_lifetime)
                 m_timer = m_lifetime;
@@ -151,8 +150,7 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
                     UnSummon();
                     return;
                 }
-                else
-                    m_timer -= update_diff;
+                m_timer -= update_diff;
             }
             else if (m_timer != m_lifetime)
                 m_timer = m_lifetime;

@@ -1627,15 +1627,13 @@ struct ChainHealingOrder : public std::binary_function<const Unit*, const Unit*,
     {
         if (Target == MainTarget)
             return 0;
-        else if (Target->IsInGroup(MainTarget))
+        if (Target->IsInGroup(MainTarget))
         {
             if (Target->GetHealth() == Target->GetMaxHealth())
                 return 40000;
-            else
-                return 20000 - Target->GetMaxHealth() + Target->GetHealth();
+            return 20000 - Target->GetMaxHealth() + Target->GetHealth();
         }
-        else
-            return 40000 - Target->GetMaxHealth() + Target->GetHealth();
+        return 40000 - Target->GetMaxHealth() + Target->GetHealth();
     }
 };
 
@@ -1966,7 +1964,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
                 break;
-            else if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SUMMON)
+            if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SUMMON)
             {
                 targetUnitMap.push_back(m_caster);
                 break;
@@ -2604,11 +2602,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                             nextPos = prevPos;
                             break;
                         }
-                        else
-                        {
-                            isInLiquid = true;
-                            isInLiquidTested = true;
-                        }
+                        isInLiquid = true;
+                        isInLiquidTested = true;
                     }
                     else
                         isOnGround = true;                                  // player is on ground
@@ -2824,8 +2819,7 @@ SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* trigger
         finish(false);
         return result;
     }
-    else
-        Prepare();
+    Prepare();
 
     return SPELL_CAST_OK;
 }
@@ -3214,11 +3208,8 @@ uint64 Spell::handle_delayed(uint64 t_offset)
         // return zero, spell is finished now
         return 0;
     }
-    else
-    {
-        // spell is unfinished, return next execution time
-        return next_time;
-    }
+    // spell is unfinished, return next execution time
+    return next_time;
 }
 
 void Spell::_handle_immediate_phase()
@@ -4265,8 +4256,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     {
         if (m_triggeredByAuraSpell)
             return SPELL_FAILED_DONT_REPORT;
-        else
-            return SPELL_FAILED_NOT_READY;
+        return SPELL_FAILED_NOT_READY;
     }
 
     if (!m_caster->isAlive() && m_caster->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD) && !m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
@@ -4459,10 +4449,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     {
                         if (m_triggeredByAuraSpell)             // not report pet not existence for triggered spells
                             return SPELL_FAILED_DONT_REPORT;
-                        else
-                            return SPELL_FAILED_NO_PET;
+                        return SPELL_FAILED_NO_PET;
                     }
-                    else if (!pet->isAlive())
+                    if (!pet->isAlive())
                         return SPELL_FAILED_TARGETS_DEAD;
                     break;
                 }
@@ -4476,8 +4465,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     if (target->GetTypeId() == TYPEID_PLAYER)
                         return SPELL_FAILED_TARGET_IS_PLAYER;
-                    else
-                        return SPELL_FAILED_BAD_TARGETS;
+                    return SPELL_FAILED_BAD_TARGETS;
                 }
 
                 // simple cases
@@ -4650,8 +4638,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     {
         if (m_caster->IsTaxiFlying())
             return SPELL_FAILED_NOT_ON_TAXI;
-        else
-            return SPELL_FAILED_NOT_MOUNTED;
+        return SPELL_FAILED_NOT_MOUNTED;
     }
 
     // always (except passive spells) check items (focus object can be required for any type casts)
@@ -4854,8 +4841,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         // not report target not existence for triggered spells
                         if (m_triggeredByAuraSpell || m_IsTriggeredSpell)
                             return SPELL_FAILED_DONT_REPORT;
-                        else
-                            return foundButOutOfRange ? SPELL_FAILED_OUT_OF_RANGE : SPELL_FAILED_BAD_TARGETS;
+                        return foundButOutOfRange ? SPELL_FAILED_OUT_OF_RANGE : SPELL_FAILED_BAD_TARGETS;
                     }
                 }
             }
@@ -5139,7 +5125,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                     if (pathFinder.getPathType() & PATHFIND_SHORT)
                         return SPELL_FAILED_OUT_OF_RANGE;
-                    else if (!result || pathFinder.getPathType() & PATHFIND_NOPATH)
+                    if (!result || pathFinder.getPathType() & PATHFIND_NOPATH)
                         return SPELL_FAILED_NOPATH;
                     //}
 
@@ -5295,20 +5281,16 @@ SpellCastResult Spell::CheckCast(bool strict)
                             ((Player*)m_caster)->SendPetTameFailure(PETTAME_DEAD);
                             return SPELL_FAILED_DONT_REPORT;
                         }
-                        else
-                            return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+                        return SPELL_FAILED_ALREADY_HAVE_SUMMON;
                     }
-                    else
+                    SpellCastResult result = Pet::TryLoadFromDB(m_caster);
+                    if (result == SPELL_FAILED_TARGETS_DEAD)
                     {
-                        SpellCastResult result = Pet::TryLoadFromDB(m_caster);
-                        if (result == SPELL_FAILED_TARGETS_DEAD)
-                        {
-                            ((Player*)m_caster)->SendPetTameFailure(PETTAME_DEAD);
-                            return SPELL_FAILED_DONT_REPORT;
-                        }
-                        else if (result != SPELL_CAST_OK)
-                            return result;
+                        ((Player*)m_caster)->SendPetTameFailure(PETTAME_DEAD);
+                        return SPELL_FAILED_DONT_REPORT;
                     }
+                    if (result != SPELL_CAST_OK)
+                        return result;
                 }
                 else if (m_caster->GetPetGuid())
                 {
@@ -5605,14 +5587,11 @@ SpellCastResult Spell::CheckCast(bool strict)
             player->SendPetTameFailure(PETTAME_ANOTHERSUMMONACTIVE);
             return SPELL_FAILED_DONT_REPORT;
         }
-        else
+        SpellCastResult result = Pet::TryLoadFromDB((Player*)m_caster);
+        if (result == SPELL_FAILED_TARGETS_DEAD || result == SPELL_CAST_OK)
         {
-            SpellCastResult result = Pet::TryLoadFromDB((Player*)m_caster);
-            if (result == SPELL_FAILED_TARGETS_DEAD || result == SPELL_CAST_OK)
-            {
-                player->SendPetTameFailure(PETTAME_ANOTHERSUMMONACTIVE);
-                return SPELL_FAILED_DONT_REPORT;
-            }
+            player->SendPetTameFailure(PETTAME_ANOTHERSUMMONACTIVE);
+            return SPELL_FAILED_DONT_REPORT;
         }
     }
 
@@ -5786,10 +5765,12 @@ SpellCastResult Spell::CheckCasterAuras() const
                         case SPELL_AURA_MOD_SILENCE:
                         case SPELL_AURA_MOD_PACIFY:
                         case SPELL_AURA_MOD_PACIFY_SILENCE:
+                        {
                             if (m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY)
                                 return SPELL_FAILED_PACIFIED;
-                            else if (m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
+                            if (m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
                                 return SPELL_FAILED_SILENCED;
+                        }
                             break;
                         default: break;
                     }
@@ -6064,11 +6045,8 @@ SpellCastResult Spell::CheckItems()
                         failReason = SPELL_FAILED_ALREADY_AT_FULL_HEALTH;
                         continue;
                     }
-                    else
-                    {
-                        failReason = SPELL_CAST_OK;
-                        break;
-                    }
+                    failReason = SPELL_CAST_OK;
+                    break;
                 }
 
                 // Mana Potion, Rage Potion, Thistle Tea(Rogue), ...
@@ -6504,12 +6482,11 @@ CurrentSpellTypes Spell::GetCurrentContainer() const
 {
     if (IsNextMeleeSwingSpell())
         return (CURRENT_MELEE_SPELL);
-    else if (IsAutoRepeat())
+    if (IsAutoRepeat())
         return (CURRENT_AUTOREPEAT_SPELL);
-    else if (IsChanneledSpell(m_spellInfo))
+    if (IsChanneledSpell(m_spellInfo))
         return (CURRENT_CHANNELED_SPELL);
-    else
-        return (CURRENT_GENERIC_SPELL);
+    return (CURRENT_GENERIC_SPELL);
 }
 
 bool Spell::CheckTargetGOScript(GameObject* target, SpellEffectIndex eff) const
@@ -6937,8 +6914,7 @@ WorldObject* Spell::GetCastingObject() const
 {
     if (m_originalCasterGUID.IsGameObject())
         return m_caster->IsInWorld() ? m_caster->GetMap()->GetGameObject(m_originalCasterGUID) : nullptr;
-    else
-        return m_caster;
+    return m_caster;
 }
 
 void Spell::ResetEffectDamageAndHeal()

@@ -678,10 +678,9 @@ bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingI
 
         if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_DEAD)
             return IsRespawnReady(pInfo->masterDBGuid, _map);
-        else if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_ALIVE)
+        if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_ALIVE)
             return !IsRespawnReady(pInfo->masterDBGuid, _map);
-        else
-            return true;
+        return true;
     }
 
     // Search for nearby master
@@ -693,10 +692,9 @@ bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingI
         {
             if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_DEAD)
                 return pMaster->isAlive();
-            else if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_ALIVE)
+            if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_ALIVE)
                 return !pMaster->isAlive();
-            else
-                return true;
+            return true;
         }
     }
 

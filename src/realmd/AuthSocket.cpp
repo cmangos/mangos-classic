@@ -845,12 +845,9 @@ bool AuthSocket::_HandleReconnectProof()
 
         return true;
     }
-    else
-    {
-        sLog.outError("[ERROR] user %s tried to login, but session invalid.", _login.c_str());
-        Close();
-        return false;
-    }
+    sLog.outError("[ERROR] user %s tried to login, but session invalid.", _login.c_str());
+    Close();
+    return false;
 }
 
 /// %Realm List command handler

@@ -277,26 +277,24 @@ namespace MaNGOS
         {
             if (pl_level <= 5)
                 return 0;
-            else if (pl_level <= 39)
+            if (pl_level <= 39)
                 return pl_level - 5 - pl_level / 10;
-            else if (pl_level <= 59)
+            if (pl_level <= 59)
                 return pl_level - 1 - pl_level / 5;
-            else
-                return pl_level - 9;
+            return pl_level - 9;
         }
 
         inline XPColorChar GetColorCode(uint32 pl_level, uint32 mob_level)
         {
             if (mob_level >= pl_level + 5)
                 return RED;
-            else if (mob_level >= pl_level + 3)
+            if (mob_level >= pl_level + 3)
                 return ORANGE;
-            else if (mob_level >= pl_level - 2)
+            if (mob_level >= pl_level - 2)
                 return YELLOW;
-            else if (mob_level > GetGrayLevel(pl_level))
+            if (mob_level > GetGrayLevel(pl_level))
                 return GREEN;
-            else
-                return GRAY;
+            return GRAY;
         }
 
         inline uint32 GetZeroDifference(uint32 pl_level)
@@ -325,16 +323,13 @@ namespace MaNGOS
                     nLevelDiff = 4;
                 return ((pl_level * 5 + nBaseExp) * (20 + nLevelDiff) / 10 + 1) / 2;
             }
-            else
+            uint32 gray_level = GetGrayLevel(pl_level);
+            if (mob_level > gray_level)
             {
-                uint32 gray_level = GetGrayLevel(pl_level);
-                if (mob_level > gray_level)
-                {
-                    uint32 ZD = GetZeroDifference(pl_level);
-                    return (pl_level * 5 + nBaseExp) * (ZD + mob_level - pl_level) / ZD;
-                }
-                return 0;
+                uint32 ZD = GetZeroDifference(pl_level);
+                return (pl_level * 5 + nBaseExp) * (ZD + mob_level - pl_level) / ZD;
             }
+            return 0;
         }
 
         inline uint32 Gain(Player* pl, Unit* u)
@@ -345,7 +340,7 @@ namespace MaNGOS
 
                 if (creatureUnit->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_XP_AT_KILL)
                     return 0;
-                else if (creatureUnit->IsElite())
+                if (creatureUnit->IsElite())
                     xp_gain *= 2;
 
                 xp_gain *= BaseGain(pl->getLevel(), u->getLevel());
@@ -353,8 +348,7 @@ namespace MaNGOS
 
                 return (uint32)(xp_gain * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL));
             }
-            else
-                return 0;
+            return 0;
         }
 
         inline float xp_in_group_rate(uint32 count, bool isRaid)
@@ -364,22 +358,19 @@ namespace MaNGOS
                 // FIX ME: must apply decrease modifiers dependent from raid size
                 return 1.0f;
             }
-            else
+            switch (count)
             {
-                switch (count)
-                {
-                    case 0:
-                    case 1:
-                    case 2:
-                        return 1.0f;
-                    case 3:
-                        return 1.166f;
-                    case 4:
-                        return 1.3f;
-                    case 5:
-                    default:
-                        return 1.4f;
-                }
+                case 0:
+                case 1:
+                case 2:
+                    return 1.0f;
+                case 3:
+                    return 1.166f;
+                case 4:
+                    return 1.3f;
+                case 5:
+                default:
+                    return 1.4f;
             }
         }
     }

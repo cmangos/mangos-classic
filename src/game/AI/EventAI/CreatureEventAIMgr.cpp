@@ -963,14 +963,11 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                                 sLog.outErrorEventAI("Event %u Action %u references non-existing entry for text template (%i) in dbscript_random_templates table.", i, j + 1, action.textNew.textId);
                                 break;
                             }
-                            else
-                            {
-                                ScriptMgr::ScriptTemplateVector templateData;
-                                sScriptMgr.GetScriptStringTemplate(action.textNew.templateId, templateData);
-                                for (auto& data : templateData)
-                                    if (data.first)
-                                        usedTextIds.insert(data.first);
-                            }
+                            ScriptMgr::ScriptTemplateVector templateData;
+                            sScriptMgr.GetScriptStringTemplate(action.textNew.templateId, templateData);
+                            for (auto& data : templateData)
+                                if (data.first)
+                                    usedTextIds.insert(data.first);
                         }
                         break;
                     case ACTION_T_ATTACK_START:

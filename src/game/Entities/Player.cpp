@@ -2707,11 +2707,8 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                     next_active_spell_id = next_itr->second;
                     break;
                 }
-                else
-                {
-                    tempSpellId = next_itr->second;
-                    next_itr = nextMap.lower_bound(next_itr->second);
-                }
+                tempSpellId = next_itr->second;
+                next_itr = nextMap.lower_bound(next_itr->second);
             }
         }
 
@@ -2884,7 +2881,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                             if (IsInWorld())                // not send spell (re-/over-)learn packets at loading
                             {
                                 WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
-                                data << uint16(m_spell->first);
+                                data << uint16(m_spell.first);
                                 data << uint16(spell_id);
                                 GetSession()->SendPacket(data);
                             }
@@ -2901,7 +2898,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                             {
                                 WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
                                 data << uint16(spell_id);
-                                data << uint16(m_spell->first);
+                                data << uint16(m_spell.first);
                                 GetSession()->SendPacket(data);
                             }
 
@@ -3386,31 +3383,25 @@ uint32 Player::resetTalentsCost() const
     if (m_resetTalentsCost < 1 * GOLD)
         return 1 * GOLD;
     // then 5 gold
-    else if (m_resetTalentsCost < 5 * GOLD)
+    if (m_resetTalentsCost < 5 * GOLD)
         return 5 * GOLD;
     // After that it increases in increments of 5 gold
-    else if (m_resetTalentsCost < 10 * GOLD)
+    if (m_resetTalentsCost < 10 * GOLD)
         return 10 * GOLD;
-    else
+    time_t months = (sWorld.GetGameTime() - m_resetTalentsTime) / MONTH;
+    if (months > 0)
     {
-        time_t months = (sWorld.GetGameTime() - m_resetTalentsTime) / MONTH;
-        if (months > 0)
-        {
-            // This cost will be reduced by a rate of 5 gold per month
-            int32 new_cost = int32((m_resetTalentsCost) - 5 * GOLD * months);
-            // to a minimum of 10 gold.
-            return uint32(new_cost < 10 * GOLD ? 10 * GOLD : new_cost);
-        }
-        else
-        {
-            // After that it increases in increments of 5 gold
-            int32 new_cost = m_resetTalentsCost + 5 * GOLD;
-            // until it hits a cap of 50 gold.
-            if (new_cost > 50 * GOLD)
-                new_cost = 50 * GOLD;
-            return new_cost;
-        }
+        // This cost will be reduced by a rate of 5 gold per month
+        int32 new_cost = int32((m_resetTalentsCost) - 5 * GOLD * months);
+        // to a minimum of 10 gold.
+        return uint32(new_cost < 10 * GOLD ? 10 * GOLD : new_cost);
     }
+    // After that it increases in increments of 5 gold
+    int32 new_cost = m_resetTalentsCost + 5 * GOLD;
+    // until it hits a cap of 50 gold.
+    if (new_cost > 50 * GOLD)
+        new_cost = 50 * GOLD;
+    return new_cost;
 }
 
 bool Player::resetTalents(bool no_cost)
@@ -4931,15 +4922,17 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLeve
         case SKILL_LOCKPICKING:
             return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
         case SKILL_SKINNING:
+        {
             if (sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_SKINNING_STEPS) == 0)
                 return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
-            else
-                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_SKINNING_STEPS)), gathering_skill_gain);
+            return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_SKINNING_STEPS)), gathering_skill_gain);
+        }
         case SKILL_MINING:
+        {
             if (sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_MINING_STEPS) == 0)
                 return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
-            else
-                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_MINING_STEPS)), gathering_skill_gain);
+            return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_MINING_STEPS)), gathering_skill_gain);
+        }
     }
     return false;
 }
@@ -5448,7 +5441,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Pl
                     sLog.outError("Spell action %u not added into button %u for player %s: player don't known this spell", action, button, player->GetName());
                     return false;
                 }
-                else if (IsPassiveSpell(spellProto))
+                if (IsPassiveSpell(spellProto))
                 {
                     sLog.outError("Spell action %u not added into button %u for player %s: spell is passive", action, button, player->GetName());
                     return false;
@@ -6195,8 +6188,7 @@ uint32 Player::GetRankFromDB(ObjectGuid guid)
         delete result;
         return v;
     }
-    else
-        return 0;
+    return 0;
 }
 
 uint32 Player::GetZoneIdFromDB(ObjectGuid guid)
@@ -6922,9 +6914,10 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
     // use triggered flag only for items with many spell casts and for not first cast
     int count = 0;
 
-    // item spells casted at use
-    for (const auto& spellData : proto->Spells)
+    for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
     {
+        _Spell const& spellData = proto->Spells[i];
+
         // no spell
         if (!spellData.SpellId)
             continue;
@@ -7692,8 +7685,8 @@ Item* Player::GetItemByPos(uint8 bag, uint8 slot) const
 {
     if (bag == INVENTORY_SLOT_BAG_0 && (slot < BANK_SLOT_BAG_END || (slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_END)))
         return m_items[slot];
-    else if ((bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END)
-             || (bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END))
+    if ((bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END)
+        || (bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END))
     {
         Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
         if (pBag)
@@ -9210,7 +9203,7 @@ InventoryResult Player::CanUseItem(ItemPrototype const* pProto, bool direct_acti
         {
             if (GetSkillValue(pProto->RequiredSkill) == 0)
                 return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
-            else if (GetSkillValue(pProto->RequiredSkill) < pProto->RequiredSkillRank)
+            if (GetSkillValue(pProto->RequiredSkill) < pProto->RequiredSkillRank)
                 return EQUIP_ERR_CANT_EQUIP_SKILL;
         }
 
@@ -9397,41 +9390,38 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
 
         return pItem;
     }
-    else
+    ItemPrototype const* itemProto = pItem2->GetProto();
+    if (itemProto->Bonding == BIND_WHEN_PICKED_UP
+        || itemProto->Bonding == BIND_QUEST_ITEM
+        || (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
+        pItem2->SetBinding(true);
+
+    pItem2->SetCount(pItem2->GetCount() + count);
+    if (IsInWorld() && update)
+        pItem2->SendCreateUpdateToPlayer(this);
+
+    if (!clone)
     {
-        ItemPrototype const* itemProto = pItem2->GetProto();
-        if (itemProto->Bonding == BIND_WHEN_PICKED_UP
-                || itemProto->Bonding == BIND_QUEST_ITEM
-                || (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
-            pItem2->SetBinding(true);
-
-        pItem2->SetCount(pItem2->GetCount() + count);
+        // delete item (it not in any slot currently)
         if (IsInWorld() && update)
-            pItem2->SendCreateUpdateToPlayer(this);
-
-        if (!clone)
         {
-            // delete item (it not in any slot currently)
-            if (IsInWorld() && update)
-            {
-                pItem->RemoveFromWorld();
-                pItem->DestroyForPlayer(this);
-            }
-
-            RemoveEnchantmentDurations(pItem);
-            RemoveItemDurations(pItem);
-
-            pItem->SetOwnerGuid(GetObjectGuid());           // prevent error at next SetState in case trade/mail/buy from vendor
-            pItem->SetState(ITEM_REMOVED, this);
+            pItem->RemoveFromWorld();
+            pItem->DestroyForPlayer(this);
         }
 
-        // AddItemDurations(pItem2); - pItem2 already have duration listed for player
-        AddEnchantmentDurations(pItem2);
+        RemoveEnchantmentDurations(pItem);
+        RemoveItemDurations(pItem);
 
-        pItem2->SetState(ITEM_CHANGED, this);
-
-        return pItem2;
+        pItem->SetOwnerGuid(GetObjectGuid());           // prevent error at next SetState in case trade/mail/buy from vendor
+        pItem->SetState(ITEM_REMOVED, this);
     }
+
+    // AddItemDurations(pItem2); - pItem2 already have duration listed for player
+    AddEnchantmentDurations(pItem2);
+
+    pItem2->SetState(ITEM_CHANGED, this);
+
+    return pItem2;
 }
 
 Item* Player::EquipNewItem(uint16 pos, uint32 item, bool update)
@@ -11353,7 +11343,7 @@ uint32 Player::GetDefaultGossipMenuForSource(WorldObject* pSource) const
 {
     if (pSource->GetTypeId() == TYPEID_UNIT)
         return ((Creature*)pSource)->GetCreatureInfo()->GossipMenuId;
-    else if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
+    if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
         return ((GameObject*)pSource)->GetGOInfo()->GetGossipMenuId();
 
     return 0;
@@ -12178,8 +12168,7 @@ bool Player::SatisfyQuestCondition(Quest const* qInfo, bool msg) const
 
         return result;
     }
-    else
-        return true;
+    return true;
 }
 
 bool Player::SatisfyQuestLevel(Quest const* qInfo, bool msg) const
@@ -12504,8 +12493,7 @@ bool Player::CanGiveQuestSourceItemIfNeed(Quest const* pQuest, ItemPosCountVec* 
 
         if (msg == EQUIP_ERR_OK)
             return true;
-        else
-            SendEquipError(msg, nullptr, nullptr, srcitem);
+        SendEquipError(msg, nullptr, nullptr, srcitem);
         return false;
     }
 
@@ -14544,8 +14532,7 @@ InstancePlayerBind* Player::GetBoundInstance(uint32 mapid)
     BoundInstancesMap::iterator itr = m_boundInstances.find(mapid);
     if (itr != m_boundInstances.end())
         return &itr->second;
-    else
-        return nullptr;
+    return nullptr;
 }
 
 void Player::UnbindInstance(uint32 mapid, bool unload)
@@ -14603,8 +14590,7 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool p
                       GetName(), GetGUIDLow(), state->GetMapId(), state->GetInstanceId());
         return &bind;
     }
-    else
-        return nullptr;
+    return nullptr;
 }
 
 DungeonPersistentState* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)
@@ -16506,7 +16492,8 @@ bool Player::OnTaxiFlightSplineUpdate()
                 OnTaxiFlightSplineStart(first);
                 return true;
             }
-            else if (m_taxiTracker.GetState() < Taxi::TRACKER_TRANSFER)
+
+            if (m_taxiTracker.GetState() < Taxi::TRACKER_TRANSFER)
             {
                 OnTaxiFlightSplineEnd();
                 TeleportTo(first->mapid, first->x, first->y, first->z, GetOrientation());

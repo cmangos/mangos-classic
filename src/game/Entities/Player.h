@@ -738,8 +738,7 @@ class PlayerTaxi
                 m_taximask[field] |= submask;
                 return true;
             }
-            else
-                return false;
+            return false;
         }
         void AppendTaximaskTo(ByteBuffer& data, bool all);
 

@@ -150,8 +150,7 @@ class WeatherMgr
             WeatherZoneMap::const_iterator itr = mWeatherZoneMap.find(zone_id);
             if (itr != mWeatherZoneMap.end())
                 return &itr->second;
-            else
-                return nullptr;
+            return nullptr;
         }
 
     private:

@@ -565,12 +565,9 @@ void PoolManager::LoadFromDB()
         sLog.outString();
         return;
     }
-    else
-    {
-        Field* fields = result->Fetch();
-        max_pool_id = fields[0].GetUInt16();
-        delete result;
-    }
+    Field* fields = result->Fetch();
+    max_pool_id = fields[0].GetUInt16();
+    delete result;
 
     mPoolTemplate.resize(max_pool_id + 1);
 

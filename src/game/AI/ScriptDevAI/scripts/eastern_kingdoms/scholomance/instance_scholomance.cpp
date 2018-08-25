@@ -444,8 +444,7 @@ void instance_scholomance::HandleDawnGambitEvent()
         m_uiGambitTransformTimer = 12 * IN_MILLISECONDS;
         return;
     }
-    else
-        m_uiGambitTransformTimer = 0;
+    m_uiGambitTransformTimer = 0;
 
     // Make each of the Scholomance Student cast "Viewing Room Student Transform - Effect" on himself
     // Change faction to hostile and roam in the room

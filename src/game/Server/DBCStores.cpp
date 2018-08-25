@@ -482,7 +482,7 @@ void LoadDBCStores(const std::string& dataPath)
         Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
-    else if (!bad_dbc_files.empty())
+    if (!bad_dbc_files.empty())
     {
         std::string str;
         for (auto& bad_dbc_file : bad_dbc_files)
@@ -605,8 +605,7 @@ uint32 GetAreaFlagByMapId(uint32 mapid)
     AreaFlagByMapID::iterator i = sAreaFlagByMapID.find(mapid);
     if (i == sAreaFlagByMapID.end())
         return 0;
-    else
-        return i->second;
+    return i->second;
 }
 
 

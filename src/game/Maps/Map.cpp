@@ -860,8 +860,7 @@ bool Map::CreatureRespawnRelocation(Creature* c)
         c->OnRelocated();
         return true;
     }
-    else
-        return false;
+    return false;
 }
 
 bool Map::UnloadGrid(const uint32& x, const uint32& y, bool pForce)

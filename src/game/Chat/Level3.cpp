@@ -148,12 +148,9 @@ bool ChatHandler::HandleAHBotReloadCommand(char* /*args*/)
         SendSysMessage(LANG_AHBOT_RELOAD_OK);
         return true;
     }
-    else
-    {
-        SendSysMessage(LANG_AHBOT_RELOAD_FAIL);
-        SetSentErrorMessage(true);
-        return false;
-    }
+    SendSysMessage(LANG_AHBOT_RELOAD_FAIL);
+    SetSentErrorMessage(true);
+    return false;
 }
 
 bool ChatHandler::HandleAHBotStatusCommand(char* args)
@@ -4700,7 +4697,7 @@ bool ChatHandler::HandleResetTalentsCommand(char* args)
             PSendSysMessage(LANG_RESET_TALENTS_ONLINE, GetNameLink(target).c_str());
         return true;
     }
-    else if (target_guid)
+    if (target_guid)
     {
         uint32 at_flags = AT_LOGIN_RESET_TALENTS;
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'", at_flags, target_guid.GetCounter());
@@ -4731,7 +4728,7 @@ bool ChatHandler::HandleResetTaxiNodesCommand(char* args)
             PSendSysMessage("Taxi nodes of %s have been reset.", GetNameLink(target).c_str());
         return true;
     }
-    else if (target_guid)
+    if (target_guid)
     {
         uint32 at_flags = AT_LOGIN_RESET_TAXINODES;
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'", at_flags, target_guid.GetCounter());

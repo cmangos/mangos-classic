@@ -76,12 +76,9 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
             AttackStart(who);
             return true;
         }
-        else
-        {
-            who->SetInCombatWith(m_creature);
-            m_creature->AddThreat(who);
-            return true;
-        }
+        who->SetInCombatWith(m_creature);
+        m_creature->AddThreat(who);
+        return true;
     }
 
     return false;
@@ -280,20 +277,17 @@ Player* FollowerAI::GetLeaderForFollower()
     {
         if (leader->isAlive())
             return leader;
-        else
+        if (Group* group = leader->GetGroup())
         {
-            if (Group* group = leader->GetGroup())
+            for (GroupReference* ref = group->GetFirstMember(); ref != nullptr; ref = ref->next())
             {
-                for (GroupReference* ref = group->GetFirstMember(); ref != nullptr; ref = ref->next())
-                {
-                    Player* member = ref->getSource();
+                Player* member = ref->getSource();
 
-                    if (member && member->isAlive() && m_creature->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
-                    {
-                        debug_log("SD2: FollowerAI GetLeader changed and returned new leader.");
-                        m_leaderGuid = member->GetObjectGuid();
-                        return member;
-                    }
+                if (member && member->isAlive() && m_creature->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
+                {
+                    debug_log("SD2: FollowerAI GetLeader changed and returned new leader.");
+                    m_leaderGuid = member->GetObjectGuid();
+                    return member;
                 }
             }
         }

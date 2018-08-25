@@ -854,8 +854,8 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
             // we are already under the surface or vmap height above map heigt
             if (z < mapHeight || vmapHeight > mapHeight)
                 return vmapHeight;
-            else
-                return mapHeight;                           // better use .map surface height
+            return mapHeight;
+            // better use .map surface height
         }
         else
             return vmapHeight;                              // we have only vmapHeight (if have)
@@ -942,8 +942,7 @@ uint8 TerrainInfo::GetTerrainType(float x, float y) const
 {
     if (GridMap* gmap = const_cast<TerrainInfo*>(this)->GetGrid(x, y))
         return gmap->getTerrainType(x, y);
-    else
-        return 0;
+    return 0;
 }
 
 uint32 TerrainInfo::GetAreaId(float x, float y, float z) const
@@ -1249,8 +1248,7 @@ uint32 TerrainManager::GetAreaIdByAreaFlag(uint16 areaflag, uint32 map_id)
 
     if (entry)
         return entry->ID;
-    else
-        return 0;
+    return 0;
 }
 
 uint32 TerrainManager::GetZoneIdByAreaFlag(uint16 areaflag, uint32 map_id)
@@ -1259,8 +1257,7 @@ uint32 TerrainManager::GetZoneIdByAreaFlag(uint16 areaflag, uint32 map_id)
 
     if (entry)
         return (entry->zone != 0) ? entry->zone : entry->ID;
-    else
-        return 0;
+    return 0;
 }
 
 void TerrainManager::GetZoneAndAreaIdByAreaFlag(uint32& zoneid, uint32& areaid, uint16 areaflag, uint32 map_id)

@@ -1466,7 +1466,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
     if (!target || (target != this && !target->isAlive()))
         return SPELL_AURA_PROC_FAILED;
     // Quick check for target modes for procs: do not cast offensive procs on friendly targets and in reverse
-    else if (!(procEx & PROC_EX_REFLECT))
+    if (!(procEx & PROC_EX_REFLECT))
     {
         if (IsPositiveSpellTargetMode(triggerEntry, this, target) != CanAssist(target))
             return SPELL_AURA_PROC_FAILED;

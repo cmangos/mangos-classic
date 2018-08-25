@@ -304,13 +304,10 @@ struct npc_plucky_johnsonAI : public ScriptedAI
         {
             if (m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
                 return;
-            else
-            {
-                m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
-                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                m_creature->CastSpell(m_creature, SPELL_PLUCKY_HUMAN, TRIGGERED_NONE);
-                m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
-            }
+            m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            m_creature->CastSpell(m_creature, SPELL_PLUCKY_HUMAN, TRIGGERED_NONE);
+            m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
         }
     }
 
@@ -327,8 +324,7 @@ struct npc_plucky_johnsonAI : public ScriptedAI
 
                 return;
             }
-            else
-                m_uiResetTimer -= uiDiff;
+            m_uiResetTimer -= uiDiff;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())

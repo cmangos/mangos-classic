@@ -254,9 +254,8 @@ uint32 BattleGroundQueue::GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleG
     // check if there is enought values(we always add values > 0)
     if (m_WaitTimes[team_index][bracket_id][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME - 1])
         return (m_SumOfWaitTimes[team_index][bracket_id] / COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME);
-    else
         // if there aren't enough values return 0 - not available
-        return 0;
+    return 0;
 }
 
 // remove player from queue and from group info, if group info is empty then remove it too
@@ -1500,12 +1499,9 @@ void BattleGroundMgr::LoadBattleEventIndexes()
                 continue;
             }
             // we have an event which shouldn't exist
-            else
-            {
-                sLog.outErrorDb("BattleGroundEvent: %s with guid %u is registered, for a nonexistent event: map:%u, event1:%u, event2:%u",
-                                (gameobject) ? "gameobject" : "creature", dbTableGuidLow, map, events.event1, events.event2);
-                continue;
-            }
+            sLog.outErrorDb("BattleGroundEvent: %s with guid %u is registered, for a nonexistent event: map:%u, event1:%u, event2:%u",
+                    (gameobject) ? "gameobject" : "creature", dbTableGuidLow, map, events.event1, events.event2);
+            continue;
         }
 
         if (gameobject)

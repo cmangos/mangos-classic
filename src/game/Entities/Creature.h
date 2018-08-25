@@ -167,10 +167,10 @@ struct CreatureInfo
     {
         if (CreatureTypeFlags & CREATURE_TYPEFLAGS_HERBLOOT)
             return SKILL_HERBALISM;
-        else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
+        if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
             return SKILL_MINING;
-        else
-            return SKILL_SKINNING;                          // normal case
+
+        return SKILL_SKINNING;                          // normal case
     }
 
     bool isTameable() const
@@ -629,8 +629,17 @@ class Creature : public Unit
 
         bool AIM_Initialize();
 
-        virtual UnitAI* AI() override { if (m_charmInfo && m_charmInfo->GetAI()) return m_charmInfo->GetAI(); else return m_ai.get(); }
-        virtual CombatData* GetCombatData() override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); else return m_combatData; }
+        virtual UnitAI* AI() override
+        {
+            if (m_charmInfo && m_charmInfo->GetAI()) return m_charmInfo->GetAI();
+            return m_ai.get();
+        }
+
+        virtual CombatData* GetCombatData() override
+        {
+            if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData();
+            return m_combatData;
+        }
 
         void SetWalk(bool enable, bool asDefault = true);
         void SetLevitate(bool enable) override;
@@ -773,8 +782,7 @@ class Creature : public Unit
         {
             if (pos >= CREATURE_MAX_SPELLS || m_charmInfo->GetCharmSpell(pos)->GetType() != ACT_ENABLED)
                 return 0;
-            else
-                return m_charmInfo->GetCharmSpell(pos)->GetAction();
+            return m_charmInfo->GetCharmSpell(pos)->GetAction();
         }
 
         void SetCombatStartPosition(float x, float y, float z, float o) { m_combatStartPos.x = x; m_combatStartPos.y = y; m_combatStartPos.z = z; m_combatStartPos.o = o; }

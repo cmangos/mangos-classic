@@ -289,7 +289,7 @@ ReputationRank GameObject::GetReactionTo(Unit const* unit) const
 
     if (const Unit* owner = GetOwner())
         return owner->GetReactionTo(unit);
-    else if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
+    if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
     {
         if (const FactionTemplateEntry* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
             return GetFactionReaction(factionTemplate, unit);
@@ -856,7 +856,7 @@ bool GameObject::IsEnemy(Unit const* unit) const
 
     if (const Unit* owner = GetOwner())
         return owner->IsEnemy(unit);
-    else if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
+    if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
     {
         if (const FactionTemplateEntry* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
             return (GetFactionReaction(factionTemplate, unit) < REP_UNFRIENDLY);
@@ -881,7 +881,7 @@ bool GameObject::IsFriend(Unit const* unit) const
 
     if (const Unit* owner = GetOwner())
         return owner->IsFriend(unit);
-    else if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
+    if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
     {
         if (const FactionTemplateEntry* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
             return (GetFactionReaction(factionTemplate, unit) > REP_NEUTRAL);
@@ -969,8 +969,7 @@ bool DynamicObject::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bo
 {
     if (Unit* owner = GetCaster())
         return owner->CanAttackSpell(target, spellInfo, isAOE);
-    else
-        return false;
+    return false;
 }
 
 /////////////////////////////////////////////////
@@ -986,8 +985,7 @@ bool DynamicObject::CanAssistSpell(Unit* target, SpellEntry const* spellInfo) co
 {
     if (Unit* owner = GetCaster())
         return owner->CanAttackSpell(target, spellInfo);
-    else
-        return false;
+    return false;
 }
 
 /////////////////////////////////////////////////
@@ -1077,7 +1075,7 @@ bool Unit::CanAttackSpell(Unit* target, SpellEntry const* spellInfo, bool isAOE)
 
         return true;
     }
-    else return false;
+    return false;
 }
 
 /////////////////////////////////////////////////

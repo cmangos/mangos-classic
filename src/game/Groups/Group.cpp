@@ -1009,8 +1009,7 @@ bool Group::SameSubGroup(Player const* member1, Player const* member2) const
         return false;
     if (member1->GetGroup() != this || member2->GetGroup() != this)
         return false;
-    else
-        return member1->GetSubGroup() == member2->GetSubGroup();
+    return member1->GetSubGroup() == member2->GetSubGroup();
 }
 
 // allows setting subgroup for offline members
@@ -1230,8 +1229,8 @@ InstanceGroupBind* Group::GetBoundInstance(uint32 mapid)
     BoundInstancesMap::iterator itr = m_boundInstances.find(mapid);
     if (itr != m_boundInstances.end())
         return &itr->second;
-    else
-        return nullptr;
+
+    return nullptr;
 }
 
 InstanceGroupBind* Group::BindToInstance(DungeonPersistentState* state, bool permanent, bool load)
@@ -1265,8 +1264,7 @@ InstanceGroupBind* Group::BindToInstance(DungeonPersistentState* state, bool per
                       GetId(), state->GetMapId(), state->GetInstanceId());
         return &bind;
     }
-    else
-        return nullptr;
+    return nullptr;
 }
 
 void Group::UnbindInstance(uint32 mapid, bool unload)

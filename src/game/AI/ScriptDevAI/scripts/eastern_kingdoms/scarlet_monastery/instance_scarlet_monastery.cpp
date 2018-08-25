@@ -93,7 +93,7 @@ uint32 instance_scarlet_monastery::GetData(uint32 uiData) const
 {
     if (uiData == TYPE_MOGRAINE_AND_WHITE_EVENT)
         return m_auiEncounter[0];
-    else if (uiData == TYPE_ASHBRINGER_EVENT)
+    if (uiData == TYPE_ASHBRINGER_EVENT)
         return m_auiEncounter[1];
 
     return 0;

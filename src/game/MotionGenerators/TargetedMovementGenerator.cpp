@@ -181,8 +181,7 @@ bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float 
     // More distance let have better performance, less distance let have more sensitive reaction at target move.
     if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
         return !i_target->IsWithinDist3d(x, y, z, this->GetDynamicTargetDistance(owner, true));
-    else
-        return !i_target->IsWithinDist2d(x, y, this->GetDynamicTargetDistance(owner, true));
+    return !i_target->IsWithinDist2d(x, y, this->GetDynamicTargetDistance(owner, true));
 }
 
 template<class T, typename D>
@@ -271,14 +270,11 @@ float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRang
 
         return CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
     }
-    else
-    {
-        if (!forRangeCheck) // move slightly closer than setting to prevent jittery movement
-            return this->i_offset * CHASE_MOVE_CLOSER_FACTOR + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner);
+    if (!forRangeCheck) // move slightly closer than setting to prevent jittery movement
+        return this->i_offset * CHASE_MOVE_CLOSER_FACTOR + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner);
 
-        // check against actual max range setting
-        return this->i_offset + CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
-    }
+    // check against actual max range setting
+    return this->i_offset + CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
 }
 
 //-----------------------------------------------//

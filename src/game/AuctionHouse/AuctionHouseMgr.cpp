@@ -799,9 +799,7 @@ bool AuctionEntry::UpdateBid(uint32 newbid, Player* newbidder /*=nullptr*/)
         CharacterDatabase.CommitTransaction();
         return true;
     }
-    else                                                    // buyout
-    {
-        AuctionBidWinning(newbidder);
-        return false;
-    }
+    // buyout
+    AuctionBidWinning(newbidder);
+    return false;
 }

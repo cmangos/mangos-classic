@@ -136,8 +136,7 @@ CanCastResult UnitAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo, bo
 
         return CAST_OK;
     }
-    else
-        return CAST_FAIL_OTHER;
+    return CAST_FAIL_OTHER;
 }
 
 CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags, ObjectGuid originalCasterGUID) const
@@ -203,14 +202,10 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
             caster->CastSpell(target, spellInfo, flags, nullptr, nullptr, originalCasterGUID);
             return CAST_OK;
         }
-        else
-        {
-            sLog.outErrorDb("DoCastSpellIfCan by %s attempt to cast spell %u but spell does not exist.", m_unit->GetObjectGuid().GetString().c_str(), spellId);
-            return CAST_FAIL_OTHER;
-        }
+        sLog.outErrorDb("DoCastSpellIfCan by %s attempt to cast spell %u but spell does not exist.", m_unit->GetObjectGuid().GetString().c_str(), spellId);
+        return CAST_FAIL_OTHER;
     }
-    else
-        return CAST_FAIL_IS_CASTING;
+    return CAST_FAIL_IS_CASTING;
 }
 
 void UnitAI::AttackStart(Unit* who)

@@ -184,8 +184,7 @@ struct boss_mr_smiteAI : public ScriptedAI
                     m_uiEquipTimer -= uiDiff;
                     return;
                 }
-                else
-                    m_uiEquipTimer = 0;
+                m_uiEquipTimer = 0;
             }
 
             switch (m_uiPhase)

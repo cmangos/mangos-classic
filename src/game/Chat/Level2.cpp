@@ -427,8 +427,7 @@ bool ChatHandler::HandleGoTriggerCommand(char* args)
 
         return HandleGoHelper(_player, at->target_mapId, at->target_X, at->target_Y, &at->target_Z);
     }
-    else
-        return HandleGoHelper(_player, atEntry->mapid, atEntry->x, atEntry->y, &atEntry->z);
+    return HandleGoHelper(_player, atEntry->mapid, atEntry->x, atEntry->y, &atEntry->z);
 }
 
 bool ChatHandler::HandleGoGraveyardCommand(char* args)
@@ -3017,7 +3016,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
         PSendSysMessage(LANG_WAYPOINT_REMOVED);
         return true;
     }
-    else if (subCmd == "move")                              // Move to player position, no additional command required
+    if (subCmd == "move")                              // Move to player position, no additional command required
     {
         float x, y, z;
         m_session->GetPlayer()->GetPosition(x, y, z);
@@ -3030,7 +3029,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
         PSendSysMessage(LANG_WAYPOINT_CHANGED);
         return true;
     }
-    else if (subCmd == "waittime")
+    if (subCmd == "waittime")
     {
         uint32 waittime;
         if (!ExtractUInt32(&args, waittime))

@@ -4195,7 +4195,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                             rank = 1;
                             break;
                         }
-                        else if (mDummyAura->GetId() == 18693)
+                        if (mDummyAura->GetId() == 18693)
                         {
                             rank = 2;
                             break;
@@ -5262,8 +5262,7 @@ void Spell::EffectDispelMechanic(SpellEffectIndex eff_idx)
             unitTarget->RemoveAurasDueToSpell(spell->Id);
             if (Auras.empty())
                 break;
-            else
-                next = Auras.begin();
+            next = Auras.begin();
         }
     }
 

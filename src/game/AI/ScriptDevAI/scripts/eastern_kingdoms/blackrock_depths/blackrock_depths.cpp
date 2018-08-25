@@ -58,9 +58,8 @@ bool GOUse_go_bar_beer_keg(Player* /*pPlayer*/, GameObject* pGo)
     {
         if (pInstance->GetData(TYPE_HURLEY) == IN_PROGRESS || pInstance->GetData(TYPE_HURLEY) == DONE) // GOs despawning on use, this check should never be true but this is proper to have it there
             return false;
-        else
             // Every time we set the event to SPECIAL, the instance script increments the number of broken kegs, capping at 3
-            pInstance->SetData(TYPE_HURLEY, SPECIAL);
+        pInstance->SetData(TYPE_HURLEY, SPECIAL);
     }
     return false;
 }
@@ -1484,8 +1483,7 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
     {
         if (pWho && (pWho->GetEntry() == NPC_RIBBLY_SCREWSPIGOT || pWho->GetEntry() == NPC_RIBBLY_CRONY))
             return;
-        else
-            ScriptedAI::AttackStart(pWho);
+        ScriptedAI::AttackStart(pWho);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -1814,21 +1812,18 @@ bool GOUse_go_bar_ale_mug(Player* pPlayer, GameObject* pGo)
     {
         if (pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS || pInstance->GetData(TYPE_PLUGGER) == DONE) // GOs despawning on use, this check should never be true but this is proper to have it there
             return false;
-        else
+        if (Creature* pPlugger = pInstance->GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
         {
-            if (Creature* pPlugger = pInstance->GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
+            if (boss_plugger_spazzringAI* pPluggerAI = dynamic_cast<boss_plugger_spazzringAI*>(pPlugger->AI()))
             {
-                if (boss_plugger_spazzringAI* pPluggerAI = dynamic_cast<boss_plugger_spazzringAI*>(pPlugger->AI()))
-                {
-                    // Every time we set the event to SPECIAL, the instance script increments the number of stolen mugs/boars, capping at 3
-                    pInstance->SetData(TYPE_PLUGGER, SPECIAL);
-                    // If the cap is reached the instance script changes the type from SPECIAL to IN_PROGRESS
-                    // Plugger then aggroes and engage players, else he just warns them
-                    if (pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS)
-                        pPluggerAI->AttackThief(pPlayer);
-                    else
-                        pPluggerAI->WarnThief(pPlayer);
-                }
+                // Every time we set the event to SPECIAL, the instance script increments the number of stolen mugs/boars, capping at 3
+                pInstance->SetData(TYPE_PLUGGER, SPECIAL);
+                // If the cap is reached the instance script changes the type from SPECIAL to IN_PROGRESS
+                // Plugger then aggroes and engage players, else he just warns them
+                if (pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS)
+                    pPluggerAI->AttackThief(pPlayer);
+                else
+                    pPluggerAI->WarnThief(pPlayer);
             }
         }
     }

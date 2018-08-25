@@ -404,10 +404,11 @@ uint32 instance_blackrock_depths::GetData(uint32 uiType) const
         case TYPE_VAULT:
             return m_auiEncounter[1];
         case TYPE_ROCKNOT:
+        {
             if (m_auiEncounter[2] == IN_PROGRESS && m_uiBarAleCount == 3)
                 return SPECIAL;
-            else
-                return m_auiEncounter[2];
+            return m_auiEncounter[2];
+        }
         case TYPE_TOMB_OF_SEVEN:
             return m_auiEncounter[3];
         case TYPE_LYCEUM:
@@ -542,11 +543,14 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
         case NPC_RIBBLY_SCREWSPIGGOT:
             // Do nothing if the patrol was already spawned or is about to:
             // Plugger has made the bar hostile
+        {
+            // Do nothing if the patrol was already spawned or is about to:
+            // Plugger has made the bar hostile
             if (GetData(TYPE_BAR) == IN_PROGRESS || GetData(TYPE_PLUGGER) == IN_PROGRESS || GetData(TYPE_BAR) == DONE || GetData(TYPE_PLUGGER) == DONE)
                 return;
-            else
-                SetData(TYPE_BAR, IN_PROGRESS);
-            break;
+            SetData(TYPE_BAR, IN_PROGRESS);
+        }
+        break;
         case NPC_SHADOWFORGE_SENATOR:
             // Emperor Dagran Thaurissan performs a random yell upon the death
             // of Shadowforge Senators in the Throne Room

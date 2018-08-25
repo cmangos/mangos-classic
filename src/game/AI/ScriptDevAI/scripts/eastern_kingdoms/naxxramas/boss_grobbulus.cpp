@@ -116,8 +116,7 @@ struct boss_grobbulusAI : public ScriptedAI
             DoScriptText(EMOTE_INJECTION, m_creature, pTarget);
             return true;
         }
-        else
-            return false;
+        return false;
     }
 
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override

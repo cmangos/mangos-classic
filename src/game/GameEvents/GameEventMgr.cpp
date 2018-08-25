@@ -60,8 +60,7 @@ uint32 GameEventMgr::NextCheck(uint16 entry) const
     // In case the end is before next check
     if (mGameEvent[entry].end  < time_t(currenttime + delay))
         return uint32(mGameEvent[entry].end - currenttime);
-    else
-        return delay;
+    return delay;
 }
 
 void GameEventMgr::StartEvent(uint16 event_id, bool overwrite /*=false*/, bool resume /*=false*/)

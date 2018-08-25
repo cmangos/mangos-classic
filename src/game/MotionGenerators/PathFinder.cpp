@@ -221,18 +221,15 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
             m_type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
             return;
         }
-        else
+        float closestPoint[VERTEX_SIZE];
+        // we may want to use closestPointOnPolyBoundary instead
+        if (dtStatusSucceed(m_navMeshQuery->closestPointOnPoly(endPoly, endPoint, closestPoint, nullptr)))
         {
-            float closestPoint[VERTEX_SIZE];
-            // we may want to use closestPointOnPolyBoundary instead
-            if (dtStatusSucceed(m_navMeshQuery->closestPointOnPoly(endPoly, endPoint, closestPoint, nullptr)))
-            {
-                dtVcopy(endPoint, closestPoint);
-                setActualEndPosition(Vector3(endPoint[2], endPoint[0], endPoint[1]));
-            }
-
-            m_type = PATHFIND_INCOMPLETE;
+            dtVcopy(endPoint, closestPoint);
+            setActualEndPosition(Vector3(endPoint[2], endPoint[0], endPoint[1]));
         }
+
+        m_type = PATHFIND_INCOMPLETE;
     }
 
     // *** poly path generating logic ***
@@ -805,7 +802,7 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
             }
             break;
         }
-        else if (offMeshConnection && inRangeYZX(iterPos, steerPos, SMOOTH_PATH_SLOP, 1.0f))
+        if (offMeshConnection && inRangeYZX(iterPos, steerPos, SMOOTH_PATH_SLOP, 1.0f))
         {
             // Advance the path up to and over the off-mesh connection.
             dtPolyRef prevRef = INVALID_POLYREF;

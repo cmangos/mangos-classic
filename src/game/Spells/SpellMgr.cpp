@@ -334,12 +334,14 @@ WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo)
             return RANGED_ATTACK;
         default:
             // Wands
+        {
+            // Wands
             if (spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))
                 return RANGED_ATTACK;
-            else if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQ_OFFHAND))
+            if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQ_OFFHAND))
                 return OFF_ATTACK;
-            else
-                return BASE_ATTACK;
+            return BASE_ATTACK;
+        }
             break;
     }
 }
@@ -505,7 +507,7 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 f
     {
         if (spellInfo->HasAttribute(SPELL_ATTR_NOT_SHAPESHIFT)) // not while shapeshifted
             return SPELL_FAILED_NOT_SHAPESHIFT;
-        else if (spellInfo->Stances != 0)                   // needs other shapeshift
+        if (spellInfo->Stances != 0)                   // needs other shapeshift
             return SPELL_FAILED_ONLY_SHAPESHIFT;
     }
     else
@@ -624,11 +626,8 @@ struct SpellRankHelper
                 if (!worker.IsValidCustomRank(entry, spell_id, first_id))
                     return;
                 // for later check that first rank also added
-                else
-                {
-                    firstRankSpellsWithCustomRanks.insert(first_id);
-                    ++customRank;
-                }
+                firstRankSpellsWithCustomRanks.insert(first_id);
+                ++customRank;
             }
         }
 
@@ -2395,7 +2394,7 @@ void SpellMgr::LoadSpellAreas()
             sLog.outErrorDb("Spell %u listed in `spell_area` have wrong conditionId (%u) requirement", spell, spellArea.conditionId);
             continue;
         }
-        else if (!spellArea.conditionId)
+        if (!spellArea.conditionId)
         {
             if (spellArea.questStart && !sObjectMgr.GetQuestTemplate(spellArea.questStart))
             {
@@ -3049,9 +3048,8 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
         if (auraSpell > 0)
             // have expected aura
             return player->HasAura(auraSpell);
-        else
             // not have expected aura
-            return !player->HasAura(-auraSpell);
+        return !player->HasAura(-auraSpell);
     }
 
     return true;

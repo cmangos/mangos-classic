@@ -149,18 +149,16 @@ int32 GetUnlearnCostMedium(Player* pPlayer)                 // blacksmith, leath
 
     if (level < 51)
         return 250000;
-    else if (level < 66)
+    if (level < 66)
         return 500000;
-    else
-        return 1000000;
+    return 1000000;
 }
 
 int32 GetUnlearnCostLow(Player* pPlayer)                    // blacksmith
 {
     if (pPlayer->getLevel() < 66)
         return 50000;
-    else
-        return 100000;
+    return 100000;
 }
 
 /*###

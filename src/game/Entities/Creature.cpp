@@ -597,8 +597,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                     RemoveCorpse();
                     break;
                 }
-                else
-                    m_corpseDecayTimer -= update_diff;
+                m_corpseDecayTimer -= update_diff;
             }
 
             Unit::Update(update_diff, diff);
@@ -2319,10 +2318,9 @@ time_t Creature::GetRespawnTimeEx() const
     time_t now = time(nullptr);
     if (m_respawnTime > now)                                // dead (no corpse)
         return m_respawnTime;
-    else if (m_corpseDecayTimer > 0)                        // dead (corpse)
+    if (m_corpseDecayTimer > 0)                        // dead (corpse)
         return now + m_respawnDelay + m_corpseDecayTimer / IN_MILLISECONDS;
-    else
-        return now;
+    return now;
 }
 
 void Creature::GetRespawnCoord(float& x, float& y, float& z, float* ori, float* dist) const

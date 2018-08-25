@@ -307,8 +307,7 @@ class BattleGround
         {
             if (team == ALLIANCE)
                 return m_InvitedAlliance;
-            else
-                return m_InvitedHorde;
+            return m_InvitedHorde;
         }
         bool HasFreeSlots() const;
         uint32 GetFreeSlotsForTeam(Team team) const;

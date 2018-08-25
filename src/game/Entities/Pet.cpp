@@ -242,8 +242,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
         delete result;
         return false;
     }
-    else
-        owner->SetTemporaryUnsummonedPetNumber(0);
+    owner->SetTemporaryUnsummonedPetNumber(0);
 
     Map* map = owner->GetMap();
 
@@ -883,10 +882,9 @@ HappinessState Pet::GetHappinessState() const
 {
     if (GetPower(POWER_HAPPINESS) < HAPPINESS_LEVEL_SIZE)
         return UNHAPPY;
-    else if (GetPower(POWER_HAPPINESS) >= HAPPINESS_LEVEL_SIZE * 2)
+    if (GetPower(POWER_HAPPINESS) >= HAPPINESS_LEVEL_SIZE * 2)
         return HAPPY;
-    else
-        return CONTENT;
+    return CONTENT;
 }
 
 void Pet::SetLoyaltyLevel(LoyaltyLevel level)
@@ -1513,14 +1511,14 @@ uint32 Pet::GetCurrentFoodBenefitLevel(uint32 itemlevel) const
     if (getLevel() <= itemlevel + 5)                        // possible to feed level 60 pet with level 55 level food for full effect
         return 35000;
     // -10..-6
-    else if (getLevel() <= itemlevel + 10)                  // pure guess, but sounds good
+    if (getLevel() <= itemlevel + 10)                  // pure guess, but sounds good
         return 17000;
     // -14..-11
-    else if (getLevel() <= itemlevel + 14)                  // level 55 food gets green on 70, makes sense to me
+    if (getLevel() <= itemlevel + 14)                  // level 55 food gets green on 70, makes sense to me
         return 8000;
-    // -15 or less
-    else
-        return 0;                                           // food too low level
+        // -15 or less
+    return 0;
+    // food too low level
 }
 
 void Pet::_LoadSpellCooldowns()
@@ -1932,7 +1930,7 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
                     break;
                 }
                 // ignore new lesser rank
-                else if (sSpellMgr.IsHighRankOfSpell(oldspell_id, spell_id))
+                if (sSpellMgr.IsHighRankOfSpell(oldspell_id, spell_id))
                     return false;
             }
         }
@@ -2103,14 +2101,13 @@ uint32 Pet::resetTalentsCost() const
     if (m_resetTalentsCost < 10 * SILVER || days > 0)
         return 10 * SILVER;
     // then 50 silver
-    else if (m_resetTalentsCost < 50 * SILVER)
+    if (m_resetTalentsCost < 50 * SILVER)
         return 50 * SILVER;
-    // then 1 gold
-    else if (m_resetTalentsCost < 1 * GOLD)
+        // then 1 gold
+    if (m_resetTalentsCost < 1 * GOLD)
         return 1 * GOLD;
     // then increasing at a rate of 1 gold; cap 10 gold
-    else
-        return (m_resetTalentsCost + 1 * GOLD > 10 * GOLD ? 10 * GOLD : m_resetTalentsCost + 1 * GOLD);
+    return (m_resetTalentsCost + 1 * GOLD > 10 * GOLD ? 10 * GOLD : m_resetTalentsCost + 1 * GOLD);
 }
 
 CharmInfo* Pet::InitCharmInfo(Unit* charm)

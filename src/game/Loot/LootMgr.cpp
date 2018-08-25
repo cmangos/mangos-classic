@@ -314,7 +314,7 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
             sLog.outErrorDb("Table '%s' entry %d item %d: negative chance is given for a reference, skipped", store.GetName(), entry, itemid);
             return false;
         }
-        else if (chance == 0)                               // no chance for the reference
+        if (chance == 0)                               // no chance for the reference
         {
             sLog.outErrorDb("Table '%s' entry %d item %d: zero chance is given for a reference, reference will never be used, skipped", store.GetName(), entry, itemid);
             return false;
@@ -467,8 +467,7 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
             {
                 if (loot->m_isReleased || player->GetObjectGuid() == loot->m_currentLooterGuid)
                     return LOOT_SLOT_NORMAL;
-                else
-                    return MAX_LOOT_SLOT_TYPE;
+                return MAX_LOOT_SLOT_TYPE;
             }
             return LOOT_SLOT_VIEW;
         }
@@ -482,20 +481,14 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
                     return LOOT_SLOT_NORMAL;
                 return MAX_LOOT_SLOT_TYPE;
             }
-            else
-            {
-                if (player->GetObjectGuid() == loot->m_masterOwnerGuid)
-                    return LOOT_SLOT_MASTER;
-                else
-                {
-                    if (!isAllowed)
-                        return MAX_LOOT_SLOT_TYPE;
+            if (player->GetObjectGuid() == loot->m_masterOwnerGuid)
+                return LOOT_SLOT_MASTER;
+            if (!isAllowed)
+                return MAX_LOOT_SLOT_TYPE;
 
-                    if (!isBlocked && isNotVisibleForML)
-                        return LOOT_SLOT_NORMAL;
-                }
-                return LOOT_SLOT_VIEW;
-            }
+            if (!isBlocked && isNotVisibleForML)
+                return LOOT_SLOT_NORMAL;
+            return LOOT_SLOT_VIEW;
         }
         case ROUND_ROBIN:
         {
@@ -1445,7 +1438,7 @@ bool IsEligibleForLoot(Player* looter, WorldObject* lootTarget)
 {
     if (looter->IsAtGroupRewardDistance(lootTarget))
         return true;
-    else if (lootTarget->GetTypeId() == TYPEID_UNIT)
+    if (lootTarget->GetTypeId() == TYPEID_UNIT)
     {
         Unit* creature = (Unit*)lootTarget;
         return creature->getThreatManager().HasThreat(looter);

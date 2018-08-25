@@ -208,8 +208,7 @@ struct boss_sapphironAI : public ScriptedAI
 
                         return;
                     }
-                    else
-                        m_uiFlyTimer -= uiDiff;
+                    m_uiFlyTimer -= uiDiff;
                 }
 
                 // Only Phase in which we have melee attack!

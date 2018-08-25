@@ -1274,8 +1274,7 @@ class Unit : public WorldObject
                 m_attackers.insert(pAttacker);
                 return true;
             }
-            else
-                return false;
+            return false;
         }
         void _removeAttacker(Unit* pAttacker)               //< (Internal Use) must be called only from Unit::AttackStop()
         {
@@ -2546,8 +2545,7 @@ struct LowestHPNearestOrder : public std::binary_function<Unit const, Unit const
     {
         if (_Left->GetHealthPercent() == _Right->GetHealthPercent())
             return m_mainTarget->GetDistanceOrder(_Left, _Right, m_distcalc);
-        else
-            return _Left->GetHealthPercent() < _Right->GetHealthPercent();
+        return _Left->GetHealthPercent() < _Right->GetHealthPercent();
     }
 };
 

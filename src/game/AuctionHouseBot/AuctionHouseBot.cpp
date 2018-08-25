@@ -131,10 +131,9 @@ class AHB_Seller_Config
         {
             if (m_minTime < 1)
                 return 1;
-            else if ((m_maxTime) && (m_minTime > m_maxTime))
+            if ((m_maxTime) && (m_minTime > m_maxTime))
                 return m_maxTime;
-            else
-                return m_minTime;
+            return m_minTime;
         }
 
         void        SetMaxTime(uint32 value) { m_maxTime = value; }
@@ -244,8 +243,7 @@ bool AuctionBotConfig::Initialize()
         setConfig(CONFIG_UINT32_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO, 0);
         return false;
     }
-    else
-        sLog.outString("AHBot using configuration file %s", m_configFileName.c_str());
+    sLog.outString("AHBot using configuration file %s", m_configFileName.c_str());
 
     GetConfigFromFile();
 
@@ -706,11 +704,8 @@ bool AuctionBotBuyer::IsBidableEntry(uint32 bidPrice, double InGame_BuyPrice, do
         DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: WIN BID! Chance = %u, num = %u.", Chance, RandNum);
         return true;
     }
-    else
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: LOOSE BID! Chance = %u, num = %u.", Chance, RandNum);
-        return false;
-    }
+    DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: LOOSE BID! Chance = %u, num = %u.", Chance, RandNum);
+    return false;
 }
 
 void AuctionBotBuyer::PlaceBidToEntry(AuctionEntry* auction, uint32 bidPrice) const
@@ -868,7 +863,7 @@ bool AuctionBotBuyer::Update(AuctionHouseType houseType)
             addNewAuctionBuyerBotBid(m_HouseConfig[houseType]);
         return true;
     }
-    else return false;
+    return false;
 }
 
 //== AuctionBotSeller functions ============================
@@ -1625,8 +1620,7 @@ bool AuctionBotSeller::Update(AuctionHouseType houseType)
             addNewAuctions(m_HouseConfig[houseType]);
         return true;
     }
-    else
-        return false;
+    return false;
 }
 
 //== AuctionHouseBot functions =============================

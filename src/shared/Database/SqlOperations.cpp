@@ -185,8 +185,7 @@ QueryResult* SqlQueryHolder::GetResult(size_t index)
         /// when you get a result aways remember to delete it!
         return m_queries[index].second;
     }
-    else
-        return nullptr;
+    return nullptr;
 }
 
 void SqlQueryHolder::SetResult(size_t index, QueryResult* result)

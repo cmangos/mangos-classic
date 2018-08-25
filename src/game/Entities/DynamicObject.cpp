@@ -209,16 +209,14 @@ bool DynamicObject::IsHostileTo(Unit const* unit) const
 {
     if (Unit* owner = GetCaster())
         return owner->IsHostileTo(unit);
-    else
-        return false;
+    return false;
 }
 
 bool DynamicObject::IsFriendlyTo(Unit const* unit) const
 {
     if (Unit* owner = GetCaster())
         return owner->IsFriendlyTo(unit);
-    else
-        return true;
+    return true;
 }
 
 void DynamicObject::OnPersistentAreaAuraEnd()

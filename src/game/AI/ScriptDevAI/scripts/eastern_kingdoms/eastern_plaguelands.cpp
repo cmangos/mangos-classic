@@ -269,16 +269,13 @@ struct npc_eris_havenfireAI : public ScriptedAI
                 if (pTemp->getVictim() && pTemp->IsWithinDistInMap(pTemp->getVictim(), 30.0f))
                     continue;
                 // Else, find a new target in range
-                else
-                {
-                    // First look for an Injured Peasant in range (arbitrary choice), if none look for a Plagued Peasant
-                    Creature* pTarget = GetClosestCreatureWithEntry(pTemp, NPC_INJURED_PEASANT, 30.0f);
-                    if (!pTarget)
-                        pTarget = GetClosestCreatureWithEntry(pTemp, NPC_PLAGUED_PEASANT, 30.0f);
+                // First look for an Injured Peasant in range (arbitrary choice), if none look for a Plagued Peasant
+                Creature* pTarget = GetClosestCreatureWithEntry(pTemp, NPC_INJURED_PEASANT, 30.0f);
+                if (!pTarget)
+                    pTarget = GetClosestCreatureWithEntry(pTemp, NPC_PLAGUED_PEASANT, 30.0f);
 
-                    if (pTarget)
-                        pTemp->AI()->AttackStart(pTarget);
-                }
+                if (pTarget)
+                    pTemp->AI()->AttackStart(pTarget);
             }
         }
     }

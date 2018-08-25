@@ -98,9 +98,9 @@ namespace FactorySelector
         const CreatureAICreator* ai_factory = ai_registry.GetRegistryItem(ainame);
         if (creature)
             return  ai_factory->Create(creature);
-        else if (ainame == "PetAI")
+        if (ainame == "PetAI")
             return (new PetAI(unit));
-        else if (ainame == "PossessedAI")
+        if (ainame == "PossessedAI")
             return (new PossessedAI(unit));
 
         sLog.outError("FactorySelector::GetSpecificAI> Cannot get %s AI for %s", ainame.c_str(), unit->GetObjectGuid().GetString().c_str());
