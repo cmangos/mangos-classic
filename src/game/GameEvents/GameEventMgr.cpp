@@ -599,7 +599,7 @@ void GameEventMgr::Initialize(MapPersistentState* state)
 {
     // At map persistent state creating need only apply pool spawn modifications
     // other data is global and will be auto-apply
-    for (std::_Simple_types<unsigned short>::value_type m_ActiveEvent : m_ActiveEvents)
+    for (uint16 m_ActiveEvent : m_ActiveEvents)
         for (IdList::iterator pool_itr = mGameEventSpawnPoolIds[m_ActiveEvent].begin(); pool_itr != mGameEventSpawnPoolIds[m_ActiveEvent].end(); ++pool_itr)
             sPoolMgr.InitSpawnPool(*state, *pool_itr);
 }
@@ -715,7 +715,7 @@ void GameEventMgr::GameEventSpawn(int16 event_id)
         return;
     }
 
-    for (std::_Simple_types<unsigned int>::value_type& itr : mGameEventCreatureGuids[internal_event_id])
+    for (uint32& itr : mGameEventCreatureGuids[internal_event_id])
     {
         // Add to correct cell
         CreatureData const* data = sObjectMgr.GetCreatureData(itr);
@@ -745,7 +745,7 @@ void GameEventMgr::GameEventSpawn(int16 event_id)
         return;
     }
 
-    for (std::_Simple_types<unsigned int>::value_type& itr : mGameEventGameobjectGuids[internal_event_id])
+    for (uint32& itr : mGameEventGameobjectGuids[internal_event_id])
     {
         // Add to correct cell
         GameObjectData const* data = sObjectMgr.GetGOData(itr);
@@ -777,7 +777,7 @@ void GameEventMgr::GameEventSpawn(int16 event_id)
             return;
         }
 
-        for (std::_Simple_types<unsigned short>::value_type& itr : mGameEventSpawnPoolIds[event_id])
+        for (uint16& itr : mGameEventSpawnPoolIds[event_id])
         sPoolMgr.SpawnPoolInMaps(itr, true);
     }
 }
@@ -792,7 +792,7 @@ void GameEventMgr::GameEventUnspawn(int16 event_id)
         return;
     }
 
-    for (std::_Simple_types<unsigned int>::value_type& itr : mGameEventCreatureGuids[internal_event_id])
+    for (uint32& itr : mGameEventCreatureGuids[internal_event_id])
     {
         // Remove the creature from grid
         if (CreatureData const* data = sObjectMgr.GetCreatureData(itr))
@@ -822,7 +822,7 @@ void GameEventMgr::GameEventUnspawn(int16 event_id)
         return;
     }
 
-    for (std::_Simple_types<unsigned int>::value_type& itr : mGameEventGameobjectGuids[internal_event_id])
+    for (uint32& itr : mGameEventGameobjectGuids[internal_event_id])
     {
         // Remove the gameobject from grid
         if (GameObjectData const* data = sObjectMgr.GetGOData(itr))
@@ -854,7 +854,7 @@ void GameEventMgr::GameEventUnspawn(int16 event_id)
             return;
         }
 
-        for (std::_Simple_types<unsigned short>::value_type& itr : mGameEventSpawnPoolIds[event_id])
+        for (uint16& itr : mGameEventSpawnPoolIds[event_id])
         {
             sPoolMgr.DespawnPoolInMaps(itr);
         }
@@ -925,7 +925,7 @@ void GameEventMgr::UpdateCreatureData(int16 event_id, bool activate)
 
 void GameEventMgr::UpdateEventQuests(uint16 event_id, bool Activate)
 {
-    for (std::_Simple_types<unsigned int>::value_type& itr : mGameEventQuests[event_id])
+    for (uint32& itr : mGameEventQuests[event_id])
     {
         const Quest* pQuest = sObjectMgr.GetQuestTemplate(itr);
 
@@ -1006,7 +1006,7 @@ bool GameEventMgr::IsActiveHoliday(HolidayIds id)
     if (id == HOLIDAY_NONE)
         return false;
 
-    for (std::_Simple_types<unsigned short>::value_type m_ActiveEvent : m_ActiveEvents)
+    for (uint16 m_ActiveEvent : m_ActiveEvents)
         if (mGameEvent[m_ActiveEvent].holiday_id == id)
             return true;
 

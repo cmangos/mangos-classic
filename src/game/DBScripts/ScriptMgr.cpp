@@ -978,7 +978,7 @@ void ScriptMgr::LoadDbScriptStrings()
     CheckScriptTexts(sCreatureMovementScripts, ids);
     CheckScriptTexts(sRelayScripts, ids);
 
-    for (std::_Simple_types<int>::value_type id : ids)
+    for (int32 id : ids)
     sLog.outErrorDb("Table `dbscript_string` has unused string id %u", id);
 }
 

@@ -475,14 +475,14 @@ void BattleGround::SendPacketToTeam(Team teamId, WorldPacket const& packet, Play
     }
 }
 
-void BattleGround::PlaySoundToAll(uint32 SoundID)
+void BattleGround::PlaySoundToAll(uint32 SoundID) const
 {
     WorldPacket data;
     sBattleGroundMgr.BuildPlaySoundPacket(data, SoundID);
     SendPacketToAll(data);
 }
 
-void BattleGround::PlaySoundToTeam(uint32 SoundID, Team teamId)
+void BattleGround::PlaySoundToTeam(uint32 SoundID, Team teamId) const
 {
     WorldPacket data;
 

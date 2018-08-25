@@ -104,7 +104,7 @@ void MapManager::LoadTransports()
 
         m_Transports.insert(t);
 
-        for (std::_Simple_types<unsigned int>::value_type i : mapsUsed)
+        for (uint32 i : mapsUsed)
             m_TransportsByMap[i].insert(t);
 
         // If we someday decide to use the grid to track transports, here:

@@ -230,7 +230,7 @@ void LootStore::ReportUnusedIds(LootIdSet const& ids_set) const
     // all still listed ids isn't referenced
     if (!ids_set.empty())
     {
-        for (std::_Simple_types<unsigned int>::value_type itr : ids_set)
+        for (uint32 itr : ids_set)
         sLog.outErrorDb("Table '%s' entry %d isn't %s and not referenced from loot, and then useless.", GetName(), itr, GetEntryName());
         sLog.outString();
     }
@@ -2507,7 +2507,7 @@ void LoadLootTemplates_Creature()
             }
         }
     }
-    for (std::_Simple_types<unsigned int>::value_type itr : ids_setUsed)
+    for (uint32 itr : ids_setUsed)
         ids_set.erase(itr);
 
     // for alterac valley we've defined Player-loot inside creature_loot_template id=0
@@ -2537,7 +2537,7 @@ void LoadLootTemplates_Disenchant()
             }
         }
     }
-    for (std::_Simple_types<unsigned int>::value_type itr : ids_setUsed)
+    for (uint32 itr : ids_setUsed)
         ids_set.erase(itr);
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Disenchant.ReportUnusedIds(ids_set);
@@ -2579,7 +2579,7 @@ void LoadLootTemplates_Gameobject()
                 ids_setUsed.insert(lootid);
         }
     }
-    for (std::_Simple_types<unsigned int>::value_type itr : ids_setUsed)
+    for (uint32 itr : ids_setUsed)
         ids_set.erase(itr);
 
     // output error for any still listed (not referenced from appropriate table) ids
@@ -2630,7 +2630,7 @@ void LoadLootTemplates_Pickpocketing()
             }
         }
     }
-    for (std::_Simple_types<unsigned int>::value_type itr : ids_setUsed)
+    for (uint32 itr : ids_setUsed)
         ids_set.erase(itr);
 
     // output error for any still listed (not referenced from appropriate table) ids
@@ -2671,7 +2671,7 @@ void LoadLootTemplates_Skinning()
             }
         }
     }
-    for (std::_Simple_types<unsigned int>::value_type itr : ids_setUsed)
+    for (uint32 itr : ids_setUsed)
         ids_set.erase(itr);
 
     // output error for any still listed (not referenced from appropriate table) ids

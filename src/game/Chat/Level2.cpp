@@ -790,7 +790,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         eventFilter << " AND (event IS nullptr ";
         bool initString = true;
 
-        for (std::_Simple_types<unsigned short>::value_type itr : activeEventsList)
+        for (uint16 itr : activeEventsList)
         {
             if (initString)
             {
@@ -4372,7 +4372,7 @@ bool ChatHandler::HandlePoolSpawnsCommand(char* args)
     SpawnedPoolData const& spawns = mapState->GetSpawnedPoolData();
 
     SpawnedPoolObjects const& crSpawns = spawns.GetSpawnedCreatures();
-    for (std::_Simple_types<unsigned int>::value_type crSpawn : crSpawns)
+    for (uint32 crSpawn : crSpawns)
         if (!pool_id || pool_id == sPoolMgr.IsPartOfAPool<Creature>(crSpawn))
             if (CreatureData const* data = sObjectMgr.GetCreatureData(crSpawn))
                 if (CreatureInfo const* info = ObjectMgr::GetCreatureTemplate(data->id))
@@ -4380,7 +4380,7 @@ bool ChatHandler::HandlePoolSpawnsCommand(char* args)
                         crSpawn, info->Name, data->posX, data->posY, data->posZ, data->mapid);
 
     SpawnedPoolObjects const& goSpawns = spawns.GetSpawnedGameobjects();
-    for (std::_Simple_types<unsigned int>::value_type goSpawn : goSpawns)
+    for (uint32 goSpawn : goSpawns)
         if (!pool_id || pool_id == sPoolMgr.IsPartOfAPool<GameObject>(goSpawn))
             if (GameObjectData const* data = sObjectMgr.GetGOData(goSpawn))
                 if (GameObjectInfo const* info = ObjectMgr::GetGameObjectInfo(data->id))

@@ -12448,7 +12448,7 @@ bool Player::SatisfyQuestPrevChain(Quest const* qInfo, bool msg) const
     if (qInfo->prevChainQuests.empty())
         return true;
 
-    for (std::_Simple_types<unsigned int>::value_type prevId : qInfo->prevChainQuests)
+    for (uint32 prevId : qInfo->prevChainQuests)
     {
         // If any of the previous quests in chain active, return false
         if (IsCurrentQuest(prevId))
@@ -17407,7 +17407,7 @@ void Player::learnDefaultSpells()
 {
     // learn default race/class spells
     PlayerInfo const* info = sObjectMgr.GetPlayerInfo(getRace(), getClass());
-    for (std::_Simple_types<unsigned int>::value_type tspell : info->spell)
+    for (uint32 tspell : info->spell)
     {
         DEBUG_LOG("PLAYER (Class: %u Race: %u): Adding initial spell, id = %u", uint32(getClass()), uint32(getRace()), tspell);
         if (!IsInWorld())                                   // will send in INITIAL_SPELLS in list anyway at map add
@@ -17724,7 +17724,7 @@ void Player::UpdateForQuestWorldObjects()
     {
         if (m_clientGUID.IsGameObject())
         {
-            if (GameObject* obj = GetMap()->GetGameObject(*itr))
+            if (GameObject* obj = GetMap()->GetGameObject(m_clientGUID))
                 // obj->BuildValuesUpdateBlockForPlayer(&udata,this);
                 obj->SendCreateUpdateToPlayer(this); //[-ZERO] we must send create packet because of GAMEOBJECT_FLAGS change (not dynamic) - probably incorrect
         }

@@ -101,7 +101,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
     if (spell)
     {
         // Workaround for custom cast time
-        switch (spellInfo->Id)
+        /*switch (spellInfo->Id)
         {
             case 3366:  // Opening - seems to have a settable timer per usage
                 if (spell->m_CastItem)
@@ -115,7 +115,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
                 break;
             default:
                 break;
-        }
+        }*/
 
         // some triggered spells have data only usable for client
         if (spell->IsTriggeredSpellWithRedundantCastTime())

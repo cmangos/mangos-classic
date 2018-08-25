@@ -6520,7 +6520,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
         if (!i->isAffectedOnSpell(spellProto))
             continue;
 
-        switch ((*i)->GetModifier()->m_miscvalue)
+        switch (i->GetModifier()->m_miscvalue)
         {
             case 4418: // Increased Shock Damage
             case 4554: // Increased Lightning Damage
@@ -6530,7 +6530,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
             }
             case 4555: // Improved Moonfire
             {
-                DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
                 break;
             }
         }
@@ -8076,7 +8076,7 @@ bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const
     MANGOS_ASSERT(pTarget);
 
     // little hack before handling threatarea in unit instead of creature as charmed players will act like creature
-    Creature* thisCreature = GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(this) : nullptr;
+    Creature const* thisCreature = GetTypeId() == TYPEID_UNIT ? static_cast<Creature const*>(this) : nullptr;
 
     return
         pTarget->IsTargetUnderControl(*this) ||

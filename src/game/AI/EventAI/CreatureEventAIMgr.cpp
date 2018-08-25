@@ -83,7 +83,7 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
 
     sScriptMgr.CheckRandomStringTemplates(idx_set);
 
-    for (std::_Simple_types<int>::value_type itr : idx_set)
+    for (int32 itr : idx_set)
     sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` but not used in EventAI scripts.", itr);
 }
 
@@ -170,7 +170,7 @@ void CreatureEventAIMgr::CheckUnusedAISummons()
         }
     }
 
-    for (std::_Simple_types<int>::value_type itr : idx_set)
+    for (int32 itr : idx_set)
     sLog.outErrorEventAI("Entry %i in table `creature_ai_summons` but not used in EventAI scripts.", itr);
 }
 

@@ -110,7 +110,7 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
 {
     BattleGround* bg = map->IsBattleGround() ? ((BattleGroundMap*)map)->GetBG() : nullptr;
 
-    for (std::_Simple_types<unsigned int>::value_type guid : guid_set)
+    for (uint32 guid : guid_set)
     {
         T* obj = new T;
         // sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);

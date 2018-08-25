@@ -118,7 +118,7 @@ Tokens StrSplit(const std::string& src, const std::string& sep)
 {
     Tokens r;
     std::string s;
-    for (std::_Simple_types<char>::value_type i : src)
+    for (char i : src)
     {
         if (sep.find(i) != std::string::npos)
         {
@@ -211,7 +211,7 @@ uint32 TimeStringToSecs(const std::string& timestring)
     uint32 buffer     = 0;
     uint32 multiplier = 0;
 
-    for (std::_Simple_types<char>::value_type itr : timestring)
+    for (char itr : timestring)
     {
         if (isdigit(itr))
         {

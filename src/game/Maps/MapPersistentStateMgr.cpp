@@ -810,7 +810,7 @@ void MapPersistentStateManager::PackInstances() const
 
     uint32 InstanceNumber = 1;
     // we do assume std::set is sorted properly on integer value
-    for (std::_Simple_types<unsigned int>::value_type i : InstanceSet)
+    for (uint32 i : InstanceSet)
     {
         if (i != InstanceNumber)
         {

@@ -1800,7 +1800,7 @@ void ObjectMgr::LoadItemPrototypes()
         }
     }
 
-    for (std::_Simple_types<unsigned int>::value_type itr : notFoundOutfit)
+    for (uint32 itr : notFoundOutfit)
     sLog.outErrorDb("Item (Entry: %u) not exist in `item_template` but referenced in `CharStartOutfit.dbc`", itr);
 
     sLog.outString(">> Loaded %u item prototypes", sItemStorage.GetRecordCount());
@@ -4093,7 +4093,7 @@ void ObjectMgr::LoadPageTexts()
             {
                 std::ostringstream ss;
                 ss << "The text page(s) ";
-                for (std::_Simple_types<unsigned int>::value_type checkedPage : checkedPages)
+                for (uint32 checkedPage : checkedPages)
                     ss << checkedPage << " ";
                 ss << "create(s) a circular reference, which can cause the server to freeze. Changing Next_Page of page "
                    << pageItr->Page_ID << " to 0";
@@ -5721,7 +5721,7 @@ void ObjectMgr::PackGroupIds()
 
     uint32 groupId = 1;
     // we do assume std::set is sorted properly on integer value
-    for (std::_Simple_types<unsigned int>::value_type i : groupIds)
+    for (uint32 i : groupIds)
     {
         if (i != groupId)
         {
@@ -8488,7 +8488,7 @@ void ObjectMgr::LoadTrainerTemplates()
         }
     }
 
-    for (std::_Simple_types<unsigned int>::value_type trainer_id : trainer_ids)
+    for (uint32 trainer_id : trainer_ids)
     sLog.outErrorDb("Table `npc_trainer_template` has trainer template %u not used by any trainers ", trainer_id);
 
     if (hasErrored || !trainer_ids.empty())                 // Append extra line in case of reported errors
@@ -8573,8 +8573,8 @@ void ObjectMgr::LoadVendorTemplates()
     }
 
 
-    for (uint32 vItr : vendor_ids)
-        sLog.outErrorDb("Table `npc_vendor_template` has vendor template %u not used by any vendors ", vItr);
+    for (uint32 vendor_id : vendor_ids)
+        sLog.outErrorDb("Table `npc_vendor_template` has vendor template %u not used by any vendors ", vendor_id);
 }
 
 /* This function is supposed to take care of three things:
@@ -8930,7 +8930,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
 
     if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
     {
-        for (std::_Simple_types<unsigned int>::value_type menu_id : menu_ids)
+        for (uint32 menu_id : menu_ids)
         sLog.outErrorDb("Table `gossip_menu` contain unused (in creature or GO or menu options) menu id %u.", menu_id);
     }
 
@@ -8951,7 +8951,7 @@ void ObjectMgr::LoadGossipMenus()
     sLog.outString("(Re)Loading Gossip menu options...");
     LoadGossipMenuItems(gossipScriptSet);
 
-    for (std::_Simple_types<unsigned int>::value_type itr : gossipScriptSet)
+    for (uint32 itr : gossipScriptSet)
     sLog.outErrorDb("Table `dbscripts_on_gossip` contains unused script, id %u.", itr);
 }
 

@@ -280,8 +280,8 @@ WeatherState Weather::GetWeatherState() const
                 return WEATHER_STATE_LIGHT_SANDSTORM;
             if (m_grade < 0.70f)
                 return WEATHER_STATE_MEDIUM_SANDSTORM;
-            else
-                return WEATHER_STATE_HEAVY_SANDSTORM;
+            return WEATHER_STATE_HEAVY_SANDSTORM;
+        }
         case WEATHER_TYPE_FINE:
         default:
             return WEATHER_STATE_FINE;
