@@ -548,8 +548,8 @@ void PathFinder::NormalizePath()
     if (!sWorld.getConfig(CONFIG_BOOL_PATH_FIND_NORMALIZE_Z))
         return;
 
-    for (uint32 i = 0; i < m_pathPoints.size(); ++i)
-        m_sourceUnit->UpdateAllowedPositionZ(m_pathPoints[i].x, m_pathPoints[i].y, m_pathPoints[i].z);
+    for (auto& m_pathPoint : m_pathPoints)
+        m_sourceUnit->UpdateAllowedPositionZ(m_pathPoint.x, m_pathPoint.y, m_pathPoint.z);
 }
 
 void PathFinder::BuildShortcut()

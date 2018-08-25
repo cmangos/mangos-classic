@@ -159,15 +159,15 @@ void WaypointManager::Load()
 
         if (!creatureNoMoveType.empty())
         {
-            for (std::set<uint32>::const_iterator itr = creatureNoMoveType.begin(); itr != creatureNoMoveType.end(); ++itr)
+            for (std::_Simple_types<unsigned int>::value_type itr : creatureNoMoveType)
             {
-                const CreatureData* cData = sObjectMgr.GetCreatureData(*itr);
+                const CreatureData* cData = sObjectMgr.GetCreatureData(itr);
                 const CreatureInfo* cInfo = ObjectMgr::GetCreatureTemplate(cData->id);
 
-                ERROR_DB_STRICT_LOG("Table creature_movement has waypoint for creature guid %u (entry %u), but MovementType is not WAYPOINT_MOTION_TYPE(2). Make sure that this is actually used in a script!", *itr, cData->id);
+                ERROR_DB_STRICT_LOG("Table creature_movement has waypoint for creature guid %u (entry %u), but MovementType is not WAYPOINT_MOTION_TYPE(2). Make sure that this is actually used in a script!", itr, cData->id);
 
                 if (cInfo->MovementType == WAYPOINT_MOTION_TYPE)
-                    sLog.outErrorDb("Table creature_template for this entry(%u) guid(%u) has MovementType WAYPOINT_MOTION_TYPE(2), did you intend to use creature_movement_template ?", cData->id, *itr);
+                    sLog.outErrorDb("Table creature_template for this entry(%u) guid(%u) has MovementType WAYPOINT_MOTION_TYPE(2), did you intend to use creature_movement_template ?", cData->id, itr);
             }
         }
 
@@ -276,8 +276,8 @@ void WaypointManager::Load()
 
     if (!movementScriptSet.empty())
     {
-        for (std::set<uint32>::const_iterator itr = movementScriptSet.begin(); itr != movementScriptSet.end(); ++itr)
-            sLog.outErrorDb("Table `dbscripts_on_creature_movement` contain unused script, id %u.", *itr);
+        for (std::_Simple_types<unsigned int>::value_type itr : movementScriptSet)
+        sLog.outErrorDb("Table `dbscripts_on_creature_movement` contain unused script, id %u.", itr);
         sLog.outString();
     }
 }

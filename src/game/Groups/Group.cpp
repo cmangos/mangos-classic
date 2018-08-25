@@ -258,27 +258,27 @@ uint32 Group::RemoveInvite(Player* player)
 
 void Group::RemoveAllInvites()
 {
-    for (InvitesList::iterator itr = m_invitees.begin(); itr != m_invitees.end(); ++itr)
-        (*itr)->SetGroupInvite(nullptr);
+    for (auto m_invitee : m_invitees)
+        m_invitee->SetGroupInvite(nullptr);
 
     m_invitees.clear();
 }
 
 Player* Group::GetInvited(ObjectGuid guid) const
 {
-    for (InvitesList::const_iterator itr = m_invitees.begin(); itr != m_invitees.end(); ++itr)
-        if ((*itr)->GetObjectGuid() == guid)
-            return (*itr);
+    for (auto m_invitee : m_invitees)
+        if (m_invitee->GetObjectGuid() == guid)
+            return m_invitee;
 
     return nullptr;
 }
 
 Player* Group::GetInvited(const std::string& name) const
 {
-    for (InvitesList::const_iterator itr = m_invitees.begin(); itr != m_invitees.end(); ++itr)
+    for (auto m_invitee : m_invitees)
     {
-        if ((*itr)->GetName() == name)
-            return (*itr);
+        if (m_invitee->GetName() == name)
+            return m_invitee;
     }
     return nullptr;
 }
@@ -762,8 +762,8 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
 
     if (!isRaidGroup())                                     // reset targetIcons for non-raid-groups
     {
-        for (int i = 0; i < TARGET_ICON_COUNT; ++i)
-            m_targetIcons[i].Clear();
+        for (auto& m_targetIcon : m_targetIcons)
+            m_targetIcon.Clear();
     }
 
     if (!isBGGroup())

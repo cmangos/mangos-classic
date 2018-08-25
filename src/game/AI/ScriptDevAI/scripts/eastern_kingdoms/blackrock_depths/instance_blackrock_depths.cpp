@@ -192,9 +192,9 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                 DoRespawnGameObject(GO_ARENA_SPOILS, HOUR);
             else if (uiData == DONE)
             {
-                for (GuidSet::const_iterator itr = m_sArenaCrowdNpcGuids.begin(); itr != m_sArenaCrowdNpcGuids.end(); ++itr)
+                for (auto m_sArenaCrowdNpcGuid : m_sArenaCrowdNpcGuids)
                 {
-                    if (Creature* pSpectator = instance->GetCreature(*itr))
+                    if (Creature* pSpectator = instance->GetCreature(m_sArenaCrowdNpcGuid))
                         pSpectator->SetFactionTemporary(FACTION_ARENA_NEUTRAL, TEMPFACTION_RESTORE_RESPAWN);
                 }
             }
@@ -212,9 +212,9 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                     Creature* pConstruct = nullptr;
 
                     // Activate vault constructs
-                    for (GuidSet::const_iterator itr = m_sVaultNpcGuids.begin(); itr != m_sVaultNpcGuids.end(); ++itr)
+                    for (auto m_sVaultNpcGuid : m_sVaultNpcGuids)
                     {
-                        pConstruct = instance->GetCreature(*itr);
+                        pConstruct = instance->GetCreature(m_sVaultNpcGuid);
                         if (pConstruct)
                             pConstruct->RemoveAurasDueToSpell(SPELL_STONED);
                     }
@@ -260,9 +260,9 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
             if (uiData == FAIL)
             {
                 // Reset dwarfes
-                for (uint8 i = 0; i < MAX_DWARFS; ++i)
+                for (unsigned int aTombDwarfe : aTombDwarfes)
                 {
-                    if (Creature* pDwarf = GetSingleCreatureFromStorage(aTombDwarfes[i]))
+                    if (Creature* pDwarf = GetSingleCreatureFromStorage(aTombDwarfe))
                     {
                         if (!pDwarf->isAlive())
                             pDwarf->Respawn();
@@ -466,9 +466,9 @@ void instance_blackrock_depths::OnCreatureEvade(Creature* pCreature)
 {
     if (GetData(TYPE_RING_OF_LAW) == IN_PROGRESS || GetData(TYPE_RING_OF_LAW) == SPECIAL)
     {
-        for (uint8 i = 0; i < countof(aArenaNPCs); ++i)
+        for (unsigned int aArenaNPC : aArenaNPCs)
         {
-            if (pCreature->GetEntry() == aArenaNPCs[i])
+            if (pCreature->GetEntry() == aArenaNPC)
             {
                 SetData(TYPE_RING_OF_LAW, FAIL);
                 return;
@@ -595,9 +595,9 @@ bool instance_blackrock_depths::CanReplacePrincess() const
     if (players.isEmpty())
         return false;
 
-    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    for (const auto& player : players)
     {
-        if (Player* pPlayer = itr->getSource())
+        if (Player* pPlayer = player.getSource())
         {
             // if at least one player didn't complete the quest, return false
             if ((pPlayer->GetTeam() == ALLIANCE && !pPlayer->GetQuestRewardStatus(QUEST_FATE_KINGDOM))
@@ -618,7 +618,7 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
             if (GetData(TYPE_PLUGGER) == DONE)
                 return;
 
-            for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
+            for (auto m_sBarPatronNpcGuid : m_sBarPatronNpcGuids)
             {
                 // About 5% of patrons do emote at a given time
                 // So avoid executing follow up code for the 95% others
@@ -627,7 +627,7 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
                     // Only three emotes are seen in data: laugh, cheer and exclamation
                     // the last one appearing the least and the first one appearing the most
                     // emotes are stored in a table and frequency is handled there
-                    if (Creature* pPatron = instance->GetCreature(*itr))
+                    if (Creature* pPatron = instance->GetCreature(m_sBarPatronNpcGuid))
                         pPatron->HandleEmote(aPatronsEmotes[urand(0, 5)]);
                 }
             }
@@ -638,9 +638,9 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
             // Only by patrons near the broken barrel react to Rocknot's rampage
             if (GameObject* pGo = GetSingleGameObjectFromStorage(GO_BAR_KEG_SHOT))
             {
-                for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
+                for (auto m_sBarPatronNpcGuid : m_sBarPatronNpcGuids)
                 {
-                    if (Creature* pPatron = instance->GetCreature(*itr))
+                    if (Creature* pPatron = instance->GetCreature(m_sBarPatronNpcGuid))
                     {
                         if (pPatron->GetPositionZ() > pGo->GetPositionZ() - 1 && pPatron->IsWithinDist2d(pGo->GetPositionX(), pGo->GetPositionY(), 18.0f))
                         {
@@ -661,9 +661,9 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
             return;
         // case when Plugger is killed
         case PATRON_HOSTILE:
-            for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
+            for (auto m_sBarPatronNpcGuid : m_sBarPatronNpcGuids)
             {
-                if (Creature* pPatron = instance->GetCreature(*itr))
+                if (Creature* pPatron = instance->GetCreature(m_sBarPatronNpcGuid))
                 {
                     pPatron->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
                     pPatron->SetStandState(UNIT_STAND_STATE_STAND);
@@ -703,12 +703,12 @@ void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
                 }
 
                 // One Fireguard Destroyer and two Anvilrage Officers are spawned
-                for (uint8 i = 0; i < 3; ++i)
+                for (unsigned int i : aBarPatrolId)
                 {
                     float fX, fY, fZ;
                     // spawn them behind the bar door
                     pPlugger->GetRandomPoint(aBarPatrolPositions[0][0], aBarPatrolPositions[0][1], aBarPatrolPositions[0][2], 2.0f, fX, fY, fZ);
-                    if (Creature* pSummoned = pPlugger->SummonCreature(aBarPatrolId[i], fX, fY, fZ, aBarPatrolPositions[0][3], TEMPSPAWN_DEAD_DESPAWN, 0))
+                    if (Creature* pSummoned = pPlugger->SummonCreature(i, fX, fY, fZ, aBarPatrolPositions[0][3], TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
                         m_sBarPatrolGuids.insert(pSummoned->GetObjectGuid());
                         // move them to the Grim Guzzler
@@ -722,9 +722,9 @@ void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
                 break;
             }
         case 1:
-            for (GuidSet::const_iterator itr = m_sBarPatrolGuids.begin(); itr != m_sBarPatrolGuids.end(); ++itr)
+            for (auto m_sBarPatrolGuid : m_sBarPatrolGuids)
             {
-                if (Creature* pTmp = instance->GetCreature(*itr))
+                if (Creature* pTmp = instance->GetCreature(m_sBarPatrolGuid))
                 {
                     if (pTmp->GetEntry() == NPC_FIREGUARD_DESTROYER)
                     {
@@ -737,9 +737,9 @@ void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
             }
             break;
         case 2:
-            for (GuidSet::const_iterator itr = m_sBarPatrolGuids.begin(); itr != m_sBarPatrolGuids.end(); ++itr)
+            for (auto m_sBarPatrolGuid : m_sBarPatrolGuids)
             {
-                if (Creature* pTmp = instance->GetCreature(*itr))
+                if (Creature* pTmp = instance->GetCreature(m_sBarPatrolGuid))
                 {
                     if (pTmp->GetEntry() == NPC_FIREGUARD_DESTROYER)
                     {

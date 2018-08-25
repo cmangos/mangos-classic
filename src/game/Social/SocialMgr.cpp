@@ -149,11 +149,11 @@ void PlayerSocial::SendIgnoreList()
     WorldPacket data(SMSG_IGNORE_LIST, (1 + size * 8));     // just can guess size
     data << uint8(size);                                    // friends count
 
-    for (PlayerSocialMap::iterator itr = m_playerSocialMap.begin(); itr != m_playerSocialMap.end(); ++itr)
+    for (auto& itr : m_playerSocialMap)
     {
-        if (itr->second.Flags & SOCIAL_FLAG_IGNORED)
+        if (itr.second.Flags & SOCIAL_FLAG_IGNORED)
         {
-            data << ObjectGuid(HIGHGUID_PLAYER, itr->first);// player guid
+            data << ObjectGuid(HIGHGUID_PLAYER, itr.first);// player guid
         }
     }
 

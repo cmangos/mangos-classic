@@ -35,10 +35,10 @@ void instance_gnomeregan::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
-    for (uint8 i = 0; i < MAX_GNOME_FACES; ++i)
+    for (auto& m_asBombFace : m_asBombFaces)
     {
-        m_asBombFaces[i].m_bActivated = false;
-        m_asBombFaces[i].m_uiBombTimer = 0;
+        m_asBombFace.m_bActivated = false;
+        m_asBombFace.m_uiBombTimer = 0;
     }
 }
 
@@ -104,16 +104,16 @@ void instance_gnomeregan::SetData(uint32 uiType, uint32 uiData)
                     GameObject* pCaveInNorth = GetSingleGameObjectFromStorage(GO_CAVE_IN_NORTH);
                     if (pCaveInSouth && pCaveInNorth)
                     {
-                        for (std::list<GameObject*>::iterator itr = lExplosiveCharges.begin(); itr != lExplosiveCharges.end(); ++itr)
+                        for (auto& lExplosiveCharge : lExplosiveCharges)
                         {
-                            if ((*itr)->GetDistanceOrder(pCaveInSouth, pCaveInNorth) && uiCounterSouth < MAX_EXPLOSIVES_PER_SIDE)
+                            if (lExplosiveCharge->GetDistanceOrder(pCaveInSouth, pCaveInNorth) && uiCounterSouth < MAX_EXPLOSIVES_PER_SIDE)
                             {
-                                m_aExplosiveSortedGuids[0][uiCounterSouth] = (*itr)->GetObjectGuid();
+                                m_aExplosiveSortedGuids[0][uiCounterSouth] = lExplosiveCharge->GetObjectGuid();
                                 ++uiCounterSouth;
                             }
                             else if (uiCounterNorth < MAX_EXPLOSIVES_PER_SIDE)
                             {
-                                m_aExplosiveSortedGuids[1][uiCounterNorth] = (*itr)->GetObjectGuid();
+                                m_aExplosiveSortedGuids[1][uiCounterNorth] = lExplosiveCharge->GetObjectGuid();
                                 ++uiCounterNorth;
                             }
                         }
@@ -222,10 +222,10 @@ void instance_gnomeregan::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;

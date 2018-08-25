@@ -33,6 +33,7 @@
 #include <deque>
 #include <mutex>
 #include <functional>
+#include <utility>
 #include <vector>
 
 class Object;
@@ -384,7 +385,7 @@ struct CliCommandHolder
     CommandFinished m_commandFinished;
 
     CliCommandHolder(uint32 accountId, AccountTypes cliAccessLevel, const char* command, Print print, CommandFinished commandFinished)
-        : m_cliAccountId(accountId), m_cliAccessLevel(cliAccessLevel), m_command(strlen(command) + 1), m_print(print), m_commandFinished(commandFinished)
+        : m_cliAccountId(accountId), m_cliAccessLevel(cliAccessLevel), m_command(strlen(command) + 1), m_print(std::move(print)), m_commandFinished(std::move(commandFinished))
     {
         memcpy(&m_command[0], command, m_command.size() - 1);
     }

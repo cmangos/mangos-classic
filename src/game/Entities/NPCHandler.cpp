@@ -174,9 +174,9 @@ void WorldSession::SendTrainerList(ObjectGuid guid) const
 
     if (cSpells)
     {
-        for (TrainerSpellMap::const_iterator itr = cSpells->spellList.begin(); itr != cSpells->spellList.end(); ++itr)
+        for (const auto& itr : cSpells->spellList)
         {
-            TrainerSpell const* tSpell = &itr->second;
+            TrainerSpell const* tSpell = &itr.second;
 
             uint32 triggerSpell = sSpellTemplate.LookupEntry<SpellEntry>(tSpell->spell)->EffectTriggerSpell[0];
 
@@ -199,9 +199,9 @@ void WorldSession::SendTrainerList(ObjectGuid guid) const
 
     if (tSpells)
     {
-        for (TrainerSpellMap::const_iterator itr = tSpells->spellList.begin(); itr != tSpells->spellList.end(); ++itr)
+        for (const auto& itr : tSpells->spellList)
         {
-            TrainerSpell const* tSpell = &itr->second;
+            TrainerSpell const* tSpell = &itr.second;
 
             uint32 triggerSpell = sSpellTemplate.LookupEntry<SpellEntry>(tSpell->spell)->EffectTriggerSpell[0];
 

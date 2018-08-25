@@ -158,14 +158,14 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
         std::list<Creature*> lAssistList;
         GetCreatureListWithEntryInGrid(lAssistList, m_creature, m_creature->GetEntry(), 80.0f);
 
-        for (std::list<Creature*>::iterator iter = lAssistList.begin(); iter != lAssistList.end(); ++iter)
+        for (auto& iter : lAssistList)
         {
-            m_lAssistList.push_back((*iter)->GetObjectGuid());
+            m_lAssistList.push_back(iter->GetObjectGuid());
 
-            if ((*iter)->GetObjectGuid() == m_creature->GetObjectGuid())
+            if (iter->GetObjectGuid() == m_creature->GetObjectGuid())
                 continue;
 
-            (*iter)->AI()->AttackStart(pTarget);
+            iter->AI()->AttackStart(pTarget);
         }
 
         if (m_lAssistList.size() != MAX_BUDDY)

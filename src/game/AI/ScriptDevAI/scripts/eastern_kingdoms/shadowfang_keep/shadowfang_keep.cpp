@@ -228,16 +228,16 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
             Creature* pNewLeader = nullptr;
             uint8 uiHighestPosition = 0;
             GetCreatureListWithEntryInGrid(lVoidwalkerList, m_creature, NPC_VOIDWALKER, 50.0f);
-            for (std::list<Creature*>::iterator itr = lVoidwalkerList.begin(); itr != lVoidwalkerList.end(); ++itr)
+            for (auto& itr : lVoidwalkerList)
             {
-                if ((*itr)->isAlive())
+                if (itr->isAlive())
                 {
-                    if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>((*itr)->AI()))
+                    if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(itr->AI()))
                     {
                         uint8 uiPosition = pVoidwalkerAI->GetPosition();
                         if (uiPosition > uiHighestPosition)
                         {
-                            pNewLeader = (*itr);
+                            pNewLeader = itr;
                             uiHighestPosition = uiPosition;
                         }
                     }
@@ -352,10 +352,10 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
     {
         std::list<Creature*> lVoidwalkerList;
         GetCreatureListWithEntryInGrid(lVoidwalkerList, m_creature, NPC_VOIDWALKER, 50.0f);
-        for (std::list<Creature*>::iterator itr = lVoidwalkerList.begin(); itr != lVoidwalkerList.end(); ++itr)
+        for (auto& itr : lVoidwalkerList)
         {
-            if ((*itr)->isAlive())
-                if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>((*itr)->AI()))
+            if (itr->isAlive())
+                if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(itr->AI()))
                     pVoidwalkerAI->ReceiveWaypoint(m_uiCurrentPoint, m_bReverse);
         }
     }

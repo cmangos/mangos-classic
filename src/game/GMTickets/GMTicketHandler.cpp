@@ -146,7 +146,7 @@ void WorldSession::HandleGMSurveySubmitOpcode(WorldPacket& recv_data)
 
     uint8 result[10];
     memset(result, 0, sizeof(result));
-    for (int i = 0; i < 10; ++i)
+    for (unsigned char& i : result)
     {
         uint32 questionID;
         recv_data >> questionID;                            // GMSurveyQuestions.dbc
@@ -158,7 +158,7 @@ void WorldSession::HandleGMSurveySubmitOpcode(WorldPacket& recv_data)
         recv_data >> value;                                 // answer
         recv_data >> unk_text;                              // always empty?
 
-        result[i] = value;
+        i = value;
         DEBUG_LOG("SURVEY: ID %u, value %u, text %s", questionID, value, unk_text.c_str());
     }
 

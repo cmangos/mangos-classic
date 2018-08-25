@@ -302,9 +302,9 @@ bool Guild::CheckGuildStructure()
         SetLeader(m_LeaderGuid);
 
     // Allow only 1 guildmaster, set other to officer
-    for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
+    for (auto& itr : members)
     {
-        MemberSlot& member = itr->second;
+        MemberSlot& member = itr.second;
         if (member.RankId == GR_GUILDMASTER && m_LeaderGuid != member.guid)
             member.ChangeRank(GR_OFFICER);
     }
@@ -494,18 +494,18 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
         MemberSlot* oldLeader = nullptr;
         MemberSlot* best = nullptr;
         ObjectGuid newLeaderGUID;
-        for (Guild::MemberList::iterator i = members.begin(); i != members.end(); ++i)
+        for (auto& member : members)
         {
-            if (i->first == lowguid)
+            if (member.first == lowguid)
             {
-                oldLeader = &(i->second);
+                oldLeader = &(member.second);
                 continue;
             }
 
-            if (!best || best->RankId > i->second.RankId)
+            if (!best || best->RankId > member.second.RankId)
             {
-                best = &(i->second);
-                newLeaderGUID = ObjectGuid(HIGHGUID_PLAYER, i->first);
+                best = &(member.second);
+                newLeaderGUID = ObjectGuid(HIGHGUID_PLAYER, member.first);
             }
         }
 

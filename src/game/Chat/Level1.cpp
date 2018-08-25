@@ -1564,17 +1564,17 @@ bool ChatHandler::HandleLookupTeleCommand(char* args)
     std::ostringstream reply;
 
     GameTeleMap const& teleMap = sObjectMgr.GetGameTeleMap();
-    for (GameTeleMap::const_iterator itr = teleMap.begin(); itr != teleMap.end(); ++itr)
+    for (const auto& itr : teleMap)
     {
-        GameTele const* tele = &itr->second;
+        GameTele const* tele = &itr.second;
 
         if (tele->wnameLow.find(wnamepart) == std::wstring::npos)
             continue;
 
         if (m_session)
-            reply << "  |cffffffff|Htele:" << itr->first << "|h[" << tele->name << "]|h|r\n";
+            reply << "  |cffffffff|Htele:" << itr.first << "|h[" << tele->name << "]|h|r\n";
         else
-            reply << "  " << itr->first << " " << tele->name << "\n";
+            reply << "  " << itr.first << " " << tele->name << "\n";
     }
 
     if (reply.str().empty())

@@ -199,18 +199,18 @@ void ChatHandler::HandleCharacterDeletedListHelper(DeletedInfoList const& foundL
         SendSysMessage(LANG_CHARACTER_DELETED_LIST_BAR);
     }
 
-    for (DeletedInfoList::const_iterator itr = foundList.begin(); itr != foundList.end(); ++itr)
+    for (const auto& itr : foundList)
     {
-        std::string dateStr = TimeToTimestampStr(itr->deleteDate);
+        std::string dateStr = TimeToTimestampStr(itr.deleteDate);
 
         if (!m_session)
             PSendSysMessage(LANG_CHARACTER_DELETED_LIST_LINE_CONSOLE,
-                            itr->lowguid, itr->name.c_str(), itr->accountName.empty() ? "<nonexistent>" : itr->accountName.c_str(),
-                            itr->accountId, dateStr.c_str());
+                itr.lowguid, itr.name.c_str(), itr.accountName.empty() ? "<nonexistent>" : itr.accountName.c_str(),
+                itr.accountId, dateStr.c_str());
         else
             PSendSysMessage(LANG_CHARACTER_DELETED_LIST_LINE_CHAT,
-                            itr->lowguid, itr->name.c_str(), itr->accountName.empty() ? "<nonexistent>" : itr->accountName.c_str(),
-                            itr->accountId, dateStr.c_str());
+                itr.lowguid, itr.name.c_str(), itr.accountName.empty() ? "<nonexistent>" : itr.accountName.c_str(),
+                itr.accountId, dateStr.c_str());
     }
 
     if (!m_session)
@@ -321,8 +321,8 @@ bool ChatHandler::HandleCharacterDeletedRestoreCommand(char* args)
     if (newCharName.empty())
     {
         // Drop nonexistent account cases
-        for (DeletedInfoList::iterator itr = foundList.begin(); itr != foundList.end(); ++itr)
-            HandleCharacterDeletedRestoreHelper(*itr);
+        for (auto& itr : foundList)
+            HandleCharacterDeletedRestoreHelper(itr);
     }
     else if (foundList.size() == 1 && normalizePlayerName(newCharName))
     {

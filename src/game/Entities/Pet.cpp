@@ -1789,9 +1789,9 @@ void Pet::_SaveAuras()
             "basepoints0, basepoints1, basepoints2, periodictime0, periodictime1, periodictime2, maxduration, remaintime, effIndexMask) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-    for (SpellAuraHolderMap::const_iterator itr = auraHolders.begin(); itr != auraHolders.end(); ++itr)
+    for (const auto& auraHolder : auraHolders)
     {
-        SpellAuraHolder* holder = itr->second;
+        SpellAuraHolder* holder = auraHolder.second;
 
         bool save = true;
         for (int32 j = 0; j < MAX_EFFECT_INDEX; ++j)
@@ -1840,11 +1840,11 @@ void Pet::_SaveAuras()
             stmt.addUInt32(holder->GetStackAmount());
             stmt.addUInt8(holder->GetAuraCharges());
 
-            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-                stmt.addInt32(damage[i]);
+            for (int i : damage)
+                stmt.addInt32(i);
 
-            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-                stmt.addUInt32(periodicTime[i]);
+            for (unsigned int i : periodicTime)
+                stmt.addUInt32(i);
 
             stmt.addInt32(holder->GetAuraMaxDuration());
             stmt.addInt32(holder->GetAuraDuration());
@@ -2224,8 +2224,8 @@ void Pet::LearnPetPassives()
     PetFamilySpellsStore::const_iterator petStore = sPetFamilySpellsStore.find(cFamily->ID);
     if (petStore != sPetFamilySpellsStore.end())
     {
-        for (PetFamilySpellsSet::const_iterator petSet = petStore->second.begin(); petSet != petStore->second.end(); ++petSet)
-            addSpell(*petSet, ACT_DECIDE, PETSPELL_NEW, PETSPELL_FAMILY);
+        for (std::_Simple_types<unsigned int>::value_type petSet : petStore->second)
+            addSpell(petSet, ACT_DECIDE, PETSPELL_NEW, PETSPELL_FAMILY);
     }
 }
 

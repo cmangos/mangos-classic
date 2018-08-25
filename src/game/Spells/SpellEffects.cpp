@@ -336,13 +336,13 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 {
                     // for caster applied auras only
                     Unit::AuraList const& mPeriodic = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                    for (Unit::AuraList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
+                    for (auto i : mPeriodic)
                     {
-                        if ((*i)->GetCasterGuid() == m_caster->GetObjectGuid() &&
+                        if (i->GetCasterGuid() == m_caster->GetObjectGuid() &&
                                 // Immolate
-                                (*i)->GetSpellProto()->IsFitToFamily(SPELLFAMILY_WARLOCK, uint64(0x0000000000000004)))
+                                i->GetSpellProto()->IsFitToFamily(SPELLFAMILY_WARLOCK, uint64(0x0000000000000004)))
                         {
-                            unitTarget->RemoveAurasByCasterSpell((*i)->GetId(), m_caster->GetObjectGuid());
+                            unitTarget->RemoveAurasByCasterSpell(i->GetId(), m_caster->GetObjectGuid());
                             break;
                         }
                     }
@@ -704,9 +704,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             {
                                 // Need remove self if Lightning Shield not active
                                 Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
-                                for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                                for (const auto& aura : auras)
                                 {
-                                    SpellEntry const* spell = itr->second->GetSpellProto();
+                                    SpellEntry const* spell = aura.second->GetSpellProto();
                                     if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN
                                         && spell->SpellFamilyFlags & uint64(0x0000000000000400))
                                         return;
@@ -4188,14 +4188,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     uint32 itemtype;
                     uint32 rank = 0;
                     Unit::AuraList const& mDummyAuras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
-                    for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+                    for (auto mDummyAura : mDummyAuras)
                     {
-                        if ((*i)->GetId() == 18692)
+                        if (mDummyAura->GetId() == 18692)
                         {
                             rank = 1;
                             break;
                         }
-                        else if ((*i)->GetId() == 18693)
+                        else if (mDummyAura->GetId() == 18693)
                         {
                             rank = 2;
                             break;

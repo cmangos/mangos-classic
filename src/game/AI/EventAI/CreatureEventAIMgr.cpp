@@ -55,13 +55,10 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
 
     for (CreatureEventAI_Event_Map::const_iterator itr = m_CreatureEventAI_Event_Map.begin(); itr != m_CreatureEventAI_Event_Map.end(); ++itr)
     {
-        for (size_t i = 0; i < itr->second.size(); ++i)
+        for (const auto& event : itr->second)
         {
-            CreatureEventAI_Event const& event = itr->second[i];
-
-            for (int j = 0; j < MAX_ACTIONS; ++j)
+            for (auto action : event.action)
             {
-                CreatureEventAI_Action const& action = event.action[j];
                 switch (action.type)
                 {
                     case ACTION_T_TEXT:
@@ -86,8 +83,8 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
 
     sScriptMgr.CheckRandomStringTemplates(idx_set);
 
-    for (std::set<int32>::const_iterator itr = idx_set.begin(); itr != idx_set.end(); ++itr)
-        sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` but not used in EventAI scripts.", *itr);
+    for (std::_Simple_types<int>::value_type itr : idx_set)
+    sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` but not used in EventAI scripts.", itr);
 }
 
 // -------------------
@@ -155,13 +152,10 @@ void CreatureEventAIMgr::CheckUnusedAISummons()
 
     for (CreatureEventAI_Event_Map::const_iterator itr = m_CreatureEventAI_Event_Map.begin(); itr != m_CreatureEventAI_Event_Map.end(); ++itr)
     {
-        for (size_t i = 0; i < itr->second.size(); ++i)
+        for (const auto& event : itr->second)
         {
-            CreatureEventAI_Event const& event = itr->second[i];
-
-            for (int j = 0; j < MAX_ACTIONS; ++j)
+            for (auto action : event.action)
             {
-                CreatureEventAI_Action const& action = event.action[j];
                 switch (action.type)
                 {
                     case ACTION_T_SUMMON_ID:
@@ -176,8 +170,8 @@ void CreatureEventAIMgr::CheckUnusedAISummons()
         }
     }
 
-    for (std::set<int32>::const_iterator itr = idx_set.begin(); itr != idx_set.end(); ++itr)
-        sLog.outErrorEventAI("Entry %i in table `creature_ai_summons` but not used in EventAI scripts.", *itr);
+    for (std::_Simple_types<int>::value_type itr : idx_set)
+    sLog.outErrorEventAI("Entry %i in table `creature_ai_summons` but not used in EventAI scripts.", itr);
 }
 
 /// Helper function to check if a target-type is suitable for the event-type

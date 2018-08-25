@@ -68,9 +68,9 @@ namespace FactorySelector
             int best_val = PERMIT_BASE_NO;
             typedef CreatureAIRegistry::RegistryMapType RMT;
             RMT const& l = ai_registry.GetRegisteredItems();
-            for (RMT::const_iterator iter = l.begin(); iter != l.end(); ++iter)
+            for (const auto& iter : l)
             {
-                const CreatureAICreator* factory = iter->second;
+                const CreatureAICreator* factory = iter.second;
                 const SelectableAI* p = dynamic_cast<const SelectableAI*>(factory);
                 MANGOS_ASSERT(p != nullptr);
                 int val = p->Permit(creature);

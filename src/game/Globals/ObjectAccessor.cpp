@@ -99,8 +99,8 @@ ObjectAccessor::SaveAllPlayers() const
 {
     HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
-    for (HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-        itr->second->SaveToDB();
+    for (auto& itr : m)
+        itr.second->SaveToDB();
 }
 
 void ObjectAccessor::KickPlayer(ObjectGuid guid)
@@ -167,20 +167,20 @@ void
 ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair, GridType& grid, Map* map)
 {
     Guard guard(i_corpseGuard);
-    for (Player2CorpsesMapType::iterator iter = i_player2corpse.begin(); iter != i_player2corpse.end(); ++iter)
-        if (iter->second->GetGrid() == gridpair)
+    for (auto& iter : i_player2corpse)
+        if (iter.second->GetGrid() == gridpair)
         {
             // verify, if the corpse in our instance (add only corpses which are)
             if (map->Instanceable())
             {
-                if (iter->second->GetInstanceId() == map->GetInstanceId())
+                if (iter.second->GetInstanceId() == map->GetInstanceId())
                 {
-                    grid.AddWorldObject(iter->second);
+                    grid.AddWorldObject(iter.second);
                 }
             }
             else
             {
-                grid.AddWorldObject(iter->second);
+                grid.AddWorldObject(iter.second);
             }
         }
 }

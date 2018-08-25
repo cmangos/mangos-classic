@@ -25,6 +25,7 @@
 
 #include <string>
 #include <memory>
+#include <utility>
 #include <vector>
 #include <functional>
 #include <cstring>
@@ -33,7 +34,7 @@ namespace MaNGOS
 {
     Socket::Socket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
         : m_writeState(WriteState::Idle), m_readState(ReadState::Idle), m_socket(service),
-          m_closeHandler(closeHandler), m_outBufferFlushTimer(service), m_address("0.0.0.0") {}
+          m_closeHandler(std::move(closeHandler)), m_outBufferFlushTimer(service), m_address("0.0.0.0") {}
 
     bool Socket::Open()
     {

@@ -24,6 +24,7 @@
 #include "Entities/ObjectGuid.h"
 
 #include <functional>
+#include <utility>
 
 struct AreaTrigger;
 struct AreaTriggerEntry;
@@ -735,7 +736,7 @@ class CliHandler : public ChatHandler
 
     public:
         CliHandler(uint32 accountId, AccountTypes accessLevel, Print zprint)
-            : m_accountId(accountId), m_loginAccessLevel(accessLevel), m_print(zprint) {}
+            : m_accountId(accountId), m_loginAccessLevel(accessLevel), m_print(std::move(zprint)) {}
 
         // overwrite functions
         const char* GetMangosString(int32 entry) const override;

@@ -46,10 +46,10 @@ void TotemAI::EnterEvadeMode()
     m_creature->CombatStop(true);
 
     // Handle Evade events
-    for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
+    for (auto& i : m_CreatureEventAIList)
     {
-        if (i->Event.event_type == EVENT_T_EVADE)
-            ProcessEvent(*i);
+        if (i.Event.event_type == EVENT_T_EVADE)
+            ProcessEvent(i);
     }
 }
 
@@ -61,27 +61,27 @@ void TotemAI::UpdateAI(const uint32 diff)
         m_EventDiff += diff;
 
         // Check for time based events
-        for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
+        for (auto& i : m_CreatureEventAIList)
         {
             // Decrement Timers
-            if (i->Time)
+            if (i.Time)
             {
                 // Do not decrement timers if event cannot trigger in this phase
-                if (!(i->Event.event_inverse_phase_mask & (1 << m_Phase)))
+                if (!(i.Event.event_inverse_phase_mask & (1 << m_Phase)))
                 {
-                    if (i->Time > m_EventDiff)
-                        i->Time -= m_EventDiff;
+                    if (i.Time > m_EventDiff)
+                        i.Time -= m_EventDiff;
                     else
-                        i->Time = 0;
+                        i.Time = 0;
                 }
             }
 
             // Skip processing of events that have time remaining or are disabled
-            if (!(i->Enabled) || i->Time)
+            if (!(i.Enabled) || i.Time)
                 continue;
 
-            if (IsTimerBasedEvent(i->Event.event_type))
-                ProcessEvent(*i);
+            if (IsTimerBasedEvent(i.Event.event_type))
+                ProcessEvent(i);
         }
 
         m_EventDiff = 0;

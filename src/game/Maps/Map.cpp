@@ -451,24 +451,24 @@ void Map::MessageDistBroadcast(WorldObject const* obj, WorldPacket const& msg, f
 void Map::MessageMapBroadcast(WorldObject const* obj, WorldPacket const& msg)
 {
     Map::PlayerList const& pList = GetPlayers();
-    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        itr->getSource()->SendDirectMessage(msg);
+    for (const auto& itr : pList)
+        itr.getSource()->SendDirectMessage(msg);
 }
 
 void Map::MessageMapBroadcastZone(WorldObject const* obj, WorldPacket const& msg, uint32 zoneId)
 {
     Map::PlayerList const& pList = GetPlayers();
-    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        if (itr->getSource()->GetZoneId() == zoneId)
-            itr->getSource()->SendDirectMessage(msg);
+    for (const auto& itr : pList)
+        if (itr.getSource()->GetZoneId() == zoneId)
+            itr.getSource()->SendDirectMessage(msg);
 }
 
 void Map::MessageMapBroadcastArea(WorldObject const* obj, WorldPacket const& msg, uint32 areaId)
 {
     Map::PlayerList const& pList = GetPlayers();
-    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        if (itr->getSource()->GetAreaId() == areaId)
-            itr->getSource()->SendDirectMessage(msg);
+    for (const auto& itr : pList)
+        if (itr.getSource()->GetAreaId() == areaId)
+            itr.getSource()->SendDirectMessage(msg);
 }
 
 void Map::ExecuteDistWorker(WorldObject const* obj, float dist, std::function<void(Player*)> const& worker)
@@ -495,24 +495,24 @@ void Map::ExecuteDistWorker(WorldObject const* obj, float dist, std::function<vo
 void Map::ExecuteMapWorker(std::function<void(Player*)> const& worker)
 {
     Map::PlayerList const& pList = GetPlayers();
-    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        worker(itr->getSource());
+    for (const auto& itr : pList)
+        worker(itr.getSource());
 }
 
 void Map::ExecuteMapWorkerZone(uint32 zoneId, std::function<void(Player*)> const& worker)
 {
     Map::PlayerList const& pList = GetPlayers();
-    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        if (itr->getSource()->GetZoneId() == zoneId)
-            worker(itr->getSource());
+    for (const auto& itr : pList)
+        if (itr.getSource()->GetZoneId() == zoneId)
+            worker(itr.getSource());
 }
 
 void Map::ExecuteMapWorkerArea(uint32 areaId, std::function<void(Player*)> const& worker)
 {
     Map::PlayerList const& pList = GetPlayers();
-    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        if (itr->getSource()->GetAreaId() == areaId)
-            worker(itr->getSource());
+    for (const auto& itr : pList)
+        if (itr.getSource()->GetAreaId() == areaId)
+            worker(itr.getSource());
 }
 
 bool Map::loaded(const GridPair& p) const
@@ -921,7 +921,7 @@ const char* Map::GetMapName() const
     return i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
 }
 
-void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, CellPair cellpair)
+void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& cellpair)
 {
     cell.SetNoCreate();
     MaNGOS::VisibleChangesNotifier notifier(*obj);
@@ -950,12 +950,12 @@ void Map::SendInitSelf(Player* player) const
     // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
     if (Transport* transport = player->GetTransport())
     {
-        for (Transport::PlayerSet::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
+        for (auto itr : transport->GetPassengers())
         {
-            if (player != (*itr) && player->HaveAtClient(*itr))
+            if (player != itr && player->HaveAtClient(itr))
             {
                 hasTransport = true;
-                (*itr)->BuildCreateUpdateBlockForPlayer(&data, player);
+                itr->BuildCreateUpdateBlockForPlayer(&data, player);
             }
         }
     }
@@ -980,13 +980,13 @@ void Map::SendInitTransports(Player* player) const
 
     bool hasTransport = false;
 
-    for (MapManager::TransportSet::const_iterator i = tset.begin(); i != tset.end(); ++i)
+    for (auto i : tset)
     {
         // send data for current transport in other place
-        if ((*i) != player->GetTransport() && (*i)->GetMapId() == i_id)
+        if (i != player->GetTransport() && i->GetMapId() == i_id)
         {
             hasTransport = true;
-            (*i)->BuildCreateUpdateBlockForPlayer(&transData, player);
+            i->BuildCreateUpdateBlockForPlayer(&transData, player);
         }
     }
 
@@ -1009,9 +1009,9 @@ void Map::SendRemoveTransports(Player* player) const
     MapManager::TransportSet& tset = tmap[player->GetMapId()];
 
     // except used transport
-    for (MapManager::TransportSet::const_iterator i = tset.begin(); i != tset.end(); ++i)
-        if ((*i) != player->GetTransport() && (*i)->GetMapId() != i_id)
-            (*i)->BuildOutOfRangeUpdateBlock(&transData);
+    for (auto i : tset)
+        if (i != player->GetTransport() && i->GetMapId() != i_id)
+            i->BuildOutOfRangeUpdateBlock(&transData);
 
     WorldPacket packet;
     transData.BuildPacket(packet);
@@ -1081,26 +1081,26 @@ void Map::RemoveAllObjectsInRemoveList()
 uint32 Map::GetPlayersCountExceptGMs() const
 {
     uint32 count = 0;
-    for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-        if (!itr->getSource()->isGameMaster())
+    for (const auto& itr : m_mapRefManager)
+        if (!itr.getSource()->isGameMaster())
             ++count;
     return count;
 }
 
 void Map::SendToPlayers(WorldPacket const& data) const
 {
-    for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-        itr->getSource()->GetSession()->SendPacket(data);
+    for (const auto& itr : m_mapRefManager)
+        itr.getSource()->GetSession()->SendPacket(data);
 }
 
 bool Map::SendToPlayersInZone(WorldPacket const& data, uint32 zoneId) const
 {
     bool foundPlayer = false;
-    for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
+    for (const auto& itr : m_mapRefManager)
     {
-        if (itr->getSource()->GetZoneId() == zoneId)
+        if (itr.getSource()->GetZoneId() == zoneId)
         {
-            itr->getSource()->GetSession()->SendPacket(data);
+            itr.getSource()->GetSession()->SendPacket(data);
             foundPlayer = true;
         }
     }
@@ -1124,9 +1124,9 @@ bool Map::ActiveObjectsNearGrid(uint32 x, uint32 y) const
     cell_max >> cell_range;
     cell_max += cell_range;
 
-    for (MapRefManager::const_iterator iter = m_mapRefManager.begin(); iter != m_mapRefManager.end(); ++iter)
+    for (const auto& iter : m_mapRefManager)
     {
-        Player* plr = iter->getSource();
+        Player* plr = iter.getSource();
 
         CellPair p = MaNGOS::ComputeCellPair(plr->GetPositionX(), plr->GetPositionY());
         if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord) &&
@@ -1134,10 +1134,8 @@ bool Map::ActiveObjectsNearGrid(uint32 x, uint32 y) const
             return true;
     }
 
-    for (ActiveNonPlayers::const_iterator iter = m_activeNonPlayers.begin(); iter != m_activeNonPlayers.end(); ++iter)
+    for (auto obj : m_activeNonPlayers)
     {
-        WorldObject* obj = *iter;
-
         CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
         if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord) &&
                 (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
@@ -1516,16 +1514,16 @@ bool DungeonMap::Reset(InstanceResetMethod method)
         if (method == INSTANCE_RESET_ALL)
         {
             // notify the players to leave the instance so it can be reset
-            for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-                itr->getSource()->SendResetFailedNotify(GetId());
+            for (auto& itr : m_mapRefManager)
+                itr.getSource()->SendResetFailedNotify(GetId());
         }
         else
         {
             if (method == INSTANCE_RESET_GLOBAL)
             {
                 // set the homebind timer for players inside (1 minute)
-                for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-                    itr->getSource()->m_InstanceValid = false;
+                for (auto& itr : m_mapRefManager)
+                    itr.getSource()->m_InstanceValid = false;
             }
 
             // the unload timer is not started
@@ -1548,9 +1546,9 @@ void DungeonMap::PermBindAllPlayers(Player* player)
 {
     Group* group = player->GetGroup();
     // group members outside the instance group don't get bound
-    for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
+    for (auto& itr : m_mapRefManager)
     {
-        Player* plr = itr->getSource();
+        Player* plr = itr.getSource();
         // players inside an instance cannot be bound to other instances
         // some players may already be permanently bound, in this case nothing happens
         InstancePlayerBind* bind = plr->GetBoundInstance(GetId());
@@ -1580,8 +1578,8 @@ void DungeonMap::UnloadAll(bool pForce)
 
 void DungeonMap::SendResetWarnings(uint32 timeLeft) const
 {
-    for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-        itr->getSource()->SendInstanceResetWarning(GetId(), timeLeft);
+    for (const auto& itr : m_mapRefManager)
+        itr.getSource()->SendInstanceResetWarning(GetId(), timeLeft);
 }
 
 void DungeonMap::SetResetSchedule(bool on)
@@ -1733,11 +1731,11 @@ bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* sourc
 
     ///- Schedule script execution for all scripts in the script map
     ScriptMap const* s2 = &(s->second);
-    for (ScriptMap::const_iterator iter = s2->begin(); iter != s2->end(); ++iter)
+    for (const auto& iter : *s2)
     {
-        ScriptAction sa(scripts.first, this, sourceGuid, targetGuid, ownerGuid, &iter->second);
+        ScriptAction sa(scripts.first, this, sourceGuid, targetGuid, ownerGuid, &iter.second);
 
-        m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(sWorld.GetGameTime() + iter->first), sa));
+        m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(sWorld.GetGameTime() + iter.first), sa));
 
         sScriptMgr.IncreaseScheduledScriptsCount();
     }
@@ -1940,10 +1938,10 @@ void Map::SendObjectUpdates()
     }
 
     WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
-    for (UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
+    for (auto& update_player : update_players)
     {
-        iter->second.BuildPacket(packet);
-        iter->first->GetSession()->SendPacket(packet);
+        update_player.second.BuildPacket(packet);
+        update_player.first->GetSession()->SendPacket(packet);
         packet.clear();                                     // clean the string
     }
 }
@@ -2045,8 +2043,8 @@ void Map::MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, ChatMsg chat
     MaNGOS::LocalizedPacketDo<StaticMonsterChatBuilder> say_do(say_build);
 
     Map::PlayerList const& pList = GetPlayers();
-    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        say_do(itr->getSource());
+    for (const auto& itr : pList)
+        say_do(itr.getSource());
 }
 
 /**
@@ -2061,9 +2059,9 @@ void Map::PlayDirectSoundToMap(uint32 soundId, uint32 zoneId /*=0*/) const
     data << uint32(soundId);
 
     Map::PlayerList const& pList = GetPlayers();
-    for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        if (!zoneId || itr->getSource()->GetZoneId() == zoneId)
-            itr->getSource()->SendDirectMessage(data);
+    for (const auto& itr : pList)
+        if (!zoneId || itr.getSource()->GetZoneId() == zoneId)
+            itr.getSource()->SendDirectMessage(data);
 }
 
 /**
@@ -2354,7 +2352,7 @@ bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, f
     return false;
 }
 
-void Map::AddMessage(std::function<void(Map*)> message)
+void Map::AddMessage(const std::function<void(Map*)>& message)
 {
     std::lock_guard<std::mutex> guard(m_messageMutex);
     m_messageVector.push_back(message);

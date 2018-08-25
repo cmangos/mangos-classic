@@ -335,9 +335,9 @@ void BattleGround::Update(uint32 diff)
         {
             if (m_validStartPositionTimer < diff)
             {
-                for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                for (const auto& itr : GetPlayers())
                 {
-                    if (Player* player = sObjectMgr.GetPlayer(itr->first))
+                    if (Player* player = sObjectMgr.GetPlayer(itr.first))
                     {
                         float x, y, z, o;
                         GetTeamStartLoc(player->GetTeam(), x, y, z, o);
@@ -654,17 +654,17 @@ void BattleGround::EndBattleGround(Team winner)
     // we must set it this way, because end time is sent in packet!
     m_EndTime = TIME_TO_AUTOREMOVE;
 
-    for (BattleGroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    for (auto m_Player : m_Players)
     {
-        Team team = itr->second.PlayerTeam;
+        Team team = m_Player.second.PlayerTeam;
 
-        if (itr->second.OfflineRemoveTime)
+        if (m_Player.second.OfflineRemoveTime)
             continue;
 
-        Player* plr = sObjectMgr.GetPlayer(itr->first);
+        Player* plr = sObjectMgr.GetPlayer(m_Player.first);
         if (!plr)
         {
-            sLog.outError("BattleGround:EndBattleGround %s not found!", itr->first.GetString().c_str());
+            sLog.outError("BattleGround:EndBattleGround %s not found!", m_Player.first.GetString().c_str());
             continue;
         }
 
@@ -690,7 +690,7 @@ void BattleGround::EndBattleGround(Team winner)
         if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_SCORE_STATISTICS))
         {
             static SqlStatementID insPvPstatsPlayer;
-            BattleGroundScoreMap::iterator score = m_PlayerScores.find(itr->first);
+            BattleGroundScoreMap::iterator score = m_PlayerScores.find(m_Player.first);
             SqlStatement stmt = CharacterDatabase.CreateStatement(insPvPstatsPlayer, "INSERT INTO pvpstats_players (battleground_id, character_guid, score_killing_blows, score_deaths, score_honorable_kills, score_bonus_honor, score_damage_done, score_healing_done, attr_1, attr_2, attr_3, attr_4, attr_5) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             stmt.addUInt32(battleground_id);
@@ -1492,11 +1492,11 @@ void BattleGround::PlayerAddedToBGCheckIfBGIsRunning(Player* plr)
 uint32 BattleGround::GetAlivePlayersCountByTeam(Team team) const
 {
     int count = 0;
-    for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    for (const auto& m_Player : m_Players)
     {
-        if (itr->second.PlayerTeam == team)
+        if (m_Player.second.PlayerTeam == team)
         {
-            Player* pl = sObjectMgr.GetPlayer(itr->first);
+            Player* pl = sObjectMgr.GetPlayer(m_Player.first);
             if (pl && pl->isAlive())
                 ++count;
         }

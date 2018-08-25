@@ -91,9 +91,9 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
     if (pUser->isInCombat())
     {
-        for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+        for (const auto& Spell : proto->Spells)
         {
-            if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(proto->Spells[i].SpellId))
+            if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(Spell.SpellId))
             {
                 if (IsNonCombatSpell(spellInfo))
                 {
@@ -423,10 +423,10 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
         {
             // except own aura spells
             bool allow = false;
-            for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
+            for (unsigned int k : spellInfo->EffectApplyAuraName)
             {
-                if (spellInfo->EffectApplyAuraName[k] == SPELL_AURA_MOD_POSSESS ||
-                        spellInfo->EffectApplyAuraName[k] == SPELL_AURA_MOD_POSSESS_PET)
+                if (k == SPELL_AURA_MOD_POSSESS ||
+                    k == SPELL_AURA_MOD_POSSESS_PET)
                 {
                     allow = true;
                     break;

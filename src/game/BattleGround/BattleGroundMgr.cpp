@@ -58,13 +58,13 @@ BattleGroundQueue::BattleGroundQueue()
 BattleGroundQueue::~BattleGroundQueue()
 {
     m_QueuedPlayers.clear();
-    for (uint8 i = 0; i < MAX_BATTLEGROUND_BRACKETS; ++i)
+    for (auto& m_QueuedGroup : m_QueuedGroups)
     {
         for (uint8 j = 0; j < BG_QUEUE_GROUP_TYPES_COUNT; ++j)
         {
-            for (GroupsQueueType::iterator itr = m_QueuedGroups[i][j].begin(); itr != m_QueuedGroups[i][j].end(); ++itr)
+            for (GroupsQueueType::iterator itr = m_QueuedGroup[j].begin(); itr != m_QueuedGroup[j].end(); ++itr)
                 delete (*itr);
-            m_QueuedGroups[i][j].clear();
+            m_QueuedGroup[j].clear();
         }
     }
 }
@@ -847,11 +847,11 @@ void BattleGroundMgr::Update(uint32 diff)
             // release lock
         }
 
-        for (uint8 i = 0; i < scheduled.size(); ++i)
+        for (uint32 i : scheduled)
         {
-            BattleGroundQueueTypeId bgQueueTypeId = BattleGroundQueueTypeId(scheduled[i] >> 16 & 255);
-            BattleGroundTypeId bgTypeId = BattleGroundTypeId((scheduled[i] >> 8) & 255);
-            BattleGroundBracketId bracket_id = BattleGroundBracketId(scheduled[i] & 255);
+            BattleGroundQueueTypeId bgQueueTypeId = BattleGroundQueueTypeId(i >> 16 & 255);
+            BattleGroundTypeId bgTypeId = BattleGroundTypeId((i >> 8) & 255);
+            BattleGroundBracketId bracket_id = BattleGroundBracketId(i & 255);
             m_BattleGroundQueues[bgQueueTypeId].Update(bgTypeId, bracket_id);
         }
     }
@@ -999,10 +999,10 @@ BattleGround* BattleGroundMgr::GetBattleGroundThroughClientInstance(uint32 insta
     if (!bg)
         return nullptr;
 
-    for (BattleGroundSet::iterator itr = m_BattleGrounds[bgTypeId].begin(); itr != m_BattleGrounds[bgTypeId].end(); ++itr)
+    for (auto& itr : m_BattleGrounds[bgTypeId])
     {
-        if (itr->second->GetClientInstanceID() == instanceId)
-            return itr->second;
+        if (itr.second->GetClientInstanceID() == instanceId)
+            return itr.second;
     }
     return nullptr;
 }
@@ -1321,9 +1321,9 @@ void BattleGroundMgr::ScheduleQueueUpdate(BattleGroundQueueTypeId bgQueueTypeId,
     // we will use only 1 number created of bgTypeId and bracket_id
     uint32 schedule_id = (bgQueueTypeId << 16) | (bgTypeId << 8) | bracket_id;
     bool found = false;
-    for (uint8 i = 0; i < m_QueueUpdateScheduler.size(); ++i)
+    for (unsigned long long i : m_QueueUpdateScheduler)
     {
-        if (m_QueueUpdateScheduler[i] == schedule_id)
+        if (i == schedule_id)
         {
             found = true;
             break;

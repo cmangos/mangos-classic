@@ -717,9 +717,9 @@ namespace MaNGOS
             if (!i_originalCaster)
                 return;
 
-            for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+            for (auto& itr : m)
             {
-                Player* pPlayer = itr->getSource();
+                Player* pPlayer = itr.getSource();
                 if (!pPlayer->isAlive() || pPlayer->IsTaxiFlying())
                     continue;
 

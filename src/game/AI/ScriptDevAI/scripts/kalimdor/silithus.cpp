@@ -446,8 +446,8 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
 
     void DoSummonDragons()
     {
-        for (uint8 i = 0; i < MAX_DRAGONS; ++i)
-            m_creature->SummonCreature(aEternalBoardNPCs[i].m_uiEntry, aEternalBoardNPCs[i].m_fX, aEternalBoardNPCs[i].m_fY, aEternalBoardNPCs[i].m_fZ, aEternalBoardNPCs[i].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0);
+        for (auto& aEternalBoardNPC : aEternalBoardNPCs)
+            m_creature->SummonCreature(aEternalBoardNPC.m_uiEntry, aEternalBoardNPC.m_fX, aEternalBoardNPC.m_fY, aEternalBoardNPC.m_fZ, aEternalBoardNPC.m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0);
 
         // Also summon the 3 anubisath conquerors
         float fX, fY, fZ;
@@ -814,9 +814,9 @@ struct npc_solenorAI : public ScriptedAI
             {
                 ThreatList const& tList = m_creature->getThreatManager().getThreatList();
 
-                for (ThreatList::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
+                for (auto itr : tList)
                 {
-                    if (Unit* pUnit = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                    if (Unit* pUnit = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                     {
                         if (pUnit->isAlive())
                         {

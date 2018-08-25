@@ -230,9 +230,9 @@ struct npc_paoka_swiftmountainAI : public npc_escortAI
 
     void DoSpawnWyvern()
     {
-        for (int i = 0; i < 3; ++i)
+        for (auto& i : m_afWyvernLoc)
             m_creature->SummonCreature(NPC_WYVERN,
-                                       m_afWyvernLoc[i][0], m_afWyvernLoc[i][1], m_afWyvernLoc[i][2], 0.0f,
+                i[0], i[1], i[2], 0.0f,
                                        TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
     }
 };

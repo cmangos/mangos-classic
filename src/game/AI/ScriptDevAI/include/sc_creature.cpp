@@ -313,9 +313,9 @@ void ScriptedAI::DoResetThreat()
     }
 
     ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-    for (ThreatList::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
+    for (auto itr : tList)
     {
-        Unit* unit = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid());
+        Unit* unit = m_creature->GetMap()->GetUnit(itr->getUnitGuid());
 
         if (unit && m_creature->getThreatManager().getThreat(unit))
             m_creature->getThreatManager().modifyThreatPercent(unit, -100);

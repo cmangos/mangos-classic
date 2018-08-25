@@ -42,9 +42,9 @@ inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T>& m)
 
 inline void MaNGOS::ObjectUpdater::Visit(CreatureMapType& m)
 {
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        WorldObject::UpdateHelper helper(iter->getSource());
+        WorldObject::UpdateHelper helper(iter.getSource());
         helper.Update(i_timeDiff);
     }
 }
@@ -112,9 +112,9 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(CreatureMapType& m)
 
     bool playerHasAI = i_player.AI();
 
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        Creature* creature = iter->getSource();
+        Creature* creature = iter.getSource();
         if (!creature->isAlive())
             continue;
 
@@ -133,9 +133,9 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(PlayerMapType& m)
 
     bool playerHasAI = i_player.AI();
 
-    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        Player* player = iter->getSource();
+        Player* player = iter.getSource();
         if (player->isAlive() && !player->IsTaxiFlying())
             continue;
 
@@ -153,9 +153,9 @@ inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(PlayerMapType& m)
     if (!i_creature.isAlive())
         return;
 
-    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        Player* player = iter->getSource();
+        Player* player = iter.getSource();
         if (player->isAlive() && !player->IsTaxiFlying())
             continue;
 
@@ -172,9 +172,9 @@ inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(CreatureMapType& m)
     if (!i_creature.isAlive())
         return;
 
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        Creature* creature = iter->getSource();
+        Creature* creature = iter.getSource();
         if (creature == &i_creature || !creature->isAlive())
             continue;
 
@@ -292,15 +292,15 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
 template<>
 inline void MaNGOS::DynamicObjectUpdater::Visit(CreatureMapType&  m)
 {
-    for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-        VisitHelper(itr->getSource());
+    for (auto& itr : m)
+        VisitHelper(itr.getSource());
 }
 
 template<>
 inline void MaNGOS::DynamicObjectUpdater::Visit(PlayerMapType&  m)
 {
-    for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-        VisitHelper(itr->getSource());
+    for (auto& itr : m)
+        VisitHelper(itr.getSource());
 }
 
 // SEARCHERS & LIST SEARCHERS & WORKERS

@@ -213,8 +213,8 @@ void instance_ruins_of_ahnqiraj::DoSapwnAndorovIfCan()
     if (!pPlayer)
         return;
 
-    for (uint8 i = 0; i < MAX_HELPERS; ++i)
-        pPlayer->SummonCreature(aAndorovSpawnLocs[i].m_uiEntry, aAndorovSpawnLocs[i].m_fX, aAndorovSpawnLocs[i].m_fY, aAndorovSpawnLocs[i].m_fZ, aAndorovSpawnLocs[i].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+    for (const auto& aAndorovSpawnLoc : aAndorovSpawnLocs)
+        pPlayer->SummonCreature(aAndorovSpawnLoc.m_uiEntry, aAndorovSpawnLoc.m_fX, aAndorovSpawnLoc.m_fY, aAndorovSpawnLoc.m_fZ, aAndorovSpawnLoc.m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
 void instance_ruins_of_ahnqiraj::Load(const char* chrIn)
@@ -232,10 +232,10 @@ void instance_ruins_of_ahnqiraj::Load(const char* chrIn)
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2]
                >> m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -319,9 +319,9 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
         }
 
         float fX, fY, fZ;
-        for (GuidSet::const_iterator itr = m_sArmyWavesGuids[m_uiCurrentArmyWave].begin(); itr != m_sArmyWavesGuids[m_uiCurrentArmyWave].end(); ++itr)
+        for (auto itr : m_sArmyWavesGuids[m_uiCurrentArmyWave])
         {
-            if (Creature* pTemp = instance->GetCreature(*itr))
+            if (Creature* pTemp = instance->GetCreature(itr))
             {
                 if (!pTemp->isAlive())
                     continue;

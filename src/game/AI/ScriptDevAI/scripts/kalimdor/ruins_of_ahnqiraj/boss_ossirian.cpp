@@ -107,8 +107,8 @@ struct boss_ossirianAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
         DoSpawnNextCrystal();
 
-        for (uint8 i = 0; i < countof(aSandVortexSpawnPos); ++i)
-            m_creature->SummonCreature(NPC_SAND_VORTEX, aSandVortexSpawnPos[i][0], aSandVortexSpawnPos[i][1], aSandVortexSpawnPos[i][2], aSandVortexSpawnPos[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
+        for (auto aSandVortexSpawnPo : aSandVortexSpawnPos)
+            m_creature->SummonCreature(NPC_SAND_VORTEX, aSandVortexSpawnPo[0], aSandVortexSpawnPo[1], aSandVortexSpawnPo[2], aSandVortexSpawnPo[3], TEMPSPAWN_CORPSE_DESPAWN, 0);
 
         if (m_pInstance)
             m_pInstance->instance->SetWeather(ZONE_ID_RUINS_AQ, WEATHER_TYPE_STORM, 1.0f, true);
@@ -174,9 +174,9 @@ struct boss_ossirianAI : public ScriptedAI
         {
             // Check for proper spell id
             bool bIsWeaknessSpell = false;
-            for (uint8 i = 0; i < countof(aWeaknessSpell); ++i)
+            for (unsigned int i : aWeaknessSpell)
             {
-                if (pSpell->Id == aWeaknessSpell[i])
+                if (pSpell->Id == i)
                 {
                     bIsWeaknessSpell = true;
                     break;

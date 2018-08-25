@@ -46,15 +46,15 @@ static uint32 TriggerOrphanSpell[6][3] =
 
 bool AreaTrigger_at_childrens_week_spot(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    for (uint8 i = 0; i < 6; ++i)
+    for (auto& i : TriggerOrphanSpell)
     {
-        if (pPlayer->IsCurrentQuest(TriggerOrphanSpell[i][2]))
+        if (pPlayer->IsCurrentQuest(i[2]))
         {
-            if (pAt->id == TriggerOrphanSpell[i][0] &&
-                    pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == TriggerOrphanSpell[i][1])
+            if (pAt->id == i[0] &&
+                    pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == i[1])
             {
-                pPlayer->SendQuestCompleteEvent(TriggerOrphanSpell[i][2]);
-                pPlayer->CompleteQuest(TriggerOrphanSpell[i][2]);
+                pPlayer->SendQuestCompleteEvent(i[2]);
+                pPlayer->CompleteQuest(i[2]);
                 return true;
             }
         }
@@ -183,8 +183,8 @@ bool AreaTrigger_at_ancient_leaf(Player* pPlayer, AreaTriggerEntry const* pAt)
         if (GetClosestCreatureWithEntry(pPlayer, NPC_VARTRUS, 50.0f) || GetClosestCreatureWithEntry(pPlayer, NPC_STOMA, 50.0f) || GetClosestCreatureWithEntry(pPlayer, NPC_HASTAT, 50.0f))
             return true;
 
-        for (uint8 i = 0; i < MAX_ANCIENTS; ++i)
-            pPlayer->SummonCreature(afSpawnLocations[i].uiEntry, afSpawnLocations[i].fX, afSpawnLocations[i].fY, afSpawnLocations[i].fZ, afSpawnLocations[i].fO, TEMPSPAWN_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+        for (const auto& afSpawnLocation : afSpawnLocations)
+            pPlayer->SummonCreature(afSpawnLocation.uiEntry, afSpawnLocation.fX, afSpawnLocation.fY, afSpawnLocation.fZ, afSpawnLocation.fO, TEMPSPAWN_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
     }
 
     return false;

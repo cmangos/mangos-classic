@@ -305,9 +305,9 @@ void BattleGroundAV::EndBattleGround(Team winner)
         if (m_Nodes[i].State == POINT_CONTROLLED && m_Nodes[i].Owner != BG_AV_TEAM_NEUTRAL)
             ++graves_owned[m_Nodes[i].Owner];
 
-    for (uint8 i = 0; i < BG_AV_MAX_MINES; ++i)
-        if (m_Mine_Owner[i] != BG_AV_TEAM_NEUTRAL)
-            ++mines_owned[m_Mine_Owner[i]];
+    for (auto& i : m_Mine_Owner)
+        if (i != BG_AV_TEAM_NEUTRAL)
+            ++mines_owned[i];
 
     // now we have the values give the honor/reputation to the teams:
     Team team[PVP_TEAM_COUNT]      = { ALLIANCE, HORDE };

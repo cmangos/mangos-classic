@@ -478,9 +478,9 @@ bool AuctionBotBuyer::Initialize()
     LoadConfig();
 
     bool active_house = false;
-    for (int i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
+    for (auto& i : m_HouseConfig)
     {
-        if (m_HouseConfig[i].BuyerEnabled)
+        if (i.BuyerEnabled)
         {
             active_house = true;
             break;
@@ -1486,8 +1486,8 @@ void AuctionBotSeller::SetItemsRatio(uint32 al, uint32 ho, uint32 ne)
     sAuctionBotConfig.setConfig(CONFIG_UINT32_AHBOT_HORDE_ITEM_AMOUNT_RATIO, ho < 10000 ? ho : 10000);
     sAuctionBotConfig.setConfig(CONFIG_UINT32_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO, ne < 10000 ? ne : 10000);
 
-    for (int i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
-        LoadItemsQuantity(m_HouseConfig[i]);
+    for (auto& i : m_HouseConfig)
+        LoadItemsQuantity(i);
 }
 
 void AuctionBotSeller::SetItemsRatioForHouse(AuctionHouseType house, uint32 val)
@@ -1515,8 +1515,8 @@ void AuctionBotSeller::SetItemsAmount(uint32(&vals) [MAX_AUCTION_QUALITY])
     sAuctionBotConfig.setConfig(CONFIG_UINT32_AHBOT_ITEM_ORANGE_AMOUNT, vals[AUCTION_QUALITY_ORANGE]);
     sAuctionBotConfig.setConfig(CONFIG_UINT32_AHBOT_ITEM_YELLOW_AMOUNT, vals[AUCTION_QUALITY_YELLOW]);
 
-    for (int i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
-        LoadItemsQuantity(m_HouseConfig[i]);
+    for (auto& i : m_HouseConfig)
+        LoadItemsQuantity(i);
 }
 
 void AuctionBotSeller::SetItemsAmountForQuality(AuctionQuality quality, uint32 val)
@@ -1532,8 +1532,8 @@ void AuctionBotSeller::SetItemsAmountForQuality(AuctionQuality quality, uint32 v
         default:                    sAuctionBotConfig.setConfig(CONFIG_UINT32_AHBOT_ITEM_YELLOW_AMOUNT, val); break;
     }
 
-    for (int i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
-        LoadItemsQuantity(m_HouseConfig[i]);
+    for (auto& i : m_HouseConfig)
+        LoadItemsQuantity(i);
 }
 
 // Add new auction to one of the factions.
@@ -1713,8 +1713,8 @@ void AuctionHouseBot::PrepareStatusInfos(AuctionHouseBotStatusInfo& statusInfo) 
     {
         statusInfo[i].ItemsCount = 0;
 
-        for (int j = 0; j < MAX_AUCTION_QUALITY; ++j)
-            statusInfo[i].QualityInfo[j] = 0;
+        for (unsigned int& j : statusInfo[i].QualityInfo)
+            j = 0;
 
         AuctionHouseObject::AuctionEntryMapBounds bounds = sAuctionMgr.GetAuctionsMap(AuctionHouseType(i))->GetAuctionsBounds();
         for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)

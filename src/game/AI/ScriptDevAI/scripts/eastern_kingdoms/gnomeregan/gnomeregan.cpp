@@ -164,13 +164,13 @@ struct npc_blastmaster_emi_shortfuseAI : public npc_escortAI
 
     void DoSummonPack(uint8 uiIndex)
     {
-        for (uint8 i = 0; i < MAX_SUMMON_POSITIONS; ++i)
+        for (const auto& i : asSummonInfo)
         {
             // This requires order of the array
-            if (asSummonInfo[i].uiPosition > uiIndex)
+            if (i.uiPosition > uiIndex)
                 break;
-            if (asSummonInfo[i].uiPosition == uiIndex)
-                m_creature->SummonCreature(asSummonInfo[i].uiEntry, asSummonInfo[i].fX, asSummonInfo[i].fY, asSummonInfo[i].fZ, asSummonInfo[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+            if (i.uiPosition == uiIndex)
+                m_creature->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, i.fO, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 

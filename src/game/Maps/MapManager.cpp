@@ -39,11 +39,11 @@ MapManager::MapManager()
 
 MapManager::~MapManager()
 {
-    for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        delete iter->second;
+    for (auto& i_map : i_maps)
+        delete i_map.second;
 
-    for (TransportSet::iterator i = m_Transports.begin(); i != m_Transports.end(); ++i)
-        delete *i;
+    for (auto m_Transport : m_Transports)
+        delete m_Transport;
 
     DeleteStateMachine();
 }
@@ -82,8 +82,8 @@ void MapManager::UpdateGridState(grid_state_t state, Map& map, NGridType& ngrid,
 
 void MapManager::InitializeVisibilityDistanceInfo()
 {
-    for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        (*iter).second->InitVisibilityDistance();
+    for (auto& i_map : i_maps)
+        i_map.second->InitVisibilityDistance();
 }
 
 /// @param id - MapId of the to be created map. @param obj WorldObject for which the map is to be created. Must be player for Instancable maps.
@@ -172,12 +172,12 @@ void MapManager::Update(uint32 diff)
     if (!i_timer.Passed())
         return;
 
-    for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        iter->second->Update((uint32)i_timer.GetCurrent());
+    for (auto& i_map : i_maps)
+        i_map.second->Update((uint32)i_timer.GetCurrent());
 
-    for (TransportSet::iterator iter = m_Transports.begin(); iter != m_Transports.end(); ++iter)
+    for (auto m_Transport : m_Transports)
     {
-        WorldObject::UpdateHelper helper((*iter));
+        WorldObject::UpdateHelper helper(m_Transport);
         helper.Update((uint32)i_timer.GetCurrent());
     }
 
@@ -203,8 +203,8 @@ void MapManager::Update(uint32 diff)
 
 void MapManager::RemoveAllObjectsInRemoveList()
 {
-    for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        iter->second->RemoveAllObjectsInRemoveList();
+    for (auto& i_map : i_maps)
+        i_map.second->RemoveAllObjectsInRemoveList();
 }
 
 bool MapManager::ExistMapAndVMap(uint32 mapid, float x, float y)
@@ -226,8 +226,8 @@ bool MapManager::IsValidMAP(uint32 mapid)
 
 void MapManager::UnloadAll()
 {
-    for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        iter->second->UnloadAll(true);
+    for (auto& i_map : i_maps)
+        i_map.second->UnloadAll(true);
 
     while (!i_maps.empty())
     {
@@ -253,9 +253,9 @@ void MapManager::InitMaxInstanceId()
 uint32 MapManager::GetNumInstances()
 {
     uint32 ret = 0;
-    for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
+    for (auto& i_map : i_maps)
     {
-        Map* map = itr->second;
+        Map* map = i_map.second;
         if (!map->IsDungeon()) continue;
         ret += 1;
     }
@@ -265,9 +265,9 @@ uint32 MapManager::GetNumInstances()
 uint32 MapManager::GetNumPlayersInInstances()
 {
     uint32 ret = 0;
-    for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
+    for (auto& i_map : i_maps)
     {
-        Map* map = itr->second;
+        Map* map = i_map.second;
         if (!map->IsDungeon()) continue;
         ret += map->GetPlayers().getSize();
     }

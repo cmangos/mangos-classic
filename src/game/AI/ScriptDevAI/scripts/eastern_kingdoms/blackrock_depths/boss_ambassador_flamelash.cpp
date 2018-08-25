@@ -50,8 +50,8 @@ struct boss_ambassador_flamelashAI : public ScriptedAI
 
     void Reset() override
     {
-        for (uint8 i = 0; i < MAX_DWARF_RUNES; ++i)
-            m_uiSpiritTimer[i] = urand(0, 1000);
+        for (unsigned int& i : m_uiSpiritTimer)
+            i = urand(0, 1000);
 
         m_sSpiritsGuidsSet.clear();
     }

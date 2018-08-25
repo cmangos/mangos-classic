@@ -735,9 +735,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     // find Mage Armor
                     bool found = false;
                     AuraList const& mRegenInterrupt = GetAurasByType(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
-                    for (AuraList::const_iterator iter = mRegenInterrupt.begin(); iter != mRegenInterrupt.end(); ++iter)
+                    for (auto iter : mRegenInterrupt)
                     {
-                        if (SpellEntry const* iterSpellProto = (*iter)->GetSpellProto())
+                        if (SpellEntry const* iterSpellProto = iter->GetSpellProto())
                         {
                             if (iterSpellProto->SpellFamilyName == SPELLFAMILY_MAGE && (iterSpellProto->SpellFamilyFlags & uint64(0x10000000)))
                             {

@@ -66,8 +66,8 @@ static uint32 ahbotQualityIds[MAX_AUCTION_QUALITY] =
 bool ChatHandler::HandleAHBotItemsAmountCommand(char* args)
 {
     uint32 qVals[MAX_AUCTION_QUALITY];
-    for (int i = 0; i < MAX_AUCTION_QUALITY; ++i)
-        if (!ExtractUInt32(&args, qVals[i]))
+    for (unsigned int& qVal : qVals)
+        if (!ExtractUInt32(&args, qVal))
             return false;
 
     sAuctionBot.SetItemsAmount(qVals);
@@ -101,8 +101,8 @@ template bool ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_
 bool ChatHandler::HandleAHBotItemsRatioCommand(char* args)
 {
     uint32 rVal[MAX_AUCTION_HOUSE_TYPE];
-    for (int i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
-        if (!ExtractUInt32(&args, rVal[i]))
+    for (unsigned int& i : rVal)
+        if (!ExtractUInt32(&args, i))
             return false;
 
     sAuctionBot.SetItemsRatio(rVal[0], rVal[1], rVal[2]);
@@ -3059,9 +3059,9 @@ bool ChatHandler::HandleLookupQuestCommand(char* args)
     int loc_idx = GetSessionDbLocaleIndex();
 
     ObjectMgr::QuestMap const& qTemplates = sObjectMgr.GetQuestTemplates();
-    for (ObjectMgr::QuestMap::const_iterator iter = qTemplates.begin(); iter != qTemplates.end(); ++iter)
+    for (const auto& qTemplate : qTemplates)
     {
-        Quest* qinfo = iter->second;
+        Quest* qinfo = qTemplate.second;
 
         std::string title;                                  // "" for avoid repeating check default locale
         sObjectMgr.GetQuestLocaleStrings(qinfo->GetQuestId(), loc_idx, &title);
@@ -3870,15 +3870,15 @@ bool ChatHandler::HandleNpcThreatCommand(char* /*args*/)
     PSendSysMessage(LANG_NPC_THREAT_SELECTED_CREATURE, target->GetName(), target->GetEntry());
 
     ThreatList const& tList = target->getThreatManager().getThreatList();
-    for (ThreatList::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
+    for (auto itr : tList)
     {
-        Unit* pUnit = (*itr)->getTarget();
+        Unit* pUnit = itr->getTarget();
 
         if (pUnit)
             // Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat and taunt state %u
-            PSendSysMessage(LANG_NPC_THREAT_PLAYER, pUnit->GetName(), pUnit->GetGUIDLow(), target->getThreatManager().getThreat(pUnit), (*itr)->GetTauntState());
+            PSendSysMessage(LANG_NPC_THREAT_PLAYER, pUnit->GetName(), pUnit->GetGUIDLow(), target->getThreatManager().getThreat(pUnit), itr->GetTauntState());
     }
-    
+
     return true;
 }
 
@@ -4465,11 +4465,11 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
 
     Unit::SpellAuraHolderMap const& uAuras = unit->GetSpellAuraHolderMap();
     PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, uAuras.size());
-    for (Unit::SpellAuraHolderMap::const_iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
+    for (const auto& uAura : uAuras)
     {
-        bool talent = GetTalentSpellCost(itr->second->GetId()) > 0;
+        bool talent = GetTalentSpellCost(uAura.second->GetId()) > 0;
 
-        SpellAuraHolder* holder = itr->second;
+        SpellAuraHolder* holder = uAura.second;
         char const* name = holder->GetSpellProto()->SpellName[GetSessionDbcLocale()];
 
         for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -4481,7 +4481,7 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
             if (m_session)
             {
                 std::ostringstream ss_name;
-                ss_name << "|cffffffff|Hspell:" << itr->second->GetId() << "|h[" << name << "]|h|r";
+                ss_name << "|cffffffff|Hspell:" << uAura.second->GetId() << "|h[" << name << "]|h|r";
 
                 PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, holder->GetId(), aur->GetEffIndex(),
                                 aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
@@ -4544,17 +4544,17 @@ bool ChatHandler::HandleListTalentsCommand(char* /*args*/)
     uint32 count = 0;
     uint32 cost = 0;
     PlayerSpellMap const& uSpells = player->GetSpellMap();
-    for (PlayerSpellMap::const_iterator itr = uSpells.begin(); itr != uSpells.end(); ++itr)
+    for (const auto& uSpell : uSpells)
     {
-        if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.disabled)
+        if (uSpell.second.state == PLAYERSPELL_REMOVED || uSpell.second.disabled)
             continue;
 
-        uint32 cost_itr = GetTalentSpellCost(itr->first);
+        uint32 cost_itr = GetTalentSpellCost(uSpell.first);
 
         if (cost_itr == 0)
             continue;
 
-        SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(itr->first);
+        SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(uSpell.first);
         if (!spellEntry)
             continue;
 
@@ -4778,8 +4778,8 @@ bool ChatHandler::HandleResetAllCommand(char* args)
 
     CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE (at_login & '%u') = '0'", atLogin, atLogin);
     HashMapHolder<Player>::MapType const& plist = sObjectAccessor.GetPlayers();
-    for (HashMapHolder<Player>::MapType::const_iterator itr = plist.begin(); itr != plist.end(); ++itr)
-        itr->second->SetAtLoginFlag(atLogin);
+    for (const auto& itr : plist)
+        itr.second->SetAtLoginFlag(atLogin);
 
     return true;
 }
@@ -6710,9 +6710,9 @@ bool ChatHandler::HandleMmapTestArea(char* args)
 
         float gx, gy, gz;
         m_session->GetPlayer()->GetPosition(gx, gy, gz);
-        for (std::list<Creature*>::iterator itr = creatureList.begin(); itr != creatureList.end(); ++itr)
+        for (auto& itr : creatureList)
         {
-            PathFinder path(*itr);
+            PathFinder path(itr);
             path.calculate(gx, gy, gz);
             ++paths;
         }

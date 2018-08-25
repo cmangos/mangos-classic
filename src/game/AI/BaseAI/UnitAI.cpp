@@ -446,8 +446,8 @@ class AiDelayEventAround : public BasicEvent
         {
             // Pushing guids because in delay can happen some creature gets despawned => invalid pointer
             m_receiverGuids.reserve(receivers.size());
-            for (std::list<Creature*>::const_iterator itr = receivers.begin(); itr != receivers.end(); ++itr)
-                m_receiverGuids.push_back((*itr)->GetObjectGuid());
+            for (auto receiver : receivers)
+                m_receiverGuids.push_back(receiver->GetObjectGuid());
         }
 
         bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) override

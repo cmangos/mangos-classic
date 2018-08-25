@@ -108,17 +108,17 @@ World::World(): mail_timer(0), mail_timer_expires(0)
     m_defaultDbcLocale = LOCALE_enUS;
     m_availableDbcLocaleMask = 0;
 
-    for (int i = 0; i < CONFIG_UINT32_VALUE_COUNT; ++i)
-        m_configUint32Values[i] = 0;
+    for (unsigned int& m_configUint32Value : m_configUint32Values)
+        m_configUint32Value = 0;
 
-    for (int i = 0; i < CONFIG_INT32_VALUE_COUNT; ++i)
-        m_configInt32Values[i] = 0;
+    for (int& m_configInt32Value : m_configInt32Values)
+        m_configInt32Value = 0;
 
-    for (int i = 0; i < CONFIG_FLOAT_VALUE_COUNT; ++i)
-        m_configFloatValues[i] = 0.0f;
+    for (float& m_configFloatValue : m_configFloatValues)
+        m_configFloatValue = 0.0f;
 
-    for (int i = 0; i < CONFIG_BOOL_VALUE_COUNT; ++i)
-        m_configBoolValues[i] = false;
+    for (bool& m_configBoolValue : m_configBoolValues)
+        m_configBoolValue = false;
 }
 
 /// World destructor
@@ -1374,12 +1374,12 @@ void World::Update(uint32 diff)
     m_currentDiff = diff;
 
     ///- Update the different timers
-    for (int i = 0; i < WUPDATE_COUNT; ++i)
+    for (auto& m_timer : m_timers)
     {
-        if (m_timers[i].GetCurrent() >= 0)
-            m_timers[i].Update(diff);
+        if (m_timer.GetCurrent() >= 0)
+            m_timer.Update(diff);
         else
-            m_timers[i].SetCurrent(0);
+            m_timer.SetCurrent(0);
     }
 
     ///- Update the game time and check for shutdown time
@@ -1587,9 +1587,9 @@ void World::SendWorldTextToAboveSecurity(uint32 securityLevel, int32 string_id, 
 /// Sends a packet to all players with optional team and instance restrictions
 void World::SendGlobalMessage(WorldPacket const& packet) const
 {
-    for (SessionMap::const_iterator itr = m_sessions.cbegin(); itr != m_sessions.cend(); ++itr)
+    for (const auto& m_session : m_sessions)
     {
-        if (WorldSession* session = itr->second)
+        if (WorldSession* session = m_session.second)
         {
             Player* player = session->GetPlayer();
             if (player && player->IsInWorld())

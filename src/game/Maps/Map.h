@@ -192,7 +192,7 @@ class Map : public GridRefManager<NGridType>
 
         void AddObjectToRemoveList(WorldObject* obj);
 
-        void UpdateObjectVisibility(WorldObject* obj, Cell cell, CellPair cellpair);
+        void UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& cellpair);
 
         void resetMarkedCells() { marked_cells.reset(); }
         bool isCellMarked(uint32 pCellId) const { return marked_cells.test(pCellId); }
@@ -301,7 +301,7 @@ class Map : public GridRefManager<NGridType>
         bool GetRandomPointInTheAir(float& x, float& y, float& z, float radius) const;
         bool GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status) const;
 
-        void AddMessage(std::function<void(Map*)> message);
+        void AddMessage(const std::function<void(Map*)>& message);
 
         uint32 SpawnedCountForEntry(uint32 entry);
         void AddToSpawnCount(const ObjectGuid& guid);

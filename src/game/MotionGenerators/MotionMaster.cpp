@@ -93,9 +93,8 @@ void MotionMaster::UpdateMotion(uint32 diff)
 
     if (m_expList)
     {
-        for (size_t i = 0; i < m_expList->size(); ++i)
+        for (auto mg : *m_expList)
         {
-            MovementGenerator* mg = (*m_expList)[i];
             if (!isStatic(mg))
                 delete mg;
         }

@@ -491,9 +491,9 @@ struct npc_klinfranAI : public ScriptedAI
             {
                 ThreatList const& tList = m_creature->getThreatManager().getThreatList();
 
-                for (ThreatList::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
+                for (auto itr : tList)
                 {
-                    if (Unit* pUnit = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                    if (Unit* pUnit = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                     {
                         if (pUnit->isAlive())
                         {

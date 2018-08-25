@@ -150,15 +150,15 @@ Quest::Quest(Field* questRecord)
             ++m_reqCreatureOrGOcount;
     }
 
-    for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
+    for (unsigned int i : RewItemId)
     {
-        if (RewItemId[i])
+        if (i)
             ++m_rewitemscount;
     }
 
-    for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
+    for (unsigned int i : RewChoiceItemId)
     {
-        if (RewChoiceItemId[i])
+        if (i)
             ++m_rewchoiceitemscount;
     }
 }

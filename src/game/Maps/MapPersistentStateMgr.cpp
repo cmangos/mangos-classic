@@ -583,14 +583,14 @@ void DungeonResetScheduler::ResetAllRaid()
 
     time_t timeleft = resetEventTypeDelay[RESET_EVENT_FORCED_INFORM_1];
 
-    for (ResetTimeQueue::iterator itr = m_resetTimeQueue.begin(); itr != m_resetTimeQueue.end(); ++itr)
+    for (auto& itr : m_resetTimeQueue)
     {
-        DungeonResetEvent& event = itr->second;
+        DungeonResetEvent& event = itr.second;
 
         // we only reset raid dungeon
         if (event.type == RESET_EVENT_NORMAL_DUNGEON)
         {
-            rTQ.insert(std::pair<time_t, DungeonResetEvent>(itr->first, event));
+            rTQ.insert(std::pair<time_t, DungeonResetEvent>(itr.first, event));
             continue;
         }
         event.type = RESET_EVENT_FORCED_INFORM_1;
@@ -612,10 +612,10 @@ MapPersistentStateManager::~MapPersistentStateManager()
     // it is undefined whether this or objectmgr will be unloaded first
     // so we must be prepared for both cases
     lock_instLists = true;
-    for (PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end(); ++itr)
-        delete  itr->second;
-    for (PersistentStateMap::iterator itr = m_instanceSaveByMapId.begin(); itr != m_instanceSaveByMapId.end(); ++itr)
-        delete  itr->second;
+    for (auto& itr : m_instanceSaveByInstanceId)
+        delete itr.second;
+    for (auto& itr : m_instanceSaveByMapId)
+        delete itr.second;
 }
 
 /*
@@ -815,18 +815,18 @@ void MapPersistentStateManager::PackInstances() const
 
     uint32 InstanceNumber = 1;
     // we do assume std::set is sorted properly on integer value
-    for (std::set<uint32>::iterator i = InstanceSet.begin(); i != InstanceSet.end(); ++i)
+    for (std::_Simple_types<unsigned int>::value_type i : InstanceSet)
     {
-        if (*i != InstanceNumber)
+        if (i != InstanceNumber)
         {
             CharacterDatabase.BeginTransaction();
             // remap instance id
-            CharacterDatabase.PExecute("UPDATE creature_respawn SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
-            CharacterDatabase.PExecute("UPDATE gameobject_respawn SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
-            CharacterDatabase.PExecute("UPDATE corpse SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
-            CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
-            CharacterDatabase.PExecute("UPDATE instance SET id = '%u' WHERE id = '%u'", InstanceNumber, *i);
-            CharacterDatabase.PExecute("UPDATE group_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
+            CharacterDatabase.PExecute("UPDATE creature_respawn SET instance = '%u' WHERE instance = '%u'", InstanceNumber, i);
+            CharacterDatabase.PExecute("UPDATE gameobject_respawn SET instance = '%u' WHERE instance = '%u'", InstanceNumber, i);
+            CharacterDatabase.PExecute("UPDATE corpse SET instance = '%u' WHERE instance = '%u'", InstanceNumber, i);
+            CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, i);
+            CharacterDatabase.PExecute("UPDATE instance SET id = '%u' WHERE id = '%u'", InstanceNumber, i);
+            CharacterDatabase.PExecute("UPDATE group_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, i);
             // execute transaction synchronously
             CharacterDatabase.CommitTransaction();
         }
@@ -917,12 +917,14 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 
         // remove all binds for online player
         std::list<DungeonPersistentState*> unbindList;
 
-        for (PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end(); ++itr)
-            if (itr->second->GetMapId() == mapid)
-                unbindList.push_back((DungeonPersistentState*)itr->second);
+        // note that we must build a list of states to unbind and then unbind them in two steps.  this is because the unbinding may
+        // trigger the modification of the collection, which would invalidate the iterator and cause a crash.
+        for (auto& itr : m_instanceSaveByInstanceId)
+            if (itr.second->GetMapId() == mapid)
+                unbindList.push_back((DungeonPersistentState*)itr.second);
 
-        for (std::list<DungeonPersistentState*>::iterator itr = unbindList.begin(); itr != unbindList.end(); itr++)
-            (*itr)->UnbindThisState();
+        for (auto itr : unbindList)
+            itr->UnbindThisState();
 
         // reset maps, teleport player automaticaly to their homebinds and unload maps
         MapPersistantStateResetWorker worker;
@@ -954,14 +956,14 @@ void MapPersistentStateManager::GetStatistics(uint32& numStates, uint32& numBoun
     numBoundGroups = 0;
 
     // only instanceable maps have bounds
-    for (PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end(); ++itr)
+    for (auto& itr : m_instanceSaveByInstanceId)
     {
-        if (!itr->second->GetMapEntry()->IsDungeon())
+        if (!itr.second->GetMapEntry()->IsDungeon())
             continue;
 
         ++numStates;
-        numBoundPlayers += ((DungeonPersistentState*)itr->second)->GetPlayerCount();
-        numBoundGroups += ((DungeonPersistentState*)itr->second)->GetGroupCount();
+        numBoundPlayers += ((DungeonPersistentState*)itr.second)->GetPlayerCount();
+        numBoundGroups += ((DungeonPersistentState*)itr.second)->GetGroupCount();
     }
 }
 

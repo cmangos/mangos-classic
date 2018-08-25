@@ -104,8 +104,8 @@ void MapManager::LoadTransports()
 
         m_Transports.insert(t);
 
-        for (std::set<uint32>::const_iterator i = mapsUsed.begin(); i != mapsUsed.end(); ++i)
-            m_TransportsByMap[*i].insert(t);
+        for (std::_Simple_types<unsigned int>::value_type i : mapsUsed)
+            m_TransportsByMap[i].insert(t);
 
         // If we someday decide to use the grid to track transports, here:
         t->SetMap(sMapMgr.CreateMap(mapid, t));
@@ -287,20 +287,20 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
             tmpDist = 0;
     }
 
-    for (size_t i = 0; i < keyFrames.size(); ++i)
+    for (auto& keyFrame : keyFrames)
     {
-        if (keyFrames[i].distSinceStop < (30 * 30 * 0.5f))
-            keyFrames[i].tFrom = sqrt(2 * keyFrames[i].distSinceStop);
+        if (keyFrame.distSinceStop < (30 * 30 * 0.5f))
+            keyFrame.tFrom = sqrt(2 * keyFrame.distSinceStop);
         else
-            keyFrames[i].tFrom = ((keyFrames[i].distSinceStop - (30 * 30 * 0.5f)) / 30) + 30;
+            keyFrame.tFrom = ((keyFrame.distSinceStop - (30 * 30 * 0.5f)) / 30) + 30;
 
-        if (keyFrames[i].distUntilStop < (30 * 30 * 0.5f))
-            keyFrames[i].tTo = sqrt(2 * keyFrames[i].distUntilStop);
+        if (keyFrame.distUntilStop < (30 * 30 * 0.5f))
+            keyFrame.tTo = sqrt(2 * keyFrame.distUntilStop);
         else
-            keyFrames[i].tTo = ((keyFrames[i].distUntilStop - (30 * 30 * 0.5f)) / 30) + 30;
+            keyFrame.tTo = ((keyFrame.distUntilStop - (30 * 30 * 0.5f)) / 30) + 30;
 
-        keyFrames[i].tFrom *= 1000;
-        keyFrames[i].tTo *= 1000;
+        keyFrame.tFrom *= 1000;
+        keyFrame.tTo *= 1000;
     }
 
     //    for (int i = 0; i < keyFrames.size(); ++i) {
@@ -532,15 +532,15 @@ void Transport::UpdateForMap(Map const* targetMap)
 
     if (GetMapId() == targetMap->GetId())
     {
-        for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+        for (const auto& itr : pl)
         {
-            if (this != itr->getSource()->GetTransport())
+            if (this != itr.getSource()->GetTransport())
             {
                 UpdateData transData;
-                BuildCreateUpdateBlockForPlayer(&transData, itr->getSource());
+                BuildCreateUpdateBlockForPlayer(&transData, itr.getSource());
                 WorldPacket packet;
                 transData.BuildPacket(packet, true);
-                itr->getSource()->SendDirectMessage(packet);
+                itr.getSource()->SendDirectMessage(packet);
             }
         }
     }
@@ -551,8 +551,8 @@ void Transport::UpdateForMap(Map const* targetMap)
         WorldPacket out_packet;
         transData.BuildPacket(out_packet, true);
 
-        for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
-            if (this != itr->getSource()->GetTransport())
-                itr->getSource()->SendDirectMessage(out_packet);
+        for (const auto& itr : pl)
+            if (this != itr.getSource()->GetTransport())
+                itr.getSource()->SendDirectMessage(out_packet);
     }
 }

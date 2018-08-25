@@ -110,10 +110,8 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
 {
     BattleGround* bg = map->IsBattleGround() ? ((BattleGroundMap*)map)->GetBG() : nullptr;
 
-    for (CellGuidSet::const_iterator i_guid = guid_set.begin(); i_guid != guid_set.end(); ++i_guid)
+    for (std::_Simple_types<unsigned int>::value_type guid : guid_set)
     {
-        uint32 guid = *i_guid;
-
         T* obj = new T;
         // sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);
         if (!obj->LoadFromDB(guid, map))
@@ -144,12 +142,12 @@ void LoadHelper(CellCorpseSet const& cell_corpses, CellPair& cell, CorpseMapType
     if (cell_corpses.empty())
         return;
 
-    for (CellCorpseSet::const_iterator itr = cell_corpses.begin(); itr != cell_corpses.end(); ++itr)
+    for (const auto& cell_corpse : cell_corpses)
     {
-        if (itr->second != map->GetInstanceId())
+        if (cell_corpse.second != map->GetInstanceId())
             continue;
 
-        uint32 player_lowguid = itr->first;
+        uint32 player_lowguid = cell_corpse.first;
 
         Corpse* obj = sObjectAccessor.GetCorpseForPlayerGUID(ObjectGuid(HIGHGUID_PLAYER, player_lowguid));
         if (!obj)
@@ -290,10 +288,10 @@ void
 ObjectGridStoper::Visit(CreatureMapType& m)
 {
     // stop any fights at grid de-activation and remove dynobjects created at cast by creatures
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        iter->getSource()->CombatStop();
-        iter->getSource()->RemoveAllDynObjects();
+        iter.getSource()->CombatStop();
+        iter.getSource()->RemoveAllDynObjects();
     }
 }
 

@@ -236,7 +236,7 @@ struct PlayerClassInfo
 
 struct PlayerLevelInfo
 {
-    PlayerLevelInfo() { for (int i = 0; i < MAX_STATS; ++i) stats[i] = 0; }
+    PlayerLevelInfo() { for (unsigned char& stat : stats) stat = 0; }
 
     uint8 stats[MAX_STATS];
 };
@@ -1805,8 +1805,8 @@ class Player : public Unit
 
         bool InBattleGroundQueue() const
         {
-            for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_NONE)
+            for (auto i : m_bgBattleGroundQueueID)
+                if (i.bgQueueTypeId != BATTLEGROUND_QUEUE_NONE)
                     return true;
             return false;
         }
@@ -1821,9 +1821,9 @@ class Player : public Unit
         }
         bool IsInvitedForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId) const
         {
-            for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-                    return m_bgBattleGroundQueueID[i].invitedToInstance != 0;
+            for (auto i : m_bgBattleGroundQueueID)
+                if (i.bgQueueTypeId == bgQueueTypeId)
+                    return i.invitedToInstance != 0;
             return false;
         }
         bool InBattleGroundQueueForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId) const
@@ -1852,20 +1852,20 @@ class Player : public Unit
         }
         bool HasFreeBattleGroundQueueId() const
         {
-            for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId == BATTLEGROUND_QUEUE_NONE)
+            for (auto i : m_bgBattleGroundQueueID)
+                if (i.bgQueueTypeId == BATTLEGROUND_QUEUE_NONE)
                     return true;
             return false;
         }
 
         void RemoveBattleGroundQueueId(BattleGroundQueueTypeId val)
         {
-            for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+            for (auto& i : m_bgBattleGroundQueueID)
             {
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId == val)
+                if (i.bgQueueTypeId == val)
                 {
-                    m_bgBattleGroundQueueID[i].bgQueueTypeId = BATTLEGROUND_QUEUE_NONE;
-                    m_bgBattleGroundQueueID[i].invitedToInstance = 0;
+                    i.bgQueueTypeId = BATTLEGROUND_QUEUE_NONE;
+                    i.invitedToInstance = 0;
                     return;
                 }
             }
@@ -1873,15 +1873,15 @@ class Player : public Unit
 
         void SetInviteForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId, uint32 instanceId)
         {
-            for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-                    m_bgBattleGroundQueueID[i].invitedToInstance = instanceId;
+            for (auto& i : m_bgBattleGroundQueueID)
+                if (i.bgQueueTypeId == bgQueueTypeId)
+                    i.invitedToInstance = instanceId;
         }
 
         bool IsInvitedForBattleGroundInstance(uint32 instanceId) const
         {
-            for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-                if (m_bgBattleGroundQueueID[i].invitedToInstance == instanceId)
+            for (auto i : m_bgBattleGroundQueueID)
+                if (i.invitedToInstance == instanceId)
                     return true;
             return false;
         }

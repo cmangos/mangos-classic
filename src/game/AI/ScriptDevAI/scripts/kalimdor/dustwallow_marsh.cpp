@@ -249,10 +249,10 @@ struct npc_ogronAI : public npc_escortAI
     {
         if (!lCreatureList.empty())
         {
-            for (std::list<Creature*>::iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr)
+            for (auto& itr : lCreatureList)
             {
-                if ((*itr)->GetEntry() == uiCreatureEntry && (*itr)->isAlive())
-                    return (*itr);
+                if (itr->GetEntry() == uiCreatureEntry && itr->isAlive())
+                    return itr;
             }
         }
 
@@ -299,15 +299,15 @@ struct npc_ogronAI : public npc_escortAI
     {
         if (!lCreatureList.empty())
         {
-            for (std::list<Creature*>::iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr)
+            for (auto& itr : lCreatureList)
             {
-                if ((*itr)->GetEntry() == NPC_REETHE)
+                if (itr->GetEntry() == NPC_REETHE)
                     continue;
 
-                if ((*itr)->isAlive())
+                if (itr->isAlive())
                 {
-                    (*itr)->setFaction(FACTION_THER_HOSTILE);
-                    (*itr)->AI()->AttackStart(m_creature);
+                    itr->setFaction(FACTION_THER_HOSTILE);
+                    itr->AI()->AttackStart(m_creature);
                 }
             }
         }
@@ -572,13 +572,13 @@ struct npc_private_hendelAI : public ScriptedAI
             }
 
             // Summon Jaina Proudmoore, Archmage Tervosh and Pained
-            for (uint8 i = 0; i < 3; i++)
+            for (const auto& lOutroSpawn : lOutroSpawns)
             {
-                Creature* pCreature = m_creature->SummonCreature(lOutroSpawns[i].uiEntry, lOutroSpawns[i].fX, lOutroSpawns[i].fY, lOutroSpawns[i].fZ, lOutroSpawns[i].fO, TEMPSPAWN_TIMED_DESPAWN, 3 * MINUTE * IN_MILLISECONDS, false, true);
+                Creature* pCreature = m_creature->SummonCreature(lOutroSpawn.uiEntry, lOutroSpawn.fX, lOutroSpawn.fY, lOutroSpawn.fZ, lOutroSpawn.fO, TEMPSPAWN_TIMED_DESPAWN, 3 * MINUTE * IN_MILLISECONDS, false, true);
                 if (pCreature)
                 {
                     pCreature->CastSpell(pCreature, SPELL_TELEPORT_VISUAL, TRIGGERED_NONE);
-                    pCreature->GetMotionMaster()->MovePoint(0, lOutroSpawns[i].fDestX, lOutroSpawns[i].fDestY, lOutroSpawns[i].fDestZ);
+                    pCreature->GetMotionMaster()->MovePoint(0, lOutroSpawn.fDestX, lOutroSpawn.fDestY, lOutroSpawn.fDestZ);
 
                     // Exception case for Archmage Tervosh: the outro event is a simple speech with visual spell cast
                     // so it will be handled by a DBScript held by NPC Archmage Tervosh

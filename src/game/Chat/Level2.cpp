@@ -791,15 +791,15 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         eventFilter << " AND (event IS nullptr ";
         bool initString = true;
 
-        for (GameEventMgr::ActiveEvents::const_iterator itr = activeEventsList.begin(); itr != activeEventsList.end(); ++itr)
+        for (std::_Simple_types<unsigned short>::value_type itr : activeEventsList)
         {
             if (initString)
             {
-                eventFilter  <<  "OR event IN (" << *itr;
+                eventFilter  <<  "OR event IN (" << itr;
                 initString = false;
             }
             else
-                eventFilter << "," << *itr;
+                eventFilter << "," << itr;
         }
 
         if (!initString)
@@ -2651,12 +2651,12 @@ inline void UnsummonVisualWaypoints(Player const* player, ObjectGuid ownerGuid)
     MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(waypoints, checkerForWaypoint);
     Cell::VisitGridObjects(player, searcher, SIZE_OF_GRIDS);
 
-    for (std::list<Creature*>::iterator itr = waypoints.begin(); itr != waypoints.end(); ++itr)
+    for (auto& waypoint : waypoints)
     {
-        if ((*itr)->GetSubtype() != CREATURE_SUBTYPE_TEMPORARY_SUMMON)
+        if (waypoint->GetSubtype() != CREATURE_SUBTYPE_TEMPORARY_SUMMON)
             continue;
 
-        TemporarySpawnWaypoint* wpTarget = dynamic_cast<TemporarySpawnWaypoint*>(*itr);
+        TemporarySpawnWaypoint* wpTarget = dynamic_cast<TemporarySpawnWaypoint*>(waypoint);
         if (!wpTarget)
             continue;
 
@@ -2809,9 +2809,9 @@ bool ChatHandler::HandleWpAddCommand(char* args)
     // Unsummon old visuals, summon new ones
     UnsummonVisualWaypoints(m_session->GetPlayer(), wpOwner->GetObjectGuid());
     WaypointPath const* wpPath = sWaypointMgr.GetPathFromOrigin(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPathId, wpDestination);
-    for (WaypointPath::const_iterator itr = wpPath->begin(); itr != wpPath->end(); ++itr)
+    for (const auto& itr : *wpPath)
     {
-        if (!Helper_CreateWaypointFor(wpOwner, wpDestination, wpPathId, itr->first, &itr->second, waypointInfo))
+        if (!Helper_CreateWaypointFor(wpOwner, wpDestination, wpPathId, itr.first, &itr.second, waypointInfo))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
             SetSentErrorMessage(true);
@@ -3475,11 +3475,11 @@ bool ChatHandler::HandleCharacterReputationCommand(char* args)
     LocaleConstant loc = GetSessionDbcLocale();
 
     FactionStateList const& targetFSL = target->GetReputationMgr().GetStateList();
-    for (FactionStateList::const_iterator itr = targetFSL.begin(); itr != targetFSL.end(); ++itr)
+    for (const auto& itr : targetFSL)
     {
-        FactionEntry const* factionEntry = sFactionStore.LookupEntry(itr->second.ID);
+        FactionEntry const* factionEntry = sFactionStore.LookupEntry(itr.second.ID);
 
-        ShowFactionListHelper(factionEntry, loc, &itr->second, target);
+        ShowFactionListHelper(factionEntry, loc, &itr.second, target);
     }
     return true;
 }
@@ -4373,20 +4373,20 @@ bool ChatHandler::HandlePoolSpawnsCommand(char* args)
     SpawnedPoolData const& spawns = mapState->GetSpawnedPoolData();
 
     SpawnedPoolObjects const& crSpawns = spawns.GetSpawnedCreatures();
-    for (SpawnedPoolObjects::const_iterator itr = crSpawns.begin(); itr != crSpawns.end(); ++itr)
-        if (!pool_id || pool_id == sPoolMgr.IsPartOfAPool<Creature>(*itr))
-            if (CreatureData const* data = sObjectMgr.GetCreatureData(*itr))
+    for (std::_Simple_types<unsigned int>::value_type crSpawn : crSpawns)
+        if (!pool_id || pool_id == sPoolMgr.IsPartOfAPool<Creature>(crSpawn))
+            if (CreatureData const* data = sObjectMgr.GetCreatureData(crSpawn))
                 if (CreatureInfo const* info = ObjectMgr::GetCreatureTemplate(data->id))
-                    PSendSysMessage(LANG_CREATURE_LIST_CHAT, *itr, PrepareStringNpcOrGoSpawnInformation<Creature>(*itr).c_str(),
-                                    *itr, info->Name, data->posX, data->posY, data->posZ, data->mapid);
+                    PSendSysMessage(LANG_CREATURE_LIST_CHAT, crSpawn, PrepareStringNpcOrGoSpawnInformation<Creature>(crSpawn).c_str(),
+                        crSpawn, info->Name, data->posX, data->posY, data->posZ, data->mapid);
 
     SpawnedPoolObjects const& goSpawns = spawns.GetSpawnedGameobjects();
-    for (SpawnedPoolObjects::const_iterator itr = goSpawns.begin(); itr != goSpawns.end(); ++itr)
-        if (!pool_id || pool_id == sPoolMgr.IsPartOfAPool<GameObject>(*itr))
-            if (GameObjectData const* data = sObjectMgr.GetGOData(*itr))
+    for (std::_Simple_types<unsigned int>::value_type goSpawn : goSpawns)
+        if (!pool_id || pool_id == sPoolMgr.IsPartOfAPool<GameObject>(goSpawn))
+            if (GameObjectData const* data = sObjectMgr.GetGOData(goSpawn))
                 if (GameObjectInfo const* info = ObjectMgr::GetGameObjectInfo(data->id))
-                    PSendSysMessage(LANG_GO_LIST_CHAT, *itr, PrepareStringNpcOrGoSpawnInformation<GameObject>(*itr).c_str(),
-                                    *itr, info->name, data->posX, data->posY, data->posZ, data->mapid);
+                    PSendSysMessage(LANG_GO_LIST_CHAT, goSpawn, PrepareStringNpcOrGoSpawnInformation<GameObject>(goSpawn).c_str(),
+                        goSpawn, info->name, data->posX, data->posY, data->posZ, data->mapid);
 
     return true;
 }
@@ -4433,19 +4433,19 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     if (!poolCreaturesEx.empty())
     {
         SendSysMessage(LANG_POOL_CHANCE_CREATURE_LIST_HEADER);
-        for (PoolObjectList::const_iterator itr = poolCreaturesEx.begin(); itr != poolCreaturesEx.end(); ++itr)
+        for (auto itr : poolCreaturesEx)
         {
-            if (CreatureData const* data = sObjectMgr.GetCreatureData(itr->guid))
+            if (CreatureData const* data = sObjectMgr.GetCreatureData(itr.guid))
             {
                 if (CreatureInfo const* info = ObjectMgr::GetCreatureTemplate(data->id))
                 {
-                    char const* active = crSpawns && crSpawns->find(itr->guid) != crSpawns->end() ? active_str.c_str() : "";
+                    char const* active = crSpawns && crSpawns->find(itr.guid) != crSpawns->end() ? active_str.c_str() : "";
                     if (m_session)
-                        PSendSysMessage(LANG_POOL_CHANCE_CREATURE_LIST_CHAT, itr->guid, PrepareStringNpcOrGoSpawnInformation<Creature>(itr->guid).c_str(),
-                                        itr->guid, info->Name, data->posX, data->posY, data->posZ, data->mapid, itr->chance, active);
+                        PSendSysMessage(LANG_POOL_CHANCE_CREATURE_LIST_CHAT, itr.guid, PrepareStringNpcOrGoSpawnInformation<Creature>(itr.guid).c_str(),
+                            itr.guid, info->Name, data->posX, data->posY, data->posZ, data->mapid, itr.chance, active);
                     else
-                        PSendSysMessage(LANG_POOL_CHANCE_CREATURE_LIST_CONSOLE, itr->guid, PrepareStringNpcOrGoSpawnInformation<Creature>(itr->guid).c_str(),
-                                        info->Name, data->posX, data->posY, data->posZ, data->mapid, itr->chance, active);
+                        PSendSysMessage(LANG_POOL_CHANCE_CREATURE_LIST_CONSOLE, itr.guid, PrepareStringNpcOrGoSpawnInformation<Creature>(itr.guid).c_str(),
+                                        info->Name, data->posX, data->posY, data->posZ, data->mapid, itr.chance, active);
                 }
             }
         }
@@ -4455,18 +4455,18 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     if (!poolCreaturesEq.empty())
     {
         SendSysMessage(LANG_POOL_CREATURE_LIST_HEADER);
-        for (PoolObjectList::const_iterator itr = poolCreaturesEq.begin(); itr != poolCreaturesEq.end(); ++itr)
+        for (auto itr : poolCreaturesEq)
         {
-            if (CreatureData const* data = sObjectMgr.GetCreatureData(itr->guid))
+            if (CreatureData const* data = sObjectMgr.GetCreatureData(itr.guid))
             {
                 if (CreatureInfo const* info = ObjectMgr::GetCreatureTemplate(data->id))
                 {
-                    char const* active = crSpawns && crSpawns->find(itr->guid) != crSpawns->end() ? active_str.c_str() : "";
+                    char const* active = crSpawns && crSpawns->find(itr.guid) != crSpawns->end() ? active_str.c_str() : "";
                     if (m_session)
-                        PSendSysMessage(LANG_POOL_CREATURE_LIST_CHAT, itr->guid, PrepareStringNpcOrGoSpawnInformation<Creature>(itr->guid).c_str(),
-                                        itr->guid, info->Name, data->posX, data->posY, data->posZ, data->mapid, active);
+                        PSendSysMessage(LANG_POOL_CREATURE_LIST_CHAT, itr.guid, PrepareStringNpcOrGoSpawnInformation<Creature>(itr.guid).c_str(),
+                            itr.guid, info->Name, data->posX, data->posY, data->posZ, data->mapid, active);
                     else
-                        PSendSysMessage(LANG_POOL_CREATURE_LIST_CONSOLE, itr->guid, PrepareStringNpcOrGoSpawnInformation<Creature>(itr->guid).c_str(),
+                        PSendSysMessage(LANG_POOL_CREATURE_LIST_CONSOLE, itr.guid, PrepareStringNpcOrGoSpawnInformation<Creature>(itr.guid).c_str(),
                                         info->Name, data->posX, data->posY, data->posZ, data->mapid, active);
                 }
             }
@@ -4480,19 +4480,19 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     if (!poolGameObjectsEx.empty())
     {
         SendSysMessage(LANG_POOL_CHANCE_GO_LIST_HEADER);
-        for (PoolObjectList::const_iterator itr = poolGameObjectsEx.begin(); itr != poolGameObjectsEx.end(); ++itr)
+        for (auto itr : poolGameObjectsEx)
         {
-            if (GameObjectData const* data = sObjectMgr.GetGOData(itr->guid))
+            if (GameObjectData const* data = sObjectMgr.GetGOData(itr.guid))
             {
                 if (GameObjectInfo const* info = ObjectMgr::GetGameObjectInfo(data->id))
                 {
-                    char const* active = goSpawns && goSpawns->find(itr->guid) != goSpawns->end() ? active_str.c_str() : "";
+                    char const* active = goSpawns && goSpawns->find(itr.guid) != goSpawns->end() ? active_str.c_str() : "";
                     if (m_session)
-                        PSendSysMessage(LANG_POOL_CHANCE_GO_LIST_CHAT, itr->guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(itr->guid).c_str(),
-                                        itr->guid, info->name, data->posX, data->posY, data->posZ, data->mapid, itr->chance, active);
+                        PSendSysMessage(LANG_POOL_CHANCE_GO_LIST_CHAT, itr.guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(itr.guid).c_str(),
+                            itr.guid, info->name, data->posX, data->posY, data->posZ, data->mapid, itr.chance, active);
                     else
-                        PSendSysMessage(LANG_POOL_CHANCE_GO_LIST_CONSOLE, itr->guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(itr->guid).c_str(),
-                                        info->name, data->posX, data->posY, data->posZ, data->mapid, itr->chance, active);
+                        PSendSysMessage(LANG_POOL_CHANCE_GO_LIST_CONSOLE, itr.guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(itr.guid).c_str(),
+                                        info->name, data->posX, data->posY, data->posZ, data->mapid, itr.chance, active);
                 }
             }
         }
@@ -4502,18 +4502,18 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     if (!poolGameObjectsEq.empty())
     {
         SendSysMessage(LANG_POOL_GO_LIST_HEADER);
-        for (PoolObjectList::const_iterator itr = poolGameObjectsEq.begin(); itr != poolGameObjectsEq.end(); ++itr)
+        for (auto itr : poolGameObjectsEq)
         {
-            if (GameObjectData const* data = sObjectMgr.GetGOData(itr->guid))
+            if (GameObjectData const* data = sObjectMgr.GetGOData(itr.guid))
             {
                 if (GameObjectInfo const* info = ObjectMgr::GetGameObjectInfo(data->id))
                 {
-                    char const* active = goSpawns && goSpawns->find(itr->guid) != goSpawns->end() ? active_str.c_str() : "";
+                    char const* active = goSpawns && goSpawns->find(itr.guid) != goSpawns->end() ? active_str.c_str() : "";
                     if (m_session)
-                        PSendSysMessage(LANG_POOL_GO_LIST_CHAT, itr->guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(itr->guid).c_str(),
-                                        itr->guid, info->name, data->posX, data->posY, data->posZ, data->mapid, active);
+                        PSendSysMessage(LANG_POOL_GO_LIST_CHAT, itr.guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(itr.guid).c_str(),
+                            itr.guid, info->name, data->posX, data->posY, data->posZ, data->mapid, active);
                     else
-                        PSendSysMessage(LANG_POOL_GO_LIST_CONSOLE, itr->guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(itr->guid).c_str(),
+                        PSendSysMessage(LANG_POOL_GO_LIST_CONSOLE, itr.guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(itr.guid).c_str(),
                                         info->name, data->posX, data->posY, data->posZ, data->mapid, active);
                 }
             }
@@ -4527,20 +4527,20 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     if (!poolPoolsEx.empty())
     {
         SendSysMessage(LANG_POOL_CHANCE_POOL_LIST_HEADER);
-        for (PoolObjectList::const_iterator itr = poolPoolsEx.begin(); itr != poolPoolsEx.end(); ++itr)
+        for (auto itr : poolPoolsEx)
         {
-            PoolTemplateData const& itr_template = sPoolMgr.GetPoolTemplate(itr->guid);
-            char const* active = poolSpawns && poolSpawns->find(itr->guid) != poolSpawns->end() ? active_str.c_str() : "";
+            PoolTemplateData const& itr_template = sPoolMgr.GetPoolTemplate(itr.guid);
+            char const* active = poolSpawns && poolSpawns->find(itr.guid) != poolSpawns->end() ? active_str.c_str() : "";
             if (m_session)
-                PSendSysMessage(LANG_POOL_CHANCE_POOL_LIST_CHAT, itr->guid,
-                                itr->guid, itr_template.description.c_str(), itr_template.AutoSpawn ? 1 : 0, itr_template.MaxLimit,
-                                sPoolMgr.GetPoolCreatures(itr->guid).size(), sPoolMgr.GetPoolGameObjects(itr->guid).size(), sPoolMgr.GetPoolPools(itr->guid).size(),
-                                itr->chance, active);
+                PSendSysMessage(LANG_POOL_CHANCE_POOL_LIST_CHAT, itr.guid,
+                    itr.guid, itr_template.description.c_str(), itr_template.AutoSpawn ? 1 : 0, itr_template.MaxLimit,
+                                sPoolMgr.GetPoolCreatures(itr.guid).size(), sPoolMgr.GetPoolGameObjects(itr.guid).size(), sPoolMgr.GetPoolPools(itr.guid).size(),
+                    itr.chance, active);
             else
-                PSendSysMessage(LANG_POOL_CHANCE_POOL_LIST_CONSOLE, itr->guid,
+                PSendSysMessage(LANG_POOL_CHANCE_POOL_LIST_CONSOLE, itr.guid,
                                 itr_template.description.c_str(), itr_template.AutoSpawn ? 1 : 0, itr_template.MaxLimit,
-                                sPoolMgr.GetPoolCreatures(itr->guid).size(), sPoolMgr.GetPoolGameObjects(itr->guid).size(), sPoolMgr.GetPoolPools(itr->guid).size(),
-                                itr->chance, active);
+                                sPoolMgr.GetPoolCreatures(itr.guid).size(), sPoolMgr.GetPoolGameObjects(itr.guid).size(), sPoolMgr.GetPoolPools(itr.guid).size(),
+                    itr.chance, active);
         }
     }
 
@@ -4548,19 +4548,19 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     if (!poolPoolsEq.empty())
     {
         SendSysMessage(LANG_POOL_POOL_LIST_HEADER);
-        for (PoolObjectList::const_iterator itr = poolPoolsEq.begin(); itr != poolPoolsEq.end(); ++itr)
+        for (auto itr : poolPoolsEq)
         {
-            PoolTemplateData const& itr_template = sPoolMgr.GetPoolTemplate(itr->guid);
-            char const* active = poolSpawns && poolSpawns->find(itr->guid) != poolSpawns->end() ? active_str.c_str() : "";
+            PoolTemplateData const& itr_template = sPoolMgr.GetPoolTemplate(itr.guid);
+            char const* active = poolSpawns && poolSpawns->find(itr.guid) != poolSpawns->end() ? active_str.c_str() : "";
             if (m_session)
-                PSendSysMessage(LANG_POOL_POOL_LIST_CHAT, itr->guid,
-                                itr->guid, itr_template.description.c_str(), itr_template.AutoSpawn ? 1 : 0, itr_template.MaxLimit,
-                                sPoolMgr.GetPoolCreatures(itr->guid).size(), sPoolMgr.GetPoolGameObjects(itr->guid).size(), sPoolMgr.GetPoolPools(itr->guid).size(),
+                PSendSysMessage(LANG_POOL_POOL_LIST_CHAT, itr.guid,
+                    itr.guid, itr_template.description.c_str(), itr_template.AutoSpawn ? 1 : 0, itr_template.MaxLimit,
+                                sPoolMgr.GetPoolCreatures(itr.guid).size(), sPoolMgr.GetPoolGameObjects(itr.guid).size(), sPoolMgr.GetPoolPools(itr.guid).size(),
                                 active);
             else
-                PSendSysMessage(LANG_POOL_POOL_LIST_CONSOLE, itr->guid,
+                PSendSysMessage(LANG_POOL_POOL_LIST_CONSOLE, itr.guid,
                                 itr_template.description.c_str(), itr_template.AutoSpawn ? 1 : 0, itr_template.MaxLimit,
-                                sPoolMgr.GetPoolCreatures(itr->guid).size(), sPoolMgr.GetPoolGameObjects(itr->guid).size(), sPoolMgr.GetPoolPools(itr->guid).size(),
+                                sPoolMgr.GetPoolCreatures(itr.guid).size(), sPoolMgr.GetPoolGameObjects(itr.guid).size(), sPoolMgr.GetPoolPools(itr.guid).size(),
                                 active);
         }
     }
@@ -4710,8 +4710,8 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
     if (!player->isGameMaster())
         PSendSysMessage("Enable GM mode to see the path points.");
 
-    for (uint32 i = 0; i < pointPath.size(); ++i)
-        player->SummonCreature(VISUAL_WAYPOINT, pointPath[i].x, pointPath[i].y, pointPath[i].z, 0, TEMPSPAWN_TIMED_DESPAWN, 9000);
+    for (auto& i : pointPath)
+        player->SummonCreature(VISUAL_WAYPOINT, i.x, i.y, i.z, 0, TEMPSPAWN_TIMED_DESPAWN, 9000);
 
     if (followPath)
     {

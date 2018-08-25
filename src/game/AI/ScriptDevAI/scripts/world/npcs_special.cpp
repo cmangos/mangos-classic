@@ -394,12 +394,12 @@ void npc_doctorAI::BeginEvent(Player* pPlayer)
     switch (m_creature->GetEntry())
     {
         case DOCTOR_ALLIANCE:
-            for (uint8 i = 0; i < ALLIANCE_COORDS; ++i)
-                m_vPatientSummonCoordinates.push_back(&AllianceCoords[i]);
+            for (auto& AllianceCoord : AllianceCoords)
+                m_vPatientSummonCoordinates.push_back(&AllianceCoord);
             break;
         case DOCTOR_HORDE:
-            for (uint8 i = 0; i < HORDE_COORDS; ++i)
-                m_vPatientSummonCoordinates.push_back(&HordeCoords[i]);
+            for (auto& HordeCoord : HordeCoords)
+                m_vPatientSummonCoordinates.push_back(&HordeCoord);
             break;
     }
 

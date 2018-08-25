@@ -155,8 +155,8 @@ void Database::StopServer()
     m_pResultQueue = nullptr;
     m_pAsyncConn = nullptr;
 
-    for (size_t i = 0; i < m_pQueryConnections.size(); ++i)
-        delete m_pQueryConnections[i];
+    for (auto& m_pQueryConnection : m_pQueryConnections)
+        delete m_pQueryConnection;
 
     m_pQueryConnections.clear();
 }
@@ -473,11 +473,11 @@ bool Database::CheckRequiredField(char const* table_name, char const* required_n
     {
         QueryFieldNames const& namesMap = result2->GetFieldNames();
         std::string reqName;
-        for (QueryFieldNames::const_iterator itr = namesMap.begin(); itr != namesMap.end(); ++itr)
+        for (const auto& itr : namesMap)
         {
-            if (itr->substr(0, 9) == "required_")
+            if (itr.substr(0, 9) == "required_")
             {
-                reqName = *itr;
+                reqName = itr;
                 break;
             }
         }

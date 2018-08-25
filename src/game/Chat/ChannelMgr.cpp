@@ -38,8 +38,8 @@ ChannelMgr* channelMgr(Team team)
 
 ChannelMgr::~ChannelMgr()
 {
-    for (ChannelMap::iterator itr = channels.begin(); itr != channels.end(); ++itr)
-        delete itr->second;
+    for (auto& channel : channels)
+        delete channel.second;
 
     channels.clear();
 }

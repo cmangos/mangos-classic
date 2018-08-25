@@ -439,9 +439,9 @@ struct mob_zealot_lorkhanAI : public boss_thekalBaseAI
                     Creature* dispelTarget = nullptr;
 
                     if (!pList.empty())
-                        for (std::list<Creature*>::iterator itr = pList.begin(); itr != pList.end(); ++itr)
+                        for (auto& itr : pList)
                         {
-                            dispelTarget = (*itr);
+                            dispelTarget = itr;
                             break;
                         }
 

@@ -207,8 +207,8 @@ struct npc_eris_havenfireAI : public ScriptedAI
         }
         else if (uiSummonId == NPC_SCOURGE_ARCHER)
         {
-            for (uint8 i = 0; i < MAX_ARCHERS; ++i)
-                m_creature->SummonCreature(NPC_SCOURGE_ARCHER, aArcherSpawn[i][0], aArcherSpawn[i][1], aArcherSpawn[i][2], aArcherSpawn[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
+            for (auto i : aArcherSpawn)
+                m_creature->SummonCreature(NPC_SCOURGE_ARCHER, i[0], i[1], i[2], i[3], TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 

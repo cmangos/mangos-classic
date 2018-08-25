@@ -293,10 +293,10 @@ void PlayerMenu::SendTalking(uint32 textID) const
 
             data << pGossip->Options[i].Language;
 
-            for (int j = 0; j < 3; ++j)
+            for (auto Emote : pGossip->Options[i].Emotes)
             {
-                data << pGossip->Options[i].Emotes[j]._Delay;
-                data << pGossip->Options[i].Emotes[j]._Emote;
+                data << Emote._Delay;
+                data << Emote._Emote;
             }
         }
     }
@@ -649,9 +649,9 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
     data << uint32(EnableNext ? 1 : 0);                     // Auto Finish
 
     uint32 EmoteCount = 0;
-    for (uint32 i = 0; i < QUEST_EMOTE_COUNT; ++i)
+    for (unsigned int i : pQuest->OfferRewardEmote)
     {
-        if (pQuest->OfferRewardEmote[i] <= 0)
+        if (i <= 0)
             break;
         ++EmoteCount;
     }

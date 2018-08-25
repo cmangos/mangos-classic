@@ -495,9 +495,9 @@ namespace MaNGOS
 
         void Visit(CameraMapType& m)
         {
-            for (CameraMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+            for (auto& itr : m)
             {
-                Camera* camera = itr->getSource();
+                Camera* camera = itr.getSource();
                 if (camera->GetBody()->IsWithinDist(i_searcher, i_dist))
                     i_do(camera->GetOwner());
             }

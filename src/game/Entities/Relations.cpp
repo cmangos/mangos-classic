@@ -80,9 +80,9 @@ static inline ReputationRank GetFactionReaction(FactionTemplateEntry const* this
 
     if (thisTemplate->enemyFaction[0] && otherTemplate->faction)
     {
-        for (int i = 0; i < 4; ++i)
+        for (unsigned int i : thisTemplate->enemyFaction)
         {
-            if (thisTemplate->enemyFaction[i] == otherTemplate->faction)
+            if (i == otherTemplate->faction)
                 return REP_HOSTILE;
         }
     }
@@ -92,9 +92,9 @@ static inline ReputationRank GetFactionReaction(FactionTemplateEntry const* this
 
     if (thisTemplate->friendFaction[0] && otherTemplate->faction)
     {
-        for (int i = 0; i < 4; ++i)
+        for (unsigned int i : thisTemplate->friendFaction)
         {
-            if (thisTemplate->friendFaction[i] == otherTemplate->faction)
+            if (i == otherTemplate->faction)
                 return REP_FRIENDLY;
         }
     }
@@ -104,9 +104,9 @@ static inline ReputationRank GetFactionReaction(FactionTemplateEntry const* this
 
     if (otherTemplate->friendFaction[0] && thisTemplate->faction)
     {
-        for (int i = 0; i < 4; ++i)
+        for (unsigned int i : otherTemplate->friendFaction)
         {
-            if (otherTemplate->friendFaction[i] == thisTemplate->faction)
+            if (i == thisTemplate->faction)
                 return REP_FRIENDLY;
         }
     }
@@ -748,16 +748,16 @@ bool Unit::IsInGroup(Unit const* other, bool party/* = false*/, bool UI/* = fals
             getUIPlayerComparisions(this, thisPlayer);
             getUIPlayerComparisions(other, otherPlayer);
 
-            for (size_t i = 0; i < comparisions; ++i)
+            for (auto& i : thisPlayer)
             {
-                if (thisPlayer[i])
+                if (i)
                 {
-                    for (size_t j = 0; j < comparisions; ++j)
+                    for (auto& j : otherPlayer)
                     {
-                        if (otherPlayer[j])
+                        if (j)
                         {
-                            const Group* group = thisPlayer[i]->GetGroup();
-                            if (thisPlayer[i] == otherPlayer[j] || (group && group == otherPlayer[j]->GetGroup() && (!party || group->SameSubGroup(thisPlayer[i], otherPlayer[j]))))
+                            const Group* group = i->GetGroup();
+                            if (i == j || (group && group == j->GetGroup() && (!party || group->SameSubGroup(i, j))))
                                 return true;
                         }
                     }

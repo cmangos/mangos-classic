@@ -130,10 +130,10 @@ void instance_zulfarrak::Load(const char* chrIn)
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
                >> m_auiEncounter[8];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;

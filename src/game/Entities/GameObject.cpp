@@ -474,9 +474,9 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     // if gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
                     if (uint32 spellId = GetGOInfo()->goober.spellId)
                     {
-                        for (GuidSet::const_iterator itr = m_UniqueUsers.begin(); itr != m_UniqueUsers.end(); ++itr)
+                        for (auto m_UniqueUser : m_UniqueUsers)
                         {
-                            if (Player* owner = GetMap()->GetPlayer(*itr))
+                            if (Player* owner = GetMap()->GetPlayer(m_UniqueUser))
                                 owner->CastSpell(owner, spellId, TRIGGERED_NONE, nullptr, nullptr, GetObjectGuid());
                         }
 
@@ -489,9 +489,9 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     break;
                 case GAMEOBJECT_TYPE_CAPTURE_POINT:
                     // remove capturing players because slider wont be displayed if capture point is being locked
-                    for (GuidSet::const_iterator itr = m_UniqueUsers.begin(); itr != m_UniqueUsers.end(); ++itr)
+                    for (auto m_UniqueUser : m_UniqueUsers)
                     {
-                        if (Player* owner = GetMap()->GetPlayer(*itr))
+                        if (Player* owner = GetMap()->GetPlayer(m_UniqueUser))
                             owner->SendUpdateWorldState(GetGOInfo()->capturePoint.worldState1, WORLD_STATE_REMOVE);
                     }
 
@@ -2066,33 +2066,33 @@ void GameObject::TickCapturePoint()
     int oldValue = m_captureSlider;
     int rangePlayers = 0;
 
-    for (std::list<Player*>::iterator itr = capturingPlayers.begin(); itr != capturingPlayers.end(); ++itr)
+    for (auto& capturingPlayer : capturingPlayers)
     {
-        if ((*itr)->GetTeam() == ALLIANCE)
+        if (capturingPlayer->GetTeam() == ALLIANCE)
             ++rangePlayers;
         else
             --rangePlayers;
 
-        ObjectGuid guid = (*itr)->GetObjectGuid();
+        ObjectGuid guid = capturingPlayer->GetObjectGuid();
         if (!tempUsers.erase(guid))
         {
             // new player entered capture point zone
             m_UniqueUsers.insert(guid);
 
             // update pvp info
-            (*itr)->pvpInfo.inPvPCapturePoint = true;
+            capturingPlayer->pvpInfo.inPvPCapturePoint = true;
 
             // send capture point enter packets
-            (*itr)->SendUpdateWorldState(info->capturePoint.worldState3, neutralPercent);
-            (*itr)->SendUpdateWorldState(info->capturePoint.worldState2, oldValue);
-            (*itr)->SendUpdateWorldState(info->capturePoint.worldState1, WORLD_STATE_ADD);
-            (*itr)->SendUpdateWorldState(info->capturePoint.worldState2, oldValue); // also redundantly sent on retail to prevent displaying the initial capture direction on client capture slider incorrectly
+            capturingPlayer->SendUpdateWorldState(info->capturePoint.worldState3, neutralPercent);
+            capturingPlayer->SendUpdateWorldState(info->capturePoint.worldState2, oldValue);
+            capturingPlayer->SendUpdateWorldState(info->capturePoint.worldState1, WORLD_STATE_ADD);
+            capturingPlayer->SendUpdateWorldState(info->capturePoint.worldState2, oldValue); // also redundantly sent on retail to prevent displaying the initial capture direction on client capture slider incorrectly
         }
     }
 
-    for (GuidSet::iterator itr = tempUsers.begin(); itr != tempUsers.end(); ++itr)
+    for (auto tempUser : tempUsers)
     {
-        if (Player* owner = GetMap()->GetPlayer(*itr))
+        if (Player* owner = GetMap()->GetPlayer(tempUser))
         {
             // update pvp info
             owner->pvpInfo.inPvPCapturePoint = false;
@@ -2102,7 +2102,7 @@ void GameObject::TickCapturePoint()
         }
 
         // player left capture point zone
-        m_UniqueUsers.erase(*itr);
+        m_UniqueUsers.erase(tempUser);
     }
 
     // return if there are not enough players capturing the point (works because minSuperiority is always 1)
@@ -2154,8 +2154,8 @@ void GameObject::TickCapturePoint()
         return;
 
     // on retail this is also sent to newly added players even though they already received a slider value
-    for (std::list<Player*>::iterator itr = capturingPlayers.begin(); itr != capturingPlayers.end(); ++itr)
-        (*itr)->SendUpdateWorldState(info->capturePoint.worldState2, (uint32)m_captureSlider);
+    for (auto& capturingPlayer : capturingPlayers)
+        capturingPlayer->SendUpdateWorldState(info->capturePoint.worldState2, (uint32)m_captureSlider);
 
     // send capture point events
     uint32 eventId = 0;
@@ -2277,12 +2277,12 @@ void GameObject::TriggerSummoningRitual()
 
     if (caster) // two caster checks to maintain order
     {
-        for (GuidSet::const_iterator itr = m_UniqueUsers.begin(); itr != m_UniqueUsers.end(); ++itr)
+        for (auto m_UniqueUser : m_UniqueUsers)
         {
-            if (*itr == caster->GetObjectGuid())
+            if (m_UniqueUser == caster->GetObjectGuid())
                 continue;
 
-            if (Player* pUnique = GetMap()->GetPlayer(*itr))
+            if (Player* pUnique = GetMap()->GetPlayer(m_UniqueUser))
                 pUnique->FinishSpell(CURRENT_CHANNELED_SPELL);
         }
     }

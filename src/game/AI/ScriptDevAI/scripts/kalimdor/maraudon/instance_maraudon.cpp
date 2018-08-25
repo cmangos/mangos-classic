@@ -115,10 +115,10 @@ void instance_maraudon::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_encounter[0];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_encounter)
     {
-        if (m_encounter[i] == IN_PROGRESS)
-            m_encounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;

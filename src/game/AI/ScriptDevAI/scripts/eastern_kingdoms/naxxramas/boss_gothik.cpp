@@ -164,9 +164,9 @@ struct boss_gothikAI : public ScriptedAI
         if (lPlayers.isEmpty())
             return false;
 
-        for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+        for (const auto& lPlayer : lPlayers)
         {
-            if (Player* pPlayer = itr->getSource())
+            if (Player* pPlayer = lPlayer.getSource())
             {
                 if (!m_pInstance->IsInRightSideGothArea(pPlayer) && pPlayer->isAlive())
                     return true;
@@ -208,17 +208,17 @@ struct boss_gothikAI : public ScriptedAI
         uint8 index = 0;
         uint8 uiTraineeCount = 3;
         lSummonList.sort(ObjectDistanceOrder(m_creature));
-        for (std::list<Creature*>::iterator itr = lSummonList.begin(); itr != lSummonList.end(); ++itr)
+        for (auto& itr : lSummonList)
         {
-            if (*itr)
+            if (itr)
             {
                 if (uiTraineeCount == 0)
                     break;
                 if (index == 1)
-                    m_lRiderSummonPosGuids.push_back((*itr)->GetObjectGuid());
+                    m_lRiderSummonPosGuids.push_back(itr->GetObjectGuid());
                 else
                 {
-                    m_lTraineeSummonPosGuids.push_back((*itr)->GetObjectGuid());
+                    m_lTraineeSummonPosGuids.push_back(itr->GetObjectGuid());
                     --uiTraineeCount;
                 }
                 index++;
@@ -228,13 +228,13 @@ struct boss_gothikAI : public ScriptedAI
         // DeathKnights
         uint8 uiDeathKnightCount = 2;
         lSummonList.sort(ObjectDistanceOrderReversed(m_creature));
-        for (std::list<Creature*>::iterator itr = lSummonList.begin(); itr != lSummonList.end(); ++itr)
+        for (auto& itr : lSummonList)
         {
-            if (*itr)
+            if (itr)
             {
                 if (uiDeathKnightCount == 0)
                     break;
-                m_lDeathKnightSummonPosGuids.push_back((*itr)->GetObjectGuid());
+                m_lDeathKnightSummonPosGuids.push_back(itr->GetObjectGuid());
                 --uiDeathKnightCount;
             }
         }
@@ -254,9 +254,9 @@ struct boss_gothikAI : public ScriptedAI
         if (plSummonPosGuids->empty())
             return;
 
-        for (GuidList::iterator itr = plSummonPosGuids->begin(); itr != plSummonPosGuids->end(); ++itr)
+        for (auto& plSummonPosGuid : *plSummonPosGuids)
         {
-            if (Creature* pPos = m_creature->GetMap()->GetCreature(*itr))
+            if (Creature* pPos = m_creature->GetMap()->GetCreature(plSummonPosGuid))
                 m_creature->SummonCreature(uiSummonEntry, pPos->GetPositionX(), pPos->GetPositionY(), pPos->GetPositionZ(), pPos->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }

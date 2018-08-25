@@ -97,9 +97,9 @@ void RealmList::UpdateRealm(uint32 ID, const std::string& name, const std::strin
 
     Tokens tokens = StrSplit(builds, " ");
 
-    for (Tokens::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
+    for (auto& token : tokens)
     {
-        uint32 build = atol((*iter).c_str());
+        uint32 build = atol(token.c_str());
         realm.realmbuilds.insert(build);
     }
 

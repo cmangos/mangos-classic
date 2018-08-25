@@ -118,16 +118,16 @@ Tokens StrSplit(const std::string& src, const std::string& sep)
 {
     Tokens r;
     std::string s;
-    for (std::string::const_iterator i = src.begin(); i != src.end(); ++i)
+    for (std::_Simple_types<char>::value_type i : src)
     {
-        if (sep.find(*i) != std::string::npos)
+        if (sep.find(i) != std::string::npos)
         {
             if (s.length()) r.push_back(s);
             s.clear();
         }
         else
         {
-            s += *i;
+            s += i;
         }
     }
     if (s.length()) r.push_back(s);
@@ -211,16 +211,16 @@ uint32 TimeStringToSecs(const std::string& timestring)
     uint32 buffer     = 0;
     uint32 multiplier = 0;
 
-    for (std::string::const_iterator itr = timestring.begin(); itr != timestring.end(); ++itr)
+    for (std::_Simple_types<char>::value_type itr : timestring)
     {
-        if (isdigit(*itr))
+        if (isdigit(itr))
         {
             buffer *= 10;
-            buffer += (*itr) - '0';
+            buffer += itr - '0';
         }
         else
         {
-            switch (*itr)
+            switch (itr)
             {
                 case 'd': multiplier = DAY;     break;
                 case 'h': multiplier = HOUR;    break;

@@ -121,16 +121,16 @@ bool GuardianAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker
     // Process actions, normal case
     if (!(holder.Event.event_flags & EFLAG_RANDOM_ACTION))
     {
-        for (uint32 j = 0; j < MAX_ACTIONS; ++j)
-            ProcessAction(holder.Event.action[j], rnd, holder.Event.event_id, actionInvoker, AIEventSender);
+        for (auto j : holder.Event.action)
+            ProcessAction(j, rnd, holder.Event.event_id, actionInvoker, AIEventSender);
     }
     // Process actions, random case
     else
     {
         // amount of real actions
         uint32 count = 0;
-        for (uint32 j = 0; j < MAX_ACTIONS; ++j)
-            if (holder.Event.action[j].type != ACTION_T_NONE)
+        for (auto& j : holder.Event.action)
+            if (j.type != ACTION_T_NONE)
                 ++count;
 
         if (count)
@@ -189,10 +189,10 @@ void GuardianAI::EnterEvadeMode()
     m_creature->TriggerEvadeEvents();
 
     // Handle Evade events
-    for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
+    for (auto& i : m_CreatureEventAIList)
     {
-        if (i->Event.event_type == EVENT_T_EVADE)
-            ProcessEvent(*i);
+        if (i.Event.event_type == EVENT_T_EVADE)
+            ProcessEvent(i);
     }
 }
 

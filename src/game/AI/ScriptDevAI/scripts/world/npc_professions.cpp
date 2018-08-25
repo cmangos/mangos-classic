@@ -174,9 +174,8 @@ bool EquippedOk(Player* pPlayer, uint32 spellId)
     if (!spell)
         return false;
 
-    for (int i = 0; i < 3; ++i)
+    for (unsigned int reqSpell : spell->EffectTriggerSpell)
     {
-        uint32 reqSpell = spell->EffectTriggerSpell[i];
         if (!reqSpell)
             continue;
 

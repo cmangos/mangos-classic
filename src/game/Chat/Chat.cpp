@@ -1854,9 +1854,9 @@ bool ChatHandler::isValidChatMessage(const char* message) const
                             }
 
                             bool foundName = false;
-                            for (uint8 i = 0; i < ql->Title.size(); ++i)
+                            for (const auto& i : ql->Title)
                             {
-                                if (ql->Title[i] == buffer)
+                                if (i == buffer)
                                 {
                                     foundName = true;
                                     break;

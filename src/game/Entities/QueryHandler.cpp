@@ -327,10 +327,10 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recv_data)
 
             data << pGossip->Options[i].Language;
 
-            for (int j = 0; j < 3; ++j)
+            for (auto Emote : pGossip->Options[i].Emotes)
             {
-                data << pGossip->Options[i].Emotes[j]._Delay;
-                data << pGossip->Options[i].Emotes[j]._Emote;
+                data << Emote._Delay;
+                data << Emote._Emote;
             }
         }
     }

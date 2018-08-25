@@ -300,9 +300,9 @@ struct npc_grimstoneAI : public npc_escortAI
     {
         Map::PlayerList const& PlayerList = m_creature->GetMap()->GetPlayers();
 
-        for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+        for (const auto& itr : PlayerList)
         {
-            Player* pPlayer = itr->getSource();
+            Player* pPlayer = itr.getSource();
             if (pPlayer && pPlayer->GetQuestStatus(QUEST_THE_CHALLENGE) == QUEST_STATUS_INCOMPLETE)
                 pPlayer->KilledMonsterCredit(NPC_THELDREN_QUEST_CREDIT);
         }
@@ -421,9 +421,9 @@ struct npc_grimstoneAI : public npc_escortAI
                         // Some of the NPCs in the crowd do cheer emote at event start
                         // we randomly select 25% of the NPCs to do this
                         m_pInstance->GetArenaCrowdGuid(m_lArenaCrowd);
-                        for (GuidSet::const_iterator itr = m_lArenaCrowd.begin(); itr != m_lArenaCrowd.end(); ++itr)
+                        for (auto itr : m_lArenaCrowd)
                         {
-                            if (Creature* pSpectator = m_creature->GetMap()->GetCreature(*itr))
+                            if (Creature* pSpectator = m_creature->GetMap()->GetCreature(itr))
                             {
                                 if (urand(0, 3) < 1)
                                     pSpectator->HandleEmote(EMOTE_ONESHOT_CHEER);
@@ -494,8 +494,8 @@ struct npc_grimstoneAI : public npc_escortAI
                         {
                             m_uiPhase = PHASE_GLADIATORS;
                             SummonRingMob(NPC_THELDREN, 1, POS_NORTH);
-                            for (uint8 i = 0; i < MAX_THELDREN_ADDS; ++i)
-                                SummonRingMob(m_uiGladiatorId[i], 1, POS_NORTH);
+                            for (unsigned int i : m_uiGladiatorId)
+                                SummonRingMob(i, 1, POS_NORTH);
                         }
                         else
                         {
@@ -1513,10 +1513,10 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
                     m_creature->SetImmuneToPlayer(false);
                     std::list<Creature*> lCroniesList;
                     GetCreatureListWithEntryInGrid(lCroniesList, m_creature, NPC_BLACKBREATH_CRONY, 30.0f);
-                    for (std::list<Creature*>::iterator itr = lCroniesList.begin(); itr != lCroniesList.end(); ++itr)
+                    for (auto& itr : lCroniesList)
                     {
-                        if ((*itr)->isAlive())
-                            (*itr)->SetImmuneToPlayer(false);
+                        if (itr->isAlive())
+                            itr->SetImmuneToPlayer(false);
                     }
                     break;
                 }

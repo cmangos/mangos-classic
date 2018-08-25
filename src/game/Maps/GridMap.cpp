@@ -712,8 +712,8 @@ TerrainInfo::TerrainInfo(uint32 mapid) : m_mapId(mapid)
 TerrainInfo::~TerrainInfo()
 {
     for (int k = 0; k < MAX_NUMBER_OF_GRIDS; ++k)
-        for (int i = 0; i < MAX_NUMBER_OF_GRIDS; ++i)
-            delete m_GridMaps[i][k];
+        for (auto& m_GridMap : m_GridMaps)
+            delete m_GridMap[k];
 
     VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(m_mapId);
     MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(m_mapId);
@@ -1190,8 +1190,8 @@ TerrainManager::TerrainManager()
 
 TerrainManager::~TerrainManager()
 {
-    for (TerrainDataMap::iterator it = i_TerrainMap.begin(); it != i_TerrainMap.end(); ++it)
-        delete it->second;
+    for (auto& it : i_TerrainMap)
+        delete it.second;
 }
 
 TerrainInfo* TerrainManager::LoadTerrain(const uint32 mapId)
@@ -1231,14 +1231,14 @@ void TerrainManager::UnloadTerrain(const uint32 mapId)
 void TerrainManager::Update(const uint32 diff)
 {
     // global garbage collection for GridMap objects and VMaps
-    for (TerrainDataMap::iterator iter = i_TerrainMap.begin(); iter != i_TerrainMap.end(); ++iter)
-        iter->second->CleanUpGrids(diff);
+    for (auto& iter : i_TerrainMap)
+        iter.second->CleanUpGrids(diff);
 }
 
 void TerrainManager::UnloadAll()
 {
-    for (TerrainDataMap::iterator it = i_TerrainMap.begin(); it != i_TerrainMap.end(); ++it)
-        delete it->second;
+    for (auto& it : i_TerrainMap)
+        delete it.second;
 
     i_TerrainMap.clear();
 }

@@ -17,6 +17,7 @@
  */
 
 #include <zlib.h>
+#include <utility>
 
 #include "Common.h"
 #include "Tools/Language.h"

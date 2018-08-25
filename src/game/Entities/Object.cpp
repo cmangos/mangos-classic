@@ -111,10 +111,10 @@ void Object::SendForcedObjectUpdate()
     RemoveFromClientUpdateList();
 
     WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
-    for (UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
+    for (auto& update_player : update_players)
     {
-        iter->second.BuildPacket(packet);
-        iter->first->GetSession()->SendPacket(packet);
+        update_player.second.BuildPacket(packet);
+        update_player.first->GetSession()->SendPacket(packet);
         packet.clear();                                     // clean the string
     }
 }
@@ -2037,9 +2037,9 @@ struct WorldObjectChangeAccumulator
 
     void Visit(CameraMapType& m)
     {
-        for (CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+        for (auto& iter : m)
         {
-            Player* owner = iter->getSource()->GetOwner();
+            Player* owner = iter.getSource()->GetOwner();
             if (owner != &i_object && owner->HaveAtClient(&i_object))
                 i_object.BuildUpdateDataForPlayer(owner, i_updateDatas);
         }
@@ -2212,11 +2212,11 @@ bool WorldObject::IsSpellReady(SpellEntry const& spellEntry, ItemPrototype const
     // overwrite category by provided category in item prototype during item cast if need
     if (itemProto)
     {
-        for (int idx = 0; idx < MAX_ITEM_PROTO_SPELLS; ++idx)
+        for (const auto& Spell : itemProto->Spells)
         {
-            if (itemProto->Spells[idx].SpellId == spellEntry.Id)
+            if (Spell.SpellId == spellEntry.Id)
             {
-                spellCategory = itemProto->Spells[idx].SpellCategory;
+                spellCategory = Spell.SpellCategory;
                 break;
             }
         }

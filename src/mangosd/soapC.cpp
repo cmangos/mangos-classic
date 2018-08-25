@@ -310,8 +310,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_ignore_element(struct soap* soap)
 SOAP_FMAC3 int SOAP_FMAC4 soap_putindependent(struct soap* soap)
 {
     if (soap->version == 1 && soap->encodingStyle && !(soap->mode & (SOAP_XML_TREE | SOAP_XML_GRAPH)))
-        for (int i = 0; i < SOAP_PTRHASH; i++)
-            for (struct soap_plist* pp = soap->pht[i]; pp; pp = pp->next)
+        for (auto pp : soap->pht)
+            for (; pp; pp = pp->next)
                 if (pp->mark1 == 2 || pp->mark2 == 2)
                     if (soap_putelement(soap, pp->ptr, SOAP_MULTIREFTAG, pp->id, pp->type))
                         return soap->error;

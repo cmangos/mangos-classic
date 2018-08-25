@@ -912,12 +912,12 @@ void WorldSession::HandleGroupSwapSubGroupOpcode(WorldPacket& recv_data)
     auto getMemberSlotInfo = [&group](std::string const& playerName, uint8& subgroup, ObjectGuid& guid)
     {
         auto slots = group->GetMemberSlots();
-        for (auto i = slots.begin(); i != slots.end(); ++i)
+        for (auto& slot : slots)
         {
-            if ((*i).guid && (*i).name == playerName)
+            if (slot.guid && slot.name == playerName)
             {
-                subgroup = (*i).group;
-                guid = (*i).guid;
+                subgroup = slot.group;
+                guid = slot.guid;
                 return true;
             }
         }
