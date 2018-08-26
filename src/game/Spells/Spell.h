@@ -512,6 +512,10 @@ class Spell
         uint64 GetScriptValue() const { return m_scriptValue; }
         void SetScriptValue(uint64 value) { m_scriptValue = value; }
 
+        // Spell Script hooks
+        void OnSuccessfulSpellStart();
+        void OnSuccessfulSpellFinish();
+
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
