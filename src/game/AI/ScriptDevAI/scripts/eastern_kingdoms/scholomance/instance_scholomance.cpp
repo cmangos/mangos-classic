@@ -62,7 +62,7 @@ void instance_scholomance::OnCreatureCreate(Creature* pCreature)
         case NPC_REANIMATED_CORPSE:
         case NPC_DISEASED_GHOUL:
         case NPC_RISEN_ABERRATION:
-            if (GetData(TYPE_RATTLEGORE) != DONE && (pCreature->GetPositionZ() > aEntranceRoom->m_fCenterZ) && (pCreature->GetPositionX() - aEntranceRoom->m_fCornerX < aEntranceRoom->m_uiLength) && (pCreature->GetPositionY() - aEntranceRoom->m_fCornerY < aEntranceRoom->m_uiWidth))
+            if (GetData(TYPE_RATTLEGORE) != DONE && (pCreature->GetPositionZ() > aEntranceRoom.m_fCenterZ) && (pCreature->GetPositionX() - aEntranceRoom.m_fCornerX < aEntranceRoom.m_uiLength) && (pCreature->GetPositionY() - aEntranceRoom.m_fCornerY < aEntranceRoom.m_uiWidth))
                 m_sEntranceRoomGuids.insert(pCreature->GetObjectGuid());
             break;
         case NPC_SCHOLOMANCE_STUDENT:

@@ -157,7 +157,7 @@ struct ArenaCylinder
     uint32 m_uiHeight;
 };
 
-static const ArenaCylinder aArenaCrowdVolume[] = {595.78f, -188.65f, -38.63f, 69, 10};
+static const ArenaCylinder aArenaCrowdVolume = { 595.78f, -188.65f, -38.63f, 69, 10 };
 
 enum ArenaNPCs
 {

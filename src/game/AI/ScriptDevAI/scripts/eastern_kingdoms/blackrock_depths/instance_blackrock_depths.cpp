@@ -96,8 +96,8 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
         case NPC_ANVILRAGE_SOLDIER:
         case NPC_ANVILRAGE_MEDIC:
         case NPC_ANVILRAGE_OFFICER:
-            if (pCreature->GetPositionZ() < aArenaCrowdVolume->m_fCenterZ || pCreature->GetPositionZ() > aArenaCrowdVolume->m_fCenterZ + aArenaCrowdVolume->m_uiHeight ||
-                    !pCreature->IsWithinDist2d(aArenaCrowdVolume->m_fCenterX, aArenaCrowdVolume->m_fCenterY, aArenaCrowdVolume->m_uiRadius))
+            if (pCreature->GetPositionZ() < aArenaCrowdVolume.m_fCenterZ || pCreature->GetPositionZ() > aArenaCrowdVolume.m_fCenterZ + aArenaCrowdVolume.m_uiHeight ||
+                    !pCreature->IsWithinDist2d(aArenaCrowdVolume.m_fCenterX, aArenaCrowdVolume.m_fCenterY, aArenaCrowdVolume.m_uiRadius))
                 break;
             m_sArenaCrowdNpcGuids.insert(pCreature->GetObjectGuid());
             if (m_auiEncounter[0] == DONE)
