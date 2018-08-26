@@ -970,7 +970,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex, CheckExcepti
     // Get spell hit result on target
     TargetInfo target;
     target.targetGUID = targetGUID;                         // Store target GUID
-    target.effectHitMask = immuned && !exception == EXCEPTION_MAGNET ? 0 : (1 << effIndex); // Store not immuned effects
+    target.effectHitMask = immuned && exception != EXCEPTION_MAGNET ? 0 : (1 << effIndex); // Store not immuned effects
     target.effectMask = (1 << effIndex);                    // Store index of effect
     target.processed  = false;                              // Effects not applied on target
     target.magnet = (exception == EXCEPTION_MAGNET);
