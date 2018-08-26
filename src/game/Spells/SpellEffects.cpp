@@ -5106,8 +5106,6 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
     if (!unitTarget || !m_caster)
         return;
 
-    float angle = unitTarget->GetAngle(m_caster) - unitTarget->GetOrientation();
-
     WorldLocation pos;
     unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetCombatReach(), unitTarget->GetAngle(m_caster));
 

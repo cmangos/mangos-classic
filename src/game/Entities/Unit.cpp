@@ -3709,7 +3709,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
         {
             // generic spells always break channeled not delayed spells
             // Unless they have this attribute
-            if (Spell* spell = m_currentSpells[CURRENT_CHANNELED_SPELL])
+            if (m_currentSpells[CURRENT_CHANNELED_SPELL])
             {
                 if(!pSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
                     InterruptSpell(CURRENT_CHANNELED_SPELL, false);
@@ -3749,7 +3749,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
             {
                 // generic autorepeats break generic non-delayed and channeled non-delayed spells
                 InterruptSpell(CURRENT_GENERIC_SPELL, false);
-                if (Spell* spell = m_currentSpells[CURRENT_CHANNELED_SPELL])
+                if (m_currentSpells[CURRENT_CHANNELED_SPELL])
                 {
                     if (!pSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
                         InterruptSpell(CURRENT_CHANNELED_SPELL, false);
@@ -10631,8 +10631,6 @@ void Unit::Uncharm(Unit* charmed)
     if (charmed->GetTypeId() == TYPEID_UNIT)
     {
         // now we have to clean threat list to be able to restore normal creature behavior
-        FactionTemplateEntry const* factionEntry = charmed->getFactionTemplateEntry();
-
         charmedCreature = static_cast<Creature*>(charmed);
         if (!charmedCreature->IsPet())
         {

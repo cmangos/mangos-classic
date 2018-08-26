@@ -637,7 +637,7 @@ bool QuestAccept_npc_cork_gizelton(Player* pPlayer, Creature* pCreature, const Q
         if (pPlayer->GetTeam() == HORDE)
             pCreature->SetFactionTemporary(FACTION_ESCORT_H_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
 
-        if (npc_cork_gizeltonAI* pCork = dynamic_cast<npc_cork_gizeltonAI*>(pCreature->AI()))
+        if (pCreature->AI() != nullptr)
             pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
     }
     return true;

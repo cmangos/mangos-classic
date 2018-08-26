@@ -5111,7 +5111,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (Unit* target = m_targets.getUnitTarget())
                 {
                     float range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
-                    float angle = target->GetAngle(m_caster) - target->GetOrientation();
 
                     WorldLocation pos;
                     target->GetFirstCollisionPosition(pos, target->GetCombatReach(), target->GetAngle(m_caster));

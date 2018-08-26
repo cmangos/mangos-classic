@@ -1602,7 +1602,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (Unit* charm = GetCharm())
                 BreakCharmOutgoing(charm);
 
-            if (Pet* pet = GetPet())
+            if (GetPet())
                 UnsummonPetTemporaryIfAny();
         }
     }
@@ -15434,7 +15434,7 @@ void Player::_SaveSpells()
     SqlStatement stmtDel = CharacterDatabase.CreateStatement(delSpells, "DELETE FROM character_spell WHERE guid = ? and spell = ?");
     SqlStatement stmtIns = CharacterDatabase.CreateStatement(insSpells, "INSERT INTO character_spell (guid,spell,active,disabled) VALUES (?, ?, ?, ?)");
 
-    for (PlayerSpellMap::iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end();)
+    for (PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end();)
     {
         PlayerSpell& playerSpell = itr->second;
 
@@ -16446,7 +16446,7 @@ void Player::OnTaxiFlightSplineStart(const TaxiPathNodeEntry* node)
     if (m_taxiTracker.GetState() == Taxi::TRACKER_TRANSFER)
         UpdateClientControl(this, false);
 
-    if (const TaxiPathEntry* path = sTaxiPathStore.LookupEntry(node->path))
+    if (sTaxiPathStore.LookupEntry(node->path))
         Mount(m_taxiTracker.GetMountDisplayId());
 
     getHostileRefManager().updateOnlineOfflineState(false);

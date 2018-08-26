@@ -525,7 +525,6 @@ bool ThreatManager::HasThreat(Unit * victim, bool alsoSearchOfflineList)
 
 void ThreatManager::TauntUpdate()
 {
-    HostileReference* taunterRef = nullptr;
     const Unit::AuraList& tauntAuras = iOwner->GetAurasByType(SPELL_AURA_MOD_TAUNT);
     std::unordered_map<ObjectGuid, TauntState> tauntStates;
     uint32 state = STATE_TAUNTED;

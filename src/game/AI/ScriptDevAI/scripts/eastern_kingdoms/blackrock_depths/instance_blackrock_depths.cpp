@@ -363,7 +363,7 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
         case TYPE_PLUGGER:
             if (uiData == SPECIAL)
             {
-                if (Creature* pPlugger = GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
+                if (GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
                 {
                     ++m_uiStolenAles;
                     if (m_uiStolenAles == 3)

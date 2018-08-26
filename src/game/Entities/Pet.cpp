@@ -59,7 +59,7 @@ Pet::Pet(PetType type) :
     m_regenTimer = 4000;
 
     // pets always have a charminfo, even if they are not actually charmed
-    CharmInfo* charmInfo = InitCharmInfo(this);
+    InitCharmInfo(this);
 }
 
 Pet::~Pet()

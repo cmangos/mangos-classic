@@ -2181,7 +2181,6 @@ bool WorldObject::CheckLockout(SpellSchoolMask schoolMask) const
 
 bool WorldObject::GetExpireTime(SpellEntry const& spellEntry, TimePoint& expireTime, bool& isPermanent) const
 {
-    TimePoint resultExpireTime;
     auto spellItr = m_cooldownMap.FindBySpellId(spellEntry.Id);
     if (spellItr != m_cooldownMap.end())
     {
@@ -2368,7 +2367,6 @@ void WorldObject::PrintCooldownList(ChatHandler& chat) const
 
     for (auto& lockoutItr : m_lockoutMap)
     {
-        SpellSchoolMask lockoutSchoolMask = SpellSchoolMask(1 << lockoutItr.first);
         std::stringstream cdLine;
         std::stringstream durationStr;
         auto& cdData = lockoutItr.second;

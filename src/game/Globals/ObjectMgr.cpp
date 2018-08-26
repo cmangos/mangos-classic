@@ -1522,7 +1522,7 @@ void ObjectMgr::LoadItemPrototypes()
         {
             if (Spell.SpellCategory && Spell.SpellId)
             {
-                if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(Spell.SpellId))
+                if (sSpellTemplate.LookupEntry<SpellEntry>(Spell.SpellId))
                     sItemSpellCategoryStore[Spell.SpellCategory].insert(ItemCategorySpellPair(Spell.SpellId, i));
                 else
                     sLog.outErrorDb("Item (Entry: %u) not correct %u spell id, must exist in spell table.", i, Spell.SpellId);

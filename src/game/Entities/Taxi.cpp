@@ -273,7 +273,7 @@ bool Tracker::Prepare(Index nodeResume /*= 0*/)
                 if (prev && (*j)->mapid != prev->mapid)
                 {
                     // Detect map change and advance atlas by adding a new map
-                    if (const MapEntry* entry = sMapStore.LookupEntry((*j)->mapid))
+                    if (sMapStore.LookupEntry((*j)->mapid))
                     {
                         // Bugcheck: latest finished map spline is suspiciously short
                         MANGOS_ASSERT(m_atlas.back().size() > 2);

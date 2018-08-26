@@ -541,8 +541,6 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetGUIDLow());
                 UpdateEntry(m_originalEntry, TEAM_NONE, data, eventData, false);
 
-                CreatureInfo const* cinfo = GetCreatureInfo();
-
                 SelectLevel();
                 UpdateAllStats();  // to be sure stats is correct regarding level of the creature
                 SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
