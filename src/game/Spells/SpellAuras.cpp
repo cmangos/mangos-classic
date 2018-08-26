@@ -5384,8 +5384,7 @@ SpellAuraHolder::~SpellAuraHolder()
 {
     // note: auras in delete list won't be affected since they clear themselves from holder when adding to deletedAuraslist
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        if (Aura* aur = m_auras[i])
-            delete aur;
+        delete m_auras[i];
 }
 
 void SpellAuraHolder::Update(uint32 diff)
