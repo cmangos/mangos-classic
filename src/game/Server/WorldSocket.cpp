@@ -55,10 +55,10 @@ struct ServerPktHeader
 #pragma pack(pop)
 #endif
 
-WorldSocket::WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
-    : Socket(service, std::move(closeHandler)), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0),
-      m_useExistingHeader(false), m_session(nullptr), m_seed(urand())
-{}
+WorldSocket::WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler) : Socket(service, std::move(closeHandler)), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0), m_existingHeader(),
+    m_useExistingHeader(false), m_session(nullptr), m_seed(urand())
+{
+}
 
 void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
 {

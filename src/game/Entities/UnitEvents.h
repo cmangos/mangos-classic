@@ -87,11 +87,15 @@ class ThreatRefStatusChangeEvent : public UnitBaseEvent
         };
         ThreatManager* iThreatManager;
     public:
-        ThreatRefStatusChangeEvent(uint32 pType) : UnitBaseEvent(pType), iThreatManager(nullptr)
-        { iHostileReference = nullptr; }
+        ThreatRefStatusChangeEvent(uint32 pType) : UnitBaseEvent(pType), iFValue(0), iIValue(0), iBValue(false), iThreatManager(nullptr)
+        {
+            iHostileReference = nullptr;
+        }
 
-        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference) : UnitBaseEvent(pType), iThreatManager(nullptr)
-        { iHostileReference = pHostileReference; }
+        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference) : UnitBaseEvent(pType), iFValue(0), iIValue(0), iBValue(false), iThreatManager(nullptr)
+        {
+            iHostileReference = pHostileReference;
+        }
 
         ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, float pValue) : UnitBaseEvent(pType), iThreatManager(nullptr)
         { iHostileReference = pHostileReference; iFValue = pValue; }

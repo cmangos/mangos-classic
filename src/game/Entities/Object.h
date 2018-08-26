@@ -87,7 +87,10 @@ enum DistanceCalculation
 
 struct PlayPacketParameters
 {
-    PlayPacketParameters(PlayPacketSettings setting) : setting(setting) {}
+    PlayPacketParameters(PlayPacketSettings setting) : setting(setting), target(), areaOrZone()
+    {
+    }
+
     PlayPacketParameters(PlayPacketSettings setting, Player const* target) : setting(setting) { this->target.target = target; }
     PlayPacketParameters(PlayPacketSettings setting, uint32 id) : setting(setting) { this->areaOrZone.id = id; }
     PlayPacketSettings setting;

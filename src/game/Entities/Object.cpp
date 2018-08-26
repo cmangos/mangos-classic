@@ -41,7 +41,7 @@
 #include "Loot/LootMgr.h"
 #include "Spells/SpellMgr.h"
 
-Object::Object(): m_updateFlag(0)
+Object::Object(): m_updateFlag(0), m_itsNewObject(false)
 {
     m_objectTypeId      = TYPEID_OBJECT;
     m_objectType        = TYPEMASK_OBJECT;

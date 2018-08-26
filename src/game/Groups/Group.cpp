@@ -63,7 +63,7 @@ GroupMemberStatus GetGroupMemberStatus(const Player* member = nullptr)
 
 Group::Group() : m_Id(0), m_groupType(GROUPTYPE_NORMAL),
     m_bgGroup(nullptr), m_lootMethod(FREE_FOR_ALL), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
-    m_subGroupsCounts(nullptr)
+    m_subGroupsCounts(nullptr), m_leaderLastOnline(0)
 {
 }
 

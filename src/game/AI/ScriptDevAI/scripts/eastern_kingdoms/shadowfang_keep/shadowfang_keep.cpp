@@ -196,7 +196,7 @@ enum
 
 struct mob_arugal_voidwalkerAI : public ScriptedAI
 {
-    mob_arugal_voidwalkerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    mob_arugal_voidwalkerAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiResetTimer(0), m_uiDarkOffering(0), m_uiPosition(0), m_bWPDone(false)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsLeader = false;
