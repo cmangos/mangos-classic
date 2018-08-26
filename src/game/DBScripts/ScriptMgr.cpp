@@ -1046,7 +1046,7 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32
                     for (auto& data : vector)
                     {
                         if (!sObjectMgr.GetMangosStringLocale(data.first))
-                            sLog.outErrorDb("Table `dbscript_string` is missing string id %u, used in database script template table dbscript_string_template id %u.", data.first, itrM->second.talk.stringTemplateId);
+                            sLog.outErrorDb("Table `dbscript_string` is missing string id %d, used in database script template table dbscript_string_template id %u.", data.first, itrM->second.talk.stringTemplateId);
                     }
                 }
             }
