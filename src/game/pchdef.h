@@ -1,5 +1,8 @@
 // add here most rarely modified headers to speed up debug build compilation
-#include "Server/WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
+#ifndef PCHDEF_H
+#define PCHDEF_H
+
+#include "Server/WorldSocket.h"
 #include "Common.h"
 
 #include "Log.h"
@@ -20,3 +23,4 @@
 #include "Spells/SpellAuras.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
+#endif // PCHDEF_H
