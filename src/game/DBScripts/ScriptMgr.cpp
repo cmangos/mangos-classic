@@ -1744,8 +1744,13 @@ bool ScriptAction::HandleScriptStep()
             if (!pPlayer)
                 break;
 
-            if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(m_script->createItem.itemEntry, m_script->createItem.amount))
-                pPlayer->SendNewItem(pItem, m_script->createItem.amount, true, false);
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+                pPlayer->DestroyItemCount(m_script->createItem.itemEntry, m_script->createItem.amount, true, false);
+            else
+            {
+                if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(m_script->createItem.itemEntry, m_script->createItem.amount))
+                    pPlayer->SendNewItem(pItem, m_script->createItem.amount, true, false);
+            }
 
             break;
         }
