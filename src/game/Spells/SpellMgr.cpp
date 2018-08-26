@@ -342,7 +342,6 @@ WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo)
                 return OFF_ATTACK;
             return BASE_ATTACK;
         }
-            break;
     }
 }
 

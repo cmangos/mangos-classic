@@ -874,10 +874,8 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         case SPELL_EFFECT_CREATE_ITEM:
         case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
             return true;
-            break;
         case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:    // Always hostile effects
             return false;
-            break;
         case SPELL_EFFECT_DUMMY:
             // some explicitly required dummy effect sets
             switch (spellproto->Id)
