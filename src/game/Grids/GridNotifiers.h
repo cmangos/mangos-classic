@@ -865,10 +865,8 @@ namespace MaNGOS
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u) const
             {
-                if (u->isAlive() && (i_controlledByPlayer ? !i_obj->IsFriendlyTo(u) && i_obj->CanAttackSpell(u) : i_obj->IsHostileTo(u))
-                    && i_obj->IsWithinDistInMap(u, i_range))
-                    return true;
-                return false;
+                return u->isAlive() && (i_controlledByPlayer ? !i_obj->IsFriendlyTo(u) && i_obj->CanAttackSpell(u) : i_obj->IsHostileTo(u))
+                    && i_obj->IsWithinDistInMap(u, i_range);
             }
         private:
             WorldObject const* i_obj;
@@ -883,9 +881,7 @@ namespace MaNGOS
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
-                if (u->isAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_obj->CanAssistSpell(u, i_spellInfo))
-                    return true;
-                return false;
+                return u->isAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_obj->CanAssistSpell(u, i_spellInfo);
             }
         private:
             WorldObject const* i_obj;
