@@ -589,7 +589,7 @@ void Group::UpdatePlayerOutOfRange(Player* pPlayer)
         return;
 
     WorldPacket data;
-    pPlayer->GetSession()->BuildPartyMemberStatsChangedPacket(pPlayer, data);
+    WorldSession::BuildPartyMemberStatsChangedPacket(pPlayer, data);
 
     for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
         if (Player* player = itr->getSource())
