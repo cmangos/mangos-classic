@@ -114,7 +114,7 @@ void SystemMgr::LoadScriptWaypoints()
 
         delete result;
 
-        outstring_log("");
+        outstring_log();
         outstring_log(">> Loaded %u Script Waypoint nodes.", nodeCount);
     }
     else
