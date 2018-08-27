@@ -76,7 +76,7 @@ class BIH
             tree.clear();
             objects.clear();
             // create space for the first node
-            tree.push_back(3 << 30); // dummy leaf
+            tree.push_back(static_cast<uint32>(3 << 30)); // dummy leaf
             tree.insert(tree.end(), 2, 0);
         }
 

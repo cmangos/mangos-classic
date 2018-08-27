@@ -1379,7 +1379,7 @@ void CreatureEventAI::ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* 
     for (auto& itr : m_CreatureEventAIList)
     {
         if (itr.Event.event_type == EVENT_T_RECEIVE_AI_EVENT &&
-            itr.Event.receiveAIEvent.eventType == eventType && (!itr.Event.receiveAIEvent.senderEntry || itr.Event.receiveAIEvent.senderEntry == sender->GetEntry()))
+            itr.Event.receiveAIEvent.eventType == static_cast<uint32>(eventType) && (!itr.Event.receiveAIEvent.senderEntry || itr.Event.receiveAIEvent.senderEntry == sender->GetEntry()))
             ProcessEvent(itr, invoker, sender);
     }
 }

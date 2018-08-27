@@ -240,14 +240,14 @@ class BattleGroundMgr
             CreatureBattleEventIndexesMap::const_iterator itr = m_CreatureBattleEventIndexMap.find(dbTableGuidLow);
             if (itr != m_CreatureBattleEventIndexMap.end())
                 return itr->second;
-            return m_CreatureBattleEventIndexMap.find(-1)->second;
+            return m_CreatureBattleEventIndexMap.find(static_cast<uint32>(-1))->second;
         }
         const BattleGroundEventIdx GetGameObjectEventIndex(uint32 dbTableGuidLow) const
         {
             GameObjectBattleEventIndexesMap::const_iterator itr = m_GameObjectBattleEventIndexMap.find(dbTableGuidLow);
             if (itr != m_GameObjectBattleEventIndexMap.end())
                 return itr->second;
-            return m_GameObjectBattleEventIndexMap.find(-1)->second;
+            return m_GameObjectBattleEventIndexMap.find(static_cast<uint32>(-1))->second;
         }
 
         bool isTesting() const { return m_Testing; }

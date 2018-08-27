@@ -549,7 +549,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                     SetDeathState(JUST_DIED);
                     SetHealth(0);
                     i_motionMaster.Clear();
-                    clearUnitState(UNIT_STAT_ALL_STATE);
+                    clearUnitState(static_cast<uint32>(UNIT_STAT_ALL_STATE));
                     LoadCreatureAddon(true);
                 }
                 else
@@ -1175,8 +1175,8 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     // Calculate level dependent stats
     //////////////////////////////////////////////////////////////////////////
 
-    uint32 health = -1;
-    uint32 mana = -1;
+    uint32 health = static_cast<uint32>(-1);
+    uint32 mana = static_cast<uint32>(-1);
     float armor = -1.f;
     float mainMinDmg = 0.f;
     float mainMaxDmg = 0.f;
@@ -1617,7 +1617,7 @@ void Creature::SetDeathState(DeathState s)
 
     if (s == JUST_ALIVED)
     {
-        clearUnitState(UNIT_STAT_ALL_STATE);
+        clearUnitState(static_cast<uint32>(UNIT_STAT_ALL_STATE));
 
         Unit::SetDeathState(ALIVE);
 

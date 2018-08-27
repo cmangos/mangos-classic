@@ -59,14 +59,12 @@ struct boss_emperor_dagran_thaurissanAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        uint32 uiTextId;
         switch (urand(0, 2))
         {
-            case 0: uiTextId = YELL_AGGRO_1; break;
-            case 1: uiTextId = YELL_AGGRO_2; break;
-            case 2: uiTextId = YELL_AGGRO_3; break;
+            case 0: DoScriptText(YELL_AGGRO_1, m_creature); break;
+            case 1: DoScriptText(YELL_AGGRO_2, m_creature); break;
+            case 2: DoScriptText(YELL_AGGRO_3, m_creature); break;
         }
-        DoScriptText(uiTextId, m_creature);
         m_creature->CallForHelp(VISIBLE_RANGE);
     }
 
