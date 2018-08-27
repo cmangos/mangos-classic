@@ -53,8 +53,8 @@ void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry cons
 
     uint32 size = singleTarget ? 1 : validRefs.size();            // if singleTarget do not devide threat
     float threatPerTarget = threat / size;
-    for (HostileReference* ref : validRefs)
-        ref->getSource()->addThreat(victim, threatPerTarget, false, (threatSpell ? GetSpellSchoolMask(threatSpell) : SPELL_SCHOOL_MASK_NORMAL), threatSpell);
+    for (HostileReference* validReference : validRefs)
+        validReference->getSource()->addThreat(victim, threatPerTarget, false, (threatSpell ? GetSpellSchoolMask(threatSpell) : SPELL_SCHOOL_MASK_NORMAL), threatSpell);
 }
 
 //=================================================

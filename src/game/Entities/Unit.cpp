@@ -1121,7 +1121,8 @@ void Unit::InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype)
 
             if (CurrentSpellTypes(i) == CURRENT_CHANNELED_SPELL)
             {
-                if (Spell* spell = pVictim->GetCurrentSpell(CURRENT_CHANNELED_SPELL)) // fetch again because spell couldve been interrupted before
+                spell = pVictim->GetCurrentSpell(CURRENT_CHANNELED_SPELL); // fetch again because spell couldve been interrupted before
+                if (spell)
                 {
                     if (spell->CanBeInterrupted())
                     {
@@ -10301,8 +10302,8 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
     if (player)
     {
         // Initialize pet bar
-        if (CharmInfo* charmInfo = pCreature->InitCharmInfo(pCreature))
-            charmInfo->InitPossessCreateSpells();
+        if (CharmInfo* charmInfo2 = pCreature->InitCharmInfo(pCreature))
+            charmInfo2->InitPossessCreateSpells();
         player->PossessSpellInitialize();
 
         // Take away client control immediately if we are not supposed to have control at the moment

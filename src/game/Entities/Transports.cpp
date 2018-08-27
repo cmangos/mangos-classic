@@ -339,16 +339,16 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
                     float newY = keyFrames[i].node->y + (keyFrames[i + 1].node->y - keyFrames[i].node->y) * d / keyFrames[i + 1].distFromPrev;
                     float newZ = keyFrames[i].node->z + (keyFrames[i + 1].node->z - keyFrames[i].node->z) * d / keyFrames[i + 1].distFromPrev;
 
-                    bool teleport = false;
+                    bool teleport2 = false;
                     if (keyFrames[i].node->mapid != cM || (i && keyFrames[i - 1].node->actionFlag == 1))
                     {
-                        teleport = true;
+                        teleport2 = true;
                         cM = keyFrames[i].node->mapid;
                     }
 
                     //                    sLog.outString("T: %d, D: %f, x: %f, y: %f, z: %f", t, d, newX, newY, newZ);
-                    pos = WayPoint(keyFrames[i].node->mapid, newX, newY, newZ, teleport);
-                    if (teleport)
+                    pos = WayPoint(keyFrames[i].node->mapid, newX, newY, newZ, teleport2);
+                    if (teleport2)
                         m_WayPoints[t] = pos;
                 }
 
@@ -386,14 +386,19 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
         else
             t += (long)keyFrames[i + 1].tTo % 100;
 
-        bool teleport = false;
+        bool teleport3 = false;
         if ((keyFrames[i].node->actionFlag == 1) || (keyFrames[i + 1].node->mapid != keyFrames[i].node->mapid))
         {
-            teleport = true;
+            teleport3 = true;
             cM = keyFrames[i + 1].node->mapid;
         }
 
+<<<<<<< HEAD
         WayPoint pos(keyFrames[i + 1].node->mapid, keyFrames[i + 1].node->x, keyFrames[i + 1].node->y, keyFrames[i + 1].node->z, teleport);
+=======
+        pos = WayPoint(keyFrames[i + 1].node->mapid, keyFrames[i + 1].node->x, keyFrames[i + 1].node->y, keyFrames[i + 1].node->z, teleport3,
+                       keyFrames[i + 1].node->arrivalEventID, keyFrames[i + 1].node->departureEventID);
+>>>>>>> Fix declaration hides class member / function parameter / local variable warnings
 
         //        sLog.outString("T: %d, x: %f, y: %f, z: %f, t:%d", t, pos.x, pos.y, pos.z, teleport);
 

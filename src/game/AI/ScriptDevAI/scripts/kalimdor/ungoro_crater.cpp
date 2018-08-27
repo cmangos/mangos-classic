@@ -672,7 +672,6 @@ struct npc_simone_the_inconspicuousAI : public ScriptedAI
     bool m_bTransform;
 
     ObjectGuid m_playerGuid;
-    Creature* pPrecious;
 
     void Reset() override
     {
@@ -687,7 +686,7 @@ struct npc_simone_the_inconspicuousAI : public ScriptedAI
         m_uiTransformEmote_Timer = 5000;
         m_bTransform = false;
 
-        pPrecious = GetClosestCreatureWithEntry(m_creature, NPC_PRECIOUS, 100.0f);
+        Creature* pPrecious = GetClosestCreatureWithEntry(m_creature, NPC_PRECIOUS, 100.0f);
         if (pPrecious)
         {
             pPrecious->SetVisibility(VISIBILITY_ON);
@@ -703,9 +702,8 @@ struct npc_simone_the_inconspicuousAI : public ScriptedAI
 
     void Transform()
     {
-        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+        if (m_creature->GetMap()->GetPlayer(m_playerGuid))
         {
-            Creature* pPreciousDevourer = nullptr;
             Creature* pDemon = m_creature->SummonCreature(NPC_SIMONE_THE_SEDUCTRESS,
                 m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetAngle(m_creature), TEMPSPAWN_DEAD_DESPAWN, 0);
             Creature* pPrecious = GetClosestCreatureWithEntry(m_creature, NPC_PRECIOUS, 100.0f);
@@ -721,7 +719,7 @@ struct npc_simone_the_inconspicuousAI : public ScriptedAI
 
             if (pDemon && pPrecious)
             {
-                pPreciousDevourer = m_creature->SummonCreature(NPC_PRECIOUS_THE_DEVOURER,
+                Creature* pPreciousDevourer = m_creature->SummonCreature(NPC_PRECIOUS_THE_DEVOURER,
                     pPrecious->GetPositionX(), pPrecious->GetPositionY(), pPrecious->GetPositionZ(), pPrecious->GetAngle(pPrecious), TEMPSPAWN_DEAD_DESPAWN, 0, true);
 
                 if (pPreciousDevourer)

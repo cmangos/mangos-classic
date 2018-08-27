@@ -1215,20 +1215,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     }
                     case 23183:                             // Mark of Frost
                     {
-                        if (Unit* target = GetTarget())
-                        {
-                            if (target->HasAura(23182))
-                                target->CastSpell(target, 23186, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
-                        }
+                        if (target->HasAura(23182))
+                            target->CastSpell(target, 23186, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
                         return;
                     }
                     case 25042:                             // Mark of Nature
                     {
-                        if (Unit* target = GetTarget())
-                        {
-                            if (target->HasAura(25040))
-                                target->CastSpell(target, 25043, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
-                        }
+                        if (target->HasAura(25040))
+                            target->CastSpell(target, 25043, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
                         return;
                     }
                     case 28832:                             // Mark of Korth'azz
@@ -2322,7 +2316,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         Unit* caster = GetCaster();
         target->SetStunned(true, (caster ? caster->GetObjectGuid() : ObjectGuid()), GetSpellProto()->Id);
 
-        if (Unit* caster = GetCaster())
+        if (caster)
             if (UnitAI* ai = caster->AI())
                 ai->JustStunnedTarget(GetSpellProto(), target);
     }
