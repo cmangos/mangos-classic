@@ -1233,7 +1233,9 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
         SetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + i), BASE_VALUE, float(createResistance[i]));
 
-    float health, mana, armor, minDmg;
+    float health = 0.f;
+    float mana = 0.f;
+    float armor = 0.f;
 
     switch (getPetType())
     {
@@ -1318,7 +1320,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(petlevel, cInfo->UnitClass);
                 if (cInfo->ArmorMultiplier && cCLS) // Info found in ClassLevelStats
                 {
-                    minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseMeleeAttackPower / 14) * (cInfo->MeleeBaseAttackTime / 1000)) * cInfo->DamageMultiplier;
+                    float minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseMeleeAttackPower / 14) * (cInfo->MeleeBaseAttackTime / 1000)) * cInfo->DamageMultiplier;
 
                     // Apply custom damage setting (from config)
                     minDmg *= _GetDamageMod(cInfo->Rank);
@@ -1368,7 +1370,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 armor = cCLS->BaseArmor;
 
                 // Melee
-                minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseMeleeAttackPower / 14) * (cInfo->MeleeBaseAttackTime / 1000)) * cInfo->DamageMultiplier;
+                float minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseMeleeAttackPower / 14) * (cInfo->MeleeBaseAttackTime / 1000)) * cInfo->DamageMultiplier;
 
                 // Get custom setting
                 minDmg *= _GetDamageMod(cInfo->Rank);

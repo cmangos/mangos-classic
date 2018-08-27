@@ -319,6 +319,8 @@ struct go_elemental_rift : public GameObjectAI
             case GO_FIRE_ELEMENTAL_RIFT:
                 elementalEntry = NPC_BLAZING_INVADER;
                 break;
+            default:
+                return;
         }
 
         std::list<Creature*> lElementalList;

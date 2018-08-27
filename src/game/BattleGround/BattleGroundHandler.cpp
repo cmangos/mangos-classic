@@ -79,7 +79,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
     uint32 mapId;
     uint8 joinAsGroup;
     bool isPremade = false;
-    Group* grp;
+    Group* grp = nullptr;
 
     recv_data >> guid;                                      // battlemaster guid
     recv_data >> mapId;

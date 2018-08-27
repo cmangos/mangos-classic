@@ -5164,7 +5164,7 @@ void ObjectMgr::LoadTaxiShortcuts()
 uint32 ObjectMgr::GetNearestTaxiNode(float x, float y, float z, uint32 mapid, Team team) const
 {
     bool found = false;
-    float dist;
+    float dist = std::numeric_limits<float>().max();
     uint32 id = 0;
 
     for (uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
@@ -5351,12 +5351,12 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
 
     // at corpse map
     bool foundNear = false;
-    float distNear;
+    float distNear = std::numeric_limits<float>::max();
     WorldSafeLocsEntry const* entryNear = nullptr;
 
     // at entrance map for corpse map
     bool foundEntr = false;
-    float distEntr;
+    float distEntr = std::numeric_limits<float>::max();
     WorldSafeLocsEntry const* entryEntr = nullptr;
 
     // some where other

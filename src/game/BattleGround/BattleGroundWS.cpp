@@ -305,7 +305,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target
         return;
 
     int32 message_id = 0;
-    ChatMsg type;
+    ChatMsg type = CHAT_MSG_BG_SYSTEM_NEUTRAL;
 
     uint8 event = (sBattleGroundMgr.GetGameObjectEventIndex(target_obj->GetGUIDLow())).event1;
 

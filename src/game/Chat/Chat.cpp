@@ -1619,7 +1619,7 @@ bool ChatHandler::isValidChatMessage(const char* message) const
 
                     int32 propertyId = 0;
                     bool negativeNumber = false;
-                    char c;
+                    char c = '\0';
                     for (uint8 i = 0; i < randomPropertyPosition; ++i)
                     {
                         propertyId = 0;

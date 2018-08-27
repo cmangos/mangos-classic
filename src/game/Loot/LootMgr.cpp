@@ -1876,7 +1876,7 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
         return EQUIP_ERR_ITEM_NOT_FOUND;
 
     bool playerGotItem = false;
-    InventoryResult msg;
+    InventoryResult msg = EQUIP_ERR_CANT_DO_RIGHT_NOW;
     if (target && target->GetSession())
     {
         ItemPosCountVec dest;

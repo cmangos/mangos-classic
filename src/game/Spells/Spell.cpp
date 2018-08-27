@@ -2589,7 +2589,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     bool isInLiquid = false;
                     bool isInLiquidTested = false;
                     bool isOnGround = false;
-                    GridMapLiquidData liquidData;
+                    GridMapLiquidData liquidData = {};
 
                     // try fix height for next position
                     if (!m_caster->GetMap()->GetHeightInRange(nextPos.x, nextPos.y, nextPos.z))
@@ -6490,10 +6490,10 @@ CurrentSpellTypes Spell::GetCurrentContainer() const
 
 bool Spell::CheckTargetGOScript(GameObject* target, SpellEffectIndex eff) const
 {
-    switch (m_spellInfo->Id)
+    /*switch (m_spellInfo->Id)
     {
         default: break;
-    }
+    }*/
     return true;
 }
 
