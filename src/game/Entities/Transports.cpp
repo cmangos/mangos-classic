@@ -393,13 +393,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
             cM = keyFrames[i + 1].node->mapid;
         }
 
-<<<<<<< HEAD
         WayPoint pos(keyFrames[i + 1].node->mapid, keyFrames[i + 1].node->x, keyFrames[i + 1].node->y, keyFrames[i + 1].node->z, teleport);
-=======
-        pos = WayPoint(keyFrames[i + 1].node->mapid, keyFrames[i + 1].node->x, keyFrames[i + 1].node->y, keyFrames[i + 1].node->z, teleport3,
-                       keyFrames[i + 1].node->arrivalEventID, keyFrames[i + 1].node->departureEventID);
->>>>>>> Fix declaration hides class member / function parameter / local variable warnings
-
         //        sLog.outString("T: %d, x: %f, y: %f, z: %f, t:%d", t, pos.x, pos.y, pos.z, teleport);
 
         // if (teleport)

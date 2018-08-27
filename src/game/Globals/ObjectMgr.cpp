@@ -5164,7 +5164,7 @@ void ObjectMgr::LoadTaxiShortcuts()
 uint32 ObjectMgr::GetNearestTaxiNode(float x, float y, float z, uint32 mapid, Team team) const
 {
     bool found = false;
-    float dist = std::numeric_limits<float>().max();
+    float dist = std::numeric_limits<float>::max();
     uint32 id = 0;
 
     for (uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
