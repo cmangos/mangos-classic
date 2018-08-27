@@ -161,8 +161,9 @@ void PetAI::UpdateAI(const uint32 diff)
     else if (charminfo->GetSpellOpener() != 0) // have opener stored
     {
         uint32 minRange = charminfo->GetSpellOpenerMinRange();
+        victim = m_unit->getVictim();
 
-        if (!(victim = m_unit->getVictim())
+        if (!victim
                 || (minRange != 0 && m_unit->IsWithinDistInMap(victim, minRange)))
             charminfo->SetSpellOpener();
         else if (m_unit->IsWithinDistInMap(victim, charminfo->GetSpellOpenerMaxRange())

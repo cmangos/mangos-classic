@@ -114,8 +114,9 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
     BattleGround* bg = nullptr;
     if (instanceId)
         bg = sBattleGroundMgr.GetBattleGroundThroughClientInstance(instanceId, bgTypeId);
-
-    if (!bg && !(bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId)))
+    if (!bg)
+        bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
+    if (!bg)
     {
         sLog.outError("Battleground: no available bg / template found");
         return;

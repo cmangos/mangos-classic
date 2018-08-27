@@ -687,7 +687,8 @@ struct npc_simone_the_inconspicuousAI : public ScriptedAI
         m_uiTransformEmote_Timer = 5000;
         m_bTransform = false;
 
-        if (pPrecious = GetClosestCreatureWithEntry(m_creature, NPC_PRECIOUS, 100.0f))
+        pPrecious = GetClosestCreatureWithEntry(m_creature, NPC_PRECIOUS, 100.0f);
+        if (pPrecious)
         {
             pPrecious->SetVisibility(VISIBILITY_ON);
             pPrecious->GetMotionMaster()->MoveFollow(m_creature, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
