@@ -3890,8 +3890,8 @@ bool ChatHandler::HandleNpcThreatCommand(char* /*args*/)
         Unit* pUnit = itr->getTarget();
 
         if (pUnit)
-            // Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat and taunt state %u
-            PSendSysMessage(LANG_NPC_THREAT_PLAYER, pUnit->GetName(), pUnit->GetGUIDLow(), target->getThreatManager().getThreat(pUnit), itr->GetTauntState());
+            // Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat, taunt state %u and hostile state %u
+            PSendSysMessage(LANG_NPC_THREAT_PLAYER, pUnit->GetName(), pUnit->GetGUIDLow(), target->getThreatManager().getThreat(pUnit), itr->GetTauntState(), itr->GetHostileState());
     }
 
     return true;

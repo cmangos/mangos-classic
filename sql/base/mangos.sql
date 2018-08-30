@@ -4052,7 +4052,7 @@ INSERT INTO `mangos_string` VALUES
 (1607,'|cffffff00The Plaguewood Tower has been taken by the Alliance!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1635,'|cffffff00The Horde has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1636,'|cffffff00The Alliance has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(1702,'Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat and taunt state %u',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1702,'Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat, taunt state %u and hostile state %u.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1703,'Showing threat for %s [Entry %u]',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `mangos_string` ENABLE KEYS */;
 UNLOCK TABLES;

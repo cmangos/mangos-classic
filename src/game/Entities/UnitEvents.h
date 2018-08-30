@@ -42,19 +42,11 @@ enum UnitThreatEventType
     // Player/Pet entered/left  water or some other place where it is/was not accessible for the creature
     UEV_THREAT_REF_ASSECCIBLE_STATUS    = 1 << 3,
 
-    // Threat list is going to be sorted (if dirty flag is set)
-    UEV_THREAT_SORT_LIST                = 1 << 4,
-
-    // New target should be fetched, could tbe the current target as well
-    UEV_THREAT_SET_NEXT_TARGET          = 1 << 5,
-
-    // A new victim (target) was set. Could be nullptr
-    UEV_THREAT_VICTIM_CHANGED           = 1 << 6,
+    // Suppressed state was updated
+    UEV_THREAT_REF_SUPPRESSED_STATUS    = 1 << 4,
 };
 
 #define UEV_THREAT_REF_EVENT_MASK ( UEV_THREAT_REF_ONLINE_STATUS | UEV_THREAT_REF_THREAT_CHANGE | UEV_THREAT_REF_REMOVE_FROM_LIST | UEV_THREAT_REF_ASSECCIBLE_STATUS)
-#define UEV_THREAT_MANAGER_EVENT_MASK (UEV_THREAT_SORT_LIST | UEV_THREAT_SET_NEXT_TARGET | UEV_THREAT_VICTIM_CHANGED)
-#define UEV_ALL_EVENT_MASK (0xffffffff)
 
 // Future use
 //#define UEV_UNIT_EVENT_MASK (UEV_UNIT_KILLED | UEV_UNIT_HEALTH_CHANGE)

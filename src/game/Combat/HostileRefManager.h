@@ -65,6 +65,9 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
         // delete one reference, defined by Unit
         void deleteReference(Unit* victim);
 
+        // Suppression
+        void HandleSuppressed(bool apply, bool immunity = false);
+
     private:
         Unit* iOwner;                                       // owner of manager variable, back ref. to it, always exist
 };

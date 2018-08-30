@@ -1355,7 +1355,7 @@ class Unit : public WorldObject
         void StopAttackFaction(uint32 faction_id);
         Unit* SelectRandomUnfriendlyTarget(Unit* except = nullptr, float radius = ATTACK_DISTANCE) const;
         Unit* SelectRandomFriendlyTarget(Unit* except = nullptr, float radius = ATTACK_DISTANCE) const;
-        bool hasNegativeAuraWithInterruptFlag(uint32 flag) const;
+        bool HasDamageInterruptibleStunAura() const;
         void SendMeleeAttackStop(Unit* victim) const;
         void SendMeleeAttackStart(Unit* pVictim) const;
 
@@ -2028,9 +2028,9 @@ class Unit : public WorldObject
         void AddThreat(Unit* pVictim, float threat = 0.0f, bool crit = false, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NONE, SpellEntry const* threatSpell = nullptr);
         float ApplyTotalThreatModifier(float threat, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NORMAL);
         void DeleteThreatList();
-        bool IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const;
         bool SelectHostileTarget();
-        bool IsOutOfThreatArea(Unit* victim) const;
+        bool IsSuppressedTarget(Unit* target) const;
+        bool IsOfflineTarget(Unit* victim) const;
         void TauntUpdate();
         void FixateTarget(Unit* taunter);
         ThreatManager& getThreatManager() { return GetCombatData()->threatManager; }

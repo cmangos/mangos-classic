@@ -41,6 +41,12 @@ class ThreatCalcHelper
         static float CalcThreat(Unit* hatedUnit, Unit* hatingUnit, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell);
 };
 
+enum HostileState : uint32
+{
+    STATE_SUPPRESSED,
+    STATE_NORMAL,
+};
+
 enum TauntState : uint32
 {
     STATE_NONE,
@@ -70,7 +76,7 @@ class HostileReference : public Reference<Unit, ThreatManager>
         void setFadeoutThreatReduction(float value);
         void resetFadeoutThreatReduction();
 
-        bool isOnline() const { return iOnline; }
+        bool isOnline() const { return m_online; }
 
         // The Unit might be in water and the creature can not enter the water, but has range attack
         // in this case online = true, but accessable = false
@@ -112,6 +118,10 @@ class HostileReference : public Reference<Unit, ThreatManager>
         void sourceObjectDestroyLink() override;
 
         // Priority alterations
+        void SetSuppressabilityToggle() { m_suppresabilityToggle = true; }
+        void SetHostileState(HostileState state);
+        HostileState GetHostileState() const { return m_hostileState; }
+
         void SetTauntState(TauntState state) { m_tauntState = state; }
         TauntState GetTauntState() const { return m_tauntState; }
     protected:
@@ -121,10 +131,12 @@ class HostileReference : public Reference<Unit, ThreatManager>
         Unit* getSourceUnit() const;
     private:
         float iThreat;
+        HostileState m_hostileState;
+        bool m_suppresabilityToggle;
         TauntState m_tauntState;
         float iFadeoutThreadReduction;                      // used for fade
         ObjectGuid iUnitGuid;
-        bool iOnline;
+        bool m_online;
         bool iAccessible;
 };
 
@@ -164,8 +176,9 @@ class ThreatContainer
         void clearReferences();
         // Sort the list if necessary
         void update();
-    private:
+
         ThreatList iThreatList;
+    private:
         bool iDirty;
 };
 
@@ -196,7 +209,7 @@ class ThreatManager
 
         bool isThreatListEmpty() const { return iThreatContainer.empty(); }
 
-        void processThreatEvent(ThreatRefStatusChangeEvent* threatRefStatusChangeEvent);
+        void processThreatEvent(ThreatRefStatusChangeEvent& threatRefStatusChangeEvent);
 
         HostileReference* getCurrentVictim() const { return iCurrentVictim; }
 
@@ -216,8 +229,11 @@ class ThreatManager
         ThreatList const& getThreatList() const { return iThreatContainer.getThreatList(); }
 
         // When a target is unreachable, we need to set someone as low priority
-        void SetTargetNotAccessible(Unit* target);
+        void SetTargetSuppressed(Unit* target);
+        void ClearSuppressed(HostileReference* except);
     private:
+        void UpdateContainers();
+
         HostileReference* iCurrentVictim;
         Unit* iOwner;
         ThreatContainer iThreatContainer;

@@ -330,10 +330,6 @@ class UnitAI
         /// Check if this AI can be replaced in possess case
         // virtual bool IsControllable() const { return false; }
 
-        // Called when victim entered water and creature can not enter water
-        // TODO: rather unused
-        virtual bool canReachByRangeAttack(Unit*) { return false; }
-
         ///== Helper functions =============================
 
         /// This function is used to do the actual melee damage (if possible)
