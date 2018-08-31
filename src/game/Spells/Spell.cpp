@@ -980,7 +980,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex, CheckExcepti
     if (IsDestinationOnlyEffect(m_spellInfo, effIndex) && pVictim == m_caster) // TODO: research and unhack
         target.missCondition = SPELL_MISS_NONE;
     else
-        target.missCondition = m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(pVictim, m_spellInfo, m_reflectable);
+        target.missCondition = m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(pVictim, m_spellInfo, effIndex, m_reflectable);
 
     // spell fly from visual cast object
     WorldObject* affectiveObject = GetAffectiveCasterObject();
@@ -1020,7 +1020,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex, CheckExcepti
         // Victim reflects, apply reflect procs
         m_caster->ProcDamageAndSpell(ProcSystemArguments(pVictim, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
         // Calculate reflected spell result on caster
-        target.reflectResult =  m_caster->SpellHitResult(m_caster, m_spellInfo, m_reflectable);
+        target.reflectResult =  m_caster->SpellHitResult(m_caster, m_spellInfo, effIndex, m_reflectable);
         // Caster reflects back spell which was already reflected by victim
         if (target.reflectResult == SPELL_MISS_REFLECT)
         {
@@ -1341,7 +1341,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
     // Recheck immune (only for delayed spells)
     if (traveling && (
                 unit->IsImmuneToDamage(GetSpellSchoolMask(m_spellInfo)) ||
-                unit->IsImmuneToSpell(m_spellInfo, unit == realCaster)))
+                unit->IsImmuneToSpell(m_spellInfo, unit == realCaster, effectMask)))
     {
         if (realCaster)
             realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
@@ -4622,7 +4622,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
 
             if (IsPositiveSpell(m_spellInfo->Id, m_caster, target))
-                if (target->IsImmuneToSpell(m_spellInfo, target == m_caster) && !target->hasUnitState(UNIT_STAT_ISOLATED))
+                if (target->IsImmuneToSpell(m_spellInfo, target == m_caster, 7) && !target->hasUnitState(UNIT_STAT_ISOLATED))
                     return SPELL_FAILED_TARGET_AURASTATE;
 
             // Must be behind the target.

@@ -613,7 +613,7 @@ class Creature : public Unit
 
         void FillGuidsListFromThreatList(GuidVector& guids, uint32 maxamount = 0);
 
-        bool IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf) override;
+        bool IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf, uint8 effectMask) override;
         bool IsImmuneToDamage(SpellSchoolMask meleeSchoolMask) override;
         bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const override;
 

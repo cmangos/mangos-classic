@@ -1518,7 +1518,7 @@ class Unit : public WorldObject
 
         SpellMissInfo MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell);
         SpellMissInfo MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell, SpellSchoolMask schoolMask);
-        SpellMissInfo SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool reflectable = false);
+        SpellMissInfo SpellHitResult(Unit* pVictim, SpellEntry const* spell, uint8 effectMask, bool reflectable = false);
 
         // Unit Combat reactions API: Dodge/Parry/Block
         bool CanDodge() const { return m_canDodge; }
@@ -2142,8 +2142,8 @@ class Unit : public WorldObject
 
         void ApplySpellImmune(Aura const* aura, uint32 op, uint32 type, bool apply);
         void ApplySpellDispelImmunity(Aura const* aura, DispelType type, bool apply);
-        virtual bool IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf);
-        virtual bool IsImmuneToDamage(SpellSchoolMask shoolMask);
+        virtual bool IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf, uint8 effectMask);
+        virtual bool IsImmuneToDamage(SpellSchoolMask meleeSchoolMask);
         virtual bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const;
         bool IsImmuneToSchool(SpellEntry const* spellInfo) const;
 
