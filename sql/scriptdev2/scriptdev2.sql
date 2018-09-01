@@ -234,7 +234,6 @@ INSERT INTO scripted_event_id VALUES
 
 
 /* BLASTED LANDS */
-UPDATE creature_template SET ScriptName='npc_fallen_hero_of_horde' WHERE entry=7572;
 UPDATE creature_template SET ScriptName='boss_kazzak' WHERE entry=12397;
 
 /* BURNING STEPPES */
@@ -391,7 +390,6 @@ UPDATE creature_template SET ScriptName='boss_onyxia' WHERE entry=10184;
 
 /* ORGRIMMAR */
 UPDATE creature_template SET ScriptName='npc_shenthul' WHERE entry=3401;
-UPDATE creature_template SET ScriptName='npc_thrall_warchief' WHERE entry=4949;
 
 /* RAGEFIRE CHASM */
 
