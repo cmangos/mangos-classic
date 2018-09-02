@@ -1663,6 +1663,15 @@ bool Spell::CheckAndAddMagnetTarget(Unit* target, SpellEffectIndex effIndex, Uni
     return false;
 }
 
+Unit* Spell::GetUnitTarget(SpellEffectIndex effIdx)
+{
+    Unit* target = m_targets.getUnitTarget();
+    if (effIdx != EFFECT_INDEX_0 && !IsUnitTargetTarget(m_spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])) // eff index 0 always need to supply correct target or from client
+        target = m_caster->GetTarget();
+
+    return target;
+}
+
 void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap, CheckException& exception)
 {
     float radius;
@@ -1795,17 +1804,26 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
             break;
         }
+        case TARGET_DUELVSPLAYER:
+        {
+            Unit* newUnitTarget = GetUnitTarget(effIndex);
+            if (!newUnitTarget)
+                break;
+
+            if (m_caster->CanAssist(newUnitTarget))
+                targetUnitMap.push_back(newUnitTarget);
+            else
+            {
+                if (!CheckAndAddMagnetTarget(newUnitTarget, effIndex, targetUnitMap, exception))
+                    targetUnitMap.push_back(newUnitTarget);
+            }
+            break;
+        }
         case TARGET_CHAIN_DAMAGE:
         {
-            Unit* newUnitTarget = m_targets.getUnitTarget();
+            Unit* newUnitTarget = GetUnitTarget(effIndex);
             if (!newUnitTarget)
-            {
-                if (effIndex != EFFECT_INDEX_0) // eff index 0 always need to supply correct target or from client
-                    newUnitTarget = m_caster->GetTarget();
-
-                if (!newUnitTarget)
-                    break;
-            }
+                break;
 
             // Check if target have Grounding Totem Aura(Magnet target). Check for physical school inside included.
             if (CheckAndAddMagnetTarget(newUnitTarget, effIndex, targetUnitMap, exception))
@@ -2185,20 +2203,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
             if (!tempTargetUnitMap.empty())
                 CheckSpellScriptTargets(bounds, tempTargetUnitMap, targetUnitMap, effIndex);
-            break;
-        }
-        case TARGET_DUELVSPLAYER:
-        {
-            if (Unit* target = m_targets.getUnitTarget())
-            {
-                if (m_caster->CanAssist(target))
-                    targetUnitMap.push_back(target);
-                else
-                {
-                    if (!CheckAndAddMagnetTarget(target, effIndex, targetUnitMap, exception))
-                        targetUnitMap.push_back(target);
-                }
-            }
             break;
         }
         case TARGET_GAMEOBJECT_ITEM:

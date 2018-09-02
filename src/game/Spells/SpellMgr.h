@@ -661,6 +661,16 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
     return true;
 }
 
+inline bool IsUnitTargetTarget(uint32 target)
+{
+    switch (target)
+    {
+        case TARGET_CHAIN_DAMAGE:
+        case TARGET_DUELVSPLAYER: return true;
+        default: return false;
+    }
+}
+
 inline bool IsScriptTarget(uint32 target)
 {
     switch (target)
