@@ -71,7 +71,7 @@ float ThreatCalcHelper::CalcThreat(Unit* hatedUnit, Unit* /*pHatingUnit*/, float
 //================= HostileReference ==========================
 //============================================================
 
-HostileReference::HostileReference(Unit* unit, ThreatManager* threatManager, float threat) : 
+HostileReference::HostileReference(Unit* unit, ThreatManager* threatManager, float threat) :
     m_tauntState(STATE_NONE)
 {
     iThreat = threat;
@@ -161,7 +161,7 @@ void HostileReference::updateOnlineStatus()
     // ref is valid
     // target is not gamemaster
     // target is not in flight
-    bool validTarget = getTarget() && (getTarget()->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(getTarget())->isGameMaster() || !getTarget()->IsTaxiFlying());
+    bool validTarget = getTarget() && ((getTarget()->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(getTarget())->isGameMaster()) || !getTarget()->IsTaxiFlying());
     if (isValid() && validTarget)
     {
         Unit* unit = getSourceUnit();
@@ -456,7 +456,7 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
     // not to dead and not for dead
     if (!victim->isAlive() || !getOwner()->isAlive())
         return;
- 
+
     float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, threat, crit, schoolMask, threatSpell);
 
     addThreatDirectly(victim, calculatedThreat);
