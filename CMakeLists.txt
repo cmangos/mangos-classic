@@ -129,7 +129,7 @@ endif()
 # find Git: used to get the revision number
 find_package(Git)
 
-if(NOT MSVC)
+if(NOT MSVC AND PCH)
   # Include cotire to manage PCH support
   include(cotire)
 endif()
