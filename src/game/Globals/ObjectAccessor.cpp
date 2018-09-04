@@ -35,6 +35,31 @@
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, std::mutex);
 
+template<class T>
+void HashMapHolder<T>::Insert(T* o)
+{
+    WriteGuard guard(i_lock);
+    m_objectMap[o->GetObjectGuid()] = o;
+}
+
+template<class T>
+void HashMapHolder<T>::Remove(T* o)
+{
+    WriteGuard guard(i_lock);
+    m_objectMap.erase(o->GetObjectGuid());
+}
+
+template<class T>
+T* HashMapHolder<T>::Find(ObjectGuid guid)
+{
+    ReadGuard guard(i_lock);
+    typename MapType::iterator itr = m_objectMap.find(guid);
+    return (itr != m_objectMap.end()) ? itr->second : nullptr;
+}
+
+template<class T>
+typename HashMapHolder<T>::MapType& HashMapHolder<T>::GetContainer() { return m_objectMap; }
+
 ObjectAccessor::ObjectAccessor() {}
 ObjectAccessor::~ObjectAccessor()
 {

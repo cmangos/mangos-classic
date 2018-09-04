@@ -47,26 +47,13 @@ class HashMapHolder
         typedef std::lock_guard<std::mutex> ReadGuard;
         typedef std::lock_guard<std::mutex> WriteGuard;
 
-        static void Insert(T* o)
-        {
-            WriteGuard guard(i_lock);
-            m_objectMap[o->GetObjectGuid()] = o;
-        }
+        static void Insert(T* o);
 
-        static void Remove(T* o)
-        {
-            WriteGuard guard(i_lock);
-            m_objectMap.erase(o->GetObjectGuid());
-        }
+        static void Remove(T* o);
 
-        static T* Find(ObjectGuid guid)
-        {
-            ReadGuard guard(i_lock);
-            typename MapType::iterator itr = m_objectMap.find(guid);
-            return (itr != m_objectMap.end()) ? itr->second : nullptr;
-        }
+        static T* Find(ObjectGuid guid);
 
-        static MapType& GetContainer() { return m_objectMap; }
+        static MapType& GetContainer();
 
         static LockType& GetLock() { return i_lock; }
 
