@@ -1808,9 +1808,9 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
         }
 
         bool bcontinue = true;
-        for (unsigned int j : spellInfo->Effect)
+        for (uint32 j : spellInfo->Effect)
         {
-            if ((j == SPELL_EFFECT_HEAL))
+            if (j == uint32(SPELL_EFFECT_HEAL))
             {
                 bcontinue = false;
                 break;
