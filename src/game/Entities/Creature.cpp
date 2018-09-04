@@ -2261,6 +2261,12 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
                 std::advance(itr2, position);
             return *itr2;
         }
+        case ATTACKING_TARGET_ALL_SUITABLE:
+            //TODO:: This should not happen
+            sLog.outError("Creature::SelectAttackingTarget> Target have unimplemented value 'ATTACKING_TARGET_ALL_SUITABLE'!");
+            break;
+        default:
+            break;
     }
 
     return nullptr;
@@ -2299,6 +2305,15 @@ void Creature::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, Attac
             }
             break;
         }
+        case ATTACKING_TARGET_RANDOM:
+        case ATTACKING_TARGET_TOPAGGRO:
+        case ATTACKING_TARGET_BOTTOMAGGRO:
+        case ATTACKING_TARGET_NEAREST_BY:
+        case ATTACKING_TARGET_FARTHEST_AWAY:
+        default:
+            //TODO:: This should not happen
+            sLog.outError("Creature::SelectAttackingTarget> Target have unimplemented value!");
+            break;
     }
 }
 

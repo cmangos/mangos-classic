@@ -17290,10 +17290,14 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaTrigg
             case AREA_LOCKSTATUS_TOO_LOW_LEVEL:
             case AREA_LOCKSTATUS_QUEST_NOT_COMPLETED:
             case AREA_LOCKSTATUS_RAID_LOCKED:
+            {
                 std::string message = at->status_failed_text;
                 sObjectMgr.GetAreaTriggerLocales(at->entry, GetSession()->GetSessionDbLocaleIndex(), &message);
                 GetSession()->SendAreaTriggerMessage(message.data(), miscRequirement);
                 return;
+            }
+            default:
+                break;
         }
     }
 
