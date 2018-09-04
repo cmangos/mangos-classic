@@ -506,8 +506,6 @@ enum UnitFlags
     UNIT_FLAG_UNK_6                 = 0x00000040,
     UNIT_FLAG_IMMUNE_TO_PLAYER      = 0x00000100,           // Target is immune to players
     UNIT_FLAG_IMMUNE_TO_NPC         = 0x00000200,           // Target is immune to Non-Player Characters
-    UNIT_FLAG_LOOTING               = 0x00000400,           // loot animation
-    UNIT_FLAG_PET_IN_COMBAT         = 0x00000800,           // in combat?, 2.0.8
     UNIT_FLAG_PVP                   = 0x00001000,
     UNIT_FLAG_SILENCED              = 0x00002000,           // silenced, 2.1.1
     UNIT_FLAG_PERSUADED             = 0x00004000,           // persuaded, 2.0.8
