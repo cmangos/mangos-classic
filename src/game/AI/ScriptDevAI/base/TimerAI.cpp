@@ -18,39 +18,43 @@
 #include "Chat/Chat.h"
 #include <string>
 
-bool Timer::UpdateTimer(const uint32 diff)
+bool Timer::UpdateTimer(const uint32 diff, bool combat)
 {
-    if (!disabled)
+    if (disabled)
+        return false;
+
+    if (this->combat && !combat)
+        return false;
+
+    if (timer <= diff)
     {
-        if (timer <= diff)
-        {
-            timer = 0;
-            disabled = true;
-            return true;
-        }
-        else timer -= diff;
+        timer = 0;
+        disabled = true;
+        return true;
     }
+    else timer -= diff;
+
     return false;
 }
 
 void TimerAI::AddCombatAction(uint32 id, uint32 timer)
 {
-    m_timers.emplace(id, Timer(id, timer, [&, id] { m_actionReadyStatus[id] = true; }));
+    m_timers.emplace(id, Timer(id, timer, [&, id] { m_actionReadyStatus[id] = true; }, true));
 }
 
 void TimerAI::AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor, bool disabled)
 {
-    m_timers.emplace(id, Timer(id, timer, functor, disabled));
+    m_timers.emplace(id, Timer(id, timer, functor, false, disabled));
 }
 
-void TimerAI::UpdateTimers(const uint32 diff)
+void TimerAI::UpdateTimers(const uint32 diff, bool combat)
 {
     for (auto itr = m_timers.begin(); itr != m_timers.end();)
     {
         Timer& timer = (*itr).second;
-        if (timer.UpdateTimer(diff))
+        if (timer.UpdateTimer(diff, combat))
             timer.functor();
-        else ++itr;
+        ++itr;
     }
 }
 

@@ -27,13 +27,14 @@ Timer data class used for execution of TimerAI events
 */
 struct Timer
 {
-    Timer(uint32 id, uint32 timer, std::function<void()> functor, bool disabled = false) : id(id), timer(timer), disabled(disabled), functor(functor) {}
+    Timer(uint32 id, uint32 timer, std::function<void()> functor, bool combat, bool disabled = false) : id(id), timer(timer), disabled(disabled), combat(combat), functor(functor) {}
     uint32 id;
     uint32 timer;
     bool disabled;
+    bool combat;
     std::function<void()> functor;
 
-    bool UpdateTimer(const uint32 diff);
+    bool UpdateTimer(const uint32 diff, bool combat);
 };
 
 /*
@@ -48,7 +49,7 @@ class TimerAI
         void AddCombatAction(uint32 id, uint32 timer);
         void AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor, bool disabled = false);
 
-        void UpdateTimers(const uint32 diff);
+        void UpdateTimers(const uint32 diff, bool combat);
         virtual void ExecuteActions() = 0;
 
         inline void SetActionReadyStatus(uint32 index, bool state) { m_actionReadyStatus[index] = state; }
