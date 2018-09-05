@@ -143,60 +143,76 @@ enum
     FACTION_FRIENDLY_F  = 35,
     SPELL_FLARE         = 10113,
     SPELL_FOLLY         = 10137,
+
+    FIZZULE_FLARE_1             = 1,
+    FIZZULE_FLARE_2             = 2,
+    FIZZULE_SALUTE              = 3,
+    FIZZULE_WHISTLE             = 4,
 };
 
 struct npc_taskmaster_fizzuleAI : public ScriptedAI
 {
-    npc_taskmaster_fizzuleAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    uint32 m_uiResetTimer;
-    uint8 m_uiFlareCount;
-
-    void Reset() override
-    {
-        m_uiResetTimer = 0;
-        m_uiFlareCount = 0;
+    npc_taskmaster_fizzuleAI(Creature* creature) : ScriptedAI(creature)
+    { 
+        resetTimer = 0;
+        flareCount = 0;
     }
+
+    uint32 resetTimer;
+    uint8 flareCount;
+
+    void Reset() override {}
 
     void EnterEvadeMode() override
     {
-        if (m_uiResetTimer)
+        if (resetTimer)
         {
             m_creature->RemoveAllAurasOnEvade();
             m_creature->CombatStop(true);
-            m_creature->LoadCreatureAddon(true);
-
-            m_creature->SetLootRecipient(nullptr);
-
-            m_creature->SetFactionTemporary(FACTION_FRIENDLY_F, TEMPFACTION_RESTORE_REACH_HOME);
-            m_creature->HandleEmote(EMOTE_ONESHOT_SALUTE);
         }
         else
             ScriptedAI::EnterEvadeMode();
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    void SpellHit(Unit* caster, const SpellEntry* spell) override
     {
-        if (pCaster->GetTypeId() == TYPEID_PLAYER && (pSpell->Id == SPELL_FLARE || pSpell->Id == SPELL_FOLLY))
-        {
-            ++m_uiFlareCount;
+        if (caster->GetTypeId() != TYPEID_PLAYER)
+            return;
 
-            if (m_uiFlareCount >= 2 && m_creature->getFaction() != FACTION_FRIENDLY_F)
-                m_uiResetTimer = 120000;
+        switch (spell->Id)
+        {
+            case SPELL_FLARE:
+            {
+                if (flareCount < 2)
+                {
+                    ++flareCount;
+                    HandleFlareOrKneel();
+                }
+                break;
+            }
+            case SPELL_FOLLY:
+            {
+                flareCount = 4;
+                HandleFlareOrKneel();
+                break;
+            }
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
-        if (m_uiResetTimer)
+        if (resetTimer)
         {
-            if (m_uiResetTimer <= uiDiff)
+            if (resetTimer <= diff)
             {
-                m_uiResetTimer = 0;
+                resetTimer = 0;
+                flareCount = 0;
+                m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                m_creature->SetImmuneToPlayer(false);
                 EnterEvadeMode();
             }
             else
-                m_uiResetTimer -= uiDiff;
+                resetTimer -= diff;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -205,19 +221,47 @@ struct npc_taskmaster_fizzuleAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 
-    void ReceiveEmote(Player* /*pPlayer*/, uint32 uiTextEmote) override
+    void HandleFlareOrKneel()
     {
-        if (uiTextEmote == TEXTEMOTE_SALUTE)
+        switch (flareCount)
         {
-            if (m_uiFlareCount >= 2 && m_creature->getFaction() != FACTION_FRIENDLY_F)
-                EnterEvadeMode();
+            case FIZZULE_FLARE_1:
+                resetTimer = 120000;
+                m_creature->SetImmuneToPlayer(true);
+                break;
+            case FIZZULE_FLARE_2:
+                m_creature->SetFactionTemporary(FACTION_FRIENDLY_F, TEMPFACTION_RESTORE_REACH_HOME);
+                break;
+            case FIZZULE_SALUTE:
+                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                m_creature->HandleEmote(EMOTE_ONESHOT_SALUTE);
+                break;
+            case FIZZULE_WHISTLE:
+                resetTimer = 120000;
+                m_creature->SetImmuneToPlayer(true);
+                m_creature->SetFactionTemporary(FACTION_FRIENDLY_F, TEMPFACTION_RESTORE_REACH_HOME);
+                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                m_creature->HandleEmote(EMOTE_ONESHOT_SALUTE);
+                break;
+        }
+    }
+
+    void ReceiveEmote(Player* /*player*/, uint32 textEmote) override
+    {
+        if (textEmote == TEXTEMOTE_SALUTE)
+        {
+            if (flareCount == 2)
+            {
+                flareCount++;
+                HandleFlareOrKneel();
+            }
         }
     }
 };
 
-UnitAI* GetAI_npc_taskmaster_fizzule(Creature* pCreature)
+UnitAI* GetAI_npc_taskmaster_fizzule(Creature* creature)
 {
-    return new npc_taskmaster_fizzuleAI(pCreature);
+    return new npc_taskmaster_fizzuleAI(creature);
 }
 
 /*#####
