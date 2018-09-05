@@ -2484,8 +2484,11 @@ void Aura::HandleInvisibility(bool apply, bool Real)
 {
     Unit* target = GetTarget();
 
-    target->SetInvisibilityMask(m_modifier.m_miscvalue, apply);
-    if (apply)
+    target->AddInvisibilityValue(m_modifier.m_miscvalue, apply ? m_modifier.m_amount : -m_modifier.m_amount);
+    int32 value = target->GetInvisibilityValue(m_modifier.m_miscvalue);
+    bool trueApply = value > 0;
+    target->SetInvisibilityMask(m_modifier.m_miscvalue, trueApply);
+    if (trueApply)
     {
         target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
@@ -2503,19 +2506,10 @@ void Aura::HandleInvisibility(bool apply, bool Real)
 
         // apply only if not in GM invisibility and not stealth
         if (target->GetVisibility() == VISIBILITY_ON)
-        {
-            // Aura not added yet but visibility code expect temporary add aura
-            target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
-            target->SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
-        }
+            target->SetVisibilityWithoutUpdate(VISIBILITY_GROUP_INVISIBILITY);
     }
     else
     {
-        // recalculate value at modifier remove (current aura already removed)
-        Unit::AuraList const& auras = target->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
-        for (Aura* aura : auras)
-            target->SetInvisibilityMask(aura->GetModifier()->m_miscvalue, apply);
-
         // only at real aura remove and if not have different invisibility auras.
         if (Real && target->GetInvisibilityMask() == 0)
         {
@@ -2528,10 +2522,13 @@ void Aura::HandleInvisibility(bool apply, bool Real)
             {
                 // if have stealth aura then already have stealth visibility
                 if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
-                    target->SetVisibility(VISIBILITY_ON);
+                    target->SetVisibilityWithoutUpdate(VISIBILITY_ON);
             }
         }
     }
+
+    if (target->IsInWorld())
+        target->UpdateVisibilityAndView();
 }
 
 void Aura::HandleInvisibilityDetect(bool apply, bool Real)
@@ -2539,6 +2536,7 @@ void Aura::HandleInvisibilityDetect(bool apply, bool Real)
     Unit* target = GetTarget();
 
     target->SetInvisibilityDetectMask(m_modifier.m_miscvalue, apply);
+    target->AddInvisibilityDetectValue(m_modifier.m_miscvalue, apply ? m_modifier.m_amount : -m_modifier.m_amount);
     if (!apply)
     {
         Unit::AuraList const& auras = target->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);

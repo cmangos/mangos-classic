@@ -329,6 +329,10 @@ Unit::Unit() :
 
     m_detectInvisibilityMask = 0;
     m_invisibilityMask = 0;
+    
+    memset(m_invisibilityValues, 0, sizeof(m_invisibilityValues));
+    memset(m_invisibilityDetectValues, 0, sizeof(m_invisibilityDetectValues));
+
     m_transform = 0;
     m_canModifyStats = false;
 
@@ -7576,32 +7580,19 @@ bool Unit::CanDetectInvisibilityOf(Unit const* u) const
 {
     if (uint32 mask = (GetInvisibilityDetectMask() & u->GetInvisibilityMask()))
     {
-        for (int32 i = 0; i < 32; ++i)
+        for (int32 i = 0; i < INVISIBILITY_MAX; ++i)
         {
             if (((1 << i) & mask) == 0)
                 continue;
 
             // find invisibility level
-            int32 invLevel = 0;
-            Unit::AuraList const& iAuras = u->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
-            for (auto iAura : iAuras)
-                if (iAura->GetModifier()->m_miscvalue == i && invLevel < iAura->GetModifier()->m_amount)
-                    invLevel = iAura->GetModifier()->m_amount;
-
-            Unit const* owner = this;
-            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-                if (Player const* controller = GetControllingPlayer())
-                    owner = controller;
+            int32 invLevel = GetInvisibilityValue(i);
 
             // find invisibility detect level - this is taken from controlling player or self
-            int32 detectLevel = 0;
-            Unit::AuraList const& dAuras = owner->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
-            for (auto dAura : dAuras)
-                if (dAura->GetModifier()->m_miscvalue == i && detectLevel < dAura->GetModifier()->m_amount)
-                    detectLevel = dAura->GetModifier()->m_amount;
+            int32 detectLevel = GetInvisibilityDetectValue(i);
 
             if (i == 6 && GetTypeId() == TYPEID_PLAYER)     // special drunk detection case
-                detectLevel = ((Player*)this)->GetDrunkValue();
+                detectLevel += ((Player*)this)->GetDrunkValue();
 
             if (invLevel <= detectLevel)
                 return true;
@@ -7641,6 +7632,22 @@ void Unit::SetInvisibilityMask(uint32 index, bool apply)
         m_invisibilityMask |= (1 << index);
     else
         m_invisibilityMask &= ~(1 << index);
+}
+
+int32 Unit::GetInvisibilityValue(uint32 index) const
+{
+    return m_invisibilityValues[index];
+}
+
+int32 Unit::GetInvisibilityDetectValue(uint32 index) const
+{
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        Player const* controller = GetControllingPlayer();
+        if (controller)
+            return controller->m_invisibilityDetectValues[index]; // directly access value without bypass
+    }
+    return m_invisibilityDetectValues[index];
 }
 
 void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
