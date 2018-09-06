@@ -237,7 +237,6 @@ INSERT INTO scripted_event_id VALUES
 UPDATE creature_template SET ScriptName='boss_kazzak' WHERE entry=12397;
 
 /* BURNING STEPPES */
-UPDATE creature_template SET ScriptName='npc_ragged_john' WHERE entry=9563;
 UPDATE creature_template SET ScriptName='npc_grark_lorkrub' WHERE entry=9520;
 UPDATE creature_template SET ScriptName='npc_klinfran' WHERE entry IN (14529,14534);
 
