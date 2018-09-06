@@ -72,7 +72,7 @@ public:
     }
 
     void increment() {
-        m_value++;
+        ++m_value;
     }
 
     /** Returns zero if the result is zero after decrement, non-zero otherwise.*/
