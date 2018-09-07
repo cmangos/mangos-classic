@@ -364,6 +364,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
     switch (spellInfo->Id)
     {
         case 9460:          // Corrosive Ooze
+        case 17327:         // Spirit Particles
         case 22735:         // Spirit of Runn Tum
         case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
         case 28126:         // Spirit Particles (purple)
