@@ -6592,6 +6592,10 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             if (eff != EFFECT_INDEX_0 && target == m_targets.getUnitTarget())
                 return false;
             break;
+        case 9082:                                          // Create Containment Coffer
+            if (!target->HasAura(9032))
+                return false;
+            break;
         // Exceptions for Nefarian class calls
         // as it is not possible to filter out targets based on their class from data in spells template (like spell family masks for example)
         case 23397:                                         // Berserk

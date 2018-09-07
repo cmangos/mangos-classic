@@ -455,7 +455,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 9012:                                  // Attract Rift Spawn
                 {
-                    if (!unitTarget || !unitTarget->GetAura(9032, EFFECT_INDEX_0))
+                    if (!unitTarget || !unitTarget->HasAura(9032))
                         return;
 
                     unitTarget->CastSpell(unitTarget, 9010, TRIGGERED_OLD_TRIGGERED);
