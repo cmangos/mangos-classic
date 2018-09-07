@@ -4847,7 +4847,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                                     failed = true;
                                 if (failed)
                                     iter = foundScriptCreatureTargets.erase(iter);
-                                ++iter;
+                                else
+                                    ++iter;
                             }
 
                             foundScriptCreatureTargets.sort([ = ](const Creature * a, const Creature * b) -> bool
