@@ -2243,7 +2243,11 @@ bool ScriptAction::HandleScriptStep()
                 break;
 
             // ToDo: Change this to pGo->ForcedDespawn() when function is implemented!
-            ((GameObject*)pTarget)->SetLootState(GO_JUST_DEACTIVATED);
+            if (((GameObject*)pTarget)->GetSpellId())
+                ((GameObject*)pTarget)->Delete();
+            else
+                ((GameObject*)pTarget)->SetLootState(GO_JUST_DEACTIVATED);
+
             break;
         }
         case SCRIPT_COMMAND_RESPAWN:                        // 41
