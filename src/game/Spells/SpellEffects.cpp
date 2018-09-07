@@ -453,6 +453,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 9012:                                  // Attract Rift Spawn
+                {
+                    if (!unitTarget || !unitTarget->GetAura(9032, EFFECT_INDEX_0))
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 9010, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 9204:                                  // Hate to Zero
                 case 20538:
                 case 26569:
