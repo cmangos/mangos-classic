@@ -210,6 +210,8 @@ Defining a buddy could be done in several way:
                                             * datalong3 = pathId - creature_movement_template
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: summon as active object
                                             * dataint = (bool) setRun; 0 = off (default), 1 = on
+                                            * dataint2 = factionId - if 0 is set, faction is from DB entry
+                                            * dataint3 = modelId - if 0 is set, model is from DB entry
 
 11 SCRIPT_COMMAND_OPEN_DOOR                 source = any
                                             * datalong = db_guid (can be skipped for buddy)
