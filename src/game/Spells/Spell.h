@@ -307,6 +307,7 @@ class Spell
         void EffectTeleUnitsFaceCaster(SpellEffectIndex eff_idx);
         void EffectLearnSkill(SpellEffectIndex eff_idx);
         void EffectAddHonor(SpellEffectIndex eff_idx);
+        void EffectSpawn(SpellEffectIndex eff_idx);
         void EffectTradeSkill(SpellEffectIndex eff_idx);
         void EffectEnchantItemPerm(SpellEffectIndex eff_idx);
         void EffectEnchantItemTmp(SpellEffectIndex eff_idx);
