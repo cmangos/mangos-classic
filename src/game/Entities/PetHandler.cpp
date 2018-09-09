@@ -383,8 +383,18 @@ void WorldSession::HandlePetNameQueryOpcode(WorldPacket& recv_data)
 void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber) const
 {
     Creature* pet = _player->GetMap()->GetAnyTypeCreature(petguid);
-    if (!pet || !pet->GetCharmInfo() || pet->GetCharmInfo()->GetPetNumber() != petnumber)
+
+    // When replying to a query, verify input against public field info only (where it comes from)
+    if (!pet || !pet->GetCharmInfo() || (pet->GetUInt32Value(UNIT_FIELD_PETNUMBER) && pet->GetUInt32Value(UNIT_FIELD_PETNUMBER) != petnumber))
+    {
+        WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (4 + 1 + 4 + 1));
+        data << uint32(petnumber);
+        data << uint8(0);
+        data << uint32(0);
+        data << uint8(0);
+        _player->GetSession()->SendPacket(data);
         return;
+    }
 
     char const* name = pet->GetName();
 
