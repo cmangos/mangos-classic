@@ -965,6 +965,7 @@ enum Targets
     TARGET_FRIENDLY_FRONTAL_CONE       = 59,
     TARGET_NARROW_FRONTAL_CONE         = 60,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
+    TARGET_62                          = 62,
     TARGET_DUELVSPLAYER_COORDINATES    = 63,
 };
 
