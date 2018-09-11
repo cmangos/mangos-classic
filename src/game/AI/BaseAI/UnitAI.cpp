@@ -64,14 +64,19 @@ void UnitAI::MoveInLineOfSight(Unit* who)
     if (who->GetObjectGuid().IsCreature() && who->isInCombat())
         CheckForHelp(who, m_unit, 10.0);
 
-    if (m_unit->CanInitiateAttack() && who->isInAccessablePlaceFor(m_unit))
-    {
-        if (AssistPlayerInCombat(who))
-            return;
+    if (!m_unit->CanInitiateAttack())
+        return;
 
-        if (m_unit->CanAttackOnSight(who))
-            DetectOrAttack(who);
-    }
+    if (AssistPlayerInCombat(who))
+        return;
+
+    if (!m_unit->CanAttackOnSight(who))
+        return;
+
+    if (!who->isInAccessablePlaceFor(m_unit))
+        return;
+
+    DetectOrAttack(who);
 }
 
 void UnitAI::EnterEvadeMode()
