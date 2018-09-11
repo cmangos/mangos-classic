@@ -8598,25 +8598,6 @@ void ObjectMgr::LoadVendorTemplates()
  */
 void ObjectMgr::LoadActiveEntities(Map* _map)
 {
-    // Special case on startup - load continents
-    if (!_map)
-    {
-        uint32 continents[] = {0, 1};
-        for (unsigned int continent : continents)
-        {
-            _map = sMapMgr.FindMap(continent);
-            if (!_map)
-                _map = sMapMgr.CreateMap(continent, nullptr);
-
-            if (_map)
-                LoadActiveEntities(_map);
-            else
-                sLog.outError("ObjectMgr::LoadActiveEntities - Unable to create Map %u", continent);
-        }
-
-        return;
-    }
-
     // Load active objects for _map
     if (sWorld.isForceLoadMap(_map->GetId()))
     {

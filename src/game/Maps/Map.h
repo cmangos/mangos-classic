@@ -99,7 +99,6 @@ class Map : public GridRefManager<NGridType>
 
     protected:
         Map(uint32 id, time_t, uint32 InstanceId);
-
     public:
         virtual ~Map();
 
@@ -111,6 +110,8 @@ class Map : public GridRefManager<NGridType>
             m_unloadTimer -= diff;
             return false;
         }
+
+        virtual void Initialize(bool loadInstanceData = true);
 
         virtual bool Add(Player*);
         virtual void Remove(Player*, bool);
@@ -460,6 +461,7 @@ class BattleGroundMap : public Map
         BattleGroundMap(uint32 id, time_t, uint32 InstanceId);
         ~BattleGroundMap();
 
+        virtual void Initialize(bool) override;
         void Update(const uint32&) override;
         bool Add(Player*) override;
         void Remove(Player*, bool) override;

@@ -26,6 +26,7 @@
 #include "World/World.h"
 #include "Grids/CellImpl.h"
 #include "Globals/ObjectMgr.h"
+#include <future>
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, std::recursive_mutex>
 INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
@@ -53,6 +54,7 @@ MapManager::Initialize()
 {
     InitStateMachine();
     InitMaxInstanceId();
+    CreateContinents();
 }
 
 void MapManager::InitStateMachine()
@@ -86,6 +88,25 @@ void MapManager::InitializeVisibilityDistanceInfo()
         i_map.second->InitVisibilityDistance();
 }
 
+void MapManager::CreateContinents()
+{
+
+    std::vector<std::future<void>> futures;
+    uint32 continents[] = { 0, 1 };
+    for (auto id : continents)
+    {
+        Map* m = new WorldMap(id, i_gridCleanUpDelay);
+        // add map into container
+        i_maps[MapID(id)] = m;
+
+        // non-instanceable maps always expected have saved state
+        futures.push_back(std::async(std::launch::async, std::bind(&Map::Initialize, m, true)));
+    }
+
+    for (auto& futurItr : futures)
+        futurItr.wait();
+}
+
 /// @param id - MapId of the to be created map. @param obj WorldObject for which the map is to be created. Must be player for Instancable maps.
 Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 {
@@ -101,8 +122,6 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
         MANGOS_ASSERT(obj && obj->GetTypeId() == TYPEID_PLAYER);
         // create DungeonMap object
         m = CreateInstance(id, (Player*)obj);
-        // Load active objects for this map
-        sObjectMgr.LoadActiveEntities(m);
     }
     else
     {
@@ -115,7 +134,7 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
             i_maps[MapID(id)] = m;
 
             // non-instanceable maps always expected have saved state
-            m->CreateInstanceData(true);
+            m->Initialize();
         }
     }
 
@@ -340,7 +359,7 @@ DungeonMap* MapManager::CreateDungeonMap(uint32 id, uint32 InstanceId, DungeonPe
 
     // Dungeons can have saved instance data
     bool load_data = save != nullptr;
-    map->CreateInstanceData(load_data);
+    map->Initialize(load_data);
 
     return map;
 }
@@ -358,7 +377,7 @@ BattleGroundMap* MapManager::CreateBattleGroundMap(uint32 id, uint32 InstanceId,
     i_maps[MapID(id, InstanceId)] = map;
 
     // BGs/Arenas not have saved instance data
-    map->CreateInstanceData(false);
+    map->Initialize(false);
 
     return map;
 }
