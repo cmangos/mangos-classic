@@ -1399,22 +1399,32 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_DRUID:
         {
-            // Loatheb Corrupted Mind triggered sub spells
-            if (m_spellInfo->Id == 29201)
+            switch (m_spellInfo->Id)
             {
-                uint32 spellid;
-                switch (unitTarget->getClass())
+                case 5229:                                  // Enrage
                 {
-                    case CLASS_PALADIN: spellid = 29196; break;
-                    case CLASS_PRIEST: spellid = 29185; break;
-                    case CLASS_SHAMAN: spellid = 29198; break;
-                    case CLASS_DRUID: spellid = 29194; break;
-                    default: break;
+                    int32 reductionMod = -26;
+                    if (m_caster->HasAura(9634)) // If in Dire Bear form only 17%
+                        reductionMod = -17;
+                    m_caster->CastCustomSpell(nullptr, 25503, &reductionMod, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                    return;
                 }
-                if (spellid != 0)
-                    m_caster->CastSpell(unitTarget, spellid, TRIGGERED_OLD_TRIGGERED, nullptr);
+                case 29201:                                 // Loatheb Corrupted Mind triggered sub spells
+                {
+                    uint32 spellid = 0;
+                    switch (unitTarget->getClass())
+                    {
+                        case CLASS_PALADIN: spellid = 29196; break;
+                        case CLASS_PRIEST: spellid = 29185; break;
+                        case CLASS_SHAMAN: spellid = 29198; break;
+                        case CLASS_DRUID: spellid = 29194; break;
+                        default: break;
+                    }
+                    if (spellid != 0)
+                        m_caster->CastSpell(unitTarget, spellid, TRIGGERED_OLD_TRIGGERED, nullptr);
+                    return;
+                }
             }
-
             break;
         }
         case SPELLFAMILY_ROGUE:
