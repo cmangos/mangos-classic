@@ -9254,7 +9254,7 @@ void ObjectMgr::LoadCreatureTemplateSpells()
         }
         for (uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
         {
-            if (itr->spells[i] && !sSpellTemplate.LookupEntry<SpellEntry>(itr->spells[i]))
+            if (itr->spells[i] && !sSpellTemplate.LookupEntry<SpellEntry>(itr->spells[i]) && itr->spells[i] != 2) // 2 is attack which is hardcoded in client
             {
                 sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, assigned spell %u does not exist, set to 0", itr->entry, itr->spells[i]);
                 const_cast<CreatureTemplateSpells*>(*itr)->spells[i] = 0;
