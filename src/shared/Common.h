@@ -51,6 +51,9 @@
 // included to use sleep_for()
 #include <thread>
 
+typedef std::chrono::system_clock Clock;
+typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> TimePoint;
+
 #if COMPILER == COMPILER_MICROSOFT
 
 #  include <float.h>

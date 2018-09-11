@@ -125,10 +125,6 @@ struct SpellEntry;
 
 typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
-// cooldown system
-typedef std::chrono::system_clock Clock;
-typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> TimePoint;
-
 class CooldownData
 {
         friend class CooldownContainer;
