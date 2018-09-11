@@ -77,6 +77,16 @@ namespace VMAP
             bool InitMap(const std::string& fname, VMapManager2* vm);
             void UnloadMap(VMapManager2* vm);
             bool LoadMapTile(uint32 tileX, uint32 tileY, VMapManager2* vm);
+            bool IsTileLoaded(uint32 x, uint32 y) const
+            {
+                if (!iIsTiled)
+                    return true;
+
+                auto itr = iLoadedTiles.find(packTileID(x, y));
+                if (itr == iLoadedTiles.end())
+                    return false;
+                return itr->second;
+            }
             void UnloadMapTile(uint32 tileX, uint32 tileY, VMapManager2* vm);
             bool isTiled() const { return iIsTiled; }
             uint32 numLoadedTiles() const { return iLoadedTiles.size(); }

@@ -177,6 +177,23 @@ namespace MMAP
         return uint32(x << 16 | y);
     }
 
+    bool MMapManager::IsMMapIsLoaded(uint32 mapId, uint32 x, uint32 y) const
+    {
+        // get this mmap data
+        auto itr = loadedMMaps.find(mapId);
+
+        if (itr == loadedMMaps.end())
+            return false;
+
+        auto mmap = itr->second;
+
+        uint32 packedGridPos = packTileID(x, y);
+        if (mmap->mmapLoadedTiles.find(packedGridPos) != mmap->mmapLoadedTiles.end())
+            return true;
+
+        return false;
+    }
+
     bool MMapManager::loadMap(uint32 mapId, int32 x, int32 y)
     {
         // make sure the mmap is loaded and ready to load tiles

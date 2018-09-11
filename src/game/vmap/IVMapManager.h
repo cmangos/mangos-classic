@@ -88,6 +88,7 @@ namespace VMAP
             bool isMapLoadingEnabled() const { return iEnableLineOfSightCalc || iEnableHeightCalc; }
 
             virtual std::string getDirFileName(unsigned int pMapId, int x, int y) const = 0;
+            virtual bool IsTileLoaded(uint32 mapId, uint32 x, uint32 y) const = 0;
             /**
             Query world model area info.
             \param z gets adjusted to the ground height for which this are info is valid

@@ -64,6 +64,7 @@ GridMap::GridMap(): m_gridIntHeightMultiplier(0)
     m_liquidFlags = nullptr;
     m_liquidEntry = nullptr;
     m_liquid_map  = nullptr;
+    m_fullyLoaded = false;
 }
 
 GridMap::~GridMap()
@@ -80,7 +81,7 @@ bool GridMap::loadData(char const* filename)
     // Not return error if file not found
     FILE* in = fopen(filename, "rb");
     if (!in)
-        return true;
+        return false;
 
     fread(&header, sizeof(header), 1, in);
     if (header.mapMagic     == *((uint32 const*)(MAP_MAGIC)) &&
@@ -719,7 +720,7 @@ TerrainInfo::~TerrainInfo()
     MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(m_mapId);
 }
 
-GridMap* TerrainInfo::Load(const uint32 x, const uint32 y)
+GridMap* TerrainInfo::Load(const uint32 x, const uint32 y, bool mapOnly /*= false*/)
 {
     MANGOS_ASSERT(x < MAX_NUMBER_OF_GRIDS);
     MANGOS_ASSERT(y < MAX_NUMBER_OF_GRIDS);
@@ -730,7 +731,7 @@ GridMap* TerrainInfo::Load(const uint32 x, const uint32 y)
     // quick check if GridMap already loaded
     GridMap* pMap = m_GridMaps[x][y];
     if (!pMap)
-        pMap = LoadMapAndVMap(x, y);
+        pMap = LoadMapAndVMap(x, y, mapOnly);
 
     return pMap;
 }
@@ -921,7 +922,7 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
         areaflag = atEntry->exploreFlag;
     else
     {
-        if (GridMap* gmap = const_cast<TerrainInfo*>(this)->GetGrid(x, y))
+        if (GridMap* gmap = const_cast<TerrainInfo*>(this)->GetGrid(x, y, true))
             areaflag = gmap->getArea(x, y);
         // this used while not all *.map files generated (instances)
         else
@@ -1090,7 +1091,7 @@ float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float* pGrou
     return VMAP_INVALID_HEIGHT_VALUE;
 }
 
-GridMap* TerrainInfo::GetGrid(const float x, const float y)
+GridMap* TerrainInfo::GetGrid(const float x, const float y, bool loadOnlyMap /*= false*/)
 {
     // half opt method
     int gx = (int)(32 - x / SIZE_OF_GRIDS);                 // grid x
@@ -1098,19 +1099,24 @@ GridMap* TerrainInfo::GetGrid(const float x, const float y)
 
     // quick check if GridMap already loaded
     GridMap* pMap = m_GridMaps[gx][gy];
-    if (!pMap)
-        pMap = LoadMapAndVMap(gx, gy);
+    if (!pMap || (!pMap->IsFullyLoaded() && !loadOnlyMap))
+        pMap = LoadMapAndVMap(gx, gy, loadOnlyMap);
 
     return pMap;
 }
 
-GridMap* TerrainInfo::LoadMapAndVMap(const uint32 x, const uint32 y)
+GridMap* TerrainInfo::LoadMapAndVMap(const uint32 x, const uint32 y, bool mapOnly /*= false*/)
 {
-    // double checked lock pattern
-    if (!m_GridMaps[x][y])
+    if ((m_GridMaps[x][y] && mapOnly)
+        || (VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(m_mapId, x, y) && MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y)))
+    {
+        // nothing to load here
+        return m_GridMaps[x][y];
+    }
+
     {
         LOCK_GUARD lock(m_mutex);
-
+        // double checked lock pattern
         if (!m_GridMaps[x][y])
         {
             GridMap* map = new GridMap();
@@ -1123,35 +1129,48 @@ GridMap* TerrainInfo::LoadMapAndVMap(const uint32 x, const uint32 y)
 
             if (!map->loadData(tmp))
             {
-                sLog.outError("Error load map file: \n %s\n", tmp);
-                // ASSERT(false);
+                sLog.outError("Error load map file: %s", tmp);
+                //assert(false);
             }
 
             delete[] tmp;
             m_GridMaps[x][y] = map;
-
-            // load VMAPs for current map/grid...
-            const MapEntry* i_mapEntry = sMapStore.LookupEntry(m_mapId);
-            const char* mapName = i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
-
-            int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld.GetDataPath() + "vmaps").c_str(),  m_mapId, x, y);
-            switch (vmapLoadResult)
-            {
-                case VMAP::VMAP_LOAD_RESULT_OK:
-                    DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMAP loaded name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
-                    break;
-                case VMAP::VMAP_LOAD_RESULT_ERROR:
-                    DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Could not load VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
-                    break;
-                case VMAP::VMAP_LOAD_RESULT_IGNORED:
-                    DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Ignored VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
-                    break;
-            }
-
-            // load navmesh
-            MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y);
         }
     }
+
+    // we'll load the rest later
+    if (mapOnly)
+        return m_GridMaps[x][y];
+
+    if (!VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(m_mapId, x, y))
+    {
+        // load VMAPs for current map/grid...
+        const MapEntry* i_mapEntry = sMapStore.LookupEntry(m_mapId);
+        const char* mapName = i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
+
+        int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld.GetDataPath() + "vmaps").c_str(), m_mapId, x, y);
+        switch (vmapLoadResult)
+        {
+            case VMAP::VMAP_LOAD_RESULT_OK:
+                DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMAP loaded name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
+                break;
+            case VMAP::VMAP_LOAD_RESULT_ERROR:
+                DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Could not load VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
+                break;
+            case VMAP::VMAP_LOAD_RESULT_IGNORED:
+                DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Ignored VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
+                break;
+        }
+    }
+
+    if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y))
+    {
+        // load navmesh
+        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y);
+    }
+
+    if (m_GridMaps[x][y])
+        m_GridMaps[x][y]->SetFullyLoaded();
 
     return  m_GridMaps[x][y];
 }

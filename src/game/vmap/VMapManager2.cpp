@@ -88,6 +88,16 @@ namespace VMAP
     }
 
     //=========================================================
+    // Check if specified map have tile loaded
+    bool VMapManager2::IsTileLoaded(uint32 mapId, uint32 x, uint32 y) const
+    {
+        InstanceTreeMap::const_iterator instanceTree = iInstanceMapTrees.find(mapId);
+        if (instanceTree == iInstanceMapTrees.end())
+            return false;
+        return instanceTree->second->IsTileLoaded(x, y);
+    }
+
+    //=========================================================
     // load one tile (internal use only)
 
     bool VMapManager2::_loadMap(unsigned int pMapId, const std::string& basePath, uint32 tileX, uint32 tileY)
@@ -102,7 +112,12 @@ namespace VMAP
                 delete newTree;
                 return false;
             }
-            instanceTree = iInstanceMapTrees.insert(InstanceTreeMap::value_type(pMapId, newTree)).first;
+
+            // insert new data
+            {
+                std::lock_guard<std::mutex> lock(m_vmStaticMapMutex);
+                instanceTree = iInstanceMapTrees.insert(InstanceTreeMap::value_type(pMapId, newTree)).first;
+            }
         }
         return instanceTree->second->LoadMapTile(tileX, tileY, this);
     }
@@ -260,9 +275,14 @@ namespace VMAP
                 delete worldmodel;
                 return nullptr;
             }
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMapManager2: loading file '%s%s'.", basepath.c_str(), filename.c_str());
-            model = iLoadedModelFiles.insert(std::pair<std::string, ManagedModel>(filename, ManagedModel())).first;
-            model->second.setModel(worldmodel);
+
+            // insert new data
+            {
+                std::lock_guard<std::mutex> lock(m_vmModelMutex);
+                DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMapManager2: loading file '%s%s'.", basepath.c_str(), filename.c_str());
+                model = iLoadedModelFiles.insert(std::pair<std::string, ManagedModel>(filename, ManagedModel())).first;
+                model->second.setModel(worldmodel);
+            }
         }
         model->second.incRefCount();
         return model->second.getModel();

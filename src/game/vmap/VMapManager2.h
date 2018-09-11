@@ -24,6 +24,7 @@
 #include <G3D/Vector3.h>
 
 #include <unordered_map>
+#include <mutex>
 
 //===========================================================
 
@@ -64,6 +65,10 @@ namespace VMAP
 
     class VMapManager2 : public IVMapManager
     {
+        private:
+            std::mutex m_vmStaticMapMutex;
+            std::mutex m_vmModelMutex;
+
         protected:
             // Tree to check collision
             ModelFileMap iLoadedModelFiles;
@@ -81,6 +86,7 @@ namespace VMAP
             ~VMapManager2();
 
             VMAPLoadResult loadMap(const char* pBasePath, unsigned int pMapId, int x, int y) override;
+            bool IsTileLoaded(uint32 mapId, uint32 x, uint32 y) const override;
 
             void unloadMap(unsigned int pMapId, int x, int y) override;
             void unloadMap(unsigned int pMapId) override;

@@ -151,6 +151,9 @@ class GridMap
         uint8* m_liquidFlags;
         float* m_liquid_map;
 
+        // For fast check
+        bool m_fullyLoaded;
+
         bool loadAreaData(FILE* in, uint32 offset, uint32 size);
         bool loadHeightData(FILE* in, uint32 offset, uint32 size);
         bool loadGridMapLiquidData(FILE* in, uint32 offset, uint32 size);
@@ -172,6 +175,8 @@ class GridMap
 
         bool loadData(char const* filename);
         void unloadData();
+        bool IsFullyLoaded() const { return m_fullyLoaded; }
+        void SetFullyLoaded() { m_fullyLoaded = true; }
 
         static bool ExistMap(uint32 mapid, int gx, int gy);
         static bool ExistVMap(uint32 mapid, int gx, int gy);
@@ -247,16 +252,17 @@ class TerrainInfo : public Referencable<std::atomic_long>
 
     protected:
         friend class Map;
+        friend class ObjectMgr;
         // load/unload terrain data
-        GridMap* Load(const uint32 x, const uint32 y);
+        GridMap* Load(const uint32 x, const uint32 y, bool mapOnly = false);
         void Unload(const uint32 x, const uint32 y);
 
     private:
         TerrainInfo(const TerrainInfo&);
         TerrainInfo& operator=(const TerrainInfo&);
 
-        GridMap* GetGrid(const float x, const float y);
-        GridMap* LoadMapAndVMap(const uint32 x, const uint32 y);
+        GridMap* GetGrid(const float x, const float y, bool loadOnlyMap = false);
+        GridMap* LoadMapAndVMap(const uint32 x, const uint32 y, bool mapOnly = false);
 
         int RefGrid(const uint32& x, const uint32& y);
         int UnrefGrid(const uint32& x, const uint32& y);
