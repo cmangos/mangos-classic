@@ -103,7 +103,7 @@ namespace FactorySelector
         if (ainame == "PossessedAI")
             return (new PossessedAI(unit));
 
-        sLog.outError("FactorySelector::GetSpecificAI> Cannot get %s AI for %s", ainame.c_str(), unit->GetObjectGuid().GetString().c_str());
+        sLog.outError("FactorySelector::GetSpecificAI> Cannot get %s AI for %s", ainame.c_str(), unit->GetGuidStr().c_str());
         MANGOS_ASSERT(false);
         return nullptr;
     }

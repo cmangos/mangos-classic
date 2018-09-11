@@ -202,7 +202,7 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
             caster->CastSpell(target, spellInfo, flags, nullptr, nullptr, originalCasterGUID);
             return CAST_OK;
         }
-        sLog.outErrorDb("DoCastSpellIfCan by %s attempt to cast spell %u but spell does not exist.", m_unit->GetObjectGuid().GetString().c_str(), spellId);
+        sLog.outErrorDb("DoCastSpellIfCan by %s attempt to cast spell %u but spell does not exist.", m_unit->GetGuidStr().c_str(), spellId);
         return CAST_FAIL_OTHER;
     }
     return CAST_FAIL_IS_CASTING;

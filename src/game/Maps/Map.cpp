@@ -1398,7 +1398,7 @@ bool DungeonMap::Add(Player* player)
             if (playerBind)
             {
                 sLog.outError("InstanceMap::Add: %s is being put in instance %d,%d,%d,%d,%d but he is in group (Id: %d) and is bound to instance %d,%d,%d,%d,%d!",
-                              player->GetObjectGuid().GetString().c_str(), playerBind->state->GetMapId(), playerBind->state->GetInstanceId(),
+                              player->GetGuidStr().c_str(), playerBind->state->GetMapId(), playerBind->state->GetInstanceId(),
                               playerBind->state->GetPlayerCount(), playerBind->state->GetGroupCount(),
                               playerBind->state->CanReset(), pGroup->GetId(),
                               playerBind->state->GetMapId(), playerBind->state->GetInstanceId(),
@@ -1423,7 +1423,7 @@ bool DungeonMap::Add(Player* player)
                 if (groupBind->state != GetPersistentState())
                 {
                     sLog.outError("InstanceMap::Add: %s is being put in instance %d,%d but he is in group (Id: %d) which is bound to instance %d,%d!",
-                                  player->GetObjectGuid().GetString().c_str(), GetPersistentState()->GetMapId(),
+                                  player->GetGuidStr().c_str(), GetPersistentState()->GetMapId(),
                                   GetPersistentState()->GetInstanceId(),
                                   pGroup->GetId(), groupBind->state->GetMapId(),
                                   groupBind->state->GetInstanceId());

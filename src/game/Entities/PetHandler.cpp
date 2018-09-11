@@ -439,7 +439,7 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
     CharmInfo* charmInfo = petUnit->GetCharmInfo();
     if (!charmInfo)
     {
-        sLog.outError("WorldSession::HandlePetSetAction: %s is considered pet-like but doesn't have a charminfo!", petUnit->GetObjectGuid().GetString().c_str());
+        sLog.outError("WorldSession::HandlePetSetAction: %s is considered pet-like but doesn't have a charminfo!", petUnit->GetGuidStr().c_str());
         return;
     }
 
