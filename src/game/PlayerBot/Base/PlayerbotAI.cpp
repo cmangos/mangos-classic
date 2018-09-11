@@ -2674,8 +2674,12 @@ void PlayerbotAI::DoLoot()
         return;
     }
 
-    Creature* c = m_bot->GetMap()->GetCreature(m_lootCurrent);
-    GameObject* go = m_bot->GetMap()->GetGameObject(m_lootCurrent);
+    Creature* c = nullptr;
+    GameObject* go = nullptr;
+    if (m_lootCurrent.IsAnyTypeCreature())
+        c = static_cast<Creature*>(wo);
+    else if (m_lootCurrent.IsGameObject())
+        go = static_cast<GameObject*>(wo);
 
     // clear creature or object that is not spawned or if not creature or object
     if ((c && c->IsDespawned()) || (go && !go->IsSpawned()) || (!c && !go))
