@@ -499,68 +499,49 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
     }
 
     CreatureData const* data = nullptr;
+    uint32 dbGuid = 0;
+    uint32 creatureEntry;
 
     switch (crType)
     {
         case CREATURE_LINK_ENTRY:
         {
-            uint32 tEntry;
-            if (!ExtractUInt32(&pParam1, tEntry))
+            if (!ExtractUInt32(&pParam1, creatureEntry))
                 return false;
 
-            if (!tEntry)
+            if (!creatureEntry)
                 return false;
 
-            if (!ObjectMgr::GetCreatureTemplate(tEntry))
+            if (!ObjectMgr::GetCreatureTemplate(creatureEntry))
             {
                 SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
                 SetSentErrorMessage(true);
                 return false;
             }
 
-            FindCreatureData worker(tEntry, m_session ? m_session->GetPlayer() : nullptr);
+            FindCreatureData worker(creatureEntry, m_session ? m_session->GetPlayer() : nullptr);
 
             sObjectMgr.DoCreatureData(worker);
 
             CreatureDataPair const* dataPair = worker.GetResult();
             if (!dataPair)
-            {
-                SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
-                SetSentErrorMessage(true);
-                return false;
-            }
+                break;
 
             data = &dataPair->second;
             break;
         }
         case CREATURE_LINK_GUID:
         {
-            uint32 lowguid;
-            if (!ExtractUInt32(&pParam1, lowguid))
+            if (!ExtractUInt32(&pParam1, dbGuid))
                 return false;
 
-            data = sObjectMgr.GetCreatureData(lowguid);
-            if (!data)
-            {
-                SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
-                SetSentErrorMessage(true);
-                return false;
-            }
+            data = sObjectMgr.GetCreatureData(dbGuid);
             break;
         }
         case CREATURE_LINK_RAW:
         {
-            uint32 lowguid;
-            if (ExtractUInt32(&pParam1, lowguid))
-            {
-                data = sObjectMgr.GetCreatureData(lowguid);
-                if (!data)
-                {
-                    SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
-                    SetSentErrorMessage(true);
-                    return false;
-                }
-            }
+            if (ExtractUInt32(&pParam1, dbGuid))
+                data = sObjectMgr.GetCreatureData(dbGuid);
             // Number is invalid - maybe the user specified the mob's name
             else
             {
@@ -586,22 +567,76 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
                         continue;
 
                     worker(*cr_data);
-                }
-                while (result->NextRow());
+                } while (result->NextRow());
 
                 delete result;
 
                 CreatureDataPair const* dataPair = worker.GetResult();
                 if (!dataPair)
-                {
-                    SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
-                    SetSentErrorMessage(true);
-                    return false;
-                }
+                    break;
 
                 data = &dataPair->second;
             }
             break;
+        }
+    }
+
+    if (!data)
+    {
+        //TODO::next par will be added in the future
+        // data is nullptr so this mean either the guid/entry provided was wrong or its a summoned creature. Lets give a chance to find a summoned creature.
+        /*WorldObject* wObj = nullptr;
+        do
+        {
+            if (dbGuid)
+            {
+                auto check = [dbGuid](Map * map) -> WorldObject*
+                {
+                    return map->GetCreature(ObjectGuid(HIGHGUID_UNIT, dbGuid));
+                };
+
+                wObj = sMapMgr.SearchOnAllLoadedMap(check);
+                break;
+            }
+
+            if (creatureEntry)
+            {
+                auto check = [creatureEntry](Map * map) -> WorldObject*
+                {
+                    return map->GetCreatureByEntry(creatureEntry);
+                };
+
+                wObj = sMapMgr.SearchOnAllLoadedMap(check);
+                break;
+            }
+        } while (false);
+
+        if (wObj)
+        {
+            float z = wObj->GetPositionZ();
+            return HandleGoHelper(_player, wObj->GetMapId(), wObj->GetPositionX(), wObj->GetPositionY(), &z);
+        }*/
+
+        SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (Map* map = sMapMgr.FindMap(data->mapid))
+    {
+        if (map->IsContinent())
+        {
+            Creature* creature = nullptr;
+            if (dbGuid)
+                creature = map->GetCreature(ObjectGuid(HIGHGUID_UNIT, dbGuid));
+            /*else
+                creature = map->GetCreatureByEntry(data->id);*/
+
+            if (creature)
+            {
+                float z = creature->GetPositionZ();
+                return HandleGoHelper(_player, data->mapid, creature->GetPositionX(), creature->GetPositionY(), &z);
+            }
         }
     }
 
