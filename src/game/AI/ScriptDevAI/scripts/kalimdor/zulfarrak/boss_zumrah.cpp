@@ -113,7 +113,7 @@ struct boss_zumrahAI : public ScriptedAI
 
         // Get the list of usable graves (not used already by players)
         GuidList lTempList;
-        std::list<GameObject*> lGravesInRange;
+        GameObjectList lGravesInRange;
 
         m_pInstance->GetShallowGravesGuidList(lTempList);
         for (GuidList::const_iterator itr = lTempList.begin(); itr != lTempList.end(); ++itr)

@@ -1683,7 +1683,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
     GetSpellRangeAndRadius(effIndex, radius, EffectChainTarget);
 
-    std::list<GameObject*> tempTargetGOList;
+    GameObjectList tempTargetGOList;
 
     switch (targetMode)
     {
@@ -2694,7 +2694,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             // make sure one go is always removed per iteration
             uint32 removed_utarget = 0;
-            for (std::list<GameObject*>::iterator itr = tempTargetGOList.begin(), next; itr != tempTargetGOList.end(); itr = next)
+            for (GameObjectList::iterator itr = tempTargetGOList.begin(), next; itr != tempTargetGOList.end(); itr = next)
             {
                 next = itr;
                 ++next;
@@ -2710,7 +2710,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             while (tempTargetGOList.size() > unMaxTargets - removed_utarget)
             {
                 uint32 poz = urand(0, tempTargetGOList.size() - 1);
-                for (std::list<GameObject*>::iterator itr = tempTargetGOList.begin(); itr != tempTargetGOList.end(); ++itr, --poz)
+                for (GameObjectList::iterator itr = tempTargetGOList.begin(); itr != tempTargetGOList.end(); ++itr, --poz)
                 {
                     if (!*itr) continue;
 
@@ -2723,7 +2723,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
         }
 
-        for (std::list<GameObject*>::iterator iter = tempTargetGOList.begin(); iter != tempTargetGOList.end();)
+        for (GameObjectList::iterator iter = tempTargetGOList.begin(); iter != tempTargetGOList.end();)
         {
             if (CheckTargetGOScript(*iter, SpellEffectIndex(effIndex)))
                 ++iter;
@@ -4690,8 +4690,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     range = m_caster->GetMap()->IsDungeon() ? DEFAULT_VISIBILITY_INSTANCE : DEFAULT_VISIBILITY_DISTANCE;
 
                 uint32 targetCount = std::max(m_spellInfo->EffectChainTarget[j], uint32(1));
-                std::list<Creature*> foundScriptCreatureTargets;
-                std::list<GameObject*> foundScriptGOTargets;
+                CreatureList foundScriptCreatureTargets;
+                GameObjectList foundScriptGOTargets;
                 std::set<uint32> entriesToUse;
                 uint32 type = MAX_SPELL_TARGET_TYPE;
                 bool foundButOutOfRange = false;

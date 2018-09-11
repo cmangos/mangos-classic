@@ -756,8 +756,8 @@ class CreatureEventAI : public CreatureAI
 
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event) const;
 
-        void DoFindFriendlyMissingBuff(std::list<Creature*>& list, float range, uint32 spellId) const;
-        void DoFindFriendlyCC(std::list<Creature*>& list, float range) const;
+        void DoFindFriendlyMissingBuff(CreatureList& list, float range, uint32 spellId) const;
+        void DoFindFriendlyCC(CreatureList& list, float range) const;
 
     protected:
         bool IsTimerBasedEvent(EventAI_Type type) const;

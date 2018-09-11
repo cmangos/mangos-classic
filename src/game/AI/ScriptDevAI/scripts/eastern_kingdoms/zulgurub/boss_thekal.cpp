@@ -434,7 +434,7 @@ struct mob_zealot_lorkhanAI : public boss_thekalBaseAI
             case PHASE_NORMAL:
                 if (m_uiDispelTimer < uiDiff)
                 {
-                    std::list<Creature*> pList = DoFindFriendlyCC(30.0f);
+                    CreatureList pList = DoFindFriendlyCC(30.0f);
 
                     Creature* dispelTarget = nullptr;
 

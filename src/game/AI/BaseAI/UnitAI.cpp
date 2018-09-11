@@ -432,7 +432,7 @@ bool UnitAI::CanTriggerStealthAlert(Unit* who, float attackRadius) const
 class AiDelayEventAround : public BasicEvent
 {
     public:
-        AiDelayEventAround(AIEventType eventType, ObjectGuid invokerGuid, Unit& owner, std::list<Creature*> const& receivers, uint32 miscValue) :
+        AiDelayEventAround(AIEventType eventType, ObjectGuid invokerGuid, Unit& owner, CreatureList const& receivers, uint32 miscValue) :
             BasicEvent(),
             m_eventType(eventType),
             m_invokerGuid(invokerGuid),
@@ -482,7 +482,7 @@ void UnitAI::SendAIEventAround(AIEventType eventType, Unit* invoker, uint32 dela
 {
     if (radius > 0)
     {
-        std::list<Creature*> receiverList;
+        CreatureList receiverList;
 
         // Allow sending custom AI events to all units in range
         if (eventType >= AI_EVENT_CUSTOM_EVENTAI_A && eventType <= AI_EVENT_CUSTOM_EVENTAI_F && eventType != AI_EVENT_GOT_CCED)

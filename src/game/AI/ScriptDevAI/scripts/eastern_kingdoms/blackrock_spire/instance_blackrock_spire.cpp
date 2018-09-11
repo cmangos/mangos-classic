@@ -941,7 +941,7 @@ struct npc_rookery_hatcherAI : public ScriptedAI
     // Function to search for new rookery egg in range
     void DoFindNewEgg()
     {
-        std::list<GameObject*> lEggsInRange;
+        GameObjectList lEggsInRange;
         GetGameObjectListWithEntryInGrid(lEggsInRange, m_creature, GO_ROOKERY_EGG, 20.0f);
 
         if (lEggsInRange.empty())   // No GO found
@@ -951,7 +951,7 @@ struct npc_rookery_hatcherAI : public ScriptedAI
         GameObject* pNearestEgg = nullptr;
 
         // Always need to find new ones
-        for (std::list<GameObject*>::const_iterator itr = lEggsInRange.begin(); itr != lEggsInRange.end(); ++itr)
+        for (GameObjectList::const_iterator itr = lEggsInRange.begin(); itr != lEggsInRange.end(); ++itr)
         {
             if (!((*itr)->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE)))
             {

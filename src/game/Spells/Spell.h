@@ -513,8 +513,6 @@ class Spell
 
         bool CanBeInterrupted() const { return m_spellState <= SPELL_STATE_DELAYED || m_spellState == SPELL_STATE_CHANNELING; }
 
-        typedef std::list<Unit*> UnitList;
-
         uint64 GetScriptValue() const { return m_scriptValue; }
         void SetScriptValue(uint64 value) { m_scriptValue = value; }
 
@@ -701,13 +699,13 @@ namespace MaNGOS
 {
     struct SpellNotifierPlayer              // Currently unused. When put to use this one requires handling for source-location (smilar to below)
     {
-        Spell::UnitList& i_data;
+        UnitList& i_data;
         Spell& i_spell;
         const uint32& i_index;
         float i_radius;
         WorldObject* i_originalCaster;
 
-        SpellNotifierPlayer(Spell& spell, Spell::UnitList& data, const uint32& i, float radius)
+        SpellNotifierPlayer(Spell& spell, UnitList& data, const uint32& i, float radius)
             : i_data(data), i_spell(spell), i_index(i), i_radius(radius)
         {
             i_originalCaster = i_spell.GetAffectiveCasterObject();
@@ -736,7 +734,7 @@ namespace MaNGOS
 
     struct SpellNotifierCreatureAndPlayer
     {
-        Spell::UnitList& i_data;
+        UnitList& i_data;
         Spell& i_spell;
         SpellNotifyPushType i_push_type;
         float i_radius;
@@ -751,7 +749,7 @@ namespace MaNGOS
         float GetCenterX() const { return i_centerX; }
         float GetCenterY() const { return i_centerY; }
 
-        SpellNotifierCreatureAndPlayer(Spell& spell, Spell::UnitList& data, float radius, SpellNotifyPushType type,
+        SpellNotifierCreatureAndPlayer(Spell& spell, UnitList& data, float radius, SpellNotifyPushType type,
                                        SpellTargets TargetType = SPELL_TARGETS_AOE_ATTACKABLE, WorldObject* originalCaster = nullptr)
             : i_data(data), i_spell(spell), i_push_type(type), i_radius(radius), i_TargetType(TargetType),
               i_originalCaster(originalCaster), i_castingObject(i_spell.GetCastingObject())

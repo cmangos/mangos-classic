@@ -34,7 +34,7 @@ Creature* GetClosestCreatureWithEntry(WorldObject* source, uint32 entry, float m
     return creature;
 }
 
-void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& goList, WorldObject* source, uint32 entry, float maxSearchRange)
+void GetGameObjectListWithEntryInGrid(GameObjectList& goList, WorldObject* source, uint32 entry, float maxSearchRange)
 {
     MaNGOS::GameObjectEntryInPosRangeCheck check(*source, entry, source->GetPositionX(), source->GetPositionY(), source->GetPositionZ(), maxSearchRange);
     MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectEntryInPosRangeCheck> searcher(goList, check);
@@ -42,7 +42,7 @@ void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& goList, WorldObjec
     Cell::VisitGridObjects(source, searcher, maxSearchRange);
 }
 
-void GetCreatureListWithEntryInGrid(std::list<Creature*>& creatureList, WorldObject* source, uint32 entry, float maxSearchRange)
+void GetCreatureListWithEntryInGrid(CreatureList& creatureList, WorldObject* source, uint32 entry, float maxSearchRange)
 {
     MaNGOS::AllCreaturesOfEntryInRangeCheck check(source, entry, maxSearchRange);
     MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatureList, check);
@@ -50,7 +50,7 @@ void GetCreatureListWithEntryInGrid(std::list<Creature*>& creatureList, WorldObj
     Cell::VisitGridObjects(source, searcher, maxSearchRange);
 }
 
-void GetPlayerListWithEntryInWorld(std::list<Player*>& playerList, WorldObject* source, float maxSearchRange)
+void GetPlayerListWithEntryInWorld(PlayerList& playerList, WorldObject* source, float maxSearchRange)
 {
     MaNGOS::AnyPlayerInObjectRangeCheck check(source, maxSearchRange);
     MaNGOS::PlayerListSearcher<MaNGOS::AnyPlayerInObjectRangeCheck> searcher(playerList, check);

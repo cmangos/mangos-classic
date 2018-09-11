@@ -278,9 +278,9 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
             case 41:
             {
                 // Search for all nearest lights and respawn them
-                std::list<GameObject*> m_lEluneLights;
+                GameObjectList m_lEluneLights;
                 GetGameObjectListWithEntryInGrid(m_lEluneLights, m_creature, GO_ELUNE_LIGHT, 20.0f);
-                for (std::list<GameObject*>::const_iterator itr = m_lEluneLights.begin(); itr != m_lEluneLights.end(); ++itr)
+                for (GameObjectList::const_iterator itr = m_lEluneLights.begin(); itr != m_lEluneLights.end(); ++itr)
                 {
                     if ((*itr)->IsSpawned())
                         continue;

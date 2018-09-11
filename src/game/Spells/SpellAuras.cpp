@@ -402,7 +402,7 @@ void AreaAura::Update(uint32 diff)
             Unit* owner = caster->GetMaster();
             if (!owner)
                 owner = caster;
-            Spell::UnitList targets;
+            UnitList targets;
 
             switch (m_areaAuraType)
             {
@@ -1125,7 +1125,7 @@ void Aura::TriggerSpell()
                         break;
                 }
                 uint32 curCount = 0;
-                std::list<Player*> playerList;
+                PlayerList playerList;
                 GetPlayerListWithEntryInWorld(playerList, target, range); // official range
                 for (Player* player : playerList)
                     if (target != player && player->HasAura(auraId))

@@ -222,7 +222,7 @@ class DungeonPersistentState : public MapPersistentState
         bool HasBounds() const { return !m_playerList.empty() || !m_groupList.empty(); }
 
     private:
-        typedef std::list<Player*> PlayerListType;
+        typedef PlayerList PlayerListType;
         typedef std::list<Group*> GroupListType;
 
         time_t m_resetTime;

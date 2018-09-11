@@ -224,7 +224,7 @@ class instance_naxxramas : public ScriptedInstance
         // goth
         void SetGothTriggers();
         Creature* GetClosestAnchorForGoth(Creature* pSource, bool bRightSide);
-        void GetGothSummonPointCreatures(std::list<Creature*>& lList, bool bRightSide);
+        void GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide);
         bool IsInRightSideGothArea(Unit* pUnit);
 
         // thaddius

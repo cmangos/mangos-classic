@@ -178,7 +178,7 @@ struct boss_vaelastraszAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         bool bHasYelled = false;
-        std::list<Creature*> lTechniciansList;
+        CreatureList lTechniciansList;
 
         if (m_uiIntroTimer)
         {
@@ -192,7 +192,7 @@ struct boss_vaelastraszAI : public ScriptedAI
 
                         // Search for the Blackwing Technicians tormeting Vaelastrasz to make them flee to the next room above the stairs
                         GetCreatureListWithEntryInGrid(lTechniciansList, m_creature, NPC_BLACKWING_TECHNICIAN, 40.0f);
-                        for (std::list<Creature*>::const_iterator itr = lTechniciansList.begin(); itr != lTechniciansList.end(); ++itr)
+                        for (CreatureList::const_iterator itr = lTechniciansList.begin(); itr != lTechniciansList.end(); ++itr)
                         {
                             // Ignore Blackwing Technicians on upper floors and dead ones
                             if (!((*itr)->isAlive()) || (*itr)->GetPositionZ() > m_creature->GetPositionZ() + 1)

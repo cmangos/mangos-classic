@@ -155,7 +155,7 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
             return;
         }
 
-        std::list<Creature*> lAssistList;
+        CreatureList lAssistList;
         GetCreatureListWithEntryInGrid(lAssistList, m_creature, m_creature->GetEntry(), 80.0f);
 
         for (auto& iter : lAssistList)

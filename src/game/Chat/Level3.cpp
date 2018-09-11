@@ -6692,7 +6692,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
     float radius = 40.0f;
     ExtractFloat(&args, radius);
 
-    std::list<Creature*> creatureList;
+    CreatureList creatureList;
     MaNGOS::AnyUnitInObjectRangeCheck go_check(m_session->GetPlayer(), radius);
     MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> go_search(creatureList, go_check);
     // Get Creatures

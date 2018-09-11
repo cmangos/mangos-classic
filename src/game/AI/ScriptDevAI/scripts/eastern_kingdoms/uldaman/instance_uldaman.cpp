@@ -218,7 +218,7 @@ void instance_uldaman::DoResetKeeperEvent()
 
 Creature* instance_uldaman::GetClosestDwarfNotInCombat(Creature* pSearcher)
 {
-    std::list<Creature*> lTemp;
+    CreatureList lTemp;
 
     for (GuidList::const_iterator itr = m_lWardens.begin(); itr != m_lWardens.end(); ++itr)
     {

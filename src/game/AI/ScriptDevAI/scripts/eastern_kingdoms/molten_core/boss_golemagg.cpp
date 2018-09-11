@@ -78,7 +78,7 @@ struct boss_golemaggAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         // Send event to the Core Ragers so they know that Golemagg is dead and that they must go suicide
-        std::list<Creature*> lCoreRagerList;
+        CreatureList lCoreRagerList;
         GetCreatureListWithEntryInGrid(lCoreRagerList, m_creature, NPC_CORE_RAGER, 100.0f);
         for (auto& itr : lCoreRagerList)
         {

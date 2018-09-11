@@ -847,10 +847,10 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                     pWrynn->GetMotionMaster()->MovePoint(0, aMoveLocations[6][0], aMoveLocations[6][1], aMoveLocations[6][2]);
 
                     // Store all the nearby guards, in order to transform them into Onyxia guards
-                    std::list<Creature*> lGuardsList;
+                    CreatureList lGuardsList;
                     GetCreatureListWithEntryInGrid(lGuardsList, pWrynn, NPC_GUARD_ROYAL, 25.0f);
 
-                    for (std::list<Creature*>::const_iterator itr = lGuardsList.begin(); itr != lGuardsList.end(); ++itr)
+                    for (CreatureList::const_iterator itr = lGuardsList.begin(); itr != lGuardsList.end(); ++itr)
                         m_lRoyalGuardsGuidList.push_back((*itr)->GetObjectGuid());
                 }
                 break;

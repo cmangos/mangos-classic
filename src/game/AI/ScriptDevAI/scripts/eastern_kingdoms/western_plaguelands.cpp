@@ -402,11 +402,11 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
 
-                std::list<Creature*> lCavaliersInRange;
+                CreatureList lCavaliersInRange;
                 GetCreatureListWithEntryInGrid(lCavaliersInRange, m_creature, NPC_SCARLET_CAVALIER, 10.0f);
 
                 uint8 uiIndex = 0;
-                for (std::list<Creature*>::const_iterator itr = lCavaliersInRange.begin(); itr != lCavaliersInRange.end(); ++itr)
+                for (CreatureList::const_iterator itr = lCavaliersInRange.begin(); itr != lCavaliersInRange.end(); ++itr)
                 {
                     m_lCavalierGuids.push_back((*itr)->GetObjectGuid());
                     (*itr)->SetFacingToObject(m_creature);

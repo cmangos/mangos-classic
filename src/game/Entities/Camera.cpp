@@ -133,16 +133,16 @@ void Camera::UpdateVisibilityOf(WorldObject* target) const
 }
 
 template<class T>
-void Camera::UpdateVisibilityOf(T* target, UpdateData& data, std::set<WorldObject*>& vis)
+void Camera::UpdateVisibilityOf(T* target, UpdateData& data, WorldObjectSet& vis)
 {
     m_owner.UpdateVisibilityOf<T>(m_source, target, data, vis);
 }
 
-template void Camera::UpdateVisibilityOf(Player*, UpdateData&, std::set<WorldObject*>&);
-template void Camera::UpdateVisibilityOf(Creature*, UpdateData&, std::set<WorldObject*>&);
-template void Camera::UpdateVisibilityOf(Corpse*, UpdateData&, std::set<WorldObject*>&);
-template void Camera::UpdateVisibilityOf(GameObject*, UpdateData&, std::set<WorldObject*>&);
-template void Camera::UpdateVisibilityOf(DynamicObject*, UpdateData&, std::set<WorldObject*>&);
+template void Camera::UpdateVisibilityOf(Player*, UpdateData&, WorldObjectSet&);
+template void Camera::UpdateVisibilityOf(Creature*, UpdateData&, WorldObjectSet&);
+template void Camera::UpdateVisibilityOf(Corpse*, UpdateData&, WorldObjectSet&);
+template void Camera::UpdateVisibilityOf(GameObject*, UpdateData&, WorldObjectSet&);
+template void Camera::UpdateVisibilityOf(DynamicObject*, UpdateData&, WorldObjectSet&);
 
 void Camera::UpdateVisibilityForOwner()
 {

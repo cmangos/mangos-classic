@@ -145,7 +145,7 @@ void OutdoorPvPEP::HandleGameObjectCreate(GameObject* go)
     }
 }
 
-void OutdoorPvPEP::HandleObjectiveComplete(uint32 eventId, const std::list<Player*>& players, Team team)
+void OutdoorPvPEP::HandleObjectiveComplete(uint32 eventId, const PlayerList& players, Team team)
 {
     uint32 credit;
     switch (eventId)

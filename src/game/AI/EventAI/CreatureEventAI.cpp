@@ -338,7 +338,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionIn
             if (!m_creature->isInCombat())
                 return false;
 
-            std::list<Creature*> pList;
+            CreatureList pList;
             DoFindFriendlyCC(pList, (float)event.friendly_is_cc.radius);
 
             // List is empty
@@ -355,7 +355,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionIn
         }
         case EVENT_T_FRIENDLY_MISSING_BUFF:
         {
-            std::list<Creature*> pList;
+            CreatureList pList;
             DoFindFriendlyMissingBuff(pList, (float)event.friendly_buff.radius, event.friendly_buff.spellId);
 
             // List is empty
@@ -1641,14 +1641,14 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 target, Unit* actionInvoker
     }
 }
 
-void CreatureEventAI::DoFindFriendlyCC(std::list<Creature*>& list, float range) const
+void CreatureEventAI::DoFindFriendlyCC(CreatureList& list, float range) const
 {
     MaNGOS::FriendlyCCedInRangeCheck u_check(m_creature, range);
     MaNGOS::CreatureListSearcher<MaNGOS::FriendlyCCedInRangeCheck> searcher(list, u_check);
     Cell::VisitGridObjects(m_creature, searcher, range);
 }
 
-void CreatureEventAI::DoFindFriendlyMissingBuff(std::list<Creature*>& list, float range, uint32 spellId) const
+void CreatureEventAI::DoFindFriendlyMissingBuff(CreatureList& list, float range, uint32 spellId) const
 {
     MaNGOS::FriendlyMissingBuffInRangeCheck u_check(m_creature, range, spellId);
     MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRangeCheck> searcher(list, u_check);

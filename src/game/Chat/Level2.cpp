@@ -1208,7 +1208,7 @@ bool ChatHandler::HandleGameObjectNearSpawnedCommand(char* args)
     if (!ExtractOptFloat(&args, distance, 10.0f))
         return false;
 
-    std::list<GameObject*> gameobjects;
+    GameObjectList gameobjects;
     Player* player = m_session->GetPlayer();
 
     MaNGOS::GameObjectInPosRangeCheck go_check(*player, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), distance);
@@ -2645,7 +2645,7 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
 }
 inline void UnsummonVisualWaypoints(Player const* player, ObjectGuid ownerGuid)
 {
-    std::list<Creature*> waypoints;
+    CreatureList waypoints;
     MaNGOS::AllCreaturesOfEntryInRangeCheck checkerForWaypoint(player, VISUAL_WAYPOINT, SIZE_OF_GRIDS);
     MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(waypoints, checkerForWaypoint);
     Cell::VisitGridObjects(player, searcher, SIZE_OF_GRIDS);

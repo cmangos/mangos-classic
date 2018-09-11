@@ -198,7 +198,7 @@ struct boss_gothikAI : public ScriptedAI
 
     void PrepareSummonPlaces()
     {
-        std::list<Creature*> lSummonList;
+        CreatureList lSummonList;
         m_pInstance->GetGothSummonPointCreatures(lSummonList, true);
 
         if (lSummonList.empty())
@@ -482,12 +482,12 @@ bool EffectDummyCreature_spell_anchor(Unit* /*pCaster*/, uint32 uiSpellId, Spell
         case SPELL_B_TO_ANCHOR_2:
         case SPELL_C_TO_ANCHOR_2:
         {
-            std::list<Creature*> lTargets;
+            CreatureList lTargets;
             pInstance->GetGothSummonPointCreatures(lTargets, false);
 
             if (!lTargets.empty())
             {
-                std::list<Creature*>::iterator itr = lTargets.begin();
+                CreatureList::iterator itr = lTargets.begin();
                 uint32 uiPosition = urand(0, lTargets.size() - 1);
                 advance(itr, uiPosition);
 

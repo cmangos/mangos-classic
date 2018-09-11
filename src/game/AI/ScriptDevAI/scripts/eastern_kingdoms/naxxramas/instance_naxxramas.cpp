@@ -624,7 +624,7 @@ Creature* instance_naxxramas::GetClosestAnchorForGoth(Creature* pSource, bool bR
     return nullptr;
 }
 
-void instance_naxxramas::GetGothSummonPointCreatures(std::list<Creature*>& lList, bool bRightSide)
+void instance_naxxramas::GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide)
 {
     for (auto& itr : m_mGothTriggerMap)
     {

@@ -62,7 +62,7 @@ class OutdoorPvP
         virtual bool HandleEvent(uint32 /*eventId*/, GameObject* /*go*/) { return false; }
 
         // handle capture objective complete
-        virtual void HandleObjectiveComplete(uint32 /*eventId*/, const std::list<Player*>& /*players*/, Team /*team*/) {}
+        virtual void HandleObjectiveComplete(uint32 /*eventId*/, const PlayerList& /*players*/, Team /*team*/) {}
 
         // Called when a creature is created
         virtual void HandleCreatureCreate(Creature* /*creature*/) {}

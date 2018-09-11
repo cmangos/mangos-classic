@@ -553,7 +553,7 @@ void instance_stratholme::DoSortZiggurats()
     if (m_luiAcolyteGUIDs.empty())
         return;
 
-    std::list<Creature*> lAcolytes;                         // Valid pointers, only used locally
+    CreatureList lAcolytes;                         // Valid pointers, only used locally
     for (GuidList::const_iterator itr = m_luiAcolyteGUIDs.begin(); itr != m_luiAcolyteGUIDs.end(); ++itr)
     {
         if (Creature* pAcolyte = instance->GetCreature(*itr))
@@ -573,7 +573,7 @@ void instance_stratholme::DoSortZiggurats()
     }
 
     // Sort Acolytes
-    for (std::list<Creature*>::iterator itr = lAcolytes.begin(); itr != lAcolytes.end();)
+    for (CreatureList::iterator itr = lAcolytes.begin(); itr != lAcolytes.end();)
     {
         bool bAlreadyIterated = false;
         for (auto& i : m_zigguratStorage)
@@ -595,7 +595,7 @@ void instance_stratholme::DoSortZiggurats()
     }
 
     // In case some mobs have not been able to be sorted, store their GUIDs again
-    for (std::list<Creature*>::const_iterator itr = lAcolytes.begin(); itr != lAcolytes.end(); ++itr)
+    for (CreatureList::const_iterator itr = lAcolytes.begin(); itr != lAcolytes.end(); ++itr)
         m_luiAcolyteGUIDs.push_back((*itr)->GetObjectGuid());
 
     // Sort Crystal

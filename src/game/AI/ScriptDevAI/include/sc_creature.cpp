@@ -336,9 +336,9 @@ void ScriptedAI::DoTeleportPlayer(Unit* unit, float x, float y, float z, float o
     ((Player*)unit)->TeleportTo(unit->GetMapId(), x, y, z, ori, TELE_TO_NOT_LEAVE_COMBAT);
 }
 
-std::list<Creature*> ScriptedAI::DoFindFriendlyCC(float range)
+CreatureList ScriptedAI::DoFindFriendlyCC(float range)
 {
-    std::list<Creature*> creatureList;
+    CreatureList creatureList;
 
     MaNGOS::FriendlyCCedInRangeCheck u_check(m_creature, range);
     MaNGOS::CreatureListSearcher<MaNGOS::FriendlyCCedInRangeCheck> searcher(creatureList, u_check);
@@ -348,9 +348,9 @@ std::list<Creature*> ScriptedAI::DoFindFriendlyCC(float range)
     return creatureList;
 }
 
-std::list<Creature*> ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 spellId)
+CreatureList ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 spellId)
 {
-    std::list<Creature*> creatureList;
+    CreatureList creatureList;
 
     MaNGOS::FriendlyMissingBuffInRangeCheck u_check(m_creature, range, spellId);
     MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRangeCheck> searcher(creatureList, u_check);

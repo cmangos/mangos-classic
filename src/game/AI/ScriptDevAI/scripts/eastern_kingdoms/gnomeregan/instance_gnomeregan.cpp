@@ -86,7 +86,7 @@ void instance_gnomeregan::SetData(uint32 uiType, uint32 uiData)
                 // Sort the explosive charges if needed
                 if (!m_luiExplosiveChargeGUIDs.empty())
                 {
-                    std::list<GameObject*> lExplosiveCharges;
+                    GameObjectList lExplosiveCharges;
                     for (GuidList::const_iterator itr = m_luiExplosiveChargeGUIDs.begin(); itr != m_luiExplosiveChargeGUIDs.end(); ++itr)
                     {
                         if (GameObject* pCharge = instance->GetGameObject(*itr))

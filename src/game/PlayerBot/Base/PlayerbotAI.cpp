@@ -4924,7 +4924,7 @@ void PlayerbotAI::findNearbyGO()
 
 void PlayerbotAI::findNearbyCreature()
 {
-    std::list<Creature*> creatureList;
+    CreatureList creatureList;
     float radius = 2.5;
 
     CellPair pair(MaNGOS::ComputeCellPair(m_bot->GetPositionX(), m_bot->GetPositionY()));
@@ -4940,7 +4940,7 @@ void PlayerbotAI::findNearbyCreature()
     // if (!creatureList.empty())
     //    TellMaster("Found %i Creatures.", creatureList.size());
 
-    for (std::list<Creature*>::iterator iter = creatureList.begin(); iter != creatureList.end(); iter++)
+    for (CreatureList::iterator iter = creatureList.begin(); iter != creatureList.end(); iter++)
     {
         Creature* currCreature = *iter;
 

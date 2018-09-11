@@ -260,7 +260,7 @@ void instance_ruins_of_ahnqiraj::Update(uint32 uiDiff)
 
 void instance_ruins_of_ahnqiraj::DoSortArmyWaves()
 {
-    std::list<Creature*> lCreatureList;
+    CreatureList lCreatureList;
 
     // Sort the 7 army waves
     // We need to use gridsearcher for this, because coords search is too complicated here
@@ -275,7 +275,7 @@ void instance_ruins_of_ahnqiraj::DoSortArmyWaves()
             GetCreatureListWithEntryInGrid(lCreatureList, pTemp, NPC_QIRAJI_WARRIOR, aArmySortingParameters[i].m_fSearchDist);
             GetCreatureListWithEntryInGrid(lCreatureList, pTemp, NPC_SWARMGUARD_NEEDLER, aArmySortingParameters[i].m_fSearchDist);
 
-            for (std::list<Creature*>::const_iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr)
+            for (CreatureList::const_iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr)
             {
                 if ((*itr)->isAlive())
                     m_sArmyWavesGuids[i].insert((*itr)->GetObjectGuid());

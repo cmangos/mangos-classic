@@ -1509,7 +1509,7 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
                     SetEscortPaused(true);
                     // Make Hurley and his cronies able to attack players (and be attacked)
                     m_creature->SetImmuneToPlayer(false);
-                    std::list<Creature*> lCroniesList;
+                    CreatureList lCroniesList;
                     GetCreatureListWithEntryInGrid(lCroniesList, m_creature, NPC_BLACKBREATH_CRONY, 30.0f);
                     for (auto& itr : lCroniesList)
                     {

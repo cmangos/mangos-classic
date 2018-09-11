@@ -2234,7 +2234,7 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         case ATTACKING_TARGET_NEAREST_BY:
         case ATTACKING_TARGET_FARTHEST_AWAY:
         {
-            std::list<Unit*> suitableUnits;
+            UnitList suitableUnits;
 
             for (; itr != threatlist.end(); ++itr)
             {
@@ -2256,7 +2256,7 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
                     suitableUnits.sort(TargetDistanceOrderFarAway(this));
             }
 
-            std::list<Unit*>::iterator itr2 = suitableUnits.begin();
+            UnitList::iterator itr2 = suitableUnits.begin();
             if (position)
                 std::advance(itr2, position);
             return *itr2;

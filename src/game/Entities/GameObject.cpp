@@ -2051,7 +2051,7 @@ void GameObject::TickCapturePoint()
     float radius = info->capturePoint.radius;
 
     // search for players in radius
-    std::list<Player*> capturingPlayers;
+    PlayerList capturingPlayers;
     MaNGOS::AnyPlayerInCapturePointRange u_check(this, radius);
     MaNGOS::PlayerListSearcher<MaNGOS::AnyPlayerInCapturePointRange> checker(capturingPlayers, u_check);
     Cell::VisitWorldObjects(this, checker, radius);

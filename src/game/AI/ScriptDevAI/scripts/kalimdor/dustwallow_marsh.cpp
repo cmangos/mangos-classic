@@ -216,7 +216,7 @@ struct npc_ogronAI : public npc_escortAI
         Reset();
     }
 
-    std::list<Creature*> lCreatureList;
+    CreatureList lCreatureList;
 
     uint32 m_uiPhase;
     uint32 m_uiPhaseCounter;
@@ -556,10 +556,10 @@ struct npc_private_hendelAI : public ScriptedAI
             EnterEvadeMode();
 
             // Make the two sentries flee and despawn
-            std::list<Creature*> lSentryList;
+            CreatureList lSentryList;
             GetCreatureListWithEntryInGrid(lSentryList, m_creature, NPC_SENTRY, 40.0f);
 
-            for (std::list<Creature*>::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
+            for (CreatureList::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
             {
                 if ((*itr)->isAlive())
                 {
@@ -604,10 +604,10 @@ bool QuestAccept_npc_private_hendel(Player* pPlayer, Creature* pCreature, const 
 
         // Find the nearby sentries in order to make them attack
         // The two sentries are linked to Private Hendel in DB to ensure they respawn together
-        std::list<Creature*> lSentryList;
+        CreatureList lSentryList;
         GetCreatureListWithEntryInGrid(lSentryList, pCreature, NPC_SENTRY, 40.0f);
 
-        for (std::list<Creature*>::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
+        for (CreatureList::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
         {
             if ((*itr)->isAlive())
             {
