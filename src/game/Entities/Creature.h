@@ -219,10 +219,17 @@ struct CreatureData
     uint32 curmana;
     bool  is_dead;
     uint8 movementType;
+    uint16 gameEvent;
+    uint16 GuidPoolId;
+    uint16 EntryPoolId;
+    uint16 OriginalZoneId;
 
     // helper function
     ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(CreatureInfo::GetHighGuid(), id, lowguid); }
     uint32 GetRandomRespawnTime() const { return urand(spawntimesecsmin, spawntimesecsmax); }
+
+    // return false if it should be handled by GameEventMgr or PoolMgr
+    bool IsNotPartOfPoolOrEvent() const { return (!gameEvent && !GuidPoolId && !EntryPoolId); }
 };
 
 enum SplineFlags

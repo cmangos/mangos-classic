@@ -518,8 +518,15 @@ struct GameObjectData
     int32 spawntimesecsmax;
     uint32 animprogress;
     GOState go_state;
+    uint16 gameEvent;
+    uint16 GuidPoolId;
+    uint16 EntryPoolId;
+    uint16 OriginalZoneId;
 
     uint32 GetRandomRespawnTime() const { return urand(uint32(spawntimesecsmin), uint32(spawntimesecsmax)); }
+
+    // return false if it should be handled by GameEventMgr or PoolMgr
+    bool IsNotPartOfPoolOrEvent() const { return (!gameEvent && !GuidPoolId && !EntryPoolId && spawntimesecsmin >= 0); }
 };
 
 // For containers:  [GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY        -> ...
