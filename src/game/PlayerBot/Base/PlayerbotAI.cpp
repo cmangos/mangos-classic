@@ -4756,8 +4756,8 @@ void PlayerbotAI::extractGOinfo(const std::string& text, BotObjectList& m_lootTa
 
         ObjectGuid lootCurrent = ObjectGuid(HIGHGUID_GAMEOBJECT, entry, guid);
 
-        if (guid)
-            m_lootTargets.push_back(lootCurrent);
+        if (GameObject* gob = m_bot->GetMap()->GetGameObject(lootCurrent))
+            m_lootTargets.push_back(gob->GetObjectGuid());
     }
 }
 
