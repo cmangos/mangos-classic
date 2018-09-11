@@ -4948,12 +4948,15 @@ void PlayerbotAI::findNearbyCreature()
     {
         Creature* currCreature = *iter;
 
-        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end(); itr++)
+        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end();)
         {
             uint32 npcflags = currCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
             if (!(*itr & npcflags))
+            {
+                ++itr;
                 continue;
+            }
 
             WorldObject* wo = m_bot->GetMap()->GetWorldObject(currCreature->GetObjectGuid());
 
