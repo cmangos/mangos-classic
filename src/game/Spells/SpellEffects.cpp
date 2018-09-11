@@ -1403,9 +1403,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             {
                 case 5229:                                  // Enrage
                 {
-                    int32 reductionMod = -26;
-                    if (m_caster->HasAura(9634)) // If in Dire Bear form only 17%
-                        reductionMod = -17;
+                    int32 reductionMod = -27;
+                    if (m_caster->HasAura(9634)) // If in Dire Bear form only 16%
+                        reductionMod = -16;
                     m_caster->CastCustomSpell(nullptr, 25503, &reductionMod, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
