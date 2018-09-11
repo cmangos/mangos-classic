@@ -505,7 +505,7 @@ struct npc_cork_gizeltonAI : public ScriptedAI
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
-        if (uiType != WAYPOINT_MOTION_TYPE)
+        if (m_playerGuid.IsEmpty() || uiType != WAYPOINT_MOTION_TYPE)
             return;
 
         // No player assigned as quest taker: abort to avoid summoning adds
