@@ -60,6 +60,9 @@ T* HashMapHolder<T>::Find(ObjectGuid guid)
 template<class T>
 typename HashMapHolder<T>::MapType& HashMapHolder<T>::GetContainer() { return m_objectMap; }
 
+template<class T>
+typename HashMapHolder<T>::LockType& HashMapHolder<T>::GetLock() { return i_lock; }
+
 ObjectAccessor::ObjectAccessor() {}
 ObjectAccessor::~ObjectAccessor()
 {

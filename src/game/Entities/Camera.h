@@ -21,12 +21,11 @@
 
 #include "Common.h"
 #include "Maps/GridDefines.h"
+#include "Entities/EntitiesMgr.h"
 
 class ViewPoint;
-class WorldObject;
 class UpdateData;
 class WorldPacket;
-class Player;
 
 /// Camera - object-receiver. Receives broadcast packets from nearby worldobjects, object visibility changes and sends them to client
 class Camera

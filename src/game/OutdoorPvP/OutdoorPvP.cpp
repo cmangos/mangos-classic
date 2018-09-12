@@ -17,10 +17,10 @@
  */
 
 #include "OutdoorPvP.h"
-#include "Globals/ObjectMgr.h"
 #include "Entities/Object.h"
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
+#include "Globals/ObjectMgr.h"
 
 /**
    Function that adds a player to the players of the affected outdoor pvp zones

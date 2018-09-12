@@ -41,13 +41,14 @@ if(WIN32)
   set(EXECUTABLE_SRCS ${EXECUTABLE_SRCS} mangosd.rc)
 endif()
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_BINARY_DIR}
-)
-
 add_executable(${EXECUTABLE_NAME}
   ${EXECUTABLE_SRCS}
+)
+
+target_include_directories(${EXECUTABLE_NAME}
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+  PRIVATE ${OPENSSL_INCLUDE_DIR}
+  PRIVATE ${Boost_INCLUDE_DIRS}
 )
 
 target_link_libraries(${EXECUTABLE_NAME}
@@ -62,6 +63,7 @@ if(WIN32)
     optimized ${OPENSSL_LIBRARIES}
     debug ${MYSQL_DEBUG_LIBRARY}
     debug ${OPENSSL_DEBUG_LIBRARIES}
+    ${Boost_LIBRARIES}
   )
   if(MINGW)
     target_link_libraries(${EXECUTABLE_NAME}
@@ -90,6 +92,7 @@ if(UNIX)
   target_link_libraries(${EXECUTABLE_NAME}
     ${OPENSSL_LIBRARIES}
     ${OPENSSL_EXTRA_LIBRARIES}
+    ${Boost_LIBRARIES}
   )
 
   if(POSTGRESQL AND POSTGRESQL_FOUND)

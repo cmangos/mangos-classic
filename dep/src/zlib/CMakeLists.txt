@@ -15,8 +15,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-set(LIBRARY_NAME z)
-
 set(LIBRARY_SRCS
   adler32.c
   compress.c
@@ -35,19 +33,15 @@ set(LIBRARY_SRCS
   zutil.c
 )
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-add_library(${LIBRARY_NAME} STATIC
+add_library(${ZLIB_LIBRARIES} STATIC
   ${LIBRARY_SRCS}
 )
 
-target_include_directories(${LIBRARY_NAME}
+target_include_directories(${ZLIB_LIBRARIES}
   INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 if(MSVC)
-  set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "zlib")
-  set_target_properties(${LIBRARY_NAME} PROPERTIES FOLDER "Dependencies")
+  set_target_properties(${ZLIB_LIBRARIES} PROPERTIES PROJECT_LABEL "zlib")
+  set_target_properties(${ZLIB_LIBRARIES} PROPERTIES FOLDER "Dependencies")
 endif()

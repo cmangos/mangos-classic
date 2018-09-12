@@ -26,8 +26,6 @@ list(APPEND AD_SOURCE
      System.cpp
 )
 
-include_directories(loadlib)
-
 add_executable(${EXECUTABLE_NAME} ${AD_SOURCE})
 
 target_link_libraries(${EXECUTABLE_NAME} mpqlib)

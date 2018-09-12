@@ -55,7 +55,7 @@ class HashMapHolder
 
         static MapType& GetContainer();
 
-        static LockType& GetLock() { return i_lock; }
+        static LockType& GetLock();
 
     private:
 

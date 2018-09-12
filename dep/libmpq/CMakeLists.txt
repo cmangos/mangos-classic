@@ -13,30 +13,25 @@ cmake_minimum_required (VERSION 3.0)
 # disable warnings for dependencies
 DisableWarnings()
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/libmpq
-)
-
 file(GLOB mpqfiles libmpq/*.c libmpq/*.h *.h)
 
 add_library(mpqlib STATIC
   ${mpqfiles}
 )
 
-if(WIN32)
-  target_link_libraries(mpqlib
-    PUBLIC z
-    PUBLIC bzip2
-  )
-endif()
+target_link_libraries(mpqlib
+  PRIVATE ${ZLIB_LIBRARIES}
+  PRIVATE ${BZIP2_LIBRARIES}
+)
 
 target_include_directories(mpqlib
-  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+  PRIVATE ${ZLIB_INCLUDE_DIRS}
+  PRIVATE ${BZIP2_INCLUDE_DIRS}
 )
 
 if(MSVC)
   target_compile_options(mpqlib PRIVATE /wd4103)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/win)
+  target_include_directories(mpqlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/win)
   set_target_properties(mpqlib PROPERTIES FOLDER "Dependencies")
 endif()

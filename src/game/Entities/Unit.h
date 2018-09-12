@@ -2282,7 +2282,6 @@ class Unit : public WorldObject
 
         GuidList m_dynObjGUIDs;
 
-        typedef GameObjectList GameObjectList;
         GameObjectList m_gameObj;
         typedef std::map<uint32, ObjectGuid> WildGameObjectMap;
         WildGameObjectMap m_wildGameObjs;
