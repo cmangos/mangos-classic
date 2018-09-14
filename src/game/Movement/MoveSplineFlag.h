@@ -31,7 +31,7 @@ namespace Movement
     class MoveSplineFlag
     {
         public:
-            enum eFlags
+            enum eFlags : uint32
             {
                 None         = 0x00000000,
                 Done         = 0x00000001,
