@@ -1981,9 +1981,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         }
         case TARGET_AREAEFFECT_CUSTOM:
         {
-            if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
-                break;
-            if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SUMMON)
+            if (IsDestinationOnlyEffect(m_spellInfo, effIndex))
             {
                 targetUnitMap.push_back(m_caster);
                 break;
