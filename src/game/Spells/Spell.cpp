@@ -1715,6 +1715,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
             float x, y;
             float z = m_caster->GetPositionZ();
+            if (radius == 0.f) // All shaman totems have 0 radius - need to override with proper value
+                radius = 2.f;
             // Do not search for a free spot. TODO: Should there be searched for a free spot. There was once a discussion that in case this space was impossible (LOS) m_caster's position should be used.
             // TODO Bring this back to memory and search for it!
             m_caster->GetNearPoint2D(x, y, radius, angle);
