@@ -444,7 +444,7 @@ void instance_dire_maul::Load(const char* chrIn)
     if (m_auiEncounter[TYPE_ALZZIN] >= DONE)
         m_bWallDestroyed = true;
 
-    for (unsigned int& i : m_auiEncounter)
+    for (uint32& i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             i = NOT_STARTED;
