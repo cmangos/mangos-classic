@@ -691,6 +691,9 @@ bool Unit::CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod /*= 0.0f*
 
     float reach = GetCombinedCombatReach(pVictim, true, flat_mod);
 
+    if (IsMoving() && !IsWalking() && pVictim->IsMoving() && !pVictim->IsWalking())
+        reach += MELEE_LEEWAY;
+
     // This check is not related to bounding radius
     float dx = GetPositionX() - pVictim->GetPositionX();
     float dy = GetPositionY() - pVictim->GetPositionY();

@@ -35,6 +35,9 @@
 #define CONTACT_DISTANCE            0.5f
 #define INTERACTION_DISTANCE        5.0f
 #define ATTACK_DISTANCE             5.0f
+#define MELEE_LEEWAY                8.0f / 3.0f // Melee attack and melee spell leeway when moving
+#define RANGED_LEEWAY               2.0f        // Ranged leeway when moving
+#define AOE_LEEWAY                  2.0f        // AOE leeway when moving
 #define INSPECT_DISTANCE            11.11f
 #define TRADE_DISTANCE              11.11f
 #define MAX_VISIBILITY_DISTANCE     333.0f      // max distance for visible object show, limited in 333 yards

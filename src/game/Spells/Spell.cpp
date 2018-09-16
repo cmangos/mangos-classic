@@ -5938,10 +5938,9 @@ SpellCastResult Spell::CheckRange(bool strict)
         }
     }
 
-    // leeway for moving
-    if (target && m_caster->IsMoving() && target->IsMoving() && !m_caster->IsWalking() && !target->IsWalking() &&
-            (m_spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT || target->GetTypeId() == TYPEID_PLAYER))
-        range_mod += 8.0f / 3.0f;
+    // leeway for moving - 8/3f for melee and 2f for ranged
+    if (target && m_caster->IsMoving() && target->IsMoving() && !m_caster->IsWalking() && !target->IsWalking())
+        range_mod += m_spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT ? MELEE_LEEWAY : RANGED_LEEWAY;
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
     float max_range = GetSpellMaxRange(srange) + range_mod;
@@ -7116,6 +7115,10 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
         }
     }
+
+    // AOE leeway - 2f when caster is moving
+    if (m_caster->IsMoving() && !m_caster->IsWalking())
+        radius += AOE_LEEWAY;
 
     // custom radius cases
     switch (m_spellInfo->SpellFamilyName)
