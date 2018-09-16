@@ -592,8 +592,9 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionIn
     {
         actionSuccess = ProcessAction(holder.event.action[0], rnd, holder.event.event_id, actionInvoker, AIEventSender, holder.eventTarget);
 
-        for (uint32 j = 1; j < MAX_ACTIONS; ++j)
-            ProcessAction(holder.event.action[j], rnd, holder.event.event_id, actionInvoker, AIEventSender, holder.eventTarget);
+        if (!(holder.event.event_flags & EFLAG_COMBAT_ACTION) || actionSuccess)
+            for (uint32 j = 1; j < MAX_ACTIONS; ++j)
+                ProcessAction(holder.event.action[j], rnd, holder.event.event_id, actionInvoker, AIEventSender, holder.eventTarget);
     }
     // Process actions, random case
     else
