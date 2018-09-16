@@ -1887,8 +1887,25 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
                 if (alreadyDone.find(*i) == alreadyDone.end())
                 {
                     alreadyDone.insert(*i);
-                    uint32 damage = (*i)->GetModifier()->m_amount;
+
                     SpellEntry const* i_spellProto = (*i)->GetSpellProto();
+
+                    // Damage shield can be resisted...
+                    if (SpellMissInfo missInfo = pVictim->SpellHitResult(this, i_spellProto, false))
+                    {
+                        pVictim->SendSpellMiss(this, i_spellProto->Id, missInfo);
+                        continue;
+                    }
+
+                    // ...or immuned
+                    if (IsImmuneToDamage(GetSpellSchoolMask(i_spellProto)))
+                    {
+                        pVictim->SendSpellOrDamageImmune(this, i_spellProto->Id);
+                        continue;
+                    }
+
+                    uint32 damage = (*i)->GetModifier()->m_amount;
+
                     // Calculate absorb resist ??? no data in opcode for this possibly unable to absorb or resist?
                     // uint32 absorb;
                     // uint32 resist;

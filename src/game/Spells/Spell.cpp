@@ -1367,6 +1367,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
                 unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) &&
                 unit->GetMasterGuid() != m_caster->GetObjectGuid())
         {
+            realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
             ResetEffectDamageAndHeal();
             return;
         }
@@ -1387,6 +1388,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
             // for delayed spells ignore negative spells (after duel end) for friendly targets
             if (traveling && !IsPositiveSpell(m_spellInfo->Id, realCaster, unit))
             {
+                realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
                 ResetEffectDamageAndHeal();
                 return;
             }
