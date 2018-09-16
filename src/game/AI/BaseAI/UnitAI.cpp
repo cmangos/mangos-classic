@@ -209,7 +209,12 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
             if (flags == TRIGGERED_NONE)
                 flags |= TRIGGERED_NORMAL_COMBAT_CAST;
 
-            caster->CastSpell(target, spellInfo, flags, nullptr, nullptr, originalCasterGUID);
+            SpellCastResult result = caster->CastSpell(target, spellInfo, flags, nullptr, nullptr, originalCasterGUID);
+            if (result != SPELL_CAST_OK)
+            {
+                sLog.outError("DoCastSpellIfCan by %s attempt to cast spell %u but spell failed due to unknown result %u.", m_unit->GetObjectGuid().GetString().c_str(), spellId, result);
+                return CAST_FAIL_OTHER;
+            }
             return CAST_OK;
         }
         sLog.outErrorDb("DoCastSpellIfCan by %s attempt to cast spell %u but spell does not exist.", m_unit->GetGuidStr().c_str(), spellId);
