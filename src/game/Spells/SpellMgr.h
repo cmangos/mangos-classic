@@ -328,6 +328,17 @@ inline bool IsAutocastable(uint32 spellId)
     return IsAutocastable(spellInfo);
 }
 
+// TODO: Unify with creature_template_spells so that we can set both attack and pet bar visibility
+// If true, only gives access to spellbar, and not states and commands
+// Works in connection with AI-CanHandleCharm
+inline bool IsPossessCharmType(uint32 spellId)
+{
+    switch (spellId)
+    {
+        default: return false;
+    }
+}
+
 inline bool IsDeathOnlySpell(SpellEntry const* spellInfo)
 {
     return spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD) || spellInfo->Id == 2584;

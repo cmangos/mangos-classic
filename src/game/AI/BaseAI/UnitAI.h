@@ -452,6 +452,9 @@ class UnitAI
         virtual void JustStunnedTarget(SpellEntry const* spellInfo, Unit* victim) { JustStoppedMovementOfTarget(spellInfo, victim); }
         virtual void JustStoppedMovementOfTarget(SpellEntry const* spellInfo, Unit* victim) {}
 
+        // AI selection - works in connection with IsPossessCharmType
+        virtual bool CanHandleCharm() { return false; }
+
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }
 
