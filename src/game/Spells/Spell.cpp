@@ -980,7 +980,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex, CheckExcepti
     if (IsDestinationOnlyEffect(m_spellInfo, effIndex) && pVictim == m_caster) // TODO: research and unhack
         target.missCondition = SPELL_MISS_NONE;
     else
-        target.missCondition = m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(pVictim, m_spellInfo, effIndex, m_reflectable);
+        target.missCondition = m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(pVictim, m_spellInfo, target.effectMask, m_reflectable);
 
     // spell fly from visual cast object
     WorldObject* affectiveObject = GetAffectiveCasterObject();
@@ -1020,7 +1020,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex, CheckExcepti
         // Victim reflects, apply reflect procs
         m_caster->ProcDamageAndSpell(ProcSystemArguments(pVictim, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
         // Calculate reflected spell result on caster
-        target.reflectResult =  m_caster->SpellHitResult(m_caster, m_spellInfo, effIndex, m_reflectable);
+        target.reflectResult =  m_caster->SpellHitResult(m_caster, m_spellInfo, target.effectMask, m_reflectable);
         // Caster reflects back spell which was already reflected by victim
         if (target.reflectResult == SPELL_MISS_REFLECT)
         {
