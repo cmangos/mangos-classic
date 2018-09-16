@@ -2238,6 +2238,7 @@ class Unit : public WorldObject
         void ScheduleAINotify(uint32 delay, bool forced = false);
         bool IsAINotifyScheduled() const { return bool(m_AINotifyEvent);}
         void FinalizeAINotifyEvent() { m_AINotifyEvent = nullptr; }
+        void AbortAINotifyEvent();
         void OnRelocated();
 
         bool IsLinkingEventTrigger() { return m_isCreatureLinkingTrigger; }

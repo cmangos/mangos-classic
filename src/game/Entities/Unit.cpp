@@ -7227,6 +7227,12 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
         pCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 
+        if (!pCreature->CanAggro()) // if creature aggroed during initial ignoration period, clear the state
+        {
+            pCreature->SetCanAggro(true);
+            AbortAINotifyEvent();
+        }
+
         if (pCreature->AI())
             pCreature->AI()->EnterCombat(enemy);
 
@@ -10093,6 +10099,15 @@ void Unit::ScheduleAINotify(uint32 delay, bool forced)
         m_events.KillEvent(m_AINotifyEvent);
         m_AINotifyEvent = new UnitVisitObjectsInRangeNotifyEvent(*this);
         m_events.AddEvent(m_AINotifyEvent, m_events.CalculateTime(delay));
+    }
+}
+
+void Unit::AbortAINotifyEvent()
+{
+    if (m_AINotifyEvent)
+    {
+        m_events.KillEvent(m_AINotifyEvent);
+        m_AINotifyEvent = nullptr;
     }
 }
 
