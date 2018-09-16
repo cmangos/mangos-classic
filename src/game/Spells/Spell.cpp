@@ -1375,7 +1375,10 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
             // for delayed spells ignore not visible explicit target
             if (unit == m_targets.getUnitTarget() && !unit->isVisibleForOrDetect(m_caster, m_caster, false))
             {
-                realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
+                // Workaround: do not send evade if caster is already dead, trying to prevent combat log errors
+                // TODO: Fix sometime later, maybe through improving visibility check
+                if (realCaster->isAlive())
+                    realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
                 ResetEffectDamageAndHeal();
                 return;
             }
