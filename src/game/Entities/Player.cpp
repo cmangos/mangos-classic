@@ -16325,7 +16325,7 @@ bool Player::ActivateTaxiPathTo(uint32 path_id, uint32 spellid /*= 0*/)
     return ActivateTaxiPathTo({ entry->from, entry->to }, nullptr, spellid);
 }
 
-void Player::TaxiFlightResume()
+void Player::TaxiFlightResume(bool forceRenewMoveGen /*= false*/)
 {
     if (m_taxiTracker.GetState() < Taxi::TRACKER_STANDBY)
         return;
@@ -16336,7 +16336,8 @@ void Player::TaxiFlightResume()
     if (hasUnitState(UNIT_STAT_TAXI_FLIGHT))
     {
         UpdateClientControl(this, IsClientControlled(this));
-        return;
+        if (!forceRenewMoveGen)
+            return;
     }
 
     GetMotionMaster()->MoveTaxiFlight();
@@ -17226,7 +17227,8 @@ void Player::SendInitialPacketsBeforeAddToMap()
     if (IsTaxiFlying())
         m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
 
-    SetMover(this);
+    if(!GetSession()->PlayerLoading())
+        SetMover(this);
 }
 
 void Player::SendInitialPacketsAfterAddToMap()
@@ -19440,5 +19442,24 @@ void Player::UpdateNewInstanceIdTimers(TimePoint const& now)
             iter = m_enteredInstances.erase(iter);
         else
             ++iter;
+    }
+}
+
+void Player::UpdateClientAuras()
+{
+    for (const auto& iter : m_spellAuraHolders)
+        iter.second->UpdateAuraDuration();
+}
+
+void Player::SendPetBar()
+{
+    if (Pet* pet = GetPet())
+        PetSpellInitialize();
+    else if (Unit* charm = GetCharm())
+    {
+        if (charm->hasUnitState(UNIT_STAT_POSSESSED))
+            PossessSpellInitialize();
+        else
+            CharmSpellInitialize();
     }
 }

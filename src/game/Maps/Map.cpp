@@ -307,6 +307,20 @@ void Map::ForceLoadGrid(float x, float y)
     }
 }
 
+void Map::CreatePlayerOnClient(Player* player)
+{
+    // update player state for other player and visa-versa
+    CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
+    Cell cell(p);
+
+    SendInitSelf(player);
+    SendInitTransports(player);
+
+    NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
+    player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()));
+    UpdateObjectVisibility(player, cell, p);
+}
+
 bool Map::Add(Player* player)
 {
     player->GetMapRef().link(this, player);

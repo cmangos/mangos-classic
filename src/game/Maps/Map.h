@@ -312,6 +312,9 @@ class Map : public GridRefManager<NGridType>
         TimePoint GetCurrentClockTime() const;
         uint32 GetCurrentDiff() const;
 
+
+        void CreatePlayerOnClient(Player* player);
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 

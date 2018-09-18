@@ -187,6 +187,12 @@ World::AddSession_(WorldSession* s)
 {
     MANGOS_ASSERT(s);
 
+    if (FindSession(s->GetAccountId()))
+    {
+        sLog.outError("Trying to add an already existing session");
+        return;
+    }
+
     // NOTE - Still there is race condition in WorldSession* being used in the Sockets
 
     ///- kick already loaded player with same account (if any) and remove session

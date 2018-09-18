@@ -2241,6 +2241,18 @@ enum ShapeshiftFormFlags
     SHAPESHIFT_FORM_FLAG_UNK7               = 0x00000040,
 };
 
+enum CharLoginFailReasons
+{
+    CHAR_LOGIN_NO_WORLD                                    = 0x01,
+    CHAR_LOGIN_DUPLICATE_CHARACTER                         = 0x02,
+    CHAR_LOGIN_NO_INSTANCES                                = 0x03,
+    CHAR_LOGIN_DISABLED                                    = 0x04,
+    CHAR_LOGIN_NO_CHARACTER                                = 0x05,
+    CHAR_LOGIN_LOCKED_FOR_TRANSFER                         = 0x06,
+    CHAR_LOGIN_LOCKED_BY_BILLING                           = 0x07,
+    CHAR_LOGIN_FAILED                                      = 0x08,
+};
+
 enum ResponseCodes
 {
     RESPONSE_SUCCESS                                       = 0x00,
@@ -2313,7 +2325,7 @@ enum ResponseCodes
     CHAR_DELETE_FAILED_LOCKED_FOR_TRANSFER                 = 0x3A,/// UNSURE
     CHAR_DELETE_FAILED_GUILD_LEADER                        = 0x3A,/// UNSURE
 
-    CHAR_LOGIN_IN_PROGRESS                                 = 0x3B,
+    /*CHAR_LOGIN_IN_PROGRESS                                 = 0x3B,
     CHAR_LOGIN_SUCCESS                                     = 0x3C,
     CHAR_LOGIN_NO_WORLD                                    = 0x3D,
     CHAR_LOGIN_DUPLICATE_CHARACTER                         = 0x3E,
@@ -2322,7 +2334,7 @@ enum ResponseCodes
     CHAR_LOGIN_DISABLED                                    = 0x41,
     CHAR_LOGIN_NO_CHARACTER                                = 0x42,
     CHAR_LOGIN_LOCKED_FOR_TRANSFER                         = 0x40, /// UNSURE
-    CHAR_LOGIN_LOCKED_BY_BILLING                           = 0x40, /// UNSURE
+    CHAR_LOGIN_LOCKED_BY_BILLING                           = 0x40, /// UNSURE*/
 
     CHAR_NAME_SUCCESS                                      = 0x50,
     CHAR_NAME_FAILURE                                      = 0x4F,

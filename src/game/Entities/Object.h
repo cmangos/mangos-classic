@@ -437,7 +437,6 @@ class Object
         void SetStatFloatValue(uint16 index, float value);
         void SetStatInt32Value(uint16 index, int32 value);
         void ForceValuesUpdateAtIndex(uint32 index);
-
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModPositiveFloatValue(uint16 index, float val, bool apply);
