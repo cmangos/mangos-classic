@@ -466,6 +466,11 @@ struct ScriptInfo
         }
     }
 
+    bool IsDeadOrDespawnedBuddy() const
+    {
+        return (data_flags & SCRIPT_FLAG_BUDDY_IS_DESPAWNED) != 0;
+    }
+
     bool HasAdditionalScriptFlag() const
     {
         switch (command)
