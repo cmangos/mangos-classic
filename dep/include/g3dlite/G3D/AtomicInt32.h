@@ -90,10 +90,9 @@ public:
 
         Under VC6 the sign bit may be lost.
      */
-    int32 compareAndSet(int32 comperand, const int32 exchange) {
+    bool compareAndSet(const int32 exchange) {
         int32 oldValue = m_value.load();
-        m_value.compare_exchange_weak(comperand, exchange);
-        return oldValue;
+        return  m_value.compare_exchange_weak(oldValue, exchange);
     }
 
 };

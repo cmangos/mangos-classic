@@ -1,6 +1,6 @@
-/** 
+/**
   @file GMutex.h
-   
+
   @created 2005-09-22
   @edited  2009-03-25
  */
@@ -44,19 +44,12 @@ public:
         try (indicating no contention). */
     inline bool lock() {
         bool first = true;
-        while (x.compareAndSet(0, 1) == 1) {
-            first = false;
-#           ifdef G3D_WIN32
-                Sleep(0);
-#           else
-                usleep(0);
-#           endif
-        }
+        while (!x.compareAndSet(0)) { }
         return first;
     }
 
     inline void unlock() {
-        x.compareAndSet(1, 0);
+        x.compareAndSet(1);
     }
 
 };
