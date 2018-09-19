@@ -305,31 +305,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
 
     bool IsActivateToQuest = false;
     bool IsPerCasterAuraState = false;
-    bool sendPercent = false;
-
-    if (isType(TYPEMASK_UNIT))
-    {
-        if (!static_cast<Unit const*>(this)->IsTargetUnderControl(*target))
-        {
-            if (m_objectTypeId == TYPEID_UNIT)
-            {
-                if (!static_cast<Creature const*>(this)->IsPet() && !target->IsFriendlyTo(static_cast<Unit const*>(this)))
-                    sendPercent = true;
-            }
-            else
-            {
-                if (target != this && m_objectTypeId == TYPEID_PLAYER)
-                {
-                    if (static_cast<Player const*>(this)->GetTeam() != static_cast<Player const*>(target)->GetTeam() ||
-                            !target->IsFriendlyTo(static_cast<Unit const*>(this)))
-                    {
-                        // not same faction or not friendly
-                        sendPercent = true;
-                    }
-                }
-            }
-        }
-    }
 
     if (updatetype == UPDATETYPE_CREATE_OBJECT || updatetype == UPDATETYPE_CREATE_OBJECT2)
     {
@@ -410,18 +385,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     }
 
                     *data << uint32(appendValue);
-                }
-                else if (sendPercent && index == UNIT_FIELD_HEALTH)
-                {
-                    // send health percentage instead of real value to enemy
-                    if (m_uint32Values[UNIT_FIELD_HEALTH] == 0)
-                        *data << uint32(0);
-                    else
-                        *data << uint32(ceil(m_uint32Values[UNIT_FIELD_HEALTH] * 100 / float(m_uint32Values[UNIT_FIELD_MAXHEALTH]))); // never less than 1 as health is not zero
-                }
-                else if (sendPercent && index == UNIT_FIELD_MAXHEALTH)
-                {
-                    *data << uint32(100);
                 }
                 // FIXME: Some values at server stored in float format but must be sent to client in uint32 format
                 else if (index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME)

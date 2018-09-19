@@ -813,9 +813,6 @@ class WorldObject : public Object
         void SendObjectDeSpawnAnim(ObjectGuid guid) const;
         void SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId = 0) const;
 
-        virtual bool IsHostileTo(Unit const* unit) const = 0;
-        virtual bool IsFriendlyTo(Unit const* unit) const = 0;
-
         virtual ReputationRank GetReactionTo(Unit const* unit) const;
         virtual ReputationRank GetReactionTo(Corpse const* corpse) const;
 

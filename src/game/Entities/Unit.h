@@ -1406,9 +1406,7 @@ class Unit : public WorldObject
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction); }
         FactionTemplateEntry const* getFactionTemplateEntry() const;
-        bool IsHostileTo(Unit const* unit) const override;
-        bool IsHostileToPlayers() const;
-        bool IsFriendlyTo(Unit const* unit) const override;
+        void RestoreOriginalFaction();
         bool IsNeutralToAll() const;
         bool IsContestedGuard() const
         {

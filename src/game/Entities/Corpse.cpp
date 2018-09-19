@@ -265,20 +265,6 @@ bool Corpse::isVisibleForInState(Player const* u, WorldObject const* viewPoint, 
     return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }
 
-bool Corpse::IsHostileTo(Unit const* unit) const
-{
-    if (Player* owner = sObjectMgr.GetPlayer(GetOwnerGuid()))
-        return owner->IsHostileTo(unit);
-    return false;
-}
-
-bool Corpse::IsFriendlyTo(Unit const* unit) const
-{
-    if (Player* owner = sObjectMgr.GetPlayer(GetOwnerGuid()))
-        return owner->IsFriendlyTo(unit);
-    return true;
-}
-
 bool Corpse::IsExpired(time_t t) const
 {
     if (m_type == CORPSE_BONES)
