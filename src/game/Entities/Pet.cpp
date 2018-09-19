@@ -1015,7 +1015,8 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
     if (!owner)
         owner = GetOwner();
 
-    CombatStop(true);
+    if (isInCombat())
+        CombatStop(true);
 
     if (owner)
     {
