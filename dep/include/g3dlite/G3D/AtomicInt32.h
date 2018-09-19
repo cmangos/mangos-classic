@@ -92,7 +92,7 @@ public:
      */
     int32 compareAndSet(int32 comperand, const int32 exchange) {
         int32 oldValue = m_value.load();
-        m_value.compare_exchange_strong(comperand, exchange);
+        m_value.compare_exchange_weak(comperand, exchange);
         return oldValue;
     }
 

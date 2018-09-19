@@ -265,6 +265,7 @@ namespace VMAP
 
     WorldModel* VMapManager2::acquireModelInstance(const std::string& basepath, const std::string& filename)
     {
+        std::lock_guard<std::mutex> lock(m_vmModelMutex);
         ModelFileMap::iterator model = iLoadedModelFiles.find(filename);
         if (model == iLoadedModelFiles.end())
         {
@@ -277,12 +278,9 @@ namespace VMAP
             }
 
             // insert new data
-            {
-                std::lock_guard<std::mutex> lock(m_vmModelMutex);
-                DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMapManager2: loading file '%s%s'.", basepath.c_str(), filename.c_str());
-                model = iLoadedModelFiles.insert(std::pair<std::string, ManagedModel>(filename, ManagedModel())).first;
-                model->second.setModel(worldmodel);
-            }
+            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMapManager2: loading file '%s%s'.", basepath.c_str(), filename.c_str());
+            model = iLoadedModelFiles.insert(std::pair<std::string, ManagedModel>(filename, ManagedModel())).first;
+            model->second.setModel(worldmodel);
         }
         model->second.incRefCount();
         return model->second.getModel();
