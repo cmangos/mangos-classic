@@ -79,6 +79,9 @@ void ScriptedPetAI::UpdateAI(const uint32 diff)
     }
     else if (m_creature->GetCharmInfo())
     {
+        if (m_creature->isInCombat())
+            m_creature->CombatStop(true, true);
+
         Unit* owner = m_creature->GetMaster();
 
         if (!owner)
@@ -100,4 +103,9 @@ void ScriptedPetAI::UpdateAI(const uint32 diff)
             UpdatePetOOCAI(diff);
         }
     }
+}
+
+void ScriptedPetAI::CombatStop()
+{
+    ResetPetCombat();
 }
