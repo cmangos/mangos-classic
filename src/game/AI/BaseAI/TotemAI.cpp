@@ -119,10 +119,10 @@ void TotemAI::UpdateAI(const uint32 diff)
             m_creature->CanAssist(victim) || !victim->isVisibleForOrDetect(m_creature, m_creature, false))
     {
         victim = nullptr;
-        
+
         if (maxRange != 0.0f)
         {
-            MaNGOS::NearestAttackableUnitInObjectRangeCheck u_check(m_creature, maxRange);
+            MaNGOS::NearestAttackableUnitInObjectRangeCheck u_check(m_creature, m_creature->GetOwner(), maxRange);
             MaNGOS::UnitLastSearcher<MaNGOS::NearestAttackableUnitInObjectRangeCheck> checker(victim, u_check);
             Cell::VisitAllObjects(m_creature, checker, maxRange);
         }

@@ -1266,6 +1266,14 @@ class Unit : public WorldObject
         uint32 m_extraAttacks;
         void DoExtraAttacks(Unit* pVictim);
 
+        bool IsAttackedBy(Unit* attacker) const
+        {
+            if (m_attackers.find(attacker) != m_attackers.end())
+                return true;
+
+            return false;
+        }
+
         bool _addAttacker(Unit* pAttacker)                  //< (Internal Use) must be called only from Unit::Attack(Unit*)
         {
             AttackerSet::const_iterator itr = m_attackers.find(pAttacker);

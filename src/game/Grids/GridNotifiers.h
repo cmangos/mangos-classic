@@ -980,24 +980,29 @@ namespace MaNGOS
     class NearestAttackableUnitInObjectRangeCheck
     {
         public:
-            NearestAttackableUnitInObjectRangeCheck(Unit const* funit, float range) : i_funit(funit), i_range(range) {}
-            Unit const& GetFocusObject() const { return *i_funit; }
-            bool operator()(Unit* u)
+            NearestAttackableUnitInObjectRangeCheck(Unit* source, Unit* owner, float range) : m_source(source), m_owner(owner), m_range(range) {}
+            NearestAttackableUnitInObjectRangeCheck(NearestAttackableUnitInObjectRangeCheck const&) =  delete;
+
+            Unit const& GetFocusObject() const { return *m_source; }
+
+            bool operator()(Unit* currUnit)
             {
-                if (i_funit->CanAttack(u) && u->isVisibleForOrDetect(i_funit, i_funit, false) && i_funit->IsWithinDistInMap(u, i_range))
+                if (currUnit->isAlive() && (m_source->IsAttackedBy(currUnit) || (m_owner && m_owner->IsAttackedBy(currUnit)) || currUnit->IsHostileTo(m_source))
+                    && m_source->CanAttack(currUnit)
+                    && currUnit->isVisibleForOrDetect(m_source, m_source, false)
+                    && m_source->IsWithinDistInMap(currUnit, m_range))
                 {
-                    i_range = i_funit->GetDistance(u);        // use found unit range as new range limit for next check
+                    m_range = m_source->GetDistance(currUnit);        // use found unit range as new range limit for next check
                     return true;
                 }
 
                 return false;
             }
-            // prevent clone this object
-            NearestAttackableUnitInObjectRangeCheck(NearestAttackableUnitInObjectRangeCheck const&);
 
         private:
-            Unit const* i_funit;
-            float i_range;
+            Unit*       m_source;
+            Unit*       m_owner;
+            float       m_range;
     };
 
     class AnyAoETargetUnitInObjectRangeCheck
