@@ -6172,11 +6172,7 @@ SpellCastResult Spell::CheckItems()
         /*[-ZERO] to rewrite?
         // Check items for TotemCategory  (items presence in inventory)
         uint32 TotemCategory = MAX_SPELL_TOTEM_CATEGORIES;
-<<<<<<< HEAD
-        for(int i= 0; i < MAX_SPELL_TOTEM_CATEGORIES; ++i)
-=======
         for (unsigned int i : m_spellInfo->TotemCategory)
->>>>>>> Apply clang-tidy performance fixes:
         {
             if (i != 0)
             {
