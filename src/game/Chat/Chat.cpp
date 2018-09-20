@@ -216,6 +216,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "sellerror",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendSellErrorCommand,       "", nullptr },
         { "spellfail",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendSpellFailCommand,       "", nullptr },
         { "spellVisual",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSpellVisual,                "", nullptr },
+        { "worldstate",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendWorldState,             "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 

@@ -1232,3 +1232,18 @@ bool ChatHandler::HandleDebugMoveflags(char* args)
     PSendSysMessage("Moveflags on target %u", target->m_movementInfo.GetMovementFlags());
     return true;
 }
+
+bool ChatHandler::HandleDebugSendWorldState(char* args)
+{
+    Player* player = m_session->GetPlayer();
+    uint32 worldState;
+    if (!ExtractUInt32(&args, worldState))
+        return false;
+
+    uint32 value;
+    if (!ExtractUInt32(&args, value))
+        return false;
+
+    player->SendUpdateWorldState(worldState, value);
+    return true;
+}
