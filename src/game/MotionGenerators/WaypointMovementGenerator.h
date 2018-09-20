@@ -116,6 +116,7 @@ class FlightPathMovementGenerator
         void Reset(Player&);
         bool Update(Player&, const uint32&);
         MovementGeneratorType GetMovementGeneratorType() const override { return FLIGHT_MOTION_TYPE; }
+        bool Resume(Player& player) const;
 };
 
 #endif

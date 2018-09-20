@@ -411,8 +411,25 @@ void MotionMaster::MoveWaypoint(uint32 pathId /*=0*/, uint32 source /*=0==PATH_N
 
 void MotionMaster::MoveTaxiFlight()
 {
-    while (m_owner->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
-        m_owner->GetMotionMaster()->MovementExpired(false);
+    if (m_owner->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
+    {
+        if (m_owner->GetTypeId() == TYPEID_PLAYER)
+        {
+            auto flightMGen = static_cast<FlightPathMovementGenerator const*>(m_owner->GetMotionMaster()->GetCurrent());
+            flightMGen->Resume(*static_cast<Player*>(m_owner));
+            return;
+        }
+
+        do
+        {
+            // remove this generator from stack
+            m_owner->GetMotionMaster()->MovementExpired(false);
+        }
+        while (m_owner->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE);
+
+        sLog.outError("%s can't be in taxi flight", m_owner->GetGuidStr().c_str());
+        return;
+    }
 
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
     {
