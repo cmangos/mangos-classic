@@ -1057,6 +1057,12 @@ void ObjectMgr::LoadCreatures()
             continue;
         }
 
+        if (!MaNGOS::IsValidMapCoord(data.posX, data.posY, data.posZ))
+        {
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u) that spawned at not valid coordinate (x:%5.2f, y:%5.2f, z:%5.2f) skipped.", guid, data.posX, data.posY, data.posZ);
+            continue;
+        }
+
         if (data.spawntimesecsmax < data.spawntimesecsmin)
         {
             sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `spawntimesecsmax` (%u) value lower than `spawntimesecsmin` (%u), it will be adjusted to %u.",
@@ -1234,6 +1240,12 @@ void ObjectMgr::LoadGameObjects()
         if (!mapEntry)
         {
             sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) that spawned at nonexistent map (Id: %u), skip", guid, data.id, data.mapid);
+            continue;
+        }
+
+        if (!MaNGOS::IsValidMapCoord(data.posX, data.posY, data.posZ))
+        {
+            sLog.outErrorDb("Table `creature` have gameobject (GUID: %u) that spawned at not valid coordinate (x:%5.2f, y:%5.2f, z:%5.2f) skipped.", guid, data.posX, data.posY, data.posZ);
             continue;
         }
 
