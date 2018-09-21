@@ -100,7 +100,8 @@ enum LootStatus
 {
     LOOT_STATUS_NOT_FULLY_LOOTED = 0x01,
     LOOT_STATUS_CONTAIN_FFA      = 0x02,
-    LOOT_STATUS_CONTAIN_GOLD     = 0x04
+    LOOT_STATUS_CONTAIN_GOLD     = 0x04,
+    LOOT_STATUS_FAKE_LOOT        = 0x08
 };
 
 enum LootError
@@ -320,7 +321,10 @@ class Loot
         GuidSet const& GetOwnerSet() const { return m_ownerSet; }
 
     private:
-        Loot(): m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(), m_clientLootType(), m_lootMethod(), m_threshold(), m_maxEnchantSkill(0), m_isReleased(false), m_haveItemOverThreshold(false), m_isChecked(false), m_isChest(false), m_isChanged(false)
+        Loot(): m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(),
+            m_clientLootType(), m_lootMethod(), m_threshold(), m_maxEnchantSkill(0), m_isReleased(false)
+            , m_haveItemOverThreshold(false), m_isChecked(false), m_isChest(false), m_isChanged(false),
+            m_isFakeLoot(false)
         {}
         void Clear();
         bool IsLootedFor(Player const* player) const;
@@ -342,6 +346,7 @@ class Loot
         void SetPlayerIsNotLooting(Player* player);
         void GetLootContentFor(Player* player, ByteBuffer& buffer);
         uint32 GetLootStatusFor(Player const* player) const;
+        bool IsLootOpenedBy(ObjectGuid const& playerGuid) const { return m_playersOpened.find(playerGuid) != m_playersOpened.end(); }
 
         // What is looted
         WorldObject*     m_lootTarget;
@@ -364,8 +369,10 @@ class Loot
         bool             m_isChecked;                     // true if at least one player received the loot content
         bool             m_isChest;                       // chest type object have special loot right
         bool             m_isChanged;                     // true if at least one item is looted
+        bool             m_isFakeLoot;                    // nothing to loot but will sparkle for empty windows
         GroupLootRollMap m_roll;                          // used if an item is under rolling
         GuidSet          m_playersLooting;                // player who opened loot windows
+        GuidSet          m_playersOpened;                 // players that have released the corpse
 };
 
 extern LootStore LootTemplates_Creature;
