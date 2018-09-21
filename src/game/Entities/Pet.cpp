@@ -2338,3 +2338,55 @@ void Pet::InitTamedPetPassives(Unit* player)
             break;
     }
 }
+
+void Pet::RegenerateHealth()
+{
+    if (!IsRegeneratingHealth())
+        return;
+
+    uint32 curValue = GetHealth();
+    uint32 maxValue = GetMaxHealth();
+
+    if (curValue >= maxValue)
+        return;
+
+    float HealthIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_HEALTH);
+    uint32 addvalue = 0;
+
+    switch (m_petType)
+    {
+        case SUMMON_PET:
+        case HUNTER_PET:
+        {
+            float Spirit = GetStat(STAT_SPIRIT);
+
+            if (GetPower(POWER_MANA) > 0)
+                addvalue = uint32(Spirit * 0.25 * HealthIncreaseRate);
+            else
+                addvalue = uint32(Spirit * 0.80 * HealthIncreaseRate);
+            break;
+
+            // HACK: increase warlock pet regen *5 until formula is found
+            if (m_petType == SUMMON_PET)
+                addvalue *= 5;
+        }
+
+        case GUARDIAN_PET:
+        {
+            // HACK: use this formula until we know the exact way to regen these type
+            addvalue = maxValue / 20;
+            break;
+        }
+
+        case MINI_PET:
+        {
+            // HACK: use this formula until we know the exact way to regen these type
+            addvalue = maxValue / 3;
+            break;
+        }
+        default:
+            return;
+    }
+
+    ModifyHealth(addvalue);
+}

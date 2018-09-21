@@ -704,21 +704,7 @@ void Creature::RegenerateHealth()
     if (curValue >= maxValue)
         return;
 
-    uint32 addvalue;
-
-    // Not only pet, but any controlled creature
-    if (GetMasterGuid())
-    {
-        float HealthIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_HEALTH);
-        float Spirit = GetStat(STAT_SPIRIT);
-
-        if (GetPower(POWER_MANA) > 0)
-            addvalue = uint32(Spirit * 0.25 * HealthIncreaseRate);
-        else
-            addvalue = uint32(Spirit * 0.80 * HealthIncreaseRate);
-    }
-    else
-        addvalue = maxValue / 3;
+    uint32 addvalue = maxValue / 3;
 
     ModifyHealth(addvalue);
 }
