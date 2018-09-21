@@ -492,7 +492,12 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
 
             if (!isBlocked && isNotVisibleForML)
                 return LOOT_SLOT_NORMAL;
-            return LOOT_SLOT_VIEW;
+
+            // give a chance to let others just see the content of the loot
+            if (sWorld.getConfig(CONFIG_BOOL_CORPSE_ALLOW_ALL_ITEMS_SHOW_IN_MASTER_LOOT))
+                return LOOT_SLOT_VIEW;
+
+            return MAX_LOOT_SLOT_TYPE;
         }
         case ROUND_ROBIN:
         {

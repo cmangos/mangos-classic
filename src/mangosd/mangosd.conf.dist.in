@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2018060601
+ConfVersion=2018092101
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -902,6 +902,12 @@ TalentsInspecting = 1
 #        If target can have loot (or can be skining after loot) but no loot generated still show loot window
 #        Default: 1 (show)
 #                 0 (not show)
+#
+#    Corpse.AllowAllItemsShowInMasterLoot
+#        In master loot mode every one can see the loot content under or over treshold
+#        Only the master loot can still distrube it
+#                 1 (show)
+#        Default: 0 (not show)
 #
 #    Corpse.Decay.NORMAL
 #    Corpse.Decay.RARE
