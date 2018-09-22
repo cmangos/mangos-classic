@@ -31,6 +31,7 @@
 #include "AI/CreatureAISelector.h"
 #include "Entities/Creature.h"
 #include "Entities/CreatureLinkingMgr.h"
+#include "Entities/Player.h"
 #include "Entities/Pet.h"
 #include "Server/DBCStores.h"
 #include "Log.h"
