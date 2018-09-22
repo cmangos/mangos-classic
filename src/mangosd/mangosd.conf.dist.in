@@ -976,6 +976,7 @@ CreatureFamilyAssistanceDelay = 1500
 CreatureFamilyFleeDelay = 7000
 WorldBossLevelDiff = 3
 Corpse.EmptyLootShow = 1
+Corpse.AllowAllItemsShowInMasterLoot = 1
 Corpse.Decay.NORMAL = 300
 Corpse.Decay.RARE = 900
 Corpse.Decay.ELITE = 600

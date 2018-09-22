@@ -1245,7 +1245,7 @@ void ObjectMgr::LoadGameObjects()
 
         if (!MaNGOS::IsValidMapCoord(data.posX, data.posY, data.posZ))
         {
-            sLog.outErrorDb("Table `creature` have gameobject (GUID: %u) that spawned at not valid coordinate (x:%5.2f, y:%5.2f, z:%5.2f) skipped.", guid, data.posX, data.posY, data.posZ);
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u) that spawned at not valid coordinate (x:%5.2f, y:%5.2f, z:%5.2f) skipped.", guid, data.posX, data.posY, data.posZ);
             continue;
         }
 
