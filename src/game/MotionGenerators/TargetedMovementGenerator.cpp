@@ -241,8 +241,7 @@ bool ChaseMovementGenerator<T>::_lostTarget(T& u) const
 template<class T>
 void ChaseMovementGenerator<T>::_reachTarget(T& owner)
 {
-    if (m_combat && owner.CanReachWithMeleeAttack(this->i_target.getTarget()))
-        owner.Attack(this->i_target.getTarget(), true);
+
 }
 
 template<>
