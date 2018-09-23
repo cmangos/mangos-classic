@@ -828,6 +828,14 @@ class ObjectMgr
             return dataPair ? &dataPair->second : nullptr;
         }
 
+        CreatureData* GetCreatureData(uint32 guid)
+        {
+            auto dataItr = mCreatureDataMap.find(guid);
+            if (dataItr != mCreatureDataMap.end())
+                return &dataItr->second;
+            return nullptr;
+        }
+
         CreatureData& NewOrExistCreatureData(uint32 guid) { return mCreatureDataMap[guid]; }
         void DeleteCreatureData(uint32 guid);
 

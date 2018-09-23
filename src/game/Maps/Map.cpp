@@ -2336,11 +2336,9 @@ bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, f
             return false;
     }
 
-    if (radius < 0.1f)
-    {
-        sLog.outError("Map::GetReachableRandomPosition> Unsupported unit type is passed!");
-        return false;
-    }
+    // define 1 as minimum radius for random position
+    if (radius < 1.0f)
+        radius = 1.0f;
 
     bool newDestAssigned;   // used to check if new random destination is found
     if (isFlying)

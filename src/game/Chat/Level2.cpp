@@ -1995,10 +1995,18 @@ bool ChatHandler::HandleNpcSpawnDistCommand(char* args)
     if (!pCreature)
         return false;
 
-    pCreature->SetRespawnRadius((float)option);
+    pCreature->SetRespawnRadius(option);
     pCreature->SetDefaultMovementType(mtype);
-    pCreature->GetMotionMaster()->Initialize();
-    if (pCreature->isAlive())                               // dead creature will reset movement generator at respawn
+    CreatureData* cData = sObjectMgr.GetCreatureData(pCreature->GetGUIDLow());
+    if (cData)
+    {
+        // as we do not reload it from DB we'll update the creature data here
+        cData->movementType = uint8(mtype);
+        cData->spawndist = option;
+    }
+
+    // respawn alive creature to reinitialize everything including movement generator (dead one will do it anyway at respawn)
+    if (pCreature->isAlive())
     {
         pCreature->SetDeathState(JUST_DIED);
         pCreature->Respawn();
