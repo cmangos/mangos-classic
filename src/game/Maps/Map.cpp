@@ -1650,13 +1650,7 @@ BattleGroundMap::~BattleGroundMap()
 
 void BattleGroundMap::Initialize(bool)
 {
-    CreateInstanceData(false);
-
-    m_persistentState = sMapPersistentStateMgr.AddPersistentState(i_mapEntry, GetInstanceId(), 0, false, false, false);
-    m_persistentState->SetUsedByMapState(this);
-    m_persistentState->InitPools();
-
-    sObjectMgr.LoadActiveEntities(this);
+    Map::Initialize(false);
 }
 
 void BattleGroundMap::Update(const uint32& diff)
