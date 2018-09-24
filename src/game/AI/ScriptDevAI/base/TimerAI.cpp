@@ -18,7 +18,23 @@
 #include "Chat/Chat.h"
 #include <string>
 
-bool Timer::UpdateTimer(const uint32 diff, bool combat)
+bool Timer::UpdateTimer(const uint32 diff)
+{
+    if (disabled)
+        return false;
+
+    if (timer <= diff)
+    {
+        timer = 0;
+        disabled = true;
+        return true;
+    }
+    else timer -= diff;
+
+    return false;
+}
+
+bool CombatTimer::UpdateTimer(const uint32 diff, bool combat)
 {
     if (disabled)
         return false;
@@ -37,35 +53,50 @@ bool Timer::UpdateTimer(const uint32 diff, bool combat)
     return false;
 }
 
-void TimerAI::AddCombatAction(uint32 id, uint32 timer)
+void TimerManager::AddTimer(uint32 id, Timer&& timer)
 {
-    m_timers.emplace(id, Timer(id, timer, [&, id] { m_actionReadyStatus[id] = true; }, true));
+    m_timers.emplace(id, timer);
 }
 
-void TimerAI::AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor, bool disabled)
+void TimerManager::AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor, bool disabled)
 {
-    m_timers.emplace(id, Timer(id, timer, functor, false, disabled));
+    m_timers.emplace(id, Timer(id, timer, functor, disabled));
 }
 
-void TimerAI::UpdateTimers(const uint32 diff, bool combat)
+void TimerManager::UpdateTimers(const uint32 diff)
 {
-    for (auto itr = m_timers.begin(); itr != m_timers.end();)
+    for (auto& data : m_timers)
     {
-        Timer& timer = (*itr).second;
-        if (timer.UpdateTimer(diff, combat))
+        Timer& timer = data.second;
+        if (timer.UpdateTimer(diff))
             timer.functor();
-        ++itr;
     }
 }
 
-void TimerAI::GetAIInformation(ChatHandler& reader)
+void TimerManager::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage("TimerAI: Timers:");
     std::string output = "";
     for (auto itr = m_timers.begin(); itr != m_timers.end(); ++itr)
     {
         Timer& timer = (*itr).second;
-        output += "Timer ID: " + std::to_string(timer.id) + " Timer: " + std::to_string(timer.timer), + " Disabled: " + std::to_string(timer.disabled) + "\n";
+        output += "Timer ID: " + std::to_string(timer.id) + " Timer: " + std::to_string(timer.timer), +" Disabled: " + std::to_string(timer.disabled) + "\n";
     }
     reader.PSendSysMessage("%s", output.data());
+}
+
+void CombatTimerAI::UpdateTimers(const uint32 diff, bool combat)
+{
+    TimerManager::UpdateTimers(diff);
+    for (auto& data : m_combatTimers)
+    {
+        CombatTimer& timer = data.second;
+        if (timer.UpdateTimer(diff, combat))
+            timer.functor();
+    }
+}
+
+void CombatTimerAI::AddCombatAction(uint32 id, uint32 timer)
+{
+    AddTimer(id, Timer(id, timer, [&, id] { m_actionReadyStatus[id] = true; }, true));
 }
