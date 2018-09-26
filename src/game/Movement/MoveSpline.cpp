@@ -214,10 +214,9 @@ namespace Movement
 
         UpdateResult result = Result_None;
 
-        int32 minimal_diff = std::min(ms_time_diff, segment_time_elapsed());
-        MANGOS_ASSERT(minimal_diff >= 0);
-        time_passed += uint32(minimal_diff);
-        ms_time_diff -= uint32(minimal_diff);
+        uint32 minimal_diff = std::min(ms_time_diff, segment_time_elapsed());
+        time_passed += minimal_diff;
+        ms_time_diff -= minimal_diff;
 
         if (time_passed >= next_timestamp())
         {
