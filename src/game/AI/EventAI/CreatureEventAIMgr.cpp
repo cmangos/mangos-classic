@@ -369,13 +369,10 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         sLog.outErrorEventAI("Creature %u are using repeatable event(%u) with param4 < param3 (RepeatMax < RepeatMin). Event will never repeat.", temp.creature_id, i);
                     break;
                 case EVENT_T_OOC_LOS:
-                    if (temp.ooc_los.conditionId)
+                    if (temp.ooc_los.conditionId && !sConditionStorage.LookupEntry<PlayerCondition>(temp.ooc_los.conditionId))
                     {
-                        if (!sConditionStorage.LookupEntry<PlayerCondition>(temp.ooc_los.conditionId))
-                        {
-                            sLog.outErrorDb("Creature %u has `ConditionId` = %u but does not exist. Setting ConditionId to 0 for event %u.", temp.creature_id, temp.ooc_los.conditionId, i);
-                            temp.ooc_los.conditionId = 0;
-                        }
+                        sLog.outErrorDb("Creature %u has `ConditionId` = %u but does not exist. Setting ConditionId to 0 for event %u.", temp.creature_id, temp.ooc_los.conditionId, i);
+                        temp.ooc_los.conditionId = 0;
                     }
 
                     if (temp.ooc_los.repeatMax < temp.ooc_los.repeatMin)
@@ -448,13 +445,11 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     continue;
                 case EVENT_T_DEATH:
                 {
-                    if (temp.death.conditionId)
+                    if (temp.death.conditionId && !sConditionStorage.LookupEntry<PlayerCondition>(temp.death.conditionId))
                     {
-                        if (!sConditionStorage.LookupEntry<PlayerCondition>(temp.death.conditionId)) // condition does not exist for some reason
-                        {
-                            sLog.outErrorDb("Creature %u has `ConditionId` = %u but does not exist. Setting ConditionId to 0 for event %u.", temp.creature_id, temp.death.conditionId, i);
-                            temp.death.conditionId = 0;
-                        }
+                        // condition does not exist for some reason
+                        sLog.outErrorDb("Creature %u has `ConditionId` = %u but does not exist. Setting ConditionId to 0 for event %u.", temp.creature_id, temp.death.conditionId, i);
+                        temp.death.conditionId = 0;
                     }
                 }
                 case EVENT_T_AGGRO:
