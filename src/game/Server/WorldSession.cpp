@@ -765,6 +765,7 @@ void WorldSession::Handle_Deprecated(WorldPacket& recvPacket)
 
 void WorldSession::SendAuthWaitQue(uint32 position) const
 {
+    // these SMSG_AUTH_RESPONSE structure should be used only after at least one WorldSession::SendAuthOk or WorldSession::SendQueued was sent
     if (position == 0)
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
@@ -775,7 +776,7 @@ void WorldSession::SendAuthWaitQue(uint32 position) const
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4);
         packet << uint8(AUTH_WAIT_QUEUE);
-        packet << uint32(position);
+        packet << uint32(position);     // position in queue
         SendPacket(packet);
     }
 }
@@ -895,15 +896,22 @@ void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) cons
 
 void WorldSession::SendAuthOk()
 {
-    WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 1);
     packet << uint8(AUTH_OK);
+    packet << uint32(0);                                    // BillingTimeRemaining
+    packet << uint8(0);                                     // BillingPlanFlags
+    packet << uint32(0);                                    // BillingTimeRested
     SendPacket(packet);
 }
 
 void WorldSession::SendAuthQueued()
 {
-    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4);
+    // The 1st SMSG_AUTH_RESPONSE needs to contain other info too.
+    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 1 + 4);
     packet << uint8(AUTH_WAIT_QUEUE);
-    packet << uint32(sWorld.GetQueuedSessionPos(this));     // position in queue
+    packet << uint32(0);                                    // BillingTimeRemaining
+    packet << uint8(0);                                     // BillingPlanFlags
+    packet << uint32(0);                                    // BillingTimeRested
+    packet << uint32(sWorld.GetQueuedSessionPos(this));            // position in queue
     SendPacket(packet);
 }

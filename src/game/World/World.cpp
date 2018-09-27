@@ -241,14 +241,6 @@ World::AddSession_(WorldSession* s)
         return;
     }
 
-    // Checked for 1.12.2
-    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4);
-    packet << uint8(AUTH_OK);
-    packet << uint32(0);                                    // BillingTimeRemaining
-    packet << uint8(0);                                     // BillingPlanFlags
-    packet << uint32(0);                                    // BillingTimeRested
-    s->SendPacket(packet);
-
     UpdateMaxSessionCounters();
 
     // Updates the population
@@ -282,16 +274,6 @@ void World::AddQueuedSession(WorldSession* sess)
 {
     sess->SetInQueue(true);
     m_QueuedSessions.push_back(sess);
-
-    // [-ZERO] Possible wrong
-    // The 1st SMSG_AUTH_RESPONSE needs to contain other info too.
-    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 4);
-    packet << uint8(AUTH_WAIT_QUEUE);
-    packet << uint32(0);                                    // BillingTimeRemaining
-    packet << uint8(0);                                     // BillingPlanFlags
-    packet << uint32(0);                                    // BillingTimeRested
-    packet << uint32(GetQueuedSessionPos(sess));            // position in queue
-    sess->SendPacket(packet);
 }
 
 bool World::RemoveQueuedSession(WorldSession* sess)
