@@ -439,7 +439,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
             return false;
 
         // wait session going to be ready
-        while (m_session->GetState() != WORLD_SESSION_STATE_READY)
+        while (m_session->GetState() != WORLD_SESSION_STATE_CHAR_SELECTION)
         {
             // just wait
             std::this_thread::sleep_for(std::chrono::milliseconds(1));

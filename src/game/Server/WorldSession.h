@@ -83,9 +83,10 @@ enum TutorialDataState
 
 enum WorldSessionState
 {
-    WORLD_SESSION_STATE_CREATED     = 0,
-    WORLD_SESSION_STATE_READY       = 1,
-    WORLD_SESSION_STATE_OFFLINE     = 2
+    WORLD_SESSION_STATE_CREATED        = 0,
+    WORLD_SESSION_STATE_CHAR_SELECTION = 1,
+    WORLD_SESSION_STATE_READY          = 2,
+    WORLD_SESSION_STATE_OFFLINE        = 3
 };
 
 // class to deal with packet processing
@@ -136,6 +137,7 @@ class WorldSession
 
         // Set this session have no attached socket but keep it alive for short period of time to permit a possible reconnection
         void SetOffline();
+        void SetOnline();
 
         // Request set offline, close socket and put session offline
         bool RequestNewSocket(WorldSocket* socket);
@@ -148,7 +150,7 @@ class WorldSession
 
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
-        void SendPacket(WorldPacket const& packet) const;
+        void SendPacket(WorldPacket const& packet, bool forcedSend = false) const;
         void SendExpectedSpamRecords();
         void SendMotd(Player* currChar);
         void SendNotification(const char* format, ...) const ATTR_PRINTF(2, 3);

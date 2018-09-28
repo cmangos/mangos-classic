@@ -46,7 +46,7 @@ void WorldSession::SendNameQueryOpcode(Player* p) const
     data << uint32(p->getGender());
     data << uint32(p->getClass());
 
-    SendPacket(data);
+    SendPacket(data, true);
 }
 
 void WorldSession::SendNameQueryOpcodeFromDB(ObjectGuid guid) const
@@ -92,7 +92,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32
     data << uint32(pGender);                                // gender
     data << uint32(pClass);                                 // class
 
-    session->SendPacket(data);
+    session->SendPacket(data, true);
     delete result;
 }
 

@@ -139,6 +139,12 @@ void WorldSession::SetOffline()
     m_sessionState = WORLD_SESSION_STATE_OFFLINE;
 }
 
+void WorldSession::SetOnline()
+{
+    if (_player && m_Socket && !m_Socket->IsClosed())
+        m_sessionState = WORLD_SESSION_STATE_READY;
+}
+
 bool WorldSession::RequestNewSocket(WorldSocket* socket)
 {
     std::lock_guard<std::mutex> guard(m_recvQueueLock);
@@ -163,7 +169,7 @@ char const* WorldSession::GetPlayerName() const
 }
 
 /// Send a packet to the client
-void WorldSession::SendPacket(WorldPacket const& packet) const
+void WorldSession::SendPacket(WorldPacket const& packet, bool forcedSend /*= false*/) const
 {
 #ifdef BUILD_PLAYERBOT
     // Send packet to bot AI
@@ -176,8 +182,11 @@ void WorldSession::SendPacket(WorldPacket const& packet) const
     }
 #endif
 
-    if (!m_Socket || m_Socket->IsClosed())
+    if (!m_Socket || (m_sessionState != WORLD_SESSION_STATE_READY && !forcedSend))
+    {
+        //sLog.outDebug("Refused to send %s to %s", packet.GetOpcodeName(), _player ? _player->GetName() : "UKNOWN");
         return;
+    }
 
 #ifdef MANGOS_DEBUG
 
@@ -396,8 +405,10 @@ bool WorldSession::Update(PacketFilter& updater)
 
                     m_Socket = m_requestSocket;
                     m_requestSocket = nullptr;
-
-                    SendAuthOk();
+                    sLog.outString("New Session key %s", m_Socket->GetSessionKey().AsHexStr());
+                    WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+                    packet << uint8(AUTH_OK);
+                    SendPacket(packet, true);
                 }
                 else
                 {
@@ -406,9 +417,24 @@ bool WorldSession::Update(PacketFilter& updater)
                     else
                         SendAuthOk();
                 }
-                m_sessionState = WORLD_SESSION_STATE_READY;
+                m_sessionState = WORLD_SESSION_STATE_CHAR_SELECTION;
                 return true;
             }
+
+            case  WORLD_SESSION_STATE_CHAR_SELECTION:
+
+                // waiting to go online
+                // TODO:: Maybe check if have to send queue update?
+                if (!m_Socket || (m_Socket && m_Socket->IsClosed()))
+                {
+                    // directly remove this session
+                    return false;
+                }
+
+                if (ShouldLogOut(time(nullptr)) && !m_playerLoading)   // check if delayed logout is fired
+                    LogoutPlayer(true);
+
+                return true;
 
             case WORLD_SESSION_STATE_READY:
             {
@@ -770,14 +796,14 @@ void WorldSession::SendAuthWaitQue(uint32 position) const
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_OK);
-        SendPacket(packet);
+        SendPacket(packet, true);
     }
     else
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4);
         packet << uint8(AUTH_WAIT_QUEUE);
         packet << uint32(position);     // position in queue
-        SendPacket(packet);
+        SendPacket(packet, true);
     }
 }
 
@@ -901,7 +927,7 @@ void WorldSession::SendAuthOk()
     packet << uint32(0);                                    // BillingTimeRemaining
     packet << uint8(0);                                     // BillingPlanFlags
     packet << uint32(0);                                    // BillingTimeRested
-    SendPacket(packet);
+    SendPacket(packet, true);
 }
 
 void WorldSession::SendAuthQueued()
@@ -912,6 +938,6 @@ void WorldSession::SendAuthQueued()
     packet << uint32(0);                                    // BillingTimeRemaining
     packet << uint8(0);                                     // BillingPlanFlags
     packet << uint32(0);                                    // BillingTimeRested
-    packet << uint32(sWorld.GetQueuedSessionPos(this));            // position in queue
-    SendPacket(packet);
+    packet << uint32(sWorld.GetQueuedSessionPos(this));     // position in queue
+    SendPacket(packet, true);
 }
