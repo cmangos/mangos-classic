@@ -174,12 +174,12 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!lootItem->AllowedForPlayer(target, pLoot->GetLootTarget()))
+    if (!lootItem->IsAllowed(target, pLoot))
     {
         _player->SendEquipError(EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, nullptr, nullptr);
         return;
     }
-    
+
     InventoryResult result = pLoot->SendItem(target, lootItem);
     if (result != EQUIP_ERR_OK)
     {

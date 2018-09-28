@@ -98,10 +98,11 @@ enum ClientLootType
 
 enum LootStatus
 {
-    LOOT_STATUS_NOT_FULLY_LOOTED = 0x01,
-    LOOT_STATUS_CONTAIN_FFA      = 0x02,
-    LOOT_STATUS_CONTAIN_GOLD     = 0x04,
-    LOOT_STATUS_FAKE_LOOT        = 0x08
+    LOOT_STATUS_NOT_FULLY_LOOTED       = 0x01,
+    LOOT_STATUS_CONTAIN_FFA            = 0x02,
+    LOOT_STATUS_CONTAIN_GOLD           = 0x04,
+    LOOT_STATUS_CONTAIN_RELEASED_ITEMS = 0x08,
+    LOOT_STATUS_FAKE_LOOT              = 0x10
 };
 
 enum LootError
@@ -187,7 +188,7 @@ struct LootItem
     int32        randomPropertyId;
     uint32       displayID;
     LootItemType lootItemType;
-    GuidSet      lootedBy;                                          // player's guid who looted this item
+    GuidSet      allowedGuid;                                       // player's that have right to loot this item
     uint32       lootSlot;                                          // the slot number will be send to client
     uint16       conditionId       : 16;                            // allow compiler pack structure
     uint8        count             : 8;
@@ -195,8 +196,7 @@ struct LootItem
     bool         freeForAll        : 1;                             // free for all
     bool         isUnderThreshold  : 1;
     bool         currentLooterPass : 1;
-    bool         isNotVisibleForML : 1;                             // true when in master loot the leader do not have the condition to see the item
-    bool         checkRollNeed     : 1;                             // true if for this item we need to check if roll is needed
+    bool         isReleased        : 1;                             // true if item is released by looter or by roll system
 
     // storing item prototype for fast access
     ItemPrototype const* itemProto;
@@ -210,7 +210,7 @@ struct LootItem
     // Basic checks for player/item compatibility - if false no chance to see the item in the loot
     bool AllowedForPlayer(Player const* player, WorldObject const* lootTarget) const;
     LootSlotType GetSlotTypeForSharedLoot(Player const* player, Loot const* loot) const;
-    bool IsLootedFor(ObjectGuid const& playerGuid) const { return lootedBy.find(playerGuid) != lootedBy.end(); }
+    bool IsAllowed(Player const* player, Loot const* loot) const;
 };
 
 typedef std::vector<LootItem*> LootItemList;
@@ -322,9 +322,8 @@ class Loot
 
     private:
         Loot(): m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(),
-            m_clientLootType(), m_lootMethod(), m_threshold(), m_maxEnchantSkill(0), m_isReleased(false)
-            , m_haveItemOverThreshold(false), m_isChecked(false), m_isChest(false), m_isChanged(false),
-            m_isFakeLoot(false)
+            m_clientLootType(), m_lootMethod(), m_threshold(), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
+            m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
         {}
         void Clear();
         bool IsLootedFor(Player const* player) const;
@@ -364,7 +363,6 @@ class Loot
         ObjectGuid       m_currentLooterGuid;             // current player for under threshold items (Round Robin)
         GuidSet          m_ownerSet;                      // set of all player who have right to the loot
         uint32           m_maxEnchantSkill;               // used to know group right to use disenchant option
-        bool             m_isReleased;                    // used to release loot for round robin item
         bool             m_haveItemOverThreshold;         // if at least one item in the loot is over threshold
         bool             m_isChecked;                     // true if at least one player received the loot content
         bool             m_isChest;                       // chest type object have special loot right
@@ -412,7 +410,6 @@ inline void LoadLootTables()
 class LootMgr
 {
     public:
-        bool IsAllowedToLoot(Player* player, Creature* creature) const;
         void PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint32 itemSlot, RollVote vote);
         Loot* GetLoot(Player* player, ObjectGuid const& targetGuid = ObjectGuid()) const;
 };

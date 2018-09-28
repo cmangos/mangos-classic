@@ -2136,6 +2136,17 @@ void Player::SetGameMaster(bool on)
         UpdateArea(m_areaUpdateId);
     }
 
+    // update dead corpse sparkles
+    UnitList deadUnits;
+    MaNGOS::AnyDeadUnitCheck u_check(this);
+    MaNGOS::UnitListSearcher<MaNGOS::AnyDeadUnitCheck > searcher(deadUnits, u_check);
+    Cell::VisitAllObjects(this, searcher, GetMap()->GetVisibilityDistance());
+    for (auto deadUnit : deadUnits)
+    {
+        if (deadUnit->GetTypeId() == TYPEID_UNIT)
+            deadUnit->ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);
+    }
+
     m_camera.UpdateVisibilityForOwner();
     UpdateObjectVisibility();
     UpdateForQuestWorldObjects();
