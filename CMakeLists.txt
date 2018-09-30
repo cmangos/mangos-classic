@@ -237,7 +237,7 @@ if(UNIX)
   endif()
 
   if(APPLE)
-    find_package(OpenSSL)
+    find_package(OpenSSL QUIET)
     if(NOT OpenSSL_FOUND AND NOT OPENSSL_FOUND)
       # If OpenSSL path isn't specified on mac we set the one that homebrew uses and try again
       set(OPENSSL_ROOT_DIR /usr/local/opt/openssl/)
