@@ -474,6 +474,13 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     return true;
 }
 
+void Creature::ResetEntry()
+{
+    CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow());
+    GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetGUIDLow());
+    UpdateEntry(m_originalEntry, TEAM_NONE, data, eventData, false);
+}
+
 uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* data /*= nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
 {
     // Use creature event model explicit, override any other static models
@@ -546,9 +553,7 @@ void Creature::Update(const uint32 diff)
                 RemoveAllAuras();
 
                 // need to preserve gameevent state
-                CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow());
-                GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetGUIDLow());
-                UpdateEntry(m_originalEntry, TEAM_NONE, data, eventData, false);
+                ResetEntry();
 
                 SelectLevel();
                 UpdateAllStats();  // to be sure stats is correct regarding level of the creature

@@ -665,6 +665,7 @@ class Creature : public Unit
         bool HasSpell(uint32 spellID) const override;
 
         bool UpdateEntry(uint32 Entry, Team team = ALLIANCE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true);
+        void ResetEntry();
 
         void ApplyGameEventSpells(GameEventCreatureData const* eventData, bool activated);
         bool UpdateStats(Stats stat) override;
