@@ -474,50 +474,11 @@ void WorldSession::LogoutPlayer(bool save)
         if (Loot* loot = sLootMgr.GetLoot(_player))
             loot->Release(_player);
 
-        // remove all references to this pointer
-        _player->getHostileRefManager().deleteReferences();
-
-        ///- If the player just died before logging out, make him appear as a ghost
-        // FIXME: logout must be delayed in case lost connection with client in time of combat
         if (_player->GetDeathTimer())
         {
             _player->getHostileRefManager().deleteReferences();
             _player->BuildPlayerRepop();
             _player->RepopAtGraveyard();
-        }
-        else if (!_player->getAttackers().empty())
-        {
-            _player->CombatStop();
-            _player->RemoveAllAurasOnDeath();
-
-            // build set of player who attack _player or who have pet attacking of _player
-            std::set<Player*> aset;
-            for (auto itr : _player->getAttackers())
-            {
-                Unit* owner = itr->GetOwner();           // including player controlled case
-                if (owner)
-                {
-                    if (owner->GetTypeId() == TYPEID_PLAYER)
-                        aset.insert(static_cast<Player*>(owner));
-                }
-                else if (itr->GetTypeId() == TYPEID_PLAYER)
-                    aset.insert(static_cast<Player*>(itr));
-            }
-
-            _player->SetPvPDeath(!aset.empty());
-            _player->KillPlayer();
-            _player->BuildPlayerRepop();
-            _player->RepopAtGraveyard();
-
-            // give honor to all attackers from set like group case
-            for (std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
-                (*itr)->RewardHonor(_player, aset.size());
-
-            // give bg rewards and update counters like kill by first from attackers
-            // this can't be called for all attackers.
-            if (!aset.empty())
-                if (BattleGround* bg = _player->GetBattleGround())
-                    bg->HandleKillPlayer(_player, *aset.begin());
         }
         else if (_player->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
         {
@@ -528,6 +489,9 @@ void WorldSession::LogoutPlayer(bool save)
             _player->BuildPlayerRepop();
             _player->RepopAtGraveyard();
         }
+        else if (_player->isInCombat())
+            _player->CombatStop(true, true);
+
         // drop a flag if player is carrying it
         if (BattleGround* bg = _player->GetBattleGround())
             bg->EventPlayerLoggedOut(_player);
