@@ -428,7 +428,7 @@ bool WorldSession::Update(PacketFilter& updater)
 
             case WORLD_SESSION_STATE_OFFLINE:
             {
-                if (ShouldLogOut(time(nullptr)))   // check if delayed logout is fired
+                if (ShouldDisconnect(time(nullptr)))   // check if delayed logout is fired
                 {
                     LogoutPlayer(true);
                     if (!m_requestSocket && (!m_Socket || m_Socket->IsClosed()))

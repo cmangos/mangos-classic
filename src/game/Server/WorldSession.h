@@ -187,6 +187,11 @@ class WorldSession
         /// Is logout cooldown expired?
         bool ShouldLogOut(time_t currTime) const
         {
+            return (_logoutTime > 0 && currTime >= _logoutTime + 20);
+        }
+
+        bool ShouldDisconnect(time_t currTime)
+        {
             return (_logoutTime > 0 && currTime >= _logoutTime + 60);
         }
 
