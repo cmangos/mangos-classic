@@ -473,6 +473,11 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
             return;
         }
 
+        if (!_player->IsInWorld())
+            // finish pending transfers before starting the logout
+            while (_player && _player->IsBeingTeleportedFar())
+                HandleMoveWorldportAckOpcode();
+
         HandlePlayerReconnect();
         return;
     }
