@@ -264,7 +264,7 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
     if (!holder.enabled || holder.timer || holder.inProgress)
         return false;
 
-    if (holder.event.event_flags & EFLAG_COMBAT_ACTION && GetCombatScriptStatus())
+    if (holder.event.event_flags & EFLAG_COMBAT_ACTION && !CanExecuteCombatAction())
         return false;
 
     // Check the inverse phase mask (event doesn't trigger if current phase bit is set in mask)
