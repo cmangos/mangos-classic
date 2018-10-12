@@ -1062,7 +1062,7 @@ RUN_CHASE    - sets running during chasing (default)
 WALK_CHASE   - sets walking during chasing
 
 --------------------------------
-58 - ACTION_T_SET_FACING
+59 - ACTION_T_SET_FACING
 --------------------------------
 Parameter 1: Target type
 Parameter 2: Reset boolean, 0 sets and 1 resets
