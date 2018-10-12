@@ -1026,6 +1026,15 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                                 break;
                         }
                         break;
+                    case ACTION_T_SET_FACING:
+                        if (action.setFacing.reset > 1)
+                        {
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid facing setting %u. Setting to 0.", i, j + 1, action.setFacing.reset);
+                            action.setFacing.reset = 0;
+                            break;
+                        }
+                        IsValidTargetType(temp.event_type, action.type, action.setFacing.target, i, j + 1);
+                        break;
                     default:
                         sLog.outErrorEventAI("Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j + 1, temp.action[j].type);
                         break;

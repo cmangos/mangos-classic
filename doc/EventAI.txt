@@ -169,6 +169,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 56  ACTION_T_DESPAWN_GUARDIANS              EntryId                             Despawns guardian with specified entry, or if 0 despawns all guardians
 57  ACTION_T_SET_RANGED_MODE                RangeModeType,chaseDistance         Enables RangeModeType AI (0 off, 1 = caster, 2 = hunter), distance to chase at
 58  ACTION_T_SET_WALK                       WalkSetting                         Enables Walk (0 off, 1 on) or enables chase walk (2 off, 3 on)
+59  ACTION_T_SET_FACING                     Target, Reset                       Set 0, Reset 1
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -1052,7 +1053,7 @@ TYPE_PROXIMITY - Creature will use spells and not melee until target comes withi
 TYPE_NO_MELEE_MODE - Creature will never melee. If OOM, interrupted or silenced, it will stand there and do nothing.
 
 --------------------------------
-57 = ACTION_T_SET_WALK:
+58 = ACTION_T_SET_WALK:
 --------------------------------
 Parameter1: Type of walking.
 RUN_DEFAULT  - sets running by default (default)
@@ -1060,12 +1061,19 @@ WALK_DEFAULT - sets walking by default
 RUN_CHASE    - sets running during chasing (default)
 WALK_CHASE   - sets walking during chasing
 
+--------------------------------
+58 - ACTION_T_SET_FACING
+--------------------------------
+Parameter 1: Target type
+Parameter 2: Reset boolean, 0 sets and 1 resets
+
+Sets facing, i.e. orientation to target, or resets it to last waypoint hit, or to respawn position.
+
 =========================================
 Target Types
 =========================================
 Below is the list of current Target types that EventAI can handle.
 Target types are used by certain actions and may effect actions differently
-
 #   Internal Name                               Description
 --------------------------------------------------------------
 0   TARGET_T_SELF                               Self Cast

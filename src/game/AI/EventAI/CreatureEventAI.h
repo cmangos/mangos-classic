@@ -137,6 +137,7 @@ enum EventAI_ActionType
     ACTION_T_DESPAWN_GUARDIANS          = 56,               // Guardian Entry ID (or 0 to despawn all guardians), unused, unused
     ACTION_T_SET_RANGED_MODE            = 57,               // type of ranged mode, distance to chase at
     ACTION_T_SET_WALK					= 58,				// type of walking, unused, unused
+    ACTION_T_SET_FACING                 = 59,               // Target, 0 - set, 1 - reset
 
     ACTION_T_END,
 };
@@ -536,6 +537,12 @@ struct CreatureEventAI_Action
         {
             WalkSetting type;                               // enum RangeModeType
         } walkSetting;
+        // ACTION_T_SET_FACING
+        struct
+        {
+            uint32 target;                                  // Target
+            uint32 reset;                                   // 0 - set, 1 - reset
+        } setFacing;
         // RAW
         struct
         {

@@ -30,6 +30,7 @@
 #include "Tools/Language.h"
 #include "Entities/TemporarySpawn.h"
 #include "Spells/Spell.h"
+#include "MotionGenerators/MovementGenerator.h"
 
 bool CreatureEventAIHolder::UpdateRepeatTimer(Creature* creature, uint32 repeatMin, uint32 repeatMax)
 {
@@ -1325,6 +1326,28 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         case ACTION_T_SET_RANGED_MODE:
         {
             SetRangedMode(action.rangedMode.type != TYPE_NONE, float(action.rangedMode.chaseDistance), RangeModeType(action.rangedMode.type));
+            break;
+        }
+        case ACTION_T_SET_FACING:
+        {
+            if (action.setFacing.reset)
+            {
+                float x, y, z, o;
+                if (m_creature->GetMotionMaster()->empty() || !m_creature->GetMotionMaster()->top()->GetResetPosition(*m_creature, x, y, z, o))
+                    m_creature->GetRespawnCoord(x, y, z, &o);
+                m_creature->SetFacingTo(o);
+            }
+            else
+            {
+                Unit* target = GetTargetByType(action.attackStart.target, actionInvoker, AIEventSender, eventTarget, failedTargetSelection);
+                if (!target)
+                {
+                    if (failedTargetSelection)
+                        sLog.outErrorEventAI("Event %d attempt to attack nullptr target. Creature %d", eventId, m_creature->GetEntry());
+                    return false;
+                }
+                m_creature->SetFacingToObject(target);
+            }
             break;
         }
         case ACTION_T_SET_WALK:
