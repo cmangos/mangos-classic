@@ -573,6 +573,12 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionIn
 {
     bool actionSuccess = false;
     uint32 rnd = urand();
+    if (holder.event.event_flags & EFLAG_COMBAT_ACTION && !CanExecuteCombatAction())
+    {
+        holder.inProgress = false;
+        return false;
+    }
+
     // Process actions, normal case
     if (!(holder.event.event_flags & EFLAG_RANDOM_ACTION))
     {
