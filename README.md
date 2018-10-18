@@ -1,7 +1,7 @@
 # C(ontinued)-MaNGOS -- README
 [![Linux Build Status](https://travis-ci.org/cmangos/mangos-classic.svg?branch=master)](https://travis-ci.org/cmangos/mangos-classic) [![Windows Build status](https://ci.appveyor.com/api/projects/status/github/cmangos/mangos-classic?branch=master&svg=true)](https://ci.appveyor.com/project/cmangos/mangos-classic/branch/master)
 
-This file is part of the CMaNGOS Project. See [AUTHORS](AUTHORS.md) file for Copyright information
+This file is part of the CMaNGOS Project. See [AUTHORS](AUTHORS.md) and [COPYRIGHT](COPYRIGHT.md) files for Copyright information
 
 ## Welcome to C(ontinued)-MaNGOS
 
@@ -104,6 +104,9 @@ To be able to accomplish these goals, we support and promote:
   You can find the full license text in the file [COPYING](COPYING) delivered with this package.
 
 ### Exceptions to GPL
+
+  World of Warcraft content and materials are trademarks and copyrights of Blizzard or its licensors. All rights reserved.
+  CMaNGOS project is not affiliated with Blizzard or its licensors.
 
   Some third-party libraries CMaNGOS uses have other licenses, that must be
   uphold.  These libraries are located within the dep/ directory
