@@ -1171,11 +1171,29 @@ void Aura::TriggerSpell()
     // All ok cast by default case
     if (triggeredSpellInfo)
     {
-        if (triggerTargetObject)
-            triggerCaster->CastSpell(triggerTargetObject->GetPositionX(), triggerTargetObject->GetPositionY(), triggerTargetObject->GetPositionZ(),
-                                     triggeredSpellInfo, TRIGGERED_OLD_TRIGGERED, nullptr, this, casterGUID);
-        else
-            triggerCaster->CastSpell(triggerTarget, triggeredSpellInfo, TRIGGERED_OLD_TRIGGERED, nullptr, this, casterGUID);
+        Spell* spell = new Spell(triggerCaster, triggeredSpellInfo, TRIGGERED_OLD_TRIGGERED, casterGUID);
+        SpellCastTargets targets;
+        if (triggeredSpellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+        {
+            if (triggerTargetObject)
+                targets.setDestination(triggerTargetObject->GetPositionX(), triggerTargetObject->GetPositionY(), triggerTargetObject->GetPositionZ());
+            else if (triggerTarget)
+                targets.setDestination(triggerTarget->GetPositionX(), triggerTarget->GetPositionY(), triggerTarget->GetPositionZ());
+            else
+                targets.setDestination(triggerCaster->GetPositionX(), triggerCaster->GetPositionY(), triggerCaster->GetPositionZ());
+        }
+        if (triggeredSpellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
+        {
+            if (triggerTargetObject)
+                targets.setSource(triggerTargetObject->GetPositionX(), triggerTargetObject->GetPositionY(), triggerTargetObject->GetPositionZ());
+            else if (triggerTarget)
+                targets.setSource(triggerTarget->GetPositionX(), triggerTarget->GetPositionY(), triggerTarget->GetPositionZ());
+            else
+                targets.setSource(triggerCaster->GetPositionX(), triggerCaster->GetPositionY(), triggerCaster->GetPositionZ());
+        }
+        if (triggerTarget)
+            targets.setUnitTarget(triggerTarget);
+        spell->SpellStart(&targets, this);
     }
     else
     {
