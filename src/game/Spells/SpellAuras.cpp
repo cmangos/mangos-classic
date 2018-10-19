@@ -1171,7 +1171,7 @@ void Aura::TriggerSpell()
     // All ok cast by default case
     if (triggeredSpellInfo)
     {
-        Spell* spell = new Spell(triggerCaster, triggeredSpellInfo, TRIGGERED_OLD_TRIGGERED, casterGUID);
+        Spell* spell = new Spell(triggerCaster, triggeredSpellInfo, TRIGGERED_OLD_TRIGGERED, casterGUID, GetSpellProto());
         SpellCastTargets targets;
         if (triggeredSpellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
         {
