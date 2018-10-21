@@ -56,12 +56,12 @@ class TimerManager
 
         void AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor, bool disabled = false);
 
-        inline void ResetTimer(uint32 index, uint32 timer)
+        virtual void ResetTimer(uint32 index, uint32 timer)
         {
             auto data = m_timers.find(index);
             (*data).second.timer = timer; (*data).second.disabled = false;
         }
-        inline void DisableTimer(uint32 index)
+        virtual void DisableTimer(uint32 index)
         {
             auto data = m_timers.find(index);
             (*data).second.timer = 0; (*data).second.disabled = true;
@@ -69,7 +69,7 @@ class TimerManager
 
         virtual void UpdateTimers(const uint32 diff);
 
-        void GetAIInformation(ChatHandler& reader);
+        virtual void GetAIInformation(ChatHandler& reader);
 
     protected:
         void AddTimer(uint32 id, Timer&& timer);
@@ -84,11 +84,36 @@ class CombatTimerAI : public TimerManager
 
         void AddCombatAction(uint32 id, uint32 timer);
 
+        virtual void ResetTimer(uint32 index, uint32 timer) override
+        {
+            auto data = m_combatTimers.find(index);
+            if (data == m_combatTimers.end())
+                TimerManager::ResetTimer(index, timer);
+            else
+            {
+                (*data).second.timer = timer;
+                (*data).second.disabled = false;
+            }
+        }
+        virtual void DisableTimer(uint32 index) override
+        {
+            auto data = m_combatTimers.find(index);
+            if (data == m_combatTimers.end())
+                TimerManager::DisableTimer(index);
+            else
+            {
+                (*data).second.timer = 0;
+                (*data).second.disabled = true;
+            }
+        }
+
         inline void SetActionReadyStatus(uint32 index, bool state) { m_actionReadyStatus[index] = state; }
         inline bool GetActionReadyStatus(uint32 index) { return m_actionReadyStatus[index]; }
 
         virtual void UpdateTimers(const uint32 diff, bool combat);
         virtual void ExecuteActions() = 0;
+
+        virtual void GetAIInformation(ChatHandler& reader) override;
 
     private:
         std::map<uint32, CombatTimer> m_combatTimers;

@@ -98,5 +98,17 @@ void CombatTimerAI::UpdateTimers(const uint32 diff, bool combat)
 
 void CombatTimerAI::AddCombatAction(uint32 id, uint32 timer)
 {
-    AddTimer(id, Timer(id, timer, [&, id] { m_actionReadyStatus[id] = true; }, true));
+    m_combatTimers.emplace(id, CombatTimer(id, timer, [&, id] { m_actionReadyStatus[id] = true; }, true));
+}
+
+void CombatTimerAI::GetAIInformation(ChatHandler& reader)
+{
+    reader.PSendSysMessage("Combat Timers:");
+    std::string output = "";
+    for (auto itr = m_combatTimers.begin(); itr != m_combatTimers.end(); ++itr)
+    {
+        Timer& timer = (*itr).second;
+        output += "Timer ID: " + std::to_string(timer.id) + " Timer: " + std::to_string(timer.timer), +" Disabled: " + std::to_string(timer.disabled) + "\n";
+    }
+    reader.PSendSysMessage("%s", output.data());
 }
