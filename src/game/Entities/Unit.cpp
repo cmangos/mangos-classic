@@ -7202,7 +7202,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         if (enemy)
         {
             Unit* controller = HasCharmer() ? GetCharmer() : GetOwner();
-            if (controller && enemy->CanAttack(controller))
+            if (controller && enemy->CanAttack(controller) && !hasUnitState(UNIT_STAT_FEIGN_DEATH))
             {
                 if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                     controller->SetInCombatWith(enemy); // player only enters combat
