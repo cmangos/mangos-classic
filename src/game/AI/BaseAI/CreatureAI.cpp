@@ -52,7 +52,7 @@ void CreatureAI::AttackStart(Unit* who)
     {
         m_creature->AddThreat(who);
         m_creature->SetInCombatWith(who);
-        who->SetInCombatWith(m_unit);
+        who->SetInCombatWith(m_creature);
 
         // Cast "Spawn Guard" to help Civilian
         if (m_creature->IsCivilian())

@@ -2071,8 +2071,9 @@ void Creature::SetInCombatWithZone()
 
             if (pPlayer->isAlive())
             {
-                SetInCombatWith(pPlayer);
                 AddThreat(pPlayer);
+                SetInCombatWith(pPlayer);
+                pPlayer->SetInCombatWith(this);
             }
         }
     }
