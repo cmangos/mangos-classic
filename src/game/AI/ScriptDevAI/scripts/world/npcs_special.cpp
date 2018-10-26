@@ -493,7 +493,7 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
 
             if (Creature* Patient = m_creature->SummonCreature(patientEntry, (*itr)->x, (*itr)->y, (*itr)->z, (*itr)->o, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 5000))
             {
-                // 2.4.3, this flag appear to be required for client side item->spell to work (TARGET_SINGLE_FRIEND)
+                // 2.4.3, this flag appear to be required for client side item->spell to work (TARGET_UNIT_FRIEND)
                 Patient->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
 
                 m_lPatientGuids.push_back(Patient->GetObjectGuid());

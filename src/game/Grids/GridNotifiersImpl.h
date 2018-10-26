@@ -235,7 +235,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
             return;
     }
     // This condition is only needed due to missing neutral spell type
-    else if(i_dynobject.GetTarget() != TARGET_AREAEFFECT_CUSTOM)
+    else if(i_dynobject.GetTarget() != TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DEST_LOC)
     {
         // for player casts use less strict negative and more stricted positive targeting
         if (i_positive)

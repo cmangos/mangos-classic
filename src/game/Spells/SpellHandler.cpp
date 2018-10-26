@@ -416,7 +416,7 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     if (!holder)
         return;
 
-    if (!IsPositiveSpell(spellId, holder->GetCaster(), _player))
+    if (!holder->IsPositive())
     {
         // ignore for remote control state
         if (!_player->IsSelfMover())
