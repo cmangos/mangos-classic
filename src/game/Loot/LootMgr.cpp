@@ -1712,7 +1712,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
             ((type != LOOT_FISHING && type != LOOT_FISHING_FAIL) || gameObject->GetOwnerGuid() != player->GetObjectGuid()) &&
             !gameObject->IsWithinDistInMap(player, INTERACTION_DISTANCE)))
     {
-        sLog.outError("Loot::CreateLoot> cannot create game object loot, basic check failed!");
+        sLog.outError("Loot::CreateLoot> cannot create game object loot, basic check failed for gameobject %u!", gameObject->GetEntry());
         return;
     }
 
