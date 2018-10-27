@@ -775,6 +775,10 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
     ((Player*)GetTarget())->AddSpellMod(m_spellmod, apply);
 
+    // Heap was freed in player->AddSpellMod(), let class member acknowledge
+    if (m_spellmod && !apply)
+        m_spellmod = nullptr;
+
     ReapplyAffectedPassiveAuras();
 }
 
