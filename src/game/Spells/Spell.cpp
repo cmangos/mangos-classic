@@ -757,21 +757,6 @@ void Spell::FillTargetMap()
             }
         }
 
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            Player* me = (Player*)m_caster;
-            for (UnitList::const_iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end(); ++itr)
-            {
-                Player* targetOwner = (*itr)->GetBeneficiaryPlayer();
-                if (targetOwner && targetOwner != me && targetOwner->IsPvP() && !me->IsInDuelWith(targetOwner))
-                {
-                    me->UpdatePvP(true);
-                    me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
-                    break;
-                }
-            }
-        }
-
         for (UnitList::iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end();)
         {
             if (!CheckTarget(*itr, SpellEffectIndex(i), effException[effToIndex[i]]))
@@ -781,6 +766,9 @@ void Spell::FillTargetMap()
             else
                 ++itr;
         }
+
+        // Secial target filter before adding targets to list
+        FilterTargetMap(tmpUnitLists[effToIndex[i]], SpellEffectIndex(i));
 
         if (m_affectedTargetCount && tmpUnitLists[effToIndex[i]].size() > m_affectedTargetCount)
         {
@@ -797,6 +785,21 @@ void Spell::FillTargetMap()
                         itr = tmpUnitLists[effToIndex[i]].erase(itr);
                         break;
                     }
+                }
+            }
+        }
+
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player* me = (Player*)m_caster;
+            for (UnitList::const_iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end(); ++itr)
+            {
+                Player* targetOwner = (*itr)->GetBeneficiaryPlayer();
+                if (targetOwner && targetOwner != me && targetOwner->IsPvP() && !me->IsInDuelWith(targetOwner))
+                {
+                    me->UpdatePvP(true);
+                    me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+                    break;
                 }
             }
         }
@@ -7156,6 +7159,11 @@ float Spell::GetCone()
         return G3D::toRadians(coneData->coneAngle);
 
     return M_PI_F / 3.f; // 60 degrees is default
+}
+
+void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
+{
+
 }
 
 bool Spell::IsEffectWithImplementedMultiplier(uint32 effectId) const
