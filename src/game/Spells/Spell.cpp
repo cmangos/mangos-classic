@@ -2763,32 +2763,34 @@ void Spell::CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTa
 {
     for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
     {
-        if ((*iter)->GetTypeId() != TYPEID_UNIT)
+        Unit* target = (*iter);
+        if (target->GetTypeId() != TYPEID_UNIT)
             continue;
 
         for (SQLMultiStorage::SQLMultiSIterator<SpellTargetEntry> i_spellST = bounds.first; i_spellST != bounds.second; ++i_spellST)
         {
-            if (i_spellST->CanNotHitWithSpellEffect(effIndex))
+            SpellTargetEntry const* spellST = (*i_spellST);
+            if (spellST->CanNotHitWithSpellEffect(effIndex))
                 continue;
 
             // only creature entries supported for this target type
-            if (i_spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT)
+            if (spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT)
                 continue;
 
-            if (i_spellST->type == SPELL_TARGET_TYPE_CREATURE_GUID ? (*iter)->GetGUIDLow() == i_spellST->targetEntry : (*iter)->GetEntry() == i_spellST->targetEntry)
+            if (spellST->type == SPELL_TARGET_TYPE_CREATURE_GUID ? target->GetGUIDLow() == spellST->targetEntry : target->GetEntry() == spellST->targetEntry)
             {
-                switch (i_spellST->type)
+                switch (spellST->type)
                 {
                     case SPELL_TARGET_TYPE_DEAD:
-                        if (((Creature*)(*iter))->IsCorpse())
-                            targetUnitMap.push_back((*iter));
+                        if (static_cast<Creature*>(target)->IsCorpse())
+                            targetUnitMap.push_back(target);
                         break;
                     case SPELL_TARGET_TYPE_CREATURE:
-                        if ((*iter)->isAlive())
-                            targetUnitMap.push_back((*iter));
+                        if (target->isAlive())
+                            targetUnitMap.push_back(target);
                         break;
                     case SPELL_TARGET_TYPE_CREATURE_GUID:
-                        targetUnitMap.push_back((*iter));
+                        targetUnitMap.push_back(target);
                         break;
                     default:
                         break;
