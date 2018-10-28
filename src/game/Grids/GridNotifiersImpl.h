@@ -251,6 +251,9 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (target->IsImmuneToSpell(spellInfo, false, eff_index) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
         return;
 
+    if (!i_dynobject.IsWithinLOSInMap(target))
+        return;
+
     // Apply PersistentAreaAura on target
     // in case 2 dynobject overlap areas for same spell, same holder is selected, so dynobjects share holder
     SpellAuraHolder* holder = target->GetSpellAuraHolder(spellInfo->Id, i_dynobject.GetCasterGuid());
