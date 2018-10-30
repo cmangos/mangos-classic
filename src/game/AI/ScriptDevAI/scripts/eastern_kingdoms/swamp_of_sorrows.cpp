@@ -140,7 +140,7 @@ bool QuestAccept_npc_galen_goodward(Player* pPlayer, Creature* pCreature, const 
         if (npc_galen_goodwardAI* pEscortAI = dynamic_cast<npc_galen_goodwardAI*>(pCreature->AI()))
         {
             pEscortAI->Start(false, pPlayer, pQuest);
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
             DoScriptText(SAY_QUEST_ACCEPTED, pCreature);
         }
     }
