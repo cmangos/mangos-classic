@@ -2222,7 +2222,7 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     if (!apply && GetTarget()->HasAuraType(SPELL_AURA_MOD_CONFUSE))
         return;
 
-    GetTarget()->SetConfused(apply, GetCasterGuid(), GetId());
+    GetTarget()->SetConfused(apply, GetCasterGuid(), GetId(), m_removeMode);
 }
 
 void Aura::HandleModFear(bool apply, bool Real)

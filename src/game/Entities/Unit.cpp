@@ -9102,12 +9102,12 @@ void Unit::SetImmobilizedState(bool apply, bool stun)
 
 void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 time)
 {
-    SetIncapacitatedState(apply, UNIT_FLAG_FLEEING, casterGuid, spellID, time);
+    SetIncapacitatedState(apply, UNIT_FLAG_FLEEING, casterGuid, spellID, AURA_REMOVE_BY_DEFAULT, time);
 }
 
-void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
+void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID, AuraRemoveMode removeMode)
 {
-    SetIncapacitatedState(apply, UNIT_FLAG_CONFUSED, casterGuid, spellID);
+    SetIncapacitatedState(apply, UNIT_FLAG_CONFUSED, casterGuid, spellID, removeMode);
 }
 
 void Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
@@ -9115,7 +9115,7 @@ void Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
     SetIncapacitatedState(apply, UNIT_FLAG_STUNNED, casterGuid, spellID);
 }
 
-void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid, uint32 spellID, uint32 time)
+void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid, uint32 spellID, AuraRemoveMode removeMode, uint32 time)
 {
     // We are interested only in a particular subset of flags:
     const uint32 filter = (UNIT_FLAG_STUNNED | UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING);
@@ -9157,40 +9157,43 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
     }
 
     if (movement)
-        GetMotionMaster()->MovementExpired(false);
+        GetMotionMaster()->MovementExpired();
     if (apply)
         CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
 
-    if (GetTypeId() == TYPEID_UNIT)
+    bool requireTargetChange = GetTypeId() != TYPEID_PLAYER || !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    if (requireTargetChange)
     {
         if (HasFlag(UNIT_FIELD_FLAGS, filter))
         {
             if (!GetTargetGuid().IsEmpty()) // Incapacitated creature loses its target
                 SetTargetGuid(ObjectGuid());
         }
-        else if (isAlive())
+        else if (isAlive() && removeMode != AURA_REMOVE_BY_STACK)
         {
             if (Unit* victim = getVictim())
             {
                 SetTargetGuid(victim->GetObjectGuid());  // Restore target
                 if (movement)
-                    GetMotionMaster()->MoveChase(victim); // Restore movement generator
+                    AI()->HandleMovementOnAttackStart(victim);
             }
-            else if (movement)
-                GetMotionMaster()->Initialize(); // Reset movement generator
 
             if (!apply && fleeing)
             {
                 // Attack the caster if can on fear expiration
                 if (Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGuid) : nullptr)
-                    ((Creature*)this)->AttackedBy(caster);
+                    AttackedBy(caster);
             }
         }
     }
 
     // Update stun if required:
     if (stun)
+    {
         SetImmobilizedState(apply, true);
+        if (apply && requireTargetChange)
+            SetFacingTo(GetOrientation()); // broadcast orientation change on stun start for creatures
+    }
 
     if (!movement)
         return;
@@ -9204,7 +9207,7 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
     else if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING))
     {
         StopMoving(true);
-        GetMotionMaster()->MoveFleeing(IsInWorld() ?  GetMap()->GetUnit(casterGuid) : nullptr, time);
+        GetMotionMaster()->MoveFleeing(IsInWorld() ? GetMap()->GetUnit(casterGuid) : nullptr, time);
     }
 }
 

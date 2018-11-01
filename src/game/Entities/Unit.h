@@ -2165,9 +2165,9 @@ class Unit : public WorldObject
         bool IsIncapacitated() const { return (IsFleeing() || IsConfused() || IsStunned()); }
 
         void SetFeared(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, uint32 time = 0);
-        void SetConfused(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0);
+        void SetConfused(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT);
         void SetStunned(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0);
-        void SetIncapacitatedState(bool apply, uint32 state = 0, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, uint32 time = 0);
+        void SetIncapacitatedState(bool apply, uint32 state = 0, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT, uint32 time = 0);
         ///----------End of crowd control methods----------
 
         bool IsFeigningDeath() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29); }
