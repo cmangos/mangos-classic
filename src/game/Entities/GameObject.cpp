@@ -91,8 +91,9 @@ void GameObject::AddToWorld()
     // After Object::AddToWorld so that for initial state the GO is added to the world (and hence handled correctly)
     UpdateCollisionState();
 
-    if (GameObject* linkedGO = SummonLinkedTrapIfAny())
-        SetLinkedTrap(linkedGO);
+    if (IsSpawned()) // need to prevent linked trap addition due to Pool system Map::Add abuse
+        if (GameObject* linkedGO = SummonLinkedTrapIfAny())
+            SetLinkedTrap(linkedGO);
 }
 
 void GameObject::RemoveFromWorld()
@@ -626,19 +627,14 @@ void GameObject::Delete()
     SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
 
     if (uint16 poolid = sPoolMgr.IsPartOfAPool<GameObject>(GetGUIDLow()))
-    {
         sPoolMgr.UpdatePool<GameObject>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
-        if (GameObject* linkedTrap = GetLinkedTrap())
-            linkedTrap->SetLootState(GO_JUST_DEACTIVATED);
-    }
     else
-    {
         AddObjectToRemoveList();
-        if (GameObject* linkedTrap = GetLinkedTrap())
-        {
-            linkedTrap->SetLootState(GO_JUST_DEACTIVATED);
-            linkedTrap->Delete();
-        }
+
+    if (GameObject* linkedTrap = GetLinkedTrap())
+    {
+        linkedTrap->SetLootState(GO_JUST_DEACTIVATED);
+        linkedTrap->Delete();
     }
 }
 
