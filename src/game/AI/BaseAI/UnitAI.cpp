@@ -93,7 +93,7 @@ void UnitAI::EnterEvadeMode()
 
 void UnitAI::AttackedBy(Unit* attacker)
 {
-    if (!m_unit->getVictim())
+    if (!m_unit->isInCombat() && !m_unit->getVictim())
         AttackStart(attacker);
 }
 
