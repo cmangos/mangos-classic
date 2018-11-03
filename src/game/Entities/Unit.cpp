@@ -5547,10 +5547,11 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
 
     m_attacking = victim;
 
-    if (GetTypeId() == TYPEID_UNIT)
+    if (AI())
     {
-        ((Creature*)this)->SendAIReaction(AI_REACTION_HOSTILE);
-        ((Creature*)this)->CallAssistance();
+        SendAIReaction(AI_REACTION_HOSTILE);
+        if (GetTypeId() == TYPEID_UNIT)
+            ((Creature*)this)->CallAssistance();
     }
 
     // delay offhand weapon attack to next attack time
