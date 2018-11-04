@@ -1693,7 +1693,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     if (spawnCounting)
         pCreature->SetSpawnCounting(true);
 
-    pCreature->GetMotionMaster()->SetPathId(pathId);
+    pCreature->GetMotionMaster()->SetDefaultPathId(pathId);
 
     pCreature->Summon(spwtype, despwtime);                  // Also initializes the AI and MMGen
 

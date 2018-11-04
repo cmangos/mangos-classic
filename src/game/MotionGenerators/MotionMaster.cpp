@@ -57,8 +57,9 @@ void MotionMaster::Initialize()
         MovementGenerator* movement = FactorySelector::selectMovementGenerator((Creature*)m_owner);
         push(movement == nullptr ? &si_idleMovement : movement);
         top()->Initialize(*m_owner);
+        m_currentPathId = m_defaultPathId;
         if (top()->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-            (static_cast<WaypointMovementGenerator<Creature>*>(top()))->InitializeWaypointPath(*((Creature*)(m_owner)), m_defaultPathId, PATH_NO_PATH, 0, 0);
+            (static_cast<WaypointMovementGenerator<Creature>*>(top()))->InitializeWaypointPath(*((Creature*)(m_owner)), m_currentPathId, PATH_NO_PATH, 0, 0);
     }
     else
         push(&si_idleMovement);
@@ -398,6 +399,7 @@ void MotionMaster::MoveWaypoint(uint32 pathId /*=0*/, uint32 source /*=0==PATH_N
         }
 
         Creature* creature = (Creature*)m_owner;
+        m_currentPathId = pathId;
 
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s start MoveWaypoint()", m_owner->GetGuidStr().c_str());
         WaypointMovementGenerator<Creature>* newWPMMgen = new WaypointMovementGenerator<Creature>(*creature);
