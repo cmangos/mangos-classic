@@ -691,113 +691,6 @@ inline bool IsScriptTarget(uint32 target)
     return false;
 }
 
-// Reverse engineered from binary: do not alter
-inline bool IsHarmfulSpellTargetAtClient(uint32 target)
-{
-    switch (target)
-    {
-        case TARGET_UNIT_ENEMY_NEAR_CASTER:
-        case TARGET_UNIT_ENEMY:
-        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC:
-        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC:
-        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24:
-        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC:
-        case TARGET_LOCATION_CASTER_TARGET_POSITION:
-        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_54:
-            return true;
-        default:
-            return false;
-    }
-}
-
-// Reverse engineered from binary: do not alter
-inline bool IsHelpfulSpellTargetAtClient(uint32 target)
-{
-    switch (target)
-    {
-        case TARGET_UNIT_CASTER:
-        case TARGET_UNIT_FRIEND_NEAR_CASTER:
-        case TARGET_UNIT_NEAR_CASTER:
-        case TARGET_UNIT_CASTER_PET:
-        case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE:
-        case TARGET_UNIT_FRIEND:
-        case TARGET_UNIT_CASTER_MASTER:
-        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DYNOBJ_LOC:
-        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_SRC_LOC:
-        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DEST_LOC:
-        case TARGET_ENUM_UNITS_PARTY_AOE_AT_SRC_LOC:
-        case TARGET_ENUM_UNITS_PARTY_AOE_AT_DEST_LOC:
-        case TARGET_UNIT_PARTY:
-        case TARGET_UNIT_FRIEND_CHAIN_HEAL:
-        case TARGET_ENUM_UNITS_RAID_WITHIN_CASTER_RANGE:
-        case TARGET_UNIT_RAID:
-        case TARGET_UNIT_RAID_NEAR_CASTER:
-        case TARGET_ENUM_UNITS_FRIEND_IN_CONE:
-        case TARGET_UNIT_RAID_AND_CLASS:
-        case TARGET_PLAYER_RAID_NYI:
-            return true;
-        default:
-            return false;
-    }
-}
-
-// Reverse engineered from binary: do not alter
-inline bool IsHarmfulSpellEffectAtClient(const SpellEntry &entry, SpellEffectIndex effIndex)
-{
-    return (IsHarmfulSpellTargetAtClient(entry.EffectImplicitTargetA[effIndex]) || IsHarmfulSpellTargetAtClient(entry.EffectImplicitTargetB[effIndex]));
-}
-
-// Reverse engineered from binary: do not alter
-inline bool IsHelpfulSpellEffectAtClient(const SpellEntry &entry, SpellEffectIndex effIndex)
-{
-    if (IsHelpfulSpellTargetAtClient(entry.EffectImplicitTargetA[effIndex]))
-    {
-        if (entry.EffectImplicitTargetA[effIndex] != TARGET_UNIT_CASTER || entry.EffectApplyAuraName[effIndex] != SPELL_AURA_DUMMY)
-            return true;
-    }
-
-    if (IsHelpfulSpellTargetAtClient(entry.EffectImplicitTargetB[effIndex]))
-    {
-        if (entry.EffectImplicitTargetB[effIndex] != TARGET_UNIT_CASTER || entry.EffectApplyAuraName[effIndex] != SPELL_AURA_DUMMY)
-            return true;
-    }
-
-    return false;
-}
-
-// Reverse engineered from binary: do not alter
-enum SpellFaction
-{
-    SPELL_NEUTRAL = 0,
-    SPELL_HELPFUL = 1,
-    SPELL_HARMFUL = 2,
-};
-
-// Reverse engineered from binary: do not alter
-inline SpellFaction GetSpellFactionAtClient(const SpellEntry &entry, SpellEffectIndexMask mask = EFFECT_MASK_ALL)
-{
-    if (entry.Targets & TARGET_FLAG_UNIT_TARGET)
-        return SPELL_HELPFUL;
-
-    if (entry.Targets & TARGET_FLAG_OBJECT_UNK)
-        return SPELL_HARMFUL;
-
-    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-    {
-        // Customization: skip junk, skip by mask
-        if (!entry.Effect[i] || !(mask & (1 << i)))
-            continue;
-
-        if (IsHarmfulSpellEffectAtClient(entry, SpellEffectIndex(i)))
-            return SPELL_HARMFUL;
-
-        if (IsHelpfulSpellEffectAtClient(entry, SpellEffectIndex(i)))
-            return SPELL_HELPFUL;
-    }
-
-    return SPELL_NEUTRAL;
-}
-
 inline bool IsNeutralTarget(uint32 target)
 {
     // This is an exhaustive list for demonstrativeness and global search reasons.
@@ -2179,6 +2072,113 @@ class SpellMgr
                     return SPELL_WELL_FED;
             }
             return SPELL_NORMAL;
+        }
+
+        // Reverse engineered from binary: do not alter
+        static inline bool IsSpellTargetHarmfulAtClient(uint32 target)
+        {
+            switch (target)
+            {
+                case TARGET_UNIT_ENEMY_NEAR_CASTER:
+                case TARGET_UNIT_ENEMY:
+                case TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC:
+                case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC:
+                case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24:
+                case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC:
+                case TARGET_LOCATION_CASTER_TARGET_POSITION:
+                case TARGET_ENUM_UNITS_ENEMY_IN_CONE_54:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // Reverse engineered from binary: do not alter
+        static inline bool IsSpellTargetHelpfulAtClient(uint32 target)
+        {
+            switch (target)
+            {
+                case TARGET_UNIT_CASTER:
+                case TARGET_UNIT_FRIEND_NEAR_CASTER:
+                case TARGET_UNIT_NEAR_CASTER:
+                case TARGET_UNIT_CASTER_PET:
+                case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE:
+                case TARGET_UNIT_FRIEND:
+                case TARGET_UNIT_CASTER_MASTER:
+                case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DYNOBJ_LOC:
+                case TARGET_ENUM_UNITS_FRIEND_AOE_AT_SRC_LOC:
+                case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DEST_LOC:
+                case TARGET_ENUM_UNITS_PARTY_AOE_AT_SRC_LOC:
+                case TARGET_ENUM_UNITS_PARTY_AOE_AT_DEST_LOC:
+                case TARGET_UNIT_PARTY:
+                case TARGET_UNIT_FRIEND_CHAIN_HEAL:
+                case TARGET_ENUM_UNITS_RAID_WITHIN_CASTER_RANGE:
+                case TARGET_UNIT_RAID:
+                case TARGET_UNIT_RAID_NEAR_CASTER:
+                case TARGET_ENUM_UNITS_FRIEND_IN_CONE:
+                case TARGET_UNIT_RAID_AND_CLASS:
+                case TARGET_PLAYER_RAID_NYI:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // Reverse engineered from binary: do not alter
+        static inline bool IsSpellEffectHarmfulAtClient(const SpellEntry &entry, SpellEffectIndex effIndex)
+        {
+            return (IsSpellTargetHarmfulAtClient(entry.EffectImplicitTargetA[effIndex]) || IsSpellTargetHarmfulAtClient(entry.EffectImplicitTargetB[effIndex]));
+        }
+
+        // Reverse engineered from binary: do not alter
+        static inline bool IsSpellEffectHelpfulAtClient(const SpellEntry &entry, SpellEffectIndex effIndex)
+        {
+            if (IsSpellTargetHelpfulAtClient(entry.EffectImplicitTargetA[effIndex]))
+            {
+                if (entry.EffectImplicitTargetA[effIndex] != TARGET_UNIT_CASTER || entry.EffectApplyAuraName[effIndex] != SPELL_AURA_DUMMY)
+                    return true;
+            }
+
+            if (IsSpellTargetHelpfulAtClient(entry.EffectImplicitTargetB[effIndex]))
+            {
+                if (entry.EffectImplicitTargetB[effIndex] != TARGET_UNIT_CASTER || entry.EffectApplyAuraName[effIndex] != SPELL_AURA_DUMMY)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // Reverse engineered from binary: do not alter
+        enum SpellFaction
+        {
+            SPELL_NEUTRAL = 0,
+            SPELL_HELPFUL = 1,
+            SPELL_HARMFUL = 2,
+        };
+
+        // Reverse engineered from binary: do not alter
+        static inline SpellFaction GetSpellFactionAtClient(const SpellEntry &entry, SpellEffectIndexMask mask = EFFECT_MASK_ALL)
+        {
+            if (entry.Targets & TARGET_FLAG_UNIT_TARGET)
+                return SPELL_HELPFUL;
+
+            if (entry.Targets & TARGET_FLAG_OBJECT_UNK)
+                return SPELL_HARMFUL;
+
+            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            {
+                // Customization: skip junk, skip by mask
+                if (!entry.Effect[i] || !(mask & (1 << i)))
+                    continue;
+
+                if (IsSpellEffectHarmfulAtClient(entry, SpellEffectIndex(i)))
+                    return SPELL_HARMFUL;
+
+                if (IsSpellEffectHelpfulAtClient(entry, SpellEffectIndex(i)))
+                    return SPELL_HELPFUL;
+            }
+
+            return SPELL_NEUTRAL;
         }
 
         SpellThreatEntry const* GetSpellThreatEntry(uint32 spellid) const
