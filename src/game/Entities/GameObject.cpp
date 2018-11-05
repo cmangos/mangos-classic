@@ -567,14 +567,7 @@ void GameObject::Update(const uint32 diff)
 
             // if part of pool, let pool system schedule new spawn instead of just scheduling respawn
             if (uint16 poolid = sPoolMgr.IsPartOfAPool<GameObject>(GetGUIDLow()))
-            {
                 sPoolMgr.UpdatePool<GameObject>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
-                if (GameObject* linkedTrap = GetLinkedTrap())
-                {
-                    linkedTrap->SetLootState(GO_JUST_DEACTIVATED);
-                    linkedTrap->Delete();
-                }
-            }
 
             // can be not in world at pool despawn
             if (IsInWorld())
