@@ -50,6 +50,16 @@ class GameObjectAI
         */
         virtual void OnLootStateChange() {}
 
+        /*
+        * Called when a GO appears in the world to normal observers
+        */
+        virtual void JustSpawned() {}
+
+        /*
+        * Called when a GO disappears from the world to normal observers
+        */
+        virtual void JustDespawned() {}
+
     protected:
         GameObject* m_go;
 };
