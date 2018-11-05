@@ -92,8 +92,13 @@ void GameObject::AddToWorld()
     UpdateCollisionState();
 
     if (IsSpawned()) // need to prevent linked trap addition due to Pool system Map::Add abuse
+    {
         if (GameObject* linkedGO = SummonLinkedTrapIfAny())
             SetLinkedTrap(linkedGO);
+
+        if (AI())
+            AI()->JustSpawned();
+    }
 }
 
 void GameObject::RemoveFromWorld()
@@ -478,6 +483,9 @@ void GameObject::Update(const uint32 diff)
             // If nearby linked trap exists, despawn it
             if (GameObject* linkedTrap = GetLinkedTrap())
                 linkedTrap->SetLootState(GO_JUST_DEACTIVATED);
+
+            if (AI())
+                AI()->JustDespawned();
 
             switch (GetGoType())
             {
