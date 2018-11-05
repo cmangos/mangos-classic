@@ -1050,8 +1050,8 @@ GameObject* GameObject::SummonLinkedTrapIfAny() const
         linkedGO->SetUInt32Value(GAMEOBJECT_LEVEL, GetUInt32Value(GAMEOBJECT_LEVEL));
     }
 
-    GetMap()->Add(linkedGO);
     linkedGO->AIM_Initialize();
+    GetMap()->Add(linkedGO);
 
     return linkedGO;
 }
