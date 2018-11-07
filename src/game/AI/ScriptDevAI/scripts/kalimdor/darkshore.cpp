@@ -187,6 +187,7 @@ bool QuestAccept_npc_kerlonian(Player* pPlayer, Creature* pCreature, const Quest
         {
             pCreature->RemoveAurasDueToSpell(SPELL_BEAR_FORM);
             pCreature->SetStandState(UNIT_STAND_STATE_STAND);
+            pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             DoScriptText(SAY_KER_START, pCreature, pPlayer);
             pKerlonianAI->StartFollow(pPlayer, FACTION_ESCORT_N_FRIEND_PASSIVE, pQuest);
         }
@@ -505,7 +506,7 @@ struct npc_volcorAI : public npc_escortAI
         if (pQuest->GetQuestId() == QUEST_ESCAPE_THROUGH_STEALTH)
         {
             // Note: faction may not be correct, but only this way works fine
-            m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
+            m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
 
             Start(true, pPlayer, pQuest);
             SetEscortPaused(true);
