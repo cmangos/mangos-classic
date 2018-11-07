@@ -635,7 +635,7 @@ bool QuestAccept_npc_therylune(Player* pPlayer, Creature* pCreature, const Quest
         if (npc_theryluneAI* pEscortAI = dynamic_cast<npc_theryluneAI*>(pCreature->AI()))
         {
             pEscortAI->Start(false, pPlayer, pQuest);
-            pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            pCreature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
             DoScriptText(SAY_THERYLUNE_START, pCreature, pPlayer);
         }
     }
