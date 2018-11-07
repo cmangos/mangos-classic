@@ -449,7 +449,7 @@ bool QuestAccept_npc_ogron(Player* pPlayer, Creature* pCreature, const Quest* pQ
         if (npc_ogronAI* pEscortAI = dynamic_cast<npc_ogronAI*>(pCreature->AI()))
         {
             pEscortAI->Start(false, pPlayer, pQuest, true);
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+            pCreature->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
             DoScriptText(SAY_OGR_START, pCreature, pPlayer);
         }
     }
