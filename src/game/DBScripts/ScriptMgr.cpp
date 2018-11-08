@@ -1546,7 +1546,9 @@ bool ScriptAction::HandleScriptStep()
         }
         case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:             // 9
         {
-            GameObject* pGo;
+            GameObject* pGo = nullptr;
+            uint32 time_to_despawn = m_script->respawnGo.despawnDelay;
+
             if (m_script->respawnGo.goGuid)
             {
                 GameObjectData const* goData = sObjectMgr.GetGOData(m_script->respawnGo.goGuid);
@@ -1580,11 +1582,14 @@ bool ScriptAction::HandleScriptStep()
             if (pGo->IsSpawned())
                 break;                                      // gameobject already spawned
 
-            uint32 time_to_despawn = m_script->respawnGo.despawnDelay < 5 ? 5 : m_script->respawnGo.despawnDelay;
-
-            pGo->SetLootState(GO_READY);
-            pGo->SetRespawnTime(time_to_despawn);           // despawn object in ? seconds
-            pGo->Refresh();
+            if (pGo->IsSpawnedByDefault()) // static spawned go - can only respawn
+                pGo->Respawn();
+            else
+            {
+                pGo->SetLootState(GO_READY);
+                pGo->SetRespawnTime(time_to_despawn);           // despawn object in ? seconds
+                pGo->Refresh();
+            }
             break;
         }
         case SCRIPT_COMMAND_TEMP_SPAWN_CREATURE:            // 10
