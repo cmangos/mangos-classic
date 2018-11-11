@@ -4359,6 +4359,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 
     const uint32 spellId = holder->GetId();
     const SpellSpecific specific = GetSpellSpecific(spellId);
+    auto drGroup = holder->getDiminishGroup();
     SpellEntry const* triggeredBy = holder->GetTriggeredBy();
 
     SpellAuraHolderMap::iterator next;
@@ -4376,6 +4377,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 
         const uint32 existingSpellId = existingSpellProto->Id;
         const SpellSpecific existingSpecific = GetSpellSpecific(existingSpellId);
+        auto existingDrGroup = existing->getDiminishGroup();
         const bool own = (holder->GetCasterGuid() == existing->GetCasterGuid());
 
         // early checks that spellId is passive non stackable spell
@@ -4405,6 +4407,14 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             unique = (personal || IsSpellSpecificUniquePerTarget(specific));
         }
 
+        bool diminished = false;
+        // Remove any existing holders from the same diminishing returns group by treating as unique
+        if (!unique && drGroup)
+        {
+            diminished = (drGroup == existingDrGroup);
+            unique = diminished;
+        }
+
         const bool stackable = !sSpellMgr.IsNoStackSpellDueToSpell(spellProto, existingSpellProto);
         if (unique || !stackable)
         {
@@ -4416,8 +4426,12 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             {
                 if (personal && stackable)
                     continue;
-                // holder cannot remove higher rank if it isn't from the same caster
-                if (IsSimilarExistingAuraStronger(holder, existing) || (sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId) && sSpellMgr.IsSpellHigherRankOfSpell(existingSpellId, spellId)))
+
+                // holder cannot remove higher/stronger rank if it isn't from the same caster
+                if (IsSimilarExistingAuraStronger(holder, existing))
+                    return false;
+
+                if (!diminished && sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId) && sSpellMgr.IsSpellHigherRankOfSpell(existingSpellId, spellId))
                     return false;
             }
 
