@@ -1922,7 +1922,7 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
             if (sSpellMgr.IsSpellAnotherRankOfSpell(spell_id, oldspell_id))
             {
                 // replace by new high rank
-                if (sSpellMgr.IsHighRankOfSpell(spell_id, oldspell_id))
+                if (sSpellMgr.IsSpellHigherRankOfSpell(spell_id, oldspell_id))
                 {
                     newspell.active = itr2->second.active;
 
@@ -1933,7 +1933,7 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
                     break;
                 }
                 // ignore new lesser rank
-                if (sSpellMgr.IsHighRankOfSpell(oldspell_id, spell_id))
+                if (sSpellMgr.IsSpellHigherRankOfSpell(oldspell_id, spell_id))
                     return false;
             }
         }

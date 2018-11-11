@@ -4579,7 +4579,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!own && sSpellMgr.IsNoStackSpellDueToSpell(m_spellInfo, entry))
                     {
                         if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing) ||
-                            (sSpellMgr.IsSpellAnotherRankOfSpell(m_spellInfo->Id, entry->Id) && sSpellMgr.IsHighRankOfSpell(entry->Id, m_spellInfo->Id)))
+                            (sSpellMgr.IsSpellAnotherRankOfSpell(m_spellInfo->Id, entry->Id) && sSpellMgr.IsSpellHigherRankOfSpell(entry->Id, m_spellInfo->Id)))
                             return SPELL_FAILED_AURA_BOUNCED;
                     }
                 }

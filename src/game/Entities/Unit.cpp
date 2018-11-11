@@ -4378,7 +4378,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
                 if (personal && stackable)
                     continue;
                 // holder cannot remove higher rank if it isn't from the same caster
-                if (IsSimilarExistingAuraStronger(holder, existing) || (sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId) && sSpellMgr.IsHighRankOfSpell(existingSpellId, spellId)))
+                if (IsSimilarExistingAuraStronger(holder, existing) || (sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId) && sSpellMgr.IsSpellHigherRankOfSpell(existingSpellId, spellId)))
                     return false;
             }
 
