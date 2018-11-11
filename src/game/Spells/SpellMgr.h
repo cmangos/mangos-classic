@@ -1487,16 +1487,6 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
                 break;
             nonmui = true;
             break;
-        case SPELL_AURA_MOD_FEAR: // Fear/confuse effects: do not stack with the same mechanic type
-        case SPELL_AURA_MOD_CONFUSE:
-            return (entry->Mechanic != entry2->Mechanic);
-            break;
-        case SPELL_AURA_MOD_STUN: // Stun/root effects: prefer refreshing (overwrite) existing types if possible
-        case SPELL_AURA_MOD_ROOT:
-            if (entry->Mechanic != entry2->Mechanic)
-                return true;
-            nonmui = true;
-            break;
         case SPELL_AURA_MOD_RATING: // Whitelisted, Rejuvenation has this
         case SPELL_AURA_MOD_SPELL_CRIT_CHANCE: // Party auras whitelist for Totem of Wrath
         case SPELL_AURA_MOD_SPELL_HIT_CHANCE: // Party auras whitelist for Totem of Wrath
