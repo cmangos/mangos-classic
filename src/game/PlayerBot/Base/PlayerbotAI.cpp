@@ -5275,7 +5275,6 @@ void PlayerbotAI::UseItem(Item* item, uint16 targetFlag, ObjectGuid targetGUID)
 
     uint8 bagIndex = item->GetBagSlot();
     uint8 slot = item->GetSlot();
-    uint8 spell_count = 1;
     ObjectGuid item_guid = item->GetObjectGuid();
 
     if (uint32 questid = item->GetProto()->StartQuest)
@@ -5298,11 +5297,13 @@ void PlayerbotAI::UseItem(Item* item, uint16 targetFlag, ObjectGuid targetGUID)
     }
 
     uint32 spellId = 0;
+    uint8 spell_index = 0;
     for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
     {
         if (item->GetProto()->Spells[i].SpellId > 0)
         {
             spellId = item->GetProto()->Spells[i].SpellId;
+            spell_index = i;
             break;
         }
     }
@@ -5335,7 +5336,7 @@ void PlayerbotAI::UseItem(Item* item, uint16 targetFlag, ObjectGuid targetGUID)
     std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_USE_ITEM, 13));
     *packet << bagIndex;
     *packet << slot;
-    *packet << spell_count;
+    *packet << spell_index;
     *packet << targetFlag;
 
     if (targetFlag & (TARGET_FLAG_UNIT | TARGET_FLAG_ITEM | TARGET_FLAG_OBJECT))
