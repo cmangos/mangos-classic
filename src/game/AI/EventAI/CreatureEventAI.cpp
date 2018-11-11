@@ -287,12 +287,6 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
 
     CreatureEventAI_Event const& event = holder.event;
 
-    uint32 rnd = urand();
-
-    // Return if chance for event is not met
-    if (holder.event.event_chance <= rnd % 100)
-        return false;
-
     // Check event conditions based on the event type, also reset events
     switch (event.event_type)
     {
@@ -572,14 +566,24 @@ void CreatureEventAI::CheckAndReadyEventForExecution(CreatureEventAIHolder& hold
 bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& holder, Unit* actionInvoker, Unit* AIEventSender /*=nullptr*/)
 {
     bool actionSuccess = false;
-    uint32 rnd = urand();
     if (holder.event.event_flags & EFLAG_COMBAT_ACTION && !CanExecuteCombatAction())
     {
         holder.inProgress = false;
         return false;
     }
 
+    uint32 rnd = urand();
+
+    // Reset timer if roll failed
+    if (holder.event.event_chance <= rnd % 100)
+    {
+        ResetEvent(holder);
+        holder.inProgress = false;
+        return false;
+    }
+
     // Process actions, normal case
+    rnd = urand();
     if (!(holder.event.event_flags & EFLAG_RANDOM_ACTION))
     {
         actionSuccess = ProcessAction(holder.event.action[0], rnd, holder.event.event_id, actionInvoker, AIEventSender, holder.eventTarget);
