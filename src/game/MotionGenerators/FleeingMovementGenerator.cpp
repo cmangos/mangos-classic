@@ -64,37 +64,23 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T& owner)
 template<class T>
 bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float& z)
 {
-    float dist_from_caster, angle_to_caster;
-    if (Unit* fright = ObjectAccessor::GetUnit(owner, i_frightGuid))
-    {
-        dist_from_caster = fright->GetDistance(&owner);
-        if (dist_from_caster > 0.2f)
-            angle_to_caster = fright->GetAngle(&owner);
-        else
-            angle_to_caster = frand(0, 2 * M_PI_F);
-    }
-    else
-    {
-        dist_from_caster = 0.0f;
-        angle_to_caster = frand(0, 2 * M_PI_F);
-    }
+    float dist_from_caster;
 
-    float dist, angle;
+    if (Unit* fright = ObjectAccessor::GetUnit(owner, i_frightGuid))
+        dist_from_caster = fright->GetDistance(&owner);
+    else
+        dist_from_caster = 0.0f;
+
+    float angle = frand(0, 2 * M_PI_F);
+
+    float dist;
+
     if (dist_from_caster < MIN_QUIET_DISTANCE)
-    {
         dist = frand(0.4f, 1.3f) * (MIN_QUIET_DISTANCE - dist_from_caster);
-        angle = angle_to_caster + frand(-M_PI_F / 8, M_PI_F / 8);
-    }
     else if (dist_from_caster > MAX_QUIET_DISTANCE)
-    {
         dist = frand(0.4f, 1.0f) * (MAX_QUIET_DISTANCE - MIN_QUIET_DISTANCE);
-        angle = -angle_to_caster + frand(-M_PI_F / 4, M_PI_F / 4);
-    }
     else    // we are inside quiet range
-    {
         dist = frand(0.6f, 1.2f) * (MAX_QUIET_DISTANCE - MIN_QUIET_DISTANCE);
-        angle = frand(0, 2 * M_PI_F);
-    }
 
     float curr_x, curr_y, curr_z;
     owner.GetPosition(curr_x, curr_y, curr_z);
