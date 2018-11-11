@@ -60,7 +60,9 @@ namespace MaNGOS
 
     void Socket::Close()
     {
-        assert(!IsClosed());
+        std::lock_guard<std::mutex> guard(m_closeMutex);
+        if (IsClosed())
+            return;
 
         boost::system::error_code ec;
         m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
