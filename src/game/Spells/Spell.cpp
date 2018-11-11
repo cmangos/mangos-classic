@@ -1189,20 +1189,32 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             }
         }
 
-        // Failed hostile spell hits count as attack made against target (if detected)
         if (real_caster && real_caster != unit)
         {
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
-                    !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) &&
-                    !IsPositiveSpell(m_spellInfo->Id, real_caster, unit) &&
-                    m_caster->isVisibleForOrDetect(unit, unit, false))
-            {
-                if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
-                    ((Creature*)unit)->AI()->AttackedBy(real_caster);
+            const bool combat = (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT));
+            const bool touch = (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK));
 
-                unit->AddThreat(real_caster);
-                unit->SetInCombatWithAggressor(real_caster);
-                real_caster->SetInCombatWithVictim(unit);
+            if (combat || touch)
+            {
+                // Failed hostile spell hits count as attack made against target (if detected)
+                if (const bool attack = (!IsPositiveSpell(m_spellInfo->Id, real_caster, unit) && m_caster->isVisibleForOrDetect(unit, unit, false)))
+                {
+                    if (combat)
+                    {
+                        if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
+                            ((Creature*)unit)->AI()->AttackedBy(real_caster);
+
+                        unit->AddThreat(real_caster);
+                        unit->SetInCombatWithAggressor(real_caster);
+                        real_caster->SetInCombatWithVictim(unit);
+                    }
+
+                    if (touch)
+                    {
+                        unit->SetOutOfCombatWithAggressor(real_caster);
+                        real_caster->SetOutOfCombatWithVictim(unit);
+                    }
+                }
             }
         }
     }
