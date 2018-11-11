@@ -405,10 +405,7 @@ bool WorldSession::Update(PacketFilter& updater)
 
                     m_Socket = m_requestSocket;
                     m_requestSocket = nullptr;
-                    sLog.outString("New Session key %s", m_Socket->GetSessionKey().AsHexStr());
-                    WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
-                    packet << uint8(AUTH_OK);
-                    SendPacket(packet, true);
+                    SendAuthOk();
                 }
                 else
                 {
