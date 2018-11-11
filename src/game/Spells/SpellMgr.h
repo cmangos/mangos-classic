@@ -2336,7 +2336,11 @@ class SpellMgr
             return false;
         }
 
-        bool IsRankSpellDueToSpell(SpellEntry const* spellInfo_1, uint32 spellId_2) const;
+        inline bool IsSpellAnotherRankOfSpell(uint32 spellId1, uint32 spellId2) const
+        {
+            return (spellId1 != spellId2 && GetFirstSpellInChain(spellId1) == GetFirstSpellInChain(spellId2));
+        }
+
         bool IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const;
         bool IsSingleTargetSpell(SpellEntry const* entry) const
         {

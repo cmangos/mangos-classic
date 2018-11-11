@@ -1919,7 +1919,7 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
 
             uint32 const oldspell_id = itr2->first;
 
-            if (sSpellMgr.IsRankSpellDueToSpell(spellInfo, oldspell_id))
+            if (sSpellMgr.IsSpellAnotherRankOfSpell(spell_id, oldspell_id))
             {
                 // replace by new high rank
                 if (sSpellMgr.IsHighRankOfSpell(spell_id, oldspell_id))

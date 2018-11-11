@@ -2872,7 +2872,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                 SpellEntry const* i_spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_spell.first);
                 if (!i_spellInfo) continue;
 
-                if (sSpellMgr.IsRankSpellDueToSpell(spellInfo, m_spell.first))
+                if (sSpellMgr.IsSpellAnotherRankOfSpell(spell_id, m_spell.first))
                 {
                     if (playerSpell2.active)
                     {

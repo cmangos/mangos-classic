@@ -4271,7 +4271,7 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
         uint32 i_spellId = (*i).second->GetId();
         if ((*i).second && i_spellId && i_spellId != spellId)
         {
-            if (sSpellMgr.IsRankSpellDueToSpell(spellInfo, i_spellId))
+            if (sSpellMgr.IsSpellAnotherRankOfSpell(spellId, i_spellId))
             {
                 RemoveAurasDueToSpell(i_spellId);
 
@@ -4347,7 +4347,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
                 continue;
 
             // passive non-stackable spells not stackable only with another rank of same spell
-            if (!sSpellMgr.IsRankSpellDueToSpell(spellProto, existingSpellId))
+            if (!sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId))
                 continue;
         }
 
@@ -4378,7 +4378,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
                 if (personal && stackable)
                     continue;
                 // holder cannot remove higher rank if it isn't from the same caster
-                if (IsSimilarExistingAuraStronger(holder, existing) || (sSpellMgr.IsRankSpellDueToSpell(spellProto, existingSpellId) && sSpellMgr.IsHighRankOfSpell(existingSpellId, spellId)))
+                if (IsSimilarExistingAuraStronger(holder, existing) || (sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId) && sSpellMgr.IsHighRankOfSpell(existingSpellId, spellId)))
                     return false;
             }
 
