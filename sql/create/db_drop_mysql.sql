@@ -1,21 +1,7 @@
-REVOKE ALL PRIVILEGES ON * . * FROM 'mangos'@'localhost';
+/* Delete default user and its privileges (require MYSQL 5.7, MARIADB 10.1.3) */
+DROP USER IF EXISTS `mangos`;
 
-REVOKE ALL PRIVILEGES ON `classicmangos` . * FROM 'mangos'@'localhost';
-
-REVOKE GRANT OPTION ON `classicmangos` . * FROM 'mangos'@'localhost';
-
-REVOKE ALL PRIVILEGES ON `classiccharacters` . * FROM 'mangos'@'localhost';
-
-REVOKE GRANT OPTION ON `classiccharacters` . * FROM 'mangos'@'localhost';
-
-REVOKE ALL PRIVILEGES ON `classicrealmd` . * FROM 'mangos'@'localhost';
-
-REVOKE GRANT OPTION ON `classicrealmd` . * FROM 'mangos'@'localhost';
-
-DELETE FROM `user` WHERE CONVERT( User USING utf8 ) = CONVERT( 'mangos' USING utf8 ) AND CONVERT( Host USING utf8 ) = CONVERT( 'localhost' USING utf8 ) ;
-
-DROP DATABASE IF EXISTS `classicmangos` ;
-
-DROP DATABASE IF EXISTS `classiccharacters` ;
-
-DROP DATABASE IF EXISTS `classicrealmd` ;
+/* Delete default tables */
+DROP DATABASE IF EXISTS `classicmangos`;
+DROP DATABASE IF EXISTS `classiccharacters`;
+DROP DATABASE IF EXISTS `classicrealmd`;
