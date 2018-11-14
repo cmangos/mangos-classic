@@ -10996,10 +10996,13 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                         break;
                     }
 
-                    std::string reqQuestIds = botConfig.GetStringDefault("PlayerbotAI.BotguyQuests", "");
-                    uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost", 0);
-                    if ((reqQuestIds == "" || requiredQuests(reqQuestIds.c_str())) && !pCreature->isInnkeeper() && this->GetMoney() >= cost)
-                        pCreature->LoadBotMenu(this);
+                    int32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost", 0);
+                    if (cost >= 0)
+                    {
+                        std::string reqQuestIds = botConfig.GetStringDefault("PlayerbotAI.BotguyQuests", "");
+                        if ((reqQuestIds == "" || requiredQuests(reqQuestIds.c_str())) && !pCreature->isInnkeeper() && this->GetMoney() >= (uint32)cost)
+                            pCreature->LoadBotMenu(this);
+                    }
 #endif
                     hasMenuItem = false;
                     break;
@@ -11247,7 +11250,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
             // DEBUG_LOG("GOSSIP_OPTION_BOT");
             PlayerTalkClass->CloseGossip();
             uint32 guidlo = PlayerTalkClass->GossipOptionSender(gossipListId);
-            uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost", 0);
+            int32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost", 0);
 
             if (!GetPlayerbotMgr())
                 SetPlayerbotMgr(new PlayerbotMgr(this));
