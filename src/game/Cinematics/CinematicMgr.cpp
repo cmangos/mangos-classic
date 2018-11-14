@@ -56,7 +56,7 @@ void CinematicMgr::BeginCinematic()
             Position pos { camitr->locations.x, camitr->locations.y, camitr->locations.z, camitr->locations.w };
             if (!MaNGOS::IsValidMapCoord(pos.x, pos.y, pos.z, pos.o))
                 return;
-            
+
             player->GetMap()->ForceLoadGrid(camitr->locations.x, camitr->locations.y);
             m_CinematicObject = player->SummonCreature(VISUAL_WAYPOINT, pos.x, pos.y, pos.z, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
             if (m_CinematicObject)
@@ -93,10 +93,22 @@ void CinematicMgr::EndCinematic()
     }
 }
 
-void CinematicMgr::UpdateCinematicLocation(uint32 /*diff*/)
+bool CinematicMgr::UpdateCinematicLocation(uint32 diff)
 {
-    if (m_activeCinematicCameraId == 0 || !m_cinematicCamera || m_cinematicCamera->size() == 0)
-        return;
+    // should not occur
+    if (m_activeCinematicCameraId == 0)
+        return false;
+
+    // If we never received an end packet 10 seconds after the final timestamp then force an end
+    if (m_cinematicDiff > m_cinematicLength + 10 * IN_MILLISECONDS)
+    {
+        EndCinematic();
+        return false;
+    }
+
+    // just created and waiting BeginCinematic call
+    if (!m_cinematicCamera || m_cinematicCamera->size() == 0)
+        return true;
 
     Position lastPosition;
     uint32 lastTimestamp = 0;
@@ -167,12 +179,10 @@ void CinematicMgr::UpdateCinematicLocation(uint32 /*diff*/)
     Position interPosition = { lastPosition.x + (xDiff * (float(interDiff) / float(timeDiff))), lastPosition.y +
         (yDiff * (float(interDiff) / float(timeDiff))), lastPosition.z + (zDiff * (float(interDiff) / float(timeDiff))), 0.0f };
 
-    // Advance (at speed) to this position. The remote sight object is used 
+    // Advance (at speed) to this position. The remote sight object is used
     // to send update information to player in cinematic
     if (m_CinematicObject && MaNGOS::IsValidMapCoord(interPosition.x, interPosition.y, interPosition.z, interPosition.o))
         m_CinematicObject->MonsterMoveWithSpeed(interPosition.x, interPosition.y, interPosition.z, 500.0f, false, true);
 
-    // If we never received an end packet 10 seconds after the final timestamp then force an end
-    if (m_cinematicDiff > m_cinematicLength + 10 * IN_MILLISECONDS)
-        EndCinematic();
+    return true;
 }

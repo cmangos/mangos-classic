@@ -23,9 +23,12 @@
 #include "M2Stores.h"
 
 #define CINEMATIC_LOOKAHEAD (2 * IN_MILLISECONDS)
-#define CINEMATIC_UPDATEDIFF 500
+#define CINEMATIC_UPDATEDIFF 200
 
 class Player;
+class CinematicMgr;
+
+typedef std::unique_ptr<CinematicMgr> CinematicMgrUPtr;
 
 class CinematicMgr
 {
@@ -40,7 +43,7 @@ public:
     bool IsOnCinematic() const { return (m_cinematicCamera != nullptr); }
     void BeginCinematic();
     void EndCinematic();
-    void UpdateCinematicLocation(uint32 diff);
+    bool UpdateCinematicLocation(uint32 diff);
 
 private:
     // Remote location information

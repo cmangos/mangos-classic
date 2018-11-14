@@ -983,7 +983,7 @@ void ExtractDBCFiles()
     printf("Extracted %u DBC files\n\n", count);
 }
 
-void ExtractCameraFiles(int locale, bool basicLocale)
+void ExtractCameraFiles()
 {
     printf("Extracting camera files...\n");
     DBCFile camdbc("DBFilesClient\\CinematicCamera.dbc");
@@ -1010,12 +1010,6 @@ void ExtractCameraFiles(int locale, bool basicLocale)
     std::string path = output_path;
     path += "/Cameras/";
     CreateDir(path);
-    if (!basicLocale)
-    {
-        path += langs[locale];
-        path += "/";
-        CreateDir(path);
-    }
 
     // extract M2s
     uint32 count = 0;
@@ -1031,25 +1025,6 @@ void ExtractCameraFiles(int locale, bool basicLocale)
             ++count;
     }
     printf("Extracted %u camera files\n", count);
-}
-
-void LoadLocaleMPQFiles(int const locale)
-{
-    char filename[512];
-
-    sprintf(filename, "%s/Data/%s/locale-%s.MPQ", input_path, langs[locale], langs[locale]);
-    new MPQArchive(filename);
-
-    for (int i = 1; i < 5; ++i)
-    {
-        char ext[3] = "";
-        if (i > 1)
-            sprintf(ext, "-%i", i);
-
-        sprintf(filename, "%s/Data/%s/patch-%s%s.MPQ", input_path, langs[locale], langs[locale], ext);
-        if (FileExists(filename))
-            new MPQArchive(filename);
-    }
 }
 
 void LoadCommonMPQFiles()
@@ -1080,23 +1055,12 @@ int main(int argc, char* arg[])
     // Open MPQs
     LoadCommonMPQFiles();
 
-
     // Extract dbc
     if (CONF_extract & EXTRACT_DBC)
         ExtractDBCFiles();
 
     if (CONF_extract & EXTRACT_CAMERA)
-    {
-        printf("Using locale: %s\n", langs[FirstLocale]);
-
-        // Open MPQs
-        LoadLocaleMPQFiles(FirstLocale);
-        LoadCommonMPQFiles();
-
-        ExtractCameraFiles(FirstLocale, true);
-        // Close MPQs
-        CloseMPQFiles();
-    }
+        ExtractCameraFiles();
 
     // Extract maps
     if (CONF_extract & EXTRACT_MAP)

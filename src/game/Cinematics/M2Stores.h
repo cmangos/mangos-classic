@@ -20,12 +20,18 @@
 #define MANGOS_M2STORES_H
 
 #include "Common.h"
-#include <G3D/Vector4.h>
+
+struct CamLocation
+{
+    CamLocation() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
+    CamLocation(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
+    float x, y, z, w;
+};
 
 struct FlyByCamera
 {
     uint32 timeStamp;
-    G3D::Vector4 locations;
+    CamLocation locations;
 };
 
 typedef std::vector<FlyByCamera> FlyByCameraCollection;

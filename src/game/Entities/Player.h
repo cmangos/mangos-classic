@@ -978,7 +978,7 @@ class Player : public Unit
         void TextEmote(const std::string& text) const;
         void Whisper(const std::string& text, const uint32 language, ObjectGuid receiver);
 
-        CinematicMgr* GetCinematicMgr() const { return _cinematicMgr; }
+        CinematicMgr* GetCinematicMgr() const { return m_cinematicMgr.get(); }
 
         /*********************************************************/
         /***                    TAXI SYSTEM                    ***/
@@ -1518,6 +1518,8 @@ class Player : public Unit
 
         void UpdateClientAuras();
         void SendPetBar();
+        void StartCinematic();
+        void StopCinematic();
         bool UpdateSkill(uint32 skill_id, uint32 step);
         bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);
 
@@ -2325,7 +2327,7 @@ class Player : public Unit
         InventoryResult _CanStoreItem_InInventorySlots(uint8 slot_begin, uint8 slot_end, ItemPosCountVec& dest, ItemPrototype const* pProto, uint32& count, bool merge, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot) const;
         Item* _StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool update);
 
-        CinematicMgr* _cinematicMgr;
+        CinematicMgrUPtr m_cinematicMgr;
 
         void AdjustQuestReqItemCount(Quest const* pQuest, QuestStatusData& questStatusData);
 
