@@ -5391,11 +5391,12 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
                     RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
             }
 
+            target->AttackedBy(realCaster);
+
             target->AddThreat(realCaster);
+            realCaster->AddThreat(target);
             target->SetInCombatWithAggressor(realCaster);
             realCaster->SetInCombatWithVictim(target);
-
-            target->AttackedBy(realCaster);
         }
 
         if (attack && spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
