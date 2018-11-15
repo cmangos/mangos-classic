@@ -945,7 +945,7 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, b
         for (auto lootItem : m_lootItems)
         {
             // roll for over-threshold item if it's one-player loot
-            if (!lootItem->freeForAll && lootItem->itemProto->Quality < uint32(m_threshold))
+            if (lootItem->freeForAll || lootItem->itemProto->Quality < uint32(m_threshold))
                 lootItem->isUnderThreshold = true;
             else
             {
@@ -970,7 +970,7 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, b
                 }
             }
 
-            if (player && (lootItem->lootItemType == LOOTITEM_TYPE_NORMAL || lootItem->AllowedForPlayer(player, GetLootTarget())))
+            if (player && (lootItem->AllowedForPlayer(player, GetLootTarget())))
             {
                 if (!m_isChest)
                     lootItem->allowedGuid.emplace(player->GetObjectGuid());
@@ -991,7 +991,7 @@ uint32 Loot::GetLootStatusFor(Player const* player) const
 {
     uint32 status = 0;
 
-    if (m_isFakeLoot && !IsLootOpenedBy(player->GetObjectGuid()))
+    if (m_isFakeLoot && m_playersOpened.empty())
         return LOOT_STATUS_FAKE_LOOT;
 
     if (m_gold != 0)
@@ -1022,19 +1022,6 @@ bool Loot::IsLootedFor(Player const* player) const
 
 bool Loot::IsLootedForAll() const
 {
-    if (m_isChest)
-    {
-        for (auto item : m_lootItems)
-        {
-            if (item->freeForAll)
-                return false;
-
-            if (item->allowedGuid.empty())
-                return false;
-        }
-        return true;
-    }
-
     for (auto itr : m_ownerSet)
     {
         Player* player = ObjectAccessor::FindPlayer(itr);
@@ -1403,6 +1390,8 @@ void Loot::Release(Player* player)
 
                     if (m_isFakeLoot)
                     {
+                        SendReleaseForAll();
+                        creature->SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
                         m_lootTarget->ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);
                         break;
                     }
@@ -1718,6 +1707,10 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
             if (!creature->isAlive() || player->getClass() != CLASS_ROGUE)
                 return;
 
+            // setting loot right
+            m_ownerSet.insert(player->GetObjectGuid());
+            m_lootMethod = NOT_GROUP_TYPE_LOOT;
+
             if (!creatureInfo->LootId || !FillLoot(creatureInfo->PickpocketLootId, LootTemplates_Pickpocketing, player, false))
             {
                 sLog.outError("Loot::CreateLoot> cannot create pickpocket loot, FillLoot failed with loot id(%u)!", creatureInfo->LootId);
@@ -1729,23 +1722,19 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
             const uint32 b = urand(0, player->getLevel() / 2);
             m_gold = uint32(10 * (a + b) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
 
-            // setting loot right
-            m_ownerSet.insert(player->GetObjectGuid());
-            m_lootMethod = NOT_GROUP_TYPE_LOOT;
             break;
         }
         case LOOT_SKINNING:
         {
+            // setting loot right
+            m_ownerSet.insert(player->GetObjectGuid());
             m_clientLootType = CLIENT_LOOT_PICKPOCKETING;
+            m_lootMethod = NOT_GROUP_TYPE_LOOT;
             if (!creatureInfo->SkinningLootId || !FillLoot(creatureInfo->SkinningLootId, LootTemplates_Skinning, player, false))
             {
                 sLog.outError("Loot::CreateLoot> cannot create skinning loot, FillLoot failed with loot id(%u)!", creatureInfo->SkinningLootId);
                 return;
             }
-
-            // setting loot right
-            m_ownerSet.insert(player->GetObjectGuid());
-            m_lootMethod = NOT_GROUP_TYPE_LOOT;
             break;
         }
         default:
@@ -1804,29 +1793,29 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
         {
             case LOOT_FISHING_FAIL:
             {
-                // Entry 0 in fishing loot template used for store junk fish loot at fishing fail it junk allowed by config option
-                // this is overwrite fishinghole loot for example
-                FillLoot(0, LootTemplates_Fishing, player, true);
-
                 // setting loot right
                 m_ownerSet.insert(player->GetObjectGuid());
                 m_lootMethod = NOT_GROUP_TYPE_LOOT;
                 m_clientLootType = CLIENT_LOOT_FISHING;
+
+                // Entry 0 in fishing loot template used for store junk fish loot at fishing fail it junk allowed by config option
+                // this is overwrite fishinghole loot for example
+                FillLoot(0, LootTemplates_Fishing, player, true);
                 break;
             }
             case LOOT_FISHING:
             {
+                // setting loot right
+                m_ownerSet.insert(player->GetObjectGuid());
+                m_lootMethod = NOT_GROUP_TYPE_LOOT;
+                m_clientLootType = CLIENT_LOOT_FISHING;
+
                 uint32 zone, subzone;
                 gameObject->GetZoneAndAreaId(zone, subzone);
                 // if subzone loot exist use it
                 if (!FillLoot(subzone, LootTemplates_Fishing, player, true, (subzone != zone)) && subzone != zone)
                     // else use zone loot (if zone diff. from subzone, must exist in like case)
                     FillLoot(zone, LootTemplates_Fishing, player, true);
-
-                // setting loot right
-                m_ownerSet.insert(player->GetObjectGuid());
-                m_lootMethod = NOT_GROUP_TYPE_LOOT;
-                m_clientLootType = CLIENT_LOOT_FISHING;
                 break;
             }
             default:
@@ -1886,15 +1875,17 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
         else
             pLevel = player->getLevel(); // TODO:: not correct, need to save real player level in the corpse data in case of logout
 
+         m_ownerSet.insert(player->GetObjectGuid());
+         m_lootMethod = NOT_GROUP_TYPE_LOOT;
+         m_clientLootType = CLIENT_LOOT_CORPSE;
+
         if (player->GetBattleGround()->GetTypeID() == BATTLEGROUND_AV)
             FillLoot(0, LootTemplates_Creature, player, false);
+
         // It may need a better formula
         // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
         m_gold = (uint32)(urand(50, 150) * 0.016f * pow(((float)pLevel) / 5.76f, 2.5f) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
     }
-    m_ownerSet.insert(player->GetObjectGuid());
-    m_lootMethod = NOT_GROUP_TYPE_LOOT;
-    m_clientLootType = CLIENT_LOOT_CORPSE;
     return;
 }
 
@@ -1919,6 +1910,9 @@ Loot::Loot(Player* player, Item* item, LootType type) :
     m_itemTarget = item;
     m_guidTarget = item->GetObjectGuid();
 
+    m_ownerSet.insert(player->GetObjectGuid());
+    m_lootMethod = NOT_GROUP_TYPE_LOOT;
+    m_clientLootType = CLIENT_LOOT_PICKPOCKETING;
     switch (type)
     {
         case LOOT_DISENCHANTING:
@@ -1931,9 +1925,6 @@ Loot::Loot(Player* player, Item* item, LootType type) :
             item->SetLootState(ITEM_LOOT_CHANGED);
             break;
     }
-    m_ownerSet.insert(player->GetObjectGuid());
-    m_lootMethod = NOT_GROUP_TYPE_LOOT;
-    m_clientLootType = CLIENT_LOOT_PICKPOCKETING;
     return;
 }
 
@@ -1951,6 +1942,7 @@ Loot::Loot(Player* player, uint32 id, LootType type) :
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
     m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
 {
+    m_ownerSet.insert(player->GetObjectGuid());
     switch (type)
     {
         case LOOT_MAIL:
