@@ -578,6 +578,8 @@ void Spell::FillTargetMap()
                                 case SPELL_EFFECT_TRIGGER_SPELL: // guessed based on 37851
                                 case SPELL_EFFECT_SEND_TAXI: // based on 42295
                                 case SPELL_EFFECT_APPLY_AURA:
+                                case SPELL_EFFECT_BLOCK: // no packets sent ever to client - guessing its a targetless effect
+                                case SPELL_EFFECT_PARRY: // no packets sent ever to client - guessing its a targetless effect
                                     SetTargetMap(SpellEffectIndex(i), TARGET_UNIT_CASTER, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                                     break;
                                 case SPELL_EFFECT_SUMMON: // no spell guesswork - dest only effect
