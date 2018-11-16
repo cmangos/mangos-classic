@@ -623,12 +623,7 @@ void Map::Update(const uint32& t_diff)
 
         // If player is using far sight, visit that object too
         if (WorldObject* viewPoint = GetWorldObject(plr->GetFarSightGuid()))
-        {
-            if (viewPoint->isType(TYPEMASK_UNIT))
-                VisitNearbyCellsOf(reinterpret_cast<Creature*>(viewPoint), grid_object_update, world_object_update);
-            else if (viewPoint->isType(TYPEMASK_DYNAMICOBJECT))
-                VisitNearbyCellsOf(reinterpret_cast<DynamicObject*>(viewPoint), grid_object_update, world_object_update);
-        }
+            VisitNearbyCellsOf(viewPoint, grid_object_update, world_object_update);
     }
 
     // non-player active objects
