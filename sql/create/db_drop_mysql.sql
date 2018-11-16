@@ -2,6 +2,6 @@
 DROP USER IF EXISTS `mangos`@`localhost`;
 
 /* Delete default tables */
-DROP DATABASE IF EXISTS `tbcmangos`;
-DROP DATABASE IF EXISTS `tbccharacters`;
-DROP DATABASE IF EXISTS `tbcrealmd`;
+DROP DATABASE IF EXISTS `classicmangos` ;
+DROP DATABASE IF EXISTS `classiccharacters` ;
+DROP DATABASE IF EXISTS `classicrealmd` ;
