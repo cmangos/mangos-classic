@@ -470,7 +470,23 @@ void Creature::ResetEntry(bool respawn)
 {
     CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow());
     GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetGUIDLow());
-    UpdateEntry(m_originalEntry, data, eventData, false);
+
+    if (respawn)
+    {
+        auto spawnEntriesMap = sObjectMgr.GetCreatureSpawnEntry();
+        auto itr = spawnEntriesMap.find(GetGUIDLow());
+        if (itr != spawnEntriesMap.end())
+        {
+            auto& spawnList = (*itr).second;
+            uint32 newEntry = spawnList[irand(0, spawnList.size() - 1)];
+            UpdateEntry(newEntry, data, eventData, false);
+            AIM_Initialize();
+        }
+        else
+            UpdateEntry(m_originalEntry, data, eventData, false);
+    }
+    else
+        UpdateEntry(m_originalEntry, data, eventData, false);
 }
 
 uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* data /*= nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
@@ -1374,9 +1390,19 @@ bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const 
 {
     m_originalEntry = cinfo->Entry;
 
-    Object::_Create(guidlow, cinfo->Entry, cinfo->GetHighGuid());
+    uint32 newEntry = cinfo->Entry;
 
-    return UpdateEntry(cinfo->Entry, data, eventData, false);
+    Object::_Create(guidlow, newEntry, cinfo->GetHighGuid());
+
+    auto spawnEntriesMap = sObjectMgr.GetCreatureSpawnEntry();
+    auto itr = spawnEntriesMap.find(guidlow);
+    if (itr != spawnEntriesMap.end())
+    {
+        auto& spawnList = (*itr).second;
+        newEntry = spawnList[irand(0, spawnList.size() - 1)];
+    }
+
+    return UpdateEntry(newEntry, data, eventData, false);
 }
 
 bool Creature::LoadFromDB(uint32 guidlow, Map* map)
