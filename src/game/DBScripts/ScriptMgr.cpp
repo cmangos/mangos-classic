@@ -1782,7 +1782,13 @@ bool ScriptAction::HandleScriptStep()
             Creature* source = ((Creature*)pSource);
 
             // Consider add additional checks for cases where creature should not change movementType
-            // (pet? in combat? already using same MMgen as script try to apply?)
+            // (pet? already using same MMgen as script try to apply?)
+
+            if (source->isInCombat())
+            {
+                sLog.outDebug(" DB-SCRIPTS: Process table `%s` id %u, SCRIPT_COMMAND_MOVEMENT called for movement change to %u with source guid %s but source is in combat and may lead to wrong behaviour: skipping.", m_table, m_script->id, m_script->movement.movementType, pSource->GetGuidStr().c_str());
+                break;
+            }
 
             switch (m_script->movement.movementType)
             {
@@ -2161,6 +2167,13 @@ bool ScriptAction::HandleScriptStep()
                 return false;
             if (LogIfNotUnit(pTarget))
                 return false;
+
+            Creature* source = ((Creature*)pSource);
+            if (source->isInCombat())
+            {
+                sLog.outDebug(" DB-SCRIPTS: Process table `%s` id %u, SCRIPT_COMMAND_MOVE_DYNAMIC called for source guid %s but source is in combat and may lead to wrong behaviour: skipping.", m_table, m_script->id, pSource->GetGuidStr().c_str());
+                break;
+            }
 
             float x, y, z;
             if (m_script->moveDynamic.maxDist == 0)         // Move to pTarget
