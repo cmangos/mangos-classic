@@ -674,109 +674,22 @@ inline bool IsUnitTargetTarget(uint32 target)
 
 inline bool IsScriptTarget(uint32 target)
 {
-    switch (target)
-    {
-        case TARGET_UNIT_SCRIPT_NEAR_CASTER:
-        case TARGET_LOCATION_SCRIPT_NEAR_CASTER:
-        case TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER:
-        case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_SRC_LOC:
-        case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DEST_LOC:
-        case TARGET_ENUM_GAMEOBJECTS_SCRIPT_AOE_AT_SRC_LOC:
-        case TARGET_ENUM_GAMEOBJECTS_SCRIPT_AOE_AT_DEST_LOC:
-        case TARGET_ENUM_UNITS_SCRIPT_IN_CONE_60:
-            return true;
-        default:
-            break;
-    }
-    return false;
+    return (target < MAX_SPELL_TARGETS ? (SpellTargetInfoTable[target].filter == TARGET_SCRIPT) : false);
 }
 
 inline bool IsNeutralTarget(uint32 target)
 {
-    // This is an exhaustive list for demonstrativeness and global search reasons.
-    // Also includes unknown targets, so we wont forget about them easily.
-    // TODO: We need to research the unknown targets and list them under their proper category in the future.
-    switch (target)
-    {
-        case TARGET_NONE:
-        case TARGET_UNIT_NEAR_CASTER:
-        case TARGET_LOCATION_CASTER_HOME_BIND:
-        case TARGET_PLAYER_NYI:
-        case TARGET_LOCATION_DATABASE:
-        case TARGET_LOCATION_CASTER_DEST:
-        case TARGET_LOCATION_CASTER_SRC:
-        case TARGET_GAMEOBJECT:
-        case TARGET_UNIT:
-        case TARGET_LOCKED:
-        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DYNOBJ_LOC:
-        case TARGET_LOCATION_CASTER_FRONT_RIGHT:
-        case TARGET_LOCATION_CASTER_BACK_RIGHT:
-        case TARGET_LOCATION_CASTER_BACK_LEFT:
-        case TARGET_LOCATION_CASTER_FRONT_LEFT:
-        case TARGET_LOCATION_CASTER_FRONT:
-        case TARGET_LOCATION_CASTER_BACK:
-        case TARGET_LOCATION_CASTER_LEFT:
-        case TARGET_LOCATION_CASTER_RIGHT:
-        case TARGET_LOCATION_CASTER_FRONT_LEAP:
-        case TARGET_UNIT_RAID_NEAR_CASTER:
-        case TARGET_LOCATION_UNIT_POSITION:
-            return true;
-        default:
-            break;
-    }
-    return false;
+    return (target < MAX_SPELL_TARGETS ? (SpellTargetInfoTable[target].filter == TARGET_NEUTRAL) : false);
 }
 
 inline bool IsFriendlyTarget(uint32 target)
 {
-    // This is an exhaustive list for demonstrativeness and global search reasons.
-    switch (target)
-    {
-        case TARGET_UNIT_CASTER:
-        case TARGET_UNIT_FRIEND_NEAR_CASTER:
-        case TARGET_UNIT_CASTER_PET:
-        case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE:
-        case TARGET_UNIT_FRIEND:
-        case TARGET_UNIT_CASTER_MASTER:
-        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_SRC_LOC:
-        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DEST_LOC:
-        case TARGET_LOCATION_UNIT_MINION_POSITION:
-        case TARGET_ENUM_UNITS_PARTY_AOE_AT_SRC_LOC:
-        case TARGET_ENUM_UNITS_PARTY_AOE_AT_DEST_LOC:
-        case TARGET_UNIT_PARTY:
-        case TARGET_UNIT_FRIEND_AND_PARTY:
-        case TARGET_LOCATION_CASTER_FISHING_SPOT:
-        case TARGET_UNIT_FRIEND_CHAIN_HEAL:
-        case TARGET_ENUM_UNITS_RAID_WITHIN_CASTER_RANGE:
-        case TARGET_UNIT_RAID:
-        case TARGET_ENUM_UNITS_FRIEND_IN_CONE:
-        case TARGET_UNIT_RAID_AND_CLASS:
-            return true;
-        default:
-            break;
-    }
-    return false;
+    return (target < MAX_SPELL_TARGETS ? (SpellTargetInfoTable[target].filter == TARGET_HELPFUL) : false);
 }
 
 inline bool IsHostileTarget(uint32 target)
 {
-    // This is an exhaustive list for demonstrativeness and global search reasons.
-    switch (target)
-    {
-        case TARGET_UNIT_ENEMY_NEAR_CASTER:
-        case TARGET_UNIT_ENEMY:
-        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC:
-        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC:
-        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24:
-        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC:
-        case TARGET_ENUM_UNITS_ENEMY_WITHIN_CASTER_RANGE:
-        case TARGET_LOCATION_CASTER_TARGET_POSITION:
-        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_54:
-            return true;
-        default:
-            break;
-    }
-    return false;
+    return (target < MAX_SPELL_TARGETS ? (SpellTargetInfoTable[target].filter == TARGET_HARMFUL) : false);
 }
 
 inline bool IsEffectTargetScript(uint32 targetA, uint32 targetB)
@@ -801,17 +714,9 @@ inline bool IsEffectTargetNegative(uint32 targetA, uint32 targetB)
 
 inline bool IsNeutralEffectTargetPositive(uint32 etarget, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
 {
-    switch (etarget)
-    {
-        case TARGET_UNIT_NEAR_CASTER:
-        case TARGET_PLAYER_NYI:
-        case TARGET_UNIT:
-        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DYNOBJ_LOC:
-        case TARGET_UNIT_RAID_NEAR_CASTER:
-            break;
-        default:
-            return true; // Some gameobjects or coords, who cares
-    }
+    if (etarget < MAX_SPELL_TARGETS && SpellTargetInfoTable[etarget].type != TARGET_TYPE_UNIT)
+        return true; // Some gameobjects or coords, who cares
+
     if (!target || (target->GetTypeId() != TYPEID_PLAYER && target->GetTypeId() != TYPEID_UNIT))
         return true;
 
