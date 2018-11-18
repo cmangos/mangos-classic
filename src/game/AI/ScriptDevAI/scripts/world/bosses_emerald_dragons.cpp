@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: bosses_emerald_dragons
-SD%Complete: 98
+SD%Complete: 99
 SDComment: Correct models used by Spirit Shade for each race/gender combination are missing (Lethon)
 SDCategory: Emerald Dragon Bosses
 EndScriptData
@@ -278,14 +278,25 @@ struct npc_spirit_shadeAI : public ScriptedAI
     npc_spirit_shadeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
     bool m_bHasHealed;
+    uint32 m_uiInitialMovementTimer;
 
     void Reset() override
     {
         m_bHasHealed = false;
+        m_creature->SetVisibility(VISIBILITY_OFF);
+        m_uiInitialMovementTimer = 3 * IN_MILLISECONDS;
+    }
+
+    void JustDied(Unit* /*pKiller*/) override
+    {
+        m_creature->ForcedDespawn();
     }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
+        if (m_uiInitialMovementTimer)   // Does nothing while movement is not initiated in UpdateAI()
+            return;
+
         if (pWho->GetEntry() == NPC_LETHON)
         {
             if (!m_bHasHealed && pWho->IsWithinDistInMap(m_creature, 3.0f))
@@ -303,7 +314,20 @@ struct npc_spirit_shadeAI : public ScriptedAI
 
     void AttackStart(Unit* /*pWho*/) override { }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // NPC does not start to move when summoned, it waits 4 seconds then removes invisibility and moves towards boss Lethon
+        if (m_uiInitialMovementTimer)
+        {
+            if (m_uiInitialMovementTimer < uiDiff)
+            {
+                m_creature->SetVisibility(VISIBILITY_ON);
+                m_uiInitialMovementTimer = 0;
+            }
+            else
+                m_uiInitialMovementTimer -= uiDiff;
+        }
+    }
 };
 
 UnitAI* GetAI_boss_lethon(Creature* pCreature)
