@@ -661,9 +661,6 @@ class Creature : public Unit
         // TODO: Research mob shield block values
         uint32 GetShieldBlockValue() const override { return (getLevel() / 2 + uint32(GetStat(STAT_STRENGTH) / 20)); }
 
-        SpellSchoolMask GetMeleeDamageSchoolMask() const override { return m_meleeDamageSchoolMask; }
-        void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchoolMask = GetSchoolMask(school); }
-
         bool HasSpell(uint32 spellID) const override;
 
         bool UpdateEntry(uint32 Entry, Team team = ALLIANCE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true);
@@ -872,7 +869,6 @@ class Creature : public Unit
         bool m_isDeadByDefault;
         uint32 m_temporaryFactionFlags;                     // used for real faction changes (not auras etc)
 
-        SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;
 
         Position m_combatStartPos;                          // after combat contains last position

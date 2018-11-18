@@ -3346,7 +3346,7 @@ float Unit::CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType at
     // For elemental melee auto-attacks: full resist outcome converted into miss chance (original research on combat logs)
     if (!ranged && !ability)
     {
-        const float resistance = victim->CalculateEffectiveMagicResistancePercent(this, GetMeleeDamageSchoolMask());
+        const float resistance = victim->CalculateEffectiveMagicResistancePercent(this, GetMeleeDamageSchoolMask(attType == BASE_ATTACK));
         if (const uint32 uindex = uint32(resistance * 100))
         {
             const SpellPartialResistChanceEntry &chances = SPELL_PARTIAL_RESIST_DISTRIBUTION.at(uindex);
@@ -6732,7 +6732,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
     bool isWeaponDamageBasedSpell = !(spellProto && (damagetype == DOT || IsSpellHaveEffect(spellProto, SPELL_EFFECT_SCHOOL_DAMAGE)));
     Item*  pWeapon          = GetTypeId() == TYPEID_PLAYER ? ((Player*)this)->GetWeaponForAttack(attType, true, false) : nullptr;
     uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
-    uint32 schoolMask       = spellProto ? GetSpellSchoolMask(spellProto) : uint32(GetMeleeDamageSchoolMask());
+    uint32 schoolMask       = spellProto ? GetSpellSchoolMask(spellProto) : uint32(GetMeleeDamageSchoolMask(attType == BASE_ATTACK));
 
     // FLAT damage bonus auras
     // =======================
@@ -6784,7 +6784,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
         for (auto i : mModDamagePercentDone)
         {
             if (i->GetModifier()->m_miscvalue & schoolMask &&                         // schoolmask has to fit with the intrinsic spell school
-                i->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask() &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
+                i->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask(attType == BASE_ATTACK) &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
                     ((i->GetSpellProto()->EquippedItemClass == -1) ||                     // general, weapon independent
                      (pWeapon && pWeapon->IsFitToSpellRequirements(i->GetSpellProto()))))  // OR used weapon fits aura requirements
             {
@@ -6870,7 +6870,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackTy
 
     // differentiate for weapon damage based spells
     bool isWeaponDamageBasedSpell = !(spellProto && (damagetype == DOT || IsSpellHaveEffect(spellProto, SPELL_EFFECT_SCHOOL_DAMAGE)));
-    uint32 schoolMask       = spellProto ? GetSpellSchoolMask(spellProto) : uint32(pCaster->GetMeleeDamageSchoolMask());
+    uint32 schoolMask       = spellProto ? GetSpellSchoolMask(spellProto) : uint32(pCaster->GetMeleeDamageSchoolMask(attType == BASE_ATTACK));
 
     // FLAT damage bonus auras
     // =======================
@@ -8427,6 +8427,20 @@ float Unit::GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange dam
     return m_weaponDamage[attType][index].damage[damageRange];
 }
 
+SpellSchoolMask Unit::GetMeleeDamageSchoolMask(bool main) const
+{
+    uint32 mask = SPELL_SCHOOL_MASK_NORMAL;
+    for (auto& damage : m_weaponDamage[(main ? BASE_ATTACK : OFF_ATTACK)])
+        mask |= (1 << damage.school);
+    return SpellSchoolMask(mask);
+}
+
+void Unit::SetMeleeDamageSchool(bool main, SpellSchools school)
+{
+    for (auto& damage : m_weaponDamage[(main ? BASE_ATTACK : OFF_ATTACK)])
+        damage.school = school;
+}
+
 void Unit::SetLevel(uint32 lvl)
 {
     SetUInt32Value(UNIT_FIELD_LEVEL, lvl);
@@ -8990,11 +9004,6 @@ void CharmInfo::SetStayPosition(bool stay)
 bool Unit::isFrozen() const
 {
     return HasAuraState(AURA_STATE_FROZEN);
-}
-
-SpellSchoolMask Unit::GetMeleeDamageSchoolMask() const
-{
-    return SPELL_SCHOOL_MASK_NORMAL;
 }
 
 ///----------Pet responses methods-----------------
