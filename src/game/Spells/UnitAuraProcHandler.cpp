@@ -426,9 +426,8 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
         bool procSuccess = true;
         bool anyAuraProc = false;
 
-        // For players set spell cooldown if need
         execData.cooldown = 0;
-        if (GetTypeId() == TYPEID_PLAYER && spellProcEvent && spellProcEvent->cooldown)
+        if (spellProcEvent && spellProcEvent->cooldown)
             execData.cooldown = spellProcEvent->cooldown;
 
         for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
