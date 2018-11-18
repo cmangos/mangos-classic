@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2738_01_mangos_quest_template` bit(1) DEFAULT NULL
+  `required_z2738_01_mangos_creature_spawn_entry` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -900,6 +900,26 @@ CREATE TABLE `creature_conditional_spawn` (
 LOCK TABLES `creature_conditional_spawn` WRITE;
 /*!40000 ALTER TABLE `creature_conditional_spawn` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_conditional_spawn` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_spawn_entry`
+--
+
+DROP TABLE IF EXISTS `creature_spawn_entry`;
+CREATE TABLE `creature_spawn_entry` (
+  `guid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`,`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System (Spawn Entry)';
+
+--
+-- Dumping data for table `creature_spawn_entry`
+--
+
+LOCK TABLES `creature_spawn_entry` WRITE;
+/*!40000 ALTER TABLE `creature_spawn_entry` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_spawn_entry` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
