@@ -1640,10 +1640,21 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             modelid = 4613;
             break;
         case FORM_MOONKIN:
-            if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                modelid = 15374;
+            if (GetId() == 24809)       // Specific case for spell Spirit Shade Visual in Lethon encounter (spell use moonkin form value for some reason)
+            {
+                Unit* caster = GetCaster();
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                modelid = caster->GetNativeDisplayId();
+            }
             else
-                modelid = 15375;
+            {
+                if (Player::TeamForRace(target->getRace()) == ALLIANCE)
+                    modelid = 15374;
+                else
+                    modelid = 15375;
+            }
             break;
         case FORM_AMBIENT:
         case FORM_SHADOW:
