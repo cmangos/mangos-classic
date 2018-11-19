@@ -581,6 +581,8 @@ void Spell::FillTargetMap()
                                 case SPELL_EFFECT_BLOCK: // no packets sent ever to client - guessing its a targetless effect
                                 case SPELL_EFFECT_PARRY: // no packets sent ever to client - guessing its a targetless effect
                                 case SPELL_EFFECT_SELF_RESURRECT: // targetless effect - verified with sniffs
+                                case SPELL_EFFECT_WEAPON:
+                                case SPELL_EFFECT_PROFICIENCY:
                                     SetTargetMap(SpellEffectIndex(i), TARGET_UNIT_CASTER, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                                     break;
                                 case SPELL_EFFECT_SUMMON: // no spell guesswork - dest only effect
