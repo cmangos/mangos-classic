@@ -1338,16 +1338,37 @@ void AuctionBotSeller::LoadItemsQuantity(AHB_Seller_Config& config) const
     // ============================================================================================
 
     // Set the best value to get nearest amount of items wanted
+    uint32 totalAmount = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_CONSUMABLE_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_CONTAINER_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_WEAPON_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_GEM_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_ARMOR_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_REAGENT_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_PROJECTILE_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_TRADEGOOD_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_GENERIC_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_RECIPE_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_QUIVER_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_QUEST_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_KEY_AMOUNT)
+        + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_AMOUNT);
+
+    if (totalAmount != 0)
+    {
+        for (uint32 j = 0; j < MAX_AUCTION_QUALITY; ++j)
+        {
+            uint32 indice = config.GetItemsAmountPerQuality(AuctionQuality(j)) / totalAmount;
+            for (uint32 i = 0; i < MAX_ITEM_CLASS; ++i)
+                config.SetItemsAmountPerClass(AuctionQuality(j), ItemClass(i), indice);
+        }
+        return;
+    }
+
+    sLog.outError("AuctionHouseBot> Warning all items amount are set to 0!");
     for (uint32 j = 0; j < MAX_AUCTION_QUALITY; ++j)
     {
-        uint32 indice = config.GetItemsAmountPerQuality(AuctionQuality(j)) /
-                        (sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_CONSUMABLE_AMOUNT) + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_CONTAINER_AMOUNT) + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_WEAPON_AMOUNT) +
-                         sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_GEM_AMOUNT) + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_ARMOR_AMOUNT) + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_REAGENT_AMOUNT) +
-                         sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_PROJECTILE_AMOUNT) + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_TRADEGOOD_AMOUNT) + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_GENERIC_AMOUNT) +
-                         sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_RECIPE_AMOUNT) + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_QUIVER_AMOUNT) + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_QUEST_AMOUNT) +
-                         sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_KEY_AMOUNT) + sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_AMOUNT));
         for (uint32 i = 0; i < MAX_ITEM_CLASS; ++i)
-            config.SetItemsAmountPerClass(AuctionQuality(j), ItemClass(i), indice);
+            config.SetItemsAmountPerClass(AuctionQuality(j), ItemClass(i), 0);
     }
 }
 
