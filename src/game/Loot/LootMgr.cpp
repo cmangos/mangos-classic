@@ -910,6 +910,10 @@ void Loot::AddItem(uint32 itemid, uint32 count, uint32 randomSuffix, int32 rando
         LootItem* lootItem = new LootItem(itemid, count, randomSuffix, randomPropertyId, m_maxSlot++);
 
         m_lootItems.push_back(lootItem);
+
+        // add permission to pick this item to loot owner
+        for (auto allowedGuid : m_ownerSet)
+            lootItem->allowedGuid.emplace(allowedGuid);
     }
 }
 
