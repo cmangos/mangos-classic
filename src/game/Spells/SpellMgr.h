@@ -389,12 +389,31 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
 
     switch (spellInfo->Id)
     {
+        case 3417:          // Thrash
+        case 8876:          // Thrash
+        case 9205:          // Hate to Zero (Hate to Zero)
         case 9460:          // Corrosive Ooze
+        case 10095:         // Hate to Zero (Hate to Zero)
+        case 11838:         // Hate to Zero (Hate to Zero)
+        case 12787:         // Thrash
+        case 13767:         // Hate to Zero (Hate to Zero)
         case 16140:         // Exploding Cadaver (Exploding Cadaver)
         case 17327:         // Spirit Particles
+        case 18943:         // Double Attack
+        case 18950:         // Invisibility and Stealth Detection
+        case 19194:         // Double Attack
+        case 19195:         // Hate to 90% (Hate to 90%)
+        case 19396:         // Incinerate (Incinerate)
+        case 19626:         // Fire Shield (Fire Shield)
+        case 19640:         // Pummel (Pummel)
+        case 19817:         // Double Attack
+        case 19818:         // Double Attack
+        case 21857:         // Lava Shield
         case 22735:         // Spirit of Runn Tum
         case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
+        case 25592:         // Hate to Zero (Hate to Zero)
         case 28126:         // Spirit Particles (purple)
+        case 29526:         // Hate to Zero (Hate to Zero)
             return false;
         default:
             return true;
