@@ -395,6 +395,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 9460:          // Corrosive Ooze
         case 10095:         // Hate to Zero (Hate to Zero)
         case 11838:         // Hate to Zero (Hate to Zero)
+        case 12546:         // Spitelash (Spitelash)
         case 12787:         // Thrash
         case 13767:         // Hate to Zero (Hate to Zero)
         case 16140:         // Exploding Cadaver (Exploding Cadaver)
