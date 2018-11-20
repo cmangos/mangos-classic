@@ -410,35 +410,53 @@ void AreaAura::Update(uint32 diff)
                 {
                     Group* pGroup = nullptr;
 
+                    // Handle aura party for players
                     if (owner->GetTypeId() == TYPEID_PLAYER)
+                    {
                         pGroup = ((Player*)owner)->GetGroup();
 
-                    if (pGroup)
-                    {
-                        uint8 subgroup = ((Player*)owner)->GetSubGroup();
-                        for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
+                        if (pGroup)
                         {
-                            Player* Target = itr->getSource();
-                            if (Target && Target->isAlive() && Target->GetSubGroup() == subgroup && caster->CanAssist(Target))
+                            uint8 subgroup = ((Player*)owner)->GetSubGroup();
+                            for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
                             {
-                                if (caster->IsWithinDistInMap(Target, m_radius))
-                                    targets.push_back(Target);
-                                Pet* pet = Target->GetPet();
-                                if (pet && pet->isAlive() && caster->IsWithinDistInMap(pet, m_radius))
-                                    targets.push_back(pet);
+                                Player* Target = itr->getSource();
+                                if (Target && Target->isAlive() && Target->GetSubGroup() == subgroup && caster->CanAssist(Target))
+                                {
+                                    if (caster->IsWithinDistInMap(Target, m_radius))
+                                        targets.push_back(Target);
+                                    Pet* pet = Target->GetPet();
+                                    if (pet && pet->isAlive() && caster->IsWithinDistInMap(pet, m_radius))
+                                        targets.push_back(pet);
+                                }
                             }
+                            break;
                         }
                     }
-                    else
+                    else    // handle aura party for creatures
                     {
-                        // add owner
-                        if (owner != caster && caster->IsWithinDistInMap(owner, m_radius))
-                            targets.push_back(owner);
-                        // add caster's pet
-                        Unit* pet = caster->GetPet();
-                        if (pet && caster->IsWithinDistInMap(pet, m_radius))
-                            targets.push_back(pet);
+                        // Get all creatures in spell radius
+                        std::list<Creature*> nearbyTargets;
+                        MaNGOS::AnyUnitInObjectRangeCheck u_check(owner, m_radius);
+                        MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(nearbyTargets, u_check);
+                        Cell::VisitGridObjects(owner, searcher, m_radius);
+
+                        for (auto target : nearbyTargets)
+                        {
+                            // Due to the lack of support for NPC groups or formations, are considered of the same party NPCs with same faction than caster
+                            if (target != owner && target->isAlive() && target->getFaction() == ((Creature*)owner)->getFaction())
+                                targets.push_back(target);
+                        }
                     }
+
+                    // add owner
+                    if (owner != caster && caster->IsWithinDistInMap(owner, m_radius))
+                        targets.push_back(owner);
+                    // add caster's pet
+                    Unit* pet = caster->GetPet();
+                    if (pet && caster->IsWithinDistInMap(pet, m_radius))
+                        targets.push_back(pet);
+
                     break;
                 }
                 case AREA_AURA_PET:
@@ -559,8 +577,11 @@ void AreaAura::Update(uint32 diff)
         }
         else if (m_areaAuraType == AREA_AURA_PARTY)         // check if in same sub group
         {
-            // not check group if target == owner or target == pet
-            if (caster->GetMasterGuid() != target->GetObjectGuid() && caster->GetObjectGuid() != target->GetMasterGuid())
+            // Do not check group if target == owner or target == pet
+            // or if caster is a not player (as NPCs do not support group so aura is only removed by moving out of range)
+            if (caster->GetMasterGuid() != target->GetObjectGuid()  &&
+                caster->GetObjectGuid() != target->GetMasterGuid()  &&
+                caster->GetTypeId() == TYPEID_PLAYER)
             {
                 Player* check = caster->GetBeneficiaryPlayer();
 
