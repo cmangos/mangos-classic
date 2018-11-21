@@ -453,39 +453,6 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
             case FREE_FOR_ALL:
                 return LOOT_SLOT_NORMAL;
 
-            case MASTER_LOOT:
-                if (!IsAllowed(player, loot))
-                {
-                    if (loot->m_isChest)
-                        return LOOT_SLOT_MASTER;
-
-                    if (!isUnderThreshold && player->GetObjectGuid() == loot->m_masterOwnerGuid && !allowedGuid.empty())
-                        return LOOT_SLOT_MASTER;
-
-                    return MAX_LOOT_SLOT_TYPE;
-                }
-
-                if (isUnderThreshold)
-                {
-                    if (loot->m_isChest)
-                        return LOOT_SLOT_NORMAL;
-
-                    // Check if its turn of that player to loot a not party loot. The loot may be released or the item may be passed by currentLooter
-                    if (isReleased || currentLooterPass || loot->m_currentLooterGuid == player->GetObjectGuid())
-                        return LOOT_SLOT_NORMAL;
-                    return MAX_LOOT_SLOT_TYPE;
-                }
-
-                if (player->GetObjectGuid() == loot->m_masterOwnerGuid)
-                    return LOOT_SLOT_MASTER;
-
-                // give a chance to let others just see the content of the loot
-                if (isBlocked || sWorld.getConfig(CONFIG_BOOL_CORPSE_ALLOW_ALL_ITEMS_SHOW_IN_MASTER_LOOT))
-                    return LOOT_SLOT_VIEW;
-
-                return MAX_LOOT_SLOT_TYPE;
-                break;
-
             default:
                 if (loot->m_isChest)
                     return LOOT_SLOT_NORMAL;
@@ -1993,7 +1960,10 @@ InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
 InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
 {
     if (!lootItem)
+    {
+        Release(target);
         return EQUIP_ERR_ITEM_NOT_FOUND;
+    }
 
     bool playerGotItem = false;
     InventoryResult msg = EQUIP_ERR_CANT_DO_RIGHT_NOW;
