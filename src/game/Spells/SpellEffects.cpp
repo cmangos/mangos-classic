@@ -5573,30 +5573,43 @@ void Spell::EffectSkill(SpellEffectIndex /*eff_idx*/)
 
 void Spell::EffectSummonDemon(SpellEffectIndex eff_idx)
 {
+    // ToDo: research what effect Multiple value really does
+    //       it is only used by two spells that are triggered by parent spells
+    //       which pick every enemy around the original caster and force each target
+    //       to cast the summon demon spell
+
+    // Effect base points control how many demons are summoned
+    if (!m_currentBasePoints[eff_idx])
+        return;
+
     float x = m_targets.m_destX;
     float y = m_targets.m_destY;
     float z = m_targets.m_destZ;
 
-    Creature* Charmed = m_caster->SummonCreature(m_spellInfo->EffectMiscValue[eff_idx], x, y, z, m_caster->GetOrientation(), TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 3600000);
-    if (!Charmed)
-        return;
-
-    // might not always work correctly, maybe the creature that dies from CoD casts the effect on itself and is therefore the caster?
-    Charmed->SetLevel(m_caster->getLevel());
-
-    // TODO: Add damage/mana/hp according to level
-
-    switch (m_spellInfo->Id)
+    for (int i = 0; i < m_currentBasePoints[eff_idx]; i++)
     {
-        case 1122: // Warlock Infernal - requires custom code - generalized in WOTLK
+        Creature* Charmed = m_caster->SummonCreature(m_spellInfo->EffectMiscValue[eff_idx], x, y, z, m_caster->GetOrientation(), TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 3600000);
+
+        if (!Charmed)
+            return;
+
+        // might not always work correctly, maybe the creature that dies from CoD casts the effect on itself and is therefore the caster?
+        Charmed->SetLevel(m_caster->getLevel());
+
+        // TODO: Add damage/mana/hp according to level
+
+        switch (m_spellInfo->Id)
         {
-            Charmed->SelectLevel(m_caster->getLevel()); // needs to have casters level
-            // Enslave demon effect, without mana cost and cooldown
-            Charmed->CastSpell(Charmed, 22707, TRIGGERED_OLD_TRIGGERED);  // short root spell on infernal from sniffs
-            m_caster->CastSpell(Charmed, 20882, TRIGGERED_OLD_TRIGGERED);
-            Charmed->CastSpell(nullptr, 22699, TRIGGERED_NONE);  // Inferno effect
-            Charmed->CastSpell(x, y, z, 20310, TRIGGERED_NONE);  // Stun
-            break;
+            case 1122: // Warlock Infernal - requires custom code - generalized in WOTLK
+            {
+                Charmed->SelectLevel(m_caster->getLevel()); // needs to have casters level
+                // Enslave demon effect, without mana cost and cooldown
+                Charmed->CastSpell(Charmed, 22707, TRIGGERED_OLD_TRIGGERED);  // short root spell on infernal from sniffs
+                m_caster->CastSpell(Charmed, 20882, TRIGGERED_OLD_TRIGGERED);
+                Charmed->CastSpell(nullptr, 22699, TRIGGERED_NONE);  // Inferno effect
+                Charmed->CastSpell(x, y, z, 20310, TRIGGERED_NONE);  // Stun
+                break;
+            }
         }
     }
 }
