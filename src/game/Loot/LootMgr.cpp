@@ -29,6 +29,7 @@
 #include "BattleGround/BattleGroundAV.h"
 #include "Entities/ItemEnchantmentMgr.h"
 #include "Entities/Corpse.h"
+#include "Tools/Language.h"
 
 INSTANTIATE_SINGLETON_1(LootMgr);
 
@@ -2177,6 +2178,41 @@ bool Loot::IsItemAlreadyIn(uint32 itemId) const
             return true;
     }
     return false;
+}
+
+void Loot::PrintLootList(ChatHandler& chat, WorldSession* session) const
+{
+    if (!session)
+    {
+        chat.SendSysMessage("Error you have to be in game for this command.");
+        return;
+    }
+
+    if (m_gold == 0)
+        chat.PSendSysMessage("Loot have no money");
+    else
+        chat.PSendSysMessage("Loot have (%u)coppers", m_gold);
+
+    if (m_lootItems.empty())
+    {
+        chat.PSendSysMessage("Loot have no item.");
+        return;
+    }
+
+    for (auto lootItem : m_lootItems)
+    {
+        uint32 itemId = lootItem->itemId;
+        ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
+        if (!pProto)
+            continue;
+
+        int loc_idx = session->GetSessionDbLocaleIndex();
+
+        std::string name = pProto->Name1;
+        sObjectMgr.GetItemLocaleStrings(itemId, loc_idx, &name);
+        std::string count = "x" + std::to_string(lootItem->count);
+        chat.PSendSysMessage(LANG_ITEM_LIST_CHAT, itemId, itemId, name.c_str(), count.c_str());
+    }
 }
 
 // fill in the bytebuffer with loot content for specified player

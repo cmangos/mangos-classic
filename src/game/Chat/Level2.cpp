@@ -2150,6 +2150,28 @@ bool ChatHandler::HandleNpcSetDeathStateCommand(char* args)
     return true;
 }
 
+// set model of creature
+bool ChatHandler::HandleNpcShowLootCommand(char* args)
+{
+    Creature* creature = getSelectedCreature();
+
+    if (!creature)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (!creature->loot)
+    {
+        PSendSysMessage("Creature does not have any loot.");
+        return true;
+    }
+
+    creature->loot->PrintLootList(*this, m_session);
+    return true;
+}
+
 // TODO: NpcCommands that need to be fixed :
 
 bool ChatHandler::HandleNpcNameCommand(char* /*args*/)
