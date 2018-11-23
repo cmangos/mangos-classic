@@ -148,6 +148,7 @@ void CreatureEventAI::InitAI()
                                 m_mainSpellId = i.action[actionIdx].cast.spellId;
                                 SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_mainSpellId);
                                 m_mainSpellCost = Spell::CalculatePowerCost(spellInfo, m_creature, nullptr, nullptr);
+                                m_mainSpellMinRange = GetSpellMinRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex));
                                 m_mainSpells.insert(i.action[actionIdx].cast.spellId);
                             }
 
@@ -779,6 +780,7 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                         {
                             case CAST_FAIL_COOLDOWN:
                             case CAST_FAIL_POWER:
+                            case CAST_FAIL_TOO_CLOSE:
                                 SetCurrentRangedMode(false);
                                 break;
                             case CAST_OK:
@@ -2013,7 +2015,8 @@ void CreatureEventAI::DistanceYourself()
         SetCurrentRangedMode(true);
 
     float x, y, z;
-    victim->GetNearPoint(m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim) * 1.5f, victim->GetAngle(m_creature));
+    float distance = DISTANCING_CONSTANT + std::max(m_creature->GetCombinedCombatReach(victim) * 1.5f, m_creature->GetCombinedCombatReach(victim) + m_mainSpellMinRange);
+    victim->GetNearPoint(m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), distance, victim->GetAngle(m_creature));
     m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_DISTANCE, x, y, z);
 }
 
