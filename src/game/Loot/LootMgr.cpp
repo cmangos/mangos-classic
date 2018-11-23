@@ -429,14 +429,6 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
 
 LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const* loot) const
 {
-    // GM can see all loot items in any corpses
-    if (player->isGameMaster())
-    {
-        if (IsAllowed(player, loot))
-            return LOOT_SLOT_NORMAL;
-        return LOOT_SLOT_VIEW;
-    }
-
     // Master looter needs to see quest/conditional items above threshold so he can distribute them
     if (!IsAllowed(player, loot) && (loot->m_lootMethod != MASTER_LOOT || player->GetObjectGuid() != loot->m_masterOwnerGuid || allowedGuid.empty()))
         return MAX_LOOT_SLOT_TYPE;
@@ -1007,9 +999,6 @@ bool Loot::IsLootedForAll() const
 
 bool Loot::CanLoot(Player const* player)
 {
-    if (player->isGameMaster())
-        return true;
-
     ObjectGuid const& playerGuid = player->GetObjectGuid();
 
     // not in Guid list of possible owner mean cheat
@@ -1155,12 +1144,6 @@ void Loot::SetPlayerIsNotLooting(Player* player)
 
 void Loot::Release(Player* player)
 {
-    if (player->isGameMaster())
-    {
-        SetPlayerIsNotLooting(player);
-        return;
-    }
-
     bool updateClients = false;
     if (player->GetObjectGuid() == m_currentLooterGuid)
     {
@@ -1393,47 +1376,44 @@ void Loot::Release(Player* player)
 // Popup windows with loot content
 void Loot::ShowContentTo(Player* plr)
 {
-    if (!plr->isGameMaster())
+    if (!m_isChest)
     {
-        if (!m_isChest)
+        // for item loot that might be empty we should not display error but instead send empty loot window
+        if (!m_lootItems.empty() && !CanLoot(plr))
         {
-            // for item loot that might be empty we should not display error but instead send empty loot window
-            if (!m_lootItems.empty() && !CanLoot(plr))
-            {
-                Release(plr);
-                sLog.outError("Loot::ShowContentTo()> %s is trying to open a loot without credential", plr->GetGuidStr().c_str());
-                return;
-            }
-
-            // add this player to the the openers list of this loot
-            m_playersOpened.emplace(plr->GetObjectGuid());
-        }
-        else
-        {
-            if (static_cast<GameObject*>(m_lootTarget)->IsInUse())
-            {
-                SendReleaseFor(plr);
-                return;
-            }
-
-            if (m_ownerSet.find(plr->GetObjectGuid()) == m_ownerSet.end())
-                SetGroupLootRight(plr);
+            SendReleaseFor(plr);
+            sLog.outError("Loot::ShowContentTo()> %s is trying to open a loot without credential", plr->GetGuidStr().c_str());
+            return;
         }
 
-        if (m_lootMethod != NOT_GROUP_TYPE_LOOT && !m_isChecked)
+        // add this player to the the openers list of this loot
+        m_playersOpened.emplace(plr->GetObjectGuid());
+    }
+    else
+    {
+        if (static_cast<GameObject*>(m_lootTarget)->IsInUse())
         {
-            GroupCheck();
-            switch (m_lootMethod)
+            SendReleaseFor(plr);
+            return;
+        }
+
+        if (m_ownerSet.find(plr->GetObjectGuid()) == m_ownerSet.end())
+            SetGroupLootRight(plr);
+    }
+
+    if (m_lootMethod != NOT_GROUP_TYPE_LOOT && !m_isChecked)
+    {
+        GroupCheck();
+        switch (m_lootMethod)
+        {
+            case NEED_BEFORE_GREED:
+            case GROUP_LOOT:
             {
-                case NEED_BEFORE_GREED:
-                case GROUP_LOOT:
-                {
-                    CheckIfRollIsNeeded(plr);               // check if there is the need to start a roll
-                    break;
-                }
-                default:
-                    break;
+                CheckIfRollIsNeeded(plr);               // check if there is the need to start a roll
+                break;
             }
+            default:
+                break;
         }
     }
 
