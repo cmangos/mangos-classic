@@ -1053,27 +1053,26 @@ void Aura::TriggerSpell()
     {
         // for channeled spell cast applied from aura owner to channel target (persistent aura affects already applied to true target)
         // come periodic casts applied to targets, so need select proper caster (ex. 15790)
-        if (IsChanneledSpell(GetSpellProto()) || GetSpellProto()->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
-        {
-            // interesting 2 cases: periodic aura at caster of channeled spell
-            if (target->GetObjectGuid() == casterGUID)
-                triggerCaster = target;
+        // interesting 2 cases: periodic aura at caster of channeled spell
+        if (target->GetObjectGuid() == casterGUID)
+            triggerCaster = target;
 
-            switch (triggeredSpellInfo->EffectImplicitTargetA[0])
-            {
-                case TARGET_UNIT_ENEMY:
-                case TARGET_UNIT:
-                    triggerCaster = GetCaster();
-                    triggerTarget = target;
-                    break;
-                case TARGET_UNIT_CASTER:
-                    triggerCaster = target;
-                    triggerTarget = target;
-                    break;
-                case TARGET_LOCATION_CASTER_SRC: // TODO: this needs to be done whenever target isnt important, doing it per case for safety
-                    triggerTarget = nullptr;
-                    break;
-            }
+        switch (triggeredSpellInfo->EffectImplicitTargetA[0])
+        {
+            case TARGET_UNIT_ENEMY:
+            case TARGET_UNIT:
+                triggerCaster = GetCaster();
+                triggerTarget = triggerCaster->GetTarget(); // This will default to channel target for channels
+                break;
+            case TARGET_UNIT_CASTER:
+                triggerCaster = target;
+                triggerTarget = target;
+                break;
+            case TARGET_LOCATION_CASTER_DEST:
+            case TARGET_LOCATION_CASTER_SRC: // TODO: this needs to be done whenever target isnt important, doing it per case for safety
+            default:
+                triggerTarget = nullptr;
+                break;
         }
 
         // Spell exist but require custom code
