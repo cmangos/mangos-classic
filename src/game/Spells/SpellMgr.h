@@ -1012,6 +1012,17 @@ inline uint32 GetAffectedTargets(SpellEntry const* spellInfo)
             }
             break;
         }
+        case SPELLFAMILY_MAGE:
+        {
+            switch (spellInfo->Id)
+            {
+                case 23603:                                 // Wild Polymorph (BWL, Nefarian)
+                    return 1;
+                default:
+                    break;
+            }
+            break;
+        }
         default:
             break;
     }
