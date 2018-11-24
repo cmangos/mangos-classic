@@ -37,6 +37,7 @@
 
 #include <bitset>
 #include <functional>
+#include <list>
 
 struct CreatureInfo;
 class Creature;
