@@ -1541,6 +1541,15 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(ProcExecutionData& d
             triggered_spell_id = 12486;
             break;
         }
+        case 3656:                                          // Corrupted Healing (Priest class call in Nefarian encounter)
+        {
+            // Procced spell can only be triggered by direct heals
+            // Heal over time like Renew does not trigger it
+            // Check that only priest class can proc it is done on aura 23401 appliance
+            if (IsSpellHaveEffect(procSpell, SPELL_EFFECT_HEAL))
+                triggered_spell_id = 23402;
+            break;
+        }
         case 4086:                                          // Improved Mend Pet (Rank 1)
         case 4087:                                          // Improved Mend Pet (Rank 2)
         {
