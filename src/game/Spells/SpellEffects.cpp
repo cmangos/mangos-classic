@@ -1323,6 +1323,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 23424:                  // Corrupted Totems (Shaman Nefarian class call)
+                {
+                    uint32 totemsSpellIds[] = { 23419, 23420, 23422, 23423 };   // Corrupted Fire Nova Totem / Corrupted Stoneskin Totem / Corrupted Healing Stream Totem (Rank 5) / Corrupted Windfury Totem
+                    m_caster->CastSpell(m_caster, totemsSpellIds[urand(0, 3)], TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
             }
 
             break;
