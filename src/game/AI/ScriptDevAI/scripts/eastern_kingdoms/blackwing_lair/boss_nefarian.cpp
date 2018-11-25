@@ -96,6 +96,7 @@ struct boss_nefarianAI : public ScriptedAI
         m_uiInitialYellTimer    = 0;
         m_bPhase3               = false;
         m_bHasEndYell           = false;
+        SetReactState(REACT_PASSIVE);						// Prevent Nefarian from aggroing while in air and being stuck as untargetable
     }
 
     void KilledUnit(Unit* pVictim) override
@@ -140,6 +141,7 @@ struct boss_nefarianAI : public ScriptedAI
                 m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
                 m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
                 m_creature->SetLevitate(false);
+                SetReactState(REACT_AGGRESSIVE);
                 m_creature->SetInCombatWithZone();
                 // Make attackable and attack
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
