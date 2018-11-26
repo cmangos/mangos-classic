@@ -1855,47 +1855,6 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
     if (!unitTarget)
         return;
 
-    // Hack for Nefarian class calls
-    // it is not possible to filter out targets based on their class from data in spells template
-    // so this is hardcoded for now
-    switch (m_spellInfo->Id)
-    {
-        case 23397:
-            if (unitTarget->getClass() != CLASS_WARRIOR)
-                return;
-            break;
-        case 23398:
-            if (unitTarget->getClass() != CLASS_DRUID)
-                return;
-            break;
-        case 23401:
-            if (unitTarget->getClass() != CLASS_PRIEST)
-                return;
-            break;
-        case 23410:
-            if (unitTarget->getClass() != CLASS_MAGE)
-                return;
-            break;
-        case 23414:
-            if (unitTarget->getClass() != CLASS_ROGUE)
-                return;
-            break;
-        case 23418:
-            if (unitTarget->getClass() != CLASS_PALADIN)
-                return;
-            break;
-        case 23425:
-            if (unitTarget->getClass() != CLASS_SHAMAN)
-                return;
-            break;
-        case 23427:
-            if (unitTarget->getClass() != CLASS_WARLOCK)
-                return;
-            break;
-        default:
-            break;
-    }
-
     // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
     if ((!unitTarget->isAlive() && !(IsDeathOnlySpell(m_spellInfo) || IsDeathPersistentSpell(m_spellInfo))) &&
             (unitTarget->GetTypeId() != TYPEID_PLAYER || !((Player*)unitTarget)->GetSession()->PlayerLoading()))
@@ -5412,10 +5371,6 @@ void Spell::EffectDurabilityDamage(SpellEffectIndex eff_idx)
 void Spell::EffectDurabilityDamagePCT(SpellEffectIndex eff_idx)
 {
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    // Exception for Nefarian hunter class call because the spell targets all players regardless of their classes
-    if (m_spellInfo->Id == 23436 && unitTarget->getClass() != CLASS_HUNTER)
         return;
 
     int32 slot = m_spellInfo->EffectMiscValue[eff_idx];

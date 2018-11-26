@@ -1549,7 +1549,7 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(ProcExecutionData& d
         {
             // Procced spell can only be triggered by direct heals
             // Heal over time like Renew does not trigger it
-            // Check that only priest class can proc it is done on aura 23401 appliance
+            // Check that only priest class can proc it is done in Spell::CheckTargetScript() for aura 23401
             if (IsSpellHaveEffect(procSpell, SPELL_EFFECT_HEAL))
                 triggered_spell_id = 23402;
             break;

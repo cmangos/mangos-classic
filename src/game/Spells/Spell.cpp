@@ -6547,6 +6547,44 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
 {
     switch (m_spellInfo->Id)
     {
+        // Exceptions for Nefarian class calls
+        // as it is not possible to filter out targets based on their class from data in spells template (like spell family masks for example)
+        case 23397:                                         // Berserk
+            if (target->getClass() != CLASS_WARRIOR)
+                return false;
+            break;
+        case 23398:                                         // Involuntary Transformation
+            if (target->getClass() != CLASS_DRUID)
+                return false;
+            break;
+        case 23401:                                         // Corrupted Healing
+            if (target->getClass() != CLASS_PRIEST)
+                return false;
+            break;
+        case 23410:                                         // Wild Magic
+            if (target->getClass() != CLASS_MAGE)
+                return false;
+            break;
+        case 23414:                                         // Paralyze
+            if (target->getClass() != CLASS_ROGUE)
+                return false;
+            break;
+        case 23418:                                         // Siphon Blessing
+            if (target->getClass() != CLASS_PALADIN)
+                return false;
+            break;
+        case 23425:                                         // Corrupted Totems
+            if (target->getClass() != CLASS_SHAMAN)
+                return false;
+            break;
+        case 23427:                                         // Summon Infernals
+            if (target->getClass() != CLASS_WARLOCK)
+                return false;
+            break;
+        case 23436:                                         // Corrupted Weapon
+            if (target->getClass() != CLASS_HUNTER)
+                return false;
+            break;
         case 25676:                                         // Drain Mana
         case 25754:
         case 26457:
