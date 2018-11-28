@@ -1417,7 +1417,7 @@ void WorldObject::MovePositionToFirstCollision(WorldLocation &pos, float dist, f
 
     MaNGOS::NormalizeMapCoord(pos.coord_x);
     MaNGOS::NormalizeMapCoord(pos.coord_y);
-    UpdateGroundPositionZ(pos.coord_x, pos.coord_y, pos.coord_z);
+    UpdateAllowedPositionZ(pos.coord_x, pos.coord_y, pos.coord_z);
     pos.orientation = m_position.o;
 }
 
