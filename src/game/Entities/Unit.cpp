@@ -10921,3 +10921,34 @@ void Unit::InterruptSpellsCastedOnMe(bool killDelayed)
                         event->GetSpell()->cancel();
     }
 }
+
+void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=nullptr*/) const
+{
+    if (!atMap)
+        atMap = GetMap();
+
+    // non fly unit don't must be in air
+    // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
+    if (!CanFly())
+    {
+        bool canSwim = CanSwim();
+        float ground_z = z, max_z;
+        if (canSwim)
+            max_z = atMap->GetTerrain()->GetWaterOrGroundLevel(x, y, z, &ground_z, !HasAuraType(SPELL_AURA_WATER_WALK));
+        else
+            max_z = ground_z = atMap->GetHeight(x, y, z);
+        if (max_z > INVALID_HEIGHT)
+        {
+            if (z > max_z)
+                z = max_z;
+            else if (z < ground_z)
+                z = ground_z;
+        }
+    }
+    else
+    {
+        float ground_z = atMap->GetHeight(x, y, z);
+        if (z < ground_z)
+            z = ground_z;
+    }
+}

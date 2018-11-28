@@ -2335,6 +2335,9 @@ class Unit : public WorldObject
         void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
         void ResetAuraUpdateMask() { m_auraUpdateMask = 0; }
 
+        // WorldObject overrides
+        void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const override;
+
     protected:
 
         struct WeaponDamageInfo
