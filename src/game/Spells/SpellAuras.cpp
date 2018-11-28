@@ -5672,6 +5672,11 @@ void SpellAuraHolder::SetAuraCharges(uint32 charges, bool update)
         return;
     m_procCharges = charges;
 
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; i++)
+        if (m_auras[i])
+            if (SpellModifier* spellMod = m_auras[i]->GetSpellModifier())
+                spellMod->charges = charges;
+
     if (update)
         UpdateAuraApplication();
 }
