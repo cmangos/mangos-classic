@@ -5277,7 +5277,7 @@ void Unit::SendSpellOrDamageImmune(Unit* target, uint32 spellID) const
     SendMessageToSet(data, true);
 }
 
-void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo)
+void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo, bool success/* = true*/)
 {
     if (realCaster->CanAttack(target))
     {
@@ -5296,18 +5296,21 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
             if (attack)
             {
                 // Since patch 1.5.0 sitting characters always stand up on attack (even if stunned)
-                if (!target->IsStandState() && target->GetTypeId() == TYPEID_PLAYER)
+                if (success && !target->IsStandState() && target->GetTypeId() == TYPEID_PLAYER)
                     target->SetStandState(UNIT_STAND_STATE_STAND);
 
                 if (!spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
                 {
-                    target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
-                    // use speedup check to avoid re-remove after above lines - TODO: move to proc
-                    if (spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
-                        target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                    if (success)
+                    {
+                        target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
+                        // use speedup check to avoid re-remove after above lines - TODO: move to proc
+                        if (spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
+                            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
-                    // caster can be detected but have stealth aura
-                    RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                        // caster can be detected but have stealth aura
+                        RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                    }
 
                     target->AddThreat(realCaster);
                     target->SetInCombatWithAggressor(realCaster);
