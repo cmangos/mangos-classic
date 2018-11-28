@@ -159,14 +159,7 @@ class SpellAuraHolder
         uint8 GetAuraLevel() const { return m_auraLevel; }
         void SetAuraLevel(uint8 level) { m_auraLevel = level; }
         uint32 GetAuraCharges() const { return m_procCharges; }
-        void SetAuraCharges(uint32 charges)
-        {
-            if (m_procCharges == charges)
-                return;
-            m_procCharges = charges;
-
-            UpdateAuraApplication();
-        }
+        void SetAuraCharges(uint32 charges, bool update = true);
 
         bool DropAuraCharge();                               // return true if last charge dropped
 
