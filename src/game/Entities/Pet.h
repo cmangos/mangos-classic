@@ -95,7 +95,7 @@ enum PetSpellType
 
 struct PetSpell
 {
-    uint8 active;                                           // use instead enum (not good use *uint8* limited enum in case when value in enum not possitive in *int8*)
+    uint8 active;                                           // use instead enum (not good use *uint8* limited enum in case when value in enum not positive in *int8*)
 
     PetSpellState state : 8;
     PetSpellType type   : 8;
