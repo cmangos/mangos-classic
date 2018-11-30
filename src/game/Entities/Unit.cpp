@@ -5305,9 +5305,6 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
                         // use speedup check to avoid re-remove after above lines - TODO: move to proc
                         if (spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
                             target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-
-                        // caster can be detected but have stealth aura
-                        RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
                     }
 
                     target->AddThreat(realCaster);
