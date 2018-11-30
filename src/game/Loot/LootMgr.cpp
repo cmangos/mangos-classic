@@ -526,7 +526,7 @@ bool LootItem::IsAllowed(Player const* player, Loot const* loot) const
     if (!loot->m_isChest)
         return allowedGuid.find(player->GetObjectGuid()) != allowedGuid.end();
 
-    if (allowedGuid.empty() || freeForAll && allowedGuid.find(player->GetObjectGuid()) == allowedGuid.end())
+    if (allowedGuid.empty() || (freeForAll && allowedGuid.find(player->GetObjectGuid()) == allowedGuid.end()))
         return AllowedForPlayer(player, loot->GetLootTarget());
 
     return false;
