@@ -1343,7 +1343,7 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 if (!target)
                 {
                     if (failedTargetSelection)
-                        sLog.outErrorEventAI("Event %d attempt to attack nullptr target. Creature %d", eventId, m_creature->GetEntry());
+                        sLog.outErrorEventAI("Event %d attempt to face nullptr target. Creature %d", eventId, m_creature->GetEntry());
                     return false;
                 }
                 m_creature->SetFacingToObject(target);
