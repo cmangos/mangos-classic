@@ -670,6 +670,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 17678:                                 // Despawn Spectral Combatants (sic)
+                {
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
+                    {
+                        Creature* creatureTarget = (Creature*)unitTarget;
+                        if (creatureTarget)
+                            creatureTarget->ForcedDespawn(3000);
+                    }
+
+                    return;
+                }
                 case 17770:                                 // Wolfshead Helm Energy
                 {
                     m_caster->CastSpell(m_caster, 29940, TRIGGERED_OLD_TRIGGERED, nullptr);
