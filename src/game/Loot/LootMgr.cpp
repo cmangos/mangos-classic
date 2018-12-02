@@ -450,6 +450,9 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
                 if (loot->m_isChest)
                     return LOOT_SLOT_NORMAL;
 
+                if (isBlocked)
+                    return LOOT_SLOT_VIEW;
+
                 // Check if its turn of that player to loot a not party loot. The loot may be released or the item may be passed by currentLooter
                 if (isReleased || currentLooterPass || loot->m_currentLooterGuid == player->GetObjectGuid())
                     return LOOT_SLOT_NORMAL;
