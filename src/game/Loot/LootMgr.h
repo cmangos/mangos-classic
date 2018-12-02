@@ -338,7 +338,6 @@ class Loot
         void NotifyItemRemoved(uint32 lootIndex);
         void NotifyItemRemoved(Player* player, uint32 lootIndex) const;
         void GroupCheck();
-        void CheckIfRollIsNeeded(Player const* plr);
         void SetGroupLootRight(Player* player);
         void GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount);
         bool FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false);
