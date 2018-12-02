@@ -31,6 +31,7 @@ EndContentData */
 
 /*######
 ## npc_eris_havenfire
+## npc_darrowshire_spirit
 ######*/
 
 enum
@@ -353,11 +354,49 @@ bool QuestAccept_npc_eris_havenfire(Player* pPlayer, Creature* pCreature, const 
     return true;
 }
 
+/*######
+## npc_darrowshire_spirit
+######*/
+
+#define SPELL_SPIRIT_SPAWNIN    17321
+
+struct npc_darrowshire_spiritAI : public ScriptedAI
+{
+    npc_darrowshire_spiritAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
+    }
+
+    void Reset()
+    {
+        DoCastSpellIfCan(m_creature, SPELL_SPIRIT_SPAWNIN);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    }
+};
+
+UnitAI* GetAI_npc_darrowshire_spirit(Creature* pCreature)
+{
+    return new npc_darrowshire_spiritAI(pCreature);
+}
+
+bool GossipHello_npc_darrowshire_spirit(Player* pPlayer, Creature* pCreature)
+{
+    pPlayer->SEND_GOSSIP_MENU(3873, pCreature->GetGUID());
+    pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetGUID());
+    pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    return true;
+}
+
 void AddSC_eastern_plaguelands()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_eris_havenfire";
     pNewScript->GetAI = &GetAI_npc_eris_havenfire;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_eris_havenfire;
+    pNewScript->RegisterSelf();
+
+    pNewScript->Name = "npc_darrowshire_spirit";
+    pNewScript->GetAI = &GetAI_npc_darrowshire_spirit;
+    pNewScript->pGossipHello = &GossipHello_npc_darrowshire_spirit;
     pNewScript->RegisterSelf();
 }
