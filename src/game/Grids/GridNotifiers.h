@@ -1132,24 +1132,24 @@ namespace MaNGOS
     class NearestCreatureEntryWithLiveStateInObjectRangeCheck
     {
         public:
-            NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject const& obj, uint32 entry, bool onlyAlive, bool onlyDead, float range, bool excludeSelf = false)
-                : i_obj(obj), i_entry(entry), i_range(range), i_onlyAlive(onlyAlive), i_onlyDead(onlyDead), i_excludeSelf(excludeSelf), i_foundOutOfRange(false) {}
+            NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject const& obj, uint32 entry, bool onlyAlive, bool onlyDead, float range, bool excludeSelf = false, bool is3D = true)
+                : i_obj(obj), i_entry(entry), i_range(range * range), i_onlyAlive(onlyAlive), i_onlyDead(onlyDead), i_excludeSelf(excludeSelf), i_is3D(is3D), i_foundOutOfRange(false) {}
             WorldObject const& GetFocusObject() const { return i_obj; }
             bool operator()(Creature* u)
             {
                 if (u->GetEntry() == i_entry && ((i_onlyAlive && u->isAlive()) || (i_onlyDead && u->IsCorpse()) || (!i_onlyAlive && !i_onlyDead)) && (!i_excludeSelf || (&i_obj != u)))
                 {
-                    float dist = sqrt(i_obj.GetDistance(u, true, DIST_CALC_NONE));
+                    float dist = i_obj.GetDistance(u, true, DIST_CALC_NONE);
                     if (dist < i_range)
                     {
-                        i_range = dist;         // use found unit range as new range limit for next check
+                        i_range = dist; // use found unit range as new range limit for next check
                         return true;
                     }
                     i_foundOutOfRange = true;
                 }
                 return false;
             }
-            float GetLastRange() const { return i_range; }
+            float GetLastRange() const { return sqrt(i_range); }
         private:
             WorldObject const& i_obj;
             uint32 i_entry;
