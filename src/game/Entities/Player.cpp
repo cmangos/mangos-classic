@@ -16743,7 +16743,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
 
     uint32 reqFaction = pProto->RequiredReputationFaction;
     if (!reqFaction && pProto->RequiredReputationRank > 0)
-        reqFaction = pCreature->getFactionTemplateEntry()->faction;
+        reqFaction = pCreature->GetFactionTemplateEntry()->faction;
 
     if (uint32(GetReputationRank(reqFaction)) < pProto->RequiredReputationRank)
     {
@@ -17646,7 +17646,7 @@ BattleGroundBracketId Player::GetBattleGroundBracketIdFromLevel(BattleGroundType
 
 float Player::GetReputationPriceDiscount(Creature const* creature) const
 {
-    return GetReputationPriceDiscount(creature->getFactionTemplateEntry());
+    return GetReputationPriceDiscount(creature->GetFactionTemplateEntry());
 }
 
 float Player::GetReputationPriceDiscount(FactionTemplateEntry const* vendor_faction) const
@@ -17661,7 +17661,7 @@ float Player::GetReputationPriceDiscount(FactionTemplateEntry const* vendor_fact
 
     if (GetHonorRankInfo().visualRank >= 3)                             // get pvp grade
     {
-        if (FactionTemplateEntry const* player_faction = getFactionTemplateEntry())
+        if (FactionTemplateEntry const* player_faction = GetFactionTemplateEntry())
         {
             if (player_faction->IsFriendlyTo(*vendor_faction))          // check if its friendly faction (not neutral)
                 discount -= 10;                                         // give 10% discount if grade is at least sergent

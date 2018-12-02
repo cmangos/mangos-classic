@@ -1413,12 +1413,12 @@ class Unit : public WorldObject
         // faction template id
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction); }
-        FactionTemplateEntry const* getFactionTemplateEntry() const;
+        FactionTemplateEntry const* GetFactionTemplateEntry() const;
         void RestoreOriginalFaction();
         bool IsNeutralToAll() const;
         bool IsContestedGuard() const
         {
-            if (FactionTemplateEntry const* entry = getFactionTemplateEntry())
+            if (FactionTemplateEntry const* entry = GetFactionTemplateEntry())
                 return entry->IsContestedGuardFaction();
 
             return false;
