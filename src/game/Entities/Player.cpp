@@ -18021,22 +18021,19 @@ void Player::RewardSinglePlayerAtKill(Unit* pVictim)
     RewardHonor(pVictim, 1);
 
     // xp and reputation only in !PvP case
-    if (!pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    if (!pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && pVictim->GetTypeId() == TYPEID_UNIT)
     {
-        if (pVictim->GetTypeId() == TYPEID_UNIT)
-        {
-            Creature* creatureVictim = static_cast<Creature*>(pVictim);
-            RewardReputation(creatureVictim, 1);
-            uint32 xp = MaNGOS::XP::Gain(this, creatureVictim);
-            GiveXP(xp, creatureVictim);
+        Creature* creatureVictim = static_cast<Creature*>(pVictim);
+        RewardReputation(creatureVictim, 1);
+        uint32 xp = MaNGOS::XP::Gain(this, creatureVictim);
+        GiveXP(xp, creatureVictim);
 
-            if (Pet* pet = GetPet())
-                pet->GivePetXP(xp);
+        if (Pet* pet = GetPet())
+            pet->GivePetXP(xp);
 
-            // normal creature (not pet/etc) can be only in !PvP case
-            if (CreatureInfo const* normalInfo = creatureVictim->GetCreatureInfo())
-                KilledMonster(normalInfo, creatureVictim->GetObjectGuid());
-        }
+        // normal creature (not pet/etc) can be only in !PvP case
+        if (CreatureInfo const* normalInfo = creatureVictim->GetCreatureInfo())
+            KilledMonster(normalInfo, creatureVictim->GetObjectGuid());
     }
 }
 
