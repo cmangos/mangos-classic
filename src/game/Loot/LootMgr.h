@@ -321,6 +321,7 @@ class Loot
         ObjectGuid const& GetLootGuid() const { return m_guidTarget; }
         ObjectGuid const& GetMasterLootGuid() const { return m_masterOwnerGuid; }
         GuidSet const& GetOwnerSet() const { return m_ownerSet; }
+        TimePoint const& GetCreateTime() const { return m_createTime; }
 
     private:
         Loot(): m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(),
@@ -372,6 +373,7 @@ class Loot
         GroupLootRollMap m_roll;                          // used if an item is under rolling
         GuidSet          m_playersLooting;                // player who opened loot windows
         GuidSet          m_playersOpened;                 // players that have released the corpse
+        TimePoint        m_createTime;                    // create time (used to refill loot if need)
 };
 
 extern LootStore LootTemplates_Creature;

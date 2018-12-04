@@ -1586,7 +1586,7 @@ void Loot::SetGroupLootRight(Player* player)
 Loot::Loot(Player* player, Creature* creature, LootType type) :
     m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
-    m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
+    m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false), m_createTime(World::GetCurrentClockTime())
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1688,7 +1688,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
 Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
     m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
-    m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
+    m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false), m_createTime(World::GetCurrentClockTime())
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1785,7 +1785,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
 Loot::Loot(Player* player, Corpse* corpse, LootType type) :
     m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
-    m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
+    m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false), m_createTime(World::GetCurrentClockTime())
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1832,7 +1832,7 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
 Loot::Loot(Player* player, Item* item, LootType type) :
     m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
-    m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
+    m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false), m_createTime(World::GetCurrentClockTime())
 {
     // the player whose group may loot the corpse
     if (!player)
@@ -1871,7 +1871,7 @@ Loot::Loot(Player* player, Item* item, LootType type) :
 Loot::Loot(Unit* unit, Item* item) :
     m_lootTarget(nullptr), m_itemTarget(item), m_gold(0), m_maxSlot(0),
     m_lootType(LOOT_SKINNING), m_clientLootType(CLIENT_LOOT_PICKPOCKETING), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0),
-    m_haveItemOverThreshold(false), m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
+    m_haveItemOverThreshold(false), m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false), m_createTime(World::GetCurrentClockTime())
 {
     m_ownerSet.insert(unit->GetObjectGuid());
     m_guidTarget = item->GetObjectGuid();
@@ -1880,7 +1880,7 @@ Loot::Loot(Unit* unit, Item* item) :
 Loot::Loot(Player* player, uint32 id, LootType type) :
     m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
-    m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
+    m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false), m_createTime(World::GetCurrentClockTime())
 {
     m_ownerSet.insert(player->GetObjectGuid());
     switch (type)
