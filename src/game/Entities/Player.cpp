@@ -12747,13 +12747,17 @@ void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
 
                     SendQuestUpdateAddItem(qInfo, j, curitemcount, additemcount);
                 }
+
                 if (CanCompleteQuest(questid))
-                    CompleteQuest(questid);
+                    CompleteQuest(questid); // will call UpdateForQuestWorldObjects to clean sparkles for this quest on client
+                else if (q_status.m_itemcount[j] == reqitemcount)
+                    UpdateForQuestWorldObjects(); // call UpdateForQuestWorldObjects to remove sparkles from finished objective on client
+
+                // we should remove this return if there is possibility that an quest item can be used in more than one quest
                 return;
             }
         }
     }
-    UpdateForQuestWorldObjects();
 }
 
 void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
@@ -18029,7 +18033,7 @@ void Player::RewardSinglePlayerAtKill(Unit* pVictim)
             if (Pet* pet = GetPet())
                 pet->GivePetXP(xp);
 
-            // normal creature (not pet/etc) can be only in !PvP case        
+            // normal creature (not pet/etc) can be only in !PvP case
             if (CreatureInfo const* normalInfo = creatureVictim->GetCreatureInfo())
                 KilledMonster(normalInfo, creatureVictim->GetObjectGuid());
         }
