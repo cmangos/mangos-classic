@@ -5673,23 +5673,6 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NOT_TRADING;
     }
 
-    switch (m_spellInfo->Id)
-    {
-        case 27230: // Health Stone
-        case 11730:
-        case 11729:
-        case 6202:
-        case 6201:
-        case 5699:
-        {
-            // check if we already have a healthstone
-            uint32 itemType = GetUsableHealthStoneItemType(m_caster);
-            if (itemType && m_caster->IsPlayer() && ((Player*)m_caster)->GetItemCount(itemType) > 0)
-                return SPELL_FAILED_TOO_MANY_OF_ITEM;
-            break;
-        }
-    }
-
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TAME_BEAST))
     {
         Player* player = (Player*)m_caster;
@@ -5707,7 +5690,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // all ok
-    return SPELL_CAST_OK;
+    return OnCheckCast(strict);
 }
 
 SpellCastResult Spell::CheckPetCast(Unit* target)
@@ -7236,6 +7219,28 @@ void Spell::OnSuccessfulSpellFinish()
             break;
         }
     }
+}
+
+SpellCastResult Spell::OnCheckCast(bool strict)
+{
+    switch (m_spellInfo->Id)
+    {
+        case 27230: // Health Stone
+        case 11730:
+        case 11729:
+        case 6202:
+        case 6201:
+        case 5699:
+        {
+            // check if we already have a healthstone
+            uint32 itemType = GetUsableHealthStoneItemType(m_caster);
+            if (itemType && m_caster->IsPlayer() && ((Player*)m_caster)->GetItemCount(itemType) > 0)
+                return SPELL_FAILED_TOO_MANY_OF_ITEM;
+            break;
+        }
+    }
+
+    return SPELL_CAST_OK;
 }
 
 void Spell::StopCast(SpellCastResult castResult)

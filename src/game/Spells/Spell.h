@@ -519,6 +519,7 @@ class Spell
         // Spell Script hooks
         void OnSuccessfulSpellStart();
         void OnSuccessfulSpellFinish();
+        SpellCastResult OnCheckCast(bool strict);
 
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
