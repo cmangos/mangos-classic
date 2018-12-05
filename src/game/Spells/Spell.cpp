@@ -4796,7 +4796,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         Cell::VisitGridObjects(m_caster, checker, range);
                         foundScriptGOTargets.sort([ = ](const GameObject * a, const GameObject * b) -> bool
                         {
-                            return objectForSearch->GetDistance(a) < objectForSearch->GetDistance(b);
+                            return objectForSearch->GetDistance(a, true, DIST_CALC_NONE) < objectForSearch->GetDistance(b, true, DIST_CALC_NONE);
                         });
 
                         if (foundScriptGOTargets.size() > targetCount) // if we have too many targets, we need to trim the list
@@ -4844,7 +4844,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                             foundScriptCreatureTargets.sort([ = ](const Creature * a, const Creature * b) -> bool
                             {
-                                return objectForSearch->GetDistance(a, true, DIST_CALC_COMBAT_REACH) < objectForSearch->GetDistance(b, true, DIST_CALC_COMBAT_REACH);
+                                return objectForSearch->GetDistance(a, true, DIST_CALC_NONE) < objectForSearch->GetDistance(b, true, DIST_CALC_NONE);
                             });
 
                             if (foundScriptCreatureTargets.size() > targetCount) // if we have too many targets, we need to trim the list
