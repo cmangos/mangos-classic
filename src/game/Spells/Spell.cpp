@@ -1681,7 +1681,7 @@ bool Spell::CheckAndAddMagnetTarget(Unit* target, SpellEffectIndex effIndex, Uni
 Unit* Spell::GetUnitTarget(SpellEffectIndex effIdx)
 {
     Unit* target = m_targets.getUnitTarget();
-    if (effIdx != EFFECT_INDEX_0 && !IsUnitTargetTarget(m_spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])) // eff index 0 always need to supply correct target or from client
+    if (!target && effIdx != EFFECT_INDEX_0 && !IsUnitTargetTarget(m_spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])) // eff index 0 always need to supply correct target or from client
         target = m_caster->GetTarget();
 
     return target;
