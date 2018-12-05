@@ -606,30 +606,28 @@ void AreaAura::Update(uint32 diff)
 
 void PersistentAreaAura::Update(uint32 diff)
 {
-    bool remove = false;
+    bool remove = true;
+    AuraRemoveMode removeMode = AURA_REMOVE_BY_EXPIRE;
 
     // remove the aura if its caster or the dynamic object causing it was removed
     // or if the target moves too far from the dynamic object
     if (Unit* caster = GetCaster())
     {
-        DynamicObject* dynObj = caster->GetDynObject(GetId(), GetEffIndex());
-        if (dynObj)
+        if (DynamicObject* dynObj = caster->GetDynObject(GetId()))
         {
-            if (!GetTarget()->IsWithinDistInMap(dynObj, dynObj->GetRadius()))
+            if (GetTarget()->GetDistance(dynObj, true, DIST_CALC_COMBAT_REACH) > dynObj->GetRadius())
             {
-                remove = true;
-                dynObj->RemoveAffected(GetTarget());        // let later reapply if target return to range
+                removeMode = AURA_REMOVE_BY_DEFAULT;
+                dynObj->RemoveAffected(GetTarget()); // let later reapply if target return to range
             }
+            else
+                remove = false;
         }
-        else
-            remove = true;
     }
-    else
-        remove = true;
 
     if (remove)
     {
-        GetTarget()->RemoveAura(GetId(), GetEffIndex());
+        GetTarget()->RemoveSingleAuraFromSpellAuraHolder(GetHolder(), GetEffIndex(), removeMode);
         return;
     }
 
