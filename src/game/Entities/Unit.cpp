@@ -4424,23 +4424,6 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
     return true;
 }
 
-void Unit::RemoveAura(uint32 spellId, SpellEffectIndex effindex, Aura* except)
-{
-    SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellId);
-    for (SpellAuraHolderMap::iterator iter = spair.first; iter != spair.second;)
-    {
-        Aura* aur = iter->second->m_auras[effindex];
-        if (aur && aur != except)
-        {
-            RemoveSingleAuraFromSpellAuraHolder(iter->second, effindex);
-            // may remove holder
-            spair = GetSpellAuraHolderBounds(spellId);
-            iter = spair.first;
-        }
-        else
-            ++iter;
-    }
-}
 void Unit::RemoveAurasByCasterSpell(uint32 spellId, ObjectGuid casterGuid)
 {
     SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellId);
