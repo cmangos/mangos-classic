@@ -664,7 +664,6 @@ void Spell::FillTargetMap()
                             break;
                         case TARGET_NONE:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
-                            tmpUnitLists[i /*==effToIndex[i]*/].push_back(m_caster);
                             break;
                         default:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
@@ -680,9 +679,6 @@ void Spell::FillTargetMap()
 
                             // need some target for processing
                             SetTargetMap(SpellEffectIndex(i), TARGET_LOCATION_CASTER_DEST, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
-                            break;
-                        case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_SRC_LOC:     // All 17/7 pairs used for dest teleportation, A processed in effect code
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                             break;
                         default:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
