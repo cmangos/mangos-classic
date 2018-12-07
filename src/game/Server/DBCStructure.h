@@ -601,7 +601,7 @@ struct SpellEntry
         uint32    Id;                                       // 0 normally counted from 0 field (but some tools start counting from 1, check this before tool use for data view!)
         uint32    School;                                   // 1 not schoolMask from 2.x - just school type so everything linked with SpellEntry::SchoolMask must be rewrited
         uint32    Category;                                 // 2
-        // uint32 castUI;                                   // 3 not used
+        uint32    CastUI;                                   // 3 not used
         uint32    Dispel;                                   // 4
         uint32    Mechanic;                                 // 5
         uint32    Attributes;                               // 6
@@ -636,7 +636,7 @@ struct SpellEntry
         uint32    manaPerSecondPerLevel;                    // 35
         uint32    rangeIndex;                               // 36
         float     speed;                                    // 37
-        //uint32    modalNextSpell;                           // 38 not used
+        uint32    modalNextSpell;                           // 38 not used
         uint32    StackAmount;                              // 39
         uint32    Totem[MAX_SPELL_TOTEMS];                  // 40-41
         int32     Reagent[MAX_SPELL_REAGENTS];              // 42-49
@@ -684,11 +684,11 @@ struct SpellEntry
         uint32    MaxAffectedTargets;                       // 163
         uint32    DmgClass;                                 // 164 defenseType
         uint32    PreventionType;                           // 165
-        // uint32    StanceBarOrder;                        // 166 not used
+        uint32    StanceBarOrder;                           // 166 not used
         float     DmgMultiplier[MAX_EFFECT_INDEX];          // 167-169
-        // uint32    MinFactionId;                          // 170 not used, and 0 in 2.4.2
-        // uint32    MinReputation;                         // 171 not used, and 0 in 2.4.2
-        // uint32    RequiredAuraVision;                    // 172 not used
+        uint32    MinFactionId;                             // 170 not used, and 0 in 2.4.2
+        uint32    MinReputation;                            // 171 not used, and 0 in 2.4.2
+        uint32    RequiredAuraVision;                       // 172 not used
 
         // custom
         uint32    IsServerSide;                             // 173
