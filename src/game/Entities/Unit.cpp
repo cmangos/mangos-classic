@@ -2562,9 +2562,6 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, uint8
         // Check for immune
         if (!wand && pVictim->IsImmuneToSpell(spell, (this == pVictim), effectMask))
             return SPELL_MISS_IMMUNE;
-        // Check for immune (use charges)
-        if (pVictim->IsImmuneToDamage(schoolMask))
-            return SPELL_MISS_IMMUNE;
     }
     switch (spell->DmgClass)
     {
