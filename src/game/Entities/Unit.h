@@ -309,6 +309,7 @@ enum AuraRemoveMode
     AURA_REMOVE_BY_SHIELD_BREAK,                            // when absorb shield is removed by damage
     AURA_REMOVE_BY_EXPIRE,                                  // at duration end
     AURA_REMOVE_BY_TRACKING,                                // aura is removed because of a conflicting tracked aura
+    AURA_REMOVE_BY_GAINED_STACK                             // gained stack
 };
 
 // Spell triggering settings for CastSpell that enable us to skip some checks so that we can investigate spell specific settings
