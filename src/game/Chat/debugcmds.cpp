@@ -1209,6 +1209,51 @@ bool ChatHandler::HandleDebugWaypoint(char* args)
     return true;
 }
 
+bool ChatHandler::HandleDebugByteFields(char* args)
+{
+    Creature* target = getSelectedCreature();
+    if (!target)
+        return false;
+
+    int32 fieldNum;
+    if (!ExtractInt32(&args, fieldNum))
+        return false;
+
+    uint32 byte;
+    if (!ExtractUInt32(&args, byte))
+        return false;
+
+    uint32 value;
+    if (!ExtractUInt32(&args, value))
+        return false;
+
+    switch (fieldNum)
+    {
+        case 0:
+            target->SetByteFlag(UNIT_FIELD_BYTES_0, byte, value);
+            break;
+        case 1:
+            target->SetByteFlag(UNIT_FIELD_BYTES_1, byte, value);
+            break;
+        case 2:
+            target->SetByteFlag(UNIT_FIELD_BYTES_2, byte, value);
+            break;
+        case -10:
+            target->RemoveByteFlag(UNIT_FIELD_BYTES_0, byte, value);
+            break;
+        case -1:
+            target->RemoveByteFlag(UNIT_FIELD_BYTES_1, byte, value);
+            break;
+        case -2:
+            target->RemoveByteFlag(UNIT_FIELD_BYTES_2, byte, value);
+            break;
+        default:
+            break;
+    }
+
+    return true;
+}
+
 bool ChatHandler::HandleDebugSpellVisual(char* args)
 {
     Unit* target = getSelectedUnit();
