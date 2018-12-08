@@ -85,8 +85,7 @@ struct CreatureInfo
     uint32  MinLevel;
     uint32  MaxLevel;
     uint32  ModelId[MAX_CREATURE_MODEL];
-    uint32  FactionAlliance;
-    uint32  FactionHorde;
+    uint32  Faction;
     float   Scale;
     uint32  Family;                                         // enum CreatureFamily values (optional)
     uint32  CreatureType;                                   // enum CreatureType values
@@ -565,7 +564,7 @@ class Creature : public Unit
         void RemoveFromWorld() override;
         void CleanupsBeforeDelete() override;
 
-        bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Team team = TEAM_NONE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
+        bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool LoadCreatureAddon(bool reload);
 
         // SelectLevel set creature bases stats for given level or for default levels stored in db
@@ -664,7 +663,7 @@ class Creature : public Unit
 
         bool HasSpell(uint32 spellID) const override;
 
-        bool UpdateEntry(uint32 Entry, Team team = ALLIANCE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true);
+        bool UpdateEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true);
         void ResetEntry();
 
         void ApplyGameEventSpells(GameEventCreatureData const* eventData, bool activated);
@@ -844,8 +843,8 @@ class Creature : public Unit
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 
-        bool CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, Team team, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
-        bool InitEntry(uint32 Entry, Team team = ALLIANCE, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
+        bool CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
+        bool InitEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
 
         uint32 GetCreatureConditionalSpawnEntry(uint32 guidlow, Map* map) const;
 

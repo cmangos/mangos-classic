@@ -37,10 +37,13 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
 {
     SetMap(cPos.GetMap());
 
-    Team team = owner->GetTypeId() == TYPEID_PLAYER ? ((Player*)owner)->GetTeam() : TEAM_NONE;
-
-    if (!CreateFromProto(guidlow, cinfo, team))
+    if (!CreateFromProto(guidlow, cinfo))
         return false;
+
+    // special model selection case for totems
+    if (owner->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(owner)->GetTeam() == ALLIANCE)
+        if (uint32 modelid_team = sObjectMgr.GetCreatureModelOtherTeamModel(GetDisplayId()))
+            SetDisplayId(modelid_team);
 
     cPos.SelectFinalPoint(this);
 

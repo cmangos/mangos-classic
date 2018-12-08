@@ -115,7 +115,7 @@ enum EventAI_ActionType
     ACTION_T_KILLED_MONSTER             = 33,               // CreatureId, Target
     ACTION_T_SET_INST_DATA              = 34,               // Field, Data
     ACTION_T_SET_INST_DATA64            = 35,               // Field, Target
-    ACTION_T_UPDATE_TEMPLATE            = 36,               // Entry, Team
+    ACTION_T_UPDATE_TEMPLATE            = 36,               // Entry
     ACTION_T_DIE                        = 37,               // No Params
     ACTION_T_ZONE_COMBAT_PULSE          = 38,               // No Params
     ACTION_T_CALL_FOR_HELP              = 39,               // Radius
@@ -408,7 +408,6 @@ struct CreatureEventAI_Action
         struct
         {
             uint32 creatureId;
-            uint32 team;
         } update_template;
         // ACTION_T_CALL_FOR_HELP                           = 39
         struct

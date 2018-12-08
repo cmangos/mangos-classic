@@ -725,11 +725,6 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                     sLog.outErrorDb("Table `%s` uses nonexistent creature entry %u in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u.", tablename, tmp.updateTemplate.newTemplate, tmp.id);
                     continue;
                 }
-                if (tmp.updateTemplate.newFactionTeam != 0 && tmp.updateTemplate.newFactionTeam != 1)
-                {
-                    sLog.outErrorDb("Table `%s` uses nonexistent faction team %u in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u.", tablename, tmp.updateTemplate.newFactionTeam, tmp.id);
-                    continue;
-                }
                 break;
             }
             case SCRIPT_COMMAND_START_RELAY_SCRIPT:         // 45
@@ -2310,7 +2305,7 @@ bool ScriptAction::HandleScriptStep()
             Creature* pCSource = static_cast<Creature*>(pSource);
 
             if (pCSource->GetEntry() != m_script->updateTemplate.newTemplate)
-                pCSource->UpdateEntry(m_script->updateTemplate.newTemplate, m_script->updateTemplate.newFactionTeam ? HORDE : ALLIANCE);
+                pCSource->UpdateEntry(m_script->updateTemplate.newTemplate);
             else
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. Source already has specified creature entry.", m_table, m_script->id, m_script->command);
             break;

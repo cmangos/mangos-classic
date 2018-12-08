@@ -396,7 +396,6 @@ struct ScriptInfo
         struct                                              // SCRIPT_COMMAND_UPDATE_TEMPLATE (44)
         {
             uint32 newTemplate;                             // datalong
-            uint32 newFactionTeam;                          // datalong2
         } updateTemplate;
 
         struct                                              // SCRIPT_COMMAND_START_RELAY_SCRIPT

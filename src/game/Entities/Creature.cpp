@@ -249,7 +249,7 @@ void Creature::RemoveCorpse(bool inPlace)
 /**
  * change the entry of creature until respawn
  */
-bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
+bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
 {
     // use game event entry if any instead default suggested
     if (eventData && eventData->entry_id)
@@ -292,13 +292,6 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=nu
     display_id = minfo->modelid;                            // it can be different (for another gender)
 
     SetNativeDisplayId(display_id);
-
-    // special case for totems (model for team==HORDE is stored in creature_template as the default)
-    if (team == ALLIANCE && cinfo->CreatureType == CREATURE_TYPE_TOTEM)
-    {
-        uint32 modelid_tmp = sObjectMgr.GetCreatureModelOtherTeamModel(display_id);
-        display_id = modelid_tmp ? modelid_tmp : display_id;
-    }
 
     // normally the same as native, but some has exceptions (Spell::DoSummonTotem)
     // also recalculates speed since speed is based on Model and/or template
@@ -374,9 +367,9 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=nu
     return true;
 }
 
-bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/, bool preserveHPAndPower /*=true*/)
+bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/, bool preserveHPAndPower /*=true*/)
 {
-    if (!InitEntry(Entry, team, data, eventData))
+    if (!InitEntry(Entry, data, eventData))
         return false;
 
     // creatures always have melee weapon ready if any
@@ -408,10 +401,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
         }
     }
 
-    if (team == HORDE)
-        setFaction(GetCreatureInfo()->FactionHorde);
-    else
-        setFaction(GetCreatureInfo()->FactionAlliance);
+    setFaction(GetCreatureInfo()->Faction);
 
     SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->NpcFlags);
 
@@ -453,7 +443,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     UpdateAllStats();
 
     // checked and error show at loading templates
-    if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->FactionAlliance))
+    if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->Faction))
     {
         if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_PVP)
             SetPvP(true);
@@ -478,7 +468,7 @@ void Creature::ResetEntry()
 {
     CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow());
     GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetGUIDLow());
-    UpdateEntry(m_originalEntry, TEAM_NONE, data, eventData, false);
+    UpdateEntry(m_originalEntry, data, eventData, false);
 }
 
 uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* data /*= nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
@@ -764,11 +754,11 @@ bool Creature::AIM_Initialize()
     return true;
 }
 
-bool Creature::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Team team /*= TEAM_NONE*/, const CreatureData* data /*= nullptr*/, GameEventCreatureData const* eventData /*= nullptr*/)
+bool Creature::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, const CreatureData* data /*= nullptr*/, GameEventCreatureData const* eventData /*= nullptr*/)
 {
     SetMap(cPos.GetMap());
 
-    if (!CreateFromProto(guidlow, cinfo, team, data, eventData))
+    if (!CreateFromProto(guidlow, cinfo, data, eventData))
         return false;
 
     cPos.SelectFinalPoint(this);
@@ -1383,13 +1373,13 @@ float Creature::_GetSpellDamageMod(int32 Rank)
     }
 }
 
-bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, Team team, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
+bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
 {
     m_originalEntry = cinfo->Entry;
 
     Object::_Create(guidlow, cinfo->Entry, cinfo->GetHighGuid());
 
-    return UpdateEntry(cinfo->Entry, team, data, eventData, false);
+    return UpdateEntry(cinfo->Entry, data, eventData, false);
 }
 
 bool Creature::LoadFromDB(uint32 guidlow, Map* map)
@@ -1426,7 +1416,7 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
 
     CreatureCreatePos pos(map, data->posX, data->posY, data->posZ, data->orientation);
 
-    if (!Create(guidlow, pos, cinfo, TEAM_NONE, data, eventData))
+    if (!Create(guidlow, pos, cinfo, data, eventData))
         return false;
 
     SetRespawnCoord(pos);
@@ -2536,7 +2526,7 @@ void Creature::ClearTemporaryFaction()
         return;
 
     // Reset to original faction
-    setFaction(GetCreatureInfo()->FactionAlliance);
+    setFaction(GetCreatureInfo()->Faction);
 
     ForceHealthAndPowerUpdate();                            // update health and power for client needed to hide enemy real value
 

@@ -1125,7 +1125,7 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 return false;
             }
 
-            m_creature->UpdateEntry(action.update_template.creatureId, action.update_template.team ? HORDE : ALLIANCE);
+            m_creature->UpdateEntry(action.update_template.creatureId);
             break;
         case ACTION_T_DIE:
         {
