@@ -1630,6 +1630,7 @@ void CreatureEventAI::SpellHit(Unit* unit, const SpellEntry* spellInfo)
 
 void CreatureEventAI::SpellHitTarget(Unit* target, const SpellEntry* spellInfo)
 {
+    IncreaseDepthIfNecessary();
     for (auto& i : m_CreatureEventAIList)
         if (i.event.event_type == EVENT_T_SPELLHIT_TARGET)
             // If spell id matches (or no spell id) & if spell school matches (or no spell school)
