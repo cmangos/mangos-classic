@@ -107,6 +107,12 @@ class CombatTimerAI : public TimerManager
             }
         }
 
+        void DisableCombatAction(uint32 index) // for multiphase fights mostly
+        {
+            DisableTimer(index);
+            SetActionReadyStatus(index, false);
+        }
+
         inline void SetActionReadyStatus(uint32 index, bool state) { m_actionReadyStatus[index] = state; }
         inline bool GetActionReadyStatus(uint32 index) { return m_actionReadyStatus[index]; }
 
