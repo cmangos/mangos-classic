@@ -335,6 +335,7 @@ inline bool IsPossessCharmType(uint32 spellId)
 {
     switch (spellId)
     {
+        case 999999: // compilation warning suppression
         default: return false;
     }
 }
