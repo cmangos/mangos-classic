@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Four_Horsemen
 SD%Complete: 99
-SDComment: TODO: Test enrages
+SDComment: Is special text used when 100 marks are reached?
 SDCategory: Naxxramas
 EndScriptData
 
@@ -61,8 +61,6 @@ enum
     // ***** Spells *****
     // all horsemen
     SPELL_SHIELDWALL        = 29061,
-    SPELL_BESERK            = 26662,
-    // Note: Berserk should be applied once 100 marks are casted.
 
     // lady blaumeux
     SPELL_MARK_OF_BLAUMEUX  = 28833,
@@ -83,6 +81,8 @@ enum
     SPELL_MARK_OF_ZELIEK    = 28835,
     SPELL_HOLY_WRATH        = 28883,
     SPELL_SPIRIT_ZELIEK     = 28934,
+
+    MAX_MARK_STACKS         = 100,      // Horsemen enrage at this milestone
 };
 
 struct boss_lady_blaumeuxAI : public ScriptedAI
@@ -163,12 +163,7 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
         if (m_uiVoidZoneTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VOID_ZONE) == CAST_OK)
-            {
-                if (m_uiMarkCounter < 100)
-                    m_uiVoidZoneTimer = 15000;
-                else
-                    m_uiVoidZoneTimer = 1000;
-            }
+                m_uiVoidZoneTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 15000 : 1000;
         }
         else
             m_uiVoidZoneTimer -= uiDiff;
@@ -265,12 +260,7 @@ struct boss_alexandros_mograineAI : public ScriptedAI
         if (m_uiRighteousFireTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RIGHTEOUS_FIRE) == CAST_OK)
-            {
-                if (m_uiMarkCounter < 100)
-                    m_uiRighteousFireTimer = 15000;
-                else
-                    m_uiRighteousFireTimer = 1000;
-            }
+                m_uiRighteousFireTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 15000 : 1000;
         }
         else
             m_uiRighteousFireTimer -= uiDiff;
@@ -362,12 +352,7 @@ struct boss_thane_korthazzAI : public ScriptedAI
         if (m_uiMeteorTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_METEOR) == CAST_OK)
-            {
-                if (m_uiMarkCounter < 100)
-                    m_uiMeteorTimer = 20000;
-                else
-                    m_uiMeteorTimer = 1000;
-            }
+                m_uiMeteorTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 20000 : 1000;
         }
         else
             m_uiMeteorTimer -= uiDiff;
@@ -459,12 +444,7 @@ struct boss_sir_zeliekAI : public ScriptedAI
         if (m_uiHolyWrathTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLY_WRATH) == CAST_OK)
-            {
-                if (m_uiMarkCounter < 100)
-                    m_uiHolyWrathTimer = 15000;
-                else
-                    m_uiHolyWrathTimer = 1000;
-            }
+                m_uiHolyWrathTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 15000 : 1000;
         }
         else
             m_uiHolyWrathTimer -= uiDiff;
