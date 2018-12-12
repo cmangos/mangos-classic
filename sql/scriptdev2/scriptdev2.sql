@@ -2356,7 +2356,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1533042,'I... am... undone!',8805,1,0,0,'gothik SAY_DEATH'),
 (-1533043,'I have waited long enough! Now, you face the harvester of souls!',8808,1,0,0,'gothik SAY_TELEPORT'),
 
-(-1533044,'Defend youself!',8892,0,0,0,'blaumeux SAY_BLAU_AGGRO'),
+(-1533044,'Defend yourself!',8892,0,0,0,'blaumeux SAY_BLAU_AGGRO'),
 (-1533045,'Come, Zeliek, do not drive them out. Not before we\'ve had our fun.',8896,6,0,0,'blaumeux SAY_BLAU_TAUNT1'),
 (-1533046,'I do hope they stay alive long enough for me to... introduce myself.',8897,6,0,0,'blaumeux SAY_BLAU_TAUNT2'),
 (-1533047,'The first kill goes to me! Anyone care to wager?',8898,6,0,0,'blaumeux SAY_BLAU_TAUNT3'),
