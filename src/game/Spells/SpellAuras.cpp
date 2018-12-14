@@ -1892,7 +1892,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                     target->SetObjectScale(DEFAULT_TAUREN_MALE_SCALE * target->GetObjectScaleMod());
                 else
                     target->SetObjectScale(DEFAULT_TAUREN_FEMALE_SCALE * target->GetObjectScaleMod());
-            }            
+            }
         }
 
         target->RestoreDisplayId();
@@ -5295,7 +5295,7 @@ void SpellAuraHolder::SetStackAmount(uint32 stackAmount, Unit* newCaster)
             int32 baseAmount = aur->GetModifier()->m_baseAmount;
             int32 amount = m_stackAmount * baseAmount;
             // Reapply if amount change
-            if (amount != aur->GetModifier()->m_amount)
+            if (!baseAmount || amount != aur->GetModifier()->m_amount)
             {
                 aur->SetRemoveMode(AURA_REMOVE_BY_GAINED_STACK);
                 if (IsAuraRemoveOnStacking(this->GetSpellProto(), aur->GetEffIndex()))
