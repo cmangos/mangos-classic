@@ -332,6 +332,8 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
 
         if (currentVictim) // select 1.3/1.1 better target in comparison current target
         {
+
+
             // normal case: pCurrentRef is still valid and most hated
             if (currentVictim == pCurrentRef)
             {

@@ -2035,6 +2035,7 @@ class Unit : public WorldObject
         bool SelectHostileTarget();
         bool IsSuppressedTarget(Unit* target) const;
         bool IsOfflineTarget(Unit* victim) const;
+        bool IsLeashingTarget(Unit* victim) const;
         void TauntUpdate();
         void FixateTarget(Unit* taunter);
         ThreatManager& getThreatManager() { return GetCombatData()->threatManager; }
