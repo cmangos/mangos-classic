@@ -1278,12 +1278,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         {
                             case 1:
                                 return;
-                            case 2: damage =   500; break;
-                            case 3: damage =  1500; break;
-                            case 4: damage =  4000; break;
-                            case 5: damage = 12500; break;
+                            case 2: damage =   250; break;
+                            case 3: damage =  1000; break;
+                            case 4: damage =  3000; break;
                             default:
-                                damage = 14000 + 1000 * GetStackAmount();
+                                damage = 1000 * GetStackAmount();
                                 break;
                         }
 
