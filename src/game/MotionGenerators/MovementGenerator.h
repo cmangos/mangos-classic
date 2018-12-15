@@ -96,14 +96,20 @@ class MovementGeneratorMedium : public MovementGenerator
             return (static_cast<D const*>(this))->GetResetPosition(*((T*)&u), x, y, z, o);
         }
     public:
-        // Will not link if not overridden in the generators
+        // Will not link if not overridden in the generators - also not generate for T==Unit
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
         void Initialize(T& u);
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
         void Finalize(T& u);
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
         void Interrupt(T& u);
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
         void Reset(T& u);
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
         bool Update(T& u, const uint32& time_diff);
 
         // not need always overwrites
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
         bool GetResetPosition(T& /*u*/, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const { return false; }
 };
 
