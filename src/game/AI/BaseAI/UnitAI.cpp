@@ -634,3 +634,13 @@ void UnitAI::DoFlee()
     SetAIOrder(ORDER_FLEEING);
     SetCombatScriptStatus(true);
 }
+
+void UnitAI::DistancingStarted()
+{
+    SetCombatScriptStatus(true);
+}
+
+void UnitAI::DistancingEnded()
+{
+    SetCombatScriptStatus(false);
+}
