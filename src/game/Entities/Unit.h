@@ -237,6 +237,7 @@ enum HitInfo
     HITINFO_RESIST              = 0x00000040,               // resisted atleast some damage
     HITINFO_CRITICALHIT         = 0x00000080,
     HITINFO_UNK8                = 0x00000100,               // wotlk?
+    HITINFO_BLOCK               = 0x00000800,
     HITINFO_UNK9                = 0x00002000,               // wotlk?
     HITINFO_GLANCING            = 0x00004000,
     HITINFO_CRUSHING            = 0x00008000,
