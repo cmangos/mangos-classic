@@ -5763,20 +5763,10 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
                 Unit* target = nullptr;
                 float distance = 0.f;
                 float angle = 0.f;
-                if (unit->GetTypeId() == TYPEID_PLAYER)
-                {
-                    ChaseMovementGenerator<Player> const* movegen = static_cast<ChaseMovementGenerator<Player> const*>(*itr);
-                    target = movegen->GetCurrentTarget();
-                    distance = movegen->GetOffset();
-                    angle = movegen->GetAngle();
-                }
-                else
-                {
-                    ChaseMovementGenerator<Creature> const* movegen = static_cast<ChaseMovementGenerator<Creature> const*>(*itr);
-                    target = movegen->GetCurrentTarget();
-                    distance = movegen->GetOffset();
-                    angle = movegen->GetAngle();
-                }
+                ChaseMovementGenerator const* movegen = static_cast<ChaseMovementGenerator const*>(*itr);
+                target = movegen->GetCurrentTarget();
+                distance = movegen->GetOffset();
+                angle = movegen->GetAngle();
 
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_CHASE_NULL);

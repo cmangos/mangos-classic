@@ -974,16 +974,18 @@ namespace MaNGOS
     class AnyUnitFulfillingConditionInRangeCheck
     {
         public:
-            AnyUnitFulfillingConditionInRangeCheck(WorldObject const* obj, std::function<bool(Unit*)>& functor, float radius) : i_obj(obj), i_functor(functor), i_range(radius) {}
+            AnyUnitFulfillingConditionInRangeCheck(WorldObject const* obj, std::function<bool(Unit*)> functor, float radius, DistanceCalculation type = DIST_CALC_COMBAT_REACH)
+                    : i_obj(obj), i_functor(functor), i_range(radius), i_type(type) {}
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
-                return i_functor(u) && i_obj->IsWithinDistInMap(u, i_range);
+                return i_functor(u) && i_obj->GetDistance(u, true, i_type) <= i_range;
             }
         private:
             WorldObject const* i_obj;
-            std::function<bool(Unit*)>& i_functor;
+            std::function<bool(Unit*)> i_functor;
             float i_range;
+            DistanceCalculation i_type;
     };
 
     // Success at unit in range, range update for next check (this can be use with UnitLastSearcher to find nearest unit)

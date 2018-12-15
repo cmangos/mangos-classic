@@ -19,7 +19,8 @@
 #ifndef MANGOS_TARGETEDMOVEMENTGENERATOR_H
 #define MANGOS_TARGETEDMOVEMENTGENERATOR_H
 
-#include "MovementGenerator.h"
+#include "Movement/MoveSplineInit.h"
+#include "MotionGenerators/MovementGenerator.h"
 #include "MotionGenerators/FollowerReference.h"
 #include <G3D/Vector3.h>
 
@@ -45,7 +46,7 @@ class TargetedMovementGeneratorMedium
             i_recheckDistance(0),
             i_offset(offset), i_angle(angle),
             m_speedChanged(false), i_targetReached(false),
-            i_path(nullptr)
+            i_path(nullptr), i_faceTarget(true)
         {
         }
         ~TargetedMovementGeneratorMedium() { delete i_path; }
@@ -53,20 +54,22 @@ class TargetedMovementGeneratorMedium
     public:
         bool Update(T&, const uint32&);
 
-        bool IsReachable() const;
+        virtual bool IsReachable() const override;
 
         Unit* GetCurrentTarget() const override { return i_target.getTarget(); }
         float GetOffset() const { return i_offset; }
         float GetAngle() const { return i_angle; }
 
-        void unitSpeedChanged() { m_speedChanged = true; }
-
-        void SetOffsetAndAngle(float offset, float angle);
+        void UnitSpeedChanged() { m_speedChanged = true; }
 
     protected:
         void _setTargetLocation(T&, bool updateDestination);
-        bool RequiresNewPosition(T& owner, float x, float y, float z) const;
+        virtual bool RequiresNewPosition(T& owner, float x, float y, float z) const;
         virtual float GetDynamicTargetDistance(T& /*owner*/, bool /*forRangeCheck*/) const { return i_offset; }
+        virtual bool ShouldFaceTarget() const { return i_faceTarget; }
+        virtual void HandleTargetedMovement(T& owner, const uint32& time_diff) = 0;
+        virtual void HandleFinalizedMovement(T& owner) = 0;
+        virtual void HandleMovementFailure(T& owner) = 0;
 
         ShortTimeTracker i_recheckDistance;
         float i_offset;
@@ -74,40 +77,79 @@ class TargetedMovementGeneratorMedium
         G3D::Vector3 m_prevTargetPos;
         bool m_speedChanged : 1;
         bool i_targetReached : 1;
+        bool i_faceTarget : 1;
 
         PathFinder* i_path;
 };
 
-// TODO: need collision detection, but not on approaching but after being at target for 1-2 seconds
-template<class T>
-class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >
+/*
+Chases after target
+Has these custom features:
+Backpedaling - when player is standing inside model, mob backs away with 2 second delay, likely for smoothness
+Fanning - likewise after 2 seconds, all mobs spread out at a given target - has to be coordinated with all targets which attack same victim
+TODO: Implement variable chase speed for pet chase
+*/
+enum ChaseMovementMode
 {
+    CHASE_MODE_NORMAL, // chasing target
+    CHASE_MODE_BACKPEDAL, // collision movement
+    CHASE_MODE_DISTANCING, // running away from melee
+    CHASE_MODE_FANNING, // mob collision movement
+};
+
+extern const char* ChaseModes[];
+
+class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator >
+{
+    using TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator>::i_offset;
+    using TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator>::i_angle;
     public:
         ChaseMovementGenerator(Unit& target, float offset, float angle, bool moveFurther = true, bool walk = false, bool combat = true)
-            : TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >(target, offset, angle), m_moveFurther(moveFurther), m_walk(walk), m_combat(combat) {}
+            : TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator >(target, offset, angle), m_moveFurther(moveFurther), m_walk(walk), m_combat(combat), m_currentMode(CHASE_MODE_NORMAL),
+              m_closenessAndFanningTimer(0), m_closenessExpired(false), m_reachable(true) {}
         ~ChaseMovementGenerator() {}
 
         MovementGeneratorType GetMovementGeneratorType() const override { return CHASE_MOTION_TYPE; }
 
-        void Initialize(T&);
-        void Finalize(T&);
-        void Interrupt(T&);
-        void Reset(T&);
-        void SetMovementParameters(float offset, float angle, bool moveFurther);
+        void Initialize(Unit&) override;
+        void Finalize(Unit&) override;
+        void Interrupt(Unit&) override;
+        void Reset(Unit&) override;
+        void SetOffsetAndAngle(float offset, float angle, bool moveFurther);
+        void DistanceYourself(Unit& owner, float distance);
+        void FanOut(Unit& owner);
 
-        static void _clearUnitStateMove(T& u);
-        static void _addUnitStateMove(T& u);
+        static void _clearUnitStateMove(Unit& u);
+        static void _addUnitStateMove(Unit& u);
         bool EnableWalking() const { return m_walk;}
-        bool _lostTarget(T& u) const;
-        void _reachTarget(T&);
+        bool _lostTarget(Unit& u) const;
+        void _reachTarget(Unit&);
+        bool GetResetPosition(Unit& /*u*/, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const override { return false; }
+        void HandleMovementFailure(Unit& owner) override;
+
+        ChaseMovementMode GetCurrentMode() const { return m_currentMode; }
+        virtual bool IsReachable() const override;
 
     protected:
-        float GetDynamicTargetDistance(T& owner, bool forRangeCheck) const override;
+        float GetDynamicTargetDistance(Unit& owner, bool forRangeCheck) const override;
+        void HandleTargetedMovement(Unit& owner, const uint32& time_diff) override;
+        void HandleFinalizedMovement(Unit& owner) override;
+        bool RequiresNewPosition(Unit& owner, float x, float y, float z) const override;
 
     private:
+        bool DispatchSplineToPosition(Unit& owner, float x, float y, float z, bool walk, bool cutPath);
+        void CutPath(Unit& owner, PointsArray& path);
+        void Backpedal(Unit& owner);
+
         bool m_moveFurther;
         bool m_walk;
         bool m_combat;
+        bool m_reachable;
+
+        uint32 m_closenessAndFanningTimer;
+        bool m_closenessExpired;
+
+        ChaseMovementMode m_currentMode;
 };
 
 template<class T>
@@ -133,8 +175,12 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, Follow
         bool _lostTarget(T&) const { return false; }
         void _reachTarget(T&) {}
 
+        void HandleMovementFailure(T& owner) override;
+
     private:
         void _updateSpeed(T& u);
+        void HandleTargetedMovement(T& owner, const uint32& time_diff) override;
+        void HandleFinalizedMovement(T& owner) override;
 
     protected:
         float GetDynamicTargetDistance(T& owner, bool forRangeCheck) const override;

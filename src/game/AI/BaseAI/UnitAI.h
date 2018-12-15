@@ -407,8 +407,6 @@ class UnitAI
          */
         virtual void OnChannelStateChange(SpellEntry const* spellInfo, bool state, WorldObject* target = nullptr);
 
-        virtual void TimedFleeingEnded();
-
         void CheckForHelp(Unit* /*who*/, Unit* /*me*/, float /*dist*/);
         void DetectOrAttack(Unit* who);
         bool CanTriggerStealthAlert(Unit* who, float attackRadius) const;
@@ -450,6 +448,12 @@ class UnitAI
 
         // AI selection - works in connection with IsPossessCharmType
         virtual bool CanHandleCharm() { return false; }
+
+        // Movement generator responses
+        virtual void TimedFleeingEnded();
+
+        virtual void DistancingStarted();
+        virtual void DistancingEnded();
 
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }

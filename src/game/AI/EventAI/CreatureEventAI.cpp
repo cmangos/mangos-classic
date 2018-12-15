@@ -2030,15 +2030,23 @@ void CreatureEventAI::DistanceYourself()
     if (m_mainSpellCost * 2 > m_creature->GetPower(POWER_MANA))
         return;
 
+    float distance = DISTANCING_CONSTANT + std::max(m_creature->GetCombinedCombatReach(victim) * 1.5f, m_creature->GetCombinedCombatReach(victim) + m_mainSpellMinRange);
+    m_creature->GetMotionMaster()->DistanceYourself(distance);
+}
+
+void CreatureEventAI::DistancingStarted()
+{
     SetCombatScriptStatus(true);
 
     if (!m_currentRangedMode)
         SetCurrentRangedMode(true);
+}
 
-    float x, y, z;
-    float distance = DISTANCING_CONSTANT + std::max(m_creature->GetCombinedCombatReach(victim) * 1.5f, m_creature->GetCombinedCombatReach(victim) + m_mainSpellMinRange);
-    victim->GetNearPoint(m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), distance, victim->GetAngle(m_creature));
-    m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_DISTANCE, x, y, z);
+void CreatureEventAI::DistancingEnded()
+{
+    SetCombatScriptStatus(false);
+    if (m_creature->getVictim())
+        DoStartMovement(m_creature->getVictim());
 }
 
 void CreatureEventAI::JustStoppedMovementOfTarget(SpellEntry const* spellInfo, Unit* victim)
@@ -2047,18 +2055,6 @@ void CreatureEventAI::JustStoppedMovementOfTarget(SpellEntry const* spellInfo, U
         return;
     if (m_distanceSpells.find(spellInfo->Id) != m_distanceSpells.end())
         DistanceYourself();
-}
-
-void CreatureEventAI::MovementInform(uint32 uiType, uint32 uiPointId)
-{
-    if (uiType != POINT_MOTION_TYPE)
-        return;
-    if (uiPointId == POINT_MOVE_DISTANCE)
-    {
-        SetCombatScriptStatus(false);
-        if (m_creature->getVictim())
-            DoStartMovement(m_creature->getVictim());
-    }
 }
 
 void CreatureEventAI::OnSpellInterrupt(SpellEntry const* spellInfo)
