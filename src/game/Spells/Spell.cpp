@@ -2492,14 +2492,14 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 float angle = m_caster->GetOrientation();
                 switch (targetMode)
                 {
-                    case TARGET_LOCATION_CASTER_FRONT:                           break;
-                    case TARGET_LOCATION_CASTER_BACK:      angle += M_PI_F;      break;
+                    case TARGET_LOCATION_CASTER_FRONT:                        break;
+                    case TARGET_LOCATION_CASTER_BACK:   angle += M_PI_F;      break;
                     case TARGET_LOCATION_CASTER_LEFT:   angle += M_PI_F / 2;  break;
                     case TARGET_LOCATION_CASTER_RIGHT:  angle -= M_PI_F / 2;  break;
                 }
 
                 float x, y, z = m_caster->GetPositionZ();
-                m_caster->GetNearPoint2D(x, y, radius + m_caster->GetObjectBoundingRadius(), angle);
+                m_caster->GetNearPoint2D(x, y, radius, angle);
                 m_caster->UpdateGroundPositionZ(x, y, z);
                 m_targets.setDestination(x, y, z);
             }
