@@ -150,6 +150,7 @@ inline bool IsDestinationOnlyEffect(SpellEntry const* spellInfo, SpellEffectInde
         case SPELL_EFFECT_PERSISTENT_AREA_AURA:
         case SPELL_EFFECT_TRANS_DOOR:
         case SPELL_EFFECT_SUMMON:
+        case SPELL_EFFECT_SUMMON_WILD:
         case SPELL_EFFECT_SUMMON_DEAD_PET:
         case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
         case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
