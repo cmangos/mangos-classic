@@ -1326,15 +1326,25 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
     const bool traveling = (GetSpellSpeed() > 0.0f);
 
     // Recheck immune (only for delayed spells)
-    if (traveling && (
-                unit->IsImmuneToDamage(GetSpellSchoolMask(m_spellInfo)) ||
-                unit->IsImmuneToSpell(m_spellInfo, unit == realCaster, effectMask)))
+    if (traveling)
     {
-        if (realCaster)
-            realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
+        switch (m_spellInfo->Id) // keeping switch for porting ease for now
+        {
+            default:
+            {
+                if (unit->IsImmuneToDamage(GetSpellSchoolMask(m_spellInfo)) ||
+                    unit->IsImmuneToSpell(m_spellInfo, unit == realCaster, effectMask))
+                {
+                    if (realCaster)
+                        realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
 
-        ResetEffectDamageAndHeal();
-        return;
+                    ResetEffectDamageAndHeal();
+                    return;
+                }
+                break;
+            }
+        }
+
     }
 
     if (traveling && realCaster && realCaster != unit)
