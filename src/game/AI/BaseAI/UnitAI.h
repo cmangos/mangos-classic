@@ -419,8 +419,8 @@ class UnitAI
         // TODO: Implement proper casterAI in EAI and remove this from Leotheras script
         void SetMoveChaseParams(float dist, float angle, bool moveFurther) { m_attackDistance = dist; m_attackAngle = angle; m_moveFurther = moveFurther; }
 
-        // Returns friendly unit with the most amount of hp missing from max hp
-        Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false);
+        // Returns friendly unit with the most amount of hp missing from max hp - ignoreSelf - some spells cant target self
+        Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false, bool ignoreSelf = false);
 
         // Start movement toward victim
         void DoStartMovement(Unit* victim);

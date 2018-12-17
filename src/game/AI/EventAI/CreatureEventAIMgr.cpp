@@ -1060,6 +1060,29 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
             // Add to list
             m_CreatureEventAI_Event_Map[creature_id].push_back(temp);
             ++Count;
+
+            switch (temp.event_type)
+            {
+                case EVENT_T_FRIENDLY_HP:
+                {
+                    // compute data at the end
+                    CreatureEventAI_EventComputedData data;
+                    data.friendlyHp.targetSelf = true;
+                    for (uint32 j = 0; j < MAX_ACTIONS; ++j)
+                    {
+                        CreatureEventAI_Action& action = temp.action[j];
+                        if (temp.action[j].type == ACTION_T_CAST && temp.action[j].cast.target == TARGET_T_EVENT_SPECIFIC)
+                        {
+                            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(temp.action[j].cast.spellId);
+                            if (spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
+                                data.friendlyHp.targetSelf = false;
+                        }
+                    }
+                    m_creatureEventAI_ComputedDataMap.emplace(temp.event_id, data);
+                    break;
+                }
+                default: break;
+            }
         }
         while (result->NextRow());
 

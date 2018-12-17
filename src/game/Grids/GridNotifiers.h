@@ -775,11 +775,14 @@ namespace MaNGOS
     class MostHPMissingInRangeCheck
     {
         public:
-            MostHPMissingInRangeCheck(Unit const* obj, float range, float hp, bool onlyInCombat = true) : i_obj(obj), i_range(range), i_hp(hp), i_onlyInCombat(onlyInCombat) {}
+            MostHPMissingInRangeCheck(Unit const* obj, float range, float hp, bool onlyInCombat, bool targetSelf) : i_obj(obj), i_range(range), i_hp(hp), i_onlyInCombat(onlyInCombat), i_targetSelf(targetSelf) {}
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
                 if (!u->isAlive() || (i_onlyInCombat && !u->isInCombat()))
+                    return false;
+
+                if (!i_targetSelf && u == i_obj)
                     return false;
 
                 if (i_obj->CanAssist(u) && i_obj->IsWithinDistInMap(u, i_range))
@@ -797,16 +800,20 @@ namespace MaNGOS
             float i_range;
             float i_hp;
             bool i_onlyInCombat;
+            bool i_targetSelf;
     };
 
     class MostHPPercentMissingInRangeCheck
     {
         public:
-            MostHPPercentMissingInRangeCheck(Unit const* obj, float range, float hp, bool onlyInCombat = true) : i_obj(obj), i_range(range), i_hp(hp), i_onlyInCombat(onlyInCombat) {}
+            MostHPPercentMissingInRangeCheck(Unit const* obj, float range, float hp, bool onlyInCombat, bool targetSelf) : i_obj(obj), i_range(range), i_hp(hp), i_onlyInCombat(onlyInCombat), i_targetSelf(targetSelf) {}
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
                 if (!u->isAlive() || (i_onlyInCombat && !u->isInCombat()))
+                    return false;
+
+                if (!i_targetSelf && u == i_obj)
                     return false;
 
                 if (i_obj->CanAssist(u) && i_obj->IsWithinDistInMap(u, i_range))
@@ -824,6 +831,7 @@ namespace MaNGOS
             float i_range;
             float i_hp;
             bool i_onlyInCombat;
+            bool i_targetSelf;
     };
 
     class FriendlyCCedInRangeCheck

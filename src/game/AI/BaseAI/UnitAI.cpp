@@ -551,20 +551,20 @@ bool UnitAI::IsVisible(Unit* pl) const
     return m_unit->IsWithinDist(pl, m_visibilityDistance) && pl->IsVisibleForOrDetect(m_unit, m_unit, true);
 }
 
-Unit* UnitAI::DoSelectLowestHpFriendly(float range, float minMissing, bool percent)
+Unit* UnitAI::DoSelectLowestHpFriendly(float range, float minMissing, bool percent, bool targetSelf)
 {
     Unit* pUnit = nullptr;
 
     if (percent)
     {
-        MaNGOS::MostHPPercentMissingInRangeCheck u_check(m_unit, range, minMissing, true);
+        MaNGOS::MostHPPercentMissingInRangeCheck u_check(m_unit, range, minMissing, true, targetSelf);
         MaNGOS::UnitLastSearcher<MaNGOS::MostHPPercentMissingInRangeCheck> searcher(pUnit, u_check);
 
         Cell::VisitGridObjects(m_unit, searcher, range);
     }
     else
     {
-        MaNGOS::MostHPMissingInRangeCheck u_check(m_unit, range, minMissing, true);
+        MaNGOS::MostHPMissingInRangeCheck u_check(m_unit, range, minMissing, true, targetSelf);
         MaNGOS::UnitLastSearcher<MaNGOS::MostHPMissingInRangeCheck> searcher(pUnit, u_check);
 
         Cell::VisitGridObjects(m_unit, searcher, range);

@@ -377,7 +377,8 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
             if (!m_creature->isInCombat())
                 return false;
 
-            Unit* pUnit = DoSelectLowestHpFriendly(float(event.friendly_hp.radius), float(event.friendly_hp.hpDeficit), false);
+            CreatureEventAI_EventComputedData const& data = (*sEventAIMgr.GetEAIComputedDataMap().find(event.event_id)).second; // always found
+            Unit* pUnit = DoSelectLowestHpFriendly(float(event.friendly_hp.radius), float(event.friendly_hp.hpDeficit), data.friendlyHp.targetSelf);
             if (!pUnit)
                 return false;
 

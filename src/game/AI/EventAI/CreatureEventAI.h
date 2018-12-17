@@ -737,11 +737,24 @@ struct CreatureEventAI_Event
     CreatureEventAI_Action action[MAX_ACTIONS];
 };
 
+struct CreatureEventAI_EventComputedData
+{
+    union
+    {
+        // EVENT_T_FRIENDLY_HP
+        struct
+        {
+            bool targetSelf;
+        } friendlyHp;
+    };
+};
+
 #define AIEVENT_DEFAULT_THROW_RADIUS    30.0f
 
 // Event_Map
 typedef std::vector<CreatureEventAI_Event> CreatureEventAI_Event_Vec;
-typedef std::unordered_map<uint32, CreatureEventAI_Event_Vec > CreatureEventAI_Event_Map;
+typedef std::unordered_map<uint32, CreatureEventAI_Event_Vec> CreatureEventAI_Event_Map;
+typedef std::unordered_map<uint32, CreatureEventAI_EventComputedData> CreatureEventAI_EventComputedData_Map;
 
 struct CreatureEventAI_Summon
 {
