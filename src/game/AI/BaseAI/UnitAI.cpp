@@ -121,6 +121,9 @@ CanCastResult UnitAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo, bo
         if (target && !IsIgnoreLosSpellCast(spellInfo) && !m_unit->IsWithinLOSInMap(target, true) && m_unit != target)
             return CAST_FAIL_NOT_IN_LOS;
 
+        if (m_unit->HasGCD(spellInfo))
+            return CAST_FAIL_COOLDOWN;
+
         if (!m_unit->IsSpellReady(*spellInfo))
             return CAST_FAIL_COOLDOWN;
     }
