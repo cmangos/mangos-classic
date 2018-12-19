@@ -5850,7 +5850,7 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
             // Get server side data
             uint32 newzone, newarea;
             GetZoneAndAreaId(newzone, newarea);
-            if (!MapCoordinateVsZoneCheck(x, y, GetMapId(), m_newZone))
+            if (newzone != m_newZone)
             {
                 sLog.outError("Delayed Zone Update: Client sent invalid zoneId for X,Y & MAP Coordinates. GUID: %u zoneId: %u Expected %u, Coords: %f %f %f", GetGUIDLow(), m_newZone, newzone, x, y, z);
                 m_newZone = newzone;
