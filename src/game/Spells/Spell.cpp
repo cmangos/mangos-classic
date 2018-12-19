@@ -2442,16 +2442,28 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             Group* pGroup = targetPlayer ? targetPlayer->GetGroup() : nullptr;
             if (pGroup)
             {
+                float x, y, z;
+                targetPlayer->GetPosition(x, y, z);
                 for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
                 {
-                    Player* Target = itr->getSource();
+                    Player* target = itr->getSource();
 
                     // CanAssist check duel and controlled by enemy
-                    if (Target && targetPlayer->IsWithinDistInMap(Target, radius) &&
-                            targetPlayer->getClass() == Target->getClass() &&
-                            m_caster->CanAssist(Target))
+                    if (target)
                     {
-                        targetUnitMap.push_back(Target);
+                        if (target->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH) <= radius &&
+                            targetPlayer->getClass() == target->getClass() &&
+                            m_caster->CanAssist(target))
+                        {
+                            targetUnitMap.push_back(target);
+                        }
+                        if (Pet* pet = target->GetPet())
+                        {
+                            if (pet->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH) <= radius &&
+                                targetPlayer->getClass() == pet->getClass() &&
+                                m_caster->CanAssist(pet))
+                                targetUnitMap.push_back(pet);
+                        }
                     }
                 }
             }
