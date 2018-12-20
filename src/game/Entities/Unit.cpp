@@ -3923,7 +3923,7 @@ void Unit::FinishSpell(CurrentSpellTypes spellType, bool ok /*= true*/)
     spell->finish(ok);
 }
 
-bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skipAutorepeat) const
+bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skipAutorepeat, bool forMovement) const
 {
     // We don't do loop here to explicitly show that melee spell is excluded.
     // Maybe later some special spells will be excluded too.
@@ -3935,11 +3935,19 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
         return true;
 
     // channeled spells may be delayed, but they are still considered casted
-    if (!skipChanneled && m_currentSpells[CURRENT_CHANNELED_SPELL] &&
-        !m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING) &&
-        !m_currentSpells[CURRENT_CHANNELED_SPELL]->m_IsTriggeredSpell &&
-        (m_currentSpells[CURRENT_CHANNELED_SPELL]->getState() != SPELL_STATE_FINISHED))
-        return true;
+    if (!skipChanneled)
+    {
+        if (Spell const* channeledSpell = m_currentSpells[CURRENT_CHANNELED_SPELL])
+        {
+            bool attributeResult;
+            if (!forMovement)
+                attributeResult = channeledSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING);
+
+            if (!attributeResult && !channeledSpell->m_IsTriggeredSpell &&
+                    (channeledSpell->getState() != SPELL_STATE_FINISHED))
+                return true;
+        }
+    }
 
     // autorepeat spells may be finished or delayed, but they are still considered casted
     if (!skipAutorepeat && m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
