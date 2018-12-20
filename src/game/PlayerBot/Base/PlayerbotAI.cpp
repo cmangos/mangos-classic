@@ -3781,13 +3781,14 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     if (!m_findNPC.empty())
         findNearbyCreature();
 
-    // if we are casting a spell then interrupt it
+    // if we are casting a spell then interrupt it, unless we're a healer
     // make sure any actions that cast a spell set a proper m_ignoreAIUpdatesUntilTime!
     Spell* const pSpell = GetCurrentSpell();
     if (pSpell && !(pSpell->IsChannelActive() || pSpell->IsAutoRepeat()))
     {
         // DEBUG_LOG("spell (%s) is being interrupted",pSpell->m_spellInfo->SpellName[0]);
-        InterruptCurrentCastingSpell();
+        if (!(GetCombatOrder() & ORDERS_HEAL))
+            InterruptCurrentCastingSpell();
         return;
     }
 
