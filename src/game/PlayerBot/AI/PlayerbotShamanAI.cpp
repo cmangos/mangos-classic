@@ -23,9 +23,11 @@ class PlayerbotAI;
 PlayerbotShamanAI::PlayerbotShamanAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
 {
     // restoration
-    CHAIN_HEAL               = m_ai->initSpell(CHAIN_HEAL_1);
     HEALING_WAVE             = m_ai->initSpell(HEALING_WAVE_1);
     LESSER_HEALING_WAVE      = m_ai->initSpell(LESSER_HEALING_WAVE_1);
+    (LESSER_HEALING_WAVE > 0 ) ? LESSER_HEALING_WAVE : LESSER_HEALING_WAVE = HEALING_WAVE;
+    CHAIN_HEAL               = m_ai->initSpell(CHAIN_HEAL_1);
+    (CHAIN_HEAL > 0 ) ? CHAIN_HEAL : CHAIN_HEAL = LESSER_HEALING_WAVE;
     ANCESTRAL_SPIRIT         = m_ai->initSpell(ANCESTRAL_SPIRIT_1);
     EARTH_SHIELD             = m_ai->initSpell(EARTH_SHIELD_1);
     TREMOR_TOTEM             = m_ai->initSpell(TREMOR_TOTEM_1); // totems
