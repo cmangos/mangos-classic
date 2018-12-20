@@ -10747,6 +10747,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         charmedPlayer->DeleteThreatList(); // TODO: Add threat management for player during charm, only entries with 0 threat
     }
 
+    charmed->SetEvade(EVADE_NONE); // if charm expires mid evade clear evade since movement is also cleared - TODO: maybe should be done on HomeMovementGenerator::MovementExpires?
     // Update possessed's client control status after altering flags
     if (const Player* controllingClientPlayer = charmed->GetClientControlling())
         controllingClientPlayer->UpdateClientControl(charmed, true);
