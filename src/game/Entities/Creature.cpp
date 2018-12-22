@@ -2137,6 +2137,9 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
             return true;
         }
 
+        if (pSpellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && pTarget->GetTypeId() != TYPEID_PLAYER)
+            return false;
+
         switch (pSpellInfo->rangeIndex)
         {
             case SPELL_RANGE_IDX_ANYWHERE:  return true;
