@@ -3585,6 +3585,54 @@ Mail* Player::GetMail(uint32 id)
     return nullptr;
 }
 
+void Player::SaveItemToInventory(Item* item)
+{
+    Bag* container = item->GetContainer();
+    uint32 bag_guid = container ? container->GetGUIDLow() : 0;
+
+    static SqlStatementID insertInventory;
+    static SqlStatementID updateInventory;
+    static SqlStatementID deleteInventory;
+
+    switch (item->GetState())
+    {
+        case ITEM_NEW:
+        {
+            SqlStatement stmt = CharacterDatabase.CreateStatement(insertInventory, "INSERT INTO character_inventory (guid,bag,slot,item,item_template) VALUES (?, ?, ?, ?, ?)");
+            stmt.addUInt32(GetGUIDLow());
+            stmt.addUInt32(bag_guid);
+            stmt.addUInt8(item->GetSlot());
+            stmt.addUInt32(item->GetGUIDLow());
+            stmt.addUInt32(item->GetEntry());
+            stmt.Execute();
+        }
+        break;
+        case ITEM_CHANGED:
+        {
+            SqlStatement stmt = CharacterDatabase.CreateStatement(updateInventory, "UPDATE character_inventory SET guid = ?, bag = ?, slot = ?, item_template = ? WHERE item = ?");
+            stmt.addUInt32(GetGUIDLow());
+            stmt.addUInt32(bag_guid);
+            stmt.addUInt8(item->GetSlot());
+            stmt.addUInt32(item->GetEntry());
+            stmt.addUInt32(item->GetGUIDLow());
+            stmt.Execute();
+        }
+        break;
+        case ITEM_REMOVED:
+        {
+            SqlStatement stmt = CharacterDatabase.CreateStatement(deleteInventory, "DELETE FROM character_inventory WHERE item = ?");
+            stmt.PExecute(item->GetGUIDLow());
+        }
+        break;
+        case ITEM_UNCHANGED:
+            break;
+        default:
+            throw std::domain_error("Unrecognized item state");
+    }
+
+    item->SaveToDB();                                   // item have unchanged inventory record and can be save standalone
+}
+
 void Player::_SetCreateBits(UpdateMask* updateMask, Player* target) const
 {
     if (target == this)
@@ -15507,54 +15555,11 @@ void Player::_SaveInventory()
         return;
     }
 
-    static SqlStatementID insertInventory ;
-    static SqlStatementID updateInventory ;
-    static SqlStatementID deleteInventory ;
-
     for (auto item : m_itemUpdateQueue)
     {
         if (!item) continue;
 
-        Bag* container = item->GetContainer();
-        uint32 bag_guid = container ? container->GetGUIDLow() : 0;
-
-        switch (item->GetState())
-        {
-            case ITEM_NEW:
-            {
-                SqlStatement stmt = CharacterDatabase.CreateStatement(insertInventory, "INSERT INTO character_inventory (guid,bag,slot,item,item_template) VALUES (?, ?, ?, ?, ?)");
-                stmt.addUInt32(GetGUIDLow());
-                stmt.addUInt32(bag_guid);
-                stmt.addUInt8(item->GetSlot());
-                stmt.addUInt32(item->GetGUIDLow());
-                stmt.addUInt32(item->GetEntry());
-                stmt.Execute();
-            }
-            break;
-            case ITEM_CHANGED:
-            {
-                SqlStatement stmt = CharacterDatabase.CreateStatement(updateInventory, "UPDATE character_inventory SET guid = ?, bag = ?, slot = ?, item_template = ? WHERE item = ?");
-                stmt.addUInt32(GetGUIDLow());
-                stmt.addUInt32(bag_guid);
-                stmt.addUInt8(item->GetSlot());
-                stmt.addUInt32(item->GetEntry());
-                stmt.addUInt32(item->GetGUIDLow());
-                stmt.Execute();
-            }
-            break;
-            case ITEM_REMOVED:
-            {
-                SqlStatement stmt = CharacterDatabase.CreateStatement(deleteInventory, "DELETE FROM character_inventory WHERE item = ?");
-                stmt.PExecute(item->GetGUIDLow());
-            }
-            break;
-            case ITEM_UNCHANGED:
-                break;
-            default:
-                throw std::domain_error("Unrecognized item state");
-        }
-
-        item->SaveToDB();                                   // item have unchanged inventory record and can be save standalone
+        SaveItemToInventory(item);
     }
     m_itemUpdateQueue.clear();
 }

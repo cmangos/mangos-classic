@@ -2201,6 +2201,10 @@ class Player : public Unit
         }
 
         void UpdateEverything();
+
+        // Public Save system functions
+        void SaveItemToInventory(Item* item); // optimization for gift wrapping
+
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
