@@ -2031,7 +2031,7 @@ void Creature::SendZoneUnderAttackMessage(Player* attacker) const
     sWorld.SendZoneUnderAttackMessage(GetZoneId(), attacker->GetTeam() == ALLIANCE ? HORDE : ALLIANCE);
 }
 
-void Creature::SetInCombatWithZone()
+void Creature::SetInCombatWithZone(bool checkAttackability)
 {
     if (!CanHaveThreatList())
     {
@@ -2061,6 +2061,9 @@ void Creature::SetInCombatWithZone()
 
             if (pPlayer->isAlive())
             {
+                if (checkAttackability && !CanAttack(pPlayer))
+                    continue;
+
                 AddThreat(pPlayer);
                 SetInCombatWith(pPlayer);
                 pPlayer->SetInCombatWith(this);
