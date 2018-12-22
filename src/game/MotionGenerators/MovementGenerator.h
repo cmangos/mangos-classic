@@ -48,7 +48,7 @@ class MovementGenerator
         virtual MovementGeneratorType GetMovementGeneratorType() const = 0;
         virtual Unit* GetCurrentTarget() const { return nullptr; }
 
-        virtual void unitSpeedChanged() { }
+        virtual void UnitSpeedChanged() { }
 
         // used by Evade code for select point to evade with expected restart default movement
         virtual bool GetResetPosition(Unit&, float& /*x*/, float& /*y*/, float& /*z*/, float& o) const { return false; }
