@@ -740,6 +740,14 @@ void Spell::FillTargetMap()
             }
         }
 
+        switch (m_spellInfo->Id) // workaround for targetless effects - TODO: Add support for targetless SPELL_EFFECT_TRIGGER_SPELL
+        {
+            case 1680: // Whirlwind
+                if (SpellEffectIndex(i) == EFFECT_INDEX_1)
+                    tmpUnitLists[i].push_back(m_caster);
+                break;
+        }
+
         for (UnitList::iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end();)
         {
             if (!CheckTarget(*itr, SpellEffectIndex(i), effException[effToIndex[i]]))
