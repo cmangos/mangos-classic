@@ -4445,10 +4445,13 @@ void Aura::PeriodicTick()
                 return;
 
             // Check for immune (not use charges)
-            if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+            if (!spellProto->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)) // confirmed Impaling spine goes through immunity
             {
-                pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
-                return;
+                if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+                {
+                    pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
+                    return;
+                }
             }
 
             uint32 absorb = 0;
@@ -4533,10 +4536,13 @@ void Aura::PeriodicTick()
                 return;
 
             // Check for immune
-            if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+            if (!spellProto->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
             {
-                pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
-                return;
+                if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+                {
+                    pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
+                    return;
+                }
             }
 
             uint32 absorb = 0;
@@ -4698,10 +4704,13 @@ void Aura::PeriodicTick()
                 return;
 
             // Check for immune (not use charges)
-            if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+            if (!spellProto->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)) // confirmed Impaling spine goes through immunity
             {
-                pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
-                return;
+                if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+                {
+                    pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
+                    return;
+                }
             }
 
             // ignore non positive values (can be result apply spellmods to aura damage
@@ -4836,10 +4845,13 @@ void Aura::PeriodicTick()
                 return;
 
             // Check for immune (not use charges)
-            if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+            if (!spellProto->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)) // confirmed Impaling spine goes through immunity
             {
-                pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
-                return;
+                if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+                {
+                    pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
+                    return;
+                }
             }
 
             int32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
