@@ -230,6 +230,9 @@ class ChatHandler
         bool HandleDebugLootDropStats(char* args);
         bool HandleDebugOverflowCommand(char* args);
 
+        bool HandleDebugHaveAtClientCommand(char* args);
+        bool HandleDebugIsVisibleCommand(char* args);
+
         bool HandleDebugPlayCinematicCommand(char* args);
         bool HandleDebugPlaySoundCommand(char* args);
         bool HandleDebugPlayMusicCommand(char* args);
