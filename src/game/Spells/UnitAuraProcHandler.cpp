@@ -1690,7 +1690,7 @@ SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(ProcExecutionData& data
 SpellAuraProcResult Unit::HandleInvisibilityAuraProc(ProcExecutionData& data)
 {
     Aura* triggeredByAura = data.triggeredByAura;
-    if (triggeredByAura->GetSpellProto()->HasAttribute(SPELL_ATTR_PASSIVE) || triggeredByAura->GetSpellProto()->HasAttribute(SPELL_ATTR_NEGATIVE))
+    if (triggeredByAura->GetSpellProto()->HasAttribute(SPELL_ATTR_PASSIVE) || triggeredByAura->GetSpellProto()->HasAttribute(SPELL_ATTR_AURA_IS_DEBUFF))
         return SPELL_AURA_PROC_FAILED;
 
     RemoveAurasDueToSpell(triggeredByAura->GetId());

@@ -769,7 +769,7 @@ inline bool IsPositiveEffectTargetMode(const SpellEntry* entry, SpellEffectIndex
         return false;
 
     // Forces positive targets to be negative TODO: Find out if this is true for neutral targets
-    if (entry->HasAttribute(SPELL_ATTR_NEGATIVE))
+    if (entry->HasAttribute(SPELL_ATTR_AURA_IS_DEBUFF))
         return false;
 
     // Triggered spells case: prefer child spell via IsPositiveSpell()-like scan for triggered spell
@@ -874,7 +874,8 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
 
 inline bool IsPositiveAuraEffect(const SpellEntry* entry, SpellEffectIndex effIndex, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
 {
-    return (IsAuraApplyEffect(entry, effIndex) && IsPositiveEffect(entry, effIndex, caster, target));
+    return IsAuraApplyEffect(entry, effIndex) && !IsEffectTargetNegative(entry->EffectImplicitTargetA[effIndex], entry->EffectImplicitTargetB[effIndex])
+        && !entry->HasAttribute(SPELL_ATTR_AURA_IS_DEBUFF);
 }
 
 inline bool IsPositiveSpellTargetModeForSpecificTarget(const SpellEntry* entry, uint8 effectMask, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)

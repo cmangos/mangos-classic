@@ -290,7 +290,7 @@ enum SpellAttributes
     SPELL_ATTR_CASTABLE_WHILE_DEAD             = 0x00800000,// 23 castable while dead TODO: Implement
     SPELL_ATTR_CASTABLE_WHILE_MOUNTED          = 0x01000000,// 24 castable while mounted
     SPELL_ATTR_DISABLED_WHILE_ACTIVE           = 0x02000000,// 25 Activate and start cooldown after aura fade or remove summoned creature or go
-    SPELL_ATTR_NEGATIVE                        = 0x04000000,// 26 Almost all negative spell have it
+    SPELL_ATTR_AURA_IS_DEBUFF                  = 0x04000000,// 26
     SPELL_ATTR_CASTABLE_WHILE_SITTING          = 0x08000000,// 27 castable while sitting
     SPELL_ATTR_CANT_USED_IN_COMBAT             = 0x10000000,// 28 Cannot be used in combat
     SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY   = 0x20000000,// 29 unaffected by invulnerability (hmm possible not...)
