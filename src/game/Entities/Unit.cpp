@@ -4012,6 +4012,11 @@ bool Unit::IsInWater() const
     return GetTerrain()->IsInWater(GetPositionX(), GetPositionY(), GetPositionZ());
 }
 
+bool Unit::IsInSwimmableWater() const
+{
+    return GetTerrain()->IsSwimmable(GetPositionX(), GetPositionY(), GetPositionZ());
+}
+
 bool Unit::IsUnderwater() const
 {
     return GetTerrain()->IsUnderWater(GetPositionX(), GetPositionY(), GetPositionZ());
