@@ -74,8 +74,8 @@ uint32 urand(uint32 min, uint32 max)
 
 float frand(float min, float max)
 {
-    std::uniform_real_distribution<double> dist(min, max);
-    return float(dist(*mtRand.get()));
+    std::uniform_real_distribution<float> dist(min, max);
+    return dist(*mtRand.get());
 }
 
 int32 irand()
