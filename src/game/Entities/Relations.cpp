@@ -1003,6 +1003,9 @@ bool GameObject::CanAttackSpell(Unit const* target, SpellEntry const* spellInfo,
     if (owner)
         return owner->CanAttackSpell(target, spellInfo, isAOE);
 
+    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        return !IsFriend(target);
+
     return IsEnemy(target);
 }
 
@@ -1020,6 +1023,9 @@ bool GameObject::CanAssistSpell(Unit const* target, SpellEntry const* spellInfo)
     Unit* owner = GetOwner();
     if (owner)
         return owner->CanAssistSpell(target, spellInfo);
+
+    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        return !IsEnemy(target);
 
     return IsFriend(target);
 }
