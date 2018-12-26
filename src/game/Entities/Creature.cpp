@@ -542,11 +542,6 @@ void Creature::Update(const uint32 diff)
                 // Clear possible auras having IsDeathPersistent() attribute
                 RemoveAllAuras();
 
-                // need to preserve gameevent state
-                ResetEntry();
-
-                SelectLevel();
-                UpdateAllStats();  // to be sure stats is correct regarding level of the creature
                 SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
                 if (m_isDeadByDefault)
                 {
@@ -1610,6 +1605,8 @@ void Creature::SetDeathState(DeathState s)
         clearUnitState(static_cast<uint32>(UNIT_STAT_ALL_STATE));
 
         Unit::SetDeathState(ALIVE);
+
+        ResetEntry(true);
 
         SetLootRecipient(nullptr);
         if (GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_RESPAWN)
