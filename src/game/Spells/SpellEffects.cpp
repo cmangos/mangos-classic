@@ -4224,6 +4224,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         unitTarget->CastSpell(unitTarget, 25648, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
                     return;
                 }
+                case 26528:                                 // Summon Reindeer - trigger actual summoning
+                {
+                    if (unitTarget)
+                        unitTarget->CastSpell(nullptr, 26529, TRIGGERED_NONE);
+                    return;
+                }
                 case 26656:                                 // Summon Black Qiraji Battle Tank
                 {
                     if (!unitTarget)
