@@ -6814,16 +6814,14 @@ void ObjectMgr::CheckSpellCones()
             if (uint32 firstRankId = sSpellMgr.GetFirstSpellInChain(i))
             {
                 SpellCone const* spellConeFirst = sSpellCones.LookupEntry<SpellCone>(firstRankId);
-                if ((!spellConeFirst && !spellCone) || !spellCone)
+                if (!spellConeFirst && !spellCone) // no cones for either - is fine
+                    continue;
+
+                if (!spellCone && spellConeFirst) // cone for first - is fine
                     continue;
 
                 if (!spellConeFirst && spellCone)
-                {
-                    if (spellCone)
-                        sLog.outErrorDb("Table spell_cone is missing entry for spell %u - angle %d for its first rank %u. But has cone for this one.", i, spellCone->coneAngle, firstRankId);
-                    else
-                        sLog.outErrorDb("Table spell_cone is missing entry for spell %u for its first rank %u, no cone even for this rank.", i, firstRankId);
-                }
+                    sLog.outErrorDb("Table spell_cone is missing entry for spell %u - angle %d for its first rank %u. But has cone for this one.", i, spellCone->coneAngle, firstRankId);
                 else if (spellCone->coneAngle != spellConeFirst->coneAngle)
                     sLog.outErrorDb("Table spell_cone has different cone angle for spell Id %u - angle %d and first rank %u - angle %d", i, spellCone->coneAngle, firstRankId, spellConeFirst->coneAngle);
             }
