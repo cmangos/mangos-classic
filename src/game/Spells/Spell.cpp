@@ -136,6 +136,7 @@ void SpellCastTargets::setTradeItemTarget(Player* caster)
 
 void SpellCastTargets::setCorpseTarget(Corpse* corpse)
 {
+    m_CorpseTarget = corpse;
     m_CorpseTargetGUID = corpse->GetObjectGuid();
 }
 
@@ -147,6 +148,7 @@ void SpellCastTargets::Update(Unit* caster)
                    nullptr;
 
     m_itemTarget = nullptr;
+    m_CorpseTarget = ObjectAccessor::GetCorpseInMap(m_CorpseTargetGUID, caster->GetMapId());
     if (caster->GetTypeId() == TYPEID_PLAYER)
     {
         Player* player = ((Player*)caster);
@@ -490,7 +492,7 @@ void Spell::FillTargetMap()
                                         tmpUnitLists[i].push_back(m_targets.getUnitTarget());
                                     else if (m_targets.getCorpseTargetGuid())
                                     {
-                                        if (Corpse* corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGuid()))
+                                        if (Corpse* corpse = m_targets.getCorpseTarget())
                                             if (Player* owner = ObjectAccessor::FindPlayer(corpse->GetOwnerGuid()))
                                                 tmpUnitLists[i].push_back(owner);
                                     }
@@ -5918,66 +5920,103 @@ bool Spell::CanAutoCast(Unit* target)
     return false;                                           // target invalid
 }
 
-SpellCastResult Spell::CheckRange(bool strict)
+std::pair<float, float> Spell::GetMinMaxRange(bool strict)
 {
-    Unit* target = m_targets.getUnitTarget();
+    float minRange = 0.0f, maxRange = 0.0f, rangeMod = 0.0f;
 
-    // add radius of caster and ~5 yds "give" for non stricred (landing) check
-    float range_mod = strict ? 1.25f : 6.25;
+    if (strict && IsNextMeleeSwingSpell())
+        return { 0.0f, 100.0f };
 
-    // special range cases
-    switch (m_spellInfo->rangeIndex)
+    Unit* caster = dynamic_cast<Unit*>(m_caster); // preparation for GO casting
+
+    SpellRangeEntry const* spellRange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+    if (spellRange)
     {
-        // self cast doesn't need range checking -- also for Starshards fix
-        // spells that can be cast anywhere also need no check
-        case SPELL_RANGE_IDX_SELF_ONLY:
-        case SPELL_RANGE_IDX_ANYWHERE:
-            return SPELL_CAST_OK;
-        // combat range spells are treated differently
-        case SPELL_RANGE_IDX_COMBAT:
+        Unit* target = m_targets.getUnitTarget();
+        if (spellRange->Flags & SPELL_RANGE_FLAG_MELEE)
         {
-            range_mod = 0.0f; // These spells do not have any leeway like ranged ones do
-            break;
+            if (caster)
+                rangeMod = caster->GetCombinedCombatReach(target ? target : caster, true, 0.f);
         }
+        else
+        {
+            float meleeRange = 0.f;
+            if (spellRange->Flags & SPELL_RANGE_FLAG_RANGED)
+            {
+                if (caster)
+                    meleeRange = caster->GetCombinedCombatReach(target ? target : caster, true, 0.f);
+            }
+
+            minRange = GetSpellMinRange(spellRange) + meleeRange;
+            maxRange = GetSpellMaxRange(spellRange);
+
+            if (target || m_targets.getCorpseTarget())
+            {
+                rangeMod = m_caster->GetCombatReach() + (target ? target->GetCombatReach() : m_caster->GetCombatReach());
+
+                if (minRange > 0.0f && !(spellRange->Flags & SPELL_RANGE_FLAG_RANGED))
+                    minRange += rangeMod;
+            }
+        }
+
+        if (target && caster && caster->IsMovingForward() && target->IsMovingForward() && !caster->IsWalking() && !target->IsWalking() &&
+            ((spellRange->Flags & SPELL_RANGE_FLAG_MELEE) || target->GetTypeId() == TYPEID_PLAYER))
+            rangeMod += MELEE_LEEWAY;
     }
 
-    // leeway for moving - 8/3f for melee and 2f for ranged
-    if (target && m_caster->IsMoving() && target->IsMoving() && !m_caster->IsWalking() && !target->IsWalking())
-        range_mod += m_spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT ? MELEE_LEEWAY : RANGED_LEEWAY;
-
-    SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-    float max_range = GetSpellMaxRange(srange) + range_mod;
-    float min_range = GetSpellMinRange(srange);
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_RANGED) && m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (Item* ranged = static_cast<Player*>(m_caster)->GetWeaponForAttack(RANGED_ATTACK))
+            maxRange *= ranged->GetProto()->RangedModRange * 0.01f;
 
     if (Player* modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, maxRange, this);
+
+    maxRange += rangeMod;
+
+    return { minRange, maxRange };
+}
+
+SpellCastResult Spell::CheckRange(bool strict)
+{
+    // Don't check for instant cast spells
+    if (!strict && m_casttime == 0)
+        return SPELL_CAST_OK;
+
+    Unit* target = m_targets.getUnitTarget();
+
+    float minRange, maxRange;
+    std::tie(minRange, maxRange) = GetMinMaxRange(strict);
+
+    // non strict spell tolerance
+    if (SpellRangeEntry const* spellRange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex))
+        if ((spellRange->Flags & SPELL_RANGE_FLAG_MELEE) == 0 && !strict)
+            maxRange += std::min(3.f, maxRange * 0.1f); // 10% but no more than MAX_SPELL_RANGE_TOLERANCE
 
     if (target && target != m_caster)
     {
         // distance from target in checks
-        float dist = m_caster->GetDistance(target, true, m_spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT ? DIST_CALC_COMBAT_REACH_WITH_MELEE : DIST_CALC_COMBAT_REACH);
-
-        if (dist > max_range)
-            return SPELL_FAILED_OUT_OF_RANGE;
-        if (min_range && dist < min_range)
+        float dist = m_caster->GetDistance(target, true, DIST_CALC_NONE); // minRange/maxRange already contain everything
+        if (dist > maxRange * maxRange)
+           return SPELL_FAILED_OUT_OF_RANGE;
+        if (minRange && dist < minRange * minRange)
             return SPELL_FAILED_TOO_CLOSE;
         if (m_caster->GetTypeId() == TYPEID_PLAYER &&
                 (sSpellMgr.GetSpellFacingFlag(m_spellInfo->Id) & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(target))
             return SPELL_FAILED_UNIT_NOT_INFRONT;
     }
 
-    // TODO verify that such spells really use bounding radius
-    if (m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destZ != 0)
+    if (m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION)
     {
-        if (!m_caster->IsWithinDist3d(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, max_range))
+        float dist = m_caster->GetDistance(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, DIST_CALC_NONE);
+        if (dist > maxRange * maxRange)
             return SPELL_FAILED_OUT_OF_RANGE;
-        if (min_range && m_caster->IsWithinDist3d(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, min_range))
+        if (minRange && dist < minRange * minRange)
             return SPELL_FAILED_TOO_CLOSE;
         if (!m_caster->IsWithinLOS(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ))
             return SPELL_FAILED_LINE_OF_SIGHT;
     }
 
-    m_maxRange = max_range; // need to save max range for some calculations
+    m_maxRange = maxRange; // need to save max range for some calculations
 
     return SPELL_CAST_OK;
 }
