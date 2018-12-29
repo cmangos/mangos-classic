@@ -973,6 +973,12 @@ enum SpellRangeIndex
     SPELL_RANGE_IDX_ANYWHERE  = 13,                         //< 500000 (anywhere)
 };
 
+enum SpellRangeFlags
+{
+    SPELL_RANGE_FLAG_MELEE = 0x1,                          // Melee combat range
+    SPELL_RANGE_FLAG_RANGED = 0x2,                          // Complement of melee combat range
+};
+
 enum DamageEffectType
 {
     DIRECT_DAMAGE           = 0,                            //< Used for normal weapon damage (not for class abilities or spells)

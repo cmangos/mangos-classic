@@ -762,7 +762,7 @@ struct SpellRangeEntry
     uint32    ID;                                           // 0        m_ID
     float     minRange;                                     // 1        m_rangeMin
     float     maxRange;                                     // 2        m_rangeMax
-    // uint32  Flags;                                       // 3        m_flags
+    uint32  Flags;                                          // 3        m_flags
     // char*  Name[8];                                      // 4-11     m_displayName_lang
     // uint32 NameFlags;                                    // 12 string flags
     // char*  ShortName[8];                                 // 13-20    m_displayNameShort_lang
