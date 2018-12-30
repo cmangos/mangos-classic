@@ -8582,42 +8582,21 @@ float Unit::GetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange dama
     return m_weaponDamageInfo.weapon[attType].damage[index].value[damageRange];
 }
 
-SpellSchoolMask Unit::GetRangedDamageSchoolMask(bool first /*= false*/) const
+SpellSchoolMask Unit::GetAttackDamageSchoolMask(WeaponAttackType attType, bool first /*= false*/) const
 {
     if (first)
-        return SpellSchoolMask(1 << (m_weaponDamageInfo.weapon[RANGED_ATTACK].damage[0].school));
+        return SpellSchoolMask(1 << (m_weaponDamageInfo.weapon[attType].damage[0].school));
 
     uint32 mask = SPELL_SCHOOL_MASK_NONE;
-    for (uint8 i = 0; i < m_weaponDamageInfo.weapon[RANGED_ATTACK].lines; i++)
-        mask |= (1 << m_weaponDamageInfo.weapon[RANGED_ATTACK].damage[i].school);
+    for (uint8 i = 0; i < m_weaponDamageInfo.weapon[attType].lines; i++)
+        mask |= (1 << m_weaponDamageInfo.weapon[attType].damage[i].school);
     return SpellSchoolMask(mask);
 }
 
-void Unit::SetRangedDamageSchool(SpellSchools school)
+void Unit::SetAttackDamageSchool(WeaponAttackType attType, SpellSchools school)
 {
-    for (uint8 i = 0; i < m_weaponDamageInfo.weapon[RANGED_ATTACK].lines; i++)
-        m_weaponDamageInfo.weapon[RANGED_ATTACK].damage[i].school = school;
-}
-
-SpellSchoolMask Unit::GetMeleeDamageSchoolMask(bool main, bool first /*= false*/) const
-{
-    const WeaponAttackType type = (main ? BASE_ATTACK : OFF_ATTACK);
-
-    if (first)
-        return SpellSchoolMask(1 << (m_weaponDamageInfo.weapon[type].damage[0].school));
-
-    uint32 mask = SPELL_SCHOOL_MASK_NONE;
-    for (uint8 i = 0; i < m_weaponDamageInfo.weapon[type].lines; i++)
-        mask |= (1 << m_weaponDamageInfo.weapon[type].damage[i].school);
-    return SpellSchoolMask(mask);
-}
-
-void Unit::SetMeleeDamageSchool(bool main, SpellSchools school)
-{
-    const WeaponAttackType type = (main ? BASE_ATTACK : OFF_ATTACK);
-
-    for (uint8 i = 0; i < m_weaponDamageInfo.weapon[type].lines; i++)
-        m_weaponDamageInfo.weapon[type].damage[i].school = school;
+    for (uint8 i = 0; i < m_weaponDamageInfo.weapon[attType].lines; i++)
+        m_weaponDamageInfo.weapon[attType].damage[i].school = school;
 }
 
 void Unit::SetLevel(uint32 lvl)
