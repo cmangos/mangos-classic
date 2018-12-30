@@ -162,8 +162,12 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
 
         if (m_uiVoidZoneTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VOID_ZONE) == CAST_OK)
-                m_uiVoidZoneTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 15000 : 1000;
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_VOID_ZONE, SELECT_FLAG_PLAYER);
+            if (pTarget)
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_VOID_ZONE) == CAST_OK)
+                    m_uiVoidZoneTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 15000 : 1000;
+            }
         }
         else
             m_uiVoidZoneTimer -= uiDiff;
