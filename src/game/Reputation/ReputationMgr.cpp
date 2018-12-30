@@ -315,18 +315,27 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
         else if (standing < Reputation_Bottom)
             standing = Reputation_Bottom;
 
+        ReputationRank rankOld = ReputationToRank(faction.Standing + BaseRep);
+        ReputationRank rankNew = ReputationToRank(standing);
+
         faction.Standing = standing - BaseRep;
         faction.needSend = true;
         faction.needSave = true;
 
         SetVisible(&faction);
 
-        if (ReputationToRank(standing) <= REP_HOSTILE)
-            SetAtWar(&itr->second, true);
+        if (rankNew != rankOld)                 // Server alters "At war" flag on two occasions:
+        {
+            if (rankNew < REP_UNFRIENDLY && rankNew < rankOld && rankOld > REP_HOSTILE)
+                SetAtWar(&itr->second, true);   // * When reputation dips to "Hostile": tick and now locked for manual changes
+            else if (rankNew > REP_UNFRIENDLY && rankNew > rankOld && rankOld < REP_NEUTRAL)
+                SetAtWar(&itr->second, false);  // * When reputation improves to "Neutral": untick, can be manually overriden for eligible factions
+        }
 
         m_player->ReputationChanged(factionEntry);
 
-        return true;
+        if (rankNew > rankOld)
+            return true;
     }
     return false;
 }
