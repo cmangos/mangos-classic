@@ -32,3 +32,6 @@ UPDATE `spell_template` SET `EffectRealPointsPerLevel1`=0.25, `EffectRealPointsP
 
 -- Added Ignore LoS attribute for Magic Wings spell (trigger NPC is not always in LoS of player)
 UPDATE `spell_template` SET `AttributesEx2`=AttributesEx2|0x00000004 WHERE `id`=24742;
+
+-- Remove channeled extra attribute from spell 28370 (Toxic Gas) that is not channeled
+UPDATE `spell_template` SET `AttributesEx`=0 WHERE `id`=28370;
