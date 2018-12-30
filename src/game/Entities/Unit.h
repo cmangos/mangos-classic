@@ -1991,10 +1991,10 @@ class Unit : public WorldObject
         float GetTotalAttackPowerValue(WeaponAttackType attType) const;
 
         float GetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, uint8 index = 0) const;
-        void SetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, float value, uint8 index = 0) { m_weaponDamage[attType][index].damage[damageRange] = value; }
+        void SetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, float value, uint8 index = 0) { m_weaponDamageInfo.weapon[attType].damage[index].value[damageRange] = value; }
 
-        SpellSchools GetWeaponDamageSchool(WeaponAttackType attType, uint8 index = 0) const { return m_weaponDamage[attType][index].school; }
-        void SetWeaponDamageSchool(WeaponAttackType attType, SpellSchools school, uint8 index = 0) { m_weaponDamage[attType][index].school = school; }
+        SpellSchools GetWeaponDamageSchool(WeaponAttackType attType, uint8 index = 0) const { return m_weaponDamageInfo.weapon[attType].damage[index].school; }
+        void SetWeaponDamageSchool(WeaponAttackType attType, SpellSchools school, uint8 index = 0) { m_weaponDamageInfo.weapon[attType].damage[index].school = school; }
 
         SpellSchoolMask GetRangedDamageSchoolMask(bool first = false) const;
         void SetRangedDamageSchool(SpellSchools school);
@@ -2315,6 +2315,24 @@ class Unit : public WorldObject
         void ResetAuraUpdateMask() { m_auraUpdateMask = 0; }
 
     protected:
+
+        struct WeaponDamageInfo
+        {
+            struct Weapon
+            {
+                struct Damage
+                {
+                    SpellSchools school = SPELL_SCHOOL_NORMAL;
+                    float value[2] = { BASE_MINDAMAGE, BASE_MAXDAMAGE };
+                };
+
+                uint32 lines = 1;
+                Damage damage[MAX_ITEM_PROTO_DAMAGES];
+            };
+
+            Weapon weapon[MAX_ATTACK];
+        };
+
         explicit Unit();
 
         void _UpdateSpells(uint32 time);
@@ -2350,8 +2368,7 @@ class Unit : public WorldObject
         AuraList m_modAuras[TOTAL_AURAS];
         float m_auraModifiersGroup[UNIT_MOD_END][MODIFIER_TYPE_END];
 
-        WeaponDamageInfo m_weaponDamage[MAX_ATTACK][MAX_ITEM_PROTO_DAMAGES];
-        uint8 m_weaponDamageCount[MAX_ATTACK];
+        WeaponDamageInfo m_weaponDamageInfo;
 
         bool m_canModifyStats;
         // std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
