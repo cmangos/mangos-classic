@@ -896,7 +896,7 @@ void Unit::Kill(Unit* victim, DamageEffectType damagetype, SpellEntry const* spe
     // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
     if (damagetype != INSTAKILL)
     {
-        if (killer && killer != victim && (killer == tapper || killer->GetGroup() == tapperGroup && tapperGroup))
+        if (killer && killer != victim && (killer == tapper || (killer->GetGroup() == tapperGroup && tapperGroup)))
         {
             WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL
             data << killer->GetObjectGuid();                // player with killing blow

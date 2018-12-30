@@ -6702,7 +6702,7 @@ void ObjectMgr::CheckSpellCones()
             if (uint32 firstRankId = sSpellMgr.GetFirstSpellInChain(i))
             {
                 SpellCone const* spellConeFirst = sSpellCones.LookupEntry<SpellCone>(firstRankId);
-                if (!spellConeFirst && !spellCone || !spellCone)
+                if ((!spellConeFirst && !spellCone) || !spellCone)
                     continue;
 
                 if (!spellConeFirst && spellCone)
