@@ -996,7 +996,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     // one hand weapon/no weapon
                     damageBasePoints = 0.85f * ceil(triggerAmount * 1.2f * 1.03f * speed / 100.0f) - 1;
 
-                int32 damagePoint = int32(damageBasePoints + 0.03f * (GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE) + GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE)) / 2.0f) + 1;
+                int32 damagePoint = int32(damageBasePoints + 0.03f * (GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE) + GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)) / 2.0f) + 1;
 
                 // apply damage bonuses manually
                 if (damagePoint >= 0)

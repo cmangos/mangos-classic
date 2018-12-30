@@ -339,7 +339,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
     // wand case
     if (m_attackType == RANGED_ATTACK)
         if (!!(m_caster->getClassMask() & CLASSMASK_WAND_USERS) && m_caster->GetTypeId() == TYPEID_PLAYER)
-            m_spellSchoolMask = GetSchoolMask(m_caster->GetWeaponDamageSchool(RANGED_ATTACK));
+            m_spellSchoolMask = m_caster->GetRangedDamageSchoolMask();
 
     // Set health leech amount to zero
     m_healthLeech = 0;

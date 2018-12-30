@@ -2569,7 +2569,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, uint8
     // wand case
     bool wand = spell->Id == 5019;
     if (wand && !!(getClassMask() & CLASSMASK_WAND_USERS) && GetTypeId() == TYPEID_PLAYER)
-        schoolMask = GetSchoolMask(GetWeaponDamageSchool(RANGED_ATTACK));
+        schoolMask = GetRangedDamageSchoolMask();
 
     // Reflect (when available)
     if (reflectable)
@@ -8586,7 +8586,7 @@ float Unit::GetTotalAttackPowerValue(WeaponAttackType attType) const
     return ap * (1.0f + GetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER));
 }
 
-float Unit::GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange damageRange, uint8 index) const
+float Unit::GetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, uint8 index) const
 {
     if (attType == OFF_ATTACK && !haveOffhandWeapon())
         return 0.0f;
@@ -8594,21 +8594,42 @@ float Unit::GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange dam
     return m_weaponDamage[attType][index].damage[damageRange];
 }
 
-SpellSchoolMask Unit::GetMeleeDamageSchoolMask(bool main, bool first /*= false*/) const
+SpellSchoolMask Unit::GetRangedDamageSchoolMask(bool first /*= false*/) const
 {
     if (first)
-        return SpellSchoolMask(1 << (m_weaponDamage[(main ? BASE_ATTACK : OFF_ATTACK)][0]).school);
+        return SpellSchoolMask(1 << (m_weaponDamage[RANGED_ATTACK][0]).school);
 
-    uint32 mask = SPELL_SCHOOL_MASK_NORMAL;
-    for (auto& damage : m_weaponDamage[(main ? BASE_ATTACK : OFF_ATTACK)])
-        mask |= (1 << damage.school);
+    uint32 mask = SPELL_SCHOOL_MASK_NONE;
+    for (uint8 i = 0; i < m_weaponDamageCount[RANGED_ATTACK]; i++)
+        mask |= (1 << m_weaponDamage[RANGED_ATTACK][i].school);
+    return SpellSchoolMask(mask);
+}
+
+void Unit::SetRangedDamageSchool(SpellSchools school)
+{
+    for (uint8 i = 0; i < m_weaponDamageCount[RANGED_ATTACK]; i++)
+        m_weaponDamage[RANGED_ATTACK][i].school = school;
+}
+
+SpellSchoolMask Unit::GetMeleeDamageSchoolMask(bool main, bool first /*= false*/) const
+{
+    const WeaponAttackType type = (main ? BASE_ATTACK : OFF_ATTACK);
+
+    if (first)
+        return SpellSchoolMask(1 << (m_weaponDamage[type][0]).school);
+
+    uint32 mask = SPELL_SCHOOL_MASK_NONE;
+    for (uint8 i = 0; i < m_weaponDamageCount[type]; i++)
+        mask |= (1 << m_weaponDamage[type][i].school);
     return SpellSchoolMask(mask);
 }
 
 void Unit::SetMeleeDamageSchool(bool main, SpellSchools school)
 {
-    for (auto& damage : m_weaponDamage[(main ? BASE_ATTACK : OFF_ATTACK)])
-        damage.school = school;
+    const WeaponAttackType type = (main ? BASE_ATTACK : OFF_ATTACK);
+
+    for (uint8 i = 0; i < m_weaponDamageCount[type]; i++)
+        m_weaponDamage[type][i].school = school;
 }
 
 void Unit::SetLevel(uint32 lvl)
