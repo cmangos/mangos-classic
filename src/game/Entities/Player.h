@@ -1527,10 +1527,10 @@ class Player : public Unit
         bool UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator = 1);
         bool UpdateFishingSkill();
 
-        uint32 GetBaseDefenseSkillValue() const { return GetBaseSkillValue(SKILL_DEFENSE); }
+        uint32 GetBaseDefenseSkillValue() const { return GetSkillValueBase(SKILL_DEFENSE); }
         uint32 GetBaseWeaponSkillValue(WeaponAttackType attType) const;
 
-        uint32 GetPureDefenseSkillValue() const { return GetPureSkillValue(SKILL_DEFENSE); }
+        uint32 GetPureDefenseSkillValue() const { return GetSkillValuePure(SKILL_DEFENSE); }
         uint32 GetPureWeaponSkillValue(WeaponAttackType attType) const;
 
         float GetHealthBonusFromStamina() const;
@@ -1647,14 +1647,16 @@ class Player : public Unit
         void UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence);
 
         void SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step = 0);
-        uint16 GetMaxSkillValue(uint32 skill) const;        // max + perm. bonus + temp bonus
-        uint16 GetPureMaxSkillValue(uint32 skill) const;    // max
-        uint16 GetSkillValue(uint32 skill) const;           // skill value + perm. bonus + temp bonus
-        uint16 GetBaseSkillValue(uint32 skill) const;       // skill value + perm. bonus
-        uint16 GetPureSkillValue(uint32 skill) const;       // skill value
-        int16 GetSkillPermBonusValue(uint32 skill) const;
-        int16 GetSkillTempBonusValue(uint32 skill) const;
         bool HasSkill(uint32 skill) const;
+        uint16 GetSkill(uint16 id, bool bonusPerm, bool bonusTemp, bool max = false) const;
+        inline uint16 GetSkillValue(uint16 id) const { return GetSkill(id, true, true); }           // skill value + perm. bonus + temp bonus
+        inline uint16 GetSkillValueBase(uint16 id) const { return GetSkill(id, true, false); }      // skill value + perm. bonus
+        inline uint16 GetSkillValuePure(uint16 id) const { return GetSkill(id, false, false); }     // skill value
+        inline uint16 GetSkillMax(uint16 id) const { return GetSkill(id, true, true, true); }       // skill max + perm. bonus + temp bonus
+        inline uint16 GetSkillMaxPure(uint16 id) const { return GetSkill(id, false, false, true); } // skill max
+        int16 GetSkillBonus(uint16 id, bool temporary) const;
+        inline int16 GetSkillBonusPermanent(uint16 id) const { return GetSkillBonus(id, false); }   // skill perm. bonus
+        inline int16 GetSkillBonusTemporary(uint16 id) const { return GetSkillBonus(id, true); }    // skill temp bonus
         void learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value);
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }

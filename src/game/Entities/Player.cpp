@@ -2978,14 +2978,14 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     }
 
     // add dependent skills
-    uint16 maxskill = GetMaxSkillValueForLevel();
+    uint16 maxskill = GetSkillMaxForLevel();
 
     SpellLearnSkillNode const* spellLearnSkill = sSpellMgr.GetSpellLearnSkill(spell_id);
 
     if (spellLearnSkill)
     {
-        uint32 skill_value = GetPureSkillValue(spellLearnSkill->skill);
-        uint32 skill_max_value = GetPureMaxSkillValue(spellLearnSkill->skill);
+        uint32 skill_value = GetSkillValuePure(spellLearnSkill->skill);
+        uint32 skill_max_value = GetSkillMaxPure(spellLearnSkill->skill);
 
         if (skill_value < spellLearnSkill->value)
             skill_value = spellLearnSkill->value;
@@ -3024,7 +3024,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                         SetSkill(pSkill->id, 300, 300);
                         break;
                     case SKILL_RANGE_LEVEL:
-                        SetSkill(pSkill->id, 1, GetMaxSkillValueForLevel());
+                        SetSkill(pSkill->id, 1, GetSkillMaxForLevel());
                         break;
                     case SKILL_RANGE_MONO:
                         SetSkill(pSkill->id, 1, 1);
@@ -3205,13 +3205,13 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
                 SetSkill(spellLearnSkill->skill, 0, 0);
             else                                            // set to prev. skill setting values
             {
-                uint32 skill_value = GetPureSkillValue(prevSkill->skill);
-                uint32 skill_max_value = GetPureMaxSkillValue(prevSkill->skill);
+                uint32 skill_value = GetSkillValuePure(prevSkill->skill);
+                uint32 skill_max_value = GetSkillMaxPure(prevSkill->skill);
 
                 if (skill_value >  prevSkill->value)
                     skill_value = prevSkill->value;
 
-                uint32 new_skill_max_value = prevSkill->maxvalue == 0 ? GetMaxSkillValueForLevel() : prevSkill->maxvalue;
+                uint32 new_skill_max_value = prevSkill->maxvalue == 0 ? GetSkillMaxForLevel() : prevSkill->maxvalue;
 
                 if (skill_max_value > new_skill_max_value)
                     skill_max_value =  new_skill_max_value;
@@ -3746,7 +3746,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
 
     // check skill requirement
     if (!prof || GetSession()->GetSecurity() < AccountTypes(sWorld.getConfig(CONFIG_UINT32_TRADE_SKILL_GMIGNORE_SKILL)))
-        if (trainer_spell->reqSkill && GetBaseSkillValue(trainer_spell->reqSkill) < trainer_spell->reqSkillValue)
+        if (trainer_spell->reqSkill && GetSkillValueBase(trainer_spell->reqSkill) < trainer_spell->reqSkillValue)
             return TRAINER_SPELL_RED;
 
     // exist, already checked at loading
@@ -4919,7 +4919,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
         SkillLineAbilityEntry const* skill = _spell_idx->second;
         if (skill->skillId)
         {
-            uint32 SkillValue = GetPureSkillValue(skill->skillId);
+            uint32 SkillValue = GetSkillValuePure(skill->skillId);
 
             uint32 craft_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_CRAFTING);
 
@@ -4968,7 +4968,7 @@ bool Player::UpdateFishingSkill()
 {
     DEBUG_LOG("UpdateFishingSkill");
 
-    uint32 SkillValue = GetPureSkillValue(SKILL_FISHING);
+    uint32 SkillValue = GetSkillValuePure(SKILL_FISHING);
 
     int32 chance = SkillValue < 75 ? 100 : 2500 / (SkillValue - 50);
 
@@ -5112,7 +5112,7 @@ void Player::ModifySkillBonus(uint32 skillid, int32 val, bool talent)
 void Player::UpdateSkillsForLevel()
 {
     uint16 maxconfskill = sWorld.GetConfigMaxSkillValue();
-    uint32 maxSkill = GetMaxSkillValueForLevel();
+    uint32 maxSkill = GetSkillMaxForLevel();
 
     bool alwaysMaxSkill = sWorld.getConfig(CONFIG_BOOL_ALWAYS_MAX_SKILL_FOR_LEVEL);
 
@@ -5276,6 +5276,7 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
     }
 }
 
+
 bool Player::HasSkill(uint32 skill) const
 {
     if (!skill)
@@ -5285,12 +5286,45 @@ bool Player::HasSkill(uint32 skill) const
     return (itr != mSkillStatus.end() && itr->second.uState != SKILL_DELETED);
 }
 
-uint16 Player::GetSkillValue(uint32 skill) const
+uint16 Player::GetSkill(uint16 id, bool bonusPerm, bool bonusTemp, bool max /*= false*/) const
 {
-    if (!skill)
+    if (!id)
         return 0;
 
-    SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
+    SkillStatusMap::const_iterator itr = mSkillStatus.find(id);
+    if (itr == mSkillStatus.end())
+        return 0;
+
+    SkillStatusData const& skillStatus = itr->second;
+    if (skillStatus.uState == SKILL_DELETED)
+        return 0;
+
+    uint32 field = GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(skillStatus.pos));
+
+    // Pure value
+    int32 value = (max ? SKILL_MAX(field) : SKILL_VALUE(field));
+
+    // Bonus values
+    if (bonusPerm || bonusTemp)
+    {
+        uint32 bonus = GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(skillStatus.pos));
+
+        if (bonusPerm)
+            value += SKILL_PERM_BONUS(bonus);
+
+        if (bonusTemp)
+            value += SKILL_TEMP_BONUS(bonus);
+    }
+
+    return uint16(std::max(0, value));
+}
+
+int16 Player::GetSkillBonus(uint16 id, bool temporary) const
+{
+    if (!id)
+        return 0;
+
+    SkillStatusMap::const_iterator itr = mSkillStatus.find(id);
     if (itr == mSkillStatus.end())
         return 0;
 
@@ -5300,113 +5334,7 @@ uint16 Player::GetSkillValue(uint32 skill) const
 
     uint32 bonus = GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(skillStatus.pos));
 
-    int32 result = int32(SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(skillStatus.pos))));
-    result += SKILL_TEMP_BONUS(bonus);
-    result += SKILL_PERM_BONUS(bonus);
-    return result < 0 ? 0 : result;
-}
-
-uint16 Player::GetMaxSkillValue(uint32 skill) const
-{
-    if (!skill)
-        return 0;
-
-    SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end())
-        return 0;
-
-    SkillStatusData const& skillStatus = itr->second;
-    if (skillStatus.uState == SKILL_DELETED)
-        return 0;
-
-    uint32 bonus = GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(skillStatus.pos));
-
-    int32 result = int32(SKILL_MAX(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(skillStatus.pos))));
-    result += SKILL_TEMP_BONUS(bonus);
-    result += SKILL_PERM_BONUS(bonus);
-    return result < 0 ? 0 : result;
-}
-
-uint16 Player::GetPureMaxSkillValue(uint32 skill) const
-{
-    if (!skill)
-        return 0;
-
-    SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end())
-        return 0;
-
-    SkillStatusData const& skillStatus = itr->second;
-    if (skillStatus.uState == SKILL_DELETED)
-        return 0;
-
-    return SKILL_MAX(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(skillStatus.pos)));
-}
-
-uint16 Player::GetBaseSkillValue(uint32 skill) const
-{
-    if (!skill)
-        return 0;
-
-    SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end())
-        return 0;
-
-    SkillStatusData const& skillStatus = itr->second;
-    if (skillStatus.uState == SKILL_DELETED)
-        return 0;
-
-    int32 result = int32(SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(skillStatus.pos))));
-    result += SKILL_PERM_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(skillStatus.pos)));
-    return result < 0 ? 0 : result;
-}
-
-uint16 Player::GetPureSkillValue(uint32 skill) const
-{
-    if (!skill)
-        return 0;
-
-    SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end())
-        return 0;
-
-    SkillStatusData const& skillStatus = itr->second;
-    if (skillStatus.uState == SKILL_DELETED)
-        return 0;
-
-    return SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(skillStatus.pos)));
-}
-
-int16 Player::GetSkillPermBonusValue(uint32 skill) const
-{
-    if (!skill)
-        return 0;
-
-    SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end())
-        return 0;
-
-    SkillStatusData const& skillStatus = itr->second;
-    if (skillStatus.uState == SKILL_DELETED)
-        return 0;
-
-    return SKILL_PERM_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(skillStatus.pos)));
-}
-
-int16 Player::GetSkillTempBonusValue(uint32 skill) const
-{
-    if (!skill)
-        return 0;
-
-    SkillStatusMap::const_iterator itr = mSkillStatus.find(skill);
-    if (itr == mSkillStatus.end())
-        return 0;
-
-    SkillStatusData const& skillStatus = itr->second;
-    if (skillStatus.uState == SKILL_DELETED)
-        return 0;
-
-    return SKILL_TEMP_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(skillStatus.pos)));
+    return (temporary ? SKILL_TEMP_BONUS(bonus) : SKILL_PERM_BONUS(bonus));
 }
 
 void Player::SendInitialActionButtons() const
@@ -18138,7 +18066,7 @@ uint32 Player::GetBaseWeaponSkillValue(WeaponAttackType attType) const
 
     // weapon skill or (unarmed for base attack)
     uint32  skill = item ? item->GetSkill() : uint32(SKILL_UNARMED);
-    return GetBaseSkillValue(skill);
+    return GetSkillValueBase(skill);
 }
 
 uint32 Player::GetPureWeaponSkillValue(WeaponAttackType attType) const
@@ -18151,7 +18079,7 @@ uint32 Player::GetPureWeaponSkillValue(WeaponAttackType attType) const
 
     // weapon skill or (unarmed for base attack)
     uint32  skill = item ? item->GetSkill() : uint32(SKILL_UNARMED);
-    return GetPureSkillValue(skill);
+    return GetSkillValuePure(skill);
 }
 
 void Player::ResurrectUsingRequestDataInit()

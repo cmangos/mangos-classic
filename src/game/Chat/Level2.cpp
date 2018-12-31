@@ -4116,7 +4116,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(char* args)
 
     HandleLearnSkillRecipesHelper(target, targetSkillInfo->id);
 
-    uint16 maxLevel = target->GetPureMaxSkillValue(targetSkillInfo->id);
+    uint16 maxLevel = target->GetSkillMaxPure(targetSkillInfo->id);
     target->SetSkill(targetSkillInfo->id, maxLevel, maxLevel);
     PSendSysMessage(LANG_COMMAND_LEARN_ALL_RECIPES, name.c_str());
     return true;

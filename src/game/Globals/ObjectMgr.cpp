@@ -7479,7 +7479,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             return uint32(player->GetTeam()) == m_value1;
         }
         case CONDITION_SKILL:
-            return player->HasSkill(m_value1) && player->GetBaseSkillValue(m_value1) >= m_value2;
+            return player->HasSkill(m_value1) && player->GetSkillValueBase(m_value1) >= m_value2;
         case CONDITION_QUESTREWARDED:
             return player->GetQuestRewardStatus(m_value1);
         case CONDITION_QUESTTAKEN:
@@ -7615,7 +7615,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         {
             if (m_value2 == 1)
                 return !player->HasSkill(m_value1);
-            return player->HasSkill(m_value1) && player->GetBaseSkillValue(m_value1) < m_value2;
+            return player->HasSkill(m_value1) && player->GetSkillValueBase(m_value1) < m_value2;
         }
         case CONDITION_REPUTATION_RANK_MAX:
         {

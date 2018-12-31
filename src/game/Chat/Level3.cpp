@@ -1249,7 +1249,7 @@ bool ChatHandler::HandleSetSkillCommand(char* args)
         return false;
 
     int32 maxskill;
-    if (!ExtractOptInt32(&args, maxskill, target->GetPureMaxSkillValue(skill)))
+    if (!ExtractOptInt32(&args, maxskill, target->GetSkillMaxPure(skill)))
         return false;
 
     if (skill <= 0)
@@ -2871,10 +2871,10 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
                 if (target && target->HasSkill(id))
                 {
                     knownStr = GetMangosString(LANG_KNOWN);
-                    uint32 curValue = target->GetPureSkillValue(id);
-                    uint32 maxValue  = target->GetPureMaxSkillValue(id);
-                    uint32 permValue = target->GetSkillPermBonusValue(id);
-                    uint32 tempValue = target->GetSkillTempBonusValue(id);
+                    uint32 curValue = target->GetSkillValuePure(id);
+                    uint32 maxValue  = target->GetSkillMaxPure(id);
+                    uint32 permValue = target->GetSkillBonusPermanent(id);
+                    uint32 tempValue = target->GetSkillBonusTemporary(id);
 
                     char const* valFormat = GetMangosString(LANG_SKILL_VALUES);
                     snprintf(valStr, 50, valFormat, curValue, maxValue, permValue, tempValue);

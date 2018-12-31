@@ -423,7 +423,7 @@ void Player::UpdateBlockPercentage()
         value += GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT);
         real = value;
         // Set UI display value: modify value from defense skill against same level target
-        value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
+        value += (int32(GetDefenseSkillValue()) - int32(GetSkillMaxForLevel())) * 0.04f;
     }
     m_modBlockChance = real;
     SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, std::max(0.0f, std::min(value, 100.0f)));
@@ -451,7 +451,7 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
     float value = GetTotalPercentageModValue(modGroup);
     m_modCritChance[attType] = value;
     // Modify crit from weapon skill and maximized defense skill of same level victim difference
-    value += (int32(GetWeaponSkillValue(attType)) - int32(GetMaxSkillValueForLevel())) * 0.04f;
+    value += (int32(GetWeaponSkillValue(attType)) - int32(GetSkillMaxForLevel())) * 0.04f;
     SetStatFloatValue(index, std::max(0.0f, std::min(value, 100.0f)));
 }
 
@@ -480,7 +480,7 @@ void Player::UpdateParryPercentage()
         value += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
         real = value;
         // Set UI display value: modify value from defense skill against same level target
-        value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
+        value += (int32(GetDefenseSkillValue()) - int32(GetSkillMaxForLevel())) * 0.04f;
     }
     // Set current dodge chance
     m_modParryChance = real;
@@ -515,7 +515,7 @@ void Player::UpdateDodgePercentage()
     // Set current dodge chance
     m_modDodgeChance = value;
     // Set UI display value: modify value from defense skill against same level target
-    value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
+    value += (int32(GetDefenseSkillValue()) - int32(GetSkillMaxForLevel())) * 0.04f;
     SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, std::max(0.0f, std::min(value, 100.0f)));
 }
 
