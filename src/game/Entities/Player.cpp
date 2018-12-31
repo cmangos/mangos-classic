@@ -735,6 +735,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
 
     SetByteValue(UNIT_FIELD_BYTES_0, 0, race);
     SetByteValue(UNIT_FIELD_BYTES_0, 1, class_);
+    SetSpellClass(class_);
     SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);
     SetByteValue(UNIT_FIELD_BYTES_0, 3, powertype);
 
@@ -13815,7 +13816,9 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     // overwrite some data fields
     SetByteValue(UNIT_FIELD_BYTES_0, 0, fields[3].GetUInt8()); // race
+    uint8 playerClass = fields[4].GetUInt8();
     SetByteValue(UNIT_FIELD_BYTES_0, 1, fields[4].GetUInt8()); // class
+    SetSpellClass(playerClass);
 
     uint8 gender = fields[5].GetUInt8() & 0x01;             // allowed only 1 bit values male/female cases (for fit drunk gender part)
     SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);            // gender
