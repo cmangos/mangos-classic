@@ -2393,20 +2393,6 @@ class SpellMgr
             return false;
         }
 
-        uint32 GetSpellBookSuccessorSpellId(uint32 spellId)
-        {
-            SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBoundsBySpellId(spellId);
-            for (SkillLineAbilityMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
-            {
-                if (SkillLineAbilityEntry const* pAbility = itr->second)
-                {
-                    if (pAbility->forward_spellid)
-                        return pAbility->forward_spellid;
-                }
-            }
-            return 0;
-        }
-
         bool IsSpellRankOfSpell(SpellEntry const* spellInfo_1, uint32 spellId_2) const;
         bool IsSpellStackableWithSpell(const SpellEntry* entry1, const SpellEntry* entry2) const
         {
@@ -2443,6 +2429,20 @@ class SpellMgr
 
             // By default, check formal aura holder stacking rules
             return IsSpellStackableWithSpell(entry1, entry2);
+        }
+
+        uint32 GetSpellBookSuccessorSpellId(uint32 spellId)
+        {
+            SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBoundsBySpellId(spellId);
+            for (SkillLineAbilityMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+            {
+                if (SkillLineAbilityEntry const* pAbility = itr->second)
+                {
+                    if (pAbility->forward_spellid)
+                        return pAbility->forward_spellid;
+                }
+            }
+            return 0;
         }
 
         // return true if spell1 can affect spell2
