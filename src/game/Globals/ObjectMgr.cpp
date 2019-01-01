@@ -8485,6 +8485,26 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
 
         trainerSpell.isProvidedReqLevel = trainerSpell.reqLevel > 0;
 
+        // calculate learned spell for profession case when stored cast-spell
+        trainerSpell.learnedSpell = spell;
+        for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
+            if (spellinfo->Effect[i] == SPELL_EFFECT_LEARN_SPELL &&
+                    SpellMgr::IsProfessionOrRidingSpell(spellinfo->EffectTriggerSpell[i]))
+            {
+                // prof spells sometime only additions to main spell learn that have level data
+                for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+                {
+                    if (spellinfo->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+                    {
+                        trainerSpell.learnedSpell = spellinfo->EffectTriggerSpell[j];
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
         if (trainerSpell.reqLevel)
         {
             if (trainerSpell.reqLevel == spellinfo->spellLevel)
