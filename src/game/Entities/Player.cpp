@@ -2711,21 +2711,13 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         bool dependent_set = false;
 
         // fix activate state for non-stackable low rank (and find next spell for !active case)
-        if (sSpellMgr.IsRankedSpellNonStackableInSpellBook(spellInfo))
+        if (uint32 nextId = sSpellMgr.GetSpellBookSuccessorSpellId(spellInfo->Id))
         {
-            uint32 tempSpellId = spell_id;
-            SpellChainMapNext const& nextMap = sSpellMgr.GetSpellChainNext();
-            for (SpellChainMapNext::const_iterator next_itr = nextMap.lower_bound(tempSpellId); next_itr != nextMap.upper_bound(tempSpellId);)
+            if (HasSpell(nextId))
             {
-                if (HasSpell(next_itr->second))
-                {
-                    // high rank already known so this must !active
-                    active = false;
-                    next_active_spell_id = next_itr->second;
-                    break;
-                }
-                tempSpellId = next_itr->second;
-                next_itr = nextMap.lower_bound(next_itr->second);
+                // high rank already known so this must !active
+                active = false;
+                next_active_spell_id = nextId;
             }
         }
 
@@ -2886,21 +2878,20 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         newspell.disabled  = disabled;
 
         // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
-        if (newspell.active && !newspell.disabled && sSpellMgr.IsRankedSpellNonStackableInSpellBook(spellInfo))
+        if (newspell.active && !newspell.disabled)
         {
             for (auto& m_spell : m_spells)
             {
                 PlayerSpell& playerSpell2 = m_spell.second;
 
-                if (playerSpell2.state == PLAYERSPELL_REMOVED) continue;
-                SpellEntry const* i_spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_spell.first);
-                if (!i_spellInfo) continue;
+                if (playerSpell2.state == PLAYERSPELL_REMOVED)
+                    continue;
 
-                if (sSpellMgr.IsSpellAnotherRankOfSpell(spell_id, m_spell.first))
+                if (uint32 nextId = sSpellMgr.GetSpellBookSuccessorSpellId(m_spell.first))
                 {
                     if (playerSpell2.active)
                     {
-                        if (sSpellMgr.IsSpellHigherRankOfSpell(spell_id, m_spell.first))
+                        if (nextId == spell_id)
                         {
                             if (IsInWorld())                // not send spell (re-/over-)learn packets at loading
                             {
@@ -2916,7 +2907,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                                 playerSpell2.state = PLAYERSPELL_CHANGED;
                             superceded_old = true;          // new spell replace old in action bars and spell book.
                         }
-                        else if (sSpellMgr.IsSpellHigherRankOfSpell(m_spell.first, spell_id))
+                        else if (m_spell.first == spell_id)
                         {
                             if (IsInWorld())                // not send spell (re-/over-)learn packets at loading
                             {
@@ -3229,7 +3220,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
 
     if (uint32 prev_id = sSpellMgr.GetPrevSpellInChain(spell_id))
     {
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
+        uint32 nextId = sSpellMgr.GetSpellBookSuccessorSpellId(prev_id);
 
         // if talent then lesser rank also talent and need learn
         if (talentPos)
@@ -3238,7 +3229,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
                 learnSpell(prev_id, false);
         }
         // if ranked non-stackable spell: need activate lesser rank and update dependence state
-        else if (cur_active && sSpellMgr.IsRankedSpellNonStackableInSpellBook(spellInfo))
+        else if (cur_active && nextId == spell_id)
         {
             // need manually update dependence state (learn spell ignore like attempts)
             PlayerSpellMap::iterator prev_itr = m_spells.find(prev_id);

@@ -2352,10 +2352,19 @@ class SpellMgr
 
             return false;
         }
-        bool canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const;
-        bool IsRankedSpellNonStackableInSpellBook(SpellEntry const* spellInfo) const
+
+        uint32 GetSpellBookSuccessorSpellId(uint32 spellId)
         {
-            return !canStackSpellRanksInSpellBook(spellInfo) && GetSpellRank(spellInfo->Id) != 0;
+            SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBounds(spellId);
+            for (SkillLineAbilityMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+            {
+                if (SkillLineAbilityEntry const* pAbility = itr->second)
+                {
+                    if (pAbility->forward_spellid)
+                        return pAbility->forward_spellid;
+                }
+            }
+            return 0;
         }
 
         // return true if spell1 can affect spell2

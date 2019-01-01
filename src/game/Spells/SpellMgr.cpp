@@ -1284,31 +1284,6 @@ void SpellMgr::LoadSpellThreats()
     sLog.outString();
 }
 
-bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
-{
-    if (IsPassiveSpell(spellInfo))                          // ranked passive spell
-        return false;
-    if (const SpellChainNode* node = GetSpellChainNode(spellInfo->Id))
-    {
-        // do not corrupt talent tree display by removing a rank from there, e.g. Faerie Fire (feral)
-        if (GetTalentSpellPos(node->first))
-            return true;
-    }
-    if (spellInfo->powerType != POWER_MANA && spellInfo->powerType != POWER_HEALTH)
-        return false;
-    if (IsProfessionOrRidingSpell(spellInfo->Id))
-        return false;
-
-    if (IsSkillBonusSpell(spellInfo->Id))
-        return false;
-
-    // All stances and stance-like spells
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX2_DISPLAY_IN_STANCE_BAR) || IsSpellHaveAura(spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
-        return false;
-
-    return true;
-}
-
 bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const
 {
     if (!spellInfo_1 || !spellInfo_2)
