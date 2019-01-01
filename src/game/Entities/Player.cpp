@@ -2984,18 +2984,9 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
 
     if (spellLearnSkill)
     {
-        uint32 skill_value = GetSkillValuePure(spellLearnSkill->skill);
-        uint32 skill_max_value = GetSkillMaxPure(spellLearnSkill->skill);
-
-        if (skill_value < spellLearnSkill->value)
-            skill_value = spellLearnSkill->value;
-
-        uint32 new_skill_max_value = spellLearnSkill->maxvalue == 0 ? maxskill : spellLearnSkill->maxvalue;
-
-        if (skill_max_value < new_skill_max_value)
-            skill_max_value =  new_skill_max_value;
-
-        SetSkill(spellLearnSkill->skill, skill_value, skill_max_value, spellLearnSkill->step);
+        uint16 value = std::max(spellLearnSkill->value, GetSkillValuePure(spellLearnSkill->skill));
+        uint16 max = std::max((!spellLearnSkill->maxvalue ? maxskill : spellLearnSkill->maxvalue), GetSkillMaxPure(spellLearnSkill->skill));
+        SetSkill(spellLearnSkill->skill, value, max, spellLearnSkill->step);
     }
     else
     {
@@ -3205,18 +3196,9 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
                 SetSkill(spellLearnSkill->skill, 0, 0);
             else                                            // set to prev. skill setting values
             {
-                uint32 skill_value = GetSkillValuePure(prevSkill->skill);
-                uint32 skill_max_value = GetSkillMaxPure(prevSkill->skill);
-
-                if (skill_value >  prevSkill->value)
-                    skill_value = prevSkill->value;
-
-                uint32 new_skill_max_value = prevSkill->maxvalue == 0 ? GetSkillMaxForLevel() : prevSkill->maxvalue;
-
-                if (skill_max_value > new_skill_max_value)
-                    skill_max_value =  new_skill_max_value;
-
-                SetSkill(prevSkill->skill, skill_value, skill_max_value, prevSkill->step);
+                uint16 value = std::min(prevSkill->value, GetSkillValuePure(prevSkill->skill));
+                uint16 max = std::min((!prevSkill->maxvalue ? GetSkillMaxForLevel() : prevSkill->maxvalue), GetSkillMaxPure(prevSkill->skill));
+                SetSkill(prevSkill->skill, value, max, prevSkill->step);
             }
         }
     }
