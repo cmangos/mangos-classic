@@ -1426,6 +1426,7 @@ class Player : public Unit
         void learnDefaultSpells();
         void learnQuestRewardedSpells();
         void learnQuestRewardedSpells(Quest const* quest);
+        void learnSkillRewardedSpells(uint16 skillId, uint16 value);
         void learnSpellHighRank(uint32 spellid);
 
         uint32 GetFreeTalentPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS1); }
@@ -1658,7 +1659,6 @@ class Player : public Unit
         int16 GetSkillBonus(uint16 id, bool permanent = false) const;
         inline int16 GetSkillBonusPermanent(uint16 id) const { return GetSkillBonus(id, true); }   // skill perm. bonus
         inline int16 GetSkillBonusTemporary(uint16 id) const { return GetSkillBonus(id); }         // skill temp bonus
-        void learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value);
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
         bool IsBeingTeleported() const { return mSemaphoreTeleport_Near || mSemaphoreTeleport_Far; }

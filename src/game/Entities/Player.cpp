@@ -2978,14 +2978,10 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     }
 
     // add dependent skills
-    uint16 maxskill = GetSkillMaxForLevel();
-
-    SpellLearnSkillNode const* spellLearnSkill = sSpellMgr.GetSpellLearnSkill(spell_id);
-
-    if (spellLearnSkill)
+    if (SpellLearnSkillNode const* spellLearnSkill = sSpellMgr.GetSpellLearnSkill(spell_id))
     {
         uint16 value = std::max(spellLearnSkill->value, GetSkillValuePure(spellLearnSkill->skill));
-        uint16 max = std::max((!spellLearnSkill->maxvalue ? maxskill : spellLearnSkill->maxvalue), GetSkillMaxPure(spellLearnSkill->skill));
+        uint16 max = std::max((!spellLearnSkill->maxvalue ? GetSkillMaxForLevel() : spellLearnSkill->maxvalue), GetSkillMaxPure(spellLearnSkill->skill));
         SetSkill(spellLearnSkill->skill, value, max, spellLearnSkill->step);
     }
     else
@@ -3000,7 +2996,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
             if (!pSkill)
                 continue;
 
-            if (HasSkill(pSkill->id))
+            if (HasSkill(uint16(pSkill->id)))
                 continue;
 
             if (skillAbility->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
@@ -3012,13 +3008,13 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                 switch (GetSkillRangeType(pSkill, skillAbility->racemask != 0))
                 {
                     case SKILL_RANGE_LANGUAGE:
-                        SetSkill(pSkill->id, 300, 300);
+                        SetSkill(uint16(pSkill->id), 300, 300);
                         break;
                     case SKILL_RANGE_LEVEL:
-                        SetSkill(pSkill->id, 1, GetSkillMaxForLevel());
+                        SetSkill(uint16(pSkill->id), 1, GetSkillMaxForLevel());
                         break;
                     case SKILL_RANGE_MONO:
-                        SetSkill(pSkill->id, 1, 1);
+                        SetSkill(uint16(pSkill->id), 1, 1);
                         break;
                     default:
                         break;
@@ -3176,8 +3172,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
     }
 
     // remove dependent skill
-    SpellLearnSkillNode const* spellLearnSkill = sSpellMgr.GetSpellLearnSkill(spell_id);
-    if (spellLearnSkill)
+    if (SpellLearnSkillNode const* spellLearnSkill = sSpellMgr.GetSpellLearnSkill(spell_id))
     {
         uint32 prev_spell = sSpellMgr.GetPrevSpellInChain(spell_id);
         if (!prev_spell)                                    // first rank, remove skill
@@ -3224,7 +3219,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
                         (IsProfessionSkill(pSkill->id) || skillAbility->racemask != 0))
                     continue;
 
-                SetSkill(pSkill->id, 0, 0);
+                SetSkill(uint16(pSkill->id), 0, 0);
             }
         }
     }
@@ -17471,14 +17466,14 @@ void Player::learnQuestRewardedSpells()
     }
 }
 
-void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
+void Player::learnSkillRewardedSpells(uint16 skillId, uint16 value)
 {
     uint32 raceMask  = getRaceMask();
     uint32 classMask = getClassMask();
     for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
     {
         SkillLineAbilityEntry const* pAbility = sSkillLineAbilityStore.LookupEntry(j);
-        if (!pAbility || pAbility->skillId != skill_id || pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
+        if (!pAbility || pAbility->skillId != skillId || pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
             continue;
         // Check race if set
         if (pAbility->racemask && !(pAbility->racemask & raceMask))
@@ -17490,7 +17485,7 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
         if (sSpellTemplate.LookupEntry<SpellEntry>(pAbility->spellId))
         {
             // need unlearn spell
-            if (skill_value < pAbility->req_skill_value)
+            if (value < pAbility->req_skill_value)
                 removeSpell(pAbility->spellId);
             // need learn
             else if (!IsInWorld())
