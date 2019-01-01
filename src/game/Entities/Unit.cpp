@@ -10951,3 +10951,11 @@ void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=null
             z = ground_z;
     }
 }
+
+uint32 Unit::GetSpellRank(SpellEntry const* spellInfo)
+{
+    uint32 spellRank = getLevel();
+    if (spellInfo->maxLevel > 0 && spellRank >= spellInfo->maxLevel * 5)
+        spellRank = spellInfo->maxLevel * 5;
+    return spellRank;
+}
