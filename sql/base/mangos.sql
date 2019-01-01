@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2729_01_mangos_creature_template_faction_removal` bit(1) DEFAULT NULL
+  `required_z2730_01_mangos_seal_of_righteousness_restored` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -7963,7 +7963,7 @@ INSERT INTO `playercreateinfo_action` VALUES
 (3,2,4,2481,0),
 (3,2,3,20594,0),
 (3,2,2,635,0),
-(3,2,1,21084,0),
+(3,2,1,20154,0),
 (3,2,0,6603,0),
 (3,1,83,117,128),
 (3,1,75,2481,0),
@@ -8021,7 +8021,7 @@ INSERT INTO `playercreateinfo_action` VALUES
 (1,2,11,2070,128),
 (1,2,10,159,128),
 (1,2,2,635,0),
-(1,2,1,21084,0),
+(1,2,1,20154,0),
 (1,2,0,6603,0),
 (1,1,83,117,128),
 (1,1,73,78,0),
@@ -8140,7 +8140,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (1,2,9078,'Cloth'),
 (1,2,9116,'Shield'),
 (1,2,9125,'Generic'),
-(1,2,21084,'Seal of Righteousness'),
+(1,2,20154,'Seal of Righteousness'),
 (1,2,20597,'Sword Specialization'),
 (1,2,20598,'The Human Spirit'),
 (1,2,20599,'Diplomacy'),
@@ -8547,7 +8547,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (3,2,9078,'Cloth'),
 (3,2,9116,'Shield'),
 (3,2,9125,'Generic'),
-(3,2,21084,'Seal of Righteousness'),
+(3,2,20154,'Seal of Righteousness'),
 (3,2,20594,'Stoneform'),
 (3,2,20595,'Gun Specialization'),
 (3,2,20596,'Frost Resistance'),
@@ -11901,15 +11901,14 @@ INSERT INTO `spell_chain` VALUES
 (20347,20165,20165,2,0),
 (20348,20347,20165,3,0),
 (20349,20348,20165,4,0),
-/* Seal of Righteousness */
-(21084,0,21084,1,0),
-(20287,21084,21084,2,0),
-(20288,20287,21084,3,0),
-(20289,20288,21084,4,0),
-(20290,20289,21084,5,0),
-(20291,20290,21084,6,0),
-(20292,20291,21084,7,0),
-(20293,20292,21084,8,0),
+/* Seal of Righteousness (serverside extension) */
+(20287,21084,20154,3,0),
+(20288,20287,20154,4,0),
+(20289,20288,20154,5,0),
+(20290,20289,20154,6,0),
+(20291,20290,20154,7,0),
+(20292,20291,20154,8,0),
+(20293,20292,20154,9,0),
 /* Seal of Righteousness Proc */
 (25742,0,25742,1,0),
 (25740,25742,25742,2,0),
