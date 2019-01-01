@@ -2338,6 +2338,8 @@ class Unit : public WorldObject
         // WorldObject overrides
         void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const override;
 
+        virtual uint32 GetSpellRank(SpellEntry const* spellInfo);
+
     protected:
 
         struct WeaponDamageInfo
