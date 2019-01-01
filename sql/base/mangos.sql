@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2730_01_mangos_seal_of_righteousness_restored` bit(1) DEFAULT NULL
+  `required_z2731_01_mangos_seal_of_righteousness_proc_restored` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -11911,13 +11911,14 @@ INSERT INTO `spell_chain` VALUES
 (20293,20292,20154,9,0),
 /* Seal of Righteousness Proc */
 (25742,0,25742,1,0),
-(25740,25742,25742,2,0),
-(25739,25740,25742,3,0),
-(25738,25739,25742,4,0),
-(25737,25738,25742,5,0),
-(25736,25737,25742,6,0),
-(25735,25736,25742,7,0),
-(25713,25735,25742,8,0),
+(25741,25742,25742,2,0),
+(25740,25741,25742,3,0),
+(25739,25740,25742,4,0),
+(25738,25739,25742,5,0),
+(25737,25738,25742,6,0),
+(25736,25737,25742,7,0),
+(25735,25736,25742,8,0),
+(25713,25735,25742,9,0),
 /* Seal of Wisdom */
 (20166,0,20166,1,0),
 (20356,20166,20166,2,0),

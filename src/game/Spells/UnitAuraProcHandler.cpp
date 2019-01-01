@@ -973,7 +973,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 uint32 spellId;
                 switch (triggeredByAura->GetId())
                 {
-                    case 21084: spellId = 25742; break;     // Rank 1
+                    case 20154: spellId = 25742; break;     // Rank 1
+                    case 21084: spellId = 25741; break;     // Rank 1.5
                     case 20287: spellId = 25740; break;     // Rank 2
                     case 20288: spellId = 25739; break;     // Rank 3
                     case 20289: spellId = 25738; break;     // Rank 4
