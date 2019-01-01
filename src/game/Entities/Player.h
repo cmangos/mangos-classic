@@ -1646,17 +1646,18 @@ class Player : public Unit
         void UpdateWeaponSkill(WeaponAttackType attType);
         void UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence);
 
+        bool HasSkill(uint16 id) const;
         void SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step = 0);
-        bool HasSkill(uint32 skill) const;
         uint16 GetSkill(uint16 id, bool bonusPerm, bool bonusTemp, bool max = false) const;
         inline uint16 GetSkillValue(uint16 id) const { return GetSkill(id, true, true); }           // skill value + perm. bonus + temp bonus
         inline uint16 GetSkillValueBase(uint16 id) const { return GetSkill(id, true, false); }      // skill value + perm. bonus
         inline uint16 GetSkillValuePure(uint16 id) const { return GetSkill(id, false, false); }     // skill value
         inline uint16 GetSkillMax(uint16 id) const { return GetSkill(id, true, true, true); }       // skill max + perm. bonus + temp bonus
         inline uint16 GetSkillMaxPure(uint16 id) const { return GetSkill(id, false, false, true); } // skill max
-        int16 GetSkillBonus(uint16 id, bool temporary) const;
-        inline int16 GetSkillBonusPermanent(uint16 id) const { return GetSkillBonus(id, false); }   // skill perm. bonus
-        inline int16 GetSkillBonusTemporary(uint16 id) const { return GetSkillBonus(id, true); }    // skill temp bonus
+        bool ModifySkillBonus(uint16 id, int16 diff, bool permanent = false);
+        int16 GetSkillBonus(uint16 id, bool permanent = false) const;
+        inline int16 GetSkillBonusPermanent(uint16 id) const { return GetSkillBonus(id, true); }   // skill perm. bonus
+        inline int16 GetSkillBonusTemporary(uint16 id) const { return GetSkillBonus(id); }         // skill temp bonus
         void learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value);
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
@@ -1693,7 +1694,6 @@ class Player : public Unit
 
         void UpdateSkillsForLevel();
         void UpdateSkillsToMaxSkillsForLevel();             // for .levelup
-        void ModifySkillBonus(uint32 skillid, int32 val, bool talent);
 
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
