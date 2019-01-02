@@ -3678,30 +3678,25 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     if (!trainer_spell)
         return TRAINER_SPELL_RED;
 
-    if (!trainer_spell->spell)
+    if (!trainer_spell->learnedSpell)
         return TRAINER_SPELL_RED;
 
-    // exist, already checked at loading
-    SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(trainer_spell->spell);
-    SpellEntry const* TriggerSpell = sSpellTemplate.LookupEntry<SpellEntry>(spell->EffectTriggerSpell[0]);
-
-
     // known spell
-    if (HasSpell(TriggerSpell->Id))
+    if (HasSpell(trainer_spell->learnedSpell))
         return TRAINER_SPELL_GRAY;
 
     // check race/class requirement
-    if (!IsSpellFitByClassAndRace(TriggerSpell->Id))
+    if (!IsSpellFitByClassAndRace(trainer_spell->learnedSpell))
         return TRAINER_SPELL_RED;
 
-    bool prof = SpellMgr::IsProfessionSpell(trainer_spell->spell);
+    bool prof = SpellMgr::IsProfessionSpell(trainer_spell->learnedSpell);
 
     // check level requirement
-    uint32 spellLevel = reqLevel ? reqLevel : TriggerSpell->spellLevel;
-    if (getLevel() < spellLevel)
-        return TRAINER_SPELL_RED;
+    if (!prof || GetSession()->GetSecurity() < AccountTypes(sWorld.getConfig(CONFIG_UINT32_TRADE_SKILL_GMIGNORE_LEVEL)))
+        if (getLevel() < reqLevel)
+            return TRAINER_SPELL_RED;
 
-    if (SpellChainNode const* spell_chain = sSpellMgr.GetSpellChainNode(TriggerSpell->Id))
+    if (SpellChainNode const* spell_chain = sSpellMgr.GetSpellChainNode(trainer_spell->learnedSpell))
     {
         // check prev.rank requirement
         if (spell_chain->prev && !HasSpell(spell_chain->prev))
@@ -3718,7 +3713,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
             return TRAINER_SPELL_RED;
 
     // exist, already checked at loading
-    // SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(trainer_spell->spell);
+    SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(trainer_spell->learnedSpell);
 
     // secondary prof. or not prof. spell
     uint32 skill = spell->EffectMiscValue[1];
