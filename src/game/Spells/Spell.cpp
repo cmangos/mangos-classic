@@ -3162,10 +3162,6 @@ void Spell::_handle_immediate_phase()
         }
     }
 
-    if (IsRangedSpell() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))
-        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS))
-            m_caster->resetAttackTimer(RANGED_ATTACK);
-
     // handle some immediate features of the spell here
     HandleThreatSpells();
 

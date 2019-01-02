@@ -1319,10 +1319,6 @@ void Player::Update(const uint32 diff)
         m_nextMailDelivereTime = 0;
     }
 
-    // Update player only attacks
-    if (uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
-        setAttackTimer(RANGED_ATTACK, (diff >= ranged_att ? 0 : ranged_att - diff));
-
     // Update cinematic location
     if (m_cinematicMgr)
     {
@@ -19599,6 +19595,9 @@ void Player::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*= 0*/,
         gcdDuration = std::min(gcdDuration, 1500);
     }
 
+    if (!gcdDuration)
+        return;
+
     // TODO: Remove this once spells are queuable and GCD is checked on execute
     if (uint32 latency = GetSession()->GetLatency())
     {
@@ -19671,11 +19670,13 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
 
     if (forcedDuration)
         recTime = forcedDuration;
-
-    // shoot spells used equipped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
-    // prevent 0 cooldowns set by another way
-    if (!recTime && !categoryRecTime && (spellCategory == 76 || spellCategory == 351))
-        recTime = GetAttackTime(RANGED_ATTACK);
+    else
+    {
+        // shoot spells used equipped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
+        // prevent 0 cooldowns set by another way
+        if (spellEntry.HasAttribute(SPELL_ATTR_RANGED) && !spellEntry.HasAttribute(SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS))
+            recTime += GetFloatValue(UNIT_FIELD_RANGEDATTACKTIME);
+    }
 
     // blizzlike code for choosing which is recTime > categoryRecTime after spellmod application
     if (recTime)
