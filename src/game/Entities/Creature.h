@@ -185,10 +185,18 @@ struct CreatureTemplateSpells
     uint32 spells[CREATURE_MAX_SPELLS];
 };
 
+struct CreatureCooldowns
+{
+    uint32 entry;
+    uint32 spellId;
+    uint32 cooldownMin;
+    uint32 cooldownMax;
+};
+
 struct EquipmentInfo
 {
-    uint32  entry;
-    uint32  equipentry[3];
+    uint32 entry;
+    uint32 equipentry[3];
 };
 
 // depricated old way
