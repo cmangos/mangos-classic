@@ -68,9 +68,9 @@ struct boss_razorgoreAI : public ScriptedAI
         m_uiFireballVolleyTimer = urand(15000, 20000);
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*doneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (uiDamage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth())
             return;
 
         if (!m_pInstance)
@@ -79,14 +79,14 @@ struct boss_razorgoreAI : public ScriptedAI
         // Don't allow any accident
         if (m_bEggsExploded)
         {
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
             return;
         }
 
         // Boss explodes everything and resets - this happens if not all eggs are destroyed
         if (m_pInstance->GetData(TYPE_RAZORGORE) == IN_PROGRESS)
         {
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
             m_bEggsExploded = true;
             m_pInstance->SetData(TYPE_RAZORGORE, FAIL);
             DoScriptText(SAY_RAZORGORE_DEATH, m_creature);

@@ -180,8 +180,7 @@ class UnitAI
          * @param pDoneTo Unit* to whom Damage of amount uiDamage will be dealt
          * @param uiDamage Amount of Damage that will be dealt, can be changed here
          */
-        virtual void DamageDeal(Unit* doneTo, uint32& damage, DamageEffectType damageType, SpellEntry const* spellInfo) { DamageDeal(doneTo, damage, damageType); }
-        virtual void DamageDeal(Unit* /*doneTo*/, uint32& /*damage*/, DamageEffectType damageType) {}
+        virtual void DamageDeal(Unit* doneTo, uint32& damage, DamageEffectType damageType, SpellEntry const* spellInfo) {}
 
         /**
          * Called at any Damage from any attacker (before damage apply)
@@ -190,8 +189,7 @@ class UnitAI
          * @param pDealer Unit* who will deal Damage to the creature
          * @param uiDamage Amount of Damage that will be dealt, can be changed here
          */
-        virtual void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damageType, SpellEntry const* spellInfo) { DamageTaken(dealer, damage, damageType); }
-        virtual void DamageTaken(Unit* /*dealer*/, uint32& /*damage*/, DamageEffectType damageType) {}
+        virtual void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damageType, SpellEntry const* spellInfo) {}
 
         /**
          * Called when the creature is killed

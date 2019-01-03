@@ -165,7 +165,7 @@ struct mob_core_ragerAI : public ScriptedAI
         m_uiMangleTimer = 7 * IN_MILLISECONDS;              // These times are probably wrong
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDoneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (m_creature->GetHealthPercent() < 50.0f)
         {
@@ -173,7 +173,7 @@ struct mob_core_ragerAI : public ScriptedAI
             {
                 DoScriptText(EMOTE_LOW_HP, m_creature);
                 DoCastSpellIfCan(m_creature, SPELL_FULL_HEAL, CAST_TRIGGERED);
-                uiDamage = 0;
+                damage = 0;
             }
         }
     }

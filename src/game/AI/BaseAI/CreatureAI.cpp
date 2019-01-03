@@ -65,7 +65,6 @@ void CreatureAI::AttackStart(Unit* who)
 void CreatureAI::DoFakeDeath(uint32 spellId)
 {
     m_creature->InterruptNonMeleeSpells(false);
-    m_creature->SetHealth(1);
     m_creature->StopMoving();
     m_creature->ClearComboPointHolders();
     m_creature->RemoveAllAurasOnDeath();

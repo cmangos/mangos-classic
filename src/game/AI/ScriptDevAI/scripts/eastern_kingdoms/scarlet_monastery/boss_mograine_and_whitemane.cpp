@@ -130,9 +130,9 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
             pWhitemane->Respawn();
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDoneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (uiDamage < m_creature->GetHealth() || m_bHasDied)
+        if (damage < m_creature->GetHealth() || m_bHasDied)
             return;
 
         if (!m_pInstance)
@@ -148,8 +148,6 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
             m_creature->GetMotionMaster()->MovementExpired();
             m_creature->GetMotionMaster()->MoveIdle();
 
-            m_creature->SetHealth(0);
-
             if (m_creature->IsNonMeleeSpellCasted(false))
                 m_creature->InterruptNonMeleeSpells(false);
 
@@ -164,7 +162,7 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
             m_bHasDied = true;
             m_bFakeDeath = true;
 
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
         }
     }
 
@@ -282,16 +280,15 @@ struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
         // This needs to be empty because Whitemane should NOT aggro while fighting Mograine. Mograine will give us a target.
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDoneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (uiDamage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth())
             return;
 
         if (!m_bCanResurrectCheck || m_bCanResurrect)
         {
             // prevent killing blow before rezzing commander
-            m_creature->SetHealth(uiDamage + 1);
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
         }
     }
 

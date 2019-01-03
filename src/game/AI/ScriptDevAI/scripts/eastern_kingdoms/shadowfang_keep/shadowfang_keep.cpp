@@ -840,7 +840,7 @@ struct npc_deathstalker_vincentAI : public ScriptedAI
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* pDoneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (pDoneBy)
         {
@@ -851,9 +851,9 @@ struct npc_deathstalker_vincentAI : public ScriptedAI
         if (m_creature->getStandState())
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
 
-        if (uiDamage >= m_creature->GetHealth())
+        if (damage >= m_creature->GetHealth())
         {
-            m_creature->GetHealth() > 1 ? uiDamage = m_creature->GetHealth() - 1 : uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
             m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_NONE);
             EnterEvadeMode();
             DoScriptText(SAY_VINCENT_DIE, m_creature);
