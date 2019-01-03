@@ -9503,6 +9503,45 @@ void ObjectMgr::LoadCreatureTemplateSpells()
     sLog.outString();
 }
 
+void ObjectMgr::LoadCreatureCooldowns()
+{
+    uint32 count = 0;
+    QueryResult* result = WorldDatabase.Query("SELECT Entry, SpellId, CooldownMin, CooldownMax FROM creature_cooldowns");
+
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 entry = fields[0].GetUInt32();
+            if (!sCreatureStorage.LookupEntry<CreatureInfo>(entry))
+            {
+                sLog.outErrorDb("LoadCreatureCooldowns: Entry %u does not exist.", entry);
+                continue;
+            }
+            uint32 spellId = fields[1].GetUInt32();
+            if (!sSpellTemplate.LookupEntry<SpellEntry>(spellId))
+            {
+                sLog.outErrorDb("LoadCreatureCooldowns: SpellId %u does not exist.", entry);
+                continue;
+            }
+            uint32 cooldownMin = fields[2].GetUInt32();
+            uint32 cooldownMax = fields[3].GetUInt32();
+            if (cooldownMin == 0 && cooldownMax == 0)
+            {
+                sLog.outErrorDb("LoadCreatureCooldowns: Cooldowns are both 0 - redundant entry.", entry);
+                continue;
+            }
+            m_creatureCooldownMap[entry].emplace(spellId, std::make_pair(cooldownMin, cooldownMax));
+        } while (result->NextRow());
+    }
+    delete result;
+
+    sLog.outString(">> Loaded %u creature_cooldowns definitions", count);
+    sLog.outString();
+}
+
 CreatureInfo const* GetCreatureTemplateStore(uint32 entry)
 {
     return sCreatureStorage.LookupEntry<CreatureInfo>(entry);

@@ -954,6 +954,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature template spells...");
     sObjectMgr.LoadCreatureTemplateSpells();
 
+    sLog.outString("Loading Creature cooldowns...");
+    sObjectMgr.LoadCreatureCooldowns();
+
     sLog.outString("Loading ItemRequiredTarget...");
     sObjectMgr.LoadItemRequiredTarget();
 

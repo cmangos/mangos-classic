@@ -19699,17 +19699,6 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
             SendDirectMessage(data);
             sLog.outDebug("Sending SMSG_COOLDOWN_EVENT with spell id = %u", spellEntry.Id);
         }
-
-        if (spellEntry.AttributesServerside & SPELL_ATTR_SS_SEND_COOLDOWN)
-        {
-            // send to client
-            WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4);
-            data << GetObjectGuid();
-            data << uint8(1);
-            data << uint32(spellEntry.Id);
-            data << uint32(recTime);
-            GetSession()->SendPacket(data);
-        }
     }
 }
 
