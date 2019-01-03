@@ -207,7 +207,6 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
             case NPC_GRARK_LORKRUB:
                 // Fake death creature when the axe is lowered. This will allow us to finish the event
                 m_creature->InterruptNonMeleeSpells(true);
-                m_creature->SetHealth(1);
                 m_creature->StopMoving();
                 m_creature->ClearComboPointHolders();
                 m_creature->RemoveAllAurasOnDeath();

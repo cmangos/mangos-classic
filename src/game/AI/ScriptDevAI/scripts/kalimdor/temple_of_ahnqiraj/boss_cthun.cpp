@@ -38,7 +38,7 @@ enum
     SPELL_ROTATE_360_RIGHT          = 26136,
 
     // ***** Phase 2 ******
-    // SPELL_CARAPACE_CTHUN         = 26156,                // Was removed from client dbcs
+    SPELL_CARAPACE_CTHUN            = 26156,                // Was removed from client dbcs
     SPELL_TRANSFORM                 = 26232,
     SPELL_CTHUN_VULNERABLE          = 26235,
     SPELL_MOUTH_TENTACLE            = 26332,                // prepare target to teleport to stomach
@@ -385,21 +385,15 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         // Ignore damage reduction when vulnerable
         if (m_Phase == PHASE_CTHUN_WEAKENED)
             return;
 
-        // Not weakened so reduce damage by 99% - workaround for missing spell 26156
-        if (uiDamage / 99 > 0)
-            uiDamage /= 99;
-        else
-            uiDamage = 1;
-
         // Prevent death in non-weakened state
-        if (uiDamage >= m_creature->GetHealth())
-            uiDamage = 0;
+        if (damage >= m_creature->GetHealth())
+            damage = std::min(damage, m_creature->GetHealth() - 1);
     }
 
     void EnterEvadeMode() override
@@ -553,6 +547,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                     // Transform and start C'thun phase
                     if (DoCastSpellIfCan(m_creature, SPELL_TRANSFORM) == CAST_OK)
                     {
+                        m_creature->CastSpell(nullptr, SPELL_CARAPACE_CTHUN, TRIGGERED_OLD_TRIGGERED);
                         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         DoSpawnFleshTentacles();
 

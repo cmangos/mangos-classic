@@ -588,20 +588,20 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 
-    void DamageTaken(Unit* pKiller, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* pKiller, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (uiDamage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth())
             return;
 
         // Prevent glitch if in fake death
         if (m_bFakeDeath)
         {
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
             return;
         }
 
         // prevent death
-        uiDamage = 0;
+        damage = std::min(damage, m_creature->GetHealth() - 1);
         m_bFakeDeath = true;
 
         m_creature->InterruptNonMeleeSpells(false);

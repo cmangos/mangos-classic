@@ -809,7 +809,7 @@ class CreatureEventAI : public CreatureAI
         void MoveInLineOfSight(Unit* who) override;
         void SpellHit(Unit* unit, const SpellEntry* spellInfo) override;
         void SpellHitTarget(Unit* target, const SpellEntry* spell) override;
-        void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damagetype) override;
+        void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damagetype, SpellEntry const* spellInfo) override;
         void HealedBy(Unit* healer, uint32& healedAmount) override;
         void UpdateAI(const uint32 diff) override;
         void ReceiveEmote(Player* player, uint32 textEmote) override;

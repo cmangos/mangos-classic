@@ -133,12 +133,12 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
             pSummoned->AI()->AttackStart(pPlayer);
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*doneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
             return;
 
-        if (m_creature->GetHealthPercent() < 20.0f || uiDamage > m_creature->GetHealth())
+        if (m_creature->GetHealthPercent() < 20.0f || damage > m_creature->GetHealth())
         {
             if (Pet* pFriend = m_creature->FindGuardianWithEntry(NPC_SLIMS_FRIEND))
             {
@@ -147,7 +147,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
             }
 
             // set escort on pause and evade
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
             m_bEventComplete = true;
 
             SetEscortPaused(true);
