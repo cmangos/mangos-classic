@@ -7580,7 +7580,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
 
             bool isSkillOk = false;
 
-            SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(m_value1);
+            SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(m_value1);
 
             for (SkillLineAbilityMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
             {
@@ -8069,7 +8069,7 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             break;
         case CONDITION_LEARNABLE_ABILITY:
         {
-            SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(value1);
+            SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(value1);
 
             if (bounds.first == bounds.second)
             {

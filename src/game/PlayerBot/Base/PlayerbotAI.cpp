@@ -7351,7 +7351,7 @@ void PlayerbotAI::_HandleCommandSpells(std::string& /*text*/, Player& fromPlayer
 
         spellName = pSpellInfo->SpellName[loc];
 
-        SkillLineAbilityMapBounds const bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellId);
+        SkillLineAbilityMapBounds const bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(spellId);
 
         bool isProfessionOrRidingSpell = false;
         for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter)

@@ -1370,7 +1370,7 @@ bool SpellMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId) const
 
 bool SpellMgr::IsSkillBonusSpell(uint32 spellId) const
 {
-    SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBounds(spellId);
+    SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBoundsBySpellId(spellId);
 
     for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
     {
@@ -1540,7 +1540,7 @@ void SpellMgr::LoadSpellChains()
     {
         // we can calculate ranks only after full data generation
         AbilitySpellPrevMap prevRanks;
-        for (SkillLineAbilityMap::const_iterator ab_itr = mSkillLineAbilityMap.begin(); ab_itr != mSkillLineAbilityMap.end(); ++ab_itr)
+        for (SkillLineAbilityMap::const_iterator ab_itr = mSkillLineAbilityMapBySpellId.begin(); ab_itr != mSkillLineAbilityMapBySpellId.end(); ++ab_itr)
         {
             uint32 spell_id = ab_itr->first;
 
@@ -1565,7 +1565,7 @@ void SpellMgr::LoadSpellChains()
                 continue;
 
             // some forward spells still exist but excluded from real use as ranks and not listed in skill abilities now
-            SkillLineAbilityMapBounds bounds = mSkillLineAbilityMap.equal_range(forward_id);
+            SkillLineAbilityMapBounds bounds = mSkillLineAbilityMapBySpellId.equal_range(forward_id);
             if (bounds.first == bounds.second)
                 continue;
 
@@ -2532,25 +2532,27 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
     return SPELL_CAST_OK;
 }
 
-void SpellMgr::LoadSkillLineAbilityMap()
+void SpellMgr::LoadSkillLineAbilityMaps()
 {
-    mSkillLineAbilityMap.clear();
+    mSkillLineAbilityMapBySpellId.clear();
+    mSkillLineAbilityMapBySkillId.clear();
 
-    BarGoLink bar(sSkillLineAbilityStore.GetNumRows());
+    const uint32 rows = sSkillLineAbilityStore.GetNumRows();
     uint32 count = 0;
 
-    for (uint32 i = 0; i < sSkillLineAbilityStore.GetNumRows(); ++i)
+    BarGoLink bar(rows);
+    for (uint32 row = 0; row < rows; ++row)
     {
         bar.step();
-        SkillLineAbilityEntry const* SkillInfo = sSkillLineAbilityStore.LookupEntry(i);
-        if (!SkillInfo)
-            continue;
-
-        mSkillLineAbilityMap.insert(SkillLineAbilityMap::value_type(SkillInfo->spellId, SkillInfo));
-        ++count;
+        if (SkillLineAbilityEntry const* entry = sSkillLineAbilityStore.LookupEntry(row))
+        {
+            mSkillLineAbilityMapBySpellId.insert(SkillLineAbilityMap::value_type(entry->spellId, entry));
+            mSkillLineAbilityMapBySkillId.insert(SkillLineAbilityMap::value_type(entry->skillId, entry));
+            ++count;
+        }
     }
 
-    sLog.outString(">> Loaded %u SkillLineAbility MultiMap Data", count);
+    sLog.outString(">> Loaded %u SkillLineAbility MultiMaps Data", count);
     sLog.outString();
 }
 
