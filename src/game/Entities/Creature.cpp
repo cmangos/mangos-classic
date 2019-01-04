@@ -169,6 +169,24 @@ void Creature::AddToWorld()
     if (!IsInWorld() && GetObjectGuid().GetHigh() == HIGHGUID_UNIT)
         GetMap()->GetObjectsStore().insert<Creature>(GetObjectGuid(), (Creature*)this);
 
+    switch (GetSubtype())
+    {
+        case CREATURE_SUBTYPE_PET:
+        case CREATURE_SUBTYPE_TEMPORARY_SUMMON:
+        {
+            std::map<uint32, uint32>& targetArray = GetMap()->GetTempCreatures();
+            if (GetSubtype() == CREATURE_SUBTYPE_PET)
+                targetArray = GetMap()->GetTempPets();
+            // If creature exists, add count
+            if (targetArray.find(this->GetEntry()) != targetArray.end())
+                ++targetArray[this->GetEntry()];
+            else
+                targetArray.insert(std::pair<uint32, uint32>(this->GetEntry(), 1));
+            break;
+        }
+        default: break;
+    }
+
     Unit::AddToWorld();
 
     // Make active if required
@@ -186,6 +204,26 @@ void Creature::RemoveFromWorld()
     {
         if (GetObjectGuid().GetHigh() == HIGHGUID_UNIT)
             GetMap()->GetObjectsStore().erase<Creature>(GetObjectGuid(), (Creature*)nullptr);
+
+        switch (GetSubtype())
+        {
+            case CREATURE_SUBTYPE_PET:
+            case CREATURE_SUBTYPE_TEMPORARY_SUMMON:
+            {
+                std::map<uint32, uint32>& targetArray = GetMap()->GetTempCreatures();
+                if (GetSubtype() == CREATURE_SUBTYPE_PET)
+                    targetArray = GetMap()->GetTempPets();
+                if (targetArray.find(this->GetEntry()) != targetArray.end())
+                {
+                    --targetArray[this->GetEntry()];
+
+                    if (targetArray[this->GetEntry()] <= 0)
+                        targetArray.erase(this->GetEntry());
+                }
+                break;
+            }
+            default: break;
+        }
 
         if (m_countSpawns)
             GetMap()->RemoveFromSpawnCount(GetObjectGuid());

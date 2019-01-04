@@ -290,6 +290,24 @@ uint32 MapManager::GetNumPlayersInInstances()
     return ret;
 }
 
+uint32 MapManager::GetMapUpdateMinTime(uint32 mapId, uint32 instance)
+{
+    std::lock_guard<std::mutex> lock(m_lock);
+    return i_maps[MapID(mapId, instance)]->GetUpdateTimeMin();
+}
+
+uint32 MapManager::GetMapUpdateMaxTime(uint32 mapId, uint32 instance)
+{
+    std::lock_guard<std::mutex> lock(m_lock);
+    return i_maps[MapID(mapId, instance)]->GetUpdateTimeMax();
+}
+
+uint32 MapManager::GetMapUpdateAvgTime(uint32 mapId, uint32 instance)
+{
+    std::lock_guard<std::mutex> lock(m_lock);
+    return i_maps[MapID(mapId, instance)]->GetUpdateTimeAvg();
+}
+
 ///// returns a new or existing Instance
 ///// in case of battlegrounds it will only return an existing map, those maps are created by bg-system
 Map* MapManager::CreateInstance(uint32 id, Player* player)
