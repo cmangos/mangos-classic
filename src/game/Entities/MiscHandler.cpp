@@ -388,6 +388,10 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket& recv_data)
 
     _player->SetSelectionGuid(guid);
 
+    if (Unit* mover = _player->GetMover()) // when player has a mover and the mover is a 
+        if (mover != _player)
+            mover->SetSelectionGuid(guid);
+
     // update reputation list if need
     Unit* unit = ObjectAccessor::GetUnit(*_player, guid);   // can select group members at diff maps
     if (!unit)

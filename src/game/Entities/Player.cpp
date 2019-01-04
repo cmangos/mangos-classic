@@ -17668,7 +17668,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
     data << (float)0.01666667f;                             // game speed
     GetSession()->SendPacket(data);
 
-    if(!GetSession()->PlayerLoading())
+    if (!GetSession()->PlayerLoading())
         SetMover(this);
 }
 

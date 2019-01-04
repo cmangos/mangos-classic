@@ -10303,86 +10303,86 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
         return nullptr;
     }
 
-    TemporarySpawn* pCreature = new TemporarySpawn(GetObjectGuid());
+    TemporarySpawn* possessed = new TemporarySpawn(GetObjectGuid());
 
     CreatureCreatePos pos(GetMap(), x, y, z, ang);
 
     if (x == 0.0f && y == 0.0f && z == 0.0f)
         pos = CreatureCreatePos(this, GetOrientation(), CONTACT_DISTANCE, ang);
 
-    if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
+    if (!possessed->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
     {
-        delete pCreature;
+        delete possessed;
         return nullptr;
     }
 
     Player* player = GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr;
 
-    pCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);     // set same faction than player
-    pCreature->SetRespawnCoord(pos);                                    // set spawn coord
-    pCreature->SetCharmerGuid(GetObjectGuid());                         // save guid of the charmer
-    pCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, spellEntry->Id);   // set the spell id used to create this (may be used for removing corresponding aura
-    pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);          // set flag for client that mean this unit is controlled by a player
-    pCreature->addUnitState(UNIT_STAT_POSSESSED);                       // also set internal unit state flag
-    pCreature->SelectLevel(getLevel());                                 // set level to same level than summoner TODO:: not sure its always the case...
-    pCreature->SetLinkedToOwnerAura(TEMPSPAWN_LINKED_AURA_OWNER_CHECK | TEMPSPAWN_LINKED_AURA_REMOVE_OWNER); // set what to do if linked aura is removed or the creature is dead.
-    pCreature->SetWalk(IsWalking(), true);                              // sync the walking state with the summoner
+    possessed->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);     // set same faction than player
+    possessed->SetRespawnCoord(pos);                                    // set spawn coord
+    possessed->SetCharmerGuid(GetObjectGuid());                         // save guid of the charmer
+    possessed->SetCreatorGuid(GetObjectGuid());                         // save guid of the creator
+    possessed->SetUInt32Value(UNIT_CREATED_BY_SPELL, spellEntry->Id);   // set the spell id used to create this (may be used for removing corresponding aura
+    possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);          // set flag for client that mean this unit is controlled by a player
+    possessed->addUnitState(UNIT_STAT_POSSESSED);                       // also set internal unit state flag
+    possessed->SelectLevel(getLevel());                                 // set level to same level than summoner TODO:: not sure its always the case...
+    possessed->SetLinkedToOwnerAura(TEMPSPAWN_LINKED_AURA_OWNER_CHECK | TEMPSPAWN_LINKED_AURA_REMOVE_OWNER); // set what to do if linked aura is removed or the creature is dead.
+    possessed->SetWalk(IsWalking(), true);                              // sync the walking state with the summoner
 
     // important before adding to the map!
-    SetCharmGuid(pCreature->GetObjectGuid());                           // save guid of charmed creature
+    SetCharmGuid(possessed->GetObjectGuid());                           // save guid of charmed creature
 
-    pCreature->SetSummonProperties(TEMPSPAWN_CORPSE_TIMED_DESPAWN, 5000); // set 5s corpse decay
-    GetMap()->Add(static_cast<Creature*>(pCreature));                   // create the creature in the client
-    pCreature->AIM_Initialize();                                        // even if this will be replaced it need to be initialized to take care of spawn spells
+    possessed->SetSummonProperties(TEMPSPAWN_CORPSE_TIMED_DESPAWN, 5000); // set 5s corpse decay
+    GetMap()->Add(static_cast<Creature*>(possessed));                   // create the creature in the client
+    possessed->AIM_Initialize();                                        // even if this will be replaced it need to be initialized to take care of spawn spells
 
     // Give the control to the player
     if (player)
     {
         player->UnsummonPetTemporaryIfAny();
 
-        player->GetCamera().SetView(pCreature);                         // modify camera view to the creature view
+        player->GetCamera().SetView(possessed);                         // modify camera view to the creature view
         // Force client control (required to function propely)
-        player->UpdateClientControl(pCreature, true, true);             // transfer client control to the creature after altering flags
-        player->SetMover(pCreature);                                    // set mover so now we know that creature is "moved" by this unit
+        player->UpdateClientControl(possessed, true, true);             // transfer client control to the creature after altering flags
+        player->SetMover(possessed);                                    // set mover so now we know that creature is "moved" by this unit
         player->SendForcedObjectUpdate();                               // we have to update client data here to avoid problem with the "release spirit" windows reappear.
     }
 
     // init CharmInfo class that will hold charm data
-    CharmInfo* charmInfo = pCreature->InitCharmInfo(pCreature);
+    CharmInfo* charmInfo = possessed->InitCharmInfo(possessed);
 
     // set temp possess ai (creature will not be able to react by itself)
     charmInfo->SetCharmState("PossessedAI");
 
     // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+        possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
     const bool immunePC = IsImmuneToPlayer();
-    if (pCreature->IsImmuneToPlayer() != immunePC)
-        pCreature->SetImmuneToPlayer(immunePC);
+    if (possessed->IsImmuneToPlayer() != immunePC)
+        possessed->SetImmuneToPlayer(immunePC);
 
     const bool immuneNPC = IsImmuneToNPC();
-    if (pCreature->IsImmuneToNPC() != immuneNPC)
-        pCreature->SetImmuneToNPC(immuneNPC);
+    if (possessed->IsImmuneToNPC() != immuneNPC)
+        possessed->SetImmuneToNPC(immuneNPC);
 
     if (player)
     {
         // Initialize pet bar
-        if (CharmInfo* charmInfo2 = pCreature->InitCharmInfo(pCreature))
-            charmInfo2->InitPossessCreateSpells();
+        charmInfo->InitPossessCreateSpells();
         player->PossessSpellInitialize();
 
         // Take away client control immediately if we are not supposed to have control at the moment
-        if (!pCreature->IsClientControlled(player))
-            player->UpdateClientControl(pCreature, false);
+        if (!possessed->IsClientControlled(player))
+            player->UpdateClientControl(possessed, false);
     }
 
     // Creature Linking, Initial load is handled like respawn
-    if (pCreature->IsLinkingEventTrigger())
-        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, pCreature);
+    if (possessed->IsLinkingEventTrigger())
+        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, possessed);
 
     // return the creature therewith the summoner has access to it
-    return pCreature;
+    return possessed;
 }
 
 bool Unit::TakePossessOf(Unit* possessed)
@@ -10773,6 +10773,8 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
             // as possessed is a pet we have to restore original charminfo so Pet::DeleteCharmInfo will take care of that
             charmed->DeleteCharmInfo();
         }
+
+        charmed->SetTarget(charmed->getVictim());
     }
     else if (charmed->GetTypeId() == TYPEID_PLAYER)
     {
@@ -10794,6 +10796,8 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
             charmedPlayer->GetMotionMaster()->MovementExpired(true);
 
         charmedPlayer->DeleteThreatList(); // TODO: Add threat management for player during charm, only entries with 0 threat
+
+        charmed->SetTarget(nullptr);
     }
 
     charmed->SetEvade(EVADE_NONE); // if charm expires mid evade clear evade since movement is also cleared - TODO: maybe should be done on HomeMovementGenerator::MovementExpires?
