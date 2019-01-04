@@ -145,6 +145,9 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         uint32 GetNumInstances();
         uint32 GetNumPlayersInInstances();
 
+        uint32 GetMapUpdateMinTime(uint32 mapId, uint32 instance = 0);
+        uint32 GetMapUpdateMaxTime(uint32 mapId, uint32 instance = 0);
+        uint32 GetMapUpdateAvgTime(uint32 mapId, uint32 instance = 0);
 
         // get list of all maps
         const MapMapType& Maps() const { return i_maps; }
@@ -178,6 +181,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         DungeonMap* CreateDungeonMap(uint32 id, uint32 InstanceId, DungeonPersistentState* save = nullptr);
         BattleGroundMap* CreateBattleGroundMap(uint32 id, uint32 InstanceId, BattleGround* bg);
 
+        std::mutex m_lock;
         uint32 i_gridCleanUpDelay;
         MapMapType i_maps;
         IntervalTimer i_timer;
