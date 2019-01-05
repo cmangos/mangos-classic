@@ -128,24 +128,6 @@ CanCastResult UnitAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo, bo
             return CAST_FAIL_COOLDOWN;
     }
 
-    if (const SpellRangeEntry* spellRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex))
-    {
-        if (target && target != m_unit)
-        {
-            // pTarget is out of range of this spell (also done by Spell::CheckCast())
-            float distance = m_unit->GetDistance(target, true, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT ? DIST_CALC_COMBAT_REACH_WITH_MELEE : DIST_CALC_COMBAT_REACH);
-
-            if (distance > spellRange->maxRange)
-                return CAST_FAIL_TOO_FAR;
-
-            float minRange = spellRange->minRange;
-
-            if (minRange && distance < minRange)
-                return CAST_FAIL_TOO_CLOSE;
-        }
-
-        return CAST_OK;
-    }
     return CAST_FAIL_OTHER;
 }
 
@@ -215,6 +197,13 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
             SpellCastResult result = caster->CastSpell(target, spellInfo, flags, nullptr, nullptr, originalCasterGUID);
             if (result != SPELL_CAST_OK)
             {
+                switch (result) // temporary adapter
+                {
+                    case SPELL_FAILED_OUT_OF_RANGE:
+                        return CAST_FAIL_TOO_FAR;
+                    case SPELL_FAILED_TOO_CLOSE:
+                        return CAST_FAIL_TOO_CLOSE;
+                }
                 sLog.outBasic("DoCastSpellIfCan by %s attempt to cast spell %u but spell failed due to unknown result %u.", m_unit->GetObjectGuid().GetString().c_str(), spellId, result);
                 return CAST_FAIL_OTHER;
             }
