@@ -193,9 +193,6 @@ void MapPersistentState::InitPools()
     }
 }
 
-//== WorldPersistentState functions ========================
-SpawnedPoolData WorldPersistentState::m_sharedSpawnedPoolData;
-
 bool WorldPersistentState::CanBeUnload() const
 {
     // prevent unload if used for loaded map
