@@ -100,11 +100,11 @@ void MapManager::CreateContinents()
         i_maps[MapID(id)] = m;
         m->Initialize();
         // non-instanceable maps always expected have saved state
-        // futures.push_back(std::async(std::launch::async, std::bind(&Map::Initialize, m, true)));
+        futures.push_back(std::async(std::launch::async, std::bind(&Map::Initialize, m, true)));
     }
 
-    //for (auto& futurItr : futures)
-    //    futurItr.wait();
+    for (auto& futurItr : futures)
+        futurItr.wait();
 }
 
 /// @param id - MapId of the to be created map. @param obj WorldObject for which the map is to be created. Must be player for Instancable maps.
