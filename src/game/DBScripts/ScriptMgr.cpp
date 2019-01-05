@@ -1130,7 +1130,7 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
             // TODO Maybe load related grid if not already done? How to handle multi-map case?
             if (!pBuddy)
             {
-                sLog.outDetail(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u by guid %u not loaded in map %u (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry, m_script->searchRadiusOrGuid, m_map->GetId(), m_script->data_flags);
+                sLog.outDetail(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy by guid %u not loaded in map %u (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->searchRadiusOrGuid, m_map->GetId(), m_script->data_flags);
                 return false;
             }
         }
