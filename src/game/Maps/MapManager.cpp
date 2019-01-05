@@ -98,7 +98,7 @@ void MapManager::CreateContinents()
         Map* m = new WorldMap(id, i_gridCleanUpDelay);
         // add map into container
         i_maps[MapID(id)] = m;
-        m->Initialize();
+
         // non-instanceable maps always expected have saved state
         futures.push_back(std::async(std::launch::async, std::bind(&Map::Initialize, m, true)));
     }
