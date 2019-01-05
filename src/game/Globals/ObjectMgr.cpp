@@ -3278,7 +3278,7 @@ void ObjectMgr::LoadGroups()
                 continue;
             }
 
-            DungeonPersistentState* state = (DungeonPersistentState*)sMapPersistentStateMgr.AddPersistentState(mapEntry, fields[2].GetUInt32(), (time_t)fields[4].GetUInt64(), (fields[5].GetUInt32() == 0), true, false, fields[7].GetUInt32());
+            DungeonPersistentState* state = (DungeonPersistentState*)sMapPersistentStateMgr.AddPersistentState(mapEntry, fields[2].GetUInt32(), (time_t)fields[4].GetUInt64(), (fields[5].GetUInt32() == 0), true, fields[7].GetUInt32());
             group->BindToInstance(state, fields[3].GetBool(), true);
         }
         while (result->NextRow());

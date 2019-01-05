@@ -121,7 +121,7 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
     m_TerrainData->AddRef();
     CreateInstanceData(loadInstanceData);
 
-    m_persistentState = sMapPersistentStateMgr.AddPersistentState(i_mapEntry, GetInstanceId(), 0, IsDungeon(), false, false);
+    m_persistentState = sMapPersistentStateMgr.AddPersistentState(i_mapEntry, GetInstanceId(), 0, IsDungeon(), false);
     m_persistentState->SetUsedByMapState(this);
     m_persistentState->InitPools();
 

@@ -337,7 +337,7 @@ class MapPersistentStateManager : public MaNGOS::Singleton<MapPersistentStateMan
 
         // auto select appropriate MapPersistentState (sub)class by MapEntry, and autoselect appropriate way store (by instance/map id)
         // always return != nullptr
-        MapPersistentState* AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, time_t resetTime, bool canReset, bool load = false, bool initPools = true, uint32 completedEncountersMask = 0);
+        MapPersistentState* AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, time_t resetTime, bool canReset, bool load = false, uint32 completedEncountersMask = 0);
 
         // search stored state, can be nullptr in result
         MapPersistentState* GetPersistentState(uint32 mapId, uint32 instanceId);
