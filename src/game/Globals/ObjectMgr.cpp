@@ -9523,14 +9523,14 @@ void ObjectMgr::LoadCreatureCooldowns()
             uint32 spellId = fields[1].GetUInt32();
             if (!sSpellTemplate.LookupEntry<SpellEntry>(spellId))
             {
-                sLog.outErrorDb("LoadCreatureCooldowns: SpellId %u does not exist.", entry);
+                sLog.outErrorDb("LoadCreatureCooldowns: SpellId %u does not exist.", spellId);
                 continue;
             }
             uint32 cooldownMin = fields[2].GetUInt32();
             uint32 cooldownMax = fields[3].GetUInt32();
             if (cooldownMin == 0 && cooldownMax == 0)
             {
-                sLog.outErrorDb("LoadCreatureCooldowns: Cooldowns are both 0 - redundant entry.", entry);
+                sLog.outErrorDb("LoadCreatureCooldowns: Cooldowns are both 0 for entry %u spellId %u - redundant entry.", entry, spellId);
                 continue;
             }
             m_creatureCooldownMap[entry].emplace(spellId, std::make_pair(cooldownMin, cooldownMax));
