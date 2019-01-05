@@ -675,7 +675,7 @@ void PoolManager::LoadFromDB()
 
             ++count;
 
-            PoolObject plObject = PoolObject(guid, chance);
+            PoolObject plObject(guid, chance);
             PoolGroup<Creature>& cregroup = mPoolCreatureGroups[pool_id];
             cregroup.SetPoolId(pool_id);
             cregroup.AddEntry(plObject, pPoolTemplate->MaxLimit);
@@ -747,7 +747,7 @@ void PoolManager::LoadFromDB()
 
             ++count;
 
-            PoolObject plObject = PoolObject(guid, chance);
+            PoolObject plObject(guid, chance);
             PoolGroup<Creature>& cregroup = mPoolCreatureGroups[pool_id];
             cregroup.SetPoolId(pool_id);
             cregroup.AddEntry(plObject, pPoolTemplate->MaxLimit);
@@ -813,7 +813,7 @@ void PoolManager::LoadFromDB()
 
             ++count;
 
-            PoolObject plObject = PoolObject(guid, chance);
+            PoolObject plObject(guid, chance);
             PoolGroup<GameObject>& gogroup = mPoolGameobjectGroups[pool_id];
             gogroup.SetPoolId(pool_id);
             gogroup.AddEntry(plObject, pPoolTemplate->MaxLimit);
