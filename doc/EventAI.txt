@@ -100,6 +100,7 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 32  EVENT_T_SELECT_ATTACKING_TARGET     MinRange, MaxRange, RepeatMin, RepeatMax                                Deprecated use TARGET_T_NEAREST_AOE_TARGET - Expires when the NPC has a target in threat table further than Param1 and closer than Param2. First time happens after and will repeat after Param3 and Param4.
 33  EVENT_T_FACING_TARGET               BackOrFront, unused, RepeatMin, RepeatMax                               Expires when the NPC is in back (Param1=0) or in front (Param1=1) of its current target. Will repeat after Param3 and Param4.
 34  EVENT_T_SPELLHIT_TARGET             SpellID, Schoolmask, RepeatMin, RepeatMax                               Expires upon Spell Hit of the NPC. When (param1) is set, it is the specific Spell ID used as the trigger. With (param2) specified, the expiration is limited to specific spell schools (-1 for all) and Spell ID value is ignored. Will repeat Event Conditions Check between every (Param3) and (Param4). Only A Spell ID or Spell School may be Specified but NOT both.
+35  EVENT_T_DEATH_PREVENTED             NONE                                                                    Expires when Death prevention kicks in
 
 =========================================
 Action Types
@@ -153,7 +154,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 39  ACTION_T_CALL_FOR_HELP                  Radius                              Call any friendly out-of-combat creatures in a radius (Param1) to attack current creature's target.
 40  ACTION_T_SET_SHEATH                     Sheath                              Sets sheath state for a creature (0 = no weapon, 1 = melee weapon, 2 = ranged weapon).
 41  ACTION_T_FORCE_DESPAWN                  Delay                               Despawns the creature, if delay = 0 immediate otherwise will despawn after delay time set in Param1 (in ms).
-42  ACTION_T_SET_INVINCIBILITY_HP_LEVEL     HP_Level, HP_Percent                Set min. health level for creature that can be set at damage as flat value or percent from max health
+42  ACTION_T_SET_DEATH_PREVENTION           State                               0-off/1-on
 43  ACTION_T_MOUNT_TO_ENTRY_OR_MODEL        CreatureEntry, ModelId              Set mount model from creature_template.entry (Param1) OR explicit modelId (Param2). If (Param1) AND (Param2) are both 0, unmount.
 44  ACTION_T_CHANCED_TEXT                   Chance, -TextId1, -TextId2          Deprecated use 54 - Displays by Chance (1..100) the specified -TextId. When -TextId2 is specified, the selection will be randomized. Text types are defined, along with other options for the text, in a table below. Param2 and Param3 needs to be negative.
 45  ACTION_T_THROW_AI_EVENT                 EventType, Radius, Target           Throws an AIEvent of type (Param1) to nearby friendly Npcs in range of (Param2), Invoker of event is Target
@@ -531,6 +532,11 @@ Parameter 4: RepeatMax - Maximum Time used to calculate Random Repeat Event Expi
 BOTH - Expires on SpellhitTarget. If (param1) is set it will only expire on that SPECIFIC Spell OR If (param2) is set it will only expire on Spells of that School. Will repeat every (Param3) and (Param4).
 This Event is commonly used for NPC's who can do special things when you cast a spell (Or specific spell) on them.
 NOTE: For Repeat Events the Repeat Timer ONLY Re-Check's Event Conditions to see If another Spellhit has occured. So After Repeat Min/Max expires Spellhit Event can occur again.
+
+-----------------------------
+35 = EVENT_T_DEATH_PREVENTED:
+-----------------------------
+Expires when death prevention kicks in. It expires once, and then death prevention has to be reset for it to happen again.
 
 (Name ==> School ==> School Bitmask Values)
 -------------------------------------------
@@ -924,14 +930,11 @@ Despawns The NPC with optional delay time (Works In or Out of Combat)
 Parameter 1: Delay - Sets delay time until Despawn occurs after triggering the action. Time is in (ms).
 
 -----------------------------------------
-42   ACTION_T_SET_INVINCIBILITY_HP_LEVEL:
+42   ACTION_T_SET_DEATH_PREVENTION:
 -----------------------------------------
-Parameter 1: Minimum Health Level That NPC Can Reach (NPC Will Not Go Below This Value).
-Parameter 2: Sets Format of Paramater 1 Value
-0 = Sets Paramater 1 as an exact HP value
-1 = Sets Paramater 1 as a HP Percent (0..100) of the creature's max health
-
-NOTE: To Cancel Invincible You Need To Set Script For Either 0% HP or 0 HP So Then NPC Can Be Killed Again
+Parameter 1: State for death prevention
+0 = Turns off death prevention
+1 = Turns on death prevention and resets triggering of death prevented
 
 -----------------------------------------
 43 ACTION_T_MOUNT_TO_ENTRY_OR_MODEL:

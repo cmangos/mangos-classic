@@ -73,6 +73,7 @@ enum EventAI_Type
     EVENT_T_SELECT_ATTACKING_TARGET = 32,                   // MinRange, MaxRange, RepeatMin, RepeatMax
     EVENT_T_FACING_TARGET           = 33,                   // Position, unused, RepeatMin, RepeatMax
     EVENT_T_SPELLHIT_TARGET         = 34,                   // SpellID, School, RepeatMin, RepeatMax
+    EVENT_T_DEATH_PREVENTED         = 35,                   //
 
     EVENT_T_END,
 };
@@ -121,7 +122,7 @@ enum EventAI_ActionType
     ACTION_T_CALL_FOR_HELP              = 39,               // Radius
     ACTION_T_SET_SHEATH                 = 40,               // Sheath (0-passive,1-melee,2-ranged)
     ACTION_T_FORCE_DESPAWN              = 41,               // Delay (0-instant despawn)
-    ACTION_T_SET_INVINCIBILITY_HP_LEVEL = 42,               // MinHpValue, format(0-flat,1-percent from max health)
+    ACTION_T_SET_DEATH_PREVENTION       = 42,               // 0-off/1-on
     ACTION_T_MOUNT_TO_ENTRY_OR_MODEL    = 43,               // Creature_template entry(param1) OR ModelId (param2) (or 0 for both to unmount)
     ACTION_T_CHANCED_TEXT               = 44,               // Chance to display the text, TextId1, optionally TextId2. If more than just -TextId1 is defined, randomize. Negative values.
     ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, Target
@@ -424,12 +425,11 @@ struct CreatureEventAI_Action
         {
             uint32 msDelay;
         } forced_despawn;
-        // ACTION_T_SET_INVINCIBILITY_HP_LEVEL              = 42
+        // ACTION_T_SET_DEATH_PREVENTION                    = 42
         struct
         {
-            uint32 hp_level;
-            uint32 is_percent;
-        } invincibility_hp_level;
+            uint32 state;
+        } deathPrevention;
         // ACTION_T_MOUNT_TO_ENTRY_OR_MODEL                 = 43
         struct
         {
@@ -727,6 +727,11 @@ struct CreatureEventAI_Event
             uint32 repeatMin;
             uint32 repeatMax;
         } spell_hit_target;
+        // EVENT_T_DEATH_PREVENTED                          = 35
+        struct
+        {
+            uint32 unused;
+        } deathPrevented;
         // RAW
         struct
         {
@@ -810,6 +815,7 @@ class CreatureEventAI : public CreatureAI
         void SpellHit(Unit* unit, const SpellEntry* spellInfo) override;
         void SpellHitTarget(Unit* target, const SpellEntry* spell) override;
         void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damagetype, SpellEntry const* spellInfo) override;
+        void JustPreventedDeath(Unit* attacker);
         void HealedBy(Unit* healer, uint32& healedAmount) override;
         void UpdateAI(const uint32 diff) override;
         void ReceiveEmote(Player* player, uint32 textEmote) override;

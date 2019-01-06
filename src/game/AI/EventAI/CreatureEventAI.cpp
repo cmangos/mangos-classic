@@ -521,6 +521,8 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
                 return false;
             break;
         }
+        case EVENT_T_DEATH_PREVENTED:
+            break;
         default:
             sLog.outErrorEventAI("Creature %u using Event %u has invalid Event Type(%u), missing from ProcessEvent() Switch.", m_creature->GetEntry(), holder.event.event_id, holder.event.event_type);
             return false;
@@ -1158,12 +1160,9 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_creature->ForcedDespawn(action.forced_despawn.msDelay);
             break;
         }
-        case ACTION_T_SET_INVINCIBILITY_HP_LEVEL:
+        case ACTION_T_SET_DEATH_PREVENTION:
         {
-            if (action.invincibility_hp_level.is_percent)
-                m_InvinceabilityHpLevel = m_creature->GetMaxHealth() * action.invincibility_hp_level.hp_level / 100;
-            else
-                m_InvinceabilityHpLevel = action.invincibility_hp_level.hp_level;
+            SetDeathPrevention(action.deathPrevention.state);
             break;
         }
         case ACTION_T_MOUNT_TO_ENTRY_OR_MODEL:
@@ -1855,13 +1854,7 @@ void CreatureEventAI::ReceiveEmote(Player* player, uint32 textEmote)
 
 void CreatureEventAI::DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damagetype, SpellEntry const* spellInfo)
 {
-    if (m_InvinceabilityHpLevel > 0 && m_creature->GetHealth() < m_InvinceabilityHpLevel + damage)
-    {
-        if (m_creature->GetHealth() <= m_InvinceabilityHpLevel)
-            damage = 0;
-        else
-            damage = m_creature->GetHealth() - m_InvinceabilityHpLevel;
-    }
+    CreatureAI::DamageTaken(dealer, damage, damagetype, spellInfo);
 
     uint32 step = m_throwAIEventStep != 100 ? m_throwAIEventStep : 0;
     if (step < HEALTH_STEPS)
@@ -1889,6 +1882,17 @@ void CreatureEventAI::DamageTaken(Unit* dealer, uint32& damage, DamageEffectType
 
         m_throwAIEventStep = step + 1;
     }
+}
+
+void CreatureEventAI::JustPreventedDeath(Unit* attacker)
+{
+    IncreaseDepthIfNecessary();
+    for (auto& i : m_CreatureEventAIList)
+        if (i.event.event_type == EVENT_T_DEATH_PREVENTED)
+            // If spell id matches (or no spell id) & if spell school matches (or no spell school)
+            CheckAndReadyEventForExecution(i, attacker);
+
+    ProcessEvents(attacker);
 }
 
 void CreatureEventAI::HealedBy(Unit* healer, uint32& healedAmount)
