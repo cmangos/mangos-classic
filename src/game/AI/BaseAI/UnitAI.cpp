@@ -127,8 +127,7 @@ CanCastResult UnitAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo, bo
         if (!m_unit->IsSpellReady(*spellInfo))
             return CAST_FAIL_COOLDOWN;
     }
-
-    return CAST_FAIL_OTHER;
+    return CAST_OK;
 }
 
 CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags, ObjectGuid originalCasterGUID) const
