@@ -450,7 +450,7 @@ bool AuthSocket::_HandleLogonChallenge()
                 else
                 {
                     ///- Get the password from the account table, upper it, and make the SRP6 calculation
-                    std::string rI = fields[0].GetCppString();
+                    std::string rI = fields[0].GetCppString(); // never use this
 
                     ///- Don't calculate (v, s) if there are already some in the database
                     std::string databaseV = fields[5].GetCppString();
@@ -459,13 +459,8 @@ bool AuthSocket::_HandleLogonChallenge()
                     DEBUG_LOG("database authentication values: v='%s' s='%s'", databaseV.c_str(), databaseS.c_str());
 
                     // multiply with 2, bytes are stored as hexstring
-                    if (databaseV.size() != s_BYTE_SIZE * 2 || databaseS.size() != s_BYTE_SIZE * 2)
-                        _SetVSFields(rI);
-                    else
-                    {
-                        s.SetHexStr(databaseS.c_str());
-                        v.SetHexStr(databaseV.c_str());
-                    }
+                    s.SetHexStr(databaseS.c_str());
+                    v.SetHexStr(databaseV.c_str());
 
                     b.SetRand(19 * 8);
                     BigNumber gmod = g.ModExp(b, N);
