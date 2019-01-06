@@ -573,6 +573,8 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     if (temp.spell_hit_target.repeatMax < temp.spell_hit_target.repeatMin)
                         sLog.outErrorEventAI("Creature %u are using repeatable event(%u) with param4 < param3 (RepeatMax < RepeatMin). Event will never repeat.", temp.creature_id, i);
                     break;
+                case EVENT_T_DEATH_PREVENTED:
+                    break;
                 default:
                     sLog.outErrorEventAI("Creature %u using not checked at load event (%u) in event %u. Need check code update?", temp.creature_id, temp.event_id, i);
                     break;
@@ -864,14 +866,11 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             action.set_sheath.sheath = SHEATH_STATE_UNARMED;
                         }
                         break;
-                    case ACTION_T_SET_INVINCIBILITY_HP_LEVEL:
-                        if (action.invincibility_hp_level.is_percent)
+                    case ACTION_T_SET_DEATH_PREVENTION:
+                        if (action.deathPrevention.state > 1)
                         {
-                            if (action.invincibility_hp_level.hp_level > 100)
-                            {
-                                sLog.outErrorEventAI("Event %u Action %u uses wrong percent value %u.", i, j + 1, action.invincibility_hp_level.hp_level);
-                                action.invincibility_hp_level.hp_level = 100;
-                            }
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid death prevention state %u. Setting to 1.", i, j + 1, action.deathPrevention.state);
+                            action.deathPrevention.state = 1;
                         }
                         break;
                     case ACTION_T_MOUNT_TO_ENTRY_OR_MODEL:

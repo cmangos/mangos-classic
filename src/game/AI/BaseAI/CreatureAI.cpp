@@ -22,7 +22,8 @@
 
 CreatureAI::CreatureAI(Creature* creature) :
     UnitAI(creature),
-    m_creature(creature)
+    m_creature(creature),
+    m_deathPrevention(false), m_deathPrevented(false)
 {
     m_dismountOnAggro = !(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT);
 
@@ -60,6 +61,26 @@ void CreatureAI::AttackStart(Unit* who)
 
         HandleMovementOnAttackStart(who);
     }
+}
+
+void CreatureAI::DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damageType, SpellEntry const* spellInfo)
+{
+    if (m_deathPrevention)
+    {
+        if (m_creature->GetHealth() <= damage)
+        {
+            damage = m_creature->GetHealth() - 1;
+            if (!m_deathPrevented)
+                JustPreventedDeath(dealer);
+        }        
+    }
+}
+
+void CreatureAI::SetDeathPrevention(bool state)
+{
+    m_deathPrevention = true;
+    if (state)
+        m_deathPrevented = false;
 }
 
 void CreatureAI::DoFakeDeath(uint32 spellId)
