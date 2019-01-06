@@ -324,12 +324,15 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
 
         SetVisible(&faction);
 
-        if (rankNew != rankOld)                 // Server alters "At war" flag on two occasions:
+        if (rankNew != rankOld)
         {
+            // Server alters "At war" flag on two occasions:
+            // * When reputation dips to "Hostile": forced tick and now locked for manual changes
             if (rankNew < REP_UNFRIENDLY && rankNew < rankOld && rankOld > REP_HOSTILE)
-                SetAtWar(&itr->second, true);   // * When reputation dips to "Hostile": tick and now locked for manual changes
+                SetAtWar(&itr->second, true);
+            // * When reputation improves to "Neutral": untick by id, can be manually overriden for eligible factions
             else if (rankNew > REP_UNFRIENDLY && rankNew > rankOld && rankOld < REP_NEUTRAL)
-                SetAtWar(&itr->second, false);  // * When reputation improves to "Neutral": untick, can be manually overriden for eligible factions
+                SetAtWar(RepListID(factionEntry->reputationListID), false);
         }
 
         m_player->ReputationChanged(factionEntry);
@@ -404,13 +407,13 @@ void ReputationMgr::SetAtWar(FactionState* faction, bool atWar)
         return;
 
     // already set
-    if (((faction->Flags & FACTION_FLAG_AT_WAR) != 0) == atWar)
+    if (bool(faction->Flags & FACTION_FLAG_AT_WAR) == atWar)
         return;
 
     if (atWar)
         faction->Flags |= FACTION_FLAG_AT_WAR;
     else
-        faction->Flags &= ~FACTION_FLAG_AT_WAR;
+        faction->Flags &= ~uint32(FACTION_FLAG_AT_WAR);
 
     faction->needSend = true;
     faction->needSave = true;
