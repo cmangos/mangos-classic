@@ -135,7 +135,7 @@ void HostileReference::addThreat(float mod)
     {
         Unit* target = getTarget();
         Unit* victim_owner = target->GetOwner();
-        if (victim_owner && victim_owner->isAlive())
+        if (victim_owner && victim_owner->isAlive() && getSource()->getOwner()->CanAttack(victim_owner))
             getSource()->addThreat(victim_owner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
     }
 }
