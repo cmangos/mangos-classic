@@ -636,7 +636,15 @@ bool CreatureLinkingHolder::IsSlaveInRangeOfMaster(Creature const* pBoss, float 
 bool CreatureLinkingHolder::IsRespawnReady(uint32 dbLowGuid, Map* _map) const
 {
     time_t respawnTime = _map->GetPersistentState()->GetCreatureRespawnTime(dbLowGuid);
-    return (!respawnTime || respawnTime <= time(nullptr)) && CanSpawn(dbLowGuid, _map, nullptr, 0.0f, 0.0f);
+    if ((!respawnTime || respawnTime <= time(nullptr)) && CanSpawn(dbLowGuid, _map, nullptr, 0.0f, 0.0f))
+    {
+        if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(dbLowGuid))
+            if (!_map->GetPersistentState()->IsSpawnedPoolObject<Creature>(dbLowGuid))
+                return false;
+
+        return true;
+    }
+    return false;
 }
 
 // Function to check if a passive spawning condition is met
