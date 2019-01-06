@@ -5781,9 +5781,9 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_CHASE_NULL);
                 else if (target->GetTypeId() == TYPEID_PLAYER)
-                    PSendSysMessage(LANG_MOVEGENS_CHASE_PLAYER, target->GetName(), target->GetGUIDLow(), distance, angle);
+                    PSendSysMessage(LANG_MOVEGENS_CHASE_PLAYER, target->GetName(), target->GetGUIDLow(), distance, angle, ChaseModes[movegen->GetCurrentMode()]);
                 else
-                    PSendSysMessage(LANG_MOVEGENS_CHASE_CREATURE, target->GetName(), target->GetGUIDLow(), distance, angle);
+                    PSendSysMessage(LANG_MOVEGENS_CHASE_CREATURE, target->GetName(), target->GetGUIDLow(), distance, angle, ChaseModes[movegen->GetCurrentMode()]);
                 break;
             }
             case FOLLOW_MOTION_TYPE:
