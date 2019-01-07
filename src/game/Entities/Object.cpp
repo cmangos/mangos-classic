@@ -1102,7 +1102,7 @@ float WorldObject::GetDistance2d(float x, float y, DistanceCalculation distcalc)
 float WorldObject::GetDistanceZ(const WorldObject* obj) const
 {
     float dz = fabs(GetPositionZ() - obj->GetPositionZ());
-    float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
+    float sizefactor = GetCombatReach() + obj->GetCombatReach();
     float dist = dz - sizefactor;
     return dist > 0 ? dist : 0;
 }
@@ -1110,7 +1110,7 @@ float WorldObject::GetDistanceZ(const WorldObject* obj) const
 bool WorldObject::IsWithinDist3d(float x, float y, float z, float dist2compare) const
 {
     float distsq = GetDistance(x, y, z, DIST_CALC_NONE);
-    float sizefactor = GetObjectBoundingRadius();
+    float sizefactor = GetCombatReach();
     float maxdist = dist2compare + sizefactor;
 
     return distsq < maxdist * maxdist;
@@ -1119,7 +1119,7 @@ bool WorldObject::IsWithinDist3d(float x, float y, float z, float dist2compare) 
 bool WorldObject::IsWithinDist2d(float x, float y, float dist2compare) const
 {
     float distsq = GetDistance2d(x, y, DIST_CALC_NONE);
-    float sizefactor = GetObjectBoundingRadius();
+    float sizefactor = GetCombatReach();
     float maxdist = dist2compare + sizefactor;
 
     return distsq < maxdist * maxdist;
@@ -1128,7 +1128,7 @@ bool WorldObject::IsWithinDist2d(float x, float y, float dist2compare) const
 bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const
 {
     float distsq = GetDistance(obj, is3D, DIST_CALC_NONE);
-    float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
+    float sizefactor = GetCombatReach() + obj->GetCombatReach();
     float maxdist = dist2compare + sizefactor;
 
     return distsq < maxdist * maxdist;
