@@ -2244,7 +2244,7 @@ class Unit : public WorldObject
         Movement::MoveSpline* movespline;
 
         void ScheduleAINotify(uint32 delay, bool forced = false);
-        bool IsAINotifyScheduled() const { return bool(m_AINotifyEvent);}
+        bool IsAINotifyScheduled() const { return m_AINotifyEvent != nullptr;}
         void FinalizeAINotifyEvent() { m_AINotifyEvent = nullptr; }
         void AbortAINotifyEvent();
         void OnRelocated();
