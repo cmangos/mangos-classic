@@ -3772,7 +3772,7 @@ void Spell::SendChannelUpdate(uint32 time, uint32 lastTick) const
         if (stackable)
             m_caster->RemoveAuraStack(m_spellInfo->Id);
         else
-            m_caster->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
+            m_caster->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid(), m_timer == 0 ? AURA_REMOVE_BY_EXPIRE : AURA_REMOVE_BY_CANCEL);
 
         if (!m_caster->HasChannelObject(m_caster->GetObjectGuid()))
         {
@@ -3787,7 +3787,7 @@ void Spell::SendChannelUpdate(uint32 time, uint32 lastTick) const
                 if (stackable)
                     target->RemoveAuraStack(m_spellInfo->Id);
                 else
-                    target->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
+                    target->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid(), m_timer == 0 ? AURA_REMOVE_BY_EXPIRE : AURA_REMOVE_BY_CANCEL);
             }
         }
 
