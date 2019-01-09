@@ -128,7 +128,7 @@ enum EventAI_ActionType
     ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, Target
     ACTION_T_SET_THROW_MASK             = 46,               // EventTypeMask, unused, unused
     ACTION_T_SET_STAND_STATE            = 47,               // StandState, unused, unused
-    ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance if Movement Type 1 and PathId if Movement Type 2, unused
+    ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance if Movement Type 1 and PathId if Movement Type 2, asDefault
     ACTION_T_DYNAMIC_MOVEMENT           = 49,               // EnableDynamicMovement (1 = on; 0 = off)
     ACTION_T_SET_REACT_STATE            = 50,               // React state, unused, unused
     ACTION_T_PAUSE_WAYPOINTS            = 51,               // DoPause 0: unpause waypoint 1: pause waypoint, unused, unused
@@ -468,7 +468,7 @@ struct CreatureEventAI_Action
         {
             uint32 movementType;
             uint32 wanderORpathID;
-            uint32 unused1;
+            uint32 asDefault;
         } changeMovement;
         // ACTION_T_DYNAMIC_MOVEMENT                        = 49
         struct
@@ -853,6 +853,7 @@ class CreatureEventAI : public CreatureAI
         void DistancingStarted() override;
         void DistancingEnded() override;
 
+        MovementGeneratorType GetDefaultMovement() { return m_defaultMovement; }
     protected:
         std::string GetAIName() override { return "EventAI"; }
         // Event rules specifiers
@@ -892,6 +893,8 @@ class CreatureEventAI : public CreatureAI
         uint32 m_mainSpellId;
         uint32 m_mainSpellCost;
         float m_mainSpellMinRange;
+
+        MovementGeneratorType m_defaultMovement; // TODO: Extend to all of AI
 };
 
 #endif

@@ -98,7 +98,8 @@ CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
     m_rangedModeSetting(TYPE_NONE),
     m_currentRangedMode(false),
     m_chaseDistance(0.f),
-    m_depth(0)
+    m_depth(0),
+    m_defaultMovement(IDLE_MOTION_TYPE)
 {
     InitAI();
 }
@@ -1212,6 +1213,8 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         }
         case ACTION_T_CHANGE_MOVEMENT:
         {
+            if (action.changeMovement.asDefault)
+                m_defaultMovement = MovementGeneratorType(action.changeMovement.movementType);
             switch (action.changeMovement.movementType)
             {
                 case IDLE_MOTION_TYPE:
