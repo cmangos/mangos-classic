@@ -151,7 +151,9 @@ void PetAI::UpdateAI(const uint32 diff)
         {    
             m_attackAngle = 0.0f;
             AttackStart(victim);
-        } else {
+        }
+        else
+        {
             // Pet is not the target, try to get behind it again.
             m_attackAngle = M_PI_F;
             AttackStart(victim);
