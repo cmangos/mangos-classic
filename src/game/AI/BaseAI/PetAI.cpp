@@ -144,6 +144,20 @@ void PetAI::UpdateAI(const uint32 diff)
         inCombat = false;
     }
 
+    // If hunter pet's victim is targeting the pet, do not try to get behind it.
+    if (pet && victim && inCombat && (pet->getPetType() == HUNTER_PET))
+    {
+        if (victim->getVictim() == m_unit)
+        {    
+            m_attackAngle = 0.0f;
+            AttackStart(victim);
+        } else {
+            // Pet is not the target, try to get behind it again.
+            m_attackAngle = M_PI_F;
+            AttackStart(victim);
+        }
+    }
+
     CharmInfo* charminfo = m_unit->GetCharmInfo();
     MANGOS_ASSERT(charminfo);
 
