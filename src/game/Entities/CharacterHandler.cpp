@@ -478,6 +478,10 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
             while (_player && _player->IsBeingTeleportedFar())
                 HandleMoveWorldportAckOpcode();
 
+        // release loot on reconnect
+        if (Loot* loot = sLootMgr.GetLoot(_player))
+            loot->Release(_player);
+
         HandlePlayerReconnect();
         return;
     }

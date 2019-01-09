@@ -118,7 +118,6 @@ void WorldSession::HandleLootReleaseOpcode(WorldPacket& recv_data)
 
     if (Loot* loot = sLootMgr.GetLoot(_player, lguid))
         loot->Release(_player);
-
 }
 
 void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
