@@ -954,6 +954,11 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         {
                             sLog.outErrorEventAI("Event %u Action %u uses invalid movement type %u (must be smaller than %u)", i, j + 1, action.changeMovement.movementType, MAX_DB_MOTION_TYPE);
                         }
+                        if (action.changeMovement.asDefault > 1)
+                        {
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid default movement setting %u. Setting to 0.", i, j + 1, action.changeMovement.asDefault);
+                            action.deathPrevention.state = 0;
+                        }
                         break;
                     case ACTION_T_SET_REACT_STATE:
                         if (action.setReactState.reactState > REACT_AGGRESSIVE)
