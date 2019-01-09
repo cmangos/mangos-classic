@@ -2,5 +2,5 @@
 #define __REVISION_SQL_H__
  #define REVISION_DB_REALMD "required_z2716_01_realmd_totp"
  #define REVISION_DB_CHARACTERS "required_z2724_01_characters_taxi_system_format_update"
- #define REVISION_DB_MANGOS "required_z2732_01_mangos_seal_of_righteousness_cleanup"
+ #define REVISION_DB_MANGOS "required_z2733_01_mangos_playercreate_skills_vanilla"
 #endif // __REVISION_SQL_H__

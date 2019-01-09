@@ -256,6 +256,14 @@ struct PlayerCreateInfoAction
 
 typedef std::list<PlayerCreateInfoAction> PlayerCreateInfoActions;
 
+struct PlayerCreateInfoSkill
+{
+    uint16 SkillId;
+    uint16 Step;
+};
+
+typedef std::list<PlayerCreateInfoSkill> PlayerCreateInfoSkills;
+
 struct PlayerInfo
 {
     // existence checked by displayId != 0             // existence checked by displayId != 0
@@ -273,6 +281,7 @@ struct PlayerInfo
     uint16 displayId_f;
     PlayerCreateInfoItems item;
     PlayerCreateInfoSpells spell;
+    PlayerCreateInfoSkills skill;
     PlayerCreateInfoActions action;
 
     PlayerLevelInfo* levelInfo;                             //[level-1] 0..MaxPlayerLevel-1
@@ -1660,6 +1669,7 @@ class Player : public Unit
         inline int16 GetSkillBonusTemporary(uint16 id) const { return GetSkillBonus(id); }          // skill temp bonus
         void UpdateSkillTrainedSpells(uint16 id, uint16 currVal);                                   // learns/unlearns spells dependent on a skill
         void UpdateSpellTrainedSkills(uint32 spellId, bool apply);                                  // learns/unlearns skills dependent on a spell
+        void LearnDefaultSkills();
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
         bool IsBeingTeleported() const { return mSemaphoreTeleport_Near || mSemaphoreTeleport_Far; }

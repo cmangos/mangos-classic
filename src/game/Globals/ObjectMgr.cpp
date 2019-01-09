@@ -2200,6 +2200,116 @@ void ObjectMgr::LoadPlayerInfo()
         }
     }
 
+    // Load playercreate skills
+    {
+        //
+        QueryResult* result = WorldDatabase.Query("SELECT raceMask, classMask, skill, step FROM playercreateinfo_skills");
+
+        uint32 count = 0;
+
+        if (!result)
+        {
+            BarGoLink bar(1);
+
+            sLog.outString();
+            sLog.outString(">> Loaded %u player create skills", count);
+            sLog.outErrorDb("Error loading `playercreateinfo_skills` table or empty table.");
+        }
+        else
+        {
+            BarGoLink bar(result->GetRowCount());
+
+            do
+            {
+                Field* fields = result->Fetch();
+                uint32 raceMask = fields[0].GetUInt32();
+                uint32 classMask = fields[1].GetUInt32();
+                PlayerCreateInfoSkill skill;
+                skill.SkillId = fields[2].GetUInt16();
+                skill.Step = fields[3].GetUInt16();
+
+                if (skill.Step > MAX_SKILL_STEP)
+                {
+                    sLog.outErrorDb("Skill step %u out of bounds in `playercreateinfo_skills` table, ignoring.", skill.Step);
+                    continue;
+                }
+
+                if (raceMask && !(raceMask & RACEMASK_ALL_PLAYABLE))
+                {
+                    sLog.outErrorDb("Wrong race mask %u in `playercreateinfo_skills` table, ignoring.", raceMask);
+                    continue;
+                }
+
+                if (classMask && !(classMask & CLASSMASK_ALL_PLAYABLE))
+                {
+                    sLog.outErrorDb("Wrong class mask %u in `playercreateinfo_skills` table, ignoring.", classMask);
+                    continue;
+                }
+
+                if (!sSkillLineStore.LookupEntry(skill.SkillId))
+                {
+                    sLog.outErrorDb("Non existing skill %u in `playercreateinfo_skills` table, ignoring.", skill.SkillId);
+                    continue;
+                }
+
+                auto bounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(skill.SkillId);
+
+                for (uint32 raceIndex = RACE_HUMAN; raceIndex < MAX_RACES; ++raceIndex)
+                {
+                    const uint32 raceIndexMask = (1 << (raceIndex - 1));
+                    if (!raceMask || (raceMask & raceIndexMask))
+                    {
+                        for (uint32 classIndex = CLASS_WARRIOR; classIndex < MAX_CLASSES; ++classIndex)
+                        {
+                            const uint32 classIndexMask = (1 << (classIndex - 1));
+                            if (!classMask || (classMask & classIndexMask))
+                            {
+                                bool obtainable = false;
+
+                                for (auto itr = bounds.first; (itr != bounds.second && !obtainable); ++itr)
+                                {
+                                    SkillRaceClassInfoEntry const* entry = itr->second;
+
+                                    if (!(entry->raceMask & raceIndexMask))
+                                        continue;
+
+                                    if (!(entry->classMask & classIndexMask))
+                                        continue;
+
+                                    if (skill.Step)
+                                    {
+                                        const uint32 stepIndex = (skill.Step - 1);
+                                        SkillTiersEntry const* steps = sSkillTiersStore.LookupEntry(entry->skillTierId);
+
+                                        if (!steps || !steps->maxSkillValue[stepIndex] || !steps->skillValue[stepIndex])
+                                            continue;
+                                    }
+
+                                    obtainable = true;
+                                }
+
+                                if (!obtainable)
+                                    continue;
+
+                                if (PlayerInfo* info = &playerInfo[raceIndex][classIndex])
+                                {
+                                    info->skill.push_back(skill);
+                                    ++count;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            while (result->NextRow());
+
+            delete result;
+
+            sLog.outString();
+            sLog.outString(">> Loaded %u player create skills", count);
+        }
+    }
+
     // Load playercreate spells
     {
         //                                                0     1      2

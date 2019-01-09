@@ -669,7 +669,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     }
 
-    // original spells
+    LearnDefaultSkills();
     learnDefaultSpells();
 
     // original action bar
@@ -5372,6 +5372,80 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
                 }
             }
         }
+    }
+}
+
+void Player::LearnDefaultSkills()
+{
+    uint32 raceMask = getRaceMask();
+    uint32 classMask = getClassMask();
+
+    // learn default race/class skills
+    PlayerInfo const* info = sObjectMgr.GetPlayerInfo(getRace(), getClass());
+
+    for (auto tskill : info->skill)
+    {
+        if (HasSkill(tskill.SkillId))
+            continue;
+
+        DEBUG_LOG("PLAYER (Class: %u Race: %u): Adding initial skill, id = %u", uint32(getClass()), uint32(getRace()), uint32(tskill.SkillId));
+
+        uint16 value = 0;
+        uint16 max = 0;
+        uint16 step = 0;
+
+        if (SkillLineEntry const* entry = sSkillLineStore.LookupEntry(tskill.SkillId))
+        {
+            switch (GetSkillRangeType(entry, false))
+            {
+                case SKILL_RANGE_LANGUAGE:
+                    value = max = 300;
+                    break;
+                case SKILL_RANGE_MONO:
+                    value = max = 1;
+                    break;
+                case SKILL_RANGE_LEVEL:
+                    value = 1;
+                    max = GetSkillMaxForLevel();
+                    break;
+                case SKILL_RANGE_RANK:
+                {
+                    const bool predefined = (tskill.Step != 0);
+                    step = (predefined ? tskill.Step : 1);
+                    uint32 stepIndex = (step - 1);
+
+                    auto bounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(tskill.SkillId);
+
+                    for (auto itr = bounds.first; itr != bounds.second; ++itr)
+                    {
+                        SkillRaceClassInfoEntry const* entry = itr->second;
+
+                        if (!(entry->raceMask & raceMask))
+                            continue;
+
+                        if (!(entry->classMask & classMask))
+                            continue;
+
+                        if (SkillTiersEntry const* steps = sSkillTiersStore.LookupEntry(entry->skillTierId))
+                        {
+                            value = 1;
+                            max = uint16(steps->maxSkillValue[stepIndex]);
+
+                            if (entry->flags & ABILITY_SKILL_AT_MAX_VALUE)
+                                value = max;
+                            else if (predefined)
+                                value = std::max(uint16(1), uint16((getLevel() - 1) * 5));
+
+                            break;
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        SetSkill(tskill.SkillId, value, max, step);
     }
 }
 
@@ -13706,6 +13780,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     // after spell load
     InitTalentForLevel();
+    LearnDefaultSkills();
     learnDefaultSpells();
 
     // after spell load, learn rewarded spell if need also
@@ -17422,6 +17497,7 @@ void Player::resetSpells()
     for (PlayerSpellMap::const_iterator iter = smap.begin(); iter != smap.end(); ++iter)
         removeSpell(iter->first, false, false);             // only iter->first can be accessed, object by iter->second can be deleted already
 
+    LearnDefaultSkills();
     learnDefaultSpells();
     learnQuestRewardedSpells();
 }
@@ -17430,6 +17506,7 @@ void Player::learnDefaultSpells()
 {
     // learn default race/class spells
     PlayerInfo const* info = sObjectMgr.GetPlayerInfo(getRace(), getClass());
+
     for (uint32 tspell : info->spell)
     {
         DEBUG_LOG("PLAYER (Class: %u Race: %u): Adding initial spell, id = %u", uint32(getClass()), uint32(getRace()), tspell);
@@ -18537,6 +18614,9 @@ void Player::_LoadSkills(QueryResult* result)
                 case SKILL_RANGE_MONO:                      // 1..1, grey monolite bar
                     value = max = 1;
                     break;
+                case SKILL_RANGE_LEVEL:
+                    max = GetSkillMaxForLevel();
+                    break;
                 default:
                     break;
             }
@@ -18548,7 +18628,35 @@ void Player::_LoadSkills(QueryResult* result)
                 continue;
             }
 
-            SetUInt32Value(PLAYER_SKILL_INDEX(count), MAKE_PAIR32(skill, 0));
+            // Deduct current skill step from skill max value using data from dbc
+            // TODO: Maybe save step to db in the future?
+            uint16 step = 0;
+
+            uint32 raceMask = getRaceMask();
+            uint32 classMask = getClassMask();
+            auto bounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(skill);
+
+            for (auto itr = bounds.first; (itr != bounds.second && !step); ++itr)
+            {
+                SkillRaceClassInfoEntry const* entry = itr->second;
+
+                if (!(entry->raceMask & raceMask))
+                    continue;
+
+                if (!(entry->classMask & classMask))
+                    continue;
+
+                if (SkillTiersEntry const* steps = sSkillTiersStore.LookupEntry(entry->skillTierId))
+                {
+                    for (uint16 i = 0; (i < MAX_SKILL_STEP && !step && steps->maxSkillValue[i]); ++i)
+                    {
+                        if (steps->maxSkillValue[i] == max)
+                            step = i + 1;
+                    }
+                }
+            }
+
+            SetUInt32Value(PLAYER_SKILL_INDEX(count), MAKE_PAIR32(skill, step));
             SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(count), MAKE_SKILL_VALUE(value, max));
             SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(count), 0);
 
