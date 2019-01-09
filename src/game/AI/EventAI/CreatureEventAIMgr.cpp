@@ -462,6 +462,12 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         temp.event_flags &= ~EFLAG_REPEATABLE;
                     }
 
+                    if (temp.event_flags & EFLAG_COMBAT_ACTION)
+                    {
+                        sLog.outErrorEventAI("Creature %u has EFLAG_COMBAT_ACTION set. Event can never be done during combat. Removing flag for event %u.", temp.creature_id, i);
+                        temp.event_flags &= ~EFLAG_COMBAT_ACTION;
+                    }
+
                     break;
                 }
 
