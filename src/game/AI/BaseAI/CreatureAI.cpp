@@ -78,7 +78,7 @@ void CreatureAI::DamageTaken(Unit* dealer, uint32& damage, DamageEffectType dama
 
 void CreatureAI::SetDeathPrevention(bool state)
 {
-    m_deathPrevention = true;
+    m_deathPrevention = state;
     if (state)
         m_deathPrevented = false;
 }
