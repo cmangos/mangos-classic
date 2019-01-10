@@ -3592,14 +3592,6 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     if (HasSpell(trainer_spell->learnedSpell))
         return TRAINER_SPELL_GRAY;
 
-    // known pet spell (pet training support)
-    if (trainer_spell->learnedSpell != trainer_spell->spell)
-    {
-        Pet* pet = GetPet();
-        if (pet && pet->HasSpell(trainer_spell->learnedSpell))
-            return TRAINER_SPELL_GRAY;
-    }
-
     // check race/class requirement
     if (!IsSpellFitByClassAndRace(trainer_spell->learnedSpell))
         return TRAINER_SPELL_RED;

@@ -8492,10 +8492,16 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         {
             if (spellinfo->Effect[i] == SPELL_EFFECT_LEARN_SPELL && spellinfo->EffectTriggerSpell[i])
             {
-                // ...looks like the specified spell is actually a trainer's spell casted on player to teach another spell
-                // Trainer's spells can teach more than one spell (up to number of effects), but we will stick to the first one
-                trainerSpell.learnedSpell = spellinfo->EffectTriggerSpell[i];
-                break;
+                switch (spellinfo->EffectImplicitTargetA[i])
+                {
+                    case TARGET_NONE:
+                    case TARGET_UNIT_CASTER:
+                        // ...looks like the specified spell is actually a trainer's spell casted on a player to teach another spell
+                        // Trainer's spells can teach more than one spell (up to number of effects), but we will stick to the first one
+                        // Self-casts listed in trainer's lists usually come from recipes which were made trainable in a later patch
+                        trainerSpell.learnedSpell = spellinfo->EffectTriggerSpell[i];
+                        break;
+                }
             }
         }
 
