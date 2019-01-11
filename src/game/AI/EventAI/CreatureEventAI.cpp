@@ -884,11 +884,16 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 pCreature->AI()->AttackStart(target);
             break;
         }
-        case ACTION_T_THREAT_SINGLE_PCT:
-            if (Unit* target = GetTargetByType(action.threat_single_pct.target, actionInvoker, AIEventSender, eventTarget, failedTargetSelection))
-                m_creature->getThreatManager().modifyThreatPercent(target, action.threat_single_pct.percent);
+        case ACTION_T_THREAT_SINGLE:
+            if (Unit* target = GetTargetByType(action.threat_single.target, actionInvoker, AIEventSender, eventTarget, failedTargetSelection))
+            {
+                if (action.threat_single.isDirect)
+                    m_creature->getThreatManager().addThreat(target, action.threat_single.value);
+                else
+                    m_creature->getThreatManager().modifyThreatPercent(target, action.threat_single.value);
+            }
             else if (failedTargetSelection)
-                sLog.outErrorEventAI("Event %u - nullptr target for ACTION_T_THREAT_SINGLE_PCT(%u), target-type %u", eventId, action.type, action.threat_single_pct.target);
+                sLog.outErrorEventAI("Event %u - nullptr target for ACTION_T_THREAT_SINGLE(%u), target-type %u", eventId, action.type, action.threat_single.target);
             break;
         case ACTION_T_THREAT_ALL_PCT:
         {

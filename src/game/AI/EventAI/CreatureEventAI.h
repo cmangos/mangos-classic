@@ -93,7 +93,7 @@ enum EventAI_ActionType
     ACTION_T_RANDOM_EMOTE               = 10,               // EmoteId1, EmoteId2, EmoteId3 (-1 in any field means no output if randomed that field)
     ACTION_T_CAST                       = 11,               // SpellId, Target - default = 15, CastFlags
     ACTION_T_SPAWN                      = 12,               // CreatureID, Target, Duration in ms
-    ACTION_T_THREAT_SINGLE_PCT          = 13,               // Threat%, Target
+    ACTION_T_THREAT_SINGLE              = 13,               // Threat, Target, IsDirect
     ACTION_T_THREAT_ALL_PCT             = 14,               // Threat%
     ACTION_T_QUEST_EVENT                = 15,               // QuestID, Target
     ACTION_T_CAST_EVENT                 = 16,               // QuestID, SpellId, Target - must be removed as hack?
@@ -283,12 +283,13 @@ struct CreatureEventAI_Action
             uint32 target;
             uint32 duration;
         } summon;
-        // ACTION_T_THREAT_SINGLE_PCT                       = 13
+        // ACTION_T_THREAT_SINGLE                           = 13
         struct
         {
-            int32 percent;
+            int32 value;
             uint32 target;
-        } threat_single_pct;
+            uint32 isDirect;
+        } threat_single;
         // ACTION_T_THREAT_ALL_PCT                          = 14
         struct
         {
