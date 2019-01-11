@@ -2244,13 +2244,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         case TARGET_ENUM_UNITS_FRIEND_IN_CONE:
         case TARGET_ENUM_UNITS_SCRIPT_IN_CONE_60:
         {
-            SpellTargets targetType;
+            SpellTargets targetType = SPELL_TARGETS_ALL;
             switch (targetMode)
             {
                 case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24:
                 case TARGET_ENUM_UNITS_ENEMY_IN_CONE_54: targetType = SPELL_TARGETS_AOE_ATTACKABLE; break;
                 case TARGET_ENUM_UNITS_FRIEND_IN_CONE: targetType = SPELL_TARGETS_ASSISTABLE; break;
-                case TARGET_ENUM_UNITS_SCRIPT_IN_CONE_60: targetType = SPELL_TARGETS_ALL; break;
             }
 
             switch (targetMode)
