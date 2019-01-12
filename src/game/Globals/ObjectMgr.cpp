@@ -3330,11 +3330,11 @@ void ObjectMgr::LoadQuests()
                           "RewOrReqMoney, RewMoneyMaxLevel, RewSpell, RewSpellCast, RewMailTemplateId, RewMailDelaySecs, PointMapId, PointX, PointY, PointOpt,"
                           //   106            107            108            109            110                 111                 112                 113
                           "DetailsEmote1, DetailsEmote2, DetailsEmote3, DetailsEmote4, DetailsEmoteDelay1, DetailsEmoteDelay2, DetailsEmoteDelay3, DetailsEmoteDelay4,"
-                          //   114              115            116                117                118                119
-                          "IncompleteEmote, CompleteEmote, OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4,"
-                          //   120                     121                     122                     123
+                          //   114          115                   116            117                  118                119                120                121
+                          "IncompleteEmote, IncompleteEmoteDelay, CompleteEmote, CompleteEmoteDelay,  OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4,"
+                          //   122                 123                     124                     125
                           "OfferRewardEmoteDelay1, OfferRewardEmoteDelay2, OfferRewardEmoteDelay3, OfferRewardEmoteDelay4,"
-                          //   124          125          126
+                          //   126      127             128
                           "StartScript, CompleteScript, RequiredCondition"
                           " FROM quest_template");
     if (!result)
