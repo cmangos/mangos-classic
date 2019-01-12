@@ -233,7 +233,9 @@ class Quest
         float  GetPointY() const { return PointY; }
         uint32 GetPointOpt() const { return PointOpt; }
         uint32 GetIncompleteEmote() const { return IncompleteEmote; }
+        uint32 GetIncompleteEmoteDelay() const { return IncompleteEmoteDelay; }
         uint32 GetCompleteEmote() const { return CompleteEmote; }
+        uint32 GetCompleteEmoteDelay() const { return CompleteEmoteDelay; }
         uint32 GetDetailsEmoteCount() const { return m_detailsemotecount; }
         uint32 GetQuestStartScript() const { return QuestStartScript; }
         uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
@@ -334,7 +336,9 @@ class Quest
         float  PointY;
         uint32 PointOpt;
         uint32 IncompleteEmote;
+        uint32 IncompleteEmoteDelay;
         uint32 CompleteEmote;
+        uint32 CompleteEmoteDelay;
         uint32 QuestStartScript;
         uint32 QuestCompleteScript;
 };
