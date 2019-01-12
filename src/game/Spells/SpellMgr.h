@@ -372,6 +372,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 13767:         // Hate to Zero (Hate to Zero)
         case 16140:         // Exploding Cadaver (Exploding Cadaver)
         case 17327:         // Spirit Particles
+        case 17467:         // Unholy Aura
         case 18943:         // Double Attack
         case 18950:         // Invisibility and Stealth Detection
         case 19194:         // Double Attack
