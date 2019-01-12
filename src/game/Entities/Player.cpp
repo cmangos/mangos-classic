@@ -5251,6 +5251,7 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
 {
     if (SpellLearnSkillNode const* skillLearnInfo = sSpellMgr.GetSpellLearnSkill(spellId))
     {
+        // Specifically defined: no checks needed
         if (apply)
         {
             uint16 value = std::max(skillLearnInfo->value, GetSkillValuePure(skillLearnInfo->skill));
@@ -5259,10 +5260,7 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
         }
         else
         {
-            uint32 prev_spell = sSpellMgr.GetPrevSpellInChain(spellId);
-            if (!prev_spell)                                    // first rank, remove skill
-                SetSkill(skillLearnInfo->skill, 0, 0);
-            else
+            if (uint32 prev_spell = sSpellMgr.GetPrevSpellInChain(spellId))
             {
                 // search prev. skill setting by spell ranks chain
                 SpellLearnSkillNode const* prevSkill = sSpellMgr.GetSpellLearnSkill(prev_spell);
@@ -5281,58 +5279,96 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
                     SetSkill(prevSkill->skill, value, max, prevSkill->step);
                 }
             }
+            else                                                // first rank, remove skill
+                SetSkill(skillLearnInfo->skill, 0, 0);
         }
     }
     else
     {
-        SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(spellId);
+        // Detect obtained child spells of specific skills
+        auto bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(spellId);
+
         for (auto itr = bounds.first; itr != bounds.second; ++itr)
         {
-            SkillLineAbilityEntry const* skillAbility = itr->second;
-            SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skillAbility->skillId);
+            SkillLineAbilityEntry const* info = itr->second;
+
+            SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(info->skillId);
             if (!pSkill)
                 continue;
 
+            const uint16 skillId = uint16(pSkill->id);
+
+            switch (skillId)            // Legacy workarounds:
+            {
+                case SKILL_POISONS:     // Poisons/lockpicking special case: no ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
+                case SKILL_LOCKPICKING:
+                    if (info->max_value != 0)
+                        continue;
+                    [[clang::fallthrough]];
+                default:                // Spells obtained via ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL only
+                    if (info->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
+                        continue;
+            }
+
             if (apply)
             {
-                if (HasSkill(uint16(pSkill->id)))
+                if (HasSkill(skillId))
                     continue;
 
-                if (skillAbility->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
-                        // poison special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
-                        ((pSkill->id == SKILL_POISONS) && (skillAbility->max_value == 0)) ||
-                        // lockpicking special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
-                        ((pSkill->id == SKILL_LOCKPICKING) && (skillAbility->max_value == 0)))
+                const uint32 raceMask  = getRaceMask();
+                const uint32 classMask = getClassMask();
+
+                auto rcbounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(skillId);
+
+                bool obtainable = false;
+
+                // Check if player is eligible for rewarding the skill in this particular SkillLineAbility entry
+                for (auto rcitr = rcbounds.first; (rcitr != rcbounds.second && !obtainable); ++rcitr)
                 {
-                    switch (GetSkillRangeType(pSkill, skillAbility->racemask != 0))
-                    {
+                    SkillRaceClassInfoEntry const* rcinfo = rcitr->second;
+
+                    // Check race if set
+                    if (rcinfo->raceMask && !(rcinfo->raceMask & raceMask))
+                        continue;
+
+                    // Check class if set
+                    if (rcinfo->classMask && !(rcinfo->classMask & classMask))
+                        continue;
+
+                    obtainable = true;
+                }
+
+                if (!obtainable)
+                    continue;
+
+                switch (GetSkillRangeType(pSkill, info->racemask != 0))
+                {
                     case SKILL_RANGE_LANGUAGE:
-                        SetSkill(uint16(pSkill->id), 300, 300);
+                        SetSkill(skillId, 300, 300);
                         break;
                     case SKILL_RANGE_LEVEL:
-                        SetSkill(uint16(pSkill->id), 1, GetSkillMaxForLevel());
+                        SetSkill(skillId, 1, GetSkillMaxForLevel());
                         break;
                     case SKILL_RANGE_MONO:
-                        SetSkill(uint16(pSkill->id), 1, 1);
+                        SetSkill(skillId, 1, 1);
                         break;
                     default:
                         break;
-                    }
                 }
             }
             else
             {
-                if ((skillAbility->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL &&
-                     pSkill->categoryId != SKILL_CATEGORY_CLASS) ||// not unlearn class skills (spellbook/talent pages)
-                        // poisons/lockpicking special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
-                        ((pSkill->id == SKILL_POISONS || pSkill->id == SKILL_LOCKPICKING) && skillAbility->max_value == 0))
+                switch (pSkill->categoryId)         // Legacy workarounds:
                 {
-                    // not reset skills for professions and racial abilities
-                    if ((pSkill->categoryId == SKILL_CATEGORY_SECONDARY || pSkill->categoryId == SKILL_CATEGORY_PROFESSION) &&
-                            (IsProfessionSkill(pSkill->id) || skillAbility->racemask != 0))
+                    case SKILL_CATEGORY_CLASS:      // not unlearn class skills (spellbook/talent pages)
                         continue;
-
-                    SetSkill(uint16(pSkill->id), 0, 0);
+                    case SKILL_CATEGORY_SECONDARY:  // not reset skills for professions and racial abilities
+                    case SKILL_CATEGORY_PROFESSION:
+                        if (IsProfessionSkill(skillId) || info->racemask != 0)
+                            continue;
+                        [[clang::fallthrough]];
+                    default:
+                        SetSkill(skillId, 0, 0);
                 }
             }
         }
