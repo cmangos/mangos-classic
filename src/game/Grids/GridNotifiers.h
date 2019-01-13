@@ -601,7 +601,7 @@ namespace MaNGOS
             {
                 if (go->GetGOInfo()->type == GAMEOBJECT_TYPE_FISHINGHOLE && go->IsSpawned() && i_obj.IsWithinDistInMap(go, i_range) && i_obj.IsWithinDistInMap(go, (float)go->GetGOInfo()->fishinghole.radius))
                 {
-                    i_range = i_obj.GetDistance(go);
+                    i_range = i_obj.GetDistance(go, true, DIST_CALC_COMBAT_REACH);
                     return true;
                 }
                 return false;
