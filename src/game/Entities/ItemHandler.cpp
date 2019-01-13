@@ -673,7 +673,8 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: Received opcode CMSG_BUY_ITEM");
     ObjectGuid vendorGuid;
     uint32 item;
-    uint8 count, unk1;
+    uint8 count;
+    uint8 unk1; // hardcoded 1u inside TBC client
 
     recv_data >> vendorGuid >> item >> count >> unk1;
 
