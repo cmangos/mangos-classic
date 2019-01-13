@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2733_01_mangos_playercreate_skills_vanilla` bit(1) DEFAULT NULL
+  `required_z2735_01_mangos_weapon_skills_fix_vanilla` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -8081,48 +8081,67 @@ INSERT INTO `playercreateinfo_skills` VALUES
 (0,     1,  26, 0,  'Warrior: Arms'),
 (0,     1, 256, 0,  'Warrior: Fury'),
 (0,     1, 257, 0,  'Warrior: Protection'),
+(167,   1,  44, 0,  'Weapon: Axes (Warrior)'),
+(216,   1, 173, 0,  'Weapon: Daggers (Warrior)'),
+(109,   1,  54, 0,  'Weapon: Maces (Warrior)'),
+(91,    1,  43, 0,  'Weapon: Swords (Warrior)'),
+(128,   1, 176, 0,  'Weapon: Thrown (Warrior)'),
+(6,     1, 172, 0,  'Weapon: Two-Handed Axes (Warrior)'),
+(32,    1, 160, 0,  'Weapon: Two-Handed Maces (Warrior)'),
+(16,    1,  55, 0,  'Weapon: Two-Handed Swords (Warrior)'),
 -- PALADIN CLASS:
 (0,     2, 594, 0,  'Paladin: Holy'),
 (0,     2, 267, 0,  'Paladin: Protection'),
 (0,     2, 184, 0,  'Paladin: Retribution'),
+(0,     2,  54, 0,  'Weapon: Maces (Paladin)'),
+(0,     2, 160, 0,  'Weapon: Two-Handed Maces (Paladin)'),
 -- HUNTER CLASS:
 (0,     4,  50, 0,  'Hunter: Beast Mastery'),
 (0,     4, 163, 0,  'Hunter: Marksmanship'),
 (0,     4,  51, 0,  'Hunter: Survival'),
+(166,   4,  44, 0,  'Weapon: Axes (Hunter)'),
+(138,   4,  45, 0,  'Weapon: Bows (Hunter)'),
+(8,     4, 173, 0,  'Weapon: Daggers (Hunter)'),
+(36,    4,  46, 0,  'Weapon: Guns (Hunter)'),
 -- ROGUE CLASS:
 (0,     8,  38, 0,  'Rogue: Combat'),
 (0,     8, 253, 0,  'Rogue: Assassination'),
 (0,     8,  39, 0,  'Rogue: Subtlety'),
 (0,     8, 176, 0,  'Weapon: Thrown'),
-(0,     8, 118, 0,  'Misc: Dual Wield'),
+(0,     8, 173, 0,  'Weapon: Daggers (Rogue)'),
+(0,     8, 176, 0,  'Weapon: Thrown (Rogue)'),
 -- PRIEST CLASS:
 (0,    16,  56, 0,  'Priest: Holy'),
 (0,    16, 613, 0,  'Priest: Discipline'),
 (0,    16,  78, 0,  'Priest: Shadow'),
+(0,    16,  54, 0,  'Weapon: Maces (Priest)'),
+(0,    16, 228, 0,  'Weapon: Wands (Priest)'),
 -- SHAMAN CLASS:
 (0,    64, 375, 0,  'Shaman: Elemental'),
 (0,    64, 373, 0,  'Shaman: Enhancement'),
 (0,    64, 374, 0,  'Shaman: Restoration'),
+(0,    64,  54, 0,  'Weapon: Maces (Shaman)'),
+(0,    64, 136, 0,  'Weapon: Staves (Shaman)'),
 -- MAGE CLASS:
 (0,   128, 237, 0,  'Mage: Arcane'),
 (0,   128,   8, 0,  'Mage: Fire'),
 (0,   128,   6, 0,  'Mage: Frost'),
+(0,   128, 136, 0,  'Weapon: Staves (Mage)'),
+(0,   128, 228, 0,  'Weapon: Wands (Mage)'),
 -- WARLOCK CLASS:
 (0,   256, 355, 0,  'Warlock: Affliction'),
 (0,   256, 354, 0,  'Warlock: Demonology'),
 (0,   256, 593, 0,  'Warlock: Destruction'),
+(0,   256, 173, 0,  'Weapon: Daggers (Warlock)'),
+(0,   256, 228, 0,  'Weapon: Wands (Warlock)'),
 -- DRUID CLASS:
 (0,  1024, 574, 0,  'Druid: Balance'),
 (0,  1024, 134, 0,  'Druid: Feral Combat'),
 (0,  1024, 573, 0,  'Druid: Restoration'),
--- WEAPONS, ARMOR AND MISC SKILLS BY CLASSES:
-(0,     5,  44, 0,  'Weapon: Axes'),
-(0,     5, 172, 0,  'Weapon: Two-Handed Axes'),
-(0,     7,  43, 0,  'Weapon: Swords'),
-(0,     3,  55, 0,  'Weapon: Two-Handed Swords'),
-(0,  1107,  54, 0,  'Weapon: Maces'),
-(0,  1488, 136, 0,  'Weapon: Staves'),
-(0,   400, 228, 0,  'Weapon: Wands'),
+(8,  1024, 173, 0,  'Weapon: Daggers (Druid)'),
+(32, 1024,  54, 0,  'Weapon: Maces (Druid)'),
+(0,  1024, 136, 0,  'Weapon: Staves (Druid)'),
+-- ARMOR AND MISC SKILLS:
 (0,     3, 413, 0,  'Armor: Mail'),
 (0,  1103, 414, 0,  'Armor: Leather'),
 (0,    67, 433, 0,  'Armor: Shield'),
@@ -8143,12 +8162,7 @@ INSERT INTO `playercreateinfo_skills` VALUES
 (32,    0, 124, 0,  'Racial: Tauren'),
 (32,    0, 115, 0,  'Language: Taurahe'),
 (128,   0, 733, 0,  'Racial: Troll'),
-(128,   0, 315, 0,  'Language: Troll'),
--- WEAPONS, ARMOR AND MISC SKILLS BY RACES AND CLASSES:
-(37,    3, 160, 0,  'Weapon: Two-Handed Maces'),
-(223,1293, 173, 0,  'Weapon: Daggers'),
-(36,    4,  46, 0,  'Weapon: Guns'),
-(138,   4,  45, 0,  'Weapon: Bows');
+(128,   0, 315, 0,  'Language: Troll');
 /*!40000 ALTER TABLE `playercreateinfo_skills` ENABLE KEYS */;
 UNLOCK TABLES;
 
