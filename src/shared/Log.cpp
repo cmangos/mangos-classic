@@ -65,8 +65,8 @@ enum LogType
 const int LogType_count = int(LogError) + 1;
 
 Log::Log() :
-    raLogfile(nullptr), logfile(nullptr), gmLogfile(nullptr), charLogfile(nullptr), customLogFile(nullptr),
-    dberLogfile(nullptr), eventAiErLogfile(nullptr), scriptErrLogFile(nullptr), worldLogfile(nullptr), m_colored(false), m_includeTime(false), m_gmlog_per_account(false), m_scriptLibName(nullptr)
+    raLogfile(nullptr), logfile(nullptr), gmLogfile(nullptr), charLogfile(nullptr), dberLogfile(nullptr),
+    eventAiErLogfile(nullptr), scriptErrLogFile(nullptr), worldLogfile(nullptr), customLogFile(nullptr), m_colored(false), m_includeTime(false), m_gmlog_per_account(false), m_scriptLibName(nullptr)
 {
     Initialize();
 }
@@ -83,14 +83,14 @@ void Log::InitColors(const std::string& str)
 
     std::istringstream ss(str);
 
-    for (int i = 0; i < LogType_count; ++i)
+    for (int& i : color)
     {
-        ss >> color[i];
+        ss >> i;
 
         if (!ss)
             return;
 
-        if (color[i] < 0 || color[i] >= Color_count)
+        if (i < 0 || i >= Color_count)
             return;
     }
 
@@ -241,7 +241,7 @@ void Log::Initialize()
             bool m_gmlog_timestamp = sConfig.GetBoolDefault("GmLogTimestamp", false);
 
             size_t dot_pos = m_gmlog_filename_format.find_last_of('.');
-            if (dot_pos != m_gmlog_filename_format.npos)
+            if (dot_pos != std::string::npos)
             {
                 if (m_gmlog_timestamp)
                     m_gmlog_filename_format.insert(dot_pos, m_logsTimestamp);
@@ -292,7 +292,7 @@ FILE* Log::openLogFile(char const* configFileName, char const* configTimeStampFl
     if (configTimeStampFlag && sConfig.GetBoolDefault(configTimeStampFlag, false))
     {
         size_t dot_pos = logfn.find_last_of('.');
-        if (dot_pos != logfn.npos)
+        if (dot_pos != std::string::npos)
             logfn.insert(dot_pos, m_logsTimestamp);
         else
             logfn += m_logsTimestamp;

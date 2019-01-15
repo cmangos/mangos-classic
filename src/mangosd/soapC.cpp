@@ -26,9 +26,9 @@ SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.8.55 2017-10-31 00:08:52 GMT")
 SOAP_FMAC3 int SOAP_FMAC4 soap_getheader(struct soap* soap)
 {
     soap->part = SOAP_IN_HEADER;
-    soap->header = soap_in_SOAP_ENV__Header(soap, "SOAP-ENV:Header", soap->header, NULL);
+    soap->header = soap_in_SOAP_ENV__Header(soap, "SOAP-ENV:Header", soap->header, nullptr);
     soap->part = SOAP_END_HEADER;
-    return soap->header == NULL;
+    return soap->header == nullptr;
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_putheader(struct soap* soap)
@@ -51,7 +51,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serializeheader(struct soap* soap)
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_header(struct soap* soap)
 {
-    if (soap->header == NULL)
+    if (soap->header == nullptr)
     {
         if ((soap->header = soap_new_SOAP_ENV__Header(soap)))
             soap_default_SOAP_ENV__Header(soap, soap->header);
@@ -60,10 +60,10 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_header(struct soap* soap)
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_fault(struct soap* soap)
 {
-    if (soap->fault == NULL)
+    if (soap->fault == nullptr)
     {
         soap->fault = soap_new_SOAP_ENV__Fault(soap);
-        if (soap->fault == NULL)
+        if (soap->fault == nullptr)
             return;
         soap_default_SOAP_ENV__Fault(soap, soap->fault);
     }
@@ -95,7 +95,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putfault(struct soap* soap)
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_getfault(struct soap* soap)
 {
-    return (soap->fault = soap_get_SOAP_ENV__Fault(soap, NULL, "SOAP-ENV:Fault", NULL)) == NULL;
+    return (soap->fault = soap_get_SOAP_ENV__Fault(soap, nullptr, "SOAP-ENV:Fault", nullptr)) == nullptr;
 }
 
 SOAP_FMAC3 const char** SOAP_FMAC4 soap_faultcode(struct soap* soap)
@@ -111,7 +111,7 @@ SOAP_FMAC3 const char** SOAP_FMAC4 soap_faultsubcode(struct soap* soap)
     soap_fault(soap);
     if (soap->version == 2)
     {
-        if (soap->fault->SOAP_ENV__Code->SOAP_ENV__Subcode == NULL)
+        if (soap->fault->SOAP_ENV__Code->SOAP_ENV__Subcode == nullptr)
         {
             soap->fault->SOAP_ENV__Code->SOAP_ENV__Subcode = soap_new_SOAP_ENV__Code(soap);
             soap_default_SOAP_ENV__Code(soap, soap->fault->SOAP_ENV__Code->SOAP_ENV__Subcode);
@@ -128,7 +128,7 @@ SOAP_FMAC3 const char* SOAP_FMAC4 soap_check_faultsubcode(struct soap* soap)
     {
         if (soap->fault->SOAP_ENV__Code && soap->fault->SOAP_ENV__Code->SOAP_ENV__Subcode)
             return soap->fault->SOAP_ENV__Code->SOAP_ENV__Subcode->SOAP_ENV__Value;
-        return NULL;
+        return nullptr;
     }
     return soap->fault->faultcode;
 }
@@ -146,14 +146,14 @@ SOAP_FMAC3 const char** SOAP_FMAC4 soap_faultdetail(struct soap* soap)
     soap_fault(soap);
     if (soap->version == 2)
     {
-        if (soap->fault->SOAP_ENV__Detail == NULL)
+        if (soap->fault->SOAP_ENV__Detail == nullptr)
         {
             soap->fault->SOAP_ENV__Detail = soap_new_SOAP_ENV__Detail(soap);
             soap_default_SOAP_ENV__Detail(soap, soap->fault->SOAP_ENV__Detail);
         }
         return (const char**)(void*)&soap->fault->SOAP_ENV__Detail->__any;
     }
-    if (soap->fault->detail == NULL)
+    if (soap->fault->detail == nullptr)
     {
         soap->fault->detail = soap_new_SOAP_ENV__Detail(soap);
         soap_default_SOAP_ENV__Detail(soap, soap->fault->detail);
@@ -168,7 +168,7 @@ SOAP_FMAC3 const char* SOAP_FMAC4 soap_check_faultdetail(struct soap* soap)
         return soap->fault->SOAP_ENV__Detail->__any;
     if (soap->fault->detail)
         return soap->fault->detail->__any;
-    return NULL;
+    return nullptr;
 }
 
 #endif
@@ -199,33 +199,31 @@ SOAP_FMAC3 void* SOAP_FMAC4 soap_getelement(struct soap* soap, int* type)
 {
     (void)type;
     if (soap_peek_element(soap))
-        return NULL;
+        return nullptr;
 #ifndef WITH_NOIDREF
     if (!*soap->id || !(*type = soap_lookup_type(soap, soap->id)))
         * type = soap_lookup_type(soap, soap->href);
     switch (*type)
     {
         case SOAP_TYPE_byte:
-            return soap_in_byte(soap, NULL, NULL, "xsd:byte");
+            return soap_in_byte(soap, nullptr, nullptr, "xsd:byte");
         case SOAP_TYPE_int:
-            return soap_in_int(soap, NULL, NULL, "xsd:int");
+            return soap_in_int(soap, nullptr, nullptr, "xsd:int");
         case SOAP_TYPE_ns1__executeCommand:
-            return soap_in_ns1__executeCommand(soap, NULL, NULL, "ns1:executeCommand");
+            return soap_in_ns1__executeCommand(soap, nullptr, nullptr, "ns1:executeCommand");
         case SOAP_TYPE_ns1__executeCommandResponse:
-            return soap_in_ns1__executeCommandResponse(soap, NULL, NULL, "ns1:executeCommandResponse");
+            return soap_in_ns1__executeCommandResponse(soap, nullptr, nullptr, "ns1:executeCommandResponse");
         case SOAP_TYPE_PointerTostring:
-            return soap_in_PointerTostring(soap, NULL, NULL, "xsd:string");
+            return soap_in_PointerTostring(soap, nullptr, nullptr, "xsd:string");
         case SOAP_TYPE__QName:
         {
-            char** s;
-            s = soap_in__QName(soap, NULL, NULL, "xsd:QName");
-            return s ? *s : NULL;
+            char** s = soap_in__QName(soap, nullptr, nullptr, "xsd:QName");
+            return s ? *s : nullptr;
         }
         case SOAP_TYPE_string:
         {
-            char** s;
-            s = soap_in_string(soap, NULL, NULL, "xsd:string");
-            return s ? *s : NULL;
+            char** s = soap_in_string(soap, nullptr, nullptr, "xsd:string");
+            return s ? *s : nullptr;
         }
         default:
 #else
@@ -238,36 +236,34 @@ SOAP_FMAC3 void* SOAP_FMAC4 soap_getelement(struct soap* soap, int* type)
                 if (!soap_match_tag(soap, t, "xsd:byte"))
                 {
                     *type = SOAP_TYPE_byte;
-                    return soap_in_byte(soap, NULL, NULL, NULL);
+                    return soap_in_byte(soap, nullptr, nullptr, nullptr);
                 }
                 if (!soap_match_tag(soap, t, "xsd:int"))
                 {
                     *type = SOAP_TYPE_int;
-                    return soap_in_int(soap, NULL, NULL, NULL);
+                    return soap_in_int(soap, nullptr, nullptr, nullptr);
                 }
                 if (!soap_match_tag(soap, t, "ns1:executeCommand"))
                 {
                     *type = SOAP_TYPE_ns1__executeCommand;
-                    return soap_in_ns1__executeCommand(soap, NULL, NULL, NULL);
+                    return soap_in_ns1__executeCommand(soap, nullptr, nullptr, nullptr);
                 }
                 if (!soap_match_tag(soap, t, "ns1:executeCommandResponse"))
                 {
                     *type = SOAP_TYPE_ns1__executeCommandResponse;
-                    return soap_in_ns1__executeCommandResponse(soap, NULL, NULL, NULL);
+                    return soap_in_ns1__executeCommandResponse(soap, nullptr, nullptr, nullptr);
                 }
                 if (!soap_match_tag(soap, t, "xsd:QName"))
                 {
-                    char** s;
                     *type = SOAP_TYPE__QName;
-                    s = soap_in__QName(soap, NULL, NULL, NULL);
-                    return s ? *s : NULL;
+                    char** s = soap_in__QName(soap, nullptr, nullptr, nullptr);
+                    return s ? *s : nullptr;
                 }
                 if (!soap_match_tag(soap, t, "xsd:string"))
                 {
-                    char** s;
                     *type = SOAP_TYPE_string;
-                    s = soap_in_string(soap, NULL, NULL, NULL);
-                    return s ? *s : NULL;
+                    char** s = soap_in_string(soap, nullptr, nullptr, nullptr);
+                    return s ? *s : nullptr;
                 }
                 t = soap->tag;
 #ifndef WITH_NOIDREF
@@ -275,7 +271,7 @@ SOAP_FMAC3 void* SOAP_FMAC4 soap_getelement(struct soap* soap, int* type)
 #endif
     }
     soap->error = SOAP_TAG_MISMATCH;
-    return NULL;
+    return nullptr;
 }
 
 #ifdef __cplusplus
@@ -313,11 +309,9 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_ignore_element(struct soap* soap)
 #ifndef WITH_NOIDREF
 SOAP_FMAC3 int SOAP_FMAC4 soap_putindependent(struct soap* soap)
 {
-    int i;
-    struct soap_plist* pp;
     if (soap->version == 1 && soap->encodingStyle && !(soap->mode & (SOAP_XML_TREE | SOAP_XML_GRAPH)))
-        for (i = 0; i < SOAP_PTRHASH; i++)
-            for (pp = soap->pht[i]; pp; pp = pp->next)
+        for (auto pp : soap->pht)
+            for (; pp; pp = pp->next)
                 if (pp->mark1 == 2 || pp->mark2 == 2)
                     if (soap_putelement(soap, pp->ptr, SOAP_MULTIREFTAG, pp->id, pp->type))
                         return soap->error;
@@ -394,7 +388,7 @@ extern "C" {
 SOAP_FMAC3 void* SOAP_FMAC4 soap_dupelement(struct soap* soap, const void* ptr, int type)
 {
     (void)soap; (void)ptr; (void)type; /* appease -Wall -Werror */
-    return NULL;
+    return nullptr;
 }
 #ifdef __cplusplus
 }
@@ -442,7 +436,7 @@ SOAP_FMAC3 void* SOAP_FMAC4 soap_instantiate(struct soap* soap, int t, const cha
             return (void*)soap_instantiate_SOAP_ENV__Fault(soap, -1, type, arrayType, n);
 #endif
     }
-    return NULL;
+    return nullptr;
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist* p)
@@ -609,7 +603,7 @@ SOAP_FMAC3 char* SOAP_FMAC4 soap_get_byte(struct soap* soap, char* p, const char
 {
     if ((p = soap_in_byte(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -643,7 +637,7 @@ SOAP_FMAC3 int* SOAP_FMAC4 soap_get_int(struct soap* soap, int* p, const char* t
 {
     if ((p = soap_in_int(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -655,12 +649,12 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Fault(struct soap* soap, struc
     soap_default__QName(soap, &a->faultcode);
     soap_default_string(soap, &a->faultstring);
     soap_default_string(soap, &a->faultactor);
-    a->detail = NULL;
-    a->SOAP_ENV__Code = NULL;
-    a->SOAP_ENV__Reason = NULL;
+    a->detail = nullptr;
+    a->SOAP_ENV__Code = nullptr;
+    a->SOAP_ENV__Reason = nullptr;
     soap_default_string(soap, &a->SOAP_ENV__Node);
     soap_default_string(soap, &a->SOAP_ENV__Role);
-    a->SOAP_ENV__Detail = NULL;
+    a->SOAP_ENV__Detail = nullptr;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Fault(struct soap* soap, const struct SOAP_ENV__Fault* a)
@@ -718,10 +712,10 @@ SOAP_FMAC3 struct SOAP_ENV__Fault* SOAP_FMAC4 soap_in_SOAP_ENV__Fault(struct soa
     size_t soap_flag_SOAP_ENV__Role = 1;
     size_t soap_flag_SOAP_ENV__Detail = 1;
     if (soap_element_begin_in(soap, tag, 0, type))
-        return NULL;
-    a = (struct SOAP_ENV__Fault*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Fault, sizeof(struct SOAP_ENV__Fault), NULL, NULL, NULL, NULL);
+        return nullptr;
+    a = (struct SOAP_ENV__Fault*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Fault, sizeof(struct SOAP_ENV__Fault), nullptr, nullptr, nullptr, nullptr);
     if (!a)
-        return NULL;
+        return nullptr;
     soap_default_SOAP_ENV__Fault(soap, a);
     if (soap->body && *soap->href != '#')
     {
@@ -805,16 +799,16 @@ SOAP_FMAC3 struct SOAP_ENV__Fault* SOAP_FMAC4 soap_in_SOAP_ENV__Fault(struct soa
             if (soap->error == SOAP_NO_TAG)
                 break;
             if (soap->error)
-                return NULL;
+                return nullptr;
         }
         if (soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     else
     {
-        a = (struct SOAP_ENV__Fault*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_SOAP_ENV__Fault, SOAP_TYPE_SOAP_ENV__Fault, sizeof(struct SOAP_ENV__Fault), 0, soap_finsert, NULL);
+        a = (struct SOAP_ENV__Fault*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_SOAP_ENV__Fault, SOAP_TYPE_SOAP_ENV__Fault, sizeof(struct SOAP_ENV__Fault), 0, soap_finsert, nullptr);
         if (soap->body && soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     return a;
 }
@@ -852,7 +846,7 @@ SOAP_FMAC3 struct SOAP_ENV__Fault* SOAP_FMAC4 soap_get_SOAP_ENV__Fault(struct so
 {
     if ((p = soap_in_SOAP_ENV__Fault(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -890,10 +884,10 @@ SOAP_FMAC3 struct SOAP_ENV__Reason* SOAP_FMAC4 soap_in_SOAP_ENV__Reason(struct s
 {
     size_t soap_flag_SOAP_ENV__Text = 1;
     if (soap_element_begin_in(soap, tag, 0, type))
-        return NULL;
-    a = (struct SOAP_ENV__Reason*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Reason, sizeof(struct SOAP_ENV__Reason), NULL, NULL, NULL, NULL);
+        return nullptr;
+    a = (struct SOAP_ENV__Reason*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Reason, sizeof(struct SOAP_ENV__Reason), nullptr, nullptr, nullptr, nullptr);
     if (!a)
-        return NULL;
+        return nullptr;
     soap_default_SOAP_ENV__Reason(soap, a);
     if (soap->body && *soap->href != '#')
     {
@@ -913,16 +907,16 @@ SOAP_FMAC3 struct SOAP_ENV__Reason* SOAP_FMAC4 soap_in_SOAP_ENV__Reason(struct s
             if (soap->error == SOAP_NO_TAG)
                 break;
             if (soap->error)
-                return NULL;
+                return nullptr;
         }
         if (soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     else
     {
-        a = (struct SOAP_ENV__Reason*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_SOAP_ENV__Reason, SOAP_TYPE_SOAP_ENV__Reason, sizeof(struct SOAP_ENV__Reason), 0, soap_finsert, NULL);
+        a = (struct SOAP_ENV__Reason*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_SOAP_ENV__Reason, SOAP_TYPE_SOAP_ENV__Reason, sizeof(struct SOAP_ENV__Reason), 0, soap_finsert, nullptr);
         if (soap->body && soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     return a;
 }
@@ -960,7 +954,7 @@ SOAP_FMAC3 struct SOAP_ENV__Reason* SOAP_FMAC4 soap_get_SOAP_ENV__Reason(struct 
 {
     if ((p = soap_in_SOAP_ENV__Reason(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -971,9 +965,9 @@ SOAP_FMAC3 struct SOAP_ENV__Reason* SOAP_FMAC4 soap_get_SOAP_ENV__Reason(struct 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Detail(struct soap* soap, struct SOAP_ENV__Detail* a)
 {
     (void)soap; (void)a; /* appease -Wall -Werror */
-    a->__any = NULL;
+    a->__any = nullptr;
     a->__type = 0;
-    a->fault = NULL;
+    a->fault = nullptr;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Detail(struct soap* soap, const struct SOAP_ENV__Detail* a)
@@ -989,7 +983,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_SOAP_ENV__Detail(struct soap* soap, const cha
     (void)soap; (void)tag; (void)id; (void)a; (void)type; /* appease -Wall -Werror */
     if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_SOAP_ENV__Detail), type))
         return soap->error;
-    soap_outliteral(soap, "-any", (char* const*)&a->__any, NULL);
+    soap_outliteral(soap, "-any", (char* const*)&a->__any, nullptr);
     if (soap_putelement(soap, a->fault, "fault", -1, a->__type))
         return soap->error;
     return soap_element_end_out(soap, tag);
@@ -1000,10 +994,10 @@ SOAP_FMAC3 struct SOAP_ENV__Detail* SOAP_FMAC4 soap_in_SOAP_ENV__Detail(struct s
     size_t soap_flag___any = 1;
     size_t soap_flag_fault = 1;
     if (soap_element_begin_in(soap, tag, 0, type))
-        return NULL;
-    a = (struct SOAP_ENV__Detail*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Detail, sizeof(struct SOAP_ENV__Detail), NULL, NULL, NULL, NULL);
+        return nullptr;
+    a = (struct SOAP_ENV__Detail*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Detail, sizeof(struct SOAP_ENV__Detail), nullptr, nullptr, nullptr, nullptr);
     if (!a)
-        return NULL;
+        return nullptr;
     soap_default_SOAP_ENV__Detail(soap, a);
     if (soap->body && *soap->href != '#')
     {
@@ -1031,16 +1025,16 @@ SOAP_FMAC3 struct SOAP_ENV__Detail* SOAP_FMAC4 soap_in_SOAP_ENV__Detail(struct s
             if (soap->error == SOAP_NO_TAG)
                 break;
             if (soap->error)
-                return NULL;
+                return nullptr;
         }
         if (soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     else
     {
-        a = (struct SOAP_ENV__Detail*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_SOAP_ENV__Detail, SOAP_TYPE_SOAP_ENV__Detail, sizeof(struct SOAP_ENV__Detail), 0, soap_finsert, NULL);
+        a = (struct SOAP_ENV__Detail*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_SOAP_ENV__Detail, SOAP_TYPE_SOAP_ENV__Detail, sizeof(struct SOAP_ENV__Detail), 0, soap_finsert, nullptr);
         if (soap->body && soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     return a;
 }
@@ -1078,7 +1072,7 @@ SOAP_FMAC3 struct SOAP_ENV__Detail* SOAP_FMAC4 soap_get_SOAP_ENV__Detail(struct 
 {
     if ((p = soap_in_SOAP_ENV__Detail(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -1090,7 +1084,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Code(struct soap* soap, struct
 {
     (void)soap; (void)a; /* appease -Wall -Werror */
     soap_default__QName(soap, &a->SOAP_ENV__Value);
-    a->SOAP_ENV__Subcode = NULL;
+    a->SOAP_ENV__Subcode = nullptr;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Code(struct soap* soap, const struct SOAP_ENV__Code* a)
@@ -1120,10 +1114,10 @@ SOAP_FMAC3 struct SOAP_ENV__Code* SOAP_FMAC4 soap_in_SOAP_ENV__Code(struct soap*
     size_t soap_flag_SOAP_ENV__Value = 1;
     size_t soap_flag_SOAP_ENV__Subcode = 1;
     if (soap_element_begin_in(soap, tag, 0, type))
-        return NULL;
-    a = (struct SOAP_ENV__Code*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Code, sizeof(struct SOAP_ENV__Code), NULL, NULL, NULL, NULL);
+        return nullptr;
+    a = (struct SOAP_ENV__Code*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Code, sizeof(struct SOAP_ENV__Code), nullptr, nullptr, nullptr, nullptr);
     if (!a)
-        return NULL;
+        return nullptr;
     soap_default_SOAP_ENV__Code(soap, a);
     if (soap->body && *soap->href != '#')
     {
@@ -1151,16 +1145,16 @@ SOAP_FMAC3 struct SOAP_ENV__Code* SOAP_FMAC4 soap_in_SOAP_ENV__Code(struct soap*
             if (soap->error == SOAP_NO_TAG)
                 break;
             if (soap->error)
-                return NULL;
+                return nullptr;
         }
         if (soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     else
     {
-        a = (struct SOAP_ENV__Code*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_SOAP_ENV__Code, SOAP_TYPE_SOAP_ENV__Code, sizeof(struct SOAP_ENV__Code), 0, soap_finsert, NULL);
+        a = (struct SOAP_ENV__Code*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_SOAP_ENV__Code, SOAP_TYPE_SOAP_ENV__Code, sizeof(struct SOAP_ENV__Code), 0, soap_finsert, nullptr);
         if (soap->body && soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     return a;
 }
@@ -1198,7 +1192,7 @@ SOAP_FMAC3 struct SOAP_ENV__Code* SOAP_FMAC4 soap_get_SOAP_ENV__Code(struct soap
 {
     if ((p = soap_in_SOAP_ENV__Code(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -1229,10 +1223,10 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_SOAP_ENV__Header(struct soap* soap, const cha
 SOAP_FMAC3 struct SOAP_ENV__Header* SOAP_FMAC4 soap_in_SOAP_ENV__Header(struct soap* soap, const char* tag, struct SOAP_ENV__Header* a, const char* type)
 {
     if (soap_element_begin_in(soap, tag, 0, type))
-        return NULL;
-    a = (struct SOAP_ENV__Header*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Header, sizeof(struct SOAP_ENV__Header), NULL, NULL, NULL, NULL);
+        return nullptr;
+    a = (struct SOAP_ENV__Header*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_SOAP_ENV__Header, sizeof(struct SOAP_ENV__Header), nullptr, nullptr, nullptr, nullptr);
     if (!a)
-        return NULL;
+        return nullptr;
     soap_default_SOAP_ENV__Header(soap, a);
     if (soap->body && *soap->href != '#')
     {
@@ -1244,16 +1238,16 @@ SOAP_FMAC3 struct SOAP_ENV__Header* SOAP_FMAC4 soap_in_SOAP_ENV__Header(struct s
             if (soap->error == SOAP_NO_TAG)
                 break;
             if (soap->error)
-                return NULL;
+                return nullptr;
         }
         if (soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     else
     {
-        a = (struct SOAP_ENV__Header*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_SOAP_ENV__Header, SOAP_TYPE_SOAP_ENV__Header, sizeof(struct SOAP_ENV__Header), 0, soap_finsert, NULL);
+        a = (struct SOAP_ENV__Header*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_SOAP_ENV__Header, SOAP_TYPE_SOAP_ENV__Header, sizeof(struct SOAP_ENV__Header), 0, soap_finsert, nullptr);
         if (soap->body && soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     return a;
 }
@@ -1291,7 +1285,7 @@ SOAP_FMAC3 struct SOAP_ENV__Header* SOAP_FMAC4 soap_get_SOAP_ENV__Header(struct 
 {
     if ((p = soap_in_SOAP_ENV__Header(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -1325,10 +1319,10 @@ SOAP_FMAC3 struct ns1__executeCommand* SOAP_FMAC4 soap_in_ns1__executeCommand(st
 {
     size_t soap_flag_command = 1;
     if (soap_element_begin_in(soap, tag, 0, type))
-        return NULL;
-    a = (struct ns1__executeCommand*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_ns1__executeCommand, sizeof(struct ns1__executeCommand), NULL, NULL, NULL, NULL);
+        return nullptr;
+    a = (struct ns1__executeCommand*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_ns1__executeCommand, sizeof(struct ns1__executeCommand), nullptr, nullptr, nullptr, nullptr);
     if (!a)
-        return NULL;
+        return nullptr;
     soap_default_ns1__executeCommand(soap, a);
     if (soap->body && *soap->href != '#')
     {
@@ -1348,16 +1342,16 @@ SOAP_FMAC3 struct ns1__executeCommand* SOAP_FMAC4 soap_in_ns1__executeCommand(st
             if (soap->error == SOAP_NO_TAG)
                 break;
             if (soap->error)
-                return NULL;
+                return nullptr;
         }
         if (soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     else
     {
-        a = (struct ns1__executeCommand*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ns1__executeCommand, SOAP_TYPE_ns1__executeCommand, sizeof(struct ns1__executeCommand), 0, soap_finsert, NULL);
+        a = (struct ns1__executeCommand*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ns1__executeCommand, SOAP_TYPE_ns1__executeCommand, sizeof(struct ns1__executeCommand), 0, soap_finsert, nullptr);
         if (soap->body && soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     return a;
 }
@@ -1395,14 +1389,14 @@ SOAP_FMAC3 struct ns1__executeCommand* SOAP_FMAC4 soap_get_ns1__executeCommand(s
 {
     if ((p = soap_in_ns1__executeCommand(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns1__executeCommandResponse(struct soap* soap, struct ns1__executeCommandResponse* a)
 {
     (void)soap; (void)a; /* appease -Wall -Werror */
-    a->result = NULL;
+    a->result = nullptr;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns1__executeCommandResponse(struct soap* soap, const struct ns1__executeCommandResponse* a)
@@ -1427,10 +1421,10 @@ SOAP_FMAC3 struct ns1__executeCommandResponse* SOAP_FMAC4 soap_in_ns1__executeCo
 {
     size_t soap_flag_result = 1;
     if (soap_element_begin_in(soap, tag, 0, type))
-        return NULL;
-    a = (struct ns1__executeCommandResponse*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_ns1__executeCommandResponse, sizeof(struct ns1__executeCommandResponse), NULL, NULL, NULL, NULL);
+        return nullptr;
+    a = (struct ns1__executeCommandResponse*)soap_id_enter(soap, soap->id, a, SOAP_TYPE_ns1__executeCommandResponse, sizeof(struct ns1__executeCommandResponse), nullptr, nullptr, nullptr, nullptr);
     if (!a)
-        return NULL;
+        return nullptr;
     soap_default_ns1__executeCommandResponse(soap, a);
     if (soap->body && *soap->href != '#')
     {
@@ -1450,16 +1444,16 @@ SOAP_FMAC3 struct ns1__executeCommandResponse* SOAP_FMAC4 soap_in_ns1__executeCo
             if (soap->error == SOAP_NO_TAG)
                 break;
             if (soap->error)
-                return NULL;
+                return nullptr;
         }
         if (soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     else
     {
-        a = (struct ns1__executeCommandResponse*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ns1__executeCommandResponse, SOAP_TYPE_ns1__executeCommandResponse, sizeof(struct ns1__executeCommandResponse), 0, soap_finsert, NULL);
+        a = (struct ns1__executeCommandResponse*)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ns1__executeCommandResponse, SOAP_TYPE_ns1__executeCommandResponse, sizeof(struct ns1__executeCommandResponse), 0, soap_finsert, nullptr);
         if (soap->body && soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     return a;
 }
@@ -1497,7 +1491,7 @@ SOAP_FMAC3 struct ns1__executeCommandResponse* SOAP_FMAC4 soap_get_ns1__executeC
 {
     if ((p = soap_in_ns1__executeCommandResponse(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -1514,7 +1508,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Reason(struct soap*
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Reason(struct soap* soap, const char* tag, int id, struct SOAP_ENV__Reason* const* a, const char* type)
 {
-    id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_SOAP_ENV__Reason, NULL);
+    id = soap_element_id(soap, tag, id, *a, nullptr, 0, type, SOAP_TYPE_SOAP_ENV__Reason, nullptr);
     if (id < 0)
         return soap->error;
     return soap_out_SOAP_ENV__Reason(soap, tag, id, *a, type);
@@ -1523,23 +1517,23 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Reason(struct soap* soap, 
 SOAP_FMAC3 struct SOAP_ENV__Reason** SOAP_FMAC4 soap_in_PointerToSOAP_ENV__Reason(struct soap* soap, const char* tag, struct SOAP_ENV__Reason** a, const char* type)
 {
     (void)type; /* appease -Wall -Werror */
-    if (soap_element_begin_in(soap, tag, 1, NULL))
-        return NULL;
+    if (soap_element_begin_in(soap, tag, 1, nullptr))
+        return nullptr;
     if (!a)
         if (!(a = (struct SOAP_ENV__Reason**)soap_malloc(soap, sizeof(struct SOAP_ENV__Reason*))))
-            return NULL;
-    *a = NULL;
+            return nullptr;
+    *a = nullptr;
     if (!soap->null && *soap->href != '#')
     {
         soap_revert(soap);
         if (!(*a = soap_in_SOAP_ENV__Reason(soap, tag, *a, type)))
-            return NULL;
+            return nullptr;
     }
     else
     {
-        a = (struct SOAP_ENV__Reason**)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_SOAP_ENV__Reason, sizeof(struct SOAP_ENV__Reason), 0, NULL);
+        a = (struct SOAP_ENV__Reason**)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_SOAP_ENV__Reason, sizeof(struct SOAP_ENV__Reason), 0, nullptr);
         if (soap->body && soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     return a;
 }
@@ -1555,7 +1549,7 @@ SOAP_FMAC3 struct SOAP_ENV__Reason** SOAP_FMAC4 soap_get_PointerToSOAP_ENV__Reas
 {
     if ((p = soap_in_PointerToSOAP_ENV__Reason(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -1574,7 +1568,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Detail(struct soap*
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Detail(struct soap* soap, const char* tag, int id, struct SOAP_ENV__Detail* const* a, const char* type)
 {
-    id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_SOAP_ENV__Detail, NULL);
+    id = soap_element_id(soap, tag, id, *a, nullptr, 0, type, SOAP_TYPE_SOAP_ENV__Detail, nullptr);
     if (id < 0)
         return soap->error;
     return soap_out_SOAP_ENV__Detail(soap, tag, id, *a, type);
@@ -1583,23 +1577,23 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Detail(struct soap* soap, 
 SOAP_FMAC3 struct SOAP_ENV__Detail** SOAP_FMAC4 soap_in_PointerToSOAP_ENV__Detail(struct soap* soap, const char* tag, struct SOAP_ENV__Detail** a, const char* type)
 {
     (void)type; /* appease -Wall -Werror */
-    if (soap_element_begin_in(soap, tag, 1, NULL))
-        return NULL;
+    if (soap_element_begin_in(soap, tag, 1, nullptr))
+        return nullptr;
     if (!a)
         if (!(a = (struct SOAP_ENV__Detail**)soap_malloc(soap, sizeof(struct SOAP_ENV__Detail*))))
-            return NULL;
-    *a = NULL;
+            return nullptr;
+    *a = nullptr;
     if (!soap->null && *soap->href != '#')
     {
         soap_revert(soap);
         if (!(*a = soap_in_SOAP_ENV__Detail(soap, tag, *a, type)))
-            return NULL;
+            return nullptr;
     }
     else
     {
-        a = (struct SOAP_ENV__Detail**)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_SOAP_ENV__Detail, sizeof(struct SOAP_ENV__Detail), 0, NULL);
+        a = (struct SOAP_ENV__Detail**)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_SOAP_ENV__Detail, sizeof(struct SOAP_ENV__Detail), 0, nullptr);
         if (soap->body && soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     return a;
 }
@@ -1615,7 +1609,7 @@ SOAP_FMAC3 struct SOAP_ENV__Detail** SOAP_FMAC4 soap_get_PointerToSOAP_ENV__Deta
 {
     if ((p = soap_in_PointerToSOAP_ENV__Detail(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -1635,7 +1629,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Code(struct soap* s
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Code(struct soap* soap, const char* tag, int id, struct SOAP_ENV__Code* const* a, const char* type)
 {
     char* mark;
-    id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_SOAP_ENV__Code, &mark);
+    id = soap_element_id(soap, tag, id, *a, nullptr, 0, type, SOAP_TYPE_SOAP_ENV__Code, &mark);
     if (id < 0)
         return soap->error;
     soap_out_SOAP_ENV__Code(soap, tag, id, *a, type);
@@ -1646,23 +1640,23 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Code(struct soap* soap, co
 SOAP_FMAC3 struct SOAP_ENV__Code** SOAP_FMAC4 soap_in_PointerToSOAP_ENV__Code(struct soap* soap, const char* tag, struct SOAP_ENV__Code** a, const char* type)
 {
     (void)type; /* appease -Wall -Werror */
-    if (soap_element_begin_in(soap, tag, 1, NULL))
-        return NULL;
+    if (soap_element_begin_in(soap, tag, 1, nullptr))
+        return nullptr;
     if (!a)
         if (!(a = (struct SOAP_ENV__Code**)soap_malloc(soap, sizeof(struct SOAP_ENV__Code*))))
-            return NULL;
-    *a = NULL;
+            return nullptr;
+    *a = nullptr;
     if (!soap->null && *soap->href != '#')
     {
         soap_revert(soap);
         if (!(*a = soap_in_SOAP_ENV__Code(soap, tag, *a, type)))
-            return NULL;
+            return nullptr;
     }
     else
     {
-        a = (struct SOAP_ENV__Code**)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_SOAP_ENV__Code, sizeof(struct SOAP_ENV__Code), 0, NULL);
+        a = (struct SOAP_ENV__Code**)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_SOAP_ENV__Code, sizeof(struct SOAP_ENV__Code), 0, nullptr);
         if (soap->body && soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     return a;
 }
@@ -1678,7 +1672,7 @@ SOAP_FMAC3 struct SOAP_ENV__Code** SOAP_FMAC4 soap_get_PointerToSOAP_ENV__Code(s
 {
     if ((p = soap_in_PointerToSOAP_ENV__Code(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -1695,7 +1689,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTostring(struct soap* soap, cha
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTostring(struct soap* soap, const char* tag, int id, char** const* a, const char* type)
 {
-    id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_string, NULL);
+    id = soap_element_id(soap, tag, id, *a, nullptr, 0, type, SOAP_TYPE_string, nullptr);
     if (id < 0)
         return soap->error;
     return soap_out_string(soap, tag, id, *a, type);
@@ -1704,23 +1698,23 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTostring(struct soap* soap, const char
 SOAP_FMAC3 char*** SOAP_FMAC4 soap_in_PointerTostring(struct soap* soap, const char* tag, char** *a, const char* type)
 {
     (void)type; /* appease -Wall -Werror */
-    if (soap_element_begin_in(soap, tag, 1, NULL))
-        return NULL;
+    if (soap_element_begin_in(soap, tag, 1, nullptr))
+        return nullptr;
     if (!a)
         if (!(a = (char***)soap_malloc(soap, sizeof(char**))))
-            return NULL;
-    *a = NULL;
+            return nullptr;
+    *a = nullptr;
     if (!soap->null && *soap->href != '#')
     {
         soap_revert(soap);
         if (!(*a = soap_in_string(soap, tag, *a, type)))
-            return NULL;
+            return nullptr;
     }
     else
     {
-        a = (char***)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_string, sizeof(char*), 1, NULL);
+        a = (char***)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_string, sizeof(char*), 1, nullptr);
         if (soap->body && soap_element_end_in(soap, tag))
-            return NULL;
+            return nullptr;
     }
     return a;
 }
@@ -1736,7 +1730,7 @@ SOAP_FMAC3 char*** SOAP_FMAC4 soap_get_PointerTostring(struct soap* soap, char**
 {
     if ((p = soap_in_PointerTostring(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -1755,7 +1749,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out__QName(struct soap* soap, const char* tag, in
 
 SOAP_FMAC3 char ** SOAP_FMAC4 soap_in__QName(struct soap* soap, const char* tag, char** a, const char* type)
 {
-    a = soap_instring(soap, tag, a, type, SOAP_TYPE__QName, 2, 0, -1, NULL);
+    a = soap_instring(soap, tag, a, type, SOAP_TYPE__QName, 2, 0, -1, nullptr);
     return a;
 }
 
@@ -1770,7 +1764,7 @@ SOAP_FMAC3 char** SOAP_FMAC4 soap_get__QName(struct soap* soap, char** p, const 
 {
     if ((p = soap_in__QName(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 
@@ -1789,7 +1783,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_string(struct soap* soap, const char* tag, in
 
 SOAP_FMAC3 char ** SOAP_FMAC4 soap_in_string(struct soap* soap, const char* tag, char** a, const char* type)
 {
-    a = soap_instring(soap, tag, a, type, SOAP_TYPE_string, 1, 0, -1, NULL);
+    a = soap_instring(soap, tag, a, type, SOAP_TYPE_string, 1, 0, -1, nullptr);
     return a;
 }
 
@@ -1812,7 +1806,7 @@ SOAP_FMAC3 char** SOAP_FMAC4 soap_get_string(struct soap* soap, char** p, const 
 {
     if ((p = soap_in_string(soap, tag, p, type)))
         if (soap_getindependent(soap))
-            return NULL;
+            return nullptr;
     return p;
 }
 

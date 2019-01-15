@@ -131,7 +131,7 @@ Player* PlayerbotAI::GetMaster() const
 bool PlayerbotAI::CanReachWithSpellAttack(Unit* target)
 {
     bool inrange = false;
-    float dist = m_bot->GetCombatDistance(target, false);
+    float dist = m_bot->GetDistance(target, true, DIST_CALC_COMBAT_REACH_WITH_MELEE);
 
     for (SpellRanges::iterator itr = m_spellRangeMap.begin(); itr != m_spellRangeMap.end(); ++itr)
     {
@@ -172,7 +172,7 @@ bool PlayerbotAI::In_Reach(Unit* Target, uint32 spellId)
         return false;
 
     float range = 0;
-    float dist = m_bot->GetCombatDistance(Target, false);
+    float dist = m_bot->GetDistance(Target, true, DIST_CALC_COMBAT_REACH_WITH_MELEE);
     SpellRanges::iterator it;
     it = m_spellRangeMap.find(spellId);
     (it != m_spellRangeMap.end()) ? range = it->second : range = 0;
@@ -2674,11 +2674,15 @@ void PlayerbotAI::DoLoot()
         return;
     }
 
-    Creature* c = m_bot->GetMap()->GetCreature(m_lootCurrent);
-    GameObject* go = m_bot->GetMap()->GetGameObject(m_lootCurrent);
+    Creature* c = nullptr;
+    GameObject* go = nullptr;
+    if (m_lootCurrent.IsAnyTypeCreature())
+        c = static_cast<Creature*>(wo);
+    else if (m_lootCurrent.IsGameObject())
+        go = static_cast<GameObject*>(wo);
 
     // clear creature or object that is not spawned or if not creature or object
-    if ((c && c->IsDespawned()) || (go && !go->isSpawned()) || (!c && !go))
+    if ((c && c->IsDespawned()) || (go && !go->IsSpawned()) || (!c && !go))
     {
         m_lootCurrent = ObjectGuid();
         return;
@@ -4513,7 +4517,7 @@ void PlayerbotAI::extractQuestIds(const std::string& text, std::list<uint32>& qu
 void PlayerbotAI::MakeWeaponSkillLink(const SpellEntry* sInfo, std::ostringstream& out, uint32 skillid)
 {
     int loc = GetMaster()->GetSession()->GetSessionDbcLocale();
-    out << "|cff00ffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[loc] << " : " << m_bot->GetSkillValue(skillid) << " /" << m_bot->GetMaxSkillValue(skillid) << "]|h|r";
+    out << "|cff00ffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[loc] << " : " << m_bot->GetSkillValue(skillid) << " /" << m_bot->GetSkillMax(skillid) << "]|h|r";
 }
 
 // Build an hlink for spells in White
@@ -4752,8 +4756,8 @@ void PlayerbotAI::extractGOinfo(const std::string& text, BotObjectList& m_lootTa
 
         ObjectGuid lootCurrent = ObjectGuid(HIGHGUID_GAMEOBJECT, entry, guid);
 
-        if (guid)
-            m_lootTargets.push_back(lootCurrent);
+        if (GameObject* gob = m_bot->GetMap()->GetGameObject(lootCurrent))
+            m_lootTargets.push_back(gob->GetObjectGuid());
     }
 }
 
@@ -4916,7 +4920,7 @@ void PlayerbotAI::findNearbyGO()
         for (std::list<GameObject*>::iterator iter = tempTargetGOList.begin(); iter != tempTargetGOList.end(); iter++)
         {
             GameObject* go = (*iter);
-            if (go->isSpawned())
+            if (go->IsSpawned())
                 m_lootTargets.push_back(go->GetObjectGuid());
         }
     }
@@ -4924,7 +4928,7 @@ void PlayerbotAI::findNearbyGO()
 
 void PlayerbotAI::findNearbyCreature()
 {
-    std::list<Creature*> creatureList;
+    CreatureList creatureList;
     float radius = 2.5;
 
     CellPair pair(MaNGOS::ComputeCellPair(m_bot->GetPositionX(), m_bot->GetPositionY()));
@@ -4940,16 +4944,19 @@ void PlayerbotAI::findNearbyCreature()
     // if (!creatureList.empty())
     //    TellMaster("Found %i Creatures.", creatureList.size());
 
-    for (std::list<Creature*>::iterator iter = creatureList.begin(); iter != creatureList.end(); iter++)
+    for (CreatureList::iterator iter = creatureList.begin(); iter != creatureList.end(); iter++)
     {
         Creature* currCreature = *iter;
 
-        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end(); itr++)
+        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end();)
         {
             uint32 npcflags = currCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
             if (!(*itr & npcflags))
+            {
+                ++itr;
                 continue;
+            }
 
             WorldObject* wo = m_bot->GetMap()->GetWorldObject(currCreature->GetObjectGuid());
 
@@ -5186,6 +5193,27 @@ void PlayerbotAI::FaceTarget(Unit* pTarget)
     return;
 }
 
+/**
+ * IsImmuneToSchool()
+ * Playerbot wrapper to know if a target is immune or not to a specific damage school. This is used by the AI to prevent using an ability the target is immuned to
+ * return bool Returns true if bot's target is a creature with immunity to specified damage school
+ *
+ * params:target Unit* the target to check if it is immune
+ * params:schoolMask the school mask to be checked against the creature template or current spell immunity
+ * return false if the target is not immune, also return false by default
+ *
+ */
+bool PlayerbotAI::IsImmuneToSchool(Unit* target, SpellSchoolMask schoolMask)
+{
+    if (!target)
+        return false;
+
+    if (Creature* creature = (Creature*) target)
+            return creature->IsImmuneToDamage(schoolMask);
+
+    return false;
+}
+
 bool PlayerbotAI::CanStore()
 {
     uint32 totalused = 0;
@@ -5247,7 +5275,6 @@ void PlayerbotAI::UseItem(Item* item, uint16 targetFlag, ObjectGuid targetGUID)
 
     uint8 bagIndex = item->GetBagSlot();
     uint8 slot = item->GetSlot();
-    uint8 spell_count = 1;
     ObjectGuid item_guid = item->GetObjectGuid();
 
     if (uint32 questid = item->GetProto()->StartQuest)
@@ -5270,11 +5297,13 @@ void PlayerbotAI::UseItem(Item* item, uint16 targetFlag, ObjectGuid targetGUID)
     }
 
     uint32 spellId = 0;
+    uint8 spell_index = 0;
     for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
     {
         if (item->GetProto()->Spells[i].SpellId > 0)
         {
             spellId = item->GetProto()->Spells[i].SpellId;
+            spell_index = i;
             break;
         }
     }
@@ -5307,7 +5336,7 @@ void PlayerbotAI::UseItem(Item* item, uint16 targetFlag, ObjectGuid targetGUID)
     std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_USE_ITEM, 13));
     *packet << bagIndex;
     *packet << slot;
-    *packet << spell_count;
+    *packet << spell_index;
     *packet << targetFlag;
 
     if (targetFlag & (TARGET_FLAG_UNIT | TARGET_FLAG_ITEM | TARGET_FLAG_OBJECT))
@@ -7322,7 +7351,7 @@ void PlayerbotAI::_HandleCommandSpells(std::string& /*text*/, Player& fromPlayer
 
         spellName = pSpellInfo->SpellName[loc];
 
-        SkillLineAbilityMapBounds const bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellId);
+        SkillLineAbilityMapBounds const bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(spellId);
 
         bool isProfessionOrRidingSpell = false;
         for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter)
@@ -7424,7 +7453,7 @@ void PlayerbotAI::_HandleCommandSurvey(std::string& /*text*/, Player& fromPlayer
             if (!go)
                 continue;
 
-            if (!go->isSpawned())
+            if (!go->IsSpawned())
                 continue;
 
             detectout << "|cFFFFFF00|Hfound:" << guid << ":" << entry  << ":" <<  "|h[" << go->GetGOInfo()->name << "]|h|r";

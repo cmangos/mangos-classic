@@ -96,11 +96,10 @@ void RealmList::UpdateRealm(uint32 ID, const std::string& name, const std::strin
     realm.populationLevel      = popu;
 
     Tokens tokens = StrSplit(builds, " ");
-    Tokens::iterator iter;
 
-    for (iter = tokens.begin(); iter != tokens.end(); ++iter)
+    for (auto& token : tokens)
     {
-        uint32 build = atol((*iter).c_str());
+        uint32 build = atol(token.c_str());
         realm.realmbuilds.insert(build);
     }
 

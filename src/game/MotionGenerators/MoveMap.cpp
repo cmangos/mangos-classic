@@ -110,13 +110,7 @@ namespace MMAP
     bool MMapFactory::IsPathfindingForceDisabled(const Unit* unit)
     {
         if (const Creature* pCreature = dynamic_cast<const Creature*>(unit))
-        {
-            if (const CreatureInfo* pInfo = pCreature->GetCreatureInfo())
-            {
-                if (pInfo->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE)
-                    return true;
-            }
-        }
+            return pCreature->IsIgnoringMMAP();
 
         return false;
     }
@@ -124,8 +118,8 @@ namespace MMAP
     // ######################## MMapManager ########################
     MMapManager::~MMapManager()
     {
-        for (MMapDataSet::iterator i = loadedMMaps.begin(); i != loadedMMaps.end(); ++i)
-            delete i->second;
+        for (auto& loadedMMap : loadedMMaps)
+            delete loadedMMap.second;
 
         // by now we should not have maps loaded
         // if we had, tiles in MMapData->mmapLoadedTiles, their actual data is lost!
@@ -181,6 +175,23 @@ namespace MMAP
     uint32 MMapManager::packTileID(int32 x, int32 y) const
     {
         return uint32(x << 16 | y);
+    }
+
+    bool MMapManager::IsMMapIsLoaded(uint32 mapId, uint32 x, uint32 y) const
+    {
+        // get this mmap data
+        auto itr = loadedMMaps.find(mapId);
+
+        if (itr == loadedMMaps.end())
+            return false;
+
+        auto mmap = itr->second;
+
+        uint32 packedGridPos = packTileID(x, y);
+        if (mmap->mmapLoadedTiles.find(packedGridPos) != mmap->mmapLoadedTiles.end())
+            return true;
+
+        return false;
     }
 
     bool MMapManager::loadMap(uint32 mapId, int32 x, int32 y)

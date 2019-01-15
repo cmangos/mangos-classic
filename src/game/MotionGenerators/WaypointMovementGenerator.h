@@ -67,11 +67,11 @@ class WaypointMovementGenerator<Creature>
         WaypointMovementGenerator(Creature&) : i_nextMoveTime(0), m_isArrivalDone(false), m_lastReachedWaypoint(0), m_pathId(0), m_PathOrigin()
         {}
         ~WaypointMovementGenerator() { i_path = nullptr; }
-        void Initialize(Creature& u);
+        void Initialize(Creature& creature);
         void Interrupt(Creature&);
         void Finalize(Creature&);
-        void Reset(Creature& u);
-        bool Update(Creature& u, const uint32& diff);
+        void Reset(Creature& creature);
+        bool Update(Creature& creature, const uint32& diff);
         void InitializeWaypointPath(Creature& u, int32 pathId, WaypointPathOrigin wpSource, uint32 initialDelay, uint32 overwriteEntry);
 
         MovementGeneratorType GetMovementGeneratorType() const { return WAYPOINT_MOTION_TYPE; }
@@ -85,7 +85,7 @@ class WaypointMovementGenerator<Creature>
         bool SetNextWaypoint(uint32 pointId);
 
     private:
-        void LoadPath(Creature& c, int32 id, WaypointPathOrigin wpOrigin, uint32 overwriteEntry);
+        void LoadPath(Creature& creature, int32 pathId, WaypointPathOrigin wpOrigin, uint32 overwriteEntry);
 
         void Stop(int32 time) { i_nextMoveTime.Reset(time); }
         bool Stopped(Creature& u);
@@ -93,6 +93,7 @@ class WaypointMovementGenerator<Creature>
 
         void OnArrived(Creature&);
         void StartMove(Creature&);
+        void InformAI(Creature& creature, uint32 type, uint32 data);
 
         ShortTimeTracker i_nextMoveTime;
         bool m_isArrivalDone;
@@ -106,38 +107,16 @@ class WaypointMovementGenerator<Creature>
  * and hence generates ground and activities for the player.
  */
 class FlightPathMovementGenerator
-    : public MovementGeneratorMedium< Player, FlightPathMovementGenerator >,
-      public PathMovementBase<Player, TaxiPathNodeList>
+    : public MovementGeneratorMedium< Player, FlightPathMovementGenerator >
 {
     public:
-        explicit FlightPathMovementGenerator(uint32 startNode = 0)
-        {
-            i_currentNode = startNode;
-        }
-        void LoadPath(Player&);
         void Initialize(Player&);
         void Finalize(Player&);
         void Interrupt(Player&);
         void Reset(Player&);
         bool Update(Player&, const uint32&);
         MovementGeneratorType GetMovementGeneratorType() const override { return FLIGHT_MOTION_TYPE; }
-
-        TaxiPathNodeList const& GetPath() { return i_path; }
-        uint32 GetPathAtMapEnd() const;
-        bool HasArrived() const { return (i_currentNode >= i_path.size()); }
-        void SetCurrentNodeAfterTeleport();
-        void SkipCurrentNode() { ++i_currentNode; }
-        bool GetResetPosition(Player&, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const;
-
-        void OnFlightPathEnd(Player& player, uint32 finalNode);
-
-        struct TaxiNodeChangeInfo
-        {
-            uint32 PathIndex;
-            int32 Cost;
-        };
-
-        std::deque<TaxiNodeChangeInfo> _pointsForPathSwitch;    //! node indexes and costs where TaxiPath changes
+        bool Resume(Player& player) const;
 };
 
 #endif

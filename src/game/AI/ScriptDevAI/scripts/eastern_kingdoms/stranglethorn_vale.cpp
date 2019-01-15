@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 mob_yenniku
 EndContentData */
 
@@ -67,7 +67,6 @@ struct mob_yennikuAI : public ScriptedAI
         if (m_uiResetTimer)
         {
             m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
             m_creature->LoadCreatureAddon(true);
 
@@ -101,7 +100,7 @@ struct mob_yennikuAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_yenniku(Creature* _Creature)
+UnitAI* GetAI_mob_yenniku(Creature* _Creature)
 {
     return new mob_yennikuAI(_Creature);
 }
@@ -112,9 +111,7 @@ CreatureAI* GetAI_mob_yenniku(Creature* _Creature)
 
 void AddSC_stranglethorn_vale()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mob_yenniku";
     pNewScript->GetAI = &GetAI_mob_yenniku;
     pNewScript->RegisterSelf();

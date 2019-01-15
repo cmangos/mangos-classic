@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Globals/ObjectMgr.h"
 #include "GameEvents/GameEventMgr.h"
@@ -36,6 +36,7 @@ npc_injured_patient     100%    patients for triage-quests (6622 and 6624)
 npc_doctor              100%    Gustaf Vanhowzen and Gregory Victor, quest 6622 and 6624 (Triage)
 npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
 npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
+npc_aoe_damage_trigger   75%    Used for passive aoe damage triggers in various encounters with overlapping usage of entries: 16697
 EndContentData */
 
 /*########
@@ -117,7 +118,7 @@ struct npc_chicken_cluckAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_chicken_cluck(Creature* pCreature)
+UnitAI* GetAI_npc_chicken_cluck(Creature* pCreature)
 {
     return new npc_chicken_cluckAI(pCreature);
 }
@@ -373,7 +374,7 @@ struct npc_injured_patientAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_injured_patient(Creature* pCreature)
+UnitAI* GetAI_npc_injured_patient(Creature* pCreature)
 {
     return new npc_injured_patientAI(pCreature);
 }
@@ -394,12 +395,12 @@ void npc_doctorAI::BeginEvent(Player* pPlayer)
     switch (m_creature->GetEntry())
     {
         case DOCTOR_ALLIANCE:
-            for (uint8 i = 0; i < ALLIANCE_COORDS; ++i)
-                m_vPatientSummonCoordinates.push_back(&AllianceCoords[i]);
+            for (auto& AllianceCoord : AllianceCoords)
+                m_vPatientSummonCoordinates.push_back(&AllianceCoord);
             break;
         case DOCTOR_HORDE:
-            for (uint8 i = 0; i < HORDE_COORDS; ++i)
-                m_vPatientSummonCoordinates.push_back(&HordeCoords[i]);
+            for (auto& HordeCoord : HordeCoords)
+                m_vPatientSummonCoordinates.push_back(&HordeCoord);
             break;
     }
 
@@ -415,7 +416,7 @@ void npc_doctorAI::PatientDied(Location* pPoint)
     {
         ++m_uiPatientDiedCount;
 
-        if (m_uiPatientDiedCount > 5 && m_bIsEventInProgress)
+        if (m_uiPatientDiedCount > 5)
         {
             if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE)
                 pPlayer->FailQuest(QUEST_TRIAGE_A);
@@ -449,10 +450,14 @@ void npc_doctorAI::PatientSaved(Creature* /*soldier*/, Player* pPlayer, Location
                         Patient->SetDeathState(JUST_DIED);
                 }
 
-                if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE)
-                    pPlayer->GroupEventHappens(QUEST_TRIAGE_A, m_creature);
-                else if (pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
-                    pPlayer->GroupEventHappens(QUEST_TRIAGE_H, m_creature);
+                switch (m_creature->GetEntry())
+                {
+                    case DOCTOR_ALLIANCE: pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TRIAGE_A, m_creature); break;
+                    case DOCTOR_HORDE:    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TRIAGE_H, m_creature); break;
+                    default:
+                        script_error_log("Invalid entry for Triage doctor. Please check your database");
+                        return;
+                }
 
                 Reset();
                 return;
@@ -465,7 +470,7 @@ void npc_doctorAI::PatientSaved(Creature* /*soldier*/, Player* pPlayer, Location
 
 void npc_doctorAI::UpdateAI(const uint32 uiDiff)
 {
-    if (m_bIsEventInProgress && m_uiSummonPatientCount >= 20)
+    if (m_bIsEventInProgress && m_uiSummonPatientCount >= 21)	// worst case scenario : 5 deads + 15 saved
     {
         Reset();
         return;
@@ -487,9 +492,9 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
                     return;
             }
 
-            if (Creature* Patient = m_creature->SummonCreature(patientEntry, (*itr)->x, (*itr)->y, (*itr)->z, (*itr)->o, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000))
+            if (Creature* Patient = m_creature->SummonCreature(patientEntry, (*itr)->x, (*itr)->y, (*itr)->z, (*itr)->o, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 5000))
             {
-                // 2.4.3, this flag appear to be required for client side item->spell to work (TARGET_SINGLE_FRIEND)
+                // 2.4.3, this flag appear to be required for client side item->spell to work (TARGET_UNIT_FRIEND)
                 Patient->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
 
                 m_lPatientGuids.push_back(Patient->GetObjectGuid());
@@ -520,7 +525,7 @@ bool QuestAccept_npc_doctor(Player* pPlayer, Creature* pCreature, const Quest* p
     return true;
 }
 
-CreatureAI* GetAI_npc_doctor(Creature* pCreature)
+UnitAI* GetAI_npc_doctor(Creature* pCreature)
 {
     return new npc_doctorAI(pCreature);
 }
@@ -733,7 +738,7 @@ struct npc_garments_of_questsAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_garments_of_quests(Creature* pCreature)
+UnitAI* GetAI_npc_garments_of_quests(Creature* pCreature)
 {
     return new npc_garments_of_questsAI(pCreature);
 }
@@ -766,7 +771,7 @@ struct npc_guardianAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_guardian(Creature* pCreature)
+UnitAI* GetAI_npc_guardian(Creature* pCreature)
 {
     return new npc_guardianAI(pCreature);
 }
@@ -916,7 +921,7 @@ struct npc_redemption_targetAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_redemption_target(Creature* pCreature)
+UnitAI* GetAI_npc_redemption_target(Creature* pCreature)
 {
     return new npc_redemption_targetAI(pCreature);
 }
@@ -934,6 +939,53 @@ bool EffectDummyCreature_npc_redemption_target(Unit* pCaster, uint32 uiSpellId, 
     }
 
     return false;
+}
+
+/*######
+## npc_aoe_damage_trigger
+######*/
+
+enum npc_aoe_damage_trigger
+{
+    // trigger npcs
+    NPC_VOID_ZONE = 16697,
+
+    // m_uiAuraPassive
+    SPELL_CONSUMPTION_NPC_16697 = 28874,
+    SPELL_CONSUMPTION_NPC_17471 = 30497,
+    SPELL_CONSUMPTION_NPC_20570 = 35952,
+};
+
+struct npc_aoe_damage_triggerAI : public Scripted_NoMovementAI
+{
+    npc_aoe_damage_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature), m_uiAuraPassive(SetAuraPassive()) { }
+
+    uint32 m_uiAuraPassive;
+
+    inline uint32 SetAuraPassive()
+    {
+        switch (m_creature->GetCreatureInfo()->Entry)
+        {
+            case NPC_VOID_ZONE:
+                return SPELL_CONSUMPTION_NPC_16697;
+            default:
+                return SPELL_CONSUMPTION_NPC_16697;
+        }
+    }
+
+    void Reset() override
+    {
+        DoCastSpellIfCan(m_creature, m_uiAuraPassive, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void UpdateAI(const uint32 uiDiff) override {}
+};
+
+UnitAI* GetAI_npc_aoe_damage_trigger(Creature* pCreature)
+{
+    return new npc_aoe_damage_triggerAI(pCreature);
 }
 
 /*######
@@ -986,7 +1038,7 @@ struct npc_the_cleanerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_the_cleaner(Creature* pCreature)
+UnitAI* GetAI_npc_the_cleaner(Creature* pCreature)
 {
     return new npc_the_cleanerAI(pCreature);
 }
@@ -1038,5 +1090,10 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_the_cleaner";
     pNewScript->GetAI = &GetAI_npc_the_cleaner;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_aoe_damage_trigger";
+    pNewScript->GetAI = &GetAI_npc_aoe_damage_trigger;
     pNewScript->RegisterSelf();
 }

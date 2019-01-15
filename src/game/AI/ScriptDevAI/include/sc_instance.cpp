@@ -2,7 +2,7 @@
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 /**
    Function that uses a door or a button
@@ -20,9 +20,9 @@ void ScriptedInstance::DoUseDoorOrButton(ObjectGuid guid, uint32 withRestoreTime
     {
         if (pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR || pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
         {
-            if (pGo->getLootState() == GO_READY)
+            if (pGo->GetLootState() == GO_READY)
                 pGo->UseDoorOrButton(withRestoreTime, useAlternativeState);
-            else if (pGo->getLootState() == GO_ACTIVATED)
+            else if (pGo->GetLootState() == GO_ACTIVATED)
                 pGo->ResetDoorOrButton();
         }
         else
@@ -59,7 +59,7 @@ void ScriptedInstance::DoRespawnGameObject(ObjectGuid guid, uint32 timeToDespawn
                 pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON || pGo->GetGoType() == GAMEOBJECT_TYPE_TRAP)
             return;
 
-        if (pGo->isSpawned())
+        if (pGo->IsSpawned())
             return;
 
         pGo->SetRespawnTime(timeToDespawn);
@@ -122,9 +122,9 @@ void ScriptedInstance::DoUpdateWorldState(uint32 stateId, uint32 stateData)
 
     if (!lPlayers.isEmpty())
     {
-        for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+        for (const auto& lPlayer : lPlayers)
         {
-            if (Player* pPlayer = itr->getSource())
+            if (Player* pPlayer = lPlayer.getSource())
                 pPlayer->SendUpdateWorldState(stateId, stateData);
         }
     }
@@ -133,13 +133,13 @@ void ScriptedInstance::DoUpdateWorldState(uint32 stateId, uint32 stateData)
 }
 
 /// Get the first found Player* (with requested properties) in the map. Can return nullptr.
-Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBeGamemaster /*=true*/)
+Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBeGamemaster /*=true*/) const
 {
     Map::PlayerList const& lPlayers = instance->GetPlayers();
 
-    for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+    for (const auto& lPlayer : lPlayers)
     {
-        Player* pPlayer = itr->getSource();
+        Player* pPlayer = lPlayer.getSource();
         if (pPlayer && (!bOnlyAlive || pPlayer->isAlive()) && (bCanBeGamemaster || !pPlayer->isGameMaster()))
             return pPlayer;
     }

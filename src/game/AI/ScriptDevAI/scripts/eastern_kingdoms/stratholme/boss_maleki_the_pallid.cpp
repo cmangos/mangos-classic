@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {
@@ -107,16 +107,14 @@ struct boss_maleki_the_pallidAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_maleki_the_pallid(Creature* pCreature)
+UnitAI* GetAI_boss_maleki_the_pallid(Creature* pCreature)
 {
     return new boss_maleki_the_pallidAI(pCreature);
 }
 
 void AddSC_boss_maleki_the_pallid()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_maleki_the_pallid";
     pNewScript->GetAI = &GetAI_boss_maleki_the_pallid;
     pNewScript->RegisterSelf();

@@ -106,17 +106,6 @@ void WorldSession::SendTaxiMenu(Creature* unit) const
     DEBUG_LOG("WORLD: Sent SMSG_SHOWTAXINODES");
 }
 
-void WorldSession::SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode) const
-{
-    while (GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
-        GetPlayer()->GetMotionMaster()->MovementExpired(false);
-
-    if (mountDisplayId)
-        GetPlayer()->Mount(mountDisplayId);
-
-    GetPlayer()->GetMotionMaster()->MoveTaxiFlight(path, pathNode);
-}
-
 bool WorldSession::SendLearnNewTaxiNode(Creature* unit) const
 {
     // find current node
@@ -137,8 +126,7 @@ bool WorldSession::SendLearnNewTaxiNode(Creature* unit) const
 
         return true;
     }
-    else
-        return false;
+    return false;
 }
 
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply) const

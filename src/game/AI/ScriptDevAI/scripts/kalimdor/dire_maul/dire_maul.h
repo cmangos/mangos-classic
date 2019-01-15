@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 17,
+    MAX_ENCOUNTER               = 19,
     MAX_GENERATORS              = 5,
 
     // East
@@ -31,9 +31,11 @@ enum
     TYPE_FENGUS                 = 13,
     TYPE_SLIPKIK                = 14,
     TYPE_KROMCRUSH              = 15,
+    TYPE_CHORUSH                = 16,
+    TYPE_STOMPER_KREEG          = 17,
 
     // Other
-    TYPE_DREADSTEED             = 16,
+    TYPE_DREADSTEED             = 18,
 
     // East
     GO_CRUMBLE_WALL             = 177220,
@@ -86,9 +88,14 @@ enum
     SAY_KILL_IMMOLTHAR          = -1429001,
     SAY_IRONBARK_REDEEM         = -1429002,
     SAY_CHORUSH_KING_DEAD       = -1429003,
+    SAY_SLIPKIK_TRAP            = -1429004,
 
     FACTION_HOSTILE             = 14,
     FACTION_FRIENDLY            = 35,
+    FACTION_OGRE                = 45,
+
+    SPELL_ICE_LOCK              = 22856,
+    SPELL_GUARD_SLIPKIK_TRIGGER = 31770,
 };
 
 static const float afMizzleSpawnLoc[4] = {683.296f, 484.384f, 29.544f, 0.0174f};

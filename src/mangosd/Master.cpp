@@ -490,9 +490,9 @@ void Master::_HookSignals()
 /// Unhook the signals before leaving
 void Master::_UnhookSignals()
 {
-    signal(SIGINT, 0);
-    signal(SIGTERM, 0);
+    signal(SIGINT, nullptr);
+    signal(SIGTERM, nullptr);
 #ifdef _WIN32
-    signal(SIGBREAK, 0);
+    signal(SIGBREAK, nullptr);
 #endif
 }

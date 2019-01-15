@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackwing_lair.h"
 
 instance_blackwing_lair::instance_blackwing_lair(Map* pMap) : ScriptedInstance(pMap),
@@ -47,9 +47,9 @@ void instance_blackwing_lair::Initialize()
 
 bool instance_blackwing_lair::IsEncounterInProgress() const
 {
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (uint32 i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
+        if (i == IN_PROGRESS)
             return true;
     }
     return false;
@@ -298,10 +298,10 @@ void instance_blackwing_lair::Load(const char* chrIn)
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10]>> m_auiEncounter[11]
                >> m_auiEncounter[12];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (uint32& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -540,7 +540,7 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
             {
                 if (GameObject* pEgg = instance->GetGameObject(*itr))
                 {
-                    if (!pEgg->isSpawned())
+                    if (!pEgg->IsSpawned())
                         pEgg->Respawn();
                 }
             }
@@ -632,8 +632,6 @@ void instance_blackwing_lair::InitiateBreath(uint32 uiEventId)
             SetData(TYPE_CHROMA_RBREATH, rightBreath);
         debug_log("SD2 Instance Blackwing Lair: Chromaggus' right breath set to spell %u", GetData(TYPE_CHROMA_RBREATH));
     }
-
-    return;
 }
 
 void instance_blackwing_lair::InitiateDrakonid(uint32 uiEventId)
@@ -669,8 +667,6 @@ void instance_blackwing_lair::InitiateDrakonid(uint32 uiEventId)
             SetData(TYPE_NEFA_RTUNNEL, rightTunnel);
         debug_log("SD2 Instance Blackwing Lair: Nefarian's lair left tunnel set with drakonid spawner %u", GetData(TYPE_NEFA_RTUNNEL));
     }
-
-    return;
 }
 
 void instance_blackwing_lair::CleanupNefarianStage(bool fullCleanup)
@@ -735,7 +731,7 @@ struct go_ai_suppression : public GameObjectAI
 
         // As long as Broodlord Lashlayer is alive, the GO will rearm on a random timer from 30 sec to 2 min
         // It will not rearm for the instance lifetime after Broodlord Lashlayer death
-        if (m_go->getLootState() == GO_ACTIVATED)
+        if (m_go->GetLootState() == GO_ACTIVATED)
         {
             if (pInstance->GetData(TYPE_LASHLAYER) != DONE)
                 m_go->SetRespawnTime(urand(30, 2 * MINUTE));
@@ -754,7 +750,7 @@ struct go_ai_suppression : public GameObjectAI
             {
                 // TODO replace by go->Use(go) or go->Use(nullptr) once GO casting is added in core
                 // The loot state check may be removed in that case because it should probably be handled in the Gameobject::Use() code
-                if (m_go->getLootState() == GO_READY)
+                if (m_go->GetLootState() == GO_READY)
                     m_go->SendGameObjectCustomAnim(m_go->GetObjectGuid());
                 m_uiFumeTimer = 5 * IN_MILLISECONDS;
             }
@@ -818,9 +814,7 @@ bool ProcessEventId_event_weekly_chromatic_selection(uint32 uiEventId, Object* p
 
 void AddSC_instance_blackwing_lair()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_blackwing_lair";
     pNewScript->GetInstanceData = &GetInstanceData_instance_blackwing_lair;
     pNewScript->RegisterSelf();

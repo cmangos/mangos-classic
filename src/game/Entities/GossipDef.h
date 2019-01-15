@@ -175,7 +175,7 @@ class GossipMenu
 
         // used to avoid opening gossip menu at node discover
         void SetDiscoveredNode() { m_discoveredNode = true; }
-        bool IsJustDiscoveredNode() { return m_discoveredNode; }
+        bool IsJustDiscoveredNode() const { return m_discoveredNode; }
 
         void AddGossipMenuItemData(int32 action_menu, uint32 action_poi, uint32 action_script);
 
@@ -262,7 +262,7 @@ class PlayerMenu
         QuestMenu  mQuestMenu;
 
     public:
-        explicit PlayerMenu(WorldSession* Session);
+        explicit PlayerMenu(WorldSession* session);
         ~PlayerMenu();
 
         GossipMenu& GetGossipMenu() { return mGossipMenu; }
@@ -277,7 +277,7 @@ class PlayerMenu
         uint32 GossipOptionAction(unsigned int Selection);
         bool GossipOptionCoded(unsigned int Selection);
 
-        void SendGossipMenu(uint32 titleTextId, ObjectGuid objectGuid);
+        void SendGossipMenu(uint32 TitleTextId, ObjectGuid objectGuid);
         void CloseGossip() const;
         void SendPointOfInterest(float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const char* locName) const;
         void SendPointOfInterest(uint32 poi_id) const;
@@ -292,9 +292,9 @@ class PlayerMenu
         void SendQuestGiverQuestList(QEmote eEmote, const std::string& Title, ObjectGuid npcGUID);
 
         void SendQuestQueryResponse(Quest const* pQuest) const;
-        void SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid npcGUID, bool ActivateAccept) const;
+        void SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid, bool ActivateAccept) const;
 
-        void SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGUID, bool EnbleNext) const;
+        void SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGUID, bool EnableNext) const;
         void SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcGUID, bool Completable, bool CloseOnCancel) const;
 };
 #endif

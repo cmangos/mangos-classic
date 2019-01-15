@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 guard_bluffwatcher
 guard_contested
 guard_darnassus
@@ -42,67 +42,67 @@ EndContentData */
 
 #include "AI/ScriptDevAI/base/guard_ai.h"
 
-CreatureAI* GetAI_guard_bluffwatcher(Creature* pCreature)
+UnitAI* GetAI_guard_bluffwatcher(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_contested(Creature* pCreature)
+UnitAI* GetAI_guard_contested(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_darnassus(Creature* pCreature)
+UnitAI* GetAI_guard_darnassus(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_dunmorogh(Creature* pCreature)
+UnitAI* GetAI_guard_dunmorogh(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_durotar(Creature* pCreature)
+UnitAI* GetAI_guard_durotar(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_elwynnforest(Creature* pCreature)
+UnitAI* GetAI_guard_elwynnforest(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_ironforge(Creature* pCreature)
+UnitAI* GetAI_guard_ironforge(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_mulgore(Creature* pCreature)
+UnitAI* GetAI_guard_mulgore(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_orgrimmar(Creature* pCreature)
+UnitAI* GetAI_guard_orgrimmar(Creature* pCreature)
 {
     return new guardAI_orgrimmar(pCreature);
 }
 
-CreatureAI* GetAI_guard_stormwind(Creature* pCreature)
+UnitAI* GetAI_guard_stormwind(Creature* pCreature)
 {
     return new guardAI_stormwind(pCreature);
 }
 
-CreatureAI* GetAI_guard_teldrassil(Creature* pCreature)
+UnitAI* GetAI_guard_teldrassil(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_tirisfal(Creature* pCreature)
+UnitAI* GetAI_guard_tirisfal(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_undercity(Creature* pCreature)
+UnitAI* GetAI_guard_undercity(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }

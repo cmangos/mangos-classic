@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 #define GENERIC_CREATURE_COOLDOWN   5000
 
@@ -164,16 +164,14 @@ struct generic_creatureAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_generic_creature(Creature* pCreature)
+UnitAI* GetAI_generic_creature(Creature* pCreature)
 {
     return new generic_creatureAI(pCreature);
 }
 
 void AddSC_generic_creature()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "generic_creature";
     pNewScript->GetAI = &GetAI_generic_creature;
     pNewScript->RegisterSelf(false);

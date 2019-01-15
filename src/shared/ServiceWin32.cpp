@@ -47,8 +47,6 @@ typedef WINADVAPI BOOL (WINAPI* CSD_T)(SC_HANDLE, DWORD, LPCVOID);
 
 bool WinServiceInstall()
 {
-    CSD_T ChangeService_Config2;
-    HMODULE advapi32;
     SC_HANDLE serviceControlManager = OpenSCManager(nullptr, nullptr, SC_MANAGER_CREATE_SERVICE);
 
     if (!serviceControlManager)
@@ -89,7 +87,7 @@ bool WinServiceInstall()
         return false;
     }
 
-    advapi32 = GetModuleHandle("ADVAPI32.DLL");
+    HMODULE advapi32 = GetModuleHandle("ADVAPI32.DLL");
     if (!advapi32)
     {
         sLog.outError("SERVICE: Can't access ADVAPI32.DLL");
@@ -98,7 +96,7 @@ bool WinServiceInstall()
         return false;
     }
 
-    ChangeService_Config2 = (CSD_T) GetProcAddress(advapi32, "ChangeServiceConfig2A");
+    CSD_T ChangeService_Config2 = (CSD_T)GetProcAddress(advapi32, "ChangeServiceConfig2A");
     if (!ChangeService_Config2)
     {
         sLog.outError("SERVICE: Can't access ChangeServiceConfig2A from ADVAPI32.DLL");
@@ -192,12 +190,13 @@ void WINAPI ServiceControlHandler(DWORD controlCode)
             break;
 
         default:
+        {
             if (controlCode >= 128 && controlCode <= 255)
                 // user defined control code
                 break;
-            else
                 // unrecognized control code
-                break;
+            break;
+        }
     }
 
     SetServiceStatus(serviceStatusHandle, &serviceStatus);
@@ -219,11 +218,11 @@ void WINAPI ServiceMain(DWORD argc, char* argv[])
     if (serviceStatusHandle)
     {
         char path[_MAX_PATH + 1];
-        unsigned int i, last_slash = 0;
+        unsigned int last_slash = 0;
 
         GetModuleFileName(nullptr, path, sizeof(path) / sizeof(path[0]));
 
-        for (i = 0; i < std::strlen(path); ++i)
+        for (unsigned int i = 0; i < std::strlen(path); ++i)
         {
             if (path[i] == '\\') last_slash = i;
         }

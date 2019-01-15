@@ -307,8 +307,7 @@ class BattleGround
         {
             if (team == ALLIANCE)
                 return m_InvitedAlliance;
-            else
-                return m_InvitedHorde;
+            return m_InvitedHorde;
         }
         bool HasFreeSlots() const;
         uint32 GetFreeSlotsForTeam(Team team) const;
@@ -352,17 +351,17 @@ class BattleGround
         /* Packet Transfer */
         // method that should fill worldpacket with actual world states (not yet implemented for all battlegrounds!)
         virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/) {}
-        void SendPacketToTeam(Team team, WorldPacket const& packet, Player* sender = nullptr, bool self = true) const;
+        void SendPacketToTeam(Team teamId, WorldPacket const& packet, Player* sender = nullptr, bool self = true) const;
         void SendPacketToAll(WorldPacket const& packet) const;
 
         template<class Do>
         void BroadcastWorker(Do& _do);
 
-        void PlaySoundToTeam(uint32 SoundID, Team team);
-        void PlaySoundToAll(uint32 SoundID);
-        void CastSpellOnTeam(uint32 SpellID, Team team);
-        void RewardHonorToTeam(uint32 Honor, Team team);
-        void RewardReputationToTeam(uint32 faction_id, uint32 Reputation, Team team);
+        void PlaySoundToTeam(uint32 SoundID, Team teamId) const;
+        void PlaySoundToAll(uint32 SoundID) const;
+        void CastSpellOnTeam(uint32 SpellID, Team teamId);
+        void RewardHonorToTeam(uint32 Honor, Team teamId);
+        void RewardReputationToTeam(uint32 faction_id, uint32 Reputation, Team teamId);
         void RewardMark(Player* plr, uint32 count);
         void SendRewardMarkByMail(Player* plr, uint32 mark, uint32 count) const;
         void RewardItem(Player* plr, uint32 item_id, uint32 count);
@@ -378,7 +377,7 @@ class BattleGround
         void PSendMessageToAll(int32 entry, ChatMsg type, Player const* source, ...);
 
         // specialized version with 2 string id args
-        void SendMessage2ToAll(int32 entry, ChatMsg type, Player const* source, int32 strId1 = 0, int32 strId2 = 0);
+        void SendMessage2ToAll(int32 entry, ChatMsg type, Player const* source, int32 arg1 = 0, int32 arg2 = 0);
         void SendYell2ToAll(int32 entry, uint32 language, ObjectGuid guid, int32 arg1, int32 arg2);
 
         /* Raid Group */

@@ -36,9 +36,9 @@ struct ObjectDistanceOrderReversed : public std::binary_function<const WorldObje
 GameObject* GetClosestGameObjectWithEntry(WorldObject* source, uint32 entry, float maxSearchRange);
 Creature* GetClosestCreatureWithEntry(WorldObject* source, uint32 entry, float maxSearchRange, bool onlyAlive = true, bool onlyDead = false, bool excludeSelf = false);
 
-void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& goList, WorldObject* source, uint32 entry, float maxSearchRange);
-void GetCreatureListWithEntryInGrid(std::list<Creature*>& creatureList, WorldObject* source, uint32 entry, float maxSearchRange);
-void GetPlayerListWithEntryInWorld(std::list<Player*>& playerList, WorldObject* source, float maxSearchRange);
+void GetGameObjectListWithEntryInGrid(GameObjectList& goList, WorldObject* source, uint32 entry, float maxSearchRange);
+void GetCreatureListWithEntryInGrid(CreatureList& creatureList, WorldObject* source, uint32 entry, float maxSearchRange);
+void GetPlayerListWithEntryInWorld(PlayerList& playerList, WorldObject* source, float maxSearchRange);
 
 // Used in: hyjalAI.cpp
 /*

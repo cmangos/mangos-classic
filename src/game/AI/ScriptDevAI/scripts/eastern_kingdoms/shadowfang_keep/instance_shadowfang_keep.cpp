@@ -16,14 +16,14 @@
 
 /* ScriptData
 SDName: Instance_Shadowfang_Keep
-SD%Complete: 90
+SD%Complete: 100
 SDComment:
 SDCategory: Shadowfang Keep
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "shadowfang_keep.h"
 
 instance_shadowfang_keep::instance_shadowfang_keep(Map* pMap) : ScriptedInstance(pMap)
@@ -43,17 +43,55 @@ void instance_shadowfang_keep::OnCreatureCreate(Creature* pCreature)
         case NPC_ASH:
         case NPC_ADA:
         case NPC_FENRUS:
+        case NPC_MASTER_NANDOS:
             break;
         case NPC_VINCENT:
             // If Arugal has done the intro, make Vincent dead!
             if (m_auiEncounter[4] == DONE)
                 pCreature->SetStandState(UNIT_STAND_STATE_DEAD);
             break;
-
+        case NPC_LUPINE_HORROR:
+        case NPC_WOLFGUARD_WORG:
+        case NPC_BLEAK_WORG:
+        case NPC_SLAVERING_WORG:
+            // Only store the wolves/worgs that are static spawn on the top level of the instance
+            if (pCreature->GetPositionZ() > nandosMovement.fZ && !pCreature->IsTemporarySummon())
+                m_lNandosWolvesGuids.push_back(pCreature->GetObjectGuid());
+            break;
         default:
             return;
     }
     m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+}
+
+void instance_shadowfang_keep::OnCreatureDeath(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_LUPINE_HORROR:
+        case NPC_WOLFGUARD_WORG:
+        case NPC_BLEAK_WORG:
+        case NPC_SLAVERING_WORG:
+            if (m_lNandosWolvesGuids.empty())
+                return;
+
+            m_lNandosWolvesGuids.remove(pCreature->GetObjectGuid());
+            // If all wolves are dead, make Wolf Master Nandos engage in combat
+            if (m_lNandosWolvesGuids.empty())
+            {
+                if (Creature* nandos = GetSingleCreatureFromStorage(NPC_MASTER_NANDOS))
+                {
+                    if (nandos->isInCombat())   // Wolf Master Nandos already joined the fight: no need to go further
+                        return;
+                    DoScriptText(YELL_PACK_DEAD, nandos);
+                    nandos->SetWalk(false);
+                    nandos->GetMotionMaster()->MovePoint(0, nandosMovement.fX, nandosMovement.fY, nandosMovement.fZ);
+                }
+            }
+            break;
+        default:
+            return;
+    }
 }
 
 void instance_shadowfang_keep::OnObjectCreate(GameObject* pGo)
@@ -179,10 +217,10 @@ void instance_shadowfang_keep::Load(const char* chrIn)
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                >> m_auiEncounter[4] >> m_auiEncounter[5];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (uint32& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -195,9 +233,7 @@ InstanceData* GetInstanceData_instance_shadowfang_keep(Map* pMap)
 
 void AddSC_instance_shadowfang_keep()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_shadowfang_keep";
     pNewScript->GetInstanceData = &GetInstanceData_instance_shadowfang_keep;
     pNewScript->RegisterSelf();

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulgurub.h"
 
 enum
@@ -393,21 +393,19 @@ struct npc_gurubashi_bat_riderAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_jeklik(Creature* pCreature)
+UnitAI* GetAI_boss_jeklik(Creature* pCreature)
 {
     return new boss_jeklikAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_gurubashi_bat_rider(Creature* pCreature)
+UnitAI* GetAI_npc_gurubashi_bat_rider(Creature* pCreature)
 {
     return new npc_gurubashi_bat_riderAI(pCreature);
 }
 
 void AddSC_boss_jeklik()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_jeklik";
     pNewScript->GetAI = &GetAI_boss_jeklik;
     pNewScript->RegisterSelf();

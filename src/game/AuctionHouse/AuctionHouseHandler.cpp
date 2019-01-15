@@ -264,6 +264,13 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
     if (!itemGuid)
         return;
 
+    // client allows to send too high money amount
+    if (bid > MAX_MONEY_AMOUNT || buyout > MAX_MONEY_AMOUNT)
+    {
+        SendAuctionCommandResult(nullptr, AUCTION_STARTED, AUCTION_ERR_DATABASE);
+        return;
+    }
+
     Item* it = pl->GetItemByGuid(itemGuid);
 
     // do not allow to sell already auctioned items

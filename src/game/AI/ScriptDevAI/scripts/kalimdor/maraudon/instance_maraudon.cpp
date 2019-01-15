@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "maraudon.h"
 
 instance_maraudon::instance_maraudon(Map* map) : ScriptedInstance(map),
@@ -74,7 +74,7 @@ void instance_maraudon::SetData(uint32 type, uint32 data)
                 // Destroy the larva spewer if not already done
                 if (GameObject* go = GetSingleGameObjectFromStorage(GO_LARVA_SPEWER))
                 {
-                    if (go->getLootState() != GO_ACTIVATED)
+                    if (go->GetLootState() != GO_ACTIVATED)
                         go->SetLootState(GO_ACTIVATED);
                 }
         }
@@ -115,10 +115,10 @@ void instance_maraudon::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_encounter[0];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_encounter)
     {
-        if (m_encounter[i] == IN_PROGRESS)
-            m_encounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -175,7 +175,7 @@ struct go_ai_larva_spewer : public GameObjectAI
 
     void OnLootStateChange()
     {
-        if (m_go->getLootState() == GO_ACTIVATED)
+        if (m_go->GetLootState() == GO_ACTIVATED)
         {
             ScriptedInstance* pInstance = (ScriptedInstance*)m_go->GetMap()->GetInstanceData();
             if (pInstance)
@@ -191,9 +191,7 @@ GameObjectAI* GetAI_go_larva_spewer(GameObject* go)
 
 void AddSC_instance_maraudon()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_maraudon";
     pNewScript->GetInstanceData = &GetInstanceData_instance_maraudon;
     pNewScript->RegisterSelf();

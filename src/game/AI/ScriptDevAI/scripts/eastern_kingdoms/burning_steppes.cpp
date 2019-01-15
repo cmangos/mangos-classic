@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_ragged_john
 npc_grark_lorkrub
 EndContentData */
@@ -56,7 +56,7 @@ struct npc_ragged_johnAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_ragged_john(Creature* pCreature)
+UnitAI* GetAI_npc_ragged_john(Creature* pCreature)
 {
     return new npc_ragged_johnAI(pCreature);
 }
@@ -252,7 +252,7 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
             case SAY_LEXLORT_4:
                 // Finish the quest
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_PRECARIOUS_PREDICAMENT, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_PRECARIOUS_PREDICAMENT, m_creature);
                 // Kill self
                 m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
                 break;
@@ -330,7 +330,7 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_grark_lorkrub(Creature* pCreature)
+UnitAI* GetAI_npc_grark_lorkrub(Creature* pCreature)
 {
     return new npc_grark_lorkrubAI(pCreature);
 }
@@ -491,9 +491,9 @@ struct npc_klinfranAI : public ScriptedAI
             {
                 ThreatList const& tList = m_creature->getThreatManager().getThreatList();
 
-                for (ThreatList::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
+                for (auto itr : tList)
                 {
-                    if (Unit* pUnit = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                    if (Unit* pUnit = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                     {
                         if (pUnit->isAlive())
                         {
@@ -592,16 +592,14 @@ bool GossipSelect_npc_klinfran(Player* pPlayer, Creature* pCreature, uint32 uiSe
     return true;
 }
 
-CreatureAI* GetAI_npc_klinfran(Creature* pCreature)
+UnitAI* GetAI_npc_klinfran(Creature* pCreature)
 {
     return new npc_klinfranAI(pCreature);
 }
 
 void AddSC_burning_steppes()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_ragged_john";
     pNewScript->GetAI = &GetAI_npc_ragged_john;
     pNewScript->RegisterSelf();

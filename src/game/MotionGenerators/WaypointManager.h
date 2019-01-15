@@ -118,7 +118,7 @@ class WaypointManager
         void SetExternalWPTable(char const* tableName) { m_externalTable = std::string(tableName); }
         std::string GetExternalWPTable() const { return m_externalTable; }
         /// Add Nodes from external sources
-        bool AddExternalNode(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
+        bool AddExternalNode(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime, uint32 scriptId);
 
         // Toolbox for .wp add command
         /// Add a node as position pointId. If pointId == 0 then as last point

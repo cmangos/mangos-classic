@@ -358,12 +358,12 @@ void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
 
         if (pQuest->IsAllowedInRaid())
         {
-            if (!_player->IsInSameRaidWith(pOriginalPlayer))
+            if (!_player->IsInGroup(pOriginalPlayer))
                 return;
         }
         else
         {
-            if (!_player->IsInSameGroupWith(pOriginalPlayer))
+            if (!_player->IsInParty(pOriginalPlayer))
                 return;
         }
 

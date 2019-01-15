@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 
 enum
@@ -101,10 +101,10 @@ struct boss_sulfuronAI : public ScriptedAI
         if (m_uiInspireTimer < uiDiff)
         {
             Creature* pTarget = nullptr;
-            std::list<Creature*> pList = DoFindFriendlyMissingBuff(45.0f, SPELL_INSPIRE);
+            CreatureList pList = DoFindFriendlyMissingBuff(45.0f, SPELL_INSPIRE);
             if (!pList.empty())
             {
-                std::list<Creature*>::iterator i = pList.begin();
+                CreatureList::iterator i = pList.begin();
                 advance(i, (rand() % pList.size()));
                 pTarget = (*i);
             }
@@ -218,21 +218,19 @@ struct mob_flamewaker_priestAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_sulfuron(Creature* pCreature)
+UnitAI* GetAI_boss_sulfuron(Creature* pCreature)
 {
     return new boss_sulfuronAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_flamewaker_priest(Creature* pCreature)
+UnitAI* GetAI_mob_flamewaker_priest(Creature* pCreature)
 {
     return new mob_flamewaker_priestAI(pCreature);
 }
 
 void AddSC_boss_sulfuron()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_sulfuron";
     pNewScript->GetAI = &GetAI_boss_sulfuron;
     pNewScript->RegisterSelf();

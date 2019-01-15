@@ -266,12 +266,11 @@ void AuctionHouseMgr::LoadAuctionItems()
 
     uint32 count = 0;
 
-    Field* fields;
     do
     {
         bar.step();
 
-        fields = result->Fetch();
+        Field* fields = result->Fetch();
         uint32 item_guid        = fields[1].GetUInt32();
         uint32 item_template    = fields[2].GetUInt32();
 
@@ -441,8 +440,8 @@ bool AuctionHouseMgr::RemoveAItem(uint32 id)
 
 void AuctionHouseMgr::Update()
 {
-    for (int i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
-        mAuctions[i].Update();
+    for (auto& mAuction : mAuctions)
+        mAuction.Update();
 }
 
 uint32 AuctionHouseMgr::GetAuctionHouseTeam(AuctionHouseEntry const* house)
@@ -585,9 +584,9 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
 {
     int loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
 
-    for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
+    for (auto& AentryItr : AuctionsMap)
     {
-        AuctionEntry* Aentry = itr->second;
+        auto Aentry = AentryItr.second;
         Item* item = sAuctionMgr.GetAItem(Aentry->itemGuidLow);
         if (!item)
             continue;
@@ -800,9 +799,7 @@ bool AuctionEntry::UpdateBid(uint32 newbid, Player* newbidder /*=nullptr*/)
         CharacterDatabase.CommitTransaction();
         return true;
     }
-    else                                                    // buyout
-    {
-        AuctionBidWinning(newbidder);
-        return false;
-    }
+    // buyout
+    AuctionBidWinning(newbidder);
+    return false;
 }

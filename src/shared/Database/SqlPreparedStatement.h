@@ -75,7 +75,7 @@ class SqlStmtFieldData
         void set(T1 param1);
 
         // getters
-        bool toBool() const { MANGOS_ASSERT(m_type == FIELD_BOOL); return !!m_binaryData.ui8; }
+        bool toBool() const { MANGOS_ASSERT(m_type == FIELD_BOOL); return m_binaryData.ui8 != 0; }
         uint8 toUint8() const { MANGOS_ASSERT(m_type == FIELD_UI8); return m_binaryData.ui8; }
         int8 toInt8() const { MANGOS_ASSERT(m_type == FIELD_I8); return m_binaryData.i8; }
         uint16 toUint16() const { MANGOS_ASSERT(m_type == FIELD_UI16); return m_binaryData.ui16; }

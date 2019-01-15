@@ -1,8 +1,8 @@
 /**
  @file Random.h
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @created 2009-01-02
  @edited  2009-03-20
 
@@ -14,7 +14,7 @@
 
 #include "G3D/platform.h"
 #include "G3D/g3dmath.h"
-#include "G3D/GMutex.h"
+#include "mutex"
 
 namespace G3D {
 
@@ -30,7 +30,7 @@ namespace G3D {
     On average, uniform() runs about 2x-3x faster than rand().
 
     @cite http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html
-    
+
     On OS X, Random is about 10x faster than drand48() (which is
     threadsafe) and 4x faster than rand() (which is not threadsafe).
  */
@@ -50,10 +50,10 @@ protected:
         B = 0x9D2C5680,
         C = 0xEFC60000};
 
-    /** 
-        Prevents multiple overlapping calls to generate(). 
+    /**
+        Prevents multiple overlapping calls to generate().
      */
-    Spinlock     lock;
+    std::mutex     lock;
 
     /** State vector (these are the next N values that will be returned) */
     uint32*      state;
@@ -81,7 +81,7 @@ public:
 
     virtual ~Random();
 
-    /** Each bit is random.  Subclasses can choose to override just 
+    /** Each bit is random.  Subclasses can choose to override just
        this method and the other methods will all work automatically. */
     virtual uint32 bits();
 
@@ -108,7 +108,7 @@ public:
     /** Normally distributed reals. */
     virtual float gaussian(float mean, float stdev);
 
-    /** Returns 3D unit vectors distributed according to 
+    /** Returns 3D unit vectors distributed according to
         a cosine distribution about the z-axis. */
     virtual void cosHemi(float& x, float& y, float& z);
 
@@ -117,7 +117,7 @@ public:
         the z-axis. */
     virtual void cosPowHemi(const float k, float& x, float& y, float& z);
 
-    /** Returns 3D unit vectors uniformly distributed on the 
+    /** Returns 3D unit vectors uniformly distributed on the
         hemisphere about the z-axis. */
     virtual void hemi(float& x, float& y, float& z);
 
@@ -128,7 +128,7 @@ public:
        A shared instance for when the performance and features but not
        consistency of the class are desired.  It is slightly (10%)
        faster to use a distinct instance than to use the common one.
-       
+
        Threadsafe.
     */
     static Random& common();

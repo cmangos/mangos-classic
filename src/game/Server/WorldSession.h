@@ -81,6 +81,14 @@ enum TutorialDataState
     TUTORIALDATA_NEW       = 2
 };
 
+enum WorldSessionState
+{
+    WORLD_SESSION_STATE_CREATED        = 0,
+    WORLD_SESSION_STATE_CHAR_SELECTION = 1,
+    WORLD_SESSION_STATE_READY          = 2,
+    WORLD_SESSION_STATE_OFFLINE        = 3
+};
+
 // class to deal with packet processing
 // allows to determine if next packet is safe to be processed
 class PacketFilter
@@ -127,13 +135,22 @@ class WorldSession
         WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_t mute_time, LocaleConstant locale);
         ~WorldSession();
 
+        // Set this session have no attached socket but keep it alive for short period of time to permit a possible reconnection
+        void SetOffline();
+        void SetOnline();
+
+        // Request set offline, close socket and put session offline
+        bool RequestNewSocket(WorldSocket* socket);
+        bool IsOffline() const { return m_sessionState == WORLD_SESSION_STATE_OFFLINE; }
+        WorldSessionState GetState() const { return m_sessionState; }
+
         bool PlayerLoading() const { return m_playerLoading; }
         bool PlayerLogout() const { return m_playerLogout; }
         bool PlayerLogoutWithSave() const { return m_playerLogout && m_playerSave; }
 
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
-        void SendPacket(WorldPacket const& packet) const;
+        void SendPacket(WorldPacket const& packet, bool forcedSend = false) const;
         void SendExpectedSpamRecords();
         void SendMotd(Player* currChar);
         void SendNotification(const char* format, ...) const ATTR_PRINTF(2, 3);
@@ -151,9 +168,9 @@ class WorldSession
         void SetSecurity(AccountTypes security) { _security = security; }
 #ifdef BUILD_PLAYERBOT
         // Players connected without socket are bot
-        const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "bot"; }
+        const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "disconnected/bot"; }
 #else
-        const std::string GetRemoteAddress() const { return m_Socket->GetRemoteAddress(); }
+        const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "disconnected"; }
 #endif
         void SetPlayer(Player* plr) { _player = plr; }
 
@@ -175,6 +192,11 @@ class WorldSession
             return (_logoutTime > 0 && currTime >= _logoutTime + 20);
         }
 
+        bool ShouldDisconnect(time_t currTime)
+        {
+            return (_logoutTime > 0 && currTime >= _logoutTime + 60);
+        }
+
         void LogoutPlayer(bool save);
         void KickPlayer();
 
@@ -190,7 +212,6 @@ class WorldSession
         static void SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32 accountId);
 
         void SendTrainerList(ObjectGuid guid) const;
-        void SendTrainerList(ObjectGuid guid, const std::string& strTitle) const;
 
         void SendListInventory(ObjectGuid guid) const;
         bool CheckBanker(ObjectGuid guid) const;
@@ -252,7 +273,6 @@ class WorldSession
         // Taxi
         void SendTaxiStatus(ObjectGuid guid) const;
         void SendTaxiMenu(Creature* unit) const;
-        void SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode = 0) const;
         bool SendLearnNewTaxiNode(Creature* unit) const;
         void SendActivateTaxiReply(ActivateTaxiReply reply) const;
 
@@ -281,6 +301,8 @@ class WorldSession
         void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed) const;
         void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) const;
 
+        void SendAuthOk();
+        void SendAuthQueued();
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
         void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
@@ -293,6 +315,7 @@ class WorldSession
         void HandlePlayerLoginOpcode(WorldPacket& recvPacket);
         void HandleCharEnum(QueryResult* result);
         void HandlePlayerLogin(LoginQueryHolder* holder);
+        void HandlePlayerReconnect();
 
         // played time
         void HandlePlayedTime(WorldPacket& recvPacket);
@@ -667,6 +690,8 @@ class WorldSession
         std::mutex m_logoutMutex;                           // this mutex is necessary to avoid two simultaneous logouts due to a valid logout request and socket error
         Player* _player;
         std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it
+        std::shared_ptr<WorldSocket> m_requestSocket;       // a new socket for this session is requested (double connection)
+        WorldSessionState m_sessionState;                   // this session state
 
         AccountTypes _security;
         uint32 _accountId;

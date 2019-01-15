@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "deadmines.h"
 
 enum
@@ -184,8 +184,7 @@ struct boss_mr_smiteAI : public ScriptedAI
                     m_uiEquipTimer -= uiDiff;
                     return;
                 }
-                else
-                    m_uiEquipTimer = 0;
+                m_uiEquipTimer = 0;
             }
 
             switch (m_uiPhase)
@@ -261,16 +260,14 @@ struct boss_mr_smiteAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_mr_smite(Creature* pCreature)
+UnitAI* GetAI_boss_mr_smite(Creature* pCreature)
 {
     return new boss_mr_smiteAI(pCreature);
 }
 
 void AddSC_boss_mr_smite()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_mr_smite";
     pNewScript->GetAI = &GetAI_boss_mr_smite;
     pNewScript->RegisterSelf();

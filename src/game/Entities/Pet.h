@@ -95,7 +95,7 @@ enum PetSpellType
 
 struct PetSpell
 {
-    uint8 active;                                           // use instead enum (not good use *uint8* limited enum in case when value in enum not possitive in *int8*)
+    uint8 active;                                           // use instead enum (not good use *uint8* limited enum in case when value in enum not positive in *int8*)
 
     PetSpellState state : 8;
     PetSpellType type   : 8;
@@ -149,7 +149,7 @@ extern const uint32 LevelStartLoyalty[6];
 #define ACTIVE_SPELLS_MAX           4
 
 #define PET_FOLLOW_DIST  1.0f
-#define PET_FOLLOW_ANGLE (M_PI_F / 4.00f) * 3.50f
+#define PET_FOLLOW_ANGLE (M_PI_F / 2.0f)
 
 class Player;
 
@@ -172,10 +172,12 @@ class Pet : public Creature
         bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, uint32 healthPercentage = 0, bool permanentOnly = false);
         void SavePetToDB(PetSaveMode mode);
         bool isLoading() const { return m_loading; }
+        void SetLoading(bool state) { m_loading = state; }
         void Unsummon(PetSaveMode mode, Unit* owner = nullptr);
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
         static void DeleteFromDB(Unit* owner, PetSaveMode slot);
         static SpellCastResult TryLoadFromDB(Unit* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, PetType mandatoryPetType = MAX_PET_TYPE);
+        void PlayDismissSound();
 
         ObjectGuid const GetSpawnerGuid() const override { return GetOwnerGuid(); }
 
@@ -184,15 +186,14 @@ class Pet : public Creature
         Player* GetSpellModOwner() const override;
 
         void SetDeathState(DeathState s) override;          // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
-        void Update(uint32 update_diff, uint32 diff) override;  // overwrite virtual Creature::Update and Unit::Update
+        void Update(const uint32 diff) override;  // overwrite virtual Creature::Update and Unit::Update
 
         uint8 GetPetAutoSpellSize() const { return m_autospells.size(); }
         uint32 GetPetAutoSpellOnPos(uint8 pos) const override
         {
             if (pos >= m_autospells.size())
                 return 0;
-            else
-                return m_autospells[pos];
+            return m_autospells[pos];
         }
 
         bool CanSwim() const
@@ -200,8 +201,7 @@ class Pet : public Creature
             Unit const* owner = GetOwner();
             if (owner)
                 return owner->GetTypeId() == TYPEID_PLAYER ? true : ((Creature const*)owner)->CanSwim();
-            else
-                return Creature::CanSwim();
+            return Creature::CanSwim();
         }
 
         bool CanFly() const { return false; } // pet are not able to fly. TODO: check if this is right
@@ -219,7 +219,7 @@ class Pet : public Creature
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);
         void SynchronizeLevelWithOwner();
-        void InitStatsForLevel(uint32 level);
+        void InitStatsForLevel(uint32 petlevel);
         bool HaveInDiet(ItemPrototype const* item) const;
         uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel) const;
         void SetDuration(int32 dur) { m_duration = dur; }
@@ -237,7 +237,7 @@ class Pet : public Creature
         void UpdateAttackPowerAndDamage(bool ranged = false) override;
         void UpdateDamagePhysical(WeaponAttackType attType) override;
 
-        bool   CanTakeMoreActiveSpells(uint32 SpellIconID) const;
+        bool   CanTakeMoreActiveSpells(uint32 spellid) const;
         void   ToggleAutocast(uint32 spellid, bool apply);
         bool   HasTPForSpell(uint32 spellid) const;
         int32  GetTPForSpell(uint32 spellid) const;
@@ -284,20 +284,24 @@ class Pet : public Creature
         uint32  m_resetTalentsCost;
         time_t  m_resetTalentsTime;
 
-        const uint64& GetAuraUpdateMask() const { return m_auraUpdateMask; }
-        void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
-        void ResetAuraUpdateMask() { m_auraUpdateMask = 0; }
-
         // overwrite Creature function for name localization back to WorldObject version without localization
         const char* GetNameForLocaleIdx(int32 locale_idx) const { return WorldObject::GetNameForLocaleIdx(locale_idx); }
+
+        void SetRequiredXpForNextLoyaltyLevel();
+        void UpdateRequireXpForNextLoyaltyLevel(uint32 xp);
 
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
 
         // return charminfo ai only when this pet is possessed. (eye of the beast case for ex.)
-        virtual CreatureAI* AI() override { if (hasUnitState(UNIT_STAT_POSSESSED) && m_charmInfo->GetAI()) return m_charmInfo->GetAI(); else return m_ai.get(); }
+        virtual UnitAI* AI() override
+        {
+            if (hasUnitState(UNIT_STAT_POSSESSED) && m_charmInfo->GetAI()) return m_charmInfo->GetAI();
+            return m_ai.get();
+        }
+
         virtual CombatData* GetCombatData() override { return m_combatData; }
 
-        void InitTamedPetPassives(Unit* player);
+        virtual void RegenerateHealth() override;
 
     protected:
         uint32  m_happinessTimer;
@@ -306,8 +310,8 @@ class Pet : public Creature
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         int32   m_loyaltyPoints;
         int32   m_bonusdamage;
-        uint64  m_auraUpdateMask;
         bool    m_loading;
+        uint32  m_xpRequiredForNextLoyaltyLevel;
 
     private:
         PetModeFlags m_petModeFlags;

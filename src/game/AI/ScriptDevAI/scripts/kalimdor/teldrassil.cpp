@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_mist
 EndContentData */
 
@@ -70,7 +70,7 @@ struct npc_mistAI : public FollowerAI
         if (Player* pPlayer = GetLeaderForFollower())
         {
             if (pPlayer->GetQuestStatus(QUEST_MIST) == QUEST_STATUS_INCOMPLETE)
-                pPlayer->GroupEventHappens(QUEST_MIST, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_MIST, m_creature);
         }
 
         // The follow is over (and for later development, run off to the woods before really end)
@@ -87,7 +87,7 @@ struct npc_mistAI : public FollowerAI
     }*/
 };
 
-CreatureAI* GetAI_npc_mist(Creature* pCreature)
+UnitAI* GetAI_npc_mist(Creature* pCreature)
 {
     return new npc_mistAI(pCreature);
 }
@@ -105,9 +105,7 @@ bool QuestAccept_npc_mist(Player* pPlayer, Creature* pCreature, const Quest* pQu
 
 void AddSC_teldrassil()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_mist";
     pNewScript->GetAI = &GetAI_npc_mist;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_mist;

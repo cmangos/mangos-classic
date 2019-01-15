@@ -132,7 +132,7 @@ class CreatureLinkingMgr
         std::unordered_set<uint32> m_eventGuidTriggers;          // master by guid
 
         // Check-routine
-        static bool IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingInfo* pInfo, bool byEntry);
+        static bool IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingInfo* pTmp, bool byEntry);
 };
 
 /**
@@ -190,7 +190,7 @@ class CreatureLinkingHolder
         void SetFollowing(Creature* pWho, Creature* pWhom) const;
         // Helper function to return if a slave is in range of a boss
         bool IsSlaveInRangeOfMaster(Creature const* pSlave, Creature const* pBoss, uint16 searchRange) const;
-        bool IsSlaveInRangeOfMaster(Creature const* pBoss, float slaveX, float slaveY, uint16 searchRange) const;
+        bool IsSlaveInRangeOfMaster(Creature const* pBoss, float sX, float sY, uint16 searchRange) const;
         // Another helper function
         bool IsRespawnReady(uint32 dbLowGuid, Map* _map) const;
         // Helper function for recursive spawning-checks of an additional linked

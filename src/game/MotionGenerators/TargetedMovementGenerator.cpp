@@ -25,6 +25,13 @@
 #include "Movement/MoveSplineInit.h"
 #include "Movement/MoveSpline.h"
 
+#define IGNORE_M2 true // simple define for avoiding bugs due to different setting across movechase
+
+ // Chase-Movement: These factors depend on combat-reach distance
+#define CHASE_DEFAULT_RANGE_FACTOR                        0.5f
+#define CHASE_RECHASE_RANGE_FACTOR                        0.75f
+#define CHASE_MOVE_CLOSER_FACTOR                          0.875f
+
 //-----------------------------------------------//
 template<class T, typename D>
 void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool updateDestination)
@@ -78,6 +85,32 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
     i_path->calculate(x, y, z, forceDest);
     if (i_path->getPathType() & PATHFIND_NOPATH)
         return;
+
+    auto& path = i_path->getPath();
+
+    if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)
+    {
+        if (float offset = this->i_offset) // need to cut path until most distant viable point
+        {
+            float dist = this->i_offset * CHASE_MOVE_CLOSER_FACTOR + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner);
+            float tarX, tarY, tarZ;
+            i_target->GetPosition(tarX, tarY, tarZ);
+            auto iter = std::next(path.begin(), 1); // need to start at index 1, index 0 is start position and filled in init.Launch()
+            for (; iter != path.end(); ++iter)
+            {
+                G3D::Vector3 data = (*iter);
+                if (!i_target->IsWithinDist3d(data.x, data.y, data.z, dist))
+                    continue;
+                if (!owner.GetMap()->IsInLineOfSight(tarX, tarY, tarZ + 2.0f, data.x, data.y, data.z + 2.0f, IGNORE_M2))
+                    continue;
+                // both in LOS and in range - advance to next and stop
+                ++iter;
+                break;
+            }
+            if (iter != path.end())
+                path.erase(iter, path.end());
+        }
+    }
 
     D::_addUnitStateMove(owner);
     i_targetReached = false;
@@ -178,11 +211,12 @@ bool TargetedMovementGeneratorMedium<T, D>::IsReachable() const
 template<class T, typename D>
 bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float x, float y, float z) const
 {
+    float dist = this->GetDynamicTargetDistance(owner, true);
     // More distance let have better performance, less distance let have more sensitive reaction at target move.
-    if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
-        return !i_target->IsWithinDist3d(x, y, z, this->GetDynamicTargetDistance(owner, true));
+    if (dist != 0.f && this->GetMovementGeneratorType() == CHASE_MOTION_TYPE) // optimization for los check
+        return !i_target->IsWithinDist3d(x, y, z, dist) || !i_target->IsWithinLOSInMap(&owner, IGNORE_M2);
     else
-        return !i_target->IsWithinDist2d(x, y, this->GetDynamicTargetDistance(owner, true));
+        return !i_target->IsWithinDist3d(x, y, z, dist);
 }
 
 template<class T, typename D>
@@ -201,14 +235,13 @@ void ChaseMovementGenerator<T>::_addUnitStateMove(T& u) { u.addUnitState(UNIT_ST
 template<class T>
 bool ChaseMovementGenerator<T>::_lostTarget(T& u) const
 {
-    return u.getVictim() != this->GetCurrentTarget();
+    return m_combat && u.getVictim() != this->GetCurrentTarget();
 }
 
 template<class T>
 void ChaseMovementGenerator<T>::_reachTarget(T& owner)
 {
-    if (owner.CanReachWithMeleeAttack(this->i_target.getTarget()))
-        owner.Attack(this->i_target.getTarget(), true);
+
 }
 
 template<>
@@ -223,7 +256,7 @@ void ChaseMovementGenerator<Player>::Initialize(Player& owner)
 template<>
 void ChaseMovementGenerator<Creature>::Initialize(Creature& owner)
 {
-    owner.SetWalk(false, false);                            // Chase movement is running
+    owner.SetWalk(m_walk, false);                            // Chase movement is running
     owner.addUnitState(UNIT_STAT_CHASE);                    // _MOVE set in _SetTargetLocation after required checks
     _setTargetLocation(owner, true);
 
@@ -256,28 +289,23 @@ void ChaseMovementGenerator<T>::SetMovementParameters(float offset, float angle,
     m_moveFurther = moveFurther;
 }
 
-// Chase-Movement: These factors depend on combat-reach distance
-#define CHASE_DEFAULT_RANGE_FACTOR                        0.5f
-#define CHASE_RECHASE_RANGE_FACTOR                        0.75f
-#define CHASE_MOVE_CLOSER_FACTOR                          0.875f
-
 template<class T>
 float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
 {
     if (m_moveFurther)
     {
         if (!forRangeCheck)
-            return this->i_offset + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner);
+            return this->i_offset + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner, false);
 
-        return CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
+        return CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner, false);
     }
     else
     {
-        if (!forRangeCheck) // move slightly closer than setting to prevent jittery movement
-            return this->i_offset * CHASE_MOVE_CLOSER_FACTOR + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner);
+        if (!forRangeCheck) // move to melee range and then cut path to simulate retail
+            return CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner, false);
 
         // check against actual max range setting
-        return this->i_offset + CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
+        return this->i_offset + CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner, false);
     }
 }
 

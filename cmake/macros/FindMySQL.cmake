@@ -22,6 +22,8 @@ if( UNIX )
     /usr/local/mysql/bin/
     /usr/local/bin/
     /usr/bin/
+    /usr/local/opt/mysql/bin/
+    /opt/mysql/mysql/bin/
   )
 
   if( MYSQL_CONFIG )
@@ -57,8 +59,7 @@ if( UNIX )
     endforeach(LIB ${MYSQL_LIBS})
 
   else( MYSQL_CONFIG )
-    set(MYSQL_ADD_LIBRARIES "")
-    list(APPEND MYSQL_ADD_LIBRARIES "mysqlclient_r")
+    set(MYSQL_ADD_LIBRARIES "mysqlclient")
   endif( MYSQL_CONFIG )
 endif( UNIX )
 
@@ -72,6 +73,12 @@ find_path(MYSQL_INCLUDE_DIR
     /usr/local/include
     /usr/local/include/mysql
     /usr/local/mysql/include
+    /usr/local/mysql/include/mysql
+    /usr/local/opt/mysql/include
+    /usr/local/opt/mysql-client/include
+    /usr/local/opt/mysql-client/include/mysql
+    /opt/mysql/mysql/include
+    /opt/mysql/mysql/include/mysql
     "C:/Program Files/MySQL/include"
     "C:/Program Files/MySQL/MySQL Server 5.0/include"
     "C:/Program Files/MySQL/MySQL Server 5.1/include"
@@ -97,6 +104,11 @@ foreach(LIB ${MYSQL_ADD_LIBRARIES})
       /usr/local/lib
       /usr/local/lib/mysql
       /usr/local/mysql/lib
+      /usr/local/mysql/lib/mysql
+      /usr/local/opt/mysql/lib
+      /usr/local/opt/mysql-client/lib
+      /opt/mysql/mysql/lib
+      /opt/mysql/mysql/lib/mysql
     DOC "Specify the location of the mysql library here."
   )
 endforeach(LIB ${MYSQL_ADD_LIBRARY})
@@ -116,7 +128,7 @@ if( WIN32 )
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.1;Location]/lib/opt"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.0;Location]/lib/opt"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.1;Location]/lib/opt"
-      "c:/msys/local/include"
+      "C:/msys/local/include"
     DOC "Specify the location of the mysql library here."
   )
 endif( WIN32 )

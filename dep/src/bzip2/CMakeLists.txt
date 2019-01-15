@@ -15,8 +15,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-set(LIBRARY_NAME bzip2)
-
 set(LIBRARY_SRCS
   compress.c
   crctable.c
@@ -27,20 +25,15 @@ set(LIBRARY_SRCS
   bzlib.c
 )
 
-include_directories(
-  ${CMAKE_SOURCE_DIR}/dep/include/bzip2
-  ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-add_library(${LIBRARY_NAME} STATIC
+add_library(${BZIP2_LIBRARIES} STATIC
   ${LIBRARY_SRCS}
 )
 
-target_include_directories(${LIBRARY_NAME}
+target_include_directories(${BZIP2_LIBRARIES}
   INTERFACE ${CMAKE_SOURCE_DIR}/dep/include/bzip2
   INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 if(MSVC)
-  set_target_properties(${LIBRARY_NAME} PROPERTIES FOLDER "Dependencies")
+  set_target_properties(${BZIP2_LIBRARIES} PROPERTIES FOLDER "Dependencies")
 endif()

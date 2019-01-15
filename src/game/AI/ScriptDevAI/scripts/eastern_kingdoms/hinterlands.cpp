@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_00x09hl
 npc_rinji
 EndContentData */
@@ -78,7 +78,7 @@ struct npc_00x09hlAI : public npc_escortAI
             case 64:
                 DoScriptText(SAY_OOX_END, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_RESQUE_OOX_09, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_RESQUE_OOX_09, m_creature);
                 break;
         }
     }
@@ -157,7 +157,7 @@ bool QuestAccept_npc_00x09hl(Player* pPlayer, Creature* pCreature, const Quest* 
     return true;
 }
 
-CreatureAI* GetAI_npc_00x09hl(Creature* pCreature)
+UnitAI* GetAI_npc_00x09hl(Creature* pCreature)
 {
     return new npc_00x09hlAI(pCreature);
 }
@@ -288,7 +288,7 @@ struct npc_rinjiAI : public npc_escortAI
                 break;
             case 17:
                 DoScriptText(SAY_RIN_COMPLETE, m_creature, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_RINJI_TRAPPED, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_RINJI_TRAPPED, m_creature);
                 SetRun();
                 m_uiPostEventCount = 1;
                 break;
@@ -350,16 +350,14 @@ bool QuestAccept_npc_rinji(Player* pPlayer, Creature* pCreature, const Quest* pQ
     return true;
 }
 
-CreatureAI* GetAI_npc_rinji(Creature* pCreature)
+UnitAI* GetAI_npc_rinji(Creature* pCreature)
 {
     return new npc_rinjiAI(pCreature);
 }
 
 void AddSC_hinterlands()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_00x09hl";
     pNewScript->GetAI = &GetAI_npc_00x09hl;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_00x09hl;

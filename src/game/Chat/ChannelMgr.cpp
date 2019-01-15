@@ -38,8 +38,8 @@ ChannelMgr* channelMgr(Team team)
 
 ChannelMgr::~ChannelMgr()
 {
-    for (ChannelMap::iterator itr = channels.begin(); itr != channels.end(); ++itr)
-        delete itr->second;
+    for (auto& channel : channels)
+        delete channel.second;
 
     channels.clear();
 }
@@ -79,8 +79,7 @@ Channel* ChannelMgr::GetChannel(const std::string& name, Player* p, bool pkt)
 
         return nullptr;
     }
-    else
-        return i->second;
+    return i->second;
 }
 
 void ChannelMgr::LeftChannel(const std::string& name)

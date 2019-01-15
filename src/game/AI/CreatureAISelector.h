@@ -21,15 +21,15 @@
 
 #include <string>
 
-class CreatureAI;
+class UnitAI;
 class Unit;
 class Creature;
 class MovementGenerator;
 
 namespace FactorySelector
 {
-    CreatureAI* selectAI(Creature*);
-    CreatureAI* GetSpecificAI(Unit* unit, std::string const& ainame);
+    UnitAI* selectAI(Creature*);
+    UnitAI* GetSpecificAI(Unit* unit, std::string const& ainame);
     MovementGenerator* selectMovementGenerator(Creature*);
 }
 #endif

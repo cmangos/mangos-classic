@@ -49,8 +49,8 @@ namespace MMAP
         MMapData(dtNavMesh* mesh) : navMesh(mesh) {}
         ~MMapData()
         {
-            for (NavMeshQuerySet::iterator i = navMeshQueries.begin(); i != navMeshQueries.end(); ++i)
-                dtFreeNavMeshQuery(i->second);
+            for (auto& navMeshQuerie : navMeshQueries)
+                dtFreeNavMeshQuery(navMeshQuerie.second);
 
             if (navMesh)
                 dtFreeNavMesh(navMesh);
@@ -78,6 +78,7 @@ namespace MMAP
             bool unloadMap(uint32 mapId, int32 x, int32 y);
             bool unloadMap(uint32 mapId);
             bool unloadMapInstance(uint32 mapId, uint32 instanceId);
+            bool IsMMapIsLoaded(uint32 mapId, uint32 x, uint32 y) const;
 
             // the returned [dtNavMeshQuery const*] is NOT threadsafe
             dtNavMeshQuery const* GetNavMeshQuery(uint32 mapId, uint32 instanceId);

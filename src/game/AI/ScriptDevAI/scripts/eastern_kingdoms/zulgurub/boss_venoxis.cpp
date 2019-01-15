@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulgurub.h"
 
 enum
@@ -136,9 +136,9 @@ struct boss_venoxisAI : public ScriptedAI
 
                 // See how many targets are in melee range
                 ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-                for (ThreatList::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
+                for (auto iter : tList)
                 {
-                    if (Unit* pTempTarget = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid()))
+                    if (Unit* pTempTarget = m_creature->GetMap()->GetUnit(iter->getUnitGuid()))
                     {
                         if (pTempTarget->GetTypeId() == TYPEID_PLAYER && m_creature->CanReachWithMeleeAttack(pTempTarget))
                             ++uiTargetsInRange;
@@ -213,16 +213,14 @@ struct boss_venoxisAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_venoxis(Creature* pCreature)
+UnitAI* GetAI_boss_venoxis(Creature* pCreature)
 {
     return new boss_venoxisAI(pCreature);
 }
 
 void AddSC_boss_venoxis()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_venoxis";
     pNewScript->GetAI = &GetAI_boss_venoxis;
     pNewScript->RegisterSelf();

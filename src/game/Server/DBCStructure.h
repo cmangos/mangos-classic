@@ -167,22 +167,20 @@ struct ChrRacesEntry
     // 28       m_hairCustomization
 };
 
-/*struct CinematicCameraEntry
+struct CinematicCameraEntry
 {
-    uint32      id;                                         // 0        m_ID
-    char*       filename;                                   // 1        m_model
-    uint32      soundid;                                    // 2        m_soundID
-    float       start_x;                                    // 3        m_originX
-    float       start_y;                                    // 4        m_originY
-    float       start_z;                                    // 5        m_originZ
-    float       unk6;                                       // 6        m_originFacing
-};*/
+    uint32 ID;                                               // 0
+    char const* Model;                                       // 1    Model filename (translate .mdx to .m2)
+    uint32 SoundID;                                          // 2    Sound ID       (voiceover for cinematic)
+    DBCPosition3D Origin;                                    // 3-5  Position in map used for basis for M2 co-ordinates
+    float OriginFacing;                                      // 4    Orientation in map used for basis for M2 co-ordinates
+};
 
 struct CinematicSequencesEntry
 {
     uint32      Id;                                         // 0        m_ID
     // uint32      unk1;                                    // 1        m_soundID
-    // uint32      cinematicCamera;                         // 2        m_camera[8]
+    uint32      cinematicCamera;                            // 2        m_camera[8]
 };
 
 struct CreatureDisplayInfoEntry
@@ -344,11 +342,11 @@ struct FactionTemplateEntry
     {
         if (entry.faction)
         {
-            for (int i = 0; i < 4; ++i)
-                if (enemyFaction[i]  == entry.faction)
+            for (unsigned int i : enemyFaction)
+                if (i == entry.faction)
                     return false;
-            for (int i = 0; i < 4; ++i)
-                if (friendFaction[i] == entry.faction)
+            for (unsigned int i : friendFaction)
+                if (i == entry.faction)
                     return true;
         }
         return (friendGroupMask & entry.factionGroupMask) || (factionGroupMask & entry.friendGroupMask);
@@ -357,11 +355,11 @@ struct FactionTemplateEntry
     {
         if (entry.faction)
         {
-            for (int i = 0; i < 4; ++i)
-                if (enemyFaction[i]  == entry.faction)
+            for (unsigned int i : enemyFaction)
+                if (i == entry.faction)
                     return true;
-            for (int i = 0; i < 4; ++i)
-                if (friendFaction[i] == entry.faction)
+            for (unsigned int i : friendFaction)
+                if (i == entry.faction)
                     return false;
         }
         return (enemyGroupMask & entry.factionGroupMask) != 0;
@@ -369,8 +367,8 @@ struct FactionTemplateEntry
     bool IsHostileToPlayers() const { return (enemyGroupMask & FACTION_GROUP_MASK_PLAYER) != 0; }
     bool IsNeutralToAll() const
     {
-        for (int i = 0; i < 4; ++i)
-            if (enemyFaction[i] != 0)
+        for (unsigned int i : enemyFaction)
+            if (i != 0)
                 return false;
         return enemyGroupMask == 0 && friendGroupMask == 0;
     }
@@ -513,15 +511,18 @@ struct SkillRaceClassInfoEntry
     uint32    classMask;                                    // 3        m_classMask
     uint32    flags;                                        // 4        m_flags
     uint32    reqLevel;                                     // 5        m_minLevel
-    // uint32    skillTierId;                               // 6        m_skillTierID
+    uint32    skillTierId;                                  // 6        m_skillTierID
     // uint32    skillCostID;                               // 7        m_skillCostIndex
 };
 
-/*struct SkillTiersEntry{
+#define MAX_SKILL_STEP 16
+
+struct SkillTiersEntry
+{
     uint32    id;                                           // 0        m_ID
-    uint32    skillValue[16];                               // 1-17     m_cost
-    uint32    maxSkillValue[16];                            // 18-3     m_valueMax
-};*/
+    uint32    skillValue[MAX_SKILL_STEP];                   // 1-17     m_cost
+    uint32    maxSkillValue[MAX_SKILL_STEP];                // 18-33    m_valueMax
+};
 
 struct SkillLineEntry
 {
@@ -603,7 +604,7 @@ struct SpellEntry
         uint32    Id;                                       // 0 normally counted from 0 field (but some tools start counting from 1, check this before tool use for data view!)
         uint32    School;                                   // 1 not schoolMask from 2.x - just school type so everything linked with SpellEntry::SchoolMask must be rewrited
         uint32    Category;                                 // 2
-        // uint32 castUI;                                   // 3 not used
+        uint32    CastUI;                                   // 3 not used
         uint32    Dispel;                                   // 4
         uint32    Mechanic;                                 // 5
         uint32    Attributes;                               // 6
@@ -638,7 +639,7 @@ struct SpellEntry
         uint32    manaPerSecondPerLevel;                    // 35
         uint32    rangeIndex;                               // 36
         float     speed;                                    // 37
-        //uint32    modalNextSpell;                           // 38 not used
+        uint32    modalNextSpell;                           // 38 not used
         uint32    StackAmount;                              // 39
         uint32    Totem[MAX_SPELL_TOTEMS];                  // 40-41
         int32     Reagent[MAX_SPELL_REAGENTS];              // 42-49
@@ -686,12 +687,15 @@ struct SpellEntry
         uint32    MaxAffectedTargets;                       // 163
         uint32    DmgClass;                                 // 164 defenseType
         uint32    PreventionType;                           // 165
-        // uint32    StanceBarOrder;                        // 166 not used
+        uint32    StanceBarOrder;                           // 166 not used
         float     DmgMultiplier[MAX_EFFECT_INDEX];          // 167-169
-        // uint32    MinFactionId;                          // 170 not used, and 0 in 2.4.2
-        // uint32    MinReputation;                         // 171 not used, and 0 in 2.4.2
-        // uint32    RequiredAuraVision;                    // 172 not used
-        uint32    IsServerSide;
+        uint32    MinFactionId;                             // 170 not used, and 0 in 2.4.2
+        uint32    MinReputation;                            // 171 not used, and 0 in 2.4.2
+        uint32    RequiredAuraVision;                       // 172 not used
+
+        // custom
+        uint32    IsServerSide;                             // 173
+        uint32    AttributesServerside;                     // 174
 
         // helpers
         int32 CalculateSimpleValue(SpellEffectIndex eff) const { return EffectBasePoints[eff] + int32(EffectBaseDice[eff]); }
@@ -716,11 +720,14 @@ struct SpellEntry
             return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(mask);
         }
 
-        bool HasAttribute(SpellAttributes attribute) const { return !!(Attributes & attribute); }
-        bool HasAttribute(SpellAttributesEx attribute) const { return !!(AttributesEx & attribute); }
-        bool HasAttribute(SpellAttributesEx2 attribute) const { return !!(AttributesEx2 & attribute); }
-        bool HasAttribute(SpellAttributesEx3 attribute) const { return !!(AttributesEx3 & attribute); }
-        bool HasAttribute(SpellAttributesEx4 attribute) const { return !!(AttributesEx4 & attribute); }
+        inline bool HasAttribute(SpellAttributes attribute) const { return (Attributes & attribute) != 0; }
+        inline bool HasAttribute(SpellAttributesEx attribute) const { return (AttributesEx & attribute) != 0; }
+        inline bool HasAttribute(SpellAttributesEx2 attribute) const { return (AttributesEx2 & attribute) != 0; }
+        inline bool HasAttribute(SpellAttributesEx3 attribute) const { return (AttributesEx3 & attribute) != 0; }
+        inline bool HasAttribute(SpellAttributesEx4 attribute) const { return (AttributesEx4 & attribute) != 0; }
+
+        // custom
+        bool HasAttribute(SpellAttributesServerside attribute) const { return (AttributesServerside & attribute) != 0; }
 
     private:
         // prevent creating custom entries (copy data from original in fact)

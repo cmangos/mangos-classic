@@ -309,7 +309,6 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
     DEBUG_LOG("Received opcode CMSG_PETITION_SIGN");    // ok
     // recv_data.hexlike();
 
-    Field* fields;
     ObjectGuid petitionGuid;
     uint8 unk;
     recv_data >> petitionGuid;                              // petition guid
@@ -328,7 +327,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
         return;
     }
 
-    fields = result->Fetch();
+    Field* fields = result->Fetch();
     uint32 ownerLowGuid = fields[0].GetUInt32();
     ObjectGuid ownerGuid = ObjectGuid(HIGHGUID_PLAYER, ownerLowGuid);
     uint8 signs = fields[1].GetUInt8();
@@ -582,6 +581,10 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
     // register guild and add guildmaster
     sGuildMgr.AddGuild(guild);
 
+    // Send result to GM
+    if (WorldSession* session = _player->GetSession())
+        session->SendGuildCommandResult(GUILD_CREATE_S, name, 0);
+
     // add members
     for (uint8 i = 0; i < signs; ++i)
     {
@@ -592,6 +595,17 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
             continue;
 
         guild->AddMember(signGuid, guild->GetLowestRank());
+
+        // Put record into guild log
+        guild->LogGuildEvent(GUILD_EVENT_LOG_JOIN_GUILD, signGuid);
+
+        // Send result to online signees
+        if (Player* signee = sObjectMgr.GetPlayer(signGuid))
+        {
+            if (WorldSession* session = signee->GetSession())
+                session->SendGuildCommandResult(GUILD_FOUNDER_S, name, 0);
+        }
+
         result->NextRow();
     }
 

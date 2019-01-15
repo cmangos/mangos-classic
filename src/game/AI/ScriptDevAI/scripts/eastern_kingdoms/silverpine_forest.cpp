@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_deathstalker_erland
 npc_deathstalker_faerleia
 EndContentData */
@@ -74,7 +74,7 @@ struct npc_deathstalker_erlandAI : public npc_escortAI
                 break;
             case 13:
                 DoScriptText(SAY_END, m_creature, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_ERLAND, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ERLAND, m_creature);
                 break;
             case 14:
                 if (Creature* pRane = GetClosestCreatureWithEntry(m_creature, NPC_RANE, 45.0f))
@@ -124,7 +124,7 @@ bool QuestAccept_npc_deathstalker_erland(Player* pPlayer, Creature* pCreature, c
     return true;
 }
 
-CreatureAI* GetAI_npc_deathstalker_erland(Creature* pCreature)
+UnitAI* GetAI_npc_deathstalker_erland(Creature* pCreature)
 {
     return new npc_deathstalker_erlandAI(pCreature);
 }
@@ -237,7 +237,7 @@ struct npc_deathstalker_faerleiaAI : public ScriptedAI
                 DoScriptText(SAY_COMPLETED, m_creature);
 
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                    pPlayer->GroupEventHappens(QUEST_PYREWOOD_AMBUSH, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_PYREWOOD_AMBUSH, m_creature);
 
                 FinishEvent();
             }
@@ -299,16 +299,14 @@ bool QuestAccept_npc_deathstalker_faerleia(Player* pPlayer, Creature* pCreature,
     return true;
 }
 
-CreatureAI* GetAI_npc_deathstalker_faerleia(Creature* pCreature)
+UnitAI* GetAI_npc_deathstalker_faerleia(Creature* pCreature)
 {
     return new npc_deathstalker_faerleiaAI(pCreature);
 }
 
 void AddSC_silverpine_forest()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_deathstalker_erland";
     pNewScript->GetAI = &GetAI_npc_deathstalker_erland;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_deathstalker_erland;

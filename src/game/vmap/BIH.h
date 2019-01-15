@@ -76,7 +76,7 @@ class BIH
             tree.clear();
             objects.clear();
             // create space for the first node
-            tree.push_back(3 << 30); // dummy leaf
+            tree.push_back(static_cast<uint32>(3 << 30)); // dummy leaf
             tree.insert(tree.end(), 2, 0);
         }
 
@@ -119,7 +119,7 @@ class BIH
         size_t primCount() const { return objects.size(); }
 
         template<typename RayCallback>
-        void intersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist, bool stopAtFirst = false, bool checkLOS = false) const
+        void intersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist, bool stopAtFirst = false, bool ignoreM2Model = false) const
         {
             float intervalMin = -1.f;
             float intervalMax = -1.f;
@@ -131,7 +131,7 @@ class BIH
                 invDir[i] = 1.f / dir[i];
                 if (G3D::fuzzyNe(dir[i], 0.0f))
                 {
-                    float t1 = (bounds.low()[i]  - org[i]) * invDir[i];
+                    float t1 = (bounds.low()[i] - org[i]) * invDir[i];
                     float t2 = (bounds.high()[i] - org[i]) * invDir[i];
                     if (t1 > t2)
                         std::swap(t1, t2);
@@ -179,7 +179,7 @@ class BIH
                 {
                     uint32 tn = tree[node];
                     uint32 axis = (tn & (3 << 30)) >> 30;
-                    const bool BVH2 = !!(tn & (1 << 29));
+                    const bool BVH2 = (tn & (1 << 29)) != 0;
                     int offset = tn & ~(7 << 29);
                     if (!BVH2)
                     {
@@ -200,7 +200,7 @@ class BIH
                                 continue;
                             }
                             node = offset + offsetFront3[axis]; // front
-                            // ray passes through near node only
+                                                                // ray passes through near node only
                             if (tb > intervalMax)
                             {
                                 intervalMax = (tf <= intervalMax) ? tf : intervalMax;
@@ -214,7 +214,6 @@ class BIH
                             ++stackPos;
                             // update ray interval for front node
                             intervalMax = (tf <= intervalMax) ? tf : intervalMax;
-                            continue;
                         }
                         else
                         {
@@ -222,7 +221,7 @@ class BIH
                             int n = tree[node + 1];
                             while (n > 0)
                             {
-                                bool hit = intersectCallback(r, objects[offset], maxDist, stopAtFirst, checkLOS);
+                                bool hit = intersectCallback(r, objects[offset], maxDist, stopAtFirst, ignoreM2Model);
                                 if (stopAtFirst && hit) return;
                                 --n;
                                 ++offset;
@@ -241,7 +240,6 @@ class BIH
                         intervalMax = (tb <= intervalMax) ? tb : intervalMax;
                         if (intervalMin > intervalMax)
                             break;
-                        continue;
                     }
                 } // traversal loop
                 do
@@ -257,8 +255,7 @@ class BIH
                     node = stack[stackPos].node;
                     intervalMax = stack[stackPos].tfar;
                     break;
-                }
-                while (true);
+                } while (true);
             }
         }
 
@@ -278,7 +275,7 @@ class BIH
                 {
                     uint32 tn = tree[node];
                     uint32 axis = (tn & (3 << 30)) >> 30;
-                    const bool BVH2 = !!(tn & (1 << 29));
+                    const bool BVH2 = (tn & (1 << 29)) != 0;
                     int offset = tn & ~(7 << 29);
                     if (!BVH2)
                     {
@@ -307,7 +304,6 @@ class BIH
                             // push back right node
                             stack[stackPos].node = right;
                             ++stackPos;
-                            continue;
                         }
                         else
                         {
@@ -331,7 +327,6 @@ class BIH
                         node = offset;
                         if (tl > p[axis] || tr < p[axis])
                             break;
-                        continue;
                     }
                 } // traversal loop
 
@@ -386,7 +381,7 @@ class BIH
                     maxObjects(0xFFFFFFFF), sumDepth(0), minDepth(0x0FFFFFFF),
                     maxDepth(0xFFFFFFFF), numBVH2(0)
                 {
-                    for (int i = 0; i < 6; ++i) numLeavesN[i] = 0;
+                    for (int& i : numLeavesN) i = 0;
                 }
 
                 void updateInner() { ++numNodes; }

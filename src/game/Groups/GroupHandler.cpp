@@ -76,7 +76,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     }
 
     // can't group with
-    if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP) && initiator->GetTeam() != recipient->GetTeam())
+    if (!GetPlayer()->isGameMaster() && !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP) && initiator->GetTeam() != recipient->GetTeam())
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_PLAYER_WRONG_FACTION);
         return;
@@ -96,7 +96,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     }
 
     Group* initiatorGroup = initiator->GetGroup();
-    if (initiatorGroup && initiatorGroup->isBGGroup())
+    if (initiatorGroup && initiatorGroup->isBattleGroup())
         initiatorGroup = initiator->GetOriginalGroup();
     if (!initiatorGroup)
         initiatorGroup = initiator->GetGroupInvite();
@@ -109,7 +109,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     }
 
     Group* recipientGroup = recipient->GetGroup();
-    if (recipientGroup && recipientGroup->isBGGroup())
+    if (recipientGroup && recipientGroup->isBattleGroup())
         recipientGroup = recipient->GetOriginalGroup();
 
     // player already in another group
@@ -259,6 +259,13 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recv_data)
     if (!grp)
         return;
 
+    // raid assistant cannot kick leader
+    if (grp->IsLeader(guid))
+    {
+        SendPartyResult(PARTY_OP_LEAVE, "", ERR_NOT_LEADER);
+        return;
+    }
+
     if (grp->IsMember(guid))
     {
         Player::RemoveFromGroup(grp, guid);
@@ -300,6 +307,13 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recv_data)
     Group* grp = GetPlayer()->GetGroup();
     if (!grp)
         return;
+
+    // raid assistant cannot kick leader
+    if (grp->GetLeaderName() == membername)
+    {
+        SendPartyResult(PARTY_OP_LEAVE, "", ERR_NOT_LEADER);
+        return;
+    }
 
     if (ObjectGuid guid = grp->GetMemberGuid(membername))
     {
@@ -391,7 +405,7 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
 {
-    uint32 minimum, maximum, roll;
+    uint32 minimum, maximum;
     recv_data >> minimum;
     recv_data >> maximum;
 
@@ -401,7 +415,7 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
     /********************/
 
     // everything is fine, do it
-    roll = urand(minimum, maximum);
+    uint32 roll = urand(minimum, maximum);
 
     // DEBUG_LOG("ROLL: MIN: %u, MAX: %u, ROLL: %u", minimum, maximum, roll);
 
@@ -494,7 +508,7 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recv_data)
         group->ChangeMembersGroup(player, groupNr);
     else
     {
-        if (ObjectGuid guid = sObjectMgr.GetPlayerGuidByName(name.c_str()))
+        if (ObjectGuid guid = sObjectMgr.GetPlayerGuidByName(name))
             group->ChangeMembersGroup(guid, groupNr);
     }
 }
@@ -516,7 +530,7 @@ void WorldSession::HandleGroupAssistantLeaderOpcode(WorldPacket& recv_data)
     /********************/
 
     // everything is fine, do it
-    group->SetAssistant(guid, (flag == 0 ? false : true));
+    group->SetAssistant(guid, (flag != 0));
 }
 
 void WorldSession::HandlePartyAssignmentOpcode(WorldPacket& recv_data)
@@ -662,78 +676,78 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         }
     }
 
-    Pet* pet = player->GetPet();
+    Unit* charm = player->GetCharm();
     if (mask & GROUP_UPDATE_FLAG_PET_GUID)
-        data << (pet ? pet->GetObjectGuid() : ObjectGuid());
+        data << (charm ? charm->GetObjectGuid() : ObjectGuid());
 
     if (mask & GROUP_UPDATE_FLAG_PET_NAME)
     {
-        if (pet)
-            data << pet->GetName();
+        if (charm)
+            data << charm->GetName();
         else
             data << uint8(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MODEL_ID)
     {
-        if (pet)
-            data << uint16(pet->GetDisplayId());
+        if (charm)
+            data << uint16(charm->GetDisplayId());
         else
             data << uint16(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_CUR_HP)
     {
-        if (pet)
-            data << uint16(pet->GetHealth());
+        if (charm)
+            data << uint16(charm->GetHealth());
         else
             data << uint16(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MAX_HP)
     {
-        if (pet)
-            data << uint16(pet->GetMaxHealth());
+        if (charm)
+            data << uint16(charm->GetMaxHealth());
         else
             data << uint16(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_POWER_TYPE)
     {
-        if (pet)
-            data << uint8(pet->GetPowerType());
+        if (charm)
+            data << uint8(charm->GetPowerType());
         else
             data << uint8(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_CUR_POWER)
     {
-        if (pet)
-            data << uint16(pet->GetPower(pet->GetPowerType()));
+        if (charm)
+            data << uint16(charm->GetPower(charm->GetPowerType()));
         else
             data << uint16(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MAX_POWER)
     {
-        if (pet)
-            data << uint16(pet->GetMaxPower(pet->GetPowerType()));
+        if (charm)
+            data << uint16(charm->GetMaxPower(charm->GetPowerType()));
         else
             data << uint16(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_AURAS)
     {
-        if (pet)
+        if (charm)
         {
-            const uint64& auramask = pet->GetAuraUpdateMask();
+            const uint64& auramask = charm->GetAuraUpdateMask();
             data << uint32(auramask);
             // In all checked pre-2.x data of packets included only positive auras
             for (uint32 i = 0; i < MAX_POSITIVE_AURAS; ++i)
             {
                 if (auramask & (uint64(1) << i))
                 {
-                    data << uint16(pet->GetUInt32Value(UNIT_FIELD_AURA + i));
+                    data << uint16(charm->GetUInt32Value(UNIT_FIELD_AURA + i));
                 }
             }
         }
@@ -760,13 +774,13 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         return;
     }
 
-    Pet* pet = player->GetPet();
+    Unit* charm = player->GetCharm();
 
     WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 4 + 2 + 2 + 2 + 1 + 2 * 6 + 8 + 1 + 8);
     data << player->GetPackGUID();
 
     uint32 mask1 = 0x00040BFF;                              // common mask, real flags used 0x000040BFF
-    if (pet)
+    if (charm)
         mask1 = 0x7FFFFFFF;                                 // for hunters and other classes with pets
 
     Powers powerType = player->GetPowerType();
@@ -819,24 +833,24 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     }
     data.put<uint32>(maskPos, auramask);                    // GROUP_UPDATE_FLAG_AURAS
 
-    if (pet)
+    if (charm)
     {
-        Powers petpowertype = pet->GetPowerType();
-        data << pet->GetObjectGuid();                       // GROUP_UPDATE_FLAG_PET_GUID
-        data << pet->GetName();                             // GROUP_UPDATE_FLAG_PET_NAME
-        data << uint16(pet->GetDisplayId());                // GROUP_UPDATE_FLAG_PET_MODEL_ID
-        data << uint16(pet->GetHealth());                   // GROUP_UPDATE_FLAG_PET_CUR_HP
-        data << uint16(pet->GetMaxHealth());                // GROUP_UPDATE_FLAG_PET_MAX_HP
-        data << uint8(petpowertype);                        // GROUP_UPDATE_FLAG_PET_POWER_TYPE
-        data << uint16(pet->GetPower(petpowertype));        // GROUP_UPDATE_FLAG_PET_CUR_POWER
-        data << uint16(pet->GetMaxPower(petpowertype));     // GROUP_UPDATE_FLAG_PET_MAX_POWER
+        Powers charmPowerType = charm->GetPowerType();
+        data << charm->GetObjectGuid();                       // GROUP_UPDATE_FLAG_PET_GUID
+        data << charm->GetName();                             // GROUP_UPDATE_FLAG_PET_NAME
+        data << uint16(charm->GetDisplayId());                // GROUP_UPDATE_FLAG_PET_MODEL_ID
+        data << uint16(charm->GetHealth());                   // GROUP_UPDATE_FLAG_PET_CUR_HP
+        data << uint16(charm->GetMaxHealth());                // GROUP_UPDATE_FLAG_PET_MAX_HP
+        data << uint8(charmPowerType);                          // GROUP_UPDATE_FLAG_PET_POWER_TYPE
+        data << uint16(charm->GetPower(charmPowerType));        // GROUP_UPDATE_FLAG_PET_CUR_POWER
+        data << uint16(charm->GetMaxPower(charmPowerType));     // GROUP_UPDATE_FLAG_PET_MAX_POWER
 
         uint32 petauramask = 0;
         size_t petMaskPos = data.wpos();
         data << uint32(petauramask);                        // placeholder
         for (uint8 i = 0; i < MAX_AURAS; ++i)
         {
-            if (uint32 petaura = pet->GetUInt32Value(UNIT_FIELD_AURA + i))
+            if (uint32 petaura = charm->GetUInt32Value(UNIT_FIELD_AURA + i))
             {
                 petauramask |= (uint32(1) << i);
                 data << uint16(petaura);
@@ -898,12 +912,12 @@ void WorldSession::HandleGroupSwapSubGroupOpcode(WorldPacket& recv_data)
     auto getMemberSlotInfo = [&group](std::string const& playerName, uint8& subgroup, ObjectGuid& guid)
     {
         auto slots = group->GetMemberSlots();
-        for (auto i = slots.begin(); i != slots.end(); ++i)
+        for (auto& slot : slots)
         {
-            if ((*i).guid && (*i).name == playerName)
+            if (slot.guid && slot.name == playerName)
             {
-                subgroup = (*i).group;
-                guid = (*i).guid;
+                subgroup = slot.group;
+                guid = slot.guid;
                 return true;
             }
         }

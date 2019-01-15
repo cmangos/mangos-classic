@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "wailing_caverns.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
@@ -150,7 +150,6 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
         if (m_uiPoint == 15 || m_uiPoint == 32)
         {
             m_creature->SetLootRecipient(nullptr);
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(false);
 
             if (m_creature->isAlive())
@@ -487,16 +486,14 @@ bool GossipSelect_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature, 
     return true;
 }
 
-CreatureAI* GetAI_npc_disciple_of_naralex(Creature* pCreature)
+UnitAI* GetAI_npc_disciple_of_naralex(Creature* pCreature)
 {
     return new npc_disciple_of_naralexAI(pCreature);
 }
 
 void AddSC_wailing_caverns()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_disciple_of_naralex";
     pNewScript->GetAI = &GetAI_npc_disciple_of_naralex;
     pNewScript->pGossipHello =  &GossipHello_npc_disciple_of_naralex;

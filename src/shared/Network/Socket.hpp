@@ -64,6 +64,7 @@ namespace MaNGOS
             std::unique_ptr<PacketBuffer> m_secondaryOutBuffer;
 
             std::mutex m_mutex;
+            std::mutex m_closeMutex;
             boost::asio::deadline_timer m_outBufferFlushTimer;
 
             void StartAsyncRead();

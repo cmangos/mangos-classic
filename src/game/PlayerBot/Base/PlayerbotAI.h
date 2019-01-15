@@ -404,6 +404,8 @@ class MANGOS_DLL_SPEC PlayerbotAI
         bool IsNeutralized(Unit* pTarget);
         // Make the bots face their target
         void FaceTarget(Unit* pTarget);
+        // Used by bot to check if target is immune to a specific damage school before using an ability
+        bool IsImmuneToSchool(Unit* pTarget, SpellSchoolMask SchoolMask);
 
         void MakeSpellLink(const SpellEntry* sInfo, std::ostringstream& out);
         void MakeWeaponSkillLink(const SpellEntry* sInfo, std::ostringstream& out, uint32 skillid);

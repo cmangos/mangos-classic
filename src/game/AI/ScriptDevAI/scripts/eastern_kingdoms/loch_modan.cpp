@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_mountaineer_pebblebitty
 npc_miran
 EndContentData */
@@ -137,7 +137,7 @@ struct npc_miranAI: public npc_escortAI
             case 23:
                 DoScriptText(SAY_MIRAN_3, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_PROTECTING_THE_SHIPMENT, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_PROTECTING_THE_SHIPMENT, m_creature);
                 break;
         }
     }
@@ -174,16 +174,14 @@ bool QuestAccept_npc_miran(Player* pPlayer, Creature* pCreature, const Quest* pQ
     return true;
 }
 
-CreatureAI* GetAI_npc_miran(Creature* pCreature)
+UnitAI* GetAI_npc_miran(Creature* pCreature)
 {
     return new npc_miranAI(pCreature);
 }
 
 void AddSC_loch_modan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_mountaineer_pebblebitty";
     pNewScript->pGossipHello =  &GossipHello_npc_mountaineer_pebblebitty;
     pNewScript->pGossipSelect = &GossipSelect_npc_mountaineer_pebblebitty;

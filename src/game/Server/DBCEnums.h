@@ -32,6 +32,23 @@
 // also see MAX_LEVEL and GT_MAX_LEVEL define
 #define STRONG_MAX_LEVEL 255
 
+#pragma pack(push, 1)
+
+struct DBCPosition2D
+{
+    float X;
+    float Y;
+};
+
+struct DBCPosition3D
+{
+    float X;
+    float Y;
+    float Z;
+};
+
+#pragma pack(pop)
+
 enum AreaTeams
 {
     AREATEAM_NONE  = 0,
@@ -84,7 +101,8 @@ enum AbilytyLearnType
 
 enum AbilitySkillFlags
 {
-    ABILITY_SKILL_NONTRAINABLE = 0x100
+    ABILITY_SKILL_AT_MAX_VALUE = 0x010,
+    ABILITY_SKILL_NONTRAINABLE = 0x100,
 };
 
 enum ItemEnchantmentType

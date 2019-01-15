@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {
@@ -112,16 +112,14 @@ struct boss_hazzarahAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_hazzarah(Creature* pCreature)
+UnitAI* GetAI_boss_hazzarah(Creature* pCreature)
 {
     return new boss_hazzarahAI(pCreature);
 }
 
 void AddSC_boss_hazzarah()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_hazzarah";
     pNewScript->GetAI = &GetAI_boss_hazzarah;
     pNewScript->RegisterSelf();

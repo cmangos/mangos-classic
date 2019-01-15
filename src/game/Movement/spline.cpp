@@ -162,9 +162,9 @@ namespace Movement
     {
         MANGOS_ASSERT(index >= index_lo && index < index_hi);
 
-        Vector3 curPos, nextPos;
+        Vector3 nextPos;
         const Vector3* p = &points[index - 1];
-        curPos = nextPos = p[1];
+        Vector3 curPos = nextPos = p[1];
 
         index_type i = 1;
         double length = 0;
@@ -183,11 +183,11 @@ namespace Movement
         index *= 3u;
         MANGOS_ASSERT(index >= index_lo && index < index_hi);
 
-        Vector3 curPos, nextPos;
+        Vector3 nextPos;
         const Vector3* p = &points[index];
 
         C_Evaluate(p, 0.f, s_Bezier3Coeffs, nextPos);
-        curPos = nextPos;
+        Vector3 curPos = nextPos;
 
         index_type i = 1;
         double length = 0;
@@ -218,7 +218,7 @@ namespace Movement
         (this->*initializers[m_mode])(controls, count, cyclic, cyclic_point);
     }
 
-    void SplineBase::InitLinear(const Vector3* controls, index_type count, bool cyclic, index_type cyclic_point)
+    void SplineBase::InitLinear(const Vector3* controls, index_type count, bool isCyclic, index_type cyclic_point)
     {
         MANGOS_ASSERT(count >= 2);
         const int real_size = count + 1;
@@ -229,18 +229,18 @@ namespace Movement
 
         // first and last two indexes are space for special 'virtual points'
         // these points are required for proper C_Evaluate and C_Evaluate_Derivative methtod work
-        if (cyclic)
+        if (isCyclic)
             points[count] = controls[cyclic_point];
         else
             points[count] = controls[count - 1];
 
         index_lo = 0;
-        index_hi = cyclic ? count : (count - 1);
+        index_hi = isCyclic ? count : (count - 1);
     }
 
-    void SplineBase::InitCatmullRom(const Vector3* controls, index_type count, bool cyclic, index_type cyclic_point)
+    void SplineBase::InitCatmullRom(const Vector3* controls, index_type count, bool isCyclic, index_type cyclic_point)
     {
-        const int real_size = count + (cyclic ? (1 + 2) : (1 + 1));
+        const int real_size = count + (isCyclic ? (1 + 2) : (1 + 1));
 
         points.resize(real_size);
 
@@ -251,7 +251,7 @@ namespace Movement
 
         // first and last two indexes are space for special 'virtual points'
         // these points are required for proper C_Evaluate and C_Evaluate_Derivative methtod work
-        if (cyclic)
+        if (isCyclic)
         {
             if (cyclic_point == 0)
                 points[0] = controls[count - 1];
@@ -268,7 +268,7 @@ namespace Movement
         }
 
         index_lo = lo_index;
-        index_hi = high_index + (cyclic ? 1 : 0);
+        index_hi = high_index + (isCyclic ? 1 : 0);
     }
 
     void SplineBase::InitBezier3(const Vector3* controls, index_type count, bool /*cyclic*/, index_type /*cyclic_point*/)

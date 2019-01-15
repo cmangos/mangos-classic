@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "temple_of_ahnqiraj.h"
 
 enum
@@ -297,21 +297,19 @@ struct mob_sartura_royal_guardAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_sartura(Creature* pCreature)
+UnitAI* GetAI_boss_sartura(Creature* pCreature)
 {
     return new boss_sarturaAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_sartura_royal_guard(Creature* pCreature)
+UnitAI* GetAI_mob_sartura_royal_guard(Creature* pCreature)
 {
     return new mob_sartura_royal_guardAI(pCreature);
 }
 
 void AddSC_boss_sartura()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_sartura";
     pNewScript->GetAI = &GetAI_boss_sartura;
     pNewScript->RegisterSelf();

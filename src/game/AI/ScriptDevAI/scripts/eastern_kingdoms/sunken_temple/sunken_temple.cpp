@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 at_shade_of_eranikus
 npc_malfurion_stormrage
 event_antalarion_statue_activation
@@ -141,7 +141,7 @@ struct npc_malfurionAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_malfurion(Creature* pCreature)
+UnitAI* GetAI_npc_malfurion(Creature* pCreature)
 {
     return new npc_malfurionAI(pCreature);
 }
@@ -173,10 +173,10 @@ bool ProcessEventId_event_antalarion_statue_activation(uint32 uiEventId, Object*
                 // We don't know actually which trap goes to which statue so we need to search for each
                 if (GameObject* pTrap = GetClosestGameObjectWithEntry((GameObject*)pTarget, GO_ATALAI_TRAP_1, INTERACTION_DISTANCE))
                     pTrap->Use((Unit*)pSource);
-                else if (GameObject* pTrap = GetClosestGameObjectWithEntry((GameObject*)pTarget, GO_ATALAI_TRAP_2, INTERACTION_DISTANCE))
-                    pTrap->Use((Unit*)pSource);
-                else if (GameObject* pTrap = GetClosestGameObjectWithEntry((GameObject*)pTarget, GO_ATALAI_TRAP_3, INTERACTION_DISTANCE))
-                    pTrap->Use((Unit*)pSource);
+                else if (GameObject* pTrap2 = GetClosestGameObjectWithEntry((GameObject*)pTarget, GO_ATALAI_TRAP_2, INTERACTION_DISTANCE))
+                    pTrap2->Use((Unit*)pSource);
+                else if (GameObject* pTrap3 = GetClosestGameObjectWithEntry((GameObject*)pTarget, GO_ATALAI_TRAP_3, INTERACTION_DISTANCE))
+                    pTrap3->Use((Unit*)pSource);
             }
 
             return true;
@@ -251,9 +251,7 @@ bool EffectDummyCreature_summon_hakkar(Unit* pCaster, uint32 uiSpellId, SpellEff
 
 void AddSC_sunken_temple()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "at_shade_of_eranikus";
     pNewScript->pAreaTrigger = &AreaTrigger_at_shade_of_eranikus;
     pNewScript->RegisterSelf();

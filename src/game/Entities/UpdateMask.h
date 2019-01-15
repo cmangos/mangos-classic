@@ -50,7 +50,7 @@ class UpdateMask
         uint32 GetBlockCount() const { return mBlocks; }
         uint32 GetLength() const { return mBlocks << 2; }
         uint32 GetCount() const { return mCount; }
-        uint8* GetMask() { return (uint8*)mUpdateMask; }
+        uint8* GetMask() const { return (uint8*)mUpdateMask; }
 
         void SetCount(uint32 valuesCount)
         {
@@ -95,8 +95,7 @@ class UpdateMask
         {
             MANGOS_ASSERT(mask.mCount <= mCount);
 
-            UpdateMask newmask;
-            newmask = *this;
+            UpdateMask newmask = *this;
             newmask &= mask;
 
             return newmask;
@@ -106,8 +105,7 @@ class UpdateMask
         {
             MANGOS_ASSERT(mask.mCount <= mCount);
 
-            UpdateMask newmask;
-            newmask = *this;
+            UpdateMask newmask = *this;
             newmask |= mask;
 
             return newmask;

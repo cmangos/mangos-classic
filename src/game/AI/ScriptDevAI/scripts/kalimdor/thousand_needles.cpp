@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_kanati
 npc_lakota_windsong
 npc_paoka_swiftmountain
@@ -63,7 +63,7 @@ struct npc_kanatiAI : public npc_escortAI
                 break;
             case 1:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_PROTECT_KANATI, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_PROTECT_KANATI, m_creature);
                 break;
         }
     }
@@ -82,7 +82,7 @@ struct npc_kanatiAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_kanati(Creature* pCreature)
+UnitAI* GetAI_npc_kanati(Creature* pCreature)
 {
     return new npc_kanatiAI(pCreature);
 }
@@ -151,7 +151,7 @@ struct npc_lakota_windsongAI : public npc_escortAI
                 break;
             case 45:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_FREE_AT_LAST, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_FREE_AT_LAST, m_creature);
                 break;
         }
     }
@@ -165,7 +165,7 @@ struct npc_lakota_windsongAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_lakota_windsong(Creature* pCreature)
+UnitAI* GetAI_npc_lakota_windsong(Creature* pCreature)
 {
     return new npc_lakota_windsongAI(pCreature);
 }
@@ -223,21 +223,21 @@ struct npc_paoka_swiftmountainAI : public npc_escortAI
                 break;
             case 27:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_HOMEWARD, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_HOMEWARD, m_creature);
                 break;
         }
     }
 
     void DoSpawnWyvern()
     {
-        for (int i = 0; i < 3; ++i)
+        for (auto& i : m_afWyvernLoc)
             m_creature->SummonCreature(NPC_WYVERN,
-                                       m_afWyvernLoc[i][0], m_afWyvernLoc[i][1], m_afWyvernLoc[i][2], 0.0f,
+                i[0], i[1], i[2], 0.0f,
                                        TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
     }
 };
 
-CreatureAI* GetAI_npc_paoka_swiftmountain(Creature* pCreature)
+UnitAI* GetAI_npc_paoka_swiftmountain(Creature* pCreature)
 {
     return new npc_paoka_swiftmountainAI(pCreature);
 }
@@ -304,13 +304,10 @@ struct npc_plucky_johnsonAI : public ScriptedAI
         {
             if (m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
                 return;
-            else
-            {
-                m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
-                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                m_creature->CastSpell(m_creature, SPELL_PLUCKY_HUMAN, TRIGGERED_NONE);
-                m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
-            }
+            m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            m_creature->CastSpell(m_creature, SPELL_PLUCKY_HUMAN, TRIGGERED_NONE);
+            m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
         }
     }
 
@@ -327,8 +324,7 @@ struct npc_plucky_johnsonAI : public ScriptedAI
 
                 return;
             }
-            else
-                m_uiResetTimer -= uiDiff;
+            m_uiResetTimer -= uiDiff;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -338,7 +334,7 @@ struct npc_plucky_johnsonAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_plucky_johnson(Creature* pCreature)
+UnitAI* GetAI_npc_plucky_johnson(Creature* pCreature)
 {
     return new npc_plucky_johnsonAI(pCreature);
 }
@@ -365,9 +361,7 @@ bool GossipSelect_npc_plucky_johnson(Player* pPlayer, Creature* pCreature, uint3
 
 void AddSC_thousand_needles()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_kanati";
     pNewScript->GetAI = &GetAI_npc_kanati;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_kanati;
