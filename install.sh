@@ -4,6 +4,7 @@
 uname="root"
 upasswd="root"
 cmd="mysql -u${uname} -p${upasswd} -s"
+cmd2="mysql -ucmangos -pcmangos -s"
 #创建库
 
 #创建库
@@ -29,18 +30,20 @@ ${cmd} -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER, LOCK TABLE
 ${cmd} -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER, LOCK TABLES, CREATE TEMPORARY TABLES, EXECUTE ON classicrealmd.* TO cmangos@localhost"
 
 
-#创建基础数据
 #修改缓存大小256M(1024*1024*256),检查方法show global variables like 'max_allowed_packet';
+printf "config mysql cache size \n"
 ${cmd} -e "set global max_allowed_packet=268435456"
+
 #创建基础数据
-${cmd} --database=classicmangos  < sql/base/mangos.sql
 printf "importing classicmangos base datas \n"
+${cmd2} --database=classicmangos  < sql/base/mangos.sql
+printf "importing dbc sql files \n"
 for sql_file in `ls sql/base/dbc/original_data/*.sql`; do ${cmd} --database=classicmangos < $sql_file ; done
 for sql_file in `ls sql/base/dbc/cmangos_fixes/*.sql`; do ${cmd} --database=classicmangos < $sql_file ; done
 #创建角色属性数据
 printf "import classiccharacters for wow \n"
-${cmd} classiccharacters < sql/base/characters.sql
+${cmd2} classiccharacters < sql/base/characters.sql
 #创建登录数据库
 printf "import classiccharacters for wow \n"
-${cmd} classicrealmd < sql/base/realmd.sql
+${cmd2} classicrealmd < sql/base/realmd.sql
 printf "import finish！！！ \n"
