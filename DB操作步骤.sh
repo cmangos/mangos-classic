@@ -39,6 +39,8 @@ for sql_file in `ls sql/base/dbc/cmangos_fixes/*.sql`; do ${cmd} --database=clas
 printf "import classiccharacters for wow \n"
 ${cmd} classiccharacters < sql/base/characters.sql
 #创建登录数据库
-printf "import classicelmd for wow \n"
+printf "import classiccharacters for wow \n"
 ${cmd} classicrealmd < sql/base/realmd.sql
+
+${cmd} classicmangos < sql/scriptdev2/scriptdev2.sql
 printf "import finish！！！ \n"
