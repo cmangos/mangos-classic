@@ -35,6 +35,34 @@
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, std::mutex);
 
+template<class T>
+void HashMapHolder<T>::Insert(T* o)
+{
+    WriteGuard guard(i_lock);
+    m_objectMap[o->GetObjectGuid()] = o;
+}
+
+template<class T>
+void HashMapHolder<T>::Remove(T* o)
+{
+    WriteGuard guard(i_lock);
+    m_objectMap.erase(o->GetObjectGuid());
+}
+
+template<class T>
+T* HashMapHolder<T>::Find(ObjectGuid guid)
+{
+    ReadGuard guard(i_lock);
+    typename MapType::iterator itr = m_objectMap.find(guid);
+    return (itr != m_objectMap.end()) ? itr->second : nullptr;
+}
+
+template<class T>
+typename HashMapHolder<T>::MapType& HashMapHolder<T>::GetContainer() { return m_objectMap; }
+
+template<class T>
+typename HashMapHolder<T>::LockType& HashMapHolder<T>::GetLock() { return i_lock; }
+
 ObjectAccessor::ObjectAccessor() {}
 ObjectAccessor::~ObjectAccessor()
 {
@@ -99,8 +127,8 @@ ObjectAccessor::SaveAllPlayers() const
 {
     HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
-    for (HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-        itr->second->SaveToDB();
+    for (auto& itr : m)
+        itr.second->SaveToDB();
 }
 
 void ObjectAccessor::KickPlayer(ObjectGuid guid)
@@ -109,7 +137,6 @@ void ObjectAccessor::KickPlayer(ObjectGuid guid)
     {
         WorldSession* s = p->GetSession();
         s->KickPlayer();                            // mark session to remove at next session list update
-        s->LogoutPlayer(false);                     // logout player without waiting next session list update
     }
 }
 
@@ -167,20 +194,20 @@ void
 ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair, GridType& grid, Map* map)
 {
     Guard guard(i_corpseGuard);
-    for (Player2CorpsesMapType::iterator iter = i_player2corpse.begin(); iter != i_player2corpse.end(); ++iter)
-        if (iter->second->GetGrid() == gridpair)
+    for (auto& iter : i_player2corpse)
+        if (iter.second->GetGrid() == gridpair)
         {
             // verify, if the corpse in our instance (add only corpses which are)
             if (map->Instanceable())
             {
-                if (iter->second->GetInstanceId() == map->GetInstanceId())
+                if (iter.second->GetInstanceId() == map->GetInstanceId())
                 {
-                    grid.AddWorldObject(iter->second);
+                    grid.AddWorldObject(iter.second);
                 }
             }
             else
             {
-                grid.AddWorldObject(iter->second);
+                grid.AddWorldObject(iter.second);
             }
         }
 }

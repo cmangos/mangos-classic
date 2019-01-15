@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackrock_depths.h"
 
 enum eEmperor
@@ -59,14 +59,12 @@ struct boss_emperor_dagran_thaurissanAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        uint32 uiTextId;
         switch (urand(0, 2))
         {
-            case 0: uiTextId = YELL_AGGRO_1; break;
-            case 1: uiTextId = YELL_AGGRO_2; break;
-            case 2: uiTextId = YELL_AGGRO_3; break;
+            case 0: DoScriptText(YELL_AGGRO_1, m_creature); break;
+            case 1: DoScriptText(YELL_AGGRO_2, m_creature); break;
+            case 2: DoScriptText(YELL_AGGRO_3, m_creature); break;
         }
-        DoScriptText(uiTextId, m_creature);
         m_creature->CallForHelp(VISIBLE_RANGE);
     }
 
@@ -123,7 +121,7 @@ struct boss_emperor_dagran_thaurissanAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_emperor_dagran_thaurissan(Creature* pCreature)
+UnitAI* GetAI_boss_emperor_dagran_thaurissan(Creature* pCreature)
 {
     return new boss_emperor_dagran_thaurissanAI(pCreature);
 }
@@ -165,18 +163,9 @@ struct boss_moira_bronzebeardAI : public ScriptedAI
         m_uiMindBlastTimer      = 16000;
         m_uiShadowWordPainTimer = 2000;
         m_uiSmiteTimer          = 8000;
-    }
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, false))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-
-            m_creature->GetMotionMaster()->MoveChase(pWho, 25.0f);
-        }
+        m_attackDistance = 25.0f;
+        m_meleeEnabled = false;
     }
 
     void JustReachedHome() override
@@ -244,16 +233,14 @@ struct boss_moira_bronzebeardAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_moira_bronzebeard(Creature* pCreature)
+UnitAI* GetAI_boss_moira_bronzebeard(Creature* pCreature)
 {
     return new boss_moira_bronzebeardAI(pCreature);
 }
 
 void AddSC_boss_draganthaurissan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_emperor_dagran_thaurissan";
     pNewScript->GetAI = &GetAI_boss_emperor_dagran_thaurissan;
     pNewScript->RegisterSelf();

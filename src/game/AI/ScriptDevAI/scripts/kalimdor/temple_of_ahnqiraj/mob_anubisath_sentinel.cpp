@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {
@@ -155,17 +155,17 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
             return;
         }
 
-        std::list<Creature*> lAssistList;
+        CreatureList lAssistList;
         GetCreatureListWithEntryInGrid(lAssistList, m_creature, m_creature->GetEntry(), 80.0f);
 
-        for (std::list<Creature*>::iterator iter = lAssistList.begin(); iter != lAssistList.end(); ++iter)
+        for (auto& iter : lAssistList)
         {
-            m_lAssistList.push_back((*iter)->GetObjectGuid());
+            m_lAssistList.push_back(iter->GetObjectGuid());
 
-            if ((*iter)->GetObjectGuid() == m_creature->GetObjectGuid())
+            if (iter->GetObjectGuid() == m_creature->GetObjectGuid())
                 continue;
 
-            (*iter)->AI()->AttackStart(pTarget);
+            iter->AI()->AttackStart(pTarget);
         }
 
         if (m_lAssistList.size() != MAX_BUDDY)
@@ -190,16 +190,14 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_anubisath_sentinel(Creature* pCreature)
+UnitAI* GetAI_npc_anubisath_sentinel(Creature* pCreature)
 {
     return new npc_anubisath_sentinelAI(pCreature);
 }
 
 void AddSC_mob_anubisath_sentinel()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mob_anubisath_sentinel";
     pNewScript->GetAI = &GetAI_npc_anubisath_sentinel;
     pNewScript->RegisterSelf();

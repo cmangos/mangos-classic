@@ -24,6 +24,7 @@
 #include "Maps/MapPersistentStateMgr.h"
 #include "World/World.h"
 #include "Policies/Singleton.h"
+#include <algorithm>
 
 INSTANTIATE_SINGLETON_1(PoolManager);
 
@@ -191,34 +192,70 @@ void PoolGroup<T>::SetExcludeObject(uint32 guid, bool state)
     }
 }
 
-
 template <class T>
 PoolObject* PoolGroup<T>::RollOne(SpawnedPoolData& spawns, uint32 triggerFrom)
 {
+    PoolObject* explicitlyObjFound = nullptr;
+
     if (!ExplicitlyChanced.empty())
     {
         float roll = (float)rand_chance();
 
-        for (uint32 i = 0; i < ExplicitlyChanced.size(); ++i)
+        std::vector <PoolObject*> explicitlyChancedVector;
+
+        // call memory manager once to reserve enough memory for performance
+        explicitlyChancedVector.reserve(ExplicitlyChanced.size());
+
+        // fill new vector with address of object in EqualChanced list
+        std::transform(ExplicitlyChanced.begin(), ExplicitlyChanced.end(), std::back_inserter(explicitlyChancedVector), [](PoolObject& objPtr) { return &objPtr; });
+
+        // randomize the new vector
+        random_shuffle(explicitlyChancedVector.begin(), explicitlyChancedVector.end());
+
+        for (auto obj : explicitlyChancedVector)
         {
-            roll -= ExplicitlyChanced[i].chance;
-            // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
-            // so this need explicit check for this case
-            if (roll < 0 && !ExplicitlyChanced[i].exclude && (ExplicitlyChanced[i].guid == triggerFrom || !spawns.IsSpawnedObject<T>(ExplicitlyChanced[i].guid)))
-                return &ExplicitlyChanced[i];
+            if (obj->exclude)
+                continue;
+
+            if (obj->guid != triggerFrom && spawns.IsSpawnedObject<T>(obj->guid))
+                continue;
+
+            // we found an object but it may have no luck to be picked so we save it in case of no other object have been picked.
+            if (!explicitlyObjFound)
+                explicitlyObjFound = obj;
+
+            if (roll < obj->chance)
+                return obj;
         }
     }
 
     if (!EqualChanced.empty())
     {
-        int32 index = irand(0, EqualChanced.size() - 1);
-        // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
-        // so this need explicit check for this case
-        if (!EqualChanced[index].exclude && (EqualChanced[index].guid == triggerFrom || !spawns.IsSpawnedObject<T>(EqualChanced[index].guid)))
-            return &EqualChanced[index];
+        std::vector <PoolObject*> equalyChancedVector;
+
+        // call memory manager once to reserve enough memory for performance
+        equalyChancedVector.reserve(EqualChanced.size());
+
+        // fill new vector with address of object in EqualChanced list
+        std::transform(EqualChanced.begin(), EqualChanced.end(), std::back_inserter(equalyChancedVector), [](PoolObject& objPtr) { return &objPtr; });
+
+        // randomize the new vector
+        random_shuffle(equalyChancedVector.begin(), equalyChancedVector.end());
+
+        for (auto obj : equalyChancedVector)
+        {
+            if (obj->exclude)
+                continue;
+
+            if (obj->guid != triggerFrom && spawns.IsSpawnedObject<T>(obj->guid))
+                continue;
+
+            return obj;
+        }
     }
 
-    return nullptr;
+    // return first explicitly chanced object if there is one
+    return explicitlyObjFound;
 }
 
 // Main method to despawn a creature or gameobject in a pool
@@ -392,7 +429,6 @@ void PoolGroup<Creature>::Spawn1Object(MapPersistentState& mapState, PoolObject*
                 if (!pCreature->LoadFromDB(obj->guid, dataMap))
                 {
                     delete pCreature;
-                    return;
                 }
                 else
                 {
@@ -436,7 +472,6 @@ void PoolGroup<GameObject>::Spawn1Object(MapPersistentState& mapState, PoolObjec
                 if (!pGameobject->LoadFromDB(obj->guid, dataMap))
                 {
                     delete pGameobject;
-                    return;
                 }
                 else
                 {
@@ -567,12 +602,9 @@ void PoolManager::LoadFromDB()
         sLog.outString();
         return;
     }
-    else
-    {
-        Field* fields = result->Fetch();
-        max_pool_id = fields[0].GetUInt16();
-        delete result;
-    }
+    Field* fields = result->Fetch();
+    max_pool_id = fields[0].GetUInt16();
+    delete result;
 
     mPoolTemplate.resize(max_pool_id + 1);
 
@@ -591,7 +623,7 @@ void PoolManager::LoadFromDB()
     do
     {
         ++count;
-        Field* fields = result->Fetch();
+        fields = result->Fetch();
 
         bar.step();
 
@@ -631,7 +663,7 @@ void PoolManager::LoadFromDB()
         BarGoLink bar2(result->GetRowCount());
         do
         {
-            Field* fields = result->Fetch();
+            fields = result->Fetch();
 
             bar2.step();
 
@@ -692,7 +724,7 @@ void PoolManager::LoadFromDB()
         BarGoLink bar2(result->GetRowCount());
         do
         {
-            Field* fields = result->Fetch();
+            fields = result->Fetch();
 
             bar2.step();
 
@@ -769,7 +801,7 @@ void PoolManager::LoadFromDB()
         BarGoLink bar2(result->GetRowCount());
         do
         {
-            Field* fields = result->Fetch();
+            fields = result->Fetch();
 
             bar2.step();
 
@@ -831,7 +863,7 @@ void PoolManager::LoadFromDB()
         BarGoLink bar2(result->GetRowCount());
         do
         {
-            Field* fields = result->Fetch();
+            fields = result->Fetch();
 
             bar2.step();
 
@@ -906,7 +938,7 @@ void PoolManager::LoadFromDB()
         BarGoLink bar2(result->GetRowCount());
         do
         {
-            Field* fields = result->Fetch();
+            fields = result->Fetch();
 
             bar2.step();
 
@@ -974,8 +1006,8 @@ void PoolManager::LoadFromDB()
                 {
                     std::ostringstream ss;
                     ss << "The pool(s) ";
-                    for (std::set<uint16>::const_iterator itr = checkedPools.begin(); itr != checkedPools.end(); ++itr)
-                        ss << *itr << " ";
+                    for (uint16 checkedPool : checkedPools)
+                        ss << checkedPool << " ";
                     ss << "create(s) a circular reference, which can cause the server to freeze.\nRemoving the last link between mother pool "
                        << poolItr->first << " and child pool " << poolItr->second;
                     sLog.outErrorDb("%s", ss.str().c_str());

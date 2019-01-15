@@ -17,6 +17,11 @@
  */
 
 #include "NullCreatureAI.h"
+#include "Entities/Creature.h"
+
+NullCreatureAI::NullCreatureAI(Creature* creature) : CreatureAI(creature)
+{
+}
 
 NullCreatureAI::~NullCreatureAI()
 {

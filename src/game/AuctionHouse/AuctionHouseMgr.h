@@ -73,7 +73,7 @@ struct AuctionEntry
     bool BuildAuctionInfo(WorldPacket& data) const;
     void DeleteFromDB() const;
     void SaveToDB() const;
-    void AuctionBidWinning(Player* bidder = nullptr);
+    void AuctionBidWinning(Player* newbidder = nullptr);
     bool UpdateBid(uint32 newbid, Player* newbidder = nullptr);// true if normal bid, false if buyout, bidder==nullptr for generated bid
 };
 

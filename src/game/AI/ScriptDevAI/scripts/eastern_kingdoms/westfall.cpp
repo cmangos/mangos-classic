@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_daphne_stilwell
 npc_defias_traitor
 EndContentData */
@@ -104,7 +104,7 @@ struct npc_daphne_stilwellAI : public npc_escortAI
                 case 7: DoScriptText(SAY_DS_DOWN_1, m_creature); break;
                 case 8: DoScriptText(SAY_DS_DOWN_2, m_creature); break;
                 case 9:
-                    if (m_lSummonedRaidersGUIDs.size() == 0)
+                    if (m_lSummonedRaidersGUIDs.empty())
                         DoScriptText(SAY_DS_DOWN_3, m_creature);
                     break;
             }
@@ -155,7 +155,7 @@ struct npc_daphne_stilwellAI : public npc_escortAI
                 break;
             case 17:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_TOME_VALOR, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TOME_VALOR, m_creature);
                 break;
             case 18:
                 DoEndEscort();
@@ -240,7 +240,7 @@ struct npc_daphne_stilwellAI : public npc_escortAI
     {
         m_lSummonedRaidersGUIDs.remove(pSummoned->GetObjectGuid());
 
-        if (m_uiWPHolder >= 9 && m_lSummonedRaidersGUIDs.size() == 0)
+        if (m_uiWPHolder >= 9 && m_lSummonedRaidersGUIDs.empty())
             SetEscortPaused(false);
     }
 
@@ -298,7 +298,7 @@ bool QuestAccept_npc_daphne_stilwell(Player* pPlayer, Creature* pCreature, const
     return true;
 }
 
-CreatureAI* GetAI_npc_daphne_stilwell(Creature* pCreature)
+UnitAI* GetAI_npc_daphne_stilwell(Creature* pCreature)
 {
     return new npc_daphne_stilwellAI(pCreature);
 }
@@ -337,7 +337,7 @@ struct npc_defias_traitorAI : public npc_escortAI
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_END, m_creature, pPlayer);
-                    pPlayer->GroupEventHappens(QUEST_DEFIAS_BROTHERHOOD, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_DEFIAS_BROTHERHOOD, m_creature);
                 }
                 break;
         }
@@ -364,16 +364,14 @@ bool QuestAccept_npc_defias_traitor(Player* pPlayer, Creature* pCreature, const 
     return true;
 }
 
-CreatureAI* GetAI_npc_defias_traitor(Creature* pCreature)
+UnitAI* GetAI_npc_defias_traitor(Creature* pCreature)
 {
     return new npc_defias_traitorAI(pCreature);
 }
 
 void AddSC_westfall()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_daphne_stilwell";
     pNewScript->GetAI = &GetAI_npc_daphne_stilwell;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_daphne_stilwell;

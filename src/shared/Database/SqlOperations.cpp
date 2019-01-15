@@ -185,8 +185,7 @@ QueryResult* SqlQueryHolder::GetResult(size_t index)
         /// when you get a result aways remember to delete it!
         return m_queries[index].second;
     }
-    else
-        return nullptr;
+    return nullptr;
 }
 
 void SqlQueryHolder::SetResult(size_t index, QueryResult* result)
@@ -198,14 +197,14 @@ void SqlQueryHolder::SetResult(size_t index, QueryResult* result)
 
 SqlQueryHolder::~SqlQueryHolder()
 {
-    for (size_t i = 0; i < m_queries.size(); ++i)
+    for (auto& m_querie : m_queries)
     {
         /// if the result was never used, free the resources
         /// results used already (getresult called) are expected to be deleted
-        if (m_queries[i].first != nullptr)
+        if (m_querie.first != nullptr)
         {
-            delete[](const_cast<char*>(m_queries[i].first));
-            delete m_queries[i].second;
+            delete[](const_cast<char*>(m_querie.first));
+            delete m_querie.second;
         }
     }
 }

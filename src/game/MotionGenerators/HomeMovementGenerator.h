@@ -32,7 +32,10 @@ class HomeMovementGenerator<Creature>
 {
     public:
 
-        HomeMovementGenerator(bool _runHome = true) : arrived(false), runHome(_runHome) {}
+        HomeMovementGenerator(bool _runHome = true) : arrived(false), runHome(_runHome), wasActive(false)
+        {
+        }
+
         ~HomeMovementGenerator() {}
 
         void Initialize(Creature&);
@@ -46,5 +49,6 @@ class HomeMovementGenerator<Creature>
         void _setTargetLocation(Creature&);
         bool arrived;
         bool runHome;
+        bool wasActive;
 };
 #endif

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "temple_of_ahnqiraj.h"
 
 enum
@@ -266,26 +266,24 @@ struct boss_yaujAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_yauj(Creature* pCreature)
+UnitAI* GetAI_boss_yauj(Creature* pCreature)
 {
     return new boss_yaujAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_vem(Creature* pCreature)
+UnitAI* GetAI_boss_vem(Creature* pCreature)
 {
     return new boss_vemAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_kri(Creature* pCreature)
+UnitAI* GetAI_boss_kri(Creature* pCreature)
 {
     return new boss_kriAI(pCreature);
 }
 
 void AddSC_bug_trio()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_kri";
     pNewScript->GetAI = &GetAI_boss_kri;
     pNewScript->RegisterSelf();

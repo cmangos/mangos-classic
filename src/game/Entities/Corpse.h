@@ -59,7 +59,7 @@ class Corpse : public WorldObject
         bool Create(uint32 guidlow, Player* owner);
 
         void SaveToDB();
-        bool LoadFromDB(uint32 guid, Field* fields);
+        bool LoadFromDB(uint32 lowguid, Field* fields);
 
         void DeleteBonesFromWorld();
         void DeleteFromDB() const;
@@ -77,9 +77,6 @@ class Corpse : public WorldObject
         time_t const& GetGhostTime() const { return m_time; }
         void ResetGhostTime() { m_time = time(nullptr); }
         CorpseType GetType() const { return m_type; }
-
-        bool IsHostileTo(Unit const* unit) const override;
-        bool IsFriendlyTo(Unit const* unit) const override;
 
         GridPair const& GetGrid() const { return m_grid; }
         void SetGrid(GridPair const& grid) { m_grid = grid; }

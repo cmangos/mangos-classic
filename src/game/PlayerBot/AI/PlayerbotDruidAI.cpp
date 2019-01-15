@@ -668,8 +668,12 @@ void PlayerbotDruidAI::DoNonCombatActions()
     CheckForms();
 
     // Nothing else to do, Night Elves will cast Shadowmeld to reduce their aggro versus patrols or nearby mobs
-    if (SHADOWMELD && !m_bot->HasAura(SHADOWMELD, EFFECT_INDEX_0) && m_ai->CastSpell(SHADOWMELD, *m_bot))
-        return;
+    if (SHADOWMELD && !m_bot->isMovingOrTurning()
+        && !m_bot->IsMounted()
+        && !m_bot->HasAura(SHADOWMELD, EFFECT_INDEX_0))
+    {
+        m_ai->CastSpell(SHADOWMELD, *m_bot);
+    }
 } // end DoNonCombatActions
 
 bool PlayerbotDruidAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target)

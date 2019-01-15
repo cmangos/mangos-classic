@@ -61,7 +61,7 @@ namespace MaNGOS
             bool wait();
             void destroy();
 
-            void setPriority(Priority type);
+            void setPriority(Priority priority);
 
             static void Sleep(unsigned long msecs);
             static std::thread::id currentId();

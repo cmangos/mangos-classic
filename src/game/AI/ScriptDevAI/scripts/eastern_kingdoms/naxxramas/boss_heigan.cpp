@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "naxxramas.h"
 
 enum
@@ -200,8 +200,7 @@ struct boss_heiganAI : public ScriptedAI
                 ResetPhase();
                 return;
             }
-            else
-                m_uiPhaseTimer -= uiDiff;
+            m_uiPhaseTimer -= uiDiff;
 
             if (m_uiStartChannelingTimer)
             {
@@ -259,16 +258,14 @@ struct boss_heiganAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_heigan(Creature* pCreature)
+UnitAI* GetAI_boss_heigan(Creature* pCreature)
 {
     return new boss_heiganAI(pCreature);
 }
 
 void AddSC_boss_heigan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_heigan";
     pNewScript->GetAI = &GetAI_boss_heigan;
     pNewScript->RegisterSelf();

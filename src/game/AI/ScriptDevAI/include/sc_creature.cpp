@@ -2,7 +2,7 @@
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Entities/Item.h"
 #include "Spells/Spell.h"
 #include "WorldPacket.h"
@@ -65,7 +65,7 @@ void ScriptedAI::UpdateAI(const uint32 /*diff*/)
  */
 void ScriptedAI::EnterEvadeMode()
 {
-    CreatureAI::EnterEvadeMode();
+    UnitAI::EnterEvadeMode();
 
     Reset();
 }
@@ -76,10 +76,10 @@ void ScriptedAI::JustRespawned()
     Reset();
 }
 
-void ScriptedAI::DoStartMovement(Unit* victim, float distance, float angle)
+void ScriptedAI::DoStartMovement(Unit* victim)
 {
     if (victim)
-        m_creature->GetMotionMaster()->MoveChase(victim, distance, angle);
+        m_creature->GetMotionMaster()->MoveChase(victim, m_attackDistance, m_attackAngle, m_moveFurther);
 }
 
 void ScriptedAI::DoStartNoMovement(Unit* victim)
@@ -127,13 +127,10 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* target, int32 school, int32 mech
 
     uint32 spellCount = 0;
 
-    SpellEntry const* tempSpellInfo;
-    SpellRangeEntry const* tempRange;
-
     // Check if each spell is viable(set it to null if not)
     for (uint8 i = 0; i < 4; ++i)
     {
-        tempSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(m_creature->m_spells[i]);
+        SpellEntry const* tempSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(m_creature->m_spells[i]);
 
         // This spell doesn't exist
         if (!tempSpellInfo)
@@ -168,7 +165,7 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* target, int32 school, int32 mech
             continue;
 
         // Get the Range
-        tempRange = GetSpellRangeStore()->LookupEntry(tempSpellInfo->rangeIndex);
+        SpellRangeEntry const* tempRange = GetSpellRangeStore()->LookupEntry(tempSpellInfo->rangeIndex);
 
         // Spell has invalid range store so we can't use it
         if (!tempRange)
@@ -228,14 +225,12 @@ void FillSpellSummary()
 {
     SpellSummary = new TSpellSummary[GetSpellStore()->GetMaxEntry()];
 
-    SpellEntry const* tempSpell;
-
     for (uint32 i = 0; i < GetSpellStore()->GetMaxEntry(); ++i)
     {
         SpellSummary[i].Effects = 0;
         SpellSummary[i].Targets = 0;
 
-        tempSpell = GetSpellStore()->LookupEntry<SpellEntry>(i);
+        SpellEntry const* tempSpell = GetSpellStore()->LookupEntry<SpellEntry>(i);
         // This spell doesn't exist
         if (!tempSpell)
             continue;
@@ -243,49 +238,49 @@ void FillSpellSummary()
         for (uint8 j = 0; j < 3; ++j)
         {
             // Spell targets self
-            if (tempSpell->EffectImplicitTargetA[j] == TARGET_SELF)
+            if (tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_CASTER)
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_SELF - 1);
 
             // Spell targets a single enemy
-            if (tempSpell->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_CURRENT_ENEMY_COORDINATES)
+            if (tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_ENEMY ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_LOCATION_CASTER_TARGET_POSITION)
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_SINGLE_ENEMY - 1);
 
             // Spell targets AoE at enemy
-            if (tempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_INSTANT ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
+            if (tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_LOCATION_CASTER_SRC ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC)
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_AOE_ENEMY - 1);
 
             // Spell targets an enemy
-            if (tempSpell->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_CURRENT_ENEMY_COORDINATES ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_INSTANT ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
+            if (tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_ENEMY ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_LOCATION_CASTER_TARGET_POSITION ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_LOCATION_CASTER_SRC ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC)
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_ANY_ENEMY - 1);
 
             // Spell targets a single friend(or self)
-            if (tempSpell->EffectImplicitTargetA[j] == TARGET_SELF ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_FRIEND ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_PARTY)
+            if (tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_CASTER ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_FRIEND ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_PARTY)
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_SINGLE_FRIEND - 1);
 
             // Spell targets aoe friends
-            if (tempSpell->EffectImplicitTargetA[j] == TARGET_ALL_PARTY_AROUND_CASTER ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_AREAEFFECT_PARTY ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES)
+            if (tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_FRIEND_AND_PARTY ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_LOCATION_CASTER_SRC)
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_AOE_FRIEND - 1);
 
             // Spell targets any friend(or self)
-            if (tempSpell->EffectImplicitTargetA[j] == TARGET_SELF ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_FRIEND ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_PARTY ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_ALL_PARTY_AROUND_CASTER ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_AREAEFFECT_PARTY ||
-                    tempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES)
+            if (tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_CASTER ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_FRIEND ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_PARTY ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_FRIEND_AND_PARTY ||
+                    tempSpell->EffectImplicitTargetA[j] == TARGET_LOCATION_CASTER_SRC)
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_ANY_FRIEND - 1);
 
             // Make sure that this spell includes a damage effect
@@ -318,9 +313,9 @@ void ScriptedAI::DoResetThreat()
     }
 
     ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-    for (ThreatList::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
+    for (auto itr : tList)
     {
-        Unit* unit = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid());
+        Unit* unit = m_creature->GetMap()->GetUnit(itr->getUnitGuid());
 
         if (unit && m_creature->getThreatManager().getThreat(unit))
             m_creature->getThreatManager().modifyThreatPercent(unit, -100);
@@ -341,9 +336,9 @@ void ScriptedAI::DoTeleportPlayer(Unit* unit, float x, float y, float z, float o
     ((Player*)unit)->TeleportTo(unit->GetMapId(), x, y, z, ori, TELE_TO_NOT_LEAVE_COMBAT);
 }
 
-std::list<Creature*> ScriptedAI::DoFindFriendlyCC(float range)
+CreatureList ScriptedAI::DoFindFriendlyCC(float range)
 {
-    std::list<Creature*> creatureList;
+    CreatureList creatureList;
 
     MaNGOS::FriendlyCCedInRangeCheck u_check(m_creature, range);
     MaNGOS::CreatureListSearcher<MaNGOS::FriendlyCCedInRangeCheck> searcher(creatureList, u_check);
@@ -353,9 +348,9 @@ std::list<Creature*> ScriptedAI::DoFindFriendlyCC(float range)
     return creatureList;
 }
 
-std::list<Creature*> ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 spellId)
+CreatureList ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 spellId)
 {
-    std::list<Creature*> creatureList;
+    CreatureList creatureList;
 
     MaNGOS::FriendlyMissingBuffInRangeCheck u_check(m_creature, range, spellId);
     MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRangeCheck> searcher(creatureList, u_check);
@@ -365,7 +360,7 @@ std::list<Creature*> ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 s
     return creatureList;
 }
 
-Player* ScriptedAI::GetPlayerAtMinimumRange(float minimumRange)
+Player* ScriptedAI::GetPlayerAtMinimumRange(float minimumRange) const
 {
     Player* player = nullptr;
 
@@ -435,6 +430,14 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
     return true;
 }
 
+void ScriptedAI::DespawnGuids(GuidVector& spawns)
+{
+    for (ObjectGuid& guid : spawns)
+        if (Creature* spawn = m_creature->GetMap()->GetCreature(guid))
+            spawn->ForcedDespawn();
+    spawns.clear();
+}
+
 void Scripted_NoMovementAI::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage("Subclass of Scripted_NoMovementAI");
@@ -442,7 +445,7 @@ void Scripted_NoMovementAI::GetAIInformation(ChatHandler& reader)
 
 void Scripted_NoMovementAI::AttackStart(Unit* who)
 {
-    if (who && m_creature->Attack(who, true))
+    if (who && m_creature->Attack(who, m_meleeEnabled))
     {
         m_creature->AddThreat(who);
         m_creature->SetInCombatWith(who);

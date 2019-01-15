@@ -16,14 +16,14 @@
 
 /* ScriptData
 SDName: Boss_Golemagg
-SD%Complete: 80
-SDComment: Rager need to be tied to boss (Despawn on boss-death)
+SD%Complete: 100
+SDComment:
 SDCategory: Molten Core
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 
 enum
@@ -37,7 +37,9 @@ enum
 
     // Core Rager
     EMOTE_LOW_HP            = -1409002,
+    SPELL_QUIET_SUICIDE     = 3617,
     SPELL_THRASH            = 12787,
+    SPELL_FULL_HEAL         = 17683,
     SPELL_MANGLE            = 19820
 };
 
@@ -75,6 +77,14 @@ struct boss_golemaggAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
+        // Send event to the Core Ragers so they know that Golemagg is dead and that they must go suicide
+        CreatureList lCoreRagerList;
+        GetCreatureListWithEntryInGrid(lCoreRagerList, m_creature, NPC_CORE_RAGER, 100.0f);
+        for (auto& itr : lCoreRagerList)
+        {
+            if (itr->isAlive())
+                m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, itr);
+        }
         if (m_pInstance)
             m_pInstance->SetData(TYPE_GOLEMAGG, DONE);
     }
@@ -162,7 +172,7 @@ struct mob_core_ragerAI : public ScriptedAI
             if (m_pInstance && m_pInstance->GetData(TYPE_GOLEMAGG) != DONE)
             {
                 DoScriptText(EMOTE_LOW_HP, m_creature);
-                m_creature->SetHealth(m_creature->GetMaxHealth());
+                DoCastSpellIfCan(m_creature, SPELL_FULL_HEAL, CAST_TRIGGERED);
                 uiDamage = 0;
             }
         }
@@ -171,6 +181,13 @@ struct mob_core_ragerAI : public ScriptedAI
     void JustReachedHome() override
     {
         DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+    
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        // Event sent by Golemagg at the time of his death so Core Rager knows he can self-suicide
+        if (pSender->GetEntry() == NPC_GOLEMAGG && eventType == AI_EVENT_CUSTOM_A)
+            DoCastSpellIfCan(m_creature, SPELL_QUIET_SUICIDE, CAST_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -191,21 +208,19 @@ struct mob_core_ragerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_golemagg(Creature* pCreature)
+UnitAI* GetAI_boss_golemagg(Creature* pCreature)
 {
     return new boss_golemaggAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_core_rager(Creature* pCreature)
+UnitAI* GetAI_mob_core_rager(Creature* pCreature)
 {
     return new mob_core_ragerAI(pCreature);
 }
 
 void AddSC_boss_golemagg()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_golemagg";
     pNewScript->GetAI = &GetAI_boss_golemagg;
     pNewScript->RegisterSelf();

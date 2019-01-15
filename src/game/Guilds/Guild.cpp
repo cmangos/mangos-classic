@@ -302,9 +302,9 @@ bool Guild::CheckGuildStructure()
         SetLeader(m_LeaderGuid);
 
     // Allow only 1 guildmaster, set other to officer
-    for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
+    for (auto& itr : members)
     {
-        MemberSlot& member = itr->second;
+        MemberSlot& member = itr.second;
         if (member.RankId == GR_GUILDMASTER && m_LeaderGuid != member.guid)
             member.ChangeRank(GR_OFFICER);
     }
@@ -321,7 +321,6 @@ bool Guild::LoadRanksFromDB(QueryResult* guildRanksResult)
         return true;
     }
 
-    Field* fields;
     bool broken_ranks = false;
 
     // GUILD RANKS are sequence starting from 0 = GUILD_MASTER (ALL PRIVILEGES) to max 9 (lowest privileges)
@@ -331,7 +330,7 @@ bool Guild::LoadRanksFromDB(QueryResult* guildRanksResult)
 
     do
     {
-        fields = guildRanksResult->Fetch();
+        Field* fields = guildRanksResult->Fetch();
         // condition that would be true when all ranks in QueryResult will be processed and guild without ranks is being processed
         if (!fields)
             break;
@@ -495,18 +494,18 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
         MemberSlot* oldLeader = nullptr;
         MemberSlot* best = nullptr;
         ObjectGuid newLeaderGUID;
-        for (Guild::MemberList::iterator i = members.begin(); i != members.end(); ++i)
+        for (auto& member : members)
         {
-            if (i->first == lowguid)
+            if (member.first == lowguid)
             {
-                oldLeader = &(i->second);
+                oldLeader = &(member.second);
                 continue;
             }
 
-            if (!best || best->RankId > i->second.RankId)
+            if (!best || best->RankId > member.second.RankId)
             {
-                best = &(i->second);
-                newLeaderGUID = ObjectGuid(HIGHGUID_PLAYER, i->first);
+                best = &(member.second);
+                newLeaderGUID = ObjectGuid(HIGHGUID_PLAYER, member.first);
             }
         }
 
@@ -728,7 +727,7 @@ void Guild::Roster(WorldSession* session /*= nullptr*/)
             data << uint8(pl->getClass());
             data << uint32(pl->GetZoneId());
             data << itr->second.Pnote;
-            data << itr->second.OFFnote;
+            data << ((session && HasRankRight(session->GetPlayer()->GetRank(), GR_RIGHT_VIEWOFFNOTE)) ? itr->second.OFFnote : "");
         }
         else
         {
@@ -741,7 +740,7 @@ void Guild::Roster(WorldSession* session /*= nullptr*/)
             data << uint32(itr->second.ZoneId);
             data << float(float(time(nullptr) - itr->second.LogoutTime) / DAY);
             data << itr->second.Pnote;
-            data << itr->second.OFFnote;
+            data << ((session && HasRankRight(session->GetPlayer()->GetRank(), GR_RIGHT_VIEWOFFNOTE)) ? itr->second.OFFnote : "");
         }
     }
     if (session)

@@ -171,9 +171,9 @@ bool MailDraft::prepareItems(Player* receiver)
  */
 void MailDraft::deleteIncludedItems(bool inDB /**= false*/)
 {
-    for (MailItemMap::iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)
+    for (auto& m_item : m_items)
     {
-        Item* item = mailItemIter->second;
+        Item* item = m_item.second;
 
         if (inDB)
             CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'", item->GetGUIDLow());
@@ -205,9 +205,9 @@ void MailDraft::CloneFrom(MailDraft const& draft)
     m_money = draft.GetMoney();
     m_COD = draft.GetCOD();
 
-    for (MailItemMap::const_iterator mailItemIter = draft.m_items.begin(); mailItemIter != draft.m_items.end(); ++mailItemIter)
+    for (const auto& m_item : draft.m_items)
     {
-        Item* item = mailItemIter->second;
+        Item* item = m_item.second;
 
         if (Item* newitem = item->CloneItem(item->GetCount()))
         {
@@ -247,9 +247,9 @@ void MailDraft::SendReturnToSender(uint32 sender_acc, ObjectGuid sender_guid, Ob
 
         // set owner to new receiver (to prevent delete item with sender char deleting)
         CharacterDatabase.BeginTransaction();
-        for (MailItemMap::iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)
+        for (auto& m_item : m_items)
         {
-            Item* item = mailItemIter->second;
+            Item* item = m_item.second;
             item->SaveToDB();                               // item not in inventory and can be save standalone
             // owner in data will set at mail receive and item extracting
             CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid = '%u' WHERE guid='%u'", receiver_guid.GetCounter(), item->GetGUIDLow());
@@ -361,8 +361,8 @@ void MailDraft::SendMailTo(MailReceiver const& receiver, MailSender const& sende
 
         if (!m_items.empty())
         {
-            for (MailItemMap::iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)
-                pReceiver->AddMItem(mailItemIter->second);
+            for (auto& m_item : m_items)
+                pReceiver->AddMItem(m_item.second);
         }
     }
     else if (!m_items.empty())

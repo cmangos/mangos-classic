@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 mob_anubisath_guardian
 EndContentData */
 
@@ -157,16 +157,14 @@ struct mob_anubisath_guardianAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_anubisath_guardian(Creature* pCreature)
+UnitAI* GetAI_mob_anubisath_guardian(Creature* pCreature)
 {
     return new mob_anubisath_guardianAI(pCreature);
 }
 
 void AddSC_ruins_of_ahnqiraj()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mob_anubisath_guardian";
     pNewScript->GetAI = &GetAI_mob_anubisath_guardian;
     pNewScript->RegisterSelf();

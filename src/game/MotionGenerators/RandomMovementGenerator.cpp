@@ -58,7 +58,6 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
     }
     else
         i_nextMoveTime.Reset(50);                           // Retry later
-    return;
 }
 
 template<>

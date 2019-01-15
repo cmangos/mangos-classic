@@ -178,7 +178,7 @@ typedef std::pair<QuestRelationsMap::const_iterator, QuestRelationsMap::const_it
 
 struct PetLevelInfo
 {
-    PetLevelInfo() : health(0), mana(0), armor(0) { for (int i = 0; i < MAX_STATS; ++i) stats[i] = 0; }
+    PetLevelInfo() : health(0), mana(0), armor(0) { for (unsigned short& stat : stats) stat = 0; }
 
     uint16 stats[MAX_STATS];
     uint16 health;
@@ -272,6 +272,14 @@ struct DungeonEncounter
 typedef std::multimap<uint32, DungeonEncounter const*> DungeonEncounterMap;
 typedef std::pair<DungeonEncounterMap::const_iterator, DungeonEncounterMap::const_iterator> DungeonEncounterMapBounds;
 
+struct TaxiShortcutData
+{
+    uint32 lengthTakeoff;
+    uint32 lengthLanding;
+};
+
+typedef std::unordered_multimap <uint32 /*nodeid*/, TaxiShortcutData> TaxiShortcutMap;
+
 struct GraveYardData
 {
     uint32 safeLocId;
@@ -301,6 +309,19 @@ enum
     QUESTGIVER_GAMEOBJECT = 1,
     QUESTGIVER_TYPE_MAX = 2,
 };
+
+struct TrainerGreeting
+{
+    std::string text;
+};
+
+struct TrainerGreetingLocale
+{
+    std::vector<std::string> localeText;
+};
+
+typedef std::map<uint32, TrainerGreeting> TrainerGreetingMap;
+typedef std::map<uint32, TrainerGreetingLocale> TrainerGreetingLocaleMap;
 
 enum ConditionType
 {
@@ -388,7 +409,7 @@ class PlayerCondition
         static bool CanBeUsedWithoutPlayer(uint16 entry);
 
         // Checks if the player meets the condition
-        bool Meets(Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
+        bool Meets(Player const* player, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
 
     private:
         bool CheckParamRequirements(Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
@@ -542,6 +563,9 @@ class ObjectMgr
         uint32 GetPlayerAccountIdByGUID(ObjectGuid guid) const;
         uint32 GetPlayerAccountIdByPlayerName(const std::string& name) const;
 
+        bool AddTaxiShortcut(const TaxiPathEntry* path, uint32 lengthTakeoff, uint32 lengthLanding);
+        bool GetTaxiShortcut(uint32 pathid, TaxiShortcutData& data);
+        void LoadTaxiShortcuts();
         uint32 GetNearestTaxiNode(float x, float y, float z, uint32 mapid, Team team) const;
         void GetTaxiPath(uint32 source, uint32 destination, uint32& path, uint32& cost) const;
         uint32 GetTaxiMountDisplayId(uint32 id, Team team, bool allowed_alt_team = false) const;
@@ -573,12 +597,13 @@ class ObjectMgr
         GossipText const* GetGossipText(uint32 Text_ID) const;
 
         QuestgiverGreeting const* GetQuestgiverGreetingData(uint32 entry, uint32 type) const;
+        TrainerGreeting const* GetTrainerGreetingData(uint32 entry) const;
 
         WorldSafeLocsEntry const* GetClosestGraveYard(float x, float y, float z, uint32 MapId, Team team);
-        bool AddGraveYardLink(uint32 id, uint32 zone, Team team, bool inDB = true);
+        bool AddGraveYardLink(uint32 id, uint32 zoneId, Team team, bool inDB = true);
         void SetGraveYardLinkTeam(uint32 id, uint32 zoneId, Team team);
         void LoadGraveyardZones();
-        GraveYardData const* FindGraveYardData(uint32 id, uint32 zone) const;
+        GraveYardData const* FindGraveYardData(uint32 id, uint32 zoneId) const;
 
         AreaTrigger const* GetAreaTrigger(uint32 trigger) const
         {
@@ -588,7 +613,7 @@ class ObjectMgr
             return nullptr;
         }
 
-        AreaTrigger const* GetGoBackTrigger(uint32 Map) const;
+        AreaTrigger const* GetGoBackTrigger(uint32 map_id) const;
         AreaTrigger const* GetMapEntranceTrigger(uint32 Map) const;
 
         RepRewardRate const* GetRepRewardRate(uint32 factionId) const
@@ -645,6 +670,7 @@ class ObjectMgr
         static ItemPrototype const* GetItemPrototype(uint32 id);                    ///< Wrapper for sItemStorage.LookupEntry
         static InstanceTemplate const* GetInstanceTemplate(uint32 map);             ///< Wrapper for sInstanceTemplate.LookupEntry
         static WorldTemplate const* GetWorldTemplate(uint32 map);                   ///< Wrapper for sWorldTemplate.LookupEntry
+        static CreatureConditionalSpawn const* GetCreatureConditionalSpawn(uint32 lowguid); ///< Wrapper for sCreatureConditionalSpawnStore.LookupEntry
 
         void LoadGroups();
         void LoadQuests();
@@ -668,6 +694,7 @@ class ObjectMgr
         void LoadCreatures();
         void LoadCreatureAddons();
         void LoadCreatureClassLvlStats();
+        void LoadCreatureConditionalSpawn();
         void LoadCreatureModelInfo();
         void LoadEquipmentTemplates();
         void LoadGameObjectLocales();
@@ -679,6 +706,8 @@ class ObjectMgr
         void LoadGossipTextLocales();
         void LoadQuestgiverGreeting();
         void LoadQuestgiverGreetingLocales();
+        void LoadTrainerGreetings();
+        void LoadTrainerGreetingLocales();
         void LoadPageTextLocales();
         void LoadGossipMenuItemsLocales();
         void LoadPointOfInterestLocales();
@@ -712,6 +741,8 @@ class ObjectMgr
 
         void LoadPointsOfInterest();
 
+        void LoadSpellTemplate();
+        void CheckSpellCones();
         void LoadCreatureTemplateSpells();
 
         void LoadGameTele();
@@ -726,7 +757,6 @@ class ObjectMgr
         void LoadVendors() { LoadVendors("npc_vendor", false); }
         void LoadTrainerTemplates();
         void LoadTrainers() { LoadTrainers("npc_trainer", false); }
-        void LoadSpellTemplate();
 
         /// @param _map Map* of the map for which to load active entities. If nullptr active entities on continents are loaded
         void LoadActiveEntities(Map* _map);
@@ -799,6 +829,14 @@ class ObjectMgr
             return dataPair ? &dataPair->second : nullptr;
         }
 
+        CreatureData* GetCreatureData(uint32 guid)
+        {
+            auto dataItr = mCreatureDataMap.find(guid);
+            if (dataItr != mCreatureDataMap.end())
+                return &dataItr->second;
+            return nullptr;
+        }
+
         CreatureData& NewOrExistCreatureData(uint32 guid) { return mCreatureDataMap[guid]; }
         void DeleteCreatureData(uint32 guid);
 
@@ -861,6 +899,15 @@ class ObjectMgr
         {
             auto itr = m_questgiverGreetingLocaleMap[type].find(entry);
             if (itr == m_questgiverGreetingLocaleMap[type].end()) return nullptr;
+            return &itr->second;
+        }
+
+        void GetTrainerGreetingLocales(uint32 entry, int32 loc_idx, std::string* titlePtr) const;
+
+        TrainerGreetingLocale const* GetTrainerGreetingLocale(uint32 entry) const
+        {
+            auto itr = m_trainerGreetingLocaleMap.find(entry);
+            if (itr == m_trainerGreetingLocaleMap.end()) return nullptr;
             return &itr->second;
         }
 
@@ -976,7 +1023,7 @@ class ObjectMgr
 
         GameTele const* GetGameTele(const std::string& name) const;
         GameTeleMap const& GetGameTeleMap() const { return m_GameTeleMap; }
-        bool AddGameTele(GameTele& data);
+        bool AddGameTele(GameTele& tele);
         bool DeleteGameTele(const std::string& name);
 
         uint32 GetNpcGossip(uint32 entry) const
@@ -1026,7 +1073,7 @@ class ObjectMgr
 
         void AddVendorItem(uint32 entry, uint32 item, uint32 maxcount, uint32 incrtime);
         bool RemoveVendorItem(uint32 entry, uint32 item);
-        bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item, uint32 maxcount, uint32 ptime, uint16 conditionId, Player* pl = nullptr, std::set<uint32>* skip_vendors = nullptr) const;
+        bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item_id, uint32 maxcount, uint32 incrtime, uint16 conditionId, Player* pl = nullptr, std::set<uint32>* skip_vendors = nullptr) const;
 
         int GetOrNewIndexForLocale(LocaleConstant loc);
 
@@ -1147,6 +1194,8 @@ class ObjectMgr
         typedef std::set<std::wstring> ReservedNamesMap;
         ReservedNamesMap    m_ReservedNames;
 
+        TaxiShortcutMap     m_TaxiShortcutMap;
+
         GraveYardMap        mGraveYardMap;
 
         GameTeleMap         m_GameTeleMap;
@@ -1181,7 +1230,7 @@ class ObjectMgr
 
         PlayerClassInfo playerClassInfo[MAX_CLASSES];
 
-        void BuildPlayerLevelInfo(uint8 race, uint8 class_, uint8 level, PlayerLevelInfo* plinfo) const;
+        void BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, PlayerLevelInfo* info) const;
         PlayerInfo playerInfo[MAX_RACES][MAX_CLASSES];
 
         typedef std::vector<uint32> PlayerXPperLevel;       // [level]
@@ -1226,6 +1275,8 @@ class ObjectMgr
 
         QuestgiverGreetingMap m_questgiverGreetingMap[QUESTGIVER_TYPE_MAX];
         QuestgiverGreetingLocaleMap m_questgiverGreetingLocaleMap[QUESTGIVER_TYPE_MAX];
+        TrainerGreetingMap m_trainerGreetingMap;
+        TrainerGreetingLocaleMap m_trainerGreetingLocaleMap;
 
         CacheNpcTextIdMap m_mCacheNpcTextIdMap;
         CacheVendorItemMap m_mCacheVendorTemplateItemMap;

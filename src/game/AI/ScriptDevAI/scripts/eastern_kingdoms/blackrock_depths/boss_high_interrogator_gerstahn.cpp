@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {
@@ -102,16 +102,14 @@ struct boss_high_interrogator_gerstahnAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_high_interrogator_gerstahn(Creature* pCreature)
+UnitAI* GetAI_boss_high_interrogator_gerstahn(Creature* pCreature)
 {
     return new boss_high_interrogator_gerstahnAI(pCreature);
 }
 
 void AddSC_boss_high_interrogator_gerstahn()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_high_interrogator_gerstahn";
     pNewScript->GetAI = &GetAI_boss_high_interrogator_gerstahn;
     pNewScript->RegisterSelf();

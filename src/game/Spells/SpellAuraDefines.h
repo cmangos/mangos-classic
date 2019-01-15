@@ -29,7 +29,13 @@
 
 enum AuraFlags
 {
-    AFLAG_MASK              = 0x09
+    AFLAG_NONE                  = 0x00,
+    AFLAG_CANCELABLE            = 0x01,
+    ALFAG_UNK2                  = 0x02,
+    AFLAG_UNK3                  = 0x04,
+    AFLAG_UNK4                  = 0x08,
+
+    AFLAG_MASK_ALL              = 0x0F
 };
 
 /**

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {
@@ -87,7 +87,7 @@ struct boss_noxxionAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_noxxion(Creature* pCreature)
+UnitAI* GetAI_boss_noxxion(Creature* pCreature)
 {
     return new boss_noxxionAI(pCreature);
 }
@@ -112,9 +112,7 @@ bool EffectAuraDummy_spell_aura_dummy_noxxion_spawns(const Aura* pAura, bool bAp
 
 void AddSC_boss_noxxion()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_noxxion";
     pNewScript->GetAI = &GetAI_boss_noxxion;
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_noxxion_spawns;

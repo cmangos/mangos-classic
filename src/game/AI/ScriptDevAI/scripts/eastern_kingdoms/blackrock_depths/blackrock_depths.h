@@ -157,7 +157,7 @@ struct ArenaCylinder
     uint32 m_uiHeight;
 };
 
-static const ArenaCylinder aArenaCrowdVolume[] = {595.78f, -188.65f, -38.63f, 69, 10};
+static const ArenaCylinder aArenaCrowdVolume = { 595.78f, -188.65f, -38.63f, 69, 10 };
 
 enum ArenaNPCs
 {
@@ -239,18 +239,19 @@ class instance_blackrock_depths : public ScriptedInstance
 
         // Arena Event
         void SetArenaCenterCoords(float fX, float fY, float fZ) { m_fArenaCenterX = fX; m_fArenaCenterY = fY; m_fArenaCenterZ = fZ; }
-        void GetArenaCenterCoords(float& fX, float& fY, float& fZ) { fX = m_fArenaCenterX; fY = m_fArenaCenterY; fZ = m_fArenaCenterZ; }
-        void GetArenaCrowdGuid(GuidSet& sCrowdSet) { sCrowdSet = m_sArenaCrowdNpcGuids; }
+        void GetArenaCenterCoords(float& fX, float& fY, float& fZ) const
+        { fX = m_fArenaCenterX; fY = m_fArenaCenterY; fZ = m_fArenaCenterZ; }
+        void GetArenaCrowdGuid(GuidSet& sCrowdSet) const { sCrowdSet = m_sArenaCrowdNpcGuids; }
 
         // Bar events
         void SetBarDoorIsOpen() { m_bIsBarDoorOpen = true; }
-        void GetBarDoorIsOpen(bool& bIsOpen) { bIsOpen = m_bIsBarDoorOpen; }
+        void GetBarDoorIsOpen(bool& bIsOpen) const { bIsOpen = m_bIsBarDoorOpen; }
         void HandleBarPatrons(uint8 uiEventType);
         void HandleBarPatrol(uint8 uiStep);
 
     private:
         void DoCallNextDwarf();
-        bool CanReplacePrincess();
+        bool CanReplacePrincess() const;
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;

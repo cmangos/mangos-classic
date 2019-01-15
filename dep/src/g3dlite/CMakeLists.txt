@@ -118,21 +118,17 @@ set(LIBRARY_SRCS
     uint128.cpp
 )
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
-)
-
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
 )
-
-if(WIN32)
-  target_link_libraries(${LIBRARY_NAME} PUBLIC z)
-endif()
+target_link_libraries(${LIBRARY_NAME}
+  PRIVATE ${ZLIB_LIBRARIES}
+)
 
 target_include_directories(${LIBRARY_NAME}
-  INTERFACE ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
+  PUBLIC ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+  PRIVATE ${ZLIB_INCLUDE_DIRS}
 )
 
 if(MSVC)

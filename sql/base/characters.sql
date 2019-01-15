@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_z2708_01_characters_account_instances_entered` bit(1) DEFAULT NULL
+  `required_z2735_01_characters_weapon_skills_fix_vanilla` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -323,6 +323,7 @@ CREATE TABLE `character_pet` (
   `Reactstate` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `loyaltypoints` int(11) NOT NULL DEFAULT '0',
   `loyalty` int(11) unsigned NOT NULL DEFAULT '0',
+  `xpForNextLoyalty` int(11) unsigned NOT NULL default '0',
   `trainpoint` int(11) NOT NULL DEFAULT '0',
   `name` varchar(100) DEFAULT 'Pet',
   `renamed` tinyint(1) unsigned NOT NULL DEFAULT '0',

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 spell 8913
 spell 10848
 spell 17327
@@ -151,9 +151,7 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
 
 void AddSC_spell_scripts()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "spell_dummy_npc";
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_dummy_npc;
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_npc;

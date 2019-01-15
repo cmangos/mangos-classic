@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 #include "Entities/TemporarySpawn.h"
 
@@ -43,8 +43,11 @@ enum
     SPELL_AEGIS              = 20620,
     SPELL_TELEPORT_RANDOM    = 20618,                       // Teleport random target
     SPELL_TELEPORT_TARGET    = 20534,                       // Teleport Victim
+    SPELL_HATE_TO_ZERO       = 20538,                       // Threat reset after each teleport
     SPELL_IMMUNE_POLY        = 21087,                       // Cast onto Flamewaker Healers when half the adds are dead
     SPELL_SEPARATION_ANXIETY = 21094,                       // Aura cast on himself by Majordomo Executus, if adds move out of range, they will cast spell 21095 on themselves
+    SPELL_ENCOURAGEMENT      = 21086,                       // Cast onto all remaining adds every time one is killed
+    SPELL_CHAMPION           = 21090,                       // Cast onto the last remaining add
 
     // Ragnaros summoning event
     GOSSIP_ITEM_SUMMON_1     = -3409000,
@@ -121,6 +124,8 @@ struct boss_majordomoAI : public ScriptedAI
         // Majordomo Executus has a 100 yard aura to keep track of the distance of each of his adds, the Flamewaker Healers will enrage if moved out of it
         DoCastSpellIfCan(m_creature, SPELL_SEPARATION_ANXIETY, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
+        DoCastSpellIfCan(m_creature, SPELL_AEGIS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MAJORDOMO, IN_PROGRESS);
     }
@@ -136,7 +141,6 @@ struct boss_majordomoAI : public ScriptedAI
         {
             // Exit combat
             m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
             m_creature->SetLootRecipient(nullptr);
 
@@ -216,20 +220,26 @@ struct boss_majordomoAI : public ScriptedAI
         {
             m_uiAddsKilled += 1;
 
-            // If 4 adds (half of them) are dead, make all remaining healers immune to polymorph via aura
-            if (m_uiAddsKilled >= MAX_MAJORDOMO_ADDS / 2)
-                DoCastSpellIfCan(m_creature, SPELL_IMMUNE_POLY);
-
-            // Yell if only one Add alive
+            // Yell if only one add is alive and buff it
             if (m_uiAddsKilled == m_luiMajordomoAddsGUIDs.size() - 1)
+            {
                 DoScriptText(SAY_LAST_ADD, m_creature);
-
+                DoCastSpellIfCan(m_creature, SPELL_CHAMPION);
+            }
             // All adds are killed, retreat
             else if (m_uiAddsKilled == m_luiMajordomoAddsGUIDs.size())
             {
                 m_bHasEncounterFinished = true;
                 m_creature->GetMotionMaster()->MoveTargetedHome();
+                return;
             }
+
+            // If 4 adds (half of them) are dead, make all remaining healers immune to polymorph via aura
+            if (m_uiAddsKilled >= MAX_MAJORDOMO_ADDS / 2)
+                DoCastSpellIfCan(m_creature, SPELL_IMMUNE_POLY);
+
+            // Buff the remaining adds
+            DoCastSpellIfCan(m_creature, SPELL_ENCOURAGEMENT);
         }
     }
 
@@ -361,17 +371,14 @@ struct boss_majordomoAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        // Cast Ageis to heal self
-        if (m_uiAegisTimer <= uiDiff)
-            m_uiAegisTimer = 0;
+        // Cast Aegis to heal self
+        if (m_uiAegisTimer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature, SPELL_AEGIS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            m_uiAegisTimer = 5000;  // Classic could use a 5 min timer as this buff was not removable or stealable at that time, but we keep the same value for consistency with other cores
+        }
         else
             m_uiAegisTimer -= uiDiff;
-
-        if (m_creature->GetHealthPercent() < 90.0f && !m_uiAegisTimer)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_AEGIS);
-            m_uiAegisTimer = 10000;
-        }
 
         // Damage/Magic Reflection Timer
         if (m_uiReflectionShieldTimer < uiDiff)
@@ -386,7 +393,10 @@ struct boss_majordomoAI : public ScriptedAI
         if (m_uiTeleportTargetTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TELEPORT_TARGET) == CAST_OK)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_HATE_TO_ZERO);
                 m_uiTeleportTargetTimer = urand(25000, 30000);
+            }
         }
         else
             m_uiTeleportTargetTimer -= uiDiff;
@@ -394,10 +404,13 @@ struct boss_majordomoAI : public ScriptedAI
         // Teleports a random target to the heated rock in the center of the area
         if (m_uiTeleportRandomTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_TELEPORT_RANDOM) == CAST_OK)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_HATE_TO_ZERO);
                     m_uiTeleportRandomTimer = urand(25000, 30000);
+                }
             }
         }
         else
@@ -407,7 +420,7 @@ struct boss_majordomoAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_majordomo(Creature* pCreature)
+UnitAI* GetAI_boss_majordomo(Creature* pCreature)
 {
     return new boss_majordomoAI(pCreature);
 }
@@ -460,9 +473,7 @@ bool EffectDummyCreature_spell_boss_majordomo(Unit* /*pCaster*/, uint32 uiSpellI
 
 void AddSC_boss_majordomo()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_majordomo";
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_boss_majordomo;
     pNewScript->pGossipHello = &GossipHello_boss_majordomo;

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_fallen_hero_of_horde
 EndContentData */
 
@@ -113,9 +113,7 @@ bool GossipSelect_npc_fallen_hero_of_horde(Player* pPlayer, Creature* pCreature,
 
 void AddSC_blasted_lands()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_fallen_hero_of_horde";
     pNewScript->pGossipHello =  &GossipHello_npc_fallen_hero_of_horde;
     pNewScript->pGossipSelect = &GossipSelect_npc_fallen_hero_of_horde;

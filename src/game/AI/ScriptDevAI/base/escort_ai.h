@@ -29,7 +29,7 @@ struct npc_escortAI : public ScriptedAI
 
         virtual void Reset() override = 0;
 
-        // CreatureAI functions
+        // UnitAI functions
         void JustDied(Unit* killer) override;
 
         void CorpseRemoved(uint32& /*respawnDelay*/) override;
@@ -37,7 +37,7 @@ struct npc_escortAI : public ScriptedAI
         void UpdateAI(const uint32 diff) override;               // the "internal" update, calls UpdateEscortAI()
         virtual void UpdateEscortAI(const uint32 diff);          // used when it's needed to add code in update (abilities, scripted events, etc)
 
-        void MovementInform(uint32 movementType, uint32 data) override;
+        void MovementInform(uint32 moveType, uint32 pointId) override;
 
         virtual void WaypointReached(uint32 pointId) = 0;
         virtual void WaypointStart(uint32 /*pointId*/) {}
@@ -47,7 +47,7 @@ struct npc_escortAI : public ScriptedAI
         void SetRun(bool run = true);
         void SetEscortPaused(bool paused);
 
-        bool HasEscortState(uint32 escortState) const { return !!(m_escortState & escortState); }
+        bool HasEscortState(uint32 escortState) const { return (m_escortState & escortState) != 0; }
 
         // update current point
         void SetCurrentWaypoint(uint32 pointId);
@@ -56,10 +56,11 @@ struct npc_escortAI : public ScriptedAI
 
         bool AssistPlayerInCombat(Unit* who) override;
     protected:
-        Player* GetPlayerForEscort() { return m_creature->GetMap()->GetPlayer(m_playerGuid); }
+        Player* GetPlayerForEscort() const { return m_creature->GetMap()->GetPlayer(m_playerGuid); }
         bool IsSD2EscortMovement(uint32 moveType) const;
         virtual void JustStartedEscort() {}
 
+        void SetEscortWaypoints(uint32 pathId);
     private:
         bool IsPlayerOrGroupInRange();
 
@@ -75,6 +76,8 @@ struct npc_escortAI : public ScriptedAI
         bool m_isRunning;                                  // all creatures are walking by default (has flag SPLINEFLAG_WALKMODE)
         bool m_canInstantRespawn;                          // if creature should respawn instantly after escort over (if not, database respawntime are used)
         bool m_canReturnToStart;                           // if creature can walk same path (loop) without despawn. Not for regular escort quests.
+
+        uint32 m_waypointPathID;
 };
 
 #endif

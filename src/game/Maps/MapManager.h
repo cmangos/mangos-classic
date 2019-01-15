@@ -58,6 +58,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
     public:
         typedef std::map<MapID, Map* > MapMapType;
 
+        void CreateContinents();
         Map* CreateMap(uint32, const WorldObject* obj);
         Map* CreateBgMap(uint32 mapid, BattleGround* bg);
         Map* FindMap(uint32 mapid, uint32 instanceId = 0) const;
@@ -140,7 +141,6 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         uint32 GenerateInstanceId() { return ++i_MaxInstanceId; }
         void InitMaxInstanceId();
         void InitializeVisibilityDistanceInfo();
-
         /* statistics */
         uint32 GetNumInstances();
         uint32 GetNumPlayersInInstances();
@@ -149,10 +149,9 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         // get list of all maps
         const MapMapType& Maps() const { return i_maps; }
 
-        template<typename Do>
-        void DoForAllMapsWithMapId(uint32 mapId, Do& _do);
-
-        void DoForAllMaps(std::function<void(Map*)> worker)
+        template<typename Do> void DoForAllMapsWithMapId(uint32 mapId, Do& _do);
+        template<typename Check> inline WorldObject* SearchOnAllLoadedMap(Check& check);
+        void DoForAllMaps(const std::function<void(Map*)>& worker)
         {
             for (MapMapType::const_iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
                 worker(itr->second);
@@ -193,6 +192,18 @@ inline void MapManager::DoForAllMapsWithMapId(uint32 mapId, Do& _do)
     MapMapType::const_iterator end   = i_maps.lower_bound(MapID(mapId + 1, 0));
     for (MapMapType::const_iterator itr = start; itr != end; ++itr)
         _do(itr->second);
+}
+
+template<typename Check>
+inline WorldObject* MapManager::SearchOnAllLoadedMap(Check& check)
+{
+    for (auto& mapItr : i_maps)
+    {
+        WorldObject* result = check(mapItr.second);
+        if (result)
+            return result;
+    }
+    return nullptr;
 }
 
 #define sMapMgr MapManager::Instance()

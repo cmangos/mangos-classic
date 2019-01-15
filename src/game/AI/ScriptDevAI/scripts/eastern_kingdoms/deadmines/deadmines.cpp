@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "deadmines.h"
 
 bool GOUse_go_defias_cannon(Player* /*pPlayer*/, GameObject* pGo)
@@ -42,9 +42,7 @@ bool GOUse_go_defias_cannon(Player* /*pPlayer*/, GameObject* pGo)
 
 void AddSC_deadmines()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "go_defias_cannon";
     pNewScript->pGOUse = &GOUse_go_defias_cannon;
     pNewScript->RegisterSelf();

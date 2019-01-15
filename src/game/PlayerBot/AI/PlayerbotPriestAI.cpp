@@ -275,7 +275,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
             return RETURN_NO_ACTION_OK;
 
         // Cast Shadow Word:Pain on current target and keep its up (if mana >= 40% or target HP < 15%)
-        if (SHADOW_WORD_PAIN > 0 && m_ai->In_Reach(pTarget, SHADOW_WORD_PAIN) && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) &&
+        if (SHADOW_WORD_PAIN > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SHADOW_WORD_PAIN) && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) &&
                 (pTarget->GetHealthPercent() < 15 || m_ai->GetManaPercent() >= 40) && CastSpell(SHADOW_WORD_PAIN, pTarget))
             return RETURN_CONTINUE;
         else // else shoot at it
@@ -295,13 +295,13 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
             break;
 
         case PRIEST_SPEC_SHADOW:
-            if (DEVOURING_PLAGUE > 0 && m_ai->In_Reach(pTarget, DEVOURING_PLAGUE) && !pTarget->HasAura(DEVOURING_PLAGUE, EFFECT_INDEX_0) && CastSpell(DEVOURING_PLAGUE, pTarget))
+            if (DEVOURING_PLAGUE > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, DEVOURING_PLAGUE) && !pTarget->HasAura(DEVOURING_PLAGUE, EFFECT_INDEX_0) && CastSpell(DEVOURING_PLAGUE, pTarget))
                 return RETURN_CONTINUE;
-            if (SHADOW_WORD_PAIN > 0 && m_ai->In_Reach(pTarget, SHADOW_WORD_PAIN) && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && CastSpell(SHADOW_WORD_PAIN, pTarget))
+            if (SHADOW_WORD_PAIN > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SHADOW_WORD_PAIN) && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && CastSpell(SHADOW_WORD_PAIN, pTarget))
                 return RETURN_CONTINUE;
-            if (MIND_BLAST > 0 && m_ai->In_Reach(pTarget, MIND_BLAST) && (m_bot->IsSpellReady(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
+            if (MIND_BLAST > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, MIND_BLAST) && (m_bot->IsSpellReady(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
                 return RETURN_CONTINUE;
-            if (MIND_FLAY > 0 && m_ai->In_Reach(pTarget, MIND_FLAY) && CastSpell(MIND_FLAY, pTarget))
+            if (MIND_FLAY > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, MIND_FLAY) && CastSpell(MIND_FLAY, pTarget))
             {
                 m_ai->SetIgnoreUpdateTime(3);
                 return RETURN_CONTINUE;
@@ -321,11 +321,11 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
     }
 
     // No spec due to low level OR no spell found yet
-    if (MIND_BLAST > 0 && m_ai->In_Reach(pTarget, MIND_BLAST) && (m_bot->IsSpellReady(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
+    if (MIND_BLAST > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, MIND_BLAST) && (m_bot->IsSpellReady(MIND_BLAST)) && CastSpell(MIND_BLAST, pTarget))
         return RETURN_CONTINUE;
-    if (SHADOW_WORD_PAIN > 0 && m_ai->In_Reach(pTarget, SHADOW_WORD_PAIN) && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && CastSpell(SHADOW_WORD_PAIN, pTarget))
+    if (SHADOW_WORD_PAIN > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SHADOW_WORD_PAIN) && !pTarget->HasAura(SHADOW_WORD_PAIN, EFFECT_INDEX_0) && CastSpell(SHADOW_WORD_PAIN, pTarget))
         return RETURN_CONTINUE;
-    if (MIND_FLAY > 0 && m_ai->In_Reach(pTarget, MIND_FLAY) && CastSpell(MIND_FLAY, pTarget))
+    if (MIND_FLAY > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, MIND_FLAY) && CastSpell(MIND_FLAY, pTarget))
     {
         m_ai->SetIgnoreUpdateTime(3);
         return RETURN_CONTINUE;

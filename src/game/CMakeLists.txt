@@ -21,17 +21,6 @@ set(LIBRARY_NAME game)
 add_definitions(-DDT_POLYREF64)
 add_definitions(-D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0)
 
-# include additionals headers
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/vmap
-  ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
-  ${CMAKE_CURRENT_SOURCE_DIR}/BattleGround
-  ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
-  ${CMAKE_CURRENT_SOURCE_DIR}/PlayerBot
-  ${CMAKE_BINARY_DIR}
-)
-
 # Find all the input files
 FILE(GLOB_RECURSE LIBRARY_SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.h" "*.cpp")
 
@@ -69,17 +58,27 @@ add_library(${LIBRARY_NAME} STATIC
 )
 
 target_link_libraries(${LIBRARY_NAME}
-  PUBLIC shared
-  PUBLIC g3dlite
+  PRIVATE shared
+  PRIVATE g3dlite
   PRIVATE detour
+  PRIVATE ${ZLIB_LIBRARIES}
 )
 
-if(WIN32)
-  target_link_libraries(${LIBRARY_NAME} PUBLIC z)
-endif()
+# include additionals headers
+set(ADDITIONAL_INCLUDE_DIRS
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/vmap
+  ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
+  ${CMAKE_CURRENT_SOURCE_DIR}/BattleGround
+  ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
+  ${CMAKE_CURRENT_SOURCE_DIR}/PlayerBot
+  ${CMAKE_BINARY_DIR}
+)
 
 target_include_directories(${LIBRARY_NAME}
   INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+  PRIVATE ${ADDITIONAL_INCLUDE_DIRS}
+  PRIVATE ${Boost_INCLUDE_DIRS}
 )
 
 if(UNIX)

@@ -9,7 +9,7 @@ SDComment: This AI is under development
 SDCategory: Npc
 EndScriptData */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "follower_ai.h"
 
 const float MAX_PLAYER_DISTANCE = 100.0f;
@@ -30,7 +30,7 @@ void FollowerAI::AttackStart(Unit* who)
     if (!who)
         return;
 
-    if (m_creature->Attack(who, true))
+    if (m_creature->Attack(who, m_meleeEnabled))
     {
         m_creature->AddThreat(who);
         m_creature->SetInCombatWith(who);
@@ -76,12 +76,9 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
             AttackStart(who);
             return true;
         }
-        else
-        {
-            who->SetInCombatWith(m_creature);
-            m_creature->AddThreat(who);
-            return true;
-        }
+        who->SetInCombatWith(m_creature);
+        m_creature->AddThreat(who);
+        return true;
     }
 
     return false;
@@ -125,9 +122,7 @@ void FollowerAI::CorpseRemoved(uint32& /*respawnDelay*/)
 void FollowerAI::EnterEvadeMode()
 {
     m_creature->RemoveAllAurasOnEvade();
-    m_creature->DeleteThreatList();
     m_creature->CombatStop(true);
-    m_creature->SetLootRecipient(nullptr);
 
     if (HasFollowState(STATE_FOLLOW_INPROGRESS))
     {
@@ -135,16 +130,18 @@ void FollowerAI::EnterEvadeMode()
 
         if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
         {
-            float posX, posY, posZ, ori;
-            m_creature->GetCombatStartPosition(posX, posY, posZ, ori);
+            float posX, posY, posZ, posO;
+            m_creature->GetCombatStartPosition(posX, posY, posZ, posO);
             m_creature->GetMotionMaster()->MovePoint(POINT_COMBAT_START, posX, posY, posZ);
         }
     }
     else
     {
-        if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+        if (m_creature->isAlive())
             m_creature->GetMotionMaster()->MoveTargetedHome();
     }
+
+    m_creature->SetLootRecipient(nullptr);
 
     Reset();
 }
@@ -280,20 +277,17 @@ Player* FollowerAI::GetLeaderForFollower()
     {
         if (leader->isAlive())
             return leader;
-        else
+        if (Group* group = leader->GetGroup())
         {
-            if (Group* group = leader->GetGroup())
+            for (GroupReference* ref = group->GetFirstMember(); ref != nullptr; ref = ref->next())
             {
-                for (GroupReference* ref = group->GetFirstMember(); ref != nullptr; ref = ref->next())
-                {
-                    Player* member = ref->getSource();
+                Player* member = ref->getSource();
 
-                    if (member && member->isAlive() && m_creature->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
-                    {
-                        debug_log("SD2: FollowerAI GetLeader changed and returned new leader.");
-                        m_leaderGuid = member->GetObjectGuid();
-                        return member;
-                    }
+                if (member && member->isAlive() && m_creature->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
+                {
+                    debug_log("SD2: FollowerAI GetLeader changed and returned new leader.");
+                    m_leaderGuid = member->GetObjectGuid();
+                    return member;
                 }
             }
         }

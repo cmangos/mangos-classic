@@ -33,8 +33,8 @@ GuildMgr::GuildMgr()
 
 GuildMgr::~GuildMgr()
 {
-    for (GuildMap::iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
-        delete itr->second;
+    for (auto& itr : m_GuildMap)
+        delete itr.second;
 }
 
 void GuildMgr::AddGuild(Guild* guild)
@@ -58,18 +58,18 @@ Guild* GuildMgr::GetGuildById(uint32 guildId) const
 
 Guild* GuildMgr::GetGuildByName(std::string const& name) const
 {
-    for (GuildMap::const_iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
-        if (itr->second->GetName() == name)
-            return itr->second;
+    for (const auto& itr : m_GuildMap)
+        if (itr.second->GetName() == name)
+            return itr.second;
 
     return nullptr;
 }
 
 Guild* GuildMgr::GetGuildByLeader(ObjectGuid const& guid) const
 {
-    for (GuildMap::const_iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
-        if (itr->second->GetLeaderGuid() == guid)
-            return itr->second;
+    for (const auto& itr : m_GuildMap)
+        if (itr.second->GetLeaderGuid() == guid)
+            return itr.second;
 
     return nullptr;
 }

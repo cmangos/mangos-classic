@@ -118,16 +118,16 @@ Tokens StrSplit(const std::string& src, const std::string& sep)
 {
     Tokens r;
     std::string s;
-    for (std::string::const_iterator i = src.begin(); i != src.end(); ++i)
+    for (char i : src)
     {
-        if (sep.find(*i) != std::string::npos)
+        if (sep.find(i) != std::string::npos)
         {
             if (s.length()) r.push_back(s);
             s.clear();
         }
         else
         {
-            s += *i;
+            s += i;
         }
     }
     if (s.length()) r.push_back(s);
@@ -211,16 +211,16 @@ uint32 TimeStringToSecs(const std::string& timestring)
     uint32 buffer     = 0;
     uint32 multiplier = 0;
 
-    for (std::string::const_iterator itr = timestring.begin(); itr != timestring.end(); ++itr)
+    for (char itr : timestring)
     {
-        if (isdigit(*itr))
+        if (isdigit(itr))
         {
             buffer *= 10;
-            buffer += (*itr) - '0';
+            buffer += itr - '0';
         }
         else
         {
-            switch (*itr)
+            switch (itr)
             {
                 case 'd': multiplier = DAY;     break;
                 case 'h': multiplier = HOUR;    break;
@@ -261,7 +261,7 @@ bool IsIPAddress(char const* ipaddress)
     // Drawback: all valid ip address formats are recognized e.g.: 12.23,121234,0xABCD)
     boost::system::error_code ec;
     boost::asio::ip::address::from_string(ipaddress, ec);
-    return !!ec;
+    return ec.value() != 0;
 }
 
 /// create PID file
@@ -448,10 +448,7 @@ bool Utf8FitTo(const std::string& str, const std::wstring& search)
     // converting to lower case
     wstrToLower(temp);
 
-    if (temp.find(search) == std::wstring::npos)
-        return false;
-
-    return true;
+    return temp.find(search) != std::wstring::npos;
 }
 
 void utf8printf(FILE* out, const char* str, ...)

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulgurub.h"
 
 /* ContentData
@@ -99,9 +99,13 @@ struct boss_arlokkAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
-        if ((m_pTrigger1 = m_pInstance->SelectRandomPantherTrigger(true)))
+
+        m_pTrigger1 = m_pInstance->SelectRandomPantherTrigger(true);
+        if (m_pTrigger1)
             m_pTrigger1->CastSpell(m_pTrigger1, SPELL_SUMMON_ZULIAN_PROWLERS, TRIGGERED_NONE);
-        if ((m_pTrigger2 = m_pInstance->SelectRandomPantherTrigger(false)))
+
+        m_pTrigger2 = m_pInstance->SelectRandomPantherTrigger(false);
+        if (m_pTrigger2)
             m_pTrigger2->CastSpell(m_pTrigger2, SPELL_SUMMON_ZULIAN_PROWLERS, TRIGGERED_NONE);
     }
 
@@ -319,12 +323,12 @@ struct npc_zulian_prowlerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_arlokk(Creature* pCreature)
+UnitAI* GetAI_boss_arlokk(Creature* pCreature)
 {
     return new boss_arlokkAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_zulian_prowler(Creature* pCreature)
+UnitAI* GetAI_npc_zulian_prowler(Creature* pCreature)
 {
     return new npc_zulian_prowlerAI(pCreature);
 }
@@ -344,9 +348,7 @@ bool GOUse_go_gong_of_bethekk(Player* /*pPlayer*/, GameObject* pGo)
 
 void AddSC_boss_arlokk()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_arlokk";
     pNewScript->GetAI = &GetAI_boss_arlokk;
     pNewScript->RegisterSelf();

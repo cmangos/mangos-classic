@@ -36,9 +36,9 @@ namespace VMAP
     {
         public:
             MapRayCallback(ModelInstance* val): prims(val), hit(false) {}
-            bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool pStopAtFirstHit = true, bool pCheckLOS = false)
+            bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool pStopAtFirstHit = true, bool ignoreM2Model = false)
             {
-                bool result = prims[entry].intersectRay(ray, distance, pStopAtFirstHit, pCheckLOS);
+                bool result = prims[entry].intersectRay(ray, distance, pStopAtFirstHit, ignoreM2Model);
                 if (result)
                     hit = true;
                 return result;
@@ -141,18 +141,18 @@ namespace VMAP
     Else, pMaxDist is not modified and returns false;
     */
 
-    bool StaticMapTree::getIntersectionTime(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, bool pCheckLOS) const
+    bool StaticMapTree::getIntersectionTime(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, bool ignoreM2Model) const
     {
         float distance = pMaxDist;
         MapRayCallback intersectionCallBack(iTreeValues);
-        iTree.intersectRay(pRay, intersectionCallBack, distance, pStopAtFirstHit, pCheckLOS);
+        iTree.intersectRay(pRay, intersectionCallBack, distance, pStopAtFirstHit, ignoreM2Model);
         if (intersectionCallBack.didHit())
             pMaxDist = distance;
         return intersectionCallBack.didHit();
     }
     //=========================================================
 
-    bool StaticMapTree::isInLineOfSight(const Vector3& pos1, const Vector3& pos2) const
+    bool StaticMapTree::isInLineOfSight(const Vector3& pos1, const Vector3& pos2, bool ignoreM2Model) const
     {
         float maxDist = (pos2 - pos1).magnitude();
         // valid map coords should *never ever* produce float overflow, but this would produce NaNs too:
@@ -162,10 +162,7 @@ namespace VMAP
             return true;
         // direction with length of 1
         G3D::Ray ray = G3D::Ray::fromOriginAndDirection(pos1, (pos2 - pos1) / maxDist);
-        if (getIntersectionTime(ray, maxDist, true, true))
-            return false;
-
-        return true;
+        return !getIntersectionTime(ray, maxDist, true, ignoreM2Model);
     }
     //=========================================================
     /**
@@ -324,11 +321,11 @@ namespace VMAP
 
     void StaticMapTree::UnloadMap(VMapManager2* vm)
     {
-        for (loadedSpawnMap::iterator i = iLoadedSpawns.begin(); i != iLoadedSpawns.end(); ++i)
+        for (auto& iLoadedSpawn : iLoadedSpawns)
         {
-            iTreeValues[i->first].setUnloaded();
-            for (uint32 refCount = 0; refCount < i->second; ++refCount)
-                vm->releaseModelInstance(iTreeValues[i->first].name);
+            iTreeValues[iLoadedSpawn.first].setUnloaded();
+            for (uint32 refCount = 0; refCount < iLoadedSpawn.second; ++refCount)
+                vm->releaseModelInstance(iTreeValues[iLoadedSpawn.first].name);
         }
         iLoadedSpawns.clear();
         iLoadedTiles.clear();
@@ -419,7 +416,7 @@ namespace VMAP
         loadedTileMap::iterator tile = iLoadedTiles.find(tileID);
         if (tile == iLoadedTiles.end())
         {
-            ERROR_LOG("StaticMapTree::UnloadMapTile(): Trying to unload non-loaded tile. Map:%u X:%u Y:%u", iMapID, tileX, tileY);
+            //ERROR_LOG("StaticMapTree::UnloadMapTile(): Trying to unload non-loaded tile. Map:%u X:%u Y:%u", iMapID, tileX, tileY);
             return;
         }
         if (tile->second) // file associated with tile

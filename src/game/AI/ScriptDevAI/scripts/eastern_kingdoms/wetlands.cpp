@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_mikhail
 npc_tapoke_slim_jahn
 EndContentData */
@@ -73,6 +73,9 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
 
     void Reset() override
     {
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        SetReactState(REACT_PASSIVE);
+
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
         {
             m_bFriendSummoned = false;
@@ -100,6 +103,8 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
                 SetRun();
                 m_creature->RemoveAurasDueToSpell(SPELL_STEALTH);
                 m_creature->SetFactionTemporary(FACTION_ENEMY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                SetReactState(REACT_AGGRESSIVE);
                 break;
             case 6:
                 // fail the quest if he escapes
@@ -135,8 +140,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
 
         if (m_creature->GetHealthPercent() < 20.0f || uiDamage > m_creature->GetHealth())
         {
-            // despawn friend - Note: may not work on guardian pets
-            if (Creature* pFriend = GetClosestCreatureWithEntry(m_creature, NPC_SLIMS_FRIEND, 10.0f))
+            if (Pet* pFriend = m_creature->FindGuardianWithEntry(NPC_SLIMS_FRIEND))
             {
                 DoScriptText(SAY_FRIEND_DEFEAT, pFriend);
                 pFriend->ForcedDespawn(1000);
@@ -151,7 +155,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         // start escort
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
@@ -164,7 +168,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
         {
             // complete quest
             if (Player* pPlayer = GetPlayerForEscort())
-                pPlayer->GroupEventHappens(QUEST_MISSING_DIPLOMAT11, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_MISSING_DIPLOMAT11, m_creature);
 
             // despawn and respawn at inn
             m_creature->ForcedDespawn(1000);
@@ -191,7 +195,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_tapoke_slim_jahn(Creature* pCreature)
+UnitAI* GetAI_npc_tapoke_slim_jahn(Creature* pCreature)
 {
     return new npc_tapoke_slim_jahnAI(pCreature);
 }
@@ -224,9 +228,7 @@ bool QuestAccept_npc_mikhail(Player* pPlayer, Creature* pCreature, const Quest* 
 
 void AddSC_wetlands()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_tapoke_slim_jahn";
     pNewScript->GetAI = &GetAI_npc_tapoke_slim_jahn;
     pNewScript->RegisterSelf();

@@ -95,9 +95,7 @@ BigNumber BigNumber::operator-=(const BigNumber& bn)
 
 BigNumber BigNumber::operator*=(const BigNumber& bn)
 {
-    BN_CTX* bnctx;
-
-    bnctx = BN_CTX_new();
+    BN_CTX* bnctx = BN_CTX_new();
     BN_mul(_bn, _bn, bn._bn, bnctx);
     BN_CTX_free(bnctx);
 
@@ -106,9 +104,7 @@ BigNumber BigNumber::operator*=(const BigNumber& bn)
 
 BigNumber BigNumber::operator/=(const BigNumber& bn)
 {
-    BN_CTX* bnctx;
-
-    bnctx = BN_CTX_new();
+    BN_CTX* bnctx = BN_CTX_new();
     BN_div(_bn, nullptr, _bn, bn._bn, bnctx);
     BN_CTX_free(bnctx);
 
@@ -117,9 +113,7 @@ BigNumber BigNumber::operator/=(const BigNumber& bn)
 
 BigNumber BigNumber::operator%=(const BigNumber& bn)
 {
-    BN_CTX* bnctx;
-
-    bnctx = BN_CTX_new();
+    BN_CTX* bnctx = BN_CTX_new();
     BN_mod(_bn, _bn, bn._bn, bnctx);
     BN_CTX_free(bnctx);
 
@@ -129,9 +123,8 @@ BigNumber BigNumber::operator%=(const BigNumber& bn)
 BigNumber BigNumber::Exp(const BigNumber& bn)
 {
     BigNumber ret;
-    BN_CTX* bnctx;
 
-    bnctx = BN_CTX_new();
+    BN_CTX* bnctx = BN_CTX_new();
     BN_exp(ret._bn, _bn, bn._bn, bnctx);
     BN_CTX_free(bnctx);
 
@@ -141,9 +134,8 @@ BigNumber BigNumber::Exp(const BigNumber& bn)
 BigNumber BigNumber::ModExp(const BigNumber& bn1, const BigNumber& bn2)
 {
     BigNumber ret;
-    BN_CTX* bnctx;
 
-    bnctx = BN_CTX_new();
+    BN_CTX* bnctx = BN_CTX_new();
     BN_mod_exp(ret._bn, _bn, bn1._bn, bn2._bn, bnctx);
     BN_CTX_free(bnctx);
 
@@ -162,7 +154,7 @@ uint32 BigNumber::AsDword() const
 
 bool BigNumber::isZero() const
 {
-    return BN_is_zero(_bn);
+    return BN_is_zero(_bn) != 0;
 }
 
 uint8* BigNumber::AsByteArray(int minSize)

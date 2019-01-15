@@ -76,7 +76,7 @@ class BattleGroundQueue
         void FillPlayersToBG(BattleGround* bg, BattleGroundBracketId bracket_id);
         bool CheckPremadeMatch(BattleGroundBracketId bracket_id, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam);
         bool CheckNormalMatch(BattleGroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers);
-        GroupQueueInfo* AddGroup(Player* leader, Group* group, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracketId, bool isPremade);
+        GroupQueueInfo* AddGroup(Player* leader, Group* grp, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracketId, bool isPremade);
         void RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount);
         bool IsPlayerInvited(ObjectGuid pl_guid, const uint32 bgInstanceGuid, const uint32 removeTime);
         bool GetPlayerGroupInfoData(ObjectGuid guid, GroupQueueInfo* ginfo);
@@ -212,7 +212,7 @@ class BattleGroundMgr
         void CreateInitialBattleGrounds();
         void DeleteAllBattleGrounds();
 
-        void SendToBattleGround(Player* pl, uint32 InstanceID, BattleGroundTypeId bgTypeId);
+        void SendToBattleGround(Player* pl, uint32 instanceId, BattleGroundTypeId bgTypeId);
 
         /* Battleground queues */
         // these queues are instantiated when creating BattlegroundMrg
@@ -240,14 +240,14 @@ class BattleGroundMgr
             CreatureBattleEventIndexesMap::const_iterator itr = m_CreatureBattleEventIndexMap.find(dbTableGuidLow);
             if (itr != m_CreatureBattleEventIndexMap.end())
                 return itr->second;
-            return m_CreatureBattleEventIndexMap.find(-1)->second;
+            return m_CreatureBattleEventIndexMap.find(static_cast<uint32>(-1))->second;
         }
         const BattleGroundEventIdx GetGameObjectEventIndex(uint32 dbTableGuidLow) const
         {
             GameObjectBattleEventIndexesMap::const_iterator itr = m_GameObjectBattleEventIndexMap.find(dbTableGuidLow);
             if (itr != m_GameObjectBattleEventIndexMap.end())
                 return itr->second;
-            return m_GameObjectBattleEventIndexMap.find(-1)->second;
+            return m_GameObjectBattleEventIndexMap.find(static_cast<uint32>(-1))->second;
         }
 
         bool isTesting() const { return m_Testing; }

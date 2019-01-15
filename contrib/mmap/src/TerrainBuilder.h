@@ -20,7 +20,6 @@
 #define _MMAP_TERRAIN_BUILDER_H
 
 #include "MMapCommon.h"
-#include "MangosMap.h"
 #include "MotionGenerators/MoveMapSharedDefines.h"
 
 #include "WorldModel.h"
@@ -28,8 +27,6 @@
 #include "G3D/Array.h"
 #include "G3D/Vector3.h"
 #include "G3D/Matrix3.h"
-
-using namespace MaNGOS;
 
 namespace MMAP
 {
@@ -62,8 +59,8 @@ namespace MMAP
     // see following files:
     // contrib/extractor/system.cpp
     // src/game/GridMap.cpp
-    static char const* MAP_VERSION_MAGIC = "z1.3";
-
+    static char const* MAP_VERSION_MAGIC = "z1.4";
+    
     struct MeshData
     {
         G3D::Array<float> solidVerts;

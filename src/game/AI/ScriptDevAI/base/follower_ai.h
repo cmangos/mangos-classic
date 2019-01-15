@@ -39,12 +39,12 @@ class FollowerAI : public ScriptedAI
         void UpdateAI(const uint32 diff) override;               // the "internal" update, calls UpdateFollowerAI()
         virtual void UpdateFollowerAI(const uint32 diff);        // used when it's needed to add code in update (abilities, scripted events, etc)
 
-        void StartFollow(Player* player, uint32 factionForFollower = 0, const Quest* quest = nullptr);
+        void StartFollow(Player* leader, uint32 factionForFollower = 0, const Quest* quest = nullptr);
 
         void SetFollowPaused(bool paused);                 // if special event require follow mode to hold/resume during the follow
         void SetFollowComplete(bool withEndEvent = false);
 
-        bool HasFollowState(uint32 followState) const { return !!(m_followState & followState); }
+        bool HasFollowState(uint32 followState) const { return (m_followState & followState) != 0; }
 
         bool AssistPlayerInCombat(Unit* who) override;
 

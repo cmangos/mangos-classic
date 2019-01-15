@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 enum
@@ -54,7 +54,7 @@ enum
 
 struct example_escortAI : public npc_escortAI
 {
-    // CreatureAI functions
+    // UnitAI functions
     example_escortAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
     uint32 m_uiDeathCoilTimer;
@@ -174,7 +174,7 @@ struct example_escortAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_example_escort(Creature* pCreature)
+UnitAI* GetAI_example_escort(Creature* pCreature)
 {
     return new example_escortAI(pCreature);
 }
@@ -226,9 +226,7 @@ bool GossipSelect_example_escort(Player* pPlayer, Creature* pCreature, uint32 /*
 
 void AddSC_example_escort()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "example_escort";
     pNewScript->GetAI = &GetAI_example_escort;
     pNewScript->pGossipHello = &GossipHello_example_escort;

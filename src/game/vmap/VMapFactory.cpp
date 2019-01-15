@@ -51,6 +51,7 @@ namespace VMAP
         }
     }
 
+    std::mutex m_vmapMutex;
     IVMapManager* gVMapManager = nullptr;
     Table<unsigned int, bool>* iIgnoreSpellIds = nullptr;
 
@@ -113,7 +114,11 @@ namespace VMAP
     IVMapManager* VMapFactory::createOrGetVMapManager()
     {
         if (!gVMapManager)
-            gVMapManager = new VMapManager2();              // should be taken from config ... Please change if you like :-)
+        {
+            std::lock_guard<std::mutex> lock(m_vmapMutex);
+            if (!gVMapManager)
+                gVMapManager = new VMapManager2();              // should be taken from config ... Please change if you like :-)
+        }
         return gVMapManager;
     }
 
@@ -121,6 +126,7 @@ namespace VMAP
     // delete all internal data structures
     void VMapFactory::clear()
     {
+        std::lock_guard<std::mutex> lock(m_vmapMutex);
         delete iIgnoreSpellIds;
         delete gVMapManager;
 

@@ -374,7 +374,7 @@ bool PlayerbotClassAI::FleeFromTrapGOIfCan(uint32 goEntry, Unit* pTarget)
     if (!trapInfo || trapInfo->type != GAMEOBJECT_TYPE_TRAP)
         return false;
 
-    float trapRadius = float(trapInfo->trap.radius);
+    float trapRadius = float(trapInfo->trap.diameter) / 2.f;
 
     // Step 2: find a GO in the range around player
     GameObject* pGo = nullptr;

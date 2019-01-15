@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2016101401
+ConfVersion=2018092101
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -62,9 +62,9 @@ ConfVersion=2016101401
 RealmID = 1
 DataDir = "."
 LogsDir = ""
-LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;realmd"
-WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;mangos"
-CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;characters"
+LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicrealmd"
+WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicmangos"
+CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;classiccharacters"
 LoginDatabaseConnections = 1
 WorldDatabaseConnections = 1
 CharacterDatabaseConnections = 1
@@ -563,6 +563,11 @@ LogColors = ""
 #        Enable or disable instant logout for security level (0..4) or high (NOT in combat/while dueling/while falling)
 #        Default: 1 (Mods/GMs/Admins)
 #
+#    LongFlightPathsPersistence
+#        Controls whether logging out in multi-destination taxi flight will resume entire flight or the nearest destination only.
+#        Default: 0 (false)
+#                 1 (true)
+#
 #    AllFlightPaths
 #        Players will start with all flight paths (Note: ALL flight paths, not only player's team)
 #        Default: 0 (true)
@@ -604,6 +609,11 @@ LogColors = ""
 #        Default: 0 (false)
 #                 1 (true)
 #
+#    Instance.StrictCombatLockdown
+#        This setting determines whether its possible to leave combat mode through additional means (such as Feign Death) when zone is set in combat.
+#        Default: 0 (false, drop combat, default pre-2.3.0)
+#                 1 (true, combat persists, default post-2.3.0)
+#
 #    Instance.ResetTimeHour
 #        The hour of the day (0-23) when the global instance resets occur.
 #        Default: 4
@@ -631,7 +641,7 @@ LogColors = ""
 #                 1 (allowed)
 #
 #    Group.OfflineLeaderDelay
-#        A grace period for an offline group leader to reconnect before tranfering leadership to a next suitable member of the group (in secs) 
+#        A grace period for an offline group leader to reconnect before tranfering leadership to a next suitable member of the group (in secs)
 #        Default: 300 (5 minutes)
 #                   0 (Do not transfer group leadership)
 #
@@ -759,6 +769,7 @@ StartHonorPoints = 0
 MinHonorKills = 15
 MaintenanceDay = 3
 InstantLogout = 1
+LongFlightPathsPersistence = 0
 AllFlightPaths = 0
 AlwaysMaxSkillForLevel = 0
 ActivateWeather = 1
@@ -767,6 +778,7 @@ MaxSpellCastsInChain = 20
 RabbitDay = 0
 Instance.IgnoreLevel = 0
 Instance.IgnoreRaid = 0
+Instance.StrictCombatLockdown = 0
 Instance.ResetTimeHour = 4
 Instance.UnloadDelay = 1800000
 Quests.LowLevelHideDiff = 4
@@ -891,6 +903,12 @@ TalentsInspecting = 1
 #        Default: 1 (show)
 #                 0 (not show)
 #
+#    Corpse.AllowAllItemsShowInMasterLoot
+#        In master loot mode every one can see the loot content under or over treshold
+#        Only the master loot can still distrube it
+#                 1 (show)
+#        Default: 0 (not show)
+#
 #    Corpse.Decay.NORMAL
 #    Corpse.Decay.RARE
 #    Corpse.Decay.ELITE
@@ -958,6 +976,7 @@ CreatureFamilyAssistanceDelay = 1500
 CreatureFamilyFleeDelay = 7000
 WorldBossLevelDiff = 3
 Corpse.EmptyLootShow = 1
+Corpse.AllowAllItemsShowInMasterLoot = 1
 Corpse.Decay.NORMAL = 300
 Corpse.Decay.RARE = 900
 Corpse.Decay.ELITE = 600
@@ -1120,11 +1139,22 @@ GM.InvisibleAura         = 31748
 ###################################################################################################################
 # VISIBILITY AND RADIUSES
 #
-#    Visibility.GroupMode
-#        Group visibility modes
-#        Default: 0 (standard setting: only members from same group can 100% auto detect invisible player)
-#                 1 (raid members 100% auto detect invisible player from same raid)
-#                 2 (players from same team can 100% auto detect invisible player)
+#    Visibility.FogOfWar.Stealth
+#        Sets visibility mode for invisible units. Fog Of War settings are not applied to GMs.
+#        Default: 0 (standard setting: players can see invisibile units in their own group)
+#                 1 (players can see same faction invisibile units)
+#
+#    Visibility.FogOfWar.Health
+#        Sets visibility mode for absolute health values. Fog Of War settings are not applied to GMs.
+#        Default: 0 (Pre-3.0 standard setting: players can see health values of units in their own group)
+#                 1 (players can see health values of same faction units)
+#                 2 (Post-3.0 standard setting: players can see health values of all units)
+#
+#    Visibility.FogOfWar.Stats
+#        Sets visibility mode for values of character attributes and attack stats. Fog Of War settings are not applied to GMs.
+#        Default: 0 (standard setting: players can see own values and values of their pets)
+#                 1 (players can see values of same faction units)
+#                 2 (players can see values of all units)
 #
 #    Visibility.Distance.Continents
 #    Visibility.Distance.Instances
@@ -1160,7 +1190,9 @@ GM.InvisibleAura         = 31748
 #
 ###################################################################################################################
 
-Visibility.GroupMode = 0
+Visibility.FogOfWar.Stealth = 0
+Visibility.FogOfWar.Health  = 0
+Visibility.FogOfWar.Stats   = 0
 Visibility.Distance.Continents    = 90
 Visibility.Distance.Instances     = 120
 Visibility.Distance.BG            = 180

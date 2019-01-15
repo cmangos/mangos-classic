@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Entities/Object.h"
 /* ContentData
 go_andorhal_tower
@@ -119,7 +119,7 @@ struct go_ai_bell : public GameObjectAI
     uint32 m_uiBellTimer;
     PlayPacketSettings m_playTo;
 
-    uint32 GetBellSound(GameObject* pGo)
+    uint32 GetBellSound(GameObject* pGo) const
     {
         uint32 soundId;
         switch (pGo->GetEntry())
@@ -158,7 +158,7 @@ struct go_ai_bell : public GameObjectAI
         return soundId;
     }
 
-    PlayPacketSettings GetBellZoneOrArea(GameObject* pGo)
+    PlayPacketSettings GetBellZoneOrArea(GameObject* pGo) const
     {
         PlayPacketSettings playTo = PLAY_AREA;
         switch (pGo->GetEntry())
@@ -319,9 +319,11 @@ struct go_elemental_rift : public GameObjectAI
             case GO_FIRE_ELEMENTAL_RIFT:
                 elementalEntry = NPC_BLAZING_INVADER;
                 break;
+            default:
+                return;
         }
 
-        std::list<Creature*> lElementalList;
+        CreatureList lElementalList;
         GetCreatureListWithEntryInGrid(lElementalList, m_go, elementalEntry, 35.0f);
         // Do nothing if at least three elementals are found nearby
         if (lElementalList.size() >= 3)
@@ -336,7 +338,7 @@ struct go_elemental_rift : public GameObjectAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Do nothing if not spawned
-        if (!m_go->isSpawned())
+        if (!m_go->IsSpawned())
             return;
 
         if (m_uiElementalTimer <= uiDiff)

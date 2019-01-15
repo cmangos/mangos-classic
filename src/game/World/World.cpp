@@ -64,6 +64,7 @@
 #include "Tools/CharacterDatabaseCleaner.h"
 #include "Entities/CreatureLinkingMgr.h"
 #include "Weather/Weather.h"
+#include "Cinematics/CinematicMgr.h"
 
 #include <algorithm>
 #include <mutex>
@@ -89,6 +90,7 @@ float World::m_VisibleObjectGreyDistance      = 0;
 float  World::m_relocation_lower_limit_sq     = 10.f * 10.f;
 uint32 World::m_relocation_ai_notify_delay    = 1000u;
 
+uint32 World::m_currentMSTime = 0;
 TimePoint World::m_currentTime = TimePoint();
 uint32 World::m_currentDiff = 0;
 
@@ -108,17 +110,17 @@ World::World(): mail_timer(0), mail_timer_expires(0)
     m_defaultDbcLocale = LOCALE_enUS;
     m_availableDbcLocaleMask = 0;
 
-    for (int i = 0; i < CONFIG_UINT32_VALUE_COUNT; ++i)
-        m_configUint32Values[i] = 0;
+    for (unsigned int& m_configUint32Value : m_configUint32Values)
+        m_configUint32Value = 0;
 
-    for (int i = 0; i < CONFIG_INT32_VALUE_COUNT; ++i)
-        m_configInt32Values[i] = 0;
+    for (int& m_configInt32Value : m_configInt32Values)
+        m_configInt32Value = 0;
 
-    for (int i = 0; i < CONFIG_FLOAT_VALUE_COUNT; ++i)
-        m_configFloatValues[i] = 0.0f;
+    for (float& m_configFloatValue : m_configFloatValues)
+        m_configFloatValue = 0.0f;
 
-    for (int i = 0; i < CONFIG_BOOL_VALUE_COUNT; ++i)
-        m_configBoolValues[i] = false;
+    for (bool& m_configBoolValue : m_configBoolValues)
+        m_configBoolValue = false;
 }
 
 /// World destructor
@@ -156,8 +158,7 @@ WorldSession* World::FindSession(uint32 id) const
 
     if (itr != m_sessions.end())
         return itr->second;                                 // also can return nullptr for kicked session
-    else
-        return nullptr;
+    return nullptr;
 }
 
 /// Remove a given session
@@ -187,6 +188,12 @@ void
 World::AddSession_(WorldSession* s)
 {
     MANGOS_ASSERT(s);
+
+    if (FindSession(s->GetAccountId()))
+    {
+        sLog.outError("Trying to add an already existing session");
+        return;
+    }
 
     // NOTE - Still there is race condition in WorldSession* being used in the Sockets
 
@@ -236,14 +243,6 @@ World::AddSession_(WorldSession* s)
         return;
     }
 
-    // Checked for 1.12.2
-    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4);
-    packet << uint8(AUTH_OK);
-    packet << uint32(0);                                    // BillingTimeRemaining
-    packet << uint8(0);                                     // BillingPlanFlags
-    packet << uint32(0);                                    // BillingTimeRested
-    s->SendPacket(packet);
-
     UpdateMaxSessionCounters();
 
     // Updates the population
@@ -277,16 +276,6 @@ void World::AddQueuedSession(WorldSession* sess)
 {
     sess->SetInQueue(true);
     m_QueuedSessions.push_back(sess);
-
-    // [-ZERO] Possible wrong
-    // The 1st SMSG_AUTH_RESPONSE needs to contain other info too.
-    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 4);
-    packet << uint8(AUTH_WAIT_QUEUE);
-    packet << uint32(0);                                    // BillingTimeRemaining
-    packet << uint8(0);                                     // BillingPlanFlags
-    packet << uint32(0);                                    // BillingTimeRested
-    packet << uint32(GetQueuedSessionPos(sess));            // position in queue
-    sess->SendPacket(packet);
 }
 
 bool World::RemoveQueuedSession(WorldSession* sess)
@@ -536,10 +525,12 @@ void World::LoadConfigSettings(bool reload)
 
     setConfigMinMax(CONFIG_UINT32_MAINTENANCE_DAY, "MaintenanceDay", 4, 0, 6);
 
+    setConfig(CONFIG_BOOL_LONG_TAXI_PATHS_PERSISTENCE, "LongFlightPathsPersistence", false);
     setConfig(CONFIG_BOOL_ALL_TAXI_PATHS, "AllFlightPaths", false);
 
     setConfig(CONFIG_BOOL_INSTANCE_IGNORE_LEVEL, "Instance.IgnoreLevel", false);
     setConfig(CONFIG_BOOL_INSTANCE_IGNORE_RAID,  "Instance.IgnoreRaid", false);
+    setConfig(CONFIG_BOOL_INSTANCE_STRICT_COMBAT_LOCKDOWN,  "Instance.StrictCombatLockdown", false);
 
     setConfig(CONFIG_BOOL_CAST_UNSTUCK, "CastUnstuck", true);
     setConfig(CONFIG_UINT32_MAX_SPELL_CASTS_IN_CHAIN, "MaxSpellCastsInChain", 20);
@@ -570,7 +561,9 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_GM_LOWER_SECURITY, "GM.LowerSecurity", false);
     setConfig(CONFIG_UINT32_GM_INVISIBLE_AURA, "GM.InvisibleAura", 31748);
 
-    setConfig(CONFIG_UINT32_GROUP_VISIBILITY, "Visibility.GroupMode", 0);
+    setConfig(CONFIG_UINT32_FOGOFWAR_STEALTH, "Visibility.FogOfWar.Stealth", 0);
+    setConfig(CONFIG_UINT32_FOGOFWAR_HEALTH, "Visibility.FogOfWar.Health", 0);
+    setConfig(CONFIG_UINT32_FOGOFWAR_STATS, "Visibility.FogOfWar.Stats", 0);
 
     setConfig(CONFIG_UINT32_MAIL_DELIVERY_DELAY, "MailDeliveryDelay", HOUR);
 
@@ -638,12 +631,13 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_CHAT_STRICT_LINK_CHECKING_SEVERITY, "ChatStrictLinkChecking.Severity", 0);
     setConfig(CONFIG_UINT32_CHAT_STRICT_LINK_CHECKING_KICK,     "ChatStrictLinkChecking.Kick", 0);
 
-    setConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW,      "Corpse.EmptyLootShow", true);
-    setConfig(CONFIG_UINT32_CORPSE_DECAY_NORMAL,    "Corpse.Decay.NORMAL",    300);
-    setConfig(CONFIG_UINT32_CORPSE_DECAY_RARE,      "Corpse.Decay.RARE",      900);
-    setConfig(CONFIG_UINT32_CORPSE_DECAY_ELITE,     "Corpse.Decay.ELITE",     600);
-    setConfig(CONFIG_UINT32_CORPSE_DECAY_RAREELITE, "Corpse.Decay.RAREELITE", 1200);
-    setConfig(CONFIG_UINT32_CORPSE_DECAY_WORLDBOSS, "Corpse.Decay.WORLDBOSS", 3600);
+    setConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW,                     "Corpse.EmptyLootShow",                  true);
+    setConfig(CONFIG_BOOL_CORPSE_ALLOW_ALL_ITEMS_SHOW_IN_MASTER_LOOT, "Corpse.AllowAllItemsShowInMasterLoot", false);
+    setConfig(CONFIG_UINT32_CORPSE_DECAY_NORMAL,                      "Corpse.Decay.NORMAL",                    300);
+    setConfig(CONFIG_UINT32_CORPSE_DECAY_RARE,                        "Corpse.Decay.RARE",                      900);
+    setConfig(CONFIG_UINT32_CORPSE_DECAY_ELITE,                       "Corpse.Decay.ELITE",                     600);
+    setConfig(CONFIG_UINT32_CORPSE_DECAY_RAREELITE,                   "Corpse.Decay.RAREELITE",                1200);
+    setConfig(CONFIG_UINT32_CORPSE_DECAY_WORLDBOSS,                   "Corpse.Decay.WORLDBOSS",                3600);
 
     setConfig(CONFIG_INT32_DEATH_SICKNESS_LEVEL, "Death.SicknessLevel", 11);
 
@@ -862,6 +856,10 @@ void World::SetInitialWorldSettings()
     DetectDBCLang();
     sObjectMgr.SetDBCLocaleIndex(GetDefaultDbcLocale());    // Get once for all the locale index of DBC language (console/broadcasts)
 
+    // Loading cameras for characters creation cinematic
+    sLog.outString("Loading cinematic...");
+    LoadM2Cameras(m_dataPath);
+
     sLog.outString("Loading Script Names...");
     sScriptDevAIMgr.LoadScriptNames();
 
@@ -871,8 +869,8 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading InstanceTemplate...");
     sObjectMgr.LoadInstanceTemplate();
 
-    sLog.outString("Loading SkillLineAbilityMultiMap Data...");
-    sSpellMgr.LoadSkillLineAbilityMap();
+    sLog.outString("Loading SkillLineAbilityMultiMaps Data...");
+    sSpellMgr.LoadSkillLineAbilityMaps();
 
     sLog.outString("Loading SkillRaceClassInfoMultiMap Data...");
     sSpellMgr.LoadSkillRaceClassInfoMap();
@@ -903,6 +901,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Spell Chain Data...");
     sSpellMgr.LoadSpellChains();
+
+    sLog.outString("Checking Spell Cone Data...");
+    sObjectMgr.CheckSpellCones();
 
     sLog.outString("Loading Spell Elixir types...");
     sSpellMgr.LoadSpellElixirs();
@@ -955,9 +956,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature template spells...");
     sObjectMgr.LoadCreatureTemplateSpells();
 
-    sLog.outString("Loading SpellsScriptTarget...");
-    sSpellMgr.LoadSpellScriptTarget();                      // must be after LoadCreatureTemplates and LoadGameobjectInfo
-
     sLog.outString("Loading ItemRequiredTarget...");
     sObjectMgr.LoadItemRequiredTarget();
 
@@ -976,8 +974,14 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Pet Create Spells...");
     sObjectMgr.LoadPetCreateSpells();
 
+    sLog.outString("Loading Creature Conditional Spawn Data...");  // must be after LoadCreatureTemplates and before LoadCreatures
+    sObjectMgr.LoadCreatureConditionalSpawn();
+
     sLog.outString("Loading Creature Data...");
     sObjectMgr.LoadCreatures();
+
+    sLog.outString("Loading SpellsScriptTarget...");
+    sSpellMgr.LoadSpellScriptTarget();                      // must be after LoadCreatureTemplates, LoadCreatures and LoadGameobjectInfo
 
     sLog.outString("Loading Creature Addon Data...");
     sObjectMgr.LoadCreatureAddons();                        // must be after LoadCreatureTemplates() and LoadCreatures()
@@ -1045,6 +1049,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Graveyard-zone links...");
     sObjectMgr.LoadGraveyardZones();
+
+    sLog.outString("Loading taxi flight shortcuts...");
+    sObjectMgr.LoadTaxiShortcuts();
 
     sLog.outString("Loading spell target destination coordinates...");
     sSpellMgr.LoadSpellTargetPositions();
@@ -1147,6 +1154,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Questgiver Greetings...");
     sObjectMgr.LoadQuestgiverGreeting();
 
+    sLog.outString("Loading Trainer Greetings...");
+    sObjectMgr.LoadTrainerGreetings();
+
     ///- Loading localization data
     sLog.outString("Loading Localization strings...");
     sObjectMgr.LoadCreatureLocales();                       // must be after CreatureInfo loading
@@ -1158,6 +1168,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadGossipMenuItemsLocales();                // must be after gossip menu items loading
     sObjectMgr.LoadPointOfInterestLocales();                // must be after POI loading
     sObjectMgr.LoadQuestgiverGreetingLocales();
+    sObjectMgr.LoadTrainerGreetingLocales();                // must be after CreatureInfo loading
     sLog.outString(">>> Localization strings loaded");
     sLog.outString();
 
@@ -1213,10 +1224,9 @@ void World::SetInitialWorldSettings()
     m_gameTime = time(nullptr);
     m_startTime = m_gameTime;
 
-    tm local;
     time_t curr;
     time(&curr);
-    local = *(localtime(&curr));                            // dereference and assign
+    tm local = *(localtime(&curr));                            // dereference and assign
     char isoDate[128];
     sprintf(isoDate, "%04d-%02d-%02d %02d:%02d:%02d",
             local.tm_year + 1900, local.tm_mon + 1, local.tm_mday, local.tm_hour, local.tm_min, local.tm_sec);
@@ -1282,10 +1292,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Starting Game Event system...");
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    // depend on next event
-    sLog.outString();
-
-    sLog.outString("Loading grids for active creatures or transports...");
-    sObjectMgr.LoadActiveEntities(nullptr);
     sLog.outString();
 
     // Delete all characters which have been deleted X days before
@@ -1357,16 +1363,17 @@ void World::DetectDBCLang()
 /// Update the World !
 void World::Update(uint32 diff)
 {
+    m_currentMSTime = WorldTimer::getMSTime();
     m_currentTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
     m_currentDiff = diff;
 
     ///- Update the different timers
-    for (int i = 0; i < WUPDATE_COUNT; ++i)
+    for (auto& m_timer : m_timers)
     {
-        if (m_timers[i].GetCurrent() >= 0)
-            m_timers[i].Update(diff);
+        if (m_timer.GetCurrent() >= 0)
+            m_timer.Update(diff);
         else
-            m_timers[i].SetCurrent(0);
+            m_timer.SetCurrent(0);
     }
 
     ///- Update the game time and check for shutdown time
@@ -1562,8 +1569,8 @@ void World::SendWorldTextToAboveSecurity(uint32 securityLevel, int32 string_id, 
         {
             Player* player = session->GetPlayer();
             if (player && player->IsInWorld())
-                if (WorldSession* session = player->GetSession())
-                    if (uint32(session->GetSecurity()) >= securityLevel)
+                if (WorldSession* playerSession = player->GetSession())
+                    if (uint32(playerSession->GetSecurity()) >= securityLevel)
                         wt_do(player);
         }
     }
@@ -1574,9 +1581,9 @@ void World::SendWorldTextToAboveSecurity(uint32 securityLevel, int32 string_id, 
 /// Sends a packet to all players with optional team and instance restrictions
 void World::SendGlobalMessage(WorldPacket const& packet) const
 {
-    for (SessionMap::const_iterator itr = m_sessions.cbegin(); itr != m_sessions.cend(); ++itr)
+    for (const auto& m_session : m_sessions)
     {
-        if (WorldSession* session = itr->second)
+        if (WorldSession* session = m_session.second)
         {
             Player* player = session->GetPlayer();
             if (player && player->IsInWorld())
@@ -1692,8 +1699,8 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
     {
         if (mode == BAN_IP)
             return BAN_SUCCESS;                             // ip correctly banned but nobody affected (yet)
-        else
-            return BAN_NOTFOUND;                            // Nobody to ban
+        return BAN_NOTFOUND;
+        // Nobody to ban
     }
 
     ///- Disconnect all affected players (for IP it can be several)

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 go_bar_beer_keg
 go_shadowforge_brazier
 go_relic_coffer_door
@@ -58,9 +58,8 @@ bool GOUse_go_bar_beer_keg(Player* /*pPlayer*/, GameObject* pGo)
     {
         if (pInstance->GetData(TYPE_HURLEY) == IN_PROGRESS || pInstance->GetData(TYPE_HURLEY) == DONE) // GOs despawning on use, this check should never be true but this is proper to have it there
             return false;
-        else
             // Every time we set the event to SPECIAL, the instance script increments the number of broken kegs, capping at 3
-            pInstance->SetData(TYPE_HURLEY, SPECIAL);
+        pInstance->SetData(TYPE_HURLEY, SPECIAL);
     }
     return false;
 }
@@ -300,9 +299,9 @@ struct npc_grimstoneAI : public npc_escortAI
     {
         Map::PlayerList const& PlayerList = m_creature->GetMap()->GetPlayers();
 
-        for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+        for (const auto& itr : PlayerList)
         {
-            Player* pPlayer = itr->getSource();
+            Player* pPlayer = itr.getSource();
             if (pPlayer && pPlayer->GetQuestStatus(QUEST_THE_CHALLENGE) == QUEST_STATUS_INCOMPLETE)
                 pPlayer->KilledMonsterCredit(NPC_THELDREN_QUEST_CREDIT);
         }
@@ -421,9 +420,9 @@ struct npc_grimstoneAI : public npc_escortAI
                         // Some of the NPCs in the crowd do cheer emote at event start
                         // we randomly select 25% of the NPCs to do this
                         m_pInstance->GetArenaCrowdGuid(m_lArenaCrowd);
-                        for (GuidSet::const_iterator itr = m_lArenaCrowd.begin(); itr != m_lArenaCrowd.end(); ++itr)
+                        for (auto itr : m_lArenaCrowd)
                         {
-                            if (Creature* pSpectator = m_creature->GetMap()->GetCreature(*itr))
+                            if (Creature* pSpectator = m_creature->GetMap()->GetCreature(itr))
                             {
                                 if (urand(0, 3) < 1)
                                     pSpectator->HandleEmote(EMOTE_ONESHOT_CHEER);
@@ -494,8 +493,8 @@ struct npc_grimstoneAI : public npc_escortAI
                         {
                             m_uiPhase = PHASE_GLADIATORS;
                             SummonRingMob(NPC_THELDREN, 1, POS_NORTH);
-                            for (uint8 i = 0; i < MAX_THELDREN_ADDS; ++i)
-                                SummonRingMob(m_uiGladiatorId[i], 1, POS_NORTH);
+                            for (unsigned int i : m_uiGladiatorId)
+                                SummonRingMob(i, 1, POS_NORTH);
                         }
                         else
                         {
@@ -522,7 +521,7 @@ struct npc_grimstoneAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_grimstone(Creature* pCreature)
+UnitAI* GetAI_npc_grimstone(Creature* pCreature)
 {
     return new npc_grimstoneAI(pCreature);
 }
@@ -678,7 +677,7 @@ struct npc_phalanxAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_phalanx(Creature* pCreature)
+UnitAI* GetAI_npc_phalanx(Creature* pCreature)
 {
     return new npc_phalanxAI(pCreature);
 }
@@ -849,7 +848,7 @@ bool QuestRewarded_npc_mistress_nagmara(Player* pPlayer, Creature* pCreature, Qu
     return true;
 }
 
-CreatureAI* GetAI_npc_mistress_nagmara(Creature* pCreature)
+UnitAI* GetAI_npc_mistress_nagmara(Creature* pCreature)
 {
     return new npc_mistress_nagmaraAI(pCreature);
 }
@@ -1072,7 +1071,7 @@ struct npc_rocknotAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_rocknot(Creature* pCreature)
+UnitAI* GetAI_npc_rocknot(Creature* pCreature)
 {
     return new npc_rocknotAI(pCreature);
 }
@@ -1314,7 +1313,7 @@ struct npc_marshal_windsorAI : public npc_escortAI
                     m_pInstance->SetData(TYPE_QUEST_JAIL_BREAK, DONE);
 
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_JAIL_BREAK, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_JAIL_BREAK, m_creature);
                 break;
         }
     }
@@ -1348,7 +1347,7 @@ struct npc_marshal_windsorAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_marshal_windsor(Creature* pCreature)
+UnitAI* GetAI_npc_marshal_windsor(Creature* pCreature)
 {
     return new npc_marshal_windsorAI(pCreature);
 }
@@ -1484,8 +1483,7 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
     {
         if (pWho && (pWho->GetEntry() == NPC_RIBBLY_SCREWSPIGOT || pWho->GetEntry() == NPC_RIBBLY_CRONY))
             return;
-        else
-            ScriptedAI::AttackStart(pWho);
+        ScriptedAI::AttackStart(pWho);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -1507,8 +1505,19 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
                 SetRun(true);
                 break;
             case 5:
-                SetEscortPaused(true);
-                break;
+                {
+                    SetEscortPaused(true);
+                    // Make Hurley and his cronies able to attack players (and be attacked)
+                    m_creature->SetImmuneToPlayer(false);
+                    CreatureList lCroniesList;
+                    GetCreatureListWithEntryInGrid(lCroniesList, m_creature, NPC_BLACKBREATH_CRONY, 30.0f);
+                    for (auto& itr : lCroniesList)
+                    {
+                        if (itr->isAlive())
+                            itr->SetImmuneToPlayer(false);
+                    }
+                    break;
+                }
         }
     }
 
@@ -1553,7 +1562,7 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_hurley_blackbreath(Creature* pCreature)
+UnitAI* GetAI_npc_hurley_blackbreath(Creature* pCreature)
 {
     return new npc_hurley_blackbreathAI(pCreature);
 }
@@ -1788,7 +1797,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_plugger_spazzring(Creature* pCreature)
+UnitAI* GetAI_boss_plugger_spazzring(Creature* pCreature)
 {
     return new boss_plugger_spazzringAI(pCreature);
 }
@@ -1803,21 +1812,18 @@ bool GOUse_go_bar_ale_mug(Player* pPlayer, GameObject* pGo)
     {
         if (pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS || pInstance->GetData(TYPE_PLUGGER) == DONE) // GOs despawning on use, this check should never be true but this is proper to have it there
             return false;
-        else
+        if (Creature* pPlugger = pInstance->GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
         {
-            if (Creature* pPlugger = pInstance->GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
+            if (boss_plugger_spazzringAI* pPluggerAI = dynamic_cast<boss_plugger_spazzringAI*>(pPlugger->AI()))
             {
-                if (boss_plugger_spazzringAI* pPluggerAI = dynamic_cast<boss_plugger_spazzringAI*>(pPlugger->AI()))
-                {
-                    // Every time we set the event to SPECIAL, the instance script increments the number of stolen mugs/boars, capping at 3
-                    pInstance->SetData(TYPE_PLUGGER, SPECIAL);
-                    // If the cap is reached the instance script changes the type from SPECIAL to IN_PROGRESS
-                    // Plugger then aggroes and engage players, else he just warns them
-                    if (pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS)
-                        pPluggerAI->AttackThief(pPlayer);
-                    else
-                        pPluggerAI->WarnThief(pPlayer);
-                }
+                // Every time we set the event to SPECIAL, the instance script increments the number of stolen mugs/boars, capping at 3
+                pInstance->SetData(TYPE_PLUGGER, SPECIAL);
+                // If the cap is reached the instance script changes the type from SPECIAL to IN_PROGRESS
+                // Plugger then aggroes and engage players, else he just warns them
+                if (pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS)
+                    pPluggerAI->AttackThief(pPlayer);
+                else
+                    pPluggerAI->WarnThief(pPlayer);
             }
         }
     }
@@ -1883,16 +1889,14 @@ struct npc_ironhand_guardianAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_ironhand_guardian(Creature* pCreature)
+UnitAI* GetAI_npc_ironhand_guardian(Creature* pCreature)
 {
     return new npc_ironhand_guardianAI(pCreature);
 }
 
 void AddSC_blackrock_depths()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "go_bar_beer_keg";
     pNewScript->pGOUse = &GOUse_go_bar_beer_keg;
     pNewScript->RegisterSelf();

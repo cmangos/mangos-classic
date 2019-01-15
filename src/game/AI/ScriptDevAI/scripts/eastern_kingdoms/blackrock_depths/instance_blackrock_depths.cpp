@@ -23,24 +23,24 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackrock_depths.h"
 
 instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstance(pMap),
+    m_bIsBarDoorOpen(false),
     m_uiBarAleCount(0),
-    m_uiBrokenKegs(0),
-    m_uiCofferDoorsOpened(0),
-    m_uiDwarfRound(0),
-    m_uiDwarfFightTimer(0),
     m_uiPatronEmoteTimer(2000),
+    m_uiBrokenKegs(0),
     m_uiPatrolTimer(0),
     m_uiStolenAles(0),
     m_uiDagranTimer(0),
+    m_uiCofferDoorsOpened(0),
+    m_uiDwarfRound(0),
 
+    m_uiDwarfFightTimer(0),
     m_fArenaCenterX(0.0f),
     m_fArenaCenterY(0.0f),
-    m_fArenaCenterZ(0.0f),
-    m_bIsBarDoorOpen(false)
+    m_fArenaCenterZ(0.0f)
 {
     Initialize();
 }
@@ -96,8 +96,8 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
         case NPC_ANVILRAGE_SOLDIER:
         case NPC_ANVILRAGE_MEDIC:
         case NPC_ANVILRAGE_OFFICER:
-            if (pCreature->GetPositionZ() < aArenaCrowdVolume->m_fCenterZ || pCreature->GetPositionZ() > aArenaCrowdVolume->m_fCenterZ + aArenaCrowdVolume->m_uiHeight ||
-                    !pCreature->IsWithinDist2d(aArenaCrowdVolume->m_fCenterX, aArenaCrowdVolume->m_fCenterY, aArenaCrowdVolume->m_uiRadius))
+            if (pCreature->GetPositionZ() < aArenaCrowdVolume.m_fCenterZ || pCreature->GetPositionZ() > aArenaCrowdVolume.m_fCenterZ + aArenaCrowdVolume.m_uiHeight ||
+                    !pCreature->IsWithinDist2d(aArenaCrowdVolume.m_fCenterX, aArenaCrowdVolume.m_fCenterY, aArenaCrowdVolume.m_uiRadius))
                 break;
             m_sArenaCrowdNpcGuids.insert(pCreature->GetObjectGuid());
             if (m_auiEncounter[0] == DONE)
@@ -192,9 +192,9 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                 DoRespawnGameObject(GO_ARENA_SPOILS, HOUR);
             else if (uiData == DONE)
             {
-                for (GuidSet::const_iterator itr = m_sArenaCrowdNpcGuids.begin(); itr != m_sArenaCrowdNpcGuids.end(); ++itr)
+                for (auto m_sArenaCrowdNpcGuid : m_sArenaCrowdNpcGuids)
                 {
-                    if (Creature* pSpectator = instance->GetCreature(*itr))
+                    if (Creature* pSpectator = instance->GetCreature(m_sArenaCrowdNpcGuid))
                         pSpectator->SetFactionTemporary(FACTION_ARENA_NEUTRAL, TEMPFACTION_RESTORE_RESPAWN);
                 }
             }
@@ -212,9 +212,9 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                     Creature* pConstruct = nullptr;
 
                     // Activate vault constructs
-                    for (GuidSet::const_iterator itr = m_sVaultNpcGuids.begin(); itr != m_sVaultNpcGuids.end(); ++itr)
+                    for (auto m_sVaultNpcGuid : m_sVaultNpcGuids)
                     {
-                        pConstruct = instance->GetCreature(*itr);
+                        pConstruct = instance->GetCreature(m_sVaultNpcGuid);
                         if (pConstruct)
                             pConstruct->RemoveAurasDueToSpell(SPELL_STONED);
                     }
@@ -260,9 +260,9 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
             if (uiData == FAIL)
             {
                 // Reset dwarfes
-                for (uint8 i = 0; i < MAX_DWARFS; ++i)
+                for (unsigned int aTombDwarfe : aTombDwarfes)
                 {
-                    if (Creature* pDwarf = GetSingleCreatureFromStorage(aTombDwarfes[i]))
+                    if (Creature* pDwarf = GetSingleCreatureFromStorage(aTombDwarfe))
                     {
                         if (!pDwarf->isAlive())
                             pDwarf->Respawn();
@@ -338,7 +338,8 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                                 pSummoned->SetWalk(false);
                                 // The cronies should not engage anyone until their boss does so
                                 // the linking is done by DB
-                                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                                pSummoned->SetImmuneToNPC(true);
+                                pSummoned->SetImmuneToPlayer(true);
                                 // The movement toward the kegs is handled by Hurley EscortAI
                                 // and we want the cronies to follow him there
                                 pSummoned->GetMotionMaster()->MoveFollow(pHurley, 1.0f, 0);
@@ -362,7 +363,7 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
         case TYPE_PLUGGER:
             if (uiData == SPECIAL)
             {
-                if (Creature* pPlugger = GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
+                if (GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
                 {
                     ++m_uiStolenAles;
                     if (m_uiStolenAles == 3)
@@ -403,10 +404,11 @@ uint32 instance_blackrock_depths::GetData(uint32 uiType) const
         case TYPE_VAULT:
             return m_auiEncounter[1];
         case TYPE_ROCKNOT:
+        {
             if (m_auiEncounter[2] == IN_PROGRESS && m_uiBarAleCount == 3)
                 return SPECIAL;
-            else
-                return m_auiEncounter[2];
+            return m_auiEncounter[2];
+        }
         case TYPE_TOMB_OF_SEVEN:
             return m_auiEncounter[3];
         case TYPE_LYCEUM:
@@ -465,9 +467,9 @@ void instance_blackrock_depths::OnCreatureEvade(Creature* pCreature)
 {
     if (GetData(TYPE_RING_OF_LAW) == IN_PROGRESS || GetData(TYPE_RING_OF_LAW) == SPECIAL)
     {
-        for (uint8 i = 0; i < countof(aArenaNPCs); ++i)
+        for (unsigned int aArenaNPC : aArenaNPCs)
         {
-            if (pCreature->GetEntry() == aArenaNPCs[i])
+            if (pCreature->GetEntry() == aArenaNPC)
             {
                 SetData(TYPE_RING_OF_LAW, FAIL);
                 return;
@@ -541,18 +543,19 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
         case NPC_RIBBLY_SCREWSPIGGOT:
             // Do nothing if the patrol was already spawned or is about to:
             // Plugger has made the bar hostile
+        {
+            // Do nothing if the patrol was already spawned or is about to:
+            // Plugger has made the bar hostile
             if (GetData(TYPE_BAR) == IN_PROGRESS || GetData(TYPE_PLUGGER) == IN_PROGRESS || GetData(TYPE_BAR) == DONE || GetData(TYPE_PLUGGER) == DONE)
                 return;
-            else
-                SetData(TYPE_BAR, IN_PROGRESS);
-            break;
+            SetData(TYPE_BAR, IN_PROGRESS);
+        }
+        break;
         case NPC_SHADOWFORGE_SENATOR:
             // Emperor Dagran Thaurissan performs a random yell upon the death
             // of Shadowforge Senators in the Throne Room
             if (Creature* pDagran = GetSingleCreatureFromStorage(NPC_EMPEROR))
             {
-                uint32 uiTextId;
-
                 if (!pDagran->isAlive())
                     return;
 
@@ -561,12 +564,11 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
 
                 switch (urand(0, 3))
                 {
-                    case 0: uiTextId = YELL_SENATOR_1; break;
-                    case 1: uiTextId = YELL_SENATOR_2; break;
-                    case 2: uiTextId = YELL_SENATOR_3; break;
-                    case 3: uiTextId = YELL_SENATOR_4; break;
+                    case 0: DoScriptText(YELL_SENATOR_1, pDagran); break;
+                    case 1: DoScriptText(YELL_SENATOR_2, pDagran); break;
+                    case 2: DoScriptText(YELL_SENATOR_3, pDagran); break;
+                    case 3: DoScriptText(YELL_SENATOR_4, pDagran); break;
                 }
-                DoScriptText(uiTextId, pDagran);
                 m_uiDagranTimer = 30000;    // set a timer of 30 sec to avoid Emperor Thaurissan to spam yells in case many senators are killed in a short amount of time
             }
             break;
@@ -588,15 +590,15 @@ void instance_blackrock_depths::DoCallNextDwarf()
 }
 
 // function that replaces the princess if requirements are met
-bool instance_blackrock_depths::CanReplacePrincess()
+bool instance_blackrock_depths::CanReplacePrincess() const
 {
     Map::PlayerList const& players = instance->GetPlayers();
     if (players.isEmpty())
         return false;
 
-    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    for (const auto& player : players)
     {
-        if (Player* pPlayer = itr->getSource())
+        if (Player* pPlayer = player.getSource())
         {
             // if at least one player didn't complete the quest, return false
             if ((pPlayer->GetTeam() == ALLIANCE && !pPlayer->GetQuestRewardStatus(QUEST_FATE_KINGDOM))
@@ -617,7 +619,7 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
             if (GetData(TYPE_PLUGGER) == DONE)
                 return;
 
-            for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
+            for (auto m_sBarPatronNpcGuid : m_sBarPatronNpcGuids)
             {
                 // About 5% of patrons do emote at a given time
                 // So avoid executing follow up code for the 95% others
@@ -626,7 +628,7 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
                     // Only three emotes are seen in data: laugh, cheer and exclamation
                     // the last one appearing the least and the first one appearing the most
                     // emotes are stored in a table and frequency is handled there
-                    if (Creature* pPatron = instance->GetCreature(*itr))
+                    if (Creature* pPatron = instance->GetCreature(m_sBarPatronNpcGuid))
                         pPatron->HandleEmote(aPatronsEmotes[urand(0, 5)]);
                 }
             }
@@ -637,22 +639,20 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
             // Only by patrons near the broken barrel react to Rocknot's rampage
             if (GameObject* pGo = GetSingleGameObjectFromStorage(GO_BAR_KEG_SHOT))
             {
-                for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
+                for (auto m_sBarPatronNpcGuid : m_sBarPatronNpcGuids)
                 {
-                    if (Creature* pPatron = instance->GetCreature(*itr))
+                    if (Creature* pPatron = instance->GetCreature(m_sBarPatronNpcGuid))
                     {
                         if (pPatron->GetPositionZ() > pGo->GetPositionZ() - 1 && pPatron->IsWithinDist2d(pGo->GetPositionX(), pGo->GetPositionY(), 18.0f))
                         {
-                            uint32 uiTextId = 0;
                             switch (urand(0, 4))
                             {
-                                case 0: uiTextId = SAY_PISSED_PATRON_3; break;
+                                case 0: DoScriptText(SAY_PISSED_PATRON_3, pPatron); break;
                                 case 1:  // case is double to give this text twice the chance of the previous one do be displayed
-                                case 2: uiTextId = SAY_PISSED_PATRON_2; break;
+                                case 2: DoScriptText(SAY_PISSED_PATRON_2, pPatron); break;
                                 // covers the two remaining cases
-                                default: uiTextId = SAY_PISSED_PATRON_1; break;
+                                default: DoScriptText(SAY_PISSED_PATRON_1, pPatron); break;
                             }
-                            DoScriptText(uiTextId, pPatron);
                         }
                     }
                 }
@@ -660,9 +660,9 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
             return;
         // case when Plugger is killed
         case PATRON_HOSTILE:
-            for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
+            for (auto m_sBarPatronNpcGuid : m_sBarPatronNpcGuids)
             {
-                if (Creature* pPatron = instance->GetCreature(*itr))
+                if (Creature* pPatron = instance->GetCreature(m_sBarPatronNpcGuid))
                 {
                     pPatron->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
                     pPatron->SetStandState(UNIT_STAND_STATE_STAND);
@@ -681,7 +681,6 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
                 pNagmara->CastSpell(pNagmara, SPELL_NAGMARA_VANISH, TRIGGERED_OLD_TRIGGERED);
                 pNagmara->ForcedDespawn();
             }
-            return;
     }
 }
 
@@ -703,12 +702,12 @@ void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
                 }
 
                 // One Fireguard Destroyer and two Anvilrage Officers are spawned
-                for (uint8 i = 0; i < 3; ++i)
+                for (unsigned int i : aBarPatrolId)
                 {
                     float fX, fY, fZ;
                     // spawn them behind the bar door
                     pPlugger->GetRandomPoint(aBarPatrolPositions[0][0], aBarPatrolPositions[0][1], aBarPatrolPositions[0][2], 2.0f, fX, fY, fZ);
-                    if (Creature* pSummoned = pPlugger->SummonCreature(aBarPatrolId[i], fX, fY, fZ, aBarPatrolPositions[0][3], TEMPSPAWN_DEAD_DESPAWN, 0))
+                    if (Creature* pSummoned = pPlugger->SummonCreature(i, fX, fY, fZ, aBarPatrolPositions[0][3], TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
                         m_sBarPatrolGuids.insert(pSummoned->GetObjectGuid());
                         // move them to the Grim Guzzler
@@ -722,9 +721,9 @@ void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
                 break;
             }
         case 1:
-            for (GuidSet::const_iterator itr = m_sBarPatrolGuids.begin(); itr != m_sBarPatrolGuids.end(); ++itr)
+            for (auto m_sBarPatrolGuid : m_sBarPatrolGuids)
             {
-                if (Creature* pTmp = instance->GetCreature(*itr))
+                if (Creature* pTmp = instance->GetCreature(m_sBarPatrolGuid))
                 {
                     if (pTmp->GetEntry() == NPC_FIREGUARD_DESTROYER)
                     {
@@ -737,9 +736,9 @@ void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
             }
             break;
         case 2:
-            for (GuidSet::const_iterator itr = m_sBarPatrolGuids.begin(); itr != m_sBarPatrolGuids.end(); ++itr)
+            for (auto m_sBarPatrolGuid : m_sBarPatrolGuids)
             {
-                if (Creature* pTmp = instance->GetCreature(*itr))
+                if (Creature* pTmp = instance->GetCreature(m_sBarPatrolGuid))
                 {
                     if (pTmp->GetEntry() == NPC_FIREGUARD_DESTROYER)
                     {
@@ -820,9 +819,7 @@ InstanceData* GetInstanceData_instance_blackrock_depths(Map* pMap)
 
 void AddSC_instance_blackrock_depths()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_blackrock_depths";
     pNewScript->GetInstanceData = &GetInstanceData_instance_blackrock_depths;
     pNewScript->RegisterSelf();

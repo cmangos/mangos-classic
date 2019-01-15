@@ -135,8 +135,7 @@ class MANGOS_DLL_SPEC LinkedListHead
 
                 return result;
             }
-            else
-                return iSize;
+            return iSize;
         }
 
         void incSize() { ++iSize; }

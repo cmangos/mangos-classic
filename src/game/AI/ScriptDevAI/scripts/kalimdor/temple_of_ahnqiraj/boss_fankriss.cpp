@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "temple_of_ahnqiraj.h"
 
 enum
@@ -169,16 +169,14 @@ struct boss_fankrissAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_fankriss(Creature* pCreature)
+UnitAI* GetAI_boss_fankriss(Creature* pCreature)
 {
     return new boss_fankrissAI(pCreature);
 }
 
 void AddSC_boss_fankriss()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_fankriss";
     pNewScript->GetAI = &GetAI_boss_fankriss;
     pNewScript->RegisterSelf();

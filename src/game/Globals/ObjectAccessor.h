@@ -47,28 +47,15 @@ class HashMapHolder
         typedef std::lock_guard<std::mutex> ReadGuard;
         typedef std::lock_guard<std::mutex> WriteGuard;
 
-        static void Insert(T* o)
-        {
-            WriteGuard guard(i_lock);
-            m_objectMap[o->GetObjectGuid()] = o;
-        }
+        static void Insert(T* o);
 
-        static void Remove(T* o)
-        {
-            WriteGuard guard(i_lock);
-            m_objectMap.erase(o->GetObjectGuid());
-        }
+        static void Remove(T* o);
 
-        static T* Find(ObjectGuid guid)
-        {
-            ReadGuard guard(i_lock);
-            typename MapType::iterator itr = m_objectMap.find(guid);
-            return (itr != m_objectMap.end()) ? itr->second : nullptr;
-        }
+        static T* Find(ObjectGuid guid);
 
-        static MapType& GetContainer() { return m_objectMap; }
+        static MapType& GetContainer();
 
-        static LockType& GetLock() { return i_lock; }
+        static LockType& GetLock();
 
     private:
 
@@ -93,14 +80,14 @@ class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLev
 
         // Search player at any map in world and other objects at same map with `obj`
         // Note: recommended use Map::GetUnit version if player also expected at same map only
-        static Unit* GetUnit(WorldObject const& obj, ObjectGuid guid);
+        static Unit* GetUnit(WorldObject const& u, ObjectGuid guid);
 
         // Player access
         static Player* FindPlayer(ObjectGuid guid, bool inWorld = true);// if need player at specific map better use Map::GetPlayer
         static Player* FindPlayerByName(const char* name);
         static void KickPlayer(ObjectGuid guid);
 
-        HashMapHolder<Player>::MapType& GetPlayers()
+        HashMapHolder<Player>::MapType& GetPlayers() const
         {
             return HashMapHolder<Player>::GetContainer();
         }

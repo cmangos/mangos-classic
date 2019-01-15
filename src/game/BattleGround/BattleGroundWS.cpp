@@ -305,7 +305,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target
         return;
 
     int32 message_id = 0;
-    ChatMsg type;
+    ChatMsg type = CHAT_MSG_BG_SYSTEM_NEUTRAL;
 
     uint8 event = (sBattleGroundMgr.GetGameObjectEventIndex(target_obj->GetGUIDLow())).event1;
 
@@ -562,16 +562,11 @@ WorldSafeLocsEntry const* BattleGroundWS::GetClosestGraveYard(Player* player)
     {
         if (GetStatus() == STATUS_IN_PROGRESS)
             return sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_MAIN_ALLIANCE);
-        else
-            return sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_FLAGROOM_ALLIANCE);
+        return sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_FLAGROOM_ALLIANCE);
     }
-    else
-    {
-        if (GetStatus() == STATUS_IN_PROGRESS)
-            return sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_MAIN_HORDE);
-        else
-            return sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_FLAGROOM_HORDE);
-    }
+    if (GetStatus() == STATUS_IN_PROGRESS)
+        return sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_MAIN_HORDE);
+    return sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_FLAGROOM_HORDE);
 }
 
 void BattleGroundWS::FillInitialWorldStates(WorldPacket& data, uint32& count)

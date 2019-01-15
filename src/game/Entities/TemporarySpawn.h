@@ -28,7 +28,7 @@ class TemporarySpawn : public Creature
         explicit TemporarySpawn(ObjectGuid summoner = ObjectGuid());
         virtual ~TemporarySpawn() {};
 
-        void Update(uint32 update_diff, uint32 time) override;
+        void Update(const uint32 diff) override;
         void SetSummonProperties(TempSpawnType type, uint32 lifetime);
         void Summon(TempSpawnType type, uint32 lifetime);
         void UnSummon();
@@ -36,10 +36,12 @@ class TemporarySpawn : public Creature
         ObjectGuid const GetSpawnerGuid() const override { return m_spawner ; }
         void SetLinkedToOwnerAura(uint32 flags) { m_linkedToOwnerAura |= flags; };
     private:
+        bool IsExpired() const;
+
         bool CheckAuraOnOwner();
         void RemoveAuraFromOwner();
         TempSpawnType m_type;
-        uint32 m_timer;
+        TimePoint m_expirationTimestamp;
         uint32 m_lifetime;
         ObjectGuid m_spawner;
         uint32 m_linkedToOwnerAura;

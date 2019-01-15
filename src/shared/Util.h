@@ -30,7 +30,7 @@ Tokens StrSplit(const std::string& src, const std::string& sep);
 uint32 GetUInt32ValueFromArray(Tokens const& data, uint16 index);
 float GetFloatValueFromArray(Tokens const& data, uint16 index);
 
-void stripLineInvisibleChars(std::string& src);
+void stripLineInvisibleChars(std::string& str);
 
 std::string secsToTimeString(time_t timeInSecs, bool shortText = false, bool hoursOnly = false);
 uint32 TimeStringToSecs(const std::string& timestring);
@@ -254,8 +254,8 @@ inline bool isNumeric(char const* str)
 
 inline bool isNumeric(std::string const& str)
 {
-    for (std::string::const_iterator itr = str.begin(); itr != str.end(); ++itr)
-        if (!isNumeric(*itr))
+    for (char itr : str)
+        if (!isNumeric(itr))
             return false;
 
     return true;
@@ -263,8 +263,8 @@ inline bool isNumeric(std::string const& str)
 
 inline bool isNumeric(std::wstring const& str)
 {
-    for (std::wstring::const_iterator itr = str.begin(); itr != str.end(); ++itr)
-        if (!isNumeric(*itr))
+    for (wchar_t itr : str)
+        if (!isNumeric(itr))
             return false;
 
     return true;
@@ -272,32 +272,32 @@ inline bool isNumeric(std::wstring const& str)
 
 inline bool isBasicLatinString(const std::wstring& wstr, bool numericOrSpace)
 {
-    for (size_t i = 0; i < wstr.size(); ++i)
-        if (!isBasicLatinCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
+    for (wchar_t i : wstr)
+        if (!isBasicLatinCharacter(i) && (!numericOrSpace || !isNumericOrSpace(i)))
             return false;
     return true;
 }
 
 inline bool isExtendedLatinString(const std::wstring& wstr, bool numericOrSpace)
 {
-    for (size_t i = 0; i < wstr.size(); ++i)
-        if (!isExtendedLatinCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
+    for (wchar_t i : wstr)
+        if (!isExtendedLatinCharacter(i) && (!numericOrSpace || !isNumericOrSpace(i)))
             return false;
     return true;
 }
 
 inline bool isCyrillicString(const std::wstring& wstr, bool numericOrSpace)
 {
-    for (size_t i = 0; i < wstr.size(); ++i)
-        if (!isCyrillicCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
+    for (wchar_t i : wstr)
+        if (!isCyrillicCharacter(i) && (!numericOrSpace || !isNumericOrSpace(i)))
             return false;
     return true;
 }
 
 inline bool isEastAsianString(const std::wstring& wstr, bool numericOrSpace)
 {
-    for (size_t i = 0; i < wstr.size(); ++i)
-        if (!isEastAsianCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
+    for (wchar_t i : wstr)
+        if (!isEastAsianCharacter(i) && (!numericOrSpace || !isNumericOrSpace(i)))
             return false;
     return true;
 }

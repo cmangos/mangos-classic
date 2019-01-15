@@ -151,12 +151,9 @@ uint32 AccountMgr::GetId(std::string username) const
     QueryResult* result = LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", username.c_str());
     if (!result)
         return 0;
-    else
-    {
-        uint32 id = (*result)[0].GetUInt32();
-        delete result;
-        return id;
-    }
+    uint32 id = (*result)[0].GetUInt32();
+    delete result;
+    return id;
 }
 
 AccountTypes AccountMgr::GetSecurity(uint32 acc_id)
@@ -196,8 +193,7 @@ uint32 AccountMgr::GetCharactersCount(uint32 acc_id) const
         delete result;
         return charcount;
     }
-    else
-        return 0;
+    return 0;
 }
 
 bool AccountMgr::CheckPassword(uint32 accid, std::string passwd) const
@@ -243,7 +239,7 @@ std::string AccountMgr::CalculateShaPassHash(std::string& name, std::string& pas
     sha.Finalize();
 
     std::string encoded;
-    hexEncodeByteArray(sha.GetDigest(), sha.GetLength(), encoded);
+    hexEncodeByteArray(sha.GetDigest(), Sha1Hash::GetLength(), encoded);
 
     return encoded;
 }

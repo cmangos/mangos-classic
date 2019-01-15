@@ -70,10 +70,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns1__executeCommand(struct soap* soap)
     struct ns1__executeCommandResponse soap_tmp_ns1__executeCommandResponse;
     char* soap_tmp_string;
     soap_default_ns1__executeCommandResponse(soap, &soap_tmp_ns1__executeCommandResponse);
-    soap_tmp_string = NULL;
+    soap_tmp_string = nullptr;
     soap_tmp_ns1__executeCommandResponse.result = &soap_tmp_string;
     soap_default_ns1__executeCommand(soap, &soap_tmp_ns1__executeCommand);
-    if (!soap_get_ns1__executeCommand(soap, &soap_tmp_ns1__executeCommand, "ns1:executeCommand", NULL))
+    if (!soap_get_ns1__executeCommand(soap, &soap_tmp_ns1__executeCommand, "ns1:executeCommand", nullptr))
         return soap->error;
     if (soap_body_end_in(soap)
             || soap_envelope_end_in(soap)
@@ -82,7 +82,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns1__executeCommand(struct soap* soap)
     soap->error = ns1__executeCommand(soap, soap_tmp_ns1__executeCommand.command, soap_tmp_ns1__executeCommandResponse.result);
     if (soap->error)
         return soap->error;
-    soap->encodingStyle = NULL;
+    soap->encodingStyle = nullptr;
     soap_serializeheader(soap);
     soap_serialize_ns1__executeCommandResponse(soap, &soap_tmp_ns1__executeCommandResponse);
     if (soap_begin_count(soap))
@@ -96,7 +96,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns1__executeCommand(struct soap* soap)
                 || soap_body_end_out(soap)
                 || soap_envelope_end_out(soap))
             return soap->error;
-    };
+    }
     if (soap_end_count(soap)
             || soap_response(soap, SOAP_OK)
             || soap_envelope_begin_out(soap)

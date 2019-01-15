@@ -190,6 +190,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 {
                     if (pet)
                     {
+                        pet->PlayDismissSound();
                         // No action for Hunter pets, Hunters must use their Dismiss Pet spell
                         if (pet->getPetType() != HUNTER_PET)
                             pet->ForcedDespawn();
@@ -243,22 +244,20 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 return;
             }
 
+            // do not cast not learned spells
+            if (IsPassiveSpell(spellInfo) || !petUnit->HasSpell(spellid))
+                return;
+
             if (!petUnit->IsSpellReady(*spellInfo))
                 return;
 
-            for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+            for (unsigned int i : spellInfo->EffectImplicitTargetA)
             {
-                if (spellInfo->EffectImplicitTargetA[i] == TARGET_ALL_ENEMY_IN_AREA
-                        || spellInfo->EffectImplicitTargetA[i] == TARGET_ALL_ENEMY_IN_AREA_INSTANT
-                        || spellInfo->EffectImplicitTargetA[i] == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
+                if (i == TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC
+                        || i == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC
+                        || i == TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC)
                     return;
             }
-
-            // do not cast not learned spells
-            if (!petUnit->HasSpell(spellid) || IsPassiveSpell(spellInfo))
-                return;
-
-            _player->SetInCombatState(true, unit_target);
 
             petUnit->clearUnitState(UNIT_STAT_MOVING);
 
@@ -382,8 +381,18 @@ void WorldSession::HandlePetNameQueryOpcode(WorldPacket& recv_data)
 void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber) const
 {
     Creature* pet = _player->GetMap()->GetAnyTypeCreature(petguid);
-    if (!pet || !pet->GetCharmInfo() || pet->GetCharmInfo()->GetPetNumber() != petnumber)
+
+    // When replying to a query, verify input against public field info only (where it comes from)
+    if (!pet || !pet->GetCharmInfo() || (pet->GetUInt32Value(UNIT_FIELD_PETNUMBER) && pet->GetUInt32Value(UNIT_FIELD_PETNUMBER) != petnumber))
+    {
+        WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (4 + 1 + 4 + 1));
+        data << uint32(petnumber);
+        data << uint8(0);
+        data << uint32(0);
+        data << uint8(0);
+        _player->GetSession()->SendPacket(data);
         return;
+    }
 
     char const* name = pet->GetName();
 
@@ -407,7 +416,6 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
     DETAIL_LOG("HandlePetSetAction. CMSG_PET_SET_ACTION");
 
     ObjectGuid petGuid;
-    uint8  count;
 
     recv_data >> petGuid;
 
@@ -429,11 +437,11 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
     CharmInfo* charmInfo = petUnit->GetCharmInfo();
     if (!charmInfo)
     {
-        sLog.outError("WorldSession::HandlePetSetAction: %s is considered pet-like but doesn't have a charminfo!", petUnit->GetObjectGuid().GetString().c_str());
+        sLog.outError("WorldSession::HandlePetSetAction: %s is considered pet-like but doesn't have a charminfo!", petUnit->GetGuidStr().c_str());
         return;
     }
 
-    count = (recv_data.size() == 24) ? 2 : 1;
+    uint8 count = (recv_data.size() == 24) ? 2 : 1;
 
     uint32 position[2];
     uint32 data[2];
@@ -685,11 +693,11 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
 
     if (petUnit->HasCharmer())
         // state can be used as boolean
-        petUnit->GetCharmInfo()->ToggleCreatureAutocast(spellid, !!state);
+        petUnit->GetCharmInfo()->ToggleCreatureAutocast(spellid, state != 0);
     else if (pet)
-        pet->ToggleAutocast(spellid, !!state);
+        pet->ToggleAutocast(spellid, state != 0);
 
-    charmInfo->SetSpellAutocast(spellid, !!state);
+    charmInfo->SetSpellAutocast(spellid, state != 0);
 }
 
 void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)

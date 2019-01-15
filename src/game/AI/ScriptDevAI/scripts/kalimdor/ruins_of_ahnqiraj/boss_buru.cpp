@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "ruins_of_ahnqiraj.h"
 
 enum
@@ -170,7 +170,7 @@ struct boss_buruAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_buru(Creature* pCreature)
+UnitAI* GetAI_boss_buru(Creature* pCreature)
 {
     return new boss_buruAI(pCreature);
 }
@@ -227,16 +227,14 @@ struct npc_buru_eggAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_buru_egg(Creature* pCreature)
+UnitAI* GetAI_npc_buru_egg(Creature* pCreature)
 {
     return new npc_buru_eggAI(pCreature);
 }
 
 void AddSC_boss_buru()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_buru";
     pNewScript->GetAI = &GetAI_boss_buru;
     pNewScript->RegisterSelf();

@@ -20,16 +20,12 @@
 #define OUTDOOR_PVP_H
 
 #include "Common.h"
+#include "Entities/EntitiesMgr.h"
 #include "Entities/ObjectGuid.h"
 #include "Globals/SharedDefines.h"
 #include "OutdoorPvPMgr.h"
 
 class WorldPacket;
-class WorldObject;
-class Player;
-class GameObject;
-class Unit;
-class Creature;
 
 enum CapturePointArtKits
 {
@@ -62,7 +58,7 @@ class OutdoorPvP
         virtual bool HandleEvent(uint32 /*eventId*/, GameObject* /*go*/) { return false; }
 
         // handle capture objective complete
-        virtual void HandleObjectiveComplete(uint32 /*eventId*/, const std::list<Player*>& /*players*/, Team /*team*/) {}
+        virtual void HandleObjectiveComplete(uint32 /*eventId*/, const PlayerList& /*players*/, Team /*team*/) {}
 
         // Called when a creature is created
         virtual void HandleCreatureCreate(Creature* /*creature*/) {}

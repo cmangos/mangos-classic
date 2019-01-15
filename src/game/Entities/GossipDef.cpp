@@ -107,7 +107,7 @@ uint32 GossipMenu::MenuItemAction(unsigned int ItemId)
 bool GossipMenu::MenuItemCoded(unsigned int ItemId)
 {
     if (ItemId >= m_gItems.size())
-        return 0;
+        return false;
 
     return m_gItems[ ItemId ].m_gCoded;
 }
@@ -293,10 +293,10 @@ void PlayerMenu::SendTalking(uint32 textID) const
 
             data << pGossip->Options[i].Language;
 
-            for (int j = 0; j < 3; ++j)
+            for (auto Emote : pGossip->Options[i].Emotes)
             {
-                data << pGossip->Options[i].Emotes[j]._Delay;
-                data << pGossip->Options[i].Emotes[j]._Emote;
+                data << Emote._Delay;
+                data << Emote._Emote;
             }
         }
     }
@@ -506,12 +506,11 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
 // send only static data in this packet!
 void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest) const
 {
-    std::string Title, Details, Objectives, EndText;
     std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
-    Title = pQuest->GetTitle();
-    Details = pQuest->GetDetails();
-    Objectives = pQuest->GetObjectives();
-    EndText = pQuest->GetEndText();
+    std::string Title = pQuest->GetTitle();
+    std::string Details = pQuest->GetDetails();
+    std::string Objectives = pQuest->GetObjectives();
+    std::string EndText = pQuest->GetEndText();
 
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
         ObjectiveText[i] = pQuest->ObjectiveText[i];
@@ -650,9 +649,9 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
     data << uint32(EnableNext ? 1 : 0);                     // Auto Finish
 
     uint32 EmoteCount = 0;
-    for (uint32 i = 0; i < QUEST_EMOTE_COUNT; ++i)
+    for (unsigned int i : pQuest->OfferRewardEmote)
     {
-        if (pQuest->OfferRewardEmote[i] <= 0)
+        if (i <= 0)
             break;
         ++EmoteCount;
     }
@@ -721,8 +720,8 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
         }
     }
 
-    // We may wish a better check, perhaps checking the real quest requirements
-    if (RequestItemsText.empty())
+    // Only shown for incomplete quests, or ones that require items.
+    if (RequestItemsText.empty() || ((pQuest->GetReqItemsCount() == 0) && Completable))
     {
         SendQuestGiverOfferReward(pQuest, npcGUID, true);
         return;
@@ -748,12 +747,11 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
     data << uint32(pQuest->GetRewOrReqMoney() < 0 ? -pQuest->GetRewOrReqMoney() : 0);
 
     data << uint32(pQuest->GetReqItemsCount());
-    ItemPrototype const* pItem;
     for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
     {
         if (!pQuest->ReqItemId[i])
             continue;
-        pItem = ObjectMgr::GetItemPrototype(pQuest->ReqItemId[i]);
+        ItemPrototype const* pItem = ObjectMgr::GetItemPrototype(pQuest->ReqItemId[i]);
         data << uint32(pQuest->ReqItemId[i]);
         data << uint32(pQuest->ReqItemCount[i]);
 

@@ -67,7 +67,7 @@ namespace Movement
         // add fake Enter_Cycle flag - needed for client-side cyclic movement (client will erase first spline vertex after first cycle done)
         splineflags.enter_cycle = move_spline.isCyclic();
         // add fake Runmode flag - client has strange issues without that flag
-        data << uint32(splineflags & ~MoveSplineFlag::Mask_No_Monster_Move | MoveSplineFlag::Runmode);
+        data << uint32((splineflags & ~MoveSplineFlag::Mask_No_Monster_Move) | MoveSplineFlag::Runmode);
         data << move_spline.Duration();
     }
 
@@ -75,14 +75,14 @@ namespace Movement
     {
         Movement::SplineBase::ControlArray const& pathPoint = spline.getPoints(); // get ref of whole path points array
 
-        uint32 pathSize = spline.last() - spline.first() - 1; // -1 as we send destination first and last index is destination
+        int32 pathSize = spline.last() - spline.first() - 1; // -1 as we send destination first and last index is destination
         MANGOS_ASSERT(pathSize >= 0);                       // should never be less than 0
 
         Vector3 destination = pathPoint[spline.last()];     // destination of this path should be send right after path size
         data << pathSize;
         data << destination;
 
-        for (uint32 i = spline.first(); i < spline.first() + pathSize; i++) // from first real index (this array contain also special data)
+        for (int32 i = spline.first(); i < spline.first() + pathSize; i++) // from first real index (this array contain also special data)
         {
             Vector3 offset = destination - pathPoint[i];    // we have to send offset relative to destination instead of directly path point.
             data.appendPackXYZ(offset.x, offset.y, offset.z); // we have to pack x,y,z before send

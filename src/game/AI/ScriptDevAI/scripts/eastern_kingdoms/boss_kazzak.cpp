@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {
@@ -47,7 +47,7 @@ enum
     SPELL_VOIDBOLT            = 21066,
     SPELL_MARK_OF_KAZZAK      = 21056,                  // triggers 21058 when target gets to 0 mana
     SPELL_CAPTURESOUL         = 21053,                  // procs 21054 on kill
-    SPELL_TWISTEDREFLECTION   = 21063
+    SPELL_TWISTED_REFLECTION   = 21063
 };
 
 struct boss_kazzakAI : public ScriptedAI
@@ -141,7 +141,7 @@ struct boss_kazzakAI : public ScriptedAI
 
         if (m_uiThunderClapTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_THUNDERCLAP) == CAST_OK)
+            if (DoCastSpellIfCan(nullptr, SPELL_THUNDERCLAP) == CAST_OK)
                 m_uiThunderClapTimer = urand(10000, 14000);
         }
         else
@@ -168,9 +168,9 @@ struct boss_kazzakAI : public ScriptedAI
 
         if (m_uiTwistedReflectionTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_TWISTED_REFLECTION, SELECT_FLAG_PLAYER))
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_TWISTEDREFLECTION) == CAST_OK)
+                if (DoCastSpellIfCan(pTarget, SPELL_TWISTED_REFLECTION) == CAST_OK)
                     m_uiTwistedReflectionTimer = 15000;
             }
         }
@@ -181,16 +181,14 @@ struct boss_kazzakAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_kazzak(Creature* pCreature)
+UnitAI* GetAI_boss_kazzak(Creature* pCreature)
 {
     return new boss_kazzakAI(pCreature);
 }
 
 void AddSC_boss_kazzakAI()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_kazzak";
     pNewScript->GetAI = &GetAI_boss_kazzak;
     pNewScript->RegisterSelf();

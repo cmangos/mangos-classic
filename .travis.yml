@@ -51,6 +51,8 @@ matrix:
   exclude:
     - os: osx
       compiler: gcc
+    - os: osx
+      env: BUILD_TYPE=Release PCH_FLAG=ON
 
 addons:
   apt:

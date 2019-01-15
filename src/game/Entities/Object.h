@@ -24,6 +24,7 @@
 #include "Entities/UpdateFields.h"
 #include "Entities/UpdateData.h"
 #include "Entities/ObjectGuid.h"
+#include "Entities/EntitiesMgr.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/Camera.h"
 #include "Camera.h"
@@ -34,6 +35,9 @@
 #define CONTACT_DISTANCE            0.5f
 #define INTERACTION_DISTANCE        5.0f
 #define ATTACK_DISTANCE             5.0f
+#define MELEE_LEEWAY                8.0f / 3.0f // Melee attack and melee spell leeway when moving
+#define RANGED_LEEWAY               2.0f        // Ranged leeway when moving
+#define AOE_LEEWAY                  2.0f        // AOE leeway when moving
 #define INSPECT_DISTANCE            11.11f
 #define TRADE_DISTANCE              11.11f
 #define MAX_VISIBILITY_DISTANCE     333.0f      // max distance for visible object show, limited in 333 yards
@@ -77,6 +81,14 @@ enum PlayPacketSettings
     PLAY_AREA,
 };
 
+enum DistanceCalculation
+{
+    DIST_CALC_NONE,
+    DIST_CALC_BOUNDING_RADIUS,
+    DIST_CALC_COMBAT_REACH,
+    DIST_CALC_COMBAT_REACH_WITH_MELEE,
+};
+
 struct PlayPacketParameters
 {
     PlayPacketParameters(PlayPacketSettings setting) : setting(setting) {}
@@ -116,18 +128,14 @@ struct SpellEntry;
 
 typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
-// cooldown system
-typedef std::chrono::system_clock Clock;
-typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> TimePoint;
-
 class CooldownData
 {
         friend class CooldownContainer;
     public:
         CooldownData(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory, uint32 categoryDuration, uint32 itemId = 0, bool isPermanent = false) :
             m_spellId(spellId),
-            m_expireTime(duration ? std::chrono::milliseconds(duration) + clockNow : TimePoint()),
             m_category(spellCategory),
+            m_expireTime(duration ? std::chrono::milliseconds(duration) + clockNow : TimePoint()),
             m_catExpireTime(spellCategory && categoryDuration ? std::chrono::milliseconds(categoryDuration) + clockNow : TimePoint()),
             m_typePermanent(isPermanent),
             m_itemId(itemId)
@@ -158,10 +166,7 @@ class CooldownData
             if (m_typePermanent)
                 return false;
 
-            if (now >= m_expireTime)
-                return true;
-
-            return false;
+            return now >= m_expireTime;
         }
 
         bool IsCatCDExpired(TimePoint const& now) const
@@ -288,6 +293,7 @@ class CooldownContainer
 struct Position
 {
     Position() : x(0.0f), y(0.0f), z(0.0f), o(0.0f) {}
+    Position(float _x, float _y, float _z, float _o) : x(_x), y(_y), z(_z), o(_o) {}
     float x, y, z, o;
 };
 
@@ -366,7 +372,7 @@ class Object
         void SetObjectScale(float newScale);
 
         uint8 GetTypeId() const { return m_objectTypeId; }
-        bool isType(TypeMask mask) const { return !!(mask & m_objectType); }
+        bool isType(TypeMask mask) const { return (mask & m_objectType) != 0; }
 
         virtual void BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const;
         void SendCreateUpdateToPlayer(Player* player) const;
@@ -379,6 +385,7 @@ class Object
         void SendForcedObjectUpdate();
 
         void BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const;
+        void BuildForcedValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const;
         void BuildOutOfRangeUpdateBlock(UpdateData* data) const;
         void BuildMovementUpdateBlock(UpdateData* data, uint8 flags = 0) const;
 
@@ -435,7 +442,6 @@ class Object
         void SetStatFloatValue(uint16 index, float value);
         void SetStatInt32Value(uint16 index, int32 value);
         void ForceValuesUpdateAtIndex(uint32 index);
-
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModPositiveFloatValue(uint16 index, float val, bool apply);
@@ -473,7 +479,7 @@ class Object
         }
 
         void SetByteFlag(uint16 index, uint8 offset, uint8 newFlag);
-        void RemoveByteFlag(uint16 index, uint8 offset, uint8 newFlag);
+        void RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag);
 
         void ToggleByteFlag(uint16 index, uint8 offset, uint8 flag)
         {
@@ -631,31 +637,9 @@ class WorldObject : public Object
         friend struct WorldObjectChangeAccumulator;
 
     public:
-
-        // class is used to manipulate with WorldUpdateCounter
-        // it is needed in order to get time diff between two object's Update() calls
-        class UpdateHelper
-        {
-            public:
-                explicit UpdateHelper(WorldObject* obj) : m_obj(obj) {}
-                ~UpdateHelper() { }
-
-                void Update(uint32 time_diff)
-                {
-                    m_obj->Update(m_obj->m_updateTracker.timeElapsed(), time_diff);
-                    m_obj->m_updateTracker.Reset();
-                }
-
-            private:
-                UpdateHelper(const UpdateHelper&);
-                UpdateHelper& operator=(const UpdateHelper&);
-
-                WorldObject* const m_obj;
-        };
-
         virtual ~WorldObject() {}
 
-        virtual void Update(uint32 /*update_diff*/, uint32 /*time_diff*/) {}
+        virtual void Update(const uint32 /*diff*/) {}
 
         void _Create(uint32 guidlow, HighGuid guidhigh);
 
@@ -709,11 +693,18 @@ class WorldObject : public Object
         virtual float GetObjectBoundingRadius() const { return DEFAULT_WORLD_OBJECT_SIZE; }
         virtual float GetCombatReach() const { return 0.f; }
         float GetCombinedCombatReach(WorldObject const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;
+        float GetCombinedCombatReach(bool forMeleeRange = true, float flat_mod = 0.0f) const;
 
         bool IsPositionValid() const;
         void UpdateGroundPositionZ(float x, float y, float& z) const;
         void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const;
 
+        void MovePositionToFirstCollision(WorldLocation &pos, float dist, float angle);
+        void GetFirstCollisionPosition(WorldLocation &pos, float dist, float angle)
+        {
+            GetPosition(pos);
+            MovePositionToFirstCollision(pos, dist, angle);
+        }
         void GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist = 0.0f, float const* ori = nullptr) const;
 
         uint32 GetMapId() const { return m_mapId; }
@@ -733,12 +724,9 @@ class WorldObject : public Object
         virtual ObjectGuid const& GetOwnerGuid() const { return GetGuidValue(OBJECT_FIELD_GUID); }
         virtual void SetOwnerGuid(ObjectGuid /*guid*/) { }
 
-        float GetDistance(const WorldObject* obj) const;
-        float GetDistance(float x, float y, float z) const;
-        float GetDistanceNoBoundingRadius(float x, float y, float z) const;
-        float GetCombatDistance(const WorldObject* obj, bool forMeleeRange) const;
-        float GetDistance2d(const WorldObject* obj) const;
-        float GetDistance2d(float x, float y) const;
+        float GetDistance(const WorldObject* obj, bool is3D = true, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS) const;
+        float GetDistance(float x, float y, float z, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS) const;
+        float GetDistance2d(float x, float y, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS) const;
         float GetDistanceZ(const WorldObject* obj) const;
         bool IsInMap(const WorldObject* obj) const
         {
@@ -767,16 +755,16 @@ class WorldObject : public Object
         {
             return obj && IsInMap(obj) && _IsWithinDist(obj, dist2compare, is3D);
         }
-        bool IsWithinLOS(float x, float y, float z) const;
-        bool IsWithinLOSInMap(const WorldObject* obj) const;
-        bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true) const;
-        bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true) const;
-        bool IsInRange2d(float x, float y, float minRange, float maxRange) const;
-        bool IsInRange3d(float x, float y, float z, float minRange, float maxRange) const;
+        bool IsWithinLOS(float ox, float oy, float oz, bool ignoreM2Model = false) const;
+        bool IsWithinLOSInMap(const WorldObject* obj, bool ignoreM2Model = false) const;
+        bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true, DistanceCalculation distcalc = DIST_CALC_NONE) const;
+        bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true, bool combat = false) const;
+        bool IsInRange2d(float x, float y, float minRange, float maxRange, bool combat = false) const;
+        bool IsInRange3d(float x, float y, float z, float minRange, float maxRange, bool combat = false) const;
 
         float GetAngle(const WorldObject* obj) const;
         float GetAngle(const float x, const float y) const;
-        bool HasInArc(const WorldObject* target, const float arcangle = M_PI) const;
+        bool HasInArc(const WorldObject* target, const float arc = M_PI) const;
         bool isInFrontInMap(WorldObject const* target, float distance, float arc = M_PI) const;
         bool isInBackInMap(WorldObject const* target, float distance, float arc = M_PI) const;
         // Used in AOE - meant to ignore bounding radius of source
@@ -801,13 +789,11 @@ class WorldObject : public Object
         void PlayDistanceSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
         void PlayDirectSound(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
         void PlayMusic(uint32 sound_id, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
+        void PlaySpellVisual(uint32 artKitId, PlayPacketParameters parameters = PlayPacketParameters(PLAY_SET)) const;
         void HandlePlayPacketSettings(WorldPacket& msg, PlayPacketParameters& parameters) const;
 
         void SendObjectDeSpawnAnim(ObjectGuid guid) const;
         void SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId = 0) const;
-
-        virtual bool IsHostileTo(Unit const* unit) const = 0;
-        virtual bool IsFriendlyTo(Unit const* unit) const = 0;
 
         virtual ReputationRank GetReactionTo(Unit const* unit) const;
         virtual ReputationRank GetReactionTo(Corpse const* corpse) const;
@@ -841,7 +827,7 @@ class WorldObject : public Object
         void RemoveFromClientUpdateList() override;
         void BuildUpdateData(UpdateDataMapType&) override;
 
-        Creature* SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject = false, bool setRun = false, uint32 pathId = 0);
+        Creature* SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject = false, bool setRun = false, uint32 pathId = 0, uint32 faction = 0, bool spawnCounting = false, bool forcedOnTop = false);
 
         bool isActiveObject() const { return m_isActiveObject || m_viewPoint.hasViewers(); }
         void SetActiveObjectState(bool active);
@@ -861,7 +847,7 @@ class WorldObject : public Object
 
         // cooldown system
         virtual void AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration = 0, bool updateClient = false);
-        virtual bool HaveGCD(SpellEntry const* spellEntry) const;
+        virtual bool HasGCD(SpellEntry const* spellEntry) const;
         void ResetGCD(SpellEntry const* spellEntry = nullptr);
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0);
         virtual void RemoveSpellCooldown(SpellEntry const& spellEntry, bool updateClient = true);
@@ -875,8 +861,8 @@ class WorldObject : public Object
 
         virtual void InspectingLoot() {}
 
-        virtual bool CanAttackSpell(Unit* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const { return true; }
-        virtual bool CanAssistSpell(Unit* target, SpellEntry const* spellInfo = nullptr) const { return true; }
+        virtual bool CanAttackSpell(Unit const* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const { return true; }
+        virtual bool CanAssistSpell(Unit const* target, SpellEntry const* spellInfo = nullptr) const { return true; }
 
     protected:
         explicit WorldObject();
@@ -890,7 +876,7 @@ class WorldObject : public Object
         // cooldown system
         void UpdateCooldowns(TimePoint const& now);
         bool CheckLockout(SpellSchoolMask schoolMask) const;
-        bool GetExpireTime(SpellEntry const& spellEntry, TimePoint& expireTime, bool& isPermanent);
+        bool GetExpireTime(SpellEntry const& spellEntry, TimePoint& expireTime, bool& isPermanent) const;
 
         GCDMap            m_GCDCatMap;
         LockoutMap        m_lockoutMap;
@@ -907,7 +893,6 @@ class WorldObject : public Object
 
         Position m_position;
         ViewPoint m_viewPoint;
-        WorldUpdateCounter m_updateTracker;
         bool m_isActiveObject;
 };
 

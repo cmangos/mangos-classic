@@ -79,7 +79,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
     uint32 mapId;
     uint8 joinAsGroup;
     bool isPremade = false;
-    Group* grp;
+    Group* grp = nullptr;
 
     recv_data >> guid;                                      // battlemaster guid
     recv_data >> mapId;
@@ -114,8 +114,9 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
     BattleGround* bg = nullptr;
     if (instanceId)
         bg = sBattleGroundMgr.GetBattleGroundThroughClientInstance(instanceId, bgTypeId);
-
-    if (!bg && !(bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId)))
+    if (!bg)
+        bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
+    if (!bg)
     {
         sLog.outError("Battleground: no available bg / template found");
         return;
@@ -384,12 +385,8 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
                 _player->ResurrectPlayer(1.0f);
                 _player->SpawnCorpseBones();
             }
-            // stop taxi flight at port
-            if (_player->IsTaxiFlying())
-            {
-                _player->GetMotionMaster()->MovementExpired();
-                _player->m_taxi.ClearTaxiDestinations();
-            }
+
+            _player->TaxiFlightInterrupt();
 
             sBattleGroundMgr.BuildBattleGroundStatusPacket(data, bg, queueSlot, STATUS_IN_PROGRESS, 0, bg->GetStartTime());
             _player->GetSession()->SendPacket(data);

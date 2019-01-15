@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_eris_havenfire
 EndContentData */
 
@@ -207,8 +207,8 @@ struct npc_eris_havenfireAI : public ScriptedAI
         }
         else if (uiSummonId == NPC_SCOURGE_ARCHER)
         {
-            for (uint8 i = 0; i < MAX_ARCHERS; ++i)
-                m_creature->SummonCreature(NPC_SCOURGE_ARCHER, aArcherSpawn[i][0], aArcherSpawn[i][1], aArcherSpawn[i][2], aArcherSpawn[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
+            for (auto i : aArcherSpawn)
+                m_creature->SummonCreature(NPC_SCOURGE_ARCHER, i[0], i[1], i[2], i[3], TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 
@@ -269,16 +269,13 @@ struct npc_eris_havenfireAI : public ScriptedAI
                 if (pTemp->getVictim() && pTemp->IsWithinDistInMap(pTemp->getVictim(), 30.0f))
                     continue;
                 // Else, find a new target in range
-                else
-                {
-                    // First look for an Injured Peasant in range (arbitrary choice), if none look for a Plagued Peasant
-                    Creature* pTarget = GetClosestCreatureWithEntry(pTemp, NPC_INJURED_PEASANT, 30.0f);
-                    if (!pTarget)
-                        pTarget = GetClosestCreatureWithEntry(pTemp, NPC_PLAGUED_PEASANT, 30.0f);
+                // First look for an Injured Peasant in range (arbitrary choice), if none look for a Plagued Peasant
+                Creature* pTarget = GetClosestCreatureWithEntry(pTemp, NPC_INJURED_PEASANT, 30.0f);
+                if (!pTarget)
+                    pTarget = GetClosestCreatureWithEntry(pTemp, NPC_PLAGUED_PEASANT, 30.0f);
 
-                    if (pTarget)
-                        pTemp->AI()->AttackStart(pTarget);
-                }
+                if (pTarget)
+                    pTemp->AI()->AttackStart(pTarget);
             }
         }
     }
@@ -340,7 +337,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_eris_havenfire(Creature* pCreature)
+UnitAI* GetAI_npc_eris_havenfire(Creature* pCreature)
 {
     return new npc_eris_havenfireAI(pCreature);
 }
@@ -358,9 +355,7 @@ bool QuestAccept_npc_eris_havenfire(Player* pPlayer, Creature* pCreature, const 
 
 void AddSC_eastern_plaguelands()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_eris_havenfire";
     pNewScript->GetAI = &GetAI_npc_eris_havenfire;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_eris_havenfire;

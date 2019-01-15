@@ -68,9 +68,8 @@ enum Typecommand
     GUILD_QUIT_S    = 0x03,
     // 0x05?
     GUILD_FOUNDER_S = 0x0E,
-    // [-ZERO] tbc enumerations [?]
-    GUILD_UNK1      = 0x10,
-    GUILD_UNK3      = 0x16
+    GUILD_UNK1      = 0x13,     // triggers UI event EVENT_GUILD_ROSTER_UPDATE
+    GUILD_UNK2      = 0x14      // triggers UI event EVENT_GUILD_ROSTER_UPDATE
 };
 
 enum CommandErrors
@@ -257,13 +256,13 @@ class Guild
                         _do(player);
         }
 
-        void CreateRank(std::string name, uint32 rights);
+        void CreateRank(std::string name_, uint32 rights);
         void DelRank();
         std::string GetRankName(uint32 rankId);
         uint32 GetRankRights(uint32 rankId);
         uint32 GetRanksSize() const { return m_Ranks.size(); }
 
-        void SetRankName(uint32 rankId, std::string name);
+        void SetRankName(uint32 rankId, std::string name_);
         void SetRankRights(uint32 rankId, uint32 rights);
         bool HasRankRight(uint32 rankId, uint32 right)
         {
@@ -284,9 +283,9 @@ class Guild
 
         MemberSlot* GetMemberSlot(const std::string& name)
         {
-            for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
-                if (itr->second.Name == name)
-                    return &itr->second;
+            for (auto& member : members)
+                if (member.second.Name == name)
+                    return &member.second;
 
             return nullptr;
         }
@@ -300,7 +299,7 @@ class Guild
         void   LogGuildEvent(uint8 EventType, ObjectGuid playerGuid1, ObjectGuid playerGuid2 = ObjectGuid(), uint8 newRank = 0);
 
     protected:
-        void AddRank(const std::string& name, uint32 rights);
+        void AddRank(const std::string& name_, uint32 rights);
 
         uint32 m_Id;
         std::string m_Name;

@@ -145,21 +145,18 @@ bool Weather::ReGenerate()
             m_grade = 0.9999f;                              // go nuts
             return true;
         }
-        else
+        if (m_grade > 0.6666667f)
         {
-            if (m_grade > 0.6666667f)
+            // Severe change, but how severe?
+            uint32 rnd = urand(0, 99);
+            if (rnd < 50)
             {
-                // Severe change, but how severe?
-                uint32 rnd = urand(0, 99);
-                if (rnd < 50)
-                {
-                    m_grade -= 0.6666667f;
-                    return true;
-                }
+                m_grade -= 0.6666667f;
+                return true;
             }
-            m_type = WEATHER_TYPE_FINE;                     // clear up
-            m_grade = 0;
         }
+        m_type = WEATHER_TYPE_FINE;                     // clear up
+        m_grade = 0;
     }
 
     // At this point, only weather that isn't doing anything remains but that have weather data
@@ -262,26 +259,29 @@ WeatherState Weather::GetWeatherState() const
     switch (m_type)
     {
         case WEATHER_TYPE_RAIN:
+        {
             if (m_grade < 0.40f)
                 return WEATHER_STATE_LIGHT_RAIN;
-            else if (m_grade < 0.70f)
+            if (m_grade < 0.70f)
                 return WEATHER_STATE_MEDIUM_RAIN;
-            else
-                return WEATHER_STATE_HEAVY_RAIN;
+            return WEATHER_STATE_HEAVY_RAIN;
+        }
         case WEATHER_TYPE_SNOW:
+        {
             if (m_grade < 0.40f)
                 return WEATHER_STATE_LIGHT_SNOW;
-            else if (m_grade < 0.70f)
+            if (m_grade < 0.70f)
                 return WEATHER_STATE_MEDIUM_SNOW;
-            else
-                return WEATHER_STATE_HEAVY_SNOW;
+            return WEATHER_STATE_HEAVY_SNOW;
+        }
         case WEATHER_TYPE_STORM:
+        {
             if (m_grade < 0.40f)
                 return WEATHER_STATE_LIGHT_SANDSTORM;
-            else if (m_grade < 0.70f)
+            if (m_grade < 0.70f)
                 return WEATHER_STATE_MEDIUM_SANDSTORM;
-            else
-                return WEATHER_STATE_HEAVY_SANDSTORM;
+            return WEATHER_STATE_HEAVY_SANDSTORM;
+        }
         case WEATHER_TYPE_FINE:
         default:
             return WEATHER_STATE_FINE;
@@ -392,7 +392,11 @@ uint32 Weather::GetSound()
     switch (m_type)
     {
         case WEATHER_TYPE_RAIN:                             // rain
-            if (m_grade < 0.40f)
+            // A minimum grade value of 0.27 is required for rain to be seen on all weather intensity settings.
+            // Rain without sound is better than sound without rain so we pick this value.
+            if (m_grade < 0.27f)
+                sound = WEATHER_NOSOUND;
+            else if (m_grade < 0.40f)
                 sound = WEATHER_RAINLIGHT;
             else if (m_grade < 0.70f)
                 sound = WEATHER_RAINMEDIUM;

@@ -87,11 +87,8 @@ class TypeUnorderedMapContainer
                 elements._element[handle] = obj;
                 return true;
             }
-            else
-            {
-                assert(i->second == obj && "Object with certain key already in but objects are different!");
-                return false;
-            }
+            assert(i->second == obj && "Object with certain key already in but objects are different!");
+            return false;
         }
 
         template<class SPECIFIC_TYPE>
@@ -120,8 +117,7 @@ class TypeUnorderedMapContainer
             typename std::unordered_map<KEY_TYPE, SPECIFIC_TYPE*>::iterator i = elements._element.find(hdl);
             if (i == elements._element.end())
                 return nullptr;
-            else
-                return i->second;
+            return i->second;
         }
 
         template<class SPECIFIC_TYPE>

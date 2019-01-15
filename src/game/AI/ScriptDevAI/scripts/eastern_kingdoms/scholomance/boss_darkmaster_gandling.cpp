@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "scholomance.h"
 
 enum
@@ -115,16 +115,14 @@ struct boss_darkmaster_gandlingAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_darkmaster_gandling(Creature* pCreature)
+UnitAI* GetAI_boss_darkmaster_gandling(Creature* pCreature)
 {
     return new boss_darkmaster_gandlingAI(pCreature);
 }
 
 void AddSC_boss_darkmaster_gandling()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_darkmaster_gandling";
     pNewScript->GetAI = &GetAI_boss_darkmaster_gandling;
     pNewScript->RegisterSelf();

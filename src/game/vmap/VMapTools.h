@@ -22,8 +22,6 @@
 #include <G3D/CollisionDetection.h>
 #include <G3D/AABox.h>
 
-#include "NodeValueAccess.h"
-
 /**
 The Class is mainly taken from G3D/AABSPTree.h but modified to be able to use our internal data structure.
 This is an iterator that helps us analysing the BSP-Trees.
@@ -40,9 +38,9 @@ namespace VMAP
             G3D::Vector3 hitLocation;
             G3D::Vector3 hitNormal;
 
-            void operator()(const G3D::Ray& ray, const TValue* entity, bool pStopAtFirstHit, bool checkLOS, float& distance)
+            void operator()(const G3D::Ray& ray, const TValue* entity, bool pStopAtFirstHit, bool ignoreM2Model, float& distance)
             {
-                entity->intersect(ray, distance, pStopAtFirstHit, checkLOS, hitLocation, hitNormal);
+                entity->intersect(ray, distance, pStopAtFirstHit, ignoreM2Model, hitLocation, hitNormal);
             }
     };
 

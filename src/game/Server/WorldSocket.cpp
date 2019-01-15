@@ -37,6 +37,7 @@
 #include <memory>
 
 #include <boost/asio.hpp>
+#include <utility>
 
 #if defined( __GNUC__ )
 #pragma pack(1)
@@ -54,10 +55,10 @@ struct ServerPktHeader
 #pragma pack(pop)
 #endif
 
-WorldSocket::WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
-    : Socket(service, closeHandler), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0),
-      m_useExistingHeader(false), m_session(nullptr), m_seed(urand())
-{}
+WorldSocket::WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler) : Socket(service, std::move(closeHandler)), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0), m_existingHeader(),
+    m_useExistingHeader(false), m_session(nullptr), m_seed(urand())
+{
+}
 
 void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
 {
@@ -238,7 +239,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 {
     // NOTE: ATM the socket is singlethread, have this in mind ...
     uint8 digest[20];
-    uint32 clientSeed, id, security;
+    uint32 clientSeed;
     uint32 ClientBuild;
     LocaleConstant locale;
     std::string account;
@@ -336,8 +337,8 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         }
     }
 
-    id = fields[0].GetUInt32();
-    security = fields[1].GetUInt16();
+    uint32 id = fields[0].GetUInt32();
+    uint32 security = fields[1].GetUInt16();
     if (security > SEC_ADMINISTRATOR)                       // prevent invalid security settings in DB
         security = SEC_ADMINISTRATOR;
 
@@ -423,16 +424,40 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "UPDATE account SET last_ip = ? WHERE username = ?");
     stmt.PExecute(address.c_str(), account.c_str());
 
-    m_session = new WorldSession(id, this, AccountTypes(security), mutetime, locale);
     m_crypt.Init(&K);
-
-    m_session->LoadTutorialsData();
-
-    sWorld.AddSession(m_session);
 
     // Create and send the Addon packet
     if (sAddOnHandler.BuildAddonPacket(recvPacket, SendAddonPacked))
         SendPacket(SendAddonPacked);
+
+    m_session = sWorld.FindSession(id);
+    if (m_session)
+    {
+        // Session exist so player is reconnecting
+        // check if we can request a new socket
+        if (!m_session->RequestNewSocket(this))
+            return false;
+
+        // wait session going to be ready
+        while (m_session->GetState() != WORLD_SESSION_STATE_CHAR_SELECTION)
+        {
+            // just wait
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+            if (IsClosed())
+                return false;
+        }
+    }
+    else
+    {
+        // new session
+        if (!(m_session = new WorldSession(id, this, AccountTypes(security), mutetime, locale)))
+            return false;
+
+        m_session->LoadTutorialsData();
+
+        sWorld.AddSession(m_session);
+    }
 
     return true;
 }

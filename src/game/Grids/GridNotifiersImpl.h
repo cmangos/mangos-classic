@@ -22,7 +22,7 @@
 #include "Grids/GridNotifiers.h"
 #include "WorldPacket.h"
 #include "Entities/Player.h"
-#include "AI/BaseAI/CreatureAI.h"
+#include "AI/BaseAI/UnitAI.h"
 #include "Spells/SpellAuras.h"
 #include "Server/DBCEnums.h"
 #include "Server/SQLStorages.h"
@@ -42,24 +42,51 @@ inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T>& m)
 
 inline void MaNGOS::ObjectUpdater::Visit(CreatureMapType& m)
 {
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
-    {
-        WorldObject::UpdateHelper helper(iter->getSource());
-        helper.Update(i_timeDiff);
-    }
+    for (auto& iter : m)
+        iter.getSource()->Update(i_timeDiff);
 }
 
-inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
+inline void UnitVisitObjectsNotifierWorker(Unit* unitA, Unit* unitB)
 {
-    // Creature AI reaction
+    if (unitA->hasUnitState(UNIT_STAT_LOST_CONTROL) ||
+        unitA->IsInEvadeMode() ||
+        !unitA->AI()->IsVisible(unitB))
+        return;
+
+    unitA->AI()->MoveInLineOfSight(unitB);
+}
+
+inline void PlayerVisitCreatureWorker(Player* pl, Creature* c)
+{
     if (!c->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
         if (c->AI() && c->AI()->IsVisible(pl) && !c->IsInEvadeMode())
             c->AI()->MoveInLineOfSight(pl);
     }
+
+    if (!pl->hasUnitState(UNIT_STAT_LOST_CONTROL))
+    {
+        if (pl->AI() && pl->AI()->IsVisible(c) && !pl->IsInEvadeMode())
+            pl->AI()->MoveInLineOfSight(c);
+    }
 }
 
-inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
+inline void PlayerVisitPlayerWorker(Player* p1, Player* p2)
+{
+    if (!p2->hasUnitState(UNIT_STAT_LOST_CONTROL))
+    {
+        if (p2->AI() && p2->AI()->IsVisible(p1) && !p2->IsInEvadeMode())
+            p2->AI()->MoveInLineOfSight(p1);
+    }
+
+    if (!p1->hasUnitState(UNIT_STAT_LOST_CONTROL))
+    {
+        if (p1->AI() && p1->AI()->IsVisible(p2) && !p1->IsInEvadeMode())
+            p1->AI()->MoveInLineOfSight(p2);
+    }
+}
+
+inline void CreatureVisitCreatureWorker(Creature* c1, Creature* c2)
 {
     if (!c1->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
@@ -74,44 +101,83 @@ inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
     }
 }
 
-inline void MaNGOS::PlayerRelocationNotifier::Visit(CreatureMapType& m)
+template<>
+inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(CreatureMapType& m)
 {
     if (!i_player.isAlive() || i_player.IsTaxiFlying())
         return;
 
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    bool playerHasAI = i_player.AI() != nullptr;
+
+    for (auto& iter : m)
     {
-        Creature* c = iter->getSource();
-        if (c->isAlive())
-            PlayerCreatureRelocationWorker(&i_player, c);
+        Creature* creature = iter.getSource();
+        if (!creature->isAlive())
+            continue;
+
+        UnitVisitObjectsNotifierWorker(creature, &i_player);
+
+        if (playerHasAI)
+            UnitVisitObjectsNotifierWorker(&i_player, creature);
     }
 }
 
 template<>
-inline void MaNGOS::CreatureRelocationNotifier::Visit(PlayerMapType& m)
+inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(PlayerMapType& m)
 {
-    if (!i_creature.isAlive())
+    if (!i_player.isAlive() || i_player.IsTaxiFlying())
         return;
 
-    for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    bool playerHasAI = i_player.AI() != nullptr;
+
+    for (auto& iter : m)
     {
-        Player* player = iter->getSource();
+        Player* player = iter.getSource();
         if (player->isAlive() && !player->IsTaxiFlying())
-            PlayerCreatureRelocationWorker(player, &i_creature);
+            continue;
+
+        if (player->AI())
+            UnitVisitObjectsNotifierWorker(player, &i_player);
+
+        if (playerHasAI)
+            UnitVisitObjectsNotifierWorker(&i_player, player);
     }
 }
 
 template<>
-inline void MaNGOS::CreatureRelocationNotifier::Visit(CreatureMapType& m)
+inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(PlayerMapType& m)
 {
     if (!i_creature.isAlive())
         return;
 
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        Creature* c = iter->getSource();
-        if (c != &i_creature && c->isAlive())
-            CreatureCreatureRelocationWorker(c, &i_creature);
+        Player* player = iter.getSource();
+        if (!player->isAlive() || player->IsTaxiFlying())
+            continue;
+
+        if (player->AI())
+            UnitVisitObjectsNotifierWorker(player, &i_creature);
+
+        UnitVisitObjectsNotifierWorker(&i_creature, player);
+    }
+}
+
+template<>
+inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(CreatureMapType& m)
+{
+    if (!i_creature.isAlive())
+        return;
+
+    for (auto& iter : m)
+    {
+        Creature* creature = iter.getSource();
+        if (creature == &i_creature || !creature->isAlive())
+            continue;
+
+        UnitVisitObjectsNotifierWorker(creature, &i_creature);
+
+        UnitVisitObjectsNotifierWorker(&i_creature, creature);
     }
 }
 
@@ -123,11 +189,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsTotem())
         return;
 
-    if (!i_dynobject.IsWithinDistInMap(target, i_dynobject.GetRadius()))
-        return;
-
-    // Check targets for not_selectable unit flag and remove
-    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER))
+    if (i_dynobject.GetDistance(target, true, DIST_CALC_COMBAT_REACH) > i_dynobject.GetRadius())
         return;
 
     // Evade target
@@ -169,7 +231,8 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         if (!found)
             return;
     }
-    else
+    // This condition is only needed due to missing neutral spell type
+    else if(i_dynobject.GetTarget() != TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DEST_LOC)
     {
         // for player casts use less strict negative and more stricted positive targeting
         if (i_positive)
@@ -185,7 +248,10 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     }
 
     // Check target immune to spell or aura
-    if (target->IsImmuneToSpell(spellInfo, false) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
+    if (target->IsImmuneToSpell(spellInfo, false, eff_index) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
+        return;
+
+    if (!i_dynobject.IsWithinLOSInMap(target))
         return;
 
     // Apply PersistentAreaAura on target
@@ -217,21 +283,24 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     }
 
     if (!i_dynobject.IsAffecting(target))
+    {
         i_dynobject.AddAffected(target);
+        caster->CasterHitTargetWithSpell(caster, target, spellInfo);
+    }
 }
 
 template<>
 inline void MaNGOS::DynamicObjectUpdater::Visit(CreatureMapType&  m)
 {
-    for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-        VisitHelper(itr->getSource());
+    for (auto& itr : m)
+        VisitHelper(itr.getSource());
 }
 
 template<>
 inline void MaNGOS::DynamicObjectUpdater::Visit(PlayerMapType&  m)
 {
-    for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-        VisitHelper(itr->getSource());
+    for (auto& itr : m)
+        VisitHelper(itr.getSource());
 }
 
 // SEARCHERS & LIST SEARCHERS & WORKERS

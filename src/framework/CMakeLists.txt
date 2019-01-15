@@ -100,14 +100,10 @@ source_group("Utilities\\LinkedReference"
     ${SRC_GRP_LINKED_REFERENCE}
 )
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
 )
 
 target_include_directories(${LIBRARY_NAME}
-  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
