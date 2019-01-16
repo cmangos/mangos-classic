@@ -5347,9 +5347,9 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
             {
                 case SKILL_POISONS:     // Poisons/lockpicking special case: no ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
                 case SKILL_LOCKPICKING:
-                    if (info->max_value != 0)
+                    if (info->max_value)
                         continue;
-                    [[clang::fallthrough]];
+                    break;
                 default:                // Spells obtained via ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL only
                     if (info->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
                         continue;
