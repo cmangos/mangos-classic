@@ -2962,11 +2962,6 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     {
         CastSpell(this, spell_id, TRIGGERED_OLD_TRIGGERED);
     }
-    else if (IsSpellHaveEffect(spellInfo, SPELL_EFFECT_SKILL_STEP))
-    {
-        CastSpell(this, spell_id, TRIGGERED_OLD_TRIGGERED);
-        return false;
-    }
 
     // Add dependent skills
     UpdateSpellTrainedSkills(spell_id, true);
@@ -4728,13 +4723,12 @@ void Player::SetRegularAttackTime()
     }
 }
 
-// skill+step, checking for max value
-bool Player::UpdateSkill(uint32 skill_id, uint32 step)
+bool Player::UpdateSkill(uint16 id, uint16 diff)
 {
-    if (!skill_id)
+    if (!id)
         return false;
 
-    SkillStatusMap::iterator itr = mSkillStatus.find(skill_id);
+    SkillStatusMap::iterator itr = mSkillStatus.find(id);
     if (itr == mSkillStatus.end())
         return false;
 
@@ -4752,7 +4746,7 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
 
     if (value * 512 < max * urand(0, 512))
     {
-        uint32 new_value = value + step;
+        uint32 new_value = value + diff;
         if (new_value > max)
             new_value = max;
 
@@ -4847,7 +4841,7 @@ bool Player::UpdateFishingSkill()
     return UpdateSkillPro(SKILL_FISHING, chance * 10, gathering_skill_gain);
 }
 
-bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
+bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint16 diff)
 {
     DEBUG_LOG("UpdateSkillPro(SkillId %d, Chance %3.1f%%)", SkillId, Chance / 10.0);
     if (!SkillId)
@@ -4880,7 +4874,7 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
 
     if (Roll <= Chance)
     {
-        uint32 new_value = SkillValue + step;
+        uint32 new_value = SkillValue + diff;
         if (new_value > MaxValue)
             new_value = MaxValue;
 
@@ -5167,6 +5161,65 @@ uint16 Player::GetSkill(uint16 id, bool bonusPerm, bool bonusTemp, bool max/* = 
     return uint16(std::max(0, value));
 }
 
+void Player::SetSkillStep(uint16 id, uint16 step)
+{
+    if (!id || step > MAX_SKILL_STEP)
+        return;
+
+    if (step)   // Set step
+    {
+        uint16 val = 0;
+        uint16 max = 0;
+        bool maxed = false;
+
+        uint32 raceMask = getRaceMask();
+        uint32 classMask = getClassMask();
+
+        auto bounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(id);
+
+        for (auto itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            SkillRaceClassInfoEntry const* entry = itr->second;
+
+            if (!(entry->raceMask & raceMask))
+                continue;
+
+            if (!(entry->classMask & classMask))
+                continue;
+
+            if (!entry->skillTierId)
+                continue;
+
+            if (SkillTiersEntry const* steps = sSkillTiersStore.LookupEntry(entry->skillTierId))
+            {
+                val = uint16(steps->skillValue[(step - 1)]);
+                max = uint16(steps->maxSkillValue[(step - 1)]);
+                maxed = (entry->flags & ABILITY_SKILL_AT_MAX_VALUE);
+                break;
+            }
+        }
+
+        if (max)
+            SetSkill(id, (maxed ? max : (GetSkillValuePure(id) + val)), max, step);
+    }
+    else        // Unlearn
+        SetSkill(id, 0, 0);
+}
+
+uint16 Player::GetSkillStep(uint16 id) const
+{
+    if (!id)
+        return 0;
+
+    SkillStatusMap::const_iterator itr = mSkillStatus.find(id);
+    if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+        return 0;
+
+    SkillStatusData const& skillStatus = itr->second;
+
+    return PAIR32_HIPART(GetUInt32Value(PLAYER_SKILL_INDEX(skillStatus.pos)));
+}
+
 bool Player::ModifySkillBonus(uint16 id, int16 diff, bool permanent/* = false*/)
 {
     if (!id || !diff)
@@ -5253,11 +5306,7 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
     {
         // Specifically defined: no checks needed
         if (apply)
-        {
-            uint16 value = std::max(skillLearnInfo->value, GetSkillValuePure(skillLearnInfo->skill));
-            uint16 max = std::max((!skillLearnInfo->maxvalue ? GetSkillMaxForLevel() : skillLearnInfo->maxvalue), GetSkillMaxPure(skillLearnInfo->skill));
-            SetSkill(skillLearnInfo->skill, value, max, skillLearnInfo->step);
-        }
+            SetSkillStep(skillLearnInfo->skill, skillLearnInfo->step);
         else
         {
             if (uint32 prev_spell = sSpellMgr.GetPrevSpellInChain(spellId))
@@ -5273,11 +5322,7 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
                 if (!prevSkill)                                 // not found prev skill setting, remove skill
                     SetSkill(skillLearnInfo->skill, 0, 0);
                 else                                            // set to prev. skill setting values
-                {
-                    uint16 value = std::min(prevSkill->value, GetSkillValuePure(prevSkill->skill));
-                    uint16 max = std::min((!prevSkill->maxvalue ? GetSkillMaxForLevel() : prevSkill->maxvalue), GetSkillMaxPure(prevSkill->skill));
-                    SetSkill(prevSkill->skill, value, max, prevSkill->step);
-                }
+                    SetSkillStep(prevSkill->skill, prevSkill->step);
             }
             else                                                // first rank, remove skill
                 SetSkill(skillLearnInfo->skill, 0, 0);

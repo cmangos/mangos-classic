@@ -1529,8 +1529,8 @@ class Player : public Unit
         void SendPetBar();
         void StartCinematic();
         void StopCinematic();
-        bool UpdateSkill(uint32 skill_id, uint32 step);
-        bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);
+        bool UpdateSkill(uint16 id, uint16 diff);
+        bool UpdateSkillPro(uint16 id, int32 Chance, uint16 diff);
 
         bool UpdateCraftSkill(uint32 spellid);
         bool UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator = 1);
@@ -1663,6 +1663,8 @@ class Player : public Unit
         inline uint16 GetSkillValuePure(uint16 id) const { return GetSkill(id, false, false); }     // skill value
         inline uint16 GetSkillMax(uint16 id) const { return GetSkill(id, true, true, true); }       // skill max + perm. bonus + temp bonus
         inline uint16 GetSkillMaxPure(uint16 id) const { return GetSkill(id, false, false, true); } // skill max
+        void SetSkillStep(uint16 id, uint16 step);
+        uint16 GetSkillStep(uint16 id) const;
         bool ModifySkillBonus(uint16 id, int16 diff, bool permanent = false);
         int16 GetSkillBonus(uint16 id, bool permanent = false) const;
         inline int16 GetSkillBonusPermanent(uint16 id) const { return GetSkillBonus(id, true); }    // skill perm. bonus
