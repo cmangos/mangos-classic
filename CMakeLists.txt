@@ -333,7 +333,7 @@ endif()
 # print out the results before continuing
 include(cmake/showoptions.cmake)
 
-if(NOT BUILD_GAME_SERVER AND NOT BUILD_LOGIN_SERVER AND NOT BUILD_EXTRACTORS)
+if(NOT BUILD_GAME_SERVER AND NOT BUILD_LOGIN_SERVER AND NOT BUILD_EXTRACTORS AND NOT BUILD_RECASTDEMOMOD)
   message(FATAL_ERROR "You must select something to build!")
 endif()
 
@@ -369,9 +369,6 @@ endif()
 
 if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS)
   add_subdirectory(src)
-  if(MSVC AND BUILD_GAME_SERVER)
-    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_SERVER_NAME})
-  endif()
 endif()
 
 if(BUILD_EXTRACTORS)
@@ -379,6 +376,28 @@ if(BUILD_EXTRACTORS)
   add_subdirectory(contrib/vmap_extractor)
   add_subdirectory(contrib/vmap_assembler)
   add_subdirectory(contrib/mmap)
+endif()
+
+if(BUILD_RECASTDEMOMOD)
+  if (WIN32)
+    if (NOT BUILD_EXTRACTORS)
+      add_subdirectory(contrib/mmap)
+    endif()
+    add_subdirectory(contrib/recastdemomod)
+  else()
+    message(STATUS "BUILD_RECASTDEMOMOD forced to OFF. Not supported on non windows system.")
+  endif()
+endif()
+
+# set default startup project
+if(MSVC)
+  if(BUILD_GAME_SERVER)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_SERVER_NAME})
+  elseif(BUILD_LOGIN_SERVER)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_REALMD_NAME})
+  elseif(BUILD_RECASTDEMOMOD)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "RecastDemoMod")
+  endif()
 endif()
 
 # if(SQL)

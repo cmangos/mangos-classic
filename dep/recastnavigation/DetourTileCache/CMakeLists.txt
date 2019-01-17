@@ -21,17 +21,23 @@ FILE(GLOB_RECURSE SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Source/*.cpp")
 FILE(GLOB_RECURSE HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Include/*.h")
 
 # create the lib
-add_library(recast STATIC
+add_library(detourtilecache STATIC
   ${SRCS}
   ${HEADERS}
 )
 
+# add dependencies libs
+target_link_libraries(detourtilecache
+    PUBLIC detour
+    PUBLIC recast
+)
+
 # add header include folder
-target_include_directories(recast
+target_include_directories(detourtilecache
     PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Include"
 )
 
 if(MSVC)
   # Put this lib in dependencies category
-  set_target_properties(recast PROPERTIES FOLDER "Dependencies")
+  set_target_properties(detourtilecache PROPERTIES FOLDER "Dependencies")
 endif()

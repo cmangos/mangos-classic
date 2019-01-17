@@ -15,4 +15,24 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-add_subdirectory(Source)
+
+# enumerate all library files
+FILE(GLOB_RECURSE SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Source/*.cpp")
+FILE(GLOB_RECURSE HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Include/*.h")
+
+# create the lib
+add_library(detour STATIC
+  ${SRCS}
+  ${HEADERS}
+)
+
+# add header include folder
+target_include_directories(detour
+    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Include"
+)
+
+if(MSVC)
+  # Put this lib in dependencies category
+  set_target_properties(detour PROPERTIES FOLDER "Dependencies")
+endif()
+
