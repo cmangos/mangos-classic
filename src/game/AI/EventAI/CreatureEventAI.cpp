@@ -1664,7 +1664,7 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
 
     Unit* victim = m_creature->getVictim();
     // Melee Auto-Attack
-    if (Combat && victim && !(m_creature->IsNonMeleeSpellCasted(false) || m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT)) && !m_combatScriptHappening)
+    if (Combat && victim && CanExecuteCombatAction())
     {
         if (m_rangedMode)
         {
@@ -2043,23 +2043,21 @@ void CreatureEventAI::DistanceYourself()
     if (m_mainSpellCost * 2 > m_creature->GetPower(POWER_MANA))
         return;
 
-    float distance = DISTANCING_CONSTANT + std::max(m_creature->GetCombinedCombatReach(victim) * 1.5f, m_creature->GetCombinedCombatReach(victim) + m_mainSpellMinRange);
+    float combatReach = m_creature->GetCombinedCombatReach(victim, true);
+    float distance = DISTANCING_CONSTANT + std::max(combatReach * 1.5f, combatReach + m_mainSpellMinRange);
     m_creature->GetMotionMaster()->DistanceYourself(distance);
 }
 
 void CreatureEventAI::DistancingStarted()
 {
     SetCombatScriptStatus(true);
-
-    if (!m_currentRangedMode)
-        SetCurrentRangedMode(true);
 }
 
 void CreatureEventAI::DistancingEnded()
 {
     SetCombatScriptStatus(false);
-    if (m_creature->getVictim())
-        DoStartMovement(m_creature->getVictim());
+    if (!m_currentRangedMode)
+        SetCurrentRangedMode(true);
 }
 
 void CreatureEventAI::JustStoppedMovementOfTarget(SpellEntry const* spellInfo, Unit* victim)
