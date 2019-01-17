@@ -16,24 +16,28 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-add_definitions(-DDT_POLYREF64)
+# enumerate all library files
+FILE(GLOB_RECURSE SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Source/*.cpp")
+FILE(GLOB_RECURSE HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Include/*.h")
 
-set(DETOUR_SRCS
-    DetourAlloc.cpp
-    DetourCommon.cpp
-    DetourNavMeshBuilder.cpp
-    DetourNavMesh.cpp
-    DetourNavMeshQuery.cpp
-    DetourNode.cpp
+# create the lib
+add_library(detourcrowd STATIC
+  ${SRCS}
+  ${HEADERS}
 )
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/recastnavigation
-  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour
-  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour/Include
+# add dependencies libs
+target_link_libraries(detourcrowd
+    PUBLIC detour
+    PUBLIC recast
 )
 
-add_library(detour STATIC
-  ${DETOUR_SRCS}
+# add header include folder
+target_include_directories(detourcrowd
+    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Include"
 )
+
+if(MSVC)
+  # Put this lib in dependencies category
+  set_target_properties(detourcrowd PROPERTIES FOLDER "Dependencies")
+endif()

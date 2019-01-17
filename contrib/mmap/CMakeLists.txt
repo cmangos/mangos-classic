@@ -30,6 +30,11 @@ include_directories(
     ../../src/game/vmap
 )
 
+IF(APPLE)
+   FIND_LIBRARY(CORE_SERVICES CoreServices )
+   SET(EXTRA_LIBS ${CORE_SERVICES})
+ENDIF (APPLE)
+
 # TODO: Do we still need that vmaplib?
 add_library(vmaplib STATIC
     ../../src/game/vmap/BIH.cpp
@@ -40,50 +45,63 @@ add_library(vmaplib STATIC
     ../../src/game/vmap/ModelInstance.cpp
 )
 
-IF(APPLE)
-   FIND_LIBRARY(CORE_SERVICES CoreServices )
-   SET(EXTRA_LIBS ${CORE_SERVICES})
-ENDIF (APPLE)
-
 target_link_libraries(vmaplib
-  PUBLIC shared
+#  PUBLIC shared
   PUBLIC g3dlite
   PUBLIC detour
   PUBLIC recast
   PUBLIC ${EXTRA_LIBS}
 )
 
-set(SOURCES
+target_include_directories(vmaplib
+    PUBLIC "${CMAKE_SOURCE_DIR}/src/framework"
+)
+
+add_library(mmaplib STATIC
     ./src/IntermediateValues.cpp
-    ./src/generator.cpp
     ./src/MapBuilder.cpp
     ./src/TerrainBuilder.cpp
     ./src/VMapExtensions.cpp
 )
 
-add_executable(${EXECUTABLE_NAME} ${SOURCES})
-
-target_link_libraries(${EXECUTABLE_NAME}
-  vmaplib
-  detour
-  recast
+target_include_directories(mmaplib
+    PUBLIC "${CMAKE_SOURCE_DIR}/src/framework"
 )
 
-if(MSVC)
-  # Define OutDir to source/bin/(platform)_(configuaration) folder.
-  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}/Extractors")
-  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DEV_BIN_DIR}/Extractors")
-  set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
-  set_target_properties(${EXECUTABLE_NAME} PROPERTIES PROJECT_LABEL "MoveMapGen")
-  set_target_properties(${EXECUTABLE_NAME} PROPERTIES FOLDER "Extractors")
+target_link_libraries(mmaplib
+  PUBLIC vmaplib
+)
+
+if (MSVC)
   set_target_properties(vmaplib PROPERTIES FOLDER "Dependencies")
-  
-  # Add script file to dev folder
-  set(FILES_LIST_TO_COPY
-        \"${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/MoveMapGen.sh\"
-        \"${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/offmesh.txt\")
-  add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILES_LIST_TO_COPY} \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>\")
+  set_target_properties(mmaplib PROPERTIES FOLDER "Dependencies")
 endif()
 
-install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)
+if (BUILD_EXTRACTORS)
+  add_executable(${EXECUTABLE_NAME} ./src/generator.cpp)
+
+  target_link_libraries(${EXECUTABLE_NAME}
+    vmaplib
+    detour
+    recast
+    mmaplib
+  )
+
+  if(MSVC)
+    # Define OutDir to source/bin/(platform)_(configuaration) folder.
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}/Extractors")
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DEV_BIN_DIR}/Extractors")
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES PROJECT_LABEL "MoveMapGen")
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES FOLDER "Extractors")
+
+    # Add script file to dev folder
+    set(FILES_LIST_TO_COPY
+          \"${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/MoveMapGen.sh\"
+          \"${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/offmesh.txt\")
+    add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILES_LIST_TO_COPY} \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>\")
+  endif()
+
+  install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)
+endif()

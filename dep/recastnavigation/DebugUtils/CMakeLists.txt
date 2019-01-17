@@ -16,27 +16,29 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-add_definitions(-DDT_POLYREF64)
+# enumerate all library files
+FILE(GLOB_RECURSE SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Source/*.cpp")
+FILE(GLOB_RECURSE HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Include/*.h")
 
-set(RECAST_SRCS
-    Recast.cpp
-    RecastAlloc.cpp
-    RecastArea.cpp
-    RecastContour.cpp
-    RecastFilter.cpp
-    RecastMesh.cpp
-    RecastMeshDetail.cpp
-    RecastRasterization.cpp
-    RecastRegion.cpp
+# create the lib
+add_library(debugutils STATIC
+  ${SRCS}
+  ${HEADERS}
 )
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/recastnavigation
-  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Recast
-  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Recast/Include
+# add dependencies libs
+target_link_libraries(debugutils
+    PUBLIC detour
+    PUBLIC recast
+    PUBLIC detourtilecache
 )
 
-add_library(recast STATIC
-  ${RECAST_SRCS}
+# add header include folder
+target_include_directories(debugutils
+    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Include"
 )
+
+if(MSVC)
+  # Put this lib in dependencies category
+  set_target_properties(debugutils PROPERTIES FOLDER "Dependencies")
+endif()
