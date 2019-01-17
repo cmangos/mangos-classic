@@ -1088,6 +1088,9 @@ class Player : public Unit
         bool StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount);
         Item* StoreNewItemInInventorySlot(uint32 itemEntry, uint32 amount);
 
+        bool hasWeapon(WeaponAttackType type) const override { return GetWeaponForAttack(type, false, false); }
+        bool hasWeaponForAttack(WeaponAttackType type) const override { return (Unit::hasWeaponForAttack(type) && GetWeaponForAttack(type, true, true)); }
+
         Item* ConvertItem(Item* item, uint32 newItemId);
 
         InventoryResult _CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count = nullptr) const;

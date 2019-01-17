@@ -1207,7 +1207,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                 float weaponDamage;
                 // DW should benefit of attack power, damage percent mods etc.
                 // TODO: check if using offhand damage is correct and if it should be divided by 2
-                if (haveOffhandWeapon() && getAttackTimer(BASE_ATTACK) > getAttackTimer(OFF_ATTACK))
+                if (hasOffhandWeaponForAttack() && getAttackTimer(BASE_ATTACK) > getAttackTimer(OFF_ATTACK))
                     weaponDamage = (GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) + GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE)) / 2;
                 else
                     weaponDamage = (GetFloatValue(UNIT_FIELD_MINDAMAGE) + GetFloatValue(UNIT_FIELD_MAXDAMAGE)) / 2;

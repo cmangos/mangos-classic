@@ -2664,6 +2664,14 @@ void Creature::SetVirtualItem(VirtualItemSlot slot, uint32 item_id)
     SetByteValue(UNIT_VIRTUAL_ITEM_INFO + (slot * 2) + 1, VIRTUAL_ITEM_INFO_1_OFFSET_SHEATH,        proto->Sheath);
 }
 
+bool Creature::hasWeapon(WeaponAttackType type) const
+{
+    const uint8 slot = uint8(type);
+    const uint8 itemClass = GetByteValue(UNIT_VIRTUAL_ITEM_INFO + (slot * 2) + 0, VIRTUAL_ITEM_INFO_0_OFFSET_CLASS);
+
+    return (itemClass == ITEM_CLASS_WEAPON);
+}
+
 void Creature::SetWalk(bool enable, bool asDefault)
 {
     if (asDefault)
