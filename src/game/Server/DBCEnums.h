@@ -101,7 +101,8 @@ enum AbilytyLearnType
 
 enum AbilitySkillFlags
 {
-    ABILITY_SKILL_NONTRAINABLE = 0x100
+    ABILITY_SKILL_AT_MAX_VALUE = 0x010,
+    ABILITY_SKILL_NONTRAINABLE = 0x100,
 };
 
 enum ItemEnchantmentType

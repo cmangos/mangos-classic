@@ -102,9 +102,9 @@ there is no difference here (except that default text is chosen with `gameobject
 
 #define S_LEARN_WEAPON          9789
 #define S_LEARN_ARMOR           9790
-#define S_LEARN_HAMMER          39099
-#define S_LEARN_AXE             39098
-#define S_LEARN_SWORD           39097
+#define S_LEARN_HAMMER          17044
+#define S_LEARN_AXE             17043
+#define S_LEARN_SWORD           17042
 
 #define S_UNLEARN_WEAPON        36436
 #define S_UNLEARN_ARMOR         36435
@@ -305,7 +305,7 @@ bool GossipHello_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature)
 
     uint32 eCreature = pCreature->GetEntry();
     // WEAPONSMITH & ARMORSMITH
-    if (pPlayer->GetBaseSkillValue(SKILL_BLACKSMITHING) >= 225)
+    if (pPlayer->GetSkillValueBase(SKILL_BLACKSMITHING) >= 225)
     {
         switch (eCreature)
         {
@@ -329,7 +329,7 @@ bool GossipHello_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature)
         }
     }
     // WEAPONSMITH SPEC
-    if (pPlayer->HasSpell(S_WEAPON) && pPlayer->getLevel() > 49 && pPlayer->GetBaseSkillValue(SKILL_BLACKSMITHING) >= 250)
+    if (pPlayer->HasSpell(S_WEAPON) && pPlayer->getLevel() > 49 && pPlayer->GetSkillValueBase(SKILL_BLACKSMITHING) >= 250)
     {
         switch (eCreature)
         {
@@ -592,7 +592,7 @@ bool GossipHello_npc_prof_leather(Player* pPlayer, Creature* pCreature)
 
     uint32 eCreature = pCreature->GetEntry();
 
-    if (pPlayer->HasSkill(SKILL_LEATHERWORKING) && pPlayer->GetBaseSkillValue(SKILL_LEATHERWORKING) >= 250 && pPlayer->getLevel() > 49)
+    if (pPlayer->HasSkill(SKILL_LEATHERWORKING) && pPlayer->GetSkillValueBase(SKILL_LEATHERWORKING) >= 250 && pPlayer->getLevel() > 49)
     {
         switch (eCreature)
         {

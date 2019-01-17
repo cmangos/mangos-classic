@@ -1,8 +1,8 @@
 # CMaNGOS -- History of visible changes
 
-This file is part of the CMaNGOS Project. See [AUTHORS](AUTHORS.md) file for Copyright information
+This file is part of the CMaNGOS Project. See [Copyright](COPYRIGHT.md) file for Copyright information
 
-Most of our code is released under the GPL v2, a copy is shipped with the file [COPYING](COPYING).
+Most of our code is released under the GPL v2, a copy is shipped with the file [LICENSE](LICENSE).
 
 Visit our project website for forums, links and more:
 http://cmangos.net
@@ -11,21 +11,6 @@ Please submit bug reports at our bugtracker at:
 https://github.com/cmangos/issues
 
 See the file ChangeLog.md for details!
-
-In branch
- * ACE Framework updated to ACE 5.8.3.
- * MySQL client libs updated to MySQL 5.1.49
- * G3DLite lib upgrade to G3DLite 8.0b4
- * OpenSSL lib upgrade to OpenSSL 1.0.0.
- * Sockets lib use dropped.
- * dotconfpp lib use dropped.
- * Visual Studio 2003 (VC71) support dropped
- * Implement AV battleground.
- * Implement new DB-based gossip system for creatures/gameobjects.
- * Implement realmd support realms for different client versions.
- * New memory allocator for MaNGOS, based on Intel Threading Building Blocks library.
- * DB-based store battleground gameobjects/creatures.
- * Map search/loading improvements
 
 ## Version 0.12
  * Migrate from SVN to GIT.

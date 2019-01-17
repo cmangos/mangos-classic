@@ -2022,12 +2022,18 @@ void Aura::HandleAuraModSkill(bool apply, bool /*Real*/)
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    uint32 prot = GetSpellProto()->EffectMiscValue[m_effIndex];
-    int32 points = GetModifier()->m_amount;
+    Player* target = static_cast<Player*>(GetTarget());
 
-    ((Player*)GetTarget())->ModifySkillBonus(prot, (apply ? points : -points), m_modifier.m_auraname == SPELL_AURA_MOD_SKILL_TALENT);
-    if (prot == SKILL_DEFENSE)
-        ((Player*)GetTarget())->UpdateDefenseBonusesMod();
+    Modifier const* mod = GetModifier();
+    const uint16 skillId = uint16(GetSpellProto()->EffectMiscValue[m_effIndex]);
+    const int16 amount = int16(mod->m_amount);
+    const bool permanent = (mod->m_auraname == SPELL_AURA_MOD_SKILL_TALENT);
+
+    if (target->ModifySkillBonus(skillId, (apply ? amount : -amount), permanent))
+    {
+        if (skillId == SKILL_DEFENSE)
+            target->UpdateDefenseBonusesMod();
+    }
 }
 
 void Aura::HandleChannelDeathItem(bool apply, bool Real)
@@ -2328,17 +2334,17 @@ void Aura::HandleAuraModDisarm(bool apply, bool Real)
 
     target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED, apply);
 
-    if (target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
     // main-hand attack speed already set to special value for feral form already and don't must change and reset at remove.
     if (target->IsInFeralForm())
         return;
 
-    if (apply)
-        target->SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
-    else
-        ((Player*)target)->SetRegularAttackTime();
+    if (target->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (apply)
+            target->SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
+        else
+            ((Player*)target)->SetRegularAttackTime();
+    }
 
     target->UpdateDamagePhysical(BASE_ATTACK);
 }

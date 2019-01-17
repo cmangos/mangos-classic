@@ -2197,7 +2197,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_ENUM_UNITS_FRIEND_IN_CONE:
         case TARGET_ENUM_UNITS_SCRIPT_IN_CONE_60:
         {
-            SpellTargets targetType;
+            SpellTargets targetType = SPELL_TARGETS_ALL;
             switch (targetMode)
             {
                 case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24:
@@ -2209,17 +2209,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 case TARGET_ENUM_UNITS_SCRIPT_IN_CONE_60:
                 {
-                    if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SCRIPT_EFFECT) // workaround for neutral target type
-                        targetType = SPELL_TARGETS_ALL;
                     UnitList tempTargetUnitMap;
                     SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->Id);
                     // fill real target list if no spell script target defined
-                    FillAreaTargets(bounds.first != bounds.second ? tempTargetUnitMap : targetUnitMap,
-                        radius, cone, PUSH_CONE, bounds.first != bounds.second ? SPELL_TARGETS_ALL : targetType);
+                    FillAreaTargets(bounds.first != bounds.second ? tempTargetUnitMap : targetUnitMap, radius, cone, PUSH_CONE, targetType);
                     if (!tempTargetUnitMap.empty())
-                    {
                         CheckSpellScriptTargets(bounds, tempTargetUnitMap, targetUnitMap, effIndex);
-                    }
                     break;
                 }
                 default:
@@ -3240,7 +3235,7 @@ void Spell::_handle_immediate_phase()
         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS))
         {
             m_caster->resetAttackTimer(BASE_ATTACK);
-            if (m_caster->haveOffhandWeapon())
+            if (m_caster->hasOffhandWeaponForAttack())
                 m_caster->resetAttackTimer(OFF_ATTACK);
         }
     }
@@ -5647,6 +5642,17 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (player->IsInDisallowedMountForm() || player->IsMounted())
                         return SPELL_FAILED_BAD_TARGETS;
                 }
+            }
+            case SPELL_AURA_MOD_DISARM:
+            {
+                if (!expectedTarget)
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                // Target must be a weapon wielder
+                if (!expectedTarget->hasMainhandWeapon())
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                break;
             }
             default:
                 break;

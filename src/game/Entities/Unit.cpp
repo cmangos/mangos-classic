@@ -583,7 +583,7 @@ bool Unit::UpdateMeleeAttackingState()
     if (!CanAttack(victim))
         return false;
 
-    if (!isAttackReady(BASE_ATTACK) && !(isAttackReady(OFF_ATTACK) && haveOffhandWeapon()))
+    if (!isAttackReady(BASE_ATTACK) && !(isAttackReady(OFF_ATTACK) && hasOffhandWeaponForAttack()))
         return false;
 
     uint8 swingError = 0;
@@ -591,7 +591,7 @@ bool Unit::UpdateMeleeAttackingState()
     {
         if (isAttackReady(BASE_ATTACK))
             setAttackTimer(BASE_ATTACK, 100);
-        if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
+        if (hasOffhandWeaponForAttack() && isAttackReady(OFF_ATTACK))
             setAttackTimer(OFF_ATTACK, 100);
 
         swingError = 1;
@@ -601,7 +601,7 @@ bool Unit::UpdateMeleeAttackingState()
     {
         if (isAttackReady(BASE_ATTACK))
             setAttackTimer(BASE_ATTACK, 100);
-        if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
+        if (hasOffhandWeaponForAttack() && isAttackReady(OFF_ATTACK))
             setAttackTimer(OFF_ATTACK, 100);
 
         swingError = 2;
@@ -611,7 +611,7 @@ bool Unit::UpdateMeleeAttackingState()
         if (isAttackReady(BASE_ATTACK))
         {
             // prevent base and off attack in same time, delay attack at 0.2 sec
-            if (haveOffhandWeapon())
+            if (hasOffhandWeaponForAttack())
             {
                 if (getAttackTimer(OFF_ATTACK) < ATTACK_DISPLAY_DELAY)
                     setAttackTimer(OFF_ATTACK, ATTACK_DISPLAY_DELAY);
@@ -619,7 +619,7 @@ bool Unit::UpdateMeleeAttackingState()
             AttackerStateUpdate(victim, BASE_ATTACK);
             resetAttackTimer(BASE_ATTACK);
         }
-        if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
+        if (hasOffhandWeaponForAttack() && isAttackReady(OFF_ATTACK))
         {
             // prevent base and off attack in same time, delay attack at 0.2 sec
             uint32 base_att = getAttackTimer(BASE_ATTACK);
@@ -642,21 +642,6 @@ bool Unit::UpdateMeleeAttackingState()
     }
 
     return swingError != 0;
-}
-
-bool Unit::haveOffhandWeapon() const
-{
-    if (!CanUseEquippedWeapon(OFF_ATTACK))
-        return false;
-
-    if (GetTypeId() == TYPEID_PLAYER)
-        return ((Player*)this)->GetWeaponForAttack(OFF_ATTACK, true, true) != 0;
-
-    uint8 itemClass = GetByteValue(UNIT_VIRTUAL_ITEM_INFO + (1 * 2) + 0, VIRTUAL_ITEM_INFO_0_OFFSET_CLASS);
-    if (itemClass == ITEM_CLASS_WEAPON)
-        return true;
-
-    return false;
 }
 
 void Unit::SendHeartBeat()
@@ -1872,7 +1857,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
             float offtime = float(pVictim->getAttackTimer(OFF_ATTACK));
             float basetime = float(pVictim->getAttackTimer(BASE_ATTACK));
             // Reduce attack time
-            if (pVictim->haveOffhandWeapon() && offtime < basetime)
+            if (pVictim->hasOffhandWeaponForAttack() && offtime < basetime)
             {
                 float percent20 = pVictim->GetAttackTime(OFF_ATTACK) * 0.20f;
                 float percent60 = 3.0f * percent20;
@@ -2593,7 +2578,7 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
     {
         // in PvP always use full skill (and bonuses on top of it if present)
         uint32 value = (target && target->GetTypeId() == TYPEID_PLAYER)
-                       ? std::max(((Player*)this)->GetMaxSkillValue(SKILL_DEFENSE), ((Player*)this)->GetSkillValue(SKILL_DEFENSE))
+                       ? std::max(((Player*)this)->GetSkillMax(SKILL_DEFENSE), ((Player*)this)->GetSkillValue(SKILL_DEFENSE))
                        : ((Player*)this)->GetSkillValue(SKILL_DEFENSE);
         return value;
     }
@@ -2845,7 +2830,7 @@ float Unit::CalculateEffectiveDodgeChance(const Unit* attacker, WeaponAttackType
     // a) Attacker's level is higher
     // b) Attacker has +skill bonuses
     const bool isPlayerOrPet = (GetTypeId() == TYPEID_PLAYER || GetOwnerGuid().IsPlayer());
-    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetMaxSkillValueForLevel(this));
+    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetSkillMaxForLevel(this));
     int32 difference = int32(GetDefenseSkillValue(attacker) - skill);
     // Defense/weapon skill factor: for players and NPCs
     float factor = 0.04f;
@@ -2872,7 +2857,7 @@ float Unit::CalculateEffectiveParryChance(const Unit* attacker, WeaponAttackType
     // a) Attacker's level is higher
     // b) Attacker has +skill bonuses
     const bool isPlayerOrPet = (GetTypeId() == TYPEID_PLAYER || GetOwnerGuid().IsPlayer());
-    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetMaxSkillValueForLevel(this));
+    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetSkillMaxForLevel(this));
     int32 difference = int32(GetDefenseSkillValue(attacker) - skill);
     // Defense/weapon skill factor: for players and NPCs
     float factor = 0.04f;
@@ -2908,7 +2893,7 @@ float Unit::CalculateEffectiveBlockChance(const Unit* attacker, WeaponAttackType
     // a) Attacker's level is higher
     // b) Attacker has +skill bonuses
     const bool isPlayerOrPet = (GetTypeId() == TYPEID_PLAYER || GetOwnerGuid().IsPlayer());
-    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetMaxSkillValueForLevel(this));
+    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetSkillMaxForLevel(this));
     const int32 difference = int32(GetDefenseSkillValue(attacker) - skill);
     // Defense/weapon skill factor: for players and NPCs
     float factor = 0.04f;
@@ -2925,7 +2910,7 @@ float Unit::CalculateEffectiveCrushChance(const Unit* victim, WeaponAttackType a
 
     // Crushing blow chance is present when attacker's weapon skill is >= 15 over victim's own capped defense skill
     // The chance starts at 15% and increased by 2% per each additional skill point of defense deficit
-    const uint32 cap = victim->GetMaxSkillValueForLevel();
+    const uint32 cap = victim->GetSkillMaxForLevel();
     const uint32 defense = std::min(victim->GetDefenseSkillValue(this), cap);
     const int32 deficit = (int32(GetWeaponSkillValue(attType, victim)) - int32(defense));
     if (deficit >= 15)
@@ -2939,7 +2924,7 @@ float Unit::CalculateEffectiveGlanceChance(const Unit* victim, WeaponAttackType 
 
     // Glancing blow chance starts at 2% when victim's defense skill is > 10 lower than attacker's own capped weapon skill
     // The chance is increased for each point of skill diffrernce
-    const uint32 cap = GetMaxSkillValueForLevel();
+    const uint32 cap = GetSkillMaxForLevel();
     const uint32 skill = std::min(GetWeaponSkillValue(attType, victim), cap);
     const int32 level = int32(GetLevelForTarget(victim));
     const uint32 defense = victim->GetDefenseSkillValue(this);
@@ -3350,7 +3335,7 @@ float Unit::CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType at
     // Skill difference can be both negative and positive.
     // a) Positive means that attacker's level is higher or additional weapon +skill bonuses
     // b) Negative means that victim's level is higher or additional +defense bonuses
-    const uint32 skill = (weapon ? GetWeaponSkillValue(attType, victim) : GetMaxSkillValueForLevel(victim));
+    const uint32 skill = (weapon ? GetWeaponSkillValue(attType, victim) : GetSkillMaxForLevel(victim));
     const int32 difference = int32(skill - victim->GetDefenseSkillValue(this));
     // Weapon skill factor: for players and NPCs
     float factor = 0.04f;
@@ -3372,13 +3357,13 @@ float Unit::CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType at
     const bool ranged = (attType == RANGED_ATTACK);
     const bool weapon = (!ability || ability->EquippedItemClass == ITEM_CLASS_WEAPON);
     // Check if dual wielding, add additional miss penalty
-    if (!ability && !ranged && haveOffhandWeapon())
+    if (!ability && !ranged && hasOffhandWeaponForAttack())
         chance += 19.0f;
     // Skill difference can be both negative and positive. Positive difference means that:
     // a) Victim's level is higher
     // b) Victim has additional defense skill bonuses
     const bool vsPlayerOrPet = (victim->GetTypeId() == TYPEID_PLAYER || victim->GetOwnerGuid().IsPlayer());
-    const uint32 skill = (weapon ? GetWeaponSkillValue(attType, victim) : GetMaxSkillValueForLevel(victim));
+    const uint32 skill = (weapon ? GetWeaponSkillValue(attType, victim) : GetSkillMaxForLevel(victim));
     int32 difference = int32(victim->GetDefenseSkillValue(this) - skill);
     // Defense/weapon skill factor: for players and NPCs
     float factor = 0.04f;
@@ -3542,11 +3527,11 @@ float Unit::CalculateEffectiveMagicResistancePercent(const Unit* attacker, Spell
         schools >>= 1;
     }
     // Attacker's level based skill, penalize when calculating for low levels (< 20):
-    const uint32 skill = std::max(attacker->GetMaxSkillValueForLevel(this), uint16(100));
+    const uint32 skill = std::max(attacker->GetSkillMaxForLevel(this), uint16(100));
     float percent = float(float(resistance) / float(skill)) * 100 * 0.75f;
     // Bonus resistance by level difference when calculating damage hit for NPCs only
     if (!binary && GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-        percent += (0.4f * std::max(int32(GetMaxSkillValueForLevel(attacker) - skill), 0));
+        percent += (0.4f * std::max(int32(GetSkillMaxForLevel(attacker) - skill), 0));
     // Magic resistance percentage cap (same as armor cap)
     return std::max(0.0f, std::min(percent, 75.0f));
 }
@@ -3629,14 +3614,14 @@ uint32 Unit::GetWeaponSkillValue(WeaponAttackType attType, Unit const* target) c
             return 0;
 
         if (IsInFeralForm())
-            return GetMaxSkillValueForLevel();              // always maximized SKILL_FERAL_COMBAT in fact
+            return GetSkillMaxForLevel();              // always maximized SKILL_FERAL_COMBAT in fact
 
         // weapon skill or (unarmed for base attack)
         uint32 skill = item ? item->GetSkill() : uint32(SKILL_UNARMED);
 
         // in PvP always use full skill (and bonuses on top of it if present)
         value = (target && target->GetTypeId() == TYPEID_PLAYER)
-                ? std::max(((Player*)this)->GetMaxSkillValue(skill), ((Player*)this)->GetSkillValue(skill))
+                ? std::max(((Player*)this)->GetSkillMax(skill), ((Player*)this)->GetSkillValue(skill))
                 : ((Player*)this)->GetSkillValue(skill);
     }
     else
@@ -4359,6 +4344,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 
     const uint32 spellId = holder->GetId();
     const SpellSpecific specific = GetSpellSpecific(spellId);
+    auto drGroup = holder->getDiminishGroup();
     SpellEntry const* triggeredBy = holder->GetTriggeredBy();
 
     SpellAuraHolderMap::iterator next;
@@ -4376,6 +4362,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 
         const uint32 existingSpellId = existingSpellProto->Id;
         const SpellSpecific existingSpecific = GetSpellSpecific(existingSpellId);
+        auto existingDrGroup = existing->getDiminishGroup();
         const bool own = (holder->GetCasterGuid() == existing->GetCasterGuid());
 
         // early checks that spellId is passive non stackable spell
@@ -4405,6 +4392,14 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             unique = (personal || IsSpellSpecificUniquePerTarget(specific));
         }
 
+        bool diminished = false;
+        // Remove any existing holders from the same diminishing returns group by treating as unique
+        if (!unique && drGroup)
+        {
+            diminished = (drGroup == existingDrGroup);
+            unique = diminished;
+        }
+
         const bool stackable = !sSpellMgr.IsNoStackSpellDueToSpell(spellProto, existingSpellProto);
         if (unique || !stackable)
         {
@@ -4416,8 +4411,12 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             {
                 if (personal && stackable)
                     continue;
-                // holder cannot remove higher rank if it isn't from the same caster
-                if (IsSimilarExistingAuraStronger(holder, existing) || (sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId) && sSpellMgr.IsSpellHigherRankOfSpell(existingSpellId, spellId)))
+
+                // holder cannot remove higher/stronger rank if it isn't from the same caster
+                if (IsSimilarExistingAuraStronger(holder, existing))
+                    return false;
+
+                if (!diminished && sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId) && sSpellMgr.IsSpellHigherRankOfSpell(existingSpellId, spellId))
                     return false;
             }
 
@@ -5630,7 +5629,7 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     }
 
     // delay offhand weapon attack to next attack time
-    if (haveOffhandWeapon())
+    if (hasOffhandWeaponForAttack())
         resetAttackTimer(OFF_ATTACK);
 
     if (meleeAttack)
@@ -7041,7 +7040,7 @@ float Unit::GetWeaponProcChance() const
     // (odd formula...)
     if (isAttackReady(BASE_ATTACK))
         return (GetAttackTime(BASE_ATTACK) * 1.8f / 1000.0f);
-    if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
+    if (hasOffhandWeaponForAttack() && isAttackReady(OFF_ATTACK))
         return (GetAttackTime(OFF_ATTACK) * 1.6f / 1000.0f);
 
     return 0.0f;
@@ -8576,7 +8575,7 @@ float Unit::GetTotalAttackPowerValue(WeaponAttackType attType) const
 
 float Unit::GetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, uint8 index) const
 {
-    if (attType == OFF_ATTACK && !haveOffhandWeapon())
+    if (attType == OFF_ATTACK && !hasOffhandWeaponForAttack())
         return 0.0f;
 
     return m_weaponDamageInfo.weapon[attType].damage[index].value[damageRange];

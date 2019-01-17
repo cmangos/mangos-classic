@@ -199,6 +199,11 @@ if(MSVC)
   endif()
 endif()
 
+# In our case use new way to treat BOOST_ROOT environement variable
+if (POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
+
 # Find needed packages and if necessery abort if something important is missing
 find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
 
