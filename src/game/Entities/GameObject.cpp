@@ -1111,8 +1111,7 @@ bool GameObject::IsCollisionEnabled() const
     switch (GetGoType())
     {
         case GAMEOBJECT_TYPE_DOOR:
-            return GetGoState() != GO_STATE_ACTIVE && GetGoState() != GO_STATE_ACTIVE_ALTERNATIVE;
-
+            return GetGoState() == GO_STATE_READY;
         default:
             return true;
     }
