@@ -48,3 +48,5 @@ UPDATE spell_template SET Attributes=Attributes|0x00010000 WHERE Id IN(12328);
 -- targeting section
 -- Draw Spirit - Lethon - both effects need to have same radius index - faulty data
 UPDATE spell_template SET EffectRadiusIndex1=EffectRadiusIndex2 WHERE Id IN(24811);
+-- Opening Termite Barrel - target flags for GO/ITEM, effect targets GO/ITEM yet target targets units - fixes apparent typo
+UPDATE spell_template SET EffectImplicitTargetA1=26 WHERE Id IN(18952);
