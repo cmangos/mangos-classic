@@ -1660,10 +1660,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             m_modifier.m_amount = 632;
             break;
         case FORM_AQUA:
-            if (Player::TeamForRace(target->getRace()) == ALLIANCE)
-                m_modifier.m_amount = 2428;
-            else
-                m_modifier.m_amount = 2428;
+            m_modifier.m_amount = 2428;
             break;
         case FORM_BEAR:
             if (Player::TeamForRace(target->getRace()) == ALLIANCE)
