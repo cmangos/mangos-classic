@@ -5322,6 +5322,9 @@ void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
     if (damage && dist > damage)
         dist = float(damage);
 
+    if (dist < 0.1f)
+        return;
+
     // Projectile motion
     float speedXY = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.1f;
     float time = dist / speedXY;
