@@ -433,7 +433,7 @@ struct boss_onyxiaAI : public ScriptedAI
                             break;
                         }
                         case 2:                             // a point on the right side
-                            ++m_uiMovePoint %= NUM_MOVE_POINT;
+                            m_uiMovePoint = (m_uiMovePoint + 1) % NUM_MOVE_POINT;
                             break;
                     }
 
