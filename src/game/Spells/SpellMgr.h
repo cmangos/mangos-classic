@@ -444,6 +444,16 @@ inline bool IsSpellEffectDamage(SpellEntry const& spellInfo, SpellEffectIndex i)
     return false;
 }
 
+inline bool IsSpellEffectsDamage(SpellEntry const& spellInfo, uint8 effectMask = EFFECT_MASK_ALL)
+{
+    for (uint8 i = EFFECT_INDEX_0; (i < MAX_EFFECT_INDEX && effectMask); (++i, (effectMask >>= 1)))
+    {
+        if (spellInfo.Effect[i] && (effectMask & 1) && !IsSpellEffectDamage(spellInfo, SpellEffectIndex(i)))
+            return false;
+    }
+    return true;
+}
+
 inline bool IsBinarySpell(SpellEntry const* spellInfo)
 {
     // Spell is considered binary if:
