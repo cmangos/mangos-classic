@@ -5199,7 +5199,7 @@ void Player::SetSkillStep(uint16 id, uint16 step)
             }
         }
 
-        if (max)
+        if (max && GetSkillMaxPure(id) < max)
         {
             // Note: Some SkillTiers entries contain 0 as starting value for first step, needs investigation (sanitized for now)
             const uint16 value = std::max(uint16(1), uint16(maxed ? max : (GetSkillValuePure(id) + val)));
