@@ -454,38 +454,37 @@ inline bool IsSpellEffectsDamage(SpellEntry const& spellInfo, uint8 effectMask =
     return true;
 }
 
-inline bool IsBinarySpell(SpellEntry const* spellInfo)
+inline bool IsBinarySpell(SpellEntry const& spellInfo, uint8 effectMask = EFFECT_MASK_ALL)
 {
     // Spell is considered binary if:
     // * (Pre-WotLK): It contains non-damage effects or auras
     // * (WotLK+): It contains no damage effects or auras
-    // TODO: In theory, same spell may behave differently for different tagets. At some point, we probably will need to query binary on effect mask basis.
-    uint32 effectmask = 0;  // A bitmask of effects: set bits are valid effects
-    uint32 nondmgmask = 0;  // A bitmask of effects: set bits are non-damage effects
-    uint32 auramask = 0;    // A bitmask of aura effcts: set bits are auras
+    uint8 validmask = 0;    // A bitmask of effects: set bits are valid effects
+    uint8 nondmgmask = 0;   // A bitmask of effects: set bits are non-damage effects
+    uint8 auramask = 0;     // A bitmask of aura effcts: set bits are auras
     for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if (!spellInfo->Effect[i] || IsSpellEffectTriggerSpell(spellInfo, SpellEffectIndex(i)))
+        const uint8 thisMask = uint8(1 << (i - 1));
+
+        if (!spellInfo.Effect[i] || !(effectMask & thisMask) || IsSpellEffectTriggerSpell(&spellInfo, SpellEffectIndex(i)))
             continue;
 
-        effectmask |= (1 << i);
+        validmask |= thisMask;
 
-        if (spellInfo->EffectApplyAuraName[i])
-            auramask |= (1 << i);
-        if (!IsSpellEffectDamage(*spellInfo, SpellEffectIndex(i)))
-            nondmgmask |= (1 << i);
+        if (spellInfo.EffectApplyAuraName[i])
+            auramask |= thisMask;
+        if (!IsSpellEffectDamage(spellInfo, SpellEffectIndex(i)))
+            nondmgmask |= thisMask;
     }
     // No valid effects: treat as non-binary
-    if (!effectmask)
+    if (!validmask)
         return false;
     // All effects are non-damage: treat as binary
-    if (nondmgmask == effectmask)
-        return true;
     // All effects are auras: treat as binary (even pure DoTs are treated as binary on initial application)
-    if (auramask == effectmask)
+    if (nondmgmask == validmask || auramask == validmask)
         return true;
-    const uint32 dmgmask = (effectmask & ~nondmgmask);
-    const uint32 dotmask = (dmgmask & auramask);
+    const uint8 dmgmask = (validmask & ~nondmgmask);
+    const uint8 dotmask = (dmgmask & auramask);
     // Just in case, if all damage effects are DoTs: treat as binary
     if (dmgmask == dotmask)
         return true;
@@ -493,26 +492,24 @@ inline bool IsBinarySpell(SpellEntry const* spellInfo)
     // Pre-WotLK: check if at least one non-damage effect hits the same target as damage effect (e.g. Frostbolt) and treat as binary
     if (nondmgmask)
     {
-        uint32 nukemask = (dmgmask & ~dotmask);
-        for (uint8 effect = EFFECT_INDEX_0; nukemask; ++effect)
+        uint8 directmask = (dmgmask & ~dotmask);
+        for (uint8 i = EFFECT_INDEX_0; directmask; (++i, (directmask >>= 1)))
         {
-            if (nukemask & 1)
+            if (directmask & 1)
             {
-                uint32 imask = nondmgmask;
-                for (uint8 i = EFFECT_INDEX_0; imask; ++i)
+                uint8 jmask = nondmgmask;
+                for (uint8 j = EFFECT_INDEX_0; jmask; (++j, (jmask >>= 1)))
                 {
-                    if (imask & 1)
+                    if (jmask & 1)
                     {
-                        if (spellInfo->EffectImplicitTargetA[effect] == spellInfo->EffectImplicitTargetA[i] &&
-                            spellInfo->EffectImplicitTargetB[effect] == spellInfo->EffectImplicitTargetB[i])
+                        if (spellInfo.EffectImplicitTargetA[i] == spellInfo.EffectImplicitTargetA[j] &&
+                            spellInfo.EffectImplicitTargetB[i] == spellInfo.EffectImplicitTargetB[j])
                         {
                             return true;
                         }
                     }
-                    imask >>= 1;
                 }
             }
-            nukemask >>= 1;
         }
     }
     return false;
