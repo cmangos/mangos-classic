@@ -408,6 +408,42 @@ inline bool IsResistableSpell(const SpellEntry* entry)
     return (entry->DmgClass != SPELL_DAMAGE_CLASS_NONE && !entry->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES));
 }
 
+inline bool IsSpellEffectDamage(SpellEntry const& spellInfo, SpellEffectIndex i)
+{
+    if (!spellInfo.EffectApplyAuraName[i])
+    {
+        // If its not an aura effect, check for damage effects
+        switch (spellInfo.Effect[i])
+        {
+            case SPELL_EFFECT_SCHOOL_DAMAGE:
+            case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+            case SPELL_EFFECT_HEALTH_LEECH:
+            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+            case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE:
+            //   SPELL_EFFECT_POWER_BURN: deals damage for power burned, but its either full damage or resist?
+            case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                return true;
+        }
+    }
+    else
+    {
+        // If its an aura effect, check for DoT auras
+        switch (spellInfo.EffectApplyAuraName[i])
+        {
+            case SPELL_AURA_PERIODIC_DAMAGE:
+            case SPELL_AURA_PERIODIC_LEECH:
+            //   SPELL_AURA_POWER_BURN_MANA: deals damage for power burned, but not really a DoT?
+            case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+                return true;
+            case SPELL_AURA_DUMMY:
+                // Placeholder: insert any possible overrides here...
+                break;
+        }
+    }
+    return false;
+}
+
 inline bool IsBinarySpell(SpellEntry const* spellInfo)
 {
     // Spell is considered binary if:
@@ -424,42 +460,9 @@ inline bool IsBinarySpell(SpellEntry const* spellInfo)
 
         effectmask |= (1 << i);
 
-        bool damage = false;
-        if (!spellInfo->EffectApplyAuraName[i])
-        {
-            // If its not an aura effect, check for damage effects
-            switch (spellInfo->Effect[i])
-            {
-                case SPELL_EFFECT_SCHOOL_DAMAGE:
-                case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
-                case SPELL_EFFECT_HEALTH_LEECH:
-                case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
-                case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-                case SPELL_EFFECT_WEAPON_DAMAGE:
-                //   SPELL_EFFECT_POWER_BURN: deals damage for power burned, but its either full damage or resist?
-                case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
-                    damage = true;
-                    break;
-            }
-        }
-        else
-        {
-            // If its an aura effect, check for DoT auras
-            switch (spellInfo->EffectApplyAuraName[i])
-            {
-                case SPELL_AURA_PERIODIC_DAMAGE:
-                case SPELL_AURA_PERIODIC_LEECH:
-                //   SPELL_AURA_POWER_BURN_MANA: deals damage for power burned, but not really a DoT?
-                case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
-                    damage = true;
-                    break;
-                case SPELL_AURA_DUMMY:
-                    // Placeholder: insert any possible overrides here...
-                    break;
-            }
+        if (spellInfo->EffectApplyAuraName[i])
             auramask |= (1 << i);
-        }
-        if (!damage)
+        if (!IsSpellEffectDamage(*spellInfo, SpellEffectIndex(i)))
             nondmgmask |= (1 << i);
     }
     // No valid effects: treat as non-binary
