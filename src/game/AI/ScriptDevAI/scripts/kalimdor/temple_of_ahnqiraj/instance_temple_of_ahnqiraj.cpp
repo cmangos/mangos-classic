@@ -65,6 +65,18 @@ bool instance_temple_of_ahnqiraj::IsEncounterInProgress() const
     return false;
 }
 
+void instance_temple_of_ahnqiraj::OnPlayerLeave(Player* pPlayer) {
+    // Remove any aura related to Temple of Ahn'Qiraj specific mounts
+    for (uint32 aura : qiraji_mount_auras)
+    {
+        if (pPlayer->HasAura(aura))
+        {
+            pPlayer->RemoveAurasDueToSpell(aura);
+            return;
+        }
+    }
+}
+
 void instance_temple_of_ahnqiraj::DoHandleTempleAreaTrigger(uint32 uiTriggerId)
 {
     if (uiTriggerId == AREATRIGGER_TWIN_EMPERORS && !m_bIsEmperorsIntroDone)
