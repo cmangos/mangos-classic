@@ -4191,9 +4191,17 @@ void Aura::HandleAuraGhost(bool apply, bool /*Real*/)
     Player* player = (Player*)GetTarget();
 
     if (apply)
+    {
         player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
+        if (!player->HasAuraType(SPELL_AURA_WATER_WALK))
+            player->SetWaterWalk(true);
+    }
     else
+    {
         player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
+        if (!player->HasAuraType(SPELL_AURA_WATER_WALK))
+            player->SetWaterWalk(false);
+    }
 
     if (player->GetGroup())
         player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_STATUS);
