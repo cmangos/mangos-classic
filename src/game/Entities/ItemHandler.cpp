@@ -1005,17 +1005,6 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket& recv_data)
         GetPlayer()->SetAmmo(item);
 }
 
-void WorldSession::SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 spellId) const
-{
-    WorldPacket data(SMSG_ENCHANTMENTLOG, (8 + 8 + 4 + 4 + 1)); // last check 2.0.10
-    data << ObjectGuid(targetGuid);
-    data << ObjectGuid(casterGuid);
-    data << uint32(itemId);
-    data << uint32(spellId);
-    data << uint8(0);
-    SendPacket(data);
-}
-
 void WorldSession::SendItemEnchantTimeUpdate(ObjectGuid playerGuid, ObjectGuid itemGuid, uint32 slot, uint32 duration) const
 {
     // last check 2.0.10

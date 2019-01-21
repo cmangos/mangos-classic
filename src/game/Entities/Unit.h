@@ -1767,6 +1767,8 @@ class Unit : public WorldObject
         void SendSpellDamageResist(Unit* target, uint32 spellId) const;
         void SendSpellOrDamageImmune(Unit* target, uint32 spellID) const;
 
+        void SendEnchantmentLog(ObjectGuid targetGuid, uint32 itemEntry, uint32 enchantId) const;
+
         void CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo, bool success = true);
         bool CanInitiateAttack() const;
 

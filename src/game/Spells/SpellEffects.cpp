@@ -3312,7 +3312,7 @@ void Spell::EffectEnchantItemPerm(SpellEffectIndex eff_idx)
     // remove old enchanting before applying new if equipped
     item_owner->ApplyEnchantment(itemTarget, PERM_ENCHANTMENT_SLOT, false);
 
-    itemTarget->SetEnchantment(PERM_ENCHANTMENT_SLOT, enchant_id, 0, 0);
+    itemTarget->SetEnchantment(PERM_ENCHANTMENT_SLOT, enchant_id, 0, 0, m_caster->GetObjectGuid());
 
     // add new enchanting if equipped
     item_owner->ApplyEnchantment(itemTarget, PERM_ENCHANTMENT_SLOT, true);
@@ -3377,7 +3377,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
     // remove old enchanting before applying new if equipped
     item_owner->ApplyEnchantment(itemTarget, TEMP_ENCHANTMENT_SLOT, false);
 
-    itemTarget->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, duration * 1000, 0);
+    itemTarget->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, duration * 1000, 0, m_caster->GetObjectGuid());
 
     // add new enchanting if equipped
     item_owner->ApplyEnchantment(itemTarget, TEMP_ENCHANTMENT_SLOT, true);
