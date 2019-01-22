@@ -1658,8 +1658,10 @@ class Player : public Unit
         void UpdateWeaponSkill(WeaponAttackType attType);
         void UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence);
 
+        SkillRaceClassInfoEntry const* GetSkillInfo(uint16 id, std::function<bool (SkillRaceClassInfoEntry const&)> filterfunc = nullptr) const;
         bool HasSkill(uint16 id) const;
-        void SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step = 0);
+        void SetSkill(SkillStatusMap::iterator itr, uint16 value, uint16 max, uint16 step = 0);
+        void SetSkill(uint16 id, uint16 value, uint16 max, uint16 step = 0);
         uint16 GetSkill(uint16 id, bool bonusPerm, bool bonusTemp, bool max = false) const;
         inline uint16 GetSkillValue(uint16 id) const { return GetSkill(id, true, true); }           // skill value + perm. bonus + temp bonus
         inline uint16 GetSkillValueBase(uint16 id) const { return GetSkill(id, true, false); }      // skill value + perm. bonus
@@ -1672,6 +1674,7 @@ class Player : public Unit
         int16 GetSkillBonus(uint16 id, bool permanent = false) const;
         inline int16 GetSkillBonusPermanent(uint16 id) const { return GetSkillBonus(id, true); }    // skill perm. bonus
         inline int16 GetSkillBonusTemporary(uint16 id) const { return GetSkillBonus(id); }          // skill temp bonus
+        void UpdateSkillsForLevel(bool maximize = false);
         void UpdateSkillTrainedSpells(uint16 id, uint16 currVal);                                   // learns/unlearns spells dependent on a skill
         void UpdateSpellTrainedSkills(uint32 spellId, bool apply);                                  // learns/unlearns skills dependent on a spell
         void LearnDefaultSkills();
@@ -1707,9 +1710,6 @@ class Player : public Unit
         void RewardReputation(Creature* victim, float rate);
         void RewardReputation(Quest const* pQuest);
         int32 CalculateReputationGain(ReputationSource source, int32 rep, int32 faction, uint32 creatureOrQuestLevel = 0, bool noAuraBonus = false) const;
-
-        void UpdateSkillsForLevel();
-        void UpdateSkillsToMaxSkillsForLevel();             // for .levelup
 
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
