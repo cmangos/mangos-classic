@@ -92,6 +92,11 @@ ConfVersion=2010062001
 #        Default: 20
 #                 0  (Disabled)
 #
+#    StrictVersionCheck
+#        Description: Prevent modified clients from connnecting
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+#
 #    WrongPass.MaxCount
 #        Number of login attemps with wrong password before the account or IP is banned
 #        Default: 0  (Never ban)
@@ -123,6 +128,7 @@ UseProcessors = 0
 ProcessPriority = 1
 WaitAtStartupError = 0
 RealmsStateUpdateDelay = 20
+StrictVersionCheck = 0
 WrongPass.MaxCount = 0
 WrongPass.BanTime = 600
 WrongPass.BanType = 0

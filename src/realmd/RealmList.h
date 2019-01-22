@@ -24,6 +24,7 @@
 #define _REALMLIST_H
 
 #include "Common.h"
+#include <array>
 
 struct RealmBuildInfo
 {
@@ -32,6 +33,8 @@ struct RealmBuildInfo
     int minor_version;
     int bugfix_version;
     int hotfix_version;
+    std::array<uint8, 20> WindowsHash;
+    std::array<uint8, 20> MacHash;
 };
 
 RealmBuildInfo const* FindBuildInfo(uint16 _build);
