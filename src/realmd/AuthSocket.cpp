@@ -674,7 +674,7 @@ bool AuthSocket::_HandleLogonProof()
         {
             BASIC_LOG("[AuthChallenge] Account %s tried to login with modified client!", _login.c_str());
 
-            const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 0, 0 };
+            const char data[2] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_VERSION_INVALID };
             Write(data, sizeof(data));
             return true;
         }
@@ -855,7 +855,6 @@ bool AuthSocket::_HandleReconnectProof()
             ByteBuffer pkt;
             pkt << (uint8)CMD_AUTH_RECONNECT_PROOF;
             pkt << (uint8)WOW_FAIL_VERSION_INVALID;
-            pkt << (uint16)0x00;                               // 2 bytes zeros
             Write((const char*)pkt.contents(), pkt.size());
             return true;
         }
