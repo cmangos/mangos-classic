@@ -2026,11 +2026,7 @@ void Aura::HandleAuraModSkill(bool apply, bool /*Real*/)
     const int16 amount = int16(mod->m_amount);
     const bool permanent = (mod->m_auraname == SPELL_AURA_MOD_SKILL_TALENT);
 
-    if (target->ModifySkillBonus(skillId, (apply ? amount : -amount), permanent))
-    {
-        if (skillId == SKILL_DEFENSE)
-            target->UpdateDefenseBonusesMod();
-    }
+    target->ModifySkillBonus(skillId, (apply ? amount : -amount), permanent);
 }
 
 void Aura::HandleChannelDeathItem(bool apply, bool Real)
