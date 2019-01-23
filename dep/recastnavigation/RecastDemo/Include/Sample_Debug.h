@@ -31,7 +31,7 @@ protected:
 	rcContourSet* m_cset;
 	rcPolyMesh* m_pmesh;
 
-	float m_ext[3];
+	float m_halfExtents[3];
 	float m_center[3];
 	float m_bmin[3], m_bmax[3];
 	dtPolyRef m_ref;
@@ -52,6 +52,11 @@ public:
 
 	virtual const float* getBoundsMin();
 	virtual const float* getBoundsMax();
+
+private:
+	// Explicitly disabled copy constructor and copy assignment operator.
+	Sample_Debug(const Sample_Debug&);
+	Sample_Debug& operator=(const Sample_Debug&);
 };
 
 
