@@ -124,12 +124,12 @@ Sample_Debug::Sample_Debug() :
 		m_navMesh->addTileAt(-14,-14, data, dataSize, true);
 	}
 	
-	const float ext[3] = {40,100,40};
+	const float halfExtents[3] = {40,100,40};
 	const float center[3] = { -1667.9491f, 135.52649f, -1680.6149f };
 	dtQueryFilter filter;
-	m_ref = m_navMesh->findNearestPoly(center, ext, &filter, 0);
+	m_ref = m_navMesh->findNearestPoly(center, halfExtents, &filter, 0);
 
-	vcopy(m_ext, ext);
+	vcopy(m_halfExtents, halfExtents);
 	vcopy(m_center, center);*/
 	
 
@@ -191,35 +191,33 @@ void Sample_Debug::handleDebugMode()
 
 void Sample_Debug::handleRender()
 {
-	DebugDrawGL dd;
-	
 	if (m_chf)
 	{
-		duDebugDrawCompactHeightfieldRegions(&dd, *m_chf);
+		duDebugDrawCompactHeightfieldRegions(&m_dd, *m_chf);
 //		duDebugDrawCompactHeightfieldSolid(&dd, *m_chf);
 	}
 		
 	if (m_navMesh)
-		duDebugDrawNavMesh(&dd, *m_navMesh, DU_DRAWNAVMESH_OFFMESHCONS);
+		duDebugDrawNavMesh(&m_dd, *m_navMesh, DU_DRAWNAVMESH_OFFMESHCONS);
 
 	if (m_ref && m_navMesh)
-		duDebugDrawNavMeshPoly(&dd, *m_navMesh, m_ref, duRGBA(255,0,0,128));
+		duDebugDrawNavMeshPoly(&m_dd, *m_navMesh, m_ref, duRGBA(255,0,0,128));
 
 /*	float bmin[3], bmax[3];
-	rcVsub(bmin, m_center, m_ext);
-	rcVadd(bmax, m_center, m_ext);
+	rcVsub(bmin, m_center, m_halfExtents);
+	rcVadd(bmax, m_center, m_halfExtents);
 	duDebugDrawBoxWire(&dd, bmin[0],bmin[1],bmin[2], bmax[0],bmax[1],bmax[2], duRGBA(255,255,255,128), 1.0f);
 	duDebugDrawCross(&dd, m_center[0], m_center[1], m_center[2], 1.0f, duRGBA(255,255,255,128), 2.0f);*/
 
 	if (m_cset)
 	{
-		duDebugDrawRawContours(&dd, *m_cset, 0.25f);
-		duDebugDrawContours(&dd, *m_cset);
+		duDebugDrawRawContours(&m_dd, *m_cset, 0.25f);
+		duDebugDrawContours(&m_dd, *m_cset);
 	}
 	
 	if (m_pmesh)
 	{
-		duDebugDrawPolyMesh(&dd, *m_pmesh);
+		duDebugDrawPolyMesh(&m_dd, *m_pmesh);
 	}
 	
 	/*

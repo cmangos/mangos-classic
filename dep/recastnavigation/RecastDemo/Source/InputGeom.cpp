@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <algorithm>
 #include "Recast.h"
 #include "InputGeom.h"
 #include "ChunkyTriMesh.h"
@@ -28,6 +29,7 @@
 #include "DebugDraw.h"
 #include "RecastDebugDraw.h"
 #include "DetourNavMesh.h"
+#include "Sample.h"
 
 static bool intersectSegmentTriangle(const float* sp, const float* sq,
 									 const float* a, const float* b, const float* c,
@@ -90,6 +92,7 @@ static char* parseRow(char* buf, char* bufEnd, char* row, int len)
 			case '\t':
 			case ' ':
 				if (start) break;
+				// else falls through
 			default:
 				start = false;
 				row[n++] = c;
@@ -107,6 +110,7 @@ static char* parseRow(char* buf, char* bufEnd, char* row, int len)
 InputGeom::InputGeom() :
 	m_chunkyMesh(0),
 	m_mesh(0),
+	m_hasBuildSettings(false),
 	m_offMeshConCount(0),
 	m_volumeCount(0)
 {
@@ -118,7 +122,7 @@ InputGeom::~InputGeom()
 	delete m_mesh;
 }
 		
-bool InputGeom::loadMesh(rcContext* ctx, const char* filepath)
+bool InputGeom::loadMesh(rcContext* ctx, const std::string& filepath)
 {
 	if (m_mesh)
 	{
@@ -138,7 +142,7 @@ bool InputGeom::loadMesh(rcContext* ctx, const char* filepath)
 	}
 	if (!m_mesh->load(filepath))
 	{
-		ctx->log(RC_LOG_ERROR, "buildTiledNavigation: Could not load '%s'", filepath);
+		ctx->log(RC_LOG_ERROR, "buildTiledNavigation: Could not load '%s'", filepath.c_str());
 		return false;
 	}
 
@@ -159,15 +163,31 @@ bool InputGeom::loadMesh(rcContext* ctx, const char* filepath)
 	return true;
 }
 
-bool InputGeom::load(rcContext* ctx, const char* filePath)
+bool InputGeom::loadGeomSet(rcContext* ctx, const std::string& filepath)
 {
 	char* buf = 0;
-	FILE* fp = fopen(filePath, "rb");
+	FILE* fp = fopen(filepath.c_str(), "rb");
 	if (!fp)
+	{
 		return false;
-	fseek(fp, 0, SEEK_END);
-	int bufSize = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
+	}
+	if (fseek(fp, 0, SEEK_END) != 0)
+	{
+		fclose(fp);
+		return false;
+	}
+
+	long bufSize = ftell(fp);
+	if (bufSize < 0)
+	{
+		fclose(fp);
+		return false;
+	}
+	if (fseek(fp, 0, SEEK_SET) != 0)
+	{
+		fclose(fp);
+		return false;
+	}
 	buf = new char[bufSize];
 	if (!buf)
 	{
@@ -178,6 +198,7 @@ bool InputGeom::load(rcContext* ctx, const char* filePath)
 	fclose(fp);
 	if (readLen != 1)
 	{
+		delete[] buf;
 		return false;
 	}
 	
@@ -242,6 +263,33 @@ bool InputGeom::load(rcContext* ctx, const char* filePath)
 				}
 			}
 		}
+		else if (row[0] == 's')
+		{
+			// Settings
+			m_hasBuildSettings = true;
+			sscanf(row + 1, "%f %f %f %f %f %f %f %f %f %f %f %f %f %d %f %f %f %f %f %f %f",
+							&m_buildSettings.cellSize,
+							&m_buildSettings.cellHeight,
+							&m_buildSettings.agentHeight,
+							&m_buildSettings.agentRadius,
+							&m_buildSettings.agentMaxClimb,
+							&m_buildSettings.agentMaxSlope,
+							&m_buildSettings.regionMinSize,
+							&m_buildSettings.regionMergeSize,
+							&m_buildSettings.edgeMaxLen,
+							&m_buildSettings.edgeMaxError,
+							&m_buildSettings.vertsPerPoly,
+							&m_buildSettings.detailSampleDist,
+							&m_buildSettings.detailSampleMaxError,
+							&m_buildSettings.partitionType,
+							&m_buildSettings.navMeshBMin[0],
+							&m_buildSettings.navMeshBMin[1],
+							&m_buildSettings.navMeshBMin[2],
+							&m_buildSettings.navMeshBMax[0],
+							&m_buildSettings.navMeshBMax[1],
+							&m_buildSettings.navMeshBMax[2],
+							&m_buildSettings.tileSize);
+		}
 	}
 	
 	delete [] buf;
@@ -249,15 +297,68 @@ bool InputGeom::load(rcContext* ctx, const char* filePath)
 	return true;
 }
 
-bool InputGeom::save(const char* filepath)
+bool InputGeom::load(rcContext* ctx, const std::string& filepath)
+{
+	size_t extensionPos = filepath.find_last_of('.');
+	if (extensionPos == std::string::npos)
+		return false;
+
+	std::string extension = filepath.substr(extensionPos);
+	std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
+
+	if (extension == ".gset")
+		return loadGeomSet(ctx, filepath);
+	if (extension == ".obj")
+		return loadMesh(ctx, filepath);
+
+	return false;
+}
+
+bool InputGeom::saveGeomSet(const BuildSettings* settings)
 {
 	if (!m_mesh) return false;
 	
-	FILE* fp = fopen(filepath, "w");
+	// Change extension
+	std::string filepath = m_mesh->getFileName();
+	size_t extPos = filepath.find_last_of('.');
+	if (extPos != std::string::npos)
+		filepath = filepath.substr(0, extPos);
+
+	filepath += ".gset";
+
+	FILE* fp = fopen(filepath.c_str(), "w");
 	if (!fp) return false;
 	
 	// Store mesh filename.
-	fprintf(fp, "f %s\n", m_mesh->getFileName());
+	fprintf(fp, "f %s\n", m_mesh->getFileName().c_str());
+
+	// Store settings if any
+	if (settings)
+	{
+		fprintf(fp,
+			"s %f %f %f %f %f %f %f %f %f %f %f %f %f %d %f %f %f %f %f %f %f\n",
+			settings->cellSize,
+			settings->cellHeight,
+			settings->agentHeight,
+			settings->agentRadius,
+			settings->agentMaxClimb,
+			settings->agentMaxSlope,
+			settings->regionMinSize,
+			settings->regionMergeSize,
+			settings->edgeMaxLen,
+			settings->edgeMaxError,
+			settings->vertsPerPoly,
+			settings->detailSampleDist,
+			settings->detailSampleMaxError,
+			settings->partitionType,
+			settings->navMeshBMin[0],
+			settings->navMeshBMin[1],
+			settings->navMeshBMin[2],
+			settings->navMeshBMax[0],
+			settings->navMeshBMax[1],
+			settings->navMeshBMax[2],
+			settings->tileSize);
+	}
 	
 	// Store off-mesh links.
 	for (int i = 0; i < m_offMeshConCount; ++i)
@@ -456,7 +557,7 @@ void InputGeom::drawConvexVolumes(struct duDebugDraw* dd, bool /*hilight*/)
 	for (int i = 0; i < m_volumeCount; ++i)
 	{
 		const ConvexVolume* vol = &m_volumes[i];
-		unsigned int col = duIntToCol(vol->area, 32);
+		unsigned int col = duTransCol(dd->areaToCol(vol->area), 32);
 		for (int j = 0, k = vol->nverts-1; j < vol->nverts; k = j++)
 		{
 			const float* va = &vol->verts[k*3];
@@ -482,7 +583,7 @@ void InputGeom::drawConvexVolumes(struct duDebugDraw* dd, bool /*hilight*/)
 	for (int i = 0; i < m_volumeCount; ++i)
 	{
 		const ConvexVolume* vol = &m_volumes[i];
-		unsigned int col = duIntToCol(vol->area, 220);
+		unsigned int col = duTransCol(dd->areaToCol(vol->area), 220);
 		for (int j = 0, k = vol->nverts-1; j < vol->nverts; k = j++)
 		{
 			const float* va = &vol->verts[k*3];
@@ -501,7 +602,7 @@ void InputGeom::drawConvexVolumes(struct duDebugDraw* dd, bool /*hilight*/)
 	for (int i = 0; i < m_volumeCount; ++i)
 	{
 		const ConvexVolume* vol = &m_volumes[i];
-		unsigned int col = duDarkenCol(duIntToCol(vol->area, 255));
+		unsigned int col = duDarkenCol(duTransCol(dd->areaToCol(vol->area), 220));
 		for (int j = 0; j < vol->nverts; ++j)
 		{
 			dd->vertex(vol->verts[j*3+0],vol->verts[j*3+1]+0.1f,vol->verts[j*3+2], col);

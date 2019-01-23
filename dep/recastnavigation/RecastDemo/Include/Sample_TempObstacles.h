@@ -40,7 +40,7 @@ protected:
 	int m_cacheCompressedSize;
 	int m_cacheRawSize;
 	int m_cacheLayerCount;
-	int m_cacheBuildMemUsage;
+	unsigned int m_cacheBuildMemUsage;
 	
 	enum DrawMode
 	{
@@ -82,6 +82,16 @@ public:
 	void addTempObstacle(const float* pos);
 	void removeTempObstacle(const float* sp, const float* sq);
 	void clearAllTempObstacles();
+
+	void saveAll(const char* path);
+	void loadAll(const char* path);
+
+private:
+	// Explicitly disabled copy constructor and copy assignment operator.
+	Sample_TempObstacles(const Sample_TempObstacles&);
+	Sample_TempObstacles& operator=(const Sample_TempObstacles&);
+
+	int rasterizeTileLayers(const int tx, const int ty, const rcConfig& cfg, struct TileCacheData* tiles, const int maxTiles);
 };
 
 
