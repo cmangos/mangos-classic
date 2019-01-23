@@ -62,7 +62,7 @@ protected:
 	DrawMode m_drawMode;
 	
 	void cleanup();
-		
+
 public:
 	Sample_SoloMesh();
 	virtual ~Sample_SoloMesh();
@@ -75,6 +75,11 @@ public:
 	virtual void handleRenderOverlay(double* proj, double* model, int* view);
 	virtual void handleMeshChanged(class InputGeom* geom);
 	virtual bool handleBuild();
+
+private:
+	// Explicitly disabled copy constructor and copy assignment operator.
+	Sample_SoloMesh(const Sample_SoloMesh&);
+	Sample_SoloMesh& operator=(const Sample_SoloMesh&);
 };
 
 

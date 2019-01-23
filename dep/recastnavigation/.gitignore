@@ -7,15 +7,17 @@
 *.o
 *.pdb
 *.so
+*.idb
 
 ## Linux exes have no extension
 RecastDemo/Bin/RecastDemo
+RecastDemo/Bin/Tests
 
 # Build directory
 RecastDemo/Build
 
-# Ignore some meshes based on name
-RecastDemo/Bin/Meshes/_*
+# Ignore meshes
+RecastDemo/Bin/Meshes/*
 
 ## Logs and databases #
 *.log
@@ -41,3 +43,7 @@ RecastDemo/Contrib/SDL/*
 
 ## Generated doc files
 Docs/html
+
+## IDE files
+.idea/
+cmake-build-*/

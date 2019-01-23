@@ -27,7 +27,7 @@
 class Unit;
 
 //  memory management
-inline void* dtCustomAlloc(int size, dtAllocHint /*hint*/)
+inline void* dtCustomAlloc(size_t size, dtAllocHint /*hint*/)
 {
     return (void*)new unsigned char[size];
 }

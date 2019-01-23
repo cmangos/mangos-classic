@@ -19,6 +19,7 @@
 #ifndef TESTCASE_H
 #define TESTCASE_H
 
+#include <string>
 #include "DetourNavMesh.h"
 
 class TestCase
@@ -31,7 +32,23 @@ class TestCase
 	
 	struct Test
 	{
-		Test() : straight(0), nstraight(0), polys(0), npolys(0) {};
+		Test() :
+			type(),
+			radius(0),
+			includeFlags(0),
+			excludeFlags(0),
+			expand(false),
+			straight(0),
+			nstraight(0),
+			polys(0),
+			npolys(0),
+			findNearestPolyTime(0),
+			findPathTime(0),
+			findStraightPathTime(0),
+			next(0)
+		{
+		}
+
 		~Test()
 		{
 			delete [] straight;
@@ -39,10 +56,13 @@ class TestCase
 		}
 		
 		TestType type;
-		float spos[3], epos[3];
-		float nspos[3], nepos[3];
+		float spos[3];
+		float epos[3];
+		float nspos[3];
+		float nepos[3];
 		float radius;
-		int includeFlags, excludeFlags;
+		unsigned short includeFlags;
+		unsigned short excludeFlags;
 		bool expand;
 		
 		float* straight;
@@ -55,10 +75,14 @@ class TestCase
 		int findStraightPathTime;
 		
 		Test* next;
+	private:
+		// Explicitly disabled copy constructor and copy assignment operator.
+		Test(const Test&);
+		Test& operator=(const Test&);
 	};
 
-	char m_sampleName[256];
-	char m_geomFileName[256];
+	std::string m_sampleName;
+	std::string m_geomFileName;
 	Test* m_tests;
 	
 	void resetTimes();
@@ -67,15 +91,20 @@ public:
 	TestCase();
 	~TestCase();
 
-	bool load(const char* filePath);
+	bool load(const std::string& filePath);
 	
-	inline const char* getSampleName() const { return m_sampleName; }
-	inline const char* getGeomFileName() const { return m_geomFileName; }
+	const std::string& getSampleName() const { return m_sampleName; }
+	const std::string& getGeomFileName() const { return m_geomFileName; }
 	
 	void doTests(class dtNavMesh* navmesh, class dtNavMeshQuery* navquery);
 	
 	void handleRender();
 	bool handleRenderOverlay(double* proj, double* model, int* view);
+
+private:
+	// Explicitly disabled copy constructor and copy assignment operator.
+	TestCase(const TestCase&);
+	TestCase& operator=(const TestCase&);
 };
 
 #endif // TESTCASE_H
