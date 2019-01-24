@@ -287,6 +287,7 @@ class Loot
     public:
         friend struct LootItem;
         friend class GroupLootRoll;
+        friend class LootMgr;
 
         Loot(Player* player, Creature* creature, LootType type);
         Loot(Player* player, GameObject* gameObject, LootType type);
@@ -294,6 +295,7 @@ class Loot
         Loot(Player* player, Item* item, LootType type);
         Loot(Player* player, uint32 id, LootType type);
         Loot(Unit* unit, Item* item);
+        Loot(LootType type);
 
         ~Loot();
 
@@ -415,6 +417,7 @@ class LootMgr
     public:
         void PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint32 itemSlot, RollVote vote);
         Loot* GetLoot(Player* player, ObjectGuid const& targetGuid = ObjectGuid()) const;
+        void CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 lootId, std::string lootStore) const;
 };
 
 #define sLootMgr MaNGOS::Singleton<LootMgr>::Instance()
