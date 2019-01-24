@@ -27,18 +27,24 @@ Timer data class used for execution of TimerAI events
 */
 struct Timer
 {
-    Timer(uint32 id, uint32 timer, std::function<void()> functor, bool disabled = false) : id(id), timer(timer), disabled(disabled), functor(functor) {}
+    // TODO: remove this constructor
+    Timer(uint32 id, std::function<void()> functor, uint32 timerMin, uint32 timerMax, bool disabled = false);
     uint32 id;
     uint32 timer;
     bool disabled;
     std::function<void()> functor;
 
+    // initial settings
+    uint32 initialMin, initialMax;
+    bool initialDisabled;
+
     virtual bool UpdateTimer(const uint32 diff);
+    void ResetTimer();
 };
 
 struct CombatTimer : public Timer
 {
-    CombatTimer(uint32 id, uint32 timer, std::function<void()> functor, bool combat, bool disabled = false) : Timer(id, timer, functor, disabled), combat(combat) {}
+    CombatTimer(uint32 id, std::function<void()> functor, bool combat, uint32 timerMin, uint32 timerMax, bool disabled = false) : Timer(id, functor, timerMin, timerMax, disabled), combat(combat) {}
 
     bool combat;
 
@@ -54,7 +60,10 @@ class TimerManager
     public:
         TimerManager() {}
 
-        void AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor, bool disabled = false);
+        // TODO: remove first function
+        void AddCustomAction(uint32 id, bool disabled, std::function<void()> functor);
+        void AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor);
+        void AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, std::function<void()> functor);
 
         virtual void ResetTimer(uint32 index, uint32 timer)
         {
@@ -68,6 +77,7 @@ class TimerManager
         }
 
         virtual void UpdateTimers(const uint32 diff);
+        virtual void ResetAllTimers();
 
         virtual void GetAIInformation(ChatHandler& reader);
 
@@ -82,7 +92,11 @@ class CombatTimerAI : public TimerManager
     public:
         CombatTimerAI(uint32 maxCombatActions) : m_actionReadyStatus(maxCombatActions) {}
 
+        // TODO: remove first function
         void AddCombatAction(uint32 id, uint32 timer);
+        void AddCombatAction(uint32 id, bool disabled);
+        void AddCombatAction(uint32 id, uint32 timerMin, uint32 timerMax);
+        void AddTimerlessCombatAction(uint32 id, bool byDefault);
 
         virtual void ResetTimer(uint32 index, uint32 timer) override
         {
@@ -113,15 +127,23 @@ class CombatTimerAI : public TimerManager
             SetActionReadyStatus(index, false);
         }
 
+        void ResetCombatAction(uint32 index, uint32 timer)
+        {
+            ResetTimer(index, timer);
+            SetActionReadyStatus(index, false);
+        }
+
         inline void SetActionReadyStatus(uint32 index, bool state) { m_actionReadyStatus[index] = state; }
         inline bool GetActionReadyStatus(uint32 index) { return m_actionReadyStatus[index]; }
 
         virtual void UpdateTimers(const uint32 diff, bool combat);
         virtual void ExecuteActions() = 0;
+        virtual void ResetAllTimers() override;
 
         virtual void GetAIInformation(ChatHandler& reader) override;
 
     private:
         std::map<uint32, CombatTimer> m_combatTimers;
         std::vector<bool> m_actionReadyStatus;
+        std::map<uint32, bool> m_timerlessActionSettings;
 };

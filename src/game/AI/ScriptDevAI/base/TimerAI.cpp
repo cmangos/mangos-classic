@@ -18,6 +18,10 @@
 #include "Chat/Chat.h"
 #include <string>
 
+Timer::Timer(uint32 id, std::function<void()> functor, uint32 timerMin, uint32 timerMax, bool disabled)
+    : id(id), timer(urand(timerMin, timerMax)), disabled(disabled), functor(functor), initialMin(timerMin), initialMax(timerMax), initialDisabled(disabled)
+    {}
+
 bool Timer::UpdateTimer(const uint32 diff)
 {
     if (disabled)
@@ -32,6 +36,12 @@ bool Timer::UpdateTimer(const uint32 diff)
     else timer -= diff;
 
     return false;
+}
+
+void Timer::ResetTimer()
+{
+    timer = urand(initialMin, initialMax);
+    disabled = initialDisabled;
 }
 
 bool CombatTimer::UpdateTimer(const uint32 diff, bool combat)
@@ -58,9 +68,19 @@ void TimerManager::AddTimer(uint32 id, Timer&& timer)
     m_timers.emplace(id, timer);
 }
 
-void TimerManager::AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor, bool disabled)
+void TimerManager::AddCustomAction(uint32 id, bool disabled, std::function<void()> functor)
 {
-    m_timers.emplace(id, Timer(id, timer, functor, disabled));
+    m_timers.emplace(id, Timer(id, functor, 0, 0, false));
+}
+
+void TimerManager::AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor)
+{
+    m_timers.emplace(id, Timer(id, functor, timer, timer, false));
+}
+
+void TimerManager::AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, std::function<void()> functor)
+{
+    m_timers.emplace(id, Timer(id, functor, timerMin, timerMax, false));
 }
 
 void TimerManager::UpdateTimers(const uint32 diff)
@@ -71,6 +91,12 @@ void TimerManager::UpdateTimers(const uint32 diff)
         if (timer.UpdateTimer(diff))
             timer.functor();
     }
+}
+
+void TimerManager::ResetAllTimers()
+{
+    for (auto& data : m_timers)
+        data.second.ResetTimer();
 }
 
 void TimerManager::GetAIInformation(ChatHandler& reader)
@@ -96,9 +122,39 @@ void CombatTimerAI::UpdateTimers(const uint32 diff, bool combat)
     }
 }
 
+void CombatTimerAI::ResetAllTimers()
+{
+    for (uint32 i = 0; i < m_actionReadyStatus.size(); ++i)
+    {
+        auto itr = m_timerlessActionSettings.find(i);
+        if (itr == m_timerlessActionSettings.end())
+            m_actionReadyStatus[i] = false;
+        else
+            m_actionReadyStatus[i] = (*itr).second;
+    }
+    for (auto& data : m_combatTimers)
+        data.second.ResetTimer();
+    TimerManager::ResetAllTimers();
+}
+
+void CombatTimerAI::AddCombatAction(uint32 id, bool disabled)
+{
+    m_combatTimers.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, 0, 0, disabled));
+}
+
 void CombatTimerAI::AddCombatAction(uint32 id, uint32 timer)
 {
-    m_combatTimers.emplace(id, CombatTimer(id, timer, [&, id] { m_actionReadyStatus[id] = true; }, true));
+    m_combatTimers.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, timer, timer, false));
+}
+
+void CombatTimerAI::AddCombatAction(uint32 id, uint32 timerMin, uint32 timerMax)
+{
+    m_combatTimers.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, timerMin, timerMax, false));
+}
+
+void CombatTimerAI::AddTimerlessCombatAction(uint32 id, bool byDefault)
+{
+    m_timerlessActionSettings[id] = byDefault;
 }
 
 void CombatTimerAI::GetAIInformation(ChatHandler& reader)
