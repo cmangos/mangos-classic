@@ -103,7 +103,7 @@ While developing you should try to keep these points in mind:
 * *Write good commit messages to tell people what you are trying to do in your commit*
   This must include some test instructions, link to bug-report and similar
 
-Also we expect you to keep our [Coding Style](https://github.com/cmangos/mangos-wotlk/wiki/Coding-Standards)
+Also we expect you to keep our [Coding Standards](https://github.com/cmangos/issues/wiki/Coding-Standards)
 This code style is automatically enforced by the helper scripts in contrib/cleanupTools (which require AStyle to be installed)
 
 ## Deployment
