@@ -1744,6 +1744,13 @@ void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
         }
     }
 
+    switch (triggered_spell_id) // custom targeting cases - for now classic only
+    {
+        case 6608: // Lash
+            caster = unitTarget;
+            break;
+    }
+
     SpellCastTargets targets;
 
     switch (m_spellInfo->EffectImplicitTargetA[eff_idx])
