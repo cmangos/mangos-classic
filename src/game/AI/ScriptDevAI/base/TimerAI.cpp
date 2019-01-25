@@ -70,7 +70,7 @@ void TimerManager::AddTimer(uint32 id, Timer&& timer)
 
 void TimerManager::AddCustomAction(uint32 id, bool disabled, std::function<void()> functor)
 {
-    m_timers.emplace(id, Timer(id, functor, 0, 0, false));
+    m_timers.emplace(id, Timer(id, functor, 0, 0, disabled));
 }
 
 void TimerManager::AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor)
