@@ -1661,3 +1661,43 @@ SOAP.Port = 7878
 CharDelete.Method = 0
 CharDelete.MinLevel = 0
 CharDelete.KeepDays = 30
+
+###################################################################################################################
+# METRICS CONFIGURATION
+#
+#    Metric.Enable
+#        Enable or disable metric logging
+#        Default: 0  - Disabled
+#                 1  - Enable
+#
+#    Metric.Address
+#        IP / Hostname for the InfluxDB where measurements are stored.
+#        Default: "127.0.0.1"
+#
+#    Metric.Port
+#        Port for the InfluxDB where measurements are stored.
+#        Default: 8086
+#
+#    Metric.Database
+#        Database name for the InfluxDB where measurements are stored.
+#        Default: "perfd"
+#
+#    Metric.Username
+#        Username of the InfluxDB where measurements are stored.
+#        Default: ""
+#
+#    Metric.Password
+#        Password of the InfluxDB where measurements are stored.
+#        Default: ""
+#
+###################################################################################################################
+
+Metric.Enable = 0
+Metric.Address = "127.0.0.1"
+Metric.Port = 8086
+Metric.Database = "perfd"
+Metric.Username = ""
+Metric.Password = ""
+
+Dummy.Debug1 = 0
+Dummy.Debug2 = 0

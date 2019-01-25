@@ -48,6 +48,7 @@
 #include "Movement/MoveSpline.h"
 #include "Entities/CreatureLinkingMgr.h"
 #include "Tools/Formulas.h"
+#include "Metric/Metric.h"
 
 #include <math.h>
 #include <limits>
@@ -428,6 +429,14 @@ void Unit::Update(const uint32 diff)
     if (!IsInWorld())
         return;
 
+    metric::duration<std::chrono::microseconds> meas("unit.update", {
+        { "entry", std::to_string(GetEntry()) },
+        { "guid", std::to_string(GetGUIDLow()) },
+        { "unit_type", std::to_string(GetGUIDHigh()) },
+        { "map_id", std::to_string(GetMapId()) },
+        { "instance_id", std::to_string(GetInstanceId()) }
+    }, 1000);
+
     /*if(p_time > m_AurasCheck)
     {
     m_AurasCheck = 2000;
@@ -468,7 +477,17 @@ void Unit::Update(const uint32 diff)
     i_motionMaster.UpdateMotion(diff);
 
     if (AI() && IsAlive())
+    {
+        metric::duration<std::chrono::microseconds> meas_ai("unit.ai.update", {
+            { "entry", std::to_string(GetEntry()) },
+            { "guid", std::to_string(GetGUIDLow()) },
+            { "unit_type", std::to_string(GetGUIDHigh()) },
+            { "map_id", std::to_string(GetMapId()) },
+            { "instance_id", std::to_string(GetInstanceId()) }
+        }, 1000);
+
         AI()->UpdateAI(diff);   // AI not react good at real update delays (while freeze in non-active part of map)
+    }
 
     GetCombatManager().Update(diff);
 
@@ -10290,6 +10309,14 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
 
     if (movespline->Finalized())
         return;
+
+    metric::duration<std::chrono::microseconds> meas_ai("unit.update.spline.movement", {
+        { "entry", std::to_string(GetEntry()) },
+        { "guid", std::to_string(GetGUIDLow()) },
+        { "unit_type", std::to_string(GetGUIDHigh()) },
+        { "map_id", std::to_string(GetMapId()) },
+        { "instance_id", std::to_string(GetInstanceId()) }
+    }, 1000);
 
     movespline->updateState(t_diff);
     bool arrived = movespline->Finalized();

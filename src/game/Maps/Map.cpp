@@ -22,6 +22,7 @@
 #include "Grids/GridNotifiers.h"
 #include "Log.h"
 #include "Grids/ObjectGridLoader.h"
+#include "Metric/Metric.h"
 #include "Grids/CellImpl.h"
 #include "GridDefines.h"
 #include "Grids/GridNotifiersImpl.h"
@@ -583,9 +584,17 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<MaNGOS::Obje
 
 void Map::Update(const uint32& t_diff)
 {
+    metric::duration<std::chrono::milliseconds> meas("map.update.objects", {
+    { "map_id", std::to_string(i_id) },
+    { "instance_id", std::to_string(i_InstanceId) }
+        });
+
+    uint64 count = 0;
     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 
     m_dyn_tree.update(t_diff);
+
+    GetMessager().Execute(this);
 
     /// update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
@@ -610,14 +619,6 @@ void Map::Update(const uint32& t_diff)
 
     /// update active cells around players and active objects
     resetMarkedCells();
-
-    {
-        std::lock_guard<std::mutex> guard(m_messageMutex);
-        for (auto& message : m_messageVector)
-            message(this);
-
-        m_messageVector.clear();
-    }
 
     WorldObjectUnSet objToUpdate;
     MaNGOS::ObjectUpdater obj_updater(objToUpdate, t_diff);
@@ -680,7 +681,12 @@ void Map::Update(const uint32& t_diff)
 
     // update all objects
     for (auto wObj : objToUpdate)
+    {
         wObj->Update(t_diff);
+        ++count;
+    }
+
+    meas.add_field("count", static_cast<int32>(count));
 
     // Send world objects and item update field changes
     SendObjectUpdates();
@@ -2432,12 +2438,6 @@ bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, f
     }
 
     return false;
-}
-
-void Map::AddMessage(const std::function<void(Map*)>& message)
-{
-    std::lock_guard<std::mutex> guard(m_messageMutex);
-    m_messageVector.push_back(message);
 }
 
 bool Map::IsMountAllowed() const

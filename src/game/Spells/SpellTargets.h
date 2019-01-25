@@ -19,6 +19,8 @@
 #ifndef MANGOS_SPELLTARGETS_H
 #define MANGOS_SPELLTARGETS_H
 
+#include <map>
+
 #include "Spells/SpellTargetDefines.h"
 #include "Spells/SpellEffectDefines.h"
 #include "Server/DBCEnums.h"

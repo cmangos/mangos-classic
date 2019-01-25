@@ -1403,6 +1403,8 @@ void World::Update(uint32 diff)
     ///- Update the game time and check for shutdown time
     _UpdateGameTime();
 
+    GetMessager().Execute(this);
+
     ///-Update mass mailer tasks if any
     sMassMailMgr.Update();
 
