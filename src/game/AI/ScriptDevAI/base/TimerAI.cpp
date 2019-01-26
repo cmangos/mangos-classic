@@ -111,10 +111,10 @@ void TimerManager::GetAIInformation(ChatHandler& reader)
     reader.PSendSysMessage("%s", output.data());
 }
 
-void CombatTimerAI::UpdateTimers(const uint32 diff, bool combat)
+void CombatActions::UpdateTimers(const uint32 diff, bool combat)
 {
     TimerManager::UpdateTimers(diff);
-    for (auto& data : m_combatTimers)
+    for (auto& data : m_CombatActions)
     {
         CombatTimer& timer = data.second;
         if (timer.UpdateTimer(diff, combat))
@@ -122,7 +122,7 @@ void CombatTimerAI::UpdateTimers(const uint32 diff, bool combat)
     }
 }
 
-void CombatTimerAI::ResetAllTimers()
+void CombatActions::ResetAllTimers()
 {
     for (uint32 i = 0; i < m_actionReadyStatus.size(); ++i)
     {
@@ -132,36 +132,72 @@ void CombatTimerAI::ResetAllTimers()
         else
             m_actionReadyStatus[i] = (*itr).second;
     }
-    for (auto& data : m_combatTimers)
+    for (auto& data : m_CombatActions)
         data.second.ResetTimer();
     TimerManager::ResetAllTimers();
 }
 
-void CombatTimerAI::AddCombatAction(uint32 id, bool disabled)
+void CombatActions::AddCombatAction(uint32 id, bool disabled)
 {
-    m_combatTimers.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, 0, 0, disabled));
+    m_CombatActions.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, 0, 0, disabled));
 }
 
-void CombatTimerAI::AddCombatAction(uint32 id, uint32 timer)
+void CombatActions::AddCombatAction(uint32 id, uint32 timer)
 {
-    m_combatTimers.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, timer, timer, false));
+    m_CombatActions.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, timer, timer, false));
 }
 
-void CombatTimerAI::AddCombatAction(uint32 id, uint32 timerMin, uint32 timerMax)
+void CombatActions::AddCombatAction(uint32 id, uint32 timerMin, uint32 timerMax)
 {
-    m_combatTimers.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, timerMin, timerMax, false));
+    m_CombatActions.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, timerMin, timerMax, false));
 }
 
-void CombatTimerAI::AddTimerlessCombatAction(uint32 id, bool byDefault)
+void CombatActions::AddTimerlessCombatAction(uint32 id, bool byDefault)
 {
     m_timerlessActionSettings[id] = byDefault;
 }
 
-void CombatTimerAI::GetAIInformation(ChatHandler& reader)
+void CombatActions::AddSpellCombatAction(uint32 id, bool disabled)
+{
+}
+
+void CombatActions::AddSpellCombatAction(uint32 id, uint32 timer)
+{
+}
+
+void CombatActions::AddSpellCombatAction(uint32 id, uint32 timerMin, uint32 timerMax)
+{
+}
+
+void CombatActions::ResetTimer(uint32 index, uint32 timer)
+{
+    auto data = m_CombatActions.find(index);
+    if (data == m_CombatActions.end())
+        TimerManager::ResetTimer(index, timer);
+    else
+    {
+        (*data).second.timer = timer;
+        (*data).second.disabled = false;
+    }
+}
+
+void CombatActions::DisableTimer(uint32 index)
+{
+    auto data = m_CombatActions.find(index);
+    if (data == m_CombatActions.end())
+        TimerManager::DisableTimer(index);
+    else
+    {
+        (*data).second.timer = 0;
+        (*data).second.disabled = true;
+    }
+}
+
+void CombatActions::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage("Combat Timers:");
     std::string output = "";
-    for (auto itr = m_combatTimers.begin(); itr != m_combatTimers.end(); ++itr)
+    for (auto itr = m_CombatActions.begin(); itr != m_CombatActions.end(); ++itr)
     {
         Timer& timer = (*itr).second;
         output += "Timer ID: " + std::to_string(timer.id) + " Timer: " + std::to_string(timer.timer), +" Disabled: " + std::to_string(timer.disabled) + "\n";
