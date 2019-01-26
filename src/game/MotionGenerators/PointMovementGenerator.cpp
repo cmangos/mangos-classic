@@ -37,6 +37,8 @@ void PointMovementGenerator<T>::Initialize(T& unit)
     m_speedChanged = false;
     Movement::MoveSplineInit init(unit);
     init.MoveTo(i_x, i_y, i_z, m_generatePath);
+    if (m_forcedMovement == FORCED_MOVEMENT_WALK)
+        init.SetWalk(true);
     init.Launch();
 }
 

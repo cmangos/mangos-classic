@@ -329,14 +329,14 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, bool asMain
         Mutate(new FollowMovementGenerator<Creature>(*target, dist, angle));
 }
 
-void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath)
+void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath, ForcedMovement forcedMovement)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted point (Id: %u X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), id, x, y, z);
 
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
-        Mutate(new PointMovementGenerator<Player>(id, x, y, z, generatePath));
+        Mutate(new PointMovementGenerator<Player>(id, x, y, z, generatePath, forcedMovement));
     else
-        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, generatePath));
+        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, generatePath, forcedMovement));
 }
 
 void MotionMaster::MoveSeekAssistance(float x, float y, float z)
