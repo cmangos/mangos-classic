@@ -104,13 +104,6 @@ class CombatActions : public TimerManager
         void AddCombatAction(uint32 id, uint32 timerMin, uint32 timerMax);
         // Adds a combat action which has no timer. It is reset to default value at start. Useful for one-off actions like phase transition at HP level.
         void AddTimerlessCombatAction(uint32 id, bool byDefault);
-        // Family of methods which add spell combat actions. They differ in that spell combat actions only reset after a successful cast.
-        // Adds a spell combat action which is always disabled at start
-        void AddSpellCombatAction(uint32 id, bool disabled);
-        // Adds a spell combat action which is always reset to static timer value
-        void AddSpellCombatAction(uint32 id, uint32 timer);
-        // Adds a spell combat action which is reset to a random number between min and max (inclusive)
-        void AddSpellCombatAction(uint32 id, uint32 timerMin, uint32 timerMax);
 
         virtual void ResetTimer(uint32 index, uint32 timer) override;
         virtual void DisableTimer(uint32 index) override;
