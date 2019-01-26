@@ -110,13 +110,15 @@ namespace MaNGOS
 
     struct ObjectUpdater
     {
-        uint32 i_timeDiff;
-        explicit ObjectUpdater(const uint32& diff) : i_timeDiff(diff) {}
+        explicit ObjectUpdater(WorldObjectUnSet& otus) : m_objectToUpdateSet(otus) {}
         template<class T> void Visit(GridRefManager<T>& m);
         void Visit(PlayerMapType&) {}
         void Visit(CorpseMapType&) {}
         void Visit(CameraMapType&) {}
         void Visit(CreatureMapType&);
+
+      private:
+      WorldObjectUnSet& m_objectToUpdateSet;
     };
 
     struct PlayerVisitObjectsNotifier
