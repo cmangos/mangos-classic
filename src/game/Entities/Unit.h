@@ -845,13 +845,13 @@ struct SpellNonMeleeDamage
 
 struct SpellPeriodicAuraLogInfo
 {
-    SpellPeriodicAuraLogInfo(Aura* _aura, uint32 _damage, uint32 _absorb, uint32 _resist, float _multiplier)
+    SpellPeriodicAuraLogInfo(Aura* _aura, uint32 _damage, uint32 _absorb, int32 _resist, float _multiplier)
         : aura(_aura), damage(_damage), absorb(_absorb), resist(_resist), multiplier(_multiplier) {}
 
     Aura*   aura;
     uint32 damage;
     uint32 absorb;
-    uint32 resist;
+    int32 resist;
     float  multiplier;
 };
 

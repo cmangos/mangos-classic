@@ -4404,7 +4404,7 @@ void Aura::PeriodicTick()
             uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
             pdamage = (pdamage <= absorb + resist) ? 0 : (pdamage - absorb - resist);
 
-            SpellPeriodicAuraLogInfo pInfo(this, pdamage, absorb, resist, 0.0f);
+            SpellPeriodicAuraLogInfo pInfo(this, pdamage, absorb, int32(resist), 0.0f);
             target->SendPeriodicAuraLog(&pInfo);
 
             if (pdamage)
