@@ -41,6 +41,7 @@ struct GameObjectData;
 
 typedef std::list<WorldObject*> WorldObjectList;
 typedef std::set<WorldObject*> WorldObjectSet;
+typedef std::unordered_set<WorldObject*> WorldObjectUnSet;
 typedef std::list<Unit*> UnitList;
 typedef std::list<Creature*> CreatureList;
 typedef std::list<GameObject*> GameObjectList;
