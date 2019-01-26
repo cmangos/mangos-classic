@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_z2736_01_characters_fix_skills_overflow` bit(1) DEFAULT NULL
+  `required_z2737_00_characters_cooldown` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -477,13 +477,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_spell_cooldown`;
 CREATE TABLE `character_spell_cooldown` (
-  `LowGuid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier, Low part',
+  `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier, Low part',
   `SpellId` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell Identifier',
   `SpellExpireTime` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell cooldown expire time',
   `Category` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell category',
   `CategoryExpireTime` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell category cooldown expire time',
   `ItemId` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Item Identifier',
-  PRIMARY KEY (`LowGuid`,`SpellId`)
+  PRIMARY KEY (`guid`,`SpellId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
