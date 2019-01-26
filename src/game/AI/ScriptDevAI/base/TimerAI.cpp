@@ -157,18 +157,6 @@ void CombatActions::AddTimerlessCombatAction(uint32 id, bool byDefault)
     m_timerlessActionSettings[id] = byDefault;
 }
 
-void CombatActions::AddSpellCombatAction(uint32 id, bool disabled)
-{
-}
-
-void CombatActions::AddSpellCombatAction(uint32 id, uint32 timer)
-{
-}
-
-void CombatActions::AddSpellCombatAction(uint32 id, uint32 timerMin, uint32 timerMax)
-{
-}
-
 void CombatActions::ResetTimer(uint32 index, uint32 timer)
 {
     auto data = m_CombatActions.find(index);
