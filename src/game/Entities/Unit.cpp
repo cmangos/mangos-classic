@@ -5428,7 +5428,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
         data << float(line.damage) / float(calcDamageInfo->totalDamage);   // Float coefficient of subdamage
         data << uint32(line.damage);
         data << uint32(line.absorb);
-        data << uint32(line.resist);
+        data << int32(line.resist);
     }
 
     data << uint32(calcDamageInfo->TargetState);
