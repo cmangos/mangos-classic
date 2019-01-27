@@ -178,10 +178,6 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
             if (castFlags & CAST_INTERRUPT_PREVIOUS && caster->IsNonMeleeSpellCasted(false))
                 caster->InterruptNonMeleeSpells(false);
 
-            // Creature should always stop before it will cast a non-instant spell
-            if (GetSpellCastTime(spellInfo, caster) || (IsChanneledSpell(spellInfo) && spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT))
-                caster->StopMoving();
-
             // Creature should interrupt any current melee spell
             caster->InterruptSpell(CURRENT_MELEE_SPELL);
 
@@ -278,10 +274,15 @@ void UnitAI::HandleMovementOnAttackStart(Unit* victim) const
     }
 }
 
-void UnitAI::OnSpellCastStateChange(SpellEntry const* spellInfo, bool state, WorldObject* target)
+void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject* target)
 {
+    SpellEntry const* spellInfo = spell->m_spellInfo;
     if (spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_1) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_2))
         return;
+
+    // Creature should always stop before it will cast a non-instant spell
+    if (spell->GetCastTime() || (IsChanneledSpell(spellInfo) && spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT))
+        m_unit->StopMoving();
 
     bool forceTarget = false;
 
@@ -320,8 +321,9 @@ void UnitAI::OnSpellCastStateChange(SpellEntry const* spellInfo, bool state, Wor
     }
 }
 
-void UnitAI::OnChannelStateChange(SpellEntry const* spellInfo, bool state, WorldObject* target)
+void UnitAI::OnChannelStateChange(Spell const* spell, bool state, WorldObject* target)
 {
+    SpellEntry const* spellInfo = spell->m_spellInfo;
     // TODO: Determine if CHANNEL_FLAG_MOVEMENT is worth implementing
     if (!spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET))
     {
