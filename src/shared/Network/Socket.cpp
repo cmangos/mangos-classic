@@ -43,9 +43,9 @@ namespace MaNGOS
             const_cast<std::string&>(m_address) = m_socket.remote_endpoint().address().to_string();
             const_cast<std::string&>(m_remoteEndpoint) = boost::lexical_cast<std::string>(m_socket.remote_endpoint());
         }
-        catch (boost::system::error_code& error)
+        catch (boost::system::system_error& error)
         {
-            sLog.outError("Socket::Open() failed to get remote address.  Error: %s", error.message().c_str());
+            sLog.outError("Socket::Open() failed to get remote address.  Error: %s", error.what());
             return false;
         }
 
