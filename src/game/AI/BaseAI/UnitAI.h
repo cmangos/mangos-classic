@@ -398,12 +398,12 @@ class UnitAI
         /*
          * Notifies AI on cast state change
          */
-        virtual void OnSpellCastStateChange(SpellEntry const* spellInfo, bool state, WorldObject* target = nullptr);
+        virtual void OnSpellCastStateChange(Spell const* spell, bool state, WorldObject* target = nullptr);
 
         /*
          * Notifies AI on channel state update
          */
-        virtual void OnChannelStateChange(SpellEntry const* spellInfo, bool state, WorldObject* target = nullptr);
+        virtual void OnChannelStateChange(Spell const* spell, bool state, WorldObject* target = nullptr);
 
         /*
          * Notifies AI on successfull spell execution

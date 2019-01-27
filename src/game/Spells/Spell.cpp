@@ -2793,7 +2793,7 @@ void Spell::Prepare()
 
         // Orientation changes inside
         if (m_notifyAI && m_caster->AI())
-            m_caster->AI()->OnSpellCastStateChange(m_spellInfo, true, m_targets.getUnitTarget());
+            m_caster->AI()->OnSpellCastStateChange(this, true, m_targets.getUnitTarget());
     }
 
     // add non-triggered (with cast time and without)
@@ -2889,7 +2889,7 @@ void Spell::cast(bool skipCheck)
     SetExecutedCurrently(true);
 
     if (m_notifyAI && m_caster->AI())
-        m_caster->AI()->OnSpellCastStateChange(m_spellInfo, false);
+        m_caster->AI()->OnSpellCastStateChange(this, false);
 
     if (!m_caster->CheckAndIncreaseCastCounter())
     {
@@ -3800,7 +3800,7 @@ void Spell::SendChannelUpdate(uint32 time, uint32 lastTick) const
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
         m_caster->clearUnitState(UNIT_STAT_CHANNELING);
         if (m_caster->AI())
-            m_caster->AI()->OnChannelStateChange(m_spellInfo, false);
+            m_caster->AI()->OnChannelStateChange(this, false);
     }
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -3860,7 +3860,7 @@ void Spell::SendChannelStart(uint32 duration)
     m_caster->addUnitState(UNIT_STAT_CHANNELING);
 
     if (m_caster->AI())
-        m_caster->AI()->OnChannelStateChange(m_spellInfo, true, target);
+        m_caster->AI()->OnChannelStateChange(this, true, target);
 }
 
 void Spell::SendResurrectRequest(Player* target) const
