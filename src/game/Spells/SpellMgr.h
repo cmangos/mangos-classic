@@ -361,6 +361,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
     switch (spellInfo->Id)
     {
         case 3417:          // Thrash
+        case 6752:          // Weak Poison Proc
         case 8279:          // Stealth Detection
         case 8876:          // Thrash
         case 9205:          // Hate to Zero (Hate to Zero)
