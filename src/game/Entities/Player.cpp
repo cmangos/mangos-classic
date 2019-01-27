@@ -956,7 +956,7 @@ uint32 Player::EnvironmentalDamage(EnvironmentalDamageType type, uint32 damage)
 
     // Absorb, resist some environmental damage type
     uint32 absorb = 0;
-    uint32 resist = 0;
+    int32 resist = 0;
     if (type == DAMAGE_LAVA)
     {
         // TODO: Find out if we should sent packet
@@ -968,7 +968,10 @@ uint32 Player::EnvironmentalDamage(EnvironmentalDamageType type, uint32 damage)
     else if (type == DAMAGE_SLIME)
         CalculateDamageAbsorbAndResist(this, SPELL_SCHOOL_MASK_NATURE, DIRECT_DAMAGE, damage, &absorb, &resist);
 
-    damage -= absorb + resist;
+    const uint32 bonus = (resist < 0 ? uint32(std::abs(resist)) : 0);
+    damage += bonus;
+    const uint32 malus = (resist > 0 ? (absorb + uint32(resist)) : absorb);
+    damage = (damage <= malus ? 0 : (damage - malus));
 
     DamageEffectType damageType = SELF_DAMAGE;
     if (type == DAMAGE_FALL && getClass() == CLASS_ROGUE)
@@ -976,7 +979,7 @@ uint32 Player::EnvironmentalDamage(EnvironmentalDamageType type, uint32 damage)
 
     DealDamageMods(this, damage, &absorb, damageType);
 
-    SendEnvironmentalDamageLog(type, damage, absorb, int32(resist));
+    SendEnvironmentalDamageLog(type, damage, absorb, resist);
 
     uint32 final_damage = DealDamage(this, damage, nullptr, damageType, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
 
@@ -15822,7 +15825,7 @@ void Player::_SaveStats()
         stmt.addFloat(GetStat(Stats(i)));
     // armor + school resistances
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
-        stmt.addUInt32(GetResistance(SpellSchools(i)));
+        stmt.addInt32(GetResistance(SpellSchools(i)));
     stmt.addFloat(GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
     stmt.addFloat(GetFloatValue(PLAYER_DODGE_PERCENTAGE));
     stmt.addFloat(GetFloatValue(PLAYER_PARRY_PERCENTAGE));
@@ -15844,10 +15847,10 @@ void Player::outDebugStatsValues() const
     sLog.outDebug("AGILITY is: \t\t%f\t\tSTRENGTH is: \t\t%f", GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
     sLog.outDebug("INTELLECT is: \t\t%f\t\tSPIRIT is: \t\t%f", GetStat(STAT_INTELLECT), GetStat(STAT_SPIRIT));
     sLog.outDebug("STAMINA is: \t\t%f", GetStat(STAT_STAMINA));
-    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%f", GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u", GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
-    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u", GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
-    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u", GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));
+    sLog.outDebug("Armor is: \t\t%i\t\tBlock is: \t\t%f", GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%i\t\tFireRes is: \t\t%i", GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
+    sLog.outDebug("NatureRes is: \t\t%i\t\tFrostRes is: \t\t%i", GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
+    sLog.outDebug("ShadowRes is: \t\t%i\t\tArcaneRes is: \t\t%i", GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));
     sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f", GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f", GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f", GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
