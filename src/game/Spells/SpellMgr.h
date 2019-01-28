@@ -372,6 +372,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 12529:         // Chilling Touch
         case 12546:         // Spitelash (Spitelash)
         case 12787:         // Thrash
+        case 13299:         // Poison Proc
         case 13767:         // Hate to Zero (Hate to Zero)
         case 16140:         // Exploding Cadaver (Exploding Cadaver)
         case 17327:         // Spirit Particles
