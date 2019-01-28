@@ -362,6 +362,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
     {
         case 3417:          // Thrash
         case 6752:          // Weak Poison Proc
+        case 7276:          // Poison Proc
         case 8279:          // Stealth Detection
         case 8393:          // Barbs
         case 8876:          // Thrash
