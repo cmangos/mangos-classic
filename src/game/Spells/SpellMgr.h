@@ -365,6 +365,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 7276:          // Poison Proc
         case 8279:          // Stealth Detection
         case 8393:          // Barbs
+        case 8601:          // Slowing Poison
         case 8876:          // Thrash
         case 9205:          // Hate to Zero (Hate to Zero)
         case 9460:          // Corrosive Ooze
