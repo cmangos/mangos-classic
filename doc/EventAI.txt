@@ -161,7 +161,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 46  ACTION_T_SET_THROW_MASK                 EventTypeMask                       Marks for which AIEvents the npc will throw AIEvents on its own.
 47  ACTION_T_SET_STAND_STATE                StandState                          Set the unit stand state (Param1) of the current creature.
 48  ACTION_T_CHANGE_MOVEMENT                MovementType, WanderDistance        Change the unit movement type (Param1). If the movement type is Random Movement (1), the WanderDistance (Param2) must be provided. If the movement type is Waypoint Movement (2), Param2 is PathId. Param3 is asDefault.
-49  ACTION_T_DYNAMIC_MOVEMENT               EnableDynamicMovement               Deprecated use 57 - Enable dynamic movement behavior (1 = on; 0 = off)
+49  ACTION_T_REUSE
 50  ACTION_T_SET_REACT_STATE                ReactState                          Change react state of the creature
 51  ACTION_T_PAUSE_WAYPOINTS                DoPause                             Pause waypoints of creature
 52  ACTION_T_INTERRUPT_SPELL                SpellType - CurrentSpellTypes       Interrupt spell in given slot for creature
@@ -1014,9 +1014,8 @@ Parameter 2: WanderDistance - Wander distance to be used in case the movement ty
 Parameter 3: AsDefault - sets given movement type as default. Only usable to turn off GuardianAI follow movement for now.
 
 -------------------------------
-49 = ACTION_T_DYNAMIC_MOVEMENT:
+49 = ACTION_T_REUSE:
 -------------------------------
-Parameter 1: EnableDynamicMovement - Enable dynamic movement behavior. 1 = on / 0 = off.
 
 ------------------------------
 50 = ACTION_T_SET_REACT_STATE:
