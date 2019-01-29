@@ -129,7 +129,7 @@ enum EventAI_ActionType
     ACTION_T_SET_THROW_MASK             = 46,               // EventTypeMask, unused, unused
     ACTION_T_SET_STAND_STATE            = 47,               // StandState, unused, unused
     ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance if Movement Type 1 and PathId if Movement Type 2, asDefault
-    ACTION_T_DYNAMIC_MOVEMENT           = 49,               // EnableDynamicMovement (1 = on; 0 = off)
+    ACTION_T_REUSE                      = 49,               // REUSE
     ACTION_T_SET_REACT_STATE            = 50,               // React state, unused, unused
     ACTION_T_PAUSE_WAYPOINTS            = 51,               // DoPause 0: unpause waypoint 1: pause waypoint, unused, unused
     ACTION_T_INTERRUPT_SPELL            = 52,               // SpellType enum CurrentSpellTypes, unused, unused
@@ -471,13 +471,13 @@ struct CreatureEventAI_Action
             uint32 wanderORpathID;
             uint32 asDefault;
         } changeMovement;
-        // ACTION_T_DYNAMIC_MOVEMENT                        = 49
+        // ACTION_T_REUSE                                   = 49
         struct
         {
-            uint32 state;                                   // bool: 1 = on; 0 = off
             uint32 unused1;
             uint32 unused2;
-        } dynamicMovement;
+            uint32 unused3;
+        } reuse;
         // ACTION_T_SET_REACT_STATE                         = 50
         struct
         {
@@ -874,7 +874,6 @@ class CreatureEventAI : public CreatureAI
         uint32 m_depth;
 
         uint8  m_Phase;                                     // Current phase, max 32 phases
-        bool   m_DynamicMovement;                           // Core will control creatures movement if this is enabled
         bool   m_HasOOCLoSEvent;                            // Cache if a OOC-LoS Event exists
         uint32 m_InvinceabilityHpLevel;                     // Minimal health level allowed at damage apply
 
