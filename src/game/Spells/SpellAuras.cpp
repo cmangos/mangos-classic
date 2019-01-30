@@ -1306,6 +1306,18 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
                 break;
             }
+            case SPELLFAMILY_PRIEST:
+            {
+                switch (GetId())
+                {
+                    case 30238:             // Lordaeron's Blessing
+                    {
+                        target->CastSpell(target, 31906, TRIGGERED_OLD_TRIGGERED);
+                        return;
+                    }
+                }
+                break;
+            }
         }
     }
     // AT REMOVE
@@ -1395,6 +1407,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 target->CastSpell(target, 28206, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 // Poison Cloud
                 target->CastSpell(target, 28240, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                return;
+            }
+            case 30238:                                     // Lordaeron's Bleesing
+            {
+                target->RemoveAurasDueToSpell(31906);
                 return;
             }
         }
