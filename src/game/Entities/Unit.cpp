@@ -6728,7 +6728,7 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool /*castOnSelf*/, uin
         {
             SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
             for (auto itr : schoolList)
-                if (!(itr.aura && IsPositiveEffectMask(itr.aura->GetSpellProto(), itr.aura->GetEffIndex()) && isPositive && !itr.aura->GetSpellProto()->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE)) &&
+                if (!(itr.aura && IsPositiveEffectMask(itr.aura->GetSpellProto(), uint8(1 << (itr.aura->GetEffIndex() - 1))) && isPositive && !itr.aura->GetSpellProto()->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE)) &&
                     (itr.type & GetSpellSchoolMask(spellInfo)))
                     return true;
         }
