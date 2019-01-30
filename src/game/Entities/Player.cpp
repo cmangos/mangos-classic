@@ -3517,15 +3517,14 @@ void Player::_SaveSpellCooldowns()
     stmt.PExecute(GetGUIDLow());
 
     static SqlStatementID insertSpellCooldown;
-    TimePoint currTime = GetMap()->GetCurrentClockTime();
 
     for (auto& cdItr : m_cooldownMap)
     {
         auto& cdData = cdItr.second;
         if (!cdData->IsPermanent())
         {
-            TimePoint sTime = currTime;
-            TimePoint cTime = currTime;
+            TimePoint sTime = TimePoint::min();
+            TimePoint cTime = TimePoint::min();
             cdData->GetSpellCDExpireTime(sTime);
             cdData->GetCatCDExpireTime(cTime);
             uint64 spellExpireTime = uint64(Clock::to_time_t(sTime));
