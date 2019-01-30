@@ -2403,14 +2403,22 @@ void SpellMgr::LoadSpellAreas()
                 continue;
             }
 
-            switch (spellInfo->EffectApplyAuraName[EFFECT_INDEX_0])
+            bool validSpellEffect = false;
+            for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
             {
-                case SPELL_AURA_DUMMY:
-                case SPELL_AURA_GHOST:
-                    break;
-                default:
-                    sLog.outErrorDb("Spell %u listed in `spell_area` have aura spell requirement (%u) without dummy/phase/ghost aura in effect 0", spell, abs(spellArea.auraSpell));
-                    continue;
+                switch (spellInfo->EffectApplyAuraName[i])
+                {
+                    case SPELL_AURA_DUMMY:
+                    case SPELL_AURA_GHOST:
+                        validSpellEffect = true;
+                        break;
+                }
+            }
+
+            if (!validSpellEffect)
+            {
+                sLog.outErrorDb("Spell %u listed in `spell_area` have aura spell requirement (%u) without dummy/phase/ghost aura in effect 0", spell, abs(spellArea.auraSpell));
+                continue;
             }
 
             if (uint32(abs(spellArea.auraSpell)) == spellArea.spellId)
