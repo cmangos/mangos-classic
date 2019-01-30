@@ -560,7 +560,7 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
     if (LiquidTypeEntry const* liquidEntry = sLiquidTypeStore.LookupEntry(entry))
     {
         entry = liquidEntry->Id;
-        type &= MAP_LIQUID_TYPE_DARK_WATER;
+        type &= MAP_LIQUID_TYPE_DEEP_WATER;
         uint32 liqTypeIdx = liquidEntry->Type;
         if (entry < 21)
         {
@@ -582,7 +582,7 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
             }
         }
 
-        type |= (1 << liqTypeIdx) | (type & MAP_LIQUID_TYPE_DARK_WATER);
+        type |= (1 << liqTypeIdx) | (type & MAP_LIQUID_TYPE_DEEP_WATER);
     }
 
     if (type == 0)
