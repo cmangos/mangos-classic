@@ -560,7 +560,7 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x)
                     {
                         liquid_show[cy][cx] = true;
                         if (liquid->flags[y][x] & (1 << 7))
-                            liquid_flags[i][j] |= MAP_LIQUID_TYPE_DARK_WATER;
+                            liquid_flags[i][j] |= MAP_LIQUID_TYPE_DEEP_WATER;
                         ++count;
                     }
                 }
@@ -643,7 +643,7 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x)
                 {
                     uint8* lm = h2o->getLiquidLightMap(h);
                     if (!lm)
-                        liquid_flags[i][j] |= MAP_LIQUID_TYPE_DARK_WATER;
+                        liquid_flags[i][j] |= MAP_LIQUID_TYPE_DEEP_WATER;
                 }
 
                 if (!count && liquid_flags[i][j])

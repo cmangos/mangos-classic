@@ -599,7 +599,7 @@ void PathFinder::updateFilter()
 {
     // allow creatures to cheat and use different movement types if they are moved
     // forcefully into terrain they can't normally move in
-    if (m_sourceUnit->IsInWater() || m_sourceUnit->IsUnderWater())
+    if (m_sourceUnit->IsInWater() || m_sourceUnit->IsUnderwater())
     {
         uint16 includedFlags = m_filter.getIncludeFlags();
         includedFlags |= getNavTerrain(m_sourceUnit->GetPositionX(),
