@@ -2417,7 +2417,7 @@ void SpellMgr::LoadSpellAreas()
 
             if (!validSpellEffect)
             {
-                sLog.outErrorDb("Spell %u listed in `spell_area` have aura spell requirement (%u) without dummy/phase/ghost aura in effect 0", spell, abs(spellArea.auraSpell));
+                sLog.outErrorDb("Spell %u listed in `spell_area` have aura spell requirement (%u) without dummy/ghost aura in spell effects", spell, abs(spellArea.auraSpell));
                 continue;
             }
 
