@@ -479,6 +479,31 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
     _player->SummonIfPossible(true);
 }
 
+void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
+{
+    /*  WorldSession::Update( WorldTimer::getMSTime() );*/
+    DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_TIME_SKIPPED");
+
+    ObjectGuid guid;
+    uint32 timeSkipped;
+    recv_data >> guid;
+    recv_data >> timeSkipped;
+
+    Unit* mover = _player->GetMover();
+
+    // Ignore updates not for current player
+    if (mover == nullptr || guid != mover->GetObjectGuid())
+        return;
+
+    mover->m_movementInfo.UpdateTime(mover->m_movementInfo.GetTime() + timeSkipped);
+
+    // Send to other players
+    WorldPacket data(MSG_MOVE_TIME_SKIPPED, 16);
+    data << mover->GetPackGUID();
+    data << timeSkipped;
+    mover->SendMessageToSetExcept(data, _player);
+}
+
 bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGuid const& guid) const
 {
     // ignore wrong guid (player attempt cheating own session for not own guid possible...)
