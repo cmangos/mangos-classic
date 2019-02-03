@@ -839,8 +839,13 @@ void Unit::Kill(Unit* victim, DamageEffectType damagetype, SpellEntry const* spe
     *                      Preparation: Who gets credit for killing whom, invoke SpiritOfRedemtion?
     */
     // for loot will be used only if group_tap == nullptr
-    Player* killer = GetBeneficiaryPlayer();
-    Player* tapper = killer;
+    Unit* killer = this;
+
+    Player* plKiller = nullptr;
+    if (killer->GetTypeId() == TYPEID_PLAYER)
+        plKiller = static_cast<Player*>(this);
+
+    Player* tapper = GetBeneficiaryPlayer();
     Group* tapperGroup = nullptr;
 
     // in creature kill case group/player tap stored for creature
@@ -881,7 +886,7 @@ void Unit::Kill(Unit* victim, DamageEffectType damagetype, SpellEntry const* spe
     // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
     if (damagetype != INSTAKILL)
     {
-        if (killer && killer != victim && (killer == tapper || (killer->GetGroup() == tapperGroup && tapperGroup)))
+        if (plKiller && killer != victim && (plKiller == tapper || (tapperGroup && plKiller->GetGroup() == tapperGroup)))
         {
             WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL
             data << killer->GetObjectGuid();                // player with killing blow
@@ -890,7 +895,7 @@ void Unit::Kill(Unit* victim, DamageEffectType damagetype, SpellEntry const* spe
             if (tapperGroup)
                 tapperGroup->BroadcastPacket(data, false, tapperGroup->GetMemberGroup(killer->GetObjectGuid()), killer->GetObjectGuid());
 
-            killer->SendDirectMessage(data);
+            plKiller->SendDirectMessage(data);
         }
     }
 
@@ -945,18 +950,18 @@ void Unit::Kill(Unit* victim, DamageEffectType damagetype, SpellEntry const* spe
     */
     if (victim->GetTypeId() == TYPEID_PLAYER)          // Killed player
     {
-        Player* playerVictim = (Player*)victim;
+        Player* playerVictim = static_cast<Player*>(victim);
 
         // remember victim PvP death for corpse type and corpse reclaim delay
         // at original death (not at SpiritOfRedemtionTalent timeout)
         if (!damageFromSpiritOfRedemtionTalent)
-            playerVictim->SetPvPDeath(killer != nullptr);
+            playerVictim->SetPvPDeath(plKiller != nullptr);
 
         // 10% durability loss on death
         // only if not player and not controlled by player pet. And not at BG
-        if (durabilityLoss && !killer && !playerVictim->InBattleGround())
+        if (durabilityLoss && !plKiller && !playerVictim->InBattleGround())
         {
-            DEBUG_LOG("DealDamage: Killed %s, looing 10 percents durability", victim->GetGuidStr().c_str());
+            DEBUG_LOG("DealDamage: Killed %s, losing 10 percents durability", victim->GetGuidStr().c_str());
             playerVictim->DurabilityLossAll(0.10f, false);
             // durability lost message
             WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
@@ -979,22 +984,22 @@ void Unit::Kill(Unit* victim, DamageEffectType damagetype, SpellEntry const* spe
             playerVictim->DuelComplete(DUEL_INTERRUPTED);
         }
 
-        if (killer)                                 // PvP kill
+        if (plKiller)                                 // PvP kill
         {
             if (BattleGround* bg = playerVictim->GetBattleGround())
             {
-                bg->HandleKillPlayer(playerVictim, killer);
+                bg->HandleKillPlayer(playerVictim, plKiller);
             }
             else if (victim != this)
             {
                 // selfkills are not handled in outdoor pvp scripts
                 if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(playerVictim->GetCachedZoneId()))
-                    outdoorPvP->HandlePlayerKill(killer, playerVictim);
+                    outdoorPvP->HandlePlayerKill(plKiller, playerVictim);
             }
         }
     }
     else                                                // Killed creature
-        JustKilledCreature((Creature*)victim, killer);
+        JustKilledCreature(static_cast<Creature*>(victim), plKiller);
 
     // stop combat
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAttackStop");
