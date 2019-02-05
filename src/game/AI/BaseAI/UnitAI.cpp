@@ -403,10 +403,10 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
 void UnitAI::DetectOrAttack(Unit* who)
 {
     float attackRadius = m_unit->GetAttackDistance(who);
-    if (!m_unit->IsWithinLOSInMap(who))
+    if (m_unit->GetDistance(who, true, DIST_CALC_NONE) > attackRadius * attackRadius)
         return;
 
-    if (!m_unit->IsWithinDistInMap(who, attackRadius))
+    if (!m_unit->IsWithinLOSInMap(who))
         return;
 
     if (!m_unit->getVictim() && !m_unit->isInCombat())
