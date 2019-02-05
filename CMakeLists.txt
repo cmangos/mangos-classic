@@ -389,6 +389,10 @@ if(BUILD_RECASTDEMOMOD)
   endif()
 endif()
 
+if(BUILD_GIT_ID)
+  add_subdirectory(contrib/git_id)
+endif()
+
 # set default startup project
 if(MSVC)
   if(BUILD_GAME_SERVER)
