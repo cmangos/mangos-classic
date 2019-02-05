@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2018092101
+ConfVersion=2019020501
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -713,9 +713,14 @@ LogColors = ""
 #        Default: 10
 #
 #    PetUnsummonAtMount
-#        Persmanent pet will unsummoned at player mount
+#        Permanent pet will unsummoned at player mount
 #        Default: 0 - not unsummon
 #                 1 - unsummon for any mount
+#
+#    PetAttackFromBehind
+#        Player controlled pet will attack from behind
+#        Default: 0 - Engage from any angle
+#                 1 - Engage from behind
 #
 #    Event.Announce
 #        Default: 0 (false)
@@ -801,6 +806,7 @@ MaxGroupXPDistance = 74
 MailDeliveryDelay = 3600
 MassMailer.SendPerTick = 10
 PetUnsummonAtMount = 0
+PetAttackFromBehind = 0
 Event.Announce = 0
 BeepAtStart = 1
 ShowProgressBars = 0
