@@ -67,6 +67,12 @@ else()
   message(STATUS "Build RecastDemoMod   : No  (default)")
 endif()
 
+if(BUILD_GIT_ID)
+  message(STATUS "Build git_id          : Yes")
+else()
+  message(STATUS "Build git_id          : No  (default)")
+endif()
+
 # if(SQL)
 #   message(STATUS "Install SQL-files     : Yes")
 # else()
