@@ -599,7 +599,7 @@ class ObjectMgr
         QuestgiverGreeting const* GetQuestgiverGreetingData(uint32 entry, uint32 type) const;
         TrainerGreeting const* GetTrainerGreetingData(uint32 entry) const;
 
-        WorldSafeLocsEntry const* GetClosestGraveYard(float x, float y, float z, uint32 MapId, Team team);
+        WorldSafeLocsEntry const* GetClosestGraveYard(float x, float y, float z, uint32 MapId, Team team) const;
         bool AddGraveYardLink(uint32 id, uint32 zoneId, Team team, bool inDB = true);
         void SetGraveYardLinkTeam(uint32 id, uint32 zoneId, Team team);
         void LoadGraveyardZones();
@@ -1223,6 +1223,10 @@ class ObjectMgr
 
         void LoadGossipMenu(std::set<uint32>& gossipScriptSet);
         void LoadGossipMenuItems(std::set<uint32>& gossipScriptSet);
+        
+        WorldSafeLocsEntry const* GetClosestGraveyardHelper(
+                GraveYardMapBounds bounds, float x, float y, float z,
+                uint32 mapId, Team team) const;
 
         typedef std::map<uint32, PetLevelInfo*> PetLevelInfoMap;
         // PetLevelInfoMap[creature_id][level]

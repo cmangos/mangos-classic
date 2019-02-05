@@ -5436,12 +5436,6 @@ void ObjectMgr::LoadGraveyardZones()
             continue;
         }
 
-        if (areaEntry->zone != 0)
-        {
-            sLog.outErrorDb("Table `game_graveyard_zone` has record subzone id (%u) instead of zone, skipped.", zoneId);
-            continue;
-        }
-
         if (team != TEAM_BOTH_ALLOWED && team != HORDE && team != ALLIANCE)
         {
             sLog.outErrorDb("Table `game_graveyard_zone` has record for non player faction (%u), skipped.", team);
@@ -5459,11 +5453,11 @@ void ObjectMgr::LoadGraveyardZones()
     sLog.outString();
 }
 
-WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId, Team team)
-{
-    // search for zone associated closest graveyard
-    uint32 zoneId = sTerrainMgr.GetZoneId(MapId, x, y, z);
 
+WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveyardHelper(
+        GraveYardMapBounds bounds, float x, float y, float z, uint32 mapId,
+        Team team) const
+{
     // Simulate std. algorithm:
     //   found some graveyard associated to (ghost_zone,ghost_map)
     //
@@ -5471,14 +5465,7 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
     //     then check faction
     //   if mapId != graveyard.mapId (ghost in instance) and search any graveyard associated
     //     then check faction
-    GraveYardMapBounds bounds = mGraveYardMap.equal_range(zoneId);
-
-    if (bounds.first == bounds.second)
-    {
-        sLog.outErrorDb("Table `game_graveyard_zone` incomplete: Zone %u Team %u does not have a linked graveyard.", zoneId, uint32(team));
-        return nullptr;
-    }
-
+    
     // at corpse map
     bool foundNear = false;
     float distNear = std::numeric_limits<float>::max();
@@ -5492,7 +5479,7 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
     // some where other
     WorldSafeLocsEntry const* entryFar = nullptr;
 
-    InstanceTemplate const* tempEntry = GetInstanceTemplate(MapId);
+    InstanceTemplate const* tempEntry = GetInstanceTemplate(mapId);
 
     for (GraveYardMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
     {
@@ -5508,7 +5495,7 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
             continue;
 
         // find now nearest graveyard at other (continent) map
-        if (MapId != entry->map_id)
+        if (mapId != entry->map_id)
         {
             // if find graveyard at different map from where entrance placed (or no entrance data), use any first
             if (!tempEntry ||
@@ -5567,6 +5554,30 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
         return entryEntr;
 
     return entryFar;
+}
+
+WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(
+        float x, float y, float z, uint32 MapId, Team team) const
+{
+    // Search for the closest linked graveyard, first for graveyards linked to
+    // the current areaId and if that fails for the current zoneId.
+    uint32 zoneId = sTerrainMgr.GetZoneId(MapId, x, y, z);
+    uint32 areaId = sTerrainMgr.GetAreaId(MapId, x, y, z);
+    
+    auto areaBounds = mGraveYardMap.equal_range(areaId);
+    auto zoneBounds = mGraveYardMap.equal_range(zoneId);
+    
+    auto entry = GetClosestGraveyardHelper(areaBounds, x, y, z, MapId, team);
+    if (entry != nullptr)
+        return entry;
+
+    entry = GetClosestGraveyardHelper(zoneBounds, x, y, z, MapId, team);
+    if (entry == nullptr)
+        sLog.outErrorDb("Table `game_graveyard_zone` incomplete: Zone %u Area "
+                        "%u Team %u does not have a linked graveyard.",
+                        zoneId, areaId, uint32(team));
+    
+    return entry;
 }
 
 GraveYardData const* ObjectMgr::FindGraveYardData(uint32 id, uint32 zoneId) const
