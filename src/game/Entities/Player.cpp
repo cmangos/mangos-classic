@@ -5882,23 +5882,31 @@ int32 Player::CalculateReputationGain(ReputationSource source, int32 rep, int32 
 
     percent += rep > 0 ? repMod : -repMod;
 
-    float rate;
+    float minRate;
     switch (source)
     {
         case REPUTATION_SOURCE_KILL:
-            rate = sWorld.getConfig(CONFIG_FLOAT_RATE_REPUTATION_LOWLEVEL_KILL);
+            minRate = sWorld.getConfig(CONFIG_FLOAT_RATE_REPUTATION_LOWLEVEL_KILL);
             break;
         case REPUTATION_SOURCE_QUEST:
-            rate = sWorld.getConfig(CONFIG_FLOAT_RATE_REPUTATION_LOWLEVEL_QUEST);
+            minRate = sWorld.getConfig(CONFIG_FLOAT_RATE_REPUTATION_LOWLEVEL_QUEST);
             break;
-        case REPUTATION_SOURCE_SPELL:
         default:
-            rate = 1.0f;
+            minRate = 1.0f;
             break;
     }
 
-    if (rate != 1.0f && creatureOrQuestLevel <= MaNGOS::XP::GetGrayLevel(getLevel()))
-        percent *= rate;
+    uint32 currentLevel = getLevel();
+    if (creatureOrQuestLevel <= MaNGOS::XP::GetGrayLevel(currentLevel))
+        percent *= minRate;
+    else
+    {
+        // Pre-3.0.8: Declines with 20% for each level if 6 levels or more below the player down to a minimum (default: 20%)
+        const uint32 treshold = (creatureOrQuestLevel + 5);
+
+        if (currentLevel > treshold)
+            percent *= std::max(minRate, (1.0f - (0.2f * (currentLevel - treshold))));
+    }
 
     if (percent <= 0.0f)
         return 0;
