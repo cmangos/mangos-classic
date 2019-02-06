@@ -658,8 +658,8 @@ LogColors = ""
 #
 #    MirrorTimer.Breath.Max
 #        Waterbreathing max timer value (in secs)
-#        Default: 180
-#                   0 (instant underwater breathing damage start)
+#        Default: 60
+#                  0 (instant underwater breathing damage start)
 #
 #    MirrorTimer.Environmental.Max
 #        Generic environmental (lava/slime/etc) damage delay max timer value (in secs)
