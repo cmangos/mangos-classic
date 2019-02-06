@@ -164,13 +164,13 @@ void MirrorTimer::Stop()
 
 void MirrorTimer::Start(uint32 interval, uint32 spellId/* = 0*/)
 {
-    if (interval && m_scale < 0)
+    if (m_scale < 0)
     {
         m_active = true;
         m_pulse.SetCurrent(0);
         m_pulse.SetInterval(2 * IN_MILLISECONDS);
         m_tracker.SetCurrent(0);
-        SetDuration(interval);
+        m_tracker.SetInterval(interval);
         m_spellId = spellId;
         m_status = FULL_UPDATE;
     }

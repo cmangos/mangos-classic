@@ -654,7 +654,7 @@ LogColors = ""
 #    MirrorTimer.Fatigue.Max
 #        Fatigue max timer value (in secs)
 #        Default: 60 (1 minute)
-#                  0 (instant death)
+#                  0 (instant exhaustion damage start)
 #
 #    MirrorTimer.Breath.Max
 #        Waterbreathing max timer value (in secs)
