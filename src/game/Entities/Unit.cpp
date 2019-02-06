@@ -8640,7 +8640,7 @@ float Unit::GetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange dama
     if (attType == OFF_ATTACK && !hasOffhandWeaponForAttack())
         return 0.0f;
 
-    return m_weaponDamageInfo.weapon[attType].damage[index].value[damageRange];
+    return (m_weaponDamageInfo.weapon[attType].damage[index].value[damageRange] * m_modAttackBaseDPSPct[attType]);
 }
 
 SpellSchoolMask Unit::GetAttackDamageSchoolMask(WeaponAttackType attType, bool first /*= false*/) const

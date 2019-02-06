@@ -1971,6 +1971,7 @@ class Unit : public WorldObject
 
         float m_threatModifier[MAX_SPELL_SCHOOL];
         float m_modAttackSpeedPct[3];
+        float m_modAttackBaseDPSPct[MAX_ATTACK] = { 1.0f, 1.0f, 1.0f };
 
         // Event handler
         EventProcessor m_events;
