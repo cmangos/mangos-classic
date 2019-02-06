@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2019020501
+ConfVersion=2019020502
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -1279,12 +1279,12 @@ Visibility.AIRelocationNotifyDelay = 1000
 #         Default: 1
 #
 #    Rate.Reputation.LowLevel.Kill
-#         Reputation Gain form low level kill (grey creture)
+#         Lowest Reputation Gain rate from low level kill
 #         Default: 0.2
 #
 #    Rate.Reputation.LowLevel.Quest
-#         Reputation Gain rate
-#         Default: 1
+#         Lowest Reputation Gain rate from low level quest
+#         Default: 0.2
 #
 #    Rate.InstanceResetTime
 #        Multiplier for the number of days in between global raid/heroic instance resets.
@@ -1402,7 +1402,7 @@ Rate.Mining.Next   = 1
 Rate.Talent = 1
 Rate.Reputation.Gain = 1
 Rate.Reputation.LowLevel.Kill    = 0.2
-Rate.Reputation.LowLevel.Quest   = 1
+Rate.Reputation.LowLevel.Quest   = 0.2
 Rate.InstanceResetTime = 1
 SkillGain.Crafting = 1
 SkillGain.Defense = 1
