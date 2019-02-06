@@ -1902,7 +1902,7 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
     if (active == ACT_DECIDE)                               // active was not used before, so we save it's autocast/passive state here
     {
         if (IsAutocastable(spellInfo))
-            newspell.active = ACT_DISABLED;
+            newspell.active = ACT_ENABLED;
         else
             newspell.active = ACT_PASSIVE;
     }
