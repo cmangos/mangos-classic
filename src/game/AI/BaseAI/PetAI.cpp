@@ -150,52 +150,34 @@ void PetAI::UpdateAI(const uint32 diff)
         }
         charminfo->SetIsRetreating();
     }
-    else if (charminfo->GetSpellOpener() != 0) // have opener stored
-    {
-        uint32 minRange = charminfo->GetSpellOpenerMinRange();
-        victim = m_unit->getVictim();
 
-        if (!victim
-                || (minRange != 0 && m_unit->IsWithinDistInMap(victim, minRange)))
-            charminfo->SetSpellOpener();
-        else if (m_unit->IsWithinDistInMap(victim, charminfo->GetSpellOpenerMaxRange())
-                 && m_unit->IsWithinLOSInMap(victim))
-        {
-            // stop moving
-            m_unit->clearUnitState(UNIT_STAT_MOVING);
-
-            // auto turn to target
-            m_unit->SetInFront(victim);
-
-            if (victim->GetTypeId() == TYPEID_PLAYER)
-                m_unit->SendCreateUpdateToPlayer((Player*)victim);
-
-            if (owner->GetTypeId() == TYPEID_PLAYER)
-                m_unit->SendCreateUpdateToPlayer((Player*)owner);
-
-            uint32 spellId = charminfo->GetSpellOpener();
-            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-
-            Spell* spell = new Spell(m_unit, spellInfo, TRIGGERED_NONE);
-
-            SpellCastResult result = spell->CheckPetCast(victim);
-
-            if (result == SPELL_CAST_OK)
-                spell->SpellStart(&(spell->m_targets));
-            else
-                delete spell;
-
-            charminfo->SetSpellOpener();
-        }
-        else
-            return;
-    }
     // Auto cast (casted only in combat or persistent spells in any state)
-    else if (!m_unit->IsNonMeleeSpellCasted(false))
+    if (!m_unit->IsNonMeleeSpellCasted(false))
     {
         typedef std::vector<std::pair<Unit*, Spell*> > TargetSpellList;
         TargetSpellList targetSpellStore;
-        if (pet)
+        if (charminfo->GetSpellOpener() != 0) // have opener stored
+        {
+            uint32 minRange = charminfo->GetSpellOpenerMinRange();
+            victim = m_unit->getVictim();
+
+            if (!victim || (minRange != 0 && m_unit->IsWithinDistInMap(victim, minRange)))
+                charminfo->SetSpellOpener();
+            else if (m_unit->IsWithinDistInMap(victim, charminfo->GetSpellOpenerMaxRange())
+                     && m_unit->IsWithinLOSInMap(victim))
+            {
+                uint32 spellId = charminfo->GetSpellOpener();
+                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+                Spell* spell = new Spell(m_unit, spellInfo, false);
+
+                // Push back stored spell
+                targetSpellStore.push_back(TargetSpellList::value_type(victim, spell));
+
+                // Clear spell opener
+                charminfo->SetSpellOpener();
+            }
+        }
+        else if (pet)
         {
             for (uint8 i = 0; i < pet->GetPetAutoSpellSize(); ++i)
             {
