@@ -5164,9 +5164,6 @@ bool ChatHandler::HandleBanHelper(BanMode mode, char* args)
                 case BAN_CHARACTER:
                     PSendSysMessage(LANG_BAN_NOTFOUND, "character", nameOrIP.c_str());
                     break;
-                case BAN_IP:
-                    PSendSysMessage(LANG_BAN_NOTFOUND, "ip", nameOrIP.c_str());
-                    break;
             }
             SetSentErrorMessage(true);
             return false;
