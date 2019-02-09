@@ -395,13 +395,9 @@ bool AuthSocket::_HandleLogonChallenge()
     std::unique_ptr<QueryResult> ip_banned_result(LoginDatabase.PQuery("SELECT unbandate FROM ip_banned "
             "WHERE (unbandate = bandate OR unbandate > UNIX_TIMESTAMP()) AND ip = '%s'", m_address.c_str()));
 
-    std::unique_ptr<QueryResult> account_banned_result(LoginDatabase.PQuery(
-                "SELECT ab.unbandate FROM account_banned ab LEFT JOIN account a ON a.id = ab.id "
-                "WHERE active = 1 AND a.username = '%s' AND (ab.unbandate = ab.bandate OR ab.unbandate > UNIX_TIMESTAMP())", _safelogin.c_str()));
-
-    if (ip_banned_result || account_banned_result)
+    if (ip_banned_result)
     {
-        pkt << (uint8)WOW_FAIL_BANNED;
+        pkt << (uint8)WOW_FAIL_FAIL_NOACCESS;
         BASIC_LOG("[AuthChallenge] Banned ip %s tries to login!", m_address.c_str());
     }
     else
