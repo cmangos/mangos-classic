@@ -3171,6 +3171,11 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     {
         CastSpell(this, spell_id, TRIGGERED_OLD_TRIGGERED);
     }
+    else if (IsSpellHaveEffect(spellInfo, SPELL_EFFECT_SKILL_STEP))
+    {
+        CastSpell(this, spell_id, TRIGGERED_OLD_TRIGGERED);
+        return false;
+    }
 
     // Add dependent skills
     UpdateSpellTrainedSkills(spell_id, true);
@@ -3242,7 +3247,7 @@ void Player::learnSpell(uint32 spell_id, bool dependent, bool talent)
     }
 }
 
-void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
+void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bool sendUpdate)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr == m_spells.end())
@@ -3269,7 +3274,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
     SpellChainMapNext const& nextMap = sSpellMgr.GetSpellChainNext();
     for (SpellChainMapNext::const_iterator itr2 = nextMap.lower_bound(spell_id); itr2 != nextMap.upper_bound(spell_id); ++itr2)
         if (HasSpell(itr2->second) && !GetTalentSpellPos(itr2->second))
-            removeSpell(itr2->second, !IsPassiveSpell(itr2->second), false);
+            removeSpell(itr2->second, !IsPassiveSpell(itr2->second), false, sendUpdate);
 
     // re-search, it can be corrupted in prev loop
     itr = m_spells.find(spell_id);
@@ -3372,7 +3377,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
     }
 
     // remove from spell book if not replaced by lesser rank
-    if (!prev_activate)
+    if (!prev_activate && sendUpdate)
     {
         WorldPacket data(SMSG_REMOVED_SPELL, 4);
         data << uint16(spell_id);
@@ -5235,6 +5240,7 @@ void Player::SetSkill(SkillStatusMap::iterator itr, uint16 value, uint16 max, ui
 
     // Learn/unlearn all spells auto-trained by this skill on change
     UpdateSkillTrainedSpells(id, value);
+
     // On updating specific skills values
     switch (id)
     {
@@ -5295,6 +5301,7 @@ void Player::SetSkill(uint16 id, uint16 value, uint16 max, uint16 step/* = 0*/)
                         aura->ApplyModifier(true);
                 }
             }
+            break;
         }
     }
 }
@@ -5359,10 +5366,10 @@ void Player::SetSkillStep(uint16 id, uint16 step)
         if (SkillRaceClassInfoEntry const* entry = GetSkillInfo(id, filterfunc))
             maxed = (entry->flags & SKILL_FLAG_MAXIMIZED);
 
-        if (max && GetSkillMaxPure(id) < max)
+        if (max)
         {
             // Note: Some SkillTiers entries contain 0 as starting value for first step, needs investigation (sanitized for now)
-            const uint16 value = std::max(uint16(1), uint16(maxed ? max : (GetSkillValuePure(id) + val)));
+            const uint16 value = std::max(uint16(1), uint16(maxed ? max : GetSkillValuePure(id)));
             SetSkill(id, value, max, step);
         }
     }
@@ -5488,7 +5495,7 @@ void Player::UpdateSkillTrainedSpells(uint16 id, uint16 currVal)
             // Update training: skill removal mode, wipe all dependent spells regardless of training method
             if (!currVal)
             {
-                removeSpell(pAbility->spellId);
+                removeSpell(pAbility->spellId, false, false, false);
                 continue;
             }
 
@@ -5523,26 +5530,8 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
         // Specifically defined: no checks needed
         if (apply)
             SetSkillStep(skillLearnInfo->skill, skillLearnInfo->step);
-        else
-        {
-            if (uint32 prev_spell = sSpellMgr.GetPrevSpellInChain(spellId))
-            {
-                // search prev. skill setting by spell ranks chain
-                SpellLearnSkillNode const* prevSkill = sSpellMgr.GetSpellLearnSkill(prev_spell);
-                while (!prevSkill && prev_spell)
-                {
-                    prev_spell = sSpellMgr.GetPrevSpellInChain(prev_spell);
-                    prevSkill = sSpellMgr.GetSpellLearnSkill(sSpellMgr.GetFirstSpellInChain(prev_spell));
-                }
-
-                if (!prevSkill)                                 // not found prev skill setting, remove skill
-                    SetSkill(skillLearnInfo->skill, 0, 0);
-                else                                            // set to prev. skill setting values
-                    SetSkillStep(prevSkill->skill, prevSkill->step);
-            }
-            else                                                // first rank, remove skill
-                SetSkill(skillLearnInfo->skill, 0, 0);
-        }
+        else if (HasSkill(skillLearnInfo->skill))
+            SetSkillStep(skillLearnInfo->skill, (skillLearnInfo->step ? (skillLearnInfo->step - 1) : 0));
     }
     else
     {

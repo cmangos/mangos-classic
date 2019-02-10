@@ -70,5 +70,12 @@ void WorldSession::HandleUnlearnSkillOpcode(WorldPacket& recv_data)
 {
     uint32 skill_id;
     recv_data >> skill_id;
-    GetPlayer()->SetSkill(skill_id, 0, 0);
+
+    Player* player = GetPlayer();
+
+    // Check if unlearnable
+    if (!player->GetSkillInfo(uint16(skill_id), ([] (SkillRaceClassInfoEntry const& entry) { return (entry.flags & SKILL_FLAG_CAN_UNLEARN); })))
+        return;
+
+    player->SetSkillStep(uint16(skill_id), 0);
 }
