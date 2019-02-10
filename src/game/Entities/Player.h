@@ -1487,7 +1487,7 @@ class Player : public Unit
         void SendInitialSpells() const;
         bool addSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled);
         void learnSpell(uint32 spell_id, bool dependent, bool talent = false);
-        void removeSpell(uint32 spell_id, bool disabled = false, bool learn_low_rank = true);
+        void removeSpell(uint32 spell_id, bool disabled = false, bool learn_low_rank = true, bool sendUpdate = true);
         void resetSpells();
         void learnDefaultSpells();
         void learnQuestRewardedSpells();
