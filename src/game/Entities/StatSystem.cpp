@@ -695,8 +695,28 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
         maxdamage *= 0.5f;
     }
 
-    SetStatFloatValue(attType == BASE_ATTACK ? UNIT_FIELD_MINDAMAGE : UNIT_FIELD_MINOFFHANDDAMAGE, mindamage);
-    SetStatFloatValue(attType == BASE_ATTACK ? UNIT_FIELD_MAXDAMAGE : UNIT_FIELD_MAXOFFHANDDAMAGE, maxdamage);
+    uint16 fieldmin, fieldmax;
+
+    switch (attType)
+    {
+        case RANGED_ATTACK:
+            fieldmin = UNIT_FIELD_MINRANGEDDAMAGE;
+            fieldmax = UNIT_FIELD_MAXRANGEDDAMAGE;
+            break;
+        case BASE_ATTACK:
+            fieldmin = UNIT_FIELD_MINDAMAGE;
+            fieldmax = UNIT_FIELD_MAXDAMAGE;
+            break;
+        case OFF_ATTACK:
+            fieldmin = UNIT_FIELD_MINOFFHANDDAMAGE;
+            fieldmax = UNIT_FIELD_MAXOFFHANDDAMAGE;
+            break;
+        default:
+            return;
+    }
+
+    SetStatFloatValue(fieldmin, mindamage);
+    SetStatFloatValue(fieldmax, maxdamage);
 }
 
 /*#######################################

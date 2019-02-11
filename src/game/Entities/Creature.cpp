@@ -1308,8 +1308,8 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, mainMaxDmg);
     SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, offMinDmg);
     SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, offMaxDmg);
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minRangedDmg);
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, maxRangedDmg);
+    SetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE, minRangedDmg);
+    SetBaseWeaponDamage(RANGED_ATTACK, MAXDAMAGE, maxRangedDmg);
 
     // attack power
     SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, meleeAttackPwr * damageMod);
