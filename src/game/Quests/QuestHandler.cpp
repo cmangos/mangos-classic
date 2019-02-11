@@ -547,7 +547,8 @@ uint32 WorldSession::getDialogStatus(const Player* pPlayer, const Object* questg
         QuestStatus status = pPlayer->GetQuestStatus(quest_id);
 
         if (status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id))
-            dialogStatusNew = pQuest->IsRepeatable() ? DIALOG_STATUS_REWARD_REP : DIALOG_STATUS_REWARD2;
+            dialogStatusNew = pQuest->IsRepeatable() && pQuest->GetQuestMethod() != 2 ?
+                              DIALOG_STATUS_REWARD_REP : DIALOG_STATUS_REWARD2;
         else if (pQuest->IsAutoComplete() && pPlayer->CanTakeQuest(pQuest, false))
             dialogStatusNew = pQuest->IsRepeatable() ? DIALOG_STATUS_REWARD_REP : DIALOG_STATUS_AVAILABLE;
         else if (status == QUEST_STATUS_INCOMPLETE)
