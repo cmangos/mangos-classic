@@ -3358,7 +3358,7 @@ bool ChatHandler::HandleGuildRankCommand(char* args)
     if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
         return false;
 
-    uint32 glId   = target ? target->GetGuildId() : Player::GetGuildIdFromDB(target_guid);
+    uint32 glId = target ? target->GetGuildId() : Player::GetGuildIdFromDB(target_guid);
     if (!glId)
         return false;
 
@@ -3377,7 +3377,18 @@ bool ChatHandler::HandleGuildRankCommand(char* args)
     if (!slot)
         return false;
 
-    slot->ChangeRank(newrank);
+    if (newrank == GR_GUILDMASTER)
+    {
+        MemberSlot* leaderSlot = targetGuild->GetMemberSlot(targetGuild->GetLeaderGuid());
+        if (!leaderSlot)
+            return false;
+
+        leaderSlot->ChangeRank(GR_OFFICER);
+        targetGuild->SetLeader(target_guid);
+    }
+    else
+        slot->ChangeRank(newrank);
+
     return true;
 }
 
