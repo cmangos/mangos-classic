@@ -11789,7 +11789,7 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
                 else if (status == DIALOG_STATUS_INCOMPLETE)
                     PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, false, true);
                 // Send completable on repeatable quest if player don't have quest
-                else if (pQuest->IsRepeatable())
+                else if (pQuest->IsRepeatable() && pQuest->IsAutoComplete())
                     PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanCompleteRepeatableQuest(pQuest), true);
                 else
                     PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, guid, true);
