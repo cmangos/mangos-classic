@@ -5485,6 +5485,7 @@ void Player::UpdateSkillTrainedSpells(uint16 id, uint16 currVal)
 {
     uint32 raceMask  = getRaceMask();
     uint32 classMask = getClassMask();
+    uint16 step = GetSkillStep(id);
 
     SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySkillId(id);
 
@@ -5499,10 +5500,6 @@ void Player::UpdateSkillTrainedSpells(uint16 id, uint16 currVal)
                 continue;
             }
 
-            // Check if auto-training method is set, skip if not
-            if (!pAbility->learnOnGetSkill)
-                continue;
-
             // Check race if set
             if (pAbility->racemask && !(pAbility->racemask & raceMask))
                 continue;
@@ -5510,6 +5507,26 @@ void Player::UpdateSkillTrainedSpells(uint16 id, uint16 currVal)
             // Check class if set
             if (pAbility->classmask && !(pAbility->classmask & classMask))
                 continue;
+
+            // Check if auto-training method is set, skip if not
+            if (!pAbility->learnOnGetSkill)
+            {
+                // Check if its actually an original profession/tradeskill spell and we miss it somehow - repair
+                if (SpellLearnSkillNode const* training = sSpellMgr.GetSpellLearnSkill(pAbility->spellId))
+                {
+                    if (training->skill == id && training->effect == SPELL_EFFECT_SKILL && training->step < step)
+                    {
+                        if (!HasSpell(pAbility->spellId))
+                        {
+                            if (!IsInWorld())
+                                addSpell(pAbility->spellId, true, true, true, false);
+                            else
+                                learnSpell(pAbility->spellId, true);
+                        }
+                    }
+                }
+                continue;
+            }
 
             // Update training: needs unlearning spell if current value is too low
             if (currVal < pAbility->req_skill_value)
