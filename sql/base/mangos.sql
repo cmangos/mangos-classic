@@ -8107,7 +8107,6 @@ INSERT INTO `playercreateinfo_skills` VALUES
 (0,     8,  38, 0,  'Rogue: Combat'),
 (0,     8, 253, 0,  'Rogue: Assassination'),
 (0,     8,  39, 0,  'Rogue: Subtlety'),
-(0,     8, 176, 0,  'Weapon: Thrown'),
 (0,     8, 173, 0,  'Weapon: Daggers (Rogue)'),
 (0,     8, 176, 0,  'Weapon: Thrown (Rogue)'),
 -- PRIEST CLASS:
