@@ -3436,8 +3436,6 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     pet->CastOwnerTalentAuras();
     pet->UpdateAllStats();
 
-    pet->SetRequiredXpForNextLoyaltyLevel();
-
     // caster have pet now
     plr->SetPet(pet);
 

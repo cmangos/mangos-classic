@@ -287,9 +287,6 @@ class Pet : public Creature
         // overwrite Creature function for name localization back to WorldObject version without localization
         const char* GetNameForLocaleIdx(int32 locale_idx) const { return WorldObject::GetNameForLocaleIdx(locale_idx); }
 
-        void SetRequiredXpForNextLoyaltyLevel();
-        void UpdateRequireXpForNextLoyaltyLevel(uint32 xp);
-
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
 
         // return charminfo ai only when this pet is possessed. (eye of the beast case for ex.)
@@ -311,7 +308,6 @@ class Pet : public Creature
         int32   m_loyaltyPoints;
         int32   m_bonusdamage;
         bool    m_loading;
-        uint32  m_xpRequiredForNextLoyaltyLevel;
 
     private:
         PetModeFlags m_petModeFlags;
