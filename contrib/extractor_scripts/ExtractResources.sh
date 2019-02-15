@@ -27,6 +27,8 @@ USE_VMAPS="0"
 USE_MMAPS="0"
 USE_MMAPS_OFFMESH="0"
 USE_MMAPS_DELAY=""
+AD_REZ=""
+VMAP_REZ=""
 
 if [ "$1" = "a" ]
 then
@@ -110,8 +112,34 @@ then
   fi
 fi
 
+## Check if user want to do high resolution extraction of maps
+if [ "$USE_AD" = "1" ]; then
+  echo
+  echo "Would you like to do hi-rez extraction of maps? (y/n)"
+  read line
+  if [ "$line" = "y" ]; then
+    AD_REZ="-f 0"
+  else
+    AD_REZ=""
+  fi
+fi
+
+## Check if user want to do high resolution extraction of vmaps
+if [ "$USE_VMAPS" = "1" ]; then
+  echo
+  echo "Would you like to do hi-rez extraction of vmaps? (y/n)"
+  read line
+  if [ "$line" = "y" ]; then
+    VMAP_REZ="-l"
+  else
+    VMAP_REZ=""
+  fi
+fi
 ## Give some status
 echo "Current Settings: Extract DBCs/maps: $USE_AD, Extract vmaps: $USE_VMAPS, Extract mmaps: $USE_MMAPS on $NUM_CPU processes"
+echo
+if [ "$USE_AD" = "1" ]; then echo "./ad $AD_REZ"; fi
+if [ "$USE_VMAPS" = "1" ]; then echo "./vmaps_extractor $VMAP_REZ"; fi
 if [ "$USE_MMAPS_DELAY" != "" ]; then
   echo "MMap Extraction will be started delayed by $USE_MMAPS_DELAY"
 fi
@@ -152,7 +180,7 @@ echo | tee -a $DETAIL_LOG_FILE
 if [ "$USE_AD" = "1" ]
 then
  echo "`date`: Start extraction of DBCs and map files..." | tee -a $LOG_FILE
- ./ad | tee -a $DETAIL_LOG_FILE
+ ./ad $AD_REZ | tee -a $DETAIL_LOG_FILE
  echo "`date`: Extracting of DBCs and map files finished" | tee -a $LOG_FILE
  echo | tee -a $LOG_FILE
  echo | tee -a $DETAIL_LOG_FILE
@@ -162,7 +190,7 @@ fi
 if [ "$USE_VMAPS" = "1" ]
 then
   echo "`date`: Start extraction of vmaps..." | tee -a $LOG_FILE
-  ./vmap_extractor | tee -a $DETAIL_LOG_FILE
+  ./vmap_extractor $VMAP_REZ | tee -a $DETAIL_LOG_FILE
   echo "`date`: Extracting of vmaps finished" | tee -a $LOG_FILE
   mkdir vmaps
   echo "`date`: Start assembling of vmaps..." | tee -a $LOG_FILE
