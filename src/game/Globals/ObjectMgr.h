@@ -285,7 +285,9 @@ struct GraveYardData
     uint32 safeLocId;
     Team team;
 };
-typedef std::multimap < uint32 /*zoneId*/, GraveYardData > GraveYardMap;
+#define GRAVEYARD_AREALINK  0
+#define GRAVEYARD_MAPLINK   1
+typedef std::multimap < uint32 /*locId*/, GraveYardData > GraveYardMap;
 typedef std::pair<GraveYardMap::const_iterator, GraveYardMap::const_iterator> GraveYardMapBounds;
 
 struct QuestgiverGreeting
@@ -599,11 +601,12 @@ class ObjectMgr
         QuestgiverGreeting const* GetQuestgiverGreetingData(uint32 entry, uint32 type) const;
         TrainerGreeting const* GetTrainerGreetingData(uint32 entry) const;
 
-        WorldSafeLocsEntry const* GetClosestGraveYard(float x, float y, float z, uint32 MapId, Team team) const;
-        bool AddGraveYardLink(uint32 id, uint32 zoneId, Team team, bool inDB = true);
-        void SetGraveYardLinkTeam(uint32 id, uint32 zoneId, Team team);
+        WorldSafeLocsEntry const* GetClosestGraveYard(float x, float y, float z, uint32 mapId, Team team) const;
+        bool AddGraveYardLink(uint32 id, uint32 locId, uint32 linkKind, Team team, bool inDB = true);
+        void SetGraveYardLinkTeam(uint32 id, uint32 linkKey, Team team);
         void LoadGraveyardZones();
         GraveYardData const* FindGraveYardData(uint32 id, uint32 zoneId) const;
+        static uint32 GraveyardLinkKey(uint32 locId, uint32 linkKind);
 
         AreaTrigger const* GetAreaTrigger(uint32 trigger) const
         {

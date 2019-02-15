@@ -3710,7 +3710,7 @@ bool ChatHandler::HandleLinkGraveCommand(char* args)
         return false;
     }
 
-    if (sObjectMgr.AddGraveYardLink(g_id, zoneId, g_team))
+    if (sObjectMgr.AddGraveYardLink(g_id, zoneId, GRAVEYARD_AREALINK, g_team))
         PSendSysMessage(LANG_COMMAND_GRAVEYARDLINKED, g_id, zoneId);
     else
         PSendSysMessage(LANG_COMMAND_GRAVEYARDALRLINKED, g_id, zoneId);

@@ -5392,11 +5392,18 @@ uint32 ObjectMgr::GetTaxiMountDisplayId(uint32 id, Team team, bool allowed_alt_t
     return mount_id;
 }
 
+// Load or reload the graveyard links from the data
 void ObjectMgr::LoadGraveyardZones()
 {
-    mGraveYardMap.clear();                                  // need for reload case
+    // Clear the map (in case we're reloading) and then add all the entries from
+    // the database.
 
-    QueryResult* result = WorldDatabase.Query("SELECT id,ghost_zone,faction FROM game_graveyard_zone");
+    // mGraveYardMap has records by both map id and area id. map ID records have their
+    // most significant bit set. If you want to query for a map id you must
+    // query map_id | (1 << 31) instead.
+    mGraveYardMap.clear();
+
+    QueryResult* result = WorldDatabase.Query("SELECT id,ghost_loc,link_kind,faction FROM game_graveyard_zone");
 
     uint32 count = 0;
 
@@ -5419,20 +5426,32 @@ void ObjectMgr::LoadGraveyardZones()
         Field* fields = result->Fetch();
 
         uint32 safeLocId = fields[0].GetUInt32();
-        uint32 zoneId = fields[1].GetUInt32();
-        uint32 team   = fields[2].GetUInt32();
+        uint32 locId = fields[1].GetUInt32();
+        uint32 linkKind = fields[2].GetUInt32();
+        uint32 team = fields[3].GetUInt32();
+
+        if (linkKind != 0 && linkKind != 1)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` has record with invalid `link_kind`=%d state, skipped.", linkKind);
+            continue;
+        }
 
         WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(safeLocId);
         if (!entry)
         {
-            sLog.outErrorDb("Table `game_graveyard_zone` has record for not existing graveyard (WorldSafeLocs.dbc id) %u, skipped.", safeLocId);
+            sLog.outErrorDb("Table `game_graveyard_zone` has record for nonexistent graveyard (WorldSafeLocs.dbc id) %u, skipped.", safeLocId);
             continue;
         }
 
-        AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(zoneId);
-        if (!areaEntry)
+        if (linkKind == GRAVEYARD_AREALINK && GetAreaEntryByAreaID(locId) == nullptr)
         {
-            sLog.outErrorDb("Table `game_graveyard_zone` has record for not existing zone id (%u), skipped.", zoneId);
+            sLog.outErrorDb("Table `game_graveyard_zone` has record for nonexistent area id (%u), skipped.", locId);
+            continue;
+        }
+
+        if (linkKind == GRAVEYARD_MAPLINK && sMapStore.LookupEntry(locId) == nullptr)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` has record for nonexistent map id (%u), skipped.", locId);
             continue;
         }
 
@@ -5442,8 +5461,10 @@ void ObjectMgr::LoadGraveyardZones()
             continue;
         }
 
-        if (!AddGraveYardLink(safeLocId, zoneId, Team(team), false))
-            sLog.outErrorDb("Table `game_graveyard_zone` has a duplicate record for Graveyard (ID: %u) and Zone (ID: %u), skipped.", safeLocId, zoneId);
+        if (!AddGraveYardLink(safeLocId, locId, linkKind, Team(team), false))
+            sLog.outErrorDb("Table `game_graveyard_zone` has a duplicate record"
+                    " for Graveyard (ID: %u) and location (ID: %u, kind: %u), "
+                    "skipped.", safeLocId, locId, linkKind);
     }
     while (result->NextRow());
 
@@ -5557,32 +5578,52 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveyardHelper(
 }
 
 WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(
-        float x, float y, float z, uint32 MapId, Team team) const
+        float x, float y, float z, uint32 mapId, Team team) const
 {
-    // Search for the closest linked graveyard, first for graveyards linked to
-    // the current areaId and if that fails for the current zoneId.
-    uint32 zoneId = sTerrainMgr.GetZoneId(MapId, x, y, z);
-    uint32 areaId = sTerrainMgr.GetAreaId(MapId, x, y, z);
-    
-    auto areaBounds = mGraveYardMap.equal_range(areaId);
-    auto zoneBounds = mGraveYardMap.equal_range(zoneId);
-    
-    auto entry = GetClosestGraveyardHelper(areaBounds, x, y, z, MapId, team);
-    if (entry != nullptr)
-        return entry;
+    // Search for the closest linked graveyard by decreasing priority:
+    //  - First try linked to the current area id (if we have one)
+    //  - Then try linked to the current zone id (if we have one)
+    //  - Then try linked to the current map id
+    const uint32 zoneId = sTerrainMgr.GetZoneId(mapId, x, y, z);
+    const uint32 areaId = sTerrainMgr.GetAreaId(mapId, x, y, z);
 
-    entry = GetClosestGraveyardHelper(zoneBounds, x, y, z, MapId, team);
-    if (entry == nullptr)
-        sLog.outErrorDb("Table `game_graveyard_zone` incomplete: Zone %u Area "
-                        "%u Team %u does not have a linked graveyard.",
-                        zoneId, areaId, uint32(team));
-    
-    return entry;
+    WorldSafeLocsEntry const* graveyard = nullptr;
+    if (zoneId != 0)
+    {
+        auto bounds = mGraveYardMap.equal_range(GraveyardLinkKey(areaId, GRAVEYARD_AREALINK));
+        graveyard = GetClosestGraveyardHelper(bounds, x, y, z, mapId, team);
+    }
+        
+    if (zoneId != 0 && graveyard == nullptr)
+    {
+        auto bounds = mGraveYardMap.equal_range(GraveyardLinkKey(zoneId, GRAVEYARD_AREALINK));
+        graveyard = GetClosestGraveyardHelper(bounds, x, y, z, mapId, team);
+    }
+
+    if (graveyard == nullptr)
+    {
+        auto bounds = mGraveYardMap.equal_range(GraveyardLinkKey(mapId, GRAVEYARD_MAPLINK));
+        graveyard = GetClosestGraveyardHelper(bounds, x, y, z, mapId, team);
+    }
+        
+    if (graveyard == nullptr)
+        sLog.outErrorDb("Table `game_graveyard_zone` incomplete: Map %u Zone "
+                        "%u Area %u Team %u does not have a linked graveyard.",
+                        mapId, zoneId, areaId, uint32(team));
+    return graveyard;
 }
 
-GraveYardData const* ObjectMgr::FindGraveYardData(uint32 id, uint32 zoneId) const
+/*!
+ * Return the Graveyard link data for a given graveyard and location
+ * combination.
+ *
+ * \param id        The id of a graveyard. This is an index to the graveyard in
+ *                  sWorldSafeLocsStore which holds data from WorldSafeLocs.dbc
+ * \param locKey    A location key as returned by ObjectMgr::GraveyardLinkKey
+ */
+GraveYardData const* ObjectMgr::FindGraveYardData(uint32 id, uint32 locKey) const
 {
-    GraveYardMapBounds bounds = mGraveYardMap.equal_range(zoneId);
+    GraveYardMapBounds bounds = mGraveYardMap.equal_range(locKey);
 
     for (GraveYardMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
     {
@@ -5593,28 +5634,64 @@ GraveYardData const* ObjectMgr::FindGraveYardData(uint32 id, uint32 zoneId) cons
     return nullptr;
 }
 
-bool ObjectMgr::AddGraveYardLink(uint32 id, uint32 zoneId, Team team, bool inDB)
+/*!
+ * Turn a location id and a link kind into a location key that indexes the
+ * graveyard link map.
+ *
+ * \param locationId    The id of an area or a map.
+ * \param linkKind      The kind of id, either GRAVEYARD_MAPLINK or
+ *                      GRAVEYARD_AREALINK
+ * \return The location key composed of the given data.
+ */
+uint32 ObjectMgr::GraveyardLinkKey(uint32 locationId, uint32 linkKind)
 {
-    if (FindGraveYardData(id, zoneId))                      // This ensures that (safeLoc)Id,  zoneId is unique in mGraveYardMap
+    return locationId | (linkKind << 31);
+}
+
+/*!
+ * Adds a given graveyard link to the currently active graveyard links.
+ * Optionally add it into the database too.
+ *
+ * \param id        The id of a graveyard. This is an index to the graveyard in
+ *                  sWorldSafeLocsStore which holds data from WorldSafeLocs.dbc
+ * 
+ * \param locId     The id of a location. This is either an area id or a map id
+ *                  based on the value of linkKind
+ *
+ * \param linkKind  The kind of the graveyard link to be added. Kind is either
+ *                  GRAVEYARD_MAPLINK or GRAVEYARD_AREALINK
+ * 
+ * \param team      The team that is allowed to use this graveyard link. Can be
+ *                  TEAM_BOTH_ALLOWED, HORDE or ALLIANCE.
+ * 
+ * \param inDB      True if the given graveyard link needs to be added to the
+ *                  database. False otherwise.
+ * 
+ * \return          Whether or not the link was added (False only if the link
+ *                  was already added added).
+ */
+bool ObjectMgr::AddGraveYardLink(uint32 id, uint32 locId, uint32 linkKind, Team team, bool inDB)
+{
+    uint32 locKey = GraveyardLinkKey(locId, linkKind);
+    if (FindGraveYardData(id, locKey))
         return false;
 
-    // add link to loaded data
     GraveYardData data;
     data.safeLocId = id;
     data.team = team;
+    mGraveYardMap.insert(GraveYardMap::value_type(locKey, data));
 
-    mGraveYardMap.insert(GraveYardMap::value_type(zoneId, data));
-
-    // add link to DB
     if (inDB)
-        WorldDatabase.PExecuteLog("INSERT INTO game_graveyard_zone ( id,ghost_zone,faction) VALUES ('%u', '%u','%u')", id, zoneId, uint32(team));
+        WorldDatabase.PExecuteLog("INSERT INTO game_graveyard_zone "
+            "(id, ghost_loc, link_kind, faction) VALUES "
+            "('%u', '%u','%u', '%u')", id, locId, linkKind, uint32(team));
 
     return true;
 }
 
-void ObjectMgr::SetGraveYardLinkTeam(uint32 id, uint32 zoneId, Team team)
+void ObjectMgr::SetGraveYardLinkTeam(uint32 id, uint32 locKey, Team team)
 {
-    std::pair<GraveYardMap::iterator, GraveYardMap::iterator> bounds = mGraveYardMap.equal_range(zoneId);
+    auto bounds = mGraveYardMap.equal_range(locKey);
 
     for (GraveYardMap::iterator itr = bounds.first; itr != bounds.second; ++itr)
     {
@@ -5631,9 +5708,13 @@ void ObjectMgr::SetGraveYardLinkTeam(uint32 id, uint32 zoneId, Team team)
     if (team == TEAM_INVALID)
         return;
 
-    // Link expected but not exist.
-    sLog.outErrorDb("ObjectMgr::SetGraveYardLinkTeam called for safeLoc %u, zoneId %u, but no graveyard link for this found in database.", id, zoneId);
-    AddGraveYardLink(id, zoneId, team);                     // Add to prevent further error message and correct mechanismn
+    // No graveyard link found but one was expected. Log it and add one to
+    // prevent further errors.
+    uint32 locId = locKey & 0x7FFFFFFF;
+    uint32 linkKind = locKey & 0x80000000;
+    sLog.outErrorDb("ObjectMgr::SetGraveYardLinkTeam called for safeLoc %u, "
+            "locKey %u, but no graveyard link for this found in database.", id, locKey);
+    AddGraveYardLink(id, locId, linkKind, team);
 }
 
 void ObjectMgr::LoadAreaTriggerTeleports()
