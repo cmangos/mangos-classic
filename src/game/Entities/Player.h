@@ -83,16 +83,17 @@ enum SpellModType
 enum EnvironmentFlags
 {
     ENVIRONMENT_FLAG_NONE           = 0x00,
-    ENVIRONMENT_FLAG_UNDERWATER     = 0x01,                     // Swimming submerged in any liquid
-    ENVIRONMENT_FLAG_IN_WATER       = 0x02,                     // Swimming in water
-    ENVIRONMENT_FLAG_IN_MAGMA       = 0x04,                     // Swimming in magma
-    ENVIRONMENT_FLAG_IN_SLIME       = 0x08,                     // Swimming in slime
-    ENVIRONMENT_FLAG_HIGH_SEA       = 0x10,                     // Anywhere inside deep water area
-    ENVIRONMENT_FLAG_LIQUID         = 0x20,                     // Anywhere near any liquid
+    ENVIRONMENT_FLAG_IN_WATER       = 0x01,                     // Swimming or standing in water
+    ENVIRONMENT_FLAG_IN_MAGMA       = 0x02,                     // Swimming or standing in magma
+    ENVIRONMENT_FLAG_IN_SLIME       = 0x04,                     // Swimming or standing in slime
+    ENVIRONMENT_FLAG_HIGH_SEA       = 0x08,                     // Anywhere inside deep water area
+    ENVIRONMENT_FLAG_UNDERWATER     = 0x10,                     // Swimming submerged in any liquid
+    ENVIRONMENT_FLAG_LIQUID         = 0x20,                     // Anywhere indide area with any liquid
+    ENVIRONMENT_FLAG_SHALLOW_LIQUID = 0x40,                     // Standing in liquid shallow enough to not be able to swim
 
     ENVIRONMENT_MASK_LIQUID_HAZARD  = (ENVIRONMENT_FLAG_IN_MAGMA | ENVIRONMENT_FLAG_IN_SLIME),
     ENVIRONMENT_MASK_IN_LIQUID      = (ENVIRONMENT_FLAG_IN_WATER | ENVIRONMENT_MASK_LIQUID_HAZARD),
-    ENVIRONMENT_MASK_LIQUID_FLAGS   = (ENVIRONMENT_FLAG_UNDERWATER | ENVIRONMENT_MASK_IN_LIQUID | ENVIRONMENT_FLAG_HIGH_SEA | ENVIRONMENT_FLAG_LIQUID),
+    ENVIRONMENT_MASK_LIQUID_FLAGS   = (ENVIRONMENT_FLAG_UNDERWATER | ENVIRONMENT_MASK_IN_LIQUID | ENVIRONMENT_FLAG_HIGH_SEA | ENVIRONMENT_FLAG_LIQUID | ENVIRONMENT_FLAG_SHALLOW_LIQUID),
 };
 
 enum BuyBankSlotResult
@@ -1993,6 +1994,7 @@ class Player : public Unit
         inline bool IsInMagma() const { return (m_environmentFlags & ENVIRONMENT_FLAG_IN_MAGMA); }
         inline bool IsInSlime() const { return (m_environmentFlags & ENVIRONMENT_FLAG_IN_SLIME); }
         inline bool IsInHighSea() const { return (m_environmentFlags & ENVIRONMENT_FLAG_HIGH_SEA); }
+        inline bool IsInShallowWater() const { return (m_environmentFlags & ENVIRONMENT_FLAG_SHALLOW_LIQUID); }
 
         inline uint32 GetWaterBreathingInterval() const;
         void SetWaterBreathingIntervalMultiplier(float multiplier);
@@ -2032,6 +2034,7 @@ class Player : public Unit
         bool CanWalk() const { return true; }
         bool IsFlying() const { return false; }
         bool IsFreeFlying() const { return false; }
+        bool IsSwimming() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING); }
 
         void UpdateClientControl(Unit const* target, bool enabled, bool forced = false) const;
 
