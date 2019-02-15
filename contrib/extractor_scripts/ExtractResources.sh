@@ -68,7 +68,7 @@ else
     then
       USE_MMAPS="1";
     else
-      echo "Only reextract offmesh tiles for mmaps?"
+      echo "Only reextract offmesh tiles for mmaps? (y/n)"
       read line
       if [ "$line" = "y" ]
       then
@@ -146,7 +146,7 @@ fi
 echo
 if [ "$1" != "a" ]
 then
-  echo "If you don't like this settings, interrupt with CTRL+C"
+  echo "Press (Enter) to continue, or interrupt with (CTRL+C)"
   read line
 fi
 
