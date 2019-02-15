@@ -1059,18 +1059,19 @@ void Player::SetEnvironmentFlags(EnvironmentFlags flags, bool apply)
     else
         m_environmentFlags &= ~flags;
 
-    // On liquid in/out change
+    // On liquid in/out
     if (flags & ENVIRONMENT_MASK_IN_LIQUID)
     {
-        // remove auras that need water/land
-        RemoveAurasWithInterruptFlags(apply ? AURA_INTERRUPT_FLAG_NOT_ABOVEWATER : AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
-
         // move player's guid into HateOfflineList of those mobs
         // which can't swim and move guid back into ThreatList when
         // on surface.
         // TODO: exist also swimming mobs, and function must be symmetric to enter/leave water
         getHostileRefManager().updateThreatTables();
     }
+
+    // Remove auras that need land or water
+    if (flags & ENVIRONMENT_FLAG_SHALLOW_LIQUID && (apply || IsInWater()))
+        RemoveAurasWithInterruptFlags(apply ? AURA_INTERRUPT_FLAG_NOT_UNDERWATER : AURA_INTERRUPT_FLAG_NOT_ABOVEWATER);
 
     // On moving in/out high sea area: affect fatigue timer
     if (flags & ENVIRONMENT_FLAG_HIGH_SEA)
@@ -18699,6 +18700,9 @@ void Player::UpdateTerainEnvironmentFlags(Map* m, float x, float y, float z)
 
     // In deep water: on, under, above surface level
     SetEnvironmentFlags(ENVIRONMENT_FLAG_HIGH_SEA, (liquid_status.type_flags & MAP_LIQUID_TYPE_DEEP_WATER));
+
+    // All liquid types: check too shallow level for swimming
+    SetEnvironmentFlags(ENVIRONMENT_FLAG_SHALLOW_LIQUID, ((res & LIQUID_MAP_IN_WATER) && !(res & LIQUID_MAP_UNDER_WATER) && (liquid_status.level < liquid_status.depth_level + 1.5f)));
 }
 
 bool ItemPosCount::isContainedIn(ItemPosCountVec const& vec) const
