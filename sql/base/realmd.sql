@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `realmd_db_version`;
 CREATE TABLE `realmd_db_version` (
-  `required_z2743_00_realmd_account_drop_sha` bit(1) DEFAULT NULL
+  `required_z2748_01_realmd_banning` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -83,13 +83,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `account_banned`;
 CREATE TABLE `account_banned` (
-  `id` int(11) NOT NULL DEFAULT '0' COMMENT 'Account id',
-  `bandate` bigint(40) NOT NULL DEFAULT '0',
-  `unbandate` bigint(40) NOT NULL DEFAULT '0',
-  `bannedby` varchar(50) NOT NULL,
-  `banreason` varchar(255) NOT NULL,
+  `id` int(11) AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL DEFAULT '0' COMMENT 'Account id',
+  `banned_at` bigint(40) NOT NULL DEFAULT '0',
+  `expires_at` bigint(40) NOT NULL DEFAULT '0',
+  `banned_by` varchar(50) NOT NULL,
+  `unbanned_at` bigint(40) NOT NULL DEFAULT '0',
+  `unbanned_by` varchar(50) DEFAULT NULL,
+  `reason` varchar(255) NOT NULL,
   `active` tinyint(4) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id`,`bandate`)
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Ban List';
 
 --
@@ -108,11 +111,11 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `ip_banned`;
 CREATE TABLE `ip_banned` (
   `ip` varchar(32) NOT NULL DEFAULT '0.0.0.0',
-  `bandate` bigint(40) NOT NULL,
-  `unbandate` bigint(40) NOT NULL,
-  `bannedby` varchar(50) NOT NULL DEFAULT '[Console]',
-  `banreason` varchar(255) NOT NULL DEFAULT 'no reason',
-  PRIMARY KEY (`ip`,`bandate`)
+  `banned_at` bigint(40) NOT NULL,
+  `expires_at` bigint(40) NOT NULL,
+  `banned_by` varchar(50) NOT NULL DEFAULT '[Console]',
+  `reason` varchar(255) NOT NULL DEFAULT 'no reason',
+  PRIMARY KEY (`ip`,`banned_at`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Banned IPs';
 
 --

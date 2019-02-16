@@ -3624,7 +3624,7 @@ INSERT INTO `mangos_string` VALUES
 (415,'There is no such IP in banlist.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (416,'Account %s has never been banned',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (417,'Ban history for account %s:',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(418,'Ban Date: %s Bantime: %s Still active: %s  Reason: %s Set by: %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(418,'Ban Date: %s Bantime: %s Still active: %s  Reason: %s Set by: %s Manually unbanned: %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (419,'Inf.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (420,'Never',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (421,'Yes',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),

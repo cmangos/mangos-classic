@@ -74,6 +74,10 @@ bool ChatHandler::HandleMuteCommand(char* args)
     if (!ExtractUInt32(&args, notspeaktime))
         return false;
 
+    std::string givenReason;
+    if (char* givenReasonC = ExtractQuotedOrLiteralArg(&args))
+        givenReason = givenReasonC;
+
     uint32 account_id = target ? target->GetSession()->GetAccountId() : sObjectMgr.GetPlayerAccountIdByGUID(target_guid);
 
     // find only player from same account if any
@@ -100,6 +104,14 @@ bool ChatHandler::HandleMuteCommand(char* args)
     std::string nameLink = playerLink(target_name);
 
     PSendSysMessage(LANG_YOU_DISABLE_CHAT, nameLink.c_str(), notspeaktime);
+
+    // Add warning to the account
+    std::string authorName = m_session ? m_session->GetPlayerName() : "Console";
+    std::stringstream reason;
+    reason << target->GetName() << " muted " << notspeaktime << " minutes";
+    if (givenReason != "")
+        reason << " for \"" << givenReason << "\"";
+    sWorld.WarnAccount(account_id, authorName, reason.str(), "WARNING");
     return true;
 }
 
