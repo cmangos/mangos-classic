@@ -51,6 +51,11 @@ class AccountMgr
         uint32 GetCharactersCount(uint32 acc_id) const;
         std::string CalculateShaPassHash(std::string& name, std::string& password) const;
 
+        uint8 GetSecuritySetting(uint32 accid) const;
+        AccountOpResult SecuritySetNone(uint32 accid) const;
+        AccountOpResult SecuritySetPin(uint32 accid, uint32 pin) const;
+        AccountOpResult SecuritySetTOTP(uint32 accid, std::string& token) const;
+
         static bool normalizeString(std::string& utf8str);
 };
 

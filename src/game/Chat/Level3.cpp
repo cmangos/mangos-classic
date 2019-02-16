@@ -1210,6 +1210,138 @@ bool ChatHandler::HandleAccountSetPasswordCommand(char* args)
     return false;
 }
 
+bool ChatHandler::HandleAccountSecurityGetCommand(char* args)
+{
+    ///- Get the command line arguments
+    std::string account_name;
+    uint32 targetAccountId = ExtractAccountId(&args, &account_name);
+    if (!targetAccountId)
+        return false;
+
+    uint8 sec = sAccountMgr.GetSecuritySetting(targetAccountId);
+
+    char msg[100];
+    if (!sec)
+        snprintf(msg, 100, "Account %s has 2FA security disabled", account_name.c_str());
+    else if (sec == 1)
+        snprintf(msg, 100, "Account %s has PIN security enabled", account_name.c_str());
+    else if (sec == 4)
+        snprintf(msg, 100, "Account %s has TOTP security enabled", account_name.c_str());
+    else
+    {
+        snprintf(msg, 100, "Account %s has an unknown 2fa setting enabled", account_name.c_str());
+        LogCommand(msg);
+        return false;
+    }
+
+    LogCommand(msg);
+    return true;
+}
+
+bool ChatHandler::HandleAccountSecuritySetNoneCommand(char* args)
+{
+    ///- Get the command line arguments
+    std::string account_name;
+    uint32 targetAccountId = ExtractAccountId(&args, &account_name);
+    if (!targetAccountId)
+        return false;
+
+    AccountOpResult result = sAccountMgr.SecuritySetNone(targetAccountId);
+    switch (result)
+    {
+        case AOR_OK:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool ChatHandler::HandleAccountSecuritySetPinCommand(char* args)
+{
+    ///- Get the command line arguments
+    std::string account_name;
+    uint32 targetAccountId = ExtractAccountId(&args, &account_name);
+    if (!targetAccountId)
+        return false;
+
+    char* cpin = ExtractQuotedOrLiteralArg(&args);
+
+    std::string pin = cpin;
+
+    // client pin promt range is 4 - 9 digits,
+    // require an all numeric pin in the range of 4 to 9 digits
+    uint32 pinLength = 0;
+    while (pin[pinLength] != '\0')
+    {
+        if (!std::isdigit(pin[pinLength]))
+            return false;
+        if (pinLength >= 9)
+            return false;
+        ++pinLength;
+    }
+
+    if (pinLength <= 3)
+        return false;
+
+    // Pin is all numerical and within range so convert to uint32
+    uint32 upin;
+    if (!ExtractUInt32(&cpin, upin))
+        return false;
+
+    // don't allow pins to start with a 0,
+    // it causes client 'call customer service' error message
+    if (pinLength == 4 && upin <= 999)
+        return false;
+
+    AccountOpResult result = sAccountMgr.SecuritySetPin(targetAccountId, upin);
+    switch (result)
+    {
+        case AOR_OK:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool ChatHandler::HandleAccountSecuritySetTOTPCommand(char* args)
+{
+    ///- Get the command line arguments
+    std::string account_name;
+    uint32 targetAccountId = ExtractAccountId(&args, &account_name);
+    if (!targetAccountId)
+        return false;
+
+    char* ctoken = ExtractQuotedOrLiteralArg(&args);
+
+    std::string token = ctoken;
+
+    // Limit to 16 character alphabetic secret
+    uint32 tokenLength = 0;
+    while (token[tokenLength] != '\0')
+    {
+        if (!std::isalpha(token[tokenLength]))
+            return false;
+        if (tokenLength >= 16)
+            return false;
+        ++tokenLength;
+    }
+
+    if (tokenLength <= 15)
+        return false;
+
+    /*if (!IsValidToken(&token))
+        return false;*/
+
+    AccountOpResult result = sAccountMgr.SecuritySetTOTP(targetAccountId, token);
+    switch (result)
+    {
+        case AOR_OK:
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool ChatHandler::HandleMaxSkillCommand(char* /*args*/)
 {
     Player* SelectedPlayer = getSelectedPlayer();

@@ -63,6 +63,21 @@ bool ChatHandler::load_command_table = true;
 
 ChatCommand* ChatHandler::getCommandTable()
 {
+    static ChatCommand accountSecuritySetCommandTable[] =
+    {
+        { "none",           SEC_PLAYER,         true,  &ChatHandler::HandleAccountSecuritySetNoneCommand,   "", nullptr },
+        { "pin",            SEC_PLAYER,         true,  &ChatHandler::HandleAccountSecuritySetPinCommand,    "", nullptr },
+        { "totp",           SEC_CONSOLE,        true,  &ChatHandler::HandleAccountSecuritySetTOTPCommand,   "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                             "", nullptr }
+    };
+
+    static ChatCommand accountSecurityCommandTable[] =
+    {
+        { "get",            SEC_PLAYER,         true,  &ChatHandler::HandleAccountSecurityGetCommand,  "", nullptr },
+        { "set",            SEC_PLAYER,         true,  nullptr,                                        "", accountSecuritySetCommandTable },
+        { nullptr,          0,                  false, nullptr,                                        "", nullptr }
+    };
+
     static ChatCommand accountSetCommandTable[] =
     {
         { "addon",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAccountSetAddonCommand,     "", nullptr },
@@ -80,6 +95,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "lock",           SEC_PLAYER,         true,  &ChatHandler::HandleAccountLockCommand,         "", nullptr },
         { "set",            SEC_ADMINISTRATOR,  true,  nullptr,                                        "", accountSetCommandTable },
         { "password",       SEC_PLAYER,         true,  &ChatHandler::HandleAccountPasswordCommand,     "", nullptr },
+        { "security",       SEC_PLAYER,         true,  nullptr,                                        "", accountSecurityCommandTable },
         { "",               SEC_PLAYER,         true,  &ChatHandler::HandleAccountCommand,             "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };

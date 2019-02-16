@@ -164,6 +164,10 @@ class ChatHandler
         bool HandleAccountSetAddonCommand(char* args);
         bool HandleAccountSetGmLevelCommand(char* args);
         bool HandleAccountSetPasswordCommand(char* args);
+        bool HandleAccountSecurityGetCommand(char* args);
+        bool HandleAccountSecuritySetNoneCommand(char* args);
+        bool HandleAccountSecuritySetPinCommand(char* args);
+        bool HandleAccountSecuritySetTOTPCommand(char* args);
 
         bool HandleAHBotItemsAmountCommand(char* args);
         template <int Q>

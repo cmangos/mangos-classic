@@ -169,6 +169,43 @@ AccountTypes AccountMgr::GetSecurity(uint32 acc_id)
     return SEC_PLAYER;
 }
 
+uint8 AccountMgr::GetSecuritySetting(uint32 accid) const
+{
+    QueryResult* result = LoginDatabase.PQuery("SELECT security FROM account WHERE id = '%u'", accid);
+    if (result)
+    {
+        uint8 sec = uint8((*result)[0].GetInt32());
+        delete result;
+        return sec;
+    }
+    else
+        return 0;
+}
+
+AccountOpResult AccountMgr::SecuritySetNone(uint32 accid) const
+{
+    if (!LoginDatabase.PExecute("UPDATE account SET security='0', token=NULL WHERE id = '%u'", accid))
+        return AOR_DB_INTERNAL_ERROR;                       // unexpected error
+
+    return AOR_OK;
+}
+
+AccountOpResult AccountMgr::SecuritySetPin(uint32 accid, uint32 pin) const
+{
+    if (!LoginDatabase.PExecute("UPDATE account SET security='1', token='%u' WHERE id = '%u'", pin, accid))
+        return AOR_DB_INTERNAL_ERROR;                       // unexpected error
+
+    return AOR_OK;
+}
+
+AccountOpResult AccountMgr::SecuritySetTOTP(uint32 accid, std::string& token) const
+{
+    if (!LoginDatabase.PExecute("UPDATE account SET security='4', token='%s' WHERE id = '%u'", token.c_str(), accid))
+        return AOR_DB_INTERNAL_ERROR;                       // unexpected error
+
+    return AOR_OK;
+}
+
 bool AccountMgr::GetName(uint32 acc_id, std::string& name) const
 {
     QueryResult* result = LoginDatabase.PQuery("SELECT username FROM account WHERE id = '%u'", acc_id);
