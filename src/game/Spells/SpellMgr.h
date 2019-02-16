@@ -360,6 +360,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
 
     switch (spellInfo->Id)
     {
+        case 3235:          // Rancid Blood
         case 3417:          // Thrash
         case 6752:          // Weak Poison Proc
         case 7276:          // Poison Proc
