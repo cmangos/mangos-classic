@@ -34,7 +34,7 @@
 
 #include <functional>
 
-#define HMAC_RES_SIZE 20
+struct AUTH_LOGON_PIN_DATA_C;  // forward decl
 
 class AuthSocket : public MaNGOS::Socket
 {
@@ -45,7 +45,8 @@ class AuthSocket : public MaNGOS::Socket
 
         void SendProof(Sha1Hash sha);
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
-        int32 generateToken(char const* b32key);
+        bool VerifyPinData(uint32 pin, const AUTH_LOGON_PIN_DATA_C& clientData);
+        uint32 generateTotpPin(const std::string& secret, int interval);
 
         bool VerifyVersion(uint8 const* a, int32 aLength, uint8 const* versionProof, bool isReconnect);
         bool _HandleLogonChallenge();
@@ -79,10 +80,16 @@ class AuthSocket : public MaNGOS::Socket
 
         eStatus _status;
 
+        bool promptPin;
+
         std::string _login;
         std::string _safelogin;
         std::string _token;
         std::string m_os;
+
+        BigNumber serverSecuritySalt;
+        uint8 securityFlags;
+        uint32 gridSeed;
 
         // Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ
         // between enUS and enGB, which is important for the patch system

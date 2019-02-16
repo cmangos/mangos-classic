@@ -23,8 +23,8 @@ set(SRC_GRP_AUTH
     Auth/AuthCrypt.h
     Auth/BigNumber.cpp
     Auth/BigNumber.h
-    Auth/HMACSHA1.cpp
-    Auth/HMACSHA1.h
+    Auth/Hmac.cpp
+    Auth/Hmac.h
     Auth/md5.h
     Auth/Sha1.cpp
     Auth/Sha1.h

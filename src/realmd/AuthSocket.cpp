@@ -21,7 +21,7 @@
 */
 
 #include "Common.h"
-#include "Auth/HMACSHA1.h"
+#include "Auth/Hmac.h"
 #include "Auth/base32.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
@@ -29,6 +29,7 @@
 #include "RealmList.h"
 #include "AuthSocket.h"
 #include "AuthCodes.h"
+#include "Util.h"
 
 #include <openssl/md5.h>
 #include <ctime>
@@ -79,11 +80,11 @@ typedef struct AUTH_LOGON_CHALLENGE_C
     uint8   I[1];
 } sAuthLogonChallenge_C;
 
-typedef struct AUTH_LOGON_PIN_DATA_C
+struct AUTH_LOGON_PIN_DATA_C
 {
     uint8 salt[16];
     uint8 hash[20];
-} sAuthLogonPinData_C;
+};
 
 typedef struct AUTH_LOGON_AUTHENTICATOR_DATA_C
 {
@@ -182,7 +183,7 @@ std::array<uint8, 16> VersionChallenge = { { 0xBA, 0xA3, 0x1E, 0x99, 0xA0, 0x0B,
 
 /// Constructor - set the N and g values for SRP6
 AuthSocket::AuthSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
-    : Socket(service, std::move(closeHandler)), _status(STATUS_CHALLENGE), _build(0), _accountSecurityLevel(SEC_PLAYER)
+    : Socket(service, std::move(closeHandler)), _status(STATUS_CHALLENGE), promptPin(false), _build(0), _accountSecurityLevel(SEC_PLAYER)
 {
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
@@ -404,7 +405,7 @@ bool AuthSocket::_HandleLogonChallenge()
     {
         ///- Get the account details from the account table
         // No SQL injection (escaped user name)
-        QueryResult* result = LoginDatabase.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel,v,s,token FROM account WHERE username = '%s'", _safelogin.c_str());
+        QueryResult* result = LoginDatabase.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel,v,s,security,token FROM account WHERE username = '%s'", _safelogin.c_str());
         if (result)
         {
             Field* fields = result->Fetch();
@@ -484,32 +485,21 @@ bool AuthSocket::_HandleLogonChallenge()
                     pkt.append(N.AsByteArray(32), 32);
                     pkt.append(s.AsByteArray(), s.GetNumBytes());// 32 bytes
                     pkt.append(VersionChallenge.data(), VersionChallenge.size());
-                    uint8 securityFlags = 0;
 
-                    _token = fields[7].GetCppString();
-                    if (!_token.empty() && _build >= 8606) // authenticator was added in 2.4.3
-                        securityFlags = SECURITY_FLAG_AUTHENTICATOR;
+                    securityFlags = (fields[7].GetUInt8());
+                    pkt << uint8(securityFlags ? 1 : 0); // securityFlags, only '1' is available in classic (PIN input)
 
-                    pkt << uint8(securityFlags);                    // security flags (0x0...0x04)
-
-                    if (securityFlags & SECURITY_FLAG_PIN)          // PIN input
+                    if (securityFlags)                              // 2FA input
                     {
-                        pkt << uint32(0);
-                        pkt << uint64(0);
-                        pkt << uint64(0);
+                        BASIC_LOG("[AuthChallenge] account %s is using PIN authentication", _login.c_str());
+                        _token = fields[8].GetCppString();
+                        uint32 gridSeedPkt = gridSeed = urand();
+                        EndianConvert(gridSeedPkt);
+                        serverSecuritySalt.SetRand(16 * 8);         // 16 bytes random
+                        pkt << gridSeedPkt;
+                        pkt.append(serverSecuritySalt.AsByteArray(16), 16);
+                        promptPin = true;
                     }
-
-                    if (securityFlags & SECURITY_FLAG_UNK)          // Matrix input
-                    {
-                        pkt << uint8(0);
-                        pkt << uint8(0);
-                        pkt << uint8(0);
-                        pkt << uint8(0);
-                        pkt << uint64(0);
-                    }
-
-                    if (securityFlags & SECURITY_FLAG_AUTHENTICATOR)    // Authenticator input
-                        pkt << uint8(1);
 
                     uint8 secLevel = fields[4].GetUInt8();
                     _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
@@ -542,6 +532,13 @@ bool AuthSocket::_HandleLogonProof()
     sAuthLogonProof_C lp{};
     if (!Read((char*)&lp, sizeof(sAuthLogonProof_C)))
         return false;
+
+    AUTH_LOGON_PIN_DATA_C pinData;
+    if (lp.securityFlags)
+    {
+        if (!Read((char*)&pinData, sizeof(AUTH_LOGON_PIN_DATA_C)))
+            return false;
+    }
 
     ///- Session is closed unless overriden
     _status = STATUS_CLOSED;
@@ -636,31 +633,39 @@ bool AuthSocket::_HandleLogonProof()
     BigNumber M;
     M.SetBinary(sha.GetDigest(), 20);
 
-    ///- Check if SRP6 results match (password is correct), else send an error
-    if (!memcmp(M.AsByteArray(), lp.M1, 20))
+    ///- Check PIN data is correct
+    bool pinResult = true;
+
+    if (promptPin && !lp.securityFlags)
+        pinResult = false; // expected PIN data but did not receive it
+
+    if (promptPin && lp.securityFlags)
     {
-        if (lp.securityFlags & SECURITY_FLAG_AUTHENTICATOR || !_token.empty())
+        if (lp.securityFlags & SECURITY_FLAG_PIN)
+            pinResult = VerifyPinData(std::stoi(_token), pinData);
+        else if (lp.securityFlags & SECURITY_FLAG_AUTHENTICATOR)
         {
-            sAuthLogonAuthenticatorData_C authData{};
-            if (!Read((char*) &authData, sizeof(sAuthLogonAuthenticatorData_C)))
+            for (int i = -2; i != 2; ++i)
             {
-                const char data[4] = {CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0};
-                Write(data, sizeof(data));
-                return true;
-            }
+                auto totpPin = generateTotpPin(_token, i);
 
-            auto ServerToken = generateToken(_token.c_str());
-            auto clientToken = atoi((const char*) authData.keys);
-            if (ServerToken != clientToken)
-            {
-                BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode! Given %u Expected %u", _login.c_str(), clientToken, ServerToken);
+                if (totpPin == uint32(-1))
+                    break;
 
-                const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 0, 0};
-                Write(data, sizeof(data));
-                return true;
+                if ((pinResult = VerifyPinData(totpPin, pinData)))
+                    break;
             }
         }
+        else
+        {
+            DEBUG_LOG("Unknown lock flags set for %s", _safelogin.c_str());
+            pinResult = false;
+        }
+    }
 
+    ///- Check if SRP6 results match (password is correct), else send an error
+    if (!memcmp(M.AsByteArray(), lp.M1, 20) && pinResult)
+    {
         if (!VerifyVersion(lp.A, sizeof(lp.A), lp.crc_hash, false))
         {
             BASIC_LOG("[AuthChallenge] Account %s tried to login with modified client!", _login.c_str());
@@ -1068,31 +1073,6 @@ bool AuthSocket::_HandleXferAccept()
     return true;
 }
 
-int32 AuthSocket::generateToken(char const* b32key)
-{
-    size_t keySize = strlen(b32key);
-    size_t bufSize = (keySize + 7) / 8 * 5;
-    char* encoded = new char[bufSize];
-    memset(encoded, 0, bufSize);
-    unsigned int hmac_result_size = HMAC_RES_SIZE;
-    unsigned char hmac_result[HMAC_RES_SIZE];
-    unsigned long timestamp = time(nullptr) / 30;
-    unsigned char challenge[8];
-
-    for (int i = 8; i--; timestamp >>= 8)
-        challenge[i] = timestamp;
-
-    base32_decode(b32key, encoded, bufSize);
-    HMAC(EVP_sha1(), encoded, bufSize, challenge, 8, hmac_result, &hmac_result_size);
-    unsigned int offset = hmac_result[19] & 0xF;
-    unsigned int truncHash = (hmac_result[offset] << 24) | (hmac_result[offset + 1] << 16) | (hmac_result[offset + 2] << 8) | (hmac_result[offset + 3]);
-    truncHash &= 0x7FFFFFFF;
-
-    delete[] encoded;
-
-    return truncHash % 1000000;
-}
-
 bool AuthSocket::VerifyVersion(uint8 const* a, int32 aLength, uint8 const* versionProof, bool isReconnect)
 {
     if (!sConfig.GetBoolDefault("StrictVersionCheck", false))
@@ -1126,4 +1106,108 @@ bool AuthSocket::VerifyVersion(uint8 const* a, int32 aLength, uint8 const* versi
     version.Finalize();
 
     return memcmp(versionProof, version.GetDigest(), version.GetLength()) == 0;
+}
+
+/// Very PIN entry data
+bool AuthSocket::VerifyPinData(uint32 pin, const AUTH_LOGON_PIN_DATA_C& clientData)
+{
+    // remap the grid to match the client's layout
+    std::vector<uint8> grid { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    std::vector<uint8> remappedGrid(grid.size());
+
+    uint8* remappedIndex = remappedGrid.data();
+    uint32 seed = gridSeed;
+
+    for (size_t i = grid.size(); i > 0; --i)
+    {
+        auto remainder = seed % i;
+        seed /= i;
+        *remappedIndex = grid[remainder];
+
+        size_t copySize = i;
+        copySize -= remainder;
+        --copySize;
+
+        uint8* srcPtr = grid.data() + remainder + 1;
+        uint8* dstPtr = grid.data() + remainder;
+
+        std::copy(srcPtr, srcPtr + copySize, dstPtr);
+        ++remappedIndex;
+    }
+
+    // convert the PIN to bytes (for ex. '1234' to {1, 2, 3, 4})
+    std::vector<uint8> pinBytes;
+
+    while (pin != 0)
+    {
+        pinBytes.push_back(pin % 10);
+        pin /= 10;
+    }
+
+    std::reverse(pinBytes.begin(), pinBytes.end());
+
+    // validate PIN length
+    if (pinBytes.size() < 4 || pinBytes.size() > 10)
+        return false; // PIN outside of expected range
+
+    // remap the PIN to calculate the expected client input sequence
+    for (size_t i = 0; i < pinBytes.size(); ++i)
+    {
+        auto index = std::find(remappedGrid.begin(), remappedGrid.end(), pinBytes[i]);
+        pinBytes[i] = std::distance(remappedGrid.begin(), index);
+    }
+
+    // convert PIN bytes to their ASCII values
+    for (size_t i = 0; i < pinBytes.size(); ++i)
+        pinBytes[i] += 0x30;
+
+    // validate the PIN, x = H(client_salt | H(server_salt | ascii(pin_bytes)))
+    Sha1Hash sha;
+    sha.UpdateData(serverSecuritySalt.AsByteArray(), serverSecuritySalt.GetNumBytes());
+    sha.UpdateData(pinBytes.data(), pinBytes.size());
+    sha.Finalize();
+
+    BigNumber hash;
+    hash.SetBinary(sha.GetDigest(), sha.GetLength());
+
+    sha.Initialize();
+    sha.UpdateData(clientData.salt, sizeof(clientData.salt));
+    sha.UpdateData(hash.AsByteArray(), hash.GetNumBytes());
+    sha.Finalize();
+    hash.SetBinary(sha.GetDigest(), sha.GetLength());
+
+    return !memcmp(hash.AsByteArray(), clientData.hash, 20);
+}
+
+uint32 AuthSocket::generateTotpPin(const std::string& secret, int interval)
+{
+    std::vector<uint8> decoded_key((secret.size() + 7) / 8 * 5);
+    int key_size = base32_decode((const uint8_t*)secret.data(), decoded_key.data(), decoded_key.size());
+
+    if (key_size == -1)
+    {
+        DEBUG_LOG("Unable to base32 decode TOTP key for user %s", _safelogin.c_str());
+        return -1;
+    }
+
+    // not guaranteed by the standard to be the UNIX epoch but it is on all supported platforms
+    auto timenow = time(nullptr);
+    uint64 now = static_cast<uint64>(timenow);
+    uint64 step = static_cast<uint64>((floor(now / 30))) + interval;
+    EndianConvertReverse(step);
+    
+    HmacHash hmac(decoded_key.data(), key_size);
+    hmac.UpdateData((uint8*)&step, sizeof(step));
+    hmac.Finalize();
+
+    auto hmac_result = hmac.GetDigest();
+
+    unsigned int offset = hmac_result[19] & 0xF;
+    std::uint32_t pin = (hmac_result[offset] & 0x7f) << 24 | (hmac_result[offset + 1] & 0xff) << 16
+        | (hmac_result[offset + 2] & 0xff) << 8 | (hmac_result[offset + 3] & 0xff);
+    EndianConvert(pin);
+
+    pin &= 0x7FFFFFFF;
+    pin %= 1000000;
+    return pin;
 }

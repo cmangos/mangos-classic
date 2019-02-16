@@ -17,7 +17,7 @@
  */
 
 #include "AuthCrypt.h"
-#include "HMACSHA1.h"
+#include "Hmac.h"
 #include "Log.h"
 #include "BigNumber.h"
 
