@@ -24,7 +24,7 @@
 class BarGoLink
 {
     public:                                                 // constructors
-        explicit BarGoLink(int row_count);
+        explicit BarGoLink(size_t row_count);
         ~BarGoLink();
 
     public:                                                 // modifiers
@@ -32,15 +32,15 @@ class BarGoLink
 
         static void SetOutputState(bool on);
     private:
-        void init(int row_count);
+        void init(size_t row_count);
 
         static bool m_showOutput;                           // not recommended change with existed active bar
         static char const* const empty;
         static char const* const full;
 
-        int rec_no;
-        int rec_pos;
-        int num_rec;
-        int indic_len;
+        size_t rec_no;
+        size_t rec_pos;
+        size_t num_rec;
+        size_t indic_len;
 };
 #endif

@@ -30,7 +30,7 @@ char const* const BarGoLink::full  = "\x3D";
 char const* const BarGoLink::full  = "*";
 #endif
 
-BarGoLink::BarGoLink(int row_count)
+BarGoLink::BarGoLink(size_t row_count)
 {
     init(row_count);
 }
@@ -44,7 +44,7 @@ BarGoLink::~BarGoLink()
     fflush(stdout);
 }
 
-void BarGoLink::init(int row_count)
+void BarGoLink::init(size_t row_count)
 {
     rec_no    = 0;
     rec_pos   = 0;
@@ -59,7 +59,7 @@ void BarGoLink::init(int row_count)
 #else
     printf("[");
 #endif
-    for (int i = 0; i < indic_len; ++i) printf(empty);
+    for (size_t i = 0; i < indic_len; ++i) printf(empty);
 #ifdef _WIN32
     printf("\x3D 0%%\r\x3D");
 #else
@@ -73,11 +73,11 @@ void BarGoLink::step()
     if (!m_showOutput)
         return;
 
-    int i;
+    size_t i;
 
     if (num_rec == 0) return;
     ++rec_no;
-    int n = rec_no * indic_len / num_rec;
+    size_t n = rec_no * indic_len / num_rec;
     if (n != rec_pos)
     {
 #ifdef _WIN32
@@ -87,11 +87,11 @@ void BarGoLink::step()
 #endif
         for (i = 0; i < n; ++i) printf(full);
         for (; i < indic_len; ++i) printf(empty);
-        float percent = (((float)n / (float)indic_len) * 100);
+        int percent = int((double(n) / double(indic_len)) * 100);
 #ifdef _WIN32
-        printf("\x3D %i%%  \r\x3D", (int)percent);
+        printf("\x3D %i%%  \r\x3D", percent);
 #else
-        printf("] %i%%  \r[", (int)percent);
+        printf("] %i%%  \r[", percent);
 #endif
         fflush(stdout);
 
