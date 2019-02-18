@@ -1268,31 +1268,40 @@ bool ChatHandler::HandleAccountSecuritySetPinCommand(char* args)
 
     std::string pin = cpin;
 
-    // client pin promt range is 4 - 9 digits,
-    // require an all numeric pin in the range of 4 to 9 digits
+    uint32 upin = 0;
     uint32 pinLength = 0;
     while (pin[pinLength] != '\0')
     {
-        if (!std::isdigit(pin[pinLength]))
-            return false;
+        // require an all numeric pin in the range of 4 to 9 digits
         if (pinLength >= 9)
             return false;
+        // We can convert char directly to int and find the 0 - 9 range by removing '0'
+        // Some symbols have negative values, use int32 and not uint32 for that reason
+        int32 ichar = pin[pinLength] - '0';
+        // only allow chars fitting in the 0 - 9 range (numeric)
+        if (ichar < 0 || ichar > 9)
+            return false;
+        if (!upin)    // first character
+        {
+            // don't allow pins to start with a '0',
+            // it causes client 'call customer service' error message
+            if (!ichar)
+                return false;
+            else
+                upin = ichar;
+        }
+        else
+        {
+            upin *= 10;
+            upin += ichar;
+        }
         ++pinLength;
     }
 
     if (pinLength <= 3)
         return false;
 
-    // Pin is all numerical and within range so convert to uint32
-    uint32 upin;
-    if (!ExtractUInt32(&cpin, upin))
-        return false;
-
-    // don't allow pins to start with a 0,
-    // it causes client 'call customer service' error message
-    if (pinLength == 4 && upin <= 999)
-        return false;
-
+    // Pin is all numerical and within range
     AccountOpResult result = sAccountMgr.SecuritySetPin(targetAccountId, upin);
     switch (result)
     {
@@ -1315,14 +1324,16 @@ bool ChatHandler::HandleAccountSecuritySetTOTPCommand(char* args)
 
     std::string token = ctoken;
 
-    // Limit to 16 character alphabetic secret
     uint32 tokenLength = 0;
     while (token[tokenLength] != '\0')
     {
-        if (!std::isalpha(token[tokenLength]))
-            return false;
+        // Limit to 16 character alphabetic secret
         if (tokenLength >= 16)
             return false;
+        if (!std::isalpha(token[tokenLength]))
+            return false;
+        // make the string all uppercase
+        token[tokenLength] = std::toupper(token[tokenLength]);
         ++tokenLength;
     }
 
