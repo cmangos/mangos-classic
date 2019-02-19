@@ -45,9 +45,8 @@ EndContentData */
 
 enum
 {
-    EMOTE_A_HELLO           = -1000204,
-    EMOTE_H_HELLO           = -1000205,
-    EMOTE_CLUCK_TEXT2       = -1000206,
+    EMOTE_CLUCK_TEXT1       = -1000204,
+    EMOTE_CLUCK_TEXT2       = -1000205,
 
     QUEST_CLUCK             = 3861,
     FACTION_FRIENDLY        = 35,
@@ -74,7 +73,7 @@ struct npc_chicken_cluckAI : public ScriptedAI
         {
             m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             m_creature->setFaction(FACTION_FRIENDLY);
-            DoScriptText(EMOTE_A_HELLO, m_creature);
+            DoScriptText(EMOTE_CLUCK_TEXT1, m_creature);
         }
         else if (uiEmote == TEXTEMOTE_CHEER && pPlayer->GetQuestStatus(QUEST_CLUCK) == QUEST_STATUS_COMPLETE)
         {
