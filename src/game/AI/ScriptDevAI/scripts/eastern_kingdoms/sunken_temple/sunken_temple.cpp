@@ -50,10 +50,10 @@ bool AreaTrigger_at_shade_of_eranikus(Player* pPlayer, AreaTriggerEntry const* /
                 !pPlayer->GetQuestRewardStatus(QUEST_ERANIKUS_TYRANT_OF_DREAMS) &&
                 pPlayer->GetQuestStatus(QUEST_ERANIKUS_TYRANT_OF_DREAMS) != QUEST_STATUS_COMPLETE)
         {
-            if (pInstance->GetData(TYPE_MALFURION) != DONE)
+            if (pInstance->GetData(TYPE_MALFURION) != IN_PROGRESS)
             {
                 pPlayer->SummonCreature(NPC_MALFURION, aSunkenTempleLocation[2].m_fX, aSunkenTempleLocation[2].m_fY, aSunkenTempleLocation[2].m_fZ, aSunkenTempleLocation[2].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
-                pInstance->SetData(TYPE_MALFURION, DONE);
+                pInstance->SetData(TYPE_MALFURION, IN_PROGRESS);
             }
         }
     }
@@ -87,6 +87,7 @@ struct npc_malfurionAI : public ScriptedAI
             m_uiSayTimer = 3000;
         }
 
+        DoCastSpellIfCan(m_creature, SPELL_SPIRIT_SPAWN_IN, TRIGGERED_OLD_TRIGGERED);
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
     }
 

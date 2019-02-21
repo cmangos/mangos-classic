@@ -167,6 +167,10 @@ void instance_sunken_temple::SetData(uint32 uiType, uint32 uiData)
             }
             m_auiEncounter[uiType] = uiData;
             break;
+        case TYPE_MALFURION:
+            if (uiData == IN_PROGRESS)
+                m_auiEncounter[uiType] = uiData;
+            break;
         case TYPE_AVATAR:
             if (uiData == SPECIAL)
             {
