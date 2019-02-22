@@ -54,6 +54,8 @@ enum
 
     ASHBRINGER_RELAY_SCRIPT_ID   = 9001,
     ITEM_CORRUPTED_ASHBRINGER    = 22691,
+
+    SOUND_MOGRAINE_FAKE_DEATH    = 1326,
 };
 
 struct boss_scarlet_commander_mograineAI : public ScriptedAI
@@ -83,7 +85,7 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
         m_bFakeDeath              = false;
 
         // Incase wipe during phase that mograine fake death
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
     }
@@ -155,7 +157,9 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
             m_creature->RemoveAllAurasOnDeath();
             m_creature->ClearAllReactives();
 
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_creature->PlayDistanceSound(SOUND_MOGRAINE_FAKE_DEATH);
+
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
 
@@ -187,7 +191,7 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
         if (m_bHasDied && !m_bHeal && m_pInstance && m_pInstance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) == SPECIAL)
         {
             // On ressurection, stop fake death and heal whitemane and resume fight
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
             // spell has script target on Whitemane
