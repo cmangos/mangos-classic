@@ -436,9 +436,27 @@ inline bool IsSpellEffectDamage(SpellEntry const& spellInfo, SpellEffectIndex i)
             //   SPELL_AURA_POWER_BURN_MANA: deals damage for power burned, but not really a DoT?
             case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
                 return true;
+        }
+    }
+    return false;
+}
+
+inline bool IsSpellEffectDummy(SpellEntry const& spellInfo, SpellEffectIndex i)
+{
+    if (!spellInfo.EffectApplyAuraName[i])
+    {
+        switch (spellInfo.Effect[i])
+        {
+            case SPELL_EFFECT_DUMMY:
+                return true;
+        }
+    }
+    else
+    {
+        switch (spellInfo.EffectApplyAuraName[i])
+        {
             case SPELL_AURA_DUMMY:
-                // Placeholder: insert any possible overrides here...
-                break;
+                return true;
         }
     }
     return false;
@@ -466,7 +484,10 @@ inline bool IsBinarySpell(SpellEntry const& spellInfo, uint8 effectMask = EFFECT
     {
         const uint8 thisMask = uint8(1 << (i - 1));
 
-        if (!spellInfo.Effect[i] || !(effectMask & thisMask) || IsSpellEffectTriggerSpell(&spellInfo, SpellEffectIndex(i)))
+        if (!spellInfo.Effect[i] || !(effectMask & thisMask))
+            continue;
+
+        if (IsSpellEffectDummy(spellInfo, SpellEffectIndex(i)) || IsSpellEffectTriggerSpell(&spellInfo, SpellEffectIndex(i)))
             continue;
 
         validmask |= thisMask;
