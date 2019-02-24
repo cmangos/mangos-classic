@@ -1950,7 +1950,7 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[eff_idx]);
 
-    Aura* aur = CreateAura(m_spellInfo, eff_idx, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, caster, m_CastItem);
+    Aura* aur = CreateAura(m_spellInfo, eff_idx, &damage, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, caster, m_CastItem);
     m_spellAuraHolder->AddAura(aur, eff_idx);
 }
 
@@ -2271,7 +2271,7 @@ void Spell::EffectPersistentAA(SpellEffectIndex eff_idx)
 
     DynamicObject* dynObj = new DynamicObject;
     if (!dynObj->Create(pCaster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), pCaster, m_spellInfo->Id,
-                        eff_idx, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_duration, radius, DYNAMIC_OBJECT_AREA_SPELL, target))
+                        eff_idx, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_duration, radius, DYNAMIC_OBJECT_AREA_SPELL, target, damage, m_currentBasePoints[eff_idx]))
     {
         delete dynObj;
         return;
@@ -2576,7 +2576,7 @@ void Spell::EffectApplyAreaAura(SpellEffectIndex eff_idx)
     if (!unitTarget->isAlive())
         return;
 
-    AreaAura* Aur = new AreaAura(m_spellInfo, eff_idx, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, m_caster, m_CastItem);
+    AreaAura* Aur = new AreaAura(m_spellInfo, eff_idx, &damage, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, m_caster, m_CastItem);
     m_spellAuraHolder->AddAura(Aur, eff_idx);
 }
 
@@ -2930,7 +2930,7 @@ void Spell::EffectAddFarsight(SpellEffectIndex eff_idx)
 
     // set radius to 0: spell not expected to work as persistent aura
     if (!dynObj->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster,
-                        m_spellInfo->Id, eff_idx, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_duration, 0, DYNAMIC_OBJECT_FARSIGHT_FOCUS, TARGET_NONE))
+                        m_spellInfo->Id, eff_idx, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_duration, 0, DYNAMIC_OBJECT_FARSIGHT_FOCUS, TARGET_NONE, damage, m_currentBasePoints[eff_idx]))
     {
         delete dynObj;
         return;

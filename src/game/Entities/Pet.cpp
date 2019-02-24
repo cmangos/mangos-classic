@@ -1671,7 +1671,7 @@ void Pet::_LoadAuras(uint32 timediff)
                 if ((effIndexMask & (1 << i)) == 0)
                     continue;
 
-                Aura* aura = CreateAura(spellproto, SpellEffectIndex(i), nullptr, holder, this);
+                Aura* aura = CreateAura(spellproto, SpellEffectIndex(i), nullptr, nullptr, holder, this);
                 if (!damage[i])
                     damage[i] = aura->GetModifier()->m_amount;
 
