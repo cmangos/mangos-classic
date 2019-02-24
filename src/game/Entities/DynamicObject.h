@@ -41,7 +41,7 @@ class DynamicObject : public WorldObject
         void AddToWorld() override;
         void RemoveFromWorld() override;
 
-        bool Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEffectIndex effIndex, float x, float y, float z, int32 duration, float radius, DynamicObjectType type, SpellTarget target);
+        bool Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEffectIndex effIndex, float x, float y, float z, int32 duration, float radius, DynamicObjectType type, SpellTarget target, int32 damage, int32 basePoints);
         void Update(const uint32 diff) override;
         void Delete();
         uint32 GetSpellId() const { return m_spellId; }
@@ -53,6 +53,8 @@ class DynamicObject : public WorldObject
         void SetCasterGuid(ObjectGuid guid) { SetGuidValue(DYNAMICOBJECT_CASTER, guid); }
         Unit* GetCaster() const;
         float GetRadius() const { return m_radius; }
+        int32 const& GetDamage() const { return m_damage; }
+        int32 const& GetBasePoints() const { return m_basePoints; }
         DynamicObjectType GetType() const { return (DynamicObjectType)GetByteValue(DYNAMICOBJECT_BYTES, 0); }
         bool IsAffecting(Unit* unit) const { return m_affected.find(unit->GetObjectGuid()) != m_affected.end(); }
         void AddAffected(Unit* unit) { m_affected.insert(unit->GetObjectGuid()); }
@@ -87,6 +89,8 @@ class DynamicObject : public WorldObject
         bool m_positive;
         GuidSet m_affected;
         SpellTarget m_target;
+        int32 m_damage;
+        int32 m_basePoints;
     private:
         GridReference<DynamicObject> m_gridRef;
 };
