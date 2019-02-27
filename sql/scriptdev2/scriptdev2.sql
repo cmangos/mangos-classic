@@ -45,6 +45,7 @@ INSERT INTO scripted_areatrigger VALUES
 (3626,'at_vaelastrasz'),
 (3958,'at_zulgurub'),
 (3960,'at_zulgurub'),
+(4017,'at_twilight_grove'),
 (4047,'at_temple_ahnqiraj'),
 (4052,'at_temple_ahnqiraj'),
 (4112,'at_naxxramas'),
@@ -1040,7 +1041,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1000410,'Here they come! Defend yourself!',0,0,1,5,'kanati SAY_KAN_START'),
 
--- REUSE -1000411 TO -1000414
+(-1000411,'Come, $N. See what the Nightmare brings...',15625,4,0,0,'Twilight Corrupter SAY_TWILIGHT_CORRUPTER_SPAWN'),
+
+-- REUSE -1000412 TO -1000414
 (-1000415,'%s, too injured, gives up the chase.',0,2,0,0,'hendel EMOTE_SURRENDER'),
 
 (-1000416,'Well, I\'m not sure how far I\'ll make it in this state... I\'m feeling kind of faint...',0,0,0,0,'ringo SAY_RIN_START_1'),
