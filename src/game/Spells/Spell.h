@@ -500,7 +500,7 @@ class Spell
 
         uint32 GetPowerCost() const { return m_powerCost; }
         // channels are generally instant - until more research provided all need to have speed 0
-        float GetSpellSpeed() const { if (IsChanneledSpell(m_spellInfo)) return 0.f; return m_spellInfo->speed; }
+        float GetSpellSpeed() const;
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
 
