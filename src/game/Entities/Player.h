@@ -87,13 +87,13 @@ enum EnvironmentFlags
     ENVIRONMENT_FLAG_IN_MAGMA       = 0x02,                     // Swimming or standing in magma
     ENVIRONMENT_FLAG_IN_SLIME       = 0x04,                     // Swimming or standing in slime
     ENVIRONMENT_FLAG_HIGH_SEA       = 0x08,                     // Anywhere inside deep water area
-    ENVIRONMENT_FLAG_UNDERWATER     = 0x10,                     // Swimming submerged in any liquid
-    ENVIRONMENT_FLAG_LIQUID         = 0x20,                     // Anywhere indide area with any liquid
-    ENVIRONMENT_FLAG_SHALLOW_LIQUID = 0x40,                     // Standing in liquid shallow enough to not be able to swim
+    ENVIRONMENT_FLAG_UNDERWATER     = 0x10,                     // Swimming fully submerged in any liquid
+    ENVIRONMENT_FLAG_HIGH_LIQUID    = 0x20,                     // In any liquid deep enough to be able to swim
+    ENVIRONMENT_FLAG_LIQUID         = 0x40,                     // Anywhere indide area with any liquid
 
     ENVIRONMENT_MASK_LIQUID_HAZARD  = (ENVIRONMENT_FLAG_IN_MAGMA | ENVIRONMENT_FLAG_IN_SLIME),
     ENVIRONMENT_MASK_IN_LIQUID      = (ENVIRONMENT_FLAG_IN_WATER | ENVIRONMENT_MASK_LIQUID_HAZARD),
-    ENVIRONMENT_MASK_LIQUID_FLAGS   = (ENVIRONMENT_FLAG_UNDERWATER | ENVIRONMENT_MASK_IN_LIQUID | ENVIRONMENT_FLAG_HIGH_SEA | ENVIRONMENT_FLAG_LIQUID | ENVIRONMENT_FLAG_SHALLOW_LIQUID),
+    ENVIRONMENT_MASK_LIQUID_FLAGS   = (ENVIRONMENT_FLAG_UNDERWATER | ENVIRONMENT_MASK_IN_LIQUID | ENVIRONMENT_FLAG_HIGH_SEA | ENVIRONMENT_FLAG_LIQUID | ENVIRONMENT_FLAG_HIGH_LIQUID),
 };
 
 enum BuyBankSlotResult
@@ -1994,7 +1994,7 @@ class Player : public Unit
         inline bool IsInMagma() const { return (m_environmentFlags & ENVIRONMENT_FLAG_IN_MAGMA); }
         inline bool IsInSlime() const { return (m_environmentFlags & ENVIRONMENT_FLAG_IN_SLIME); }
         inline bool IsInHighSea() const { return (m_environmentFlags & ENVIRONMENT_FLAG_HIGH_SEA); }
-        inline bool IsInShallowWater() const { return (m_environmentFlags & ENVIRONMENT_FLAG_SHALLOW_LIQUID); }
+        inline bool IsInHighLiquid() const { return (m_environmentFlags & ENVIRONMENT_FLAG_HIGH_LIQUID); }
 
         inline uint32 GetWaterBreathingInterval() const;
         void SetWaterBreathingIntervalMultiplier(float multiplier);
