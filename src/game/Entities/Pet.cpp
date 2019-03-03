@@ -1210,8 +1210,6 @@ void Pet::InitStatsForLevel(uint32 petlevel)
 
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0);
 
-    int32 createResistance[MAX_SPELL_SCHOOL] = {0, 0, 0, 0, 0, 0, 0};
-
     SetAttackTime(BASE_ATTACK, cInfo->MeleeBaseAttackTime);
     SetAttackTime(OFF_ATTACK, cInfo->MeleeBaseAttackTime);
     SetAttackTime(RANGED_ATTACK, cInfo->RangedBaseAttackTime);
@@ -1222,16 +1220,13 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     {
         SetMeleeDamageSchool(SpellSchools(cInfo->DamageSchool));
 
-        createResistance[SPELL_SCHOOL_HOLY]   = cInfo->ResistanceHoly;
-        createResistance[SPELL_SCHOOL_FIRE]   = cInfo->ResistanceFire;
-        createResistance[SPELL_SCHOOL_NATURE] = cInfo->ResistanceNature;
-        createResistance[SPELL_SCHOOL_FROST]  = cInfo->ResistanceFrost;
-        createResistance[SPELL_SCHOOL_SHADOW] = cInfo->ResistanceShadow;
-        createResistance[SPELL_SCHOOL_ARCANE] = cInfo->ResistanceArcane;
+        SetCreateResistance(SPELL_SCHOOL_HOLY, cInfo->ResistanceHoly);
+        SetCreateResistance(SPELL_SCHOOL_FIRE, cInfo->ResistanceFire);
+        SetCreateResistance(SPELL_SCHOOL_NATURE, cInfo->ResistanceNature);
+        SetCreateResistance(SPELL_SCHOOL_FROST, cInfo->ResistanceFrost);
+        SetCreateResistance(SPELL_SCHOOL_SHADOW, cInfo->ResistanceShadow);
+        SetCreateResistance(SPELL_SCHOOL_ARCANE, cInfo->ResistanceArcane);
     }
-
-    for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-        SetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + i), BASE_VALUE, float(createResistance[i]));
 
     float health = 0.f;
     float mana = 0.f;
@@ -1448,7 +1443,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     SetCreateHealth(health);
     SetCreateMana(mana);
     // Set base Armor
-    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, armor);
+    SetCreateResistance(SPELL_SCHOOL_NORMAL, int32(armor));
 
     // Need to update stats - calculates max health/mana etc
     UpdateAllStats();
