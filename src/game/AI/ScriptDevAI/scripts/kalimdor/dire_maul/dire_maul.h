@@ -94,6 +94,7 @@ enum
     FACTION_FRIENDLY            = 35,
     FACTION_OGRE                = 45,
 
+    SPELL_KING_OF_GORDOK        = 22799,
     SPELL_ICE_LOCK              = 22856,
     SPELL_GUARD_SLIPKIK_TRIGGER = 31770,
 };
@@ -109,6 +110,7 @@ class instance_dire_maul : public ScriptedInstance
         void Initialize() override;
 
         void OnPlayerEnter(Player* pPlayer) override;
+        void OnPlayerLeave(Player* pPlayer) override;
 
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
