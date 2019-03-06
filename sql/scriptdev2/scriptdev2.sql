@@ -35,6 +35,7 @@ INSERT INTO scripted_areatrigger VALUES
 (2066,'at_blackrock_spire'),
 (2067,'at_blackrock_spire'),
 (3066,'at_ravenholdt'),
+(3146,'at_hive_tower'),
 (3546,'at_childrens_week_spot'), -- Darnassian bank
 (3547,'at_childrens_week_spot'), -- Undercity - thone room
 (3548,'at_childrens_week_spot'), -- Stonewrought Dam
