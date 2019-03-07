@@ -201,10 +201,10 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // TODO adjust treshold (may be too low)
     if (m_ai->GetHealthPercent() < 8)
     {
-        if (DIVINE_SHIELD > 0 && m_bot->IsSpellReady(DIVINE_SHIELD) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DIVINE_SHIELD, *m_bot))
+        if (DIVINE_SHIELD > 0 && m_bot->IsSpellReady(DIVINE_SHIELD) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DIVINE_SHIELD, *m_bot) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
 
-        if (DIVINE_PROTECTION > 0 && !(m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK) && m_bot->IsSpellReady(DIVINE_PROTECTION) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DIVINE_PROTECTION, *m_bot))
+        if (DIVINE_PROTECTION > 0 && !(m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK) && m_bot->IsSpellReady(DIVINE_PROTECTION) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DIVINE_PROTECTION, *m_bot) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
     }
 
@@ -237,16 +237,16 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
         if (m_ai->IsElite(newTarget))
         {
             // Try to stun the mob
-            if (HAMMER_OF_JUSTICE > 0 && m_ai->In_Reach(newTarget, HAMMER_OF_JUSTICE) && m_bot->IsSpellReady(HAMMER_OF_JUSTICE) && !newTarget->HasAura(HAMMER_OF_JUSTICE) && m_ai->CastSpell(HAMMER_OF_JUSTICE, *newTarget))
+            if (HAMMER_OF_JUSTICE > 0 && m_ai->In_Reach(newTarget, HAMMER_OF_JUSTICE) && m_bot->IsSpellReady(HAMMER_OF_JUSTICE) && !newTarget->HasAura(HAMMER_OF_JUSTICE) && m_ai->CastSpell(HAMMER_OF_JUSTICE, *newTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
 
             // Bot has low life: use divine powers to protect him/herself
             if (m_ai->GetHealthPercent() < 15)
             {
-                if (DIVINE_SHIELD > 0 && m_bot->IsSpellReady(DIVINE_SHIELD) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DIVINE_SHIELD, *m_bot))
+                if (DIVINE_SHIELD > 0 && m_bot->IsSpellReady(DIVINE_SHIELD) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DIVINE_SHIELD, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
 
-                if (DIVINE_PROTECTION > 0 && m_bot->IsSpellReady(DIVINE_PROTECTION) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DIVINE_PROTECTION, *m_bot))
+                if (DIVINE_PROTECTION > 0 && m_bot->IsSpellReady(DIVINE_PROTECTION) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DIVINE_PROTECTION, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
             }
 
@@ -264,26 +264,26 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
         // else: DPS (retribution, NEVER protection)
 
         case PALADIN_SPEC_RETRIBUTION:
-            if (HAMMER_OF_WRATH > 0 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && m_ai->CastSpell(HAMMER_OF_WRATH, *pTarget))
+            if (HAMMER_OF_WRATH > 0 && pTarget->GetHealth() < pTarget->GetMaxHealth() * 0.20 && m_ai->CastSpell(HAMMER_OF_WRATH, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
             return RETURN_CONTINUE;
-            /*if (HAMMER_OF_JUSTICE > 0 && !pTarget->HasAura(HAMMER_OF_JUSTICE, EFFECT_INDEX_0) && m_ai->CastSpell (HAMMER_OF_JUSTICE, *pTarget))
+            /*if (HAMMER_OF_JUSTICE > 0 && !pTarget->HasAura(HAMMER_OF_JUSTICE, EFFECT_INDEX_0) && m_ai->CastSpell(HAMMER_OF_JUSTICE, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;*/
-            /*if (HOLY_WRATH > 0 && m_ai->GetAttackerCount() >= 3 && meleeReach && m_ai->CastSpell (HOLY_WRATH, *pTarget))
+            /*if (HOLY_WRATH > 0 && m_ai->GetAttackerCount() >= 3 && meleeReach && m_ai->CastSpell(HOLY_WRATH, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;*/
-            /*if (BLESSING_OF_SACRIFICE > 0 && pVictim == GetMaster() && !GetMaster()->HasAura(BLESSING_OF_SACRIFICE, EFFECT_INDEX_0) && m_ai->CastSpell (BLESSING_OF_SACRIFICE, *GetMaster()))
+            /*if (BLESSING_OF_SACRIFICE > 0 && pVictim == GetMaster() && !GetMaster()->HasAura(BLESSING_OF_SACRIFICE, EFFECT_INDEX_0) && m_ai->CastSpell(BLESSING_OF_SACRIFICE, *GetMaster()) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;*/
-            /*if (DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && m_ai->CastSpell (DIVINE_FAVOR, *m_bot))
+            /*if (DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && m_ai->CastSpell(DIVINE_FAVOR, *m_bot) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;*/
             return RETURN_NO_ACTION_OK;
 
         case PALADIN_SPEC_PROTECTION:
             //Taunt if orders specify
-            if (CONSECRATION > 0 && m_bot->IsSpellReady(CONSECRATION) && m_ai->CastSpell(CONSECRATION, *pTarget))
+            if (CONSECRATION > 0 && m_bot->IsSpellReady(CONSECRATION) && m_ai->CastSpell(CONSECRATION, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (HOLY_SHIELD > 0 && !m_bot->HasAura(HOLY_SHIELD) && m_ai->CastSpell(HOLY_SHIELD, *m_bot))
+            if (HOLY_SHIELD > 0 && !m_bot->HasAura(HOLY_SHIELD) && m_ai->CastSpell(HOLY_SHIELD, *m_bot) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (SHIELD_OF_RIGHTEOUSNESS > 0 && m_bot->IsSpellReady(SHIELD_OF_RIGHTEOUSNESS) && m_ai->CastSpell(SHIELD_OF_RIGHTEOUSNESS, *pTarget))
+            if (SHIELD_OF_RIGHTEOUSNESS > 0 && m_bot->IsSpellReady(SHIELD_OF_RIGHTEOUSNESS) && m_ai->CastSpell(SHIELD_OF_RIGHTEOUSNESS, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
             return RETURN_NO_ACTION_OK;
     }
@@ -293,7 +293,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
 
 CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVP(Unit* pTarget)
 {
-    if (m_ai->CastSpell(HAMMER_OF_JUSTICE))
+    if (m_ai->CastSpell(HAMMER_OF_JUSTICE) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative
@@ -307,7 +307,7 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
 
     if (!target->isAlive())
     {
-        if (REDEMPTION && m_ai->CastSpell(REDEMPTION, *target))
+        if (REDEMPTION && m_ai->CastSpell(REDEMPTION, *target) == SPELL_CAST_OK)
         {
             std::string msg = "Resurrecting ";
             msg += target->GetName();
@@ -321,21 +321,21 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
     // Remove negative magic on group members if orders allow bot to do so
     if (Player* pCursedTarget = GetDispelTarget(DISPEL_MAGIC))
     {
-        if (dispel > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && m_ai->CastSpell(dispel, *pCursedTarget))
+        if (dispel > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && m_ai->CastSpell(dispel, *pCursedTarget) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
     }
     // Remove poison on group members if orders allow bot to do so
     if (Player* pPoisonedTarget = GetDispelTarget(DISPEL_POISON))
     {
         m_ai->TellMaster("Has poison %s :", pPoisonedTarget->GetName());
-        if (dispel > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && m_ai->CastSpell(dispel, *pPoisonedTarget))
+        if (dispel > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && m_ai->CastSpell(dispel, *pPoisonedTarget) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
     }
 
     // Remove disease on group members if orders allow bot to do so
     if (Player* pDiseasedTarget = GetDispelTarget(DISPEL_DISEASE))
     {
-        if (dispel > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && m_ai->CastSpell(dispel, *pDiseasedTarget))
+        if (dispel > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && m_ai->CastSpell(dispel, *pDiseasedTarget) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
     }
 
@@ -358,7 +358,7 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
     if (hp >= 90)
         return RETURN_NO_ACTION_OK;
 
-    if (hp < 10 && LAY_ON_HANDS && m_bot->IsSpellReady(LAY_ON_HANDS) && m_ai->In_Reach(target, LAY_ON_HANDS) && m_ai->CastSpell(LAY_ON_HANDS, *target))
+    if (hp < 10 && LAY_ON_HANDS && m_bot->IsSpellReady(LAY_ON_HANDS) && m_ai->In_Reach(target, LAY_ON_HANDS) && m_ai->CastSpell(LAY_ON_HANDS, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     // Target is a moderately wounded healer or a badly wounded not tank? Blessing of Protection!
@@ -368,20 +368,20 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
             && !target->HasAura(FORBEARANCE, EFFECT_INDEX_0)
             && !target->HasAura(BLESSING_OF_PROTECTION, EFFECT_INDEX_0) && !target->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0)
             && !target->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0)
-            && m_ai->CastSpell(BLESSING_OF_PROTECTION, *target))
+            && m_ai->CastSpell(BLESSING_OF_PROTECTION, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     // Low HP : activate Divine Favor to make next heal a critical heal
-    if (hp < 25 && DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && m_bot->IsSpellReady(DIVINE_FAVOR) && m_ai->CastSpell(DIVINE_FAVOR, *m_bot))
+    if (hp < 25 && DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && m_bot->IsSpellReady(DIVINE_FAVOR) && m_ai->CastSpell(DIVINE_FAVOR, *m_bot) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
-    if (hp < 40 && FLASH_OF_LIGHT && m_ai->In_Reach(target, FLASH_OF_LIGHT) && m_ai->CastSpell(FLASH_OF_LIGHT, *target))
+    if (hp < 40 && FLASH_OF_LIGHT && m_ai->In_Reach(target, FLASH_OF_LIGHT) && m_ai->CastSpell(FLASH_OF_LIGHT, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
-    if (hp < 60 && HOLY_SHOCK && m_ai->In_Reach(target, HOLY_SHOCK) && m_ai->CastSpell(HOLY_SHOCK, *target))
+    if (hp < 60 && HOLY_SHOCK && m_ai->In_Reach(target, HOLY_SHOCK) && m_ai->CastSpell(HOLY_SHOCK, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
-    if (hp < 90 && HOLY_LIGHT && m_ai->In_Reach(target, HOLY_LIGHT) && m_ai->CastSpell(HOLY_LIGHT, *target))
+    if (hp < 90 && HOLY_LIGHT && m_ai->In_Reach(target, HOLY_LIGHT) && m_ai->CastSpell(HOLY_LIGHT, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
@@ -470,7 +470,7 @@ bool PlayerbotPaladinAI::CheckSealAndJudgement(Unit* pTarget)
     // Prevent low health humanoid from fleeing by judging them with Seal of Justice
     if (pCreature && pCreature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_HUMANOID && pTarget->GetHealthPercent() < 20 && !pCreature->IsWorldBoss())
     {
-        if (SEAL_OF_JUSTICE > 0 && !m_bot->HasAura(SEAL_OF_JUSTICE, EFFECT_INDEX_0) && m_ai->CastSpell(SEAL_OF_JUSTICE, *m_bot))
+        if (SEAL_OF_JUSTICE > 0 && !m_bot->HasAura(SEAL_OF_JUSTICE, EFFECT_INDEX_0) && m_ai->CastSpell(SEAL_OF_JUSTICE, *m_bot) == SPELL_CAST_OK)
         {
             m_CurrentSeal = SEAL_OF_JUSTICE;
             m_CurrentJudgement = 0;
@@ -497,13 +497,13 @@ bool PlayerbotPaladinAI::CheckSealAndJudgement(Unit* pTarget)
 
     // Judgement is still active on target: refresh seal on bot if needed
     if (m_CurrentJudgement > 0 && m_CurrentSeal > 0 && !m_bot->HasAura(m_CurrentSeal, EFFECT_INDEX_0))
-        if (m_CurrentSeal > 0 && !m_bot->HasAura(m_CurrentSeal, EFFECT_INDEX_0) && m_ai->CastSpell(m_CurrentSeal, *m_bot))
+        if (m_CurrentSeal > 0 && !m_bot->HasAura(m_CurrentSeal, EFFECT_INDEX_0) && m_ai->CastSpell(m_CurrentSeal, *m_bot) == SPELL_CAST_OK)
             return true;
 
     // No judgement on target but bot has seal active: time to judge the target
     if (m_CurrentJudgement == 0 && m_CurrentSeal > 0 && m_bot->HasAura(m_CurrentSeal, EFFECT_INDEX_0))
     {
-        if (JUDGEMENT > 0 && m_bot->IsSpellReady(JUDGEMENT) && m_ai->In_Reach(pTarget, JUDGEMENT) && m_ai->CastSpell(JUDGEMENT, *pTarget))
+        if (JUDGEMENT > 0 && m_bot->IsSpellReady(JUDGEMENT) && m_ai->In_Reach(pTarget, JUDGEMENT) && m_ai->CastSpell(JUDGEMENT, *pTarget) == SPELL_CAST_OK)
         {
             if (m_CurrentSeal == SEAL_OF_JUSTICE)
                 m_CurrentJudgement = JUDGEMENT_OF_JUSTICE;
@@ -552,7 +552,7 @@ bool PlayerbotPaladinAI::CheckSealAndJudgement(Unit* pTarget)
             m_CurrentSeal = SEAL_OF_RIGHTEOUSNESS;
     }
 
-    if (m_CurrentSeal > 0 && !m_bot->HasAura(m_CurrentSeal, EFFECT_INDEX_0) && m_ai->CastSpell(m_CurrentSeal, *m_bot))
+    if (m_CurrentSeal > 0 && !m_bot->HasAura(m_CurrentSeal, EFFECT_INDEX_0) && m_ai->CastSpell(m_CurrentSeal, *m_bot) == SPELL_CAST_OK)
         return true;
 
     return false;
@@ -731,11 +731,11 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* targe
     else if (spellId == c->BLESSING_OF_SANCTUARY)
         bigSpellId = c->GREATER_BLESSING_OF_SANCTUARY;
 
-    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->HasSpellReagents(petBigSpellId) && ai->Buff(petBigSpellId, pet))
+    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->HasSpellReagents(petBigSpellId) && ai->Buff(petBigSpellId, pet) == SPELL_CAST_OK)
         return true;
-    if (ai->HasSpellReagents(bigSpellId) && ai->Buff(bigSpellId, target))
+    if (ai->HasSpellReagents(bigSpellId) && ai->Buff(bigSpellId, target) == SPELL_CAST_OK)
         return true;
-    if ((pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(petSpellId, pet)) || ai->Buff(spellId, target))
+    if ((pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(petSpellId, pet)) == SPELL_CAST_OK || ai->Buff(spellId, target) == SPELL_CAST_OK)
         return true;
     return false;
 }
@@ -754,7 +754,7 @@ bool PlayerbotPaladinAI::CanPull()
 // Match up with "CanPull()" above
 bool PlayerbotPaladinAI::Pull()
 {
-    if (EXORCISM && m_ai->CastSpell(EXORCISM))
+    if (EXORCISM && m_ai->CastSpell(EXORCISM) == SPELL_CAST_OK)
         return true;
 
     return false;
