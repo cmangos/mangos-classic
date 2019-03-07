@@ -290,7 +290,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
                 return RETURN_CONTINUE;
             if (SMITE > 0 && m_ai->In_Reach(pTarget, SMITE) && CastSpell(SMITE, pTarget))
                 return RETURN_CONTINUE;
-            //if (HOLY_NOVA > 0 && m_ai->In_Reach(pTarget,HOLY_NOVA) && meleeReach && m_ai->CastSpell(HOLY_NOVA))
+            //if (HOLY_NOVA > 0 && m_ai->In_Reach(pTarget,HOLY_NOVA) && meleeReach && m_ai->CastSpell(HOLY_NOVA) == SPELL_CAST_OK)
             //    return RETURN_CONTINUE;
             break;
 
@@ -382,7 +382,7 @@ CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
 
     if (!target->isAlive())
     {
-        if (RESURRECTION && m_ai->In_Reach(target, RESURRECTION) && m_ai->CastSpell(RESURRECTION, *target))
+        if (RESURRECTION && m_ai->In_Reach(target, RESURRECTION) && m_ai->CastSpell(RESURRECTION, *target) == SPELL_CAST_OK)
         {
             std::string msg = "Resurrecting ";
             msg += target->GetName();
@@ -432,15 +432,15 @@ CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
         if (INNER_FOCUS > 0 && m_bot->IsSpellReady(INNER_FOCUS) && !m_bot->HasAura(INNER_FOCUS, EFFECT_INDEX_0) && CastSpell(INNER_FOCUS, m_bot))
             return RETURN_CONTINUE;
 
-    if (hp < 25 && POWER_WORD_SHIELD > 0 && m_ai->In_Reach(target, POWER_WORD_SHIELD) && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0) && !target->HasAura(WEAKNED_SOUL, EFFECT_INDEX_0) && m_ai->CastSpell(POWER_WORD_SHIELD, *target))
+    if (hp < 25 && POWER_WORD_SHIELD > 0 && m_ai->In_Reach(target, POWER_WORD_SHIELD) && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0) && !target->HasAura(WEAKNED_SOUL, EFFECT_INDEX_0) && m_ai->CastSpell(POWER_WORD_SHIELD, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
-    if (hp < 35 && FLASH_HEAL > 0 && m_ai->In_Reach(target, FLASH_HEAL) && m_ai->CastSpell(FLASH_HEAL, *target))
+    if (hp < 35 && FLASH_HEAL > 0 && m_ai->In_Reach(target, FLASH_HEAL) && m_ai->CastSpell(FLASH_HEAL, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
-    if (hp < 50 && GREATER_HEAL > 0 && m_ai->In_Reach(target, GREATER_HEAL) && m_ai->CastSpell(GREATER_HEAL, *target))
+    if (hp < 50 && GREATER_HEAL > 0 && m_ai->In_Reach(target, GREATER_HEAL) && m_ai->CastSpell(GREATER_HEAL, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
-    if (hp < 70 && HEAL > 0 && m_ai->In_Reach(target, HEAL) && m_ai->CastSpell(HEAL, *target))
+    if (hp < 70 && HEAL > 0 && m_ai->In_Reach(target, HEAL) && m_ai->CastSpell(HEAL, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
-    if (hp < 90 && RENEW > 0 && m_ai->In_Reach(target, RENEW) && !target->HasAura(RENEW) && m_ai->CastSpell(RENEW, *target))
+    if (hp < 90 && RENEW > 0 && m_ai->In_Reach(target, RENEW) && !target->HasAura(RENEW) && m_ai->CastSpell(RENEW, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     // Group heal. Not really useful until a group check is available?
@@ -460,7 +460,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
     uint32 spec = m_bot->GetSpec();
 
     // selfbuff goes first
-    if (m_ai->SelfBuff(INNER_FIRE))
+    if (m_ai->SelfBuff(INNER_FIRE) == SPELL_CAST_OK)
         return;
 
     // Revive
@@ -517,7 +517,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
         return;
 
     // Nothing else to do, Night Elves will cast Shadowmeld to reduce their aggro versus patrols or nearby mobs
-    if (SHADOWMELD && !m_bot->HasAura(SHADOWMELD, EFFECT_INDEX_0) && m_ai->CastSpell(SHADOWMELD, *m_bot))
+    if (SHADOWMELD && !m_bot->HasAura(SHADOWMELD, EFFECT_INDEX_0) && m_ai->CastSpell(SHADOWMELD, *m_bot) == SPELL_CAST_OK)
         return;
 } // end DoNonCombatActions
 
@@ -529,10 +529,10 @@ bool PlayerbotPriestAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target
     if (!target)      return false;
 
     Pet* pet = target->GetPet();
-    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet))
+    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet) == SPELL_CAST_OK)
         return true;
 
-    if (ai->Buff(spellId, target))
+    if (ai->Buff(spellId, target) == SPELL_CAST_OK)
         return true;
 
     return false;

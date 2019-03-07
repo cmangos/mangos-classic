@@ -663,9 +663,9 @@ CombatManeuverReturns PlayerbotClassAI::CastSpellNoRanged(uint32 nextAction, Uni
         return RETURN_NO_ACTION_OK; // Asked to do nothing so... yeh... Dooone.
 
     if (pTarget != nullptr)
-        return (m_ai->CastSpell(nextAction, *pTarget) ? RETURN_CONTINUE : RETURN_NO_ACTION_ERROR);
+        return (m_ai->CastSpell(nextAction, *pTarget) == SPELL_CAST_OK ? RETURN_CONTINUE : RETURN_NO_ACTION_ERROR);
     else
-        return (m_ai->CastSpell(nextAction) ? RETURN_CONTINUE : RETURN_NO_ACTION_ERROR);
+        return (m_ai->CastSpell(nextAction) == SPELL_CAST_OK ? RETURN_CONTINUE : RETURN_NO_ACTION_ERROR);
 }
 
 CombatManeuverReturns PlayerbotClassAI::CastSpellWand(uint32 nextAction, Unit* pTarget, uint32 SHOOT)
@@ -691,14 +691,14 @@ CombatManeuverReturns PlayerbotClassAI::CastSpellWand(uint32 nextAction, Unit* p
     if (nextAction == SHOOT)
     {
         if (SHOOT > 0 && m_ai->GetCombatStyle() == PlayerbotAI::COMBAT_RANGED && !m_bot->FindCurrentSpellBySpellId(SHOOT) && m_bot->GetWeaponForAttack(RANGED_ATTACK, true, true))
-            return (m_ai->CastSpell(SHOOT, *pTarget) ? RETURN_CONTINUE : RETURN_NO_ACTION_ERROR);
+            return (m_ai->CastSpell(SHOOT, *pTarget) == SPELL_CAST_OK ? RETURN_CONTINUE : RETURN_NO_ACTION_ERROR);
         else
             // Do Melee attack
             return RETURN_NO_ACTION_UNKNOWN; // We're asked to shoot and aren't.
     }
 
     if (pTarget != nullptr)
-        return (m_ai->CastSpell(nextAction, *pTarget) ? RETURN_CONTINUE : RETURN_NO_ACTION_ERROR);
+        return (m_ai->CastSpell(nextAction, *pTarget) == SPELL_CAST_OK ? RETURN_CONTINUE : RETURN_NO_ACTION_ERROR);
     else
-        return (m_ai->CastSpell(nextAction) ? RETURN_CONTINUE : RETURN_NO_ACTION_ERROR);
+        return (m_ai->CastSpell(nextAction) == SPELL_CAST_OK ? RETURN_CONTINUE : RETURN_NO_ACTION_ERROR);
 }
