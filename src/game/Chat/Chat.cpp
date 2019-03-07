@@ -251,6 +251,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "byte",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugByteFields,                 "", nullptr },
         { "moveflag",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugMoveflags,                  "", nullptr },
         { "lootdropstats",  SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugLootDropStats,              "", nullptr },
+        { "utf8overflow",   SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugOverflowCommand,            "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
