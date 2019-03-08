@@ -269,7 +269,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit* pTarget)
             (m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY))
     {
         m_ai->InterruptCurrentCastingSpell();
-        m_bot->GetMotionMaster()->MoveFollow(pTarget, 39.0f, m_bot->GetOrientation());
+        m_bot->GetMotionMaster()->MoveFollow(pTarget, 20.0f, m_bot->GetOrientation());
         return RETURN_CONTINUE;
     }
     // If below ranged combat distance and bot is not attacked by target
