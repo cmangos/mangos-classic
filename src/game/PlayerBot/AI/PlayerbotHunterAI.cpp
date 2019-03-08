@@ -424,15 +424,32 @@ void PlayerbotHunterAI::DoNonCombatActions()
     {
         // we can summon pet, and no critical summon errors before
         Pet* pet = m_bot->GetPet();
-        if (!pet)
+        if (!pet)    // Hunter has pet but it is not found: dismissed or dead and corpse was removed
         {
             // summon pet
-            if (PET_SUMMON > 0 && m_ai->CastSpell(PET_SUMMON, *m_bot) == SPELL_CAST_OK)
-                m_ai->TellMaster("summoning pet.");
-            else
+            SpellCastResult res = m_ai->CastSpell(PET_SUMMON, *m_bot);
+            switch (res)
             {
-                m_petSummonFailed = true;
-                m_ai->TellMaster("summon pet failed!");
+                case SPELL_CAST_OK:
+                    m_ai->TellMaster("summoning pet.");
+                    break;
+                case SPELL_FAILED_DONT_REPORT:
+                    if (PET_REVIVE > 0 && m_ai->CastSpell(PET_REVIVE, *m_bot) == SPELL_CAST_OK)
+                        m_ai->TellMaster("Pet is dead, reviving it.");
+                    else
+                    {
+                        m_petSummonFailed = true;
+                        m_ai->TellMaster("summon pet failed!");
+                    }
+                    break;
+                case SPELL_FAILED_NO_PET:   // This should not happen as if we went this far, there is a pet entry in the DB
+                    m_petSummonFailed = true;
+                    m_ai->TellMaster("I don't appear to have a pet. Weird...");
+                    break;
+                default:                    // Also, pure sanity check: should never happen unless there is an error elsewhere
+                    m_petSummonFailed = true;
+                    m_ai->TellMaster("summon pet failed!");
+                    break;
             }
         }
         else if (!(pet->isAlive()))
