@@ -1030,9 +1030,19 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     return;
                 }
         */
+        // If master dismounted, do so
+        case SMSG_DISMOUNT:
+        {
+            if (!GetMaster()->IsMounted() && m_bot->IsMounted())    // only execute code if master is the one who dismounted
+            {
+                WorldPacket emptyPacket;
+                m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
+            }
+            return;
+        }
         // if a change in speed was detected for the master
         // make sure we have the same mount status
-        case SMSG_FORCE_RUN_SPEED_CHANGE:
+        case SMSG_SPLINE_SET_RUN_SPEED:
         {
             WorldPacket p(packet);
             ObjectGuid guid;
@@ -1042,7 +1052,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 return;
             if (GetMaster()->IsMounted() && !m_bot->IsMounted())
             {
-                //Player Part
+                // Player Part
                 if (!GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).empty())
                 {
                     int32 master_speed1 = 0;
@@ -1050,7 +1060,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     master_speed1 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellProto()->EffectBasePoints[1];
                     master_speed2 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellProto()->EffectBasePoints[2];
 
-                    //Bot Part
+                    // Bot Part
+                    // Step 1: find spell in bot spellbook that matches the speed change from master
                     uint32 spellMount = 0;
                     for (PlayerSpellMap::iterator itr = m_bot->GetSpellMap().begin(); itr != m_bot->GetSpellMap().end(); ++itr)
                     {
@@ -1079,13 +1090,22 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                                 }
                         }
                     }
-                    if (spellMount > 0) m_bot->CastSpell(m_bot, spellMount, TRIGGERED_NONE);
+                    if (spellMount > 0 && m_bot->CastSpell(m_bot, spellMount, TRIGGERED_NONE) == SPELL_CAST_OK)
+                        return;
+
+                    // Step 2: no spell found or cast failed -> search for an item in inventory (mount)
+                    // We start with the fastest mounts as bot will not be able to outrun its master since it is following him/her
+                    uint32 skillLevels[] = { 375, 300, 225, 150, 75 };
+                    for (uint32 level : skillLevels)
+                    {
+                        Item* mount = FindMount(level);
+                        if (mount)
+                        {
+                            UseItem(mount);
+                            return;
+                        }
+                    }
                 }
-            }
-            else if (!GetMaster()->IsMounted() && m_bot->IsMounted())
-            {
-                WorldPacket emptyPacket;
-                m_bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);  //updated code
             }
             return;
         }
@@ -1674,6 +1694,24 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const
             if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK || pItemProto->RequiredSkill != SKILL_RIDING)
                 continue;
 
+            // Ignore items that can not be used in the current situation (have requirements)
+            uint32 spellId = 0;
+            for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+            {
+                if (pItemProto->Spells[i].SpellId > 0)
+                {
+                    spellId = pItemProto->Spells[i].SpellId;
+                    break;
+                }
+            }
+            const SpellEntry* const spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+            if (spellInfo)
+            {
+                Spell* spell = new Spell(m_bot, spellInfo, false);
+                if (spell && spell->CheckCast(false) != SPELL_CAST_OK)
+                    continue;
+            }
+
             if (pItemProto->RequiredSkillRank == matchingRidingSkill)
                 return pItem;
 
@@ -1695,6 +1733,24 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const
                     const ItemPrototype* const pItemProto = pItem->GetProto();
                     if (!pItemProto || m_bot->CanUseItem(pItemProto) != EQUIP_ERR_OK || pItemProto->RequiredSkill != SKILL_RIDING)
                         continue;
+
+                    // Ignore items that can not be used in the current situation (have requirements)
+                    uint32 spellId = 0;
+                    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+                    {
+                        if (pItemProto->Spells[i].SpellId > 0)
+                        {
+                            spellId = pItemProto->Spells[i].SpellId;
+                            break;
+                        }
+                    }
+                    const SpellEntry* const spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+                    if (spellInfo)
+                    {
+                        Spell* spell = new Spell(m_bot, spellInfo, false);
+                        if (spell && spell->CheckCast(false) != SPELL_CAST_OK)
+                            continue;
+                    }
 
                     if (pItemProto->RequiredSkillRank == matchingRidingSkill)
                         return pItem;
