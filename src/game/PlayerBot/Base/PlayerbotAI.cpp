@@ -5288,7 +5288,7 @@ bool PlayerbotAI::CanStore()
 // use item on self
 void PlayerbotAI::UseItem(Item* item)
 {
-    UseItem(item, TARGET_FLAG_SELF, ObjectGuid());
+    UseItem(item, m_bot);
 }
 
 // use item on equipped item
