@@ -3036,7 +3036,7 @@ void Spell::cast(bool skipCheck)
 
     // CAST SPELL
     SendSpellCooldown();
-    if (m_caster->AI())
+    if (m_notifyAI && m_caster->AI())
         m_caster->AI()->OnSpellCooldownAdded(m_spellInfo);
 
     TakePower();
