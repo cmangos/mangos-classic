@@ -1806,8 +1806,6 @@ class Player : public Unit
         void SendCorpseReclaimDelay(bool load = false) const;
 
         uint32 GetShieldBlockValue() const override;        // overwrite Unit version (virtual)
-        bool CanDualWield() const { return m_canDualWield; }
-        void SetCanDualWield(bool value) { m_canDualWield = value; }
 
         // in 0.12 and later in Unit
         void InitStatBuffMods()
@@ -2376,7 +2374,6 @@ class Player : public Unit
 
         uint32 m_WeaponProficiency;
         uint32 m_ArmorProficiency;
-        bool m_canDualWield;
         uint8 m_swingErrorMsg;
         float m_ammoDPS;
 
