@@ -3545,7 +3545,7 @@ float Unit::CalculateEffectiveMagicResistancePercent(const Unit* attacker, Spell
             int32 penetration = attacker->GetResistancePenetration(SpellSchools(school));
 
             // Modify by penetration, but can't go negative with it
-            int32 result = (amount + penetration);
+            int32 result = (amount - penetration);
 
             if (result < 0)
                 result = std::min(amount, 0);
