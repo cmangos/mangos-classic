@@ -36,6 +36,8 @@ class CombatAI : public ScriptedAI, public CombatActions
         virtual void ExecuteActions() override;
 
         virtual void ExecuteAction(uint32 action) = 0;
+
+        void UpdateAI(const uint32 diff) override;
 };
 
 #endif

@@ -27,3 +27,15 @@ void CombatAI::ExecuteActions()
             ExecuteAction(i);
     }
 }
+
+void CombatAI::UpdateAI(const uint32 diff)
+{
+    UpdateTimers(diff, m_creature->isInCombat());
+
+    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        return;
+
+    ExecuteActions();
+
+    DoMeleeAttackIfReady();
+}
