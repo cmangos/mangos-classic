@@ -2812,8 +2812,8 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
 
 void Spell::EffectDualWield(SpellEffectIndex /*eff_idx*/)
 {
-    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)unitTarget)->SetCanDualWield(true);
+    if (unitTarget)
+        unitTarget->SetCanDualWield(true);
 }
 
 void Spell::EffectPull(SpellEffectIndex /*eff_idx*/)

@@ -1529,6 +1529,9 @@ class Unit : public WorldObject
         SpellMissInfo MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell, SpellSchoolMask schoolMask);
         SpellMissInfo SpellHitResult(Unit* pVictim, SpellEntry const* spell, uint8 effectMask, bool reflectable = false);
 
+        bool CanDualWield() const { return m_canDualWield; }
+        void SetCanDualWield(bool value) { m_canDualWield = value; }
+
         // Unit Combat reactions API: Dodge/Parry/Block
         bool CanDodge() const { return m_canDodge; }
         bool CanParry() const { return m_canParry; }
@@ -2400,6 +2403,8 @@ class Unit : public WorldObject
         bool m_canDodge;
         bool m_canParry;
         bool m_canBlock;
+
+        bool m_canDualWield = false;
 
         void DisableSpline();
         bool m_isCreatureLinkingTrigger;
