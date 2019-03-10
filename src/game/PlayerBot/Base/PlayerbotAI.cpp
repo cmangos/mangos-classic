@@ -6123,6 +6123,7 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
 {
     uint32 SoldCost = 0;
     uint32 SoldQuantity = 0;
+    bool sellableItems = false;
     std::ostringstream report, goods;
 
     // list out items in main backpack
@@ -6132,25 +6133,32 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
         if (item)
             _doSellItem(item, report, goods, SoldCost, SoldQuantity);
     }
+    if (goods.str().size() > 0)
+        sellableItems = true;
+    if (bVerbose && bListNonTrash && goods.str().size() > 0)    // Tell master of unsold items
+        TellMaster("Unsold items in my main backpack: %s", goods.str().c_str());
 
     // and each of our other packs
     for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
     {
-        std::ostringstream goods;
+        std::ostringstream subBagGoods;
         const Bag* const pBag = static_cast<Bag*>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
         if (pBag)
         {
-            // Very nice, but who cares what bag it's in?
-            //const ItemPrototype* const pBagProto = pBag->GetProto();
-            //std::string bagName = pBagProto->Name1;
-            //ItemLocalization(bagName, pBagProto->ItemId);
-            //goods << "\nIn my " << bagName << ":";
-
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 Item* const item = m_bot->GetItemByPos(bag, slot);
                 if (item)
-                    _doSellItem(item, report, goods, SoldCost, SoldQuantity);
+                    _doSellItem(item, report, subBagGoods, SoldCost, SoldQuantity);
+            }
+            if (subBagGoods.str().size() > 0)
+                sellableItems = true;
+            if (bVerbose && bListNonTrash && subBagGoods.str().size() > 0)  // Tell master of unsold items
+            {
+                const ItemPrototype* const bagProto = pBag->GetProto();     // Get bag name to help master retrieve it
+                std::string bagName = bagProto->Name1;
+                ItemLocalization(bagName, bagProto->ItemId);
+                TellMaster("Unsold items in my %s: %s", bagName.c_str(), subBagGoods.str().c_str());
             }
         }
     }
@@ -6182,17 +6190,8 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
     // For all bags, non-gray sellable items
     if (bVerbose)
     {
-        if (bListNonTrash && goods.str().size() > 0)
-        {
-            if (SoldQuantity)
-                TellMaster("I could also sell: %s", goods.str().c_str());
-            else
-                TellMaster("I could sell: %s", goods.str().c_str());
-        }
-        else if (SoldQuantity == 0 && goods.str().size() == 0)
-        {
+        if (SoldQuantity == 0 && !sellableItems)
             TellMaster("No items to sell, trash or otherwise.");
-        }
     }
 }
 
