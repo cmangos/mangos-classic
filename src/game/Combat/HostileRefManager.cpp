@@ -46,7 +46,7 @@ void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry cons
     while (ref)
     {
         Unit* owner = ref->getSource()->getOwner();
-        if (!owner->IsIncapacitated() && owner != victim)
+        if (!owner->IsIncapacitated() && owner != victim && owner->CanAttack(victim))
             validRefs.push_back(ref);
         ref = ref->next();
     }
