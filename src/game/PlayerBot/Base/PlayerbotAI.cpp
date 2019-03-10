@@ -4079,9 +4079,12 @@ SpellCastResult PlayerbotAI::CastSpell(uint32 spellId)
     // for AI debug purpose: uncomment the following line and bot will tell Master of every spell they attempt to cast
     // TellMaster("I'm trying to cast %s (spellID %u)", pSpellInfo->SpellName[0], spellId);
 
-    // Power check (stolen from: CreatureAI.cpp - CreatureAI::CanCastSpell)
-    if (m_bot->GetPower((Powers)pSpellInfo->powerType) < Spell::CalculatePowerCost(pSpellInfo, m_bot))
-        return SPELL_FAILED_NO_POWER;
+    // Power check
+    // We use Spell::CheckPower() instead of UnitAI::CanCastSpell() because bots are players and have more requirements than mere units
+    Spell* tmp_spell = new Spell(m_bot, pSpellInfo, false);
+    SpellCastResult res = tmp_spell->CheckPower();
+    if (res != SPELL_CAST_OK)
+        return res;
 
     // set target
     ObjectGuid targetGUID = m_bot->GetSelectionGuid();

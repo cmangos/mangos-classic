@@ -434,12 +434,19 @@ void PlayerbotHunterAI::DoNonCombatActions()
                     m_ai->TellMaster("summoning pet.");
                     break;
                 case SPELL_FAILED_DONT_REPORT:
-                    if (PET_REVIVE > 0 && m_ai->CastSpell(PET_REVIVE, *m_bot) == SPELL_CAST_OK)
-                        m_ai->TellMaster("Pet is dead, reviving it.");
-                    else
+                    if (PET_REVIVE > 0)
                     {
-                        m_petSummonFailed = true;
-                        m_ai->TellMaster("summon pet failed!");
+                        switch (m_ai->CastSpell(PET_REVIVE, *m_bot))
+                        {
+                            case SPELL_CAST_OK:
+                                m_ai->TellMaster("Pet is dead, reviving it.");
+                                break;
+                            case SPELL_FAILED_NO_POWER: // Not enough mana, just wait for it
+                                break;
+                            default:
+                                m_petSummonFailed = true;
+                                m_ai->TellMaster("summon pet failed!");
+                        }                   
                     }
                     break;
                 case SPELL_FAILED_NO_PET:   // This should not happen as if we went this far, there is a pet entry in the DB
