@@ -5371,9 +5371,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     if (plClass == CLASS_WARLOCK)                  // let warlock do a replacement summon
                     {
-                        if (strict)     // Summoning Disorientation, trigger pet stun (cast by pet so it doesn't attack player)
-                            if (Pet* pet = ((Player*)m_caster)->GetPet())
-                                pet->CastSpell(pet, 32752, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pet->GetObjectGuid());
+						((Player*)m_caster)->UnsummonPetIfAny();
                     }
                     else
                         return SPELL_FAILED_ALREADY_HAVE_SUMMON;
