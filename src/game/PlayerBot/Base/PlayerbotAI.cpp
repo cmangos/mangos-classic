@@ -3838,9 +3838,10 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         findNearbyCreature();
 
     // if we are casting a spell then interrupt it
+    // unless it is a positive spell then bot is helping a friendly unit and the death of an enemy target should not prevent this
     // make sure any actions that cast a spell set a proper m_ignoreAIUpdatesUntilTime!
     Spell* const pSpell = GetCurrentSpell();
-    if (pSpell && !(pSpell->IsChannelActive() || pSpell->IsAutoRepeat()))
+    if (pSpell && !(pSpell->IsChannelActive() || pSpell->IsAutoRepeat()) && !IsPositiveSpell(pSpell->m_spellInfo->Id))
     {
         // DEBUG_LOG("spell (%s) is being interrupted",pSpell->m_spellInfo->SpellName[0]);
         InterruptCurrentCastingSpell();
