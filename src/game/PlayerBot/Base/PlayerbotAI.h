@@ -231,6 +231,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
 
         enum BotState
         {
+            BOTSTATE_LOADING,           // loading state during world load
             BOTSTATE_NORMAL,            // normal AI routines are processed
             BOTSTATE_COMBAT,            // bot is in combat
             BOTSTATE_DEAD,              // we are dead and wait for becoming ghost
@@ -344,11 +345,6 @@ class MANGOS_DLL_SPEC PlayerbotAI
         // Since there is no client at the other end, the packets are dropped of course.
         // For a list of opcodes that can be caught see Opcodes.cpp (SMSG_* opcodes only)
         void HandleBotOutgoingPacket(const WorldPacket& packet);
-
-        // This is called by WorldSession.cpp
-        // when it detects that a bot is being teleported. It acknowledges to the server to complete the
-        // teleportation
-        void HandleTeleportAck();
 
         // Returns what kind of situation we are in so the ai can react accordingly
         ScenarioType GetScenarioType() { return m_ScenarioType; }
