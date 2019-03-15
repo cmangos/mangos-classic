@@ -5143,7 +5143,7 @@ void PlayerbotAI::findNearbyGO()
 void PlayerbotAI::findNearbyCreature()
 {
     CreatureList creatureList;
-    float radius = 2.5;
+    float radius = INTERACTION_DISTANCE;
 
     CellPair pair(MaNGOS::ComputeCellPair(m_bot->GetPositionX(), m_bot->GetPositionY()));
     Cell cell(pair);
@@ -5162,7 +5162,7 @@ void PlayerbotAI::findNearbyCreature()
     {
         Creature* currCreature = *iter;
 
-        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end();)
+        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end(); itr = m_findNPC.erase(itr))
         {
             uint32 npcflags = currCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
@@ -5187,6 +5187,9 @@ void PlayerbotAI::findNearbyCreature()
             {
 
                 // DEBUG_LOG("%s is interacting with (%s)",m_bot->GetName(),currCreature->GetCreatureInfo()->Name);
+                // Stop moving as soon as bot is in range
+                m_bot->GetMotionMaster()->Clear(false);
+                m_bot->GetMotionMaster()->MoveIdle();
                 GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(currCreature->GetCreatureInfo()->GossipMenuId);
 
                 // prepares quest menu when true
@@ -5200,8 +5203,6 @@ void PlayerbotAI::findNearbyCreature()
                 {
                     if (!(it->second.npc_option_npcflag & npcflags))
                         continue;
-
-                    DEBUG_LOG("GOSSIP_OPTION_ (%u)", it->second.option_id);
 
                     switch (it->second.option_id)
                     {
@@ -5243,10 +5244,11 @@ void PlayerbotAI::findNearbyCreature()
                         case GOSSIP_OPTION_TRAINER:
                         case GOSSIP_OPTION_QUESTGIVER:
                         case GOSSIP_OPTION_VENDOR:
+                        case GOSSIP_OPTION_ARMORER:
                         {
                             // Manage questgiver, trainer, innkeeper & vendor actions
                             if (!m_tasks.empty())
-                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end();)
+                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
                                     switch (ait->first)
                                     {
@@ -5289,7 +5291,7 @@ void PlayerbotAI::findNearbyCreature()
                                         default:
                                             break;
                                     }
-                                    ait = m_tasks.erase(ait);
+                                    
                                 }
                             break;
                         }
@@ -5297,7 +5299,7 @@ void PlayerbotAI::findNearbyCreature()
                         {
                             // Manage auctioneer actions
                             if (!m_tasks.empty())
-                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end();)
+                                for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
                                     switch (ait->first)
                                     {
@@ -5319,7 +5321,7 @@ void PlayerbotAI::findNearbyCreature()
                                         default:
                                             break;
                                     }
-                                    ait = m_tasks.erase(ait);
+                                    
                                 }
                             ListAuctions();
                             break;
@@ -5330,9 +5332,6 @@ void PlayerbotAI::findNearbyCreature()
                     m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
                 }
             }
-            itr = m_findNPC.erase(itr); // all done lets go home
-            m_bot->GetMotionMaster()->Clear(false);
-            m_bot->GetMotionMaster()->MoveIdle();
         }
     }
 }
