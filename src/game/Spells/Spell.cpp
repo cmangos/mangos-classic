@@ -5370,9 +5370,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 else if (m_caster->GetPetGuid())
                 {
                     if (plClass == CLASS_WARLOCK)                  // let warlock do a replacement summon
-                    {
-						((Player*)m_caster)->UnsummonPetIfAny();
-                    }
+                        static_cast<Player*>(m_caster)->UnsummonPetIfAny();
                     else
                         return SPELL_FAILED_ALREADY_HAVE_SUMMON;
                 }
