@@ -344,7 +344,7 @@ class Aura
         void HandleModPercentStat(bool apply, bool Real);
         void HandleAurasVisible(bool apply, bool Real);
         void HandleModResistancePercent(bool apply, bool Real);
-        void HandleAuraModBaseResistancePCT(bool apply, bool Real);
+        void HandleAuraModBaseResistancePercent(bool apply, bool Real);
         void HandleAuraTrackStealthed(bool apply, bool Real);
         void HandleForceReaction(bool apply, bool Real);
         void HandleAuraModRangedHaste(bool apply, bool Real);
