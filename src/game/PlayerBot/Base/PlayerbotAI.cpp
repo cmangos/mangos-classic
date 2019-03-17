@@ -1293,7 +1293,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 if (countTradeable > 0)
                     out << outT.str();
                 if (countNonTradeable > 0)
-                    out << outNT.str();
+                    out << "\r" << outNT.str();
                 SendWhisper(out.str().c_str(), *(m_bot->GetTrader()));
 
                 // list out items in other removable backpacks
@@ -1338,7 +1338,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         if (countTradeable > 0)
                             outbag << outbagT.str();
                         if (countNonTradeable > 0)
-                            outbag << outbagNT.str();
+                            outbag << "\r" << outbagNT.str();
                         SendWhisper(outbag.str().c_str(), *(m_bot->GetTrader()));
                     }
                 }
