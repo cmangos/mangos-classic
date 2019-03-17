@@ -1345,20 +1345,11 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 if (countTotalTradeable == 0)
                     SendWhisper("I have no items to give you.", *(m_bot->GetTrader()));
 
-                // calculate how much money bot has
+                // calculate how much money bot has and send the message
                 uint32 copper = m_bot->GetMoney();
-                uint32 gold = uint32(copper / 10000);
-                copper -= (gold * 10000);
-                uint32 silver = uint32(copper / 100);
-                copper -= (silver * 100);
-
-                // send bot the message
-                std::ostringstream whisper;
-                whisper << "I have |cff00ff00" << gold
-                        << "|r|cfffffc00g|r|cff00ff00" << silver
-                        << "|r|cffcdcdcds|r|cff00ff00" << copper
-                        << "|r|cffffd333c|r";
-                SendWhisper(whisper.str().c_str(), *(m_bot->GetTrader()));
+                out.str("");
+                out << "I have " << Cash(copper);
+                SendWhisper(out.str().c_str(), *(m_bot->GetTrader()));
             }
             return;
         }
@@ -5864,18 +5855,7 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream& report, std:
 
         report << "Sold ";
         MakeItemLink(item, report, true);
-        report << " for ";
-
-        uint32 gold = uint32(cost / 10000);
-        cost -= (gold * 10000);
-        uint32 silver = uint32(cost / 100);
-        cost -= (silver * 100);
-
-        if (gold > 0)
-            report << gold << "|r|cfffffc00g|r|cff00ff00";
-        if (silver > 0)
-            report << silver << "|r|cffc0c0c0s|r|cff00ff00";
-        report << cost << "|r|cff95524Cc|r|cff00ff00\n";
+        report << " for " << Cash(cost) << "\n";
     }
     else if (item->GetProto()->SellPrice > 0)
         MakeItemLink(item, canSell, true);
@@ -6042,6 +6022,33 @@ bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
     return true;
 }
 
+/**
+ * Cash()
+ * Playerbot function format the money amount into a number of gold, silver and copper coins
+ *
+ * params:copper uint32 the amount of money (in copper) to be formatted
+ * return change String the formatted amount of money in gold, silver and copper
+ */
+std::string PlayerbotAI::Cash(uint32 copper)
+{
+    using namespace std;
+    std::ostringstream change;
+
+    uint32 gold = uint32(copper / 10000);
+    copper -= (gold * 10000);
+    uint32 silver = uint32(copper / 100);
+    copper -= (silver * 100);
+
+    change << "|r|cff00ff00";
+    if (gold > 0)
+        change << gold << "|r|cfffffc00g |r|cff00ff00";
+    change << silver
+        << "|r|cffc0c0c0s |r|cff00ff00" << copper
+        << "|r|cff95524Cc |r|cff00ff00";
+
+    return change.str();
+}
+
 void PlayerbotAI::ListQuests(WorldObject* questgiver)
 {
     if (!questgiver)
@@ -6187,16 +6194,7 @@ void PlayerbotAI::ListAuctions()
                     if (sObjectMgr.GetPlayerNameByGUID(guid, bidder_name))
                         report << " " << bidder_name << ": ";
 
-                    uint32 gold = uint32(bid / 10000);
-                    bid -= (gold * 10000);
-                    uint32 silver = uint32(bid / 100);
-                    bid -= (silver * 100);
-
-                    if (gold > 0)
-                        report << gold << "|r|cfffffc00g|r|cff00ff00";
-                    if (silver > 0)
-                        report << silver << "|r|cffc0c0c0s|r|cff00ff00";
-                    report << bid << "|r|cff95524Cc|r|cff00ff00";
+                    report << Cash(bid);
                 }
                 if (aItem)
                     report << " ends: " << aTm->tm_hour << "|cff0070dd|hH|h|r " << aTm->tm_min << "|cff0070dd|hmin|h|r";
@@ -6275,18 +6273,7 @@ void PlayerbotAI::Sell(const uint32 itemid)
 
         report << "Sold ";
         MakeItemLink(pItem, report, true);
-        report << " for ";
-
-        uint32 gold = uint32(cost / 10000);
-        cost -= (gold * 10000);
-        uint32 silver = uint32(cost / 100);
-        cost -= (silver * 100);
-
-        if (gold > 0)
-            report << gold << "|r|cfffffc00g|r|cff00ff00";
-        if (silver > 0)
-            report << silver << "|r|cffc0c0c0s|r|cff00ff00";
-        report << cost << "|r|cff95524Cc|r|cff00ff00";
+        report << " for " << Cash(cost);
 
         TellMaster(report.str());
     }
@@ -6345,16 +6332,7 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
             report << "Sold total " << SoldQuantity << " item(s) for ";
         else
             report << "Sold " << SoldQuantity << " trash item(s) for ";
-        uint32 gold = uint32(SoldCost / 10000);
-        SoldCost -= (gold * 10000);
-        uint32 silver = uint32(SoldCost / 100);
-        SoldCost -= (silver * 100);
-
-        if (gold > 0)
-            report << gold << "|r|cfffffc00g|r|cff00ff00";
-        if (silver > 0)
-            report << silver << "|r|cffc0c0c0s|r|cff00ff00";
-        report << SoldCost << "|r|cff95524Cc|r|cff00ff00";
+        report << Cash(SoldCost);
 
         if (bVerbose)
             TellMaster(report.str());
@@ -7818,30 +7796,14 @@ void PlayerbotAI::_HandleCommandSkill(std::string& text, Player& fromPlayer)
                                 GetMaster()->GetSession()->SendPacket(&data);
                 */
                 MakeSpellLink(pSpellInfo, msg);
-                uint32 gold = uint32(cost / 10000);
-                cost -= (gold * 10000);
-                uint32 silver = uint32(cost / 100);
-                cost -= (silver * 100);
                 msg << " ";
-                if (gold > 0)
-                    msg << gold <<  "|r|cfffffc00g|r|cff00ff00";
-                if (silver > 0)
-                    msg << silver <<  "|r|cffc0c0c0s|r|cff00ff00";
-                msg << cost <<  "|r|cff95524Cc|r|cff00ff00\r";
+                msg << Cash(cost) <<  "\r";
             }
             ReloadAI();
-            uint32 gold = uint32(totalCost / 10000);
-            totalCost -= (gold * 10000);
-            uint32 silver = uint32(totalCost / 100);
-            totalCost -= (silver * 100);
             msg << "Total of " << totalSpellLearnt << " spell";
             if (totalSpellLearnt != 1) msg << "s";
             msg << " learnt, ";
-            if (gold > 0)
-                msg << gold <<  "|r|cfffffc00g|r|cff00ff00";
-            if (silver > 0)
-                msg << silver <<  "|r|cffc0c0c0s|r|cff00ff00";
-            msg << totalCost <<  "|r|cff95524Cc|r|cff00ff00 spent.";
+            msg << Cash(totalCost) <<  " spent.";
         }
         // Handle: List class or profession skills, spells & abilities for selected trainer
         else
@@ -7879,47 +7841,23 @@ void PlayerbotAI::_HandleCommandSkill(std::string& text, Player& fromPlayer)
                 uint32 cost = uint32(floor(tSpell->spellCost *  fDiscountMod));
                 totalCost += cost;
 
-                uint32 gold = uint32(cost / 10000);
-                cost -= (gold * 10000);
-                uint32 silver = uint32(cost / 100);
-                cost -= (silver * 100);
                 MakeSpellLink(pSpellInfo, msg);
                 msg << " ";
-                if (gold > 0)
-                    msg << gold <<  "|r|cfffffc00g|r|cff00ff00";
-                if (silver > 0)
-                    msg << silver <<  "|r|cffc0c0c0s|r|cff00ff00";
-                msg << cost <<  "|r|cff95524Cc|r|cff00ff00\r";
+                msg << Cash(cost) <<  "\r";
             }
             int32 moneyDiff = m_bot->GetMoney() - totalCost;
             if (moneyDiff >= 0)
             {
-                // calculate how much money bot has
-                uint32 gold = uint32(moneyDiff / 10000);
-                moneyDiff -= (gold * 10000);
-                uint32 silver = uint32(moneyDiff / 100);
-                moneyDiff -= (silver * 100);
+                // Display how much money bot has
                 msg << " ";
-                if (gold > 0)
-                    msg << gold <<  "|r|cfffffc00g|r|cff00ff00";
-                if (silver > 0)
-                    msg << silver <<  "|r|cffc0c0c0s|r|cff00ff00";
-                msg << moneyDiff <<  "|r|cff95524Cc|r|cff00ff00 left.";
+                msg << Cash(moneyDiff) <<  " left.";
             }
             else
             {
                 Announce(CANT_AFFORD);
                 moneyDiff *= -1;
-                uint32 gold = uint32(moneyDiff / 10000);
-                moneyDiff -= (gold * 10000);
-                uint32 silver = uint32(moneyDiff / 100);
-                moneyDiff -= (silver * 100);
                 msg << "I need ";
-                if (gold > 0)
-                    msg << " " << gold <<  "|r|cfffffc00g|r|cff00ff00";
-                if (silver > 0)
-                    msg << silver <<  "|r|cffc0c0c0s|r|cff00ff00";
-                msg << moneyDiff <<  "|r|cff95524Cc|r|cff00ff00 more to learn all the spells!";
+                msg << Cash(moneyDiff) <<  " more to learn all the spells!";
             }
         }
     }
@@ -8045,32 +7983,14 @@ void PlayerbotAI::_HandleCommandStats(std::string& text, Player& fromPlayer)
 
     // estimate how much item damage the bot has
     uint32 copper = EstRepairAll();
-    uint32 gold = uint32(copper / 10000);
-    copper -= (gold * 10000);
-    uint32 silver = uint32(copper / 100);
-    copper -= (silver * 100);
-
     out << "|cffffffff[|h|cff00ffff" << m_bot->GetName() << "|h|cffffffff] has |cff00ff00";
     out << totalfree << " |h|cffffffff bag slots,|h" << " |cff00ff00";
-    if (gold > 0)
-        out << "|r|cff00ff00" << gold <<  "|r|cfffffc00g|r|cff00ff00";
-    if (silver > 0)
-        out << silver <<  "|r|cffc0c0c0s|r|cff00ff00";
-    out << copper <<  "|r|cff95524Cc|r|cff00ff00";
+    out << Cash(copper);
 
     // calculate how much money bot has
     copper = m_bot->GetMoney();
-    gold = uint32(copper / 10000);
-    copper -= (gold * 10000);
-    silver = uint32(copper / 100);
-    copper -= (silver * 100);
-
-    out << "|h|cffffffff item damage & has " << "|r|cff00ff00";
-    if (gold > 0)
-        out << gold <<  "|r|cfffffc00g|r|cff00ff00";
-    if (silver > 0)
-        out << silver <<  "|r|cffc0c0c0s|r|cff00ff00";
-    out << copper <<  "|r|cff95524Cc|r|cff00ff00";
+    out << "|h|cffffffff item damage & has ";
+    out << Cash(copper);
     ChatHandler ch(&fromPlayer);
     ch.SendSysMessage(out.str().c_str());
 }
