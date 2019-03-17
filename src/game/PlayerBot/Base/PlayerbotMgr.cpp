@@ -1045,13 +1045,19 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
         delete resultchar;
     }
 
-    QueryResult* resultlvl = CharacterDatabase.PQuery("SELECT level,name FROM characters WHERE guid = '%u'", guid.GetCounter());
+    QueryResult* resultlvl = CharacterDatabase.PQuery("SELECT level, name, race FROM characters WHERE guid = '%u'", guid.GetCounter());
     if (resultlvl)
     {
         Field* fields = resultlvl->Fetch();
         int charlvl = fields[0].GetUInt32();
         int maxlvl = botConfig.GetIntDefault("PlayerbotAI.RestrictBotLevel", 60);
+        uint8 race = fields[2].GetUInt8();
+        uint32 team = 0;
+
+        team = Player::TeamForRace(race);
+
         if (!(m_session->GetSecurity() > SEC_PLAYER))
+        {
             if (charlvl > maxlvl)
             {
                 PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.(Current Max:lvl |cffffffff%u)", fields[1].GetString(), maxlvl);
@@ -1059,6 +1065,16 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
                 delete resultlvl;
                 return false;
             }
+
+            // Opposing team bot
+            if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP) && m_session->GetPlayer()->GetTeam() != team)
+            {
+                PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, a member of the enemy side", fields[1].GetString());
+                SetSentErrorMessage(true);
+                delete resultlvl;
+                return false;
+            }
+        }
         delete resultlvl;
     }
 
