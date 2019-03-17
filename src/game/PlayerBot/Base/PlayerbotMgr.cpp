@@ -63,6 +63,18 @@ PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
     m_confCollectLoot = botConfig.GetBoolDefault("PlayerbotAI.Collect.Loot", true);
     m_confCollectSkin = botConfig.GetBoolDefault("PlayerbotAI.Collect.Skin", true);
     m_confCollectObjects = botConfig.GetBoolDefault("PlayerbotAI.Collect.Objects", true);
+    m_confCollectDistanceMax = botConfig.GetIntDefault("PlayerbotAI.Collect.DistanceMax", 50);
+    if (m_confCollectDistanceMax > 100)
+    {
+        sLog.outError("Playerbot: PlayerbotAI.Collect.DistanceMax higher than allowed. Using 100");
+        m_confCollectDistanceMax = 100;
+    }
+    m_confCollectDistance = botConfig.GetIntDefault("PlayerbotAI.Collect.Distance", 25);
+    if (m_confCollectDistance > m_confCollectDistanceMax)
+    {
+        sLog.outError("Playerbot: PlayerbotAI.Collect.Distance higher than PlayerbotAI.Collect.DistanceMax. Using DistanceMax value");
+        m_confCollectDistance = m_confCollectDistanceMax;
+    }
 }
 
 PlayerbotMgr::~PlayerbotMgr()

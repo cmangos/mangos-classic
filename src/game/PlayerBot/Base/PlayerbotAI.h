@@ -34,8 +34,6 @@ class Item;
 class PlayerbotClassAI;
 class PlayerbotMgr;
 
-#define BOTLOOT_DISTANCE 75.0f
-
 enum RacialTraits
 {
     BERSERKING_ALL                 = 26297,
@@ -395,6 +393,8 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void findNearbyGO();
         // finds nearby creatures, whose UNIT_NPC_FLAGS match the flags specified in item list m_itemIds
         void findNearbyCreature();
+        // finds nearby corpse that is lootable
+        void findNearbyCorpse();
         bool IsElite(Unit* pTarget, bool isWorldBoss = false) const;
         // Used by bots to check if their target is neutralized (polymorph, shackle or the like). Useful to avoid breaking crowd control
         bool IsNeutralized(Unit* pTarget);
@@ -659,6 +659,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         BotTaxiNode m_taxiNodes;            // flight node chain;
 
         uint8 m_collectionFlags;            // what the bot should look for to loot
+        uint32 m_collectDist;               // distance to collect objects
         bool m_inventory_full;
 
         time_t m_TimeDoneEating;
