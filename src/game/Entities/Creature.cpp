@@ -193,6 +193,10 @@ void Creature::AddToWorld()
     if (sWorld.isForceLoadMap(GetMapId()) || (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE))
         SetActiveObjectState(true);
 
+    // Check if visibility distance different
+    if (GetCreatureInfo()->visibilityDistanceType != VisibilityDistanceType::Normal)
+        SetVisibilityDistanceOverride(GetCreatureInfo()->visibilityDistanceType);
+
     if (m_countSpawns)
         GetMap()->AddToSpawnCount(GetObjectGuid());
 }

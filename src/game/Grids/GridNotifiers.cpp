@@ -55,6 +55,20 @@ void VisibleNotifier::Notify()
         }
     }
 
+    // Far objects update on player notify
+    for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end();)
+    {
+        GuidSet::iterator current = itr++;
+        if (WorldObject* obj = player.GetMap()->GetWorldObject(*current))
+        {
+            if (!obj->IsVisibilityOverridden())
+                continue;
+
+            player.UpdateVisibilityOf(&player, obj);
+            i_clientGUIDs.erase(current);
+        }
+    }
+
     // generate outOfRange for not iterate objects
     i_data.AddOutOfRangeGUID(i_clientGUIDs);
     for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end(); ++itr)

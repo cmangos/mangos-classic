@@ -376,4 +376,12 @@ bool IsIPAddress(char const* ipaddress);
 uint32 CreatePIDFile(const std::string& filename);
 
 void hexEncodeByteArray(uint8* bytes, uint32 arrayLen, std::string& result);
+
+template<typename E>
+constexpr typename std::underlying_type<E>::type AsUnderlyingType(E enumValue)
+{
+    static_assert(std::is_enum<E>::value, "AsUnderlyingType can only be used with enums");
+    return static_cast<typename std::underlying_type<E>::type>(enumValue);
+}
+
 #endif

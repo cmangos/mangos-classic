@@ -262,7 +262,7 @@ uint32 Corpse::getFaction() const
 
 bool Corpse::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
 {
-    return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
+    return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance(), false);
 }
 
 bool Corpse::IsExpired(time_t t) const
