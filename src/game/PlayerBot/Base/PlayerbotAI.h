@@ -578,6 +578,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         bool Withdraw(const uint32 itemid);
         bool Deposit(const uint32 itemid);
         void BankBalance();
+        std::string Cash(uint32 copper);
 
     private:
         bool ExtractCommand(const std::string sLookingFor, std::string& text, bool bUseShort = false);
