@@ -552,6 +552,13 @@ void ObjectMgr::LoadCreatureTemplates()
             else
                 const_cast<CreatureInfo*>(cInfo)->Scale = DEFAULT_OBJECT_SCALE;
         }
+
+        if (cInfo->visibilityDistanceType >= VisibilityDistanceType::Max)
+        {
+            sLog.outErrorDb("sql.sql", "Creature (Entry: %u) has invalid visibilityDistanceType (%u) defined in `creature_template`.", cInfo->Entry, AsUnderlyingType(cInfo->visibilityDistanceType));
+            const_cast<CreatureInfo*>(cInfo)->visibilityDistanceType = VisibilityDistanceType::Normal;
+        }
+
     }
 
     sLog.outString(">> Loaded %u creature definitions", sCreatureStorage.GetRecordCount());
