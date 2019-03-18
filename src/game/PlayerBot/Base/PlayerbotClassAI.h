@@ -36,12 +36,14 @@ class PlayerbotAI;
 
 enum JOB_TYPE
 {
-    JOB_HEAL     = 0x01,
-    JOB_TANK     = 0x02,
-    JOB_MASTER   = 0x04, // Not a fan of this distinction but user (or rather, admin) choice
-    JOB_DPS      = 0x08,
-    JOB_ALL      = 0x0F, // all of the above
-    JOB_MANAONLY = 0x10  // for buff checking (NOTE: this means any with powertype mana AND druids (who may be shifted but still have mana)
+    JOB_MAIN_TANK = 0x01,   // for main tank that will need specific heal focus and priority over other party members or even regular tanks
+    JOB_MAIN_HEAL = 0x02,   // for healers that will focus on main tank
+    JOB_HEAL      = 0x04,
+    JOB_TANK      = 0x08,
+    JOB_MASTER    = 0x10,   // Not a fan of this distinction but user (or rather, admin) choice
+    JOB_DPS       = 0x20,
+    JOB_ALL       = 0x3F,   // all of the above
+    JOB_MANAONLY  = 0x40    // for buff checking (NOTE: this means any with powertype mana AND druids (who may be shifted but still have mana)
 };
 
 struct heal_priority
@@ -95,6 +97,7 @@ class MANGOS_DLL_SPEC PlayerbotClassAI
         Player* GetHealTarget(JOB_TYPE type = JOB_ALL);
         Player* GetDispelTarget(DispelType dispelType, JOB_TYPE type = JOB_ALL, bool bMustBeOOC = false);
         Player* GetResurrectionTarget(JOB_TYPE type = JOB_ALL, bool bMustBeOOC = true);
+        JOB_TYPE GetBotJob(Player* target);
         JOB_TYPE GetTargetJob(Player* target);
 
         bool FleeFromAoEIfCan(uint32 spellId, Unit* pTarget);

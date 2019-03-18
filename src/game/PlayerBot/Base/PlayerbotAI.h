@@ -212,6 +212,8 @@ class MANGOS_DLL_SPEC PlayerbotAI
             ORDERS_RESIST_NATURE        = 0x0200,   // resist nature
             ORDERS_RESIST_FROST         = 0x0400,   // resist frost
             ORDERS_RESIST_SHADOW        = 0x0800,   // resist shadow
+            ORDERS_MAIN_TANK            = 0x1000,   // main attackers binder by gaining threat in raid situation
+            ORDERS_MAIN_HEAL            = 0x2000,   // concentrate on healing the main tank (will ignore other targets as long as MT needs healing)
 
             // Cumulative orders
             ORDERS_PRIMARY              = 0x0007,
@@ -549,8 +551,10 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void SetCombatOrder(CombatOrderType co, Unit* target = 0);
         void ClearCombatOrder(CombatOrderType co);
         CombatOrderType GetCombatOrder() { return this->m_combatOrder; }
-        bool IsTank() { return (m_combatOrder & ORDERS_TANK) ? true : false; }
-        bool IsHealer() { return (m_combatOrder & ORDERS_HEAL) ? true : false; }
+        bool IsMainTank() { return (m_combatOrder & ORDERS_MAIN_TANK) ? true : false; }
+        bool IsTank() { return (m_combatOrder & ORDERS_TANK) || IsMainTank() ? true : false; }
+        bool IsMainHealer() { return (m_combatOrder & ORDERS_MAIN_HEAL) ? true : false; }
+        bool IsHealer() { return (m_combatOrder & ORDERS_HEAL) || IsMainHealer() ? true : false; }
         bool IsDPS() { return (m_combatOrder & ORDERS_ASSIST) ? true : false; }
         bool Impulse() { srand(time(nullptr)); return (((rand() % 100) > 50) ? true : false); }
         void SetMovementOrder(MovementOrderType mo, Unit* followTarget = 0);
