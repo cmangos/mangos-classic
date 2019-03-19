@@ -198,7 +198,8 @@ bool PlayerbotClassAI::NeedGroupBuff(uint32 groupBuffSpellId, uint32 singleBuffS
 
 /**
  * GetHealTarget()
- * return Unit* Returns unit to be healed. First checks 'critical' Healer(s), next Tank(s), next Master (if different from:), next DPS.
+ * return Unit* Returns unit to be healed. First checks Main Tank(s), next 'critical' Healer(s), next regular Tank(s)
+ * next Master (if different from:), next DPS.
  * If none of the healths are low enough (or multiple valid targets) against these checks, the lowest health is healed. Having a target
  * returned does not guarantee it's worth healing, merely that the target does not have 100% health.
  *
@@ -528,7 +529,8 @@ bool PlayerbotClassAI::FleeFromPointIfCan(uint32 radius, Unit* pTarget, float x0
 
 /**
  * GetDispelTarget()
- * return Unit* Returns unit to be dispelled. First checks 'critical' Healer(s), next Tank(s), next Master (if different from:), next DPS.
+ * return Unit* Returns unit to be dispelled. First checks Main Tank(s), next 'critical' Healer(s), next regular Tank(s)
+ * next Master (if different from:), next DPS.
  *
  * return NULL If NULL is returned, no healing is required. At all.
  *
