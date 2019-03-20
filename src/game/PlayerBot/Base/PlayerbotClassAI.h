@@ -94,7 +94,7 @@ class MANGOS_DLL_SPEC PlayerbotClassAI
         virtual CombatManeuverReturns HealPlayer(Player* target);
         CombatManeuverReturns Buff(bool (*BuffHelper)(PlayerbotAI*, uint32, Unit*), uint32 spellId, uint32 type = JOB_ALL, bool bMustBeOOC = true);
         bool NeedGroupBuff(uint32 groupBuffSpellId, uint32 singleBuffSpellId);
-        Player* GetHealTarget(JOB_TYPE type = JOB_ALL);
+        Player* GetHealTarget(JOB_TYPE type = JOB_ALL, bool onlyPickFromSameGroup = false);
         Player* GetDispelTarget(DispelType dispelType, JOB_TYPE type = JOB_ALL, bool bMustBeOOC = false);
         Player* GetResurrectionTarget(JOB_TYPE type = JOB_ALL, bool bMustBeOOC = true);
         JOB_TYPE GetBotJob(Player* target);

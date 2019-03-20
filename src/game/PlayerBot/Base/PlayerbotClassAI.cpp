@@ -208,7 +208,7 @@ bool PlayerbotClassAI::NeedGroupBuff(uint32 groupBuffSpellId, uint32 singleBuffS
  * Will need extensive re-write for co-operation amongst multiple healers. As it stands, multiple healers would all pick the same 'ideal'
  * healing target.
  */
-Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type)
+Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type, bool onlyPickFromSameGroup)
 {
     if (!m_ai)  return nullptr;
     if (!m_bot) return nullptr;
@@ -225,7 +225,8 @@ Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type)
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel())
+            if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel()
+                             || (!m_bot->GetGroup()->SameSubGroup(m_bot, groupMember) && onlyPickFromSameGroup))
                 continue;
             JOB_TYPE job = GetTargetJob(groupMember);
             if (job & type)
