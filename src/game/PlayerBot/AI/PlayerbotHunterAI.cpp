@@ -446,7 +446,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
                             default:
                                 m_petSummonFailed = true;
                                 m_ai->TellMaster("summon pet failed!");
-                        }                   
+                        }
                     }
                     break;
                 case SPELL_FAILED_NO_PET:   // This should not happen as if we went this far, there is a pet entry in the DB
@@ -532,6 +532,10 @@ void PlayerbotHunterAI::DoNonCombatActions()
     }
 
     // Nothing else to do, Night Elves will cast Shadowmeld to reduce their aggro versus patrols or nearby mobs
-    if (SHADOWMELD && !m_bot->HasAura(SHADOWMELD, EFFECT_INDEX_0) && m_ai->CastSpell(SHADOWMELD, *m_bot) == SPELL_CAST_OK)
-        return;
+    if (SHADOWMELD > 0 && !m_bot->isMovingOrTurning()
+        && !m_bot->IsMounted()
+        && !m_bot->HasAura(SHADOWMELD, EFFECT_INDEX_0))
+    {
+        m_ai->CastSpell(SHADOWMELD, *m_bot);
+    }
 } // end DoNonCombatActions
