@@ -2940,6 +2940,9 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
 
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature_entry);
 
+    if (!cInfo)
+        return;
+
     if (m_caster->getLevel() >= cInfo->MaxLevel)
         level = cInfo->MaxLevel;
 
