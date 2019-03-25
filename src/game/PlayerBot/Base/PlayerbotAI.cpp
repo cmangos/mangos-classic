@@ -3903,6 +3903,9 @@ bool PlayerbotAI::IsMoving()
 
 void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
 {
+    if (GetClassAI()->GetWaitUntil() <= CurrentTime())
+        GetClassAI()->ClearWait();
+
     if (CurrentTime() < m_ignoreAIUpdatesUntilTime)
         return;
 
