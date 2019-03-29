@@ -22,7 +22,6 @@
 #include "PlayerbotMgr.h"
 #include "../config.h"
 #include "../../Chat/Chat.h"
-#include "../../Chat/Chat.h"
 #include "../../Entities/GossipDef.h"
 #include "../../Entities/Player.h"
 #include "../../Globals/ObjectMgr.h"
@@ -234,12 +233,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                         std::ostringstream out;
                         out << "CurrentTime: " << CurrentTime()
                             << " m_ignoreAIUpdatesUntilTime: " << pBot->m_ignoreAIUpdatesUntilTime;
-                        ch.SendSysMessage(out.str().c_str());
-                    }
-                    {
-                        std::ostringstream out;
-                        out << "m_TimeDoneEating: " << pBot->m_TimeDoneEating
-                            << " m_TimeDoneDrinking: " << pBot->m_TimeDoneDrinking;
                         ch.SendSysMessage(out.str().c_str());
                     }
                     {
