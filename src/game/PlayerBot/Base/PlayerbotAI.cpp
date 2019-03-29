@@ -2491,13 +2491,26 @@ Player* PlayerbotAI::GetGroupTank()
     if (m_bot->GetGroup())
     {
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
+        // First loop: we look for a main tank (only bots with JOB_MAIN_TANK) can announce themselves as main tank
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
             if (!groupMember || !groupMember->GetPlayerbotAI())
                 continue;
-            if (groupMember->GetPlayerbotAI()->IsTank())
+            if (groupMember->GetPlayerbotAI()->IsMainTank())
                 return groupMember;
+        }
+        // Second loop: we look for any tank (bots with JOB_TANK or human players with the right class/spec combination)
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (groupMember)
+            {
+                if (!groupMember->GetPlayerbotAI() && m_bot->GetPlayerbotAI()->GetClassAI()->GetTargetJob(groupMember) & JOB_TANK)
+                    return groupMember;
+                else if (groupMember->GetPlayerbotAI() && groupMember->GetPlayerbotAI()->IsTank())
+                    return groupMember;
+            }
         }
     }
 
