@@ -282,9 +282,15 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit* pTarget)
         if (SLICE_DICE > 0 && m_ai->IsElite(pTarget) && !m_bot->HasAura(SLICE_DICE, EFFECT_INDEX_1) && m_ai->CastSpell(SLICE_DICE, *pTarget) == SPELL_CAST_OK) // 25 energy (checked above)
             return RETURN_CONTINUE;
 
-        // If target is a warrior or paladin type (high armor): expose its armor if not a worldboss
-        if (EXPOSE_ARMOR > 0 && !m_ai->IsElite(pTarget, true) && pCreature && pCreature->GetCreatureInfo()->UnitClass != 8 && !pTarget->HasAura(EXPOSE_ARMOR, EFFECT_INDEX_0) && m_ai->CastSpell(EXPOSE_ARMOR, *pTarget) == SPELL_CAST_OK) // 25 energy (checked above)
-            return RETURN_CONTINUE;
+        // If target is a warrior or paladin type (high armor): expose its armor unless already tanked by a warrior (Sunder Armor > Expose Armor)
+        if (m_ai->IsElite(pTarget) && pCreature && pCreature->GetCreatureInfo()->UnitClass != 8)
+        {
+            if  (!m_ai->GetGroupTank() || (m_ai->GetGroupTank() && m_ai->GetGroupTank()->getVictim() != pTarget))
+            {
+                if (EXPOSE_ARMOR > 0 && !pTarget->HasAura(EXPOSE_ARMOR, EFFECT_INDEX_0) && m_ai->CastSpell(EXPOSE_ARMOR, *pTarget) == SPELL_CAST_OK) // 25 energy (checked above)
+                    return RETURN_CONTINUE;
+            }
+        }
 
         if (RUPTURE > 0 && !pTarget->HasAura(RUPTURE, EFFECT_INDEX_0) && m_ai->CastSpell(RUPTURE, *pTarget) == SPELL_CAST_OK) // 25 energy (checked above)
             return RETURN_CONTINUE;
