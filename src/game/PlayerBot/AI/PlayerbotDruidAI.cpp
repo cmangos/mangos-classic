@@ -181,8 +181,6 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVE(Unit* pTarget)
 
     bool meleeReach = m_bot->CanReachWithMeleeAttack(pTarget);
 
-    //uint32 masterHP = GetMaster()->GetHealth() * 100 / GetMaster()->GetMaxHealth();
-
     uint32 spec = m_bot->GetSpec();
     if (spec == 0) // default to spellcasting or healing for healer
         spec = (PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder() ? DRUID_SPEC_RESTORATION : DRUID_SPEC_BALANCE);
@@ -408,7 +406,20 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverHeal()
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    if (HealPlayer(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+    // Heal other players/bots first
+    // Select a target based on orders and some context (pets are ignored because GetHealTarget() only works on players)
+    Player* targetToHeal;
+    // 1. bot has orders to focus on main tank
+    if (m_ai->IsMainHealer())
+        targetToHeal = GetHealTarget(JOB_MAIN_TANK);
+    // 2. Look at its own group (this implies raid leader creates balanced groups, except for the MT group)
+    else
+        targetToHeal = GetHealTarget(JOB_ALL, true);
+    // 3. still no target to heal, search amongst everyone
+    if (!targetToHeal)
+        targetToHeal = GetHealTarget();
+
+    if (HealPlayer(targetToHeal) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
         return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
@@ -453,14 +464,14 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
 
     uint8 hp = target->GetHealthPercent();
 
-    // Define a tank bot will look at
-    Unit* pMainTank = GetHealTarget(JOB_TANK);
-
     // If target is out of range (40 yards) and is a tank: move towards it
+    // if bot is not asked to stay
     // Other classes have to adjust their position to the healers
     // TODO: This code should be common to all healers and will probably
-    // move to a more suitable place
-    if (pMainTank && !m_ai->In_Reach(pMainTank, HEALING_TOUCH))
+    // move to a more suitable place like PlayerbotAI::DoCombatMovement()
+    if ((GetTargetJob(target) == JOB_TANK || GetTargetJob(target) == JOB_MAIN_TANK)
+            && m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY
+            && !m_ai->In_Reach(target, HEALING_TOUCH))
     {
         m_bot->GetMotionMaster()->MoveFollow(target, 39.0f, m_bot->GetOrientation());
         return RETURN_CONTINUE;
@@ -473,7 +484,8 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
     // Start heals. Do lowest HP checks at the top
 
     // Emergency heal: target needs to be healed NOW!
-    if ((target == pMainTank && hp < 10) || (target != pMainTank && hp < 15))
+    if (((GetTargetJob(target) == JOB_TANK || GetTargetJob(target) == JOB_MAIN_TANK) && hp < 10)
+            || (GetTargetJob(target) != JOB_TANK && GetTargetJob(target) != JOB_MAIN_TANK && hp < 15))
     {
         // first try Nature's Swiftness + Healing Touch: instant heal
         if (NATURES_SWIFTNESS > 0 && m_bot->IsSpellReady(NATURES_SWIFTNESS) && CastSpell(NATURES_SWIFTNESS, m_bot))
@@ -488,7 +500,8 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
     }
 
     // Urgent heal: target won't die next second, but first bot needs to gain some time to cast Healing Touch safely
-    if ((target == pMainTank && hp < 15) || (target != pMainTank && hp < 25))
+    if (((GetTargetJob(target) == JOB_TANK || GetTargetJob(target) == JOB_MAIN_TANK) && hp < 15)
+            || (GetTargetJob(target) != JOB_TANK && GetTargetJob(target) != JOB_MAIN_TANK && hp < 25))
     {
         if (REGROWTH > 0 && m_ai->In_Reach(target, REGROWTH) && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
             return RETURN_CONTINUE;
@@ -522,7 +535,7 @@ uint8 PlayerbotDruidAI::CheckForms()
 
     // if bot has healing orders always shift to humanoid form
     // regardless of spec
-    if ((PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder()) || spec == DRUID_SPEC_RESTORATION)
+    if (m_ai->IsHealer() || spec == DRUID_SPEC_RESTORATION)
     {
         if (m_bot->HasAura(CAT_FORM, EFFECT_INDEX_0))
         {
@@ -654,14 +667,14 @@ void PlayerbotDruidAI::DoNonCombatActions()
         return;
     if (Buff(&PlayerbotDruidAI::BuffHelper, THORNS, (m_bot->GetGroup() ? JOB_TANK : JOB_ALL)) & RETURN_CONTINUE)
         return;
-    if (OMEN_OF_CLARITY && !m_bot->HasAura(OMEN_OF_CLARITY) && CastSpell(OMEN_OF_CLARITY, m_bot))
+    if (OMEN_OF_CLARITY > 0 && !m_bot->HasAura(OMEN_OF_CLARITY) && CastSpell(OMEN_OF_CLARITY, m_bot))
         return;
 
     // hp/mana check
     if (EatDrinkBandage())
         return;
 
-    if (INNERVATE && m_ai->In_Reach(m_bot, INNERVATE) && !m_bot->HasAura(INNERVATE) && m_ai->GetManaPercent() <= 20 && CastSpell(INNERVATE, m_bot))
+    if (INNERVATE > 0 && m_ai->In_Reach(m_bot, INNERVATE) && !m_bot->HasAura(INNERVATE) && m_ai->GetManaPercent() <= 20 && CastSpell(INNERVATE, m_bot))
         return;
 
     // Return to fighting form AFTER reviving, healing, buffing
@@ -752,7 +765,7 @@ uint32 PlayerbotDruidAI::Neutralize(uint8 creatureType)
         return 0;
     }
 
-    if (HIBERNATE)
+    if (HIBERNATE > 0)
         return HIBERNATE;
     else
         return 0;

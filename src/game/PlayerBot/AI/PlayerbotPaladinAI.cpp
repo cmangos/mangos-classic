@@ -215,7 +215,20 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // Heal
     if (m_ai->IsHealer())
     {
-        if (HealPlayer(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        // Heal other players/bots first
+        // Select a target based on orders and some context (pets are ignored because GetHealTarget() only works on players)
+        Player* targetToHeal;
+        // 1. bot has orders to focus on main tank
+        if (m_ai->IsMainHealer())
+            targetToHeal = GetHealTarget(JOB_MAIN_TANK);
+        // 2. Look at its own group (this implies raid leader creates balanced groups, except for the MT group)
+        else
+            targetToHeal = GetHealTarget(JOB_ALL, true);
+        // 3. still no target to heal, search amongst everyone
+        if (!targetToHeal)
+            targetToHeal = GetHealTarget();
+
+        if (HealPlayer(targetToHeal) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return RETURN_CONTINUE;
     }
     else
@@ -339,14 +352,14 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
             return RETURN_CONTINUE;
     }
 
-    // Define a tank bot will look at
-    Unit* pMainTank = GetHealTarget(JOB_TANK);
-
     // If target is out of range (40 yards) and is a tank: move towards it
+    // if bot is not asked to stay
     // Other classes have to adjust their position to the healers
     // TODO: This code should be common to all healers and will probably
-    // move to a more suitable place
-    if (pMainTank && !m_ai->In_Reach(pMainTank, FLASH_OF_LIGHT))
+    // move to a more suitable place like PlayerbotAI::DoCombatMovement()
+    if ((GetTargetJob(target) == JOB_TANK || GetTargetJob(target) == JOB_MAIN_TANK)
+            && m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY
+            && !m_ai->In_Reach(target, FLASH_OF_LIGHT))
     {
         m_bot->GetMotionMaster()->MoveFollow(target, 39.0f, m_bot->GetOrientation());
         return RETURN_CONTINUE;
@@ -363,7 +376,8 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
 
     // Target is a moderately wounded healer or a badly wounded not tank? Blessing of Protection!
     if (BLESSING_OF_PROTECTION > 0
-            && ((hp < 25 && (GetTargetJob(target) & JOB_HEAL)) || (hp < 15 && !(GetTargetJob(target) & JOB_TANK)))
+            && ((hp < 25 && (GetTargetJob(target) & JOB_HEAL || GetTargetJob(target) & JOB_MAIN_HEAL)) 
+            || (hp < 15 && !(GetTargetJob(target) & JOB_TANK) && !(GetTargetJob(target) & JOB_MAIN_TANK)))
             && m_bot->IsSpellReady(BLESSING_OF_PROTECTION) && m_ai->In_Reach(target, BLESSING_OF_PROTECTION)
             && !target->HasAura(FORBEARANCE, EFFECT_INDEX_0)
             && !target->HasAura(BLESSING_OF_PROTECTION, EFFECT_INDEX_0) && !target->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0)
@@ -375,13 +389,13 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
     if (hp < 25 && DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && m_bot->IsSpellReady(DIVINE_FAVOR) && m_ai->CastSpell(DIVINE_FAVOR, *m_bot) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
-    if (hp < 40 && FLASH_OF_LIGHT && m_ai->In_Reach(target, FLASH_OF_LIGHT) && m_ai->CastSpell(FLASH_OF_LIGHT, *target) == SPELL_CAST_OK)
+    if (hp < 40 && FLASH_OF_LIGHT > 0 && m_ai->In_Reach(target, FLASH_OF_LIGHT) && m_ai->CastSpell(FLASH_OF_LIGHT, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
-    if (hp < 60 && HOLY_SHOCK && m_ai->In_Reach(target, HOLY_SHOCK) && m_ai->CastSpell(HOLY_SHOCK, *target) == SPELL_CAST_OK)
+    if (hp < 60 && HOLY_SHOCK > 0 && m_ai->In_Reach(target, HOLY_SHOCK) && m_ai->CastSpell(HOLY_SHOCK, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
-    if (hp < 90 && HOLY_LIGHT && m_ai->In_Reach(target, HOLY_LIGHT) && m_ai->CastSpell(HOLY_LIGHT, *target) == SPELL_CAST_OK)
+    if (hp < 90 && HOLY_LIGHT > 0 && m_ai->In_Reach(target, HOLY_LIGHT) && m_ai->CastSpell(HOLY_LIGHT, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
@@ -426,7 +440,7 @@ void PlayerbotPaladinAI::CheckAuras()
             if (!groupMember)
                 continue;
 
-            if (GetTargetJob(groupMember) & JOB_TANK)
+            if (GetTargetJob(groupMember) & JOB_TANK || GetTargetJob(groupMember) & JOB_MAIN_TANK)
             {
                 tankInGroup = true;
                 break;
@@ -528,8 +542,8 @@ bool PlayerbotPaladinAI::CheckSealAndJudgement(Unit* pTarget)
     uint32 spec = m_bot->GetSpec();
 
     // Bypass spec if combat orders were given
-    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_HEAL) spec = PALADIN_SPEC_HOLY;
-    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK) spec = PALADIN_SPEC_PROTECTION;
+    if (m_ai->IsHealer()) spec = PALADIN_SPEC_HOLY;
+    if (m_ai->IsTank()) spec = PALADIN_SPEC_PROTECTION;
     if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_ASSIST) spec = PALADIN_SPEC_RETRIBUTION;
 
     if (m_CurrentJudgement == 0)
@@ -568,7 +582,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     CheckAuras();
 
     //Put up RF if tank
-    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK)
+    if (m_ai->IsTank())
         m_ai->SelfBuff(RIGHTEOUS_FURY);
     //Disable RF if not tank
     else if (m_bot->HasAura(RIGHTEOUS_FURY))
@@ -743,9 +757,9 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* targe
 // Match up with "Pull()" below
 bool PlayerbotPaladinAI::CanPull()
 {
-    if (HAND_OF_RECKONING && m_bot->IsSpellReady(HAND_OF_RECKONING))
+    if (HAND_OF_RECKONING > 0 && m_bot->IsSpellReady(HAND_OF_RECKONING))
         return true;
-    if (EXORCISM && m_bot->IsSpellReady(EXORCISM))
+    if (EXORCISM > 0 && m_bot->IsSpellReady(EXORCISM))
         return true;
 
     return false;
@@ -754,7 +768,7 @@ bool PlayerbotPaladinAI::CanPull()
 // Match up with "CanPull()" above
 bool PlayerbotPaladinAI::Pull()
 {
-    if (EXORCISM && m_ai->CastSpell(EXORCISM) == SPELL_CAST_OK)
+    if (EXORCISM > 0 && m_ai->CastSpell(EXORCISM) == SPELL_CAST_OK)
         return true;
 
     return false;
@@ -764,7 +778,7 @@ bool PlayerbotPaladinAI::CastHoTOnTank()
 {
     if (!m_ai) return false;
 
-    if ((PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder()) == 0) return false;
+    if (!m_ai->IsHealer()) return false;
 
     // Paladin: Sheath of Light (with talents), Flash of Light (with Infusion of Light talent and only on a target with the Sacred Shield buff),
     //          Holy Shock (with Tier 8 set bonus)

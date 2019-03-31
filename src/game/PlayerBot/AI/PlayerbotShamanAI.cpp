@@ -192,7 +192,20 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // Heal
     if (m_ai->IsHealer())
     {
-        if (HealPlayer(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        // Heal other players/bots first
+        // Select a target based on orders and some context (pets are ignored because GetHealTarget() only works on players)
+        Player* targetToHeal;
+        // 1. bot has orders to focus on main tank
+        if (m_ai->IsMainHealer())
+            targetToHeal = GetHealTarget(JOB_MAIN_TANK);
+        // 2. Look at its own group (this implies raid leader creates balanced groups, except for the MT group)
+        else
+            targetToHeal = GetHealTarget(JOB_ALL, true);
+        // 3. still no target to heal, search amongst everyone
+        if (!targetToHeal)
+            targetToHeal = GetHealTarget();
+
+        if (HealPlayer(targetToHeal) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return RETURN_CONTINUE;
     }
     else
@@ -263,7 +276,7 @@ CombatManeuverReturns PlayerbotShamanAI::HealPlayer(Player* target)
 
     if (!target->isAlive())
     {
-        if (ANCESTRAL_SPIRIT && m_ai->CastSpell(ANCESTRAL_SPIRIT, *target) == SPELL_CAST_OK)
+        if (ANCESTRAL_SPIRIT > 0 && m_ai->CastSpell(ANCESTRAL_SPIRIT, *target) == SPELL_CAST_OK)
         {
             std::string msg = "Resurrecting ";
             msg += target->GetName();
@@ -285,6 +298,19 @@ CombatManeuverReturns PlayerbotShamanAI::HealPlayer(Player* target)
     {
         if (CURE_DISEASE_SHAMAN > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && m_ai->CastSpell(CURE_DISEASE_SHAMAN, *pDiseasedTarget) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
+    }
+
+    // If target is out of range (40 yards) and is a tank: move towards it
+    // if bot is not asked to stay
+    // Other classes have to adjust their position to the healers
+    // TODO: This code should be common to all healers and will probably
+    // move to a more suitable place like PlayerbotAI::DoCombatMovement()
+    if ((GetTargetJob(target) == JOB_TANK || GetTargetJob(target) == JOB_MAIN_TANK)
+            && m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY
+            && !m_ai->In_Reach(target, HEALING_WAVE))
+    {
+        m_bot->GetMotionMaster()->MoveFollow(target, 39.0f, m_bot->GetOrientation());
+        return RETURN_CONTINUE;
     }
 
     // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
@@ -488,7 +514,7 @@ bool PlayerbotShamanAI::CastHoTOnTank()
 {
     if (!m_ai) return false;
 
-    if ((PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder()) == 0) return false;
+    if (!m_ai->IsHealer()) return false;
 
     // Shaman: Healing Stream Totem
     // None of these are cast before Pulling
