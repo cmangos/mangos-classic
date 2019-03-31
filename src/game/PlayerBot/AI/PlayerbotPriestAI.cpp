@@ -177,7 +177,16 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
     uint32 spec = m_bot->GetSpec();
 
     // Define a tank bot will look at
-    Unit* pMainTank = GetHealTarget(JOB_TANK);
+    // or Main Tank if healer has order to do so
+    Unit* mainTank;
+    if (m_ai->IsMainHealer())
+        mainTank = GetHealTarget(JOB_MAIN_TANK);
+    // Else look at tank from own group if one
+    else
+        mainTank = GetHealTarget(JOB_TANK, true);
+    // Finally get any tank
+    if (!mainTank)
+        mainTank = GetHealTarget(JOB_TANK);
 
     if (m_ai->GetCombatStyle() != PlayerbotAI::COMBAT_RANGED && !meleeReach)
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
@@ -192,9 +201,9 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
     if (FEAR_WARD > 0 && m_bot->IsSpellReady(FEAR_WARD))
     {
         // Buff tank first
-        if (pMainTank)
+        if (mainTank)
         {
-            if (m_ai->In_Reach(pMainTank, FEAR_WARD) && !pMainTank->HasAura(FEAR_WARD, EFFECT_INDEX_0) && CastSpell(FEAR_WARD, pMainTank))
+            if (m_ai->In_Reach(mainTank, FEAR_WARD) && !mainTank->HasAura(FEAR_WARD, EFFECT_INDEX_0) && CastSpell(FEAR_WARD, mainTank))
                 return RETURN_CONTINUE;
         }
         // Else try to buff master
@@ -266,12 +275,24 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
     if (m_ai->IsHealer())
     {
         // Heal other players/bots first
-        if (HealPlayer(GetHealTarget()) & RETURN_CONTINUE)
+        // Select a target based on orders and some context (pets are ignored because GetHealTarget() only works on players)
+        Player* targetToHeal;
+        // 1. bot has orders to focus on main tank
+        if (m_ai->IsMainHealer())
+            targetToHeal = GetHealTarget(JOB_MAIN_TANK);
+        // 2. Look at its own group (this implies raid leader creates balanced groups, except for the MT group)
+        else
+            targetToHeal = GetHealTarget(JOB_ALL, true);
+        // 3. still no target to heal, search amongst everyone
+        if (!targetToHeal)
+            targetToHeal = GetHealTarget();
+
+        if (HealPlayer(targetToHeal) & RETURN_CONTINUE)
             return RETURN_CONTINUE;
 
         // No one needs to be healed: do small damage instead
         // If target is elite and not handled by MT: do nothing
-        if (m_ai->IsElite(pTarget) && pMainTank && pMainTank->getVictim() != pTarget)
+        if (m_ai->IsElite(pTarget) && mainTank && mainTank->getVictim() != pTarget)
             return RETURN_NO_ACTION_OK;
 
         // Cast Shadow Word:Pain on current target and keep its up (if mana >= 40% or target HP < 15%)
@@ -335,8 +356,6 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
 
     // Default: shoot with wand
     return CastSpell(SHOOT, pTarget);
-
-    return RETURN_NO_ACTION_OK;
 } // end DoNextCombatManeuver
 
 CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVP(Unit* pTarget)
@@ -382,7 +401,7 @@ CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
 
     if (!target->isAlive())
     {
-        if (RESURRECTION && m_ai->In_Reach(target, RESURRECTION) && m_ai->CastSpell(RESURRECTION, *target) == SPELL_CAST_OK)
+        if (RESURRECTION > 0 && !m_ai->IsInCombat() && m_ai->In_Reach(target, RESURRECTION) && m_ai->CastSpell(RESURRECTION, *target) == SPELL_CAST_OK)
         {
             std::string msg = "Resurrecting ";
             msg += target->GetName();
@@ -403,7 +422,6 @@ CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
     if (Player* pDiseasedTarget = GetDispelTarget(DISPEL_DISEASE))
     {
         uint32 cure = ABOLISH_DISEASE > 0 ? ABOLISH_DISEASE : CURE_DISEASE;
-        // uint32 poison = ABOLISH_POISON ? ABOLISH_POISON : CURE_POISON;
         if (cure > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && CastSpell(cure, pDiseasedTarget))
             return RETURN_CONTINUE;
     }
@@ -411,17 +429,17 @@ CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
     uint8 hp = target->GetHealthPercent();
     uint8 hpSelf = m_ai->GetHealthPercent();
 
-    // Define a tank bot will look at
-    Unit* pMainTank = GetHealTarget(JOB_TANK);
-
     if (hp >= 90)
         return RETURN_NO_ACTION_OK;
 
     // If target is out of range (40 yards) and is a tank: move towards it
+    // if bot is not asked to stay
     // Other classes have to adjust their position to the healers
     // TODO: This code should be common to all healers and will probably
-    // move to a more suitable place
-    if (pMainTank && !m_ai->In_Reach(pMainTank, FLASH_HEAL))
+    // move to a more suitable place like PlayerbotAI::DoCombatMovement()
+    if ((GetTargetJob(target) == JOB_TANK || GetTargetJob(target) == JOB_MAIN_TANK)
+            && m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY
+            && !m_ai->In_Reach(target, FLASH_HEAL))
     {
         m_bot->GetMotionMaster()->MoveFollow(target, 39.0f, m_bot->GetOrientation());
         return RETURN_CONTINUE;
@@ -432,7 +450,7 @@ CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
         if (INNER_FOCUS > 0 && m_bot->IsSpellReady(INNER_FOCUS) && !m_bot->HasAura(INNER_FOCUS, EFFECT_INDEX_0) && CastSpell(INNER_FOCUS, m_bot))
             return RETURN_CONTINUE;
 
-    if (hp < 25 && POWER_WORD_SHIELD > 0 && m_ai->In_Reach(target, POWER_WORD_SHIELD) && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0) && !target->HasAura(WEAKNED_SOUL, EFFECT_INDEX_0) && m_ai->CastSpell(POWER_WORD_SHIELD, *target) == SPELL_CAST_OK)
+    if (hp < 25 && POWER_WORD_SHIELD > 0 && m_ai->IsInCombat() && m_ai->In_Reach(target, POWER_WORD_SHIELD) && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0) && !target->HasAura(WEAKNED_SOUL, EFFECT_INDEX_0) && m_ai->CastSpell(POWER_WORD_SHIELD, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
     if (hp < 35 && FLASH_HEAL > 0 && m_ai->In_Reach(target, FLASH_HEAL) && m_ai->CastSpell(FLASH_HEAL, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
@@ -546,7 +564,7 @@ bool PlayerbotPriestAI::CastHoTOnTank()
 {
     if (!m_ai) return false;
 
-    if ((PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder()) == 0) return false;
+    if (!m_ai->IsHealer()) return false;
 
     // Priest HoTs: Renew, Penance (with talents, channeled)
     if (RENEW > 0 && m_ai->In_Reach(m_ai->GetGroupTank(), RENEW))
@@ -568,7 +586,7 @@ uint32 PlayerbotPriestAI::Neutralize(uint8 creatureType)
         return 0;
     }
 
-    if (SHACKLE_UNDEAD)
+    if (SHACKLE_UNDEAD > 0)
         return SHACKLE_UNDEAD;
     else
         return 0;

@@ -127,7 +127,6 @@ class MANGOS_DLL_SPEC PlayerbotShamanAI : PlayerbotClassAI
 
         // Heals the target based off its hps
         CombatManeuverReturns HealPlayer(Player* target);
-        Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
         void DropTotems();
         void CheckShields();
         void UseCooldowns();
