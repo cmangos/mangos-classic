@@ -758,12 +758,16 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
 
     if (!m_combatOrder)
         out << "Got no combat orders!";
-    else if (m_combatOrder & ORDERS_TANK || m_combatOrder & ORDERS_MAIN_TANK)
+    else if (m_combatOrder & ORDERS_TANK)
         out << "I TANK";
+    else if (m_combatOrder & ORDERS_MAIN_TANK)
+        out << "I MAIN TANK";
     else if (m_combatOrder & ORDERS_ASSIST)
         out << "I ASSIST " << (m_targetAssist ? m_targetAssist->GetName() : "unknown");
-    else if (m_combatOrder & ORDERS_HEAL || m_combatOrder & ORDERS_MAIN_HEAL)
+    else if (m_combatOrder & ORDERS_HEAL)
         out << "I HEAL and DISPEL";
+    else if (m_combatOrder & ORDERS_MAIN_HEAL)
+        out << "I MAIN HEAL and DISPEL";
     else if (m_combatOrder & ORDERS_NODISPEL)
         out << "I HEAL and WON'T DISPEL";
     else if (m_combatOrder & ORDERS_PASSIVE)
@@ -2268,7 +2272,7 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
         m_targetCombat = forcedTarget;
         m_ignoreNeutralizeEffect = true;    // Bypass IsNeutralized() checks on next updates
         m_targetChanged = true;
-        m_targetType = (m_combatOrder & ORDERS_TANK || m_combatOrder & ORDERS_MAIN_TANK ? TARGET_THREATEN : TARGET_NORMAL);
+        m_targetType = (m_combatOrder & (ORDERS_TANK | ORDERS_MAIN_TANK) ? TARGET_THREATEN : TARGET_NORMAL);
     }
 
     // we already have a target and we are not forced to change it
@@ -2300,7 +2304,7 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
             m_targetCombat = candidateTarget;
             if (m_mgr->m_confDebugWhisper)
                 TellMaster("Attacking %s to assist %s", m_targetCombat->GetName(), m_targetAssist->GetName());
-            m_targetType = (m_combatOrder & ORDERS_TANK || m_combatOrder & ORDERS_MAIN_TANK ? TARGET_THREATEN : TARGET_NORMAL);
+            m_targetType = (m_combatOrder & (ORDERS_TANK | ORDERS_MAIN_TANK) ? TARGET_THREATEN : TARGET_NORMAL);
             m_targetChanged = true;
         }
     }
@@ -2311,7 +2315,7 @@ void PlayerbotAI::GetCombatTarget(Unit* forcedTarget)
         if (candidateTarget && !IsNeutralized(candidateTarget))
         {
             m_targetCombat = candidateTarget;
-            m_targetType = (m_combatOrder & ORDERS_TANK || m_combatOrder & ORDERS_MAIN_TANK ? TARGET_THREATEN : TARGET_NORMAL);
+            m_targetType = (m_combatOrder & (ORDERS_TANK | ORDERS_MAIN_TANK) ? TARGET_THREATEN : TARGET_NORMAL);
             m_targetChanged = true;
         }
     }
