@@ -420,7 +420,7 @@ CombatManeuverReturns PlayerbotDruidAI::_DoNextPVECombatManeuverHeal()
 
     // Combat resurrection (only tanks or master. If other targets are required, let master explicitly requests it)
     if (ResurrectPlayer(GetResurrectionTarget(JOB_TANK_MASTER, false)) & RETURN_CONTINUE)
-    	return RETURN_CONTINUE;
+        return RETURN_CONTINUE;
 
     // Heal other players/bots first
     // Select a target based on orders and some context (pets are ignored because GetHealTarget() only works on players)
@@ -473,8 +473,8 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
             || (GetTargetJob(target) != JOB_TANK && GetTargetJob(target) != JOB_MAIN_TANK && hp < 15))
     {
         // first try Nature's Swiftness + Healing Touch: instant heal
-        if (NATURES_SWIFTNESS > 0 && m_bot->IsSpellReady(NATURES_SWIFTNESS) && CastSpell(NATURES_SWIFTNESS, m_bot))
-            return RETURN_CONTINUE;
+        if (NATURES_SWIFTNESS > 0 && m_bot->IsSpellReady(NATURES_SWIFTNESS))
+            CastSpell(NATURES_SWIFTNESS, m_bot);
 
         if (HEALING_TOUCH > 0 && m_bot->HasAura(NATURES_SWIFTNESS, EFFECT_INDEX_0) && m_ai->In_Reach(target, HEALING_TOUCH) && CastSpell(HEALING_TOUCH, target))
             return RETURN_CONTINUE;

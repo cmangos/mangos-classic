@@ -338,7 +338,7 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
     uint8 hp = target->GetHealthPercent();
 
     // Everyone is healthy enough, return OK. MUST correlate to highest value below (should be last HP check)
-    if (hp >= 90)
+    if (hp >= 80)
         return RETURN_NO_ACTION_OK;
 
     if (hp < 10 && LAY_ON_HANDS && m_bot->IsSpellReady(LAY_ON_HANDS) && m_ai->In_Reach(target, LAY_ON_HANDS) && m_ai->CastSpell(LAY_ON_HANDS, *target) == SPELL_CAST_OK)
@@ -356,16 +356,16 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
         return RETURN_CONTINUE;
 
     // Low HP : activate Divine Favor to make next heal a critical heal
-    if (hp < 25 && DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && m_bot->IsSpellReady(DIVINE_FAVOR) && m_ai->CastSpell(DIVINE_FAVOR, *m_bot) == SPELL_CAST_OK)
-        return RETURN_CONTINUE;
+    if (hp < 25 && DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && m_bot->IsSpellReady(DIVINE_FAVOR))
+        m_ai->CastSpell(DIVINE_FAVOR, *m_bot);
 
-    if (hp < 40 && FLASH_OF_LIGHT > 0 && m_ai->In_Reach(target, FLASH_OF_LIGHT) && m_ai->CastSpell(FLASH_OF_LIGHT, *target) == SPELL_CAST_OK)
+    if (hp < 40 && HOLY_LIGHT > 0 && m_ai->In_Reach(target, HOLY_LIGHT) && m_ai->CastSpell(HOLY_LIGHT, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     if (hp < 60 && HOLY_SHOCK > 0 && m_ai->In_Reach(target, HOLY_SHOCK) && m_ai->CastSpell(HOLY_SHOCK, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
-    if (hp < 90 && HOLY_LIGHT > 0 && m_ai->In_Reach(target, HOLY_LIGHT) && m_ai->CastSpell(HOLY_LIGHT, *target) == SPELL_CAST_OK)
+    if (hp < 80 && FLASH_OF_LIGHT > 0 && m_ai->In_Reach(target, FLASH_OF_LIGHT) && m_ai->CastSpell(FLASH_OF_LIGHT, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
