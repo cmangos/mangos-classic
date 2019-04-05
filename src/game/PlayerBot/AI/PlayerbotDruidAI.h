@@ -115,6 +115,10 @@ class MANGOS_DLL_SPEC PlayerbotDruidAI : PlayerbotClassAI
 
         // Heals the target based off its hps
         CombatManeuverReturns HealPlayer(Player* target);
+        // Resurrects the target
+        CombatManeuverReturns ResurrectPlayer(Player* target);
+        // Dispel disease or negative magic effects from an internally selected target
+        CombatManeuverReturns DispelPlayer(Player* target = nullptr);
 
         static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target);
         // Callback method to reset shapeshift forms blocking buffs and heals

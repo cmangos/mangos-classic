@@ -178,11 +178,8 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
     Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE)(PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
 
     // Remove curse on group members
-    if (Player* pCursedTarget = GetDispelTarget(DISPEL_CURSE))
-    {
-        if (MAGE_REMOVE_CURSE > 0 && CastSpell(MAGE_REMOVE_CURSE, pCursedTarget))
-            return RETURN_CONTINUE;
-    }
+    if (m_ai->HasDispelOrder() && DispelPlayer(GetDispelTarget(DISPEL_CURSE)) & RETURN_CONTINUE)
+        return RETURN_CONTINUE;
 
     if (newTarget && !m_ai->IsNeutralized(newTarget)) // Bot has aggro and the mob is not already crowd controled
     {
@@ -400,6 +397,18 @@ Item* PlayerbotMageAI::FindManaGem() const
     return nullptr;
 }
 
+CombatManeuverReturns PlayerbotMageAI::DispelPlayer(Player* cursedTarget)
+{
+    CombatManeuverReturns r = PlayerbotClassAI::DispelPlayer(cursedTarget);
+    if (r != RETURN_NO_ACTION_OK)
+        return r;
+
+    if (MAGE_REMOVE_CURSE > 0 && CastSpell(MAGE_REMOVE_CURSE, cursedTarget))
+        return RETURN_CONTINUE;
+
+    return RETURN_NO_ACTION_OK;
+}
+
 void PlayerbotMageAI::DoNonCombatActions()
 {
     Player* master = GetMaster();
@@ -407,12 +416,9 @@ void PlayerbotMageAI::DoNonCombatActions()
     if (!m_bot || !master)
         return;
 
-    // Remove curse on group members if orders allow bot to do so
-    if (Player* pCursedTarget = GetDispelTarget(DISPEL_CURSE))
-    {
-        if (MAGE_REMOVE_CURSE > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && CastSpell(MAGE_REMOVE_CURSE, pCursedTarget))
-            return;
-    }
+    // Remove curse on group members
+    if (m_ai->HasDispelOrder() && DispelPlayer(GetDispelTarget(DISPEL_CURSE)) & RETURN_CONTINUE)
+        return;
 
     // Buff armor
     if (MAGE_ARMOR)
