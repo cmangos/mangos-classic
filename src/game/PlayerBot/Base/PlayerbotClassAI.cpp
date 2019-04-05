@@ -107,7 +107,29 @@ CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target)
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
-    if (target->IsInDuel()) return RETURN_NO_ACTION_INVALIDTARGET;
+    if (target->IsInDuel() || !target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
+
+    return RETURN_NO_ACTION_OK;
+}
+
+CombatManeuverReturns PlayerbotClassAI::ResurrectPlayer(Player* target)
+{
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
+
+    if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
+    if (target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
+
+    return RETURN_NO_ACTION_OK;
+}
+
+CombatManeuverReturns PlayerbotClassAI::DispelPlayer(Player* target)
+{
+    if (!m_ai)  return RETURN_NO_ACTION_ERROR;
+    if (!m_bot) return RETURN_NO_ACTION_ERROR;
+
+    if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
+    if (target->IsInDuel() || !target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
 
     return RETURN_NO_ACTION_OK;
 }

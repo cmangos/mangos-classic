@@ -91,6 +91,10 @@ class MANGOS_DLL_SPEC PlayerbotPaladinAI : PlayerbotClassAI
 
         // Heals the target based off its hps
         CombatManeuverReturns HealPlayer(Player* target);
+        // Resurrects the target
+        CombatManeuverReturns ResurrectPlayer(Player* target);
+        // Dispel disease or negative magic effects from an internally selected target
+        CombatManeuverReturns DispelPlayer(Player* target = nullptr);
 
         //Changes aura according to spec/orders
         void CheckAuras();
