@@ -278,20 +278,8 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // Damage tweaking for healers
     if (m_ai->IsHealer())
     {
-        // Heal other players/bots first
-        // Select a target based on orders and some context (pets are ignored because GetHealTarget() only works on players)
-        Player* targetToHeal;
-        // 1. bot has orders to focus on main tank
-        if (m_ai->IsMainHealer())
-            targetToHeal = GetHealTarget(JOB_MAIN_TANK);
-        // 2. Look at its own group (this implies raid leader creates balanced groups, except for the MT group)
-        else
-            targetToHeal = GetHealTarget(JOB_ALL, true);
-        // 3. still no target to heal, search amongst everyone
-        if (!targetToHeal)
-            targetToHeal = GetHealTarget();
-
-        if (HealPlayer(targetToHeal) & RETURN_CONTINUE)
+        // Heal (try to pick a target by on common rules, than heal using each PlayerbotClassAI HealPlayer() method)
+        if (FindTargetAndHeal())
             return RETURN_CONTINUE;
 
         // No one needs to be healed: do small damage instead
