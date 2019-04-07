@@ -216,40 +216,14 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
     if (CheckSealAndJudgement(pTarget))
         return RETURN_CONTINUE;
 
-    // Heal
-    if (m_ai->IsHealer())
-    {
-        // Heal other players/bots first
-        // Select a target based on orders and some context (pets are ignored because GetHealTarget() only works on players)
-        Player* targetToHeal;
-        // 1. bot has orders to focus on main tank
-        if (m_ai->IsMainHealer())
-            targetToHeal = GetHealTarget(JOB_MAIN_TANK);
-        // 2. Look at its own group (this implies raid leader creates balanced groups, except for the MT group)
-        else
-            targetToHeal = GetHealTarget(JOB_ALL, true);
-        // 3. still no target to heal, search amongst everyone
-        if (!targetToHeal)
-            targetToHeal = GetHealTarget();
-
-        if (HealPlayer(targetToHeal) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-            return RETURN_CONTINUE;
-    }
-    else
-    {
-        // Is this desirable? Debatable.
-        // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
-        if (HealPlayer(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-            return RETURN_CONTINUE;
-    }
+    // Heal (try to pick a target by on common rules, than heal using each PlayerbotClassAI HealPlayer() method)
+    if (FindTargetAndHeal())
+        return RETURN_CONTINUE;
 
     //Used to determine if this bot has highest threat
     Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE)(PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
     if (newTarget && !(m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK) && !m_ai->IsNeutralized(newTarget)) // TODO: && party has a tank
     {
-        if (HealPlayer(m_bot) == RETURN_CONTINUE)
-            return RETURN_CONTINUE;
-
         // Aggroed by an elite
         if (m_ai->IsElite(newTarget))
         {
