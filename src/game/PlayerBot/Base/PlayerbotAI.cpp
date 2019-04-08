@@ -765,9 +765,11 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
     else if (m_combatOrder & ORDERS_ASSIST)
         out << "I ASSIST " << (m_targetAssist ? m_targetAssist->GetName() : "unknown");
     else if (m_combatOrder & ORDERS_MAIN_HEAL)
-        out << "I'm MAIN HEALER";
+        out << "I'm a MAIN HEALER";
     else if (m_combatOrder & ORDERS_HEAL)
         out << "I HEAL";
+    else if (m_combatOrder & ORDERS_NOT_MAIN_HEAL)
+        out << "I HEAL but will ignore any main tank";
     else if (m_combatOrder & ORDERS_PASSIVE)
         out << "I'm PASSIVE";
     if ((m_combatOrder & ORDERS_PRIMARY) && (m_combatOrder & (ORDERS_PROTECT | ORDERS_RESIST | ORDERS_NODISPEL)))
@@ -3658,6 +3660,7 @@ void PlayerbotAI::SetCombatOrderByStr(std::string str, Unit* target)
     else if (str == "assist")       co = ORDERS_ASSIST;
     else if (str == "heal")         co = ORDERS_HEAL;
     else if (str == "mainheal")     co = ORDERS_MAIN_HEAL;
+    else if (str == "notmainheal")  co = ORDERS_NOT_MAIN_HEAL;
     else if (str == "protect")      co = ORDERS_PROTECT;
     else if (str == "passive")      co = ORDERS_PASSIVE;
     else if (str == "pull")         co = ORDERS_TEMP_WAIT_TANKAGGRO;
@@ -3691,6 +3694,12 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit* target)
 
     switch (co)
     {
+        case ORDERS_TANK:   // 1(01)
+        {
+            if (m_combatOrder & ORDERS_MAIN_TANK)
+                m_combatOrder = (CombatOrderType)((uint32) m_combatOrder & (uint32) ~ORDERS_MAIN_TANK);  // ORDERS_TANK and ORDERS_MAIN_TANK exclude one each other, remove one when the other is set
+            break;
+        }
         case ORDERS_ASSIST: // 2(10)
         {
             if (!target)
@@ -3699,6 +3708,12 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit* target)
                 return;
             }
             else m_targetAssist = target;
+            break;
+        }
+        case ORDERS_HEAL:    // 4(100)
+        {
+            if (m_combatOrder & ORDERS_MAIN_HEAL)
+                m_combatOrder = (CombatOrderType)((uint32) m_combatOrder & (uint32) ~ORDERS_MAIN_HEAL);  // ORDERS_HEAL and ORDERS_MAIN_HEAL exclude one each other, remove one when the other is set
             break;
         }
         case ORDERS_PROTECT: // 10(10000)
@@ -3718,7 +3733,27 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit* target)
             m_targetProtect = 0;
             return;
         }
-        case ORDERS_RESET: // FFFF(11111111)
+        case ORDERS_MAIN_TANK:  // 1000(1000000000000)
+        {
+            if (m_combatOrder & ORDERS_TANK)
+                m_combatOrder = (CombatOrderType)((uint32) m_combatOrder & (uint32) ~ORDERS_TANK);   // ORDERS_TANK and ORDERS_MAIN_TANK exclude one each other, remove one when the other is set
+            break;
+        }
+        case ORDERS_MAIN_HEAL:  // 2000(10000000000000)
+        {
+            if (m_combatOrder & ORDERS_HEAL)
+                m_combatOrder = (CombatOrderType)((uint32) m_combatOrder & (uint32) ~ORDERS_HEAL);   // ORDERS_HEAL and ORDERS_MAIN_HEAL exclude one each other, remove one when the other is set
+            if (m_combatOrder & ORDERS_NOT_MAIN_HEAL)
+                m_combatOrder = (CombatOrderType)((uint32) m_combatOrder & (uint32) ~ORDERS_NOT_MAIN_HEAL);  // ORDERS_NOT_MAIN_HEAL and ORDERS_MAIN_HEAL exclude one each other, remove one when the other is set
+            break;
+        }
+        case ORDERS_NOT_MAIN_HEAL:  // 4000(100000000000000)
+        {
+            if (m_combatOrder & ORDERS_MAIN_HEAL)
+                m_combatOrder = (CombatOrderType)((uint32) m_combatOrder & (uint32) ~ORDERS_MAIN_HEAL);  // ORDERS_NOT_MAIN_HEAL and ORDERS_MAIN_HEAL exclude one each other, remove one when the other is set
+            break;
+        }
+        case ORDERS_RESET: // FFFF(1111111111111111)
         {
             m_combatOrder = ORDERS_NONE;
             m_targetAssist = 0;

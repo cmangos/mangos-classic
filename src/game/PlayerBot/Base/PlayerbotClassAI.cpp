@@ -233,15 +233,16 @@ bool PlayerbotClassAI::FindTargetAndHeal()
     // Heal other players/bots first
     // Select a target based on orders and some context (pets are ignored because GetHealTarget() only works on players)
     Player* targetToHeal;
+    JOB_TYPE type = (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NOT_MAIN_HEAL) ? JOB_ALL_NO_MT : JOB_ALL;
     // 1. bot has orders to focus on main tank
     if (m_ai->IsMainHealer())
         targetToHeal = GetHealTarget(JOB_MAIN_TANK);
     // 2. Look at its own group (this implies raid leader creates balanced groups, except for the MT group)
     else
-        targetToHeal = GetHealTarget(JOB_ALL, true);
+        targetToHeal = GetHealTarget(type, true);
     // 3. still no target to heal, search amongst everyone
     if (!targetToHeal)
-        targetToHeal = GetHealTarget();
+        targetToHeal = GetHealTarget(type);
 
     if (m_ai->GetClassAI()->HealPlayer(targetToHeal) & RETURN_CONTINUE)
         return true;

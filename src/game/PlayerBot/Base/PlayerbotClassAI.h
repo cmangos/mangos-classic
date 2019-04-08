@@ -43,6 +43,7 @@ enum JOB_TYPE
     JOB_MASTER      = 0x10,     // Not a fan of this distinction but user (or rather, admin) choice
     JOB_TANK_MASTER = 0x19, 
     JOB_DPS         = 0x20,
+    JOB_ALL_NO_MT   = 0x3E,     // all of the above except Main Tank
     JOB_ALL         = 0x3F,     // all of the above
     JOB_MANAONLY    = 0x40      // for buff checking (NOTE: this means any with powertype mana AND druids (who may be shifted but still have mana)
 };
