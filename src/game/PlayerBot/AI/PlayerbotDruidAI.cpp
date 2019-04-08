@@ -684,7 +684,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
     }
     else if (Buff(&PlayerbotDruidAI::BuffHelper, MARK_OF_THE_WILD) & RETURN_CONTINUE)
         return;
-    if (Buff(&PlayerbotDruidAI::BuffHelper, THORNS, (m_bot->GetGroup() ? JOB_TANK : JOB_ALL)) & RETURN_CONTINUE)
+    if (Buff(&PlayerbotDruidAI::BuffHelper, THORNS, (m_bot->GetGroup() ? JOB_TANK | JOB_MAIN_TANK : JOB_ALL)) & RETURN_CONTINUE)
         return;
     if (OMEN_OF_CLARITY > 0 && !m_bot->HasAura(OMEN_OF_CLARITY) && CastSpell(OMEN_OF_CLARITY, m_bot))
         return;
