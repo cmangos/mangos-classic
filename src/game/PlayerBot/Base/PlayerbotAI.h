@@ -214,9 +214,10 @@ class MANGOS_DLL_SPEC PlayerbotAI
             ORDERS_RESIST_SHADOW        = 0x0800,   // resist shadow
             ORDERS_MAIN_TANK            = 0x1000,   // main attackers binder by gaining threat in raid situation
             ORDERS_MAIN_HEAL            = 0x2000,   // concentrate on healing the main tank (will ignore other targets as long as MT needs healing)
+            ORDERS_NOT_MAIN_HEAL        = 0x4000,   // concentrate on healing except the main tank that will be ignored
 
             // Cumulative orders
-            ORDERS_PRIMARY              = 0x0007,
+            ORDERS_PRIMARY              = 0x7007,
             ORDERS_SECONDARY            = 0x0F78,
             ORDERS_RESIST               = 0x0F00,
             ORDERS_TEMP                 = 0x00C0,   // All orders NOT to be saved, turned off by bots (or logoff, reset, ...)
@@ -552,7 +553,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         bool IsMainTank() { return (m_combatOrder & ORDERS_MAIN_TANK) ? true : false; }
         bool IsTank() { return (m_combatOrder & ORDERS_TANK) || IsMainTank() ? true : false; }
         bool IsMainHealer() { return (m_combatOrder & ORDERS_MAIN_HEAL) ? true : false; }
-        bool IsHealer() { return (m_combatOrder & ORDERS_HEAL) || IsMainHealer() ? true : false; }
+        bool IsHealer() { return (m_combatOrder & (ORDERS_HEAL | ORDERS_NOT_MAIN_HEAL)) || IsMainHealer() ? true : false; }
         bool HasDispelOrder() { return !(m_combatOrder & ORDERS_NODISPEL); }
         bool IsDPS() { return (m_combatOrder & ORDERS_ASSIST) ? true : false; }
         bool Impulse() { srand(time(nullptr)); return (((rand() % 100) > 50) ? true : false); }
