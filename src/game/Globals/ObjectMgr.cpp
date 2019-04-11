@@ -4431,7 +4431,7 @@ void ObjectMgr::LoadInstanceTemplate()
             MapEntry const* ghostEntry = sMapStore.LookupEntry(temp->ghostEntranceMap);
             if (!ghostEntry)
             {
-                sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad ghost entrance map id %u for instance template %d template!", ghostEntry->MapID, temp->map);
+                sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad ghost entrance map id %u for instance template %d template!", temp->ghostEntranceMap, temp->map);
                 sInstanceTemplate.EraseEntry(i);
                 continue;
             }
