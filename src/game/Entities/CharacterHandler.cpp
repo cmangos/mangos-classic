@@ -457,18 +457,18 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
     {
         // player is reconnecting
 
-        if (!isLogingOut())
-        {
-            sLog.outError("HandlePlayerLoginOpcode> %s try to login again, AccountId = %u", pCurrChar->GetGuidStr().c_str(), GetAccountId());
-            data << (uint8)CHAR_LOGIN_FAILED;
-            SendPacket(data, true);
-            return;
-        }
-
         if (!pCurrChar)
         {
             sLog.outError("HandlePlayerLoginOpcode> %s try to login a second char, AccountId = %u", _player->GetGuidStr().c_str(), GetAccountId());
             data << (uint8)CHAR_LOGIN_DUPLICATE_CHARACTER;
+            SendPacket(data, true);
+            return;
+        }
+
+        if (!isLogingOut())
+        {
+            sLog.outError("HandlePlayerLoginOpcode> %s try to login again, AccountId = %u", pCurrChar->GetGuidStr().c_str(), GetAccountId());
+            data << (uint8)CHAR_LOGIN_FAILED;
             SendPacket(data, true);
             return;
         }
