@@ -417,7 +417,7 @@ bool WorldSession::Update(PacketFilter& updater)
 
                 // waiting to go online
                 // TODO:: Maybe check if have to send queue update?
-                if (!m_Socket || (m_Socket && m_Socket->IsClosed()))
+                if (!m_Socket || m_Socket->IsClosed())
                 {
                     // directly remove this session
                     return false;
