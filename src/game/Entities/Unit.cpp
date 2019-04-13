@@ -3924,10 +3924,16 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
     // Maybe later some special spells will be excluded too.
 
     // generic spells are casted when they are not finished and not delayed
-    if (m_currentSpells[CURRENT_GENERIC_SPELL] &&
-            (m_currentSpells[CURRENT_GENERIC_SPELL]->getState() != SPELL_STATE_FINISHED) &&
-            (withDelayed || m_currentSpells[CURRENT_GENERIC_SPELL]->getState() != SPELL_STATE_TRAVELING))
-        return true;
+    if (Spell const* genericSpell = m_currentSpells[CURRENT_GENERIC_SPELL])
+    {
+        if (genericSpell->getState() != SPELL_STATE_FINISHED)
+        {
+            bool specialResult = true;
+            if (forMovement) // mobs can move during spells without this flag
+                specialResult = genericSpell->m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT;
+            return specialResult && (withDelayed || genericSpell->getState() != SPELL_STATE_TRAVELING);
+        }
+    }
 
     // channeled spells may be delayed, but they are still considered casted
     if (!skipChanneled)
