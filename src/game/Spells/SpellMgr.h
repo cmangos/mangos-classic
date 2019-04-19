@@ -363,6 +363,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 3235:          // Rancid Blood
         case 3417:          // Thrash
         case 6752:          // Weak Poison Proc
+        case 7090:          // Bear Form (Shapeshift)
         case 7276:          // Poison Proc
         case 8247:          // Wandering Plague
         case 8279:          // Stealth Detection
