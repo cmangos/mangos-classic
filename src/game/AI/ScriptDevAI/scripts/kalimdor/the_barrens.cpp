@@ -62,6 +62,12 @@ struct npc_giltharesAI : public npc_escortAI
 
     void Reset() override { }
 
+    void JustReachedHome() override 
+    {
+        npc_escortAI::JustReachedHome();
+        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+    }
+
     void WaypointReached(uint32 uiPointId) override
     {
         Player* pPlayer = GetPlayerForEscort();
