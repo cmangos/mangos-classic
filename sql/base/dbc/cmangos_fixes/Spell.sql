@@ -50,3 +50,7 @@ UPDATE spell_template SET Attributes=Attributes|0x00010000 WHERE Id IN(12328);
 UPDATE spell_template SET EffectRadiusIndex1=EffectRadiusIndex2 WHERE Id IN(24811);
 -- Opening Termite Barrel - target flags for GO/ITEM, effect targets GO/ITEM yet target targets units - fixes apparent typo
 UPDATE spell_template SET EffectImplicitTargetA1=26 WHERE Id IN(18952);
+
+-- Mangletooth - These spells need to ignore LOS
+UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (7764, 16618, 10767, 16610, 16612, 17013);
+
