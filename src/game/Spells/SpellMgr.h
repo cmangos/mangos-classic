@@ -388,6 +388,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 17327:         // Spirit Particles
         case 17467:         // Unholy Aura
         case 18943:         // Double Attack
+        case 19030:         // Bear Form (Shapeshift)
         case 18950:         // Invisibility and Stealth Detection
         case 19194:         // Double Attack
         case 19195:         // Hate to 90% (Hate to 90%)
