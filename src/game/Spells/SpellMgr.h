@@ -402,6 +402,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 22735:         // Spirit of Runn Tum
         case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
         case 25592:         // Hate to Zero (Hate to Zero)
+        case 26341:         // Saurfang's Rage
         case 27987:         // Unholy Aura
         case 28126:         // Spirit Particles (purple)
         case 29526:         // Hate to Zero (Hate to Zero)
