@@ -1490,7 +1490,7 @@ class Unit : public WorldObject
         bool IsSitState() const;
         bool IsStandState() const;
         bool IsSeatedState() const;
-        void SetStandState(uint8 state);
+        void SetStandState(uint8 state, bool acknowledge = false);
 
         bool IsMounted() const { return !!GetMountID(); }
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
