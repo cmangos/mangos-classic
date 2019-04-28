@@ -9556,18 +9556,21 @@ bool Unit::IsSeatedState() const
     return standState != UNIT_STAND_STATE_SLEEP && standState != UNIT_STAND_STATE_STAND;
 }
 
-void Unit::SetStandState(uint8 state)
+void Unit::SetStandState(uint8 state, bool acknowledge/* = false*/)
 {
+    if (getStandState() == state)
+        return;
+
     SetByteValue(UNIT_FIELD_BYTES_1, 0, state);
 
     if (!IsSeatedState())
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_SEATED);
 
-    if (GetTypeId() == TYPEID_PLAYER)
+    if (!acknowledge && GetTypeId() == TYPEID_PLAYER)
     {
         WorldPacket data(SMSG_STANDSTATE_UPDATE, 1);
-        data << (uint8)state;
-        ((Player*)this)->GetSession()->SendPacket(data);
+        data << uint8(state);
+        static_cast<Player*>(this)->GetSession()->SendPacket(data);
     }
 }
 
