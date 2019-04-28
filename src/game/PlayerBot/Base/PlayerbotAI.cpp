@@ -2878,6 +2878,8 @@ void PlayerbotAI::DoLoot()
     {
         // DEBUG_LOG ("[PlayerbotAI]: DoLoot - %s is going back to idle", m_bot->GetName());
         SetState(BOTSTATE_NORMAL);
+        if (m_movementOrder == MOVEMENT_FOLLOW)
+            MovementReset();
         m_bot->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
         m_inventory_full = false;
         return;
