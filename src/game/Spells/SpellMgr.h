@@ -362,6 +362,9 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
     {
         case 3235:          // Rancid Blood
         case 3417:          // Thrash
+        case 3616:          // Poison Proc
+        case 5680:          // Torch Burn
+        case 6718:          // Phasing Stealth
         case 6752:          // Weak Poison Proc
         case 7090:          // Bear Form (Shapeshift)
         case 7276:          // Poison Proc
@@ -380,8 +383,13 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 11838:         // Hate to Zero (Hate to Zero)
         case 11919:         // Poison Proc
         case 11984:         // Immolate
+        case 12099:         // Shield Spike
+        case 12246:         // Infected Spine
         case 12529:         // Chilling Touch
+        case 12539:         // Ghoul Rot
         case 12546:         // Spitelash (Spitelash)
+        case 12556:         // Frost Armor
+        case 12627:         // Disease Cloud
         case 12787:         // Thrash
         case 13299:         // Poison Proc
         case 13767:         // Hate to Zero (Hate to Zero)
@@ -398,6 +406,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 19640:         // Pummel (Pummel)
         case 19817:         // Double Attack
         case 19818:         // Double Attack
+        case 21061:         // Putrid Breath
         case 21857:         // Lava Shield
         case 22735:         // Spirit of Runn Tum
         case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
