@@ -23,6 +23,7 @@
 #include "Entities/GameObject.h"
 #include "Entities/DynamicObject.h"
 #include "Globals/ObjectMgr.h"
+#include "Globals/ObjectAccessor.h"
 #include "Tools/Formulas.h"
 
 /////////////////////////////////////////////////
@@ -59,6 +60,35 @@
 ########   TIER 1   ########
 ########            ########
 ##########################*/
+
+/////////////////////////////////////////////////
+/// Controlling player: get which player is the "master" of the unit gameplay-wise
+///
+/// @note Relations API Tier 1
+///
+/// Client-side counterpart: <tt>CGUnit_C::GetControllingPlayer(CGUnit_C *this)</tt>
+/// Contains optional logic for getting original permanent "master" by ignoring charms (also known as "UI PoV"), datamined from other functions.
+/////////////////////////////////////////////////
+Player const* Unit::GetControllingPlayer(bool ignoreCharms/* = false*/) const
+{
+    // Mode selector: normal or permanent (UI point of view, ignore charms)
+    ObjectGuid const& (Unit::* getter) () const = (ignoreCharms ? &Unit::GetOwnerGuid : &Unit::GetMasterGuid);
+
+    // Original logic begins
+
+    // Pre-TBC variant
+    if (ObjectGuid const& masterGuid = (this->*getter)())
+    {
+        if (Unit const* master = ObjectAccessor::GetUnit(*this, masterGuid))
+        {
+            if (master->GetTypeId() == TYPEID_PLAYER)
+                return static_cast<Player const*>(master);
+        }
+    }
+    else if (GetTypeId() == TYPEID_PLAYER)
+        return static_cast<Player const*>(this);
+    return nullptr;
+}
 
 /////////////////////////////////////////////////
 /// Get faction template to faction tenplate reaction
@@ -707,10 +737,10 @@ bool Unit::IsCivilianForTarget(Unit const* pov) const
 /// @note Relations API Tier 1
 ///
 /// Based on client-side counterpart: <tt>static CGUnit_C::IsUnitInGroup(const CGUnit_C *this, const CGUnit_C *unit)</tt>
-/// Additionally contains optional detection of same group from UI standpoint datamined from other functions.
 /// Points of view are swapped to fit in with the rest of API, logic is preserved.
+/// Additionally contains optional detection of same group from UI standpoint (ignoring charms).
 /////////////////////////////////////////////////
-bool Unit::IsInGroup(Unit const* other, bool party/* = false*/, bool UI/* = false*/) const
+bool Unit::IsInGroup(Unit const* other, bool party/* = false*/, bool ignoreCharms/* = false*/) const
 {
     // Simple sanity check
     if (!other)
@@ -725,51 +755,10 @@ bool Unit::IsInGroup(Unit const* other, bool party/* = false*/, bool UI/* = fals
     // Only player controlled
     if (this->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && other->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
-        // UI mode: only players and their current pets/charms are in the party UI
-        if (UI)
-        {
-            const size_t comparisions = 3;
-            const Player* thisPlayer[comparisions] = { nullptr, nullptr, nullptr };
-            const Player* otherPlayer[comparisions] = { nullptr, nullptr, nullptr };
-
-            auto getUIPlayerComparisions = [] (const Unit* unit, const Player* (&array)[comparisions])
-            {
-                // In reverse order
-                if (unit->GetTypeId() == TYPEID_PLAYER)
-                    array[0] = static_cast<const Player*>(unit);
-                 ObjectGuid const& summonerGuid = unit->GetSummonerGuid();
-                 ObjectGuid const& charmerGuid = unit->GetCharmerGuid();
-                 if (summonerGuid.IsPlayer())
-                    array[1] = sObjectMgr.GetPlayer(summonerGuid);
-                 if (charmerGuid.IsPlayer())
-                    array[2] = sObjectMgr.GetPlayer(charmerGuid);
-            };
-
-            getUIPlayerComparisions(this, thisPlayer);
-            getUIPlayerComparisions(other, otherPlayer);
-
-            for (auto& i : thisPlayer)
-            {
-                if (i)
-                {
-                    for (auto& j : otherPlayer)
-                    {
-                        if (j)
-                        {
-                            const Group* group = i->GetGroup();
-                            if (i == j || (group && group == j->GetGroup() && (!party || group->SameSubGroup(i, j))))
-                                return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
         // Check if controlling players are in the same group (same logic as client, but not local)
-        if (const Player* thisPlayer = GetControllingPlayer())
+        if (const Player* thisPlayer = GetControllingPlayer(ignoreCharms))
         {
-            if (const Player* otherPlayer = other->GetControllingPlayer())
+            if (const Player* otherPlayer = other->GetControllingPlayer(ignoreCharms))
             {
                 const Group* group = thisPlayer->GetGroup();
                 return (thisPlayer == otherPlayer || (group && group == otherPlayer->GetGroup() && (!party || group->SameSubGroup(thisPlayer, otherPlayer))));
@@ -1149,7 +1138,7 @@ bool Unit::IsFogOfWarVisibleHealth(Unit const* other) const
     switch (sWorld.getConfig(CONFIG_UINT32_FOGOFWAR_HEALTH))
     {
         default: return IsInGroup(other, false, true);
-        case 1:  return CanCooperate(other);
+        case 1:  return IsInTeam(other);
         case 2:  return true;
     }
 }
@@ -1171,9 +1160,72 @@ bool Unit::IsFogOfWarVisibleStats(Unit const* other) const
     switch (sWorld.getConfig(CONFIG_UINT32_FOGOFWAR_STATS))
     {
         default: return (this == other || GetSummonerGuid() == other->GetObjectGuid());
-        case 1:  return CanCooperate(other);
+        case 1:  return IsInTeam(other);
         case 2:  return true;
     }
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Guild: Unit counts as being placed in the same guild with another unit (for gameplay purposes)
+///
+/// @note Relations API Tier 3
+///
+/// Loosely inspired by client-side Lua script counterpart: <tt>UnitIsInMyGuild()</tt>
+/// Additionally contains optional detection of same guild from UI standpoint (ignoring charms).
+/////////////////////////////////////////////////
+bool Unit::IsInGuild(Unit const* other, bool ignoreCharms/* = false*/) const
+{
+    // Simple sanity check
+    if (!other)
+        return false;
+
+    // Same unit is always in guild with itself
+    if (this == other)
+        return true;
+
+    // Only player controlled
+    if (this->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && other->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        // Check if controlling players are in the same group (same logic as client, but not local)
+        if (const Player* thisPlayer = GetControllingPlayer(ignoreCharms))
+        {
+            if (const Player* otherPlayer = other->GetControllingPlayer(ignoreCharms))
+                return (thisPlayer == otherPlayer || (thisPlayer->GetGuildId() == otherPlayer->GetGuildId()));
+        }
+    }
+
+    return false;
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Team: Check if both units are in the same faction team (for gameplay purposes)
+///
+/// @note Relations API Tier 3
+///
+/// Loosely inspired by client-side Lua script counterpart: <tt>UnitFactionGroup()</tt>
+/// Additionally contains optional detection of same team temporarily with taking charms in account.
+bool Unit::IsInTeam(const Unit *other, bool ignoreCharms) const
+{
+    // Simple sanity check
+    if (!other)
+        return false;
+
+    // Same unit is always in team with itself
+    if (this == other)
+        return true;
+
+    // Only player controlled
+    if (this->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && other->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        // Check if controlling players are in the same group (same logic as client, but not local)
+        if (const Player* thisPlayer = GetControllingPlayer(ignoreCharms))
+        {
+            if (const Player* otherPlayer = other->GetControllingPlayer(ignoreCharms))
+                return (thisPlayer == otherPlayer || (thisPlayer->GetTeam() == otherPlayer->GetTeam()));
+        }
+    }
+
+    return false;
 }
 
 /////////////////////////////////////////////////
