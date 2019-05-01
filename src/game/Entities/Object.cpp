@@ -516,6 +516,23 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
 
                     *data << dynflagsValue;
                 }
+                // [XFACTION]: Alter faction if detected crossfaction group interaction when updating faction field:
+                else if (index == UNIT_FIELD_FACTIONTEMPLATE && target != this && sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                {
+                    uint32 value = m_uint32Values[index];
+                    Unit const* thisUnit = static_cast<Unit const*>(this);
+
+                    if (!thisUnit->HasCharmer() && target->IsInGroup(thisUnit) && !target->CanCooperate(thisUnit))
+                    {
+                        switch (uint32(target->GetTeam()))
+                        {
+                            case ALLIANCE:  value = 1054;   break;  // "Alliance Generic"
+                            case HORDE:     value = 1495;   break;  // "Horde Generic"
+                        }
+                    }
+
+                    *data << value;
+                }
                 else                                        // Unhandled index, just send
                 {
                     // send in current format (float as float, uint32 as uint32)
@@ -911,7 +928,7 @@ void Object::MarkForClientUpdate()
     }
 }
 
-void Object::ForceValuesUpdateAtIndex(uint32 index)
+void Object::ForceValuesUpdateAtIndex(uint16 index)
 {
     m_changedValues[index] = true;
     if (m_inWorld && !m_objectUpdated)

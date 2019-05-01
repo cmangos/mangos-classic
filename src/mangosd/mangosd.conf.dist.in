@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2019020601
+ConfVersion=2019050101
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -814,8 +814,14 @@ PlayerCommands = 1
 #    AllowTwoSide.Interaction.Trade
 #    AllowTwoSide.Interaction.Auction
 #    AllowTwoSide.Interaction.Mail
-#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);trade with different team,
-#        merge all auction houses for players from different teams, send mail to different team.
+#        Allow or disallow players from different teams to:
+#        - chat with each other (say, yell);
+#        - have merged chat channels;
+#        - join each other's groups;
+#        - join each other's guilds;
+#        - trade with each other when not in group;
+#        - have merged auction house listings;
+#        - send in-game mail;
 #        Default: 0 (Not allowed)
 #                 1 (Allowed)
 #
