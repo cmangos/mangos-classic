@@ -270,6 +270,7 @@ class Group
         void _chooseLeader(bool offline = false);
         void _setLeader(ObjectGuid guid);
         void _updateLeaderFlag(bool remove = false) const;
+        void _updateMembersOnRosterChanged(Player* changed);
 
         bool _setMembersGroup(ObjectGuid guid, uint8 group);
         bool _setAssistantFlag(ObjectGuid guid, const bool& state);
