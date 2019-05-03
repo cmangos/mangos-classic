@@ -923,28 +923,39 @@ void Group::_updateMembersOnRosterChanged(Player* changed)
     if (!changed || !changed->IsInWorld())
         return;
 
-    // [XFACTION]: Prepare to alter fields if detected crossfaction group interaction:
-    if (const bool xfaction = sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+    // Fog of War: setting implies health obfuscation outside of groups, force update
+    const bool fow = (sWorld.getConfig(CONFIG_UINT32_FOGOFWAR_HEALTH) == 0);
+    // [XFACTION]: Prepare to alter fields if detected crossfaction group interaction
+    const bool xfaction = sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP);
+
+    if (!fow && !xfaction)
+        return;
+
+    auto update = [&fow, &xfaction] (Unit* pov, Unit* target)
     {
-        // [XFACTION]: Prepare to alter faction:
-        auto xfactionUpdate = [] (Unit* a, Unit* b)
+        if (fow)
         {
-            if (!a->HasCharmer() && !a->CanCooperate(b))
-                b->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
-        };
+            auto forcehp = [] (Unit* u) { u->ForceValuesUpdateAtIndex(UNIT_FIELD_HEALTH); u->ForceValuesUpdateAtIndex(UNIT_FIELD_MAXHEALTH); };
+            forcehp(target);
+            target->CallForAllControlledUnits(forcehp, (CONTROLLED_MINIPET | CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM));
+        }
 
-        for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
+        // [XFACTION]: Prepare to alter faction if detected crossfaction group interaction:
+        if (xfaction && !pov->HasCharmer() && !pov->CanCooperate(target))
+            target->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+    };
+
+    for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
+    {
+        if (Player* member = itr->getSource())
         {
-            if (Player* member = itr->getSource())
+            if (member != changed && member->IsInWorld())
             {
-                if (member != changed && member->IsInWorld())
-                {
-                    if (member->HaveAtClient(changed))
-                        xfactionUpdate(member, changed);
+                if (member->HaveAtClient(changed))
+                    update(member, changed);
 
-                    if (changed->HaveAtClient(member))
-                        xfactionUpdate(changed, member);
-                }
+                if (changed->HaveAtClient(member))
+                    update(changed, member);
             }
         }
     }
