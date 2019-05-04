@@ -61,7 +61,7 @@ class UpdateData
         void AddOutOfRangeGUID(GuidSet& guids);
         void AddOutOfRangeGUID(ObjectGuid const& guid);
         void AddUpdateBlock(const ByteBuffer& block);
-        bool BuildPacket(WorldPacket& packet, size_t index, bool hasTransport = false);
+        WorldPacket BuildPacket(size_t index, bool hasTransport = false); // Copy Elision is a thing
         bool HasData() const { return m_data[0].m_buffer.size() > 0 || !m_outOfRangeGUIDs.empty(); }
         size_t GetPacketCount() const { return m_data.size(); }
         void Clear();
