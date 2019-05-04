@@ -82,12 +82,10 @@ void VisibleNotifier::Notify()
     if (i_data.HasData())
     {
         // send create/outofrange packet to player (except player create updates that already sent using SendUpdateToPlayer)
-        WorldPacket packet;
         for (size_t i = 0; i < i_data.GetPacketCount(); ++i)
         {
-            i_data.BuildPacket(packet, i);
+            WorldPacket packet = i_data.BuildPacket(i);
             player.GetSession()->SendPacket(packet);
-            packet.clear();
         }
 
         // send out of range to other players if need
