@@ -326,7 +326,7 @@ inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
     if (!IsPassiveSpell(spellProto))
         return false;
 
-    return !IsSpellHaveEffect(spellProto, SPELL_EFFECT_APPLY_AURA);
+    return !IsSpellHaveEffect(spellProto, SPELL_EFFECT_APPLY_AURA) && !IsSpellHaveEffect(spellProto, SPELL_EFFECT_APPLY_AREA_AURA_PARTY);
 }
 
 inline bool IsAutocastable(SpellEntry const* spellInfo)
@@ -1423,7 +1423,7 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         case SPELL_AURA_MOD_ATTACK_POWER:
             // Attack Power debuffs logic: Do not stack Curse of Weakness, Demoralizing Roars/Shouts
             if (!positive && entry->EffectBasePoints[i] < 1 && entry2->EffectBasePoints[similar] < 1)
-                return (!entry->SpellFamilyName && !entry->SpellFamilyName);
+                return (!entry->SpellFamilyName && !entry2->SpellFamilyName);
             break;
         // Armor & Resistance buffs and debuffs logic
         case SPELL_AURA_MOD_RESISTANCE:
@@ -1434,13 +1434,11 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
             {
                 // Used as a non-zero type in this context
                 const bool type = (entry->Dispel && entry->Dispel == entry2->Dispel);
-                const bool family = (entry->SpellFamilyName || entry2->SpellFamilyName);
-                const bool uncategorized = (!entry->SpellFamilyName || !entry2->SpellFamilyName);
-                if (type && family && uncategorized)
-                    return false; // Do not stack player buffs with scrolls
                 const bool attacktable = (entry->DmgClass && entry->DmgClass == entry2->DmgClass);
-                if (attacktable && !entry->SpellFamilyName && !entry2->SpellFamilyName)
-                    return false; // Do not stack scrolls with other some procs (such Hyjal ring)
+                if ((attacktable || type) && !entry->SpellFamilyName && !entry2->SpellFamilyName)
+                    return false; // Do not stack scrolls with other srolls and some procs (such as Hyjal ring)
+                if (player && related && siblings && entry->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
+                    return true;
             }
             else
             {
@@ -1449,7 +1447,7 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
                 if (type && prevention)
                     return false;
             }
-            return true;
+            break;
         }
         case SPELL_AURA_MOD_RESISTANCE_PCT:
         {
@@ -1473,6 +1471,13 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
                 const bool uncategorized = (!entry->SpellFamilyName || !entry2->SpellFamilyName);
                 if (type && family && uncategorized)
                     return false; // Do not stack player buffs with scrolls
+                if (!entry->SpellFamilyName && !entry2->SpellFamilyName)
+                {
+                    if (type)
+                        return false; // Do not stack scrolls and other non-player buffs with each other
+                    if (entry->HasAttribute(SPELL_ATTR_EX2_UNK28) && entry2->HasAttribute(SPELL_ATTR_EX2_UNK28))
+                        return false; // FIXME: Cozy fire hack
+                }
             }
             else
             {
