@@ -408,6 +408,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 19818:         // Double Attack
         case 21061:         // Putrid Breath
         case 21857:         // Lava Shield
+        case 22128:         // Thorns
         case 22735:         // Spirit of Runn Tum
         case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
         case 25592:         // Hate to Zero (Hate to Zero)
