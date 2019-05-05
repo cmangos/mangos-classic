@@ -5460,6 +5460,7 @@ void PlayerbotAI::findNearbyCreature()
                 }
                 itr = m_findNPC.erase(itr); // all done lets go home
             }
+            ++itr;
         }
     }
 }
