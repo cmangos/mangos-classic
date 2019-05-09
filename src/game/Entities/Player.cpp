@@ -5583,7 +5583,7 @@ void Player::UpdateSpellTrainedSkills(uint32 spellId, bool apply)
                     continue;
 
                 // Check if obtainable
-                if (!GetSkillInfo(skillId, ([] (SkillRaceClassInfoEntry const& entry) { return !(entry.flags & SKILL_FLAG_NOT_TRAINABLE); })))
+                if (!GetSkillInfo(skillId))
                     continue;
 
                 switch (GetSkillRangeType(pSkill, info->racemask != 0))
