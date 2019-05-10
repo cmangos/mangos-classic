@@ -7856,12 +7856,14 @@ void PlayerbotAI::_HandleCommandSkill(std::string& text, Player& fromPlayer)
             for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); it++)
             {
                 uint32 spellId = *it;
+                TrainerSpell const* trainer_spell;
 
                 if (!spellId)
                     break;
 
-                TrainerSpell const* trainer_spell = cSpells->Find(spellId);
-                if (!trainer_spell)
+                if (cSpells)
+                    trainer_spell = cSpells->Find(spellId);
+                if (tSpells && !trainer_spell)
                     trainer_spell = tSpells->Find(spellId);
 
                 if (!trainer_spell)
