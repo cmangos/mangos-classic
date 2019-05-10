@@ -44,8 +44,8 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
 
     creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
 
-    // check if new random position is assigned, GetReachableRandomPosition may fail
-    if (creature.GetMap()->GetReachableRandomPosition(&creature, destX, destY, destZ, i_radius))
+    // check if new random position is assigned (GetReachableRandomPosition may fail) and dest is visible
+    if (creature.GetMap()->GetReachableRandomPosition(&creature, destX, destY, destZ, i_radius) && creature.IsWithinLOS(destX, destY, destZ))
     {
         Movement::MoveSplineInit init(creature);
         init.MoveTo(destX, destY, destZ, true);
