@@ -1006,7 +1006,7 @@ void Unit::HandleDamageDealt(Unit* victim, uint32& damage, CleanDamage const* cl
 
     victim->ModifyHealth(-(int32)damage);
 
-    if (CanAttack(victim) && (!spellProto || (!spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
+    if (victim->CanAttack(this) && (!spellProto || (!spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
         !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))) && CanEnterCombat() && victim->CanEnterCombat())
     {
         float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
