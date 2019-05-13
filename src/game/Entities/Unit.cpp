@@ -1024,10 +1024,7 @@ void Unit::HandleDamageDealt(Unit* victim, uint32& damage, CleanDamage const* cl
     {
         // Rage from damage received
         if (this != victim && victim->GetPowerType() == POWER_RAGE)
-        {
-            uint32 rage_damage = damage + (cleanDamage ? cleanDamage->damage : 0);
-            ((Player*)victim)->RewardRage(rage_damage, false);
-        }
+            ((Player*)victim)->RewardRage(cleanDamage ? cleanDamage->damage : 0, false);
 
         // random durability for items (HIT TAKEN)
         if (roll_chance_f(sWorld.getConfig(CONFIG_FLOAT_RATE_DURABILITY_LOSS_DAMAGE)))
@@ -1632,11 +1629,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
 
         // Calculate armor reduction
         if (subDamage->damageSchoolMask == SPELL_SCHOOL_MASK_NORMAL)
-        {
-            calcDamageInfo->cleanDamage += subDamage->damage;
             subDamage->damage = CalcArmorReducedDamage(calcDamageInfo->target, subDamage->damage);
-            calcDamageInfo->cleanDamage -= subDamage->damage;
-        }
 
         calcDamageInfo->totalDamage += subDamage->damage;
     }
@@ -1652,6 +1645,8 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
         calcDamageInfo->cleanDamage = 0;
         return;
     }
+
+    calcDamageInfo->cleanDamage = calcDamageInfo->totalDamage;
 
     // FIXME: Fix individual school results later when appropriate API is ready
     uint32 mask = SPELL_SCHOOL_MASK_NORMAL;
@@ -1837,12 +1832,16 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
 
             if (subDamage->absorb)
             {
+                calcDamageInfo->cleanDamage = calcDamageInfo->cleanDamage <= subDamage->absorb ? 0 : calcDamageInfo->cleanDamage - subDamage->absorb;
                 calcDamageInfo->HitInfo |= HITINFO_ABSORB;
                 calcDamageInfo->procEx |= PROC_EX_ABSORB;
             }
 
             if (subDamage->resist)
+            {
+                calcDamageInfo->cleanDamage = calcDamageInfo->cleanDamage <= subDamage->resist ? 0 : calcDamageInfo->cleanDamage - subDamage->resist;
                 calcDamageInfo->HitInfo |= HITINFO_RESIST;
+            }
         }
     }
     else
