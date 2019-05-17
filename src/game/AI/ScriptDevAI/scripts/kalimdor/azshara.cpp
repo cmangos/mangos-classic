@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Azshara
 SD%Complete: 100%
-SDComment: Quest support: 2744, 3141, 3602, 9364, 10994
+SDComment: Quest support: 2744, 3141, 3602, 8729, 9364, 10994
 SDCategory: Azshara
 EndScriptData
 
@@ -27,6 +27,9 @@ EndScriptData
 mobs_spitelashes
 npc_loramus_thalipedes
 npc_felhound_tracker
+event_arcanite_buoy
+go_lightning
+boss_maws
 EndContentData */
 
 #include "AI/ScriptDevAI/base/pet_ai.h"
@@ -370,6 +373,184 @@ UnitAI* GetAI_npc_felhound_tracker(Creature* pCreature)
     return new npc_felhound_trackerAI(pCreature);
 }
 
+/*######
+## event_arcanite_buoy
+######*/
+
+enum
+{
+    EVENT_ARCANITE_BUOY     = 9542,
+    NPC_MAWS                = 15571,
+    GO_THEATRIC_LIGHTNING   = 183356,
+};
+
+struct SummonLocation
+{
+    float m_fX, m_fY, m_fZ;
+};
+
+static const SummonLocation aMawsSpawn = { 3561.73f, -6647.2f, -7.5f };
+
+bool ProcessEventId_arcanite_buoy(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+{
+    if (uiEventId == EVENT_ARCANITE_BUOY)
+    {
+        if (pSource->GetTypeId() == TYPEID_PLAYER)
+        {
+            // Do not summon it twice
+            if (Creature* temp = GetClosestCreatureWithEntry((Player*)pSource, NPC_MAWS, 200.0f))
+                return false;
+
+            // Summon Maws
+            if (Creature* maws = ((Player*)pSource)->SummonCreature(NPC_MAWS, aMawsSpawn.m_fX, aMawsSpawn.m_fY, aMawsSpawn.m_fZ, 1.6f, TEMPSPAWN_MANUAL_DESPAWN, 0))
+            {
+                maws->SetWalk(false);
+                maws->GetMotionMaster()->MoveWaypoint();
+
+                // Respawn visual lightning GO
+                if (GameObject* lightning = GetClosestGameObjectWithEntry((Player*)pSource, GO_THEATRIC_LIGHTNING, 20.0f))
+                {
+                    if (!lightning->IsSpawned())
+                    {
+                        lightning->SetRespawnTime(9000);
+                        lightning->Refresh();
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+/*###############
+## go_lightning
+################*/
+
+struct go_ai_lightning : public GameObjectAI
+{
+    go_ai_lightning(GameObject* go) : GameObjectAI(go), m_uilightningTimer(urand(2, 5) * IN_MILLISECONDS) {}
+
+    uint32 m_uilightningTimer;
+
+    // Custom anim is played on a random timer as long as GO is spawned in world
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_go->IsSpawned())
+            return;
+
+        if (m_uilightningTimer <= uiDiff)
+        {
+            m_go->SendGameObjectCustomAnim(m_go->GetObjectGuid());
+            m_uilightningTimer = urand(2, 5) * IN_MILLISECONDS;
+        }
+        else
+            m_uilightningTimer -= uiDiff;
+    }
+};
+
+GameObjectAI* GetAI_go_lightning(GameObject* go)
+{
+    return new go_ai_lightning(go);
+}
+
+/*###############
+## boss_maws
+################*/
+
+enum
+{
+    SPELL_FRENZY                = 19812,
+    SPELL_DARK_WATER            = 25743,
+    SPELL_RAMPAGE               = 25744,
+
+    EMOTE_GENERIC_FRENZY_KILL   = -1000001,
+    EMOTE_MAWS_KILL             = -1000891      // World emote that was removed in WotLK patch 3.2
+};
+
+struct boss_mawsAI : public ScriptedAI
+{
+    boss_mawsAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
+    }
+
+    uint32 uiFrenzyTimer;
+    uint32 uiDarkWaterTimer;
+    uint32 uiRampageTimer;
+    uint32 uiDespawnTimer;
+
+    void Reset() override
+    {
+        uiFrenzyTimer           = 25 * IN_MILLISECONDS;
+        uiDarkWaterTimer        = 15 * IN_MILLISECONDS;
+        uiRampageTimer          = urand(20, 120) * IN_MILLISECONDS;
+        uiDespawnTimer          = 2.5 * HOUR * IN_MILLISECONDS;
+    }
+
+    void JustDied(Unit* pKiller)
+    {
+        // Despawn visual lightning GO
+        if (GameObject* lightning = GetClosestGameObjectWithEntry(m_creature, GO_THEATRIC_LIGHTNING, 200.0f))
+            lightning->SetLootState(GO_JUST_DEACTIVATED);
+        DoScriptText(EMOTE_MAWS_KILL, m_creature);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // Despawn timer handled in UpdateAI because creature must perform actions on despawn that cannot be done in OnDespawn() (creature is already despawned)
+        if (uiDespawnTimer < uiDiff)
+        {
+            // Despawn visual lightning GO
+            if (GameObject* lightning = GetClosestGameObjectWithEntry(m_creature, GO_THEATRIC_LIGHTNING, 200.0f))
+                lightning->SetLootState(GO_JUST_DEACTIVATED);
+            DoScriptText(EMOTE_MAWS_KILL, m_creature);
+            m_creature->ForcedDespawn();
+        }
+        else
+            uiDespawnTimer -= uiDiff;
+
+        // Return since we have no target
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (uiFrenzyTimer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature, SPELL_FRENZY);
+            DoScriptText(EMOTE_GENERIC_FRENZY_KILL, m_creature);
+            uiFrenzyTimer = (m_creature->GetHealthPercent() < 20.0f ? 15 : 25) * IN_MILLISECONDS;
+        }
+        else
+            uiFrenzyTimer -= uiDiff;
+
+        if (uiRampageTimer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAMPAGE);
+            uiRampageTimer = (m_creature->GetHealthPercent() < 20.0f ? 12 : urand(20, 120)) * IN_MILLISECONDS;
+        }
+        else
+            uiRampageTimer -= uiDiff;
+
+        if (m_creature->GetHealthPercent() < 20.0f)
+        {
+            if (uiDarkWaterTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_DARK_WATER);
+                uiDarkWaterTimer = 15 * IN_MILLISECONDS;
+            }
+            else
+                uiDarkWaterTimer -= uiDiff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAI_boss_maws(Creature* pCreature)
+{
+    return new boss_mawsAI(pCreature);
+}
+
 void AddSC_azshara()
 {
     Script* pNewScript;
@@ -388,5 +569,20 @@ void AddSC_azshara()
     pNewScript = new Script;
     pNewScript->Name = "npc_felhound_tracker";
     pNewScript->GetAI = &GetAI_npc_felhound_tracker;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "event_arcanite_buoy";
+    pNewScript->pProcessEventId = &ProcessEventId_arcanite_buoy;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_lightning";
+    pNewScript->GetGameObjectAI = &GetAI_go_lightning;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "boss_maws";
+    pNewScript->GetAI = &GetAI_boss_maws;
     pNewScript->RegisterSelf();
 }
