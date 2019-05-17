@@ -1625,7 +1625,12 @@ class Player : public Unit
         float GetMeleeCritFromAgility() const;
         float GetDodgeFromAgility(float amount) const;
         float GetSpellCritFromIntellect() const;
+<<<<<<< HEAD
         float OCTRegenMPPerSpirit() const;
+=======
+        float GetRatingMultiplier(CombatRating cr) const;
+        float GetRatingBonusValue(CombatRating cr) const;
+>>>>>>> 37fac0a844a... Fix mana regeneration from spirit and intelect for pets
 
         void UpdateBlockPercentage();
         void UpdateCritPercentage(WeaponAttackType attType);

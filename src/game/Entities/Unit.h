@@ -1403,6 +1403,7 @@ class Unit : public WorldObject
         void SetHealthPercent(float percent);
         int32 ModifyHealth(int32 dVal);
         float OCTRegenHPPerSpirit() const;
+        float OCTRegenMPPerSpirit() const;
 
         Powers GetPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
         void SetPowerType(Powers new_powertype);
