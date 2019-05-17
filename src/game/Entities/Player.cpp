@@ -2212,7 +2212,7 @@ void Player::RegenerateHealth()
     if (addvalue < 0)
         addvalue = 0;
 
-    ModifyHealth(int32(addvalue));
+    ModifyHealth(int32(addvalue * 2));
 }
 
 Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask)
@@ -4964,29 +4964,6 @@ float Player::GetSpellCritFromIntellect() const
         return 0.0f;
     const float crit_ratio = crit_data[pclass].rate0 + crit_data[pclass].rate1 * getLevel();
     return (crit_data[pclass].base + (GetStat(STAT_INTELLECT) / crit_ratio));
-}
-
-float Player::OCTRegenHPPerSpirit() const
-{
-    float regen = 0.0f;
-
-    float Spirit = GetStat(STAT_SPIRIT);
-    uint8 Class = getClass();
-
-    switch (Class)
-    {
-        case CLASS_DRUID:   regen = (Spirit * 0.11 + 1);    break;
-        case CLASS_HUNTER:  regen = (Spirit * 0.43 - 5.5);  break;
-        case CLASS_MAGE:    regen = (Spirit * 0.11 + 1);    break;
-        case CLASS_PALADIN: regen = (Spirit * 0.25);        break;
-        case CLASS_PRIEST:  regen = (Spirit * 0.15 + 1.4);  break;
-        case CLASS_ROGUE:   regen = (Spirit * 0.84 - 13);   break;
-        case CLASS_SHAMAN:  regen = (Spirit * 0.28 - 3.6);  break;
-        case CLASS_WARLOCK: regen = (Spirit * 0.12 + 1.5);  break;
-        case CLASS_WARRIOR: regen = (Spirit * 1.26 - 22.6); break;
-    }
-
-    return regen;
 }
 
 float Player::OCTRegenMPPerSpirit() const
