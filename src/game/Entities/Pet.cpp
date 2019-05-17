@@ -2253,14 +2253,8 @@ void Pet::RegenerateHealth()
         case SUMMON_PET:
         case HUNTER_PET:
         {
-            float Spirit = GetStat(STAT_SPIRIT);
-
-            if (GetPower(POWER_MANA) > 0)
-                addvalue = uint32(Spirit * 0.25 * HealthIncreaseRate);
-            else
-                addvalue = uint32(Spirit * 0.80 * HealthIncreaseRate);
+            addvalue = OCTRegenHPPerSpirit() * HealthIncreaseRate * 4; // pets regen per 4 seconds
             break;
-
             // HACK: increase warlock pet regen *5 until formula is found
             if (m_petType == SUMMON_PET)
                 addvalue *= 5;

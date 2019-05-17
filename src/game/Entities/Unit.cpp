@@ -11011,3 +11011,26 @@ uint32 Unit::GetSpellRank(SpellEntry const* spellInfo)
         spellRank = spellInfo->maxLevel * 5;
     return spellRank;
 }
+
+float Unit::OCTRegenHPPerSpirit() const
+{
+    float regen = 0.0f;
+
+    float Spirit = GetStat(STAT_SPIRIT);
+    uint8 Class = getClass();
+
+    switch (Class)
+    {
+        case CLASS_DRUID:   regen = (Spirit * 0.11 + 1);    break;
+        case CLASS_HUNTER:  regen = (Spirit * 0.43 - 5.5);  break;
+        case CLASS_MAGE:    regen = (Spirit * 0.11 + 1);    break;
+        case CLASS_PALADIN: regen = (Spirit * 0.25);        break;
+        case CLASS_PRIEST:  regen = (Spirit * 0.15 + 1.4);  break;
+        case CLASS_ROGUE:   regen = (Spirit * 0.84 - 13);   break;
+        case CLASS_SHAMAN:  regen = (Spirit * 0.28 - 3.6);  break;
+        case CLASS_WARLOCK: regen = (Spirit * 0.12 + 1.5);  break;
+        case CLASS_WARRIOR: regen = (Spirit * 1.26 - 22.6); break;
+    }
+
+    return regen;
+}
