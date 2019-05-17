@@ -141,6 +141,10 @@ UPDATE creature_template SET ScriptName='npc_feero_ironhand' WHERE entry=4484;
 UPDATE creature_template SET ScriptName='mobs_spitelashes' WHERE entry IN (6190,6193,6194,6195,6196);
 UPDATE creature_template SET ScriptName='npc_loramus_thalipedes' WHERE entry=7783;
 UPDATE creature_template SET ScriptName='npc_felhound_tracker' WHERE entry=8668;
+UPDATE creature_template SET ScriptName='boss_maws' WHERE entry=15571;
+UPDATE gameobject_template SET ScriptName='go_lightning' WHERE entry=183356;
+INSERT INTO scripted_event_id VALUES
+(9542,'event_arcanite_buoy');
 
 /* BADLANDS */
 
@@ -1509,7 +1513,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000889,'%s submits.',0,2,0,0,'grark EMOTE_SUBMIT'),
 (-1000890,'You have come to play? Then let us play!',0,0,0,0,'grark SAY_AGGRO'),
 
-(-1000891,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1000891,'The beast returns from whence it came. The wrath of Neptulon has subsided.',0,3,0,0,'Maws EMOTE_MAWS_KILL'),
+
 (-1000892,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1000893,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1000894,'REUSE_ME',0,0,0,0,'REUSE_ME'),
