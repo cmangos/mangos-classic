@@ -708,9 +708,8 @@ void Creature::RegeneratePower()
                 if (!IsUnderLastManaUseEffect())
                 {
                     float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
-                    float Spirit = GetStat(STAT_SPIRIT);
-
-                    addValue = (Spirit / 5.0f + 17.0f) * ManaIncreaseRate;
+                    float intellect = GetStat(STAT_INTELLECT);
+                    addValue = sqrt(intellect) * OCTRegenMPPerSpirit() * ManaIncreaseRate;
                 }
             }
             else
