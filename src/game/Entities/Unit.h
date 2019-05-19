@@ -790,7 +790,7 @@ struct CleanDamage
     CleanDamage(uint32 _damage, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome) :
         damage(_damage), attackType(_attackType), hitOutCome(_hitOutCome) {}
 
-    uint32 damage;
+    uint32 damage; // only used for rage generation
     WeaponAttackType attackType;
     MeleeHitOutcome hitOutCome;
 };
