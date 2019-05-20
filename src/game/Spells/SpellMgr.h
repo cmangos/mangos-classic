@@ -362,6 +362,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
     {
         case 588:           // Inner Fire (Rank 1)
         case 3235:          // Rancid Blood
+        case 3284:          // Violent Shield
         case 3417:          // Thrash
         case 3418:          // Improved Blocking
         case 3616:          // Poison Proc
