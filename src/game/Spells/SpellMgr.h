@@ -366,7 +366,8 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 3417:          // Thrash
         case 3418:          // Improved Blocking
         case 3616:          // Poison Proc
-        case 3637:           // Improved Blocking III
+        case 3637:          // Improved Blocking III
+        case 5301:          // Defensive State (DND)
         case 5680:          // Torch Burn
         case 6718:          // Phasing Stealth
         case 6752:          // Weak Poison Proc
