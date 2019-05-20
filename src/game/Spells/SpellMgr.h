@@ -360,6 +360,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
 
     switch (spellInfo->Id)
     {
+        case 588:           // Inner Fire (Rank 1)
         case 3235:          // Rancid Blood
         case 3417:          // Thrash
         case 3418:          // Improved Blocking
