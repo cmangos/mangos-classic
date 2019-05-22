@@ -1311,9 +1311,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 mana = pInfo->mana;
                 armor = pInfo->armor;
 
-                // TODO: Remove cinfo->ArmorMultiplier test workaround to disable classlevelstats when DB is ready
-                CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(petlevel, cInfo->UnitClass);
-                if (cInfo->ArmorMultiplier && cCLS) // Info found in ClassLevelStats
+                if (CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(petlevel, cInfo->UnitClass)) // Info found in ClassLevelStats
                 {
                     float minDmg = (cCLS->BaseDamage * cInfo->DamageVariance + (cCLS->BaseMeleeAttackPower / 14) * (cInfo->MeleeBaseAttackTime / 1000)) * cInfo->DamageMultiplier;
 
@@ -1325,7 +1323,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 }
                 else
                 {
-                    sLog.outErrorDb("SUMMON_PET creature_template not finished on creature %s! (entry: %u)", GetGuidStr().c_str(), cInfo->Entry);
+                    sLog.outErrorDb("SUMMON_PET creature_template_ClassLevelStats missing in DB for UnitClass %u and level %u! Calculating pet damage based on creature_template values instead.", cInfo->UnitClass, petlevel);
 
                     float dMinLevel = cInfo->MinMeleeDmg / cInfo->MinLevel;
                     float dMaxLevel = cInfo->MaxMeleeDmg / cInfo->MaxLevel;
