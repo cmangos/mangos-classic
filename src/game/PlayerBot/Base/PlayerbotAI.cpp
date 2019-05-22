@@ -4068,6 +4068,15 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         return;
     }
 
+    // If bot is in water, allow it to swim instead of being stuck above water or at the floor until it drowns itself
+    if (m_bot->IsInWater())
+    {
+        if (!m_bot->IsSwimming())
+            m_bot->m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
+    }
+    else if (m_bot->IsSwimming())   // Clear swimming when going out of water
+        m_bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+    
     // bot still alive
     if (!m_findNPC.empty())
         findNearbyCreature();
