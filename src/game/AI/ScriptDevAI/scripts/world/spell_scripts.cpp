@@ -111,6 +111,7 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                 pCreatureTarget->RemoveAurasDueToSpell(SPELL_SICKLY_AURA);
                 pCreatureTarget->UpdateEntry(uiUpdateEntry);
                 ((Player*)pCaster)->KilledMonsterCredit(uiUpdateEntry);
+                pCreatureTarget->SetImmuneToPlayer(true);
                 pCreatureTarget->ForcedDespawn(20000);
 
                 return true;
