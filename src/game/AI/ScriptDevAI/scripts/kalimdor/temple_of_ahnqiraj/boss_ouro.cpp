@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "temple_of_ahnqiraj.h"
 
 enum
@@ -251,7 +251,7 @@ struct boss_ouroAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_ouro(Creature* pCreature)
+UnitAI* GetAI_boss_ouro(Creature* pCreature)
 {
     return new boss_ouroAI(pCreature);
 }
@@ -292,16 +292,14 @@ struct npc_ouro_spawnerAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_ouro_spawner(Creature* pCreature)
+UnitAI* GetAI_npc_ouro_spawner(Creature* pCreature)
 {
     return new npc_ouro_spawnerAI(pCreature);
 }
 
 void AddSC_boss_ouro()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ouro";
     pNewScript->GetAI = &GetAI_boss_ouro;
     pNewScript->RegisterSelf();

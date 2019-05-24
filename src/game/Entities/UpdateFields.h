@@ -58,9 +58,9 @@ enum EContainerFields
 {
     CONTAINER_FIELD_NUM_SLOTS                  = ITEM_END + 0x00, // Size:1
     CONTAINER_ALIGN_PAD                        = ITEM_END + 0x01, // Size:1
-    CONTAINER_FIELD_SLOT_1                     = ITEM_END + 0x02, // count=56
-    CONTAINER_FIELD_SLOT_LAST                  = ITEM_END + 0x38,
-    CONTAINER_END                              = ITEM_END + 0x3A,
+    CONTAINER_FIELD_SLOT_1                     = ITEM_END + 0x02, // count=72
+    CONTAINER_FIELD_SLOT_LAST                  = ITEM_END + 0x48,
+    CONTAINER_END                              = ITEM_END + 0x4A,
 };
 
 enum EUnitFields
@@ -204,7 +204,7 @@ enum EUnitFields
     PLAYER_FIELD_BANK_SLOT_1                   = 0x178 + UNIT_END, // Size:48
     PLAYER_FIELD_BANK_SLOT_LAST                = 0x1a6 + UNIT_END,
     PLAYER_FIELD_BANKBAG_SLOT_1                = 0x1a8 + UNIT_END, // Size:12
-    PLAYER_FIELD_BANKBAG_SLOT_LAST             = 0xab2 + UNIT_END,
+    PLAYER_FIELD_BANKBAG_SLOT_LAST             = 0x1b2 + UNIT_END,
     PLAYER_FIELD_VENDORBUYBACK_SLOT_1          = 0x1b4 + UNIT_END, // Size:24
     PLAYER_FIELD_VENDORBUYBACK_SLOT_LAST       = 0x1ca + UNIT_END,
     PLAYER_FIELD_KEYRING_SLOT_1                = 0x1cc + UNIT_END, // Size:64

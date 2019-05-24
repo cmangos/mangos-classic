@@ -34,8 +34,8 @@ OutdoorPvPEP::OutdoorPvPEP() : OutdoorPvP(),
     m_towerWorldState[2] = WORLD_STATE_EP_EASTWALL_NEUTRAL;
     m_towerWorldState[3] = WORLD_STATE_EP_PLAGUEWOOD_NEUTRAL;
 
-    for (uint8 i = 0; i < MAX_EP_TOWERS; ++i)
-        m_towerOwner[i] = TEAM_NONE;
+    for (auto& i : m_towerOwner)
+        i = TEAM_NONE;
 
     // initially set graveyard owner to neither faction
     sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, TEAM_INVALID);
@@ -46,14 +46,14 @@ void OutdoorPvPEP::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
     FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
 
-    for (uint8 i = 0; i < MAX_EP_TOWERS; ++i)
-        FillInitialWorldState(data, count, m_towerWorldState[i], WORLD_STATE_ADD);
+    for (unsigned int i : m_towerWorldState)
+        FillInitialWorldState(data, count, i, WORLD_STATE_ADD);
 }
 
 void OutdoorPvPEP::SendRemoveWorldStates(Player* player)
 {
-    for (uint8 i = 0; i < MAX_EP_TOWERS; ++i)
-        player->SendUpdateWorldState(m_towerWorldState[i], WORLD_STATE_REMOVE);
+    for (unsigned int i : m_towerWorldState)
+        player->SendUpdateWorldState(i, WORLD_STATE_REMOVE);
 }
 
 void OutdoorPvPEP::HandlePlayerEnterZone(Player* player, bool isMainZone)
@@ -61,8 +61,8 @@ void OutdoorPvPEP::HandlePlayerEnterZone(Player* player, bool isMainZone)
     OutdoorPvP::HandlePlayerEnterZone(player, isMainZone);
 
     // remove the buff from the player first; Sometimes on relog players still have the aura
-    for (uint8 i = 0; i < MAX_EP_TOWERS; ++i)
-        player->RemoveAurasDueToSpell(player->GetTeam() == ALLIANCE ? plaguelandsTowerBuffs[i].spellIdAlliance : plaguelandsTowerBuffs[i].spellIdHorde);
+    for (auto plaguelandsTowerBuff : plaguelandsTowerBuffs)
+        player->RemoveAurasDueToSpell(player->GetTeam() == ALLIANCE ? plaguelandsTowerBuff.spellIdAlliance : plaguelandsTowerBuff.spellIdHorde);
 
     // buff the player
     switch (player->GetTeam())
@@ -83,8 +83,8 @@ void OutdoorPvPEP::HandlePlayerEnterZone(Player* player, bool isMainZone)
 void OutdoorPvPEP::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 {
     // remove the buff from the player
-    for (uint8 i = 0; i < MAX_EP_TOWERS; ++i)
-        player->RemoveAurasDueToSpell(player->GetTeam() == ALLIANCE ? plaguelandsTowerBuffs[i].spellIdAlliance : plaguelandsTowerBuffs[i].spellIdHorde);
+    for (auto plaguelandsTowerBuff : plaguelandsTowerBuffs)
+        player->RemoveAurasDueToSpell(player->GetTeam() == ALLIANCE ? plaguelandsTowerBuff.spellIdAlliance : plaguelandsTowerBuff.spellIdHorde);
 
     OutdoorPvP::HandlePlayerLeaveZone(player, isMainZone);
 }
@@ -145,7 +145,7 @@ void OutdoorPvPEP::HandleGameObjectCreate(GameObject* go)
     }
 }
 
-void OutdoorPvPEP::HandleObjectiveComplete(uint32 eventId, const std::list<Player*>& players, Team team)
+void OutdoorPvPEP::HandleObjectiveComplete(uint32 eventId, const PlayerList& players, Team team)
 {
     uint32 credit;
     switch (eventId)
@@ -170,12 +170,12 @@ void OutdoorPvPEP::HandleObjectiveComplete(uint32 eventId, const std::list<Playe
             return;
     }
 
-    for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    for (auto player : players)
     {
-        if ((*itr) && (*itr)->GetTeam() == team)
+        if (player && player->GetTeam() == team)
         {
-            (*itr)->KilledMonsterCredit(credit);
-            (*itr)->AddHonorCP(HONOR_REWARD_PLAGUELANDS, HONORABLE);
+            player->KilledMonsterCredit(credit);
+            player->AddHonorCP(HONOR_REWARD_PLAGUELANDS, HONORABLE);
         }
     }
 }
@@ -213,6 +213,13 @@ bool OutdoorPvPEP::HandleEvent(uint32 eventId, GameObject* go)
 
 bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState)
 {
+    // Remove existing buff for both teams before applying new one: this prevent auras stacking
+    if (m_towersAlliance != 0)
+        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance, true);
+    if (m_towersHorde != 0)
+        BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde, true);
+
+    // Update world state and banners for captured tower
     if (team == ALLIANCE)
     {
         // update banner
@@ -222,9 +229,6 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
         // update counter
         ++m_towersAlliance;
         SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
-
-        // buff players
-        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance);
     }
     else if (team == HORDE)
     {
@@ -235,9 +239,6 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
         // update counter
         ++m_towersHorde;
         SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
-
-        // buff players
-        BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde);
     }
     else
     {
@@ -250,21 +251,23 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
             // update counter
             --m_towersAlliance;
             SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
-
-            if (m_towersAlliance == 0)
-                BuffTeam(ALLIANCE, plaguelandsTowerBuffs[0].spellIdAlliance, true);
         }
         else
         {
             // update counter
             --m_towersHorde;
             SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
-
-            if (m_towersHorde == 0)
-                BuffTeam(HORDE, plaguelandsTowerBuffs[0].spellIdHorde, true);
         }
     }
 
+    // Update Echoes of Lordaeron aura for capturing team and opposite team (if needed)
+    // Apply auras with updated capture towers values
+    if (m_towersAlliance != 0)
+        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance);
+    if (m_towersHorde != 0)
+        BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde);
+
+    // Update reward for captured tower
     bool eventHandled = true;
 
     if (team != TEAM_NONE)

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_spectral_tutor
 EndContentData */
 
@@ -118,16 +118,14 @@ struct npc_spectral_tutorAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_spectral_tutor(Creature* pCreature)
+UnitAI* GetAI_npc_spectral_tutor(Creature* pCreature)
 {
     return new npc_spectral_tutorAI(pCreature);
 }
 
 void AddSC_scholomance()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_spectral_tutor";
     pNewScript->GetAI = &GetAI_npc_spectral_tutor;
     pNewScript->RegisterSelf();

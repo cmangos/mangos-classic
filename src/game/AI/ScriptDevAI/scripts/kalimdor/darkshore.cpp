@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_kerlonian
 npc_prospector_remtravel
 npc_threshwackonator
@@ -95,7 +95,7 @@ struct npc_kerlonianAI : public FollowerAI
                 if (Player* pPlayer = GetLeaderForFollower())
                 {
                     if (pPlayer->GetQuestStatus(QUEST_SLEEPER_AWAKENED) == QUEST_STATUS_INCOMPLETE)
-                        pPlayer->GroupEventHappens(QUEST_SLEEPER_AWAKENED, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_SLEEPER_AWAKENED, m_creature);
 
                     DoScriptText(SAY_KER_END, m_creature);
                 }
@@ -105,7 +105,7 @@ struct npc_kerlonianAI : public FollowerAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -174,7 +174,7 @@ struct npc_kerlonianAI : public FollowerAI
     }
 };
 
-CreatureAI* GetAI_npc_kerlonian(Creature* pCreature)
+UnitAI* GetAI_npc_kerlonian(Creature* pCreature)
 {
     return new npc_kerlonianAI(pCreature);
 }
@@ -294,7 +294,7 @@ struct npc_prospector_remtravelAI : public npc_escortAI
                 break;
             case 42:
                 DoScriptText(EMOTE_REM_END, m_creature, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_ABSENT_MINDED_PT2, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ABSENT_MINDED_PT2, m_creature);
                 break;
         }
     }
@@ -314,7 +314,7 @@ struct npc_prospector_remtravelAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_prospector_remtravel(Creature* pCreature)
+UnitAI* GetAI_npc_prospector_remtravel(Creature* pCreature)
 {
     return new npc_prospector_remtravelAI(pCreature);
 }
@@ -381,7 +381,7 @@ struct npc_threshwackonatorAI : public FollowerAI
     }
 };
 
-CreatureAI* GetAI_npc_threshwackonator(Creature* pCreature)
+UnitAI* GetAI_npc_threshwackonator(Creature* pCreature)
 {
     return new npc_threshwackonatorAI(pCreature);
 }
@@ -540,7 +540,7 @@ struct npc_volcorAI : public npc_escortAI
             case 15:
                 DoScriptText(SAY_END, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ESCAPE_THROUGH_FORCE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_THROUGH_FORCE, m_creature);
                 SetEscortPaused(true);
                 m_creature->ForcedDespawn(10000);
                 break;
@@ -557,13 +557,13 @@ struct npc_volcorAI : public npc_escortAI
                 break;
             case 24:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ESCAPE_THROUGH_STEALTH, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_THROUGH_STEALTH, m_creature);
                 break;
         }
     }
 };
 
-CreatureAI* GetAI_npc_volcor(Creature* pCreature)
+UnitAI* GetAI_npc_volcor(Creature* pCreature)
 {
     return new npc_volcorAI(pCreature);
 }
@@ -600,13 +600,19 @@ struct npc_theryluneAI : public npc_escortAI
 
     void Reset() override {}
 
+    void JustRespawned() override
+    {
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+        npc_escortAI::JustRespawned();
+    }
+
     void WaypointReached(uint32 uiPointId) override
     {
         switch (uiPointId)
         {
             case 17:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_THERYLUNE_ESCAPE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_THERYLUNE_ESCAPE, m_creature);
                 break;
             case 19:
                 if (Player* pPlayer = GetPlayerForEscort())
@@ -617,7 +623,7 @@ struct npc_theryluneAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_therylune(Creature* pCreature)
+UnitAI* GetAI_npc_therylune(Creature* pCreature)
 {
     return new npc_theryluneAI(pCreature);
 }
@@ -629,6 +635,7 @@ bool QuestAccept_npc_therylune(Player* pPlayer, Creature* pCreature, const Quest
         if (npc_theryluneAI* pEscortAI = dynamic_cast<npc_theryluneAI*>(pCreature->AI()))
         {
             pEscortAI->Start(false, pPlayer, pQuest);
+            pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             DoScriptText(SAY_THERYLUNE_START, pCreature, pPlayer);
         }
     }
@@ -695,7 +702,6 @@ struct npc_rabid_bearAI : public ScriptedAI
         if (pCaster->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_BEAR_CAPTURED)
         {
             m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
             m_creature->SetLootRecipient(nullptr);
             Reset();
@@ -726,8 +732,7 @@ struct npc_rabid_bearAI : public ScriptedAI
                 m_creature->ForcedDespawn();
                 return;
             }
-            else
-                m_uiDespawnTimer -= uiDiff;
+            m_uiDespawnTimer -= uiDiff;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -746,16 +751,14 @@ struct npc_rabid_bearAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_rabid_bear(Creature* pCreature)
+UnitAI* GetAI_npc_rabid_bear(Creature* pCreature)
 {
     return new npc_rabid_bearAI(pCreature);
 }
 
 void AddSC_darkshore()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_kerlonian";
     pNewScript->GetAI = &GetAI_npc_kerlonian;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_kerlonian;

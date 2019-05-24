@@ -2,7 +2,7 @@
 * This program is free software licensed under GPL version 2
 * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Policies/Singleton.h"
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
@@ -337,7 +337,7 @@ bool ScriptDevAIMgr::OnProcessEvent(uint32 uiEventId, Object* pSource, Object* p
     return pTempScript->pProcessEventId(uiEventId, pSource, pTarget, bIsStart);
 }
 
-CreatureAI* ScriptDevAIMgr::GetCreatureAI(Creature* pCreature)
+UnitAI* ScriptDevAIMgr::GetCreatureAI(Creature* pCreature) const
 {
     Script* pTempScript = GetScript(pCreature->GetScriptId());
 
@@ -347,7 +347,7 @@ CreatureAI* ScriptDevAIMgr::GetCreatureAI(Creature* pCreature)
     return pTempScript->GetAI(pCreature);
 }
 
-GameObjectAI* ScriptDevAIMgr::GetGameObjectAI(GameObject* gameobject)
+GameObjectAI* ScriptDevAIMgr::GetGameObjectAI(GameObject* gameobject) const
 {
     Script* pTempScript = GetScript(gameobject->GetScriptId());
 
@@ -486,10 +486,9 @@ void ScriptDevAIMgr::Initialize()
     // Load database (must be called after SD2Config.SetSource).
     LoadDatabase();
 
-    outstring_log("SD2: Loading C++ scripts");
+    outstring_log("SD2: Loading C++ scripts\n");
     BarGoLink bar(1);
     bar.step();
-    outstring_log();
 
     // Resize script ids to needed amount of assigned ScriptNames (from core)
     m_scripts.resize(GetScriptIdsCount(), nullptr);
@@ -507,8 +506,7 @@ void ScriptDevAIMgr::Initialize()
 
     outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
 #else
-    outstring_log();
-    outstring_log(">> ScriptDev is disabled!");
+    outstring_log(">> ScriptDev is disabled!\n");
 #endif
 }
 

@@ -103,7 +103,7 @@ bool ReputationMgr::IsAtWar(FactionEntry const* factionEntry) const
         return false;
 
     if (FactionState const* state = GetState(factionEntry))
-        return (state->Flags & FACTION_FLAG_AT_WAR);
+        return (state->Flags & FACTION_FLAG_AT_WAR) != 0;
 
     return false;
 }
@@ -174,9 +174,9 @@ void ReputationMgr::SendState(FactionState const* faction)
     data << (uint32) faction->ReputationListID;
     data << (uint32) faction->Standing;
 
-    for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+    for (auto& m_faction : m_factions)
     {
-        FactionState& subFaction = itr->second;
+        FactionState& subFaction = m_faction.second;
         if (subFaction.needSend)
         {
             subFaction.needSend = false;
@@ -201,20 +201,20 @@ void ReputationMgr::SendInitialReputations()
 
     RepListID a = 0;
 
-    for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+    for (auto& m_faction : m_factions)
     {
         // fill in absent fields
-        for (; a != itr->first; ++a)
+        for (; a != m_faction.first; ++a)
         {
             data << uint8(0x00);
             data << uint32(0x00000000);
         }
 
         // fill in encountered data
-        data << uint8(itr->second.Flags);
-        data << uint32(itr->second.Standing);
+        data << uint8(m_faction.second.Flags);
+        data << uint32(m_faction.second.Standing);
 
-        itr->second.needSend = false;
+        m_faction.second.needSend = false;
 
         ++a;
     }
@@ -315,18 +315,30 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
         else if (standing < Reputation_Bottom)
             standing = Reputation_Bottom;
 
+        ReputationRank rankOld = ReputationToRank(faction.Standing + BaseRep);
+        ReputationRank rankNew = ReputationToRank(standing);
+
         faction.Standing = standing - BaseRep;
         faction.needSend = true;
         faction.needSave = true;
 
         SetVisible(&faction);
 
-        if (ReputationToRank(standing) <= REP_HOSTILE)
-            SetAtWar(&itr->second, true);
+        if (rankNew != rankOld)
+        {
+            // Server alters "At war" flag on two occasions:
+            // * When reputation dips to "Hostile": forced tick and now locked for manual changes
+            if (rankNew < REP_UNFRIENDLY && rankNew < rankOld && rankOld > REP_HOSTILE)
+                SetAtWar(&itr->second, true);
+            // * When reputation improves to "Neutral": untick by id, can be manually overriden for eligible factions
+            else if (rankNew > REP_UNFRIENDLY && rankNew > rankOld && rankOld < REP_NEUTRAL)
+                SetAtWar(RepListID(factionEntry->reputationListID), false);
+        }
 
         m_player->ReputationChanged(factionEntry);
 
-        return true;
+        if (rankNew > rankOld)
+            return true;
     }
     return false;
 }
@@ -391,17 +403,17 @@ void ReputationMgr::SetAtWar(FactionState* faction, bool atWar)
         return;
 
     // not allow declare war to faction unless already hated or less
-    if (atWar && (faction->Flags & FACTION_FLAG_PEACE_FORCED) && ReputationToRank(faction->Standing) > REP_HATED)
+    if (atWar && (faction->Flags & FACTION_FLAG_PEACE_FORCED) != 0 && ReputationToRank(faction->Standing) > REP_HATED)
         return;
 
     // already set
-    if (((faction->Flags & FACTION_FLAG_AT_WAR) != 0) == atWar)
+    if (((faction->Flags & FACTION_FLAG_AT_WAR) != 0) && atWar)
         return;
 
     if (atWar)
         faction->Flags |= FACTION_FLAG_AT_WAR;
     else
-        faction->Flags &= ~FACTION_FLAG_AT_WAR;
+        faction->Flags &= ~uint32(FACTION_FLAG_AT_WAR);
 
     faction->needSend = true;
     faction->needSave = true;
@@ -508,9 +520,9 @@ void ReputationMgr::SaveToDB()
     SqlStatement stmtDel = CharacterDatabase.CreateStatement(delRep, "DELETE FROM character_reputation WHERE guid = ? AND faction=?");
     SqlStatement stmtIns = CharacterDatabase.CreateStatement(insRep, "INSERT INTO character_reputation (guid,faction,standing,flags) VALUES (?, ?, ?, ?)");
 
-    for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+    for (auto& m_faction : m_factions)
     {
-        FactionState& faction = itr->second;
+        FactionState& faction = m_faction.second;
         if (faction.needSave)
         {
             stmtDel.PExecute(m_player->GetGUIDLow(), faction.ID);

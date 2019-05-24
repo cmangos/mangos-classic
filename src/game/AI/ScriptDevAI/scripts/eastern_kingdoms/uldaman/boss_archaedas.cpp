@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "uldaman.h"
 
 enum
@@ -182,7 +182,7 @@ struct boss_archaedasAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_archaedas(Creature* pCreature)
+UnitAI* GetAI_boss_archaedas(Creature* pCreature)
 {
     return new boss_archaedasAI(pCreature);
 }
@@ -235,9 +235,7 @@ bool EffectAuraDummy_spell_aura_dummy_awaken_dwarf(const Aura* pAura, bool bAppl
 
 void AddSC_boss_archaedas()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_archaedas";
     pNewScript->GetAI = &GetAI_boss_archaedas;
     pNewScript->RegisterSelf();

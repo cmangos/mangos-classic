@@ -22,7 +22,6 @@
 #include "PlayerbotMgr.h"
 #include "../config.h"
 #include "../../Chat/Chat.h"
-#include "../../Chat/Chat.h"
 #include "../../Entities/GossipDef.h"
 #include "../../Entities/Player.h"
 #include "../../Globals/ObjectMgr.h"
@@ -30,6 +29,7 @@
 #include "../../Loot/LootMgr.h"
 #include "../../MotionGenerators/WaypointMovementGenerator.h"
 #include "../../Tools/Language.h"
+#include "../../World/World.h"
 
 class LoginQueryHolder;
 class CharacterHandler;
@@ -62,6 +62,18 @@ PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
     m_confCollectLoot = botConfig.GetBoolDefault("PlayerbotAI.Collect.Loot", true);
     m_confCollectSkin = botConfig.GetBoolDefault("PlayerbotAI.Collect.Skin", true);
     m_confCollectObjects = botConfig.GetBoolDefault("PlayerbotAI.Collect.Objects", true);
+    m_confCollectDistanceMax = botConfig.GetIntDefault("PlayerbotAI.Collect.DistanceMax", 50);
+    if (m_confCollectDistanceMax > 100)
+    {
+        sLog.outError("Playerbot: PlayerbotAI.Collect.DistanceMax higher than allowed. Using 100");
+        m_confCollectDistanceMax = 100;
+    }
+    m_confCollectDistance = botConfig.GetIntDefault("PlayerbotAI.Collect.Distance", 25);
+    if (m_confCollectDistance > m_confCollectDistanceMax)
+    {
+        sLog.outError("Playerbot: PlayerbotAI.Collect.Distance higher than PlayerbotAI.Collect.DistanceMax. Using DistanceMax value");
+        m_confCollectDistance = m_confCollectDistanceMax;
+    }
 }
 
 PlayerbotMgr::~PlayerbotMgr()
@@ -221,12 +233,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                         std::ostringstream out;
                         out << "CurrentTime: " << CurrentTime()
                             << " m_ignoreAIUpdatesUntilTime: " << pBot->m_ignoreAIUpdatesUntilTime;
-                        ch.SendSysMessage(out.str().c_str());
-                    }
-                    {
-                        std::ostringstream out;
-                        out << "m_TimeDoneEating: " << pBot->m_TimeDoneEating
-                            << " m_TimeDoneDrinking: " << pBot->m_TimeDoneDrinking;
                         ch.SendSysMessage(out.str().c_str());
                     }
                     {
@@ -764,6 +770,15 @@ Player* PlayerbotMgr::GetPlayerBot(ObjectGuid playerGuid) const
 
 void PlayerbotMgr::OnBotLogin(Player* const bot)
 {
+    // simulate client taking control
+    WorldPacket* const pCMSG_SET_ACTIVE_MOVER = new WorldPacket(CMSG_SET_ACTIVE_MOVER, 8);
+    *pCMSG_SET_ACTIVE_MOVER << bot->GetObjectGuid();
+    bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(pCMSG_SET_ACTIVE_MOVER)));
+
+    WorldPacket* const pMSG_MOVE_FALL_LAND = new WorldPacket(MSG_MOVE_FALL_LAND, 28);
+    *pMSG_MOVE_FALL_LAND << bot->GetMover()->m_movementInfo;
+    bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(pMSG_MOVE_FALL_LAND)));
+
     // give the bot some AI, object is owned by the player class
     PlayerbotAI* ai = new PlayerbotAI(this, bot);
     bot->SetPlayerbotAI(ai);
@@ -956,12 +971,14 @@ uint32 Player::GetSpec()
 bool ChatHandler::HandlePlayerbotCommand(char* args)
 {
     if (!(m_session->GetSecurity() > SEC_PLAYER))
+    {
         if (botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false))
         {
             PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
             SetSentErrorMessage(true);
             return false;
         }
+    }
 
     if (!m_session)
     {
@@ -977,17 +994,39 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
         return false;
     }
 
-    char* cmd = strtok((char*) args, " ");
-    char* charname = strtok(nullptr, " ");
-
-    if (!cmd || !charname)
+    // create the playerbot manager if it doesn't already exist
+    PlayerbotMgr* mgr = m_session->GetPlayer()->GetPlayerbotMgr();
+    if (!mgr)
     {
-        PSendSysMessage("|cffff0000usage: add PLAYERNAME  or  remove PLAYERNAME");
+        mgr = new PlayerbotMgr(m_session->GetPlayer());
+        m_session->GetPlayer()->SetPlayerbotMgr(mgr);
+    }
+
+    char* cmd = strtok((char*) args, " ");
+    if (!cmd)
+    {
+        PSendSysMessage("|cffff0000usage: add PLAYERNAME, remove PLAYERNAME, removeall");
         SetSentErrorMessage(true);
         return false;
     }
 
     std::string cmdStr = cmd;
+
+    if (cmdStr == "removeall")
+    {
+        mgr->LogoutAllBots();
+        return true;
+    }
+
+    // commands that require botname
+    char* charname = strtok(NULL, " ");
+    if (!charname)
+    {
+        PSendSysMessage("|cffff0000usage: add PLAYERNAME, remove PLAYERNAME, removeall");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
     std::string charnameStr = charname;
 
     if (!normalizePlayerName(charnameStr))
@@ -1009,14 +1048,6 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
         return false;
     }
 
-    // create the playerbot manager if it doesn't already exist
-    PlayerbotMgr* mgr = m_session->GetPlayer()->GetPlayerbotMgr();
-    if (!mgr)
-    {
-        mgr = new PlayerbotMgr(m_session->GetPlayer());
-        m_session->GetPlayer()->SetPlayerbotMgr(mgr);
-    }
-
     QueryResult* resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
     if (resultchar)
     {
@@ -1034,13 +1065,19 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
         delete resultchar;
     }
 
-    QueryResult* resultlvl = CharacterDatabase.PQuery("SELECT level,name FROM characters WHERE guid = '%u'", guid.GetCounter());
+    QueryResult* resultlvl = CharacterDatabase.PQuery("SELECT level, name, race FROM characters WHERE guid = '%u'", guid.GetCounter());
     if (resultlvl)
     {
         Field* fields = resultlvl->Fetch();
         int charlvl = fields[0].GetUInt32();
         int maxlvl = botConfig.GetIntDefault("PlayerbotAI.RestrictBotLevel", 60);
+        uint8 race = fields[2].GetUInt8();
+        uint32 team = 0;
+
+        team = Player::TeamForRace(race);
+
         if (!(m_session->GetSecurity() > SEC_PLAYER))
+        {
             if (charlvl > maxlvl)
             {
                 PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.(Current Max:lvl |cffffffff%u)", fields[1].GetString(), maxlvl);
@@ -1048,6 +1085,16 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
                 delete resultlvl;
                 return false;
             }
+
+            // Opposing team bot
+            if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP) && m_session->GetPlayer()->GetTeam() != team)
+            {
+                PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, a member of the enemy side", fields[1].GetString());
+                SetSentErrorMessage(true);
+                delete resultlvl;
+                return false;
+            }
+        }
         delete resultlvl;
     }
 

@@ -19,10 +19,10 @@
 #ifndef CREATUREAIIMPL_H
 #define CREATUREAIIMPL_H
 
-#include "CreatureAI.h"
+#include "UnitAI.h"
 
 template<class REAL_AI>
-CreatureAI*
+UnitAI*
 CreatureAIFactory<REAL_AI>::Create(void* data) const
 {
     Creature* creature = reinterpret_cast<Creature*>(data);

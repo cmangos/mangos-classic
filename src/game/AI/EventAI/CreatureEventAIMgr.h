@@ -34,6 +34,7 @@ class CreatureEventAIMgr
 
         CreatureEventAI_Event_Map  const& GetCreatureEventAIMap()       const { return m_CreatureEventAI_Event_Map; }
         CreatureEventAI_Summon_Map const& GetCreatureEventAISummonMap() const { return m_CreatureEventAI_Summon_Map; }
+        CreatureEventAI_EventComputedData_Map const& GetEAIComputedDataMap() const { return m_creatureEventAI_ComputedDataMap; }
 
     private:
         void CheckUnusedAITexts();
@@ -41,6 +42,7 @@ class CreatureEventAIMgr
 
         CreatureEventAI_Event_Map  m_CreatureEventAI_Event_Map;
         CreatureEventAI_Summon_Map m_CreatureEventAI_Summon_Map;
+        CreatureEventAI_EventComputedData_Map m_creatureEventAI_ComputedDataMap;
 
         uint32 m_usedTextsAmount;
 };

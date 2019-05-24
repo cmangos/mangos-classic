@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 /*
 A few notes for future developement:
@@ -102,9 +102,9 @@ there is no difference here (except that default text is chosen with `gameobject
 
 #define S_LEARN_WEAPON          9789
 #define S_LEARN_ARMOR           9790
-#define S_LEARN_HAMMER          39099
-#define S_LEARN_AXE             39098
-#define S_LEARN_SWORD           39097
+#define S_LEARN_HAMMER          17044
+#define S_LEARN_AXE             17043
+#define S_LEARN_SWORD           17042
 
 #define S_UNLEARN_WEAPON        36436
 #define S_UNLEARN_ARMOR         36435
@@ -149,18 +149,16 @@ int32 GetUnlearnCostMedium(Player* pPlayer)                 // blacksmith, leath
 
     if (level < 51)
         return 250000;
-    else if (level < 66)
+    if (level < 66)
         return 500000;
-    else
-        return 1000000;
+    return 1000000;
 }
 
 int32 GetUnlearnCostLow(Player* pPlayer)                    // blacksmith
 {
     if (pPlayer->getLevel() < 66)
         return 50000;
-    else
-        return 100000;
+    return 100000;
 }
 
 /*###
@@ -174,16 +172,14 @@ bool EquippedOk(Player* pPlayer, uint32 spellId)
     if (!spell)
         return false;
 
-    for (int i = 0; i < 3; ++i)
+    for (unsigned int reqSpell : spell->EffectTriggerSpell)
     {
-        uint32 reqSpell = spell->EffectTriggerSpell[i];
         if (!reqSpell)
             continue;
 
-        Item* pItem;
         for (int j = EQUIPMENT_SLOT_START; j < EQUIPMENT_SLOT_END; ++j)
         {
-            pItem = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, j);
+            Item* pItem = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, j);
             if (pItem)
                 if (pItem->GetProto()->RequiredSpell == reqSpell)
                 {
@@ -295,9 +291,7 @@ void ProfessionUnlearnSpells(Player* pPlayer, uint32 type)
 
 bool HasWeaponSub(Player* pPlayer)
 {
-    if (pPlayer->HasSpell(S_HAMMER) || pPlayer->HasSpell(S_AXE) || pPlayer->HasSpell(S_SWORD))
-        return true;
-    return false;
+    return pPlayer->HasSpell(S_HAMMER) || pPlayer->HasSpell(S_AXE) || pPlayer->HasSpell(S_SWORD);
 }
 
 bool GossipHello_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature)
@@ -311,7 +305,7 @@ bool GossipHello_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature)
 
     uint32 eCreature = pCreature->GetEntry();
     // WEAPONSMITH & ARMORSMITH
-    if (pPlayer->GetBaseSkillValue(SKILL_BLACKSMITHING) >= 225)
+    if (pPlayer->GetSkillValueBase(SKILL_BLACKSMITHING) >= 225)
     {
         switch (eCreature)
         {
@@ -335,7 +329,7 @@ bool GossipHello_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature)
         }
     }
     // WEAPONSMITH SPEC
-    if (pPlayer->HasSpell(S_WEAPON) && pPlayer->getLevel() > 49 && pPlayer->GetBaseSkillValue(SKILL_BLACKSMITHING) >= 250)
+    if (pPlayer->HasSpell(S_WEAPON) && pPlayer->getLevel() > 49 && pPlayer->GetSkillValueBase(SKILL_BLACKSMITHING) >= 250)
     {
         switch (eCreature)
         {
@@ -598,7 +592,7 @@ bool GossipHello_npc_prof_leather(Player* pPlayer, Creature* pCreature)
 
     uint32 eCreature = pCreature->GetEntry();
 
-    if (pPlayer->HasSkill(SKILL_LEATHERWORKING) && pPlayer->GetBaseSkillValue(SKILL_LEATHERWORKING) >= 250 && pPlayer->getLevel() > 49)
+    if (pPlayer->HasSkill(SKILL_LEATHERWORKING) && pPlayer->GetSkillValueBase(SKILL_LEATHERWORKING) >= 250 && pPlayer->getLevel() > 49)
     {
         switch (eCreature)
         {
@@ -745,9 +739,7 @@ bool GossipSelect_npc_prof_leather(Player* pPlayer, Creature* pCreature, uint32 
 
 void AddSC_npc_professions()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_prof_blacksmith";
     pNewScript->pGossipHello =  &GossipHello_npc_prof_blacksmith;
     pNewScript->pGossipSelect = &GossipSelect_npc_prof_blacksmith;

@@ -17,18 +17,20 @@
 /* ScriptData
 SDName: Azshara
 SD%Complete: 100%
-SDComment: Quest support: 2744, 3141, 3602, 9364, 10994
+SDComment: Quest support: 2744, 3141, 3602, 8729, 9364, 10994
 SDCategory: Azshara
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 mobs_spitelashes
 npc_loramus_thalipedes
 npc_felhound_tracker
+event_arcanite_buoy
+go_lightning
+boss_maws
 EndContentData */
-
 
 #include "AI/ScriptDevAI/base/pet_ai.h"
 
@@ -103,8 +105,8 @@ struct mobs_spitelashesAI : public ScriptedAI
     {
         m_uiMorphTimer = 0;
 
-        for (std::unordered_map<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
-            itr->second = m_aSpitelashAbility[itr->first].m_uiInitialTimer;
+        for (auto& m_mSpellTimer : m_mSpellTimers)
+            m_mSpellTimer.second = m_aSpitelashAbility[m_mSpellTimer.first].m_uiInitialTimer;
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
@@ -167,25 +169,25 @@ struct mobs_spitelashesAI : public ScriptedAI
                 m_uiMorphTimer -= uiDiff;
         }
 
-        for (std::unordered_map<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
+        for (auto& m_mSpellTimer : m_mSpellTimers)
         {
-            if (itr->second < uiDiff)
+            if (m_mSpellTimer.second < uiDiff)
             {
-                if (CanUseSpecialAbility(itr->first))
+                if (CanUseSpecialAbility(m_mSpellTimer.first))
                 {
-                    itr->second = m_aSpitelashAbility[itr->first].m_uiCooldown;
+                    m_mSpellTimer.second = m_aSpitelashAbility[m_mSpellTimer.first].m_uiCooldown;
                     break;
                 }
             }
             else
-                itr->second -= uiDiff;
+                m_mSpellTimer.second -= uiDiff;
         }
 
         DoMeleeAttackIfReady();
     }
 };
 
-CreatureAI* GetAI_mobs_spitelashes(Creature* pCreature)
+UnitAI* GetAI_mobs_spitelashes(Creature* pCreature)
 {
     return new mobs_spitelashesAI(pCreature);
 }
@@ -305,10 +307,10 @@ struct npc_felhound_trackerAI : public ScriptedPetAI
     // Function to search for new tubber in range
     void DoFindNewCrystal(Player* pMaster)
     {
-        std::list<GameObject*> lCrystalsInRange;
-        for (uint8 i = 0; i < 4; i++)
+        GameObjectList lCrystalsInRange;
+        for (unsigned int i : aGOList)
         {
-            GetGameObjectListWithEntryInGrid(lCrystalsInRange, m_creature, aGOList[i], 40.0f);
+            GetGameObjectListWithEntryInGrid(lCrystalsInRange, m_creature, i, 40.0f);
             // If a crystal was found in range, stop the search here, else try with another GO
             if (!lCrystalsInRange.empty())
                 break;
@@ -323,7 +325,7 @@ struct npc_felhound_trackerAI : public ScriptedPetAI
         GameObject* pNearestCrystal = nullptr;
 
         // Always need to find new ones
-        for (std::list<GameObject*>::const_iterator itr = lCrystalsInRange.begin(); itr != lCrystalsInRange.end(); ++itr)
+        for (GameObjectList::const_iterator itr = lCrystalsInRange.begin(); itr != lCrystalsInRange.end(); ++itr)
         {
             if ((*itr)->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND))
             {
@@ -366,9 +368,187 @@ struct npc_felhound_trackerAI : public ScriptedPetAI
     }
 };
 
-CreatureAI* GetAI_npc_felhound_tracker(Creature* pCreature)
+UnitAI* GetAI_npc_felhound_tracker(Creature* pCreature)
 {
     return new npc_felhound_trackerAI(pCreature);
+}
+
+/*######
+## event_arcanite_buoy
+######*/
+
+enum
+{
+    EVENT_ARCANITE_BUOY     = 9542,
+    NPC_MAWS                = 15571,
+    GO_THEATRIC_LIGHTNING   = 183356,
+};
+
+struct SummonLocation
+{
+    float m_fX, m_fY, m_fZ;
+};
+
+static const SummonLocation aMawsSpawn = { 3561.73f, -6647.2f, -7.5f };
+
+bool ProcessEventId_arcanite_buoy(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+{
+    if (uiEventId == EVENT_ARCANITE_BUOY)
+    {
+        if (pSource->GetTypeId() == TYPEID_PLAYER)
+        {
+            // Do not summon it twice
+            if (Creature* temp = GetClosestCreatureWithEntry((Player*)pSource, NPC_MAWS, 200.0f))
+                return false;
+
+            // Summon Maws
+            if (Creature* maws = ((Player*)pSource)->SummonCreature(NPC_MAWS, aMawsSpawn.m_fX, aMawsSpawn.m_fY, aMawsSpawn.m_fZ, 1.6f, TEMPSPAWN_MANUAL_DESPAWN, 0))
+            {
+                maws->SetWalk(false);
+                maws->GetMotionMaster()->MoveWaypoint();
+
+                // Respawn visual lightning GO
+                if (GameObject* lightning = GetClosestGameObjectWithEntry((Player*)pSource, GO_THEATRIC_LIGHTNING, 20.0f))
+                {
+                    if (!lightning->IsSpawned())
+                    {
+                        lightning->SetRespawnTime(9000);
+                        lightning->Refresh();
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+/*###############
+## go_lightning
+################*/
+
+struct go_ai_lightning : public GameObjectAI
+{
+    go_ai_lightning(GameObject* go) : GameObjectAI(go), m_uilightningTimer(urand(2, 5) * IN_MILLISECONDS) {}
+
+    uint32 m_uilightningTimer;
+
+    // Custom anim is played on a random timer as long as GO is spawned in world
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_go->IsSpawned())
+            return;
+
+        if (m_uilightningTimer <= uiDiff)
+        {
+            m_go->SendGameObjectCustomAnim(m_go->GetObjectGuid());
+            m_uilightningTimer = urand(2, 5) * IN_MILLISECONDS;
+        }
+        else
+            m_uilightningTimer -= uiDiff;
+    }
+};
+
+GameObjectAI* GetAI_go_lightning(GameObject* go)
+{
+    return new go_ai_lightning(go);
+}
+
+/*###############
+## boss_maws
+################*/
+
+enum
+{
+    SPELL_FRENZY                = 19812,
+    SPELL_DARK_WATER            = 25743,
+    SPELL_RAMPAGE               = 25744,
+
+    EMOTE_GENERIC_FRENZY_KILL   = -1000001,
+    EMOTE_MAWS_KILL             = -1000891      // World emote that was removed in WotLK patch 3.2
+};
+
+struct boss_mawsAI : public ScriptedAI
+{
+    boss_mawsAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
+    }
+
+    uint32 uiFrenzyTimer;
+    uint32 uiDarkWaterTimer;
+    uint32 uiRampageTimer;
+    uint32 uiDespawnTimer;
+
+    void Reset() override
+    {
+        uiFrenzyTimer           = 25 * IN_MILLISECONDS;
+        uiDarkWaterTimer        = 15 * IN_MILLISECONDS;
+        uiRampageTimer          = urand(20, 120) * IN_MILLISECONDS;
+        uiDespawnTimer          = 2.5 * HOUR * IN_MILLISECONDS;
+    }
+
+    void JustDied(Unit* pKiller)
+    {
+        // Despawn visual lightning GO
+        if (GameObject* lightning = GetClosestGameObjectWithEntry(m_creature, GO_THEATRIC_LIGHTNING, 200.0f))
+            lightning->SetLootState(GO_JUST_DEACTIVATED);
+        DoScriptText(EMOTE_MAWS_KILL, m_creature);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // Despawn timer handled in UpdateAI because creature must perform actions on despawn that cannot be done in OnDespawn() (creature is already despawned)
+        if (uiDespawnTimer < uiDiff)
+        {
+            // Despawn visual lightning GO
+            if (GameObject* lightning = GetClosestGameObjectWithEntry(m_creature, GO_THEATRIC_LIGHTNING, 200.0f))
+                lightning->SetLootState(GO_JUST_DEACTIVATED);
+            DoScriptText(EMOTE_MAWS_KILL, m_creature);
+            m_creature->ForcedDespawn();
+        }
+        else
+            uiDespawnTimer -= uiDiff;
+
+        // Return since we have no target
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (uiFrenzyTimer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature, SPELL_FRENZY);
+            DoScriptText(EMOTE_GENERIC_FRENZY_KILL, m_creature);
+            uiFrenzyTimer = (m_creature->GetHealthPercent() < 20.0f ? 15 : 25) * IN_MILLISECONDS;
+        }
+        else
+            uiFrenzyTimer -= uiDiff;
+
+        if (uiRampageTimer < uiDiff)
+        {
+            DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAMPAGE);
+            uiRampageTimer = (m_creature->GetHealthPercent() < 20.0f ? 12 : urand(20, 120)) * IN_MILLISECONDS;
+        }
+        else
+            uiRampageTimer -= uiDiff;
+
+        if (m_creature->GetHealthPercent() < 20.0f)
+        {
+            if (uiDarkWaterTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_DARK_WATER);
+                uiDarkWaterTimer = 15 * IN_MILLISECONDS;
+            }
+            else
+                uiDarkWaterTimer -= uiDiff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAI_boss_maws(Creature* pCreature)
+{
+    return new boss_mawsAI(pCreature);
 }
 
 void AddSC_azshara()
@@ -389,5 +569,20 @@ void AddSC_azshara()
     pNewScript = new Script;
     pNewScript->Name = "npc_felhound_tracker";
     pNewScript->GetAI = &GetAI_npc_felhound_tracker;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "event_arcanite_buoy";
+    pNewScript->pProcessEventId = &ProcessEventId_arcanite_buoy;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_lightning";
+    pNewScript->GetGameObjectAI = &GetAI_go_lightning;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "boss_maws";
+    pNewScript->GetAI = &GetAI_boss_maws;
     pNewScript->RegisterSelf();
 }

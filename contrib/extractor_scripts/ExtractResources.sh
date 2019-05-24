@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
 #
@@ -27,6 +27,8 @@ USE_VMAPS="0"
 USE_MMAPS="0"
 USE_MMAPS_OFFMESH="0"
 USE_MMAPS_DELAY=""
+AD_RES=""
+VMAP_RES=""
 
 if [ "$1" = "a" ]
 then
@@ -66,7 +68,8 @@ else
     then
       USE_MMAPS="1";
     else
-      echo "Only reextract offmesh tiles for mmaps?"
+      echo
+      echo "Only reextract offmesh tiles for mmaps? (y/n)"
       read line
       if [ "$line" = "y" ]
       then
@@ -91,8 +94,7 @@ then
   echo "How many CPUs should be used for extracting mmaps? (1, 2, 4, 8)"
   read line
   echo
-  if [[ ($line == 1) || ($line == 2) || ($line == 4) || ($line == 8) ]]
-  then
+  if [ $line -eq 1 ] || [ $line -eq 2 ] || [ $line -eq 4 ] || [ $line -eq 8 ]; then 
     NUM_CPU=$line
   else
     echo "Only numbers 1,2,4 and 8 are supported!"
@@ -104,26 +106,58 @@ then
     echo "If you do _not_ want MMap Extraction to start delayed, just press return"
     echo "Else enter number followed by s for seconds, m for minutes, h for hours"
     echo "Example: \"3h\" - will start mmap extraction in 3 hours"
-    read -p"MMap Extraction Delay (leave blank for direct extraction): " USE_MMAPS_DELAY
     echo
+    echo "MMap Extraction Delay (leave blank for direct extraction):"
+    read USE_MMAPS_DELAY
   else
     USE_MMAPS_DELAY=""
   fi
 fi
 
+## Check if user want to do high resolution extraction of maps
+if [ "$USE_AD" = "1" ]; then
+  echo
+  echo "Would you like the extraction of maps to be high-resolution? (y/n)"
+  read line
+  if [ "$line" = "y" ]; then
+    AD_RES="-f 0"
+  else
+    AD_RES=""
+  fi
+fi
+
+## Check if user want to do high resolution extraction of vmaps
+if [ "$USE_VMAPS" = "1" ]; then
+  echo
+  echo "Would you like the extraction of vmaps to be high-resolution? (y/n)"
+  read line
+  if [ "$line" = "y" ]; then
+    VMAP_RES="-l"
+  else
+    VMAP_RES=""
+  fi
+fi
 ## Give some status
-echo "Current Settings: Extract DBCs/maps: $USE_AD, Extract vmaps: $USE_VMAPS, Extract mmaps: $USE_MMAPS on $NUM_CPU processes"
+echo
+echo "Current Settings:"
+echo "Extract DBCs/maps: $USE_AD, Extract vmaps: $USE_VMAPS, Extract mmaps: $USE_MMAPS, Processes for mmaps: $NUM_CPU"
+if [ "$USE_AD" = "1" ] && [ "$AD_RES" = "-f 0" ]; then
+  echo "maps extraction will be high-resolution";
+fi
+if [ "$USE_VMAPS" = "1" ] && [ "$VMAP_RES" = "-l" ]; then
+  echo "vmaps extraction will be high-resolution";
+fi
 if [ "$USE_MMAPS_DELAY" != "" ]; then
   echo "MMap Extraction will be started delayed by $USE_MMAPS_DELAY"
 fi
 echo
 if [ "$1" != "a" ]
 then
-  echo "If you don't like this settings, interrupt with CTRL+C"
+  echo "Press (Enter) to continue, or interrupt with (CTRL+C)"
   read line
 fi
 
-echo "`date`: Start extracting dataz for MaNGOS" | tee $LOG_FILE
+echo "$(date): Start extracting dataz for MaNGOS" | tee $LOG_FILE
 
 ## Handle log messages
 if [ "$USE_AD" = "1" ];
@@ -146,15 +180,15 @@ else
 fi
 echo | tee -a $LOG_FILE
 
-echo "`date`: Start extracting dataz for MaNGOS, DBCs/maps $USE_AD, vmaps $USE_VMAPS, mmaps $USE_MMAPS on $NUM_CPU processes" | tee $DETAIL_LOG_FILE
+echo "$(date): Start extracting dataz for MaNGOS, DBCs/maps $USE_AD, vmaps $USE_VMAPS, mmaps $USE_MMAPS on $NUM_CPU processes" | tee $DETAIL_LOG_FILE
 echo | tee -a $DETAIL_LOG_FILE
 
 ## Extract dbcs and maps
 if [ "$USE_AD" = "1" ]
 then
- echo "`date`: Start extraction of DBCs and map files..." | tee -a $LOG_FILE
- ./ad | tee -a $DETAIL_LOG_FILE
- echo "`date`: Extracting of DBCs and map files finished" | tee -a $LOG_FILE
+ echo "$(date): Start extraction of DBCs and map files..." | tee -a $LOG_FILE
+ ./ad $AD_RES | tee -a $DETAIL_LOG_FILE
+ echo "$(date): Extracting of DBCs and map files finished" | tee -a $LOG_FILE
  echo | tee -a $LOG_FILE
  echo | tee -a $DETAIL_LOG_FILE
 fi
@@ -162,13 +196,13 @@ fi
 ## Extract vmaps
 if [ "$USE_VMAPS" = "1" ]
 then
-  echo "`date`: Start extraction of vmaps..." | tee -a $LOG_FILE
-  ./vmap_extractor | tee -a $DETAIL_LOG_FILE
-  echo "`date`: Extracting of vmaps finished" | tee -a $LOG_FILE
+  echo "$(date): Start extraction of vmaps..." | tee -a $LOG_FILE
+  ./vmap_extractor $VMAP_RES | tee -a $DETAIL_LOG_FILE
+  echo "$(date): Extracting of vmaps finished" | tee -a $LOG_FILE
   mkdir vmaps
-  echo "`date`: Start assembling of vmaps..." | tee -a $LOG_FILE
+  echo "$(date): Start assembling of vmaps..." | tee -a $LOG_FILE
   ./vmap_assembler Buildings vmaps | tee -a $DETAIL_LOG_FILE
-  echo "`date`: Assembling of vmaps finished" | tee -a $LOG_FILE
+  echo "$(date): Assembling of vmaps finished" | tee -a $LOG_FILE
 
   echo | tee -a $LOG_FILE
   echo | tee -a $DETAIL_LOG_FILE

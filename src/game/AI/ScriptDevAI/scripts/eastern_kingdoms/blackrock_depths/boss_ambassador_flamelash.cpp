@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackrock_depths.h"
 
 enum
@@ -50,8 +50,8 @@ struct boss_ambassador_flamelashAI : public ScriptedAI
 
     void Reset() override
     {
-        for (uint8 i = 0; i < MAX_DWARF_RUNES; ++i)
-            m_uiSpiritTimer[i] = urand(0, 1000);
+        for (unsigned int& i : m_uiSpiritTimer)
+            i = urand(0, 1000);
 
         m_sSpiritsGuidsSet.clear();
     }
@@ -63,7 +63,7 @@ struct boss_ambassador_flamelashAI : public ScriptedAI
             return;
 
         if (GameObject* pRune = m_pInstance->GetSingleGameObjectFromStorage(GO_DWARFRUNE_A01 + uiIndex))
-            m_creature->SummonCreature(NPC_BURNING_SPIRIT, pRune->GetPositionX(), pRune->GetPositionY(), pRune->GetPositionZ(), m_creature->GetAngle(m_creature), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+            m_creature->SummonCreature(NPC_BURNING_SPIRIT, pRune->GetPositionX(), pRune->GetPositionY(), pRune->GetPositionZ(), pRune->GetAngle(m_creature), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -126,16 +126,14 @@ struct boss_ambassador_flamelashAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ambassador_flamelash(Creature* pCreature)
+UnitAI* GetAI_boss_ambassador_flamelash(Creature* pCreature)
 {
     return new boss_ambassador_flamelashAI(pCreature);
 }
 
 void AddSC_boss_ambassador_flamelash()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ambassador_flamelash";
     pNewScript->GetAI = &GetAI_boss_ambassador_flamelash;
     pNewScript->RegisterSelf();

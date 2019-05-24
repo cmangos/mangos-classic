@@ -2,7 +2,11 @@
 Recast & Detour
 ===============
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/memononen/recastnavigation/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[![Travis (Linux) Build Status](https://travis-ci.org/recastnavigation/recastnavigation.svg?branch=master)](https://travis-ci.org/recastnavigation/recastnavigation)
+[![Appveyor (Windows) Build  Status](https://ci.appveyor.com/api/projects/status/20w84u25b3f8h179/branch/master?svg=true)](https://ci.appveyor.com/project/recastnavigation/recastnavigation/branch/master)
+
+[![Issue Stats](http://www.issuestats.com/github/recastnavigation/recastnavigation/badge/pr?style=flat)](http://www.issuestats.com/github/recastnavigation/recastnavigation)
+[![Issue Stats](http://www.issuestats.com/github/recastnavigation/recastnavigation/badge/issue?style=flat)](http://www.issuestats.com/github/recastnavigation/recastnavigation)
 
 ![screenshot of a navmesh baked with the sample program](/RecastDemo/screenshot.png?raw=true)
 
@@ -19,7 +23,7 @@ and then casting a navigation mesh over it. The process consists of three steps,
 building the voxel mold, partitioning the mold into simple regions, peeling off 
 the regions as simple polygons.
 
-1. The voxel mold is build from the input triangle mesh by rasterizing the triangles into a multi-layer heightfield. Some simple filters are  then applied to the mold to prune out locations where the character would not be able to move.
+1. The voxel mold is built from the input triangle mesh by rasterizing the triangles into a multi-layer heightfield. Some simple filters are  then applied to the mold to prune out locations where the character would not be able to move.
 2. The walkable areas described by the mold are divided into simple overlayed 2D regions. The resulting regions have only one non-overlapping contour, which simplifies the final step of the process tremendously.
 3. The navigation polygons are peeled off from the regions by first tracing the boundaries and then simplifying them. The resulting polygons are finally converted to convex polygons which makes them perfect for pathfinding and spatial reasoning about the level. 
 
@@ -37,25 +41,48 @@ You can find a comprehensive demo project in RecastDemo folder. It is a kitchen 
 
 ### Building RecastDemo
 
-RecastDemo uses [premake4](http://industriousone.com/premake) to build platform specific projects, now is good time to install it if you don't have it already. To build *RecasDemo*, in your favorite terminal navigate into the `RecastDemo` folder, then:
+RecastDemo uses [premake5](http://premake.github.io/) to build platform specific projects. Download it and make sure it's available on your path, or specify the path to it.
 
-- *OS X*: `premake4 xcode4`
-- *Windows*: `premake4 vs2010`
-- *Linux*: `premake4 gmake`
+#### Linux
 
-See premake4 documentation for full list of supported build file types. The projects will be created in `RecastDemo/Build` folder. And after you have compiled the project, the *RecastDemo* executable will be located in `RecastDemo/Bin` folder.
+- Install SDL2 and its dependencies according to your distro's guidelines.
+- run `premake5 gmake` from the `RecastDemo` folder.
+- `cd Build/gmake` then `make`
+- Run `RecastDemo\Bin\RecastDemo`
 
+#### OSX
+
+- Grab the latest SDL2 development library dmg from [here](https://www.libsdl.org/download-2.0.php) and place `SDL2.framework` in `/Library/Frameworks/`
+- Navigate to the `RecastDemo` folder and run `premake5 xcode4`
+- Open `Build/xcode4/recastnavigation.xcworkspace`
+- Select the "RecastDemo" project in the left pane, go to the "BuildPhases" tab and expand "Link Binary With Libraries"
+- Remove the existing entry for SDL2 (it should have a white box icon) and re-add it by hitting the plus, selecting "Add Other", and selecting `/Library/Frameworks/SDL2.framework`.  It should now have a suitcase icon.
+- Set the RecastDemo project as the target and build.
+
+#### Windows
+
+- Grab the latest SDL2 development library release from [here](https://www.libsdl.org/download-2.0.php) and unzip it `RecastDemo\Contrib`.  Rename the SDL folder such that the path `RecastDemo\Contrib\SDL\lib\x86` is valid.
+- Run `"premake5" vs2015` from the `RecastDemo` folder
+- Open the solution, build, and run.
+
+### Running Unit tests
+
+- Follow the instructions to build RecastDemo above.  Premake should generate another build target called "Tests".
+- Build the "Tests" project.  This will generate an executable named "Tests" in `RecastDemo/Bin/`
+- Run the "Tests" executable.  It will execute all the unit tests, indicate those that failed, and display a count of those that succeeded.
 
 ## Integrating with your own project
 
-It is recommended to add the source directories `DebugUtils`, `Detour`, `DetourCrowd`, `DetourTileCache`, and `Recast` into your own project depending on which parts of the project you need. For example your level building tool could include DebugUtils, Recast, and Detour, and your game runtime could just include Detour.
+It is recommended to add the source directories `DebugUtils`, `Detour`, `DetourCrowd`, `DetourTileCache`, and `Recast` into your own project depending on which parts of the project you need. For example your level building tool could include `DebugUtils`, `Recast`, and `Detour`, and your game runtime could just include `Detour`.
 
+## Contributing
+
+See the [Contributing document](CONTRIBUTING.md) for guidelines for making contributions.
 
 ## Discuss
 
 - Discuss Recast & Detour: http://groups.google.com/group/recastnavigation
 - Development blog: http://digestingduck.blogspot.com/
-
 
 ## License
 

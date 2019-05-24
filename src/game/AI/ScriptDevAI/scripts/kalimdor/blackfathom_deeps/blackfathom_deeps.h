@@ -112,7 +112,7 @@ class instance_blackfathom_deeps : public ScriptedInstance
 
     protected:
         void DoSpawnMobs(uint8 uiWaveIndex);
-        bool IsWaveEventFinished();
+        bool IsWaveEventFinished() const;
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;

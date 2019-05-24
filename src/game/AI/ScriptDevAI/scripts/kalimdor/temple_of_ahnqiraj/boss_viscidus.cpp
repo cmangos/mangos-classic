@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "temple_of_ahnqiraj.h"
 
 enum
@@ -284,7 +284,7 @@ struct boss_viscidusAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -350,7 +350,7 @@ struct boss_viscidusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_viscidus(Creature* pCreature)
+UnitAI* GetAI_boss_viscidus(Creature* pCreature)
 {
     return new boss_viscidusAI(pCreature);
 }
@@ -378,16 +378,14 @@ struct npc_glob_of_viscidusAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_glob_of_viscidus(Creature* pCreature)
+UnitAI* GetAI_npc_glob_of_viscidus(Creature* pCreature)
 {
     return new npc_glob_of_viscidusAI(pCreature);
 }
 
 void AddSC_boss_viscidus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_viscidus";
     pNewScript->GetAI = &GetAI_boss_viscidus;
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_viscidus_freeze;

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 
 static sSpawnLocation m_aBosspawnLocs[MAX_MAJORDOMO_ADDS] =
@@ -50,9 +50,9 @@ void instance_molten_core::Initialize()
 
 bool instance_molten_core::IsEncounterInProgress() const
 {
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (uint32 i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
+        if (i == IN_PROGRESS)
             return true;
     }
 
@@ -92,9 +92,9 @@ void instance_molten_core::OnObjectCreate(GameObject* pGo)
         case GO_RUNE_KORO:
             // Activate the rune if it was previously doused by a player (encounter set to SPECIAL)
             m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
-            for (uint8 i = 0; i < MAX_MOLTEN_RUNES; ++i)
+            for (auto m_aMoltenCoreRune : m_aMoltenCoreRunes)
             {
-                if (m_aMoltenCoreRunes[i].m_uiRuneEntry == pGo->GetEntry() && GetData(m_aMoltenCoreRunes[i].m_uiType) == SPECIAL)
+                if (m_aMoltenCoreRune.m_uiRuneEntry == pGo->GetEntry() && GetData(m_aMoltenCoreRune.m_uiType) == SPECIAL)
                 {
                     pGo->UseDoorOrButton();
                     break;
@@ -111,9 +111,9 @@ void instance_molten_core::OnObjectCreate(GameObject* pGo)
         case GO_CIRCLE_GOLEMAGG:
             // Delete the Flames Circle around the rune if the boss guarding it is killed
             m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
-            for (uint8 i = 0; i < MAX_MOLTEN_RUNES; ++i)
+            for (auto m_aMoltenCoreRune : m_aMoltenCoreRunes)
             {
-                if (m_aMoltenCoreRunes[i].m_uiFlamesCircleEntry == pGo->GetEntry() && (GetData(m_aMoltenCoreRunes[i].m_uiType) == SPECIAL || GetData(m_aMoltenCoreRunes[i].m_uiType) == DONE))
+                if (m_aMoltenCoreRune.m_uiFlamesCircleEntry == pGo->GetEntry() && (GetData(m_aMoltenCoreRune.m_uiType) == SPECIAL || GetData(m_aMoltenCoreRune.m_uiType) == DONE))
                 {
                     pGo->SetLootState(GO_JUST_DEACTIVATED);
                     break;
@@ -148,11 +148,11 @@ void instance_molten_core::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
             {
-                for (uint8 i = 0; i < MAX_MOLTEN_RUNES; ++i)
+                for (auto m_aMoltenCoreRune : m_aMoltenCoreRunes)
                 {
-                    if (m_aMoltenCoreRunes[i].m_uiType == uiType)
+                    if (m_aMoltenCoreRune.m_uiType == uiType)
                     {
-                        if (GameObject* pGo = GetSingleGameObjectFromStorage(m_aMoltenCoreRunes[i].m_uiFlamesCircleEntry))
+                        if (GameObject* pGo = GetSingleGameObjectFromStorage(m_aMoltenCoreRune.m_uiFlamesCircleEntry))
                             pGo->SetLootState(GO_JUST_DEACTIVATED);
                         break;
                     }
@@ -236,8 +236,8 @@ void instance_molten_core::DoSpawnMajordomoIfCan(bool bByPlayerEnter)
             if (!bByPlayerEnter)
                 DoScriptText(SAY_MAJORDOMO_SPAWN, pMajordomo);
 
-            for (uint8 i = 0; i < MAX_MAJORDOMO_ADDS; ++i)
-                pMajordomo->SummonCreature(m_aBosspawnLocs[i].m_uiEntry, m_aBosspawnLocs[i].m_fX, m_aBosspawnLocs[i].m_fY, m_aBosspawnLocs[i].m_fZ, m_aBosspawnLocs[i].m_fO, TEMPSPAWN_MANUAL_DESPAWN, DAY * IN_MILLISECONDS);
+            for (auto& m_aBosspawnLoc : m_aBosspawnLocs)
+                pMajordomo->SummonCreature(m_aBosspawnLoc.m_uiEntry, m_aBosspawnLoc.m_fX, m_aBosspawnLoc.m_fY, m_aBosspawnLoc.m_fZ, m_aBosspawnLoc.m_fO, TEMPSPAWN_MANUAL_DESPAWN, DAY * IN_MILLISECONDS);
         }
     }
 }
@@ -258,10 +258,10 @@ void instance_molten_core::Load(const char* chrIn)
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
                >> m_auiEncounter[8] >> m_auiEncounter[9];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (uint32& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -274,9 +274,7 @@ InstanceData* GetInstance_instance_molten_core(Map* pMap)
 
 void AddSC_instance_molten_core()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_molten_core";
     pNewScript->GetInstanceData = &GetInstance_instance_molten_core;
     pNewScript->RegisterSelf();

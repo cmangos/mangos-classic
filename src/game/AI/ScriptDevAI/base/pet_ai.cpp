@@ -9,7 +9,7 @@ SDComment: Intended to be used with Guardian/Protector/Minipets. Little/no contr
 SDCategory: Npc
 EndScriptData */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "pet_ai.h"
 
 ScriptedPetAI::ScriptedPetAI(Creature* creature) : CreatureAI(creature)
@@ -17,7 +17,7 @@ ScriptedPetAI::ScriptedPetAI(Creature* creature) : CreatureAI(creature)
 
 void ScriptedPetAI::AttackStart(Unit* who)
 {
-    if (who && m_creature->Attack(who, true))
+    if (who && m_creature->Attack(who, m_meleeEnabled))
         m_creature->GetMotionMaster()->MoveChase(who);
 }
 
@@ -79,6 +79,9 @@ void ScriptedPetAI::UpdateAI(const uint32 diff)
     }
     else if (m_creature->GetCharmInfo())
     {
+        if (m_creature->isInCombat())
+            m_creature->CombatStop(true, true);
+
         Unit* owner = m_creature->GetMaster();
 
         if (!owner)
@@ -100,4 +103,9 @@ void ScriptedPetAI::UpdateAI(const uint32 diff)
             UpdatePetOOCAI(diff);
         }
     }
+}
+
+void ScriptedPetAI::CombatStop()
+{
+    ResetPetCombat();
 }

@@ -37,10 +37,13 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
 {
     SetMap(cPos.GetMap());
 
-    Team team = owner->GetTypeId() == TYPEID_PLAYER ? ((Player*)owner)->GetTeam() : TEAM_NONE;
-
-    if (!CreateFromProto(guidlow, cinfo, team))
+    if (!CreateFromProto(guidlow, cinfo))
         return false;
+
+    // special model selection case for totems
+    if (owner->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(owner)->GetTeam() == ALLIANCE)
+        if (uint32 modelid_team = sObjectMgr.GetCreatureModelOtherTeamModel(GetDisplayId()))
+            SetDisplayId(modelid_team);
 
     cPos.SelectFinalPoint(this);
 
@@ -66,7 +69,7 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
     return true;
 }
 
-void Totem::Update(uint32 update_diff, uint32 time)
+void Totem::Update(const uint32 diff)
 {
     Unit* owner = GetOwner();
     if (!owner || !owner->isAlive() || !isAlive())
@@ -75,15 +78,15 @@ void Totem::Update(uint32 update_diff, uint32 time)
         return;
     }
 
-    if (m_duration <= update_diff)
+    if (m_duration <= diff)
     {
         UnSummon();                                         // remove self
         return;
     }
     else
-        m_duration -= update_diff;
+        m_duration -= diff;
 
-    Creature::Update(update_diff, time);
+    Creature::Update(diff);
 }
 
 void Totem::Summon(Unit* owner)
@@ -118,7 +121,7 @@ void Totem::UnSummon()
 {
     SendObjectDeSpawnAnim(GetObjectGuid());
 
-    CombatStop();
+    CombatStop(true);
     RemoveAurasDueToSpell(GetSpell());
 
     if (Unit* owner = GetOwner())

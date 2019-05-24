@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "ruins_of_ahnqiraj.h"
 
 instance_ruins_of_ahnqiraj::instance_ruins_of_ahnqiraj(Map* pMap) : ScriptedInstance(pMap),
@@ -68,7 +68,6 @@ void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
             break;
         case NPC_KALDOREI_ELITE:
             m_lKaldoreiGuidList.push_back(pCreature->GetObjectGuid());
-            return;
     }
 }
 
@@ -214,8 +213,8 @@ void instance_ruins_of_ahnqiraj::DoSapwnAndorovIfCan()
     if (!pPlayer)
         return;
 
-    for (uint8 i = 0; i < MAX_HELPERS; ++i)
-        pPlayer->SummonCreature(aAndorovSpawnLocs[i].m_uiEntry, aAndorovSpawnLocs[i].m_fX, aAndorovSpawnLocs[i].m_fY, aAndorovSpawnLocs[i].m_fZ, aAndorovSpawnLocs[i].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+    for (const auto& aAndorovSpawnLoc : aAndorovSpawnLocs)
+        pPlayer->SummonCreature(aAndorovSpawnLoc.m_uiEntry, aAndorovSpawnLoc.m_fX, aAndorovSpawnLoc.m_fY, aAndorovSpawnLoc.m_fZ, aAndorovSpawnLoc.m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
 void instance_ruins_of_ahnqiraj::Load(const char* chrIn)
@@ -233,10 +232,10 @@ void instance_ruins_of_ahnqiraj::Load(const char* chrIn)
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2]
                >> m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (uint32& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -261,7 +260,7 @@ void instance_ruins_of_ahnqiraj::Update(uint32 uiDiff)
 
 void instance_ruins_of_ahnqiraj::DoSortArmyWaves()
 {
-    std::list<Creature*> lCreatureList;
+    CreatureList lCreatureList;
 
     // Sort the 7 army waves
     // We need to use gridsearcher for this, because coords search is too complicated here
@@ -276,7 +275,7 @@ void instance_ruins_of_ahnqiraj::DoSortArmyWaves()
             GetCreatureListWithEntryInGrid(lCreatureList, pTemp, NPC_QIRAJI_WARRIOR, aArmySortingParameters[i].m_fSearchDist);
             GetCreatureListWithEntryInGrid(lCreatureList, pTemp, NPC_SWARMGUARD_NEEDLER, aArmySortingParameters[i].m_fSearchDist);
 
-            for (std::list<Creature*>::const_iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr)
+            for (CreatureList::const_iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr)
             {
                 if ((*itr)->isAlive())
                     m_sArmyWavesGuids[i].insert((*itr)->GetObjectGuid());
@@ -320,9 +319,9 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
         }
 
         float fX, fY, fZ;
-        for (GuidSet::const_iterator itr = m_sArmyWavesGuids[m_uiCurrentArmyWave].begin(); itr != m_sArmyWavesGuids[m_uiCurrentArmyWave].end(); ++itr)
+        for (auto itr : m_sArmyWavesGuids[m_uiCurrentArmyWave])
         {
-            if (Creature* pTemp = instance->GetCreature(*itr))
+            if (Creature* pTemp = instance->GetCreature(itr))
             {
                 if (!pTemp->isAlive())
                     continue;
@@ -353,9 +352,7 @@ InstanceData* GetInstanceData_instance_ruins_of_ahnqiraj(Map* pMap)
 
 void AddSC_instance_ruins_of_ahnqiraj()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_ruins_of_ahnqiraj";
     pNewScript->GetInstanceData = &GetInstanceData_instance_ruins_of_ahnqiraj;
     pNewScript->RegisterSelf();

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {
@@ -127,16 +127,14 @@ struct boss_arcanist_doanAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_arcanist_doan(Creature* pCreature)
+UnitAI* GetAI_boss_arcanist_doan(Creature* pCreature)
 {
     return new boss_arcanist_doanAI(pCreature);
 }
 
 void AddSC_boss_arcanist_doan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_arcanist_doan";
     pNewScript->GetAI = &GetAI_boss_arcanist_doan;
     pNewScript->RegisterSelf();

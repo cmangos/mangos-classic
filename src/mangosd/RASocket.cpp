@@ -32,13 +32,14 @@
 #include "Globals/ObjectMgr.h"
 #include "Policies/Lock.h"
 
+#include <utility>
 #include <vector>
 #include <string>
 
 /// RASocket constructor
 RASocket::RASocket(boost::asio::io_service& service, std::function<void(Socket*)> closeHandler) :
-    m_secure(sConfig.GetBoolDefault("RA.Secure", true)), MaNGOS::Socket(service, closeHandler),
-    m_authLevel(AuthLevel::None), m_accountId(0), m_accountLevel(AccountTypes::SEC_PLAYER)
+    MaNGOS::Socket(service, std::move(closeHandler)), m_secure(sConfig.GetBoolDefault("RA.Secure", true)),
+    m_authLevel(AuthLevel::None), m_accountLevel(AccountTypes::SEC_PLAYER), m_accountId(0)
 {
     if (sConfig.IsSet("RA.Stricted"))
     {
@@ -200,7 +201,7 @@ bool RASocket::HandleInput()
         default:
             return false;
             ///</ul>
-    };
+    }
 
     m_input.clear();
 

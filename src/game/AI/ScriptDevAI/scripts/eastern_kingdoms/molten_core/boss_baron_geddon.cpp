@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 
 enum
@@ -130,16 +130,14 @@ struct boss_baron_geddonAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_baron_geddon(Creature* pCreature)
+UnitAI* GetAI_boss_baron_geddon(Creature* pCreature)
 {
     return new boss_baron_geddonAI(pCreature);
 }
 
 void AddSC_boss_baron_geddon()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_baron_geddon";
     pNewScript->GetAI = &GetAI_boss_baron_geddon;
     pNewScript->RegisterSelf();

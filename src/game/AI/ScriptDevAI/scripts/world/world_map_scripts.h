@@ -27,7 +27,6 @@ enum
 
     // Quest 8868
     TYPE_OMEN                   = 0,
-    MAX_ENCOUNTER               = 1,
     NPC_MINION_OMEN             = 15466,
     NPC_OMEN                    = 15467,
     GO_ROCKET_CLUSTER           = 180875,
@@ -44,6 +43,11 @@ enum
     GO_WATER_RIFT               = 179665,
     GO_FIRE_RIFT                = 179666,
     GO_AIR_RIFT                 = 179667,
+
+    // Quest 1126
+    TYPE_HIVE                   = 1,
+    MAX_ENCOUNTER               = 2,
+    NPC_HIVE_ASHI_DRONES        = 13136,
 };
 
 enum ElementalInvasionIndexes
@@ -64,7 +68,9 @@ enum SpawnIndexes
     POS_IDX_OMEN_MOVE           = 4,
     POS_IDX_MINION_OMEN_START   = 5,
     POS_IDX_MINION_OMEN_STOP    = 11,
-    POS_IDX_MAX                 = 12
+    POS_IDX_HIVE_DRONES_START   = 12,
+    POS_IDX_HIVE_DRONES_STOP    = 14,
+    POS_IDX_MAX                 = 15
 };
 
 static const float aSpawnLocations[POS_IDX_MAX][4] =
@@ -81,6 +87,9 @@ static const float aSpawnLocations[POS_IDX_MAX][4] =
     {7477.750f,  -2849.020f,  464.466f, 0.14f},
     {7507.560f,  -2818.230f,  459.486f, 4.63f},
     {7558.880f,  -2856.770f,  457.684f, 4.31f},
+    {-7185.94f,     443.29f,  26.59f, 4.8458f},         // Hive'Ashi Drones spawn 1, guesswork
+    {-7180.59f,     441.33f,  26.68f, 4.1798f},         // Hive'Ashi Drones spawn 2, guesswork
+    {-7176.63f,     437.42f,  26.84f, 3.9348f}          // Hive'Ashi Drones spawn 3, guesswork
 };
 
 #endif

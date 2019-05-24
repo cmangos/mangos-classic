@@ -192,12 +192,11 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
 {
-    Guild* guild;
     Player* player = GetPlayer();
 
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_ACCEPT");
 
-    guild = sGuildMgr.GetGuildById(player->GetGuildIdInvited());
+    Guild* guild = sGuildMgr.GetGuildById(player->GetGuildIdInvited());
     if (!guild || player->GetGuildId())
         return;
 

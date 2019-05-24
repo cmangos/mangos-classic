@@ -124,7 +124,7 @@ struct BoxVolume
     uint32 m_uiWidth;
 };
 
-static const BoxVolume aEntranceRoom[] = {174.13f, 63.84f, 104.0f, 54, 44};
+static const BoxVolume aEntranceRoom = { 174.13f, 63.84f, 104.0f, 54, 44 };
 
 static const uint32 aGandlingEvents[MAX_EVENTS] = {EVENT_ID_POLKELT, EVENT_ID_THEOLEN, EVENT_ID_MALICIA, EVENT_ID_ILLUCIA, EVENT_ID_BAROV, EVENT_ID_RAVENIAN};
 

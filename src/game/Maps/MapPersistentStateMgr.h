@@ -72,7 +72,7 @@ class MapPersistentState
 
         MapEntry const* GetMapEntry() const;
 
-        bool IsUsedByMap() const { return !!m_usedByMap; }
+        bool IsUsedByMap() const { return m_usedByMap != nullptr; }
         Map* GetMap() const { return m_usedByMap; }         // Can be nullptr if map not loaded for persistent state
         void SetUsedByMapState(Map* map)
         {
@@ -222,7 +222,7 @@ class DungeonPersistentState : public MapPersistentState
         bool HasBounds() const { return !m_playerList.empty() || !m_groupList.empty(); }
 
     private:
-        typedef std::list<Player*> PlayerListType;
+        typedef PlayerList PlayerListType;
         typedef std::list<Group*> GroupListType;
 
         time_t m_resetTime;
@@ -340,7 +340,7 @@ class MapPersistentStateManager : public MaNGOS::Singleton<MapPersistentStateMan
         MapPersistentState* AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, time_t resetTime, bool canReset, bool load = false, bool initPools = true, uint32 completedEncountersMask = 0);
 
         // search stored state, can be nullptr in result
-        MapPersistentState* GetPersistentState(uint32 mapId, uint32 InstanceId);
+        MapPersistentState* GetPersistentState(uint32 mapId, uint32 instanceId);
 
         void RemovePersistentState(uint32 mapId, uint32 instanceId);
 
@@ -362,7 +362,7 @@ class MapPersistentStateManager : public MaNGOS::Singleton<MapPersistentStateMan
         typedef std::unordered_map < uint32 /*InstanceId or MapId*/, MapPersistentState* > PersistentStateMap;
 
         //  called by scheduler for DungeonPersistentStates
-        void _ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeleft);
+        void _ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeLeft);
         void _ResetInstance(uint32 mapid, uint32 instanceId);
         void _CleanupExpiredInstancesAtTime(time_t t);
 

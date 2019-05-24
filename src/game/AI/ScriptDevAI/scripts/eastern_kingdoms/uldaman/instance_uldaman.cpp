@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "uldaman.h"
 
 instance_uldaman::instance_uldaman(Map* pMap) : ScriptedInstance(pMap),
@@ -139,10 +139,10 @@ void instance_uldaman::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (uint32& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -218,7 +218,7 @@ void instance_uldaman::DoResetKeeperEvent()
 
 Creature* instance_uldaman::GetClosestDwarfNotInCombat(Creature* pSearcher)
 {
-    std::list<Creature*> lTemp;
+    CreatureList lTemp;
 
     for (GuidList::const_iterator itr = m_lWardens.begin(); itr != m_lWardens.end(); ++itr)
     {
@@ -317,9 +317,7 @@ bool ProcessEventId_event_spell_altar_boss_aggro(uint32 uiEventId, Object* pSour
 
 void AddSC_instance_uldaman()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_uldaman";
     pNewScript->GetInstanceData = &GetInstanceData_instance_uldaman;
     pNewScript->RegisterSelf();

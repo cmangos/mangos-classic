@@ -34,8 +34,8 @@ OutdoorPvPMgr::OutdoorPvPMgr()
 
 OutdoorPvPMgr::~OutdoorPvPMgr()
 {
-    for (uint8 i = 0; i < MAX_OPVP_ID; ++i)
-        delete m_scripts[i];
+    for (auto& m_script : m_scripts)
+        delete m_script;
 }
 
 #define LOAD_OPVP_ZONE(a)                                           \
@@ -122,9 +122,9 @@ void OutdoorPvPMgr::Update(uint32 diff)
     if (!m_updateTimer.Passed())
         return;
 
-    for (uint8 i = 0; i < MAX_OPVP_ID; ++i)
-        if (m_scripts[i])
-            m_scripts[i]->Update(m_updateTimer.GetCurrent());
+    for (auto& m_script : m_scripts)
+        if (m_script)
+            m_script->Update(m_updateTimer.GetCurrent());
 
     m_updateTimer.Reset();
 }

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 mob_aquementas
 npc_oox17tn
 npc_stone_watcher_of_norgannon
@@ -128,7 +128,7 @@ struct mob_aquementasAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_aquementas(Creature* pCreature)
+UnitAI* GetAI_mob_aquementas(Creature* pCreature)
 {
     return new mob_aquementasAI(pCreature);
 }
@@ -189,7 +189,7 @@ struct npc_oox17tnAI : public npc_escortAI
             case 34:
                 DoScriptText(SAY_OOX_END, m_creature);
                 // Award quest credit
-                pPlayer->GroupEventHappens(QUEST_RESCUE_OOX_17TN, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_RESCUE_OOX_17TN, m_creature);
                 break;
         }
     }
@@ -228,7 +228,7 @@ struct npc_oox17tnAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_oox17tn(Creature* pCreature)
+UnitAI* GetAI_npc_oox17tn(Creature* pCreature)
 {
     return new npc_oox17tnAI(pCreature);
 }
@@ -357,7 +357,7 @@ struct npc_toogaAI : public FollowerAI
                 if (Player* pPlayer = GetLeaderForFollower())
                 {
                     if (pPlayer->GetQuestStatus(QUEST_TOOGA) == QUEST_STATUS_INCOMPLETE)
-                        pPlayer->GroupEventHappens(QUEST_TOOGA, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TOOGA, m_creature);
                 }
 
                 pTorta = pWho;
@@ -447,7 +447,7 @@ struct npc_toogaAI : public FollowerAI
     }
 };
 
-CreatureAI* GetAI_npc_tooga(Creature* pCreature)
+UnitAI* GetAI_npc_tooga(Creature* pCreature)
 {
     return new npc_toogaAI(pCreature);
 }
@@ -465,9 +465,7 @@ bool QuestAccept_npc_tooga(Player* pPlayer, Creature* pCreature, const Quest* pQ
 
 void AddSC_tanaris()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mob_aquementas";
     pNewScript->GetAI = &GetAI_mob_aquementas;
     pNewScript->RegisterSelf();

@@ -142,7 +142,7 @@ class Group
         uint32 GetId() const { return m_Id; }
         bool IsFull() const { return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE); }
         bool isRaidGroup() const { return m_groupType == GROUPTYPE_RAID; }
-        bool isBGGroup()   const { return m_bgGroup != nullptr; }
+        bool isBattleGroup()   const { return m_bgGroup != nullptr; }
         bool IsCreated()   const { return GetMembersCount() > 0; }
         ObjectGuid const& GetLeaderGuid() const { return m_leaderGuid; }
         const char*       GetLeaderName() const { return m_leaderName.c_str(); }
@@ -180,7 +180,7 @@ class Group
         GroupReference* GetFirstMember() { return m_memberMgr.getFirst(); }
         GroupReference const* GetFirstMember() const { return m_memberMgr.getFirst(); }
         uint32 GetMembersCount() const { return m_memberSlots.size(); }
-        uint32 GetMembersMinCount() const { return (isBGGroup() ? 1 : 2); }
+        uint32 GetMembersMinCount() const { return (isBattleGroup() ? 1 : 2); }
         uint32 GetInviteesCount() const { return m_invitees.size(); }
         void GetDataForXPAtKill(Unit const* victim, uint32& count, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level, Player* additional = nullptr);
         uint8 GetMemberGroup(ObjectGuid guid) const
@@ -258,7 +258,7 @@ class Group
         void LinkMember(GroupReference* pRef) { m_memberMgr.insertFirst(pRef); }
         void DelinkMember(GroupReference* /*pRef*/) const { }
 
-        InstanceGroupBind* BindToInstance(DungeonPersistentState* save, bool permanent, bool load = false);
+        InstanceGroupBind* BindToInstance(DungeonPersistentState* state, bool permanent, bool load = false);
         void UnbindInstance(uint32 mapid, bool unload = false);
         InstanceGroupBind* GetBoundInstance(uint32 mapid);
         BoundInstancesMap& GetBoundInstances() { return m_boundInstances; }
@@ -270,6 +270,7 @@ class Group
         void _chooseLeader(bool offline = false);
         void _setLeader(ObjectGuid guid);
         void _updateLeaderFlag(bool remove = false) const;
+        void _updateMembersOnRosterChanged(Player* changed);
 
         bool _setMembersGroup(ObjectGuid guid, uint8 group);
         bool _setAssistantFlag(ObjectGuid guid, const bool& state);

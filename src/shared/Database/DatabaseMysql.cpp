@@ -85,13 +85,11 @@ bool MySQLConnection::Initialize(const char* infoString)
 
     Tokens tokens = StrSplit(infoString, ";");
 
-    Tokens::iterator iter;
-
     std::string host, port_or_socket, user, password, database;
     int port;
     char const* unix_socket;
 
-    iter = tokens.begin();
+    Tokens::iterator iter = tokens.begin();
 
     if (iter != tokens.end())
         host = *iter++;
@@ -177,7 +175,7 @@ bool MySQLConnection::Initialize(const char* infoString)
 bool MySQLConnection::_Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD** pFields, uint64* pRowCount, uint32* pFieldCount)
 {
     if (!mMysql)
-        return 0;
+        return false;
 
     uint32 _s = WorldTimer::getMSTime();
 
@@ -187,10 +185,7 @@ bool MySQLConnection::_Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD**
         sLog.outErrorDb("query ERROR: %s", mysql_error(mMysql));
         return false;
     }
-    else
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", WorldTimer::getMSTimeDiff(_s, WorldTimer::getMSTime()), sql);
-    }
+    DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", WorldTimer::getMSTimeDiff(_s, WorldTimer::getMSTime()), sql);
 
     *pResult = mysql_store_result(mMysql);
     *pRowCount = mysql_affected_rows(mMysql);
@@ -259,10 +254,7 @@ bool MySQLConnection::Execute(const char* sql)
             sLog.outErrorDb("SQL ERROR: %s", mysql_error(mMysql));
             return false;
         }
-        else
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", WorldTimer::getMSTimeDiff(_s, WorldTimer::getMSTime()), sql);
-        }
+        DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", WorldTimer::getMSTimeDiff(_s, WorldTimer::getMSTime()), sql);
         // end guarded block
     }
 
@@ -277,10 +269,7 @@ bool MySQLConnection::_TransactionCmd(const char* sql)
         sLog.outError("SQL ERROR: %s", mysql_error(mMysql));
         return false;
     }
-    else
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "SQL: %s", sql);
-    }
+    DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "SQL: %s", sql);
     return true;
 }
 

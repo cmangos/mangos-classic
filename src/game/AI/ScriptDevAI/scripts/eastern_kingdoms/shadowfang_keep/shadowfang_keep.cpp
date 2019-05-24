@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_shadowfang_prisoner
 mob_arugal_voidwalker
 npc_arugal
@@ -130,13 +130,12 @@ struct npc_shadowfang_prisonerAI : public npc_escortAI
         {
             if (pWho->GetEntry() == NPC_ASH || pWho->GetEntry() == NPC_ADA)
                 return;
-            else
-                ScriptedAI::AttackStart(pWho);
+            ScriptedAI::AttackStart(pWho);
         }
     }
 };
 
-CreatureAI* GetAI_npc_shadowfang_prisoner(Creature* pCreature)
+UnitAI* GetAI_npc_shadowfang_prisoner(Creature* pCreature)
 {
     return new npc_shadowfang_prisonerAI(pCreature);
 }
@@ -197,7 +196,7 @@ enum
 
 struct mob_arugal_voidwalkerAI : public ScriptedAI
 {
-    mob_arugal_voidwalkerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    mob_arugal_voidwalkerAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiResetTimer(0), m_uiDarkOffering(0), m_uiPosition(0), m_bWPDone(false)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsLeader = false;
@@ -224,20 +223,20 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
         }
         else
         {
-            std::list<Creature*> lVoidwalkerList;
+            CreatureList lVoidwalkerList;
             Creature* pNewLeader = nullptr;
             uint8 uiHighestPosition = 0;
             GetCreatureListWithEntryInGrid(lVoidwalkerList, m_creature, NPC_VOIDWALKER, 50.0f);
-            for (std::list<Creature*>::iterator itr = lVoidwalkerList.begin(); itr != lVoidwalkerList.end(); ++itr)
+            for (auto& itr : lVoidwalkerList)
             {
-                if ((*itr)->isAlive())
+                if (itr->isAlive())
                 {
-                    if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>((*itr)->AI()))
+                    if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(itr->AI()))
                     {
                         uint8 uiPosition = pVoidwalkerAI->GetPosition();
                         if (uiPosition > uiHighestPosition)
                         {
-                            pNewLeader = (*itr);
+                            pNewLeader = itr;
                             uiHighestPosition = uiPosition;
                         }
                     }
@@ -343,19 +342,19 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
         Reset();
     }
 
-    uint8 GetPosition()
+    uint8 GetPosition() const
     {
         return m_uiPosition;
     }
 
     void SendWaypoint()
     {
-        std::list<Creature*> lVoidwalkerList;
+        CreatureList lVoidwalkerList;
         GetCreatureListWithEntryInGrid(lVoidwalkerList, m_creature, NPC_VOIDWALKER, 50.0f);
-        for (std::list<Creature*>::iterator itr = lVoidwalkerList.begin(); itr != lVoidwalkerList.end(); ++itr)
+        for (auto& itr : lVoidwalkerList)
         {
-            if ((*itr)->isAlive())
-                if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>((*itr)->AI()))
+            if (itr->isAlive())
+                if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(itr->AI()))
                     pVoidwalkerAI->ReceiveWaypoint(m_uiCurrentPoint, m_bReverse);
         }
     }
@@ -367,7 +366,7 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_arugal_voidwalker(Creature* pCreature)
+UnitAI* GetAI_mob_arugal_voidwalker(Creature* pCreature)
 {
     return new mob_arugal_voidwalkerAI(pCreature);
 }
@@ -652,14 +651,14 @@ struct boss_arugalAI : public ScriptedAI
     }
 
     // Make the code nice and pleasing to the eye
-    inline float GetManaPercent()
+    inline float GetManaPercent() const
     {
         return (((float)m_creature->GetPower(POWER_MANA) / (float)m_creature->GetMaxPower(POWER_MANA)) * 100);
     }
 
-    inline float GetVictimDistance()
+    inline float GetVictimDistance() const
     {
-        return (m_creature->getVictim() ? m_creature->GetDistance2d(m_creature->getVictim()) : 999.9f);
+        return (m_creature->getVictim() ? m_creature->GetDistance(m_creature->getVictim(), false) : 999.9f);
     }
 
     void StopAttacking()
@@ -688,7 +687,7 @@ struct boss_arugalAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_arugal(Creature* pCreature)
+UnitAI* GetAI_boss_arugal(Creature* pCreature)
 {
     return new boss_arugalAI(pCreature);
 }
@@ -809,7 +808,7 @@ struct npc_arugalAI : public ScriptedAI
     void AttackStart(Unit* /*who*/) override { }
 };
 
-CreatureAI* GetAI_npc_arugal(Creature* pCreature)
+UnitAI* GetAI_npc_arugal(Creature* pCreature)
 {
     return new npc_arugalAI(pCreature);
 }
@@ -870,16 +869,14 @@ struct npc_deathstalker_vincentAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_deathstalker_vincent(Creature* pCreature)
+UnitAI* GetAI_npc_deathstalker_vincent(Creature* pCreature)
 {
     return new npc_deathstalker_vincentAI(pCreature);
 }
 
 void AddSC_shadowfang_keep()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_shadowfang_prisoner";
     pNewScript->pGossipHello =  &GossipHello_npc_shadowfang_prisoner;
     pNewScript->pGossipSelect = &GossipSelect_npc_shadowfang_prisoner;

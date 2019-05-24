@@ -151,12 +151,9 @@ uint32 AccountMgr::GetId(std::string username) const
     QueryResult* result = LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", username.c_str());
     if (!result)
         return 0;
-    else
-    {
-        uint32 id = (*result)[0].GetUInt32();
-        delete result;
-        return id;
-    }
+    uint32 id = (*result)[0].GetUInt32();
+    delete result;
+    return id;
 }
 
 AccountTypes AccountMgr::GetSecurity(uint32 acc_id)
@@ -196,8 +193,7 @@ uint32 AccountMgr::GetCharactersCount(uint32 acc_id) const
         delete result;
         return charcount;
     }
-    else
-        return 0;
+    return 0;
 }
 
 bool AccountMgr::CheckPassword(uint32 accid, std::string passwd) const
@@ -221,16 +217,16 @@ bool AccountMgr::CheckPassword(uint32 accid, std::string passwd) const
 
 bool AccountMgr::normalizeString(std::string& utf8str)
 {
-    wchar_t wstr_buf[MAX_ACCOUNT_STR + 1];
-    size_t wstr_len = MAX_ACCOUNT_STR;
-
-    if (!Utf8toWStr(utf8str, wstr_buf, wstr_len))
+    std::wstring wstr_buf;
+    if (!Utf8toWStr(utf8str, wstr_buf))
         return false;
 
-    for (uint32 i = 0; i <= wstr_len; ++i)
-        wstr_buf[i] = wcharToUpperOnlyLatin(wstr_buf[i]);
+    if (wstr_buf.size() > MAX_ACCOUNT_STR)
+        return false;
 
-    return WStrToUtf8(wstr_buf, wstr_len, utf8str);
+    std::transform(wstr_buf.begin(), wstr_buf.end(), wstr_buf.begin(), wcharToUpperOnlyLatin);
+
+    return WStrToUtf8(wstr_buf, utf8str);
 }
 
 std::string AccountMgr::CalculateShaPassHash(std::string& name, std::string& password) const
@@ -243,7 +239,7 @@ std::string AccountMgr::CalculateShaPassHash(std::string& name, std::string& pas
     sha.Finalize();
 
     std::string encoded;
-    hexEncodeByteArray(sha.GetDigest(), sha.GetLength(), encoded);
+    hexEncodeByteArray(sha.GetDigest(), Sha1Hash::GetLength(), encoded);
 
     return encoded;
 }

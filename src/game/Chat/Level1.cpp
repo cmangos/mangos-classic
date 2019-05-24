@@ -408,7 +408,7 @@ bool ChatHandler::HandleNamegoCommand(char* args)
                 return false;
             }
             // if both players are in different bgs
-            else if (target->GetBattleGroundId() && player->GetBattleGroundId() != target->GetBattleGroundId())
+            if (target->GetBattleGroundId() && player->GetBattleGroundId() != target->GetBattleGroundId())
             {
                 PSendSysMessage(LANG_CANNOT_GO_TO_BG_FROM_BG, nameLink.c_str());
                 SetSentErrorMessage(true);
@@ -515,7 +515,7 @@ bool ChatHandler::HandleGonameCommand(char* args)
                 return false;
             }
             // if both players are in different bgs
-            else if (_player->GetBattleGroundId() && _player->GetBattleGroundId() != target->GetBattleGroundId())
+            if (_player->GetBattleGroundId() && _player->GetBattleGroundId() != target->GetBattleGroundId())
             {
                 PSendSysMessage(LANG_CANNOT_GO_TO_BG_FROM_BG, chrNameLink.c_str());
                 SetSentErrorMessage(true);
@@ -1378,17 +1378,8 @@ bool ChatHandler::HandleModifyMountCommand(char* args)
     chr->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
     chr->Mount(mId);
 
-    WorldPacket data(SMSG_FORCE_RUN_SPEED_CHANGE, (8 + 4 + 4));
-    data << chr->GetPackGUID();
-    data << (uint32)0;
-    data << float(speed);
-    chr->SendMessageToSet(data, true);
-
-    data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE, (8 + 4 + 4));
-    data << chr->GetPackGUID();
-    data << (uint32)0;
-    data << float(speed);
-    chr->SendMessageToSet(data, true);
+    chr->SetSpeedRate(MOVE_RUN, speed, true);
+    chr->SetSpeedRate(MOVE_SWIM, speed, true);
 
     return true;
 }
@@ -1564,17 +1555,17 @@ bool ChatHandler::HandleLookupTeleCommand(char* args)
     std::ostringstream reply;
 
     GameTeleMap const& teleMap = sObjectMgr.GetGameTeleMap();
-    for (GameTeleMap::const_iterator itr = teleMap.begin(); itr != teleMap.end(); ++itr)
+    for (const auto& itr : teleMap)
     {
-        GameTele const* tele = &itr->second;
+        GameTele const* tele = &itr.second;
 
         if (tele->wnameLow.find(wnamepart) == std::wstring::npos)
             continue;
 
         if (m_session)
-            reply << "  |cffffffff|Htele:" << itr->first << "|h[" << tele->name << "]|h|r\n";
+            reply << "  |cffffffff|Htele:" << itr.first << "|h[" << tele->name << "]|h|r\n";
         else
-            reply << "  " << itr->first << " " << tele->name << "\n";
+            reply << "  " << itr.first << " " << tele->name << "\n";
     }
 
     if (reply.str().empty())
@@ -1680,7 +1671,7 @@ bool ChatHandler::HandleTeleNameCommand(char* args)
 
         std::string chrNameLink = playerLink(target_name);
 
-        if (target->IsBeingTeleported() == true)
+        if (target->IsBeingTeleported())
         {
             PSendSysMessage(LANG_IS_TELEPORTED, chrNameLink.c_str());
             SetSentErrorMessage(true);
@@ -1693,19 +1684,16 @@ bool ChatHandler::HandleTeleNameCommand(char* args)
 
         return HandleGoHelper(target, tele->mapId, tele->position_x, tele->position_y, &tele->position_z, &tele->orientation);
     }
-    else
-    {
-        // check offline security
-        if (HasLowerSecurity(nullptr, target_guid))
-            return false;
+    // check offline security
+    if (HasLowerSecurity(nullptr, target_guid))
+        return false;
 
-        std::string nameLink = playerLink(target_name);
+    std::string nameLink = playerLink(target_name);
 
-        PSendSysMessage(LANG_TELEPORTING_TO, nameLink.c_str(), GetMangosString(LANG_OFFLINE), tele->name.c_str());
-        Player::SavePositionInDB(target_guid, tele->mapId,
-                                 tele->position_x, tele->position_y, tele->position_z, tele->orientation,
-                                 sTerrainMgr.GetZoneId(tele->mapId, tele->position_x, tele->position_y, tele->position_z));
-    }
+    PSendSysMessage(LANG_TELEPORTING_TO, nameLink.c_str(), GetMangosString(LANG_OFFLINE), tele->name.c_str());
+    Player::SavePositionInDB(target_guid, tele->mapId,
+        tele->position_x, tele->position_y, tele->position_z, tele->orientation,
+        sTerrainMgr.GetZoneId(tele->mapId, tele->position_x, tele->position_y, tele->position_z));
 
     return true;
 }
@@ -1830,7 +1818,7 @@ bool ChatHandler::HandleGroupgoCommand(char* args)
 
         std::string plNameLink = GetNameLink(pl);
 
-        if (pl->IsBeingTeleported() == true)
+        if (pl->IsBeingTeleported())
         {
             PSendSysMessage(LANG_IS_TELEPORTED, plNameLink.c_str());
             SetSentErrorMessage(true);
@@ -1990,23 +1978,34 @@ bool ChatHandler::HandleGoXYCommand(char* args)
 // teleport at coordinates, including Z
 bool ChatHandler::HandleGoXYZCommand(char* args)
 {
+    if (!*args)
+        return false;
+
     Player* _player = m_session->GetPlayer();
 
-    float x;
-    if (!ExtractFloat(&args, x))
+    char* px = strtok((char*)args, " ");
+    char* py = strtok(nullptr, " ");
+    char* pz = strtok(nullptr, " ");
+    char* pmapid = strtok(nullptr, " ");
+
+    if (!px || !py || !pz)
         return false;
 
-    float y;
-    if (!ExtractFloat(&args, y))
-        return false;
-
-    float z;
-    if (!ExtractFloat(&args, z))
-        return false;
-
+    float x = (float)atof(px);
+    float y = (float)atof(py);
+    float z = (float)atof(pz);
     uint32 mapid;
-    if (!ExtractOptUInt32(&args, mapid, _player->GetMapId()))
+    if (pmapid)
+        mapid = (uint32)atoi(pmapid);
+    else
+        mapid = _player->GetMapId();
+
+    if (!MapManager::IsValidMapCoord(mapid, x, y, z))
+    {
+        PSendSysMessage(LANG_INVALID_TARGET_COORD, x, y, mapid);
+        SetSentErrorMessage(true);
         return false;
+    }
 
     return HandleGoHelper(_player, mapid, x, y, &z);
 }

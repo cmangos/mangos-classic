@@ -121,6 +121,13 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
         return;
     }
 
+    if (money && COD) // cannot send money in a COD mail
+    {
+        // TODO: Add hack logging since this is not normally possible
+        pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_INTERNAL_ERROR);
+        return;
+    }
+
     uint32 reqmoney = money + 30;
 
     if (pl->GetMoney() < reqmoney)
@@ -373,12 +380,12 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recv_data)
 
         if (m->HasItems())
         {
-            for (MailItemInfoVec::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
+            for (auto& itr2 : m->items)
             {
-                if (Item* item = pl->GetMItem(itr2->item_guid))
+                if (Item* item = pl->GetMItem(itr2.item_guid))
                     draft.AddItem(item);
 
-                pl->RemoveMItem(itr2->item_guid);
+                pl->RemoveMItem(itr2.item_guid);
             }
         }
 

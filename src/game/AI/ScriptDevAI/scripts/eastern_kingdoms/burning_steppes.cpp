@@ -17,49 +17,18 @@
 /* ScriptData
 SDName: Burning_Steppes
 SD%Complete: 100
-SDComment: Quest support: 4121, 4122, 4866
+SDComment: Quest support: 4121, 4122
 SDCategory: Burning Steppes
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
-npc_ragged_john
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_grark_lorkrub
 EndContentData */
 
 
 #include "AI/ScriptDevAI/base/escort_ai.h"
-
-/*######
-## npc_ragged_john
-######*/
-
-struct npc_ragged_johnAI : public ScriptedAI
-{
-    npc_ragged_johnAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    void Reset() override {}
-
-    void MoveInLineOfSight(Unit* who) override
-    {
-        if (who->HasAura(16468, EFFECT_INDEX_0))
-        {
-            if (who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 15) && who->isInAccessablePlaceFor(m_creature))
-            {
-                DoCastSpellIfCan(who, 16472);
-                ((Player*)who)->AreaExploredOrEventHappens(4866);
-            }
-        }
-
-        ScriptedAI::MoveInLineOfSight(who);
-    }
-};
-
-CreatureAI* GetAI_npc_ragged_john(Creature* pCreature)
-{
-    return new npc_ragged_johnAI(pCreature);
-}
 
 /*######
 ## npc_grark_lorkrub
@@ -252,7 +221,7 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
             case SAY_LEXLORT_4:
                 // Finish the quest
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_PRECARIOUS_PREDICAMENT, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_PRECARIOUS_PREDICAMENT, m_creature);
                 // Kill self
                 m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
                 break;
@@ -330,7 +299,7 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_grark_lorkrub(Creature* pCreature)
+UnitAI* GetAI_npc_grark_lorkrub(Creature* pCreature)
 {
     return new npc_grark_lorkrubAI(pCreature);
 }
@@ -491,9 +460,9 @@ struct npc_klinfranAI : public ScriptedAI
             {
                 ThreatList const& tList = m_creature->getThreatManager().getThreatList();
 
-                for (ThreatList::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
+                for (auto itr : tList)
                 {
-                    if (Unit* pUnit = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                    if (Unit* pUnit = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                     {
                         if (pUnit->isAlive())
                         {
@@ -592,21 +561,14 @@ bool GossipSelect_npc_klinfran(Player* pPlayer, Creature* pCreature, uint32 uiSe
     return true;
 }
 
-CreatureAI* GetAI_npc_klinfran(Creature* pCreature)
+UnitAI* GetAI_npc_klinfran(Creature* pCreature)
 {
     return new npc_klinfranAI(pCreature);
 }
 
 void AddSC_burning_steppes()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_ragged_john";
-    pNewScript->GetAI = &GetAI_npc_ragged_john;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_grark_lorkrub";
     pNewScript->GetAI = &GetAI_npc_grark_lorkrub;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_grark_lorkrub;

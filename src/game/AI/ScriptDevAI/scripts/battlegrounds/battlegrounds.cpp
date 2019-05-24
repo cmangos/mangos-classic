@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 // **** Script Info ****
 // Spiritguides in battlegrounds resurrecting many players at once
@@ -73,9 +73,9 @@ struct npc_spirit_guideAI : public ScriptedAI
 
         Map::PlayerList const& PlayerList = pMap->GetPlayers();
 
-        for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+        for (const auto& itr : PlayerList)
         {
-            Player* pPlayer = itr->getSource();
+            Player* pPlayer = itr.getSource();
             if (!pPlayer || !pPlayer->IsWithinDistInMap(m_creature, 20.0f) || !pPlayer->HasAura(SPELL_WAITING_TO_RESURRECT))
                 continue;
 
@@ -91,16 +91,14 @@ bool GossipHello_npc_spirit_guide(Player* pPlayer, Creature* /*pCreature*/)
     return true;
 }
 
-CreatureAI* GetAI_npc_spirit_guide(Creature* pCreature)
+UnitAI* GetAI_npc_spirit_guide(Creature* pCreature)
 {
     return new npc_spirit_guideAI(pCreature);
 }
 
 void AddSC_battleground()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_spirit_guide";
     pNewScript->GetAI = &GetAI_npc_spirit_guide;
     pNewScript->pGossipHello = &GossipHello_npc_spirit_guide;

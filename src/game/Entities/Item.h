@@ -226,7 +226,7 @@ struct ItemRequiredTarget
     bool IsFitToRequirements(Unit* pUnitTarget) const;
 };
 
-bool ItemCanGoIntoBag(ItemPrototype const* proto, ItemPrototype const* pBagProto);
+bool ItemCanGoIntoBag(ItemPrototype const* pProto, ItemPrototype const* pBagProto);
 
 class Item : public Object
 {

@@ -17,13 +17,13 @@
 /* ScriptData
 SDName: Boss_Four_Horsemen
 SD%Complete: 99
-SDComment: TODO: Test enrages
+SDComment: Is special text used when 100 marks are reached?
 SDCategory: Naxxramas
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "naxxramas.h"
 
 enum
@@ -61,8 +61,6 @@ enum
     // ***** Spells *****
     // all horsemen
     SPELL_SHIELDWALL        = 29061,
-    SPELL_BESERK            = 26662,
-    // Note: Berserk should be applied once 100 marks are casted.
 
     // lady blaumeux
     SPELL_MARK_OF_BLAUMEUX  = 28833,
@@ -83,6 +81,8 @@ enum
     SPELL_MARK_OF_ZELIEK    = 28835,
     SPELL_HOLY_WRATH        = 28883,
     SPELL_SPIRIT_ZELIEK     = 28934,
+
+    MAX_MARK_STACKS         = 100,      // Horsemen enrage at this milestone
 };
 
 struct boss_lady_blaumeuxAI : public ScriptedAI
@@ -162,12 +162,11 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
 
         if (m_uiVoidZoneTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VOID_ZONE) == CAST_OK)
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_VOID_ZONE, SELECT_FLAG_PLAYER);
+            if (pTarget)
             {
-                if (m_uiMarkCounter < 100)
-                    m_uiVoidZoneTimer = 15000;
-                else
-                    m_uiVoidZoneTimer = 1000;
+                if (DoCastSpellIfCan(pTarget, SPELL_VOID_ZONE) == CAST_OK)
+                    m_uiVoidZoneTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 15000 : 1000;
             }
         }
         else
@@ -177,7 +176,7 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_lady_blaumeux(Creature* pCreature)
+UnitAI* GetAI_boss_lady_blaumeux(Creature* pCreature)
 {
     return new boss_lady_blaumeuxAI(pCreature);
 }
@@ -265,12 +264,7 @@ struct boss_alexandros_mograineAI : public ScriptedAI
         if (m_uiRighteousFireTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RIGHTEOUS_FIRE) == CAST_OK)
-            {
-                if (m_uiMarkCounter < 100)
-                    m_uiRighteousFireTimer = 15000;
-                else
-                    m_uiRighteousFireTimer = 1000;
-            }
+                m_uiRighteousFireTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 15000 : 1000;
         }
         else
             m_uiRighteousFireTimer -= uiDiff;
@@ -279,7 +273,7 @@ struct boss_alexandros_mograineAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_alexandros_mograine(Creature* pCreature)
+UnitAI* GetAI_boss_alexandros_mograine(Creature* pCreature)
 {
     return new boss_alexandros_mograineAI(pCreature);
 }
@@ -362,12 +356,7 @@ struct boss_thane_korthazzAI : public ScriptedAI
         if (m_uiMeteorTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_METEOR) == CAST_OK)
-            {
-                if (m_uiMarkCounter < 100)
-                    m_uiMeteorTimer = 20000;
-                else
-                    m_uiMeteorTimer = 1000;
-            }
+                m_uiMeteorTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 20000 : 1000;
         }
         else
             m_uiMeteorTimer -= uiDiff;
@@ -376,7 +365,7 @@ struct boss_thane_korthazzAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_thane_korthazz(Creature* pCreature)
+UnitAI* GetAI_boss_thane_korthazz(Creature* pCreature)
 {
     return new boss_thane_korthazzAI(pCreature);
 }
@@ -459,12 +448,7 @@ struct boss_sir_zeliekAI : public ScriptedAI
         if (m_uiHolyWrathTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLY_WRATH) == CAST_OK)
-            {
-                if (m_uiMarkCounter < 100)
-                    m_uiHolyWrathTimer = 15000;
-                else
-                    m_uiHolyWrathTimer = 1000;
-            }
+                m_uiHolyWrathTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 15000 : 1000;
         }
         else
             m_uiHolyWrathTimer -= uiDiff;
@@ -473,16 +457,14 @@ struct boss_sir_zeliekAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_sir_zeliek(Creature* pCreature)
+UnitAI* GetAI_boss_sir_zeliek(Creature* pCreature)
 {
     return new boss_sir_zeliekAI(pCreature);
 }
 
 void AddSC_boss_four_horsemen()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_lady_blaumeux";
     pNewScript->GetAI = &GetAI_boss_lady_blaumeux;
     pNewScript->RegisterSelf();

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackrock_spire.h"
 
 enum
@@ -188,7 +188,7 @@ struct boss_pyroguard_emberseerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_pyroguard_emberseer(Creature* pCreature)
+UnitAI* GetAI_boss_pyroguard_emberseer(Creature* pCreature)
 {
     return new boss_pyroguard_emberseerAI(pCreature);
 }
@@ -207,9 +207,7 @@ bool EffectDummyCreature_pyroguard_emberseer(Unit* /*pCaster*/, uint32 uiSpellId
 
 void AddSC_boss_pyroguard_emberseer()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_pyroguard_emberseer";
     pNewScript->GetAI = &GetAI_boss_pyroguard_emberseer;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_pyroguard_emberseer;

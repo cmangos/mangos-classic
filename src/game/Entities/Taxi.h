@@ -118,9 +118,15 @@ namespace Taxi
             size_t GetResumeWaypointIndex() const { return m_resumeIndex; }
 
             /// Add a taxi flight path to the container in addition to the last one, returns true if input is correct
+            bool AddRoute(TaxiPathEntry const* entry, float discountMulti = 0.0f, bool requireModel = true);
+            /// Add a taxi flight path to the container by ID in addition to the last one, returns true if input is correct
+            bool AddRoute(PathID pathID, float discountMulti = 0.0f, bool requireModel = true);
+            /// Add a taxi flight path to the container by destinations in addition to the last one, returns true if input is correct
             bool AddRoute(DestID start, DestID end, float discountMulti = 0.0f, bool requireModel = true);
-            /// Add a chain of flights to the container. Returns true if input is correct.
+            /// Replace any existing container contents with a chain of flights defined by a vector of destinations, returns true if input is correct.
             bool AddRoutes(std::vector<DestID> const& destinations, float discountMulti = 0.0f, bool requireModel = true);
+            /// Replace any existing container contents with a chain of flights defined by a deque of flight path ids, returns true if input is correct.
+            bool AddRoutes(std::deque<PathID> const& paths, float discountMulti = 0.0f, bool requireModel = true);
             /// Finalize the container and prepare for the tracking of the flight. Used when all routes are added. It will be impossible to alter the container until the flight ends
             bool Prepare(Index nodeResume = 0);
             /// Clear the container by removing all contents. Can't be performed if taxi flight tracking is currently active, unless forced

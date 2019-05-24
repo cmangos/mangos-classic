@@ -15,14 +15,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+# Minimum required cmake version to run the build
+cmake_minimum_required(VERSION 3.0)
+
+# Will cache object files if ccache is available
+# Must be set at top of cmake outside of project header
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+endif()
+
 project(CMaNGOS_Classic)
 
 # Define here name of the binaries
 set(CMANGOS_BINARY_SERVER_NAME "mangosd")
 set(CMANGOS_BINARY_REALMD_NAME "realmd")
 set(CMANGOS_BINARY_ANTICHEAT_NAME "anticheat")
-
-cmake_minimum_required(VERSION 3.0)
 
 # Function to remove duplicate entries in provided string
 function(RemoveDuplicateSubstring stringIn stringOut)
@@ -122,7 +130,7 @@ endif()
 # find Git: used to get the revision number
 find_package(Git)
 
-if(NOT MSVC)
+if(NOT MSVC AND PCH)
   # Include cotire to manage PCH support
   include(cotire)
 endif()
@@ -186,19 +194,21 @@ set(Boost_USE_STATIC_LIBS ON)
 if(MSVC)
   # Use at least verion 3.8.1 of FindBoost to fix some issues. Especialy in MSVC with fixed Toolset issues.
   # This is a workaround while VisualStudio does not embed higher cmake version than 3.7.2
-  if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION} LESS 3.8.1)
+  if(${CMAKE_VERSION} VERSION_LESS "3.11.3")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/macros/FindBoost)
-    message(STATUS "FindBoost: included version 3.8.1 of FindBoost is used.")
+    message(STATUS "FindBoost: included version 3.11.3 of FindBoost is used.")
   endif()
+endif()
+
+# In our case use new way to treat BOOST_ROOT environement variable
+if (POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
 endif()
 
 # Find needed packages and if necessery abort if something important is missing
 find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
 
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-    link_libraries(${Boost_LIBRARIES})
-else()
+if(NOT Boost_FOUND)
   message(STATUS "BOOST_ROOT = $ENV{BOOST_ROOT}")
   message(STATUS "BOOST_LIBRARYDIR = $ENV{BOOST_LIBRARYDIR}")
   if ("$ENV{BOOST_ROOT}" STREQUAL "")
@@ -233,7 +243,7 @@ if(UNIX)
   endif()
 
   if(APPLE)
-    find_package(OpenSSL)
+    find_package(OpenSSL QUIET)
     if(NOT OpenSSL_FOUND AND NOT OPENSSL_FOUND)
       # If OpenSSL path isn't specified on mac we set the one that homebrew uses and try again
       set(OPENSSL_ROOT_DIR /usr/local/opt/openssl/)
@@ -254,20 +264,20 @@ if(UNIX)
       message(WARNING "You are using an outdated version of OpenSSL library. It may be incompatible or vulnerable.")
     endif()
   endif()
+endif()
 
-  find_package(ZLIB REQUIRED)
-  if(ZLIB_FOUND)
-    # add to global includes and linking lists for all sub-projects at once
-    include_directories(${ZLIB_INCLUDE_DIRS})
-    link_libraries(${ZLIB_LIBRARIES})
-  endif()
-  if(BUILD_EXTRACTORS)
-    find_package(BZip2 REQUIRED)
-    if(BZip2_FOUND OR BZIP2_FOUND)
-      # add to global includes and linking lists for all sub-projects at once
-      include_directories(${BZIP2_INCLUDE_DIRS})
-      link_libraries(${BZIP2_LIBRARIES})
-    endif()
+find_package(ZLIB QUIET)
+if(NOT ZLIB_FOUND)
+  # use internal source code
+  set(ZLIB_LIBRARIES "zlib")
+  message(STATUS "Could not find ZLIB on your system. The provided sources will be used.")
+endif()
+if(BUILD_EXTRACTORS)
+  find_package(BZip2 QUIET)
+  if(NOT (BZip2_FOUND OR BZIP2_FOUND))
+    # use provided source code
+    set(BZIP2_LIBRARIES "bzip2")
+    message(STATUS "Could not find BZIP2 on your system. The provided sources will be used.")
   endif()
 endif()
 
@@ -324,7 +334,7 @@ endif()
 # print out the results before continuing
 include(cmake/showoptions.cmake)
 
-if(NOT BUILD_GAME_SERVER AND NOT BUILD_LOGIN_SERVER AND NOT BUILD_EXTRACTORS)
+if(NOT BUILD_GAME_SERVER AND NOT BUILD_LOGIN_SERVER AND NOT BUILD_EXTRACTORS AND NOT BUILD_RECASTDEMOMOD)
   message(FATAL_ERROR "You must select something to build!")
 endif()
 
@@ -360,9 +370,6 @@ endif()
 
 if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS)
   add_subdirectory(src)
-  if(MSVC AND BUILD_GAME_SERVER)
-    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_SERVER_NAME})
-  endif()
 endif()
 
 if(BUILD_EXTRACTORS)
@@ -370,6 +377,32 @@ if(BUILD_EXTRACTORS)
   add_subdirectory(contrib/vmap_extractor)
   add_subdirectory(contrib/vmap_assembler)
   add_subdirectory(contrib/mmap)
+endif()
+
+if(BUILD_RECASTDEMOMOD)
+  if (WIN32)
+    if (NOT BUILD_EXTRACTORS)
+      add_subdirectory(contrib/mmap)
+    endif()
+    add_subdirectory(contrib/recastdemomod)
+  else()
+    message(STATUS "BUILD_RECASTDEMOMOD forced to OFF. Not supported on non windows system.")
+  endif()
+endif()
+
+if(BUILD_GIT_ID)
+  add_subdirectory(contrib/git_id)
+endif()
+
+# set default startup project
+if(MSVC)
+  if(BUILD_GAME_SERVER)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_SERVER_NAME})
+  elseif(BUILD_LOGIN_SERVER)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_REALMD_NAME})
+  elseif(BUILD_RECASTDEMOMOD)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "RecastDemoMod")
+  endif()
 endif()
 
 # if(SQL)

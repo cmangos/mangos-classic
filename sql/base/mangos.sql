@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2720_01_mangos_warden_system` bit(1) DEFAULT NULL
+  `required_z2739_01_mangos_warden_system` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -774,6 +774,8 @@ CREATE TABLE `creature_ai_scripts` (
   `event_param2` int(11) NOT NULL DEFAULT '0',
   `event_param3` int(11) NOT NULL DEFAULT '0',
   `event_param4` int(11) NOT NULL DEFAULT '0',
+  `event_param5` int(11) NOT NULL DEFAULT '0',
+  `event_param6` int(11) NOT NULL DEFAULT '0',
   `action1_type` tinyint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Action Type',
   `action1_param1` int(11) NOT NULL DEFAULT '0',
   `action1_param2` int(11) NOT NULL DEFAULT '0',
@@ -876,6 +878,28 @@ CREATE TABLE `creature_battleground` (
 LOCK TABLES `creature_battleground` WRITE;
 /*!40000 ALTER TABLE `creature_battleground` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_battleground` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_conditional_spawn`
+--
+
+DROP TABLE IF EXISTS `creature_conditional_spawn`;
+CREATE TABLE `creature_conditional_spawn` (
+  `Guid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Global Unique Identifier',
+  `EntryAlliance` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Alliance Creature Identifier',
+  `EntryHorde` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Horde Creature Identifier',
+  `Comments` varchar(255) NOT NULL,
+  PRIMARY KEY (`Guid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System (Conditional Spawn)';
+
+--
+-- Dumping data for table `creature_conditional_spawn`
+--
+
+LOCK TABLES `creature_conditional_spawn` WRITE;
+/*!40000 ALTER TABLE `creature_conditional_spawn` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_conditional_spawn` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1045,9 +1069,10 @@ CREATE TABLE `creature_movement` (
   `position_x` float NOT NULL DEFAULT '0',
   `position_y` float NOT NULL DEFAULT '0',
   `position_z` float NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
   `waittime` int(10) unsigned NOT NULL DEFAULT '0',
   `script_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `orientation` float NOT NULL DEFAULT '0',
+  `comment` text,
   PRIMARY KEY (`id`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System';
 
@@ -1072,9 +1097,10 @@ CREATE TABLE `creature_movement_template` (
   `position_x` float NOT NULL DEFAULT '0',
   `position_y` float NOT NULL DEFAULT '0',
   `position_z` float NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
   `waittime` int(10) unsigned NOT NULL DEFAULT '0',
   `script_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `orientation` float NOT NULL DEFAULT '0',
+  `comment` text,
   PRIMARY KEY (`entry`,`pathId`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature waypoint system';
 
@@ -1150,8 +1176,7 @@ CREATE TABLE `creature_template` (
   `ModelId2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ModelId3` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ModelId4` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `FactionAlliance` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `FactionHorde` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `Faction` smallint(5) unsigned NOT NULL DEFAULT '0',
   `Scale` float NOT NULL DEFAULT '1',
   `Family` tinyint(4) NOT NULL DEFAULT '0',
   `CreatureType` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -1230,7 +1255,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,'Waypoint (Only GM can see it)','Visual',63,63,10045,0,0,0,35,35,0,8,8,7,1,0,0,4096,0,130,5242886,0.91,1.14286,20,0,0,0,0,0,3,1,1,1,1,1,1,9999,9999,0,0,7,7,1.76,2.42,0,3,100,2000,2200,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','');
+(1,'Waypoint (Only GM can see it)','Visual',63,63,10045,0,0,0,35,0,8,8,7,1,0,0,4096,0,130,5242886,0.91,1.14286,20,0,0,0,0,0,3,1,1,1,1,1,1,9999,9999,0,0,7,7,1.76,2.42,0,3,100,2000,2200,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1271,6 +1296,10 @@ CREATE TABLE `creature_template_spells` (
   `spell2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `spell3` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `spell4` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spell5` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spell6` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spell7` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spell8` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System (Spells used by creature)';
 
@@ -1608,7 +1637,7 @@ DROP TABLE IF EXISTS `game_event_creature`;
 CREATE TABLE `game_event_creature` (
   `guid` int(10) unsigned NOT NULL,
   `event` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Negatives value to remove during event and ignore pool grouping, positive value for spawn during event and if guid is part of pool then al pool memebers must be listed as part of event spawn.',
-  PRIMARY KEY (`guid`)
+  PRIMARY KEY (`guid`,`event`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -1653,7 +1682,7 @@ DROP TABLE IF EXISTS `game_event_gameobject`;
 CREATE TABLE `game_event_gameobject` (
   `guid` int(10) unsigned NOT NULL,
   `event` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Negatives value to remove during event and ignore pool grouping, positive value for spawn during event and if guid is part of pool then al pool memebers must be listed as part of event spawn.',
-  PRIMARY KEY (`guid`)
+  PRIMARY KEY (`guid`,`event`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -3152,6 +3181,24 @@ CREATE TABLE `locales_questgiver_greeting` (
    PRIMARY KEY(`Entry`,`Type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Quest and Gossip system';
 
+--
+-- Table structure for table `locales_trainer_greeting`
+--
+
+DROP TABLE IF EXISTS `locales_trainer_greeting`;
+CREATE TABLE `locales_trainer_greeting` (
+   `Entry` INT(11) UNSIGNED NOT NULL COMMENT 'Entry of Trainer',
+   `Text_loc1` LONGTEXT COMMENT 'Text of the greeting locale 1',
+   `Text_loc2` LONGTEXT COMMENT 'Text of the greeting locale 2',
+   `Text_loc3` LONGTEXT COMMENT 'Text of the greeting locale 3',
+   `Text_loc4` LONGTEXT COMMENT 'Text of the greeting locale 4',
+   `Text_loc5` LONGTEXT COMMENT 'Text of the greeting locale 5',
+   `Text_loc6` LONGTEXT COMMENT 'Text of the greeting locale 6',
+   `Text_loc7` LONGTEXT COMMENT 'Text of the greeting locale 7',
+   `Text_loc8` LONGTEXT COMMENT 'Text of the greeting locale 8',
+   PRIMARY KEY(`Entry`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Trainer system';
+
 -- Table structure for table `mail_loot_template`
 --
 
@@ -3653,8 +3700,8 @@ INSERT INTO `mangos_string` VALUES
 (529,'   Waypoint',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (530,'   Animal random',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (531,'   Confused',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(532,'   Targeted to player %s (lowguid %u)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(533,'   Targeted to creature %s (lowguid %u)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(532,'   Targeted to player %s (lowguid %u) distance %f angle %f',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(533,'   Targeted to creature %s (lowguid %u) distance %f angle %f',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (534,'   Targeted to <NULL>',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (535,'   Home movement to (X:%f Y:%f Z:%f)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (536,'   Home movement used for player?!?',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -4003,7 +4050,9 @@ INSERT INTO `mangos_string` VALUES
 (1606,'|cffffff00The Plaguewood Tower has been taken by the Horde!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1607,'|cffffff00The Plaguewood Tower has been taken by the Alliance!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1635,'|cffffff00The Horde has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(1636,'|cffffff00The Alliance has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+(1636,'|cffffff00The Alliance has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1702,'Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat, taunt state %u and hostile state %u.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1703,'Showing threat for %s [Entry %u]',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `mangos_string` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7914,7 +7963,7 @@ INSERT INTO `playercreateinfo_action` VALUES
 (3,2,4,2481,0),
 (3,2,3,20594,0),
 (3,2,2,635,0),
-(3,2,1,21084,0),
+(3,2,1,20154,0),
 (3,2,0,6603,0),
 (3,1,83,117,128),
 (3,1,75,2481,0),
@@ -7972,7 +8021,7 @@ INSERT INTO `playercreateinfo_action` VALUES
 (1,2,11,2070,128),
 (1,2,10,159,128),
 (1,2,2,635,0),
-(1,2,1,21084,0),
+(1,2,1,20154,0),
 (1,2,0,6603,0),
 (1,1,83,117,128),
 (1,1,73,78,0),
@@ -8001,6 +8050,119 @@ CREATE TABLE `playercreateinfo_item` (
 LOCK TABLES `playercreateinfo_item` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_item` DISABLE KEYS */;
 /*!40000 ALTER TABLE `playercreateinfo_item` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `playercreateinfo_skills`
+--
+
+CREATE TABLE `playercreateinfo_skills` (
+  `raceMask` int unsigned NOT NULL,
+  `classMask` int unsigned NOT NULL,
+  `skill` smallint(5) unsigned NOT NULL,
+  `step` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `note` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`raceMask`,`classMask`,`skill`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `playercreateinfo_skills`
+--
+
+LOCK TABLES `playercreateinfo_skills` WRITE;
+/*!40000 ALTER TABLE `playercreateinfo_skills` DISABLE KEYS */;
+INSERT INTO `playercreateinfo_skills` VALUES
+-- ALL PLAYERS:
+(0,     0,  95, 0,  'Misc: Defense'),
+(0,     0, 162, 0,  'Weapon: Unarmed'),
+(0,     0, 183, 0,  'Misc: GENERIC (DND)'),
+(0,     0, 415, 0,  'Armor: Cloth'),
+-- WARRIOR CLASS:
+(0,     1,  26, 0,  'Warrior: Arms'),
+(0,     1, 256, 0,  'Warrior: Fury'),
+(0,     1, 257, 0,  'Warrior: Protection'),
+(167,   1,  44, 0,  'Weapon: Axes (Warrior)'),
+(216,   1, 173, 0,  'Weapon: Daggers (Warrior)'),
+(109,   1,  54, 0,  'Weapon: Maces (Warrior)'),
+(91,    1,  43, 0,  'Weapon: Swords (Warrior)'),
+(128,   1, 176, 0,  'Weapon: Thrown (Warrior)'),
+(6,     1, 172, 0,  'Weapon: Two-Handed Axes (Warrior)'),
+(32,    1, 160, 0,  'Weapon: Two-Handed Maces (Warrior)'),
+(16,    1,  55, 0,  'Weapon: Two-Handed Swords (Warrior)'),
+-- PALADIN CLASS:
+(0,     2, 594, 0,  'Paladin: Holy'),
+(0,     2, 267, 0,  'Paladin: Protection'),
+(0,     2, 184, 0,  'Paladin: Retribution'),
+(0,     2,  54, 0,  'Weapon: Maces (Paladin)'),
+(0,     2, 160, 0,  'Weapon: Two-Handed Maces (Paladin)'),
+-- HUNTER CLASS:
+(0,     4,  50, 0,  'Hunter: Beast Mastery'),
+(0,     4, 163, 0,  'Hunter: Marksmanship'),
+(0,     4,  51, 0,  'Hunter: Survival'),
+(166,   4,  44, 0,  'Weapon: Axes (Hunter)'),
+(138,   4,  45, 0,  'Weapon: Bows (Hunter)'),
+(8,     4, 173, 0,  'Weapon: Daggers (Hunter)'),
+(36,    4,  46, 0,  'Weapon: Guns (Hunter)'),
+-- ROGUE CLASS:
+(0,     8,  38, 0,  'Rogue: Combat'),
+(0,     8, 253, 0,  'Rogue: Assassination'),
+(0,     8,  39, 0,  'Rogue: Subtlety'),
+(0,     8, 173, 0,  'Weapon: Daggers (Rogue)'),
+(0,     8, 176, 0,  'Weapon: Thrown (Rogue)'),
+-- PRIEST CLASS:
+(0,    16,  56, 0,  'Priest: Holy'),
+(0,    16, 613, 0,  'Priest: Discipline'),
+(0,    16,  78, 0,  'Priest: Shadow'),
+(0,    16,  54, 0,  'Weapon: Maces (Priest)'),
+(0,    16, 228, 0,  'Weapon: Wands (Priest)'),
+-- SHAMAN CLASS:
+(0,    64, 375, 0,  'Shaman: Elemental'),
+(0,    64, 373, 0,  'Shaman: Enhancement'),
+(0,    64, 374, 0,  'Shaman: Restoration'),
+(0,    64,  54, 0,  'Weapon: Maces (Shaman)'),
+(0,    64, 136, 0,  'Weapon: Staves (Shaman)'),
+-- MAGE CLASS:
+(0,   128, 237, 0,  'Mage: Arcane'),
+(0,   128,   8, 0,  'Mage: Fire'),
+(0,   128,   6, 0,  'Mage: Frost'),
+(0,   128, 136, 0,  'Weapon: Staves (Mage)'),
+(0,   128, 228, 0,  'Weapon: Wands (Mage)'),
+-- WARLOCK CLASS:
+(0,   256, 355, 0,  'Warlock: Affliction'),
+(0,   256, 354, 0,  'Warlock: Demonology'),
+(0,   256, 593, 0,  'Warlock: Destruction'),
+(0,   256, 173, 0,  'Weapon: Daggers (Warlock)'),
+(0,   256, 228, 0,  'Weapon: Wands (Warlock)'),
+-- DRUID CLASS:
+(0,  1024, 574, 0,  'Druid: Balance'),
+(0,  1024, 134, 0,  'Druid: Feral Combat'),
+(0,  1024, 573, 0,  'Druid: Restoration'),
+(8,  1024, 173, 0,  'Weapon: Daggers (Druid)'),
+(32, 1024,  54, 0,  'Weapon: Maces (Druid)'),
+(0,  1024, 136, 0,  'Weapon: Staves (Druid)'),
+-- ARMOR AND MISC SKILLS:
+(0,     3, 413, 0,  'Armor: Mail'),
+(0,  1103, 414, 0,  'Armor: Leather'),
+(0,    67, 433, 0,  'Armor: Shield'),
+-- ALLIANCE RACES:
+(1,     0, 754, 0,  'Racial: Human'),
+(77,    0,  98, 0,  'Language: Common'),
+(4,     0, 101, 0,  'Racial: Dwarf'),
+(4,     0, 111, 0,  'Language: Dwarven'),
+(8,     0, 126, 0,  'Racial: Night Elf'),
+(8,     0, 113, 0,  'Language: Darnassian'),
+(64,    0, 753, 0,  'Racial: Gnome'),
+(64,    0, 313, 0,  'Language: Gnomish'),
+-- HORDE RACES:
+(2,     0, 125, 0,  'Racial: Orc'),
+(178,   0, 109, 0,  'Language: Orcish'),
+(16,    0, 220, 0,  'Racial: Undead'),
+(16,    0, 673, 0,  'Language: Gutterspeak'),
+(32,    0, 124, 0,  'Racial: Tauren'),
+(32,    0, 115, 0,  'Language: Taurahe'),
+(128,   0, 733, 0,  'Racial: Troll'),
+(128,   0, 315, 0,  'Language: Troll');
+/*!40000 ALTER TABLE `playercreateinfo_skills` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -8091,7 +8253,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (1,2,9078,'Cloth'),
 (1,2,9116,'Shield'),
 (1,2,9125,'Generic'),
-(1,2,21084,'Seal of Righteousness'),
+(1,2,20154,'Seal of Righteousness'),
 (1,2,20597,'Sword Specialization'),
 (1,2,20598,'The Human Spirit'),
 (1,2,20599,'Diplomacy'),
@@ -8498,7 +8660,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (3,2,9078,'Cloth'),
 (3,2,9116,'Shield'),
 (3,2,9125,'Generic'),
-(3,2,21084,'Seal of Righteousness'),
+(3,2,20154,'Seal of Righteousness'),
 (3,2,20594,'Stoneform'),
 (3,2,20595,'Gun Specialization'),
 (3,2,20596,'Frost Resistance'),
@@ -9694,6 +9856,7 @@ CREATE TABLE `quest_template` (
   `Method` tinyint(3) unsigned NOT NULL DEFAULT '2',
   `ZoneOrSort` smallint(6) NOT NULL DEFAULT '0',
   `MinLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `MaxLevel` tinyint(3) unsigned NOT NULL DEFAULT '255',
   `QuestLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `Type` smallint(5) unsigned NOT NULL DEFAULT '0',
   `RequiredClasses` smallint(5) unsigned NOT NULL DEFAULT '0',
@@ -9979,14 +10142,17 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `script_waypoint`;
 CREATE TABLE script_waypoint (
-  entry mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'creature_template entry',
-  pointid mediumint(8) unsigned NOT NULL DEFAULT '0',
-  location_x float NOT NULL DEFAULT '0',
-  location_y float NOT NULL DEFAULT '0',
-  location_z float NOT NULL DEFAULT '0',
-  waittime int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'waittime in millisecs',
-  point_comment text,
-  PRIMARY KEY (entry, pointid)
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'creature_template entry',
+  `pathId` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  `pointid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `position_x` float NOT NULL DEFAULT '0',
+  `position_y` float NOT NULL DEFAULT '0',
+  `position_z` float NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
+  `waittime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'waittime in millisecs',
+  `script_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `comment` text,
+  PRIMARY KEY (entry, pathId, pointid)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Script Creature waypoints';
 
 --
@@ -11849,24 +12015,24 @@ INSERT INTO `spell_chain` VALUES
 (20347,20165,20165,2,0),
 (20348,20347,20165,3,0),
 (20349,20348,20165,4,0),
-/* Seal of Righteousness */
-(21084,0,21084,1,0),
-(20287,21084,21084,2,0),
-(20288,20287,21084,3,0),
-(20289,20288,21084,4,0),
-(20290,20289,21084,5,0),
-(20291,20290,21084,6,0),
-(20292,20291,21084,7,0),
-(20293,20292,21084,8,0),
+/* Seal of Righteousness (serverside extension) */
+(20287,21084,20154,3,0),
+(20288,20287,20154,4,0),
+(20289,20288,20154,5,0),
+(20290,20289,20154,6,0),
+(20291,20290,20154,7,0),
+(20292,20291,20154,8,0),
+(20293,20292,20154,9,0),
 /* Seal of Righteousness Proc */
 (25742,0,25742,1,0),
-(25740,25742,25742,2,0),
-(25739,25740,25742,3,0),
-(25738,25739,25742,4,0),
-(25737,25738,25742,5,0),
-(25736,25737,25742,6,0),
-(25735,25736,25742,7,0),
-(25713,25735,25742,8,0),
+(25741,25742,25742,2,0),
+(25740,25741,25742,3,0),
+(25739,25740,25742,4,0),
+(25738,25739,25742,5,0),
+(25737,25738,25742,6,0),
+(25736,25737,25742,7,0),
+(25735,25736,25742,8,0),
+(25713,25735,25742,9,0),
 /* Seal of Wisdom */
 (20166,0,20166,1,0),
 (20356,20166,20166,2,0),
@@ -13571,6 +13737,17 @@ LOCK TABLES `taxi_shortcuts` WRITE;
 /*!40000 ALTER TABLE `taxi_shortcuts` DISABLE KEYS */;
 /*!40000 ALTER TABLE `taxi_shortcuts` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `trainer_greeeting`
+--
+
+DROP TABLE IF EXISTS `trainer_greeting`;
+CREATE TABLE `trainer_greeting` (
+   `Entry` INT(11) UNSIGNED NOT NULL COMMENT 'Entry of Trainer',
+   `Text` LONGTEXT COMMENT 'Text of the greeting',
+   PRIMARY KEY(`Entry`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Trainer system';
 
 --
 -- Table structure for table `transports`

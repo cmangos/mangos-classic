@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulgurub.h"
 
 enum
@@ -126,8 +126,8 @@ struct boss_mandokirAI : public ScriptedAI
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        for (uint8 i = 0; i < countof(aSpirits); ++i)
-            m_creature->SummonCreature(NPC_CHAINED_SPIRIT, aSpirits[i].fX, aSpirits[i].fY, aSpirits[i].fZ, aSpirits[i].fAng, TEMPSPAWN_CORPSE_DESPAWN, 0);
+        for (auto& aSpirit : aSpirits)
+            m_creature->SummonCreature(NPC_CHAINED_SPIRIT, aSpirit.fX, aSpirit.fY, aSpirit.fZ, aSpirit.fAng, TEMPSPAWN_CORPSE_DESPAWN, 0);
 
         // At combat start Mandokir is mounted so we must unmount it first
         m_creature->Unmount();
@@ -154,7 +154,6 @@ struct boss_mandokirAI : public ScriptedAI
     void EnterEvadeMode() override
     {
         m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
         m_creature->LoadCreatureAddon(true);
 
@@ -308,9 +307,9 @@ struct boss_mandokirAI : public ScriptedAI
                 uint8 uiTargetInRangeCount = 0;
 
                 ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-                for (ThreatList::const_iterator i = tList.begin(); i != tList.end(); ++i)
+                for (auto i : tList)
                 {
-                    Unit* pTarget = m_creature->GetMap()->GetUnit((*i)->getUnitGuid());
+                    Unit* pTarget = m_creature->GetMap()->GetUnit(i->getUnitGuid());
 
                     if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER && m_creature->CanReachWithMeleeAttack(pTarget))
                         ++uiTargetInRangeCount;
@@ -383,21 +382,19 @@ struct mob_ohganAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_mandokir(Creature* pCreature)
+UnitAI* GetAI_boss_mandokir(Creature* pCreature)
 {
     return new boss_mandokirAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_ohgan(Creature* pCreature)
+UnitAI* GetAI_mob_ohgan(Creature* pCreature)
 {
     return new mob_ohganAI(pCreature);
 }
 
 void AddSC_boss_mandokir()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_mandokir";
     pNewScript->GetAI = &GetAI_boss_mandokir;
     pNewScript->RegisterSelf();

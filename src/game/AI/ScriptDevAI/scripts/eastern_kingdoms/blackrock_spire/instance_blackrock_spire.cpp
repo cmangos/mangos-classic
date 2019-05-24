@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackrock_spire.h"
 
 enum
@@ -102,13 +102,13 @@ instance_blackrock_spire::instance_blackrock_spire(Map* pMap) : ScriptedInstance
     m_bUpperDoorOpened(false),
     m_uiDragonspineDoorTimer(0),
     m_uiDragonspineGoCount(0),
+    m_bBeastIntroDone(false),
+    m_bBeastOutOfLair(false),
     m_uiFlamewreathEventTimer(0),
     m_uiFlamewreathWaveCount(0),
     m_uiStadiumEventTimer(0),
     m_uiStadiumWaves(0),
-    m_uiStadiumMobsAlive(0),
-    m_bBeastIntroDone(false),
-    m_bBeastOutOfLair(false)
+    m_uiStadiumMobsAlive(0)
 {
     Initialize();
 }
@@ -319,10 +319,10 @@ void instance_blackrock_spire::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (uint32& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -941,7 +941,7 @@ struct npc_rookery_hatcherAI : public ScriptedAI
     // Function to search for new rookery egg in range
     void DoFindNewEgg()
     {
-        std::list<GameObject*> lEggsInRange;
+        GameObjectList lEggsInRange;
         GetGameObjectListWithEntryInGrid(lEggsInRange, m_creature, GO_ROOKERY_EGG, 20.0f);
 
         if (lEggsInRange.empty())   // No GO found
@@ -951,7 +951,7 @@ struct npc_rookery_hatcherAI : public ScriptedAI
         GameObject* pNearestEgg = nullptr;
 
         // Always need to find new ones
-        for (std::list<GameObject*>::const_iterator itr = lEggsInRange.begin(); itr != lEggsInRange.end(); ++itr)
+        for (GameObjectList::const_iterator itr = lEggsInRange.begin(); itr != lEggsInRange.end(); ++itr)
         {
             if (!((*itr)->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE)))
             {
@@ -1018,16 +1018,14 @@ struct npc_rookery_hatcherAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_rookery_hatcher(Creature* pCreature)
+UnitAI* GetAI_npc_rookery_hatcher(Creature* pCreature)
 {
     return new npc_rookery_hatcherAI(pCreature);
 }
 
 void AddSC_instance_blackrock_spire()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_blackrock_spire";
     pNewScript->GetInstanceData = &GetInstanceData_instance_blackrock_spire;
     pNewScript->RegisterSelf();

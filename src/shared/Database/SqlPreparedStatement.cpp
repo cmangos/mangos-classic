@@ -59,6 +59,7 @@ bool SqlStatement::Execute()
     {
         sLog.outError("SQL ERROR: wrong amount of parameters (%i instead of %i)", args->boundParams(), arguments());
         sLog.outError("SQL ERROR: statement: %s", m_pDB->GetStmtString(ID()).c_str());
+        delete args;
         MANGOS_ASSERT(false);
         return false;
     }
@@ -74,6 +75,7 @@ bool SqlStatement::DirectExecute()
     {
         sLog.outError("SQL ERROR: wrong amount of parameters (%i instead of %i)", args->boundParams(), arguments());
         sLog.outError("SQL ERROR: statement: %s", m_pDB->GetStmtString(ID()).c_str());
+        delete args;
         MANGOS_ASSERT(false);
         return false;
     }

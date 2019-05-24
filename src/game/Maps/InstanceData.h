@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include "Entities/ObjectGuid.h"
+#include "ByteBuffer.h"
 
 class Map;
 class Unit;
@@ -37,6 +38,8 @@ enum InstanceConditionIDs                                   // Suggested values 
     INSTANCE_CONDITION_ID_HARD_MODE_2       = 2,
     INSTANCE_CONDITION_ID_HARD_MODE_3       = 3,
     INSTANCE_CONDITION_ID_HARD_MODE_4       = 4,
+    INSTANCE_CONDITION_ID_HARD_MODE_5       = 5,
+    INSTANCE_CONDITION_ID_HARD_MODE_6       = 6,
 
     // to check for which team the instance is doing scripts
     INSTANCE_CONDITION_ID_TEAM_HORDE        = 67,
@@ -118,6 +121,23 @@ class InstanceData
         // This is used for such things are heroic loot
         // See ObjectMgr.h enum ConditionSource for possible values of conditionSourceType
         virtual bool CheckConditionCriteriaMeet(Player const* source, uint32 instance_condition_id, WorldObject const* conditionSource, uint32 conditionSourceType) const;
+
+        virtual void FillInitialWorldStates(ByteBuffer& /*data*/, uint32& /*count*/, uint32 /*zoneId*/, uint32 /*areaId*/) {}
+
+        // helper functions for world state list fill
+        inline void FillInitialWorldStateData(ByteBuffer& data, uint32& count, uint32 state, uint32 value)
+        {
+            data << uint32(state);
+            data << uint32(value);
+            ++count;
+        }
+
+        inline void FillInitialWorldStateData(ByteBuffer& data, uint32& count, uint32 state, int32 value)
+        {
+            data << uint32(state);
+            data << int32(value);
+            ++count;
+        }
 };
 
 #endif

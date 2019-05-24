@@ -26,7 +26,9 @@ list(APPEND AD_SOURCE
      System.cpp
 )
 
-include_directories(loadlib)
+include_directories(
+     ../../src/game
+)
 
 add_executable(${EXECUTABLE_NAME} ${AD_SOURCE})
 

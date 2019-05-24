@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 /* ContentData
 EndContentData */
@@ -113,7 +113,7 @@ struct npc_soulflayerAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), m_uiRandomCcAbility) == CAST_OK)
             {
-                m_creature->getVictim()->DeleteThreatList();
+                m_creature->getVictim()->DeleteThreatList(); // TODO: This is simply WTF
                 m_uiRandomCcAbilityTimer = urand(8000, 10000);
             }
         }
@@ -131,16 +131,14 @@ struct npc_soulflayerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_soulflayer(Creature* pCreature)
+UnitAI* GetAI_npc_soulflayer(Creature* pCreature)
 {
     return new npc_soulflayerAI(pCreature);
 }
 
 void AddSC_zulgurub()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script();
+    Script* pNewScript = new Script();
     pNewScript->Name = "npc_soulflayer";
     pNewScript->GetAI = &GetAI_npc_soulflayer;
     pNewScript->RegisterSelf();

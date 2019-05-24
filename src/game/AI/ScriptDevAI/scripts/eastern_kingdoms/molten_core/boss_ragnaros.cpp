@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
 
 enum
@@ -366,22 +366,19 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
                     m_uiNextPhaseTimer = 3 * MINUTE * IN_MILLISECONDS;
                     m_uiMagmaBlastTimer = 3000;                 // Delay the magma blast after emerge
                 }
-                return;
             }
         }
     }
 };
 
-CreatureAI* GetAI_boss_ragnaros(Creature* pCreature)
+UnitAI* GetAI_boss_ragnaros(Creature* pCreature)
 {
     return new boss_ragnarosAI(pCreature);
 }
 
 void AddSC_boss_ragnaros()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ragnaros";
     pNewScript->GetAI = &GetAI_boss_ragnaros;
     pNewScript->RegisterSelf();

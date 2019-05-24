@@ -5,9 +5,7 @@
 #ifndef SC_PET_H
 #define SC_PET_H
 
-#include "AI/ScriptDevAI/include/sc_creature.h"
-
-// Using CreatureAI for now. Might change later and use PetAI (need to export for dll first)
+// Using UnitAI for now. Might change later and use PetAI (need to export for dll first)
 class ScriptedPetAI : public CreatureAI
 {
     public:
@@ -23,6 +21,8 @@ class ScriptedPetAI : public CreatureAI
         void OwnerKilledUnit(Unit* /*victim*/) override {}
 
         void UpdateAI(const uint32 diff) override;
+
+        void CombatStop() override;
 
         virtual void Reset() {}
 

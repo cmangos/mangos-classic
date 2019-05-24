@@ -149,11 +149,11 @@ void PlayerSocial::SendIgnoreList()
     WorldPacket data(SMSG_IGNORE_LIST, (1 + size * 8));     // just can guess size
     data << uint8(size);                                    // friends count
 
-    for (PlayerSocialMap::iterator itr = m_playerSocialMap.begin(); itr != m_playerSocialMap.end(); ++itr)
+    for (auto& itr : m_playerSocialMap)
     {
-        if (itr->second.Flags & SOCIAL_FLAG_IGNORED)
+        if (itr.second.Flags & SOCIAL_FLAG_IGNORED)
         {
-            data << ObjectGuid(HIGHGUID_PLAYER, itr->first);// player guid
+            data << ObjectGuid(HIGHGUID_PLAYER, itr.first);// player guid
         }
     }
 
@@ -172,9 +172,7 @@ bool PlayerSocial::HasFriend(ObjectGuid friend_guid)
 bool PlayerSocial::HasIgnore(ObjectGuid ignore_guid)
 {
     PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(ignore_guid.GetCounter());
-    if (itr != m_playerSocialMap.end())
-        return !!(itr->second.Flags & SOCIAL_FLAG_IGNORED);
-    return false;
+    return itr == m_playerSocialMap.end() ? false : (itr->second.Flags & SOCIAL_FLAG_IGNORED) != 0;
 }
 
 SocialMgr::SocialMgr()

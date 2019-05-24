@@ -51,16 +51,17 @@
 // included to use sleep_for()
 #include <thread>
 
+typedef std::chrono::system_clock Clock;
+typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> TimePoint;
+
 #if COMPILER == COMPILER_MICROSOFT
 
 #  include <float.h>
 
 #  define I32FMT "%08I32X"
 #  define I64FMT "%016I64X"
-#  define snprintf _snprintf
-#  define vsnprintf _vsnprintf
-#  define finite(X) _finite(X)
 
+#  pragma warning ( disable : 4251 )
 #else
 
 #  define stricmp strcasecmp
@@ -98,8 +99,8 @@ inline float finiteAlways(float f) { return std::isfinite(f) ? f : 0.0f; }
 #define PAIR64_LOPART(x)   (uint32)(uint64(x)         & uint64(0x00000000FFFFFFFF))
 
 #define MAKE_PAIR32(l, h)  uint32( uint16(l) | ( uint32(h) << 16 ) )
-#define PAIR32_HIPART(x)   (uint16)((uint32(x) >> 16) & 0x0000FFFF)
-#define PAIR32_LOPART(x)   (uint16)(uint32(x)         & 0x0000FFFF)
+#define PAIR32_HIPART(x)   uint16( ((uint32(x) >> 16) & 0x0000FFFF) )
+#define PAIR32_LOPART(x)   uint16( (uint32(x)         & 0x0000FFFF) )
 
 enum TimeConstants
 {

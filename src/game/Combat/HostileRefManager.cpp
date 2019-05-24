@@ -22,7 +22,7 @@
 #include "Server/DBCStructure.h"
 #include "Spells/SpellMgr.h"
 
-HostileRefManager::HostileRefManager(Unit* pOwner) : iOwner(pOwner)
+HostileRefManager::HostileRefManager(Unit* owner) : iOwner(owner)
 {
 }
 
@@ -36,30 +36,54 @@ HostileRefManager::~HostileRefManager()
 // The pVictim is hated than by them as well
 // use for buffs and healing threat functionality
 
-void HostileRefManager::threatAssist(Unit* pVictim, float pThreat, SpellEntry const* pThreatSpell, bool pSingleTarget)
+void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry const* threatSpell, bool singleTarget)
 {
-    uint32 size = pSingleTarget ? 1 : getSize();            // if pSingleTarget do not devide threat
-    float threat = pThreat / size;
     HostileReference* ref = getFirst();
+    if (!ref)
+        return;
+
+    std::vector<HostileReference*> validRefs;
     while (ref)
     {
-        if (!ref->getSource()->getOwner()->IsIncapacitated())
-            ref->getSource()->addThreat(pVictim, threat, false, (pThreatSpell ? GetSpellSchoolMask(pThreatSpell) : SPELL_SCHOOL_MASK_NORMAL), pThreatSpell);
-
+        Unit* owner = ref->getSource()->getOwner();
+        if (!owner->IsIncapacitated() && owner != victim)
+            validRefs.push_back(ref);
         ref = ref->next();
     }
+
+    uint32 size = singleTarget ? 1 : validRefs.size();            // if singleTarget do not devide threat
+    float threatPerTarget = threat / size;
+    for (HostileReference* validReference : validRefs)
+        validReference->getSource()->addThreat(victim, threatPerTarget, false, (threatSpell ? GetSpellSchoolMask(threatSpell) : SPELL_SCHOOL_MASK_NORMAL), threatSpell);
 }
 
 //=================================================
 
-void HostileRefManager::addThreatPercent(int32 pValue)
+void HostileRefManager::addThreatPercent(int32 threatPercent)
 {
-    HostileReference* ref;
-
-    ref = getFirst();
+    HostileReference* ref = getFirst();
     while (ref != nullptr)
     {
-        ref->addThreatPercent(pValue);
+        ref->addThreatPercent(threatPercent);
+        ref = ref->next();
+    }
+}
+
+void HostileRefManager::threatTemporaryFade(Unit* victim, float threat, bool apply)
+{
+    HostileReference* ref = getFirst();
+
+    while (ref)
+    {
+        if (apply)
+        {
+            float curThreat = ref->getThreat();
+            float reducedThreat = std::max(-curThreat, threat);
+            ref->setFadeoutThreatReduction(reducedThreat);
+        }
+        else
+            ref->resetFadeoutThreatReduction();
+
         ref = ref->next();
     }
 }
@@ -67,14 +91,12 @@ void HostileRefManager::addThreatPercent(int32 pValue)
 //=================================================
 // The online / offline status is given to the method. The calculation has to be done before
 
-void HostileRefManager::setOnlineOfflineState(bool pIsOnline)
+void HostileRefManager::setOnlineOfflineState(bool isOnline)
 {
-    HostileReference* ref;
-
-    ref = getFirst();
+    HostileReference* ref = getFirst();
     while (ref != nullptr)
     {
-        ref->setOnlineOfflineState(pIsOnline);
+        ref->setOnlineOfflineState(isOnline);
         ref = ref->next();
     }
 }
@@ -83,15 +105,8 @@ void HostileRefManager::updateOnlineOfflineState(bool pIsOnline)
 {
     if (pIsOnline && iOwner)
     {
-        // Check for causes which prevent setting online state
-
         // Do not set online while feigning death in combat
         if (iOwner->IsFeigningDeathSuccessfully() && iOwner->isInCombat())
-            return;
-
-        // Do not set online if player is in GM mode or on taxi path
-        const Player* player = iOwner->GetControllingPlayer();
-        if (player && (player->IsTaxiFlying() || !player->isGameMaster()))
             return;
     }
     setOnlineOfflineState(pIsOnline);
@@ -135,7 +150,7 @@ void HostileRefManager::deleteReferencesForFaction(uint32 faction)
     while (ref)
     {
         HostileReference* nextRef = ref->next();
-        if (ref->getSource()->getOwner()->getFactionTemplateEntry()->faction == faction)
+        if (ref->getSource()->getOwner()->GetFactionTemplateEntry()->faction == faction)
         {
             ref->removeReference();
             delete ref;
@@ -147,13 +162,13 @@ void HostileRefManager::deleteReferencesForFaction(uint32 faction)
 //=================================================
 // delete one reference, defined by Unit
 
-void HostileRefManager::deleteReference(Unit* pCreature)
+void HostileRefManager::deleteReference(Unit* victim)
 {
     HostileReference* ref = getFirst();
     while (ref)
     {
         HostileReference* nextRef = ref->next();
-        if (ref->getSource()->getOwner() == pCreature)
+        if (ref->getSource()->getOwner() == victim)
         {
             ref->removeReference();
             delete ref;
@@ -166,18 +181,57 @@ void HostileRefManager::deleteReference(Unit* pCreature)
 //=================================================
 // set state for one reference, defined by Unit
 
-void HostileRefManager::setOnlineOfflineState(Unit* pCreature, bool pIsOnline)
+void HostileRefManager::setOnlineOfflineState(Unit* victim, bool isOnline)
 {
     HostileReference* ref = getFirst();
     while (ref)
     {
         HostileReference* nextRef = ref->next();
-        if (ref->getSource()->getOwner() == pCreature)
+        if (ref->getSource()->getOwner() == victim)
         {
-            ref->setOnlineOfflineState(pIsOnline);
+            ref->setOnlineOfflineState(isOnline);
             break;
         }
         ref = nextRef;
+    }
+}
+
+HostileReference* HostileRefManager::getFirst()
+{
+    return static_cast<HostileReference*>(RefManager<Unit, ThreatManager>::getFirst());
+}
+
+void HostileRefManager::HandleSuppressed(bool apply, bool immunity)
+{
+    if (apply)
+    {
+        for (auto& data : *this)
+        {
+            HostileReference& ref = static_cast<HostileReference&>(data);
+            if (immunity)
+            {
+                Unit* source = ref.getSource()->getOwner();
+                Unit* target = ref.getTarget();
+                if (!target->IsImmuneToDamage(source->GetMeleeDamageSchoolMask()))
+                    continue;
+            }
+            ref.SetHostileState(STATE_SUPPRESSED);
+        }
+    }
+    else
+    {
+        for (auto& data : *this)
+        {
+            HostileReference& ref = static_cast<HostileReference&>(data);
+            Unit* source = ref.getSource()->getOwner();
+            Unit* target = ref.getTarget();
+            if (!target->IsSuppressedTarget(source))
+            {
+                ref.SetSuppressabilityToggle();
+                continue;
+            }
+            ref.SetHostileState(STATE_SUPPRESSED);
+        }
     }
 }
 

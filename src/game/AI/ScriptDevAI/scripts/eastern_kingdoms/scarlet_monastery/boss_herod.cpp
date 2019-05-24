@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 enum
@@ -130,7 +130,7 @@ struct boss_herodAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_herod(Creature* pCreature)
+UnitAI* GetAI_boss_herod(Creature* pCreature)
 {
     return new boss_herodAI(pCreature);
 }
@@ -168,16 +168,14 @@ struct mob_scarlet_traineeAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_mob_scarlet_trainee(Creature* pCreature)
+UnitAI* GetAI_mob_scarlet_trainee(Creature* pCreature)
 {
     return new mob_scarlet_traineeAI(pCreature);
 }
 
 void AddSC_boss_herod()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_herod";
     pNewScript->GetAI = &GetAI_boss_herod;
     pNewScript->RegisterSelf();

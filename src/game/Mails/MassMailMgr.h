@@ -71,7 +71,7 @@ class MassMailMgr
          *
          * Note: this function safe to be called from Map::Update content/etc, real data add will executed in next tick after query results ready
          */
-        void AddMassMailTask(MailDraft* mailProto, const MailSender& sender, char const* queryStr);
+        void AddMassMailTask(MailDraft* mailProto, const MailSender& sender, char const* query);
 
         /**
          * And new mass mail task and let fill receivers list returned as result.

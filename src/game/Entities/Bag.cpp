@@ -33,8 +33,8 @@ Bag::Bag(): Item()
 
 Bag::~Bag()
 {
-    for (int i = 0; i < MAX_BAG_SIZE; ++i)
-        delete m_bagslot[i];
+    for (auto& i : m_bagslot)
+        delete i;
 }
 
 void Bag::AddToWorld()
@@ -111,9 +111,9 @@ bool Bag::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
 
 void Bag::DeleteFromDB()
 {
-    for (int i = 0; i < MAX_BAG_SIZE; ++i)
-        if (m_bagslot[i])
-            m_bagslot[i]->DeleteFromDB();
+    for (auto& i : m_bagslot)
+        if (i)
+            i->DeleteFromDB();
 
     Item::DeleteFromDB();
 }

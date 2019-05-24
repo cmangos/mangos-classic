@@ -17,13 +17,13 @@
 /* ScriptData
 SDName: world_map_scripts
 SD%Complete: 100
-SDComment: Quest support: 4740, 8868, 11538
+SDComment: Quest support: 1126, 4740, 8868, 11538
 SDCategory: World Map Scripts
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "world_map_scripts.h"
 
 /* *********************************************************
@@ -78,6 +78,7 @@ struct world_map_kalimdor : public ScriptedMap
     uint32 m_encounter[MAX_ENCOUNTER];
     bool b_isOmenSpellCreditDone;
     std::array<std::vector<ObjectGuid>, MAX_ELEMENTS> m_aElementalRiftGUIDs;
+    uint32 m_uiDronesTimer;
 
     void Initialize()
     {
@@ -89,6 +90,7 @@ struct world_map_kalimdor : public ScriptedMap
         b_isOmenSpellCreditDone = false;
         for (auto& riftList : m_aElementalRiftGUIDs)
             riftList.clear();
+        m_uiDronesTimer = 0;
     }
 
     void OnCreatureCreate(Creature* pCreature)
@@ -248,8 +250,7 @@ struct world_map_kalimdor : public ScriptedMap
             }
             return true;
         }
-        else
-            return false;
+        return false;
     }
 
     void Update(uint32 diff)
@@ -276,8 +277,7 @@ struct world_map_kalimdor : public ScriptedMap
                     // Return is Omen is in fight
                     if (pOmen->isInCombat())
                         return;
-                    else
-                        pOmen->ForcedDespawn();
+                    pOmen->ForcedDespawn();
                 }
                 m_encounter[TYPE_OMEN] = NOT_STARTED;
                 m_uiOmenResetTimer = 0;
@@ -303,6 +303,17 @@ struct world_map_kalimdor : public ScriptedMap
                 else
                     m_uiOmenMoonlightTimer -= diff;
             }
+        }
+        // Used for Hive Tower area trigger in Silithus
+        if (m_uiDronesTimer)
+        {
+            if (m_uiDronesTimer <= diff)
+            {
+                SetData(TYPE_HIVE, NOT_STARTED);
+                m_uiDronesTimer = 0;
+            }
+            else
+                m_uiDronesTimer -= diff;
         }
     }
 
@@ -347,9 +358,14 @@ struct world_map_kalimdor : public ScriptedMap
                     break;
                 case DONE:
                     m_uiOmenMoonlightTimer = 5 * IN_MILLISECONDS;            // Timer before casting the end quest spell
-                    m_uiOmenResetTimer = 5 * MINUTE * IN_MILLISECONDS;        // Prevent another summoning of Omen for 5 minutes (based on spell duration)
+                    m_uiOmenResetTimer = 5 * MINUTE * IN_MILLISECONDS;       // Prevent another summoning of Omen for 5 minutes (based on spell duration)
                     break;
             }
+        }
+        else if (uiType == TYPE_HIVE)
+        {
+            if (uiData == IN_PROGRESS)
+            	m_uiDronesTimer = 5 * MINUTE * IN_MILLISECONDS;
         }
         m_encounter[uiType] = uiData;
     }
@@ -364,9 +380,7 @@ InstanceData* GetInstanceData_world_map_kalimdor(Map* pMap)
 
 void AddSC_world_map_scripts()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "world_map_eastern_kingdoms";
     pNewScript->GetInstanceData = &GetInstanceData_world_map_eastern_kingdoms;
     pNewScript->RegisterSelf();

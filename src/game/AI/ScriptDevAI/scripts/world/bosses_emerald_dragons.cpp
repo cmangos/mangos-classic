@@ -16,14 +16,14 @@
 
 /* ScriptData
 SDName: bosses_emerald_dragons
-SD%Complete: 98
+SD%Complete: 99
 SDComment: Correct models used by Spirit Shade for each race/gender combination are missing (Lethon)
 SDCategory: Emerald Dragon Bosses
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 boss_emerald_dragon -- Superclass for the four dragons
 boss_emeriss
 boss_lethon
@@ -210,7 +210,7 @@ struct boss_emerissAI : public boss_emerald_dragonAI
     }
 };
 
-CreatureAI* GetAI_boss_emeriss(Creature* pCreature)
+UnitAI* GetAI_boss_emeriss(Creature* pCreature)
 {
     return new boss_emerissAI(pCreature);
 }
@@ -267,7 +267,7 @@ struct boss_lethonAI : public boss_emerald_dragonAI
             // Summon this way to be able to cast the shade visual spell with player as original caster
             // This is not currently supported by core but this spell's visual should be dependent on player
             // Also possible that this was no problem due to the special way these NPCs had been summoned in classic times
-            if (Creature* pSummoned = pTarget->SummonCreature(NPC_SPIRIT_SHADE, 0.0f, 0.0f, 0.0f, pTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
+            if (Creature* pSummoned = pTarget->SummonCreature(NPC_SPIRIT_SHADE, 0.0f, 0.0f, 0.0f, pTarget->GetOrientation(), TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 60 * IN_MILLISECONDS, false, 0, 0, false, false, true))
                 pSummoned->CastSpell(pSummoned, SPELL_SPIRIT_SHAPE_VISUAL, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pTarget->GetObjectGuid());
         }
     }
@@ -278,14 +278,25 @@ struct npc_spirit_shadeAI : public ScriptedAI
     npc_spirit_shadeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
     bool m_bHasHealed;
+    uint32 m_uiInitialMovementTimer;
 
     void Reset() override
     {
         m_bHasHealed = false;
+        m_creature->SetVisibility(VISIBILITY_OFF);
+        m_uiInitialMovementTimer = 3 * IN_MILLISECONDS;
+    }
+
+    void JustDied(Unit* /*pKiller*/) override
+    {
+        m_creature->ForcedDespawn();
     }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
+        if (m_uiInitialMovementTimer)   // Does nothing while movement is not initiated in UpdateAI()
+            return;
+
         if (pWho->GetEntry() == NPC_LETHON)
         {
             if (!m_bHasHealed && pWho->IsWithinDistInMap(m_creature, 3.0f))
@@ -303,15 +314,28 @@ struct npc_spirit_shadeAI : public ScriptedAI
 
     void AttackStart(Unit* /*pWho*/) override { }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // NPC does not start to move when summoned, it waits 4 seconds then removes invisibility and moves towards boss Lethon
+        if (m_uiInitialMovementTimer)
+        {
+            if (m_uiInitialMovementTimer < uiDiff)
+            {
+                m_creature->SetVisibility(VISIBILITY_ON);
+                m_uiInitialMovementTimer = 0;
+            }
+            else
+                m_uiInitialMovementTimer -= uiDiff;
+        }
+    }
 };
 
-CreatureAI* GetAI_boss_lethon(Creature* pCreature)
+UnitAI* GetAI_boss_lethon(Creature* pCreature)
 {
     return new boss_lethonAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_spirit_shade(Creature* pCreature)
+UnitAI* GetAI_npc_spirit_shade(Creature* pCreature)
 {
     return new npc_spirit_shadeAI(pCreature);
 }
@@ -448,7 +472,7 @@ struct boss_taerarAI : public boss_emerald_dragonAI
     }
 };
 
-CreatureAI* GetAI_boss_taerar(Creature* pCreature)
+UnitAI* GetAI_boss_taerar(Creature* pCreature)
 {
     return new boss_taerarAI(pCreature);
 }
@@ -513,16 +537,14 @@ struct boss_ysondreAI : public boss_emerald_dragonAI
     }
 };
 
-CreatureAI* GetAI_boss_ysondre(Creature* pCreature)
+UnitAI* GetAI_boss_ysondre(Creature* pCreature)
 {
     return new boss_ysondreAI(pCreature);
 }
 
 void AddSC_bosses_emerald_dragons()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_emeriss";
     pNewScript->GetAI = &GetAI_boss_emeriss;
     pNewScript->RegisterSelf();

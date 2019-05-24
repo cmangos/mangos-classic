@@ -32,6 +32,23 @@
 // also see MAX_LEVEL and GT_MAX_LEVEL define
 #define STRONG_MAX_LEVEL 255
 
+#pragma pack(push, 1)
+
+struct DBCPosition2D
+{
+    float X;
+    float Y;
+};
+
+struct DBCPosition3D
+{
+    float X;
+    float Y;
+    float Z;
+};
+
+#pragma pack(pop)
+
 enum AreaTeams
 {
     AREATEAM_NONE  = 0,
@@ -82,9 +99,20 @@ enum AbilytyLearnType
     ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL  = 2
 };
 
-enum AbilitySkillFlags
+enum SkillRaceClassInfoFlags
 {
-    ABILITY_SKILL_NONTRAINABLE = 0x100
+    SKILL_FLAG_NONE                     = 0x000,
+    SKILL_FLAG_UNK0                     = 0x001,
+    SKILL_FLAG_DISPLAY_SILENCED         = 0x002,    // Clientside: no skillup messages
+    SKILL_FLAG_UNK2                     = 0x004,
+    SKILL_FLAG_UNK3                     = 0x008,
+    SKILL_FLAG_MAXIMIZED                = 0x010,    // Always at max value
+    SKILL_FLAG_CAN_UNLEARN              = 0x020,
+    SKILL_FLAG_UNK6                     = 0x040,
+    SKILL_FLAG_DISPLAY_SORTED           = 0x080,    // Clientside: affects spellbook sorting for dependent spells
+    SKILL_FLAG_NOT_TRAINABLE            = 0x100,
+    SKILL_FLAG_UNK9                     = 0x200,
+    SKILL_FLAG_DISPLAY_AS_MONO          = 0x400     // Clientside: appear as greyed out bar (1/1)
 };
 
 enum ItemEnchantmentType

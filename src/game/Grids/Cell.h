@@ -28,7 +28,7 @@ class WorldObject;
 struct CellArea
 {
     CellArea() {}
-    CellArea(CellPair low, CellPair high) : low_bound(low), high_bound(high) {}
+    CellArea(const CellPair& low, const CellPair& high) : low_bound(low), high_bound(high) {}
 
     bool operator!() const { return low_bound == high_bound; }
 

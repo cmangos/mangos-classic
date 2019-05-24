@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_blastmaster_emi_shortfuse
 npc_kernobee
 EndContentData */
@@ -164,13 +164,13 @@ struct npc_blastmaster_emi_shortfuseAI : public npc_escortAI
 
     void DoSummonPack(uint8 uiIndex)
     {
-        for (uint8 i = 0; i < MAX_SUMMON_POSITIONS; ++i)
+        for (const auto& i : asSummonInfo)
         {
             // This requires order of the array
-            if (asSummonInfo[i].uiPosition > uiIndex)
+            if (i.uiPosition > uiIndex)
                 break;
-            if (asSummonInfo[i].uiPosition == uiIndex)
-                m_creature->SummonCreature(asSummonInfo[i].uiEntry, asSummonInfo[i].fX, asSummonInfo[i].fY, asSummonInfo[i].fZ, asSummonInfo[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+            if (i.uiPosition == uiIndex)
+                m_creature->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, i.fO, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 
@@ -208,7 +208,7 @@ struct npc_blastmaster_emi_shortfuseAI : public npc_escortAI
         m_luiSummonedMobGUIDs.remove(pSummoned->GetObjectGuid());
     }
 
-    bool IsPreparingExplosiveCharge()
+    bool IsPreparingExplosiveCharge() const
     {
         return m_uiPhase == 11 || m_uiPhase == 13 || m_uiPhase == 26 || m_uiPhase == 28;
     }
@@ -593,7 +593,7 @@ struct npc_blastmaster_emi_shortfuseAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_blastmaster_emi_shortfuse(Creature* pCreature)
+UnitAI* GetAI_npc_blastmaster_emi_shortfuse(Creature* pCreature)
 {
     return new npc_blastmaster_emi_shortfuseAI(pCreature);
 }
@@ -658,7 +658,7 @@ struct npc_kernobeeAI : public FollowerAI
 
     void Reset() override {}
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -682,7 +682,7 @@ struct npc_kernobeeAI : public FollowerAI
             {
                 SetFollowComplete(true);
                 if (Player* pPlayer = GetLeaderForFollower())
-                    pPlayer->GroupEventHappens(QUEST_A_FINE_MESS, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_A_FINE_MESS, m_creature);
                 m_creature->GetMotionMaster()->MovePoint(1, aKernobeePositions[1][0], aKernobeePositions[1][1], aKernobeePositions[1][2], false);
                 m_creature->ForcedDespawn(2000);
             }
@@ -692,7 +692,7 @@ struct npc_kernobeeAI : public FollowerAI
     }
 };
 
-CreatureAI* GetAI_npc_kernobee(Creature* pCreature)
+UnitAI* GetAI_npc_kernobee(Creature* pCreature)
 {
     return new npc_kernobeeAI(pCreature);
 }
@@ -707,9 +707,7 @@ bool QuestAccept_npc_kernobee(Player* pPlayer, Creature* pCreature, const Quest*
 
 void AddSC_gnomeregan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_blastmaster_emi_shortfuse";
     pNewScript->GetAI = &GetAI_npc_blastmaster_emi_shortfuse;
     pNewScript->pGossipHello = &GossipHello_npc_blastmaster_emi_shortfuse;

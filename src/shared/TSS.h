@@ -19,6 +19,7 @@
 #ifndef TSS_H
 #define TSS_H
 
+#include <boost/shared_ptr.hpp>
 #include <boost/thread/tss.hpp>
 
 #include <functional>

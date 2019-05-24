@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_gilthares
 npc_taskmaster_fizzule
 npc_twiggy_flathead
@@ -88,7 +88,7 @@ struct npc_giltharesAI : public npc_escortAI
                 break;
             case 53:
                 DoScriptText(SAY_GIL_FREED, m_creature, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_FREE_FROM_HOLD, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_FREE_FROM_HOLD, m_creature);
                 break;
         }
     }
@@ -114,7 +114,7 @@ struct npc_giltharesAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_gilthares(Creature* pCreature)
+UnitAI* GetAI_npc_gilthares(Creature* pCreature)
 {
     return new npc_giltharesAI(pCreature);
 }
@@ -123,7 +123,7 @@ bool QuestAccept_npc_gilthares(Player* pPlayer, Creature* pCreature, const Quest
 {
     if (pQuest->GetQuestId() == QUEST_FREE_FROM_HOLD)
     {
-        pCreature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+        pCreature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
         pCreature->SetStandState(UNIT_STAND_STATE_STAND);
 
         DoScriptText(SAY_GIL_START, pCreature, pPlayer);
@@ -143,61 +143,76 @@ enum
     FACTION_FRIENDLY_F  = 35,
     SPELL_FLARE         = 10113,
     SPELL_FOLLY         = 10137,
+
+    FIZZULE_FLARE_1             = 1,
+    FIZZULE_FLARE_2             = 2,
+    FIZZULE_SALUTE              = 3,
+    FIZZULE_WHISTLE             = 4,
 };
 
 struct npc_taskmaster_fizzuleAI : public ScriptedAI
 {
-    npc_taskmaster_fizzuleAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    uint32 m_uiResetTimer;
-    uint8 m_uiFlareCount;
-
-    void Reset() override
-    {
-        m_uiResetTimer = 0;
-        m_uiFlareCount = 0;
+    npc_taskmaster_fizzuleAI(Creature* creature) : ScriptedAI(creature)
+    { 
+        resetTimer = 0;
+        flareCount = 0;
     }
+
+    uint32 resetTimer;
+    uint8 flareCount;
+
+    void Reset() override {}
 
     void EnterEvadeMode() override
     {
-        if (m_uiResetTimer)
+        if (resetTimer)
         {
             m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
-            m_creature->LoadCreatureAddon(true);
-
-            m_creature->SetLootRecipient(nullptr);
-
-            m_creature->SetFactionTemporary(FACTION_FRIENDLY_F, TEMPFACTION_RESTORE_REACH_HOME);
-            m_creature->HandleEmote(EMOTE_ONESHOT_SALUTE);
         }
         else
             ScriptedAI::EnterEvadeMode();
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    void SpellHit(Unit* caster, const SpellEntry* spell) override
     {
-        if (pCaster->GetTypeId() == TYPEID_PLAYER && (pSpell->Id == SPELL_FLARE || pSpell->Id == SPELL_FOLLY))
-        {
-            ++m_uiFlareCount;
+        if (caster->GetTypeId() != TYPEID_PLAYER)
+            return;
 
-            if (m_uiFlareCount >= 2 && m_creature->getFaction() != FACTION_FRIENDLY_F)
-                m_uiResetTimer = 120000;
+        switch (spell->Id)
+        {
+            case SPELL_FLARE:
+            {
+                if (flareCount < 2)
+                {
+                    ++flareCount;
+                    HandleFlareOrKneel();
+                }
+                break;
+            }
+            case SPELL_FOLLY:
+            {
+                flareCount = 4;
+                HandleFlareOrKneel();
+                break;
+            }
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
-        if (m_uiResetTimer)
+        if (resetTimer)
         {
-            if (m_uiResetTimer <= uiDiff)
+            if (resetTimer <= diff)
             {
-                m_uiResetTimer = 0;
+                resetTimer = 0;
+                flareCount = 0;
+                m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                m_creature->SetImmuneToPlayer(false);
                 EnterEvadeMode();
             }
             else
-                m_uiResetTimer -= uiDiff;
+                resetTimer -= diff;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -206,19 +221,47 @@ struct npc_taskmaster_fizzuleAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 
-    void ReceiveEmote(Player* /*pPlayer*/, uint32 uiTextEmote) override
+    void HandleFlareOrKneel()
     {
-        if (uiTextEmote == TEXTEMOTE_SALUTE)
+        switch (flareCount)
         {
-            if (m_uiFlareCount >= 2 && m_creature->getFaction() != FACTION_FRIENDLY_F)
-                EnterEvadeMode();
+            case FIZZULE_FLARE_1:
+                resetTimer = 120000;
+                m_creature->SetImmuneToPlayer(true);
+                break;
+            case FIZZULE_FLARE_2:
+                m_creature->SetFactionTemporary(FACTION_FRIENDLY_F, TEMPFACTION_RESTORE_REACH_HOME);
+                break;
+            case FIZZULE_SALUTE:
+                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                m_creature->HandleEmote(EMOTE_ONESHOT_SALUTE);
+                break;
+            case FIZZULE_WHISTLE:
+                resetTimer = 120000;
+                m_creature->SetImmuneToPlayer(true);
+                m_creature->SetFactionTemporary(FACTION_FRIENDLY_F, TEMPFACTION_RESTORE_REACH_HOME);
+                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                m_creature->HandleEmote(EMOTE_ONESHOT_SALUTE);
+                break;
+        }
+    }
+
+    void ReceiveEmote(Player* /*player*/, uint32 textEmote) override
+    {
+        if (textEmote == TEXTEMOTE_SALUTE)
+        {
+            if (flareCount == 2)
+            {
+                flareCount++;
+                HandleFlareOrKneel();
+            }
         }
     }
 };
 
-CreatureAI* GetAI_npc_taskmaster_fizzule(Creature* pCreature)
+UnitAI* GetAI_npc_taskmaster_fizzule(Creature* creature)
 {
-    return new npc_taskmaster_fizzuleAI(pCreature);
+    return new npc_taskmaster_fizzuleAI(creature);
 }
 
 /*#####
@@ -282,7 +325,22 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
 
         m_playerGuid.Clear();
         m_bigWillGuid.Clear();
+
         m_vAffrayChallengerGuidsVector.clear();
+    }
+
+    void FailEvent()
+    {
+        if (Creature* bigWill = m_creature->GetMap()->GetCreature(m_bigWillGuid))
+            if (bigWill->isAlive())
+                bigWill->ForcedDespawn();
+
+        for (ObjectGuid guid : m_vAffrayChallengerGuidsVector)
+            if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
+                if (creature->isAlive())
+                    creature->ForcedDespawn();
+
+        Reset();
     }
 
     bool CanStartEvent(Player* pPlayer)
@@ -354,7 +412,7 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_BIG_WILL)
         {
             DoScriptText(SAY_TWIGGY_OVER, m_creature);
-            EnterEvadeMode();
+            Reset();
         }
         else
         {
@@ -373,7 +431,10 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
             Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
             if (!pPlayer || !pPlayer->isAlive())
-                EnterEvadeMode();
+            {
+                FailEvent();
+                return;
+            }
 
             switch (m_uiStep)
             {
@@ -387,7 +448,10 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
                     if (Creature* pChallenger = m_creature->GetMap()->GetCreature(m_vAffrayChallengerGuidsVector[m_uiChallengerCount]))
                         SetChallengerReady(pChallenger);
                     else
-                        EnterEvadeMode();
+                    {
+                        FailEvent(); // this should never happen
+                        return;
+                    }
 
                     if (m_uiChallengerCount == MAX_CHALLENGERS)
                     {
@@ -412,7 +476,7 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_twiggy_flathead(Creature* pCreature)
+UnitAI* GetAI_npc_twiggy_flathead(Creature* pCreature)
 {
     return new npc_twiggy_flatheadAI(pCreature);
 }
@@ -555,7 +619,7 @@ struct npc_wizzlecranks_shredderAI : public npc_escortAI
                         case 3:
                             if (Player* pPlayer = GetPlayerForEscort())
                             {
-                                pPlayer->GroupEventHappens(QUEST_ESCAPE, m_creature);
+                                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE, m_creature);
                                 m_creature->SummonCreature(NPC_PILOT_WIZZ, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 180000);
                             }
                             break;
@@ -588,7 +652,7 @@ bool QuestAccept_npc_wizzlecranks_shredder(Player* pPlayer, Creature* pCreature,
     return true;
 }
 
-CreatureAI* GetAI_npc_wizzlecranks_shredder(Creature* pCreature)
+UnitAI* GetAI_npc_wizzlecranks_shredder(Creature* pCreature)
 {
     return new npc_wizzlecranks_shredderAI(pCreature);
 }
@@ -609,16 +673,14 @@ struct npc_gallywixAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_gallywix(Creature* pCreature)
+UnitAI* GetAI_npc_gallywix(Creature* pCreature)
 {
     return new npc_gallywixAI(pCreature);
 }
 
 void AddSC_the_barrens()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_gilthares";
     pNewScript->GetAI = &GetAI_npc_gilthares;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_gilthares;

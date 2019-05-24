@@ -24,6 +24,7 @@
 #include "Entities/ObjectGuid.h"
 
 #include <functional>
+#include <utility>
 
 struct AreaTrigger;
 struct AreaTriggerEntry;
@@ -41,6 +42,7 @@ class MailDraft;
 class Object;
 class GameObject;
 class Creature;
+class Pet;
 class Player;
 class Unit;
 
@@ -93,7 +95,7 @@ class ChatHandler
         bool ParseCommands(const char* text);
         ChatCommand const* FindCommand(char const* text);
 
-        bool isValidChatMessage(const char* msg) const;
+        bool isValidChatMessage(const char* message) const;
         bool HasSentErrorMessage() const { return sentErrorMessage;}
 
         /**
@@ -137,11 +139,11 @@ class ChatHandler
         virtual int GetSessionDbLocaleIndex() const;
 
         bool HasLowerSecurity(Player* target, ObjectGuid guid = ObjectGuid(), bool strong = false);
-        bool HasLowerSecurityAccount(WorldSession* target, uint32 account, bool strong = false);
+        bool HasLowerSecurityAccount(WorldSession* target, uint32 target_account, bool strong = false);
 
         void SendGlobalSysMessage(const char* str) const;
 
-        bool SetDataForCommandInTable(ChatCommand* table, const char* text, uint32 security, std::string const& help);
+        bool SetDataForCommandInTable(ChatCommand* commandTable, const char* text, uint32 security, std::string const& help);
         void ExecuteCommand(const char* text);
         void LogCommand(char const* fullcmd) const;
 
@@ -222,10 +224,17 @@ class ChatHandler
         bool HandleDebugTaxiCommand(char* /*args*/);
         bool HandleDebugUpdateWorldStateCommand(char* args);
         bool HandleDebugWaypoint(char* args);
+        bool HandleDebugByteFields(char* args);
+        bool HandleDebugSpellVisual(char* args);
+        bool HandleDebugMoveflags(char* args);
+        bool HandleDebugLootDropStats(char* args);
+        bool HandleDebugOverflowCommand(char* args);
 
         bool HandleDebugPlayCinematicCommand(char* args);
         bool HandleDebugPlaySoundCommand(char* args);
         bool HandleDebugPlayMusicCommand(char* args);
+
+        bool HandleDebugPetDismissSound(char* args);
 
         bool HandleDebugSendBuyErrorCommand(char* args);
         bool HandleDebugSendChannelNotifyCommand(char* args);
@@ -233,10 +242,12 @@ class ChatHandler
         bool HandleDebugSendEquipErrorCommand(char* args);
         bool HandleDebugSendOpcodeCommand(char* args);
         bool HandleDebugSendPoiCommand(char* args);
+        bool HandleDebugSendQuestFailedMsgCommand(char* args);
         bool HandleDebugSendQuestPartyMsgCommand(char* args);
         bool HandleDebugSendQuestInvalidMsgCommand(char* args);
         bool HandleDebugSendSellErrorCommand(char* args);
         bool HandleDebugSendSpellFailCommand(char* args);
+        bool HandleDebugSendWorldState(char* args);
 
         bool HandleEventListCommand(char* args);
         bool HandleEventStartCommand(char* args);
@@ -247,6 +258,7 @@ class ChatHandler
         bool HandleGameObjectDeleteCommand(char* args);
         bool HandleGameObjectMoveCommand(char* args);
         bool HandleGameObjectNearCommand(char* args);
+        bool HandleGameObjectNearSpawnedCommand(char* args);
         bool HandleGameObjectPhaseCommand(char* args);
         bool HandleGameObjectTargetCommand(char* args);
         bool HandleGameObjectTurnCommand(char* args);
@@ -353,10 +365,12 @@ class ChatHandler
         bool HandleNpcFlagCommand(char* args);
         bool HandleNpcFollowCommand(char* args);
         bool HandleNpcInfoCommand(char* args);
+        bool HandleNpcThreatCommand(char* args);
         bool HandleNpcMoveCommand(char* args);
         bool HandleNpcPlayEmoteCommand(char* args);
         bool HandleNpcSayCommand(char* args);
         bool HandleNpcSetDeathStateCommand(char* args);
+        bool HandleNpcShowLootCommand(char* args);
         bool HandleNpcSetModelCommand(char* args);
         bool HandleNpcSetMoveTypeCommand(char* args);
         bool HandleNpcSpawnDistCommand(char* args);
@@ -423,6 +437,7 @@ class ChatHandler
         bool HandleReloadGameTeleCommand(char* args);
         bool HandleReloadGossipMenuCommand(char* args);
         bool HandleReloadQuestgiverGreetingCommand(char* args);
+        bool HandleReloadTrainerGreetingCommand(char* args);
         bool HandleReloadGOQuestRelationsCommand(char* args);
         bool HandleReloadGOQuestInvRelationsCommand(char* args);
         bool HandleReloadItemEnchantementsCommand(char* args);
@@ -437,6 +452,7 @@ class ChatHandler
         bool HandleReloadLocalesQuestCommand(char* args);
         bool HandleReloadLocalesAreaTriggerCommand(char*);
         bool HandleReloadQuestgiverGreetingLocalesCommand(char* args);
+        bool HandleReloadLocalesTrainerGreetingCommand(char* args);
         bool HandleReloadLootTemplatesCreatureCommand(char* args);
         bool HandleReloadLootTemplatesDisenchantCommand(char* args);
         bool HandleReloadLootTemplatesFishingCommand(char* args);
@@ -558,6 +574,7 @@ class ChatHandler
         bool HandleCooldownClearClientSideCommand(char* args);
         bool HandleUnLearnCommand(char* args);
         bool HandleGetDistanceCommand(char* args);
+        bool HandleGetLosCommand(char* args);
         bool HandleModifyStandStateCommand(char* args);
         bool HandleDieCommand(char* args);
         bool HandleDamageCommand(char* args);
@@ -610,9 +627,12 @@ class ChatHandler
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
 
+        bool HandlePetLevelLoyaltyCommand(char* args);
+
         Player*   getSelectedPlayer() const;
+        Unit*     getSelectedUnit(bool self = true) const;
         Creature* getSelectedCreature() const;
-        Unit*     getSelectedUnit() const;
+        Pet*      getSelectedPet() const;
 
         // extraction different type params from args string, all functions update (char** args) to first unparsed tail symbol at return
         static void  SkipWhiteSpaces(char** args);
@@ -699,7 +719,7 @@ class ChatHandler
         };
 
         typedef std::list<DeletedInfo> DeletedInfoList;
-        bool GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::string searchString = "");
+        bool GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::string searchString = "") const;
         std::string GenerateDeletedCharacterGUIDsWhereStr(DeletedInfoList::const_iterator& itr, DeletedInfoList::const_iterator const& itr_end);
         void HandleCharacterDeletedListHelper(DeletedInfoList const& foundList);
         void HandleCharacterDeletedRestoreHelper(DeletedInfo const& delInfo);
@@ -723,7 +743,7 @@ class CliHandler : public ChatHandler
 
     public:
         CliHandler(uint32 accountId, AccountTypes accessLevel, Print zprint)
-            : m_accountId(accountId), m_loginAccessLevel(accessLevel), m_print(zprint) {}
+            : m_accountId(accountId), m_loginAccessLevel(accessLevel), m_print(std::move(zprint)) {}
 
         // overwrite functions
         const char* GetMangosString(int32 entry) const override;

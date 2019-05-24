@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackfathom_deeps.h"
 
 /* Encounter 0 = Twilight Lord Kelris
@@ -80,27 +80,27 @@ void instance_blackfathom_deeps::DoSpawnMobs(uint8 uiWaveIndex)
 
     pKelris->GetRespawnCoord(fX_resp, fY_resp, fZ_resp);
 
-    for (uint8 i = 0; i < countof(aWaveSummonInformation); ++i)
+    for (auto i : aWaveSummonInformation)
     {
-        if (aWaveSummonInformation[i].m_uiWaveIndex != uiWaveIndex)
+        if (i.m_uiWaveIndex != uiWaveIndex)
             continue;
 
         // Summon mobs at positions
         for (uint8 j = 0; j < MAX_COUNT_POS; ++j)
         {
-            for (uint8 k = 0; k < aWaveSummonInformation[i].m_aCountAndPos[j].m_uiCount; ++k)
+            for (uint8 k = 0; k < i.m_aCountAndPos[j].m_uiCount; ++k)
             {
-                uint8 uiPos = aWaveSummonInformation[i].m_aCountAndPos[j].m_uiSummonPosition;
+                uint8 uiPos = i.m_aCountAndPos[j].m_uiSummonPosition;
                 float fPosX = aSpawnLocations[uiPos].m_fX;
                 float fPosY = aSpawnLocations[uiPos].m_fY;
                 float fPosZ = aSpawnLocations[uiPos].m_fZ;
                 float fPosO = aSpawnLocations[uiPos].m_fO;
 
                 // Adapt fPosY slightly in case of higher summon-counts
-                if (aWaveSummonInformation[i].m_aCountAndPos[j].m_uiCount > 1)
-                    fPosY = fPosY - INTERACTION_DISTANCE / 2 + k * INTERACTION_DISTANCE / aWaveSummonInformation[i].m_aCountAndPos[j].m_uiCount;
+                if (i.m_aCountAndPos[j].m_uiCount > 1)
+                    fPosY = fPosY - INTERACTION_DISTANCE / 2 + k * INTERACTION_DISTANCE / i.m_aCountAndPos[j].m_uiCount;
 
-                if (Creature* pSummoned = pKelris->SummonCreature(aWaveSummonInformation[i].m_uiNpcEntry, fPosX, fPosY, fPosZ, fPosO, TEMPSPAWN_DEAD_DESPAWN, 0))
+                if (Creature* pSummoned = pKelris->SummonCreature(i.m_uiNpcEntry, fPosX, fPosY, fPosZ, fPosO, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pSummoned->GetMotionMaster()->MovePoint(0, fX_resp, fY_resp, fZ_resp);
                     m_lWaveMobsGuids[uiWaveIndex].push_back(pSummoned->GetGUIDLow());
@@ -172,10 +172,10 @@ void instance_blackfathom_deeps::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (uint32& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -211,16 +211,16 @@ void instance_blackfathom_deeps::OnCreatureDeath(Creature* pCreature)
 }
 
 // Check if all the summoned event mobs are dead
-bool instance_blackfathom_deeps::IsWaveEventFinished()
+bool instance_blackfathom_deeps::IsWaveEventFinished() const
 {
     // If not all fires are lighted return
     if (m_uiWaveCounter < MAX_FIRES)
         return false;
 
     // Check if all mobs are dead
-    for (uint8 i = 0; i < MAX_FIRES; ++i)
+    for (const auto& m_lWaveMobsGuid : m_lWaveMobsGuids)
     {
-        if (!m_lWaveMobsGuids[i].empty())
+        if (!m_lWaveMobsGuid.empty())
             return false;
     }
 
@@ -289,9 +289,7 @@ bool GOUse_go_fathom_stone(Player* pPlayer, GameObject* pGo)
 
 void AddSC_instance_blackfathom_deeps()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_blackfathom_deeps";
     pNewScript->GetInstanceData = &GetInstanceData_instance_blackfathom_deeps;
     pNewScript->RegisterSelf();

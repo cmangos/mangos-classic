@@ -79,7 +79,7 @@ inline int soap_write_byte(struct soap* soap, char const* p)
 inline int soap_PUT_byte(struct soap* soap, const char* URL, char const* p)
 {
     soap_free_temp(soap);
-    if (soap_PUT(soap, URL, NULL, "text/xml; charset=utf-8") || soap_put_byte(soap, p, "byte", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
+    if (soap_PUT(soap, URL, nullptr, "text/xml; charset=utf-8") || soap_put_byte(soap, p, "byte", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -87,7 +87,7 @@ inline int soap_PUT_byte(struct soap* soap, const char* URL, char const* p)
 inline int soap_POST_send_byte(struct soap* soap, const char* URL, char const* p)
 {
     soap_free_temp(soap);
-    if (soap_POST(soap, URL, NULL, "text/xml; charset=utf-8") || soap_put_byte(soap, p, "byte", "") || soap_end_send(soap))
+    if (soap_POST(soap, URL, nullptr, "text/xml; charset=utf-8") || soap_put_byte(soap, p, "byte", "") || soap_end_send(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -97,7 +97,7 @@ inline int soap_read_byte(struct soap* soap, char* p)
 {
     if (p)
     {
-        if (soap_begin_recv(soap) || soap_get_byte(soap, p, NULL, NULL) == NULL || soap_end_recv(soap))
+        if (soap_begin_recv(soap) || soap_get_byte(soap, p, nullptr, nullptr) == nullptr || soap_end_recv(soap))
             return soap->error;
     }
     return SOAP_OK;
@@ -105,7 +105,7 @@ inline int soap_read_byte(struct soap* soap, char* p)
 
 inline int soap_GET_byte(struct soap* soap, const char* URL, char* p)
 {
-    if (soap_GET(soap, URL, NULL) || soap_read_byte(soap, p) || soap_closesock(soap))
+    if (soap_GET(soap, URL, nullptr) || soap_read_byte(soap, p) || soap_closesock(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -150,7 +150,7 @@ inline int soap_write_int(struct soap* soap, int const* p)
 inline int soap_PUT_int(struct soap* soap, const char* URL, int const* p)
 {
     soap_free_temp(soap);
-    if (soap_PUT(soap, URL, NULL, "text/xml; charset=utf-8") || soap_put_int(soap, p, "int", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
+    if (soap_PUT(soap, URL, nullptr, "text/xml; charset=utf-8") || soap_put_int(soap, p, "int", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -158,7 +158,7 @@ inline int soap_PUT_int(struct soap* soap, const char* URL, int const* p)
 inline int soap_POST_send_int(struct soap* soap, const char* URL, int const* p)
 {
     soap_free_temp(soap);
-    if (soap_POST(soap, URL, NULL, "text/xml; charset=utf-8") || soap_put_int(soap, p, "int", "") || soap_end_send(soap))
+    if (soap_POST(soap, URL, nullptr, "text/xml; charset=utf-8") || soap_put_int(soap, p, "int", "") || soap_end_send(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -168,7 +168,7 @@ inline int soap_read_int(struct soap* soap, int* p)
 {
     if (p)
     {
-        if (soap_begin_recv(soap) || soap_get_int(soap, p, NULL, NULL) == NULL || soap_end_recv(soap))
+        if (soap_begin_recv(soap) || soap_get_int(soap, p, nullptr, nullptr) == nullptr || soap_end_recv(soap))
             return soap->error;
     }
     return SOAP_OK;
@@ -176,7 +176,7 @@ inline int soap_read_int(struct soap* soap, int* p)
 
 inline int soap_GET_int(struct soap* soap, const char* URL, int* p)
 {
-    if (soap_GET(soap, URL, NULL) || soap_read_int(soap, p) || soap_closesock(soap))
+    if (soap_GET(soap, URL, nullptr) || soap_read_int(soap, p) || soap_closesock(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -201,7 +201,7 @@ SOAP_FMAC1 struct SOAP_ENV__Fault* SOAP_FMAC2 soap_instantiate_SOAP_ENV__Fault(s
 
 inline struct SOAP_ENV__Fault* soap_new_SOAP_ENV__Fault(struct soap* soap, int n = -1)
 {
-    return soap_instantiate_SOAP_ENV__Fault(soap, n, NULL, NULL, NULL);
+    return soap_instantiate_SOAP_ENV__Fault(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct SOAP_ENV__Fault* soap_new_req_SOAP_ENV__Fault(
@@ -256,7 +256,7 @@ inline int soap_write_SOAP_ENV__Fault(struct soap* soap, struct SOAP_ENV__Fault 
 inline int soap_PUT_SOAP_ENV__Fault(struct soap* soap, const char* URL, struct SOAP_ENV__Fault const* p)
 {
     soap_free_temp(soap);
-    if (soap_PUT(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Fault(soap, p), 0) || soap_put_SOAP_ENV__Fault(soap, p, "SOAP-ENV:Fault", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
+    if (soap_PUT(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Fault(soap, p), 0) || soap_put_SOAP_ENV__Fault(soap, p, "SOAP-ENV:Fault", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -264,7 +264,7 @@ inline int soap_PUT_SOAP_ENV__Fault(struct soap* soap, const char* URL, struct S
 inline int soap_POST_send_SOAP_ENV__Fault(struct soap* soap, const char* URL, struct SOAP_ENV__Fault const* p)
 {
     soap_free_temp(soap);
-    if (soap_POST(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Fault(soap, p), 0) || soap_put_SOAP_ENV__Fault(soap, p, "SOAP-ENV:Fault", "") || soap_end_send(soap))
+    if (soap_POST(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Fault(soap, p), 0) || soap_put_SOAP_ENV__Fault(soap, p, "SOAP-ENV:Fault", "") || soap_end_send(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -275,7 +275,7 @@ inline int soap_read_SOAP_ENV__Fault(struct soap* soap, struct SOAP_ENV__Fault* 
     if (p)
     {
         soap_default_SOAP_ENV__Fault(soap, p);
-        if (soap_begin_recv(soap) || soap_get_SOAP_ENV__Fault(soap, p, NULL, NULL) == NULL || soap_end_recv(soap))
+        if (soap_begin_recv(soap) || soap_get_SOAP_ENV__Fault(soap, p, nullptr, nullptr) == nullptr || soap_end_recv(soap))
             return soap->error;
     }
     return SOAP_OK;
@@ -283,7 +283,7 @@ inline int soap_read_SOAP_ENV__Fault(struct soap* soap, struct SOAP_ENV__Fault* 
 
 inline int soap_GET_SOAP_ENV__Fault(struct soap* soap, const char* URL, struct SOAP_ENV__Fault* p)
 {
-    if (soap_GET(soap, URL, NULL) || soap_read_SOAP_ENV__Fault(soap, p) || soap_closesock(soap))
+    if (soap_GET(soap, URL, nullptr) || soap_read_SOAP_ENV__Fault(soap, p) || soap_closesock(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -310,7 +310,7 @@ SOAP_FMAC1 struct SOAP_ENV__Reason* SOAP_FMAC2 soap_instantiate_SOAP_ENV__Reason
 
 inline struct SOAP_ENV__Reason* soap_new_SOAP_ENV__Reason(struct soap* soap, int n = -1)
 {
-    return soap_instantiate_SOAP_ENV__Reason(soap, n, NULL, NULL, NULL);
+    return soap_instantiate_SOAP_ENV__Reason(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct SOAP_ENV__Reason* soap_new_req_SOAP_ENV__Reason(
@@ -349,7 +349,7 @@ inline int soap_write_SOAP_ENV__Reason(struct soap* soap, struct SOAP_ENV__Reaso
 inline int soap_PUT_SOAP_ENV__Reason(struct soap* soap, const char* URL, struct SOAP_ENV__Reason const* p)
 {
     soap_free_temp(soap);
-    if (soap_PUT(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Reason(soap, p), 0) || soap_put_SOAP_ENV__Reason(soap, p, "SOAP-ENV:Reason", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
+    if (soap_PUT(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Reason(soap, p), 0) || soap_put_SOAP_ENV__Reason(soap, p, "SOAP-ENV:Reason", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -357,7 +357,7 @@ inline int soap_PUT_SOAP_ENV__Reason(struct soap* soap, const char* URL, struct 
 inline int soap_POST_send_SOAP_ENV__Reason(struct soap* soap, const char* URL, struct SOAP_ENV__Reason const* p)
 {
     soap_free_temp(soap);
-    if (soap_POST(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Reason(soap, p), 0) || soap_put_SOAP_ENV__Reason(soap, p, "SOAP-ENV:Reason", "") || soap_end_send(soap))
+    if (soap_POST(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Reason(soap, p), 0) || soap_put_SOAP_ENV__Reason(soap, p, "SOAP-ENV:Reason", "") || soap_end_send(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -368,7 +368,7 @@ inline int soap_read_SOAP_ENV__Reason(struct soap* soap, struct SOAP_ENV__Reason
     if (p)
     {
         soap_default_SOAP_ENV__Reason(soap, p);
-        if (soap_begin_recv(soap) || soap_get_SOAP_ENV__Reason(soap, p, NULL, NULL) == NULL || soap_end_recv(soap))
+        if (soap_begin_recv(soap) || soap_get_SOAP_ENV__Reason(soap, p, nullptr, nullptr) == nullptr || soap_end_recv(soap))
             return soap->error;
     }
     return SOAP_OK;
@@ -376,7 +376,7 @@ inline int soap_read_SOAP_ENV__Reason(struct soap* soap, struct SOAP_ENV__Reason
 
 inline int soap_GET_SOAP_ENV__Reason(struct soap* soap, const char* URL, struct SOAP_ENV__Reason* p)
 {
-    if (soap_GET(soap, URL, NULL) || soap_read_SOAP_ENV__Reason(soap, p) || soap_closesock(soap))
+    if (soap_GET(soap, URL, nullptr) || soap_read_SOAP_ENV__Reason(soap, p) || soap_closesock(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -403,7 +403,7 @@ SOAP_FMAC1 struct SOAP_ENV__Detail* SOAP_FMAC2 soap_instantiate_SOAP_ENV__Detail
 
 inline struct SOAP_ENV__Detail* soap_new_SOAP_ENV__Detail(struct soap* soap, int n = -1)
 {
-    return soap_instantiate_SOAP_ENV__Detail(soap, n, NULL, NULL, NULL);
+    return soap_instantiate_SOAP_ENV__Detail(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct SOAP_ENV__Detail* soap_new_req_SOAP_ENV__Detail(
@@ -450,7 +450,7 @@ inline int soap_write_SOAP_ENV__Detail(struct soap* soap, struct SOAP_ENV__Detai
 inline int soap_PUT_SOAP_ENV__Detail(struct soap* soap, const char* URL, struct SOAP_ENV__Detail const* p)
 {
     soap_free_temp(soap);
-    if (soap_PUT(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Detail(soap, p), 0) || soap_put_SOAP_ENV__Detail(soap, p, "SOAP-ENV:Detail", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
+    if (soap_PUT(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Detail(soap, p), 0) || soap_put_SOAP_ENV__Detail(soap, p, "SOAP-ENV:Detail", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -458,7 +458,7 @@ inline int soap_PUT_SOAP_ENV__Detail(struct soap* soap, const char* URL, struct 
 inline int soap_POST_send_SOAP_ENV__Detail(struct soap* soap, const char* URL, struct SOAP_ENV__Detail const* p)
 {
     soap_free_temp(soap);
-    if (soap_POST(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Detail(soap, p), 0) || soap_put_SOAP_ENV__Detail(soap, p, "SOAP-ENV:Detail", "") || soap_end_send(soap))
+    if (soap_POST(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Detail(soap, p), 0) || soap_put_SOAP_ENV__Detail(soap, p, "SOAP-ENV:Detail", "") || soap_end_send(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -469,7 +469,7 @@ inline int soap_read_SOAP_ENV__Detail(struct soap* soap, struct SOAP_ENV__Detail
     if (p)
     {
         soap_default_SOAP_ENV__Detail(soap, p);
-        if (soap_begin_recv(soap) || soap_get_SOAP_ENV__Detail(soap, p, NULL, NULL) == NULL || soap_end_recv(soap))
+        if (soap_begin_recv(soap) || soap_get_SOAP_ENV__Detail(soap, p, nullptr, nullptr) == nullptr || soap_end_recv(soap))
             return soap->error;
     }
     return SOAP_OK;
@@ -477,7 +477,7 @@ inline int soap_read_SOAP_ENV__Detail(struct soap* soap, struct SOAP_ENV__Detail
 
 inline int soap_GET_SOAP_ENV__Detail(struct soap* soap, const char* URL, struct SOAP_ENV__Detail* p)
 {
-    if (soap_GET(soap, URL, NULL) || soap_read_SOAP_ENV__Detail(soap, p) || soap_closesock(soap))
+    if (soap_GET(soap, URL, nullptr) || soap_read_SOAP_ENV__Detail(soap, p) || soap_closesock(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -504,7 +504,7 @@ SOAP_FMAC1 struct SOAP_ENV__Code* SOAP_FMAC2 soap_instantiate_SOAP_ENV__Code(str
 
 inline struct SOAP_ENV__Code* soap_new_SOAP_ENV__Code(struct soap* soap, int n = -1)
 {
-    return soap_instantiate_SOAP_ENV__Code(soap, n, NULL, NULL, NULL);
+    return soap_instantiate_SOAP_ENV__Code(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct SOAP_ENV__Code* soap_new_req_SOAP_ENV__Code(
@@ -545,7 +545,7 @@ inline int soap_write_SOAP_ENV__Code(struct soap* soap, struct SOAP_ENV__Code co
 inline int soap_PUT_SOAP_ENV__Code(struct soap* soap, const char* URL, struct SOAP_ENV__Code const* p)
 {
     soap_free_temp(soap);
-    if (soap_PUT(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Code(soap, p), 0) || soap_put_SOAP_ENV__Code(soap, p, "SOAP-ENV:Code", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
+    if (soap_PUT(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Code(soap, p), 0) || soap_put_SOAP_ENV__Code(soap, p, "SOAP-ENV:Code", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -553,7 +553,7 @@ inline int soap_PUT_SOAP_ENV__Code(struct soap* soap, const char* URL, struct SO
 inline int soap_POST_send_SOAP_ENV__Code(struct soap* soap, const char* URL, struct SOAP_ENV__Code const* p)
 {
     soap_free_temp(soap);
-    if (soap_POST(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Code(soap, p), 0) || soap_put_SOAP_ENV__Code(soap, p, "SOAP-ENV:Code", "") || soap_end_send(soap))
+    if (soap_POST(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Code(soap, p), 0) || soap_put_SOAP_ENV__Code(soap, p, "SOAP-ENV:Code", "") || soap_end_send(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -564,7 +564,7 @@ inline int soap_read_SOAP_ENV__Code(struct soap* soap, struct SOAP_ENV__Code* p)
     if (p)
     {
         soap_default_SOAP_ENV__Code(soap, p);
-        if (soap_begin_recv(soap) || soap_get_SOAP_ENV__Code(soap, p, NULL, NULL) == NULL || soap_end_recv(soap))
+        if (soap_begin_recv(soap) || soap_get_SOAP_ENV__Code(soap, p, nullptr, nullptr) == nullptr || soap_end_recv(soap))
             return soap->error;
     }
     return SOAP_OK;
@@ -572,7 +572,7 @@ inline int soap_read_SOAP_ENV__Code(struct soap* soap, struct SOAP_ENV__Code* p)
 
 inline int soap_GET_SOAP_ENV__Code(struct soap* soap, const char* URL, struct SOAP_ENV__Code* p)
 {
-    if (soap_GET(soap, URL, NULL) || soap_read_SOAP_ENV__Code(soap, p) || soap_closesock(soap))
+    if (soap_GET(soap, URL, nullptr) || soap_read_SOAP_ENV__Code(soap, p) || soap_closesock(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -599,7 +599,7 @@ SOAP_FMAC1 struct SOAP_ENV__Header* SOAP_FMAC2 soap_instantiate_SOAP_ENV__Header
 
 inline struct SOAP_ENV__Header* soap_new_SOAP_ENV__Header(struct soap* soap, int n = -1)
 {
-    return soap_instantiate_SOAP_ENV__Header(soap, n, NULL, NULL, NULL);
+    return soap_instantiate_SOAP_ENV__Header(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct SOAP_ENV__Header* soap_new_req_SOAP_ENV__Header(
@@ -636,7 +636,7 @@ inline int soap_write_SOAP_ENV__Header(struct soap* soap, struct SOAP_ENV__Heade
 inline int soap_PUT_SOAP_ENV__Header(struct soap* soap, const char* URL, struct SOAP_ENV__Header const* p)
 {
     soap_free_temp(soap);
-    if (soap_PUT(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Header(soap, p), 0) || soap_put_SOAP_ENV__Header(soap, p, "SOAP-ENV:Header", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
+    if (soap_PUT(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Header(soap, p), 0) || soap_put_SOAP_ENV__Header(soap, p, "SOAP-ENV:Header", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -644,7 +644,7 @@ inline int soap_PUT_SOAP_ENV__Header(struct soap* soap, const char* URL, struct 
 inline int soap_POST_send_SOAP_ENV__Header(struct soap* soap, const char* URL, struct SOAP_ENV__Header const* p)
 {
     soap_free_temp(soap);
-    if (soap_POST(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Header(soap, p), 0) || soap_put_SOAP_ENV__Header(soap, p, "SOAP-ENV:Header", "") || soap_end_send(soap))
+    if (soap_POST(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_SOAP_ENV__Header(soap, p), 0) || soap_put_SOAP_ENV__Header(soap, p, "SOAP-ENV:Header", "") || soap_end_send(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -655,7 +655,7 @@ inline int soap_read_SOAP_ENV__Header(struct soap* soap, struct SOAP_ENV__Header
     if (p)
     {
         soap_default_SOAP_ENV__Header(soap, p);
-        if (soap_begin_recv(soap) || soap_get_SOAP_ENV__Header(soap, p, NULL, NULL) == NULL || soap_end_recv(soap))
+        if (soap_begin_recv(soap) || soap_get_SOAP_ENV__Header(soap, p, nullptr, nullptr) == nullptr || soap_end_recv(soap))
             return soap->error;
     }
     return SOAP_OK;
@@ -663,7 +663,7 @@ inline int soap_read_SOAP_ENV__Header(struct soap* soap, struct SOAP_ENV__Header
 
 inline int soap_GET_SOAP_ENV__Header(struct soap* soap, const char* URL, struct SOAP_ENV__Header* p)
 {
-    if (soap_GET(soap, URL, NULL) || soap_read_SOAP_ENV__Header(soap, p) || soap_closesock(soap))
+    if (soap_GET(soap, URL, nullptr) || soap_read_SOAP_ENV__Header(soap, p) || soap_closesock(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -688,7 +688,7 @@ SOAP_FMAC1 struct ns1__executeCommand* SOAP_FMAC2 soap_instantiate_ns1__executeC
 
 inline struct ns1__executeCommand* soap_new_ns1__executeCommand(struct soap* soap, int n = -1)
 {
-    return soap_instantiate_ns1__executeCommand(soap, n, NULL, NULL, NULL);
+    return soap_instantiate_ns1__executeCommand(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct ns1__executeCommand* soap_new_req_ns1__executeCommand(
@@ -727,7 +727,7 @@ inline int soap_write_ns1__executeCommand(struct soap* soap, struct ns1__execute
 inline int soap_PUT_ns1__executeCommand(struct soap* soap, const char* URL, struct ns1__executeCommand const* p)
 {
     soap_free_temp(soap);
-    if (soap_PUT(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_ns1__executeCommand(soap, p), 0) || soap_put_ns1__executeCommand(soap, p, "ns1:executeCommand", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
+    if (soap_PUT(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_ns1__executeCommand(soap, p), 0) || soap_put_ns1__executeCommand(soap, p, "ns1:executeCommand", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -735,7 +735,7 @@ inline int soap_PUT_ns1__executeCommand(struct soap* soap, const char* URL, stru
 inline int soap_POST_send_ns1__executeCommand(struct soap* soap, const char* URL, struct ns1__executeCommand const* p)
 {
     soap_free_temp(soap);
-    if (soap_POST(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_ns1__executeCommand(soap, p), 0) || soap_put_ns1__executeCommand(soap, p, "ns1:executeCommand", "") || soap_end_send(soap))
+    if (soap_POST(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_ns1__executeCommand(soap, p), 0) || soap_put_ns1__executeCommand(soap, p, "ns1:executeCommand", "") || soap_end_send(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -746,7 +746,7 @@ inline int soap_read_ns1__executeCommand(struct soap* soap, struct ns1__executeC
     if (p)
     {
         soap_default_ns1__executeCommand(soap, p);
-        if (soap_begin_recv(soap) || soap_get_ns1__executeCommand(soap, p, NULL, NULL) == NULL || soap_end_recv(soap))
+        if (soap_begin_recv(soap) || soap_get_ns1__executeCommand(soap, p, nullptr, nullptr) == nullptr || soap_end_recv(soap))
             return soap->error;
     }
     return SOAP_OK;
@@ -754,7 +754,7 @@ inline int soap_read_ns1__executeCommand(struct soap* soap, struct ns1__executeC
 
 inline int soap_GET_ns1__executeCommand(struct soap* soap, const char* URL, struct ns1__executeCommand* p)
 {
-    if (soap_GET(soap, URL, NULL) || soap_read_ns1__executeCommand(soap, p) || soap_closesock(soap))
+    if (soap_GET(soap, URL, nullptr) || soap_read_ns1__executeCommand(soap, p) || soap_closesock(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -777,7 +777,7 @@ SOAP_FMAC1 struct ns1__executeCommandResponse* SOAP_FMAC2 soap_instantiate_ns1__
 
 inline struct ns1__executeCommandResponse* soap_new_ns1__executeCommandResponse(struct soap* soap, int n = -1)
 {
-    return soap_instantiate_ns1__executeCommandResponse(soap, n, NULL, NULL, NULL);
+    return soap_instantiate_ns1__executeCommandResponse(soap, n, nullptr, nullptr, nullptr);
 }
 
 inline struct ns1__executeCommandResponse* soap_new_req_ns1__executeCommandResponse(
@@ -816,7 +816,7 @@ inline int soap_write_ns1__executeCommandResponse(struct soap* soap, struct ns1_
 inline int soap_PUT_ns1__executeCommandResponse(struct soap* soap, const char* URL, struct ns1__executeCommandResponse const* p)
 {
     soap_free_temp(soap);
-    if (soap_PUT(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_ns1__executeCommandResponse(soap, p), 0) || soap_put_ns1__executeCommandResponse(soap, p, "ns1:executeCommandResponse", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
+    if (soap_PUT(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_ns1__executeCommandResponse(soap, p), 0) || soap_put_ns1__executeCommandResponse(soap, p, "ns1:executeCommandResponse", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -824,7 +824,7 @@ inline int soap_PUT_ns1__executeCommandResponse(struct soap* soap, const char* U
 inline int soap_POST_send_ns1__executeCommandResponse(struct soap* soap, const char* URL, struct ns1__executeCommandResponse const* p)
 {
     soap_free_temp(soap);
-    if (soap_POST(soap, URL, NULL, "text/xml; charset=utf-8") || (soap_serialize_ns1__executeCommandResponse(soap, p), 0) || soap_put_ns1__executeCommandResponse(soap, p, "ns1:executeCommandResponse", "") || soap_end_send(soap))
+    if (soap_POST(soap, URL, nullptr, "text/xml; charset=utf-8") || (soap_serialize_ns1__executeCommandResponse(soap, p), 0) || soap_put_ns1__executeCommandResponse(soap, p, "ns1:executeCommandResponse", "") || soap_end_send(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -835,7 +835,7 @@ inline int soap_read_ns1__executeCommandResponse(struct soap* soap, struct ns1__
     if (p)
     {
         soap_default_ns1__executeCommandResponse(soap, p);
-        if (soap_begin_recv(soap) || soap_get_ns1__executeCommandResponse(soap, p, NULL, NULL) == NULL || soap_end_recv(soap))
+        if (soap_begin_recv(soap) || soap_get_ns1__executeCommandResponse(soap, p, nullptr, nullptr) == nullptr || soap_end_recv(soap))
             return soap->error;
     }
     return SOAP_OK;
@@ -843,7 +843,7 @@ inline int soap_read_ns1__executeCommandResponse(struct soap* soap, struct ns1__
 
 inline int soap_GET_ns1__executeCommandResponse(struct soap* soap, const char* URL, struct ns1__executeCommandResponse* p)
 {
-    if (soap_GET(soap, URL, NULL) || soap_read_ns1__executeCommandResponse(soap, p) || soap_closesock(soap))
+    if (soap_GET(soap, URL, nullptr) || soap_read_ns1__executeCommandResponse(soap, p) || soap_closesock(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -913,7 +913,7 @@ inline void soap_default__QName(struct soap* soap, char** a)
 #ifdef SOAP_DEFAULT__QName
     *a = SOAP_DEFAULT__QName;
 #else
-    *a = (char*)0;
+    *a = (char*)nullptr;
 #endif
 }
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize__QName(struct soap*, char* const*);
@@ -945,7 +945,7 @@ inline int soap_write__QName(struct soap* soap, char* const* p)
 inline int soap_PUT__QName(struct soap* soap, const char* URL, char* const* p)
 {
     soap_free_temp(soap);
-    if (soap_PUT(soap, URL, NULL, "text/xml; charset=utf-8") || soap_put__QName(soap, p, "QName", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
+    if (soap_PUT(soap, URL, nullptr, "text/xml; charset=utf-8") || soap_put__QName(soap, p, "QName", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -953,7 +953,7 @@ inline int soap_PUT__QName(struct soap* soap, const char* URL, char* const* p)
 inline int soap_POST_send__QName(struct soap* soap, const char* URL, char* const* p)
 {
     soap_free_temp(soap);
-    if (soap_POST(soap, URL, NULL, "text/xml; charset=utf-8") || soap_put__QName(soap, p, "QName", "") || soap_end_send(soap))
+    if (soap_POST(soap, URL, nullptr, "text/xml; charset=utf-8") || soap_put__QName(soap, p, "QName", "") || soap_end_send(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -963,7 +963,7 @@ inline int soap_read__QName(struct soap* soap, char** p)
 {
     if (p)
     {
-        if (soap_begin_recv(soap) || soap_get__QName(soap, p, NULL, NULL) == NULL || soap_end_recv(soap))
+        if (soap_begin_recv(soap) || soap_get__QName(soap, p, nullptr, nullptr) == nullptr || soap_end_recv(soap))
             return soap->error;
     }
     return SOAP_OK;
@@ -971,7 +971,7 @@ inline int soap_read__QName(struct soap* soap, char** p)
 
 inline int soap_GET__QName(struct soap* soap, const char* URL, char** p)
 {
-    if (soap_GET(soap, URL, NULL) || soap_read__QName(soap, p) || soap_closesock(soap))
+    if (soap_GET(soap, URL, nullptr) || soap_read__QName(soap, p) || soap_closesock(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -997,7 +997,7 @@ inline void soap_default_string(struct soap* soap, char** a)
 #ifdef SOAP_DEFAULT_string
     *a = SOAP_DEFAULT_string;
 #else
-    *a = (char*)0;
+    *a = (char*)nullptr;
 #endif
 }
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_string(struct soap*, char* const*);
@@ -1025,7 +1025,7 @@ inline int soap_write_string(struct soap* soap, char* const* p)
 inline int soap_PUT_string(struct soap* soap, const char* URL, char* const* p)
 {
     soap_free_temp(soap);
-    if (soap_PUT(soap, URL, NULL, "text/xml; charset=utf-8") || soap_put_string(soap, p, "string", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
+    if (soap_PUT(soap, URL, nullptr, "text/xml; charset=utf-8") || soap_put_string(soap, p, "string", "") || soap_end_send(soap) || soap_recv_empty_response(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -1033,7 +1033,7 @@ inline int soap_PUT_string(struct soap* soap, const char* URL, char* const* p)
 inline int soap_POST_send_string(struct soap* soap, const char* URL, char* const* p)
 {
     soap_free_temp(soap);
-    if (soap_POST(soap, URL, NULL, "text/xml; charset=utf-8") || soap_put_string(soap, p, "string", "") || soap_end_send(soap))
+    if (soap_POST(soap, URL, nullptr, "text/xml; charset=utf-8") || soap_put_string(soap, p, "string", "") || soap_end_send(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }
@@ -1043,7 +1043,7 @@ inline int soap_read_string(struct soap* soap, char** p)
 {
     if (p)
     {
-        if (soap_begin_recv(soap) || soap_get_string(soap, p, NULL, NULL) == NULL || soap_end_recv(soap))
+        if (soap_begin_recv(soap) || soap_get_string(soap, p, nullptr, nullptr) == nullptr || soap_end_recv(soap))
             return soap->error;
     }
     return SOAP_OK;
@@ -1051,7 +1051,7 @@ inline int soap_read_string(struct soap* soap, char** p)
 
 inline int soap_GET_string(struct soap* soap, const char* URL, char** p)
 {
-    if (soap_GET(soap, URL, NULL) || soap_read_string(soap, p) || soap_closesock(soap))
+    if (soap_GET(soap, URL, nullptr) || soap_read_string(soap, p) || soap_closesock(soap))
         return soap_closesock(soap);
     return SOAP_OK;
 }

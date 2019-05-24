@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackwing_lair.h"
 
 enum
@@ -131,16 +131,14 @@ struct boss_flamegorAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 };
-CreatureAI* GetAI_boss_flamegor(Creature* pCreature)
+UnitAI* GetAI_boss_flamegor(Creature* pCreature)
 {
     return new boss_flamegorAI(pCreature);
 }
 
 void AddSC_boss_flamegor()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_flamegor";
     pNewScript->GetAI = &GetAI_boss_flamegor;
     pNewScript->RegisterSelf();

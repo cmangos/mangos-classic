@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "naxxramas.h"
 
 enum
@@ -86,7 +86,7 @@ struct npc_web_wrapAI : public ScriptedAI
 
             // NOTE: This implementation may not be 100% correct, but it gets very close to the expected result
 
-            float fDist = m_creature->GetDistance2d(pVictim);
+            float fDist = m_creature->GetDistance(pVictim, false);
             // Switch the speed multiplier based on the distance from the web wrap
             uint32 uiEffectMiscValue = 500;
             if (fDist < 25.0f)
@@ -296,21 +296,19 @@ struct boss_maexxnaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_web_wrap(Creature* pCreature)
+UnitAI* GetAI_npc_web_wrap(Creature* pCreature)
 {
     return new npc_web_wrapAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_maexxna(Creature* pCreature)
+UnitAI* GetAI_boss_maexxna(Creature* pCreature)
 {
     return new boss_maexxnaAI(pCreature);
 }
 
 void AddSC_boss_maexxna()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_maexxna";
     pNewScript->GetAI = &GetAI_boss_maexxna;
     pNewScript->RegisterSelf();

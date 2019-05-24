@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_belnistrasz
 EndContentData */
 
@@ -226,11 +226,11 @@ struct npc_belnistraszAI : public npc_escortAI
                     {
                         if (Player* pPlayer = GetPlayerForEscort())
                         {
-                            pPlayer->GroupEventHappens(QUEST_EXTINGUISHING_THE_IDOL, m_creature);
+                            pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_EXTINGUISHING_THE_IDOL, m_creature);
 
                             if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_BELNISTRASZ_BRAZIER, 10.0f))
                             {
-                                if (!pGo->isSpawned())
+                                if (!pGo->IsSpawned())
                                 {
                                     pGo->SetRespawnTime(HOUR * IN_MILLISECONDS);
                                     pGo->Refresh();
@@ -243,7 +243,7 @@ struct npc_belnistraszAI : public npc_escortAI
 
                         // Desactivate the fires on the idol now it is extinguished
                         DoCastSpellIfCan(m_creature, SPELL_IDOL_ROOM_SHAKE);
-                        std::list<GameObject*> lOvenFires;
+                        GameObjectList lOvenFires;
                         for (auto&& gameObjectEntry : aGOList)
                             GetGameObjectListWithEntryInGrid(lOvenFires, m_creature, gameObjectEntry, 40.0f);
 
@@ -285,7 +285,7 @@ struct npc_belnistraszAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_belnistrasz(Creature* pCreature)
+UnitAI* GetAI_npc_belnistrasz(Creature* pCreature)
 {
     return new npc_belnistraszAI(pCreature);
 }
@@ -307,9 +307,7 @@ bool QuestAccept_npc_belnistrasz(Player* pPlayer, Creature* pCreature, const Que
 
 void AddSC_razorfen_downs()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_belnistrasz";
     pNewScript->GetAI = &GetAI_npc_belnistrasz;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_belnistrasz;

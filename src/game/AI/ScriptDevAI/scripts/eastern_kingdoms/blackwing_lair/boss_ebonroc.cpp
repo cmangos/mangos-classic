@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackwing_lair.h"
 
 enum
@@ -127,16 +127,14 @@ struct boss_ebonrocAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ebonroc(Creature* pCreature)
+UnitAI* GetAI_boss_ebonroc(Creature* pCreature)
 {
     return new boss_ebonrocAI(pCreature);
 }
 
 void AddSC_boss_ebonroc()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ebonroc";
     pNewScript->GetAI = &GetAI_boss_ebonroc;
     pNewScript->RegisterSelf();

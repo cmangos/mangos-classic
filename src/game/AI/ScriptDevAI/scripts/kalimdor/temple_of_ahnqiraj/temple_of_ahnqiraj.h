@@ -67,6 +67,9 @@ enum
     SPELL_WHISPERINGS_CTHUN_5   = 26259,
 };
 
+// Spells from Qiraji Resonating crystal (AQ40 specific mounts)
+static const uint32 qiraji_mount_auras[] = { 25953, 26054, 26055, 26056 };
+
 class instance_temple_of_ahnqiraj : public ScriptedInstance
 {
     public:
@@ -79,6 +82,8 @@ class instance_temple_of_ahnqiraj : public ScriptedInstance
 
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+
+        void OnPlayerLeave(Player* pPlayer) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;

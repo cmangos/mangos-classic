@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "onyxias_lair.h"
 
 enum
@@ -433,7 +433,7 @@ struct boss_onyxiaAI : public ScriptedAI
                             break;
                         }
                         case 2:                             // a point on the right side
-                            ++m_uiMovePoint %= NUM_MOVE_POINT;
+                            m_uiMovePoint = (m_uiMovePoint + 1) % NUM_MOVE_POINT;
                             break;
                     }
 
@@ -490,16 +490,14 @@ struct boss_onyxiaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_onyxia(Creature* pCreature)
+UnitAI* GetAI_boss_onyxia(Creature* pCreature)
 {
     return new boss_onyxiaAI(pCreature);
 }
 
 void AddSC_boss_onyxia()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_onyxia";
     pNewScript->GetAI = &GetAI_boss_onyxia;
     pNewScript->RegisterSelf();

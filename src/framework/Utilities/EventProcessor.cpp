@@ -85,6 +85,19 @@ void EventProcessor::KillAllEvents(bool force)
         m_events.clear();
 }
 
+void EventProcessor::KillEvent(BasicEvent* event)
+{
+    for (EventList::iterator iter = m_events.begin(); iter != m_events.end();)
+    {
+        if (iter->second == event)
+        {
+            delete iter->second;
+            iter = m_events.erase(iter);
+        }
+        else ++iter;
+    }
+}
+
 void EventProcessor::AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime)
 {
     if (set_addtime)

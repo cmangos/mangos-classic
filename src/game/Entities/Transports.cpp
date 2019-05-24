@@ -85,9 +85,7 @@ void MapManager::LoadTransports()
             continue;
         }
 
-        float x, y, z, o;
-        uint32 mapid;
-        x = t->m_WayPoints[0].x; y = t->m_WayPoints[0].y; z = t->m_WayPoints[0].z; mapid = t->m_WayPoints[0].mapid; o = 1;
+        float x = t->m_WayPoints[0].x; float y = t->m_WayPoints[0].y; float z = t->m_WayPoints[0].z; uint32 mapid = t->m_WayPoints[0].mapid; float o = 1;
 
         // current code does not support transports in dungeon!
         const MapEntry* pMapInfo = sMapStore.LookupEntry(mapid);
@@ -106,8 +104,8 @@ void MapManager::LoadTransports()
 
         m_Transports.insert(t);
 
-        for (std::set<uint32>::const_iterator i = mapsUsed.begin(); i != mapsUsed.end(); ++i)
-            m_TransportsByMap[*i].insert(t);
+        for (uint32 i : mapsUsed)
+            m_TransportsByMap[i].insert(t);
 
         // If we someday decide to use the grid to track transports, here:
         t->SetMap(sMapMgr.CreateMap(mapid, t));
@@ -289,20 +287,20 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
             tmpDist = 0;
     }
 
-    for (size_t i = 0; i < keyFrames.size(); ++i)
+    for (auto& keyFrame : keyFrames)
     {
-        if (keyFrames[i].distSinceStop < (30 * 30 * 0.5f))
-            keyFrames[i].tFrom = sqrt(2 * keyFrames[i].distSinceStop);
+        if (keyFrame.distSinceStop < (30 * 30 * 0.5f))
+            keyFrame.tFrom = sqrt(2 * keyFrame.distSinceStop);
         else
-            keyFrames[i].tFrom = ((keyFrames[i].distSinceStop - (30 * 30 * 0.5f)) / 30) + 30;
+            keyFrame.tFrom = ((keyFrame.distSinceStop - (30 * 30 * 0.5f)) / 30) + 30;
 
-        if (keyFrames[i].distUntilStop < (30 * 30 * 0.5f))
-            keyFrames[i].tTo = sqrt(2 * keyFrames[i].distUntilStop);
+        if (keyFrame.distUntilStop < (30 * 30 * 0.5f))
+            keyFrame.tTo = sqrt(2 * keyFrame.distUntilStop);
         else
-            keyFrames[i].tTo = ((keyFrames[i].distUntilStop - (30 * 30 * 0.5f)) / 30) + 30;
+            keyFrame.tTo = ((keyFrame.distUntilStop - (30 * 30 * 0.5f)) / 30) + 30;
 
-        keyFrames[i].tFrom *= 1000;
-        keyFrames[i].tTo *= 1000;
+        keyFrame.tFrom *= 1000;
+        keyFrame.tTo *= 1000;
     }
 
     //    for (int i = 0; i < keyFrames.size(); ++i) {
@@ -337,21 +335,20 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
 
                 if (d > 0)
                 {
-                    float newX, newY, newZ;
-                    newX = keyFrames[i].node->x + (keyFrames[i + 1].node->x - keyFrames[i].node->x) * d / keyFrames[i + 1].distFromPrev;
-                    newY = keyFrames[i].node->y + (keyFrames[i + 1].node->y - keyFrames[i].node->y) * d / keyFrames[i + 1].distFromPrev;
-                    newZ = keyFrames[i].node->z + (keyFrames[i + 1].node->z - keyFrames[i].node->z) * d / keyFrames[i + 1].distFromPrev;
+                    float newX = keyFrames[i].node->x + (keyFrames[i + 1].node->x - keyFrames[i].node->x) * d / keyFrames[i + 1].distFromPrev;
+                    float newY = keyFrames[i].node->y + (keyFrames[i + 1].node->y - keyFrames[i].node->y) * d / keyFrames[i + 1].distFromPrev;
+                    float newZ = keyFrames[i].node->z + (keyFrames[i + 1].node->z - keyFrames[i].node->z) * d / keyFrames[i + 1].distFromPrev;
 
-                    bool teleport = false;
+                    bool teleport2 = false;
                     if (keyFrames[i].node->mapid != cM || (i && keyFrames[i - 1].node->actionFlag == 1))
                     {
-                        teleport = true;
+                        teleport2 = true;
                         cM = keyFrames[i].node->mapid;
                     }
 
                     //                    sLog.outString("T: %d, D: %f, x: %f, y: %f, z: %f", t, d, newX, newY, newZ);
-                    pos = WayPoint(keyFrames[i].node->mapid, newX, newY, newZ, teleport);
-                    if (teleport)
+                    pos = WayPoint(keyFrames[i].node->mapid, newX, newY, newZ, teleport2);
+                    if (teleport2)
                         m_WayPoints[t] = pos;
                 }
 
@@ -389,15 +386,14 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
         else
             t += (long)keyFrames[i + 1].tTo % 100;
 
-        bool teleport = false;
+        bool teleport3 = false;
         if ((keyFrames[i].node->actionFlag == 1) || (keyFrames[i + 1].node->mapid != keyFrames[i].node->mapid))
         {
-            teleport = true;
+            teleport3 = true;
             cM = keyFrames[i + 1].node->mapid;
         }
 
         WayPoint pos(keyFrames[i + 1].node->mapid, keyFrames[i + 1].node->x, keyFrames[i + 1].node->y, keyFrames[i + 1].node->z, teleport);
-
         //        sLog.outString("T: %d, x: %f, y: %f, z: %f, t:%d", t, pos.x, pos.y, pos.z, teleport);
 
         // if (teleport)
@@ -489,7 +485,7 @@ bool Transport::RemovePassenger(Player* passenger)
     return true;
 }
 
-void Transport::Update(uint32 /*update_diff*/, uint32 /*p_time*/)
+void Transport::Update(const uint32 /*diff*/)
 {
     if (m_WayPoints.size() <= 1)
         return;
@@ -535,15 +531,15 @@ void Transport::UpdateForMap(Map const* targetMap)
 
     if (GetMapId() == targetMap->GetId())
     {
-        for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+        for (const auto& itr : pl)
         {
-            if (this != itr->getSource()->GetTransport())
+            if (this != itr.getSource()->GetTransport())
             {
                 UpdateData transData;
-                BuildCreateUpdateBlockForPlayer(&transData, itr->getSource());
+                BuildCreateUpdateBlockForPlayer(&transData, itr.getSource());
                 WorldPacket packet;
                 transData.BuildPacket(packet, true);
-                itr->getSource()->SendDirectMessage(packet);
+                itr.getSource()->SendDirectMessage(packet);
             }
         }
     }
@@ -554,8 +550,8 @@ void Transport::UpdateForMap(Map const* targetMap)
         WorldPacket out_packet;
         transData.BuildPacket(out_packet, true);
 
-        for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
-            if (this != itr->getSource()->GetTransport())
-                itr->getSource()->SendDirectMessage(out_packet);
+        for (const auto& itr : pl)
+            if (this != itr.getSource()->GetTransport())
+                itr.getSource()->SendDirectMessage(out_packet);
     }
 }

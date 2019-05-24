@@ -66,8 +66,8 @@ static uint32 ahbotQualityIds[MAX_AUCTION_QUALITY] =
 bool ChatHandler::HandleAHBotItemsAmountCommand(char* args)
 {
     uint32 qVals[MAX_AUCTION_QUALITY];
-    for (int i = 0; i < MAX_AUCTION_QUALITY; ++i)
-        if (!ExtractUInt32(&args, qVals[i]))
+    for (unsigned int& qVal : qVals)
+        if (!ExtractUInt32(&args, qVal))
             return false;
 
     sAuctionBot.SetItemsAmount(qVals);
@@ -101,8 +101,8 @@ template bool ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_
 bool ChatHandler::HandleAHBotItemsRatioCommand(char* args)
 {
     uint32 rVal[MAX_AUCTION_HOUSE_TYPE];
-    for (int i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
-        if (!ExtractUInt32(&args, rVal[i]))
+    for (unsigned int& i : rVal)
+        if (!ExtractUInt32(&args, i))
             return false;
 
     sAuctionBot.SetItemsRatio(rVal[0], rVal[1], rVal[2]);
@@ -148,12 +148,9 @@ bool ChatHandler::HandleAHBotReloadCommand(char* /*args*/)
         SendSysMessage(LANG_AHBOT_RELOAD_OK);
         return true;
     }
-    else
-    {
-        SendSysMessage(LANG_AHBOT_RELOAD_FAIL);
-        SetSentErrorMessage(true);
-        return false;
-    }
+    SendSysMessage(LANG_AHBOT_RELOAD_FAIL);
+    SetSentErrorMessage(true);
+    return false;
 }
 
 bool ChatHandler::HandleAHBotStatusCommand(char* args)
@@ -452,6 +449,22 @@ bool ChatHandler::HandleReloadQuestgiverGreetingLocalesCommand(char* /*args*/)
 {
     sObjectMgr.LoadQuestgiverGreetingLocales();
     SendGlobalSysMessage("DB table `locales_questgiver_greeting` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadTrainerGreetingCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading Trainer Greetings...");
+    sObjectMgr.LoadTrainerGreetings();
+    SendGlobalSysMessage("DB table `trainer_greeting` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLocalesTrainerGreetingCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading Trainer Greeting Locales...");
+    sObjectMgr.LoadTrainerGreetingLocales();
+    SendGlobalSysMessage("DB table `locales_trainer_greeting` reloaded.");
     return true;
 }
 
@@ -1087,10 +1100,7 @@ bool ChatHandler::HandleReloadExpectedSpamRecords(char* /*args*/)
 
 bool ChatHandler::HandleLoadScriptsCommand(char* args)
 {
-    if (!*args)
-        return false;
-
-    return true;
+    return *args != 0;
 }
 
 bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
@@ -1211,7 +1221,7 @@ bool ChatHandler::HandleMaxSkillCommand(char* /*args*/)
     }
 
     // each skills that have max skill value dependent from level seted to current level max skill value
-    SelectedPlayer->UpdateSkillsToMaxSkillsForLevel();
+    SelectedPlayer->UpdateSkillsForLevel(true);
     return true;
 }
 
@@ -1239,7 +1249,7 @@ bool ChatHandler::HandleSetSkillCommand(char* args)
         return false;
 
     int32 maxskill;
-    if (!ExtractOptInt32(&args, maxskill, target->GetPureMaxSkillValue(skill)))
+    if (!ExtractOptInt32(&args, maxskill, target->GetSkillMaxPure(skill)))
         return false;
 
     if (skill <= 0)
@@ -1384,615 +1394,611 @@ bool ChatHandler::HandleCooldownClearClientSideCommand(char*)
 
 bool ChatHandler::HandleLearnAllCommand(char* /*args*/)
 {
-    static const char* allSpellList[] =
+    static uint32 allSpellList[] =
     {
-        "3365",
-        "6233",
-        "6247",
-        "6246",
-        "6477",
-        "6478",
-        "22810",
-        "8386",
-        "21651",
-        "21652",
-        "522",
-        "7266",
-        "8597",
-        "2479",
-        "22027",
-        "6603",
-        "5019",
-        "133",
-        "168",
-        "227",
-        "5009",
-        "9078",
-        "668",
-        "203",
-        "20599",
-        "20600",
-        "81",
-        "20597",
-        "20598",
-        "20864",
-        "1459",
-        "5504",
-        "587",
-        "5143",
-        "118",
-        "5505",
-        "597",
-        "604",
-        "1449",
-        "1460",
-        "2855",
-        "1008",
-        "475",
-        "5506",
-        "1463",
-        "12824",
-        "8437",
-        "990",
-        "5145",
-        "8450",
-        "1461",
-        "759",
-        "8494",
-        "8455",
-        "8438",
-        "6127",
-        "8416",
-        "6129",
-        "8451",
-        "8495",
-        "8439",
-        "3552",
-        "8417",
-        "10138",
-        "12825",
-        "10169",
-        "10156",
-        "10144",
-        "10191",
-        "10201",
-        "10211",
-        "10053",
-        "10173",
-        "10139",
-        "10145",
-        "10192",
-        "10170",
-        "10202",
-        "10054",
-        "10174",
-        "10193",
-        "12826",
-        "2136",
-        "143",
-        "145",
-        "2137",
-        "2120",
-        "3140",
-        "543",
-        "2138",
-        "2948",
-        "8400",
-        "2121",
-        "8444",
-        "8412",
-        "8457",
-        "8401",
-        "8422",
-        "8445",
-        "8402",
-        "8413",
-        "8458",
-        "8423",
-        "8446",
-        "10148",
-        "10197",
-        "10205",
-        "10149",
-        "10215",
-        "10223",
-        "10206",
-        "10199",
-        "10150",
-        "10216",
-        "10207",
-        "10225",
-        "10151",
-        "116",
-        "205",
-        "7300",
-        "122",
-        "837",
-        "10",
-        "7301",
-        "7322",
-        "6143",
-        "120",
-        "865",
-        "8406",
-        "6141",
-        "7302",
-        "8461",
-        "8407",
-        "8492",
-        "8427",
-        "8408",
-        "6131",
-        "7320",
-        "10159",
-        "8462",
-        "10185",
-        "10179",
-        "10160",
-        "10180",
-        "10219",
-        "10186",
-        "10177",
-        "10230",
-        "10181",
-        "10161",
-        "10187",
-        "10220",
-        "2018",
-        "2663",
-        "12260",
-        "2660",
-        "3115",
-        "3326",
-        "2665",
-        "3116",
-        "2738",
-        "3293",
-        "2661",
-        "3319",
-        "2662",
-        "9983",
-        "8880",
-        "2737",
-        "2739",
-        "7408",
-        "3320",
-        "2666",
-        "3323",
-        "3324",
-        "3294",
-        "22723",
-        "23219",
-        "23220",
-        "23221",
-        "23228",
-        "23338",
-        "10788",
-        "10790",
-        "5611",
-        "5016",
-        "5609",
-        "2060",
-        "10963",
-        "10964",
-        "10965",
-        "22593",
-        "22594",
-        "596",
-        "996",
-        "499",
-        "768",
-        "17002",
-        "1448",
-        "1082",
-        "16979",
-        "1079",
-        "5215",
-        "20484",
-        "5221",
-        "15590",
-        "17007",
-        "6795",
-        "6807",
-        "5487",
-        "1446",
-        "1066",
-        "5421",
-        "3139",
-        "779",
-        "6811",
-        "6808",
-        "1445",
-        "5216",
-        "1737",
-        "5222",
-        "5217",
-        "1432",
-        "6812",
-        "9492",
-        "5210",
-        "3030",
-        "1441",
-        "783",
-        "6801",
-        "20739",
-        "8944",
-        "9491",
-        "22569",
-        "5226",
-        "6786",
-        "1433",
-        "8973",
-        "1828",
-        "9495",
-        "9006",
-        "6794",
-        "8993",
-        "5203",
-        "16914",
-        "6784",
-        "9635",
-        "22830",
-        "20722",
-        "9748",
-        "6790",
-        "9753",
-        "9493",
-        "9752",
-        "9831",
-        "9825",
-        "9822",
-        "5204",
-        "5401",
-        "22831",
-        "6793",
-        "9845",
-        "17401",
-        "9882",
-        "9868",
-        "20749",
-        "9893",
-        "9899",
-        "9895",
-        "9832",
-        "9902",
-        "9909",
-        "22832",
-        "9828",
-        "9851",
-        "9883",
-        "9869",
-        "17406",
-        "17402",
-        "9914",
-        "20750",
-        "9897",
-        "9848",
-        "3127",
-        "107",
-        "204",
-        "9116",
-        "2457",
-        "78",
-        "18848",
-        "331",
-        "403",
-        "2098",
-        "1752",
-        "11278",
-        "11288",
-        "11284",
-        "6461",
-        "2344",
-        "2345",
-        "6463",
-        "2346",
-        "2352",
-        "775",
-        "1434",
-        "1612",
-        "71",
-        "2468",
-        "2458",
-        "2467",
-        "7164",
-        "7178",
-        "7367",
-        "7376",
-        "7381",
-        "21156",
-        "5209",
-        "3029",
-        "5201",
-        "9849",
-        "9850",
-        "20719",
-        "22568",
-        "22827",
-        "22828",
-        "22829",
-        "6809",
-        "8972",
-        "9005",
-        "9823",
-        "9827",
-        "6783",
-        "9913",
-        "6785",
-        "6787",
-        "9866",
-        "9867",
-        "9894",
-        "9896",
-        "6800",
-        "8992",
-        "9829",
-        "9830",
-        "780",
-        "769",
-        "6749",
-        "6750",
-        "9755",
-        "9754",
-        "9908",
-        "20745",
-        "20742",
-        "20747",
-        "20748",
-        "9746",
-        "9745",
-        "9880",
-        "9881",
-        "5391",
-        "842",
-        "3025",
-        "3031",
-        "3287",
-        "3329",
-        "1945",
-        "3559",
-        "4933",
-        "4934",
-        "4935",
-        "4936",
-        "5142",
-        "5390",
-        "5392",
-        "5404",
-        "5420",
-        "6405",
-        "7293",
-        "7965",
-        "8041",
-        "8153",
-        "9033",
-        "9034",
-        //"9036", problems with ghost state
-        "16421",
-        "21653",
-        "22660",
-        "5225",
-        "9846",
-        "2426",
-        "5916",
-        "6634",
-        //"6718", phasing stealth, annoying for learn all case.
-        "6719",
-        "8822",
-        "9591",
-        "9590",
-        "10032",
-        "17746",
-        "17747",
-        "8203",
-        "11392",
-        "12495",
-        "16380",
-        "23452",
-        "4079",
-        "4996",
-        "4997",
-        "4998",
-        "4999",
-        "5000",
-        "6348",
-        "6349",
-        "6481",
-        "6482",
-        "6483",
-        "6484",
-        "11362",
-        "11410",
-        "11409",
-        "12510",
-        "12509",
-        "12885",
-        "13142",
-        "21463",
-        "23460",
-        "11421",
-        "11416",
-        "11418",
-        "1851",
-        "10059",
-        "11423",
-        "11417",
-        "11422",
-        "11419",
-        "11424",
-        "11420",
-        "27",
-        "31",
-        "33",
-        "34",
-        "35",
-        "15125",
-        "21127",
-        "22950",
-        "1180",
-        "201",
-        "12593",
-        "12842",
-        "16770",
-        "6057",
-        "12051",
-        "18468",
-        "12606",
-        "12605",
-        "18466",
-        "12502",
-        "12043",
-        "15060",
-        "12042",
-        "12341",
-        "12848",
-        "12344",
-        "12353",
-        "18460",
-        "11366",
-        "12350",
-        "12352",
-        "13043",
-        "11368",
-        "11113",
-        "12400",
-        "11129",
-        "16766",
-        "12573",
-        "15053",
-        "12580",
-        "12475",
-        "12472",
-        "12953",
-        "12488",
-        "11189",
-        "12985",
-        "12519",
-        "16758",
-        "11958",
-        "12490",
-        "11426",
-        "3565",
-        "3562",
-        "18960",
-        "3567",
-        "3561",
-        "3566",
-        "3563",
-        "1953",
-        "2139",
-        "12505",
-        "13018",
-        "12522",
-        "12523",
-        "5146",
-        "5144",
-        "5148",
-        "8419",
-        "8418",
-        "10213",
-        "10212",
-        "10157",
-        "12524",
-        "13019",
-        "12525",
-        "13020",
-        "12526",
-        "13021",
-        "18809",
-        "13031",
-        "13032",
-        "13033",
-        "4036",
-        "3920",
-        "3919",
-        "3918",
-        "7430",
-        "3922",
-        "3923",
-        "7411",
-        "7418",
-        "7421",
-        "13262",
-        "7412",
-        "7415",
-        "7413",
-        "7416",
-        "13920",
-        "13921",
-        "7745",
-        "7779",
-        "7428",
-        "7457",
-        "7857",
-        "7748",
-        "7426",
-        "13421",
-        "7454",
-        "13378",
-        "7788",
-        "14807",
-        "14293",
-        "7795",
-        "6296",
-        "20608",
-        "755",
-        "444",
-        "427",
-        "428",
-        "442",
-        "447",
-        "3578",
-        "3581",
-        "19027",
-        "3580",
-        "665",
-        "3579",
-        "3577",
-        "6755",
-        "3576",
-        "2575",
-        "2577",
-        "2578",
-        "2579",
-        "2580",
-        "2656",
-        "2657",
-        "2576",
-        "3564",
-        "10248",
-        "8388",
-        "2659",
-        "14891",
-        "3308",
-        "3307",
-        "10097",
-        "2658",
-        "3569",
-        "16153",
-        "3304",
-        "10098",
-        "4037",
-        "3929",
-        "3931",
-        "3926",
-        "3924",
-        "3930",
-        "3977",
-        "3925",
-        "136",
-        "228",
-        "5487",
-        "43",
-        "202",
-        "0"
+        3365,
+        6233,
+        6247,
+        6246,
+        6477,
+        6478,
+        22810,
+        8386,
+        21651,
+        21652,
+        522,
+        7266,
+        8597,
+        2479,
+        22027,
+        6603,
+        5019,
+        133,
+        168,
+        227,
+        5009,
+        9078,
+        668,
+        203,
+        20599,
+        20600,
+        81,
+        20597,
+        20598,
+        20864,
+        1459,
+        5504,
+        587,
+        5143,
+        118,
+        5505,
+        597,
+        604,
+        1449,
+        1460,
+        2855,
+        1008,
+        475,
+        5506,
+        1463,
+        12824,
+        8437,
+        990,
+        5145,
+        8450,
+        1461,
+        759,
+        8494,
+        8455,
+        8438,
+        6127,
+        8416,
+        6129,
+        8451,
+        8495,
+        8439,
+        3552,
+        8417,
+        10138,
+        12825,
+        10169,
+        10156,
+        10144,
+        10191,
+        10201,
+        10211,
+        10053,
+        10173,
+        10139,
+        10145,
+        10192,
+        10170,
+        10202,
+        10054,
+        10174,
+        10193,
+        12826,
+        2136,
+        143,
+        145,
+        2137,
+        2120,
+        3140,
+        543,
+        2138,
+        2948,
+        8400,
+        2121,
+        8444,
+        8412,
+        8457,
+        8401,
+        8422,
+        8445,
+        8402,
+        8413,
+        8458,
+        8423,
+        8446,
+        10148,
+        10197,
+        10205,
+        10149,
+        10215,
+        10223,
+        10206,
+        10199,
+        10150,
+        10216,
+        10207,
+        10225,
+        10151,
+        116,
+        205,
+        7300,
+        122,
+        837,
+        10,
+        7301,
+        7322,
+        6143,
+        120,
+        865,
+        8406,
+        6141,
+        7302,
+        8461,
+        8407,
+        8492,
+        8427,
+        8408,
+        6131,
+        7320,
+        10159,
+        8462,
+        10185,
+        10179,
+        10160,
+        10180,
+        10219,
+        10186,
+        10177,
+        10230,
+        10181,
+        10161,
+        10187,
+        10220,
+        2018,
+        2663,
+        12260,
+        2660,
+        3115,
+        3326,
+        2665,
+        3116,
+        2738,
+        3293,
+        2661,
+        3319,
+        2662,
+        9983,
+        8880,
+        2737,
+        2739,
+        7408,
+        3320,
+        2666,
+        3323,
+        3324,
+        3294,
+        22723,
+        23219,
+        23220,
+        23221,
+        23228,
+        23338,
+        10788,
+        10790,
+        5611,
+        5016,
+        5609,
+        2060,
+        10963,
+        10964,
+        10965,
+        22593,
+        22594,
+        596,
+        996,
+        499,
+        768,
+        17002,
+        1448,
+        1082,
+        16979,
+        1079,
+        5215,
+        20484,
+        5221,
+        15590,
+        17007,
+        6795,
+        6807,
+        5487,
+        1446,
+        1066,
+        5421,
+        3139,
+        779,
+        6811,
+        6808,
+        1445,
+        5216,
+        1737,
+        5222,
+        5217,
+        1432,
+        6812,
+        9492,
+        5210,
+        3030,
+        1441,
+        783,
+        6801,
+        20739,
+        8944,
+        9491,
+        22569,
+        5226,
+        6786,
+        1433,
+        8973,
+        1828,
+        9495,
+        9006,
+        6794,
+        8993,
+        5203,
+        16914,
+        6784,
+        9635,
+        22830,
+        20722,
+        9748,
+        6790,
+        9753,
+        9493,
+        9752,
+        9831,
+        9825,
+        9822,
+        5204,
+        5401,
+        22831,
+        6793,
+        9845,
+        17401,
+        9882,
+        9868,
+        20749,
+        9893,
+        9899,
+        9895,
+        9832,
+        9902,
+        9909,
+        22832,
+        9828,
+        9851,
+        9883,
+        9869,
+        17406,
+        17402,
+        9914,
+        20750,
+        9897,
+        9848,
+        3127,
+        107,
+        204,
+        9116,
+        2457,
+        78,
+        18848,
+        331,
+        403,
+        2098,
+        1752,
+        11278,
+        11288,
+        11284,
+        6461,
+        2344,
+        2345,
+        6463,
+        2346,
+        2352,
+        775,
+        1434,
+        1612,
+        71,
+        2468,
+        2458,
+        2467,
+        7164,
+        7178,
+        7367,
+        7376,
+        7381,
+        21156,
+        5209,
+        3029,
+        5201,
+        9849,
+        9850,
+        20719,
+        22568,
+        22827,
+        22828,
+        22829,
+        6809,
+        8972,
+        9005,
+        9823,
+        9827,
+        6783,
+        9913,
+        6785,
+        6787,
+        9866,
+        9867,
+        9894,
+        9896,
+        6800,
+        8992,
+        9829,
+        9830,
+        780,
+        769,
+        6749,
+        6750,
+        9755,
+        9754,
+        9908,
+        20745,
+        20742,
+        20747,
+        20748,
+        9746,
+        9745,
+        9880,
+        9881,
+        5391,
+        842,
+        3025,
+        3031,
+        3287,
+        3329,
+        1945,
+        3559,
+        4933,
+        4934,
+        4935,
+        4936,
+        5142,
+        5390,
+        5392,
+        5404,
+        5420,
+        6405,
+        7293,
+        7965,
+        8041,
+        8153,
+        9033,
+        9034,
+        //9036, problems with ghost state
+        16421,
+        21653,
+        22660,
+        5225,
+        9846,
+        2426,
+        5916,
+        6634,
+        //6718, phasing stealth, annoying for learn all case.
+        6719,
+        8822,
+        9591,
+        9590,
+        10032,
+        17746,
+        17747,
+        8203,
+        11392,
+        12495,
+        16380,
+        23452,
+        4079,
+        4996,
+        4997,
+        4998,
+        4999,
+        5000,
+        6348,
+        6349,
+        6481,
+        6482,
+        6483,
+        6484,
+        11362,
+        11410,
+        11409,
+        12510,
+        12509,
+        12885,
+        13142,
+        21463,
+        23460,
+        11421,
+        11416,
+        11418,
+        1851,
+        10059,
+        11423,
+        11417,
+        11422,
+        11419,
+        11424,
+        11420,
+        27,
+        31,
+        33,
+        34,
+        35,
+        15125,
+        21127,
+        22950,
+        1180,
+        201,
+        12593,
+        12842,
+        16770,
+        6057,
+        12051,
+        18468,
+        12606,
+        12605,
+        18466,
+        12502,
+        12043,
+        15060,
+        12042,
+        12341,
+        12848,
+        12344,
+        12353,
+        18460,
+        11366,
+        12350,
+        12352,
+        13043,
+        11368,
+        11113,
+        12400,
+        11129,
+        16766,
+        12573,
+        15053,
+        12580,
+        12475,
+        12472,
+        12953,
+        12488,
+        11189,
+        12985,
+        12519,
+        16758,
+        11958,
+        12490,
+        11426,
+        3565,
+        3562,
+        18960,
+        3567,
+        3561,
+        3566,
+        3563,
+        1953,
+        2139,
+        12505,
+        13018,
+        12522,
+        12523,
+        5146,
+        5144,
+        5148,
+        8419,
+        8418,
+        10213,
+        10212,
+        10157,
+        12524,
+        13019,
+        12525,
+        13020,
+        12526,
+        13021,
+        18809,
+        13031,
+        13032,
+        13033,
+        4036,
+        3920,
+        3919,
+        3918,
+        7430,
+        3922,
+        3923,
+        7411,
+        7418,
+        7421,
+        13262,
+        7412,
+        7415,
+        7413,
+        7416,
+        13920,
+        13921,
+        7745,
+        7779,
+        7428,
+        7457,
+        7857,
+        7748,
+        7426,
+        13421,
+        7454,
+        13378,
+        7788,
+        14807,
+        14293,
+        7795,
+        6296,
+        20608,
+        755,
+        444,
+        427,
+        428,
+        442,
+        447,
+        3578,
+        3581,
+        19027,
+        3580,
+        665,
+        3579,
+        3577,
+        6755,
+        3576,
+        2575,
+        2577,
+        2578,
+        2579,
+        2580,
+        2656,
+        2657,
+        2576,
+        3564,
+        10248,
+        8388,
+        2659,
+        14891,
+        3308,
+        3307,
+        10097,
+        2658,
+        3569,
+        16153,
+        3304,
+        10098,
+        4037,
+        3929,
+        3931,
+        3926,
+        3924,
+        3930,
+        3977,
+        3925,
+        136,
+        228,
+        5487,
+        43,
+        202
     };
 
-    int loop = 0;
-    while (strcmp(allSpellList[loop], "0"))
+    for (uint32 spell : allSpellList)
     {
-        uint32 spell = std::stoul((char*)allSpellList[loop++]);
-
         if (m_session->GetPlayer()->HasSpell(spell))
             continue;
 
@@ -2013,29 +2019,26 @@ bool ChatHandler::HandleLearnAllCommand(char* /*args*/)
 
 bool ChatHandler::HandleLearnAllGMCommand(char* /*args*/)
 {
-    static const char* gmSpellList[] =
+    static uint32 gmSpellList[] =
     {
-        "24347",                                            // Become A Fish, No Breath Bar
-        "35132",                                            // Visual Boom
-        "38488",                                            // Attack 4000-8000 AOE
-        "38795",                                            // Attack 2000 AOE + Slow Down 90%
-        "15712",                                            // Attack 200
-        "1852",                                             // GM Spell Silence
-        "31899",                                            // Kill
-        "31924",                                            // Kill
-        "29878",                                            // Kill My Self
-        "26644",                                            // More Kill
+        24347,                                            // Become A Fish, No Breath Bar
+        35132,                                            // Visual Boom
+        38488,                                            // Attack 4000-8000 AOE
+        38795,                                            // Attack 2000 AOE + Slow Down 90%
+        15712,                                            // Attack 200
+        1852,                                             // GM Spell Silence
+        31899,                                            // Kill
+        31924,                                            // Kill
+        29878,                                            // Kill My Self
+        26644,                                            // More Kill
 
-        "28550",                                            // Invisible 24
-        "23452",                                            // Invisible + Target
-        "0"
+        28550,                                            // Invisible 24
+        23452,                                            // Invisible + Target
+        0
     };
 
-    uint16 gmSpellIter = 0;
-    while (strcmp(gmSpellList[gmSpellIter], "0"))
+    for (uint32 spell : gmSpellList)
     {
-        uint32 spell = std::stoul((char*)gmSpellList[gmSpellIter++]);
-
         SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell);
         if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, m_session->GetPlayer()))
         {
@@ -2166,6 +2169,7 @@ bool ChatHandler::HandleLearnAllDefaultCommand(char* args)
     if (!ExtractPlayerTarget(&args, &target))
         return false;
 
+    target->LearnDefaultSkills();
     target->learnDefaultSpells();
     target->learnQuestRewardedSpells();
 
@@ -2395,11 +2399,9 @@ bool ChatHandler::HandleListItemCommand(char* args)
     if (!ExtractOptUInt32(&args, count, 10))
         return false;
 
-    QueryResult* result;
-
     // inventory case
     uint32 inv_count = 0;
-    result = CharacterDatabase.PQuery("SELECT COUNT(item_template) FROM character_inventory WHERE item_template='%u'", item_id);
+    QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(item_template) FROM character_inventory WHERE item_template='%u'", item_id);
     if (result)
     {
         inv_count = (*result)[0].GetUInt32();
@@ -2578,10 +2580,8 @@ bool ChatHandler::HandleListObjectCommand(char* args)
     if (!ExtractOptUInt32(&args, count, 10))
         return false;
 
-    QueryResult* result;
-
     uint32 obj_count = 0;
-    result = WorldDatabase.PQuery("SELECT COUNT(guid) FROM gameobject WHERE id='%u'", go_id);
+    QueryResult* result = WorldDatabase.PQuery("SELECT COUNT(guid) FROM gameobject WHERE id='%u'", go_id);
     if (result)
     {
         obj_count = (*result)[0].GetUInt32();
@@ -2649,10 +2649,8 @@ bool ChatHandler::HandleListCreatureCommand(char* args)
     if (!ExtractOptUInt32(&args, count, 10))
         return false;
 
-    QueryResult* result;
-
     uint32 cr_count = 0;
-    result = WorldDatabase.PQuery("SELECT COUNT(guid) FROM creature WHERE id='%u'", cr_id);
+    QueryResult* result = WorldDatabase.PQuery("SELECT COUNT(guid) FROM creature WHERE id='%u'", cr_id);
     if (result)
     {
         cr_count = (*result)[0].GetUInt32();
@@ -2874,10 +2872,10 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
                 if (target && target->HasSkill(id))
                 {
                     knownStr = GetMangosString(LANG_KNOWN);
-                    uint32 curValue = target->GetPureSkillValue(id);
-                    uint32 maxValue  = target->GetPureMaxSkillValue(id);
-                    uint32 permValue = target->GetSkillPermBonusValue(id);
-                    uint32 tempValue = target->GetSkillTempBonusValue(id);
+                    uint32 curValue = target->GetSkillValuePure(id);
+                    uint32 maxValue  = target->GetSkillMaxPure(id);
+                    uint32 permValue = target->GetSkillBonusPermanent(id);
+                    uint32 tempValue = target->GetSkillBonusTemporary(id);
 
                     char const* valFormat = GetMangosString(LANG_SKILL_VALUES);
                     snprintf(valStr, 50, valFormat, curValue, maxValue, permValue, tempValue);
@@ -3059,9 +3057,9 @@ bool ChatHandler::HandleLookupQuestCommand(char* args)
     int loc_idx = GetSessionDbLocaleIndex();
 
     ObjectMgr::QuestMap const& qTemplates = sObjectMgr.GetQuestTemplates();
-    for (ObjectMgr::QuestMap::const_iterator iter = qTemplates.begin(); iter != qTemplates.end(); ++iter)
+    for (const auto& qTemplate : qTemplates)
     {
-        Quest* qinfo = iter->second;
+        Quest* qinfo = qTemplate.second;
 
         std::string title;                                  // "" for avoid repeating check default locale
         sObjectMgr.GetQuestLocaleStrings(qinfo->GetQuestId(), loc_idx, &title);
@@ -3424,14 +3422,41 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
     }
 
     Player* player = m_session->GetPlayer();
-    // Calculate point-to-point distance
-    float dx, dy, dz;
-    dx = player->GetPositionX() - obj->GetPositionX();
-    dy = player->GetPositionY() - obj->GetPositionY();
-    dz = player->GetPositionZ() - obj->GetPositionZ();
+    float dx = player->GetPositionX() - obj->GetPositionX();
+    float dy = player->GetPositionY() - obj->GetPositionY();
+    float dz = player->GetPositionZ() - obj->GetPositionZ();
 
-    PSendSysMessage(LANG_DISTANCE, player->GetDistance(obj), player->GetDistance2d(obj), sqrt(dx * dx + dy * dy + dz * dz));
+    PSendSysMessage(LANG_DISTANCE, player->GetDistance(obj), player->GetDistance(obj, false), sqrt(dx * dx + dy * dy + dz * dz));
 
+    Unit* target = dynamic_cast<Unit*>(obj);
+
+    PSendSysMessage("P -> T Attack distance: %.2f", player->GetAttackDistance(target));
+    PSendSysMessage("P -> T Visible distance: %.2f", player->GetVisibleDistance(target));
+    PSendSysMessage("P -> T Visible distance (Alert): %.2f", player->GetVisibleDistance(target, true));
+    PSendSysMessage("P -> T Can trigger alert: %s", !player->IsWithinDistInMap(target, target->GetVisibleDistance(player)) ? "true" : "false");
+    PSendSysMessage("T -> P Attack distance: %.2f", target->GetAttackDistance(player));
+    PSendSysMessage("T -> P Visible distance: %.2f", target->GetVisibleDistance(player));
+    PSendSysMessage("T -> P Visible distance (Alert): %.2f", target->GetVisibleDistance(player, true));
+    PSendSysMessage("T -> P Can trigger alert: %s", !target->IsWithinDistInMap(player, player->GetVisibleDistance(target)) ? "true" : "false");
+
+    return true;
+}
+
+bool ChatHandler::HandleGetLosCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+    Unit* target = getSelectedUnit();
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return false;
+    }
+
+    float x, y, z;
+    target->GetPosition(x, y, z);
+    bool normalLos = player->IsWithinLOS(x, y, z, false);
+    bool m2Los = player->IsWithinLOS(x, y, z, true);
+    PSendSysMessage("Los check: Normal: %s M2: %s", normalLos ? "true" : "false", m2Los ? "true" : "false");
     return true;
 }
 
@@ -3502,7 +3527,7 @@ bool ChatHandler::HandleDamageCommand(char* args)
     if (damage_int <= 0)
         return true;
 
-    uint32 damage = damage_int;
+    uint32 damage = uint32(damage_int);
 
     // flat melee damage without resistance/etc reduction
     if (!*args)
@@ -3529,14 +3554,18 @@ bool ChatHandler::HandleDamageCommand(char* args)
     if (!*args)
     {
         uint32 absorb = 0;
-        uint32 resist = 0;
+        int32 resist = 0;
 
         target->CalculateDamageAbsorbAndResist(player, schoolmask, SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
 
-        if (damage <= absorb + resist)
+        const uint32 bonus = (resist < 0 ? uint32(std::abs(resist)) : 0);
+        damage += bonus;
+        const uint32 malus = (resist > 0 ? (absorb + uint32(resist)) : absorb);
+
+        if (damage <= malus)
             return true;
 
-        damage -= absorb + resist;
+        damage -= malus;
 
         player->DealDamageMods(target, damage, &absorb, DIRECT_DAMAGE);
         player->DealDamage(target, damage, nullptr, DIRECT_DAMAGE, schoolmask, nullptr, false);
@@ -3821,7 +3850,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
         curRespawnDelay = 0;
     std::string curRespawnDelayStr = secsToTimeString(curRespawnDelay, true);
     std::string defRespawnDelayStr = secsToTimeString(target->GetRespawnDelay(), true);
-    std::string curCorpseDecayStr = secsToTimeString(time_t(target->GetCorpseDecayTimer() / IN_MILLISECONDS), true);
+    std::string curCorpseDecayStr = secsToTimeString(std::chrono::system_clock::to_time_t(target->GetCorpseDecayTimer()), true);
 
     PSendSysMessage(LANG_NPCINFO_CHAR, target->GetGuidStr().c_str(), faction, npcflags, Entry, displayid, nativeid);
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
@@ -3843,6 +3872,33 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     }
 
     ShowNpcOrGoSpawnInformation<Creature>(target->GetGUIDLow());
+    return true;
+}
+
+bool ChatHandler::HandleNpcThreatCommand(char* /*args*/)
+{
+    Unit* target = getSelectedUnit();
+
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    // Showing threat for %s [Entry %u]
+    PSendSysMessage(LANG_NPC_THREAT_SELECTED_CREATURE, target->GetName(), target->GetEntry());
+
+    ThreatList const& tList = target->getThreatManager().getThreatList();
+    for (auto itr : tList)
+    {
+        Unit* pUnit = itr->getTarget();
+
+        if (pUnit)
+            // Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat, taunt state %u and hostile state %u
+            PSendSysMessage(LANG_NPC_THREAT_PLAYER, pUnit->GetName(), pUnit->GetGUIDLow(), target->getThreatManager().getThreat(pUnit), itr->GetTauntState(), itr->GetHostileState());
+    }
+
     return true;
 }
 
@@ -4076,21 +4132,19 @@ bool ChatHandler::HandleLevelUpCommand(char* args)
     //add pet to levelup command
     if (m_session)
     {
-        Creature* creatureTarget = getSelectedCreature();
+        Pet* pet = getSelectedPet();
         Player* player = m_session->GetPlayer();
-        if (creatureTarget && creatureTarget->IsPet() && creatureTarget->GetOwner() && creatureTarget->GetOwner()->GetTypeId() == TYPEID_PLAYER)
+        if (pet && pet->GetOwner() && pet->GetOwner()->GetTypeId() == TYPEID_PLAYER)
         {
-            Pet* petTarget = (Pet*)creatureTarget;
-
-            if (petTarget->getPetType() == HUNTER_PET)
+            if (pet->getPetType() == HUNTER_PET)
             {
-                uint32 newPetLevel = petTarget->getLevel() + addlevel;
+                uint32 newPetLevel = pet->getLevel() + addlevel;
 
                 if (newPetLevel <= player->getLevel())
                 {
-                    petTarget->GivePetLevel(newPetLevel);
+                    pet->GivePetLevel(newPetLevel);
 
-                    std::string nameLink = petLink(petTarget->GetName());
+                    std::string nameLink = petLink(pet->GetName());
                     PSendSysMessage(LANG_YOU_CHANGE_LVL, nameLink.c_str(), newPetLevel);
                     return true;
                 }
@@ -4416,7 +4470,7 @@ bool ChatHandler::HandleTeleDelCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleListAurasCommand(char* /*args*/)
+bool ChatHandler::HandleListAurasCommand(char* args)
 {
     Unit* unit = getSelectedUnit();
     if (!unit)
@@ -4426,46 +4480,54 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
         return false;
     }
 
+    uint32 auraNameId;
+    ExtractOptUInt32(&args, auraNameId, 0);
+
     char const* talentStr = GetMangosString(LANG_TALENT);
     char const* passiveStr = GetMangosString(LANG_PASSIVE);
 
-    Unit::SpellAuraHolderMap const& uAuras = unit->GetSpellAuraHolderMap();
-    PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, uAuras.size());
-    for (Unit::SpellAuraHolderMap::const_iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
+    if (!auraNameId)
     {
-        bool talent = GetTalentSpellCost(itr->second->GetId()) > 0;
-
-        SpellAuraHolder* holder = itr->second;
-        char const* name = holder->GetSpellProto()->SpellName[GetSessionDbcLocale()];
-
-        for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        Unit::SpellAuraHolderMap const& uAuras = unit->GetSpellAuraHolderMap();
+        PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, uAuras.size());
+        for (Unit::SpellAuraHolderMap::const_iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
         {
-            Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i));
-            if (!aur)
-                continue;
+            bool talent = GetTalentSpellCost(itr->second->GetId()) > 0;
 
-            if (m_session)
-            {
-                std::ostringstream ss_name;
-                ss_name << "|cffffffff|Hspell:" << itr->second->GetId() << "|h[" << name << "]|h|r";
+            SpellAuraHolder* holder = itr->second;
+            char const* name = holder->GetSpellProto()->SpellName[GetSessionDbcLocale()];
 
-                PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, holder->GetId(), aur->GetEffIndex(),
-                                aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
-                                ss_name.str().c_str(),
-                                (holder->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
-                                holder->GetCasterGuid().GetString().c_str(), holder->GetStackAmount());
-            }
-            else
+            for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
-                PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, holder->GetId(), aur->GetEffIndex(),
-                                aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
-                                name,
-                                (holder->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
-                                holder->GetCasterGuid().GetString().c_str(), holder->GetStackAmount());
+                Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i));
+                if (!aur)
+                    continue;
+
+                if (m_session)
+                {
+                    std::ostringstream ss_name;
+                    ss_name << "|cffffffff|Hspell:" << itr->second->GetId() << "|h[" << name << "]|h|r";
+
+                    PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, holder->GetId(), aur->GetEffIndex(),
+                        aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
+                        ss_name.str().c_str(),
+                        (holder->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
+                        holder->GetCasterGuid().GetString().c_str(), holder->GetStackAmount());
+                }
+                else
+                {
+                    PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, holder->GetId(), aur->GetEffIndex(),
+                        aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
+                        name,
+                        (holder->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
+                        holder->GetCasterGuid().GetString().c_str(), holder->GetStackAmount());
+                }
             }
         }
     }
-    for (int i = 0; i < TOTAL_AURAS; ++i)
+    uint32 i = auraNameId ? auraNameId : 0;
+    uint32 max = auraNameId ? auraNameId + 1 : TOTAL_AURAS;
+    for (; i < max; ++i)
     {
         Unit::AuraList const& uAuraList = unit->GetAurasByType(AuraType(i));
         if (uAuraList.empty()) continue;
@@ -4510,17 +4572,17 @@ bool ChatHandler::HandleListTalentsCommand(char* /*args*/)
     uint32 count = 0;
     uint32 cost = 0;
     PlayerSpellMap const& uSpells = player->GetSpellMap();
-    for (PlayerSpellMap::const_iterator itr = uSpells.begin(); itr != uSpells.end(); ++itr)
+    for (const auto& uSpell : uSpells)
     {
-        if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.disabled)
+        if (uSpell.second.state == PLAYERSPELL_REMOVED || uSpell.second.disabled)
             continue;
 
-        uint32 cost_itr = GetTalentSpellCost(itr->first);
+        uint32 cost_itr = GetTalentSpellCost(uSpell.first);
 
         if (cost_itr == 0)
             continue;
 
-        SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(itr->first);
+        SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(uSpell.first);
         if (!spellEntry)
             continue;
 
@@ -4666,7 +4728,7 @@ bool ChatHandler::HandleResetTalentsCommand(char* args)
             PSendSysMessage(LANG_RESET_TALENTS_ONLINE, GetNameLink(target).c_str());
         return true;
     }
-    else if (target_guid)
+    if (target_guid)
     {
         uint32 at_flags = AT_LOGIN_RESET_TALENTS;
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'", at_flags, target_guid.GetCounter());
@@ -4697,7 +4759,7 @@ bool ChatHandler::HandleResetTaxiNodesCommand(char* args)
             PSendSysMessage("Taxi nodes of %s have been reset.", GetNameLink(target).c_str());
         return true;
     }
-    else if (target_guid)
+    if (target_guid)
     {
         uint32 at_flags = AT_LOGIN_RESET_TAXINODES;
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'", at_flags, target_guid.GetCounter());
@@ -4744,8 +4806,8 @@ bool ChatHandler::HandleResetAllCommand(char* args)
 
     CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE (at_login & '%u') = '0'", atLogin, atLogin);
     HashMapHolder<Player>::MapType const& plist = sObjectAccessor.GetPlayers();
-    for (HashMapHolder<Player>::MapType::const_iterator itr = plist.begin(); itr != plist.end(); ++itr)
-        itr->second->SetAtLoginFlag(atLogin);
+    for (const auto& itr : plist)
+        itr.second->SetAtLoginFlag(atLogin);
 
     return true;
 }
@@ -5101,9 +5163,6 @@ bool ChatHandler::HandleBanHelper(BanMode mode, char* args)
                     break;
                 case BAN_CHARACTER:
                     PSendSysMessage(LANG_BAN_NOTFOUND, "character", nameOrIP.c_str());
-                    break;
-                case BAN_IP:
-                    PSendSysMessage(LANG_BAN_NOTFOUND, "ip", nameOrIP.c_str());
                     break;
             }
             SetSentErrorMessage(true);
@@ -5578,7 +5637,7 @@ bool ChatHandler::HandlePDumpLoadCommand(char* args)
         }
     }
 
-    switch (PlayerDumpReader().LoadDump(file, account_id, name, lowguid))
+    switch (PlayerDumpReader::LoadDump(file, account_id, name, lowguid))
     {
         case DUMP_SUCCESS:
             PSendSysMessage(LANG_COMMAND_IMPORT_SUCCESS);
@@ -5692,18 +5751,30 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
 
             case CHASE_MOTION_TYPE:
             {
-                Unit* target;
+                Unit* target = nullptr;
+                float distance = 0.f;
+                float angle = 0.f;
                 if (unit->GetTypeId() == TYPEID_PLAYER)
-                    target = static_cast<ChaseMovementGenerator<Player> const*>(*itr)->GetCurrentTarget();
+                {
+                    ChaseMovementGenerator<Player> const* movegen = static_cast<ChaseMovementGenerator<Player> const*>(*itr);
+                    target = movegen->GetCurrentTarget();
+                    distance = movegen->GetOffset();
+                    angle = movegen->GetAngle();
+                }
                 else
-                    target = static_cast<ChaseMovementGenerator<Creature> const*>(*itr)->GetCurrentTarget();
+                {
+                    ChaseMovementGenerator<Creature> const* movegen = static_cast<ChaseMovementGenerator<Creature> const*>(*itr);
+                    target = movegen->GetCurrentTarget();
+                    distance = movegen->GetOffset();
+                    angle = movegen->GetAngle();
+                }
 
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_CHASE_NULL);
                 else if (target->GetTypeId() == TYPEID_PLAYER)
-                    PSendSysMessage(LANG_MOVEGENS_CHASE_PLAYER, target->GetName(), target->GetGUIDLow());
+                    PSendSysMessage(LANG_MOVEGENS_CHASE_PLAYER, target->GetName(), target->GetGUIDLow(), distance, angle);
                 else
-                    PSendSysMessage(LANG_MOVEGENS_CHASE_CREATURE, target->GetName(), target->GetGUIDLow());
+                    PSendSysMessage(LANG_MOVEGENS_CHASE_CREATURE, target->GetName(), target->GetGUIDLow(), distance, angle);
                 break;
             }
             case FOLLOW_MOTION_TYPE:
@@ -5805,14 +5876,7 @@ bool ChatHandler::HandleCastCommand(char* args)
     if (!*args)
         return false;
 
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
+    Unit* target = getSelectedUnit(false);
 
     // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
     uint32 spell = ExtractSpellIdFromLink(&args);
@@ -6388,7 +6452,7 @@ bool ChatHandler::HandleSendItemsHelper(MailDraft& draft, char* args)
 
     for (ItemPairs::const_iterator itr = items.begin(); itr != items.end(); ++itr)
     {
-        if (Item* item = Item::CreateItem(itr->first, itr->second, m_session ? m_session->GetPlayer() : 0))
+        if (Item* item = Item::CreateItem(itr->first, itr->second, m_session ? m_session->GetPlayer() : nullptr))
         {
             item->SaveToDB();                               // save for prevent lost at next mail load, if send fail then item will deleted
             draft.AddItem(item);
@@ -6656,7 +6720,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
     float radius = 40.0f;
     ExtractFloat(&args, radius);
 
-    std::list<Creature*> creatureList;
+    CreatureList creatureList;
     MaNGOS::AnyUnitInObjectRangeCheck go_check(m_session->GetPlayer(), radius);
     MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> go_search(creatureList, go_check);
     // Get Creatures
@@ -6671,9 +6735,9 @@ bool ChatHandler::HandleMmapTestArea(char* args)
 
         float gx, gy, gz;
         m_session->GetPlayer()->GetPosition(gx, gy, gz);
-        for (std::list<Creature*>::iterator itr = creatureList.begin(); itr != creatureList.end(); ++itr)
+        for (auto& itr : creatureList)
         {
-            PathFinder path(*itr);
+            PathFinder path(itr);
             path.calculate(gx, gy, gz);
             ++paths;
         }

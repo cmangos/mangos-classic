@@ -16,20 +16,20 @@
 
 /* ScriptData
 SDName: instance_dire_maul
-SD%Complete: 30
-SDComment: Basic Support - Most events and quest-related stuff missing
+SD%Complete: 70
+SDComment: Ogre costume suit missing for Tribute Run, Cho'Rush spells randomisation is not handled properly, Warpwood pods are not implemented, the Maul event is not handled
 SDCategory: Dire Maul
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "dire_maul.h"
 
 instance_dire_maul::instance_dire_maul(Map* pMap) : ScriptedInstance(pMap),
     m_bWallDestroyed(false),
-    m_bDoNorthBeforeWest(false),
-    m_uiDreadsteedEventTimer(0)
+    m_uiDreadsteedEventTimer(0),
+    m_bDoNorthBeforeWest(false)
 {
     Initialize();
 }
@@ -50,6 +50,12 @@ void instance_dire_maul::OnPlayerEnter(Player* pPlayer)
 
     DoToggleGameObjectFlags(GO_WEST_LIBRARY_DOOR, GO_FLAG_NO_INTERACT, m_bDoNorthBeforeWest);
     DoToggleGameObjectFlags(GO_WEST_LIBRARY_DOOR, GO_FLAG_LOCKED, !m_bDoNorthBeforeWest);
+}
+
+void instance_dire_maul::OnPlayerLeave(Player* pPlayer) {
+    // Remove King of the Gordok aura
+    if (pPlayer->HasAura(SPELL_KING_OF_GORDOK))
+        pPlayer->RemoveAurasDueToSpell(SPELL_KING_OF_GORDOK);
 }
 
 void instance_dire_maul::OnCreatureCreate(Creature* pCreature)
@@ -80,6 +86,7 @@ void instance_dire_maul::OnCreatureCreate(Creature* pCreature)
         case NPC_CHORUSH:
         case NPC_KING_GORDOK:
         case NPC_CAPTAIN_KROMCRUSH:
+        case NPC_GUARD_SLIPKIK:
             break;
 
         default:
@@ -306,6 +313,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                     // start WP movement for Mizzle; event handled by movement and gossip dbscripts
                     if (Creature* pMizzle = pOgre->SummonCreature(NPC_MIZZLE_THE_CRAFTY, afMizzleSpawnLoc[0], afMizzleSpawnLoc[1], afMizzleSpawnLoc[2], afMizzleSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true))
                     {
+                        pMizzle->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         pMizzle->SetWalk(false);
                         pMizzle->GetMotionMaster()->MoveWaypoint();
                     }
@@ -316,6 +324,8 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
         case TYPE_FENGUS:
         case TYPE_SLIPKIK:
         case TYPE_KROMCRUSH:
+        case TYPE_CHORUSH:
+        case TYPE_STOMPER_KREEG:
             m_auiEncounter[uiType] = uiData;
             break;
     }
@@ -330,7 +340,8 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                       << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
                       << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11] << " "
                       << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14] << " "
-                      << m_auiEncounter[15] << " " << m_auiEncounter[16];
+                      << m_auiEncounter[15] << " " << m_auiEncounter[16] << " " << m_auiEncounter[17] << " "
+                      << m_auiEncounter[18];
 
         m_strInstData = saveStream.str();
 
@@ -409,6 +420,12 @@ void instance_dire_maul::OnCreatureDeath(Creature* pCreature)
         case NPC_CAPTAIN_KROMCRUSH:
             SetData(TYPE_KROMCRUSH, DONE);
             break;
+        case NPC_CHORUSH:
+            SetData(TYPE_CHORUSH, DONE);
+            break;
+        case NPC_STOMPER_KREEG:
+            SetData(TYPE_STOMPER_KREEG, DONE);
+            break;
     }
 }
 
@@ -428,15 +445,16 @@ void instance_dire_maul::Load(const char* chrIn)
                m_auiEncounter[6] >> m_auiEncounter[7] >> m_auiEncounter[8] >>
                m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11] >>
                m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >>
-               m_auiEncounter[15] >> m_auiEncounter[16];
+               m_auiEncounter[15] >> m_auiEncounter[16] >> m_auiEncounter[17] >>
+               m_auiEncounter[18];
 
     if (m_auiEncounter[TYPE_ALZZIN] >= DONE)
         m_bWallDestroyed = true;
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (uint32& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -450,10 +468,12 @@ bool instance_dire_maul::CheckConditionCriteriaMeet(Player const* pPlayer, uint3
         case INSTANCE_CONDITION_ID_HARD_MODE:               // One guard alive
         case INSTANCE_CONDITION_ID_HARD_MODE_2:             // Two guards alive
         case INSTANCE_CONDITION_ID_HARD_MODE_3:             // Three guards alive
-        case INSTANCE_CONDITION_ID_HARD_MODE_4:             // All guards alive
+        case INSTANCE_CONDITION_ID_HARD_MODE_4:             // Four guards alive
+        case INSTANCE_CONDITION_ID_HARD_MODE_5:             // Five guards alive
+        case INSTANCE_CONDITION_ID_HARD_MODE_6:             // Six guards alive
         {
             uint8 uiTributeRunAliveBosses = (GetData(TYPE_MOLDAR) != DONE ? 1 : 0) + (GetData(TYPE_FENGUS) != DONE ? 1 : 0) + (GetData(TYPE_SLIPKIK) != DONE ? 1 : 0)
-                                            + (GetData(TYPE_KROMCRUSH) != DONE ? 1 : 0);
+                                            + (GetData(TYPE_KROMCRUSH) != DONE ? 1 : 0) + (GetData(TYPE_CHORUSH) != DONE ? 1 : 0) + (GetData(TYPE_STOMPER_KREEG) != DONE ? 1 : 0);
 
             return uiInstanceConditionId == uiTributeRunAliveBosses;
         }
@@ -466,10 +486,7 @@ bool instance_dire_maul::CheckConditionCriteriaMeet(Player const* pPlayer, uint3
 
 bool instance_dire_maul::CheckAllGeneratorsDestroyed()
 {
-    if (m_auiEncounter[TYPE_PYLON_1] != DONE || m_auiEncounter[TYPE_PYLON_2] != DONE || m_auiEncounter[TYPE_PYLON_3] != DONE || m_auiEncounter[TYPE_PYLON_4] != DONE || m_auiEncounter[TYPE_PYLON_5] != DONE)
-        return false;
-
-    return true;
+    return !(m_auiEncounter[TYPE_PYLON_1] != DONE || m_auiEncounter[TYPE_PYLON_2] != DONE || m_auiEncounter[TYPE_PYLON_3] != DONE || m_auiEncounter[TYPE_PYLON_4] != DONE || m_auiEncounter[TYPE_PYLON_5] != DONE);
 }
 
 void instance_dire_maul::ProcessForceFieldOpening()
@@ -574,12 +591,73 @@ InstanceData* GetInstanceData_instance_dire_maul(Map* pMap)
     return new instance_dire_maul(pMap);
 }
 
+/*###############
+## go_fixed_trap
+################*/
+
+struct go_ai_fixed_trap : public GameObjectAI
+{
+    go_ai_fixed_trap(GameObject* go) : GameObjectAI(go) {}
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_go->IsSpawned())
+        {
+            // Sniffs show that trap should only react to Guard Slip'kik
+            // He then enters evade mode and becomes an invalid target to hostile actions from players
+            // Faction is changed to 14 and restored by spell 22799 (King of the Gordok)
+            // Additionnaly, Guard Slip'kik should get UnitFlags 16 but purpose is unknown so we skip it for now
+            if (Creature* slipkik = GetClosestCreatureWithEntry(m_go, NPC_GUARD_SLIPKIK, 0.5f))
+            {
+                m_go->Use(slipkik);
+                DoScriptText(SAY_SLIPKIK_TRAP, slipkik);
+                slipkik->AI()->EnterEvadeMode();
+                slipkik->SetImmuneToPlayer(true);
+                slipkik->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
+                m_go->SetLootState(GO_JUST_DEACTIVATED);    // Despawn the trap
+            }
+        }
+    }
+};
+
+GameObjectAI* GetAI_go_fixed_trap(GameObject* go)
+{
+    return new go_ai_fixed_trap(go);
+}
+
+/*####################################
+## Guard Slip'kik Trigger dummy effect
+####################################*/
+
+bool EffectDummyCreature_spell_guard_slip_kik(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex /* uiEffIndex */, Creature* /* pCreatureTarget */, ObjectGuid /*originalCasterGuid*/)
+{
+    if (uiSpellId == SPELL_GUARD_SLIPKIK_TRIGGER)
+    {
+        instance_dire_maul* pInstance = (instance_dire_maul*)pCaster->GetInstanceData();
+        if (pInstance)
+        {
+            if (Creature* slipkik = pInstance->GetSingleCreatureFromStorage(NPC_GUARD_SLIPKIK))
+                slipkik->setFaction(FACTION_OGRE);
+            return true;
+        }
+    }
+    return false;
+}
+
 void AddSC_instance_dire_maul()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_dire_maul";
     pNewScript->GetInstanceData = &GetInstanceData_instance_dire_maul;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_fixed_trap";
+    pNewScript->GetGameObjectAI = &GetAI_go_fixed_trap;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_mizzle_crafty";
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_guard_slip_kik;
     pNewScript->RegisterSelf();
 }

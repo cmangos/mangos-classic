@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
+#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
 npc_corporal_keeshan */
 
 
@@ -60,7 +60,7 @@ struct npc_corporal_keeshan_escortAI : public npc_escortAI
         m_uiShieldBashTimer  = 8000;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -95,7 +95,7 @@ struct npc_corporal_keeshan_escortAI : public npc_escortAI
             case 53:                                        // quest_complete
                 DoScriptText(SAY_CORPORAL_KEESHAN_4, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_MISSING_IN_ACTION, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_MISSING_IN_ACTION, m_creature);
                 break;
         }
     }
@@ -126,7 +126,7 @@ struct npc_corporal_keeshan_escortAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_corporal_keeshan(Creature* pCreature)
+UnitAI* GetAI_npc_corporal_keeshan(Creature* pCreature)
 {
     return new npc_corporal_keeshan_escortAI(pCreature);
 }
@@ -141,9 +141,7 @@ bool QuestAccept_npc_corporal_keeshan(Player* pPlayer, Creature* pCreature, cons
 
 void AddSC_redridge_mountains()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_corporal_keeshan";
     pNewScript->GetAI = &GetAI_npc_corporal_keeshan;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_corporal_keeshan;
