@@ -109,7 +109,7 @@ if(PCH)
     #set_property(SOURCE ${PrecompiledSource} PROPERTY COMPILE_FLAGS "/Yc\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\"")
     set_target_properties(${LIBRARY_NAME} PROPERTIES COMPILE_FLAGS " /Yu\"${PrecompiledHeader}\" /FI\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\" /bigobj")
     set_source_files_properties(${PrecompiledSource} PROPERTIES COMPILE_FLAGS "/Yc\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\"")
-    set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "Game")
+    set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "game")
   elseif(NOT MINGW)
     # TODO: Resolve issues with order of includes before enabling Cotire for MinGW builds
     cotire(${LIBRARY_NAME})

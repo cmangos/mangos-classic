@@ -208,5 +208,5 @@ set_source_files_properties(${CMAKE_SOURCE_DIR}/src/shared/revision.h
   PROPERTIES GENERATED TRUE
              HEADER_FILE_ONLY TRUE)
 if(MSVC)
-  set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "Shared")
+  set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "shared")
 endif()
