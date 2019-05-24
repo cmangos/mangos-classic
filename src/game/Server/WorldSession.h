@@ -663,10 +663,7 @@ class WorldSession
         void HandleBattleFieldPortOpcode(WorldPacket& recv_data);
         void HandleBattlefieldListOpcode(WorldPacket& recv_data);
         void HandleLeaveBattlefieldOpcode(WorldPacket& recv_data);
-
-#ifdef BUILD_ANTICHEAT
         void HandleWardenDataOpcode(WorldPacket& recv_data);
-#endif
         void HandleWorldTeleportOpcode(WorldPacket& recv_data);
         void HandleMinimapPingOpcode(WorldPacket& recv_data);
         void HandleRandomRollOpcode(WorldPacket& recv_data);
