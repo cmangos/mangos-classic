@@ -45,7 +45,9 @@ class Item;
 class Object;
 class Player;
 class Unit;
+#ifdef BUILD_ANTICHEAT
 class Warden;
+#endif
 class WorldPacket;
 class QueryResult;
 class LoginQueryHolder;
@@ -158,8 +160,10 @@ class WorldSession
 #endif
         void SetPlayer(Player* plr) { _player = plr; }
 
+#ifdef BUILD_ANTICHEAT
         // Warden
         void InitWarden(uint16 build, BigNumber* k, std::string const& os);
+#endif
 
         /// Session in auth.queue currently
         void SetInQueue(bool state) { m_inQueue = state; }
@@ -636,7 +640,9 @@ class WorldSession
         void HandleBattlefieldListOpcode(WorldPacket& recv_data);
         void HandleLeaveBattlefieldOpcode(WorldPacket& recv_data);
 
+#ifdef BUILD_ANTICHEAT
         void HandleWardenDataOpcode(WorldPacket& recv_data);
+#endif
         void HandleWorldTeleportOpcode(WorldPacket& recv_data);
         void HandleMinimapPingOpcode(WorldPacket& recv_data);
         void HandleRandomRollOpcode(WorldPacket& recv_data);
@@ -654,7 +660,6 @@ class WorldSession
 
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
-        // for Warden
         uint16 GetClientBuild() const { return _build; }
 
     private:
@@ -677,8 +682,10 @@ class WorldSession
         AccountTypes _security;
         uint32 _accountId;
 
+#ifdef BUILD_ANTICHEAT
         // Warden
         Warden* _warden;                                    // Remains NULL if Warden system is not enabled by config
+#endif
         uint16 _build;
 
         time_t _logoutTime;

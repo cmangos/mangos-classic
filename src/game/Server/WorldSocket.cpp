@@ -390,6 +390,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         return false;
     }
 
+#ifdef BUILD_ANTICHEAT
     bool wardenActive = (sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED) || sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED));
 
     // Must be done before WorldSession is created
@@ -402,6 +403,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         BASIC_LOG("WorldSocket::HandleAuthSession: Client %s attempted to log in using invalid client OS (%s).", GetRemoteAddress().c_str(), os.c_str());
         return false;
     }
+#endif
 
     // Check that Key and account name are the same on client and server
     Sha1Hash sha;
@@ -445,9 +447,11 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     m_session->LoadTutorialsData();
 
+#ifdef BUILD_ANTICHEAT
     // Initialize Warden system only if it is enabled by config
     if (wardenActive)
         m_session->InitWarden(uint16(ClientBuild), &K, os);
+#endif
 
     sWorld.AddSession(m_session);
 

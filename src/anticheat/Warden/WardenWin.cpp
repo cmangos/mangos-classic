@@ -342,7 +342,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
         uint32 ourTicks = newClientTicks + (ticksNow - _serverTicks);
 
         sLog.outWardenLog("ServerTicks %u, RequestTicks %u, ClientTicks %u", ticksNow, _serverTicks, newClientTicks);  // Now, At request, At response
-        sLog.outWardenLog("Waittime %u", ourTicks - newClientTicks);
+        sLog.outWardenLog("WaitTime %u", ourTicks - newClientTicks);
 
     }
 

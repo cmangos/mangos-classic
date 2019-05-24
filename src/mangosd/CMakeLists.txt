@@ -56,6 +56,11 @@ target_link_libraries(${EXECUTABLE_NAME}
   gsoap
 )
 
+# Define BUILD_ANTICHEAT if need
+if (BUILD_ANTICHEAT)
+  add_definitions(-DBUILD_ANTICHEAT)
+endif()
+
 if(WIN32)
   target_link_libraries(${EXECUTABLE_NAME}
     optimized ${MYSQL_LIBRARY}

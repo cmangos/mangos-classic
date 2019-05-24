@@ -20,6 +20,7 @@ project(CMaNGOS_Classic)
 # Define here name of the binaries
 set(CMANGOS_BINARY_SERVER_NAME "mangosd")
 set(CMANGOS_BINARY_REALMD_NAME "realmd")
+set(CMANGOS_BINARY_ANTICHEAT_NAME "anticheat")
 
 cmake_minimum_required(VERSION 3.0)
 

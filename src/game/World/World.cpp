@@ -64,7 +64,10 @@
 #include "Tools/CharacterDatabaseCleaner.h"
 #include "Entities/CreatureLinkingMgr.h"
 #include "Weather/Weather.h"
+
+#ifdef BUILD_ANTICHEAT
 #include "Warden/WardenCheckMgr.h"
+#endif
 
 #include <algorithm>
 #include <mutex>
@@ -1280,6 +1283,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Starting Outdoor PvP System");
     sOutdoorPvPMgr.InitOutdoorPvP();
 
+#ifdef BUILD_ANTICHEAT
     // Initialize Warden
     sLog.outString("Loading Warden Checks...");
     sWardenCheckMgr->LoadWardenChecks();
@@ -1288,6 +1292,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Warden Action Overrides...");
     sWardenCheckMgr->LoadWardenOverrides();
     sLog.outString();
+#endif
 
     // Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
     sLog.outString("Loading Transports...");

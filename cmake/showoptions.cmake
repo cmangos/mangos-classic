@@ -43,6 +43,12 @@ else()
   message(STATUS "Build login server    : No")
 endif()
 
+if(BUILD_ANTICHEAT)
+  message(STATUS "Build anticheat       : Yes")
+else()
+  message(STATUS "Build anticheat       : No (default)")
+endif()
+
 if(BUILD_SCRIPTDEV)
   message(STATUS "Build ScriptDev       : Yes (default)")
 else()

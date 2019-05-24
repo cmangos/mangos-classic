@@ -74,6 +74,10 @@ target_link_libraries(${LIBRARY_NAME}
   PRIVATE detour
 )
 
+if (BUILD_ANTICHEAT)
+  target_link_libraries(${LIBRARY_NAME} PUBLIC anticheat)
+endif()
+
 if(WIN32)
   target_link_libraries(${LIBRARY_NAME} PUBLIC z)
 endif()
@@ -97,6 +101,11 @@ endif()
 # Define BUILD_PLAYERBOT if need
 if (BUILD_PLAYERBOT)
   add_definitions(-DBUILD_PLAYERBOT)
+endif()
+
+# Define BUILD_ANTICHEAT if need
+if (BUILD_ANTICHEAT)
+  add_definitions(-DBUILD_ANTICHEAT)
 endif()
 
 # Generate precompiled header

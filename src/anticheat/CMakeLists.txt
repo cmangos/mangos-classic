@@ -16,20 +16,43 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS OR BUILD_ANTICHEAT)
-  add_subdirectory(framework)
-  add_subdirectory(shared)
-endif()
+set(LIBRARY_NAME anticheat)
 
-if(BUILD_ANTICHEAT)
-  add_subdirectory(anticheat)
-endif()
+add_definitions(-DBUILD_ANTICHEAT)
 
-if(BUILD_GAME_SERVER)
-  add_subdirectory(game)
-  add_subdirectory(mangosd)
-endif()
+set(SRC_WARDEN
+    Warden/Warden.cpp
+    Warden/Warden.h
+    Warden/WardenCheckMgr.h
+    Warden/WardenCheckMgr.cpp
+    Warden/WardenMac.cpp
+    Warden/WardenMac.h
+    Warden/WardenWin.cpp
+    Warden/WardenWin.h
+)
 
-if(BUILD_LOGIN_SERVER)
-  add_subdirectory(realmd)
-endif()
+set(LIBRARY_SRCS
+    ${SRC_WARDEN}
+)
+
+source_group("Warden"
+  FILES
+    ${SRC_WARDEN}
+)
+
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_library(${LIBRARY_NAME} STATIC
+  ${LIBRARY_SRCS}
+)
+
+target_include_directories(${LIBRARY_NAME}
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(${LIBRARY_NAME}
+  PUBLIC shared
+  PUBLIC game
+)

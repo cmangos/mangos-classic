@@ -43,9 +43,11 @@
 #include <memory>
 #include <cstdarg>
 
+#ifdef BUILD_ANTICHEAT
 // Warden
 #include "Warden/WardenWin.h"
 #include "Warden/WardenMac.h"
+#endif
 
 #ifdef BUILD_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotMgr.h"
@@ -95,10 +97,14 @@ bool WorldSessionFilter::Process(WorldPacket const& packet) const
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_t mute_time, LocaleConstant locale) :
     m_muteTime(mute_time),
-    _player(nullptr), m_Socket(sock ? sock->shared<WorldSocket>() : nullptr), _security(sec), _accountId(id), _logoutTime(0), _warden(NULL), _build(0),
+    _player(nullptr), m_Socket(sock ? sock->shared<WorldSocket>() : nullptr), _security(sec), _accountId(id), _logoutTime(0), _build(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
-    m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED) {}
+    m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED) {
+#ifdef BUILD_ANTICHEAT
+	_warden = NULL;
+#endif
+}
 
 /// WorldSession destructor
 WorldSession::~WorldSession()
@@ -112,9 +118,11 @@ WorldSession::~WorldSession()
     if (m_Socket)
         m_Socket->FinalizeSession();
 
+#ifdef BUILD_ANTICHEAT
     // Warden
     if (_warden)
         delete _warden;
+#endif
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -351,9 +359,11 @@ bool WorldSession::Update(PacketFilter& updater)
     }
 #endif
 
+#ifdef BUILD_ANTICHEAT
     // Warden
     if (m_Socket && !m_Socket->IsClosed() && _warden)
         _warden->Update();
+#endif
 
     // check if we are safe to proceed with logout
     // logout procedure should happen only in World::UpdateSessions() method!!!
@@ -365,9 +375,11 @@ bool WorldSession::Update(PacketFilter& updater)
         if (!m_Socket || m_Socket->IsClosed() || (ShouldLogOut(currTime) && !m_playerLoading))
             LogoutPlayer(true);
 
+#ifdef BUILD_ANTICHEAT
         // Warden
         if (m_Socket && !m_Socket->IsClosed() && _warden)
             _warden->Update();
+#endif
 
         // finalize the session if disconnected.
         if (!m_Socket || m_Socket->IsClosed())
@@ -856,6 +868,7 @@ void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) cons
     SendPacket(data);
 }
 
+#ifdef BUILD_ANTICHEAT
 void WorldSession::InitWarden(uint16 build, BigNumber* k, std::string const& os) {
     _build = build;
 
@@ -867,3 +880,4 @@ void WorldSession::InitWarden(uint16 build, BigNumber* k, std::string const& os)
         _warden->Init(this, k);
     }
 }
+#endif
