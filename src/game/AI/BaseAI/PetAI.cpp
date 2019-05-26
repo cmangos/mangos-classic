@@ -370,7 +370,7 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 if (following)
                 {
-                    m_unit->GetMotionMaster()->Clear(false);
+                    m_unit->GetMotionMaster()->Clear(false);    // does this need to be removed since MoveFollow is calling Clear?
                     m_unit->GetMotionMaster()->MoveFollow(owner, m_followDist, m_followAngle);
                 }
             }
