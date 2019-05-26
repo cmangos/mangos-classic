@@ -4308,48 +4308,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (!unitTarget)
                         return;
 
-                    uint32 itemtype;
-                    uint32 rank = 0;
-                    Unit::AuraList const& mDummyAuras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
-                    for (auto mDummyAura : mDummyAuras)
-                    {
-                        if (mDummyAura->GetId() == 18692)
-                        {
-                            rank = 1;
-                            break;
-                        }
-                        if (mDummyAura->GetId() == 18693)
-                        {
-                            rank = 2;
-                            break;
-                        }
-                    }
-
-                    static uint32 const itypes[5][3] =
-                    {
-                        { 5512, 19004, 19005},              // Minor Healthstone
-                        { 5511, 19006, 19007},              // Lesser Healthstone
-                        { 5509, 19008, 19009},              // Healthstone
-                        { 5510, 19010, 19011},              // Greater Healthstone
-                        { 9421, 19012, 19013}               // Major Healthstone
-                    };
-
-                    switch (m_spellInfo->Id)
-                    {
-                        case  6201:
-                            itemtype = itypes[0][rank]; break; // Minor Healthstone
-                        case  6202:
-                            itemtype = itypes[1][rank]; break; // Lesser Healthstone
-                        case  5699:
-                            itemtype = itypes[2][rank]; break; // Healthstone
-                        case 11729:
-                            itemtype = itypes[3][rank]; break; // Greater Healthstone
-                        case 11730:
-                            itemtype = itypes[4][rank]; break; // Major Healthstone
-                        default:
-                            return;
-                    }
-                    DoCreateItem(eff_idx, itemtype);
+                    uint32 itemType = GetUsableHealthStoneItemType(unitTarget);
+                    if (itemType)
+                        DoCreateItem(eff_idx, itemType);
                     return;
                 }
             }
@@ -5756,4 +5717,51 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
     data << m_caster->GetObjectGuid();
     data << uint32(area_id);
     player->SendDirectMessage(data);
+}
+
+uint32 Spell::GetUsableHealthStoneItemType(Unit* target)
+{
+    if (!target || target->GetTypeId() != TYPEID_PLAYER)
+        return 0;
+
+    uint32 itemtype;
+    uint32 rank = 0;
+    Unit::AuraList const& mDummyAuras = target->GetAurasByType(SPELL_AURA_DUMMY);
+    for (auto mDummyAura : mDummyAuras)
+    {
+        if (mDummyAura->GetId() == 18692)
+        {
+            rank = 1;
+            break;
+        }
+        if (mDummyAura->GetId() == 18693)
+        {
+            rank = 2;
+            break;
+        }
+    }
+
+    static uint32 const itypes[6][3] =
+    {
+        { 5512, 19004, 19005},              // Minor Healthstone
+        { 5511, 19006, 19007},              // Lesser Healthstone
+        { 5509, 19008, 19009},              // Healthstone
+        { 5510, 19010, 19011},              // Greater Healthstone
+        { 9421, 19012, 19013},              // Major Healthstone
+    };
+
+    switch (m_spellInfo->Id)
+    {
+        case  6201:
+            itemtype = itypes[0][rank]; break; // Minor Healthstone
+        case  6202:
+            itemtype = itypes[1][rank]; break; // Lesser Healthstone
+        case  5699:
+            itemtype = itypes[2][rank]; break; // Healthstone
+        case 11729:
+            itemtype = itypes[3][rank]; break; // Greater Healthstone
+        case 11730:
+            itemtype = itypes[4][rank]; break; // Major Healthstone
+    }
+    return itemtype;
 }
