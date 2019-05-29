@@ -318,7 +318,7 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, bool asMain
     if (asMain)
         Clear(false, true);
     else
-        Clear();
+        Clear(!empty()); // avoid resetting if we are already empty
 
     // ignore movement request if target not exist
     if (!target)
