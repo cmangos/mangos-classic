@@ -5389,36 +5389,30 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
         if (spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
             return;
 
+        // we want to change the stand state of each character if possible/required
+         // Since patch 1.5.0 sitting creature always stand up on attack (even if stunned)
+        if (success && !target->IsStandState() && target->IsPlayer())
+            target->SetStandState(UNIT_STAND_STATE_STAND);
+
         // Hostile spell hits count as attack made against target (if detected), stealth removed at Spell::cast if spell break it
         const bool attack = (!IsPositiveSpell(spellInfo->Id, realCaster, target) && IsVisibleForOrDetect(target, target, false) && CanEnterCombat() && target->CanEnterCombat());
 
-        if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
+        if (attack && !spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
         {
-            if (attack)
+            if (success)
             {
-                // Since patch 1.5.0 sitting characters always stand up on attack (even if stunned)
-                if (!spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_SITTING))
-                    if (success && !target->IsStandState() && target->GetTypeId() == TYPEID_PLAYER)
-                        target->SetStandState(UNIT_STAND_STATE_STAND);
+                target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
 
-                if (!spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
-                {
-                    if (success)
-                    {
-                        target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
-
-                        // caster can be detected but have stealth aura
-                        if (!spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
-                            RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-                    }
-
-                    target->AddThreat(realCaster);
-                    target->SetInCombatWithAggressor(realCaster);
-                    realCaster->SetInCombatWithVictim(target);
-
-                    target->AttackedBy(realCaster);
-                }
+                // caster can be detected but have stealth aura
+                if (!spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
+                    RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
             }
+
+            target->AddThreat(realCaster);
+            target->SetInCombatWithAggressor(realCaster);
+            realCaster->SetInCombatWithVictim(target);
+
+            target->AttackedBy(realCaster);
         }
 
         if (attack && spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
