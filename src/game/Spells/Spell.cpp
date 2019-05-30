@@ -6885,7 +6885,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
 
     // spell processing not complete, plan event on the next update interval
     m_Spell->GetCaster()->m_events.AddEvent(this, e_time + 1, false);
-    return false;                                           // event not complete
+    return false; // event not complete
 }
 
 void SpellEvent::Abort(uint64 /*e_time*/)
