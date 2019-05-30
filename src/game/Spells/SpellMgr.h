@@ -2330,6 +2330,7 @@ class SpellMgr
             return (spellId1 != spellId2 && GetFirstSpellInChain(spellId1) == GetFirstSpellInChain(spellId2));
         }
 
+        bool IsNoStackSpellDueToSpellAndCastItem(SpellAuraHolder const* spellHolder1, SpellAuraHolder const* spellHolder2) const;
         bool IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const;
         bool IsSingleTargetSpell(SpellEntry const* entry) const
         {
