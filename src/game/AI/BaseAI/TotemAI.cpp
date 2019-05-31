@@ -43,7 +43,7 @@ void TotemAI::MoveInLineOfSight(Unit* /*who*/)
 
 void TotemAI::EnterEvadeMode()
 {
-    m_creature->CombatStop(true);
+    m_creature->CombatStopWithPets(true);
 
     // Handle Evade events
     IncreaseDepthIfNecessary();
