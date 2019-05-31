@@ -84,7 +84,7 @@ void UnitAI::MoveInLineOfSight(Unit* who)
 void UnitAI::EnterEvadeMode()
 {
     m_unit->RemoveAllAurasOnEvade();
-    m_unit->CombatStop(true);
+    m_unit->CombatStopWithPets(true);
 
     // only alive creatures that are not on transport can return to home position
     if (GetReactState() != REACT_PASSIVE && m_unit->isAlive())
