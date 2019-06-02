@@ -1301,8 +1301,8 @@ bool SpellMgr::IsNoStackSpellDueToSpellAndCastItem(SpellAuraHolder const* spellH
         ObjectGuid castItem1 = spellHolder1->GetCastItemGuid();
         ObjectGuid castItem2 = spellHolder2->GetCastItemGuid();
         
-        // check that we have found an item, if we do then we are not stackable
-        stackable = !((castItem1 && !castItem1.IsEmpty()) || (castItem2 && !castItem2.IsEmpty()));
+        // check that we have found matching items, if we do then we are not stackable
+        stackable = !(castItem1 && castItem2 && castItem1 == castItem2);
     }
     return !stackable;
 }
