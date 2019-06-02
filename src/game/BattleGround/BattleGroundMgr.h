@@ -259,8 +259,8 @@ class BattleGroundMgr
         static BattleGroundTypeId WeekendHolidayIdToBGType(HolidayIds holiday);
         static bool IsBGWeekend(BattleGroundTypeId bgTypeId);
     private:
-        std::mutex    SchedulerLock;
-        BattleMastersMap    mBattleMastersMap;
+        std::mutex SchedulerLock;
+        BattleMastersMap mBattleMastersMap;
         CreatureBattleEventIndexesMap m_CreatureBattleEventIndexMap;
         GameObjectBattleEventIndexesMap m_GameObjectBattleEventIndexMap;
 

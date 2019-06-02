@@ -534,6 +534,9 @@ void BattleGround::CastSpellOnTeam(uint32 SpellID, Team teamId)
 
 void BattleGround::RewardHonorToTeam(uint32 Honor, Team teamId)
 {
+    if (teamId == TEAM_NONE)
+        return;
+
     for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
         if (itr->second.OfflineRemoveTime)
