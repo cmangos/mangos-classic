@@ -111,7 +111,7 @@ endif()
 
 # Override configuration-types - we don't use anything else than debug and release
 if(CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_CONFIGURATION_TYPES "Release;Debug" CACHE STRING "Reset the configurations to what we need" FORCE)
+  set(CMAKE_CONFIGURATION_TYPES "Release;Debug;RelWithDebInfo;MinSizeRel" CACHE STRING "Reset the configurations to what we need" FORCE)
 else()
   if(NOT CMAKE_BUILD_TYPE)
     if (NOT DEBUG)
@@ -123,7 +123,7 @@ else()
   endif()
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY HELPSTRING "Choose the type of build")
   # set the valid options for cmake-gui drop-down list
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release")
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release;RelWithDebInfo;MinSizeRel")
 endif()
 
 # find Git: used to get the revision number
@@ -318,6 +318,8 @@ configure_file(
 )
 
 set(DEFINITIONS_RELEASE NDEBUG)
+set(DEFINITIONS_RELWITHDEBINFO NDEBUG _RELWITHDEBINFO MANGOS_RELWITHDEBINFO)
+set(DEFINITIONS_MINSIZEREL NDEBUG _MINSIZEREL MANGOS_MINSIZEREL)
 set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
 
 if(NOT BUILD_GAME_SERVER AND BUILD_SCRIPTDEV)
@@ -363,6 +365,10 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_DEBUG}")
+elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+  set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_RELWITHDEBINFO}")
+elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+  set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_MINSIZEREL}")
 else()
   set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_RELEASE}")
 endif()

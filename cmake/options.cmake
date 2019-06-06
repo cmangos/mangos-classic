@@ -24,7 +24,6 @@ message(STATUS
     PCH                     Use precompiled headers
     DEBUG                   Include additional debug-code in core
     WARNINGS                Show all warnings during compile
-    DEBUG                   Include additional debug-code in core
     POSTGRESQL              Use PostgreSQL instead of mysql
     BUILD_GAME_SERVER       Build game server (core server)
     BUILD_LOGIN_SERVER      Build login server (auth server)
