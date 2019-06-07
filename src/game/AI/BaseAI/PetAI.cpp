@@ -369,10 +369,7 @@ void PetAI::UpdateAI(const uint32 diff)
             else if (!m_unit->hasUnitState(UNIT_STAT_FOLLOW_MOVE) && !owner->IsWithinDistInMap(m_unit, (PET_FOLLOW_DIST * 2)))
             {
                 if (following)
-                {
-                    m_unit->GetMotionMaster()->Clear(false);    // does this need to be removed since MoveFollow is calling Clear?
                     m_unit->GetMotionMaster()->MoveFollow(owner, m_followDist, m_followAngle);
-                }
             }
         }
     }
