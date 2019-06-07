@@ -2043,7 +2043,6 @@ bool ChatHandler::HandleLearnAllGMCommand(char* /*args*/)
         23452,  // Invisibility
         23775,  // Stun Forever
         24199,  // Knockback 35
-        31750,  // QATest +1000 Spell Dmg (QASpell)
         0
     };
 
