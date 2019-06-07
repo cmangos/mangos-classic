@@ -394,36 +394,26 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     owner->SetPet(this);                                    // in DB stored only full controlled creature
     DEBUG_LOG("New Pet has guid %u", GetGUIDLow());
 
-    if (owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        ((Player*)owner)->PetSpellInitialize();
-        if (((Player*)owner)->GetGroup())
-            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_PET);
-    }
+    owner->PetSpellInitialize();
+
+    if (owner->GetGroup())
+        owner->SetGroupUpdateFlag(GROUP_UPDATE_PET);
 
     m_loading = false;
 
     SynchronizeLevelWithOwner();
 
-    SavePetToDB(PET_SAVE_AS_CURRENT);
+    SavePetToDB(PET_SAVE_AS_CURRENT, owner);
     return true;
 }
 
-void Pet::SavePetToDB(PetSaveMode mode)
+void Pet::SavePetToDB(PetSaveMode mode, Player* owner)
 {
     if (!GetEntry())
         return;
 
     // save only fully controlled creature
     if (!isControlled())
-        return;
-
-    // not save not player pets
-    if (!GetOwnerGuid().IsPlayer())
-        return;
-
-    Player* pOwner = (Player*)GetOwner();
-    if (!pOwner)
         return;
 
     // current/stable/not_in_slot
@@ -433,8 +423,8 @@ void Pet::SavePetToDB(PetSaveMode mode)
         if (mode == PET_SAVE_REAGENTS)
             mode = PET_SAVE_NOT_IN_SLOT;
         // not save pet as current if another pet temporary unsummoned
-        else if (mode == PET_SAVE_AS_CURRENT && pOwner->GetTemporaryUnsummonedPetNumber() &&
-                 pOwner->GetTemporaryUnsummonedPetNumber() != m_charmInfo->GetPetNumber())
+        else if (mode == PET_SAVE_AS_CURRENT && owner->GetTemporaryUnsummonedPetNumber() &&
+                 owner->GetTemporaryUnsummonedPetNumber() != m_charmInfo->GetPetNumber())
         {
             // pet will lost anyway at restore temporary unsummoned
             if (getPetType() == HUNTER_PET)
@@ -1019,13 +1009,15 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
 
     if (owner)
     {
+        Player* p_owner = nullptr;
+
         if (GetOwnerGuid() != owner->GetObjectGuid())
             return;
 
-        Player* p_owner = owner->GetTypeId() == TYPEID_PLAYER ? (Player*)owner : nullptr;
-
-        if (p_owner)
+        if (owner->GetTypeId() == TYPEID_PLAYER)
         {
+            p_owner = static_cast<Player*>(owner);
+
             // not save secondary permanent pet as current
             if (mode == PET_SAVE_AS_CURRENT && p_owner->GetTemporaryUnsummonedPetNumber() &&
                     p_owner->GetTemporaryUnsummonedPetNumber() != GetCharmInfo()->GetPetNumber())
@@ -1080,9 +1072,11 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
                     owner->SetPet(nullptr);
                 break;
         }
+
+        if (p_owner)
+            SavePetToDB(mode, p_owner);
     }
 
-    SavePetToDB(mode);
     AddObjectToRemoveList();
     m_removed = true;
 }
