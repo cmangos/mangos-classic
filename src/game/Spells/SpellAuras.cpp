@@ -4902,11 +4902,6 @@ void Aura::PeriodicTick()
         }
         case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
         {
-            // Some NPCs have persistent passive auras that are not removed on death
-            // so prevent them from triggering if aura holder is dead
-            Unit* caster = GetCaster();
-            if (caster && caster->GetTypeId() == TYPEID_UNIT && !caster->isAlive())
-                break;
             TriggerSpell();
             break;
         }
