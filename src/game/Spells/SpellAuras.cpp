@@ -1269,6 +1269,24 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->CastSpell(target, 25043, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
                         return;
                     }
+                    case 26681:                             // Cologne
+                    {
+                        if (Unit* target = GetTarget())
+                        {
+                            if (target->HasAura(26682))
+                                target->RemoveAurasDueToSpell(26682);
+                        }
+                        return;
+                    }
+                    case 26682:                             // Perfume
+                    {
+                        if (Unit* target = GetTarget())
+                        {
+                            if (target->HasAura(26681))
+                                target->RemoveAurasDueToSpell(26681);
+                        }
+                        return;
+                    }
                     case 28832:                             // Mark of Korth'azz
                     case 28833:                             // Mark of Blaumeux
                     case 28834:                             // Mark of Rivendare
