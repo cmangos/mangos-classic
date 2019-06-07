@@ -3434,7 +3434,7 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     plr->PetSpellInitialize();
     pet->SetLoading(false);
 
-    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT, plr);
 }
 
 void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
@@ -3443,13 +3443,17 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     Pet* NewSummon = new Pet;
 
+    Player* _player = nullptr;
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+        _player = static_cast<Player*>(m_caster);
+
         switch (m_caster->getClass())
         {
             case CLASS_HUNTER:
             {
-                NewSummon->LoadPetFromDB((Player*)m_caster);
+                NewSummon->LoadPetFromDB(_player);
                 return;
             }
             case CLASS_WARLOCK:
@@ -3473,7 +3477,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
                     OldSummon->Unsummon(PET_SAVE_NOT_IN_SLOT, m_caster);
 
                 // Load pet from db; if any to load
-                if (NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
+                if (NewSummon->LoadPetFromDB(_player, petentry))
                     return;
 
                 NewSummon->setPetType(SUMMON_PET);
@@ -3508,7 +3512,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     // Level of pet summoned
     uint32 level = m_caster->getLevel();
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    if (!_player)
     {
         // pet players do not need this
         // TODO :: Totem, Pet and Critter may not use this. This is probably wrongly used and need more research.
@@ -3558,9 +3562,9 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     NewSummon->AIM_Initialize();
     NewSummon->AI()->SetReactState(REACT_DEFENSIVE);
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (_player)
     {
-        NewSummon->GetCharmInfo()->SetPetNumber(pet_number, (m_caster->GetTypeId() == TYPEID_PLAYER));
+        NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
 
         // generate new name for summon pet
         NewSummon->SetName(sObjectMgr.GeneratePetName(petentry));
@@ -3570,7 +3574,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         NewSummon->CastOwnerTalentAuras();
         NewSummon->UpdateAllStats();
 
-        NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
+        NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT, _player);
         ((Player*)m_caster)->PetSpellInitialize();
         NewSummon->SetLoading(false);
     }
@@ -3605,7 +3609,7 @@ void Spell::EffectLearnPetSpell(SpellEffectIndex eff_idx)
     pet->SetTP(pet->m_TrainingPoints - pet->GetTPForSpell(learn_spellproto->Id));
     pet->learnSpell(learn_spellproto->Id);
 
-    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT, _player);
     _player->PetSpellInitialize();
 
     if (WorldObject const* caster = GetCastingObject())
@@ -5455,7 +5459,7 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
     pet->SetHealth(uint32(pet->GetMaxHealth() * (float(damage) / 100)));
 
     // _player->PetSpellInitialize(); // action bar not removed at death and not required send at revive
-    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT, _player);
 }
 
 void Spell::EffectDestroyAllTotems(SpellEffectIndex /*eff_idx*/)
