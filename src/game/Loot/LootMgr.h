@@ -344,7 +344,7 @@ class Loot
         void SetGroupLootRight(Player* player);
         void GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount);
         bool FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false);
-        void ForceLootAnimationCLientUpdate() const;
+        void ForceLootAnimationClientUpdate() const;
         void SetPlayerIsLooting(Player* player);
         void SetPlayerIsNotLooting(Player* player);
         void GetLootContentFor(Player* player, ByteBuffer& buffer);
