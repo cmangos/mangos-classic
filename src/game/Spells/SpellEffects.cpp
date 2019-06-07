@@ -4226,6 +4226,75 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 26663:                                 // Valentine - Orgrimmar Grunt
+                case 26923:                                 // Valentine - Thunderbluff Watcher
+                case 26924:                                 // Valentine - Undercity Guardian
+                case 27541:                                 // Valentine - Darnassus Sentinel
+                case 27547:                                 // Valentine - Ironforge Guard
+                case 27548:                                 // Valentine - Stormwind City Guard
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 PledgeGiftOrHeartbroken;
+                    // Guard spellIds map [Pledge of Friendship , Pledge of Adoration]
+                    std::map<uint32, std::vector<uint32>> loveAirSpellsMapForFaction = {
+                            {11, {27242, 27510}},   // Stormwind
+                            {85, {27247, 27507}},   // Orgrimmar
+                            {57, {27244, 27506}},   // Ironforge
+                            {68, {27246, 27515}},   // Undercity Guardian
+                            {71, {27246, 27515}},   // Undercity Seeker
+                            {79, {27245, 27504}},   // Darnassus
+                            {105, {27248, 27513}}   // Thunderbluff
+                        };
+
+                    if (loveAirSpellsMapForFaction.count(m_caster->getFaction()))
+                    {
+                        if (!urand(0, 5))                       // Sets 1 in 6 chance to cast Heartbroken
+                            PledgeGiftOrHeartbroken = 26898;    // Heartbroken
+                        else if (!unitTarget->HasAura(26680))
+                        {
+                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->getFaction()][1];    // Pledge of Adoration for related faction
+                            unitTarget->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);  // Cast Adored
+                        }
+                        else
+                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->getFaction()][0];    // Pledge of Friendship for related faction
+
+                        unitTarget->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
+                        m_caster->RemoveAurasDueToSpell(27741);                             // Remove Love is in the Air from guard
+                        ((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);     // Remove 1 love token on cast from inventory
+                    }
+                    return;
+                }
+                case 26678:                                 // Create Heart Candy
+                {
+                    uint32 spellId = 0;
+
+                    switch (urand(0, 7))
+                    {
+                        case 0: spellId = 26668; break;
+                        case 1: spellId = 26670; break;
+                        case 2: spellId = 26671; break;
+                        case 3: spellId = 26672; break;
+                        case 4: spellId = 26673; break;
+                        case 5: spellId = 26674; break;
+                        case 6: spellId = 26675; break;
+                        case 7: spellId = 26676; break;
+                    }
+
+                    m_caster->CastSpell(m_caster, spellId, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 27654:                                 // Love is in the Air Test
+                {
+                    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        unitTarget->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);          // Add gossip flag for NPC missing it
+                        if (!unitTarget->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER))  // Cast Amorous if caster is not an innkeeper
+                            unitTarget->CastSpell(m_caster, 26869, TRIGGERED_OLD_TRIGGERED);
+                    }
+                    return;
+                }
                 case 27687:                                 // Summon Bone Minions
                 {
                     if (!unitTarget)
