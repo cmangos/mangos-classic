@@ -3740,6 +3740,8 @@ void Unit::_UpdateAutoRepeatSpell()
         // cancel wand shoot
         if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Category == 351)
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+        // set 0.5 second wind-up time.
+        m_AutoRepeatFirstCast = true;
         return;
     }
 
