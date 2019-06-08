@@ -3229,9 +3229,7 @@ void Spell::_handle_immediate_phase()
 
         // apply Send Event effect to ground in case empty target lists
         if (m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT && !HaveTargetsForEffect(SpellEffectIndex(j)))
-        {
             HandleEffects(nullptr, nullptr, nullptr, SpellEffectIndex(j));
-        }
     }
 
     // initialize Diminishing Returns Data
@@ -4277,9 +4275,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (m_caster->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) &&
             !m_IsTriggeredSpell && !m_caster->IsSpellReady(*m_spellInfo, m_CastItem ? m_CastItem->GetProto() : nullptr))
     {
-        if (m_triggeredByAuraSpell)
-            return SPELL_FAILED_DONT_REPORT;
-        return SPELL_FAILED_NOT_READY;
+        return m_triggeredByAuraSpell ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
     }
 
     if (!m_caster->isAlive() && m_caster->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD) && !m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
@@ -4298,8 +4294,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (bg->GetStatus() == STATUS_WAIT_LEAVE)
                 return SPELL_FAILED_DONT_REPORT;
 
-    if (!m_IsTriggeredSpell && IsNonCombatSpell(m_spellInfo) &&
-            m_caster->isInCombat())
+    if (!m_IsTriggeredSpell && IsNonCombatSpell(m_spellInfo) && m_caster->isInCombat())
         return SPELL_FAILED_AFFECTING_COMBAT;
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER && !((Player*)m_caster)->isGameMaster() &&
@@ -4361,9 +4356,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
                     {
                         if ((*itr)->GetModifier()->m_miscvalue == 3655)
-                        {
                             return SPELL_FAILED_TARGET_AURASTATE;
-                        }
                         else
                             ++itr;
                     }
@@ -4381,9 +4374,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
                     {
                         if ((*itr)->GetModifier()->m_miscvalue == 4327)
-                        {
                             return SPELL_FAILED_FIZZLE;
-                        }
                         else
                             ++itr;
                     }
@@ -4398,9 +4389,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
                     {
                         if ((*itr)->GetModifier()->m_miscvalue == 3654)
-                        {
                             return SPELL_FAILED_TARGET_AURASTATE;
-                        }
                         else
                             ++itr;
                     }
