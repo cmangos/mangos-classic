@@ -4261,20 +4261,10 @@ void Player::SetLevitate(bool enable)
 void Player::SetCanFly(bool enable)
 {
 //     TODO: check if there is something similar for 1.12.x (99% chance there is not)
-//     WorldPacket data;
-//     if (enable)
-//         data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
-//     else
-//         data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
-//
+//     WorldPacket data(enable ? SMSG_MOVE_SET_CAN_FLY : SMSG_MOVE_UNSET_CAN_FLY, GetPackGUID().size() + 4);
 //     data << GetPackGUID();
-//     data << uint32(0);                                      // unk
-//     SendMessageToSet(data, true);
-//
-//     data.Initialize(MSG_MOVE_UPDATE_CAN_FLY, 64);
-//     data << GetPackGUID();
-//     m_movementInfo.Write(data);
-//     SendMessageToSet(data, false);
+//     data << uint32(0);
+//     GetSession()->SendPacket(data);
 }
 
 void Player::SetFeatherFall(bool enable)
