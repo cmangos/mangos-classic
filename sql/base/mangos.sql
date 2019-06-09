@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2735_01_mangos_weapon_skills_fix_vanilla` bit(1) DEFAULT NULL
+  `required_z2738_01_mangos_quest_template` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -8107,7 +8107,6 @@ INSERT INTO `playercreateinfo_skills` VALUES
 (0,     8,  38, 0,  'Rogue: Combat'),
 (0,     8, 253, 0,  'Rogue: Assassination'),
 (0,     8,  39, 0,  'Rogue: Subtlety'),
--- (0,     8, 176, 0,  'Weapon: Thrown'),
 (0,     8, 173, 0,  'Weapon: Daggers (Rogue)'),
 (0,     8, 176, 0,  'Weapon: Thrown (Rogue)'),
 -- PRIEST CLASS:
@@ -9857,6 +9856,7 @@ CREATE TABLE `quest_template` (
   `Method` tinyint(3) unsigned NOT NULL DEFAULT '2',
   `ZoneOrSort` smallint(6) NOT NULL DEFAULT '0',
   `MinLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `MaxLevel` tinyint(3) unsigned NOT NULL DEFAULT '255',
   `QuestLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `Type` smallint(5) unsigned NOT NULL DEFAULT '0',
   `RequiredClasses` smallint(5) unsigned NOT NULL DEFAULT '0',
