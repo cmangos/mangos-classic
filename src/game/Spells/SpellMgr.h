@@ -326,7 +326,7 @@ inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
     if (!IsPassiveSpell(spellProto))
         return false;
 
-    return !IsSpellHaveEffect(spellProto, SPELL_EFFECT_APPLY_AURA);
+    return !IsSpellHaveEffect(spellProto, SPELL_EFFECT_APPLY_AURA) && !IsSpellHaveEffect(spellProto, SPELL_EFFECT_APPLY_AREA_AURA_PARTY);
 }
 
 inline bool IsAutocastable(SpellEntry const* spellInfo)
@@ -408,71 +408,104 @@ inline bool IsResistableSpell(const SpellEntry* entry)
     return (entry->DmgClass != SPELL_DAMAGE_CLASS_NONE && !entry->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES));
 }
 
-inline bool IsBinarySpell(SpellEntry const* spellInfo)
+inline bool IsSpellEffectDamage(SpellEntry const& spellInfo, SpellEffectIndex i)
+{
+    if (!spellInfo.EffectApplyAuraName[i])
+    {
+        // If its not an aura effect, check for damage effects
+        switch (spellInfo.Effect[i])
+        {
+            case SPELL_EFFECT_SCHOOL_DAMAGE:
+            case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+            case SPELL_EFFECT_HEALTH_LEECH:
+            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+            case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE:
+            //   SPELL_EFFECT_POWER_BURN: deals damage for power burned, but its either full damage or resist?
+            case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                return true;
+        }
+    }
+    else
+    {
+        // If its an aura effect, check for DoT auras
+        switch (spellInfo.EffectApplyAuraName[i])
+        {
+            case SPELL_AURA_PERIODIC_DAMAGE:
+            case SPELL_AURA_PERIODIC_LEECH:
+            //   SPELL_AURA_POWER_BURN_MANA: deals damage for power burned, but not really a DoT?
+            case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+                return true;
+        }
+    }
+    return false;
+}
+
+inline bool IsSpellEffectDummy(SpellEntry const& spellInfo, SpellEffectIndex i)
+{
+    if (!spellInfo.EffectApplyAuraName[i])
+    {
+        switch (spellInfo.Effect[i])
+        {
+            case SPELL_EFFECT_DUMMY:
+                return true;
+        }
+    }
+    else
+    {
+        switch (spellInfo.EffectApplyAuraName[i])
+        {
+            case SPELL_AURA_DUMMY:
+                return true;
+        }
+    }
+    return false;
+}
+
+inline bool IsSpellEffectsDamage(SpellEntry const& spellInfo, uint8 effectMask = EFFECT_MASK_ALL)
+{
+    for (uint8 i = EFFECT_INDEX_0; (i < MAX_EFFECT_INDEX && effectMask); (++i, (effectMask >>= 1)))
+    {
+        if (spellInfo.Effect[i] && (effectMask & 1) && !IsSpellEffectDamage(spellInfo, SpellEffectIndex(i)))
+            return false;
+    }
+    return true;
+}
+
+inline bool IsBinarySpell(SpellEntry const& spellInfo, uint8 effectMask = EFFECT_MASK_ALL)
 {
     // Spell is considered binary if:
     // * (Pre-WotLK): It contains non-damage effects or auras
     // * (WotLK+): It contains no damage effects or auras
-    // TODO: In theory, same spell may behave differently for different tagets. At some point, we probably will need to query binary on effect mask basis.
-    uint32 effectmask = 0;  // A bitmask of effects: set bits are valid effects
-    uint32 nondmgmask = 0;  // A bitmask of effects: set bits are non-damage effects
-    uint32 auramask = 0;    // A bitmask of aura effcts: set bits are auras
+    uint8 validmask = 0;    // A bitmask of effects: set bits are valid effects
+    uint8 nondmgmask = 0;   // A bitmask of effects: set bits are non-damage effects
+    uint8 auramask = 0;     // A bitmask of aura effcts: set bits are auras
     for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if (!spellInfo->Effect[i] || IsSpellEffectTriggerSpell(spellInfo, SpellEffectIndex(i)))
+        const uint8 thisMask = uint8(1 << (i - 1));
+
+        if (!spellInfo.Effect[i] || !(effectMask & thisMask))
             continue;
 
-        effectmask |= (1 << i);
+        if (IsSpellEffectDummy(spellInfo, SpellEffectIndex(i)) || IsSpellEffectTriggerSpell(&spellInfo, SpellEffectIndex(i)))
+            continue;
 
-        bool damage = false;
-        if (!spellInfo->EffectApplyAuraName[i])
-        {
-            // If its not an aura effect, check for damage effects
-            switch (spellInfo->Effect[i])
-            {
-                case SPELL_EFFECT_SCHOOL_DAMAGE:
-                case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
-                case SPELL_EFFECT_HEALTH_LEECH:
-                case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
-                case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-                case SPELL_EFFECT_WEAPON_DAMAGE:
-                //   SPELL_EFFECT_POWER_BURN: deals damage for power burned, but its either full damage or resist?
-                case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
-                    damage = true;
-                    break;
-            }
-        }
-        else
-        {
-            // If its an aura effect, check for DoT auras
-            switch (spellInfo->EffectApplyAuraName[i])
-            {
-                case SPELL_AURA_PERIODIC_DAMAGE:
-                case SPELL_AURA_PERIODIC_LEECH:
-                //   SPELL_AURA_POWER_BURN_MANA: deals damage for power burned, but not really a DoT?
-                case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
-                    damage = true;
-                    break;
-                case SPELL_AURA_DUMMY:
-                    // Placeholder: insert any possible overrides here...
-                    break;
-            }
-            auramask |= (1 << i);
-        }
-        if (!damage)
-            nondmgmask |= (1 << i);
+        validmask |= thisMask;
+
+        if (spellInfo.EffectApplyAuraName[i])
+            auramask |= thisMask;
+        if (!IsSpellEffectDamage(spellInfo, SpellEffectIndex(i)))
+            nondmgmask |= thisMask;
     }
     // No valid effects: treat as non-binary
-    if (!effectmask)
+    if (!validmask)
         return false;
     // All effects are non-damage: treat as binary
-    if (nondmgmask == effectmask)
-        return true;
     // All effects are auras: treat as binary (even pure DoTs are treated as binary on initial application)
-    if (auramask == effectmask)
+    if (nondmgmask == validmask || auramask == validmask)
         return true;
-    const uint32 dmgmask = (effectmask & ~nondmgmask);
-    const uint32 dotmask = (dmgmask & auramask);
+    const uint8 dmgmask = (validmask & ~nondmgmask);
+    const uint8 dotmask = (dmgmask & auramask);
     // Just in case, if all damage effects are DoTs: treat as binary
     if (dmgmask == dotmask)
         return true;
@@ -480,26 +513,24 @@ inline bool IsBinarySpell(SpellEntry const* spellInfo)
     // Pre-WotLK: check if at least one non-damage effect hits the same target as damage effect (e.g. Frostbolt) and treat as binary
     if (nondmgmask)
     {
-        uint32 nukemask = (dmgmask & ~dotmask);
-        for (uint8 effect = EFFECT_INDEX_0; nukemask; ++effect)
+        uint8 directmask = (dmgmask & ~dotmask);
+        for (uint8 i = EFFECT_INDEX_0; directmask; (++i, (directmask >>= 1)))
         {
-            if (nukemask & 1)
+            if (directmask & 1)
             {
-                uint32 imask = nondmgmask;
-                for (uint8 i = EFFECT_INDEX_0; imask; ++i)
+                uint8 jmask = nondmgmask;
+                for (uint8 j = EFFECT_INDEX_0; jmask; (++j, (jmask >>= 1)))
                 {
-                    if (imask & 1)
+                    if (jmask & 1)
                     {
-                        if (spellInfo->EffectImplicitTargetA[effect] == spellInfo->EffectImplicitTargetA[i] &&
-                            spellInfo->EffectImplicitTargetB[effect] == spellInfo->EffectImplicitTargetB[i])
+                        if (spellInfo.EffectImplicitTargetA[i] == spellInfo.EffectImplicitTargetA[j] &&
+                            spellInfo.EffectImplicitTargetB[i] == spellInfo.EffectImplicitTargetB[j])
                         {
                             return true;
                         }
                     }
-                    imask >>= 1;
                 }
             }
-            nukemask >>= 1;
         }
     }
     return false;
@@ -1392,7 +1423,7 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         case SPELL_AURA_MOD_ATTACK_POWER:
             // Attack Power debuffs logic: Do not stack Curse of Weakness, Demoralizing Roars/Shouts
             if (!positive && entry->EffectBasePoints[i] < 1 && entry2->EffectBasePoints[similar] < 1)
-                return (!entry->SpellFamilyName && !entry->SpellFamilyName);
+                return (!entry->SpellFamilyName && !entry2->SpellFamilyName);
             break;
         // Armor & Resistance buffs and debuffs logic
         case SPELL_AURA_MOD_RESISTANCE:
@@ -1403,13 +1434,11 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
             {
                 // Used as a non-zero type in this context
                 const bool type = (entry->Dispel && entry->Dispel == entry2->Dispel);
-                const bool family = (entry->SpellFamilyName || entry2->SpellFamilyName);
-                const bool uncategorized = (!entry->SpellFamilyName || !entry2->SpellFamilyName);
-                if (type && family && uncategorized)
-                    return false; // Do not stack player buffs with scrolls
                 const bool attacktable = (entry->DmgClass && entry->DmgClass == entry2->DmgClass);
-                if (attacktable && !entry->SpellFamilyName && !entry2->SpellFamilyName)
-                    return false; // Do not stack scrolls with other some procs (such Hyjal ring)
+                if ((attacktable || type) && !entry->SpellFamilyName && !entry2->SpellFamilyName)
+                    return false; // Do not stack scrolls with other srolls and some procs (such as Hyjal ring)
+                if (player && related && siblings && entry->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
+                    return true;
             }
             else
             {
@@ -1418,7 +1447,7 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
                 if (type && prevention)
                     return false;
             }
-            return true;
+            break;
         }
         case SPELL_AURA_MOD_RESISTANCE_PCT:
         {
@@ -1442,6 +1471,13 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
                 const bool uncategorized = (!entry->SpellFamilyName || !entry2->SpellFamilyName);
                 if (type && family && uncategorized)
                     return false; // Do not stack player buffs with scrolls
+                if (!entry->SpellFamilyName && !entry2->SpellFamilyName)
+                {
+                    if (type)
+                        return false; // Do not stack scrolls and other non-player buffs with each other
+                    if (entry->HasAttribute(SPELL_ATTR_EX2_UNK28) && entry2->HasAttribute(SPELL_ATTR_EX2_UNK28))
+                        return false; // FIXME: Cozy fire hack
+                }
             }
             else
             {
@@ -1869,8 +1905,7 @@ struct SpellLearnSkillNode
 {
     uint16 skill;
     uint16 step;
-    uint16 value;                                           // 0  - max skill value for player level
-    uint16 maxvalue;                                        // 0  - max skill value for player level
+    SpellEffects effect;
 };
 
 typedef std::map<uint32, SpellLearnSkillNode> SpellLearnSkillMap;
@@ -2295,6 +2330,7 @@ class SpellMgr
             return (spellId1 != spellId2 && GetFirstSpellInChain(spellId1) == GetFirstSpellInChain(spellId2));
         }
 
+        bool IsNoStackSpellDueToSpellAndCastItem(SpellAuraHolder const* spellHolder1, SpellAuraHolder const* spellHolder2) const;
         bool IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const;
         bool IsSingleTargetSpell(SpellEntry const* entry) const
         {

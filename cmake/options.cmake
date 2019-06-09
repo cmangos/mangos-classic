@@ -7,6 +7,8 @@ option(BUILD_LOGIN_SERVER   "Build login server"                    ON)
 option(BUILD_EXTRACTORS     "Build map/dbc/vmap/mmap extractors"    OFF)
 option(BUILD_SCRIPTDEV      "Build ScriptDev. (OFF Speedup build)"  ON)
 option(BUILD_PLAYERBOT      "Build Playerbot mod"                   OFF)
+option(BUILD_RECASTDEMOMOD  "Build map/vmap/mmap viewer"            OFF)
+option(BUILD_GIT_ID         "Build git_id"                          OFF)
 
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)
@@ -22,13 +24,14 @@ message(STATUS
     PCH                     Use precompiled headers
     DEBUG                   Include additional debug-code in core
     WARNINGS                Show all warnings during compile
-    DEBUG                   Include additional debug-code in core
     POSTGRESQL              Use PostgreSQL instead of mysql
     BUILD_GAME_SERVER       Build game server (core server)
     BUILD_LOGIN_SERVER      Build login server (auth server)
     BUILD_EXTRACTORS        Build map/dbc/vmap/mmap extractor
     BUILD_SCRIPTDEV         Build scriptdev. (Disable it to speedup build in dev mode by not including scripts)
     BUILD_PLAYERBOT         Build Playerbot mod
+    BUILD_RECASTDEMOMOD     Build map/vmap/mmap viewer
+    BUILD_GIT_ID            Build git_id
 
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. see 'cmake --help' for more details

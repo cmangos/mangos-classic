@@ -213,6 +213,13 @@ bool OutdoorPvPEP::HandleEvent(uint32 eventId, GameObject* go)
 
 bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState)
 {
+    // Remove existing buff for both teams before applying new one: this prevent auras stacking
+    if (m_towersAlliance != 0)
+        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance, true);
+    if (m_towersHorde != 0)
+        BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde, true);
+
+    // Update world state and banners for captured tower
     if (team == ALLIANCE)
     {
         // update banner
@@ -222,9 +229,6 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
         // update counter
         ++m_towersAlliance;
         SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
-
-        // buff players
-        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance);
     }
     else if (team == HORDE)
     {
@@ -235,9 +239,6 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
         // update counter
         ++m_towersHorde;
         SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
-
-        // buff players
-        BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde);
     }
     else
     {
@@ -250,21 +251,23 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
             // update counter
             --m_towersAlliance;
             SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
-
-            if (m_towersAlliance == 0)
-                BuffTeam(ALLIANCE, plaguelandsTowerBuffs[0].spellIdAlliance, true);
         }
         else
         {
             // update counter
             --m_towersHorde;
             SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
-
-            if (m_towersHorde == 0)
-                BuffTeam(HORDE, plaguelandsTowerBuffs[0].spellIdHorde, true);
         }
     }
 
+    // Update Echoes of Lordaeron aura for capturing team and opposite team (if needed)
+    // Apply auras with updated capture towers values
+    if (m_towersAlliance != 0)
+        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance);
+    if (m_towersHorde != 0)
+        BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde);
+
+    // Update reward for captured tower
     bool eventHandled = true;
 
     if (team != TEAM_NONE)

@@ -267,7 +267,7 @@ void Spell::EffectInstaKill(SpellEffectIndex /*eff_idx*/)
 void Spell::EffectEnvironmentalDMG(SpellEffectIndex eff_idx)
 {
     uint32 absorb = 0;
-    uint32 resist = 0;
+    int32 resist = 0;
 
     // Note: this hack with damage replace required until GO casting not implemented
     // environment damage spells already have around enemies targeting but this not help in case nonexistent GO casting support
@@ -1096,6 +1096,29 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 25145:                                 // Merithra's Wake
+                {
+                    unitTarget->CastSpell(unitTarget, 25172, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 25149:                                 // Arygos's Vengeance
+                {
+                    unitTarget->CastSpell(unitTarget, 25168, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 25150:                                 // Molten Rain
+                {
+                    unitTarget->CastSpell(unitTarget, 25169, TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->CastSpell(unitTarget, 25170, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 25158:                                 // Time Stop
+                {
+                    unitTarget->SetImmuneToNPC(true);
+                    unitTarget->RemoveAllAuras();
+                    unitTarget->CastSpell(unitTarget, 25171, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 26080:                                 // Stinger Charge Primer
                 {
                     if (unitTarget->HasAura(26078))
@@ -1265,15 +1288,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 1661:
                 {
                     uint32 healthPerc = uint32((float(m_caster->GetHealth()) / m_caster->GetMaxHealth()) * 100);
-                    int32 melee_mod = 10;
+                    int32 haste_mod = 10;
                     if (healthPerc <= 40)
-                        melee_mod = 30;
-                    else if (healthPerc < 100)
-                        melee_mod = 10 + (100 - healthPerc) / 3;
+                        haste_mod = 30;
+                    if (healthPerc < 100 && healthPerc > 40)
+                        haste_mod = 10 + (100 - healthPerc) / 3;
 
-                    int32 hasteModBasePoints0 = melee_mod;  // (EffectBasePoints[0]+1)-1+(5-melee_mod) = (melee_mod-1+1)-1+5-melee_mod = 5-1
-                    int32 hasteModBasePoints1 = (5 - melee_mod);
-                    int32 hasteModBasePoints2 = 5;
+                    // haste_mod is the same for all effects
+                    int32 hasteModBasePoints0 = haste_mod;    // Haste Melee
+                    int32 hasteModBasePoints1 = haste_mod;    // Haste Range
+                    int32 hasteModBasePoints2 = haste_mod;    // Haste Cast
 
                     // FIXME: custom spell required this aura state by some unknown reason, we not need remove it anyway
                     m_caster->ModifyAuraState(AURA_STATE_BERSERKING, true);
@@ -1550,11 +1574,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             {
                 if (m_CastItem)
                 {
+                    // found spelldamage coefficients of 0.381% per 0.1 speed and 15.244 per 4.0 speed
+                    // but own calculation say 0.385 gives at most one point difference to published values
                     int32 bonusDamage = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo))
                                         + unitTarget->SpellBaseDamageBonusTaken(GetSpellSchoolMask(m_spellInfo));
                     // Does Amplify Magic/Dampen Magic influence flametongue? If not, the above addition must be removed.
                     float weaponSpeed = float(m_CastItem->GetProto()->Delay) / IN_MILLISECONDS;
-                    bonusDamage = m_caster->SpellBonusWithCoeffs(m_spellInfo, bonusDamage, 0, 0, SPELL_DIRECT_DAMAGE, false); // apply spell coeff
+                    bonusDamage = m_caster->SpellBonusWithCoeffs(m_spellInfo, 0, bonusDamage, 0, SPELL_DIRECT_DAMAGE, false); // apply spell coeff
                     int32 totalDamage = (damage * 0.01 * weaponSpeed) + bonusDamage;
 
                     m_caster->CastCustomSpell(unitTarget, 10444, &totalDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, m_CastItem);
@@ -1742,6 +1768,13 @@ void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
             if (!item->IsFitToSpellRequirements(spellInfo))
                 return;
         }
+    }
+
+    switch (triggered_spell_id) // custom targeting cases - for now classic only
+    {
+        case 6608: // Lash
+            caster = unitTarget;
+            break;
     }
 
     SpellCastTargets targets;
@@ -2779,8 +2812,8 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
 
 void Spell::EffectDualWield(SpellEffectIndex /*eff_idx*/)
 {
-    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)unitTarget)->SetCanDualWield(true);
+    if (unitTarget)
+        unitTarget->SetCanDualWield(true);
 }
 
 void Spell::EffectPull(SpellEffectIndex /*eff_idx*/)
@@ -2906,6 +2939,9 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
     }
 
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature_entry);
+
+    if (!cInfo)
+        return;
 
     if (m_caster->getLevel() >= cInfo->MaxLevel)
         level = cInfo->MaxLevel;
@@ -3180,12 +3216,10 @@ void Spell::EffectLearnSkill(SpellEffectIndex eff_idx)
 
     uint16 skillid =  uint16(m_spellInfo->EffectMiscValue[eff_idx]);
     uint16 step = uint16(damage);
-    uint16 current = std::max(uint16(1), target->GetSkillValuePure(skillid));
-    uint16 max = (step * 75);
-    target->SetSkill(skillid, current, max, step);
+    target->SetSkillStep(skillid, step);
 
     if (WorldObject const* caster = GetCastingObject())
-        DEBUG_LOG("Spell: %s has learned skill %u (to maxlevel %u) from %s", target->GetGuidStr().c_str(), skillid, max, caster->GetGuidStr().c_str());
+        DEBUG_LOG("Spell: %s teaches %s skill %u (to step %u)", caster->GetGuidStr().c_str(), target->GetGuidStr().c_str(), skillid, step);
 }
 
 void Spell::EffectAddHonor(SpellEffectIndex /*eff_idx*/)
@@ -3509,7 +3543,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     {
         NewSummon->SetFlag(UNIT_FIELD_FLAGS, cInfo->UnitFlags);
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, cInfo->NpcFlags);
-    }        
+    }
 
     if (m_caster->IsImmuneToNPC())
         NewSummon->SetImmuneToNPC(true);
@@ -4192,6 +4226,75 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 26663:                                 // Valentine - Orgrimmar Grunt
+                case 26923:                                 // Valentine - Thunderbluff Watcher
+                case 26924:                                 // Valentine - Undercity Guardian
+                case 27541:                                 // Valentine - Darnassus Sentinel
+                case 27547:                                 // Valentine - Ironforge Guard
+                case 27548:                                 // Valentine - Stormwind City Guard
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 PledgeGiftOrHeartbroken;
+                    // Guard spellIds map [Pledge of Friendship , Pledge of Adoration]
+                    std::map<uint32, std::vector<uint32>> loveAirSpellsMapForFaction = {
+                            {11, {27242, 27510}},   // Stormwind
+                            {85, {27247, 27507}},   // Orgrimmar
+                            {57, {27244, 27506}},   // Ironforge
+                            {68, {27246, 27515}},   // Undercity Guardian
+                            {71, {27246, 27515}},   // Undercity Seeker
+                            {79, {27245, 27504}},   // Darnassus
+                            {105, {27248, 27513}}   // Thunderbluff
+                        };
+
+                    if (loveAirSpellsMapForFaction.count(m_caster->getFaction()))
+                    {
+                        if (!urand(0, 5))                       // Sets 1 in 6 chance to cast Heartbroken
+                            PledgeGiftOrHeartbroken = 26898;    // Heartbroken
+                        else if (!unitTarget->HasAura(26680))
+                        {
+                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->getFaction()][1];    // Pledge of Adoration for related faction
+                            unitTarget->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);  // Cast Adored
+                        }
+                        else
+                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->getFaction()][0];    // Pledge of Friendship for related faction
+
+                        unitTarget->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
+                        m_caster->RemoveAurasDueToSpell(27741);                             // Remove Love is in the Air from guard
+                        ((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);     // Remove 1 love token on cast from inventory
+                    }
+                    return;
+                }
+                case 26678:                                 // Create Heart Candy
+                {
+                    uint32 spellId = 0;
+
+                    switch (urand(0, 7))
+                    {
+                        case 0: spellId = 26668; break;
+                        case 1: spellId = 26670; break;
+                        case 2: spellId = 26671; break;
+                        case 3: spellId = 26672; break;
+                        case 4: spellId = 26673; break;
+                        case 5: spellId = 26674; break;
+                        case 6: spellId = 26675; break;
+                        case 7: spellId = 26676; break;
+                    }
+
+                    m_caster->CastSpell(m_caster, spellId, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 27654:                                 // Love is in the Air Test
+                {
+                    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        unitTarget->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);          // Add gossip flag for NPC missing it
+                        if (!unitTarget->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER))  // Cast Amorous if caster is not an innkeeper
+                            unitTarget->CastSpell(m_caster, 26869, TRIGGERED_OLD_TRIGGERED);
+                    }
+                    return;
+                }
                 case 27687:                                 // Summon Bone Minions
                 {
                     if (!unitTarget)
@@ -4274,48 +4377,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (!unitTarget)
                         return;
 
-                    uint32 itemtype;
-                    uint32 rank = 0;
-                    Unit::AuraList const& mDummyAuras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
-                    for (auto mDummyAura : mDummyAuras)
-                    {
-                        if (mDummyAura->GetId() == 18692)
-                        {
-                            rank = 1;
-                            break;
-                        }
-                        if (mDummyAura->GetId() == 18693)
-                        {
-                            rank = 2;
-                            break;
-                        }
-                    }
-
-                    static uint32 const itypes[5][3] =
-                    {
-                        { 5512, 19004, 19005},              // Minor Healthstone
-                        { 5511, 19006, 19007},              // Lesser Healthstone
-                        { 5509, 19008, 19009},              // Healthstone
-                        { 5510, 19010, 19011},              // Greater Healthstone
-                        { 9421, 19012, 19013}               // Major Healthstone
-                    };
-
-                    switch (m_spellInfo->Id)
-                    {
-                        case  6201:
-                            itemtype = itypes[0][rank]; break; // Minor Healthstone
-                        case  6202:
-                            itemtype = itypes[1][rank]; break; // Lesser Healthstone
-                        case  5699:
-                            itemtype = itypes[2][rank]; break; // Healthstone
-                        case 11729:
-                            itemtype = itypes[3][rank]; break; // Greater Healthstone
-                        case 11730:
-                            itemtype = itypes[4][rank]; break; // Major Healthstone
-                        default:
-                            return;
-                    }
-                    DoCreateItem(eff_idx, itemtype);
+                    uint32 itemType = GetUsableHealthStoneItemType(unitTarget);
+                    if (itemType)
+                        DoCreateItem(eff_idx, itemType);
                     return;
                 }
             }
@@ -5324,6 +5388,9 @@ void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
     if (damage && dist > damage)
         dist = float(damage);
 
+    if (dist < 0.1f)
+        return;
+
     // Projectile motion
     float speedXY = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.1f;
     float time = dist / speedXY;
@@ -5719,4 +5786,51 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
     data << m_caster->GetObjectGuid();
     data << uint32(area_id);
     player->SendDirectMessage(data);
+}
+
+uint32 Spell::GetUsableHealthStoneItemType(Unit* target)
+{
+    if (!target || target->GetTypeId() != TYPEID_PLAYER)
+        return 0;
+
+    uint32 itemtype;
+    uint32 rank = 0;
+    Unit::AuraList const& mDummyAuras = target->GetAurasByType(SPELL_AURA_DUMMY);
+    for (auto mDummyAura : mDummyAuras)
+    {
+        if (mDummyAura->GetId() == 18692)
+        {
+            rank = 1;
+            break;
+        }
+        if (mDummyAura->GetId() == 18693)
+        {
+            rank = 2;
+            break;
+        }
+    }
+
+    static uint32 const itypes[6][3] =
+    {
+        { 5512, 19004, 19005},              // Minor Healthstone
+        { 5511, 19006, 19007},              // Lesser Healthstone
+        { 5509, 19008, 19009},              // Healthstone
+        { 5510, 19010, 19011},              // Greater Healthstone
+        { 9421, 19012, 19013},              // Major Healthstone
+    };
+
+    switch (m_spellInfo->Id)
+    {
+        case  6201:
+            itemtype = itypes[0][rank]; break; // Minor Healthstone
+        case  6202:
+            itemtype = itypes[1][rank]; break; // Lesser Healthstone
+        case  5699:
+            itemtype = itypes[2][rank]; break; // Healthstone
+        case 11729:
+            itemtype = itypes[3][rank]; break; // Greater Healthstone
+        case 11730:
+            itemtype = itypes[4][rank]; break; // Major Healthstone
+    }
+    return itemtype;
 }

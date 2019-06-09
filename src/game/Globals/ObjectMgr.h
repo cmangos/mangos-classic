@@ -374,6 +374,8 @@ enum ConditionType
     // value2: if != 0 only consider players in range of this value
     CONDITION_CREATURE_IN_RANGE     = 37,                   // value1: creature entry; value2: range; returns only alive creatures
     CONDITION_SPAWN_COUNT           = 39,                   // value1: creatureId; value2: count;
+    CONDITION_WORLD_SCRIPT          = 40,
+    CONDITION_GENDER_NPC            = 41,                   // value1: creature model gender: 0=male, 1=female, 2=none (see enum Gender)
 };
 
 enum ConditionSource                                        // From where was the condition called?
@@ -441,7 +443,7 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial);
 #define MAX_PET_NAME             12                         // max allowed by client name length
 #define MAX_CHARTER_NAME         24                         // max allowed by client name length
 
-bool normalizePlayerName(std::string& name);
+bool normalizePlayerName(std::string& name, size_t max_len = MAX_INTERNAL_PLAYER_NAME);
 
 struct LanguageDesc
 {

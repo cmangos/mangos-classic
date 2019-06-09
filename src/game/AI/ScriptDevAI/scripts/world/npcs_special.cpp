@@ -45,9 +45,8 @@ EndContentData */
 
 enum
 {
-    EMOTE_A_HELLO           = -1000204,
-    EMOTE_H_HELLO           = -1000205,
-    EMOTE_CLUCK_TEXT2       = -1000206,
+    EMOTE_CLUCK_TEXT1       = -1000204,
+    EMOTE_CLUCK_TEXT2       = -1000205,
 
     QUEST_CLUCK             = 3861,
     FACTION_FRIENDLY        = 35,
@@ -62,7 +61,7 @@ struct npc_chicken_cluckAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiResetFlagTimer = 120000;
+        m_uiResetFlagTimer = 20000;
 
         m_creature->setFaction(FACTION_CHICKEN);
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
@@ -70,35 +69,17 @@ struct npc_chicken_cluckAI : public ScriptedAI
 
     void ReceiveEmote(Player* pPlayer, uint32 uiEmote) override
     {
-        if (uiEmote == TEXTEMOTE_CHICKEN)
+        if (uiEmote == TEXTEMOTE_CHICKEN && !urand(0, 49))
         {
-            if (!urand(0, 29))
-            {
-                if (pPlayer->GetQuestStatus(QUEST_CLUCK) == QUEST_STATUS_NONE)
-                {
-                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                    m_creature->setFaction(FACTION_FRIENDLY);
-
-                    DoScriptText(EMOTE_A_HELLO, m_creature);
-
-                    /* are there any difference in texts, after 3.x ?
-                    if (pPlayer->GetTeam() == HORDE)
-                        DoScriptText(EMOTE_H_HELLO, m_creature);
-                    else
-                        DoScriptText(EMOTE_A_HELLO, m_creature);
-                    */
-                }
-            }
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            m_creature->setFaction(FACTION_FRIENDLY);
+            DoScriptText(EMOTE_CLUCK_TEXT1, m_creature);
         }
-
-        if (uiEmote == TEXTEMOTE_CHEER)
+        else if (uiEmote == TEXTEMOTE_CHEER && pPlayer->GetQuestStatus(QUEST_CLUCK) == QUEST_STATUS_COMPLETE)
         {
-            if (pPlayer->GetQuestStatus(QUEST_CLUCK) == QUEST_STATUS_COMPLETE)
-            {
-                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                m_creature->setFaction(FACTION_FRIENDLY);
-                DoScriptText(EMOTE_CLUCK_TEXT2, m_creature);
-            }
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            m_creature->setFaction(FACTION_FRIENDLY);
+            DoScriptText(EMOTE_CLUCK_TEXT2, m_creature);
         }
     }
 
@@ -121,28 +102,6 @@ struct npc_chicken_cluckAI : public ScriptedAI
 UnitAI* GetAI_npc_chicken_cluck(Creature* pCreature)
 {
     return new npc_chicken_cluckAI(pCreature);
-}
-
-bool QuestAccept_npc_chicken_cluck(Player* /*pPlayer*/, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_CLUCK)
-    {
-        if (npc_chicken_cluckAI* pChickenAI = dynamic_cast<npc_chicken_cluckAI*>(pCreature->AI()))
-            pChickenAI->Reset();
-    }
-
-    return true;
-}
-
-bool QuestRewarded_npc_chicken_cluck(Player* /*pPlayer*/, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_CLUCK)
-    {
-        if (npc_chicken_cluckAI* pChickenAI = dynamic_cast<npc_chicken_cluckAI*>(pCreature->AI()))
-            pChickenAI->Reset();
-    }
-
-    return true;
 }
 
 /*######
@@ -1050,8 +1009,6 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_chicken_cluck";
     pNewScript->GetAI = &GetAI_npc_chicken_cluck;
-    pNewScript->pQuestAcceptNPC =   &QuestAccept_npc_chicken_cluck;
-    pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_chicken_cluck;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

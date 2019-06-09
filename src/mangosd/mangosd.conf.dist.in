@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2018092101
+ConfVersion=2019050101
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -384,7 +384,7 @@ MaxWhoListReturns = 49
 
 LogSQL = 1
 PidFile = ""
-LogLevel = 3
+LogLevel = 1
 LogTime = 0
 LogFile = "Server.log"
 LogTimestamp = 0
@@ -651,32 +651,20 @@ LogColors = ""
 #        You can set it to very high value to prevent oldest guild events to be rewritten by latest guild events - but it can slow down performance
 #        Default: 100
 #
-#    TimerBar.Fatigue.GMLevel
-#        Disable/enable fatigue for security level (0..4) or high
-#        Default: 4 (None)
-#
-#    TimerBar.Fatigue.Max
+#    MirrorTimer.Fatigue.Max
 #        Fatigue max timer value (in secs)
 #        Default: 60 (1 minute)
-#                  0 (instant death)
+#                  0 (instant exhaustion damage start)
 #
-#    TimerBar.Breath.GMLevel
-#        Disable/enable waterbreathing for security level (0..4) or high
-#        Default: 4 (None)
-#
-#    TimerBar.Breath.Max
+#    MirrorTimer.Breath.Max
 #        Waterbreathing max timer value (in secs)
-#        Default: 180
-#                   0 (instant underwater breathing damage start)
+#        Default: 60
+#                  0 (instant underwater breathing damage start)
 #
-#    TimerBar.Fire.GMLevel
-#        Disable/enable lava fire damage for security level (0..4) or high
-#        Default: 4 (None)
-#
-#    TimerBar.Fire.Max
-#        Lava damage delay max timer value (in secs)
+#    MirrorTimer.Environmental.Max
+#        Generic environmental (lava/slime/etc) damage delay max timer value (in secs)
 #        Default:  1
-#                  0 (instant in lava damage start)
+#                  0 (instant in liquid damage start)
 #
 #    MaxPrimaryTradeSkill
 #        Max count that player can learn the primary trade skill.
@@ -713,9 +701,14 @@ LogColors = ""
 #        Default: 10
 #
 #    PetUnsummonAtMount
-#        Persmanent pet will unsummoned at player mount
+#        Permanent pet will unsummoned at player mount
 #        Default: 0 - not unsummon
 #                 1 - unsummon for any mount
+#
+#    PetAttackFromBehind
+#        Player controlled pet will attack from behind
+#        Default: 0 - Engage from any angle
+#                 1 - Engage from behind
 #
 #    Event.Announce
 #        Default: 0 (false)
@@ -786,12 +779,9 @@ Quests.HighLevelHideDiff = 7
 Quests.IgnoreRaid = 0
 Group.OfflineLeaderDelay = 300
 Guild.EventLogRecordsCount = 100
-TimerBar.Fatigue.GMLevel = 4
-TimerBar.Fatigue.Max = 60
-TimerBar.Breath.GMLevel = 4
-TimerBar.Breath.Max = 60
-TimerBar.Fire.GMLevel = 4
-TimerBar.Fire.Max = 1
+MirrorTimer.Fatigue.Max = 60
+MirrorTimer.Breath.Max = 60
+MirrorTimer.Environmental.Max = 1
 MaxPrimaryTradeSkill = 2
 TradeSkill.GMIgnore.MaxPrimarySkillsCount = 4
 TradeSkill.GMIgnore.Level = 4
@@ -801,6 +791,7 @@ MaxGroupXPDistance = 74
 MailDeliveryDelay = 3600
 MassMailer.SendPerTick = 10
 PetUnsummonAtMount = 0
+PetAttackFromBehind = 0
 Event.Announce = 0
 BeepAtStart = 1
 ShowProgressBars = 0
@@ -823,8 +814,14 @@ PlayerCommands = 1
 #    AllowTwoSide.Interaction.Trade
 #    AllowTwoSide.Interaction.Auction
 #    AllowTwoSide.Interaction.Mail
-#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);trade with different team,
-#        merge all auction houses for players from different teams, send mail to different team.
+#        Allow or disallow players from different teams to:
+#        - chat with each other (say, yell);
+#        - have merged chat channels;
+#        - join each other's groups;
+#        - join each other's guilds;
+#        - trade with each other when not in group;
+#        - have merged auction house listings;
+#        - send in-game mail;
 #        Default: 0 (Not allowed)
 #                 1 (Allowed)
 #
@@ -1273,12 +1270,12 @@ Visibility.AIRelocationNotifyDelay = 1000
 #         Default: 1
 #
 #    Rate.Reputation.LowLevel.Kill
-#         Reputation Gain form low level kill (grey creture)
+#         Lowest Reputation Gain rate from low level kill
 #         Default: 0.2
 #
 #    Rate.Reputation.LowLevel.Quest
-#         Reputation Gain rate
-#         Default: 1
+#         Lowest Reputation Gain rate from low level quest
+#         Default: 0.2
 #
 #    Rate.InstanceResetTime
 #        Multiplier for the number of days in between global raid/heroic instance resets.
@@ -1396,7 +1393,7 @@ Rate.Mining.Next   = 1
 Rate.Talent = 1
 Rate.Reputation.Gain = 1
 Rate.Reputation.LowLevel.Kill    = 0.2
-Rate.Reputation.LowLevel.Quest   = 1
+Rate.Reputation.LowLevel.Quest   = 0.2
 Rate.InstanceResetTime = 1
 SkillGain.Crafting = 1
 SkillGain.Defense = 1

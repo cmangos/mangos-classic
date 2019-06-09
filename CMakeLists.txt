@@ -111,7 +111,7 @@ endif()
 
 # Override configuration-types - we don't use anything else than debug and release
 if(CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_CONFIGURATION_TYPES "Release;Debug" CACHE STRING "Reset the configurations to what we need" FORCE)
+  set(CMAKE_CONFIGURATION_TYPES "Release;Debug;RelWithDebInfo;MinSizeRel" CACHE STRING "Reset the configurations to what we need" FORCE)
 else()
   if(NOT CMAKE_BUILD_TYPE)
     if (NOT DEBUG)
@@ -123,7 +123,7 @@ else()
   endif()
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY HELPSTRING "Choose the type of build")
   # set the valid options for cmake-gui drop-down list
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release")
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release;RelWithDebInfo;MinSizeRel")
 endif()
 
 # find Git: used to get the revision number
@@ -318,6 +318,8 @@ configure_file(
 )
 
 set(DEFINITIONS_RELEASE NDEBUG)
+set(DEFINITIONS_RELWITHDEBINFO NDEBUG _RELWITHDEBINFO MANGOS_RELWITHDEBINFO)
+set(DEFINITIONS_MINSIZEREL NDEBUG _MINSIZEREL MANGOS_MINSIZEREL)
 set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
 
 if(NOT BUILD_GAME_SERVER AND BUILD_SCRIPTDEV)
@@ -333,7 +335,7 @@ endif()
 # print out the results before continuing
 include(cmake/showoptions.cmake)
 
-if(NOT BUILD_GAME_SERVER AND NOT BUILD_LOGIN_SERVER AND NOT BUILD_EXTRACTORS)
+if(NOT BUILD_GAME_SERVER AND NOT BUILD_LOGIN_SERVER AND NOT BUILD_EXTRACTORS AND NOT BUILD_RECASTDEMOMOD)
   message(FATAL_ERROR "You must select something to build!")
 endif()
 
@@ -363,15 +365,16 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_DEBUG}")
+elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+  set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_RELWITHDEBINFO}")
+elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+  set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_MINSIZEREL}")
 else()
   set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_RELEASE}")
 endif()
 
 if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS)
   add_subdirectory(src)
-  if(MSVC AND BUILD_GAME_SERVER)
-    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_SERVER_NAME})
-  endif()
 endif()
 
 if(BUILD_EXTRACTORS)
@@ -379,6 +382,32 @@ if(BUILD_EXTRACTORS)
   add_subdirectory(contrib/vmap_extractor)
   add_subdirectory(contrib/vmap_assembler)
   add_subdirectory(contrib/mmap)
+endif()
+
+if(BUILD_RECASTDEMOMOD)
+  if (WIN32)
+    if (NOT BUILD_EXTRACTORS)
+      add_subdirectory(contrib/mmap)
+    endif()
+    add_subdirectory(contrib/recastdemomod)
+  else()
+    message(STATUS "BUILD_RECASTDEMOMOD forced to OFF. Not supported on non windows system.")
+  endif()
+endif()
+
+if(BUILD_GIT_ID)
+  add_subdirectory(contrib/git_id)
+endif()
+
+# set default startup project
+if(MSVC)
+  if(BUILD_GAME_SERVER)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_SERVER_NAME})
+  elseif(BUILD_LOGIN_SERVER)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_REALMD_NAME})
+  elseif(BUILD_RECASTDEMOMOD)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "RecastDemoMod")
+  endif()
 endif()
 
 # if(SQL)

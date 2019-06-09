@@ -372,20 +372,15 @@ bool WorldSession::Update(PacketFilter& updater)
         {
             Player* const botPlayer = itr->second;
             WorldSession* const pBotWorldSession = botPlayer->GetSession();
-            if (botPlayer->IsBeingTeleported())
-                botPlayer->GetPlayerbotAI()->HandleTeleportAck();
-            else if (botPlayer->IsInWorld())
+            while(!pBotWorldSession->m_recvQueue.empty())
             {
-                while (!pBotWorldSession->m_recvQueue.empty())
-                {
-                    auto const botpacket = std::move(pBotWorldSession->m_recvQueue.front());
-                    pBotWorldSession->m_recvQueue.pop_front();
+                auto const botpacket = std::move(pBotWorldSession->m_recvQueue.front());
+                pBotWorldSession->m_recvQueue.pop_front();
 
-                    OpcodeHandler const& opHandle = opcodeTable[botpacket->GetOpcode()];
-                    pBotWorldSession->ExecuteOpcode(opHandle, *botpacket);
-                };
-                pBotWorldSession->m_recvQueue.clear();
+                OpcodeHandler const& opHandle = opcodeTable[botpacket->GetOpcode()];
+                pBotWorldSession->ExecuteOpcode(opHandle, *botpacket);
             }
+            pBotWorldSession->m_recvQueue.clear();
         }
     }
 #endif
@@ -513,7 +508,7 @@ void WorldSession::LogoutPlayer(bool save)
             _player->RepopAtGraveyard();
         }
         else if (_player->isInCombat())
-            _player->CombatStop(true, true);
+            _player->CombatStopWithPets(true, true);
 
         // drop a flag if player is carrying it
         if (BattleGround* bg = _player->GetBattleGround())

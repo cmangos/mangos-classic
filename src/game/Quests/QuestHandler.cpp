@@ -547,7 +547,8 @@ uint32 WorldSession::getDialogStatus(const Player* pPlayer, const Object* questg
         QuestStatus status = pPlayer->GetQuestStatus(quest_id);
 
         if (status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id))
-            dialogStatusNew = pQuest->IsRepeatable() ? DIALOG_STATUS_REWARD_REP : DIALOG_STATUS_REWARD2;
+            dialogStatusNew = pQuest->IsRepeatable() && pQuest->GetQuestMethod() != 2 ?
+                              DIALOG_STATUS_REWARD_REP : DIALOG_STATUS_REWARD2;
         else if (pQuest->IsAutoComplete() && pPlayer->CanTakeQuest(pQuest, false))
             dialogStatusNew = pQuest->IsRepeatable() ? DIALOG_STATUS_REWARD_REP : DIALOG_STATUS_AVAILABLE;
         else if (status == QUEST_STATUS_INCOMPLETE)
@@ -569,28 +570,22 @@ uint32 WorldSession::getDialogStatus(const Player* pPlayer, const Object* questg
 
         QuestStatus status = pPlayer->GetQuestStatus(quest_id);
 
-        if (status == QUEST_STATUS_NONE)                    // For all other cases the mark is handled either at some place else, or with involved-relations already
+        // For all other cases the mark is handled either at some place else, or with involved-relations already
+        if (status == QUEST_STATUS_NONE && pPlayer->CanSeeStartQuest(pQuest))
         {
-            if (pPlayer->CanSeeStartQuest(pQuest))
+            if (pPlayer->SatisfyQuestLevel(pQuest, false))
             {
-                if (pPlayer->SatisfyQuestLevel(pQuest, false))
-                {
-                    int32 lowLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF);
+                int32 lowLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF);
 
-                    if (pQuest->IsAutoComplete())
-                    {
-                        dialogStatusNew = DIALOG_STATUS_REWARD_REP;
-                    }
-                    else if (lowLevelDiff < 0 || pPlayer->getLevel() <= pPlayer->GetQuestLevelForPlayer(pQuest) + uint32(lowLevelDiff))
-                    {
-                        dialogStatusNew = DIALOG_STATUS_AVAILABLE;
-                    }
-                    else
-                        dialogStatusNew = DIALOG_STATUS_CHAT;
-                }
+                if (pQuest->IsAutoComplete())
+                    dialogStatusNew = DIALOG_STATUS_REWARD_REP;
+                else if (lowLevelDiff < 0 || pPlayer->getLevel() <= (pPlayer->GetQuestLevelForPlayer(pQuest) + uint32(lowLevelDiff)))
+                    dialogStatusNew = DIALOG_STATUS_AVAILABLE;
                 else
-                    dialogStatusNew = DIALOG_STATUS_UNAVAILABLE;
+                    dialogStatusNew = DIALOG_STATUS_CHAT;
             }
+            else
+                dialogStatusNew = DIALOG_STATUS_UNAVAILABLE;
         }
 
         if (dialogStatusNew > dialogStatus)

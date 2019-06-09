@@ -403,7 +403,7 @@ void WorldSession::HandleStandStateChangeOpcode(WorldPacket& recv_data)
     uint32 animstate;
     recv_data >> animstate;
 
-    _player->SetStandState(animstate);
+    _player->SetStandState(uint8(animstate), true);
 }
 
 void WorldSession::HandleFriendListOpcode(WorldPacket& recv_data)

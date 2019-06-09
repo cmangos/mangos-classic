@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Areatrigger_Scripts
 SD%Complete: 100
-SDComment: Quest support: 4291, 6681, 7632, 273
+SDComment: Quest support: 1126, 4291, 6681, 7632, 273, 8735
 SDCategory: Areatrigger
 EndScriptData
 
@@ -29,6 +29,9 @@ at_childrens_week_spot          3546,3547,3548,3552,3549,3550
 at_scent_larkorwi               1726,1727,1728,1729,1730,1731,1732,1733,1734,1735,1736,1737,1738,1739,1740
 at_murkdeep                     1966
 at_ancient_leaf                 3587
+at_huldar_miran                 171
+at_twilight_grove               4017
+at_hive_tower                   3146
 EndContentData */
 
 
@@ -267,6 +270,72 @@ bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*
     return true;
 }
 
+/*######
+## at_twilight_grove
+######*/
+
+enum
+{
+    NPC_TWILIGHT_CORRUPTER          = 15625,
+    ITEM_FRAGMENT_NIGHTMARE         = 21149,
+    QUEST_NIGHTMARE_CORRUPTION      = 8735,
+    SAY_TWILIGHT_CORRUPTER_SPAWN    = -1000411
+};
+
+static const Location m_twilightCorrupterSpawn = { -10326.3f, -487.423f, 50.1127f, 5.73692f };
+
+bool AreaTrigger_at_twilight_grove(Player* player, AreaTriggerEntry const* /*pAt*/)
+{
+    // Player is deaed, a GM, quest complete, no quest or already got item: do nothing
+    if (!player->isAlive() || player->isGameMaster() ||
+            player->GetQuestStatus(QUEST_NIGHTMARE_CORRUPTION) == QUEST_STATUS_COMPLETE ||
+            player->GetQuestStatus(QUEST_NIGHTMARE_CORRUPTION) == QUEST_STATUS_NONE ||
+            player->HasItemCount(ITEM_FRAGMENT_NIGHTMARE, 1))
+        return false;
+
+    ScriptedMap* scriptedMap = (ScriptedMap*)player->GetInstanceData();
+    if (!scriptedMap)
+        return false;
+
+    // Return if Twilight Corrupter is already spawned
+    if (Creature* twilightCorrupter = GetClosestCreatureWithEntry(player, NPC_TWILIGHT_CORRUPTER, 500.0f))
+        return true;
+
+    // Spawn the Twilight Corrupter and send whisper to player
+    if (Creature* twilightCorrupter = player->SummonCreature(NPC_TWILIGHT_CORRUPTER, m_twilightCorrupterSpawn.m_fX, m_twilightCorrupterSpawn.m_fY, m_twilightCorrupterSpawn.m_fZ, m_twilightCorrupterSpawn.m_fO, TEMPSPAWN_TIMED_OOC_DESPAWN, 30 * MINUTE * IN_MILLISECONDS))
+    {
+        DoScriptText(SAY_TWILIGHT_CORRUPTER_SPAWN, twilightCorrupter, player);
+        return true;
+    }
+
+    return false;
+}
+
+/*######
+## at_hive_tower
+######*/
+
+bool AreaTrigger_at_hive_tower(Player* player, AreaTriggerEntry const* /*pAt*/)
+{
+    ScriptedMap* scriptedMap = (ScriptedMap*)player->GetInstanceData();
+    if (!scriptedMap)
+        return false;
+
+    if (scriptedMap->GetData(TYPE_HIVE) != NOT_STARTED) // Only summon more Hive'Ashi Drones if the 5 minutes timer is elapsed
+        return false;
+
+    if (player->isAlive() && !player->isGameMaster())
+    {
+        // spawn three Hive'Ashi Drones for 5 minutes (timer is guesswork)
+        for (uint8 i = POS_IDX_HIVE_DRONES_START; i <= POS_IDX_HIVE_DRONES_STOP; ++i)
+            player->SummonCreature(NPC_HIVE_ASHI_DRONES, aSpawnLocations[i][0], aSpawnLocations[i][1], aSpawnLocations[i][2], aSpawnLocations[i][3], TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+        scriptedMap->SetData(TYPE_HIVE, IN_PROGRESS);   // Notify the map script to start the timer
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_areatrigger_scripts()
 {
     Script* pNewScript = new Script;
@@ -297,5 +366,15 @@ void AddSC_areatrigger_scripts()
     pNewScript = new Script;
     pNewScript->Name = "at_huldar_miran";
     pNewScript->pAreaTrigger = &AreaTrigger_at_huldar_miran;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_twilight_grove";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_twilight_grove;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_hive_tower";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_hive_tower;
     pNewScript->RegisterSelf();
 }

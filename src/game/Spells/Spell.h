@@ -401,6 +401,7 @@ class Spell
         uint32 getState() const { return m_spellState; }
         void setState(uint32 state) { m_spellState = state; }
 
+        uint32 GetUsableHealthStoneItemType(Unit* unitTarget);
         bool DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype);
 
         void WriteSpellGoTargets(WorldPacket& data);
@@ -422,6 +423,8 @@ class Spell
         void SendChannelUpdate(uint32 time, uint32 lastTick = 0) const;
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target) const;
+
+        void StopCast(SpellCastResult castResult);
 
         void HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTarget, SpellEffectIndex i, float DamageMultiplier = 1.0);
         void HandleThreatSpells();

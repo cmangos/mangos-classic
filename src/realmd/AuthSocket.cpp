@@ -142,7 +142,7 @@ typedef struct AUTH_LOGON_PROOF_S_BUILD_6005
     uint8   error;
     uint8   M2[20];
     // uint32  unk1;
-    uint32  unk2;
+    uint32  LoginFlags;
     // uint16  unk3;
 } sAuthLogonProof_S_BUILD_6005;
 
@@ -177,6 +177,8 @@ typedef struct AuthHandler
 #else
 #pragma pack(pop)
 #endif
+
+std::array<uint8, 16> VersionChallenge = { { 0xBA, 0xA3, 0x1E, 0x99, 0xA0, 0x0B, 0x21, 0x57, 0xFC, 0x37, 0x3F, 0xB3, 0x69, 0xCD, 0xD2, 0xF1 } };
 
 /// Constructor - set the N and g values for SRP6
 AuthSocket::AuthSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
@@ -292,7 +294,7 @@ void AuthSocket::SendProof(Sha1Hash sha)
             memcpy(proof.M2, sha.GetDigest(), 20);
             proof.cmd = CMD_AUTH_LOGON_PROOF;
             proof.error = 0;
-            proof.unk2 = 0x00;
+            proof.LoginFlags = 0x00;
 
             Write((const char*)&proof, sizeof(proof));
             break;
@@ -368,6 +370,15 @@ bool AuthSocket::_HandleLogonChallenge()
     _login = (const char*)ch->I;
     _build = ch->build;
 
+    // convert uint8[4] to string and storing to m_os
+    std::array<char, 5> os;
+    os.fill('\0');
+    memcpy(os.data(), ch->os, sizeof(ch->os));
+    m_os = os.data();
+
+    // Restore string order as its byte order is reversed
+    std::reverse(m_os.begin(), m_os.end());
+
     ///- Normalize account name
     // utf8ToUpperOnlyLatin(_login); -- client already send account in expected form
 
@@ -384,20 +395,15 @@ bool AuthSocket::_HandleLogonChallenge()
     std::unique_ptr<QueryResult> ip_banned_result(LoginDatabase.PQuery("SELECT unbandate FROM ip_banned "
             "WHERE (unbandate = bandate OR unbandate > UNIX_TIMESTAMP()) AND ip = '%s'", m_address.c_str()));
 
-    std::unique_ptr<QueryResult> account_banned_result(LoginDatabase.PQuery(
-                "SELECT ab.unbandate FROM account_banned ab LEFT JOIN account a ON a.id = ab.id "
-                "WHERE active = 1 AND a.username = '%s' AND (ab.unbandate = ab.bandate OR ab.unbandate > UNIX_TIMESTAMP())", _safelogin.c_str()));
-
-    if (ip_banned_result || account_banned_result)
+    if (ip_banned_result)
     {
-        pkt << (uint8)WOW_FAIL_BANNED;
+        pkt << (uint8)WOW_FAIL_FAIL_NOACCESS;
         BASIC_LOG("[AuthChallenge] Banned ip %s tries to login!", m_address.c_str());
     }
     else
     {
         ///- Get the account details from the account table
         // No SQL injection (escaped user name)
-
         QueryResult* result = LoginDatabase.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel,v,s,token FROM account WHERE username = '%s'", _safelogin.c_str());
         if (result)
         {
@@ -416,14 +422,10 @@ bool AuthSocket::_HandleLogonChallenge()
                     locked = true;
                 }
                 else
-                {
                     DEBUG_LOG("[AuthChallenge] Account IP matches");
-                }
             }
             else
-            {
                 DEBUG_LOG("[AuthChallenge] Account '%s' is not locked to ip", _login.c_str());
-            }
 
             if (!locked)
             {
@@ -471,9 +473,6 @@ bool AuthSocket::_HandleLogonChallenge()
 
                     MANGOS_ASSERT(gmod.GetNumBytes() <= 32);
 
-                    BigNumber unk3;
-                    unk3.SetRand(16 * 8);
-
                     ///- Fill the response packet with the result
                     pkt << uint8(WOW_SUCCESS);
 
@@ -484,7 +483,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     pkt << uint8(32);
                     pkt.append(N.AsByteArray(32), 32);
                     pkt.append(s.AsByteArray(), s.GetNumBytes());// 32 bytes
-                    pkt.append(unk3.AsByteArray(16), 16);
+                    pkt.append(VersionChallenge.data(), VersionChallenge.size());
                     uint8 securityFlags = 0;
 
                     _token = fields[7].GetCppString();
@@ -656,10 +655,19 @@ bool AuthSocket::_HandleLogonProof()
             {
                 BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode! Given %u Expected %u", _login.c_str(), clientToken, ServerToken);
 
-                const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0};
+                const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 0, 0};
                 Write(data, sizeof(data));
                 return true;
             }
+        }
+
+        if (!VerifyVersion(lp.A, sizeof(lp.A), lp.crc_hash, false))
+        {
+            BASIC_LOG("[AuthChallenge] Account %s tried to login with modified client!", _login.c_str());
+
+            const char data[2] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_VERSION_INVALID };
+            Write(data, sizeof(data));
+            return true;
         }
 
         BASIC_LOG("User '%s' successfully authenticated", _login.c_str());
@@ -684,7 +692,7 @@ bool AuthSocket::_HandleLogonProof()
     {
         if (_build > 6005)                                  // > 1.12.2
         {
-            const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0};
+            const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 0, 0};
             Write(data, sizeof(data));
         }
         else
@@ -802,7 +810,7 @@ bool AuthSocket::_HandleReconnectChallenge()
     pkt << (uint8)  0x00;
     _reconnectProof.SetRand(16 * 8);
     pkt.append(_reconnectProof.AsByteArray(16), 16);        // 16 bytes random
-    pkt << (uint64) 0x00 << (uint64) 0x00;                  // 16 bytes zeros
+    pkt.append(VersionChallenge.data(), VersionChallenge.size());
     Write((const char*)pkt.contents(), pkt.size());
     return true;
 }
@@ -833,10 +841,18 @@ bool AuthSocket::_HandleReconnectProof()
 
     if (!memcmp(sha.GetDigest(), lp.R2, SHA_DIGEST_LENGTH))
     {
+        if (!VerifyVersion(lp.R1, sizeof(lp.R1), lp.R3, true))
+        {
+            ByteBuffer pkt;
+            pkt << (uint8)CMD_AUTH_RECONNECT_PROOF;
+            pkt << (uint8)WOW_FAIL_VERSION_INVALID;
+            Write((const char*)pkt.contents(), pkt.size());
+            return true;
+        }
         ///- Sending response
         ByteBuffer pkt;
         pkt << (uint8)  CMD_AUTH_RECONNECT_PROOF;
-        pkt << (uint8)  0x00;
+        pkt << (uint8)  WOW_SUCCESS;
         pkt << (uint16) 0x00;                               // 2 bytes zeros
         Write((const char*)pkt.contents(), pkt.size());
 
@@ -1075,4 +1091,39 @@ int32 AuthSocket::generateToken(char const* b32key)
     delete[] encoded;
 
     return truncHash % 1000000;
+}
+
+bool AuthSocket::VerifyVersion(uint8 const* a, int32 aLength, uint8 const* versionProof, bool isReconnect)
+{
+    if (!sConfig.GetBoolDefault("StrictVersionCheck", false))
+        return true;
+
+    std::array<uint8, 20> zeros = { {} };
+    std::array<uint8, 20> const* versionHash = nullptr;
+    if (!isReconnect)
+    {
+        RealmBuildInfo const* buildInfo = FindBuildInfo(_build);
+        if (!buildInfo)
+            return false;
+
+        if (m_os == "Win")
+            versionHash = &buildInfo->WindowsHash;
+        else if (m_os == "OSX")
+            versionHash = &buildInfo->MacHash;
+
+        if (!versionHash)
+            return false;
+
+        if (!memcmp(versionHash->data(), zeros.data(), zeros.size()))
+            return true;                                                            // not filled serverside
+    }
+    else
+        versionHash = &zeros;
+
+    Sha1Hash version;
+    version.UpdateData(a, aLength);
+    version.UpdateData(versionHash->data(), versionHash->size());
+    version.Finalize();
+
+    return memcmp(versionProof, version.GetDigest(), version.GetLength()) == 0;
 }

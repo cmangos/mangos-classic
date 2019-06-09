@@ -19,7 +19,7 @@
 #include "MeshLoaderObj.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <cstring>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -99,6 +99,7 @@ static char* parseRow(char* buf, char* bufEnd, char* row, int len)
 			case '\t':
 			case ' ':
 				if (start) break;
+				// else falls through
 			default:
 				start = false;
 				row[n++] = c;
@@ -135,15 +136,28 @@ static int parseFace(char* row, int* data, int n, int vcnt)
 	return j;
 }
 
-bool rcMeshLoaderObj::load(const char* filename)
+bool rcMeshLoaderObj::load(const std::string& filename)
 {
 	char* buf = 0;
-	FILE* fp = fopen(filename, "rb");
+	FILE* fp = fopen(filename.c_str(), "rb");
 	if (!fp)
 		return false;
-	fseek(fp, 0, SEEK_END);
-	int bufSize = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
+	if (fseek(fp, 0, SEEK_END) != 0)
+	{
+		fclose(fp);
+		return false;
+	}
+	long bufSize = ftell(fp);
+	if (bufSize < 0)
+	{
+		fclose(fp);
+		return false;
+	}
+	if (fseek(fp, 0, SEEK_SET) != 0)
+	{
+		fclose(fp);
+		return false;
+	}
 	buf = new char[bufSize];
 	if (!buf)
 	{
@@ -155,6 +169,7 @@ bool rcMeshLoaderObj::load(const char* filename)
 
 	if (readLen != 1)
 	{
+		delete[] buf;
 		return false;
 	}
 
@@ -225,8 +240,6 @@ bool rcMeshLoaderObj::load(const char* filename)
 		}
 	}
 	
-	strncpy(m_filename, filename, sizeof(m_filename));
-	m_filename[sizeof(m_filename)-1] = '\0';
-	
+	m_filename = filename;
 	return true;
 }

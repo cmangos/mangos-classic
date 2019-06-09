@@ -35,6 +35,7 @@ INSERT INTO scripted_areatrigger VALUES
 (2066,'at_blackrock_spire'),
 (2067,'at_blackrock_spire'),
 (3066,'at_ravenholdt'),
+(3146,'at_hive_tower'),
 (3546,'at_childrens_week_spot'), -- Darnassian bank
 (3547,'at_childrens_week_spot'), -- Undercity - thone room
 (3548,'at_childrens_week_spot'), -- Stonewrought Dam
@@ -45,6 +46,7 @@ INSERT INTO scripted_areatrigger VALUES
 (3626,'at_vaelastrasz'),
 (3958,'at_zulgurub'),
 (3960,'at_zulgurub'),
+(4017,'at_twilight_grove'),
 (4047,'at_temple_ahnqiraj'),
 (4052,'at_temple_ahnqiraj'),
 (4112,'at_naxxramas'),
@@ -139,6 +141,10 @@ UPDATE creature_template SET ScriptName='npc_feero_ironhand' WHERE entry=4484;
 UPDATE creature_template SET ScriptName='mobs_spitelashes' WHERE entry IN (6190,6193,6194,6195,6196);
 UPDATE creature_template SET ScriptName='npc_loramus_thalipedes' WHERE entry=7783;
 UPDATE creature_template SET ScriptName='npc_felhound_tracker' WHERE entry=8668;
+UPDATE creature_template SET ScriptName='boss_maws' WHERE entry=15571;
+UPDATE gameobject_template SET ScriptName='go_lightning' WHERE entry=183356;
+INSERT INTO scripted_event_id VALUES
+(9542,'event_arcanite_buoy');
 
 /* BADLANDS */
 
@@ -232,11 +238,9 @@ INSERT INTO scripted_event_id VALUES
 
 
 /* BLASTED LANDS */
-UPDATE creature_template SET ScriptName='npc_fallen_hero_of_horde' WHERE entry=7572;
 UPDATE creature_template SET ScriptName='boss_kazzak' WHERE entry=12397;
 
 /* BURNING STEPPES */
-UPDATE creature_template SET ScriptName='npc_ragged_john' WHERE entry=9563;
 UPDATE creature_template SET ScriptName='npc_grark_lorkrub' WHERE entry=9520;
 UPDATE creature_template SET ScriptName='npc_klinfran' WHERE entry IN (14529,14534);
 
@@ -389,7 +393,6 @@ UPDATE creature_template SET ScriptName='boss_onyxia' WHERE entry=10184;
 
 /* ORGRIMMAR */
 UPDATE creature_template SET ScriptName='npc_shenthul' WHERE entry=3401;
-UPDATE creature_template SET ScriptName='npc_thrall_warchief' WHERE entry=4949;
 
 /* RAGEFIRE CHASM */
 
@@ -750,7 +753,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000169,'Muahahahaha! You fool! You\'ve released me from my banishment in the interstices between space and time!',0,1,0,0,'nether_drake SAY_NIHIL_1'),
 (-1000170,'All of Draenor shall quick beneath my feet! I will destroy this world and reshape it in my image!',0,1,0,0,'nether_drake SAY_NIHIL_2'),
 (-1000171,'Where shall I begin? I cannot bother myself with a worm such as yourself. There is a world to be conquered!',0,1,0,0,'nether_drake SAY_NIHIL_3'),
-(-1000172,'No doubt the fools that banished me are long dead. I shall take wing survey my demense. Pray to whatever gods you hold dear that we do not meet again.',0,1,0,0,'nether_drake SAY_NIHIL_4'),
+(-1000172,'No doubt the fools that banished me are long dead. I shall take wing survey my demesne. Pray to whatever gods you hold dear that we do not meet again.',0,1,0,0,'nether_drake SAY_NIHIL_4'),
 (-1000173,'NOOOOooooooo!',0,1,0,0,'nether_drake SAY_NIHIL_INTERRUPT'),
 
 (-1000174,'Good $N, you are under the spell\'s influence. I must analyze it quickly, then we can talk.',0,0,7,0,'daranelle SAY_SPELL_INFLUENCE'),
@@ -797,10 +800,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000202,'HOORAY! I AM SAVED!',0,0,0,0,'injured_patient SAY_DOC2'),
 (-1000203,'Sweet, sweet embrace... take me...',0,0,0,0,'injured_patient SAY_DOC3'),
 
-(-1000204,'%s looks up at you quizzically. Maybe you should inspect it?',0,2,0,0,'cluck EMOTE_A_HELLO'),
-(-1000205,'%s looks at you unexpectadly.',0,2,0,0,'cluck EMOTE_H_HELLO'),
-(-1000206,'%s starts pecking at the feed.',0,2,0,0,'cluck EMOTE_CLUCK_TEXT2'),
+(-1000204,'%s looks up at you quizzically. Maybe you should inspect it?',0,2,0,0,'cluck EMOTE_CLUCK_TEXT1'),
+(-1000205,'%s looks at you unexpectedly.',0,2,0,0,'cluck EMOTE_CLUCK_TEXT2'),
 
+(-1000206,'REUSE ME',0,0,0,0,'REUSE ME'),
 (-1000207,'REUSE ME',0,0,0,0,'REUSE ME'),
 
 (-1000208,'Frenzyheart kill you if you come back. You no welcome here no more!',0,0,0,0,'vekjik SAY_TEXTID_VEKJIK1'),
@@ -892,11 +895,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000285,'We have all three of the relics, but my energy is rapidly fading. We must make our way back to Dreamwarden Lurosa! He will let you know what to do next.',0,0,0,0,'clintar SAY_RELIC3'),
 (-1000286,'Lurosa, I am entrusting the Relics of Aviana to $N, who will take them to Morthis Whisperwing. I must return completely to the Emerald Dream now. Do not let $N fail!',0,0,0,1,'clintar SAY_END'),
 
-(-1000287,'Emergency power activated! Initializing ambulanory motor! CLUCK!',0,0,0,0,'oox SAY_OOX_START'),
+(-1000287,'Emergency power activated! Initializing ambulatory motor! CLUCK!',0,0,0,0,'oox SAY_OOX_START'),
 (-1000288,'Physical threat detected! Evasive action! CLUCK!',0,0,0,0,'oox SAY_OOX_AGGRO1'),
 (-1000289,'Threat analyzed! Activating combat plan beta! CLUCK!',0,0,0,0,'oox SAY_OOX_AGGRO2'),
 (-1000290,'CLUCK! Sensors detect spatial anomaly - danger imminent! CLUCK!',0,0,0,0,'oox SAY_OOX_AMBUSH'),
-(-1000291,'No one challanges the Wastewander nomads - not even robotic chickens! ATTACK!',0,0,0,0,'oox SAY_OOX17_AMBUSH_REPLY'),
+(-1000291,'No one challenges the Wastewander nomads - not even robotic chickens! ATTACK!',0,0,0,0,'oox SAY_OOX17_AMBUSH_REPLY'),
 (-1000292,'Cloaking systems online! CLUCK! Engaging cloak for transport to Booty Bay!',0,0,0,0,'oox SAY_OOX_END'),
 
 (-1000293,'To the house! Stay close to me, no matter what! I have my gun and ammo there!',0,0,7,0,'stilwell SAY_DS_START'),
@@ -1040,7 +1043,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1000410,'Here they come! Defend yourself!',0,0,1,5,'kanati SAY_KAN_START'),
 
--- REUSE -1000411 TO -1000414
+(-1000411,'Come, $N. See what the Nightmare brings...',15625,4,0,0,'Twilight Corrupter SAY_TWILIGHT_CORRUPTER_SPAWN'),
+
+-- REUSE -1000412 TO -1000414
 (-1000415,'%s, too injured, gives up the chase.',0,2,0,0,'hendel EMOTE_SURRENDER'),
 
 (-1000416,'Well, I\'m not sure how far I\'ll make it in this state... I\'m feeling kind of faint...',0,0,0,0,'ringo SAY_RIN_START_1'),
@@ -1174,7 +1179,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000532,'At your command, my liege...',0,0,0,0,'torloth TORLOTH_DIALOGUE1'),
 (-1000533,'As you desire, Lord Illidan.',0,0,0,0,'torloth TORLOTH_DIALOGUE2'),
 (-1000534,'Yes, Lord Illidan, I would sacrifice to you this magnificent physique. On this day you will fall - another victim of Torloth...',0,0,0,0,'torloth TORLOTH_DIALOGUE3'),
-(-1000535,'Destroy them, Torloth. Let lose their blood like a river upon this hallowed ground.',0,0,0,0,'lordillidan ILLIDAN_DIALOGUE'),
+(-1000535,'Destroy them, Torloth. Let loose their blood like a river upon this hallowed ground.',0,0,0,0,'lordillidan ILLIDAN_DIALOGUE'),
 (-1000536,'What manner of fool dares stand before Illidan Stormrage? Soldiers, destroy these insects!',0,1,0,0,'lordillidan ILLIDAN_SUMMON1'),
 (-1000537,'You are no challenge for the Crimson Sigil. Mind breakers, end this nonsense.',0,1,0,0,'lordillidan ILLIDAN_SUMMON2'),
 (-1000538,'Run while you still can. The highlords come soon...',0,1,0,0,'lordillidan ILLIDAN_SUMMON3'),
@@ -1221,7 +1226,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000585,'Help! I\'m under attack!',0,0,0,0,'Galen - aggro 2'),
 (-1000586,'Thank you $N. I will remember you always. You can find my strongbox in my camp, north of Stonard.',0,0,0,0,'Galen - quest complete'),
 (-1000587,'%s whispers to $N the secret to opening his strongbox.',0,2,0,0,'Galen - emote whisper'),
-(-1000588,'%s disappears into the swamp.',0,2,0,0,'Galen - emote disapper'),
+(-1000588,'%s disappears into the swamp.',0,2,0,0,'Galen - emote disappear'),
 
 (-1000589,'Kroshius live? Kroshius crush!',0,1,0,0,'SAY_KROSHIUS_REVIVE'),
 
@@ -1278,21 +1283,21 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1000669,'We will locate the origin of the Nightmare through the fragments you collected, $N. From there, we will pull Eranikus through a rift in the Dream. Steel yourself, $C. We are inviting the embodiment of the Nightmare into our world.',0,0,0,0,'remulos SAY_REMULOS_INTRO_1'),
 (-1000670,'To Nighthaven! Keep your army close, champion. ',0,0,0,0,'remulos SAY_REMULOS_INTRO_2'),
-(-1000671,'The rift will be opened there, above the Lake Elun\'ara. Prepare yourself, $N. Eranikus entry into our world will be wrought with chaos and strife.',0,0,0,0,'remulos SAY_REMULOS_INTRO_3'),
-(-1000672,'He will stop at nothing to get to Malfurion\'s physical manifistation. That must not happen... We must keep the beast occupied long enough for Tyrande to arrive.',0,0,0,0,'remulos SAY_REMULOS_INTRO_4'),
+(-1000671,'The rift will be opened there, above the Lake Elun\'ara. Prepare yourself, $N. Eranikus\'s entry into our world will be wrought with chaos and strife.',0,0,0,0,'remulos SAY_REMULOS_INTRO_3'),
+(-1000672,'He will stop at nothing to get to Malfurion\'s physical manifestation. That must not happen... We must keep the beast occupied long enough for Tyrande to arrive.',0,0,0,0,'remulos SAY_REMULOS_INTRO_4'),
 (-1000673,'Defend Nightaven, hero...',0,0,0,0,'remulos SAY_REMULOS_INTRO_5'),
 (-1000674,'%s has entered our world',0,3,0,0,'eranikus EMOTE_SUMMON_ERANIKUS'),
 (-1000675,'Pitful predictable mortals... You know not what you have done! The master\'s will fulfilled. The Moonglade shall be destroyed and Malfurion along with it!',0,1,0,0,'eranikus SAY_ERANIKUS_SPAWN'),
 (-1000676,'Fiend! Face the might of Cenarius!',0,1,0,1,'remulos SAY_REMULOS_TAUNT_1'),
 (-1000677,'%s lets loose a sinister laugh.',0,2,0,0,'eranikus EMOTE_ERANIKUS_LAUGH'),
-(-1000678,'You are certanly not your father, insect. Should it interest me, I would crush you with but a swipe of my claws. Turn Shan\'do Stormrage over to me and your pitiful life will be spared along with the lives of your people.',0,1,0,0,'eranikus SAY_ERANIKUS_TAUNT_2'),
+(-1000678,'You are certainly not your father, insect. Should it interest me, I would crush you with but a swipe of my claws. Turn Shan\'do Stormrage over to me and your pitiful life will be spared along with the lives of your people.',0,1,0,0,'eranikus SAY_ERANIKUS_TAUNT_2'),
 (-1000679,'Who is the predictable one, beast? Surely you did not think that we would summon you on top of Malfurion? Your redemption comes, Eranikus. You will be cleansed of this madness - this corruption.',0,1,0,1,'remulos SAY_REMULOS_TAUNT_3'),
 (-1000680,'My redemption? You are bold, little one. My redemption comes by the will of my god.',0,1,0,0,'eranikus SAY_ERANIKUS_TAUNT_4'),
 (-1000681,'%s roars furiously.',0,2,0,0,'eranikus EMOTE_ERANIKUS_ATTACK'),
 (-1000682,'Hurry, $N! We must find protective cover!',0,0,0,0,'remulos SAY_REMULOS_DEFEND_1'),
 (-1000683,'Please, champion, protect our people.',0,0,0,1,'remulos SAY_REMULOS_DEFEND_2'),
 (-1000684,'Rise, servants of the Nightmare! Rise and destroy this world! Let there be no survivors...',0,1,0,0,'eranikus SAY_ERANIKUS_SHADOWS'),
-(-1000685,'We will battle these fiends, together! Nighthaven\'s Defenders are also among us. They will fight to the death if asked. Now, quickly, we must drive these aberations back to the Nightmare. Destroy them all!',0,0,0,1,'remulos SAY_REMULOS_DEFEND_3'),
+(-1000685,'We will battle these fiends, together! Nighthaven\'s Defenders are also among us. They will fight to the death if asked. Now, quickly, we must drive these aberrations back to the Nightmare. Destroy them all!',0,0,0,1,'remulos SAY_REMULOS_DEFEND_3'),
 (-1000686,'Where is your savior? How long can you hold out against my attacks?',0,1,0,0,'eranikus SAY_ERANIKUS_ATTACK_1'),
 (-1000687,'Defeated my minions? Then face me, mortals!',0,1,0,0,'eranikus SAY_ERANIKUS_ATTACK_2'),
 (-1000688,'Remulos, look how easy they fall before me? You can stop this, fool. Turn the druid over to me and it will all be over...',0,1,0,0,'eranikus SAY_ERANIKUS_ATTACK_3'),
@@ -1304,12 +1309,12 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000694,'IT BURNS! THE PAIN.. SEARING...',0,1,0,0,'eranikus SAY_ERANIKUS_DEFEAT_1'),
 (-1000695,'WHY? Why did this happen to... to me? Where were you Tyrande? Where were you when I fell from the grace of Elune?',0,1,0,0,'eranikus SAY_ERANIKUS_DEFEAT_2'),
 (-1000696,'I... I feel... I feel the touch of Elune upon my being once more... She smiles upon me... Yes... I...', 0,1,0,0,'eranikus SAY_ERANIKUS_DEFEAT_3'),
-(-1000697,'%s is wholly consumed by the Light of Elune. Tranquility sets in over the Moonglade',0,2,0,0,'eranikus EMOTE_ERANIKUS_REDEEM'),
+(-1000697,'%s is wholly consumed by the Light of Elune. Tranquility sets in over the Moonglade',0,3,0,0,'eranikus EMOTE_ERANIKUS_REDEEM'),
 (-1000698,'%s falls to one knee.',0,2,0,0,'tyrande EMOTE_TYRANDE_KNEEL'),
 (-1000699,'Praise be to Elune... Eranikus is redeemed.',0,1,0,0,'tyrande SAY_TYRANDE_REDEEMED'),
-(-1000700,'For so long, I was lost... The Nightmare\'s corruption had consumed me... And now, you... all of you.. you have saved me. Released me from its grasp.',0,0,0,0,'eranikus SAY_REDEEMED_1'),
+(-1000700,'For so long, I was lost... The Nightmare\'s corruption had consumed me... And now, you... all of you... you have saved me. Released me from its grasp.',0,0,0,0,'eranikus SAY_REDEEMED_1'),
 (-1000701,'But... Malfurion, Cenarius, Ysera... They still fight. They need me. I must return to the Dream at once.', 0,0,0,0,'eranikus SAY_REDEEMED_2'),
-(-1000702,'My lady, I am unworthy of your prayer. Truly, you are an angel of light. Please, assist me in returning to the barrow den so that I may return to the Dream. I like Malfurion, also have a love awaiting me... I must return to her... to protect her...', 0,0,0,0,'eranikus SAY_REDEEMED_3'),
+(-1000702,'My lady, I am unworthy of your prayer. Truly, you are an angel of light. Please, assist me in returning to the barrow den so that I may return to the Dream. I, like Malfurion, also have a love awaiting me... I must return to her... to protect her...', 0,0,0,0,'eranikus SAY_REDEEMED_3'),
 (-1000703,'And heroes... I hold that which you seek. May it once more see the evil dissolved. Remulos, see to it that our champion receives the shard of the Green Flight.',0,0,0,0,'eranikus SAY_REDEEMED_4'),
 (-1000704,'It will be done, Eranikus. Be well, ancient one.',0,0,0,0,'remulos SAY_REMULOS_OUTRO_1'),
 (-1000705,'Let us leave Nighthave, hero. Seek me out at the grove.',0,0,0,0,'remulos SAY_REMULOS_OUTRO_2'),
@@ -1344,39 +1349,39 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000733,'Know that wherever you might find them in the world, they are protecting something of importance, as they were entrusted to do so long ago.',0,0,0,0,'Priestess of Elune SAY_PRIESTESS_ALTAR_19'),
 (-1000734,'Please, remember what we have shown you...',0,0,0,0,'Priestess of Elune SAY_PRIESTESS_ALTAR_20'),
 (-1000735,'Farewell.',0,0,0,0,'Priestess of Elune SAY_PRIESTESS_ALTAR_21'),
-(-1000736,'Thank you for you help, $n. I wish you well in your adventures.',0,0,0,0,'Ranshalla SAY_QUEST_END_1'),
+(-1000736,'Thank you for your help, $n. I wish you well in your adventures.',0,0,0,0,'Ranshalla SAY_QUEST_END_1'),
 (-1000737,'I want to stay here and reflect on what we have seen. Please see Erelas and tell him what we have learned.',0,0,0,0,'Ranshalla SAY_QUEST_END_2'),
 (-1000738,'%s begins chanting a strange spell...',0,2,0,0,'Ranshalla EMOTE_CHANT_SPELL'),
 (-1000739,'Remember, I need your help to properly channel. I will ask you to aid me several times in our path, so please be ready.',0,0,0,0,'Ranshalla SAY_QUEST_START'),
 
-(-1000740,'We must act quickly or shall be lost!',0,0,0,1,'SAY_ANACHRONOS_INTRO_1'),
-(-1000741,'My forces cannot overcome the Qiraji defenses. We will not be able to get close enough to place our precious barrier, dragon.',0,0,0,0,'SAY_FANDRAL_INTRO_2'),
+(-1000740,'We must act quickly or all shall be lost!',0,0,0,1,'SAY_ANACHRONOS_INTRO_1'),
+(-1000741,'My forces cannot overcome the Qiraji defenses. We will not be able to get close enough to place your precious barrier, dragon.',0,0,0,0,'SAY_FANDRAL_INTRO_2'),
 (-1000742,'There is a way...',0,0,0,22,'SAY_MERITHRA_INTRO_3'),
 (-1000743,'%s nods knowingly.',0,2,0,0,'EMOTE_ARYGOS_NOD'),
-(-1000744,'Aye, Fandral, remember these words: Let not your grief guide your faith. These thoughts you hold... dark places you go, night elf.Absolution cannot be had through misguided vengeance.',0,0,0,1,'SAY_CAELESTRASZ_INTRO_4'),
+(-1000744,'Aye, Fandral, remember these words: Let not your grief guide your faith. These thoughts you hold... dark places you go, night elf. Absolution cannot be had through misguided vengeance.',0,0,0,1,'SAY_CAELESTRASZ_INTRO_4'),
 (-1000745,'%s glances at her compatriots.',0,2,0,0,'EMOTE_MERITHRA_GLANCE'),
-(-1000746,'We will push him back, Anachronos. This is wow. Uphold your end of this task. Let not your hands falter as you seal our fates behind the barrier.',0,0,0,1,'SAY_MERITHRA_INTRO_5'),
-(-1000747,'Succumb to the endless dream, little ones. Let it comsume you!',0,1,0,22,'SAY_MERITHRA_ATTACK_1'),
-(-1000748,'Anachronos, the diversion will give you an the young druid time enough to seal the gate. Do not falter. Now, let us see how they deal with chaotic magic.',0,0,0,1,'SAY_ARYGOS_ATTACK_2'),
-(-1000749,'Let them feelt the wrath of the blue flight! May Malygos protect me!',0,1,0,22,'SAY_ARYGOS_ATTACK_3'),
-(-1000750,'Do not forget sacrifices made on this day, night elf. We have all suffered immensely at the hands of these beasts.',0,0,0,1,'SAY_CAELESTRASZ_ATTACK_4'),
-(-1000751,'Alexstrasza, give me the resolve to drive your enemies back.',0,1,0,22,'SAY_CAELESTRASZ_ATTACK_5'),
-(-1000752,'NOW,STAGHELM! WE GO NOW! Prepare your magic!',0,0,0,22,'SAY_ANACHRONOS_SEAL_1'),
+(-1000746,'We will push him back, Anachronos. This I vow. Uphold your end of this task. Let not your hands falter as you seal our fates behind the barrier.',0,0,0,1,'SAY_MERITHRA_INTRO_5'),
+(-1000747,'Succumb to the endless dream, little ones. Let it consume you!',0,1,0,22,'SAY_MERITHRA_ATTACK_1'),
+(-1000748,'Anachronos, this diversion will give you and the young druid time enough to seal the gate. Do not falter. Now, let us see how they deal with chaotic magic.',0,0,0,1,'SAY_ARYGOS_ATTACK_2'),
+(-1000749,'Let them feel the wrath of the Blue Flight! May Malygos protect me!',0,1,0,22,'SAY_ARYGOS_ATTACK_3'),
+(-1000750,'Do not forget the sacrifices made on this day, night elf. We have all suffered immensely at the hands of these beasts.',0,0,0,1,'SAY_CAELESTRASZ_ATTACK_4'),
+(-1000751,'Alexstrasza grant me the resolve to drive our enemies back!',0,1,0,22,'SAY_CAELESTRASZ_ATTACK_5'),
+(-1000752,'NOW, STAGHELM! WE GO NOW! Prepare your magic!',0,0,0,22,'SAY_ANACHRONOS_SEAL_1'),
 (-1000753,'It is done, dragon. Lead the way!',0,0,0,25,'SAY_FANDRAL_SEAL_2'),
-(-1000754,'Stay close.',0,0,0,0,'SAY_ANACHRONOS_SEAL_3'),
+(-1000754,'Stay close...',0,0,0,0,'SAY_ANACHRONOS_SEAL_3'),
 (-1000755,'The sands of time will halt, but only for a moment! I will now conjure the barrier.',0,0,0,0,'SAY_ANACHRONOS_SEAL_4'),
 (-1000756,'FINISH THE SPELL, STAGHELM! I CANNOT HOLD THE GLYPHS OF WARDING IN PLACE MUCH LONGER! CALL FORTH THE ROOTS!', 0,0,0,0,'SAY_ANACHRONOS_SEAL_5'),
 (-1000757,'Ancient ones guide my hand... Wake from your slumber! WAKE AND SEAL THIS CURSED PLACE!',0,0,0,0, 'SAY_FANDRAL_SEAL_6'),
 (-1000758,'%s falls to one knee - exhausted.',0,2,0,0,'EMOTE_FANDRAL_EXHAUSTED'),
 (-1000759,'It... It is over, Lord Staghelm. We are victorious. Albeit the cost for this victory was great.',0,0,0,1,'SAY_ANACHRONOS_EPILOGUE_1'),
 (-1000760,'There is but one duty that remains...',0,0,0,1,'SAY_ANACHRONOS_EPILOGUE_2'),
-(-1000761,'Before I leave this place, I make one final offering for you, Lord Staghelm. Should a time arise in which you must gain entry to this accursed fortress, use the scepter of the shifting sands on the sacred gong. The magic holding the barrier together will dissipate an the horrors of the Ahn\'Qiraj will be unleashed upon the world once more.',0,0,0,1,'SAY_ANACHRONOS_EPILOGUE_3'),
+(-1000761,'Before I leave this place, I make one final offering for you, Lord Staghelm. Should a time arise in which you must gain entry to this accursed fortress, use the Scepter of the Shifting Sands on the sacred gong. The magic holding the barrier together will dissipate and the horrors of Ahn\'Qiraj will be unleashed upon the world once more.',0,0,0,1,'SAY_ANACHRONOS_EPILOGUE_3'),
 (-1000762,'%s hands the Scepter of the Shifting Sands to $N.',0,2,0,0,'EMOTE_ANACHRONOS_SCEPTER'),
 (-1000763,'After the savagery that my people have witnessed and felt, you expect me to accept another burden, dragon? Surely you are mad.',0,0,0,1,'SAY_FANDRAL_EPILOGUE_4'),
-(-1000764,'I want nothing to do with Silithus, the Qiraji and least of all, any damed dragons!',0,0,0,1,'SAY_FANDRAL_EPILOGUE_5'),
+(-1000764,'I want nothing to do with Silithus, the Qiraji and least of all, any damned dragons!',0,0,0,1,'SAY_FANDRAL_EPILOGUE_5'),
 (-1000765,'%s hurls the Scepter of the Shifting Sands into the barrier, shattering it.',0,2,0,0,'EMOTE_FANDRAL_SHATTER'),
 (-1000766,'Lord Staghelm, where are you going? You would shatter our bond for the sake of pride?',0,0,0,1,'SAY_ANACHRONOS_EPILOGUE_6'),
-(-1000767,'My son\'s soul will find no comfort in this hollow victory, dragon! I will have him back. Though it takes a millenia. I WILL have my son back!',0,0,0,1,'SAY_FANDRAL_EPILOGUE_7'),
+(-1000767,'My son\'s soul will find no comfort in this hollow victory, dragon. I will have him back. Though it takes a millennia, I WILL have my son back!',0,0,0,1,'SAY_FANDRAL_EPILOGUE_7'),
 (-1000768,'%s shakes his head in disappointment.',0,2,0,25,'EMOTE_ANACHRONOS_DISPPOINTED'),
 (-1000769,'%s kneels down to pickup the fragments of the shattered scepter.',0,2,0,0,'EMOTE_ANACHRONOS_PICKUP'),
 (-1000770,'And now you know all that there is to know, mortal...',0,0,0,0,'SAY_ANACHRONOS_EPILOGUE_8'),
@@ -1508,7 +1513,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000889,'%s submits.',0,2,0,0,'grark EMOTE_SUBMIT'),
 (-1000890,'You have come to play? Then let us play!',0,0,0,0,'grark SAY_AGGRO'),
 
-(-1000891,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1000891,'The beast returns from whence it came. The wrath of Neptulon has subsided.',0,3,0,0,'Maws EMOTE_MAWS_KILL'),
+
 (-1000892,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1000893,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1000894,'REUSE_ME',0,0,0,0,'REUSE_ME'),
@@ -1533,7 +1539,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000951,'You have my word that I shall find a use for your body after I\'ve killed you, Kinelory.',0,0,0,0,'jorell SAY_AGGRO_JORELL'),
 (-1000952,'Watch my rear! I\'ll see what I can find in all this junk...',0,0,0,0,'kinelory SAY_WATCH_BACK'),
 (-1000953,'%s begins rummaging through the apothecary\'s belongings.',0,2,0,0,'kinelory EMOTE_BELONGINGS'),
-(-1000954,'I bet Quae\'ll think this is important. She\'s pretty knowledgeable about these things--no expert, but knowledgable.',0,0,0,0,'kinelory SAY_DATA_FOUND'),
+(-1000954,'I bet Quae\'ll think this is important. She\'s pretty knowledgeable about these things--no expert, but knowledgeable.',0,0,0,0,'kinelory SAY_DATA_FOUND'),
 (-1000955,'Okay, let\'s get out of here quick quick! Try and keep up. I\'m going to make a break for it.',0,0,0,0,'kinelory SAY_ESCAPE'),
 (-1000956,'We made it! Quae, we made it!',0,0,0,0,'kinelory SAY_FINISH'),
 (-1000957,'%s hands her pack to Quae.',0,2,0,0,'kinelory EMOTE_HAND_PACK'),
@@ -1584,7 +1590,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001101,'Look what they did to my boy.',0,0,0,5,'tirion fordring SAY_EPILOG_2'),
 (-1001102,'%s holds the limp body of Taelan Fordring and softly sobs.',0,2,0,0,'tirion fordring EMOTE_HOLD_TAELAN'),
 (-1001103,'Too long have I sat idle, gripped in this haze... this malaise, lamenting what could have been... what should have been.',0,0,0,0,'tirion fordring SAY_EPILOG_3'),
-(-1001104,'Your death will not have been in vain, Taelan. A new Order is born on this day... an Order which will dedicate itself to extinguising the evil that plagues this world. An evil that cannot hide behind politics and pleasantries.',0,0,0,0,'tirion fordring SAY_EPILOG_4'),
+(-1001104,'Your death will not have been in vain, Taelan. A new Order is born on this day... an Order which will dedicate itself to extinguishing the evil that plagues this world. An evil that cannot hide behind politics and pleasantries.',0,0,0,0,'tirion fordring SAY_EPILOG_4'),
 (-1001105,'This I promise... This I vow...',0,0,0,15,'tirion fordring SAY_EPILOG_5'),
 
 (-1001106,'Don\'t forget to get my bell out of the chest here. And remember, if do happen to wander off, just ring it and I\'ll find you again.',0,0,0,1,'shay leafrunner SAY_ESCORT_START'),
@@ -1626,7 +1632,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001163,'That I must fight against my own kind deeply saddens me.',0,0,0,0,'arei SAY_CLEAR_PATH'),
 (-1001164,'I can sense it now, $N. Ashenvale lies down this path.',0,0,0,0,'arei SAY_ASHENVALE'),
 (-1001165,'I feel... something strange...',0,0,0,0,'arei SAY_TRANSFORM'),
-(-1001166,'$N my form has now changed! The true strength of my spirit is returing to me now... The cursed grasp of the forest is leaving me.',0,0,0,0,'arei SAY_LIFT_CURSE'),
+(-1001166,'$N my form has now changed! The true strength of my spirit is returning to me now... The cursed grasp of the forest is leaving me.',0,0,0,0,'arei SAY_LIFT_CURSE'),
 (-1001167,'Thank you, $N. Now my spirit will finally be at peace.',0,0,0,0,'arei SAY_ESCORT_COMPLETE'),
 
 (-1001168,'REUSE ME',0,0,0,0,'REUSE_ME'),
@@ -1668,7 +1674,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001226,'%s is drawn to the ghost magnet...',0,2,0,0,'Magrami Spectre on spawn 1'),
 (-1001227,'%s is angered!',0,2,0,0,'Magrami Spectre on spawn 2'),
 -- used in TBC
-(-1001250,'%s is silenced by the venemous sting.',0,2,0,0,'npc_simone EMOTE_SILENCE'),
+(-1001250,'%s is silenced by the venomous sting.',0,2,0,0,'npc_simone EMOTE_SILENCE'),
 (-1001251,'%s is stricken by a virulent poison.',0,2,0,0,'npc_artorius EMOTE_POISON'),
 (-1001252,'%s is immobilized.',0,2,0,0,'npc_solenor EMOTE_IMMOBILIZED'),
 (-1001253,'You dare interfere with this being''s testing? The battle must be fought alone! You shall all pay for this interference!',0,0,0,0,'the_cleaner SAY_CLEANER_AGGRO'),
@@ -1904,7 +1910,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1229004,'Excellent... it would appear as if the meddlesome insects have arrived just in time to feed my legion. Welcome, mortals!',0,1,0,1,'nefarius SAY_INTRO_1'),
 (-1229005,'Let not even a drop of their blood remain upon the arena floor, my children. Feast on their souls!',0,1,0,1,'nefarius SAY_INTRO_2'),
-(-1229006,'Foolsss...Kill the one in the dress!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT1'),
+(-1229006,'Foolsss... Kill the one in the dress!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT1'),
 (-1229007,'Sire, let me join the fray! I shall tear their spines out with my bare hands!',0,1,0,1,'rend SAY_REND_TAUNT1'),
 (-1229008,'Concentrate your attacks upon the healer!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT2'),
 (-1229009,'Inconceivable!',0,1,0,0,'nefarius SAY_NEFARIUS_TAUNT3'),
@@ -2226,10 +2232,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1509013,'Do not hesitate! Destroy them!',8606,1,0,0,'rajaxx SAY_UNK3'),
 (-1509014,'Warriors! Captains! Continue the fight!',8613,1,0,0,'rajaxx SAY_UNK4'),
 (-1509015,'You are not worth my time $N!',8614,1,0,0,'rajaxx SAY_DEAGGRO'),
-(-1509016,'Breath your last!',8604,1,0,0,'rajaxx SAY_KILLS_ANDOROV'),
-(-1509017,'Soon you will know the price of your meddling, mortals... The master is nearly whole... And when he rises, your world will be cease!',0,1,0,0,'rajaxx SAY_COMPLETE_QUEST'),
+(-1509016,'Breathe your last!',8604,1,0,0,'rajaxx SAY_KILLS_ANDOROV'),
+(-1509017,'Soon you will know the price of your meddling, mortals... The master is nearly whole... And when he rises, your world will cease!',0,1,0,0,'rajaxx SAY_COMPLETE_QUEST'),
 
-(-1509018,'I am rejuvinated!',8593,1,0,0,'ossirian SAY_SURPREME1'),
+(-1509018,'I am rejuvenated!',8593,1,0,0,'ossirian SAY_SURPREME1'),
 (-1509019,'My powers are renewed!',8595,1,0,0,'ossirian SAY_SURPREME2'),
 (-1509020,'My powers return!',8596,1,0,0,'ossirian SAY_SURPREME3'),
 (-1509021,'Protect the city at all costs!',8597,1,0,0,'ossirian SAY_RAND_INTRO1'),
@@ -2253,7 +2259,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1531004,'Spineless wretches! You will drown in rivers of blood!',8619,1,0,0,'skeram SAY_SLAY2'),
 (-1531005,'The screams of the dying will fill the air. A symphony of terror is about to begin!',8620,1,0,0,'skeram SAY_SLAY3'),
 (-1531006,'Prepare for the return of the ancient ones!',8618,1,0,0,'skeram SAY_SPLIT'),
-(-1531007,'You only delay... the inevetable.',8622,1,0,0,'skeram SAY_DEATH'),
+(-1531007,'You only delay... the inevitable.',8622,1,0,0,'skeram SAY_DEATH'),
 
 (-1531008,'You will be judged for defiling these sacred grounds! The laws of the Ancients will not be challenged! Trespassers will be annihilated!',8646,1,0,0,'sartura SAY_AGGRO'),
 (-1531009,'I sentence you to death!',8647,1,0,0,'sartura SAY_SLAY'),
@@ -2267,7 +2273,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1531015,'There will be pain...',0,1,0,0,'veklor SAY_INTRO_3'),
 (-1531016,'Oh so much pain...',0,1,0,0,'veknilash SAY_INTRO_4'),
 (-1531017,'Come, little ones.',0,1,0,0,'veklor SAY_INTRO_5'),
-(-1531018,'The feast of souls begin now...',0,1,0,0,'veknilash SAY_INTRO_6'),
+(-1531018,'The feast of souls begins now...',0,1,0,0,'veknilash SAY_INTRO_6'),
 
 (-1531019,'It\'s too late to turn away.',8623,1,0,0,'veklor SAY_AGGRO_1'),
 (-1531020,'Prepare to embrace oblivion!',8626,1,0,0,'veklor SAY_AGGRO_2'),

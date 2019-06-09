@@ -227,6 +227,8 @@ class ChatHandler
         bool HandleDebugByteFields(char* args);
         bool HandleDebugSpellVisual(char* args);
         bool HandleDebugMoveflags(char* args);
+        bool HandleDebugLootDropStats(char* args);
+        bool HandleDebugOverflowCommand(char* args);
 
         bool HandleDebugPlayCinematicCommand(char* args);
         bool HandleDebugPlaySoundCommand(char* args);

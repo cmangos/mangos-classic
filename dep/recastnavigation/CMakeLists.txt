@@ -16,24 +16,20 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-if (BUILD_GAME_SERVER OR BUILD_EXTRACTORS)
+if (BUILD_GAME_SERVER OR BUILD_EXTRACTORS OR BUILD_RECASTDEMOMOD)
+  add_definitions(-DDT_POLYREF64)
   add_subdirectory(Detour)
-  if(MSVC)
-    set_target_properties(detour PROPERTIES FOLDER "Dependencies")
-  endif()
   target_include_directories(detour
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Detour/Include
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
   )
 endif()
 
-if (BUILD_EXTRACTORS)
+if (BUILD_EXTRACTORS OR BUILD_RECASTDEMOMOD)
   add_subdirectory(Recast)
-  if(MSVC)
-    set_target_properties(recast PROPERTIES FOLDER "Dependencies")
-  endif()
-  target_include_directories(recast
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Recast/Include
-  )
+endif()
+
+if (BUILD_RECASTDEMOMOD)
+  add_subdirectory(DetourCrowd)
+  add_subdirectory(DetourTileCache)
+  add_subdirectory(DebugUtils)
 endif()

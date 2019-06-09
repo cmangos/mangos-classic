@@ -30,6 +30,8 @@
 #include "Entities/ItemEnchantmentMgr.h"
 #include "Entities/Corpse.h"
 #include "Tools/Language.h"
+#include <sstream>
+#include <iomanip>
 
 INSTANTIATE_SINGLETON_1(LootMgr);
 
@@ -1261,6 +1263,7 @@ void Loot::Release(Player* player)
         }
         case HIGHGUID_ITEM:
         {
+            ForceLootAnimationClientUpdate();
             switch (m_lootType)
             {
                 // temporary loot in stacking items, clear loot state, no auto loot move
@@ -1275,7 +1278,6 @@ void Loot::Release(Player* player)
                     // reset loot for allow repeat looting if stack > 5
                     Clear();
                     m_itemTarget->SetLootState(ITEM_LOOT_REMOVED);
-
                     player->DestroyItemCount(m_itemTarget, count, true);
                     break;
                 }
@@ -1301,7 +1303,9 @@ void Loot::Release(Player* player)
                     break;
                 }
             }
-            return;                                         // item can be looted only single player
+            //already done above
+            updateClients = false;
+            break;
         }
         case HIGHGUID_UNIT:
         {
@@ -1373,7 +1377,7 @@ void Loot::Release(Player* player)
     }
 
     if (updateClients)
-        ForceLootAnimationCLientUpdate();
+        ForceLootAnimationClientUpdate();
 }
 
 // Popup windows with loot content
@@ -1632,7 +1636,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
                     creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                 else
                     creature->SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
-                ForceLootAnimationCLientUpdate();
+                ForceLootAnimationClientUpdate();
                 break;
             }
 
@@ -1899,6 +1903,14 @@ Loot::Loot(Player* player, uint32 id, LootType type) :
     }
 }
 
+Loot::Loot(LootType type) :
+    m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
+    m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
+    m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false), m_createTime(World::GetCurrentClockTime())
+{
+
+}
+
 void Loot::SendAllowedLooter()
 {
     if (m_lootMethod == FREE_FOR_ALL || m_lootMethod == NOT_GROUP_TYPE_LOOT)
@@ -2007,7 +2019,7 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
         }
         else if (IsLootedFor(target))
             SendReleaseFor(target);
-        ForceLootAnimationCLientUpdate();
+        ForceLootAnimationClientUpdate();
     }
     return msg;
 }
@@ -2063,7 +2075,7 @@ void Loot::Update()
 
 // this will force server to update all client that is showing this object
 // used to update players right to loot or sparkles animation
-void Loot::ForceLootAnimationCLientUpdate() const
+void Loot::ForceLootAnimationClientUpdate() const
 {
     if (!m_lootTarget)
         return;
@@ -2173,9 +2185,15 @@ void Loot::SendGold(Player* player)
     }
     m_gold = 0;
 
+    // animation update is done in Release if needed.
     if (IsLootedFor(player))
+    {
         Release(player);
-    ForceLootAnimationCLientUpdate();
+        // Be aware that in case of items that contain loot this class may be freed.
+        // All pointers may be invalid due to Player::DestroyItem call.
+    }
+    else
+        ForceLootAnimationClientUpdate();
 }
 
 bool Loot::IsItemAlreadyIn(uint32 itemId) const
@@ -2300,7 +2318,7 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
         {
             LootStoreItem const* lsi = *itr;
 
-            if (lsi->conditionId && !LootTemplate::PlayerOrGroupFulfilsCondition(loot, lootOwner, lsi->conditionId))
+            if (lsi->conditionId && lootOwner && !LootTemplate::PlayerOrGroupFulfilsCondition(loot, lootOwner, lsi->conditionId))
             {
                 sLog.outDebug("In explicit chance -> This item cannot be added! (%u)", lsi->itemid);
                 continue;
@@ -2341,7 +2359,7 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
                     continue;                               // pass this item
             }
 
-            if (lsi->conditionId && !LootTemplate::PlayerOrGroupFulfilsCondition(loot, lootOwner, lsi->conditionId))
+            if (lsi->conditionId && lootOwner && !LootTemplate::PlayerOrGroupFulfilsCondition(loot, lootOwner, lsi->conditionId))
             {
                 sLog.outDebug("In equal chance -> This item cannot be added! (%u)", lsi->itemid);
                 continue;
@@ -2480,7 +2498,7 @@ void LootTemplate::Process(Loot& loot, Player const* lootOwner, LootStore const&
     for (auto Entrie : Entries)
     {
         // Check condition
-        if (Entrie.conditionId && !PlayerOrGroupFulfilsCondition(loot, lootOwner, Entrie.conditionId))
+        if (Entrie.conditionId && lootOwner && !PlayerOrGroupFulfilsCondition(loot, lootOwner, Entrie.conditionId))
             continue;
 
         if (!Entrie.Roll(rate))
@@ -2905,4 +2923,77 @@ Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid) const
     }
 
     return loot;
+}
+
+void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 lootId, std::string lootStore) const
+{
+    // choose correct loot template
+    LootStore* store = &LootTemplates_Creature;
+    if (lootStore != "creature")
+    {
+        if (lootStore == "gameobject")
+            store = &LootTemplates_Gameobject;
+        else if (lootStore == "fishing")
+            store = &LootTemplates_Fishing;
+        else if (lootStore == "item")
+            store = &LootTemplates_Item;
+        else if (lootStore == "pickpocketing")
+            store = &LootTemplates_Pickpocketing;
+        else if (lootStore == "skinning")
+            store = &LootTemplates_Skinning;
+        else if (lootStore == "disenchanting")
+            store = &LootTemplates_Disenchant;
+        else if (lootStore == "mail")
+            store = &LootTemplates_Mail;
+    }
+
+    if (amountOfCheck < 1)
+        amountOfCheck = 1;
+
+    std::unique_ptr<Loot> loot = std::unique_ptr<Loot>(new Loot(LOOT_DEBUG));
+
+    // get loot table for provided loot id
+    LootTemplate const* lootTable = store->GetLootFor(lootId);
+    if (!lootTable)
+    {
+        chat.PSendSysMessage("No table loot found for lootId(%u) in table loot table '%s'.", lootId, store->GetName());
+        return;
+    }
+
+    // do the loot drop simulation
+    std::unordered_map<uint32, uint32> itemStatsMap;
+    for (uint32 i = 1; i <= amountOfCheck; ++i)
+    {
+        lootTable->Process(*loot, nullptr, *store, store->IsRatesAllowed());
+        for (auto lootItem : loot->m_lootItems)
+            ++itemStatsMap[lootItem->itemId];
+        loot->Clear();
+    }
+
+    // sort the result
+    auto comp = [](std::pair<uint32, uint32> const& a, std::pair<uint32, uint32> const& b) { return a.second > b.second; };
+    std::set<std::pair<uint32, uint32>, decltype(comp)> sortedResult(
+        itemStatsMap.begin(), itemStatsMap.end(), comp);
+
+    // report the result in both chat client and console
+    chat.PSendSysMessage("Results for %u drops simulation of loot id(%u) in %s:", amountOfCheck, lootId, store->GetName());
+    sLog.outString("Results for %u drops simulation of loot id(%u) in %s:", amountOfCheck, lootId, store->GetName());
+    std::stringstream ss;
+    for (auto itemStat : sortedResult)
+    {
+        uint32 itemId = itemStat.first;
+        ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
+        if (!pProto)
+            continue;
+
+        std::string name = pProto->Name1;
+        sObjectMgr.GetItemLocaleStrings(itemId, -1, &name);
+        float computedStats = itemStat.second / float(amountOfCheck) * 100;
+        ss.str("");
+        ss.clear();
+        ss << std::fixed << std::setprecision(4) << computedStats;
+        ss << '%';
+        chat.PSendSysMessage(LANG_ITEM_LIST_CHAT, itemId, itemId, name.c_str(), ss.str().c_str());
+        sLog.outString("%6u - %-45s \tfound %6u/%-6u \tso %8s%% drop", itemStat.first, name.c_str(), itemStat.second, amountOfCheck, ss.str().c_str());
+    }
 }

@@ -140,6 +140,12 @@ struct boss_sapphironAI : public ScriptedAI
         }
     }
 
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    {
+        if (m_Phase != PHASE_GROUND && uiDamage >= m_creature->GetHealth())
+            uiDamage = 0;
+    }
+
     void MovementInform(uint32 uiType, uint32 /*uiPointId*/) override
     {
         if (uiType == POINT_MOTION_TYPE && m_Phase == PHASE_LIFT_OFF)

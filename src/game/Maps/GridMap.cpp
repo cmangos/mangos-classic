@@ -82,7 +82,11 @@ bool GridMap::loadData(char const* filename)
     // Not return error if file not found
     FILE* in = fopen(filename, "rb");
     if (!in)
-        return false;
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Failled to found %s", filename);
+        // its a valid error only in case of no vmap files are available too
+        return true;
+    }
 
     fread(&header, sizeof(header), 1, in);
     if (header.mapMagic     == *((uint32 const*)(MAP_MAGIC)) &&
@@ -556,7 +560,7 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
     if (LiquidTypeEntry const* liquidEntry = sLiquidTypeStore.LookupEntry(entry))
     {
         entry = liquidEntry->Id;
-        type &= MAP_LIQUID_TYPE_DARK_WATER;
+        type &= MAP_LIQUID_TYPE_DEEP_WATER;
         uint32 liqTypeIdx = liquidEntry->Type;
         if (entry < 21)
         {
@@ -578,7 +582,7 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
             }
         }
 
-        type |= (1 << liqTypeIdx) | (type & MAP_LIQUID_TYPE_DARK_WATER);
+        type |= (1 << liqTypeIdx) | (type & MAP_LIQUID_TYPE_DEEP_WATER);
     }
 
     if (type == 0)

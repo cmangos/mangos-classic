@@ -17,49 +17,18 @@
 /* ScriptData
 SDName: Burning_Steppes
 SD%Complete: 100
-SDComment: Quest support: 4121, 4122, 4866
+SDComment: Quest support: 4121, 4122
 SDCategory: Burning Steppes
 EndScriptData
 
 */
 
 #include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
-npc_ragged_john
 npc_grark_lorkrub
 EndContentData */
 
 
 #include "AI/ScriptDevAI/base/escort_ai.h"
-
-/*######
-## npc_ragged_john
-######*/
-
-struct npc_ragged_johnAI : public ScriptedAI
-{
-    npc_ragged_johnAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    void Reset() override {}
-
-    void MoveInLineOfSight(Unit* who) override
-    {
-        if (who->HasAura(16468, EFFECT_INDEX_0))
-        {
-            if (who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 15) && who->isInAccessablePlaceFor(m_creature))
-            {
-                DoCastSpellIfCan(who, 16472);
-                ((Player*)who)->AreaExploredOrEventHappens(4866);
-            }
-        }
-
-        ScriptedAI::MoveInLineOfSight(who);
-    }
-};
-
-UnitAI* GetAI_npc_ragged_john(Creature* pCreature)
-{
-    return new npc_ragged_johnAI(pCreature);
-}
 
 /*######
 ## npc_grark_lorkrub
@@ -600,11 +569,6 @@ UnitAI* GetAI_npc_klinfran(Creature* pCreature)
 void AddSC_burning_steppes()
 {
     Script* pNewScript = new Script;
-    pNewScript->Name = "npc_ragged_john";
-    pNewScript->GetAI = &GetAI_npc_ragged_john;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "npc_grark_lorkrub";
     pNewScript->GetAI = &GetAI_npc_grark_lorkrub;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_grark_lorkrub;

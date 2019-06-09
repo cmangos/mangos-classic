@@ -54,22 +54,24 @@
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 
-bool normalizePlayerName(std::string& name)
+bool normalizePlayerName(std::string& name, size_t max_len)
 {
     if (name.empty())
         return false;
 
-    wchar_t wstr_buf[MAX_INTERNAL_PLAYER_NAME + 1];
-    size_t wstr_len = MAX_INTERNAL_PLAYER_NAME;
+    std::wstring wstr_buf;
+    if (!Utf8toWStr(name, wstr_buf))
+        return false;
 
-    if (!Utf8toWStr(name, &wstr_buf[0], wstr_len))
+    size_t len = wstr_buf.size();
+    if (len > max_len)
         return false;
 
     wstr_buf[0] = wcharToUpper(wstr_buf[0]);
-    for (size_t i = 1; i < wstr_len; ++i)
+    for (size_t i = 1; i < len; ++i)
         wstr_buf[i] = wcharToLower(wstr_buf[i]);
 
-    return WStrToUtf8(wstr_buf, wstr_len, name);
+    return WStrToUtf8(wstr_buf, name);
 }
 
 LanguageDesc lang_description[LANGUAGES_COUNT] =
@@ -2281,7 +2283,7 @@ void ObjectMgr::LoadPlayerInfo()
                                         const uint32 stepIndex = (skill.Step - 1);
                                         SkillTiersEntry const* steps = sSkillTiersStore.LookupEntry(entry->skillTierId);
 
-                                        if (!steps || !steps->maxSkillValue[stepIndex] || !steps->skillValue[stepIndex])
+                                        if (!steps || !steps->maxSkillValue[stepIndex])
                                             continue;
                                     }
 
@@ -3069,7 +3071,7 @@ void ObjectMgr::LoadGroups()
     // -- loading groups --
     uint32 count = 0;
     //                                                    0         1              2           3           4              5      6      7      8      9      10     11     12     13      14          15
-    QueryResult* result = CharacterDatabase.Query("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, leaderGuid, groupId FROM groups");
+    QueryResult* result = CharacterDatabase.Query("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, leaderGuid, groupId FROM `groups`");
 
     if (!result)
     {
@@ -3173,10 +3175,10 @@ void ObjectMgr::LoadGroups()
                  // 5
                  "(SELECT COUNT(*) FROM character_instance WHERE guid = group_instance.leaderGuid AND instance = group_instance.instance AND permanent = 1 LIMIT 1), "
                  // 6
-                 " groups.groupId, "
+                 "`groups`.groupId, "
                  // 7
                  "instance.encountersMask "
-                 "FROM group_instance LEFT JOIN instance ON instance = id LEFT JOIN groups ON groups.leaderGUID = group_instance.leaderGUID ORDER BY leaderGuid"
+                 "FROM group_instance LEFT JOIN instance ON instance = id LEFT JOIN `groups` ON `groups`.leaderGUID = group_instance.leaderGUID ORDER BY leaderGuid"
              );
 
     if (!result)
@@ -3241,39 +3243,39 @@ void ObjectMgr::LoadQuests()
 
     m_ExclusiveQuestGroups.clear();
 
-    //                                                0      1       2           3         4           5     6                7              8              9
-    QueryResult* result = WorldDatabase.Query("SELECT entry, Method, ZoneOrSort, MinLevel, QuestLevel, Type, RequiredClasses, RequiredRaces, RequiredSkill, RequiredSkillValue,"
-                          //   10                   11                 12                     13                   14                     15                   16                17
+    //                                                0      1       2           3         4         5           6     7                8              9              10
+    QueryResult* result = WorldDatabase.Query("SELECT entry, Method, ZoneOrSort, MinLevel, MaxLevel, QuestLevel, Type, RequiredClasses, RequiredRaces, RequiredSkill, RequiredSkillValue,"
+                          //   11                   12                 13                     14                   15                     16                   17                18
                           "RepObjectiveFaction, RepObjectiveValue, RequiredMinRepFaction, RequiredMinRepValue, RequiredMaxRepFaction, RequiredMaxRepValue, SuggestedPlayers, LimitTime,"
-                          //   18          19            20           21           22              23                24         25            26
+                          //   19          20            21           22           23              24                25         26            27
                           "QuestFlags, SpecialFlags, PrevQuestId, NextQuestId, ExclusiveGroup, NextQuestInChain, SrcItemId, SrcItemCount, SrcSpell,"
-                          //   27     28       29          30               31                32       33              34              35              36
+                          //   28     29       30          31               32                33       34              35              36              37
                           "Title, Details, Objectives, OfferRewardText, RequestItemsText, EndText, ObjectiveText1, ObjectiveText2, ObjectiveText3, ObjectiveText4,"
-                          //   37          38          39          40          41             42             43             44
+                          //   38          39          40          41          42             43             44             45
                           "ReqItemId1, ReqItemId2, ReqItemId3, ReqItemId4, ReqItemCount1, ReqItemCount2, ReqItemCount3, ReqItemCount4,"
-                          //   45            46            47            48            49               50               51               52
+                          //   46            47            48            49            50               51               52               53
                           "ReqSourceId1, ReqSourceId2, ReqSourceId3, ReqSourceId4, ReqSourceCount1, ReqSourceCount2, ReqSourceCount3, ReqSourceCount4,"
-                          //   53                  54                  55                  56                  57                     58                     59                     60
+                          //   54                  55                  56                  57                  58                     59                     60                     60
                           "ReqCreatureOrGOId1, ReqCreatureOrGOId2, ReqCreatureOrGOId3, ReqCreatureOrGOId4, ReqCreatureOrGOCount1, ReqCreatureOrGOCount2, ReqCreatureOrGOCount3, ReqCreatureOrGOCount4,"
-                          //   61             62             63             64
+                          //   62             63             64             65
                           "ReqSpellCast1, ReqSpellCast2, ReqSpellCast3, ReqSpellCast4,"
-                          //   65                66                67                68                69                70
+                          //   66                67                68                69                70                71
                           "RewChoiceItemId1, RewChoiceItemId2, RewChoiceItemId3, RewChoiceItemId4, RewChoiceItemId5, RewChoiceItemId6,"
-                          //   71                   72                   73                   74                   75                   76
+                          //   72                   73                   74                   75                   76                   77
                           "RewChoiceItemCount1, RewChoiceItemCount2, RewChoiceItemCount3, RewChoiceItemCount4, RewChoiceItemCount5, RewChoiceItemCount6,"
-                          //   77          78          79          80          81             82             83             84
+                          //   78          79          80          81          82             83             84             85
                           "RewItemId1, RewItemId2, RewItemId3, RewItemId4, RewItemCount1, RewItemCount2, RewItemCount3, RewItemCount4,"
-                          //   85              86              87              88              89              90            91            92            93            94
+                          //   86              87              88              89              90              91            92            93            94            95
                           "RewRepFaction1, RewRepFaction2, RewRepFaction3, RewRepFaction4, RewRepFaction5, RewRepValue1, RewRepValue2, RewRepValue3, RewRepValue4, RewRepValue5,"
-                          //   95             96                97        98            99                 100               101         102     103     104
+                          //   96             97                98        99            100                101               102       103     104     105
                           "RewOrReqMoney, RewMoneyMaxLevel, RewSpell, RewSpellCast, RewMailTemplateId, RewMailDelaySecs, PointMapId, PointX, PointY, PointOpt,"
-                          //   105            106            107            108            109                 110                 111                 112
+                          //   106            107            108            109            110                 111                 112                 113
                           "DetailsEmote1, DetailsEmote2, DetailsEmote3, DetailsEmote4, DetailsEmoteDelay1, DetailsEmoteDelay2, DetailsEmoteDelay3, DetailsEmoteDelay4,"
-                          //   113              114            115                116                117                118
+                          //   114              115            116                117                118                119
                           "IncompleteEmote, CompleteEmote, OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4,"
-                          //   119                     120                     121                     122
+                          //   120                     121                     122                     123
                           "OfferRewardEmoteDelay1, OfferRewardEmoteDelay2, OfferRewardEmoteDelay3, OfferRewardEmoteDelay4,"
-                          //   123          124          125
+                          //   124          125          126
                           "StartScript, CompleteScript, RequiredCondition"
                           " FROM quest_template");
     if (!result)
@@ -4429,7 +4431,7 @@ void ObjectMgr::LoadInstanceTemplate()
             MapEntry const* ghostEntry = sMapStore.LookupEntry(temp->ghostEntranceMap);
             if (!ghostEntry)
             {
-                sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad ghost entrance map id %u for instance template %d template!", ghostEntry->MapID, temp->map);
+                sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad ghost entrance map id %u for instance template %d template!", temp->ghostEntranceMap, temp->map);
                 sInstanceTemplate.EraseEntry(i);
                 continue;
             }
@@ -5062,7 +5064,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             {
                 // mail will be returned:
                 CharacterDatabase.PExecute("UPDATE mail SET sender = '%u', receiver = '%u', expire_time = '" UI64FMTD "', deliver_time = '" UI64FMTD "',cod = '0', checked = '%u' WHERE id = '%u'",
-                                           m->receiverGuid.GetCounter(), m->sender, (uint64)(basetime + 30 * DAY), (uint64)basetime, MAIL_CHECK_MASK_RETURNED, m->messageID);
+                                           m->receiverGuid.GetCounter(), m->sender, (uint64)basetime + 30 * DAY, (uint64)basetime, MAIL_CHECK_MASK_RETURNED, m->messageID);
                 for (MailItemInfoVec::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
                 {
                     // update receiver in mail items for its proper delivery, and in instance_item for avoid lost item at sender delete
@@ -5822,7 +5824,7 @@ void ObjectMgr::PackGroupIds()
     // all valid ids are in the instance table
     // any associations to ids not in this table are assumed to be
     // cleaned already in CleanupInstances
-    QueryResult* result = CharacterDatabase.Query("SELECT groupId FROM groups");
+    QueryResult* result = CharacterDatabase.Query("SELECT groupId FROM `groups`");
     if (result)
     {
         do
@@ -5834,7 +5836,7 @@ void ObjectMgr::PackGroupIds()
             if (id == 0)
             {
                 CharacterDatabase.BeginTransaction();
-                CharacterDatabase.PExecute("DELETE FROM groups WHERE groupId = '%u'", id);
+                CharacterDatabase.PExecute("DELETE FROM `groups` WHERE groupId = '%u'", id);
                 CharacterDatabase.PExecute("DELETE FROM group_member WHERE groupId = '%u'", id);
                 CharacterDatabase.CommitTransaction();
                 continue;
@@ -5857,7 +5859,7 @@ void ObjectMgr::PackGroupIds()
         {
             // remap group id
             CharacterDatabase.BeginTransaction();
-            CharacterDatabase.PExecute("UPDATE groups SET groupId = '%u' WHERE groupId = '%u'", groupId, i);
+            CharacterDatabase.PExecute("UPDATE `groups` SET groupId = '%u' WHERE groupId = '%u'", groupId, i);
             CharacterDatabase.PExecute("UPDATE group_member SET groupId = '%u' WHERE groupId = '%u'", groupId, i);
             CharacterDatabase.CommitTransaction();
         }
@@ -5944,7 +5946,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = CharacterDatabase.Query("SELECT MAX(groupId) FROM groups");
+    result = CharacterDatabase.Query("SELECT MAX(groupId) FROM `groups`");
     if (result)
     {
         m_GroupIds.Set((*result)[0].GetUInt32() + 1);
@@ -7822,6 +7824,10 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         }
         case CONDITION_SPAWN_COUNT:
             return source->GetMap()->SpawnedCountForEntry(m_value1) >= m_value2;
+        case CONDITION_WORLD_SCRIPT:
+            return false; // Not yet implemented in Classic core but may be needed in the future. Kept for compatibility with TBC/WotLK cores where it was added with World State implementation
+        case CONDITION_GENDER_NPC:
+            return ((Creature*)source)->getGender() == m_value1;
         default:
             return false;
     }
@@ -8265,6 +8271,17 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             if (!sCreatureStorage.LookupEntry<CreatureInfo>(value1))
             {
                 sLog.outErrorDb("Spawn count condition (entry %u, type %u) has an invalid value in value1. (Creature %u does not exist in the database), skipping.", entry, condition, value1);
+                return false;
+            }
+            break;
+        }
+        case CONDITION_WORLD_SCRIPT:
+            break;
+        case CONDITION_GENDER_NPC:
+        {
+            if (value1 >= MAX_GENDER)
+            {
+                sLog.outErrorDb("Gender condition (entry %u, type %u) has an invalid value in value1. (Has %u, must be smaller than %u), skipping.", entry, condition, value1, MAX_GENDER);
                 return false;
             }
             break;

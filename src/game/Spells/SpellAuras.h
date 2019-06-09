@@ -322,6 +322,7 @@ class Aura
         void HandleModCastingSpeed(bool apply, bool Real);
         void HandleAuraMounted(bool apply, bool Real);
         void HandleWaterBreathing(bool Apply, bool Real);
+        void HandleModWaterBreathing(bool apply, bool Real);
         void HandleModBaseResistance(bool apply, bool Real);
         void HandleModRegen(bool apply, bool Real);
         void HandleModPowerRegen(bool apply, bool Real);
@@ -343,7 +344,7 @@ class Aura
         void HandleModPercentStat(bool apply, bool Real);
         void HandleAurasVisible(bool apply, bool Real);
         void HandleModResistancePercent(bool apply, bool Real);
-        void HandleAuraModBaseResistancePCT(bool apply, bool Real);
+        void HandleAuraModBaseResistancePercent(bool apply, bool Real);
         void HandleAuraTrackStealthed(bool apply, bool Real);
         void HandleForceReaction(bool apply, bool Real);
         void HandleAuraModRangedHaste(bool apply, bool Real);

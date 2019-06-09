@@ -35,3 +35,6 @@ UPDATE `spell_template` SET `AttributesEx2`=AttributesEx2|0x00000004 WHERE `id`=
 
 -- Remove channeled extra attribute from spell 28370 (Toxic Gas) that is not channeled
 UPDATE `spell_template` SET `AttributesEx`=0 WHERE `id`=28370;
+
+-- Hurricane Spell From Druid And NPC must be interruptable
+UPDATE `spell_template` SET `InterruptFlags`=15 WHERE `id`=16914 OR `id`=17401 OR `id`=17402;

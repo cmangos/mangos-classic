@@ -1284,6 +1284,29 @@ void SpellMgr::LoadSpellThreats()
     sLog.outString();
 }
 
+bool SpellMgr::IsNoStackSpellDueToSpellAndCastItem(SpellAuraHolder const* spellHolder1, SpellAuraHolder const* spellHolder2) const
+{
+    if (!spellHolder1 || !spellHolder2)
+        return false;
+
+    SpellEntry const* spellInfo1 = spellHolder1->GetSpellProto();
+    SpellEntry const* spellInfo2 = spellHolder2->GetSpellProto();
+
+    bool stackable = !IsNoStackSpellDueToSpell(spellInfo1, spellInfo2);
+    const bool own = (spellHolder1->GetCasterGuid() == spellHolder2->GetCasterGuid());
+
+    // lets check if we are an item spell from another player
+    if (stackable && !own && !spellInfo1->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
+    {
+        ObjectGuid castItem1 = spellHolder1->GetCastItemGuid();
+        ObjectGuid castItem2 = spellHolder2->GetCastItemGuid();
+        
+        // check that we have found an item, if we do then we are not stackable
+        stackable = !((castItem1 && !castItem1.IsEmpty()) || (castItem2 && !castItem2.IsEmpty()));
+    }
+    return !stackable;
+}
+
 bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const
 {
     if (!spellInfo_1 || !spellInfo_2)
@@ -1614,7 +1637,7 @@ void SpellMgr::LoadSpellChains()
     }
 
     // load custom case
-    QueryResult* result = WorldDatabase.Query("SELECT spell_id, prev_spell, first_spell, rank, req_spell FROM spell_chain");
+    QueryResult* result = WorldDatabase.Query("SELECT spell_id, prev_spell, first_spell, `rank`, req_spell FROM spell_chain");
     if (!result)
     {
         BarGoLink bar(1);
@@ -1863,15 +1886,14 @@ void SpellMgr::LoadSpellLearnSkills()
                 SpellLearnSkillNode dbc_node;
                 dbc_node.skill    = entry->EffectMiscValue[i];
                 dbc_node.step     = entry->CalculateSimpleValue(SpellEffectIndex(i));
-                if (dbc_node.skill != SKILL_RIDING)
-                    dbc_node.value = 1;
-                else
-                    dbc_node.value = dbc_node.step * 75;
-                dbc_node.maxvalue = dbc_node.step * 75;
+                dbc_node.effect   = SpellEffects(entry->Effect[i]);
 
-                mSpellLearnSkills[spell] = dbc_node;
-                ++dbc_count;
-                break;
+                if (dbc_node.skill && dbc_node.step)
+                {
+                    mSpellLearnSkills[spell] = dbc_node;
+                    ++dbc_count;
+                    break;
+                }
             }
         }
     }
@@ -2404,14 +2426,22 @@ void SpellMgr::LoadSpellAreas()
                 continue;
             }
 
-            switch (spellInfo->EffectApplyAuraName[EFFECT_INDEX_0])
+            bool validSpellEffect = false;
+            for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
             {
-                case SPELL_AURA_DUMMY:
-                case SPELL_AURA_GHOST:
-                    break;
-                default:
-                    sLog.outErrorDb("Spell %u listed in `spell_area` have aura spell requirement (%u) without dummy/phase/ghost aura in effect 0", spell, abs(spellArea.auraSpell));
-                    continue;
+                switch (spellInfo->EffectApplyAuraName[i])
+                {
+                    case SPELL_AURA_DUMMY:
+                    case SPELL_AURA_GHOST:
+                        validSpellEffect = true;
+                        break;
+                }
+            }
+
+            if (!validSpellEffect)
+            {
+                sLog.outErrorDb("Spell %u listed in `spell_area` have aura spell requirement (%u) without dummy/ghost aura in spell effects", spell, abs(spellArea.auraSpell));
+                continue;
             }
 
             if (uint32(abs(spellArea.auraSpell)) == spellArea.spellId)

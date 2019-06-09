@@ -178,11 +178,8 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
     Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE)(PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
 
     // Remove curse on group members
-    if (Player* pCursedTarget = GetDispelTarget(DISPEL_CURSE))
-    {
-        if (MAGE_REMOVE_CURSE > 0 && CastSpell(MAGE_REMOVE_CURSE, pCursedTarget))
-            return RETURN_CONTINUE;
-    }
+    if (m_ai->HasDispelOrder() && DispelPlayer(GetDispelTarget(DISPEL_CURSE)) & RETURN_CONTINUE)
+        return RETURN_CONTINUE;
 
     if (newTarget && !m_ai->IsNeutralized(newTarget)) // Bot has aggro and the mob is not already crowd controled
     {
@@ -200,11 +197,11 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
                 }
 
                 // Things are getting dire: cast Ice block
-                if (ICE_BLOCK > 0 && m_bot->IsSpellReady(ICE_BLOCK) && m_ai->GetHealthPercent() < 30 && !m_bot->HasAura(ICE_BLOCK, EFFECT_INDEX_0) && m_ai->CastSpell(ICE_BLOCK))
+                if (ICE_BLOCK > 0 && m_bot->IsSpellReady(ICE_BLOCK) && m_ai->GetHealthPercent() < 30 && !m_bot->HasAura(ICE_BLOCK, EFFECT_INDEX_0) && m_ai->CastSpell(ICE_BLOCK) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
 
                 // Cast Ice Barrier if health starts to goes low
-                if (ICE_BARRIER > 0 && m_bot->IsSpellReady(ICE_BARRIER) && m_ai->GetHealthPercent() < 50 && !m_bot->HasAura(ICE_BARRIER) && m_ai->SelfBuff(ICE_BARRIER))
+                if (ICE_BARRIER > 0 && m_bot->IsSpellReady(ICE_BARRIER) && m_ai->GetHealthPercent() < 50 && !m_bot->HasAura(ICE_BARRIER) && m_ai->SelfBuff(ICE_BARRIER) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
 
                 // Have threat, can't quickly lower it. 3 options remain: Stop attacking, lowlevel damage (wand), keep on keeping on.
@@ -213,14 +210,14 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
             else // not elite
             {
                 // Cast mana shield if no shield is already up
-                if (MANA_SHIELD > 0 && m_ai->GetHealthPercent() < 70 && !m_bot->HasAura(MANA_SHIELD) && !m_bot->HasAura(ICE_BARRIER) && m_ai->SelfBuff(MANA_SHIELD))
+                if (MANA_SHIELD > 0 && m_ai->GetHealthPercent() < 70 && !m_bot->HasAura(MANA_SHIELD) && !m_bot->HasAura(ICE_BARRIER) && m_ai->SelfBuff(MANA_SHIELD) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
             }
         }
     }
 
     // Mana check and replenishment
-    if (EVOCATION && m_ai->GetManaPercent() <= 10 && m_bot->IsSpellReady(EVOCATION) && !newTarget && m_ai->SelfBuff(EVOCATION))
+    if (EVOCATION && m_ai->GetManaPercent() <= 10 && m_bot->IsSpellReady(EVOCATION) && !newTarget && m_ai->SelfBuff(EVOCATION) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
     if (m_ai->GetManaPercent() <= 20)
     {
@@ -230,9 +227,9 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
     }
 
     // If bot has frost/fire resist order use Frost/Fire Ward when available
-    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FROST && FROST_WARD && m_bot->IsSpellReady(FROST_WARD) && m_ai->SelfBuff(FROST_WARD))
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FROST && FROST_WARD && m_bot->IsSpellReady(FROST_WARD) && m_ai->SelfBuff(FROST_WARD) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
-    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FIRE && FIRE_WARD && m_bot->IsSpellReady(FIRE_WARD) && m_ai->SelfBuff(FIRE_WARD))
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_RESIST_FIRE && FIRE_WARD && m_bot->IsSpellReady(FIRE_WARD) && m_ai->SelfBuff(FIRE_WARD) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     if (COUNTERSPELL > 0 && m_bot->IsSpellReady(COUNTERSPELL) && pTarget->IsNonMeleeSpellCasted(true) && CastSpell(COUNTERSPELL, pTarget))
@@ -250,13 +247,13 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
     switch (spec)
     {
         case MAGE_SPEC_FROST:
-            if (COLD_SNAP && m_bot->IsSpellReady(COLD_SNAP) && CheckFrostCooldowns() > 2 && m_ai->SelfBuff(COLD_SNAP))  // Clear frost spell cooldowns if bot has more than 2 active
+            if (COLD_SNAP && m_bot->IsSpellReady(COLD_SNAP) && CheckFrostCooldowns() > 2 && m_ai->SelfBuff(COLD_SNAP) == SPELL_CAST_OK)  // Clear frost spell cooldowns if bot has more than 2 active
                 return RETURN_CONTINUE;
             if (CONE_OF_COLD > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_bot->IsSpellReady(CONE_OF_COLD) && meleeReach)
             {
                 // Cone of Cold does not require a target, so ensure that the bot faces the current one before casting
                 m_ai->FaceTarget(pTarget);
-                if (m_ai->CastSpell(CONE_OF_COLD))
+                if (m_ai->CastSpell(CONE_OF_COLD) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
             }
             if (FROSTBOLT > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_ai->In_Reach(pTarget, FROSTBOLT) && !pTarget->HasAura(FROSTBOLT, EFFECT_INDEX_0) && CastSpell(FROSTBOLT, pTarget))
@@ -276,7 +273,7 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
             break;
 
         case MAGE_SPEC_FIRE:
-            if (COMBUSTION > 0 && m_ai->SelfBuff(COMBUSTION))
+            if (COMBUSTION > 0 && m_ai->SelfBuff(COMBUSTION) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
             if (BLAST_WAVE > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->GetAttackerCount() >= 3 && meleeReach && CastSpell(BLAST_WAVE, pTarget))
                 return RETURN_CONTINUE;
@@ -315,9 +312,9 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
             break;
 
         case MAGE_SPEC_ARCANE:
-            if (ARCANE_POWER > 0 && m_bot->IsSpellReady(ARCANE_POWER) && m_ai->IsElite(pTarget) && m_ai->CastSpell(ARCANE_POWER))    // Do not waste Arcane Power on normal NPCs as the bot is likely in a group
+            if (ARCANE_POWER > 0 && m_bot->IsSpellReady(ARCANE_POWER) && m_ai->IsElite(pTarget) && m_ai->CastSpell(ARCANE_POWER) == SPELL_CAST_OK)    // Do not waste Arcane Power on normal NPCs as the bot is likely in a group
                 return RETURN_CONTINUE;
-            if (PRESENCE_OF_MIND > 0 && !m_bot->HasAura(PRESENCE_OF_MIND) && m_bot->IsSpellReady(PRESENCE_OF_MIND) && m_ai->IsElite(pTarget) && m_ai->SelfBuff(PRESENCE_OF_MIND))
+            if (PRESENCE_OF_MIND > 0 && !m_bot->HasAura(PRESENCE_OF_MIND) && m_bot->IsSpellReady(PRESENCE_OF_MIND) && m_ai->IsElite(pTarget) && m_ai->SelfBuff(PRESENCE_OF_MIND) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
             // If bot has presence of mind active, cast long casting time spells
             if (PRESENCE_OF_MIND && m_bot->HasAura(PRESENCE_OF_MIND))
@@ -358,7 +355,7 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
 
 CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVP(Unit* pTarget)
 {
-    if (FIREBALL && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIREBALL) && m_ai->CastSpell(FIREBALL))
+    if (FIREBALL && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIREBALL) && m_ai->CastSpell(FIREBALL) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative
@@ -400,6 +397,18 @@ Item* PlayerbotMageAI::FindManaGem() const
     return nullptr;
 }
 
+CombatManeuverReturns PlayerbotMageAI::DispelPlayer(Player* cursedTarget)
+{
+    CombatManeuverReturns r = PlayerbotClassAI::DispelPlayer(cursedTarget);
+    if (r != RETURN_NO_ACTION_OK)
+        return r;
+
+    if (MAGE_REMOVE_CURSE > 0 && CastSpell(MAGE_REMOVE_CURSE, cursedTarget))
+        return RETURN_CONTINUE;
+
+    return RETURN_NO_ACTION_OK;
+}
+
 void PlayerbotMageAI::DoNonCombatActions()
 {
     Player* master = GetMaster();
@@ -407,31 +416,28 @@ void PlayerbotMageAI::DoNonCombatActions()
     if (!m_bot || !master)
         return;
 
-    // Remove curse on group members if orders allow bot to do so
-    if (Player* pCursedTarget = GetDispelTarget(DISPEL_CURSE))
-    {
-        if (MAGE_REMOVE_CURSE > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && CastSpell(MAGE_REMOVE_CURSE, pCursedTarget))
-            return;
-    }
+    // Remove curse on group members
+    if (m_ai->HasDispelOrder() && DispelPlayer(GetDispelTarget(DISPEL_CURSE)) & RETURN_CONTINUE)
+        return;
 
     // Buff armor
     if (MAGE_ARMOR)
     {
-        if (m_ai->SelfBuff(MAGE_ARMOR))
+        if (m_ai->SelfBuff(MAGE_ARMOR) == SPELL_CAST_OK)
             return;
     }
     else if (ICE_ARMOR)
     {
-        if (m_ai->SelfBuff(ICE_ARMOR))
+        if (m_ai->SelfBuff(ICE_ARMOR) == SPELL_CAST_OK)
             return;
     }
     else if (FROST_ARMOR)
     {
-        if (m_ai->SelfBuff(FROST_ARMOR))
+        if (m_ai->SelfBuff(FROST_ARMOR) == SPELL_CAST_OK)
             return;
     }
 
-    if (COMBUSTION && m_bot->IsSpellReady(COMBUSTION) && m_ai->SelfBuff(COMBUSTION))
+    if (COMBUSTION && m_bot->IsSpellReady(COMBUSTION) && m_ai->SelfBuff(COMBUSTION) == SPELL_CAST_OK)
         return;
 
     // buff group
@@ -445,7 +451,7 @@ void PlayerbotMageAI::DoNonCombatActions()
         return;
 
     Item* gem = FindManaGem();
-    if (!gem && CONJURE_MANA_GEM && m_ai->CastSpell(CONJURE_MANA_GEM, *m_bot))
+    if (!gem && CONJURE_MANA_GEM && m_ai->CastSpell(CONJURE_MANA_GEM, *m_bot) == SPELL_CAST_OK)
     {
         m_ai->SetIgnoreUpdateTime(3);
         return;
@@ -453,13 +459,13 @@ void PlayerbotMageAI::DoNonCombatActions()
 
     // TODO: The beauty of a mage is not only its ability to supply itself with water, but to share its water
     // So, conjure at *least* 1.25 stacks, ready to trade a stack and still have some left for self
-    if (m_ai->FindDrink() == nullptr && CONJURE_WATER && m_ai->CastSpell(CONJURE_WATER, *m_bot))
+    if (m_ai->FindDrink() == nullptr && CONJURE_WATER && m_ai->CastSpell(CONJURE_WATER, *m_bot) == SPELL_CAST_OK)
     {
         m_ai->TellMaster("I'm conjuring some water.");
         m_ai->SetIgnoreUpdateTime(3);
         return;
     }
-    if (m_ai->FindFood() == nullptr && CONJURE_FOOD && m_ai->CastSpell(CONJURE_FOOD, *m_bot))
+    if (m_ai->FindFood() == nullptr && CONJURE_FOOD && m_ai->CastSpell(CONJURE_FOOD, *m_bot) == SPELL_CAST_OK)
     {
         m_ai->TellMaster("I'm conjuring some food.");
         m_ai->SetIgnoreUpdateTime(3);
@@ -478,10 +484,10 @@ bool PlayerbotMageAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target)
     if (!target)      return false;
 
     Pet* pet = target->GetPet();
-    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet))
+    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet) == SPELL_CAST_OK)
         return true;
 
-    if (ai->Buff(spellId, target))
+    if (ai->Buff(spellId, target) == SPELL_CAST_OK)
         return true;
 
     return false;

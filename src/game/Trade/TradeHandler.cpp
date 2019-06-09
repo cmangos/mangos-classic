@@ -628,7 +628,11 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_TRADE) && pOther->GetTeam() != _player->GetTeam())
+    // [XFACTION]: Vanilla-specific - possibility to trade with opposing team when not in the same group
+    const bool xfaction = (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_TRADE) && pOther->GetTeam() != _player->GetTeam());
+
+    // [XFACTION]: Reserve possibility to trade with each other for crossfaction group members (when no charms involved)
+    if (!_player->CanCooperate(pOther) && (pOther->HasCharmer() || _player->HasCharmer() || (!pOther->IsInGroup(_player) && !xfaction)))
     {
         info.Status = TRADE_STATUS_WRONG_FACTION;
         SendTradeStatus(info);

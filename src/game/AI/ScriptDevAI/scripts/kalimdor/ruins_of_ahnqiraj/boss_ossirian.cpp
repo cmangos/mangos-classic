@@ -153,7 +153,7 @@ struct boss_ossirianAI : public ScriptedAI
             m_pInstance->DoRespawnGameObject(pCrystal->GetObjectGuid(), 5 * MINUTE);
 
         // Increase position
-        ++m_uiCrystalPosition %= MAX_CRYSTAL_POSITIONS;
+        m_uiCrystalPosition = (m_uiCrystalPosition + 1) % MAX_CRYSTAL_POSITIONS;
     }
 
     void JustSummoned(Creature* pSummoned) override

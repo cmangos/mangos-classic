@@ -26,6 +26,11 @@
 #include "DetourCommon.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
+#ifdef __APPLE__
+#	include <OpenGL/glu.h>
+#else
+#	include <GL/glu.h>
+#endif
 #include "imgui.h"
 #include "PerfTimer.h"
 
@@ -71,6 +76,7 @@ static char* parseRow(char* buf, char* bufEnd, char* row, int len)
 			case '\t':
 			case ' ':
 				if (start) break;
+				// else falls through
 			default:
 				start = false;
 				row[n++] = c;
@@ -83,23 +89,36 @@ static char* parseRow(char* buf, char* bufEnd, char* row, int len)
 	return buf;
 }
 
-static void copyName(char* dst, const char* src)
+static void copyName(std::string& dst, const char* src)
 {
 	// Skip white spaces
 	while (*src && isspace(*src))
 		src++;
-	strcpy(dst, src);
+	dst = src;
 }
 
-bool TestCase::load(const char* filePath)
+bool TestCase::load(const std::string& filePath)
 {
 	char* buf = 0;
-	FILE* fp = fopen(filePath, "rb");
+	FILE* fp = fopen(filePath.c_str(), "rb");
 	if (!fp)
 		return false;
-	fseek(fp, 0, SEEK_END);
-	int bufSize = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
+	if (fseek(fp, 0, SEEK_END) != 0)
+	{
+		fclose(fp);
+		return false;
+	}
+	long bufSize = ftell(fp);
+	if (bufSize < 0)
+	{
+		fclose(fp);
+		return false;
+	}
+	if (fseek(fp, 0, SEEK_SET) != 0)
+	{
+		fclose(fp);
+		return false;
+	}
 	buf = new char[bufSize];
 	if (!buf)
 	{
@@ -110,6 +129,7 @@ bool TestCase::load(const char* filePath)
 	fclose(fp);
 	if (readLen != 1)
 	{
+		delete[] buf;
 		return false;
 	}
 
@@ -140,7 +160,7 @@ bool TestCase::load(const char* filePath)
 			test->expand = false;
 			test->next = m_tests;
 			m_tests = test;
-			sscanf(row+2, "%f %f %f %f %f %f %x %x",
+			sscanf(row+2, "%f %f %f %f %f %f %hx %hx",
 				   &test->spos[0], &test->spos[1], &test->spos[2],
 				   &test->epos[0], &test->epos[1], &test->epos[2],
 				   &test->includeFlags, &test->excludeFlags);
@@ -154,7 +174,7 @@ bool TestCase::load(const char* filePath)
 			test->expand = false;
 			test->next = m_tests;
 			m_tests = test;
-			sscanf(row+2, "%f %f %f %f %f %f %x %x",
+			sscanf(row+2, "%f %f %f %f %f %f %hx %hx",
 				   &test->spos[0], &test->spos[1], &test->spos[2],
 				   &test->epos[0], &test->epos[1], &test->epos[2],
 				   &test->includeFlags, &test->excludeFlags);
@@ -198,8 +218,8 @@ void TestCase::doTests(dtNavMesh* navmesh, dtNavMeshQuery* navquery)
 		iter->nstraight = 0;
 		
 		dtQueryFilter filter;
-		filter.setIncludeFlags((unsigned short)iter->includeFlags);
-		filter.setExcludeFlags((unsigned short)iter->excludeFlags);
+		filter.setIncludeFlags(iter->includeFlags);
+		filter.setExcludeFlags(iter->excludeFlags);
 	
 		// Find start points
 		TimeVal findNearestPolyStart = getPerfTime();
@@ -209,7 +229,7 @@ void TestCase::doTests(dtNavMesh* navmesh, dtNavMeshQuery* navquery)
 		navquery->findNearestPoly(iter->epos, polyPickExt, &filter, &endRef, iter->nepos);
 
 		TimeVal findNearestPolyEnd = getPerfTime();
-		iter->findNearestPolyTime += getPerfDeltaTimeUsec(findNearestPolyStart, findNearestPolyEnd);
+		iter->findNearestPolyTime += getPerfTimeUsec(findNearestPolyEnd - findNearestPolyStart);
 
 		if (!startRef || ! endRef)
 			continue;
@@ -222,7 +242,7 @@ void TestCase::doTests(dtNavMesh* navmesh, dtNavMeshQuery* navquery)
 			navquery->findPath(startRef, endRef, iter->spos, iter->epos, &filter, polys, &iter->npolys, MAX_POLYS);
 			
 			TimeVal findPathEnd = getPerfTime();
-			iter->findPathTime += getPerfDeltaTimeUsec(findPathStart, findPathEnd);
+			iter->findPathTime += getPerfTimeUsec(findPathEnd - findPathStart);
 		
 			// Find straight path
 			if (iter->npolys)
@@ -232,7 +252,7 @@ void TestCase::doTests(dtNavMesh* navmesh, dtNavMeshQuery* navquery)
 				navquery->findStraightPath(iter->spos, iter->epos, polys, iter->npolys,
 										   straight, 0, 0, &iter->nstraight, MAX_POLYS);
 				TimeVal findStraightPathEnd = getPerfTime();
-				iter->findStraightPathTime += getPerfDeltaTimeUsec(findStraightPathStart, findStraightPathEnd);
+				iter->findStraightPathTime += getPerfTimeUsec(findStraightPathEnd - findStraightPathStart);
 			}
 		
 			// Copy results
@@ -264,7 +284,7 @@ void TestCase::doTests(dtNavMesh* navmesh, dtNavMeshQuery* navquery)
 			navquery->raycast(startRef, iter->spos, iter->epos, &filter, &t, hitNormal, polys, &iter->npolys, MAX_POLYS);
 
 			TimeVal findPathEnd = getPerfTime();
-			iter->findPathTime += getPerfDeltaTimeUsec(findPathStart, findPathEnd);
+			iter->findPathTime += getPerfTimeUsec(findPathEnd - findPathStart);
 
 			if (t > 1)
 			{

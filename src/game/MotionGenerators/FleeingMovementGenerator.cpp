@@ -35,9 +35,9 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T& owner)
         return;
 
     float x, y, z;
-    if (!_getPoint(owner, x, y, z))
+    if (!_getPoint(owner, x, y, z) || !owner.IsWithinLOS(x, y, z))
     {
-        // random point not found recheck later
+        // random point not found or not visible by unit: recheck later
         i_nextCheckTime.Reset(50);
         return;
     }
@@ -90,19 +90,14 @@ bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float&
     z = curr_z + 0.5f;
 
     // try to fix z
-    if (!owner.GetMap()->GetHeightInRange(x, y, z))
-        return false;
+    owner.UpdateAllowedPositionZ(x, y, z);
 
-    if (owner.GetTypeId() == TYPEID_PLAYER)
+    // check any collision
+    float testZ = z + 1.0f; // needed to avoid some false positive hit detection of terrain or passable little object
+    if (owner.GetMap()->GetHitPosition(curr_x, curr_y, curr_z + 0.5f, x, y, testZ, -0.1f))
     {
-        // check any collision
-        float testZ = z + 0.5f; // needed to avoid some false positive hit detection of terrain or passable little object
-        if (owner.GetMap()->GetHitPosition(curr_x, curr_y, curr_z + 0.5f, x, y, testZ, -0.1f))
-        {
-            z = testZ;
-            if (!owner.GetMap()->GetHeightInRange(x, y, z))
-                return false;
-        }
+        z = testZ;
+        owner.UpdateAllowedPositionZ(x, y, z);
     }
 
     return true;

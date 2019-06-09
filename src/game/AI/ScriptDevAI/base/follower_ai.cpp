@@ -122,7 +122,7 @@ void FollowerAI::CorpseRemoved(uint32& /*respawnDelay*/)
 void FollowerAI::EnterEvadeMode()
 {
     m_creature->RemoveAllAurasOnEvade();
-    m_creature->CombatStop(true);
+    m_creature->CombatStopWithPets(true);
 
     if (HasFollowState(STATE_FOLLOW_INPROGRESS))
     {

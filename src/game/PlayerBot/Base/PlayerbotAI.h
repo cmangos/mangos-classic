@@ -34,8 +34,6 @@ class Item;
 class PlayerbotClassAI;
 class PlayerbotMgr;
 
-#define BOTLOOT_DISTANCE 75.0f
-
 enum RacialTraits
 {
     BERSERKING_ALL                 = 26297,
@@ -214,9 +212,12 @@ class MANGOS_DLL_SPEC PlayerbotAI
             ORDERS_RESIST_NATURE        = 0x0200,   // resist nature
             ORDERS_RESIST_FROST         = 0x0400,   // resist frost
             ORDERS_RESIST_SHADOW        = 0x0800,   // resist shadow
+            ORDERS_MAIN_TANK            = 0x1000,   // main attackers binder by gaining threat in raid situation
+            ORDERS_MAIN_HEAL            = 0x2000,   // concentrate on healing the main tank (will ignore other targets as long as MT needs healing)
+            ORDERS_NOT_MAIN_HEAL        = 0x4000,   // concentrate on healing except the main tank that will be ignored
 
             // Cumulative orders
-            ORDERS_PRIMARY              = 0x0007,
+            ORDERS_PRIMARY              = 0x7007,
             ORDERS_SECONDARY            = 0x0F78,
             ORDERS_RESIST               = 0x0F00,
             ORDERS_TEMP                 = 0x00C0,   // All orders NOT to be saved, turned off by bots (or logoff, reset, ...)
@@ -231,6 +232,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
 
         enum BotState
         {
+            BOTSTATE_LOADING,           // loading state during world load
             BOTSTATE_NORMAL,            // normal AI routines are processed
             BOTSTATE_COMBAT,            // bot is in combat
             BOTSTATE_DEAD,              // we are dead and wait for becoming ghost
@@ -345,11 +347,6 @@ class MANGOS_DLL_SPEC PlayerbotAI
         // For a list of opcodes that can be caught see Opcodes.cpp (SMSG_* opcodes only)
         void HandleBotOutgoingPacket(const WorldPacket& packet);
 
-        // This is called by WorldSession.cpp
-        // when it detects that a bot is being teleported. It acknowledges to the server to complete the
-        // teleportation
-        void HandleTeleportAck();
-
         // Returns what kind of situation we are in so the ai can react accordingly
         ScenarioType GetScenarioType() { return m_ScenarioType; }
         CombatStyle GetCombatStyle() { return m_combatStyle; }
@@ -399,6 +396,8 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void findNearbyGO();
         // finds nearby creatures, whose UNIT_NPC_FLAGS match the flags specified in item list m_itemIds
         void findNearbyCreature();
+        // finds nearby corpse that is lootable
+        void findNearbyCorpse();
         bool IsElite(Unit* pTarget, bool isWorldBoss = false) const;
         // Used by bots to check if their target is neutralized (polymorph, shackle or the like). Useful to avoid breaking crowd control
         bool IsNeutralized(Unit* pTarget);
@@ -429,8 +428,6 @@ class MANGOS_DLL_SPEC PlayerbotAI
 
         uint8 GetHealthPercent(const Unit& target) const;
         uint8 GetHealthPercent() const;
-        uint8 GetBaseManaPercent(const Unit& target) const;
-        uint8 GetBaseManaPercent() const;
         uint8 GetManaPercent(const Unit& target) const;
         uint8 GetManaPercent() const;
         uint8 GetRageAmount(const Unit& target) const;
@@ -458,13 +455,13 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void TellMaster(const std::string& text) const;
         void TellMaster(const char* fmt, ...) const;
         void SendWhisper(const std::string& text, Player& player) const;
-        bool CastSpell(const char* args);
-        bool CastSpell(uint32 spellId);
-        bool CastSpell(uint32 spellId, Unit& target);
-        bool CheckBotCast(const SpellEntry* sInfo);
-        bool CastPetSpell(uint32 spellId, Unit* target = nullptr);
-        bool Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player*) = nullptr);
-        bool SelfBuff(uint32 spellId);
+        SpellCastResult CastSpell(const char* args);
+        SpellCastResult CastSpell(uint32 spellId);
+        SpellCastResult CastSpell(uint32 spellId, Unit& target);
+        SpellCastResult CheckBotCast(const SpellEntry* sInfo);
+        SpellCastResult CastPetSpell(uint32 spellId, Unit* target = nullptr);
+        SpellCastResult Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player*) = nullptr);
+        SpellCastResult SelfBuff(uint32 spellId);
         bool In_Range(Unit* Target, uint32 spellId);
         bool In_Reach(Unit* Target, uint32 spellId);
         bool CanReachWithSpellAttack(Unit* target);
@@ -519,7 +516,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void DoFlight();
         void GetTaxi(ObjectGuid guid, BotTaxiNode& nodes);
 
-        bool HasCollectFlag(uint8 flag) { return m_collectionFlags & flag; }
+        bool HasCollectFlag(uint8 flag) { return (m_collectionFlags & flag) ? true : false; }
         void SetCollectFlag(uint8 flag)
         {
             if (HasCollectFlag(flag)) m_collectionFlags &= ~flag;
@@ -553,15 +550,17 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void SetCombatOrder(CombatOrderType co, Unit* target = 0);
         void ClearCombatOrder(CombatOrderType co);
         CombatOrderType GetCombatOrder() { return this->m_combatOrder; }
-        bool IsTank() { return (m_combatOrder & ORDERS_TANK) ? true : false; }
-        bool IsHealer() { return (m_combatOrder & ORDERS_HEAL) ? true : false; }
+        bool IsMainTank() { return (m_combatOrder & ORDERS_MAIN_TANK) ? true : false; }
+        bool IsTank() { return (m_combatOrder & ORDERS_TANK) || IsMainTank() ? true : false; }
+        bool IsMainHealer() { return (m_combatOrder & ORDERS_MAIN_HEAL) ? true : false; }
+        bool IsHealer() { return (m_combatOrder & (ORDERS_HEAL | ORDERS_NOT_MAIN_HEAL)) || IsMainHealer() ? true : false; }
+        bool HasDispelOrder() { return !(m_combatOrder & ORDERS_NODISPEL); }
         bool IsDPS() { return (m_combatOrder & ORDERS_ASSIST) ? true : false; }
         bool Impulse() { srand(time(nullptr)); return (((rand() % 100) > 50) ? true : false); }
         void SetMovementOrder(MovementOrderType mo, Unit* followTarget = 0);
         MovementOrderType GetMovementOrder() { return this->m_movementOrder; }
         void MovementReset();
         void MovementClear();
-        bool IsMoving();
 
         void SetInFront(const Unit* obj);
 
@@ -582,6 +581,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         bool Withdraw(const uint32 itemid);
         bool Deposit(const uint32 itemid);
         void BankBalance();
+        std::string Cash(uint32 copper);
 
     private:
         bool ExtractCommand(const std::string sLookingFor, std::string& text, bool bUseShort = false);
@@ -662,10 +662,9 @@ class MANGOS_DLL_SPEC PlayerbotAI
         BotTaxiNode m_taxiNodes;            // flight node chain;
 
         uint8 m_collectionFlags;            // what the bot should look for to loot
+        uint32 m_collectDist;               // distance to collect objects
         bool m_inventory_full;
 
-        time_t m_TimeDoneEating;
-        time_t m_TimeDoneDrinking;
         uint32 m_CurrentlyCastingSpellId;
         //bool m_IsFollowingMaster;
 
@@ -679,6 +678,8 @@ class MANGOS_DLL_SPEC PlayerbotAI
 
         AttackerInfoList m_attackerInfo;
 
+        // Force bot to pick a neutralised unit as combat target when told so
+        bool m_ignoreNeutralizeEffect;
         bool m_targetChanged;
         CombatTargetType m_targetType;
 
