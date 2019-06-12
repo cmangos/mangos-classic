@@ -281,7 +281,7 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
         return;
 
     // Creature should always stop before it will cast a non-instant spell
-    if (spell->GetCastTime() || (IsChanneledSpell(spellInfo) && spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT))
+    if ((spell->GetCastTime() && spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT) || (IsChanneledSpell(spellInfo) && spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT))
         m_unit->StopMoving();
 
     bool forceTarget = false;
