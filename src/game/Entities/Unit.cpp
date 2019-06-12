@@ -392,6 +392,7 @@ Unit::Unit() :
 
     m_canEnterCombat = true;
 
+    m_noThreat = false;
     m_extraAttacksExecuting = false;
 
     m_baseSpeedWalk = 1.f;
