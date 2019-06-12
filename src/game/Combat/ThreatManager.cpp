@@ -37,6 +37,9 @@ float ThreatCalcHelper::CalcThreat(Unit* hatedUnit, Unit* /*pHatingUnit*/, float
     if (!threat)
         return 0.0f;
 
+    if (hatedUnit->GetNoThreatState()) // some NPCs cause no threat
+        return 0.0f;
+
     if (threatSpell)
     {
         // Keep exception to calculate the real threat for SPELL_AURA_MOD_TOTAL_THREAT
