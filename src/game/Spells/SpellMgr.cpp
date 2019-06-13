@@ -1284,29 +1284,6 @@ void SpellMgr::LoadSpellThreats()
     sLog.outString();
 }
 
-bool SpellMgr::IsNoStackSpellDueToSpellAndCastItem(SpellAuraHolder const* spellHolder1, SpellAuraHolder const* spellHolder2) const
-{
-    if (!spellHolder1 || !spellHolder2)
-        return false;
-
-    SpellEntry const* spellInfo1 = spellHolder1->GetSpellProto();
-    SpellEntry const* spellInfo2 = spellHolder2->GetSpellProto();
-
-    bool stackable = !IsNoStackSpellDueToSpell(spellInfo1, spellInfo2);
-    const bool own = (spellHolder1->GetCasterGuid() == spellHolder2->GetCasterGuid());
-
-    // lets check if we are an item spell from another player
-    if (stackable && !own && !spellInfo1->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
-    {
-        ObjectGuid castItem1 = spellHolder1->GetCastItemGuid();
-        ObjectGuid castItem2 = spellHolder2->GetCastItemGuid();
-        
-        // check that we have found matching items, if we do then we are not stackable
-        stackable = !(castItem1 && castItem2 && castItem1 == castItem2);
-    }
-    return !stackable;
-}
-
 bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const
 {
     if (!spellInfo_1 || !spellInfo_2)
