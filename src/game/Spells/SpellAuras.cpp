@@ -1225,6 +1225,28 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 switch (GetId())
                 {
+                    case 126:                               // Eye of Kilrogg
+                    {
+                        if (target->IsPlayer())
+                        {
+                            Unit* pet = static_cast<Player*>(target)->GetCharm();
+                            if (pet && pet->GetEntry() == 4277)
+                            {
+                                pet->CastSpell(pet, 2585, TRIGGERED_OLD_TRIGGERED);
+                            }
+                        }
+                        break;
+                    }
+                    case 11403:                             // Dream Vision
+                    {
+                        if (target->IsPlayer())
+                        {
+                            Unit* pet = static_cast<Player*>(target)->GetCharm();
+                            if (pet && pet->GetEntry() == 7863)
+                                pet->SetVisibility(VISIBILITY_OFF);
+                        }
+                        break;
+                    }
                     case 7057:                              // Haunting Spirits
                         // expected to tick with 30 sec period (tick part see in Aura::PeriodicTick)
                         m_isPeriodic = true;
