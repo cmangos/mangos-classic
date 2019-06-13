@@ -4287,7 +4287,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // check global cooldown
     if (strict && !m_IsTriggeredSpell && m_caster->HasGCD(m_spellInfo))
-        return SPELL_FAILED_NOT_READY;
+        return m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
 
     // only allow triggered spells if at an ended battleground
     if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
