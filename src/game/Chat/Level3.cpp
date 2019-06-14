@@ -3551,6 +3551,8 @@ bool ChatHandler::HandleDamageCommand(char* args)
     // flat melee damage without resistance/etc reduction
     if (!*args)
     {
+        uint32 absorb = 0;
+        player->DealDamageMods(target, damage, &absorb, DIRECT_DAMAGE);
         player->DealDamage(target, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         if (target != player)
             player->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, SPELL_SCHOOL_MASK_NORMAL, damage, 0, 0, VICTIMSTATE_NORMAL, 0);
