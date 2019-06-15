@@ -1284,32 +1284,6 @@ void SpellMgr::LoadSpellThreats()
     sLog.outString();
 }
 
-bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const
-{
-    if (!spellInfo_1 || !spellInfo_2)
-        return false;
-
-    // Uncancellable spells are expected to be persistent at all times
-    if (spellInfo_1->HasAttribute(SPELL_ATTR_CANT_CANCEL) || spellInfo_2->HasAttribute(SPELL_ATTR_CANT_CANCEL))
-        return false;
-
-    // Allow stack passive and not passive spells
-    if (spellInfo_1->HasAttribute(SPELL_ATTR_PASSIVE) != spellInfo_2->HasAttribute(SPELL_ATTR_PASSIVE))
-        return false;
-
-    // Special case for potions
-    if (spellInfo_1->SpellFamilyName == SPELLFAMILY_POTION || spellInfo_2->SpellFamilyName == SPELLFAMILY_POTION)
-        return false;
-
-    if (IsSpellAnotherRankOfSpell(spellInfo_1->Id, spellInfo_2->Id))
-        return true;
-
-    if (IsStackableSpell(spellInfo_1, spellInfo_2))
-        return false;
-
-    return true;
-}
-
 bool SpellMgr::IsSpellCanAffectSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const
 {
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)

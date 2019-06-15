@@ -4624,13 +4624,19 @@ SpellCastResult Spell::CheckCast(bool strict)
                 for (Unit::SpellAuraHolderMap::const_iterator iter = spair.begin(); iter != spair.end(); ++iter)
                 {
                     const SpellAuraHolder* existing = iter->second;
+                    // We can overwrite own auras at all times
+                    if (casterGuid == existing->GetCasterGuid())
+                        continue;
                     const SpellEntry* entry = existing->GetSpellProto();
-                    const bool own = (casterGuid == existing->GetCasterGuid());
                     // Cannot overwrite someone else's auras
-                    if (!own && sSpellMgr.IsNoStackSpellDueToSpell(m_spellInfo, entry))
+                    if (!sSpellMgr.IsSpellStackableWithSpellForDifferentCasters(m_spellInfo, entry))
                     {
-                        if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing) ||
-                            (sSpellMgr.IsSpellAnotherRankOfSpell(m_spellInfo->Id, entry->Id) && sSpellMgr.IsSpellHigherRankOfSpell(entry->Id, m_spellInfo->Id)))
+                        bool bounce = false;
+                        if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing))
+                            bounce = true;
+                        if (!bounce && sSpellMgr.IsSpellAnotherRankOfSpell(m_spellInfo->Id, entry->Id) && sSpellMgr.IsSpellHigherRankOfSpell(entry->Id, m_spellInfo->Id))
+                            bounce = true;
+                        if (bounce)
                             return SPELL_FAILED_AURA_BOUNCED;
                     }
                 }
