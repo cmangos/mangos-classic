@@ -18163,7 +18163,7 @@ void Player::AddItemDurations(Item* item)
     }
 }
 
-void Player::AutoUnequipOffhandIfNeed()
+void Player::AutoUnequipOffhandIfNeed(uint8 bag)
 {
     Item* offItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
     if (!offItem)
@@ -18174,7 +18174,7 @@ void Player::AutoUnequipOffhandIfNeed()
         return;
 
     ItemPosCountVec off_dest;
-    uint8 off_msg = CanStoreItem(NULL_BAG, NULL_SLOT, off_dest, offItem, false);
+    uint8 off_msg = CanStoreItem(bag, NULL_SLOT, off_dest, offItem, false);
     if (off_msg == EQUIP_ERR_OK)
     {
         RemoveItem(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND, true);
