@@ -1415,6 +1415,10 @@ void CreatureEventAI::Reset()
     m_currentRangedMode = m_rangedMode;
     m_attackDistance = m_chaseDistance;
 
+    // reset AI state
+    SetAIOrder(ORDER_NONE);
+    SetCombatScriptStatus(false);
+
     // Reset all events to enabled
     for (auto& i : m_CreatureEventAIList)
     {

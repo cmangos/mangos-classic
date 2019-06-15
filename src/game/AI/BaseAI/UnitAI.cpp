@@ -619,7 +619,18 @@ void UnitAI::DoFlee()
     if (!victim)
         return;
 
+    // first check if its not already feared somewhere else
+    if (m_unit->isFeared() || m_unit->hasUnitState(UNIT_STAT_FLEEING))
+        return;
+
+    // now we can call the fear method
+    m_unit->SetFeared(true, victim->GetObjectGuid(), 0, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
+
+    // check if fear method succeed
+    if (!m_unit->isFeared() && !m_unit->hasUnitState(UNIT_STAT_FLEEING))
+        return;
+
+    // set the ai state to feared so it can reset movegen and ai state at the end of the fear
     SetAIOrder(ORDER_FLEEING);
     SetCombatScriptStatus(true);
-    m_unit->SetFeared(true, victim->GetObjectGuid(), 0, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
 }
