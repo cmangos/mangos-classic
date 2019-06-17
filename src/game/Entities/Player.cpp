@@ -16503,6 +16503,26 @@ void Player::ResetSpellModsDueToCanceledSpell(Spell const* spell)
     }
 }
 
+void Player::SetSpellClass(uint8 playerClass)
+{
+    SpellFamily name;
+    switch (playerClass)
+    {
+        default: // compiler
+        case CLASS_WARRIOR: name = SPELLFAMILY_WARRIOR; break;
+        case CLASS_PALADIN: name = SPELLFAMILY_PALADIN; break;
+        case CLASS_HUNTER: name = SPELLFAMILY_HUNTER; break;
+        case CLASS_ROGUE: name = SPELLFAMILY_ROGUE; break;
+        case CLASS_PRIEST: name = SPELLFAMILY_PRIEST; break;
+            // case CLASS_DEATH_KNIGHT: name = SPELLFAMILY_DEATH_KNIGHT; break;
+        case CLASS_SHAMAN: name = SPELLFAMILY_SHAMAN; break;
+        case CLASS_MAGE: name = SPELLFAMILY_MAGE; break;
+        case CLASS_WARLOCK: name = SPELLFAMILY_WARLOCK; break;
+        case CLASS_DRUID: name = SPELLFAMILY_DRUID; break;
+    }
+    m_spellClassName = name;
+}
+
 // send Proficiency
 void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask) const
 {
