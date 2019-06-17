@@ -1520,6 +1520,8 @@ class Player : public Unit
         SpellModifier* GetSpellMod(SpellModOp op, uint32 spellId) const;
         void RemoveSpellMods(Spell const* spell);
         void ResetSpellModsDueToCanceledSpell(Spell const* spell);
+        void SetSpellClass(uint8 playerClass);
+        SpellFamily GetSpellClass() const { return m_spellClassName; } // client function equivalent - says what player can cast
 
         void setResurrectRequestData(ObjectGuid guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
         {
@@ -2348,6 +2350,7 @@ class Player : public Unit
 
         SpellModList m_spellMods[MAX_SPELLMOD];
         int32 m_SpellModRemoveCount;
+        SpellFamily m_spellClassName; // s_spellClassSet
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;
 
@@ -2510,13 +2513,11 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto);
 template <class T> void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell const* spell)
 {
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-    if (!spellInfo) return;
+    if (!spellInfo || spellInfo->SpellFamilyName != GetSpellClass() || spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS)) return; // client condition
     int32 totalpct = 100;
     int32 totalflat = 0;
-    for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
+    for (SpellModifier* mod : m_spellMods[op])
     {
-        SpellModifier* mod = *itr;
-
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
             continue;
         if (mod->type == SPELLMOD_FLAT)
