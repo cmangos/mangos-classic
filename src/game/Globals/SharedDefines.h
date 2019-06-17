@@ -971,6 +971,7 @@ enum SpellRangeIndex
     SPELL_RANGE_IDX_SELF_ONLY = 1,                          //< 0.0
     SPELL_RANGE_IDX_COMBAT    = 2,                          //< often ~5.5 (but infact dynamic melee combat range)
     SPELL_RANGE_IDX_ANYWHERE  = 13,                         //< 500000 (anywhere)
+    SPELL_RANGE_IDX_HUNTER    = 114,                        //< has min range custom condition
 };
 
 enum SpellRangeFlags
