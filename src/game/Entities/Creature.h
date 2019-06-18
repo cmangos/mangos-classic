@@ -669,7 +669,7 @@ class Creature : public Unit
         bool HasSpell(uint32 spellID) const override;
 
         bool UpdateEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true);
-        void ResetEntry();
+        void ResetEntry(bool respawn = false);
 
         void ApplyGameEventSpells(GameEventCreatureData const* eventData, bool activated);
         bool UpdateStats(Stats stat) override;

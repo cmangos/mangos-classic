@@ -464,7 +464,7 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     return true;
 }
 
-void Creature::ResetEntry()
+void Creature::ResetEntry(bool respawn)
 {
     CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow());
     GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetGUIDLow());
