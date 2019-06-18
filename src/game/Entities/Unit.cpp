@@ -4554,51 +4554,6 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
     RemoveAuraHolderFromStack(spellId, stackAmount, casterGuid, AURA_REMOVE_BY_DISPEL);
 }
 
-void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, Unit* stealer)
-{
-    SpellAuraHolder* holder = GetSpellAuraHolder(spellId, casterGuid);
-    SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-    SpellAuraHolder* new_holder = CreateSpellAuraHolder(spellProto, stealer, this);
-
-    // set its duration and maximum duration
-    // max duration 2 minutes (in msecs)
-    int32 dur = holder->GetAuraDuration();
-    int32 max_dur = 2 * MINUTE * IN_MILLISECONDS;
-    int32 new_max_dur = max_dur > dur ? dur : max_dur;
-    new_holder->SetAuraMaxDuration(new_max_dur);
-    new_holder->SetAuraDuration(new_max_dur);
-
-    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-    {
-        Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i));
-
-        if (!aur)
-            continue;
-
-        int32 basePoints = aur->GetBasePoints();
-        // construct the new aura for the attacker - will never return nullptr, it's just a wrapper for
-        // some different constructors
-        Aura* new_aur = CreateAura(aur->GetSpellProto(), aur->GetEffIndex(), &basePoints, new_holder, stealer, this);
-
-        // set periodic to do at least one tick (for case when original aura has been at last tick preparing)
-        int32 periodic = aur->GetModifier()->periodictime;
-        new_aur->GetModifier()->periodictime = periodic < new_max_dur ? periodic : new_max_dur;
-
-        // add the new aura to stealer
-        new_holder->AddAura(new_aur, new_aur->GetEffIndex());
-    }
-
-    if (holder->ModStackAmount(-1, nullptr))
-        // Remove aura as dispel
-        RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DISPEL);
-
-    // strange but intended behaviour: Stolen single target auras won't be treated as single targeted
-    new_holder->SetTrackedAuraType(TRACK_AURA_TYPE_NOT_TRACKED);
-
-    if (!stealer->AddSpellAuraHolder(new_holder))
-        delete new_holder;
-}
-
 void Unit::RemoveAurasDueToSpellByCancel(uint32 spellId)
 {
     SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellId);
