@@ -17,6 +17,7 @@
 #ifndef COMBAT_AI_H
 #define COMBAT_AI_H
 
+#include "Entities/Creature.h"
 #include "AI/ScriptDevAI/include/sc_creature.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 
