@@ -1149,7 +1149,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
     {
         // after save it will be impossible to remove the item from the queue
         item->RemoveFromUpdateQueueOf(_player);
-        item->SaveToDB();                                   // item gave inventory record unchanged and can be save standalone
+        _player->SaveItemToInventory(item);
     }
     CharacterDatabase.CommitTransaction();
 

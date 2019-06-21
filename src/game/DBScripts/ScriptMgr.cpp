@@ -1130,7 +1130,7 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
             // TODO Maybe load related grid if not already done? How to handle multi-map case?
             if (!pBuddy)
             {
-                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u by guid %u not loaded in map %u (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry, m_script->searchRadiusOrGuid, m_map->GetId(), m_script->data_flags);
+                sLog.outDetail(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u by guid %u not loaded in map %u (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry, m_script->searchRadiusOrGuid, m_map->GetId(), m_script->data_flags);
                 return false;
             }
         }
@@ -1327,7 +1327,7 @@ bool ScriptAction::HandleScriptStep()
             return false;
 
         // Give some debug log output for easier use
-        DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, command %u for source %s (%sin world), target %s (%sin world)", m_table, m_script->id, m_script->command, m_sourceGuid.GetString().c_str(), source ? "" : "not ", m_targetGuid.GetString().c_str(), target ? "" : "not ");
+        DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, "DB-SCRIPTS: Process table `%s` id %u, command %u for source %s (%sin world), target %s (%sin world)", m_table, m_script->id, m_script->command, m_sourceGuid.GetString().c_str(), source ? "" : "not ", m_targetGuid.GetString().c_str(), target ? "" : "not ");
 
         // Get expected source and target (if defined with buddy)
         pSource = source && source->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)source : nullptr;
@@ -1546,7 +1546,9 @@ bool ScriptAction::HandleScriptStep()
         }
         case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:             // 9
         {
-            GameObject* pGo;
+            GameObject* pGo = nullptr;
+            uint32 time_to_despawn = m_script->respawnGo.despawnDelay;
+
             if (m_script->respawnGo.goGuid)
             {
                 GameObjectData const* goData = sObjectMgr.GetGOData(m_script->respawnGo.goGuid);
@@ -1580,11 +1582,14 @@ bool ScriptAction::HandleScriptStep()
             if (pGo->IsSpawned())
                 break;                                      // gameobject already spawned
 
-            uint32 time_to_despawn = m_script->respawnGo.despawnDelay < 5 ? 5 : m_script->respawnGo.despawnDelay;
-
-            pGo->SetLootState(GO_READY);
-            pGo->SetRespawnTime(time_to_despawn);           // despawn object in ? seconds
-            pGo->Refresh();
+            if (pGo->IsSpawnedByDefault()) // static spawned go - can only respawn
+                pGo->Respawn();
+            else
+            {
+                pGo->SetLootState(GO_READY);
+                pGo->SetRespawnTime(time_to_despawn);           // despawn object in ? seconds
+                pGo->Refresh();
+            }
             break;
         }
         case SCRIPT_COMMAND_TEMP_SPAWN_CREATURE:            // 10

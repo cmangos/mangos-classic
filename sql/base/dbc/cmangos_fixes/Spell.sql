@@ -38,3 +38,9 @@ UPDATE `spell_template` SET `AttributesEx`=0 WHERE `id`=28370;
 
 -- Hurricane Spell From Druid And NPC must be interruptable
 UPDATE `spell_template` SET `InterruptFlags`=15 WHERE `id`=16914 OR `id`=17401 OR `id`=17402;
+
+-- Stun Self - vanilla spell - 44355 - Fel Crystal Visual - entry 24722 - has SPELL_ATTR_EX5_USABLE_WHILE_STUNNED confirmed with sniffs
+UPDATE spell_template SET Mechanic=12 WHERE Id IN(25900);
+
+-- sweeping strikes should not be lost on stance change to defensive
+UPDATE spell_template SET Attributes=Attributes|0x00010000 WHERE Id IN(12328);

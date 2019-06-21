@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2019050101
+ConfVersion=2019061401
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -303,6 +303,7 @@ MaxWhoListReturns = 49
 #    LogFilter_Pathfinding
 #    LogFilter_MapsLoading
 #    LogFilter_EventAiDev
+#    LogFilter_DbScriptDev
 #        Log filters (active by default - meaning: the filter is active, hence the log is not displayed)
 #        Default: 1 - not include with any log level
 #                 0 - include in log if log level permit
@@ -397,6 +398,7 @@ LogFilter_DbStrictedCheck = 1
 LogFilter_Pathfinding = 1
 LogFilter_MapsLoading = 1
 LogFilter_EventAiDev = 1
+LogFilter_DbScriptDev = 1
 LogFilter_PeriodicAffects = 0
 LogFilter_PlayerMoves = 1
 LogFilter_SQLText = 1

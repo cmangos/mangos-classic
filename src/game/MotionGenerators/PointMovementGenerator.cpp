@@ -34,6 +34,7 @@ void PointMovementGenerator<T>::Initialize(T& unit)
     unit.StopMoving();
 
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    m_speedChanged = false;
     Movement::MoveSplineInit init(unit);
     init.MoveTo(i_x, i_y, i_z, m_generatePath);
     init.Launch();
@@ -71,7 +72,7 @@ bool PointMovementGenerator<T>::Update(T& unit, const uint32& /*diff*/)
         return true;
     }
 
-    if (!unit.hasUnitState(UNIT_STAT_ROAMING_MOVE) && unit.movespline->Finalized())
+    if ((!unit.hasUnitState(UNIT_STAT_ROAMING_MOVE) && unit.movespline->Finalized()) || this->m_speedChanged)
         Initialize(unit);
 
     return !unit.movespline->Finalized();

@@ -966,6 +966,53 @@ void ObjectMgr::LoadCreatureConditionalSpawn()
     sLog.outString();
 }
 
+void ObjectMgr::LoadCreatureSpawnEntry()
+{
+    mCreatureSpawnEntryMap.clear();
+
+    QueryResult* result = WorldDatabase.Query("SELECT guid, entry FROM creature_spawn_entry");
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outErrorDb(">> Loaded creature_spawn_entry, table is empty!");
+        sLog.outString();
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    uint32 count = 0;
+
+    do
+    {
+        bar.step();
+
+        Field* fields = result->Fetch();
+
+        uint32 guid = fields[0].GetUInt32();
+        uint32 entry = fields[1].GetUInt32();
+
+        CreatureInfo const* cInfo = GetCreatureTemplate(entry);
+        if (!cInfo)
+        {
+            sLog.outErrorDb("Table `creature_spawn_entry` has creature (GUID: %u) with non existing creature entry %u, skipped.", guid, entry);
+            continue;
+        }
+
+        auto& entries = mCreatureSpawnEntryMap[guid];
+        entries.push_back(entry);
+
+        ++count;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString(">> Loaded %u creature_spawn_entry entries", count);
+    sLog.outString();
+}
+
 void ObjectMgr::LoadCreatures()
 {
     uint32 count = 0;
@@ -1010,13 +1057,25 @@ void ObjectMgr::LoadCreatures()
             CreatureConditionalSpawn const* cSpawn = GetCreatureConditionalSpawn(guid);
             if (!cSpawn)
             {
-                sLog.outErrorDb("Table `creature` has creature (GUID: %u) with non existing link to creature dual spawn, skipped.", guid);
-                continue;
+                auto spawnEntriesMap = sObjectMgr.GetCreatureSpawnEntry();
+                auto itr = spawnEntriesMap.find(guid);
+                if (itr == spawnEntriesMap.end())
+                {
+                    sLog.outErrorDb("Table `creature` has creature (GUID: %u) with 0 id and no records in creature_conditional_spawn/creature_spawn_entry, skipped.", guid);
+                    continue;
+                }
+                else
+                {
+                    auto& spawnList = (*itr).second;
+                    entry = spawnList[irand(0, spawnList.size() - 1)];
+                }
             }
-
-            isConditional = true;
-            // set a default entry to validate the record; will be reset back to 0 afterwards
-            entry = cSpawn->EntryAlliance != 0 ? cSpawn->EntryAlliance : cSpawn->EntryHorde;
+            else
+            {
+                isConditional = true;
+                // set a default entry to validate the record; will be reset back to 0 afterwards
+                entry = cSpawn->EntryAlliance != 0 ? cSpawn->EntryAlliance : cSpawn->EntryHorde;
+            }
         }
 
         CreatureInfo const* cInfo = GetCreatureTemplate(entry);
@@ -6814,16 +6873,14 @@ void ObjectMgr::CheckSpellCones()
             if (uint32 firstRankId = sSpellMgr.GetFirstSpellInChain(i))
             {
                 SpellCone const* spellConeFirst = sSpellCones.LookupEntry<SpellCone>(firstRankId);
-                if ((!spellConeFirst && !spellCone) || !spellCone)
+                if (!spellConeFirst && !spellCone) // no cones for either - is fine
+                    continue;
+
+                if (!spellCone && spellConeFirst) // cone for first - is fine
                     continue;
 
                 if (!spellConeFirst && spellCone)
-                {
-                    if (spellCone)
-                        sLog.outErrorDb("Table spell_cone is missing entry for spell %u - angle %d for its first rank %u. But has cone for this one.", i, spellCone->coneAngle, firstRankId);
-                    else
-                        sLog.outErrorDb("Table spell_cone is missing entry for spell %u for its first rank %u, no cone even for this rank.", i, firstRankId);
-                }
+                    sLog.outErrorDb("Table spell_cone is missing entry for spell %u - angle %d for its first rank %u. But has cone for this one.", i, spellCone->coneAngle, firstRankId);
                 else if (spellCone->coneAngle != spellConeFirst->coneAngle)
                     sLog.outErrorDb("Table spell_cone has different cone angle for spell Id %u - angle %d and first rank %u - angle %d", i, spellCone->coneAngle, firstRankId, spellConeFirst->coneAngle);
             }

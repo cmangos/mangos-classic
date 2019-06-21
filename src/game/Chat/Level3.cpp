@@ -2977,7 +2977,7 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
         SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(id);
         if (spellInfo)
         {
-            int loc = GetSessionDbcLocale();
+            int loc = int(LOCALE_enUS);
             std::string name = spellInfo->SpellName[loc];
             if (name.empty())
                 continue;
@@ -3431,22 +3431,21 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
     }
 
     Player* player = m_session->GetPlayer();
-    float dx = player->GetPositionX() - obj->GetPositionX();
-    float dy = player->GetPositionY() - obj->GetPositionY();
-    float dz = player->GetPositionZ() - obj->GetPositionZ();
 
-    PSendSysMessage(LANG_DISTANCE, player->GetDistance(obj), player->GetDistance(obj, false), sqrt(dx * dx + dy * dy + dz * dz));
+    PSendSysMessage("Raw distance: %.2f", sqrt(player->GetDistance(obj, true, DIST_CALC_NONE)));
+
+    PSendSysMessage("P -> T Combat distance: %.2f", player->GetDistance(obj, true, DIST_CALC_COMBAT_REACH));
+    PSendSysMessage("P -> T Bounding distance: %.2f", player->GetDistance(obj, true, DIST_CALC_BOUNDING_RADIUS));
+    PSendSysMessage("T -> P Combat distance: %.2f", obj->GetDistance(player, true, DIST_CALC_COMBAT_REACH));
+    PSendSysMessage("T -> P Bounding distance: %.2f", obj->GetDistance(player, true, DIST_CALC_BOUNDING_RADIUS));
 
     Unit* target = dynamic_cast<Unit*>(obj);
-
     PSendSysMessage("P -> T Attack distance: %.2f", player->GetAttackDistance(target));
     PSendSysMessage("P -> T Visible distance: %.2f", player->GetVisibleDistance(target));
     PSendSysMessage("P -> T Visible distance (Alert): %.2f", player->GetVisibleDistance(target, true));
-    PSendSysMessage("P -> T Can trigger alert: %s", !player->IsWithinDistInMap(target, target->GetVisibleDistance(player)) ? "true" : "false");
     PSendSysMessage("T -> P Attack distance: %.2f", target->GetAttackDistance(player));
     PSendSysMessage("T -> P Visible distance: %.2f", target->GetVisibleDistance(player));
     PSendSysMessage("T -> P Visible distance (Alert): %.2f", target->GetVisibleDistance(player, true));
-    PSendSysMessage("T -> P Can trigger alert: %s", !target->IsWithinDistInMap(player, player->GetVisibleDistance(target)) ? "true" : "false");
 
     return true;
 }
@@ -5763,20 +5762,10 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
                 Unit* target = nullptr;
                 float distance = 0.f;
                 float angle = 0.f;
-                if (unit->GetTypeId() == TYPEID_PLAYER)
-                {
-                    ChaseMovementGenerator<Player> const* movegen = static_cast<ChaseMovementGenerator<Player> const*>(*itr);
-                    target = movegen->GetCurrentTarget();
-                    distance = movegen->GetOffset();
-                    angle = movegen->GetAngle();
-                }
-                else
-                {
-                    ChaseMovementGenerator<Creature> const* movegen = static_cast<ChaseMovementGenerator<Creature> const*>(*itr);
-                    target = movegen->GetCurrentTarget();
-                    distance = movegen->GetOffset();
-                    angle = movegen->GetAngle();
-                }
+                ChaseMovementGenerator const* movegen = static_cast<ChaseMovementGenerator const*>(*itr);
+                target = movegen->GetCurrentTarget();
+                distance = movegen->GetOffset();
+                angle = movegen->GetAngle();
 
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_CHASE_NULL);
@@ -5824,6 +5813,22 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
                 break;
         }
     }
+    return true;
+}
+
+bool ChatHandler::HandleMovespeedShowCommand(char* args)
+{
+    Unit* unit = getSelectedUnit();
+    if (!unit)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    PSendSysMessage("%s speeds:", unit->GetName());
+    PSendSysMessage("Walk speed %f, Run speed %f, Swim speed %f", unit->GetSpeed(MOVE_WALK), unit->GetSpeed(MOVE_RUN), unit->GetSpeed(MOVE_SWIM));
+
     return true;
 }
 

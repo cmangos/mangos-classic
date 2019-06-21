@@ -1261,7 +1261,7 @@ bool ChatHandler::HandleGameObjectNearSpawnedCommand(char* args)
         float x, y, z;
         go->GetPosition(x, y, z);
         ObjectGuid guid = go->GetObjectGuid();
-        PSendSysMessage(LANG_GO_MIXED_LIST_CHAT, guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(guid).c_str(), entry, guid, goInfo->name, x, y, z, go->GetMapId());
+        PSendSysMessage(LANG_GO_MIXED_LIST_CHAT, guid.GetCounter(), PrepareStringNpcOrGoSpawnInformation<GameObject>(guid).c_str(), entry, guid, goInfo->name, x, y, z, go->GetMapId());
     }
 
     PSendSysMessage(LANG_COMMAND_NEAROBJMESSAGE, distance, gameobjects.size());
@@ -2699,6 +2699,7 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
 
     wpCreature->SetVisibility(VISIBILITY_OFF);
     wpCreature->SetRespawnCoord(pos);
+    wpCreature->SetLevel(wpId);
 
     wpCreature->SetActiveObjectState(true);
 

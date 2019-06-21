@@ -58,10 +58,12 @@ struct npc_kanatiAI : public npc_escortAI
         switch (uiPointId)
         {
             case 0:
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 DoScriptText(SAY_KAN_START, m_creature);
                 DoSpawnGalak();
                 break;
             case 1:
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_PROTECT_KANATI, m_creature);
                 break;

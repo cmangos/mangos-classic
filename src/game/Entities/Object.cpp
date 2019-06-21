@@ -1372,69 +1372,18 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
     if (!atMap)
         atMap = GetMap();
 
-    switch (GetTypeId())
-    {
-        case TYPEID_UNIT:
-        {
-            // non fly unit don't must be in air
-            // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
-            if (!((Creature const*)this)->CanFly())
-            {
-                bool canSwim = ((Creature const*)this)->CanSwim();
-                float ground_z = z;
-                float max_z = canSwim
-                              ? atMap->GetTerrain()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK))
-                              : ((ground_z = atMap->GetHeight(x, y, z)));
-                if (max_z > INVALID_HEIGHT)
-                {
-                    if (z > max_z)
-                        z = max_z;
-                    else if (z < ground_z)
-                        z = ground_z;
-                }
-            }
-            else
-            {
-                float ground_z = atMap->GetHeight(x, y, z);
-                if (z < ground_z)
-                    z = ground_z;
-            }
-            break;
-        }
-        case TYPEID_PLAYER:
-        {
-            // for server controlled moves player work same as creature (but it can always swim)
-            {
-                float ground_z = z;
-                float max_z = atMap->GetTerrain()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK));
-                if (max_z > INVALID_HEIGHT)
-                {
-                    if (z > max_z)
-                        z = max_z;
-                    else if (z < ground_z)
-                        z = ground_z;
-                }
-            }
-            break;
-        }
-        default:
-        {
-            float ground_z = atMap->GetHeight(x, y, z);
-            if (ground_z > INVALID_HEIGHT)
-                z = ground_z;
-            break;
-        }
-    }
+    float ground_z = atMap->GetHeight(x, y, z);
+    if (ground_z > INVALID_HEIGHT)
+        z = ground_z;
 }
 
 void WorldObject::MovePositionToFirstCollision(WorldLocation &pos, float dist, float angle)
 {
     float destX = pos.coord_x + dist * cos(angle);
     float destY = pos.coord_y + dist * sin(angle);
-    float ground = GetMap()->GetTerrain()->GetHeightStatic(destX, destY, MAX_HEIGHT, true);
-    float floor = GetMap()->GetTerrain()->GetHeightStatic(destX, destY, pos.coord_z, true);
-    float destZ = fabs(ground - pos.coord_z) <= fabs(floor - pos.coord_z) ? ground : floor;
+    float destZ = pos.coord_z;
 
+    UpdateAllowedPositionZ(destX, destY, destZ);
     bool colPoint = GetMap()->GetHitPosition(pos.coord_x, pos.coord_y, pos.coord_z + 0.5f, destX, destY, destZ, -0.5f);
 
     if (colPoint)
@@ -1452,9 +1401,7 @@ void WorldObject::MovePositionToFirstCollision(WorldLocation &pos, float dist, f
         {
             destX -= step * cos(angle);
             destY -= step * sin(angle);
-            ground = GetMap()->GetTerrain()->GetHeightStatic(destX, destY, MAX_HEIGHT, true);
-            floor = GetMap()->GetTerrain()->GetHeightStatic(destX, destY, pos.coord_z, true);
-            destZ = fabs(ground - pos.coord_z) <= fabs(floor - pos.coord_z) ? ground : floor;
+            UpdateAllowedPositionZ(destX, destY, destZ);
         }
         else
         {
@@ -1467,7 +1414,7 @@ void WorldObject::MovePositionToFirstCollision(WorldLocation &pos, float dist, f
 
     MaNGOS::NormalizeMapCoord(pos.coord_x);
     MaNGOS::NormalizeMapCoord(pos.coord_y);
-    UpdateGroundPositionZ(pos.coord_x, pos.coord_y, pos.coord_z);
+    UpdateAllowedPositionZ(pos.coord_x, pos.coord_y, pos.coord_z);
     pos.orientation = m_position.o;
 }
 
@@ -1479,11 +1426,14 @@ float WorldObject::GetCombinedCombatReach(WorldObject const* pVictim, bool forMe
 float WorldObject::GetCombinedCombatReach(bool forMeleeRange, float flat_mod) const
 {
     // The measured values show BASE_MELEE_OFFSET in (1.3224, 1.342)
-    float reach = GetCombatReach() +
-        BASE_MELEERANGE_OFFSET + flat_mod;
+    float reach = GetCombatReach() + flat_mod;
 
-    if (forMeleeRange && reach < ATTACK_DISTANCE)
-        reach = ATTACK_DISTANCE;
+    if (forMeleeRange)
+    {
+        reach += BASE_MELEERANGE_OFFSET;
+        if (reach < ATTACK_DISTANCE)
+            reach = ATTACK_DISTANCE;
+    }
 
     return reach;
 }

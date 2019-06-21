@@ -207,6 +207,7 @@ struct npc_kineloryAI : public npc_escortAI
             m_creature->SetImmuneToNPC(false);
             DoScriptText(SAY_START, m_creature);
             Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue), true);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         }
     }
 

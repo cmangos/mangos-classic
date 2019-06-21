@@ -842,8 +842,10 @@ class CreatureEventAI : public CreatureAI
         void SetCurrentRangedMode(bool state);
 
         void JustStoppedMovementOfTarget(SpellEntry const* spell, Unit* victim) override;
-        void MovementInform(uint32 uiType, uint32 uiPointId) override;
         void OnSpellInterrupt(SpellEntry const* spellInfo) override;
+
+        void DistancingStarted() override;
+        void DistancingEnded() override;
 
     protected:
         std::string GetAIName() override { return "EventAI"; }

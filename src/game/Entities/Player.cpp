@@ -735,6 +735,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
 
     SetByteValue(UNIT_FIELD_BYTES_0, 0, race);
     SetByteValue(UNIT_FIELD_BYTES_0, 1, class_);
+    SetSpellClass(class_);
     SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);
     SetByteValue(UNIT_FIELD_BYTES_0, 3, powertype);
 
@@ -2805,6 +2806,68 @@ void Player::SendInitialSpells() const
     DETAIL_LOG("CHARACTER: Sent Initial Spells");
 }
 
+void Player::SendUnlearnSpells() const
+{
+    WorldPacket data(SMSG_SEND_UNLEARN_SPELLS, 4 + 4 * m_spells.size());
+
+    uint32 spellCount = 0;
+    size_t countPos = data.wpos();
+    data << uint32(spellCount);                             // spell count placeholder
+
+    for (auto& spellData : m_spells)
+    {
+        if (spellData.second.state == PLAYERSPELL_REMOVED)
+            continue;
+
+        if (spellData.second.active || spellData.second.disabled)
+            continue;
+
+        auto skillLineAbilities = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(spellData.first);
+        if (skillLineAbilities.first == skillLineAbilities.second)
+            continue;
+
+        bool hasSupercededSpellInfoInClient = false;
+        for (auto boundsItr = skillLineAbilities.first; boundsItr != skillLineAbilities.second; ++boundsItr)
+        {
+            if (boundsItr->second->forward_spellid)
+            {
+                hasSupercededSpellInfoInClient = true;
+                break;
+            }
+        }
+
+        if (hasSupercededSpellInfoInClient)
+            continue;
+
+        uint32 nextRank = sSpellMgr.GetNextSpellInChain(spellData.first);
+        if (!nextRank || !HasSpell(nextRank))
+            continue;
+
+        data << uint32(spellData.first);
+
+        ++spellCount;
+    }
+
+    data.put<uint32>(countPos, spellCount);                  // write real count value
+
+    SendDirectMessage(data);
+}
+
+void Player::SendSupercededSpell(uint32 oldSpell, uint32 newSpell) const
+{
+    WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
+    data << uint16(oldSpell);
+    data << uint16(newSpell);
+    GetSession()->SendPacket(data);
+}
+
+void Player::SendRemovedSpell(uint32 spellId) const
+{
+    WorldPacket data(SMSG_REMOVED_SPELL, 4);
+    data << uint16(spellId);
+    GetSession()->SendPacket(data);
+}
+
 void Player::RemoveMail(uint32 id)
 {
     for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); ++itr)
@@ -2873,6 +2936,11 @@ void Player::AddNewMailDeliverTime(time_t deliver_time)
         if (!m_nextMailDelivereTime || m_nextMailDelivereTime > deliver_time)
             m_nextMailDelivereTime =  deliver_time;
     }
+}
+
+static inline bool IsUnlearnSpellsPacketNeededForSpell(uint32 spellId)
+{
+    return sSpellMgr.GetSpellBookSuccessorSpellId(spellId);
 }
 
 bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled)
@@ -2969,17 +3037,12 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                 if (next_active_spell_id)
                 {
                     // update spell ranks in spellbook and action bar
-                    WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
-                    data << uint16(spell_id);
-                    data << uint16(next_active_spell_id);
-                    GetSession()->SendPacket(data);
+                    SendSupercededSpell(spell_id, next_active_spell_id);
+                    if (IsUnlearnSpellsPacketNeededForSpell(spell_id))
+                        SendUnlearnSpells();
                 }
                 else
-                {
-                    WorldPacket data(SMSG_REMOVED_SPELL, 4);
-                    data << uint16(spell_id);
-                    GetSession()->SendPacket(data);
-                }
+                    SendRemovedSpell(spell_id);
             }
 
             return active;                                  // learn (show in spell book if active now)
@@ -3084,6 +3147,8 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         newspell.dependent = dependent;
         newspell.disabled  = disabled;
 
+        bool needsUnlearnSpellsPacket = false;
+
         // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
         if (newspell.active && !newspell.disabled)
         {
@@ -3102,10 +3167,8 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                         {
                             if (IsInWorld())                // not send spell (re-/over-)learn packets at loading
                             {
-                                WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
-                                data << uint16(m_spell.first);
-                                data << uint16(spell_id);
-                                GetSession()->SendPacket(data);
+                                SendSupercededSpell(m_spell.first, spell_id);
+                                needsUnlearnSpellsPacket = needsUnlearnSpellsPacket || IsUnlearnSpellsPacketNeededForSpell(m_spell.first);
                             }
 
                             // mark old spell as disable (SMSG_SUPERCEDED_SPELL replace it in client by new)
@@ -3118,10 +3181,8 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                         {
                             if (IsInWorld())                // not send spell (re-/over-)learn packets at loading
                             {
-                                WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
-                                data << uint16(spell_id);
-                                data << uint16(m_spell.first);
-                                GetSession()->SendPacket(data);
+                                SendSupercededSpell(spell_id, m_spell.first);
+                                needsUnlearnSpellsPacket = needsUnlearnSpellsPacket || IsUnlearnSpellsPacketNeededForSpell(spell_id);
                             }
 
                             // mark new spell as disable (not learned yet for client and will not learned)
@@ -3137,6 +3198,9 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         }
 
         m_spells[spell_id] = newspell;
+
+        if (needsUnlearnSpellsPacket)
+            SendUnlearnSpells();
 
         // return false if spell disabled
         if (newspell.disabled)
@@ -3331,6 +3395,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
 
     // activate lesser rank in spellbook/action bar, and cast it if need
     bool prev_activate = false;
+    bool needsUnlearnSpellsPacket = false;
 
     if (uint32 prev_id = sSpellMgr.GetPrevSpellInChain(spell_id))
     {
@@ -3363,10 +3428,8 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
                     if (addSpell(prev_id, true, false, spell.dependent, spell.disabled))
                     {
                         // downgrade spell ranks in spellbook and action bar
-                        WorldPacket data(SMSG_SUPERCEDED_SPELL, 4);
-                        data << uint16(spell_id);
-                        data << uint16(prev_id);
-                        GetSession()->SendPacket(data);
+                        SendSupercededSpell(spell_id, prev_id);
+                        needsUnlearnSpellsPacket = IsUnlearnSpellsPacketNeededForSpell(prev_id);
                         prev_activate = true;
                     }
                 }
@@ -3374,13 +3437,12 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
         }
     }
 
+    if (needsUnlearnSpellsPacket)
+        SendUnlearnSpells();
+
     // remove from spell book if not replaced by lesser rank
     if (!prev_activate && sendUpdate)
-    {
-        WorldPacket data(SMSG_REMOVED_SPELL, 4);
-        data << uint16(spell_id);
-        GetSession()->SendPacket(data);
-    }
+        SendRemovedSpell(spell_id);
 }
 
 void Player::_LoadSpellCooldowns(QueryResult* result)
@@ -3583,6 +3645,54 @@ Mail* Player::GetMail(uint32 id)
         }
     }
     return nullptr;
+}
+
+void Player::SaveItemToInventory(Item* item)
+{
+    Bag* container = item->GetContainer();
+    uint32 bag_guid = container ? container->GetGUIDLow() : 0;
+
+    static SqlStatementID insertInventory;
+    static SqlStatementID updateInventory;
+    static SqlStatementID deleteInventory;
+
+    switch (item->GetState())
+    {
+        case ITEM_NEW:
+        {
+            SqlStatement stmt = CharacterDatabase.CreateStatement(insertInventory, "INSERT INTO character_inventory (guid,bag,slot,item,item_template) VALUES (?, ?, ?, ?, ?)");
+            stmt.addUInt32(GetGUIDLow());
+            stmt.addUInt32(bag_guid);
+            stmt.addUInt8(item->GetSlot());
+            stmt.addUInt32(item->GetGUIDLow());
+            stmt.addUInt32(item->GetEntry());
+            stmt.Execute();
+        }
+        break;
+        case ITEM_CHANGED:
+        {
+            SqlStatement stmt = CharacterDatabase.CreateStatement(updateInventory, "UPDATE character_inventory SET guid = ?, bag = ?, slot = ?, item_template = ? WHERE item = ?");
+            stmt.addUInt32(GetGUIDLow());
+            stmt.addUInt32(bag_guid);
+            stmt.addUInt8(item->GetSlot());
+            stmt.addUInt32(item->GetEntry());
+            stmt.addUInt32(item->GetGUIDLow());
+            stmt.Execute();
+        }
+        break;
+        case ITEM_REMOVED:
+        {
+            SqlStatement stmt = CharacterDatabase.CreateStatement(deleteInventory, "DELETE FROM character_inventory WHERE item = ?");
+            stmt.PExecute(item->GetGUIDLow());
+        }
+        break;
+        case ITEM_UNCHANGED:
+            break;
+        default:
+            throw std::domain_error("Unrecognized item state");
+    }
+
+    item->SaveToDB();                                   // item have unchanged inventory record and can be save standalone
 }
 
 void Player::_SetCreateBits(UpdateMask* updateMask, Player* target) const
@@ -5850,7 +5960,7 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
             // Get server side data
             uint32 newzone, newarea;
             GetZoneAndAreaId(newzone, newarea);
-            if (!MapCoordinateVsZoneCheck(x, y, GetMapId(), m_newZone))
+            if (newzone != m_newZone)
             {
                 sLog.outError("Delayed Zone Update: Client sent invalid zoneId for X,Y & MAP Coordinates. GUID: %u zoneId: %u Expected %u, Coords: %f %f %f", GetGUIDLow(), m_newZone, newzone, x, y, z);
                 m_newZone = newzone;
@@ -13706,7 +13816,9 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     // overwrite some data fields
     SetByteValue(UNIT_FIELD_BYTES_0, 0, fields[3].GetUInt8()); // race
+    uint8 playerClass = fields[4].GetUInt8();
     SetByteValue(UNIT_FIELD_BYTES_0, 1, fields[4].GetUInt8()); // class
+    SetSpellClass(playerClass);
 
     uint8 gender = fields[5].GetUInt8() & 0x01;             // allowed only 1 bit values male/female cases (for fit drunk gender part)
     SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);            // gender
@@ -15311,7 +15423,7 @@ void Player::SaveToDB()
 
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
-        pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+        pet->SavePetToDB(PET_SAVE_AS_CURRENT, this);
 }
 
 // fast save function for item/money cheating preventing - save only inventory and money state
@@ -15507,54 +15619,11 @@ void Player::_SaveInventory()
         return;
     }
 
-    static SqlStatementID insertInventory ;
-    static SqlStatementID updateInventory ;
-    static SqlStatementID deleteInventory ;
-
     for (auto item : m_itemUpdateQueue)
     {
         if (!item) continue;
 
-        Bag* container = item->GetContainer();
-        uint32 bag_guid = container ? container->GetGUIDLow() : 0;
-
-        switch (item->GetState())
-        {
-            case ITEM_NEW:
-            {
-                SqlStatement stmt = CharacterDatabase.CreateStatement(insertInventory, "INSERT INTO character_inventory (guid,bag,slot,item,item_template) VALUES (?, ?, ?, ?, ?)");
-                stmt.addUInt32(GetGUIDLow());
-                stmt.addUInt32(bag_guid);
-                stmt.addUInt8(item->GetSlot());
-                stmt.addUInt32(item->GetGUIDLow());
-                stmt.addUInt32(item->GetEntry());
-                stmt.Execute();
-            }
-            break;
-            case ITEM_CHANGED:
-            {
-                SqlStatement stmt = CharacterDatabase.CreateStatement(updateInventory, "UPDATE character_inventory SET guid = ?, bag = ?, slot = ?, item_template = ? WHERE item = ?");
-                stmt.addUInt32(GetGUIDLow());
-                stmt.addUInt32(bag_guid);
-                stmt.addUInt8(item->GetSlot());
-                stmt.addUInt32(item->GetEntry());
-                stmt.addUInt32(item->GetGUIDLow());
-                stmt.Execute();
-            }
-            break;
-            case ITEM_REMOVED:
-            {
-                SqlStatement stmt = CharacterDatabase.CreateStatement(deleteInventory, "DELETE FROM character_inventory WHERE item = ?");
-                stmt.PExecute(item->GetGUIDLow());
-            }
-            break;
-            case ITEM_UNCHANGED:
-                break;
-            default:
-                throw std::domain_error("Unrecognized item state");
-        }
-
-        item->SaveToDB();                                   // item have unchanged inventory record and can be save standalone
+        SaveItemToInventory(item);
     }
     m_itemUpdateQueue.clear();
 }
@@ -16432,6 +16501,26 @@ void Player::ResetSpellModsDueToCanceledSpell(Spell const* spell)
                 ++mod->charges;
         }
     }
+}
+
+void Player::SetSpellClass(uint8 playerClass)
+{
+    SpellFamily name;
+    switch (playerClass)
+    {
+        default: // compiler
+        case CLASS_WARRIOR: name = SPELLFAMILY_WARRIOR; break;
+        case CLASS_PALADIN: name = SPELLFAMILY_PALADIN; break;
+        case CLASS_HUNTER: name = SPELLFAMILY_HUNTER; break;
+        case CLASS_ROGUE: name = SPELLFAMILY_ROGUE; break;
+        case CLASS_PRIEST: name = SPELLFAMILY_PRIEST; break;
+            // case CLASS_DEATH_KNIGHT: name = SPELLFAMILY_DEATH_KNIGHT; break;
+        case CLASS_SHAMAN: name = SPELLFAMILY_SHAMAN; break;
+        case CLASS_MAGE: name = SPELLFAMILY_MAGE; break;
+        case CLASS_WARLOCK: name = SPELLFAMILY_WARLOCK; break;
+        case CLASS_DRUID: name = SPELLFAMILY_DRUID; break;
+    }
+    m_spellClassName = name;
 }
 
 // send Proficiency
@@ -17559,7 +17648,11 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // tutorial stuff
     GetSession()->SendTutorialsData();
+
     SendInitialSpells();
+
+    SendUnlearnSpells();
+
     SendInitialActionButtons();
     m_reputationMgr.SendInitialReputations();
     UpdateHonor();
@@ -17722,7 +17815,7 @@ void Player::ApplyEquipCooldown(Item* pItem)
         if (!spellentry)
             continue;
 
-        AddCooldown(*spellentry, pItem->GetProto(), false, 30 * IN_MILLISECONDS);
+        AddCooldown(*spellentry, nullptr, false, 30 * IN_MILLISECONDS);
 
         WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
         data << ObjectGuid(pItem->GetObjectGuid());
@@ -18311,11 +18404,10 @@ void Player::RewardSinglePlayerAtKill(Unit* pVictim)
     {
         Creature* creatureVictim = static_cast<Creature*>(pVictim);
         RewardReputation(creatureVictim, 1);
-        uint32 xp = MaNGOS::XP::Gain(this, creatureVictim);
-        GiveXP(xp, creatureVictim);
+        GiveXP(MaNGOS::XP::Gain(this, creatureVictim), creatureVictim);
 
         if (Pet* pet = GetPet())
-            pet->GivePetXP(xp);
+            pet->GivePetXP(MaNGOS::XP::Gain(pet, creatureVictim));
 
         // normal creature (not pet/etc) can be only in !PvP case
         if (CreatureInfo const* normalInfo = creatureVictim->GetCreatureInfo())
