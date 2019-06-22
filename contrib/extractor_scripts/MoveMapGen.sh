@@ -15,6 +15,8 @@
 ## Second param can be an additional filename for storing log
 ## Third param can be an addition filename for storing detailed log
 
+PREFIX="$(dirname $0)"
+
 ## Additional Parameters to be forwarded to MoveMapGen, see mmaps/readme for instructions
 PARAMS="--silent"
 
@@ -107,7 +109,7 @@ createMMaps()
        continue 2
      fi
    done
-   ./MoveMapGen $PARAMS $OFFMESH $MMG_RES $i | tee -a $DETAIL_LOG_FILE
+   $PREFIX/MoveMapGen $PARAMS $OFFMESH $MMG_RES $i | tee -a $DETAIL_LOG_FILE
    echo "`date`: (Re)created map $i" | tee -a $LOG_FILE
  done
 }
@@ -163,7 +165,7 @@ case "$1" in
    echo "Recreate offmeshs from file $OFFMESH_FILE" | tee -a $DETAIL_LOG_FILE
    while read map tile line
    do
-     ./MoveMapGen $PARAMS $OFFMESH $MMG_RES $map --tile $tile | tee -a $DETAIL_LOG_FILE
+     $PREFIX/MoveMapGen $PARAMS $OFFMESH $MMG_RES $map --tile $tile | tee -a $DETAIL_LOG_FILE
      echo "`date`: Recreated $map $tile from $OFFMESH_FILE" | tee -a $LOG_FILE
    done < $OFFMESH_FILE &
    ;;
