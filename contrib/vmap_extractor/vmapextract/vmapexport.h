@@ -31,7 +31,8 @@ enum ModelFlags
     MOD_HAS_BOUND = 1 << 2
 };
 
-extern const char* szWorkDirWmo;
+const int path_l = 1024;
+extern char szWorkDirWmo[path_l + 512];
 extern const char* szRawVMAPMagic;                          // vmap magic string for extracted raw vmap data
 
 bool FileExists(const char* file);

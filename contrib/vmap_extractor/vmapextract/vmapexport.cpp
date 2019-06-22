@@ -67,15 +67,16 @@ typedef struct
 map_id* map_ids;
 uint16* LiqType = 0;
 uint32 map_count;
-char output_path[128] = ".";
-char input_path[1024] = ".";
+char output_path[path_l] = ".";
+char input_path[path_l] = ".";
 bool hasInputPathParam = false;
+bool hasOutputPathParam = false;
 bool preciseVectorData = false;
 
 // Constants
 
 //static const char * szWorkDirMaps = ".\\Maps";
-const char* szWorkDirWmo = "./Buildings";
+char szWorkDirWmo[path_l + 512];
 const char* szRawVMAPMagic = "VMAP005";
 
 // Local testing functions
@@ -149,10 +150,12 @@ bool ExtractSingleWmo(std::string& fname)
 {
     // Copy files from archive
 
-    char szLocalFile[1024];
+    char szLocalFile[path_l + 512];
+    char path[path_l];
     const char* plain_name = GetPlainName(fname.c_str());
-    sprintf(szLocalFile, "%s/%s", szWorkDirWmo, plain_name);
-    fixnamen(szLocalFile, strlen(szLocalFile));
+    sprintf(path, "%s", plain_name);
+    fixnamen(path, strlen(path));
+    sprintf(szLocalFile, "%s/%s", szWorkDirWmo, path);
 
     if (FileExists(szLocalFile))
         return true;
@@ -309,7 +312,7 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
 
     printf("\nGame path: %s\n", input_path);
 
-    char path[512];
+    char path[path_l + 16];
 
     // open expansion and common files
     printf("Opening data files from data directory.\n");
@@ -341,6 +344,7 @@ bool processArgv(int argc, char** argv)
     bool result = true;
     hasInputPathParam = false;
     preciseVectorData = false;
+    sprintf(szWorkDirWmo, "%s", "./Buildings");
 
     for (int i = 1; i < argc; ++i)
     {
@@ -356,6 +360,22 @@ bool processArgv(int argc, char** argv)
                 strcpy(input_path, argv[i + 1]);
                 if (input_path[strlen(input_path) - 1] != '\\' && input_path[strlen(input_path) - 1] != '/')
                     strcat(input_path, "/");
+                ++i;
+            }
+            else
+            {
+                result = false;
+            }
+        }
+        else if (strcmp("-o", argv[i]) == 0)
+        {
+            if ((i + 1) < argc)
+            {
+                hasOutputPathParam = true;
+                strcpy(output_path, argv[i + 1]);
+                if (output_path[strlen(output_path) - 1] != '\\' && output_path[strlen(output_path) - 1] != '/')
+                    strcat(output_path, "/");
+                sprintf(szWorkDirWmo, "%s/Buildings", output_path);
                 ++i;
             }
             else
@@ -384,6 +404,7 @@ bool processArgv(int argc, char** argv)
         printf("   -s : (default) small size (data size optimization), ~500MB less vmap data.\n");
         printf("   -l : large size, ~500MB more vmap data. (might contain more details)\n");
         printf("   -d <path>: Path to the vector data source folder.\n");
+        printf("   -o <path>: Path to the output folder.\n");
         printf("   -? : This message.\n");
     }
     return result;
@@ -402,6 +423,7 @@ bool processArgv(int argc, char** argv)
 int main(int argc, char** argv)
 {
     bool success = true;
+    char path[path_l + 512];
 
     // Use command line arguments, when some
     if (!processArgv(argc, argv))
