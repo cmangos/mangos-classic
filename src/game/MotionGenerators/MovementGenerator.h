@@ -97,20 +97,20 @@ class MovementGeneratorMedium : public MovementGenerator
         }
     public:
         // Will not link if not overridden in the generators - also not generate for T==Unit
-        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
-        void Initialize(T& u);
-        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
-        void Finalize(T& u);
-        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
-        void Interrupt(T& u);
-        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
-        void Reset(T& u);
-        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
-        bool Update(T& u, const uint32& time_diff);
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value, U>::type* = nullptr>
+        void Initialize(U& u);
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value, U>::type* = nullptr>
+        void Finalize(U& u);
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value, U>::type* = nullptr>
+        void Interrupt(U& u);
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value, U>::type* = nullptr>
+        void Reset(U& u);
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value, U>::type* = nullptr>
+        bool Update(U& u, const uint32& time_diff);
 
         // not need always overwrites
-        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value>::type>
-        bool GetResetPosition(T& /*u*/, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const { return false; }
+        template <class U = T, typename std::enable_if<false == std::is_same<U, Unit>::value, U>::type* = nullptr>
+        bool GetResetPosition(U& /*u*/, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const { return false; }
 };
 
 struct SelectableMovement : public FactoryHolder<MovementGenerator, MovementGeneratorType>
