@@ -29,7 +29,7 @@ namespace MMAP
         rcFreePolyMeshDetail(polyMeshDetail);
     }
 
-    void IntermediateValues::writeIV(uint32 mapID, uint32 tileX, uint32 tileY)
+    void IntermediateValues::writeIV(const char* workdir, uint32 mapID, uint32 tileX, uint32 tileY)
     {
         char fileName[255];
         char tileString[25];
@@ -37,11 +37,11 @@ namespace MMAP
 
         printf("%sWriting debug output...                       \r", tileString);
 
-        string name("meshes/%03u%02i%02i.");
+        string name("%s/meshes/%03u%02i%02i.");
 
 #define DEBUG_WRITE(fileExtension,data) \
         do { \
-            sprintf(fileName, (name + fileExtension).c_str(), mapID, tileY, tileX); \
+            sprintf(fileName, (name + fileExtension).c_str(), workdir, mapID, tileY, tileX); \
             FILE* file = fopen(fileName, "wb"); \
             if (!file) \
             { \
@@ -199,10 +199,10 @@ namespace MMAP
         fwrite(mesh->meshes, sizeof(int), mesh->nmeshes * 4, file);
     }
 
-    void IntermediateValues::generateObjFile(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData)
+    void IntermediateValues::generateObjFile(const char* workdir, uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData)
     {
         char objFileName[255];
-        sprintf(objFileName, "meshes/map%03u%02u%02u.obj", mapID, tileY, tileX);
+        sprintf(objFileName, "%s/meshes/map%03u%02u%02u.obj", workdir, mapID, tileY, tileX);
 
         FILE* objFile = fopen(objFileName, "wb");
         if (!objFile)
@@ -239,7 +239,7 @@ namespace MMAP
         sprintf(tileString, "[%02u,%02u]: ", tileY, tileX);
         printf("%sWriting debug output...                       \r", tileString);
 
-        sprintf(objFileName, "meshes/%03u.map", mapID);
+        sprintf(objFileName, "%s/meshes/%03u.map", workdir, mapID);
 
         objFile = fopen(objFileName, "wb");
         if (!objFile)
@@ -254,7 +254,7 @@ namespace MMAP
         fwrite(&b, sizeof(char), 1, objFile);
         fclose(objFile);
 
-        sprintf(objFileName, "meshes/%03u%02u%02u.mesh", mapID, tileY, tileX);
+        sprintf(objFileName, "%s/meshes/%03u%02u%02u.mesh", mapID, tileY, tileX);
         objFile = fopen(objFileName, "wb");
         if (!objFile)
         {

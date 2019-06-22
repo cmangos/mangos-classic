@@ -67,7 +67,8 @@ namespace MMAP
                        bool skipBattlegrounds   = false,
                        bool debugOutput         = false,
                        bool bigBaseUnit         = false,
-                       const char* offMeshFilePath = NULL);
+                       const char* offMeshFilePath = NULL,
+                       const char* workdir = NULL);
 
             ~MapBuilder();
 
@@ -113,6 +114,7 @@ namespace MMAP
             bool m_debugOutput;
 
             const char* m_offMeshFilePath;
+            const char* m_workdir;
             bool m_skipContinents;
             bool m_skipJunkMaps;
             bool m_skipBattlegrounds;
