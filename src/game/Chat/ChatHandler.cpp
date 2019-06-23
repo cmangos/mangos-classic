@@ -189,7 +189,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
 
             if (!normalizePlayerName(to))
             {
-                SendPlayerNotFoundNotice(to);
+                if (lang != LANG_ADDON)
+                    SendPlayerNotFoundNotice(to);
                 break;
             }
 
@@ -198,7 +199,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             uint32 pSecurity = player ? player->GetSession()->GetSecurity() : SEC_PLAYER;
             if (!player || (tSecurity == SEC_PLAYER && pSecurity > SEC_PLAYER && !player->isAcceptWhispers()))
             {
-                SendPlayerNotFoundNotice(to);
+                if (lang != LANG_ADDON)
+                    SendPlayerNotFoundNotice(to);
                 return;
             }
 
@@ -206,7 +208,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             {
                 if (GetPlayer()->GetTeam() != player->GetTeam())
                 {
-                    SendWrongFactionNotice();
+                    if (lang != LANG_ADDON)
+                        SendWrongFactionNotice();
                     return;
                 }
             }
