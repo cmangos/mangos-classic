@@ -140,12 +140,6 @@ struct boss_sapphironAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
-    {
-        if (m_Phase != PHASE_GROUND && uiDamage >= m_creature->GetHealth())
-            uiDamage = 0;
-    }
-
     void MovementInform(uint32 uiType, uint32 /*uiPointId*/) override
     {
         if (uiType == POINT_MOTION_TYPE && m_Phase == PHASE_LIFT_OFF)
@@ -206,6 +200,7 @@ struct boss_sapphironAI : public ScriptedAI
                     if (m_uiFlyTimer < uiDiff)
                     {
                         m_Phase = PHASE_LIFT_OFF;
+                        SetDeathPrevention(true);
                         m_creature->InterruptNonMeleeSpells(false);
                         SetCombatMovement(false);
                         m_creature->GetMotionMaster()->Clear(false);
@@ -279,7 +274,7 @@ struct boss_sapphironAI : public ScriptedAI
                 if (m_uiLandTimer < uiDiff)
                 {
                     m_Phase = PHASE_GROUND;
-
+                    SetDeathPrevention(false);
                     SetCombatMovement(true);
                     m_creature->GetMotionMaster()->Clear(false);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());

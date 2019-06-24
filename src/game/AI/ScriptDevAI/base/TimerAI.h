@@ -17,6 +17,7 @@
 #ifndef TIMER_AI_H
 #define TIMER_AI_H
 
+#include "Util.h"
 #include "Platform/Define.h"
 
 #include <functional>
