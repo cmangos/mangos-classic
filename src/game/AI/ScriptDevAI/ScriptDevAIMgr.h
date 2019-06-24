@@ -8,6 +8,7 @@
 #include "Common.h"
 #include "Server/DBCStructure.h"
 #include "Server/SQLStorages.h"
+#include "Spells/SpellMgr.h"
 
 class Player;
 class Creature;

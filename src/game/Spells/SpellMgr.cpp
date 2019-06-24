@@ -2632,7 +2632,7 @@ void SpellMgr::CheckUsedSpells(char const* table) const
             continue;
         }
 
-        if (effectType < -1 || effectType >= TOTAL_SPELL_EFFECTS)
+        if (effectType < -1 || effectType >= MAX_SPELL_EFFECTS)
         {
             sLog.outError("Table '%s' for spell %u have wrong SpellEffect type value(%u), skipped.", table, spell, effectType);
             continue;

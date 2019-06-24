@@ -421,7 +421,7 @@ void AreaAura::Update(uint32 diff)
                             for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
                             {
                                 Player* Target = itr->getSource();
-                                if (Target && Target->isAlive() && Target->GetSubGroup() == subgroup && caster->CanAssist(Target))
+                                if (Target && Target->isAlive() && Target->GetSubGroup() == subgroup && caster->CanAssistSpell(Target, GetSpellProto()))
                                 {
                                     if (caster->IsWithinDistInMap(Target, m_radius))
                                         targets.push_back(Target);
@@ -570,7 +570,7 @@ void AreaAura::Update(uint32 diff)
                 caster->hasUnitState(UNIT_STAT_ISOLATED)               ||
                 !caster->HasAura(originalRankSpellId, GetEffIndex())   ||
                 !caster->IsWithinDistInMap(target, m_radius)           ||
-                caster->CanAssist(target) != needFriendly
+                caster->CanAssistSpell(target, GetSpellProto()) != needFriendly
            )
         {
             target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGuid());

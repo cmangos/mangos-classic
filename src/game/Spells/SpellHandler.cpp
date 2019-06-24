@@ -377,7 +377,10 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             spellInfo = actualSpellInfo;
     }
 
-    Spell* spell = new Spell(_player, spellInfo, false);
+    if (HasMissingTargetFromClient(spellInfo))
+        targets.setUnitTarget(mover->GetTarget());
+
+    Spell* spell = new Spell(mover, spellInfo, TRIGGERED_NONE);
     spell->SpellStart(&targets);
 }
 

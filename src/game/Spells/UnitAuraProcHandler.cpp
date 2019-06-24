@@ -1478,7 +1478,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
         // TODO: add neutral target handling, neutral targets should still be able to go through
         if (!(this == target && IsOnlySelfTargeting(triggerEntry)))
         {
-            if (IsPositiveSpellTargetMode(triggerEntry, this, target) != CanAssist(target))
+            if (IsPositiveSpellTargetMode(triggerEntry, this, target) != CanAssistSpell(target, triggerEntry))
                 return SPELL_AURA_PROC_FAILED;
         }
     }
