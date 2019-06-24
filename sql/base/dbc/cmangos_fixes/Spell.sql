@@ -44,3 +44,7 @@ UPDATE spell_template SET Mechanic=12 WHERE Id IN(25900);
 
 -- sweeping strikes should not be lost on stance change to defensive
 UPDATE spell_template SET Attributes=Attributes|0x00010000 WHERE Id IN(12328);
+
+-- targeting section
+-- Draw Spirit - Lethon - both effects need to have same radius index - faulty data
+UPDATE spell_template SET EffectRadiusIndex1=EffectRadiusIndex2 WHERE Id IN(24811);
