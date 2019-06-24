@@ -3641,7 +3641,7 @@ bool ChatHandler::HandleAuraCommand(char* args)
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         uint8 eff = spellInfo->Effect[i];
-        if (eff >= TOTAL_SPELL_EFFECTS)
+        if (eff >= MAX_SPELL_EFFECTS)
             continue;
         if (IsAreaAuraEffect(eff)           ||
                 eff == SPELL_EFFECT_APPLY_AURA  ||

@@ -24,6 +24,7 @@
 #include "Entities/ItemEnchantmentMgr.h"
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
+#include "Spells/SpellTargetDefines.h"
 
 void AddItemsSetItem(Player* player, Item* item)
 {

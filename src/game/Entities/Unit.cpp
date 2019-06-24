@@ -6239,7 +6239,7 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
     return gain;
 }
 
-Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
+Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell)
 {
     if (!victim)
         return nullptr;

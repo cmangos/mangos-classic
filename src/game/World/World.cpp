@@ -984,6 +984,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading SpellsScriptTarget...");
     sSpellMgr.LoadSpellScriptTarget();                      // must be after LoadCreatureTemplates, LoadCreatures and LoadGameobjectInfo
 
+    sLog.outString("Generating SpellTargetMgr data...\n");
+    SpellTargetMgr::Initialize(); // must be after LoadSpellScriptTarget
+
     sLog.outString("Loading Creature Addon Data...");
     sObjectMgr.LoadCreatureAddons();                        // must be after LoadCreatureTemplates() and LoadCreatures()
     sLog.outString(">>> Creature Addon Data loaded");
