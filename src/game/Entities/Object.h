@@ -665,7 +665,7 @@ class WorldObject : public Object
          * @param distance2d        -           distance between the middle-points
          * @param absAngle          -           angle in which the spot is preferred
          */
-        void GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float searcher_bounding_radius, float distance2d, float absAngle) const;
+        void GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float searcher_bounding_radius, float distance2d, float absAngle, bool isInWater = false) const;
         /** Gives a "free" spot for a searcher on the distance (including bounding-radius calculation)
          * @param x, y, z           -           position for the found spot
          * @param bounding_radius   -           radius for the searcher
