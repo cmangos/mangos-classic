@@ -60,7 +60,7 @@ class TargetedMovementGeneratorMedium
         float GetOffset() const { return i_offset; }
         float GetAngle() const { return i_angle; }
 
-        void UnitSpeedChanged() { m_speedChanged = true; }
+        virtual void UnitSpeedChanged() override { m_speedChanged = true; }
 
     protected:
         void _setTargetLocation(T&, bool updateDestination);
