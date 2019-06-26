@@ -6017,8 +6017,13 @@ SpellCastResult Spell::CheckItems()
 
                 if (!m_IsTriggeredSpell && m_spellInfo->EffectItemType[i])
                 {
+                    ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(m_spellInfo->EffectItemType[i]);
+                    if (!itemProto)
+                        return SPELL_FAILED_ITEM_NOT_FOUND; // custom error in case item template is missing
                     ItemPosCountVec dest;
-                    InventoryResult msg = playerTarget->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, m_spellInfo->EffectItemType[i], CalculateDamage(SpellEffectIndex(i), m_caster));
+                    uint32 count = CalculateDamage(SpellEffectIndex(i), m_caster);
+                    count = count > itemProto->Stackable ? itemProto->Stackable : count;
+                    InventoryResult msg = playerTarget->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, m_spellInfo->EffectItemType[i], count);
                     if (msg != EQUIP_ERR_OK)
                     {
                         p_caster->SendEquipError(msg, nullptr, nullptr, m_spellInfo->EffectItemType[i]);
