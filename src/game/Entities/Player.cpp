@@ -11385,6 +11385,12 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                     hasMenuItem = false;
                     break;
                 }
+                case GOSSIP_OPTION_SD2_1:
+                case GOSSIP_OPTION_SD2_2:
+                case GOSSIP_OPTION_SD2_3:
+                case GOSSIP_OPTION_SD2_4:
+                case GOSSIP_OPTION_SD2_5:
+                    break;
                 default:
                     sLog.outErrorDb("Creature entry %u have unknown gossip option %u for menu %u", pCreature->GetEntry(), gossipMenu.option_id, gossipMenu.menu_id);
                     hasMenuItem = false;

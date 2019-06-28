@@ -51,6 +51,12 @@ enum Gossip_Option
     GOSSIP_OPTION_UNLEARNPETSKILLS  = 17,                   // UNIT_NPC_FLAG_TRAINER             (16) (bonus option for GOSSIP_OPTION_TRAINER)
     GOSSIP_OPTION_BOT               = 99,                   // UNIT_NPC_FLAG_GOSSIP              (1) UNUSED (just for bot system)
 
+    // Custom ones for SD2 system communication
+    GOSSIP_OPTION_SD2_1             = 100,
+    GOSSIP_OPTION_SD2_2             = 101,
+    GOSSIP_OPTION_SD2_3             = 102,
+    GOSSIP_OPTION_SD2_4             = 103,
+    GOSSIP_OPTION_SD2_5             = 104,
     GOSSIP_OPTION_MAX
 };
 
