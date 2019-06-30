@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2019100201
+ConfVersion=2019120601
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -704,6 +704,11 @@ LogColors = ""
 #        Default: 0 - Engage from any angle
 #                 1 - Engage from behind
 #
+#    AutoDownrank
+#        Automatically select correct rank when buffing/healing lower level players
+#        Default: 0 (false)
+#                 1 (true)
+#
 #    Event.Announce
 #        Default: 0 (false)
 #                 1 (true)
@@ -786,6 +791,7 @@ MailDeliveryDelay = 3600
 MassMailer.SendPerTick = 10
 PetUnsummonAtMount = 0
 PetAttackFromBehind = 0
+AutoDownrank = 0
 Event.Announce = 0
 BeepAtStart = 1
 ShowProgressBars = 0
