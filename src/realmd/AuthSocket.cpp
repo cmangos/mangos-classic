@@ -404,18 +404,18 @@ bool AuthSocket::_HandleLogonChallenge()
     {
         ///- Get the account details from the account table
         // No SQL injection (escaped user name)
-        QueryResult* result = LoginDatabase.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel,v,s,token FROM account WHERE username = '%s'", _safelogin.c_str());
+        QueryResult* result = LoginDatabase.PQuery("SELECT id,locked,last_ip,gmlevel,v,s,token FROM account WHERE username = '%s'", _safelogin.c_str());
         if (result)
         {
             Field* fields = result->Fetch();
 
             ///- If the IP is 'locked', check that the player comes indeed from the correct IP address
             bool locked = false;
-            if (fields[2].GetUInt8() == 1)               // if ip is locked
+            if (fields[1].GetUInt8() == 1)               // if ip is locked
             {
-                DEBUG_LOG("[AuthChallenge] Account '%s' is locked to IP - '%s'", _login.c_str(), fields[3].GetString());
+                DEBUG_LOG("[AuthChallenge] Account '%s' is locked to IP - '%s'", _login.c_str(), fields[2].GetString());
                 DEBUG_LOG("[AuthChallenge] Player address is '%s'", m_address.c_str());
-                if (strcmp(fields[3].GetString(), m_address.c_str()))
+                if (strcmp(fields[2].GetString(), m_address.c_str()))
                 {
                     DEBUG_LOG("[AuthChallenge] Account IP differs");
                     pkt << (uint8) WOW_FAIL_SUSPENDED;
@@ -431,7 +431,7 @@ bool AuthSocket::_HandleLogonChallenge()
             {
                 ///- If the account is banned, reject the logon attempt
                 QueryResult* banresult = LoginDatabase.PQuery("SELECT bandate,unbandate FROM account_banned WHERE "
-                                         "id = %u AND active = 1 AND (unbandate > UNIX_TIMESTAMP() OR unbandate = bandate)", fields[1].GetUInt32());
+                                         "id = %u AND active = 1 AND (unbandate > UNIX_TIMESTAMP() OR unbandate = bandate)", fields[0].GetUInt32());
                 if (banresult)
                 {
                     if ((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
@@ -449,12 +449,9 @@ bool AuthSocket::_HandleLogonChallenge()
                 }
                 else
                 {
-                    ///- Get the password from the account table, upper it, and make the SRP6 calculation
-                    std::string rI = fields[0].GetCppString();
-
                     ///- Don't calculate (v, s) if there are already some in the database
-                    std::string databaseV = fields[5].GetCppString();
-                    std::string databaseS = fields[6].GetCppString();
+                    std::string databaseV = fields[4].GetCppString();
+                    std::string databaseS = fields[5].GetCppString();
 
                     DEBUG_LOG("database authentication values: v='%s' s='%s'", databaseV.c_str(), databaseS.c_str());
 
@@ -486,7 +483,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     pkt.append(VersionChallenge.data(), VersionChallenge.size());
                     uint8 securityFlags = 0;
 
-                    _token = fields[7].GetCppString();
+                    _token = fields[6].GetCppString();
                     if (!_token.empty() && _build >= 8606) // authenticator was added in 2.4.3
                         securityFlags = SECURITY_FLAG_AUTHENTICATOR;
 
@@ -511,7 +508,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     if (securityFlags & SECURITY_FLAG_AUTHENTICATOR)    // Authenticator input
                         pkt << uint8(1);
 
-                    uint8 secLevel = fields[4].GetUInt8();
+                    uint8 secLevel = fields[3].GetUInt8();
                     _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
                     _localizationName.resize(4);
