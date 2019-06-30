@@ -321,7 +321,7 @@ void SpellLog::SendToSet()
 // ***********
 
 Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy) :
-    m_spellLog(this)
+    m_spellLog(this), m_spellScript(SpellScriptMgr::GetSpellScript(info->Id))
 {
     MANGOS_ASSERT(caster != nullptr && info != nullptr);
     MANGOS_ASSERT(info == sSpellTemplate.LookupEntry<SpellEntry>(info->Id) && "`info` must be pointer to sSpellTemplate element");
@@ -505,6 +505,7 @@ void Spell::FillTargetMap()
                 break;
             case TARGET_TYPE_LOCATION_DEST:
             case TARGET_TYPE_SPECIAL_DEST:
+                OnDestTarget();
                 AddDestExecution(SpellEffectIndex(i));
                 break;
             case TARGET_TYPE_UNIT:
@@ -586,7 +587,7 @@ void Spell::FillTargetMap()
                     {
                         for (auto iter = goTargetList.begin(); iter != goTargetList.end();)
                         {
-                            if (CheckTargetGOScript(*iter, SpellEffectIndex(i)))
+                            if (OnCheckTarget(*iter, SpellEffectIndex(i)))
                                 ++iter;
                             else
                                 iter = goTargetList.erase(iter);
@@ -1029,6 +1030,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         else
             procEx |= PROC_EX_NORMAL_HIT;
 
+        m_healing = addhealth; // update value so that script handler has access
+        OnHit(); // TODO: After spell damage calc is moved to proper handler - move this before the first if
+
         int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo, crit);
 
         if (real_caster)
@@ -1078,6 +1082,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         procEx |= createProcExtendMask(&damageInfo, missInfo);
         procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
+        m_damage = damageInfo.damage; // update value so that script handler has access
+        OnHit(); // TODO: After spell damage calc is moved to proper handler - move this before the first if
+
         caster->DealSpellDamage(&damageInfo, true);
 
         // Bloodthirst
@@ -1105,6 +1112,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     // Passive spell hits/misses or active spells only misses (only triggers if proc flags set)
     else if (procAttacker || procVictim)
     {
+        OnHit(); // TODO: After spell damage calc is moved to proper handler - move this before the first if
         // Fill base damage struct (unitTarget - is real spell target)
         SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, GetFirstSchoolInMask(m_spellSchoolMask));
         procEx = createProcExtendMask(&damageInfo, missInfo);
@@ -1113,6 +1121,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             // traps need to be procced at trap triggerer
             Unit::ProcDamageAndSpell(ProcSystemArguments(caster, procAttacker & PROC_FLAG_ON_TRAP_ACTIVATION ? m_targets.getUnitTarget() : unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
     }
+
+    OnAfterHit();
 
     // Call scripted function for AI if this spell is casted upon a creature
     if (unit->GetTypeId() == TYPEID_UNIT)
@@ -2533,7 +2543,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                     Cell::VisitGridObjects(m_caster, checker, radius);
                     for (auto itr = foundScriptGOTargets.begin(); itr != foundScriptGOTargets.end();)
                     {
-                        if (!CheckTargetGOScript(*itr, effIndex))
+                        if (!OnCheckTarget(*itr, effIndex))
                             itr = foundScriptGOTargets.erase(itr);
                         else
                             ++itr;
@@ -2575,7 +2585,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                         for (auto iter = foundScriptCreatureTargets.begin(); iter != foundScriptCreatureTargets.end();)
                         {
                             bool failed = false;
-                            if (!CheckTargetScript(*iter, effIndex))
+                            if (!OnCheckTarget(*iter, effIndex))
                                 failed = true;
                             else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF) && m_caster == (*iter))
                                 failed = true;
@@ -2724,12 +2734,6 @@ SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* trigger
     if (m_CastItem)
         m_CastItemGuid = m_CastItem->GetObjectGuid();
 
-
-    m_castPositionX = m_caster->GetPositionX();
-    m_castPositionY = m_caster->GetPositionY();
-    m_castPositionZ = m_caster->GetPositionZ();
-    m_castOrientation = m_caster->GetOrientation();
-
     if (triggeredByAura)
         m_triggeredByAuraSpell = triggeredByAura->GetSpellProto();
 
@@ -2751,8 +2755,6 @@ SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* trigger
 
 void Spell::Prepare()
 {
-    OnSuccessfulSpellStart();
-
     m_spellState = SPELL_STATE_CASTING;
 
     // Prepare data for triggers
@@ -2773,6 +2775,13 @@ void Spell::Prepare()
         if (m_notifyAI && m_caster->AI())
             m_caster->AI()->OnSpellCastStateChange(this, true, m_targets.getUnitTarget());
     }
+
+    m_castPositionX = m_caster->GetPositionX();
+    m_castPositionY = m_caster->GetPositionY();
+    m_castPositionZ = m_caster->GetPositionZ();
+    m_castOrientation = m_caster->GetOrientation();
+
+    OnSuccessfulStart();
 
     // add non-triggered (with cast time and without)
     if (!m_IsTriggeredSpell)
@@ -3012,6 +3021,8 @@ void Spell::cast(bool skipCheck)
     SendSpellGo();                                          // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
 
     InitializeDamageMultipliers();
+
+    OnCast();
 
     // process immediate effects (items, ground, etc.) also initialize some variables
     _handle_immediate_phase();
@@ -3414,7 +3425,7 @@ void Spell::finish(bool ok)
         }
     }
 
-    OnSuccessfulSpellFinish();
+    OnSuccessfulFinish();
 
     // Clear combo at finish state
     if (m_caster->GetTypeId() == TYPEID_PLAYER && NeedsComboPoints(m_spellInfo))
@@ -4110,7 +4121,10 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
                      gameObjTarget ? gameObjTarget->GetGuidStr().c_str() : "-");
 
     if (eff < MAX_SPELL_EFFECTS)
+    {
+        OnEffectExecute(i);
         (*this.*SpellEffects[eff])(i);
+    }
     else
         sLog.outError("WORLD: Spell FX %d > MAX_SPELL_EFFECTS ", eff);
 
@@ -6292,86 +6306,6 @@ CurrentSpellTypes Spell::GetCurrentContainer() const
     return (CURRENT_GENERIC_SPELL);
 }
 
-bool Spell::CheckTargetGOScript(GameObject* /*target*/, SpellEffectIndex /*eff*/) const
-{
-    /*switch (m_spellInfo->Id)
-    {
-        default: break;
-    }*/
-    return true;
-}
-
-bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
-{
-    switch (m_spellInfo->Id)
-    {
-        case 5246:                                          // Intimidating Shout
-            if (eff != EFFECT_INDEX_0 && target == m_targets.getUnitTarget())
-                return false;
-            break;
-        case 9082:                                          // Create Containment Coffer
-            if (!target->HasAura(9032))
-                return false;
-            break;
-        // Exceptions for Nefarian class calls
-        // as it is not possible to filter out targets based on their class from data in spells template (like spell family masks for example)
-        case 23397:                                         // Berserk
-            if (target->getClass() != CLASS_WARRIOR)
-                return false;
-            break;
-        case 23398:                                         // Involuntary Transformation
-            if (target->getClass() != CLASS_DRUID)
-                return false;
-            break;
-        case 23401:                                         // Corrupted Healing
-            if (target->getClass() != CLASS_PRIEST)
-                return false;
-            break;
-        case 23410:                                         // Wild Magic
-            if (target->getClass() != CLASS_MAGE)
-                return false;
-            break;
-        case 23414:                                         // Paralyze
-            if (target->getClass() != CLASS_ROGUE)
-                return false;
-            break;
-        case 23418:                                         // Siphon Blessing
-            if (target->getClass() != CLASS_PALADIN)
-                return false;
-            break;
-        case 23425:                                         // Corrupted Totems
-            if (target->getClass() != CLASS_SHAMAN)
-                return false;
-            break;
-        case 23427:                                         // Summon Infernals
-            if (target->getClass() != CLASS_WARLOCK)
-                return false;
-            break;
-        case 23436:                                         // Corrupted Weapon
-            if (target->getClass() != CLASS_HUNTER)
-                return false;
-            break;
-        case 25676:                                         // Drain Mana
-        case 25754:
-        case 26457:
-        case 26559:
-            if (target->GetPowerType() != POWER_MANA)
-                return false;
-            break;
-        case 28062:                                         // Positive Charge
-            if (!target->HasAura(29660))                    // Only deal damage if target has Negative Charge
-                return false;
-            break;
-        case 28085:                                         // Negative Charge
-            if (!target->HasAura(29659))                    // Only deal damage if target has Positive Charge
-                return false;
-            break;
-        default:
-            break;
-    }
-    return true;
-}
-
 bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckException exception) const
 {
     // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
@@ -6402,7 +6336,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
 
             // unselectable targets skipped in all cases except targets with TARGET_SCRIPT
             if (!m_ignoreUnselectableTarget && target != m_targets.getUnitTarget() &&
-                target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                    target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
                 return false;
         }
 
@@ -6433,6 +6367,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
         {
             case SPELL_EFFECT_SUMMON_PLAYER:                    // from anywhere
                 break;
+                // fall through
             case SPELL_EFFECT_RESURRECT_NEW:
                 // player far away, maybe his corpse near?
                 if (target != m_caster && !target->IsWithinLOSInMap(m_caster, true))
@@ -6476,7 +6411,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
     if (m_spellInfo->MaxTargetLevel && target->getLevel() > m_spellInfo->MaxTargetLevel)
         return false;
 
-    return CheckTargetScript(target, eff);
+    return OnCheckTarget(target, eff);
 }
 
 bool Spell::IsNeedSendToClient() const
@@ -7009,7 +6944,22 @@ bool Spell::IsEffectWithImplementedMultiplier(uint32 effectId) const
     }
 }
 
-void Spell::OnSuccessfulSpellStart()
+void Spell::StopCast(SpellCastResult castResult)
+{
+    SendCastResult(castResult);
+    SendInterrupted(castResult);
+    finish(false);
+    m_caster->DecreaseCastCounter();
+    SetExecutedCurrently(false);
+}
+
+void Spell::OnInit()
+{
+    if (SpellScript* script = GetSpellScript())
+        script->OnInit(this);
+}
+
+void Spell::OnSuccessfulStart()
 {
     switch (m_spellInfo->Id)
     {
@@ -7024,10 +6974,14 @@ void Spell::OnSuccessfulSpellStart()
             m_powerCost = 0;
             break;
         }
+        default:
+            if (SpellScript* script = GetSpellScript())
+                script->OnSuccessfulStart(this);
+            break;
     }
 }
 
-void Spell::OnSuccessfulSpellFinish()
+void Spell::OnSuccessfulFinish()
 {
     switch (m_spellInfo->Id)
     {
@@ -7045,6 +6999,10 @@ void Spell::OnSuccessfulSpellFinish()
             m_caster->RemoveAuraStack(parentSpell);
             break;
         }
+        default:
+            if (SpellScript* script = GetSpellScript())
+                script->OnSuccessfulFinish(this);
+            break;
     }
 }
 
@@ -7102,16 +7060,131 @@ SpellCastResult Spell::OnCheckCast(bool strict)
                 return SPELL_FAILED_TOO_MANY_OF_ITEM;
             break;
         }
+        default:
+            if (SpellScript* script = GetSpellScript())
+                return script->OnCheckCast(this, strict);
+            break;
     }
 
     return SPELL_CAST_OK;
 }
 
-void Spell::StopCast(SpellCastResult castResult)
+void Spell::OnEffectExecute(SpellEffectIndex effIndex)
 {
-    SendCastResult(castResult);
-    SendInterrupted(castResult);
-    finish(false);
-    m_caster->DecreaseCastCounter();
-    SetExecutedCurrently(false);
+    if (SpellScript* script = GetSpellScript())
+        script->OnEffectExecute(this, effIndex);
+}
+
+void Spell::OnDestTarget() // TODO
+{
+    if (SpellScript* script = GetSpellScript())
+        script->OnDestTarget(this);
+}
+
+bool Spell::OnCheckTarget(GameObject* target, SpellEffectIndex eff) const
+{
+    switch (m_spellInfo->Id)
+    {
+        case 38054: // Random rocket missile
+            if (target->GetLootState() == GO_ACTIVATED) // can only hit unused ones
+                return false;
+            break;
+        default:
+            if (SpellScript* script = GetSpellScript())
+                return script->OnCheckTarget(this, target, eff);
+            break;
+    }
+    return true;
+}
+
+bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
+{
+    switch (m_spellInfo->Id)
+    {
+        case 5246:                                          // Intimidating Shout
+            if (eff != EFFECT_INDEX_0 && target == m_targets.getUnitTarget())
+                return false;
+            break;
+        case 9082:                                          // Create Containment Coffer
+            if (!target->HasAura(9032))
+                return false;
+            break;
+            // Exceptions for Nefarian class calls
+            // as it is not possible to filter out targets based on their class from data in spells template (like spell family masks for example)
+        case 23397:                                         // Berserk
+            if (target->getClass() != CLASS_WARRIOR)
+                return false;
+            break;
+        case 23398:                                         // Involuntary Transformation
+            if (target->getClass() != CLASS_DRUID)
+                return false;
+            break;
+        case 23401:                                         // Corrupted Healing
+            if (target->getClass() != CLASS_PRIEST)
+                return false;
+            break;
+        case 23410:                                         // Wild Magic
+            if (target->getClass() != CLASS_MAGE)
+                return false;
+            break;
+        case 23414:                                         // Paralyze
+            if (target->getClass() != CLASS_ROGUE)
+                return false;
+            break;
+        case 23418:                                         // Siphon Blessing
+            if (target->getClass() != CLASS_PALADIN)
+                return false;
+            break;
+        case 23425:                                         // Corrupted Totems
+            if (target->getClass() != CLASS_SHAMAN)
+                return false;
+            break;
+        case 23427:                                         // Summon Infernals
+            if (target->getClass() != CLASS_WARLOCK)
+                return false;
+            break;
+        case 23436:                                         // Corrupted Weapon
+            if (target->getClass() != CLASS_HUNTER)
+                return false;
+            break;
+        case 25676:                                         // Drain Mana
+        case 25754:
+        case 26457:
+        case 26559:
+            if (target->GetPowerType() != POWER_MANA)
+                return false;
+            break;
+        case 28062:                                         // Positive Charge
+            if (!target->HasAura(29660))                    // Only deal damage if target has Negative Charge
+                return false;
+            break;
+        case 28085:                                         // Negative Charge
+            if (!target->HasAura(29659))                    // Only deal damage if target has Positive Charge
+                return false;
+            break;
+        default:
+            if (SpellScript* script = GetSpellScript())
+                return script->OnCheckTarget(this, target, eff);
+            break;
+    }
+
+    return true;
+}
+
+void Spell::OnCast()
+{
+    if (SpellScript* script = GetSpellScript())
+        return script->OnCast(this);
+}
+
+void Spell::OnHit()
+{
+    if (SpellScript* script = GetSpellScript())
+        return script->OnHit(this);
+}
+
+void Spell::OnAfterHit()
+{
+    if (SpellScript* script = GetSpellScript())
+        return script->OnAfterHit(this);
 }

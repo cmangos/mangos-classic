@@ -2052,6 +2052,13 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
     else
         *resist = 0;
 
+    // Reflect damage spells (not cast any damage spell in aura lookup)
+    uint32 reflectSpell = 0;
+    int32  reflectDamage = 0;
+    Aura*  reflectTriggeredBy = nullptr;                       // expected as not expired at reflect as in current cases
+    // Death Prevention Aura
+    Aura* preventDeathAura = nullptr;
+
     // full absorb cases (by chance)
     /* none cases, but preserve for better backporting conflict resolve
     AuraList const& vAbsorb = GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
@@ -2094,6 +2101,11 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
         if (RemainingDamage < currentAbsorb)
             currentAbsorb = RemainingDamage;
 
+        bool preventedDeath = false;
+        (*i)->OnAbsorb(currentAbsorb, reflectSpell, reflectDamage, preventedDeath);
+        if (preventedDeath)
+            preventDeathAura = (*i);
+
         RemainingDamage -= currentAbsorb;
 
         // Reduce shield amount
@@ -2118,6 +2130,12 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
             else
                 ++i;
         }
+    }
+
+    // Cast back reflect damage spell if caster exists
+    if (canReflect && reflectSpell && caster)
+    {
+        CastCustomSpell(caster, reflectSpell, &reflectDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, reflectTriggeredBy);
     }
 
     // absorb by mana cost
@@ -2148,6 +2166,8 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
             int32 manaReduction = int32(currentAbsorb * manaMultiplier);
             ApplyPowerMod(POWER_MANA, manaReduction, false);
         }
+
+        (*i)->OnManaAbsorb(currentAbsorb);
 
         (*i)->GetModifier()->m_amount -= currentAbsorb;
         if ((*i)->GetModifier()->m_amount <= 0)
@@ -2232,6 +2252,12 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
             CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
             Unit::DealDamage(caster, caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
         }
+    }
+
+    // Apply death prevention spells effects
+    if (preventDeathAura && RemainingDamage >= (int32)GetHealth())
+    {
+        preventDeathAura->OnAuraDeathPrevention(RemainingDamage);
     }
 
     *absorb = damage - RemainingDamage - *resist;
@@ -4554,9 +4580,20 @@ void Unit::RemoveSingleAuraFromSpellAuraHolder(uint32 spellId, SpellEffectIndex 
     }
 }
 
-void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount, ObjectGuid casterGuid, Unit* /*dispeller*/)
+void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 dispellingSpellId, uint32 stackAmount, ObjectGuid casterGuid, Unit* dispeller)
 {
-    RemoveAuraHolderFromStack(spellId, stackAmount, casterGuid, AURA_REMOVE_BY_DISPEL);
+    SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellId);
+    for (SpellAuraHolderMap::iterator iter = spair.first; iter != spair.second; ++iter)
+    {
+        if (!casterGuid || iter->second->GetCasterGuid() == casterGuid)
+        {
+            uint32 originalStacks = iter->second->GetStackAmount();
+            if (iter->second->ModStackAmount(-int32(stackAmount), nullptr))
+                RemoveSpellAuraHolder(iter->second, AURA_REMOVE_BY_DISPEL);
+            iter->second->OnDispel(dispeller, dispellingSpellId, originalStacks);
+            break;
+        }
+    }
 }
 
 void Unit::RemoveAurasDueToSpellByCancel(uint32 spellId)
