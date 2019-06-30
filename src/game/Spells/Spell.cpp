@@ -4606,24 +4606,20 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     if (!m_IsTriggeredSpell)
     {
+        SpellCastResult castResult;
         if (!m_triggeredByAuraSpell)
         {
-            SpellCastResult castResult = CheckRange(strict);
+            castResult = CheckRange(strict);
             if (castResult != SPELL_CAST_OK)
                 return castResult;
         }
-    }
 
-    if (!m_IsTriggeredSpell)
-    {
-        SpellCastResult castResult = CheckPower();
+        castResult = CheckPower();
         if (castResult != SPELL_CAST_OK)
             return castResult;
-    }
 
-    if (!m_IsTriggeredSpell)                                // triggered spell not affected by stun/etc
-    {
-        SpellCastResult castResult = CheckCasterAuras();
+        // triggered spell not affected by stun/etc
+        castResult = CheckCasterAuras();
         if (castResult != SPELL_CAST_OK)
             return castResult;
     }
