@@ -555,7 +555,7 @@ void ObjectMgr::LoadCreatureTemplates()
 
         if (cInfo->visibilityDistanceType >= VisibilityDistanceType::Max)
         {
-            sLog.outErrorDb("sql.sql", "Creature (Entry: %u) has invalid visibilityDistanceType (%u) defined in `creature_template`.", cInfo->Entry, AsUnderlyingType(cInfo->visibilityDistanceType));
+            sLog.outErrorDb("Creature (Entry: %u) has invalid visibilityDistanceType (%u) defined in `creature_template`.", cInfo->Entry, AsUnderlyingType(cInfo->visibilityDistanceType));
             const_cast<CreatureInfo*>(cInfo)->visibilityDistanceType = VisibilityDistanceType::Normal;
         }
 
