@@ -249,11 +249,20 @@ bool AccountMgr::CheckPassword(uint32 accid, std::string passwd) const
     normalizeString(passwd);
     normalizeString(username);
 
-    QueryResult* result = LoginDatabase.PQuery("SELECT 1 FROM account WHERE id='%u' AND sha_pass_hash='%s'", accid, CalculateShaPassHash(username, passwd).c_str());
+    QueryResult* result = LoginDatabase.PQuery("SELECT s, v FROM account WHERE id='%u'", accid);
     if (result)
     {
+        Field* fields = result->Fetch();
+        SRP6 srp;
+
+        srp.CalculateVerifier(CalculateShaPassHash(username, passwd), fields[0].GetCppString().c_str());
+        if (srp.ProofVerifier(fields[1].GetCppString()))
+        {
+            delete result;
+            return true;
+        }
+
         delete result;
-        return true;
     }
 
     return false;
