@@ -49,16 +49,15 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
         return AOR_NAME_ALREADY_EXIST;                       // username does already exist
     }
 
-    std::string sha_pass_hash = CalculateShaPassHash(username, password);
-
     SRP6 srp;
-    srp.CalculateVerifier(sha_pass_hash);
+
+    srp.CalculateVerifier(CalculateShaPassHash(username, password));
     const char* s_hex = srp.GetSalt().AsHexStr();
     const char* v_hex = srp.GetVerifier().AsHexStr();
 
     bool update_sv = LoginDatabase.PExecute(
-        "INSERT INTO account(username,sha_pass_hash,v,s,joindate) VALUES('%s','%s','%s','%s',NOW())",
-            username.c_str(), sha_pass_hash.c_str(), v_hex, s_hex);
+        "INSERT INTO account(username,v,s,joindate) VALUES('%s','%s','%s',NOW())",
+            username.c_str(), v_hex, s_hex);
 
     OPENSSL_free((void*)s_hex);
     OPENSSL_free((void*)v_hex);
@@ -130,10 +129,9 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
     normalizeString(new_uname);
     normalizeString(new_passwd);
 
-    std::string sha_pass_hash = CalculateShaPassHash(new_uname, new_passwd);
-
     SRP6 srp;
-    srp.CalculateVerifier(sha_pass_hash);
+
+    srp.CalculateVerifier(CalculateShaPassHash(new_uname, new_passwd));
 
     std::string safe_new_uname = new_uname;
     LoginDatabase.escape_string(safe_new_uname);
@@ -142,8 +140,8 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
     const char* v_hex = srp.GetVerifier().AsHexStr();
 
     bool update_sv = LoginDatabase.PExecute(
-        "UPDATE account SET v='%s',s='%s',username='%s',sha_pass_hash='%s' WHERE id='%u'",
-            v_hex, s_hex, safe_new_uname.c_str(), sha_pass_hash.c_str(), accid);
+        "UPDATE account SET v='%s',s='%s',username='%s' WHERE id='%u'",
+            v_hex, s_hex, safe_new_uname.c_str(), accid);
 
     OPENSSL_free((void*)s_hex);
     OPENSSL_free((void*)v_hex);
@@ -167,17 +165,16 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
     normalizeString(username);
     normalizeString(new_passwd);
 
-    std::string sha_pass_hash = CalculateShaPassHash(username, new_passwd);
-
     SRP6 srp;
-    srp.CalculateVerifier(sha_pass_hash);
+
+    srp.CalculateVerifier(CalculateShaPassHash(username, new_passwd));
 
     const char* s_hex = srp.GetSalt().AsHexStr();
     const char* v_hex = srp.GetVerifier().AsHexStr();
 
     bool update_sv = LoginDatabase.PExecute(
-        "UPDATE account SET v='%s', s='%s', sha_pass_hash='%s' WHERE id='%u'",
-            v_hex, s_hex, sha_pass_hash.c_str(), accid);
+        "UPDATE account SET v='%s', s='%s' WHERE id='%u'",
+            v_hex, s_hex, accid);
 
     OPENSSL_free((void*)s_hex);
     OPENSSL_free((void*)v_hex);
