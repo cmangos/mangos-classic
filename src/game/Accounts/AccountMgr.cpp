@@ -24,6 +24,7 @@
 #include "Policies/Singleton.h"
 #include "Util.h"
 #include "Auth/Sha1.h"
+#include "SRP6/SRP6.h"
 
 extern DatabaseType LoginDatabase;
 
@@ -48,9 +49,19 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
         return AOR_NAME_ALREADY_EXIST;                       // username does already exist
     }
 
-    if (!LoginDatabase.PExecute("INSERT INTO account(username,sha_pass_hash,joindate) VALUES('%s','%s',NOW())", username.c_str(), CalculateShaPassHash(username, password).c_str()))
+    std::string sha_pass_hash = CalculateShaPassHash(username, password);
+
+    SRP6 srp;
+    srp.CalculateVerifier(sha_pass_hash);
+
+    bool update_sv = LoginDatabase.PExecute(
+        "INSERT INTO account(username,sha_pass_hash,v,s,joindate) VALUES('%s','%s','%s','%s',NOW())",
+            username.c_str(), sha_pass_hash.c_str(), srp.GetVerifier(), srp.GetSalt());
+
+    if (!update_sv)
         return AOR_DB_INTERNAL_ERROR;                       // unexpected error
-    LoginDatabase.Execute("INSERT INTO realmcharacters (realmid, acctid, numchars) SELECT realmlist.id, account.id, 0 FROM realmlist,account LEFT JOIN realmcharacters ON acctid=account.id WHERE acctid IS NULL");
+    LoginDatabase.Execute(
+        "INSERT INTO realmcharacters (realmid, acctid, numchars) SELECT realmlist.id, account.id, 0 FROM realmlist,account LEFT JOIN realmcharacters ON acctid=account.id WHERE acctid IS NULL");
 
     return AOR_OK;                                          // everything's fine
 }
@@ -114,11 +125,19 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
     normalizeString(new_uname);
     normalizeString(new_passwd);
 
+    std::string sha_pass_hash = CalculateShaPassHash(new_uname, new_passwd);
+
+    SRP6 srp;
+    srp.CalculateVerifier(sha_pass_hash);
+
     std::string safe_new_uname = new_uname;
     LoginDatabase.escape_string(safe_new_uname);
 
-    if (!LoginDatabase.PExecute("UPDATE account SET v='0',s='0',username='%s',sha_pass_hash='%s' WHERE id='%u'", safe_new_uname.c_str(),
-                                CalculateShaPassHash(new_uname, new_passwd).c_str(), accid))
+    bool update_sv = LoginDatabase.PExecute(
+        "UPDATE account SET v='%s',s='%s',username='%s',sha_pass_hash='%s' WHERE id='%u'",
+            srp.GetVerifier(), srp.GetSalt(), safe_new_uname.c_str(), sha_pass_hash.c_str(), accid);
+
+    if (!update_sv)
         return AOR_DB_INTERNAL_ERROR;                       // unexpected error
 
     return AOR_OK;
@@ -137,9 +156,17 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
     normalizeString(username);
     normalizeString(new_passwd);
 
+    std::string sha_pass_hash = CalculateShaPassHash(username, new_passwd);
+
+    SRP6 srp;
+    srp.CalculateVerifier(sha_pass_hash);
+
+    bool update_sv = LoginDatabase.PExecute(
+        "UPDATE account SET v='%s', s='%s', sha_pass_hash='%s' WHERE id='%u'",
+            srp.GetVerifier(), srp.GetSalt(), sha_pass_hash.c_str(), accid);
+
     // also reset s and v to force update at next realmd login
-    if (!LoginDatabase.PExecute("UPDATE account SET v='0', s='0', sha_pass_hash='%s' WHERE id='%u'",
-                                CalculateShaPassHash(username, new_passwd).c_str(), accid))
+    if (!update_sv)
         return AOR_DB_INTERNAL_ERROR;                       // unexpected error
 
     return AOR_OK;
