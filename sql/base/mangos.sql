@@ -1261,9 +1261,9 @@ CREATE TABLE `creature_template` (
   `TrainerTemplateId` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `VendorTemplateId` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `GossipMenuId` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `VisibilityDistanceType` TINYINT NOT NULL DEFAULT '0',
   `EquipmentTemplateId` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `Civilian` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `VisibilityDistanceType` TINYINT NOT NULL DEFAULT '0',
   `AIName` char(64) NOT NULL DEFAULT '',
   `ScriptName` char(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`entry`)
