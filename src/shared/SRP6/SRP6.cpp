@@ -25,16 +25,68 @@ SRP6::SRP6()
 {
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
-    v_hex = NULL;
-    s_hex = NULL;
 }
 
-SRP6::~SRP6()
+void SRP6::CalculateHostPublicEphemeral(void)
 {
-    if (v_hex != NULL)
-        OPENSSL_free((void*)v_hex);
-    if (s_hex != NULL)
-        OPENSSL_free((void*)s_hex);
+    b.SetRand(19 * 8);
+    BigNumber gmod = g.ModExp(b, N);
+    B = ((v * 3) + gmod) % N;
+
+    MANGOS_ASSERT(gmod.GetNumBytes() <= 32);
+}
+
+void SRP6::CalculateProof(std::string username)
+{
+    uint8 hash[20];
+
+    Sha1Hash sha;
+    sha.Initialize();
+    sha.UpdateBigNumbers(&N, nullptr);
+    sha.Finalize();
+    memcpy(hash, sha.GetDigest(), 20);
+    sha.Initialize();
+    sha.UpdateBigNumbers(&g, nullptr);
+    sha.Finalize();
+    for (int i = 0; i < 20; ++i)
+    {
+        hash[i] ^= sha.GetDigest()[i];
+    }
+    BigNumber t3;
+    t3.SetBinary(hash, 20);
+
+    sha.Initialize();
+    sha.UpdateData(username);
+    sha.Finalize();
+    uint8 t4[SHA_DIGEST_LENGTH];
+    memcpy(t4, sha.GetDigest(), SHA_DIGEST_LENGTH);
+
+    sha.Initialize();
+    sha.UpdateBigNumbers(&t3, nullptr);
+    sha.UpdateData(t4, SHA_DIGEST_LENGTH);
+    sha.UpdateBigNumbers(&s, &A, &B, &K, nullptr);
+    sha.Finalize();
+    M.SetBinary(sha.GetDigest(), 20);
+}
+
+bool SRP6::CalculateSessionKey(uint8* lp_A, int l)
+{
+    A.SetBinary(lp_A, l);
+
+    // SRP safeguard: abort if A==0
+    if (A.isZero())
+        return false;
+
+    if ((A % N).isZero())
+        return false;
+
+    Sha1Hash sha;
+    sha.UpdateBigNumbers(&A, &B, nullptr);
+    sha.Finalize();
+    u.SetBinary(sha.GetDigest(), 20);
+    S = (A * (v.ModExp(u, N))).ModExp(b, N);
+
+    return true;
 }
 
 void SRP6::CalculateVerifier(const std::string& rI)
@@ -59,6 +111,51 @@ void SRP6::CalculateVerifier(const std::string& rI)
     BigNumber x;
     x.SetBinary(sha.GetDigest(), Sha1Hash::GetLength());
     v = g.ModExp(x, N);
-    v_hex = v.AsHexStr();
-    s_hex = s.AsHexStr();
+}
+
+void SRP6::HashSessionKey(void)
+{
+    uint8 t[32];
+    uint8 t1[16];
+    uint8 vK[40];
+    memcpy(t, S.AsByteArray(32), 32);
+    for (int i = 0; i < 16; ++i)
+    {
+        t1[i] = t[i * 2];
+    }
+    Sha1Hash sha;
+    sha.Initialize();
+    sha.UpdateData(t1, 16);
+    sha.Finalize();
+    for (int i = 0; i < 20; ++i)
+    {
+        vK[i * 2] = sha.GetDigest()[i];
+    }
+    for (int i = 0; i < 16; ++i)
+    {
+        t1[i] = t[i * 2 + 1];
+    }
+    sha.Initialize();
+    sha.UpdateData(t1, 16);
+    sha.Finalize();
+    for (int i = 0; i < 20; ++i)
+    {
+        vK[i * 2 + 1] = sha.GetDigest()[i];
+    }
+    K.SetBinary(vK, 40);
+}
+
+bool SRP6::Proof(uint8* lp_M, int l)
+{
+    if (!memcmp(M.AsByteArray(), lp_M, l))
+        return false;
+
+    return true;
+}
+
+void SRP6::Finalize(Sha1Hash& sha)
+{
+    sha.Initialize();
+    sha.UpdateBigNumbers(&A, &M, &K, nullptr);
+    sha.Finalize();
 }
