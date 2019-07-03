@@ -53,10 +53,15 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
 
     SRP6 srp;
     srp.CalculateVerifier(sha_pass_hash);
+    const char* s_hex = srp.GetSalt().AsHexStr();
+    const char* v_hex = srp.GetVerifier().AsHexStr();
 
     bool update_sv = LoginDatabase.PExecute(
         "INSERT INTO account(username,sha_pass_hash,v,s,joindate) VALUES('%s','%s','%s','%s',NOW())",
-            username.c_str(), sha_pass_hash.c_str(), srp.GetVerifier(), srp.GetSalt());
+            username.c_str(), sha_pass_hash.c_str(), v_hex, s_hex);
+
+    OPENSSL_free((void*)s_hex);
+    OPENSSL_free((void*)v_hex);
 
     if (!update_sv)
         return AOR_DB_INTERNAL_ERROR;                       // unexpected error
@@ -133,9 +138,15 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
     std::string safe_new_uname = new_uname;
     LoginDatabase.escape_string(safe_new_uname);
 
+    const char* s_hex = srp.GetSalt().AsHexStr();
+    const char* v_hex = srp.GetVerifier().AsHexStr();
+
     bool update_sv = LoginDatabase.PExecute(
         "UPDATE account SET v='%s',s='%s',username='%s',sha_pass_hash='%s' WHERE id='%u'",
-            srp.GetVerifier(), srp.GetSalt(), safe_new_uname.c_str(), sha_pass_hash.c_str(), accid);
+            v_hex, s_hex, safe_new_uname.c_str(), sha_pass_hash.c_str(), accid);
+
+    OPENSSL_free((void*)s_hex);
+    OPENSSL_free((void*)v_hex);
 
     if (!update_sv)
         return AOR_DB_INTERNAL_ERROR;                       // unexpected error
@@ -161,9 +172,15 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
     SRP6 srp;
     srp.CalculateVerifier(sha_pass_hash);
 
+    const char* s_hex = srp.GetSalt().AsHexStr();
+    const char* v_hex = srp.GetVerifier().AsHexStr();
+
     bool update_sv = LoginDatabase.PExecute(
         "UPDATE account SET v='%s', s='%s', sha_pass_hash='%s' WHERE id='%u'",
-            srp.GetVerifier(), srp.GetSalt(), sha_pass_hash.c_str(), accid);
+            v_hex, s_hex, sha_pass_hash.c_str(), accid);
+
+    OPENSSL_free((void*)s_hex);
+    OPENSSL_free((void*)v_hex);
 
     // also reset s and v to force update at next realmd login
     if (!update_sv)

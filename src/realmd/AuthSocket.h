@@ -26,6 +26,7 @@
 #include "Common.h"
 #include "Auth/BigNumber.h"
 #include "Auth/Sha1.h"
+#include "SRP6/SRP6.h"
 #include "ByteBuffer.h"
 
 #include "Network/Socket.hpp"
@@ -59,8 +60,6 @@ class AuthSocket : public MaNGOS::Socket
         bool _HandleXferCancel();
         bool _HandleXferAccept();
 
-        void _SetVSFields(const std::string& rI);
-
     private:
         enum eStatus
         {
@@ -72,9 +71,7 @@ class AuthSocket : public MaNGOS::Socket
             STATUS_CLOSED
         };
 
-        BigNumber N, s, g, v;
-        BigNumber b, B;
-        BigNumber K;
+        SRP6 srp;
         BigNumber _reconnectProof;
 
         eStatus _status;
