@@ -235,7 +235,7 @@ class instance_stratholme : public ScriptedInstance
         void OnCreatureEvade(Creature* pCreature);
         void OnCreatureDeath(Creature* pCreature) override;
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
     protected:
         bool StartSlaugtherSquare();

@@ -121,7 +121,7 @@ class instance_sunken_temple : public ScriptedInstance
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
         bool ProcessStatueEvent(uint32 uiEventId);
 
