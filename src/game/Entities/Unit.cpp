@@ -7817,7 +7817,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             break;
         }
         case MOVE_RUN_BACK:
-            return;
+            break;
         case MOVE_SWIM:
         {
             main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SWIM_SPEED);
