@@ -584,7 +584,7 @@ void UnitAI::DoResetThreat()
 
 bool UnitAI::CanExecuteCombatAction()
 {
-    return m_unit->CanReactInCombat() && !m_unit->hasUnitState(UNIT_STAT_DONT_TURN | UNIT_STAT_SEEKING_ASSISTANCE | UNIT_STAT_CHANNELING) && !m_unit->IsNonMeleeSpellCasted(false) && !m_combatScriptHappening;
+    return m_unit->CanReactInCombat() && !m_unit->hasUnitState(UNIT_STAT_DONT_TURN | UNIT_STAT_SEEKING_ASSISTANCE) && !m_unit->IsNonMeleeSpellCasted(false) && !m_combatScriptHappening;
 }
 
 void UnitAI::SetMeleeEnabled(bool state)

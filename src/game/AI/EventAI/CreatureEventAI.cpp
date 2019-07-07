@@ -1629,15 +1629,15 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
 
     Unit* victim = m_creature->getVictim();
     // Melee Auto-Attack
-    if (Combat && victim && CanExecuteCombatAction())
+    if (Combat && victim)
     {
-        if (m_rangedMode)
+        if (m_rangedMode && CanExecuteCombatAction())
         {
             if (m_currentRangedMode && m_rangedModeSetting == TYPE_PROXIMITY && m_creature->CanReachWithMeleeAttack(victim))
                 SetCurrentRangedMode(false);
         }
 
-        if (m_meleeEnabled && !m_currentRangedMode)
+        if (!m_currentRangedMode)
             DoMeleeAttackIfReady();
     }
 }
