@@ -1661,58 +1661,69 @@ void WorldObject::AddObjectToRemoveList()
     GetMap()->AddObjectToRemoveList(this);
 }
 
-Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject, bool setRun, uint32 pathId, uint32 faction, bool spawnCounting, bool forcedOnTop)
+Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
 {
-    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(id);
+    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(settings.entry);
     if (!cinfo)
     {
-        sLog.outErrorDb("WorldObject::SummonCreature: Creature (Entry: %u) not existed for summoner: %s. ", id, GetGuidStr().c_str());
+        sLog.outErrorDb("WorldObject::SummonCreature: Creature (Entry: %u) not existed for summoner: %s. ", settings.entry, settings.spawner ? settings.spawner->GetGuidStr().c_str() : ObjectGuid().GetString().data());
         return nullptr;
     }
 
-    TemporarySpawn* pCreature = new TemporarySpawn(GetObjectGuid());
+    TemporarySpawn* creature = new TemporarySpawn(settings.spawner ? settings.spawner->GetObjectGuid() : ObjectGuid());
 
-    CreatureCreatePos pos(GetMap(), x, y, z, ang);
+    CreatureCreatePos pos(map, settings.x, settings.y, settings.z, settings.ori);
 
-    if (x == 0.0f && y == 0.0f && z == 0.0f)
+    if (settings.x == 0.0f && settings.y == 0.0f && settings.z == 0.0f && settings.spawner)
     {
-        float dist = forcedOnTop ? 0.0f : CONTACT_DISTANCE;
-        pos = CreatureCreatePos(this, GetOrientation(), dist, ang);
+        float dist = settings.forcedOnTop ? 0.0f : CONTACT_DISTANCE;
+        pos = CreatureCreatePos(settings.spawner, settings.spawner->GetOrientation(), dist, settings.ori);
     }
 
-    if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
+    if (!creature->Create(map->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
     {
-        delete pCreature;
+        delete creature;
         return nullptr;
     }
 
-    pCreature->SetRespawnCoord(pos);
+    creature->SetRespawnCoord(pos);
 
     // Set run or walk before any other movement starts
-    pCreature->SetWalk(!setRun);
+    creature->SetWalk(!settings.setRun);
 
     // Active state set before added to map
-    pCreature->SetActiveObjectState(asActiveObject);
+    creature->SetActiveObjectState(settings.activeObject);
 
-    if (faction)
-        pCreature->setFaction(faction);
+    if (settings.faction)
+        creature->setFaction(settings.faction);
 
-    if (spawnCounting)
-        pCreature->SetSpawnCounting(true);
+    if (settings.modelId)
+        creature->SetDisplayId(settings.modelId);
 
-    pCreature->GetMotionMaster()->SetDefaultPathId(pathId);
+    if (settings.spawnCounting)
+        creature->SetSpawnCounting(true);
 
-    pCreature->Summon(spwtype, despwtime);                  // Also initializes the AI and MMGen
+    creature->GetMotionMaster()->SetDefaultPathId(settings.pathId);
 
-    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-        ((Creature*)this)->AI()->JustSummoned(pCreature);
+    creature->Summon(settings.spawnType, settings.despawnTime);                  // Also initializes the AI and MMGen
+    if (settings.corpseDespawnTime)
+        creature->SetCorpseDelay(settings.corpseDespawnTime);
+
+    if (settings.spawner && settings.spawner->GetTypeId() == TYPEID_UNIT)
+        if (Creature* spawnerCreature = static_cast<Creature*>(settings.spawner))
+            spawnerCreature->AI()->JustSummoned(creature);
 
     // Creature Linking, Initial load is handled like respawn
-    if (pCreature->IsLinkingEventTrigger())
-        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, pCreature);
+    if (creature->IsLinkingEventTrigger())
+        map->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, creature);
 
     // return the creature therewith the summoner has access to it
-    return pCreature;
+    return creature;
+}
+
+Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject, bool setRun, uint32 pathId, uint32 faction, uint32 modelId, bool spawnCounting, bool forcedOnTop)
+{
+    return WorldObject::SummonCreature(TempSpawnSettings(this, id, x, y, z, ang, spwtype, despwtime, asActiveObject, setRun, pathId, faction, modelId, spawnCounting, forcedOnTop), GetMap());
 }
 
 // how much space should be left in front of/ behind a mob that already uses a space
