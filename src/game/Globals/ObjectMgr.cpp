@@ -48,6 +48,7 @@
 #include "Globals/ObjectAccessor.h"
 #include "Entities/ItemEnchantmentMgr.h"
 #include "Loot/LootMgr.h"
+#include "World/WorldState.h"
 
 #include <limits>
 #include <cstdarg>
@@ -7889,7 +7890,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         case CONDITION_SPAWN_COUNT:
             return source->GetMap()->SpawnedCountForEntry(m_value1) >= m_value2;
         case CONDITION_WORLD_SCRIPT:
-            return false; // Not yet implemented in Classic core but may be needed in the future. Kept for compatibility with TBC/WotLK cores where it was added with World State implementation
+            return sWorldState.IsConditionFulfilled(m_value1, m_value2);
         case CONDITION_GENDER_NPC:
             return ((Creature*)source)->getGender() == m_value1;
         default:

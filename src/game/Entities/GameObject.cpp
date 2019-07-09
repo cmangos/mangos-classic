@@ -41,6 +41,7 @@
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "vmap/GameObjectModel.h"
 #include "Server/SQLStorages.h"
+#include "World/WorldState.h"
 
 GameObject::GameObject() : WorldObject(),
     m_model(nullptr),
@@ -480,6 +481,8 @@ void GameObject::Update(const uint32 diff)
         }
         case GO_JUST_DEACTIVATED:
         {
+            sWorldState.HandleGameObjectRevertState(this);
+
             // If nearby linked trap exists, despawn it
             if (GameObject* linkedTrap = GetLinkedTrap())
             {
@@ -1180,6 +1183,8 @@ void GameObject::Use(Unit* user)
     bool scriptReturnValue = user->GetTypeId() == TYPEID_PLAYER && sScriptDevAIMgr.OnGameObjectUse((Player*)user, this);
     if (!scriptReturnValue)
         GetMap()->ScriptsStart(sGameObjectTemplateScripts, GetEntry(), spellCaster, this);
+
+    sWorldState.HandleGameObjectUse(this, user);
 
     switch (GetGoType())
     {

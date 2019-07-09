@@ -65,6 +65,7 @@
 #include "Entities/CreatureLinkingMgr.h"
 #include "Weather/Weather.h"
 #include "Cinematics/CinematicMgr.h"
+#include "World/WorldState.h"
 
 #include <algorithm>
 #include <mutex>
@@ -1284,6 +1285,10 @@ void World::SetInitialWorldSettings()
     sAuctionBot.Initialize();
     sLog.outString();
 
+    sLog.outString("Loading WorldState");
+    sWorldState.Load();
+    sLog.outString();
+
 #ifdef BUILD_PLAYERBOT
     PlayerbotMgr::SetInitialWorldSettings();
 #endif
@@ -1407,6 +1412,7 @@ void World::Update(uint32 diff)
     sMapMgr.Update(diff);
     sBattleGroundMgr.Update(diff);
     sOutdoorPvPMgr.Update(diff);
+    sWorldState.Update(diff);
 
     ///- Update groups with offline leaders
     if (m_timers[WUPDATE_GROUPS].Passed())
