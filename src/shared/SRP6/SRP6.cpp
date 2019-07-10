@@ -89,18 +89,20 @@ bool SRP6::CalculateSessionKey(uint8* lp_A, int l)
     return true;
 }
 
-void SRP6::CalculateVerifier(const std::string& rI)
+bool SRP6::CalculateVerifier(const std::string& rI)
 {
     BigNumber salt;
     salt.SetRand(s_BYTE_SIZE * 8);
     const char* _salt = salt.AsHexStr();
-    CalculateVerifier(rI, _salt);
+    bool ret = CalculateVerifier(rI, _salt);
     OPENSSL_free((void*)_salt);
+    return ret;
 }
 
-void SRP6::CalculateVerifier(const std::string& rI, const char* salt)
+bool SRP6::CalculateVerifier(const std::string& rI, const char* salt)
 {
-    s.SetHexStr(salt);
+    if (s.SetHexStr(salt) == 0 || s.isZero())
+        return false;
 
     BigNumber I;
     I.SetHexStr(rI.c_str());
@@ -120,6 +122,8 @@ void SRP6::CalculateVerifier(const std::string& rI, const char* salt)
     BigNumber x;
     x.SetBinary(sha.GetDigest(), Sha1Hash::GetLength());
     v = g.ModExp(x, N);
+
+    return true;
 }
 
 void SRP6::HashSessionKey(void)
@@ -182,4 +186,17 @@ void SRP6::Finalize(Sha1Hash& sha)
     sha.Initialize();
     sha.UpdateBigNumbers(&A, &M, &K, nullptr);
     sha.Finalize();
+}
+
+bool SRP6::SetSalt(const char* new_s)
+{
+    if (s.SetHexStr(new_s) == 0 || s.isZero())
+        return false;
+    return true;
+}
+bool SRP6::SetVerifier(const char* new_v)
+{
+    if (v.SetHexStr(new_v) == 0 || v.isZero())
+        return false;
+    return true;
 }

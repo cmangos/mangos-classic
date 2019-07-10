@@ -252,8 +252,10 @@ bool AccountMgr::CheckPassword(uint32 accid, std::string passwd) const
         Field* fields = result->Fetch();
         SRP6 srp;
 
-        srp.CalculateVerifier(CalculateShaPassHash(username, passwd), fields[0].GetCppString().c_str());
-        if (srp.ProofVerifier(fields[1].GetCppString()))
+        bool calcv = srp.CalculateVerifier(
+            CalculateShaPassHash(username, passwd), fields[0].GetCppString().c_str());
+
+        if (calcv && srp.ProofVerifier(fields[1].GetCppString()))
         {
             delete result;
             return true;

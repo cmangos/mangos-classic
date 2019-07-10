@@ -34,7 +34,7 @@ class BigNumber
         void SetDword(uint32);
         void SetQword(uint64);
         void SetBinary(const uint8* bytes, int len);
-        void SetHexStr(const char* str);
+        int SetHexStr(const char* str);
 
         void SetRand(int numbits);
 

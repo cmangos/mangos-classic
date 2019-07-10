@@ -396,7 +396,18 @@ bool AuthSocket::_HandleLogonChallenge()
             else
                 DEBUG_LOG("[AuthChallenge] Account '%s' is not locked to ip", _login.c_str());
 
-            if (!locked)
+            std::string databaseV = fields[4].GetCppString();
+            std::string databaseS = fields[5].GetCppString();
+            bool broken = false;
+
+            if (!srp.SetVerifier(databaseV.c_str()) || !srp.SetSalt(databaseS.c_str()))
+            {
+                pkt << (uint8)WOW_FAIL_FAIL_NOACCESS;
+                DEBUG_LOG("[AuthChallenge] Broken v/s values in database for account %s!", _login.c_str());
+                broken = true;
+            }
+
+            if (!locked && !broken)
             {
                 ///- If the account is banned, reject the logon attempt
                 QueryResult* banresult = LoginDatabase.PQuery("SELECT bandate,unbandate FROM account_banned WHERE "
@@ -418,15 +429,8 @@ bool AuthSocket::_HandleLogonChallenge()
                 }
                 else
                 {
-                    ///- Don't calculate (v, s) if there are already some in the database
-                    std::string databaseV = fields[4].GetCppString();
-                    std::string databaseS = fields[5].GetCppString();
-
                     DEBUG_LOG("database authentication values: v='%s' s='%s'", databaseV.c_str(), databaseS.c_str());
 
-                    // multiply with 2, bytes are stored as hexstring
-                    srp.SetVerifier(databaseV.c_str());
-                    srp.SetSalt(databaseS.c_str());
                     BigNumber s;
                     s.SetHexStr(databaseS.c_str());
 
