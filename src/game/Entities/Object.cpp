@@ -1711,7 +1711,8 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
 
     if (settings.spawner && settings.spawner->GetTypeId() == TYPEID_UNIT)
         if (Creature* spawnerCreature = static_cast<Creature*>(settings.spawner))
-            spawnerCreature->AI()->JustSummoned(creature);
+            if (UnitAI* ai = spawnerCreature->AI())
+                ai->JustSummoned(creature);
 
     // Creature Linking, Initial load is handled like respawn
     if (creature->IsLinkingEventTrigger())
