@@ -4389,7 +4389,7 @@ void Aura::HandleSpiritOfRedemption(bool apply, bool Real)
     }
     // die at aura end
     else
-        target->DealDamage(target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, GetSpellProto(), false);
+        target->CastSpell(nullptr, 27965, TRIGGERED_OLD_TRIGGERED); // Suicide
 }
 
 void Aura::HandleSchoolAbsorb(bool apply, bool Real)

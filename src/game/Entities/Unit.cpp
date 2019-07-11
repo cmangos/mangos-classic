@@ -858,7 +858,7 @@ void Unit::Kill(Unit* victim, DamageEffectType damagetype, SpellEntry const* spe
     }
 
     // Spirit of Redemtion Talent
-    bool damageFromSpiritOfRedemtionTalent = spellProto && spellProto->Id == 27795;
+    bool damageFromSpiritOfRedemtionTalent = spellProto && spellProto->Id == 27965;
     // if talent known but not triggered (check priest class for speedup check)
     Aura* spiritOfRedemtionTalentReady = nullptr;
     if (!damageFromSpiritOfRedemtionTalent &&           // not called from SPELL_AURA_SPIRIT_OF_REDEMPTION
