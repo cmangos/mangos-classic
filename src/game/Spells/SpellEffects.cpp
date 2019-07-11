@@ -1286,7 +1286,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 28697:                                 // Forgiveness
                 {
-                    m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    unitTarget->CastSpell(nullptr, 3617, TRIGGERED_OLD_TRIGGERED); // guessed suicide spell
                     return;
                 }
             }

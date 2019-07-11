@@ -161,10 +161,11 @@ enum UnitStandStateType
     UNIT_STAND_STATE_SIT_MEDIUM_CHAIR  = 5,
     UNIT_STAND_STATE_SIT_HIGH_CHAIR    = 6,
     UNIT_STAND_STATE_DEAD              = 7,
-    UNIT_STAND_STATE_KNEEL             = 8
+    UNIT_STAND_STATE_KNEEL             = 8,
+    UNIT_STAND_STATE_CUSTOM            = 9, // confirm for vanilla - used on Cthun in later sniffs
 };
 
-#define MAX_UNIT_STAND_STATE             9
+#define MAX_UNIT_STAND_STATE             10
 
 /* byte flag value not exist in 1.12, moved/merged in (UNIT_FIELD_BYTES_1,3), in post-1.x it's in (UNIT_FIELD_BYTES_1,2)
 enum UnitStandFlags

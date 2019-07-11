@@ -140,6 +140,7 @@ enum
 
     SPELL_EGAN_BLASTER      = 17368,
     SPELL_SOUL_FREED        = 17370,
+    SPELL_SUMMON_FREED_SOUL = 17408,
 
     NPC_RESTLESS_SOUL      = 11122,
     NPC_FREED_SOUL         = 11136,
@@ -157,7 +158,7 @@ struct mob_restless_soulAI : public ScriptedAI
     void Reset() override
     {
         m_taggerGuid.Clear();
-        m_uiDieTimer = 5000;
+        m_uiDieTimer = 1000;
         m_bIsTagged = false;
     }
 
@@ -173,36 +174,24 @@ struct mob_restless_soulAI : public ScriptedAI
         }
     }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_FREED_SOUL)
-        {
-            pSummoned->CastSpell(pSummoned, SPELL_SOUL_FREED, TRIGGERED_NONE);
-
-            switch (urand(0, 3))
-            {
-                case 0: DoScriptText(SAY_ZAPPED0, pSummoned); break;
-                case 1: DoScriptText(SAY_ZAPPED1, pSummoned); break;
-                case 2: DoScriptText(SAY_ZAPPED2, pSummoned); break;
-                case 3: DoScriptText(SAY_ZAPPED3, pSummoned); break;
-            }
-        }
-    }
-
-    void JustDied(Unit* /*Killer*/) override
-    {
-        if (m_bIsTagged)
-            m_creature->SummonCreature(NPC_FREED_SOUL, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 300000);
-    }
-
     void UpdateAI(const uint32 uiDiff) override
     {
         if (m_bIsTagged)
         {
             if (m_uiDieTimer < uiDiff)
             {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_taggerGuid))
-                    pPlayer->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                m_creature->UpdateEntry(NPC_FREED_SOUL);
+                m_creature->ForcedDespawn(60000);
+                switch (urand(0, 6)) // not always
+                {
+                    case 0: DoScriptText(SAY_ZAPPED0, m_creature); break;
+                    case 1: DoScriptText(SAY_ZAPPED1, m_creature); break;
+                    case 2: DoScriptText(SAY_ZAPPED2, m_creature); break;
+                    case 3: DoScriptText(SAY_ZAPPED3, m_creature); break;
+                    default: break;
+                }
+                if (Player* player = m_creature->GetMap()->GetPlayer(m_taggerGuid))
+                    player->RewardPlayerAndGroupAtEventCredit(NPC_RESTLESS_SOUL, m_creature);
             }
             else
                 m_uiDieTimer -= uiDiff;
@@ -227,37 +216,32 @@ enum
 
 struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
 {
-    mobs_spectral_ghostly_citizenAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    mobs_spectral_ghostly_citizenAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiDieTimer(2000), m_bIsTagged(false) {Reset();}
 
     uint32 m_uiDieTimer;
     bool m_bIsTagged;
 
     void Reset() override
     {
-        m_uiDieTimer = 5000;
-        m_bIsTagged = false;
+
+    }
+
+    void JustRespawned() override
+    {
+        ScriptedAI::JustRespawned();
+        SetCombatScriptStatus(false);
+        SetCombatMovement(true);
     }
 
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
         if (!m_bIsTagged && pSpell->Id == SPELL_EGAN_BLASTER)
-            m_bIsTagged = true;
-    }
-
-    void JustDied(Unit* /*Killer*/) override
-    {
-        if (m_bIsTagged)
         {
-            for (uint32 i = 0; i < 4; ++i)
-            {
-                float x, y, z;
-                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, x, y, z);
-
-                // 100%, 50%, 33%, 25% chance to spawn
-                uint32 j = urand(0, i);
-                if (j == 0)
-                    m_creature->SummonCreature(NPC_RESTLESS_SOUL, x, y, z, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-            }
+            m_bIsTagged = true;
+            m_creature->CastSpell(nullptr, SPELL_SOUL_FREED, TRIGGERED_NONE);
+            SetCombatScriptStatus(true);
+            m_creature->SetTarget(nullptr);
+            SetCombatMovement(false, true);
         }
     }
 
@@ -267,7 +251,10 @@ struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
         {
             if (m_uiDieTimer < uiDiff)
             {
-                m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                m_creature->CastSpell(nullptr, SPELL_SUMMON_FREED_SOUL, TRIGGERED_OLD_TRIGGERED);
+                m_creature->ForcedDespawn();
+                SetCombatScriptStatus(false);
+                SetCombatMovement(true);
             }
             else
                 m_uiDieTimer -= uiDiff;

@@ -57,6 +57,7 @@ enum
     SPELL_GROUND_TREMOR             = 6524,
     SPELL_HAMSTRING                 = 26211,
     SPELL_THRASH                    = 3391,
+    SPELL_SUBMERGE_VISUAL           = 28819,
 
     // Npcs
     // Phase 1 npcs
@@ -193,7 +194,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
             pPortal->ForcedDespawn();
     }
 
-    // Wrapper to kill the eye tentacles before summoning new ones
+    // Wrapper to kill the eye tentacles before summoning new ones - Note: based on sniff I think this is a bad approach
     void DoDespawnEyeTentacles()
     {
         for (GuidList::const_iterator itr = m_lEyeTentaclesList.begin(); itr != m_lEyeTentaclesList.end(); ++itr)
@@ -483,7 +484,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
             m_creature->SummonCreature(NPC_FLESH_TENTACLE, afCthunLocations[i][0], afCthunLocations[i][1], afCthunLocations[i][2], afCthunLocations[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 
-    // Wrapper to kill the eye tentacles before summoning new ones
+    // Wrapper to kill the eye tentacles before summoning new ones - Note: based on sniff I think this is a bad approach
     void DoDespawnEyeTentacles()
     {
         for (GuidList::const_iterator itr = m_lEyeTentaclesList.begin(); itr != m_lEyeTentaclesList.end(); ++itr)
@@ -715,7 +716,10 @@ struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
                         pCthun->SummonCreature(NPC_GIANT_CLAW_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                         // Self kill when a new tentacle is spawned
-                        m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                        SetCombatScriptStatus(true);
+                        m_creature->SetTarget(nullptr);
+                        m_creature->CastSpell(nullptr, SPELL_SUBMERGE_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                        m_creature->ForcedDespawn(1500);
                         return;
                     }
                 }

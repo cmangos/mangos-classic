@@ -1531,6 +1531,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->RemoveAurasDueToSpell(24662);
                     return;
                 }
+                case 28819:                             // Submerge Visual
+                {
+                    if (apply)
+                        target->SetStandState(UNIT_STAND_STATE_CUSTOM);
+                    else
+                        target->SetStandState(UNIT_STAND_STATE_STAND);
+                    return;
+                }
                 case 29266:                                 // Permanent Feign Death
                 {
                     // Unclear what the difference really is between them.

@@ -41,6 +41,8 @@ enum
     // SPELL_SUMMON_ZOMBIE_CHOW      = 28216,               // removed from dbc: triggers 28217 every 6 secs
     // SPELL_CALL_ALL_ZOMBIE_CHOW    = 29681,               // removed from dbc: triggers 29682
     // SPELL_ZOMBIE_CHOW_SEARCH      = 28235,               // removed from dbc: triggers 28236 every 3 secs
+    SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_TARGETED = 28239,    // Add usage
+    SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_AOE = 28404,
 
     NPC_ZOMBIE_CHOW                 = 16360,                // old vanilla summoning spell 28217
 
@@ -151,13 +153,13 @@ struct boss_gluthAI : public ScriptedAI
                     continue;
 
                 // Devour a Zombie
-                if (pZombie->IsWithinDistInMap(m_creature, 15.0f))
+                if (pZombie->IsWithinDistInMap(m_creature, 10.0f))
                 {
                     m_creature->SetFacingToObject(pZombie);
-                    m_creature->DealDamage(pZombie, pZombie->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                 }
             }
         }
+        m_creature->CastSpell(nullptr, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_AOE, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
