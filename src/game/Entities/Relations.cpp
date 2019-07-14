@@ -939,6 +939,22 @@ bool DynamicObject::IsFriend(Unit const* unit) const
     return false;
 }
 
+/////////////////////////////////////////////////
+/// Group: Extension for creatures, player-controlled defaults to unit, creatures check based on friendliness
+///
+/// @note Relations API Tier 2
+///
+/// No client counterpart, since client only deals with player-controlled entities
+/////////////////////////////////////////////////
+bool Creature::IsInGroup(Unit const* other, bool party/* = false*/, bool ignoreCharms/* = false*/) const
+{
+    if (this->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || other->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        return Unit::IsInGroup(other, party, ignoreCharms);
+
+    // Faction-based based on research
+    return this->IsFriend(other);
+}
+
 /*##########################
 ########            ########
 ########   TIER 3   ########
