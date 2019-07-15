@@ -2774,10 +2774,9 @@ void Aura::HandleModThreat(bool apply, bool Real)
     if (level_diff > 0)
         m_modifier.m_amount += multiplier * level_diff;
 
-    if (target->GetTypeId() == TYPEID_PLAYER)
-        for (int8 x = 0; x < MAX_SPELL_SCHOOL; ++x)
-            if (m_modifier.m_miscvalue & int32(1 << x))
-                ApplyPercentModFloatVar(target->m_threatModifier[x], float(m_modifier.m_amount), apply);
+    for (int8 x = 0; x < MAX_SPELL_SCHOOL; ++x)
+        if (m_modifier.m_miscvalue & int32(1 << x))
+            ApplyPercentModFloatVar(target->m_threatModifier[x], float(m_modifier.m_amount), apply);
 }
 
 void Aura::HandleAuraModTotalThreat(bool apply, bool Real)
