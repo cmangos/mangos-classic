@@ -442,6 +442,9 @@ class UnitAI
         void DoCallForHelp(); // TODO
         void DoSeekAssistance(); // TODO
 
+        // Drops all threat to 0%. Does not remove enemies from the threat list
+        void DoResetThreat();
+
         void SetMeleeEnabled(bool state);
 
         // Rough prototype, we might not need such fidelity

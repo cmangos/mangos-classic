@@ -304,24 +304,6 @@ void FillSpellSummary()
     }
 }
 
-void ScriptedAI::DoResetThreat()
-{
-    if (!m_creature->CanHaveThreatList() || m_creature->getThreatManager().isThreatListEmpty())
-    {
-        script_error_log("DoResetThreat called for creature that either cannot have threat list or has empty threat list (m_creature entry = %d)", m_creature->GetEntry());
-        return;
-    }
-
-    ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-    for (auto itr : tList)
-    {
-        Unit* unit = m_creature->GetMap()->GetUnit(itr->getUnitGuid());
-
-        if (unit && m_creature->getThreatManager().getThreat(unit))
-            m_creature->getThreatManager().modifyThreatPercent(unit, -100);
-    }
-}
-
 void ScriptedAI::DoTeleportPlayer(Unit* unit, float x, float y, float z, float ori)
 {
     if (!unit)

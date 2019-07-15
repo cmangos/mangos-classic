@@ -564,6 +564,24 @@ Unit* UnitAI::DoSelectLowestHpFriendly(float range, float minMissing, bool perce
     return pUnit;
 }
 
+void UnitAI::DoResetThreat()
+{
+    if (!m_unit->CanHaveThreatList() || m_unit->getThreatManager().isThreatListEmpty())
+    {
+        script_error_log("DoResetThreat called for creature that either cannot have threat list or has empty threat list (m_creature entry = %d)", m_unit->GetEntry());
+        return;
+    }
+
+    ThreatList const& threatList = m_unit->getThreatManager().getThreatList();
+    for (auto itr : threatList)
+    {
+        Unit* unit = m_unit->GetMap()->GetUnit(itr->getUnitGuid());
+
+        if (unit && m_unit->getThreatManager().getThreat(unit))
+            m_unit->getThreatManager().modifyThreatPercent(unit, -100);
+    }
+}
+
 bool UnitAI::CanExecuteCombatAction()
 {
     return m_unit->CanReactInCombat() && !m_unit->hasUnitState(UNIT_STAT_DONT_TURN | UNIT_STAT_SEEKING_ASSISTANCE | UNIT_STAT_CHANNELING) && !m_unit->IsNonMeleeSpellCasted(false) && !m_combatScriptHappening;
