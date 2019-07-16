@@ -978,7 +978,7 @@ uint32 Player::EnvironmentalDamage(EnvironmentalDamageType type, uint32 damage)
 
     DamageEffectType damageType = SELF_DAMAGE;
 
-    DealDamageMods(this, damage, &absorb, damageType);
+    Unit::DealDamageMods(this, this, damage, &absorb, damageType);
 
     SendEnvironmentalDamageLog(type, damage, absorb, resist);
 
