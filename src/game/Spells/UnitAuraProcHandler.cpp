@@ -345,31 +345,37 @@ void Unit::ProcSkillsAndReactives(bool isVictim, Unit* target, uint32 procFlags,
 
 void Unit::ProcDamageAndSpell(ProcSystemArguments&& data)
 {
-    m_spellProcsHappening = true;
-    data.attacker = this;
     // First lets get skills and reactives out of the way
-    if (data.procFlagsAttacker)
-        ProcSkillsAndReactives(false, data.victim, data.procFlagsAttacker, data.procExtra, data.attType);
+    if (data.attacker)
+    {
+        data.attacker->m_spellProcsHappening = true;
+        if (data.procFlagsAttacker)
+            data.attacker->ProcSkillsAndReactives(false, data.victim, data.procFlagsAttacker, data.procExtra, data.attType);
+    }
     bool canProcVictim = data.victim && data.victim->isAlive() && data.procFlagsVictim;
     if (canProcVictim)
-        data.victim->ProcSkillsAndReactives(true, this, data.procFlagsVictim, data.procExtra, data.attType);
+        data.victim->ProcSkillsAndReactives(true, data.attacker, data.procFlagsVictim, data.procExtra, data.attType);
 
     // Not much to do if no flags are set.
-    if (data.procFlagsAttacker)
-        ProcDamageAndSpellFor(data, false);
+    if (data.attacker && data.procFlagsAttacker)
+        data.attacker->ProcDamageAndSpellFor(data, false);
 
     // Now go on with a victim's events'n'auras
     // Not much to do if no flags are set or there is no victim
     if (canProcVictim)
         data.victim->ProcDamageAndSpellFor(data, true);
-    m_spellProcsHappening = false;
 
-    // Mark auras created during proccing as ready
-    for (SpellAuraHolder* holder : m_delayedSpellAuraHolders)
-        if (holder->GetState() == SPELLAURAHOLDER_STATE_CREATED) // if deleted by some unknown circumstance
-            holder->SetState(SPELLAURAHOLDER_STATE_READY);
+    if (data.attacker)
+    {
+        data.attacker->m_spellProcsHappening = false;
 
-    m_delayedSpellAuraHolders.clear();
+        // Mark auras created during proccing as ready
+        for (SpellAuraHolder* holder : data.attacker->m_delayedSpellAuraHolders)
+            if (holder->GetState() == SPELLAURAHOLDER_STATE_CREATED) // if deleted by some unknown circumstance
+                holder->SetState(SPELLAURAHOLDER_STATE_READY);
+
+        data.attacker->m_delayedSpellAuraHolders.clear();
+    }
 }
 
 ProcExecutionData::ProcExecutionData(ProcSystemArguments& data, bool isVictim) :
