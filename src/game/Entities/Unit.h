@@ -1781,7 +1781,7 @@ class Unit : public WorldObject
         void SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo) const;
         void SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo) const;
         void SendSpellDamageResist(Unit* target, uint32 spellId) const;
-        void SendSpellOrDamageImmune(Unit* target, uint32 spellID) const;
+        static void SendSpellOrDamageImmune(ObjectGuid casterGuid, Unit* target, uint32 spellId);
 
         void SendEnchantmentLog(ObjectGuid targetGuid, uint32 itemEntry, uint32 enchantId) const;
 

@@ -1990,7 +1990,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
                     // ...or immuned
                     if (IsImmuneToDamage(GetSpellSchoolMask(i_spellProto)))
                     {
-                        pVictim->SendSpellOrDamageImmune(this, i_spellProto->Id);
+                        Unit::SendSpellOrDamageImmune(pVictim->GetObjectGuid(), this, i_spellProto->Id);
                         continue;
                     }
 
@@ -5402,14 +5402,14 @@ void Unit::SendSpellDamageResist(Unit* target, uint32 spellId) const
     SendMessageToSet(data, true);
 }
 
-void Unit::SendSpellOrDamageImmune(Unit* target, uint32 spellID) const
+void Unit::SendSpellOrDamageImmune(ObjectGuid casterGuid, Unit* target, uint32 spellID)
 {
     WorldPacket data(SMSG_SPELLORDAMAGE_IMMUNE, (8 + 8 + 4 + 1));
-    data << GetObjectGuid();
+    data << casterGuid;
     data << target->GetObjectGuid();
     data << uint32(spellID);
     data << uint8(0);
-    SendMessageToSet(data, true);
+    target->SendMessageToSet(data, true);
 }
 
 void Unit::SendEnchantmentLog(ObjectGuid targetGuid, uint32 itemEntry, uint32 enchantId) const
