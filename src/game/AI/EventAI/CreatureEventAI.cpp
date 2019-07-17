@@ -1124,7 +1124,7 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 sLog.outErrorEventAI("Event %d ACTION_T_DIE on dead creature. Creature %d", eventId, m_creature->GetEntry());
                 return false;
             }
-            m_creature->DealDamage(m_creature, m_creature->GetMaxHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+            m_creature->Suicide();
             break;
         }
         case ACTION_T_ZONE_COMBAT_PULSE:

@@ -200,7 +200,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
         for (GuidList::const_iterator itr = m_lEyeTentaclesList.begin(); itr != m_lEyeTentaclesList.end(); ++itr)
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                pTemp->DealDamage(pTemp, pTemp->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                pTemp->Suicide();
         }
 
         m_lEyeTentaclesList.clear();
@@ -490,7 +490,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         for (GuidList::const_iterator itr = m_lEyeTentaclesList.begin(); itr != m_lEyeTentaclesList.end(); ++itr)
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                pTemp->DealDamage(pTemp, pTemp->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                pTemp->Suicide();
         }
 
         m_lEyeTentaclesList.clear();

@@ -1525,10 +1525,10 @@ class Unit : public WorldObject
 
         void Suicide();
         static void DealDamageMods(Unit* dealer, Unit* victim, uint32& damage, uint32* absorb, DamageEffectType damagetype, SpellEntry const* spellProto = nullptr);
-        uint32 DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss);
+        static uint32 DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss);
         int32 DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical = false);
-        void Kill(Unit* victim, DamageEffectType damagetype, SpellEntry const* spellProto, bool durabilityLoss, bool duel_hasEnded);
-        void HandleDamageDealt(Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool duel_hasEnded);
+        static void Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEntry const* spellProto, bool durabilityLoss, bool duel_hasEnded);
+        static void HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool duel_hasEnded);
         void InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype);
 
         void PetOwnerKilledUnit(Unit* pVictim);
@@ -2495,7 +2495,7 @@ class Unit : public WorldObject
         Unit* _GetUnit(ObjectGuid guid) const;              // for templated function without include need
 
         // Wrapper called by DealDamage when a creature is killed
-        void JustKilledCreature(Creature* victim, Player* responsiblePlayer);
+        static void JustKilledCreature(Unit* killer, Creature* victim, Player* responsiblePlayer);
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
