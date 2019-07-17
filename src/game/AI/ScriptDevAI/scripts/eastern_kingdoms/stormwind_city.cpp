@@ -137,7 +137,7 @@ struct npc_dashel_stonefistAI : public ScriptedAI
     {
         if (m_uiStartEventTimer)
         {
-            if (m_uiStartEventTimer < uiDiff)
+            if (m_uiStartEventTimer <= uiDiff)
             {
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                 {
@@ -158,7 +158,7 @@ struct npc_dashel_stonefistAI : public ScriptedAI
 
         if (m_uiEndEventTimer)
         {
-            if (m_uiEndEventTimer < uiDiff)
+            if (m_uiEndEventTimer <= uiDiff)
             {
                 DoScriptText(SAY_STONEFIST_3, m_creature);
 
