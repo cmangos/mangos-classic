@@ -629,6 +629,9 @@ void Creature::Update(const uint32 diff)
                 if (AI())
                     AI()->JustRespawned();
 
+                if (InstanceData* mapInstance = GetInstanceData())
+                    mapInstance->OnCreatureRespawn(this);
+
                 if (m_isCreatureLinkingTrigger)
                     GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, this);
 

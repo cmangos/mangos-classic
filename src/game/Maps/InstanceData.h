@@ -90,6 +90,9 @@ class InstanceData
         // called on creature creation
         virtual void OnCreatureCreate(Creature* /*creature*/) {}
 
+        // called on creature spawn/respawn
+        virtual void OnCreatureRespawn(Creature* /*creature*/) {}
+
         // called on creature enter combat
         virtual void OnCreatureEnterCombat(Creature* /*creature*/) {}
 
