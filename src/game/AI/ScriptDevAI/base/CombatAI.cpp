@@ -37,7 +37,7 @@ void CombatAI::UpdateAI(const uint32 diff)
 {
     UpdateTimers(diff, m_creature->isInCombat());
 
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    if (!m_creature->SelectHostileTarget())
         return;
 
     ExecuteActions();
