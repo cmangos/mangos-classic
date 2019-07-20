@@ -307,7 +307,7 @@ UnitAI* GetAI_boss_sapphiron(Creature* pCreature)
     return new boss_sapphironAI(pCreature);
 }
 
-bool GOUse_go_sapphiron_birth(Player* pPlayer, GameObject* pGo)
+bool GOUse_go_sapphiron_birth(Player* /*pPlayer*/, GameObject* pGo)
 {
     ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 

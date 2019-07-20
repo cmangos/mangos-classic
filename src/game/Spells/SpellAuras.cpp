@@ -252,7 +252,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
 
 static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_STUN, SPELL_AURA_NONE };
 
-Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem) :
+Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* /*castItem*/) :
     m_spellmod(nullptr), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
     m_effIndex(eff), m_positive(false), m_isPeriodic(false), m_isAreaAura(false),
     m_isPersistent(false), m_magnetUsed(false), m_spellAuraHolder(holder)
@@ -1986,7 +1986,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         ((Player*)target)->InitDataForForm();
 }
 
-void Aura::HandleAuraTransform(bool apply, bool Real)
+void Aura::HandleAuraTransform(bool apply, bool /*Real*/)
 {
     Unit* target = GetTarget();
     if (apply)
@@ -2770,7 +2770,7 @@ void Aura::HandleAuraModTotalThreat(bool apply, bool Real)
     target->getHostileRefManager().threatTemporaryFade(caster, m_modifier.m_amount, apply);
 }
 
-void Aura::HandleModTaunt(bool apply, bool Real)
+void Aura::HandleModTaunt(bool /*apply*/, bool Real)
 {
     // only at real add/remove aura
     if (!Real)
@@ -2818,7 +2818,7 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool /*apply*/, bool Real)
     GetTarget()->UpdateSpeed(MOVE_SWIM, true);
 }
 
-void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
+void Aura::HandleAuraModDecreaseSpeed(bool /*apply*/, bool Real)
 {
     // all applied/removed only at real aura add/remove
     if (!Real)
@@ -5586,7 +5586,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
     }
 }
 
-void Aura::HandleAuraSafeFall(bool Apply, bool Real)
+void Aura::HandleAuraSafeFall(bool /*Apply*/, bool /*Real*/)
 {
     // implemented in WorldSession::HandleMovementOpcodes
 }

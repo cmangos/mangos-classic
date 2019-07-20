@@ -599,7 +599,7 @@ struct go_ai_fixed_trap : public GameObjectAI
 {
     go_ai_fixed_trap(GameObject* go) : GameObjectAI(go) {}
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 /*uiDiff*/) override
     {
         if (m_go->IsSpawned())
         {

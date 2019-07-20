@@ -470,7 +470,7 @@ struct npc_cork_gizeltonAI : public ScriptedAI
         uiQuestStatus = 0;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
             m_playerGuid = pInvoker->GetObjectGuid();

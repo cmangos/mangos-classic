@@ -183,7 +183,7 @@ struct mob_core_ragerAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
     
-    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // Event sent by Golemagg at the time of his death so Core Rager knows he can self-suicide
         if (pSender->GetEntry() == NPC_GOLEMAGG && eventType == AI_EVENT_CUSTOM_A)

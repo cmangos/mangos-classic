@@ -483,14 +483,14 @@ void Map::MessageDistBroadcast(WorldObject const* obj, WorldPacket const& msg, f
     cell.Visit(p, message, *this, *obj, dist);
 }
 
-void Map::MessageMapBroadcast(WorldObject const* obj, WorldPacket const& msg)
+void Map::MessageMapBroadcast(WorldObject const* /*obj*/, WorldPacket const& msg)
 {
     Map::PlayerList const& pList = GetPlayers();
     for (const auto& itr : pList)
         itr.getSource()->SendDirectMessage(msg);
 }
 
-void Map::MessageMapBroadcastZone(WorldObject const* obj, WorldPacket const& msg, uint32 zoneId)
+void Map::MessageMapBroadcastZone(WorldObject const* /*obj*/, WorldPacket const& msg, uint32 zoneId)
 {
     Map::PlayerList const& pList = GetPlayers();
     for (const auto& itr : pList)
@@ -498,7 +498,7 @@ void Map::MessageMapBroadcastZone(WorldObject const* obj, WorldPacket const& msg
             itr.getSource()->SendDirectMessage(msg);
 }
 
-void Map::MessageMapBroadcastArea(WorldObject const* obj, WorldPacket const& msg, uint32 areaId)
+void Map::MessageMapBroadcastArea(WorldObject const* /*obj*/, WorldPacket const& msg, uint32 areaId)
 {
     Map::PlayerList const& pList = GetPlayers();
     for (const auto& itr : pList)

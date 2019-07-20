@@ -938,7 +938,7 @@ struct npc_solenorAI : public ScriptedAI
         m_creature->ForcedDespawn();
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
 
         if (pSpell && pSpell->Id == 14268)   // Wing Clip (Rank 3)
@@ -1041,7 +1041,7 @@ bool GossipHello_npc_solenor(Player* pPlayer, Creature* pCreature)
     return true;
 }
 
-bool GossipSelect_npc_solenor(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+bool GossipSelect_npc_solenor(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 /*uiAction*/)
 {
     pPlayer->CLOSE_GOSSIP_MENU();
     ((npc_solenorAI*)pCreature->AI())->BeginEvent(pPlayer->GetObjectGuid());

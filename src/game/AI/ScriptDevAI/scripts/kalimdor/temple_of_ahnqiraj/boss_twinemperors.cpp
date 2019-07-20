@@ -108,7 +108,7 @@ struct boss_twin_emperorsAI : public ScriptedAI
     }
 
     // Workaround for the shared health pool
-    void HealedBy(Unit* pHealer, uint32& uiHealedAmount) override
+    void HealedBy(Unit* /*pHealer*/, uint32& uiHealedAmount) override
     {
         if (!m_pInstance)
             return;

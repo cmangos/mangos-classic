@@ -260,7 +260,7 @@ uint32 Corpse::getFaction() const
     return 0;
 }
 
-bool Corpse::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
+bool Corpse::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool /*inVisibleList*/) const
 {
     return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance(), false);
 }

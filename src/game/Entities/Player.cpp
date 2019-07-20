@@ -285,7 +285,7 @@ PlayerTaxi::PlayerTaxi()
     memset(m_taximask, 0, sizeof(m_taximask));
 }
 
-void PlayerTaxi::InitTaxiNodes(uint32 race, uint32 level)
+void PlayerTaxi::InitTaxiNodes(uint32 race, uint32 /*level*/)
 {
     memset(m_taximask, 0, sizeof(m_taximask));
     // capital and taxi hub masks
@@ -1013,7 +1013,7 @@ DrunkenState Player::GetDrunkenstateByValue(uint16 value)
     return DRUNKEN_SOBER;
 }
 
-void Player::SetDrunkValue(uint16 newDrunkenValue, uint32 itemId)
+void Player::SetDrunkValue(uint16 newDrunkenValue, uint32 /*itemId*/)
 {
     uint32 oldDrunkenState = Player::GetDrunkenstateByValue(m_drunk);
 
@@ -4234,7 +4234,7 @@ void Player::SetWaterWalk(bool enable)
     GetSession()->SendPacket(data);
 }
 
-void Player::SetLevitate(bool enable)
+void Player::SetLevitate(bool /*enable*/)
 {
     // TODO: check if there is something similar for 2.4.3.
     // WorldPacket data;
@@ -4253,7 +4253,7 @@ void Player::SetLevitate(bool enable)
     // SendMessageToSet(data, false);
 }
 
-void Player::SetCanFly(bool enable)
+void Player::SetCanFly(bool /*enable*/)
 {
 //     TODO: check if there is something similar for 1.12.x (99% chance there is not)
 //     WorldPacket data(enable ? SMSG_MOVE_SET_CAN_FLY : SMSG_MOVE_UNSET_CAN_FLY, GetPackGUID().size() + 4);
@@ -8370,7 +8370,7 @@ InventoryResult Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Ite
     return EQUIP_ERR_OK;
 }
 
-bool Player::HasItemTotemCategory(uint32 TotemCategory) const
+bool Player::HasItemTotemCategory(uint32 /*TotemCategory*/) const
 {
     /*[-ZERO] Item *pItem;
      for(uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
@@ -11054,7 +11054,7 @@ void Player::ApplyEnchantment(Item* item, bool apply)
         ApplyEnchantment(item, EnchantmentSlot(slot), apply);
 }
 
-void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur, bool ignore_condition)
+void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur, bool /*ignore_condition*/)
 {
     if (!item)
         return;
@@ -18244,7 +18244,7 @@ bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item cons
     return false;
 }
 
-bool Player::CanNoReagentCast(SpellEntry const* spellInfo) const
+bool Player::CanNoReagentCast(SpellEntry const* /*spellInfo*/) const
 {
     // don't take reagents for spells with SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP
 //[-ZERO]    if (spellInfo->AttributesEx5 & SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP &&
@@ -19527,7 +19527,7 @@ void Player::ForceHealAndPowerUpdateInZone()
     }
 }
 
-void Player::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*= 0*/, bool updateClient /*= false*/)
+void Player::AddGCD(SpellEntry const& spellEntry, uint32 /*forcedDuration = 0*/, bool updateClient /*= false*/)
 {
     int32 gcdDuration = spellEntry.StartRecoveryTime;
     if (!spellEntry.StartRecoveryCategory && !gcdDuration)

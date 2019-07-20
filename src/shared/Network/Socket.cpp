@@ -215,7 +215,7 @@ namespace MaNGOS
 
         std::shared_ptr<Socket> ptr = shared<Socket>();
         m_outBufferFlushTimer.expires_from_now(boost::posix_time::milliseconds(int(BufferTimeout)));
-        m_outBufferFlushTimer.async_wait([ptr](const boost::system::error_code & error) { ptr->FlushOut(); });
+        m_outBufferFlushTimer.async_wait([ptr](const boost::system::error_code&) { ptr->FlushOut(); });
     }
 
     void Socket::FlushOut()

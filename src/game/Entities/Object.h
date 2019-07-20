@@ -865,7 +865,7 @@ class WorldObject : public Object
 
         // Game Event Notification system
         virtual bool IsNotifyOnEventObject() { return m_isOnEventNotified; }
-        virtual void OnEventHappened(uint16 event_id, bool activate, bool resume) {}
+        virtual void OnEventHappened(uint16 /*event_id*/, bool /*activate*/, bool /*resume*/) {}
         void SetNotifyOnEventState(bool state);
 
         virtual void AddToWorld() override;
@@ -879,7 +879,7 @@ class WorldObject : public Object
         virtual void RemoveSpellCooldown(SpellEntry const& spellEntry, bool updateClient = true);
         void RemoveSpellCooldown(uint32 spellId, bool updateClient = true);
         virtual void RemoveSpellCategoryCooldown(uint32 category, bool updateClient = true);
-        virtual void RemoveAllCooldowns(bool sendOnly = false) { m_GCDCatMap.clear(); m_cooldownMap.clear(); m_lockoutMap.clear(); }
+        virtual void RemoveAllCooldowns(bool /*sendOnly*/ = false) { m_GCDCatMap.clear(); m_cooldownMap.clear(); m_lockoutMap.clear(); }
         bool IsSpellReady(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr) const;
         bool IsSpellReady(uint32 spellId, ItemPrototype const* itemProto = nullptr) const;
         virtual void LockOutSpells(SpellSchoolMask schoolMask, uint32 duration);
@@ -887,8 +887,8 @@ class WorldObject : public Object
 
         virtual void InspectingLoot() {}
 
-        virtual bool CanAttackSpell(Unit const* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const { return true; }
-        virtual bool CanAssistSpell(Unit const* target, SpellEntry const* spellInfo = nullptr) const { return true; }
+        virtual bool CanAttackSpell(Unit const* /*target*/, SpellEntry const* /*spellInfo*/ = nullptr, bool /*isAOE*/ = false) const { return true; }
+        virtual bool CanAssistSpell(Unit const* /*target*/, SpellEntry const* /*spellInfo*/ = nullptr) const { return true; }
 
     protected:
         explicit WorldObject();

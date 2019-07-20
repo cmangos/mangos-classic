@@ -387,7 +387,7 @@ bool GossipHello_boss_vaelastrasz(Player* pPlayer, Creature* pCreature)
     return true;
 }
 
-bool QuestAccept_boss_vaelastrasz(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_boss_vaelastrasz(Player* pPlayer, Creature* /*pCreature*/, const Quest* pQuest)
 {
     if (pQuest->GetQuestId() == QUEST_NEFARIUS_CORRUPTION)
     {

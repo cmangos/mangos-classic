@@ -1192,7 +1192,7 @@ bool ChatHandler::HandleDebugTaxiCommand(char* /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleDebugMaps(char* args)
+bool ChatHandler::HandleDebugMaps(char* /*args*/)
 {
     PSendSysMessage("Update time statistics:");
     PSendSysMessage("Map[0] >> Min: %ums, Max: %ums, Avg: %ums",
@@ -1221,7 +1221,7 @@ bool ChatHandler::HandleDebugMaps(char* args)
     return true;
 }
 
-bool ChatHandler::HandleShowTemporarySpawnList(char* args)
+bool ChatHandler::HandleShowTemporarySpawnList(char* /*args*/)
 {
     Player* pPlayer = m_session->GetPlayer();
 
@@ -1241,7 +1241,7 @@ bool ChatHandler::HandleShowTemporarySpawnList(char* args)
     return true;
 }
 
-bool ChatHandler::HandleGridsLoadedCount(char* args)
+bool ChatHandler::HandleGridsLoadedCount(char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
     if (!player)
@@ -1328,7 +1328,7 @@ bool ChatHandler::HandleDebugSpellVisual(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugMoveflags(char* args)
+bool ChatHandler::HandleDebugMoveflags(char* /*args*/)
 {
     Unit* target = getSelectedUnit();
     if (!target)
@@ -1431,7 +1431,7 @@ bool ChatHandler::HandleDebugSendWorldState(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugHaveAtClientCommand(char* args)
+bool ChatHandler::HandleDebugHaveAtClientCommand(char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
     Unit* target = getSelectedUnit();
@@ -1449,7 +1449,7 @@ bool ChatHandler::HandleDebugHaveAtClientCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugIsVisibleCommand(char* args)
+bool ChatHandler::HandleDebugIsVisibleCommand(char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
     Unit* target = getSelectedUnit();
@@ -1468,7 +1468,7 @@ bool ChatHandler::HandleDebugIsVisibleCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugOverflowCommand(char* args)
+bool ChatHandler::HandleDebugOverflowCommand(char* /*args*/)
 {
     std::string name("\360\222\214\245\360\222\221\243\360\222\221\251\360\223\213\215\360\223\213\210\360\223\211\241\360\222\214\245\360\222\221\243\360\222\221\251\360\223\213\215\360\223\213\210\360\223\211\241");
     // Overflow: \xd808\xdf25\xd809\xdc63\xd809\xdc69\xd80c\xdecd\xd80c\xdec8\xd80c\xde61\000\xdf25\xd809\xdc63

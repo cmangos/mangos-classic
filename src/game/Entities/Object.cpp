@@ -2131,7 +2131,7 @@ bool WorldObject::HasGCD(SpellEntry const* spellEntry) const
     return !m_GCDCatMap.empty();
 }
 
-void WorldObject::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto /*= nullptr*/, bool permanent /*= false*/, uint32 forcedDuration /*= 0*/)
+void WorldObject::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto = nullptr*/, bool /*permanent = false*/, uint32 forcedDuration /*= 0*/)
 {
     uint32 recTimeDuration = forcedDuration ? forcedDuration : spellEntry.RecoveryTime;
     if (recTimeDuration || spellEntry.CategoryRecoveryTime)
@@ -2258,12 +2258,12 @@ void WorldObject::RemoveSpellCooldown(uint32 spellId, bool updateClient /*= true
     RemoveSpellCooldown(*spellEntry, updateClient);
 }
 
-void WorldObject::RemoveSpellCooldown(SpellEntry const& spellEntry, bool updateClient /*= true*/)
+void WorldObject::RemoveSpellCooldown(SpellEntry const& spellEntry, bool /*updateClient = true*/)
 {
     m_cooldownMap.RemoveBySpellId(spellEntry.Id);
 }
 
-void WorldObject::RemoveSpellCategoryCooldown(uint32 category, bool updateClient /*= true*/)
+void WorldObject::RemoveSpellCategoryCooldown(uint32 category, bool /*updateClient = true*/)
 {
     m_cooldownMap.RemoveByCategory(category);
 }

@@ -2149,7 +2149,7 @@ void Spell::EffectHealthLeech(SpellEffectIndex eff_idx)
     }
 }
 
-bool Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype)
+bool Spell::DoCreateItem(SpellEffectIndex /*eff_idx*/, uint32 itemtype)
 {
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return false;
@@ -3201,7 +3201,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
     }
 }
 
-void Spell::EffectTeleUnitsFaceCaster(SpellEffectIndex eff_idx)
+void Spell::EffectTeleUnitsFaceCaster(SpellEffectIndex /*eff_idx*/)
 {
     if (!unitTarget)
         return;
@@ -5194,7 +5194,7 @@ void Spell::EffectBlock(SpellEffectIndex /*eff_idx*/)
     m_caster->SetCanBlock(true);
 }
 
-void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
+void Spell::EffectLeapForward(SpellEffectIndex /*eff_idx*/)
 {
     if (!unitTarget)
         return;
@@ -5804,7 +5804,7 @@ void Spell::EffectSkinPlayerCorpse(SpellEffectIndex /*eff_idx*/)
     m_spellLog.AddLog(uint32(SPELL_EFFECT_SKIN_PLAYER_CORPSE), unitTarget->GetObjectGuid());
 }
 
-void Spell::EffectBind(SpellEffectIndex eff_idx)
+void Spell::EffectBind(SpellEffectIndex /*eff_idx*/)
 {
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;

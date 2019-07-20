@@ -260,7 +260,7 @@ void CreatureEventAI::ProcessEvents(Unit* actionInvoker, Unit* AIEventSender)
     --m_depth;
 }
 
-bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvoker, Unit* AIEventSender /*=nullptr*/)
+bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvoker, Unit* /*AIEventSender =nullptr*/)
 {
     if (!holder.enabled || holder.timer || holder.inProgress)
         return false;

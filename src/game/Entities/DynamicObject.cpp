@@ -194,7 +194,7 @@ void DynamicObject::Delay(int32 delaytime)
     }
 }
 
-bool DynamicObject::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
+bool DynamicObject::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool /*inVisibleList*/) const
 {
     if (!IsInWorld() || !u->IsInWorld())
         return false;

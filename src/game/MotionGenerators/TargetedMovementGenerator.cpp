@@ -207,7 +207,7 @@ bool ChaseMovementGenerator::_lostTarget(Unit& u) const
     return m_combat && u.getVictim() != this->GetCurrentTarget();
 }
 
-void ChaseMovementGenerator::_reachTarget(Unit& owner)
+void ChaseMovementGenerator::_reachTarget(Unit& /*owner*/)
 {
 
 }

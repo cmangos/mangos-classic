@@ -3514,7 +3514,7 @@ void Spell::SendCastResult(SpellCastResult result) const
     SendCastResult(recipient, m_spellInfo, result, m_petCast);
 }
 
-void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, SpellCastResult result, bool isPetCastResult /*=false*/)
+void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, SpellCastResult result, bool /*isPetCastResult =false*/)
 {
     WorldPacket data(SMSG_CAST_RESULT, (4 + 1 + 1));
     data << uint32(spellInfo->Id);
@@ -6302,7 +6302,7 @@ CurrentSpellTypes Spell::GetCurrentContainer() const
     return (CURRENT_GENERIC_SPELL);
 }
 
-bool Spell::CheckTargetGOScript(GameObject* target, SpellEffectIndex eff) const
+bool Spell::CheckTargetGOScript(GameObject* /*target*/, SpellEffectIndex /*eff*/) const
 {
     /*switch (m_spellInfo->Id)
     {
@@ -6903,7 +6903,7 @@ float Spell::GetCone()
     return M_PI_F / 3.f; // 60 degrees is default
 }
 
-void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
+void Spell::FilterTargetMap(UnitList& /*filterUnitList*/, SpellEffectIndex /*effIndex*/)
 {
 
 }
@@ -6960,7 +6960,7 @@ void Spell::OnSuccessfulSpellFinish()
     }
 }
 
-SpellCastResult Spell::OnCheckCast(bool strict)
+SpellCastResult Spell::OnCheckCast(bool /*strict*/)
 {
     switch (m_spellInfo->Id)
     {

@@ -529,7 +529,7 @@ struct npc_private_hendelAI : public ScriptedAI
         AttackStart(pAttacker);
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
         // If Private Hendel is hit by spell Teleport (from DBScript)
         // this means it is time to grant quest credit to the player previously stored to this intend

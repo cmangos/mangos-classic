@@ -151,7 +151,7 @@ struct mob_fireswornAI : public ScriptedAI
             DoCastSpellIfCan(m_creature, SPELL_MASSIVE_ERUPTION);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 /*uiDiff*/) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;

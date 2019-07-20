@@ -452,7 +452,7 @@ CombatManeuverReturns PlayerbotPriestAI::ResurrectPlayer(Player* target)
     return RETURN_NO_ACTION_ERROR; // not error per se - possibly just OOM
 }
 
-CombatManeuverReturns PlayerbotPriestAI::DispelPlayer(Player* target)
+CombatManeuverReturns PlayerbotPriestAI::DispelPlayer(Player* /*target*/)
 {
     // Remove negative magic on group members
     if (Player* cursedTarget = GetDispelTarget(DISPEL_MAGIC))
