@@ -792,6 +792,9 @@ bool Creature::AIM_Initialize()
 
     // Handle Spawned Events, also calls Reset()
     m_ai->JustRespawned();
+
+    if (InstanceData* mapInstance = GetInstanceData())
+        mapInstance->OnCreatureRespawn(this);
     return true;
 }
 
