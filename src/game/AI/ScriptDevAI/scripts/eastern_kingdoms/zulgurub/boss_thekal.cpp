@@ -80,7 +80,7 @@ struct boss_thekalBaseAI : public ScriptedAI
             return;
 
         // Prevent glitch if in fake death
-        if (damage == PHASE_FAKE_DEATH || m_uiPhase == PHASE_WAITING)
+        if (m_uiPhase == PHASE_FAKE_DEATH || m_uiPhase == PHASE_WAITING)
         {
             damage = 0;
             return;
