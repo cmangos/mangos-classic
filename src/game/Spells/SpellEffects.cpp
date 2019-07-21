@@ -4189,6 +4189,31 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->HandleEmote(EMOTE_ONESHOT_CHEER);
                     return;
                 }
+                case 26084:                                 // Whirlwind
+                case 26686:                                 // Whirlwind
+                {
+                   if (!m_caster->CanHaveThreatList() || m_caster->getThreatManager().isThreatListEmpty())
+                        return;
+
+                    if (!m_triggeredByAuraSpell)
+                        return;
+
+                    SpellAuraHolder* holder = m_caster->GetSpellAuraHolder(m_triggeredByAuraSpell->Id);
+                    if (holder->m_auras[EFFECT_INDEX_0]->GetAuraTicks() != holder->m_auras[EFFECT_INDEX_0]->GetAuraMaxTicks())
+                    {
+                        if (m_spellInfo->Id == 26686)
+                            if (urand(0, 2))
+                                return;
+
+                        m_caster->getThreatManager().modifyAllThreatPercent(-100);
+                        if (Unit* target = static_cast<Creature*>(m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                            m_caster->getThreatManager().addThreatDirectly(target, 100000);
+                    }
+                    else
+                        m_caster->getThreatManager().modifyAllThreatPercent(-100);
+
+                    return;
+                }
                 case 26137:                                 // Rotate Trigger
                 {
                     if (!unitTarget)
