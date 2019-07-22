@@ -4336,7 +4336,7 @@ SpellCastResult PlayerbotAI::CastSpell(uint32 spellId)
     // Power check
     // We use Spell::CheckPower() instead of UnitAI::CanCastSpell() because bots are players and have more requirements than mere units
     Spell* tmp_spell = new Spell(m_bot, pSpellInfo, false);
-    SpellCastResult res = tmp_spell->CheckPower();
+    SpellCastResult res = tmp_spell->CheckPower(true);
     if (res != SPELL_CAST_OK)
         return res;
 

@@ -565,6 +565,10 @@ struct SelectAttackingTargetParams
         } range;
         struct
         {
+            uint64 guid;
+        } skip;
+        struct
+        {
             uint32 params[2];
         } raw;
     };
