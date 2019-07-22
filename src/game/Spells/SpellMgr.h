@@ -465,6 +465,7 @@ inline bool IsSpellEffectDamage(SpellEntry const& spellInfo, SpellEffectIndex i)
             case SPELL_AURA_PERIODIC_DAMAGE:
             case SPELL_AURA_PERIODIC_LEECH:
             //   SPELL_AURA_POWER_BURN_MANA: deals damage for power burned, but not really a DoT?
+            case SPELL_AURA_PERIODIC_MANA_LEECH: // confirmed via 31447
             case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
                 return true;
         }
