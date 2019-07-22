@@ -1117,7 +1117,7 @@ inline uint32 GetAffectedTargets(SpellEntry const* spellInfo)
                 case 26457:                                 // Drain Mana (correct number has to be researched)
                 case 26559:
                     return 12;
-                case 25991:                                 // Poison Bolt Volley (AQ40, Pincess Huhuran)
+                case 26052:                                 // Poison Bolt Volley (AQ40, Princess Huhuran)
                     return 15;
                 default:
                     break;

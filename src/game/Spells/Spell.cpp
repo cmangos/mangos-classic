@@ -6903,9 +6903,20 @@ float Spell::GetCone()
     return M_PI_F / 3.f; // 60 degrees is default
 }
 
-void Spell::FilterTargetMap(UnitList& /*filterUnitList*/, SpellEffectIndex /*effIndex*/)
+void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex /*effIndex*/)
 {
-
+    switch (m_spellInfo->Id)
+    {
+        case 26052: // Poison Bolt Volley (spell hits only the 15 closest targets)
+        {
+            if (filterUnitList.size() > m_affectedTargetCount)
+            {
+                filterUnitList.sort(TargetDistanceOrderNear(m_caster));
+                filterUnitList.resize(m_affectedTargetCount);
+            }
+            return;
+        }
+    }
 }
 
 bool Spell::IsEffectWithImplementedMultiplier(uint32 effectId) const
