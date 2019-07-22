@@ -6908,6 +6908,7 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex /*effInde
     switch (m_spellInfo->Id)
     {
         case 26052: // Poison Bolt Volley (spell hits only the 15 closest targets)
+        case 26180: // Wyvern Sting (spell hits only the 10 closest targets)
         {
             if (filterUnitList.size() > m_affectedTargetCount)
             {

@@ -1135,6 +1135,17 @@ inline uint32 GetAffectedTargets(SpellEntry const* spellInfo)
             }
             break;
         }
+        case SPELLFAMILY_HUNTER:
+        {
+            switch (spellInfo->Id)
+            {
+                case 26180:                                 // Wyvern Sting (AQ40, Princess Huhuran)
+                    return 10;
+                default:
+                    break;
+            }
+            break;
+        }
         default:
             break;
     }
