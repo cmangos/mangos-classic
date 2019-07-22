@@ -11075,13 +11075,8 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                 case ITEM_ENCHANTMENT_TYPE_NONE:
                     break;
                 case ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL:
-                    if (SpellModifier* mod = item->GetEnchantmentModifier())
-                    {
-                        if (!apply)
-                            item->SetEnchantmentModifier(nullptr);
-                        else
-                            AddSpellMod(mod, apply);
-                    }
+                    if (!apply) // clear modifier set by some spells
+                        item->SetEnchantmentModifier(0);
                     // processed in Player::CastItemCombatSpell
                     break;
                 case ITEM_ENCHANTMENT_TYPE_DAMAGE:

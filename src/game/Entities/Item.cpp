@@ -229,18 +229,12 @@ Item::Item()
     m_container = nullptr;
     mb_in_trade = false;
     m_lootState = ITEM_LOOT_NONE;
-    m_enchantEffectModifier = nullptr;
+    m_enchantmentModifier = 0;
 }
 
 Item::~Item()
 {
-    if (m_enchantEffectModifier)
-    {
-        if (Player* owner = GetOwner())
-            owner->AddSpellMod(m_enchantEffectModifier, false);
-        else
-            delete m_enchantEffectModifier; // on logout/DC player is mid deletion and will be nullptr
-    }
+
 }
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
@@ -922,13 +916,6 @@ bool Item::IsLimitedToAnotherMapOrZone(uint32 cur_mapId, uint32 cur_zoneId) cons
 {
     ItemPrototype const* proto = GetProto();
     return proto && ((proto->Map && proto->Map != cur_mapId) || (proto->Area && proto->Area != cur_zoneId));
-}
-
-void Item::SetEnchantmentModifier(SpellModifier* mod)
-{
-    if (m_enchantEffectModifier)
-        GetOwner()->AddSpellMod(m_enchantEffectModifier, false);
-    m_enchantEffectModifier = mod;
 }
 
 // Though the client has the information in the item's data field,

@@ -375,7 +375,21 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
             case SPELLFAMILY_HUNTER:
                 break;
             case SPELLFAMILY_PALADIN:
+            {
+                switch (m_spellInfo->Id)
+                {
+                    case 20467: // Judgement of Command
+                    case 20963:
+                    case 20964:
+                    case 20965:
+                    case 20966:
+                    case 27171:
+                        if (!unitTarget->IsStunned())
+                            damage /= 2;
+                        break;
+                }
                 break;
+            }
         }
 
         if (damage >= 0)
@@ -1413,18 +1427,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         {
             switch (m_spellInfo->Id)
             {
-                case 11189:                                 // Frost Warding
-                case 28332:
-                {
-                    // increase reflection chance (effect 1) of Frost Ward, removed in aura boosts
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        SpellModifier* mod = new SpellModifier(SPELLMOD_RESIST_MISS_CHANCE, SPELLMOD_FLAT, damage, m_spellInfo->Id, uint64(0x0000000000000100));
-                        ((Player*)unitTarget)->AddSpellMod(mod, true);
-                    }
-
-                    break;
-                }
                 case 12472:                                 // Cold Snap
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1645,27 +1647,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 561:                                   // Judgement of command
-                {
-                    if (unitTarget)
-                        if (SpellEntry const* spell_proto = sSpellTemplate.LookupEntry<SpellEntry>(m_currentBasePoints[eff_idx]))
-                        {
-                            if (!unitTarget->IsStunned() && m_caster->GetTypeId() == TYPEID_PLAYER)
-                            {
-                                // decreased damage (/2) for non-stunned target.
-                                SpellModifier* mod = new SpellModifier(SPELLMOD_DAMAGE, SPELLMOD_PCT, -50, m_spellInfo->Id, uint64(0x0000020000000000));
-
-                                ((Player*)m_caster)->AddSpellMod(mod, true);
-                                m_caster->CastSpell(unitTarget, spell_proto, TRIGGERED_OLD_TRIGGERED, nullptr);
-                                // mod deleted
-                                ((Player*)m_caster)->AddSpellMod(mod, false);
-                            }
-                            else
-                                m_caster->CastSpell(unitTarget, spell_proto, TRIGGERED_OLD_TRIGGERED, nullptr);
-                        }
-
-                    return;
-                }
             }
 
             break;
@@ -1698,8 +1679,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 if (m_CastItem) // Does not scale with gear
                 {
                     float weaponSpeed = float(m_CastItem->GetProto()->Delay) / IN_MILLISECONDS;
-                    int32 totalDamage = (damage * 0.01 * weaponSpeed);
-                    m_caster->CastCustomSpell(unitTarget, 16368, &totalDamage, nullptr, nullptr, true, m_CastItem);
+                    int32 totalDamage = (damage * 0.01f * weaponSpeed * (m_CastItem->GetEnchantmentModifier() + 100.f));
+                    m_caster->CastCustomSpell(unitTarget, 16368, &totalDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, m_CastItem);
                 }
                 else
                     sLog.outError("Spell::EffectDummy: spell %i requires cast Item", m_spellInfo->Id);
@@ -5162,21 +5143,14 @@ void Spell::EffectEnchantHeldItem(SpellEffectIndex eff_idx)
         item->SetEnchantment(slot, enchant_id, duration * IN_MILLISECONDS, 0);
 
         // Improved Weapon Totems
-        if (m_spellInfo->IsFitToFamilyMask(0x0000000004000000)) // Flametongue totem
+        if (m_spellInfo->IsFitToFamilyMask(0x0000000004000000))
         {
             SpellAuraHolder* holder = m_caster->GetOwner()->GetSpellAuraHolder(29192);
             if (!holder)
                 holder = m_caster->GetOwner()->GetSpellAuraHolder(29193);
-            if (holder && holder->m_auras[0] && holder->GetSpellProto())
-                item->SetEnchantmentModifier(new SpellModifier(SPELLMOD_ATTACK_POWER, SPELLMOD_PCT, holder->m_auras[1]->GetModifier()->m_amount, holder->GetId(), uint64(0x00400000000)));
-        }
-        if (m_spellInfo->IsFitToFamilyMask(0x0000000200000000)) // Windfury totem
-        {
-            SpellAuraHolder* holder = m_caster->GetOwner()->GetSpellAuraHolder(29192);
-            if (!holder)
-                holder = m_caster->GetOwner()->GetSpellAuraHolder(29193);
-            if (holder && holder->m_auras[0] && holder->GetSpellProto())
-                item->SetEnchantmentModifier(new SpellModifier(SPELLMOD_ATTACK_POWER, SPELLMOD_PCT, holder->m_auras[0]->GetModifier()->m_amount, holder->GetId(), uint64(0x00200000000)));
+            SpellEffectIndex dummyAuraIndex = m_spellInfo->SpellIconID == 1397 ? EFFECT_INDEX_0 : EFFECT_INDEX_1; // 0 - Windfury 1 - Flametongue
+            if (holder && holder->m_auras[dummyAuraIndex] && holder->GetSpellProto())
+                item->SetEnchantmentModifier(holder->m_auras[dummyAuraIndex]->GetModifier()->m_amount);
         }
         item_owner->ApplyEnchantment(item, slot, true);
     }

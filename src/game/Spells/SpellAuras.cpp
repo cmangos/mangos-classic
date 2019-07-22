@@ -252,7 +252,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
 
 static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_STUN, SPELL_AURA_NONE };
 
-Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* /*castItem*/) :
+Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem) :
     m_spellmod(nullptr), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
     m_effIndex(eff), m_positive(false), m_isPeriodic(false), m_isAreaAura(false),
     m_isPersistent(false), m_magnetUsed(false), m_spellAuraHolder(holder)
@@ -266,6 +266,36 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* curr
     m_applyTime = time(nullptr);
 
     int32 damage = currentDamage ? *currentDamage : m_currentBasePoints;
+    if (caster)
+    {
+        // scripting location for custom aura damage
+        switch (spellproto->Id)
+        {
+            case 6143: // Frost Ward
+            case 8461: // spell reflect chance
+            case 8462:
+            case 10177:
+            case 28609:
+            {
+                if (eff != EFFECT_INDEX_1)
+                    break;
+                SpellAuraHolder* holder = target->GetSpellAuraHolder(11189);
+                if (!holder)
+                    holder = target->GetSpellAuraHolder(28332);
+                if (holder)
+                {
+                    damage += target->CalculateSpellDamage(target, holder->GetSpellProto(), EFFECT_INDEX_1);
+                }
+                break;
+            }
+            case 8516: // Windfury Totem
+            case 10608:
+            case 10610:
+                if (castItem)
+                    damage += (damage * castItem->GetEnchantmentModifier() / 100);
+                break;
+        }
+    }
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Aura: construct Spellid : %u, Aura : %u Target : %d Damage : %d", spellproto->Id, spellproto->EffectApplyAuraName[eff], spellproto->EffectImplicitTargetA[eff], damage);
 
@@ -5584,22 +5614,11 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         }
         case SPELLFAMILY_MAGE:
         {
-            switch (GetId())
-            {
-                case 11189:                                 // Frost Warding
-                case 28332:
-                {
-                    if (m_target->GetTypeId() == TYPEID_PLAYER && !apply)
-                    {
-                        // reflection chance (effect 1) of Frost Ward, applied in dummy effect
-                        if (SpellModifier* mod = ((Player*)m_target)->GetSpellMod(SPELLMOD_RESIST_MISS_CHANCE, GetId()))
-                            ((Player*)m_target)->AddSpellMod(mod, false);
-                    }
-                    return;
-                }
-                default:
-                    break; // Break here for poly below - 2.4.2+ only player poly regens
-            }
+            //switch (GetId())
+            //{
+            //    default:
+            //        break; // Break here for poly below - 2.4.2+ only player poly regens
+            //}
             break;
         }
         case SPELLFAMILY_HUNTER:

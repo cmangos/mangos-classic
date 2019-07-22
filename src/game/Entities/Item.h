@@ -296,8 +296,8 @@ class Item : public Object
         uint32 GetEnchantmentDuration(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET);}
         uint32 GetEnchantmentCharges(EnchantmentSlot slot)  const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET);}
 
-        SpellModifier* GetEnchantmentModifier() { return m_enchantEffectModifier; }
-        void SetEnchantmentModifier(SpellModifier* mod);
+        uint32 GetEnchantmentModifier() { return m_enchantmentModifier; }
+        void SetEnchantmentModifier(uint32 value) { m_enchantmentModifier = value; }
 
         void SendTimeUpdate(Player* owner) const;
         void UpdateDuration(Player* owner, uint32 diff);
@@ -339,7 +339,7 @@ class Item : public Object
         int16 uQueuePos;
         bool mb_in_trade;                                   // true if item is currently in trade-window
         ItemLootUpdateState m_lootState;
-        SpellModifier* m_enchantEffectModifier;
+        uint32 m_enchantmentModifier; // used by one script and removed in wotlk
 };
 
 #endif
