@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Huhuran
-SD%Complete: 95
-SDComment: Wyvern Sting damage spell on aura removal is missing
+SD%Complete: 100
+SDComment:
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData
 
@@ -34,7 +34,7 @@ enum
     SPELL_ENRAGE                = 26051,        // triggers 26052 - Poison Bolt Volley (will hit the 15 closest people)
     SPELL_BERSERK               = 26068,        // triggers 26052 - Poison Bolt Volley (will hit the 15 closest people)
     SPELL_NOXIOUS_POISON        = 26053,
-    SPELL_WYVERN_STING          = 26180,        // Should trigger 26233 on aura removal, doing 500 nature damage if 26180 expires (confirmed) and about 3K if dispelled early (amount unconfirmed)
+    SPELL_WYVERN_STING          = 26180,        // triggers 26233 on aura removal, doing 500 nature damage if 26180 expires (confirmed) and about 3K if dispelled early (amount unconfirmed)
     SPELL_ACID_SPIT             = 26050
 };
 
