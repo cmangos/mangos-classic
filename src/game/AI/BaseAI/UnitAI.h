@@ -24,6 +24,7 @@
 #include "Globals/SharedDefines.h"
 #include "Dynamic/FactoryHolder.h"
 #include "Entities/ObjectGuid.h"
+#include "AI/BaseAI/AIDefines.h"
 
 class WorldObject;
 class GameObject;
@@ -66,42 +67,6 @@ enum CastFlags
     CAST_MAIN_SPELL             = 0x100,                    // Marks main spell
     CAST_PLAYER_ONLY            = 0x200,                    // Selects only player targets - substitution for EAI not having more params
     CAST_DISTANCE_YOURSELF      = 0x400,                    // If spell with this cast flag hits main aggro target, caster distances himself - EAI only
-};
-
-enum AIEventType
-{
-    // Usable with Event AI
-    AI_EVENT_JUST_DIED          = 0,                        // Sender = Killed Npc, Invoker = Killer
-    AI_EVENT_CRITICAL_HEALTH    = 1,                        // Sender = Hurt Npc, Invoker = DamageDealer - Expected to be sent by 10% health
-    AI_EVENT_LOST_HEALTH        = 2,                        // Sender = Hurt Npc, Invoker = DamageDealer - Expected to be sent by 50% health
-    AI_EVENT_LOST_SOME_HEALTH   = 3,                        // Sender = Hurt Npc, Invoker = DamageDealer - Expected to be sent by 90% health
-    AI_EVENT_GOT_FULL_HEALTH    = 4,                        // Sender = Healed Npc, Invoker = Healer
-    AI_EVENT_CUSTOM_EVENTAI_A   = 5,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    AI_EVENT_CUSTOM_EVENTAI_B   = 6,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    AI_EVENT_GOT_CCED           = 7,                        // Sender = CCed Npc, Invoker = Caster that CCed
-    AI_EVENT_CUSTOM_EVENTAI_C   = 8,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    AI_EVENT_CUSTOM_EVENTAI_D   = 9,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    AI_EVENT_CUSTOM_EVENTAI_E   = 10,                       // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    AI_EVENT_CUSTOM_EVENTAI_F   = 11,                       // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    MAXIMAL_AI_EVENT_EVENTAI    = 12,
-
-    // Internal Use
-    AI_EVENT_CALL_ASSISTANCE    = 13,                       // Sender = Attacked Npc, Invoker = Enemy
-
-    // Predefined for SD2
-    AI_EVENT_START_ESCORT       = 100,                      // Invoker = Escorting Player
-    AI_EVENT_START_ESCORT_B     = 101,                      // Invoker = Escorting Player
-    AI_EVENT_START_EVENT        = 102,                      // Invoker = EventStarter
-    AI_EVENT_START_EVENT_A      = 103,                      // Invoker = EventStarter
-    AI_EVENT_START_EVENT_B      = 104,                      // Invoker = EventStarter
-
-    // Some IDs for special cases in SD2
-    AI_EVENT_CUSTOM_A           = 1000,
-    AI_EVENT_CUSTOM_B           = 1001,
-    AI_EVENT_CUSTOM_C           = 1002,
-    AI_EVENT_CUSTOM_D           = 1003,
-    AI_EVENT_CUSTOM_E           = 1004,
-    AI_EVENT_CUSTOM_F           = 1005,
 };
 
 enum ReactStates

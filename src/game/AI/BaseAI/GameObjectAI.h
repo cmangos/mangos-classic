@@ -19,6 +19,7 @@
 #define DEF_GAMEOBJECT_AI_H
 
 #include "Platform/Define.h"
+#include "AI/BaseAI/AIDefines.h"
 
 class GameObject;
 
