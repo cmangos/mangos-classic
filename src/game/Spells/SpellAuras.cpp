@@ -869,13 +869,13 @@ void Aura::TriggerSpell()
                     }
                     case 23493:                             // Restoration
                     {
+                        // sniff confirmed to send no packets
                         uint32 heal = triggerTarget->GetMaxHealth() / 10;
-                        triggerTarget->DealHeal(triggerTarget, heal, auraSpellInfo);
-
+                        triggerTarget->ModifyHealth(int32(heal));
                         if (int32 mana = triggerTarget->GetMaxPower(POWER_MANA))
                         {
                             mana /= 10;
-                            triggerTarget->EnergizeBySpell(triggerTarget, 23493, mana, POWER_MANA);
+                            triggerTarget->ModifyPower(POWER_MANA, mana);
                         }
                         return;
                     }
