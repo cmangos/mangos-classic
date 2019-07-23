@@ -514,7 +514,7 @@ inline bool IsBinarySpell(SpellEntry const& spellInfo, uint8 effectMask = EFFECT
     uint8 auramask = 0;     // A bitmask of aura effcts: set bits are auras
     for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
     {
-        const uint8 thisMask = uint8(1 << (i - 1));
+        const uint8 thisMask = uint8(1 << i);
 
         if (!spellInfo.Effect[i] || !(effectMask & thisMask))
             continue;
