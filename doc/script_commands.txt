@@ -327,6 +327,7 @@ Defining a buddy could be done in several way:
                                             * datalong = 0:  Move resultingSource towards resultingTarget
                                             * datalong != 0: Move resultingSource to a random point between datalong2..datalong around resultingTarget.
                                               orientation != 0: Obtain a random point around resultingTarget in direction of orientation
+                                            * datalong3 = Exact contact point distance, to be used when you want to stop moving as soon as you're within this distance of the target
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL Obtain a point in direction of resTarget->GetOrientation + orientation
                                               for resTarget == resSource and orientation == 0 this will mean resSource moving forward
 
