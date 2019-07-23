@@ -321,7 +321,9 @@ enum TriggerCastFlags : uint32
     TRIGGERED_IGNORE_UNATTACKABLE_FLAG          = 0x00000020,   // Ignores UNIT_FLAG_NOT_ATTACKABLE in CheckTarget
     TRIGGERED_DO_NOT_PROC                       = 0x00000040,   // Spells from scripts should not proc - DBScripts for example
     TRIGGERED_PET_CAST                          = 0x00000080,   // Spell that should report error through pet opcode
-    TRIGGERED_NORMAL_COMBAT_CAST                = 0x00000100,   // AI needs to be notified about change of target
+    TRIGGERED_NORMAL_COMBAT_CAST                = 0x00000100,   // AI needs to be notified about change of target TODO: change into TRIGGERED_NONE
+    TRIGGERED_IGNORE_GCD                        = 0x00000200,   // Ignores GCD - to be used in spell scripts
+    TRIGGERED_IGNORE_COSTS                      = 0x00000400,   // Ignores spell costs
     TRIGGERED_FULL_MASK                         = 0xFFFFFFFF
 };
 

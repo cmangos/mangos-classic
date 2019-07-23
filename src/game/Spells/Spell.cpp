@@ -388,6 +388,8 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
     m_doNotProc = (triggeredFlags & TRIGGERED_DO_NOT_PROC) != 0;
     m_petCast = (triggeredFlags & TRIGGERED_PET_CAST) != 0;
     m_notifyAI = (triggeredFlags & TRIGGERED_NORMAL_COMBAT_CAST) != 0;
+    m_ignoreGCD = m_IsTriggeredSpell | ((triggeredFlags & TRIGGERED_IGNORE_GCD) != 0);
+    m_ignoreCosts = m_IsTriggeredSpell | ((triggeredFlags & TRIGGERED_IGNORE_COSTS) != 0);
 
     m_reflectable = IsReflectableSpell(m_spellInfo);
 
@@ -4212,7 +4214,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         return SPELL_FAILED_NOT_STANDING;
 
     // check global cooldown
-    if (strict && !m_IsTriggeredSpell && m_caster->HasGCD(m_spellInfo))
+    if (strict && !m_ignoreGCD && m_caster->HasGCD(m_spellInfo))
         return m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
 
     // only allow triggered spells if at an ended battleground
@@ -4604,7 +4606,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    if (!m_IsTriggeredSpell)
+    if (!m_ignoreCosts)
     {
         SpellCastResult castResult = CheckPower(strict);
         if (castResult != SPELL_CAST_OK)
