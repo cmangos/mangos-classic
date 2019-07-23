@@ -7043,6 +7043,28 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
         // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
         DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneFlat, APbonus, damagetype, true);
     }
+    // weapon damage based spells
+    else if (isWeaponDamageBasedSpell && (APbonus || DoneFlat))
+    {
+        // have to add AP here to melee/spells because weapon damage is generic and this AP bonus is target specific
+        bool normalized = spellProto ? IsSpellHaveEffect(spellProto, SPELL_EFFECT_NORMALIZED_WEAPON_DMG) : false;
+        float baseValue = int32(APbonus / 14.0f * GetAPMultiplier(attType, normalized));
+
+        // for weapon damage based spells we still have to apply damage done percent mods
+        // (that are already included into pdamage) to not-yet included DoneFlat
+        // e.g. from doneVersusCreature, apBonusVs...
+        UnitMods unitMod;
+        switch (attType)
+        {
+            default:
+            case BASE_ATTACK:   unitMod = UNIT_MOD_DAMAGE_MAINHAND; break;
+            case OFF_ATTACK:    unitMod = UNIT_MOD_DAMAGE_OFFHAND;  break;
+            case RANGED_ATTACK: unitMod = UNIT_MOD_DAMAGE_RANGED;   break;
+        }
+        baseValue *= GetModifierValue(unitMod, BASE_PCT);
+        DoneTotal += DoneFlat + baseValue;
+        DoneTotal *= GetModifierValue(unitMod, TOTAL_PCT);
+    }
 
     if (!flat)
         DoneTotal = 0.0f;
