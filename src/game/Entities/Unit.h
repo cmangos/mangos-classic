@@ -2306,6 +2306,7 @@ class Unit : public WorldObject
         virtual bool CanFly() const = 0;
         virtual bool CanWalk() const = 0;
         virtual bool CanBeDetected() const { return true; }
+        virtual bool IsFlying() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING); }
 
         void ForceHealthAndPowerUpdate();   // force server to send new value for hp and power (including max)
 

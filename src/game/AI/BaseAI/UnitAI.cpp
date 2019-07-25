@@ -54,8 +54,9 @@ void UnitAI::MoveInLineOfSight(Unit* who)
     if (GetReactState() < REACT_DEFENSIVE)
         return;
 
-    if (!m_unit->CanFly() && m_unit->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
-        return;
+    if (!m_unit->CanFly() && who->IsFlying())
+        if (m_unit->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+            return;
 
     if (m_unit->getVictim() && !m_unit->GetMap()->IsDungeon())
         return;
