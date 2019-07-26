@@ -32,6 +32,7 @@ const char CinematicSequencesEntryfmt[] = "nxixxxxxxx";
 const char CreatureDisplayInfofmt[] = "nxxifxxxxxxx";
 const char CreatureDisplayInfoExtrafmt[] = "nixxxxxxxxxxxxxxxxx";
 const char CreatureFamilyfmt[] = "nfifiiiissssssssxx";
+const char CreatureModelDatafmt[] = "nixxfxxxxxxxxxxf";
 const char CreatureSpellDatafmt[] = "niiiixxxx";
 const char CreatureTypefmt[] = "nxxxxxxxxxx";
 const char DurabilityCostsfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiiiiiii";
