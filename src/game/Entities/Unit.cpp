@@ -531,6 +531,12 @@ void Unit::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*item
     }
 }
 
+void Unit::TriggerAggroLinkingEvent(Unit* enemy)
+{
+    if (IsLinkingEventTrigger())
+        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_AGGRO, static_cast<Creature*>(this), enemy);
+}
+
 void Unit::TriggerEvadeEvents()
 {
     static_cast<Creature*>(this)->SetLootRecipient(nullptr);
@@ -539,7 +545,7 @@ void Unit::TriggerEvadeEvents()
         mapInstance->OnCreatureEvade((Creature*)this);
 
     if (m_isCreatureLinkingTrigger)
-        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_EVADE, (Creature*)this);
+        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_EVADE, static_cast<Creature*>(this));
 }
 
 void Unit::EvadeTimerExpired()
@@ -7443,8 +7449,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         if (InstanceData* mapInstance = GetInstanceData())
             mapInstance->OnCreatureEnterCombat(pCreature);
 
-        if (m_isCreatureLinkingTrigger)
-            GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_AGGRO, pCreature, enemy);
+        TriggerAggroLinkingEvent(enemy);
     }
 }
 

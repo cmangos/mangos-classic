@@ -2301,6 +2301,7 @@ class Unit : public WorldObject
         void OnRelocated();
 
         bool IsLinkingEventTrigger() { return m_isCreatureLinkingTrigger; }
+        void TriggerAggroLinkingEvent(Unit* enemy);
 
         virtual bool CanSwim() const = 0;
         virtual bool CanFly() const = 0;
