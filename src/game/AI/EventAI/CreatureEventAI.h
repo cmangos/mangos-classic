@@ -855,6 +855,8 @@ class CreatureEventAI : public CreatureAI
         void DistancingEnded() override;
 
         MovementGeneratorType GetDefaultMovement() { return m_defaultMovement; }
+
+        bool IsRangedUnit() override { return m_currentRangedMode; }
     protected:
         std::string GetAIName() override { return "EventAI"; }
         // Event rules specifiers

@@ -283,44 +283,28 @@ void ThreatContainer::modifyThreatPercent(Unit* victim, int32 threatPercent)
 }
 
 //============================================================
-// Modify all threat by provided percentage
-
-void ThreatContainer::modifyAllThreatPercent(int32 threatPercent)
-{
-    if (threatPercent < -100)
-    {
-        while (!iThreatList.empty())
-        {
-            HostileReference* ref = *iThreatList.begin();
-            ref->removeReference();
-            delete ref;
-        }
-    }
-    else
-    {
-        for (auto itr : iThreatList)
-            itr->addThreatPercent(threatPercent);
-    }
-}
-//============================================================
-
-bool HostileReferenceSortPredicate(const HostileReference* lhs, const HostileReference* rhs)
-{
-    if (lhs->GetTauntState() != rhs->GetTauntState())
-        return lhs->GetTauntState() > rhs->GetTauntState();
-    if (lhs->GetHostileState() != rhs->GetHostileState())
-        return lhs->GetHostileState() > rhs->GetHostileState();
-    return lhs->getThreat() > rhs->getThreat();             // reverse sorting
-}
-
-//============================================================
 // Check if the list is dirty and sort if necessary
 
-void ThreatContainer::update()
+void ThreatContainer::update(bool force)
 {
-    if (iDirty && iThreatList.size() > 1)
+    if ((iDirty || force) && iThreatList.size() > 1)
     {
-        iThreatList.sort(HostileReferenceSortPredicate);
+        iThreatList.sort([&](const HostileReference* lhs, const HostileReference* rhs)->bool
+        {
+            if (lhs->GetTauntState() != rhs->GetTauntState())
+                return lhs->GetTauntState() > rhs->GetTauntState();
+            Unit* owner = lhs->getSource()->getOwner();
+            if (force)
+            {
+                bool first = owner->CanReachWithMeleeAttack(lhs->getTarget());
+                bool second = owner->CanReachWithMeleeAttack(rhs->getTarget());
+                if (first != second)
+                    return first > second;
+            }
+            if (lhs->GetHostileState() != rhs->GetHostileState())
+                return lhs->GetHostileState() > rhs->GetHostileState();
+            return lhs->getThreat() > rhs->getThreat(); // reverse sorting
+        });
     }
     iDirty = false;
 }
@@ -331,27 +315,34 @@ void ThreatContainer::update()
 
 HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileReference* currentVictim)
 {
-    HostileReference* pCurrentRef = nullptr;
+    HostileReference* currentRef = nullptr;
     bool found = false;
     bool onlySecondChoiceTargetsFound = false;
     bool checkedCurrentVictim = false;
+    bool suppressRanged = attacker->hasUnitState(UNIT_STAT_ROOT) && !attacker->AI()->IsRangedUnit();
+    bool currentVictimInMelee = true;
+    if (suppressRanged)
+        currentVictimInMelee = attacker->CanReachWithMeleeAttack(currentVictim->getTarget());
 
     ThreatList::const_iterator lastRef = iThreatList.end();
     --lastRef;
 
     for (ThreatList::const_iterator iter = iThreatList.begin(); iter != iThreatList.end() && !found;)
     {
-        pCurrentRef = (*iter);
+        currentRef = (*iter);
 
-        Unit* pTarget = pCurrentRef->getTarget();
-        MANGOS_ASSERT(pTarget);                             // if the ref has status online the target must be there!
+        Unit* target = currentRef->getTarget();
+        MANGOS_ASSERT(target);                             // if the ref has status online the target must be there!
 
-        bool isInMelee = attacker->CanReachWithMeleeAttack(pTarget);
+        bool isInMelee = attacker->CanReachWithMeleeAttack(target);
         // Some bosses keep ranged targets in threat list but do not pick them with generic threat choice
-        if (attacker->IsIgnoringRangedTargets() && !isInMelee)
+        if (!isInMelee)
         {
-            ++iter;
-            continue;
+            if (attacker->IsIgnoringRangedTargets())
+            {
+                ++iter;
+                continue;
+            }
         }
 
         if (currentVictim) // select 1.3/1.1 better target in comparison current target
@@ -359,34 +350,40 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
 
 
             // normal case: pCurrentRef is still valid and most hated
-            if (currentVictim == pCurrentRef)
+            if (currentVictim == currentRef)
             {
                 found = true;
                 break;
             }
 
-            if (pCurrentRef->GetTauntState() > currentVictim->GetTauntState())
+            if (currentRef->GetTauntState() > currentVictim->GetTauntState())
             {
                 found = true;
                 break;
             }
 
-            if (pCurrentRef->GetHostileState() > currentVictim->GetHostileState())
+            if (suppressRanged && isInMelee && !currentVictimInMelee) // suppress ranged when rooted
+            {
+                found = true;
+                break;
+            }
+
+            if (currentRef->GetHostileState() > currentVictim->GetHostileState())
             {
                 found = true;
                 break;
             }
 
             // list sorted and and we check current target, then this is best case
-            if (pCurrentRef->getThreat() <= 1.1f * currentVictim->getThreat())
+            if (currentRef->getThreat() <= 1.1f * currentVictim->getThreat())
             {
-                pCurrentRef = currentVictim;
+                currentRef = currentVictim;
                 found = true;
                 break;
             }
 
-            if (pCurrentRef->getThreat() > 1.3f * currentVictim->getThreat() ||
-                (pCurrentRef->getThreat() > 1.1f * currentVictim->getThreat() && isInMelee))
+            if (currentRef->getThreat() > 1.3f * currentVictim->getThreat() ||
+                (currentRef->getThreat() > 1.1f * currentVictim->getThreat() && isInMelee))
             {
                 // implement 110% threat rule for targets in melee range
                 found = true;                           // and 130% rule for targets in ranged distances
@@ -401,9 +398,9 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
         ++iter;
     }
     if (!found)
-        pCurrentRef = nullptr;
+        currentRef = nullptr;
 
-    return pCurrentRef;
+    return currentRef;
 }
 
 //============================================================
@@ -485,7 +482,7 @@ void ThreatManager::modifyAllThreatPercent(int32 threatPercent)
 
 void ThreatManager::UpdateContainers()
 {
-    iThreatContainer.update();
+    iThreatContainer.update(getOwner()->hasUnitState(UNIT_STAT_ROOT) && !getOwner()->AI()->IsRangedUnit());
 }
 
 Unit* ThreatManager::getHostileTarget()

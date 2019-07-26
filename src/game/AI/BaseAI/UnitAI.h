@@ -421,6 +421,14 @@ class UnitAI
         // AI selection - works in connection with IsPossessCharmType
         virtual bool CanHandleCharm() { return false; }
 
+        /*
+        * All units which attack at ranged need to return true. It is used for 3 purposes:
+        * Determining if a creature should ignore ranged targets during root
+        * Attacking enemies flying overhead at aggro range
+        * Checking main spell school instead of melee school for immunity suppress - TODO
+        */
+        virtual bool IsRangedUnit() { return false; }
+
         // Movement generator responses
         virtual void TimedFleeingEnded();
         virtual void RetreatingArrived() {}
