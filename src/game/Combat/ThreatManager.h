@@ -154,6 +154,7 @@ class ThreatContainer
         HostileReference* addThreat(Unit* victim, float threat);
 
         void modifyThreatPercent(Unit* victim, int32 threatPercent);
+        void modifyAllThreatPercent(int32 threatPercent);
 
         HostileReference* selectNextVictim(Unit* attacker, HostileReference* currentVictim);
 
@@ -202,6 +203,7 @@ class ThreatManager
         void addThreatDirectly(Unit* victim, float threat);
 
         void modifyThreatPercent(Unit* victim, int32 threatPercent);
+        void modifyAllThreatPercent(int32 threatPercent);
 
         float getThreat(Unit* victim, bool alsoSearchOfflineList = false);
 
