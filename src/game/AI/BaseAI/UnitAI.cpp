@@ -572,14 +572,7 @@ void UnitAI::DoResetThreat()
         return;
     }
 
-    ThreatList const& threatList = m_unit->getThreatManager().getThreatList();
-    for (auto itr : threatList)
-    {
-        Unit* unit = m_unit->GetMap()->GetUnit(itr->getUnitGuid());
-
-        if (unit && m_unit->getThreatManager().getThreat(unit))
-            m_unit->getThreatManager().modifyThreatPercent(unit, -100);
-    }
+    m_unit->getThreatManager().modifyAllThreatPercent(-100);
 }
 
 bool UnitAI::CanExecuteCombatAction()
