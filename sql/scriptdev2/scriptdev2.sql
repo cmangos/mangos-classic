@@ -2267,13 +2267,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1531011,'%s is weakened!',0,2,0,0,'cthun EMOTE_WEAKENED'),
 
-(-1531012,'The massive floating eyeball in the center of the chamber turns its gaze upon you. You stand before a god.',0,2,0,0,'eye cthun EMOTE_INTRO'),
-(-1531013,'Only flesh and bone. Mortals are such easy prey...',0,1,0,0,'veklor SAY_INTRO_1'),
-(-1531014,'Where are your manners, brother. Let us properly welcome our guests.',0,1,0,0,'veknilash SAY_INTRO_2'),
+(-1531012,'The massive floating eyeball in the center of the chamber turns its gaze upon you. You stand before a god.',0,7,0,0,'eye cthun EMOTE_INTRO'),
+(-1531013,'Only flesh and bone. Mortals are such easy prey...',0,1,0,1,'veklor SAY_INTRO_1'),
+(-1531014,'Where are your manners, brother. Let us properly welcome our guests.',0,1,0,5,'veknilash SAY_INTRO_2'),
 (-1531015,'There will be pain...',0,1,0,0,'veklor SAY_INTRO_3'),
-(-1531016,'Oh so much pain...',0,1,0,0,'veknilash SAY_INTRO_4'),
-(-1531017,'Come, little ones.',0,1,0,0,'veklor SAY_INTRO_5'),
-(-1531018,'The feast of souls begins now...',0,1,0,0,'veknilash SAY_INTRO_6'),
+(-1531016,'Oh so much pain...',0,1,0,5,'veknilash SAY_INTRO_4'),
+(-1531017,'Come, little ones.',0,1,0,15,'veklor SAY_INTRO_5'),
+(-1531018,'The feast of souls begins now...',0,1,0,15,'veknilash SAY_INTRO_6'),
 
 (-1531019,'It\'s too late to turn away.',8623,1,0,0,'veklor SAY_AGGRO_1'),
 (-1531020,'Prepare to embrace oblivion!',8626,1,0,0,'veklor SAY_AGGRO_2'),
