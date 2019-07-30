@@ -211,7 +211,7 @@ struct npc_buru_eggAI : public Scripted_NoMovementAI
     {
         // Explode and Summon hatchling
         DoCastSpellIfCan(m_creature, SPELL_EXPLODE, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_HATCHLING, CAST_TRIGGERED, m_creature->GetObjectGuid());
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_HATCHLING, CAST_TRIGGERED);
 
         // Reset Buru's target - this might have been done by spell, but currently this is unk to us
         if (m_pInstance)

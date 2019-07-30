@@ -134,7 +134,7 @@ CanCastResult UnitAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo, bo
     return CAST_OK;
 }
 
-CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags, ObjectGuid originalCasterGUID) const
+CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags) const
 {
     Unit* caster = m_unit;
 
@@ -193,7 +193,7 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
             if (flags == TRIGGERED_NONE)
                 flags |= TRIGGERED_NORMAL_COMBAT_CAST;
 
-            SpellCastResult result = caster->CastSpell(target, spellInfo, flags, nullptr, nullptr, originalCasterGUID);
+            SpellCastResult result = caster->CastSpell(target, spellInfo, flags);
             if (result != SPELL_CAST_OK)
             {
                 switch (result) // temporary adapter
