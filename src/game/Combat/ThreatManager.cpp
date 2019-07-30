@@ -342,7 +342,7 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
     bool checkedCurrentVictim = false;
     bool suppressRanged = attacker->hasUnitState(UNIT_STAT_ROOT) && !attacker->AI()->IsRangedUnit();
     bool currentVictimInMelee = true;
-    if (suppressRanged)
+    if (suppressRanged && currentVictim)
         currentVictimInMelee = attacker->CanReachWithMeleeAttack(currentVictim->getTarget());
 
     ThreatList::const_iterator lastRef = iThreatList.end();
