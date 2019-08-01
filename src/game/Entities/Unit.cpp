@@ -3939,7 +3939,7 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
     {
         if (Spell const* channeledSpell = m_currentSpells[CURRENT_CHANNELED_SPELL])
         {
-            bool attributeResult;
+            bool attributeResult = false;
             if (!forMovement)
                 attributeResult = channeledSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING);
 
