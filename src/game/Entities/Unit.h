@@ -1794,7 +1794,10 @@ class Unit : public WorldObject
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
         // do not use - kept only for cinematics
         void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);
-        
+
+        // recommend use MonsterMove/MonsterMoveWithSpeed for most case that correctly work with movegens
+        // if used additional args in ... part then floats must explicitly casted to double
+        void SendTeleportPacket(float x, float y, float z, float ori);
         void SendHeartBeat();
 
         void SendMoveRoot(bool state, bool broadcastOnly = false);

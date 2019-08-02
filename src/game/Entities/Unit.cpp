@@ -10034,6 +10034,28 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
     }
 }
 
+void Unit::SendTeleportPacket(float x, float y, float z, float ori)
+{
+    MovementInfo teleportMovementInfo = m_movementInfo;
+    teleportMovementInfo.ChangePosition(x, y, z, ori);
+
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* player = static_cast<Player*>(this);
+        WorldPacket data;
+        data.Initialize(MSG_MOVE_TELEPORT_ACK, 41);
+        data << GetPackGUID();
+        data << uint32(0); // this value increments every time
+        data << teleportMovementInfo;
+        player->GetSession()->SendPacket(data);
+    }
+
+    WorldPacket moveUpdateTeleport(MSG_MOVE_TELEPORT, 38);
+    moveUpdateTeleport << GetPackGUID();
+    teleportMovementInfo.Write(moveUpdateTeleport);
+    SendMessageToSet(moveUpdateTeleport, false);
+}
+
 void Unit::MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath, bool forceDestination)
 {
     Movement::MoveSplineInit init(*this);
