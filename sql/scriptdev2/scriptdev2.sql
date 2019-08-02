@@ -1516,9 +1516,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1000891,'The beast returns from whence it came. The wrath of Neptulon has subsided.',0,3,0,0,'Maws EMOTE_MAWS_KILL'),
 
-(-1000892,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000893,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000894,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1000892,'Beware, $N! Look to the west!',0,0,0,0,'regthar SAY_START_REGTHAR'),
+(-1000893,'A defender has fallen!',0,0,0,0,'regthar SAY_DEFENDER'),
+(-1000894,'The Kolkar invaders are retreating!',0,1,0,0,'regthar YELL_RETREAT'),
 (-1000895,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1000896,'REUSE_ME',0,0,0,0,'REUSE_ME'),
 (-1000897,'REUSE_ME',0,0,0,0,'REUSE_ME'),

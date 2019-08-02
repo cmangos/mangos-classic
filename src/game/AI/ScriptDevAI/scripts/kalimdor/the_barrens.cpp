@@ -692,10 +692,9 @@ enum
 {
     QUEST_COUNTERATTACK        = 4021,
 
-    SAY_START_REGTHAR          = -1000891,
-    SAY_DEFENDER               = -1000892,
-    YELL_RETREAT               = -1000893,
-    YELL_STRONGEST             = -1000894,
+    SAY_START_REGTHAR          = -1000892,
+    SAY_DEFENDER               = -1000893,
+    YELL_RETREAT               = -1000894,
 
     NPC_REGTHAR_DEATHGATE      = 3389,
     NPC_WARLORD_KROMZAR        = 9456,
@@ -809,7 +808,7 @@ private:
             if (Creature * creature = m_creature->SummonCreature(summonEntry, spawnPoint.fX, spawnPoint.fY, spawnPoint.fZ, spawnPoint.fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40 * IN_MILLISECONDS))
             {
                 // Force Horde NPCs spawned in main point to move towards kolkar invaders. We give them WP movement to ensure they always move there event after evade/reset. WP are handled in DB
-                if (spawnPointIdx <= moveToWP)
+                if (spawnPointIdx < moveToWP)
                     creature->GetMotionMaster()->MoveWaypoint();
 
                 // update creature map
@@ -899,6 +898,7 @@ public:
     void FinishEvent()
     {
         // despawn all remaining creature
+        DoScriptText(YELL_RETREAT, m_creature);
         ForceDespawn(m_hordeCreatureMap);
         ForceDespawn(m_kolkarCreatureMap);
 
@@ -947,7 +947,6 @@ public:
 
             case NPC_WARLORD_KROMZAR:
             {
-                DoScriptText(YELL_RETREAT, m_creature);
                 FinishEvent();
                 break;
             }
@@ -1008,6 +1007,18 @@ bool GossipHello_npc_regthar_deathgate(Player* player, Creature* creature)
     return true;
 }
 
+bool QuestAccept_npc_regthar_deathgate(Player* player, Creature* creature, Quest const* quest)
+{
+    if (quest->GetQuestId() == QUEST_COUNTERATTACK)
+    {
+        DoScriptText(SAY_START_REGTHAR, creature, player);
+        player->CLOSE_GOSSIP_MENU();
+        if (npc_regthar_deathgateAI* regtharAI = dynamic_cast<npc_regthar_deathgateAI*>(creature->AI()))
+            regtharAI->StartEvent();
+    }
+    return true;
+}
+
 bool GossipSelect_npc_regthar_deathgate(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
 {
     if (action == GOSSIP_ACTION_INFO_DEF + 1)
@@ -1057,6 +1068,7 @@ void AddSC_the_barrens()
     pNewScript = new Script;
     pNewScript->Name = "npc_regthar_deathgate";
     pNewScript->pGossipHello = &GossipHello_npc_regthar_deathgate;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_regthar_deathgate;
     pNewScript->pGossipSelect = &GossipSelect_npc_regthar_deathgate;
     pNewScript->GetAI = &GetAI_npc_regthar_deathgate;
     pNewScript->RegisterSelf();
