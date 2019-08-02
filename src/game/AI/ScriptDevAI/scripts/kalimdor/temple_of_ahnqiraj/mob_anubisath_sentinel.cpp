@@ -28,6 +28,7 @@ EndScriptData
 enum
 {
     EMOTE_GENERIC_FRENZY            = -1000002,
+    EMOTE_SHARE_POWERS              = -1531047,
 
     SPELL_PERIODIC_MANA_BURN        = 812,
     SPELL_MENDING                   = 2147,
@@ -96,6 +97,7 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
+        DoScriptText(EMOTE_SHARE_POWERS, m_creature);
         DoTransferAbility();
     }
 
