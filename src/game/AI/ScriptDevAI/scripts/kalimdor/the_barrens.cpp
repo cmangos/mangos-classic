@@ -704,17 +704,22 @@ enum
     NPC_KOLKAR_INVADER         = 9524,
     NPC_KOLKAR_STORMSEER       = 9523,
 
-    MAX_HORDE_SPAWN            = 7,
-    MAX_KOLKAR_SPAWN           = 15,
     KILL_LIMIT                 = 20
 };
+
+// respawn time in seconds
+#define COUNTERATTACK_RESPAWN_TIME_HORDE      12 // normal respawn time
+#define COUNTERATTACK_RESPAWN_TIME_HORDE_INC  1  // increased respawn time to have enough defender everytime
+#define COUNTERATTACK_RESPAWN_TIME_KOLKAR     10
 
 struct SpawnPoint
 {
     float fX, fY, fZ, fO;
 };
 
-static const SpawnPoint spawnPointsHorde[] =
+typedef std::vector<SpawnPoint> SpawnPointVector;
+
+static const SpawnPointVector spawnPointsHorde
 {
     { -307.23f, -1919.84f, 91.66f, 0.64f},
     { -281.15f, -1906.39f, 91.66f, 1.88f},
@@ -725,14 +730,14 @@ static const SpawnPoint spawnPointsHorde[] =
     { -226.65f, -1927.87f, 93.24f, 0.41f},
 };
 
-static const SpawnPoint spawnPointsKromzar[] =
+static const SpawnPointVector spawnPointsKromzar
 {
     { -281.19f, -1855.54f, 92.58f, 4.85f},
     { -283.66f, -1858.45f, 92.47f, 4.85f},
     { -286.50f, -1856.18f, 92.44f, 4.85f}
 };
 
-static const SpawnPoint spawnPointsKolkar[] =
+static const SpawnPointVector spawnPointsKolkar
 {
     { -290.26f, -1860.85f, 92.48f, 3.68f},
     { -311.46f, -1871.16f, 92.64f, 6.06f},
@@ -753,47 +758,130 @@ static const SpawnPoint spawnPointsKolkar[] =
 
 struct npc_regthar_deathgateAI : public ScriptedAI
 {
+private:
+    struct KilledSlot
+    {
+        KilledSlot(ObjectGuid guid, TimePoint& rTime) : KilledGuid(guid), respawnTime(rTime) {}
+        ObjectGuid KilledGuid;
+        TimePoint respawnTime;
+    };
+
+    typedef std::map<ObjectGuid, uint32> SpawnPointIndexMap;
+    typedef std::list<KilledSlot> FullGuidList;
+
+    // keep track of spawned creature by saving their guid and assigned slot
+    SpawnPointIndexMap m_hordeCreatureMap;
+    SpawnPointIndexMap m_kolkarCreatureMap;
+
+    // keep track of killed creature by saving their respawntime those lists are sorted, the first one should be respawned first
+    FullGuidList m_killedHordeGuid;
+    FullGuidList m_killedKolkarGuid;
+
+    uint64 m_eventTimer;
+    uint32 m_waitSummonTimerKolkar;
+    uint32 m_waitSummonTimerHorde;
+    uint32 m_kolkarKillCount;
+    bool   m_eventStarted;
+    bool   m_isKromzarSpawned;
+
+    // Spawn one creature if there is at least one killed in killedGuidList (DB waypoint for all spawnpoint index less or equal given moveToWP argument)
+    bool SpawnCreature(SpawnPointVector const& spawnPoints, SpawnPointIndexMap& creatureSlotMap, FullGuidList& killedGuidList, uint32 entry1, uint32 entry2, int32 moveToWP = -1)
+    {
+        if (killedGuidList.empty())
+            return false;
+
+        bool result = false;
+        KilledSlot const& spawnSlot = killedGuidList.front();
+        auto itr = creatureSlotMap.find(spawnSlot.KilledGuid);
+        if (itr == creatureSlotMap.end())
+        {
+            error_log("SD2::npc_regthar_deathgateAI::SpawnCreature> Invalid GUID was present in guidList container!");
+            killedGuidList.erase(killedGuidList.begin());
+            return false;
+        }
+
+        if (spawnSlot.respawnTime < m_creature->GetMap()->GetCurrentClockTime())
+        {
+            killedGuidList.erase(killedGuidList.begin());
+            uint32 summonEntry = urand(0, 1) ? entry1 : entry2;
+            int32 spawnPointIdx = int32(itr->second);
+            SpawnPoint const& spawnPoint = spawnPoints[spawnPointIdx];
+            if (Creature * creature = m_creature->SummonCreature(summonEntry, spawnPoint.fX, spawnPoint.fY, spawnPoint.fZ, spawnPoint.fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40 * IN_MILLISECONDS))
+            {
+                // Force Horde NPCs spawned in main point to move towards kolkar invaders. We give them WP movement to ensure they always move there event after evade/reset. WP are handled in DB
+                if (spawnPointIdx <= moveToWP)
+                    creature->GetMotionMaster()->MoveWaypoint();
+
+                // update creature map
+                creatureSlotMap[creature->GetObjectGuid()] = spawnPointIdx;
+                creatureSlotMap.erase(itr);
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    // spawn all slot with given entry1/entry2 randomly and store them to SpawnPointIndexMap storage (moveTOWP is max slot index that should use DB waypoint)
+    void SpawnAllSlot(SpawnPointVector const& spawnPoints, SpawnPointIndexMap& creatureSlotMap, uint32 entry1, uint32 entry2, int32 moveToWP = -1)
+    {
+        int32 counter = 0;
+        for (auto& spawnPoint : spawnPoints)
+        {
+            uint32 summonEntry = urand(0, 1) ? entry1 : entry2;
+            if (Creature * creature = m_creature->SummonCreature(summonEntry, spawnPoint.fX, spawnPoint.fY, spawnPoint.fZ, spawnPoint.fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40 * IN_MILLISECONDS))
+            {
+                if (counter < moveToWP)
+                {
+                    // Force Horde NPCs spawned in main point to move towards kolkar invaders. We give them WP movement to ensure they always move there event after evade/reset. WP are handled in DB
+                    creature->GetMotionMaster()->MoveWaypoint();
+                }
+
+                creatureSlotMap[creature->GetObjectGuid()] = uint32(counter);
+                counter++;
+            }
+        }
+    }
+
+    // despawn all creature in provided SpawnPointIndexMap if they are still exist
+    void ForceDespawn(SpawnPointIndexMap& spawnPoints)
+    {
+        for (auto spawnItr : spawnPoints)
+        {
+            if (Creature * creature = m_creature->GetMap()->GetCreature(spawnItr.first))
+            {
+                if (creature->isInCombat())
+                {
+                    // Give one minute to the NPCs still fighting before despawning them
+                    creature->ForcedDespawn(MINUTE * IN_MILLISECONDS);
+                }
+                else
+                    creature->ForcedDespawn();
+            }
+        }
+    }
+
+public:
     npc_regthar_deathgateAI(Creature* creature) : ScriptedAI(creature) {Reset();}
-
-    std::list<Creature*> kolkarNPCList;
-    std::list<uint32> kolkarSpawnList;
-    std::list<Creature*>::iterator itr;
-
-    std::list<Creature*> hordeNPCList;
-    std::list<uint32> hordeSpawnList;
-    std::list<Creature*>::iterator itrh;
 
     void Reset()
     {
-        m_summonCountHorde     = 0;
-        m_waitSummonTimer      = 0;
-        m_waitSummonTimerHorde = 0;
-        m_spawnPosition        = 0;
-        m_killCount            = 0;
-        m_summonKolkarCount    = 0;
-        m_eventTimer           = 0;
-        m_isKromzarSpawned     = false;
-        kolkarNPCList.clear();
-        kolkarSpawnList.clear();
-        hordeNPCList.clear();
-        hordeSpawnList.clear();
+        m_waitSummonTimerKolkar = 0;
+        m_waitSummonTimerHorde  = 0;
+        m_kolkarKillCount       = 0;
+        m_eventTimer            = 0;
+        m_isKromzarSpawned      = false;
+        m_eventStarted          = false;
+        m_killedKolkarGuid.clear();
+        m_killedHordeGuid.clear();
+        m_hordeCreatureMap.clear();
+        m_kolkarCreatureMap.clear();
     }
 
-void JustRespawned()
-{
-    FinishEvent();
-    Reset();
-}
-
-    uint64 m_eventTimer;
-    uint32 m_summonCountHorde;
-    uint32 m_waitSummonTimer;
-    uint32 m_waitSummonTimerHorde;
-    uint32 m_spawnPosition;
-    uint32 m_killCount;
-    uint32 m_summonKolkarCount;
-    bool   m_eventStarted;
-    bool   m_isKromzarSpawned;
+    void JustRespawned()
+    {
+        FinishEvent();
+        Reset();
+    }
 
     void StartEvent()
     {
@@ -802,152 +890,68 @@ void JustRespawned()
 
         m_eventStarted         = true;
         m_eventTimer           = 20 * MINUTE * IN_MILLISECONDS;
-
+ 
         // Initial summon of NPCs, they will be resummon when killed based on their spawn point
-
-        uint32 summonEntry;
-        // Horde defenders
-        for (uint8 i = 0; i < MAX_HORDE_SPAWN; ++i)
-        {
-            summonEntry = urand(0, 1) ? NPC_HORDE_DEFENDER : NPC_HORDE_AXE_THROWER;
-            if (Creature* hordeDefender = m_creature->SummonCreature(summonEntry, spawnPointsHorde[m_summonCountHorde].fX, spawnPointsHorde[m_summonCountHorde].fY, spawnPointsHorde[m_summonCountHorde].fZ, spawnPointsHorde[m_summonCountHorde].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40 * IN_MILLISECONDS))
-            {
-                if (i <= 5) // Force Horde NPCs spawned in main point to move towards kolkar invaders. We give them WP movement to ensure they always move there event after evade/reset. WP are handled in DB
-                    hordeDefender->GetMotionMaster()->MoveWaypoint();
-                ++m_summonCountHorde;
-            }
-        }
-        // next possible summon in 12 seconds
-        m_waitSummonTimerHorde = 12 * IN_MILLISECONDS;
-
-        // Kolkar invaders
-        for (uint8 i = 0 ; i < MAX_KOLKAR_SPAWN ; ++i)
-        {
-            summonEntry = urand(0, 1) ? NPC_KOLKAR_INVADER : NPC_KOLKAR_STORMSEER;
-            m_creature->SummonCreature(summonEntry,  spawnPointsKolkar[m_summonKolkarCount].fX, spawnPointsKolkar[m_summonKolkarCount].fY, spawnPointsKolkar[m_summonKolkarCount].fZ, spawnPointsKolkar[m_summonKolkarCount].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40 * IN_MILLISECONDS);
-            ++m_summonKolkarCount;
-        }
+        SpawnAllSlot(spawnPointsHorde, m_hordeCreatureMap, NPC_HORDE_DEFENDER, NPC_HORDE_AXE_THROWER, 5);
+        SpawnAllSlot(spawnPointsKolkar, m_kolkarCreatureMap, NPC_KOLKAR_INVADER, NPC_KOLKAR_STORMSEER);
     }
 
     void FinishEvent()
     {
-        for (auto hordeNPC : hordeNPCList)
-        {
-            if (hordeNPC)
-            {
-                if (hordeNPC->isInCombat())
-                    hordeNPC->ForcedDespawn(MINUTE * IN_MILLISECONDS);   // Give one minute to the NPCs still fighting before despawning them
-                else
-                    hordeNPC->ForcedDespawn();
-            }
-        }
-
-        for (auto kolkarNPC : kolkarNPCList)
-        {
-            if (kolkarNPC)
-            {
-                if (kolkarNPC->isInCombat())
-                    kolkarNPC->ForcedDespawn(MINUTE * IN_MILLISECONDS);   // Give one minute to the NPCs still fighting before despawning them
-                else
-                    kolkarNPC->ForcedDespawn();
-            }
-        }
+        // despawn all remaining creature
+        ForceDespawn(m_hordeCreatureMap);
+        ForceDespawn(m_kolkarCreatureMap);
 
         m_eventStarted = false;
-        m_killCount    = 0;
-    }
-
-    void JustSummoned(Creature* summoned)
-    {
-        switch (summoned->GetEntry())
-        {
-            case NPC_HORDE_DEFENDER:    //replace dead creature from list with new spawned one
-            case NPC_HORDE_AXE_THROWER:
-            {
-                if (m_summonKolkarCount < MAX_KOLKAR_SPAWN)
-                {
-                    itrh = hordeNPCList.begin();
-                    advance (itrh,hordeSpawnList.front());
-                    *itrh = summoned;
-                    hordeSpawnList.pop_front(); //Drop spawned creature from spawn list
-                }
-                else
-                    hordeNPCList.push_back(summoned);
-                break;
-            }
-            case NPC_KOLKAR_INVADER:    //replace dead creature from list with new spawned one
-            case NPC_KOLKAR_STORMSEER:
-            {
-                if (m_summonKolkarCount < MAX_KOLKAR_SPAWN)
-                {
-                    itr = kolkarNPCList.begin();
-                    advance (itr,kolkarSpawnList.front());
-                    *itr = summoned;
-                    kolkarSpawnList.pop_front(); //Drop spawned creature from spawn list
-                }
-                else
-                    kolkarNPCList.push_back(summoned);
-                break;
-            }
-            default:
-                break;
-        }
+        m_kolkarKillCount = 0;
     }
 
     void SummonedCreatureJustDied(Creature* killed)
     {
+        TimePoint respTime = m_creature->GetMap()->GetCurrentClockTime();
         switch (killed->GetEntry())
         {
-            case NPC_HORDE_DEFENDER:     //find spawnpoint of dead creature spawnpoint = position in creature list
+            case NPC_HORDE_DEFENDER:
             case NPC_HORDE_AXE_THROWER:
             {
-                --m_summonCountHorde;
-                m_waitSummonTimerHorde = 12 * IN_MILLISECONDS;
-
-                m_spawnPosition = 0;
-                for (auto hordeCreature : hordeNPCList)
+                // handle respawn time
+                if (m_killedHordeGuid.size() > 3)
                 {
-                    if (hordeCreature == killed)
-                    {
-                        hordeSpawnList.push_back(m_spawnPosition);  //put spawnpoint in list
-                        hordeCreature = nullptr;
-                        break;
-                    }
-                    ++m_spawnPosition;
+                    // speed up summon if too many defenders are dead
+                    respTime += std::chrono::seconds(COUNTERATTACK_RESPAWN_TIME_HORDE_INC);
                 }
+                else
+                    respTime += std::chrono::seconds(COUNTERATTACK_RESPAWN_TIME_HORDE);
+
+                // save the killed guid and respawn time for later use in SpawnCreature
+                m_killedHordeGuid.emplace_back(killed->GetObjectGuid(), respTime);
 
                 if (urand(0,1))
                     DoScriptText(SAY_DEFENDER, m_creature);
-
                 break;
             }
-            case NPC_KOLKAR_INVADER:    //find spawnpoint of dead creature, spawnpoint = position in creature list
+
+            case NPC_KOLKAR_INVADER:
             case NPC_KOLKAR_STORMSEER:
             {
-                --m_summonKolkarCount;
-                ++m_killCount;
-                m_waitSummonTimer = 10 * IN_MILLISECONDS;
+                // handle respawn time
+                respTime += std::chrono::seconds(COUNTERATTACK_RESPAWN_TIME_KOLKAR);
 
-                m_spawnPosition = 0;
-                for (auto hordeCreature : kolkarNPCList)
-                {
-                    if (hordeCreature == killed)
-                    {
-                        kolkarSpawnList.push_back(m_spawnPosition);  //put spawnpoint in list
-                        hordeCreature = nullptr;
-                        break;
-                    }
-                    ++m_spawnPosition;
-                }
+                // save the killed guid and respawn time for later use in SpawnCreature
+                m_killedKolkarGuid.emplace_back(killed->GetObjectGuid(), respTime);
 
+                // increment killed creature count
+                ++m_kolkarKillCount;
                 break;
             }
+
             case NPC_WARLORD_KROMZAR:
             {
                 DoScriptText(YELL_RETREAT, m_creature);
                 FinishEvent();
                 break;
             }
+
             default:
                 break;
         }
@@ -955,13 +959,15 @@ void JustRespawned()
 
     void UpdateAI(const uint32 uiDiff)
     {
-        return;
+        if (!m_eventStarted)
+            return;
+
         if (!m_isKromzarSpawned && m_eventTimer < uiDiff)
             FinishEvent();
 
         if (!m_isKromzarSpawned)
         {
-            if (m_killCount >= KILL_LIMIT)  // Kill count reached: spawn Warlord Kromzar and his bodyguards
+            if (m_kolkarKillCount >= KILL_LIMIT)  // Kill count reached: spawn Warlord Kromzar and his bodyguards
             {
                 m_creature->SummonCreature(NPC_KOLKAR_INVADER,  spawnPointsKromzar[0].fX, spawnPointsKromzar[0].fY, spawnPointsKromzar[0].fZ, spawnPointsKromzar[0].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40 * IN_MILLISECONDS);
                 m_creature->SummonCreature(NPC_WARLORD_KROMZAR,  spawnPointsKromzar[1].fX, spawnPointsKromzar[1].fY, spawnPointsKromzar[1].fZ, spawnPointsKromzar[1].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40 * IN_MILLISECONDS);
@@ -970,32 +976,14 @@ void JustRespawned()
                 return;
             }
 
-            if (m_waitSummonTimerHorde < uiDiff && m_summonCountHorde < MAX_HORDE_SPAWN)  // Summon Horde defender if possible
-            {
-                uint32 summonEntry = urand(0, 1) ? NPC_HORDE_DEFENDER : NPC_HORDE_AXE_THROWER;
-                if (Creature* hordeDefender = m_creature->SummonCreature(summonEntry,  spawnPointsHorde[hordeSpawnList.front()].fX, spawnPointsHorde[hordeSpawnList.front()].fY, spawnPointsHorde[hordeSpawnList.front()].fZ, spawnPointsHorde[hordeSpawnList.front()].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40 * IN_MILLISECONDS))
-                {
-                    if (hordeSpawnList.front() <= 5) // Force Horde NPCs spawned in main point to move towards kolkar invaders. We give them WP movement to ensure they always move there event after evade/reset. WP are handled in DB
-                        hordeDefender->GetMotionMaster()->MoveWaypoint();
-                    ++m_summonCountHorde;
-                    m_waitSummonTimerHorde = (m_summonCountHorde <= 4) ? 1000 : 12 * IN_MILLISECONDS;   // speed up summon if too many defenders are dead
-                }
-            }
+            // Summon Horde defender if need
+            SpawnCreature(spawnPointsHorde, m_hordeCreatureMap, m_killedHordeGuid, NPC_HORDE_DEFENDER, NPC_HORDE_AXE_THROWER, 5);
 
-            if (m_summonKolkarCount < MAX_KOLKAR_SPAWN && m_waitSummonTimer < uiDiff)
-            {
-                uint32 summonEntry = urand(0, 1) ? NPC_KOLKAR_STORMSEER : NPC_KOLKAR_INVADER;
-                m_creature->SummonCreature(summonEntry,  spawnPointsKolkar[kolkarSpawnList.front()].fX, spawnPointsKolkar[kolkarSpawnList.front()].fY, spawnPointsKolkar[kolkarSpawnList.front()].fZ, spawnPointsKolkar[kolkarSpawnList.front()].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40 * IN_MILLISECONDS);
-                m_waitSummonTimer = 10 * IN_MILLISECONDS;
-                ++m_summonKolkarCount;
-            }
+            // Summon kolkar if need
+            SpawnCreature(spawnPointsKolkar, m_kolkarCreatureMap, m_killedKolkarGuid, NPC_KOLKAR_STORMSEER, NPC_KOLKAR_INVADER);
         }
         else    // Nothing to spawn: update all timers
-        {
-            m_waitSummonTimer -= uiDiff;
-            m_waitSummonTimerHorde -= uiDiff;
             m_eventTimer -= uiDiff;
-        }
     }
 };
 
