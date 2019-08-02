@@ -112,6 +112,7 @@ void ChaseMovementGenerator::Initialize(Unit& owner)
     owner.addUnitState(UNIT_STAT_CHASE);                    // _MOVE set in _SetTargetLocation after required checks
     _setLocation(owner);
     i_target->GetPosition(i_lastTargetPos.x, i_lastTargetPos.y, i_lastTargetPos.z);
+    m_fanningEnabled = !(owner.GetTypeId() == TYPEID_UNIT && static_cast<Creature&>(owner).IsWorldBoss());
 }
 
 void ChaseMovementGenerator::Finalize(Unit& owner)
@@ -348,6 +349,9 @@ const float fanAngleMax = M_PI_F / 4;
 
 void ChaseMovementGenerator::FanOut(Unit& owner)
 {
+    if (!m_fanningEnabled)
+        return;
+
     Unit* collider = nullptr;
     MaNGOS::AnyUnitFulfillingConditionInRangeCheck collisionCheck(&owner, [&](Unit* unit)->bool
     {
