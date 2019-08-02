@@ -156,6 +156,8 @@ INSERT INTO scripted_areatrigger VALUES
 (522,'at_twiggy_flathead');
 UPDATE creature_template SET ScriptName='npc_wizzlecranks_shredder' WHERE entry=3439;
 UPDATE creature_template SET ScriptName='npc_gallywix' WHERE entry=7288;
+UPDATE creature_template SET ScriptName = 'npc_regthar_deathgate' WHERE entry = 3389;
+UPDATE creature_template SET ScriptName = 'npc_horde_defender' WHERE entry = 9457;
 
 /* BLACKFATHOM DEPTHS */
 UPDATE instance_template SET ScriptName='instance_blackfathom_deeps' WHERE map=48;

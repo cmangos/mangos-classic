@@ -684,6 +684,535 @@ UnitAI* GetAI_npc_gallywix(Creature* pCreature)
     return new npc_gallywixAI(pCreature);
 }
 
+/*#####
+## npc_regthar_deathgate
+#####*/
+
+enum
+{
+    QUEST_COUNTERATTACK        = 4021,
+
+    SAY_START_REGTHAR          = -1000891,
+    SAY_DEFENDER               = -1000892,
+    YELL_RETREAT               = -1000893,
+    YELL_STRONGEST             = -1000894,
+
+    NPC_REGTHAR_DEATHGATE      = 3389,
+    NPC_WARLORD_KROMZAR        = 9456,
+    NPC_HORDE_DEFENDER         = 9457,
+    NPC_HORDE_AXE_THROWER      = 9458,
+    NPC_KOLKAR_INVADER         = 9524,
+    NPC_KOLKAR_STORMSEER       = 9523
+
+};
+
+struct SpawnPoint
+{
+    float fX;
+    float fY;
+    float fZ;
+    float fO;
+};
+
+SpawnPoint SpawnPointsHorde[] =
+{
+    { -307.23f, -1919.84f, 91.66f, 0.64f},
+    { -295.84f, -1913.58f, 91.66f, 1.86f},
+    { -281.15f, -1906.39f, 91.66f, 1.88f},
+    { -270.09f, -1901.58f, 91.66f, 1.88f},
+    { -226.65f, -1927.87f, 93.24f, 0.41f},
+    { -221.61f, -1936.54f, 94.00f, 0.41f},
+    { -275.24f, -1901.96f, 91.66f, 1.90f},
+};
+
+SpawnPoint SpawnPointsKromzar[] =
+{
+    { -281.19f, -1855.54f, 92.58f, 4.85f},
+    { -283.66f, -1858.45f, 92.47f, 4.85f},
+    { -286.50f, -1856.18f, 92.44f, 4.85f}
+};
+
+SpawnPoint SpawnPointsKolkar[] =
+{
+    { -290.26f, -1860.85f, 92.48f, 3.68f},
+    { -311.46f, -1871.16f, 92.64f, 6.06f},
+    { -321.75f, -1868.48f, 93.73f, 0.30f},
+    { -338.12f, -1852.10f, 94.09f, 0.01f},
+    { -311.46f, -1847.78f, 94.93f, 6.15f},
+    { -292.02f, -1840.00f, 93.06f, 3.51f},
+    { -267.14f, -1853.97f, 93.24f, 3.52f},
+    { -267.68f, -1832.77f, 92.69f, 3.52f},
+    { -279.70f, -1845.67f, 92.81f, 3.83f},
+    { -338.99f, -1868.68f, 93.50f, 0.17f},
+    { -210.28f, -1916.22f, 92.87f, 4.89f},
+    { -209.09f, -1922.44f, 93.26f, 3.87f},
+    { -206.64f, -1924.83f, 93.78f, 2.41f},
+    { -283.57f, -1883.91f, 92.60f, 3.53f},
+    { -197.50f, -1929.31f, 94.03f, 3.51f}
+};
+
+struct npc_regthar_deathgateAI : public ScriptedAI
+{
+    npc_regthar_deathgateAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+
+    std::list<Creature*> lCreatureList;
+    std::list<uint32> lSpawnList;
+    std::list<Creature*>::iterator itr;
+
+    std::list<Creature*> lCreatureListHorde;
+    std::list<uint32> lSpawnListHorde;
+    std::list<Creature*>::iterator itrh;
+
+    void Reset()
+    {
+    }
+
+
+void JustRespawned()
+{
+    FinishEvent();
+    Reset();
+}
+
+    uint64 m_uiPlayerGUID;
+    uint64 m_uiEventTimer;
+    uint32 m_uiSummonCountInvader;
+    uint32 m_uiSummonCountStormseer;
+    uint32 m_uiSummonCountHorde;
+    uint32 m_uiWaitSummonTimer;
+    uint32 m_uiWaitSummonTimerHorde;
+    uint32 m_uiSpawnPosition;
+    uint32 m_uiKillCount;
+    uint32 m_uiCreatureCount;
+    uint32 m_uiPhaseCount;
+    bool   m_bEventStarted;
+
+    void StartEvent(uint64 uiPlayerGUID)
+    {
+    if(m_bEventStarted)
+        return;
+
+        m_uiPlayerGUID           = uiPlayerGUID;
+        m_bEventStarted          = true;
+        m_uiEventTimer           = 1200000;
+        m_uiSummonCountInvader   = 0;
+        m_uiSummonCountStormseer = 0;
+        m_uiSummonCountHorde     = 0;
+        m_uiWaitSummonTimer      = 0;
+        m_uiWaitSummonTimerHorde = 0;
+        m_uiSpawnPosition        = 0;
+        m_uiKillCount            = 0;
+        m_uiCreatureCount        = 0;
+        m_uiPhaseCount           = 1;
+        lCreatureList.clear();
+        lSpawnList.clear();
+        lCreatureListHorde.clear();
+        lSpawnListHorde.clear();
+    }
+
+    void FinishEvent()
+    {
+        m_uiPlayerGUID = 0;
+        m_bEventStarted = false;
+        m_uiKillCount   = 0;
+    }
+
+    void JustSummoned(Creature* pSummoned)
+    {
+        if (pSummoned->GetEntry() == NPC_HORDE_DEFENDER) //replace died creature from list with new spawned one
+        {
+            if (m_uiPhaseCount == 2)
+            {
+                itrh = lCreatureListHorde.begin();
+                advance (itrh,lSpawnListHorde.front());
+                *itrh = pSummoned;
+                lSpawnListHorde.pop_front(); //Drop spawned creature from spawn list
+            }
+
+            if (m_uiPhaseCount == 1)
+            {
+                lCreatureListHorde.push_back(pSummoned);
+            }
+        }
+
+        if (pSummoned->GetEntry() == NPC_HORDE_AXE_THROWER) //replace died creature from list with new spawned one
+        {
+            if (m_uiPhaseCount == 2)
+            {
+                itrh = lCreatureListHorde.begin();
+                advance (itrh,lSpawnListHorde.front());
+                *itrh = pSummoned;
+                lSpawnListHorde.pop_front(); //Drop spawned creature from spawn list
+            }
+
+            if (m_uiPhaseCount == 1)
+            {
+                lCreatureListHorde.push_back(pSummoned);
+            }
+        }
+
+        if (pSummoned->GetEntry() == NPC_KOLKAR_INVADER) //replace died creature from list with new spawned one
+        {
+            if (m_uiPhaseCount == 2)
+            {
+                itr = lCreatureList.begin();
+                advance (itr,lSpawnList.front());
+                *itr = pSummoned;
+                lSpawnList.pop_front(); //Drop spawned creature from spawn list
+            }
+
+            if (m_uiPhaseCount == 1)
+            {
+                lCreatureList.push_back(pSummoned);
+            }
+        }
+
+        if (pSummoned->GetEntry() == NPC_KOLKAR_STORMSEER) //Insert each spawn into list until 10 spawned
+        {
+            if (m_uiPhaseCount == 2)
+            {
+                itr = lCreatureList.begin();
+                advance (itr,lSpawnList.front());
+                *itr = pSummoned;
+                lSpawnList.pop_front(); //Drop spawned creature from spawn list
+            }
+
+            if (m_uiPhaseCount == 1)
+            {
+                lCreatureList.push_back(pSummoned);
+            }
+        }
+    }
+
+    void SummonedCreatureJustDied(Creature* pKilled)
+    {
+        if (pKilled->GetEntry() == NPC_HORDE_DEFENDER) //find spawnpoint of died creature spawnpoint = position in creature list
+        {
+            --m_uiSummonCountHorde;
+            m_uiWaitSummonTimerHorde = 12000;
+
+            m_uiSpawnPosition = 0;
+            for (std::list<Creature*>::iterator itrh = lCreatureListHorde.begin(); itrh != lCreatureListHorde.end(); ++itrh, ++m_uiSpawnPosition)
+            {
+                if ((*itrh) == pKilled)
+                {
+                    lSpawnListHorde.push_back(m_uiSpawnPosition);  //put spawnpoint in list
+                    (*itrh) = NULL;
+                }
+            }
+            if (m_uiWaitSummonTimerHorde < 1000)
+                m_uiWaitSummonTimerHorde = 1000;
+
+            if (urand(0,1))
+                DoScriptText(SAY_DEFENDER, m_creature);
+        }
+
+        if (pKilled->GetEntry() == NPC_HORDE_AXE_THROWER) //find spawnpoint of died creature spawnpoint = position in creature list
+        {
+            --m_uiSummonCountHorde;
+            m_uiSpawnPosition = 0;
+            for (std::list<Creature*>::iterator itrh = lCreatureListHorde.begin(); itrh != lCreatureListHorde.end(); ++itrh, ++m_uiSpawnPosition)
+            {
+                if ((*itrh) == pKilled)
+                {
+                    lSpawnListHorde.push_back(m_uiSpawnPosition);  //put spawnpoint in list
+                    (*itrh) = NULL;
+                }
+            }
+            if (m_uiWaitSummonTimerHorde < 1000)
+                m_uiWaitSummonTimerHorde = 1000;
+
+            if (urand(0,1))
+                DoScriptText(SAY_DEFENDER, m_creature);
+        }
+
+        if (pKilled->GetEntry() == NPC_WARLORD_KROMZAR)
+        {
+            DoScriptText(YELL_RETREAT, m_creature);
+            m_uiPhaseCount = 4;
+        }
+
+        if (pKilled->GetEntry() == NPC_KOLKAR_INVADER) //find spawnpoint of died creature, spawnpoint = position in creature list
+        {
+            --m_uiSummonCountInvader;
+            ++m_uiKillCount;
+            m_uiWaitSummonTimer = 10000;
+
+            m_uiSpawnPosition = 0;
+            for (std::list<Creature*>::iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr, ++m_uiSpawnPosition)
+            {
+                if ((*itr) == pKilled)
+                {
+                    lSpawnList.push_back(m_uiSpawnPosition);  //put spawnpoint in list
+                    (*itr) = NULL;
+                }
+            }
+        }
+
+        if (pKilled->GetEntry() == NPC_KOLKAR_STORMSEER) //find spawnpoint of died creature, spawnpoint = position in creature list
+        {
+            --m_uiSummonCountStormseer;
+            ++m_uiKillCount;
+            m_uiWaitSummonTimer = 10000;
+
+            m_uiSpawnPosition = 0;
+            for (std::list<Creature*>::iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr, ++m_uiSpawnPosition)
+            {
+                if ((*itr) == pKilled)
+                {
+                    lSpawnList.push_back(m_uiSpawnPosition);  //put spawnpoint in list
+                    (*itr) = NULL;
+                }
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (m_uiPhaseCount <= 2 && m_uiEventTimer < uiDiff)
+            m_uiPhaseCount = 4;
+
+        if (m_uiPhaseCount == 4)
+        {
+            for (std::list<Creature*>::iterator itrh = lCreatureListHorde.begin(); itrh != lCreatureListHorde.end(); ++itrh)
+            {
+                if ((*itrh)!= NULL)
+                {
+                    (*itrh)->ForcedDespawn();
+                }
+            }
+                m_uiPhaseCount = 5;
+        }
+
+        if (m_uiPhaseCount == 5)
+        {
+            for (std::list<Creature*>::iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr)
+            {
+                if ((*itr) != NULL)
+                {
+                    (*itr)->ForcedDespawn();
+                }
+            }
+            m_uiPhaseCount = 6;
+            FinishEvent();
+        }
+        if (m_uiPhaseCount == 2 && m_uiKillCount >= 20)
+            {
+                m_uiPhaseCount = 3;
+                m_creature->SummonCreature(NPC_KOLKAR_INVADER,  SpawnPointsKromzar[0].fX, SpawnPointsKromzar[0].fY, SpawnPointsKromzar[0].fZ, SpawnPointsKromzar[0].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                m_creature->SummonCreature(NPC_WARLORD_KROMZAR,  SpawnPointsKromzar[1].fX, SpawnPointsKromzar[1].fY, SpawnPointsKromzar[1].fZ, SpawnPointsKromzar[1].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                m_creature->SummonCreature(NPC_KOLKAR_STORMSEER,  SpawnPointsKromzar[2].fX, SpawnPointsKromzar[2].fY, SpawnPointsKromzar[2].fZ, SpawnPointsKromzar[2].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+            }
+
+        if (m_uiPhaseCount <= 2 && m_uiWaitSummonTimerHorde < uiDiff && m_uiSummonCountHorde < 7)
+        {
+            if (m_uiPhaseCount == 2)
+                switch (urand(0, 1))
+                {
+                    case 0:
+                        m_creature->SummonCreature(NPC_HORDE_DEFENDER,  SpawnPointsHorde[lSpawnListHorde.front()].fX, SpawnPointsHorde[lSpawnListHorde.front()].fY, SpawnPointsHorde[lSpawnListHorde.front()].fZ, SpawnPointsHorde[lSpawnListHorde.front()].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        ++m_uiSummonCountHorde;
+                        if (m_uiSummonCountHorde <= 4)
+                            m_uiWaitSummonTimerHorde = 1000;
+                        else                        
+                        m_uiWaitSummonTimerHorde = 12000;
+                        break;
+                    case 1:
+                        m_creature->SummonCreature(NPC_HORDE_AXE_THROWER,  SpawnPointsHorde[lSpawnListHorde.front()].fX, SpawnPointsHorde[lSpawnListHorde.front()].fY, SpawnPointsHorde[lSpawnListHorde.front()].fZ, SpawnPointsHorde[lSpawnListHorde.front()].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        ++m_uiSummonCountHorde;
+                        if (m_uiSummonCountHorde <= 4)
+                            m_uiWaitSummonTimerHorde = 1000;
+                        else                        
+                        m_uiWaitSummonTimerHorde = 12000;
+                        break;
+                }
+
+            if (m_uiPhaseCount == 1)
+                switch (urand(0, 1))
+                {
+                    case 0:
+                        m_creature->SummonCreature(NPC_HORDE_DEFENDER,  SpawnPointsHorde[m_uiSummonCountHorde].fX, SpawnPointsHorde[m_uiSummonCountHorde].fY, SpawnPointsHorde[m_uiSummonCountHorde].fZ, SpawnPointsHorde[m_uiSummonCountHorde].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        ++m_uiSummonCountHorde;
+                        break;
+                    case 1:
+                        m_creature->SummonCreature(NPC_HORDE_AXE_THROWER,  SpawnPointsHorde[m_uiSummonCountHorde].fX, SpawnPointsHorde[m_uiSummonCountHorde].fY, SpawnPointsHorde[m_uiSummonCountHorde].fZ, SpawnPointsHorde[m_uiSummonCountHorde].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        ++m_uiSummonCountHorde;
+                        break;
+                }
+        }
+
+        if (m_uiPhaseCount <= 2 && m_uiWaitSummonTimer < uiDiff && (m_uiSummonCountInvader + m_uiSummonCountStormseer) < 15)
+        {
+
+            if (m_uiSummonCountInvader < 8)
+            {
+                ++m_uiSummonCountInvader;
+
+                if (m_uiPhaseCount == 2)
+                {
+                    m_creature->SummonCreature(NPC_KOLKAR_INVADER,  SpawnPointsKolkar[lSpawnList.front()].fX, SpawnPointsKolkar[lSpawnList.front()].fY, SpawnPointsKolkar[lSpawnList.front()].fZ, SpawnPointsKolkar[lSpawnList.front()].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                    m_uiWaitSummonTimer = 10000;
+                }
+
+                if (m_uiPhaseCount == 1)
+                {
+                    m_creature->SummonCreature(NPC_KOLKAR_INVADER,  SpawnPointsKolkar[m_uiCreatureCount].fX, SpawnPointsKolkar[m_uiCreatureCount].fY, SpawnPointsKolkar[m_uiCreatureCount].fZ, SpawnPointsKolkar[m_uiCreatureCount].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                    ++m_uiCreatureCount;
+                }
+            }
+
+            if (m_uiSummonCountStormseer < 7)
+            {
+                ++m_uiSummonCountStormseer;
+                if (m_uiPhaseCount == 2)
+                {
+                    m_creature->SummonCreature(NPC_KOLKAR_STORMSEER,  SpawnPointsKolkar[lSpawnList.front()].fX, SpawnPointsKolkar[lSpawnList.front()].fY, SpawnPointsKolkar[lSpawnList.front()].fZ, SpawnPointsKolkar[lSpawnList.front()].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                    m_uiWaitSummonTimer = 10000;
+                }
+
+                if (m_uiPhaseCount == 1)
+                {
+                    m_creature->SummonCreature(NPC_KOLKAR_STORMSEER,  SpawnPointsKolkar[m_uiCreatureCount].fX, SpawnPointsKolkar[m_uiCreatureCount].fY, SpawnPointsKolkar[m_uiCreatureCount].fZ, SpawnPointsKolkar[m_uiCreatureCount].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                    ++m_uiCreatureCount;
+                }
+            }
+
+            if (m_uiPhaseCount == 1 && m_uiCreatureCount == 15) //set initial spawn done when 15 enemys spawned
+            {
+                m_uiPhaseCount = 2;
+            }
+        }
+
+        else
+        {
+            m_uiWaitSummonTimer -= uiDiff;
+            m_uiWaitSummonTimerHorde -= uiDiff;
+            m_uiEventTimer -= uiDiff;
+        }
+    }        
+};
+
+CreatureAI* GetAI_npc_regthar_deathgate(Creature* pCreature)
+{
+    return new npc_regthar_deathgateAI(pCreature);
+}
+
+bool GossipHello_npc_regthar_deathgate(Player* pPlayer, Creature* pCreature)
+{
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid()); 
+
+    if (pPlayer->GetQuestStatus(QUEST_COUNTERATTACK) == QUEST_STATUS_INCOMPLETE)
+    {
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Where is Warlord Krom'zar?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        pPlayer->SEND_GOSSIP_MENU(2533, pCreature->GetObjectGuid());
+        return true;
+    }
+    else
+        pPlayer->SEND_GOSSIP_MENU(2533, pCreature->GetObjectGuid());
+    return true;
+}
+
+bool GossipSelect_npc_regthar_deathgate(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+{
+    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+    {
+        DoScriptText(SAY_START_REGTHAR, pCreature, pPlayer);
+        pPlayer->CLOSE_GOSSIP_MENU();
+        if (npc_regthar_deathgateAI* pRegtharAI = dynamic_cast<npc_regthar_deathgateAI*>(pCreature->AI()))
+            pRegtharAI->StartEvent(pPlayer->GetObjectGuid());
+    }
+    return true;
+}
+
+/*#####
+## npc_horde_defender
+#####*/
+
+enum
+{
+    SAY_AGGRO_1        = -1000895,
+    SAY_AGGRO_2        = -1000896,
+    SAY_AGGRO_3        = -1000897,
+};
+
+struct npc_horde_defenderAI : public ScriptedAI
+{
+    npc_horde_defenderAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+
+    void Reset()
+    {
+    }
+
+        uint64 i_victimGuid;
+        bool m_bCreatureFound;
+
+    void EnterEvadeMode() override
+    {
+        m_creature->RemoveAllAurasOnEvade();
+        m_creature->DeleteThreatList();
+        m_creature->SetLootRecipient(NULL);
+    }
+
+    void Aggro(Unit* pWho) override
+    {
+        switch (urand(0, 2))
+        {
+            case 0:
+                DoScriptText(SAY_AGGRO_1, m_creature);
+                break;
+            case 1:
+                DoScriptText(SAY_AGGRO_2, m_creature);
+                break;
+            case 2:
+                DoScriptText(SAY_AGGRO_3, m_creature);
+                break;
+        }
+    }
+
+    void MoveInLineOfSight(Unit* u) override
+    {
+        if (m_creature->CanInitiateAttack() && u->isTargetableForAttack() &&
+            m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
+        {
+            float attackRadius = 38.0f;
+            if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->IsWithinLOSInMap(u))
+            {
+                if (!m_creature->getVictim())
+                {
+                    AttackStart(u);
+
+                }
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+    if (!m_creature->getVictim())
+    {
+        Creature* pCreature = GetClosestCreatureWithEntry(m_creature, NPC_KOLKAR_INVADER, 38.0f);
+        if (!pCreature && m_bCreatureFound)
+        {
+            m_creature->GetMotionMaster()->MoveTargetedHome();
+            m_bCreatureFound = false;
+        }
+        if (pCreature)
+        {
+        AttackStart(pCreature);
+        m_bCreatureFound = true;
+        }
+    }
+    DoMeleeAttackIfReady();
+    }
+
+};
+
+CreatureAI* GetAI_npc_horde_defender(Creature* pCreature)
+{
+    return new npc_horde_defenderAI(pCreature);
+}
+
 void AddSC_the_barrens()
 {
     Script* pNewScript = new Script;
@@ -716,5 +1245,17 @@ void AddSC_the_barrens()
     pNewScript = new Script;
     pNewScript->Name = "npc_gallywix";
     pNewScript->GetAI = &GetAI_npc_gallywix;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_regthar_deathgate";
+    pNewScript->pGossipHello = &GossipHello_npc_regthar_deathgate;
+    pNewScript->pGossipSelect = &GossipSelect_npc_regthar_deathgate;
+    pNewScript->GetAI = &GetAI_npc_regthar_deathgate;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_horde_defender";
+    pNewScript->GetAI = &GetAI_npc_horde_defender;
     pNewScript->RegisterSelf();
 }
