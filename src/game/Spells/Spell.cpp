@@ -764,7 +764,7 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags & uint64(0x000020000000001C))
         procAttacker |= PROC_FLAG_ON_TRAP_ACTIVATION;
 
-    if (IsNextMeleeSwingSpell())
+    if (IsNextMeleeSwingSpell(m_spellInfo))
     {
         procAttacker |= PROC_FLAG_SUCCESSFUL_MELEE_HIT;
         procVictim |= PROC_FLAG_TAKEN_MELEE_HIT;
@@ -1126,11 +1126,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
             Unit::ProcDamageAndSpell(ProcSystemArguments(caster, unitTarget, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, damageInfo.damage, m_attackType, m_spellInfo, this));
-
-        // trigger weapon enchants for weapon based spells; exclude spells that stop attack, because may break CC
-        if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON &&
-            !m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
-            ((Player*)m_caster)->CastItemCombatSpell(unitTarget, m_attackType, !IsNextMeleeSwingSpell());
     }
     // Passive spell hits/misses or active spells only misses (only triggers if proc flags set)
     else if (procAttacker || procVictim)
@@ -1149,7 +1144,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     {
         // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
         // ignore pets or autorepeat/melee casts for speed (not exist quest for spells (hm... )
-        if (real_caster && !((Creature*)unit)->IsPet() && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive())
+        if (real_caster && !((Creature*)unit)->IsPet() && !IsAutoRepeat() && !IsNextMeleeSwingSpell(m_spellInfo) && !IsChannelActive())
             if (Player* p = real_caster->GetBeneficiaryPlayer())
                 p->RewardPlayerAndGroupAtCast(unit, m_spellInfo->Id);
 
@@ -1372,7 +1367,7 @@ void Spell::DoAllEffectOnTarget(GOTargetInfo* target)
 
     // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
     // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
-    if (!IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive())
+    if (!IsAutoRepeat() && !IsNextMeleeSwingSpell(m_spellInfo) && !IsChannelActive())
     {
         if (Player* p = m_caster->GetBeneficiaryPlayer())
             p->RewardPlayerAndGroupAtCast(go, m_spellInfo->Id);
@@ -2817,7 +2812,7 @@ void Spell::Prepare()
         m_caster->AddGCD(*m_spellInfo);
 
         // Execute instant spells immediate
-        if (m_timer == 0 && !IsNextMeleeSwingSpell() && (!IsAutoRepeat() || m_triggerAutorepeat))
+        if (m_timer == 0 && !IsNextMeleeSwingSpell(m_spellInfo) && (!IsAutoRepeat() || m_triggerAutorepeat))
             cast();
     }
     // execute triggered without cast time explicitly in call point
@@ -3232,7 +3227,7 @@ void Spell::update(uint32 difftime)
         if (m_spellState == SPELL_STATE_CHANNELING && m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT)
             cancel();
         // don't cancel for melee, autorepeat, triggered and instant spells
-        else if (!IsNextMeleeSwingSpell() && !IsAutoRepeat() && !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT))
+        else if (!IsNextMeleeSwingSpell(m_spellInfo) && !IsAutoRepeat() && !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT))
             cancel();
     }
 
@@ -3248,7 +3243,7 @@ void Spell::update(uint32 difftime)
                     m_timer -= difftime;
             }
 
-            if (m_timer == 0 && !IsNextMeleeSwingSpell() && !IsAutoRepeat())
+            if (m_timer == 0 && !IsNextMeleeSwingSpell(m_spellInfo) && !IsAutoRepeat())
                 cast();
         } break;
         case SPELL_STATE_CHANNELING:
@@ -3340,7 +3335,7 @@ void Spell::update(uint32 difftime)
                 // channeled spell processed independently for quest targeting
                 // cast at creature (or GO) quest objectives update at successful cast channel finished
                 // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
-                if (!IsAutoRepeat() && !IsNextMeleeSwingSpell())
+                if (!IsAutoRepeat() && !IsNextMeleeSwingSpell(m_spellInfo))
                 {
                     if (Player* p = m_caster->GetBeneficiaryPlayer())
                     {
@@ -5612,7 +5607,7 @@ std::pair<float, float> Spell::GetMinMaxRange(bool strict)
 {
     float minRange = 0.0f, maxRange = 0.0f, rangeMod = 0.0f;
 
-    if (strict && IsNextMeleeSwingSpell())
+    if (strict && IsNextMeleeSwingSpell(m_spellInfo))
         return { 0.0f, 100.0f };
 
     Unit* caster = dynamic_cast<Unit*>(m_caster); // preparation for GO casting
@@ -6303,7 +6298,7 @@ bool Spell::CheckTargetCreatureType(Unit* target) const
 
 CurrentSpellTypes Spell::GetCurrentContainer() const
 {
-    if (IsNextMeleeSwingSpell())
+    if (IsNextMeleeSwingSpell(m_spellInfo))
         return (CURRENT_MELEE_SPELL);
     if (IsAutoRepeat())
         return (CURRENT_AUTOREPEAT_SPELL);

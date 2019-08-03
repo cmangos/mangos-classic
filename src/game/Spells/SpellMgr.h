@@ -181,6 +181,11 @@ inline bool IsSpellHaveAura(SpellEntry const* spellInfo, AuraType aura, uint32 e
     return false;
 }
 
+inline bool IsNextMeleeSwingSpell(SpellEntry const* spellInfo)
+{
+	return spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_1) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_2);
+}
+
 inline bool IsSpellLastAuraEffect(SpellEntry const* spellInfo, SpellEffectIndex effecIdx)
 {
     for (int i = effecIdx + 1; i < MAX_EFFECT_INDEX; ++i)
