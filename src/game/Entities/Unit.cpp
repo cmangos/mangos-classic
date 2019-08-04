@@ -8070,10 +8070,10 @@ bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
     if (!isAlive() && !ignoreAliveState)
         return false;
 
-    Creature const* creature = ((Creature const*)this);
+    Creature const* creature = static_cast<Creature const*>(this);
 
     // totems can not have threat list
-    if (creature->IsTotem())
+    if (creature->IsTotem() && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         return false;
 
     // pets can not have a threat list, unless they are controlled by a creature
