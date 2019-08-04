@@ -133,14 +133,6 @@ void HostileReference::addThreat(float mod)
         ThreatRefStatusChangeEvent event(UEV_THREAT_REF_THREAT_CHANGE, this, mod);
         fireStatusChanged(event);
     }
-
-    if (isValid() && mod >= 0)
-    {
-        Unit* target = getTarget();
-        Unit* victim_owner = target->GetOwner();
-        if (victim_owner && victim_owner->isAlive() && getSource()->getOwner()->CanAttack(victim_owner))
-            getSource()->addThreat(victim_owner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
-    }
 }
 
 //============================================================
@@ -477,11 +469,13 @@ void ThreatManager::addThreatDirectly(Unit* victim, float threat)
 
     if (!ref)                                               // there was no ref => create a new one
     {
-        // threat has to be 0 here
-        HostileReference* hostileReference = new HostileReference(victim, this, 0);
+        HostileReference* hostileReference = new HostileReference(victim, this, 0); // threat has to be 0 here
         iThreatContainer.addReference(hostileReference);
-        hostileReference->addThreat(threat);                // now we add the real threat
+        hostileReference->addThreat(threat); // now we add the real threat
         getOwner()->TriggerAggroLinkingEvent(victim);
+        Unit* victim_owner = victim->GetOwner();
+        if (victim_owner && victim_owner->isAlive() && getOwner()->CanAttack(victim_owner))
+            addThreat(victim_owner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
         if (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->isGameMaster())
             hostileReference->setOnlineOfflineState(false); // GM is always offline
     }
