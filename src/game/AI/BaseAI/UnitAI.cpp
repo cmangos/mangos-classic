@@ -55,7 +55,7 @@ void UnitAI::MoveInLineOfSight(Unit* who)
         return;
 
     if (!m_unit->CanFly() && who->IsFlying())
-        if (m_unit->GetDistanceZ(who) > IsRangedUnit() ? CREATURE_Z_ATTACK_RANGE_RANGED : CREATURE_Z_ATTACK_RANGE_MELEE)
+        if (m_unit->GetDistanceZ(who) > (IsRangedUnit() ? CREATURE_Z_ATTACK_RANGE_RANGED : CREATURE_Z_ATTACK_RANGE_MELEE))
             return;
 
     if (m_unit->getVictim() && !m_unit->GetMap()->IsDungeon())
