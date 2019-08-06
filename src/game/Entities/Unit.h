@@ -1776,9 +1776,9 @@ class Unit : public WorldObject
         bool CanInitiateAttack() const;
 
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
+        // do not use - kept only for cinematics
         void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);
-        // recommend use MonsterMove/MonsterMoveWithSpeed for most case that correctly work with movegens
-        // if used additional args in ... part then floats must explicitly casted to double
+        
         void SendHeartBeat();
 
         bool IsMoving() const { return m_movementInfo.HasMovementFlag(movementFlagsMask); }

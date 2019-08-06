@@ -39,6 +39,8 @@ void PointMovementGenerator<T>::Initialize(T& unit)
     init.MoveTo(i_x, i_y, i_z, m_generatePath);
     if (m_forcedMovement == FORCED_MOVEMENT_WALK)
         init.SetWalk(true);
+    if (m_speed > 0.f)
+        init.SetVelocity(m_speed);
     init.Launch();
 }
 

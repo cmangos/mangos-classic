@@ -2425,4 +2425,10 @@ enum LootType
     LOOT_DEBUG          = 100
 };
 
+enum MovementEvent
+{
+    EVENT_CHARGE = 10000,
+    EVENT_JUMP   = 10001, // TODO: Implement knockback using this
+};
+
 #endif
