@@ -42,6 +42,7 @@ static const DialogueEntry aIntroDialogue[] =
 instance_temple_of_ahnqiraj::instance_temple_of_ahnqiraj(Map* pMap) : ScriptedInstance(pMap),
     m_uiBugTrioDeathCount(0),
     m_uiCthunWhisperTimer(90000),
+    m_uiSkeramProphecyTimer(5 * MINUTE * IN_MILLISECONDS),
     DialogueHelper(aIntroDialogue)
 {
     Initialize();
@@ -285,6 +286,21 @@ uint32 instance_temple_of_ahnqiraj::GetData(uint32 uiType) const
 void instance_temple_of_ahnqiraj::Update(uint32 uiDiff)
 {
     DialogueUpdate(uiDiff);
+
+    if (GetData(TYPE_SKERAM) == NOT_STARTED)
+    {
+        if (m_uiSkeramProphecyTimer < uiDiff)
+        {
+            if (Creature* skeram = GetSingleCreatureFromStorage(NPC_SKERAM))
+            {
+                if (Player* player = GetPlayerInMap())
+                    player->GetMap()->PlayDirectSoundToMap(sound_skeram_prophecy[urand(0,4)]);
+                m_uiSkeramProphecyTimer = urand(3, 4) * MINUTE * IN_MILLISECONDS;   // Timer is guesswork
+            }
+        }
+        else
+            m_uiSkeramProphecyTimer -= uiDiff;
+    }
 
     if (GetData(TYPE_CTHUN) == IN_PROGRESS || GetData(TYPE_CTHUN) == DONE)
         return;

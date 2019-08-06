@@ -69,6 +69,9 @@ enum
     SPELL_WHISPERINGS_CTHUN_5   = 26259,
 };
 
+// Prophecies yelled by Propher Skeram before he is engaged
+static const uint32 sound_skeram_prophecy[] = { 8616, 8621, 8619, 8620, 8618 };
+
 // Spells from Qiraji Resonating crystal (AQ40 specific mounts)
 static const uint32 qiraji_mount_auras[] = { 25953, 26054, 26055, 26056 };
 
@@ -103,6 +106,7 @@ class instance_temple_of_ahnqiraj : public ScriptedInstance, private DialogueHel
 
         uint8 m_uiBugTrioDeathCount;
         uint32 m_uiCthunWhisperTimer;
+        uint32 m_uiSkeramProphecyTimer;
 
         void JustDidDialogueStep(int32 entry) override;
 };
