@@ -6907,6 +6907,24 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex /*effInde
 {
     switch (m_spellInfo->Id)
     {
+        case 14297: // Shadow Storm (exclude targets below 25 yards and above 40 yards. Max value is handled by spell effect radius)
+        case 26546:
+        case 26555:
+        {
+            float x, y, z;
+            m_caster->GetPosition(x, y, z);
+            uint8 eligibleTargets = 0;
+            for (auto& unit : filterUnitList)
+            {
+                float dist = unit->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH);
+                if (dist > 25.0f)
+                    ++eligibleTargets;
+            }
+
+            filterUnitList.sort(TargetDistanceOrderFarAway(m_caster));
+            filterUnitList.resize(eligibleTargets);
+            return;
+        }
         case 26052: // Poison Bolt Volley (spell hits only the 15 closest targets)
         case 26180: // Wyvern Sting (spell hits only the 10 closest targets)
         {

@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: mob_anubisath_sentinel
-SD%Complete: 75
-SDComment: Abilities selection needs further improvements. Shadow storm is not properly implemented in core it should only target ppl outside of melee range.
+SD%Complete: 85
+SDComment: Abilities selection needs further improvements
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData
 
