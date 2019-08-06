@@ -130,6 +130,8 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
         ChaseMovementMode GetCurrentMode() const { return m_currentMode; }
         virtual bool IsReachable() const override;
 
+        virtual bool IsRemovedOnDirectExpire() const override { return true; }
+
     protected:
         float GetDynamicTargetDistance(Unit& owner, bool forRangeCheck) const override;
         void HandleTargetedMovement(Unit& owner, const uint32& time_diff) override;
@@ -158,8 +160,8 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, Follow
     public:
         FollowMovementGenerator(Unit& target)
             : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >(target) {}
-        FollowMovementGenerator(Unit& target, float offset, float angle)
-            : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >(target, offset, angle) {}
+        FollowMovementGenerator(Unit& target, float offset, float angle, bool main)
+            : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >(target, offset, angle), m_main(main) {}
         ~FollowMovementGenerator() {}
 
         MovementGeneratorType GetMovementGeneratorType() const override { return FOLLOW_MOTION_TYPE; }
@@ -177,10 +179,14 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, Follow
 
         void HandleMovementFailure(T& owner) override;
 
+        virtual bool IsRemovedOnDirectExpire() const override { return !m_main; }
+
     private:
         void _updateSpeed(T& u);
         void HandleTargetedMovement(T& owner, const uint32& time_diff) override;
         void HandleFinalizedMovement(T& owner) override;
+
+        bool m_main;
 
     protected:
         float GetDynamicTargetDistance(T& owner, bool forRangeCheck) const override;
