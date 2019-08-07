@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Skeram
-SD%Complete: 90
-SDComment: Timers
+SD%Complete: 100
+SDComment:
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData
 
@@ -38,8 +38,10 @@ enum
     SPELL_TELEPORT_1            = 4801,
     SPELL_TELEPORT_2            = 8195,
     SPELL_TELEPORT_3            = 20449,
-    SPELL_INITIALIZE_IMAGE      = 3730,
+    SPELL_INITIALIZE_IMAGES     = 794,
+//    SPELL_INITIALIZE_IMAGE      = 3730,   // Triggers by spell 794 on each summoned image
     SPELL_SUMMON_IMAGES         = 747,
+    SPELL_TELEPORT_IMAGE        = 26591,
 };
 
 struct boss_skeramAI : public ScriptedAI
@@ -63,18 +65,28 @@ struct boss_skeramAI : public ScriptedAI
     uint32 m_uiBlinkTimer;
     uint32 m_uiEarthShockTimer;
 
+    std::vector<uint32> m_teleports;
+    uint8 m_teleportCounter;
+
+    uint8 m_maxMeleeAllowed;
+
     float m_fHpCheck;
 
     bool m_bIsImage;
 
     void Reset() override
     {
-        m_uiArcaneExplosionTimer = urand(6000, 12000);
-        m_uiFullFillmentTimer    = 15000;
-        m_uiBlinkTimer           = urand(30000, 45000);
+        m_uiArcaneExplosionTimer = urand(6, 12) * IN_MILLISECONDS;
+        m_uiFullFillmentTimer    = 15 * IN_MILLISECONDS;
+        m_uiBlinkTimer           = urand(30, 45) * IN_MILLISECONDS;
         m_uiEarthShockTimer      = 1200;
 
         m_fHpCheck               = 75.0f;
+
+        m_teleports              = { SPELL_TELEPORT_1, SPELL_TELEPORT_2, SPELL_TELEPORT_3 };
+        m_teleportCounter        = 0;
+
+        m_maxMeleeAllowed        = 0;
 
         if (m_creature->GetVisibility() != VISIBILITY_ON)
             m_creature->SetVisibility(VISIBILITY_ON);
@@ -101,6 +113,11 @@ struct boss_skeramAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
+        // Prophet Skeram will only cast Arcane Explosion if a given number of players are in melee range
+        // Initial value was 4+ but it was changed in patch 1.12 to be less dependant on raid
+        // We assume value is number of players / 10 (raid of 40 people in Classic -> value of 4)
+        m_maxMeleeAllowed = m_pInstance->instance->GetPlayers().getSize() / 10 + 1;
+
         if (m_bIsImage)
             return;
 
@@ -123,34 +140,59 @@ struct boss_skeramAI : public ScriptedAI
     {
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             pSummoned->AI()->AttackStart(pTarget);
-
-        DoCastSpellIfCan(pSummoned, SPELL_INITIALIZE_IMAGE, CAST_TRIGGERED);
     }
 
-    // Wrapper to handle the image version initialize
-    void DoInitializeImage()
+    // Wrapper to handle the image teleport
+    void DoTeleport(bool forced=false)
     {
         if (!m_pInstance)
             return;
 
-        // Initialize the health of the clone
-        if (Creature* pProphet = m_pInstance->GetSingleCreatureFromStorage(NPC_SKERAM))
+        uint32 teleportSpellID = 0;
+        if (forced)
         {
-            float fHealthPct = pProphet->GetHealthPercent();
-            float fMaxHealthPct = 0;
-
-            // The max health depends on the split phase. It's percent * original boss health
-            if (fHealthPct < 25.0f)
-                fMaxHealthPct = 0.50f;
-            else if (fHealthPct < 50.0f)
-                fMaxHealthPct = 0.20f;
+            if (m_bIsImage)
+            {
+                // Get an available teleport location from original boss
+                if (Creature* prophet = m_pInstance->GetSingleCreatureFromStorage(NPC_SKERAM))
+                {
+                    if (boss_skeramAI* skeramAI = dynamic_cast<boss_skeramAI*>(prophet->AI()))
+                        teleportSpellID = skeramAI->GetAvailableTeleport();
+                }
+            }
             else
-                fMaxHealthPct = 0.10f;
-
-            // Set the same health percent as the original boss
-            m_creature->SetMaxHealth(m_creature->GetMaxHealth()*fMaxHealthPct);
-            m_creature->SetHealthPercent(fHealthPct);
+                teleportSpellID = m_teleports[0];
         }
+        else // Else, randomly blink to one of the three destinations
+        {
+            switch (urand(0, 2))
+            {
+                case 0: teleportSpellID = SPELL_TELEPORT_1; break;
+                case 1: teleportSpellID = SPELL_TELEPORT_2; break;
+                case 2: teleportSpellID = SPELL_TELEPORT_3; break;
+            }
+        }
+
+        // Teleport, reset thread (and restore visibility if needed)
+        DoCastSpellIfCan(m_creature, teleportSpellID);
+        DoResetThreat();
+        if (m_creature->GetVisibility() != VISIBILITY_ON)
+            m_creature->SetVisibility(VISIBILITY_ON);
+    }
+
+    uint32 GetAvailableTeleport()
+    {
+        // Only original boss can give teleport location
+        if (m_bIsImage)
+            return 0;
+
+        if (m_teleportCounter < m_teleports.size())
+        {
+            ++m_teleportCounter;
+            return m_teleports[m_teleportCounter];
+        }
+
+        return 0;
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -159,11 +201,19 @@ struct boss_skeramAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        // ArcaneExplosion_Timer
+        // Arcane Explosion is done if more than a set number of people are in melee range
         if (m_uiArcaneExplosionTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION) == CAST_OK)
-                m_uiArcaneExplosionTimer = urand(8000, 18000);
+            PlayerList meleePlayerList;
+            float meleeRange = m_creature->GetCombinedCombatReach(m_creature->getVictim(), true);
+            GetPlayerListWithEntryInWorld(meleePlayerList, m_creature, meleeRange);
+            if (meleePlayerList.size() > m_maxMeleeAllowed)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION) == CAST_OK)
+                   m_uiArcaneExplosionTimer = urand(8, 18) * IN_MILLISECONDS;
+            }
+            else    // Recheck in 1 second
+                m_uiArcaneExplosionTimer = 1 * IN_MILLISECONDS;
         }
         else
             m_uiArcaneExplosionTimer -= uiDiff;
@@ -174,7 +224,7 @@ struct boss_skeramAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_TRUE_FULFILLMENT) == CAST_OK)
-                    m_uiFullFillmentTimer = urand(20000, 30000);
+                    m_uiFullFillmentTimer = urand(20, 30) * IN_MILLISECONDS;
             }
         }
         else
@@ -183,18 +233,8 @@ struct boss_skeramAI : public ScriptedAI
         // Blink_Timer
         if (m_uiBlinkTimer < uiDiff)
         {
-            switch (urand(0, 2))
-            {
-                case 0: DoCastSpellIfCan(m_creature, SPELL_TELEPORT_1); break;
-                case 1: DoCastSpellIfCan(m_creature, SPELL_TELEPORT_2); break;
-                case 2: DoCastSpellIfCan(m_creature, SPELL_TELEPORT_3); break;
-            }
-
-            DoResetThreat();
-            if (m_creature->GetVisibility() != VISIBILITY_ON)
-                m_creature->SetVisibility(VISIBILITY_ON);
-
-            m_uiBlinkTimer = urand(10000, 30000);
+            DoTeleport();
+            m_uiBlinkTimer = urand(10, 30) * IN_MILLISECONDS;
         }
         else
             m_uiBlinkTimer -= uiDiff;
@@ -217,9 +257,13 @@ struct boss_skeramAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMAGES) == CAST_OK)
             {
                 m_fHpCheck -= 25.0f;
+                std::random_shuffle(m_teleports.begin(), m_teleports.end());    // Shuffle the teleport spells to ensure that boss and images have a different location assigned randomly
+                m_teleportCounter = 0;
                 // Teleport shortly after the images are summoned and set invisible to clear the selection (Workaround alert!!!)
+                DoCastSpellIfCan(m_creature, SPELL_INITIALIZE_IMAGES, CAST_TRIGGERED);
                 m_creature->SetVisibility(VISIBILITY_OFF);
-                m_uiBlinkTimer = 2000;
+                m_uiBlinkTimer = urand(30, 40) * IN_MILLISECONDS;               // Set same blink timer than the summoned images
+                DoTeleport(true);                                               // Force teleport (the images will do the same)
             }
         }
 
@@ -235,7 +279,7 @@ UnitAI* GetAI_boss_skeram(Creature* pCreature)
 bool EffectDummyCreature_prophet_skeram(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     // always check spellid and effectindex
-    if (uiSpellId == SPELL_INITIALIZE_IMAGE && uiEffIndex == EFFECT_INDEX_0)
+    if (uiSpellId == SPELL_TELEPORT_IMAGE && uiEffIndex == EFFECT_INDEX_0)
     {
         // check for target == caster first
         if (instance_temple_of_ahnqiraj* pInstance = (instance_temple_of_ahnqiraj*)pCreatureTarget->GetInstanceData())
@@ -248,7 +292,7 @@ bool EffectDummyCreature_prophet_skeram(Unit* /*pCaster*/, uint32 uiSpellId, Spe
         }
 
         if (boss_skeramAI* pSkeramAI = dynamic_cast<boss_skeramAI*>(pCreatureTarget->AI()))
-            pSkeramAI->DoInitializeImage();
+            pSkeramAI->DoTeleport(true);
     }
 
     return false;
