@@ -394,6 +394,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         {
             switch (m_spellInfo->Id)
             {
+                case 794:                                   // Initialize Images (Prophet Skeram in AQ40)
+                {
+                    if (unitTarget)
+                    {
+                        // Cast Initialize Image for each image target with orignal boss HP percent as basepoints
+                        int32 healthPercent = int32(m_caster->GetHealthPercent());
+                        unitTarget->CastCustomSpell(unitTarget, 3730, &healthPercent, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
+                        unitTarget->CastSpell(unitTarget, 26591, TRIGGERED_OLD_TRIGGERED);   // Teleport Image
+                    }
+                    return;
+                }
                 case 2400:                                  // Transfer Powers
                 {
                     if (unitTarget)
@@ -406,6 +417,27 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (unitTarget)
                         m_caster->CastSpell(unitTarget, ((unitTarget->getGender() == GENDER_MALE) ? 10651 : 10653), TRIGGERED_OLD_TRIGGERED);
 
+                    return;
+                }
+                case 3730:                                  // Initialize Image (Prophet Skeram in AQ40)
+                {
+                    if (unitTarget)
+                    {
+                        float healthPct = m_currentBasePoints[EFFECT_INDEX_0];
+                        float maxHealthPct = 0.0f;
+
+                        // The max health depends on the split phase. It's percent * original boss health
+                        if (healthPct < 25.0f)
+                            maxHealthPct = 0.50f;
+                        else if (healthPct < 50.0f)
+                            maxHealthPct = 0.20f;
+                        else
+                            maxHealthPct = 0.10f;
+
+                        // Set the same health percent as the original boss
+                        unitTarget->SetMaxHealth(unitTarget->GetMaxHealth() * maxHealthPct);
+                        unitTarget->SetHealthPercent(healthPct);
+                    }
                     return;
                 }
                 case 7671:                                  // Transformation (human<->worgen)
