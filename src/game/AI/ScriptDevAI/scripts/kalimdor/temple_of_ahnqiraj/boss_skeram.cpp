@@ -188,8 +188,9 @@ struct boss_skeramAI : public ScriptedAI
 
         if (m_teleportCounter < m_teleports.size())
         {
+            uint32 teleportSpellId = m_teleports[m_teleportCounter];
             ++m_teleportCounter;
-            return m_teleports[m_teleportCounter];
+            return teleportSpellId;
         }
 
         return 0;
@@ -207,7 +208,7 @@ struct boss_skeramAI : public ScriptedAI
             PlayerList meleePlayerList;
             float meleeRange = m_creature->GetCombinedCombatReach(m_creature->getVictim(), true);
             GetPlayerListWithEntryInWorld(meleePlayerList, m_creature, meleeRange);
-            if (meleePlayerList.size() > m_maxMeleeAllowed)
+            if (meleePlayerList.size() >= m_maxMeleeAllowed)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION) == CAST_OK)
                    m_arcaneExplosionTimer = urand(8, 18) * IN_MILLISECONDS;
@@ -258,7 +259,7 @@ struct boss_skeramAI : public ScriptedAI
             {
                 m_hpCheck -= 25.0f;
                 std::random_shuffle(m_teleports.begin(), m_teleports.end());    // Shuffle the teleport spells to ensure that boss and images have a different location assigned randomly
-                m_teleportCounter = 0;
+                m_teleportCounter = 1;
                 // Teleport shortly after the images are summoned and set invisible to clear the selection (Workaround alert!!!)
                 DoCastSpellIfCan(m_creature, SPELL_INITIALIZE_IMAGES, CAST_TRIGGERED);
                 m_creature->SetVisibility(VISIBILITY_OFF);
