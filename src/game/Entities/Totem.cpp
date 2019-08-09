@@ -102,18 +102,20 @@ void Totem::Summon(Unit* owner)
         owner->AI()->JustSummoned((Creature*)this);
 
     // there are some totems, which exist just for their visual appeareance
-    if (!GetSpell())
-        return;
-
-    switch (m_type)
+    for (uint32 spellId : m_spells)
     {
-        case TOTEM_PASSIVE:
-            CastSpell(this, GetSpell(), TRIGGERED_OLD_TRIGGERED);
+        if (!spellId)
             break;
-        case TOTEM_STATUE:
-            CastSpell(GetOwner(), GetSpell(), TRIGGERED_OLD_TRIGGERED);
-            break;
-        default: break;
+        switch (m_type)
+        {
+            case TOTEM_PASSIVE:
+                CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case TOTEM_STATUE:
+                CastSpell(GetOwner(), spellId, TRIGGERED_OLD_TRIGGERED);
+                break;
+            default: break;
+        }
     }
 }
 
