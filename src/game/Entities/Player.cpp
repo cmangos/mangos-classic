@@ -16544,7 +16544,7 @@ void Player::SetSpellClass(uint8 playerClass)
     m_spellClassName = name;
 }
 
-void Player::SendMessageToPlayer(std::string const& const message) const
+void Player::SendMessageToPlayer(std::string const& message) const
 {
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, message.data(), LANG_UNIVERSAL, CHAT_TAG_NONE, GetObjectGuid());
