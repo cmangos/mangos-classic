@@ -549,6 +549,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         return;
     }
 
+    Group* group = pCurrChar->GetGroup();
+
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << pCurrChar->GetMapId();
     data << pCurrChar->GetPositionX();
@@ -641,6 +643,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     sObjectAccessor.AddObject(pCurrChar);
     // DEBUG_LOG("Player %s added to Map.",pCurrChar->GetName());
+
+    if (group)
+        group->SendUpdateTo(pCurrChar);
+        
     pCurrChar->GetSocial()->SendFriendList();
     pCurrChar->GetSocial()->SendIgnoreList();
 
@@ -657,11 +663,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     pCurrChar->SetInGameTime(WorldTimer::getMSTime());
 
-    // announce group about member online (must be after add to player list to receive announce to self)
-    if (Group* group = pCurrChar->GetGroup())
+    // Send group member online status for other members
+    if (group)
         group->UpdatePlayerOnlineStatus(pCurrChar);
 
-    // friend status
+    // Send friend list online status for other players
     sSocialMgr.SendFriendStatus(pCurrChar, FRIEND_ONLINE, pCurrChar->GetObjectGuid(), true);
 
     // Place character in world (and load zone) before some object loading
@@ -755,6 +761,8 @@ void WorldSession::HandlePlayerReconnect()
 
     SetOnline();
 
+    Group* group = _player->GetGroup();
+
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << _player->GetMapId();
     data << _player->GetPositionX();
@@ -801,6 +809,9 @@ void WorldSession::HandlePlayerReconnect()
 
     _player->GetMap()->CreatePlayerOnClient(_player);
 
+    if (group)
+        group->SendUpdateTo(_player);
+
     _player->GetSocial()->SendFriendList();
     _player->GetSocial()->SendIgnoreList();
 
@@ -809,11 +820,7 @@ void WorldSession::HandlePlayerReconnect()
     _player->SendEnchantmentDurations();                             // must be after add to map
     _player->SendItemDurations();                                    // must be after add to map
 
-    // announce group about member online (must be after add to player list to receive announce to self)
-    if (Group* group = _player->GetGroup())
-        group->UpdatePlayerOnlineStatus(_player);
-
-    // friend status
+    // Send friend list online status for other players
     sSocialMgr.SendFriendStatus(_player, FRIEND_ONLINE, _player->GetObjectGuid(), true);
 
     // show time before shutdown if shutdown planned.
