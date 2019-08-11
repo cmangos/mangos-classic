@@ -457,6 +457,7 @@ class Spell
         bool m_notifyAI;
         bool m_ignoreGCD;
         bool m_ignoreCosts;
+        bool m_ignoreCooldowns;
 
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() const { return m_timer; }
