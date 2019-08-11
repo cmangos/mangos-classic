@@ -280,6 +280,9 @@ void UnitAI::HandleMovementOnAttackStart(Unit* victim) const
 
 void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject* target)
 {
+    if (!state && spell != m_currentSpell)
+        return;
+
     SpellEntry const* spellInfo = spell->m_spellInfo;
     if (spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_1) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_2))
         return;
@@ -324,10 +327,16 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
         else
             m_unit->SetTarget(nullptr);
     }
+
+    if (state)
+        m_currentSpell = spell;
 }
 
 void UnitAI::OnChannelStateChange(Spell const* spell, bool state, WorldObject* target)
 {
+    if (state)
+        m_currentSpell = nullptr;
+
     SpellEntry const* spellInfo = spell->m_spellInfo;
     // TODO: Determine if CHANNEL_FLAG_MOVEMENT is worth implementing
     if (!spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET))

@@ -464,6 +464,8 @@ class UnitAI
 
         bool m_combatScriptHappening;                    // disables normal combat functions without leaving combat
         AIOrders m_currentAIOrder;
+
+        Spell const* m_currentSpell;
 };
 
 struct SelectableAI : public FactoryHolder<UnitAI>, public Permissible<Creature>
