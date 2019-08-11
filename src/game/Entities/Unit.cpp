@@ -1884,55 +1884,53 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
 
 void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
 {
-    if (!calcDamageInfo)
+    if (!calcDamageInfo) return;
+    Unit* victim = calcDamageInfo->target;
+    if (!victim)
         return;
 
-    Unit* pVictim = calcDamageInfo->target;
-    if (!pVictim)
-        return;
-
-    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || pVictim->IsInEvadeMode())
+    if (!victim->isAlive() || victim->IsTaxiFlying() || victim->IsInEvadeMode())
         return;
 
     // Hmmmm dont like this emotes client must by self do all animations
     if (calcDamageInfo->HitInfo & HITINFO_CRITICALHIT)
-        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
+        victim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
 
     if (calcDamageInfo->TargetState == VICTIMSTATE_PARRY)
     {
-        if (pVictim->GetTypeId() != TYPEID_UNIT ||
-                !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN))
+        if (victim->GetTypeId() != TYPEID_UNIT ||
+                !(((Creature*)victim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN))
         {
             // Get attack timers
-            float offtime = float(pVictim->getAttackTimer(OFF_ATTACK));
-            float basetime = float(pVictim->getAttackTimer(BASE_ATTACK));
+            float offtime = float(victim->getAttackTimer(OFF_ATTACK));
+            float basetime = float(victim->getAttackTimer(BASE_ATTACK));
             // Reduce attack time
-            if (pVictim->hasOffhandWeaponForAttack() && offtime < basetime)
+            if (victim->hasOffhandWeaponForAttack() && offtime < basetime)
             {
-                float percent20 = pVictim->GetAttackTime(OFF_ATTACK) * 0.20f;
+                float percent20 = victim->GetAttackTime(OFF_ATTACK) * 0.20f;
                 float percent60 = 3.0f * percent20;
                 if (offtime > percent20 && offtime <= percent60)
                 {
-                    pVictim->setAttackTimer(OFF_ATTACK, uint32(percent20));
+                    victim->setAttackTimer(OFF_ATTACK, uint32(percent20));
                 }
                 else if (offtime > percent60)
                 {
                     offtime -= 2.0f * percent20;
-                    pVictim->setAttackTimer(OFF_ATTACK, uint32(offtime));
+                    victim->setAttackTimer(OFF_ATTACK, uint32(offtime));
                 }
             }
             else
             {
-                float percent20 = pVictim->GetAttackTime(BASE_ATTACK) * 0.20f;
+                float percent20 = victim->GetAttackTime(BASE_ATTACK) * 0.20f;
                 float percent60 = 3.0f * percent20;
                 if (basetime > percent20 && basetime <= percent60)
                 {
-                    pVictim->setAttackTimer(BASE_ATTACK, uint32(percent20));
+                    victim->setAttackTimer(BASE_ATTACK, uint32(percent20));
                 }
                 else if (basetime > percent60)
                 {
                     basetime -= 2.0f * percent20;
-                    pVictim->setAttackTimer(BASE_ATTACK, uint32(basetime));
+                    victim->setAttackTimer(BASE_ATTACK, uint32(basetime));
                 }
             }
         }
@@ -1940,23 +1938,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
 
     // Call default DealDamage
     CleanDamage cleanDamage(calcDamageInfo->cleanDamage, calcDamageInfo->attackType, calcDamageInfo->hitOutCome);
-    DealDamage(this, pVictim, calcDamageInfo->totalDamage, &cleanDamage, DIRECT_DAMAGE, SpellSchoolMask(calcDamageInfo->subDamage[0].damageSchoolMask), nullptr, durabilityLoss);
-
-    // If this attack by an NPC dealt some damage from behind to a player, it has a chance to daze victim
-    if (calcDamageInfo->totalDamage && CanDazeInCombat(pVictim) && roll_chance_f(CalculateEffectiveDazeChance(pVictim, calcDamageInfo->attackType)))
-        CastSpell(pVictim, 1604, TRIGGERED_OLD_TRIGGERED);
-
-    // update at damage Judgement aura duration that applied by attacker at victim
-    if (calcDamageInfo->totalDamage && GetTypeId() == TYPEID_PLAYER)
-    {
-        SpellAuraHolderMap const& vAuras = pVictim->GetSpellAuraHolderMap();
-        for (SpellAuraHolderMap::const_iterator itr = vAuras.begin(); itr != vAuras.end(); ++itr)
-        {
-            SpellEntry const* spellInfo = (*itr).second->GetSpellProto();
-            if (spellInfo->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) && spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && ((*itr).second->GetCasterGuid() == GetObjectGuid()))
-                (*itr).second->RefreshHolder(); // TODO: Judgement - make this into a cast which should consume grounding totem
-        }
-    }
+    DealDamage(this, victim, calcDamageInfo->totalDamage, &cleanDamage, DIRECT_DAMAGE, SpellSchoolMask(calcDamageInfo->subDamage[0].damageSchoolMask), nullptr, durabilityLoss);
 
     // If not miss
     if (!(calcDamageInfo->HitInfo & HITINFO_MISS))
@@ -1964,58 +1946,81 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
         // If not immune
         if (calcDamageInfo->TargetState != VICTIMSTATE_IS_IMMUNE)
         {
-            SetInCombatWithVictim(pVictim);
-            pVictim->SetInCombatWithAggressor(this);
+            SetInCombatWithVictim(victim);
+            victim->SetInCombatWithAggressor(this);
+        }
+    }
 
-            // victim's damage shield
-            std::set<Aura*> alreadyDone;
-            AuraList const& vDamageShields = pVictim->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
-            for (AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)
+    if (calcDamageInfo->totalDamage)
+    {
+        // If this attack by an NPC dealt some damage from behind to a player, it has a chance to daze victim
+        if (CanDazeInCombat(victim) && roll_chance_f(CalculateEffectiveDazeChance(victim, calcDamageInfo->attackType)))
+            CastSpell(victim, 1604, TRIGGERED_OLD_TRIGGERED);
+
+        // update at damage Judgement aura duration that applied by attacker at victim
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            SpellAuraHolderMap const& vAuras = victim->GetSpellAuraHolderMap();
+            for (SpellAuraHolderMap::const_iterator itr = vAuras.begin(); itr != vAuras.end(); ++itr)
             {
-                if (alreadyDone.find(*i) == alreadyDone.end())
-                {
-                    alreadyDone.insert(*i);
-
-                    SpellEntry const* i_spellProto = (*i)->GetSpellProto();
-
-                    // Damage shield can be resisted...
-                    if (SpellMissInfo missInfo = pVictim->SpellHitResult(this, i_spellProto, false))
-                    {
-                        pVictim->SendSpellMiss(this, i_spellProto->Id, missInfo);
-                        continue;
-                    }
-
-                    // ...or immuned
-                    if (IsImmuneToDamage(GetSpellSchoolMask(i_spellProto)))
-                    {
-                        Unit::SendSpellOrDamageImmune(pVictim->GetObjectGuid(), this, i_spellProto->Id);
-                        continue;
-                    }
-
-                    uint32 damage = (*i)->GetModifier()->m_amount;
-
-                    // Calculate absorb resist ??? no data in opcode for this possibly unable to absorb or resist?
-                    // uint32 absorb;
-                    // uint32 resist;
-                    // CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
-                    // damage-=absorb + resist;
-
-                    Unit::DealDamageMods(pVictim, this, damage, nullptr, SPELL_DIRECT_DAMAGE, i_spellProto);
-
-                    WorldPacket data(SMSG_SPELLDAMAGESHIELD, (8 + 8 + 4 + 4));
-                    data << pVictim->GetObjectGuid();
-                    data << GetObjectGuid();
-                    data << uint32(damage);
-                    data << uint32(i_spellProto->School);
-                    pVictim->SendMessageToSet(data, true);
-
-                    DealDamage(pVictim, this, damage, nullptr, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(i_spellProto), i_spellProto, true);
-
-                    i = vDamageShields.begin();
-                }
-                else
-                    ++i;
+                SpellEntry const* spellInfo = (*itr).second->GetSpellProto();
+                if (spellInfo->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) && spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && ((*itr).second->GetCasterGuid() == GetObjectGuid()))
+                    (*itr).second->RefreshHolder(); // TODO: Judgement - make this into a cast which should consume grounding totem
             }
+        }
+
+        // victim's damage shield
+        std::set<Aura*> alreadyDone;
+        AuraList const& vDamageShields = victim->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
+        for (AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)
+        {
+            if (alreadyDone.find(*i) == alreadyDone.end())
+            {
+                alreadyDone.insert(*i);
+
+                SpellEntry const* spellProto = (*i)->GetSpellProto();
+
+                // Damage shield can be resisted...
+                if (SpellMissInfo missInfo = victim->SpellHitResult(this, spellProto, uint8(1 << (*i)->GetEffIndex()), false))
+                {
+                    victim->SendSpellMiss(this, spellProto->Id, missInfo);
+                    continue;
+                }
+
+                // ...or immuned
+                if (IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+                {
+                    Unit::SendSpellOrDamageImmune(victim->GetObjectGuid(), this, spellProto->Id);
+                    continue;
+                }
+
+                uint32 damage = (*i)->GetModifier()->m_amount;
+
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)victim)->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, damage);
+
+                // Calculate absorb resist ??? no data in opcode for this possibly unable to absorb or resist?
+                // uint32 absorb;
+                // uint32 resist;
+                // CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
+                // damage-=absorb + resist;
+
+                Unit::DealDamageMods(victim, this, damage, nullptr, SPELL_DIRECT_DAMAGE, spellProto);
+
+                WorldPacket data(SMSG_SPELLDAMAGESHIELD, (8 + 8 + 4 + 4 + 4));
+                data << victim->GetObjectGuid();
+                data << GetObjectGuid();
+                data << uint32(spellProto->Id);
+                data << uint32(damage);                  // Damage
+                data << uint32(spellProto->School);
+                victim->SendMessageToSet(data, true);
+
+                DealDamage(victim, this, damage, nullptr, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
+
+                i = vDamageShields.begin();
+            }
+            else
+                ++i;
         }
     }
 }
