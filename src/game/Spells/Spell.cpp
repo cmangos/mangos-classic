@@ -2846,21 +2846,16 @@ void Spell::cancel()
         case SPELL_STATE_TARGETING:
         case SPELL_STATE_CASTING:
             m_caster->ResetGCD(m_spellInfo);
-
-        //(no break)
+            // [[fallthrough]]
         case SPELL_STATE_TRAVELING:
-        {
             SendInterrupted(SPELL_FAILED_INTERRUPTED);
             if (sendInterrupt)
                 SendCastResult(SPELL_FAILED_INTERRUPTED);
-        } break;
-
+            break;
         case SPELL_STATE_LANDING:
             sLog.outError("Spell [%u] is interrupted while processing", m_spellInfo->Id);
-        // no break
-
+            // [[fallthrough]]
         case SPELL_STATE_CHANNELING:
-        {
             for (auto& ihit : m_UniqueTargetInfo)
             {
                 if (ihit.missCondition == SPELL_MISS_NONE)
@@ -2877,8 +2872,7 @@ void Spell::cancel()
             SendInterrupted(SPELL_FAILED_INTERRUPTED);
             if (sendInterrupt)
                 SendCastResult(SPELL_FAILED_INTERRUPTED);
-        } break;
-
+            break;
         case SPELL_STATE_FINISHED: break; // should not occur
     }
 
