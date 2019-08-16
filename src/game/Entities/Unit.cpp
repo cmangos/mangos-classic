@@ -3661,6 +3661,7 @@ float Unit::CalculateSpellResistChance(const Unit* victim, SpellSchoolMask schoo
         chance += CalculateSpellMissChance(victim, schoolMask, spell);
 
     // Chance to fully resist a spell by magic resistance
+    // TODO: check if binaries are affected by SPELL_ATTR_EX3_CANT_MISS
     if (IsResistableSpell(spell) && spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
     {
         const bool binary = IsBinarySpell(*spell);
