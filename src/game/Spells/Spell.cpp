@@ -1310,7 +1310,7 @@ void Spell::DoAllTargetlessEffects(bool dest)
     uint32 procVictim;
     uint32 procEx = PROC_EX_NONE;
     WorldObject* caster = m_caster; // preparation for GO casting
-    Unit* unitCaster = caster->GetTypeId() == TYPEID_UNIT ? static_cast<Unit*>(caster) : nullptr;
+    Unit* unitCaster = caster->isType(TYPEMASK_UNIT) ? static_cast<Unit*>(caster) : nullptr;
 
     uint32 effectMask;
     if (dest) // can have delay
