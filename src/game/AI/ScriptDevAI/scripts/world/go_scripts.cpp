@@ -25,10 +25,11 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "Entities/Object.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
 /* ContentData
 go_andorhal_tower
 EndContentData */
-
 
 /*######
 ## go_andorhal_tower
@@ -358,6 +359,47 @@ GameObjectAI* GetAI_go_elemental_rift(GameObject* go)
 
 std::function<bool(Unit*)> function = &TrapTargetSearch;
 
+enum
+{
+    SPELL_RALLYING_CRY_OF_THE_DRAGONSLAYER = 22888,
+    
+    NPC_OVERLORD_RUNTHAK            = 14392,
+    NPC_MAJOR_MATTINGLY             = 14394,
+    NPC_HIGH_OVERLORD_SAURFANG      = 14720,
+    NPC_FIELD_MARSHAL_AFRASIABI     = 14721,
+
+    GO_ONYXIA_H                     = 179556,
+    GO_ONYXIA_A                     = 179558,
+    GO_NEFARIAN_H                   = 179881,
+    GO_NEFARIAN_A                   = 179882,
+};
+
+struct go_dragon_head : public GameObjectAI
+{
+    go_dragon_head(GameObject* go) : GameObjectAI(go) {}
+
+    void JustSpawned() override
+    {
+        uint32 npcEntry = 0;
+        switch (m_go->GetEntry())
+        {
+            case GO_ONYXIA_H: npcEntry = NPC_OVERLORD_RUNTHAK; break;
+            case GO_ONYXIA_A: npcEntry = NPC_MAJOR_MATTINGLY; break;
+            case GO_NEFARIAN_H: npcEntry = NPC_HIGH_OVERLORD_SAURFANG; break;
+            case GO_NEFARIAN_A: npcEntry = NPC_FIELD_MARSHAL_AFRASIABI; break;
+        }
+
+        Unit* caster = GetClosestCreatureWithEntry(m_go, npcEntry, 30.f);
+        if (caster)
+            caster->CastSpell(nullptr, SPELL_RALLYING_CRY_OF_THE_DRAGONSLAYER, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+GameObjectAI* GetAI_go_dragon_head(GameObject* go)
+{
+    return new go_dragon_head(go);
+}
+
 void AddSC_go_scripts()
 {
     Script* pNewScript;
@@ -385,5 +427,10 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_elemental_rift";
     pNewScript->GetGameObjectAI = &GetAI_go_elemental_rift;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_dragon_head";
+    pNewScript->GetGameObjectAI = &GetAI_go_dragon_head;
     pNewScript->RegisterSelf();
 }
