@@ -828,6 +828,7 @@ class Creature : public Unit
 
         bool hasWeapon(WeaponAttackType type) const override;
         bool hasWeaponForAttack(WeaponAttackType type) const override { return (Unit::hasWeaponForAttack(type) && hasWeapon(type)); }
+        virtual void SetCanDualWield(bool value);
 
         void SetInvisible(bool invisible) { m_isInvisible = invisible; }
         bool IsInvisible() const { return m_isInvisible; }

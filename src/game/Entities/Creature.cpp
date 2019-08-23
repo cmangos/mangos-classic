@@ -2996,3 +2996,9 @@ uint32 Creature::GetCreatureConditionalSpawnEntry(uint32 guidlow, Map* map) cons
 
     return entry;
 }
+
+void Creature::SetCanDualWield(bool state)
+{
+    Unit::SetCanDualWield(state);
+    UpdateDamagePhysical(OFF_ATTACK);
+}
