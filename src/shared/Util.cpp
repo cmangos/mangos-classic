@@ -23,7 +23,6 @@
 
 #include <boost/asio.hpp>
 
-#include <random>
 #include <chrono>
 #include <cstdarg>
 
@@ -34,6 +33,11 @@ std::mt19937* initRand()
 }
 
 static MaNGOS::thread_local_ptr<std::mt19937> mtRand(&initRand);
+
+std::mt19937* GetRandomGenerator()
+{
+    return mtRand.get();
+}
 
 uint32 WorldTimer::m_iTime = 0;
 uint32 WorldTimer::m_iPrevTime = 0;
