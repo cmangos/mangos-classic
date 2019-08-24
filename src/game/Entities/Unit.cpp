@@ -333,6 +333,9 @@ Unit::Unit() :
     memset(m_invisibilityValues, 0, sizeof(m_invisibilityValues));
     memset(m_invisibilityDetectValues, 0, sizeof(m_invisibilityDetectValues));
 
+    memset(m_stealthStrength, 0, sizeof(m_stealthStrength));
+    memset(m_stealthDetectStrength, 0, sizeof(m_stealthDetectStrength));
+
     m_transform = 0;
     m_canModifyStats = false;
 
@@ -3381,7 +3384,6 @@ float Unit::CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType at
     // Own chance appears to be zero / below zero / unmeaningful for some reason (debuffs?): skip calculation, unit is incapable
     if (chance < 0.005f)
         return 0.0f;
-    const bool ranged = (attType == RANGED_ATTACK);
     // Skip victim calculation if positive ability
     if (ability && IsPositiveSpell(ability, this, victim))
         return std::max(0.0f, std::min(chance, 100.0f));
@@ -7685,11 +7687,12 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (!isInFront)
         return false;
 
+
     // In TBC+ this is safeguarded by 228 aura
-    visibleDistance = GetVisibleDistance(u, !u->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
+    visibleDistance = GetVisibleDistance(u, HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
 
     // recheck new distance
-    if (visibleDistance <= 0 || !IsWithinDist(viewPoint, visibleDistance))
+    if (visibleDistance <= 0 || GetDistance(viewPoint, true, DIST_CALC_NONE) > visibleDistance* visibleDistance)
         return false;
 
     // Now check is target visible with LoS
@@ -7700,30 +7703,31 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 
 float Unit::GetVisibleDistance(Unit const* target, bool alert) const
 {
-    // Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
-    float visibleDistance = 10.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH) / 100.0f);
+    // Starting points
+    int32 detectionValue = 30;
 
-    // Visible distance is modified by
-    //-Level Diff (every level diff = 1.0f in visible distance)
-    visibleDistance += int32(target->GetLevelForTarget(this)) - int32(GetLevelForTarget(target));
+    // Level difference: 5 point / level, starting from level 1.
+    // There may be spells for this and the starting points too, but
+    // not in the DBCs of the client.
+    detectionValue += int32(target->GetLevelForTarget(this) - 1) * 5;
 
-    // This allows to check talent tree and will add addition stealth dependent on used points)
-    int32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
-    if (stealthMod < 0)
-        stealthMod = 0;
+    // Apply modifiers
+    detectionValue += target->GetStealthDetectionStrength(STEALTH_UNIT);
 
-    //-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
-    // based on wowwiki every 5 mod we have 1 more level diff in calculation
-    visibleDistance += (int32(target->GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_DETECT)) - stealthMod) / 5.0f;
-    visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_RANGE ? MAX_PLAYER_STEALTH_DETECT_RANGE : visibleDistance;
+    detectionValue -= GetStealthStrength(STEALTH_UNIT);
 
-    if (visibleDistance < 1.5f)
-        visibleDistance = 1.5f;
+    // Calculate max distance
+    float visibilityRange = float(detectionValue) * 0.3f + target->GetCombatReach();
 
+    // If this unit is an NPC then player detect range doesn't apply
+    if (target->GetTypeId() == TYPEID_PLAYER && visibilityRange > MAX_PLAYER_STEALTH_DETECT_RANGE)
+        visibilityRange = MAX_PLAYER_STEALTH_DETECT_RANGE;
+
+    // When checking for alert state, look 8% further, and then 1.5 yards more than that.
     if (alert)
-        return visibleDistance * 1.08f + 1.5f;
+        visibilityRange += (visibilityRange * 0.08f) + 1.5f;
 
-    return visibleDistance;
+    return std::max(target->GetCombatReach(), visibilityRange);
 }
 
 void Unit::UpdateVisibilityAndView()

@@ -917,11 +917,9 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                 }
 
                 // only rogue have skill for traps detection
-                if (Aura* aura = ((Player*)u)->GetAura(2836, EFFECT_INDEX_0))
-                {
-                    if (roll_chance_i(aura->GetModifier()->m_amount) && u->isInFront(this, 15.0f))
+                if (uint32 stealthDetectStrengh = u->GetStealthDetectionStrength(STEALTH_TRAP))
+                    if (roll_chance_i(stealthDetectStrengh) && u->isInFront(this, 15.0f))
                         return true;
-                }
 
                 if (trapNotVisible)
                     return false;
