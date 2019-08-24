@@ -409,6 +409,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 13767:         // Hate to Zero (Hate to Zero)
         case 16140:         // Exploding Cadaver (Exploding Cadaver)
         case 16563:         // Drowning Death
+        case 16577:         // Disease Cloud
         case 16592:         // Shadowform
         case 17327:         // Spirit Particles
         case 17467:         // Unholy Aura
