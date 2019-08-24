@@ -407,6 +407,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 12898:         // Smoke Aura Visual
         case 13299:         // Poison Proc
         case 13767:         // Hate to Zero (Hate to Zero)
+        case 15876:         // Ice Blast
         case 16140:         // Exploding Cadaver (Exploding Cadaver)
         case 16563:         // Drowning Death
         case 16577:         // Disease Cloud
