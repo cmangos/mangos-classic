@@ -986,11 +986,11 @@ TalentsInspecting = 1
 #
 #    ListenRange.Say
 #        Distance from player to listen text that creature (or other world object) say
-#        Default: 40
+#        Default: 25
 #
 #    ListenRange.TextEmote
 #        Distance from player to listen textemote that creature (or other world object) say
-#        Default: 40
+#        Default: 25
 #
 #    ListenRange.Yell
 #        Distance from player to listen text that creature (or other world object) yell
@@ -1042,8 +1042,8 @@ Rate.Creature.Elite.Elite.HP = 1
 Rate.Creature.Elite.RAREELITE.HP = 1
 Rate.Creature.Elite.WORLDBOSS.HP = 1
 Rate.Creature.Elite.RARE.HP = 1
-ListenRange.Say = 40
-ListenRange.TextEmote = 40
+ListenRange.Say = 25
+ListenRange.TextEmote = 25
 ListenRange.Yell = 300
 GuidReserveSize.Creature = 100
 GuidReserveSize.GameObject = 100
