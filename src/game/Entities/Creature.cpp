@@ -195,7 +195,7 @@ void Creature::AddToWorld()
 
     // Check if visibility distance different
     if (GetCreatureInfo()->visibilityDistanceType != VisibilityDistanceType::Normal)
-        SetVisibilityDistanceOverride(GetCreatureInfo()->visibilityDistanceType);
+        GetVisibilityData().SetVisibilityDistanceOverride(GetCreatureInfo()->visibilityDistanceType);
 
     if (m_countSpawns)
         GetMap()->AddToSpawnCount(GetObjectGuid());

@@ -2883,11 +2883,11 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
 
     Unit* target = dynamic_cast<Unit*>(obj);
     PSendSysMessage("P -> T Attack distance: %.2f", player->GetAttackDistance(target));
-    PSendSysMessage("P -> T Visible distance: %.2f", player->GetVisibleDistance(target));
-    PSendSysMessage("P -> T Visible distance (Alert): %.2f", player->GetVisibleDistance(target, true));
+    PSendSysMessage("P -> T Visible distance: %.2f", player->GetVisibilityData().GetStealthVisibilityDistance(target));
+    PSendSysMessage("P -> T Visible distance (Alert): %.2f", player->GetVisibilityData().GetStealthVisibilityDistance(target, true));
     PSendSysMessage("T -> P Attack distance: %.2f", target->GetAttackDistance(player));
-    PSendSysMessage("T -> P Visible distance: %.2f", target->GetVisibleDistance(player));
-    PSendSysMessage("T -> P Visible distance (Alert): %.2f", target->GetVisibleDistance(player, true));
+    PSendSysMessage("T -> P Visible distance: %.2f", target->GetVisibilityData().GetStealthVisibilityDistance(player));
+    PSendSysMessage("T -> P Visible distance (Alert): %.2f", target->GetVisibilityData().GetStealthVisibilityDistance(player, true));
 
     return true;
 }
@@ -5006,7 +5006,7 @@ bool ChatHandler::HandleRespawnCommand(char* /*args*/)
 
     MaNGOS::RespawnDo u_do;
     MaNGOS::WorldObjectWorker<MaNGOS::RespawnDo> worker(u_do);
-    Cell::VisitGridObjects(pl, worker, pl->GetMap()->GetVisibilityDistance());
+    Cell::VisitGridObjects(pl, worker, pl->GetVisibilityData().GetVisibilityDistance());
     return true;
 }
 

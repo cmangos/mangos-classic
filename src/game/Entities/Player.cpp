@@ -1027,11 +1027,11 @@ void Player::SetDrunkValue(uint16 newDrunkenValue, uint32 /*itemId*/)
 
     // special drunk invisibility detection
     if (newDrunkenState >= DRUNKEN_DRUNK)
-        SetInvisibilityDetectMask(6, true);
+        GetVisibilityData().SetInvisibilityDetectMask(INVISIBILITY_DRUNK, true);
     else
-        SetInvisibilityDetectMask(6, false);
+        GetVisibilityData().SetInvisibilityDetectMask(INVISIBILITY_DRUNK, false);
 
-    SetInvisibilityValue(6, m_drunk);
+    GetVisibilityData().SetInvisibilityValue(6, m_drunk);
 }
 
 uint32 Player::GetWaterBreathingInterval() const

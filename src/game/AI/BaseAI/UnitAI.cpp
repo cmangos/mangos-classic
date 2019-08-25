@@ -457,7 +457,7 @@ bool UnitAI::CanTriggerStealthAlert(Unit* who, float /*attackRadius*/) const
     if (m_unit->hasUnitState(UNIT_STAT_DISTRACTED))
         return false;
 
-    return who->HasStealthAura() && m_unit->GetDistance(who, true, DIST_CALC_NONE) > who->GetVisibleDistance(m_unit);
+    return who->HasStealthAura() && m_unit->GetDistance(who, true, DIST_CALC_NONE) > who->GetVisibilityData().GetStealthVisibilityDistance(m_unit);
 }
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////

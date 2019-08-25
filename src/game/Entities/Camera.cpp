@@ -147,7 +147,7 @@ template void Camera::UpdateVisibilityOf(DynamicObject*, UpdateData&, WorldObjec
 void Camera::UpdateVisibilityForOwner()
 {
     MaNGOS::VisibleNotifier notifier(*this);
-    Cell::VisitAllObjects(m_source, notifier, m_source->GetMap()->GetVisibilityDistance(), false);
+    Cell::VisitAllObjects(m_source, notifier, m_source->GetVisibilityData().GetVisibilityDistance(), false);
     notifier.Notify();
 }
 

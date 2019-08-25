@@ -127,7 +127,7 @@ struct GameObjectInfo
             uint32 serverOnly;                              // 8
             uint32 stealthed;                               // 9
             uint32 large;                                   // 10
-            uint32 stealthAffected;                         // 11
+            uint32 invisible;                               // 11
             uint32 openTextID;                              // 12 can be used to replace castBarCaption?
             uint32 closeTextID;                             // 13
         } trap;

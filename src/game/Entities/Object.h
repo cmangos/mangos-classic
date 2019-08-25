@@ -29,6 +29,7 @@
 #include "Entities/Camera.h"
 #include "Camera.h"
 #include "Server/DBCStructure.h"
+#include "Entities/ObjectVisibility.h"
 
 #include <set>
 
@@ -59,18 +60,6 @@ float const DEFAULT_COLLISION_HEIGHT = 2.03128f; // Most common value in dbc
 
 #define MAX_STEALTH_DETECT_RANGE        45.0f
 #define GRID_ACTIVATION_RANGE           45.0f
-
-enum class VisibilityDistanceType : uint32
-{
-    Normal = 0,
-    Tiny = 1,
-    Small = 2,
-    Large = 3,
-    Gigantic = 4,
-    Infinite = 5,
-
-    Max
-};
 
 enum TempSpawnType
 {
@@ -889,13 +878,6 @@ class WorldObject : public Object
         bool isActiveObject() const { return m_isActiveObject || m_viewPoint.hasViewers(); }
         void SetActiveObjectState(bool active);
 
-        // Visibility stuff
-        bool IsVisibilityOverridden() const { return m_visibilityDistanceOverride != 0.f; }
-        void SetVisibilityDistanceOverride(VisibilityDistanceType type);
-
-        float GetVisibilityDistance() const;
-        float GetVisibilityDistanceFor(WorldObject* obj) const;
-
         ViewPoint& GetViewPoint() { return m_viewPoint; }
 
         // ASSERT print helper
@@ -930,6 +912,9 @@ class WorldObject : public Object
 
         int32 CalculateSpellEffectValue(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* basePoints = nullptr) const;
 
+        VisibilityData const& GetVisibilityData() const { return m_visibilityData; }
+        VisibilityData& GetVisibilityData() { return m_visibilityData; }
+
     protected:
         explicit WorldObject();
 
@@ -952,7 +937,7 @@ class WorldObject : public Object
 
         bool m_isOnEventNotified;
 
-        float m_visibilityDistanceOverride;
+        VisibilityData m_visibilityData;
 
     private:
         Map* m_currMap;                                     // current object's Map location

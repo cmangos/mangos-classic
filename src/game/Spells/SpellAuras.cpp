@@ -2589,8 +2589,8 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 void Aura::HandleModStealth(bool apply, bool Real)
 {
     Unit* target = GetTarget();
-
-    target->AddStealthStrength(StealthType(m_modifier.m_miscvalue), apply ? m_modifier.m_amount : -m_modifier.m_amount);
+    // TODO: add mask
+    target->GetVisibilityData().AddStealthStrength(StealthType(m_modifier.m_miscvalue), apply ? m_modifier.m_amount : -m_modifier.m_amount);
 
     if (apply)
     {
@@ -2649,22 +2649,22 @@ void Aura::HandleModStealth(bool apply, bool Real)
 
 void Aura::HandleModStealthDetect(bool apply, bool Real)
 {
-    GetTarget()->AddStealthDetectionStrength(StealthType(m_modifier.m_miscvalue), apply ? m_modifier.m_amount : -m_modifier.m_amount);
+    GetTarget()->GetVisibilityData().AddStealthDetectionStrength(StealthType(m_modifier.m_miscvalue), apply ? m_modifier.m_amount : -m_modifier.m_amount);
 }
 
 void Aura::HandleModStealthLevel(bool apply, bool Real)
 {
-    GetTarget()->AddStealthStrength(StealthType(m_modifier.m_miscvalue), apply ? m_modifier.m_amount : -m_modifier.m_amount);
+    GetTarget()->GetVisibilityData().AddStealthStrength(StealthType(m_modifier.m_miscvalue), apply ? m_modifier.m_amount : -m_modifier.m_amount);
 }
 
 void Aura::HandleInvisibility(bool apply, bool Real)
 {
     Unit* target = GetTarget();
 
-    target->AddInvisibilityValue(m_modifier.m_miscvalue, apply ? m_modifier.m_amount : -m_modifier.m_amount);
-    int32 value = target->GetInvisibilityValue(m_modifier.m_miscvalue);
+    target->GetVisibilityData().AddInvisibilityValue(m_modifier.m_miscvalue, apply ? m_modifier.m_amount : -m_modifier.m_amount);
+    int32 value = target->GetVisibilityData().GetInvisibilityValue(m_modifier.m_miscvalue);
     bool trueApply = value > 0;
-    target->SetInvisibilityMask(m_modifier.m_miscvalue, trueApply);
+    target->GetVisibilityData().SetInvisibilityMask(m_modifier.m_miscvalue, trueApply);
     if (trueApply)
     {
         target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
@@ -2688,7 +2688,7 @@ void Aura::HandleInvisibility(bool apply, bool Real)
     else
     {
         // only at real aura remove and if not have different invisibility auras.
-        if (Real && target->GetInvisibilityMask() == 0)
+        if (Real && target->GetVisibilityData().GetInvisibilityMask() == 0)
         {
             // remove glow vision
             if (target->GetTypeId() == TYPEID_PLAYER)
@@ -2712,13 +2712,13 @@ void Aura::HandleInvisibilityDetect(bool apply, bool Real)
 {
     Unit* target = GetTarget();
 
-    target->SetInvisibilityDetectMask(m_modifier.m_miscvalue, apply);
-    target->AddInvisibilityDetectValue(m_modifier.m_miscvalue, apply ? m_modifier.m_amount : -m_modifier.m_amount);
+    target->GetVisibilityData().SetInvisibilityDetectMask(m_modifier.m_miscvalue, apply);
+    target->GetVisibilityData().AddInvisibilityDetectValue(m_modifier.m_miscvalue, apply ? m_modifier.m_amount : -m_modifier.m_amount);
     if (!apply)
     {
         Unit::AuraList const& auras = target->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
-        for (Aura* aura : auras)
-            target->SetInvisibilityDetectMask(aura->GetModifier()->m_miscvalue, true);
+        for (auto aura : auras)
+            target->GetVisibilityData().SetInvisibilityDetectMask(aura->GetModifier()->m_miscvalue, true);
     }
     if (Real && target->GetTypeId() == TYPEID_PLAYER)
         ((Player*)target)->GetCamera().UpdateVisibilityForOwner();

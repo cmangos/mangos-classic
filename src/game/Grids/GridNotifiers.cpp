@@ -61,7 +61,7 @@ void VisibleNotifier::Notify()
         GuidSet::iterator current = itr++;
         if (WorldObject* obj = player.GetMap()->GetWorldObject(*current))
         {
-            if (!obj->IsVisibilityOverridden())
+            if (!obj->GetVisibilityData().IsVisibilityOverridden())
                 continue;
 
             player.UpdateVisibilityOf(&player, obj);

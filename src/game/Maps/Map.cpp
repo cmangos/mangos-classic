@@ -415,7 +415,7 @@ void Map::MessageBroadcast(Player const* player, WorldPacket const& msg, bool to
 
     MaNGOS::MessageDeliverer post_man(*player, msg, to_self);
     TypeContainerVisitor<MaNGOS::MessageDeliverer, WorldTypeMapContainer > message(post_man);
-    cell.Visit(p, message, *this, *player, GetVisibilityDistance());
+    cell.Visit(p, message, *this, *player, player->GetVisibilityData().GetVisibilityDistance());
 }
 
 void Map::MessageBroadcast(WorldObject const* obj, WorldPacket const& msg)
@@ -438,7 +438,7 @@ void Map::MessageBroadcast(WorldObject const* obj, WorldPacket const& msg)
     // we have alot of blinking mobs because monster move packet send is broken...
     MaNGOS::ObjectMessageDeliverer post_man(msg);
     TypeContainerVisitor<MaNGOS::ObjectMessageDeliverer, WorldTypeMapContainer > message(post_man);
-    cell.Visit(p, message, *this, *obj, GetVisibilityDistance());
+    cell.Visit(p, message, *this, *obj, obj->GetVisibilityData().GetVisibilityDistance());
 }
 
 void Map::MessageDistBroadcast(Player const* player, WorldPacket const& msg, float dist, bool to_self, bool own_team_only)
@@ -984,7 +984,7 @@ void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& ce
     cell.SetNoCreate();
     MaNGOS::VisibleChangesNotifier notifier(*obj);
     TypeContainerVisitor<MaNGOS::VisibleChangesNotifier, WorldTypeMapContainer > player_notifier(notifier);
-    cell.Visit(cellpair, player_notifier, *this, *obj, GetVisibilityDistance());
+    cell.Visit(cellpair, player_notifier, *this, *obj, obj->GetVisibilityData().GetVisibilityDistance());
 }
 
 void Map::SendInitSelf(Player* player) const

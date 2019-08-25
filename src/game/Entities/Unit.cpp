@@ -327,15 +327,6 @@ Unit::Unit() :
     m_Visibility = VISIBILITY_ON;
     m_AINotifyEvent = nullptr;
 
-    m_detectInvisibilityMask = 0;
-    m_invisibilityMask = 0;
-    
-    memset(m_invisibilityValues, 0, sizeof(m_invisibilityValues));
-    memset(m_invisibilityDetectValues, 0, sizeof(m_invisibilityDetectValues));
-
-    memset(m_stealthStrength, 0, sizeof(m_stealthStrength));
-    memset(m_stealthDetectStrength, 0, sizeof(m_stealthDetectStrength));
-
     m_transform = 0;
     m_canModifyStats = false;
 
@@ -7577,7 +7568,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // Any units far than max visible distance for viewer or not in our map are not visible too
     if (!at_same_transport) // distance for show player/pet/creature (no transport case)
     {
-        if (!IsWithinDistInMap(viewPoint, u->GetVisibilityDistanceFor((WorldObject *)this), is3dDistance))
+        if (!IsWithinDistInMap(viewPoint, u->GetVisibilityData().GetVisibilityDistanceFor((WorldObject *)this), is3dDistance))
             return false;
     }
 
@@ -7592,8 +7583,8 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         if (u->GetTypeId() != TYPEID_PLAYER || !((Player*)u)->isGameMaster())
             return false;
 
-    // Visible units, always are visible for all units
-    if (m_Visibility == VISIBILITY_ON)
+    // Visible units, always are visible for all units, except for units under invisibility
+    if (m_Visibility == VISIBILITY_ON && u->GetVisibilityData().GetInvisibilityMask() == 0)
         return true;
 
     // GMs see any players, not higher GMs and all units
@@ -7617,26 +7608,20 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         return true;
 
     // raw invisibility
-    bool invisible = (m_invisibilityMask != 0 || u->m_invisibilityMask != 0);
+    bool invisible = (GetVisibilityData().GetInvisibilityMask() != 0 || u->GetVisibilityData().GetInvisibilityMask() != 0);
+
     if (u->GetTypeId() == TYPEID_PLAYER) // if object is player with mover, use its visibility masks, so that an invisible player MCing a creature can see stuff
-    {
-        if (Player* player = (Player*)u)
-        {
-            if (Unit* mover = player->GetMover())
-            {
-                invisible = (m_invisibilityMask != 0 || mover->m_invisibilityMask != 0);
-            }
-        }
-    }
+        if (Unit* mover = ((Player*)u)->GetMover())
+            invisible = (GetVisibilityData().GetInvisibilityMask() != 0 || mover->GetVisibilityData().GetInvisibilityMask() != 0);
 
     // detectable invisibility case
     if (invisible && (
                 // Invisible units, always are visible for units under same invisibility type
-                (m_invisibilityMask & u->m_invisibilityMask) != 0 ||
+                (GetVisibilityData().GetInvisibilityMask() & u->GetVisibilityData().GetInvisibilityMask()) != 0 ||
                 // Invisible units, always are visible for unit that can detect this invisibility (have appropriate level for detect)
-                u->CanDetectInvisibilityOf(this) ||
+                u->GetVisibilityData().CanDetectInvisibilityOf(this) ||
                 // Units that can detect invisibility always are visible for units that can be detected
-                CanDetectInvisibilityOf(u)))
+                GetVisibilityData().CanDetectInvisibilityOf(u)))
     {
         invisible = false;
     }
@@ -7687,9 +7672,8 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (!isInFront)
         return false;
 
-
     // In TBC+ this is safeguarded by 228 aura
-    visibleDistance = GetVisibleDistance(u, HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
+    visibleDistance = GetVisibilityData().GetStealthVisibilityDistance(u, HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
 
     // recheck new distance
     if (visibleDistance <= 0 || GetDistance(viewPoint, true, DIST_CALC_NONE) > visibleDistance* visibleDistance)
@@ -7699,35 +7683,6 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     float ox, oy, oz;
     viewPoint->GetPosition(ox, oy, oz);
     return IsWithinLOS(ox, oy, oz);
-}
-
-float Unit::GetVisibleDistance(Unit const* target, bool alert) const
-{
-    // Starting points
-    int32 detectionValue = 30;
-
-    // Level difference: 5 point / level, starting from level 1.
-    // There may be spells for this and the starting points too, but
-    // not in the DBCs of the client.
-    detectionValue += int32(target->GetLevelForTarget(this) - 1) * 5;
-
-    // Apply modifiers
-    detectionValue += target->GetStealthDetectionStrength(STEALTH_UNIT);
-
-    detectionValue -= GetStealthStrength(STEALTH_UNIT);
-
-    // Calculate max distance
-    float visibilityRange = float(detectionValue) * 0.3f + target->GetCombatReach();
-
-    // If this unit is an NPC then player detect range doesn't apply
-    if (target->GetTypeId() == TYPEID_PLAYER && visibilityRange > MAX_PLAYER_STEALTH_DETECT_RANGE)
-        visibilityRange = MAX_PLAYER_STEALTH_DETECT_RANGE;
-
-    // When checking for alert state, look 8% further, and then 1.5 yards more than that.
-    if (alert)
-        visibilityRange += (visibilityRange * 0.08f) + 1.5f;
-
-    return std::max(target->GetCombatReach(), visibilityRange);
 }
 
 void Unit::UpdateVisibilityAndView()
@@ -7768,77 +7723,6 @@ void Unit::SetVisibility(UnitVisibility x)
 
     if (IsInWorld())
         UpdateVisibilityAndView();
-}
-
-bool Unit::CanDetectInvisibilityOf(Unit const* u) const
-{
-    if (uint32 mask = (GetInvisibilityDetectMask() & u->GetInvisibilityMask()))
-    {
-        for (int32 i = 0; i < INVISIBILITY_MAX; ++i)
-        {
-            if (((1 << i) & mask) == 0)
-                continue;
-
-            // find invisibility level
-            int32 invLevel = GetInvisibilityValue(i);
-
-            // find invisibility detect level - this is taken from controlling player or self
-            int32 detectLevel = GetInvisibilityDetectValue(i);
-
-            if (invLevel <= detectLevel)
-                return true;
-        }
-    }
-
-    return false;
-}
-
-uint32 Unit::GetInvisibilityDetectMask() const
-{
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-    {
-        Player const* controller = GetControllingPlayer();
-        if (controller)
-            return controller->m_detectInvisibilityMask; // directly access value without bypass
-    }
-    return m_detectInvisibilityMask;
-}
-
-void Unit::SetInvisibilityDetectMask(uint32 index, bool apply)
-{
-    if (apply)
-        m_detectInvisibilityMask |= (1 << index);
-    else
-        m_detectInvisibilityMask &= ~(1 << index);
-}
-
-uint32 Unit::GetInvisibilityMask() const
-{
-    return m_invisibilityMask;
-}
-
-void Unit::SetInvisibilityMask(uint32 index, bool apply)
-{
-    if (apply)
-        m_invisibilityMask |= (1 << index);
-    else
-        m_invisibilityMask &= ~(1 << index);
-}
-
-int32 Unit::GetInvisibilityValue(uint32 index) const
-{
-    return m_invisibilityValues[index];
-}
-
-int32 Unit::GetInvisibilityDetectValue(uint32 index) const
-{
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-    {
-        Player const* controller = GetControllingPlayer();
-        if (controller)
-            return controller->m_invisibilityDetectValues[index]; // directly access value without bypass
-    }
-    return m_invisibilityDetectValues[index];
 }
 
 void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)

@@ -192,6 +192,17 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
     switch (GetGoType())
     {
         case GAMEOBJECT_TYPE_TRAP:
+            // values from rogue detect traps aura
+            if (goinfo->trap.stealthed)
+            {
+                GetVisibilityData().SetStealthMask(STEALTH_TRAP, true);
+                GetVisibilityData().AddStealthStrength(STEALTH_TRAP, 70);
+            }
+            if (goinfo->trap.invisible)
+            {
+                GetVisibilityData().SetInvisibilityMask(INVISIBILITY_TRAP, true);
+                GetVisibilityData().AddInvisibilityValue(INVISIBILITY_TRAP, 300);
+            }
         case GAMEOBJECT_TYPE_FISHINGNODE:
             m_lootState = GO_NOT_READY;                     // Initialize Traps and Fishingnode delayed in ::Update
             break;
@@ -213,7 +224,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
 
     // Check if GameObject is Large
     if (GetGOInfo()->IsLargeGameObject())
-        SetVisibilityDistanceOverride(VisibilityDistanceType::Large);
+        GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Large);
 
     return true;
 }
@@ -885,7 +896,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         {
             case GAMEOBJECT_TYPE_TRAP:
             {
-                if (GetGOInfo()->trap.stealthed == 0)
+                if (GetGOInfo()->trap.stealthed == 0 || GetGOInfo()->trap.invisible == 0)
                     break;
 
                 bool trapNotVisible = false;
@@ -916,10 +927,17 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                         trapNotVisible = true;
                 }
 
-                // only rogue have skill for traps detection
-                if (uint32 stealthDetectStrengh = u->GetStealthDetectionStrength(STEALTH_TRAP))
-                    if (roll_chance_i(stealthDetectStrengh) && u->isInFront(this, 15.0f))
+                if (GetGOInfo()->trap.invisible) // invisible traps
+                    if (u->GetVisibilityData().CanDetectInvisibilityOf(this))
                         return true;
+
+                if (GetGOInfo()->trap.stealthed) // stealthed traps
+                {
+                    float visibleDistance = GetVisibilityData().GetStealthVisibilityDistance(u);
+                    // recheck new distance
+                    if (GetDistance(viewPoint, true, DIST_CALC_NONE) < visibleDistance * visibleDistance && u->HasInArc(this))
+                        return true;
+                }
 
                 if (trapNotVisible)
                     return false;
@@ -936,12 +954,12 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         }
 
         // Smuggled Mana Cell required 10 invisibility type detection/state
-        if (GetEntry() == 187039 && ((u->GetInvisibilityDetectMask() | u->GetInvisibilityMask()) & (1 << 10)) == 0)
+        if (GetEntry() == 187039 && ((u->GetVisibilityData().GetInvisibilityDetectMask() | u->GetVisibilityData().GetInvisibilityMask()) & (1 << 10)) == 0)
             return false;
     }
 
     // check distance
-    return IsWithinDistInMap(viewPoint, GetVisibilityDistance(), false);
+    return IsWithinDistInMap(viewPoint, GetVisibilityData().GetVisibilityDistance(), false);
 }
 
 void GameObject::Respawn()

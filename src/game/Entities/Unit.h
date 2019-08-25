@@ -960,14 +960,6 @@ enum CurrentSpellTypes
 
 #define CURRENT_FIRST_NON_MELEE_SPELL 1
 #define CURRENT_MAX_SPELL             4
-#define INVISIBILITY_MAX              32
-
-enum StealthType : uint32
-{
-    STEALTH_UNIT = 0,
-    STEALTH_TRAP = 1,
-    STEALTH_TYPE_MAX,
-};
 
 enum ActiveStates
 {
@@ -2067,23 +2059,7 @@ class Unit : public WorldObject
         void UpdateVisibilityAndView() override;            // overwrite WorldObject::UpdateVisibilityAndView()
 
         // common function for visibility checks for player/creatures with detection code
-        bool IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true, bool spell = false) const;
-        float GetVisibleDistance(Unit const * target, bool alert = false) const;
-        bool CanDetectInvisibilityOf(Unit const* u) const;
-        uint32 GetInvisibilityDetectMask() const;
-        void SetInvisibilityDetectMask(uint32 index, bool apply);
-        uint32 GetInvisibilityMask() const;
-        void SetInvisibilityMask(uint32 index, bool apply);
-        void SetInvisibilityValue(uint32 index, int32 value) { m_invisibilityValues[index] = value; }
-        void AddInvisibilityValue(uint32 index, int32 value) { m_invisibilityValues[index] += value; }
-        void AddInvisibilityDetectValue(uint32 index, int32 value) { m_invisibilityDetectValues[index] += value; }
-        int32 GetInvisibilityValue(uint32 index) const;
-        int32 GetInvisibilityDetectValue(uint32 index) const;
-        // stealth
-        uint32 GetStealthStrength(StealthType type) const { return m_stealthStrength[type]; }
-        uint32 GetStealthDetectionStrength(StealthType type) const { return m_stealthDetectStrength[type]; }
-        void AddStealthStrength(StealthType type, uint32 value) { m_stealthStrength[type] += value; }
-        void AddStealthDetectionStrength(StealthType type, uint32 value) { m_stealthDetectStrength[type] += value; }
+        bool IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true, bool spell = false) const;     
 
         // virtual functions for all world objects types
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
@@ -2558,14 +2534,6 @@ class Unit : public WorldObject
 
         uint32 m_evadeTimer; // Used for evade during combat when mob is not running home and target isnt reachable
         EvadeState m_evadeMode; // Used for evade during running home
-
-        // invisibility data
-        uint32 m_invisibilityMask;
-        uint32 m_detectInvisibilityMask; // is inherited from controller in PC case
-        int32 m_invisibilityValues[INVISIBILITY_MAX];
-        int32 m_invisibilityDetectValues[INVISIBILITY_MAX];
-        uint32 m_stealthStrength[STEALTH_TYPE_MAX];
-        uint32 m_stealthDetectStrength[STEALTH_TYPE_MAX];
 
         uint64 m_auraUpdateMask;
 

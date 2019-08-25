@@ -41,16 +41,6 @@
 #include "Loot/LootMgr.h"
 #include "Spells/SpellMgr.h"
 
-constexpr float VisibilityDistances[AsUnderlyingType(VisibilityDistanceType::Max)] =
-{
-    DEFAULT_VISIBILITY_DISTANCE,
-    VISIBILITY_DISTANCE_TINY,
-    VISIBILITY_DISTANCE_SMALL,
-    VISIBILITY_DISTANCE_LARGE,
-    VISIBILITY_DISTANCE_GIGANTIC,
-    MAX_VISIBILITY_DISTANCE
-};
-
 Object::Object(): m_updateFlag(0), m_itsNewObject(false)
 {
     m_objectTypeId      = TYPEID_OBJECT;
@@ -1006,7 +996,7 @@ WorldObject::WorldObject() :
     m_isOnEventNotified(false),
     m_currMap(nullptr), m_mapId(0),
     m_InstanceId(0), m_isActiveObject(false),
-    m_visibilityDistanceOverride(0.f)
+    m_visibilityData(this)
 {
 }
 
@@ -2076,7 +2066,7 @@ struct WorldObjectChangeAccumulator
 void WorldObject::BuildUpdateData(UpdateDataMapType& update_players)
 {
     WorldObjectChangeAccumulator notifier(*this, update_players);
-    Cell::VisitWorldObjects(this, notifier, GetMap()->GetVisibilityDistance());
+    Cell::VisitWorldObjects(this, notifier, GetVisibilityData().GetVisibilityDistance());
 
     ClearUpdateMask(false);
 }
@@ -2120,31 +2110,6 @@ void WorldObject::SetActiveObjectState(bool active)
             GetMap()->AddToActive(this);
     }
     m_isActiveObject = active;
-}
-
-void WorldObject::SetVisibilityDistanceOverride(VisibilityDistanceType type)
-{
-    MANGOS_ASSERT(type < VisibilityDistanceType::Max);
-    if (GetTypeId() == TYPEID_PLAYER)
-        return;
-
-    m_visibilityDistanceOverride = VisibilityDistances[AsUnderlyingType(type)];
-}
-
-float WorldObject::GetVisibilityDistance() const
-{
-    if (IsVisibilityOverridden())
-        return m_visibilityDistanceOverride;
-    else
-        return GetMap()->GetVisibilityDistance();
-}
-
-float WorldObject::GetVisibilityDistanceFor(WorldObject* obj) const
-{
-    if (IsVisibilityOverridden() && obj->GetTypeId() == TYPEID_PLAYER)
-        return m_visibilityDistanceOverride;
-    else
-        return obj->GetVisibilityDistance();
 }
 
 void WorldObject::SetNotifyOnEventState(bool state)
