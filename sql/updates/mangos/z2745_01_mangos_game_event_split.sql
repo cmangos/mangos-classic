@@ -1,5 +1,6 @@
 ALTER TABLE db_version CHANGE COLUMN required_z2742_01_mangos_visibility required_z2745_01_mangos_game_event_split bit;
 
+DROP TABLE IF EXISTS `game_event_time`;
 CREATE TABLE `game_event_time` (
   `entry` mediumint(8) unsigned NOT NULL COMMENT 'Entry of the game event',
   `start_time` DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT 'Absolute start date, the event will never start before',
