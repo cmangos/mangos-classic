@@ -10,7 +10,6 @@ CREATE TABLE `game_event_time` (
 
 ALTER TABLE `game_event` ADD COLUMN `schedule_type` INT(11) NOT NULL DEFAULT 0 AFTER `entry`;
 UPDATE `game_event` SET `schedule_type`=1;
-UPDATE `game_event` SET `schedule_type`= 0 WHERE EventGroup > 0;
 
 INSERT INTO `game_event_time`(`entry`, `start_time`, `end_time`) SELECT `entry`, `start_time`, `end_time` FROM `game_event` WHERE `schedule_type` = 1;
 
