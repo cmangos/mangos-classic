@@ -2074,6 +2074,7 @@ class Unit : public WorldObject
         void SetInvisibilityDetectMask(uint32 index, bool apply);
         uint32 GetInvisibilityMask() const;
         void SetInvisibilityMask(uint32 index, bool apply);
+        void SetInvisibilityValue(uint32 index, int32 value) { m_invisibilityValues[index] = value; }
         void AddInvisibilityValue(uint32 index, int32 value) { m_invisibilityValues[index] += value; }
         void AddInvisibilityDetectValue(uint32 index, int32 value) { m_invisibilityDetectValues[index] += value; }
         int32 GetInvisibilityValue(uint32 index) const;

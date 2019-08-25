@@ -1030,6 +1030,8 @@ void Player::SetDrunkValue(uint16 newDrunkenValue, uint32 /*itemId*/)
         SetInvisibilityDetectMask(6, true);
     else
         SetInvisibilityDetectMask(6, false);
+
+    SetInvisibilityValue(6, m_drunk);
 }
 
 uint32 Player::GetWaterBreathingInterval() const

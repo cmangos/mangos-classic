@@ -7785,9 +7785,6 @@ bool Unit::CanDetectInvisibilityOf(Unit const* u) const
             // find invisibility detect level - this is taken from controlling player or self
             int32 detectLevel = GetInvisibilityDetectValue(i);
 
-            if (i == 6 && GetTypeId() == TYPEID_PLAYER)     // special drunk detection case
-                detectLevel += ((Player*)this)->GetDrunkValue();
-
             if (invLevel <= detectLevel)
                 return true;
         }
