@@ -408,6 +408,8 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 13299:         // Poison Proc
         case 13767:         // Hate to Zero (Hate to Zero)
         case 14178:         // Sticky Tar
+        case 15088:         // Flurry
+        case 15097:         // Enrage
         case 15876:         // Ice Blast
         case 16140:         // Exploding Cadaver (Exploding Cadaver)
         case 16563:         // Drowning Death
