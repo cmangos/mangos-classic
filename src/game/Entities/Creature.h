@@ -745,7 +745,7 @@ class Creature : public Unit
         uint32 m_spells[CREATURE_MAX_SPELLS];
 
         void DoFleeToGetAssistance();
-        void CallForHelp(float fRadius);
+        void CallForHelp(float radius);
         void CallAssistance();
         void SetNoCallAssistance(bool val) { m_AlreadyCallAssistance = val; }
         void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }

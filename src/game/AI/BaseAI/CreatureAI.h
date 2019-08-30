@@ -36,6 +36,8 @@ class CreatureAI : public UnitAI
         void DoFakeDeath(uint32 spellId = 0);
         void SetDeathPrevention(bool state);
         void ResetDeathPrevented() { m_deathPrevented = false; }
+
+        void DoCallForHelp(float radius) override;
     protected:
         Creature* m_creature;
         bool m_deathPrevention;

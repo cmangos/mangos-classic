@@ -439,7 +439,7 @@ class UnitAI
 
         void DoFlee();
         void DoDistance(); // TODO
-        void DoCallForHelp(); // TODO
+        virtual void DoCallForHelp(float radius) {} // implemented for creatures
         void DoSeekAssistance(); // TODO
 
         // Drops all threat to 0%. Does not remove enemies from the threat list
