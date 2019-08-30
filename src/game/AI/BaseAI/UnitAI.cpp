@@ -383,6 +383,9 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
     if (me->isInCombat())
         return;
 
+    if (who->IsFleeing()) // pulling happens once flee ends
+        return;
+
     if (me->GetMap()->Instanceable())
         distance = distance / 2.5f;
 
