@@ -482,6 +482,17 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     m_isInvisible = (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_INVISIBLE) != 0;
     m_ignoreMMAP = (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE) != 0;
     m_countSpawns = (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_COUNT_SPAWNS) != 0;
+    if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NOT_TAUNTABLE)\
+    {
+        ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+        ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+    }
+    if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_HASTE_SPELL_IMMUNITY)
+        ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
+    if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_POISON_IMMUNITY)
+        ApplySpellImmune(nullptr, IMMUNITY_DISPEL, DISPEL_POISON, true);
+    if (IsWorldBoss())
+        ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, true);
 
     SetCanModifyStats(true);
     UpdateAllStats();
@@ -1762,38 +1773,6 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
 {
     if (!castOnSelf && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->EffectMechanic[index] - 1)))
         return true;
-
-    if (!spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)) // spells like 37017 bypass these invulnerabilities
-    {
-        switch (spellInfo->Effect[index])
-        {
-            case SPELL_EFFECT_APPLY_AURA:
-            {
-                switch (spellInfo->EffectApplyAuraName[index])
-                {
-                    case SPELL_AURA_MOD_TAUNT: // Taunt immunity special flag check
-                        if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NOT_TAUNTABLE)
-                            return true;
-                        break;
-                    case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK: // Haste spell aura immunity
-                        if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_HASTE_SPELL_IMMUNITY)
-                            return true;
-                        break;
-                    case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
-                        if (IsWorldBoss()) // All bosses are immune to vindication in 2.4.3, needs to be setting in future
-                            return true;
-                        break;
-                    default: break;
-                }
-                break;
-            }
-            case SPELL_EFFECT_ATTACK_ME: // Taunt immunity special flag check
-                if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NOT_TAUNTABLE)
-                    return true;
-                break;
-            default: break;
-        }
-    }
 
     return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
 }
