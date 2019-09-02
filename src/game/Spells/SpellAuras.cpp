@@ -1242,6 +1242,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         }
                         break;
                     }
+                    case 6946:                              // Curse of the Bleakheart
+                    case 41170:
+                        m_isPeriodic = true;
+                        m_modifier.periodictime = 5 * IN_MILLISECONDS;
+                        m_periodicTimer = m_modifier.periodictime;
+                        return;
                     case 7057:                              // Haunting Spirits
                         // expected to tick with 30 sec period (tick part see in Aura::PeriodicTick)
                         m_isPeriodic = true;
@@ -4992,6 +4998,16 @@ void Aura::PeriodicDummyTick()
         {
             switch (spell->Id)
             {
+                case 6946:                                  // Curse of the Bleakheart
+                case 41170:
+                {
+                    if (roll_chance_i(5))
+                    {
+                        int32 damageValue = target->CalculateSpellDamage(target, spell, EFFECT_INDEX_1);
+                        target->CastCustomSpell(nullptr, spell->Id == 6946 ? 6945 : 41356, nullptr, &damageValue, nullptr, TRIGGERED_OLD_TRIGGERED);
+                    }
+                    return;
+                }
                 case 7054:                                  // Forsaken Skills
                 {
                     // Possibly need cast one of them (but
