@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2019061401
+ConfVersion=2019090201
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -963,6 +963,9 @@ TalentsInspecting = 1
 #        from reserve used before above commands can be used in like case. Less size increase amount guids for dynamic spawns
 #        in game from other side
 #        Default: 100
+#    CreaturePickpocketRestockDelay
+#        Time for pickpocket restock in seconds
+#        Default: 600 (10 minutes)
 #
 ###################################################################################################################
 
@@ -1002,6 +1005,7 @@ ListenRange.TextEmote = 40
 ListenRange.Yell = 300
 GuidReserveSize.Creature = 100
 GuidReserveSize.GameObject = 100
+CreaturePickpocketRestockDelay = 600
 
 
 ###################################################################################################################
