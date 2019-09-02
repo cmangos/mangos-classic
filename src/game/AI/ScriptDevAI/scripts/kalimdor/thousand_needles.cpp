@@ -131,7 +131,11 @@ float m_afBanditLoc[6][6] =
 
 struct npc_lakota_windsongAI : public npc_escortAI
 {
-    npc_lakota_windsongAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_lakota_windsongAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        SetReactState(REACT_DEFENSIVE);
+        Reset();
+    }
 
     void Reset() override { }
 
@@ -208,7 +212,11 @@ float m_afWyvernLoc[3][3] =
 
 struct npc_paoka_swiftmountainAI : public npc_escortAI
 {
-    npc_paoka_swiftmountainAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_paoka_swiftmountainAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        SetReactState(REACT_DEFENSIVE);
+        Reset();
+    }
 
     void Reset() override { }
 
