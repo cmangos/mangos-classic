@@ -141,6 +141,9 @@ void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* creature)
             // Don't store the summoned images guid
             if (GetData(TYPE_SKERAM) == IN_PROGRESS)
                 break;
+        case NPC_KRI:
+        case NPC_YAUJ:
+        case NPC_VEM:
         case NPC_SARTURA:
         case NPC_MASTERS_EYE:
         case NPC_OURO_SPAWNER:
@@ -187,13 +190,33 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
             if (uiData == SPECIAL)
             {
                 ++m_uiBugTrioDeathCount;
-                if (m_uiBugTrioDeathCount == 2)
+                if (m_uiBugTrioDeathCount == 3)
                     SetData(TYPE_BUG_TRIO, DONE);
 
                 // don't store any special data
                 break;
             }
             if (uiData == FAIL)
+            {
+                // Do not reset again the encounter if already set to failed
+                if (GetData(TYPE_BUG_TRIO) == FAIL)
+                    return;
+
+                // On encounter failure, despawn Vem and Princess Yauj and make Lord Kri evade
+                // the two other bosses will respawn when Lord Kri reaches home/respawns
+                if (Creature* vem = GetSingleCreatureFromStorage(NPC_VEM))
+                    vem->ForcedDespawn();
+                if (Creature* yauj = GetSingleCreatureFromStorage(NPC_YAUJ))
+                    yauj->ForcedDespawn();
+                if (Creature* kri = GetSingleCreatureFromStorage(NPC_KRI))
+                {
+                    if (kri->isAlive())
+                        kri->AI()->EnterEvadeMode();
+                    else
+                        kri->Respawn();
+                }
+            }
+            if (uiData == IN_PROGRESS)
                 m_uiBugTrioDeathCount = 0;
             m_auiEncounter[uiType] = uiData;
             break;

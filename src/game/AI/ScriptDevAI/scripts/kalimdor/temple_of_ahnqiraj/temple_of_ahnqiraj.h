@@ -21,9 +21,9 @@ enum
     TYPE_TWINS_INTRO            = 9,
 
     NPC_SKERAM                  = 15263,
-    // NPC_KRI                   = 15511,
-    // NPC_VEM                   = 15544,
-    // NPC_YAUJ                  = 15543,
+    NPC_KRI                     = 15511,
+    NPC_VEM                     = 15544,
+    NPC_YAUJ                    = 15543,
     NPC_SARTURA                 = 15516,
     NPC_VEKLOR                  = 15276,
     NPC_VEKNILASH               = 15275,

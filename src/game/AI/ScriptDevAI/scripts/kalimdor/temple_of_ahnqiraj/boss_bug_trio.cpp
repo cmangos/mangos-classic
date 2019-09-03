@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: bug_trio
-SD%Complete: 75
-SDComment: Summon Player spell NYI; Poison Cloud damage spell NYI; Timers need adjustments
+SD%Complete: 90
+SDComment: Summon Player spell NYI; Consume mechanics is missing (only dummy implementation)
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData
 
@@ -28,26 +28,136 @@ EndScriptData
 
 enum
 {
-    // kri
+    EMOTE_CONSUMED          = -1531048,
+
+    // Lord Kri
     SPELL_CLEAVE            = 26350,
     SPELL_TOXIC_VOLLEY      = 25812,
     SPELL_SUMMON_CLOUD      = 26590,            // summons 15933
+    SPELL_THRASH            = 3391,
 
-    // vem
+    // Vem
     SPELL_KNOCK_AWAY        = 18670,
+    SPELL_KNOCKDOWN         = 19128,
     SPELL_CHARGE            = 26561,
     SPELL_VENGEANCE         = 25790,
 
-    // yauj
+    // Princess Yauj
     SPELL_HEAL              = 25807,
     SPELL_FEAR              = 26580,
-
-    NPC_YAUJ_BROOD          = 15621
+    SPELL_RAVAGE            = 3242,
+    SPELL_SUMMON_BROOD      = 25789,
 };
 
-struct boss_kriAI : public ScriptedAI
+struct Location
 {
-    boss_kriAI(Creature* pCreature) : ScriptedAI(pCreature)
+    float m_fX, m_fY, m_fZ;
+};
+
+static const Location resetPoint = { -8582.0f, 2047.0f, -1.62f };
+
+struct boss_silithidRoyaltyAI : public ScriptedAI
+{
+    boss_silithidRoyaltyAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    ScriptedInstance* m_pInstance;
+
+    uint32 m_uiDeathAbility;
+    uint32 m_uiResetCheckTimer;
+
+    void Reset() override
+    {
+        m_uiResetCheckTimer = 2 * IN_MILLISECONDS;
+    }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_BUG_TRIO, IN_PROGRESS);
+    }
+
+    void JustReachedHome() override
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_BUG_TRIO, FAIL);
+    }
+
+    // Handle damage to trigger consume when the two bosses that are killed first
+    void DamageTaken(Unit* pDoneBy, uint32& damage, DamageEffectType damagetype, SpellEntry const* spellInfo) override
+    {
+        if (!m_pInstance)
+            return;
+
+        if (m_creature->GetHealth() <= damage)
+        {
+            // Inform the instance script that we are ready to be consumed
+            // The instance script keeps track of how many bosses are already defeated
+            m_pInstance->SetData(TYPE_BUG_TRIO, SPECIAL);
+
+            // Ask the instance script if we are the last boss alive
+            // If not, let be consumed
+            if (m_pInstance && m_pInstance->GetData(TYPE_BUG_TRIO) != DONE)
+            {
+                damage = 0;
+                m_creature->SetHealth(1);
+                DoDummyConsume();
+                return;
+            }
+        }
+
+        ScriptedAI::DamageTaken(pDoneBy, damage, damagetype, spellInfo);
+    }
+
+    void JustDied(Unit* pKiller) override
+    {
+        DoSpecialAbility();
+    }
+
+    void DoDummyConsume()
+    {
+        DoScriptText(EMOTE_CONSUMED, m_creature);
+        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        DoSpecialAbility();
+        m_creature->ForcedDespawn(3000);
+    }
+
+    void DoSpecialAbility()
+    {
+        DoCastSpellIfCan(m_creature, m_uiDeathAbility);
+    }
+
+    // Return true to handle shared timers and MeleeAttack
+    virtual bool UpdateBugAI(const uint32 /*uiDiff*/) { return true; }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // Return since we have no target
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        // Call silithid specific virtual function
+        if (!UpdateBugAI(uiDiff))
+            return;
+
+        // Periodically check that we are not leashed out of encounter area
+        if (m_uiResetCheckTimer < uiDiff)
+        {
+            if (m_pInstance && m_creature->GetDistance(resetPoint.m_fX, resetPoint.m_fY, resetPoint.m_fZ, DIST_CALC_COMBAT_REACH) < 10.0f)
+                m_pInstance->SetData(TYPE_BUG_TRIO, FAIL);
+            m_uiResetCheckTimer = 2 * IN_MILLISECONDS;
+        }
+        else
+            m_uiResetCheckTimer -= uiDiff;
+    }
+};
+
+struct boss_kriAI : public boss_silithidRoyaltyAI
+{
+    boss_kriAI(Creature* pCreature) : boss_silithidRoyaltyAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
@@ -57,66 +167,60 @@ struct boss_kriAI : public ScriptedAI
 
     uint32 m_uiCleaveTimer;
     uint32 m_uiToxicVolleyTimer;
+    uint32 m_uiThrashTimer;
 
     void Reset() override
     {
-        m_uiCleaveTimer      = urand(4000, 8000);
-        m_uiToxicVolleyTimer = urand(6000, 12000);
+        m_uiDeathAbility     = SPELL_SUMMON_CLOUD;
+        m_uiCleaveTimer      = urand(4, 8) * IN_MILLISECONDS;
+        m_uiToxicVolleyTimer = urand(6, 30) * IN_MILLISECONDS;
+        m_uiThrashTimer      = 6 * IN_MILLISECONDS;
+
+        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        // poison cloud on death
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_CLOUD, CAST_TRIGGERED);
-
-        if (!m_pInstance)
-            return;
-
-        // If the other 2 bugs are still alive, make unlootable
-        if (m_pInstance->GetData(TYPE_BUG_TRIO) != DONE)
-        {
-            m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            m_pInstance->SetData(TYPE_BUG_TRIO, SPECIAL);
-        }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BUG_TRIO, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
+    bool UpdateBugAI(const uint32 uiDiff) override
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+            return false;
 
-        // Cleave_Timer
+        // Cleave
         if (m_uiCleaveTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-                m_uiCleaveTimer = urand(5000, 12000);
+                m_uiCleaveTimer = urand(5, 12) * IN_MILLISECONDS;
         }
         else
             m_uiCleaveTimer -= uiDiff;
 
-        // ToxicVolley_Timer
+        // Toxic Volley
         if (m_uiToxicVolleyTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_TOXIC_VOLLEY) == CAST_OK)
-                m_uiToxicVolleyTimer = urand(10000, 15000);
+                m_uiToxicVolleyTimer = urand(15, 25) * IN_MILLISECONDS;
         }
         else
             m_uiToxicVolleyTimer -= uiDiff;
 
+        // Thrash
+        if (m_uiThrashTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_THRASH) == CAST_OK)
+                m_uiThrashTimer = urand(2, 6) * IN_MILLISECONDS;
+        }
+        else
+            m_uiThrashTimer -= uiDiff;
+
         DoMeleeAttackIfReady();
+
+        return true;
     }
 };
 
-struct boss_vemAI : public ScriptedAI
+struct boss_vemAI : public boss_silithidRoyaltyAI
 {
-    boss_vemAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_vemAI(Creature* pCreature) : boss_silithidRoyaltyAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
@@ -126,69 +230,66 @@ struct boss_vemAI : public ScriptedAI
 
     uint32 m_uiChargeTimer;
     uint32 m_uiKnockAwayTimer;
+    uint32 m_uiKnockDownTimer;
 
     void Reset() override
     {
-        m_uiChargeTimer     = urand(15000, 27000);
-        m_uiKnockAwayTimer  = urand(10000, 20000);
+        m_uiDeathAbility     = SPELL_VENGEANCE;
+
+        m_uiChargeTimer     = urand(15, 27) * IN_MILLISECONDS;
+        m_uiKnockAwayTimer  = urand(10, 20) * IN_MILLISECONDS;
+        m_uiKnockDownTimer  = urand(5, 8) * IN_MILLISECONDS;
+
+        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+
+        m_creature->SetWalk(false);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        // Enrage the other bugs
-        DoCastSpellIfCan(m_creature, SPELL_VENGEANCE, CAST_TRIGGERED);
-
-        if (!m_pInstance)
-            return;
-
-        // If the other 2 bugs are still alive, make unlootable
-        if (m_pInstance->GetData(TYPE_BUG_TRIO) != DONE)
-        {
-            m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            m_pInstance->SetData(TYPE_BUG_TRIO, SPECIAL);
-        }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BUG_TRIO, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
+    bool UpdateBugAI(const uint32 uiDiff) override
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+            return false;
 
-        // KnockAway_Timer
+        // Knock Away
         if (m_uiKnockAwayTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
-                m_uiKnockAwayTimer = urand(10000, 20000);
+                m_uiKnockAwayTimer = urand(10, 20) * IN_MILLISECONDS;
         }
         else
             m_uiKnockAwayTimer -= uiDiff;
 
-        // Charge_Timer
+        // Knockdown
+        if (m_uiKnockDownTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCKDOWN) == CAST_OK)
+                m_uiKnockDownTimer = urand(15, 20) * IN_MILLISECONDS;
+        }
+        else
+            m_uiKnockDownTimer -= uiDiff;
+
+        // Charge Timer
         if (m_uiChargeTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_CHARGE) == CAST_OK)
-                    m_uiChargeTimer = urand(8000, 16000);
+                    m_uiChargeTimer = urand(8, 16) * IN_MILLISECONDS;
             }
         }
         else
             m_uiChargeTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
+
+        return true;
     }
 };
 
-struct boss_yaujAI : public ScriptedAI
+struct boss_yaujAI : public boss_silithidRoyaltyAI
 {
-    boss_yaujAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_yaujAI(Creature* pCreature) : boss_silithidRoyaltyAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
@@ -198,53 +299,32 @@ struct boss_yaujAI : public ScriptedAI
 
     uint32 m_uiHealTimer;
     uint32 m_uiFearTimer;
+    uint32 m_uiRavageTimer;
 
     void Reset() override
     {
-        m_uiHealTimer = urand(25000, 40000);
-        m_uiFearTimer = urand(12000, 24000);
+        m_uiDeathAbility    = SPELL_SUMMON_BROOD;
+
+        m_uiHealTimer       = urand(20, 30) * IN_MILLISECONDS;
+        m_uiFearTimer       = urand(12, 24) * IN_MILLISECONDS;
+        m_uiRavageTimer     = 12 * IN_MILLISECONDS;
+
+        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
-    void JustDied(Unit* /*Killer*/) override
-    {
-        // Spawn 10 yauj brood on death
-        float fX, fY, fZ;
-        for (int i = 0; i < 10; ++i)
-        {
-            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_YAUJ_BROOD, fX, fY, fZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
-        }
-
-        if (!m_pInstance)
-            return;
-
-        // If the other 2 bugs are still alive, make unlootable
-        if (m_pInstance->GetData(TYPE_BUG_TRIO) != DONE)
-        {
-            m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            m_pInstance->SetData(TYPE_BUG_TRIO, SPECIAL);
-        }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BUG_TRIO, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
+    bool UpdateBugAI(const uint32 uiDiff) override
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+            return false;
 
-        // Fear_Timer
+        // Fear
         if (m_uiFearTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
             {
                 DoResetThreat();
-                m_uiFearTimer = 20000;
+                m_uiFearTimer = 20 * IN_MILLISECONDS;
             }
         }
         else
@@ -256,13 +336,24 @@ struct boss_yaujAI : public ScriptedAI
             if (Unit* pTarget = DoSelectLowestHpFriendly(100.0f))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_HEAL) == CAST_OK)
-                    m_uiHealTimer = urand(15000, 30000);
+                    m_uiHealTimer = urand(10, 30) * IN_MILLISECONDS;
             }
         }
         else
             m_uiHealTimer -= uiDiff;
 
+        // Ravage
+        if (m_uiRavageTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAVAGE) == CAST_OK)
+                m_uiRavageTimer = urand(10, 15) * IN_MILLISECONDS;
+        }
+        else
+            m_uiRavageTimer -= uiDiff;
+
         DoMeleeAttackIfReady();
+
+        return true;
     }
 };
 
