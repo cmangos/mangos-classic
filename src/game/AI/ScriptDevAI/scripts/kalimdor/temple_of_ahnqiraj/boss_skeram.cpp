@@ -187,11 +187,7 @@ struct boss_skeramAI : public ScriptedAI
             return 0;
 
         if (m_teleportCounter < m_teleports.size())
-        {
-            uint32 teleportSpellId = m_teleports[m_teleportCounter];
-            ++m_teleportCounter;
-            return teleportSpellId;
-        }
+            return m_teleports[m_teleportCounter++];
 
         return 0;
     }
