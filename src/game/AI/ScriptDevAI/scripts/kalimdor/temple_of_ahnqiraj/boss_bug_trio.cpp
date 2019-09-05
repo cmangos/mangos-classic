@@ -52,6 +52,7 @@ enum
     SPELL_RAVAGE            = 3242,
     SPELL_SUMMON_BROOD      = 25789,
     SPELL_DISPEL            = 25808,
+    SPELL_DESPAWN_BROOD     = 25792,
 
     NPC_YAUJ_BROOD          = 15621,
 };
@@ -91,6 +92,9 @@ struct boss_silithidRoyaltyAI : public CombatAI
 
     void JustReachedHome() override
     {
+        // Clean-up stage
+        DoCastSpellIfCan(m_creature, SPELL_DESPAWN_BROOD, CAST_TRIGGERED);
+
         if (m_instance)
             m_instance->SetData(TYPE_BUG_TRIO, FAIL);
     }
@@ -300,8 +304,8 @@ struct boss_yaujAI : public boss_silithidRoyaltyAI
         {
             case YAUJ_HEAL:
             {
-                if (Unit* target = DoSelectLowestHpFriendly(100.0f))
-                    if (DoCastSpellIfCan(target, SPELL_HEAL) == CAST_OK)
+                if (m_creature->GetHealthPercent() < 100.0f)
+                    if (DoCastSpellIfCan(m_creature, SPELL_HEAL) == CAST_OK)
                         ResetCombatAction(action, urand(10, 30) * IN_MILLISECONDS);
                 break;
             }
