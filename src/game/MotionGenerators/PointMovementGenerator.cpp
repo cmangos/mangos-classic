@@ -34,6 +34,8 @@ void PointMovementGenerator<T>::Initialize(T& unit)
     unit.StopMoving();
 
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    if (m_effect)
+        unit.addUnitState(UNIT_STAT_CHARGING);
     m_speedChanged = false;
     Movement::MoveSplineInit init(unit);
     init.MoveTo(i_x, i_y, i_z, m_generatePath);
@@ -48,6 +50,8 @@ template<class T>
 void PointMovementGenerator<T>::Finalize(T& unit)
 {
     unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    if (m_effect)
+        unit.clearUnitState(UNIT_STAT_CHARGING);
 
     if (unit.movespline->Finalized())
         MovementInform(unit);
@@ -58,6 +62,8 @@ void PointMovementGenerator<T>::Interrupt(T& unit)
 {
     unit.InterruptMoving();
     unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    if (m_effect)
+        unit.clearUnitState(UNIT_STAT_CHARGING);
 }
 
 template<class T>
@@ -65,6 +71,8 @@ void PointMovementGenerator<T>::Reset(T& unit)
 {
     unit.StopMoving();
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    if (m_effect)
+        unit.addUnitState(UNIT_STAT_CHARGING);
 }
 
 template<class T>
@@ -90,15 +98,16 @@ void PointMovementGenerator<Player>::MovementInform(Player&)
 template <>
 void PointMovementGenerator<Creature>::MovementInform(Creature& unit)
 {
+    MovementGeneratorType const type = GetMovementGeneratorType();
     if (unit.AI())
-        unit.AI()->MovementInform(POINT_MOTION_TYPE, id);
+        unit.AI()->MovementInform(type, id);
 
     if (unit.IsTemporarySummon())
     {
         if (unit.GetSpawnerGuid().IsCreatureOrPet())
             if (Creature* pSummoner = unit.GetMap()->GetAnyTypeCreature(unit.GetSpawnerGuid()))
                 if (pSummoner->AI())
-                    pSummoner->AI()->SummonedMovementInform(&unit, POINT_MOTION_TYPE, id);
+                    pSummoner->AI()->SummonedMovementInform(&unit, type, id);
     }
 }
 

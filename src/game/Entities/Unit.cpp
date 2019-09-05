@@ -10668,14 +10668,6 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
     return true;
 }
 
-void Unit::SetTurningOff(bool apply)
-{
-    if (apply)
-        addUnitState(UNIT_STAT_DONT_TURN);
-    else
-        clearUnitState(UNIT_STAT_DONT_TURN);
-}
-
 void Unit::BreakCharmOutgoing(Unit* charmed)
 {
     // Cache our own guid

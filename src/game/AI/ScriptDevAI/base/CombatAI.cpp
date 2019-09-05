@@ -24,6 +24,10 @@ void CombatAI::ExecuteActions()
 
     for (uint32 i = 0; i < GetCombatActionCount(); ++i)
     {
+        // can be changed on any action - prevent all additional ones
+        if (GetCombatScriptStatus())
+            return;
+
         if (GetActionReadyStatus(i))
             ExecuteAction(i);
     }

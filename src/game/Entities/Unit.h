@@ -415,7 +415,7 @@ enum UnitState
     UNIT_STAT_FLEEING         = 0x00020000,                 // FleeMovementGenerator/TimedFleeingMovementGenerator active/onstack
     UNIT_STAT_FLEEING_MOVE    = 0x00040000,
     UNIT_STAT_SEEKING_ASSISTANCE = 0x00080000,
-    UNIT_STAT_DONT_TURN       = 0x00100000,                 // Creature will not turn and acquire new target
+    UNIT_STAT_CHARGING        = 0x00100000,                 // Creature will not turn and acquire new target
     UNIT_STAT_CHANNELING      = 0x00200000,
     // More room for other MMGens
 
@@ -2325,7 +2325,6 @@ class Unit : public WorldObject
         bool CanEnterCombat() { return m_canEnterCombat && !IsEvadingHome(); }
         void SetCanEnterCombat(bool can) { m_canEnterCombat = can; }
 
-        void SetTurningOff(bool apply);
         virtual bool IsIgnoringRangedTargets() { return false; }
 
         float GetAttackDistance(Unit const* pl) const;

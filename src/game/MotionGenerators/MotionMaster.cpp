@@ -164,15 +164,21 @@ void MotionMaster::DirectExpire(bool reset)
         return;
 
     MovementGenerator* curr = top();
+    bool onlyRemoveOne = false; // this is an ugly hack and is indicative of a need for a rework
+    if (curr->GetMovementGeneratorType() == EFFECT_MOTION_TYPE)
+        onlyRemoveOne = true;
     pop();
 
     // also drop stored under top() targeted motions
-    while (!empty() && (top()->IsRemovedOnDirectExpire()))
+    if (!onlyRemoveOne)
     {
-        MovementGenerator* temp = top();
-        pop();
-        temp->Finalize(*m_owner);
-        delete temp;
+        while (!empty() && (top()->IsRemovedOnDirectExpire()))
+        {
+            MovementGenerator* temp = top();
+            pop();
+            temp->Finalize(*m_owner);
+            delete temp;
+        }
     }
 
     // Store current top MMGen, as Finalize might push a new MMGen
@@ -342,9 +348,9 @@ void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generate
 void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id/*= EVENT_CHARGE*/)
 {
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
-        Mutate(new PointMovementGenerator<Player>(id, x, y, z, true, 0, speed));
+        Mutate(new PointMovementGenerator<Player>(id, x, y, z, true, 0, speed, true));
     else
-        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, true, 0, speed));
+        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, true, 0, speed, true));
 }
 
 void MotionMaster::MoveSeekAssistance(float x, float y, float z)

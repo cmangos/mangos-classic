@@ -26,8 +26,8 @@ class PointMovementGenerator
     : public MovementGeneratorMedium< T, PointMovementGenerator<T> >
 {
     public:
-        PointMovementGenerator(uint32 _id, float _x, float _y, float _z, bool _generatePath, uint32 forcedMovement, float speed = 0.f) :
-            id(_id), i_x(_x), i_y(_y), i_z(_z), m_generatePath(_generatePath), m_speedChanged(false), m_forcedMovement(forcedMovement), m_speed(speed) {}
+        PointMovementGenerator(uint32 _id, float _x, float _y, float _z, bool _generatePath, uint32 forcedMovement, float speed = 0.f, bool effect = false) :
+            id(_id), i_x(_x), i_y(_y), i_z(_z), m_generatePath(_generatePath), m_speedChanged(false), m_forcedMovement(forcedMovement), m_speed(speed), m_effect(effect) {}
 
         virtual void Initialize(T&);
         void Finalize(T&);
@@ -37,7 +37,12 @@ class PointMovementGenerator
 
         void MovementInform(T&);
 
-        MovementGeneratorType GetMovementGeneratorType() const override { return POINT_MOTION_TYPE; }
+        MovementGeneratorType GetMovementGeneratorType() const override
+        {
+            if (m_effect)
+                return EFFECT_MOTION_TYPE;
+            return POINT_MOTION_TYPE;
+        }
 
         bool GetDestination(float& x, float& y, float& z) const { x = i_x; y = i_y; z = i_z; return true; }
 
@@ -53,6 +58,7 @@ class PointMovementGenerator
         bool m_speedChanged;
         uint32 m_forcedMovement;
         float m_speed;
+        bool m_effect;
 };
 
 class AssistanceMovementGenerator

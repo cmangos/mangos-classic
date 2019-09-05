@@ -23,6 +23,7 @@
 #include "Dynamic/FactoryHolder.h"
 #include "MotionMaster.h"
 #include "Timer.h"
+#include "Globals/SharedDefines.h"
 
 class Unit;
 class Creature;

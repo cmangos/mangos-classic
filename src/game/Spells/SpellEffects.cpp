@@ -5400,7 +5400,7 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
 
     float speed = m_spellInfo->speed ? m_spellInfo->speed : BASE_CHARGE_SPEED;
 
-    m_caster->GetMotionMaster()->MoveCharge(pos.coord_x, pos.coord_y, pos.coord_z, speed);
+    m_caster->GetMotionMaster()->MoveCharge(pos.coord_x, pos.coord_y, pos.coord_z, speed, m_spellInfo->Id);
 }
 
 void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
