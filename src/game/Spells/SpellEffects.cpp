@@ -1159,6 +1159,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 25171, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 25792:                                 // Despawn Brood
+                {
+                    // Despawn all Yauj Brood
+                    if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->GetEntry() == 15621)
+                        ((Creature*)unitTarget)->ForcedDespawn();
+                    return;
+                }
                 case 26080:                                 // Stinger Charge Primer
                 {
                     if (unitTarget->HasAura(26078))
