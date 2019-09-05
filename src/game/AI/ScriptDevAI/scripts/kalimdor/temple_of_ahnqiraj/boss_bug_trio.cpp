@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: bug_trio
 SD%Complete: 90
-SDComment: Summon Player spell NYI; Consume mechanics is missing (only dummy implementation)
+SDComment: Summon Player spell NYI (when current target is unreachable); Consume mechanics is missing (only dummy implementation)
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData
 
@@ -44,9 +44,11 @@ enum
 
     // Princess Yauj
     SPELL_HEAL              = 25807,
+    SPELL_DISPEL            = 25808,
     SPELL_FEAR              = 26580,
     SPELL_RAVAGE            = 3242,
     SPELL_SUMMON_BROOD      = 25789,
+    SPELL_DESPAWN_BROOD     = 25792,
 };
 
 struct Location
@@ -82,6 +84,9 @@ struct boss_silithidRoyaltyAI : public ScriptedAI
 
     void JustReachedHome() override
     {
+        // Clean-up stage
+        DoCastSpellIfCan(m_creature, SPELL_DESPAWN_BROOD, CAST_TRIGGERED);
+
         if (m_instance)
             m_instance->SetData(TYPE_BUG_TRIO, FAIL);
     }
@@ -181,10 +186,6 @@ struct boss_kriAI : public boss_silithidRoyaltyAI
 
     bool UpdateBugAI(const uint32 diff) override
     {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return false;
-
         // Cleave
         if (m_cleaveTimer < diff)
         {
@@ -247,10 +248,6 @@ struct boss_vemAI : public boss_silithidRoyaltyAI
 
     bool UpdateBugAI(const uint32 diff) override
     {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return false;
-
         // Knock Away
         if (m_knockAwayTimer < diff)
         {
@@ -300,6 +297,7 @@ struct boss_yaujAI : public boss_silithidRoyaltyAI
     uint32 m_healTimer;
     uint32 m_fearTimer;
     uint32 m_ravageTimer;
+    uint32 m_dispellTimer;
 
     void Reset() override
     {
@@ -308,16 +306,13 @@ struct boss_yaujAI : public boss_silithidRoyaltyAI
         m_healTimer       = urand(20, 30) * IN_MILLISECONDS;
         m_fearTimer       = urand(12, 24) * IN_MILLISECONDS;
         m_ravageTimer     = 12 * IN_MILLISECONDS;
+        m_dispellTimer    = urand(7, 10) * IN_MILLISECONDS;
 
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
     bool UpdateBugAI(const uint32 diff) override
     {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return false;
-
         // Fear
         if (m_fearTimer < diff)
         {
@@ -330,12 +325,24 @@ struct boss_yaujAI : public boss_silithidRoyaltyAI
         else
             m_fearTimer -= diff;
 
-        // Heal
+        // Dispel
+        if (m_dispellTimer < diff)
+        {
+            Unit* dispelTarget = m_creature->SelectRandomFriendlyTarget(nullptr, 100.0f);   // Look for any friendly unit in spell range, self dispel if none
+            if (!dispelTarget)
+                dispelTarget = m_creature;
+            DoCastSpellIfCan(dispelTarget, SPELL_DISPEL);   // Don't check against CAST_OK because cast will fail if there is nothing to dispel but this is fine
+            m_dispellTimer = urand(7, 10) * IN_MILLISECONDS;
+        }
+        else
+            m_dispellTimer -= diff;
+
+        // Heal self
         if (m_healTimer < diff)
         {
-            if (Unit* pTarget = DoSelectLowestHpFriendly(100.0f))
+            if (m_creature->GetHealthPercent() < 100.0f)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_HEAL) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature, SPELL_HEAL) == CAST_OK)
                     m_healTimer = urand(10, 30) * IN_MILLISECONDS;
             }
         }
