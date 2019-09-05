@@ -5547,7 +5547,7 @@ void Spell::EffectPullTowards(SpellEffectIndex eff_idx)
     // Projectile motion
     float speedXY = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.1f;
     float time = dist / speedXY;
-    float speedZ = ((m_caster->GetPositionZ() - unitTarget->GetPositionZ()) + 0.5f * time * time * Movement::gravity) / time;
+    float speedZ = ((z - unitTarget->GetPositionZ()) + 0.5f * time * time * Movement::gravity) / time;
 
     ((Player*)unitTarget)->KnockBackFrom(m_caster, -speedXY, speedZ);
 }
