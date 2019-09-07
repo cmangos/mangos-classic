@@ -420,6 +420,7 @@ class UnitAI
 
         // AI selection - works in connection with IsPossessCharmType
         virtual bool CanHandleCharm() { return false; }
+        virtual void JustGotCharmed(Unit* charmer) {}
 
         /*
         * All units which attack at ranged need to return true. It is used for 3 purposes:

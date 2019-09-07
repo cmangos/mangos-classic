@@ -31,14 +31,17 @@
 //==============================================================
 
 // The pHatingUnit is not used yet
-float ThreatCalcHelper::CalcThreat(Unit* hatedUnit, Unit* /*pHatingUnit*/, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell)
+float ThreatCalcHelper::CalcThreat(Unit* hatedUnit, Unit* hatingUnit, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell)
 {
     // all flat mods applied early
     if (!threat)
-        return 0.0f;
+        return 0.f;
 
     if (hatedUnit->GetNoThreatState()) // some NPCs cause no threat
-        return 0.0f;
+        return 0.f;
+
+    if (hatingUnit->GetTypeId() == TYPEID_PLAYER) // players have entries with 0 threat during charm
+        return 0.f;
 
     if (threatSpell)
     {

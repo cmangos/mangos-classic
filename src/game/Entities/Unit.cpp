@@ -7953,13 +7953,12 @@ bool Unit::IsTargetUnderControl(Unit const& target) const
 
 bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
 {
-    // only creatures can have threat list
-    if (GetTypeId() != TYPEID_UNIT)
-        return false;
-
     // only alive units can have threat list
     if (!isAlive() && !ignoreAliveState)
         return false;
+
+    if (GetTypeId() == TYPEID_PLAYER) // only charmed players have a threat list
+        return !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
     Creature const* creature = static_cast<Creature const*>(this);
 
@@ -7968,7 +7967,7 @@ bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
         return false;
 
     // pets can not have a threat list, unless they are controlled by a creature
-    if (creature->IsPet() && creature->GetOwnerGuid().IsPlayer())
+    if (creature->IsPet() && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
         Pet const* pet = static_cast<Pet const*>(creature);
         if (pet->getPetType() == GUARDIAN_PET)
@@ -10526,6 +10525,24 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
             charmerPlayer->SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
 
+    // put charmed in combat with all charmers enemies - must be done after flags
+    ThreatList const& list = getThreatManager().getThreatList();
+    for (auto& data : list)
+    {
+        Unit* enemy = data->getTarget();
+        if (charmed->CanAttack(enemy))
+            charmed->AddThreat(enemy, 0.f);
+    }
+
+    //if (!isInCombat())
+    //{
+    //    charmed->GetCombatManager().StopCombatTimer();
+    //    charmed->ClearInCombat();
+    //}
+
+    if (UnitAI* ai = charmed->AI())
+        ai->JustGotCharmed(this);
+
     return true;
 }
 
@@ -10696,10 +10713,10 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
 
         charmedPlayer->ForceHealAndPowerUpdateInZone();
 
-        while (charmedPlayer->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
-            charmedPlayer->GetMotionMaster()->MovementExpired(true);
+        charmed->GetMotionMaster()->Clear(false, true);
+        charmed->GetMotionMaster()->MoveIdle();
 
-        charmedPlayer->DeleteThreatList(); // TODO: Add threat management for player during charm, only entries with 0 threat
+        charmed->DeleteThreatList();
 
         charmed->SetTarget(nullptr);
     }

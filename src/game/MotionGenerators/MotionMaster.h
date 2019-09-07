@@ -39,6 +39,9 @@ namespace G3D
 // Creature Entry ID used for waypoints show, visible only for GMs
 #define VISUAL_WAYPOINT 1
 
+#define PET_FOLLOW_DIST  1.0f
+#define PET_FOLLOW_ANGLE (M_PI_F / 2.0f)
+
 // values 0 ... MAX_DB_MOTION_TYPE-1 used in DB
 enum MovementGeneratorType
 {

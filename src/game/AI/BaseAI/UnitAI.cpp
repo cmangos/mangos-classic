@@ -130,6 +130,12 @@ CanCastResult UnitAI::CanCastSpell(Unit* target, const SpellEntry* spellInfo, bo
 
         if (!m_unit->IsSpellReady(*spellInfo))
             return CAST_FAIL_COOLDOWN;
+        
+        // already active next melee swing spell
+        if (IsNextMeleeSwingSpell(spellInfo))
+            if (Spell* autorepeatSpell = m_unit->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL))
+                if (autorepeatSpell->m_spellInfo->Id == spellInfo->Id)
+                    return CAST_FAIL_OTHER;
     }
     return CAST_OK;
 }

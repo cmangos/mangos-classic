@@ -28,6 +28,7 @@
 #include "BaseAI/PetAI.h"
 #include "BaseAI/PossessedAI.h"
 #include "BaseAI/CritterAI.h"
+#include "AI/PlayerAI/PlayerAI.h"
 
 INSTANTIATE_SINGLETON_1(CreatureAIRegistry);
 INSTANTIATE_SINGLETON_1(MovementGeneratorRegistry);
@@ -91,15 +92,12 @@ namespace FactorySelector
 
     UnitAI* GetSpecificAI(Unit* unit, std::string const& ainame)
     {
-        // little hack to not have to change all AI to use Unit instead of Creature
-        Creature* creature = unit->GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(unit) : nullptr;
-
         CreatureAIRegistry& ai_registry(CreatureAIRepository::Instance());
         const CreatureAICreator* ai_factory = ai_registry.GetRegistryItem(ainame);
-        if (creature)
-            return  ai_factory->Create(creature);
+        if (unit->GetTypeId() == TYPEID_UNIT)
+            return  ai_factory->Create(static_cast<Creature*>(unit));
         if (ainame == "PetAI")
-            return (new PetAI(unit));
+            return GetClassAI(Classes(unit->getClass()), static_cast<Player*>(unit));
         if (ainame == "PossessedAI")
             return (new PossessedAI(unit));
 
