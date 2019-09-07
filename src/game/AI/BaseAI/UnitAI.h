@@ -437,6 +437,8 @@ class UnitAI
         virtual void DistancingStarted();
         virtual void DistancingEnded();
 
+        void AttackClosestEnemy();
+
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }
 
