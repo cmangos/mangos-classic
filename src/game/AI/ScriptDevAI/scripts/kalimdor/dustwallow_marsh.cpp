@@ -653,7 +653,11 @@ enum
 
 struct npc_stinky_ignatzAI : public npc_escortAI
 {
-    npc_stinky_ignatzAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_stinky_ignatzAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        SetReactState(REACT_DEFENSIVE);
+        Reset();
+    }
 
     ObjectGuid m_bogbeanPlantGuid;
 
