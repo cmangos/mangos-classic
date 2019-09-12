@@ -1322,6 +1322,11 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+                case 28238:                                 // Zombie Chow Search
+                {
+                    m_caster->SetHealth(m_caster->GetHealth() + m_caster->GetMaxHealth() * 0.05f); // Gain 5% heal
+                    return;
+                }
                 case 28414:                                 // Call of the Ashbringer
                 {
                     if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -1333,6 +1338,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 28697:                                 // Forgiveness
                 {
                     unitTarget->CastSpell(nullptr, 3617, TRIGGERED_OLD_TRIGGERED); // guessed suicide spell
+                    return;
+                }
+                case 29682:                                 // Call All Zombie Chow
+                {
+                    if (unitTarget->isAlive())
+                     {
+                        float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
+                        unitTarget->GetMotionMaster()->MoveFollow(m_caster, radius, 0);
+                    }
                     return;
                 }
             }
@@ -4466,6 +4480,17 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 27697, TRIGGERED_OLD_TRIGGERED);
                     unitTarget->CastSpell(unitTarget, 27698, TRIGGERED_OLD_TRIGGERED);
                     unitTarget->CastSpell(unitTarget, 27699, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 28236:                                 // Zombie Chow Search
+                {
+                    if (!unitTarget->isAlive())
+                        return;
+
+                    m_caster->SetTarget(nullptr);
+                    m_caster->SetFacingToObject(unitTarget);
+                    if (m_caster->CastSpell(unitTarget, 28239, TRIGGERED_NONE) == SPELL_CAST_OK)    // Zombie Chow Search - Insta kill, single target
+                        DoScriptText(-1533119, m_caster, unitTarget);
                     return;
                 }
                 case 28352:                                 // Breath of Sargeras
