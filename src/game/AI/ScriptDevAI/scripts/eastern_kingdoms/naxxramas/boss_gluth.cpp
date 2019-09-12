@@ -48,45 +48,45 @@ enum
 
 struct boss_gluthAI : public ScriptedAI
 {
-    boss_gluthAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_gluthAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
         Reset();
 
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
 
-    uint32 m_uiMortalWoundTimer;
-    uint32 m_uiDecimateTimer;
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiRoarTimer;
-    uint32 m_uiBerserkTimer;
+    uint32 m_mortalWoundTimer;
+    uint32 m_decimateTimer;
+    uint32 m_enrageTimer;
+    uint32 m_roarTimer;
+    uint32 m_berserkTimer;
 
     CreatureList m_summoningTriggers;
 
     void Reset() override
     {
-        m_uiMortalWoundTimer  = 10 * IN_MILLISECONDS;
-        m_uiDecimateTimer     = 105 * IN_MILLISECONDS;
-        m_uiEnrageTimer       = 10 * IN_MILLISECONDS;
-        m_uiRoarTimer         = 20 * IN_MILLISECONDS;
-        m_uiBerserkTimer      = 6.5 * MINUTE * IN_MILLISECONDS; // ~15 seconds after the third Decimate
+        m_mortalWoundTimer  = 10 * IN_MILLISECONDS;
+        m_decimateTimer     = 105 * IN_MILLISECONDS;
+        m_enrageTimer       = 10 * IN_MILLISECONDS;
+        m_roarTimer         = 20 * IN_MILLISECONDS;
+        m_berserkTimer      = 6.5 * MINUTE * IN_MILLISECONDS; // ~15 seconds after the third Decimate
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GLUTH, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_GLUTH, DONE);
 
         StopSummoning();
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GLUTH, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_GLUTH, IN_PROGRESS);
 
         DoCastSpellIfCan(m_creature, SPELL_ZOMBIE_CHOW_SEARCH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);     // Aura periodically looking for NPC 16360
         DoCastSpellIfCan(m_creature, SPELL_CALL_ALL_ZOMBIE_CHOW, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);   // Aura periodically calling all NPCs 16360
@@ -97,16 +97,16 @@ struct boss_gluthAI : public ScriptedAI
             trigger->CastSpell(trigger, SPELL_SUMMON_ZOMBIE_CHOW, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void KilledUnit(Unit* victim) override
     {
-        if (pVictim->GetEntry() == NPC_ZOMBIE_CHOW)
+        if (victim->GetEntry() == NPC_ZOMBIE_CHOW)
             DoCastSpellIfCan(m_creature, SPELL_ZOMBIE_CHOW_SEARCH_HEAL, CAST_TRIGGERED);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GLUTH, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_GLUTH, FAIL);
 
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         StopSummoning();
@@ -119,73 +119,73 @@ struct boss_gluthAI : public ScriptedAI
             trigger->RemoveAllAuras();
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
         // Do nothing if no target or if we are currently stunned (Decimate effect)
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || m_creature->HasAuraType(SPELL_AURA_MOD_STUN))
             return;
 
         // Mortal Wound
-        if (m_uiMortalWoundTimer < uiDiff)
+        if (m_mortalWoundTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTALWOUND) == CAST_OK)
-                m_uiMortalWoundTimer = 10 * IN_MILLISECONDS;
+                m_mortalWoundTimer = 10 * IN_MILLISECONDS;
         }
         else
-            m_uiMortalWoundTimer -= uiDiff;
+            m_mortalWoundTimer -= diff;
 
         // Decimate
-        if (m_uiDecimateTimer < uiDiff)
+        if (m_decimateTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_DECIMATE, CAST_TRIGGERED) == CAST_OK)
-                m_uiDecimateTimer = urand(100, 110) * IN_MILLISECONDS;
+                m_decimateTimer = urand(100, 110) * IN_MILLISECONDS;
         }
         else
-            m_uiDecimateTimer -= uiDiff;
+            m_decimateTimer -= diff;
 
         // Enrage
-        if (m_uiEnrageTimer < uiDiff)
+        if (m_enrageTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
             {
                 DoScriptText(EMOTE_BOSS_GENERIC_ENRAGED, m_creature);
-                m_uiEnrageTimer = urand(10, 12) * IN_MILLISECONDS;
+                m_enrageTimer = urand(10, 12) * IN_MILLISECONDS;
             }
         }
         else
-            m_uiEnrageTimer -= uiDiff;
+            m_enrageTimer -= diff;
 
         // Terrifying Roar
-        if (m_uiRoarTimer < uiDiff)
+        if (m_roarTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_TERRIFYING_ROAR) == CAST_OK)
-                m_uiRoarTimer = 20 * IN_MILLISECONDS;
+                m_roarTimer = 20 * IN_MILLISECONDS;
         }
         else
-            m_uiRoarTimer -= uiDiff;
+            m_roarTimer -= diff;
 
         // Berserk
-        if (m_uiBerserkTimer < uiDiff)
+        if (m_berserkTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                m_uiBerserkTimer = 5 * MINUTE * IN_MILLISECONDS;
+                m_berserkTimer = 5 * MINUTE * IN_MILLISECONDS;
         }
         else
-            m_uiBerserkTimer -= uiDiff;
+            m_berserkTimer -= diff;
 
         DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_gluth(Creature* pCreature)
+UnitAI* GetAI_boss_gluth(Creature* creature)
 {
-    return new boss_gluthAI(pCreature);
+    return new boss_gluthAI(creature);
 }
 
 void AddSC_boss_gluth()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "boss_gluth";
-    pNewScript->GetAI = &GetAI_boss_gluth;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "boss_gluth";
+    newScript->GetAI = &GetAI_boss_gluth;
+    newScript->RegisterSelf();
 }
