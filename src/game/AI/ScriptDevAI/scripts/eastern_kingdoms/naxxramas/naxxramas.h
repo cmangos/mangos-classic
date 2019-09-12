@@ -67,6 +67,8 @@ enum
     NPC_ANUB_REKHAN             = 15956,
     NPC_FAERLINA                = 15953,
 
+    NPC_ZOMBIE_CHOW             = 16360,
+    NPC_GLUTH                   = 15932,
     NPC_THADDIUS                = 15928,
     NPC_STALAGG                 = 15929,
     NPC_FEUGEN                  = 15930,
@@ -168,6 +170,8 @@ enum
     AREATRIGGER_GOTHIK          = 4116,
     AREATRIGGER_THADDIUS_DOOR   = 4113,
     AREATRIGGER_FROSTWYRM_TELE  = 4156,
+
+    EVENT_ID_DECIMATE           = 10495,
 };
 
 struct GothTrigger
@@ -236,12 +240,16 @@ class instance_naxxramas : public ScriptedInstance
         { fX = m_fChamberCenterX; fY = m_fChamberCenterY; fZ = m_fChamberCenterZ; }
         void DoTaunt();
 
+        // Gluth
+        void HandleDecimateEvent();
+
     protected:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
         GuidList m_lThadTeslaCoilList;
         GuidList m_lGothTriggerList;
+        GuidList m_lZombieChowList;
 
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];

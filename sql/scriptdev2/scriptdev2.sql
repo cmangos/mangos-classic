@@ -389,6 +389,8 @@ UPDATE creature_template SET ScriptName='boss_sapphiron' WHERE entry=15989;
 UPDATE gameobject_template SET ScriptName='go_sapphiron_birth' WHERE entry=181356;
 UPDATE gameobject_template SET ScriptName='go_anub_door' WHERE entry=181126;
 UPDATE creature_template SET ScriptName='boss_kelthuzad' WHERE entry=15990;
+INSERT INTO scripted_event_id VALUES
+(10495,'event_decimate');
 
 /* ONYXIA'S LAIR */
 UPDATE instance_template SET ScriptName='instance_onyxias_lair' WHERE map=249;
@@ -2451,7 +2453,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1533117,'Hungry worms will feast on your rotten flesh!',8834,1,0,0,'heigan SAY_TAUNT4'),
 (-1533118,'Noo... o...',8828,1,0,0,'heigan SAY_DEATH'),
 
-(-1533119,'%s spots a nearby Zombie to devour!',0,3,0,0,'gluth EMOTE_ZOMBIE'),
+(-1533119,'%s spots a nearby zombie to devour!',0,2,0,0,'gluth EMOTE_ZOMBIE'),
 
 (-1533120,'Do as I taught you!',8855,1,0,0,'razuvious SAY_AGGRO1'),
 (-1533121,'Show them no mercy!',8856,1,0,0,'razuvious SAY_AGGRO2'),

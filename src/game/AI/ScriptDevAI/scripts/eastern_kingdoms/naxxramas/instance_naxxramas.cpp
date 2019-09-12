@@ -86,6 +86,7 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
     {
         case NPC_ANUB_REKHAN:
         case NPC_FAERLINA:
+        case NPC_GLUTH:
         case NPC_THADDIUS:
         case NPC_STALAGG:
         case NPC_FEUGEN:
@@ -103,7 +104,12 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_THE_LICHKING:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
-
+        case NPC_ZOMBIE_CHOW:
+        {
+            m_lZombieChowList.push_back(pCreature->GetObjectGuid());
+            pCreature->SetInCombatWithZone();
+            break;
+        }
         case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetObjectGuid()); break;
         case NPC_TESLA_COIL:        m_lThadTeslaCoilList.push_back(pCreature->GetObjectGuid()); break;
     }
@@ -266,6 +272,11 @@ void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_MR_BIGGLESWORTH && m_auiEncounter[TYPE_KELTHUZAD] != DONE)
         DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_CAT_DIED, NPC_KELTHUZAD);
+    else if (pCreature->GetEntry() == NPC_ZOMBIE_CHOW)
+    {
+        pCreature->ForcedDespawn(2000);
+        m_lZombieChowList.remove(pCreature->GetObjectGuid());
+    }
 }
 
 bool instance_naxxramas::IsEncounterInProgress() const
@@ -696,6 +707,30 @@ void instance_naxxramas::DoTaunt()
     }
 }
 
+// Used in Gluth fight: move all spawned Zombie Chow towards Gluth to be devoured
+void instance_naxxramas::HandleDecimateEvent()
+{
+    if (Creature* gluth = GetSingleCreatureFromStorage(NPC_GLUTH))
+    {
+        for (auto& zombieGuid : m_lZombieChowList)
+        {
+            if (Creature* zombie = instance->GetCreature(zombieGuid))
+            {
+                if (zombie->isAlive())
+                {
+                    zombie->AI()->SetReactState(REACT_PASSIVE);
+                    zombie->AttackStop();
+                    zombie->SetTarget(nullptr);
+                    zombie->AI()->DoResetThreat();
+                    zombie->GetMotionMaster()->Clear();
+                    zombie->SetWalk(true);
+                    zombie->GetMotionMaster()->MoveFollow(gluth, ATTACK_DISTANCE, 0);
+                }
+            }
+        }
+    }
+}
+
 InstanceData* GetInstanceData_instance_naxxramas(Map* pMap)
 {
     return new instance_naxxramas(pMap);
@@ -757,6 +792,16 @@ bool AreaTrigger_at_naxxramas(Player* pPlayer, AreaTriggerEntry const* pAt)
     return false;
 }
 
+bool ProcessEventId_decimate(uint32 eventId, Object* source, Object* /*target*/, bool /*isStart*/)
+{
+    if (instance_naxxramas* instance = (instance_naxxramas*)((Creature*)source)->GetInstanceData())
+    {
+        if (eventId == EVENT_ID_DECIMATE)
+            instance->HandleDecimateEvent();
+    }
+    return false;   // return false so DBScripts can be triggered
+}
+
 void AddSC_instance_naxxramas()
 {
     Script* pNewScript = new Script;
@@ -767,5 +812,10 @@ void AddSC_instance_naxxramas()
     pNewScript = new Script;
     pNewScript->Name = "at_naxxramas";
     pNewScript->pAreaTrigger = &AreaTrigger_at_naxxramas;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "event_decimate";
+    pNewScript->pProcessEventId = &ProcessEventId_decimate;
     pNewScript->RegisterSelf();
 }
