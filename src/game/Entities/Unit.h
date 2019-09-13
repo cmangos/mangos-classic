@@ -533,6 +533,8 @@ enum UnitFlags
 //[-ZERO]    UNIT_FLAG_MOUNT                 = 0x08000000,
     UNIT_FLAG_UNK_28                = 0x10000000,
     UNIT_FLAG_UNK_29                = 0x20000000,           // used in Feing Death spell
+    UNIT_FLAG_SHEATHE               = 0x40000000,
+    UNIT_FLAG_IMMUNE                = 0x80000000
 };
 
 /// Non Player Character flags

@@ -3057,6 +3057,16 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
     }
 
     GetTarget()->getHostileRefManager().HandleSuppressed(apply, true);
+
+    if (apply)
+        target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE);
+    else
+    {
+        // do not remove unit flag if there are more than this auraEffect of that kind on unit
+        if (target->HasAuraType(SPELL_AURA_SCHOOL_IMMUNITY))
+            return;
+        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE);
+    }
 }
 
 void Aura::HandleAuraModDmgImmunity(bool apply, bool /*Real*/)
