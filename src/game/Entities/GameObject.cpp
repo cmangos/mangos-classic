@@ -1191,14 +1191,9 @@ void GameObject::Use(Unit* user)
     uint32 triggeredFlags = 0;
     bool originalCaster = true;
 
-    if (Player* playerUser = dynamic_cast<Player*>(user))
-    {
-        if (m_goInfo->CannotBeUsedUnderImmunity() && playerUser->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
-            return;
-
+    if (user->IsPlayer())
         if (!m_goInfo->IsUsableMounted())
-            playerUser->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-    }
+            user->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
     // test only for exist cooldown data (cooldown timer used for door/buttons reset that not have use cooldown)
     if (uint32 cooldown = GetGOInfo()->GetCooldown())

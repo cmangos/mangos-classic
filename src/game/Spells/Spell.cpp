@@ -4931,6 +4931,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                     // check if its in use only when cast is finished (called from spell::cast() with strict = false)
                     if (!strict && go->IsInUse())
                         return SPELL_FAILED_CHEST_IN_USE;
+
+                    // done in client but we need to recheck anyway
+                    if (go->GetGOInfo()->CannotBeUsedUnderImmunity() && m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
+                        return SPELL_FAILED_DAMAGE_IMMUNE;
                 }
                 else if (Item* item = m_targets.getItemTarget())
                 {
