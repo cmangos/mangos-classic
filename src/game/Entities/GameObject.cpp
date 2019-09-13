@@ -537,7 +537,7 @@ void GameObject::Update(const uint32 diff)
                     if (m_goInfo->chest.chestRestockTime)
                     {
                         m_reStockTimer = time(nullptr) + m_goInfo->chest.chestRestockTime;
-                        m_lootState = GO_NOT_READY;
+                        SetLootState(GO_NOT_READY);
                         ForceValuesUpdateAtIndex(GAMEOBJECT_DYN_FLAGS);
                         return;
                     }
@@ -574,6 +574,10 @@ void GameObject::Update(const uint32 diff)
             m_loot = nullptr;
             SetLootRecipient(nullptr);
             SetLootState(GO_READY);
+
+            // non-consumable chests and goobers should never despawn
+            if ((GetGoType() == GAMEOBJECT_TYPE_CHEST || GetGoType() == GAMEOBJECT_TYPE_GOOBER) && !GetGOInfo()->IsDespawnAtAction())
+                return;
 
             if (!m_respawnDelayTime)
                 return;
