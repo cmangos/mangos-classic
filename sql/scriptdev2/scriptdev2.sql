@@ -1519,22 +1519,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000889,'%s submits.',0,2,0,0,'grark EMOTE_SUBMIT'),
 (-1000890,'You have come to play? Then let us play!',0,0,0,0,'grark SAY_AGGRO'),
 
-(-1000891,'The beast returns from whence it came. The wrath of Neptulon has subsided.',0,3,0,0,'Maws EMOTE_MAWS_KILL'),
-
-(-1000892,'Beware, $N! Look to the west!',0,0,0,0,'regthar SAY_START_REGTHAR'),
-(-1000893,'A defender has fallen!',0,0,0,0,'regthar SAY_DEFENDER'),
-(-1000894,'The Kolkar invaders are retreating!',0,1,0,0,'regthar YELL_RETREAT'),
-(-1000895,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000896,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000897,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000898,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000899,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000900,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-
-(-1000901,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000902,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000903,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000904,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+-- used in TBC
 
 (-1000905,'Ok, let\'s go!!',0,0,0,1,'therylune SAY_THERYLUNE_START'),
 (-1000906,'I can make it the rest of the way. $N. THANKS!',0,0,0,1,'therylune SAY_THERYLUNE_START'),
@@ -1690,6 +1675,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001276,'It''s okay, boys. Back off. You''ve done enough. I''ll meet up with you later.', '0', '0', '0', '0','dashel stonefist SAY_STONEFIST_3');
 
 -- -1 010 000 Classic texts
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1010000,'The beast returns from whence it came. The wrath of Neptulon has subsided.',0,3,0,0,'Maws EMOTE_MAWS_KILL'),
+
+(-1010001,'Beware, $N! Look to the west!',0,0,0,0,'regthar SAY_START_REGTHAR'),
+(-1010002,'A defender has fallen!',0,0,0,0,'regthar SAY_DEFENDER'),
+(-1010003,'The Kolkar invaders are retreating!',0,1,0,0,'regthar YELL_RETREAT'),
+(-1010004,'%s is ripped apart as it is banished from this world.',0,3,0,0,'Cresting Exile - on Spell 4131');
 
 -- -1 015 000 TBC texts
 
