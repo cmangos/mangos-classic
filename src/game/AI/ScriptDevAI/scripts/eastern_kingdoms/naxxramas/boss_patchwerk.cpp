@@ -44,32 +44,32 @@ enum
 
 struct boss_patchwerkAI : public ScriptedAI
 {
-    boss_patchwerkAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_patchwerkAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
 
-    uint32 m_uiHatefulStrikeTimer;
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiBerserkSlimeBoltTimer;
-    uint32 m_uiSlimeboltTimer;
-    bool   m_bEnraged;
-    bool   m_bBerserk;
+    uint32 m_hatefulStrikeTimer;
+    uint32 m_berserkTimer;
+    uint32 m_berserkSlimeBoltTimer;
+    uint32 m_slimeboltTimer;
+    bool   m_isEnraged;
+    bool   m_isBerserk;
 
     void Reset() override
     {
-        m_uiHatefulStrikeTimer = 1.2 * IN_MILLISECONDS;
-        m_uiBerserkTimer = 7 * MINUTE * IN_MILLISECONDS;                        // Basic berserk
-        m_uiBerserkSlimeBoltTimer = m_uiBerserkTimer + 30 * IN_MILLISECONDS;    // Slime Bolt berserk
-        m_uiSlimeboltTimer = 10* IN_MILLISECONDS;
-        m_bEnraged = false;
-        m_bBerserk = false;
+        m_hatefulStrikeTimer = 1.2 * IN_MILLISECONDS;
+        m_berserkTimer = 7 * MINUTE * IN_MILLISECONDS;                        // Basic berserk
+        m_berserkSlimeBoltTimer = m_berserkTimer + 30 * IN_MILLISECONDS;    // Slime Bolt berserk
+        m_slimeboltTimer = 10* IN_MILLISECONDS;
+        m_isEnraged = false;
+        m_isBerserk = false;
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         if (urand(0, 4))
             return;
@@ -77,94 +77,94 @@ struct boss_patchwerkAI : public ScriptedAI
         DoScriptText(SAY_SLAY, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PATCHWERK, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_PATCHWERK, DONE);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(urand(0, 1) ? SAY_AGGRO1 : SAY_AGGRO2, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PATCHWERK, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_PATCHWERK, IN_PROGRESS);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PATCHWERK, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_PATCHWERK, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         // Hateful Strike
-        if (m_uiHatefulStrikeTimer < uiDiff)
+        if (m_hatefulStrikeTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_HATEFULSTRIKE_PRIMER) == CAST_OK);
-                m_uiHatefulStrikeTimer = 1.2 * IN_MILLISECONDS;
+                m_hatefulStrikeTimer = 1.2 * IN_MILLISECONDS;
         }
         else
-            m_uiHatefulStrikeTimer -= uiDiff;
+            m_hatefulStrikeTimer -= diff;
 
         // Soft Enrage at 5%
-        if (!m_bEnraged)
+        if (!m_isEnraged)
         {
             if (m_creature->GetHealthPercent() < 5.0f)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
                 {
                     DoScriptText(EMOTE_GENERIC_ENRAGED, m_creature);
-                    m_bEnraged = true;
+                    m_isEnraged = true;
                 }
             }
         }
 
         // Berserk after 7 minutes
-        if (!m_bBerserk)
+        if (!m_isBerserk)
         {
-            if (m_uiBerserkTimer < uiDiff)
+            if (m_berserkTimer < diff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
                     DoScriptText(EMOTE_GENERIC_BERSERK, m_creature);
-                    m_bBerserk = true;
+                    m_isBerserk = true;
                 }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+                m_berserkTimer -= diff;
         }
-        else if (m_uiBerserkSlimeBoltTimer < uiDiff)
+        else if (m_berserkSlimeBoltTimer < diff)
         {
             // Slimebolt - casted only 30 seconds after Berserking to prevent kiting
-            if (m_uiSlimeboltTimer < uiDiff)
+            if (m_slimeboltTimer < diff)
             {
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_SLIMEBOLT);
-                m_uiSlimeboltTimer = 1 * IN_MILLISECONDS;
+                m_slimeboltTimer = 1 * IN_MILLISECONDS;
             }
             else
-                m_uiSlimeboltTimer -= uiDiff;
+                m_slimeboltTimer -= diff;
         }
 
         DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_patchwerk(Creature* pCreature)
+UnitAI* GetAI_boss_patchwerk(Creature* creature)
 {
-    return new boss_patchwerkAI(pCreature);
+    return new boss_patchwerkAI(creature);
 }
 
 void AddSC_boss_patchwerk()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "boss_patchwerk";
-    pNewScript->GetAI = &GetAI_boss_patchwerk;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "boss_patchwerk";
+    newScript->GetAI = &GetAI_boss_patchwerk;
+    newScript->RegisterSelf();
 }
