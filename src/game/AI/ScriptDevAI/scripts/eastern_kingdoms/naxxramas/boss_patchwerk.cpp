@@ -28,18 +28,18 @@ EndScriptData
 
 enum
 {
-    SAY_AGGRO1            = -1533017,
-    SAY_AGGRO2            = -1533018,
-    SAY_SLAY              = -1533019,
-    SAY_DEATH             = -1533020,
+    SAY_AGGRO1                  = -1533017,
+    SAY_AGGRO2                  = -1533018,
+    SAY_SLAY                    = -1533019,
+    SAY_DEATH                   = -1533020,
 
-    EMOTE_GENERIC_BERSERK   = -1000004,
-    EMOTE_GENERIC_ENRAGED   = -1000003,
+    EMOTE_GENERIC_BERSERK       = -1000004,
+    EMOTE_GENERIC_ENRAGED       = -1000003,
 
-    SPELL_HATEFULSTRIKE   = 28308,
-    SPELL_ENRAGE          = 28131,
-    SPELL_BERSERK         = 26662,
-    SPELL_SLIMEBOLT       = 32309
+    SPELL_HATEFULSTRIKE_PRIMER  = 28307,
+    SPELL_ENRAGE                = 28131,
+    SPELL_BERSERK               = 26662,
+    SPELL_SLIMEBOLT             = 32309
 };
 
 struct boss_patchwerkAI : public ScriptedAI
@@ -61,10 +61,10 @@ struct boss_patchwerkAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiHatefulStrikeTimer = 1000;                      // 1 second
-        m_uiBerserkTimer = MINUTE * 7 * IN_MILLISECONDS;    // 7 minutes
-        m_uiBerserkSlimeBoltTimer = m_uiBerserkTimer + 30 * IN_MILLISECONDS; // Slime Bolt Enrage
-        m_uiSlimeboltTimer = 10000;
+        m_uiHatefulStrikeTimer = 1.2 * IN_MILLISECONDS;
+        m_uiBerserkTimer = 7 * MINUTE * IN_MILLISECONDS;                        // Basic berserk
+        m_uiBerserkSlimeBoltTimer = m_uiBerserkTimer + 30 * IN_MILLISECONDS;    // Slime Bolt berserk
+        m_uiSlimeboltTimer = 10* IN_MILLISECONDS;
         m_bEnraged = false;
         m_bBerserk = false;
     }
@@ -99,44 +99,6 @@ struct boss_patchwerkAI : public ScriptedAI
             m_pInstance->SetData(TYPE_PATCHWERK, FAIL);
     }
 
-    void DoHatefulStrike()
-    {
-        // The ability is used on highest HP target choosen of the top 2 (3 heroic) targets on threat list being in melee range
-        Unit* pTarget = nullptr;
-        uint32 uiHighestHP = 0;
-        uint32 uiTargets = 2;
-
-        ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-        if (tList.size() > 1)                               // Check if more than two targets, and start loop with second-most aggro
-        {
-            ThreatList::const_iterator iter = tList.begin();
-            std::advance(iter, 1);
-            for (; iter != tList.end(); ++iter)
-            {
-                if (!uiTargets)
-                    break;
-
-                if (Unit* pTempTarget = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid()))
-                {
-                    if (m_creature->CanReachWithMeleeAttack(pTempTarget))
-                    {
-                        if (pTempTarget->GetHealth() > uiHighestHP)
-                        {
-                            uiHighestHP = pTempTarget->GetHealth();
-                            pTarget = pTempTarget;
-                        }
-                        --uiTargets;
-                    }
-                }
-            }
-        }
-
-        if (!pTarget)
-            pTarget = m_creature->getVictim();
-
-        DoCastSpellIfCan(pTarget, SPELL_HATEFULSTRIKE);
-    }
-
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -145,8 +107,8 @@ struct boss_patchwerkAI : public ScriptedAI
         // Hateful Strike
         if (m_uiHatefulStrikeTimer < uiDiff)
         {
-            DoHatefulStrike();
-            m_uiHatefulStrikeTimer = 1000;
+            if (DoCastSpellIfCan(m_creature, SPELL_HATEFULSTRIKE_PRIMER) == CAST_OK);
+                m_uiHatefulStrikeTimer = 1.2 * IN_MILLISECONDS;
         }
         else
             m_uiHatefulStrikeTimer -= uiDiff;
@@ -184,7 +146,7 @@ struct boss_patchwerkAI : public ScriptedAI
             if (m_uiSlimeboltTimer < uiDiff)
             {
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_SLIMEBOLT);
-                m_uiSlimeboltTimer = 1000;
+                m_uiSlimeboltTimer = 1 * IN_MILLISECONDS;
             }
             else
                 m_uiSlimeboltTimer -= uiDiff;
