@@ -4330,9 +4330,12 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    // following code block is supposed to be applied to single target spell
-    // TODO: above assumption need to be verified
-    if (Unit* target = m_targets.getUnitTarget())
+    // Spells like Disengage are allowed only in combat
+    if (!m_caster->isInCombat() && m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET) && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_UNK26))
+        return SPELL_FAILED_CASTER_AURASTATE;
+
+    Unit* target = m_targets.getUnitTarget();
+    if (target)
     {
         // TARGET_UNIT_SCRIPT_NEAR_CASTER fills unit target per client requirement but should not be checked against common things
         // TODO: Find a nicer and more efficient way to check for this
@@ -4419,29 +4422,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_BAD_TARGETS;
             }
 
-            // check pet presents
-            for (unsigned int j : m_spellInfo->EffectImplicitTargetA)
-            {
-                if (j == TARGET_UNIT_CASTER_PET)
-                {
-                    Pet* pet = m_caster->GetPet();
-                    if (!pet)
-                    {
-                        if (m_triggeredByAuraSpell)             // not report pet not existence for triggered spells
-                            return SPELL_FAILED_DONT_REPORT;
-                        return SPELL_FAILED_NO_PET;
-                    }
-                    else
-                    {
-                        if (!pet->isAlive())
-                            return SPELL_FAILED_TARGETS_DEAD;
-                        if (!IsIgnoreLosSpellEffect(m_spellInfo, SpellEffectIndex(j)) && !m_caster->IsWithinLOSInMap(pet))
-                            return SPELL_FAILED_LINE_OF_SIGHT;
-                    }
-                    break;
-                }
-            }
-
             // check creature type
             // ignore self casts (including area casts when caster selected as target)
             if (non_caster_target)
@@ -4454,26 +4434,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
             }
 
-            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-            {
-                uint32 targetType = m_spellInfo->EffectImplicitTargetA[i];
-                if (targetType == TARGET_UNIT_CASTER || targetType == TARGET_UNIT_CASTER_PET) // fits the description but should never be checked
-                    continue;
-                auto& data = SpellTargetInfoTable[targetType];
-                if (data.type == TARGET_TYPE_UNIT && (data.enumerator == TARGET_ENUMERATOR_SINGLE || data.enumerator == TARGET_ENUMERATOR_CHAIN))
-                {
-                    switch (data.filter)
-                    {
-                        case TARGET_HARMFUL: if (!m_caster->CanAttackSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
-                        case TARGET_HELPFUL: if (!m_caster->CanAssistSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
-                        case TARGET_PARTY:
-                        case TARGET_GROUP: if (!m_caster->CanAssistSpell(target, m_spellInfo) || !m_caster->IsInGroup(target, targetType == TARGET_UNIT_PARTY)) return SPELL_FAILED_BAD_TARGETS; break;
-                        default: break;
-                    }
-                }
-            }
-
-            if (IsPositiveSpell(m_spellInfo->Id, m_caster, target))
+            if (IsPositiveSpell(m_spellInfo->Id) && !m_spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
                 if (target->IsImmuneToSpell(m_spellInfo, target == m_caster, 7) && !target->hasUnitState(UNIT_STAT_ISOLATED))
                     return SPELL_FAILED_TARGET_AURASTATE;
 
@@ -4561,10 +4522,47 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_HIGHLEVEL;
         }
     }
-    else // some spells always require targets - generally checked in client - need to check serverside as well
-        for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-            if (IsUnitTargetTarget(m_spellInfo->EffectImplicitTargetA[i]))
-                return SPELL_FAILED_BAD_TARGETS;
+
+    // check targets
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        uint32 targetType = m_spellInfo->EffectImplicitTargetA[i];
+        switch (targetType)
+        {
+            case TARGET_UNIT_CASTER: break; // never check anything
+            case TARGET_UNIT_CASTER_PET: // special pet checks
+            {
+                Pet* pet = m_caster->GetPet();
+                if (!pet)
+                    return SPELL_FAILED_NO_PET;
+                else
+                {
+                    if (!pet->isAlive())
+                        return SPELL_FAILED_TARGETS_DEAD;
+                    if (!IsIgnoreLosSpellEffect(m_spellInfo, SpellEffectIndex(i)) && !m_caster->IsWithinLOSInMap(pet))
+                        return SPELL_FAILED_LINE_OF_SIGHT;
+                }
+                break;
+            }
+            default: // needs target
+            {
+                auto& data = SpellTargetInfoTable[targetType];
+                if (data.type == TARGET_TYPE_UNIT && (data.enumerator == TARGET_ENUMERATOR_SINGLE || data.enumerator == TARGET_ENUMERATOR_CHAIN))
+                {
+                    if (!target)
+                        return SPELL_FAILED_BAD_TARGETS;
+                    switch (data.filter)
+                    {
+                        case TARGET_HARMFUL: if (!m_caster->CanAttackSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
+                        case TARGET_HELPFUL: if (!m_caster->CanAssistSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
+                        case TARGET_PARTY:
+                        case TARGET_GROUP: if (!m_caster->CanAssistSpell(target, m_spellInfo) || !m_caster->IsInGroup(target, targetType == TARGET_UNIT_PARTY)) return SPELL_FAILED_BAD_TARGETS; break;
+                        default: break;
+                    }
+                }
+            }
+        }
+    }
 
     // zone check
     uint32 zone, area;
