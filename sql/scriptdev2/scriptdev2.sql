@@ -2459,11 +2459,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1533121,'Show them no mercy!',8856,1,0,0,'razuvious SAY_AGGRO2'),
 (-1533122,'The time for practice is over! Show me what you\'ve learned!',8859,1,0,0,'razuvious SAY_AGGRO3'),
 (-1533123,'Sweep the leg! Do you have a problem with that?',8861,1,0,0,'razuvious SAY_AGGRO4'),
-(-1533124,'You should have stayed home!',8862,1,0,0,'razuvious SAY_SLAY1'),
-(-1533125,'You disappoint me, students!',8858,1,0,0,'razuvious SAY_SLAY2'),
-(-1533126,'Hah hah, I\'m just getting warmed up!',8852,1,0,0,'razuvious SAY_TRIUMPHANT1'),
-(-1533127,'Stand and fight!',8853,1,0,0,'razuvious SAY_TRIUMPHANT2'),
-(-1533128,'Show me what you\'ve got!',8854,1,0,0,'razuvious SAY_TRIUMPHANT3'),
+(-1533124,'You should have stayed home!',8862,1,0,0,'razuvious SAY_SLAY'),
+(-1533125,'You disappoint me, students!',8858,1,0,0,'razuvious SAY_UNDERSTUDY_TAUNT_1'),
+(-1533126,'I\'m just getting warmed up!',8852,1,0,0,'razuvious SAY_UNDERSTUDY_TAUNT_2'),
+(-1533127,'Stand and fight!',8853,1,0,0,'razuvious SAY_UNDERSTUDY_TAUNT_3'),
+(-1533128,'Show me what you\'ve got!',8854,1,0,0,'razuvious SAY_UNDERSTUDY_TAUNT_4'),
 (-1533129,'An honorable... death...',8860,1,0,0,'razuvious SAY_DEATH'),
 
 (-1533130,'%s summons forth Skeletal Warriors!',0,3,0,0,'noth EMOTE_WARRIOR'),
@@ -2502,7 +2502,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1533155,'Corpse Scarabs appear from a Crypt Guard\'s corpse!',0,3,0,0,'anubrekhan EMOTE_CORPSE_SCARABS'),
 
 (-1533156,'%s casts Unyielding Pain on everyone!',0,3,0,0,'lady_blaumeux EMOTE_UNYIELDING_PAIN'),
-(-1533157,'%s casts Condemation on everyone!',0,3,0,0,'sir_zeliek EMOTE_CONDEMATION');
+(-1533157,'%s casts Condemation on everyone!',0,3,0,0,'sir_zeliek EMOTE_CONDEMATION'),
+
+(-1533158,'%s lets loose a triumphant shoot.',0,2,0,0,'instructor_razuvious EMOTE_TRIUMPHANT_SHOOT');
 
 -- -1 999 900 EXAMPLE TEXT
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
