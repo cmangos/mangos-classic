@@ -49,24 +49,24 @@ enum
 
 struct boss_razuviousAI : public ScriptedAI
 {
-    boss_razuviousAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_razuviousAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
 
-    uint32 m_uiUnbalancingStrikeTimer;
-    uint32 m_uiDisruptingShoutTimer;
+    uint32 m_unbalancingStrikeTimer;
+    uint32 m_disruptingShoutTimer;
 
     void Reset() override
     {
-        m_uiUnbalancingStrikeTimer = 30 * IN_MILLISECONDS;
-        m_uiDisruptingShoutTimer   = 25 * IN_MILLISECONDS;
+        m_unbalancingStrikeTimer = 30 * IN_MILLISECONDS;
+        m_disruptingShoutTimer   = 25 * IN_MILLISECONDS;
     }
 
-    void KilledUnit(Unit* /*Victim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(SAY_SLAY, m_creature);
     }
@@ -96,17 +96,17 @@ struct boss_razuviousAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
         DoCastSpellIfCan(m_creature, SPELL_HOPELESS, CAST_TRIGGERED);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_RAZUVIOUS, DONE);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 3))
         {
@@ -116,52 +116,52 @@ struct boss_razuviousAI : public ScriptedAI
             case 3: DoScriptText(SAY_AGGRO4, m_creature); break;
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_RAZUVIOUS, IN_PROGRESS);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_RAZUVIOUS, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         // Unbalancing Strike
-        if (m_uiUnbalancingStrikeTimer < uiDiff)
+        if (m_unbalancingStrikeTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
-                m_uiUnbalancingStrikeTimer = 30 * IN_MILLISECONDS;
+                m_unbalancingStrikeTimer = 30 * IN_MILLISECONDS;
         }
         else
-            m_uiUnbalancingStrikeTimer -= uiDiff;
+            m_unbalancingStrikeTimer -= diff;
 
         // Disrupting Shout
-        if (m_uiDisruptingShoutTimer < uiDiff)
+        if (m_disruptingShoutTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_DISRUPTING_SHOUT) == CAST_OK)
-                m_uiDisruptingShoutTimer = 25 * IN_MILLISECONDS;
+                m_disruptingShoutTimer = 25 * IN_MILLISECONDS;
         }
         else
-            m_uiDisruptingShoutTimer -= uiDiff;
+            m_disruptingShoutTimer -= diff;
 
         DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_razuvious(Creature* pCreature)
+UnitAI* GetAI_boss_razuvious(Creature* creature)
 {
-    return new boss_razuviousAI(pCreature);
+    return new boss_razuviousAI(creature);
 }
 
 void AddSC_boss_razuvious()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "boss_razuvious";
-    pNewScript->GetAI = &GetAI_boss_razuvious;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "boss_razuvious";
+    newScript->GetAI = &GetAI_boss_razuvious;
+    newScript->RegisterSelf();
 }
