@@ -222,9 +222,16 @@ struct world_map_kalimdor : public ScriptedMap
         if (eventData.despawnTimer > 180000)
         {
             for (auto guid : eventData.summonedMagrami)
-                if (Creature* magrami = instance->GetCreature(guid))
+            {
+                if (Creature * magrami = instance->GetCreature(guid))
+                {
                     if (magrami->isAlive()) // dont despawn corpses with loot
-                        magrami->ForcedDespawn();
+                    {
+                        magrami->CastSpell(nullptr, SPELL_SPIRIT_SPAWN_OUT, TRIGGERED_OLD_TRIGGERED);
+                        magrami->ForcedDespawn(1000);
+                    }
+                }
+            }
 
             if (GameObject* go = instance->GetGameObject(eventData.guid))
                 go->AddObjectToRemoveList(); // TODO: Establish rules for despawning temporary GOs that were used in their lifetime (buttons for example)
