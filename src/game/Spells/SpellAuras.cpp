@@ -1456,6 +1456,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 target->CastSpell(target, 28240, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
+            case 29104:										// Anub'Rekhan Aura
+            {
+            	if (m_removeMode == AURA_REMOVE_BY_DEATH && target->GetTypeId() == TYPEID_PLAYER)
+            		target->CastSpell(target, 29105, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+            	return;
+            }
             case 30238:                                     // Lordaeron's Bleesing
             {
                 target->RemoveAurasDueToSpell(31906);
