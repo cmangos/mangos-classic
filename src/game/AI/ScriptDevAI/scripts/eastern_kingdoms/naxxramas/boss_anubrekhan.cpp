@@ -50,7 +50,7 @@ enum
     NPC_CRYPT_GUARD             = 16573
 };
 
-static const DialogueEntry aIntroDialogue[] =
+static const DialogueEntry introDialogue[] =
 {
     {SAY_GREET1,  NPC_ANUB_REKHAN,  7000},
     {SAY_GREET2,  NPC_ANUB_REKHAN,  13000},
@@ -61,38 +61,38 @@ static const DialogueEntry aIntroDialogue[] =
 
 struct boss_anubrekhanAI : public ScriptedAI
 {
-    boss_anubrekhanAI(Creature* pCreature) : ScriptedAI(pCreature),
-        m_introDialogue(aIntroDialogue)
+    boss_anubrekhanAI(Creature* creature) : ScriptedAI(creature),
+        m_introDialogue(introDialogue)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_introDialogue.InitializeDialogueHelper(m_pInstance);
-        m_bHasDoneIntro = false;
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
+        m_introDialogue.InitializeDialogueHelper(m_instance);
+        m_hasDoneIntro = false;
         Reset();
 
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
     DialogueHelper m_introDialogue;
 
-    uint32 m_uiImpaleTimer;
-    uint32 m_uiLocustSwarmTimer;
-    uint32 m_uiSummonTimer;
-    bool   m_bHasDoneIntro;
+    uint32 m_impaleTimer;
+    uint32 m_locustSwarmTimer;
+    uint32 m_summonTimer;
+    bool   m_hasDoneIntro;
 
     void Reset() override
     {
-        m_uiImpaleTimer         = 15 * IN_MILLISECONDS;
-        m_uiLocustSwarmTimer	= urand(80, 120) * IN_MILLISECONDS;
-        m_uiSummonTimer         = 0;
+        m_impaleTimer         = 15 * IN_MILLISECONDS;
+        m_locustSwarmTimer	= urand(80, 120) * IN_MILLISECONDS;
+        m_summonTimer         = 0;
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(SAY_SLAY, m_creature);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
@@ -103,46 +103,46 @@ struct boss_anubrekhanAI : public ScriptedAI
 
         DoCastSpellIfCan(m_creature, SPELL_ANUB_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUB_REKHAN, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_ANUB_REKHAN, IN_PROGRESS);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUB_REKHAN, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_ANUB_REKHAN, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUB_REKHAN, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_ANUB_REKHAN, FAIL);
 
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void StartIntro()
     {
-        if (!m_bHasDoneIntro)
+        if (!m_hasDoneIntro)
         {
             m_introDialogue.StartNextDialogueText(SAY_GREET1);
-            m_bHasDoneIntro = true;
+            m_hasDoneIntro = true;
         }
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        pSummoned->SetInCombatWithZone();
+        summoned->SetInCombatWithZone();
     }
 
-    void SummonedCreatureDespawn(Creature* pSummoned) override
+    void SummonedCreatureDespawn(Creature* summoned) override
     {
         // If creature despawns on out of combat, skip this
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
-            pSummoned->CastSpell(pSummoned, SPELL_SELF_SPAWN_10, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+        if (summoned->GetEntry() == NPC_CRYPT_GUARD)
+            summoned->CastSpell(summoned, SPELL_SELF_SPAWN_10, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     void EnterEvadeMode() override
@@ -153,76 +153,76 @@ struct boss_anubrekhanAI : public ScriptedAI
         ScriptedAI::EnterEvadeMode();
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
-        m_introDialogue.DialogueUpdate(uiDiff);
+        m_introDialogue.DialogueUpdate(diff);
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         // Impale
-        if (m_uiImpaleTimer < uiDiff)
+        if (m_impaleTimer < diff)
         {
             // Cast Impale on a random target
             // Do NOT cast it when we are afflicted by locust swarm
             if (!m_creature->HasAura(SPELL_LOCUSTSWARM))
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    DoCastSpellIfCan(pTarget, SPELL_IMPALE);
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    DoCastSpellIfCan(target, SPELL_IMPALE);
             }
 
-            m_uiImpaleTimer = urand(12, 18) * IN_MILLISECONDS;
+            m_impaleTimer = urand(12, 18) * IN_MILLISECONDS;
         }
         else
-            m_uiImpaleTimer -= uiDiff;
+            m_impaleTimer -= diff;
 
         // Locust Swarm
-        if (m_uiLocustSwarmTimer < uiDiff)
+        if (m_locustSwarmTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_LOCUSTSWARM) == CAST_OK)
             {
                 // Summon a crypt guard
-                m_uiSummonTimer = 3 * IN_MILLISECONDS;
-                m_uiLocustSwarmTimer = 90 * IN_MILLISECONDS;
-                m_uiImpaleTimer += 23 * IN_MILLISECONDS;    // Delay next Impale by Locust Swarm duration (20 sec) + casting time (3 sec), this prevent Impale to be always cast right after Locust Swarm ends
+                m_summonTimer = 3 * IN_MILLISECONDS;
+                m_locustSwarmTimer = 90 * IN_MILLISECONDS;
+                m_impaleTimer += 23 * IN_MILLISECONDS;    // Delay next Impale by Locust Swarm duration (20 sec) + casting time (3 sec), this prevent Impale to be always cast right after Locust Swarm ends
             }
         }
         else
-            m_uiLocustSwarmTimer -= uiDiff;
+            m_locustSwarmTimer -= diff;
 
         // Summon Crypt Guard after Locust Swarm
-        if (m_uiSummonTimer)
+        if (m_summonTimer)
         {
-            if (m_uiSummonTimer <= uiDiff)
+            if (m_summonTimer <= diff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_GUARD) == CAST_OK)
-                    m_uiSummonTimer = 0;
+                    m_summonTimer = 0;
             }
             else
-                m_uiSummonTimer -= uiDiff;
+                m_summonTimer -= diff;
         }
 
         DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_anubrekhan(Creature* pCreature)
+UnitAI* GetAI_boss_anubrekhan(Creature* creature)
 {
-    return new boss_anubrekhanAI(pCreature);
+    return new boss_anubrekhanAI(creature);
 }
 
-bool GOUse_go_anub_door(Player* /*pPlayer*/, GameObject* pGo)
+bool GOUse_go_anub_door(Player* /*pPlayer*/, GameObject* go)
 {
-    if (ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData())
+    if (ScriptedInstance* instance = (ScriptedInstance*)go->GetInstanceData())
     {
-        if (pInstance->GetData(TYPE_ANUB_REKHAN) == IN_PROGRESS || pInstance->GetData(TYPE_ANUB_REKHAN) == DONE) // GOs always open once used (or handled by script), so this check is only there for safety
+        if (instance->GetData(TYPE_ANUB_REKHAN) == IN_PROGRESS || instance->GetData(TYPE_ANUB_REKHAN) == DONE) // GOs always open once used (or handled by script), so this check is only there for safety
             return false;
         else
         {
-            if (Creature* pAnub = pInstance->GetSingleCreatureFromStorage(NPC_ANUB_REKHAN))
+            if (Creature* anub = instance->GetSingleCreatureFromStorage(NPC_ANUB_REKHAN))
             {
-                if (boss_anubrekhanAI* pAnubAI = dynamic_cast<boss_anubrekhanAI*>(pAnub->AI()))
-                    pAnubAI->StartIntro();
+                if (boss_anubrekhanAI* anubAI = dynamic_cast<boss_anubrekhanAI*>(anub->AI()))
+                    anubAI->StartIntro();
             }
         }
     }
@@ -231,13 +231,13 @@ bool GOUse_go_anub_door(Player* /*pPlayer*/, GameObject* pGo)
 
 void AddSC_boss_anubrekhan()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "boss_anubrekhan";
-    pNewScript->GetAI = &GetAI_boss_anubrekhan;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "boss_anubrekhan";
+    newScript->GetAI = &GetAI_boss_anubrekhan;
+    newScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "go_anub_door";
-    pNewScript->pGOUse = &GOUse_go_anub_door;
-    pNewScript->RegisterSelf();
+    newScript = new Script;
+    newScript->Name = "go_anub_door";
+    newScript->pGOUse = &GOUse_go_anub_door;
+    newScript->RegisterSelf();
 }
