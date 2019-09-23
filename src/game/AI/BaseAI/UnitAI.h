@@ -372,9 +372,14 @@ class UnitAI
         virtual void OnChannelStateChange(Spell const* spell, bool state, WorldObject* target = nullptr);
 
         /*
-         * Notifies AI on successfull spell execution
+         * Notifies AI on successful spell execution
          */
         virtual void OnSpellCooldownAdded(SpellEntry const* /*spellInfo*/) {}
+
+        /*
+         * Notifies AI on stealth alert for player nearby
+         */
+        virtual void OnStealthAlert(Unit* who) {}
 
         void CheckForHelp(Unit* /*who*/, Unit* /*me*/, float /*dist*/);
         void DetectOrAttack(Unit* who);

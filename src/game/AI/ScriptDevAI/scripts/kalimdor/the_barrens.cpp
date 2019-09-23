@@ -663,25 +663,87 @@ UnitAI* GetAI_npc_wizzlecranks_shredder(Creature* pCreature)
     return new npc_wizzlecranks_shredderAI(pCreature);
 }
 
+enum
+{
+    SPELL_DECIMATE = 10268,
+    SPELL_SLUSH    = 10267,
+
+    SAY_STEALTH_ALERT_GALLYWIX   = -1010005,
+    SAY_STEALTH_ALERT_SILIXIZ    = -1010006,
+    SAY_STEALTH_ALERT_LOOKOUT_1  = -1010007,
+    SAY_STEALTH_ALERT_LOOKOUT_2  = -1010008,
+};
+
 struct npc_gallywixAI : public ScriptedAI
 {
-    npc_gallywixAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_gallywixAI(Creature* creature) : ScriptedAI(creature)
     {
         Reset();
     }
 
     void Reset() override {}
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    void OnStealthAlert(Unit* who) override
     {
-        if (spellInfo && spellInfo->IsFitToFamilyMask(0x0000000000800200)) // on Ambush
-            uiDamage = (m_creature->GetHealth() * 0.5); // Ambush should do 50% health in damage to this creature
+        DoScriptText(SAY_STEALTH_ALERT_GALLYWIX, m_creature, who);
+    }
+
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    {
+        if (spellInfo && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->IsFitToFamilyMask(0x0000000000800200)) // on Ambush
+            m_creature->CastSpell(nullptr, SPELL_DECIMATE, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
-UnitAI* GetAI_npc_gallywix(Creature* pCreature)
+struct npc_venture_co_lookoutAI : public ScriptedAI
 {
-    return new npc_gallywixAI(pCreature);
+    npc_venture_co_lookoutAI(Creature* creature) : ScriptedAI(creature)
+    {
+        Reset();
+    }
+
+    void Reset() override {}
+
+    void OnStealthAlert(Unit* who) override
+    {
+        DoScriptText(urand(0, 1) ? SAY_STEALTH_ALERT_LOOKOUT_1 : SAY_STEALTH_ALERT_LOOKOUT_2, m_creature, who);
+    }
+
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    {
+        if (spellInfo && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->IsFitToFamilyMask(0x0000000000820000)) // on Eviscerate
+            m_creature->CastSpell(nullptr, SPELL_SLUSH, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct npc_foreman_silixizAI : public ScriptedAI
+{
+    npc_foreman_silixizAI(Creature* creature) : ScriptedAI(creature)
+    {
+        Reset();
+    }
+
+    void Reset() override {}
+
+    void OnStealthAlert(Unit* who) override
+    {
+        DoScriptText(SAY_STEALTH_ALERT_SILIXIZ, m_creature, who);
+    }
+};
+
+UnitAI* GetAI_npc_gallywix(Creature* creature)
+{
+    return new npc_gallywixAI(creature);
+}
+
+UnitAI* GetAI_npc_venture_co_lookout(Creature* creature)
+{
+    return new npc_venture_co_lookoutAI(creature);
+}
+
+UnitAI* GetAI_npc_foreman_silixiz(Creature* creature)
+{
+    return new npc_foreman_silixizAI(creature);
 }
 
 /*#####
@@ -1063,6 +1125,16 @@ void AddSC_the_barrens()
     pNewScript = new Script;
     pNewScript->Name = "npc_gallywix";
     pNewScript->GetAI = &GetAI_npc_gallywix;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_foreman_silixiz";
+    pNewScript->GetAI = &GetAI_npc_foreman_silixiz;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_venture_co_lookout";
+    pNewScript->GetAI = &GetAI_npc_venture_co_lookout;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

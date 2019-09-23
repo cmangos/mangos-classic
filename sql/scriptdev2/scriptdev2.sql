@@ -159,6 +159,8 @@ INSERT INTO scripted_areatrigger VALUES
 (522,'at_twiggy_flathead');
 UPDATE creature_template SET ScriptName='npc_wizzlecranks_shredder' WHERE entry=3439;
 UPDATE creature_template SET ScriptName='npc_gallywix' WHERE entry=7288;
+UPDATE creature_template SET ScriptName='npc_foreman_silixiz' WHERE entry=7287;
+UPDATE creature_template SET ScriptName='npc_venture_co_lookout' WHERE entry=7307;
 UPDATE creature_template SET ScriptName = 'npc_regthar_deathgate' WHERE entry = 3389;
 
 /* BLACKFATHOM DEPTHS */
@@ -1681,7 +1683,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1010001,'Beware, $N! Look to the west!',0,0,0,0,'regthar SAY_START_REGTHAR'),
 (-1010002,'A defender has fallen!',0,0,0,0,'regthar SAY_DEFENDER'),
 (-1010003,'The Kolkar invaders are retreating!',0,1,0,0,'regthar YELL_RETREAT'),
-(-1010004,'%s is ripped apart as it is banished from this world.',0,3,0,0,'Cresting Exile - on Spell 4131');
+(-1010004,'%s is ripped apart as it is banished from this world.',0,3,0,0,'Cresting Exile - on Spell 4131'),
+(-1010005,'Who would be foolish enough to enter the tower of the Grand Foreman?',0,0,0,0,'gallywix stealth alert'),
+(-1010006,'*cough* who goes there? *cough*',0,0,0,0,'Silixiz stealth alert'),
+(-1010007,'Did you hear that?',0,0,0,0,'Venture Co. Lookout stealth alert'),
+(-1010008,'I smell rogue.',0,0,0,0,'Venture Co. Lookout stealth alert');
 
 -- -1 015 000 TBC texts
 
