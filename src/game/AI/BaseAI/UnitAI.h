@@ -86,6 +86,15 @@ enum AIOrders
     ORDER_CUSTOM,
 };
 
+enum RangeModeType : uint32 // maybe can be substituted for class checks
+{
+    TYPE_NONE = 0,
+    TYPE_FULL_CASTER = 1,
+    TYPE_PROXIMITY = 2,
+    TYPE_NO_MELEE_MODE = 3,
+    TYPE_MAX,
+};
+
 class UnitAI
 {
     public:
@@ -309,7 +318,7 @@ class UnitAI
          * @param uiCastFlags Some flags to define how to cast, see enum CastFlags
          * @param OriginalCasterGuid the original caster of the spell if required, empty by default
          */
-        CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0) const;
+        virtual CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0);
 
         /// Set combat movement (on/off), also sets UNIT_STAT_NO_COMBAT_MOVEMENT
         void SetCombatMovement(bool enable, bool stopOrStartMovement = false);

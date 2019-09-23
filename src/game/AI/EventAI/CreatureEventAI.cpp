@@ -146,10 +146,13 @@ void CreatureEventAI::InitAI()
                         {
                             if (i.action[actionIdx].cast.castFlags & CAST_MAIN_SPELL)
                             {
-                                m_mainSpellId = i.action[actionIdx].cast.spellId;
-                                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_mainSpellId);
-                                m_mainSpellCost = Spell::CalculatePowerCost(spellInfo, m_creature, nullptr, nullptr);
-                                m_mainSpellMinRange = GetSpellMinRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex));
+                                if (!m_mainSpellId)
+                                {
+                                    m_mainSpellId = i.action[actionIdx].cast.spellId;
+                                    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_mainSpellId);
+                                    m_mainSpellCost = Spell::CalculatePowerCost(spellInfo, m_creature);
+                                    m_mainSpellMinRange = GetSpellMinRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex));
+                                }
                                 m_mainSpells.insert(i.action[actionIdx].cast.spellId);
                             }
 
@@ -776,69 +779,6 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 return false;
             uint32 castFlags = action.cast.castFlags &~ (CAST_MAIN_SPELL | CAST_PLAYER_ONLY | CAST_DISTANCE_YOURSELF);
             CanCastResult castResult = DoCastSpellIfCan(target, action.cast.spellId, action.cast.castFlags);
-
-            if (m_rangedMode)
-            {
-                if (m_currentRangedMode)
-                {
-                    if (CAST_MAIN_SPELL)
-                    {
-                        switch (castResult)
-                        {
-                            case CAST_FAIL_COOLDOWN:
-                            case CAST_FAIL_POWER:
-                            case CAST_FAIL_TOO_CLOSE:
-                                SetCurrentRangedMode(false);
-                                break;
-                            case CAST_OK:
-                            default:
-                                break;
-                        }
-                    }
-                }
-                else
-                {
-                    if (CAST_MAIN_SPELL)
-                    {
-                        if (castResult == CAST_OK && m_rangedModeSetting == TYPE_FULL_CASTER)
-                            SetCurrentRangedMode(true);
-                    }
-                }
-            }
-
-            switch (castResult)
-            {
-                case CAST_FAIL_TOO_FAR:
-                case CAST_FAIL_POWER:
-                case CAST_FAIL_NOT_IN_LOS:
-                {
-                    if (!m_rangedMode) // dont want prototypes to clash
-                    {
-                        if (!m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))
-                        {
-                            // Melee current victim if flag not set
-                            if (!(action.cast.castFlags & CAST_NO_MELEE_IF_OOM))
-                            {
-                                m_attackDistance = 0.0f;
-                                m_attackAngle = 0.0f;
-                                switch (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType())
-                                {
-                                    case CHASE_MOTION_TYPE:
-                                    case FOLLOW_MOTION_TYPE:
-                                        m_creature->GetMotionMaster()->Clear(false);
-                                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle);
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
 
             // If spellcast fails, action did not succeed
             if (castResult != CAST_OK)
@@ -2021,4 +1961,37 @@ void CreatureEventAI::OnSpellInterrupt(SpellEntry const* spellInfo)
     if (m_mainSpells.find(spellInfo->Id) != m_mainSpells.end())
         if (m_rangedMode && m_rangedModeSetting != TYPE_NO_MELEE_MODE && !m_creature->IsSpellReady(*spellInfo))
             SetCurrentRangedMode(false);
+}
+
+void CreatureEventAI::OnSpellCooldownAdded(SpellEntry const* spellInfo)
+{
+    CreatureAI::OnSpellCooldownAdded(spellInfo);
+    if (m_rangedModeSetting == TYPE_FULL_CASTER && m_mainSpells.find(spellInfo->Id) != m_mainSpells.end())
+        SetCurrentRangedMode(true);
+}
+
+CanCastResult CreatureEventAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags)
+{
+    CanCastResult castResult = CreatureAI::DoCastSpellIfCan(target, spellId, castFlags);
+    if (m_rangedMode)
+    {
+        if (m_currentRangedMode)
+        {
+            if (m_mainSpells.find(spellId) != m_mainSpells.end())
+            {
+                switch (castResult)
+                {
+                    case CAST_FAIL_COOLDOWN:
+                    case CAST_FAIL_POWER:
+                    case CAST_FAIL_TOO_CLOSE:
+                        SetCurrentRangedMode(false);
+                        break;
+                    case CAST_OK:
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+    return castResult;
 }

@@ -41,4 +41,44 @@ class CombatAI : public ScriptedAI, public CombatActions
         void UpdateAI(const uint32 diff) override;
 };
 
+// Implementation is identical to EAI
+class RangedCombatAI : public CombatAI
+{
+    public:
+        RangedCombatAI(Creature* creature, uint32 combatActions, RangeModeType type) : CombatAI(creature, combatActions),
+            m_rangedMode(false), m_rangedModeSetting(TYPE_NONE), m_chaseDistance(0.f), m_currentRangedMode(false), m_mainSpellId(0), m_mainSpellCost(0), m_mainSpellMinRange(0.f) {}
+
+        virtual void OnSpellCooldownAdded(SpellEntry const* spellInfo) override;
+
+        void AddMainSpell(uint32 spellId);
+        void AddDistanceSpell(uint32 spellId) { m_distanceSpells.insert(spellId); }
+
+        void SetRangedMode(bool state, float distance, RangeModeType type);
+        void SetCurrentRangedMode(bool state);
+
+        virtual void JustStoppedMovementOfTarget(SpellEntry const* spell, Unit* victim) override;
+        virtual void OnSpellInterrupt(SpellEntry const* spellInfo) override;
+
+        virtual void DistancingStarted() override;
+        virtual void DistancingEnded() override;
+
+        void DistanceYourself();
+
+        bool IsRangedUnit() override { return m_currentRangedMode; }
+
+        virtual CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0) override;
+
+        void UpdateAI(const uint32 diff) override;
+    private:
+        bool m_rangedMode;
+        RangeModeType m_rangedModeSetting;
+        float m_chaseDistance;
+        bool m_currentRangedMode;
+        std::unordered_set<uint32> m_mainSpells;
+        std::unordered_set<uint32> m_distanceSpells;
+        uint32 m_mainSpellId;
+        uint32 m_mainSpellCost;
+        float m_mainSpellMinRange;
+};
+
 #endif
