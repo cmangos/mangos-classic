@@ -295,7 +295,8 @@ Unit::Unit() :
     m_combatData(new CombatData(this)),
     m_spellUpdateHappening(false),
     m_spellProcsHappening(false),
-    m_auraUpdateMask(0)
+    m_auraUpdateMask(0),
+    m_ignoreRangedTargets(false)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
