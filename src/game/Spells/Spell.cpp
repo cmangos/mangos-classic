@@ -3234,6 +3234,16 @@ void Spell::update(uint32 difftime)
                             cancel();
                     }
 
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TAME_BEAST)) // these fail on lost target attention (aggro)
+                    {
+                        if (Unit* target = m_caster->GetChannelObject())
+                        {
+                            Unit* targetsTarget = target->GetTarget();
+                            if (targetsTarget && targetsTarget != m_caster)
+                                cancel();
+                        }
+                    }
+
                     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET) && m_UniqueTargetInfo.begin() != m_UniqueTargetInfo.end())
                     {
                         if (Unit* target = m_caster->GetChannelObject())
