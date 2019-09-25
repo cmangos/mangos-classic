@@ -107,7 +107,7 @@ struct boss_patchwerkAI : public ScriptedAI
         // Hateful Strike
         if (m_hatefulStrikeTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_HATEFULSTRIKE_PRIMER) == CAST_OK);
+            if (DoCastSpellIfCan(m_creature, SPELL_HATEFULSTRIKE_PRIMER) == CAST_OK)
                 m_hatefulStrikeTimer = 1.2 * IN_MILLISECONDS;
         }
         else
