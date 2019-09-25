@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Anubrekhan
-SD%Complete: 98
-SDComment: Corpse Scarabs summon from dead Crypt Guard may need improvement as it currently does not work on the two initial ones
+SD%Complete: 99
+SDComment: Corpse Scarabs summon from dead Crypt Guard may need improvement: timer and spell logic
 SDCategory: Naxxramas
 EndScriptData
 
@@ -45,9 +45,9 @@ enum
 
     SPELL_SUMMON_GUARD          = 29508,                    // Summons 1 Crypt Guard at targeted location
     SPELL_DESPAWN_GUARDS        = 29379,                    // Remove all Crypt Guards and Corpse Scarabs
-    SPELL_SELF_SPAWN_10         = 28864,                    // This is used by the crypt guards when they die
-
-    NPC_CRYPT_GUARD             = 16573
+    SPELL_SPAWN_CORPSE_SCARABS  = 28961,                    // Trigger 28864 Summon 10 Corpse Scarabs from dead Crypt Guard
+//  SPELL_DELAY_SUMMON_SCARABS1 = 28992,                    // Probably used to prevent two dead Crypt Guards to explode in a short time
+//  SPELL_DELAY_SUMMON_SCARABS2 = 28994,                    // Probably used to prevent two dead Crypt Guards to explode in a short time by triggering same spell cooldown than 28961
 };
 
 static const DialogueEntry introDialogue[] =
@@ -78,13 +78,15 @@ struct boss_anubrekhanAI : public ScriptedAI
     uint32 m_impaleTimer;
     uint32 m_locustSwarmTimer;
     uint32 m_summonTimer;
+    uint32 m_corpseScarabsTimer;
     bool   m_hasDoneIntro;
 
     void Reset() override
     {
-        m_impaleTimer         = 15 * IN_MILLISECONDS;
-        m_locustSwarmTimer	= urand(80, 120) * IN_MILLISECONDS;
-        m_summonTimer         = 0;
+        m_impaleTimer           = 15 * IN_MILLISECONDS;
+        m_locustSwarmTimer      = urand(80, 120) * IN_MILLISECONDS;
+        m_summonTimer           = 0;
+        m_corpseScarabsTimer    = urand(65, 105) * IN_MILLISECONDS;
     }
 
     void KilledUnit(Unit* /*victim*/) override
@@ -133,16 +135,6 @@ struct boss_anubrekhanAI : public ScriptedAI
     void JustSummoned(Creature* summoned) override
     {
         summoned->SetInCombatWithZone();
-    }
-
-    void SummonedCreatureDespawn(Creature* summoned) override
-    {
-        // If creature despawns on out of combat, skip this
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (summoned->GetEntry() == NPC_CRYPT_GUARD)
-            summoned->CastSpell(summoned, SPELL_SELF_SPAWN_10, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     void EnterEvadeMode() override
@@ -200,6 +192,18 @@ struct boss_anubrekhanAI : public ScriptedAI
             }
             else
                 m_summonTimer -= diff;
+        }
+
+        // Summon Corpse Scarabs from dead Crypt Guard
+        if (m_corpseScarabsTimer)
+        {
+            if (m_corpseScarabsTimer <= diff)
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SPAWN_CORPSE_SCARABS) == CAST_OK)
+                    m_corpseScarabsTimer = urand(65, 105) * IN_MILLISECONDS;
+            }
+            else
+                m_corpseScarabsTimer -= diff;
         }
 
         DoMeleeAttackIfReady();

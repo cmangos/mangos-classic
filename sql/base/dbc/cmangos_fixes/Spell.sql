@@ -67,3 +67,5 @@ UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(14156,14160);
 -- Mangletooth - These spells need to ignore LOS
 UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (7764, 16618, 10767, 16610, 16612, 17013);
 
+-- Fix radius of summoning spells for Corpse Scarabs used for Anub'Rekhan
+UPDATE spell_template SET EffectRadiusIndex1=16 WHERE id IN (28864, 29105);

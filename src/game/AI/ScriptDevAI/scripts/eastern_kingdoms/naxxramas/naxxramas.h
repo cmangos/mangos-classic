@@ -66,6 +66,7 @@ enum
 
     NPC_ANUB_REKHAN             = 15956,
     NPC_FAERLINA                = 15953,
+    NPC_CORPSE_SCARAB           = 16698,
 
     NPC_ZOMBIE_CHOW             = 16360,
     NPC_GLUTH                   = 15932,
