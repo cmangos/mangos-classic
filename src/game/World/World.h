@@ -482,6 +482,7 @@ class World
         void SendServerMessage(ServerMessageType type, const char* text = "", Player* player = nullptr) const;
         void SendZoneUnderAttackMessage(uint32 zoneId, Team team);
         void SendDefenseMessage(uint32 zoneId, int32 textId);
+        void SendDefenseMessageBroadcastText(uint32 zoneId, uint32 textId);
 
         /// Are we in the middle of a shutdown?
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }

@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2746_01_mangos_world_safe_locs_facing` bit(1) DEFAULT NULL
+  `required_z2747_01_mangos_broadcast_text` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -844,6 +844,7 @@ CREATE TABLE `creature_ai_texts` (
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `language` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `emote` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `broadcast_text_id` INT(11) NOT NULL DEFAULT '0',
   `comment` text,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Script Texts';
@@ -1377,8 +1378,8 @@ UNLOCK TABLES;
 -- Table structure for table `db_script_string`
 --
 
-DROP TABLE IF EXISTS `db_script_string`;
-CREATE TABLE `db_script_string` (
+DROP TABLE IF EXISTS `dbscript_string`;
+CREATE TABLE `dbscript_string` (
   `entry` int(11) unsigned NOT NULL DEFAULT '0',
   `content_default` text NOT NULL,
   `content_loc1` text,
@@ -1393,6 +1394,7 @@ CREATE TABLE `db_script_string` (
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `language` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `emote` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `broadcast_text_id` INT(11) NOT NULL DEFAULT '0',
   `comment` text,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -2055,6 +2057,7 @@ CREATE TABLE `gossip_menu_option` (
   `id` smallint(6) unsigned NOT NULL DEFAULT '0',
   `option_icon` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `option_text` text,
+  `option_broadcast_text` INT(11) NOT NULL DEFAULT '0'
   `option_id` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `npc_option_npcflag` int(10) unsigned NOT NULL DEFAULT '0',
   `action_menu_id` mediumint(8) NOT NULL DEFAULT '0',
@@ -2063,6 +2066,7 @@ CREATE TABLE `gossip_menu_option` (
   `box_coded` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `box_money` int(11) unsigned NOT NULL DEFAULT '0',
   `box_text` text,
+  `box_broadcast_text` INT(11) NOT NULL
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`menu_id`,`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -4207,6 +4211,27 @@ LOCK TABLES `npc_text` WRITE;
 /*!40000 ALTER TABLE `npc_text` DISABLE KEYS */;
 /*!40000 ALTER TABLE `npc_text` ENABLE KEYS */;
 UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `npc_text_broadcast_text`;
+CREATE TABLE `npc_text_broadcast_text` (
+`Id` MEDIUMINT(8) UNSIGNED NOT NULL COMMENT 'Identifier',
+`Prob0` float NOT NULL,
+`Prob1` float NOT NULL,
+`Prob2` float NOT NULL,
+`Prob3` float NOT NULL,
+`Prob4` float NOT NULL,
+`Prob5` float NOT NULL,
+`Prob6` float NOT NULL,
+`Prob7` float NOT NULL,
+`BroadcastTextId1` INT(11) NOT NULL,
+`BroadcastTextId2` INT(11) NOT NULL,
+`BroadcastTextId3` INT(11) NOT NULL,
+`BroadcastTextId4` INT(11) NOT NULL,
+`BroadcastTextId5` INT(11) NOT NULL,
+`BroadcastTextId6` INT(11) NOT NULL,
+`BroadcastTextId7` INT(11) NOT NULL,
+PRIMARY KEY(`ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT 'Broadcast Text npc_text equivalent';
 
 --
 -- Table structure for table `npc_trainer`
@@ -10156,6 +10181,7 @@ CREATE TABLE `script_texts` (
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `language` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `emote` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `broadcast_text_id` INT(11) NOT NULL DEFAULT '0',
   `comment` text,
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Script Texts';

@@ -80,6 +80,42 @@ struct AreaTrigger
     }
 };
 
+struct BroadcastText
+{
+    uint32 Id;
+    std::vector<std::string> maleText;
+    std::vector<std::string> femaleText;
+    Language languageId;
+    // uint32 conditionId;
+    // uint32 emotesId;
+    // uint32 flags;
+    // uint32 soundId1;
+    // uint32 soundId2;
+    uint32 emoteIds[3];
+    uint32 emoteDelays[3];
+    // uint32 verifiedBuild;
+
+    std::string const& GetText(int32 locIdx, uint8 gender = GENDER_MALE, bool forceGender = false) const
+    {
+        if ((gender == GENDER_FEMALE || gender == GENDER_NONE) && (forceGender || !femaleText[DEFAULT_LOCALE].empty()))
+        {
+            if (locIdx >= 0 && femaleText.size() > size_t(locIdx) && !femaleText[locIdx].empty())
+                return femaleText[locIdx];
+            return femaleText[DEFAULT_LOCALE];
+        }
+        // else if (gender == GENDER_MALE)
+        {
+            if (locIdx >= 0 && maleText.size() > size_t(locIdx) && !maleText[locIdx].empty())
+                return maleText[locIdx];
+            return maleText[DEFAULT_LOCALE];
+        }
+    }
+
+    BroadcastText() : maleText(DEFAULT_LOCALE + 1), femaleText(DEFAULT_LOCALE + 1) {}
+};
+
+typedef std::map<uint32, BroadcastText> BroadcastTextMap;
+
 typedef std::map < uint32/*player guid*/, uint32/*instance*/ > CellCorpseSet;
 struct CellObjectGuids
 {
@@ -103,13 +139,14 @@ static_assert(MAX_DB_SCRIPT_STRING_ID < INT_MAX, "Must scope with int32 range");
 
 struct MangosStringLocale
 {
-    MangosStringLocale() : SoundId(0), Type(0), LanguageId(LANG_UNIVERSAL), Emote(0) { }
+    MangosStringLocale() : SoundId(0), Type(0), LanguageId(LANG_UNIVERSAL), Emote(0), broadcastText(nullptr) { }
 
     std::vector<std::string> Content;                       // 0 -> default, i -> i-1 locale index
     uint32 SoundId;
     uint8  Type;
     Language LanguageId;
     uint32 Emote;
+    BroadcastText const* broadcastText;
 };
 
 typedef std::unordered_map<uint32 /*guid*/, CreatureData> CreatureDataMap;
@@ -231,6 +268,7 @@ struct GossipMenuItems
     uint32          id;
     uint8           option_icon;
     std::string     option_text;
+    uint32          option_broadcast_text;
     uint32          option_id;
     uint32          npc_option_npcflag;
     int32           action_menu_id;
@@ -238,6 +276,7 @@ struct GossipMenuItems
     uint32          action_script_id;
     bool            box_coded;
     std::string     box_text;
+    uint32          box_broadcast_text;
     uint16          conditionId;
 };
 
@@ -777,6 +816,9 @@ class ObjectMgr
         void LoadTrainerTemplates();
         void LoadTrainers() { LoadTrainers("npc_trainer", false); }
 
+        void LoadBroadcastText();
+        void LoadBroadcastTextLocales();
+
         /// @param _map Map* of the map for which to load active entities. If nullptr active entities on continents are loaded
         void LoadActiveEntities(Map* _map);
 
@@ -905,6 +947,13 @@ class ObjectMgr
         {
             NpcTextLocaleMap::const_iterator itr = mNpcTextLocaleMap.find(entry);
             if (itr == mNpcTextLocaleMap.end()) return nullptr;
+            return &itr->second;
+        }
+
+        BroadcastText const* GetBroadcastText(uint32 entry) const
+        {
+            auto itr = m_broadcastTextMap.find(entry);
+            if (itr == m_broadcastTextMap.end()) return nullptr;
             return &itr->second;
         }
 
@@ -1318,6 +1367,8 @@ class ObjectMgr
         CacheVendorItemMap m_mCacheVendorItemMap;
         CacheTrainerSpellMap m_mCacheTrainerTemplateSpellMap;
         CacheTrainerSpellMap m_mCacheTrainerSpellMap;
+
+        BroadcastTextMap m_broadcastTextMap;
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

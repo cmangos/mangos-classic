@@ -67,6 +67,7 @@ struct GossipTextOption
     uint32 Language;
     float Probability;
     QEmote Emotes[3];
+    uint32 broadcastTextId;
 };
 
 #define MAX_GOSSIP_TEXT_OPTIONS 8

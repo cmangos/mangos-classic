@@ -11405,17 +11405,33 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
 
             int loc_idx = GetSession()->GetSessionDbLocaleIndex();
 
-            if (loc_idx >= 0)
+            if (gossipMenu.option_broadcast_text || gossipMenu.box_broadcast_text)
             {
-                uint32 idxEntry = MAKE_PAIR32(menuId, gossipMenu.id);
-
-                if (GossipMenuItemsLocale const* no = sObjectMgr.GetGossipMenuItemsLocale(idxEntry))
+                if (gossipMenu.option_broadcast_text)
                 {
-                    if (no->OptionText.size() > (size_t)loc_idx && !no->OptionText[loc_idx].empty())
-                        strOptionText = no->OptionText[loc_idx];
+                    BroadcastText const* bct = sObjectMgr.GetBroadcastText(gossipMenu.option_broadcast_text);
+                    strOptionText = bct->GetText(loc_idx);
+                }
+                if (gossipMenu.box_broadcast_text)
+                {
+                    BroadcastText const* bct = sObjectMgr.GetBroadcastText(gossipMenu.box_broadcast_text);
+                    strBoxText = bct->GetText(loc_idx);
+                }
+            }
+            else
+            {
+                if (loc_idx >= 0)
+                {
+                    uint32 idxEntry = MAKE_PAIR32(menuId, gossipMenu.id);
 
-                    if (no->BoxText.size() > (size_t)loc_idx && !no->BoxText[loc_idx].empty())
-                        strBoxText = no->BoxText[loc_idx];
+                    if (GossipMenuItemsLocale const* no = sObjectMgr.GetGossipMenuItemsLocale(idxEntry))
+                    {
+                        if (no->OptionText.size() > (size_t)loc_idx && !no->OptionText[loc_idx].empty())
+                            strOptionText = no->OptionText[loc_idx];
+
+                        if (no->BoxText.size() > (size_t)loc_idx && !no->BoxText[loc_idx].empty())
+                            strBoxText = no->BoxText[loc_idx];
+                    }
                 }
             }
 
@@ -11874,11 +11890,18 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
 
                     int loc_idx = GetSession()->GetSessionDbLocaleIndex();
 
-                    std::string title0 = gossiptext->Options[0].Text_0;
-                    std::string title1 = gossiptext->Options[0].Text_1;
-                    sObjectMgr.GetNpcTextLocaleStrings0(textid, loc_idx, &title0, &title1);
-
-                    title = !title0.empty() ? title0 : title1;
+                    if (gossiptext->Options[0].broadcastTextId)
+                    {
+                        BroadcastText const* bct = sObjectMgr.GetBroadcastText(gossiptext->Options[0].broadcastTextId);
+                        title = bct->GetText(loc_idx, pCreature->getGender());
+                    }
+                    else
+                    {
+                        std::string title0 = gossiptext->Options[0].Text_0;
+                        std::string title1 = gossiptext->Options[0].Text_1;
+                        sObjectMgr.GetNpcTextLocaleStrings0(textid, loc_idx, &title0, &title1);
+                        title = !title0.empty() ? title0 : title1;
+                    }
                 }
             }
             PlayerTalkClass->SendQuestGiverQuestList(qe, title, guid);

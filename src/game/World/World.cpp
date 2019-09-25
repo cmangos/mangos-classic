@@ -832,6 +832,10 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading world safe locs ...");
     sObjectMgr.LoadWorldSafeLocs();
 
+    // Load before npc_text, gossip_menu_option, script_texts, creature_ai_texts, dbscript_string
+    sLog.outString("Loading broadcast_text...");
+    sObjectMgr.LoadBroadcastText();
+
     ///- Load the DBC files
     sLog.outString("Initialize DBC data stores...");
     LoadDBCStores(m_dataPath);
@@ -1160,6 +1164,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadPointOfInterestLocales();                // must be after POI loading
     sObjectMgr.LoadQuestgiverGreetingLocales();
     sObjectMgr.LoadTrainerGreetingLocales();                // must be after CreatureInfo loading
+    sObjectMgr.LoadBroadcastTextLocales();
     sLog.outString(">>> Localization strings loaded");
     sLog.outString();
 
@@ -1638,6 +1643,29 @@ void World::SendDefenseMessage(uint32 zoneId, int32 textId)
             {
                 char const* message = session->GetMangosString(textId);
                 uint32 messageLength = strlen(message) + 1;
+
+                WorldPacket data(SMSG_DEFENSE_MESSAGE, 4 + 4 + messageLength);
+                data << uint32(zoneId);
+                data << uint32(messageLength);
+                data << message;
+                session->SendPacket(data);
+            }
+        }
+    }
+}
+
+void World::SendDefenseMessageBroadcastText(uint32 zoneId, uint32 textId)
+{
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    {
+        if (WorldSession* session = itr->second)
+        {
+            Player* player = session->GetPlayer();
+            if (player && player->IsInWorld() && !player->GetMap()->Instanceable())
+            {
+                BroadcastText const* bct = sObjectMgr.GetBroadcastText(textId);
+                std::string const& message = bct->GetText(session->GetSessionDbLocaleIndex());
+                uint32 messageLength = message.size() + 1;
 
                 WorldPacket data(SMSG_DEFENSE_MESSAGE, 4 + 4 + messageLength);
                 data << uint32(zoneId);
