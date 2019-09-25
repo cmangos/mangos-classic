@@ -1346,6 +1346,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(nullptr, 3617, TRIGGERED_OLD_TRIGGERED); // guessed suicide spell
                     return;
                 }
+                case 28961:                                 // Summon Corpse Scarabs (10)
+                {
+                    if (unitTarget->isAlive())
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 28864, TRIGGERED_OLD_TRIGGERED);  // Actual summoning spell
+                    ((Creature*)unitTarget)->ForcedDespawn(2000);
+
+                    return;
+                }
                 case 29682:                                 // Call All Zombie Chow
                 {
                     if (unitTarget->isAlive())
