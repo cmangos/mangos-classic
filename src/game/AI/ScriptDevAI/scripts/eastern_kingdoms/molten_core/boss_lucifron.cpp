@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -33,84 +34,73 @@ enum
     SPELL_LUCIFRONCURSE     = 19703,
 };
 
-struct boss_lucifronAI : public ScriptedAI
+enum LucifronActions
 {
-    boss_lucifronAI(Creature* pCreature) : ScriptedAI(pCreature)
+    LUCIFRON_IMPENDING_DOOM,
+    LUCIFRON_LUCIFRONS_CURSE,
+    LUCIFRON_SHADOWSHOCK,
+    LUCIFRON_ACTION_MAX,
+};
+
+struct boss_lucifronAI : public CombatAI
+{
+    boss_lucifronAI(Creature* creature) : CombatAI(creature, LUCIFRON_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        AddCombatAction(LUCIFRON_IMPENDING_DOOM, 5 * IN_MILLISECONDS, 10 * IN_MILLISECONDS);
+        AddCombatAction(LUCIFRON_LUCIFRONS_CURSE, 10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
+        AddCombatAction(LUCIFRON_SHADOWSHOCK, 3 * IN_MILLISECONDS, 6 * IN_MILLISECONDS);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_uiShadowShockTimer;
-    uint32 m_uiImpendingDoomTimer;
-    uint32 m_uiLucifronCurseTimer;
-
-    void Reset() override
+    void Aggro(Unit* /*who*/) override
     {
-        m_uiShadowShockTimer   = urand(3 * IN_MILLISECONDS, 6 * IN_MILLISECONDS);
-        m_uiImpendingDoomTimer = urand(5 * IN_MILLISECONDS, 10 * IN_MILLISECONDS);
-        m_uiLucifronCurseTimer = urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
+        if (m_instance)
+            m_instance->SetData(TYPE_LUCIFRON, IN_PROGRESS);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LUCIFRON, IN_PROGRESS);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LUCIFRON, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_LUCIFRON, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LUCIFRON, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_LUCIFRON, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Shadowshock
-        if (m_uiShadowShockTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWSHOCK) == CAST_OK)
-                m_uiShadowShockTimer = urand(3 * IN_MILLISECONDS, 6 * IN_MILLISECONDS);
+            case LUCIFRON_IMPENDING_DOOM:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_IMPENDINGDOOM) == CAST_OK)
+                    ResetCombatAction(action, urand(20 * IN_MILLISECONDS, 25 * IN_MILLISECONDS));
+                break;
+            }
+            case LUCIFRON_LUCIFRONS_CURSE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_LUCIFRONCURSE) == CAST_OK)
+                    ResetCombatAction(action, urand(20 * IN_MILLISECONDS, 25 * IN_MILLISECONDS));
+                break;
+            }
+            case LUCIFRON_SHADOWSHOCK:
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWSHOCK) == CAST_OK)
+                    ResetCombatAction(action, urand(3 * IN_MILLISECONDS, 6 * IN_MILLISECONDS));
+                break;
+            }
         }
-        else
-            m_uiShadowShockTimer -= uiDiff;
-
-        // Impending doom timer
-        if (m_uiImpendingDoomTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_IMPENDINGDOOM) == CAST_OK)
-                m_uiImpendingDoomTimer = urand(20 * IN_MILLISECONDS, 25 * IN_MILLISECONDS);
-        }
-        else
-            m_uiImpendingDoomTimer -= uiDiff;
-
-        // Lucifron's curse timer
-        if (m_uiLucifronCurseTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_LUCIFRONCURSE) == CAST_OK)
-                m_uiLucifronCurseTimer = urand(20 * IN_MILLISECONDS, 25 * IN_MILLISECONDS);
-        }
-        else
-            m_uiLucifronCurseTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_lucifron(Creature* pCreature)
+UnitAI* GetAI_boss_lucifron(Creature* creature)
 {
-    return new boss_lucifronAI(pCreature);
+    return new boss_lucifronAI(creature);
 }
 
 void AddSC_boss_lucifron()
