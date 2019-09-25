@@ -17,6 +17,7 @@
 #include "Entities/Creature.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Spell.h"
+#include "Spells/SpellMgr.h"
 
 void CombatAI::ExecuteActions()
 {
