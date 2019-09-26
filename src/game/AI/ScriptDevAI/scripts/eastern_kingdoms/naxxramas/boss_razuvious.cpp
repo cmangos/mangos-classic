@@ -78,10 +78,10 @@ struct boss_razuviousAI : public ScriptedAI
         {
             switch (urand(0, 3))
             {
-                case 0: DoScriptText(SAY_UNDERSTUDY_TAUNT_1, caster); break;
-                case 1: DoScriptText(SAY_UNDERSTUDY_TAUNT_2, caster); break;
-                case 2: DoScriptText(SAY_UNDERSTUDY_TAUNT_3, caster); break;
-                case 3: DoScriptText(SAY_UNDERSTUDY_TAUNT_4, caster); break;
+                case 0: DoScriptText(SAY_UNDERSTUDY_TAUNT_1, m_creature); break;
+                case 1: DoScriptText(SAY_UNDERSTUDY_TAUNT_2, m_creature); break;
+                case 2: DoScriptText(SAY_UNDERSTUDY_TAUNT_3, m_creature); break;
+                case 3: DoScriptText(SAY_UNDERSTUDY_TAUNT_4, m_creature); break;
             }
         }
     }
