@@ -287,8 +287,6 @@ class PlayerMenu
         void CloseGossip() const;
         void SendPointOfInterest(float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const char* locName) const;
         void SendPointOfInterest(uint32 poi_id) const;
-        void SendTalking(uint32 textID) const;
-        void SendTalking(char const* title, char const* text) const;
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
