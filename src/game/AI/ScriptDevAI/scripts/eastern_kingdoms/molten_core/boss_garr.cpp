@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -42,132 +43,119 @@ enum
     SPELL_ERUPTION              = 19497,
     SPELL_ENRAGE_TRIGGER        = 19515,
     SPELL_MASSIVE_ERUPTION      = 20483,
+    SPELL_THRASH                = 8876,
+    SPELL_IMMOLATE              = 15733,
 };
 
-struct boss_garrAI : public ScriptedAI
+enum GarrActions
 {
-    boss_garrAI(Creature* pCreature) : ScriptedAI(pCreature)
+    GARR_ANTI_MAGIC_PULSE,
+    GARR_MAGMA_SHACKLES,
+    GARR_MASSIVE_ERUPTION,
+    GARR_ACTION_MAX,
+};
+
+struct boss_garrAI : public CombatAI
+{
+    boss_garrAI(Creature* creature) : CombatAI(creature, GARR_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        AddCombatAction(GARR_ANTI_MAGIC_PULSE, 10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
+        AddCombatAction(GARR_MAGMA_SHACKLES, 5 * IN_MILLISECONDS, 10 * IN_MILLISECONDS);
+        AddCombatAction(GARR_MASSIVE_ERUPTION, uint32(6 * MINUTE * IN_MILLISECONDS));
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_uiAntiMagicPulseTimer;
-    uint32 m_uiMagmaShacklesTimer;
-    uint32 m_uiMassiveEruptionTimer;
-
-    void Reset() override
+    void Aggro(Unit* /*who*/) override
     {
-        m_uiAntiMagicPulseTimer = urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
-        m_uiMagmaShacklesTimer = urand(5 * IN_MILLISECONDS, 10 * IN_MILLISECONDS);
-        m_uiMassiveEruptionTimer = 6 * MINUTE * IN_MILLISECONDS;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GARR, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_GARR, IN_PROGRESS);
 
         // Garr has a 100 yard aura to keep track of the distance of each of his adds, they will enrage if moved out of it
-        DoCastSpellIfCan(m_creature, SPELL_SEPARATION_ANXIETY, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_SEPARATION_ANXIETY, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GARR, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_GARR, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GARR, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_GARR, FAIL);
     }
 
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spellInfo) override
     {
-        if (pSpell->Id == SPELL_ENRAGE_TRIGGER)
-            DoCastSpellIfCan(m_creature, SPELL_ENRAGE, CAST_TRIGGERED);
+        if (spellInfo->Id == SPELL_ENRAGE_TRIGGER)
+            DoCastSpellIfCan(nullptr, SPELL_ENRAGE, CAST_TRIGGERED);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // AntiMagicPulse_Timer
-        if (m_uiAntiMagicPulseTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_ANTIMAGICPULSE) == CAST_OK)
-                m_uiAntiMagicPulseTimer = urand(15 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
-        }
-        else
-            m_uiAntiMagicPulseTimer -= uiDiff;
-
-        // MagmaShackles_Timer
-        if (m_uiMagmaShacklesTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_MAGMASHACKLES) == CAST_OK)
-                m_uiMagmaShacklesTimer = urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
-        }
-        else
-            m_uiMagmaShacklesTimer -= uiDiff;
-
-        // MassiveEruption_Timer
-        if (m_uiMassiveEruptionTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ERUPTION_TRIGGER) == CAST_OK)
+            case GARR_ANTI_MAGIC_PULSE:
             {
-                DoScriptText(EMOTE_MASSIVE_ERUPTION, m_creature);
-                m_uiMassiveEruptionTimer = 20 * IN_MILLISECONDS;
+                if (DoCastSpellIfCan(nullptr, SPELL_ANTIMAGICPULSE) == CAST_OK)
+                    ResetCombatAction(action, urand(15 * IN_MILLISECONDS, 20 * IN_MILLISECONDS));
+                break;
+            }
+            case GARR_MAGMA_SHACKLES:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_MAGMASHACKLES) == CAST_OK)
+                    ResetCombatAction(action, urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS));
+                break;
+            }
+            case GARR_MASSIVE_ERUPTION:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_ERUPTION_TRIGGER) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_MASSIVE_ERUPTION, m_creature);
+                    ResetCombatAction(action, 20 * IN_MILLISECONDS);
+                }
+                break;
             }
         }
-        else
-            m_uiMassiveEruptionTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
 struct mob_fireswornAI : public ScriptedAI
 {
-    mob_fireswornAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+    mob_fireswornAI(Creature* creature) : ScriptedAI(creature) {}
 
-    void Reset() override {}
-
-    void JustDied(Unit* pKiller) override
+    void Reset() override
     {
-        if (m_creature != pKiller)
-            DoCastSpellIfCan(m_creature, SPELL_ERUPTION);
-
-        DoCastSpellIfCan(m_creature, SPELL_ENRAGE_TRIGGER, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_THRASH, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_IMMOLATE, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
     }
 
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+    void JustDied(Unit* killer) override
     {
-        if (pSpell->Id == SPELL_ERUPTION_TRIGGER)
-            DoCastSpellIfCan(m_creature, SPELL_MASSIVE_ERUPTION);
+        if (m_creature != killer)
+            DoCastSpellIfCan(nullptr, SPELL_ERUPTION);
+
+        DoCastSpellIfCan(nullptr, SPELL_ENRAGE_TRIGGER, CAST_TRIGGERED);
     }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spellInfo) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        DoMeleeAttackIfReady();
+        if (spellInfo->Id == SPELL_ERUPTION_TRIGGER)
+            DoCastSpellIfCan(nullptr, SPELL_MASSIVE_ERUPTION);
     }
 };
 
-UnitAI* GetAI_boss_garr(Creature* pCreature)
+UnitAI* GetAI_boss_garr(Creature* creature)
 {
-    return new boss_garrAI(pCreature);
+    return new boss_garrAI(creature);
 }
 
-UnitAI* GetAI_mob_firesworn(Creature* pCreature)
+UnitAI* GetAI_mob_firesworn(Creature* creature)
 {
-    return new mob_fireswornAI(pCreature);
+    return new mob_fireswornAI(creature);
 }
 
 void AddSC_boss_garr()
