@@ -159,29 +159,40 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
                     Unit* targetUnit = targetGuid ? _player->GetMap()->GetUnit(targetGuid) : nullptr;
 
-                    if (targetUnit && targetUnit != petUnit && petUnit->CanAttack(targetUnit) && targetUnit->isInAccessablePlaceFor((Creature*)petUnit))
+                    if (targetUnit && targetUnit != petUnit && petUnit->CanAttack(targetUnit))
                     {
                         // This is true if pet has no target or has target but targets differs.
                         if (petUnit->getVictim() != targetUnit)
                         {
-                            petUnit->AttackStop();
-                            if (!petUnit->hasUnitState(UNIT_STAT_POSSESSED))
+                            if (petUnit->hasUnitState(UNIT_STAT_POSSESSED))
                             {
-                                petUnit->GetMotionMaster()->Clear();
-
-                                petUnit->AI()->AttackStart(targetUnit);
-
+                                petUnit->AttackStop();
+                                petUnit->Attack(targetUnit, true);
+                            }
+                            else
+                            {
+                                // Send pet response regardless of command result as acknowledgement of command being processed
                                 if (pet)
                                 {
                                     // 10% chance to play special warlock pet attack talk, else growl
                                     if (pet->getPetType() == SUMMON_PET && roll_chance_i(10))
-                                        pet->SendPetTalk((uint32)PET_TALK_ATTACK);
+                                        pet->SendPetTalk(uint32(PET_TALK_ATTACK));
 
                                     pet->SendPetAIReaction();
                                 }
+
+                                // Ignore command if target habitat is incompatible with pet
+                                if (!targetUnit->isInAccessablePlaceFor(petUnit))
+                                    break;
+
+                                // Ignore command if target is moving home
+                                if (targetUnit->IsEvadingHome())
+                                    break;
+
+                                petUnit->AttackStop();
+                                petUnit->GetMotionMaster()->Clear();
+                                petUnit->AI()->AttackStart(targetUnit);
                             }
-                            else
-                                petUnit->Attack(targetUnit, true);
                         }
                     }
                     break;

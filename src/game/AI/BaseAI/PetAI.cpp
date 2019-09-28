@@ -95,6 +95,10 @@ void PetAI::AttackStart(Unit* who)
     if (!who || (pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS))
         return;
 
+    // Do not start attack if target is moving home
+    if (who->IsEvadingHome())
+        return;
+
     if (m_unit->Attack(who, m_meleeEnabled))
     {
         // TMGs call CreatureRelocation which via MoveInLineOfSight can call this function
@@ -123,6 +127,10 @@ void PetAI::UpdateAI(const uint32 diff)
         return;
 
     Unit* victim = (pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS) ? nullptr : m_unit->getVictim();
+
+    // Do not continue attacking if victim is moving home
+    if (victim && victim->IsEvadingHome())
+        victim = nullptr;
 
     if (m_updateAlliesTimer <= diff)
         // UpdateAllies self set update timer
