@@ -89,8 +89,8 @@ struct sSpawnLocation
 
 static sSpawnLocation m_aMajordomoLocations[2] =
 {
-    {NPC_MAJORDOMO, 758.089f, -1176.71f, -118.640f, 3.12414f},  // Summon fight position
-    {NPC_MAJORDOMO, 847.103f, -816.153f, -229.775f, 4.344f} // Summon and teleport location (near Ragnaros)
+    {NPC_MAJORDOMO, 758.0892f, -1176.712f, -118.6403f, 3.124139f},  // Summon fight position
+    {NPC_MAJORDOMO, 848.933f, -812.875f, -229.601f, 4.046f}     // Summon and teleport location (near Ragnaros)
 };
 
 class instance_molten_core : public ScriptedInstance
