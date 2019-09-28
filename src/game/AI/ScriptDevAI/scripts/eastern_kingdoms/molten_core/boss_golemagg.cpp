@@ -32,7 +32,7 @@ enum
     SPELL_MAGMA_SPLASH      = 13879,
     SPELL_PYROBLAST         = 20228,
     SPELL_EARTHQUAKE        = 19798,
-    SPELL_ENRAGE            = 19953,
+    // SPELL_ENRAGE            = 19953, // unconfirmed
     SPELL_GOLEMAGG_TRUST    = 20556,
     SPELL_DOUBLE_ATTACK     = 18943,
 
@@ -107,11 +107,11 @@ struct boss_golemaggAI : public CombatAI
                 if (m_creature->GetHealthPercent() > 10.0f)
                     return;
 
-                if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
-                {
-                    SetActionReadyStatus(action, false);
-                    ResetCombatAction(GOLEMAGG_EARTHQUAKE, 3 * IN_MILLISECONDS);
-                }
+                //if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
+                //{
+                SetActionReadyStatus(action, false);
+                ResetCombatAction(GOLEMAGG_EARTHQUAKE, 0u);
+                //}
                 break;
             }
             case GOLEMAGG_PYROBLAST:
