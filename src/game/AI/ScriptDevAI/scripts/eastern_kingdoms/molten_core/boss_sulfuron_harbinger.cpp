@@ -25,207 +25,171 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "molten_core.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
-    SPELL_DARK_STRIKE           = 19777,                    // Wowhead Linked to add - need confirmation!
     SPELL_DEMORALIZING_SHOUT    = 19778,
     SPELL_INSPIRE               = 19779,
     SPELL_HAND_OF_RAGNAROS      = 19780,
     SPELL_FLAMESPEAR            = 19781,
 
     // Adds Spells
+    SPELL_DARK_STRIKE           = 19777,
     SPELL_HEAL                  = 19775,
     SPELL_SHADOWWORD_PAIN       = 19776,
     SPELL_IMMOLATE              = 20294
 };
 
-struct boss_sulfuronAI : public ScriptedAI
+enum SulfuronActions
 {
-    boss_sulfuronAI(Creature* pCreature) : ScriptedAI(pCreature)
+    SULFURON_DEMORALIZING_SHOUT,
+    SULFURON_INSPIRE,
+    SULFURON_HAND_OF_RAGNAROS,
+    SULFURON_FLAME_SPEAR,
+    SULFURON_ACTION_MAX,
+};
+
+struct boss_sulfuronAI : public CombatAI
+{
+    boss_sulfuronAI(Creature* creature) : CombatAI(creature, SULFURON_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        AddCombatAction(SULFURON_DEMORALIZING_SHOUT, 15000u);
+        AddCombatAction(SULFURON_INSPIRE, 3000u);
+        AddCombatAction(SULFURON_HAND_OF_RAGNAROS, 6000u);
+        AddCombatAction(SULFURON_FLAME_SPEAR, 2000u);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_uiDarkstrikeTimer;
-    uint32 m_uiDemoralizingShoutTimer;
-    uint32 m_uiInspireTimer;
-    uint32 m_uiKnockdownTimer;
-    uint32 m_uiFlamespearTimer;
-
-    void Reset() override
+    void Aggro(Unit* /*who*/) override
     {
-        m_uiDarkstrikeTimer = 10000;
-        m_uiDemoralizingShoutTimer = 15000;
-        m_uiInspireTimer = 3000;
-        m_uiKnockdownTimer = 6000;
-        m_uiFlamespearTimer = 2000;
+        if (m_instance)
+            m_instance->SetData(TYPE_SULFURON, IN_PROGRESS);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SULFURON, IN_PROGRESS);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SULFURON, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_SULFURON, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SULFURON, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_SULFURON, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Demoralizing Shout Timer
-        if (m_uiDemoralizingShoutTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_DEMORALIZING_SHOUT) == CAST_OK)
-                m_uiDemoralizingShoutTimer = urand(15000, 20000);
-        }
-        else
-            m_uiDemoralizingShoutTimer -= uiDiff;
-
-        // Inspire Timer
-        if (m_uiInspireTimer < uiDiff)
-        {
-            Creature* pTarget = nullptr;
-            CreatureList pList = DoFindFriendlyMissingBuff(45.0f, SPELL_INSPIRE);
-            if (!pList.empty())
+            case SULFURON_DEMORALIZING_SHOUT:
             {
-                CreatureList::iterator i = pList.begin();
-                advance(i, (rand() % pList.size()));
-                pTarget = (*i);
+                if (DoCastSpellIfCan(nullptr, SPELL_DEMORALIZING_SHOUT) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 20000));
+                break;
             }
-
-            if (!pTarget)
-                pTarget = m_creature;
-
-            if (DoCastSpellIfCan(pTarget, SPELL_INSPIRE) == CAST_OK)
-                m_uiInspireTimer = 10000;
-        }
-        else
-            m_uiInspireTimer -= uiDiff;
-
-        // Hand of Ragnaros Timer
-        if (m_uiKnockdownTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_HAND_OF_RAGNAROS) == CAST_OK)
-                m_uiKnockdownTimer = urand(12000, 15000);
-        }
-        else
-            m_uiKnockdownTimer -= uiDiff;
-
-        // Flamespear Timer
-        if (m_uiFlamespearTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            case SULFURON_INSPIRE:
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_FLAMESPEAR) == CAST_OK)
-                    m_uiFlamespearTimer = urand(12000, 16000);
+                Creature* target = nullptr;
+                CreatureList pList = DoFindFriendlyMissingBuff(45.0f, SPELL_INSPIRE);
+                if (!pList.empty())
+                {
+                    CreatureList::iterator i = pList.begin();
+                    advance(i, (rand() % pList.size()));
+                    target = (*i);
+                }
+
+                if (!target)
+                    target = m_creature;
+
+                if (DoCastSpellIfCan(target, SPELL_INSPIRE) == CAST_OK)
+                    ResetCombatAction(action, 10000);
+                break;
+            }
+            case SULFURON_HAND_OF_RAGNAROS:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_HAND_OF_RAGNAROS) == CAST_OK)
+                    ResetCombatAction(action, urand(12000, 15000));
+                break;
+            }
+            case SULFURON_FLAME_SPEAR:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOWWORD_PAIN, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_FLAMESPEAR) == CAST_OK)
+                        ResetCombatAction(action, urand(12000, 16000));
+                break;
             }
         }
-        else
-            m_uiFlamespearTimer -= uiDiff;
-
-        // Dark Strike Timer
-        if (m_uiDarkstrikeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_STRIKE) == CAST_OK)
-                m_uiDarkstrikeTimer = urand(15000, 18000);
-        }
-        else
-            m_uiDarkstrikeTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-struct mob_flamewaker_priestAI : public ScriptedAI
+enum FlamewakerPriestActions
 {
-    mob_flamewaker_priestAI(Creature* pCreature) : ScriptedAI(pCreature)
+    FLAMEWAKER_PRIEST_DARK_STRIKE,
+    FLAMEWAKER_PRIEST_DARK_MENDING,
+    FLAMEWAKER_PRIEST_SHADOW_WORD_PAIN,
+    FLAMEWAKER_PRIEST_IMMOLATE,
+    FLAMEWAKER_PRIEST_ACTION_MAX,
+};
+
+struct mob_flamewaker_priestAI : public CombatAI
+{
+    mob_flamewaker_priestAI(Creature* creature) : CombatAI(creature, FLAMEWAKER_PRIEST_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        AddCombatAction(FLAMEWAKER_PRIEST_DARK_STRIKE, 10000u);
+        AddCombatAction(FLAMEWAKER_PRIEST_DARK_MENDING, 15000, 30000);
+        AddCombatAction(FLAMEWAKER_PRIEST_SHADOW_WORD_PAIN, 2000u);
+        AddCombatAction(FLAMEWAKER_PRIEST_IMMOLATE, 8000u);
     }
 
-    uint32 m_uiHealTimer;
-    uint32 m_uiShadowWordPainTimer;
-    uint32 m_uiImmolateTimer;
+    ScriptedInstance* m_instance;
 
-    ScriptedInstance* m_pInstance;
-
-    void Reset() override
+    void ExecuteAction(uint32 action) override
     {
-        m_uiHealTimer = urand(15000, 30000);
-        m_uiShadowWordPainTimer = 2000;
-        m_uiImmolateTimer = 8000;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Casting Heal to Sulfuron or other Guards.
-        if (m_uiHealTimer < uiDiff)
+        switch (action)
         {
-            if (Unit* pUnit = DoSelectLowestHpFriendly(60.0f, 1))
+            case FLAMEWAKER_PRIEST_DARK_STRIKE:
             {
-                if (DoCastSpellIfCan(pUnit, SPELL_HEAL) == CAST_OK)
-                    m_uiHealTimer = urand(15000, 20000);
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_STRIKE) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 18000));
+                break;
+            }
+            case FLAMEWAKER_PRIEST_DARK_MENDING:
+            {
+                if (Unit* target = DoSelectLowestHpFriendly(60.0f, 1))
+                    if (DoCastSpellIfCan(target, SPELL_HEAL) == CAST_OK)
+                        ResetCombatAction(action, urand(15000, 20000));
+                break;
+            }
+            case FLAMEWAKER_PRIEST_SHADOW_WORD_PAIN:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOWWORD_PAIN, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_SHADOWWORD_PAIN) == CAST_OK)
+                        ResetCombatAction(action, urand(18000, 26000));
+                break;
+            }
+            case FLAMEWAKER_PRIEST_IMMOLATE:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOWWORD_PAIN, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_IMMOLATE) == CAST_OK)
+                        ResetCombatAction(action, urand(15000, 25000));
+                break;
             }
         }
-        else
-            m_uiHealTimer -= uiDiff;
-
-        // ShadowWord Pain Timer
-        if (m_uiShadowWordPainTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_SHADOWWORD_PAIN) == CAST_OK)
-                    m_uiShadowWordPainTimer = urand(18000, 26000);
-            }
-        }
-        else
-            m_uiShadowWordPainTimer -= uiDiff;
-
-        // Immolate Timer
-        if (m_uiImmolateTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_IMMOLATE) == CAST_OK)
-                    m_uiImmolateTimer = urand(15000, 25000);
-            }
-        }
-        else
-            m_uiImmolateTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_sulfuron(Creature* pCreature)
+UnitAI* GetAI_boss_sulfuron(Creature* creature)
 {
-    return new boss_sulfuronAI(pCreature);
+    return new boss_sulfuronAI(creature);
 }
 
-UnitAI* GetAI_mob_flamewaker_priest(Creature* pCreature)
+UnitAI* GetAI_mob_flamewaker_priest(Creature* creature)
 {
-    return new mob_flamewaker_priestAI(pCreature);
+    return new mob_flamewaker_priestAI(creature);
 }
 
 void AddSC_boss_sulfuron()
