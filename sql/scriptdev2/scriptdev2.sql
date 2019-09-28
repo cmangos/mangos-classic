@@ -2115,7 +2115,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 409 000 MOLTEN CORE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1409000,'%s performs one last service for Ragnaros.',0,2,0,0,'geddon EMOTE_SERVICE'),
+(-1409000,'%s performs one last service for Ragnaros...',0,2,0,0,'geddon EMOTE_SERVICE'),
 (-1409001,'REUSE ME',0,0,0,0,'REUSE ME'),
 (-1409002,'%s refuses to die while its master is in trouble.',0,2,0,0,'core rager EMOTE_LOWHP'),
 
