@@ -1687,7 +1687,20 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1010005,'Who would be foolish enough to enter the tower of the Grand Foreman?',0,0,0,0,'gallywix stealth alert'),
 (-1010006,'*cough* who goes there? *cough*',0,0,0,0,'Silixiz stealth alert'),
 (-1010007,'Did you hear that?',0,0,0,0,'Venture Co. Lookout stealth alert'),
-(-1010008,'I smell rogue.',0,0,0,0,'Venture Co. Lookout stealth alert');
+(-1010008,'I smell rogue.',0,0,0,0,'Venture Co. Lookout stealth alert'),
+(-1010009,'Wow, it\'s 3 degrees Kraklenheit. Keep looking.',0,0,0,0,'Krakles Thermometer'),
+(-1010010,'The temperature is 12 degrees Kraklenheit. How exciting.',0,0,0,0,'Krakles Thermometer'),
+(-1010011,'It\'s 40 degrees Kraklenheit. Can you feel the heat? No? I really couldn\'t either.',0,0,0,0,'Krakles Thermometer'),
+(-1010012,'*sigh* ...113 degrees Kraklenheit. Can\'t you do any better?',0,0,0,0,'Krakles Thermometer'),
+(-1010013,'The temperature is 122 degrees Kraklenheit.',0,0,0,0,'Krakles Thermometer'),
+(-1010014,'The temperature is 564 degrees Kraklenheit.',0,0,0,0,'Krakles Thermometer'),
+(-1010015,'You\'re getting warmer... 7039 degrees Kraklenheit!',0,0,0,0,'Krakles Thermometer'),
+(-1010016,'8536 degrees Kraklenheit is the reading... Tired of me yet?',0,0,0,0,'Krakles Thermometer'),
+(-1010017,'The temperature is 9280 degrees Kraklenheit! That\'s HOT!',0,0,0,0,'Krakles Thermometer'),
+(-1010018,'DING! 428,000 degrees Kraklenheit, exactly! Well, approximately. Almost. Somewhere around there...',0,0,0,0,'Krakles Thermometer'),
+(-1010019,'It\'s 428,000 degrees Kraklenheit... What\'s happening, hot stuff!?',0,0,0,0,'Krakles Thermometer'),
+(-1010020,'Measuring by Kraklenheit, it is 428,000 degrees! That\'s Krakley!',0,0,0,0,'Krakles Thermometer'),
+(-1010021,'Holy Krakle! The temperature is 428,000 degrees Kraklenheit!',0,0,0,0,'Krakles Thermometer');
 
 -- -1 015 000 TBC texts
 

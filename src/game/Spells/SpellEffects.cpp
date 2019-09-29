@@ -689,6 +689,54 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         ai->SendAIEvent(AI_EVENT_CUSTOM_A, m_caster, m_caster);
                     return;
                 }
+                case 16378:                                 // Temperature Reading
+                {
+                    if (!unitTarget || !m_caster->IsPlayer())
+                        return;
+
+                    switch (unitTarget->GetGUIDLow()) // sadly each spawn does different texts - meant to be db guids
+                    {
+                        case 23712: // Z: -241.0724
+                        {
+                            static std::vector<int32> textIds = {-1010012, -1010013, -1010014};
+                            DoScriptText(textIds[urand(0, textIds.size() - 1)], unitTarget, m_caster);
+                            break;
+                        }
+                        case 23713: // Z: -265.2025
+                        {
+                            static std::vector<int32> textIds = {-1010009, -1010010, -1010011};
+                            DoScriptText(textIds[urand(0, textIds.size() - 1)], unitTarget, m_caster);
+                            break;
+                        }
+                        case 23714: // Z: -240.8598
+                        {
+                            static std::vector<int32> textIds = {-1010015, -1010016, -1010017};
+                            DoScriptText(textIds[urand(0, textIds.size() - 1)], unitTarget, m_caster);
+                            break;
+                        }
+                        case 23715: // Z: -246.8467
+                        {
+                            static std::vector<int32> textIds = {-1010015, -1010016, -1010017};
+                            DoScriptText(textIds[urand(0, textIds.size() - 1)], unitTarget, m_caster);
+                            break;
+                        }
+                        case 23716: // Z: -186.0754 quest completion one
+                        {
+                            static std::vector<int32> textIds = {-1010018, -1010019, -1010020, -1010021};
+                            DoScriptText(textIds[urand(0, textIds.size() - 1)], unitTarget, m_caster);
+                            Player* player = static_cast<Player*>(m_caster);
+                            player->RewardPlayerAndGroupAtEventCredit(unitTarget->GetEntry(), unitTarget);
+                            break;
+                        }
+                        default:
+                        {
+                            sLog.outErrorDb("Database has wrong data for q.974 - guids do not correspond.");
+                            break;
+                        }
+                    }
+
+                    return;
+                }
                 case 16589:                                 // Noggenfogger Elixir
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
