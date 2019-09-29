@@ -132,7 +132,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
 
     D::_addUnitStateMove(owner);
     i_targetReached = false;
-    m_speedChanged = false;
+    i_speedChanged = false;
 
     Movement::MoveSplineInit init(owner);
     init.MovebyPath(path);
@@ -216,7 +216,7 @@ void ChaseMovementGenerator::Initialize(Unit& owner)
 {
     owner.addUnitState(UNIT_STAT_CHASE);                    // _MOVE set in _SetTargetLocation after required checks
     _setTargetLocation(owner, true);
-    i_target->GetPosition(m_prevTargetPos.x, m_prevTargetPos.y, m_prevTargetPos.z);
+    i_target->GetPosition(i_lastTargetPos.x, i_lastTargetPos.y, i_lastTargetPos.z);
 }
 
 void ChaseMovementGenerator::Finalize(Unit& owner)
@@ -289,7 +289,7 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
     {
         targetMoved = this->RequiresNewPosition(owner, dest.x, dest.y, dest.z);
 
-        if (this->m_speedChanged || targetMoved)
+        if (this->i_speedChanged || targetMoved)
         {
             float x, y, z;
 
@@ -320,11 +320,11 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
             if (DispatchSplineToPosition(owner, x, y, z, EnableWalking(), true))
             {
                 this->i_targetReached = false;
-                this->m_speedChanged = false;
+                this->i_speedChanged = false;
                 /* m_prevTargetPos is updated on making new spline (normal and distancing) and also on reaching target
                 is used for determining if player moved towards target whilst the spline was going on to stop the spline prematurely
                 and prevent it going behind targets back - it will still occur in rare cases due to PF and lag */
-                this->i_target->GetPosition(this->m_prevTargetPos.x, this->m_prevTargetPos.y, this->m_prevTargetPos.z);
+                this->i_target->GetPosition(this->i_lastTargetPos.x, this->i_lastTargetPos.y, this->i_lastTargetPos.z);
                 m_closenessAndFanningTimer = 0;
                 return;
             }
@@ -335,11 +335,11 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
         else if (!targetMoved) // we do not need new position and we are reachable
             m_reachable = true;
     }
-    else if (this->m_speedChanged)
+    else if (this->i_speedChanged)
     {
         if (DispatchSplineToPosition(owner, dest.x, dest.y, dest.z, false, false))
         {
-            this->m_speedChanged = false;
+            this->i_speedChanged = false;
             return;
         }
     }
@@ -352,7 +352,7 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
         else if (m_currentMode == CHASE_MODE_NORMAL)
         {
             // TODO: This code would benefit greatly if "Get Target Position in 250 ms" function existed
-            if (currentTargetPos != this->m_prevTargetPos)
+            if (currentTargetPos != this->i_lastTargetPos)
             {
                 G3D::Vector3 ownerPos;
                 owner.GetPosition(ownerPos.x, ownerPos.y, ownerPos.z);
@@ -392,7 +392,7 @@ void ChaseMovementGenerator::HandleFinalizedMovement(Unit& owner)
     if (!owner.HasInArc(this->i_target.getTarget(), 0.01f))
         owner.SetInFront(this->i_target.getTarget());
     this->m_closenessAndFanningTimer = CHASE_CLOSENESS_TIMER;
-    this->i_target->GetPosition(this->m_prevTargetPos.x, this->m_prevTargetPos.y, this->m_prevTargetPos.z);
+    this->i_target->GetPosition(this->i_lastTargetPos.x, this->i_lastTargetPos.y, this->i_lastTargetPos.z);
     switch (m_currentMode)
     {
         case CHASE_MODE_NORMAL:
@@ -420,7 +420,7 @@ void ChaseMovementGenerator::DistanceYourself(Unit& owner, float distance)
     {
         this->i_targetReached = false;
         m_currentMode = CHASE_MODE_DISTANCING;
-        this->m_speedChanged = false;
+        this->i_speedChanged = false;
         owner.AI()->DistancingStarted();
     }
 }
@@ -448,7 +448,7 @@ void ChaseMovementGenerator::Backpedal(Unit& owner)
     {
         this->i_targetReached = false;
         m_currentMode = CHASE_MODE_BACKPEDAL;
-        this->m_speedChanged = false;
+        this->i_speedChanged = false;
         m_closenessAndFanningTimer = 0; // restart on reaching target
     }
 }
@@ -479,7 +479,7 @@ void ChaseMovementGenerator::FanOut(Unit& owner)
         {
             this->i_targetReached = false;
             m_currentMode = CHASE_MODE_FANNING;
-            this->m_speedChanged = false;
+            this->i_speedChanged = false;
             m_closenessAndFanningTimer = 0; // restart on reaching target
             return;
         }
@@ -491,7 +491,7 @@ void ChaseMovementGenerator::FanOut(Unit& owner)
         {
             this->i_targetReached = false;
             m_currentMode = CHASE_MODE_FANNING;
-            this->m_speedChanged = false;
+            this->i_speedChanged = false;
             m_closenessAndFanningTimer = 0; // restart on reaching target
             return;
         }
@@ -517,7 +517,7 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
     init.MovebyPath(path);
     init.SetWalk(walk);
     init.Launch();
-    this->i_target->GetPosition(m_prevTargetPos.x, m_prevTargetPos.y, m_prevTargetPos.z);
+    this->i_target->GetPosition(i_lastTargetPos.x, i_lastTargetPos.y, i_lastTargetPos.z);
 
     m_reachable = true;
     return true;
@@ -576,78 +576,193 @@ bool ChaseMovementGenerator::RequiresNewPosition(Unit& owner, float x, float y, 
 }
 
 //-----------------------------------------------//
-template<class T>
-void FollowMovementGenerator<T>::_clearUnitStateMove(T& u) { u.clearUnitState(UNIT_STAT_FOLLOW_MOVE); }
-template<class T>
-void FollowMovementGenerator<T>::_addUnitStateMove(T& u) { u.addUnitState(UNIT_STAT_FOLLOW_MOVE); }
+void FollowMovementGenerator::_clearUnitStateMove(Unit& owner) { owner.clearUnitState(UNIT_STAT_FOLLOW_MOVE); }
+void FollowMovementGenerator::_addUnitStateMove(Unit& owner) { owner.addUnitState(UNIT_STAT_FOLLOW_MOVE); }
 
-template<>
-bool FollowMovementGenerator<Creature>::EnableWalking() const
-{
-    return i_target.isValid() && i_target->IsWalking();
-}
-
-template<>
-bool FollowMovementGenerator<Player>::EnableWalking() const
+bool FollowMovementGenerator::_lostTarget(Unit&/* owner*/) const
 {
     return false;
 }
 
-template<>
-void FollowMovementGenerator<Player>::_updateSpeed(Player& /*u*/)
+void FollowMovementGenerator::_reachTarget(Unit&/* owner*/)
 {
-    // nothing to do for Player
 }
 
-template<>
-void FollowMovementGenerator<Creature>::_updateSpeed(Creature& u)
+bool FollowMovementGenerator::EnableWalking() const
 {
-    // pet only sync speed with owner
-    if (!((Creature&)u).IsPet() || !i_target.isValid() || i_target->GetObjectGuid() != u.GetOwnerGuid())
-        return;
-
-    u.UpdateSpeed(MOVE_RUN, true);
-    u.UpdateSpeed(MOVE_WALK, true);
-    u.UpdateSpeed(MOVE_SWIM, true);
+    return (i_target.isValid() && i_target->IsWalking());
 }
 
-template<>
-void FollowMovementGenerator<Player>::Initialize(Player& owner)
+float FollowMovementGenerator::GetAngle(Unit&/* owner*/) const
+{
+    // FIXME: Crude standin for clientside movement prediction for pets (16.5% of the angle)
+    // Requires proper implementation at some point in the future
+    if (int32(i_angle * 100) == int32(PET_FOLLOW_ANGLE * 100) && int32(i_offset) == int32(PET_FOLLOW_DIST))
+    {
+        if (m_targetMoving && i_target->movespline->Finalized())
+            return (i_angle / 4.5f);
+    }
+    return i_angle;
+}
+
+float FollowMovementGenerator::GetOffset(Unit&/* owner*/) const
+{
+    // FIXME: Crude standin for clientside movement prediction for pets (375% of the offset)
+    // Requires proper implementation at some point in the future
+    if (int32(i_angle * 100) == int32(PET_FOLLOW_ANGLE * 100) && int32(i_offset) == int32(PET_FOLLOW_DIST))
+    {
+        if (m_targetMoving && i_target->movespline->Finalized())
+            return (i_offset * 3.75f);
+    }
+    return i_offset;
+}
+
+float FollowMovementGenerator::GetVelocity(Unit& owner, bool allowCatchup/* = false*/) const
+{
+    float speed = 0.0f;  // Use default speed
+
+    if (i_target.isValid() && !owner.isInCombat() && owner.GetMasterGuid() == i_target->GetObjectGuid())
+    {
+        // Followers sync with master's speed when not in combat and able to boost speed in attempt catch up with master
+        if (!i_target->movespline->Finalized())
+            speed = i_target->movespline->Velocity();
+        else
+        {
+            MovementFlags movementFlags = i_target->m_movementInfo.GetMovementFlags();
+            UnitMoveType movementType = MOVE_RUN;
+
+            if (movementFlags & MOVEFLAG_SWIMMING)
+                movementType = (movementFlags & MOVEFLAG_BACKWARD ? MOVE_SWIM_BACK : MOVE_SWIM);
+            else if (movementFlags & MOVEFLAG_WALK_MODE)
+                movementType = MOVE_WALK;
+            else if (movementFlags & MOVEFLAG_BACKWARD)
+                movementType = MOVE_RUN_BACK;
+
+            speed = i_target->GetSpeed(movementType);
+
+            // Catch-up speed bonus if follower is too far behind
+            // FIXME: Add catchup for units with spline movement
+            if (allowCatchup)
+            {
+                float treshold = GetDynamicTargetDistance(owner, true);
+                float dist = i_target->GetDistance(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), DIST_CALC_NONE);
+
+                if (dist > (treshold * treshold))
+                    speed += (dist / speed);
+            }
+        }
+    }
+    return speed;
+}
+
+void FollowMovementGenerator::Initialize(Unit& owner)
 {
     owner.addUnitState(UNIT_STAT_FOLLOW);                   // _MOVE set in _SetTargetLocation after required checks
-    _updateSpeed(owner);
-    _setTargetLocation(owner, true);
+    HandleTargetedMovement(owner, 0);
 }
 
-template<>
-void FollowMovementGenerator<Creature>::Initialize(Creature& owner)
-{
-    owner.addUnitState(UNIT_STAT_FOLLOW);                   // _MOVE set in _SetTargetLocation after required checks
-    _updateSpeed(owner);
-    _setTargetLocation(owner, true);
-    if (owner.IsPet())
-        i_faceTarget = false;
-}
-
-template<class T>
-void FollowMovementGenerator<T>::Finalize(T& owner)
+void FollowMovementGenerator::Finalize(Unit& owner)
 {
     owner.clearUnitState(UNIT_STAT_FOLLOW | UNIT_STAT_FOLLOW_MOVE);
-    _updateSpeed(owner);
 }
 
-template<class T>
-void FollowMovementGenerator<T>::Interrupt(T& owner)
+void FollowMovementGenerator::Interrupt(Unit& owner)
 {
+    _clearUnitStateMove(owner);
     owner.InterruptMoving();
-    owner.clearUnitState(UNIT_STAT_FOLLOW_MOVE);
-    _updateSpeed(owner);
 }
 
-template<class T>
-void FollowMovementGenerator<T>::Reset(T& owner)
+void FollowMovementGenerator::Reset(Unit& owner)
 {
     Initialize(owner);
+}
+
+bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
+{
+    if (!i_path)
+        i_path = new PathFinder(&owner);
+
+    i_path->calculate(x, y, z, false);
+
+    if (i_path->getPathType() & PATHFIND_NOPATH)
+        return false;
+
+    auto& path = i_path->getPath();
+
+    return _move(owner, path);
+}
+
+bool FollowMovementGenerator::Unstuck(Unit& owner, float x, float y, float z)
+{
+    // Attempts to move permanent pet back on the same terrain with owner when out of combat
+    // Should not be available to temporary pets/charms/other units following
+    if (i_target.isValid() && !owner.isInCombat() && owner.GetOwnerGuid() == i_target->GetObjectGuid())
+    {
+        // Wait until landing on terrain
+        if (!i_target->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)))
+        {
+            owner.Relocate(x, y, z);
+            return true;
+        }
+    }
+    return false;
+}
+
+void FollowMovementGenerator::_setOrientation(Unit& owner)
+{
+    // Final facing adjustment once target is reached
+    if (i_target.isValid())
+    {
+        m_targetFaced = true;
+        const float o = (i_faceTarget ? owner.GetAngle(i_target.getTarget()) : i_target->GetOrientation());
+        owner.SetOrientation(o);
+        owner.SetFacingTo(o);
+    }
+}
+
+void FollowMovementGenerator::_setLocation(Unit& owner, bool updateDestination)
+{
+    if (!i_target.isValid() || !i_target->IsInWorld())
+        return;
+
+    if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
+        return;
+
+    float x, y, z;
+
+    // i_path can be nullptr in case this is the first call for this MMGen (via Update)
+    // Can happen for example if no path was created on MMGen-Initialize because of the owner being stunned
+    if (updateDestination || !i_path)
+    {
+        float o = (i_target->GetOrientation() + GetAngle(owner));
+        owner.GetPosition(x, y, z);
+        i_target->GetNearPoint(&owner, x, y, z, owner.GetObjectBoundingRadius(), GetDynamicTargetDistance(owner, false), o);
+
+        if (!Move(owner, x, y, z))
+            Unstuck(owner, x, y, z);
+    }
+    else    // the destination has not changed, we just need to refresh the path (usually speed change)
+        _move(owner, i_path->getPath(), owner.movespline->currentPathIdx());
+
+    i_targetReached = false;
+    i_speedChanged = false;
+    m_targetFaced = false;
+}
+
+bool FollowMovementGenerator::_move(Unit& owner, const Movement::PointsArray& path, int32 offset/* = 0*/) const
+{
+    if (path.empty())
+        return false;
+
+    _addUnitStateMove(owner);
+
+    Movement::MoveSplineInit init(owner);
+    init.MovebyPath(path, offset);
+    init.SetWalk(EnableWalking());
+    init.SetVelocity(GetVelocity(owner, true));
+    init.Launch();
+
+    return true;
 }
 
 // This factor defines how much of the bounding-radius (as measurement of size) will be used for recalculating a new following position
@@ -658,106 +773,84 @@ void FollowMovementGenerator<T>::Reset(T& owner)
 // This factor defines how much of the follow-distance will be used as sloppyness value (if the above distance is exceeded)
 #define FOLLOW_DIST_RECALCULATE_FACTOR                    1.0f
 
-template<class T>
-float FollowMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
+float FollowMovementGenerator::GetDynamicTargetDistance(Unit& owner, bool forRangeCheck) const
 {
     if (!forRangeCheck)
-        return this->i_offset + owner.GetObjectBoundingRadius() + this->i_target->GetObjectBoundingRadius();
+        return (GetOffset(owner) + owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
 
-    float allowed_dist = sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE) - this->i_target->GetObjectBoundingRadius();
-    allowed_dist += FOLLOW_RECALCULATE_FACTOR * (owner.GetObjectBoundingRadius() + this->i_target->GetObjectBoundingRadius());
-    if (this->i_offset > FOLLOW_DIST_GAP_FOR_DIST_FACTOR)
-        allowed_dist += FOLLOW_DIST_RECALCULATE_FACTOR * this->i_offset;
+    float allowed_dist = (1.5f - i_target->GetObjectBoundingRadius());
+    allowed_dist += FOLLOW_RECALCULATE_FACTOR * (owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
+    if (i_offset > FOLLOW_DIST_GAP_FOR_DIST_FACTOR)
+        allowed_dist += FOLLOW_DIST_RECALCULATE_FACTOR * i_offset;
 
     return allowed_dist;
 }
 
-// keep same code for Follow
-template<class T>
-void FollowMovementGenerator<T>::HandleTargetedMovement(T& owner, const uint32& time_diff)
+void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& time_diff)
 {
-    bool targetMoved = false;
-    this->i_recheckDistance.Update(time_diff);
-    if (this->i_recheckDistance.Passed())
-    {
-        this->i_recheckDistance.Reset(this->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE ? 50 : 100);
-        G3D::Vector3 dest = owner.movespline->FinalDestination();
-        targetMoved = this->RequiresNewPosition(owner, dest.x, dest.y, dest.z);
+    // Detect target movement and relocation
 
-        if (!targetMoved)
+    const bool targetMovingLast = m_targetMoving;
+    // If moving in any direction (not count jumping in place)
+    m_targetMoving = i_target->m_movementInfo.HasMovementFlag(MovementFlags(movementFlagsMask & ~(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)));
+    bool targetRelocation = false;
+    bool targetOrientation = false;
+
+    if (m_targetMoving && !targetMovingLast)        // Movement just started: just force update
+        targetRelocation = true;
+    else if (!m_targetMoving && targetMovingLast)   // Movement just ended: delay update further
+        i_recheckDistance.Reset(1000);
+    else                                            // Periodic dist poll: fast when moving, slow when stationary
+    {
+        i_recheckDistance.Update(time_diff);
+
+        if (i_recheckDistance.Passed())
         {
-            // This unit is in hitbox of target
-            // howewer we have to check if the target has not moved to update the orientation
-            // client will do it automatically 'visually' but it needs the new orientation to send 
-            // or it will retrieve old orientation in some cases (like stun and sap spells)
-            G3D::Vector3 currTargetPos;
-            this->i_target->GetPosition(currTargetPos.x, currTargetPos.y, currTargetPos.z);
-            if (owner.movespline->Finalized() && currTargetPos != this->m_prevTargetPos)
-            {
-                // position changed we need to adjust owner orientation to continue facing it
-                this->m_prevTargetPos = currTargetPos;
-                if (this->i_faceTarget)
-                {
-                    owner.SetInFront(this->i_target.getTarget());         // set movementinfo orientation, needed for next movement if any
-                    float angle = owner.GetAngle(this->i_target.getTarget());
-                    owner.SetFacingTo(angle);                       // inform client that orientation changed
-                }
-                else
-                {
-                    float ori = this->i_target.getTarget()->GetOrientation();
-                    owner.SetOrientation(ori);         // set movementinfo orientation, needed for next movement if any
-                    owner.SetFacingTo(ori);            // inform client that orientation changed
-                }
-            }
+            i_recheckDistance.Reset(m_targetMoving ? 250 : 500);
+
+            G3D::Vector3 currentTargetPos;
+
+            // FIXME: Add a less resource intensive follow for units with splines with static point picking
+            /*
+            if (!i_target->movespline->Finalized()) // If moved serverside via spline: check nearest destination change
+                currentTargetPos = i_target->movespline->CurrentDestination();
+            else                                    // If moved clientside or some other way
+            */
+                i_target->GetPosition(currentTargetPos.x, currentTargetPos.y, currentTargetPos.z);
+
+            targetRelocation = (currentTargetPos != i_lastTargetPos);
+            targetOrientation = (!targetRelocation && !m_targetMoving && !m_targetFaced);
+            i_lastTargetPos = currentTargetPos;
         }
     }
 
-    if (this->m_speedChanged || targetMoved)
-        this->_setTargetLocation(owner, targetMoved);
+    if ((i_speedChanged && !i_targetReached) || targetRelocation)
+    {
+        i_recheckDistance.Reset(m_targetMoving ? 250 : 500);
+        _setLocation(owner, targetRelocation);
+    }
+
+    if (!i_faceTarget && i_targetReached && targetOrientation)
+        _setOrientation(owner);
 }
 
-template<class T>
-void FollowMovementGenerator<T>::HandleMovementFailure(T& owner)
+void FollowMovementGenerator::HandleMovementFailure(Unit& owner)
 {
     _clearUnitStateMove(owner);
 }
 
-template<class T>
-void FollowMovementGenerator<T>::HandleFinalizedMovement(T& owner)
+void FollowMovementGenerator::HandleFinalizedMovement(Unit& owner)
 {
-    this->i_targetReached = true;
-    if (!owner.HasInArc(this->i_target.getTarget(), 0.01f))
-        owner.SetInFront(this->i_target.getTarget());
-    FollowMovementGenerator<T>::_reachTarget(owner);
+    i_targetReached = true;
+    _reachTarget(owner);
 }
 
 //-----------------------------------------------//
 template void TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator>::_setTargetLocation(Unit&, bool);
-template void TargetedMovementGeneratorMedium<Player, FollowMovementGenerator<Player> >::_setTargetLocation(Player&, bool);
-template void TargetedMovementGeneratorMedium<Creature, FollowMovementGenerator<Creature> >::_setTargetLocation(Creature&, bool);
+template void TargetedMovementGeneratorMedium<Unit, FollowMovementGenerator>::_setTargetLocation(Unit&, bool);
 template bool TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator>::Update(Unit&, const uint32&);
-template bool TargetedMovementGeneratorMedium<Player, FollowMovementGenerator<Player> >::Update(Player&, const uint32&);
-template bool TargetedMovementGeneratorMedium<Creature, FollowMovementGenerator<Creature> >::Update(Creature&, const uint32&);
+template bool TargetedMovementGeneratorMedium<Unit, FollowMovementGenerator>::Update(Unit&, const uint32&);
 template bool TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator>::IsReachable() const;
-template bool TargetedMovementGeneratorMedium<Player, FollowMovementGenerator<Player> >::IsReachable() const;
-template bool TargetedMovementGeneratorMedium<Creature, FollowMovementGenerator<Creature> >::IsReachable() const;
+template bool TargetedMovementGeneratorMedium<Unit, FollowMovementGenerator>::IsReachable() const;
 template bool TargetedMovementGeneratorMedium<Unit, ChaseMovementGenerator>::RequiresNewPosition(Unit& owner, float x, float y, float z) const;
-template bool TargetedMovementGeneratorMedium<Player, FollowMovementGenerator<Player> >::RequiresNewPosition(Player& owner, float x, float y, float z) const;
-template bool TargetedMovementGeneratorMedium<Creature, FollowMovementGenerator<Creature> >::RequiresNewPosition(Creature& owner, float x, float y, float z) const;
-
-template void FollowMovementGenerator<Player>::_clearUnitStateMove(Player& u);
-template void FollowMovementGenerator<Creature>::_addUnitStateMove(Creature& u);
-template void FollowMovementGenerator<Player>::Finalize(Player&);
-template void FollowMovementGenerator<Creature>::Finalize(Creature&);
-template void FollowMovementGenerator<Player>::Interrupt(Player&);
-template void FollowMovementGenerator<Creature>::Interrupt(Creature&);
-template void FollowMovementGenerator<Player>::Reset(Player&);
-template void FollowMovementGenerator<Creature>::Reset(Creature&);
-template float FollowMovementGenerator<Creature>::GetDynamicTargetDistance(Creature&, bool) const;
-template float FollowMovementGenerator<Player>::GetDynamicTargetDistance(Player&, bool) const;
-template void FollowMovementGenerator<Creature>::HandleTargetedMovement(Creature&, const uint32&);
-template void FollowMovementGenerator<Player>::HandleTargetedMovement(Player&, const uint32&);
-template void FollowMovementGenerator<Creature>::HandleFinalizedMovement(Creature&);
-template void FollowMovementGenerator<Player>::HandleFinalizedMovement(Player&);
-template void FollowMovementGenerator<Creature>::HandleMovementFailure(Creature&);
-template void FollowMovementGenerator<Player>::HandleMovementFailure(Player&);
+template bool TargetedMovementGeneratorMedium<Unit, FollowMovementGenerator>::RequiresNewPosition(Unit& owner, float x, float y, float z) const;

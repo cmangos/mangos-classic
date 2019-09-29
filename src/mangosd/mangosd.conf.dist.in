@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2019090201
+ConfVersion=2019100201
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -164,18 +164,11 @@ SD2ErrorLogFile = "SD2Errors.log"
 #        Default: 1 (Enabled)
 #                 0 (Disabled)
 #
-#
 #    DetectPosCollision
 #        Check final move position, summon position, etc for visible collision with other objects or
 #        wall (wall only if vmaps are enabled)
 #        Default: 1 (enable, requires more CPU power)
 #                 0 (disable, not so nice position selection but will require less CPU power)
-#
-#    TargetPosRecalculateRange
-#        Max distance from movement target point (+moving unit size) and targeted object (+size)
-#        after that new target movement point calculated. Max: melee attack range (5), min: contact range (0.5)
-#        More distance let have better performence, less distance let have more sensitive reaction at target move.
-#        Default: 1.5
 #
 #    mmap.enabled
 #        Enable/Disable pathfinding using mmaps
