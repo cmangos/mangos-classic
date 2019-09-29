@@ -78,6 +78,7 @@ class TimerManager
             auto data = m_timers.find(index);
             (*data).second.timer = 0; (*data).second.disabled = true;
         }
+        virtual void ReduceTimer(uint32 index, uint32 timer);
 
         virtual void UpdateTimers(const uint32 diff);
         virtual void ResetAllTimers();
@@ -107,6 +108,7 @@ class CombatActions : public TimerManager
 
         virtual void ResetTimer(uint32 index, uint32 timer) override;
         virtual void DisableTimer(uint32 index) override;
+        virtual void ReduceTimer(uint32 index, uint32 timer) override;
 
         void DisableCombatAction(uint32 index)
         {

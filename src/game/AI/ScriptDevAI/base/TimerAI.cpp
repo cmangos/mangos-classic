@@ -83,6 +83,12 @@ void TimerManager::AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, 
     m_timers.emplace(id, Timer(id, functor, timerMin, timerMax, false));
 }
 
+void TimerManager::ReduceTimer(uint32 index, uint32 timer)
+{
+    auto data = m_timers.find(index);
+    (*data).second.timer = std::min((*data).second.timer, timer);
+}
+
 void TimerManager::UpdateTimers(const uint32 diff)
 {
     for (auto& data : m_timers)
@@ -179,6 +185,15 @@ void CombatActions::DisableTimer(uint32 index)
         (*data).second.timer = 0;
         (*data).second.disabled = true;
     }
+}
+
+void CombatActions::ReduceTimer(uint32 index, uint32 timer)
+{
+    auto data = m_CombatActions.find(index);
+    if (data == m_CombatActions.end())
+        TimerManager::ReduceTimer(index, timer);
+    else
+        (*data).second.timer = std::min((*data).second.timer, timer);
 }
 
 void CombatActions::GetAIInformation(ChatHandler& reader)
