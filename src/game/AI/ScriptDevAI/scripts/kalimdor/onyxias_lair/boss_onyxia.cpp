@@ -160,6 +160,8 @@ struct boss_onyxiaAI : public CombatAI
     bool m_bHasYelledLured;
     bool m_HasSummonedFirstWave;
 
+    ObjectGuid m_fireballVictim;
+
     void Reset() override
     {
         CombatAI::Reset();
@@ -374,6 +376,14 @@ struct boss_onyxiaAI : public CombatAI
         }
     }
 
+    void OnSpellCooldownAdded(SpellEntry const* spellInfo) override
+    {
+        CombatAI::OnSpellCooldownAdded(spellInfo);
+        if (spellInfo->Id == SPELL_FIREBALL)
+            if (Unit* target = m_creature->GetMap()->GetUnit(m_fireballVictim))
+                m_creature->getThreatManager().modifyThreatPercent(target, -100);
+    }
+
     void ExecuteAction(uint32 action) override
     {
         switch (action)
@@ -471,8 +481,13 @@ struct boss_onyxiaAI : public CombatAI
             case ONYXIA_FIREBALL:
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_FIREBALL, SELECT_FLAG_PLAYER))
+                {
                     if (DoCastSpellIfCan(target, SPELL_FIREBALL) == CAST_OK)
+                    {
                         ResetCombatAction(action, urand(3000, 5000));
+                        m_fireballVictim = target->GetObjectGuid();
+                    }
+                }
                 break;
             }
             case ONYXIA_MOVEMENT:
