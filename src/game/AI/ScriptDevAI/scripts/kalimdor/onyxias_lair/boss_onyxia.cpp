@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "onyxias_lair.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -41,6 +42,10 @@ enum
     SPELL_TAILSWEEP             = 15847,
     SPELL_KNOCK_AWAY            = 19633,
     SPELL_FIREBALL              = 18392,
+
+    SPELL_DRAGON_HOVER          = 18430,
+    SPELL_SPEED_BURST           = 18391,
+    SPELL_PACIFY_SELF           = 19951,
 
     // Not much choise about these. We have to make own defintion on the direction/start-end point
     SPELL_BREATH_NORTH_TO_SOUTH = 17086,                    // 20x in "array"
@@ -106,31 +111,47 @@ static const float afSpawnLocations[3][3] =
     { -30.817f, -177.106f, -89.258f},                       // whelps
 };
 
-struct boss_onyxiaAI : public ScriptedAI
+enum OnyxiaActions
 {
-    boss_onyxiaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    ONYXIA_PHASE_2_TRANSITION,
+    ONYXIA_PHASE_3_TRANSITION,
+    ONYXIA_CHECK_IN_LAIR,
+    ONYXIA_BELLOWING_ROAR,
+    ONYXIA_FLAME_BREATH,
+    ONYXIA_CLEAVE,
+    ONYXIA_TAIL_SWEEP,
+    ONYXIA_WING_BUFFET,
+    ONYXIA_MOVEMENT,
+    ONYXIA_FIREBALL,
+    ONYXIA_ACTION_MAX,
+    ONYXIA_SUMMON_WHELPS,
+    ONYXIA_PHASE_TRANSITIONS,
+};
+
+struct boss_onyxiaAI : public CombatAI
+{
+    boss_onyxiaAI(Creature* creature) : CombatAI(creature, ONYXIA_ACTION_MAX), m_instance(static_cast<instance_onyxias_lair*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_onyxias_lair*)pCreature->GetInstanceData();
-        Reset();
+        AddTimerlessCombatAction(ONYXIA_PHASE_2_TRANSITION, true);
+        AddTimerlessCombatAction(ONYXIA_PHASE_3_TRANSITION, false);
+        AddCombatAction(ONYXIA_BELLOWING_ROAR, true);
+        AddCombatAction(ONYXIA_CHECK_IN_LAIR, 3000u);
+        AddCombatAction(ONYXIA_FLAME_BREATH, 10000, 20000);
+        AddCombatAction(ONYXIA_CLEAVE, 2000, 5000);
+        AddCombatAction(ONYXIA_TAIL_SWEEP, 15000, 20000);
+        AddCombatAction(ONYXIA_WING_BUFFET, 10000, 20000);
+        AddCombatAction(ONYXIA_FIREBALL, true);
+        AddCombatAction(ONYXIA_MOVEMENT, true);
+        AddCustomAction(ONYXIA_SUMMON_WHELPS, true, [&]() { SummonWhelps(); });
+        AddCustomAction(ONYXIA_PHASE_TRANSITIONS, true, [&]() { PhaseTransition(); });
+        m_creature->SetWalk(false); // onyxia should run when flying
     }
 
-    instance_onyxias_lair* m_pInstance;
+    instance_onyxias_lair* m_instance;
 
     uint8 m_uiPhase;
 
-    uint32 m_uiFlameBreathTimer;
-    uint32 m_uiCleaveTimer;
-    uint32 m_uiTailSweepTimer;
-    uint32 m_uiWingBuffetTimer;
-    uint32 m_uiCheckInLairTimer;
-
     uint32 m_uiMovePoint;
-    uint32 m_uiMovementTimer;
-
-    uint32 m_uiFireballTimer;
-    uint32 m_uiSummonWhelpsTimer;
-    uint32 m_uiBellowingRoarTimer;
-    uint32 m_uiWhelpTimer;
 
     uint8 m_uiSummonCount;
     uint8 m_uiWhelpsPerWave;
@@ -139,93 +160,84 @@ struct boss_onyxiaAI : public ScriptedAI
     bool m_bHasYelledLured;
     bool m_HasSummonedFirstWave;
 
-    uint32 m_uiPhaseTimer;
-
     void Reset() override
     {
+        CombatAI::Reset();
         if (!IsCombatMovement())
             SetCombatMovement(true);
 
         m_uiPhase = PHASE_START;
 
-        m_uiFlameBreathTimer = urand(10000, 20000);
-        m_uiTailSweepTimer = urand(15000, 20000);
-        m_uiCleaveTimer = urand(2000, 5000);
-        m_uiWingBuffetTimer = urand(10000, 20000);
-        m_uiCheckInLairTimer = 3000;
-
-        m_uiBellowingRoarTimer = 30000;
-
         m_uiMovePoint = POINT_ID_NORTH;                     // First point reached by the flying Onyxia
-        m_uiMovementTimer = 25000;
 
-        m_uiFireballTimer = 1000;
-        m_uiSummonWhelpsTimer = 0;
         m_uiSummonCount = 0;
         m_uiWhelpsPerWave = 20;                               // Twenty whelps on first summon, 4 - 10 on the nexts
 
         m_bHasYelledLured = false;
         m_HasSummonedFirstWave = false;
 
-        m_uiPhaseTimer = 0;
+        m_creature->SetStandState(UNIT_STAND_STATE_SLEEP);
+        m_creature->SetSheath(SHEATH_STATE_MELEE);
+        m_creature->SetLevitate(false);
+        m_creature->SetHover(false);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ONYXIA, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_ONYXIA, IN_PROGRESS);
+
+        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
     void JustReachedHome() override
     {
         // in case evade in phase 2, see comments for hack where phase 2 is set
-        m_creature->SetLevitate(false);
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ONYXIA, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_ONYXIA, FAIL);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ONYXIA, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_ONYXIA, DONE);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
-        if (pSummoned->GetEntry() == NPC_ONYXIA_WHELP)
+        if (summoned->GetEntry() == NPC_ONYXIA_WHELP)
             ++m_uiSummonCount;
     }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiMoveType, uint32 uiPointId) override
+    void SummonedMovementInform(Creature* summoned, uint32 motionType, uint32 pointId) override
     {
-        if (uiMoveType != POINT_MOTION_TYPE || uiPointId != 1 || !m_creature->getVictim())
+        if (motionType != POINT_MOTION_TYPE || pointId != 1 || !m_creature->getVictim())
             return;
 
-        pSummoned->SetInCombatWithZone();
+        summoned->SetInCombatWithZone();
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(SAY_KILL, m_creature);
     }
 
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spellInfo) override
     {
-        if (pSpell->Id == SPELL_BREATH_EAST_TO_WEST ||
-                pSpell->Id == SPELL_BREATH_WEST_TO_EAST ||
-                pSpell->Id == SPELL_BREATH_SE_TO_NW ||
-                pSpell->Id == SPELL_BREATH_NW_TO_SE ||
-                pSpell->Id == SPELL_BREATH_SW_TO_NE ||
-                pSpell->Id == SPELL_BREATH_NE_TO_SW ||
-                pSpell->Id == SPELL_BREATH_SOUTH_TO_NORTH ||
-                pSpell->Id == SPELL_BREATH_NORTH_TO_SOUTH)
+        if (spellInfo->Id == SPELL_BREATH_EAST_TO_WEST ||
+                spellInfo->Id == SPELL_BREATH_WEST_TO_EAST ||
+                spellInfo->Id == SPELL_BREATH_SE_TO_NW ||
+                spellInfo->Id == SPELL_BREATH_NW_TO_SE ||
+                spellInfo->Id == SPELL_BREATH_SW_TO_NE ||
+                spellInfo->Id == SPELL_BREATH_NE_TO_SW ||
+                spellInfo->Id == SPELL_BREATH_SOUTH_TO_NORTH ||
+                spellInfo->Id == SPELL_BREATH_NORTH_TO_SOUTH)
         {
             // This was sent with SendMonsterMove - which resulted in better speed than now
             m_creature->GetMotionMaster()->MovePoint(m_uiMovePoint, aMoveData[m_uiMovePoint].fX, aMoveData[m_uiMovePoint].fY, aMoveData[m_uiMovePoint].fZ);
@@ -233,43 +245,53 @@ struct boss_onyxiaAI : public ScriptedAI
         }
     }
 
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+    void MovementInform(uint32 motionType, uint32 pointId) override
     {
-        if (uiMoveType != POINT_MOTION_TYPE || !m_pInstance)
+        if (motionType != POINT_MOTION_TYPE || !m_instance)
             return;
 
-        switch (uiPointId)
+        switch (pointId)
         {
             case POINT_ID_IN_AIR:
                 // sort of a hack, it is unclear how this really work but the values are valid
-                m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
-                m_creature->SetLevitate(true);
-                m_uiPhaseTimer = 1000;                          // Movement to Initial North Position is delayed
+                ResetTimer(ONYXIA_PHASE_TRANSITIONS, 1000);                          // Movement to Initial North Position is delayed
                 return;
             case POINT_ID_LAND:
                 // undo flying
                 m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
                 m_creature->SetLevitate(false);
+                m_creature->SetHover(false);
+                m_creature->SetCanFly(false);
                 m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
-                m_uiPhaseTimer = 500;                           // Start PHASE_END shortly delayed
+                m_creature->RemoveAurasDueToSpell(SPELL_PACIFY_SELF);
+                ResetTimer(ONYXIA_PHASE_TRANSITIONS, 500);                           // Start PHASE_END shortly delayed
                 return;
             case POINT_ID_LIFTOFF:
-                m_uiPhaseTimer = 500;                           // Start Flying shortly delayed
+                ResetTimer(ONYXIA_PHASE_TRANSITIONS, 500);                           // Start Flying shortly delayed
                 m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
+                m_creature->SetLevitate(true);
+                m_creature->SetHover(true);
                 break;
             case POINT_ID_INIT_NORTH:                           // Start PHASE_BREATH
                 m_uiPhase = PHASE_BREATH;
+                m_creature->CastSpell(nullptr, SPELL_DRAGON_HOVER, TRIGGERED_OLD_TRIGGERED);
+                m_creature->CastSpell(nullptr, SPELL_PACIFY_SELF, TRIGGERED_OLD_TRIGGERED);
+                SetCombatScriptStatus(false);
+                HandlePhaseTransition();
+                break;
+            default:
+                m_creature->CastSpell(nullptr, SPELL_DRAGON_HOVER, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
 
-        if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_ONYXIA_TRIGGER))
+        if (Creature* pTrigger = m_instance->GetSingleCreatureFromStorage(NPC_ONYXIA_TRIGGER))
             m_creature->SetFacingToObject(pTrigger);
     }
 
-    void AttackStart(Unit* pWho) override
+    void AttackStart(Unit* who) override
     {
         if (m_uiPhase == PHASE_START || m_uiPhase == PHASE_END)
-            ScriptedAI::AttackStart(pWho);
+            ScriptedAI::AttackStart(who);
     }
 
     // Onyxian Whelps summoning during phase 2
@@ -277,7 +299,7 @@ struct boss_onyxiaAI : public ScriptedAI
     {
         if (m_uiSummonCount >= m_uiWhelpsPerWave)
         {
-            m_uiSummonWhelpsTimer = 90 * IN_MILLISECONDS - m_uiWhelpsPerWave * (m_HasSummonedFirstWave ? 3000 : 1750); // Whelps waves are summoned every 90 secs but we need to retain the average time used to summon the current wave
+            ResetTimer(ONYXIA_SUMMON_WHELPS, 90 * IN_MILLISECONDS - m_uiWhelpsPerWave * (m_HasSummonedFirstWave ? 3000 : 1750));
             m_HasSummonedFirstWave = true;
             m_uiWhelpsPerWave = urand(4, 10);
             m_uiSummonCount = 0;
@@ -293,206 +315,204 @@ struct boss_onyxiaAI : public ScriptedAI
                     pWhelp->AI()->AttackStart(pTarget);
             }
         }
-        m_uiSummonWhelpsTimer = m_HasSummonedFirstWave ? urand(2000, 4000) : urand(1000, 2500);
+        ResetTimer(ONYXIA_SUMMON_WHELPS, m_HasSummonedFirstWave ? urand(2000, 4000) : urand(1000, 2500));
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void PhaseTransition()
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Whelps summoning timer, outside encounter phase switch because the summoning spans across several sub-parts of phase 2
-        if (m_uiSummonWhelpsTimer)
-        {
-            if (m_uiSummonWhelpsTimer < uiDiff)
-            {
-                SummonWhelps();
-                // no update of timer: handled in SummonWhelps()
-            }
-            else
-            {
-                m_uiSummonWhelpsTimer -= uiDiff;
-                if (m_uiSummonWhelpsTimer == 0)         // check needed for the rare but possible case where (m_uiSummonWhelpsTimer - uiDiff == 0)
-                    SummonWhelps();
-            }
-        }
-
         switch (m_uiPhase)
         {
-            case PHASE_END:
-                if (m_uiBellowingRoarTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_BELLOWINGROAR) == CAST_OK)
-                        m_uiBellowingRoarTimer = urand(15000, 45000);
-                }
-                else
-                    m_uiBellowingRoarTimer -= uiDiff;
-            // no break, phase 3 will use same abilities as in 1
-            case PHASE_START:
-            {
-                if (m_uiFlameBreathTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLAMEBREATH) == CAST_OK)
-                        m_uiFlameBreathTimer = urand(10000, 20000);
-                }
-                else
-                    m_uiFlameBreathTimer -= uiDiff;
-
-                if (m_uiTailSweepTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_TAILSWEEP) == CAST_OK)
-                        m_uiTailSweepTimer = urand(15000, 20000);
-                }
-                else
-                    m_uiTailSweepTimer -= uiDiff;
-
-                if (m_uiCleaveTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-                        m_uiCleaveTimer = urand(2000, 5000);
-                }
-                else
-                    m_uiCleaveTimer -= uiDiff;
-
-                if (m_uiWingBuffetTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_WINGBUFFET) == CAST_OK)
-                        m_uiWingBuffetTimer = urand(15000, 30000);
-                }
-                else
-                    m_uiWingBuffetTimer -= uiDiff;
-
-                if (m_uiCheckInLairTimer < uiDiff)
-                {
-                    if (m_pInstance)
-                    {
-                        Creature* pOnyTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_ONYXIA_TRIGGER);
-                        if (pOnyTrigger && !m_creature->IsWithinDistInMap(pOnyTrigger, 90.0f, false))
-                        {
-                            if (!m_bHasYelledLured)
-                            {
-                                m_bHasYelledLured = true;
-                                DoScriptText(SAY_KITE, m_creature);
-                            }
-                            DoCastSpellIfCan(m_creature, SPELL_BREATH_ENTRANCE);
-                        }
-                        else
-                            m_bHasYelledLured = false;
-                    }
-                    m_uiCheckInLairTimer = 3000;
-                }
-                else
-                    m_uiCheckInLairTimer -= uiDiff;
-
-                if (m_uiPhase == PHASE_START && m_creature->GetHealthPercent() < 65.0f)
-                {
-                    m_uiPhase = PHASE_TO_LIFTOFF;
-                    DoScriptText(SAY_PHASE_2_TRANS, m_creature);
-                    SetCombatMovement(false);
-                    m_creature->GetMotionMaster()->MoveIdle();
-                    m_creature->SetTarget(nullptr);
-
-                    float fGroundZ = m_creature->GetMap()->GetHeight(aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, aMoveData[POINT_ID_SOUTH].fZ);
-                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFTOFF, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, fGroundZ);
-                    return;
-                }
-
-                DoMeleeAttackIfReady();
+            case PHASE_TO_LIFTOFF:
+                m_uiPhase = PHASE_BREATH_PRE;
+                // Initial Onyxian Whelps spawn
+                ResetTimer(ONYXIA_SUMMON_WHELPS, 3000);
+                if (m_instance)
+                    m_instance->SetData(TYPE_ONYXIA, DATA_LIFTOFF);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_IN_AIR, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, aMoveData[POINT_ID_SOUTH].fZ);
                 break;
-            }
+            case PHASE_BREATH_PRE:
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_INIT_NORTH, aMoveData[POINT_ID_NORTH].fX, aMoveData[POINT_ID_NORTH].fY, aMoveData[POINT_ID_NORTH].fZ);
+                break;
+            case PHASE_BREATH_POST:
+                m_uiPhase = PHASE_END;
+                m_creature->SetTarget(m_creature->getVictim());
+                SetCombatMovement(true, true);
+                SetMeleeEnabled(true);
+                SetCombatScriptStatus(false);
+                HandlePhaseTransition();
+                break;
+        }
+    }
+
+    void HandlePhaseTransition()
+    {
+        switch (m_uiPhase)
+        {
             case PHASE_BREATH:
             {
-                if (m_creature->GetHealthPercent() < 40.0f)
-                {
-                    m_uiPhase = PHASE_BREATH_POST;
-                    DoScriptText(SAY_PHASE_3_TRANS, m_creature);
-                    m_uiSummonWhelpsTimer = 0;              // End of Onyxian Whelps summoning
-
-                    float fGroundZ = m_creature->GetMap()->GetHeight(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-                    m_creature->GetMotionMaster()->MovePointTOL(POINT_ID_LAND, m_creature->GetPositionX(), m_creature->GetPositionY(), fGroundZ, false);
-                    return;
-                }
-
-                if (m_uiMovementTimer < uiDiff)
-                {
-                    // 3 possible actions
-                    switch (urand(0, 2))
-                    {
-                        case 0:                             // breath
-                            DoScriptText(EMOTE_BREATH, m_creature);
-                            DoCastSpellIfCan(m_creature, aMoveData[m_uiMovePoint].uiSpellId, CAST_INTERRUPT_PREVIOUS);
-                            m_uiMovePoint += NUM_MOVE_POINT / 2;
-                            m_uiMovePoint %= NUM_MOVE_POINT;
-                            m_uiMovementTimer = 25000;
-                            return;
-                        case 1:                             // a point on the left side
-                        {
-                            // C++ is stupid, so add -1 with +7
-                            m_uiMovePoint += NUM_MOVE_POINT - 1;
-                            m_uiMovePoint %= NUM_MOVE_POINT;
-                            break;
-                        }
-                        case 2:                             // a point on the right side
-                            m_uiMovePoint = (m_uiMovePoint + 1) % NUM_MOVE_POINT;
-                            break;
-                    }
-
-                    m_uiMovementTimer = urand(15000, 25000);
-                    m_creature->GetMotionMaster()->MovePoint(m_uiMovePoint, aMoveData[m_uiMovePoint].fX, aMoveData[m_uiMovePoint].fY, aMoveData[m_uiMovePoint].fZ);
-                }
-                else
-                    m_uiMovementTimer -= uiDiff;
-
-                if (m_uiFireballTimer < uiDiff)
-                {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    {
-                        if (DoCastSpellIfCan(pTarget, SPELL_FIREBALL) == CAST_OK)
-                            m_uiFireballTimer = urand(3000, 5000);
-                    }
-                }
-                else
-                    m_uiFireballTimer -= uiDiff;            // engulfingflames is supposed to be activated by a fireball but haven't come by
-
+                ResetCombatAction(ONYXIA_FIREBALL, 0);
+                ResetCombatAction(ONYXIA_MOVEMENT, 25000);
+                DisableCombatAction(ONYXIA_FLAME_BREATH);
+                DisableCombatAction(ONYXIA_CLEAVE);
+                DisableCombatAction(ONYXIA_TAIL_SWEEP);
+                DisableCombatAction(ONYXIA_WING_BUFFET);
+                DisableCombatAction(ONYXIA_CHECK_IN_LAIR);
+                SetActionReadyStatus(ONYXIA_PHASE_3_TRANSITION, true);
                 break;
             }
-            default:                                        // Phase-switching phases
-                if (!m_uiPhaseTimer)
-                    break;
-                if (m_uiPhaseTimer <= uiDiff)
-                {
-                    switch (m_uiPhase)
-                    {
-                        case PHASE_TO_LIFTOFF:
-                            m_uiPhase = PHASE_BREATH_PRE;
-                            // Initial Onyxian Whelps spawn
-                            m_uiSummonWhelpsTimer = 3000;
-                            if (m_pInstance)
-                                m_pInstance->SetData(TYPE_ONYXIA, DATA_LIFTOFF);
-                            m_creature->GetMotionMaster()->MovePointTOL(POINT_ID_IN_AIR, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, aMoveData[POINT_ID_SOUTH].fZ, true);
-                            break;
-                        case PHASE_BREATH_PRE:
-                            m_creature->GetMotionMaster()->MovePoint(POINT_ID_INIT_NORTH, aMoveData[POINT_ID_NORTH].fX, aMoveData[POINT_ID_NORTH].fY, aMoveData[POINT_ID_NORTH].fZ);
-                            break;
-                        case PHASE_BREATH_POST:
-                            m_uiPhase = PHASE_END;
-                            m_creature->SetTarget(m_creature->getVictim());
-                            SetCombatMovement(true, true);
-                            DoCastSpellIfCan(m_creature, SPELL_BELLOWINGROAR);
-                            break;
-                    }
-                    m_uiPhaseTimer = 0;
-                }
-                else
-                    m_uiPhaseTimer -= uiDiff;
+            case PHASE_END:
+            {
+                DisableCombatAction(ONYXIA_FIREBALL);
+                ResetCombatAction(ONYXIA_BELLOWING_ROAR, 0);
+                ResetCombatAction(ONYXIA_FLAME_BREATH, urand(10000, 20000));
+                ResetCombatAction(ONYXIA_CLEAVE, urand(2000, 5000));
+                ResetCombatAction(ONYXIA_TAIL_SWEEP, urand(15000, 20000));
+                ResetCombatAction(ONYXIA_WING_BUFFET, urand(10000, 20000));
+                ResetCombatAction(ONYXIA_CHECK_IN_LAIR, 3000);
                 break;
+            }
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case ONYXIA_PHASE_2_TRANSITION:
+            {
+                if (m_creature->GetHealthPercent() > 65.0f)
+                    return;
+
+                m_uiPhase = PHASE_TO_LIFTOFF;
+                DoScriptText(SAY_PHASE_2_TRANS, m_creature);
+                SetCombatMovement(false);
+                SetMeleeEnabled(false);
+                m_creature->SetTarget(nullptr);
+                SetCombatScriptStatus(true);
+
+                float fGroundZ = m_creature->GetMap()->GetHeight(aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, aMoveData[POINT_ID_SOUTH].fZ);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFTOFF, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, fGroundZ);
+                SetActionReadyStatus(action, false);
+                break;
+            }
+            case ONYXIA_PHASE_3_TRANSITION:
+            {
+                if (m_creature->GetHealthPercent() > 40.0f)
+                    return;
+
+                m_uiPhase = PHASE_BREATH_POST;
+                DoScriptText(SAY_PHASE_3_TRANS, m_creature);
+                DisableTimer(ONYXIA_SUMMON_WHELPS);
+
+                SetCombatScriptStatus(true);
+                m_creature->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
+                float fGroundZ = m_creature->GetMap()->GetHeight(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+                m_creature->GetMotionMaster()->MovePointTOL(POINT_ID_LAND, m_creature->GetPositionX(), m_creature->GetPositionY(), fGroundZ, false);
+                SetActionReadyStatus(action, false);
+                break;
+            }
+            case ONYXIA_CHECK_IN_LAIR:
+            {
+                if (m_creature->IsNonMeleeSpellCasted(false))
+                    return;
+                if (m_instance)
+                {
+                    Creature* onyxiaTrigger = m_instance->GetSingleCreatureFromStorage(NPC_ONYXIA_TRIGGER);
+                    if (onyxiaTrigger && !m_creature->IsWithinDistInMap(onyxiaTrigger, 90.0f, false))
+                    {
+                        if (!m_bHasYelledLured)
+                        {
+                            m_bHasYelledLured = true;
+                            DoScriptText(SAY_KITE, m_creature);
+                        }
+                        DoCastSpellIfCan(nullptr, SPELL_BREATH_ENTRANCE);
+                    }
+                    else
+                        m_bHasYelledLured = false;
+                }
+                ResetCombatAction(action, 3000);
+                break;
+            }
+            case ONYXIA_SUMMON_WHELPS:
+            {
+                SummonWhelps();
+                break;
+            }
+            case ONYXIA_BELLOWING_ROAR:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_BELLOWINGROAR) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 45000));
+                break;
+            }
+            case ONYXIA_FLAME_BREATH:
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLAMEBREATH) == CAST_OK)
+                    ResetCombatAction(action, urand(10000, 20000));
+                break;
+            }
+            case ONYXIA_CLEAVE:
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    ResetCombatAction(action, urand(2000, 5000));
+                break;
+            }
+            case ONYXIA_TAIL_SWEEP:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_TAILSWEEP) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 20000));
+                break;
+            }
+            case ONYXIA_WING_BUFFET:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_WINGBUFFET) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 30000));
+                break;
+            }
+            case ONYXIA_FIREBALL:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_FIREBALL, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_FIREBALL) == CAST_OK)
+                        ResetCombatAction(action, urand(3000, 5000));
+                break;
+            }
+            case ONYXIA_MOVEMENT:
+            {
+                if (m_creature->IsNonMeleeSpellCasted(false))
+                    return;
+                // 3 possible actions
+                switch (urand(0, 2))
+                {
+                    case 0:                             // breath
+                        DoScriptText(EMOTE_BREATH, m_creature);
+                        DoCastSpellIfCan(m_creature, aMoveData[m_uiMovePoint].uiSpellId, CAST_INTERRUPT_PREVIOUS);
+                        m_uiMovePoint += NUM_MOVE_POINT / 2;
+                        m_uiMovePoint %= NUM_MOVE_POINT;
+                        ResetCombatAction(action, 25000);
+                        return;
+                    case 1:                             // a point on the left side
+                    {
+                        // C++ is stupid, so add -1 with +7
+                        m_uiMovePoint += NUM_MOVE_POINT - 1;
+                        m_uiMovePoint %= NUM_MOVE_POINT;
+                        break;
+                    }
+                    case 2:                             // a point on the right side
+                        m_uiMovePoint = (m_uiMovePoint + 1) % NUM_MOVE_POINT;
+                        break;
+                }
+
+                ResetCombatAction(action, urand(15000, 25000));
+                m_creature->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
+                m_creature->GetMotionMaster()->MovePoint(m_uiMovePoint, aMoveData[m_uiMovePoint].fX, aMoveData[m_uiMovePoint].fY, aMoveData[m_uiMovePoint].fZ);
+                break;
+            }
         }
     }
 };
 
-UnitAI* GetAI_boss_onyxia(Creature* pCreature)
+UnitAI* GetAI_boss_onyxia(Creature* creature)
 {
-    return new boss_onyxiaAI(pCreature);
+    return new boss_onyxiaAI(creature);
 }
 
 void AddSC_boss_onyxia()
