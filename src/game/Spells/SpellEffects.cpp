@@ -4981,9 +4981,10 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
             // Specific case for Darkmoon Faire Cannon (this is probably a hint that our logic about GO use / activation is not accurate)
             switch (m_spellInfo->Id)
             {
-            case 24731:
-                gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
-                return;
+                case 17731:         // Onyxia - Eruption
+                case 24731:
+                    gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
+                    return;
             }
 
             static ScriptInfo activateCommand = generateActivateCommand();
