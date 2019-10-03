@@ -34,11 +34,14 @@ enum
 
     SPELL_POSSESS_VISUAL        = 23014,                    // visual effect and increase the damage taken
     SPELL_DESTROY_EGG           = 19873,
+    SPELL_POSSESS               = 19832,                    // actual possess spell
 
     SPELL_CLEAVE                = 19632,
     SPELL_WARSTOMP              = 24375,
     SPELL_FIREBALL_VOLLEY       = 22425,
     SPELL_CONFLAGRATION         = 23023,
+
+    SPELL_DOUBLE_ATTACK         = 18943,
 };
 
 struct boss_razorgoreAI : public ScriptedAI
@@ -66,6 +69,8 @@ struct boss_razorgoreAI : public ScriptedAI
         m_uiWarStompTimer       = 30000;
         m_uiConflagrationTimer  = urand(10000, 15000);
         m_uiFireballVolleyTimer = urand(15000, 20000);
+
+        DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
     }
 
     void DamageTaken(Unit* /*doneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
