@@ -336,11 +336,8 @@ void instance_blackwing_lair::SetData64(uint32 uiData, uint64 uiGuid)
             }
 
             // Break mind control and set max health
-            if (Creature* pRazorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
-            {
-                pRazorgore->RemoveAllAuras();
-                pRazorgore->CastSpell(pRazorgore, SPELL_WARMING_FLAMES, TRIGGERED_OLD_TRIGGERED);
-            }
+			if (Creature* razorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
+				razorgore->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, razorgore, razorgore);
 
             // All defenders evade and despawn
             for (GuidList::const_iterator itr = m_lDefendersGuids.begin(); itr != m_lDefendersGuids.end(); ++itr)
