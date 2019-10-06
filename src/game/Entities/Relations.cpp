@@ -1108,12 +1108,24 @@ bool Unit::CanAssistSpell(Unit const* target, SpellEntry const* spellInfo) const
 /// @note Relations API Tier 3
 ///
 /// This function is not intented to have client-side counterpart by original design.
-/// It utilizes CanAttack with a small exclusion for Feign-Death targets and a hostile-only check.
 /// Typically used in AIs in MoveInLineOfSight
 /////////////////////////////////////////////////
 bool Unit::CanAttackOnSight(Unit const* target) const
 {
-    return CanAttack(target) && !target->IsFeigningDeathSuccessfully() && target->GetEvade() != EVADE_HOME && IsEnemy(target);
+    // Do not aggro on a unit which is moving home at the moment
+    if (target->GetEvade() == EVADE_HOME)
+        return false;
+
+    // Do not aggro while a successful feign death is active
+    if (target->IsFeigningDeathSuccessfully())
+        return false;
+
+    // Pets in disabled state (e.g. when player is mounted) do not draw aggro on sight
+    // TODO: Fix for temporary pets and charms
+    if (target->GetTypeId() == TYPEID_UNIT && static_cast<Creature const*>(target)->IsPet() && static_cast<Pet const*>(target)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+        return false;
+
+    return (CanAttack(target) && IsEnemy(target));
 }
 
 /////////////////////////////////////////////////
