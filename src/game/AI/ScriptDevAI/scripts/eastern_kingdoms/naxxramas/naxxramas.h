@@ -41,6 +41,11 @@ enum
     SAY_ZELI_TAUNT1             = -1533059,
     SAY_ZELI_TAUNT2             = -1533060,
     SAY_ZELI_TAUNT3             = -1533061,             // NYI - requires additiona research
+    // Grand Widow Faerlina intro
+    SAY_FAERLINA_INTRO          = -1533009,
+    FOLLOWERS_STAND             = 1,
+    FOLLOWERS_AURA              = 2,
+    FOLLOWERS_KNEEL             = 3,
 
     TYPE_ANUB_REKHAN            = 0,
     TYPE_FAERLINA               = 1,
@@ -66,6 +71,8 @@ enum
 
     NPC_ANUB_REKHAN             = 15956,
     NPC_FAERLINA                = 15953,
+    NPC_NAXXRAMAS_CULTIST       = 15980,
+    NPC_NAXXRAMAS_ACOLYTE       = 15981,
     NPC_CORPSE_SCARAB           = 16698,
 
     NPC_ZOMBIE_CHOW             = 16360,
@@ -171,8 +178,11 @@ enum
     AREATRIGGER_GOTHIK          = 4116,
     AREATRIGGER_THADDIUS_DOOR   = 4113,
     AREATRIGGER_FROSTWYRM_TELE  = 4156,
+    AREATRIGGER_FAERLINA_INTRO  = 4115,
 
     EVENT_ID_DECIMATE           = 10495,
+
+    SPELL_DARK_CHANNELING       = 21157   
 };
 
 struct GothTrigger
@@ -199,7 +209,7 @@ static const SpawnLocation aLivingPoisonPositions[6] =
     {3157.736f, -3164.859f, 293.2874f, 4.244928f},
 };
 
-class instance_naxxramas : public ScriptedInstance
+class instance_naxxramas : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_naxxramas(Map* pMap);
@@ -244,6 +254,8 @@ class instance_naxxramas : public ScriptedInstance
         // Gluth
         void HandleDecimateEvent();
 
+        bool DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger);
+
     protected:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
@@ -251,6 +263,7 @@ class instance_naxxramas : public ScriptedInstance
         GuidList m_lThadTeslaCoilList;
         GuidList m_lGothTriggerList;
         GuidList m_lZombieChowList;
+        GuidList m_lFaerlinaFollowersList;
 
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
@@ -265,7 +278,9 @@ class instance_naxxramas : public ScriptedInstance
         uint32 m_uiLivingPoisonTimer;
         uint32 m_uiScreamsTimer;
 
-        DialogueHelper m_dialogueHelper;
+        bool isFaerlinaIntroDone;
+
+        void JustDidDialogueStep(int32 entry) override;
 };
 
 #endif

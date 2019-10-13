@@ -28,7 +28,6 @@ EndScriptData
 
 enum
 {
-    SAY_GREET                   = -1533009,
     SAY_AGGRO_1                 = -1533010,
     SAY_ENRAGE_1                = -1533011,
     SAY_ENRAGE_2                = -1533012,
@@ -52,7 +51,6 @@ struct boss_faerlinaAI : public ScriptedAI
     boss_faerlinaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bHasTaunted = false;
         Reset();
     }
 
@@ -61,7 +59,6 @@ struct boss_faerlinaAI : public ScriptedAI
     uint32 m_uiPoisonBoltVolleyTimer;
     uint32 m_uiRainOfFireTimer;
     uint32 m_uiEnrageTimer;
-    bool   m_bHasTaunted;
 
     void Reset() override
     {
@@ -77,17 +74,6 @@ struct boss_faerlinaAI : public ScriptedAI
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_FAERLINA, IN_PROGRESS);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 80.0f) &&  m_creature->IsWithinLOSInMap(pWho))
-        {
-            DoScriptText(SAY_GREET, m_creature);
-            m_bHasTaunted = true;
-        }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
