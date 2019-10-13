@@ -242,7 +242,7 @@ void UnitAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=false*/)
 
     if (stopOrStartMovement && m_unit->getVictim())     // Only change current movement while in combat
     {
-        if (!m_unit->IsIncapacitated())
+        if (!m_unit->IsCrowdControlled())
         {
             if (enable)
                 DoStartMovement(m_unit->getVictim());
@@ -632,7 +632,7 @@ void UnitAI::DoFlee()
         return;
 
     // now we can call the fear method
-    m_unit->SetFeared(true, victim->GetObjectGuid(), 0, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
+    m_unit->SetInPanic(sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
 
     // check if fear method succeed
     if (!m_unit->isFeared() && !m_unit->hasUnitState(UNIT_STAT_FLEEING))

@@ -43,7 +43,7 @@ namespace AIRegistry
         (new CreatureAIFactory<PossessedAI>("PossessedAI"))->RegisterSelf();
         (new CreatureAIFactory<CritterAI>("CritterAI"))->RegisterSelf();
 
-        (new MovementGeneratorFactory<RandomMovementGenerator<Creature> >(RANDOM_MOTION_TYPE))->RegisterSelf();
+        (new MovementGeneratorFactory<WanderMovementGenerator>(RANDOM_MOTION_TYPE))->RegisterSelf();
         (new MovementGeneratorFactory<WaypointMovementGenerator<Creature> >(WAYPOINT_MOTION_TYPE))->RegisterSelf();
     }
 }

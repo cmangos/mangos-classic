@@ -331,7 +331,7 @@ void PetAI::UpdateAI(const uint32 diff)
         else if (!m_unit->hasUnitState(UNIT_STAT_MOVING))
             AttackStart(victim);
     }
-    else if (!owner->IsIncapacitated())
+    else if (!owner->IsCrowdControlled())
     {
         CharmInfo* charmInfo = m_unit->GetCharmInfo();
 

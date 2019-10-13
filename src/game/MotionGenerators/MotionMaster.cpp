@@ -17,8 +17,6 @@
  */
 
 #include "MotionMaster.h"
-#include "ConfusedMovementGenerator.h"
-#include "FleeingMovementGenerator.h"
 #include "HomeMovementGenerator.h"
 #include "IdleMovementGenerator.h"
 #include "PointMovementGenerator.h"
@@ -243,7 +241,7 @@ void MotionMaster::MoveRandomAroundPoint(float x, float y, float z, float radius
     else
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s move random.", m_owner->GetGuidStr().c_str());
-        Mutate(new RandomMovementGenerator<Creature>(x, y, z, radius, verticalZ));
+        Mutate(new WanderMovementGenerator(x, y, z, radius, verticalZ));
     }
 }
 
@@ -278,10 +276,7 @@ void MotionMaster::MoveConfused()
 {
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s move confused", m_owner->GetGuidStr().c_str());
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-        Mutate(new ConfusedMovementGenerator<Player>());
-    else
-        Mutate(new ConfusedMovementGenerator<Creature>());
+    Mutate(new ConfusedMovementGenerator(*m_owner));
 }
 
 void MotionMaster::MoveChase(Unit* target, float dist, float angle, bool moveFurther, bool walk, bool combat)
@@ -378,22 +373,17 @@ void MotionMaster::MoveSeekAssistanceDistract(uint32 time)
     }
 }
 
-void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
+void MotionMaster::MoveFleeing(Unit* source, uint32 time)
 {
-    if (!enemy)
+    if (!source)
         return;
 
-    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s flee from %s", m_owner->GetGuidStr().c_str(), enemy->GetGuidStr().c_str());
+    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s flee from %s", m_owner->GetGuidStr().c_str(), source->GetGuidStr().c_str());
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-        Mutate(new FleeingMovementGenerator<Player>(enemy->GetObjectGuid()));
+    if (time)
+        Mutate(new PanicMovementGenerator(*source, time));
     else
-    {
-        if (time)
-            Mutate(new TimedFleeingMovementGenerator(enemy->GetObjectGuid(), time));
-        else
-            Mutate(new FleeingMovementGenerator<Creature>(enemy->GetObjectGuid()));
-    }
+        Mutate(new FleeingMovementGenerator(*source));
 }
 
 void MotionMaster::MoveWaypoint(uint32 pathId /*=0*/, uint32 source /*=0==PATH_NO_PATH*/, uint32 initialDelay /*=0*/, uint32 overwriteEntry /*=0*/)

@@ -412,12 +412,14 @@ enum UnitState
     UNIT_STAT_CHASE_MOVE      = 0x00004000,
     UNIT_STAT_FOLLOW          = 0x00008000,                 // FollowMovementGenerator active
     UNIT_STAT_FOLLOW_MOVE     = 0x00010000,
-    UNIT_STAT_FLEEING         = 0x00020000,                 // FleeMovementGenerator/TimedFleeingMovementGenerator active/onstack
+    UNIT_STAT_FLEEING         = 0x00020000,                 // FleeMovementGenerator/TimedFleeingMovementGenerator active
     UNIT_STAT_FLEEING_MOVE    = 0x00040000,
     UNIT_STAT_SEEKING_ASSISTANCE = 0x00080000,
     UNIT_STAT_CHARGING        = 0x00100000,                 // Creature will not turn and acquire new target
-    UNIT_STAT_CHANNELING      = 0x00200000,
+    UNIT_STAT_PANIC           = 0x00200000,                 // TimedFleeingMovementGenerator active
     // More room for other MMGens
+
+    UNIT_STAT_CHANNELING      = 0x00800000,
 
     // High-Level states (usually only with Creatures)
     UNIT_STAT_NO_COMBAT_MOVEMENT    = 0x01000000,           // Combat Movement for MoveChase stopped
@@ -1555,7 +1557,7 @@ class Unit : public WorldObject
         void SetCanParry(const bool flag);
         void SetCanBlock(const bool flag);
 
-        bool CanReactInCombat() const { return (isAlive() && !IsIncapacitated() && !IsEvadingHome()); }
+        bool CanReactInCombat() const { return (isAlive() && !IsCrowdControlled() && !IsEvadingHome()); }
         bool CanDodgeInCombat() const;
         bool CanDodgeInCombat(const Unit* attacker) const;
         bool CanParryInCombat() const;
@@ -2221,24 +2223,26 @@ class Unit : public WorldObject
         void InterruptMoving(bool forceSendStop = false);
 
         ///----------Various crowd control methods-----------------
-        bool IsImmobilized() const { return hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED); }
-        void SetImmobilizedState(bool apply, bool stun = false);
+        inline bool IsCrowdControlled() const { return HasFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING | UNIT_FLAG_STUNNED)); }
 
-        // These getters operate on unit flags set by IncapacitatedState and are meant for formal usage in conjunction with spell effects only
-        // For actual internal movement states use UnitState flags
-        // TODO: The UnitState thing needs to be rewriten at some point, this kind of duality is bad
-        bool IsFleeing() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING); }
-        bool IsConfused() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED); }
-        bool IsStunned() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED); }
-        bool IsIncapacitated() const { return (IsFleeing() || IsConfused() || IsStunned()); }
+        inline bool IsConfused() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED); }
+        void SetConfused(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0);
 
-        void SetFeared(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, uint32 time = 0);
-        void SetConfused(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT);
+        inline bool IsFleeing() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING); }
+        void SetFleeing(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, uint32 duration = 0);
+
+        inline bool IsStunned() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED); }
         void SetStunned(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0);
-        void SetIncapacitatedState(bool apply, uint32 state = 0, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT, uint32 time = 0);
+
+        // Panic: AI reaction script, NPC flees (e.g. at low health)
+        inline bool IsInPanic() const { return hasUnitState(UNIT_STAT_PANIC); }
+        inline void SetInPanic(uint32 duration) { SetFleeing(true, ObjectGuid(), 0, duration); }
+
+        inline bool IsImmobilizedState() const { return hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED); }
+        void SetImmobilizedState(bool apply, bool stun = false);
         ///----------End of crowd control methods----------
 
-        bool IsFeigningDeath() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29); }
+        bool IsFeigningDeath() const { return ((HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD) || IsFeigningDeathSuccessfully()) && isAlive()); }
         bool IsFeigningDeathSuccessfully() const { return hasUnitState(UNIT_STAT_FEIGN_DEATH); }
         void SetFeignDeath(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, bool dynamic = true, bool success = true);
 

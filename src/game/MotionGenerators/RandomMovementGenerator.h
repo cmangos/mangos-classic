@@ -20,31 +20,83 @@
 #define MANGOS_RANDOMMOTIONGENERATOR_H
 
 #include "MovementGenerator.h"
+#include "Entities/ObjectGuid.h"
 
-// define chance for creature to not stop after reaching a waypoint
-#define MOVEMENT_RANDOM_MMGEN_CHANCE_NO_BREAK 30
-
-template<class T>
-class RandomMovementGenerator
-    : public MovementGeneratorMedium< T, RandomMovementGenerator<T> >
+class AbstractRandomMovementGenerator : public MovementGenerator
 {
     public:
-        explicit RandomMovementGenerator(const Creature&);
-        explicit RandomMovementGenerator(float x, float y, float z, float radius, float verticalZ = 0.0f) :
-            i_nextMoveTime(0), i_x(x), i_y(y), i_z(z), i_radius(radius), i_verticalZ(verticalZ) {}
+        explicit AbstractRandomMovementGenerator(uint32 stateActive, uint32 stateMotion, int32 timeMin, int32 timeMax) :
+            i_nextMoveTimer(0), i_x(0.0f), i_y(0.0f), i_z(0.0f), i_radius(0.0f), i_verticalZ(0.0f), i_pathLength(0.0f), i_walk(true),
+            i_stateActive(stateActive), i_stateMotion(stateMotion), i_timeMin(timeMin), i_timeMax(timeMax)
+        {
+        }
 
-        void _setRandomLocation(T&);
-        void Initialize(T&);
-        void Finalize(T&);
-        void Interrupt(T&);
-        void Reset(T&);
-        bool Update(T&, const uint32&);
-        MovementGeneratorType GetMovementGeneratorType() const override { return RANDOM_MOTION_TYPE; }
-    private:
-        ShortTimeTracker i_nextMoveTime;
+        void Initialize(Unit& owner) override;
+        void Finalize(Unit& owner) override;
+        void Interrupt(Unit& owner) override;
+        void Reset(Unit& owner) override;
+        bool Update(Unit& owner, const uint32& diff) override;
+
+    protected:
+        virtual bool _getLocation(Unit& owner, float& x, float& y, float& z);
+        virtual int32 _setLocation(Unit& owner);
+
+        TimeTracker i_nextMoveTimer;
         float i_x, i_y, i_z;
         float i_radius;
         float i_verticalZ;
+        float i_pathLength;
+        bool i_walk;
+        uint32 i_stateActive, i_stateMotion;
+        int32 i_timeMin, i_timeMax;
+};
+
+class ConfusedMovementGenerator : public AbstractRandomMovementGenerator
+{
+    public:
+        explicit ConfusedMovementGenerator(Unit const& owner);
+        ConfusedMovementGenerator(float x, float y, float z);
+
+        MovementGeneratorType GetMovementGeneratorType() const override { return CONFUSED_MOTION_TYPE; }
+};
+
+class WanderMovementGenerator : public AbstractRandomMovementGenerator
+{
+    public:
+        explicit WanderMovementGenerator(Creature const& npc);
+        WanderMovementGenerator(float x, float y, float z, float radius, float verticalZ = 0.0f);
+
+        void Finalize(Unit& owner) override;
+        void Interrupt(Unit& owner) override;
+
+        MovementGeneratorType GetMovementGeneratorType() const override { return RANDOM_MOTION_TYPE; }
+};
+
+class FleeingMovementGenerator : public AbstractRandomMovementGenerator
+{
+    public:
+        explicit FleeingMovementGenerator(Unit const& source);
+
+        MovementGeneratorType GetMovementGeneratorType() const override { return FLEEING_MOTION_TYPE; }
+
+    protected:
+        bool _getLocation(Unit& owner, float& x, float& y, float& z) override;
+};
+
+class PanicMovementGenerator : public FleeingMovementGenerator
+{
+    public:
+        PanicMovementGenerator(Unit const& source, uint32 time) : FleeingMovementGenerator(source), m_fleeingTimer(time) {}
+
+        void Initialize(Unit& owner) override;
+        void Finalize(Unit& owner) override;
+        void Interrupt(Unit& owner) override;
+        bool Update(Unit& owner, const uint32& diff) override;
+
+        MovementGeneratorType GetMovementGeneratorType() const override { return TIMED_FLEEING_MOTION_TYPE; }
+
+    private:
+        TimeTracker m_fleeingTimer;
 };
 
 #endif
