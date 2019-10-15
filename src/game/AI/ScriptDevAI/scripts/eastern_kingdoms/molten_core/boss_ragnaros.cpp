@@ -168,6 +168,12 @@ struct boss_ragnarosAI : public CombatAI
         }
     }
 
+    virtual void SpellHitTarget(Unit* target, const SpellEntry* spellInfo, SpellMissInfo /*missInfo*/)
+    {
+        if (spellInfo->Id == SPELL_WRATH_OF_RAGNAROS)
+            m_creature->getThreatManager().modifyThreatPercent(target, -100);
+    }
+
     void JustSummoned(Creature* summoned) override
     {
         if (summoned->GetEntry() == NPC_SON_OF_FLAME)
