@@ -25,9 +25,11 @@
 class AbstractRandomMovementGenerator : public MovementGenerator
 {
     public:
-        explicit AbstractRandomMovementGenerator(uint32 stateActive, uint32 stateMotion, int32 timeMin, int32 timeMax) :
-            i_nextMoveTimer(0), i_x(0.0f), i_y(0.0f), i_z(0.0f), i_radius(0.0f), i_verticalZ(0.0f), i_pathLength(0.0f), i_walk(true),
-            i_stateActive(stateActive), i_stateMotion(stateMotion), i_timeMin(timeMin), i_timeMax(timeMax)
+        explicit AbstractRandomMovementGenerator(uint32 stateActive, uint32 stateMotion, uint32 delayMin, uint32 delayMax, uint32 movesMax = 1) :
+            i_x(0.0f), i_y(0.0f), i_z(0.0f), i_radius(0.0f), i_verticalZ(0.0f), i_pathLength(0.0f), i_walk(true),
+            i_nextMoveTimer(0), i_nextMoveCount(1), i_nextMoveCountMax(movesMax),
+            i_nextMoveDelayMin(delayMin), i_nextMoveDelayMax(delayMax),
+            i_stateActive(stateActive), i_stateMotion(stateMotion)
         {
         }
 
@@ -41,14 +43,15 @@ class AbstractRandomMovementGenerator : public MovementGenerator
         virtual bool _getLocation(Unit& owner, float& x, float& y, float& z);
         virtual int32 _setLocation(Unit& owner);
 
-        TimeTracker i_nextMoveTimer;
         float i_x, i_y, i_z;
         float i_radius;
         float i_verticalZ;
         float i_pathLength;
         bool i_walk;
+        ShortTimeTracker i_nextMoveTimer;
+        uint32 i_nextMoveCount, i_nextMoveCountMax;
+        uint32 i_nextMoveDelayMin, i_nextMoveDelayMax;
         uint32 i_stateActive, i_stateMotion;
-        int32 i_timeMin, i_timeMax;
 };
 
 class ConfusedMovementGenerator : public AbstractRandomMovementGenerator

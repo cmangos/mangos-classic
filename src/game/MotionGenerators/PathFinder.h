@@ -67,6 +67,7 @@ class PathFinder
         // Calculate the path from owner to given destination
         // return: true if new path was calculated, false otherwise (no change needed)
         bool calculate(float destX, float destY, float destZ, bool forceDest = false);
+        bool calculate(const Vector3& start, const Vector3& dest, bool forceDest = false);
 
         // option setters - use optional
         void setUseStrightPath(bool useStraightPath) { m_useStraightPath = useStraightPath; };
