@@ -350,9 +350,9 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
         Unit* target = currentRef->getTarget();
         MANGOS_ASSERT(target);                             // if the ref has status online the target must be there!
 
+        bool isInMelee = attacker->CanReachWithMeleeAttack(target);
         if (currentVictim) // select 1.3/1.1 better target in comparison current target
         {
-            bool isInMelee = attacker->CanReachWithMeleeAttack(target);
             // normal case: pCurrentRef is still valid and most hated
             if (currentVictim == currentRef)
             {
@@ -399,7 +399,7 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
                 break;                                  // for selecting alive targets
             }
         }
-        else                                            // select any
+        else if (!suppressRanged || isInMelee) // select any
         {
             found = true;
             break;
