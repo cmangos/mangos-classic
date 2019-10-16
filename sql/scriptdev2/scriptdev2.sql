@@ -2173,8 +2173,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 469 000 BLACKWING LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1469000','None of your kind should be here! You''ve doomed only yourselves!','8286','1','0','0','0','broodlord SAY_AGGRO'),
-('-1469001','Clever Mortals but I am not so easily lured away from my sanctum!','8287','1','0','0','0','broodlord SAY_LEASH'),
+('-1469000','None of your kind should be here!  You''ve doomed only yourselves!','8286','1','0','0','9967','broodlord SAY_AGGRO'),
+('-1469001','Clever, mortals - but I am not so easily lured away from my sanctum!','8287','1','0','0','9968','broodlord SAY_LEASH'),
 
 ('-1469002','Run! They are coming!','0','1','0','0','0','vaelastrasz blackwing tech SAY_INTRO_TECH'),
 ('-1469003','%s flinches as its skin shimmers.','0','2','0','0','0','chromaggus EMOTE_SHIMMER'),
