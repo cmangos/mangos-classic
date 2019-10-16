@@ -2205,8 +2205,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1469025','If I fall into the abyss I''ll take all of you mortals with me...','8278','1','0','0','0','razorgore SAY_RAZORGORE_DEATH'),
 
 ('-1469026','Too late, friends! Nefarius'' corruption has taken hold...I cannot...control myself.','8281','1','0','1','0','vaelastrasz SAY_LINE1'),
-('-1469027','I beg you, mortals - FLEE! Flee before I lose all sense of control! The black fire rages within my heart! I MUST- release it!','8282','1','0','1','0','vaelastrasz SAY_LINE2'),
-('-1469028','FLAME! DEATH! DESTRUCTION! Cower, mortals before the wrath of Lord...NO - I MUST fight this! Alexstrasza help me, I MUST fight it!','8283','1','0','1','0','vaelastrasz SAY_LINE3'),
+('-1469027','I beg you, mortals - FLEE! Flee before I lose all sense of control! The black fire rages within my heart! I MUST- release it! ','8282','1','0','1','0','vaelastrasz SAY_LINE2'),
+('-1469028','FLAME! DEATH! DESTRUCTION! Cower, mortals before the wrath of Lord...NO - I MUST fight this! Alexstrasza help me, I MUST fight it! ','8283','1','0','1','0','vaelastrasz SAY_LINE3'),
 ('-1469029','Nefarius'' hate has made me stronger than ever before! You should have fled while you could, mortals! The fury of Blackrock courses through my veins!','8285','1','0','0','0','vaelastrasz SAY_HALFLIFE'),
 ('-1469030','Forgive me, $N! Your death only adds to my failure!','8284','1','0','0','0','vaelastrasz SAY_KILLTARGET'),
 
