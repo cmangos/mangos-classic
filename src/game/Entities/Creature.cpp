@@ -1661,6 +1661,8 @@ void Creature::SetDeathState(DeathState s)
 
         ResetEntry(true);
 
+        ResetSpellHitCounter();
+
         SetLootRecipient(nullptr);
         if (GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_RESPAWN)
             ClearTemporaryFaction();
@@ -2978,4 +2980,19 @@ bool Creature::CanRestockPickpocketLoot() const
 void Creature::StartPickpocketRestockTimer()
 {
     m_pickpocketRestockTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(sWorld.getConfig(CONFIG_UINT32_CREATURE_PICKPOCKET_RESTOCK_DELAY) * IN_MILLISECONDS);
+}
+
+bool Creature::HasBeenHitBySpell(uint32 spellId)
+{
+    return m_hitBySpells.find(spellId) != m_hitBySpells.end();
+}
+
+void Creature::RegisterHitBySpell(uint32 spellId)
+{
+    m_hitBySpells.insert(spellId);
+}
+
+void Creature::ResetSpellHitCounter()
+{
+    m_hitBySpells.clear();
 }

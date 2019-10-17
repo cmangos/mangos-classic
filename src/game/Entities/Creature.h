@@ -862,6 +862,11 @@ class Creature : public Unit
         bool IsNoReputation() { return m_noReputation; }
         void SetNoReputation(bool state) { m_noReputation = state; }
 
+        // spell scripting persistency
+        bool HasBeenHitBySpell(uint32 spellId);
+        void RegisterHitBySpell(uint32 spellId);
+        void ResetSpellHitCounter();
+
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 
@@ -923,6 +928,9 @@ class Creature : public Unit
 
         // Script logic
         bool m_countSpawns;
+
+        // spell scripting persistency
+        std::set<uint32> m_hitBySpells;
 
     private:
         GridReference<Creature> m_gridRef;
