@@ -52,7 +52,6 @@ struct boss_firemawAI : public CombatAI
         AddCombatAction(FIREMAW_WING_BUFFET, uint32(30 * IN_MILLISECONDS));
         AddCombatAction(FIREMAW_FLAME_BUFFET, 5000u);
         AddCombatAction(FIREMAW_THRASH, uint32(6 * IN_MILLISECONDS));
-        Reset();
     }
 
     ScriptedInstance* m_instance;
