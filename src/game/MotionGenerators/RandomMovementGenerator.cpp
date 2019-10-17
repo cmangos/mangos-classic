@@ -53,15 +53,6 @@ void AbstractRandomMovementGenerator::Finalize(Unit& owner)
     // Client-controlled unit should have control restored
     if (const Player* controllingClientPlayer = owner.GetClientControlling())
         controllingClientPlayer->UpdateClientControl(&owner, true);
-    // Non-client controlled unit with an AI should have target restored (if exists)
-    else if (owner.AI() && !owner.HasFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_CONFUSED | UNIT_FLAG_FLEEING | UNIT_FLAG_STUNNED)))
-    {
-        if (Unit* victim = owner.getVictim())
-        {
-            owner.SetTarget(victim);
-            owner.AI()->HandleMovementOnAttackStart(victim);
-        }
-    }
 
     // Stop any previously dispatched splines no matter the source
     if (!owner.movespline->Finalized())
