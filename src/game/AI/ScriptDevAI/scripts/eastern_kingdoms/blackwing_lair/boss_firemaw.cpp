@@ -75,6 +75,12 @@ struct boss_firemawAI : public CombatAI
             m_instance->SetData(TYPE_FIREMAW, FAIL);
     }
 
+    void SpellHitTarget(Unit* target, const SpellEntry* spellInfo, SpellMissInfo /*missInfo*/) override
+    {
+        if (spellInfo->Id == SPELL_WING_BUFFET) // reduces threat of everyone hit
+            m_creature->getThreatManager().modifyThreatPercent(target, -50);
+    }
+
     void ExecuteAction(uint32 action) override
     {
         switch (action)
@@ -88,12 +94,7 @@ struct boss_firemawAI : public CombatAI
             case FIREMAW_WING_BUFFET:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_WING_BUFFET) == CAST_OK)
-                {
-                    if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                        m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -50);
-
                     ResetCombatAction(action, urand(30 * IN_MILLISECONDS, 35 * IN_MILLISECONDS));
-                }
                 break;
             }
             case FIREMAW_FLAME_BUFFET:
