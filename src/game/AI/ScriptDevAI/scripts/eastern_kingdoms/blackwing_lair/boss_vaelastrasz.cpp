@@ -102,13 +102,11 @@ struct boss_vaelastraszAI : public CombatAI
     ObjectGuid m_nefariusGuid;
     uint8 m_uiIntroPhase;
 
-    ObjectGuid m_playerGuid;
     uint8 m_uiSpeechNum;
 
     void Reset() override
     {
         CombatAI::Reset();
-        m_playerGuid.Clear();
 
         m_uiIntroPhase                   = 0;
         m_uiSpeechNum                    = 0;
@@ -128,9 +126,6 @@ struct boss_vaelastraszAI : public CombatAI
 
     void BeginSpeech(Player* target)
     {
-        // Stand up and begin speach
-        m_playerGuid = target->GetObjectGuid();
-
         // 10 seconds
         DoScriptText(SAY_LINE_1, m_creature);
 
@@ -270,13 +265,8 @@ struct boss_vaelastraszAI : public CombatAI
                 break;
             case 2:
                 m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
-
-                if (m_playerGuid)
-                {
-                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                        AttackStart(pPlayer);
-                }
                 m_creature->SetInCombatWithZone();
+                AttackClosestEnemy();
                 break;
         }
         if (timer)
