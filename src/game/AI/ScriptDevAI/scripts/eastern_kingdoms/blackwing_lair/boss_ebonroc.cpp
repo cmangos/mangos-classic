@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackwing_lair.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -34,102 +35,86 @@ enum
     SPELL_THRASH                = 3391,
 };
 
-struct boss_ebonrocAI : public ScriptedAI
+enum EbonrocActions
 {
-    boss_ebonrocAI(Creature* pCreature) : ScriptedAI(pCreature)
+    EBONROC_SHADOW_OF_EBONROC,
+    EBONROC_SHADOW_FLAME,
+    EBONROC_WING_BUFFET,
+    EBONROC_THRASH,
+    EBONROC_ACTION_MAX,
+};
+
+struct boss_ebonrocAI : public CombatAI
+{
+    boss_ebonrocAI(Creature* creature) : CombatAI(creature, EBONROC_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        AddCombatAction(EBONROC_SHADOW_OF_EBONROC, 45000u);
+        AddCombatAction(EBONROC_SHADOW_FLAME, uint32(18 * IN_MILLISECONDS));
+        AddCombatAction(EBONROC_WING_BUFFET, uint32(30 * IN_MILLISECONDS));
+        AddCombatAction(EBONROC_THRASH, uint32(6 * IN_MILLISECONDS));
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_uiShadowFlameTimer;
-    uint32 m_uiWingBuffetTimer;
-    uint32 m_uiThrashTimer;
-    uint32 m_uiShadowOfEbonrocTimer;
-
-    void Reset() override
+    void Aggro(Unit* /*who*/) override
     {
-        m_uiShadowFlameTimer        = 18 * IN_MILLISECONDS;
-        m_uiWingBuffetTimer         = 30 * IN_MILLISECONDS;
-        m_uiThrashTimer             = 6 * IN_MILLISECONDS;
-        m_uiShadowOfEbonrocTimer    = 45000;
+        if (m_instance)
+            m_instance->SetData(TYPE_EBONROC, IN_PROGRESS);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_EBONROC, IN_PROGRESS);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_EBONROC, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_EBONROC, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_EBONROC, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_EBONROC, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void SpellHitTarget(Unit* target, const SpellEntry* spellInfo, SpellMissInfo /*missInfo*/) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        if (spellInfo->Id == SPELL_WING_BUFFET) // reduces threat of everyone hit
+            m_creature->getThreatManager().modifyThreatPercent(target, -50);
+    }
 
-        // Shadow Flame Timer
-        if (m_uiShadowFlameTimer < uiDiff)
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_FLAME) == CAST_OK)
-                m_uiShadowFlameTimer = urand(15 * IN_MILLISECONDS, 18 * IN_MILLISECONDS);
-        }
-        else
-            m_uiShadowFlameTimer -= uiDiff;
-
-        // Wing Buffet Timer
-        if (m_uiWingBuffetTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_WING_BUFFET) == CAST_OK)
+            case EBONROC_SHADOW_OF_EBONROC:
             {
-                if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                    m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -50);
-
-                m_uiWingBuffetTimer = urand(30 * IN_MILLISECONDS, 35 * IN_MILLISECONDS);
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_OF_EBONROC) == CAST_OK)
+                    ResetCombatAction(action, urand(25 * IN_MILLISECONDS, 35 * IN_MILLISECONDS));
+                break;
+            }
+            case EBONROC_SHADOW_FLAME:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SHADOW_FLAME) == CAST_OK)
+                    ResetCombatAction(action, urand(15 * IN_MILLISECONDS, 18 * IN_MILLISECONDS));
+                break;
+            }
+            case EBONROC_WING_BUFFET:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_WING_BUFFET) == CAST_OK)
+                    ResetCombatAction(action, urand(30 * IN_MILLISECONDS, 35 * IN_MILLISECONDS));
+                break;
+            }
+            case EBONROC_THRASH:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_THRASH) == CAST_OK)
+                    ResetCombatAction(action, urand(2 * IN_MILLISECONDS, 6 * IN_MILLISECONDS));
+                break;
             }
         }
-        else
-            m_uiWingBuffetTimer -= uiDiff;
-
-        // Thrash Timer
-        if (m_uiThrashTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_THRASH) == CAST_OK)
-            {
-                m_uiThrashTimer = urand(2 * IN_MILLISECONDS, 6 * IN_MILLISECONDS);
-            }
-        }
-        else
-            m_uiThrashTimer -= uiDiff;
-
-        // Shadow of Ebonroc Timer
-        if (m_uiShadowOfEbonrocTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_OF_EBONROC) == CAST_OK)
-                m_uiShadowOfEbonrocTimer = urand(25 * IN_MILLISECONDS, 35 * IN_MILLISECONDS);
-        }
-        else
-            m_uiShadowOfEbonrocTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_ebonroc(Creature* pCreature)
+UnitAI* GetAI_boss_ebonroc(Creature* creature)
 {
-    return new boss_ebonrocAI(pCreature);
+    return new boss_ebonrocAI(creature);
 }
 
 void AddSC_boss_ebonroc()
