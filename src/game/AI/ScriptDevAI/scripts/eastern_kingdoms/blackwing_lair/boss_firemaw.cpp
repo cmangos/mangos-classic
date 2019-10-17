@@ -46,7 +46,7 @@ enum FiremawActions
 
 struct boss_firemawAI : public CombatAI
 {
-    boss_firemawAI(Creature* creature) : CombatAI(creature, FIREMAW_ACTION_MAX), m_instance(static_cast<instance_blackwing_lair*>(creature->GetInstanceData()))
+    boss_firemawAI(Creature* creature) : CombatAI(creature, FIREMAW_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         AddCombatAction(FIREMAW_SHADOW_FLAME, uint32(18 * IN_MILLISECONDS));
         AddCombatAction(FIREMAW_WING_BUFFET, uint32(30 * IN_MILLISECONDS));
