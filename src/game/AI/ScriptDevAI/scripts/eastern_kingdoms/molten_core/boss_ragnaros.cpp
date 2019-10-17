@@ -168,12 +168,6 @@ struct boss_ragnarosAI : public CombatAI
         }
     }
 
-    virtual void SpellHitTarget(Unit* target, const SpellEntry* spellInfo, SpellMissInfo /*missInfo*/)
-    {
-        if (spellInfo->Id == SPELL_WRATH_OF_RAGNAROS)
-            m_creature->getThreatManager().modifyThreatPercent(target, -100);
-    }
-
     void JustSummoned(Creature* summoned) override
     {
         if (summoned->GetEntry() == NPC_SON_OF_FLAME)
@@ -187,10 +181,12 @@ struct boss_ragnarosAI : public CombatAI
             summoned->CastSpell(summoned, SPELL_INTENSE_HEAT, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
-    void SpellHitTarget(Unit* target, const SpellEntry* spellInfo) override
+    void SpellHitTarget(Unit* target, const SpellEntry* spellInfo, SpellMissInfo /*missInfo*/) override
     {
+        if (spellInfo->Id == SPELL_WRATH_OF_RAGNAROS)
+            m_creature->getThreatManager().modifyThreatPercent(target, -100);
         // As Majordomo is now killed, the last timer (until attacking) must be handled with ragnaros script
-        if (spellInfo->Id == SPELL_ELEMENTAL_FIRE_KILL && target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == NPC_MAJORDOMO)
+        else if (spellInfo->Id == SPELL_ELEMENTAL_FIRE_KILL && target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == NPC_MAJORDOMO)
             ResetTimer(RAGNAROS_ENTER_COMBAT, 10000);
     }
 
