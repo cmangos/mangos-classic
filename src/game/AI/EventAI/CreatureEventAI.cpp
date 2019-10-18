@@ -922,7 +922,8 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             EnterEvadeMode();
             break;
         case ACTION_T_FLEE_FOR_ASSIST:
-            DoFlee();
+            if (!DoFlee())
+                return false;
             break;
         case ACTION_T_QUEST_EVENT_ALL:
             if (action.quest_event_all.useThreatList)
