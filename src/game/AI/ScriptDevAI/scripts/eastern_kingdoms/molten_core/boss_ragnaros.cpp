@@ -88,7 +88,6 @@ struct boss_ragnarosAI : public CombatAI
         AddCombatAction(RAGNAROS_LAVA_BURST, uint32(20 * IN_MILLISECONDS));
         m_creature->SetImmobilizedState(true);
         m_bHasAggroYelled = false;
-        Reset();
     }
 
     instance_molten_core* m_instance;
@@ -205,11 +204,8 @@ struct boss_ragnarosAI : public CombatAI
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             if (m_instance)
             {
-                if (Player* pPlayer = m_instance->GetPlayerInMap(true, false))
-                {
-                    m_creature->AI()->AttackStart(pPlayer);
-                    return;
-                }
+                m_creature->SetInCombatWithZone();
+                AttackClosestEnemy();
             }
         }
 
