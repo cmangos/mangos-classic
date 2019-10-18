@@ -295,7 +295,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
         if ((GetPlayer()->GetPositionZ() < height + 0.1f) && !(GetPlayer()->IsInWater()))
             GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
 
-        GetPlayer()->SetRoot(true);
+        GetPlayer()->SendMoveRoot(true);
         GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
     }
 
@@ -324,7 +324,7 @@ void WorldSession::HandleLogoutCancelOpcode(WorldPacket& /*recv_data*/)
     if (GetPlayer()->CanFreeMove())
     {
         //!we can move again
-        GetPlayer()->SetRoot(false);
+        GetPlayer()->SendMoveRoot(false);
 
         //! Stand Up
         GetPlayer()->SetStandState(UNIT_STAND_STATE_STAND);
@@ -858,8 +858,19 @@ void WorldSession::HandleFeatherFallAck(WorldPacket& recv_data)
 
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
 {
+    DEBUG_LOG("WORLD: Received opcode CMSG_FORCE_MOVE_UNROOT_ACK");
+    // Pre-Wrath: broadcast unroot
+    ObjectGuid guid;
+    recv_data >> guid;
     // no used
     recv_data.rpos(recv_data.wpos());                       // prevent warnings spam
+
+    Unit* mover = _player->GetMover();
+    if (mover && mover->GetObjectGuid() == guid && mover->m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT))
+    {
+        mover->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
+        mover->SendMoveRoot(false, true);
+    }
     /*
         ObjectGuid guid;
         recv_data >> guid;
@@ -882,8 +893,20 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 {
+    DEBUG_LOG("WORLD: Received opcode CMSG_FORCE_MOVE_ROOT_ACK");
+    // Pre-Wrath: broadcast root
+    ObjectGuid guid;
+    recv_data >> guid;
     // no used
     recv_data.rpos(recv_data.wpos());                       // prevent warnings spam
+
+    Unit* mover = _player->GetMover();
+    if (mover && mover->GetObjectGuid() == guid && !mover->m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT))
+    {
+        mover->m_movementInfo.RemoveMovementFlag(movementFlagsMask);
+        mover->m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
+        mover->SendMoveRoot(true, true);
+    }
     /*
         ObjectGuid guid;
         recv_data >> guid;

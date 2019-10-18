@@ -2809,18 +2809,6 @@ void Creature::SetHover(bool enable)
     SendMessageToSet(data, false);
 }
 
-void Creature::SetRoot(bool enable)
-{
-    if (enable)
-        m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
-    else
-        m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
-
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_ROOT : SMSG_SPLINE_MOVE_UNROOT, 9);
-    data << GetPackGUID();
-    SendMessageToSet(data, true);
-}
-
 void Creature::SetWaterWalk(bool enable)
 {
     if (enable)
