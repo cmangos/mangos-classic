@@ -2183,10 +2183,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1469005','Let the games begin!','8280','1','0','22','0','victor_nefarius SAY_GAMESBEGIN_2'),
 ('-1469006','Ah...the heroes. You are persistent, aren''t you? Your ally here attempted to match his power against mine - and paid the price. Now he shall serve me...by slaughtering you.','8279','1','0','23','0','victor_nefarius SAY_NEFARIUS_CORRUPT'),
 
-('-1469007','Well done, my minions. The mortals'' courage begins to wane! Now, let''s see how they contend with the true Lord of Blackrock Spire!','8288','6','0','0','0','nefarian SAY_AGGRO'),
+('-1469007','Well done, my minions. The mortals'' courage begins to wane! Now, let''s see how they contend with the true Lord of Blackrock Spire!!!','8288','6','0','0','0','nefarian SAY_AGGRO'),
 ('-1469008','Enough! Now you vermin shall feel the force of my birthright, the fury of the earth itself.','8289','1','0','0','0','nefarian SAY_XHEALTH'),
 ('-1469009','BURN! You wretches! BURN!','8290','6','0','0','0','nefarian SAY_SHADOWFLAME'),
-('-1469010','Impossible! Rise my minions! Serve your master once more!','8291','1','0','0','0','nefarian SAY_RAISE_SKELETONS'),
+('-1469010','Impossible! Rise my minions!  Serve your master once more!','8291','1','0','0','0','nefarian SAY_RAISE_SKELETONS'),
 ('-1469011','Worthless $N! Your friends will join you soon enough!','8293','1','0','0','0','nefarian SAY_SLAY'),
 ('-1469012','This cannot be!  I am the master here!  You mortals are nothing to my kind!  Do you hear me? Nothing!','8292','1','0','0','0','nefarian SAY_DEATH'),
 ('-1469013','Mages too? You should be more careful when you play with magic...','0','1','0','0','0','nefarian SAY_MAGE'),

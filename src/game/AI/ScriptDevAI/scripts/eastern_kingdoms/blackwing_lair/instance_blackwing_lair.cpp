@@ -502,16 +502,14 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
     {
         if (m_uiNefarianSpawnTimer <= uiDiff)
         {
-            if (Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
+            if (Creature* nefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
             {
-                if (Creature* pNefarian = pNefarius->SummonCreature(NPC_NEFARIAN, aNefarianLocs[2].m_fX, aNefarianLocs[2].m_fY, aNefarianLocs[2].m_fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0, true))
+                nefarius->SummonCreature(NPC_NEFARIAN, aNefarianLocs[2].m_fX, aNefarianLocs[2].m_fY, aNefarianLocs[2].m_fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0, true);
+                // Despawn Nefarius
+                if (!nefarius->IsDespawned() && GetData(TYPE_NEFARIAN) == SPECIAL)
                 {
-                    pNefarian->SetWalk(false);
-
-                    // see boss_onyxia (also note the removal of this in boss_nefarian)
-                    pNefarian->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
-                    pNefarian->SetLevitate(true);
-                    pNefarian->GetMotionMaster()->MoveWaypoint(0);
+                    nefarius->CastSpell(nullptr, SPELL_SHADOWBLINK_OUTRO, TRIGGERED_OLD_TRIGGERED);
+                    nefarius->ForcedDespawn(2500);
                 }
             }
             m_uiNefarianSpawnTimer = 0;
@@ -675,15 +673,6 @@ void instance_blackwing_lair::CleanupNefarianStage(bool fullCleanup)
     }
     m_lDrakonidSpawnerGuids.clear();
 
-    if (Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
-    {
-        // Despawn Nefarius if phase 2 is started
-        if (!pNefarius->IsDespawned() && GetData(TYPE_NEFARIAN) == SPECIAL)
-        {
-            pNefarius->CastSpell(pNefarius, SPELL_SHADOWBLINK_OUTRO, TRIGGERED_OLD_TRIGGERED);
-            pNefarius->ForcedDespawn(2000);
-        }
-    }
     // Stop the cleanup here if we are only moving from P1 to P2
     if (!fullCleanup)
         return;
@@ -697,11 +686,11 @@ void instance_blackwing_lair::CleanupNefarianStage(bool fullCleanup)
     }
     m_lDrakonidBonesGuids.clear();
 
-    if (Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
+    if (Creature* nefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
     {
         // Respawn Nefarius if wipe in Phase 2
-        if (pNefarius->IsDespawned())
-            pNefarius->Respawn();
+        if (nefarius->IsDespawned())
+            nefarius->Respawn();
     }
 }
 
