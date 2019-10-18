@@ -168,11 +168,11 @@ struct mob_core_ragerAI : public CombatAI
         {
             case CORE_RAGER_HEAL:
             {
-                if (m_creature->GetHealthPercent() < 50.0f)
+                if (m_creature->GetHealthPercent() > 50.0f)
                     return;
 
-                DoScriptText(EMOTE_LOW_HP, m_creature);
-                DoCastSpellIfCan(nullptr, SPELL_FULL_HEAL, CAST_TRIGGERED);
+                if (DoCastSpellIfCan(nullptr, SPELL_FULL_HEAL) == CAST_OK)
+                    DoScriptText(EMOTE_LOW_HP, m_creature);
                 break;
             }
             case CORE_RAGER_MANGLE:
