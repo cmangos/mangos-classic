@@ -99,7 +99,7 @@ class PanicMovementGenerator : public FleeingMovementGenerator
         MovementGeneratorType GetMovementGeneratorType() const override { return TIMED_FLEEING_MOTION_TYPE; }
 
     private:
-        TimeTracker m_fleeingTimer;
+        ShortTimeTracker m_fleeingTimer;
 };
 
 #endif
