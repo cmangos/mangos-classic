@@ -47,53 +47,54 @@ enum
 
 enum RazorgoreActions
 {
-	RAZORGORE_CONFLAGRATION,
-	RAZORGORE_FIREBALL_VOLLEY,
-	RAZORGORE_WAR_STOMP,
-	RAZORGORE_CLEAVE,
-	RAZORGORE_ACTION_MAX,
+    RAZORGORE_CONFLAGRATION,
+    RAZORGORE_FIREBALL_VOLLEY,
+    RAZORGORE_WAR_STOMP,
+    RAZORGORE_CLEAVE,
+    RAZORGORE_ACTION_MAX,
 };
 
 struct boss_razorgoreAI : public CombatAI
 {
     boss_razorgoreAI(Creature* creature) : CombatAI(creature, RAZORGORE_ACTION_MAX), m_instance(static_cast<instance_blackwing_lair*>(creature->GetInstanceData()))
     {
-		AddCombatAction(RAZORGORE_CONFLAGRATION, 10000, 15000);
-		AddCombatAction(RAZORGORE_FIREBALL_VOLLEY, 15000, 20000);
-		AddCombatAction(RAZORGORE_WAR_STOMP, 30000u);
-		AddCombatAction(RAZORGORE_CLEAVE, 4000, 8000);
-		SetDeathPrevention(true);
+        AddCombatAction(RAZORGORE_CONFLAGRATION, 10000, 15000);
+        AddCombatAction(RAZORGORE_FIREBALL_VOLLEY, 15000, 20000);
+        AddCombatAction(RAZORGORE_WAR_STOMP, 30000u);
+        AddCombatAction(RAZORGORE_CLEAVE, 4000, 8000);
+        SetDeathPrevention(true);
+        m_creature->SetWalk(false);
     }
 
     instance_blackwing_lair* m_instance;
 
     void Reset() override
     {
-		CombatAI::Reset();
-		SetDeathPrevention(true);
+        CombatAI::Reset();
+        SetDeathPrevention(true);
 
         DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
     }
 
-	void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
-	{
-		if (eventType == AI_EVENT_CUSTOM_A)
-		{
-			SetDeathPrevention(false);
-			m_creature->RemoveAllAuras();
-			m_creature->CastSpell(nullptr, SPELL_WARMING_FLAMES, TRIGGERED_OLD_TRIGGERED);
-		}
-	}
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            SetDeathPrevention(false);
+            m_creature->RemoveAllAuras();
+            m_creature->CastSpell(nullptr, SPELL_WARMING_FLAMES, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
 
-	void JustPreventedDeath(Unit* attacker) override
-	{
-		// Boss explodes everything and resets - this happens if not all eggs are destroyed
-		// TODO: He actually dies, but without loot and despawns
-		m_instance->SetData(TYPE_RAZORGORE, FAIL);
-		DoScriptText(SAY_RAZORGORE_DEATH, m_creature);
-		m_creature->CastSpell(nullptr, SPELL_FIREBALL, TRIGGERED_OLD_TRIGGERED);
-		m_creature->ForcedDespawn(5000);
-	}
+    void JustPreventedDeath(Unit* attacker) override
+    {
+        // Boss explodes everything and resets - this happens if not all eggs are destroyed
+        // TODO: He actually dies, but without loot and despawns
+        m_instance->SetData(TYPE_RAZORGORE, FAIL);
+        DoScriptText(SAY_RAZORGORE_DEATH, m_creature);
+        m_creature->CastSpell(nullptr, SPELL_FIREBALL, TRIGGERED_OLD_TRIGGERED);
+        m_creature->ForcedDespawn(5000);
+    }
 
     void JustReachedHome() override
     {
@@ -101,36 +102,36 @@ struct boss_razorgoreAI : public CombatAI
             m_instance->SetData(TYPE_RAZORGORE, FAIL);
     }
 
-	void ExecuteAction(uint32 action) override
-	{
-		switch (action)
-		{
-			case RAZORGORE_CONFLAGRATION:
-			{
-				if (DoCastSpellIfCan(nullptr, SPELL_CONFLAGRATION) == CAST_OK)
-					ResetCombatAction(action, urand(15000, 25000));
-				break;
-			}
-			case RAZORGORE_FIREBALL_VOLLEY:
-			{
-				if (DoCastSpellIfCan(nullptr, SPELL_FIREBALL_VOLLEY) == CAST_OK)
-					ResetCombatAction(action, urand(15000, 20000));
-				break;
-			}
-			case RAZORGORE_WAR_STOMP:
-			{
-				if (DoCastSpellIfCan(nullptr, SPELL_WARSTOMP) == CAST_OK)
-					ResetCombatAction(action, 30000);
-				break;
-			}
-			case RAZORGORE_CLEAVE:
-			{
-				if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-					ResetCombatAction(action, urand(4000, 8000));
-				break;
-			}
-		}
-	}
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case RAZORGORE_CONFLAGRATION:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_CONFLAGRATION) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 25000));
+                break;
+            }
+            case RAZORGORE_FIREBALL_VOLLEY:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_FIREBALL_VOLLEY) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 20000));
+                break;
+            }
+            case RAZORGORE_WAR_STOMP:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_WARSTOMP) == CAST_OK)
+                    ResetCombatAction(action, 30000);
+                break;
+            }
+            case RAZORGORE_CLEAVE:
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    ResetCombatAction(action, urand(4000, 8000));
+                break;
+            }
+        }
+    }
 };
 
 UnitAI* GetAI_boss_razorgore(Creature* creature)
