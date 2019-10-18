@@ -92,7 +92,13 @@ void UnitAI::EnterEvadeMode()
 
     // only alive creatures that are not on transport can return to home position
     if (GetReactState() != REACT_PASSIVE && m_unit->isAlive())
-        m_unit->GetMotionMaster()->MoveTargetedHome();
+    {
+        if (!m_unit->IsImmobilizedState()) // if still rooted after aura removal - permarooted
+            m_unit->GetMotionMaster()->MoveTargetedHome();
+        else
+            JustReachedHome();
+    }
+
 
     m_unit->TriggerEvadeEvents();
 }
