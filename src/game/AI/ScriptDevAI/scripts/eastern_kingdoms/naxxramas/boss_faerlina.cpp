@@ -43,7 +43,8 @@ enum
     SPELL_POISONBOLT_VOLLEY     = 28796,
     SPELL_ENRAGE                = 28798,
     SPELL_RAIN_OF_FIRE          = 28794,
-    SPELL_WIDOWS_EMBRACE        = 28732,
+    SPELL_WIDOWS_EMBRACE_1      = 28732,                    // Cast onto Faerlina by Mind Controlled adds
+    SPELL_WIDOWS_EMBRACE_2      = 28797,                    // Cast onto herself by Faerlina and handle all the cooldown and enrage debuff
 };
 
 struct boss_faerlinaAI : public ScriptedAI
@@ -62,14 +63,13 @@ struct boss_faerlinaAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiPoisonBoltVolleyTimer = 8000;
-        m_uiRainOfFireTimer = 16000;
-        m_uiEnrageTimer = 60000;
+        m_uiPoisonBoltVolleyTimer   = 8 * IN_MILLISECONDS;
+        m_uiRainOfFireTimer         = 16 * IN_MILLISECONDS;
+        m_uiEnrageTimer             = 60 * IN_MILLISECONDS;
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
-
         DoScriptText(SAY_AGGRO_1, m_creature);
 
         if (m_pInstance)
@@ -95,28 +95,19 @@ struct boss_faerlinaAI : public ScriptedAI
             m_pInstance->SetData(TYPE_FAERLINA, FAIL);
     }
 
-    // Widow's Embrace prevents frenzy and poison bolt, if it removes frenzy, next frenzy is sceduled in 60s
-    // It is likely that this _should_ be handled with some dummy aura(s) - but couldn't find any
+    // Widow's Embrace prevents Frenzy and Poison bolt by activating 30 sec spell cooldown
+    // If target also has Frenzy, it will remove it and delay next one by 60s
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpellEntry) override
     {
-        // Check if we hit with Widow's Embrave
-        if (pSpellEntry->Id == SPELL_WIDOWS_EMBRACE)
+        if (pSpellEntry->Id == SPELL_WIDOWS_EMBRACE_1)
         {
-            bool bIsFrenzyRemove = false;
+            DoCastSpellIfCan(m_creature, SPELL_WIDOWS_EMBRACE_2);   // Start spell category cooldown, delaying next Poison Bolt and Frenzy by 30 secs
 
-            // If we remove the Frenzy, the Enrage Timer is reseted to 60s
             if (m_creature->HasAura(SPELL_ENRAGE))
             {
-                m_uiEnrageTimer = 60000;
                 m_creature->RemoveAurasDueToSpell(SPELL_ENRAGE);
-
-                bIsFrenzyRemove = true;
+                m_uiEnrageTimer = 60 * IN_MILLISECONDS;             // Delay next enrage by 60 sec if Faerlina was already enraged
             }
-
-            // In any case we prevent Frenzy and Poison Bolt Volley for Widow's Embrace Duration (30s)
-            // We do this be setting the timers to at least bigger than 30s
-            m_uiEnrageTimer = std::max(m_uiEnrageTimer, (uint32)30000);
-            m_uiPoisonBoltVolleyTimer = std::max(m_uiPoisonBoltVolleyTimer, urand(33000, 38000));
         }
     }
 
@@ -129,7 +120,7 @@ struct boss_faerlinaAI : public ScriptedAI
         if (m_uiPoisonBoltVolleyTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISONBOLT_VOLLEY) == CAST_OK)
-                m_uiPoisonBoltVolleyTimer = 11000;
+                m_uiPoisonBoltVolleyTimer = 11 * IN_MILLISECONDS;
         }
         else
             m_uiPoisonBoltVolleyTimer -= uiDiff;
@@ -140,14 +131,14 @@ struct boss_faerlinaAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_RAIN_OF_FIRE) == CAST_OK)
-                    m_uiRainOfFireTimer = 16000;
+                    m_uiRainOfFireTimer = 16 * IN_MILLISECONDS;
             }
         }
         else
             m_uiRainOfFireTimer -= uiDiff;
 
         // Enrage Timer
-        if (m_uiEnrageTimer < uiDiff)
+        if (m_uiEnrageTimer < uiDiff && !m_creature->HasAura(SPELL_ENRAGE))
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
             {
@@ -157,7 +148,7 @@ struct boss_faerlinaAI : public ScriptedAI
                     case 1: DoScriptText(SAY_ENRAGE_2, m_creature); break;
                     case 2: DoScriptText(SAY_ENRAGE_3, m_creature); break;
                 }
-                m_uiEnrageTimer = 60000;
+                m_uiEnrageTimer = 60 * IN_MILLISECONDS;
             }
         }
         else
