@@ -3249,6 +3249,17 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             }
         }
     }
+    // remove time effects
+    else
+    {
+        switch (spellProto->Id)
+        {
+            case 23155: // Chromaggus - Brood Affliction: Red
+                if (m_removeMode == AURA_REMOVE_BY_DEATH)
+                    target->CastSpell(nullptr, 23168, TRIGGERED_OLD_TRIGGERED); // Heal Chromaggus
+                break;
+        }
+    }
 }
 
 void Aura::HandlePeriodicDamagePCT(bool apply, bool /*Real*/)

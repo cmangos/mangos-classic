@@ -953,7 +953,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 22276:                                 // Elemental Shield
                 {
-                    uint32 elemshields[] = { 22277, 22278, 22279, 22280, 22281 };
+                    const uint32 elemshields[] = { 22277, 22278, 22279, 22280, 22281 };
 
                     for (uint32 spell : elemshields)
                         if (m_caster->HasAura(spell))
@@ -1075,7 +1075,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 23173:                                 // Brood Affliction
+                case 23173:                                 // Brood Affliction - TODO: Rework to use proper targeting
                 {
                     // This spell selects one brood affliction amongst five and apply it onto 15 targets
                     // If there are less than 15 targets, then the spell loops over the targets again

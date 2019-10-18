@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackwing_lair.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -33,141 +34,123 @@ enum
     EMOTE_SHIMMER               = -1469003,
 
     SPELL_BREATH_SELECTION      = 23195,
-    SPELL_BROOD_AFFLICTION      = 23173,
+    SPELL_BROOD_AFFLICTION      = 23173, // TODO: Rework spell script
 
     SPELL_ELEMENTAL_SHIELD_BWL  = 22276,
     SPELL_FRENZY                = 23128,
     SPELL_ENRAGE                = 23537
 };
 
-struct boss_chromaggusAI : public ScriptedAI
+enum ChromaggusActions
 {
-    boss_chromaggusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    CHROMAGGUS_ENRAGE,
+    CHROMAGGUS_ELEMENTAL_SHIELD,
+    CHROMAGGUS_BREATH_LEFT,
+    CHROMAGGUS_BREATH_RIGHT,
+    CHROMAGGUS_BROOD_AFFLICTION,
+    CHROMAGGUS_FRENZY,
+    CHROMAGGUS_ACTION_MAX,
+};
+
+struct boss_chromaggusAI : public CombatAI
+{
+    boss_chromaggusAI(Creature* creature) : CombatAI(creature, CHROMAGGUS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         // Select the 2 different breaths that we are going to use until despawned
-        DoCastSpellIfCan(m_creature, SPELL_BREATH_SELECTION);
-
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiBreathLeftSpell;
-    uint32 m_uiBreathRightSpell;
-
-    uint32 m_uiShimmerTimer;
-    uint32 m_uiBreathLeftTimer;
-    uint32 m_uiBreathRightTimer;
-    uint32 m_uiAfflictionTimer;
-    uint32 m_uiFrenzyTimer;
-    bool m_bEnraged;
-
-    void Reset() override
-    {
-        m_uiShimmerTimer    = 0;                                                // Time till we change vurlnerabilites
-
-        if (m_pInstance)
+        DoCastSpellIfCan(nullptr, SPELL_BREATH_SELECTION);
+        if (m_instance)
         {
-            m_uiBreathLeftSpell = m_pInstance->GetData(TYPE_CHROMA_LBREATH);    // Spell for left breath, stored in instance data
-            m_uiBreathRightSpell = m_pInstance->GetData(TYPE_CHROMA_RBREATH);   // Spell for right breath, stored in instance data
-            m_uiBreathLeftTimer  = 30000;                                       // Left breath is 30 seconds
-            m_uiBreathRightTimer  = 60000;                                      // Right is 1 minute so that we can alternate
+            m_breathLeftSpell = m_instance->GetData(TYPE_CHROMA_LBREATH);    // Spell for left breath, stored in instance data
+            m_breathRightSpell = m_instance->GetData(TYPE_CHROMA_RBREATH);   // Spell for right breath, stored in instance data
         }
-        m_uiAfflictionTimer = 7 * IN_MILLISECONDS;
-        m_uiFrenzyTimer     = 15000;
-        m_bEnraged          = false;
+        AddTimerlessCombatAction(CHROMAGGUS_ENRAGE, true);
+        AddCombatAction(CHROMAGGUS_ELEMENTAL_SHIELD, 0u);
+        AddCombatAction(CHROMAGGUS_BREATH_LEFT, 30000u);
+        AddCombatAction(CHROMAGGUS_BREATH_RIGHT, 60000u);
+        AddCombatAction(CHROMAGGUS_BROOD_AFFLICTION, uint32(7 * IN_MILLISECONDS));
+        AddCombatAction(CHROMAGGUS_FRENZY, 15000u);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    ScriptedInstance* m_instance;
+
+    uint32 m_breathLeftSpell;
+    uint32 m_breathRightSpell;
+
+    void Aggro(Unit* /*who*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_CHROMAGGUS, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_CHROMAGGUS, IN_PROGRESS);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_CHROMAGGUS, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_CHROMAGGUS, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_CHROMAGGUS, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_CHROMAGGUS, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Shimmer Timer Timer
-        if (m_uiShimmerTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_ELEMENTAL_SHIELD_BWL) == CAST_OK)
+            case CHROMAGGUS_ENRAGE:
             {
-                DoScriptText(EMOTE_SHIMMER, m_creature);
-                m_uiShimmerTimer = 45000;
+                if (m_creature->GetHealthPercent() < 20.0f)
+                {
+                    DoCastSpellIfCan(nullptr, SPELL_ENRAGE);
+                    DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
+                    SetActionReadyStatus(action, false);
+                }
+                break;
+            }
+            case CHROMAGGUS_ELEMENTAL_SHIELD:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_ELEMENTAL_SHIELD_BWL) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_SHIMMER, m_creature);
+                    ResetCombatAction(action, 45000);
+                }
+                break;
+            }
+            case CHROMAGGUS_BREATH_LEFT:
+            {
+                if (DoCastSpellIfCan(nullptr, m_breathLeftSpell) == CAST_OK)
+                    ResetCombatAction(action, 60000);
+                break;
+            }
+            case CHROMAGGUS_BREATH_RIGHT:
+            {
+                if (DoCastSpellIfCan(nullptr, m_breathRightSpell) == CAST_OK)
+                    ResetCombatAction(action, 60000);
+                break;
+            }
+            case CHROMAGGUS_BROOD_AFFLICTION:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_BROOD_AFFLICTION) == CAST_OK)
+                    ResetCombatAction(action, 7 * IN_MILLISECONDS);
+                break;
+            }
+            case CHROMAGGUS_FRENZY:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_FRENZY) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_GENERIC_FRENZY_KILL, m_creature);
+                    ResetCombatAction(action, 15 * IN_MILLISECONDS);
+                }
+                break;
             }
         }
-        else
-            m_uiShimmerTimer -= uiDiff;
-
-        // Left Breath Timer
-        if (m_uiBreathLeftTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_uiBreathLeftSpell) == CAST_OK)
-                m_uiBreathLeftTimer = 60000;
-        }
-        else
-            m_uiBreathLeftTimer -= uiDiff;
-
-        // Right Breath Timer
-        if (m_uiBreathRightTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_uiBreathRightSpell) == CAST_OK)
-                m_uiBreathRightTimer = 60000;
-        }
-        else
-            m_uiBreathRightTimer -= uiDiff;
-
-        // Affliction Timer
-        if (m_uiAfflictionTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BROOD_AFFLICTION) == CAST_OK)
-                m_uiAfflictionTimer = 7 * IN_MILLISECONDS;
-        }
-        else
-            m_uiAfflictionTimer -= uiDiff;
-
-        // Frenzy Timer
-        if (m_uiFrenzyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
-            {
-                DoScriptText(EMOTE_GENERIC_FRENZY_KILL, m_creature);
-                m_uiFrenzyTimer = 15 * IN_MILLISECONDS;
-            }
-        }
-        else
-            m_uiFrenzyTimer -= uiDiff;
-
-        // Enrage if not already enraged and below 20%
-        if (!m_bEnraged && m_creature->GetHealthPercent() < 20.0f)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
-            DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
-            m_bEnraged = true;
-        }
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_chromaggus(Creature* pCreature)
+UnitAI* GetAI_boss_chromaggus(Creature* creature)
 {
-    return new boss_chromaggusAI(pCreature);
+    return new boss_chromaggusAI(creature);
 }
 
 void AddSC_boss_chromaggus()
