@@ -90,23 +90,25 @@ bool AbstractRandomMovementGenerator::Update(Unit& owner, const uint32& diff)
         return true;
     }
 
-    i_nextMoveTimer.Update(diff);
-    if (i_nextMoveTimer.Passed())
+    if (owner.movespline->Finalized())
     {
-        if (i_nextMoveCount < i_nextMoveCountMax)
-            ++i_nextMoveCount;
+        i_nextMoveTimer.Update(diff);
 
-        if (owner.movespline->Finalized())
+        if (i_nextMoveTimer.Passed())
         {
-            if (!bool(_setLocation(owner)))
+            if (_setLocation(owner))
             {
-                // Location(s) not found: recheck sooner
-                i_nextMoveTimer.Reset(i_nextMoveDelayMin);
-                return true;
+                if (i_nextMoveCount > 1)
+                    --i_nextMoveCount;
+                else
+                {
+                    i_nextMoveCount = urand(1, i_nextMoveCountMax);
+                    i_nextMoveTimer.Reset(urand(i_nextMoveDelayMin, i_nextMoveDelayMax));
+                }
             }
+            else
+                i_nextMoveTimer.Reset(250);
         }
-
-        i_nextMoveTimer.Reset(urand(i_nextMoveDelayMin, i_nextMoveDelayMax));
     }
 
     return true;
@@ -119,45 +121,24 @@ bool AbstractRandomMovementGenerator::_getLocation(Unit& owner, float& x, float&
 
 int32 AbstractRandomMovementGenerator::_setLocation(Unit& owner)
 {
-    PointsArray destinations;
-    destinations.reserve(i_nextMoveCount);
+    // Look for a random location within certain radius of initial position
+    float x = i_x, y = i_y, z = i_z;
 
-    for (; i_nextMoveCount > 0; --i_nextMoveCount)
-    {
-        // Look for a random location within certain radius of initial position
-        float x = i_x, y = i_y, z = i_z;
+    // Require destination to be in LoS for PC units for this movegen hierarchy
+    if (!_getLocation(owner, x, y, z) || (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !owner.IsWithinLOS(x, y, z)))
+        return 0;
 
-        // Require destination to be in LoS for PC units for this movegen hierarchy
-        if (_getLocation(owner, x, y, z) && (!owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || owner.IsWithinLOS(x, y, z)))
-            destinations.emplace(destinations.end(), x, y, z);
-    }
+    PathFinder pf(&owner);
+    if (i_pathLength != 0.0f)
+        pf.setPathLengthLimit(i_pathLength);
 
-    PointsArray path;
+    pf.calculate(x, y, z);
 
-    for (auto dest = destinations.begin(); dest != destinations.end(); ++dest)
-    {
-        PathFinder pf(&owner);
-        if (i_pathLength != 0.0f)
-            pf.setPathLengthLimit(i_pathLength);
-
-        if (path.empty())
-            pf.calculate((*dest).x, (*dest).y, (*dest).z);
-        else
-            pf.calculate(*path.rbegin(), *dest);
-
-        if (pf.getPathType() & PATHFIND_NOPATH)
-            continue;
-
-        // If path is already not empty, we should trim first point in PF's output to avoid duplicate points
-        auto& points = pf.getPath();
-        path.insert(path.end(), (points.begin() + path.empty()), points.end());
-    }
-
-    if (path.size() < 2)
+    if (pf.getPathType() & PATHFIND_NOPATH)
         return 0;
 
     Movement::MoveSplineInit init(owner);
-    init.MovebyPath(path);
+    init.MovebyPath(pf.getPath());
     init.SetWalk(i_walk);
 
     int32 duration = init.Launch();
