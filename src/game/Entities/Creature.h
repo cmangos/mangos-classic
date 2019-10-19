@@ -61,6 +61,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_CIVILIAN               = 0x00010000,       // 65536 CreatureInfo->civilian substitute (for new expansions)
     CREATURE_EXTRA_FLAG_NO_MELEE               = 0x00020000,       // 131072 creature can't melee
     CREATURE_EXTRA_FLAG_FORCE_ATTACKING_CAPABILITY = 0x00080000,   // 524288 SetForceAttackingCapability(true); for nonattackable, nontargetable creatures that should be able to attack nontheless
+    // CREATURE_EXTRA_FLAG_REUSE               = 0x00100000,       // 1048576 - reuse
     CREATURE_EXTRA_FLAG_COUNT_SPAWNS           = 0x00200000,       // 2097152 count creature spawns in Map*
     CREATURE_EXTRA_FLAG_HASTE_SPELL_IMMUNITY   = 0x00400000,       // 4194304 immunity to COT or Mind Numbing Poison - very common in instances
     CREATURE_EXTRA_FLAG_DUAL_WIELD_FORCED      = 0x00800000,       // 8388606 creature is alwyas dual wielding (even if unarmed)
