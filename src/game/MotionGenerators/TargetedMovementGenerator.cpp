@@ -677,6 +677,17 @@ void FollowMovementGenerator::Reset(Unit& owner)
     Initialize(owner);
 }
 
+bool FollowMovementGenerator::GetResetPosition(Unit& owner, float& x, float& y, float& z, float& o) const
+{
+    if (!_getLocation(owner, x, y, z))
+        return false;
+
+    if (!_getOrientation(owner, o))
+        o = owner.GetAngle(x, y);
+
+    return true;
+}
+
 bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
 {
     if (!i_path)
@@ -708,13 +719,30 @@ bool FollowMovementGenerator::Unstuck(Unit& owner, float x, float y, float z)
     return false;
 }
 
+bool FollowMovementGenerator::_getOrientation(Unit& owner, float& o) const
+{
+    if (!i_target.isValid())
+        return false;
+
+    o = (i_faceTarget ? owner.GetAngle(i_target.getTarget()) : i_target->GetOrientation());
+    return true;
+}
+
+bool FollowMovementGenerator::_getLocation(Unit& owner, float& x, float& y, float& z) const
+{
+    float angle = (i_target->GetOrientation() + GetAngle(owner));
+    owner.GetPosition(x, y, z);
+    i_target->GetNearPoint(&owner, x, y, z, owner.GetObjectBoundingRadius(), GetDynamicTargetDistance(owner, false), angle);
+    return true;
+}
+
 void FollowMovementGenerator::_setOrientation(Unit& owner)
 {
     // Final facing adjustment once target is reached
-    if (i_target.isValid())
+    float o;
+    if (_getOrientation(owner, o))
     {
         m_targetFaced = true;
-        const float o = (i_faceTarget ? owner.GetAngle(i_target.getTarget()) : i_target->GetOrientation());
         owner.SetOrientation(o);
         owner.SetFacingTo(o);
     }
@@ -734,12 +762,13 @@ void FollowMovementGenerator::_setLocation(Unit& owner, bool updateDestination)
     // Can happen for example if no path was created on MMGen-Initialize because of the owner being stunned
     if (updateDestination || !i_path)
     {
-        float o = (i_target->GetOrientation() + GetAngle(owner));
-        owner.GetPosition(x, y, z);
-        i_target->GetNearPoint(&owner, x, y, z, owner.GetObjectBoundingRadius(), GetDynamicTargetDistance(owner, false), o);
-
-        if (!Move(owner, x, y, z))
-            Unstuck(owner, x, y, z);
+        if (_getLocation(owner, x, y, z))
+        {
+            if (!Move(owner, x, y, z))
+                Unstuck(owner, x, y, z);
+        }
+        else
+            return;
     }
     else    // the destination has not changed, we just need to refresh the path (usually speed change)
         _move(owner, i_path->getPath(), owner.movespline->currentPathIdx());
