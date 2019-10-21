@@ -156,6 +156,7 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_SAPPHIRON:
         case NPC_KELTHUZAD:
         case NPC_THE_LICHKING:
+        case NPC_NAXXRAMAS_TRIGGER:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_ZOMBIE_CHOW:
@@ -600,14 +601,14 @@ void instance_naxxramas::Update(uint32 uiDiff)
     {
         if (m_uiLivingPoisonTimer <= uiDiff)
         {
-            if (Player* pPlayer = GetPlayerInMap())
+            if (Creature* trigger = GetSingleCreatureFromStorage(NPC_NAXXRAMAS_TRIGGER))
             {
                 // Spawn 3 living poisons every 5 secs and make them cross the corridor and then despawn, for ever and ever
                 for (uint8 i = 0; i < 3; i++)
-                    if (Creature* pPoison = pPlayer->SummonCreature(NPC_LIVING_POISON, aLivingPoisonPositions[i].m_fX, aLivingPoisonPositions[i].m_fY, aLivingPoisonPositions[i].m_fZ, aLivingPoisonPositions[i].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    if (Creature* poison = trigger->SummonCreature(NPC_LIVING_POISON, aLivingPoisonPositions[i].m_fX, aLivingPoisonPositions[i].m_fY, aLivingPoisonPositions[i].m_fZ, aLivingPoisonPositions[i].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
-                        pPoison->GetMotionMaster()->MovePoint(0, aLivingPoisonPositions[i + 3].m_fX, aLivingPoisonPositions[i + 3].m_fY, aLivingPoisonPositions[i + 3].m_fZ);
-                        pPoison->ForcedDespawn(15000);
+                        poison->GetMotionMaster()->MovePoint(0, aLivingPoisonPositions[i + 3].m_fX, aLivingPoisonPositions[i + 3].m_fY, aLivingPoisonPositions[i + 3].m_fZ);
+                        poison->ForcedDespawn(15000);
                     }
             }
             m_uiLivingPoisonTimer = 5000;

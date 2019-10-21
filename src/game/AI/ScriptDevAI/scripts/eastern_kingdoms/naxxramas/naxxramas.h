@@ -81,6 +81,7 @@ enum
     NPC_STALAGG                 = 15929,
     NPC_FEUGEN                  = 15930,
     NPC_TESLA_COIL              = 16218,
+    NPC_NAXXRAMAS_TRIGGER       = 16082,
 
     NPC_MOGRAINE                = 16062,
     NPC_ZELIEK                  = 16063,
