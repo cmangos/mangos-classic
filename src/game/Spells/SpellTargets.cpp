@@ -258,6 +258,7 @@ void SpellTargetMgr::Initialize()
             continue;
 
         SpellTargetingData& data = spellTargetingData[i];
+        // figure out what targeting dynamic effects should use
         for (uint32 effIdx = 0; effIdx < MAX_EFFECT_INDEX; ++effIdx)
         {
             if (!spellInfo->Effect[effIdx])
@@ -310,10 +311,7 @@ void SpellTargetMgr::Initialize()
                 sLog.outError("Spell %u effect index %u failed to pick type for dynamic effect targeting type.", i, effIdx);
             }
         }
-        // data.sharedTargetingEffects.push_back();
-        // data.ignoredTargets
-        //for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        //    data.ignoredTargets[i] = {false, false};
+        // evaluate which targets should be evaluated on execution
         for (uint32 effIdxSource = 0; effIdxSource < MAX_EFFECT_INDEX; ++effIdxSource)
         {
             if (!spellInfo->Effect[effIdxSource])
