@@ -584,6 +584,13 @@ void Spell::FillTargetMap()
                     uint8 effectMask = targetMask[rightTarget];
                     if (!goTargetList.empty()) // GO case
                     {
+                        for (auto iter = goTargetList.begin(); iter != goTargetList.end();)
+                        {
+                            if (CheckTargetGOScript(*iter, SpellEffectIndex(i)))
+                                ++iter;
+                            else
+                                iter = goTargetList.erase(iter);
+                        }
                         if (m_affectedTargetCount && goTargetList.size() > m_affectedTargetCount)
                         {
                             // remove random units from the map
@@ -602,16 +609,6 @@ void Spell::FillTargetMap()
                                 }
                             }
                         }
-
-                        for (auto iter = goTargetList.begin(); iter != goTargetList.end();)
-                        {
-                            if (CheckTargetGOScript(*iter, SpellEffectIndex(i)))
-                                ++iter;
-                            else
-                                iter = goTargetList.erase(iter);
-                        }
-
-                        // Add resulting GOs as GOTargets
                         for (GameObject* go : goTargetList)
                             AddGOTarget(go, effectMask);
                     }
