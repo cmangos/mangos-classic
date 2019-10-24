@@ -701,7 +701,11 @@ class WorldObject : public Object
         float GetOrientation() const { return m_position.o; }
 
         /// Gives a 2d-point in distance distance2d in direction absAngle around the current position (point-to-point)
-        void GetNearPoint2D(float& x, float& y, float distance2d, float absAngle) const;
+        inline void GetNearPoint2d(float& x, float& y, float distance2d, float absAngle) const
+        {
+            return GetNearPoint2dAt(GetPositionX(), GetPositionY(), x, y, distance2d, absAngle);
+        }
+        static void GetNearPoint2dAt(const float posX, const float posY, float& x, float& y, float distance2d, float absAngle);
         /** Gives a "free" spot for searcher in distance distance2d in direction absAngle on "good" height
          * @param searcher          -           for whom a spot is searched for
          * @param x, y, z           -           position for the found spot of the searcher
@@ -709,7 +713,11 @@ class WorldObject : public Object
          * @param distance2d        -           distance between the middle-points
          * @param absAngle          -           angle in which the spot is preferred
          */
-        void GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float searcher_bounding_radius, float distance2d, float absAngle, bool isInWater = false) const;
+        inline void GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float searcher_bounding_radius, float distance2d, float absAngle, bool isInWater = false) const
+        {
+            return GetNearPointAt(GetPositionX(), GetPositionY(), GetPositionZ(), searcher, x, y, z, searcher_bounding_radius, distance2d, absAngle, isInWater);
+        }
+        void GetNearPointAt(const float posX, const float posY, const float posZ, WorldObject const* searcher, float& x, float& y, float& z, float searcher_bounding_radius, float distance2d, float absAngle, bool isInWater = false) const;
         /** Gives a "free" spot for a searcher on the distance (including bounding-radius calculation)
          * @param x, y, z           -           position for the found spot
          * @param bounding_radius   -           radius for the searcher
@@ -717,7 +725,7 @@ class WorldObject : public Object
          * @param angle             -           direction in which to look for a free spot. Default = 0.0f (direction in which 'this' is looking
          * @param obj               -           for whom to look for a spot. Default = nullptr
          */
-        void GetClosePoint(float& x, float& y, float& z, float bounding_radius, float distance2d = 0.0f, float angle = 0.0f, const WorldObject* obj = nullptr) const
+        inline void GetClosePoint(float& x, float& y, float& z, float bounding_radius, float distance2d = 0.0f, float angle = 0.0f, const WorldObject* obj = nullptr) const
         {
             // angle calculated from current orientation
             GetNearPoint(obj, x, y, z, bounding_radius, distance2d + GetObjectBoundingRadius() + bounding_radius, GetOrientation() + angle);
@@ -727,7 +735,7 @@ class WorldObject : public Object
          * @param obj               -           for whom to find a contact position. The position will be searched in direction from 'this' towards 'obj'
          * @param distance2d        -           distance which 'obj' and 'this' should have beetween their bounding radiuses. Default = CONTACT_DISTANCE
          */
-        void GetContactPoint(const WorldObject* obj, float& x, float& y, float& z, float distance2d = CONTACT_DISTANCE) const
+        inline void GetContactPoint(const WorldObject* obj, float& x, float& y, float& z, float distance2d = CONTACT_DISTANCE) const
         {
             // angle to face `obj` to `this` using distance includes size of `obj`
             GetNearPoint(obj, x, y, z, obj->GetObjectBoundingRadius(), distance2d + GetObjectBoundingRadius() + obj->GetObjectBoundingRadius(), GetAngle(obj));
