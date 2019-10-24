@@ -4541,10 +4541,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 28732:                                 // Widow Embrace
                 {
-                    m_caster->CastSpell(nullptr, 28748, TRIGGERED_OLD_TRIGGERED);		// Self suicide
+                    m_caster->CastSpell(nullptr, 28748, TRIGGERED_OLD_TRIGGERED);       // Self suicide
                     return;
                 }
                 case 29379:                                 // Despawn Crypt Guards
+                case 30228:                                 // Despawn Summons
                 {
                     if (unitTarget)
                         ((Creature*)unitTarget)->ForcedDespawn();
