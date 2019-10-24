@@ -235,7 +235,6 @@ vmap.enableHeight = 1
 vmap.ignoreSpellIds = "7720"
 vmap.enableIndoorCheck = 1
 DetectPosCollision = 1
-TargetPosRecalculateRange = 1.5
 mmap.enabled = 1
 mmap.ignoreMapIds = ""
 PathFinder.OptimizePath = 1

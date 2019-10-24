@@ -707,7 +707,7 @@ bool FollowMovementGenerator::Unstuck(Unit& owner, float x, float y, float z)
 {
     // Attempts to move permanent pet back on the same terrain with owner when out of combat
     // Should not be available to temporary pets/charms/other units following
-    if (i_target.isValid() && !owner.isInCombat() && owner.GetOwnerGuid() == i_target->GetObjectGuid())
+    if (i_target.isValid() && !owner.isInCombat() && owner.GetObjectGuid() == i_target->GetPetGuid())
     {
         // Wait until landing on terrain
         if (!i_target->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)))
@@ -794,8 +794,12 @@ bool FollowMovementGenerator::_move(Unit& owner, const Movement::PointsArray& pa
     return true;
 }
 
+// Max distance from movement target point (+moving unit size) and targeted object (+size) for target to be considered too far away.
+//      Suggested max: melee attack range (5), suggested min: contact range (0.5)
+//      More distance let have better performence, less distance let have more sensitive reaction at target movement digressions.
+#define FOLLOW_RECALCULATE_RANGE                          1.5f
 // This factor defines how much of the bounding-radius (as measurement of size) will be used for recalculating a new following position
-//   The smaller, the more micro movement, the bigger, possibly no proper movement updates
+//      The smaller, the more micro movement, the bigger, possibly no proper movement updates
 #define FOLLOW_RECALCULATE_FACTOR                         1.0f
 // This factor defines when the distance of a follower will have impact onto following-position updates
 #define FOLLOW_DIST_GAP_FOR_DIST_FACTOR                   1.0f
@@ -807,7 +811,7 @@ float FollowMovementGenerator::GetDynamicTargetDistance(Unit& owner, bool forRan
     if (!forRangeCheck)
         return (GetOffset(owner) + owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
 
-    float allowed_dist = (1.5f - i_target->GetObjectBoundingRadius());
+    float allowed_dist = (FOLLOW_RECALCULATE_RANGE - i_target->GetObjectBoundingRadius());
     allowed_dist += FOLLOW_RECALCULATE_FACTOR * (owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
     if (i_offset > FOLLOW_DIST_GAP_FOR_DIST_FACTOR)
         allowed_dist += FOLLOW_DIST_RECALCULATE_FACTOR * i_offset;
