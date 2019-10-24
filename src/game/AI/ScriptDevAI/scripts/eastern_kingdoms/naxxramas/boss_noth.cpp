@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Noth
-SD%Complete: 90
-SDComment: Despawn adds/corpses on fail ; Make him return early if all waves are defeated
+SD%Complete: 100
+SDComment:
 SDCategory: Naxxramas
 EndScriptData
 
@@ -84,6 +84,10 @@ enum
     // NE Corner
     SPELL_SUMMON_CONSTR02               = 29240,
 
+    SPELL_DESPAWN_SUMMONS               = 30228,            // Spell ID unsure: there are several spells doing the same thing in DBCs within Naxxramas spell IDs range
+                                                            // but it is not always clear which one is for each boss so some are assigned randomly like this one
+    NPC_PLAGUED_WARRIOR                 = 16984,
+
     PHASE_GROUND                        = 0,
     PHASE_BALCONY                       = 1,
 
@@ -114,6 +118,8 @@ struct boss_nothAI : public ScriptedAI
 
     uint8 m_uiPhase;
     uint8 m_uiPhaseSub;
+    uint8 m_uiSubWavesCount;        // On balcony phase, counts if this is the first or the second wave. Used to make Noth returns early
+    uint8 m_uiWavesNpcsCount;       // Counter for NPCs per waves during balcony phase
     uint32 m_uiPhaseTimer;
 
     uint32 m_uiBlinkTimer;
@@ -124,6 +130,8 @@ struct boss_nothAI : public ScriptedAI
     {
         m_uiPhase = PHASE_GROUND;
         m_uiPhaseSub = PHASE_GROUND;
+        m_uiWavesNpcsCount = 0;
+        m_uiSubWavesCount = 0;
         m_uiPhaseTimer = 90 * IN_MILLISECONDS;
 
         m_uiBlinkTimer = 25 * IN_MILLISECONDS;
@@ -148,6 +156,24 @@ struct boss_nothAI : public ScriptedAI
     {
         pSummoned->SetInCombatWithZone();
     }
+    
+    void SummonedCreatureJustDied(Creature* pSummoned) override
+    {
+        pSummoned->ForcedDespawn(2000);
+
+        // Count how many wave NPCs are killed: if all of them and this was the second wave, Noth returns early
+        if (pSummoned->GetEntry() != NPC_PLAGUED_WARRIOR)
+        {
+            --m_uiWavesNpcsCount;
+            if (m_uiWavesNpcsCount == 0 && m_uiSubWavesCount == 2)
+                m_uiPhaseTimer = 100;
+        }
+    }
+
+    void SummonedJustReachedHome(Creature* summoned) override
+    {
+        summoned->ForcedDespawn();
+    }
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
@@ -166,23 +192,32 @@ struct boss_nothAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_NOTH, FAIL);
+
+        // Clean-up stage
+        DoCastSpellIfCan(m_creature, SPELL_DESPAWN_SUMMONS, CAST_TRIGGERED);
     }
 
     void DoSummonPlaguedChampions(bool isThirdWave)
     {
         // Four Plagued Champions are to be summoned, one in each of the three corners and the fourth randomly along the western wall
         // On the third wave, we use specific spell to also summon a Plagued Construct in West part and North-East corner
-        DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedChampionSW[urand(0, 1)], CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedChampionNW[urand(0, 1)], CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, (isThirdWave ? SPELL_SUMMON_CONSTR02 : auiSpellSummonPlaguedChampionNE[urand(0, 1)]), CAST_TRIGGERED);  
-        DoCastSpellIfCan(m_creature, (isThirdWave ? SPELL_SUMMON_CONSTR01 : auiSpellSummonPlaguedChampionWest[urand(0, 3)]), CAST_TRIGGERED);
+        if (DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedChampionSW[urand(0, 1)], CAST_TRIGGERED) == CAST_OK)
+            ++m_uiWavesNpcsCount;           // We count the addition of a new NPC on each spell cast because JustSummoned() can possibly be called more than once per summoned NPC, making the count there incorrect
+        if (DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedChampionNW[urand(0, 1)], CAST_TRIGGERED) == CAST_OK)
+            ++m_uiWavesNpcsCount;
+        if (DoCastSpellIfCan(m_creature, (isThirdWave ? SPELL_SUMMON_CONSTR02 : auiSpellSummonPlaguedChampionNE[urand(0, 1)]), CAST_TRIGGERED) == CAST_OK)
+            (isThirdWave ? m_uiWavesNpcsCount += 2 : ++m_uiWavesNpcsCount);
+        if (DoCastSpellIfCan(m_creature, (isThirdWave ? SPELL_SUMMON_CONSTR01 : auiSpellSummonPlaguedChampionWest[urand(0, 3)]), CAST_TRIGGERED) == CAST_OK)
+            (isThirdWave ? m_uiWavesNpcsCount += 2 : ++m_uiWavesNpcsCount);
     }
 
     void DoSummonPlaguedGuardians()
     {
         // Two Plagued Guardians are to be summoned, one in the south-west corner and one in one of the two other corners
-        DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedGuardianNENW[urand(0, 1)], CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedGuardianSW[urand(0, 1)], CAST_TRIGGERED); 
+        if (DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedGuardianNENW[urand(0, 1)], CAST_TRIGGERED) == CAST_OK)
+            ++m_uiWavesNpcsCount;
+        if (DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedGuardianSW[urand(0, 1)], CAST_TRIGGERED) == CAST_OK)
+            ++m_uiWavesNpcsCount;
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -266,6 +301,7 @@ struct boss_nothAI : public ScriptedAI
                         case PHASE_SKELETON_3: m_uiPhaseTimer = 0; break;
                     }
                     m_uiPhase = PHASE_GROUND;
+                    m_uiSubWavesCount = 0;
 
                     return;
                 }
@@ -298,6 +334,7 @@ struct boss_nothAI : public ScriptedAI
                         break;
                     }
                 }
+                ++m_uiSubWavesCount;                        // Keep track of which wave we currently are
             }
             else
                 m_uiSummonTimer -= uiDiff;
