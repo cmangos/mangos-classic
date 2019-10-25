@@ -4523,14 +4523,15 @@ SpellCastResult Spell::CheckCast(bool strict)
             default: // needs target
             {
                 auto& data = SpellTargetInfoTable[targetType];
+                WorldObject* originalCaster = GetCastingObject();
                 if (data.type == TARGET_TYPE_UNIT && data.filter != TARGET_SCRIPT && (data.enumerator == TARGET_ENUMERATOR_SINGLE || data.enumerator == TARGET_ENUMERATOR_CHAIN))
                 {
                     if (!target)
                         return SPELL_FAILED_BAD_TARGETS;
                     switch (data.filter)
                     {
-                        case TARGET_HARMFUL: if (!m_caster->CanAttackSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
-                        case TARGET_HELPFUL: if (!m_caster->CanAssistSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
+                        case TARGET_HARMFUL: if (!originalCaster->CanAttackSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
+                        case TARGET_HELPFUL: if (!originalCaster->CanAssistSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
                         case TARGET_PARTY:
                         case TARGET_GROUP: if (!m_caster->CanAssistSpell(target, m_spellInfo) || !m_caster->IsInGroup(target, targetType == TARGET_UNIT_PARTY)) return SPELL_FAILED_BAD_TARGETS; break;
                         default: break;
