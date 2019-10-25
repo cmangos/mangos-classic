@@ -86,7 +86,6 @@ struct boss_ragnarosAI : public CombatAI
         AddCombatAction(RAGNAROS_MIGHT_OF_RAGNAROS, 11000u);
         AddCombatAction(RAGNAROS_MAGMA_BLAST, 2000u);
         AddCombatAction(RAGNAROS_LAVA_BURST, uint32(20 * IN_MILLISECONDS));
-        m_creature->SetImmobilizedState(true);
         m_bHasAggroYelled = false;
     }
 
@@ -109,6 +108,8 @@ struct boss_ragnarosAI : public CombatAI
 
         m_bHasYelledMagmaBurst = false;
         m_bHasSubmergedOnce = false;
+
+        m_creature->SetImmobilizedState(true);
 
         DoCastSpellIfCan(nullptr, SPELL_MELT_WEAPON, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(nullptr, SPELL_ELEMENTAL_FIRE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
