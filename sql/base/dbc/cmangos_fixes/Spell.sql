@@ -69,3 +69,6 @@ UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (7764, 166
 
 -- Fix radius of summoning spells for Corpse Scarabs used for Anub'Rekhan
 UPDATE spell_template SET EffectRadiusIndex1=16 WHERE id IN (28864, 29105);
+
+-- Fix radius of Consumption spell for Void Zone in Four Horsemen (use same value than TBC DBCs)
+UPDATE spell_template SET EffectRadiusIndex1=7 WHERE id=28865;
