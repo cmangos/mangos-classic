@@ -473,11 +473,12 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
                         if (pMaster->IsControlledByPlayer())
                             return;
 
-                        if (pMaster->isInCombat())
+                        if (pMaster->isInCombat()) // TODO: Add group leashing
                         {
                             pMaster->AddThreat(pEnemy);
                             pEnemy->AddThreat(pMaster);
                             pEnemy->SetInCombatWith(pMaster);
+                            pEnemy->GetCombatManager().TriggerCombatTimer(pMaster);
                         }                            
                         else
                             pMaster->AI()->AttackStart(pEnemy);
@@ -543,6 +544,7 @@ void CreatureLinkingHolder::ProcessSlave(CreatureLinkingEvent eventType, Creatur
                     pSlave->AddThreat(pEnemy);
                     pEnemy->AddThreat(pSlave);
                     pEnemy->SetInCombatWith(pSlave);
+                    pEnemy->GetCombatManager().TriggerCombatTimer(pSlave);
                 }
                 else
                     pSlave->AI()->AttackStart(pEnemy);

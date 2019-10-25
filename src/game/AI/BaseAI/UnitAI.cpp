@@ -233,10 +233,7 @@ void UnitAI::AttackStart(Unit* who)
 
     if (m_unit->Attack(who, m_meleeEnabled))
     {
-        m_unit->AddThreat(who);
-        m_unit->SetInCombatWith(who);
-        who->SetInCombatWith(m_unit);
-
+        m_unit->EngageInCombatWith(who);
         HandleMovementOnAttackStart(who);
     }
 }
@@ -453,9 +450,7 @@ void UnitAI::DetectOrAttack(Unit* who)
     }
     else if (m_unit->GetMap()->IsDungeon())
     {
-        m_unit->AddThreat(who);
-        m_unit->SetInCombatWith(who);
-        who->SetInCombatWith(m_unit);
+        m_unit->EngageInCombatWith(who);
     }
 }
 

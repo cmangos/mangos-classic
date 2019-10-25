@@ -220,9 +220,6 @@ struct Scripted_NoMovementAI : public ScriptedAI
     }
 
     void GetAIInformation(ChatHandler& reader) override;
-
-    // Called at each attack of m_creature by any victim
-    void AttackStart(Unit* who) override;
 };
 
 #endif

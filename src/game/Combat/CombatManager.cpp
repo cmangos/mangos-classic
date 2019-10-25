@@ -152,6 +152,12 @@ void CombatManager::SetEvadeState(EvadeState state)
         m_owner->CallForAllControlledUnits(SetEvadeHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
+void CombatManager::TriggerCombatTimer(Unit* target)
+{
+    if (target->CanHaveThreatList()) // From attackers PoV if we have victim and victim can have a threat list then set his timer
+        target->GetCombatManager().TriggerCombatTimer(target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
+}
+
 void CombatManager::TriggerCombatTimer(bool pvp)
 {
     m_combatTimer = pvp ? 5000 : 15000;

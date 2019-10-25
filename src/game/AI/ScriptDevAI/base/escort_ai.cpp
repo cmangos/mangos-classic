@@ -83,8 +83,7 @@ bool npc_escortAI::AssistPlayerInCombat(Unit* who)
             AttackStart(who);
             return true;
         }
-        who->SetInCombatWith(m_creature);
-        m_creature->AddThreat(who);
+        m_creature->EngageInCombatWith(who);
         return true;
     }
 

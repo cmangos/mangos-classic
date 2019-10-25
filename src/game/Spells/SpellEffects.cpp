@@ -3943,11 +3943,10 @@ void Spell::EffectThreat(SpellEffectIndex /*eff_idx*/)
 
     if (!m_caster->isInCombat() || !unitTarget->isInCombat())
     {
-        unitTarget->SetInCombatWith(m_caster);
-
-        if (unitTarget->GetTypeId() != TYPEID_PLAYER)
-            if (((Creature*)unitTarget)->AI())
-                ((Creature*)unitTarget)->AI()->AttackStart(m_caster);
+        if (unitTarget->AI())
+            unitTarget->AI()->AttackStart(m_caster);
+        else
+            unitTarget->EngageInCombatWith(m_caster);
     }
 
     unitTarget->AddThreat(m_caster, float(damage), false, GetSpellSchoolMask(m_spellInfo), m_spellInfo);

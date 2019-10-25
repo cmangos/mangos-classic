@@ -434,15 +434,3 @@ void Scripted_NoMovementAI::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage("Subclass of Scripted_NoMovementAI");
 }
-
-void Scripted_NoMovementAI::AttackStart(Unit* who)
-{
-    if (who && m_creature->Attack(who, m_meleeEnabled))
-    {
-        m_creature->AddThreat(who);
-        m_creature->SetInCombatWith(who);
-        who->SetInCombatWith(m_creature);
-
-        DoStartNoMovement(who);
-    }
-}

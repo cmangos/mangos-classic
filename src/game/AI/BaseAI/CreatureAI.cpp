@@ -54,9 +54,7 @@ void CreatureAI::AttackStart(Unit* who)
 
     if (m_creature->Attack(who, m_meleeEnabled))
     {
-        m_creature->AddThreat(who);
-        m_creature->SetInCombatWith(who);
-        who->SetInCombatWith(m_creature);
+        m_creature->EngageInCombatWith(who);
 
         // Cast "Spawn Guard" to help Civilian
         if (m_creature->IsCivilian())

@@ -49,6 +49,7 @@ class CombatManager
 
         // combat timer handling
         uint32 GetCombatTimer() const { return m_combatTimer; }
+        void TriggerCombatTimer(Unit* target);
         void TriggerCombatTimer(bool pvp);
         void StopCombatTimer() { m_combatTimer = 0; }
         void SetLeashingDisable(bool apply) { m_leashingDisabled = apply; }
