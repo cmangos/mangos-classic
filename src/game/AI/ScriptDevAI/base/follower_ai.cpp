@@ -25,22 +25,6 @@ FollowerAI::FollowerAI(Creature* creature) : ScriptedAI(creature),
     m_questForFollow(nullptr)
 {}
 
-void FollowerAI::AttackStart(Unit* who)
-{
-    if (!who)
-        return;
-
-    if (m_creature->Attack(who, m_meleeEnabled))
-    {
-        m_creature->AddThreat(who);
-        m_creature->SetInCombatWith(who);
-        who->SetInCombatWith(m_creature);
-
-        if (IsCombatMovement())
-            m_creature->GetMotionMaster()->MoveChase(who);
-    }
-}
-
 // This part provides assistance to a player that are attacked by pWho, even if out of normal aggro range
 // It will cause m_creature to attack pWho that are attacking _any_ player (which has been confirmed may happen also on offi)
 bool FollowerAI::AssistPlayerInCombat(Unit* who)

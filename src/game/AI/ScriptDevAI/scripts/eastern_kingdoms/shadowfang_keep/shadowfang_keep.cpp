@@ -842,12 +842,6 @@ struct npc_deathstalker_vincentAI : public ScriptedAI
 
     void DamageTaken(Unit* pDoneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (pDoneBy)
-        {
-            m_creature->SetInCombatWith(pDoneBy);
-            pDoneBy->SetInCombatWith(m_creature);
-        }
-
         if (m_creature->getStandState())
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
 
