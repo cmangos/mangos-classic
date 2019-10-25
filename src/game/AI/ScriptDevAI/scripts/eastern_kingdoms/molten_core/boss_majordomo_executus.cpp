@@ -201,6 +201,10 @@ struct boss_majordomoAI : public CombatAI
         {
             m_ragnarosGuid = summoned->GetObjectGuid();
             summoned->CastSpell(summoned, SPELL_RAGNA_EMERGE, TRIGGERED_NONE);
+            if (GameObject* lavaSplash = m_instance->GetSingleGameObjectFromStorage(GO_LAVA_SPLASH))
+                lavaSplash->SetLootState(GO_JUST_DEACTIVATED);
+            if (GameObject* lavaSteam = m_instance->GetSingleGameObjectFromStorage(GO_LAVA_STEAM))
+                lavaSteam->SetLootState(GO_JUST_DEACTIVATED);
         }
     }
 
@@ -297,6 +301,16 @@ struct boss_majordomoAI : public CombatAI
                 // Ragnaros Summon Event
             case 10:
                 DoScriptText(SAY_SUMMON_1, m_creature);
+                if (GameObject* lavaSplash = m_instance->GetSingleGameObjectFromStorage(GO_LAVA_SPLASH))
+                {
+                    lavaSplash->SetRespawnTime(900);
+                    lavaSplash->Refresh();
+                }
+                if (GameObject* lavaSteam = m_instance->GetSingleGameObjectFromStorage(GO_LAVA_STEAM))
+                {
+                    lavaSteam->SetRespawnTime(900);
+                    lavaSteam->Refresh();
+                }
                 ++m_speechStage;
                 timer = 1000;
                 break;
