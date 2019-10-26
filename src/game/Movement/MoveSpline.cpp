@@ -136,7 +136,7 @@ namespace Movement
             spline.set_length(spline.last(), spline.isCyclic() ? 1000 : 1);
         }
         point_Idx = spline.first();
-        velocity = args.velocity;
+        speed = args.velocity;
     }
 
     void MoveSpline::Initialize(const MoveSplineInitArgs& args)
@@ -157,7 +157,7 @@ namespace Movement
         init_spline(args);
     }
 
-    MoveSpline::MoveSpline() : m_Id(0), velocity(0), time_passed(0), point_Idx(0), point_Idx_offset(0)
+    MoveSpline::MoveSpline() : m_Id(0), speed(0), time_passed(0), point_Idx(0), point_Idx_offset(0)
     {
         splineflags.done = true;
     }

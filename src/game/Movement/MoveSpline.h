@@ -69,7 +69,7 @@ namespace Movement
 
             MoveSplineFlag  splineflags;
 
-            float           velocity;
+            float           speed;
 
             uint32          time_passed;
             int32           point_Idx;
@@ -127,7 +127,7 @@ namespace Movement
 
             uint32 Duration() const { return spline.length();}
 
-            float Velocity() const { return velocity; }
+            float Speed() const { return speed; }
 
             std::string ToString() const;
     };

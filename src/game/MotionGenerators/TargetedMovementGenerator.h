@@ -188,8 +188,8 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
 
     protected:
         virtual float GetAngle(Unit& owner) const;
-        virtual float GetOffset(Unit &owner) const;
-        virtual float GetVelocity(Unit& owner, bool allowCatchup = false) const;
+        virtual float GetOffset(Unit& owner) const;
+        virtual float GetSpeed(Unit& owner, bool allowCatchup = false) const;
 
         virtual bool Move(Unit& owner, float x, float y, float z);
         virtual bool Unstuck(Unit& owner, float x, float y, float z);

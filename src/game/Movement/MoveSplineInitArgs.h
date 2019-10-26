@@ -46,7 +46,7 @@ namespace Movement
     struct MoveSplineInitArgs
     {
             MoveSplineInitArgs(size_t path_capacity = 16) : path_Idx_offset(0),
-                velocity(0.f), splineId(0)
+                velocity(0), splineId(0)
             {
                 path.reserve(path_capacity);
             }
