@@ -2236,7 +2236,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1509001','%s bristles with energy!','0','2','0','0','0','moan EMOTE_MANA_FULL'),
 ('-1509028','%s drains your mana and turns to stone.','0','2','0','0','0','moam EMOTE_ENERGIZING'),
 
-('-1509002','%s sets eyes on $N!','0','2','0','0','0','buru EMOTE_TARGET'),
+('-1509002','%s sets eyes on $n!','0','2','0','0','0','buru EMOTE_TARGET'),
 
 ('-1509003','They come now. Try not to get yourself killed, young blood.','0','1','0','22','0','andorov SAY_ANDOROV_INTRO_3'),
 ('-1509004','Remember, Rajaxx, when I said I''d kill you last?','0','1','0','0','0','andorov SAY_ANDOROV_INTRO_1'),
@@ -2250,7 +2250,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1509011','Attack and make them pay dearly!','8603','1','0','0','0','rajaxx SAY_UNK1'),
 ('-1509012','Crush them! Drive them out!','8605','1','0','0','0','rajaxx SAY_UNK2'),
 ('-1509013','Do not hesitate! Destroy them!','8606','1','0','0','0','rajaxx SAY_UNK3'),
-('-1509014','Warriors! Captains! Continue the fight!','8613','1','0','0','0','rajaxx SAY_UNK4'),
+('-1509014','Warriors, Captains, continue the fight! ','8613','1','0','0','0','rajaxx SAY_UNK4'),
 ('-1509015','You are not worth my time $N!','8614','1','0','0','0','rajaxx SAY_DEAGGRO'),
 ('-1509016','Breathe your last!','8604','1','0','0','0','rajaxx SAY_KILLS_ANDOROV'),
 ('-1509017','Soon you will know the price of your meddling, mortals... The master is nearly whole... And when he rises, your world will cease!','0','1','0','0','0','rajaxx SAY_COMPLETE_QUEST'),
@@ -2262,9 +2262,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1509022','The walls have been breached!','8599','6','0','0','0','ossirian SAY_RAND_INTRO2'),
 ('-1509023','To your posts. Defend the city.','8600','1','0','0','0','ossirian SAY_RAND_INTRO3'),
 ('-1509024','Tresspassers will be terminated.','8601','1','0','0','0','ossirian SAY_RAND_INTRO4'),
-('-1509025','Sands of the desert rise and block out the sun!','8598','1','0','0','0','ossirian SAY_AGGRO'),
+('-1509025','Sands of the desert, rise and block out the sun!','8598','1','0','0','0','ossirian SAY_AGGRO'),
 ('-1509026','You are terminated.','8602','1','0','0','0','ossirian SAY_SLAY'),
-('-1509027','I...have...failed.','8594','1','0','0','0','ossirian SAY_DEATH'),
+('-1509027','I...have...failed. ','8594','1','0','0','0','ossirian SAY_DEATH'),
 -- 28 (above) = EMOTE_ENERGIZING
 ('-1509029','Come get some!','0','0','0','0','0','andorov SAY_ANDOROV_INTRO_4'),
 ('-1509030','Kill first, ask questions later... Incoming!','0','1','0','0','0','andorov SAY_ANDOROV_ATTACK_START'),
