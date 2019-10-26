@@ -126,22 +126,26 @@ void PetAI::UpdateAI(const uint32 diff)
     if (!owner)
         return;
 
-    Unit* victim = (pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS) ? nullptr : m_unit->getVictim();
-
-    // Do not continue attacking if victim is moving home
-    if (victim && victim->IsEvadingHome())
-        victim = nullptr;
-
     if (m_updateAlliesTimer <= diff)
         // UpdateAllies self set update timer
         UpdateAllies();
     else
         m_updateAlliesTimer -= diff;
 
+    Unit* victim = (pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS) ? nullptr : m_unit->getVictim();
+
+    // Do not continue attacking if victim is moving home
+    if (victim && victim->IsEvadingHome())
+        victim = nullptr;
+
+    // Stop auto attack and chase if victim was dropped
     if (inCombat && !victim)
     {
         m_unit->AttackStop(true, true);
         inCombat = false;
+        if (MotionMaster* mm = m_unit->GetMotionMaster())
+            if (mm->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+                mm->MovementExpired();
     }
 
     CharmInfo* charminfo = m_unit->GetCharmInfo();
@@ -159,8 +163,11 @@ void PetAI::UpdateAI(const uint32 diff)
         charminfo->SetIsRetreating();
     }
 
+    // Stop here if casting spell (No melee and no movement)
+    if (m_unit->IsNonMeleeSpellCasted(false))
+        return;
     // Auto cast (casted only in combat or persistent spells in any state)
-    if (!m_unit->IsNonMeleeSpellCasted(false))
+    else
     {
         typedef std::vector<std::pair<Unit*, Spell*> > TargetSpellList;
         TargetSpellList targetSpellStore;
@@ -292,10 +299,6 @@ void PetAI::UpdateAI(const uint32 diff)
             delete itr->second;
     }
 
-    // Stop here if casting spell (No melee and no movement)
-    if (m_unit->IsNonMeleeSpellCasted(false))
-        return;
-
     // we may get our actions disabled during spell casting, so do entire recheck for victim
     victim = (pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS) ? nullptr : m_unit->getVictim();
 
@@ -317,14 +320,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 && m_unit->CanReachWithMeleeAttack(victim))
         {
             if (!m_unit->HasInArc(victim, 2 * M_PI_F / 3))
-            {
-                m_unit->SetInFront(victim);
-                if (victim->GetTypeId() == TYPEID_PLAYER)
-                    m_unit->SendCreateUpdateToPlayer((Player*)victim);
-
-                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                    m_unit->SendCreateUpdateToPlayer((Player*)owner);
-            }
+                m_unit->SetFacingToObject(victim);
 
             DoMeleeAttackIfReady();
         }
@@ -338,9 +334,18 @@ void PetAI::UpdateAI(const uint32 diff)
         const bool staying = (charmInfo && charmInfo->HasCommandState(COMMAND_STAY));
         const bool following = (!staying && charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW));
 
-        if (owner->isInCombat() && !HasReactState(REACT_PASSIVE) && !staying)
+        // If not commanded to stay, try to assist owner first
+        if (!staying && owner->isInCombat() && !HasReactState(REACT_PASSIVE))
+        {
             AttackStart(owner->getAttackerForHelper());
-        else if (MotionMaster* mm = m_unit->GetMotionMaster())
+
+            // If target was acquired, skip non-combat movement handling
+            if (inCombat)
+                return;
+        }
+
+        // Handle non-combat movement
+        if (MotionMaster* mm = m_unit->GetMotionMaster())
         {
             if (staying && !m_unit->hasUnitState(UNIT_STAT_NO_FREE_MOVE | UNIT_STAT_CHARGING))
             {
@@ -348,7 +353,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 if (!charminfo->IsStayPosSet())
                     charminfo->SetStayPosition(true);
 
-                float x = charminfo->GetStayPosX(), y = charminfo->GetStayPosY(), z = charminfo->GetStayPosZ();
+                const float x = charminfo->GetStayPosX(), y = charminfo->GetStayPosY(), z = charminfo->GetStayPosZ();
 
                 if (int32(m_unit->GetDistance(x, y, z, DIST_CALC_NONE)))
                 {
