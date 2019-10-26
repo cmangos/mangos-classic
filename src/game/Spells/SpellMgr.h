@@ -385,6 +385,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 8247:          // Wandering Plague
         case 8279:          // Stealth Detection
         case 8393:          // Barbs
+        case 8599:          // Enrage
         case 8601:          // Slowing Poison
         case 8876:          // Thrash
         case 9205:          // Hate to Zero (Hate to Zero)
