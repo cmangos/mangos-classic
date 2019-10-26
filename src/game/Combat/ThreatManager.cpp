@@ -365,16 +365,24 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
                 break;
             }
 
-            if (currentRef->GetTauntState() > currentVictim->GetTauntState())
+            if (currentRef->GetTauntState() > currentVictim->GetTauntState()) // taunt overrides root skipping
             {
                 found = true;
                 break;
             }
 
-            if (suppressRanged && isInMelee && !currentVictimInMelee) // suppress ranged when rooted
+            if (suppressRanged) // suppress ranged when rooted
             {
-                found = true;
-                break;
+                if (!isInMelee) // if current ref is not in melee - skip it
+                {
+                    ++iter;
+                    continue;
+                }
+                else if (!currentVictimInMelee)
+                {
+                    found = true;
+                    break;
+                }
             }
 
             if (currentRef->GetHostileState() > currentVictim->GetHostileState())
