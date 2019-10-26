@@ -628,17 +628,7 @@ float FollowMovementGenerator::GetVelocity(Unit& owner, bool allowCatchup/* = fa
             speed = i_target->movespline->Velocity();
         else
         {
-            MovementFlags movementFlags = i_target->m_movementInfo.GetMovementFlags();
-            UnitMoveType movementType = MOVE_RUN;
-
-            if (movementFlags & MOVEFLAG_SWIMMING)
-                movementType = (movementFlags & MOVEFLAG_BACKWARD ? MOVE_SWIM_BACK : MOVE_SWIM);
-            else if (movementFlags & MOVEFLAG_WALK_MODE)
-                movementType = MOVE_WALK;
-            else if (movementFlags & MOVEFLAG_BACKWARD)
-                movementType = MOVE_RUN_BACK;
-
-            speed = i_target->GetSpeed(movementType);
+            speed = i_target->GetSpeed(i_target->m_movementInfo.GetSpeedType());
 
             // Catch-up speed bonus if follower is too far behind
             // FIXME: Add catchup for units with spline movement
