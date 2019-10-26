@@ -112,8 +112,12 @@ class instance_molten_core : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
+        void ShowChatCommands(ChatHandler* handler) override;
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
+
     protected:
         void DoSpawnMajordomoIfCan(bool bByPlayerEnter);
+        void SpawnMajordomo(Unit* summoner, bool initialSummon, uint8 summonPos);
 
         std::string m_strInstData;
         uint32 m_auiEncounter[MAX_ENCOUNTER];

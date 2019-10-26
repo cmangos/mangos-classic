@@ -220,12 +220,17 @@ void instance_molten_core::DoSpawnMajordomoIfCan(bool bByPlayerEnter)
     if (!pPlayer)
         return;
 
+    uint8 uiSummonPos = m_auiEncounter[TYPE_MAJORDOMO] == DONE ? 1 : 0;
+    SpawnMajordomo(pPlayer, !bByPlayerEnter, uiSummonPos);
+}
+
+void instance_molten_core::SpawnMajordomo(Unit* summoner, bool initialSummon, uint8 summonPos)
+{
     // Summon Majordomo
     // If Majordomo encounter isn't done, summon at encounter place, else near Ragnaros
-    uint8 uiSummonPos = m_auiEncounter[TYPE_MAJORDOMO] == DONE ? 1 : 0;
-    if (Creature* pMajordomo = pPlayer->SummonCreature(m_aMajordomoLocations[uiSummonPos].m_uiEntry, m_aMajordomoLocations[uiSummonPos].m_fX, m_aMajordomoLocations[uiSummonPos].m_fY, m_aMajordomoLocations[uiSummonPos].m_fZ, m_aMajordomoLocations[uiSummonPos].m_fO, TEMPSPAWN_MANUAL_DESPAWN, 2 * HOUR * IN_MILLISECONDS))
+    if (Creature* pMajordomo = summoner->SummonCreature(m_aMajordomoLocations[summonPos].m_uiEntry, m_aMajordomoLocations[summonPos].m_fX, m_aMajordomoLocations[summonPos].m_fY, m_aMajordomoLocations[summonPos].m_fZ, m_aMajordomoLocations[summonPos].m_fO, TEMPSPAWN_MANUAL_DESPAWN, 2 * HOUR * IN_MILLISECONDS))
     {
-        if (uiSummonPos)                                    // Majordomo encounter already done, set faction
+        if (summonPos)                                      // Majordomo encounter already done, set faction
         {
             pMajordomo->SetFactionTemporary(FACTION_MAJORDOMO_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
             pMajordomo->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
@@ -233,7 +238,7 @@ void instance_molten_core::DoSpawnMajordomoIfCan(bool bByPlayerEnter)
         }
         else                                                // Else yell and summon adds
         {
-            if (!bByPlayerEnter)
+            if (initialSummon)
                 DoScriptText(SAY_MAJORDOMO_SPAWN, pMajordomo);
 
             for (auto& m_aBosspawnLoc : m_aBosspawnLocs)
@@ -265,6 +270,32 @@ void instance_molten_core::Load(const char* chrIn)
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
+}
+
+void instance_molten_core::ShowChatCommands(ChatHandler* handler)
+{
+    handler->SendSysMessage("This instance supports the following commands:\n spawnmajordomo(0 - initial,1 - ragnaros)");
+}
+
+void instance_molten_core::ExecuteChatCommand(ChatHandler* handler, char* args)
+{
+    char* result = handler->ExtractLiteralArg(&args);
+    if (!result)
+        return;
+    std::string val = result;
+    if (val == "spawnmajordomo")
+    {
+        uint32 summonPos;
+        handler->ExtractUInt32(&args, summonPos);
+
+        if (summonPos > 1)
+        {
+            handler->PSendSysMessage("Could not spawn majordomo because spawn %u was invalid. Please specify a value between 0-1", summonPos);
+            return;
+        }
+
+        SpawnMajordomo(handler->GetPlayer(), true, summonPos);
+    }
 }
 
 InstanceData* GetInstance_instance_molten_core(Map* pMap)

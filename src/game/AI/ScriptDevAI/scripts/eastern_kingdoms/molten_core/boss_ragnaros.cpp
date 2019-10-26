@@ -99,6 +99,8 @@ struct boss_ragnarosAI : public CombatAI
     bool m_bHasYelledMagmaBurst;
     bool m_bHasSubmergedOnce;
 
+    GuidVector m_spawns;
+
     void Reset() override
     {
         CombatAI::Reset();
@@ -111,8 +113,14 @@ struct boss_ragnarosAI : public CombatAI
 
         m_creature->SetImmobilizedState(true);
 
+        m_creature->HandleEmote(EMOTE_STATE_STAND);
+        m_creature->RemoveAurasDueToSpell(SPELL_RAGNA_SUBMERGE);
+        m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE_EFFECT);
+
         DoCastSpellIfCan(nullptr, SPELL_MELT_WEAPON, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(nullptr, SPELL_ELEMENTAL_FIRE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+
+        DespawnGuids(m_spawns);
     }
 
     void KilledUnit(Unit* victim) override
@@ -178,7 +186,9 @@ struct boss_ragnarosAI : public CombatAI
             summoned->AI()->AttackClosestEnemy();
         }
         else if (summoned->GetEntry() == NPC_FLAME_OF_RAGNAROS)
-            summoned->CastSpell(summoned, SPELL_INTENSE_HEAT, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+            summoned->CastSpell(nullptr, SPELL_INTENSE_HEAT, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+
+        m_spawns.push_back(summoned->GetObjectGuid());
     }
 
     void SpellHitTarget(Unit* target, const SpellEntry* spellInfo, SpellMissInfo /*missInfo*/) override
