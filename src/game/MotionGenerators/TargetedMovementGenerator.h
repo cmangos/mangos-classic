@@ -194,8 +194,6 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
         virtual bool IsRemovedOnDirectExpire() const override { return !m_main; }
 
     protected:
-        virtual float GetAngle(Unit& owner) const;
-        virtual float GetOffset(Unit& owner) const;
         virtual float GetSpeed(Unit& owner, bool boosted = false) const;
 
         virtual bool IsBoostAllowed(Unit& owner) const;

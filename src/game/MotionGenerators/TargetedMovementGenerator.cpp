@@ -545,30 +545,6 @@ bool FollowMovementGenerator::EnableWalking() const
     return (i_target.isValid() && i_target->IsWalking());
 }
 
-float FollowMovementGenerator::GetAngle(Unit&/* owner*/) const
-{
-    // Crude visual standin for prediction of moving players for pets
-    // TODO: Requires proper implementation at some point in the future
-    if (m_targetMoving && i_target->movespline->Finalized())
-    {
-        if (int32(i_angle * 100) == int32(PET_FOLLOW_ANGLE * 100) && int32(i_offset) == int32(PET_FOLLOW_DIST))
-            return (i_angle - (i_angle * 0.77f));
-    }
-    return i_angle;
-}
-
-float FollowMovementGenerator::GetOffset(Unit&/* owner*/) const
-{
-    // Crude visual standin for prediction of moving players for pets
-    // TODO: Requires proper implementation at some point in the future
-    if (m_targetMoving && i_target->movespline->Finalized())
-    {
-        if (int32(i_angle * 100) == int32(PET_FOLLOW_ANGLE * 100) && int32(i_offset) == int32(PET_FOLLOW_DIST))
-            return (i_offset * 4);
-    }
-    return i_offset;
-}
-
 float FollowMovementGenerator::GetSpeed(Unit& owner, bool boosted/* = false*/) const
 {
     if (owner.isInCombat() || !i_target.isValid())
@@ -723,16 +699,31 @@ bool FollowMovementGenerator::_getLocation(Unit& owner, float& x, float& y, floa
     if (!i_target.isValid())
         return false;
 
-    float angle = (i_target->GetOrientation() + GetAngle(owner));
+    float angle = (i_target->GetOrientation() + GetAngle());
 
     owner.GetPosition(x, y, z);
 
-    if (!i_target->movespline->Finalized())
+    if (!i_target->movespline->Finalized()) // Server-controlled moving unit: use destination
     {
         auto const& dest = i_target->movespline->CurrentDestination();
         i_target->GetNearPointAt(dest.x, dest.y, dest.z, &owner, x, y, z, owner.GetObjectBoundingRadius(), GetDynamicTargetDistance(owner, false), angle);
     }
-    else
+    else if (m_targetMoving)                // Client-controlled moving unit: use simple prediction
+    {
+        const MovementFlags movementFlags = i_target->m_movementInfo.GetMovementFlags();
+
+        float speed = i_target->GetSpeed(i_target->m_movementInfo.GetSpeedType());
+        float tx = i_target->GetPositionX(), ty = i_target->GetPositionY(), tz = i_target->GetPositionZ(), to = i_target->GetOrientation();
+
+        if (movementFlags & MOVEFLAG_BACKWARD)
+            speed = -speed;
+
+        float dx = (speed * cos(to)), dy = (speed * sin(to));
+        float nx = (tx + dx), ny = (ty + dy);
+
+        i_target->GetNearPointAt(nx, ny, tz, &owner, x, y, z, owner.GetObjectBoundingRadius(), GetDynamicTargetDistance(owner, false), angle);
+    }
+    else                                    // Non-moving unit: use current position
         i_target->GetNearPoint(&owner, x, y, z, owner.GetObjectBoundingRadius(), GetDynamicTargetDistance(owner, false), angle);
 
     return true;
@@ -776,7 +767,7 @@ void FollowMovementGenerator::_setLocation(Unit& owner, bool catchup)
 // Max distance from movement target point (+moving unit size) and targeted object (+size) for target to be considered too far away.
 //      Suggested max: melee attack range (5), suggested min: contact range (0.5)
 //      Less distance let have more sensitive reaction at target movement digressions.
-#define FOLLOW_RECALCULATE_RANGE                          2.5f
+#define FOLLOW_RECALCULATE_RANGE                          2.0f
 // This factor defines how much of the bounding-radius (as measurement of size) will be used for recalculating a new following position
 //      The smaller, the more micro movement, the bigger, possibly no proper movement updates
 #define FOLLOW_RECALCULATE_FACTOR                         1.0f
@@ -788,12 +779,12 @@ void FollowMovementGenerator::_setLocation(Unit& owner, bool catchup)
 float FollowMovementGenerator::GetDynamicTargetDistance(Unit& owner, bool forRangeCheck) const
 {
     if (!forRangeCheck)
-        return (GetOffset(owner) + owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
+        return (GetOffset() + owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
 
     float allowed_dist = (FOLLOW_RECALCULATE_RANGE - i_target->GetObjectBoundingRadius());
     allowed_dist += FOLLOW_RECALCULATE_FACTOR * (owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius());
     if (i_offset > FOLLOW_DIST_GAP_FOR_DIST_FACTOR)
-        allowed_dist += FOLLOW_DIST_RECALCULATE_FACTOR * i_offset;
+        allowed_dist += FOLLOW_DIST_RECALCULATE_FACTOR * GetOffset();
 
     return allowed_dist;
 }
