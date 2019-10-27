@@ -264,6 +264,7 @@ struct boss_ragnarosAI : public CombatAI
                 m_creature->HandleEmote(EMOTE_STATE_STAND);
                 m_creature->RemoveAurasDueToSpell(SPELL_RAGNA_SUBMERGE);
                 m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE_EFFECT);
+                m_creature->RemoveAurasDueToSpell(SPELL_RAGNA_SUBMERGE_VISUAL);
                 ResetCombatAction(RAGNAROS_PHASE_TRANSITION, 500);
                 m_phase = PHASE_EMERGING;
                 break;
@@ -328,7 +329,7 @@ struct boss_ragnarosAI : public CombatAI
                     {
                         if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MAGMA_BLAST, SELECT_FLAG_PLAYER))
                         {
-                            if (DoCastSpellIfCan(nullptr, SPELL_MAGMA_BLAST) == CAST_OK)
+                            if (DoCastSpellIfCan(target, SPELL_MAGMA_BLAST) == CAST_OK)
                             {
                                 if (!m_bHasYelledMagmaBurst)
                                 {
