@@ -2239,7 +2239,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1509002','%s sets eyes on $n!','0','2','0','0','0','buru EMOTE_TARGET'),
 
 ('-1509003','They come now. Try not to get yourself killed, young blood.','0','1','0','22','0','andorov SAY_ANDOROV_INTRO_3'),
-('-1509004','Remember, Rajaxx, when I said I''d kill you last?','0','1','0','0','0','andorov SAY_ANDOROV_INTRO_1'),
+('-1509004','Remember, Rajaxx, when I said I''d kill you last?','0','1','0','22','0','andorov SAY_ANDOROV_INTRO_1'),
 
 ('-1509005','The time of our retribution is at hand! Let darkness reign in the hearts of our enemies!','8612','1','0','0','0','rajaxx SAY_WAVE3'),
 ('-1509006','No longer will we wait behind barred doors and walls of stone! No longer will our vengeance be denied! The dragons themselves will tremble before our wrath!','8610','1','0','0','0','rajaxx SAY_WAVE4'),

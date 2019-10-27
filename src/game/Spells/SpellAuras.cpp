@@ -1318,6 +1318,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->CastSpell(target, 25043, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
                         return;
                     }
+                    case 25471:                             // Attack Order
+                    {
+                        target->CastSpell(nullptr, 25473, TRIGGERED_OLD_TRIGGERED);
+                        return;
+                    }
                     case 26681:                             // Cologne
                     {
                         if (Unit* target = GetTarget())

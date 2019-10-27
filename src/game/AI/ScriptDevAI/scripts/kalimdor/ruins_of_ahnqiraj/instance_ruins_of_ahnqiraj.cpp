@@ -166,11 +166,9 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                 DoSortArmyWaves();
             if (uiData == DONE)
             {
-                if (Creature* pAndorov = GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
-                {
-                    if (pAndorov->isAlive())
-                        pAndorov->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                }
+                if (Creature* andorov = GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
+                    if (andorov->isAlive())
+                        andorov->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_VENDOR);
             }
             break;
         case TYPE_MOAM:
