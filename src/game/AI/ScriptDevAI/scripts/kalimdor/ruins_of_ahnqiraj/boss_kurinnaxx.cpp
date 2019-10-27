@@ -24,10 +24,13 @@ EndScriptData
 */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
-    SPELL_TRASH             = 3391,
+    SAY_ENRAGE              = -1000002,
+
+    SPELL_THRASH            = 3391,
     SPELL_WIDE_SLASH        = 25814,
     SPELL_MORTAL_WOUND      = 25646,
     SPELL_SANDTRAP          = 26524,        // summons gameobject 180647
@@ -37,107 +40,93 @@ enum
     GO_SAND_TRAP            = 180647,
 };
 
-struct boss_kurinnaxxAI : public ScriptedAI
+enum KurinnaxxAction
 {
-    boss_kurinnaxxAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    KURINNAXX_ENRAGE,
+    KURINNAXX_MORTAL_WOUND,
+    KURINNAXX_SAND_TRAP,
+    KURINNAXX_THRASH,
+    KURINNAXX_WIDE_SLASH,
+    KURINNAXX_ACTION_MAX,
+    KURINNAXX_TRAP_TRIGGER,
+};
 
-    uint32 m_uiMortalWoundTimer;
-    uint32 m_uiSandTrapTimer;
-    uint32 m_uiTrashTimer;
-    uint32 m_uiWideSlashTimer;
-    uint32 m_uiTrapTriggerTimer;
-    bool m_bEnraged;
+struct boss_kurinnaxxAI : public CombatAI
+{
+    boss_kurinnaxxAI(Creature* creature) : CombatAI(creature, KURINNAXX_ACTION_MAX)
+    {
+        AddTimerlessCombatAction(KURINNAXX_ENRAGE, true);
+        AddCombatAction(KURINNAXX_MORTAL_WOUND, 8000, 10000);
+        AddCombatAction(KURINNAXX_SAND_TRAP, 5000, 10000);
+        AddCombatAction(KURINNAXX_THRASH, 1000, 5000);
+        AddCombatAction(KURINNAXX_WIDE_SLASH, 10000, 15000);
+        AddCustomAction(KURINNAXX_TRAP_TRIGGER, true, [&]() { TriggerTrap(); });
+    }
 
     ObjectGuid m_sandtrapGuid;
-
-    void Reset() override
-    {
-        m_bEnraged = false;
-
-        m_uiMortalWoundTimer = urand(8000, 10000);
-        m_uiSandTrapTimer    = urand(5000, 10000);
-        m_uiTrashTimer       = urand(1000, 5000);
-        m_uiWideSlashTimer   = urand(10000, 15000);
-        m_uiTrapTriggerTimer = 0;
-    }
 
     void JustSummoned(GameObject* pGo) override
     {
         if (pGo->GetEntry() == GO_SAND_TRAP)
         {
-            m_uiTrapTriggerTimer = 4000;
+            ResetTimer(KURINNAXX_TRAP_TRIGGER, 4000);
             m_sandtrapGuid = pGo->GetObjectGuid();
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void TriggerTrap()
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        if (GameObject* trap = m_creature->GetMap()->GetGameObject(m_sandtrapGuid))
+            trap->Use(m_creature);
+    }
 
-        // If we are belowe 30% HP cast enrage
-        if (!m_bEnraged && m_creature->GetHealthPercent() <= 30.0f)
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
-                m_bEnraged = true;
-        }
-
-        // Mortal Wound
-        if (m_uiMortalWoundTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_WOUND) == CAST_OK)
-                m_uiMortalWoundTimer = urand(8000, 10000);
-        }
-        else
-            m_uiMortalWoundTimer -= uiDiff;
-
-        // Sand Trap
-        if (m_uiSandTrapTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SANDTRAP) == CAST_OK)
-                m_uiSandTrapTimer = urand(10000, 15000);
-        }
-        else
-            m_uiSandTrapTimer -= uiDiff;
-
-        // Trigger the sand trap in 3 secs after spawn
-        if (m_uiTrapTriggerTimer)
-        {
-            if (m_uiTrapTriggerTimer <= uiDiff)
+            case KURINNAXX_ENRAGE:
             {
-                if (GameObject* pTrap = m_creature->GetMap()->GetGameObject(m_sandtrapGuid))
-                    pTrap->Use(m_creature);
-                m_uiTrapTriggerTimer = 0;
+                if (m_creature->GetHealthPercent() <= 30.0f)
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
+                    {
+                        DoScriptText(SAY_ENRAGE, m_creature);
+                        SetActionReadyStatus(action, false);
+                    }
+                }
+                break;
             }
-            else
-                m_uiTrapTriggerTimer -= uiDiff;
+            case KURINNAXX_MORTAL_WOUND:
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_WOUND) == CAST_OK)
+                    ResetCombatAction(action, urand(8000, 10000));
+                break;
+            }
+            case KURINNAXX_SAND_TRAP:
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SANDTRAP) == CAST_OK)
+                    ResetCombatAction(action, urand(10000, 15000));
+                break;
+            }
+            case KURINNAXX_THRASH:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_THRASH) == CAST_OK)
+                    ResetCombatAction(action, urand(12000, 17000));
+                break;
+            }
+            case KURINNAXX_WIDE_SLASH:
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WIDE_SLASH) == CAST_OK)
+                    ResetCombatAction(action, urand(12000, 15000));
+                break;
+            }
         }
-
-        // Wide Slash
-        if (m_uiWideSlashTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WIDE_SLASH) == CAST_OK)
-                m_uiWideSlashTimer = urand(12000, 15000);
-        }
-        else
-            m_uiWideSlashTimer -= uiDiff;
-
-        // Trash
-        if (m_uiTrashTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRASH) == CAST_OK)
-                m_uiTrashTimer = urand(12000, 17000);
-        }
-        else
-            m_uiTrashTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_kurinnaxx(Creature* pCreature)
+UnitAI* GetAI_boss_kurinnaxx(Creature* creature)
 {
-    return new boss_kurinnaxxAI(pCreature);
+    return new boss_kurinnaxxAI(creature);
 }
 
 void AddSC_boss_kurinnaxx()

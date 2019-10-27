@@ -125,7 +125,7 @@ class instance_ruins_of_ahnqiraj : public ScriptedInstance
         void Load(const char* chrIn) override;
 
     private:
-        void DoSapwnAndorovIfCan();
+        void DoSpawnAndorovIfCan();
         void DoSortArmyWaves();
         void DoSendNextArmyWave();
 
