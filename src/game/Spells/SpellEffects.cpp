@@ -4545,6 +4545,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 29379:                                 // Despawn Crypt Guards
+                case 30134:                                 // Despawn Boss Adds
                 case 30228:                                 // Despawn Summons
                 {
                     if (unitTarget)
