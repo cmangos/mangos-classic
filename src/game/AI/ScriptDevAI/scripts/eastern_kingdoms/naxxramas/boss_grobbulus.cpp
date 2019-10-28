@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Grobbulus
-SD%Complete: 80
-SDComment: Timer need more care; Spells of Adds (Posion Cloud) need Mangos Fixes, and further handling
+SD%Complete: 100
+SDComment:
 SDCategory: Naxxramas
 EndScriptData
 
@@ -34,15 +34,15 @@ Enrages 26527*/
 
 enum
 {
-    EMOTE_SPRAY_SLIME               = -1533021,
-
     SPELL_SLIME_STREAM              = 28137,
     SPELL_MUTATING_INJECTION        = 28169,
     SPELL_POISON_CLOUD              = 28240,
     SPELL_SLIME_SPRAY               = 28157,
+    SPELL_SUMMON_FALLOUT_SLIME      = 28218,
     SPELL_BERSERK                   = 26662,
 
-    NPC_FALLOUT_SLIME               = 16290
+    SPELL_DESPAWN_SUMMONS           = 30134,            // Spell ID unsure: there are several spells doing the same thing in DBCs within Naxxramas spell IDs range
+                                                        // but it is not always clear which one is for each boss so some are assigned randomly like this one
 };
 
 struct boss_grobbulusAI : public ScriptedAI
@@ -63,7 +63,7 @@ struct boss_grobbulusAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiInjectionTimer = 12 * IN_MILLISECONDS;
+        m_uiInjectionTimer = 13 * IN_MILLISECONDS;
         m_uiPoisonCloudTimer = urand(20 * IN_MILLISECONDS, 25 * IN_MILLISECONDS);
         m_uiSlimeSprayTimer = urand(20 * IN_MILLISECONDS, 30 * IN_MILLISECONDS);
         m_uiBerserkTimer = 12 * MINUTE * IN_MILLISECONDS;
@@ -82,48 +82,27 @@ struct boss_grobbulusAI : public ScriptedAI
             m_pInstance->SetData(TYPE_GROBBULUS, DONE);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_GROBBULUS, FAIL);
-    }
 
-    // This custom selecting function, because we only want to select players without mutagen aura
-    bool DoCastMutagenInjection()
-    {
-        if (m_creature->IsNonMeleeSpellCasted(true))
-            return false;
-
-        std::vector<Unit*> suitableTargets;
-        ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-
-        for (auto itr : threatList)
-        {
-            if (Unit* pTarget = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
-            {
-                if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->HasAura(SPELL_MUTATING_INJECTION))
-                    suitableTargets.push_back(pTarget);
-            }
-        }
-
-        if (suitableTargets.empty())
-            return false;
-
-        Unit* pTarget = suitableTargets[urand(0, suitableTargets.size() - 1)];
-        if (DoCastSpellIfCan(pTarget, SPELL_MUTATING_INJECTION) == CAST_OK)
-            return true;
-
-        return false;
+        // Clean-up stage
+        DoCastSpellIfCan(m_creature, SPELL_DESPAWN_SUMMONS, CAST_TRIGGERED);
+        
+        ScriptedAI::EnterEvadeMode();
     }
 
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
+        // Summon a Fallout Slime for every player hit by Slime Spray
         if ((pSpell->Id == SPELL_SLIME_SPRAY) && pTarget->GetTypeId() == TYPEID_PLAYER)
-            m_creature->SummonCreature(NPC_FALLOUT_SLIME, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10 * IN_MILLISECONDS);
+            DoCastSpellIfCan(pTarget, SPELL_SUMMON_FALLOUT_SLIME, CAST_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        // Do nothing if no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
@@ -133,7 +112,7 @@ struct boss_grobbulusAI : public ScriptedAI
             if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SLIME_STREAM) == CAST_OK)
-                    // Give some time, to re-reach grobbulus
+                    // Give some time, to re-reach Grobbulus
                     m_uiSlimeStreamTimer = 3 * IN_MILLISECONDS;
             }
         }
@@ -161,10 +140,7 @@ struct boss_grobbulusAI : public ScriptedAI
         if (m_uiSlimeSprayTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SLIME_SPRAY) == CAST_OK)
-            {
-                m_uiSlimeSprayTimer = urand(30 * IN_MILLISECONDS, 60 * IN_MILLISECONDS);
-                DoScriptText(EMOTE_SPRAY_SLIME, m_creature);
-            }
+                m_uiSlimeSprayTimer = urand(20, 30) * IN_MILLISECONDS;
         }
         else
             m_uiSlimeSprayTimer -= uiDiff;
@@ -172,13 +148,16 @@ struct boss_grobbulusAI : public ScriptedAI
         // Mutagen Injection
         if (m_uiInjectionTimer < uiDiff)
         {
-            if (DoCastMutagenInjection())
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MUTATING_INJECTION, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
             {
-                // Mutagen Injection should be used more often when below 30%
-                if (m_creature->GetHealthPercent() > 30.0f)
-                    m_uiInjectionTimer = urand(7000, 13000);
-                else
-                    m_uiInjectionTimer = urand(3000, 7000);
+                if (DoCastSpellIfCan(pTarget, SPELL_MUTATING_INJECTION, CAST_TRIGGERED) == CAST_OK)
+                {
+                    // Mutagen Injection is used more often when below 30% HP
+                    if (m_creature->GetHealthPercent() > 30.0f)
+                        m_uiInjectionTimer = urand(7, 13) * IN_MILLISECONDS;
+                    else
+                        m_uiInjectionTimer = urand(3, 7) * IN_MILLISECONDS;
+                }
             }
         }
         else
