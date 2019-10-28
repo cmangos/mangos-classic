@@ -1268,6 +1268,50 @@ bool ChatHandler::HandleGameObjectNearSpawnedCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleGameObjectRespawnCommand(char* args)
+{
+    uint32 lowguid;
+    if (!ExtractUint32KeyFromLink(&args, "Hgameobject", lowguid))
+        return false;
+
+    if (!lowguid)
+        return false;
+
+    GameObject* obj = nullptr;
+
+    // by DB guid
+    if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))
+        obj = GetGameObjectWithGuid(lowguid, go_data->id);
+
+    if (!obj)
+    {
+        PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, lowguid);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (obj->IsSpawned())
+        return true;                                    // gameobject already spawned
+
+    if (obj->IsSpawnedByDefault()) // static spawned go - can only respawn
+        obj->Respawn();
+    else
+    {
+        uint32 timeToDespawn;
+        if (!ExtractUInt32(&args, timeToDespawn))
+        {
+            SendSysMessage("Need to input valid respawn time in seconds.");
+            return false;
+        }
+        obj->SetLootState(GO_READY);
+        obj->SetRespawnTime(timeToDespawn);             // despawn object in ? seconds
+        obj->Refresh();
+    }
+
+    PSendSysMessage("GameObject entry: %u guid: %u respawned!", obj->GetEntry(), lowguid);
+    return true;
+}
+
 bool ChatHandler::HandleGUIDCommand(char* /*args*/)
 {
     ObjectGuid guid = m_session->GetPlayer()->GetSelectionGuid();
