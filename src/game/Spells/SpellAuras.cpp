@@ -1450,17 +1450,21 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 return;
             case 28169:                                     // Mutating Injection
             {
-                // Mutagen Explosion
-                target->CastSpell(target, 28206, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                    // Embalming Cloud
+                    target->CastSpell(target, 28322, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                else // Removed by dispell
+                    // Mutagen Explosion
+                    target->CastSpell(target, 28206, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 // Poison Cloud
                 target->CastSpell(target, 28240, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
-            case 29104:										// Anub'Rekhan Aura
+            case 29104:                                     // Anub'Rekhan Aura
             {
-            	if (m_removeMode == AURA_REMOVE_BY_DEATH && target->GetTypeId() == TYPEID_PLAYER)
-            		target->CastSpell(target, 29105, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-            	return;
+                if (m_removeMode == AURA_REMOVE_BY_DEATH && target->GetTypeId() == TYPEID_PLAYER)
+                    target->CastSpell(target, 29105, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                return;
             }
             case 30238:                                     // Lordaeron's Bleesing
             {
