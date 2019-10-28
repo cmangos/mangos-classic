@@ -6895,7 +6895,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
                 case 28241:                                 // Poison (Naxxramas, Grobbulus Cloud)
                 {
                     if (SpellAuraHolder* auraHolder = m_caster->GetSpellAuraHolder(28158))
-                        radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
+                        radius = 0.3f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
                     break;
                 }
                 default:
