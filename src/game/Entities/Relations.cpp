@@ -1074,6 +1074,12 @@ bool Unit::CanAttackSpell(Unit const* target, SpellEntry const* spellInfo, bool 
                     }
                 }
             }
+            else
+            {
+                // NPC units cant *unintentionally* attack non-hostile PC units unless already in combat with them
+                if (!IsEnemy(target) && (!isInCombat() || !IsAttackedBy(const_cast<Unit*>(target))))
+                    return false;
+            }
         }
         return true;
     }
