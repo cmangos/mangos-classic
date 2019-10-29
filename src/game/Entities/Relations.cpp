@@ -1076,9 +1076,19 @@ bool Unit::CanAttackSpell(Unit const* target, SpellEntry const* spellInfo, bool 
             }
             else
             {
-                // NPC units cant *unintentionally* attack non-hostile PC units unless already in combat with them
-                if (!IsEnemy(target) && (!isInCombat() || !IsAttackedBy(const_cast<Unit*>(target))))
-                    return false;
+                // NPC units cant *unintentionally* attack non-hostile PC units which aren't at war with them
+                if (!IsEnemy(target))
+                {
+                    if (const Player* unitPlayer = target->GetControllingPlayer())
+                    {
+                        if (const FactionTemplateEntry* thisFactionTemplate = GetFactionTemplateEntry())
+                        {
+                            const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry<FactionEntry>(thisFactionTemplate->faction);
+                            if (thisFactionEntry && thisFactionEntry->HasReputation())
+                                return unitPlayer->GetReputationMgr().IsAtWar(thisFactionEntry);
+                        }
+                    }
+                }
             }
         }
         return true;
