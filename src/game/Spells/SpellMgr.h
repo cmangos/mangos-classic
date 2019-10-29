@@ -835,8 +835,7 @@ inline bool IsNeutralEffectTargetPositive(uint32 etarget, const WorldObject* cas
     if (!caster)
         return true;
 
-    // TODO: Fix it later
-    return caster->IsFriend(static_cast<const Unit*>(target));
+    return !caster->CanAttackSpell(static_cast<const Unit*>(target));
 }
 
 inline bool IsPositiveEffectTargetMode(const SpellEntry* entry, SpellEffectIndex effIndex, const WorldObject* caster = nullptr, const WorldObject* target = nullptr, bool recursive = false)
