@@ -162,13 +162,13 @@ float VisibilityData::GetStealthVisibilityDistance(Unit const* target, bool aler
     // Level difference: 5 point / level, starting from level 1.
     // There may be spells for this and the starting points too, but
     // not in the DBCs of the client.
-    detectionValue += int32(target->GetLevelForTarget(nullptr) - 1) * 5;
+    detectionValue += int32(target->GetLevelForTarget(dynamic_cast<Unit*>(m_owner)) - 1) * 5;
 
     // Apply modifiers
     detectionValue += target->GetVisibilityData().GetStealthDetectionStrength(STEALTH_UNIT);
     if (m_owner->GetTypeId() == TYPEID_GAMEOBJECT) // trap case
         if (Unit* owner = static_cast<GameObject*>(m_owner)->GetOwner())
-            detectionValue -= int32(owner->GetLevelForTarget(nullptr) - 1) * 5;
+            detectionValue -= int32(owner->GetLevelForTarget(dynamic_cast<Unit*>(m_owner)) - 1) * 5;
 
     detectionValue -= GetStealthStrength(STEALTH_UNIT);
 
