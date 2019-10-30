@@ -44,10 +44,12 @@ enum
 enum MoamActions
 {
     MOAM_ARCANE_ERUPTION,
+    MOAM_MANA_FIENDS,
+    MOAM_ENERGIZE,
     MOAM_TRAMPLE,
     MOAM_MANA_DRAIN,
-    MOAM_MANA_FIENDS,
     MOAM_ACTION_MAX,
+    MOAM_CANCEL_ENERGIZE,
 };
 
 struct boss_moamAI : public CombatAI
@@ -58,6 +60,11 @@ struct boss_moamAI : public CombatAI
         AddCombatAction(MOAM_TRAMPLE, 9000u);
         AddCombatAction(MOAM_MANA_DRAIN, 6000u);
         AddCombatAction(MOAM_MANA_FIENDS, 90000u);
+        AddCombatAction(MOAM_ENERGIZE, 90000u);
+        AddCustomAction(MOAM_CANCEL_ENERGIZE, true, [&]()
+        {
+            m_creature->RemoveAurasDueToSpell(SPELL_ENERGIZE);
+        });
     }
 
     uint8 m_uiPhase;
@@ -114,10 +121,16 @@ struct boss_moamAI : public CombatAI
             case MOAM_MANA_FIENDS:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_MANAFIENDS) == CAST_OK)
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_ENERGIZE);
-                    DoScriptText(EMOTE_ENERGIZING, m_creature);
                     ResetCombatAction(action, 90000);
+                break;
+            }
+            case MOAM_ENERGIZE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_ENERGIZE) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_ENERGIZING, m_creature);
+                    ResetTimer(MOAM_CANCEL_ENERGIZE, 90000);
+                    ResetCombatAction(action, 180000);
                 }
                 break;
             }
