@@ -219,7 +219,7 @@ bool FleeingMovementGenerator::_getLocation(Unit& owner, float& x, float& y, flo
 
     owner.GetPosition(x, y, z);
 
-    return AbstractRandomMovementGenerator::_getLocation(owner, x, y, z);
+    return owner.GetMap()->GetReachableRandomPosition(&owner, x, y, z, i_radius, false);
 }
 
 void PanicMovementGenerator::Initialize(Unit& owner)

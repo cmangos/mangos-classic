@@ -2248,10 +2248,10 @@ bool Map::ContainsGameObjectModel(const GameObjectModel& mdl) const
 }
 
 // This will generate a random point to all directions in water for the provided point in radius range.
-bool Map::GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status) const
+bool Map::GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status, bool randomRange/* = true*/) const
 {
     const float angle = rand_norm_f() * (M_PI_F * 2.0f);
-    const float range = rand_norm_f() * radius;
+    const float range = (randomRange ? rand_norm_f() : 1.f) * radius;
 
     float i_x = x + range * cos(angle);
     float i_y = y + range * sin(angle);
@@ -2282,10 +2282,10 @@ bool Map::GetRandomPointUnderWater(float& x, float& y, float& z, float radius, G
 }
 
 // This will generate a random point to all directions in air for the provided point in radius range.
-bool Map::GetRandomPointInTheAir(float& x, float& y, float& z, float radius) const
+bool Map::GetRandomPointInTheAir(float& x, float& y, float& z, float radius, bool randomRange/* = true*/) const
 {
     const float angle = rand_norm_f() * (M_PI_F * 2.0f);
-    const float range = rand_norm_f() * radius;
+    const float range = (randomRange ? rand_norm_f() : 1.f) * radius;
 
     float i_x = x + range * cos(angle);
     float i_y = y + range * sin(angle);
@@ -2308,11 +2308,11 @@ bool Map::GetRandomPointInTheAir(float& x, float& y, float& z, float radius) con
 }
 
 // supposed to be used for not big radius, usually less than 20.0f
-bool Map::GetReachableRandomPointOnGround(float& x, float& y, float& z, float radius) const
+bool Map::GetReachableRandomPointOnGround(float& x, float& y, float& z, float radius, bool randomRange/* = true*/) const
 {
     // Generate a random range and direction for the new point
     const float angle = rand_norm_f() * (M_PI_F * 2.0f);
-    const float range = rand_norm_f() * radius;
+    const float range = (randomRange ? rand_norm_f() : 1.f) * radius;
 
     float i_x = x + range * cos(angle);
     float i_y = y + range * sin(angle);
@@ -2355,7 +2355,7 @@ bool Map::GetReachableRandomPointOnGround(float& x, float& y, float& z, float ra
 }
 
 // Get random point by handling different situation depending of if the unit is flying/swimming/walking
-bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius) const
+bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius, bool randomRange/* = true*/) const
 {
     float i_x = x;
     float i_y = y;
@@ -2384,7 +2384,7 @@ bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, f
     bool newDestAssigned;   // used to check if new random destination is found
     if (isFlying)
     {
-        newDestAssigned = GetRandomPointInTheAir(i_x, i_y, i_z, radius);
+        newDestAssigned = GetRandomPointInTheAir(i_x, i_y, i_z, radius, randomRange);
         /*if (newDestAssigned)
         sLog.outString("Generating air random point for %s", GetGuidStr().c_str());*/
     }
@@ -2394,13 +2394,13 @@ bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, f
         GridMapLiquidStatus res = m_TerrainData->getLiquidStatus(i_x, i_y, i_z, MAP_ALL_LIQUIDS, &liquid_status);
         if (isSwimming && (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER)))
         {
-            newDestAssigned = GetRandomPointUnderWater(i_x, i_y, i_z, radius, liquid_status);
+            newDestAssigned = GetRandomPointUnderWater(i_x, i_y, i_z, radius, liquid_status, randomRange);
             /*if (newDestAssigned)
             sLog.outString("Generating swim random point for %s", GetGuidStr().c_str());*/
         }
         else
         {
-            newDestAssigned = GetReachableRandomPointOnGround(i_x, i_y, i_z, radius);
+            newDestAssigned = GetReachableRandomPointOnGround(i_x, i_y, i_z, radius, randomRange);
             /*if (newDestAssigned)
             sLog.outString("Generating ground random point for %s", GetGuidStr().c_str());*/
         }
