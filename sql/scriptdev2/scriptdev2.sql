@@ -2375,7 +2375,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1533045,'Come, Zeliek, do not drive them out. Not before we\'ve had our fun.',8896,6,0,0,'blaumeux SAY_BLAU_TAUNT1'),
 (-1533046,'I do hope they stay alive long enough for me to... introduce myself.',8897,6,0,0,'blaumeux SAY_BLAU_TAUNT2'),
 (-1533047,'The first kill goes to me! Anyone care to wager?',8898,6,0,0,'blaumeux SAY_BLAU_TAUNT3'),
-(-1533048,'Your life is mine!',8895,1,0,0,'blaumeux SAY_BLAU_SPECIAL'),
+(-1533048,'Your life is mine!',8895,0,0,0,'blaumeux SAY_BLAU_SPECIAL'),
 (-1533049,'Who\'s next?',8894,0,0,0,'blaumeux SAY_BLAU_SLAY'),
 (-1533050,'Tou... che!',8893,0,0,0,'blaumeux SAY_BLAU_DEATH'),
 

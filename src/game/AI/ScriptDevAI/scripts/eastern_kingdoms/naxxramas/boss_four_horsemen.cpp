@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Four_Horsemen
 SD%Complete: 99
-SDComment: Is special text used when 100 marks are reached?
+SDComment: Percentage of say for special text is guessed based on videos
 SDCategory: Naxxramas
 EndScriptData
 
@@ -34,7 +34,6 @@ enum
     SAY_BLAU_SPECIAL        = -1533048,
     SAY_BLAU_SLAY           = -1533049,
     SAY_BLAU_DEATH          = -1533050,
-    // EMOTE_UNYIELDING_PAIN = -1533156,
 
     // alexandros mograine
     SAY_MORG_AGGRO1         = -1533065,
@@ -56,7 +55,6 @@ enum
     SAY_ZELI_SPECIAL        = -1533062,
     SAY_ZELI_SLAY           = -1533063,
     SAY_ZELI_DEATH          = -1533064,
-    // EMOTE_CONDEMATION     = -1533157,
 
     // ***** Spells *****
     // all horsemen
@@ -82,12 +80,26 @@ enum
     SPELL_HOLY_WRATH        = 28883,
     SPELL_SPIRIT_ZELIEK     = 28934,
 
+    INDEX_BLAUMEUX          = 0,
+    INDEX_MORGRAINE         = 1,
+    INDEX_KORTHAZZ          = 2,
+    INDEX_ZELIEK            = 3,
+
     MAX_MARK_STACKS         = 100,      // Horsemen enrage at this milestone
 };
 
-struct boss_lady_blaumeuxAI : public ScriptedAI
+// Texts used during the encounter: they are ordered so we can easily use them in a parent class
+static int32 const aggroSayList[4] = { SAY_BLAU_AGGRO, 0, SAY_KORT_AGGRO, SAY_ZELI_AGGRO };
+static int32 const deathSayList[4] = { SAY_BLAU_DEATH, SAY_MORG_DEATH, SAY_KORT_DEATH, SAY_ZELI_DEATH };
+static int32 const killSayList[4] = { SAY_BLAU_SLAY, 0, SAY_KORT_SLAY, SAY_ZELI_SLAY };
+
+// Spells used during the encounter: they are ordered so we can easily use them in a parent class
+static uint32 const spiritSpellList[4] = { SPELL_SPIRIT_BLAUMEUX, SPELL_SPIRIT_MOGRAINE, SPELL_SPIRIT_KORTHAZZ, SPELL_SPIRIT_ZELIEK };
+static uint32 const markSpellList[4] = { SPELL_MARK_OF_BLAUMEUX, SPELL_MARK_OF_MOGRAINE, SPELL_MARK_OF_KORTHAZZ, SPELL_MARK_OF_ZELIEK };
+
+struct boss_horsmenAI : public ScriptedAI
 {
-    boss_lady_blaumeuxAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_horsmenAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
@@ -96,23 +108,23 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
 
     uint32 m_uiMarkTimer;
-    uint32 m_uiVoidZoneTimer;
     uint32 m_uiMarkCounter;
+    uint32 m_uiHorsmenIndex;            // Used to differentiate each of the Four Horsemen in the children classes
 
     float m_fHealthCheck;
 
     void Reset() override
     {
-        m_uiMarkTimer       = 20000;
-        m_uiVoidZoneTimer   = 15000;
-        m_uiMarkCounter     = 0;
+        m_uiMarkTimer           = 20 * IN_MILLISECONDS;
+        m_uiMarkCounter         = 0;
+        m_uiHorsmenIndex        = INDEX_BLAUMEUX;		// Default: Lady Blaumeux (1: Highlord Morgraine, 2: Thane Korth'azz, 3: Sir Zeliek)
 
-        m_fHealthCheck      = 50.0f;
+        m_fHealthCheck          = 50.0f;
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_BLAU_AGGRO, m_creature);
+        DoScriptText(aggroSayList[m_uiHorsmenIndex], m_creature);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
@@ -120,13 +132,13 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(SAY_BLAU_SLAY, m_creature);
+        DoScriptText(killSayList[m_uiHorsmenIndex], m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_BLAU_DEATH, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_SPIRIT_BLAUMEUX, CAST_TRIGGERED);
+        DoScriptText(deathSayList[m_uiHorsmenIndex], m_creature);
+        DoCastSpellIfCan(m_creature, spiritSpellList[m_uiHorsmenIndex], CAST_TRIGGERED);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
@@ -138,10 +150,16 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
             m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
     }
 
+    virtual void UpdateHorsmenAI(const uint32 /*uiDiff*/) {}
+
     void UpdateAI(const uint32 uiDiff) override
     {
+        // Do nothing if no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
+
+        // Call Horsemen specific virtual function to cast special spells
+        UpdateHorsmenAI(uiDiff);
 
         if (m_creature->GetHealthPercent() <= m_fHealthCheck)
         {
@@ -151,28 +169,55 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
 
         if (m_uiMarkTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_BLAUMEUX) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, markSpellList[m_uiHorsmenIndex]) == CAST_OK)
             {
                 m_uiMarkCounter++;
-                m_uiMarkTimer = 12000;
+                m_uiMarkTimer = 12 * IN_MILLISECONDS;
             }
         }
         else
             m_uiMarkTimer -= uiDiff;
 
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAI_boss_horsmen(Creature* pCreature)
+{
+    return new boss_horsmenAI(pCreature);
+}
+
+struct boss_lady_blaumeuxAI : public boss_horsmenAI
+{
+    boss_lady_blaumeuxAI(Creature* pCreature) : boss_horsmenAI(pCreature) { Reset(); }
+
+    uint32 m_uiVoidZoneTimer;
+
+    void Reset() override
+    {
+        boss_horsmenAI::Reset();
+
+        m_uiVoidZoneTimer = 15000;
+        // No need to define m_uiHorsmenIndex as Blaumeux is default index
+    }
+
+    void UpdateHorsmenAI(const uint32 uiDiff) override
+    {
         if (m_uiVoidZoneTimer < uiDiff)
         {
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_VOID_ZONE, SELECT_FLAG_PLAYER);
             if (pTarget)
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_VOID_ZONE) == CAST_OK)
-                    m_uiVoidZoneTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 15000 : 1000;
+                {
+                    m_uiVoidZoneTimer = (m_uiMarkCounter < MAX_MARK_STACKS ? 12 : 1 ) * IN_MILLISECONDS;
+                    if (urand(0 ,9) < 1)
+                        DoScriptText(SAY_BLAU_SPECIAL, m_creature);
+                }
             }
         }
         else
             m_uiVoidZoneTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
@@ -181,29 +226,18 @@ UnitAI* GetAI_boss_lady_blaumeux(Creature* pCreature)
     return new boss_lady_blaumeuxAI(pCreature);
 }
 
-struct boss_alexandros_mograineAI : public ScriptedAI
+struct boss_alexandros_mograineAI : public boss_horsmenAI
 {
-    boss_alexandros_mograineAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
+    boss_alexandros_mograineAI(Creature* pCreature) : boss_horsmenAI(pCreature) { Reset(); }
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiMarkTimer;
     uint32 m_uiRighteousFireTimer;
-    uint32 m_uiMarkCounter;
-
-    float m_fHealthCheck;
 
     void Reset() override
     {
-        m_uiMarkTimer          = 20000;
-        m_uiRighteousFireTimer = 15000;
-        m_uiMarkCounter        = 0;
+        boss_horsmenAI::Reset();
 
-        m_fHealthCheck         = 50.0f;
+        m_uiRighteousFireTimer = 15 * IN_MILLISECONDS;
+        m_uiHorsmenIndex       = INDEX_MORGRAINE;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -224,52 +258,19 @@ struct boss_alexandros_mograineAI : public ScriptedAI
         DoScriptText(urand(0, 1) ? SAY_MORG_SLAY1 : SAY_MORG_SLAY2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void UpdateHorsmenAI(const uint32 uiDiff) override
     {
-        DoScriptText(SAY_MORG_DEATH, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_SPIRIT_MOGRAINE, CAST_TRIGGERED);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_creature->GetHealthPercent() <= m_fHealthCheck)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHIELDWALL) == CAST_OK)
-                m_fHealthCheck -= 30.0f;
-        }
-
-        if (m_uiMarkTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_MOGRAINE) == CAST_OK)
-            {
-                m_uiMarkCounter++;
-                m_uiMarkTimer = 12000;
-            }
-        }
-        else
-            m_uiMarkTimer -= uiDiff;
-
         if (m_uiRighteousFireTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RIGHTEOUS_FIRE) == CAST_OK)
-                m_uiRighteousFireTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 15000 : 1000;
+            {
+                m_uiRighteousFireTimer = (m_uiMarkCounter < MAX_MARK_STACKS ? 15 : 1) * IN_MILLISECONDS;
+                if (urand(0 ,9) < 1)
+                    DoScriptText(SAY_MORG_SPECIAL, m_creature);
+            }
         }
         else
             m_uiRighteousFireTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
@@ -278,90 +279,33 @@ UnitAI* GetAI_boss_alexandros_mograine(Creature* pCreature)
     return new boss_alexandros_mograineAI(pCreature);
 }
 
-struct boss_thane_korthazzAI : public ScriptedAI
+struct boss_thane_korthazzAI : public boss_horsmenAI
 {
-    boss_thane_korthazzAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
+    boss_thane_korthazzAI(Creature* pCreature) : boss_horsmenAI(pCreature) { Reset(); }
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiMarkTimer;
     uint32 m_uiMeteorTimer;
-    uint32 m_uiMarkCounter;
-
-    float m_fHealthCheck;
 
     void Reset() override
     {
-        m_uiMarkTimer       = 20000;
-        m_uiMeteorTimer     = 30000;
-        m_uiMarkCounter     = 0;
+        boss_horsmenAI::Reset();
 
-        m_fHealthCheck      = 50.0f;
+        m_uiMeteorTimer     = 30 * IN_MILLISECONDS;
+        m_uiHorsmenIndex    = INDEX_KORTHAZZ;
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void UpdateHorsmenAI(const uint32 uiDiff) override
     {
-        DoScriptText(SAY_KORT_AGGRO, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(SAY_KORT_SLAY, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_KORT_DEATH, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_SPIRIT_KORTHAZZ, CAST_TRIGGERED);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_creature->GetHealthPercent() <= m_fHealthCheck)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHIELDWALL) == CAST_OK)
-                m_fHealthCheck -= 30.0f;
-        }
-
-        if (m_uiMarkTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_KORTHAZZ) == CAST_OK)
-            {
-                m_uiMarkCounter++;
-                m_uiMarkTimer = 12000;
-            }
-        }
-        else
-            m_uiMarkTimer -= uiDiff;
-
         if (m_uiMeteorTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_METEOR) == CAST_OK)
-                m_uiMeteorTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 20000 : 1000;
+            {
+                m_uiMeteorTimer = (m_uiMarkCounter < MAX_MARK_STACKS ? 20 : 1) * IN_MILLISECONDS;
+                if (urand(0 ,9) < 1)
+                    DoScriptText(SAY_KORT_SPECIAL, m_creature);
+            }
         }
         else
             m_uiMeteorTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
@@ -370,90 +314,33 @@ UnitAI* GetAI_boss_thane_korthazz(Creature* pCreature)
     return new boss_thane_korthazzAI(pCreature);
 }
 
-struct boss_sir_zeliekAI : public ScriptedAI
+struct boss_sir_zeliekAI : public boss_horsmenAI
 {
-    boss_sir_zeliekAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
+    boss_sir_zeliekAI(Creature* pCreature) : boss_horsmenAI(pCreature) { Reset(); }
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiMarkTimer;
     uint32 m_uiHolyWrathTimer;
-    uint32 m_uiMarkCounter;
-
-    float m_fHealthCheck;
 
     void Reset() override
     {
-        m_uiMarkTimer       = 20000;
-        m_uiHolyWrathTimer  = 12000;
-        m_uiMarkCounter     = 0;
+        boss_horsmenAI::Reset();
 
-        m_fHealthCheck      = 50.0f;
+        m_uiHolyWrathTimer  = 12 * IN_MILLISECONDS;
+        m_uiHorsmenIndex    = INDEX_ZELIEK;
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void UpdateHorsmenAI(const uint32 uiDiff) override
     {
-        DoScriptText(SAY_ZELI_AGGRO, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(SAY_ZELI_SLAY, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_ZELI_DEATH, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_SPIRIT_ZELIEK, CAST_TRIGGERED);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_creature->GetHealthPercent() <= m_fHealthCheck)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHIELDWALL) == CAST_OK)
-                m_fHealthCheck -= 30.0f;
-        }
-
-        if (m_uiMarkTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_ZELIEK) == CAST_OK)
-            {
-                m_uiMarkCounter++;
-                m_uiMarkTimer = 12000;
-            }
-        }
-        else
-            m_uiMarkTimer -= uiDiff;
-
         if (m_uiHolyWrathTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLY_WRATH) == CAST_OK)
-                m_uiHolyWrathTimer = m_uiMarkCounter < MAX_MARK_STACKS ? 15000 : 1000;
+            {
+                m_uiHolyWrathTimer = (m_uiMarkCounter < MAX_MARK_STACKS ? 12 : 1) * IN_MILLISECONDS;
+                if (urand(0 ,9) < 1)
+                    DoScriptText(SAY_ZELI_SPECIAL, m_creature);
+            }
         }
         else
             m_uiHolyWrathTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
