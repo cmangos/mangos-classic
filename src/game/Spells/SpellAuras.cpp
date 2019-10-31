@@ -950,6 +950,15 @@ void Aura::TriggerSpell()
                             return;
                         }
                     }
+                    case 29351:                             // Plague Wave Controller (Slow)
+                    case 30114:                             // Plague Wave Controller (Fast)
+                    {
+                        uint32 spellForTick[6] = { 30116, 30117, 30118, 30119, 30118, 30117 };  // Circling back and forth through the 4 plague areas
+                        uint32 tick = (GetAuraTicks() - 1) % 6;
+
+                        triggerTarget->CastSpell(triggerTarget, spellForTick[tick], TRIGGERED_OLD_TRIGGERED, nullptr, this, casterGUID);
+                        return;
+                    }
 //                    // Guardian of Icecrown Passive
 //                    case 29897: break;
 //                    // Mind Exhaustion Passive
