@@ -28,16 +28,11 @@ EndScriptData
 
 enum
 {
-    // EMOTE_AURA_BLOCKING   = -1533143,
-    // EMOTE_AURA_WANE       = -1533144,
-    // EMOTE_AURA_FADING     = -1533145,
-
     SPELL_CORRUPTED_MIND    = 29201,            // this triggers the following spells on targets (based on class): 29185, 29194, 29196, 29198
     SPELL_POISON_AURA       = 29865,
     SPELL_INEVITABLE_DOOM   = 29204,
     SPELL_SUMMON_SPORE      = 29234,
     SPELL_REMOVE_CURSE      = 30281,
-    // SPELL_BERSERK         = 26662,
 
     NPC_SPORE               = 16286
 };
@@ -57,17 +52,15 @@ struct boss_loathebAI : public ScriptedAI
     uint32 m_uiInevitableDoomTimer;
     uint32 m_uiRemoveCurseTimer;
     uint32 m_uiSummonTimer;
-    // uint32 m_uiBerserkTimer;
     uint8 m_uiCorruptedMindCount;
 
     void Reset() override
     {
-        m_uiPoisonAuraTimer = 5000;
-        m_uiCorruptedMindTimer = 4000;
-        m_uiRemoveCurseTimer = 2000;
-        m_uiInevitableDoomTimer = MINUTE * 2 * IN_MILLISECONDS;
-        m_uiSummonTimer = 12000;
-        // m_uiBerserkTimer = MINUTE*12*IN_MILLISECONDS;    // not used
+        m_uiPoisonAuraTimer = 5 * IN_MILLISECONDS;
+        m_uiCorruptedMindTimer = 4 * IN_MILLISECONDS;
+        m_uiRemoveCurseTimer = 2 * IN_MILLISECONDS;
+        m_uiInevitableDoomTimer = 2 * MINUTE * IN_MILLISECONDS;
+        m_uiSummonTimer = 12 * IN_MILLISECONDS;
         m_uiCorruptedMindCount = 0;
     }
 
@@ -91,32 +84,21 @@ struct boss_loathebAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        if (pSummoned->GetEntry() != NPC_SPORE)
-            return;
-
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AddThreat(pTarget);
+        if (pSummoned->GetEntry() == NPC_SPORE)
+            pSummoned->SetInCombatWithZone();
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        // Do nothing if no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
-
-        /* Berserk - not used
-        if (m_uiBerserkTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_BERSERK);
-            m_uiBerserkTimer = 300000;
-        }
-        else
-            m_uiBerserkTimer -= uiDiff;*/
 
         // Inevitable Doom
         if (m_uiInevitableDoomTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_INEVITABLE_DOOM) == CAST_OK)
-                m_uiInevitableDoomTimer = (m_uiCorruptedMindCount <= 5) ? 30000 : 15000;
+            if (DoCastSpellIfCan(m_creature, SPELL_INEVITABLE_DOOM, CAST_TRIGGERED) == CAST_OK)
+                m_uiInevitableDoomTimer = ((m_uiCorruptedMindCount <= 5) ? 30 : 15) * IN_MILLISECONDS;
         }
         else
             m_uiInevitableDoomTimer -= uiDiff;
@@ -124,10 +106,10 @@ struct boss_loathebAI : public ScriptedAI
         // Corrupted Mind
         if (m_uiCorruptedMindTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_CORRUPTED_MIND) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, SPELL_CORRUPTED_MIND, CAST_TRIGGERED) == CAST_OK)
             {
                 ++m_uiCorruptedMindCount;
-                m_uiCorruptedMindTimer = 60000;
+                m_uiCorruptedMindTimer = 60 * IN_MILLISECONDS;
             }
         }
         else
@@ -136,8 +118,8 @@ struct boss_loathebAI : public ScriptedAI
         // Summon
         if (m_uiSummonTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE) == CAST_OK)
-                m_uiSummonTimer = 12000;
+            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE, CAST_TRIGGERED) == CAST_OK)
+                m_uiSummonTimer = 12 * IN_MILLISECONDS;
         }
         else
             m_uiSummonTimer -= uiDiff;
@@ -146,7 +128,7 @@ struct boss_loathebAI : public ScriptedAI
         if (m_uiPoisonAuraTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_POISON_AURA) == CAST_OK)
-                m_uiPoisonAuraTimer = 12000;
+                m_uiPoisonAuraTimer = 12 * IN_MILLISECONDS;
         }
         else
             m_uiPoisonAuraTimer -= uiDiff;
@@ -154,8 +136,9 @@ struct boss_loathebAI : public ScriptedAI
         // Remove Curse
         if (m_uiRemoveCurseTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_REMOVE_CURSE) == CAST_OK)
-                m_uiRemoveCurseTimer = 30000;
+            SpellCastResult decurseResult = m_creature->CastSpell(m_creature, SPELL_REMOVE_CURSE, TRIGGERED_OLD_TRIGGERED);
+            if (decurseResult == SPELL_CAST_OK || decurseResult == SPELL_FAILED_NOTHING_TO_DISPEL)  // Don't throw an error if there is nothing to dispel
+                m_uiRemoveCurseTimer = 30 * IN_MILLISECONDS;
         }
         else
             m_uiRemoveCurseTimer -= uiDiff;
