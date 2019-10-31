@@ -72,3 +72,6 @@ UPDATE spell_template SET EffectRadiusIndex1=16 WHERE id IN (28864, 29105);
 
 -- Fix radius of Consumption spell for Void Zone in Four Horsemen (use same value than TBC DBCs)
 UPDATE spell_template SET EffectRadiusIndex1=7 WHERE id=28865;
+
+-- Fix radius of Summon Spore spell in Loatheb (use same value than WotLK DBCs)
+UPDATE spell_template SET EffectRadiusIndex1=23 WHERE id=29234;
