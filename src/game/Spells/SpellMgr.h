@@ -1106,6 +1106,8 @@ inline uint32 GetAffectedTargets(SpellEntry const* spellInfo)
                 case 10258:                                 // Awaken Vault Warder (Uldaman)
                 case 28542:                                 // Life Drain (Naxx, Sapphiron)
                     return 2;
+                case 29232:                                 // Fungal Bloom (Loatheb)
+                    return 5;
                 case 25676:                                 // Drain Mana (correct number has to be researched)
                 case 25754:
                     return 6;
