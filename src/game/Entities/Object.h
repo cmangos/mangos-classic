@@ -318,6 +318,7 @@ struct WorldLocation
     WorldLocation(WorldLocation const& loc)
         : mapid(loc.mapid), coord_x(loc.coord_x), coord_y(loc.coord_y), coord_z(loc.coord_z), orientation(loc.orientation) {}
     WorldLocation(uint32 mapId, Position const& pos) : mapid(mapId), coord_x(pos.x), coord_y(pos.y), coord_z(pos.z), orientation(pos.o) {}
+    void GetPosition(float& x, float& y, float& z) { x = coord_x; y = coord_y; z = coord_z; }
 };
 
 
