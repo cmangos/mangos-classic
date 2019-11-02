@@ -369,7 +369,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
             savedhealth = GetMaxHealth() * (float(healthPercentage) / 100);
             savedpower = 0;
         }
-        else
+        else if (getPetType() != SUMMON_PET)
             return false;
     }
 
