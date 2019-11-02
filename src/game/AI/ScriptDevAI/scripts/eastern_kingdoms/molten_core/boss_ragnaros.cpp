@@ -331,11 +331,11 @@ struct boss_ragnarosAI : public CombatAI
                         {
                             if (DoCastSpellIfCan(target, SPELL_MAGMA_BLAST) == CAST_OK)
                             {
-                                if (!m_bHasYelledMagmaBurst)
-                                {
-                                    DoScriptText(SAY_MAGMABURST, m_creature);
-                                    m_bHasYelledMagmaBurst = true;
-                                }
+                                //if (!m_bHasYelledMagmaBurst)
+                                //{
+                                //    DoScriptText(SAY_MAGMABURST, m_creature);
+                                //    m_bHasYelledMagmaBurst = true;
+                                //}
                                 timer = 2500;
                             }
                         }

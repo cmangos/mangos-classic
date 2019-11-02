@@ -54,7 +54,7 @@ struct boss_magmadarAI : public CombatAI
     boss_magmadarAI(Creature* creature) : CombatAI(creature, MAGMADAR_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         AddCombatAction(MAGMADAR_FRENZY, 30000u);
-        AddCombatAction(MAGMADAR_PANIC, 7000u);
+        AddCombatAction(MAGMADAR_PANIC, 6000, 10000);
         AddCombatAction(MAGMADAR_LAVABOMB, 12000u);
         AddCombatAction(MAGMADAR_LAVABOMB_MANA, 18000u);
         Reset();
@@ -102,7 +102,7 @@ struct boss_magmadarAI : public CombatAI
             case MAGMADAR_PANIC:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_PANIC) == CAST_OK)
-                    ResetCombatAction(action, urand(30000, 40000));
+                    ResetCombatAction(action, urand(16000, 21000));
                 break;
             }
             case MAGMADAR_LAVABOMB:
