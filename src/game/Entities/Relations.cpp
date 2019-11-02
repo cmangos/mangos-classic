@@ -962,6 +962,34 @@ bool Creature::IsInGroup(Unit const* other, bool party/* = false*/, bool ignoreC
 ##########################*/
 
 /////////////////////////////////////////////////
+/// [Serverside] Get player to corpse reaction
+///
+/// @note Relations API Tier 3
+///
+/// This function is a required serverside component for crossfaction functionality.
+/////////////////////////////////////////////////
+ReputationRank Player::GetReactionTo(const Corpse* corpse) const
+{
+    if (corpse)
+    {
+        if (Player* corpseOwner = sObjectMgr.GetPlayer(corpse->GetOwnerGuid()))
+        {
+            if (this != corpseOwner && GetTeam() != corpseOwner->GetTeam())
+            {
+                // [XFACTION]: Swap faction check with "Alliance Generic" and 'Horde Generic" for crossfaction functionality
+                if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP) && IsInGroup(corpseOwner))
+                {
+                    uint32 id = (GetTeam() == ALLIANCE ? 1054 : 1495);
+                    return GetFactionReaction(GetFactionTemplateEntry(), sFactionTemplateStore.LookupEntry(id));
+                }
+            }
+        }
+    }
+
+    return Unit::GetReactionTo(corpse);
+}
+
+/////////////////////////////////////////////////
 /// [Serverside] Opposition: DynamicObject can target a target with a harmful spell
 ///
 /// @note Relations API Tier 3

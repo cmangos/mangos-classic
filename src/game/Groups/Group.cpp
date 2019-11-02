@@ -951,9 +951,17 @@ void Group::_updateMembersOnRosterChanged(Player* changed)
             target->CallForAllControlledUnits(forcehp, (CONTROLLED_MINIPET | CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM));
         }
 
-        // [XFACTION]: Prepare to alter faction if detected crossfaction group interaction:
-        if (xfaction && !pov->HasCharmer() && !pov->CanCooperate(target))
+        // [XFACTION]: Prepare to alter object fields if detected crossfaction group interaction:
+        if (xfaction && !pov->CanCooperate(target))
+        {
             target->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+
+            if (target->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (Corpse* corpse = static_cast<Player*>(target)->GetCorpse())
+                    corpse->ForceValuesUpdateAtIndex(CORPSE_FIELD_BYTES_1);
+            }
+        }
     };
 
     for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())

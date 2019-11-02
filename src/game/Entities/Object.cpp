@@ -543,17 +543,21 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     uint32 value = m_uint32Values[index];
 
                     // [XFACTION]: Alter faction if detected crossfaction group interaction when updating faction field:
-                    if (this != target && GetTypeId() == TYPEID_PLAYER && sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                    if (this != target && GetTypeId() == TYPEID_PLAYER)
                     {
                         Player const* thisPlayer = static_cast<Player const*>(this);
-                        const uint32 targetTeam = target->GetTeam();
 
-                        if (thisPlayer->GetTeam() != targetTeam && !thisPlayer->HasCharmer() && target->IsInGroup(thisPlayer))
+                        if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP) && target->IsInGroup(thisPlayer))
                         {
-                            switch (targetTeam)
+                            const uint32 targetTeam = target->GetTeam();
+
+                            if (thisPlayer->GetTeam() != targetTeam && value == Player::getFactionForRace(thisPlayer->getRace()))
                             {
-                                case ALLIANCE:  value = 1054;   break;  // "Alliance Generic"
-                                case HORDE:     value = 1495;   break;  // "Horde Generic"
+                                switch (targetTeam)
+                                {
+                                    case ALLIANCE:  value = 1054;   break;  // "Alliance Generic"
+                                    case HORDE:     value = 1495;   break;  // "Horde Generic"
+                                }
                             }
                         }
                     }
@@ -565,6 +569,39 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     // send in current format (float as float, uint32 as uint32)
                     *data << m_uint32Values[index];
                 }
+            }
+        }
+    }
+    else if (isType(TYPEMASK_CORPSE))                       // corpse case
+    {
+        for (uint16 index = 0; index < m_valuesCount; ++index)
+        {
+            if (updateMask->GetBit(index))
+            {
+                if (index == CORPSE_FIELD_BYTES_1)
+                {
+                    uint32 value = m_uint32Values[index];
+
+                    // [XFACTION]: Alter race field if detected crossfaction group interaction:
+                    if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                    {
+                        Corpse const* thisCorpse = static_cast<Corpse const*>(this);
+                        ObjectGuid const& ownerGuid = thisCorpse->GetOwnerGuid();
+                        Group const* targetGroup = target->GetGroup();
+
+                        if (ownerGuid != target->GetObjectGuid() && targetGroup && targetGroup->IsMember(ownerGuid))
+                        {
+                            const uint8 targetRace = target->getRace();
+
+                            if (Player::TeamForRace(thisCorpse->getRace()) != Player::TeamForRace(targetRace))
+                                value = ((value &~ uint32(0xFF << 8)) | (uint32(targetRace) << 8));
+                        }
+                    }
+
+                    *data << value;
+                }
+                else
+                    *data << m_uint32Values[index];         // other cases
             }
         }
     }
