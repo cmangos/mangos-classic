@@ -189,10 +189,12 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
     protected:
         virtual float GetAngle(Unit& owner) const;
         virtual float GetOffset(Unit& owner) const;
-        virtual float GetSpeed(Unit& owner, bool allowCatchup = false) const;
+        virtual float GetSpeed(Unit& owner, bool boosted = false) const;
 
-        virtual bool Move(Unit& owner, float x, float y, float z);
-        virtual bool Unstuck(Unit& owner, float x, float y, float z);
+        virtual bool IsBoostAllowed(Unit& owner) const;
+        virtual bool IsUnstuckAllowed(Unit& owner) const;
+
+        virtual bool Move(Unit& owner, float x, float y, float z, bool catchup);
 
         float GetDynamicTargetDistance(Unit& owner, bool forRangeCheck) const override;
         void HandleTargetedMovement(Unit& owner, const uint32& time_diff) override;
@@ -202,8 +204,7 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
         virtual bool _getOrientation(Unit& owner, float& o) const;
         virtual bool _getLocation(Unit& owner, float& x, float& y, float& z) const;
         virtual void _setOrientation(Unit& owner);
-        virtual void _setLocation(Unit& owner, bool updateDestination);
-        bool _move(Unit& owner, const PointsArray& path, int32 offset = 0) const;
+        virtual void _setLocation(Unit& owner, bool catchup);
 
         bool m_main;
         bool m_targetMoving;
