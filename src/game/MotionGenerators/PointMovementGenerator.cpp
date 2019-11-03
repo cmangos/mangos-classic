@@ -21,8 +21,8 @@
 #include "AI/BaseAI/UnitAI.h"
 #include "Entities/TemporarySpawn.h"
 #include "World/World.h"
-#include "Movement/MoveSplineInit.h"
 #include "Movement/MoveSpline.h"
+#include "Movement/MoveSplineInit.h"
 
 //----- Point Movement Generator
 template<class T>
@@ -35,7 +35,7 @@ void PointMovementGenerator<T>::Initialize(T& unit)
 
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
     if (m_effect)
-        unit.addUnitState(UNIT_STAT_CHARGING);
+        unit.addUnitState(UNIT_STAT_PROPELLED);
     m_speedChanged = false;
     Movement::MoveSplineInit init(unit);
     init.MoveTo(i_x, i_y, i_z, m_generatePath);
@@ -51,7 +51,7 @@ void PointMovementGenerator<T>::Finalize(T& unit)
 {
     unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
     if (m_effect)
-        unit.clearUnitState(UNIT_STAT_CHARGING);
+        unit.clearUnitState(UNIT_STAT_PROPELLED);
 
     if (unit.movespline->Finalized())
         MovementInform(unit);
@@ -63,7 +63,7 @@ void PointMovementGenerator<T>::Interrupt(T& unit)
     unit.InterruptMoving();
     unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
     if (m_effect)
-        unit.clearUnitState(UNIT_STAT_CHARGING);
+        unit.clearUnitState(UNIT_STAT_PROPELLED);
 }
 
 template<class T>
@@ -72,7 +72,7 @@ void PointMovementGenerator<T>::Reset(T& unit)
     unit.StopMoving();
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
     if (m_effect)
-        unit.addUnitState(UNIT_STAT_CHARGING);
+        unit.addUnitState(UNIT_STAT_PROPELLED);
 }
 
 template<class T>
@@ -136,28 +136,6 @@ void AssistanceMovementGenerator::Finalize(Unit& unit)
     ((Creature*)&unit)->CallAssistance();
     if (unit.isAlive())
         unit.GetMotionMaster()->MoveSeekAssistanceDistract(sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY));
-}
-
-bool EffectMovementGenerator::Update(Unit& unit, const uint32&)
-{
-    return !unit.movespline->Finalized();
-}
-
-void EffectMovementGenerator::Finalize(Unit& unit)
-{
-    if (unit.GetTypeId() != TYPEID_UNIT)
-        return;
-
-    if (unit.AI() && unit.movespline->Finalized())
-        unit.AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
-    // Need restore previous movement since we have no proper states system
-    if (unit.isAlive() && !unit.hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING | UNIT_STAT_NO_COMBAT_MOVEMENT))
-    {
-        if (Unit* victim = unit.getVictim())
-            unit.GetMotionMaster()->MoveChase(victim);
-        else
-            unit.GetMotionMaster()->Initialize();
-    }
 }
 
 void FlyOrLandMovementGenerator::Initialize(Unit& unit)

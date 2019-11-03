@@ -345,9 +345,11 @@ void PetAI::UpdateAI(const uint32 diff)
         }
 
         // Handle non-combat movement
-        if (MotionMaster* mm = m_unit->GetMotionMaster())
+        if (!m_unit->hasUnitState(UNIT_STAT_NO_FREE_MOVE))
         {
-            if (staying && !m_unit->hasUnitState(UNIT_STAT_NO_FREE_MOVE | UNIT_STAT_CHARGING))
+            MotionMaster* mm = m_unit->GetMotionMaster();
+
+            if (staying)
             {
                 // if stay command is set but we don't have stay pos set then we need to establish current pos as stay position
                 if (!charminfo->IsStayPosSet())

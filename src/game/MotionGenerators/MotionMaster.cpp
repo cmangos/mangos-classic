@@ -19,10 +19,11 @@
 #include "MotionMaster.h"
 #include "HomeMovementGenerator.h"
 #include "IdleMovementGenerator.h"
-#include "PointMovementGenerator.h"
+#include "MotionGenerators/PointMovementGenerator.h"
+#include "MotionGenerators/RandomMovementGenerator.h"
 #include "MotionGenerators/TargetedMovementGenerator.h"
-#include "WaypointMovementGenerator.h"
-#include "RandomMovementGenerator.h"
+#include "MotionGenerators/WaypointMovementGenerator.h"
+#include "MotionGenerators/WrapperMovementGenerator.h"
 #include "Movement/MoveSpline.h"
 #include "Movement/MoveSplineInit.h"
 #include "Maps/Map.h"
@@ -337,14 +338,6 @@ void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generate
         Mutate(new PointMovementGenerator<Creature>(id, x, y, z, generatePath, forcedMovement));
 }
 
-void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id/*= EVENT_CHARGE*/)
-{
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-        Mutate(new PointMovementGenerator<Player>(id, x, y, z, true, 0, speed, true));
-    else
-        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, true, 0, speed, true));
-}
-
 void MotionMaster::MoveSeekAssistance(float x, float y, float z)
 {
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
@@ -457,6 +450,42 @@ void MotionMaster::MoveFlyOrLand(uint32 id, float x, float y, float z, bool lift
     Mutate(new FlyOrLandMovementGenerator(id, x, y, z, liftOff));
 }
 
+void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id/*= EVENT_CHARGE*/)
+{
+    if (m_owner->hasUnitState(UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE))
+        return;
+
+    Movement::MoveSplineInit init(*m_owner);
+    init.SetWalk(false);
+    init.SetVelocity(speed);
+    init.MoveTo(x, y, z, true);
+
+    Mutate(new EffectMovementGenerator(init, id, false));
+}
+
+void MotionMaster::MoveFall()
+{
+    const float x = m_owner->GetPositionX(), y = m_owner->GetPositionY(), z = m_owner->GetPositionZ();
+
+    // use larger distance for vmap height search than in most other cases
+    float tz = m_owner->GetMap()->GetHeight(x, y, z);
+
+    if (tz <= INVALID_HEIGHT)
+    {
+        DEBUG_LOG("MotionMaster::MoveFall: unable retrive a proper height at map %u (x: %f, y: %f, z: %f).", m_owner->GetMap()->GetId(), x, y, z);
+        return;
+    }
+
+    // Abort too if the ground is very near
+    if (fabs(z - tz) < 0.1f)
+        return;
+
+    Movement::MoveSplineInit init(*m_owner);
+    init.MoveTo(x, y, tz);
+    init.SetFall();
+    Mutate(new EffectMovementGenerator(init, EVENT_JUMP));
+}
+
 void MotionMaster::Mutate(MovementGenerator* m)
 {
     if (!empty())
@@ -546,25 +575,4 @@ bool MotionMaster::GetDestination(float& x, float& y, float& z) const
     y = dest.y;
     z = dest.z;
     return true;
-}
-
-void MotionMaster::MoveFall()
-{
-    // use larger distance for vmap height search than in most other cases
-    float tz = m_owner->GetMap()->GetHeight(m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ());
-    if (tz <= INVALID_HEIGHT)
-    {
-        DEBUG_LOG("MotionMaster::MoveFall: unable retrive a proper height at map %u (x: %f, y: %f, z: %f).",
-                  m_owner->GetMap()->GetId(), m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ());
-        return;
-    }
-
-    // Abort too if the ground is very near
-    if (fabs(m_owner->GetPositionZ() - tz) < 0.1f)
-        return;
-
-    Movement::MoveSplineInit init(*m_owner);
-    init.MoveTo(m_owner->GetPositionX(), m_owner->GetPositionY(), tz);
-    init.SetFall();
-    init.Launch();
 }

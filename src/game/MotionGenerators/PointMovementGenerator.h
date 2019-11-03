@@ -73,21 +73,6 @@ class AssistanceMovementGenerator
         void Finalize(Unit&) override;
 };
 
-// Does almost nothing - just doesn't allows previous movegen interrupt current effect. Can be reused for charge effect
-class EffectMovementGenerator : public MovementGenerator
-{
-    public:
-        explicit EffectMovementGenerator(uint32 Id) : m_Id(Id) {}
-        void Initialize(Unit&) override {}
-        void Finalize(Unit& unit) override;
-        void Interrupt(Unit&) override {}
-        void Reset(Unit&) override {}
-        bool Update(Unit& unit, const uint32&) override;
-        MovementGeneratorType GetMovementGeneratorType() const override { return EFFECT_MOTION_TYPE; }
-    private:
-        uint32 m_Id;
-};
-
 class FlyOrLandMovementGenerator : public PointMovementGenerator<Creature>
 {
     public:
