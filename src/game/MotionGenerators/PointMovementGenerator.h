@@ -26,61 +26,53 @@ class PointMovementGenerator
     : public MovementGeneratorMedium< T, PointMovementGenerator<T> >
 {
     public:
-        PointMovementGenerator(uint32 _id, float _x, float _y, float _z, bool _generatePath, uint32 forcedMovement, float speed = 0.f, bool effect = false) :
-            id(_id), i_x(_x), i_y(_y), i_z(_z), m_generatePath(_generatePath), m_speedChanged(false), m_forcedMovement(forcedMovement), m_speed(speed), m_effect(effect) {}
+        PointMovementGenerator(uint32 id, float x, float y, float z, bool generatePath, uint32 forcedMovement, float speed = 0.f) :
+            i_x(x), i_y(y), i_z(z), m_id(id), m_generatePath(generatePath), m_speedChanged(false), m_forcedMovement(forcedMovement), m_speed(speed) {}
 
         virtual void Initialize(T&);
-        void Finalize(T&);
+        virtual void Finalize(T&);
         void Interrupt(T&);
         void Reset(T& unit);
         bool Update(T&, const uint32& diff);
 
         void MovementInform(T&);
 
-        MovementGeneratorType GetMovementGeneratorType() const override
-        {
-            if (m_effect)
-                return EFFECT_MOTION_TYPE;
-            return POINT_MOTION_TYPE;
-        }
+        virtual void UnitSpeedChanged() override { m_speedChanged = true; }
 
-        bool GetDestination(float& x, float& y, float& z) const { x = i_x; y = i_y; z = i_z; return true; }
+        MovementGeneratorType GetMovementGeneratorType() const override { return POINT_MOTION_TYPE; }
 
-        virtual void UnitSpeedChanged() override
-        {
-            if (m_speed <= 0.f) // if custom speed - do not react to speed change
-                m_speedChanged = true;
-        }
-    private:
-        uint32 id;
+    protected:
         float i_x, i_y, i_z;
+
+    private:
+        uint32 m_id;
         bool m_generatePath;
         bool m_speedChanged;
         uint32 m_forcedMovement;
         float m_speed;
-        bool m_effect;
 };
 
-class AssistanceMovementGenerator
-    : public PointMovementGenerator<Creature>
+class AssistanceMovementGenerator : public PointMovementGenerator<Creature>
 {
     public:
-        AssistanceMovementGenerator(float _x, float _y, float _z) :
-            PointMovementGenerator<Creature>(0, _x, _y, _z, true, 0) {}
+        AssistanceMovementGenerator(float x, float y, float z) :
+            PointMovementGenerator<Creature>(0, x, y, z, true, 0) {}
+
+        void Initialize(Creature& unit) override;
+        void Finalize(Creature& unit) override;
 
         MovementGeneratorType GetMovementGeneratorType() const override { return ASSISTANCE_MOTION_TYPE; }
-        void Initialize(Creature&) override;
-        void Finalize(Unit&) override;
 };
 
 class FlyOrLandMovementGenerator : public PointMovementGenerator<Creature>
 {
     public:
-        FlyOrLandMovementGenerator(uint32 _id, float _x, float _y, float _z, bool liftOff) :
-            PointMovementGenerator<Creature>(_id, _x, _y, _z, false, 0),
+        FlyOrLandMovementGenerator(uint32 id, float x, float y, float z, bool liftOff) :
+            PointMovementGenerator<Creature>(id, x, y, z, false, 0),
             m_liftOff(liftOff) {}
 
-        void Initialize(Unit& unit) override;
+        void Initialize(Creature& unit) override;
+
     private:
         bool m_liftOff;
 };

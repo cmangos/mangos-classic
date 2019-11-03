@@ -34,24 +34,21 @@ void PointMovementGenerator<T>::Initialize(T& unit)
     unit.StopMoving();
 
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
-    if (m_effect)
-        unit.addUnitState(UNIT_STAT_PROPELLED);
-    m_speedChanged = false;
+
     Movement::MoveSplineInit init(unit);
     init.MoveTo(i_x, i_y, i_z, m_generatePath);
     if (m_forcedMovement == FORCED_MOVEMENT_WALK)
         init.SetWalk(true);
-    if (m_speed > 0.f)
-        init.SetVelocity(m_speed);
+    init.SetVelocity(m_speed);
     init.Launch();
+
+    m_speedChanged = false;
 }
 
 template<class T>
 void PointMovementGenerator<T>::Finalize(T& unit)
 {
     unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
-    if (m_effect)
-        unit.clearUnitState(UNIT_STAT_PROPELLED);
 
     if (unit.movespline->Finalized())
         MovementInform(unit);
@@ -62,8 +59,6 @@ void PointMovementGenerator<T>::Interrupt(T& unit)
 {
     unit.InterruptMoving();
     unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
-    if (m_effect)
-        unit.clearUnitState(UNIT_STAT_PROPELLED);
 }
 
 template<class T>
@@ -71,8 +66,6 @@ void PointMovementGenerator<T>::Reset(T& unit)
 {
     unit.StopMoving();
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
-    if (m_effect)
-        unit.addUnitState(UNIT_STAT_PROPELLED);
 }
 
 template<class T>
@@ -100,14 +93,14 @@ void PointMovementGenerator<Creature>::MovementInform(Creature& unit)
 {
     MovementGeneratorType const type = GetMovementGeneratorType();
     if (unit.AI())
-        unit.AI()->MovementInform(type, id);
+        unit.AI()->MovementInform(type, m_id);
 
     if (unit.IsTemporarySummon())
     {
         if (unit.GetSpawnerGuid().IsCreatureOrPet())
             if (Creature* pSummoner = unit.GetMap()->GetAnyTypeCreature(unit.GetSpawnerGuid()))
                 if (pSummoner->AI())
-                    pSummoner->AI()->SummonedMovementInform(&unit, type, id);
+                    pSummoner->AI()->SummonedMovementInform(&unit, type, m_id);
     }
 }
 
@@ -128,28 +121,26 @@ void AssistanceMovementGenerator::Initialize(Creature& unit)
     PointMovementGenerator::Initialize(unit);
 }
 
-void AssistanceMovementGenerator::Finalize(Unit& unit)
+void AssistanceMovementGenerator::Finalize(Creature& unit)
 {
     unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE | UNIT_STAT_SEEKING_ASSISTANCE);
 
-    ((Creature*)&unit)->SetNoCallAssistance(false);
-    ((Creature*)&unit)->CallAssistance();
+    unit.SetNoCallAssistance(false);
+    unit.CallAssistance();
     if (unit.isAlive())
         unit.GetMotionMaster()->MoveSeekAssistanceDistract(sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY));
 }
 
-void FlyOrLandMovementGenerator::Initialize(Unit& unit)
+void FlyOrLandMovementGenerator::Initialize(Creature& unit)
 {
     if (unit.hasUnitState(UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE))
         return;
 
     unit.StopMoving();
 
-    float x, y, z;
-    GetDestination(x, y, z);
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
     Movement::MoveSplineInit init(unit);
     init.SetFly();
-    init.MoveTo(x, y, z, false);
+    init.MoveTo(i_x, i_y, i_z, false);
     init.Launch();
 }
