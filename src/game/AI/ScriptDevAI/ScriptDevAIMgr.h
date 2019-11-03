@@ -59,6 +59,24 @@ enum EscortFaction
 // *********************************************************
 // ************* Some structures used globally *************
 
+template <typename T>
+UnitAI* GetNewAIInstance(Creature* creature)
+{
+    return new T(creature);
+}
+
+template <typename T>
+GameObjectAI* GetNewAIInstance(GameObject* gameobject)
+{
+    return new T(gameobject);
+}
+
+template <typename T>
+InstanceData* GetNewInstanceScript(Map* map)
+{
+    return new T(map);
+}
+
 struct Script
 {
     Script() :

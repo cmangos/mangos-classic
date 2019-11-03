@@ -394,6 +394,6 @@ void AddSC_boss_viscidus()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_glob_of_viscidus";
-    pNewScript->GetAI = &GetAI_npc_glob_of_viscidus;
+    pNewScript->GetAI = &GetNewAIInstance<npc_glob_of_viscidusAI>;
     pNewScript->RegisterSelf();
 }
