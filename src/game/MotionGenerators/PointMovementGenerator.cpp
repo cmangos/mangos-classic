@@ -28,7 +28,7 @@
 template<class T>
 void PointMovementGenerator<T>::Initialize(T& unit)
 {
-    if (unit.hasUnitState(UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE))
+    if (unit.hasUnitState(UNIT_STAT_NO_FREE_MOVE | UNIT_STAT_NOT_MOVE))
         return;
 
     unit.StopMoving();
@@ -39,7 +39,9 @@ void PointMovementGenerator<T>::Initialize(T& unit)
     init.MoveTo(i_x, i_y, i_z, m_generatePath);
     if (m_forcedMovement == FORCED_MOVEMENT_WALK)
         init.SetWalk(true);
-    init.SetVelocity(m_speed);
+    if (i_o != 0.f)
+        init.SetFacing(i_o);
+    init.SetVelocity(i_speed);
     init.Launch();
 
     m_speedChanged = false;
@@ -115,25 +117,65 @@ template void PointMovementGenerator<Creature>::Reset(Creature&);
 template bool PointMovementGenerator<Player>::Update(Player&, const uint32& diff);
 template bool PointMovementGenerator<Creature>::Update(Creature&, const uint32& diff);
 
-void AssistanceMovementGenerator::Initialize(Creature& unit)
+void RetreatMovementGenerator::Initialize(Creature& unit)
 {
-    unit.addUnitState(UNIT_STAT_SEEKING_ASSISTANCE);
+    if (m_arrived)
+        return;
+
+    // Non-client controlled unit with an AI should drop target
+    if (unit.AI() && !unit.IsClientControlled())
+    {
+        unit.SetTarget(nullptr);
+        // FIXME: do we need to send attack stop here? verify protocol if possible
+    }
+
+    unit.addUnitState(UNIT_STAT_RETREATING);
+
     PointMovementGenerator::Initialize(unit);
+
+    m_delayTimer.Reset(sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY));
 }
 
-void AssistanceMovementGenerator::Finalize(Creature& unit)
+void RetreatMovementGenerator::Finalize(Creature& unit)
 {
-    unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE | UNIT_STAT_SEEKING_ASSISTANCE);
+    unit.clearUnitState(UNIT_STAT_RETREATING);
 
-    unit.SetNoCallAssistance(false);
-    unit.CallAssistance();
-    if (unit.isAlive())
-        unit.GetMotionMaster()->MoveSeekAssistanceDistract(sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY));
+    PointMovementGenerator::Finalize(unit);
+
+    if (UnitAI* ai = unit.AI())
+        ai->RetreatingEnded();
+}
+
+void RetreatMovementGenerator::Interrupt(Creature &unit)
+{
+    PointMovementGenerator::Interrupt(unit);
+
+    if (UnitAI* ai = unit.AI())
+        ai->RetreatingEnded();
+}
+
+bool RetreatMovementGenerator::Update(Creature& unit, const uint32& diff)
+{
+    if (!PointMovementGenerator::Update(unit, diff))
+    {
+        if (!m_arrived)
+        {
+            m_arrived = true;
+
+            if (UnitAI* ai = unit.AI())
+                ai->RetreatingArrived();
+        }
+
+        m_delayTimer.Update(diff);
+        return !m_delayTimer.Passed();
+    }
+
+    return true;
 }
 
 void FlyOrLandMovementGenerator::Initialize(Creature& unit)
 {
-    if (unit.hasUnitState(UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE))
+    if (unit.hasUnitState(UNIT_STAT_NO_FREE_MOVE | UNIT_STAT_NOT_MOVE))
         return;
 
     unit.StopMoving();

@@ -116,6 +116,7 @@ enum AIOrders
     ORDER_NONE,
     ORDER_DISTANCING,
     ORDER_FLEEING,
+    ORDER_RETREATING,
     ORDER_EVADE,
     ORDER_CUSTOM,
 };
@@ -438,9 +439,9 @@ class UnitAI
         AIOrders GetAIOrder() const { return m_currentAIOrder; }
 
         void DoFlee();
+        virtual void DoRetreat() {} // implemented for creatures
         void DoDistance(); // TODO
         virtual void DoCallForHelp(float radius) {} // implemented for creatures
-        void DoSeekAssistance(); // TODO
 
         // Drops all threat to 0%. Does not remove enemies from the threat list
         void DoResetThreat();
@@ -457,6 +458,8 @@ class UnitAI
 
         // Movement generator responses
         virtual void TimedFleeingEnded();
+        virtual void RetreatingArrived() {}
+        virtual void RetreatingEnded() {}
 
         virtual void DistancingStarted();
         virtual void DistancingEnded();

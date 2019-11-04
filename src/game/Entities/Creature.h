@@ -746,12 +746,9 @@ class Creature : public Unit
 
         uint32 m_spells[CREATURE_MAX_SPELLS];
 
-        void DoFleeToGetAssistance();
         void CallForHelp(float radius);
         void CallAssistance();
         void SetNoCallAssistance(bool val) { m_AlreadyCallAssistance = val; }
-        void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }
-        bool HasSearchedAssistance() const { return m_AlreadySearchedAssistance; }
         bool CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction = true) const;
         bool CanInitiateAttack() const;
         bool IsInGroup(Unit const* other, bool party/* = false*/, bool ignoreCharms/* = false*/) const override;
@@ -900,7 +897,6 @@ class Creature : public Unit
 
         // below fields has potential for optimization
         bool m_AlreadyCallAssistance;
-        bool m_AlreadySearchedAssistance;
         bool m_isDeadByDefault;
         uint32 m_temporaryFactionFlags;                     // used for real faction changes (not auras etc)
 

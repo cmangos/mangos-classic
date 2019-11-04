@@ -328,41 +328,34 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, bool asMain
     Mutate(new FollowMovementGenerator(*target, dist, angle, asMain));
 }
 
-void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath, ForcedMovement forcedMovement)
+void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath/* = true*/, ForcedMovement forcedMovement/* = FORCED_MOVEMENT_NONE*/)
 {
-    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted point (Id: %u X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), id, x, y, z);
-
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-        Mutate(new PointMovementGenerator<Player>(id, x, y, z, generatePath, forcedMovement));
-    else
-        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, generatePath, forcedMovement));
+    return MovePoint(id, x, y, z, 0, generatePath, forcedMovement);
 }
 
-void MotionMaster::MoveSeekAssistance(float x, float y, float z)
+void MotionMaster::MovePoint(uint32 id, float x, float y, float z, float o, bool generatePath/* = true*/, ForcedMovement forcedMovement/* = FORCED_MOVEMENT_NONE*/)
 {
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        sLog.outError("%s attempt to seek assistance", m_owner->GetGuidStr().c_str());
-    }
+    if (o != 0.f)
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted point (Id: %u X: %f Y: %f Z: %f O: %f)", m_owner->GetGuidStr().c_str(), id, x, y, z, o);
     else
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s seek assistance (X: %f Y: %f Z: %f)",
-                         m_owner->GetGuidStr().c_str(), x, y, z);
-        Mutate(new AssistanceMovementGenerator(x, y, z));
-    }
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted point (Id: %u X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), id, x, y, z);
+
+    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+        Mutate(new PointMovementGenerator<Player>(id, x, y, z, o, generatePath, forcedMovement));
+    else
+        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, o, generatePath, forcedMovement));
 }
 
-void MotionMaster::MoveSeekAssistanceDistract(uint32 time)
+void MotionMaster::MoveRetreat(float x, float y, float z, float o)
 {
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
     {
-        sLog.outError("%s attempt to call distract after assistance", m_owner->GetGuidStr().c_str());
+        sLog.outError("%s attempts to retreat for assistance", m_owner->GetGuidStr().c_str());
     }
     else
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s is distracted after assistance call (Time: %u)",
-                         m_owner->GetGuidStr().c_str(), time);
-        Mutate(new AssistanceDistractMovementGenerator(time));
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s retreats for assistance (X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), x, y, z);
+        Mutate(new RetreatMovementGenerator(x, y, z, o));
     }
 }
 
@@ -452,7 +445,7 @@ void MotionMaster::MoveFlyOrLand(uint32 id, float x, float y, float z, bool lift
 
 void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id/*= EVENT_CHARGE*/)
 {
-    if (m_owner->hasUnitState(UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE))
+    if (m_owner->hasUnitState(UNIT_STAT_NO_FREE_MOVE))
         return;
 
     Movement::MoveSplineInit init(*m_owner);
@@ -509,7 +502,7 @@ void MotionMaster::Mutate(MovementGenerator* m)
     push(m);
 }
 
-void MotionMaster::InterruptFlee()
+void MotionMaster::InterruptPanic()
 {
     if (!empty())
         if (top()->GetMovementGeneratorType() == TIMED_FLEEING_MOTION_TYPE)

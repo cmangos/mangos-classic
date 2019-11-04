@@ -386,7 +386,8 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
     if (me->isInCombat())
         return;
 
-    if (who->IsFleeing()) // pulling happens once flee ends
+    // pulling happens once panic/retreating ends
+    if (who->hasUnitState(UNIT_STAT_PANIC | UNIT_STAT_RETREATING))
         return;
 
     if (me->GetMap()->Instanceable())
@@ -400,7 +401,7 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
             {
                 AttackStart(victim);
                 if (who->AI() && who->AI()->GetAIOrder() == ORDER_FLEEING)
-                    who->GetMotionMaster()->InterruptFlee();
+                    who->GetMotionMaster()->InterruptPanic();
             }
         }
     }
@@ -583,7 +584,7 @@ void UnitAI::DoResetThreat()
 
 bool UnitAI::CanExecuteCombatAction()
 {
-    return m_unit->CanReactInCombat() && !(m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) && !m_unit->hasUnitState(UNIT_STAT_PROPELLED | UNIT_STAT_SEEKING_ASSISTANCE) && !m_unit->IsNonMeleeSpellCasted(false) && !m_combatScriptHappening;
+    return m_unit->CanReactInCombat() && !(m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) && !m_unit->hasUnitState(UNIT_STAT_PROPELLED | UNIT_STAT_RETREATING) && !m_unit->IsNonMeleeSpellCasted(false) && !m_combatScriptHappening;
 }
 
 void UnitAI::SetMeleeEnabled(bool state)

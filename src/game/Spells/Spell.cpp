@@ -3262,7 +3262,7 @@ void Spell::update(uint32 difftime)
                         cancel();
 
                     // check for incapacitating player states
-                    if (m_caster->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+                    if (m_caster->IsCrowdControlled())
                     {
                         // certain channel spells are not interrupted
                         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNELED_1) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_UNK28))

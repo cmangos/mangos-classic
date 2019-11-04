@@ -17,6 +17,9 @@
 */
 
 #include "AI/BaseAI/CreatureAI.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
 #include "World/World.h"
 #include "Entities/Creature.h"
 
@@ -98,6 +101,51 @@ void CreatureAI::DoFakeDeath(uint32 spellId)
 
     if (spellId)
         DoCastSpellIfCan(nullptr, spellId, CAST_INTERRUPT_PREVIOUS);
+}
+
+void CreatureAI::RetreatingArrived()
+{
+    m_creature->SetNoCallAssistance(false);
+    m_creature->CallAssistance();
+}
+
+void CreatureAI::RetreatingEnded()
+{
+    if (GetAIOrder() != ORDER_RETREATING)
+        return; // prevent stack overflow by cyclic calls - TODO: remove once Motion Master is human again
+    SetAIOrder(ORDER_NONE);
+    SetCombatScriptStatus(false);
+    if (!m_creature->isAlive())
+        return;
+    DoStartMovement(m_creature->getVictim());
+}
+
+void CreatureAI::DoRetreat()
+{
+    Unit* victim = m_creature->getVictim();
+    if (!victim)
+        return;
+
+    float radius = sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_FLEE_ASSISTANCE_RADIUS);
+    if (radius <= 0)
+        return;
+
+    Creature* ally = nullptr;
+
+    MaNGOS::NearestAssistCreatureInCreatureRangeCheck check(m_creature, victim, radius);
+    MaNGOS::CreatureLastSearcher<MaNGOS::NearestAssistCreatureInCreatureRangeCheck> searcher(ally, check);
+    Cell::VisitGridObjects(m_creature, searcher, radius);
+
+    // Check if an ally to call for was found
+    if (!ally)
+        return;
+
+    WorldLocation pos;
+    ally->GetFirstCollisionPosition(pos, ally->GetCombatReach(), ally->GetAngle(m_creature));
+    m_creature->GetMotionMaster()->MoveRetreat(pos.coord_x, pos.coord_y, pos.coord_z, ally->GetAngle(victim));
+
+    SetAIOrder(ORDER_RETREATING);
+    SetCombatScriptStatus(true);
 }
 
 void CreatureAI::DoCallForHelp(float radius)

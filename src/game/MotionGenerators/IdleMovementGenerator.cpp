@@ -59,18 +59,3 @@ DistractMovementGenerator::Update(Unit& /*owner*/, const uint32& time_diff)
     m_timer -= time_diff;
     return true;
 }
-
-void
-AssistanceDistractMovementGenerator::Finalize(Unit& unit)
-{
-    unit.clearUnitState(UNIT_STAT_DISTRACTED);
-    if (Unit* victim = unit.getVictim())
-    {
-        if (unit.isAlive())
-        {
-            unit.AttackStop(true);
-            if (unit.AI())
-                unit.AI()->AttackStart(victim);
-        }
-    }
-}

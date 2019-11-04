@@ -5780,12 +5780,6 @@ void Unit::CombatStop(bool includingCast, bool includingCombo)
     {
         ((Creature*)this)->SetNoCallAssistance(false);
 
-        if (((Creature*)this)->HasSearchedAssistance())
-        {
-            ((Creature*)this)->SetNoSearchAssistance(false);
-            UpdateSpeed(MOVE_RUN, false);
-        }
-
         if (((Creature*)this)->GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_COMBAT_STOP)
             ((Creature*)this)->ClearTemporaryFaction();
     }
@@ -7878,14 +7872,8 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             break;
     }
 
-    // for creature case, we check explicit if mob searched for assistance
-    if (GetTypeId() == TYPEID_UNIT)
-    {
-        if (((Creature*)this)->HasSearchedAssistance())
-            speed *= 0.66f;                                 // best guessed value, so this will be 33% reduction. Based off initial speed, mob can then "run", "walk fast" or "walk".
-    }
     // for player case, we look for some custom rates
-    else
+    if (GetTypeId() == TYPEID_PLAYER)
     {
         if (getDeathState() == CORPSE)
             speed *= sWorld.getConfig(((Player*)this)->InBattleGround() ? CONFIG_FLOAT_GHOST_RUN_SPEED_BG : CONFIG_FLOAT_GHOST_RUN_SPEED_WORLD);

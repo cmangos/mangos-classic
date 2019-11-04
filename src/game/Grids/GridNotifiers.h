@@ -843,7 +843,7 @@ namespace MaNGOS
             Unit const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
-                return u->isAlive() && u->isInCombat() && i_obj->CanAssist(u) && i_obj->IsWithinDistInMap(u, i_range) && (u->IsImmobilizedState() || u->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED) || u->isFeared() || u->IsPolymorphed() || u->isFrozen() || u->hasUnitState(UNIT_STAT_CAN_NOT_REACT));
+                return u->isAlive() && u->isInCombat() && i_obj->CanAssist(u) && i_obj->IsWithinDistInMap(u, i_range) && (u->IsImmobilizedState() || u->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED) || u->isFrozen() || u->IsCrowdControlled());
             }
         private:
             Unit const* i_obj;
@@ -1103,8 +1103,9 @@ namespace MaNGOS
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Creature* u)
             {
-                if (u == i_obj)
+                if (u == i_obj || u->isDead() || u->isInCombat())
                     return false;
+
                 if (!u->CanAssist(i_obj) || !u->CanAttack(i_enemy))
                     return false;
 

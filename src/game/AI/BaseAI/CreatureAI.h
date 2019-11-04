@@ -37,7 +37,12 @@ class CreatureAI : public UnitAI
         void SetDeathPrevention(bool state);
         void ResetDeathPrevented() { m_deathPrevented = false; }
 
+        void DoRetreat() override;
         void DoCallForHelp(float radius) override;
+
+        void RetreatingArrived() override;
+        void RetreatingEnded() override;
+
     protected:
         Creature* m_creature;
         bool m_deathPrevention;

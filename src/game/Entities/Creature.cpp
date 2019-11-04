@@ -136,7 +136,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_canAggro(false),
     m_respawnradius(5.0f), m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE),
     m_equipmentId(0), m_AlreadyCallAssistance(false),
-    m_AlreadySearchedAssistance(false), m_isDeadByDefault(false),
+    m_isDeadByDefault(false),
     m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_originalEntry(0), m_ai(nullptr),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false), m_ignoreRangedTargets(false), m_countSpawns(false),
@@ -771,33 +771,6 @@ void Creature::RegenerateHealth()
     uint32 addvalue = maxValue / 3;
 
     ModifyHealth(addvalue);
-}
-
-void Creature::DoFleeToGetAssistance() // TODO: split this into flee and assistance
-{
-    if (!getVictim())
-        return;
-
-    float radius = sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_FLEE_ASSISTANCE_RADIUS);
-    if (radius > 0)
-    {
-        Creature* pCreature = nullptr;
-
-        MaNGOS::NearestAssistCreatureInCreatureRangeCheck u_check(this, getVictim(), radius);
-        MaNGOS::CreatureLastSearcher<MaNGOS::NearestAssistCreatureInCreatureRangeCheck> searcher(pCreature, u_check);
-        Cell::VisitGridObjects(this, searcher, radius);
-
-        SetNoSearchAssistance(true);
-        // UpdateSpeed(MOVE_RUN, false); [-ZERO] not needed?
-
-        if (!pCreature)
-            SetInPanic(sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
-        else
-        {
-            SetTargetGuid(ObjectGuid());        // creature flee loose its target
-            GetMotionMaster()->MoveSeekAssistance(pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ());
-        }
-    }
 }
 
 bool Creature::AIM_Initialize()
@@ -1667,12 +1640,6 @@ void Creature::SetDeathState(DeathState s)
     {
         SetTargetGuid(ObjectGuid());                        // remove target selection in any cases (can be set at aura remove in Unit::SetDeathState)
         SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
-
-        if (HasSearchedAssistance())
-        {
-            SetNoSearchAssistance(false);
-            UpdateSpeed(MOVE_RUN, false);
-        }
 
         if (CanFly())
             i_motionMaster.MoveFall();
