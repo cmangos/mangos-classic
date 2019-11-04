@@ -626,6 +626,11 @@ void UnitAI::DoStartMovement(Unit* victim)
         m_unit->GetMotionMaster()->MoveChase(victim, m_attackDistance, m_attackAngle, m_moveFurther, !m_chaseRun);
 }
 
+SpellSchoolMask UnitAI::GetMainAttackSchoolMask() const
+{
+    return m_unit->GetMeleeDamageSchoolMask();
+}
+
 void UnitAI::TimedFleeingEnded()
 {
     if (GetAIOrder() != ORDER_FLEEING)
