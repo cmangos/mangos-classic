@@ -87,6 +87,7 @@ void CreatureEventAI::GetAIInformation(ChatHandler& reader)
 CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
     m_EventUpdateTime(0),
     m_EventDiff(0),
+    m_depth(0),
     m_Phase(0),
     m_HasOOCLoSEvent(false),
     m_InvinceabilityHpLevel(0),
@@ -95,10 +96,10 @@ CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
     m_LastSpellMaxRange(0),
     m_rangedMode(false),
     m_rangedModeSetting(TYPE_NONE),
-    m_currentRangedMode(false),
     m_chaseDistance(0.f),
-    m_depth(0),
-    m_defaultMovement(IDLE_MOTION_TYPE)
+    m_currentRangedMode(false),
+    m_defaultMovement(IDLE_MOTION_TYPE),
+    m_mainAttackMask(SPELL_SCHOOL_MASK_NONE)
 {
     InitAI();
 }
@@ -152,6 +153,7 @@ void CreatureEventAI::InitAI()
                                     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_mainSpellId);
                                     m_mainSpellCost = Spell::CalculatePowerCost(spellInfo, m_creature);
                                     m_mainSpellMinRange = GetSpellMinRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex));
+                                    m_mainAttackMask = SpellSchoolMask(m_mainAttackMask + spellInfo->SchoolMask);
                                 }
                                 m_mainSpells.insert(i.action[actionIdx].cast.spellId);
                             }

@@ -46,7 +46,8 @@ class RangedCombatAI : public CombatAI
 {
     public:
         RangedCombatAI(Creature* creature, uint32 combatActions, RangeModeType type) : CombatAI(creature, combatActions),
-            m_rangedMode(false), m_rangedModeSetting(TYPE_NONE), m_chaseDistance(0.f), m_currentRangedMode(false), m_mainSpellId(0), m_mainSpellCost(0), m_mainSpellMinRange(0.f) {}
+            m_rangedMode(false), m_rangedModeSetting(TYPE_NONE), m_chaseDistance(0.f), m_currentRangedMode(false), m_mainSpellId(0), m_mainSpellCost(0), m_mainSpellMinRange(0.f),
+            m_mainAttackMask(SPELL_SCHOOL_MASK_NONE) {}
 
         virtual void OnSpellCooldownAdded(SpellEntry const* spellInfo) override;
 
@@ -65,6 +66,7 @@ class RangedCombatAI : public CombatAI
         void DistanceYourself();
 
         bool IsRangedUnit() override { return m_currentRangedMode; }
+        SpellSchoolMask GetMainAttackSchoolMask() const override { return m_currentRangedMode ? m_mainAttackMask : CombatAI::GetMainAttackSchoolMask(); }
 
         virtual CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0) override;
 
@@ -79,6 +81,7 @@ class RangedCombatAI : public CombatAI
         uint32 m_mainSpellId;
         uint32 m_mainSpellCost;
         float m_mainSpellMinRange;
+        SpellSchoolMask m_mainAttackMask;
 };
 
 #endif

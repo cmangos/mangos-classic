@@ -448,6 +448,7 @@ class UnitAI
         * Checking main spell school instead of melee school for immunity suppress - TODO
         */
         virtual bool IsRangedUnit() { return false; }
+        virtual SpellSchoolMask GetMainAttackSchoolMask() const { return m_unit->GetMeleeDamageSchoolMask(); }
 
         // Movement generator responses
         virtual void TimedFleeingEnded();

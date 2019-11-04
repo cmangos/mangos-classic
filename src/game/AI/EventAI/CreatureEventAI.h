@@ -849,6 +849,7 @@ class CreatureEventAI : public CreatureAI
         MovementGeneratorType GetDefaultMovement() { return m_defaultMovement; }
 
         bool IsRangedUnit() override { return m_currentRangedMode; }
+        SpellSchoolMask GetMainAttackSchoolMask() const override { return m_currentRangedMode ? m_mainAttackMask : CreatureAI::GetMainAttackSchoolMask(); }
 
         virtual CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0) override;
     protected:
@@ -889,6 +890,7 @@ class CreatureEventAI : public CreatureAI
         uint32 m_mainSpellId;
         uint32 m_mainSpellCost;
         float m_mainSpellMinRange;
+        SpellSchoolMask m_mainAttackMask;
 
         MovementGeneratorType m_defaultMovement; // TODO: Extend to all of AI
 };

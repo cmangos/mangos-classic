@@ -215,7 +215,7 @@ void HostileRefManager::HandleSuppressed(bool apply, bool immunity)
             {
                 Unit* source = ref.getSource()->getOwner();
                 Unit* target = ref.getTarget();
-                if (!target->IsImmuneToDamage(source->GetMeleeDamageSchoolMask()))
+                if (!target->IsImmuneToDamage(source->GetMainAttackSchoolMask()))
                     continue;
             }
             ref.SetHostileState(STATE_SUPPRESSED);
