@@ -2049,13 +2049,13 @@ void World::LoadSpamRecords(bool reload)
         if (reload)
             m_spamRecords.clear();
 
-        while (result->NextRow())
+        do
         {
             Field* fields = result->Fetch();
             std::string record = fields[0].GetCppString();
 
             m_spamRecords.push_back(record);
-        }
+        } while (result->NextRow());
 
         delete result;
     }
