@@ -150,7 +150,7 @@ struct boss_buruAI : public CombatAI
                         SetActionReadyStatus(action, false);
                         m_uiPhase = PHASE_TRANSFORM;
                         DisableCombatAction(BURU_DISMEMBER);
-                        DisableCombatAction(BURU_NEW_TARGET);
+                        SetActionReadyStatus(BURU_NEW_TARGET, false);
                         DisableCombatAction(BURU_GATHERING_SPEED);
                         DisableCombatAction(BURU_FULL_SPEED);
                         ResetCombatAction(BURU_CREEPING_PLAGUE, 0);
