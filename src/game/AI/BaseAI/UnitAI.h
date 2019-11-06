@@ -438,8 +438,8 @@ class UnitAI
         void SetAIOrder(AIOrders order) { m_currentAIOrder = order; }
         AIOrders GetAIOrder() const { return m_currentAIOrder; }
 
-        void DoFlee();
-        virtual void DoRetreat() {} // implemented for creatures
+        bool DoFlee();
+        virtual bool DoRetreat() { return false; } // implemented for creatures
         void DoDistance(); // TODO
         virtual void DoCallForHelp(float radius) {} // implemented for creatures
 

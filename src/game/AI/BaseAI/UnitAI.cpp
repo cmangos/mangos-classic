@@ -622,26 +622,20 @@ void UnitAI::TimedFleeingEnded()
     DoStartMovement(m_unit->getVictim());
 }
 
-void UnitAI::DoFlee()
+bool UnitAI::DoFlee()
 {
     Unit* victim = m_unit->getVictim();
     if (!victim)
-        return;
+        return false;
 
-    // first check if its not already feared somewhere else
-    if (m_unit->isFeared() || m_unit->hasUnitState(UNIT_STAT_FLEEING))
-        return;
-
-    // now we can call the fear method
-    m_unit->SetInPanic(sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
-
-    // check if fear method succeed
-    if (!m_unit->isFeared() && !m_unit->hasUnitState(UNIT_STAT_FLEEING))
-        return;
+    // call the fear method and check if fear method succeed
+    if (!m_unit->SetInPanic(sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY)))
+        return false;
 
     // set the ai state to feared so it can reset movegen and ai state at the end of the fear
     SetAIOrder(ORDER_FLEEING);
     SetCombatScriptStatus(true);
+    return true;
 }
 
 void UnitAI::DistancingStarted()

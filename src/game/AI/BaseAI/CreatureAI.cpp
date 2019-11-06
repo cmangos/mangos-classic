@@ -120,15 +120,15 @@ void CreatureAI::RetreatingEnded()
     DoStartMovement(m_creature->getVictim());
 }
 
-void CreatureAI::DoRetreat()
+bool CreatureAI::DoRetreat()
 {
     Unit* victim = m_creature->getVictim();
     if (!victim)
-        return;
+        return false;
 
     float radius = sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_FLEE_ASSISTANCE_RADIUS);
     if (radius <= 0)
-        return;
+        return false;
 
     Creature* ally = nullptr;
 
@@ -138,7 +138,7 @@ void CreatureAI::DoRetreat()
 
     // Check if an ally to call for was found
     if (!ally)
-        return;
+        return false;
 
     WorldLocation pos;
     ally->GetFirstCollisionPosition(pos, ally->GetCombatReach(), ally->GetAngle(m_creature));
@@ -146,6 +146,7 @@ void CreatureAI::DoRetreat()
 
     SetAIOrder(ORDER_RETREATING);
     SetCombatScriptStatus(true);
+    return true;
 }
 
 void CreatureAI::DoCallForHelp(float radius)
