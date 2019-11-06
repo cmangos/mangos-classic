@@ -9351,7 +9351,7 @@ void Unit::InterruptMoving(bool forceSendStop /*=false*/)
     StopMoving(forceSendStop || isMoving);
 }
 
-void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
+bool Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
 {
     if (apply != HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
     {
@@ -9376,10 +9376,13 @@ void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
 
         if (apply)
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+
+        return true;
     }
+    return false;
 }
 
-void Unit::SetFleeing(bool apply, ObjectGuid casterGuid/* = ObjectGuid()*/, uint32 spellID/* = 0*/, uint32 duration/* = 0*/)
+bool Unit::SetFleeing(bool apply, ObjectGuid casterGuid/* = ObjectGuid()*/, uint32 spellID/* = 0*/, uint32 duration/* = 0*/)
 {
     // Normal flee always takes prio over timed flee (panic)
     if (apply != HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING) || (apply && IsInPanic()))
@@ -9388,11 +9391,11 @@ void Unit::SetFleeing(bool apply, ObjectGuid casterGuid/* = ObjectGuid()*/, uint
         {
             // Fleeing prevention aura taken into account first
             if (HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
-                return;
+                return false;
 
             // Do not panic if already confused
             if (duration && IsConfused())
-                return;
+                return false;
 
             CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
         }
@@ -9413,10 +9416,13 @@ void Unit::SetFleeing(bool apply, ObjectGuid casterGuid/* = ObjectGuid()*/, uint
 
         if (apply)
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+
+        return true;
     }
+    return false;
 }
 
-void Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
+bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
 {
     if (apply != HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED))
     {
@@ -9443,9 +9449,12 @@ void Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
                 SetFacingTo(GetOrientation());
             }
         }
-    }
 
-    ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29, (IsStunned() || IsFeigningDeath()));
+        ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29, (IsStunned() || IsFeigningDeath()));
+
+        return true;
+    }
+    return false;
 }
 
 void Unit::SetImmobilizedState(bool apply, bool stun)
