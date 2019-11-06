@@ -24,31 +24,31 @@
 class IdleMovementGenerator : public MovementGenerator
 {
     public:
-
         void Initialize(Unit&) override {}
         void Finalize(Unit&) override {}
         void Interrupt(Unit&) override {}
-        void Reset(Unit&) override;
-        bool Update(Unit&, const uint32&) override { return true; }
+        void Reset(Unit&) override {}
+        bool Update(Unit&, const uint32&) override;
+
         MovementGeneratorType GetMovementGeneratorType() const override { return IDLE_MOTION_TYPE; }
 };
 
 extern IdleMovementGenerator si_idleMovement;
 
-class DistractMovementGenerator : public MovementGenerator
+class DistractMovementGenerator : public IdleMovementGenerator
 {
     public:
         explicit DistractMovementGenerator(uint32 timer) : m_timer(timer) {}
 
         void Initialize(Unit& owner) override;
         void Finalize(Unit& owner) override;
-        void Interrupt(Unit&) override;
-        void Reset(Unit&) override;
-        bool Update(Unit& owner, const uint32& time_diff) override;
+        void Reset(Unit& owner) override;
+        bool Update(Unit& owner, const uint32& diff) override;
+
         MovementGeneratorType GetMovementGeneratorType() const override { return DISTRACT_MOTION_TYPE; }
 
     private:
-        uint32 m_timer;
+        ShortTimeTracker m_timer;
 };
 
 #endif

@@ -22,40 +22,29 @@
 
 IdleMovementGenerator si_idleMovement;
 
-void
-IdleMovementGenerator::Reset(Unit& /*owner*/)
+bool IdleMovementGenerator::Update(Unit&, const uint32&)
 {
+    return true;
 }
 
-void
-DistractMovementGenerator::Initialize(Unit& owner)
+void DistractMovementGenerator::Initialize(Unit& owner)
 {
     owner.addUnitState(UNIT_STAT_DISTRACTED);
 }
 
-void
-DistractMovementGenerator::Finalize(Unit& owner)
+void DistractMovementGenerator::Finalize(Unit& owner)
 {
     owner.clearUnitState(UNIT_STAT_DISTRACTED);
 }
 
-void
-DistractMovementGenerator::Reset(Unit& owner)
+void DistractMovementGenerator::Reset(Unit& owner)
 {
     Initialize(owner);
 }
 
-void
-DistractMovementGenerator::Interrupt(Unit& /*owner*/)
+bool DistractMovementGenerator::Update(Unit& owner, const uint32& diff)
 {
+    m_timer.Update(diff);
+    return (owner.hasUnitState(UNIT_STAT_DISTRACTED) && !m_timer.Passed());
 }
 
-bool
-DistractMovementGenerator::Update(Unit& /*owner*/, const uint32& time_diff)
-{
-    if (time_diff > m_timer)
-        return false;
-
-    m_timer -= time_diff;
-    return true;
-}
