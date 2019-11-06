@@ -40,7 +40,7 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, GMTicket* ticket /*= nul
         text += textBuf;
     }
 
-    int len = text.size() + 1;
+    size_t len = text.size() + 1;
     WorldPacket data(SMSG_GMTICKET_GETTICKET, (4 + len + 1 + 4 + 2 + 4 + 4));
     data << uint32(status);                                 // standard 0x0A, 0x06 if text present
     if (status == 6)

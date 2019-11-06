@@ -22,7 +22,8 @@
 
 CreatureAI::CreatureAI(Creature* creature) :
     UnitAI(creature),
-    m_creature(creature)
+    m_creature(creature),
+    m_deathPrevention(false), m_deathPrevented(false)
 {
     m_dismountOnAggro = !(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT);
 
@@ -62,10 +63,29 @@ void CreatureAI::AttackStart(Unit* who)
     }
 }
 
+void CreatureAI::DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damageType*/, SpellEntry const* /*spellInfo*/)
+{
+    if (m_deathPrevention)
+    {
+        if (m_creature->GetHealth() <= damage)
+        {
+            damage = m_creature->GetHealth() - 1;
+            if (!m_deathPrevented)
+                JustPreventedDeath(dealer);
+        }        
+    }
+}
+
+void CreatureAI::SetDeathPrevention(bool state)
+{
+    m_deathPrevention = state;
+    if (state)
+        m_deathPrevented = false;
+}
+
 void CreatureAI::DoFakeDeath(uint32 spellId)
 {
     m_creature->InterruptNonMeleeSpells(false);
-    m_creature->SetHealth(1);
     m_creature->StopMoving();
     m_creature->ClearComboPointHolders();
     m_creature->RemoveAllAurasOnDeath();
@@ -76,8 +96,11 @@ void CreatureAI::DoFakeDeath(uint32 spellId)
     m_creature->GetMotionMaster()->Clear();
     m_creature->GetMotionMaster()->MoveIdle();
 
-    if (spellId == 0)
-        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-    else
-        DoCastSpellIfCan(m_creature, spellId, CAST_INTERRUPT_PREVIOUS);
+    if (spellId)
+        DoCastSpellIfCan(nullptr, spellId, CAST_INTERRUPT_PREVIOUS);
+}
+
+void CreatureAI::DoCallForHelp(float radius)
+{
+    m_creature->CallForHelp(radius);
 }

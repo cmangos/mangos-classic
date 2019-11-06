@@ -733,12 +733,16 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
     data << Title;
     data << RequestItemsText;
 
-    data << uint32(0x00);                                   // emote delay
-
     if (Completable)
-        data << pQuest->GetCompleteEmote();                 // emote id
+    {
+        data << pQuest->GetCompleteEmoteDelay();
+        data << pQuest->GetCompleteEmote();
+    }
     else
+    {
+        data << pQuest->GetIncompleteEmoteDelay();
         data << pQuest->GetIncompleteEmote();
+    }
 
     // Close Window after cancel
     data << uint32(CloseOnCancel);                          // auto finish

@@ -1393,7 +1393,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             if (pSpellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
                 return;
 
-            uint32 CastingTime = !IsChanneledSpell(pSpellInfo) ? GetSpellCastTime(pSpellInfo) : GetSpellDuration(pSpellInfo);
+            uint32 CastingTime = !IsChanneledSpell(pSpellInfo) ? GetSpellCastTime(pSpellInfo, m_bot) : GetSpellDuration(pSpellInfo);
 
             SetIgnoreUpdateTime((msTime / 1000) + 1);
 
@@ -3074,7 +3074,7 @@ void PlayerbotAI::DoLoot()
             // use key on object if available
             if (reqItem > 0 && m_bot->HasItemCount(reqItem, 1))
             {
-                UseItem(FindItem(reqItem), TARGET_FLAG_OBJECT, m_lootCurrent);
+                UseItem(FindItem(reqItem), TARGET_FLAG_GAMEOBJECT, m_lootCurrent);
                 m_lootCurrent = ObjectGuid();
                 return;
             }
@@ -3156,7 +3156,7 @@ void PlayerbotAI::DoLoot()
                     if (kItem)
                     {
                         TellMaster("I have a skeleton key that can open it!");
-                        UseItem(kItem, TARGET_FLAG_OBJECT, m_lootCurrent);
+                        UseItem(kItem, TARGET_FLAG_GAMEOBJECT, m_lootCurrent);
                         return;
                     }
                     else
@@ -3173,7 +3173,7 @@ void PlayerbotAI::DoLoot()
                     if (bItem)
                     {
                         TellMaster("I can blast it open!");
-                        UseItem(bItem, TARGET_FLAG_OBJECT, m_lootCurrent);
+                        UseItem(bItem, TARGET_FLAG_GAMEOBJECT, m_lootCurrent);
                         return;
                     }
                     else
@@ -4375,7 +4375,7 @@ SpellCastResult PlayerbotAI::CastSpell(uint32 spellId)
     uint16 target_type = TARGET_FLAG_UNIT;
 
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK)
-        target_type = TARGET_FLAG_OBJECT;
+        target_type = TARGET_FLAG_GAMEOBJECT;
 
     m_CurrentlyCastingSpellId = spellId;
 
@@ -5691,7 +5691,7 @@ void PlayerbotAI::UseItem(Item* item, uint16 targetFlag, ObjectGuid targetGUID)
     *packet << spell_index;
     *packet << targetFlag;
 
-    if (targetFlag & (TARGET_FLAG_UNIT | TARGET_FLAG_ITEM | TARGET_FLAG_OBJECT))
+    if (targetFlag & (TARGET_FLAG_UNIT | TARGET_FLAG_ITEM | TARGET_FLAG_GAMEOBJECT))
         *packet << targetGUID.WriteAsPacked();
 
     m_bot->GetSession()->QueuePacket(std::move(packet));
@@ -7865,12 +7865,14 @@ void PlayerbotAI::_HandleCommandSkill(std::string& text, Player& fromPlayer)
             for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); it++)
             {
                 uint32 spellId = *it;
+                TrainerSpell const* trainer_spell = nullptr;
 
                 if (!spellId)
                     break;
 
-                TrainerSpell const* trainer_spell = cSpells->Find(spellId);
-                if (!trainer_spell)
+                if (cSpells)
+                    trainer_spell = cSpells->Find(spellId);
+                if (tSpells && !trainer_spell)
                     trainer_spell = tSpells->Find(spellId);
 
                 if (!trainer_spell)

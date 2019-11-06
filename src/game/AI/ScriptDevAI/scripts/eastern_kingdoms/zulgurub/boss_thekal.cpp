@@ -74,15 +74,15 @@ struct boss_thekalBaseAI : public ScriptedAI
     virtual void OnFakeingDeath() {}
     virtual void OnRevive() {}
 
-    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pKiller*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (uiDamage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth())
             return;
 
         // Prevent glitch if in fake death
         if (m_uiPhase == PHASE_FAKE_DEATH || m_uiPhase == PHASE_WAITING)
         {
-            uiDamage = 0;
+            damage = 0;
             return;
         }
 
@@ -90,7 +90,7 @@ struct boss_thekalBaseAI : public ScriptedAI
         if (m_uiPhase != PHASE_NORMAL)
             return;
 
-        uiDamage = 0;
+        damage = std::min(damage, m_creature->GetHealth() - 1);
 
         m_creature->InterruptNonMeleeSpells(true);
         m_creature->SetHealth(0);

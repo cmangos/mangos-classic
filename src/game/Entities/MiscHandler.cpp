@@ -295,7 +295,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
         if ((GetPlayer()->GetPositionZ() < height + 0.1f) && !(GetPlayer()->IsInWater()))
             GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
 
-        GetPlayer()->SetRoot(true);
+        GetPlayer()->SendMoveRoot(true);
         GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
     }
 
@@ -324,7 +324,7 @@ void WorldSession::HandleLogoutCancelOpcode(WorldPacket& /*recv_data*/)
     if (GetPlayer()->CanFreeMove())
     {
         //!we can move again
-        GetPlayer()->SetRoot(false);
+        GetPlayer()->SendMoveRoot(false);
 
         //! Stand Up
         GetPlayer()->SetStandState(UNIT_STAND_STATE_STAND);
@@ -388,6 +388,10 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket& recv_data)
 
     _player->SetSelectionGuid(guid);
 
+    if (Unit* mover = _player->GetMover()) // when player has a mover and the mover is a 
+        if (mover != _player)
+            mover->SetSelectionGuid(guid);
+
     // update reputation list if need
     Unit* unit = ObjectAccessor::GetUnit(*_player, guid);   // can select group members at diff maps
     if (!unit)
@@ -399,9 +403,19 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleStandStateChangeOpcode(WorldPacket& recv_data)
 {
-    // DEBUG_LOG("WORLD: Received opcode CMSG_STANDSTATECHANGE"); -- too many spam in log at lags/debug stop
     uint32 animstate;
     recv_data >> animstate;
+
+    switch (animstate)
+    {
+        case UNIT_STAND_STATE_STAND:
+        case UNIT_STAND_STATE_SIT:
+        case UNIT_STAND_STATE_SLEEP:
+        case UNIT_STAND_STATE_KNEEL:
+            break;
+        default:
+            return;
+    }
 
     _player->SetStandState(uint8(animstate), true);
 }
@@ -844,29 +858,6 @@ void WorldSession::HandleNextCinematicCamera(WorldPacket& /*recv_data*/)
     GetPlayer()->StartCinematic();
 }
 
-void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
-{
-    /*  WorldSession::Update( WorldTimer::getMSTime() );*/
-    DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_TIME_SKIPPED");
-
-    recv_data >> Unused<uint64>();
-    recv_data >> Unused<uint32>();
-
-    /*
-        ObjectGuid guid;
-        uint32 time_skipped;
-        recv_data >> guid;
-        recv_data >> time_skipped;
-        DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_TIME_SKIPPED");
-
-        /// TODO
-        must be need use in mangos
-        We substract server Lags to move time ( AntiLags )
-        for exmaple
-        GetPlayer()->ModifyLastMoveTime( -int32(time_skipped) );
-    */
-}
-
 void WorldSession::HandleFeatherFallAck(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_FEATHER_FALL_ACK");
@@ -877,8 +868,19 @@ void WorldSession::HandleFeatherFallAck(WorldPacket& recv_data)
 
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
 {
+    DEBUG_LOG("WORLD: Received opcode CMSG_FORCE_MOVE_UNROOT_ACK");
+    // Pre-Wrath: broadcast unroot
+    ObjectGuid guid;
+    recv_data >> guid;
     // no used
     recv_data.rpos(recv_data.wpos());                       // prevent warnings spam
+
+    Unit* mover = _player->GetMover();
+    if (mover && mover->GetObjectGuid() == guid && mover->m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT))
+    {
+        mover->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
+        mover->SendMoveRoot(false, true);
+    }
     /*
         ObjectGuid guid;
         recv_data >> guid;
@@ -901,8 +903,20 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 {
+    DEBUG_LOG("WORLD: Received opcode CMSG_FORCE_MOVE_ROOT_ACK");
+    // Pre-Wrath: broadcast root
+    ObjectGuid guid;
+    recv_data >> guid;
     // no used
     recv_data.rpos(recv_data.wpos());                       // prevent warnings spam
+
+    Unit* mover = _player->GetMover();
+    if (mover && mover->GetObjectGuid() == guid && !mover->m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT))
+    {
+        mover->m_movementInfo.RemoveMovementFlag(movementFlagsMask);
+        mover->m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
+        mover->SendMoveRoot(true, true);
+    }
     /*
         ObjectGuid guid;
         recv_data >> guid;

@@ -90,7 +90,6 @@ void MapManager::InitializeVisibilityDistanceInfo()
 
 void MapManager::CreateContinents()
 {
-
     std::vector<std::future<void>> futures;
     uint32 continents[] = { 0, 1 };
     for (auto id : continents)
@@ -290,6 +289,24 @@ uint32 MapManager::GetNumPlayersInInstances()
     return ret;
 }
 
+uint32 MapManager::GetMapUpdateMinTime(uint32 mapId, uint32 instance)
+{
+    std::lock_guard<std::mutex> lock(m_lock);
+    return i_maps[MapID(mapId, instance)]->GetUpdateTimeMin();
+}
+
+uint32 MapManager::GetMapUpdateMaxTime(uint32 mapId, uint32 instance)
+{
+    std::lock_guard<std::mutex> lock(m_lock);
+    return i_maps[MapID(mapId, instance)]->GetUpdateTimeMax();
+}
+
+uint32 MapManager::GetMapUpdateAvgTime(uint32 mapId, uint32 instance)
+{
+    std::lock_guard<std::mutex> lock(m_lock);
+    return i_maps[MapID(mapId, instance)]->GetUpdateTimeAvg();
+}
+
 ///// returns a new or existing Instance
 ///// in case of battlegrounds it will only return an existing map, those maps are created by bg-system
 Map* MapManager::CreateInstance(uint32 id, Player* player)
@@ -377,4 +394,18 @@ BattleGroundMap* MapManager::CreateBattleGroundMap(uint32 id, uint32 InstanceId,
     map->Initialize(false);
 
     return map;
+}
+
+void MapManager::DoForAllMapsWithMapId(uint32 mapId, std::function<void(Map*)> worker)
+{
+    MapMapType::const_iterator start = i_maps.lower_bound(MapID(mapId, 0));
+    MapMapType::const_iterator end = i_maps.lower_bound(MapID(mapId + 1, 0));
+    for (MapMapType::const_iterator itr = start; itr != end; ++itr)
+        worker(itr->second);
+}
+
+void MapManager::DoForAllMaps(const std::function<void(Map*)>& worker)
+{
+    for (MapMapType::const_iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
+        worker(itr->second);
 }

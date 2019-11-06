@@ -37,7 +37,7 @@ class PossessedAI : public UnitAI
 
         //void GetAIInformation(ChatHandler& reader) override;
 
-        void UpdateAI(const uint32 diff) override
+        void UpdateAI(const uint32 /*diff*/) override
         {
             DoMeleeAttackIfReady();
         }

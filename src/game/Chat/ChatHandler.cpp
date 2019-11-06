@@ -217,7 +217,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
         case CHAT_MSG_PARTY:
         {
             std::string msg;
-            recv_data >> msg;
+
+            if (lang == LANG_ADDON)
+                recv_data.read(msg , false);
+            else
+                recv_data >> msg;
 
             if (msg.empty())
                 break;
@@ -249,7 +253,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
         case CHAT_MSG_GUILD:
         {
             std::string msg;
-            recv_data >> msg;
+
+            if (lang == LANG_ADDON)
+                recv_data.read(msg , false);
+            else
+                recv_data >> msg;
 
             if (msg.empty())
                 break;
@@ -272,7 +280,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
         case CHAT_MSG_OFFICER:
         {
             std::string msg;
-            recv_data >> msg;
+
+            if (lang == LANG_ADDON)
+                recv_data.read(msg , false);
+            else
+                recv_data >> msg;
 
             if (msg.empty())
                 break;
@@ -295,7 +307,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
         case CHAT_MSG_RAID:
         {
             std::string msg;
-            recv_data >> msg;
+
+            if (lang == LANG_ADDON)
+                recv_data.read(msg , false);
+            else
+                recv_data >> msg;
 
             if (msg.empty())
                 break;
@@ -378,7 +394,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
         case CHAT_MSG_BATTLEGROUND:
         {
             std::string msg;
-            recv_data >> msg;
+
+            if (lang == LANG_ADDON)
+                recv_data.read(msg , false);
+            else
+                recv_data >> msg;
 
             if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
                 return;
@@ -497,6 +517,11 @@ void WorldSession::HandleEmoteOpcode(WorldPacket& recv_data)
 
     uint32 emote;
     recv_data >> emote;
+
+    // restrict to the only emotes hardcoded in client
+    if (emote != EMOTE_ONESHOT_NONE && emote != EMOTE_ONESHOT_WAVE)
+        return;
+
     GetPlayer()->HandleEmoteCommand(emote);
 }
 

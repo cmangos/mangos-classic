@@ -738,8 +738,8 @@ struct SpellCastTimesEntry
 {
     uint32    ID;                                           // 0        m_ID
     int32     CastTime;                                     // 1        m_base
-    // float     CastTimePerLevel;                          // 2        m_perLevel
-    // int32     MinCastTime;                               // 3        m_minimum
+    int32     CastTimePerLevel;                             // 2        m_perLevel
+    int32     MinCastTime;                                  // 3        m_minimum
 };
 
 struct SpellFocusObjectEntry

@@ -97,6 +97,11 @@ set(SRC_GRP_UTIL
     WorldPacket.h
 )
 
+set(SRC_GRP_SRP
+    SRP6/SRP6.cpp
+    SRP6/SRP6.h
+)
+
 set(LIBRARY_SRCS
     ${SRC_GRP_AUTH}
     ${SRC_GRP_CONFIG}
@@ -104,6 +109,7 @@ set(LIBRARY_SRCS
     ${SRC_GRP_DATABASE_DBC}
     ${SRC_GRP_LOG}
     ${SRC_GRP_UTIL}
+    ${SRC_GRP_SRP}
     ${SRC_GRP_NETWORK}
     Common.cpp
     Common.h
@@ -141,6 +147,11 @@ source_group("Log"
 source_group("Util"
   FILES
     ${SRC_GRP_UTIL}
+)
+
+source_group("SRP"
+  FILES
+    ${SRC_GRP_SRP}
 )
 
 # OS specific files

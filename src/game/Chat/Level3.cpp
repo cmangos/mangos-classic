@@ -1318,7 +1318,7 @@ bool ChatHandler::HandleUnLearnCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleCooldownListCommand(char* args)
+bool ChatHandler::HandleCooldownListCommand(char* /*args*/)
 {
     Unit* target = getSelectedUnit();
     if (!target)
@@ -3358,7 +3358,7 @@ bool ChatHandler::HandleGuildRankCommand(char* args)
     if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
         return false;
 
-    uint32 glId   = target ? target->GetGuildId() : Player::GetGuildIdFromDB(target_guid);
+    uint32 glId = target ? target->GetGuildId() : Player::GetGuildIdFromDB(target_guid);
     if (!glId)
         return false;
 
@@ -3377,7 +3377,18 @@ bool ChatHandler::HandleGuildRankCommand(char* args)
     if (!slot)
         return false;
 
-    slot->ChangeRank(newrank);
+    if (newrank == GR_GUILDMASTER)
+    {
+        MemberSlot* leaderSlot = targetGuild->GetMemberSlot(targetGuild->GetLeaderGuid());
+        if (!leaderSlot)
+            return false;
+
+        leaderSlot->ChangeRank(GR_OFFICER);
+        targetGuild->SetLeader(target_guid);
+    }
+    else
+        slot->ChangeRank(newrank);
+
     return true;
 }
 
@@ -3450,7 +3461,7 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleGetLosCommand(char* args)
+bool ChatHandler::HandleGetLosCommand(char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
     Unit* target = getSelectedUnit();
@@ -3540,6 +3551,8 @@ bool ChatHandler::HandleDamageCommand(char* args)
     // flat melee damage without resistance/etc reduction
     if (!*args)
     {
+        uint32 absorb = 0;
+        player->DealDamageMods(target, damage, &absorb, DIRECT_DAMAGE);
         player->DealDamage(target, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         if (target != player)
             player->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, SPELL_SCHOOL_MASK_NORMAL, damage, 0, 0, VICTIMSTATE_NORMAL, 0);
@@ -3641,13 +3654,15 @@ bool ChatHandler::HandleAuraCommand(char* args)
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         uint8 eff = spellInfo->Effect[i];
-        if (eff >= TOTAL_SPELL_EFFECTS)
+        if (eff >= MAX_SPELL_EFFECTS)
             continue;
         if (IsAreaAuraEffect(eff)           ||
                 eff == SPELL_EFFECT_APPLY_AURA  ||
                 eff == SPELL_EFFECT_PERSISTENT_AREA_AURA)
         {
-            Aura* aur = CreateAura(spellInfo, SpellEffectIndex(i), nullptr, holder, target);
+            int32 basePoints = spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
+            int32 damage = 0; // no damage cos caster doesnt exist
+            Aura* aur = CreateAura(spellInfo, SpellEffectIndex(i), &damage, &basePoints, holder, target);
             holder->AddAura(aur, SpellEffectIndex(i));
         }
     }
@@ -5770,18 +5785,14 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_CHASE_NULL);
                 else if (target->GetTypeId() == TYPEID_PLAYER)
-                    PSendSysMessage(LANG_MOVEGENS_CHASE_PLAYER, target->GetName(), target->GetGUIDLow(), distance, angle);
+                    PSendSysMessage(LANG_MOVEGENS_CHASE_PLAYER, target->GetName(), target->GetGUIDLow(), distance, angle, ChaseModes[movegen->GetCurrentMode()]);
                 else
-                    PSendSysMessage(LANG_MOVEGENS_CHASE_CREATURE, target->GetName(), target->GetGUIDLow(), distance, angle);
+                    PSendSysMessage(LANG_MOVEGENS_CHASE_CREATURE, target->GetName(), target->GetGUIDLow(), distance, angle, ChaseModes[movegen->GetCurrentMode()]);
                 break;
             }
             case FOLLOW_MOTION_TYPE:
             {
-                Unit* target;
-                if (unit->GetTypeId() == TYPEID_PLAYER)
-                    target = static_cast<FollowMovementGenerator<Player> const*>(*itr)->GetCurrentTarget();
-                else
-                    target = static_cast<FollowMovementGenerator<Creature> const*>(*itr)->GetCurrentTarget();
+                Unit* target = static_cast<FollowMovementGenerator const*>(*itr)->GetCurrentTarget();
 
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_FOLLOW_NULL);
@@ -5816,7 +5827,7 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleMovespeedShowCommand(char* args)
+bool ChatHandler::HandleMovespeedShowCommand(char* /*args*/)
 {
     Unit* unit = getSelectedUnit();
     if (!unit)
@@ -6825,7 +6836,7 @@ bool ChatHandler::HandleMmapTestHeight(char* args)
     return true;
 }
 
-bool ChatHandler::HandleServerResetAllRaidCommand(char* args)
+bool ChatHandler::HandleServerResetAllRaidCommand(char* /*args*/)
 {
     PSendSysMessage("Global raid instances reset, all players in raid instances will be teleported to homebind!");
     sMapPersistentStateMgr.GetScheduler().ResetAllRaid();

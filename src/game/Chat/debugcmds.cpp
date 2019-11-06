@@ -28,6 +28,7 @@
 #include "Tools/Language.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include <fstream>
+#include "Maps/MapManager.h"
 #include "Globals/ObjectMgr.h"
 #include "Entities/ObjectGuid.h"
 #include "Spells/SpellMgr.h"
@@ -1191,6 +1192,65 @@ bool ChatHandler::HandleDebugTaxiCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleDebugMaps(char* /*args*/)
+{
+    PSendSysMessage("Update time statistics:");
+    PSendSysMessage("Map[0] >> Min: %ums, Max: %ums, Avg: %ums",
+        sMapMgr.GetMapUpdateMinTime(0), sMapMgr.GetMapUpdateMaxTime(0), sMapMgr.GetMapUpdateAvgTime(0));
+    PSendSysMessage("Map[1] >> Min: %ums, Max: %ums, Avg: %ums",
+        sMapMgr.GetMapUpdateMinTime(1), sMapMgr.GetMapUpdateMaxTime(1), sMapMgr.GetMapUpdateAvgTime(1));
+    PSendSysMessage("Map[530] >> Min: %ums, Max: %ums, Avg: %ums",
+        sMapMgr.GetMapUpdateMinTime(530), sMapMgr.GetMapUpdateMaxTime(530), sMapMgr.GetMapUpdateAvgTime(530));
+
+    if (m_session)
+    {
+        Player* player = m_session->GetPlayer();
+        if (!player)
+            return true;
+
+        if (player->GetMap()->IsContinent())
+            return true;
+
+        uint32 mapId = player->GetMap()->GetId();
+        uint32 instance = player->GetMap()->GetInstanceId();
+        PSendSysMessage("Instance update time statistics:");
+        PSendSysMessage("Map[%u] (Instance: %u) >> Min: %ums, Max: %ums, Avg: %ums",
+            mapId, instance, sMapMgr.GetMapUpdateMinTime(mapId, instance), sMapMgr.GetMapUpdateMaxTime(mapId, instance), sMapMgr.GetMapUpdateAvgTime(mapId, instance));
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleShowTemporarySpawnList(char* /*args*/)
+{
+    Player* pPlayer = m_session->GetPlayer();
+
+    std::map<uint32, uint32> temp_creature = pPlayer->GetMap()->GetTempCreatures();
+
+    SendSysMessage("Current temporary creatures in player map.");
+
+    for (std::map<uint32, uint32>::iterator it = temp_creature.begin(); it != temp_creature.end(); ++it)
+        PSendSysMessage("Entry: %u, Count: %u ", (*it).first, (*it).second);
+
+    std::map<uint32, uint32> temp_pet = pPlayer->GetMap()->GetTempPets();
+    SendSysMessage("Current temporary pets in player map.");
+
+    for (std::map<uint32, uint32>::iterator it = temp_pet.begin(); it != temp_pet.end(); ++it)
+        PSendSysMessage("Entry: %u, Count: %u ", (*it).first, (*it).second);
+
+    return true;
+}
+
+bool ChatHandler::HandleGridsLoadedCount(char* /*args*/)
+{
+    Player* player = m_session->GetPlayer();
+    if (!player)
+        return false;
+
+    PSendSysMessage("There are currently %u loaded grids.", player->GetMap()->GetLoadedGridsCount());
+    return true;
+}
+
 bool ChatHandler::HandleDebugWaypoint(char* args)
 {
     Creature* target = getSelectedCreature();
@@ -1268,7 +1328,7 @@ bool ChatHandler::HandleDebugSpellVisual(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugMoveflags(char* args)
+bool ChatHandler::HandleDebugMoveflags(char* /*args*/)
 {
     Unit* target = getSelectedUnit();
     if (!target)
@@ -1371,7 +1431,7 @@ bool ChatHandler::HandleDebugSendWorldState(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugHaveAtClientCommand(char* args)
+bool ChatHandler::HandleDebugHaveAtClientCommand(char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
     Unit* target = getSelectedUnit();
@@ -1389,7 +1449,7 @@ bool ChatHandler::HandleDebugHaveAtClientCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugIsVisibleCommand(char* args)
+bool ChatHandler::HandleDebugIsVisibleCommand(char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
     Unit* target = getSelectedUnit();
@@ -1408,11 +1468,21 @@ bool ChatHandler::HandleDebugIsVisibleCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugOverflowCommand(char* args)
+bool ChatHandler::HandleDebugOverflowCommand(char* /*args*/)
 {
     std::string name("\360\222\214\245\360\222\221\243\360\222\221\251\360\223\213\215\360\223\213\210\360\223\211\241\360\222\214\245\360\222\221\243\360\222\221\251\360\223\213\215\360\223\213\210\360\223\211\241");
     // Overflow: \xd808\xdf25\xd809\xdc63\xd809\xdc69\xd80c\xdecd\xd80c\xdec8\xd80c\xde61\000\xdf25\xd809\xdc63
 
     normalizePlayerName(name);
+    return true;
+}
+
+bool ChatHandler::HandleDebugChatFreezeCommand(char* /*args*/)
+{
+    std::string message("| |01");
+
+    Player* player = m_session->GetPlayer();
+    player->Whisper(message, LANG_UNIVERSAL, player->GetObjectGuid());
+
     return true;
 }

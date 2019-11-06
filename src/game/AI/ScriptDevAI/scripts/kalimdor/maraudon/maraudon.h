@@ -43,7 +43,7 @@ class instance_maraudon : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
     protected:
         uint32 m_encounter[MAX_ENCOUNTER];

@@ -174,14 +174,14 @@ Creature* ScriptedInstance::GetSingleCreatureFromStorage(uint32 entry, bool skip
     return nullptr;
 }
 
-void ScriptedInstance::GetCreatureGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool skipDebugLog)
+void ScriptedInstance::GetCreatureGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool /*skipDebugLog*/)
 {
     auto iter = m_npcEntryGuidCollection.find(entry);
     if (iter != m_npcEntryGuidCollection.end())
         entryGuidVector = (*iter).second;
 }
 
-void ScriptedInstance::GetGameObjectGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool skipDebugLog)
+void ScriptedInstance::GetGameObjectGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool /*skipDebugLog*/)
 {
     auto iter = m_goEntryGuidCollection.find(entry);
     if (iter != m_goEntryGuidCollection.end())

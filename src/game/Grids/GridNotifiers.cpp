@@ -55,6 +55,20 @@ void VisibleNotifier::Notify()
         }
     }
 
+    // Far objects update on player notify
+    for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end();)
+    {
+        GuidSet::iterator current = itr++;
+        if (WorldObject* obj = player.GetMap()->GetWorldObject(*current))
+        {
+            if (!obj->IsVisibilityOverridden())
+                continue;
+
+            player.UpdateVisibilityOf(&player, obj);
+            i_clientGUIDs.erase(current);
+        }
+    }
+
     // generate outOfRange for not iterate objects
     i_data.AddOutOfRangeGUID(i_clientGUIDs);
     for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end(); ++itr)
@@ -68,9 +82,11 @@ void VisibleNotifier::Notify()
     if (i_data.HasData())
     {
         // send create/outofrange packet to player (except player create updates that already sent using SendUpdateToPlayer)
-        WorldPacket packet;
-        i_data.BuildPacket(packet);
-        player.GetSession()->SendPacket(packet);
+        for (size_t i = 0; i < i_data.GetPacketCount(); ++i)
+        {
+            WorldPacket packet = i_data.BuildPacket(i);
+            player.GetSession()->SendPacket(packet);
+        }
 
         // send out of range to other players if need
         GuidSet const& oor = i_data.GetOutOfRangeGUIDs();

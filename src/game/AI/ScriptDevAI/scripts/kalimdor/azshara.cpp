@@ -305,7 +305,7 @@ struct npc_felhound_trackerAI : public ScriptedPetAI
     }
 
     // Function to search for new tubber in range
-    void DoFindNewCrystal(Player* pMaster)
+    void DoFindNewCrystal(Player* /*pMaster*/)
     {
         GameObjectList lCrystalsInRange;
         for (unsigned int i : aGOList)
@@ -488,7 +488,7 @@ struct boss_mawsAI : public ScriptedAI
         uiDespawnTimer          = 2.5 * HOUR * IN_MILLISECONDS;
     }
 
-    void JustDied(Unit* pKiller)
+    void JustDied(Unit* /*pKiller*/)
     {
         // Despawn visual lightning GO
         if (GameObject* lightning = GetClosestGameObjectWithEntry(m_creature, GO_THEATRIC_LIGHTNING, 200.0f))

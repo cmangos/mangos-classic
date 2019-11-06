@@ -462,6 +462,12 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         temp.event_flags &= ~EFLAG_REPEATABLE;
                     }
 
+                    if (temp.event_flags & EFLAG_COMBAT_ACTION)
+                    {
+                        sLog.outErrorEventAI("Creature %u has EFLAG_COMBAT_ACTION set. Event can never be done during combat. Removing flag for event %u.", temp.creature_id, i);
+                        temp.event_flags &= ~EFLAG_COMBAT_ACTION;
+                    }
+
                     break;
                 }
 
@@ -572,6 +578,8 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
 
                     if (temp.spell_hit_target.repeatMax < temp.spell_hit_target.repeatMin)
                         sLog.outErrorEventAI("Creature %u are using repeatable event(%u) with param4 < param3 (RepeatMax < RepeatMin). Event will never repeat.", temp.creature_id, i);
+                    break;
+                case EVENT_T_DEATH_PREVENTED:
                     break;
                 default:
                     sLog.outErrorEventAI("Creature %u using not checked at load event (%u) in event %u. Need check code update?", temp.creature_id, temp.event_id, i);
@@ -748,10 +756,10 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
 
                         IsValidTargetType(temp.event_type, action.type, action.summon.target, i, j + 1);
                         break;
-                    case ACTION_T_THREAT_SINGLE_PCT:
-                        if (std::abs(action.threat_single_pct.percent) > 100)
-                            sLog.outErrorEventAI("Event %u Action %u uses invalid percent value %u.", i, j + 1, action.threat_single_pct.percent);
-                        IsValidTargetType(temp.event_type, action.type, action.threat_single_pct.target, i, j + 1);
+                    case ACTION_T_THREAT_SINGLE:
+                        if (std::abs(action.threat_single.value) > 100 && !action.threat_single.isDirect)
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid percent value %u.", i, j + 1, action.threat_single.value);
+                        IsValidTargetType(temp.event_type, action.type, action.threat_single.target, i, j + 1);
                         break;
                     case ACTION_T_THREAT_ALL_PCT:
                         if (std::abs(action.threat_all_pct.percent) > 100)
@@ -864,14 +872,11 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             action.set_sheath.sheath = SHEATH_STATE_UNARMED;
                         }
                         break;
-                    case ACTION_T_SET_INVINCIBILITY_HP_LEVEL:
-                        if (action.invincibility_hp_level.is_percent)
+                    case ACTION_T_SET_DEATH_PREVENTION:
+                        if (action.deathPrevention.state > 1)
                         {
-                            if (action.invincibility_hp_level.hp_level > 100)
-                            {
-                                sLog.outErrorEventAI("Event %u Action %u uses wrong percent value %u.", i, j + 1, action.invincibility_hp_level.hp_level);
-                                action.invincibility_hp_level.hp_level = 100;
-                            }
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid death prevention state %u. Setting to 1.", i, j + 1, action.deathPrevention.state);
+                            action.deathPrevention.state = 1;
                         }
                         break;
                     case ACTION_T_MOUNT_TO_ENTRY_OR_MODEL:
@@ -907,7 +912,6 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_COMBAT_MOVEMENT:          // AllowCombatMovement (0 = stop combat based movement, anything else continue attacking)
                     case ACTION_T_RANGED_MOVEMENT:          // Distance, Angle
                     case ACTION_T_CALL_FOR_HELP:            // Distance
-                    case ACTION_T_DYNAMIC_MOVEMENT:         // EnableDynamicMovement (1 = on; 0 = off)
                         break;
 
                     case ACTION_T_RANDOM_SAY:
@@ -948,6 +952,11 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         if (action.changeMovement.movementType >= MAX_DB_MOTION_TYPE)
                         {
                             sLog.outErrorEventAI("Event %u Action %u uses invalid movement type %u (must be smaller than %u)", i, j + 1, action.changeMovement.movementType, MAX_DB_MOTION_TYPE);
+                        }
+                        if (action.changeMovement.asDefault > 1)
+                        {
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid default movement setting %u. Setting to 0.", i, j + 1, action.changeMovement.asDefault);
+                            action.deathPrevention.state = 0;
                         }
                         break;
                     case ACTION_T_SET_REACT_STATE:

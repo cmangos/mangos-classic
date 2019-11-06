@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include "Utilities/ByteConverter.h"
+#include <utf8.h>
 
 class ByteBufferException
 {
@@ -222,14 +223,7 @@ class ByteBuffer
 
         ByteBuffer& operator>>(std::string& value)
         {
-            value.clear();
-            while (rpos() < size())                         // prevent crash at wrong string format in packet
-            {
-                char c = read<char>();
-                if (c == 0)
-                    break;
-                value += c;
-            }
+            read(value, true);
             return *this;
         }
 
@@ -294,6 +288,22 @@ class ByteBuffer
                 throw ByteBufferException(false, _rpos, len, size());
             memcpy(dest, &_storage[_rpos], len);
             _rpos += len;
+        }
+
+        void read(std::string& value, bool utf8)
+        {
+            value.clear();
+            while (rpos() < size())
+            {
+                char c = read<char>();
+                if (c == 0)
+                    break;
+                value += c;
+            }
+
+            // Detect invalid unicode sequence in string and raise appropriate exception
+            if (utf8 && !utf8::is_valid(value.begin(), value.end()))
+                throw ByteBufferException(false, _rpos, value.length(), size());
         }
 
         uint64 readPackGUID()

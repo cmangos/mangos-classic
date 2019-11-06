@@ -140,6 +140,7 @@ enum QuestFlags
     QUEST_FLAGS_UNK2           = 0x00000100,                // Not used currently: _DELIVER_MORE Quest needs more than normal _q-item_ drops from mobs
     QUEST_FLAGS_HIDDEN_REWARDS = 0x00000200,                // Items and money rewarded only sent in SMSG_QUESTGIVER_OFFER_REWARD (not in SMSG_QUESTGIVER_QUEST_DETAILS or in client quest log(SMSG_QUEST_QUERY_RESPONSE))
     QUEST_FLAGS_AUTO_REWARDED  = 0x00000400,                // These quests are automatically rewarded on quest complete and they will never appear in quest log client side.
+    QUEST_FLAGS_WEEKLY         = 0x00008000,                // Weekly quest. Can be done once a week. Quests reset at regular intervals for all players.
 };
 
 enum QuestSpecialFlags
@@ -233,13 +234,16 @@ class Quest
         float  GetPointY() const { return PointY; }
         uint32 GetPointOpt() const { return PointOpt; }
         uint32 GetIncompleteEmote() const { return IncompleteEmote; }
+        uint32 GetIncompleteEmoteDelay() const { return IncompleteEmoteDelay; }
         uint32 GetCompleteEmote() const { return CompleteEmote; }
+        uint32 GetCompleteEmoteDelay() const { return CompleteEmoteDelay; }
         uint32 GetDetailsEmoteCount() const { return m_detailsemotecount; }
         uint32 GetQuestStartScript() const { return QuestStartScript; }
         uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
 
         bool   IsRepeatable() const { return (m_SpecialFlags & QUEST_SPECIAL_FLAG_REPEATABLE) != 0; }
         bool   IsAutoComplete() const { return !QuestMethod; }
+        bool   IsWeekly() const { return (m_QuestFlags & QUEST_FLAGS_WEEKLY) != 0; }
         bool   IsAllowedInRaid() const;
 
         // quest can be fully deactivated and will not be available for any player
@@ -334,7 +338,9 @@ class Quest
         float  PointY;
         uint32 PointOpt;
         uint32 IncompleteEmote;
+        uint32 IncompleteEmoteDelay;
         uint32 CompleteEmote;
+        uint32 CompleteEmoteDelay;
         uint32 QuestStartScript;
         uint32 QuestCompleteScript;
 };

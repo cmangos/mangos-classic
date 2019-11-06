@@ -26,12 +26,4 @@ if(UNIX)
   ADD_DEFINITIONS("-ggdb")
 endif()
 
-if (APPLE)
-  add_definitions("-Dfopen64=fopen")
-  add_definitions("-Dfseeko64=fseeko")
-  add_definitions("-Dfseek64=fseek")
-  add_definitions("-Dftell64=ftell")
-  add_definitions("-Dftello64=ftello")
-endif()
-
 add_subdirectory(vmapextract)

@@ -408,7 +408,7 @@ namespace MaNGOS
     {
         Do& i_do;
 
-        CreatureWorker(WorldObject const* searcher, Do& _do) : i_do(_do) {}
+        CreatureWorker(WorldObject const* /*searcher*/, Do& _do) : i_do(_do) {}
 
         void Visit(CreatureMapType& m)
         {
@@ -601,7 +601,7 @@ namespace MaNGOS
             {
                 if (go->GetGOInfo()->type == GAMEOBJECT_TYPE_FISHINGHOLE && go->IsSpawned() && i_obj.IsWithinDistInMap(go, i_range) && i_obj.IsWithinDistInMap(go, (float)go->GetGOInfo()->fishinghole.radius))
                 {
-                    i_range = i_obj.GetDistance(go);
+                    i_range = i_obj.GetDistance(go, true, DIST_CALC_COMBAT_REACH);
                     return true;
                 }
                 return false;
@@ -843,7 +843,7 @@ namespace MaNGOS
             Unit const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
-                return u->isAlive() && u->isInCombat() && i_obj->CanAssist(u) && i_obj->IsWithinDistInMap(u, i_range) && (u->IsImmobilized() || u->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED) || u->isFeared() || u->IsPolymorphed() || u->isFrozen() || u->hasUnitState(UNIT_STAT_CAN_NOT_REACT));
+                return u->isAlive() && u->isInCombat() && i_obj->CanAssist(u) && i_obj->IsWithinDistInMap(u, i_range) && (u->IsImmobilizedState() || u->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED) || u->isFeared() || u->IsPolymorphed() || u->isFrozen() || u->hasUnitState(UNIT_STAT_CAN_NOT_REACT));
             }
         private:
             Unit const* i_obj;

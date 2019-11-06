@@ -162,7 +162,7 @@ void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)
     if (totemSpell)
     {
         // If spell have cast time -> so its active totem
-        if (GetSpellCastTime(totemSpell))
+        if (GetSpellCastTime(totemSpell, this))
             m_type = TOTEM_ACTIVE;
     }
     if (spellProto->SpellIconID == 2056)

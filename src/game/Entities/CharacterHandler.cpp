@@ -83,6 +83,7 @@ bool LoginQueryHolder::Initialize()
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADAURAS,           "SELECT caster_guid,item_guid,spell,stackcount,remaincharges,basepoints0,basepoints1,basepoints2,periodictime0,periodictime1,periodictime2,maxduration,remaintime,effIndexMask FROM character_aura WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLS,          "SELECT spell,active,disabled FROM character_spell WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS,     "SELECT quest,status,rewarded,explored,timer,mobcount1,mobcount2,mobcount3,mobcount4,itemcount1,itemcount2,itemcount3,itemcount4 FROM character_queststatus WHERE guid = '%u'", m_guid.GetCounter());
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADWEEKLYQUESTSTATUS, "SELECT quest FROM character_queststatus_weekly WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHONORCP,         "SELECT victim_type,victim,honor,date,type FROM character_honor_cp WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADREPUTATION,      "SELECT faction,standing,flags FROM character_reputation WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADINVENTORY,       "SELECT data,bag,slot,item,item_template FROM character_inventory JOIN item_instance ON character_inventory.item = item_instance.guid WHERE character_inventory.guid = '%u' ORDER BY bag,slot", m_guid.GetCounter());
@@ -478,6 +479,10 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
             while (_player && _player->IsBeingTeleportedFar())
                 HandleMoveWorldportAckOpcode();
 
+        // release loot on reconnect
+        if (Loot* loot = sLootMgr.GetLoot(_player))
+            loot->Release(_player);
+
         HandlePlayerReconnect();
         return;
     }
@@ -544,6 +549,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         SendPacket(data, true);
         return;
     }
+
+    Group* group = pCurrChar->GetGroup();
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << pCurrChar->GetMapId();
@@ -637,6 +644,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     sObjectAccessor.AddObject(pCurrChar);
     // DEBUG_LOG("Player %s added to Map.",pCurrChar->GetName());
+
+    if (group)
+        group->SendUpdateTo(pCurrChar);
+        
     pCurrChar->GetSocial()->SendFriendList();
     pCurrChar->GetSocial()->SendIgnoreList();
 
@@ -653,11 +664,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     pCurrChar->SetInGameTime(WorldTimer::getMSTime());
 
-    // announce group about member online (must be after add to player list to receive announce to self)
-    if (Group* group = pCurrChar->GetGroup())
+    // Send group member online status for other members
+    if (group)
         group->UpdatePlayerOnlineStatus(pCurrChar);
 
-    // friend status
+    // Send friend list online status for other players
     sSocialMgr.SendFriendStatus(pCurrChar, FRIEND_ONLINE, pCurrChar->GetObjectGuid(), true);
 
     // Place character in world (and load zone) before some object loading
@@ -751,6 +762,8 @@ void WorldSession::HandlePlayerReconnect()
 
     SetOnline();
 
+    Group* group = _player->GetGroup();
+
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << _player->GetMapId();
     data << _player->GetPositionX();
@@ -797,6 +810,9 @@ void WorldSession::HandlePlayerReconnect()
 
     _player->GetMap()->CreatePlayerOnClient(_player);
 
+    if (group)
+        group->SendUpdateTo(_player);
+
     _player->GetSocial()->SendFriendList();
     _player->GetSocial()->SendIgnoreList();
 
@@ -805,11 +821,7 @@ void WorldSession::HandlePlayerReconnect()
     _player->SendEnchantmentDurations();                             // must be after add to map
     _player->SendItemDurations();                                    // must be after add to map
 
-    // announce group about member online (must be after add to player list to receive announce to self)
-    if (Group* group = _player->GetGroup())
-        group->UpdatePlayerOnlineStatus(_player);
-
-    // friend status
+    // Send friend list online status for other players
     sSocialMgr.SendFriendStatus(_player, FRIEND_ONLINE, _player->GetObjectGuid(), true);
 
     // show time before shutdown if shutdown planned.

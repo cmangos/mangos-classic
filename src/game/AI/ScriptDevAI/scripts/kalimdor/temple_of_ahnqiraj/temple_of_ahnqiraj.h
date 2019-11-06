@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 9,
+    MAX_ENCOUNTER               = 10,
 
     TYPE_SKERAM                 = 0,
     TYPE_BUG_TRIO               = 1,
@@ -18,11 +18,12 @@ enum
     TYPE_TWINS                  = 6,
     TYPE_OURO                   = 7,
     TYPE_CTHUN                  = 8,
+    TYPE_TWINS_INTRO            = 9,
 
     NPC_SKERAM                  = 15263,
-    // NPC_KRI                   = 15511,
-    // NPC_VEM                   = 15544,
-    // NPC_YAUJ                  = 15543,
+    NPC_KRI                     = 15511,
+    NPC_VEM                     = 15544,
+    NPC_YAUJ                    = 15543,
     NPC_SARTURA                 = 15516,
     NPC_VEKLOR                  = 15276,
     NPC_VEKNILASH               = 15275,
@@ -37,6 +38,7 @@ enum
     GO_SANDWORM_BASE            = 180795,
 
     EMOTE_EYE_INTRO             = -1531012,
+    STAND_EMPERORS_INTRO        = 1,
     SAY_EMPERORS_INTRO_1        = -1531013,
     SAY_EMPERORS_INTRO_2        = -1531014,
     SAY_EMPERORS_INTRO_3        = -1531015,
@@ -67,10 +69,13 @@ enum
     SPELL_WHISPERINGS_CTHUN_5   = 26259,
 };
 
+// Prophecies yelled by Propher Skeram before he is engaged
+static const uint32 sound_skeram_prophecy[] = { 8616, 8621, 8619, 8620, 8618 };
+
 // Spells from Qiraji Resonating crystal (AQ40 specific mounts)
 static const uint32 qiraji_mount_auras[] = { 25953, 26054, 26055, 26056 };
 
-class instance_temple_of_ahnqiraj : public ScriptedInstance
+class instance_temple_of_ahnqiraj : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_temple_of_ahnqiraj(Map* pMap);
@@ -80,7 +85,7 @@ class instance_temple_of_ahnqiraj : public ScriptedInstance
 
         bool IsEncounterInProgress() const override;
 
-        void OnCreatureCreate(Creature* pCreature) override;
+        void OnCreatureCreate(Creature* creature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
         void OnPlayerLeave(Player* pPlayer) override;
@@ -88,7 +93,7 @@ class instance_temple_of_ahnqiraj : public ScriptedInstance
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
 
-        void DoHandleTempleAreaTrigger(uint32 uiTriggerId);
+        void DoHandleTempleAreaTrigger(uint32 triggerId, Player* player);
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
@@ -101,10 +106,9 @@ class instance_temple_of_ahnqiraj : public ScriptedInstance
 
         uint8 m_uiBugTrioDeathCount;
         uint32 m_uiCthunWhisperTimer;
+        uint32 m_uiSkeramProphecyTimer;
 
-        bool m_bIsEmperorsIntroDone;
-
-        DialogueHelper m_dialogueHelper;
+        void JustDidDialogueStep(int32 entry) override;
 };
 
 #endif

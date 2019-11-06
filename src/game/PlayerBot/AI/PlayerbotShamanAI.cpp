@@ -300,7 +300,7 @@ CombatManeuverReturns PlayerbotShamanAI::ResurrectPlayer(Player* target)
     return RETURN_NO_ACTION_ERROR; // not error per se - possibly just OOM
 }
 
-CombatManeuverReturns PlayerbotShamanAI::DispelPlayer(Player* target)
+CombatManeuverReturns PlayerbotShamanAI::DispelPlayer(Player* /*target*/)
 {
     // Remove poison on group members
     if (Player* poisonedTarget = GetDispelTarget(DISPEL_POISON))

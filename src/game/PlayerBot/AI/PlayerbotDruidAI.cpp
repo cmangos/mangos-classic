@@ -509,7 +509,7 @@ CombatManeuverReturns PlayerbotDruidAI::ResurrectPlayer(Player* target)
     return RETURN_NO_ACTION_ERROR; // not error per se - possibly just OOM
 }
 
-CombatManeuverReturns PlayerbotDruidAI::DispelPlayer(Player* target)
+CombatManeuverReturns PlayerbotDruidAI::DispelPlayer(Player* /*target*/)
 {
     // Remove curse on group members
     if (Player* cursedTarget = GetDispelTarget(DISPEL_CURSE))

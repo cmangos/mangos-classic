@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: mob_anubisath_sentinel
-SD%Complete: 75
-SDComment: Abilities selection needs further improvements. Shadow storm is not properly implemented in core it should only target ppl outside of melee range.
+SD%Complete: 100
+SDComment:
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData
 
@@ -28,6 +28,7 @@ EndScriptData
 enum
 {
     EMOTE_GENERIC_FRENZY            = -1000002,
+    EMOTE_SHARE_POWERS              = -1531047,
 
     SPELL_PERIODIC_MANA_BURN        = 812,
     SPELL_MENDING                   = 2147,
@@ -38,6 +39,7 @@ enum
     SPELL_SHADOW_FROST_REFLECT      = 19595,
     SPELL_PERIODIC_KNOCK_AWAY       = 21737,
     SPELL_THORNS                    = 25777,
+    SPELL_TRANSFER_POWER            = 2400,
 
     SPELL_ENRAGE                    = 8599,
 
@@ -46,130 +48,144 @@ enum
 
 struct npc_anubisath_sentinelAI : public ScriptedAI
 {
-    npc_anubisath_sentinelAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_anubisath_sentinelAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_lAssistList.clear();
+        m_assistList.clear();
         Reset();
     }
 
-    uint32 m_uiMyAbility;
-    bool m_bEnraged;
+    uint32 m_myAbility;
+    bool m_isEnraged;
+    std::vector<uint32> m_abilities;
 
-    GuidList m_lAssistList;
+    GuidList m_assistList;
 
     void Reset() override
     {
-        m_uiMyAbility = 0;
-        m_bEnraged = false;
+        m_myAbility = 0;
+        m_isEnraged = false;
+        m_abilities = { SPELL_PERIODIC_MANA_BURN, SPELL_MENDING, SPELL_PERIODIC_SHADOW_STORM, SPELL_PERIODIC_THUNDERCLAP, SPELL_MORTAL_STRIKE, SPELL_FIRE_ARCANE_REFLECT, SPELL_SHADOW_FROST_REFLECT, SPELL_PERIODIC_KNOCK_AWAY, SPELL_THORNS };
     }
 
     void GetAIInformation(ChatHandler& reader) override
     {
-        if (m_lAssistList.empty())
+        if (m_assistList.empty())
             reader.PSendSysMessage("Anubisath Sentinel - group not assigned, will be assigned OnAggro");
-        if (m_lAssistList.size() == MAX_BUDDY)
-            reader.PSendSysMessage("Anubisath Sentinel - proper group found");
+        if (m_assistList.size() == MAX_BUDDY)
+            reader.PSendSysMessage("Anubisath Sentinel - proper group found, own ability is %u", m_myAbility);
         else
-            reader.PSendSysMessage("Anubisath Sentinel - not correct number of mobs for group found. Number found %u, should be %u", uint32(m_lAssistList.size()), MAX_BUDDY);
+            reader.PSendSysMessage("Anubisath Sentinel - not correct number of mobs for group found. Number found %u, should be %u", uint32(m_assistList.size()), MAX_BUDDY);
     }
 
     void JustReachedHome() override
     {
-        for (GuidList::const_iterator itr = m_lAssistList.begin(); itr != m_lAssistList.end(); ++itr)
+        for (GuidList::const_iterator itr = m_assistList.begin(); itr != m_assistList.end(); ++itr)
         {
             if (*itr == m_creature->GetObjectGuid())
                 continue;
 
-            if (Creature* pBuddy = m_creature->GetMap()->GetCreature(*itr))
+            if (Creature* buddy = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (pBuddy->isDead())
-                    pBuddy->Respawn();
+                if (buddy->isDead())
+                    buddy->Respawn();
             }
         }
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* who) override
     {
-        SetAbility();
-        InitSentinelsNear(pWho);
+        if (!m_myAbility)
+        {
+            std::random_shuffle(m_abilities.begin(), m_abilities.end());    // shuffle the abilities, they will be set to the current creature and its siblings
+            SetAbility();
+            InitSentinelsNear(who);
+        }
+        
+        // Find all buddies
+        if (m_assistList.empty())
+        {
+            CreatureList assistList;
+            GetCreatureListWithEntryInGrid(assistList, m_creature, m_creature->GetEntry(), 80.0f);
+
+            for (auto& iter : assistList)
+                m_assistList.push_back(iter->GetObjectGuid());
+
+            if (m_assistList.size() != MAX_BUDDY)
+                script_error_log("npc_anubisath_sentinel for %s found too few/too many buddies, expected %u.", m_creature->GetGuidStr().c_str(), MAX_BUDDY);
+        }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoTransferAbility();
     }
 
-    // this way will make it quite possible that sentinels get the same buff as others, need to fix that, it should be one unique each
-    void SetAbility()
+    void SetAbility(bool forced=false, uint32 abilityId=0)
     {
-        switch (urand(0, 8))
+        if (m_myAbility) // Do not set ability if already force set by the first Anubisath Sentinel to get aggro
+            return;
+
+        // This Anubisath Sentinel is the first one to set his ability as it is the one that got initial aggro
+        // Pick the first ability in the (randomised) list of abilities
+        if (!forced)
+            m_myAbility = m_abilities[0];
+        // This Anubisath Sentinel is forced to set his ability by the first sentinel to get aggro
+        // Check that the requested ability is valid
+        else if (std::find(m_abilities.begin(), m_abilities.end(), abilityId) != m_abilities.end())
+            m_myAbility = abilityId;
+        else
         {
-            case 0: m_uiMyAbility = SPELL_MENDING; break;
-            case 1: m_uiMyAbility = SPELL_PERIODIC_KNOCK_AWAY; break;
-            case 2: m_uiMyAbility = SPELL_PERIODIC_MANA_BURN; break;
-            case 3: m_uiMyAbility = SPELL_FIRE_ARCANE_REFLECT; break;
-            case 4: m_uiMyAbility = SPELL_SHADOW_FROST_REFLECT; break;
-            case 5: m_uiMyAbility = SPELL_THORNS; break;
-            case 6: m_uiMyAbility = SPELL_PERIODIC_THUNDERCLAP; break;
-            case 7: m_uiMyAbility = SPELL_MORTAL_STRIKE; break;
-            case 8: m_uiMyAbility = SPELL_PERIODIC_SHADOW_STORM; break;
+            script_error_log("npc_anubisath_sentinel for %s: request illegal spell ID as ability %u.", m_creature->GetGuidStr().c_str(), abilityId);
+            return;
         }
 
-        DoCastSpellIfCan(m_creature, m_uiMyAbility, CAST_TRIGGERED);
+        DoCastSpellIfCan(m_creature, m_myAbility, CAST_TRIGGERED);
     }
 
     void DoTransferAbility()
     {
-        for (GuidList::const_iterator itr = m_lAssistList.begin(); itr != m_lAssistList.end(); ++itr)
+        bool hasDoneEmote = false;
+        for (GuidList::const_iterator itr = m_assistList.begin(); itr != m_assistList.end(); ++itr)
         {
-            if (Creature* pBuddy = m_creature->GetMap()->GetCreature(*itr))
+            if (Creature* buddy = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (*itr == m_creature->GetObjectGuid())
+                if (*itr == m_creature->GetObjectGuid() || !buddy->isAlive())
                     continue;
 
-                if (!pBuddy->isAlive())
-                    continue;
-
-                pBuddy->SetHealth(pBuddy->GetMaxHealth());
-                DoCastSpellIfCan(pBuddy, m_uiMyAbility, CAST_TRIGGERED);
+                if (!hasDoneEmote)
+                {
+                    DoScriptText(EMOTE_SHARE_POWERS, m_creature);
+                    hasDoneEmote = true;
+                }
+                m_creature->CastSpell(buddy, SPELL_TRANSFER_POWER, TRIGGERED_OLD_TRIGGERED);
+                DoCastSpellIfCan(buddy, m_myAbility, CAST_TRIGGERED);
             }
         }
     }
 
-    void InitSentinelsNear(Unit* pTarget)
+    void InitSentinelsNear(Unit* target)
     {
-        if (!m_lAssistList.empty())
+        if (!m_assistList.empty())
         {
-            for (GuidList::const_iterator itr = m_lAssistList.begin(); itr != m_lAssistList.end(); ++itr)
+            int8 buddyCount = 1;
+            for (GuidList::const_iterator itr = m_assistList.begin(); itr != m_assistList.end(); ++itr)
             {
                 if (*itr == m_creature->GetObjectGuid())
                     continue;
 
-                if (Creature* pBuddy = m_creature->GetMap()->GetCreature(*itr))
+                if (Creature* buddy = m_creature->GetMap()->GetCreature(*itr))
                 {
-                    if (pBuddy->isAlive())
-                        pBuddy->AI()->AttackStart(pTarget);
+                    if (buddy->isAlive())
+                    {
+                        npc_anubisath_sentinelAI* buddyAI = static_cast<npc_anubisath_sentinelAI*>(buddy->AI());
+                        buddyAI->SetAbility(true, m_abilities[buddyCount]);
+                        ++buddyCount;
+                        buddy->AI()->AttackStart(target);
+                        
+                    }
                 }
             }
-
-            return;
         }
-
-        CreatureList lAssistList;
-        GetCreatureListWithEntryInGrid(lAssistList, m_creature, m_creature->GetEntry(), 80.0f);
-
-        for (auto& iter : lAssistList)
-        {
-            m_lAssistList.push_back(iter->GetObjectGuid());
-
-            if (iter->GetObjectGuid() == m_creature->GetObjectGuid())
-                continue;
-
-            iter->AI()->AttackStart(pTarget);
-        }
-
-        if (m_lAssistList.size() != MAX_BUDDY)
-            script_error_log("npc_anubisath_sentinel for %s found too few/too many buddies, expected %u.", m_creature->GetGuidStr().c_str(), MAX_BUDDY);
     }
 
     void UpdateAI(const uint32 /*uiDiff*/) override
@@ -177,12 +193,12 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (!m_bEnraged && m_creature->GetHealthPercent() < 30.0f)
+        if (!m_isEnraged && m_creature->GetHealthPercent() < 30.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
             {
                 DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
-                m_bEnraged = true;
+                m_isEnraged = true;
             }
         }
 
@@ -190,15 +206,15 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_anubisath_sentinel(Creature* pCreature)
+UnitAI* GetAI_npc_anubisath_sentinel(Creature* creature)
 {
-    return new npc_anubisath_sentinelAI(pCreature);
+    return new npc_anubisath_sentinelAI(creature);
 }
 
 void AddSC_mob_anubisath_sentinel()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "mob_anubisath_sentinel";
-    pNewScript->GetAI = &GetAI_npc_anubisath_sentinel;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "mob_anubisath_sentinel";
+    newScript->GetAI = &GetAI_npc_anubisath_sentinel;
+    newScript->RegisterSelf();
 }

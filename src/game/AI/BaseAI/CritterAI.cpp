@@ -29,8 +29,8 @@ int CritterAI::Permissible(const Creature* creature)
 
 void CritterAI::EnterCombat(Unit* /*enemy*/)
 {
-    if (!m_creature->hasUnitState(UNIT_STAT_FLEEING))
-        m_creature->SetFeared(true, m_creature->GetObjectGuid(), 0, 30000);
+    if (!m_creature->IsInPanic())
+        m_creature->SetInPanic(30000);
 }
 
 void CritterAI::UpdateAI(const uint32 /*diff*/)

@@ -24,6 +24,7 @@
 #include "Entities/ItemEnchantmentMgr.h"
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
+#include "Spells/SpellTargetDefines.h"
 
 void AddItemsSetItem(Player* player, Item* item)
 {
@@ -867,11 +868,21 @@ bool Item::IsTargetValidForItemUse(Unit* pUnitTarget) const
     return false;
 }
 
-void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges)
+void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges, ObjectGuid caster /*= ObjectGuid()*/)
 {
     // Better lost small time at check in comparison lost time at item save to DB.
     if ((GetEnchantmentId(slot) == id) && (GetEnchantmentDuration(slot) == duration) && (GetEnchantmentCharges(slot) == charges))
         return;
+
+    Player* owner = GetOwner();
+    if (slot < MAX_INSPECTED_ENCHANTMENT_SLOT)
+    {
+        if (uint32 oldEnchant = GetEnchantmentId(slot))
+            owner->SendEnchantmentLog(ObjectGuid(), GetEntry(), oldEnchant);
+
+        if (id)
+            owner->SendEnchantmentLog(caster, GetEntry(), id);
+    }
 
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET, id);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET, duration);

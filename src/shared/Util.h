@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include <random>
 
 typedef std::vector<std::string> Tokens;
 
@@ -41,6 +42,8 @@ inline uint32 secsToTimeBitFields(time_t secs)
     tm* lt = localtime(&secs);
     return (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 | (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 | lt->tm_hour << 6 | lt->tm_min;
 }
+
+std::mt19937* GetRandomGenerator();
 
 /* Return a random number in the range min..max; (max-min) must be smaller than 32768. */
 int32 irand(int32 min, int32 max);
@@ -376,4 +379,12 @@ bool IsIPAddress(char const* ipaddress);
 uint32 CreatePIDFile(const std::string& filename);
 
 void hexEncodeByteArray(uint8* bytes, uint32 arrayLen, std::string& result);
+
+template<typename E>
+constexpr typename std::underlying_type<E>::type AsUnderlyingType(E enumValue)
+{
+    static_assert(std::is_enum<E>::value, "AsUnderlyingType can only be used with enums");
+    return static_cast<typename std::underlying_type<E>::type>(enumValue);
+}
+
 #endif

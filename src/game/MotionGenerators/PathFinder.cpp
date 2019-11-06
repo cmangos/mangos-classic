@@ -50,20 +50,24 @@ PathFinder::~PathFinder()
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::~PathInfo() for %u \n", m_sourceUnit->GetGUIDLow());
 }
 
-bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest)
+bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest/* = false*/)
 {
-    if (!MaNGOS::IsValidMapCoord(destX, destY, destZ))
-        return false;
-
     float x, y, z;
     m_sourceUnit->GetPosition(x, y, z);
-    if (!MaNGOS::IsValidMapCoord(x, y, z))
+
+    return calculate(Vector3(x, y, z), Vector3(destX, destY, destZ), forceDest);
+}
+
+bool PathFinder::calculate(const Vector3& start, const Vector3& dest, bool forceDest/* = false*/)
+{
+    if (!MaNGOS::IsValidMapCoord(dest.x, dest.y, dest.z))
         return false;
 
-    Vector3 start(x, y, z);
+    if (!MaNGOS::IsValidMapCoord(start.x, start.y, start.z))
+        return false;
+
     setStartPosition(start);
 
-    Vector3 dest(destX, destY, destZ);
     setEndPosition(dest);
 
     m_forceDestination = forceDest;
@@ -73,7 +77,7 @@ bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest
     // make sure navMesh works - we can run on map w/o mmap
     // check if the start and end point have a .mmtile loaded (can we pass via not loaded tile on the way?)
     if (!m_navMesh || !m_navMeshQuery || m_sourceUnit->hasUnitState(UNIT_STAT_IGNORE_PATHFINDING) ||
-            !HaveTile(start) || !HaveTile(dest))
+        !HaveTile(start) || !HaveTile(dest))
     {
         BuildShortcut();
         m_type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
@@ -196,23 +200,18 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
         DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: farFromPoly distToStartPoly=%.3f distToEndPoly=%.3f\n", distToStartPoly, distToEndPoly);
 
         bool buildShotrcut = false;
-        if (m_sourceUnit->GetTypeId() == TYPEID_UNIT)
+        Vector3 p = (distToStartPoly > 7.0f) ? startPos : endPos;
+        if (m_sourceUnit->GetTerrain()->IsUnderWater(p.x, p.y, p.z))
         {
-            Creature* owner = (Creature*)m_sourceUnit;
-
-            Vector3 p = (distToStartPoly > 7.0f) ? startPos : endPos;
-            if (m_sourceUnit->GetTerrain()->IsUnderWater(p.x, p.y, p.z))
-            {
-                DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: underWater case\n");
-                if (owner->CanSwim())
-                    buildShotrcut = true;
-            }
-            else
-            {
-                DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: flying case\n");
-                if (owner->CanFly())
-                    buildShotrcut = true;
-            }
+            DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: underWater case\n");
+            if (m_sourceUnit->CanSwim())
+                buildShotrcut = true;
+        }
+        else
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: flying case\n");
+            if (m_sourceUnit->CanFly())
+                buildShotrcut = true;
         }
 
         if (buildShotrcut)

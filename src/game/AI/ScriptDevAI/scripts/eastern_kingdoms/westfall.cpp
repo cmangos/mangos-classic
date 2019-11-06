@@ -320,11 +320,15 @@ enum
 
 struct npc_defias_traitorAI : public npc_escortAI
 {
-    npc_defias_traitorAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
-
-    void WaypointReached(uint32 uiPointId) override
+    npc_defias_traitorAI(Creature* creature) : npc_escortAI(creature)
     {
-        switch (uiPointId)
+        SetReactState(REACT_DEFENSIVE);
+        Reset();
+    }
+
+    void WaypointReached(uint32 pointId) override
+    {
+        switch (pointId)
         {
             case 35:
                 SetRun(false);
@@ -343,30 +347,30 @@ struct npc_defias_traitorAI : public npc_escortAI
         }
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* who) override
     {
-        DoScriptText(urand(0, 1) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature, pWho);
+        DoScriptText(urand(0, 1) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature, who);
     }
 
     void Reset() override { }
 };
 
-bool QuestAccept_npc_defias_traitor(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_defias_traitor(Player* player, Creature* creature, const Quest* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_DEFIAS_BROTHERHOOD)
+    if (quest->GetQuestId() == QUEST_DEFIAS_BROTHERHOOD)
     {
-        DoScriptText(SAY_START, pCreature, pPlayer);
+        DoScriptText(SAY_START, creature, player);
 
-        if (npc_defias_traitorAI* pEscortAI = dynamic_cast<npc_defias_traitorAI*>(pCreature->AI()))
-            pEscortAI->Start(true, pPlayer, pQuest);
+        if (npc_defias_traitorAI* escortAI = dynamic_cast<npc_defias_traitorAI*>(creature->AI()))
+            escortAI->Start(true, player, quest);
     }
 
     return true;
 }
 
-UnitAI* GetAI_npc_defias_traitor(Creature* pCreature)
+UnitAI* GetAI_npc_defias_traitor(Creature* creature)
 {
-    return new npc_defias_traitorAI(pCreature);
+    return new npc_defias_traitorAI(creature);
 }
 
 void AddSC_westfall()

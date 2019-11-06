@@ -145,17 +145,17 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         uint32 GetNumInstances();
         uint32 GetNumPlayersInInstances();
 
+        uint32 GetMapUpdateMinTime(uint32 mapId, uint32 instance = 0);
+        uint32 GetMapUpdateMaxTime(uint32 mapId, uint32 instance = 0);
+        uint32 GetMapUpdateAvgTime(uint32 mapId, uint32 instance = 0);
 
         // get list of all maps
         const MapMapType& Maps() const { return i_maps; }
 
         template<typename Do> void DoForAllMapsWithMapId(uint32 mapId, Do& _do);
         template<typename Check> inline WorldObject* SearchOnAllLoadedMap(Check& check);
-        void DoForAllMaps(const std::function<void(Map*)>& worker)
-        {
-            for (MapMapType::const_iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
-                worker(itr->second);
-        }
+        void DoForAllMaps(const std::function<void(Map*)>& worker);
+        void DoForAllMapsWithMapId(uint32 mapId, std::function<void(Map*)> worker);
 
     private:
 
@@ -178,6 +178,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         DungeonMap* CreateDungeonMap(uint32 id, uint32 InstanceId, DungeonPersistentState* save = nullptr);
         BattleGroundMap* CreateBattleGroundMap(uint32 id, uint32 InstanceId, BattleGround* bg);
 
+        std::mutex m_lock;
         uint32 i_gridCleanUpDelay;
         MapMapType i_maps;
         IntervalTimer i_timer;

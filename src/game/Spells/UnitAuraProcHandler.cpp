@@ -1478,7 +1478,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
         // TODO: add neutral target handling, neutral targets should still be able to go through
         if (!(this == target && IsOnlySelfTargeting(triggerEntry)))
         {
-            if (IsPositiveSpellTargetMode(triggerEntry, this, target) != CanAssist(target))
+            if (IsPositiveSpellTargetMode(triggerEntry, this, target) != CanAssistSpell(target, triggerEntry))
                 return SPELL_AURA_PROC_FAILED;
         }
     }
@@ -1624,7 +1624,7 @@ SpellAuraProcResult Unit::HandleModCastingSpeedNotStackAuraProc(ProcExecutionDat
 {
     SpellEntry const* procSpell = data.procSpell;
     // Skip melee hits or instant cast spells
-    return !(procSpell == nullptr || GetSpellCastTime(procSpell) == 0) ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED;
+    return !(procSpell == nullptr || GetSpellCastTime(procSpell, this) == 0) ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED;
 }
 
 SpellAuraProcResult Unit::HandleReflectSpellsSchoolAuraProc(ProcExecutionData& data)

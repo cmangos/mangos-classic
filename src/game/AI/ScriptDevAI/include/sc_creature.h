@@ -181,9 +181,6 @@ struct ScriptedAI : public CreatureAI
         // Plays a sound to all nearby players
         void DoPlaySoundToSet(WorldObject* source, uint32 soundId);
 
-        // Drops all threat to 0%. Does not remove enemies from the threat list
-        void DoResetThreat();
-
         // Teleports a player without dropping threat (only teleports to same map)
         void DoTeleportPlayer(Unit* unit, float x, float y, float z, float ori);
 

@@ -66,7 +66,7 @@ struct boss_gythAI : public ScriptedAI
         uiKnockAwayTimer     = 23000;
         m_bSummonedRend      = false;
         m_bHasChromaticChaos = false;
-
+        SetDeathPrevention(true);
         DoCastSpellIfCan(m_creature, SPELL_REND_MOUNTS);
     }
 
@@ -135,6 +135,7 @@ struct boss_gythAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_REND) == CAST_OK)
             {
+                SetDeathPrevention(false);
                 m_creature->RemoveAurasDueToSpell(SPELL_REND_MOUNTS);
                 m_bSummonedRend = true;
             }

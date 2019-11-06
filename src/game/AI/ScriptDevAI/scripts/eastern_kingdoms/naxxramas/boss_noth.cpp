@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Noth
-SD%Complete: 80
-SDComment: Summons need verify, need better phase-switch support (unattackable?)
+SD%Complete: 100
+SDComment:
 SDCategory: Naxxramas
 EndScriptData
 
@@ -36,11 +36,6 @@ enum
     SAY_SLAY2                           = -1533080,
     SAY_DEATH                           = -1533081,
 
-    EMOTE_WARRIOR                       = -1533130,
-    EMOTE_SKELETON                      = -1533131,
-    EMOTE_TELEPORT                      = -1533132,
-    EMOTE_TELEPORT_RETURN               = -1533133,
-
     SPELL_TELEPORT                      = 29216,
     SPELL_TELEPORT_RETURN               = 29231,
 
@@ -52,29 +47,46 @@ enum
     SPELL_CRIPPLE                       = 29212,
     SPELL_CURSE_PLAGUEBRINGER           = 29213,
 
-    SPELL_BERSERK                       = 26662,            // guesswork, but very common berserk spell in naxx
+    SPELL_IMMUNE_ALL                    = 29230,            // Cast during balcony phase to make Noth unattackable
 
-    SPELL_SUMMON_WARRIOR_1              = 29247,
+    SPELL_SUMMON_WARRIOR_1              = 29247,            // Summon NPC 16984 (Plagued Warrior)
     SPELL_SUMMON_WARRIOR_2              = 29248,
     SPELL_SUMMON_WARRIOR_3              = 29249,
 
-    SPELL_SUMMON_WARRIOR_THREE          = 29237,
+    // SW corner
+    SPELL_SUMMON_CHAMP01                = 29217,            // Summon NPC 16983 (Plagued Champion)
+    SPELL_SUMMON_CHAMP02                = 29227,
 
-    SPELL_SUMMON_CHAMP01                = 29217,
-    SPELL_SUMMON_CHAMP02                = 29224,
-    SPELL_SUMMON_CHAMP03                = 29225,
-    SPELL_SUMMON_CHAMP04                = 29227,
-    SPELL_SUMMON_CHAMP05                = 29238,
-    SPELL_SUMMON_CHAMP06                = 29255,
-    SPELL_SUMMON_CHAMP07                = 29257,
-    SPELL_SUMMON_CHAMP08                = 29258,
-    SPELL_SUMMON_CHAMP09                = 29262,
-    SPELL_SUMMON_CHAMP10                = 29267,
+    // NW corner
+    SPELL_SUMMON_CHAMP03                = 29224,
+    SPELL_SUMMON_CHAMP04                = 29225,
 
-    SPELL_SUMMON_GUARD01                = 29226,
+    // NE corner
+    SPELL_SUMMON_CHAMP05                = 29258,
+    SPELL_SUMMON_CHAMP06                = 29262,
+
+    // West
+    SPELL_SUMMON_CHAMP07                = 29255,
+    SPELL_SUMMON_CHAMP08                = 29257,
+    SPELL_SUMMON_CHAMP09                = 29267,
+    SPELL_SUMMON_CHAMP10                = 29238,
+
+    // NE-NW corner
+    SPELL_SUMMON_GUARD01                = 29226,            // Summon NPC 16981 (Plagued Guardian)
     SPELL_SUMMON_GUARD02                = 29239,
+
+    // SW corner
     SPELL_SUMMON_GUARD03                = 29256,
     SPELL_SUMMON_GUARD04                = 29268,
+
+    // West
+    SPELL_SUMMON_CONSTR01               = 29269,            // Summon NPC 16982 (Plagued Construct)
+    // NE Corner
+    SPELL_SUMMON_CONSTR02               = 29240,
+
+    SPELL_DESPAWN_SUMMONS               = 30228,            // Spell ID unsure: there are several spells doing the same thing in DBCs within Naxxramas spell IDs range
+                                                            // but it is not always clear which one is for each boss so some are assigned randomly like this one
+    NPC_PLAGUED_WARRIOR                 = 16984,
 
     PHASE_GROUND                        = 0,
     PHASE_BALCONY                       = 1,
@@ -84,36 +96,50 @@ enum
     PHASE_SKELETON_3                    = 3
 };
 
+static uint32 const spellBlinkList[4] = { SPELL_BLINK_1, SPELL_BLINK_2, SPELL_BLINK_3, SPELL_BLINK_4 };
+
+static uint32 const spellSummonPlaguedChampionSWList[2] = { SPELL_SUMMON_CHAMP01, SPELL_SUMMON_CHAMP02 };
+static uint32 const spellSummonPlaguedChampionNWList[2] = { SPELL_SUMMON_CHAMP03, SPELL_SUMMON_CHAMP04 };
+static uint32 const spellSummonPlaguedChampionNEList[2] = { SPELL_SUMMON_CHAMP05, SPELL_SUMMON_CHAMP06 };
+static uint32 const spellSummonPlaguedChampionWestList[4] = { SPELL_SUMMON_CHAMP07, SPELL_SUMMON_CHAMP08, SPELL_SUMMON_CHAMP09, SPELL_SUMMON_CHAMP10 };
+
+static uint32 const spellSummonPlaguedGuardianNENWList[2] = { SPELL_SUMMON_GUARD01, SPELL_SUMMON_GUARD02 };
+static uint32 const spellSummonPlaguedGuardianSWList[2] = { SPELL_SUMMON_GUARD03, SPELL_SUMMON_GUARD04 };
+
 struct boss_nothAI : public ScriptedAI
 {
-    boss_nothAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_nothAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
 
-    uint8 m_uiPhase;
-    uint8 m_uiPhaseSub;
-    uint32 m_uiPhaseTimer;
+    uint8 m_phase;
+    uint8 m_phaseSub;
+    uint8 m_subWavesCount;        // On balcony phase, counts if this is the first or the second wave. Used to make Noth returns early
+    uint8 m_wavesNpcsCount;       // Counter for NPCs per waves during balcony phase
+    uint32 m_phaseTimer;
 
-    uint32 m_uiBlinkTimer;
-    uint32 m_uiCurseTimer;
-    uint32 m_uiSummonTimer;
+    uint32 m_blinkTimer;
+    uint32 m_curseTimer;
+    uint32 m_summonTimer;
 
     void Reset() override
     {
-        m_uiPhase = PHASE_GROUND;
-        m_uiPhaseSub = PHASE_GROUND;
-        m_uiPhaseTimer = 90000;
+        m_phase = PHASE_GROUND;
+        m_phaseSub = PHASE_GROUND;
+        m_wavesNpcsCount = 0;
+        m_subWavesCount = 0;
+        m_phaseTimer = 90 * IN_MILLISECONDS;
 
-        m_uiBlinkTimer = 25000;
-        m_uiCurseTimer = 4000;
-        m_uiSummonTimer = 12000;
+        m_blinkTimer = 25 * IN_MILLISECONDS;
+        m_curseTimer = 4 * IN_MILLISECONDS;
+        m_summonTimer = 12 * IN_MILLISECONDS;
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
@@ -122,208 +148,210 @@ struct boss_nothAI : public ScriptedAI
             case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NOTH, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_NOTH, IN_PROGRESS);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        pSummoned->SetInCombatWithZone();
+        summoned->SetInCombatWithZone();
+    }
+    
+    void SummonedCreatureJustDied(Creature* summoned) override
+    {
+        summoned->ForcedDespawn(2000);
+
+        // Count how many wave NPCs are killed: if all of them and this was the second wave, Noth returns early
+        if (summoned->GetEntry() != NPC_PLAGUED_WARRIOR)
+        {
+            --m_wavesNpcsCount;
+            if (m_wavesNpcsCount == 0 && m_subWavesCount == 2)
+                m_phaseTimer = 100;
+        }
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void SummonedJustReachedHome(Creature* summoned) override
+    {
+        summoned->ForcedDespawn();
+    }
+
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NOTH, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_NOTH, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NOTH, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_NOTH, FAIL);
+
+        // Clean-up stage
+        DoCastSpellIfCan(m_creature, SPELL_DESPAWN_SUMMONS, CAST_TRIGGERED);
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    void DoSummonPlaguedChampions(bool isThirdWave)
     {
-        if (pCaster == m_creature && pSpell->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_LEAP)
-            DoCastSpellIfCan(m_creature, SPELL_CRIPPLE);
+        // Four Plagued Champions are to be summoned, one in each of the three corners and the fourth randomly along the western wall
+        // On the third wave, we use specific spell to also summon a Plagued Construct in West part and North-East corner
+        if (DoCastSpellIfCan(m_creature, spellSummonPlaguedChampionSWList[urand(0, 1)], CAST_TRIGGERED) == CAST_OK)
+            ++m_wavesNpcsCount;           // We count the addition of a new NPC on each spell cast because JustSummoned() can possibly be called more than once per summoned NPC, making the count there incorrect
+        if (DoCastSpellIfCan(m_creature, spellSummonPlaguedChampionNWList[urand(0, 1)], CAST_TRIGGERED) == CAST_OK)
+            ++m_wavesNpcsCount;
+        if (DoCastSpellIfCan(m_creature, (isThirdWave ? SPELL_SUMMON_CONSTR02 : spellSummonPlaguedChampionNEList[urand(0, 1)]), CAST_TRIGGERED) == CAST_OK)
+            (isThirdWave ? m_wavesNpcsCount += 2 : ++m_wavesNpcsCount);
+        if (DoCastSpellIfCan(m_creature, (isThirdWave ? SPELL_SUMMON_CONSTR01 : spellSummonPlaguedChampionWestList[urand(0, 3)]), CAST_TRIGGERED) == CAST_OK)
+            (isThirdWave ? m_wavesNpcsCount += 2 : ++m_wavesNpcsCount);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void DoSummonPlaguedGuardians()
     {
+        // Two Plagued Guardians are to be summoned, one in the south-west corner and one in one of the two other corners
+        if (DoCastSpellIfCan(m_creature, spellSummonPlaguedGuardianNENWList[urand(0, 1)], CAST_TRIGGERED) == CAST_OK)
+            ++m_wavesNpcsCount;
+        if (DoCastSpellIfCan(m_creature, spellSummonPlaguedGuardianSWList[urand(0, 1)], CAST_TRIGGERED) == CAST_OK)
+            ++m_wavesNpcsCount;
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+    	// Do nothing if no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_uiPhase == PHASE_GROUND)
+        if (m_phase == PHASE_GROUND)
         {
-            if (m_uiPhaseTimer)                             // After PHASE_SKELETON_3 we won't have a balcony phase
+            if (m_phaseTimer)                             // After PHASE_SKELETON_3 we won't have a balcony phase
             {
-                if (m_uiPhaseTimer <= uiDiff)
+                if (m_phaseTimer <= diff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
                     {
-                        DoScriptText(EMOTE_TELEPORT, m_creature);
+                        DoCastSpellIfCan(m_creature, SPELL_IMMUNE_ALL, CAST_TRIGGERED); // Prevent players from damaging Noth when he is on the balcony
                         m_creature->GetMotionMaster()->MoveIdle();
-                        m_uiPhase = PHASE_BALCONY;
-                        ++m_uiPhaseSub;
+                        m_phase = PHASE_BALCONY;
+                        m_summonTimer = 10 * IN_MILLISECONDS;                         // Summon first wave 10 seconds after teleport
+                        ++m_phaseSub;
 
-                        switch (m_uiPhaseSub)               // Set Duration of Skeleton phase
+                        switch (m_phaseSub)               // Set Duration of Skeleton phase
                         {
-                            case PHASE_SKELETON_1: m_uiPhaseTimer = 70000;  break;
-                            case PHASE_SKELETON_2: m_uiPhaseTimer = 97000;  break;
-                            case PHASE_SKELETON_3: m_uiPhaseTimer = 120000; break;
+                            case PHASE_SKELETON_1: m_phaseTimer = 70 * IN_MILLISECONDS;  break;
+                            case PHASE_SKELETON_2: m_phaseTimer = 97 * IN_MILLISECONDS;  break;
+                            case PHASE_SKELETON_3: m_phaseTimer = 120 * IN_MILLISECONDS; break;
                         }
                         return;
                     }
                 }
                 else
-                    m_uiPhaseTimer -= uiDiff;
+                    m_phaseTimer -= diff;
             }
 
-            if (m_uiBlinkTimer < uiDiff)
+            if (m_blinkTimer < diff)
             {
-                static uint32 const auiSpellBlink[4] =
-                {
-                    SPELL_BLINK_1, SPELL_BLINK_2, SPELL_BLINK_3, SPELL_BLINK_4
-                };
-
-                if (DoCastSpellIfCan(m_creature, auiSpellBlink[urand(0, 3)]) == CAST_OK)
+                DoCastSpellIfCan(m_creature, SPELL_CRIPPLE);
+                if (DoCastSpellIfCan(m_creature, spellBlinkList[urand(0, 3)]) == CAST_OK)
                 {
                     DoResetThreat();
-                    m_uiBlinkTimer = 25000;
+                    m_blinkTimer = 25 * IN_MILLISECONDS;
                 }
             }
             else
-                m_uiBlinkTimer -= uiDiff;
+                m_blinkTimer -= diff;
 
-            if (m_uiCurseTimer < uiDiff)
+            if (m_curseTimer < diff)
             {
                 DoCastSpellIfCan(m_creature, SPELL_CURSE_PLAGUEBRINGER);
-                m_uiCurseTimer = 28000;
+                m_curseTimer = 28 * IN_MILLISECONDS;
             }
             else
-                m_uiCurseTimer -= uiDiff;
+                m_curseTimer -= diff;
 
-            if (m_uiSummonTimer < uiDiff)
+            // Summon one Plagued Warrior in each of the three locations
+            if (m_summonTimer < diff)
             {
                 DoScriptText(SAY_SUMMON, m_creature);
-                DoScriptText(EMOTE_WARRIOR, m_creature);
-
-                // It's not very clear how many warriors it should summon, so we'll just leave it as random for now
-                if (urand(0, 1))
-                {
-                    static uint32 const auiSpellSummonPlaguedWarrior[3] =
-                    {
-                        SPELL_SUMMON_WARRIOR_1, SPELL_SUMMON_WARRIOR_2, SPELL_SUMMON_WARRIOR_3
-                    };
-
-                    for (uint8 i = 0; i < 2; ++i)
-                        DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedWarrior[urand(0, 2)], CAST_TRIGGERED);
-                }
-                else
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_WARRIOR_THREE, CAST_TRIGGERED);
-                }
-
-                m_uiSummonTimer = 30000;
+                for (const uint32 spell : { SPELL_SUMMON_WARRIOR_1, SPELL_SUMMON_WARRIOR_2, SPELL_SUMMON_WARRIOR_3 })
+                    DoCastSpellIfCan(m_creature, spell, CAST_TRIGGERED);
+                m_summonTimer = 30 * IN_MILLISECONDS;
             }
             else
-                m_uiSummonTimer -= uiDiff;
+                m_summonTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
         else                                                // PHASE_BALCONY
         {
-            if (m_uiPhaseTimer < uiDiff)
+            if (m_phaseTimer < diff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RETURN) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RETURN, CAST_TRIGGERED) == CAST_OK)
                 {
-                    DoScriptText(EMOTE_TELEPORT_RETURN, m_creature);
+                    m_creature->RemoveAurasDueToSpell(SPELL_IMMUNE_ALL);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-                    switch (m_uiPhaseSub)
+                    m_summonTimer = 5 * IN_MILLISECONDS;                              // 5 seconds before summoning again Plagued Warriors
+                    switch (m_phaseSub)
                     {
-                        case PHASE_SKELETON_1: m_uiPhaseTimer = 110000; break;
-                        case PHASE_SKELETON_2: m_uiPhaseTimer = 180000; break;
-                        case PHASE_SKELETON_3:
-                            m_uiPhaseTimer = 0;
-                            // Go Berserk after third Balcony Phase
-                            DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
-                            break;
+                        case PHASE_SKELETON_1: m_phaseTimer = 110 * IN_MILLISECONDS; break;
+                        case PHASE_SKELETON_2: m_phaseTimer = 180 * IN_MILLISECONDS; break;
+                        case PHASE_SKELETON_3: m_phaseTimer = 0; break;
                     }
-                    m_uiPhase = PHASE_GROUND;
+                    m_phase = PHASE_GROUND;
+                    m_subWavesCount = 0;
 
                     return;
                 }
             }
             else
-                m_uiPhaseTimer -= uiDiff;
+                m_phaseTimer -= diff;
 
-            if (m_uiSummonTimer < uiDiff)
+            if (m_summonTimer < diff)
             {
-                DoScriptText(EMOTE_SKELETON, m_creature);
-
-                static uint32 const auiSpellSummonPlaguedChampion[10] =
-                {
-                    SPELL_SUMMON_CHAMP01, SPELL_SUMMON_CHAMP02, SPELL_SUMMON_CHAMP03, SPELL_SUMMON_CHAMP04, SPELL_SUMMON_CHAMP05, SPELL_SUMMON_CHAMP06, SPELL_SUMMON_CHAMP07, SPELL_SUMMON_CHAMP08, SPELL_SUMMON_CHAMP09, SPELL_SUMMON_CHAMP10
-                };
-
-                static uint32 const auiSpellSummonPlaguedGuardian[4] =
-                {
-                    SPELL_SUMMON_GUARD01, SPELL_SUMMON_GUARD02, SPELL_SUMMON_GUARD03, SPELL_SUMMON_GUARD04
-                };
-
-                // A bit unclear how many in each sub phase
-                switch (m_uiPhaseSub)
+                switch (m_phaseSub)
                 {
                     case PHASE_SKELETON_1:
                     {
-                        for (uint8 i = 0; i < 4; ++i)
-                            DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedChampion[urand(0, 9)], CAST_TRIGGERED);
-
+                        DoSummonPlaguedChampions(false);
+                        m_summonTimer = 30 * IN_MILLISECONDS;
                         break;
                     }
                     case PHASE_SKELETON_2:
                     {
-                        for (uint8 i = 0; i < 2; ++i)
-                        {
-                            DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedChampion[urand(0, 9)], CAST_TRIGGERED);
-                            DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedGuardian[urand(0, 3)], CAST_TRIGGERED);
-                        }
+                        DoSummonPlaguedChampions(false);
+                        DoSummonPlaguedGuardians();
+                        m_summonTimer = 45 * IN_MILLISECONDS;
                         break;
                     }
                     case PHASE_SKELETON_3:
                     {
-                        for (uint8 i = 0; i < 4; ++i)
-                            DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedGuardian[urand(0, 3)], CAST_TRIGGERED);
-
+                        DoSummonPlaguedChampions(true);     // Set parameter to true because we need to indicate this is the third wave and Plagued Construct need to be also summoned
+                        DoSummonPlaguedGuardians();
+                        m_summonTimer = 60 * IN_MILLISECONDS;
                         break;
                     }
                 }
-
-                m_uiSummonTimer = 30000;
+                ++m_subWavesCount;                        // Keep track of which wave we currently are
             }
             else
-                m_uiSummonTimer -= uiDiff;
+                m_summonTimer -= diff;
         }
     }
 };
 
-UnitAI* GetAI_boss_noth(Creature* pCreature)
+UnitAI* GetAI_boss_noth(Creature* creature)
 {
-    return new boss_nothAI(pCreature);
+    return new boss_nothAI(creature);
 }
 
 void AddSC_boss_noth()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "boss_noth";
-    pNewScript->GetAI = &GetAI_boss_noth;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "boss_noth";
+    newScript->GetAI = &GetAI_boss_noth;
+    newScript->RegisterSelf();
 }

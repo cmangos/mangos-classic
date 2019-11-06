@@ -364,7 +364,7 @@ CombatManeuverReturns PlayerbotPaladinAI::ResurrectPlayer(Player* target)
     return RETURN_NO_ACTION_ERROR; // not error per se - possibly just OOM
 }
 
-CombatManeuverReturns PlayerbotPaladinAI::DispelPlayer(Player* target)
+CombatManeuverReturns PlayerbotPaladinAI::DispelPlayer(Player* /*target*/)
 {
     uint32 dispel = CLEANSE > 0 ? CLEANSE : PURIFY;
     // Remove negative magic on group members

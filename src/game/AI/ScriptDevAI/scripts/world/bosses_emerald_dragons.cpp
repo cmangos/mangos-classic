@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+/* ContentData
 boss_emerald_dragon -- Superclass for the four dragons
 boss_emeriss
 boss_lethon
@@ -32,7 +32,8 @@ boss_taerar
 boss_ysondre
 EndContentData */
 
-
+#include "AI/ScriptDevAI/include/precompiled.h"
+#include "World/WorldState.h"
 
 /*######
 ## boss_emerald_dragon -- Superclass for the four dragons
@@ -47,6 +48,8 @@ enum
     SPELL_NOXIOUS_BREATH            = 24818,
     SPELL_TAILSWEEP                 = 15847,
     // SPELL_SUMMON_PLAYER             = 24776,                // Not used in Classic
+
+    NPC_YSONDRE                     = 14887,
 };
 
 struct boss_emerald_dragonAI : public ScriptedAI
@@ -86,6 +89,11 @@ struct boss_emerald_dragonAI : public ScriptedAI
     {
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             pSummoned->AI()->AttackStart(pTarget);
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        sWorldState.HandleExternalEvent(m_creature->GetEntry() - NPC_YSONDRE + CUSTOM_EVENT_YSONDRE_DIED);
     }
 
     // Return true, if succeeded
@@ -267,7 +275,7 @@ struct boss_lethonAI : public boss_emerald_dragonAI
             // Summon this way to be able to cast the shade visual spell with player as original caster
             // This is not currently supported by core but this spell's visual should be dependent on player
             // Also possible that this was no problem due to the special way these NPCs had been summoned in classic times
-            if (Creature* pSummoned = pTarget->SummonCreature(NPC_SPIRIT_SHADE, 0.0f, 0.0f, 0.0f, pTarget->GetOrientation(), TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 60 * IN_MILLISECONDS, false, 0, 0, false, false, true))
+            if (Creature* pSummoned = pTarget->SummonCreature(NPC_SPIRIT_SHADE, 0.0f, 0.0f, 0.0f, pTarget->GetOrientation(), TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 60 * IN_MILLISECONDS, false, false, 0, 0, false, false, true))
                 pSummoned->CastSpell(pSummoned, SPELL_SPIRIT_SHAPE_VISUAL, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pTarget->GetObjectGuid());
         }
     }

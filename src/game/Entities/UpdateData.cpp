@@ -27,8 +27,9 @@
 #include "World/World.h"
 #include "Entities/ObjectGuid.h"
 
-UpdateData::UpdateData() : m_blockCount(0)
+UpdateData::UpdateData() : m_data(1), m_currentIndex(0)
 {
+    m_data[0].m_buffer = 0;
 }
 
 void UpdateData::AddOutOfRangeGUID(GuidSet& guids)
@@ -43,8 +44,18 @@ void UpdateData::AddOutOfRangeGUID(ObjectGuid const& guid)
 
 void UpdateData::AddUpdateBlock(const ByteBuffer& block)
 {
-    m_data.append(block);
-    ++m_blockCount;
+    if (m_data[m_currentIndex].m_buffer.size() < 700)
+    {
+        m_data[m_currentIndex].m_buffer.append(block);
+        ++m_data[m_currentIndex].m_blockCount;
+    }
+    else
+    {
+        ++m_currentIndex;
+        m_data.emplace_back();
+        m_data[m_currentIndex].m_buffer.append(block);
+        m_data[m_currentIndex].m_blockCount = 1;
+    }
 }
 
 void UpdateData::Compress(void* dst, uint32* dst_size, void* src, int src_size)
@@ -103,13 +114,14 @@ void UpdateData::Compress(void* dst, uint32* dst_size, void* src, int src_size)
     *dst_size = c_stream.total_out;
 }
 
-bool UpdateData::BuildPacket(WorldPacket& packet, bool hasTransport)
+WorldPacket UpdateData::BuildPacket(size_t index, bool hasTransport)
 {
+    WorldPacket packet;
     MANGOS_ASSERT(packet.empty());                         // shouldn't happen
 
-    ByteBuffer buf(4 + 1 + (m_outOfRangeGUIDs.empty() ? 0 : 1 + 4 + 9 * m_outOfRangeGUIDs.size()) + m_data.wpos());
+    ByteBuffer buf(4 + 1 + (m_outOfRangeGUIDs.empty() ? 0 : 1 + 4 + 9 * m_outOfRangeGUIDs.size()) + m_data[index].m_buffer.wpos());
 
-    buf << (uint32)(!m_outOfRangeGUIDs.empty() ? m_blockCount + 1 : m_blockCount);
+    buf << (uint32)(!m_outOfRangeGUIDs.empty() ? m_data[index].m_blockCount + 1 : m_data[index].m_blockCount);
     buf << (uint8)(hasTransport ? 1 : 0);
 
     if (!m_outOfRangeGUIDs.empty())
@@ -121,7 +133,7 @@ bool UpdateData::BuildPacket(WorldPacket& packet, bool hasTransport)
             buf << m_outOfRangeGUID.WriteAsPacked();
     }
 
-    buf.append(m_data);
+    buf.append(m_data[index].m_buffer);
 
     size_t pSize = buf.wpos();                              // use real used data size
 
@@ -133,7 +145,7 @@ bool UpdateData::BuildPacket(WorldPacket& packet, bool hasTransport)
         packet.put<uint32>(0, pSize);
         Compress(const_cast<uint8*>(packet.contents()) + sizeof(uint32), &destsize, (void*)buf.contents(), pSize);
         if (destsize == 0)
-            return false;
+            return packet;
 
         packet.resize(destsize + sizeof(uint32));
         packet.SetOpcode(SMSG_COMPRESSED_UPDATE_OBJECT);
@@ -144,12 +156,11 @@ bool UpdateData::BuildPacket(WorldPacket& packet, bool hasTransport)
         packet.SetOpcode(SMSG_UPDATE_OBJECT);
     }
 
-    return true;
+    return packet;
 }
 
 void UpdateData::Clear()
 {
     m_data.clear();
     m_outOfRangeGUIDs.clear();
-    m_blockCount = 0;
 }

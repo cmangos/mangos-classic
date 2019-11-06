@@ -100,6 +100,7 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 32  EVENT_T_SELECT_ATTACKING_TARGET     MinRange, MaxRange, RepeatMin, RepeatMax                                Deprecated use TARGET_T_NEAREST_AOE_TARGET - Expires when the NPC has a target in threat table further than Param1 and closer than Param2. First time happens after and will repeat after Param3 and Param4.
 33  EVENT_T_FACING_TARGET               BackOrFront, unused, RepeatMin, RepeatMax                               Expires when the NPC is in back (Param1=0) or in front (Param1=1) of its current target. Will repeat after Param3 and Param4.
 34  EVENT_T_SPELLHIT_TARGET             SpellID, Schoolmask, RepeatMin, RepeatMax                               Expires upon Spell Hit of the NPC. When (param1) is set, it is the specific Spell ID used as the trigger. With (param2) specified, the expiration is limited to specific spell schools (-1 for all) and Spell ID value is ignored. Will repeat Event Conditions Check between every (Param3) and (Param4). Only A Spell ID or Spell School may be Specified but NOT both.
+35  EVENT_T_DEATH_PREVENTED             NONE                                                                    Expires when Death prevention kicks in
 
 =========================================
 Action Types
@@ -124,7 +125,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 10  ACTION_T_RANDOM_EMOTE                   EmoteId1*, EmoteId2*, EmoteId3*     NPC Emotes a Random Emote ID (Random Selects Param1, Param2 or Param3)
 11  ACTION_T_CAST                           SpellId, Target, CastFlags          Casts spell (Param1) on a target (Param2) using cast flags (Param3) --> Specified Below
 12  ACTION_T_SPAWN                          CreatureID, Target, Duration        Summons a Creature ID (Param1) for (Param3) duration after Evade (In MS) and orders it to attack (Param2) target (specified below). Spawns on top of NPC who summons it.
-13  ACTION_T_THREAT_SINGLE_PCT              Threat%, Target                     Modifies a threat by (Param1) percent on a target (Param2).
+13  ACTION_T_THREAT_SINGLE                  Threat, Target, IsDirect            Modifies a threat by (Param1) on a target (Param2). If Param3 is 0, its percent modification, else direct value.
 14  ACTION_T_THREAT_ALL_PCT                 Threat%                             Modifies a threat by (Param1) on all targets in the threat list (using -100% here will result in full aggro dump).
 15  ACTION_T_QUEST_EVENT                    QuestID, Target, RewardGroup        Calls AreaExploredOrEventHappens with (Param1) for a target in (Param2). Param3 decides if award entire group (1 = yes, 0 = no).
 16  ACTION_T_QUEST_CASTCREATUREGO           CreatureID, SpellId, Target         Sends CastCreatureOrGo for a creature specified by CreatureId (Param1) with provided spell id (Param2) for a target in (Param3).
@@ -153,14 +154,14 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 39  ACTION_T_CALL_FOR_HELP                  Radius                              Call any friendly out-of-combat creatures in a radius (Param1) to attack current creature's target.
 40  ACTION_T_SET_SHEATH                     Sheath                              Sets sheath state for a creature (0 = no weapon, 1 = melee weapon, 2 = ranged weapon).
 41  ACTION_T_FORCE_DESPAWN                  Delay                               Despawns the creature, if delay = 0 immediate otherwise will despawn after delay time set in Param1 (in ms).
-42  ACTION_T_SET_INVINCIBILITY_HP_LEVEL     HP_Level, HP_Percent                Set min. health level for creature that can be set at damage as flat value or percent from max health
+42  ACTION_T_SET_DEATH_PREVENTION           State                               0-off/1-on
 43  ACTION_T_MOUNT_TO_ENTRY_OR_MODEL        CreatureEntry, ModelId              Set mount model from creature_template.entry (Param1) OR explicit modelId (Param2). If (Param1) AND (Param2) are both 0, unmount.
 44  ACTION_T_CHANCED_TEXT                   Chance, -TextId1, -TextId2          Deprecated use 54 - Displays by Chance (1..100) the specified -TextId. When -TextId2 is specified, the selection will be randomized. Text types are defined, along with other options for the text, in a table below. Param2 and Param3 needs to be negative.
 45  ACTION_T_THROW_AI_EVENT                 EventType, Radius, Target           Throws an AIEvent of type (Param1) to nearby friendly Npcs in range of (Param2), Invoker of event is Target
 46  ACTION_T_SET_THROW_MASK                 EventTypeMask                       Marks for which AIEvents the npc will throw AIEvents on its own.
 47  ACTION_T_SET_STAND_STATE                StandState                          Set the unit stand state (Param1) of the current creature.
-48  ACTION_T_CHANGE_MOVEMENT                MovementType, WanderDistance        Change the unit movement type (Param1). If the movement type is Random Movement (1), the WanderDistance (Param2) must be provided. If the movement type is Waypoint Movement (2), Param2 is PathId.
-49  ACTION_T_DYNAMIC_MOVEMENT               EnableDynamicMovement               Deprecated use 57 - Enable dynamic movement behavior (1 = on; 0 = off)
+48  ACTION_T_CHANGE_MOVEMENT                MovementType, WanderDistance        Change the unit movement type (Param1). If the movement type is Random Movement (1), the WanderDistance (Param2) must be provided. If the movement type is Waypoint Movement (2), Param2 is PathId. Param3 is asDefault.
+49  ACTION_T_REUSE
 50  ACTION_T_SET_REACT_STATE                ReactState                          Change react state of the creature
 51  ACTION_T_PAUSE_WAYPOINTS                DoPause                             Pause waypoints of creature
 52  ACTION_T_INTERRUPT_SPELL                SpellType - CurrentSpellTypes       Interrupt spell in given slot for creature
@@ -532,6 +533,11 @@ BOTH - Expires on SpellhitTarget. If (param1) is set it will only expire on that
 This Event is commonly used for NPC's who can do special things when you cast a spell (Or specific spell) on them.
 NOTE: For Repeat Events the Repeat Timer ONLY Re-Check's Event Conditions to see If another Spellhit has occured. So After Repeat Min/Max expires Spellhit Event can occur again.
 
+-----------------------------
+35 = EVENT_T_DEATH_PREVENTED:
+-----------------------------
+Expires when death prevention kicks in. It expires once, and then death prevention has to be reset for it to happen again.
+
 (Name ==> School ==> School Bitmask Values)
 -------------------------------------------
 SPELL_SCHOOL_NORMAL = 0 ==> 1
@@ -654,13 +660,14 @@ This is used as a manual way to force an NPC to Summon.
 NOTE: THIS ONLY WORKS IN COMBAT
 
 --------------------------------
-13 = ACTION_T_THREAT_SINGLE_PCT:
+13 = ACTION_T_THREAT_SINGLE:
 --------------------------------
-Parameter 1: Threat% - Threat percent that should be modified. The value in this field can range from -100 to +100. If it is negative, threat will be taken away and if positive, threat will be added.
-Parameter 2: Target  - The Target Type defining on whom the threat change should occur. The value in this field needs to be a valid target type as specified in the reference tables below.
+Parameter 1: Threat - Threat value that should be used for modification.
+Parameter 2: Target - The Target Type defining on whom the threat change should occur. The value in this field needs to be a valid target type as specified in the reference tables below.
+Parameter 3: IsDirect - If set to 0, threat value is used as percentage. When set to 1, the value is directly added to given target.
 
-This action will modify the threat of a target in the creature's threat list by the specified percent.
-This is commonly used to allow an NPC to adjust the Threat to a single player.
+This action will modify the threat of a target in the creature's threat list by the specified amount.
+This is commonly used to allow an NPC to adjust the Threat to a single player, either for spells which reduce by percentage or static amounts on spawn.
 
 -----------------------------
 14 = ACTION_T_THREAT_ALL_PCT:
@@ -924,14 +931,11 @@ Despawns The NPC with optional delay time (Works In or Out of Combat)
 Parameter 1: Delay - Sets delay time until Despawn occurs after triggering the action. Time is in (ms).
 
 -----------------------------------------
-42   ACTION_T_SET_INVINCIBILITY_HP_LEVEL:
+42   ACTION_T_SET_DEATH_PREVENTION:
 -----------------------------------------
-Parameter 1: Minimum Health Level That NPC Can Reach (NPC Will Not Go Below This Value).
-Parameter 2: Sets Format of Paramater 1 Value
-0 = Sets Paramater 1 as an exact HP value
-1 = Sets Paramater 1 as a HP Percent (0..100) of the creature's max health
-
-NOTE: To Cancel Invincible You Need To Set Script For Either 0% HP or 0 HP So Then NPC Can Be Killed Again
+Parameter 1: State for death prevention
+0 = Turns off death prevention
+1 = Turns on death prevention and resets triggering of death prevented
 
 -----------------------------------------
 43 ACTION_T_MOUNT_TO_ENTRY_OR_MODEL:
@@ -1007,11 +1011,11 @@ Parameter 1: StandState - Stand state id to be used by the creature as defined i
 ------------------------------
 Parameter 1: MovementType   - Movement type id to be used by the creature. Can be 0 = Idle, 1 = Random, 2 = Waypoint.
 Parameter 2: WanderDistance - Wander distance to be used in case the movement type is 1 (Random).
+Parameter 3: AsDefault - sets given movement type as default. Only usable to turn off GuardianAI follow movement for now.
 
 -------------------------------
-49 = ACTION_T_DYNAMIC_MOVEMENT:
+49 = ACTION_T_REUSE:
 -------------------------------
-Parameter 1: EnableDynamicMovement - Enable dynamic movement behavior. 1 = on / 0 = off.
 
 ------------------------------
 50 = ACTION_T_SET_REACT_STATE:

@@ -877,7 +877,7 @@ void Loot::AddItem(uint32 itemid, uint32 count, uint32 randomSuffix, int32 rando
 }
 
 // Calls processor of corresponding LootTemplate (which handles everything including references)
-bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError)
+bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, bool /*personal*/, bool noEmptyError)
 {
     // Must be provided
     if (!lootOwner)
@@ -1400,7 +1400,7 @@ void Loot::ShowContentTo(Player* plr)
     {
         if (static_cast<GameObject*>(m_lootTarget)->IsInUse())
         {
-            SendReleaseFor(plr);
+            plr->SendLootError(m_guidTarget, LOOT_ERROR_LOCKED);
             return;
         }
 
@@ -1647,9 +1647,6 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
         case LOOT_PICKPOCKETING:
         {
             m_clientLootType = CLIENT_LOOT_PICKPOCKETING;
-
-            if (!creature->isAlive() || player->getClass() != CLASS_ROGUE)
-                return;
 
             // setting loot right
             m_ownerSet.insert(player->GetObjectGuid());
@@ -2590,14 +2587,15 @@ bool LootTemplate::HasQuestDropForPlayer(LootTemplateMap const& store, Player co
 
 bool LootTemplate::PlayerOrGroupFulfilsCondition(const Loot& loot, Player const* lootOwner, uint16 conditionId)
 {
+    Map* map = lootOwner->IsInWorld() ? lootOwner->GetMap() : loot.GetLootTarget()->GetMap(); // if neither succeeds, we have a design problem
     auto& ownerSet = loot.GetOwnerSet();
     // optimization - no need to look up when player is solo
     if (ownerSet.size() <= 1)
-        return sObjectMgr.IsPlayerMeetToCondition(conditionId, lootOwner, lootOwner->GetMap(), loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT);
+        return sObjectMgr.IsPlayerMeetToCondition(conditionId, lootOwner, map, loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT);
 
     for (const ObjectGuid& guid : ownerSet)
-        if (Player* player = lootOwner->GetMap()->GetPlayer(guid))
-            if (sObjectMgr.IsPlayerMeetToCondition(conditionId, player, player->GetMap(), loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT))
+        if (Player* player = map->GetPlayer(guid))
+            if (sObjectMgr.IsPlayerMeetToCondition(conditionId, player, map, loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT))
                 return true;
 
     return false;

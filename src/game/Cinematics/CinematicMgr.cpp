@@ -93,7 +93,7 @@ void CinematicMgr::EndCinematic()
     }
 }
 
-bool CinematicMgr::UpdateCinematicLocation(uint32 diff)
+bool CinematicMgr::UpdateCinematicLocation(uint32 /*diff*/)
 {
     // should not occur
     if (m_activeCinematicCameraId == 0)

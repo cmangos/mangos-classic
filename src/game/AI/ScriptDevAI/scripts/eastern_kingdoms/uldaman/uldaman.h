@@ -46,7 +46,7 @@ class instance_uldaman : public ScriptedInstance
         void OnCreatureDeath(Creature* pCreature) override;
         void OnCreatureEvade(Creature* pCreature) override;
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         void SetData64(uint32 uiData, uint64 uiGuid) override;

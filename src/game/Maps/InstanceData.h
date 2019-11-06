@@ -67,7 +67,7 @@ class InstanceData
         void SaveToDB() const;
 
         // Called every map update
-        virtual void Update(uint32 /*diff*/) {}
+        virtual void Update(const uint32 /*diff*/) {}
 
         // This is to prevent players from entering during boss encounters.
         virtual bool IsEncounterInProgress() const { return false; };

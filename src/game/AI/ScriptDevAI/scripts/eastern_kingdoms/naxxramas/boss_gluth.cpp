@@ -17,7 +17,9 @@
 /* ScriptData
 SDName: Boss_Gluth
 SD%Complete: 99
-SDComment: TODO: Test encounter.
+SDComment: Though gameplay is Blizzlike, logic in Zombie Chow Search and Call All Zombie Chow is guess work and can probably be improved.
+           Also, based on similar encounters, Trigger NPCs for the summoning should probably be spawned by a (currently unknown) spell
+           and the despawn of all adds should also be handled by a spell.
 SDCategory: Naxxramas
 EndScriptData
 
@@ -28,9 +30,7 @@ EndScriptData
 
 enum
 {
-    EMOTE_ZOMBIE                    = -1533119,
-    EMOTE_BOSS_GENERIC_ENRAGED      = -1000006,
-    EMOTE_DECIMATE                  = -1533152,
+    EMOTE_BOSS_GENERIC_ENRAGED      = -1000003,
 
     SPELL_DOUBLE_ATTACK             = 19818,
     SPELL_MORTALWOUND               = 25646,
@@ -38,220 +38,154 @@ enum
     SPELL_ENRAGE                    = 28371,
     SPELL_BERSERK                   = 26662,
     SPELL_TERRIFYING_ROAR           = 29685,
-    // SPELL_SUMMON_ZOMBIE_CHOW      = 28216,               // removed from dbc: triggers 28217 every 6 secs
-    // SPELL_CALL_ALL_ZOMBIE_CHOW    = 29681,               // removed from dbc: triggers 29682
-    // SPELL_ZOMBIE_CHOW_SEARCH      = 28235,               // removed from dbc: triggers 28236 every 3 secs
+    SPELL_SUMMON_ZOMBIE_CHOW        = 28216,                // Triggers 28217 every 6 secs
+    SPELL_CALL_ALL_ZOMBIE_CHOW      = 29681,                // Triggers 29682
+    SPELL_ZOMBIE_CHOW_SEARCH        = 28235,                // Triggers 28236 every 3 secs
+    SPELL_ZOMBIE_CHOW_SEARCH_HEAL   = 28238,                // Healing effect
 
-    NPC_ZOMBIE_CHOW                 = 16360,                // old vanilla summoning spell 28217
-
-    MAX_ZOMBIE_LOCATIONS            = 3,
-};
-
-static const float aZombieSummonLoc[MAX_ZOMBIE_LOCATIONS][3] =
-{
-    {3267.9f, -3172.1f, 297.42f},
-    {3253.2f, -3132.3f, 297.42f},
-    {3308.3f, -3185.8f, 297.42f},
+    NPC_WORLD_TRIGGER               = 15384,                // Handle the summoning of the zombie chow NPCs
 };
 
 struct boss_gluthAI : public ScriptedAI
 {
-    boss_gluthAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_gluthAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
         Reset();
 
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
 
-    uint32 m_uiMortalWoundTimer;
-    uint32 m_uiDecimateTimer;
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiRoarTimer;
-    uint32 m_uiSummonTimer;
-    uint32 m_uiZombieSearchTimer;
+    uint32 m_mortalWoundTimer;
+    uint32 m_decimateTimer;
+    uint32 m_enrageTimer;
+    uint32 m_roarTimer;
+    uint32 m_berserkTimer;
 
-    uint32 m_uiBerserkTimer;
-
-    GuidList m_lZombieChowGuidList;
+    CreatureList m_summoningTriggers;
 
     void Reset() override
     {
-        m_uiMortalWoundTimer  = 10000;
-        m_uiDecimateTimer     = 110000;
-        m_uiEnrageTimer       = 10000;
-        m_uiSummonTimer       = 6000;
-        m_uiRoarTimer         = 20000;
-        m_uiZombieSearchTimer = 3000;
-
-        m_uiBerserkTimer      = MINUTE * 6.5 * IN_MILLISECONDS; // ~15 seconds after the third Decimate
+        m_mortalWoundTimer  = 10 * IN_MILLISECONDS;
+        m_decimateTimer     = 105 * IN_MILLISECONDS;
+        m_enrageTimer       = 10 * IN_MILLISECONDS;
+        m_roarTimer         = 20 * IN_MILLISECONDS;
+        m_berserkTimer      = 6.5 * MINUTE * IN_MILLISECONDS; // ~15 seconds after the third Decimate
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GLUTH, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_GLUTH, DONE);
+
+        StopSummoning();
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GLUTH, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_GLUTH, IN_PROGRESS);
+
+        DoCastSpellIfCan(m_creature, SPELL_ZOMBIE_CHOW_SEARCH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);     // Aura periodically looking for NPC 16360
+        DoCastSpellIfCan(m_creature, SPELL_CALL_ALL_ZOMBIE_CHOW, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);   // Aura periodically calling all NPCs 16360
+
+        // Add zombies summoning aura to the three triggers
+        GetCreatureListWithEntryInGrid(m_summoningTriggers, m_creature, NPC_WORLD_TRIGGER, 100.0f);
+        for (auto& trigger : m_summoningTriggers)
+            trigger->CastSpell(trigger, SPELL_SUMMON_ZOMBIE_CHOW, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void KilledUnit(Unit* victim) override
     {
-        // Restore 5% hp when killing a zombie
-        if (pVictim->GetEntry() == NPC_ZOMBIE_CHOW)
-        {
-            DoScriptText(EMOTE_ZOMBIE, m_creature);
-            m_creature->SetHealth(m_creature->GetHealth() + m_creature->GetMaxHealth() * 0.05f);
-        }
+        if (victim->GetEntry() == NPC_ZOMBIE_CHOW)
+            DoCastSpellIfCan(m_creature, SPELL_ZOMBIE_CHOW_SEARCH_HEAL, CAST_TRIGGERED);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GLUTH, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_GLUTH, FAIL);
 
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        StopSummoning();
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void StopSummoning()
     {
-        pSummoned->GetMotionMaster()->MoveFollow(m_creature, ATTACK_DISTANCE, 0);
-        m_lZombieChowGuidList.push_back(pSummoned->GetObjectGuid());
+        // Remove summoning aura from triggers
+        for (auto& trigger : m_summoningTriggers)
+            trigger->RemoveAllAuras();
     }
 
-    void SummonedCreatureDespawn(Creature* pSummoned) override
+    void UpdateAI(const uint32 diff) override
     {
-        m_lZombieChowGuidList.remove(pSummoned->GetObjectGuid());
-    }
-
-    // Replaces missing spell 29682
-    void DoCallAllZombieChow()
-    {
-        for (GuidList::const_iterator itr = m_lZombieChowGuidList.begin(); itr != m_lZombieChowGuidList.end(); ++itr)
-        {
-            if (Creature* pZombie = m_creature->GetMap()->GetCreature(*itr))
-                pZombie->GetMotionMaster()->MoveFollow(m_creature, ATTACK_DISTANCE, 0);
-        }
-    }
-
-    // Replaces missing spell 28236
-    void DoSearchZombieChow()
-    {
-        for (GuidList::const_iterator itr = m_lZombieChowGuidList.begin(); itr != m_lZombieChowGuidList.end(); ++itr)
-        {
-            if (Creature* pZombie = m_creature->GetMap()->GetCreature(*itr))
-            {
-                if (!pZombie->isAlive())
-                    continue;
-
-                // Devour a Zombie
-                if (pZombie->IsWithinDistInMap(m_creature, 15.0f))
-                {
-                    m_creature->SetFacingToObject(pZombie);
-                    m_creature->DealDamage(pZombie, pZombie->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
-                }
-            }
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        // Do nothing if no target or if we are currently stunned (Decimate effect)
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || m_creature->HasAuraType(SPELL_AURA_MOD_STUN))
             return;
 
-        if (m_uiZombieSearchTimer < uiDiff)
-        {
-            DoSearchZombieChow();
-            m_uiZombieSearchTimer = 3000;
-        }
-        else
-            m_uiZombieSearchTimer -= uiDiff;
-
         // Mortal Wound
-        if (m_uiMortalWoundTimer < uiDiff)
+        if (m_mortalWoundTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTALWOUND) == CAST_OK)
-                m_uiMortalWoundTimer = 10000;
+                m_mortalWoundTimer = 10 * IN_MILLISECONDS;
         }
         else
-            m_uiMortalWoundTimer -= uiDiff;
+            m_mortalWoundTimer -= diff;
 
         // Decimate
-        if (m_uiDecimateTimer < uiDiff)
+        if (m_decimateTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_DECIMATE) == CAST_OK)
-            {
-                DoScriptText(EMOTE_DECIMATE, m_creature);
-                DoCallAllZombieChow();
-                m_uiDecimateTimer = urand(100000, 110000);
-            }
+            if (DoCastSpellIfCan(m_creature, SPELL_DECIMATE, CAST_TRIGGERED) == CAST_OK)
+                m_decimateTimer = urand(100, 110) * IN_MILLISECONDS;
         }
         else
-            m_uiDecimateTimer -= uiDiff;
+            m_decimateTimer -= diff;
 
         // Enrage
-        if (m_uiEnrageTimer < uiDiff)
+        if (m_enrageTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
             {
                 DoScriptText(EMOTE_BOSS_GENERIC_ENRAGED, m_creature);
-                m_uiEnrageTimer = urand(10000, 12000);
+                m_enrageTimer = urand(10, 12) * IN_MILLISECONDS;
             }
         }
         else
-            m_uiEnrageTimer -= uiDiff;
+            m_enrageTimer -= diff;
 
         // Terrifying Roar
-        if (m_uiRoarTimer < uiDiff)
+        if (m_roarTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_TERRIFYING_ROAR) == CAST_OK)
-                m_uiRoarTimer = 20000;
+                m_roarTimer = 20 * IN_MILLISECONDS;
         }
         else
-            m_uiRoarTimer -= uiDiff;
-
-        // Summon
-        if (m_uiSummonTimer < uiDiff)
-        {
-            uint8 uiPos1 = urand(0, MAX_ZOMBIE_LOCATIONS - 1);
-            m_creature->SummonCreature(NPC_ZOMBIE_CHOW, aZombieSummonLoc[uiPos1][0], aZombieSummonLoc[uiPos1][1], aZombieSummonLoc[uiPos1][2], 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
-
-            uint8 uiPos2 = (uiPos1 + urand(1, MAX_ZOMBIE_LOCATIONS - 1)) % MAX_ZOMBIE_LOCATIONS;
-            m_creature->SummonCreature(NPC_ZOMBIE_CHOW, aZombieSummonLoc[uiPos2][0], aZombieSummonLoc[uiPos2][1], aZombieSummonLoc[uiPos2][2], 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
-
-            m_uiSummonTimer = 6000;
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
+            m_roarTimer -= diff;
 
         // Berserk
-        if (m_uiBerserkTimer < uiDiff)
+        if (m_berserkTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                m_uiBerserkTimer = MINUTE * 5 * IN_MILLISECONDS;
+                m_berserkTimer = 5 * MINUTE * IN_MILLISECONDS;
         }
         else
-            m_uiBerserkTimer -= uiDiff;
+            m_berserkTimer -= diff;
 
         DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_gluth(Creature* pCreature)
+UnitAI* GetAI_boss_gluth(Creature* creature)
 {
-    return new boss_gluthAI(pCreature);
+    return new boss_gluthAI(creature);
 }
 
 void AddSC_boss_gluth()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "boss_gluth";
-    pNewScript->GetAI = &GetAI_boss_gluth;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "boss_gluth";
+    newScript->GetAI = &GetAI_boss_gluth;
+    newScript->RegisterSelf();
 }

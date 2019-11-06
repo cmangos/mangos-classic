@@ -77,6 +77,7 @@ enum
     SPELL_BARON_SOUL_DRAIN      = 27640,                    // Used by the Baron to kill Ysida
     SPELL_YSIDA_FREED           = 27773,                    // Argent Dawn extra-reputation reward on successful Baron run
     SPELL_SUMMON_POSTMASTER     = 24627,
+    SPELL_SUICIDE               = 7,                        // Used by crystals
 
     SAY_ANNOUNCE_ZIGGURAT_1     = -1329004,
     SAY_ANNOUNCE_ZIGGURAT_2     = -1329005,
@@ -235,7 +236,7 @@ class instance_stratholme : public ScriptedInstance
         void OnCreatureEvade(Creature* pCreature);
         void OnCreatureDeath(Creature* pCreature) override;
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
     protected:
         bool StartSlaugtherSquare();

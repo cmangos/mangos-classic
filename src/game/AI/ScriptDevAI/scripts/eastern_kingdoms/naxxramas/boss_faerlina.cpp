@@ -28,7 +28,6 @@ EndScriptData
 
 enum
 {
-    SAY_GREET                   = -1533009,
     SAY_AGGRO_1                 = -1533010,
     SAY_ENRAGE_1                = -1533011,
     SAY_ENRAGE_2                = -1533012,
@@ -44,124 +43,102 @@ enum
     SPELL_POISONBOLT_VOLLEY     = 28796,
     SPELL_ENRAGE                = 28798,
     SPELL_RAIN_OF_FIRE          = 28794,
-    SPELL_WIDOWS_EMBRACE        = 28732,
+    SPELL_WIDOWS_EMBRACE_1      = 28732,                    // Cast onto Faerlina by Mind Controlled adds
+    SPELL_WIDOWS_EMBRACE_2      = 28797,                    // Cast onto herself by Faerlina and handle all the cooldown and enrage debuff
 };
 
 struct boss_faerlinaAI : public ScriptedAI
 {
-    boss_faerlinaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_faerlinaAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bHasTaunted = false;
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
 
-    uint32 m_uiPoisonBoltVolleyTimer;
-    uint32 m_uiRainOfFireTimer;
-    uint32 m_uiEnrageTimer;
-    bool   m_bHasTaunted;
+    uint32 m_poisonBoltVolleyTimer;
+    uint32 m_rainOfFireTimer;
+    uint32 m_enrageTimer;
 
     void Reset() override
     {
-        m_uiPoisonBoltVolleyTimer = 8000;
-        m_uiRainOfFireTimer = 16000;
-        m_uiEnrageTimer = 60000;
+        m_poisonBoltVolleyTimer   = 8 * IN_MILLISECONDS;
+        m_rainOfFireTimer         = 16 * IN_MILLISECONDS;
+        m_enrageTimer             = 60 * IN_MILLISECONDS;
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-
         DoScriptText(SAY_AGGRO_1, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FAERLINA, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_FAERLINA, IN_PROGRESS);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 80.0f) &&  m_creature->IsWithinLOSInMap(pWho))
-        {
-            DoScriptText(SAY_GREET, m_creature);
-            m_bHasTaunted = true;
-        }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FAERLINA, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_FAERLINA, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FAERLINA, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_FAERLINA, FAIL);
     }
 
-    // Widow's Embrace prevents frenzy and poison bolt, if it removes frenzy, next frenzy is sceduled in 60s
-    // It is likely that this _should_ be handled with some dummy aura(s) - but couldn't find any
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpellEntry) override
+    // Widow's Embrace prevents Frenzy and Poison bolt by activating 30 sec spell cooldown
+    // If target also has Frenzy, it will remove it and delay next one by 60s
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spellEntry) override
     {
-        // Check if we hit with Widow's Embrave
-        if (pSpellEntry->Id == SPELL_WIDOWS_EMBRACE)
+        if (spellEntry->Id == SPELL_WIDOWS_EMBRACE_1)
         {
-            bool bIsFrenzyRemove = false;
+            DoCastSpellIfCan(m_creature, SPELL_WIDOWS_EMBRACE_2);   // Start spell category cooldown, delaying next Poison Bolt and Frenzy by 30 secs
 
-            // If we remove the Frenzy, the Enrage Timer is reseted to 60s
             if (m_creature->HasAura(SPELL_ENRAGE))
             {
-                m_uiEnrageTimer = 60000;
                 m_creature->RemoveAurasDueToSpell(SPELL_ENRAGE);
-
-                bIsFrenzyRemove = true;
+                m_enrageTimer = 60 * IN_MILLISECONDS;             // Delay next enrage by 60 sec if Faerlina was already enraged
             }
-
-            // In any case we prevent Frenzy and Poison Bolt Volley for Widow's Embrace Duration (30s)
-            // We do this be setting the timers to at least bigger than 30s
-            m_uiEnrageTimer = std::max(m_uiEnrageTimer, (uint32)30000);
-            m_uiPoisonBoltVolleyTimer = std::max(m_uiPoisonBoltVolleyTimer, urand(33000, 38000));
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         // Poison Bolt Volley
-        if (m_uiPoisonBoltVolleyTimer < uiDiff)
+        if (m_poisonBoltVolleyTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISONBOLT_VOLLEY) == CAST_OK)
-                m_uiPoisonBoltVolleyTimer = 11000;
+                m_poisonBoltVolleyTimer = 11 * IN_MILLISECONDS;
         }
         else
-            m_uiPoisonBoltVolleyTimer -= uiDiff;
+            m_poisonBoltVolleyTimer -= diff;
 
         // Rain Of Fire
-        if (m_uiRainOfFireTimer < uiDiff)
+        if (m_rainOfFireTimer < diff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_RAIN_OF_FIRE) == CAST_OK)
-                    m_uiRainOfFireTimer = 16000;
+                if (DoCastSpellIfCan(target, SPELL_RAIN_OF_FIRE) == CAST_OK)
+                    m_rainOfFireTimer = 16 * IN_MILLISECONDS;
             }
         }
         else
-            m_uiRainOfFireTimer -= uiDiff;
+            m_rainOfFireTimer -= diff;
 
         // Enrage Timer
-        if (m_uiEnrageTimer < uiDiff)
+        if (m_enrageTimer < diff && !m_creature->HasAura(SPELL_ENRAGE))
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
             {
@@ -171,25 +148,25 @@ struct boss_faerlinaAI : public ScriptedAI
                     case 1: DoScriptText(SAY_ENRAGE_2, m_creature); break;
                     case 2: DoScriptText(SAY_ENRAGE_3, m_creature); break;
                 }
-                m_uiEnrageTimer = 60000;
+                m_enrageTimer = 60 * IN_MILLISECONDS;
             }
         }
         else
-            m_uiEnrageTimer -= uiDiff;
+            m_enrageTimer -= diff;
 
         DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_faerlina(Creature* pCreature)
+UnitAI* GetAI_boss_faerlina(Creature* creature)
 {
-    return new boss_faerlinaAI(pCreature);
+    return new boss_faerlinaAI(creature);
 }
 
 void AddSC_boss_faerlina()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "boss_faerlina";
-    pNewScript->GetAI = &GetAI_boss_faerlina;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "boss_faerlina";
+    newScript->GetAI = &GetAI_boss_faerlina;
+    newScript->RegisterSelf();
 }

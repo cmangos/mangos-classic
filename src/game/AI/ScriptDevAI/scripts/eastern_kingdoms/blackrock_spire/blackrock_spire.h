@@ -183,7 +183,7 @@ class instance_blackrock_spire : public ScriptedInstance, private DialogueHelper
 
         void StartflamewreathEventIfCan();
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
         bool m_bBeastIntroDone;
         bool m_bBeastOutOfLair;

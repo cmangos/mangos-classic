@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Razuvious
-SD%Complete: 90%
-SDComment: TODO: Timers and sounds need confirmation
+SD%Complete: 95%
+SDComment: TODO: Deathknight Understudy are supposed to gain Mind Exhaustion debuff when released from player Mind Control
 SDCategory: Naxxramas
 EndScriptData
 
@@ -32,60 +32,81 @@ enum
     SAY_AGGRO2               = -1533121,
     SAY_AGGRO3               = -1533122,
     SAY_AGGRO4               = -1533123,
-    SAY_SLAY1                = -1533124,
-    SAY_SLAY2                = -1533125,
-    SAY_TRIUMPHANT1          = -1533126,
-    SAY_TRIUMPHANT2          = -1533127,
-    SAY_TRIUMPHANT3          = -1533128,
+    SAY_SLAY                 = -1533124,
+    SAY_UNDERSTUDY_TAUNT_1   = -1533125,
+    SAY_UNDERSTUDY_TAUNT_2   = -1533126,
+    SAY_UNDERSTUDY_TAUNT_3   = -1533127,
+    SAY_UNDERSTUDY_TAUNT_4   = -1533128,
     SAY_DEATH                = -1533129,
+    EMOTE_TRIUMPHANT_SHOOT   = -1533158,
 
     SPELL_UNBALANCING_STRIKE = 26613,
     SPELL_DISRUPTING_SHOUT   = 29107,
-    SPELL_HOPELESS           = 29125
+    SPELL_HOPELESS           = 29125,
+
+    SPELL_TAUNT              = 29060        // Used by Deathknight Understudy
 };
 
 struct boss_razuviousAI : public ScriptedAI
 {
-    boss_razuviousAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_razuviousAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
 
-    uint32 m_uiUnbalancingStrikeTimer;
-    uint32 m_uiDisruptingShoutTimer;
+    uint32 m_unbalancingStrikeTimer;
+    uint32 m_disruptingShoutTimer;
 
     void Reset() override
     {
-        m_uiUnbalancingStrikeTimer = 30000;                 // 30 seconds
-        m_uiDisruptingShoutTimer   = 25000;                 // 25 seconds
+        m_unbalancingStrikeTimer = 30 * IN_MILLISECONDS;
+        m_disruptingShoutTimer   = 25 * IN_MILLISECONDS;
     }
 
-    void KilledUnit(Unit* /*Victim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
-        if (urand(0, 3))
-            return;
+        DoScriptText(SAY_SLAY, m_creature);
+    }
 
-        switch (urand(0, 1))
+    void SpellHit(Unit* caster, const SpellEntry* spell) override
+    {
+        // Every time a Deathknight Understudy taunts Razuvious, he will yell its disappointment
+        if (spell->Id == SPELL_TAUNT)
         {
-            case 0: DoScriptText(SAY_SLAY1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY2, m_creature); break;
+            switch (urand(0, 3))
+            {
+                case 0: DoScriptText(SAY_UNDERSTUDY_TAUNT_1, m_creature); break;
+                case 1: DoScriptText(SAY_UNDERSTUDY_TAUNT_2, m_creature); break;
+                case 2: DoScriptText(SAY_UNDERSTUDY_TAUNT_3, m_creature); break;
+                case 3: DoScriptText(SAY_UNDERSTUDY_TAUNT_4, m_creature); break;
+            }
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void SpellHitTarget(Unit* target, const SpellEntry* spell) override
+    {
+        // This emote happens only when Disrupting Shout hit a target with mana
+        if (spell->Id == SPELL_DISRUPTING_SHOUT && target->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (((Player*)target)->GetPowerType() == POWER_MANA)
+                DoScriptText(EMOTE_TRIUMPHANT_SHOOT, m_creature);
+        }
+    }
+
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
         DoCastSpellIfCan(m_creature, SPELL_HOPELESS, CAST_TRIGGERED);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_RAZUVIOUS, DONE);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 3))
         {
@@ -95,61 +116,52 @@ struct boss_razuviousAI : public ScriptedAI
             case 3: DoScriptText(SAY_AGGRO4, m_creature); break;
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_RAZUVIOUS, IN_PROGRESS);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_RAZUVIOUS, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         // Unbalancing Strike
-        if (m_uiUnbalancingStrikeTimer < uiDiff)
+        if (m_unbalancingStrikeTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
-                m_uiUnbalancingStrikeTimer = 30000;
+                m_unbalancingStrikeTimer = 30 * IN_MILLISECONDS;
         }
         else
-            m_uiUnbalancingStrikeTimer -= uiDiff;
+            m_unbalancingStrikeTimer -= diff;
 
         // Disrupting Shout
-        if (m_uiDisruptingShoutTimer < uiDiff)
+        if (m_disruptingShoutTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_DISRUPTING_SHOUT) == CAST_OK)
-                m_uiDisruptingShoutTimer = 25000;
-
-            // TODO need core support to make this yells happen only when spell Disrupting Shout hit a target
-            // For now, Razuvious will yell it at each cast
-            switch (urand(0, 3))
-            {
-                case 0: DoScriptText(SAY_TRIUMPHANT1, m_creature); break;
-                case 1: DoScriptText(SAY_TRIUMPHANT2, m_creature); break;
-                case 2: DoScriptText(SAY_TRIUMPHANT3, m_creature); break;
-            }
+                m_disruptingShoutTimer = 25 * IN_MILLISECONDS;
         }
         else
-            m_uiDisruptingShoutTimer -= uiDiff;
+            m_disruptingShoutTimer -= diff;
 
         DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_razuvious(Creature* pCreature)
+UnitAI* GetAI_boss_razuvious(Creature* creature)
 {
-    return new boss_razuviousAI(pCreature);
+    return new boss_razuviousAI(creature);
 }
 
 void AddSC_boss_razuvious()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "boss_razuvious";
-    pNewScript->GetAI = &GetAI_boss_razuvious;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "boss_razuvious";
+    newScript->GetAI = &GetAI_boss_razuvious;
+    newScript->RegisterSelf();
 }

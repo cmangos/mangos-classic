@@ -87,14 +87,14 @@ struct boss_twin_emperorsAI : public ScriptedAI
     }
 
     // Workaround for the shared health pool
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDoneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (!m_pInstance)
             return;
 
         if (Creature* pTwin = m_pInstance->GetSingleCreatureFromStorage(m_creature->GetEntry() == NPC_VEKLOR ? NPC_VEKNILASH : NPC_VEKLOR))
         {
-            float fDamPercent = ((float)uiDamage) / ((float)m_creature->GetMaxHealth());
+            float fDamPercent = ((float)damage) / ((float)m_creature->GetMaxHealth());
             uint32 uiTwinDamage = (uint32)(fDamPercent * ((float)pTwin->GetMaxHealth()));
             uint32 uiTwinHealth = pTwin->GetHealth() - uiTwinDamage;
             pTwin->SetHealth(uiTwinHealth > 0 ? uiTwinHealth : 0);
@@ -108,7 +108,7 @@ struct boss_twin_emperorsAI : public ScriptedAI
     }
 
     // Workaround for the shared health pool
-    void HealedBy(Unit* pHealer, uint32& uiHealedAmount) override
+    void HealedBy(Unit* /*pHealer*/, uint32& uiHealedAmount) override
     {
         if (!m_pInstance)
             return;

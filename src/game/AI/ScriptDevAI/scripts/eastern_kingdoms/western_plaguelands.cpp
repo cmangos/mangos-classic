@@ -850,7 +850,7 @@ struct npc_tirion_fordringAI: public npc_escortAI
         DoCastSpellIfCan(m_creature, SPELL_DEVOTION_AURA);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* /*pWho*/) override
     {
         // attack only on request
     }

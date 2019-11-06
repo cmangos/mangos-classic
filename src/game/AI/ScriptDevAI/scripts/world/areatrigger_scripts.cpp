@@ -174,7 +174,7 @@ static const AncientSpawn afSpawnLocations[MAX_ANCIENTS] =
     { NPC_HASTAT,  6193.449219f, -1137.834106f, 366.260529f, 5.77332f },    // Hastat the Ancient
 };
 
-bool AreaTrigger_at_ancient_leaf(Player* pPlayer, AreaTriggerEntry const* pAt)
+bool AreaTrigger_at_ancient_leaf(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
     if (pPlayer->isGameMaster() || !pPlayer->isAlive())
         return false;

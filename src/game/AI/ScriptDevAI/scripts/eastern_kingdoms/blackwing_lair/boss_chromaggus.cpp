@@ -35,7 +35,7 @@ enum
     SPELL_BREATH_SELECTION      = 23195,
     SPELL_BROOD_AFFLICTION      = 23173,
 
-    SPELL_ELEMENTAL_SHIELD      = 22276,
+    SPELL_ELEMENTAL_SHIELD_BWL  = 22276,
     SPELL_FRENZY                = 23128,
     SPELL_ENRAGE                = 23537
 };
@@ -105,7 +105,7 @@ struct boss_chromaggusAI : public ScriptedAI
         // Shimmer Timer Timer
         if (m_uiShimmerTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_ELEMENTAL_SHIELD) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, SPELL_ELEMENTAL_SHIELD_BWL) == CAST_OK)
             {
                 DoScriptText(EMOTE_SHIMMER, m_creature);
                 m_uiShimmerTimer = 45000;

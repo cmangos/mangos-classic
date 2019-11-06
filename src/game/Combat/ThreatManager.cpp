@@ -37,6 +37,9 @@ float ThreatCalcHelper::CalcThreat(Unit* hatedUnit, Unit* /*pHatingUnit*/, float
     if (!threat)
         return 0.0f;
 
+    if (hatedUnit->GetNoThreatState()) // some NPCs cause no threat
+        return 0.0f;
+
     if (threatSpell)
     {
         // Keep exception to calculate the real threat for SPELL_AURA_MOD_TOTAL_THREAT
@@ -135,7 +138,7 @@ void HostileReference::addThreat(float mod)
     {
         Unit* target = getTarget();
         Unit* victim_owner = target->GetOwner();
-        if (victim_owner && victim_owner->isAlive())
+        if (victim_owner && victim_owner->isAlive() && getSource()->getOwner()->CanAttack(victim_owner))
             getSource()->addThreat(victim_owner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
     }
 }
@@ -237,6 +240,7 @@ void ThreatContainer::clearReferences()
 
 //============================================================
 // Return the HostileReference of nullptr, if not found
+
 HostileReference* ThreatContainer::getReferenceByTarget(Unit* victim)
 {
     if (!victim)
@@ -278,6 +282,26 @@ void ThreatContainer::modifyThreatPercent(Unit* victim, int32 threatPercent)
     }
 }
 
+//============================================================
+// Modify all threat by provided percentage
+
+void ThreatContainer::modifyAllThreatPercent(int32 threatPercent)
+{
+    if (threatPercent < -100)
+    {
+        while (!iThreatList.empty())
+        {
+            HostileReference* ref = *iThreatList.begin();
+            ref->removeReference();
+            delete ref;
+        }
+    }
+    else
+    {
+        for (auto itr : iThreatList)
+            itr->addThreatPercent(threatPercent);
+    }
+}
 //============================================================
 
 bool HostileReferenceSortPredicate(const HostileReference* lhs, const HostileReference* rhs)
@@ -449,6 +473,11 @@ void ThreatManager::addThreatDirectly(Unit* victim, float threat)
 void ThreatManager::modifyThreatPercent(Unit* victim, int32 threatPercent)
 {
     iThreatContainer.modifyThreatPercent(victim, threatPercent);
+}
+
+void ThreatManager::modifyAllThreatPercent(int32 threatPercent)
+{
+    iThreatContainer.modifyAllThreatPercent(threatPercent);
 }
 
 //============================================================

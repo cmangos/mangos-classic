@@ -41,7 +41,7 @@ struct PoolTemplateData
     // helpers
     bool CanBeSpawnedAtMap(MapEntry const* entry) const
     {
-        return mapEntry && (mapEntry == entry || (!entry->Instanceable() && !mapEntry->Instanceable()));
+        return mapEntry && mapEntry == entry;
     }
 };
 
@@ -106,7 +106,7 @@ class PoolGroup
         void AddEntry(PoolObject& poolitem, uint32 maxentries);
         bool CheckPool() const;
         void CheckEventLinkAndReport(int16 event_id, std::map<uint32, int16> const& creature2event, std::map<uint32, int16> const& go2event) const;
-        PoolObject* RollOne(SpawnedPoolData& spawns, uint32 triggerFrom);
+        PoolObject* RollOne(SpawnedPoolData& spawns, uint32 triggerFrom, MapPersistentState& mapState);
         void DespawnObject(MapPersistentState& mapState, uint32 guid = 0);
         void Despawn1Object(MapPersistentState& mapState, uint32 guid);
         void SpawnObject(MapPersistentState& mapState, uint32 limit, uint32 triggerFrom, bool instantly);

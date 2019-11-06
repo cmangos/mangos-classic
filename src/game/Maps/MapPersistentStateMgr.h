@@ -96,7 +96,7 @@ class MapPersistentState
 
         // pool system
         void InitPools();
-        virtual SpawnedPoolData& GetSpawnedPoolData() = 0;
+        SpawnedPoolData& GetSpawnedPoolData() { return m_spawnedPoolData; };
 
         template<typename T>
         bool IsSpawnedPoolObject(uint32 db_guid_or_pool_id) { return GetSpawnedPoolData().IsSpawnedObject<T>(db_guid_or_pool_id); }
@@ -129,6 +129,8 @@ class MapPersistentState
         RespawnTimes m_creatureRespawnTimes;                // lock MapPersistentState from unload, for example for temporary bound dungeon unload delay
         RespawnTimes m_goRespawnTimes;                      // lock MapPersistentState from unload, for example for temporary bound dungeon unload delay
         MapCellObjectGuidsMap m_gridObjectGuids;            // Single map copy specific grid spawn data, like pool spawns
+
+        SpawnedPoolData m_spawnedPoolData;                  // Pools spawns state for map copy
 };
 
 inline bool MapPersistentState::CanBeUnload() const
@@ -147,13 +149,8 @@ class WorldPersistentState : public MapPersistentState
         explicit WorldPersistentState(uint16 MapId) : MapPersistentState(MapId, 0) {}
 
         ~WorldPersistentState() {}
-
-        SpawnedPoolData& GetSpawnedPoolData() override { return m_sharedSpawnedPoolData; }
     protected:
         bool CanBeUnload() const override;                  // overwrite MapPersistentState::CanBeUnload
-
-    private:
-        static SpawnedPoolData m_sharedSpawnedPoolData;     // Pools spawns state for map, shared by all non-instanced maps
 };
 
 /*
@@ -174,8 +171,6 @@ class DungeonPersistentState : public MapPersistentState
            - when a group bound to the instance is loaded */
         DungeonPersistentState(uint16 MapId, uint32 InstanceId, time_t resetTime, bool canReset, uint32 completedEncountersMask);
         ~DungeonPersistentState();
-
-        SpawnedPoolData& GetSpawnedPoolData() override { return m_spawnedPoolData; }
 
         InstanceTemplate const* GetTemplate() const;
 
@@ -234,8 +229,6 @@ class DungeonPersistentState : public MapPersistentState
         PlayerListType m_playerList;                        // lock MapPersistentState from unload
         GroupListType m_groupList;                          // lock MapPersistentState from unload
 
-        SpawnedPoolData m_spawnedPoolData;                  // Pools spawns state for map copy
-
         uint32 m_completedEncountersMask;                   // completed encounter mask, bit indexes are DungeonEncounter.dbc boss numbers, used for packets
 };
 
@@ -249,13 +242,8 @@ class BattleGroundPersistentState : public MapPersistentState
             : MapPersistentState(MapId, InstanceId) {}
 
         ~BattleGroundPersistentState() {}
-
-        SpawnedPoolData& GetSpawnedPoolData() override { return m_spawnedPoolData; }
     protected:
         bool CanBeUnload() const override;                  // overwrite MapPersistentState::CanBeUnload
-
-    private:
-        SpawnedPoolData m_spawnedPoolData;                  // Pools spawns state for map copy
 };
 
 enum ResetEventType
@@ -337,7 +325,7 @@ class MapPersistentStateManager : public MaNGOS::Singleton<MapPersistentStateMan
 
         // auto select appropriate MapPersistentState (sub)class by MapEntry, and autoselect appropriate way store (by instance/map id)
         // always return != nullptr
-        MapPersistentState* AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, time_t resetTime, bool canReset, bool load = false, bool initPools = true, uint32 completedEncountersMask = 0);
+        MapPersistentState* AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, time_t resetTime, bool canReset, bool load = false, uint32 completedEncountersMask = 0);
 
         // search stored state, can be nullptr in result
         MapPersistentState* GetPersistentState(uint32 mapId, uint32 instanceId);
