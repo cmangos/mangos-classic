@@ -343,17 +343,10 @@ void MotionMaster::MovePoint(uint32 id, float x, float y, float z, float o, bool
     Mutate(new PointMovementGenerator(id, x, y, z, o, generatePath, forcedMovement));
 }
 
-void MotionMaster::MoveRetreat(float x, float y, float z, float o)
+void MotionMaster::MoveRetreat(float x, float y, float z, float o, uint32 delay)
 {
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        sLog.outError("%s attempts to retreat for assistance", m_owner->GetGuidStr().c_str());
-    }
-    else
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s retreats for assistance (X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), x, y, z);
-        Mutate(new RetreatMovementGenerator(x, y, z, o));
-    }
+    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s retreats for assistance (X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), x, y, z);
+    Mutate(new RetreatMovementGenerator(x, y, z, o, delay));
 }
 
 void MotionMaster::MoveFleeing(Unit* source, uint32 time)

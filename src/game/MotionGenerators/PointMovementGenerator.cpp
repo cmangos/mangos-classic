@@ -113,8 +113,6 @@ void RetreatMovementGenerator::Initialize(Unit& unit)
     unit.addUnitState(UNIT_STAT_RETREATING);
 
     PointMovementGenerator::Initialize(unit);
-
-    m_delayTimer.Reset(sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY));
 }
 
 void RetreatMovementGenerator::Finalize(Unit& unit)

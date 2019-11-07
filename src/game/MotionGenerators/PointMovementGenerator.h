@@ -54,15 +54,15 @@ class PointMovementGenerator : public MovementGenerator
 class RetreatMovementGenerator : public PointMovementGenerator
 {
     public:
-        RetreatMovementGenerator(float x, float y, float z, float o) :
-            PointMovementGenerator(0, x, y, z, o, true, 0), m_arrived(false) {}
+        RetreatMovementGenerator(float x, float y, float z, float o, uint32 delay) :
+            PointMovementGenerator(0, x, y, z, o, true, 0), m_delayTimer(delay), m_arrived(false) {}
 
         void Initialize(Unit& unit) override;
         void Finalize(Unit& unit) override;
         void Interrupt(Unit& unit) override;
         bool Update(Unit& unit, const uint32& diff) override;
 
-        MovementGeneratorType GetMovementGeneratorType() const override { return ASSISTANCE_MOTION_TYPE; }
+        MovementGeneratorType GetMovementGeneratorType() const override { return RETREAT_MOTION_TYPE; }
 
     protected:
         void MovementInform(Unit&) override {}
