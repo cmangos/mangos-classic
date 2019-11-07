@@ -398,7 +398,7 @@ enum UnitState
     UNIT_STAT_POSSESSED       = 0x00000040,                 // Aura::HandleAuraModPossess (duplicates UNIT_FLAG_POSSESSED)
 
     // movement generators begin:
-    UNIT_STAT_TAXI_FLIGHT     = 0x00000080,                 // FlightPathMovementGenerator on stack
+    UNIT_STAT_TAXI_FLIGHT     = 0x00000080,                 // TaxiMovementGenerator on stack
     UNIT_STAT_PROPELLED       = 0x00000100,                 // EffectMovementGenerator on stack
     UNIT_STAT_PANIC           = 0x00000200,                 // PanicMovementGenerator on stack
     UNIT_STAT_RETREATING      = 0x00000400,                 // RetreatMovementGenerator on stack

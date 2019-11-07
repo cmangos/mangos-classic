@@ -42,7 +42,7 @@ enum MovementGeneratorType
     CONFUSED_MOTION_TYPE            = 4,                    // RandomMovementGenerator.h
     CHASE_MOTION_TYPE               = 5,                    // TargetedMovementGenerator.h
     HOME_MOTION_TYPE                = 6,                    // HomeMovementGenerator.h
-    FLIGHT_MOTION_TYPE              = 7,                    // WaypointMovementGenerator.h
+    TAXI_MOTION_TYPE                = 7,                    // WaypointMovementGenerator.h
     POINT_MOTION_TYPE               = 8,                    // PointMovementGenerator.h
     FLEEING_MOTION_TYPE             = 9,                    // RandomMovementGenerator.h
     DISTRACT_MOTION_TYPE            = 10,                   // IdleMovementGenerator.h

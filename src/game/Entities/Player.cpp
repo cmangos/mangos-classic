@@ -16813,7 +16813,7 @@ void Player::TaxiFlightResume(bool forceRenewMoveGen /*= false*/)
 bool Player::TaxiFlightInterrupt(bool cancel /*= true*/)
 {
     // Simply pauses if bool is not set (for example, storing the flight for one reason or another)
-    if (GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
+    if (GetMotionMaster()->GetCurrentMovementGeneratorType() == TAXI_MOTION_TYPE)
     {
         OnTaxiFlightEject(cancel);
         GetMotionMaster()->MovementExpired();

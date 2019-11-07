@@ -5810,7 +5810,7 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
                 else
                     SendSysMessage(LANG_MOVEGENS_HOME_PLAYER);
                 break;
-            case FLIGHT_MOTION_TYPE:   SendSysMessage(LANG_MOVEGENS_FLIGHT);  break;
+            case TAXI_MOTION_TYPE:     SendSysMessage(LANG_MOVEGENS_FLIGHT);  break;
             case POINT_MOTION_TYPE:
             {
                 PSendSysMessage(LANG_MOVEGENS_POINT, x, y, z);

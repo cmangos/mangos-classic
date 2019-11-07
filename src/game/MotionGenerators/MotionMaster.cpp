@@ -398,11 +398,11 @@ void MotionMaster::MoveWaypoint(uint32 pathId /*=0*/, uint32 source /*=0==PATH_N
 
 void MotionMaster::MoveTaxiFlight()
 {
-    if (m_owner->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
+    if (m_owner->GetMotionMaster()->GetCurrentMovementGeneratorType() == TAXI_MOTION_TYPE)
     {
         if (m_owner->GetTypeId() == TYPEID_PLAYER)
         {
-            auto flightMGen = static_cast<FlightPathMovementGenerator const*>(m_owner->GetMotionMaster()->GetCurrent());
+            auto flightMGen = static_cast<TaxiMovementGenerator const*>(m_owner->GetMotionMaster()->GetCurrent());
             flightMGen->Resume(*static_cast<Player*>(m_owner));
             return;
         }
@@ -412,7 +412,7 @@ void MotionMaster::MoveTaxiFlight()
             // remove this generator from stack
             m_owner->GetMotionMaster()->MovementExpired(false);
         }
-        while (m_owner->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE);
+        while (m_owner->GetMotionMaster()->GetCurrentMovementGeneratorType() == TAXI_MOTION_TYPE);
 
         sLog.outError("%s can't be in taxi flight", m_owner->GetGuidStr().c_str());
         return;
@@ -421,7 +421,7 @@ void MotionMaster::MoveTaxiFlight()
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s is now in taxi flight", m_owner->GetGuidStr().c_str());
-        Mutate(new FlightPathMovementGenerator());
+        Mutate(new TaxiMovementGenerator());
     }
     else
         sLog.outError("%s can't be in taxi flight", m_owner->GetGuidStr().c_str());

@@ -328,7 +328,7 @@ bool WaypointMovementGenerator<Creature>::SetNextWaypoint(uint32 pointId)
 
 //----------------------------------------------------//
 
-void FlightPathMovementGenerator::Initialize(Player& player)
+void TaxiMovementGenerator::Initialize(Player& player)
 {
     player.InterruptMoving();
     player.addUnitState(UNIT_STAT_TAXI_FLIGHT);
@@ -336,7 +336,7 @@ void FlightPathMovementGenerator::Initialize(Player& player)
     player.UpdateClientControl(&player, false);
 }
 
-void FlightPathMovementGenerator::Finalize(Player& player)
+void TaxiMovementGenerator::Finalize(Player& player)
 {
     player.InterruptMoving();
     player.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
@@ -344,20 +344,20 @@ void FlightPathMovementGenerator::Finalize(Player& player)
     player.UpdateClientControl(&player, true);
 }
 
-void FlightPathMovementGenerator::Interrupt(Player& player)
+void TaxiMovementGenerator::Interrupt(Player& player)
 {
     player.InterruptMoving();
     player.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
 }
 
-void FlightPathMovementGenerator::Reset(Player& player)
+void TaxiMovementGenerator::Reset(Player& player)
 {
     Initialize(player);
 }
 
 #define PLAYER_FLIGHT_SPEED        32.0f
 
-bool FlightPathMovementGenerator::Update(Player& player, const uint32& /*diff*/)
+bool TaxiMovementGenerator::Update(Player& player, const uint32& /*diff*/)
 {
     Movement::MoveSpline* spline = player.movespline;
     const bool movement = (!spline->Finalized());
@@ -372,31 +372,11 @@ bool FlightPathMovementGenerator::Update(Player& player, const uint32& /*diff*/)
     // We are waiting for spline to complete at this point
     if (movement)
         return true;
-    if (player.IsMounted())
-        player.OnTaxiFlightSplineEnd();
 
-    // Load and execute the spline
-    if (player.OnTaxiFlightSplineUpdate())
-    {
-        auto nodes = player.GetTaxiPathSpline();
-        auto offset = player.GetTaxiSplinePathOffset();
-        Movement::MoveSplineInit init(player);
-        Movement::PointsArray& path = init.Path();
-        for (auto i = offset; i < nodes.size(); ++i)
-        {
-            auto node = nodes.at(i);
-            path.push_back({ node->x, node->y, node->z });
-        }
-        init.SetFirstPointId(int32(offset));
-        init.SetFly();
-        init.SetVelocity(PLAYER_FLIGHT_SPEED);
-        init.Launch();
-        return true;
-    }
-    return false;
+    return Resume(player);
 }
 
-bool FlightPathMovementGenerator::Resume(Player& player) const
+bool TaxiMovementGenerator::Resume(Player& player) const
 {
     if (player.IsMounted())
         player.OnTaxiFlightSplineEnd();
