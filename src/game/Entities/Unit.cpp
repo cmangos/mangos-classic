@@ -9171,12 +9171,12 @@ void CharmInfo::SetCommandState(CommandStates st)
     {
         case COMMAND_STAY:
             SetIsRetreating();
-            SetStayPosition(true);
+            ResetStayPosition();
             SetSpellOpener();
             break;
 
         case COMMAND_FOLLOW:
-            SetStayPosition();
+            ResetStayPosition();
             SetSpellOpener();
             break;
 
@@ -9235,24 +9235,42 @@ void CharmInfo::SetSpellAutocast(uint32 spell_id, bool state)
     }
 }
 
-void CharmInfo::SetStayPosition(bool stay)
+void CharmInfo::ResetStayPosition()
 {
-    if (stay)
+    m_stayPosX = 0;
+    m_stayPosY = 0;
+    m_stayPosZ = 0;
+    m_stayPosO = 0;
+    m_stayPosSet = false;
+}
+
+void CharmInfo::SetStayPosition()
+{
+    if (!m_unit->movespline->Finalized())
+    {
+        Movement::Location loc = m_unit->movespline->ComputePosition();
+        m_stayPosX = loc.x;
+        m_stayPosY = loc.y;
+        m_stayPosZ = loc.z;
+        m_stayPosO = loc.orientation;
+    }
+    else
     {
         m_stayPosX = m_unit->GetPositionX();
         m_stayPosY = m_unit->GetPositionY();
         m_stayPosZ = m_unit->GetPositionZ();
         m_stayPosO = m_unit->GetOrientation();
     }
-    else
-    {
-        m_stayPosX = 0;
-        m_stayPosY = 0;
-        m_stayPosZ = 0;
-        m_stayPosO = 0;
-    }
+    m_stayPosSet = true;
+}
 
-    m_stayPosSet = stay;
+bool CharmInfo::UpdateStayPosition()
+{
+    if (m_stayPosSet)
+        return false;
+
+    SetStayPosition();
+    return true;
 }
 
 bool Unit::isFrozen() const

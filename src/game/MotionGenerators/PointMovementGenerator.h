@@ -73,6 +73,26 @@ class RetreatMovementGenerator : public PointMovementGenerator
         bool m_arrived;
 };
 
+class StayMovementGenerator : public PointMovementGenerator
+{
+    public:
+        StayMovementGenerator(float x, float y, float z, float o = 0) :
+            PointMovementGenerator(0, x, y, z, o, true, 0), m_arrived(false) {}
+
+        void Initialize(Unit& unit) override;
+        void Finalize(Unit& unit) override;
+        void Interrupt(Unit& unit) override;
+        bool Update(Unit& unit, const uint32& diff) override;
+
+        MovementGeneratorType GetMovementGeneratorType() const override { return RETREAT_MOTION_TYPE; }
+
+    protected:
+        void MovementInform(Unit&) override {}
+
+    private:
+        bool m_arrived;
+};
+
 class FlyOrLandMovementGenerator : public PointMovementGenerator
 {
     public:

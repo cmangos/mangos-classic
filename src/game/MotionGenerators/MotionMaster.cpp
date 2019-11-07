@@ -328,6 +328,21 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, bool asMain
     Mutate(new FollowMovementGenerator(*target, dist, angle, asMain));
 }
 
+void MotionMaster::MoveStay(float x, float y, float z, float o, bool asMain)
+{
+    if (m_owner->hasUnitState(UNIT_STAT_LOST_CONTROL))
+        return;
+
+    if (asMain)
+        Clear(false, true);
+    else
+        Clear(!empty()); // avoid resetting if we are already empty
+
+    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s stays at position (X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), x, y, z);
+
+    Mutate(new StayMovementGenerator(x, y, z, o));
+}
+
 void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath/* = true*/, ForcedMovement forcedMovement/* = FORCED_MOVEMENT_NONE*/)
 {
     return MovePoint(id, x, y, z, 0, generatePath, forcedMovement);

@@ -817,10 +817,7 @@ void Pet::ModifyLoyalty(int32 addvalue)
                     }
                     case 2: // Stay + passive
                     {
-                        StopMoving();
                         AttackStop();
-                        GetMotionMaster()->Clear(false);
-                        GetMotionMaster()->MoveIdle();
                         charmInfo->SetCommandState(COMMAND_STAY);
                         AI()->SetReactState(ReactStates(REACT_PASSIVE));
                         SetModeFlags(PetModeFlags(AI()->GetReactState() | charmInfo->GetCommandState() * 0x100));

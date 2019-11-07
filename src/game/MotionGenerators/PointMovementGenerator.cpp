@@ -171,6 +171,34 @@ bool RetreatMovementGenerator::Update(Unit& unit, const uint32& diff)
     return true;
 }
 
+void StayMovementGenerator::Initialize(Unit &unit)
+{
+    unit.addUnitState(UNIT_STAT_STAY);
+    PointMovementGenerator::Initialize(unit);
+}
+
+void StayMovementGenerator::Finalize(Unit &unit)
+{
+    unit.clearUnitState(UNIT_STAT_STAY);
+    PointMovementGenerator::Finalize(unit);
+}
+
+void StayMovementGenerator::Interrupt(Unit& unit)
+{
+    m_arrived = false;
+    PointMovementGenerator::Interrupt(unit);
+}
+
+bool StayMovementGenerator::Update(Unit& unit, const uint32& diff)
+{
+    if (!m_arrived && !PointMovementGenerator::Update(unit, diff))
+    {
+        unit.clearUnitState(UNIT_STAT_ROAMING_MOVE);
+        m_arrived = true;
+    }
+    return true;
+}
+
 void FlyOrLandMovementGenerator::Initialize(Unit& unit)
 {
     if (unit.hasUnitState(UNIT_STAT_NO_FREE_MOVE | UNIT_STAT_NOT_MOVE))
@@ -194,3 +222,5 @@ void FlyOrLandMovementGenerator::Initialize(Unit& unit)
 
     i_speedChanged = false;
 }
+
+

@@ -47,7 +47,7 @@ enum MovementGeneratorType
     FLEEING_MOTION_TYPE             = 9,                    // RandomMovementGenerator.h
     DISTRACT_MOTION_TYPE            = 10,                   // IdleMovementGenerator.h
     RETREAT_MOTION_TYPE             = 11,                   // PointMovementGenerator.h
-    // (Deprecated)                 = 12,                   // to be reused
+    STAY_MOTION_TYPE                = 12,                   // PointMovementGenerator.h
     TIMED_FLEEING_MOTION_TYPE       = 13,                   // RandomMovementGenerator.h
     FOLLOW_MOTION_TYPE              = 14,                   // TargetedMovementGenerator.h
     EFFECT_MOTION_TYPE              = 15,                   // WrapperMovementGenerator.h
@@ -111,6 +111,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void MoveRandomAroundPoint(float x, float y, float z, float radius, float verticalZ = 0.0f);
         void MoveTargetedHome(bool runHome = true);
         void MoveFollow(Unit* target, float dist, float angle, bool asMain = false);
+        void MoveStay(float x, float y, float z, float o = 0, bool asMain = false);
         void MoveChase(Unit* target, float dist = 0.0f, float angle = 0.0f, bool moveFurther = false, bool walk = false, bool combat = true);
         void DistanceYourself(float dist);
         void MoveConfused();

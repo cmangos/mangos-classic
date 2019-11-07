@@ -329,7 +329,7 @@ void PetAI::UpdateAI(const uint32 diff)
         else if (!m_unit->hasUnitState(UNIT_STAT_MOVING))
             AttackStart(victim);
     }
-    else if (!owner->IsCrowdControlled())
+    else if (!m_unit->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
     {
         CharmInfo* charmInfo = m_unit->GetCharmInfo();
 
@@ -347,28 +347,17 @@ void PetAI::UpdateAI(const uint32 diff)
         }
 
         // Handle non-combat movement
-        if (!m_unit->hasUnitState(UNIT_STAT_NO_FREE_MOVE))
+        if (!m_unit->hasUnitState(UNIT_STAT_NO_FREE_MOVE | UNIT_STAT_CHASE))
         {
             MotionMaster* mm = m_unit->GetMotionMaster();
 
-            if (staying)
+            if (staying && !m_unit->hasUnitState(UNIT_STAT_STAY))
             {
-                // if stay command is set but we don't have stay pos set then we need to establish current pos as stay position
-                if (!charminfo->IsStayPosSet())
-                    charminfo->SetStayPosition(true);
-
-                const float x = charminfo->GetStayPosX(), y = charminfo->GetStayPosY(), z = charminfo->GetStayPosZ();
-
-                if (int32(m_unit->GetDistance(x, y, z, DIST_CALC_NONE)))
-                {
-                    mm->Clear(false);
-                    mm->MovePoint(0, x, y, z, false);
-                }
-                else if (mm->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
-                {
-                    mm->Clear(false);
-                    mm->MoveIdle();
-                }
+                // If stay command is set, but we don't have stay pos yet: establish current pos as stay position, adjust orientation
+                if (charminfo->UpdateStayPosition())
+                    mm->MoveStay(charminfo->GetStayPosX(), charminfo->GetStayPosY(), charminfo->GetStayPosZ(), charminfo->GetStayPosO());
+                 else
+                    mm->MoveStay(charminfo->GetStayPosX(), charminfo->GetStayPosY(), charminfo->GetStayPosZ());
             }
             else if (following && !m_unit->hasUnitState(UNIT_STAT_FOLLOW))
                 mm->MoveFollow(owner, m_followDist, m_followAngle);
