@@ -143,9 +143,11 @@ void PetAI::UpdateAI(const uint32 diff)
     {
         m_unit->AttackStop(true, true);
         inCombat = false;
-        if (MotionMaster* mm = m_unit->GetMotionMaster())
-            if (mm->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-                mm->MovementExpired();
+
+        MotionMaster* mm = m_unit->GetMotionMaster();
+
+        if (mm->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+            mm->MovementExpired();
     }
 
     CharmInfo* charminfo = m_unit->GetCharmInfo();
