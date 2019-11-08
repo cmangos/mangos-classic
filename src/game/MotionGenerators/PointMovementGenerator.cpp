@@ -100,9 +100,6 @@ void PointMovementGenerator::MovementInform(Unit& unit)
 
 void RetreatMovementGenerator::Initialize(Unit& unit)
 {
-    if (m_arrived)
-        return;
-
     // Non-client controlled unit with an AI should drop target
     if (unit.AI() && !unit.IsClientControlled())
     {
@@ -112,7 +109,8 @@ void RetreatMovementGenerator::Initialize(Unit& unit)
 
     unit.addUnitState(UNIT_STAT_RETREATING);
 
-    PointMovementGenerator::Initialize(unit);
+    if (!m_arrived)
+        PointMovementGenerator::Initialize(unit);
 }
 
 void RetreatMovementGenerator::Finalize(Unit& unit)
@@ -131,6 +129,12 @@ void RetreatMovementGenerator::Interrupt(Unit& unit)
 
     if (UnitAI* ai = unit.AI())
         ai->RetreatingEnded();
+}
+
+void RetreatMovementGenerator::Reset(Unit& unit)
+{
+    if (!m_arrived)
+        PointMovementGenerator::Reset(unit);
 }
 
 bool RetreatMovementGenerator::Update(Unit& unit, const uint32& diff)

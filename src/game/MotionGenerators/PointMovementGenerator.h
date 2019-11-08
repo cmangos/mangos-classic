@@ -60,6 +60,7 @@ class RetreatMovementGenerator : public PointMovementGenerator
         void Initialize(Unit& unit) override;
         void Finalize(Unit& unit) override;
         void Interrupt(Unit& unit) override;
+        void Reset(Unit& unit) override;
         bool Update(Unit& unit, const uint32& diff) override;
 
         MovementGeneratorType GetMovementGeneratorType() const override { return RETREAT_MOTION_TYPE; }
