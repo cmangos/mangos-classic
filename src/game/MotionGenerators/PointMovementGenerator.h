@@ -25,7 +25,7 @@ class PointMovementGenerator : public MovementGenerator
 {
     public:
         PointMovementGenerator(uint32 id, float x, float y, float z, float o, bool generatePath, uint32 forcedMovement, float speed = 0) :
-            i_x(x), i_y(y), i_z(z), i_o(o), i_speed(speed), m_id(id), m_generatePath(generatePath), m_speedChanged(false), m_forcedMovement(forcedMovement) {}
+            i_x(x), i_y(y), i_z(z), i_o(o), i_speed(speed), i_speedChanged(false), m_id(id), m_generatePath(generatePath), m_forcedMovement(forcedMovement) {}
         PointMovementGenerator(uint32 id, float x, float y, float z, bool generatePath, uint32 forcedMovement, float speed = 0) :
             PointMovementGenerator(id, x, y, z, 0, generatePath, forcedMovement, speed) {}
 
@@ -37,17 +37,17 @@ class PointMovementGenerator : public MovementGenerator
 
         MovementGeneratorType GetMovementGeneratorType() const override { return POINT_MOTION_TYPE; }
 
-        void UnitSpeedChanged() override { m_speedChanged = true; }
+        void UnitSpeedChanged() override { i_speedChanged = true; }
 
     protected:
         virtual void MovementInform(Unit& unit);
 
         float i_x, i_y, i_z, i_o, i_speed;
+        bool i_speedChanged;
 
     private:
         uint32 m_id;
         bool m_generatePath;
-        bool m_speedChanged;
         uint32 m_forcedMovement;
 };
 

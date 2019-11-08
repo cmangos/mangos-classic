@@ -30,7 +30,14 @@ void PointMovementGenerator::Initialize(Unit& unit)
     if (unit.hasUnitState(UNIT_STAT_NO_FREE_MOVE | UNIT_STAT_NOT_MOVE))
         return;
 
-    unit.StopMoving();
+    // Stop any previously dispatched splines no matter the source
+    if (!unit.movespline->Finalized() && !i_speedChanged)
+    {
+        if (unit.IsClientControlled())
+            unit.StopMoving(true);
+        else
+            unit.InterruptMoving();
+    }
 
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
 
@@ -43,14 +50,22 @@ void PointMovementGenerator::Initialize(Unit& unit)
     init.SetVelocity(i_speed);
     init.Launch();
 
-    m_speedChanged = false;
+    i_speedChanged = false;
 }
 
 void PointMovementGenerator::Finalize(Unit& unit)
 {
     unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
 
-    if (unit.movespline->Finalized())
+    // Stop any previously dispatched splines no matter the source
+    if (!unit.movespline->Finalized())
+    {
+        if (unit.IsClientControlled())
+            unit.StopMoving(true);
+        else
+            unit.InterruptMoving();
+    }
+    else
         MovementInform(unit);
 }
 
@@ -74,7 +89,7 @@ bool PointMovementGenerator::Update(Unit& unit, const uint32&/* diff*/)
         return true;
     }
 
-    if ((!unit.hasUnitState(UNIT_STAT_ROAMING_MOVE) && unit.movespline->Finalized()) || this->m_speedChanged)
+    if ((!unit.hasUnitState(UNIT_STAT_ROAMING_MOVE) && unit.movespline->Finalized()) || i_speedChanged)
         Initialize(unit);
 
     return !unit.movespline->Finalized();
@@ -161,11 +176,21 @@ void FlyOrLandMovementGenerator::Initialize(Unit& unit)
     if (unit.hasUnitState(UNIT_STAT_NO_FREE_MOVE | UNIT_STAT_NOT_MOVE))
         return;
 
-    unit.StopMoving();
+    // Stop any previously dispatched splines no matter the source
+    if (!unit.movespline->Finalized() && !i_speedChanged)
+    {
+        if (unit.IsClientControlled())
+            unit.StopMoving(true);
+        else
+            unit.InterruptMoving();
+    }
 
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+
     Movement::MoveSplineInit init(unit);
     init.SetFly();
     init.MoveTo(i_x, i_y, i_z, false);
     init.Launch();
+
+    i_speedChanged = false;
 }
