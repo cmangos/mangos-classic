@@ -5,8 +5,8 @@ ALTER TABLE account_banned DROP PRIMARY KEY;
 ALTER TABLE account_banned CHANGE bandate banned_at bigint(40);
 ALTER TABLE account_banned CHANGE unbandate expires_at bigint(40);
 ALTER TABLE account_banned CHANGE banreason reason varchar(255);
-ALTER TABLE account_banned ADD COLUMN unbanned_at bigint(40) NOT NULL DEFAULT '0' AFTER banned_by;
 ALTER TABLE account_banned CHANGE bannedby banned_by varchar(50);
+ALTER TABLE account_banned ADD COLUMN unbanned_at bigint(40) NOT NULL DEFAULT '0' AFTER banned_by;
 ALTER TABLE account_banned ADD COLUMN unbanned_by varchar(50) DEFAULT NULL AFTER unbanned_at;
 ALTER TABLE account_banned ADD COLUMN id int(11) PRIMARY KEY AUTO_INCREMENT FIRST;
 
