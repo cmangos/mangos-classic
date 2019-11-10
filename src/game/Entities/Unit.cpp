@@ -5703,16 +5703,21 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     {
         if (m_attacking == victim)
         {
+            bool attacked = false;
             // need to regenerate target guid after certain scenarios
             if (AI() && AI()->CanExecuteCombatAction())
+            {
+                if (GetTargetGuid().IsEmpty())
+                    attacked = true;
                 SetTargetGuid(victim->GetObjectGuid());
+            }
             // switch to melee attack from ranged/magic
             if (meleeAttack)
             {
                 MeleeAttackStart(m_attacking);
                 return true;
             }
-            return false;
+            return attacked;
         }
 
         // remove old target data
