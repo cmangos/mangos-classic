@@ -8,6 +8,7 @@ PRIMARY KEY(Id)
 -- Classic
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (7054,'spell_forsaken_skill'),
+(19832,'spell_possess_razorgore'),
 (19873,'spell_destroy_egg'),
 (20038,'spell_explosion_razorgore');
 

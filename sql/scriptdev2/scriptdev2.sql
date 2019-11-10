@@ -210,6 +210,8 @@ UPDATE gameobject_template SET ScriptName='go_father_flame' WHERE entry=175245;
 UPDATE instance_template SET ScriptName='instance_blackwing_lair' WHERE map=469;
 UPDATE creature_template SET ScriptName='boss_razorgore' WHERE entry=12435;
 UPDATE creature_template SET ScriptName='npc_blackwing_orb' WHERE entry=14449;
+INSERT INTO scripted_event_id VALUES
+(8302,'event_razorgore_possess');
 UPDATE creature_template SET ScriptName='boss_vaelastrasz' WHERE entry=13020;
 UPDATE gameobject_template SET ScriptName='go_suppression' WHERE entry=179784;
 UPDATE creature_template SET ScriptName='boss_broodlord' WHERE entry=12017;
