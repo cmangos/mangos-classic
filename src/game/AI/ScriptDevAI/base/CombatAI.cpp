@@ -166,7 +166,6 @@ CanCastResult RangedCombatAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uin
             {
                 switch (castResult)
                 {
-                    case CAST_FAIL_COOLDOWN:
                     case CAST_FAIL_POWER:
                     case CAST_FAIL_TOO_CLOSE:
                         SetCurrentRangedMode(false);
