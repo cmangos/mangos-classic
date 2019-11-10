@@ -420,24 +420,22 @@ void ChaseMovementGenerator::CutPath(Unit& owner, PointsArray& path)
 {
     if (this->i_offset != 0.f) // need to cut path until most distant viable point
     {
-        float distSquared = i_offset * CHASE_MOVE_CLOSER_FACTOR + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombinedCombatReach(&owner, false);
-        distSquared *= distSquared; // squared
+        const float dist = (i_offset * CHASE_MOVE_CLOSER_FACTOR) + (this->i_target->GetCombinedCombatReach(&owner, false) * CHASE_DEFAULT_RANGE_FACTOR);
+        const float distSquared = (dist * dist);
         float tarX, tarY, tarZ;
         this->i_target->GetPosition(tarX, tarY, tarZ);
-        auto iter = std::next(path.begin(), 1); // need to start at index 1, index 0 is start position and filled in init.Launch()
-        for (; iter != path.end(); ++iter)
+
+        // Need to start at index 1, index 0 is start position and filled in init.Launch()
+        for (size_t i = 1; i < path.size(); ++i)
         {
-            G3D::Vector3 data = (*iter);
+            const G3D::Vector3& data = path.at(i);
+
             if (this->i_target->GetDistance(data.x, data.y, data.z, DIST_CALC_NONE) > distSquared)
-                continue;
+                return path.resize(i);
+
             if (!owner.GetMap()->IsInLineOfSight(tarX, tarY, tarZ + 2.0f, data.x, data.y, data.z + 2.0f, IGNORE_M2))
-                continue;
-            // both in LOS and in range - advance to next and stop
-            ++iter;
-            break;
+                return path.resize(i);
         }
-        if (iter != path.end())
-            path.erase(iter, path.end());
     }
 }
 
