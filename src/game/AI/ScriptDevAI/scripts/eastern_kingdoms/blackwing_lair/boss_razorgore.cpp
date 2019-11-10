@@ -134,11 +134,6 @@ struct boss_razorgoreAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_razorgore(Creature* creature)
-{
-    return new boss_razorgoreAI(creature);
-}
-
 struct npc_blackwing_orbAI : public ScriptedAI
 {
     npc_blackwing_orbAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<instance_blackwing_lair*>(creature->GetInstanceData()))
@@ -208,54 +203,57 @@ struct npc_blackwing_orbAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_blackwing_orb(Creature* creature)
+struct DestroyEgg : public SpellScript
 {
-    return new npc_blackwing_orbAI(creature);
-}
-
-bool EffectDummyGameObj_go_black_dragon_egg(Unit* caster, uint32 spellId, SpellEffectIndex effIndex, GameObject* goTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    if (spellId == SPELL_DESTROY_EGG && effIndex == EFFECT_INDEX_1)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (!goTarget->IsSpawned())
-            return true;
+        GameObject* target = spell->GetGOTarget();
+        Player* player = dynamic_cast<Player*>(spell->GetCaster()->GetCharmer());
+        if (!target || !player)
+            return;
 
-        if (ScriptedInstance* pInstance = (ScriptedInstance*)goTarget->GetInstanceData())
+        if (ScriptedInstance* pInstance = static_cast<ScriptedInstance*>(target->GetInstanceData()))
         {
             if (urand(0, 1))
             {
                 switch (urand(0, 2))
                 {
-                    case 0: DoScriptText(SAY_EGGS_BROKEN_1, caster); break;
-                    case 1: DoScriptText(SAY_EGGS_BROKEN_2, caster); break;
-                    case 2: DoScriptText(SAY_EGGS_BROKEN_3, caster); break;
+                    case 0: DoScriptText(SAY_EGGS_BROKEN_1, player); break;
+                    case 1: DoScriptText(SAY_EGGS_BROKEN_2, player); break;
+                    case 2: DoScriptText(SAY_EGGS_BROKEN_3, player); break;
                 }
             }
 
             // Store the eggs which are destroyed, in order to count them for the second phase
-            pInstance->SetData64(DATA_DRAGON_EGG, goTarget->GetObjectGuid());
+            pInstance->SetData64(DATA_DRAGON_EGG, target->GetObjectGuid());
         }
-
-        return true;
     }
+};
 
-    return false;
-}
+struct ExplosionRazorgore : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex effIdx) const override
+    {
+        if (target->IsPlayer())
+            return true;
+
+        static std::set<uint32> validEntries = { NPC_BLACKWING_LEGIONNAIRE , NPC_BLACKWING_MAGE , NPC_DRAGONSPAWN, NPC_RAZORGORE };
+        return validEntries.find(target->GetEntry()) != validEntries.end();
+    }
+};
 
 void AddSC_boss_razorgore()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_razorgore";
-    pNewScript->GetAI = &GetAI_boss_razorgore;
+    pNewScript->GetAI = &GetNewAIInstance<boss_razorgoreAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_blackwing_orb";
-    pNewScript->GetAI = &GetAI_npc_blackwing_orb;
+    pNewScript->GetAI = &GetNewAIInstance<npc_blackwing_orbAI>;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "go_black_dragon_egg";
-    pNewScript->pEffectDummyGO = &EffectDummyGameObj_go_black_dragon_egg;
-    pNewScript->RegisterSelf();
+    RegisterSpellScript<DestroyEgg>("spell_destroy_egg");
+    RegisterSpellScript<ExplosionRazorgore>("spell_explosion_razorgore");
 }

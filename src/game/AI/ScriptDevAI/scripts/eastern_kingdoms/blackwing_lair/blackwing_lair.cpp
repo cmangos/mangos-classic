@@ -423,6 +423,15 @@ void instance_blackwing_lair::OnCreatureDeath(Creature* pCreature)
     }
 }
 
+void instance_blackwing_lair::OnCreatureRespawn(Creature* creature)
+{
+    if (creature->GetSpawnerGuid().GetEntry() == NPC_MONSTER_GENERATOR)
+    {
+        creature->SetNoLoot(true);
+        creature->SetCorpseDelay(5);
+    }
+}
+
 bool instance_blackwing_lair::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const
 {
     switch (uiInstanceConditionId)
@@ -585,7 +594,7 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
             }
 
             if (uiSpellId != 0)
-                pGenerator->CastSpell(pGenerator, uiSpellId, TRIGGERED_NONE);
+                pGenerator->CastSpell(nullptr, uiSpellId, TRIGGERED_NONE);
         }
 
         m_uiDefenseTimer = 15000;

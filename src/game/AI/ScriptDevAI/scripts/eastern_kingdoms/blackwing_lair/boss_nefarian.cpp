@@ -155,6 +155,8 @@ struct boss_nefarianAI : public CombatAI
                 m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
                 m_creature->SetLevitate(false);
                 m_creature->SetHover(false);
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveIdle();
                 ResetTimer(NEFARIAN_ATTACK_START, 4000);
                 break;
         }
