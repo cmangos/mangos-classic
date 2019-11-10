@@ -39,18 +39,19 @@ enum MovementGeneratorType
 
     MAX_DB_MOTION_TYPE              = 3,                    // *** this and below motion types can't be set in DB.
 
-    CONFUSED_MOTION_TYPE            = 4,                    // RandomMovementGenerator.h
-    CHASE_MOTION_TYPE               = 5,                    // TargetedMovementGenerator.h
-    HOME_MOTION_TYPE                = 6,                    // HomeMovementGenerator.h
-    TAXI_MOTION_TYPE                = 7,                    // WaypointMovementGenerator.h
-    POINT_MOTION_TYPE               = 8,                    // PointMovementGenerator.h
-    FLEEING_MOTION_TYPE             = 9,                    // RandomMovementGenerator.h
-    DISTRACT_MOTION_TYPE            = 10,                   // IdleMovementGenerator.h
-    RETREAT_MOTION_TYPE             = 11,                   // PointMovementGenerator.h
-    STAY_MOTION_TYPE                = 12,                   // PointMovementGenerator.h
-    TIMED_FLEEING_MOTION_TYPE       = 13,                   // RandomMovementGenerator.h
-    FOLLOW_MOTION_TYPE              = 14,                   // TargetedMovementGenerator.h
-    EFFECT_MOTION_TYPE              = 15,                   // WrapperMovementGenerator.h
+    DISTRACT_MOTION_TYPE            = 3,                    // IdleMovementGenerator.h
+    STAY_MOTION_TYPE                = 4,                    // PointMovementGenerator.h
+    FOLLOW_MOTION_TYPE              = 5,                    // TargetedMovementGenerator.h
+    CHASE_MOTION_TYPE               = 6,                    // TargetedMovementGenerator.h
+    RETREAT_MOTION_TYPE             = 7,                    // PointMovementGenerator.h
+    TIMED_FLEEING_MOTION_TYPE       = 8,                    // RandomMovementGenerator.h
+    // Reserved                     = 9,
+    POINT_MOTION_TYPE               = 10,                   // PointMovementGenerator.h
+    HOME_MOTION_TYPE                = 11,                   // HomeMovementGenerator.h
+    FLEEING_MOTION_TYPE             = 12,                   // RandomMovementGenerator.h
+    CONFUSED_MOTION_TYPE            = 13,                   // RandomMovementGenerator.h
+    EFFECT_MOTION_TYPE              = 14,                   // WrapperMovementGenerator.h
+    TAXI_MOTION_TYPE                = 15,                   // WaypointMovementGenerator.h
 
     EXTERNAL_WAYPOINT_MOVE          = 16,                   // Only used in UnitAI::MovementInform when a waypoint is reached. The pathId >= 0 is added as additonal value
     EXTERNAL_WAYPOINT_MOVE_START    = 17,                   // Only used in UnitAI::MovementInform when a waypoint is started. The pathId >= 0 is added as additional value
