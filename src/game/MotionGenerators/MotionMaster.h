@@ -21,11 +21,20 @@
 
 #include "Common.h"
 #include "Globals/SharedDefines.h"
+#include "MotionGenerators/WaypointManager.h"
+
 #include <stack>
 #include <vector>
 
 class MovementGenerator;
 class Unit;
+
+namespace G3D
+{
+    class Vector2;
+    class Vector3;
+    class Vector4;
+}
 
 // Creature Entry ID used for waypoints show, visible only for GMs
 #define VISUAL_WAYPOINT 1
@@ -45,7 +54,7 @@ enum MovementGeneratorType
     CHASE_MOTION_TYPE               = 6,                    // TargetedMovementGenerator.h
     RETREAT_MOTION_TYPE             = 7,                    // PointMovementGenerator.h
     TIMED_FLEEING_MOTION_TYPE       = 8,                    // RandomMovementGenerator.h
-    // Reserved                     = 9,
+    PATH_MOTION_TYPE                = 9,                    // PathMovementGenerator.h
     POINT_MOTION_TYPE               = 10,                   // PointMovementGenerator.h
     HOME_MOTION_TYPE                = 11,                   // HomeMovementGenerator.h
     FLEEING_MOTION_TYPE             = 12,                   // RandomMovementGenerator.h
@@ -77,6 +86,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
         typedef std::stack<MovementGenerator*> Impl;
         typedef std::vector<MovementGenerator*> ExpireList;
 
+
     public:
         explicit MotionMaster(Unit* unit) : m_owner(unit), m_expList(nullptr), m_cleanFlag(MMCF_NONE), m_defaultPathId(0) {}
         ~MotionMaster();
@@ -87,6 +97,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
 
         using Impl::top;
         using Impl::empty;
+
 
         typedef Impl::container_type::const_iterator const_iterator;
         const_iterator begin() const { return Impl::c.begin(); }
@@ -120,9 +131,12 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void MovePoint(uint32 id, float x, float y, float z, bool generatePath = true, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE);
         void MovePoint(uint32 id, float x, float y, float z, float o, bool generatePath = true, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE);
         void MovePointTOL(uint32 id, float x, float y, float z, bool takeOff, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE);
+        void MovePath(std::vector<G3D::Vector3>& path, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, bool flying = false);
+        void MovePath(std::vector<G3D::Vector3>& path, float o, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, bool flying = false);
+        void MovePath(WaypointPath& path, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, bool flying = false);
         void MoveRetreat(float x, float y, float z, float o, uint32 delay);
         void MoveWaypoint(uint32 pathId = 0, uint32 source = 0, uint32 initialDelay = 0, uint32 overwriteEntry = 0);
-        void MoveTaxiFlight();
+        void MoveTaxi();
         void MoveDistract(uint32 timer);
         void MoveCharge(float x, float y, float z, float speed, uint32 id = EVENT_CHARGE);
         void MoveCharge(Unit& target, float speed, uint32 id = EVENT_CHARGE);

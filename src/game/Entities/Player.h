@@ -1068,7 +1068,7 @@ class Player : public Unit
         void ToggleTaxiDebug() { m_taxiTracker.m_debug = !m_taxiTracker.m_debug; }
 
         Taxi::Map const& GetTaxiPathSpline() const;
-        size_t GetTaxiSplinePathOffset() const;
+        int32 GetTaxiPathSplineOffset() const;
 
         void OnTaxiFlightStart(const TaxiPathEntry* path);
         void OnTaxiFlightEnd(const TaxiPathEntry* path);

@@ -103,22 +103,4 @@ class WaypointMovementGenerator<Creature>
         WaypointPathOrigin m_PathOrigin;
 };
 
-/** TaxiMovementGenerator generates movement of the player for the paths
- * and hence generates ground and activities for the player.
- */
-class TaxiMovementGenerator
-    : public MovementGeneratorMedium< Player, TaxiMovementGenerator >
-{
-    public:
-        void Initialize(Player&);
-        void Finalize(Player&);
-        void Interrupt(Player&);
-        void Reset(Player&);
-        bool Update(Player&, const uint32&);
-
-        MovementGeneratorType GetMovementGeneratorType() const override { return TAXI_MOTION_TYPE; }
-
-        bool Resume(Player& player) const;
-};
-
 #endif
