@@ -63,7 +63,6 @@ class TargetedMovementGeneratorMedium
         virtual void UnitSpeedChanged() override { i_speedChanged = true; }
 
     protected:
-        void _setTargetLocation(T&, bool updateDestination);
         virtual bool RequiresNewPosition(T& owner, float x, float y, float z) const;
         virtual float GetDynamicTargetDistance(T& /*owner*/, bool /*forRangeCheck*/) const { return i_offset; }
         virtual bool ShouldFaceTarget() const { return i_faceTarget; }
@@ -139,6 +138,9 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
         bool RequiresNewPosition(Unit& owner, float x, float y, float z) const override;
 
     private:
+        virtual bool _getLocation(Unit& owner, float& x, float& y, float& z) const;
+        virtual void _setLocation(Unit& owner);
+
         bool DispatchSplineToPosition(Unit& owner, float x, float y, float z, bool walk, bool cutPath);
         void CutPath(Unit& owner, PointsArray& path);
         void Backpedal(Unit& owner);
