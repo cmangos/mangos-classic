@@ -429,12 +429,12 @@ void ChaseMovementGenerator::CutPath(Unit& owner, PointsArray& path)
         for (size_t i = 1; i < path.size(); ++i)
         {
             const G3D::Vector3& data = path.at(i);
-
             if (this->i_target->GetDistance(data.x, data.y, data.z, DIST_CALC_NONE) > distSquared)
-                return path.resize(i);
-
+                continue;
             if (!owner.GetMap()->IsInLineOfSight(tarX, tarY, tarZ + 2.0f, data.x, data.y, data.z + 2.0f, IGNORE_M2))
-                return path.resize(i);
+                continue;
+            // both in LOS and in range - advance to next and stop
+            return path.resize(++i);
         }
     }
 }
