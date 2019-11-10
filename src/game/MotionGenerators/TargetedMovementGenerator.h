@@ -70,6 +70,10 @@ class TargetedMovementGeneratorMedium
         virtual void HandleFinalizedMovement(T& owner) = 0;
         virtual void HandleMovementFailure(T& owner) = 0;
 
+        virtual bool _hasUnitStateNotMove(Unit& owner) = 0;
+        virtual void _clearUnitStateMove(Unit& owner) = 0;
+        virtual void _addUnitStateMove(Unit& owner) = 0;
+
         ShortTimeTracker i_recheckDistance;
         float i_offset;
         float i_angle;
@@ -118,8 +122,6 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
         void DistanceYourself(Unit& owner, float distance);
         void FanOut(Unit& owner);
 
-        static void _clearUnitStateMove(Unit& u);
-        static void _addUnitStateMove(Unit& u);
         bool EnableWalking() const { return m_walk;}
         bool _lostTarget(Unit& u) const;
         void _reachTarget(Unit&);
@@ -136,6 +138,10 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
         void HandleTargetedMovement(Unit& owner, const uint32& time_diff) override;
         void HandleFinalizedMovement(Unit& owner) override;
         bool RequiresNewPosition(Unit& owner, float x, float y, float z) const override;
+
+        bool _hasUnitStateNotMove(Unit& u) override;
+        void _clearUnitStateMove(Unit& u) override;
+        void _addUnitStateMove(Unit& u) override;
 
     private:
         virtual bool _getLocation(Unit& owner, float& x, float& y, float& z) const;
@@ -176,9 +182,6 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
 
         bool GetResetPosition(Unit& owner, float& x, float& y, float& z, float& o) const override;
 
-        static void _clearUnitStateMove(Unit& owner);
-        static void _addUnitStateMove(Unit& owner);
-
         virtual bool EnableWalking() const;
 
         bool _lostTarget(Unit& owner) const;
@@ -201,6 +204,10 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
         float GetDynamicTargetDistance(Unit& owner, bool forRangeCheck) const override;
         void HandleTargetedMovement(Unit& owner, const uint32& time_diff) override;
         void HandleFinalizedMovement(Unit& owner) override;
+
+        bool _hasUnitStateNotMove(Unit& owner) override;
+        void _clearUnitStateMove(Unit& owner) override;
+        void _addUnitStateMove(Unit& owner) override;
 
     private:
         virtual bool _getOrientation(Unit& owner, float& o) const;

@@ -57,13 +57,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
         return true;
     }
 
-    if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
-    {
-        HandleMovementFailure(owner);
-        return true;
-    }
-
-    if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE && owner.hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))
+    if (_hasUnitStateNotMove(owner))
     {
         HandleMovementFailure(owner);
         return true;
@@ -99,6 +93,7 @@ bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float 
 }
 
 //-----------------------------------------------//
+bool ChaseMovementGenerator::_hasUnitStateNotMove(Unit& u) { return u.hasUnitState(UNIT_STAT_NOT_MOVE | UNIT_STAT_NO_COMBAT_MOVEMENT); }
 void ChaseMovementGenerator::_clearUnitStateMove(Unit& u) { u.clearUnitState(UNIT_STAT_CHASE_MOVE); }
 void ChaseMovementGenerator::_addUnitStateMove(Unit& u) { u.addUnitState(UNIT_STAT_CHASE_MOVE); }
 
@@ -498,7 +493,7 @@ void ChaseMovementGenerator::_setLocation(Unit& owner)
     if (!i_target.isValid() || !i_target->IsInWorld())
         return;
 
-    if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
+    if (_hasUnitStateNotMove(owner))
         return;
 
     float x, y, z;
@@ -513,6 +508,7 @@ void ChaseMovementGenerator::_setLocation(Unit& owner)
 }
 
 //-----------------------------------------------//
+bool FollowMovementGenerator::_hasUnitStateNotMove(Unit& owner) { return owner.hasUnitState(UNIT_STAT_NOT_MOVE); }
 void FollowMovementGenerator::_clearUnitStateMove(Unit& owner) { owner.clearUnitState(UNIT_STAT_FOLLOW_MOVE); }
 void FollowMovementGenerator::_addUnitStateMove(Unit& owner) { owner.addUnitState(UNIT_STAT_FOLLOW_MOVE); }
 
@@ -738,7 +734,7 @@ void FollowMovementGenerator::_setLocation(Unit& owner, bool catchup)
     if (!i_target.isValid() || !i_target->IsInWorld())
         return;
 
-    if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
+    if (_hasUnitStateNotMove(owner))
         return;
 
     float x, y, z;
