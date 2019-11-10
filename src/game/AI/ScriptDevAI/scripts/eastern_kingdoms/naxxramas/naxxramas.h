@@ -67,8 +67,6 @@ enum
     TYPE_SAPPHIRON              = 13,
     TYPE_KELTHUZAD              = 14,
 
-    MAX_HEIGAN_TRAP_AREAS       = 4,
-
     NPC_ANUB_REKHAN             = 15956,
     NPC_FAERLINA                = 15953,
     NPC_NAXXRAMAS_CULTIST       = 15980,
@@ -234,9 +232,6 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
 
         void Update(const uint32 diff) override;
 
-        // Heigan
-        void DoTriggerHeiganTraps(Creature* pHeigan, uint32 uiAreaIndex);
-
         // goth
         void SetGothTriggers();
         Creature* GetClosestAnchorForGoth(Creature* pSource, bool bRightSide);
@@ -267,7 +262,6 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         GuidList m_lFaerlinaFollowersList;
 
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
-        GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
 
         float m_fChamberCenterX;
         float m_fChamberCenterY;

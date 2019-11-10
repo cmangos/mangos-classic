@@ -314,21 +314,6 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
             break;
 
         default:
-            // Heigan Traps - many different entries which are only required for sorting
-            if (pGo->GetGoType() == GAMEOBJECT_TYPE_TRAP)
-            {
-                uint32 uiGoEntry = pGo->GetEntry();
-
-                if ((uiGoEntry >= 181517 && uiGoEntry <= 181524) || uiGoEntry == 181678)
-                    m_alHeiganTrapGuids[0].push_back(pGo->GetObjectGuid());
-                else if ((uiGoEntry >= 181510 && uiGoEntry <= 181516) || (uiGoEntry >= 181525 && uiGoEntry <= 181531) || uiGoEntry == 181533 || uiGoEntry == 181676)
-                    m_alHeiganTrapGuids[1].push_back(pGo->GetObjectGuid());
-                else if ((uiGoEntry >= 181534 && uiGoEntry <= 181544) || uiGoEntry == 181532 || uiGoEntry == 181677)
-                    m_alHeiganTrapGuids[2].push_back(pGo->GetObjectGuid());
-                else if ((uiGoEntry >= 181545 && uiGoEntry <= 181552) || uiGoEntry == 181695)
-                    m_alHeiganTrapGuids[3].push_back(pGo->GetObjectGuid());
-            }
-
             return;
     }
     m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
@@ -399,7 +384,12 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_HEIGAN:
             m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_PLAG_HEIG_ENTRY_DOOR);
+            // Open the entrance door on encounter win or failure (we specifically set the GOState to avoid issue in case encounter is reset before gate is closed in Heigan script)
+            if (uiData == DONE || uiData == FAIL)
+            {
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_PLAG_HEIG_ENTRY_DOOR))
+                    door->SetGoState(GO_STATE_ACTIVE);
+            }
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_PLAG_HEIG_EXIT_HALLWAY);
             break;
@@ -724,18 +714,6 @@ bool instance_naxxramas::IsInRightSideGothArea(Unit* pUnit)
 
     script_error_log("left/right side check, Gothik combat area failed.");
     return true;
-}
-
-void instance_naxxramas::DoTriggerHeiganTraps(Creature* pHeigan, uint32 uiAreaIndex)
-{
-    if (uiAreaIndex >= MAX_HEIGAN_TRAP_AREAS)
-        return;
-
-    for (GuidList::const_iterator itr = m_alHeiganTrapGuids[uiAreaIndex].begin(); itr != m_alHeiganTrapGuids[uiAreaIndex].end(); ++itr)
-    {
-        if (GameObject* pTrap = instance->GetGameObject(*itr))
-            pTrap->Use(pHeigan);
-    }
 }
 
 void instance_naxxramas::SetChamberCenterCoords(float fX, float fY, float fZ)
