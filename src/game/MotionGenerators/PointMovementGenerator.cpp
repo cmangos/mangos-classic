@@ -25,13 +25,14 @@
 #include "Movement/MoveSplineInit.h"
 
 //----- Point Movement Generator
+
 void PointMovementGenerator::Initialize(Unit& unit)
 {
     if (unit.hasUnitState(UNIT_STAT_NO_FREE_MOVE | UNIT_STAT_NOT_MOVE))
         return;
 
     // Stop any previously dispatched splines no matter the source
-    if (!unit.movespline->Finalized() && !i_speedChanged)
+    if (!unit.movespline->Finalized() && !m_speedChanged)
     {
         if (unit.IsClientControlled())
             unit.StopMoving(true);
@@ -41,16 +42,9 @@ void PointMovementGenerator::Initialize(Unit& unit)
 
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
 
-    Movement::MoveSplineInit init(unit);
-    init.MoveTo(i_x, i_y, i_z, m_generatePath);
-    if (m_forcedMovement == FORCED_MOVEMENT_WALK)
-        init.SetWalk(true);
-    if (i_o != 0.f)
-        init.SetFacing(i_o);
-    init.SetVelocity(i_speed);
-    init.Launch();
+    Move(unit);
 
-    i_speedChanged = false;
+    m_speedChanged = false;
 }
 
 void PointMovementGenerator::Finalize(Unit& unit)
@@ -89,10 +83,22 @@ bool PointMovementGenerator::Update(Unit& unit, const uint32&/* diff*/)
         return true;
     }
 
-    if ((!unit.hasUnitState(UNIT_STAT_ROAMING_MOVE) && unit.movespline->Finalized()) || i_speedChanged)
+    if ((!unit.hasUnitState(UNIT_STAT_ROAMING_MOVE) && unit.movespline->Finalized()) || m_speedChanged)
         Initialize(unit);
 
     return !unit.movespline->Finalized();
+}
+
+void PointMovementGenerator::Move(Unit& unit)
+{
+    Movement::MoveSplineInit init(unit);
+    init.MoveTo(m_x, m_y, m_z, m_generatePath);
+    if (m_forcedMovement == FORCED_MOVEMENT_WALK)
+        init.SetWalk(true);
+    if (m_o != 0.f)
+        init.SetFacing(m_o);
+    init.SetVelocity(m_speed);
+    init.Launch();
 }
 
 void PointMovementGenerator::MovementInform(Unit& unit)
@@ -199,28 +205,15 @@ bool StayMovementGenerator::Update(Unit& unit, const uint32& diff)
     return true;
 }
 
-void FlyOrLandMovementGenerator::Initialize(Unit& unit)
+void FlyOrLandMovementGenerator::Move(Unit& unit)
 {
-    if (unit.hasUnitState(UNIT_STAT_NO_FREE_MOVE | UNIT_STAT_NOT_MOVE))
-        return;
-
-    // Stop any previously dispatched splines no matter the source
-    if (!unit.movespline->Finalized() && !i_speedChanged)
-    {
-        if (unit.IsClientControlled())
-            unit.StopMoving(true);
-        else
-            unit.InterruptMoving();
-    }
-
-    unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
-
     Movement::MoveSplineInit init(unit);
+    init.MoveTo(m_x, m_y, m_z, m_generatePath);
+    if (m_forcedMovement == FORCED_MOVEMENT_WALK)
+        init.SetWalk(true);
+    if (m_o != 0.f)
+        init.SetFacing(m_o);
+    init.SetVelocity(m_speed);
     init.SetFly();
-    init.MoveTo(i_x, i_y, i_z, false);
     init.Launch();
-
-    i_speedChanged = false;
 }
-
-
