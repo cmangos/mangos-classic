@@ -4954,7 +4954,7 @@ bool ChatHandler::HandleBanListHelper(QueryResult* result)
                     {
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|   permanent  |%-15.15s|%-15.15s|%-15.15s|%-15.15s|",
                                         account_name.c_str(), aTm_ban->tm_year % 100, aTm_ban->tm_mon + 1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
-                                        fields2[2].GetString(), fields2[3].GetString(), fields2[5].GetString(), secsToTimeString(fields2[4].GetUInt64()));
+                                        fields2[2].GetString(), fields2[3].GetString(), fields2[5].GetString(), secsToTimeString(fields2[4].GetUInt64()).data());
                     }
                     else
                     {
@@ -4963,7 +4963,7 @@ bool ChatHandler::HandleBanListHelper(QueryResult* result)
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|%-15.15s|%-15.15s|%-15.15s|",
                                         account_name.c_str(), aTm_ban->tm_year % 100, aTm_ban->tm_mon + 1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
                                         aTm_unban->tm_year % 100, aTm_unban->tm_mon + 1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min,
-                                        fields2[2].GetString(), fields2[3].GetString(), fields2[5].GetString(), secsToTimeString(fields2[4].GetUInt64()));
+                                        fields2[2].GetString(), fields2[3].GetString(), fields2[5].GetString(), secsToTimeString(fields2[4].GetUInt64()).data());
                     }
                 }
                 while (banInfo->NextRow());
