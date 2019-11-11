@@ -68,11 +68,13 @@ struct boss_moamAI : public CombatAI
     }
 
     uint8 m_uiPhase;
+    GuidVector m_summons;
 
     void Reset() override
     {
         CombatAI::Reset();
         m_creature->SetPower(POWER_MANA, 0);
+        DespawnGuids(m_summons);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -90,6 +92,8 @@ struct boss_moamAI : public CombatAI
                 summoned->AddThreat(target, 100000.f);
                 summoned->AI()->AttackStart(target);
             }
+            summoned->SetCorpseDelay(2);
+            m_summons.push_back(summoned->GetObjectGuid());
         }
     }
 
@@ -138,15 +142,10 @@ struct boss_moamAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_moam(Creature* creature)
-{
-    return new boss_moamAI(creature);
-}
-
 void AddSC_boss_moam()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_moam";
-    pNewScript->GetAI = &GetAI_boss_moam;
+    pNewScript->GetAI = &GetNewAIInstance<boss_moamAI>;
     pNewScript->RegisterSelf();
 }

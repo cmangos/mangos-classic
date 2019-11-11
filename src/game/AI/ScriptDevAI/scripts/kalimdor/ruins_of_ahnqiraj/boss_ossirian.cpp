@@ -68,10 +68,11 @@ static const float aSandVortexSpawnPos[2][4] =
 };
 
 static const float aCrystalSpawnPos[3] = { -9355.75f, 1905.43f, 85.55f};
-static const uint32 aWeaknessSpell[] = {SPELL_WEAKNESS_FIRE, SPELL_WEAKNESS_FROST, SPELL_WEAKNESS_NATURE, SPELL_WEAKNESS_ARCANE, SPELL_WEAKNESS_SHADOW};
+static const std::vector<uint32> aWeaknessSpell {SPELL_WEAKNESS_FIRE, SPELL_WEAKNESS_FROST, SPELL_WEAKNESS_NATURE, SPELL_WEAKNESS_ARCANE, SPELL_WEAKNESS_SHADOW};
 
 enum OssirianActions
 {
+    OSSIRIAN_INITIAL_SPAWN,
     OSSIRIAN_SUPREME,
     OSSIRIAN_CYCLONE,
     OSSIRIAN_STOMP,
@@ -85,6 +86,7 @@ struct boss_ossirianAI : public CombatAI
 
     boss_ossirianAI(Creature* creature) : CombatAI(creature, OSSIRIAN_ACTION_MAX), m_instance(static_cast<instance_ruins_of_ahnqiraj*>(m_creature->GetInstanceData())), m_saidIntro(false)
     {
+        AddCombatAction(OSSIRIAN_INITIAL_SPAWN, 10000u);
         AddCombatAction(OSSIRIAN_SUPREME, 45000u);
         AddCombatAction(OSSIRIAN_CYCLONE, 20000u);
         AddCombatAction(OSSIRIAN_STOMP, 30000u);
@@ -98,6 +100,8 @@ struct boss_ossirianAI : public CombatAI
 
     bool m_saidIntro;
 
+    GuidVector m_spawnedCrystals;
+
     void Reset() override
     {
         CombatAI::Reset();
@@ -107,13 +111,20 @@ struct boss_ossirianAI : public CombatAI
 
         DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(nullptr, SPELL_SUPREME, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+
+        GuidVector vector;
+        m_instance->GetCreatureGuidVectorFromStorage(NPC_OSSIRIAN_TRIGGER, vector);
+        if (vector.size() > 0)
+            if (Creature* creature = m_creature->GetMap()->GetCreature(vector[0]))
+                creature->Respawn();
+
+        DespawnGuids(m_spawnedCrystals);
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        DoCastSpellIfCan(m_creature, SPELL_SUPREME, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_SUPREME, CAST_TRIGGERED);
         DoScriptText(SAY_AGGRO, m_creature);
-        DoSpawnNextCrystal();
 
         for (auto aSandVortexSpawnPo : aSandVortexSpawnPos)
             m_creature->SummonCreature(NPC_SAND_VORTEX, aSandVortexSpawnPo[0], aSandVortexSpawnPo[1], aSandVortexSpawnPo[2], aSandVortexSpawnPo[3], TEMPSPAWN_CORPSE_DESPAWN, 0);
@@ -132,43 +143,48 @@ struct boss_ossirianAI : public CombatAI
         DoScriptText(SAY_SLAY, m_creature);
     }
 
-    void DoSpawnNextCrystal()
+    void DoSpawnNextCrystal(uint32 spawnCount)
     {
         if (!m_instance)
             return;
 
-        Creature* pOssirianTrigger = nullptr;
-        if (m_uiCrystalPosition == 0)
-        {
-            // Respawn static spawned crystal trigger
-            pOssirianTrigger = m_instance->GetSingleCreatureFromStorage(NPC_OSSIRIAN_TRIGGER);
-            if (pOssirianTrigger && !pOssirianTrigger->isAlive())
-                pOssirianTrigger->Respawn();
-        }
-        else
-        {
-            // Summon a new crystal trigger at some position depending on m_uiCrystalPosition
-            // Note: the summon points seem to be very random; requires additional research
-            float fX, fY, fZ;
-            m_creature->GetRandomPoint(aCrystalSpawnPos[0], aCrystalSpawnPos[1], aCrystalSpawnPos[2], 100.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_OSSIRIAN_TRIGGER, fX, fY, fZ, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
-        }
-        if (!pOssirianTrigger)
+        GuidVector vector;
+        m_instance->GetCreatureGuidVectorFromStorage(NPC_OSSIRIAN_TRIGGER, vector);
+        if (vector.size() < 2) // wrong db data
             return;
 
-        // Respawn GO near crystal trigger
-        if (GameObject* pCrystal = GetClosestGameObjectWithEntry(pOssirianTrigger, GO_OSSIRIAN_CRYSTAL, 10.0f))
-            m_instance->DoRespawnGameObject(pCrystal->GetObjectGuid(), 5 * MINUTE);
+        vector.erase(vector.begin()); // remove first
+        std::shuffle(vector.begin(), vector.end(), *GetRandomGenerator());
 
-        // Increase position
-        m_uiCrystalPosition = (m_uiCrystalPosition + 1) % MAX_CRYSTAL_POSITIONS;
+        uint32 spawned = 0;
+        for (uint32 i = 0; i < vector.size() - 1; ++i) // try to find at least one
+        {
+            // iterate from random roll until either one (should always occur) is found or we run out of crystals
+            if (Creature* creature = m_creature->GetMap()->GetCreature(vector[i]))
+            {
+                if (!creature->isAlive())
+                {
+                    creature->Respawn();
+                    ++spawned;
+                    if (spawned >= spawnCount)
+                        break;
+                }
+            }
+        }
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            invoker->CastSpell(nullptr, SPELL_SUMMON_CRYSTAL, TRIGGERED_OLD_TRIGGERED);
+            m_spawnedCrystals.push_back(invoker->GetObjectGuid());
+        }
     }
 
     void JustSummoned(Creature* summoned) override
     {
-        if (summoned->GetEntry() == NPC_OSSIRIAN_TRIGGER)
-            summoned->CastSpell(summoned, SPELL_SUMMON_CRYSTAL, TRIGGERED_OLD_TRIGGERED);
-        else if (summoned->GetEntry() == NPC_SAND_VORTEX)
+        if (summoned->GetEntry() == NPC_SAND_VORTEX)
         {
             // The movement of this isn't very clear - may require additional research
             summoned->CastSpell(summoned, SPELL_SAND_STORM, TRIGGERED_OLD_TRIGGERED);
@@ -181,23 +197,17 @@ struct boss_ossirianAI : public CombatAI
         if (caster->GetTypeId() == TYPEID_UNIT && caster->GetEntry() == NPC_OSSIRIAN_TRIGGER)
         {
             // Check for proper spell id
-            bool bIsWeaknessSpell = false;
-            for (unsigned int i : aWeaknessSpell)
-            {
-                if (spellInfo->Id == i)
-                {
-                    bIsWeaknessSpell = true;
-                    break;
-                }
-            }
-            if (!bIsWeaknessSpell)
+            if (std::find(aWeaknessSpell.begin(), aWeaknessSpell.end(), spellInfo->Id) == aWeaknessSpell.end())
                 return;
 
             m_creature->RemoveAurasDueToSpell(SPELL_SUPREME);
             ResetCombatAction(OSSIRIAN_SUPREME, 45000);
 
+            // despawn go
+            if (GameObject* crystal = GetClosestGameObjectWithEntry(caster, GO_OSSIRIAN_CRYSTAL, 5.0f))
+                crystal->SetLootState(GO_JUST_DEACTIVATED);
             static_cast<Creature*>(caster)->ForcedDespawn();
-            DoSpawnNextCrystal();
+            DoSpawnNextCrystal(1);
         }
     }
 
@@ -221,9 +231,15 @@ struct boss_ossirianAI : public CombatAI
     {
         switch (action)
         {
+            case OSSIRIAN_INITIAL_SPAWN:
+            {
+                DoSpawnNextCrystal(5);
+                DisableCombatAction(action);
+                break;
+            }
             case OSSIRIAN_SUPREME:
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUPREME, CAST_AURA_NOT_PRESENT) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, SPELL_SUPREME, CAST_AURA_NOT_PRESENT) == CAST_OK)
                 {
                     switch (urand(0, 2))
                     {
@@ -263,16 +279,11 @@ struct boss_ossirianAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_ossirian(Creature* creature)
-{
-    return new boss_ossirianAI(creature);
-}
-
 // This is actually a hack for a server-side spell
 bool GOUse_go_ossirian_crystal(Player* /*player*/, GameObject* go)
 {
     if (Creature* pOssirianTrigger = GetClosestCreatureWithEntry(go, NPC_OSSIRIAN_TRIGGER, 10.0f))
-        pOssirianTrigger->CastSpell(pOssirianTrigger, aWeaknessSpell[urand(0, 4)], TRIGGERED_NONE);
+        pOssirianTrigger->CastSpell(pOssirianTrigger, aWeaknessSpell[urand(0, aWeaknessSpell.size() - 1)], TRIGGERED_NONE);
 
     return true;
 }
@@ -281,7 +292,7 @@ void AddSC_boss_ossirian()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_ossirian";
-    pNewScript->GetAI = &GetAI_boss_ossirian;
+    pNewScript->GetAI = &GetNewAIInstance<boss_ossirianAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

@@ -112,7 +112,7 @@ struct boss_ayamissAI : public CombatAI
         m_phase = PHASE_AIR;
         SetCombatMovement(false);
         SetMeleeEnabled(false);
-        SetCombatScriptStatus(true);
+        SetCombatScriptStatus(false);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -212,7 +212,7 @@ struct boss_ayamissAI : public CombatAI
             {
                 Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_PARALYZE, SELECT_FLAG_PLAYER);
                 if (!target)
-                    target = m_creature->getVictim();
+                    target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARALYZE, SELECT_FLAG_PLAYER);
 
                 if (DoCastSpellIfCan(target, SPELL_PARALYZE) == CAST_OK)
                 {
@@ -233,8 +233,9 @@ struct boss_ayamissAI : public CombatAI
             }
             case AYAMISS_POISON_STINGER:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISON_STINGER) == CAST_OK)
-                    ResetCombatAction(action, urand(2000, 3000));
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_POISON_STINGER, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_POISON_STINGER) == CAST_OK)
+                        ResetCombatAction(action, urand(2000, 3000));
                 break;
             }
             case AYAMISS_SUMMON_SWARMER:

@@ -50,9 +50,15 @@ void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
     switch (pCreature->GetEntry())
     {
         case NPC_OSSIRIAN_TRIGGER:
-            // Only store static spawned
-            if (pCreature->IsTemporarySummon())
-                break;
+        {
+            GuidVector& vector = m_npcEntryGuidCollection[pCreature->GetEntry()];
+            vector.push_back(pCreature->GetObjectGuid());
+            std::sort(vector.begin(), vector.end(), [&](ObjectGuid const& a, ObjectGuid const& b) -> bool
+            {
+                return a.GetCounter() > b.GetCounter();
+            });
+            break;
+        }
         case NPC_BURU:
         case NPC_OSSIRIAN:
         case NPC_RAJAXX:
@@ -68,6 +74,7 @@ void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
             break;
         case NPC_KALDOREI_ELITE:
             m_lKaldoreiGuidList.push_back(pCreature->GetObjectGuid());
+            break;
     }
 }
 
@@ -144,6 +151,13 @@ void instance_ruins_of_ahnqiraj::OnCreatureDeath(Creature* pCreature)
             break;
         }
     }
+}
+
+void instance_ruins_of_ahnqiraj::OnCreatureRespawn(Creature* creature)
+{
+    if (creature->GetEntry() == NPC_OSSIRIAN_TRIGGER)
+        if (Creature* ossirian = GetSingleCreatureFromStorage(NPC_OSSIRIAN))
+            ossirian->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, creature, ossirian);
 }
 
 void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)

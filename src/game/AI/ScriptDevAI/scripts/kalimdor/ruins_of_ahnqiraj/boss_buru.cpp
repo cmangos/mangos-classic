@@ -97,14 +97,16 @@ struct boss_buruAI : public CombatAI
     void KilledUnit(Unit* victim) override
     {
         // Attack a new random target when a player is killed
-        if (victim->GetTypeId() == TYPEID_PLAYER)
+        if (victim == m_creature->getVictim())
             ScheduleNewTarget();
     }
 
     void SpellHitTarget(Unit* target, const SpellEntry* spellInfo, SpellMissInfo /*missInfo*/) override
     {
         if (spellInfo->Id == SPELL_CREATURE_SPECIAL)
-            ScheduleNewTarget();
+        {
+            DoAttackNewTarget();
+        }
     }
 
     void ScheduleNewTarget()
@@ -209,7 +211,10 @@ struct npc_buru_eggAI : public Scripted_NoMovementAI
     ScriptedInstance* m_instance;
 
     void Reset() override
-    { }
+    {
+        SetCombatMovement(false);
+        SetReactState(REACT_PASSIVE);
+    }
 
     void JustSummoned(Creature* summoned) override
     {
@@ -232,10 +237,13 @@ struct npc_buru_eggAI : public Scripted_NoMovementAI
 
     void SpellHitTarget(Unit* target, const SpellEntry* spellInfo, SpellMissInfo /*missInfo*/) override
     {
-        if (spellInfo->Id == SPELL_EXPLODE && target->IsPlayer())
+        if (spellInfo->Id == SPELL_EXPLODE)
         {
-            // damage from 100 - 500 based on proximity - max range 25
-            int32 damage = 100 + ((25 - std::min(m_creature->GetDistance(target, true, DIST_CALC_COMBAT_REACH), 25.f)) / 25.f) * 400;
+            int32 damage;
+            if (target->IsPlayer()) // damage from 100 - 500 based on proximity - max range 25
+                damage = 100 + ((25 - std::min(m_creature->GetDistance(target, true, DIST_CALC_COMBAT_REACH), 25.f)) / 25.f) * 400;
+            else if (target->GetEntry() == NPC_BURU)
+                damage = target->GetHealth() * 15 / 100; // 15% hp for buru
             m_creature->CastCustomSpell(target, SPELL_EXPLOSION, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
         }
     }
