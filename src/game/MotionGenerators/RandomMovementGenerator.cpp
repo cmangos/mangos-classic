@@ -107,7 +107,7 @@ bool AbstractRandomMovementGenerator::Update(Unit& owner, const uint32& diff)
                 }
             }
             else
-                i_nextMoveTimer.Reset(250);
+                i_nextMoveTimer.Reset(owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) ? 100 : 500);
         }
     }
 
@@ -124,11 +124,11 @@ int32 AbstractRandomMovementGenerator::_setLocation(Unit& owner)
     // Look for a random location within certain radius of initial position
     float x = i_x, y = i_y, z = i_z;
 
-    // Require destination to be in LoS for PC units for this movegen hierarchy
-    if (!_getLocation(owner, x, y, z) || (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !owner.IsWithinLOS(x, y, z)))
+    if (!_getLocation(owner, x, y, z))
         return 0;
 
     PathFinder pf(&owner);
+
     if (i_pathLength != 0.0f)
         pf.setPathLengthLimit(i_pathLength);
 
