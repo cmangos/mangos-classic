@@ -65,14 +65,14 @@ void PointMovementGenerator::Finalize(Unit& unit)
 
 void PointMovementGenerator::Interrupt(Unit& unit)
 {
-    unit.InterruptMoving();
     unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    unit.InterruptMoving();
 }
 
 void PointMovementGenerator::Reset(Unit& unit)
 {
-    unit.StopMoving();
-    unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    unit.addUnitState(UNIT_STAT_ROAMING);
+    Initialize(unit);
 }
 
 bool PointMovementGenerator::Update(Unit& unit, const uint32&/* diff*/)
@@ -205,10 +205,10 @@ bool StayMovementGenerator::Update(Unit& unit, const uint32& diff)
     return true;
 }
 
-void FlyOrLandMovementGenerator::Move(Unit& unit)
+void PointTOLMovementGenerator::Move(Unit& unit)
 {
     Movement::MoveSplineInit init(unit);
-    init.MoveTo(m_x, m_y, m_z, m_generatePath);
+    init.MoveTo(m_x, m_y, m_z, false);
     if (m_forcedMovement == FORCED_MOVEMENT_WALK)
         init.SetWalk(true);
     if (m_o != 0.f)

@@ -119,11 +119,11 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void MoveFleeing(Unit* enemy, uint32 time = 0);
         void MovePoint(uint32 id, float x, float y, float z, bool generatePath = true, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE);
         void MovePoint(uint32 id, float x, float y, float z, float o, bool generatePath = true, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE);
+        void MovePointTOL(uint32 id, float x, float y, float z, bool takeOff, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE);
         void MoveRetreat(float x, float y, float z, float o, uint32 delay);
         void MoveWaypoint(uint32 pathId = 0, uint32 source = 0, uint32 initialDelay = 0, uint32 overwriteEntry = 0);
         void MoveTaxiFlight();
         void MoveDistract(uint32 timer);
-        void MoveFlyOrLand(uint32 id, float x, float y, float z, bool liftOff);
         void MoveCharge(float x, float y, float z, float speed, uint32 id = EVENT_CHARGE);
         void MoveFall();
 

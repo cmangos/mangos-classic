@@ -95,18 +95,17 @@ class StayMovementGenerator : public PointMovementGenerator
         bool m_arrived;
 };
 
-class FlyOrLandMovementGenerator : public PointMovementGenerator
+class PointTOLMovementGenerator : public PointMovementGenerator
 {
     public:
-        FlyOrLandMovementGenerator(uint32 id, float x, float y, float z, bool liftOff) :
-            PointMovementGenerator(id, x, y, z, false, 0),
-            m_liftOff(liftOff) {}
+        PointTOLMovementGenerator(uint32 id, float x, float y, float z, bool takeOff, uint32 forcedMovement, float speed = 0) :
+            PointMovementGenerator(id, x, y, z, false, forcedMovement, speed), m_takeOff(takeOff) {}
 
     protected:
         void Move(Unit& unit) override;
 
     private:
-        bool m_liftOff;
+        bool m_takeOff;
 };
 
 #endif

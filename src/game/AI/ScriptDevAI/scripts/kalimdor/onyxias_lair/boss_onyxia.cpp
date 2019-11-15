@@ -409,7 +409,7 @@ struct boss_onyxiaAI : public ScriptedAI
                     m_uiSummonWhelpsTimer = 0;              // End of Onyxian Whelps summoning
 
                     float fGroundZ = m_creature->GetMap()->GetHeight(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-                    m_creature->GetMotionMaster()->MoveFlyOrLand(POINT_ID_LAND, m_creature->GetPositionX(), m_creature->GetPositionY(), fGroundZ, false);
+                    m_creature->GetMotionMaster()->MovePointTOL(POINT_ID_LAND, m_creature->GetPositionX(), m_creature->GetPositionY(), fGroundZ, false);
                     return;
                 }
 
@@ -469,7 +469,7 @@ struct boss_onyxiaAI : public ScriptedAI
                             m_uiSummonWhelpsTimer = 3000;
                             if (m_pInstance)
                                 m_pInstance->SetData(TYPE_ONYXIA, DATA_LIFTOFF);
-                            m_creature->GetMotionMaster()->MoveFlyOrLand(POINT_ID_IN_AIR, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, aMoveData[POINT_ID_SOUTH].fZ, true);
+                            m_creature->GetMotionMaster()->MovePointTOL(POINT_ID_IN_AIR, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, aMoveData[POINT_ID_SOUTH].fZ, true);
                             break;
                         case PHASE_BREATH_PRE:
                             m_creature->GetMotionMaster()->MovePoint(POINT_ID_INIT_NORTH, aMoveData[POINT_ID_NORTH].fX, aMoveData[POINT_ID_NORTH].fY, aMoveData[POINT_ID_NORTH].fZ);
