@@ -1564,7 +1564,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 28819:                             // Submerge Visual
                 {
                     if (apply)
+                    {
                         target->SetStandState(UNIT_STAND_STATE_CUSTOM);
+                        if (target->GetTypeId() == TYPEID_UNIT)
+                            ((Creature*)target)->ForcedDespawn(700);
+                    }
                     else
                         target->SetStandState(UNIT_STAND_STATE_STAND);
                     return;
