@@ -390,6 +390,7 @@ UPDATE creature_template SET ScriptName='boss_sapphiron' WHERE entry=15989;
 UPDATE gameobject_template SET ScriptName='go_sapphiron_birth' WHERE entry=181356;
 UPDATE gameobject_template SET ScriptName='go_anub_door' WHERE entry=181126;
 UPDATE creature_template SET ScriptName='boss_kelthuzad' WHERE entry=15990;
+UPDATE creature_template SET ScriptName='npc_diseased_maggot' WHERE entry IN (16056, 16057);
 INSERT INTO scripted_event_id VALUES
 (10495,'event_decimate');
 
@@ -2452,7 +2453,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1533115,'Soon... the world will tremble!',8832,1,0,0,'heigan SAY_TAUNT3'),
 (-1533116,'The end is upon you.',8833,1,0,0,'heigan SAY_CHANNELING'),
 (-1533117,'Hungry worms will feast on your rotten flesh!',8834,1,0,0,'heigan SAY_TAUNT4'),
-(-1533118,'%s takes is last breath.',0,2,0,0,'heigan EMOTE_DEATH'),
+(-1533118,'%s takes his last breath.',8828,2,0,0,'heigan EMOTE_DEATH'),
 
 (-1533119,'%s spots a nearby zombie to devour!',0,2,0,0,'gluth EMOTE_ZOMBIE'),
 

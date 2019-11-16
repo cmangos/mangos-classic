@@ -17,7 +17,9 @@
 /* ScriptData
 SDName: Boss_Heigan
 SD%Complete: 80
-SDComment: Missing poison inside the tunnel in phase 2 ; worms and eyes behaviour is incorrect
+SDComment: Missing poison inside the eye stalk tunnel in phase 2
+           Candidate spell is 30122 (correct damage range and already used in encounter) but there is no evidence of this
+           and of how the spell is cast and by who (no data found in sniffs as this part was removed in WotLK)
 SDCategory: Naxxramas
 EndScriptData
 
@@ -42,12 +44,12 @@ enum
     SAY_CHANNELING          = -1533116,
     SAY_DEATH               = -1533118,
 
-    // Spells
+    // Heigan spells
     SPELL_DECREPIT_FEVER    = 29998,
     SPELL_MANA_BURN         = 29310,
     SPELL_TELEPORT_SELF     = 30211,
     SPELL_TELEPORT_PLAYERS  = 29273,
-    SPELL_PLAGUE_CLOUD      = 29350,
+    SPELL_PLAGUE_CLOUD      = 29350,                // Channel spell periodically triggering spell 30122
     SPELL_PLAGUE_WAVE_SLOW  = 29351,                // Activates the traps during phase 1; triggers spell 30116, 30117, 30118, 30119 each 10 secs
     SPELL_PLAGUE_WAVE_FAST  = 30114,                // Activates the traps during phase 2; triggers spell 30116, 30117, 30118, 30119 each 3 secs
 
@@ -88,8 +90,8 @@ struct boss_heiganAI : public ScriptedAI
         m_feverTimer = 4 * IN_MILLISECONDS;
         m_manaBurnTimer = 5 * IN_MILLISECONDS;
         m_teleportTimer = urand(35, 45) * IN_MILLISECONDS;
-        m_eruptionStartDelay = 100;                       	// ASAP
-        m_startChannelingTimer = 100;                     	// ASAP
+        m_eruptionStartDelay = 100;                         // ASAP
+        m_startChannelingTimer = 100;                       // ASAP
 
         m_phaseTimer = (m_phase == PHASE_GROUND ? 90 : 45) * IN_MILLISECONDS;
     }
@@ -102,7 +104,7 @@ struct boss_heiganAI : public ScriptedAI
         m_teleportParams.range.minRange = 0;
         m_teleportParams.range.maxRange = 40;
         ResetPhase();
-        m_eruptionStartDelay = 5 * IN_MILLISECONDS;       	// Override value from ResetPhase() on combat start only: 5 more seconds are given at that time
+        m_eruptionStartDelay = 5 * IN_MILLISECONDS;         // Override value from ResetPhase() on combat start only: 5 more seconds are given at that time
 
         m_entranceDoorTimer = 15 * IN_MILLISECONDS;
     }
@@ -164,6 +166,7 @@ struct boss_heiganAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
+        // Do nothing if no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
@@ -305,10 +308,62 @@ UnitAI* GetAI_boss_heigan(Creature* creature)
     return new boss_heiganAI(creature);
 }
 
+/*###################
+## npc_diseased_maggot
+####################*/
+
+struct npc_diseased_maggotAI : public ScriptedAI
+{
+    npc_diseased_maggotAI(Creature* creature) : ScriptedAI(creature)
+    {
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
+        Reset();
+    }
+
+    instance_naxxramas* m_instance;
+
+    uint32 m_resetCheckTimer;
+
+    void Reset() override
+    {
+        m_resetCheckTimer = 3 * IN_MILLISECONDS;
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        // Do nothing if no target
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_resetCheckTimer < diff)
+        {
+            // Check if we are in range of the trigger NPC in the middle of Heigan room, if so: force evade
+            if (Creature* trigger = GetClosestCreatureWithEntry(m_creature, NPC_WORLD_TRIGGER, 45.0f))
+                m_creature->AI()->EnterEvadeMode();
+            m_resetCheckTimer = 3 * IN_MILLISECONDS;
+        }
+        else
+            m_resetCheckTimer -= diff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAI_npc_diseased_maggot(Creature* creature)
+{
+    return new npc_diseased_maggotAI(creature);
+}
+
 void AddSC_boss_heigan()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_heigan";
     newScript->GetAI = &GetAI_boss_heigan;
     newScript->RegisterSelf();
+
+    newScript = new Script;
+    newScript->Name = "npc_diseased_maggot";
+    newScript->GetAI = &GetAI_npc_diseased_maggot;
+    newScript->RegisterSelf();
+    newScript = new Script;
 }
