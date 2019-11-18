@@ -415,7 +415,7 @@ class Spell
         void setState(uint32 state) { m_spellState = state; }
 
         uint32 GetUsableHealthStoneItemType(Unit* unitTarget);
-        bool DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype);
+        bool DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype, bool reportError = true);
 
         void WriteSpellGoTargets(WorldPacket& data);
         void WriteAmmoToPacket(WorldPacket& data) const;
