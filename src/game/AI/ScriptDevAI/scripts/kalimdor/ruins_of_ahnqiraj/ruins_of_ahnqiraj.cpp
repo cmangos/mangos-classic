@@ -101,7 +101,7 @@ void instance_ruins_of_ahnqiraj::OnCreatureEvade(Creature* pCreature)
         case NPC_OSSIRIAN:  SetData(TYPE_OSSIRIAN, FAIL);  break;
         case NPC_RAJAXX:
             // Rajaxx yells on evade
-            DoScriptText(SAY_DEAGGRO, pCreature);
+            // DoScriptText(SAY_DEAGGRO, pCreature); - unconfirmed
         // no break;
         case NPC_COLONEL_ZERRAN:
         case NPC_MAJOR_PAKKON:
@@ -155,9 +155,21 @@ void instance_ruins_of_ahnqiraj::OnCreatureDeath(Creature* pCreature)
 
 void instance_ruins_of_ahnqiraj::OnCreatureRespawn(Creature* creature)
 {
-    if (creature->GetEntry() == NPC_OSSIRIAN_TRIGGER)
-        if (Creature* ossirian = GetSingleCreatureFromStorage(NPC_OSSIRIAN))
-            ossirian->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, creature, ossirian);
+    switch (creature->GetEntry())
+    {
+        case NPC_OSSIRIAN_TRIGGER:
+        {
+            if (Creature* ossirian = GetSingleCreatureFromStorage(NPC_OSSIRIAN))
+                ossirian->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, creature, ossirian);
+            break;
+        }
+        case NPC_QIRAJI_WARRIOR:
+        case NPC_SWARMGUARD_NEEDLER:
+        {
+            creature->SetCorpseDelay(5);
+            break;
+        }
+    }
 }
 
 void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
@@ -182,7 +194,7 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
             {
                 if (Creature* andorov = GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
                     if (andorov->isAlive())
-                        andorov->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_VENDOR);
+                        andorov->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, andorov, andorov);
             }
             break;
         case TYPE_MOAM:
@@ -316,6 +328,7 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
         {
             DoScriptText(SAY_INTRO, pRajaxx);
             pRajaxx->SetInCombatWithZone();
+            pRajaxx->AI()->AttackClosestEnemy();
         }
     }
     else

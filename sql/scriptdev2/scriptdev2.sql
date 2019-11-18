@@ -2269,7 +2269,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 -- 28 (above) = EMOTE_ENERGIZING
 ('-1509029','Come get some!','0','0','0','0','0','andorov SAY_ANDOROV_INTRO_4'),
 ('-1509030','Kill first, ask questions later... Incoming!','0','1','0','0','0','andorov SAY_ANDOROV_ATTACK_START'),
-('-1509031','I lied...','0','1','0','0','0','andorov SAY_ANDOROV_INTRO_2');
+('-1509031','I lied...','0','1','0','0','0','andorov SAY_ANDOROV_INTRO_2'),
+('-1509032','My work here is done. I\'ll be sure to let Mar\'alith and the others at Cenarion Hold know that you helped me out a little. Be careful in here, you don\'t have me holdin\' your hand past this point.','0','0','0','0','11560','andorov SAY_ANDOROV_DESPAWN');
 
 -- -1 531 000 TEMPLE OF AHN'QIRAJ
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

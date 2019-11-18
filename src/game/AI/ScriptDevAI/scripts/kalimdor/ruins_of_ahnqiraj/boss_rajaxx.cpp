@@ -35,6 +35,7 @@ enum
     SAY_ANDOROV_INTRO_3         = -1509003,
     SAY_ANDOROV_INTRO_4         = -1509029,
     SAY_ANDOROV_ATTACK_START    = -1509030,
+    SAY_ANDOROV_DESPAWN         = -1509032,
 
     // Rajaxx kills Andorov
     SAY_KILLS_ANDOROV           = -1509016,
@@ -82,6 +83,7 @@ enum AndorovActions
     ANDOROV_STRIKE,
     ANDOROV_ACTION_MAX,
     ANDOROV_MOVE,
+    ANDOROV_DESPAWN,
 };
 
 struct npc_general_andorovAI : public CombatAI, private DialogueHelper
@@ -95,6 +97,7 @@ struct npc_general_andorovAI : public CombatAI, private DialogueHelper
         AddCombatAction(ANDOROV_BASH, 8000, 11000);
         AddCombatAction(ANDOROV_STRIKE, 2000, 5000);
         AddCustomAction(ANDOROV_MOVE, 5000u, [&]() { HandleMove(); });
+        AddCustomAction(ANDOROV_DESPAWN, true, [&]() { HandleDespawn(); });
         Reset();
     }
 
@@ -206,7 +209,27 @@ struct npc_general_andorovAI : public CombatAI, private DialogueHelper
         m_creature->GetMotionMaster()->MovePoint(m_pointId, aAndorovMoveLocs[m_pointId].m_fX, aAndorovMoveLocs[m_pointId].m_fY, aAndorovMoveLocs[m_pointId].m_fZ);
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+        GuidList m_lKaldoreiGuids;
+        m_instance->GetKaldoreiGuidList(m_lKaldoreiGuids);
+        for (GuidList::const_iterator itr = m_lKaldoreiGuids.begin(); itr != m_lKaldoreiGuids.end(); ++itr)
+            if (Creature* kaldorei = m_creature->GetMap()->GetCreature(*itr))
+                kaldorei->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         StartNextDialogueText(SAY_ANDOROV_INTRO_1);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_VENDOR);
+            ResetTimer(ANDOROV_DESPAWN, 135000u);
+        }
+    }
+
+    void HandleDespawn()
+    {
+        DoScriptText(SAY_ANDOROV_DESPAWN, m_creature);
+        m_creature->ForcedDespawn(2500);
     }
 
     void HandleMove()
@@ -264,7 +287,9 @@ bool GossipHello_npc_general_andorov(Player* player, Creature* creature)
         if (instance->GetData(TYPE_RAJAXX) == NOT_STARTED || instance->GetData(TYPE_RAJAXX) == FAIL)
             player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_START, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
-        player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_VENDOR, GOSSIP_ITEM_TRADE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+        if (creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR))
+            player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_VENDOR, GOSSIP_ITEM_TRADE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+
         player->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_INTRO, creature->GetObjectGuid());
     }
 
