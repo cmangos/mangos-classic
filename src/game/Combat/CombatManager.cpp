@@ -68,16 +68,16 @@ void CombatManager::Update(const uint32 diff)
             }
             else
             {
-                bool check = !m_owner->HasCharmer();
+                bool check = !m_owner->HasMaster();
                 if (!check)
                 {
-                    Unit* charmer = m_owner->GetCharmer();
-                    if (!charmer || !charmer->isAlive()) // if charmer alive, he will evade this charm
+                    Unit* master = m_owner->GetMaster();
+                    if (!master || !master->isAlive()) // if charmer alive, he will evade this charm
                         check = true;
                 }
                 if (check)
                 {
-                    if (m_owner->IsPlayer())
+                    if (m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                     {
                         if (m_owner->getHostileRefManager().getSize() == 0)
                             m_owner->HandleExitCombat();
