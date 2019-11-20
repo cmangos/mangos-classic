@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "temple_of_ahnqiraj.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -34,36 +35,43 @@ enum
 
     SPELL_ARCANE_EXPLOSION      = 26192,
     SPELL_EARTH_SHOCK           = 26194,
-    SPELL_TRUE_FULFILLMENT      = 785,
+    SPELL_TRUE_FULFILLMENT      = 785, // wotlk+ also casts 61286 on the target on cast end and also on aura end 65634
+    SPELL_TRUE_FULFILLMENT_2    = 2313, // additional buff
     SPELL_TELEPORT_1            = 4801,
     SPELL_TELEPORT_2            = 8195,
     SPELL_TELEPORT_3            = 20449,
     SPELL_INITIALIZE_IMAGES     = 794,
-//    SPELL_INITIALIZE_IMAGE      = 3730,   // Triggers by spell 794 on each summoned image
+    SPELL_INITIALIZE_IMAGE      = 3730,   // Triggers by spell 794 on each summoned image
     SPELL_SUMMON_IMAGES         = 747,
     SPELL_TELEPORT_IMAGE        = 26591,
+
+    SPELL_BIRTH                 = 26262, // Different in tbc+ - unconfirmed but has same script
 };
 
-struct boss_skeramAI : public ScriptedAI
+enum SkeramActions
 {
-    boss_skeramAI(Creature* creature) : ScriptedAI(creature)
-    {
-        m_instance = (ScriptedInstance*)creature->GetInstanceData();
-        Reset();
+    SKERAM_SPLIT,
+    SKERAM_ARCANE_EXPLOSION,
+    SKERAM_TRUE_FULFILMENT,
+    SKERAM_BLINK,
+    SKERAM_EARTH_SHOCK,
+    SKERAM_ACTION_MAX,
+};
 
-        // Check this for images, because the Initialize spell hits the target only after aggro
-        if (m_creature->IsTemporarySummon())
-            m_isImage = true;
-        else
-            m_isImage = false;
+struct boss_skeramAI : public CombatAI
+{
+    boss_skeramAI(Creature* creature) : CombatAI(creature, SKERAM_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isImage(m_creature->IsTemporarySummon())
+    {
+        if (!m_isImage)
+            AddTimerlessCombatAction(SKERAM_SPLIT, true);
+        AddCombatAction(SKERAM_ARCANE_EXPLOSION, urand(6, 12) * IN_MILLISECONDS);
+        AddCombatAction(SKERAM_TRUE_FULFILMENT, uint32(15) * IN_MILLISECONDS);
+        AddCombatAction(SKERAM_BLINK, urand(30, 45) * IN_MILLISECONDS);
+        AddCombatAction(SKERAM_EARTH_SHOCK, 1200u);
+        Reset();
     }
 
     ScriptedInstance* m_instance;
-
-    uint32 m_arcaneExplosionTimer;
-    uint32 m_fullFillmentTimer;
-    uint32 m_blinkTimer;
-    uint32 m_earthShockTimer;
 
     std::vector<uint32> m_teleports;
     uint8 m_teleportCounter;
@@ -76,11 +84,7 @@ struct boss_skeramAI : public ScriptedAI
 
     void Reset() override
     {
-        m_arcaneExplosionTimer = urand(6, 12) * IN_MILLISECONDS;
-        m_fullFillmentTimer    = 15 * IN_MILLISECONDS;
-        m_blinkTimer           = urand(30, 45) * IN_MILLISECONDS;
-        m_earthShockTimer      = 1200;
-
+        CombatAI::Reset();
         m_hpCheck               = 75.0f;
 
         m_teleports              = { SPELL_TELEPORT_1, SPELL_TELEPORT_2, SPELL_TELEPORT_3 };
@@ -90,6 +94,12 @@ struct boss_skeramAI : public ScriptedAI
 
         if (m_creature->GetVisibility() != VISIBILITY_ON)
             m_creature->SetVisibility(VISIBILITY_ON);
+    }
+
+    void JustRespawned() override
+    {
+        CombatAI::JustRespawned();
+        DoCastSpellIfCan(nullptr, SPELL_BIRTH);
     }
 
     void KilledUnit(Unit* /*victim*/) override
@@ -192,114 +202,111 @@ struct boss_skeramAI : public ScriptedAI
         return 0;
     }
 
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 action) override
     {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Arcane Explosion is done if more than a set number of people are in melee range
-        if (m_arcaneExplosionTimer < diff)
+        switch (action)
         {
-            PlayerList meleePlayerList;
-            float meleeRange = m_creature->GetCombinedCombatReach(m_creature->getVictim(), true);
-            GetPlayerListWithEntryInWorld(meleePlayerList, m_creature, meleeRange);
-            if (meleePlayerList.size() >= m_maxMeleeAllowed)
+            case SKERAM_SPLIT:
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION) == CAST_OK)
-                   m_arcaneExplosionTimer = urand(8, 18) * IN_MILLISECONDS;
+                // Summon images at 75%, 50% and 25%
+                if (m_creature->GetHealthPercent() < m_hpCheck)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMAGES) == CAST_OK)
+                    {
+                        m_hpCheck -= 25.0f;
+                        std::random_shuffle(m_teleports.begin(), m_teleports.end());    // Shuffle the teleport spells to ensure that boss and images have a different location assigned randomly
+                        m_teleportCounter = 1;
+                        // Teleport shortly after the images are summoned and set invisible to clear the selection (Workaround alert!!!)
+                        DoCastSpellIfCan(m_creature, SPELL_INITIALIZE_IMAGES, CAST_TRIGGERED);
+                        m_creature->SetVisibility(VISIBILITY_OFF);
+                        ResetCombatAction(SKERAM_BLINK, urand(30, 40) * IN_MILLISECONDS); // Set same blink timer than the summoned images
+                        DoTeleport(true);                                                 // Force teleport (the images will do the same)
+                    }
+                }
+                break;
             }
-            else    // Recheck in 1 second
-                m_arcaneExplosionTimer = 1 * IN_MILLISECONDS;
-        }
-        else
-            m_arcaneExplosionTimer -= diff;
-
-        // True Fullfilment
-        if (m_fullFillmentTimer < diff)
-        {
-            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+            case SKERAM_ARCANE_EXPLOSION:
             {
-                if (DoCastSpellIfCan(target, SPELL_TRUE_FULFILLMENT) == CAST_OK)
-                    m_fullFillmentTimer = urand(20, 30) * IN_MILLISECONDS;
+                // Arcane Explosion is done if more than a set number of people are in melee range
+                PlayerList meleePlayerList;
+                float meleeRange = m_creature->GetCombinedCombatReach(m_creature->getVictim(), true);
+                GetPlayerListWithEntryInWorld(meleePlayerList, m_creature, meleeRange);
+                if (meleePlayerList.size() >= m_maxMeleeAllowed)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION) == CAST_OK)
+                        ResetCombatAction(action, urand(8, 18) * IN_MILLISECONDS);
+                }
+                else // Recheck in 1 second
+                    ResetCombatAction(action, 1 * IN_MILLISECONDS);
+                break;
             }
-        }
-        else
-            m_fullFillmentTimer -= diff;
-
-        // Blink_Timer
-        if (m_blinkTimer < diff)
-        {
-            DoTeleport();
-            m_blinkTimer = urand(10, 30) * IN_MILLISECONDS;
-        }
-        else
-            m_blinkTimer -= diff;
-
-        // Earth Shock is cast every 1.2s on the victim if Skeram can't reach them or they are not auto attacking him
-        if (m_earthShockTimer < diff)
-        {
-            if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim()) || !m_creature->getVictim()->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
+            case SKERAM_TRUE_FULFILMENT:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EARTH_SHOCK) == CAST_OK)
-                    m_earthShockTimer = 1200;
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_TRUE_FULFILLMENT, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_TRUE_FULFILLMENT) == CAST_OK)
+                        ResetCombatAction(action, urand(20, 30) * IN_MILLISECONDS);
+                break;
             }
-        }
-        else
-            m_earthShockTimer -= diff;
-
-        // Summon images at 75%, 50% and 25%
-        if (!m_isImage && m_creature->GetHealthPercent() < m_hpCheck)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMAGES) == CAST_OK)
+            case SKERAM_BLINK:
             {
-                m_hpCheck -= 25.0f;
-                std::random_shuffle(m_teleports.begin(), m_teleports.end());    // Shuffle the teleport spells to ensure that boss and images have a different location assigned randomly
-                m_teleportCounter = 1;
-                // Teleport shortly after the images are summoned and set invisible to clear the selection (Workaround alert!!!)
-                DoCastSpellIfCan(m_creature, SPELL_INITIALIZE_IMAGES, CAST_TRIGGERED);
-                m_creature->SetVisibility(VISIBILITY_OFF);
-                m_blinkTimer = urand(30, 40) * IN_MILLISECONDS;                 // Set same blink timer than the summoned images
-                DoTeleport(true);                                               // Force teleport (the images will do the same)
+                DoTeleport();
+                ResetCombatAction(action, urand(10, 30) * IN_MILLISECONDS);
+                break;
+            }
+            case SKERAM_EARTH_SHOCK:
+            {
+                if (Unit* victim = m_creature->getVictim())
+                    if (!m_creature->CanReachWithMeleeAttack(victim) || !victim->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EARTH_SHOCK) == CAST_OK)
+                            ResetCombatAction(action, 1200);
+                break;
             }
         }
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_skeram(Creature* creature)
+struct TrueFulfillment : public AuraScript
 {
-    return new boss_skeramAI(creature);
-}
-
-bool EffectDummyCreature_prophet_skeram(Unit* /*caster*/, uint32 spellId, SpellEffectIndex effIndex, Creature* creatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if (spellId == SPELL_TELEPORT_IMAGE && effIndex == EFFECT_INDEX_0)
+    void OnApply(Aura* aura, bool apply) const override
     {
-        // check for target == caster first
-        if (instance_temple_of_ahnqiraj* instance = (instance_temple_of_ahnqiraj*)creatureTarget->GetInstanceData())
-        {
-            if (Creature* prophet = instance->GetSingleCreatureFromStorage(NPC_SKERAM))
-            {
-                if (prophet == creatureTarget)
-                    return false;
-            }
-        }
-
-        if (boss_skeramAI* skeramAI = dynamic_cast<boss_skeramAI*>(creatureTarget->AI()))
-            skeramAI->DoTeleport(true);
+        if (apply)
+            aura->GetTarget()->CastSpell(aura->GetTarget(), SPELL_TRUE_FULFILLMENT_2, TRIGGERED_OLD_TRIGGERED);
+        // wotlk add stuff on break
     }
+};
 
-    return false;
-}
+struct InitializeImages : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (Unit* unitTarget = spell->GetUnitTarget())
+        {
+            // Cast Initialize Image for each image target with orignal boss HP percent as basepoints
+            int32 healthPercent = int32(spell->GetCaster()->GetHealthPercent());
+            unitTarget->CastCustomSpell(nullptr, SPELL_INITIALIZE_IMAGE, &healthPercent, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
+            unitTarget->CastSpell(nullptr, SPELL_TELEPORT_IMAGE, TRIGGERED_OLD_TRIGGERED);   // Teleport Image
+        }
+    }
+};
+
+struct TeleportImage : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (Unit* target = spell->GetUnitTarget())
+            if (boss_skeramAI* skeramAI = dynamic_cast<boss_skeramAI*>(target->AI()))
+                skeramAI->DoTeleport(true);
+    }
+};
 
 void AddSC_boss_skeram()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_skeram";
-    newScript->GetAI = &GetAI_boss_skeram;
-    newScript->pEffectDummyNPC = &EffectDummyCreature_prophet_skeram;
+    newScript->GetAI = &GetNewAIInstance<boss_skeramAI>;
     newScript->RegisterSelf();
+
+    RegisterAuraScript<TrueFulfillment>("spell_true_fulfillment");
+    RegisterSpellScript<InitializeImages>("spell_initialize_images");
+    RegisterSpellScript<TeleportImage>("spell_teleport_image");
 }

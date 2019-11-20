@@ -2274,9 +2274,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 531 000 TEMPLE OF AHN'QIRAJ
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1531000','Are you so eager to die? I would be happy to accomodate you.','8615','1','0','0','0','skeram SAY_AGGRO'),
+('-1531000','Are you so eager to die? I will be happy to accommodate you...','8615','1','0','0','0','skeram SAY_AGGRO'),
 ('-1531001','Let your death serve as an example!','8617','1','0','0','0','skeram SAY_SLAY'),
-('-1531002','You only delay... the inevitable.','8622','1','0','0','0','skeram SAY_DEATH'),
+('-1531002','You only delay the inevitable!','8622','1','0','0','0','skeram SAY_DEATH'),
 
 ('-1531003','REUSE_ME','0','0','0','0','0','REUSE'),
 ('-1531004','REUSE_ME','0','0','0','0','0','REUSE'),
