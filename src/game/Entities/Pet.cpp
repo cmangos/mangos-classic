@@ -1345,39 +1345,36 @@ void Pet::InitStatsForLevel(uint32 petlevel)
         }
         case GUARDIAN_PET:
         {
-            SelectLevel(petlevel);
-            break;
+            SelectLevel(petlevel);  // guardians reuse CLS function SelectLevel, so we stop here
+            return;
         }
         default:
             sLog.outError("Pet have incorrect type (%u) for level handling.", getPetType());
     }
 
-    if (getPetType() != GUARDIAN_PET) // guardians reuse CLS function SelectLevel
+    // Hunter's pets' should NOT use creature's original modifiers/multipliers
+    if (getPetType() != HUNTER_PET)
     {
-        // Hunter's pets' should NOT use creature's original modifiers/multipliers
-        if (getPetType() != HUNTER_PET)
-        {
-            health *= cInfo->HealthMultiplier;
+        health *= cInfo->HealthMultiplier;
 
-            if (mana > 0)
-                mana *= cInfo->PowerMultiplier;
+        if (mana > 0)
+            mana *= cInfo->PowerMultiplier;
 
-            armor *= cInfo->ArmorMultiplier;
-        }
-
-        // Apply custom health setting (from config)
-        health *= _GetHealthMod(cInfo->Rank);
-
-        // A pet cannot not have health
-        if (health < 1)
-            health = 1;
-
-        // Set base Health and Mana
-        SetCreateHealth(health);
-        SetCreateMana(mana);
-        // Set base Armor
-        SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, armor);
+        armor *= cInfo->ArmorMultiplier;
     }
+
+    // Apply custom health setting (from config)
+    health *= _GetHealthMod(cInfo->Rank);
+
+    // A pet cannot not have health
+    if (health < 1)
+        health = 1;
+
+    // Set base Health and Mana
+    SetCreateHealth(health);
+    SetCreateMana(mana);
+    // Set base Armor
+    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, armor);
 
     // Need to update stats - calculates max health/mana etc
     UpdateAllStats();
