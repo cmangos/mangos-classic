@@ -26,40 +26,7 @@ EndScriptData
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "world_map_scripts.h"
 
-/* *********************************************************
- *                  EASTERN KINGDOMS
- */
-struct world_map_eastern_kingdoms : public ScriptedMap
-{
-    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap) {}
-
-    void OnCreatureCreate(Creature* pCreature)
-    {
-        switch (pCreature->GetEntry())
-        {
-            case NPC_JONATHAN:
-            case NPC_WRYNN:
-            case NPC_BOLVAR:
-            case NPC_PRESTOR:
-            case NPC_WINDSOR:
-                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-                break;
-        }
-    }
-
-    void SetData(uint32 /*uiType*/, uint32 /*uiData*/) {}
-};
-
-InstanceData* GetInstanceData_world_map_eastern_kingdoms(Map* pMap)
-{
-    return new world_map_eastern_kingdoms(pMap);
-}
-
-
 void AddSC_world_map_scripts()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "world_map_eastern_kingdoms";
-    pNewScript->GetInstanceData = &GetInstanceData_world_map_eastern_kingdoms;
-    pNewScript->RegisterSelf();
+
 }

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+/* ContentData
 npc_bartleby
 npc_dashel_stonefist
 npc_lady_katrana_prestor
@@ -31,9 +31,9 @@ npc_squire_rowe
 npc_reginald_windsor
 EndContentData */
 
-
-#include "../world/world_map_scripts.h"
-#include "../../base/escort_ai.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
+#include "world_eastern_kingdoms.h"
+#include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######
 ## npc_bartleby

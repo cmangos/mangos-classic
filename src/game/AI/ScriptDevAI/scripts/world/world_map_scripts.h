@@ -7,13 +7,6 @@
 
 enum
 {
-    // Quest 6403
-    NPC_JONATHAN                = 466,
-    NPC_WRYNN                   = 1747,
-    NPC_BOLVAR                  = 1748,
-    NPC_PRESTOR                 = 1749,
-    NPC_WINDSOR                 = 12580,
-
     // Elemental invasions
     NPC_THE_WINDREAVER          = 14454,
     NPC_PRINCESS_TEMPESTRIA     = 14457,
