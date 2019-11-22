@@ -31,6 +31,9 @@ enum
 {
     EMOTE_CONSUMED          = -1531048,
 
+    SPELL_BLOODY_DEATH      = 25770,
+    SPELL_FULL_HEAL         = 17683,
+
     // Lord Kri
     SPELL_CLEAVE            = 40504,            // TBC uses different spell from vanilla 26350
     SPELL_TOXIC_VOLLEY      = 25812,
@@ -50,6 +53,8 @@ enum
     SPELL_RAVAGE            = 3242,
     SPELL_SUMMON_BROOD      = 25789,
     SPELL_DISPEL            = 25808,
+
+    NPC_YAUJ_BROOD          = 15621,
 };
 
 struct Location
@@ -61,20 +66,23 @@ static const Location resetPoint = { -8582.0f, 2047.0f, -1.62f };
 
 struct boss_silithidRoyaltyAI : public CombatAI
 {
-    boss_silithidRoyaltyAI(Creature* creature, uint32 actionCount) : CombatAI(creature, actionCount)
+    boss_silithidRoyaltyAI(Creature* creature, uint32 actionCount) : CombatAI(creature, actionCount), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_instance = (ScriptedInstance*)creature->GetInstanceData();
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit* unit, float x, float y, float z) -> bool
         {
             return m_creature->GetDistance(resetPoint.m_fX, resetPoint.m_fY, resetPoint.m_fZ, DIST_CALC_COMBAT_REACH) < 10.0f;
         });
-        SetDeathPrevention(true);
-        Reset();
     }
 
     ScriptedInstance* m_instance;
 
     uint32 m_deathAbility;
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        SetDeathPrevention(true);
+    }
 
     void Aggro(Unit* /*who*/) override
     {
@@ -98,14 +106,17 @@ struct boss_silithidRoyaltyAI : public CombatAI
         // The instance script keeps track of how many bosses are already defeated
         m_instance->SetData(TYPE_BUG_TRIO, SPECIAL);
 
-        // Ask the instance script if we are the last boss alive
-        // If not, let be consumed
-        if (m_instance && m_instance->GetData(TYPE_BUG_TRIO) != DONE)
-            DoDummyConsume();
+        DoDummyConsume();
     }
 
-    void JustDied(Unit* /* killer */) override
+    void JustDied(Unit* killer) override
     {
+        if (killer == m_creature)
+            return;
+
+        if (m_instance)
+            m_instance->SetData(TYPE_BUG_TRIO, DONE);
+
         DoSpecialAbility();
     }
 
@@ -114,12 +125,22 @@ struct boss_silithidRoyaltyAI : public CombatAI
         DoScriptText(EMOTE_CONSUMED, m_creature);
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
         DoSpecialAbility();
-        m_creature->ForcedDespawn(3000);
+        m_creature->CastSpell(nullptr, SPELL_BLOODY_DEATH, TRIGGERED_OLD_TRIGGERED);
     }
 
     void DoSpecialAbility()
     {
-        DoCastSpellIfCan(m_creature, m_deathAbility);
+        DoCastSpellIfCan(nullptr, m_deathAbility);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A) // on first 2 killed
+        {
+            m_creature->CastSpell(nullptr, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
+            if (miscValue == 2)
+                SetDeathPrevention(false);
+        }
     }
 };
 
@@ -144,7 +165,7 @@ struct boss_kriAI : public boss_silithidRoyaltyAI
 
     void Reset() override
     {
-        CombatAI::Reset();
+        boss_silithidRoyaltyAI::Reset();
         m_deathAbility     = SPELL_SUMMON_CLOUD;
 
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
@@ -197,7 +218,7 @@ struct boss_vemAI : public boss_silithidRoyaltyAI
 
     void Reset() override
     {
-        CombatAI::Reset();
+        boss_silithidRoyaltyAI::Reset();
         m_deathAbility     = SPELL_VENGEANCE;
 
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
@@ -211,7 +232,7 @@ struct boss_vemAI : public boss_silithidRoyaltyAI
         {
             case VEM_CHARGE:
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(target, SPELL_CHARGE) == CAST_OK)
                         ResetCombatAction(action, urand(8, 16) * IN_MILLISECONDS);
                 break;
@@ -255,10 +276,23 @@ struct boss_yaujAI : public boss_silithidRoyaltyAI
 
     void Reset() override
     {
-        CombatAI::Reset();
+        boss_silithidRoyaltyAI::Reset();
         m_deathAbility    = SPELL_SUMMON_BROOD;
 
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        if (summoned->GetEntry() == NPC_YAUJ_BROOD)
+        {
+            summoned->SetInCombatWithZone();
+            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+            {
+                m_creature->AddThreat(target, 1000000.f);
+                AttackStart(target);
+            }
+        }
     }
 
     void ExecuteAction(uint32 action) override

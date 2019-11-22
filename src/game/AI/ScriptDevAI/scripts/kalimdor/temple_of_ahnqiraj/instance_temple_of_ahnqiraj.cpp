@@ -190,8 +190,16 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
             if (uiData == SPECIAL)
             {
                 ++m_uiBugTrioDeathCount;
-                if (m_uiBugTrioDeathCount == 3)
-                    SetData(TYPE_BUG_TRIO, DONE);
+                // notify bugs on death to heal / remove invul
+                if (Creature* vem = GetSingleCreatureFromStorage(NPC_VEM))
+                    if (vem->isAlive())
+                        vem->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, vem, vem, m_uiBugTrioDeathCount);
+                if (Creature* yauj = GetSingleCreatureFromStorage(NPC_YAUJ))
+                    if (yauj->isAlive())
+                        yauj->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, yauj, yauj, m_uiBugTrioDeathCount);
+                if (Creature* kri = GetSingleCreatureFromStorage(NPC_KRI))
+                    if (kri->isAlive())
+                        kri->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, kri, kri, m_uiBugTrioDeathCount);
 
                 // don't store any special data
                 break;
