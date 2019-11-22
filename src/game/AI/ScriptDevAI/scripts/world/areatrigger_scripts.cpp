@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/* ContentData
+/* ContentData
 at_ravenholdt
 at_childrens_week_spot          3546,3547,3548,3552,3549,3550
 at_scent_larkorwi               1726,1727,1728,1729,1730,1731,1732,1733,1734,1735,1736,1737,1738,1739,1740
@@ -34,8 +34,8 @@ at_twilight_grove               4017
 at_hive_tower                   3146
 EndContentData */
 
-
-#include "world_map_scripts.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/scripts/kalimdor/world_kalimdor.h"
 
 static uint32 TriggerOrphanSpell[6][3] =
 {
