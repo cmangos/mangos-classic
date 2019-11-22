@@ -2284,7 +2284,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1531006','REUSE_ME','0','0','0','0','0','REUSE'),
 ('-1531007','REUSE_ME','0','0','0','0','0','REUSE'),
 
-('-1531008','You will be judged for defiling these sacred grounds! The laws of the Ancients will not be challenged! Trespassers will be annihilated!','8646','1','0','0','0','sartura SAY_AGGRO'),
+('-1531008','You will be judged for defiling these sacred grounds!  The laws of the Ancients will not be challenged!  Trespassers will be annihilated!','8646','1','0','0','0','sartura SAY_AGGRO'),
 ('-1531009','I sentence you to death!','8647','1','0','0','0','sartura SAY_SLAY'),
 ('-1531010','I serve to the last!','8648','1','0','0','0','sartura SAY_DEATH'),
 
