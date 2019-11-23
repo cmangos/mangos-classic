@@ -7,8 +7,11 @@ PRIMARY KEY(Id)
 
 -- Classic
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(720,'spell_entangle_fankriss'),
+(731,'spell_entangle_fankriss'),
 (785,'spell_true_fulfillment'),
 (794,'spell_initialize_images'),
+(1121,'spell_entangle_fankriss'),
 (7054,'spell_forsaken_skill'),
 (19832,'spell_possess_razorgore'),
 (19873,'spell_destroy_egg'),
