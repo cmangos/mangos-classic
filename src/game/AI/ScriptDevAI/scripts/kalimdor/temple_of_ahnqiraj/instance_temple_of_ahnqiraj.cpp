@@ -148,6 +148,7 @@ void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* creature)
         case NPC_MASTERS_EYE:
         case NPC_OURO_SPAWNER:
         case NPC_CTHUN:
+        case NPC_VISCIDUS:
             m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
     }
@@ -175,6 +176,13 @@ void instance_temple_of_ahnqiraj::OnObjectCreate(GameObject* pGo)
     }
 
     m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+}
+
+void instance_temple_of_ahnqiraj::OnCreatureRespawn(Creature* creature)
+{
+    if (creature->GetEntry() == NPC_VISCIDUS_TRIGGER)
+        if (Creature* viscidus = GetSingleCreatureFromStorage(NPC_VISCIDUS))
+            viscidus->AI()->JustSummoned(creature);
 }
 
 void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)

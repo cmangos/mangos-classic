@@ -543,7 +543,6 @@ UPDATE creature_template SET ScriptName='boss_kri' WHERE entry=15511;
 UPDATE creature_template SET ScriptName='boss_sartura' WHERE entry=15516;
 UPDATE creature_template SET ScriptName='boss_fankriss' WHERE entry=15510;
 UPDATE creature_template SET ScriptName='boss_viscidus' WHERE entry=15299;
-UPDATE creature_template SET ScriptName='npc_glob_of_viscidus' WHERE entry=15667;
 UPDATE creature_template SET ScriptName='boss_huhuran' WHERE entry=15509;
 UPDATE creature_template SET ScriptName='boss_veklor' WHERE entry=15276;
 UPDATE creature_template SET ScriptName='boss_veknilash' WHERE entry=15275;

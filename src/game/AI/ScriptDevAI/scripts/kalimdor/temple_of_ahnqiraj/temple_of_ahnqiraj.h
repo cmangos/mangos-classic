@@ -29,6 +29,7 @@ enum
     NPC_VEKNILASH               = 15275,
     NPC_MASTERS_EYE             = 15963,
     NPC_OURO_SPAWNER            = 15957,
+    NPC_VISCIDUS                = 15299,
     // NPC_EYE_OF_CTHUN          = 15589,
     NPC_CTHUN                   = 15727,
 
@@ -67,6 +68,8 @@ enum
     SPELL_WHISPERINGS_CTHUN_3   = 26198,
     SPELL_WHISPERINGS_CTHUN_4   = 26258,
     SPELL_WHISPERINGS_CTHUN_5   = 26259,
+
+    NPC_VISCIDUS_TRIGGER        = 15925,
 };
 
 // Prophecies yelled by Propher Skeram before he is engaged
@@ -87,6 +90,7 @@ class instance_temple_of_ahnqiraj : public ScriptedInstance, private DialogueHel
 
         void OnCreatureCreate(Creature* creature) override;
         void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureRespawn(Creature* creature) override;
 
         void OnPlayerLeave(Player* pPlayer) override;
 
