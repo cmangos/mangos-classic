@@ -156,8 +156,8 @@ struct boss_kriAI : public boss_silithidRoyaltyAI
 {
     boss_kriAI(Creature* creature) : boss_silithidRoyaltyAI(creature, KRI_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        AddCombatAction(KRI_CLEAVE, urand(4, 8) * IN_MILLISECONDS);
-        AddCombatAction(KRI_TOXIC_VOLLEY, urand(6, 30) * IN_MILLISECONDS);
+        AddCombatAction(KRI_CLEAVE, 4000, 8000);
+        AddCombatAction(KRI_TOXIC_VOLLEY, 6000, 30000);
         AddCombatAction(KRI_THRASH, 6u * IN_MILLISECONDS);
     }
 

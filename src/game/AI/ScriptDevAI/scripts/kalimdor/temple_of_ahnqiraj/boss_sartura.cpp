@@ -58,8 +58,8 @@ struct boss_sarturaAI : public CombatAI
     boss_sarturaAI(Creature* creature) : CombatAI(creature, SARTURA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         AddTimerlessCombatAction(SARTURA_ENRAGE, true);
-        AddCombatAction(SARTURA_WHIRLWIND, urand(10, 20) * IN_MILLISECONDS);
-        AddCombatAction(SARTURA_SUNDERING_CLEAVE, urand(2, 5) * IN_MILLISECONDS);
+        AddCombatAction(SARTURA_WHIRLWIND, 10000, 20000);
+        AddCombatAction(SARTURA_SUNDERING_CLEAVE, 2000, 5000);
         AddCombatAction(SARTURA_BERSERK, uint32(10 * MINUTE * IN_MILLISECONDS));
         Reset();
     }

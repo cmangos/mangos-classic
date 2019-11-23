@@ -64,9 +64,9 @@ struct boss_skeramAI : public CombatAI
     {
         if (!m_isImage)
             AddTimerlessCombatAction(SKERAM_SPLIT, true);
-        AddCombatAction(SKERAM_ARCANE_EXPLOSION, urand(6, 12) * IN_MILLISECONDS);
+        AddCombatAction(SKERAM_ARCANE_EXPLOSION, 6000, 12000);
         AddCombatAction(SKERAM_TRUE_FULFILMENT, uint32(15) * IN_MILLISECONDS);
-        AddCombatAction(SKERAM_BLINK, urand(30, 45) * IN_MILLISECONDS);
+        AddCombatAction(SKERAM_BLINK, 30000, 45000);
         AddCombatAction(SKERAM_EARTH_SHOCK, 1200u);
         Reset();
     }
