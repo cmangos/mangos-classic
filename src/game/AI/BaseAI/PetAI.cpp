@@ -400,8 +400,7 @@ void PetAI::UpdateAllies()
             m_AllySet.insert(target->GetObjectGuid());
         }
     }
-    else                                                    // remove group
-        m_AllySet.insert(owner->GetObjectGuid());
+    m_AllySet.insert(owner->GetObjectGuid());
 }
 
 void PetAI::AttackedBy(Unit* attacker)
