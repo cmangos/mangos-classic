@@ -385,8 +385,10 @@ void PetAI::UpdateAllies()
         return;
 
     m_AllySet.clear();
-    m_AllySet.insert(m_unit->GetObjectGuid());
-    if (group)                                             // add group
+    m_AllySet.insert(m_unit->GetObjectGuid());  // add self
+    m_AllySet.insert(owner->GetObjectGuid());   // add owner
+
+    if (group)                                  // add group
     {
         for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
         {
@@ -400,8 +402,6 @@ void PetAI::UpdateAllies()
             m_AllySet.insert(target->GetObjectGuid());
         }
     }
-    else                                                    // remove group
-        m_AllySet.insert(owner->GetObjectGuid());
 }
 
 void PetAI::AttackedBy(Unit* attacker)
