@@ -18,6 +18,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (20038,'spell_explosion_razorgore'),
 (25937,'spell_viscidus_freeze'),
 (26084,'spell_aq_whirlwind'),
+(26180,'spell_huhuran_wyvern_string'),
 (26584,'spell_summon_toxic_slime'),
 (26591,'spell_teleport_image'),
 (26686,'spell_aq_whirlwind');

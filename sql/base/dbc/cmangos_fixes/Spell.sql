@@ -106,3 +106,7 @@ INSERT INTO `spell_template` (`Id`, `Attributes`, `CastingTimeIndex`, `ProcChanc
 -- Razorgore - Destroy Egg - should not be affected by pushback and interrupt on damage
 UPDATE spell_template SET InterruptFlags=InterruptFlags&~0x12 WHERE Id IN(19873);
 
+-- AQ40 - Huhuran - Wyvern Sting/Poison Bolt Volley - Max 10 targets
+UPDATE spell_template SET MaxAffectedTargets=10 WHERE Id IN(26180);
+UPDATE spell_template SET MaxAffectedTargets=15 WHERE Id IN(26052);
+
