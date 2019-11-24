@@ -842,7 +842,7 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     {
         // Objects vs units case: traps and similar
         // Pre-TBC: Reflect negates the spell when not in combat with caster, otherwise reflect
-        if (!m_originalCasterGUID.IsUnit() && (!m_caster->isInCombat() || m_caster->IsAttackedBy(target)))
+        if (!m_originalCasterGUID.IsUnit() && (!m_caster->isInCombat() || !m_caster->IsAttackedBy(target)))
         {
             target->ProcDamageAndSpell(ProcSystemArguments(nullptr, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_FLAG_NONE , PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
             targetInfo.reflectResult = SPELL_MISS_REFLECT;
