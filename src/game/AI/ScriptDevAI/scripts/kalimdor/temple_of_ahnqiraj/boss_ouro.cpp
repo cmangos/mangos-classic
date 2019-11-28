@@ -35,8 +35,9 @@ enum
     SPELL_BERSERK           = 26615,
 
     // emerge spells
+    SPELL_BIRTH_SPAWN       = 26586,
     SPELL_BIRTH             = 26262,                        // The Birth Animation
-    SPELL_GROUND_RUPTURE    = 26100,                        // spell not confirmed
+    SPELL_GROUND_RUPTURE    = 26100,
     SPELL_SUMMON_BASE       = 26133,                        // summons gameobject 180795
 
     // submerge spells
@@ -46,7 +47,8 @@ enum
 
     // SPELL_SUMMON_OURO_TRIGG = 26642,
     SPELL_SUMMON_OURO       = 26061,                        // used by the script to summon the boss directly
-    //SPELL_QUAKE             = 26093,
+    SPELL_QUAKE             = 26093,
+    SPELL_DREAM_FOG         = 24780,                        // on mounds
 
     // other spells - not used
     // SPELL_SUMMON_SCARABS    = 26060,                     // triggered after 30 secs - cast by the Dirt Mounds
@@ -104,6 +106,8 @@ struct boss_ouroAI : public Scripted_NoMovementAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_OURO, IN_PROGRESS);
+
+        DoCastSpellIfCan(nullptr, SPELL_BIRTH_SPAWN);
     }
 
     void JustReachedHome() override
