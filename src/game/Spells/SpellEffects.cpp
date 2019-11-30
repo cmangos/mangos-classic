@@ -4526,6 +4526,16 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         DoScriptText(-1533119, m_caster, unitTarget);
                     return;
                 }
+                case 28338:                                 // Magnetic Pull
+                case 28339:                                 // Magnetic Pull
+                {
+                    if (unitTarget && m_caster->getVictim())
+                        unitTarget->CastSpell(m_caster->getVictim(), 28337, TRIGGERED_OLD_TRIGGERED);   // target cast actual Magnetic Pull on caster's victim
+                        // ToDo research if target should also get the threat of the caster for caster's victim.
+                        // This is the case in WotLK version but we have no proof of this in Classic/TBC
+                        // and it was common at these times to let players manage threat and tank transitions by themselves
+                    return;
+                }
                 case 28352:                                 // Breath of Sargeras
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
