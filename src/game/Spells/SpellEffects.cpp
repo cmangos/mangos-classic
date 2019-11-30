@@ -1341,6 +1341,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 28308, TRIGGERED_NONE); // Hateful Strike
                     return;
                 }
+                case 28359:                                 // Trigger Teslas
+                {
+                    if (unitTarget)
+                    {
+                        unitTarget->RemoveAllAuras();
+                        unitTarget->CastSpell(unitTarget, 28159, TRIGGERED_NONE);   // Shock
+                    }
+                    return;
+                }
                 case 28414:                                 // Call of the Ashbringer
                 {
                     if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
