@@ -1303,22 +1303,30 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 28098:                                 // Stalagg Tesla Effect
                 case 28110:                                 // Feugen Tesla Effect
                 {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->isAlive())
                     {
-                        if (m_caster->getVictim() && !m_caster->IsWithinDistInMap(unitTarget, 60.0f))
+                        if (!m_caster->hasUnitState(UNIT_STAT_ROOT))    // This state is found in sniffs and is probably caused by another aura like 23973
+                            m_caster->addUnitState(UNIT_STAT_ROOT);     // but as we are not sure (the aura does not show up in sniffs), we handle the state here
+
+                        // Cast chain (Stalagg Chain or Feugen Chain)
+                        uint32 chainSpellId = m_spellInfo->Id == 28098 ? 28096 : 28111;
+                        // Only cast if not already present and in range
+                        if (!unitTarget->HasAura(chainSpellId) && m_caster->IsWithinDistInMap(unitTarget, 60.0f))
                         {
-                            // Cast Shock on nearby targets
-                            if (Unit* pTarget = ((Creature*)m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                                unitTarget->CastSpell(pTarget, 28099, TRIGGERED_NONE);
+                            if (!m_caster->IsImmuneToPlayer())
+                                m_caster->SetImmuneToPlayer(true);
+                            m_caster->CastSpell(unitTarget, chainSpellId, TRIGGERED_OLD_TRIGGERED);
                         }
-                        else
+                        // Not in range and fight in progress: remove aura and cast Shock onto players
+                        else if (!m_caster->IsWithinDistInMap(unitTarget, 60.0f) && m_caster)
                         {
-                            // "Evade"
-                            unitTarget->RemoveAurasDueToSpell(m_spellInfo->Id == 28098 ? 28097 : 28109);
-                            unitTarget->CombatStop(true);
-                            // Recast chain (Stalagg Chain or Feugen Chain
-                            unitTarget->CastSpell(m_caster, m_spellInfo->Id == 28098 ? 28096 : 28111, TRIGGERED_NONE);
+                            unitTarget->RemoveAurasDueToSpell(chainSpellId);
+                            m_caster->SetImmuneToPlayer(false);
+
+                            if (Unit* target = ((Creature*)m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                                m_caster->CastSpell(target, 28099, TRIGGERED_NONE);
                         }
+                        // else: in range and already have aura: do nothing
                     }
                     return;
                 }
