@@ -238,9 +238,6 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         void GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide);
         bool IsInRightSideGothArea(Unit* pUnit);
 
-        // thaddius
-        void GetThadTeslaCreatures(GuidList& lList) const { lList = m_lThadTeslaCoilList; };
-
         // kel
         void SetChamberCenterCoords(float fX, float fY, float fZ);
         void GetChamberCenterCoords(float& fX, float& fY, float& fZ) const
