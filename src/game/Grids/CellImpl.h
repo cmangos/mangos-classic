@@ -196,8 +196,9 @@ inline void Cell::VisitWorldObjects(const WorldObject* center_obj, T& visitor, f
 template<class T>
 inline void Cell::VisitAllObjects(const WorldObject* center_obj, T& visitor, float radius, bool dont_load)
 {
-    if (!center_obj)
-        return;
+    // The assert below is required for https://github.com/cmangos/mangos-tbc/pull/344 and issue https://github.com/cmangos/issues/issues/2044
+    // A nullptr center_obj was passed as parameter leading to a crash. ToDo investigate why a nullptr came here in the first place.
+    MANGOS_ASSERT(center_obj != nullptr);
     CellPair p(MaNGOS::ComputeCellPair(center_obj->GetPositionX(), center_obj->GetPositionY()));
     Cell cell(p);
     if (dont_load)
