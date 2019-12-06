@@ -1352,12 +1352,12 @@ void Loot::Release(Player* player)
                 {
                     Creature* creature = (Creature*)m_lootTarget;
                     SetPlayerIsNotLooting(player);
+                    updateClients = true;
 
                     if (m_isFakeLoot)
                     {
                         SendReleaseForAll();
                         creature->SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
-                        m_lootTarget->ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);
                         break;
                     }
 
