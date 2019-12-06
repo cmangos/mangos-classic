@@ -8459,8 +8459,8 @@ bool Unit::IsLeashingTarget(Unit* victim) const
         GetPosition(x, y, z);
 
     // Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
-    // TODO: Implement proper leashing
-    return !victim->IsWithinDist3d(x, y, z, ThreatRadius > AttackDist ? ThreatRadius : AttackDist);
+    // TODO: Implement proper leashing. In the meantime, we ignore leashing for all creatures in dungeon though this is not always true
+    return !GetMap()->IsDungeon() && !victim->IsWithinDist3d(x, y, z, ThreatRadius > AttackDist ? ThreatRadius : AttackDist);
 }
 
 uint32 Unit::GetCreatureType() const
