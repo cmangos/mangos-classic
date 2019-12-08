@@ -52,7 +52,7 @@ enum
     SAY_SLAY                        = -1533033,
     SAY_ELECT                       = -1533034,
     SAY_DEATH                       = -1533035,
-    EMOTE_POLARITY_SHIFT            = -1533151,
+    EMOTE_TESLA_OVERLOAD            = -1533150,
 
     // Thaddius Spells
     SPELL_THADIUS_SPAWN             = 28160,
@@ -85,10 +85,9 @@ enum
 ** boss_thaddius
 ************/
 
-// Actually this boss behaves like a NoMovement Boss (SPELL_BALL_LIGHTNING) - but there are some movement packages used, unknown what this means!
-struct boss_thaddiusAI : public Scripted_NoMovementAI
+struct boss_thaddiusAI : public ScriptedAI
 {
-    boss_thaddiusAI(Creature* creature) : Scripted_NoMovementAI(creature)
+    boss_thaddiusAI(Creature* creature) : ScriptedAI(creature)
     {
         m_instance = (instance_naxxramas*)creature->GetInstanceData();
         Reset();
@@ -105,11 +104,12 @@ struct boss_thaddiusAI : public Scripted_NoMovementAI
     {
         m_polarityShiftTimer = 15 * IN_MILLISECONDS;
         m_chainLightningTimer = 8 * IN_MILLISECONDS;
-        m_ballLightningTimer = 1 * IN_MILLISECONDS;
+        m_ballLightningTimer = 3 * IN_MILLISECONDS;
         m_berserkTimer = 6 * MINUTE * IN_MILLISECONDS;
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
-        DoCastSpellIfCan(m_creature, SPELL_THADIUS_SPAWN);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetImmuneToPlayer(true);
+        DoCastSpellIfCan(m_creature, SPELL_THADIUS_SPAWN, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -122,29 +122,16 @@ struct boss_thaddiusAI : public Scripted_NoMovementAI
         }
 
         // Make Attackable
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetImmuneToPlayer(false);
     }
 
     void JustReachedHome() override
     {
         if (m_instance)
-        {
             m_instance->SetData(TYPE_THADDIUS, FAIL);
 
-            // Respawn Adds:
-            Creature* feugen  = m_instance->GetSingleCreatureFromStorage(NPC_FEUGEN);
-            Creature* stalagg = m_instance->GetSingleCreatureFromStorage(NPC_STALAGG);
-            if (feugen)
-            {
-                feugen->ForcedDespawn();
-                feugen->Respawn();
-            }
-            if (stalagg)
-            {
-                stalagg->ForcedDespawn();
-                stalagg->Respawn();
-            }
-        }
+        DoCastSpellIfCan(m_creature, SPELL_THADIUS_SPAWN, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void KilledUnit(Unit* victim) override
@@ -197,7 +184,6 @@ struct boss_thaddiusAI : public Scripted_NoMovementAI
             if (DoCastSpellIfCan(m_creature, SPELL_POLARITY_SHIFT, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
             {
                 DoScriptText(SAY_ELECT, m_creature);
-                DoScriptText(EMOTE_POLARITY_SHIFT, m_creature);
                 m_polarityShiftTimer = 30 * IN_MILLISECONDS;
             }
         }
@@ -214,14 +200,14 @@ struct boss_thaddiusAI : public Scripted_NoMovementAI
         else
             m_chainLightningTimer -= diff;
 
-        // Ball Lightning if target not in melee range
-        // TODO: Verify, likely that the boss should attack any enemy in melee range before starting to cast
-        if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+        // Ball Lightning if no target in melee range
+        Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE);
+        if (!target)
         {
             if (m_ballLightningTimer < diff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BALL_LIGHTNING) == CAST_OK)
-                    m_ballLightningTimer = 1 * IN_MILLISECONDS;
+                    m_ballLightningTimer = 3 * IN_MILLISECONDS;
             }
             else
                 m_ballLightningTimer -= diff;
@@ -246,20 +232,22 @@ bool EffectDummyNPC_spell_thaddius_encounter(Unit* /*caster*/, uint32 spellId, S
                 // Only do something to Thaddius, and on the first hit.
                 if (creatureTarget->GetEntry() != NPC_THADDIUS || !creatureTarget->HasAura(SPELL_THADIUS_SPAWN))
                     return true;
-                // remove Stun and then Cast
+                // remove Stun and then Cast visual starting spell
                 creatureTarget->RemoveAurasDueToSpell(SPELL_THADIUS_SPAWN);
                 creatureTarget->CastSpell(creatureTarget, SPELL_THADIUS_LIGHTNING_VISUAL, TRIGGERED_NONE);
+                // Remove visual effect on Tesla GOs
+                if (instance_naxxramas* instance = (instance_naxxramas*)creatureTarget->GetInstanceData())
+                {
+                    if (GameObject* stalaggTesla = instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG))
+                        stalaggTesla->SetGoState(GO_STATE_READY);
+                    if (GameObject* feugenTesla = instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN))
+                        feugenTesla->SetGoState(GO_STATE_READY);
+                }
             }
             return true;
         case SPELL_THADIUS_LIGHTNING_VISUAL:
             if (effIndex == EFFECT_INDEX_0 && creatureTarget->GetEntry() == NPC_THADDIUS)
-            {
-                if (instance_naxxramas* pInstance = (instance_naxxramas*)creatureTarget->GetInstanceData())
-                {
-                    if (Player* player = pInstance->GetPlayerInMap(true, false))
-                        creatureTarget->AI()->AttackStart(player);
-                }
-            }
+                creatureTarget->SetInCombatWithZone();
             return true;
     }
     return false;

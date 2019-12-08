@@ -497,6 +497,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             if (uiData == FAIL)
             {
                 // Reset stage for phase 1
+                // Respawn: Stalagg, Feugen, their respective Tesla Coil NPCs and Tesla GOs
                 if (Creature* stalagg = GetSingleCreatureFromStorage(NPC_STALAGG))
                 {
                     stalagg->ForcedDespawn();
@@ -517,6 +518,10 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                         teslaCoil->Respawn();
                     }
                 }
+                if (GameObject* stalaggTesla = GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG))
+                	stalaggTesla->SetGoState(GO_STATE_ACTIVE);
+                if (GameObject* feugenTesla = GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN))
+                	feugenTesla->SetGoState(GO_STATE_ACTIVE);
             }
             if (uiData != SPECIAL)
                 DoUseDoorOrButton(GO_CONS_THAD_DOOR, uiData);
