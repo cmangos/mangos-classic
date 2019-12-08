@@ -535,16 +535,21 @@ void Unit::EvadeTimerExpired()
     getThreatManager().SetTargetSuppressed(getVictim());
 }
 
+enum SwingErrors
+{
+    SWING_ERROR_NOT_IN_RANGE,
+    SWING_ERROR_TARGET_NOT_ALIVE,
+    SWING_ERROR_BAD_FACING,
+    SWING_ERROR_CANT_ATTACK_TARGET,
+};
+
 bool Unit::UpdateMeleeAttackingState()
 {
     Unit* victim = getVictim();
     if (!victim || IsNonMeleeSpellCasted(false))
         return false;
 
-    if (GetTypeId() != TYPEID_PLAYER && (!((Creature*)this)->CanInitiateAttack() || !victim->isInAccessablePlaceFor((Creature*)this)))
-        return false;
-
-    if (!CanAttack(victim))
+    if (GetTypeId() != TYPEID_PLAYER && (!static_cast<Creature*>(this)->CanInitiateAttack() || !victim->isInAccessablePlaceFor(static_cast<Creature*>(this))))
         return false;
 
     if (!isAttackReady(BASE_ATTACK) && !(isAttackReady(OFF_ATTACK) && hasOffhandWeaponForAttack()))
@@ -552,24 +557,13 @@ bool Unit::UpdateMeleeAttackingState()
 
     uint8 swingError = 0;
     if (!CanReachWithMeleeAttack(victim))
-    {
-        if (isAttackReady(BASE_ATTACK))
-            setAttackTimer(BASE_ATTACK, 100);
-        if (hasOffhandWeaponForAttack() && isAttackReady(OFF_ATTACK))
-            setAttackTimer(OFF_ATTACK, 100);
-
-        swingError = 1;
-    }
-    // 120 degrees of radiant range
-    else if (!HasInArc(victim, 2 * M_PI_F / 3))
-    {
-        if (isAttackReady(BASE_ATTACK))
-            setAttackTimer(BASE_ATTACK, 100);
-        if (hasOffhandWeaponForAttack() && isAttackReady(OFF_ATTACK))
-            setAttackTimer(OFF_ATTACK, 100);
-
-        swingError = 2;
-    }
+        swingError = SWING_ERROR_NOT_IN_RANGE;
+    else if (!HasInArc(victim))
+        swingError = SWING_ERROR_BAD_FACING;
+    else if (!victim->isAlive())
+        swingError = SWING_ERROR_TARGET_NOT_ALIVE;
+    else if (!CanAttack(victim))
+        swingError = SWING_ERROR_CANT_ATTACK_TARGET;
     else
     {
         if (isAttackReady(BASE_ATTACK))
@@ -595,13 +589,30 @@ bool Unit::UpdateMeleeAttackingState()
         }
     }
 
-    Player* player = (GetTypeId() == TYPEID_PLAYER ? (Player*)this : nullptr);
+    if (swingError)
+    {
+        setAttackTimer(BASE_ATTACK, 100);
+        setAttackTimer(OFF_ATTACK, 100);
+    }
+
+    Player* player = IsClientControlled() ? const_cast<Player*>(GetClientControlling()) : nullptr;
     if (player && swingError != player->LastSwingErrorMsg())
     {
-        if (swingError == 1)
-            player->SendAttackSwingNotInRange();
-        else if (swingError == 2)
-            player->SendAttackSwingBadFacingAttack();
+        switch (swingError)
+        {
+            case SWING_ERROR_NOT_IN_RANGE:
+                player->SendAttackSwingNotInRange();
+                break;
+            case SWING_ERROR_TARGET_NOT_ALIVE:
+                player->SendAttackSwingDeadTarget();
+                break;
+            case SWING_ERROR_BAD_FACING:
+                player->SendAttackSwingBadFacingAttack();
+                break;
+            case SWING_ERROR_CANT_ATTACK_TARGET:
+                player->SendAttackSwingCantAttack();
+                break;
+        }
         player->SwingErrorMsg(swingError);
     }
 

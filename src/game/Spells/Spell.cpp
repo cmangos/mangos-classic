@@ -3460,8 +3460,8 @@ void Spell::finish(bool ok)
 
         m_caster->AttackStop();
 
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_caster)->SendAttackSwingCancelAttack();
+        if (m_caster->IsClientControlled())
+            const_cast<Player*>(m_caster->GetClientControlling())->SendAttackSwingCancelAttack();
     }
 
     // update encounter state if needed
