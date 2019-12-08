@@ -5488,9 +5488,6 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
     if (!unitTarget || !m_caster)
         return;
 
-    WorldLocation pos;
-    unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetCombatReach(), unitTarget->GetAngle(m_caster));
-
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature*)unitTarget)->StopMoving();
 
@@ -5498,9 +5495,9 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         static_cast<Player*>(m_caster)->SetFallInformation(0, m_caster->GetPositionZ());
 
-    float speed = m_spellInfo->speed ? m_spellInfo->speed : BASE_CHARGE_SPEED;
+    const float speed = (m_spellInfo->speed != 0.f ? m_spellInfo->speed : BASE_CHARGE_SPEED);
 
-    m_caster->GetMotionMaster()->MoveCharge(pos.coord_x, pos.coord_y, pos.coord_z, speed, m_spellInfo->Id);
+    m_caster->GetMotionMaster()->MoveCharge(*unitTarget, speed, m_spellInfo->Id);
 }
 
 void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)

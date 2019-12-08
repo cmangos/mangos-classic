@@ -125,6 +125,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void MoveTaxiFlight();
         void MoveDistract(uint32 timer);
         void MoveCharge(float x, float y, float z, float speed, uint32 id = EVENT_CHARGE);
+        void MoveCharge(Unit& target, float speed, uint32 id = EVENT_CHARGE);
         void MoveFall();
 
         MovementGeneratorType GetCurrentMovementGeneratorType() const;

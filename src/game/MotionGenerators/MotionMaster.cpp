@@ -445,7 +445,7 @@ void MotionMaster::MoveDistract(uint32 timer)
     Mutate(mgen);
 }
 
-void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id/*= EVENT_CHARGE*/)
+void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id/* = EVENT_CHARGE*/)
 {
     if (m_owner->hasUnitState(UNIT_STAT_NO_FREE_MOVE))
         return;
@@ -454,6 +454,23 @@ void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id/
     init.SetWalk(false);
     init.SetVelocity(speed);
     init.MoveTo(x, y, z, true);
+
+    Mutate(new EffectMovementGenerator(init, id, false));
+}
+
+void MotionMaster::MoveCharge(Unit& target, float speed, uint32 id/* = EVENT_CHARGE*/)
+{
+    if (m_owner->hasUnitState(UNIT_STAT_NO_FREE_MOVE))
+        return;
+
+    WorldLocation pos;
+    target.GetFirstCollisionPosition(pos, target.GetCombatReach(), target.GetAngle(m_owner));
+
+    Movement::MoveSplineInit init(*m_owner);
+    init.SetWalk(false);
+    init.SetVelocity(speed);
+    init.SetFacing(&target);
+    init.MoveTo(pos.coord_x, pos.coord_y, pos.coord_z, true);
 
     Mutate(new EffectMovementGenerator(init, id, false));
 }
