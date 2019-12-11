@@ -1554,7 +1554,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     if (apply)
                     {
                         target->SetStandState(UNIT_STAND_STATE_CUSTOM);
-                        if (target->GetTypeId() == TYPEID_UNIT)
+                        if (target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == 16236)
                             ((Creature*)target)->ForcedDespawn(700);
                     }
                     else
