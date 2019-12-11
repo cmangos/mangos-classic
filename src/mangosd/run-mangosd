@@ -2,13 +2,29 @@
 # Massive Network Game Object Server
 # autorestart Script
 
-while :
-do
-	echo "MaNGOS daemon restarted"
-	echo `date` >> crash.log &
-	./mangosd | tail -n 20 >> crash.log
-	echo " " >> crash.log &
-	pid=`ps ax | awk '($5 ~ /mangosd/) { print $1 }'`
-	wait $pid
-        echo `date` ", MaNGOS daemon crashed and restarted." >> serverlog
-done
+case $1 in
+    start )
+        screen -dmS tbc-vengeance $PWD/$0 detached
+        echo "MaNGOS daemon started"
+    ;;
+    detached )
+        while :
+        do
+                echo `date` >> crash.log
+                cmd="./mangosd"
+                $cmd
+                status=$?
+                echo "Status after downtime is: $status"
+                mv Server.log Server$(date +%F-%H:%M).log && touch Server.log
+                if [ "$status" == "2" ]; then
+                   echo `date` ", MaNGOS daemon restarted."
+                elif [ "$status" == "0" ]; then
+                   echo "date" ", MaNGOS daemon shut down."
+                   exit 0
+                else
+                   mv crash.log $(date +%F-%H:%M).log && touch crash.log
+                   echo "date" ", MaNGOS daemon crashed."
+                fi
+        done
+        ;;
+esac
