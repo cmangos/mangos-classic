@@ -5426,8 +5426,10 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
     {
         // Players: abilities against hostiles initiate auto-attack when not currently attacking
         // TODO: This is executed after spell effects. Verify if this should be executed before spell effects, as well as this entire method
-        if (spellInfo->HasAttribute(SPELL_ATTR_ABILITY) && !realCaster->getVictim() && realCaster->IsClientControlled() && realCaster->CanAttackSpell(target, spellInfo))
-            realCaster->Attack(target, !spellInfo->HasAttribute(SPELL_ATTR_RANGED));
+        if (spellInfo->HasAttribute(SPELL_ATTR_ABILITY) && !spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
+            if (spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY && !realCaster->getVictim() && realCaster->IsClientControlled())
+                if (realCaster->CanAttackNow(target) && realCaster->CanAttackSpell(target, spellInfo))
+                    realCaster->Attack(target, !spellInfo->HasAttribute(SPELL_ATTR_RANGED));
 
         if (spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
             return;
