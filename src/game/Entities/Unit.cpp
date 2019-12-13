@@ -7501,7 +7501,7 @@ void Unit::ClearInCombat()
 
 void Unit::HandleExitCombat()
 {
-    if (AI())
+    if (AI() && !IsClientControlled())
         AI()->EnterEvadeMode();
     else
         CombatStop();
