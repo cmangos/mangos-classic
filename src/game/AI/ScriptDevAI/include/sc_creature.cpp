@@ -363,13 +363,24 @@ void ScriptedAI::SetEquipmentSlots(bool loadDefault, int32 mainHand, int32 offHa
     }
 
     if (mainHand >= 0)
+    { 
         m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, mainHand);
+        m_creature->UpdateDamagePhysical(BASE_ATTACK);            
+    }
 
     if (offHand >= 0)
+    { 
         m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_1, offHand);
-
+        if(offHand == 1)
+            m_creature->SetCanDualWield(true);
+        else
+            m_creature->SetCanDualWield(false);
+    }
     if (ranged >= 0)
+    {
         m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_2, ranged);
+        m_creature->UpdateDamagePhysical(RANGED_ATTACK);
+    }
 }
 
 // Hacklike storage used for misc creatures that are expected to evade of outside of a certain area.
