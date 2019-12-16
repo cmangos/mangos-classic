@@ -3190,16 +3190,19 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         responsibleCaster = ((GameObject*)realCaster)->GetOwner();
 
     Unit* petInvoker = responsibleCaster ? responsibleCaster : m_caster;
-    uint32 level = petInvoker->getLevel();
+    // Guardian pets use their creature template level by default
+    uint32 level = urand(0, 1) ? cInfo->MinLevel : cInfo->MaxLevel;
     if (petInvoker->GetTypeId() != TYPEID_PLAYER)
     {
-        // pet players do not need this
-        // TODO :: Totem, Pet and Critter may not use this. This is probably wrongly used and need more research.
-        uint32 resultLevel = level + std::max(m_spellInfo->EffectMultipleValue[eff_idx], .0f);
+        // If EffectMultipleValue <= 0, guardian pets use their caster level modified by EffectMultipleValue for their own level
+        if (m_spellInfo->EffectMultipleValue[eff_idx] <= 0)
+        {
+            uint32 resultLevel = std::max(petInvoker->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 0.0f);
 
-        // result level should be a possible level for creatures
-        if (resultLevel > 0 && resultLevel <= DEFAULT_MAX_CREATURE_LEVEL)
-            level = resultLevel;
+            // Result level should be a valid level for creatures
+            if (resultLevel > 0 && resultLevel <= DEFAULT_MAX_CREATURE_LEVEL)
+                level = resultLevel;
+        }
     }
     // level of pet summoned using engineering item based at engineering skill level
     else if (m_CastItem)
@@ -3209,16 +3212,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         {
             uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINEERING);
             if (skill202)
-            {
                 level = skill202 / 5;
-            }
-        }
-        else if (cInfo)
-        {
-            if (level >= cInfo->MaxLevel)
-                level = cInfo->MaxLevel;
-            else if (level <= cInfo->MinLevel)
-                level = cInfo->MinLevel;
         }
     }
 
