@@ -2139,7 +2139,7 @@ bool ScriptAction::HandleScriptStep()
                 ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
             // else if no radius and target is creature send AI event to target
             else if (pTarget->GetTypeId() == TYPEID_UNIT)
-                ((Creature*)pSource)->AI()->SendAIEvent(AIEventType(m_script->sendAIEvent.eventType), nullptr, (Creature*)pTarget);
+                ((Creature*)pSource)->AI()->SendAIEvent(AIEventType(m_script->sendAIEvent.eventType), nullptr, (Unit*)pTarget);
             break;
         }
         case SCRIPT_COMMAND_SET_FACING:                     // 36
