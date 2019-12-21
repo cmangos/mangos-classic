@@ -100,6 +100,8 @@ struct boss_victor_nefariusAI : public CombatAI, private DialogueHelper
         CombatAI::Reset();
         // set gossip flag to begin the event
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        SetCombatScriptStatus(false);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -122,7 +124,7 @@ struct boss_victor_nefariusAI : public CombatAI, private DialogueHelper
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
             m_creature->SetFactionTemporary(FACTION_BLACK_DRAGON, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
             DoCastSpellIfCan(nullptr, SPELL_NEFARIUS_BARRIER, CAST_TRIGGERED);
-            DoCastSpellIfCan(nullptr, SPELL_SHADOWBLINK, CAST_TRIGGERED);
+            DoCastSpellIfCan(nullptr, SPELL_SHADOWBLINK);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->SetInCombatWithZone();
@@ -201,11 +203,6 @@ struct boss_victor_nefariusAI : public CombatAI, private DialogueHelper
     }
 };
 
-UnitAI* GetAI_boss_victor_nefarius(Creature* creature)
-{
-    return new boss_victor_nefariusAI(creature);
-}
-
 bool GossipHello_boss_victor_nefarius(Player* player, Creature* creature)
 {
     if (creature->GetMapId() != MAP_ID_BWL)
@@ -248,7 +245,7 @@ void AddSC_boss_victor_nefarius()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_victor_nefarius";
-    pNewScript->GetAI = &GetAI_boss_victor_nefarius;
+    pNewScript->GetAI = &GetNewAIInstance<boss_victor_nefariusAI>;
     pNewScript->pGossipHello = &GossipHello_boss_victor_nefarius;
     pNewScript->pGossipSelect = &GossipSelect_boss_victor_nefarius;
     pNewScript->RegisterSelf();

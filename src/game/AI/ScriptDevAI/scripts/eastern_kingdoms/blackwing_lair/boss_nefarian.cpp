@@ -27,6 +27,8 @@ EndScriptData
 #include "blackwing_lair.h"
 #include "Entities/TemporarySpawn.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "MotionGenerators/WaypointManager.h"
+#include <G3D/Vector3.h>
 
 enum
 {
@@ -67,6 +69,8 @@ enum
     SPELL_WARLOCK               = 23427,                // infernals    -> should trigger 23426
     SPELL_HUNTER                = 23436,                // bow broke
     SPELL_ROGUE                 = 23414,                // Paralise
+
+    NPC_BONE_CONSTRUCT          = 14605,
 };
 
 enum NefarianActions
@@ -90,28 +94,34 @@ struct boss_nefarianAI : public CombatAI
     {
         AddTimerlessCombatAction(NEFARIAN_PHASE_3, true);
         AddTimerlessCombatAction(NEFARIAN_LOW_HP_YELL, true);
-        AddCombatAction(NEFARIAN_SHADOW_FLAME, 12000u);
-        AddCombatAction(NEFARIAN_BELLOWING_ROAR, 30000u);
-        AddCombatAction(NEFARIAN_VEIL_OF_SHADOW, 15000u);
-        AddCombatAction(NEFARIAN_CLEAVE, 7000u);
-        AddCombatAction(NEFARIAN_TAIL_LASH, 10000u);
-        AddCombatAction(NEFARIAN_CLASS_CALL, 35000u);
+        AddCombatAction(NEFARIAN_SHADOW_FLAME, true);
+        AddCombatAction(NEFARIAN_BELLOWING_ROAR, true);
+        AddCombatAction(NEFARIAN_VEIL_OF_SHADOW, true);
+        AddCombatAction(NEFARIAN_CLEAVE, true);
+        AddCombatAction(NEFARIAN_TAIL_LASH, true);
+        AddCombatAction(NEFARIAN_CLASS_CALL, true);
         AddCustomAction(NEFARIAN_INITIAL_YELL, true, [&]() { HandleInitialYell(); });
         AddCustomAction(NEFARIAN_ATTACK_START, true, [&]() { HandleAttackStart(); });
         SetReactState(REACT_PASSIVE);
-        m_creature->SetLevitate(true);
+        //m_creature->SetLevitate(true);
         m_creature->SetHover(true);
         SetMeleeEnabled(false);
-        m_creature->SetWalk(false);
         SetCombatMovement(false);
-        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
-        DoCastSpellIfCan(nullptr, SPELL_SPEED_BURST, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoCastSpellIfCan(nullptr, SPELL_SHADOW_FLAME_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        m_creature->GetMotionMaster()->MoveWaypoint(0);
+        // m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
     }
 
     ScriptedInstance* m_instance;
+
+    void JustRespawned() override
+    {
+        CombatAI::JustRespawned();
+        DoCastSpellIfCan(nullptr, SPELL_SPEED_BURST, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_SHADOW_FLAME_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        ResetTimer(NEFARIAN_INITIAL_YELL, 10 * IN_MILLISECONDS);
+        m_creature->SetWalk(false);
+        StartLanding();
+    }
 
     void KilledUnit(Unit* victim) override
     {
@@ -129,13 +139,26 @@ struct boss_nefarianAI : public CombatAI
             m_instance->SetData(TYPE_NEFARIAN, DONE);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
+        CombatAI::EnterEvadeMode();
         if (m_instance)
         {
             m_instance->SetData(TYPE_NEFARIAN, FAIL);
             m_creature->ForcedDespawn();
         }
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        if (summoned->GetEntry() == NPC_BONE_CONSTRUCT)
+            summoned->SetCorpseDelay(5);
+    }
+
+    void StartLanding()
+    {
+        m_creature->SetWalk(false);
+        m_creature->GetMotionMaster()->MoveWaypoint(0);
     }
 
     void MovementInform(uint32 type, uint32 pointId) override
@@ -146,17 +169,13 @@ struct boss_nefarianAI : public CombatAI
         switch (pointId)
         {
             case 1:
-                ResetTimer(NEFARIAN_INITIAL_YELL, 10 * IN_MILLISECONDS);
                 DoScriptText(SAY_AGGRO, m_creature);
                 break;
-            case 9:
+            case 8:
                 // Stop flying and land
                 m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
-                m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
                 m_creature->SetLevitate(false);
                 m_creature->SetHover(false);
-                m_creature->GetMotionMaster()->Clear(false, true);
-                m_creature->GetMotionMaster()->MoveIdle();
                 ResetTimer(NEFARIAN_ATTACK_START, 4000);
                 break;
         }
@@ -165,19 +184,25 @@ struct boss_nefarianAI : public CombatAI
     void HandleInitialYell()
     {
         DoScriptText(SAY_SHADOW_FLAME, m_creature);
-        m_creature->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
     }
 
     void HandleAttackStart()
     {
         SetMeleeEnabled(true);
         SetReactState(REACT_AGGRESSIVE);
+        m_creature->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
         SetCombatMovement(true);
         m_creature->SetInCombatWithZone();
         // Make attackable and attack
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             m_creature->AI()->AttackStart(target);
+        ResetCombatAction(NEFARIAN_SHADOW_FLAME, 12000u);
+        ResetCombatAction(NEFARIAN_BELLOWING_ROAR, 30000u);
+        ResetCombatAction(NEFARIAN_VEIL_OF_SHADOW, 15000u);
+        ResetCombatAction(NEFARIAN_CLEAVE, 7000u);
+        ResetCombatAction(NEFARIAN_TAIL_LASH, 10000u);
+        ResetCombatAction(NEFARIAN_CLASS_CALL, 35000u);
     }
 
     void ExecuteAction(uint32 action) override
@@ -267,15 +292,10 @@ struct boss_nefarianAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_nefarian(Creature* creature)
-{
-    return new boss_nefarianAI(creature);
-}
-
 void AddSC_boss_nefarian()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_nefarian";
-    pNewScript->GetAI = &GetAI_boss_nefarian;
+    pNewScript->GetAI = &GetNewAIInstance<boss_nefarianAI>;
     pNewScript->RegisterSelf();
 }

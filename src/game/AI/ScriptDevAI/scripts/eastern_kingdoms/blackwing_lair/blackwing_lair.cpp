@@ -89,12 +89,16 @@ void instance_blackwing_lair::OnCreatureCreate(Creature* pCreature)
         case NPC_BRONZE_DRAKONID:
         case NPC_CHROMATIC_DRAKONID:
             pCreature->SetInCombatWithZone();
+            m_drakonids.push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_LORD_VICTOR_NEFARIUS:
+            if (!pCreature->IsTemporarySummon())
+                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_RAZORGORE:
         case NPC_NEFARIANS_TROOPS:
         case NPC_BLACKWING_ORB_TRIGGER:
         case NPC_VAELASTRASZ:
-        case NPC_LORD_VICTOR_NEFARIUS:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
@@ -176,6 +180,13 @@ void instance_blackwing_lair::SetData(uint32 uiType, uint32 uiData)
             else if (uiData == FAIL)
             {
                 m_uiResetTimer = 30000;
+
+                if (Creature* razorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
+                {
+                    DoScriptText(SAY_RAZORGORE_DEATH, razorgore);
+                    razorgore->CastSpell(nullptr, SPELL_FIREBALL, TRIGGERED_OLD_TRIGGERED);
+                    razorgore->ForcedDespawn(5000);
+                }
 
                 // Reset the Orb of Domination and the eggs
                 DoToggleGameObjectFlags(GO_ORB_OF_DOMINATION, GO_FLAG_NO_INTERACT, true);
@@ -336,8 +347,12 @@ void instance_blackwing_lair::SetData64(uint32 uiData, uint64 uiGuid)
             }
 
             // Break mind control and set max health
-			if (Creature* razorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
-				razorgore->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, razorgore, razorgore);
+            if (Creature* razorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
+            {
+                // need to remove mc here so he gets his proper AI
+                razorgore->RemoveAurasDueToSpell(SPELL_POSSESS);
+                razorgore->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, razorgore, razorgore);
+            }
 
             // All defenders evade and despawn
             for (GuidList::const_iterator itr = m_lDefendersGuids.begin(); itr != m_lDefendersGuids.end(); ++itr)
@@ -381,26 +396,6 @@ void instance_blackwing_lair::OnCreatureDeath(Creature* pCreature)
                 SetData(TYPE_RAZORGORE, DONE);
                 break;
             }
-
-            // If the event is not already failed in Razorgore script, then force group wipe by making the boss trigger an AoE
-            // this is basically a duplicate of what is in Razorgore script because when the boss is Mind Controlled the AI is overriden
-            // So we have to handle it in the instance script instead to prevent the event to be stucked or exploited
-            if (GetData(TYPE_RAZORGORE) != FAIL)
-            {
-                if (Creature* pRazorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
-                {
-                    pRazorgore->CastSpell(pRazorgore, SPELL_FIREBALL, TRIGGERED_OLD_TRIGGERED);
-                    SetData(TYPE_RAZORGORE, FAIL);
-                    DoScriptText(SAY_RAZORGORE_DEATH, pRazorgore);
-                    pRazorgore->ForcedDespawn();
-                }
-                if (Creature* pOrbTrigger = GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
-                {
-                    if (Creature* pTemp = pOrbTrigger->SummonCreature(NPC_ORB_DOMINATION, pOrbTrigger->GetPositionX(), pOrbTrigger->GetPositionY(), pOrbTrigger->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 5 * IN_MILLISECONDS))
-                        DoScriptText(EMOTE_ORB_SHUT_OFF, pTemp);
-                    pOrbTrigger->CastSpell(pOrbTrigger, SPELL_EXPLODE_ORB, TRIGGERED_IGNORE_UNATTACKABLE_FLAG);
-                }
-            }
             break;
         case NPC_BLACKWING_LEGIONNAIRE:
         case NPC_BLACKWING_MAGE:
@@ -430,6 +425,10 @@ void instance_blackwing_lair::OnCreatureRespawn(Creature* creature)
         creature->SetNoLoot(true);
         creature->SetCorpseDelay(5);
     }
+    else if (creature->GetEntry() == NPC_GRETHOK_CONTROLLER)
+        if (Creature* razorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
+            if (GetData(TYPE_RAZORGORE) == FAIL)
+                razorgore->Respawn();
 }
 
 bool instance_blackwing_lair::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const
@@ -518,6 +517,7 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
                 if (!nefarius->IsDespawned() && GetData(TYPE_NEFARIAN) == SPECIAL)
                 {
                     nefarius->CastSpell(nullptr, SPELL_SHADOWBLINK_OUTRO, TRIGGERED_OLD_TRIGGERED);
+                    nefarius->AI()->SetCombatScriptStatus(true);
                     nefarius->ForcedDespawn(2500);
                 }
             }
@@ -675,11 +675,10 @@ void instance_blackwing_lair::InitiateDrakonid(uint32 uiEventId)
 
 void instance_blackwing_lair::CleanupNefarianStage(bool fullCleanup)
 {
-    for (GuidList::const_iterator itr = m_lDrakonidSpawnerGuids.begin(); itr != m_lDrakonidSpawnerGuids.end(); ++itr)
-    {
-        if (Creature* pTemp = instance->GetCreature(*itr))
-            pTemp->ForcedDespawn();
-    }
+    for (auto guid : m_lDrakonidSpawnerGuids)
+        if (Creature* temp = instance->GetCreature(guid))
+            temp->ForcedDespawn();
+
     m_lDrakonidSpawnerGuids.clear();
 
     // Stop the cleanup here if we are only moving from P1 to P2
@@ -687,6 +686,12 @@ void instance_blackwing_lair::CleanupNefarianStage(bool fullCleanup)
         return;
 
     m_uiDeadDrakonidsCount = 0;
+
+    for (auto guid : m_drakonids)
+        if (Creature* temp = instance->GetCreature(guid))
+            temp->ForcedDespawn();
+
+    m_drakonids.clear();
 
     for (GuidList::const_iterator itr = m_lDrakonidBonesGuids.begin(); itr != m_lDrakonidBonesGuids.end(); ++itr)
     {

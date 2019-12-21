@@ -35,7 +35,7 @@ enum
 
     SPELL_POSSESS_VISUAL        = 23014,                    // visual effect and increase the damage taken
     SPELL_DESTROY_EGG           = 19873,
-    SPELL_POSSESS               = 19832,                    // actual possess spell
+    // SPELL_POSSESS               = 19832,                    // actual possess spell
     SPELL_DRAGON_ORB            = 23021,                    // shrink - not in sniff
     SPELL_MIND_EXHAUSTION       = 23958,
 
@@ -66,6 +66,13 @@ struct boss_razorgoreAI : public CombatAI
         AddCombatAction(RAZORGORE_CLEAVE, 4000, 8000);
         SetDeathPrevention(true);
         m_creature->SetWalk(false);
+        if (m_instance)
+        {
+            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float x, float y, float z)
+            {
+                return static_cast<ScriptedInstance*>(unit->GetInstanceData())->GetPlayerInMap(true, false) == nullptr;
+            });
+        }
     }
 
     instance_blackwing_lair* m_instance;
@@ -88,19 +95,15 @@ struct boss_razorgoreAI : public CombatAI
         if (eventType == AI_EVENT_CUSTOM_A)
         {
             SetDeathPrevention(false);
-            m_creature->RemoveAllAuras();
+            SetMeleeEnabled(true);
+            m_creature->RemoveAurasDueToSpell(SPELL_POSSESS_VISUAL);
             m_creature->CastSpell(nullptr, SPELL_WARMING_FLAMES, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
     void JustPreventedDeath(Unit* attacker) override
     {
-        // Boss explodes everything and resets - this happens if not all eggs are destroyed
-        // TODO: He actually dies, but without loot and despawns
         m_instance->SetData(TYPE_RAZORGORE, FAIL);
-        DoScriptText(SAY_RAZORGORE_DEATH, m_creature);
-        m_creature->CastSpell(nullptr, SPELL_FIREBALL, TRIGGERED_OLD_TRIGGERED);
-        m_creature->ForcedDespawn(5000);
     }
 
     void JustReachedHome() override
@@ -227,8 +230,8 @@ struct DestroyEgg : public SpellScript
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         GameObject* target = spell->GetGOTarget();
-        Player* player = dynamic_cast<Player*>(spell->GetCaster()->GetCharmer());
-        if (!target || !player)
+        Unit* razorgore = spell->GetCaster();
+        if (!target || !razorgore)
             return;
 
         if (ScriptedInstance* pInstance = static_cast<ScriptedInstance*>(target->GetInstanceData()))
@@ -237,9 +240,9 @@ struct DestroyEgg : public SpellScript
             {
                 switch (urand(0, 2))
                 {
-                    case 0: DoScriptText(SAY_EGGS_BROKEN_1, player); break;
-                    case 1: DoScriptText(SAY_EGGS_BROKEN_2, player); break;
-                    case 2: DoScriptText(SAY_EGGS_BROKEN_3, player); break;
+                    case 0: DoScriptText(SAY_EGGS_BROKEN_1, razorgore); break;
+                    case 1: DoScriptText(SAY_EGGS_BROKEN_2, razorgore); break;
+                    case 2: DoScriptText(SAY_EGGS_BROKEN_3, razorgore); break;
                 }
             }
 
@@ -256,7 +259,7 @@ struct ExplosionRazorgore : public SpellScript
         if (target->IsPlayer())
             return true;
 
-        static std::set<uint32> validEntries = { NPC_BLACKWING_LEGIONNAIRE , NPC_BLACKWING_MAGE , NPC_DRAGONSPAWN, NPC_RAZORGORE };
+        static std::set<uint32> validEntries = { NPC_GRETHOK_CONTROLLER, NPC_BLACKWING_GUARDSMAN, NPC_BLACKWING_LEGIONNAIRE , NPC_BLACKWING_MAGE , NPC_DRAGONSPAWN, NPC_RAZORGORE };
         return validEntries.find(target->GetEntry()) != validEntries.end();
     }
 };
@@ -283,6 +286,17 @@ struct PossessRazorgore : public AuraScript
     }
 };
 
+struct CalmDragonkin : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
+    {
+        if (spell->m_targets.getUnitTarget()->GetEntry() == NPC_RAZORGORE)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void AddSC_boss_razorgore()
 {
     Script* pNewScript = new Script;
@@ -303,4 +317,5 @@ void AddSC_boss_razorgore()
     RegisterSpellScript<DestroyEgg>("spell_destroy_egg");
     RegisterSpellScript<ExplosionRazorgore>("spell_explosion_razorgore");
     RegisterAuraScript<PossessRazorgore>("spell_possess_razorgore");
+    RegisterSpellScript<CalmDragonkin>("spell_calm_dragonkin");
 }
