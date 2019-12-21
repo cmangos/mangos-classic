@@ -26,6 +26,7 @@ EndScriptData
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "ruins_of_ahnqiraj.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Globals/ObjectMgr.h"
 
 enum
 {
@@ -112,18 +113,12 @@ struct boss_ossirianAI : public CombatAI
         DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(nullptr, SPELL_SUPREME, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
-        GuidVector vector;
-        m_instance->GetCreatureGuidVectorFromStorage(NPC_OSSIRIAN_TRIGGER, vector);
-        if (vector.size() > 0)
-            if (Creature* creature = m_creature->GetMap()->GetCreature(vector[0]))
-                creature->Respawn();
-
         DespawnGuids(m_spawnedCrystals);
+        RespawnFirstCrystal();
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        DoCastSpellIfCan(nullptr, SPELL_SUPREME, CAST_TRIGGERED);
         DoScriptText(SAY_AGGRO, m_creature);
 
         for (auto aSandVortexSpawnPo : aSandVortexSpawnPos)
@@ -173,12 +168,34 @@ struct boss_ossirianAI : public CombatAI
         }
     }
 
+    void RespawnFirstCrystal()
+    {
+        GuidVector vector;
+        m_instance->GetCreatureGuidVectorFromStorage(NPC_OSSIRIAN_TRIGGER, vector);
+        if (vector.size() < 2) // wrong db data
+            return;
+
+        if (Creature* creature = m_creature->GetMap()->GetCreature(vector[0]))
+            if (!creature->isAlive())
+                creature->Respawn();
+    }
+
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
-            invoker->CastSpell(nullptr, SPELL_SUMMON_CRYSTAL, TRIGGERED_OLD_TRIGGERED);
-            m_spawnedCrystals.push_back(invoker->GetObjectGuid());
+            Creature* crystal = static_cast<Creature*>(invoker);
+            CreatureData const* data = sObjectMgr.GetCreatureData(crystal->GetGUIDLow());
+            if (data->spawntimesecsmin == 0 && m_instance->GetData(TYPE_OSSIRIAN) != IN_PROGRESS)
+            {
+                crystal->SetRespawnDelay(7200);
+                crystal->ForcedDespawn();
+            }
+            else
+            {
+                crystal->CastSpell(nullptr, SPELL_SUMMON_CRYSTAL, TRIGGERED_OLD_TRIGGERED);
+                m_spawnedCrystals.push_back(crystal->GetObjectGuid());
+            }
         }
     }
 
@@ -203,11 +220,12 @@ struct boss_ossirianAI : public CombatAI
             m_creature->RemoveAurasDueToSpell(SPELL_SUPREME);
             ResetCombatAction(OSSIRIAN_SUPREME, 45000);
 
+            DoSpawnNextCrystal(1);
             // despawn go
             if (GameObject* crystal = GetClosestGameObjectWithEntry(caster, GO_OSSIRIAN_CRYSTAL, 5.0f))
                 crystal->SetLootState(GO_JUST_DEACTIVATED);
-            static_cast<Creature*>(caster)->ForcedDespawn();
-            DoSpawnNextCrystal(1);
+            static_cast<Creature*>(caster)->SetRespawnDelay(7200);
+            static_cast<Creature*>(caster)->ForcedDespawn(500);
         }
     }
 
@@ -282,8 +300,9 @@ struct boss_ossirianAI : public CombatAI
 // This is actually a hack for a server-side spell
 bool GOUse_go_ossirian_crystal(Player* /*player*/, GameObject* go)
 {
+    go->SendGameObjectCustomAnim(go->GetObjectGuid());
     if (Creature* pOssirianTrigger = GetClosestCreatureWithEntry(go, NPC_OSSIRIAN_TRIGGER, 10.0f))
-        pOssirianTrigger->CastSpell(pOssirianTrigger, aWeaknessSpell[urand(0, aWeaknessSpell.size() - 1)], TRIGGERED_NONE);
+        pOssirianTrigger->CastSpell(nullptr, aWeaknessSpell[urand(0, aWeaknessSpell.size() - 1)], TRIGGERED_NONE);
 
     return true;
 }

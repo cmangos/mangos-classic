@@ -26,6 +26,8 @@ EndScriptData
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "ruins_of_ahnqiraj.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "MotionGenerators/WaypointManager.h"
+#include <G3D/Vector3.h>
 
 enum
 {
@@ -58,6 +60,7 @@ enum
     PHASE_GROUND            = 1,
 
     POINT_AIR               = 1,
+    POINT_GROUND            = 2,
 };
 
 struct SummonLocation
@@ -74,6 +77,7 @@ static const SummonLocation aAyamissSpawnLocs[] =
 
 enum AyamissActions
 {
+    AYAMISS_FLY_UP,
     AYAMISS_PHASE_2,
     AYAMISS_FRENZY,
     AYAMISS_PARALYZE,
@@ -90,6 +94,7 @@ struct boss_ayamissAI : public CombatAI
 {
     boss_ayamissAI(Creature* creature) : CombatAI(creature, AYAMISS_ACTION_MAX)
     {
+        AddTimerlessCombatAction(AYAMISS_FLY_UP, true);
         AddTimerlessCombatAction(AYAMISS_PHASE_2, true);
         AddTimerlessCombatAction(AYAMISS_FRENZY, true);
         AddCombatAction(AYAMISS_PARALYZE, 15000u);
@@ -99,28 +104,31 @@ struct boss_ayamissAI : public CombatAI
         AddCombatAction(AYAMISS_SWARMER_ATTACK, 60000u);
         AddCombatAction(AYAMISS_LASH, true);
         AddCombatAction(AYAMISS_THRASH, true);
+        m_creature->SetWalk(false);
     }
 
     uint8 m_phase;
 
     ObjectGuid m_paralyzeTarget;
     GuidList m_swarmersGuidList;
+    GuidVector m_spawns;
 
     void Reset() override
     {
         CombatAI::Reset();
         m_phase = PHASE_AIR;
+
         SetCombatMovement(false);
         SetMeleeEnabled(false);
         SetCombatScriptStatus(false);
+
+        DespawnGuids(m_spawns);
     }
 
-    void Aggro(Unit* /*who*/) override
+    void EnterEvadeMode() override
     {
-        m_creature->SetLevitate(true);
-        m_creature->SetHover(true);
-        SetCombatScriptStatus(true);
-        m_creature->GetMotionMaster()->MovePoint(POINT_AIR, -9689.292f, 1547.912f, 48.02729f);
+        m_creature->SetImmobilizedState(false);
+        CombatAI::EnterEvadeMode();
     }
 
     void JustSummoned(Creature* summoned) override
@@ -144,20 +152,36 @@ struct boss_ayamissAI : public CombatAI
         // move the larva to paralyze target position
         else if (summoned->GetEntry() == NPC_LARVA)
         {
+            summoned->SetCorpseDelay(5);
             summoned->SetWalk(false);
-            summoned->GetMotionMaster()->MovePoint(1, aAyamissSpawnLocs[3].m_fX, aAyamissSpawnLocs[3].m_fY, aAyamissSpawnLocs[3].m_fZ);
+            if (Unit* target = m_creature->GetMap()->GetUnit(m_paralyzeTarget))
+            {
+                summoned->AI()->AttackStart(target);
+                summoned->FixateTarget(target);
+            }
         }
         else if (summoned->GetEntry() == NPC_HORNET)
         {
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 summoned->AI()->AttackStart(target);
         }
+        m_spawns.push_back(summoned->GetObjectGuid());
     }
 
     void MovementInform(uint32 motionType, uint32 pointId) override
     {
         if (motionType != POINT_MOTION_TYPE)
+        {
+            if (motionType == WAYPOINT_MOTION_TYPE)
+            {
+                if (pointId == POINT_GROUND)
+                {
+                    SetCombatScriptStatus(false);
+                    SetCombatMovement(true, true);
+                }
+            }
             return;
+        }
 
         if (pointId == POINT_AIR)
         {
@@ -166,31 +190,39 @@ struct boss_ayamissAI : public CombatAI
         }
     }
 
-    void SummonedMovementInform(Creature* summoned, uint32 /*motionType*/, uint32 pointId) override
+    void StartLanding()
     {
-        if (pointId != 1 || summoned->GetEntry() != NPC_LARVA)
-            return;
-
-        // Cast feed on target
-        if (Unit* target = m_creature->GetMap()->GetUnit(m_paralyzeTarget))
-            summoned->CastSpell(target, SPELL_FEED, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+        m_creature->GetMotionMaster()->MoveWaypoint(0);
     }
 
     void ExecuteAction(uint32 action) override
     {
         switch (action)
         {
+            case AYAMISS_FLY_UP:
+            {
+                m_creature->SetLevitate(true);
+                m_creature->SetHover(true);
+                SetCombatScriptStatus(true);
+                m_creature->GetMotionMaster()->MovePoint(POINT_AIR, -9689.292f, 1547.912f, 48.02729f);
+                SetActionReadyStatus(action, false);
+                break;
+            }
             case AYAMISS_PHASE_2:
             {
-                if (m_creature->GetHealthPercent() <= 70.0f) // TODO: Recheck flying
+                if (m_creature->GetHealthPercent() <= 70.0f)
                 {
                     m_phase = PHASE_GROUND;
+                    m_creature->SetImmobilizedState(false);
                     SetMeleeEnabled(true);
                     m_creature->SetLevitate(false);
                     m_creature->SetHover(false);
                     DoResetThreat();
-                    SetCombatMovement(true, true);
+                    StartLanding();
+                    SetCombatScriptStatus(true);
+                    SetActionReadyStatus(action, false);
 
+                    DisableCombatAction(AYAMISS_POISON_STINGER);
                     ResetCombatAction(AYAMISS_LASH, urand(5000, 8000));
                     ResetCombatAction(AYAMISS_THRASH, urand(3000, 6000));
                 }
@@ -235,7 +267,7 @@ struct boss_ayamissAI : public CombatAI
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_POISON_STINGER, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(target, SPELL_POISON_STINGER) == CAST_OK)
-                        ResetCombatAction(action, urand(2000, 3000));
+                        ResetCombatAction(action, m_phase == PHASE_AIR ? urand(2000, 3000) : urand(6000, 12000));
                 break;
             }
             case AYAMISS_SUMMON_SWARMER:
@@ -274,33 +306,18 @@ struct boss_ayamissAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_ayamiss(Creature* creature)
-{
-    return new boss_ayamissAI(creature);
-}
-
 struct npc_hive_zara_larvaAI : public ScriptedAI
 {
     npc_hive_zara_larvaAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<instance_ruins_of_ahnqiraj*>(m_creature->GetInstanceData()))
     {
-
+        if (m_instance)
+            if (m_instance->GetData(TYPE_AYAMISS) == IN_PROGRESS)
+                SetReactState(REACT_DEFENSIVE);
     }
 
     instance_ruins_of_ahnqiraj* m_instance;
 
     void Reset() override { }
-
-    void AttackStart(Unit* who) override
-    {
-        // don't attack anything during the Ayamiss encounter
-        if (m_instance)
-        {
-            if (m_instance->GetData(TYPE_AYAMISS) == IN_PROGRESS)
-                return;
-        }
-
-        ScriptedAI::AttackStart(who);
-    }
 
     void MoveInLineOfSight(Unit* who) override
     {
@@ -308,7 +325,13 @@ struct npc_hive_zara_larvaAI : public ScriptedAI
         if (m_instance)
         {
             if (m_instance->GetData(TYPE_AYAMISS) == IN_PROGRESS)
+            {
+                if (m_creature->CanReachWithMeleeAttack(who) && who == m_creature->getVictim())
+                {
+                    m_creature->CastSpell(who, SPELL_FEED, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+                }
                 return;
+            }
         }
 
         ScriptedAI::MoveInLineOfSight(who);
@@ -329,20 +352,15 @@ struct npc_hive_zara_larvaAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_hive_zara_larva(Creature* creature)
-{
-    return new npc_hive_zara_larvaAI(creature);
-}
-
 void AddSC_boss_ayamiss()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_ayamiss";
-    pNewScript->GetAI = &GetAI_boss_ayamiss;
+    pNewScript->GetAI = &GetNewAIInstance<boss_ayamissAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_hive_zara_larva";
-    pNewScript->GetAI = &GetAI_npc_hive_zara_larva;
+    pNewScript->GetAI = &GetNewAIInstance<npc_hive_zara_larvaAI>;
     pNewScript->RegisterSelf();
 }

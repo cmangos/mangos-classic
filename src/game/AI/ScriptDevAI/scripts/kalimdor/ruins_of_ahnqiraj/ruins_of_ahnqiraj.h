@@ -108,6 +108,7 @@ class instance_ruins_of_ahnqiraj : public ScriptedInstance
         // bool IsEncounterInProgress() const override;              // not active in AQ20
 
         void OnCreatureCreate(Creature* pCreature) override;
+        void OnObjectCreate(GameObject* go) override;
         void OnPlayerEnter(Player* pPlayer) override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;

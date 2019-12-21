@@ -18,6 +18,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (19872,'spell_calm_dragonkin'),
 (19873,'spell_destroy_egg'),
 (20038,'spell_explosion_razorgore'),
+(25684,'spell_summon_mana_fiends_moam'),
 (25937,'spell_viscidus_freeze'),
 (26084,'spell_aq_whirlwind'),
 (26180,'spell_huhuran_wyvern_string'),

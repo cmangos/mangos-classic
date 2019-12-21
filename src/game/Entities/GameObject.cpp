@@ -1413,6 +1413,8 @@ void GameObject::Use(Unit* user)
                     outdoorPvP->HandleGameObjectUse(player, this);
             }
 
+            // exception - 180619 - ossirian crystal - supposed to be kept from despawning by a pending spellcast - to be implemented, done in db for now
+
             GameObjectInfo const* info = GetGOInfo();
 
             TriggerLinkedGameObject(user);

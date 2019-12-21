@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -37,6 +38,10 @@ enum
     SPELL_ARCANE_ERUPTION    = 25672,
     SPELL_SUMMON_MANAFIENDS  = 25684,
     SPELL_ENERGIZE           = 25685,
+
+    SPELL_SUMMON_MANA_FIEND_1 = 25681,
+    SPELL_SUMMON_MANA_FIEND_2 = 25682,
+    SPELL_SUMMON_MANA_FIEND_3 = 25683,
 
     NPC_MANA_FIEND           = 15527,
 };
@@ -65,6 +70,14 @@ struct boss_moamAI : public CombatAI
         {
             m_creature->RemoveAurasDueToSpell(SPELL_ENERGIZE);
         });
+
+        if (m_creature->GetInstanceData())
+        {
+            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float x, float y, float z)
+            {
+                return static_cast<ScriptedInstance*>(unit->GetInstanceData())->GetPlayerInMap(true, false) == nullptr;
+            });
+        }
     }
 
     uint8 m_uiPhase;
@@ -93,8 +106,15 @@ struct boss_moamAI : public CombatAI
                 summoned->AI()->AttackStart(target);
             }
             summoned->SetCorpseDelay(2);
-            m_summons.push_back(summoned->GetObjectGuid());
         }
+        m_summons.push_back(summoned->GetObjectGuid());
+    }
+
+    void SummonedCreatureJustDied(Creature* summoned) override
+    {
+        m_summons.erase(std::remove(m_summons.begin(), m_summons.end(), summoned->GetObjectGuid()), m_summons.end());
+        if (m_summons.size() == 0)
+            m_creature->RemoveAurasDueToSpell(SPELL_ENERGIZE);
     }
 
     void ExecuteAction(uint32 action) override
@@ -142,10 +162,22 @@ struct boss_moamAI : public CombatAI
     }
 };
 
+struct SummonManaFiendsMoam : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        spell->GetCaster()->CastSpell(nullptr, SPELL_SUMMON_MANA_FIEND_1, TRIGGERED_OLD_TRIGGERED);
+        spell->GetCaster()->CastSpell(nullptr, SPELL_SUMMON_MANA_FIEND_2, TRIGGERED_OLD_TRIGGERED);
+        spell->GetCaster()->CastSpell(nullptr, SPELL_SUMMON_MANA_FIEND_3, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_moam()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_moam";
     pNewScript->GetAI = &GetNewAIInstance<boss_moamAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SummonManaFiendsMoam>("spell_summon_mana_fiends_moam");
 }

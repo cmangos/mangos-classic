@@ -4319,14 +4319,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 25671, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 25684:                                 // Summon Mana Fiends
-                {
-                    m_caster->CastSpell(m_caster, 25681, TRIGGERED_OLD_TRIGGERED);
-                    m_caster->CastSpell(m_caster, 25682, TRIGGERED_OLD_TRIGGERED);
-                    m_caster->CastSpell(m_caster, 25683, TRIGGERED_OLD_TRIGGERED);
-
-                    return;
-                }
                 case 25754: // Obsidian Destroyer           // Drain Mana
                 case 26457: // Obsidian Eradicator
                 {

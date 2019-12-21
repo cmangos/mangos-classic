@@ -64,6 +64,7 @@ enum BuruActions
     BURU_GATHERING_SPEED,
     BURU_FULL_SPEED,
     BURU_ACTION_MAX,
+    BURU_PHASE_2_TRANSITION_STEP,
 };
 
 struct boss_buruAI : public CombatAI
@@ -71,27 +72,32 @@ struct boss_buruAI : public CombatAI
     boss_buruAI(Creature* creature) : CombatAI(creature, BURU_ACTION_MAX)
     {
         AddTimerlessCombatAction(BURU_PHASE_2_TRANSITION, true);
-        AddTimerlessCombatAction(BURU_NEW_TARGET, true);
+        AddTimerlessCombatAction(BURU_NEW_TARGET, false);
         AddCombatAction(BURU_DISMEMBER, 5000u);
         AddCombatAction(BURU_CREEPING_PLAGUE, true);
         AddCombatAction(BURU_GATHERING_SPEED, 9000u);
         AddCombatAction(BURU_FULL_SPEED, 60000u);
+        AddCustomAction(BURU_PHASE_2_TRANSITION_STEP, true, [&]() { HandlePhaseTwo(); });
     }
 
     uint8 m_uiPhase;
+    uint32 m_transitionStep;
 
     void Reset() override
     {
         CombatAI::Reset();
         m_uiPhase = PHASE_EGG;
+        m_transitionStep = 0;
+        SetCombatMovement(true);
+        SetCombatScriptStatus(false);
+        SetMeleeEnabled(true);
     }
 
     void Aggro(Unit* who) override
     {
         DoScriptText(EMOTE_TARGET, m_creature, who);
         DoCastSpellIfCan(nullptr, SPELL_THORNS);
-        m_creature->AddThreat(who, 1000000.f);
-        AttackStart(who);
+        DoAttackNewTarget();
     }
 
     void KilledUnit(Unit* victim) override
@@ -104,14 +110,12 @@ struct boss_buruAI : public CombatAI
     void SpellHitTarget(Unit* target, const SpellEntry* spellInfo, SpellMissInfo /*missInfo*/) override
     {
         if (spellInfo->Id == SPELL_CREATURE_SPECIAL)
-        {
             DoAttackNewTarget();
-        }
     }
 
     void ScheduleNewTarget()
     {
-        SetActionReadyStatus(BURU_NEW_TARGET, false);
+        SetActionReadyStatus(BURU_NEW_TARGET, true);
     }
 
     // Wrapper to attack a new target and remove the speed gathering buff
@@ -120,8 +124,7 @@ struct boss_buruAI : public CombatAI
         if (m_uiPhase == PHASE_TRANSFORM)
             return;
 
-        m_creature->RemoveAurasDueToSpell(SPELL_FULL_SPEED);
-        m_creature->RemoveAurasDueToSpell(SPELL_GATHERING_SPEED);
+        SetCombatMovement(true);
         DoResetThreat();
 
         if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
@@ -135,6 +138,29 @@ struct boss_buruAI : public CombatAI
         ResetCombatAction(BURU_GATHERING_SPEED, 9000);
     }
 
+    void HandlePhaseTwo()
+    {
+        switch (m_transitionStep)
+        {
+            case 0:
+            {
+                DoCastSpellIfCan(nullptr, SPELL_BURU_TRANSFORM);
+                m_creature->RemoveAurasDueToSpell(SPELL_THORNS);
+                ResetTimer(BURU_PHASE_2_TRANSITION_STEP, 5000);
+                break;
+            }
+            case 1:
+            {
+                DoCastSpellIfCan(nullptr, SPELL_FULL_SPEED, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                SetCombatScriptStatus(false);
+                SetMeleeEnabled(true);
+                SetCombatMovement(true, true);
+                break;
+            }
+        }
+        ++m_transitionStep;
+    }
+
     void ExecuteAction(uint32 action) override
     {
         switch (action)
@@ -143,27 +169,31 @@ struct boss_buruAI : public CombatAI
             {
                 if (m_creature->GetHealthPercent() < 20.0f)
                 {
-                    if (DoCastSpellIfCan(nullptr, SPELL_BURU_TRANSFORM) == CAST_OK)
-                    {
-                        // Not sure of this but the boss should gain full speed in phase II
-                        DoCastSpellIfCan(nullptr, SPELL_FULL_SPEED, CAST_TRIGGERED);
-                        m_creature->RemoveAurasDueToSpell(SPELL_THORNS);
-                        m_creature->FixateTarget(nullptr);
-                        SetActionReadyStatus(action, false);
-                        m_uiPhase = PHASE_TRANSFORM;
-                        DisableCombatAction(BURU_DISMEMBER);
-                        SetActionReadyStatus(BURU_NEW_TARGET, false);
-                        DisableCombatAction(BURU_GATHERING_SPEED);
-                        DisableCombatAction(BURU_FULL_SPEED);
-                        ResetCombatAction(BURU_CREEPING_PLAGUE, 0);
-                    }
+                    SetActionReadyStatus(action, false);
+                    m_uiPhase = PHASE_TRANSFORM;
+                    DisableCombatAction(BURU_DISMEMBER);
+                    SetActionReadyStatus(BURU_NEW_TARGET, false);
+                    DisableCombatAction(BURU_GATHERING_SPEED);
+                    DisableCombatAction(BURU_FULL_SPEED);
+                    ResetCombatAction(BURU_CREEPING_PLAGUE, 0);
+                    DoResetThreat();
+                    ResetTimer(BURU_PHASE_2_TRANSITION_STEP, 2000);
+                    SetCombatScriptStatus(true);
+                    SetMeleeEnabled(false);
+                    SetCombatMovement(false, true);
+                    m_creature->SetTarget(nullptr);
                 }
                 break;
             }
             case BURU_NEW_TARGET:
             {
+                m_creature->RemoveAurasDueToSpell(SPELL_FULL_SPEED);
+                m_creature->RemoveAurasDueToSpell(SPELL_GATHERING_SPEED);
                 if (DoCastSpellIfCan(nullptr, SPELL_CREATURE_SPECIAL) == CAST_OK)
+                {
+                    SetCombatMovement(false, true);
                     SetActionReadyStatus(action, false);
+                }
                 break;
             }
             case BURU_DISMEMBER:
@@ -188,6 +218,7 @@ struct boss_buruAI : public CombatAI
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_FULL_SPEED) == CAST_OK)
                 {
+                    m_creature->RemoveAurasDueToSpell(SPELL_GATHERING_SPEED);
                     DisableCombatAction(action);
                     DisableCombatAction(BURU_GATHERING_SPEED);
                 }
@@ -197,15 +228,11 @@ struct boss_buruAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_buru(Creature* creature)
-{
-    return new boss_buruAI(creature);
-}
-
 struct npc_buru_eggAI : public Scripted_NoMovementAI
 {
     npc_buru_eggAI(Creature* creature) : Scripted_NoMovementAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
+        m_creature->SetCorpseDelay(5);
     }
 
     ScriptedInstance* m_instance;
@@ -243,7 +270,10 @@ struct npc_buru_eggAI : public Scripted_NoMovementAI
             if (target->IsPlayer()) // damage from 100 - 500 based on proximity - max range 25
                 damage = 100 + ((25 - std::min(m_creature->GetDistance(target, true, DIST_CALC_COMBAT_REACH), 25.f)) / 25.f) * 400;
             else if (target->GetEntry() == NPC_BURU)
+            {
                 damage = target->GetHealth() * 15 / 100; // 15% hp for buru
+                static_cast<boss_buruAI*>(target->AI())->ScheduleNewTarget();
+            }
             m_creature->CastCustomSpell(target, SPELL_EXPLOSION, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
         }
     }
@@ -262,35 +292,20 @@ struct npc_buru_eggAI : public Scripted_NoMovementAI
         // Explode and Summon hatchling
         DoCastSpellIfCan(nullptr, SPELL_EXPLODE);
         DoCastSpellIfCan(nullptr, SPELL_SUMMON_HATCHLING, CAST_TRIGGERED);
-
-        // Reset Buru's target - this might have been done by spell, but currently this is unk to us
-        if (m_instance)
-        {
-            if (Creature* buru = m_instance->GetSingleCreatureFromStorage(NPC_BURU))
-            {
-                if (boss_buruAI* buruAI = dynamic_cast<boss_buruAI*>(buru->AI()))
-                    buruAI->ScheduleNewTarget();
-            }
-        }
     }
 
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-UnitAI* GetAI_npc_buru_egg(Creature* creature)
-{
-    return new npc_buru_eggAI(creature);
-}
-
 void AddSC_boss_buru()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_buru";
-    pNewScript->GetAI = &GetAI_boss_buru;
+    pNewScript->GetAI = &GetNewAIInstance<boss_buruAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_buru_egg";
-    pNewScript->GetAI = &GetAI_npc_buru_egg;
+    pNewScript->GetAI = &GetNewAIInstance<npc_buru_eggAI>;
     pNewScript->RegisterSelf();
 }

@@ -96,14 +96,18 @@ struct npc_general_andorovAI : public CombatAI, private DialogueHelper
         AddCombatAction(ANDOROV_COMMAND_AURA, 1000, 3000);
         AddCombatAction(ANDOROV_BASH, 8000, 11000);
         AddCombatAction(ANDOROV_STRIKE, 2000, 5000);
-        AddCustomAction(ANDOROV_MOVE, 5000u, [&]() { HandleMove(); });
+        AddCustomAction(ANDOROV_MOVE, true, [&]() { HandleMove(); });
         AddCustomAction(ANDOROV_DESPAWN, true, [&]() { HandleDespawn(); });
-        Reset();
     }
 
     instance_ruins_of_ahnqiraj* m_instance;
 
     uint8 m_pointId;
+
+    void JustRespawned() override
+    {
+        ResetTimer(ANDOROV_MOVE, 5000);
+    }
 
     void MoveInLineOfSight(Unit* who) override
     {

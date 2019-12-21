@@ -55,7 +55,7 @@ void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
             vector.push_back(pCreature->GetObjectGuid());
             std::sort(vector.begin(), vector.end(), [&](ObjectGuid const& a, ObjectGuid const& b) -> bool
             {
-                return a.GetCounter() > b.GetCounter();
+                return a.GetCounter() < b.GetCounter();
             });
             break;
         }
@@ -76,6 +76,12 @@ void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
             m_lKaldoreiGuidList.push_back(pCreature->GetObjectGuid());
             break;
     }
+}
+
+void instance_ruins_of_ahnqiraj::OnObjectCreate(GameObject* go)
+{
+    if (go->GetEntry() == GO_OSSIRIAN_CRYSTAL)
+        m_goEntryGuidCollection[go->GetEntry()].push_back(go->GetObjectGuid());
 }
 
 void instance_ruins_of_ahnqiraj::OnCreatureEnterCombat(Creature* pCreature)
@@ -201,6 +207,19 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
         case TYPE_BURU:
         case TYPE_AYAMISS:
         case TYPE_OSSIRIAN:
+            if (uiType == FAIL)
+            {
+                GuidVector crystals;
+                GetGameObjectGuidVectorFromStorage(GO_OSSIRIAN_CRYSTAL, crystals);
+                for (uint32 i = 1; i < crystals.size(); ++i) // skip first
+                {
+                    if (GameObject* go = instance->GetGameObject(crystals[i]))
+                    {
+                        go->SetForcedDespawn();
+                        go->SetLootState(GO_JUST_DEACTIVATED);
+                    }
+                }
+            }
             m_auiEncounter[uiType] = uiData;
             break;
     }
