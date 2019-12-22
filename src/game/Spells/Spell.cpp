@@ -72,6 +72,9 @@ SpellCastTargets::SpellCastTargets()
     m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0.0f;
     m_strTarget.clear();
     m_targetMask = 0;
+
+    m_destOri = 0.f;
+    m_mapId = UINT32_MAX;
 }
 
 SpellCastTargets::~SpellCastTargets()
@@ -435,7 +438,7 @@ void Spell::FillTargetMap()
     // TODO: ADD the correct target FILLS!!!!!!
     TempTargetingData targetingData;
     uint8 effToIndex[MAX_EFFECT_INDEX] = {0, 1, 2};         // Helper array, to link to another tmpUnitList, if the targets for both effects match
-    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         // not call for empty effect.
         // Also some spells use not used effect targets for store targets for dummy effect in triggered spells
@@ -477,38 +480,7 @@ void Spell::FillTargetMap()
             {
                 // if no targeting available, attempt to use entry mask
                 if (m_spellInfo->Targets && SpellTargetMgr::CanEffectBeFilledWithMask(m_spellInfo->Id, i, m_spellInfo->Targets))
-                {
-                    if (m_spellInfo->Targets & (TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT | TARGET_FLAG_UNIT_ENEMY))
-                    {
-                        if (Unit* unit = m_targets.getUnitTarget())
-                            targetingData.data[i].tmpUnitList[false].push_back(unit);
-                    }
-                    else if (m_spellInfo->Targets & (TARGET_FLAG_CORPSE_ENEMY | TARGET_FLAG_CORPSE_ALLY))
-                    {
-                        if (Unit* unit = m_targets.getUnitTarget())
-                            targetingData.data[i].tmpUnitList[false].push_back(unit);
-                        else if (m_targets.getCorpseTargetGuid())
-                        {
-                            if (Corpse* corpse = m_targets.getCorpseTarget())
-                                if (Player* owner = ObjectAccessor::FindPlayer(corpse->GetOwnerGuid()))
-                                    targetingData.data[i].tmpUnitList[false].push_back(owner);
-                        }
-                    }
-                    else if (m_spellInfo->Targets & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM))
-                    {
-                        if (Item* item = m_targets.getItemTarget())
-                            targetingData.data[i].tempItemList.push_back(item);
-                    }
-                    else if (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
-                    {
-                        if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) == 0)
-                        {
-                            sLog.outError("No destination for spell with flag TARGET_FLAG_DEST_LOCATION, spell ID: %u", m_spellInfo->Id); // should never occur
-                            if (WorldObject* caster = GetCastingObject())
-                                m_targets.setDestination(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
-                        }
-                    }
-                }
+                    FillFromTargetFlags(targetingData, SpellEffectIndex(i));
                 else if (uint32 defaultTarget = SpellEffectInfoTable[m_spellInfo->Effect[i]].defaultTarget) // else resort to default effect type if it exists
                     SetTargetMap(SpellEffectIndex(i), defaultTarget, false, targetingData);
             }
@@ -518,6 +490,9 @@ void Spell::FillTargetMap()
                     SetTargetMap(SpellEffectIndex(i), targetA, false, targetingData);
                 if (targetB && !ignoredTargets.second)
                     SetTargetMap(SpellEffectIndex(i), targetB, true, targetingData);
+                if (effectTargetType == TARGET_TYPE_UNIT_DEST) // special case - no unit target, but need to check for valid units
+                    if (SpellTargetInfoTable[targetA].type != TARGET_TYPE_UNIT && SpellTargetInfoTable[targetB].type != TARGET_TYPE_UNIT) // no fill for unit out of targets
+                        FillFromTargetFlags(targetingData, SpellEffectIndex(i)); // inefficient call, very rare, less code duplicity
             }
         }
 
@@ -1617,7 +1592,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             if (SpellTargetPosition const* st = sSpellMgr.GetSpellTargetPosition(m_spellInfo->Id))
             {
                 m_targets.setDestination(st->target_X, st->target_Y, st->target_Z);
-                // TODO - maybe use an (internal) value for the map for neat far teleport handling
+                m_targets.m_destOri = st->target_Orientation;
+                m_targets.m_mapId = st->target_mapId;
 
                 // far-teleport spells are handled in SpellEffect, elsewise report an error about an unexpected map (spells are always locally)
                 if (st->target_mapId != m_caster->GetMapId() && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_TELEPORT_UNITS && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_BIND)
@@ -1632,7 +1608,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
                 float x, y, z;
-                static_cast<Player*>(m_caster)->GetHomebindLocation(x, y, z);
+                static_cast<Player*>(m_caster)->GetHomebindLocation(x, y, z, m_targets.m_mapId);
                 m_targets.setDestination(x, y, z);
             }
             break;
@@ -6970,6 +6946,40 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex /*effInde
             filterUnitList.clear();
             filterUnitList.push_back(hatedTarget);
             return;
+        }
+    }
+}
+
+void Spell::FillFromTargetFlags(TempTargetingData& targetingData, SpellEffectIndex effIdx)
+{
+    if (m_spellInfo->Targets & (TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT | TARGET_FLAG_UNIT_ENEMY))
+    {
+        if (Unit* unit = m_targets.getUnitTarget())
+            targetingData.data[effIdx].tmpUnitList[false].push_back(unit);
+    }
+    else if (m_spellInfo->Targets & (TARGET_FLAG_CORPSE_ENEMY | TARGET_FLAG_CORPSE_ALLY))
+    {
+        if (Unit* unit = m_targets.getUnitTarget())
+            targetingData.data[effIdx].tmpUnitList[false].push_back(unit);
+        else if (m_targets.getCorpseTargetGuid())
+        {
+            if (Corpse* corpse = m_targets.getCorpseTarget())
+                if (Player* owner = ObjectAccessor::FindPlayer(corpse->GetOwnerGuid()))
+                    targetingData.data[effIdx].tmpUnitList[false].push_back(owner);
+        }
+    }
+    else if (m_spellInfo->Targets & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM))
+    {
+        if (Item* item = m_targets.getItemTarget())
+            targetingData.data[effIdx].tempItemList.push_back(item);
+    }
+    else if (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+    {
+        if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) == 0)
+        {
+            sLog.outError("No destination for spell with flag TARGET_FLAG_DEST_LOCATION, spell ID: %u", m_spellInfo->Id); // should never occur
+            if (WorldObject* caster = GetCastingObject())
+                m_targets.setDestination(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
         }
     }
 }

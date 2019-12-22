@@ -103,7 +103,7 @@ SpellEffectInfo SpellEffectInfoTable[MAX_SPELL_EFFECTS] =
     /*[2]*/      { "SPELL_EFFECT_SCHOOL_DAMAGE",                TARGET_TYPE_UNIT,           TARGET_UNIT_ENEMY },
     /*[3]*/      { "SPELL_EFFECT_DUMMY",                        TARGET_TYPE_DYNAMIC,        TARGET_NONE }, // confirmed none
     /*[4]*/      { "SPELL_EFFECT_PORTAL_TELEPORT",              TARGET_TYPE_UNKNOWN,        TARGET_NONE },
-    /*[5]*/      { "SPELL_EFFECT_TELEPORT_UNITS",               TARGET_TYPE_UNIT,           TARGET_NONE },
+    /*[5]*/      { "SPELL_EFFECT_TELEPORT_UNITS",               TARGET_TYPE_UNIT_DEST,      TARGET_NONE },
     /*[6]*/      { "SPELL_EFFECT_APPLY_AURA",                   TARGET_TYPE_UNIT,           TARGET_UNIT_CASTER },
     /*[7]*/      { "SPELL_EFFECT_ENVIRONMENTAL_DAMAGE",         TARGET_TYPE_NONE,           TARGET_NONE }, // none is a hack - should be unit - GO casting
     /*[8]*/      { "SPELL_EFFECT_POWER_DRAIN",                  TARGET_TYPE_UNIT,           TARGET_NONE },
@@ -427,6 +427,7 @@ bool SpellTargetMgr::CanEffectBeFilledWithMask(uint32 spellId, uint32 effIdx, ui
         case TARGET_TYPE_SPECIAL_DEST:
         case TARGET_TYPE_LOCATION_DEST: return bool(mask & TARGET_FLAG_DEST_LOCATION);
         case TARGET_TYPE_GAMEOBJECT: return bool(mask & (TARGET_FLAG_GAMEOBJECT | TARGET_FLAG_LOCKED));
+        case TARGET_TYPE_UNIT_DEST: return bool(mask & (TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT | TARGET_FLAG_UNIT_ENEMY | TARGET_FLAG_UNIT_DEAD | TARGET_FLAG_DEST_LOCATION));
         case TARGET_TYPE_PLAYER:
         case TARGET_TYPE_UNIT: return bool(mask & (TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT | TARGET_FLAG_UNIT_ENEMY | TARGET_FLAG_UNIT_DEAD));
         case TARGET_TYPE_CORPSE: return bool(mask & (TARGET_FLAG_CORPSE_ENEMY | TARGET_FLAG_CORPSE_ALLY));
