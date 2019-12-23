@@ -815,36 +815,36 @@ void Aura::PickTargetsForSpellTrigger(Unit *& triggerCaster, Unit *& triggerTarg
     }
 }
 
-void Aura::CastTriggeredSpell(Unit* triggerCaster, Unit* triggerTarget, WorldObject* triggerTargetObject, SpellEntry const* triggeredSpellInfo, int32* basePoints)
+void Aura::CastTriggeredSpell(PeriodicTriggerData& data)
 {
-    Spell* spell = new Spell(triggerCaster, triggeredSpellInfo, TRIGGERED_OLD_TRIGGERED, GetCasterGuid(), GetSpellProto());
+    Spell* spell = new Spell(data.caster, data.spellInfo, TRIGGERED_OLD_TRIGGERED, GetCasterGuid(), GetSpellProto());
     SpellCastTargets targets;
-    if (triggeredSpellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+    if (data.spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
     {
-        if (triggerTargetObject)
-            targets.setDestination(triggerTargetObject->GetPositionX(), triggerTargetObject->GetPositionY(), triggerTargetObject->GetPositionZ());
-        else if (triggerTarget)
-            targets.setDestination(triggerTarget->GetPositionX(), triggerTarget->GetPositionY(), triggerTarget->GetPositionZ());
+        if (data.targetObject)
+            targets.setDestination(data.targetObject->GetPositionX(), data.targetObject->GetPositionY(), data.targetObject->GetPositionZ());
+        else if (data.target)
+            targets.setDestination(data.target->GetPositionX(), data.target->GetPositionY(), data.target->GetPositionZ());
         else
-            targets.setDestination(triggerCaster->GetPositionX(), triggerCaster->GetPositionY(), triggerCaster->GetPositionZ());
+            targets.setDestination(data.caster->GetPositionX(), data.caster->GetPositionY(), data.caster->GetPositionZ());
     }
-    if (triggeredSpellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
+    if (data.spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
     {
-        if (triggerTargetObject)
-            targets.setSource(triggerTargetObject->GetPositionX(), triggerTargetObject->GetPositionY(), triggerTargetObject->GetPositionZ());
-        else if (triggerTarget)
-            targets.setSource(triggerTarget->GetPositionX(), triggerTarget->GetPositionY(), triggerTarget->GetPositionZ());
+        if (data.targetObject)
+            targets.setSource(data.targetObject->GetPositionX(), data.targetObject->GetPositionY(), data.targetObject->GetPositionZ());
+        else if (data.target)
+            targets.setSource(data.target->GetPositionX(), data.target->GetPositionY(), data.target->GetPositionZ());
         else
-            targets.setSource(triggerCaster->GetPositionX(), triggerCaster->GetPositionY(), triggerCaster->GetPositionZ());
+            targets.setSource(data.caster->GetPositionX(), data.caster->GetPositionY(), data.caster->GetPositionZ());
     }
-    if (triggerTarget)
-        targets.setUnitTarget(triggerTarget);
-    if (basePoints[0])
-        spell->m_currentBasePoints[EFFECT_INDEX_0] = basePoints[0];
-    if (basePoints[1])
-        spell->m_currentBasePoints[EFFECT_INDEX_1] = basePoints[1];
-    if (basePoints[2])
-        spell->m_currentBasePoints[EFFECT_INDEX_2] = basePoints[2];
+    if (data.target)
+        targets.setUnitTarget(data.target);
+    if (data.basePoints[0])
+        spell->m_currentBasePoints[EFFECT_INDEX_0] = data.basePoints[0];
+    if (data.basePoints[1])
+        spell->m_currentBasePoints[EFFECT_INDEX_1] = data.basePoints[1];
+    if (data.basePoints[2])
+        spell->m_currentBasePoints[EFFECT_INDEX_2] = data.basePoints[2];
     spell->SpellStart(&targets, this);
 }
 
@@ -1235,9 +1235,9 @@ void Aura::TriggerSpell()
     OnPeriodicTrigger(data);
 
     // All ok cast by default case
-    if (triggeredSpellInfo)
+    if (data.spellInfo)
     {
-        CastTriggeredSpell(triggerCaster, triggerTarget, triggerTargetObject, triggeredSpellInfo, basePoints);
+        CastTriggeredSpell(data);
     }
     else
     {
