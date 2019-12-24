@@ -425,7 +425,7 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
 void ScriptedAI::DespawnGuids(GuidVector& spawns)
 {
     for (ObjectGuid& guid : spawns)
-        if (Creature* spawn = m_creature->GetMap()->GetCreature(guid))
+        if (Creature* spawn = m_creature->GetMap()->GetAnyTypeCreature(guid))
             spawn->ForcedDespawn();
     spawns.clear();
 }
