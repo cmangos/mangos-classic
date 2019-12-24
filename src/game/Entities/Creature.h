@@ -781,7 +781,7 @@ class Creature : public Unit
         void SaveRespawnTime() override;
 
         uint32 GetRespawnDelay() const { return m_respawnDelay; }
-        void SetRespawnDelay(uint32 delay) { m_respawnDelay = delay; }
+        void SetRespawnDelay(uint32 delay, bool once = false) { m_respawnDelay = delay; m_respawnOverriden = true; m_respawnOverrideOnce = once; }
 
         float GetRespawnRadius() const { return m_respawnradius; }
         void SetRespawnRadius(float dist) { m_respawnradius = dist; }
@@ -892,6 +892,8 @@ class Creature : public Unit
         TimePoint m_corpseExpirationTime;                   // (msecs) time point of corpse decay
         time_t m_respawnTime;                               // (secs) time of next respawn
         uint32 m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
+        bool m_respawnOverriden;
+        bool m_respawnOverrideOnce;
         uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
         TimePoint m_pickpocketRestockTime;                  // (msecs) time point of pickpocket restock
         bool m_canAggro;                                    // controls response of creature to attacks

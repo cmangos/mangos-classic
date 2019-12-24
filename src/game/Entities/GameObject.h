@@ -672,17 +672,19 @@ class GameObject : public WorldObject
         void SetRespawnTime(time_t respawn)
         {
             m_respawnTime = respawn > 0 ? time(nullptr) + respawn : 0;
-            m_respawnDelayTime = respawn > 0 ? uint32(respawn) : 0;
+            m_respawnDelay = respawn > 0 ? uint32(respawn) : 0;
         }
         void Respawn();
         bool IsSpawned() const
         {
-            return m_respawnDelayTime == 0 ||
+            return m_respawnDelay == 0 ||
                    (m_respawnTime > 0 && !m_spawnedByDefault) ||
                    (m_respawnTime == 0 && m_spawnedByDefault);
         }
         bool IsSpawnedByDefault() const { return m_spawnedByDefault; }
-        uint32 GetRespawnDelay() const { return m_respawnDelayTime; }
+        uint32 GetRespawnDelay() const { return m_respawnDelay; }
+        void SetRespawnDelay(uint32 delay, bool once = false) { m_respawnDelay = delay; m_respawnOverriden = true; m_respawnOverrideOnce = once; }
+        void SetForcedDespawn() { m_forcedDespawn = true; };
         void Refresh();
         void Delete();
 
@@ -783,7 +785,10 @@ class GameObject : public WorldObject
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
-        uint32      m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
+        uint32      m_respawnDelay;                     // (secs) if 0 then current GO state no dependent from timer
+        bool        m_respawnOverriden;
+        bool        m_respawnOverrideOnce;
+        bool        m_forcedDespawn;
         LootState   m_lootState;
         bool        m_spawnedByDefault;
         time_t      m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).

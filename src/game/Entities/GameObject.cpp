@@ -53,8 +53,13 @@ GameObject::GameObject() : WorldObject(),
     m_updateFlag = (UPDATEFLAG_ALL | UPDATEFLAG_HAS_POSITION);
 
     m_valuesCount = GAMEOBJECT_END;
+
     m_respawnTime = 0;
-    m_respawnDelayTime = 25;
+    m_respawnDelay = 25;
+    m_respawnOverriden = false;
+    m_respawnOverrideOnce = false;
+    m_forcedDespawn = false;
+
     m_lootState = GO_READY;
     m_spawnedByDefault = true;
     m_useTimes = 0;
@@ -576,20 +581,35 @@ void GameObject::Update(const uint32 diff)
             SetLootState(GO_READY);
 
             // non-consumable chests and goobers should never despawn
-            if ((GetGoType() == GAMEOBJECT_TYPE_CHEST || GetGoType() == GAMEOBJECT_TYPE_GOOBER) && !GetGOInfo()->IsDespawnAtAction())
+            if ((GetGoType() == GAMEOBJECT_TYPE_CHEST || GetGoType() == GAMEOBJECT_TYPE_GOOBER) && !GetGOInfo()->IsDespawnAtAction() && !m_forcedDespawn)
                 return;
 
-            if (!m_respawnDelayTime)
+            if (!m_respawnDelay)
                 return;
+
+            m_forcedDespawn = false;
 
             if (AI())
                 AI()->JustDespawned();
 
-            // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
-            if (GameObjectData const* data = sObjectMgr.GetGOData(GetObjectGuid().GetCounter()))
-                m_respawnDelayTime = data->GetRandomRespawnTime();
+            if (!m_respawnOverriden)
+            {
+                // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
+                if (GameObjectData const* data = sObjectMgr.GetGOData(GetObjectGuid().GetCounter()))
+                    m_respawnDelay = data->GetRandomRespawnTime();
+            }
+            else if (m_respawnOverrideOnce)
+                m_respawnOverriden = false;
 
-            m_respawnTime = m_spawnedByDefault ? time(nullptr) + m_respawnDelayTime : 0;
+            switch (GetGoType()) // TODO: check, very experimental
+            {
+                case GAMEOBJECT_TYPE_BUTTON: // if button and not spawned by default, do not despawn
+                    m_respawnTime = time(nullptr) + m_respawnDelay;
+                    break;
+                default: // Old logic, if !m_spawnedByDefault despawn on first usage
+                    m_respawnTime = m_spawnedByDefault ? time(nullptr) + m_respawnDelay : 0;
+                    break;
+            }
 
             // if option not set then object will be saved at grid unload
             if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
@@ -699,8 +719,8 @@ void GameObject::SaveToDB(uint32 mapid) const
     data.rotation1 = GetFloatValue(GAMEOBJECT_ROTATION + 1);
     data.rotation2 = GetFloatValue(GAMEOBJECT_ROTATION + 2);
     data.rotation3 = GetFloatValue(GAMEOBJECT_ROTATION + 3);
-    data.spawntimesecsmin = m_spawnedByDefault ? (int32)m_respawnDelayTime : -(int32)m_respawnDelayTime;
-    data.spawntimesecsmax = m_spawnedByDefault ? (int32)m_respawnDelayTime : -(int32)m_respawnDelayTime;
+    data.spawntimesecsmin = m_spawnedByDefault ? (int32)m_respawnDelay : -(int32)m_respawnDelay;
+    data.spawntimesecsmax = m_spawnedByDefault ? (int32)m_respawnDelay : -(int32)m_respawnDelay;
     data.animprogress = GetGoAnimProgress();
     data.go_state = GetGoState();
 
@@ -718,8 +738,8 @@ void GameObject::SaveToDB(uint32 mapid) const
        << GetFloatValue(GAMEOBJECT_ROTATION + 1) << ", "
        << GetFloatValue(GAMEOBJECT_ROTATION + 2) << ", "
        << GetFloatValue(GAMEOBJECT_ROTATION + 3) << ", "
-       << m_respawnDelayTime << ", "
-       << m_respawnDelayTime << ", " // TODO: Add variance
+       << m_respawnDelay << ", "
+       << m_respawnDelay << ", " // TODO: Add variance
        << uint32(GetGoAnimProgress()) << ", "
        << uint32(GetGoState()) << ")";
 
@@ -761,7 +781,7 @@ bool GameObject::LoadFromDB(uint32 guid, Map* map)
     {
         SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
         m_spawnedByDefault = true;
-        m_respawnDelayTime = 0;
+        m_respawnDelay = 0;
         m_respawnTime = 0;
     }
     else
@@ -769,7 +789,7 @@ bool GameObject::LoadFromDB(uint32 guid, Map* map)
         if (data->spawntimesecsmin >= 0)
         {
             m_spawnedByDefault = true;
-            m_respawnDelayTime = data->GetRandomRespawnTime();
+            m_respawnDelay = data->GetRandomRespawnTime();
 
             m_respawnTime  = map->GetPersistentState()->GetGORespawnTime(GetGUIDLow());
 
@@ -783,7 +803,7 @@ bool GameObject::LoadFromDB(uint32 guid, Map* map)
         else
         {
             m_spawnedByDefault = false;
-            m_respawnDelayTime = -data->spawntimesecsmin;
+            m_respawnDelay = -data->spawntimesecsmin;
             m_respawnTime = 0;
         }
     }
@@ -1070,7 +1090,7 @@ GameObject* GameObject::SummonLinkedTrapIfAny() const
         return nullptr;
     }
 
-    linkedGO->m_respawnDelayTime = 0;
+    linkedGO->m_respawnDelay = 0;
     linkedGO->SetSpellId(GetSpellId());
 
     if (GetOwnerGuid())
