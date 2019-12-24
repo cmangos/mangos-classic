@@ -423,13 +423,11 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     {
         uint32 healthPercent = GetHealthPercent();
         SelectLevel();
-        UpdateAllStats(); // to be sure stats is correct regarding level of the creature
         SetHealthPercent(healthPercent);
     }
     else
     {
         SelectLevel();
-        UpdateAllStats(); // to be sure stats is correct regarding level of the creature
         if (data)
         {
             uint32 curhealth = data->curhealth ? data->curhealth : GetMaxHealth();
@@ -1363,6 +1361,8 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     // attack power
     SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, meleeAttackPwr * damageMod);
     SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, rangedAttackPwr * damageMod);
+
+    UpdateAllStats();
 }
 
 float Creature::_GetHealthMod(int32 Rank)
