@@ -24,6 +24,7 @@ EndScriptData
 */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
+#include "Spells/Scripts/SpellScript.h"
 
 // **** Script Info ****
 // Spiritguides in battlegrounds resurrecting many players at once
@@ -91,16 +92,33 @@ bool GossipHello_npc_spirit_guide(Player* pPlayer, Creature* /*pCreature*/)
     return true;
 }
 
-UnitAI* GetAI_npc_spirit_guide(Creature* pCreature)
+struct GYMidTrigger : public SpellScript
 {
-    return new npc_spirit_guideAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        // TODO: Fix when go casting is fixed
+        WorldObject* obj = spell->GetAffectiveCasterObject();
+        if (obj->IsGameObject() && spell->GetUnitTarget()->IsPlayer())
+        {
+            Player* player = static_cast<Player*>(spell->GetUnitTarget());
+            if (BattleGround* bg = player->GetBattleGround())
+            {
+                // check if it's correct bg
+                if (bg->GetTypeID() == BATTLEGROUND_AV)
+                    bg->EventPlayerClickedOnFlag(player, static_cast<GameObject*>(obj));
+                return;
+            }
+        }
+    }
+};
 
 void AddSC_battleground()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_spirit_guide";
-    pNewScript->GetAI = &GetAI_npc_spirit_guide;
+    pNewScript->GetAI = &GetNewAIInstance<npc_spirit_guideAI>;
     pNewScript->pGossipHello = &GossipHello_npc_spirit_guide;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<GYMidTrigger>("spell_gy_mid_trigger");
 }
