@@ -332,7 +332,7 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
     }
     else
     {
-        if (m_unit->getVictim())
+        if (m_unit->getVictim() && !GetCombatScriptStatus())
             m_unit->SetTarget(m_unit->getVictim());
         else
             m_unit->SetTarget(nullptr);
@@ -389,7 +389,7 @@ void UnitAI::OnChannelStateChange(Spell const* spell, bool state, WorldObject* t
     }
     else
     {
-        if (m_unit->getVictim())
+        if (m_unit->getVictim() && !GetCombatScriptStatus())
             m_unit->SetTarget(m_unit->getVictim());
         else
             m_unit->SetTarget(nullptr);
