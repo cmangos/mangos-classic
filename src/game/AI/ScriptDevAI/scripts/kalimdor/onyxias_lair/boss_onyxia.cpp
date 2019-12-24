@@ -73,10 +73,10 @@ enum
     POINT_ID_NORTH              = 0,
     POINT_ID_SOUTH              = 4,
     NUM_MOVE_POINT              = 8,
+    MAX_POINTS                  = 10,
     POINT_ID_LIFTOFF            = 1 + NUM_MOVE_POINT,
-    POINT_ID_IN_AIR             = 2 + NUM_MOVE_POINT,
-    POINT_ID_INIT_NORTH         = 3 + NUM_MOVE_POINT,
-    POINT_ID_LAND               = 4 + NUM_MOVE_POINT,
+    POINT_ID_INIT_NORTH         = 2 + NUM_MOVE_POINT,
+    POINT_ID_LAND               = 3 + NUM_MOVE_POINT,
 
     PHASE_START                 = 1,                        // Health above 65%, normal ground abilities
     PHASE_BREATH                = 2,                        // Breath phase (while health above 40%)
@@ -84,6 +84,8 @@ enum
     PHASE_BREATH_POST           = 4,                        // Landing and initial fearing
     PHASE_TO_LIFTOFF            = 5,                        // Movement to south-entrance of room and liftoff there
     PHASE_BREATH_PRE            = 6,                        // lifting off + initial flying to north side (summons also first pack of whelps)
+
+    POINT_MID_AIR_LAND          = 4 + NUM_MOVE_POINT,
 
 };
 
@@ -105,6 +107,11 @@ static const OnyxiaMove aMoveData[NUM_MOVE_POINT] =
     {SPELL_BREATH_NW_TO_SE,        12.26687f, -181.1084f, -60.23914f},  // north-west (coords verified in wotlk)
 };
 
+static const float landPoints[1][3] =
+{
+    {-1.060547f, -229.9293f, -86.14094f},
+};
+
 static const float afSpawnLocations[3][3] =
 {
     { -30.127f, -254.463f, -89.440f},                       // whelps
@@ -121,6 +128,7 @@ enum OnyxiaActions
     ONYXIA_CLEAVE,
     ONYXIA_TAIL_SWEEP,
     ONYXIA_WING_BUFFET,
+    ONYXIA_KNOCK_AWAY,
     ONYXIA_MOVEMENT,
     ONYXIA_FIREBALL,
     ONYXIA_ACTION_MAX,
@@ -140,6 +148,7 @@ struct boss_onyxiaAI : public CombatAI
         AddCombatAction(ONYXIA_CLEAVE, 2000, 5000);
         AddCombatAction(ONYXIA_TAIL_SWEEP, 15000, 20000);
         AddCombatAction(ONYXIA_WING_BUFFET, 10000, 20000);
+        AddCombatAction(ONYXIA_KNOCK_AWAY, 20000, 30000);
         AddCombatAction(ONYXIA_FIREBALL, true);
         AddCombatAction(ONYXIA_MOVEMENT, true);
         AddCustomAction(ONYXIA_SUMMON_WHELPS, true, [&]() { SummonWhelps(); });
@@ -180,8 +189,7 @@ struct boss_onyxiaAI : public CombatAI
 
         m_creature->SetStandState(UNIT_STAND_STATE_SLEEP);
         m_creature->SetSheath(SHEATH_STATE_MELEE);
-        m_creature->SetLevitate(false);
-        m_creature->SetHover(false);
+        SetMeleeEnabled(true);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -254,25 +262,17 @@ struct boss_onyxiaAI : public CombatAI
 
         switch (pointId)
         {
-            case POINT_ID_IN_AIR:
-                // sort of a hack, it is unclear how this really work but the values are valid
-                ResetTimer(ONYXIA_PHASE_TRANSITIONS, 1000);                          // Movement to Initial North Position is delayed
-                return;
             case POINT_ID_LAND:
                 // undo flying
-                m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
-                m_creature->SetLevitate(false);
-                m_creature->SetHover(false);
-                m_creature->SetCanFly(false);
                 m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
+                m_creature->SetHover(false);
                 m_creature->RemoveAurasDueToSpell(SPELL_PACIFY_SELF);
-                ResetTimer(ONYXIA_PHASE_TRANSITIONS, 500);                           // Start PHASE_END shortly delayed
+                ResetTimer(ONYXIA_PHASE_TRANSITIONS, 2000);                          // Start PHASE_END shortly delayed
                 return;
             case POINT_ID_LIFTOFF:
-                ResetTimer(ONYXIA_PHASE_TRANSITIONS, 500);                           // Start Flying shortly delayed
-                m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
-                m_creature->SetLevitate(true);
+                ResetTimer(ONYXIA_PHASE_TRANSITIONS, 3500);                           // Start Flying shortly delayed
                 m_creature->SetHover(true);
+                m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
                 break;
             case POINT_ID_INIT_NORTH:                           // Start PHASE_BREATH
                 m_uiPhase = PHASE_BREATH;
@@ -330,10 +330,7 @@ struct boss_onyxiaAI : public CombatAI
                 ResetTimer(ONYXIA_SUMMON_WHELPS, 3000);
                 if (m_instance)
                     m_instance->SetData(TYPE_ONYXIA, DATA_LIFTOFF);
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_IN_AIR, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, aMoveData[POINT_ID_SOUTH].fZ);
-                break;
-            case PHASE_BREATH_PRE:
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_INIT_NORTH, aMoveData[POINT_ID_NORTH].fX, aMoveData[POINT_ID_NORTH].fY, aMoveData[POINT_ID_NORTH].fZ);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_INIT_NORTH, aMoveData[POINT_ID_NORTH].fX, aMoveData[POINT_ID_NORTH].fY, aMoveData[POINT_ID_NORTH].fZ, true, FORCED_MOVEMENT_FLIGHT);
                 break;
             case PHASE_BREATH_POST:
                 m_uiPhase = PHASE_END;
@@ -358,6 +355,7 @@ struct boss_onyxiaAI : public CombatAI
                 DisableCombatAction(ONYXIA_CLEAVE);
                 DisableCombatAction(ONYXIA_TAIL_SWEEP);
                 DisableCombatAction(ONYXIA_WING_BUFFET);
+                DisableCombatAction(ONYXIA_KNOCK_AWAY);
                 DisableCombatAction(ONYXIA_CHECK_IN_LAIR);
                 SetActionReadyStatus(ONYXIA_PHASE_3_TRANSITION, true);
                 break;
@@ -365,11 +363,12 @@ struct boss_onyxiaAI : public CombatAI
             case PHASE_END:
             {
                 DisableCombatAction(ONYXIA_FIREBALL);
+                DisableCombatAction(ONYXIA_MOVEMENT);
                 ResetCombatAction(ONYXIA_BELLOWING_ROAR, 0);
                 ResetCombatAction(ONYXIA_FLAME_BREATH, urand(10000, 20000));
                 ResetCombatAction(ONYXIA_CLEAVE, urand(2000, 5000));
                 ResetCombatAction(ONYXIA_TAIL_SWEEP, urand(15000, 20000));
-                ResetCombatAction(ONYXIA_WING_BUFFET, urand(10000, 20000));
+                ResetCombatAction(ONYXIA_KNOCK_AWAY, urand(10000, 20000));
                 ResetCombatAction(ONYXIA_CHECK_IN_LAIR, 3000);
                 break;
             }
@@ -400,8 +399,7 @@ struct boss_onyxiaAI : public CombatAI
                 m_creature->SetTarget(nullptr);
                 SetCombatScriptStatus(true);
 
-                float fGroundZ = m_creature->GetMap()->GetHeight(aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, aMoveData[POINT_ID_SOUTH].fZ);
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFTOFF, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, fGroundZ);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFTOFF, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, -84.25523f, 6.248279f);
                 SetActionReadyStatus(action, false);
                 break;
             }
@@ -415,9 +413,9 @@ struct boss_onyxiaAI : public CombatAI
                 DisableTimer(ONYXIA_SUMMON_WHELPS);
 
                 SetCombatScriptStatus(true);
+                m_creature->SetTarget(nullptr);
                 m_creature->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
-                float fGroundZ = m_creature->GetMap()->GetHeight(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-                m_creature->GetMotionMaster()->MovePointTOL(POINT_ID_LAND, m_creature->GetPositionX(), m_creature->GetPositionY(), fGroundZ, false);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LAND, landPoints[0][0], landPoints[0][1], landPoints[0][2], true, FORCED_MOVEMENT_FLIGHT);
                 SetActionReadyStatus(action, false);
                 break;
             }
@@ -463,7 +461,7 @@ struct boss_onyxiaAI : public CombatAI
             case ONYXIA_CLEAVE:
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-                    ResetCombatAction(action, urand(2000, 5000));
+                    ResetCombatAction(action, urand(5000, 10000));
                 break;
             }
             case ONYXIA_TAIL_SWEEP:
@@ -476,6 +474,12 @@ struct boss_onyxiaAI : public CombatAI
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_WINGBUFFET) == CAST_OK)
                     ResetCombatAction(action, urand(15000, 30000));
+                break;
+            }
+            case ONYXIA_KNOCK_AWAY:
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                    ResetCombatAction(action, urand(25000, 40000));
                 break;
             }
             case ONYXIA_FIREBALL:
@@ -518,23 +522,18 @@ struct boss_onyxiaAI : public CombatAI
 
                 ResetCombatAction(action, urand(15000, 25000));
                 m_creature->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
-                m_creature->GetMotionMaster()->MovePoint(m_uiMovePoint, aMoveData[m_uiMovePoint].fX, aMoveData[m_uiMovePoint].fY, aMoveData[m_uiMovePoint].fZ);
+                m_creature->GetMotionMaster()->MovePoint(m_uiMovePoint, aMoveData[m_uiMovePoint].fX, aMoveData[m_uiMovePoint].fY, aMoveData[m_uiMovePoint].fZ, true, FORCED_MOVEMENT_FLIGHT);
                 break;
             }
         }
     }
 };
 
-UnitAI* GetAI_boss_onyxia(Creature* creature)
-{
-    return new boss_onyxiaAI(creature);
-}
-
 void AddSC_boss_onyxia()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_onyxia";
-    pNewScript->GetAI = &GetAI_boss_onyxia;
+    pNewScript->GetAI = &GetNewAIInstance<boss_onyxiaAI>;
     pNewScript->RegisterSelf();
 }
 

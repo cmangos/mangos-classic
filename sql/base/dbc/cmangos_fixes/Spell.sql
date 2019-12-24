@@ -110,3 +110,6 @@ UPDATE spell_template SET InterruptFlags=InterruptFlags&~0x12 WHERE Id IN(19873)
 UPDATE spell_template SET MaxAffectedTargets=10 WHERE Id IN(26180);
 UPDATE spell_template SET MaxAffectedTargets=15 WHERE Id IN(26052);
 
+-- Onyxia - Wing buffet is interruptible by things but shouldnt
+UPDATE spell_template SET InterruptFlags=0 WHERE Id IN(18500);
+

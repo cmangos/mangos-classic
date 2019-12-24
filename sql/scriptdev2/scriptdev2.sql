@@ -2033,8 +2033,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
 ('-1249000','How fortuitous. Usually, I must leave my lair to feed.','0','1','0','0','0','onyxia SAY_AGGRO'),
 ('-1249001','Learn your place mortal!','0','1','0','0','0','onyxia SAY_KILL'),
-('-1249002','This meaningless exertion bores me. I''ll incinerate you all from above!','0','1','0','254','0','onyxia SAY_PHASE_2_TRANS'),
-('-1249003','It seems you''ll need another lesson, mortals!','0','1','0','293','0','onyxia SAY_PHASE_3_TRANS'),
+('-1249002','This meaningless exertion bores me. I''ll incinerate you all from above!','0','1','0','0','0','onyxia SAY_PHASE_2_TRANS'),
+('-1249003','It seems you''ll need another lesson, mortals!','0','1','0','0','0','onyxia SAY_PHASE_3_TRANS'),
 ('-1249004','%s takes in a deep breath...','0','3','0','0','0','onyxia EMOTE_BREATH'),
 ('-1249005','You seek to lure me from my clutch? You shall pay for your insolence!','0','1','0','0','0','onyxia SAY_KITE');
 
