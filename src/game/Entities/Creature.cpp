@@ -1313,8 +1313,6 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     SetMaxHealth(health);
     SetHealth(health);
 
-    SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
-
     // all power types
     for (int i = POWER_MANA; i <= POWER_HAPPINESS; ++i)
     {
@@ -1336,12 +1334,13 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
             value = 0;
 
         // Mana requires an extra field to be set
-        if (i == POWER_MANA)
-            SetCreateMana(value);
-
         SetMaxPower(Powers(i), maxValue);
         SetPower(Powers(i), value);
-        SetModifierValue(UnitMods(UNIT_MOD_POWER_START + i), BASE_VALUE, float(value));
+
+        if (i == POWER_MANA)
+            SetCreateMana(value);
+        else // do not set modifier for mana
+            SetModifierValue(UnitMods(UNIT_MOD_POWER_START + i), BASE_VALUE, float(value));
     }
 
     // Armor
