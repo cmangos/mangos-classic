@@ -326,8 +326,11 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
         }
         else
         {
-            m_unit->SetFacingTo(m_unit->GetOrientation());
-            m_unit->SetTarget(nullptr);
+            if (m_unit->HasTarget())
+            {
+                m_unit->SetFacingTo(m_unit->GetOrientation());
+                m_unit->SetTarget(nullptr);
+            }
         }
     }
     else
