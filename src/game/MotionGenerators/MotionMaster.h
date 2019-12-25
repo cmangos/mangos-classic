@@ -81,6 +81,7 @@ enum ForcedMovement
 {
     FORCED_MOVEMENT_NONE,
     FORCED_MOVEMENT_WALK,
+    FORCED_MOVEMENT_FLIGHT,
 };
 
 class MotionMaster : private std::stack<MovementGenerator*>
