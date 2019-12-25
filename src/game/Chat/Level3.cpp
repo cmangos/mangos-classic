@@ -3318,6 +3318,14 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     PSendSysMessage("Combat timer: %u", target->GetCombatManager().GetCombatTimer());
     PSendSysMessage("Is in evade mode: %s", target->GetCombatManager().IsInEvadeMode() ? "true" : "false");
 
+    if (auto vector = sObjectMgr.GetAllRandomEntries(target->GetGUIDLow()))
+    {
+        std::string output;
+        for (uint32 entry : *vector)
+            output += std::to_string(entry) + ",";
+        PSendSysMessage("NPC is part of creature_spawn_entry: %s", output.data());
+    }
+
     if ((npcflags & UNIT_NPC_FLAG_VENDOR))
     {
         SendSysMessage(LANG_NPCINFO_VENDOR);

@@ -524,12 +524,9 @@ void Creature::ResetEntry(bool respawn)
 
     if (respawn)
     {
-        auto spawnEntriesMap = sObjectMgr.GetCreatureSpawnEntry();
-        auto itr = spawnEntriesMap.find(GetGUIDLow());
-        if (itr != spawnEntriesMap.end())
+        uint32 newEntry = sObjectMgr.GetRandomEntry(GetGUIDLow());
+        if (newEntry)
         {
-            auto& spawnList = (*itr).second;
-            uint32 newEntry = spawnList[irand(0, spawnList.size() - 1)];
             UpdateEntry(newEntry, data, eventData, false);
             AIM_Initialize();
         }
@@ -1430,13 +1427,8 @@ bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const 
 
     Object::_Create(guidlow, newEntry, cinfo->GetHighGuid());
 
-    auto spawnEntriesMap = sObjectMgr.GetCreatureSpawnEntry();
-    auto itr = spawnEntriesMap.find(guidlow);
-    if (itr != spawnEntriesMap.end())
-    {
-        auto& spawnList = (*itr).second;
-        newEntry = spawnList[irand(0, spawnList.size() - 1)];
-    }
+    if (uint32 entry = sObjectMgr.GetRandomEntry(guidlow))
+        newEntry = entry;
 
     return UpdateEntry(newEntry, data, eventData, false);
 }

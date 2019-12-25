@@ -1065,17 +1065,12 @@ void ObjectMgr::LoadCreatures()
             CreatureConditionalSpawn const* cSpawn = GetCreatureConditionalSpawn(guid);
             if (!cSpawn)
             {
-                auto spawnEntriesMap = sObjectMgr.GetCreatureSpawnEntry();
-                auto itr = spawnEntriesMap.find(guid);
-                if (itr == spawnEntriesMap.end())
+                if (uint32 randomEntry = sObjectMgr.GetRandomEntry(guid))
+                    entry = randomEntry;
+                else
                 {
                     sLog.outErrorDb("Table `creature` has creature (GUID: %u) with 0 id and no records in creature_conditional_spawn/creature_spawn_entry, skipped.", guid);
                     continue;
-                }
-                else
-                {
-                    auto& spawnList = (*itr).second;
-                    entry = spawnList[irand(0, spawnList.size() - 1)];
                 }
             }
             else

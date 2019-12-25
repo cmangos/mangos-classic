@@ -668,6 +668,25 @@ class ObjectMgr
             return nullptr;
         }
 
+        uint32 GetRandomEntry(uint32 guidLow) const
+        {
+            auto itr = mCreatureSpawnEntryMap.find(guidLow);
+            if (itr != mCreatureSpawnEntryMap.end())
+            {
+                auto& spawnList = (*itr).second;
+                return spawnList[irand(0, spawnList.size() - 1)];
+            }
+            return 0;
+        }
+
+        std::vector<uint32> const* GetAllRandomEntries(uint32 guidLow) const
+        {
+            auto itr = mCreatureSpawnEntryMap.find(guidLow);
+            if (itr != mCreatureSpawnEntryMap.end())
+                return &(*itr).second;
+            return nullptr;
+        }
+
         AreaTrigger const* GetGoBackTrigger(uint32 map_id) const;
         AreaTrigger const* GetMapEntranceTrigger(uint32 Map) const;
 
