@@ -56,8 +56,7 @@ void CombatManager::Update(const uint32 diff)
                 m_evadeTimer -= diff;
         }
 
-        bool isDungeon = m_owner->GetMap()->IsDungeon();
-        if (!isDungeon)
+        if (!m_owner->GetMap()->IsDungeon() || m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
             if (m_combatTimer)
             {
