@@ -738,8 +738,6 @@ bool Unit::IsInGroup(Unit const* other, bool party/* = false*/, bool ignoreCharm
         }
     }
 
-    // NOTE: For future reference: server uses additional gameplay grouping logic for mobs (in combat and out of combat) - requires research for Tier 2 implementation
-
     return false;
 }
 
@@ -904,7 +902,7 @@ bool DynamicObject::IsFriend(Unit const* unit) const
 }
 
 /////////////////////////////////////////////////
-/// Group: Extension for creatures, player-controlled defaults to unit, creatures check based on friendliness
+/// [Serverside] Group: Extension for creatures, player-controlled defaults to unit, creatures check based on friendliness
 ///
 /// @note Relations API Tier 2
 ///
@@ -919,6 +917,27 @@ bool Creature::IsInGroup(Unit const* other, bool party/* = false*/, bool ignoreC
 
     // Faction-based based on research
     return this->IsFriend(other);
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Group: Extension for players, ignoring charms also ignores PC flag presence for UI PoV
+///
+/// @note Relations API Tier 2
+///
+/// No client counterpart, since client only deals with player-controlled entities
+/////////////////////////////////////////////////
+bool Player::IsInGroup(Unit const* other, bool party/* = false*/, bool ignoreCharms/* = false*/) const
+{
+    MANGOS_ASSERT(other)
+
+    if (this != other && ignoreCharms && other->IsPlayer())
+    {
+        const Player* otherPlayer = static_cast<Player const*>(other);
+        const Group* group = this->GetGroup();
+        return (group && group == otherPlayer->GetGroup() && (!party || group->SameSubGroup(this, otherPlayer)));
+    }
+
+    return Unit::IsInGroup(other, party, ignoreCharms);
 }
 
 /*##########################

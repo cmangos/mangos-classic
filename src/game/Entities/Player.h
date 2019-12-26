@@ -956,6 +956,7 @@ class Player : public Unit
         GameObject* GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameobject_type = MAX_GAMEOBJECT_TYPE);
 
         ReputationRank GetReactionTo(Corpse const* corpse) const override;
+        bool IsInGroup(Unit const* other, bool party = false, bool ignoreCharms = false) const override;
 
         void ToggleAFK();
         void ToggleDND();
