@@ -146,21 +146,25 @@ void CombatActions::ResetAllTimers()
 void CombatActions::AddCombatAction(uint32 id, bool disabled)
 {
     m_CombatActions.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, 0, 0, disabled));
+    m_actionReadyStatus[id] = !disabled;
 }
 
 void CombatActions::AddCombatAction(uint32 id, uint32 timer)
 {
     m_CombatActions.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, timer, timer, false));
+    m_actionReadyStatus[id] = false;
 }
 
 void CombatActions::AddCombatAction(uint32 id, uint32 timerMin, uint32 timerMax)
 {
     m_CombatActions.emplace(id, CombatTimer(id, [&, id] { m_actionReadyStatus[id] = true; }, true, timerMin, timerMax, false));
+    m_actionReadyStatus[id] = false;
 }
 
 void CombatActions::AddTimerlessCombatAction(uint32 id, bool byDefault)
 {
     m_timerlessActionSettings[id] = byDefault;
+    m_actionReadyStatus[id] = byDefault;
 }
 
 void CombatActions::ResetTimer(uint32 index, uint32 timer)
