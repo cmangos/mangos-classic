@@ -1038,6 +1038,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Graveyard-zone links...");
     sObjectMgr.LoadGraveyardZones();
 
+    sLog.outString("Loading world safe locs facing values ...");
+    sObjectMgr.LoadWorldSafeLocsFacing();
+
     sLog.outString("Loading taxi flight shortcuts...");
     sObjectMgr.LoadTaxiShortcuts();
 
