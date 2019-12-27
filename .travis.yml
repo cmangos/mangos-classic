@@ -81,7 +81,7 @@ install: |-
   if [ "$TRAVIS_OS_NAME" == "osx" ]
   then
     brew update
-    brew install mysql++
+    brew install mysql-client@5.7
   fi
 
 script: |-
