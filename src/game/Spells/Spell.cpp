@@ -5647,15 +5647,15 @@ std::pair<float, float> Spell::GetMinMaxRange(bool strict)
             rangeMod += MELEE_LEEWAY;
     }
 
-	if (caster)
-	{
-		if (m_spellInfo->HasAttribute(SPELL_ATTR_RANGED) && caster->GetTypeId() == TYPEID_PLAYER)
-			if (Item * ranged = static_cast<Player*>(caster)->GetWeaponForAttack(RANGED_ATTACK))
-				maxRange *= ranged->GetProto()->RangedModRange * 0.01f;
+    if (caster)
+    {
+        if (m_spellInfo->HasAttribute(SPELL_ATTR_RANGED) && caster->GetTypeId() == TYPEID_PLAYER)
+            if (Item * ranged = static_cast<Player*>(caster)->GetWeaponForAttack(RANGED_ATTACK))
+                maxRange *= ranged->GetProto()->RangedModRange * 0.01f;
 
-		if (Player * modOwner = caster->GetSpellModOwner())
-			modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, maxRange, this);
-	}
+        if (Player * modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, maxRange, this);
+    }
 
     maxRange += rangeMod;
 
