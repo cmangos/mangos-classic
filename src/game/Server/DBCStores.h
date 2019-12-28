@@ -122,7 +122,6 @@ extern TaxiPathNodesByPath                       sTaxiPathNodesByPath;
 extern DBCStorage <WMOAreaTableEntry>            sWMOAreaTableStore;
 // extern DBCStorage <WorldMapAreaEntry>           sWorldMapAreaStore; -- use Zone2MapCoordinates and Map2ZoneCoordinates
 // extern DBCStorage <WorldMapOverlayEntry>         sWorldMapOverlayStore;
-extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
 
 void LoadDBCStores(const std::string& dataPath);
 

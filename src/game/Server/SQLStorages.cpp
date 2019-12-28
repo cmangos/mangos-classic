@@ -41,6 +41,7 @@ const char SpellScriptTargetFmt[] = "iiii";
 const char SpellEntryfmt[] = "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiifffiiiissssssssssssssssiiiiiLiiiifffiiiii";
 const char SpellConefmt[] = "ii";
 const char DungeonEncounterFmt[] = "iiiiissssssssssssssssii";
+const char WorldSafeLocsFmt[] = "iiffffs";
 
 SQLStorage sCreatureStorage(CreatureInfosrcfmt, CreatureInfodstfmt, "entry", "creature_template");
 SQLStorage sCreatureDataAddonStorage(CreatureDataAddonInfofmt, "guid", "creature_addon");
@@ -56,6 +57,7 @@ SQLStorage sSpellTemplate(SpellEntryfmt, "id", "spell_template");
 SQLStorage sSpellCones(SpellConefmt, "id", "spell_cone");
 SQLStorage sDungeonEncounterStore(DungeonEncounterFmt, "id", "instance_dungeon_encounters");
 SQLStorage sCreatureConditionalSpawnStore(CreatureConditionalSpawnSrcFmt, CreatureConditionalSpawnDstFmt, "guid", "creature_conditional_spawn");
+SQLStorage sWorldSafeLocsStore(WorldSafeLocsFmt, "id", "world_safe_locs");
 
 SQLHashStorage sGOStorage(GameObjectInfosrcfmt, GameObjectInfodstfmt, "entry", "gameobject_template");
 SQLHashStorage sCreatureTemplateSpellsStorage(CreatureTemplateSpellsFmt, "entry", "creature_template_spells");

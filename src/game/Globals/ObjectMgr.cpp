@@ -5491,7 +5491,7 @@ void ObjectMgr::LoadGraveyardZones()
         uint32 zoneId = fields[1].GetUInt32();
         uint32 team   = fields[2].GetUInt32();
 
-        WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(safeLocId);
+        WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(safeLocId);
         if (!entry)
         {
             sLog.outErrorDb("Table `game_graveyard_zone` has record for not existing graveyard (WorldSafeLocs.dbc id) %u, skipped.", safeLocId);
@@ -5568,7 +5568,7 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
         GraveYardData const& data = itr->second;
 
         // Checked on load
-        WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(data.safeLocId);
+        WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(data.safeLocId);
 
         // skip enemy faction graveyard
         // team == TEAM_BOTH_ALLOWED case can be at call from .neargrave
@@ -5694,41 +5694,10 @@ void ObjectMgr::SetGraveYardLinkTeam(uint32 id, uint32 zoneId, Team team)
     AddGraveYardLink(id, zoneId, team);                     // Add to prevent further error message and correct mechanismn
 }
 
-void ObjectMgr::LoadWorldSafeLocsFacing()
+void ObjectMgr::LoadWorldSafeLocs() const
 {
-    uint32 count = 0;
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT `id`, `orientation` FROM `world_safe_locs_facing`"));
-    if (!result)
-    {
-        BarGoLink bar(1);
-        bar.step();
-
-        sLog.outString();
-        sLog.outString(">> Loaded %u world safe locs facing values", count);
-        return;
-    }
-    BarGoLink bar(result->GetRowCount());
-    do
-    {
-        bar.step();
-        Field* fields = result->Fetch();
-
-        uint32 safeLocId = fields[0].GetUInt32();
-        float orientation = fields[1].GetFloat();
-
-        m_worldSafeLocsFacingMap[safeLocId] = orientation;
-        count++;
-    } while (result->NextRow());
-    sLog.outString();
-    sLog.outString(">> Loaded %u world safe locs facing values", count);
-}
-
-float ObjectMgr::GetWorldSafeLocFacing(uint32 id) const
-{
-    auto itr = m_worldSafeLocsFacingMap.find(id);
-    if (itr != m_worldSafeLocsFacingMap.end())
-        return itr->second;
-    return 0.0f;
+    sWorldSafeLocsStore.Load(true);
+    sLog.outString(">> Loaded %u world safe locs", sWorldSafeLocsStore.GetRecordCount());
 }
 
 void ObjectMgr::LoadAreaTriggerTeleports()
