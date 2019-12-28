@@ -11292,7 +11292,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
         bool hasMenuItem = true;
         bool isGMSkipConditionCheck = false;
 
-        if (gossipMenu.conditionId && !sObjectMgr.IsPlayerMeetToCondition(gossipMenu.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_OPTION))
+        if (gossipMenu.conditionId && !sObjectMgr.IsConditionSatisfied(gossipMenu.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_OPTION))
         {
             if (isGameMaster())                             // Let GM always see menu items regardless of conditions
                 isGMSkipConditionCheck = true;
@@ -11743,7 +11743,7 @@ uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
         // Take the text that has the highest conditionId of all fitting
         // No condition and no text with condition found OR higher and fitting condition found
         if ((!gossipMenu.conditionId && !lastConditionId) ||
-                (gossipMenu.conditionId > lastConditionId && sObjectMgr.IsPlayerMeetToCondition(gossipMenu.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_MENU)))
+                (gossipMenu.conditionId > lastConditionId && sObjectMgr.IsConditionSatisfied(gossipMenu.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_MENU)))
         {
             lastConditionId = gossipMenu.conditionId;
             textId = gossipMenu.text_id;
@@ -12594,7 +12594,7 @@ bool Player::SatisfyQuestCondition(Quest const* qInfo, bool msg) const
 {
     if (uint32 conditionId = qInfo->GetRequiredCondition())
     {
-        bool result = sObjectMgr.IsPlayerMeetToCondition(conditionId, this, GetMap(), nullptr, CONDITION_FROM_QUEST);
+        bool result = sObjectMgr.IsConditionSatisfied(conditionId, this, GetMap(), nullptr, CONDITION_FROM_QUEST);
 
         if (!result && msg)
             SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
@@ -17225,7 +17225,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         return false;
     }
 
-    if (crItem->conditionId && !isGameMaster() && !sObjectMgr.IsPlayerMeetToCondition(crItem->conditionId, this, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
+    if (crItem->conditionId && !isGameMaster() && !sObjectMgr.IsConditionSatisfied(crItem->conditionId, this, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
         return false;

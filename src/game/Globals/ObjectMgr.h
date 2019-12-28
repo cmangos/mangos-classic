@@ -31,6 +31,7 @@
 #include "Maps/Map.h"
 #include "Maps/MapPersistentStateMgr.h"
 #include "Entities/ObjectGuid.h"
+#include "DBScripts/Conditions.h"
 
 #include <map>
 
@@ -374,104 +375,6 @@ struct TrainerGreetingLocale
 
 typedef std::map<uint32, TrainerGreeting> TrainerGreetingMap;
 typedef std::map<uint32, TrainerGreetingLocale> TrainerGreetingLocaleMap;
-
-enum ConditionType
-{
-    //                                                      // value1       value2  for the Condition enumed
-    CONDITION_NOT                   = -3,                   // cond-id-1    0          returns !cond-id-1
-    CONDITION_OR                    = -2,                   // cond-id-1    cond-id-2  returns cond-id-1 OR cond-id-2
-    CONDITION_AND                   = -1,                   // cond-id-1    cond-id-2  returns cond-id-1 AND cond-id-2
-    CONDITION_NONE                  = 0,                    // 0            0
-    CONDITION_AURA                  = 1,                    // spell_id     effindex
-    CONDITION_ITEM                  = 2,                    // item_id      count   check present req. amount items in inventory
-    CONDITION_ITEM_EQUIPPED         = 3,                    // item_id      0
-    CONDITION_AREAID                = 4,                    // area_id      0, 1 (0: in (sub)area, 1: not in (sub)area)
-    CONDITION_REPUTATION_RANK_MIN   = 5,                    // faction_id   min_rank
-    CONDITION_TEAM                  = 6,                    // player_team  0,      (469 - Alliance 67 - Horde)
-    CONDITION_SKILL                 = 7,                    // skill_id     skill_value
-    CONDITION_QUESTREWARDED         = 8,                    // quest_id     0
-    CONDITION_QUESTTAKEN            = 9,                    // quest_id     0,1,2   for condition true while quest active (0 any state, 1 if quest incomplete, 2 if quest completed).
-    CONDITION_AD_COMMISSION_AURA    = 10,                   // 0            0,      for condition true while one from AD commission aura active
-    CONDITION_NO_AURA               = 11,                   // spell_id     effindex
-    CONDITION_ACTIVE_GAME_EVENT     = 12,                   // event_id     0
-    CONDITION_AREA_FLAG             = 13,                   // area_flag    area_flag_not
-    CONDITION_RACE_CLASS            = 14,                   // race_mask    class_mask
-    CONDITION_LEVEL                 = 15,                   // player_level 0, 1 or 2 (0: equal to, 1: equal or higher than, 2: equal or less than)
-    CONDITION_NOITEM                = 16,                   // item_id      count   check not present req. amount items in inventory
-    CONDITION_SPELL                 = 17,                   // spell_id     0, 1 (0: has spell, 1: hasn't spell)
-    CONDITION_INSTANCE_SCRIPT       = 18,                   // map_id       instance_condition_id (instance script specific enum)
-    CONDITION_QUESTAVAILABLE        = 19,                   // quest_id     0       for case when loot/gossip possible only if player can start quest
-    CONDITION_RESERVED_1            = 20,                   // reserved for 3.x and later
-    CONDITION_RESERVED_2            = 21,                   // reserved for 3.x and later
-    CONDITION_QUEST_NONE            = 22,                   // quest_id     0 (quest did not take and not rewarded)
-    CONDITION_ITEM_WITH_BANK        = 23,                   // item_id      count   check present req. amount items in inventory or bank
-    CONDITION_NOITEM_WITH_BANK      = 24,                   // item_id      count   check not present req. amount items in inventory or bank
-    CONDITION_NOT_ACTIVE_GAME_EVENT = 25,                   // event_id     0
-    CONDITION_ACTIVE_HOLIDAY        = 26,                   // holiday_id   0       preferred use instead CONDITION_ACTIVE_GAME_EVENT when possible
-    CONDITION_NOT_ACTIVE_HOLIDAY    = 27,                   // holiday_id   0       preferred use instead CONDITION_NOT_ACTIVE_GAME_EVENT when possible
-    CONDITION_LEARNABLE_ABILITY     = 28,                   // spell_id     0 or item_id
-    // True when player can learn ability (using min skill value from SkillLineAbility).
-    // Item_id can be defined in addition, to check if player has one (1) item in inventory or bank.
-    // When player has spell or has item (when defined), condition return false.
-    CONDITION_SKILL_BELOW           = 29,                   // skill_id     skill_value
-    // True if player has skill skill_id and skill less than (and not equal) skill_value (for skill_value > 1)
-    // If skill_value == 1, then true if player has not skill skill_id
-    CONDITION_REPUTATION_RANK_MAX   = 30,                   // faction_id   max_rank
-    CONDITION_COMPLETED_ENCOUNTER   = 31,                   // encounter_id encounter_id2       encounter_id[2] = DungeonEncounter(dbc).id (if value2 provided it will return value1 OR value2)
-    CONDITION_SOURCE_AURA           = 32,                   // spell_id     effindex (returns true if the source of the condition check has aura of spell_id, effIndex)
-    CONDITION_LAST_WAYPOINT         = 33,                   // waypointId   0 = exact, 1: wp <= waypointId, 2: wp > waypointId  Use to check what waypoint was last reached
-    CONDITION_RESERVED_4            = 34,                   // reserved for 3.x and later
-    CONDITION_GENDER                = 35,                   // 0=male, 1=female, 2=none (see enum Gender)
-    CONDITION_DEAD_OR_AWAY          = 36,                   // value1: 0=player dead, 1=player is dead (with group dead), 2=player in instance are dead, 3=creature is dead
-    // value2: if != 0 only consider players in range of this value
-    CONDITION_CREATURE_IN_RANGE     = 37,                   // value1: creature entry; value2: range; returns only alive creatures
-    CONDITION_SPAWN_COUNT           = 39,                   // value1: creatureId; value2: count;
-    CONDITION_WORLD_SCRIPT          = 40,
-    CONDITION_GENDER_NPC            = 41,                   // value1: creature model gender: 0=male, 1=female, 2=none (see enum Gender)
-};
-
-enum ConditionSource                                        // From where was the condition called?
-{
-    CONDITION_FROM_LOOT                 = 0,                    // Used to check a *_loot_template entry
-    CONDITION_FROM_REFERING_LOOT        = 1,                    // Used to check a entry refering to a reference_loot_template entry
-    CONDITION_FROM_GOSSIP_MENU          = 2,                    // Used to check a gossip menu menu-text
-    CONDITION_FROM_GOSSIP_OPTION        = 3,                    // Used to check a gossip menu option-item
-    CONDITION_FROM_EVENTAI              = 4,                    // Used to check EventAI Event "On Receive Emote"
-    CONDITION_FROM_HARDCODED            = 5,                    // Used to check a hardcoded event - not actually a condition
-    CONDITION_FROM_VENDOR               = 6,                    // Used to check a condition from a vendor
-    CONDITION_FROM_SPELL_AREA           = 7,                    // Used to check a condition from spell_area table
-    CONDITION_FROM_RESERVED_1           = 8,                    // reserved for 3.x and later
-    CONDITION_FROM_DBSCRIPTS            = 9,                    // Used to check a condition from DB Scripts Engine
-    CONDITION_FROM_TRAINER              = 10,                   // Used to check a condition from npc_trainer and npc_trainer_template
-    CONDITION_FROM_AREATRIGGER_TELEPORT = 11,                   // Used to check a condition from areatrigger_teleport
-    CONDITION_FROM_QUEST                = 12,                   // Used to check a condition from quest_template
-};
-
-class PlayerCondition
-{
-    public:
-        // Default constructor, required for SQL Storage (Will give errors if used elsewise)
-        PlayerCondition() : m_entry(0), m_condition(CONDITION_AND), m_value1(0), m_value2(0) {}
-
-        PlayerCondition(uint16 _entry, int16 _condition, uint32 _value1, uint32 _value2)
-            : m_entry(_entry), m_condition(ConditionType(_condition)), m_value1(_value1), m_value2(_value2) {}
-
-        // Checks correctness of values
-        bool IsValid() const { return IsValid(m_entry, m_condition, m_value1, m_value2); }
-        static bool IsValid(uint16 entry, ConditionType condition, uint32 value1, uint32 value2);
-
-        static bool CanBeUsedWithoutPlayer(uint16 entry);
-
-        // Checks if the player meets the condition
-        bool Meets(Player const* player, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
-
-    private:
-        bool CheckParamRequirements(Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
-        uint16 m_entry;                                     // entry of the condition
-        ConditionType m_condition;                          // additional condition type
-        uint32 m_value1;                                    // data for the condition - see ConditionType definition
-        uint32 m_value2;
-};
 
 // NPC gossip text id
 typedef std::unordered_map<uint32, uint32> CacheNpcTextIdMap;
@@ -1104,8 +1007,8 @@ class ObjectMgr
         LocaleConstant GetLocaleForIndex(int i);
 
         // Check if a player meets condition conditionId
-        bool IsPlayerMeetToCondition(uint16 conditionId, Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
-
+        bool IsConditionSatisfied(uint32 conditionId, WorldObject const* target, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
+        
         GameTele const* GetGameTele(uint32 id) const
         {
             GameTeleMap::const_iterator itr = m_GameTeleMap.find(id);

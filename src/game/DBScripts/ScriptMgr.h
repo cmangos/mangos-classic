@@ -434,6 +434,7 @@ struct ScriptInfo
     float y;
     float z;
     float o;
+    uint32 condition_id;
 
     // helpers
     uint32 GetGOGuid() const

@@ -762,7 +762,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid) const
                             ReputationRank(pProto->RequiredReputationRank) > _player->GetReputationRank(pCreature->GetFactionTemplateEntry()->faction))
                         continue;
 
-                    if (crItem->conditionId && !sObjectMgr.IsPlayerMeetToCondition(crItem->conditionId, _player, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
+                    if (crItem->conditionId && !sObjectMgr.IsConditionSatisfied(crItem->conditionId, _player, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
                         continue;
                 }
 

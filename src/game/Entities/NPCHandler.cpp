@@ -183,7 +183,7 @@ void WorldSession::SendTrainerList(ObjectGuid guid) const
             if (!_player->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
                 continue;
 
-            if (tSpell->conditionId && !sObjectMgr.IsPlayerMeetToCondition(tSpell->conditionId, GetPlayer(), unit->GetMap(), unit, CONDITION_FROM_TRAINER))
+            if (tSpell->conditionId && !sObjectMgr.IsConditionSatisfied(tSpell->conditionId, GetPlayer(), unit->GetMap(), unit, CONDITION_FROM_TRAINER))
                 continue;
 
             reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
@@ -208,7 +208,7 @@ void WorldSession::SendTrainerList(ObjectGuid guid) const
             if (!_player->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
                 continue;
 
-            if (tSpell->conditionId && !sObjectMgr.IsPlayerMeetToCondition(tSpell->conditionId, GetPlayer(), unit->GetMap(), unit, CONDITION_FROM_TRAINER))
+            if (tSpell->conditionId && !sObjectMgr.IsConditionSatisfied(tSpell->conditionId, GetPlayer(), unit->GetMap(), unit, CONDITION_FROM_TRAINER))
                 continue;
 
             reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);

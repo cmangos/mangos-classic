@@ -105,8 +105,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
     scripts.first = tablename;
     scripts.second.clear();                                 // need for reload support
 
-    //                                                 0   1      2        3         4          5          6            7              8           9        10        11        12       13 14 15 16
-    QueryResult* result = WorldDatabase.PQuery("SELECT id, delay, command, datalong, datalong2, datalong3, buddy_entry, search_radius, data_flags, dataint, dataint2, dataint3, dataint4, x, y, z, o FROM %s ORDER BY priority", tablename);
+    //                                                 0   1      2        3         4          5          6            7              8           9        10        11        12       13 14 15 16  17
+    QueryResult* result = WorldDatabase.PQuery("SELECT id, delay, command, datalong, datalong2, datalong3, buddy_entry, search_radius, data_flags, dataint, dataint2, dataint3, dataint4, x, y, z, o, condition_id FROM %s", tablename);
 
     uint32 count = 0;
 
@@ -145,6 +145,13 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
         tmp.y                  = fields[14].GetFloat();
         tmp.z                  = fields[15].GetFloat();
         tmp.o                  = fields[16].GetFloat();
+        tmp.condition_id       = fields[17].GetUInt32();
+
+        if (tmp.condition_id && !sConditionStorage.LookupEntry<ConditionEntry>(tmp.condition_id))
+        {
+            sLog.outErrorDb("Table `%s` has condition_id = %u in command %u for script id %u, but this condition does not exist, skipping.", tablename, tmp.condition_id, tmp.command, tmp.id);
+            continue;
+        }
 
         // generic command args check
         if (tmp.buddyEntry && !(tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GUID))
@@ -664,7 +671,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 break;
             case SCRIPT_COMMAND_TERMINATE_COND:             // 34
             {
-                if (!sConditionStorage.LookupEntry<PlayerCondition>(tmp.terminateCond.conditionId))
+                if (!sConditionStorage.LookupEntry<ConditionEntry>(tmp.terminateCond.conditionId))
                 {
                     sLog.outErrorDb("Table `%s` has datalong = %u in SCRIPT_COMMAND_TERMINATE_COND for script id %u, but this condition_id does not exist.", tablename, tmp.terminateCond.conditionId, tmp.id);
                     continue;
@@ -1337,6 +1344,9 @@ bool ScriptAction::HandleScriptStep()
 
         pSourceOrItem = pSource ? pSource : (source && source->isType(TYPEMASK_ITEM) ? source : nullptr);
     }
+
+    if (m_script->condition_id && !sObjectMgr.IsConditionSatisfied(m_script->condition_id, pTarget, m_map, pSource, CONDITION_FROM_DBSCRIPTS))
+        return false;
 
     switch (m_script->command)
     {
@@ -2117,9 +2127,9 @@ bool ScriptAction::HandleScriptStep()
 
             bool terminateResult;
             if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                terminateResult = !sObjectMgr.IsPlayerMeetToCondition(m_script->terminateCond.conditionId, player, m_map, second, CONDITION_FROM_DBSCRIPTS);
+                terminateResult = !sObjectMgr.IsConditionSatisfied(m_script->terminateCond.conditionId, player, m_map, second, CONDITION_FROM_DBSCRIPTS);
             else
-                terminateResult = sObjectMgr.IsPlayerMeetToCondition(m_script->terminateCond.conditionId, player, m_map, second, CONDITION_FROM_DBSCRIPTS);
+                terminateResult = sObjectMgr.IsConditionSatisfied(m_script->terminateCond.conditionId, player, m_map, second, CONDITION_FROM_DBSCRIPTS);
 
             if (terminateResult && m_script->terminateCond.failQuest && player)
             {

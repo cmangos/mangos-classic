@@ -2332,7 +2332,7 @@ void SpellMgr::LoadSpellAreas()
             continue;
         }
 
-        if (spellArea.conditionId && !sConditionStorage.LookupEntry<PlayerCondition>(spellArea.conditionId))
+        if (spellArea.conditionId && !sConditionStorage.LookupEntry<ConditionEntry>(spellArea.conditionId))
         {
             sLog.outErrorDb("Spell %u listed in `spell_area` have wrong conditionId (%u) requirement", spell, spellArea.conditionId);
             continue;
@@ -2973,7 +2973,7 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
 {
     if (conditionId)
     {
-        if (!player || !sObjectMgr.IsPlayerMeetToCondition(conditionId, player, player->GetMap(), nullptr, CONDITION_FROM_SPELL_AREA))
+        if (!player || !sObjectMgr.IsConditionSatisfied(conditionId, player, player->GetMap(), nullptr, CONDITION_FROM_SPELL_AREA))
             return false;
     }
     else                                                    // This block will be removed

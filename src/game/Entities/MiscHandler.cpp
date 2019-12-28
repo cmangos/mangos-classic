@@ -772,7 +772,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
         player->SpawnCorpseBones();
     }
 
-    if (at->conditionId && !sObjectMgr.IsPlayerMeetToCondition(at->conditionId, player, player->GetMap(), nullptr, CONDITION_FROM_AREATRIGGER_TELEPORT))
+    if (at->conditionId && !sObjectMgr.IsConditionSatisfied(at->conditionId, player, player->GetMap(), nullptr, CONDITION_FROM_AREATRIGGER_TELEPORT))
     {
         /*TODO player->GetSession()->SendAreaTriggerMessage("%s", "YOU SHALL NOT PASS!");*/
         return;
