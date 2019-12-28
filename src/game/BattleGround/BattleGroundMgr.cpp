@@ -1162,13 +1162,13 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
         uint32 start1 = fields[5].GetUInt32();
 
-        WorldSafeLocsEntry const* start = sWorldSafeLocsStore.LookupEntry(start1);
+        WorldSafeLocsEntry const* start = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(start1);
         if (start)
         {
             AStartLoc[0] = start->x;
             AStartLoc[1] = start->y;
             AStartLoc[2] = start->z;
-            AStartLoc[3] = sObjectMgr.GetWorldSafeLocFacing(start->ID);
+            AStartLoc[3] = start->o;
         }
         else
         {
@@ -1178,13 +1178,13 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
         uint32 start2 = fields[6].GetUInt32();
 
-        start = sWorldSafeLocsStore.LookupEntry(start2);
+        start = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(start2);
         if (start)
         {
             HStartLoc[0] = start->x;
             HStartLoc[1] = start->y;
             HStartLoc[2] = start->z;
-            HStartLoc[3] = sObjectMgr.GetWorldSafeLocFacing(start->ID);
+            HStartLoc[3] = start->o;
         }
         else
         {

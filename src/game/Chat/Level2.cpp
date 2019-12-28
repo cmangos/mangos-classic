@@ -438,7 +438,7 @@ bool ChatHandler::HandleGoGraveyardCommand(char* args)
     if (!ExtractUInt32(&args, gyId))
         return false;
 
-    WorldSafeLocsEntry const* gy = sWorldSafeLocsStore.LookupEntry(gyId);
+    WorldSafeLocsEntry const* gy = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(gyId);
     if (!gy)
     {
         PSendSysMessage(LANG_COMMAND_GRAVEYARDNOEXIST, gyId);

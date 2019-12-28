@@ -287,7 +287,17 @@ struct GraveYardData
 };
 typedef std::multimap < uint32 /*zoneId*/, GraveYardData > GraveYardMap;
 typedef std::pair<GraveYardMap::const_iterator, GraveYardMap::const_iterator> GraveYardMapBounds;
-typedef std::unordered_map<uint32, float> WorldSafeLocsFacingMap;
+
+struct WorldSafeLocsEntry
+{
+    uint32    ID;
+    uint32    map_id;
+    float     x;
+    float     y;
+    float     z;
+    float     o;
+    char*     name;
+};
 
 struct QuestgiverGreeting
 {
@@ -609,8 +619,7 @@ class ObjectMgr
         void SetGraveYardLinkTeam(uint32 id, uint32 zoneId, Team team);
         void LoadGraveyardZones();
         GraveYardData const* FindGraveYardData(uint32 id, uint32 zoneId) const;
-        void LoadWorldSafeLocsFacing();
-        float GetWorldSafeLocFacing(uint32 id) const;
+        void LoadWorldSafeLocs() const;
 
         AreaTrigger const* GetAreaTrigger(uint32 trigger) const
         {
@@ -1222,7 +1231,6 @@ class ObjectMgr
         TaxiShortcutMap     m_TaxiShortcutMap;
 
         GraveYardMap        mGraveYardMap;
-        WorldSafeLocsFacingMap m_worldSafeLocsFacingMap;
 
         GameTeleMap         m_GameTeleMap;
 

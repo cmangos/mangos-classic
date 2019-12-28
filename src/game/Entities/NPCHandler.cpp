@@ -425,7 +425,7 @@ void WorldSession::SendSpiritResurrect() const
                 _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetMapId(), _player->GetTeam());
 
         if (corpseGrave != ghostGrave)
-            _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, sObjectMgr.GetWorldSafeLocFacing(corpseGrave->ID));
+            _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, corpseGrave->o);
         // or update at original position
         else
         {

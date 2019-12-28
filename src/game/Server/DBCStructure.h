@@ -918,6 +918,7 @@ struct WorldMapOverlayEntry
     // 16       m_hitRectRight
 };
 
+/* Structure WorldSafeLocsEntry is no longer loaded from DBC but from DB instead
 struct WorldSafeLocsEntry
 {
     uint32    ID;                                           // 0        m_ID
@@ -928,6 +929,7 @@ struct WorldSafeLocsEntry
     // char*   name[8]                                      // 5-12     m_AreaName_lang
     // 13 string flags
 };
+*/
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
