@@ -434,7 +434,13 @@ struct ScriptInfo
     float y;
     float z;
     float o;
-    uint32 condition_id = 0;
+    uint32 condition_id;
+
+    ScriptInfo() : id(0), delay(0), command(0), buddyEntry(0), searchRadiusOrGuid(0), data_flags(0), x(0), y(0), z(0), o(0), condition_id(0)
+    {
+        memset(raw.data, 0, sizeof(raw.data));
+        memset(textId, 0, sizeof(textId));
+    }
 
     // helpers
     uint32 GetGOGuid() const
