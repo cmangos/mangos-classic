@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "DBScripts/Conditions.h"
+#include "Globals/Conditions.h"
 #include "Entities/Unit.h"
 #include "Entities/Player.h"
 #include "GameEvents/GameEventMgr.h"

@@ -31,7 +31,7 @@
 #include "Maps/Map.h"
 #include "Maps/MapPersistentStateMgr.h"
 #include "Entities/ObjectGuid.h"
-#include "DBScripts/Conditions.h"
+#include "Globals/Conditions.h"
 
 #include <map>
 
