@@ -19,6 +19,11 @@
 #ifndef __OBJECT_VISIBILITY_H
 #define __OBJECT_VISIBILITY_H
 
+#include "Common.h"
+
+class WorldObject;
+class Unit;
+
 enum class VisibilityDistanceType : uint32
 {
     Normal = 0,

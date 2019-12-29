@@ -18,6 +18,10 @@
 
 #include "ObjectVisibility.h"
 
+#include "Util.h"
+#include "Entities/Player.h"
+#include "Entities/GameObject.h"
+
 constexpr float VisibilityDistances[AsUnderlyingType(VisibilityDistanceType::Max)] =
 {
     DEFAULT_VISIBILITY_DISTANCE,
