@@ -399,7 +399,7 @@ class Map : public GridRefManager<NGridType>
 
         WorldObjectSet i_objectsToRemove;
 
-        typedef std::multimap<time_t, ScriptAction> ScriptScheduleMap;
+        typedef std::multimap<TimePoint, ScriptAction> ScriptScheduleMap;
         ScriptScheduleMap m_scriptSchedule;
 
         InstanceData* i_data;
