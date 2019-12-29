@@ -359,6 +359,29 @@ class ChatHandler
         bool HandleModifyHonorCommand(char* args);
         bool HandleModifyRepCommand(char* args);
         bool HandleModifyGenderCommand(char* args);
+        bool HandleModifyStrengthCommand(char* args);
+        bool HandleModifyAgilityCommand(char* args);
+        bool HandleModifyStaminaCommand(char* args);
+        bool HandleModifyIntellectCommand(char* args);
+        bool HandleModifySpiritCommand(char* args);
+        bool HandleModifyArmorCommand(char* args);
+        bool HandleModifyHolyCommand(char* args);
+        bool HandleModifyFireCommand(char* args);
+        bool HandleModifyNatureCommand(char* args);
+        bool HandleModifyFrostCommand(char* args);
+        bool HandleModifyShadowCommand(char* args);
+        bool HandleModifyArcaneCommand(char* args);
+        bool HandleModifyMeleeApCommand(char* args);
+        bool HandleModifyRangedApCommand(char* args);
+        bool HandleModifySpellPowerCommand(char* args);
+        bool HandleModifyMeleeCritCommand(char* args);
+        bool HandleModifySpellCritCommand(char* args);
+        bool HandleModifyMeleeHasteCommand(char* args);
+        bool HandleModifyRangedHasteCommand(char* args);
+        bool HandleModifySpellHasteCommand(char* args);
+        bool HandleModifyBlockCommand(char* args);
+        bool HandleModifyDodgeCommand(char* args);
+        bool HandleModifyParryCommand(char* args);
 
         //-----------------------Npc Commands-----------------------
         bool HandleNpcAddCommand(char* args);
@@ -505,6 +528,7 @@ class ChatHandler
         bool HandleResetStatsCommand(char* args);
         bool HandleResetTalentsCommand(char* args);
         bool HandleResetTaxiNodesCommand(char* args);
+        bool HandleResetModsCommand(char* args);
 
         bool HandleSendItemsCommand(char* args);
         bool HandleSendMailCommand(char* args);

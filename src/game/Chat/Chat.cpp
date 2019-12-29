@@ -454,6 +454,29 @@ ChatCommand* ChatHandler::getCommandTable()
         { "standstate",     SEC_GAMEMASTER,     false, &ChatHandler::HandleModifyStandStateCommand,    "", nullptr },
         { "morph",          SEC_GAMEMASTER,     false, &ChatHandler::HandleModifyMorphCommand,         "", nullptr },
         { "gender",         SEC_GAMEMASTER,     false, &ChatHandler::HandleModifyGenderCommand,        "", nullptr },
+        { "strength",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyStrengthCommand,      "", nullptr },
+        { "agility",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyAgilityCommand,       "", nullptr },
+        { "stamina",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyStaminaCommand,       "", nullptr },
+        { "intellect",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyIntellectCommand,     "", nullptr },
+        { "spirit",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifySpiritCommand,        "", nullptr },
+        { "armor",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyArmorCommand,         "", nullptr },
+        { "holyresist",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyHolyCommand,          "", nullptr },
+        { "fireresist",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyFireCommand,          "", nullptr },
+        { "natureresist",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyNatureCommand,        "", nullptr },
+        { "frostresist",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyFrostCommand,         "", nullptr },
+        { "shadowresist",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyShadowCommand,        "", nullptr },
+        { "arcaneresist",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyArcaneCommand,        "", nullptr },
+        { "ap",             SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyMeleeApCommand,       "", nullptr },
+        { "rangeap",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyRangedApCommand,      "", nullptr },
+        { "spellpower",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifySpellPowerCommand,    "", nullptr },
+        { "crit",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyMeleeCritCommand,     "", nullptr },
+        { "spellcrit",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifySpellCritCommand,     "", nullptr },
+        { "meleehaste",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyMeleeHasteCommand,    "", nullptr },
+        { "rangehaste",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyRangedHasteCommand,   "", nullptr },
+        { "spellhaste",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifySpellHasteCommand,    "", nullptr },
+        { "block",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyBlockCommand,         "", nullptr },
+        { "dodge",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyDodgeCommand,         "", nullptr },
+        { "parry",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleModifyParryCommand,         "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
@@ -631,6 +654,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "stats",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleResetStatsCommand,          "", nullptr },
         { "talents",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleResetTalentsCommand,        "", nullptr },
         { "taxinodes",      SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleResetTaxiNodesCommand,      "", nullptr },
+        { "mods",           SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleResetModsCommand,           "", nullptr },
         { "all",            SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleResetAllCommand,            "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
