@@ -228,10 +228,6 @@ void PetAI::UpdateAI(const uint32 diff)
                         // allow only spell not on cooldown
                         if (cooldown != 0 && duration < cooldown)
                             continue;
-
-                        // not allow instant kill auto casts as full health cost
-                        if (IsSpellHaveEffect(spellInfo, SPELL_EFFECT_INSTAKILL))
-                            continue;
                     }
                 }
                 // just ignore non-combat spells
