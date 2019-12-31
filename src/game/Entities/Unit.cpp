@@ -8073,12 +8073,6 @@ bool Unit::SelectHostileTarget()
 
     if (target)
     {
-        if (IsLeashingTarget(target))
-        {
-            AI()->EnterEvadeMode();
-            return false;
-        }
-
         // needs a much better check, seems to cause quite a bit of trouble
         SetInFront(target);
 
@@ -8261,21 +8255,6 @@ bool Unit::IsOfflineTarget(Unit* victim) const
         return true;
 
     return false;
-}
-
-bool Unit::IsLeashingTarget(Unit* victim) const
-{
-    float AttackDist = GetAttackDistance(victim);
-    float ThreatRadius = sWorld.getConfig(CONFIG_FLOAT_THREAT_RADIUS);
-    float x, y, z, ori;
-    if (GetTypeId() == TYPEID_UNIT)
-        static_cast<Creature const*>(this)->GetCombatStartPosition(x, y, z, ori);
-    else
-        GetPosition(x, y, z);
-
-    // Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
-    // TODO: Implement proper leashing. In the meantime, we ignore leashing for all creatures in dungeon though this is not always true
-    return !GetMap()->IsDungeon() && !victim->IsWithinDist3d(x, y, z, ThreatRadius > AttackDist ? ThreatRadius : AttackDist);
 }
 
 uint32 Unit::GetCreatureType() const
