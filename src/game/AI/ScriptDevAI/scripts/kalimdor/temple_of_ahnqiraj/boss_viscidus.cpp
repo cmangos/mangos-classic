@@ -134,8 +134,6 @@ struct boss_viscidusAI : public CombatAI
 
     void Aggro(Unit* /*who*/) override
     {
-        DoCastSpellIfCan(m_creature, SPELL_TOXIN);
-
         if (m_instance)
             m_instance->SetData(TYPE_VISCIDUS, IN_PROGRESS);
     }
@@ -224,50 +222,51 @@ struct boss_viscidusAI : public CombatAI
         }
     }
 
-    void DamageTaken(Unit* dealer, uint32& /*damage*/, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damagetype, SpellEntry const* spellInfo) override
     {
-        if (m_uiPhase != PHASE_FROZEN)
-            return;
-
-        if (!spellInfo || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE) // only melee attacks - TODO: do through proc of SPELL_VISCIDUS_FREEZE
+        if (m_uiPhase == PHASE_FROZEN)
         {
-            ++m_uiHitCount;
-
-            // only count melee attacks
-            if (m_uiHitCount >= HITCOUNT_EXPLODE)
+            if (!spellInfo || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE) // only melee attacks - TODO: do through proc of SPELL_VISCIDUS_FREEZE
             {
-                if (m_creature->GetHealthPercent() <= 5.0f)
+                ++m_uiHitCount;
+
+                // only count melee attacks
+                if (m_uiHitCount >= HITCOUNT_EXPLODE)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SUICIDE_TRIGGER, CAST_TRIGGERED) == CAST_OK)
-                        m_creature->CastSpell(nullptr, SPELL_VISCIDUS_SUICIDE, TRIGGERED_OLD_TRIGGERED);
+                    if (m_creature->GetHealthPercent() <= 5.0f)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SUICIDE_TRIGGER, CAST_TRIGGERED) == CAST_OK)
+                            m_creature->CastSpell(nullptr, SPELL_VISCIDUS_SUICIDE, TRIGGERED_OLD_TRIGGERED);
+                    }
+                    else if (DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_EXPLODE, CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_EXPLODE, m_creature);
+                        m_uiPhase = PHASE_EXPLODED;
+                        m_uiHitCount = 0;
+                        m_lGlobesGuidList.clear();
+                        uint32 uiGlobeCount = m_creature->GetHealthPercent() / 5.0f;
+
+                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_GLOBS, CAST_TRIGGERED);
+
+                        for (uint8 i = 0; i < uiGlobeCount; ++i)
+                            DoCastSpellIfCan(m_creature, auiGlobSummonSpells[i], CAST_TRIGGERED);
+
+                        m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_FREEZE);
+                        ResetTimer(VISCIDUS_EXPLODE, 2000);
+
+                        SetCombatScriptStatus(true);
+                        SetCombatMovement(false, true);
+                        SetMeleeEnabled(false);
+                        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+                    }
                 }
-                else if (DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_EXPLODE, CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_EXPLODE, m_creature);
-                    m_uiPhase = PHASE_EXPLODED;
-                    m_uiHitCount = 0;
-                    m_lGlobesGuidList.clear();
-                    uint32 uiGlobeCount = m_creature->GetHealthPercent() / 5.0f;
-
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_GLOBS, CAST_TRIGGERED);
-
-                    for (uint8 i = 0; i < uiGlobeCount; ++i)
-                        DoCastSpellIfCan(m_creature, auiGlobSummonSpells[i], CAST_TRIGGERED);
-
-                    m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_FREEZE);
-                    ResetTimer(VISCIDUS_EXPLODE, 2000);
-
-                    SetCombatScriptStatus(true);
-                    SetCombatMovement(false, true);
-                    SetMeleeEnabled(false);
-                    m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-                }
+                else if (m_uiHitCount == HITCOUNT_SHATTER)
+                    DoScriptText(EMOTE_SHATTER, m_creature);
+                else if (m_uiHitCount == HITCOUNT_CRACK)
+                    DoScriptText(EMOTE_CRACK, m_creature);
             }
-            else if (m_uiHitCount == HITCOUNT_SHATTER)
-                DoScriptText(EMOTE_SHATTER, m_creature);
-            else if (m_uiHitCount == HITCOUNT_CRACK)
-                DoScriptText(EMOTE_CRACK, m_creature);
         }
+        CombatAI::DamageTaken(dealer, damage, damagetype, spellInfo);
     }
 
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
@@ -285,19 +284,22 @@ struct boss_viscidusAI : public CombatAI
                 m_uiPhase = PHASE_FROZEN;
                 m_uiHitCount = 0;
 
-                DoScriptText(EMOTE_FROZEN, m_creature);
+                if (m_uiHitCount == HITCOUNT_FREEZE)
+                    DoScriptText(EMOTE_FROZEN, m_creature);
                 m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_SLOWED_MORE);
                 DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_FREEZE, CAST_TRIGGERED);
             }
             else if (m_uiHitCount >= HITCOUNT_SLOW_MORE)
             {
-                DoScriptText(EMOTE_FREEZE, m_creature);
+                if (m_uiHitCount == HITCOUNT_SLOW_MORE)
+                    DoScriptText(EMOTE_FREEZE, m_creature);
                 m_creature->RemoveAurasDueToSpell(SPELL_VISCIDUS_SLOWED);
                 DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SLOWED_MORE, CAST_TRIGGERED);
             }
             else if (m_uiHitCount >= HITCOUNT_SLOW)
             {
-                DoScriptText(EMOTE_SLOW, m_creature);
+                if (m_uiHitCount == HITCOUNT_SLOW)
+                    DoScriptText(EMOTE_SLOW, m_creature);
                 DoCastSpellIfCan(m_creature, SPELL_VISCIDUS_SLOWED, CAST_TRIGGERED);
             }
         }
@@ -323,7 +325,7 @@ struct boss_viscidusAI : public CombatAI
             case VISCIDUS_TOXIN:
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                    if (DoCastSpellIfCan(target, SPELL_SUMMONT_TRIGGER) == CAST_OK)
+                    if (DoCastSpellIfCan(target, SPELL_SUMMON_TOXIC_SLIME) == CAST_OK)
                         ResetCombatAction(action, 30000);
                 break;
             }

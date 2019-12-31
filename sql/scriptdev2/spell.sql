@@ -11,6 +11,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (731,'spell_entangle_fankriss'),
 (785,'spell_true_fulfillment'),
 (794,'spell_initialize_images'),
+(802,'spell_mutate_bug'),
 (1121,'spell_entangle_fankriss'),
 (3730,'spell_initialize_image'),
 (7054,'spell_forsaken_skill'),

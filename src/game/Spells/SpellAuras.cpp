@@ -3796,7 +3796,20 @@ void Aura::HandleAuraModIncreaseEnergyPercent(bool apply, bool /*Real*/)
 
 void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool /*Real*/)
 {
-    GetTarget()->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, float(m_modifier.m_amount), apply);
+    Unit* target = GetTarget();
+
+    uint32 oldMaxHealth = target->GetMaxHealth();
+    target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, float(m_modifier.m_amount), apply);
+
+    switch (GetId())
+    {
+        case 802:                           // Mutate Bug
+        {
+            if (apply)
+                target->ModifyHealth(target->GetMaxHealth() - oldMaxHealth);
+            break;
+        }
+    }
 }
 
 /********************************/

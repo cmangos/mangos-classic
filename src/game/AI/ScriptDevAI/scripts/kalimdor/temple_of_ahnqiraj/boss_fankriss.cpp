@@ -61,7 +61,6 @@ enum FankrissActions
     FANKRISS_SUMMON_WORM,
     FANKRISS_ENTANGLE,
     FANKRISS_ACTION_MAX,
-    FANKRISS_ENTANGLE_SUMMON,
 };
 
 struct boss_fankrissAI : public CombatAI
@@ -71,17 +70,18 @@ struct boss_fankrissAI : public CombatAI
         AddCombatAction(FANKRISS_MORTAL_WOUND, 10000, 15000);
         AddCombatAction(FANKRISS_SUMMON_WORM, 30000, 50000);
         AddCombatAction(FANKRISS_ENTANGLE, 25000, 40000);
-        AddCustomAction(FANKRISS_ENTANGLE_SUMMON, true, [&]() { HandleEntangleSummon(); });
     }
 
     ScriptedInstance* m_instance;
 
     ObjectGuid m_EntangleTargetGuid;
+    GuidVector m_spawns;
 
     void Reset() override
     {
         CombatAI::Reset();
         m_EntangleTargetGuid.Clear();
+        DespawnGuids(m_spawns);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -114,19 +114,7 @@ struct boss_fankrissAI : public CombatAI
             if (Player* pTarget = m_creature->GetMap()->GetPlayer(m_EntangleTargetGuid))
                 summoned->AI()->AttackStart(pTarget);
         }
-    }
-
-    void HandleEntangleSummon()
-    {
-        if (Player* target = m_creature->GetMap()->GetPlayer(m_EntangleTargetGuid))
-        {
-            float x, y, z;
-            for (uint8 i = 0; i < 4; ++i)
-            {
-                m_creature->GetRandomPoint(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 3.0f, x, y, z);
-                m_creature->SummonCreature(NPC_VEKNISS_HATCHLING, x, y, z, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
-            }
-        }
+        m_spawns.push_back(summoned->GetObjectGuid());
     }
 
     void ExecuteAction(uint32 action) override
@@ -153,7 +141,6 @@ struct boss_fankrissAI : public CombatAI
                     if (DoCastSpellIfCan(target, aEntangleSpells[uiEntangleIndex]) == CAST_OK)
                     {
                         m_EntangleTargetGuid = target->GetObjectGuid();
-                        ResetTimer(FANKRISS_ENTANGLE_SUMMON, 1000);
                         ResetCombatAction(action, urand(15000, 20000));
                     }
                 }

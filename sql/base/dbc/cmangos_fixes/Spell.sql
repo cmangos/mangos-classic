@@ -113,3 +113,6 @@ UPDATE spell_template SET MaxAffectedTargets=15 WHERE Id IN(26052);
 -- Onyxia - Wing buffet is interruptible by things but shouldnt
 UPDATE spell_template SET InterruptFlags=0 WHERE Id IN(18500);
 
+-- AQ40 - Ouro - Sweep is interruptible by things but shouldnt
+UPDATE spell_template SET InterruptFlags=0 WHERE Id IN(26103);
+

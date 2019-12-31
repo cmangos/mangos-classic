@@ -70,6 +70,10 @@ enum
     SPELL_WHISPERINGS_CTHUN_5   = 26259,
 
     NPC_VISCIDUS_TRIGGER        = 15925,
+    NPC_POISON_CLOUD            = 15933,
+
+    NPC_QIRAJI_SCARAB           = 15316,
+    NPC_QIRAJI_SCORPION         = 15317,
 };
 
 // Prophecies yelled by Propher Skeram before he is engaged
@@ -111,6 +115,8 @@ class instance_temple_of_ahnqiraj : public ScriptedInstance, private DialogueHel
         uint8 m_uiBugTrioDeathCount;
         uint32 m_uiCthunWhisperTimer;
         uint32 m_uiSkeramProphecyTimer;
+
+        GuidVector m_bugTrioSpawns;
 
         void JustDidDialogueStep(int32 entry) override;
 };

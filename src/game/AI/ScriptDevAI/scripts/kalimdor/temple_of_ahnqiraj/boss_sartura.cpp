@@ -156,7 +156,7 @@ struct AQWhirlwind : public SpellScript
 
             spell->GetCaster()->getThreatManager().modifyAllThreatPercent(-100);
             if (Unit* target = static_cast<Creature*>(spell->GetCaster())->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                spell->GetCaster()->getThreatManager().addThreatDirectly(target, 100000.f);
+                spell->GetCaster()->getThreatManager().addThreat(target, 100000.f);
         }
         else
             spell->GetCaster()->getThreatManager().modifyAllThreatPercent(-100);

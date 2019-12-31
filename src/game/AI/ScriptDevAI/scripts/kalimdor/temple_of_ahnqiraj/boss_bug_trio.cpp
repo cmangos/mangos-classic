@@ -40,6 +40,9 @@ enum
     SPELL_SUMMON_CLOUD      = 26590,            // summons 15933
     SPELL_THRASH            = 3391,
 
+    SPELL_TOXIN             = 26575,
+    SPELL_TOXIC_VAPOURS     = 25786,
+
     // Vem
     SPELL_KNOCK_AWAY        = 18670,
     SPELL_KNOCKDOWN         = 19128,
@@ -55,6 +58,9 @@ enum
     SPELL_DESPAWN_BROOD     = 25792,
 
     NPC_YAUJ_BROOD          = 15621,
+    // NPC_POISON_CLOUD        = 15933,
+
+    POINT_CONSUME           = 0,
 };
 
 struct Location
@@ -64,10 +70,16 @@ struct Location
 
 static const Location resetPoint = { -8582.0f, 2047.0f, -1.62f };
 
+enum RoyaltyActions
+{
+    ROYALTY_DEVOUR_DELAY = 10,
+};
+
 struct boss_silithidRoyaltyAI : public CombatAI
 {
     boss_silithidRoyaltyAI(Creature* creature, uint32 actionCount) : CombatAI(creature, actionCount), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
+        AddCustomAction(ROYALTY_DEVOUR_DELAY, true, [&]() { HandleDevourDelay(); });
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit* unit, float x, float y, float z) -> bool
         {
             return m_creature->GetDistance(resetPoint.m_fX, resetPoint.m_fY, resetPoint.m_fZ, DIST_CALC_COMBAT_REACH) < 10.0f;
@@ -75,6 +87,7 @@ struct boss_silithidRoyaltyAI : public CombatAI
     }
 
     ScriptedInstance* m_instance;
+    GuidVector m_spawns;
 
     uint32 m_deathAbility;
 
@@ -107,7 +120,7 @@ struct boss_silithidRoyaltyAI : public CombatAI
 
         // Inform the instance script that we are ready to be consumed
         // The instance script keeps track of how many bosses are already defeated
-        m_instance->SetData(TYPE_BUG_TRIO, SPECIAL);
+        m_instance->SetData(TYPE_BUG_TRIO, m_creature->GetEntry());
 
         DoDummyConsume();
     }
@@ -136,13 +149,40 @@ struct boss_silithidRoyaltyAI : public CombatAI
         DoCastSpellIfCan(nullptr, m_deathAbility);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
+    void MovementInform(uint32 motionType, uint32 pointId)
+    {
+        if (motionType != POINT_MOTION_TYPE)
+            return;
+
+        if (pointId == POINT_CONSUME)
+        {
+            m_creature->SetBaseRunSpeed(15.f/7.f); // sniffed
+            m_creature->CastSpell(nullptr, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
+            ResetTimer(ROYALTY_DEVOUR_DELAY, 2000);
+        }
+    }
+
+    void HandleDevourDelay()
+    {
+        SetCombatScriptStatus(false);
+        SetMeleeEnabled(true);
+        SetCombatMovement(true, true);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 miscValue) override
     {
         if (eventType == AI_EVENT_CUSTOM_A) // on first 2 killed
         {
-            m_creature->CastSpell(nullptr, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
             if (miscValue == 2)
                 SetDeathPrevention(false);
+            SetCombatScriptStatus(true);
+            SetMeleeEnabled(false);
+            SetCombatMovement(false);
+            m_creature->SetTarget(nullptr);
+            m_creature->SetBaseRunSpeed(45.f/7.f); // sniffed
+            float x, y, z;
+            invoker->GetClosePoint(x, y, z, 0.f);
+            m_creature->GetMotionMaster()->MovePoint(POINT_CONSUME, x, y, z);
         }
     }
 };
@@ -172,6 +212,18 @@ struct boss_kriAI : public boss_silithidRoyaltyAI
         m_deathAbility     = SPELL_SUMMON_CLOUD;
 
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        if (summoned->GetEntry() == NPC_POISON_CLOUD)
+        {
+            summoned->AI()->SetCombatMovement(false);
+            summoned->AI()->SetMeleeEnabled(false);
+            summoned->AI()->SetReactState(REACT_PASSIVE);
+            summoned->AI()->DoCastSpellIfCan(nullptr, SPELL_TOXIN, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            summoned->AI()->DoCastSpellIfCan(nullptr, SPELL_TOXIC_VAPOURS);
+        }
     }
 
     void ExecuteAction(uint32 action) override

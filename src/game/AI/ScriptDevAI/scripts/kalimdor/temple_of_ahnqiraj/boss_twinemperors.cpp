@@ -26,6 +26,7 @@ EndScriptData
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "temple_of_ahnqiraj.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -63,10 +64,13 @@ enum
 
     // veknilash spells
     SPELL_MUTATE_BUG            = 802,          // targets 15316 or 15317
+    SPELL_VIRULENT_POISON       = 22413,
     SPELL_UPPERCUT              = 26007,
     SPELL_UNBALANCING_STRIKE    = 26613,
     SPELL_BERSERK               = 27680,
     SPELL_DOUBLE_ATTACK         = 18943,
+
+    FACTION_HOSTILE             = 16,
 };
 
 enum EmperorActions
@@ -74,6 +78,7 @@ enum EmperorActions
     EMPEROR_BERSERK,
     EMPEROR_BUG_ABILITY,
     EMPEROR_ACTION_MAX,
+    EMPEROR_TELEPORT_DELAY = 10,
 };
 
 struct boss_twin_emperorsAI : public CombatAI
@@ -82,22 +87,22 @@ struct boss_twin_emperorsAI : public CombatAI
     {
         AddCombatAction(EMPEROR_BERSERK, 15u * MINUTE * IN_MILLISECONDS);
         AddCombatAction(EMPEROR_BUG_ABILITY, urand(7000, 14000));
+        AddCustomAction(EMPEROR_TELEPORT_DELAY, true, [&]() { HandleDelayedAttack(); });
     }
 
     instance_temple_of_ahnqiraj* m_instance;
 
     // Workaround for the shared health pool
-    void DamageTaken(Unit* /*doneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* /*doneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
-        if (!m_instance)
+        if (!m_instance || (spellInfo && spellInfo->Id == SPELL_TWIN_EMPATHY))
             return;
 
         if (Creature* twin = m_instance->GetSingleCreatureFromStorage(m_creature->GetEntry() == NPC_VEKLOR ? NPC_VEKNILASH : NPC_VEKLOR))
         {
             float fDamPercent = ((float)damage) / ((float)m_creature->GetMaxHealth());
             int32 twinDamage = (int32)(fDamPercent * ((float)twin->GetMaxHealth()));
-            uint32 twinHealth = twin->GetHealth() - twinDamage;
-            if (twinHealth <= 0)
+            if (twin->GetHealth() <= uint32(twinDamage))
                 twin->CastSpell(nullptr, SPELL_TWIN_SUICIDE, TRIGGERED_OLD_TRIGGERED);
             else
                 twin->CastCustomSpell(nullptr, SPELL_TWIN_EMPATHY, &twinDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
@@ -135,6 +140,22 @@ struct boss_twin_emperorsAI : public CombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_TWINS, FAIL);
+    }
+
+    void StartDelayedAttack()
+    {
+        SetCombatScriptStatus(true);
+        SetMeleeEnabled(false);
+        SetCombatMovement(false);
+        m_creature->SetTarget(nullptr);
+        ResetTimer(EMPEROR_TELEPORT_DELAY, 2000);
+    }
+
+    void HandleDelayedAttack()
+    {
+        SetCombatScriptStatus(false);
+        SetMeleeEnabled(true);
+        SetCombatMovement(true);
     }
 
     // Return true, if succeeded
@@ -276,7 +297,7 @@ struct boss_veklorAI : public boss_twin_emperorsAI
         boss_twin_emperorsAI::Reset();
 
         m_meleeEnabled = false;
-        m_attackDistance = 20.f;
+        m_attackDistance = 40.f;
     }
 
     void MoveInLineOfSight(Unit* who) override
@@ -335,6 +356,7 @@ struct boss_veklorAI : public boss_twin_emperorsAI
         twin->AI()->DoCastSpellIfCan(nullptr, SPELL_TWIN_TELEPORT_VISUAL, CAST_TRIGGERED);
         twin->AI()->DoCastSpellIfCan(nullptr, SPELL_TWIN_TELEPORT_STUN, CAST_TRIGGERED);
         twin->NearTeleportTo(x, y, z, ori, true);
+        static_cast<boss_twin_emperorsAI*>(twin->AI())->StartDelayedAttack();
     }
 
     bool DoHandleBugAbility() override
@@ -366,8 +388,9 @@ struct boss_veklorAI : public boss_twin_emperorsAI
             }
             case VEKLOR_ARCANE_BURST:
             {
-                if (DoCastSpellIfCan(nullptr, SPELL_ARCANE_BURST) == CAST_OK)
-                    ResetCombatAction(action, 5000);
+                if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_ARCANE_BURST, SELECT_FLAG_PLAYER | SELECT_FLAG_USE_EFFECT_RADIUS))
+                    if (DoCastSpellIfCan(nullptr, SPELL_ARCANE_BURST) == CAST_OK)
+                        ResetCombatAction(action, 5000);
                 break;
             }
             case VEKLOR_TELEPORT:
@@ -375,6 +398,26 @@ struct boss_veklorAI : public boss_twin_emperorsAI
                 if (DoCastSpellIfCan(nullptr, SPELL_TWIN_TELEPORT) == CAST_OK)
                     ResetCombatAction(action, 35000);
                 break;
+            }
+            default:
+                boss_twin_emperorsAI::ExecuteAction(action);
+                break;
+        }
+    }
+};
+
+struct MutateBug : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0 && apply)
+        {
+            aura->GetTarget()->AI()->DoCastSpellIfCan(nullptr, SPELL_VIRULENT_POISON, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            if (aura->GetTarget()->IsCreature())
+            {
+                aura->GetTarget()->setFaction(FACTION_HOSTILE);
+                static_cast<Creature*>(aura->GetTarget())->SetInCombatWithZone();
+                aura->GetTarget()->AI()->AttackClosestEnemy();
             }
         }
     }
@@ -391,4 +434,6 @@ void AddSC_boss_twinemperors()
     pNewScript->Name = "boss_veklor";
     pNewScript->GetAI = &GetNewAIInstance<boss_veklorAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<MutateBug>("spell_mutate_bug");
 }

@@ -420,27 +420,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 3730:                                  // Initialize Image (Prophet Skeram in AQ40)
-                {
-                    if (unitTarget)
-                    {
-                        float healthPct = m_currentBasePoints[EFFECT_INDEX_0];
-                        float maxHealthPct = 0.0f;
-
-                        // The max health depends on the split phase. It's percent * original boss health
-                        if (healthPct < 25.0f)
-                            maxHealthPct = 0.50f;
-                        else if (healthPct < 50.0f)
-                            maxHealthPct = 0.20f;
-                        else
-                            maxHealthPct = 0.10f;
-
-                        // Set the same health percent as the original boss
-                        unitTarget->SetMaxHealth(unitTarget->GetMaxHealth() * maxHealthPct);
-                        unitTarget->SetHealthPercent(healthPct);
-                    }
-                    return;
-                }
                 case 4131:                                  // Banish Cresting Exile
                 {
                     if (!unitTarget)
