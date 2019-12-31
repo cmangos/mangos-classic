@@ -44,6 +44,7 @@
 #include "Chat/Chat.h"
 #include "Server/SQLStorages.h"
 #include "MotionGenerators/PathFinder.h"
+#include "Spells/Scripts/SpellScript.h"
 #include "Entities/ObjectGuid.h"
 
 extern pEffect SpellEffects[MAX_SPELL_EFFECTS];

@@ -26,6 +26,7 @@
 #include "Grids/CellImpl.h"
 #include "Spells/SpellMgr.h"
 #include "World/World.h"
+#include <float.h>
 
 static_assert(MAXIMAL_AI_EVENT_EVENTAI <= 32, "Maximal 32 AI_EVENTs supported with EventAI");
 

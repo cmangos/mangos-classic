@@ -28,7 +28,6 @@
 #include "Entities/Player.h"
 #include "Server/SQLStorages.h"
 #include "Spells/SpellEffectDefines.h"
-#include "Spells/SpellMgr.h"
 
 class WorldSession;
 class WorldPacket;
