@@ -48,7 +48,6 @@ enum
 
     // Princess Yauj
     SPELL_HEAL              = 25807,
-    SPELL_DISPEL            = 25808,
     SPELL_FEAR              = 26580,
     SPELL_RAVAGE            = 3242,
     SPELL_SUMMON_BROOD      = 25789,
