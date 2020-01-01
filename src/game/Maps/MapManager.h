@@ -22,8 +22,10 @@
 #include "Common.h"
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
+#include "Map.h"
 #include "Maps/Map.h"
 #include "Grids/GridStates.h"
+#include "Maps/MapUpdater.h"
 
 class Transport;
 class BattleGround;
@@ -68,7 +70,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         // only const version for outer users
         void DeleteInstance(uint32 mapid, uint32 instanceId);
 
-        void Initialize(void);
+        void Initialize();
         void Update(uint32);
 
         void SetGridCleanUpDelay(uint32 t)
@@ -81,7 +83,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
 
         void SetMapUpdateInterval(uint32 t)
         {
-            if (t > MIN_MAP_UPDATE_DELAY)
+            if (t < MIN_MAP_UPDATE_DELAY)
                 t = MIN_MAP_UPDATE_DELAY;
 
             i_timer.SetInterval(t);
@@ -184,6 +186,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         IntervalTimer i_timer;
 
         uint32 i_MaxInstanceId;
+        MapUpdater m_updater;
 };
 
 template<typename Do>

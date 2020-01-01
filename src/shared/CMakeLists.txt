@@ -95,6 +95,7 @@ set(SRC_GRP_UTIL
     Util.cpp
     Util.h
     WorldPacket.h
+    ProducerConsumerQueue.h
 )
 
 set(SRC_GRP_SRP
