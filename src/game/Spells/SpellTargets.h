@@ -44,6 +44,7 @@ struct SpellTargetingData
     SpellTargetImplicitType implicitType[MAX_EFFECT_INDEX];
     uint8 targetMask[MAX_EFFECT_INDEX][2] = { {1, 1}, {2, 2}, {4, 4} };
     std::pair<bool, bool> ignoredTargets[MAX_EFFECT_INDEX] = { {false, false}, {false, false}, {false, false} };
+    SpellTargetFilterScheme filteringScheme[MAX_EFFECT_INDEX][2] = { {SCHEME_RANDOM, SCHEME_RANDOM}, {SCHEME_RANDOM, SCHEME_RANDOM}, {SCHEME_RANDOM, SCHEME_RANDOM} };
 };
 
 class SpellTargetMgr // thread safe
@@ -52,6 +53,10 @@ class SpellTargetMgr // thread safe
         static void Initialize(); // precalculates ignored targets and dynamic effect targeting
         static SpellTargetingData& GetSpellTargetingData(uint32 spellId);
         static bool CanEffectBeFilledWithMask(uint32 spellId, uint32 effIdx, uint32 mask);
+
+        // temporary helpers
+        static float GetJumpRadius(uint32 spellId);
+        static SpellTargetFilterScheme GetSpellTargetingFilterScheme(SpellTargetFilterScheme oldScheme, uint32 spellId);
     private:
         static std::map<uint32, SpellTargetingData> spellTargetingData;
 };

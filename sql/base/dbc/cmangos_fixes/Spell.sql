@@ -116,6 +116,12 @@ UPDATE spell_template SET InterruptFlags=0 WHERE Id IN(18500);
 -- AQ40 - Ouro - Sweep is interruptible by things but shouldnt
 UPDATE spell_template SET InterruptFlags=0 WHERE Id IN(26103);
 
+-- Fix Felguard Destroyer 18977 Sweeping Charge Id: 96 (SPELL_EFFECT_CHARGE) not working correctly changing to Id: 149 (SPELL_EFFECT_CHARGE_DEST)
+UPDATE `spell_template` SET `Effect1` = 149 WHERE `Id` IN (33971);
+
+-- Nether Beam - Netherspite - restricted to one target
+UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(30469);
+
 -- Fix bad mask for spells - always needs to have at least 1, if disproven, fix EAI functions which check SchoolMask
 UPDATE spell_template SET SchoolMask=1 WHERE SchoolMask=0;
 

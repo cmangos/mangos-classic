@@ -1041,8 +1041,8 @@ inline bool IsPositiveSpell(uint32 spellId, const WorldObject* caster = nullptr,
     return IsPositiveSpell(sSpellTemplate.LookupEntry<SpellEntry>(spellId), caster, target);
 }
 
-inline void GetChainJumpRange(SpellEntry const* spellInfo, SpellEffectIndex effIdx, float& minSearchRangeCaster, float& maxSearchRangeTarget, float& /*jumpRadius*/)
-{
+inline void GetChainJumpRange(SpellEntry const* spellInfo, SpellEffectIndex effIdx, float& minSearchRangeCaster, float& maxSearchRangeTarget)
+{ 
     const SpellRangeEntry* range = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
     if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
         maxSearchRangeTarget = range->maxRange;
@@ -1068,16 +1068,12 @@ inline void GetChainJumpRange(SpellEntry const* spellInfo, SpellEffectIndex effI
     }
 }
 
-inline bool IsChainAOESpell(SpellEntry const* spellInfo)
+// Research function for spells that should be send as GO caster in packet
+inline bool IsGOCastSpell(SpellEntry const* spellInfo)
 {
     switch (spellInfo->Id)
     {
-        case 2643:  // Multi-shot
-        case 14288:
-        case 14289:
-        case 14290:
-        case 25294:
-        case 27021:
+        case 30979:  // Flames
             return true;
         default:
             return false;
@@ -1104,7 +1100,7 @@ inline bool IsSpellRequiresRangedAP(SpellEntry const* spellInfo)
     return (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE);
 }
 
-inline uint32 GetAffectedTargets(SpellEntry const* spellInfo)
+inline uint32 GetAffectedTargets(SpellEntry const* spellInfo, WorldObject* caster)
 {
     // custom target amount cases
     switch (spellInfo->SpellFamilyName)

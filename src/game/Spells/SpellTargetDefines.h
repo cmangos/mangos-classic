@@ -151,4 +151,14 @@ enum SpellTargetFilter
     TARGET_SCRIPT,
 };
 
+enum SpellTargetFilterScheme
+{
+    SCHEME_RANDOM = 0,
+    SCHEME_CLOSEST,
+    SCHEME_CLOSEST_CHAIN,
+    SCHEME_FURTHEST,
+    SCHEME_HIGHEST_HP,
+    SCHEME_LOWEST_HP_CHAIN,
+};
+
 #endif

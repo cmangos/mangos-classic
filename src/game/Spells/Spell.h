@@ -547,6 +547,11 @@ class Spell
         void SetDamage(uint32 newDamage) { damage = newDamage; }
         // OnHit use only
         uint32 GetTotalTargetDamage() { return m_damage; }
+        // script initialization hook only setters - use only if dynamic - else use appropriate helper
+        void SetMaxAffectedTargets(uint32 newValue) { m_affectedTargetCount = newValue; }
+        void SetJumpRadius(float newValue) { m_jumpRadius = newValue; }
+        // warning - always set scheme for first unique target in a row
+        void SetFilteringScheme(SpellEffectIndex effIdx, bool targetB, SpellTargetFilterScheme scheme) { m_filteringScheme[effIdx][uint32(targetB)] = scheme; }
 
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
@@ -630,13 +635,14 @@ class Spell
         struct TempTargetingData
         {
             TempTargetData data[MAX_EFFECT_INDEX];
+            uint32 chainTargetCount[MAX_EFFECT_INDEX];
             bool magnet;
         };
         void FillTargetMap();
         void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targetB, TempTargetingData& targetingData);
         bool CheckAndAddMagnetTarget(Unit* unitTarget, SpellEffectIndex effIndex, bool targetB, TempTargetingData& data);
         static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex);
-        void FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex);
+        void FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex, SpellTargetFilterScheme scheme, uint32 chainTargetCount);
         void FillFromTargetFlags(TempTargetingData& targetingData, SpellEffectIndex effIndex);
 
         void FillAreaTargets(UnitList& targetUnitMap, float radius, float cone, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = nullptr);
@@ -738,6 +744,8 @@ class Spell
         float m_castOrientation;
 
         uint32 m_affectedTargetCount;
+        float m_jumpRadius;
+        SpellTargetFilterScheme m_filteringScheme[MAX_EFFECT_INDEX][2];
 
         // if need this can be replaced by Aura copy
         // we can't store original aura link to prevent access to deleted auras

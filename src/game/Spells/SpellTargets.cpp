@@ -416,6 +416,36 @@ void SpellTargetMgr::Initialize()
                 }
             }
         }
+        for (uint32 effIdx = 0; effIdx < MAX_EFFECT_INDEX; ++effIdx)
+        {
+            if (!spellInfo->Effect[effIdx])
+                continue;
+            SpellTargetImplicitType implicitEffectType = data.implicitType[effIdx];
+            for (uint8 right = 0; right < 2; ++right)
+            {
+                uint32 target;
+                if (right == 0)
+                    target = spellInfo->EffectImplicitTargetA[effIdx];
+                else
+                    target = spellInfo->EffectImplicitTargetB[effIdx];
+
+                if (target)
+                {
+                    SpellTargetFilterScheme scheme = SCHEME_RANDOM;
+                    if (SpellTargetInfoTable[target].enumerator == TARGET_ENUMERATOR_CHAIN)
+                    {
+                        if (target == TARGET_UNIT_FRIEND_CHAIN_HEAL)
+                            scheme = SCHEME_LOWEST_HP_CHAIN;
+                        else
+                            scheme = SCHEME_CLOSEST_CHAIN;
+                    }
+                    scheme = GetSpellTargetingFilterScheme(scheme, spellInfo->Id);
+
+                    if (scheme != SCHEME_RANDOM)
+                        data.filteringScheme[effIdx][right] = scheme;
+                }
+            }
+        }
     }
 }
 
@@ -435,4 +465,40 @@ bool SpellTargetMgr::CanEffectBeFilledWithMask(uint32 spellId, uint32 effIdx, ui
         case TARGET_TYPE_ITEM: return bool(mask & (TARGET_FLAG_LOCKED | TARGET_FLAG_ITEM));
         default: return false;
     }
+}
+
+float SpellTargetMgr::GetJumpRadius(uint32 spellId)
+{
+    return CHAIN_SPELL_JUMP_RADIUS;
+}
+
+SpellTargetFilterScheme SpellTargetMgr::GetSpellTargetingFilterScheme(SpellTargetFilterScheme oldScheme, uint32 spellId)
+{
+    switch (spellId)
+    {
+        case 2643:  // Multi-shot - chain spell but behaves like aoe
+        case 14288:
+        case 14289:
+        case 14290:
+        case 25294:
+        case 27021:
+            return SCHEME_RANDOM;
+        case 26052: // Poison Bolt Volley (spell hits only the 15 closest targets)
+        case 26180: // Wyvern Sting (spell hits only the 10 closest targets)
+        case 30284: // Change Facing - Chess event - QOL to pick deterministically closest target
+        case 37144: // Move - Chess event - same QOL change
+        case 37146:
+        case 37148:
+        case 37151:
+        case 37152:
+        case 37153:
+        case 30469: // Nether Beam - Netherspite - Picks closest target
+        case 41294: // Fixate - Reliquary of Souls - Picks closest target
+            return SCHEME_CLOSEST;
+        case 28307:
+            return SCHEME_HIGHEST_HP;
+        case 42005: // Bloodboil (spell hits only the 5 furthest away targets)
+            return SCHEME_FURTHEST;
+    }
+    return oldScheme;
 }

@@ -398,7 +398,9 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
 
     m_reflectable = IsReflectableSpell(m_spellInfo);
 
-    m_affectedTargetCount = GetAffectedTargets(m_spellInfo);
+    m_affectedTargetCount = GetAffectedTargets(m_spellInfo, caster);
+    m_jumpRadius = SpellTargetMgr::GetJumpRadius(m_spellInfo->Id);
+    memcpy(m_filteringScheme, SpellTargetMgr::GetSpellTargetingData(m_spellInfo->Id).filteringScheme, sizeof(m_filteringScheme));
 
     m_scriptValue = 0;
 
@@ -450,6 +452,8 @@ void Spell::FillTargetMap()
         SpellTargetImplicitType effectTargetType = data.implicitType[i]; // prefilled data on load
         auto& targetMask = data.targetMask[i];
         auto& ignoredTargets = data.ignoredTargets[i];
+        auto& filterScheme = data.filteringScheme[i];
+        targetingData.chainTargetCount[i] = m_spellInfo->EffectChainTarget[SpellEffectIndex(i)];
 
         if (effectTargetType == TARGET_TYPE_SPECIAL_UNIT) // area auras need custom handling
         {
@@ -519,6 +523,7 @@ void Spell::FillTargetMap()
                 {
                     UnitList& unitTargetList = targetingData.data[i].tmpUnitList[rightTarget];
                     uint8 effectMask = targetMask[rightTarget];
+                    SpellTargetFilterScheme scheme = filterScheme[rightTarget];
                     if (!unitTargetList.empty()) // Unit case
                     {
                         for (auto itr = unitTargetList.begin(); itr != unitTargetList.end();)
@@ -530,26 +535,7 @@ void Spell::FillTargetMap()
                         }
 
                         // Special target filter before adding targets to list
-                        FilterTargetMap(unitTargetList, SpellEffectIndex(i));
-
-                        if (m_affectedTargetCount && unitTargetList.size() > m_affectedTargetCount)
-                        {
-                            // remove random units from the map
-                            while (unitTargetList.size() > m_affectedTargetCount)
-                            {
-                                uint32 poz = urand(0, unitTargetList.size() - 1);
-                                for (auto itr = unitTargetList.begin(); itr != unitTargetList.end(); ++itr, --poz)
-                                {
-                                    if (!*itr) continue;
-
-                                    if (!poz)
-                                    {
-                                        itr = unitTargetList.erase(itr);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+                        FilterTargetMap(unitTargetList, SpellEffectIndex(i), scheme, targetingData.chainTargetCount[i]);
 
                         if (m_caster->GetTypeId() == TYPEID_PLAYER)
                         {
@@ -1552,10 +1538,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
 {
     TempTargetData& data = targetingData.data[effIndex];
     float radius;
-    uint32 EffectChainTarget = m_spellInfo->EffectChainTarget[effIndex];
     uint32 unMaxTargets = m_affectedTargetCount;  // Get spell max affected targets
 
-    GetSpellRangeAndRadius(effIndex, radius, targetB, EffectChainTarget);
+    GetSpellRangeAndRadius(effIndex, radius, targetB, targetingData.chainTargetCount[effIndex]);
     float cone = GetCone();
 
     UnitList& tempUnitList = data.tmpUnitList[targetB];
@@ -1831,7 +1816,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         case TARGET_UNIT_NEAR_CASTER:
         {
             m_targets.m_targetMask = 0;
-            unMaxTargets = EffectChainTarget;
             float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
             UnitList tempTargetUnitMap;
@@ -1860,53 +1844,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
 
             SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->Id);
             if (bounds.first != bounds.second)
-            {
-                UnitList sourceTempTargetUnitMap = tempTargetUnitMap;
-                tempTargetUnitMap.clear();
-                CheckSpellScriptTargets(bounds, sourceTempTargetUnitMap, tempTargetUnitMap, effIndex);
-            }
-
-            tempTargetUnitMap.sort(TargetDistanceOrderNear(m_caster));
-
-            // Now to get us a random target that's in the initial range of the spell
-            uint32 t = 0;
-            UnitList::iterator itr = tempTargetUnitMap.begin();
-            while (itr != tempTargetUnitMap.end() && (*itr)->IsWithinDist(m_caster, radius))
-                ++t, ++itr;
-
-            if (!t)
-                break;
-
-            itr = tempTargetUnitMap.begin();
-            std::advance(itr, urand() % t);
-            Unit* pUnitTarget = *itr;
-            tempUnitList.push_back(pUnitTarget);
-
-            tempTargetUnitMap.erase(itr);
-
-            tempTargetUnitMap.sort(TargetDistanceOrderNear(pUnitTarget));
-
-            t = unMaxTargets - 1;
-            Unit* prev = pUnitTarget;
-            UnitList::iterator next = tempTargetUnitMap.begin();
-
-            while (t && next != tempTargetUnitMap.end())
-            {
-                if (!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
-                    break;
-
-                if (!prev->IsWithinLOSInMap(*next))
-                {
-                    ++next;
-                    continue;
-                }
-                prev = *next;
-                tempUnitList.push_back(prev);
-                tempTargetUnitMap.erase(next);
-                tempTargetUnitMap.sort(TargetDistanceOrderNear(prev));
-                next = tempTargetUnitMap.begin();
-                --t;
-            }
+                CheckSpellScriptTargets(bounds, tempTargetUnitMap, tempUnitList, effIndex);
             break;
         }
         case TARGET_UNIT_CASTER_PET:
@@ -1946,7 +1884,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             tempUnitList.push_back(newUnitTarget);
 
             // More than one target
-            if (EffectChainTarget > 1)
+            if (targetingData.chainTargetCount[effIndex] > 1)
             {
                 WorldObject* originalCaster = GetAffectiveCasterObject();
                 if (!originalCaster)
@@ -1964,108 +1902,31 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 }
 
                 // Getting spell casting distance
-                float minRadiusCaster = 0, maxRadiusTarget = 0, jumpRadius = CHAIN_SPELL_JUMP_RADIUS;
-                GetChainJumpRange(m_spellInfo, effIndex, minRadiusCaster, maxRadiusTarget, jumpRadius);
+                float minRadiusCaster = 0, maxRadiusTarget = 0;
+                GetChainJumpRange(m_spellInfo, effIndex, minRadiusCaster, maxRadiusTarget);
 
                 // Filling target map
-                UnitList unsteadyTargetMap;
                 {
                     SpellNotifyPushType pushType = PUSH_TARGET_CENTER;
-                    FillAreaTargets(unsteadyTargetMap, maxRadiusTarget, cone, pushType, SPELL_TARGETS_AOE_ATTACKABLE);
-                    unsteadyTargetMap.remove(m_caster);
-                    unsteadyTargetMap.remove(newUnitTarget);
+                    FillAreaTargets(tempUnitList, maxRadiusTarget, cone, pushType, SPELL_TARGETS_AOE_ATTACKABLE);
                 }
 
                 // No targets. No need to process.
-                if (unsteadyTargetMap.empty())
+                if (tempUnitList.empty())
                     break;
 
                 if (minRadiusCaster)
                 {
-                    for (auto iter = unsteadyTargetMap.begin(); iter != unsteadyTargetMap.end();)
+                    float x, y, z;
+                    m_caster->GetPosition(x, y, z);
+                    auto itr = tempUnitList.begin();
+                    ++itr; // start from 2nd
+                    for (; itr != tempUnitList.end();)
                     {
-                        if ((*iter)->IsWithinDist(m_caster, minRadiusCaster))
-                            unsteadyTargetMap.erase(iter++);
+                        if ((*itr)->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH) < minRadiusCaster)
+                            itr = tempUnitList.erase(itr);
                         else
-                            ++iter;
-                    }
-                }
-
-                bool ignoreLos = IsIgnoreLosSpellEffect(m_spellInfo, effIndex); // optimization
-
-                // Removing not matched units
-                for (UnitList::iterator activeUnit = unsteadyTargetMap.begin(); activeUnit != unsteadyTargetMap.end(); )
-                {
-                    if (!m_caster->CanAttackSpell((*activeUnit), m_spellInfo, true))
-                    {
-                        unsteadyTargetMap.erase(activeUnit++);
-                        continue;
-                    }
-
-                    // Remove not LOS(Line of Sight) targets
-                    if (!ignoreLos && !originalCaster->IsWithinLOSInMap(static_cast<WorldObject*>(*activeUnit)))
-                    {
-                        unsteadyTargetMap.erase(activeUnit++);
-                        continue;
-                    }
-
-                    // If spell targets only players
-                    if ((m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && ((*activeUnit)->GetTypeId() != TYPEID_PLAYER))
-                    {
-                        unsteadyTargetMap.erase(activeUnit++);
-                        continue;
-                    }
-
-                    // TODO: Mother Shahraz beams can target totems.
-                    switch ((*activeUnit)->GetTypeId())
-                    {
-                        case TYPEID_UNIT:
-                        {
-                            Creature* target = static_cast<Creature*>(*activeUnit);
-                            if (target->IsCritter())
-                            {
-                                unsteadyTargetMap.erase(activeUnit++);
-                                continue;
-                            }
-                            break;
-                        }
-                        default: break;
-                    }
-
-                    ++activeUnit;
-                }
-
-                uint32 t = m_spellInfo->EffectChainTarget[effIndex] - 1;
-                unsteadyTargetMap.sort(TargetDistanceOrderNear(newUnitTarget));
-
-                if (IsChainAOESpell(m_spellInfo)) // Spell like Multi-Shot
-                {
-                    // Fill TargetUnitMap
-                    for (UnitList::iterator activeUnit = unsteadyTargetMap.begin(); t && activeUnit != unsteadyTargetMap.end(); ++activeUnit, --t)
-                        tempUnitList.push_back((*activeUnit));
-                }
-                else // spell like Chain Lightning
-                {
-                    Unit* prev = newUnitTarget;
-                    UnitList::iterator next = unsteadyTargetMap.begin();
-
-                    while (t && next != unsteadyTargetMap.end())
-                    {
-                        if (!prev->IsWithinDist(*next, jumpRadius))
-                            break;
-
-                        if (!prev->IsWithinLOSInMap(*next))
-                        {
-                            ++next;
-                            continue;
-                        }
-                        prev = *next;
-                        tempUnitList.push_back(prev);
-                        unsteadyTargetMap.erase(next);
-                        unsteadyTargetMap.sort(TargetDistanceOrderNear(prev));
-                        next = unsteadyTargetMap.begin();
-
-                        --t;
+                            ++itr;
                     }
                 }
             }
@@ -2361,15 +2222,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             if (!m_caster->CanAssistSpell(pUnitTarget, m_spellInfo))
                 break;
 
-            if (EffectChainTarget <= 1)
+            if (targetingData.chainTargetCount[effIndex] <= 1)
                 tempUnitList.push_back(pUnitTarget);
             else
             {
-                unMaxTargets = EffectChainTarget;
-                float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
-
-                UnitList tempTargetUnitMap;
-
+                float max_range = targetingData.chainTargetCount[effIndex] * CHAIN_SPELL_JUMP_RADIUS;
                 Group* group = nullptr;
 
                 //if target and caster are members in the same group then apply member only filtering
@@ -2408,51 +2265,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 }
 
                 MaNGOS::AnyFriendlyOrGroupMemberUnitInUnitRangeCheck u_check(m_caster, group, m_spellInfo, max_range);
-                MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyOrGroupMemberUnitInUnitRangeCheck> searcher(tempTargetUnitMap, u_check);
+                MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyOrGroupMemberUnitInUnitRangeCheck> searcher(tempUnitList, u_check);
                 Cell::VisitAllObjects(m_caster, searcher, max_range);
-
-                tempTargetUnitMap.sort(LowestHPNearestOrder(pUnitTarget, DIST_CALC_COMBAT_REACH_WITH_MELEE));
-
-                if (tempTargetUnitMap.empty())
-                    break;
-
-                //remove root target unit since it already defaults to the first target
-                tempTargetUnitMap.remove(pUnitTarget);
-
-                tempUnitList.push_back(pUnitTarget);
-
-                uint32 t = unMaxTargets - 1;
-                Unit* prev = pUnitTarget;
-                UnitList::iterator next = tempTargetUnitMap.begin();
-
-                while (t && next != tempTargetUnitMap.end())
-                {
-                    if (!prev->IsWithinCombatDist(*next, CHAIN_SPELL_JUMP_RADIUS))
-                    {
-                        ++next;
-                        continue;
-                    }
-
-                    if (!prev->IsWithinLOSInMap(*next, true))
-                    {
-                        ++next;
-                        continue;
-                    }
-
-                    if ((*next)->GetHealth() == (*next)->GetMaxHealth())
-                    {
-                        next = tempTargetUnitMap.erase(next);
-                        continue;
-                    }
-
-                    prev = *next;
-                    tempUnitList.push_back(prev);
-                    tempTargetUnitMap.erase(next);
-                    tempTargetUnitMap.sort(LowestHPNearestOrder(prev, DIST_CALC_COMBAT_REACH_WITH_MELEE));
-                    next = tempTargetUnitMap.begin();
-
-                    --t;
-                }
             }
             break;
         }
@@ -2519,7 +2333,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             uint32 type = MAX_SPELL_TARGET_TYPE;
             bool foundButOutOfRange = false;
             // corrections for numerous spells missing it
-            uint32 targetCount = std::max(EffectChainTarget, uint32(1));
+            uint32 targetCount = std::max(targetingData.chainTargetCount[effIndex], uint32(1));
             if (radius == 0.f)
                 radius = m_caster->GetMap()->IsDungeon() ? DEFAULT_VISIBILITY_INSTANCE : DEFAULT_VISIBILITY_DISTANCE;
 
@@ -6404,6 +6218,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
             return false;
     }
 
+    if (target->IsCreature() && info.enumerator == TARGET_ENUMERATOR_CHAIN && info.filter == TARGET_HARMFUL) // TODO: Mother Shahraz beams can target totems
+        if (static_cast<Creature*>(target)->IsCritter())
+            return false;
+
     if (target->GetTypeId() != TYPEID_PLAYER && m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER)
         && targetType != TARGET_UNIT_CASTER)
         return false;
@@ -6800,7 +6618,8 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
         if (Player* modOwner = realCaster->GetSpellModOwner())
         {
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius, this);
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
+            if (!targetB)
+                modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
         }
     }
 
@@ -6852,39 +6671,44 @@ void Spell::ProcReflectProcs(TargetInfo& targetInfo)
         Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, m_caster, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
 }
 
-void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
+void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex, SpellTargetFilterScheme scheme, uint32 chainTargetCount)
 {
-    switch (m_spellInfo->Id)
+    switch (scheme)
     {
-        case 14297: // Shadow Storm (exclude targets below 25 yards and above 40 yards. Max value is handled by spell effect radius)
-        case 26546:
-        case 26555:
+        case SCHEME_RANDOM:
         {
-            float x, y, z;
-            m_caster->GetPosition(x, y, z);
-            uint8 eligibleTargets = 0;
-            for (auto& unit : filterUnitList)
+            if (m_affectedTargetCount && filterUnitList.size() > m_affectedTargetCount)
             {
-                float dist = unit->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH);
-                if (dist > 25.0f)
-                    ++eligibleTargets;
+                // remove random units from the map
+                while (filterUnitList.size() > m_affectedTargetCount)
+                {
+                    uint32 poz = urand(0, filterUnitList.size() - 1);
+                    auto itr = filterUnitList.begin();
+                    std::advance(itr, poz);
+                    itr = filterUnitList.erase(itr);
+                }
             }
-
-            filterUnitList.sort(TargetDistanceOrderFarAway(m_caster));
-            filterUnitList.resize(eligibleTargets);
-            return;
+            break;
         }
-        case 26052: // Poison Bolt Volley (spell hits only the 15 closest targets)
-        case 26180: // Wyvern Sting (spell hits only the 10 closest targets)
+        case SCHEME_CLOSEST:
         {
-            if (filterUnitList.size() > m_affectedTargetCount)
+            if (m_affectedTargetCount && filterUnitList.size() > m_affectedTargetCount)
             {
                 filterUnitList.sort(TargetDistanceOrderNear(m_caster));
                 filterUnitList.resize(m_affectedTargetCount);
             }
-            return;
+            break;
         }
-        case 28307: // Hateful Strike Primer
+        case SCHEME_FURTHEST:
+        {
+            if (m_affectedTargetCount && filterUnitList.size() > m_affectedTargetCount)
+            {
+                filterUnitList.sort(TargetDistanceOrderFarAway(m_caster));
+                filterUnitList.resize(m_affectedTargetCount);
+            }
+            break;
+        }
+        case SCHEME_HIGHEST_HP:
         {
             // Returns the target with the highest HP in melee range
             Unit* hatedTarget = nullptr;
@@ -6905,7 +6729,83 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
 
             filterUnitList.clear();
             filterUnitList.push_back(hatedTarget);
-            return;
+            break;
+        }
+        case SCHEME_CLOSEST_CHAIN:
+        {
+            Unit* unitTarget = m_targets.getUnitTarget();
+            if (filterUnitList.empty() || filterUnitList.front() != unitTarget)
+                break;
+            UnitList newList;
+            newList.push_back(unitTarget);
+            filterUnitList.pop_front();
+            filterUnitList.sort(TargetDistanceOrderNear(unitTarget));
+            Unit* prev = unitTarget;
+            UnitList::iterator next = filterUnitList.begin();
+
+            while (chainTargetCount && next != filterUnitList.end())
+            {
+                if (!prev->IsWithinDist(*next, m_jumpRadius))
+                    break;
+
+                if (!prev->IsWithinLOSInMap(*next))
+                {
+                    ++next;
+                    continue;
+                }
+                prev = *next;
+                newList.push_back(prev);
+                filterUnitList.erase(next);
+                filterUnitList.sort(TargetDistanceOrderNear(prev));
+                next = filterUnitList.begin();
+
+                --chainTargetCount;
+            }
+            filterUnitList = newList;
+            break;
+        }
+        case SCHEME_LOWEST_HP_CHAIN:
+        {
+            Unit* unitTarget = m_targets.getUnitTarget();
+            if (filterUnitList.empty() || filterUnitList.front() != unitTarget)
+                break;
+            UnitList newList;
+            newList.push_back(unitTarget);
+            filterUnitList.pop_front();
+            filterUnitList.sort(LowestHPNearestOrder(unitTarget, DIST_CALC_COMBAT_REACH));
+            Unit* prev = unitTarget;
+            UnitList::iterator next = filterUnitList.begin();
+
+            while (chainTargetCount && next != filterUnitList.end())
+            {
+                if (!prev->IsWithinCombatDist(*next, m_jumpRadius))
+                {
+                    ++next;
+                    continue;
+                }
+
+                if (!prev->IsWithinLOSInMap(*next, true))
+                {
+                    ++next;
+                    continue;
+                }
+
+                if ((*next)->GetHealth() == (*next)->GetMaxHealth())
+                {
+                    next = filterUnitList.erase(next);
+                    continue;
+                }
+
+                prev = *next;
+                newList.push_back(prev);
+                filterUnitList.erase(next);
+                filterUnitList.sort(LowestHPNearestOrder(prev, DIST_CALC_COMBAT_REACH));
+                next = filterUnitList.begin();
+
+                --chainTargetCount;
+            }
+            filterUnitList = newList;
+            break;
         }
     }
 }
@@ -7120,6 +7020,20 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
             break;
         case 9082:                                          // Create Containment Coffer
             if (!target->HasAura(9032))
+                return false;
+            break;
+        case 14297: // Shadow Storm (exclude targets below 25 yards and above 40 yards. Max value is handled by spell effect radius)
+        case 26546:
+        case 26555:
+        {
+            float x, y, z;
+            m_caster->GetPosition(x, y, z);
+            if (target->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH) < 25.f)
+                return false;
+            break;
+        }
+        case 16807:                                         // Mass Teleport
+            if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)) // spell targets only creatures
                 return false;
             break;
             // Exceptions for Nefarian class calls
