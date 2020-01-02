@@ -47,12 +47,6 @@ enum ObjectUpdateFlags
     UPDATEFLAG_HAS_POSITION = 0x0040
 };
 
-struct BufferPair
-{
-    ByteBuffer m_buffer;
-    uint32 m_blockCount;
-};
-
 class UpdateData
 {
     public:
@@ -61,17 +55,16 @@ class UpdateData
         void AddOutOfRangeGUID(GuidSet& guids);
         void AddOutOfRangeGUID(ObjectGuid const& guid);
         void AddUpdateBlock(const ByteBuffer& block);
-        WorldPacket BuildPacket(size_t index, bool hasTransport = false); // Copy Elision is a thing
-        bool HasData() const { return m_data[0].m_buffer.size() > 0 || !m_outOfRangeGUIDs.empty(); }
-        size_t GetPacketCount() const { return m_data.size(); }
+        bool BuildPacket(WorldPacket& packet, bool hasTransport = false);
+        bool HasData() const { return m_blockCount > 0 || !m_outOfRangeGUIDs.empty(); }
         void Clear();
 
         GuidSet const& GetOutOfRangeGUIDs() const { return m_outOfRangeGUIDs; }
 
     protected:
+        uint32 m_blockCount;
         GuidSet m_outOfRangeGUIDs;
-        std::vector<BufferPair> m_data;
-        uint32 m_currentIndex;
+        ByteBuffer m_data;
 
         static void Compress(void* dst, uint32* dst_size, void* src, int src_size);
 };

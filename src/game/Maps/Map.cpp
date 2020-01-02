@@ -991,7 +991,7 @@ void Map::SendInitSelf(Player* player) const
 {
     DETAIL_LOG("Creating player data for himself %u", player->GetGUIDLow());
 
-    UpdateData updateData;
+    UpdateData data;
 
     bool hasTransport = false;
 
@@ -999,11 +999,11 @@ void Map::SendInitSelf(Player* player) const
     if (Transport* transport = player->GetTransport())
     {
         hasTransport = true;
-        transport->BuildCreateUpdateBlockForPlayer(&updateData, player);
+        transport->BuildCreateUpdateBlockForPlayer(&data, player);
     }
 
     // build data for self presence in world at own client (one time for map)
-    player->BuildCreateUpdateBlockForPlayer(&updateData, player);
+    player->BuildCreateUpdateBlockForPlayer(&data, player);
 
     // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
     if (Transport* transport = player->GetTransport())
@@ -1013,16 +1013,14 @@ void Map::SendInitSelf(Player* player) const
             if (player != itr && player->HaveAtClient(itr))
             {
                 hasTransport = true;
-                itr->BuildCreateUpdateBlockForPlayer(&updateData, player);
+                itr->BuildCreateUpdateBlockForPlayer(&data, player);
             }
         }
     }
 
-    for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
-    {
-        WorldPacket packet = updateData.BuildPacket(i, hasTransport);
-        player->GetSession()->SendPacket(packet);
-    }
+    WorldPacket packet;
+    data.BuildPacket(packet, hasTransport);
+    player->GetSession()->SendPacket(packet);
 }
 
 void Map::SendInitTransports(Player* player) const
@@ -1034,7 +1032,7 @@ void Map::SendInitTransports(Player* player) const
     if (tmap.find(player->GetMapId()) == tmap.end())
         return;
 
-    UpdateData updateData;
+    UpdateData transData;
 
     MapManager::TransportSet& tset = tmap[player->GetMapId()];
 
@@ -1046,15 +1044,13 @@ void Map::SendInitTransports(Player* player) const
         if (i != player->GetTransport() && i->GetMapId() == i_id)
         {
             hasTransport = true;
-            i->BuildCreateUpdateBlockForPlayer(&updateData, player);
+            i->BuildCreateUpdateBlockForPlayer(&transData, player);
         }
     }
 
-    for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
-    {
-        WorldPacket packet = updateData.BuildPacket(i, hasTransport);
-        player->GetSession()->SendPacket(packet);
-    }
+    WorldPacket packet;
+    transData.BuildPacket(packet, hasTransport);
+    player->GetSession()->SendPacket(packet);
 }
 
 void Map::SendRemoveTransports(Player* player) const
@@ -1066,20 +1062,18 @@ void Map::SendRemoveTransports(Player* player) const
     if (tmap.find(player->GetMapId()) == tmap.end())
         return;
 
-    UpdateData updateData;
+    UpdateData transData;
 
     MapManager::TransportSet& tset = tmap[player->GetMapId()];
 
     // except used transport
     for (auto i : tset)
         if (i != player->GetTransport() && i->GetMapId() != i_id)
-            i->BuildOutOfRangeUpdateBlock(&updateData);
+            i->BuildOutOfRangeUpdateBlock(&transData);
 
-    for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
-    {
-        WorldPacket packet = updateData.BuildPacket(i);
-        player->GetSession()->SendPacket(packet);
-    }
+    WorldPacket packet;
+    transData.BuildPacket(packet);
+    player->GetSession()->SendPacket(packet);
 }
 
 inline void Map::setNGrid(NGridType* grid, uint32 x, uint32 y)
@@ -2002,13 +1996,12 @@ void Map::SendObjectUpdates()
         obj->BuildUpdateData(update_players);
     }
 
+    WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
     for (auto& update_player : update_players)
     {
-        for (size_t i = 0; i < update_player.second.GetPacketCount(); ++i)
-        {
-            WorldPacket packet = update_player.second.BuildPacket(i);
-            update_player.first->GetSession()->SendPacket(packet);
-        }
+        update_player.second.BuildPacket(packet);
+        update_player.first->GetSession()->SendPacket(packet);
+        packet.clear();                                     // clean the string
     }
 }
 
