@@ -412,7 +412,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
 
     DEBUG_LOG("WORLD: Received opcode CMSG_PUSHQUESTTOPARTY quest = %u", questId);
 
-    if (!_player->HasQuest(questId))
+    if (!_player->CanShareQuest(questId))
     {
         sLog.outError("Error in CMSG_PUSHQUESTTOPARTY - %s tried to share invalid quest (%u) (probably packet hacking)", _player->GetGuidStr().c_str(), questId);
         return;
