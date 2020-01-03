@@ -790,6 +790,7 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     targetInfo.effectMask = effectMask;                         // Store index of effect
     targetInfo.processed = false;                              // Effects not applied on target
     targetInfo.magnet = (exception == EXCEPTION_MAGNET);
+    targetInfo.procReflect = false;
 
     // Calculate hit result
     targetInfo.missCondition = m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(target, m_spellInfo, targetInfo.effectMask, m_reflectable);
@@ -828,20 +829,18 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
         }
         else
         {
-            // Victim reflects, apply reflect procs
-            Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, target, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
             // Calculate reflected spell result on caster
             targetInfo.reflectResult =  m_caster->SpellHitResult(m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable);
             // Caster reflects back spell which was already reflected by victim
             if (targetInfo.reflectResult == SPELL_MISS_REFLECT)
-            {
-                // Apply reflect procs on self
-                Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, m_caster, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
                 // Full circle: it's impossible to reflect further, "Immune" shows up
                 targetInfo.reflectResult = SPELL_MISS_IMMUNE;
-            }
-            // Increase time interval for reflected spells by 1.5
-            targetInfo.timeDelay += targetInfo.timeDelay >> 1;
+
+            // Store time interval so we know how fast to return it back
+            targetInfo.initialDelay = targetInfo.timeDelay;
+            targetInfo.procReflect = true;
+            if (targetInfo.timeDelay == 0) // if no time delay, proc reflect procs immediately
+                ProcReflectProcs(targetInfo);
         }
     }
     else
@@ -965,6 +964,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     // Need init unitTarget by default unit (can changed in code on reflect)
     // Or on missInfo!=SPELL_MISS_NONE unitTarget undefined (but need in trigger subsystem)
     unitTarget = unit;
+    Unit* reflectTarget = nullptr;
 
     // Reset damage/healing counter
     ResetEffectDamageAndHeal();
@@ -1008,6 +1008,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
             {
                 DoSpellHitOnUnit(m_caster, effectMask, true);
+                reflectTarget = unit;
                 unitTarget = m_caster;
             }
         }
@@ -1078,7 +1079,11 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         Unit::DealDamageMods(caster, damageInfo.target, damageInfo.damage, &damageInfo.absorb, SPELL_DIRECT_DAMAGE, m_spellInfo);
 
         // Send log damage message to client
-        caster->SendSpellNonMeleeDamageLog(&damageInfo);
+        
+        if (reflectTarget)
+            reflectTarget->SendSpellNonMeleeDamageLog(&damageInfo);
+        else
+            caster->SendSpellNonMeleeDamageLog(&damageInfo);
 
         procEx |= createProcExtendMask(&damageInfo, missInfo);
         procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
@@ -1086,7 +1091,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         m_damage = damageInfo.damage; // update value so that script handler has access
         OnHit(); // TODO: After spell damage calc is moved to proper handler - move this before the first if
 
-        caster->DealSpellDamage(&damageInfo, true);
+        if (reflectTarget)
+            reflectTarget->DealSpellDamage(&damageInfo, true);
+        else
+            caster->DealSpellDamage(&damageInfo, true);
 
         // Bloodthirst
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && m_spellInfo->SpellFamilyFlags & uint64(0x0000000002000000))
@@ -3093,7 +3101,18 @@ uint64 Spell::handle_delayed(uint64 t_offset)
         if (!ihit.processed)
         {
             if (ihit.timeDelay <= t_offset)
-                DoAllEffectOnTarget(&ihit);
+            {
+                if (ihit.procReflect)
+                {
+                    ihit.timeDelay = ihit.initialDelay / 2; // return it at twice the speed
+                    ihit.procReflect = false;
+                    ProcReflectProcs(ihit);
+                    if (next_time == 0 || ihit.timeDelay < next_time)
+                        next_time = ihit.timeDelay;
+                }
+                else
+                    DoAllEffectOnTarget(&ihit);
+            }
             else if (next_time == 0 || ihit.timeDelay < next_time)
                 next_time = ihit.timeDelay;
         }
@@ -6820,7 +6839,20 @@ float Spell::GetCone()
     return M_PI_F / 3.f; // 60 degrees is default
 }
 
-void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex /*effIndex*/)
+void Spell::ProcReflectProcs(TargetInfo& targetInfo)
+{
+    Unit* target = m_caster->GetObjectGuid() == targetInfo.targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, targetInfo.targetGUID);
+    if (!target)
+        return;
+
+    // Victim reflects, apply reflect procs
+    Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, target, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
+    if (targetInfo.reflectResult == SPELL_MISS_REFLECT)
+        // Apply reflect procs on self
+        Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, m_caster, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
+}
+
+void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
 {
     switch (m_spellInfo->Id)
     {

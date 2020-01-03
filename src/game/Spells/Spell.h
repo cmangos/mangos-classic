@@ -545,6 +545,8 @@ class Spell
         GameObject* GetGOTarget() { return gameObjTarget; }
         uint32 GetDamage() { return damage; }
         void SetDamage(uint32 newDamage) { damage = newDamage; }
+        // OnHit use only
+        uint32 GetTotalTargetDamage() { return m_damage; }
 
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
@@ -653,6 +655,7 @@ class Spell
         {
             ObjectGuid targetGUID;
             uint64 timeDelay;
+            uint64 initialDelay; // Used to store reflect travel time so we can reset it on proc
             uint32 HitInfo;
             uint32 damage;
             SpellMissInfo missCondition: 8;
@@ -661,8 +664,10 @@ class Spell
             uint8  effectMask: 8; // Used for all effects a certain target was evaluated for
             bool   processed: 1;
             bool   magnet: 1;
+            bool   procReflect : 1; // Used to tell hit to proc reflect only and return reflect back
         };
         uint8 m_needAliveTargetMask;                        // Mask req. alive targets
+        void ProcReflectProcs(TargetInfo& targetInfo);
 
         struct GOTargetInfo
         {
