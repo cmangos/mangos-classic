@@ -4567,6 +4567,42 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 28561, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
                     return;
                 }
+                case 28617:                                 // Web Wrap (Maexxna: pull spell initialiser)
+                {
+                    if (!m_originalCaster)
+                        return;
+
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    float dist = m_caster->GetDistance(unitTarget, false);
+                    // Switch the pull target spell based on the distance from the web wrap position
+                    uint32 pullSpellId = 28621;
+                    if (dist < 25.0f)
+                        pullSpellId = 28618;
+                    else if (dist < 50.0f)
+                        pullSpellId = 28619;
+                    else if (dist < 75.0f)
+                        pullSpellId = 28620;
+
+                    unitTarget->CastSpell(m_caster, pullSpellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_originalCaster->GetObjectGuid());
+                    return;
+                }
+                case 28628:                                 // Clear Web Wrap (Maexxna: clear effects on player)
+                {
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        unitTarget->RemoveAurasDueToSpell(28627); // Web Wrap polymorph
+                        unitTarget->RemoveAurasDueToSpell(28622); // Web Wrap stun and DoT
+                    }
+                    return;
+                }
+                case 28629:                                 // Clear Web Wrap (Maexxna: kill Web Wrap NPC)
+                {
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
+                        unitTarget->CastSpell(nullptr, 29108, TRIGGERED_OLD_TRIGGERED);  // Kill Web Wrap
+                    return;
+                }
                 case 28732:                                 // Widow Embrace
                 {
                     m_caster->CastSpell(nullptr, 28748, TRIGGERED_OLD_TRIGGERED);       // Self suicide
