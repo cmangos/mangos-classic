@@ -390,6 +390,7 @@ UPDATE gameobject_template SET ScriptName='go_sapphiron_birth' WHERE entry=18135
 UPDATE gameobject_template SET ScriptName='go_anub_door' WHERE entry=181126;
 UPDATE creature_template SET ScriptName='boss_kelthuzad' WHERE entry=15990;
 UPDATE creature_template SET ScriptName='npc_diseased_maggot' WHERE entry IN (16056, 16057);
+UPDATE creature_template SET ScriptName='npc_invible_man' WHERE entry=17286;
 INSERT INTO scripted_event_id VALUES
 (10495,'event_decimate');
 
