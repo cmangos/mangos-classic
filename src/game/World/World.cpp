@@ -261,7 +261,7 @@ World::AddSession_(WorldSession* s)
     }
 }
 
-int32 World::GetQueuedSessionPos(WorldSession* sess)
+int32 World::GetQueuedSessionPos(WorldSession const* sess) const
 {
     uint32 position = 1;
 

@@ -953,7 +953,7 @@ void WorldSession::SendAuthOk() const
     SendPacket(packet, true);
 }
 
-void WorldSession::SendAuthQueued()
+void WorldSession::SendAuthQueued() const
 {
     // The 1st SMSG_AUTH_RESPONSE needs to contain other info too.
     WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 1 + 4);

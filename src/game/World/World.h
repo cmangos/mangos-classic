@@ -436,7 +436,7 @@ class World
         typedef std::list<WorldSession*> Queue;
         void AddQueuedSession(WorldSession*);
         bool RemoveQueuedSession(WorldSession* sess);
-        int32 GetQueuedSessionPos(WorldSession*);
+        int32 GetQueuedSessionPos(WorldSession const* sess) const;
 
         /// \todo Actions on m_allowMovement still to be implemented
         /// Is movement allowed?

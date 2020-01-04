@@ -392,7 +392,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
         }
 
         if (damage >= 0)
-            m_damagePerEffect[eff_idx] = damage;
+            m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage);
     }
 }
 
@@ -2104,7 +2104,7 @@ void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
     new_damage = int32(new_damage * multiplier);
-    m_damage += new_damage;
+    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage);
 
     // should use here effect POWER_DRAIN because POWER_BURN is not implemented on client
     m_spellLog.AddLog(uint32(SPELL_EFFECT_POWER_DRAIN), unitTarget->GetObjectGuid(), new_damage, uint32(powertype), multiplier);
@@ -2166,7 +2166,7 @@ void Spell::EffectHeal(SpellEffectIndex eff_idx)
     }
 }
 
-void Spell::EffectHealMechanical(SpellEffectIndex /*eff_idx*/)
+void Spell::EffectHealMechanical(SpellEffectIndex eff_idx)
 {
     // Mechanic creature type should be correctly checked by targetCreatureType field
     if (unitTarget && unitTarget->IsAlive() && damage >= 0)
@@ -2179,7 +2179,7 @@ void Spell::EffectHealMechanical(SpellEffectIndex /*eff_idx*/)
         uint32 addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, damage, HEAL);
         addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
 
-        caster->DealHeal(unitTarget, addhealth, m_spellInfo);
+        m_healingPerEffect[eff_idx] = addhealth;
     }
 }
 
@@ -3779,14 +3779,14 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
         {
             case SPELL_EFFECT_WEAPON_DAMAGE:
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
-                fixed_bonus += CalculateDamage(SpellEffectIndex(j), unitTarget);
+                fixed_bonus += CalculateSpellEffectValue(SpellEffectIndex(j), unitTarget);
                 break;
             case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
-                fixed_bonus += CalculateDamage(SpellEffectIndex(j), unitTarget);
+                fixed_bonus += CalculateSpellEffectValue(SpellEffectIndex(j), unitTarget);
                 normalized = true;
                 break;
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-                weaponDamagePercentMod *= float(CalculateDamage(SpellEffectIndex(j), unitTarget)) / 100.0f;
+                weaponDamagePercentMod *= float(CalculateSpellEffectValue(SpellEffectIndex(j), unitTarget)) / 100.0f;
 
                 // applied only to prev.effects fixed damage
                 if (customBonusDamagePercentMod)
@@ -3840,7 +3840,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
     bonus = int32(bonus * totalDamagePercentMod);
 
     // prevent negative damage
-    m_damage += uint32(bonus > 0 ? bonus : 0);
+    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, bonus);
 
     // Mangle (Cat): CP
     if (m_spellInfo->IsFitToFamily(SPELLFAMILY_DRUID, uint64(0x0000040000000000)))

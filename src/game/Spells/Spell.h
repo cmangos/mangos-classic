@@ -405,7 +405,8 @@ class Spell
         SpellCastResult CheckPower(bool strict);
         SpellCastResult CheckCasterAuras() const;
 
-        int32 CalculateDamage(SpellEffectIndex i, Unit* target) { return m_caster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i]); }
+        int32 CalculateSpellEffectValue(SpellEffectIndex i, Unit* target) { return m_caster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i]); }
+        int32 CalculateSpellEffectDamage(Unit* unitTarget, int32 damage);
         static uint32 CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell* spell = nullptr, Item* castItem = nullptr, bool finalUse = false);
 
         bool HaveTargetsForEffect(SpellEffectIndex effect) const;
@@ -437,7 +438,8 @@ class Spell
 
         void StopCast(SpellCastResult castResult);
 
-        void HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTarget, SpellEffectIndex i, float DamageMultiplier = 1.0);
+        void ExecuteEffects(Unit* unitTarget, Item* itemTarget, GameObject* GOTarget, uint32 effectMask);
+        void HandleEffect(Unit* unitTarget, Item* itemTarget, GameObject* GOTarget, SpellEffectIndex effIdx, float damageMultiplier = 1.0);
         void HandleThreatSpells();
         // void HandleAddAura(Unit* Target);
 
@@ -722,7 +724,7 @@ class Spell
         void AddItemTarget(Item* item, uint8 effectMask);
         void AddDestExecution(SpellEffectIndex effIndex);
         void DoAllEffectOnTarget(TargetInfo* target);
-        void HandleDelayedSpellLaunch(TargetInfo* target);
+        void HandleImmediateEffectExecution(TargetInfo* target);
         void InitializeDamageMultipliers();
         void ResetEffectDamageAndHeal();
         void DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, bool isReflected = false);

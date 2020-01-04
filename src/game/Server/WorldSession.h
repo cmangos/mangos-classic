@@ -318,8 +318,8 @@ class WorldSession
         void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed) const;
         void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) const;
 
-        void SendAuthOk();
-        void SendAuthQueued();
+        void SendAuthOk() const;
+        void SendAuthQueued() const;
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
         void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
