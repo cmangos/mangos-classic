@@ -4566,7 +4566,7 @@ void ObjectMgr::LoadConditions()
 
     for (uint32 i = 0; i < sConditionStorage.GetMaxEntry(); ++i)
     {
-        ConditionEntry* condition = const_cast<ConditionEntry*>(sConditionStorage.LookupEntry<ConditionEntry>(i));
+        ConditionEntry const* condition = sConditionStorage.LookupEntry<ConditionEntry>(i);
         if (!condition)
             continue;
 
