@@ -25,6 +25,7 @@
 #include "World/WorldState.h"
 #include "Maps/InstanceData.h"
 #include "Grids/GridNotifiers.h"
+#include "Spells/SpellMgr.h"
 
 // Attention: make sure to keep this list in sync with ConditionSource to avoid array
 //            out of bounds access! It is accessed with ConditionSource as index!
@@ -522,7 +523,7 @@ bool ConditionEntry::CheckParamRequirements(WorldObject const* target, Map const
 }
 
 // Verification of condition values validity
-bool ConditionEntry::IsValid()
+bool ConditionEntry::IsValid() const
 {
     switch (m_condition)
     {

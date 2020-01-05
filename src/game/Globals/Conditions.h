@@ -21,6 +21,9 @@
 
 #include "Globals/SharedDefines.h"
 
+class Map;
+class WorldObject;
+
 enum ConditionType
 {
     //                                                      // value1       value2  for the Condition enumed
@@ -131,7 +134,7 @@ class ConditionEntry
             : m_entry(_entry), m_condition(ConditionType(_condition)), m_value1(_value1), m_value2(_value2), m_value3(_value3), m_value4(_value4), m_flags(_flags) {}
 
         // Checks correctness of values
-        bool IsValid();
+        bool IsValid() const;
         static bool CanBeUsedWithoutPlayer(uint32 entry);
 
         // Checks if the condition is met
