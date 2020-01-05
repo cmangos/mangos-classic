@@ -24,7 +24,7 @@
 #include "BattleGroundMgr.h"
 #include "Tools/Language.h"
 #include "WorldPacket.h"
-#include "Server/DBCStores.h"                                   // TODO REMOVE this when graveyard handling for pvp is updated
+#include "Globals/ObjectMgr.h"
 
 BattleGroundAB::BattleGroundAB(): m_IsInformedNearVictory(false), m_honorTicks(0), m_ReputationTics(0)
 {
