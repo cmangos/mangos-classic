@@ -27,6 +27,14 @@ template<class DerivedLoader, class StorageClass>
 template<class S, class D>                                  // S source-type, D destination-type
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert(uint32 /*field_pos*/, S src, D& dst)
 {
+#if defined(__arm__)
+    if (((unsigned) &dst) % sizeof(D)) {
+       //The address is not aligned. Use memcpy to avoid ARM unaligned trap
+       D converted(src);
+       memcpy((void*) &dst, (void*) &converted, sizeof(D));
+    }
+    else
+#endif
     dst = D(src);
 }
 
@@ -66,6 +74,14 @@ template<class DerivedLoader, class StorageClass>
 template<class D>                                           // D destination-type
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_from_str(uint32 /*field_pos*/, char const* /*src*/, D& dst)
 {
+#if defined(__arm__)
+    if (((unsigned) &dst) % sizeof(D)) {
+       //The address is not aligned. Use memcpy to avoid ARM unaligned trap
+       D converted(0);
+       memcpy((void*) &dst, (void*) &converted, sizeof(D));
+    }
+    else
+#endif
     dst = 0;
 }
 
@@ -79,6 +95,14 @@ template<class DerivedLoader, class StorageClass>
 template<class S, class D>                                  // S source-type, D destination-type
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::default_fill(uint32 /*field_pos*/, S src, D& dst)
 {
+#if defined(__arm__)
+    if (((unsigned) &dst) % sizeof(D)) {
+       //The address is not aligned. Use memcpy to avoid ARM unaligned trap
+       D converted(src);
+       memcpy((void*) &dst, (void*) &converted, sizeof(D));
+    }
+    else
+#endif
     dst = D(src);
 }
 

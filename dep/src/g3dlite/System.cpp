@@ -525,8 +525,11 @@ static bool checkForCPUID() {
     // all known supported architectures have cpuid
     // add cases for incompatible architectures if they are added
     // e.g., if we ever support __powerpc__ being defined again
-
+#if defined(__arm__)
+     return false;
+#else
     return true;
+#endif
 }
 
 
@@ -1724,6 +1727,15 @@ void System::cpuid(CPUIDFunction func, uint32& areg, uint32& breg, uint32& creg,
 #elif defined(G3D_OSX) && ! defined(G3D_OSX_INTEL)
 
 // non-intel OS X; no CPUID
+void System::cpuid(CPUIDFunction func, uint32& eax, uint32& ebx, uint32& ecx, uint32& edx) {
+    eax = 0;
+    ebx = 0;
+    ecx = 0;
+    edx = 0;
+}
+
+#elif defined(G3D_LINUX) && defined(__arm__)
+// non-x86 CPU; no CPUID, at least in userspace
 void System::cpuid(CPUIDFunction func, uint32& eax, uint32& ebx, uint32& ecx, uint32& edx) {
     eax = 0;
     ebx = 0;

@@ -20,6 +20,12 @@ if(PLATFORM EQUAL X86)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SSE_FLAGS}")
 endif()
 
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
+  set(ARM_FLAGS "-latomic")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARM_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARM_FLAGS}")
+endif()
+
 add_definitions(-DHAVE_SSE2)
 message(STATUS "GCC: SFMT enabled, SSE2 flags forced")
 
@@ -30,7 +36,7 @@ if(WARNINGS)
   message(STATUS "GCC: All warnings enabled")
 else()
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result -Wno-psabi")
 endif()
 
 if(DEBUG)
