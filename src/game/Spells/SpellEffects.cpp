@@ -3585,17 +3585,8 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
             case CLASS_WARLOCK:
             {
                 // Remove Demonic Sacrifice auras (known pet)
-                Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-                {
-                    if ((*itr)->GetModifier()->m_miscvalue == 2228)
-                    {
-                        m_caster->RemoveAurasDueToSpell((*itr)->GetId());
-                        itr = auraClassScripts.begin();
-                    }
-                    else
-                        ++itr;
-                }
+                if (Aura* aura = m_caster->GetOverrideScript(2228))
+                    m_caster->RemoveAurasDueToSpell(aura->GetId());
             }
             default:
             {

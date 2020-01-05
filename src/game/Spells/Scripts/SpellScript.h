@@ -63,7 +63,9 @@ struct AuraScript
     // called on SpellAuraHolder creation
     virtual void OnHolderInit(SpellAuraHolder* holder) const {}
     // called during any event that calculates aura modifier amount - caster can be nullptr
-    virtual int32 OnDamageCalculate(Aura* aura, Unit* caster, int32 damage) const { return damage; }
+    virtual int32 OnAuraValueCalculate(Aura* aura, Unit* caster, int32 damage) const { return damage; }
+    // called during done/taken damage calculation
+    virtual void OnDamageCalculate(Aura* aura, int32& advertisedBenefit, float& totalMod) {}
     // called before aura apply and after aura unapply
     virtual void OnApply(Aura* aura, bool apply) const {}
     // called during proc eligibility checking

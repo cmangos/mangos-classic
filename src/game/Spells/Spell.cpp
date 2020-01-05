@@ -4270,17 +4270,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELLFAMILY_DRUID:
             {
                 if (IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
-                {
-                    Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                    for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-                    {
-                        if ((*itr)->GetModifier()->m_miscvalue == 3655)
-                            return SPELL_FAILED_TARGET_AURASTATE;
-                        else
-                            ++itr;
-                    }
-                }
-                // No break
+                    if (m_caster->HasOverrideScript(3655))
+                        return SPELL_FAILED_TARGET_AURASTATE;
+                //[[fallthrough]]
             }
             case SPELLFAMILY_PRIEST:
             case SPELLFAMILY_SHAMAN:
@@ -4289,14 +4281,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_HEAL) || IsSpellHaveAura(m_spellInfo, SPELL_AURA_PERIODIC_HEAL) ||
                         IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_DISPEL))
                 {
-                    Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                    for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-                    {
-                        if ((*itr)->GetModifier()->m_miscvalue == 4327)
-                            return SPELL_FAILED_FIZZLE;
-                        else
-                            ++itr;
-                    }
+                    if (m_caster->HasOverrideScript(4327))
+                        return SPELL_FAILED_FIZZLE;
                 }
                 break;
             }
@@ -4304,14 +4290,8 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
                 {
-                    Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                    for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-                    {
-                        if ((*itr)->GetModifier()->m_miscvalue == 3654)
-                            return SPELL_FAILED_TARGET_AURASTATE;
-                        else
-                            ++itr;
-                    }
+                    if (m_caster->HasOverrideScript(3654))
+                        return SPELL_FAILED_TARGET_AURASTATE;
                 }
                 break;
             }

@@ -329,6 +329,17 @@ enum TriggerCastFlags : uint32
     TRIGGERED_FULL_MASK                         = 0xFFFFFFFF
 };
 
+enum AuraScriptLocation : uint32
+{
+    SCRIPT_LOCATION_MELEE_DAMAGE_DONE,
+    SCRIPT_LOCATION_MELEE_DAMAGE_TAKEN,
+    SCRIPT_LOCATION_SPELL_DAMAGE_DONE,
+    SCRIPT_LOCATION_SPELL_DAMAGE_TAKEN,
+    SCRIPT_LOCATION_SPELL_HEALING_DONE,
+    SCRIPT_LOCATION_SPELL_HEALING_TAKEN,
+    SCRIPT_LOCATION_MAX,
+};
+
 enum UnitMods
 {
     UNIT_MOD_STAT_STRENGTH,                                 // UNIT_MOD_STAT_STRENGTH..UNIT_MOD_STAT_SPIRIT must be in existing order, it's accessed by index values of Stats enum.
@@ -2369,6 +2380,12 @@ class Unit : public WorldObject
 
         virtual uint32 GetSpellRank(SpellEntry const* spellInfo);
 
+        bool HasOverrideScript(uint32 id) const;
+        Aura* GetOverrideScript(uint32 id) const;
+        void RegisterOverrideScriptAura(Aura* aura, uint32 id, bool apply);
+        void RegisterScriptedLocationAura(Aura* aura, AuraScriptLocation location, bool apply); // Spell scripting - requires correctly set spell_affect
+        std::vector<Aura*>& GetScriptedLocationAuras(AuraScriptLocation location) { return m_scriptedLocations[location]; }
+
     protected:
 
         struct WeaponDamageInfo
@@ -2407,6 +2424,8 @@ class Unit : public WorldObject
         SpellAuraHolderMap::iterator m_spellAuraHoldersUpdateIterator; // != end() in Unit::m_spellAuraHolders update and point to next element
         AuraList m_deletedAuras;                            // auras removed while in ApplyModifier and waiting deleted
         SpellAuraHolderList m_deletedHolders;
+        std::map<uint32, Aura*> m_classScripts;
+        std::vector<Aura*> m_scriptedLocations[SCRIPT_LOCATION_MAX];
 
         // Store Auras for which the target must be tracked
         TrackedAuraTargetMap m_trackedAuraTargets[MAX_TRACKED_AURA_TYPES];

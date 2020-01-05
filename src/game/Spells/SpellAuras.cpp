@@ -168,7 +168,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleNoImmediateEffect,                         // 109 SPELL_AURA_ADD_TARGET_TRIGGER
     &Aura::HandleModPowerRegenPCT,                          // 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT
     &Aura::HandleUnused,                                    // 111 SPELL_AURA_ADD_CASTER_HIT_TRIGGER
-    &Aura::HandleNoImmediateEffect,                         // 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS implemented in diff functions.
+    &Aura::HandleOverrideClassScript,                       // 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS implemented in diff functions.
     &Aura::HandleNoImmediateEffect,                         // 113 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN implemented in Unit::MeleeDamageBonusTaken
     &Aura::HandleNoImmediateEffect,                         // 114 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT implemented in Unit::MeleeDamageBonusTaken
     &Aura::HandleNoImmediateEffect,                         // 115 SPELL_AURA_MOD_HEALING                 implemented in Unit::SpellBaseHealingBonusTaken
@@ -296,7 +296,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* curr
                     damage += (damage * castItem->GetEnchantmentModifier() / 100);
                 break;
             default:
-                damage = OnDamageCalculate(caster, damage);
+                damage = OnAuraValueCalculate(caster, damage);
                 break;
         }
     }
@@ -1962,18 +1962,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                     ShapeshiftForm previousForm = target->GetShapeshiftForm();
                     uint32 ragePercent = 0;
                     if (previousForm == FORM_DEFENSIVESTANCE)
-                    {
-                        Unit::AuraList const& auraClassScripts = target->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                        for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-                        {
-                            if ((*itr)->GetModifier()->m_miscvalue == 831)
-                            {
-                                ragePercent = (*itr)->GetModifier()->m_amount;
-                            }
-                            else
-                                ++itr;
-                        }
-                    }
+                        if (Aura* aura = target->GetOverrideScript(831))
+                            ragePercent = aura->GetModifier()->m_amount;
                     uint32 Rage_val = 0;
                     // Tactical mastery
                     if (target->GetTypeId() == TYPEID_PLAYER)
@@ -2065,8 +2055,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
                 if (m_modifier.m_miscvalue == FORM_CAT)
                 {
-                    if (target->IsPlayer())
-                        static_cast<Player*>(target)->UpdateEnergyRegen();
                     target->SetPower(POWER_ENERGY, 0);
                     if (irand(1, 100) <= furorChance)
                         target->CastSpell(target, 17099, TRIGGERED_OLD_TRIGGERED, nullptr, this);
@@ -5211,6 +5199,11 @@ void Aura::HandleManaShield(bool apply, bool Real)
     }
 }
 
+void Aura::HandleOverrideClassScript(bool apply, bool real)
+{
+    GetTarget()->RegisterOverrideScriptAura(this, m_modifier.m_miscvalue, apply);
+}
+
 bool Aura::IsLastAuraOnHolder()
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -5578,7 +5571,7 @@ void SpellAuraHolder::SetStackAmount(uint32 stackAmount, Unit* newCaster)
         {
             int32 baseAmount = aur->GetModifier()->m_baseAmount;
             int32 amount = m_stackAmount * baseAmount;
-            amount = aur->OnDamageCalculate(newCaster, amount);
+            amount = aur->OnAuraValueCalculate(newCaster, amount);
             // Reapply if amount change
             if (!baseAmount || amount != aur->GetModifier()->m_amount)
             {
@@ -6007,11 +6000,17 @@ void SpellAuraHolder::OnDispel(Unit* dispeller, uint32 dispellingSpellId, uint32
         script->OnDispel(this, dispeller, dispellingSpellId, originalStacks);
 }
 
-int32 Aura::OnDamageCalculate(Unit* caster, int32 currentValue)
+int32 Aura::OnAuraValueCalculate(Unit* caster, int32 currentValue)
 {
     if (AuraScript* script = GetAuraScript())
-        return script->OnDamageCalculate(this, caster, currentValue);
+        return script->OnAuraValueCalculate(this, caster, currentValue);
     return currentValue;
+}
+
+void Aura::OnDamageCalculate(int32& advertisedBenefit, float& totalMod)
+{
+    if (AuraScript* script = GetAuraScript())
+        return script->OnDamageCalculate(this, advertisedBenefit, totalMod);
 }
 
 void Aura::OnApply(bool apply)

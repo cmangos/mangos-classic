@@ -850,6 +850,9 @@ class Creature : public Unit
 
         uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }
 
+        void SetBaseWalkSpeed(float speed) override;
+        void SetBaseRunSpeed(float speed) override;
+
         void LockOutSpells(SpellSchoolMask schoolMask, uint32 duration) override;
 
         bool CanAggro() const { return m_canAggro; }
@@ -925,9 +928,6 @@ class Creature : public Unit
         bool m_noXP;
         bool m_noLoot;
         bool m_noReputation;
-
-        void SetBaseWalkSpeed(float speed) override;
-        void SetBaseRunSpeed(float speed) override;
 
         // Script logic
         bool m_countSpawns;
