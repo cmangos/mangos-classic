@@ -2408,6 +2408,11 @@ class Unit : public WorldObject
         void RegisterScriptedLocationAura(Aura* aura, AuraScriptLocation location, bool apply); // Spell scripting - requires correctly set spell_affect
         std::vector<Aura*>& GetScriptedLocationAuras(AuraScriptLocation location) { return m_scriptedLocations[location]; }
 
+        uint8 GetComboPoints() const { return m_comboPoints; }
+        ObjectGuid const& GetComboTargetGuid() const { return m_comboTargetGuid; }
+
+        void AddComboPoints(Unit* target, int8 count);
+        void ClearComboPoints();
     protected:
 
         struct WeaponDamageInfo
@@ -2578,6 +2583,9 @@ class Unit : public WorldObject
         bool m_extraAttacksExecuting;
 
         uint64 m_auraUpdateMask;
+
+        ObjectGuid m_comboTargetGuid;
+        int8 m_comboPoints;
 
     private:                                                // Error traps for some wrong args using
         // this will catch and prevent build for any cases when all optional args skipped and instead triggered used non boolean type

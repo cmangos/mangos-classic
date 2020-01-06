@@ -3250,7 +3250,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     // $AP * min(0.06*$cp, 0.24)/6 [Yes, there is no difference, whether 4 or 5 CPs are being used]
                     if (caster->GetTypeId() == TYPEID_PLAYER)
                     {
-                        uint8 cp = ((Player*)caster)->GetComboPoints();
+                        uint8 cp = caster->GetComboPoints();
 
                         if (cp > 4) cp = 4;
                         m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
@@ -3266,7 +3266,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                         break;
                     // Dmg/tick = $AP*min(0.01*$cp, 0.03) [Like Rip: only the first three CP increase the contribution from AP]
-                    uint8 cp = ((Player*)caster)->GetComboPoints();
+                    uint8 cp = caster->GetComboPoints();
                     if (cp > 3) cp = 3;
                     m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
                 }

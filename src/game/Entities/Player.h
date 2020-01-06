@@ -1429,14 +1429,7 @@ class Player : public Unit
         ObjectGuid const& GetSelectionGuid() const override { return m_curSelectionGuid; }
         void SetSelectionGuid(ObjectGuid guid) override { m_curSelectionGuid = guid; SetTargetGuid(guid); }
 
-        uint8 GetComboPoints() const { return m_comboPoints; }
-        ObjectGuid const& GetComboTargetGuid() const { return m_comboTargetGuid; }
-
-        void AddComboPoints(Unit* target, int8 count);
-        void ClearComboPoints();
-        void SetComboPoints();
-
-        bool AttackStop(bool targetSwitch = false, bool includingCast = false, bool includingCombo = false) override;
+        void SendComboPoints();
 
         void SendMailResult(uint32 mailId, MailResponseType mailAction, MailResponseResult mailError, uint32 equipError = 0, uint32 item_guid = 0, uint32 item_count = 0) const;
         void SendNewMail() const;
@@ -2341,9 +2334,6 @@ class Player : public Unit
 
         uint32 m_ExtraFlags;
         ObjectGuid m_curSelectionGuid;
-
-        ObjectGuid m_comboTargetGuid;
-        int8 m_comboPoints;
 
         QuestStatusMap mQuestStatus;
 

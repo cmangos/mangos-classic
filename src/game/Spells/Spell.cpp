@@ -3298,7 +3298,7 @@ void Spell::finish(bool ok)
             }
         }
         if (needDrop)
-            ((Player*)m_caster)->ClearComboPoints();
+            m_caster->ClearComboPoints();
     }
 
     // call triggered spell only at successful cast (after clear combo points -> for add some if need)
@@ -4099,6 +4099,10 @@ SpellCastResult Spell::CheckCast(bool strict)
         return SPELL_FAILED_CASTER_AURASTATE;
 
 
+    if (!m_IsTriggeredSpell && NeedsComboPoints(m_spellInfo) && (!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetObjectGuid() != m_caster->GetComboTargetGuid()))
+        // warrior not have real combo-points at client side but use this way for mark allow Overpower use
+        return m_caster->getClass() == CLASS_WARRIOR ? SPELL_FAILED_CASTER_AURASTATE : SPELL_FAILED_NO_COMBO_POINTS;
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         // cancel autorepeat spells if cast start when moving
@@ -4110,11 +4114,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                     (IsAutoRepeat() || (m_spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0))
                 return SPELL_FAILED_MOVING;
         }
-
-        if (!m_IsTriggeredSpell && NeedsComboPoints(m_spellInfo) &&
-                (!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetObjectGuid() != ((Player*)m_caster)->GetComboTargetGuid()))
-            // warrior not have real combo-points at client side but use this way for mark allow Overpower use
-            return m_caster->getClass() == CLASS_WARRIOR ? SPELL_FAILED_CASTER_AURASTATE : SPELL_FAILED_NO_COMBO_POINTS;
 
         // Loatheb Corrupted Mind and Nefarian class calls spell failed
         switch (m_spellInfo->SpellFamilyName)

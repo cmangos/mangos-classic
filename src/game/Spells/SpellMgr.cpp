@@ -82,7 +82,7 @@ int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster)
         int32 maxduration = GetSpellMaxDuration(spellInfo);
 
         if (duration != maxduration && caster->GetTypeId() == TYPEID_PLAYER)
-            duration += int32((maxduration - duration) * ((Player*)caster)->GetComboPoints() / 5);
+            duration += int32((maxduration - duration) * caster->GetComboPoints() / 5);
 
         if (Player* modOwner = caster->GetSpellModOwner())
         {

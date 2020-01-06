@@ -365,7 +365,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 // Eviscerate
                 if ((m_spellInfo->SpellFamilyFlags & uint64(0x00020000)) && m_caster->GetTypeId() == TYPEID_PLAYER)
                 {
-                    if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
+                    if (uint32 combo = m_caster->GetComboPoints())
                     {
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * combo * 0.03f);
                     }
