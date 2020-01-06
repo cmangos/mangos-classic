@@ -32,33 +32,36 @@
 #include "Entities/NPCHandler.h"
 #include "Server/SQLStorages.h"
 
-void WorldSession::SendNameQueryOpcode(Player* p) const
+void WorldSession::SendNameQueryResponse(CharacterNameQueryResponse& response) const
 {
-    if (!p)
-        return;
 
     // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8 + 1 + 4 + 4 + 4 + 10));
-    data << p->GetObjectGuid();                             // player guid
-    data << p->GetName();                                   // played name
-    data << uint8(0);                                       // realm name for cross realm BG usage
-    data << uint32(p->getRace());
-    data << uint32(p->getGender());
-    data << uint32(p->getClass());
+    data << response.guid;
+    data << (!response.name.empty() ? response.name : GetMangosString(LANG_NON_EXIST_CHARACTER));
+
+    if (response.realm.empty())
+        data << uint8(0);
+    else
+        data << response.realm;
+
+    data << response.race;
+    data << response.gender;
+    data << response.classid;
 
     SendPacket(data, true);
 }
 
-void WorldSession::SendNameQueryOpcodeFromDB(ObjectGuid guid) const
+void WorldSession::SendNameQueryResponseFromDB(ObjectGuid guid) const
 {
-    CharacterDatabase.AsyncPQuery(&WorldSession::SendNameQueryOpcodeFromDBCallBack, GetAccountId(),
+    CharacterDatabase.AsyncPQuery(&WorldSession::SendNameQueryResponseFromDBCallBack, GetAccountId(),
                                   //          0     1     2     3       4
                                   "SELECT guid, name, race, gender, class "
                                   "FROM characters WHERE guid = '%u'",
                                   guid.GetCounter());
 }
 
-void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32 accountId)
+void WorldSession::SendNameQueryResponseFromDBCallBack(QueryResult* result, uint32 accountId)
 {
     if (!result)
         return;
@@ -71,28 +74,21 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32
     }
 
     Field* fields = result->Fetch();
-    uint32 lowguid      = fields[0].GetUInt32();
-    std::string name = fields[1].GetCppString();
-    uint8 pRace = 0, pGender = 0, pClass = 0;
-    if (name.empty())
-        name         = session->GetMangosString(LANG_NON_EXIST_CHARACTER);
-    else
+
+    CharacterNameQueryResponse response;
+
+    response.guid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
+    response.name = fields[1].GetCppString();
+    response.realm = "";
+
+    if (!response.name.empty())
     {
-        pRace        = fields[2].GetUInt8();
-        pGender      = fields[3].GetUInt8();
-        pClass       = fields[4].GetUInt8();
+        response.race = fields[2].GetUInt8();
+        response.gender = fields[3].GetUInt8();
+        response.classid = fields[4].GetUInt8();
     }
 
-    // guess size
-    WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8 + 1 + 4 + 4 + 4 + 10));
-    data << ObjectGuid(HIGHGUID_PLAYER, lowguid);
-    data << name;
-    data << uint8(0);                                       // realm name for cross realm BG usage
-    data << uint32(pRace);                                  // race
-    data << uint32(pGender);                                // gender
-    data << uint32(pClass);                                 // class
-
-    session->SendPacket(data, true);
+    session->SendNameQueryResponse(response);
     delete result;
 }
 
@@ -105,9 +101,20 @@ void WorldSession::HandleNameQueryOpcode(WorldPacket& recv_data)
     Player* pChar = sObjectMgr.GetPlayer(guid);
 
     if (pChar)
-        SendNameQueryOpcode(pChar);
+    {
+        CharacterNameQueryResponse response;
+
+        response.guid = pChar->GetObjectGuid();
+        response.name = pChar->GetName();
+        response.realm = "";
+        response.race = uint32(pChar->getRace());
+        response.gender = uint32(pChar->getGender());
+        response.classid = uint32(pChar->getClass());
+
+        SendNameQueryResponse(response);
+    }
     else
-        SendNameQueryOpcodeFromDB(guid);
+        SendNameQueryResponseFromDB(guid);
 }
 
 void WorldSession::HandleQueryTimeOpcode(WorldPacket& /*recv_data*/)

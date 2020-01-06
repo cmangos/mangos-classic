@@ -947,6 +947,16 @@ struct ProcExecutionData
 typedef SpellAuraProcResult(Unit::*pAuraProcHandler)(ProcExecutionData& data);
 extern pAuraProcHandler AuraProcHandler[TOTAL_AURAS];
 
+struct CharacterNameQueryResponse
+{
+    ObjectGuid          guid;                   // pc's guid
+    std::string         name;                   // pc's name
+    std::string         realm;                  // realm name (xrealm battlegrounds)
+    uint32              race        = 0;        // pc's race
+    uint32              gender      = 0;        // pc's gender
+    uint32              classid     = 0;        // pc's class
+};
+
 enum CurrentSpellTypes
 {
     CURRENT_MELEE_SPELL             = 0,
