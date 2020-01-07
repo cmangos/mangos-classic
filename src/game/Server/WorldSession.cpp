@@ -697,6 +697,16 @@ void WorldSession::SendMotd(Player* currChar)
     DEBUG_LOG("WORLD: Sent motd (SMSG_MOTD)");
 }
 
+void WorldSession::SendOfflineNameQueryResponses()
+{
+    m_offlineNameQueries.clear();
+
+    for (auto& response : m_offlineNameResponses)
+        SendNameQueryResponse(response);
+
+    m_offlineNameResponses.clear();
+}
+
 void WorldSession::SendAreaTriggerMessage(const char* Text, ...) const
 {
     va_list ap;

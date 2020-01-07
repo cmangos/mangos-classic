@@ -569,6 +569,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     SendExpectedSpamRecords();
     SendMotd(pCurrChar);
 
+    SendOfflineNameQueryResponses();
+
     // QueryResult *result = CharacterDatabase.PQuery("SELECT guildid,rank FROM guild_member WHERE guid = '%u'",pCurrChar->GetGUIDLow());
     QueryResult* resultGuild = holder->GetResult(PLAYER_LOGIN_QUERY_LOADGUILD);
 
@@ -780,6 +782,8 @@ void WorldSession::HandlePlayerReconnect()
     // Send Spam records
     SendExpectedSpamRecords();
     SendMotd(_player);
+
+    SendOfflineNameQueryResponses();
 
     if (_player->GetGuildId() != 0)
     {

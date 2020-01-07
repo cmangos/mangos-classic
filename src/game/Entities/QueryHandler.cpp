@@ -88,7 +88,11 @@ void WorldSession::SendNameQueryResponseFromDBCallBack(QueryResult* result, uint
         response.classid = fields[4].GetUInt8();
     }
 
-    session->SendNameQueryResponse(response);
+    if (session->m_sessionState != WORLD_SESSION_STATE_READY)
+        session->m_offlineNameResponses.push_back(response);
+    else
+        session->SendNameQueryResponse(response);
+
     delete result;
 }
 
@@ -97,6 +101,15 @@ void WorldSession::HandleNameQueryOpcode(WorldPacket& recv_data)
     ObjectGuid guid;
 
     recv_data >> guid;
+
+    // When not logged in: check if name was already queried
+    if (m_sessionState != WORLD_SESSION_STATE_READY)
+    {
+        if (m_offlineNameQueries.find(guid) != m_offlineNameQueries.end())
+            return;
+        else
+            m_offlineNameQueries.insert(guid);
+    }
 
     Player* pChar = sObjectMgr.GetPlayer(guid);
 
@@ -111,7 +124,10 @@ void WorldSession::HandleNameQueryOpcode(WorldPacket& recv_data)
         response.gender = uint32(pChar->getGender());
         response.classid = uint32(pChar->getClass());
 
-        SendNameQueryResponse(response);
+        if (m_sessionState != WORLD_SESSION_STATE_READY)
+            m_offlineNameResponses.push_back(response);
+        else
+            SendNameQueryResponse(response);
     }
     else
         SendNameQueryResponseFromDB(guid);
