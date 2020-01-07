@@ -84,38 +84,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
-    static ChatCommand ahbotItemsAmountCommandTable[] =
-    {
-        { "grey",           SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_GREY>,  "", nullptr },
-        { "white",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_WHITE>, "", nullptr },
-        { "green",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_GREEN>, "", nullptr },
-        { "blue",           SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_BLUE>,  "", nullptr },
-        { "purple",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_PURPLE>, "", nullptr },
-        { "orange",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_ORANGE>, "", nullptr },
-        { "yellow",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_YELLOW>, "", nullptr },
-        { "",               SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountCommand,      "", nullptr },
-        { nullptr,          0,                  true,  nullptr,                                          "", nullptr }
-    };
-
-    static ChatCommand ahbotItemsRatioCommandTable[] =
-    {
-        { "alliance",       SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsRatioHouseCommand<AUCTION_HOUSE_ALLIANCE>,  "", nullptr },
-        { "horde",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsRatioHouseCommand<AUCTION_HOUSE_HORDE>,     "", nullptr },
-        { "neutral",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsRatioHouseCommand<AUCTION_HOUSE_NEUTRAL>,   "", nullptr },
-        { "",               SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsRatioCommand,      "", nullptr },
-        { nullptr,          0,                  true,  nullptr,                                          "", nullptr }
-    };
-
-    static ChatCommand ahbotItemsCommandTable[] =
-    {
-        { "amount",         SEC_ADMINISTRATOR,  true,  nullptr,                                        "", ahbotItemsAmountCommandTable},
-        { "ratio",          SEC_ADMINISTRATOR,  true,  nullptr,                                        "", ahbotItemsRatioCommandTable},
-        { nullptr,          0,                  true,  nullptr,                                        "", nullptr }
-    };
-
     static ChatCommand ahbotCommandTable[] =
     {
-        { "items",          SEC_ADMINISTRATOR,  true,  nullptr,                                        "", ahbotItemsCommandTable},
         { "rebuild",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotRebuildCommand,        "", nullptr },
         { "reload",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotReloadCommand,         "", nullptr },
         { "status",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotStatusCommand,         "", nullptr },
