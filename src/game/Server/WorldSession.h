@@ -37,7 +37,6 @@
 struct ItemPrototype;
 struct AuctionEntry;
 struct AuctionHouseEntry;
-struct CharacterNameQueryResponse;
 struct TradeStatusInfo;
 
 class ObjectGuid;
@@ -88,6 +87,16 @@ enum WorldSessionState
     WORLD_SESSION_STATE_CHAR_SELECTION = 1,
     WORLD_SESSION_STATE_READY          = 2,
     WORLD_SESSION_STATE_OFFLINE        = 3
+};
+
+struct CharacterNameQueryResponse
+{
+    ObjectGuid          guid;                   // pc's guid
+    std::string         name;                   // pc's name
+    std::string         realm;                  // realm name (xrealm battlegrounds)
+    uint32              race        = 0;        // pc's race
+    uint32              gender      = 0;        // pc's gender
+    uint32              classid     = 0;        // pc's class
 };
 
 // class to deal with packet processing
