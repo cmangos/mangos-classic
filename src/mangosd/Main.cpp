@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
     }
 
     if (vm.count("ahbot"))
-        sAuctionBotConfig.SetConfigFileName(auctionBotConfig);
+        sAuctionHouseBot.SetConfigFileName(auctionBotConfig);
 
 #ifdef _WIN32                                                // windows service command need execute before config read
     if (vm.count("s"))

@@ -796,7 +796,7 @@ bool AuctionEntry::UpdateBid(uint32 newbid, Player* newbidder /*=nullptr*/)
 
     if ((newbid < buyout) || (buyout == 0))                 // bid
     {
-        if (auction_owner)
+        if (auction_owner && newbidder) // don't send notification unless newbidder is set (AHBot bidding), otherwise player will be told auction was sold when it was just a bid
             auction_owner->GetSession()->SendAuctionOwnerNotification(this, false);
 
         // after this update we should save player's money ...
