@@ -300,7 +300,7 @@ void AuctionHouseBot::Update() {
     } else {
         if (!m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Buy.Enabled", false))
             return; // buying disabled
-        if (urand(0, 100) < m_buyCheckChance)
+        if (urand(0, 100) >= m_buyCheckChance)
             return; // AHBot should not buy any items this time
         // Buy items
         AuctionHouseObject::AuctionEntryMapBounds bounds = auctionHouse->GetAuctionsBounds();
