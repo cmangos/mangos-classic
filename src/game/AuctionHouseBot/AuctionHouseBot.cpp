@@ -38,7 +38,7 @@ AuctionHouseBot::~AuctionHouseBot() {
 
 void AuctionHouseBot::Initialize() {
     if (!m_ahBotCfg.SetSource(m_configFileName)) {
-        sLog.outString("AHBot is disabled. Unable to open configuration file(%s). ", m_configFileName.c_str());
+        sLog.outString("AHBot is disabled. Unable to open configuration file(%s).", m_configFileName.c_str());
         return;
     }
     sLog.outString("AHBot using configuration file %s", m_configFileName.c_str());
@@ -99,6 +99,12 @@ void AuctionHouseBot::Initialize() {
             sLog.outError("AHBot error: AuctionHouseBot.Time.Min must be less or equal to AuctionHouseBot.Time.Max. Setting Time.Min equal to Time.Max.");
             m_auctionTimeMin = m_auctionTimeMax;
         }
+
+        // multiplier for items sold by vendors
+        setMinMaxConfig("AuctionHouseBot.Vendor.Multiplier", m_vendorMultiplier, 0, 8, 4);
+
+        // probability that AHBot will visit the AH for buying items
+        setMinMaxConfig("AuctionHouseBot.Buy.Check", m_buyCheckChance, 0, 100, 20);
 
         // vendor items
         std::vector<uint32> tmpVector;
@@ -294,8 +300,8 @@ void AuctionHouseBot::Update() {
     } else {
         if (!m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Buy.Enabled", false))
             return; // buying disabled
-        if (urand(0, 5) > 0)
-            return; // do this check only once in a while
+        if (urand(0, 100) < m_buyCheckChance)
+            return; // AHBot should not buy any items this time
         // Buy items
         AuctionHouseObject::AuctionEntryMapBounds bounds = auctionHouse->GetAuctionsBounds();
         for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr) {
@@ -313,16 +319,17 @@ void AuctionHouseBot::Update() {
                 buyoutPrice = prototype->BuyPrice / 4;
             if (buyoutPrice == 0)
                 continue;
-            // multiply buyoutPrice with count and quality multiplier unless item is sold by a vendor (then multiply by 4 to avoid players having infinite income)
-            buyoutPrice *= item->GetCount() * (m_vendorItems.find(prototype->ItemId) == m_vendorItems.end() ? m_itemPrice[prototype->Quality][prototype->Class] : 4);
+            // multiply buyoutPrice with count and quality multiplier
+            // if item is sold by a vendor and the vendor multiplier is set, then multiply by this instead
+            buyoutPrice *= item->GetCount() * (m_vendorMultiplier == 0 || m_vendorItems.find(prototype->ItemId) == m_vendorItems.end() ? m_itemPrice[prototype->Quality][prototype->Class] : m_vendorMultiplier);
             buyoutPrice += ((int32) urand(0, m_itemPriceVariance * 2 + 1) - (int32) m_itemPriceVariance) * (int32) (buyoutPrice / 100);
-            uint32 buyCheck = urand(0, buyoutPrice);
+            uint32 buyItemCheck = urand(0, buyoutPrice);
             uint32 bidPrice = auction->bid + auction->GetAuctionOutBid();
             if (auction->startbid > bidPrice)
                 bidPrice = auction->startbid;
-            if (buyCheck > auction->buyout)
+            if (buyItemCheck > auction->buyout)
                 auction->UpdateBid(auction->buyout);
-            else if (buyCheck > bidPrice)
+            else if (buyItemCheck > bidPrice)
                 auction->UpdateBid(bidPrice);
         }
     }
