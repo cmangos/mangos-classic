@@ -75,6 +75,8 @@ class AuctionHouseBot {
         uint32 m_auctionBidMax;
         uint32 m_auctionTimeMin;
         uint32 m_auctionTimeMax;
+        uint32 m_vendorMultiplier;
+        uint32 m_buyCheckChance;
 
         std::vector<uint32> m_creatureLootNormalTemplates;
         std::vector<uint32> m_creatureLootRareTemplates;

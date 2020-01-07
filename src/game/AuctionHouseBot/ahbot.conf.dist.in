@@ -79,7 +79,7 @@ AuctionHouseBot.Price.Artifact  =  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 # Adds variance to item price so all items of same type won't be sold for exactly the same price.
 # This setting also affects buying items, items may be sold by players on AH for more than sell price multiplied
 # by the values in the Price.<quality> settings.
-# Value must be in range 0-100.
+# Value must be in range 0-100. Default value is 10.
 ###################################################################################################################
 AuctionHouseBot.Price.Variance = 10
 
@@ -87,7 +87,7 @@ AuctionHouseBot.Price.Variance = 10
 # Auction min/max bid price (percent)
 #
 # Sets the starting bid price of items sold on AH, a randomly selected percentage of the buyout price.
-# Values must be in range 0-100.
+# Values must be in range 0-100. Default values are Min(60) and Max(90).
 ###################################################################################################################
 AuctionHouseBot.Bid.Min = 60
 AuctionHouseBot.Bid.Max = 90
@@ -96,7 +96,28 @@ AuctionHouseBot.Bid.Max = 90
 # Auction min/max time
 #
 # The min/max auction time, randomly selected.
-# Values must be in range 1-72.
+# Values must be in range 1-72. Default values are Min(2) and Max(24).
 ###################################################################################################################
 AuctionHouseBot.Time.Min = 2
 AuctionHouseBot.Time.Max = 24
+
+###################################################################################################################
+# Vendor item multiplier
+#
+# Override AuctionHouseBot.Price.<quality> for items that can be purchased from vendors.
+# The primary function of this is to prevent players from purchasing uncommon/rare/epic items from vendors and
+# selling them at the AH for a decent profit.
+# A value of 4 makes items bought from vendors sell for about the same price at AH. Greater values makes it
+# possible to earn money by selling them at the AH for a greater price.
+# Setting this value to 0 disables the override for vendor sold items.
+# Values must be in range 0-8. Default value is 4.
+###################################################################################################################
+AuctionHouseBot.Vendor.Multiplier = 4
+
+###################################################################################################################
+# Probability of AHBot visiting the AH.
+#
+# There's an additional check per item, this is just the probability that the AHBot will visit the AH.
+# Values must be in range 0-100. Default value is 20.
+###################################################################################################################
+AuctionHouseBot.Buy.Check = 20
