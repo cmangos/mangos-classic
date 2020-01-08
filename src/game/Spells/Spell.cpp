@@ -2577,7 +2577,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                             if ((type == SPELL_TARGET_TYPE_CREATURE && target->isAlive()) ||
                                 (type == SPELL_TARGET_TYPE_DEAD && ((Creature*)target)->IsCorpse()))
                             {
-                                if (target->IsWithinDistInMap(caster, radius))
+                                if (target->IsWithinDistInMap(caster, radius) && OnCheckTarget(target, effIndex))
                                     foundScriptCreatureTargets.push_back((Creature*)target);
                                 else
                                     foundButOutOfRange = true;
