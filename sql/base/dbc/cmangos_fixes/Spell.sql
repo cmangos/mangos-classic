@@ -116,3 +116,6 @@ UPDATE spell_template SET InterruptFlags=0 WHERE Id IN(18500);
 -- AQ40 - Ouro - Sweep is interruptible by things but shouldnt
 UPDATE spell_template SET InterruptFlags=0 WHERE Id IN(26103);
 
+-- Fix bad mask for spells - always needs to have at least 1, if disproven, fix EAI functions which check SchoolMask
+UPDATE spell_template SET SchoolMask=1 WHERE SchoolMask=0;
+
