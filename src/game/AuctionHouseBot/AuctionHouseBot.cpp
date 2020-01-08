@@ -43,10 +43,13 @@ void AuctionHouseBot::Initialize() {
     }
     sLog.outString("AHBot using configuration file %s", m_configFileName.c_str());
 
-    sLog.outString("AHBot will %ssell items at the Auction House", m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Sell.Enabled", false) ? "" : "NOT ");
-    sLog.outString("AHBot will %sbuy items from the Auction House", m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Buy.Enabled", false) ? "" : "NOT ");
+    m_chanceSell = getMinMaxConfig("AuctionHouseBot.Chance.Sell", 0, 100, 100);
+    m_chanceBuy = getMinMaxConfig("AuctionHouseBot.Chance.Buy", 0, 100, 20);
 
-    if (m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Sell.Enabled", false)) {
+    sLog.outString("AHBot selling items: %s", m_chanceSell > 0 ? "Enabled" : "Disabled");
+    sLog.outString("AHBot buying items: %s", m_chanceBuy > 0 ? "Enabled" : "Disabled");
+
+    if (m_chanceSell > 0 || m_chanceBuy > 0) {
         // creature loot
         parseLootConfig("AuctionHouseBot.Loot.Creature.Normal", m_creatureLootNormalConfig);
         parseLootConfig("AuctionHouseBot.Loot.Creature.Elite", m_creatureLootEliteConfig);
@@ -84,33 +87,42 @@ void AuctionHouseBot::Initialize() {
         parseItemPriceConfig("AuctionHouseBot.Price.Legendary", m_itemPrice[ITEM_QUALITY_LEGENDARY]);
         parseItemPriceConfig("AuctionHouseBot.Price.Artifact", m_itemPrice[ITEM_QUALITY_ARTIFACT]);
         // item price variance
-        setMinMaxConfig("AuctionHouseBot.Price.Variance", m_itemPriceVariance, 0, 100, 10);
+        m_itemPriceVariance = getMinMaxConfig("AuctionHouseBot.Price.Variance", 0, 100, 10);
         // auction min/max bid
-        setMinMaxConfig("AuctionHouseBot.Bid.Min", m_auctionBidMin, 0, 100, 60);
-        setMinMaxConfig("AuctionHouseBot.Bid.Max", m_auctionBidMax, 0, 100, 90);
+        m_auctionBidMin = getMinMaxConfig("AuctionHouseBot.Bid.Min", 0, 100, 60);
+        m_auctionBidMax = getMinMaxConfig("AuctionHouseBot.Bid.Max", 0, 100, 90);
         if (m_auctionBidMin > m_auctionBidMax) {
             sLog.outError("AHBot error: AuctionHouseBot.Bid.Min must be less or equal to AuctionHouseBot.Bid.Max. Setting Bid.Min equal to Bid.Max.");
             m_auctionBidMin = m_auctionBidMax;
         }
         // auction min/max time
-        setMinMaxConfig("AuctionHouseBot.Time.Min", m_auctionTimeMin, 1, 72, 2);
-        setMinMaxConfig("AuctionHouseBot.Time.Max", m_auctionTimeMax, 1, 72, 24);
+        m_auctionTimeMin = getMinMaxConfig("AuctionHouseBot.Time.Min", 1, 72, 2);
+        m_auctionTimeMax = getMinMaxConfig("AuctionHouseBot.Time.Max", 1, 72, 24);
         if (m_auctionTimeMin > m_auctionTimeMax) {
             sLog.outError("AHBot error: AuctionHouseBot.Time.Min must be less or equal to AuctionHouseBot.Time.Max. Setting Time.Min equal to Time.Max.");
             m_auctionTimeMin = m_auctionTimeMax;
         }
 
-        // multiplier for items sold by vendors
-        setMinMaxConfig("AuctionHouseBot.Vendor.Multiplier", m_vendorMultiplier, 0, 8, 4);
-
-        // probability that AHBot will visit the AH for buying items
-        setMinMaxConfig("AuctionHouseBot.Buy.Check", m_buyCheckChance, 0, 100, 20);
+        // buyout price for items sold by vendors
+        m_vendorPrice = getMinMaxConfig("AuctionHouseBot.Price.Vendor", 0, 999, 100);
 
         // vendor items
         std::vector<uint32> tmpVector;
         fillUintVectorFromQuery("SELECT DISTINCT item FROM npc_vendor", tmpVector);
         std::copy(tmpVector.begin(), tmpVector.end(), std::inserter(m_vendorItems, m_vendorItems.end()));
     }
+}
+
+uint32 AuctionHouseBot::getMinMaxConfig(const char* config, uint32 minValue, uint32 maxValue, uint32 defaultValue) {
+    uint32 field = m_ahBotCfg.GetIntDefault(config, defaultValue);
+    if (field < minValue) {
+        sLog.outError("AHBot error: %s must be between %u and %u. Setting value to %u.", config, minValue, maxValue, defaultValue);
+        field = defaultValue;
+    } else if (field > maxValue) {
+        sLog.outError("AHBot error: %s must be between %u and %u. Setting value to %u.", config, minValue, maxValue, defaultValue);
+        field = defaultValue;
+    }
+    return field;
 }
 
 void AuctionHouseBot::parseLootConfig(char const* fieldname, std::vector<int32>& lootConfig) {
@@ -155,17 +167,6 @@ void AuctionHouseBot::fillUintVectorFromQuery(char const* query, std::vector<uin
             lootTemplates.push_back(fields[0].GetUInt32());
         } while (result->NextRow());
         delete result;
-    }
-}
-
-void AuctionHouseBot::setMinMaxConfig(const char* config, uint32& field, uint32 minValue, uint32 maxValue, uint32 defaultValue) {
-    field = m_ahBotCfg.GetIntDefault(config, defaultValue);
-    if (field < minValue) {
-        sLog.outError("AHBot error: %s must be between %u and %u. Setting value to %u.", config, minValue, maxValue, defaultValue);
-        field = defaultValue;
-    } else if (field > maxValue) {
-        sLog.outError("AHBot error: %s must be between %u and %u. Setting value to %u.", config, minValue, maxValue, defaultValue);
-        field = defaultValue;
     }
 }
 
@@ -254,9 +255,7 @@ void AuctionHouseBot::Update() {
 
     AuctionHouseType houseType = AuctionHouseType(m_houseAction % MAX_AUCTION_HOUSE_TYPE);
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(houseType);
-    if (m_houseAction < MAX_AUCTION_HOUSE_TYPE) {
-        if (!m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Sell.Enabled", false))
-            return; // selling disabled
+    if (m_houseAction < MAX_AUCTION_HOUSE_TYPE && urand(0, 100) < m_chanceSell) {
         // Sell items
         std::unordered_map<uint32, uint32> itemMap;
 
@@ -284,24 +283,14 @@ void AuctionHouseBot::Update() {
 
             for (uint32 stackCounter = 0; stackCounter < itemEntry.second; stackCounter += prototype->GetMaxStackSize()) {
                 Item* item = Item::CreateItem(itemEntry.first, itemEntry.second - stackCounter > prototype->GetMaxStackSize() ? prototype->GetMaxStackSize() : itemEntry.second - stackCounter);
-                if (!item)
-                    continue;
-                uint32 buyoutPrice = prototype->SellPrice;
-                if (buyoutPrice == 0) // fall back to buy price if no sell price (needed for enchanting mats)
-                    buyoutPrice = prototype->BuyPrice / 4;
+                uint32 buyoutPrice = calculateBuyoutPrice(item);
                 if (buyoutPrice == 0)
-                    continue;
-                buyoutPrice *= item->GetCount() * m_itemPrice[prototype->Quality][prototype->Class];
-                buyoutPrice += ((int32) urand(0, m_itemPriceVariance * 2 + 1) - (int32) m_itemPriceVariance) * (int32) (buyoutPrice / 100);
+                    continue; // don't put up items we don't know the value of
                 uint32 bidPrice = buyoutPrice * (urand(m_auctionBidMin, m_auctionBidMax + 1)) / 100;
                 auctionHouse->AddAuction(sAuctionHouseStore.LookupEntry(houseType == AUCTION_HOUSE_ALLIANCE ? 1 : (houseType == AUCTION_HOUSE_HORDE ? 6 : 7)), item, urand(m_auctionTimeMin, m_auctionTimeMax + 1) * HOUR, bidPrice, buyoutPrice);
             }
         }
-    } else {
-        if (!m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Buy.Enabled", false))
-            return; // buying disabled
-        if (urand(0, 100) >= m_buyCheckChance)
-            return; // AHBot should not buy any items this time
+    } else if (m_houseAction >= MAX_AUCTION_HOUSE_TYPE && urand(0, 100) < m_chanceBuy) {
         // Buy items
         AuctionHouseObject::AuctionEntryMapBounds bounds = auctionHouse->GetAuctionsBounds();
         for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr) {
@@ -309,21 +298,7 @@ void AuctionHouseBot::Update() {
             if (auction->owner == 0 && auction->bid == 0)
                 continue; // ignore bidding/buying auctions that were created by server and not bidded on by player
             Item* item = sAuctionMgr.GetAItem(auction->itemGuidLow);
-            if (!item)
-                continue; // shouldn't happen
-            ItemPrototype const* prototype = item->GetProto();
-            if (!prototype)
-                continue; // shouldn't happen
-            uint32 buyoutPrice = prototype->SellPrice;
-            if (buyoutPrice == 0) // fall back to buy price if no sell price (needed for enchanting mats)
-                buyoutPrice = prototype->BuyPrice / 4;
-            if (buyoutPrice == 0)
-                continue;
-            // multiply buyoutPrice with count and quality multiplier
-            // if item is sold by a vendor and the vendor multiplier is set, then multiply by this instead
-            buyoutPrice *= item->GetCount() * (m_vendorMultiplier == 0 || m_vendorItems.find(prototype->ItemId) == m_vendorItems.end() ? m_itemPrice[prototype->Quality][prototype->Class] : m_vendorMultiplier);
-            buyoutPrice += ((int32) urand(0, m_itemPriceVariance * 2 + 1) - (int32) m_itemPriceVariance) * (int32) (buyoutPrice / 100);
-            uint32 buyItemCheck = urand(0, buyoutPrice);
+            uint32 buyItemCheck = urand(0, calculateBuyoutPrice(item));
             uint32 bidPrice = auction->bid + auction->GetAuctionOutBid();
             if (auction->startbid > bidPrice)
                 bidPrice = auction->startbid;
@@ -333,4 +308,21 @@ void AuctionHouseBot::Update() {
                 auction->UpdateBid(bidPrice);
         }
     }
+}
+
+uint32 AuctionHouseBot::calculateBuyoutPrice(Item* item) {
+    if (!item)
+        return 0;
+    ItemPrototype const* prototype = item->GetProto();
+    if (!prototype)
+        return 0;
+    uint32 buyoutPrice = prototype->BuyPrice;
+    if (buyoutPrice == 0) // if no buy price then use sell price multiplied by 4 if white or gray item, 5 if green or better
+        buyoutPrice = prototype->SellPrice * (prototype->Quality <= ITEM_QUALITY_NORMAL ? 4 : 5);
+    // multiply buyoutPrice with count and item quality price percentage
+    // if item is sold by a vendor and the vendor price is set, then use this instead
+    buyoutPrice *= item->GetCount() * (m_vendorPrice == 0 || m_vendorItems.find(prototype->ItemId) == m_vendorItems.end() ? m_itemPrice[prototype->Quality][prototype->Class] : m_vendorPrice);
+    buyoutPrice += ((int32) urand(0, m_itemPriceVariance * 2 + 1) - (int32) m_itemPriceVariance) * (int32) (buyoutPrice / 100);
+    buyoutPrice /= 100; // since we multiplied with m_itemPrice
+    return buyoutPrice;
 }
