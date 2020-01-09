@@ -105,10 +105,10 @@ void WorldSession::HandleNameQueryOpcode(WorldPacket& recv_data)
     // When not logged in: check if name was already queried
     if (m_sessionState != WORLD_SESSION_STATE_READY)
     {
-        if (m_offlineNameQueries.find(guid) != m_offlineNameQueries.end())
+        auto result = m_offlineNameQueries.insert(guid);
+
+        if (!result.second)
             return;
-        else
-            m_offlineNameQueries.insert(guid);
     }
 
     Player* pChar = sObjectMgr.GetPlayer(guid);
