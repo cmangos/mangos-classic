@@ -551,7 +551,10 @@ void AreaAura::Update(uint32 diff)
                 int32 actualDamage = m_modifier.m_baseAmount;
                 // recalculate basepoints for lower rank (all AreaAura spell not use custom basepoints?)
                 if (actualSpellInfo != GetSpellProto())
+                {
                     actualBasePoints = actualSpellInfo->CalculateSimpleValue(m_effIndex);
+                    actualDamage = caster->CalculateSpellEffectValue(target, actualSpellInfo, m_effIndex, &actualBasePoints);
+                }
 
                 SpellAuraHolder* holder = target->GetSpellAuraHolder(actualSpellInfo->Id, GetCasterGuid());
 
