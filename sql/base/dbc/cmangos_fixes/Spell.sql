@@ -139,3 +139,6 @@ UPDATE spell_template SET InterruptFlags=0 WHERE Id IN (18431, 22686);
 
 -- AQ40 - C'Thun - Summon Hook Tentacles - restricted to one target
 UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id=26398;
+
+UPDATE spell_template SET Attributes=320 WHERE id=28282; -- This makes Ashbringer passive aura icon invisible
+UPDATE spell_template SET AttributesEx=32, AttributesEx3=131072 WHERE id=28441; -- AB Effect 000, critters/neutral no longer attack

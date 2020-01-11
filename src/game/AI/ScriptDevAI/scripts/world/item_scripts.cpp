@@ -23,11 +23,11 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
-EndContentData */
-
-
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "Spells/Spell.h"
+#include "Spells/Scripts/SpellScript.h"
+/* ContentData
+EndContentData */
 
 /*#####
 # item_orb_of_draconic_energy
@@ -59,10 +59,32 @@ bool ItemUse_item_orb_of_draconic_energy(Player* pPlayer, Item* pItem, const Spe
     return false;
 }
 
+enum
+{
+    SPELL_ASHBRINGER_EFFECT_001 = 28442,
+};
+
+struct AshbringerItemAura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const
+    {
+        if (apply)
+        {
+            Unit* target = aura->GetTarget();
+            int32 basepoints = ReputationRank(REP_FRIENDLY);
+            target->CastCustomSpell(nullptr, SPELL_ASHBRINGER_EFFECT_001, &basepoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+        else
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_ASHBRINGER_EFFECT_001);
+    }
+};
+
 void AddSC_item_scripts()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "item_orb_of_draconic_energy";
     pNewScript->pItemUse = &ItemUse_item_orb_of_draconic_energy;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<AshbringerItemAura>("spell_ashbringer_item");
 }
