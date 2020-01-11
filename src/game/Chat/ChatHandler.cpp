@@ -34,6 +34,7 @@
 #include "Util.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
+#include "GMTickets/GMTicketMgr.h"
 
 bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg, uint32 lang)
 {
@@ -194,6 +195,16 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             }
 
             Player* player = sObjectMgr.GetPlayer(to.c_str());
+
+            std::pair<bool, bool> hookresult = sTicketMgr.HookGMTicketWhisper(GetPlayer(), to, player, msg, (lang == LANG_ADDON));
+
+            if (hookresult.first)
+            {
+                if (!hookresult.second)
+                    SendPlayerNotFoundNotice(to);
+                return;
+            }
+
             uint32 tSecurity = GetSecurity();
             uint32 pSecurity = player ? player->GetSession()->GetSecurity() : SEC_PLAYER;
             if (!player || (tSecurity == SEC_PLAYER && pSecurity > SEC_PLAYER && !player->isAcceptWhispers()))

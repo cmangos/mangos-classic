@@ -34,6 +34,7 @@
 #include "Database/DatabaseImpl.h"
 #include "Tools/PlayerDump.h"
 #include "Social/SocialMgr.h"
+#include "GMTickets/GMTicketMgr.h"
 #include "Util.h"
 #include "Tools/Language.h"
 #include "Chat/Chat.h"
@@ -673,6 +674,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     // Send friend list online status for other players
     sSocialMgr.SendFriendStatus(pCurrChar, FRIEND_ONLINE, pCurrChar->GetObjectGuid(), true);
 
+    // GM ticket notifications
+    sTicketMgr.OnPlayerOnlineState(*pCurrChar, true);
+
     // Place character in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();
 
@@ -829,6 +833,9 @@ void WorldSession::HandlePlayerReconnect()
 
     // Send friend list online status for other players
     sSocialMgr.SendFriendStatus(_player, FRIEND_ONLINE, _player->GetObjectGuid(), true);
+
+    // GM ticket notifications
+    sTicketMgr.OnPlayerOnlineState(*_player, true);
 
     // show time before shutdown if shutdown planned.
     if (sWorld.IsShutdowning())

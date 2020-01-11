@@ -276,15 +276,15 @@ enum MangosStrings
     LANG_COMMAND_WHISPERON              = 285,
     LANG_COMMAND_WHISPEROFF             = 286,
     LANG_COMMAND_CREATGUIDNOTFOUND      = 287,
-    LANG_COMMAND_TICKETCOUNT            = 288,
-    LANG_COMMAND_TICKETNEW              = 289,
-    LANG_COMMAND_TICKETVIEW             = 290,
-    LANG_COMMAND_TICKETON               = 291,
-    LANG_COMMAND_TICKETOFF              = 292,
-    LANG_COMMAND_TICKETNOTEXIST         = 293,
-    LANG_COMMAND_ALLTICKETDELETED       = 294,
-    LANG_COMMAND_TICKETPLAYERDEL        = 295,
-    LANG_COMMAND_TICKETDEL              = 296,
+    //                                    288, not used
+    //                                    289, not used
+    //                                    290, not used
+    //                                    291, not used
+    //                                    292, not used
+    //                                    293, not used
+    //                                    294, not used
+    //                                    295, not used
+    //                                    296, not used
     LANG_COMMAND_SPAWNDIST              = 297,
     LANG_COMMAND_SPAWNTIME              = 298,
     LANG_COMMAND_MODIFY_HONOR           = 299,
@@ -363,9 +363,9 @@ enum MangosStrings
     //                                    370 used in master branch
     //                                    371 used in master branch
     //                                    372 used in master branch
-    LANG_COMMAND_TICKETRESPONSE         = 373,
-    LANG_COMMAND_TICKETCOUNT_CONSOLE    = 374,
-    LANG_COMMAND_TICKETNOTEXIST_NAME    = 375,
+    //                                    373, not used
+    //                                    374, not used
+    //                                    375, not used
     LANG_POOL_ENTRY_LIST_CHAT           = 376,
     LANG_NO_POOL_FOR_MAP                = 377,
     LANG_POOL_LIST_NON_INSTANCE         = 378,
@@ -1018,7 +1018,69 @@ enum MangosStrings
     LANG_NPC_EVENTAI_MOVE               = 1507,
     LANG_NPC_EVENTAI_COMBAT             = 1508,
     LANG_POOL_ENTRY_LOWER_MAX_POOL      = 1509,
-    // Room for more Level 2              1510-1599 not used
+    LANG_COMMAND_TICKET_NOT_FOUND       = 1510,             // "[%s]: Ticket not found"
+    LANG_COMMAND_TICKET_PLAYER_OFFLINE  = 1511,             // "[%s]: Player not found"
+    LANG_COMMAND_TICKET_ACCESS_DENIED   = 1512,             // "[%s]: Ticket requires a higher account security level"
+    LANG_COMMAND_TICKET_NOT_ASSIGNED    = 1513,             // "[%s]: Ticket has to be assigned to you"
+    LANG_COMMAND_TICKET_UNSEEN          = 1514,             // "[%s]: Ticket has not been seen by a GM yet"
+    //                                  = 1515-1519,        // Reserved for possible ticket commands and results
+    LANG_COMMAND_TICKETS_BAD_CATEGORY   = 1520,             // "Ticket category id %u does not exist"
+    LANG_COMMAND_TICKETS_NO_NEW_TICKETS = 1521,             // "No new tickets found"
+    LANG_COMMAND_TICKETS_NO_TICKETS     = 1522,             // "No tickets found matching criterea"
+    LANG_COMMAND_TICKETS_LISTING        = 1523,             // "Listing up to %u tickets matching criterea:"
+    LANG_COMMAND_TICKETS_LISTING_HEADER = 1524,             // "|       Id:   Lvl:  Locale: Category:  Status:"
+    //                                  = 1525-1530,        // Reserved for possible ticket commands and results
+    LANG_TICKET_ASSIGNEE_ALERT_ONLINE   = 1531,             // "Player is now online"
+    LANG_TICKET_ASSIGNEE_ALERT_OFFLINE  = 1532,             // "Player is now offline"
+    LANG_TICKET_ASSIGNEE_ALERT_UPDATED  = 1533,             // "Ticket was updated"
+    LANG_TICKET_ASSIGNEE_ALERT_ABANDONED= 1534,             // "Ticket was abandoned"
+    LANG_TICKET_ASSIGNEE_ALERT_ESCALATED= 1535,             // "Ticket was escalated"
+    LANG_TICKET_MOTD_SYSTEM_STATUS      = 1536,             // "[Tickets]: Queue system status: %s"
+    LANG_TICKET_MOTD_SYSTEM_STATS_CLOSED= 1537,             // "[Tickets]: Closed: %u, average time: %s"
+    LANG_TICKET_MOTD_SYSTEM_STATS_OPEN  = 1538,             // "[Tickets]: Open: %u (%u escalated)"
+    LANG_TICKET_MOTD_SYSTEM_ASSIGNED    = 1539,             // "[Tickets]: Assigned to you: %u (%u online)"
+    LANG_TICKET_BROADCAST_NEW           = 1540,             // "[Tickets]: [%s] has been added by %s"
+    LANG_TICKET_BROADCAST_ABANDONED     = 1541,             // "[Tickets]: [%s] has been abandoned by the author"
+    LANG_TICKET_BROADCAST_CATEGORY      = 1542,             // "[Tickets]: [%s] has been moved to category \'%s\' (%u) by %s"
+    LANG_TICKET_BROADCAST_COMMENTARY    = 1543,             // "[Tickets]: [%s] has been commented on by %s"
+    LANG_TICKET_BROADCAST_ASSIGNMENT    = 1544,             // "[Tickets]: [%s] has been assigned to %s"
+    LANG_TICKET_BROADCAST_ESCALATION    = 1545,             // "[Tickets]: [%s] has been escalated (L%u) by %s"
+    LANG_TICKET_BROADCAST_DEESCALATION  = 1546,             // "[Tickets]: [%s] has been de-escalated by the author\'s edits"
+    LANG_TICKET_BROADCAST_CLOSED        = 1547,             // "[Tickets]: [%s] has been closed by %s"
+    LANG_TICKET_BROADCAST_SURVEY        = 1548,             // "[Tickets]: [%s] has been successfuly surveyed"
+    //                                  = 1549              // Reserved for potential ticket broadcast
+    LANG_TICKET_STATUS_BRIEF_OPEN       = 1550,             // "Open"
+    LANG_TICKET_STATUS_BRIEF_UNSEEN     = 1551,             // "New"
+    LANG_TICKET_STATUS_BRIEF_ASSIGNED   = 1552,             // "Assigned"
+    LANG_TICKET_STATUS_BRIEF_ESCALATED  = 1553,             // "Escalated"
+    LANG_TICKET_STATUS_BRIEF_CLOSED     = 1554,             // "Closed"
+    LANG_TICKET_STATUS_BRIEF_ABANDONED  = 1555,             // "Abandoned"
+    LANG_TICKET_CLOSED_LETTER_TITLE     = 1556,             // "Ticket Response"
+    LANG_TICKET_CLOSED_LETTER_RESOLVED  = 1557,             // "Your ticket has been marked as Resolved."
+    LANG_TICKET_CLOSED_LETTER_DISCARDED = 1558,             // "Your ticket has been marked as Discarded."
+    LANG_TICKET_CLOSED_LETTER_FOOTNOTE  = 1559,             // "GM's conclusion:"
+    LANG_TICKET_DETAILS_LINE_SUMMARY    = 1560,             // "| %s L|c00FFFFFF%u|r ticket #|c00FFFFFF%u|r in category: |c00FFFFFF%s|r (|c00FFFFFF%u|r)"
+    LANG_TICKET_DETAILS_LINE_AUTHOR     = 1561,             // "| Player: |Hplayer:%s|h|c00FFFFFF<%s>|r|h (GUID |c00FFFFFF%010u|r) [|c00FFFFFF%s|r] |c00FF1A1A%s|r"
+    LANG_TICKET_DETAILS_LINE_LOCATION   = 1562,             // "| Location: |c00FFFFFF%.2f %.2f %.2f|r Map #|c00FFFFFF%u|r"
+    LANG_TICKET_DETAILS_LINE_SUBMITTED  = 1563,             // "| Submitted: |c00FFFFFF%s|r (|c00FFFFFF%s|r ago)"
+    LANG_TICKET_DETAILS_LINE_UPDATED    = 1564,             // "| Last updated: |c00FFFFFF%s|r (|c00FFFFFF%s|r ago)"
+    LANG_TICKET_DETAILS_LINE_SEEN       = 1565,             // "| Last read: |c00FFFFFF%s|r (|c00FFFFFF%s|r ago)"
+    LANG_TICKET_DETAILS_LINE_ANSWERED   = 1566,             // "| Last answered: |c00FFFFFF%s|r (|c00FFFFFF%s|r ago)"
+    LANG_TICKET_DETAILS_LINE_CLOSED     = 1567,             // "| Closed at: |c00FFFFFF%s|r (|c00FFFFFF%s|r ago)"
+    LANG_TICKET_DETAILS_LINE_ASSIGNED   = 1568,             // "| Last assigned to: |Hplayer:%s|h|c00FFFFFF<%s>|r|h (GUID |c00FFFFFF%010u|r)"
+    LANG_TICKET_DETAILS_LINE_TEXT       = 1569,             // "| Message:"
+    LANG_TICKET_DETAILS_LINE_CONCLUSION = 1570,             // "| GM's final conclusion:"
+    LANG_TICKET_DETAILS_LINE_GM_NOTES   = 1571,             // "| GM notes:"
+    LANG_TICKET_DETAILS_LINE_QUOTE      = 1572,             // "| >> |c00FF80FF%s|r"
+    LANG_TICKET_DETAILS_LINE_QUOTE_GM   = 1573,             // "| >> |c000000FF%s|r"
+    LANG_TICKET_DETAILS_LINE_ACTIONS    = 1574,             // "| Quick actions: |c00FF80FF%s|r |c001AFF1A%s|r |c00FF1A1A%s|r |c0069CCF0%s|r"
+    LANG_TICKET_DETAILS_ACTION_WHISPER  = 1575,             // "WHISPER"
+    LANG_TICKET_DETAILS_ACTION_RESOLVE  = 1576,             // "RESOLVE"
+    LANG_TICKET_DETAILS_ACTION_DISCARD  = 1577,             // "DISCARD"
+    LANG_TICKET_DETAILS_ACTION_NOTE     = 1578,             // "NOTE"
+    LANG_TICKETS_PRINT_SPACER           = 1579,             // "|========================================================|"
+    LANG_TICKETS_NOTIFICATIONS          = 1580,             // "Ticket notifications"
+    // Room for more Level 2              1581-1599 not used
 
     // Outdoor PvP
     LANG_OPVP_EP_CAPTURE_NPT_H          = 1600,

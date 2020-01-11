@@ -87,6 +87,11 @@ extern DBCStorage <FactionEntry>                 sFactionStore;
 extern DBCStorage <FactionTemplateEntry>         sFactionTemplateStore;
 extern DBCStorage <GameObjectDisplayInfoEntry>   sGameObjectDisplayInfoStore;
 
+extern DBCStorage <GMSurveyCurrentSurveyEntry>   sGMSurveyCurrentSurveyStore;
+extern DBCStorage <GMSurveyQuestionsEntry>       sGMSurveyQuestionsStore;
+extern DBCStorage <GMSurveyEntry>                sGMSurveySurveysStore;
+extern DBCStorage <GMTicketCategoryEntry>        sGMTicketCategoryStore;
+
 extern DBCStorage <ItemBagFamilyEntry>           sItemBagFamilyStore;
 extern DBCStorage <ItemClassEntry>               sItemClassStore;
 // extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently

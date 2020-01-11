@@ -35,6 +35,7 @@
 #endif
 
 #include <set>
+#include <vector>
 #include <list>
 #include <string>
 #include <map>

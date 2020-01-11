@@ -789,6 +789,29 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
+    static ChatCommand ticketCommandTable[] =
+    {
+        { "discard",        SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketDiscardCommand,       "", nullptr },
+        { "escalate",       SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketEscalateCommand,      "", nullptr },
+        { "go",             SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketGoCommand,            "", nullptr },
+        { "goname",         SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketGoNameCommand,        "", nullptr },
+        { "note",           SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketNoteCommand,          "", nullptr },
+        { "read",           SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketReadCommand,          "", nullptr },
+        { "resolve",        SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketResolveCommand,       "", nullptr },
+        { "sort",           SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketSortCommand,          "", nullptr },
+        { "whisper",        SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketWhisperCommand,       "", nullptr },
+        { "",               SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketCommand,              "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                        "", nullptr }
+    };
+
+    static ChatCommand ticketsCommandTable[] =
+    {
+        { "list",           SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketsListCommand,         "", nullptr },
+        { "queue",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleTicketsQueueCommand,        "", nullptr },
+        { "",               SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketsCommand,             "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                        "", nullptr }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "account",        SEC_PLAYER,         true,  nullptr,                                           "", accountCommandTable  },
@@ -861,8 +884,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { "additemset",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAddItemSetCommand,          "", nullptr },
         { "bank",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleBankCommand,                "", nullptr },
         { "wchange",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleChangeWeatherCommand,       "", nullptr },
-        { "ticket",         SEC_GAMEMASTER,     true,  &ChatHandler::HandleTicketCommand,              "", nullptr },
-        { "delticket",      SEC_GAMEMASTER,     true,  &ChatHandler::HandleDelTicketCommand,           "", nullptr },
+        { "ticket",         SEC_GAMEMASTER,     false, nullptr,                                        "", ticketCommandTable   },
+        { "tickets",        SEC_GAMEMASTER,     false, nullptr,                                        "", ticketsCommandTable  },
         { "maxskill",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMaxSkillCommand,            "", nullptr },
         { "setskill",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSetSkillCommand,            "", nullptr },
         { "whispers",       SEC_MODERATOR,      false, &ChatHandler::HandleWhispersCommand,            "", nullptr },

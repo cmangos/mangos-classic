@@ -231,7 +231,9 @@ class WorldSession
         void SendTabardVendorActivate(ObjectGuid guid) const;
         void SendSpiritResurrect() const;
         void SendBindPoint(Creature* npc) const;
-        void SendGMTicketGetTicket(uint32 status, GMTicket* ticket = nullptr) const;
+
+        void SendGMTicketResult(uint32 opcode, uint32 result) const;
+        void SendGMTicket(GMTicket& ticket, time_t now = time(nullptr)) const;
 
         void SendAttackStop(Unit const* enemy) const;
 
@@ -296,6 +298,8 @@ class WorldSession
 
         // Account mute time
         time_t m_muteTime;
+        // Ticket squelch timer: prevent ticket spam
+        ShortTimeTracker m_ticketSquelchTimer;
 
         // Locales
         LocaleConstant GetSessionDbcLocale() const { return m_sessionDbcLocale; }
@@ -370,13 +374,12 @@ class WorldSession
         void HandleLogoutRequestOpcode(WorldPacket& recvPacket);
         void HandlePlayerLogoutOpcode(WorldPacket& recvPacket);
         void HandleLogoutCancelOpcode(WorldPacket& recvPacket);
+
+        void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
         void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);
-        void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
-
-        void HandleGMTicketDeleteTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketUpdateTextOpcode(WorldPacket& recvPacket);
-
+        void HandleGMTicketDeleteTicketOpcode(WorldPacket& recvPacket);
         void HandleGMSurveySubmitOpcode(WorldPacket& recvPacket);
 
         void HandleTogglePvP(WorldPacket& recvPacket);
