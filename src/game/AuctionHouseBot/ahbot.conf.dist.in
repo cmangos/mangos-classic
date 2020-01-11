@@ -40,16 +40,16 @@ AuctionHouseBot.Chance.Buy  =  20
 #   Another random number between 5 and 15 for each game object is chosen to determine how many times the game
 #   object should be simulated looted.
 ###################################################################################################################
-AuctionHouseBot.Loot.Creature.Normal    =  -30, 10, 20, 50
+AuctionHouseBot.Loot.Creature.Normal    =  -30,  5, 20, 50
 AuctionHouseBot.Loot.Creature.Rare      =  -10,  3,  1,  1
-AuctionHouseBot.Loot.Creature.Elite     =  -10, 20,  1,  1
-AuctionHouseBot.Loot.Creature.RareElite =  -50,  5,  1,  1
-AuctionHouseBot.Loot.Creature.WorldBoss = -100,  3,  1,  1
+AuctionHouseBot.Loot.Creature.Elite     =  -10,  5,  5, 10
+AuctionHouseBot.Loot.Creature.RareElite =  -50,  4,  1,  1
+AuctionHouseBot.Loot.Creature.WorldBoss = -100,  2,  1,  1
 
-AuctionHouseBot.Loot.Disenchant =  -70,  2,  2,  3
-AuctionHouseBot.Loot.Fishing    =  -70,  5,  5, 10
-AuctionHouseBot.Loot.Gameobject =   -5, 10,  5, 15
-AuctionHouseBot.Loot.Skinning   =  -70,  3,  5, 10
+AuctionHouseBot.Loot.Disenchant =  -70,  1,  2,  3
+AuctionHouseBot.Loot.Fishing    =  -70,  4,  5, 10
+AuctionHouseBot.Loot.Gameobject =   -5,  5,  5, 15
+AuctionHouseBot.Loot.Skinning   =  -70,  2,  5, 10
 
 ###################################################################################################################
 # Item buyout price (0 = no sell/buy, otherwise percentage of item cost when bought from vendor)

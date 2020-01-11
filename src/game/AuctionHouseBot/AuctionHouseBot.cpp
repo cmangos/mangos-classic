@@ -241,7 +241,7 @@ void AuctionHouseBot::Rebuild(bool all) {
         }
     }
     // refill auction house with items, simulating typical max amount of items available after some time
-    uint32 updateCounter = ((m_auctionTimeMax - m_auctionTimeMin) / 4 + m_auctionTimeMin) * 90;
+    uint32 updateCounter = ((m_auctionTimeMax - m_auctionTimeMin) / 2 + m_auctionTimeMin) * 90;
     for (uint32 i = 0; i < updateCounter; ++i) {
         if (m_houseAction >= MAX_AUCTION_HOUSE_TYPE - 1)
             m_houseAction = -1; // this prevents AHBot from buying items when refilling
