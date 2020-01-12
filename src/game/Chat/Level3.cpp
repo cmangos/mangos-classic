@@ -6484,7 +6484,7 @@ enum ModSpells
     SPELL_MOD_STAMINA      = 13370,
     SPELL_MOD_INTELLECT    = 13366,
     SPELL_MOD_SPIRIT       = 13368,
-    SPELL_MOD_SPELL_POWER  = 18058,
+    SPELL_MOD_SPELL_POWER  = 22747,
 
     // custom spells
     SPELL_MOD_ARMOR        = 15170,
