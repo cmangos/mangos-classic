@@ -382,6 +382,7 @@ class ChatHandler
         bool HandleModifyBlockCommand(char* args);
         bool HandleModifyDodgeCommand(char* args);
         bool HandleModifyParryCommand(char* args);
+        bool ModifyStatCommandHelper(char* args, char const* statName, uint32 spellId);
 
         //-----------------------Npc Commands-----------------------
         bool HandleNpcAddCommand(char* args);

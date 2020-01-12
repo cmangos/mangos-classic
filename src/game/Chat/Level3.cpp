@@ -6546,11 +6546,11 @@ bool ChatHandler::HandleResetModsCommand(char *args)
     return true;
 }
 
-bool ChatHandler::HandleModifyStrengthCommand(char *args)
+bool ChatHandler::ModifyStatCommandHelper(char* args, char const* statName, uint32 spellId)
 {
     if (!*args)
         return false;
-
+    
     Unit* target = getSelectedUnit();
 
     if (!target)
@@ -6566,720 +6566,135 @@ bool ChatHandler::HandleModifyStrengthCommand(char *args)
 
     if (!amount)
     {
-        target->RemoveAurasDueToSpell(SPELL_MOD_STRENGTH);
+        target->RemoveAurasDueToSpell(spellId);
         return true;
     }
 
-    target->RemoveAurasDueToSpell(SPELL_MOD_STRENGTH);
-    target->CastCustomSpell(target, SPELL_MOD_STRENGTH, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
+    target->RemoveAurasDueToSpell(spellId);
+    target->CastCustomSpell(target, spellId, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
 
-    PSendSysMessage("You changed Strength of %s to %i.", target->GetName(), amount);
+    if (spellId == SPELL_MOD_STAMINA)
+        target->SetHealthPercent(100);
+    else if (spellId = SPELL_MOD_INTELLECT)
+        target->SetPower(POWER_MANA, target->GetMaxPower(POWER_MANA));
+
+    PSendSysMessage("You changed %s of %s to %i.", statName, target->GetName(), amount);
 
     return true;
+}
+
+bool ChatHandler::HandleModifyStrengthCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Strength", SPELL_MOD_STRENGTH);
 }
 
 bool ChatHandler::HandleModifyAgilityCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_AGILITY);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_AGILITY);
-    target->CastCustomSpell(target, SPELL_MOD_AGILITY, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Agility of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Agility", SPELL_MOD_AGILITY);
 }
 
 bool ChatHandler::HandleModifyStaminaCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_STAMINA);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_STAMINA);
-    target->CastCustomSpell(target, SPELL_MOD_STAMINA, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-    target->SetHealthPercent(100);
-
-    PSendSysMessage("You changed Stamina of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Stamina", SPELL_MOD_STAMINA);
 }
 
 bool ChatHandler::HandleModifyIntellectCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_INTELLECT);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_INTELLECT);
-    target->CastCustomSpell(target, SPELL_MOD_INTELLECT, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-    target->SetPower(POWER_MANA, target->GetMaxPower(POWER_MANA));
-
-    PSendSysMessage("You changed Intellect of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Intellect", SPELL_MOD_INTELLECT);
 }
 
 bool ChatHandler::HandleModifySpiritCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_SPIRIT);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_SPIRIT);
-    target->CastCustomSpell(target, SPELL_MOD_SPIRIT, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Spirit of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Spirit", SPELL_MOD_SPIRIT);
 }
 
 bool ChatHandler::HandleModifyArmorCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_ARMOR);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_ARMOR);
-    target->CastCustomSpell(target, SPELL_MOD_ARMOR, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Armor of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Armor", SPELL_MOD_ARMOR);
 }
 
 bool ChatHandler::HandleModifyHolyCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_RES_HOLY);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_RES_HOLY);
-    target->CastCustomSpell(target, SPELL_MOD_RES_HOLY, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Holy Resistance of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Holy Resistance", SPELL_MOD_RES_HOLY);
 }
 
 bool ChatHandler::HandleModifyFireCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_RES_FIRE);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_RES_FIRE);
-    target->CastCustomSpell(target, SPELL_MOD_RES_FIRE, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Fire Resistance of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Fire Resistance", SPELL_MOD_RES_FIRE);
 }
 
 bool ChatHandler::HandleModifyNatureCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_RES_NATURE);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_RES_NATURE);
-    target->CastCustomSpell(target, SPELL_MOD_RES_NATURE, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Nature Resistance of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Nature Resistance", SPELL_MOD_RES_NATURE);
 }
 
 bool ChatHandler::HandleModifyFrostCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_RES_FROST);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_RES_FROST);
-    target->CastCustomSpell(target, SPELL_MOD_RES_FROST, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Frost Resistance of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Frost Resistance", SPELL_MOD_RES_FROST);
 }
 
 bool ChatHandler::HandleModifyShadowCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_RES_SHADOW);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_RES_SHADOW);
-    target->CastCustomSpell(target, SPELL_MOD_RES_SHADOW, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Frost Resistance of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Shadow Resistance", SPELL_MOD_RES_SHADOW);
 }
 
 bool ChatHandler::HandleModifyArcaneCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_RES_ARCANE);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_RES_ARCANE);
-    target->CastCustomSpell(target, SPELL_MOD_RES_ARCANE, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Arcane Resistance of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Arcane Resistance", SPELL_MOD_RES_ARCANE);
 }
 
 bool ChatHandler::HandleModifyMeleeApCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_MELEE_AP);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_MELEE_AP);
-    target->CastCustomSpell(target, SPELL_MOD_MELEE_AP, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Melee Attack Power of %s to %i.", target->GetName(), amount);
-
-    return true;
+   
+    return ModifyStatCommandHelper(args, "Melee Attack Power", SPELL_MOD_MELEE_AP);
 }
 
 bool ChatHandler::HandleModifyRangedApCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_RANGE_AP);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_RANGE_AP);
-    target->CastCustomSpell(target, SPELL_MOD_RANGE_AP, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Ranged Attack Power of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Ranged Attack Power", SPELL_MOD_RANGE_AP);
 }
 
 bool ChatHandler::HandleModifySpellPowerCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_SPELL_POWER);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_SPELL_POWER);
-    target->CastCustomSpell(target, SPELL_MOD_SPELL_POWER, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Spell Power of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Spell Power", SPELL_MOD_SPELL_POWER);
 }
 
 bool ChatHandler::HandleModifyMeleeCritCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_MELEE_CRIT);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_MELEE_CRIT);
-    target->CastCustomSpell(target, SPELL_MOD_MELEE_CRIT, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Melee Crit of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Melee Crit", SPELL_MOD_MELEE_CRIT);
 }
 
 bool ChatHandler::HandleModifySpellCritCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_SPELL_CRIT);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_SPELL_CRIT);
-    target->CastCustomSpell(target, SPELL_MOD_SPELL_CRIT, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Spell Crit of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Spell Crit", SPELL_MOD_SPELL_CRIT);
 }
 
 bool ChatHandler::HandleModifyMeleeHasteCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_MELEE_HASTE);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_MELEE_HASTE);
-    target->CastCustomSpell(target, SPELL_MOD_MELEE_HASTE, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Melee Haste of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Melee Haste", SPELL_MOD_MELEE_HASTE);
 }
 
 bool ChatHandler::HandleModifyRangedHasteCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_RANGE_HASTE);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_RANGE_HASTE);
-    target->CastCustomSpell(target, SPELL_MOD_RANGE_HASTE, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Ranged Haste of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Ranged Haste", SPELL_MOD_RANGE_HASTE);
 }
 
 bool ChatHandler::HandleModifySpellHasteCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_SPELL_HASTE);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_SPELL_HASTE);
-    target->CastCustomSpell(target, SPELL_MOD_SPELL_HASTE, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Spell Haste of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Spell Haste", SPELL_MOD_SPELL_HASTE);
 }
 
 bool ChatHandler::HandleModifyBlockCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_BLOCK_CHANCE);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_BLOCK_CHANCE);
-    target->CastCustomSpell(target, SPELL_MOD_BLOCK_CHANCE, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Block Chance of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Block Chance", SPELL_MOD_BLOCK_CHANCE);
 }
 
 bool ChatHandler::HandleModifyDodgeCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_DODGE_CHANCE);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_DODGE_CHANCE);
-    target->CastCustomSpell(target, SPELL_MOD_DODGE_CHANCE, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Dodge Chance of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Dodge Chance", SPELL_MOD_DODGE_CHANCE);
 }
 
 bool ChatHandler::HandleModifyParryCommand(char *args)
 {
-    if (!*args)
-        return false;
-
-    Unit* target = getSelectedUnit();
-
-    if (!target)
-    {
-        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount;
-    if (!ExtractInt32(&args, amount))
-        return false;
-
-    if (!amount)
-    {
-        target->RemoveAurasDueToSpell(SPELL_MOD_PARRY_CHANCE);
-        return true;
-    }
-
-    target->RemoveAurasDueToSpell(SPELL_MOD_PARRY_CHANCE);
-    target->CastCustomSpell(target, SPELL_MOD_PARRY_CHANCE, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
-
-    PSendSysMessage("You changed Parry Chance of %s to %i.", target->GetName(), amount);
-
-    return true;
+    return ModifyStatCommandHelper(args, "Parry Chance", SPELL_MOD_PARRY_CHANCE);
 }
