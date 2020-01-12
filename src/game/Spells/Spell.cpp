@@ -821,8 +821,16 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
         }
         else
         {
+            // need to recheck reflect immuned effects
+            notImmunedMask = 0;
+            for (uint8 effIndex = 0; effIndex < MAX_EFFECT_INDEX; ++effIndex)
+                if ((effectMask & (1 << effIndex)) != 0)
+                    if (!target->IsImmuneToSpellEffect(m_spellInfo, SpellEffectIndex(effIndex), target == m_caster))
+                        notImmunedMask |= (1 << effIndex);
+
+            targetInfo.effectHitMask = notImmunedMask;
             // Calculate reflected spell result on caster
-            targetInfo.reflectResult = m_caster->SpellHitResult(m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable, &targetInfo.heartbeatResistChance);
+            targetInfo.reflectResult = m_caster->SpellHitResult(m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable, true, &targetInfo.heartbeatResistChance);
             // Caster reflects back spell which was already reflected by victim
             if (targetInfo.reflectResult == SPELL_MISS_REFLECT)
                 // Full circle: it's impossible to reflect further, "Immune" shows up
