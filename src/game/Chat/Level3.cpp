@@ -1408,7 +1408,7 @@ bool ChatHandler::HandleLearnAllCommand(char* /*args*/)
         if (!spellInfo)
             continue;
 
-        for (uint32 j = 0; j < MAX_SPELL_EFFECTS; j++)
+        for (uint32 j = 0; j < MAX_EFFECT_INDEX; j++)
         {
             if ((spellInfo->Effect[j] == SPELL_EFFECT_LEARN_SPELL) &&
                 (spellInfo->EffectImplicitTargetA[j] == TARGET_NONE))
