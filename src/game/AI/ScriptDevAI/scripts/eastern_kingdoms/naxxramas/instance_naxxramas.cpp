@@ -46,7 +46,7 @@ static const DialogueEntry aNaxxDialogue[] =
     {SAY_FAERLINA_INTRO,    NPC_FAERLINA,       10000},
     {FOLLOWERS_STAND,       0,                  3000},
     {FOLLOWERS_AURA,        0,                  30000},
-    {FOLLOWERS_KNEEL,       0,                  0}, 
+    {FOLLOWERS_KNEEL,       0,                  0},
     {0, 0, 0}
 };
 
@@ -57,7 +57,7 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_uiSapphSpawnTimer(0),
     m_uiTauntTimer(0),
     m_uiHorseMenKilled(0),
-    m_uiLivingPoisonTimer(5000),
+    m_uiLivingPoisonTimer(0),
     m_uiScreamsTimer(2 * MINUTE * IN_MILLISECONDS),
     isFaerlinaIntroDone(false),
     DialogueHelper(aNaxxDialogue)
@@ -156,9 +156,14 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_SAPPHIRON:
         case NPC_KELTHUZAD:
         case NPC_THE_LICHKING:
-        case NPC_NAXXRAMAS_TRIGGER:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
+        case NPC_NAXXRAMAS_TRIGGER:
+        {
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_uiLivingPoisonTimer = 5 * IN_MILLISECONDS;
+            break;
+        }
         case NPC_ZOMBIE_CHOW:
         {
             m_lZombieChowList.push_back(pCreature->GetObjectGuid());
@@ -519,9 +524,9 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                     }
                 }
                 if (GameObject* stalaggTesla = GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG))
-                	stalaggTesla->SetGoState(GO_STATE_ACTIVE);
+                    stalaggTesla->SetGoState(GO_STATE_ACTIVE);
                 if (GameObject* feugenTesla = GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN))
-                	feugenTesla->SetGoState(GO_STATE_ACTIVE);
+                    feugenTesla->SetGoState(GO_STATE_ACTIVE);
             }
             if (uiData != SPECIAL)
                 DoUseDoorOrButton(GO_CONS_THAD_DOOR, uiData);
