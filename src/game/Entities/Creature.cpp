@@ -2137,6 +2137,9 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
 
         if ((selectFlags & SELECT_FLAG_SKIP_TANK) && pTarget == getVictim())
             return false;
+
+        if ((selectFlags & SELECT_FLAG_SKIP_CUSTOM) && pTarget->GetObjectGuid() == params.skip.guid)
+            return false;
     }
 
     if (pSpellInfo)
