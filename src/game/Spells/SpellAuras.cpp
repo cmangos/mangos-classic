@@ -284,7 +284,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* curr
                     holder = target->GetSpellAuraHolder(28332);
                 if (holder)
                 {
-                    damage += target->CalculateSpellDamage(target, holder->GetSpellProto(), EFFECT_INDEX_1);
+                    damage += target->CalculateSpellEffectValue(target, holder->GetSpellProto(), EFFECT_INDEX_1);
                 }
                 break;
             }
@@ -5043,7 +5043,7 @@ void Aura::PeriodicDummyTick()
                 {
                     if (roll_chance_i(5))
                     {
-                        int32 damageValue = target->CalculateSpellDamage(target, spell, EFFECT_INDEX_1);
+                        int32 damageValue = target->CalculateSpellEffectValue(target, spell, EFFECT_INDEX_1);
                         target->CastCustomSpell(nullptr, spell->Id == 6946 ? 6945 : 41356, nullptr, &damageValue, nullptr, TRIGGERED_OLD_TRIGGERED);
                     }
                     return;
