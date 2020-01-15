@@ -322,9 +322,9 @@ CREATE TABLE `battleground_template` (
 LOCK TABLES `battleground_template` WRITE;
 /*!40000 ALTER TABLE `battleground_template` DISABLE KEYS */;
 INSERT INTO `battleground_template` VALUES
-(1,20,40,51,60,611,2.72532,610,2.27452,100),
-(2,5,10,10,60,769,3.14159,770,3.14159,75),
-(3,8,15,20,60,890,3.40156,889,0.263892,75);
+(1,20,40,51,60,611,610,100),
+(2,5,10,10,60,769,770,75),
+(3,8,15,20,60,890,889,75);
 /*!40000 ALTER TABLE `battleground_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
