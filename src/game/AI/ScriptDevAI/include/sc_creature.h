@@ -59,7 +59,7 @@ struct ScriptedAI : public CreatureAI
         // == Reactions At =================================
 
         // Called if IsVisible(Unit* pWho) is true at each relative pWho move
-        // void MoveInLineOfSight(Unit* pWho) override;
+        // void MoveInLineOfSight(Unit* who) override;
 
         // Called for reaction at enter to combat if not in combat yet (enemy can be nullptr)
         void EnterCombat(Unit* enemy) override;
