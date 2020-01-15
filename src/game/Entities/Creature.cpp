@@ -1230,12 +1230,16 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
         // Use Creature Stats to calculate stat values
 
         // health
+        if (cinfo->HealthMultiplier >= 0)
+            health = std::round(cCLS->BaseHealth * cinfo->HealthMultiplier);
+
+        // mana
+        if (cinfo->PowerMultiplier >= 0)
+            mana = std::round(cCLS->BaseMana * cinfo->PowerMultiplier);
+
+        // armor
         if (cinfo->ArmorMultiplier >= 0)
-        {
-            health = cCLS->BaseHealth * cinfo->HealthMultiplier;
-            mana = cCLS->BaseMana * cinfo->PowerMultiplier;
-            armor = cCLS->BaseArmor * cinfo->ArmorMultiplier;
-        }
+            armor = std::round(cCLS->BaseArmor * cinfo->ArmorMultiplier);
 
         // damage
         if (cinfo->DamageMultiplier >= 0 && cinfo->ArmorMultiplier >= 0)
