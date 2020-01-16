@@ -220,6 +220,13 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
+    static ChatCommand debugScriptCommandTable[] =
+    {
+        { "help",           SEC_GAMEMASTER,     false, &ChatHandler::HandleSD2HelpCommand,                  "", nullptr },
+        { "command",        SEC_GAMEMASTER,     false, &ChatHandler::HandleSD2ScriptCommand,                "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                             "", nullptr }
+    };
+
     static ChatCommand debugVisibilityCommandTable[] =
     {
         { "atclient",       SEC_MODERATOR,      false, &ChatHandler::HandleDebugHaveAtClientCommand,        "", nullptr },
@@ -256,6 +263,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "send",           SEC_ADMINISTRATOR,  false, nullptr,                                             "", debugSendCommandTable },
         { "setaurastate",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetAuraStateCommand,        "", nullptr },
         { "setitemvalue",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetItemValueCommand,        "", nullptr },
+        { "script",         SEC_GAMEMASTER,     false, nullptr,                                             "", debugScriptCommandTable },
         { "setvalue",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetValueCommand,            "", nullptr },
         { "spellcheck",     SEC_CONSOLE,        true,  &ChatHandler::HandleDebugSpellCheckCommand,          "", nullptr },
         { "spellcoefs",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugSpellCoefsCommand,          "", nullptr },
@@ -3206,6 +3214,11 @@ uint32 ChatHandler::ExtractAccountId(char** args, std::string* accountName /*= n
         *targetIfNullArg = nullptr;
 
     return account_id;
+}
+
+Player* ChatHandler::GetPlayer()
+{
+    return m_session->GetPlayer();
 }
 
 struct RaceMaskName

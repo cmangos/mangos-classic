@@ -33,6 +33,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Spells/SpellMgr.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
+#include "Maps/InstanceData.h"
 #include "Cinematics/M2Stores.h"
 
 bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
@@ -1335,6 +1336,26 @@ bool ChatHandler::HandleDebugMoveflags(char* /*args*/)
         return false;
 
     PSendSysMessage("Moveflags on target %u", target->m_movementInfo.GetMovementFlags());
+    return true;
+}
+
+bool ChatHandler::HandleSD2HelpCommand(char* /*args*/)
+{
+    Player* player = m_session->GetPlayer();
+    if (InstanceData* data = player->GetMap()->GetInstanceData())
+        data->ShowChatCommands(this);
+    else
+        PSendSysMessage("Map script does not support chat commands.");
+    return true;
+}
+
+bool ChatHandler::HandleSD2ScriptCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+    if (InstanceData* data = player->GetMap()->GetInstanceData())
+        data->ExecuteChatCommand(this, args);
+    else
+        PSendSysMessage("Map script does not support chat commands.");
     return true;
 }
 

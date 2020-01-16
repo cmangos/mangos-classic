@@ -123,6 +123,41 @@ class ChatHandler
             ObjectGuid const& senderGuid = ObjectGuid(), char const* senderName = nullptr,
             ObjectGuid const& targetGuid = ObjectGuid(), char const* targetName = nullptr,
             char const* channelName = nullptr, uint8 playerRank = 0);
+
+        // extraction different type params from args string, all functions update (char** args) to first unparsed tail symbol at return
+        static void  SkipWhiteSpaces(char** args);
+        bool  ExtractInt32(char** args, int32& val) const;
+        bool  ExtractOptInt32(char** args, int32& val, int32 defVal) const;
+        bool  ExtractUInt32Base(char** args, uint32& val, uint32 base) const;
+        bool  ExtractUInt32(char** args, uint32& val) const { return ExtractUInt32Base(args, val, 10); }
+        bool  ExtractOptUInt32(char** args, uint32& val, uint32 defVal) const;
+        static bool  ExtractFloat(char** args, float& val);
+        static bool  ExtractOptFloat(char** args, float& val, float defVal);
+        static char* ExtractQuotedArg(char** args, bool asis = false);
+        // string with " or [] or ' around
+        static char* ExtractLiteralArg(char** args, char const* lit = nullptr);
+        // literal string (until whitespace and not started from "['|), any or 'lit' if provided
+        static char* ExtractQuotedOrLiteralArg(char** args, bool asis = false);
+        static bool  ExtractOnOff(char** args, bool& value);
+        static char* ExtractLinkArg(char** args, char const* const* linkTypes = nullptr, int* foundIdx = nullptr, char** keyPair = nullptr, char** somethingPair = nullptr);
+        // shift-link like arg (with aditional info if need)
+        static char* ExtractArg(char** args, bool asis = false);   // any name/number/quote/shift-link strings
+        static char* ExtractOptNotLastArg(char** args);            // extract name/number/quote/shift-link arg only if more data in args for parse
+
+        char* ExtractKeyFromLink(char** text, char const* linkType, char** something1 = nullptr);
+        static char* ExtractKeyFromLink(char** text, char const* const* linkTypes, int* found_idx = nullptr, char** something1 = nullptr);
+        bool  ExtractUint32KeyFromLink(char** text, char const* linkType, uint32& value);
+
+        uint32 ExtractAccountId(char** args, std::string* accountName = nullptr, Player** targetIfNullArg = nullptr);
+        uint32 ExtractSpellIdFromLink(char** text);
+        ObjectGuid ExtractGuidFromLink(char** text);
+        GameTele const* ExtractGameTeleFromLink(char** text);
+        bool   ExtractLocationFromLink(char** text, uint32& mapid, float& x, float& y, float& z);
+        bool   ExtractRaceMask(char** text, uint32& raceMask, char const** maskName = nullptr);
+        std::string ExtractPlayerNameFromLink(char** text);
+        bool ExtractPlayerTarget(char** args, Player** player, ObjectGuid* player_guid = nullptr, std::string* player_name = nullptr);
+
+        Player* GetPlayer();
     protected:
         explicit ChatHandler() : m_session(nullptr), sentErrorMessage(false)
         {}      // for CLI subclass
@@ -256,6 +291,9 @@ class ChatHandler
         bool HandleDebugSendSellErrorCommand(char* args);
         bool HandleDebugSendSpellFailCommand(char* args);
         bool HandleDebugSendWorldState(char* args);
+
+        bool HandleSD2HelpCommand(char* args);
+        bool HandleSD2ScriptCommand(char* args);
 
         bool HandleEventListCommand(char* args);
         bool HandleEventStartCommand(char* args);
@@ -669,40 +707,6 @@ class ChatHandler
         Unit*     getSelectedUnit(bool self = true) const;
         Creature* getSelectedCreature() const;
         Pet*      getSelectedPet() const;
-
-        // extraction different type params from args string, all functions update (char** args) to first unparsed tail symbol at return
-        static void  SkipWhiteSpaces(char** args);
-        bool  ExtractInt32(char** args, int32& val) const;
-        bool  ExtractOptInt32(char** args, int32& val, int32 defVal) const;
-        bool  ExtractUInt32Base(char** args, uint32& val, uint32 base) const;
-        bool  ExtractUInt32(char** args, uint32& val) const { return ExtractUInt32Base(args, val, 10); }
-        bool  ExtractOptUInt32(char** args, uint32& val, uint32 defVal) const;
-        static bool  ExtractFloat(char** args, float& val);
-        static bool  ExtractOptFloat(char** args, float& val, float defVal);
-        static char* ExtractQuotedArg(char** args, bool asis = false);
-        // string with " or [] or ' around
-        static char* ExtractLiteralArg(char** args, char const* lit = nullptr);
-        // literal string (until whitespace and not started from "['|), any or 'lit' if provided
-        static char* ExtractQuotedOrLiteralArg(char** args, bool asis = false);
-        static bool  ExtractOnOff(char** args, bool& value);
-        static char* ExtractLinkArg(char** args, char const* const* linkTypes = nullptr, int* foundIdx = nullptr, char** keyPair = nullptr, char** somethingPair = nullptr);
-        // shift-link like arg (with aditional info if need)
-        static char* ExtractArg(char** args, bool asis = false);   // any name/number/quote/shift-link strings
-        static char* ExtractOptNotLastArg(char** args);            // extract name/number/quote/shift-link arg only if more data in args for parse
-
-        char* ExtractKeyFromLink(char** text, char const* linkType, char** something1 = nullptr);
-        static char* ExtractKeyFromLink(char** text, char const* const* linkTypes, int* found_idx = nullptr, char** something1 = nullptr);
-        bool  ExtractUint32KeyFromLink(char** text, char const* linkType, uint32& value);
-
-        uint32 ExtractAccountId(char** args, std::string* accountName = nullptr, Player** targetIfNullArg = nullptr);
-        uint32 ExtractSpellIdFromLink(char** text);
-        ObjectGuid ExtractGuidFromLink(char** text);
-        GameTele const* ExtractGameTeleFromLink(char** text);
-        bool   ExtractLocationFromLink(char** text, uint32& mapid, float& x, float& y, float& z);
-        bool   ExtractRaceMask(char** text, uint32& raceMask, char const** maskName = nullptr);
-        std::string ExtractPlayerNameFromLink(char** text);
-        bool ExtractPlayerTarget(char** args, Player** player, ObjectGuid* player_guid = nullptr, std::string* player_name = nullptr);
-        // select by arg (name/link) or in-game selection online/offline player
 
         std::string petLink(std::string const& name) const { return m_session ? "|cffffffff|Hpet:" + name + "|h[" + name + "]|h|r" : name; }
         std::string playerLink(std::string const& name) const { return m_session ? "|cffffffff|Hplayer:" + name + "|h[" + name + "]|h|r" : name; }
