@@ -434,10 +434,15 @@ void SpellTargetMgr::Initialize()
                     SpellTargetFilterScheme scheme = SCHEME_RANDOM;
                     if (SpellTargetInfoTable[target].enumerator == TARGET_ENUMERATOR_CHAIN)
                     {
-                        if (target == TARGET_UNIT_FRIEND_CHAIN_HEAL)
-                            scheme = SCHEME_LOWEST_HP_CHAIN;
-                        else
-                            scheme = SCHEME_CLOSEST_CHAIN;
+                        switch (target)
+                        {
+                            case TARGET_UNIT_FRIEND_CHAIN_HEAL: scheme = SCHEME_LOWEST_HP_CHAIN; break;
+                            case TARGET_UNIT_ENEMY_NEAR_CASTER:
+                            case TARGET_UNIT_FRIEND_NEAR_CASTER:
+                            case TARGET_UNIT_NEAR_CASTER:
+                            case TARGET_UNIT_ENEMY: scheme = SCHEME_CLOSEST_CHAIN; break;
+                            default: break;
+                        }
                     }
                     scheme = GetSpellTargetingFilterScheme(scheme, spellInfo->Id);
 
