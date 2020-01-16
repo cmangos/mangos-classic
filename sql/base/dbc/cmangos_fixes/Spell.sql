@@ -103,3 +103,6 @@ INSERT INTO `spell_template` (`Id`, `Attributes`, `CastingTimeIndex`, `ProcChanc
 (15185, 64, 1, 101, 1, 21, -1, 6, 49, 0, 'Custom QA Mod Dodge Chance'),
 (15186, 64, 1, 101, 1, 21, -1, 6, 51, 0, 'Custom QA Mod Block Chance');
 
+-- Razorgore - Destroy Egg - should not be affected by pushback and interrupt on damage
+UPDATE spell_template SET InterruptFlags=InterruptFlags&~0x12 WHERE Id IN(19873);
+
