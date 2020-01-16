@@ -22,6 +22,9 @@ enum
     GO_ROCKET_CLUSTER           = 180875,
     SPELL_OMEN_MOONLIGHT        = 26392,
     MAX_ROCKETS                 = 30,
+
+    // Quest 1126
+    NPC_HIVE_ASHI_DRONES        = 13136,
 };
 
 enum Encounters

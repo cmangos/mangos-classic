@@ -17,11 +17,6 @@ enum
     GO_WATER_RIFT               = 179665,
     GO_FIRE_RIFT                = 179666,
     GO_AIR_RIFT                 = 179667,
-
-    // Quest 1126
-    TYPE_HIVE                   = 1,
-    MAX_ENCOUNTER               = 2,
-    NPC_HIVE_ASHI_DRONES        = 13136,
 };
 
 enum ElementalInvasionIndexes

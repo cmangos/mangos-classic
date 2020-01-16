@@ -29,10 +29,6 @@ struct world_map_eastern_kingdoms : public ScriptedMap
     {
         switch (pCreature->GetEntry())
         {
-            case NPC_NEZRAZ:
-            case NPC_HINDENBURG:
-            case NPC_ZAPETTA:
-            case NPC_SQUIBBY_OVERSPECK:
             case NPC_JONATHAN:
             case NPC_WRYNN:
             case NPC_BOLVAR:
