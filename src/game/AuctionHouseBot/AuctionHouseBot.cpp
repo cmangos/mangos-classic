@@ -293,6 +293,7 @@ void AuctionHouseBot::Update() {
     } else if (m_houseAction >= MAX_AUCTION_HOUSE_TYPE && urand(0, 100) < m_chanceBuy) {
         // Buy items
         AuctionHouseObject::AuctionEntryMapBounds bounds = auctionHouse->GetAuctionsBounds();
+        std::vector<AuctionEntry*> buyoutAuctions;
         for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr) {
             AuctionEntry* auction = itr->second;
             if (auction->owner == 0 && auction->bid == 0)
@@ -303,10 +304,12 @@ void AuctionHouseBot::Update() {
             if (auction->startbid > bidPrice)
                 bidPrice = auction->startbid;
             if (buyItemCheck > auction->buyout)
-                auction->UpdateBid(auction->buyout);
+                buyoutAuctions.push_back(auction); // can't buyout item here as that modifies the AuctionEntryMap, invalidating the iterator
             else if (buyItemCheck > bidPrice)
                 auction->UpdateBid(bidPrice);
         }
+        for (auto auction : buyoutAuctions)
+            auction->UpdateBid(auction->buyout);
     }
 }
 
