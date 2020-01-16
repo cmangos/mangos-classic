@@ -692,9 +692,9 @@ enum
 {
     QUEST_COUNTERATTACK        = 4021,
 
-    SAY_START_REGTHAR          = -1000892,
-    SAY_DEFENDER               = -1000893,
-    YELL_RETREAT               = -1000894,
+    SAY_START_REGTHAR          = -1010001,
+    SAY_DEFENDER               = -1010002,
+    YELL_RETREAT               = -1010003,
 
     NPC_REGTHAR_DEATHGATE      = 3389,
     NPC_WARLORD_KROMZAR        = 9456,

@@ -465,7 +465,7 @@ enum
     SPELL_RAMPAGE               = 25744,
 
     EMOTE_GENERIC_FRENZY_KILL   = -1000001,
-    EMOTE_MAWS_KILL             = -1000891      // World emote that was removed in WotLK patch 3.2
+    EMOTE_MAWS_KILL             = -1010000      // World emote that was removed in WotLK patch 3.2
 };
 
 struct boss_mawsAI : public ScriptedAI
