@@ -51,7 +51,7 @@ Object::Object(): m_updateFlag(0), m_itsNewObject(false)
 
     m_inWorld           = false;
     m_objectUpdated     = false;
-    loot              = nullptr;
+    m_loot              = nullptr;
 }
 
 Object::~Object()
@@ -71,7 +71,7 @@ Object::~Object()
 
     delete[] m_uint32Values;
 
-    delete loot;
+    delete m_loot;
 }
 
 void Object::_InitValues()
@@ -485,7 +485,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     else
                     {
                         // check loot flag
-                        if (creature->loot && creature->loot->CanLoot(target))
+                        if (creature->m_loot && creature->m_loot->CanLoot(target))
                         {
                             // creature is dead and this player can loot it
                             dynflagsValue = dynflagsValue | UNIT_DYNFLAG_LOOTABLE;

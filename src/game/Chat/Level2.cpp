@@ -2159,13 +2159,13 @@ bool ChatHandler::HandleNpcShowLootCommand(char* /*args*/)
         return false;
     }
 
-    if (!creature->loot)
+    if (!creature->m_loot)
     {
         PSendSysMessage("Creature does not have any loot.");
         return true;
     }
 
-    creature->loot->PrintLootList(*this, m_session);
+    creature->m_loot->PrintLootList(*this, m_session);
     return true;
 }
 

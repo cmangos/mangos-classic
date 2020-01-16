@@ -7506,7 +7506,7 @@ void Player::RemovedInsignia(Player* looterPlr)
     // We retrieve this information at Player::SendLoot()
     bones->lootRecipient = looterPlr;
 
-    Loot*& bonesLoot = bones->loot;
+    Loot*& bonesLoot = bones->m_loot;
     if (!bonesLoot)
         bonesLoot = new Loot(looterPlr, bones, LOOT_INSIGNIA);
     else
@@ -14640,8 +14640,8 @@ void Player::_LoadItemLoot(QueryResult* result)
                 continue;
             }
 
-            if (!item->loot)
-                item->loot = new Loot(this, item);
+            if (!item->m_loot)
+                item->m_loot = new Loot(this, item);
 
             item->LoadLootFromDB(fields);
         }

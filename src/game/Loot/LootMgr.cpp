@@ -2887,7 +2887,7 @@ Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid) const
 
             // not check distance for GO in case owned GO (fishing bobber case, for example)
             if (gob)
-                loot = gob->loot;
+                loot = gob->m_loot;
 
             break;
         }
@@ -2896,7 +2896,7 @@ Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid) const
             Corpse* bones = player->GetMap()->GetCorpse(lguid);
 
             if (bones)
-                loot = bones->loot;
+                loot = bones->m_loot;
 
             break;
         }
@@ -2904,7 +2904,7 @@ Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid) const
         {
             Item* item = player->GetItemByGuid(lguid);
             if (item && item->HasGeneratedLoot())
-                loot = item->loot;
+                loot = item->m_loot;
             break;
         }
         case HIGHGUID_UNIT:
@@ -2912,7 +2912,7 @@ Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid) const
             Creature* creature = player->GetMap()->GetCreature(lguid);
 
             if (creature)
-                loot = creature->loot;
+                loot = creature->m_loot;
 
             break;
         }

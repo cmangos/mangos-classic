@@ -362,7 +362,7 @@ void Item::SaveToDB()
         stmt.PExecute(GetGUIDLow());
     }
 
-    if (loot && (m_lootState == ITEM_LOOT_NEW || m_lootState == ITEM_LOOT_CHANGED))
+    if (m_loot && (m_lootState == ITEM_LOOT_NEW || m_lootState == ITEM_LOOT_CHANGED))
     {
         if (Player* owner = GetOwner())
         {
@@ -370,17 +370,17 @@ void Item::SaveToDB()
             static SqlStatementID saveLoot ;
 
             // save money as 0 itemid data
-            if (loot->GetGoldAmount())
+            if (m_loot->GetGoldAmount())
             {
                 SqlStatement stmt = CharacterDatabase.CreateStatement(saveGold, "INSERT INTO item_loot (guid,owner_guid,itemid,amount,property) VALUES (?, ?, 0, ?, 0)");
-                stmt.PExecute(GetGUIDLow(), owner->GetGUIDLow(), loot->GetGoldAmount());
+                stmt.PExecute(GetGUIDLow(), owner->GetGUIDLow(), m_loot->GetGoldAmount());
             }
 
             SqlStatement stmt = CharacterDatabase.CreateStatement(saveLoot, "INSERT INTO item_loot (guid,owner_guid,itemid,amount,property) VALUES (?, ?, ?, ?, ?)");
 
             // save items and quest items (at load its all will added as normal, but this not important for item loot case)
             LootItemList lootList;
-            loot->GetLootItemsListFor(owner, lootList);
+            m_loot->GetLootItemsListFor(owner, lootList);
             for (LootItemList::const_iterator lootItr = lootList.begin(); lootItr != lootList.end(); ++lootItr)
             {
                 LootItem* lootItem = *lootItr;
@@ -503,7 +503,7 @@ void Item::LoadLootFromDB(Field* fields)
     // money value special case
     if (item_id == 0)
     {
-        loot->SetGoldAmount(item_amount);
+        m_loot->SetGoldAmount(item_amount);
         SetLootState(ITEM_LOOT_UNCHANGED);
         return;
     }
@@ -518,7 +518,7 @@ void Item::LoadLootFromDB(Field* fields)
         return;
     }
 
-    loot->AddItem(item_id, item_amount, 0, item_propid);
+    m_loot->AddItem(item_id, item_amount, 0, item_propid);
 
     SetLootState(ITEM_LOOT_UNCHANGED);
 }
