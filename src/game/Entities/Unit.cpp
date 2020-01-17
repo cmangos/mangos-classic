@@ -7505,8 +7505,12 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         // clear stand state if set in addon - else script has to do it on its own
         CreatureDataAddon const* cainfo = pCreature->GetCreatureAddon();
         if (cainfo)
+        {
             if (getStandState() == cainfo->bytes1)
                 SetStandState(UNIT_STAND_STATE_STAND);
+            if (cainfo->emote && GetUInt32Value(UNIT_NPC_EMOTESTATE) == cainfo->emote)
+                HandleEmoteState(0);
+        }
 
         pCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 
