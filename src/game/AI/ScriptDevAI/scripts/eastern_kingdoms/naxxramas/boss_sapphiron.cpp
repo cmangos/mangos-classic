@@ -62,40 +62,40 @@ enum Phases
 
 struct boss_sapphironAI : public ScriptedAI
 {
-    boss_sapphironAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_sapphironAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
 
-    uint32 m_uiCleaveTimer;
-    uint32 m_uiTailSweepTimer;
-    uint32 m_uiIceboltTimer;
-    uint32 m_uiFrostBreathTimer;
-    uint32 m_uiLifeDrainTimer;
-    uint32 m_uiBlizzardTimer;
-    uint32 m_uiFlyTimer;
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiLandTimer;
+    uint32 m_cleaveTimer;
+    uint32 m_tailSweepTimer;
+    uint32 m_iceboltTimer;
+    uint32 m_frostBreathTimer;
+    uint32 m_lifeDrainTimer;
+    uint32 m_blizzardTimer;
+    uint32 m_flyTimer;
+    uint32 m_berserkTimer;
+    uint32 m_landTimer;
 
-    uint32 m_uiIceboltCount;
-    Phases m_Phase;
+    uint32 m_iceboltCount;
+    Phases m_phase;
 
     void Reset() override
     {
-        m_uiCleaveTimer         = 5 * IN_MILLISECONDS;
-        m_uiTailSweepTimer      = 12 * IN_MILLISECONDS;
-        m_uiFrostBreathTimer    = 7 * IN_MILLISECONDS;
-        m_uiLifeDrainTimer      = 11 * IN_MILLISECONDS;
-        m_uiBlizzardTimer       = 15 * IN_MILLISECONDS;
-        m_uiFlyTimer            = 46 * IN_MILLISECONDS;
-        m_uiIceboltTimer        = 7 * IN_MILLISECONDS;
-        m_uiLandTimer           = 0;
-        m_uiBerserkTimer        = 15 * MINUTE * IN_MILLISECONDS;
-        m_Phase                 = PHASE_GROUND;
-        m_uiIceboltCount        = 0;
+        m_cleaveTimer         = 5 * IN_MILLISECONDS;
+        m_tailSweepTimer      = 12 * IN_MILLISECONDS;
+        m_frostBreathTimer    = 7 * IN_MILLISECONDS;
+        m_lifeDrainTimer      = 11 * IN_MILLISECONDS;
+        m_blizzardTimer       = 15 * IN_MILLISECONDS;
+        m_flyTimer            = 46 * IN_MILLISECONDS;
+        m_iceboltTimer        = 7 * IN_MILLISECONDS;
+        m_landTimer           = 0;
+        m_berserkTimer        = 15 * MINUTE * IN_MILLISECONDS;
+        m_phase                 = PHASE_GROUND;
+        m_iceboltCount        = 0;
 
         SetCombatMovement(true);
 //      m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
@@ -105,32 +105,32 @@ struct boss_sapphironAI : public ScriptedAI
         m_creature->SetLevitate(false);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoCastSpellIfCan(m_creature, SPELL_FROST_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SAPPHIRON, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_SAPPHIRON, IN_PROGRESS);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SAPPHIRON, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_SAPPHIRON, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SAPPHIRON, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_SAPPHIRON, FAIL);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_BLIZZARD)
+        if (summoned->GetEntry() == NPC_BLIZZARD)
         {
             if (Unit* pEnemy = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                pSummoned->AI()->AttackStart(pEnemy);
+                summoned->AI()->AttackStart(pEnemy);
         }
     }
 
@@ -139,69 +139,69 @@ struct boss_sapphironAI : public ScriptedAI
         summoned->ForcedDespawn();
     }
 
-    void MovementInform(uint32 uiType, uint32 /*uiPointId*/) override
+    void MovementInform(uint32 type, uint32 /*pointId*/) override
     {
-        if (uiType == POINT_MOTION_TYPE && m_Phase == PHASE_LIFT_OFF)
+        if (type == POINT_MOTION_TYPE && m_phase == PHASE_LIFT_OFF)
         {
             m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
             m_creature->SetLevitate(true);
-            m_Phase = PHASE_AIR_BOLTS;
+            m_phase = PHASE_AIR_BOLTS;
 
-            m_uiFrostBreathTimer = 5 * IN_MILLISECONDS;
-            m_uiIceboltTimer = 5 * IN_MILLISECONDS;
-            m_uiIceboltCount = 0;
+            m_frostBreathTimer = 5 * IN_MILLISECONDS;
+            m_iceboltTimer = 5 * IN_MILLISECONDS;
+            m_iceboltCount = 0;
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        switch (m_Phase)
+        switch (m_phase)
         {
             case PHASE_GROUND:
-                if (m_uiCleaveTimer < uiDiff)
+                if (m_cleaveTimer < diff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-                        m_uiCleaveTimer = urand(5, 10) * IN_MILLISECONDS;
+                        m_cleaveTimer = urand(5, 10) * IN_MILLISECONDS;
                 }
                 else
-                    m_uiCleaveTimer -= uiDiff;
+                    m_cleaveTimer -= diff;
 
-                if (m_uiTailSweepTimer < uiDiff)
+                if (m_tailSweepTimer < diff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_TAIL_SWEEP) == CAST_OK)
-                        m_uiTailSweepTimer = urand(7, 10) * IN_MILLISECONDS;
+                        m_tailSweepTimer = urand(7, 10) * IN_MILLISECONDS;
                 }
                 else
-                    m_uiTailSweepTimer -= uiDiff;
+                    m_tailSweepTimer -= diff;
 
-                if (m_uiLifeDrainTimer < uiDiff)
+                if (m_lifeDrainTimer < diff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_LIFE_DRAIN) == CAST_OK)
-                        m_uiLifeDrainTimer = 24 * IN_MILLISECONDS;
+                        m_lifeDrainTimer = 24 * IN_MILLISECONDS;
                 }
                 else
-                    m_uiLifeDrainTimer -= uiDiff;
+                    m_lifeDrainTimer -= diff;
 
-                if (m_uiBlizzardTimer < uiDiff)
+                if (m_blizzardTimer < diff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD) == CAST_OK)
-                        m_uiBlizzardTimer = 20 * IN_MILLISECONDS;
+                        m_blizzardTimer = 20 * IN_MILLISECONDS;
                 }
                 else
-                    m_uiBlizzardTimer -= uiDiff;
+                    m_blizzardTimer -= diff;
 
                 if (m_creature->GetHealthPercent() > 10.0f)
                 {
-                    if (m_uiFlyTimer < uiDiff)
+                    if (m_flyTimer < diff)
                     {
-                        m_Phase = PHASE_LIFT_OFF;
+                        m_phase = PHASE_LIFT_OFF;
                         SetDeathPrevention(true);
                         m_creature->InterruptNonMeleeSpells(false);
                         SetCombatMovement(false);
-                        m_uiIceboltTimer = 7 * IN_MILLISECONDS;
+                        m_iceboltTimer = 7 * IN_MILLISECONDS;
                         m_creature->GetMotionMaster()->Clear(false);
                         m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
 //                        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
@@ -215,7 +215,7 @@ struct boss_sapphironAI : public ScriptedAI
 
                         return;
                     }
-                    m_uiFlyTimer -= uiDiff;
+                    m_flyTimer -= diff;
                 }
 
                 // Only Phase in which we have melee attack!
@@ -224,58 +224,58 @@ struct boss_sapphironAI : public ScriptedAI
             case PHASE_LIFT_OFF:
                 break;
             case PHASE_AIR_BOLTS:
-                if (m_uiIceboltCount == 5)
+                if (m_iceboltCount == 5)
                 {
-                    if (m_uiFrostBreathTimer < uiDiff)
+                    if (m_frostBreathTimer < diff)
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_FROST_BREATH) == CAST_OK)
                         {
                             DoCastSpellIfCan(m_creature, SPELL_FROST_BREATH_DUMMY, CAST_TRIGGERED);
                             DoScriptText(EMOTE_BREATH, m_creature);
-                            m_Phase = PHASE_AIR_BREATH;
-                            m_uiFrostBreathTimer = 4 * IN_MILLISECONDS;
-                            m_uiLandTimer = 11 * IN_MILLISECONDS;
+                            m_phase = PHASE_AIR_BREATH;
+                            m_frostBreathTimer = 4 * IN_MILLISECONDS;
+                            m_landTimer = 11 * IN_MILLISECONDS;
                         }
                     }
                     else
-                        m_uiFrostBreathTimer -= uiDiff;
+                        m_frostBreathTimer -= diff;
                 }
                 else
                 {
-                    if (m_uiIceboltTimer < uiDiff)
+                    if (m_iceboltTimer < diff)
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_ICEBOLT) == CAST_OK)
                         {
-                            ++m_uiIceboltCount;
-                            m_uiIceboltTimer = 3 * IN_MILLISECONDS;
+                            ++m_iceboltCount;
+                            m_iceboltTimer = 3 * IN_MILLISECONDS;
                         }
                     }
                     else
-                        m_uiIceboltTimer -= uiDiff;
+                        m_iceboltTimer -= diff;
                 }
 
                 break;
             case PHASE_AIR_BREATH:
-                if (m_uiLandTimer)
+                if (m_landTimer)
                 {
-                    if (m_uiLandTimer <= uiDiff)
+                    if (m_landTimer <= diff)
                     {
                         // Begin Landing
                         m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
                         m_creature->SetLevitate(false);
 
-                        m_Phase = PHASE_LANDING;
-                        m_uiLandTimer = 2 * IN_MILLISECONDS;
+                        m_phase = PHASE_LANDING;
+                        m_landTimer = 2 * IN_MILLISECONDS;
                     }
                     else
-                        m_uiLandTimer -= uiDiff;
+                        m_landTimer -= diff;
                 }
 
                 break;
             case PHASE_LANDING:
-                if (m_uiLandTimer < uiDiff)
+                if (m_landTimer < diff)
                 {
-                    m_Phase = PHASE_GROUND;
+                    m_phase = PHASE_GROUND;
                     SetDeathPrevention(false);
                     SetCombatMovement(true);
                     m_creature->SetCanFly(false);
@@ -284,62 +284,62 @@ struct boss_sapphironAI : public ScriptedAI
                     m_creature->GetMotionMaster()->Clear(false);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
 
-                    m_uiFlyTimer = 67 * IN_MILLISECONDS;
-                    m_uiLandTimer = 0;
+                    m_flyTimer = 67 * IN_MILLISECONDS;
+                    m_landTimer = 0;
                 }
                 else
-                    m_uiLandTimer -= uiDiff;
+                    m_landTimer -= diff;
 
                 break;
         }
 
         // Enrage can happen in any phase
-        if (m_uiBerserkTimer < uiDiff)
+        if (m_berserkTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BESERK) == CAST_OK)
             {
                 DoScriptText(EMOTE_GENERIC_ENRAGED, m_creature);
-                m_uiBerserkTimer = 300 * IN_MILLISECONDS;
+                m_berserkTimer = 300 * IN_MILLISECONDS;
             }
         }
         else
-            m_uiBerserkTimer -= uiDiff;
+            m_berserkTimer -= diff;
     }
 };
 
-UnitAI* GetAI_boss_sapphiron(Creature* pCreature)
+UnitAI* GetAI_boss_sapphiron(Creature* creature)
 {
-    return new boss_sapphironAI(pCreature);
+    return new boss_sapphironAI(creature);
 }
 
-bool GOUse_go_sapphiron_birth(Player* /*pPlayer*/, GameObject* pGo)
+bool GOUse_go_sapphiron_birth(Player* /*player*/, GameObject* go)
 {
-    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+    ScriptedInstance* instance = (ScriptedInstance*)go->GetInstanceData();
 
-    if (!pInstance)
+    if (!instance)
         return true;
 
-    if (pInstance->GetData(TYPE_SAPPHIRON) != NOT_STARTED)
+    if (instance->GetData(TYPE_SAPPHIRON) != NOT_STARTED)
         return true;
 
     // If already summoned return (safety check)
-    if (pInstance->GetSingleCreatureFromStorage(NPC_SAPPHIRON, true))
+    if (instance->GetSingleCreatureFromStorage(NPC_SAPPHIRON, true))
         return true;
 
     // Set data to special and allow the Go animation to proceed
-    pInstance->SetData(TYPE_SAPPHIRON, SPECIAL);
+    instance->SetData(TYPE_SAPPHIRON, SPECIAL);
     return false;
 }
 
 void AddSC_boss_sapphiron()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "boss_sapphiron";
-    pNewScript->GetAI = &GetAI_boss_sapphiron;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "boss_sapphiron";
+    newScript->GetAI = &GetAI_boss_sapphiron;
+    newScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "go_sapphiron_birth";
-    pNewScript->pGOUse = &GOUse_go_sapphiron_birth;
-    pNewScript->RegisterSelf();
+    newScript = new Script;
+    newScript->Name = "go_sapphiron_birth";
+    newScript->pGOUse = &GOUse_go_sapphiron_birth;
+    newScript->RegisterSelf();
 }
