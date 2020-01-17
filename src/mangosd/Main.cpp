@@ -170,7 +170,8 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    sLog.outString("[World Server] %s v%s", _PACKAGENAME, VERSION);
+    sLog.outString("[%s World server v%s] id(%d) port(%d)", _PACKAGENAME, VERSION
+        , sConfig.GetIntDefault("RealmID", -1), sConfig.GetIntDefault("WorldServerPort", -1));
     sLog.outString("\n\n"
         "       _____     __  __       _   _  _____  ____   _____ \n"
         "      / ____|   |  \\/  |     | \\ | |/ ____|/ __ \\ / ____|\n"
