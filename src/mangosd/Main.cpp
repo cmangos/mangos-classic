@@ -171,6 +171,7 @@ int main(int argc, char* argv[])
 #endif
 
     sLog.outString("%s [world-daemon]", _FULLVERSION(REVISION_DATE, REVISION_ID));
+    sLog.outString("Built on %s at %s", __DATE__, __TIME__);
     sLog.outString("<Ctrl-C> to stop.");
     sLog.outString("\n\n"
                    "       _____     __  __       _   _  _____  ____   _____ \n"
