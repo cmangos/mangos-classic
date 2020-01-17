@@ -4596,8 +4596,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
                     {
-                        unitTarget->RemoveAurasDueToSpell(31800); // Icebolt immunity spell
-                        unitTarget->RemoveAurasDueToSpell(28522); // Icebolt stun/damage spell
+                        unitTarget->RemoveAurasDueToSpell(31800);                           // Icebolt immunity spell
+                        unitTarget->RemoveAurasDueToSpell(28522);                           // Icebolt stun/damage spell
+                        unitTarget->CastSpell(nullptr, 28523, TRIGGERED_OLD_TRIGGERED);     // Despawn Ice Block (targets Ice Block GOs)
                     }
                     return;
                 }
