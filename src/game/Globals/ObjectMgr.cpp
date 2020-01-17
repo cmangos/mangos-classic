@@ -620,6 +620,15 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
             continue;
         }
 
+        if (SpellCastTimesEntry const* spellCastTimeEntry = sSpellCastTimesStore.LookupEntry(AdditionalSpellInfo->CastingTimeIndex))
+        {
+            if (spellCastTimeEntry->CastTime > 0)
+            {
+                sLog.outErrorDb("Creature (%s: %u) has spell %u defined in `auras` field in `%s, but spell has cast time. Use it in AI instead.", guidEntryStr, addon->guidOrEntry, cAura, table);
+                continue;
+            }
+        }
+
         // TODO: Remove LogFilter check after more research
         if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK) && !IsOnlySelfTargeting(AdditionalSpellInfo))
         {
