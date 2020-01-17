@@ -691,6 +691,7 @@ class WorldSession
 
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
+        std::deque<uint32> GetOpcodeHistory();
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);

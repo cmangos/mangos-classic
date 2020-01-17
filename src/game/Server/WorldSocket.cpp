@@ -55,6 +55,11 @@ struct ServerPktHeader
 #pragma pack(pop)
 #endif
 
+std::deque<uint32> WorldSocket::GetOpcodeHistory()
+{
+    return m_opcodeHistory;
+}
+
 WorldSocket::WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler) : Socket(service, std::move(closeHandler)), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0), m_existingHeader(),
     m_useExistingHeader(false), m_session(nullptr), m_seed(urand())
 {
@@ -85,6 +90,10 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
 
     if (immediate)
         ForceFlushOut();
+
+    m_opcodeHistory.push_front(uint32(pct.GetOpcode()));
+    if (m_opcodeHistory.size() > 50)
+        m_opcodeHistory.resize(20);
 }
 
 bool WorldSocket::Open()
