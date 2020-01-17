@@ -122,6 +122,3 @@ UPDATE `spell_template` SET `Effect1` = 149 WHERE `Id` IN (33971);
 -- Nether Beam - Netherspite - restricted to one target
 UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(30469);
 
--- Fix bad mask for spells - always needs to have at least 1, if disproven, fix EAI functions which check SchoolMask
-UPDATE spell_template SET SchoolMask=1 WHERE SchoolMask=0;
-
