@@ -161,8 +161,20 @@ int main(int argc, char* argv[])
 
     sLog.Initialize();
 
-    sLog.outString("%s [realm-daemon]", _FULLVERSION(REVISION_DATE, REVISION_ID));
-    sLog.outString("<Ctrl-C> to stop.\n");
+    sLog.outString("[%s Auth server v%s] port(%d)", _PACKAGENAME, VERSION
+        , sConfig.GetIntDefault("RealmServerPort", -1));
+    sLog.outString("\n\n"
+        "       _____     __  __       _   _  _____  ____   _____ \n"
+        "      / ____|   |  \\/  |     | \\ | |/ ____|/ __ \\ / ____|\n"
+        "     | |        | \\  / |     |  \\| | |  __  |  | | (___  \n"
+        "     | |ontinued| |\\/| | __ _| . ` | | |_ | |  | |\\___ \\ \n"
+        "     | |____    | |  | |/ _` | |\\  | |__| | |__| |____) |\n"
+        "      \\_____|   |_|  |_| (_| |_| \\_|\\_____|\\____/ \\____/ \n"
+        "      http://cmangos.net\\__,_|     Doing things right!\n\n");
+
+    sLog.outString("Built on %s at %s", __DATE__, __TIME__);
+    sLog.outString("Built for %s", _ENDIAN_PLATFORM);
+    sLog.outString("Using commit hash(%s) committed on %s", REVISION_ID, REVISION_DATE);
     sLog.outString("Using configuration file %s.", configFile.c_str());
 
     ///- Check the version of the configuration file
@@ -183,6 +195,9 @@ int main(int argc, char* argv[])
         DETAIL_LOG("WARNING: Outdated version of OpenSSL lib. Logins to server may not work!");
         DETAIL_LOG("WARNING: Minimal required version [OpenSSL 0.9.8k]");
     }
+
+    sLog.outString();
+    sLog.outString("<Ctrl-C> to stop.");
 
     /// realmd PID file creation
     std::string pidfile = sConfig.GetStringDefault("PidFile");
