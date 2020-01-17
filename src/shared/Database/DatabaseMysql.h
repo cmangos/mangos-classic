@@ -25,11 +25,7 @@
 #include "Database.h"
 #include "Policies/Singleton.h"
 
-#ifdef _WIN32
-#include <mysql/mysql.h>
-#else
 #include <mysql.h>
-#endif
 
 // MySQL prepared statement class
 class MySqlPreparedStatement : public SqlPreparedStatement
