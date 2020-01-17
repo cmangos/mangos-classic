@@ -194,7 +194,7 @@ if(MSVC)
   # Use at least verion 3.8.1 of FindBoost to fix some issues. Especialy in MSVC with fixed Toolset issues.
   # This is a workaround while VisualStudio does not embed higher cmake version than 3.7.2
   if(${CMAKE_VERSION} VERSION_LESS "3.11.3")
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/macros/FindBoost)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/macros/FindBoost")
     message(STATUS "FindBoost: included version 3.11.3 of FindBoost is used.")
   endif()
 endif()
