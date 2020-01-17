@@ -98,6 +98,10 @@ struct boss_sapphironAI : public ScriptedAI
         m_uiIceboltCount        = 0;
 
         SetCombatMovement(true);
+//      m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+        m_creature->SetCanFly(false);
+        m_creature->SetHover(false);
         m_creature->SetLevitate(false);
     }
 
@@ -199,6 +203,13 @@ struct boss_sapphironAI : public ScriptedAI
                         SetCombatMovement(false);
                         m_uiIceboltTimer = 7 * IN_MILLISECONDS;
                         m_creature->GetMotionMaster()->Clear(false);
+                        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+//                        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+                        m_creature->SetCanFly(true);
+                        m_creature->SetHover(true);
+                        m_creature->SetLevitate(true);
+                        m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
+                        m_creature->GetMotionMaster()->MoveIdle();
                         m_creature->GetMotionMaster()->MovePoint(1, aLiftOffPosition[0], aLiftOffPosition[1], aLiftOffPosition[2]);
                         // TODO This should clear the target, too
 
@@ -267,6 +278,9 @@ struct boss_sapphironAI : public ScriptedAI
                     m_Phase = PHASE_GROUND;
                     SetDeathPrevention(false);
                     SetCombatMovement(true);
+                    m_creature->SetCanFly(false);
+                    m_creature->SetHover(false);
+                    m_creature->SetLevitate(false);
                     m_creature->GetMotionMaster()->Clear(false);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
 
