@@ -122,3 +122,6 @@ UPDATE `spell_template` SET `Effect1` = 149 WHERE `Id` IN (33971);
 -- Nether Beam - Netherspite - restricted to one target
 UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(30469);
 
+-- Fix duration of spell 28561 (Summon Blizzard): NPC should despawn after 30 seconds, not 5 minutes
+UPDATE spell_template SET DurationIndex=9 WHERE id=28561;
+

@@ -134,11 +134,6 @@ struct boss_sapphironAI : public ScriptedAI
         }
     }
 
-    void SummonedJustReachedHome(Creature* summoned) override
-    {
-        summoned->ForcedDespawn();
-    }
-
     void MovementInform(uint32 type, uint32 /*pointId*/) override
     {
         if (type == POINT_MOTION_TYPE && m_phase == PHASE_LIFT_OFF)
@@ -188,7 +183,7 @@ struct boss_sapphironAI : public ScriptedAI
                 if (m_blizzardTimer < diff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD) == CAST_OK)
-                        m_blizzardTimer = 20 * IN_MILLISECONDS;
+                        m_blizzardTimer = urand(10, 30) * IN_MILLISECONDS;
                 }
                 else
                     m_blizzardTimer -= diff;
@@ -207,8 +202,6 @@ struct boss_sapphironAI : public ScriptedAI
 //                        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
                         m_creature->SetCanFly(true);
                         m_creature->SetHover(true);
-                        m_creature->SetLevitate(true);
-                        m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
                         m_creature->GetMotionMaster()->MoveIdle();
                         m_creature->GetMotionMaster()->MovePoint(1, aLiftOffPosition[0], aLiftOffPosition[1], aLiftOffPosition[2]);
                         // TODO This should clear the target, too

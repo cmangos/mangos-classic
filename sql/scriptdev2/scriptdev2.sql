@@ -2433,7 +2433,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1533080','Breathe no more!','8850','1','0','0','0','noth SAY_SLAY2'),
 ('-1533081','I will serve the master... in... death!','8848','1','0','0','0','noth SAY_DEATH'),
 
-('-1533082','%s takes in a deep breath...','0','3','0','0','0','sapphiron EMOTE_BREATH'),
+('-1533082','%s takes in a deep breath...','0','7','0','0','0','sapphiron EMOTE_BREATH'),
 ('-1533083','%s resumes his attacks!','0','3','0','0','0','sapphiron EMOTE_GROUND'),
 
 ('-1533084','Our preparations continue as planned master.','8878','6','0','0','0','kelthuzad SAY_SAPP_DIALOG1'),
