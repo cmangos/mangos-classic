@@ -4535,6 +4535,16 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         m_caster->CastCustomSpell(unitTarget, 28375, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 28526:                                 // Icebolt
+                {
+                    if (!m_caster || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (Unit* target = ((Creature*)m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, 31800, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
+                        m_caster->CastSpell(target, 28522, TRIGGERED_NONE); // Icebolt
+
+                    return;
+                }
                 case 28560:                                 // Summon Blizzard
                 {
                     if (!unitTarget)
