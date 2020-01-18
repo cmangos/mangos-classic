@@ -120,7 +120,10 @@ namespace Movement
 
             uint32 GetId() const { return m_Id;}
             bool Finalized() const { return splineflags.done; }
-            bool isCyclic() const { return splineflags.cyclic;}
+            bool isCyclic() const { return splineflags.cyclic; }
+            FacingInfo const& GetFacing() const { return facing; }
+            bool isFacing() const { return splineflags.isFacing(); }
+            bool isFacingTarget() const { return splineflags.final_target; }
             const Vector3 FinalDestination() const { return Initialized() ? spline.getPoint(spline.last()) : Vector3();}
             const Vector3 CurrentDestination() const { return Initialized() ? spline.getPoint(point_Idx + 1) : Vector3();}
             int32 currentPathIdx() const;
