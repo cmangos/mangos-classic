@@ -148,7 +148,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
         virtual bool _getLocation(Unit& owner, float& x, float& y, float& z) const;
         virtual void _setLocation(Unit& owner);
 
-        bool DispatchSplineToPosition(Unit& owner, float x, float y, float z, bool walk, bool cutPath);
+        bool DispatchSplineToPosition(Unit& owner, float x, float y, float z, bool walk, bool cutPath, bool target = false);
         void CutPath(Unit& owner, PointsArray& path);
         void Backpedal(Unit& owner);
 

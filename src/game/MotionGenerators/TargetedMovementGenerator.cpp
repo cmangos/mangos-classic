@@ -207,7 +207,7 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
                 z = end.z;
             }
 
-            if (DispatchSplineToPosition(owner, x, y, z, EnableWalking(), true))
+            if (DispatchSplineToPosition(owner, x, y, z, EnableWalking(), true, true))
             {
                 this->i_targetReached = false;
                 this->i_speedChanged = false;
@@ -227,7 +227,7 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
     }
     else if (this->i_speedChanged)
     {
-        if (DispatchSplineToPosition(owner, dest.x, dest.y, dest.z, false, false))
+        if (DispatchSplineToPosition(owner, dest.x, dest.y, dest.z, false, false, true))
         {
             this->i_speedChanged = false;
             return;
@@ -298,6 +298,7 @@ void ChaseMovementGenerator::HandleFinalizedMovement(Unit& owner)
             break;
         }
     }
+    _clearUnitStateMove(owner);
     m_currentMode = CHASE_MODE_NORMAL;
     m_reachable = true; // just to be absolutely sure clear reachability here - if its unreachable it will reset on next update
 }
@@ -392,7 +393,7 @@ void ChaseMovementGenerator::FanOut(Unit& owner)
     }
 }
 
-bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, float y, float z, bool walk, bool cutPath)
+bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, float y, float z, bool walk, bool cutPath, bool target)
 {
     if (!this->i_path)
         this->i_path = new PathFinder(&owner);
@@ -412,6 +413,8 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
     Movement::MoveSplineInit init(owner);
     init.MovebyPath(path);
     init.SetWalk(walk);
+    if (target)
+        init.SetFacing(i_target.getTarget());
     init.Launch();
 
     this->i_target->GetPosition(i_lastTargetPos.x, i_lastTargetPos.y, i_lastTargetPos.z);
