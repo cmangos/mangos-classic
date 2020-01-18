@@ -52,8 +52,13 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     // prevent movement while casting spells with cast time or channel time
     if (owner.IsNonMeleeSpellCasted(false, false, true, true))
     {
-        if (!owner.IsStopped())
-            owner.StopMoving();
+        if (!owner.movespline->Finalized())
+        {
+            if (owner.IsClientControlled())
+                owner.StopMoving(true);
+            else
+                owner.InterruptMoving();
+        }
         return true;
     }
 
@@ -252,8 +257,15 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
                 // - thats when forcible spline stop is needed
                 float targetDist = this->i_target->GetCombinedCombatReach(&owner, this->i_offset == 0.f ? true : false);
                 if (distFromDestination > distOwnerFromTarget)
+                {
                     if (this->i_target->GetDistance(ownerPos.x, ownerPos.y, ownerPos.z, DIST_CALC_NONE) < targetDist * targetDist)
-                        owner.StopMoving(true);
+                    {
+                        if (owner.IsClientControlled())
+                            owner.StopMoving(true);
+                        else
+                            owner.InterruptMoving();
+                    }
+                }
             }
         }
     }
