@@ -1511,9 +1511,9 @@ bool ChatHandler::HandleDebugPacketHistory(char* args)
 {
     auto history = m_session->GetOpcodeHistory();
     std::string output = "Opcodes (reverse order):\n";
-    for (auto opcode : history)
+    for (auto itr = history.rbegin(); itr != history.rend(); ++itr)
     {
-        output += LookupOpcodeName(opcode);
+        output += LookupOpcodeName(*itr);
         output += "\n";
     }
 
