@@ -6218,7 +6218,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
             return false;
     }
 
-    if (target->IsCreature() && info.enumerator == TARGET_ENUMERATOR_CHAIN && info.filter == TARGET_HARMFUL) // TODO: Mother Shahraz beams can target totems
+    if (target->IsCreature() && target != m_targets.getUnitTarget() && info.enumerator == TARGET_ENUMERATOR_CHAIN && info.filter == TARGET_HARMFUL) // TODO: Mother Shahraz beams can target totems
         if (static_cast<Creature*>(target)->IsCritter())
             return false;
 
