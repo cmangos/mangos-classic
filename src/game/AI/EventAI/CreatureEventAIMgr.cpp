@@ -230,7 +230,7 @@ bool IsValidTargetType(EventAI_Type eventType, EventAI_ActionType actionType, ui
                     return false;
             }
         case TARGET_T_EVENT_SENDER:                         // Unit who sent an AIEvent that was received with EVENT_T_RECEIVE_AI_EVENT
-            if (eventType != EVENT_T_RECEIVE_AI_EVENT)
+            if (eventType != EVENT_T_RECEIVE_AI_EVENT && eventType != EVENT_T_SPELLHIT && eventType != EVENT_T_SPELLHIT_TARGET)
             {
                 sLog.outErrorEventAI("Event %u Action%u uses incorrect Target type %u for event-type %u", eventId, action, targetType, eventType);
                 return false;
