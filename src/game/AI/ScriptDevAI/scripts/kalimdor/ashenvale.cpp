@@ -332,6 +332,7 @@ bool QuestAccept_npc_ruul_snowhoof(Player* player, Creature* creature, const Que
     {
         creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
         creature->SetStandState(UNIT_STAND_STATE_STAND);
+        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
 
         if (npc_ruul_snowhoofAI* escortAI = dynamic_cast<npc_ruul_snowhoofAI*>(creature->AI()))
             escortAI->Start(false, player, quest);
