@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2019120601
+ConfVersion=2020011901
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -193,6 +193,11 @@ SD2ErrorLogFile = "SD2Errors.log"
 #        Update realm uptime period in minutes (for save data in 'uptime' table). Must be > 0
 #        Default: 10 (minutes)
 #
+#    MapUpdate.Threads
+#        Number of threads to use for maps update.
+#        Default: 3
+#        Don't put more thread then your number of CPU threads -1 for this to work stable.
+#
 #    MaxCoreStuckTime
 #        Periodically check if the process got freezed, if this is the case force crash after the specified
 #        amount of seconds. Must be > 0. Recommended > 10 secs if you use this.
@@ -240,6 +245,7 @@ mmap.ignoreMapIds = ""
 PathFinder.OptimizePath = 1
 PathFinder.NormalizeZ = 0
 UpdateUptimeInterval = 10
+MapUpdate.Threads = 3
 MaxCoreStuckTime = 0
 AddonChannel = 1
 CleanCharacterDB = 1
