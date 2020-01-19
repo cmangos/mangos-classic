@@ -721,6 +721,15 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         if (action.cast.castFlags & CAST_FORCE_TARGET_SELF)
                             action.cast.castFlags |= CAST_TRIGGERED;
 
+                        if (spell && spell->Targets) // causes crash if not handled
+                        {
+                            if (action.cast.target == TARGET_T_NONE || action.cast.target == TARGET_T_NEAREST_AOE_TARGET)
+                            {
+                                sLog.outErrorEventAI("Event %u Action %u uses SpellID %u that must have a target supplied (target is %u). Resetting to TARGET_T_HOSTILE.", i, j + 1, action.cast.spellId, action.cast.target);
+                                action.cast.target = TARGET_T_HOSTILE;
+                            }
+                        }
+
                         IsValidTargetType(temp.event_type, action.type, action.cast.target, i, j + 1);
 
                         // Some Advanced target type checks - Can have false positives
