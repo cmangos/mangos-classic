@@ -35,12 +35,13 @@ namespace MMAP
         rcContourSet* contours;
         rcPolyMesh* polyMesh;
         rcPolyMeshDetail* polyMeshDetail;
+        const char* m_workdir;
 
-        IntermediateValues() :  compactHeightfield(NULL), heightfield(NULL),
-            contours(NULL), polyMesh(NULL), polyMeshDetail(NULL) {}
+        IntermediateValues();
+        IntermediateValues(const char* workdir);
         ~IntermediateValues();
 
-        void writeIV(const char* workdir, uint32 mapID, uint32 tileX, uint32 tileY);
+        void writeIV(uint32 mapID, uint32 tileX, uint32 tileY);
 
         void debugWrite(FILE* file, const rcHeightfield* mesh);
         void debugWrite(FILE* file, const rcCompactHeightfield* chf);
@@ -48,7 +49,7 @@ namespace MMAP
         void debugWrite(FILE* file, const rcPolyMesh* mesh);
         void debugWrite(FILE* file, const rcPolyMeshDetail* mesh);
 
-        void generateObjFile(const char* workdir, uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData);
+        void generateObjFile(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData);
     };
 }
 #endif
