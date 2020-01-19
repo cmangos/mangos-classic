@@ -516,7 +516,7 @@ void ChaseMovementGenerator::_setLocation(Unit& owner)
     float x, y, z;
 
     if (_getLocation(owner, x, y, z))
-        DispatchSplineToPosition(owner, x, y, z, EnableWalking(), true);
+        DispatchSplineToPosition(owner, x, y, z, EnableWalking(), true, true);
     else
         return;
 
