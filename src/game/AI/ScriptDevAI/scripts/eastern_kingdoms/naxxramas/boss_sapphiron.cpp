@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Sapphiron
-SD%Complete: 98
-SDComment: Flying visual is bugged: Sapphiron uses standing animation instead of the flying/hovering one when not moving in the air
+SD%Complete: 100
+SDComment:
 SDCategory: Naxxramas
 EndScriptData
 
@@ -42,6 +42,7 @@ enum
     SPELL_SUMMON_BLIZZARD       = 28560,
 
     // Air phase spells
+    SPELL_DRAGON_HOVER          = 18430,
     SPELL_ICEBOLT               = 28526,            // Triggers spell 28522 (Icebolt)
     SPELL_FROST_BREATH_DUMMY    = 30101,
     SPELL_FROST_BREATH          = 28524,            // Triggers spells 29318 (Frost Breath) and 30132 (Despawn Ice Block)
@@ -98,11 +99,9 @@ struct boss_sapphironAI : public ScriptedAI
         m_iceboltCount        = 0;
 
         SetCombatMovement(true);
-//      m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
-        m_creature->SetCanFly(false);
+        SetDeathPrevention(false);
+        SetMeleeEnabled(true);
         m_creature->SetHover(false);
-        m_creature->SetLevitate(false);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -139,7 +138,8 @@ struct boss_sapphironAI : public ScriptedAI
         if (type == POINT_MOTION_TYPE && m_phase == PHASE_LIFT_OFF)
         {
             m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
-            m_creature->SetLevitate(true);
+            m_creature->SetHover(true);
+            m_creature->CastSpell(nullptr, SPELL_DRAGON_HOVER, TRIGGERED_OLD_TRIGGERED);
             m_phase = PHASE_AIR_BOLTS;
 
             m_frostBreathTimer = 5 * IN_MILLISECONDS;
@@ -193,18 +193,14 @@ struct boss_sapphironAI : public ScriptedAI
                     if (m_flyTimer < diff)
                     {
                         m_phase = PHASE_LIFT_OFF;
+                        m_iceboltTimer = 7 * IN_MILLISECONDS;
+
                         SetDeathPrevention(true);
                         m_creature->InterruptNonMeleeSpells(false);
                         SetCombatMovement(false);
-                        m_iceboltTimer = 7 * IN_MILLISECONDS;
-                        m_creature->GetMotionMaster()->Clear(false);
-                        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
-//                        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
-                        m_creature->SetCanFly(true);
-                        m_creature->SetHover(true);
-                        m_creature->GetMotionMaster()->MoveIdle();
+                        SetMeleeEnabled(false);
+                        m_creature->SetTarget(nullptr);
                         m_creature->GetMotionMaster()->MovePoint(1, aLiftOffPosition[0], aLiftOffPosition[1], aLiftOffPosition[2]);
-                        // TODO This should clear the target, too
 
                         return;
                     }
@@ -255,8 +251,6 @@ struct boss_sapphironAI : public ScriptedAI
                     {
                         // Begin Landing
                         m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
-                        m_creature->SetLevitate(false);
-
                         m_phase = PHASE_LANDING;
                         m_landTimer = 2 * IN_MILLISECONDS;
                     }
@@ -271,9 +265,9 @@ struct boss_sapphironAI : public ScriptedAI
                     m_phase = PHASE_GROUND;
                     SetDeathPrevention(false);
                     SetCombatMovement(true);
-                    m_creature->SetCanFly(false);
+                    SetMeleeEnabled(true);
+                    m_creature->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
                     m_creature->SetHover(false);
-                    m_creature->SetLevitate(false);
                     m_creature->GetMotionMaster()->Clear(false);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
 
