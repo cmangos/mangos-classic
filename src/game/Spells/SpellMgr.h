@@ -2114,19 +2114,6 @@ class SpellMgr
                 case 18193: // Marsh Lichen
                 case 22730: // Runn Tum Tuber Surprise
                 case 25661: // Dirge's Kickin' Chimaerok Chops
-                // Alcohol: instant application, no attribute
-                case 5020:  // Stormstout
-                case 5021:  // Trogg Ale
-                case 5257:  // Thunderbrew Lager
-                case 5909:  // Watered-down Beer
-                case 6114:  // Raptor Punch
-                case 8553:  // Barleybrew Scalder
-                case 20875: // Rumsey Rum
-                case 22789: // Gordok Green Grog
-                case 22790: // Kreeg's Stout Beatdown
-                case 25037: // Rumsey Rum Light
-                case 25722: // Rumsey Rum Dark
-                case 25804: // Rumsey Rum Black Label
                     return SPELL_WELL_FED;
             }
             return SPELL_NORMAL;
