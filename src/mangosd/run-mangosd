@@ -2,6 +2,8 @@
 # Massive Network Game Object Server
 # autorestart Script
 
+crashcount=0
+
 case $1 in
     start )
         screen -dmS tbc-vengeance $PWD/$0 detached
@@ -24,6 +26,10 @@ case $1 in
                 else
                    mv crash.log $(date +%F-%H:%M).log && touch crash.log
                    echo "date" ", MaNGOS daemon crashed."
+                   ((crashcount=crashcount+1))
+                   if [ "$crashcount" -gt 50 ]; then
+                      exit 0
+                   fi
                 fi
         done
         ;;
