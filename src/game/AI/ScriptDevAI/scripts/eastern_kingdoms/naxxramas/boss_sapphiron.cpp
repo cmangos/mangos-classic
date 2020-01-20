@@ -39,13 +39,18 @@ enum
     SPELL_CLEAVE                = 19983,
     SPELL_TAIL_SWEEP            = 15847,
     SPELL_LIFE_DRAIN            = 28542,
-    SPELL_SUMMON_BLIZZARD       = 28560,
+    SPELL_SUMMON_BLIZZARD_INIT  = 28560,
+    SPELL_SUMMON_BLIZZARD       = 28561,
 
     // Air phase spells
     SPELL_DRAGON_HOVER          = 18430,
-    SPELL_ICEBOLT               = 28526,            // Triggers spell 28522 (Icebolt)
+    SPELL_ICEBOLT_INIT          = 28526,            // Triggers spell 28522 (Icebolt)
+    SPELL_ICEBOLT               = 28522,
+    SPELL_ICEBOLT_IMMUNITY      = 31800,
+    SPELL_ICEBLOCK_SUMMON       = 28535,
     SPELL_FROST_BREATH_DUMMY    = 30101,
     SPELL_FROST_BREATH          = 28524,            // Triggers spells 29318 (Frost Breath) and 30132 (Despawn Ice Block)
+    SPELL_DESPAWN_ICEBLOCK_GO   = 28523,
 
     NPC_BLIZZARD                = 16474,
 };
@@ -182,7 +187,7 @@ struct boss_sapphironAI : public ScriptedAI
 
                 if (m_blizzardTimer < diff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD_INIT) == CAST_OK)
                         m_blizzardTimer = urand(10, 30) * IN_MILLISECONDS;
                 }
                 else
@@ -233,7 +238,7 @@ struct boss_sapphironAI : public ScriptedAI
                 {
                     if (m_iceboltTimer < diff)
                     {
-                        if (DoCastSpellIfCan(m_creature, SPELL_ICEBOLT) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature, SPELL_ICEBOLT_INIT) == CAST_OK)
                         {
                             ++m_iceboltCount;
                             m_iceboltTimer = 3 * IN_MILLISECONDS;
@@ -318,6 +323,62 @@ bool GOUse_go_sapphiron_birth(Player* /*player*/, GameObject* go)
     return false;
 }
 
+struct IceBolt : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
+    {
+        if (Unit* caster = spell->GetCaster())
+        {
+            if (Unit* target = ((Creature*)caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_ICEBOLT, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
+                caster->CastSpell(target, SPELL_ICEBOLT, TRIGGERED_NONE); // Icebolt
+        }
+    }
+};
+
+struct PeriodicIceBolt : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        if (Unit* target =  aura->GetTarget())
+        {
+            if (target->isAlive() && !target->HasAura(SPELL_ICEBOLT_IMMUNITY))
+            {
+                target->CastSpell(target, SPELL_ICEBOLT_IMMUNITY, TRIGGERED_OLD_TRIGGERED);     // Icebolt which causes immunity to frost dmg
+                data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_ICEBLOCK_SUMMON); // Summon Ice Block
+            }
+        }
+    }
+};
+
+struct SummonBlizzard : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
+    {
+        debug_log("SD2 spell script for spell with caster %s", spell->GetCaster()->GetName());
+        if (Unit* unitTarget = spell->GetUnitTarget())
+        {
+            debug_log("SD2 spell script for spell with caster %s and target %s", spell->GetCaster()->GetName(), unitTarget->GetName());
+            unitTarget->CastSpell(unitTarget, SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid());
+        }
+    }
+};
+
+struct DespawnIceBlock : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
+    {
+        if (Unit* unitTarget = spell->GetUnitTarget())
+        {
+            if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+            {
+                unitTarget->RemoveAurasDueToSpell(SPELL_ICEBOLT_IMMUNITY);                          // Icebolt immunity spell
+                unitTarget->RemoveAurasDueToSpell(SPELL_ICEBOLT);                                   // Icebolt stun/damage spell
+                unitTarget->CastSpell(nullptr, SPELL_DESPAWN_ICEBLOCK_GO, TRIGGERED_OLD_TRIGGERED); // Despawn Ice Block (targets Ice Block GOs)
+            }
+        }
+    }
+};
+
 void AddSC_boss_sapphiron()
 {
     Script* newScript = new Script;
@@ -329,4 +390,9 @@ void AddSC_boss_sapphiron()
     newScript->Name = "go_sapphiron_birth";
     newScript->pGOUse = &GOUse_go_sapphiron_birth;
     newScript->RegisterSelf();
+
+    RegisterAuraScript<PeriodicIceBolt>("spell_sapphiron_icebolt_aura");
+    RegisterSpellScript<IceBolt>("spell_sapphiron_icebolt");
+    RegisterSpellScript<SummonBlizzard>("spell_sapphiron_blizzard");
+    RegisterSpellScript<DespawnIceBlock>("spell_sapphiron_iceblock");
 }
