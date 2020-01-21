@@ -41,7 +41,7 @@ ConsolePrintHook consolePrintHook();
    @sa G3D::logPrintf, G3D::screenPrintf
    @return The string that was printed
  */
-std::string __cdecl consolePrintf(const char* fmt ...) G3D_CHECK_PRINTF_ARGS;
+std::string consolePrintf(const char* fmt ...) G3D_CHECK_PRINTF_ARGS;
 std::string consolePrint(const std::string&);
 
 /**
@@ -53,7 +53,7 @@ std::string consolePrint(const std::string&);
 
    @return The string that was printed
 */
-std::string __cdecl debugPrintf(const char* fmt ...) G3D_CHECK_PRINTF_ARGS;
+std::string debugPrintf(const char* fmt ...) G3D_CHECK_PRINTF_ARGS;
 std::string debugPrint(const std::string&);
 
 } // namespace G3D

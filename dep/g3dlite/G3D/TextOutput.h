@@ -226,12 +226,12 @@ public:
 
     /** Normal printf conventions.  Note that the output will be reformatted
         for word-wrapping and newlines */
-    void __cdecl printf(const char* fmt, ...)
+    void printf(const char* fmt, ...)
         G3D_CHECK_PRINTF_METHOD_ARGS;
 
     // Can't pass by reference because that confuses va_start
-    void __cdecl printf(const std::string fmt, ...);
-    void __cdecl vprintf(const char* fmt, va_list argPtr) 
+    void printf(const std::string fmt, ...);
+    void vprintf(const char* fmt, va_list argPtr) 
         G3D_CHECK_VPRINTF_METHOD_ARGS;
 };
 

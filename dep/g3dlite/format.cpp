@@ -22,7 +22,7 @@
 
 namespace G3D {
 
-std::string __cdecl format(const char* fmt,...) {
+std::string format(const char* fmt,...) {
     va_list argList;
     va_start(argList,fmt);
     std::string result = vformat(fmt, argList);

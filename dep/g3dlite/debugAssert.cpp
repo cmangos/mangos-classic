@@ -328,7 +328,7 @@ ConsolePrintHook consolePrintHook() {
 }
 
 
-std::string __cdecl debugPrint(const std::string& s) {
+std::string debugPrint(const std::string& s) {
 #   ifdef G3D_WIN32
         const int MAX_STRING_LEN = 1024;
     
@@ -350,7 +350,7 @@ std::string __cdecl debugPrint(const std::string& s) {
      return s;
 }
 
-std::string __cdecl debugPrintf(const char* fmt ...) {
+std::string debugPrintf(const char* fmt ...) {
     va_list argList;
     va_start(argList, fmt);
     std::string s = G3D::vformat(fmt, argList);
@@ -373,7 +373,7 @@ std::string consolePrint(const std::string& s) {
 }
 
 
-std::string __cdecl consolePrintf(const char* fmt ...) {
+std::string consolePrintf(const char* fmt ...) {
     va_list argList;
     va_start(argList, fmt);
     std::string s = G3D::vformat(fmt, argList);

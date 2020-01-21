@@ -118,6 +118,10 @@ set(LIBRARY_SRCS
     uint128.cpp
 )
 
+# Find all the input files
+FILE(GLOB LIBRARY_HDRS "${CMAKE_CURRENT_SOURCE_DIR}/G3D/*.h")
+list(APPEND LIBRARY_SRCS "${LIBRARY_HDRS}")
+
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
 )
@@ -126,8 +130,7 @@ target_link_libraries(${LIBRARY_NAME}
 )
 
 target_include_directories(${LIBRARY_NAME}
-  PUBLIC ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE ${ZLIB_INCLUDE_DIRS}
 )
 

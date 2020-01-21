@@ -903,7 +903,7 @@ WheatyExceptionReport::GetBasicType(DWORD typeIndex, DWORD64 modBase)
 // Helper function that writes to the report file, and allows the user to use
 // printf style formating
 //============================================================================
-int __cdecl WheatyExceptionReport::_tprintf(const TCHAR* format, ...)
+int WheatyExceptionReport::_tprintf(const TCHAR* format, ...)
 {
     TCHAR szBuff[1024];
     DWORD cbWritten;

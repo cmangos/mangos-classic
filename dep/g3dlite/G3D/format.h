@@ -27,7 +27,7 @@ namespace G3D {
   string is under 160 characters (not including terminator) and slower
   when the string is longer.
  */
-std::string   __cdecl format(
+std::string   format(
     const char*                 fmt
     ...) G3D_CHECK_PRINTF_ARGS;
 

@@ -1734,7 +1734,7 @@ void System::cpuid(CPUIDFunction func, uint32& eax, uint32& ebx, uint32& ecx, ui
     edx = 0;
 }
 
-#elif defined(G3D_LINUX) && defined(__arm__)
+#elif defined(G3D_LINUX) && ( defined(__arm__) || defined(__aarch64__))
 // non-x86 CPU; no CPUID, at least in userspace
 void System::cpuid(CPUIDFunction func, uint32& eax, uint32& ebx, uint32& ecx, uint32& edx) {
     eax = 0;

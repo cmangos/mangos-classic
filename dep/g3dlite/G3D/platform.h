@@ -274,31 +274,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {\
     Creates deprecated warning. */
 #   define G3D_DEPRECATED __attribute__((__deprecated__))
 
-// setup function calling conventions
-#   if defined(__i386__) && ! defined(__x86_64__)
-
-#       ifndef __cdecl
-#           define __cdecl __attribute__((cdecl))
-#       endif
-
-#       ifndef __stdcall
-#           define __stdcall __attribute__((stdcall))
-#       endif
-
-#   elif defined(__x86_64__)
-
-#       ifndef __cdecl
-#           define __cdecl
-#       endif
-
-#       ifndef __stdcall
-#           define __stdcall
-#       endif
-#   elif defined(__arm__)
-        // CDECL does not apply to arm, don't use it
-#       define __cdecl
-#   endif // calling conventions
-
 /** @def G3D_CHECK_PRINTF_METHOD_ARGS()
     Enables printf parameter validation on gcc. */
 #   define G3D_CHECK_PRINTF_METHOD_ARGS   __attribute__((__format__(__printf__, 2, 3)))

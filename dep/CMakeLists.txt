@@ -22,3 +22,5 @@ add_subdirectory(src)
 if (BUILD_EXTRACTORS)
   add_subdirectory(libmpq)
 endif()
+
+add_subdirectory(g3dlite)
