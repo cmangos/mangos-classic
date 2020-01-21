@@ -23,73 +23,72 @@ cache: ccache
 git:
   depth: 1
 
-# make use of the new container based infrastructure at travis to improve performance (we don't need sudo)
-sudo: false
-
-# use ubuntu 14.04 VM
-dist: trusty
-
 # don't re-build for tags so that [publish binary] is not re-run
 # https://github.com/travis-ci/travis-ci/issues/1532
 branches:
   except:
     - /^Last_.*/
 
-os:
-  - linux
-  - osx
+# use ubuntu 18.04 VM
+dist:
+    bionic
 
-compiler:
-  - clang
-  - gcc
-
-env:
-  - BUILD_TYPE=Release
-  - BUILD_TYPE=Release PCH_FLAG=ON
-
-matrix:
-  exclude:
-    - os: osx
-      compiler: gcc
-    - os: osx
-      env: BUILD_TYPE=Release PCH_FLAG=ON
-
+# install dpendencies for linux
 addons:
   apt:
-    sources:
-      - kubuntu-backports
-      - boost-latest
-      - ubuntu-toolchain-r-test
     packages:
       - build-essential
       - libtool
-      - gcc-4.8
-      - g++-4.8
       - make
       - cmake
-      - libboost1.55-dev
-      - libboost-system1.55-dev
-      - libboost-program-options1.55-dev
-      - libboost-thread1.55-dev
-      - libboost-regex1.55-dev
+      - libboost1.65-dev
+      - libboost-system1.65-dev
+      - libboost-program-options1.65-dev
+      - libboost-thread1.65-dev
+      - libboost-regex1.65-dev
 
-# overwrite GCC version for GCC build only
-before_install:
-  - if [ $CC = "gcc" ] ; then export CC=gcc-4.8 CXX=g++-4.8 ; fi
+# build matrix
+matrix:
+  include:
+    # linux builds on gcc x64
+    - os: linux
+      arch: amd64
+      compiler: gcc
+      env:
+        - CC=gcc-7
+        - CXX=g++-7
+    # linux builds on clang x64
+    - os: linux
+      arch: amd64
+      compiler: clang
+      env:
+        - CC=clang
+        - CXX=clang++
 
-install: |-
-  if [ "$TRAVIS_OS_NAME" == "osx" ]
-  then
-    brew install mysql-client@5.7
-    export MYSQL_HOME=/usr/local/opt/mysql-client@5.7
-    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl/lib/pkgconfig"
-  fi
+    # linux builds on gcc ARM64
+    - os: linux
+      arch: arm64
+      compiler: gcc
+      env:
+        - CC=gcc-7
+        - CXX=g++-7
+    # osx builds on clang x64
+    - os: osx
+      osx_image: xcode10
+      arch: amd64
+      compiler: clang
+      env:
+        - MYSQL_HOME=/usr/local/opt/mysql-client@5.7
+      install:
+        - brew install mysql-client@5.7
+        - export OPENSSL_ROOT_DIR=$(brew --prefix openssl)
 
 script: |-
+  cmake --version
   mkdir _build
   mkdir _install
   cd _build
   export CCACHE_SLOPPINESS=pch_defines,time_macros
-  cmake -DCMAKE_INSTALL_PREFIX=../_install -DBUILD_EXTRACTORS=ON -DBUILD_PLAYERBOT=ON -DPCH=$PCH_FLAG ..
+  cmake -DCMAKE_INSTALL_PREFIX=../_install -DBUILD_EXTRACTORS=ON -DBUILD_PLAYERBOT=ON ..
   make -j2
   make install
