@@ -80,8 +80,9 @@ before_install:
 install: |-
   if [ "$TRAVIS_OS_NAME" == "osx" ]
   then
-    brew update
     brew install mysql-client@5.7
+    export MYSQL_HOME=/usr/local/opt/mysql-client@5.7
+    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl/lib/pkgconfig"
   fi
 
 script: |-

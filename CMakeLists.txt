@@ -244,9 +244,15 @@ if(UNIX)
   if(APPLE)
     find_package(OpenSSL QUIET)
     if(NOT OpenSSL_FOUND AND NOT OPENSSL_FOUND)
-      # If OpenSSL path isn't specified on mac we set the one that homebrew uses and try again
-      set(OPENSSL_ROOT_DIR /usr/local/opt/openssl/)
-      set(OPENSSL_INCLUDE_DIR /usr/local/opt/openssl/include)
+      # If OpenSSL path isn't specified on mac we set the one that Homebrew uses
+      # and try again. This typically makes CMake find the OpenSSL headers and version.
+      # Homebrew installs the OpenSSL libraries with a version in the library file names
+      # though, like libcrypto.1.1.dylib, but CMake doesn't seem to check that file name
+      # pattern and might eventually find a non-matching library installed by macOS in
+      # a default search path. To avoid that, we'll also point pkg-config to the Homebrew
+      # location for OpenSSL details, because CMake checks pkg-config info as well.
+      set(OPENSSL_ROOT_DIR /usr/local/opt/openssl)
+      set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/opt/openssl/lib/pkgconfig")
       find_package(OpenSSL)
     endif()
   else()
