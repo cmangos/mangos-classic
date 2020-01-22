@@ -584,13 +584,13 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<MaNGOS::Obje
 
 void Map::Update(const uint32& t_diff)
 {
-    metric::duration<std::chrono::milliseconds> meas("map.update.objects", {
-    { "map_id", std::to_string(i_id) },
-    { "instance_id", std::to_string(i_InstanceId) }
+    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+    metric::duration<std::chrono::milliseconds> measurement("map.update.objects", {
+        { "map_id", std::to_string(i_id) },
+        { "instance_id", std::to_string(i_InstanceId) }
         });
 
     uint64 count = 0;
-    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 
     m_dyn_tree.update(t_diff);
 
@@ -686,7 +686,7 @@ void Map::Update(const uint32& t_diff)
         ++count;
     }
 
-    meas.add_field("count", static_cast<int32>(count));
+    measurement.add_field("count", static_cast<int32>(count));
 
     // Send world objects and item update field changes
     SendObjectUpdates();
@@ -713,7 +713,8 @@ void Map::Update(const uint32& t_diff)
         i_data->Update(t_diff);
 
     std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-    long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    measurement.add_field("duration", static_cast<uint64>(duration));
 
     if (duration < m_updateTimeMin)
         m_updateTimeMin = duration;

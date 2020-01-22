@@ -1,0 +1,38 @@
+Tutorial:
+1. setup influxdb - start influxd, start influx and create database perfd
+2. setup grafana - add dataset - influxdb - perfd - http://localhost:8086
+
+Logged Entities:
+map.update.objects:
+map_id
+instance_id
+count - count of updated objects
+duration
+
+unit.update:
+entry
+guid
+unit_type
+map_id
+instance_id
+
+unit.ai.update:
+entry
+guid
+unit_type
+map_id
+instance_id
+
+unit.update.spline.movement:
+entry
+guid
+unit_type
+map_id
+instance_id
+
+motion.update:
+entry
+guid
+unit_type
+map_id
+instance_id
