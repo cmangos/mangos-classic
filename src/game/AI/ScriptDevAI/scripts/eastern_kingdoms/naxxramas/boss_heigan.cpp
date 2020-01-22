@@ -55,7 +55,8 @@ enum
 
     MAX_PLAYERS_TELEPORT    = 3,
 
-    NPC_WORLD_TRIGGER       = 15384                 // Control plague waves
+    NPC_PLAGUE_WAVE         = 17293,                // Control plague waves
+    NPC_WORLD_TRIGGER       = 15384
 };
 
 struct boss_heiganAI : public ScriptedAI
@@ -150,7 +151,7 @@ struct boss_heiganAI : public ScriptedAI
     void StartEruptions(uint32 spellId)
     {
         // Clear current plague waves controller spell before applying the new one
-        if (Creature* trigger = GetClosestCreatureWithEntry(m_creature, NPC_WORLD_TRIGGER, 100.0f))
+        if (Creature* trigger = GetClosestCreatureWithEntry(m_creature, NPC_PLAGUE_WAVE, 100.0f))
         {
             trigger->RemoveAllAuras();
             trigger->CastSpell(trigger, spellId, TRIGGERED_OLD_TRIGGERED);
@@ -160,7 +161,7 @@ struct boss_heiganAI : public ScriptedAI
     void StopEruptions()
     {
         // Reset Plague Waves
-        if (Creature* trigger = GetClosestCreatureWithEntry(m_creature, NPC_WORLD_TRIGGER, 100.0f))
+        if (Creature* trigger = GetClosestCreatureWithEntry(m_creature, NPC_PLAGUE_WAVE, 100.0f))
             trigger->RemoveAllAuras();
     }
 
