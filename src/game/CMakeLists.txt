@@ -110,7 +110,7 @@ if(PCH)
     set_target_properties(${LIBRARY_NAME} PROPERTIES COMPILE_FLAGS " /Yu\"${PrecompiledHeader}\" /FI\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\" /bigobj")
     set_source_files_properties(${PrecompiledSource} PROPERTIES COMPILE_FLAGS "/Yc\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\"")
     set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "Game")
-  elseif(NOT MINGW)
+  elseif(NOT MINGW AND NOT APPLE)
     # TODO: Resolve issues with order of includes before enabling Cotire for MinGW builds
     cotire(${LIBRARY_NAME})
   endif()
