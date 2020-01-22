@@ -72,6 +72,7 @@ class AuctionHouseBot {
         std::vector<int32> m_fishingLootConfig;
         std::vector<int32> m_gameobjectLootConfig;
         std::vector<int32> m_skinningLootConfig;
+        std::vector<int32> m_professionItemsConfig;
 
         std::vector<std::vector<uint32>> m_itemPrice = std::vector<std::vector<uint32>>(MAX_ITEM_QUALITY, std::vector<uint32>(MAX_ITEM_CLASS));
         uint32 m_vendorPrice;
@@ -90,6 +91,7 @@ class AuctionHouseBot {
         std::vector<uint32> m_fishingLootTemplates;
         std::vector<uint32> m_gameobjectLootTemplates;
         std::vector<uint32> m_skinningLootTemplates;
+        std::vector<uint32> m_professionItems;
 
         std::unordered_set<uint32> m_vendorItems;
 };

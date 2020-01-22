@@ -12,8 +12,8 @@ ConfVersion=2020010101
 # 40th second).
 # Values must be in range 0-100. Default values are Sell(100) and Buy(20).
 ###################################################################################################################
-AuctionHouseBot.Chance.Sell = 100
-AuctionHouseBot.Chance.Buy  =  20
+AuctionHouseBot.Chance.Sell = 10
+AuctionHouseBot.Chance.Buy  = 10
 
 ###################################################################################################################
 # AuctionHouseBot.Loot.<source>[.<rank>] = <minSources>,<maxSources>,<minLootings>,<maxLootings>
@@ -40,16 +40,29 @@ AuctionHouseBot.Chance.Buy  =  20
 #   Another random number between 5 and 15 for each game object is chosen to determine how many times the game
 #   object should be simulated looted.
 ###################################################################################################################
-AuctionHouseBot.Loot.Creature.Normal    =  -30,  5, 20, 50
-AuctionHouseBot.Loot.Creature.Rare      =  -10,  3,  1,  1
-AuctionHouseBot.Loot.Creature.Elite     =  -10,  5,  5, 10
-AuctionHouseBot.Loot.Creature.RareElite =  -50,  4,  1,  1
-AuctionHouseBot.Loot.Creature.WorldBoss = -100,  2,  1,  1
+AuctionHouseBot.Loot.Creature.Normal    =   30, 35,  8, 12
+AuctionHouseBot.Loot.Creature.Rare      =    0, 10,  1,  1
+AuctionHouseBot.Loot.Creature.Elite     =    30, 34,  1,  2
+AuctionHouseBot.Loot.Creature.RareElite =  -10,  2,  1,  1
+AuctionHouseBot.Loot.Creature.WorldBoss =  -20,  1,  1,  1
 
-AuctionHouseBot.Loot.Disenchant =  -70,  1,  2,  3
-AuctionHouseBot.Loot.Fishing    =  -70,  4,  5, 10
-AuctionHouseBot.Loot.Gameobject =   -5,  5,  5, 15
-AuctionHouseBot.Loot.Skinning   =  -70,  2,  5, 10
+AuctionHouseBot.Loot.Disenchant =    0,  2,  1,  1
+AuctionHouseBot.Loot.Fishing    =    0,  1, 30, 40
+AuctionHouseBot.Loot.Gameobject =   13, 16,  7, 11
+AuctionHouseBot.Loot.Skinning   =   -4,  1, 50, 50
+
+###################################################################################################################
+# Profession craftable items added to AH.
+#
+# Determines the amount of items crafted by professions added each time the bot visits the AH.
+# Since there's no good way to determine how rare crafted items are, there will be twice as many white items as
+# green items, twice as many green as blue, etc.
+#
+# This setting is slightly different from the Loot.* settings, the 4 values are:
+#   <min items>, <max items>, <min percent stack size>, <max percent stack size>
+# Default values are: 30, 50, 100, 100
+###################################################################################################################
+AuctionHouseBot.Items.Profession = 30, 50, 100, 100
 
 ###################################################################################################################
 # Item buyout price (0 = no sell/buy, otherwise percentage of item cost when bought from vendor)
@@ -74,10 +87,10 @@ AuctionHouseBot.Loot.Skinning   =  -70,  2,  5, 10
 ###################################################################################################################
 # Class                             0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
 AuctionHouseBot.Price.Poor      =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
-AuctionHouseBot.Price.Normal    = 100,100,  0,  0,  0,100,100,100,  0,100,  0,100,  0,  0,  0,100
-AuctionHouseBot.Price.Uncommon  = 200,200,200,  0,200,200,200,200,  0,200,  0,200,  0,  0,  0,200
-AuctionHouseBot.Price.Rare      = 400,400,400,  0,400,400,400,400,  0,400,  0,400,  0,  0,  0,400
-AuctionHouseBot.Price.Epic      = 800,800,800,  0,800,800,800,800,  0,800,  0,800,  0,  0,  0,800
+AuctionHouseBot.Price.Normal    = 100,100,  0,  0,  0,100,100,100,  0,100,  0,100,100,100,  0,100
+AuctionHouseBot.Price.Uncommon  = 200,200,200,  0,200,200,200,200,  0,200,  0,200,200,200,  0,200
+AuctionHouseBot.Price.Rare      = 400,400,400,  0,400,400,400,400,  0,400,  0,400,400,400,  0,400
+AuctionHouseBot.Price.Epic      = 800,800,800,  0,800,800,800,800,  0,800,  0,800,800,800,  0,800
 AuctionHouseBot.Price.Legendary =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 AuctionHouseBot.Price.Artifact  =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 
@@ -108,9 +121,9 @@ AuctionHouseBot.Price.Variance = 10
 # Auction min/max bid price (percent)
 #
 # Sets the starting bid price of items sold on AH, a randomly selected percentage of the buyout price.
-# Values must be in range 0-100. Default values are Min(60) and Max(90).
+# Values must be in range 0-100. Default values are Min(75) and Max(90).
 ###################################################################################################################
-AuctionHouseBot.Bid.Min = 60
+AuctionHouseBot.Bid.Min = 75
 AuctionHouseBot.Bid.Max = 90
 
 ###################################################################################################################
