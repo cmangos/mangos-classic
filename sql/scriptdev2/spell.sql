@@ -30,6 +30,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28522,'spell_sapphiron_icebolt_aura'),
 (28526,'spell_sapphiron_icebolt'),
 (28560,'spell_sapphiron_blizzard'),
+(29330,'spell_sapphiron_despawn_buffet'),
 (30132,'spell_sapphiron_iceblock');
 
 -- TBC

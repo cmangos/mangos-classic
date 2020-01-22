@@ -51,6 +51,9 @@ enum
     SPELL_FROST_BREATH_DUMMY    = 30101,
     SPELL_FROST_BREATH          = 28524,            // Triggers spells 29318 (Frost Breath) and 30132 (Despawn Ice Block)
     SPELL_DESPAWN_ICEBLOCK_GO   = 28523,
+    SPELL_SUMMON_WING_BUFFET    = 29329,
+    SPELL_DESPAWN_WING_BUFFET   = 29330,            // Triggers spell 29336 (Despawn Buffet)
+    SPELL_DESPAWN_BUFFET_EFFECT = 29336,
 
     NPC_BLIZZARD                = 16474,
 };
@@ -142,6 +145,11 @@ struct boss_sapphironAI : public ScriptedAI
     {
         if (type == POINT_MOTION_TYPE && m_phase == PHASE_LIFT_OFF)
         {
+            // Summon the Wing Buffet NPC and cast the triggered aura to despawn it
+            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_WING_BUFFET) == CAST_OK)
+                DoCastSpellIfCan(m_creature, SPELL_DESPAWN_WING_BUFFET);
+
+            // Actual take off
             m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
             m_creature->SetHover(true);
             m_creature->CastSpell(nullptr, SPELL_DRAGON_HOVER, TRIGGERED_OLD_TRIGGERED);
@@ -354,12 +362,8 @@ struct SummonBlizzard : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
     {
-        debug_log("SD2 spell script for spell with caster %s", spell->GetCaster()->GetName());
         if (Unit* unitTarget = spell->GetUnitTarget())
-        {
-            debug_log("SD2 spell script for spell with caster %s and target %s", spell->GetCaster()->GetName(), unitTarget->GetName());
             unitTarget->CastSpell(unitTarget, SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid());
-        }
     }
 };
 
@@ -379,6 +383,15 @@ struct DespawnIceBlock : public SpellScript
     }
 };
 
+struct DespawnBuffet : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        if (Unit* target =  aura->GetTarget())
+            data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_DESPAWN_BUFFET_EFFECT); // Summon Ice Block
+    }
+};
+
 void AddSC_boss_sapphiron()
 {
     Script* newScript = new Script;
@@ -395,4 +408,5 @@ void AddSC_boss_sapphiron()
     RegisterSpellScript<IceBolt>("spell_sapphiron_icebolt");
     RegisterSpellScript<SummonBlizzard>("spell_sapphiron_blizzard");
     RegisterSpellScript<DespawnIceBlock>("spell_sapphiron_iceblock");
+    RegisterAuraScript<DespawnBuffet>("spell_sapphiron_despawn_buffet");
 }

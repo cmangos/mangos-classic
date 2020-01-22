@@ -4576,6 +4576,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(nullptr, 28748, TRIGGERED_OLD_TRIGGERED);       // Self suicide
                     return;
                 }
+                case 29336:                                 // Despawn Buffet
                 case 29379:                                 // Despawn Crypt Guards
                 case 30134:                                 // Despawn Boss Adds
                 case 30228:                                 // Despawn Summons
