@@ -43,8 +43,8 @@ void AuctionHouseBot::Initialize() {
     }
     sLog.outString("AHBot using configuration file %s", m_configFileName.c_str());
 
-    m_chanceSell = getMinMaxConfig("AuctionHouseBot.Chance.Sell", 0, 100, 100);
-    m_chanceBuy = getMinMaxConfig("AuctionHouseBot.Chance.Buy", 0, 100, 20);
+    m_chanceSell = getMinMaxConfig("AuctionHouseBot.Chance.Sell", 0, 100, 10);
+    m_chanceBuy = getMinMaxConfig("AuctionHouseBot.Chance.Buy", 0, 100, 10);
 
     sLog.outString("AHBot selling items: %s", m_chanceSell > 0 ? "Enabled" : "Disabled");
     sLog.outString("AHBot buying items: %s", m_chanceBuy > 0 ? "Enabled" : "Disabled");
@@ -78,6 +78,15 @@ void AuctionHouseBot::Initialize() {
         parseLootConfig("AuctionHouseBot.Loot.Skinning", m_skinningLootConfig);
         fillUintVectorFromQuery("SELECT DISTINCT entry FROM skinning_loot_template", m_skinningLootTemplates);
 
+        // profession items (different than the loot above, but use similar config)
+        parseLootConfig("AuctionHouseBot.Items.Profession", m_professionItemsConfig);
+        fillUintVectorFromQuery("SELECT entry FROM item_template WHERE entry IN (SELECT EffectItemType1 FROM spell_template WHERE attributes & 32 AND attributes & 65536)", m_professionItems);
+
+        // vendor items (used to prevent items being bought from vendor and sold at ah for profit)
+        std::vector<uint32> tmpVector;
+        fillUintVectorFromQuery("SELECT item FROM npc_vendor", tmpVector);
+        std::copy(tmpVector.begin(), tmpVector.end(), std::inserter(m_vendorItems, m_vendorItems.end()));
+
         // item price
         parseItemPriceConfig("AuctionHouseBot.Price.Poor", m_itemPrice[ITEM_QUALITY_POOR]);
         parseItemPriceConfig("AuctionHouseBot.Price.Normal", m_itemPrice[ITEM_QUALITY_NORMAL]);
@@ -89,7 +98,7 @@ void AuctionHouseBot::Initialize() {
         // item price variance
         m_itemPriceVariance = getMinMaxConfig("AuctionHouseBot.Price.Variance", 0, 100, 10);
         // auction min/max bid
-        m_auctionBidMin = getMinMaxConfig("AuctionHouseBot.Bid.Min", 0, 100, 60);
+        m_auctionBidMin = getMinMaxConfig("AuctionHouseBot.Bid.Min", 0, 100, 75);
         m_auctionBidMax = getMinMaxConfig("AuctionHouseBot.Bid.Max", 0, 100, 90);
         if (m_auctionBidMin > m_auctionBidMax) {
             sLog.outError("AHBot error: AuctionHouseBot.Bid.Min must be less or equal to AuctionHouseBot.Bid.Max. Setting Bid.Min equal to Bid.Max.");
@@ -105,11 +114,6 @@ void AuctionHouseBot::Initialize() {
 
         // buyout price for items sold by vendors
         m_vendorPrice = getMinMaxConfig("AuctionHouseBot.Price.Vendor", 0, 999, 100);
-
-        // vendor items
-        std::vector<uint32> tmpVector;
-        fillUintVectorFromQuery("SELECT DISTINCT item FROM npc_vendor", tmpVector);
-        std::copy(tmpVector.begin(), tmpVector.end(), std::inserter(m_vendorItems, m_vendorItems.end()));
     }
 }
 
@@ -140,7 +144,7 @@ void AuctionHouseBot::parseLootConfig(char const* fieldname, std::vector<int32>&
     }
     for (uint32 index = 1; index < 4; ++index) {
         if (lootConfig[index] < 0) {
-            sLog.outError("AHBot error: %s value (%d) for field %s should not be a negative number, setting value to 0.", (index == 1 ? "First" : (index == 2 ? "Second" : "Third")), lootConfig[1], fieldname);
+            sLog.outError("AHBot error: %s value (%d) for field %s should not be a negative number, setting value to 0.", (index == 1 ? "Second" : (index == 2 ? "Third" : "Fourth")), lootConfig[1], fieldname);
             lootConfig[index] = 0;
         }
     }
@@ -269,6 +273,23 @@ void AuctionHouseBot::Update() {
         addLootToItemMap(&LootTemplates_Fishing, m_fishingLootConfig, m_fishingLootTemplates, itemMap);                      // fishing loot
         addLootToItemMap(&LootTemplates_Gameobject, m_gameobjectLootConfig, m_gameobjectLootTemplates, itemMap);             // gameobject loot
         addLootToItemMap(&LootTemplates_Skinning, m_skinningLootConfig, m_skinningLootTemplates, itemMap);                   // skinning loot
+
+        // profession items are a bit different (not looted)
+        if (m_professionItemsConfig[1] > 0 && m_professionItemsConfig[3] > 0) {
+            int32 maxTemplates = m_professionItemsConfig[0] < 0 ? urand(0, m_professionItemsConfig[1] + 1 - m_professionItemsConfig[0]) + m_professionItemsConfig[0] : urand(m_professionItemsConfig[0], m_professionItemsConfig[1] + 1);
+            if (maxTemplates > 0) {
+                for (uint32 templateCounter = 0; templateCounter < maxTemplates; ++templateCounter) {
+                    uint32 item = m_professionItems[urand(0, m_professionItems.size())];
+                    ItemPrototype const* prototype = ObjectMgr::GetItemPrototype(item);
+                    if (prototype->Quality == 0 || urand(0, 1 << (prototype->Quality - 1)) > 0)
+                        continue; // make it decreasingly likely that crafted items of higher quality is added to the auction house (white: 100%, green: 50%, blue: 25%, purple: 12.5%, ...)
+                    uint32 count = prototype->GetMaxStackSize() * urand(m_professionItemsConfig[2], m_professionItemsConfig[3]) / 100 + 1;
+                    if (count > prototype->GetMaxStackSize())
+                        count = prototype->GetMaxStackSize(); // when adding from professions, we won't allow more than one stack at most
+                    itemMap[item] += count;
+                }
+            }
+        }
 
         for (auto itemEntry : itemMap) {
             ItemPrototype const* prototype = sObjectMgr.GetItemPrototype(itemEntry.first);
