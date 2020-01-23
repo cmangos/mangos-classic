@@ -3,10 +3,7 @@
 #ifndef PRECOMPILED_H
 #define PRECOMPILED_H
 
-#ifndef MSVC
 #include "pchdef.h"
-#endif
-
 #include "AI/ScriptDevAI/include/sc_creature.h"
 #include "AI/ScriptDevAI/include/sc_gossip.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"

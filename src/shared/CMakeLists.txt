@@ -120,6 +120,10 @@ set(LIBRARY_SRCS
     Threading.h
 )
 
+# define header files
+set(PCH_FILE_HEADER "pchdef.h")
+set(PCH_FILE_SOURCE "pchdef.cpp")
+
 source_group("Auth"
   FILES
     ${SRC_GRP_AUTH}
@@ -185,6 +189,7 @@ target_include_directories(${LIBRARY_NAME}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
   PUBLIC ${Boost_INCLUDE_DIRS}
   PUBLIC ${OPENSSL_INCLUDE_DIR}
+  PUBLIC "${CMAKE_SOURCE_DIR}/src/game"
 )
 
 target_link_libraries(${LIBRARY_NAME}
@@ -205,6 +210,11 @@ else()
     add_custom_command(TARGET ${LIBRARY_NAME} POST_BUILD
       COMMAND copy \"${LibFolder}\\*.dll\" \"$(OutDir)\")
   endif()
+endif()
+
+# Generate precompiled header
+if(PCH)
+  target_precompile_headers(${LIBRARY_NAME} PUBLIC "${PCH_FILE_HEADER}")
 endif()
 
 # Mark the revision header as being generated.

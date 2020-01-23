@@ -46,6 +46,20 @@ if(NOT BUILD_PLAYERBOT)
   endforeach()
 endif()
 
+set(PCH_BASE_FILENAME "pchdef")
+# exclude pchdef files
+set (EXCLUDE_FILE "${PCH_BASE_FILENAME}")
+foreach (TMP_PATH ${LIBRARY_SRCS})
+    string (FIND ${TMP_PATH} ${EXCLUDE_FILE} EXCLUDE_FILE_FOUND)
+    if (NOT ${EXCLUDE_FILE_FOUND} EQUAL -1)
+        list(REMOVE_ITEM LIBRARY_SRCS ${TMP_PATH})
+    endif ()
+endforeach()
+
+# set pch file names
+set(PCH_FILE_HEADER "${PCH_BASE_FILENAME}.h")
+set(PCH_FILE_SOURCE "${PCH_BASE_FILENAME}.cpp")
+
 # Create visual studio groups using folder structure
 foreach(source ${LIBRARY_SRCS})
     get_filename_component(source_path "${source}" PATH)
@@ -98,23 +112,13 @@ if (BUILD_PLAYERBOT)
   add_definitions(-DBUILD_PLAYERBOT)
 endif()
 
+if (MSVC)
+  set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "Game")
+endif()
+
 # Generate precompiled header
 if(PCH)
-  if (MSVC)
-    set(PCHBaseName "pchdef")
-    set(PrecompiledBinary "$(IntDir)/${PCHBaseName}.pch")
-    set(PrecompiledHeader "${PCHBaseName}.h")
-    set(PrecompiledSource "${PCHBaseName}.cpp")
-    #set_property(TARGET ${LIBRARY_NAME} PROPERTY COMPILE_FLAGS " /Yu\"${PrecompiledHeader}\" /FI\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\"")
-    #set_property(SOURCE ${PrecompiledSource} PROPERTY COMPILE_FLAGS "/Yc\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\"")
-    set_target_properties(${LIBRARY_NAME} PROPERTIES COMPILE_FLAGS " /Yu\"${PrecompiledHeader}\" /FI\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\" /bigobj")
-    set_source_files_properties(${PrecompiledSource} PROPERTIES COMPILE_FLAGS "/Yc\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\"")
-    set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "Game")
-  elseif(NOT MINGW AND NOT APPLE)
-    # TODO: Resolve issues with order of includes before enabling Cotire for MinGW builds
-    cotire(${LIBRARY_NAME})
-  endif()
-  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+  target_precompile_headers(${LIBRARY_NAME} PRIVATE "${PCH_FILE_HEADER}")
 endif()
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/PlayerBot/playerbot.conf.dist.in DESTINATION ${CONF_DIR} RENAME playerbot.conf.dist)

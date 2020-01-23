@@ -6,13 +6,6 @@
 #include <dbghelp.h>
 #pragma warning(pop)
 
-#if _MSC_VER < 1400
-#   define countof(array)   (sizeof(array) / sizeof(array[0]))
-#else
-#   include <stdlib.h>
-#   define countof  _countof
-#endif                                                      // _MSC_VER < 1400
-
 enum BasicType                                              // Stolen from CVCONST.H in the DIA 2.0 SDK
 {
     btNoType = 0,
