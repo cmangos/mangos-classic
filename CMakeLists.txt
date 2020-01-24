@@ -339,6 +339,15 @@ if(NOT BUILD_GAME_SERVER AND BUILD_PLAYERBOT)
   message(STATUS "BUILD_PLAYERBOT forced to OFF due to BUILD_GAME_SERVER is not set")
 endif()
 
+if(PCH)
+  if(${CMAKE_VERSION} VERSION_LESS "3.16") 
+    message("PCH is not supported by your CMake version")
+    message("Please consider to switch to CMake 3.16")
+    message("PCH is forced to OFF")
+    set(PCH OFF)
+  endif()
+endif()
+
 # print out the results before continuing
 include(cmake/showoptions.cmake)
 
