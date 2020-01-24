@@ -53,7 +53,7 @@ class AuctionHouseBot {
         void fillUintVectorFromQuery(char const* query, std::vector<uint32>& lootTemplates);
         void parseItemPriceConfig(char const* fieldname, std::vector<uint32>& itemPrices);
         void addLootToItemMap(LootStore* store, std::vector<int32>& lootConfig, std::vector<uint32>& lootTemplates, std::unordered_map<uint32, uint32>& itemMap);
-        uint32 calculateBuyoutPrice(Item* item);
+        uint32 calculateBuyoutPrice(ItemPrototype const* prototype, uint32 count);
 
         std::string m_configFileName;
         Config m_ahBotCfg;

@@ -195,7 +195,7 @@ void AuctionHouseBot::addLootToItemMap(LootStore* store, std::vector<int32>& loo
         if (!lootTable)
             continue;
         std::unique_ptr<Loot> loot = std::unique_ptr<Loot>(new Loot(LOOT_DEBUG));
-        for (uint32 repeat = urand(lootConfig[2], lootConfig[3]); repeat > 0; --repeat)
+        for (uint32 repeat = urand(lootConfig[2], lootConfig[3] + 1); repeat > 0; --repeat)
             lootTable->Process(*loot, nullptr, *store, store->IsRatesAllowed());
 
         LootItem* lootItem;
@@ -281,9 +281,9 @@ void AuctionHouseBot::Update() {
                 for (uint32 templateCounter = 0; templateCounter < maxTemplates; ++templateCounter) {
                     uint32 item = m_professionItems[urand(0, m_professionItems.size())];
                     ItemPrototype const* prototype = ObjectMgr::GetItemPrototype(item);
-                    if (prototype->Quality == 0 || urand(0, 1 << (prototype->Quality - 1)) > 0)
+                    if (!prototype || prototype->Quality == 0 || urand(0, 1 << (prototype->Quality - 1)) > 0)
                         continue; // make it decreasingly likely that crafted items of higher quality is added to the auction house (white: 100%, green: 50%, blue: 25%, purple: 12.5%, ...)
-                    uint32 count = prototype->GetMaxStackSize() * urand(m_professionItemsConfig[2], m_professionItemsConfig[3]) / 100 + 1;
+                    uint32 count = prototype->GetMaxStackSize() * urand(m_professionItemsConfig[2], m_professionItemsConfig[3] + 1) / 100 + 1;
                     if (count > prototype->GetMaxStackSize())
                         count = prototype->GetMaxStackSize(); // when adding from professions, we won't allow more than one stack at most
                     itemMap[item] += count;
@@ -303,12 +303,14 @@ void AuctionHouseBot::Update() {
                 continue; // item class is filtered out
 
             for (uint32 stackCounter = 0; stackCounter < itemEntry.second; stackCounter += prototype->GetMaxStackSize()) {
-                Item* item = Item::CreateItem(itemEntry.first, itemEntry.second - stackCounter > prototype->GetMaxStackSize() ? prototype->GetMaxStackSize() : itemEntry.second - stackCounter);
-                uint32 buyoutPrice = calculateBuyoutPrice(item);
-                if (buyoutPrice == 0)
+                uint32 count = itemEntry.second - stackCounter > prototype->GetMaxStackSize() ? prototype->GetMaxStackSize() : itemEntry.second - stackCounter;
+                uint32 buyoutPrice = calculateBuyoutPrice(prototype, count);
+                Item* item = Item::CreateItem(itemEntry.first, count);
+                if (buyoutPrice == 0 || !item)
                     continue; // don't put up items we don't know the value of
                 uint32 bidPrice = buyoutPrice * (urand(m_auctionBidMin, m_auctionBidMax + 1)) / 100;
-                auctionHouse->AddAuction(sAuctionHouseStore.LookupEntry(houseType == AUCTION_HOUSE_ALLIANCE ? 1 : (houseType == AUCTION_HOUSE_HORDE ? 6 : 7)), item, urand(m_auctionTimeMin, m_auctionTimeMax + 1) * HOUR, bidPrice, buyoutPrice);
+                if (item)
+                    auctionHouse->AddAuction(sAuctionHouseStore.LookupEntry(houseType == AUCTION_HOUSE_ALLIANCE ? 1 : (houseType == AUCTION_HOUSE_HORDE ? 6 : 7)), item, urand(m_auctionTimeMin, m_auctionTimeMax + 1) * HOUR, bidPrice, buyoutPrice);
             }
         }
     } else if (m_houseAction >= MAX_AUCTION_HOUSE_TYPE && urand(0, 100) < m_chanceBuy) {
@@ -320,7 +322,7 @@ void AuctionHouseBot::Update() {
             if (auction->owner == 0 && auction->bid == 0)
                 continue; // ignore bidding/buying auctions that were created by server and not bidded on by player
             Item* item = sAuctionMgr.GetAItem(auction->itemGuidLow);
-            uint32 buyItemCheck = urand(0, calculateBuyoutPrice(item));
+            uint32 buyItemCheck = urand(0, calculateBuyoutPrice(item->GetProto(), item->GetCount()));
             uint32 bidPrice = auction->bid + auction->GetAuctionOutBid();
             if (auction->startbid > bidPrice)
                 bidPrice = auction->startbid;
@@ -334,10 +336,7 @@ void AuctionHouseBot::Update() {
     }
 }
 
-uint32 AuctionHouseBot::calculateBuyoutPrice(Item* item) {
-    if (!item)
-        return 0;
-    ItemPrototype const* prototype = item->GetProto();
+uint32 AuctionHouseBot::calculateBuyoutPrice(ItemPrototype const* prototype, uint32 count) {
     if (!prototype)
         return 0;
     uint32 buyoutPrice = prototype->BuyPrice;
@@ -345,7 +344,7 @@ uint32 AuctionHouseBot::calculateBuyoutPrice(Item* item) {
         buyoutPrice = prototype->SellPrice * (prototype->Quality <= ITEM_QUALITY_NORMAL ? 4 : 5);
     // multiply buyoutPrice with count and item quality price percentage
     // if item is sold by a vendor and the vendor price is set, then use this instead
-    buyoutPrice *= item->GetCount() * (m_vendorPrice == 0 || m_vendorItems.find(prototype->ItemId) == m_vendorItems.end() ? m_itemPrice[prototype->Quality][prototype->Class] : m_vendorPrice);
+    buyoutPrice *= count * (m_vendorPrice == 0 || m_vendorItems.find(prototype->ItemId) == m_vendorItems.end() ? m_itemPrice[prototype->Quality][prototype->Class] : m_vendorPrice);
     buyoutPrice += ((int32) urand(0, m_itemPriceVariance * 2 + 1) - (int32) m_itemPriceVariance) * (int32) (buyoutPrice / 100);
     buyoutPrice /= 100; // since we multiplied with m_itemPrice
     return buyoutPrice;
