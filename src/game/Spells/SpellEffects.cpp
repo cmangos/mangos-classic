@@ -1188,7 +1188,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 24019:                                 // Gurubashi Axe Thrower; Axe Flurry.
                 {
-                    if (unitTarget && m_caster->IsWithinLOSInMap(unitTarget))
+                    if (unitTarget && m_caster->IsWithinLOSInMap(unitTarget, true))
                         m_caster->CastSpell(unitTarget, 24020, TRIGGERED_OLD_TRIGGERED);
 
                     return;

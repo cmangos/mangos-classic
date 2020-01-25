@@ -80,7 +80,7 @@ void PetAI::MoveInLineOfSight(Unit* who)
             && m_creature->CanAttackOnSight(who) && who->isInAccessablePlaceFor(m_unit)
             && m_unit->IsWithinDistInMap(who, m_unit->GetAttackDistance(who))
             && m_unit->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE_MELEE
-            && m_unit->IsWithinLOSInMap(who))
+            && m_unit->IsWithinLOSInMap(who, true))
     {
         AttackStart(who);
 
@@ -183,7 +183,7 @@ void PetAI::UpdateAI(const uint32 diff)
             if (!victim || (minRange != 0 && m_unit->IsWithinDistInMap(victim, minRange)))
                 charminfo->SetSpellOpener();
             else if (m_unit->IsWithinDistInMap(victim, charminfo->GetSpellOpenerMaxRange())
-                     && m_unit->IsWithinLOSInMap(victim))
+                     && m_unit->IsWithinLOSInMap(victim, true))
             {
                 uint32 spellId = charminfo->GetSpellOpener();
                 SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);

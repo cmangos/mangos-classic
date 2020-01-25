@@ -53,14 +53,14 @@ void GuardAI::MoveInLineOfSight(Unit* who)
         {
             if (who->GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() != TYPEID_PLAYER)
             {
-                if (m_creature->IsWithinDistInMap(who, 5.0) && m_creature->IsWithinDistInMap(victim, 10.0) && m_creature->IsWithinLOSInMap(victim))
+                if (m_creature->IsWithinDistInMap(who, 5.0) && m_creature->IsWithinDistInMap(victim, 10.0) && m_creature->IsWithinLOSInMap(victim, true))
                 {
                     AttackStart(victim);
                 }
             }
             else if ((who->GetTypeId() == TYPEID_PLAYER && victim->GetTypeId() == TYPEID_PLAYER) || (victim->GetObjectGuid().IsCreature() && ((Creature*)victim)->IsPet() && ((Creature*)victim)->GetOwnerGuid().IsPlayer()))
             {
-                if (m_creature->IsWithinDistInMap(who, 30.0) && m_creature->IsWithinLOSInMap(who))
+                if (m_creature->IsWithinDistInMap(who, 30.0) && m_creature->IsWithinLOSInMap(who, true))
                 {
                     AttackStart(victim);
                 }
@@ -69,7 +69,7 @@ void GuardAI::MoveInLineOfSight(Unit* who)
             {
                 if (((Creature*)who)->IsGuard() || ((Creature*)who)->IsCivilian())
                 {
-                    if (m_creature->IsWithinDistInMap(who, 20.0) && m_creature->IsWithinLOSInMap(who))
+                    if (m_creature->IsWithinDistInMap(who, 20.0) && m_creature->IsWithinLOSInMap(who, true))
                     {
                         AttackStart(victim);
                     }
@@ -83,7 +83,7 @@ void GuardAI::MoveInLineOfSight(Unit* who)
         if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(who) && who->isInAccessablePlaceFor(m_creature))
         {
             float attackRadius = m_creature->GetAttackDistance(who);
-            if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->IsWithinLOSInMap(who))
+            if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->IsWithinLOSInMap(who, true))
             {
                 AttackStart(who);
             }
