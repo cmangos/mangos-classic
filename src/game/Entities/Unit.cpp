@@ -4599,12 +4599,13 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 dispellingS
     SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellId);
     for (SpellAuraHolderMap::iterator iter = spair.first; iter != spair.second; ++iter)
     {
-        if (!casterGuid || iter->second->GetCasterGuid() == casterGuid)
+        SpellAuraHolder* holder = iter->second; // need to save due to iterator corruption
+        if (!casterGuid || holder->GetCasterGuid() == casterGuid)
         {
-            uint32 originalStacks = iter->second->GetStackAmount();
-            if (iter->second->ModStackAmount(-int32(stackAmount), nullptr))
-                RemoveSpellAuraHolder(iter->second, AURA_REMOVE_BY_DISPEL);
-            iter->second->OnDispel(dispeller, dispellingSpellId, originalStacks);
+            uint32 originalStacks = holder->GetStackAmount();
+            if (holder->ModStackAmount(-int32(stackAmount), nullptr))
+                RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DISPEL);
+            holder->OnDispel(dispeller, dispellingSpellId, originalStacks);
             break;
         }
     }
