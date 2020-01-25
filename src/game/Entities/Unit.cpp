@@ -10848,12 +10848,10 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         {
             if (!charmed->IsInCombat())
                 EngageInCombatWithAggressor(charmed);
-            else
-            {
-                if (charmed->GetTypeId() == TYPEID_UNIT)
-                    charmed->AddThreat(this, GetMaxHealth()); // Simulates being charmed
-                this->AddThreat(charmed);
-            }
+
+            if (charmed->GetTypeId() == TYPEID_UNIT)
+                charmed->AddThreat(this, GetMaxHealth()); // Simulates being charmed
+            this->AddThreat(charmed);
         }
     }
     else
