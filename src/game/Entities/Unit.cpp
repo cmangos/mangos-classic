@@ -8867,7 +8867,7 @@ CharmInfo::CharmInfo(Unit* unit) :
     m_petnumber(0), m_opener(0), m_openerMinRange(0),
     m_openerMaxRange(0), m_unitFieldFlags(0), m_unitFieldBytes2_1(0), m_retreating(false), m_stayPosSet(false),
     m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0),
-    m_stayPosO(0)
+    m_stayPosO(0), m_walk(true)
 {
     for (auto& m_charmspell : m_charmspells)
         m_charmspell.SetActionAndType(0, ACT_DISABLED);
@@ -8892,6 +8892,7 @@ void CharmInfo::SetCharmState(std::string const& ainame, bool withNewThreatList 
     m_unitFieldBytes2_1 = m_unit->GetByteValue(UNIT_FIELD_BYTES_2, 1);
     // Save unit flags
     m_unitFieldFlags = m_unit->GetUInt32Value(UNIT_FIELD_FLAGS);
+    SetWalk(m_unit->IsWalking());
 }
 
 void CharmInfo::ResetCharmState()
@@ -8922,6 +8923,9 @@ void CharmInfo::ResetCharmState()
         m_unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
 
     m_unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+
+    if (m_unit->IsCreature())
+        static_cast<Creature*>(m_unit)->SetWalk(GetWalk(), true);
 }
 
 void CharmInfo::InitPetActionBar()
