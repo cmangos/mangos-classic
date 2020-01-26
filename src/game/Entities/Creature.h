@@ -815,8 +815,8 @@ class Creature : public Unit
             return m_charmInfo->GetCharmSpell(pos)->GetAction();
         }
 
-        void SetCombatStartPosition(float x, float y, float z, float o) { m_combatStartPos.x = x; m_combatStartPos.y = y; m_combatStartPos.z = z; m_combatStartPos.o = o; }
-        void GetCombatStartPosition(float& x, float& y, float& z, float& o) const { x = m_combatStartPos.x; y = m_combatStartPos.y; z = m_combatStartPos.z; o = m_combatStartPos.o; }
+        void SetCombatStartPosition(Position const& pos) { m_combatStartPos = pos; }
+        void GetCombatStartPosition(Position& pos) const { pos = m_combatStartPos; }
 
         void SetRespawnCoord(CreatureCreatePos const& pos) { m_respawnPos = pos.m_pos; }
         void SetRespawnCoord(float x, float y, float z, float ori) { m_respawnPos.x = x; m_respawnPos.y = y; m_respawnPos.z = z; m_respawnPos.o = ori; }

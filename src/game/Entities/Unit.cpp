@@ -7492,7 +7492,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                 HandleEmoteState(0);
         }
 
-        pCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+        pCreature->SetCombatStartPosition(GetPosition());
 
         if (!pCreature->CanAggro()) // if creature aggroed during initial ignoration period, clear the state
         {
@@ -10508,6 +10508,9 @@ bool Unit::TakePossessOf(Unit* possessed)
         possessed->ClearInCombat();
     }
 
+    Position const& pos = possessed->GetPosition();
+    charmInfo->SetCharmStartPosition(pos);
+
     if (player)
     {
         player->GetCamera().SetView(possessed);
@@ -10632,6 +10635,9 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
     const bool immuneNPC = IsImmuneToNPC();
     if (charmed->IsImmuneToNPC() != immuneNPC)
         charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+
+    Position const& pos = charmed->GetPosition();
+    charmInfo->SetCharmStartPosition(pos);
 
     if (charmerPlayer && advertised)
     {
@@ -10852,6 +10858,13 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
             if (charmed->GetTypeId() == TYPEID_UNIT)
                 charmed->AddThreat(this, GetMaxHealth()); // Simulates being charmed
             this->AddThreat(charmed);
+
+            if (charmed->GetTypeId() == TYPEID_UNIT)
+            {
+                Position const& pos = charmInfo->GetCharmStartPosition();
+                if (!pos.IsEmpty())
+                    static_cast<Creature*>(charmed)->SetCombatStartPosition(pos);
+            }                
         }
     }
     else

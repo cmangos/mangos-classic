@@ -1122,6 +1122,12 @@ class CharmInfo
         UnitAI* GetAI() const { return m_ai; }
         CombatData* GetCombatData() const { return m_combatData; };
 
+        void SetCharmStartPosition(Position const& position) { m_charmStartPosition = position; }
+        Position const& GetCharmStartPosition() { return m_charmStartPosition; }
+
+        void SetWalk(bool walk) { m_walk = walk; }
+        bool GetWalk() const { return m_walk; }
+
     private:
         Unit*               m_unit;
         UnitAI*             m_ai;
@@ -1141,6 +1147,9 @@ class CharmInfo
         float               m_stayPosY;
         float               m_stayPosZ;
         float               m_stayPosO;
+
+        Position            m_charmStartPosition;
+        bool                m_walk;
 };
 
 // used in CallForAllControlledUnits/CheckAllControlledUnits

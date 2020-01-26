@@ -113,9 +113,9 @@ void FollowerAI::EnterEvadeMode()
 
         if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
         {
-            float posX, posY, posZ, posO;
-            m_creature->GetCombatStartPosition(posX, posY, posZ, posO);
-            m_creature->GetMotionMaster()->MovePoint(POINT_COMBAT_START, posX, posY, posZ);
+            Position pos;
+            m_creature->GetCombatStartPosition(pos);
+            m_creature->GetMotionMaster()->MovePoint(POINT_COMBAT_START, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
         }
     }
     else
