@@ -10468,9 +10468,12 @@ bool Unit::TakePossessOf(Unit* possessed)
     possessed->GetMotionMaster()->MoveIdle();
     possessed->StopMoving(true);
 
+    Position combatStartPosition;
+
     if (possessed->GetTypeId() == TYPEID_UNIT)
     {
         possessedCreature = static_cast<Creature*>(possessed);
+        possessedCreature->GetCombatStartPosition(combatStartPosition);
         possessedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
         possessedCreature->SetWalk(IsWalking(), true);
         charmInfo->SetCharmState("PossessedAI");
@@ -10506,14 +10509,13 @@ bool Unit::TakePossessOf(Unit* possessed)
     if (possessed->IsImmuneToNPC() != immuneNPC)
         possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
+    charmInfo->SetCharmStartPosition(combatStartPosition.IsEmpty() ? possessed->GetPosition() : combatStartPosition);
+
     if (!IsInCombat())
     {
         possessed->GetCombatManager().StopCombatTimer();
         possessed->ClearInCombat();
     }
-
-    Position const& pos = possessed->GetPosition();
-    charmInfo->SetCharmStartPosition(pos);
 
     if (player)
     {
@@ -10578,6 +10580,8 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
 
     bool isPossessCharm = IsPossessCharmType(spellId);
 
+    Position combatStartPosition;
+
     if (charmed->GetTypeId() == TYPEID_PLAYER)
     {
         Player* charmedPlayer = static_cast<Player*>(charmed);
@@ -10603,6 +10607,8 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
     else if (charmed->GetTypeId() == TYPEID_UNIT)
     {
         Creature* charmedCreature = static_cast<Creature*>(charmed);
+
+        charmedCreature->GetCombatStartPosition(combatStartPosition);
 
         if (charmed->AI() && charmed->AI()->CanHandleCharm())
             charmInfo->SetCharmState("", false);
@@ -10640,8 +10646,7 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
     if (charmed->IsImmuneToNPC() != immuneNPC)
         charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
-    Position const& pos = charmed->GetPosition();
-    charmInfo->SetCharmStartPosition(pos);
+    charmInfo->SetCharmStartPosition(combatStartPosition.IsEmpty() ? charmed->GetPosition() : combatStartPosition);
 
     if (charmerPlayer && advertised)
     {
