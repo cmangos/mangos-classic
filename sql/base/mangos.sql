@@ -1375,7 +1375,7 @@ LOCK TABLES `custom_texts` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `db_script_string`
+-- Table structure for table `dbscript_string`
 --
 
 DROP TABLE IF EXISTS `dbscript_string`;
@@ -1400,12 +1400,12 @@ CREATE TABLE `dbscript_string` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `db_script_string`
+-- Dumping data for table `dbscript_string`
 --
 
-LOCK TABLES `db_script_string` WRITE;
-/*!40000 ALTER TABLE `db_script_string` DISABLE KEYS */;
-/*!40000 ALTER TABLE `db_script_string` ENABLE KEYS */;
+LOCK TABLES `dbscript_string` WRITE;
+/*!40000 ALTER TABLE `dbscript_string` DISABLE KEYS */;
+/*!40000 ALTER TABLE `dbscript_string` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1485,7 +1485,7 @@ CREATE TABLE `dbscript_random_templates` (
 DROP TABLE IF EXISTS `dbscript_string_template`;
 CREATE TABLE `dbscript_string_template` (
   `id` int(11) unsigned NOT NULL COMMENT 'Id of template' AUTO_INCREMENT,
-  `string_id` int(11) NOT NULL DEFAULT '0' COMMENT 'db_script_string id',
+  `string_id` int(11) NOT NULL DEFAULT '0' COMMENT 'dbscript_string id',
   PRIMARY KEY (`id`,`string_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='DBScript system';
 

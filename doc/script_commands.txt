@@ -163,7 +163,7 @@ Defining a buddy could be done in several way:
 -- --------------------------
 
  0 SCRIPT_COMMAND_TALK                      resultingSource = WorldObject, resultingTarget = Unit/none
-                                            * datalong = dbscript_string_template ID - will randomize between all db_script_strings in given template, ids from template are checked against dbscript_string table
+                                            * datalong = dbscript_string_template ID - will randomize between all dbscript_strings in given template, ids from template are checked against dbscript_string table
                                             * dataint = text entry from dbscript_string -table. dataint2-dataint4 optionally, for random selection of text
 
  1 SCRIPT_COMMAND_EMOTE                     resultingSource = Unit, resultingTarget = Unit/none
