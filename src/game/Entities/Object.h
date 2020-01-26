@@ -280,7 +280,7 @@ struct Position
     float GetPositionY() const { return y; }
     float GetPositionZ() const { return z; }
     float GetPositionO() const { return o; }
-    bool IsEmpty() const { return x != 0.f || y != 0.f || z != 0.f; }
+    bool IsEmpty() const { return x == 0.f && y == 0.f && z == 0.f; }
 };
 
 struct WorldLocation
