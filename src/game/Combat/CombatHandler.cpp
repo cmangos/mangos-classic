@@ -36,16 +36,24 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recv_data)
         return;
     }
 
-    Unit* pEnemy = _player->GetMap()->GetUnit(guid);
+    Unit* enemy = _player->GetMap()->GetUnit(guid);
 
-    if (!_player->CanAttackNow(pEnemy))
+    if (!enemy)
+    {
+        sLog.outError("WORLD: %s isn't unit", guid.GetString().c_str());
+        return;
+    }
+
+    Unit* mover = _player->GetMover();
+
+    if (!mover->CanAttackNow(enemy))
     {
         // stop attack state at client
         SendAttackStop(nullptr);
         return;
     }
 
-    _player->Attack(pEnemy, true);
+    mover->Attack(enemy, true);
 }
 
 void WorldSession::HandleAttackStopOpcode(WorldPacket& /*recv_data*/)
