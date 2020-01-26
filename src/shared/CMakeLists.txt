@@ -192,12 +192,22 @@ target_include_directories(${LIBRARY_NAME}
   PUBLIC "${CMAKE_SOURCE_DIR}/src/game"
 )
 
-target_link_libraries(${LIBRARY_NAME}
-  PUBLIC framework
-  PUBLIC ${Boost_LIBRARIES}
-  PUBLIC ${OPENSSL_LIBRARIES}
-  PUBLIC utf8cpp
-)
+if(UNIX)
+  target_link_libraries(${LIBRARY_NAME}
+    PUBLIC framework
+    PUBLIC utf8cpp
+    PUBLIC dl
+    PUBLIC ${Boost_LIBRARIES}
+    PUBLIC ${OPENSSL_LIBRARIES}
+  )
+else()
+  target_link_libraries(${LIBRARY_NAME}
+    PUBLIC framework
+    PUBLIC ${Boost_LIBRARIES}
+    PUBLIC ${OPENSSL_LIBRARIES}
+    PUBLIC utf8cpp
+  )
+endif()
 
 if(POSTGRESQL AND POSTGRESQL_FOUND)
   target_include_directories(${LIBRARY_NAME} PUBLIC ${PostgreSQL_INCLUDE_DIRS})
