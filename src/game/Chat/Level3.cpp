@@ -5432,6 +5432,9 @@ bool ChatHandler::HandleCastCommand(char* args)
     if (!triggered && *args)                                // can be fail also at syntax error
         return false;
 
+    if (spellInfo->Targets && !target)
+        target = m_session->GetPlayer();
+
     m_session->GetPlayer()->CastSpell(target, spell, triggered ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
 
     return true;
