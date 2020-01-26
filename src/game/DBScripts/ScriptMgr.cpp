@@ -258,7 +258,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                     }
                 }
 
-                // if (!GetMangosStringLocale(tmp.dataint)) will be checked after db_script_string loading
+                // if (!GetMangosStringLocale(tmp.dataint)) will be checked after dbscript_string loading
                 break;
             }
             case SCRIPT_COMMAND_EMOTE:                      // 1
