@@ -478,7 +478,7 @@ void ThreatManager::addThreatDirectly(Unit* victim, float threat)
         hostileReference->addThreat(threat); // now we add the real threat
         getOwner()->TriggerAggroLinkingEvent(victim);
         Unit* victim_owner = victim->GetOwner();
-        if (victim_owner && victim_owner->isAlive() && getOwner()->CanAttack(victim_owner))
+        if (victim_owner && victim_owner->isAlive() && getOwner()->CanAttack(victim_owner) && !victim_owner->hasUnitState(UNIT_STAT_FEIGN_DEATH))
             addThreat(victim_owner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
         if (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->isGameMaster())
             hostileReference->setOnlineOfflineState(false); // GM is always offline
