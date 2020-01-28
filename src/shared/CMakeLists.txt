@@ -214,7 +214,7 @@ endif()
 
 # Generate precompiled header
 if(PCH)
-  target_precompile_headers(${LIBRARY_NAME} PUBLIC "${PCH_FILE_HEADER}")
+  target_precompile_headers(${LIBRARY_NAME} PRIVATE "${PCH_FILE_HEADER}")
 endif()
 
 # Mark the revision header as being generated.
