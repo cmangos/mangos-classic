@@ -7,6 +7,7 @@
 
 #include "Maps/InstanceData.h"
 #include "Maps/Map.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
 enum EncounterState
 {
