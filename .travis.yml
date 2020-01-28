@@ -76,21 +76,21 @@ matrix:
         - CC=clang
         - CXX=clang++
 
-    # linux builds on gcc ARM64
-    - os: linux
-      arch: arm64
-      compiler: gcc
-      env:
-        - CC=gcc-7
-        - CXX=g++-7
-      install:
-        # Install newer cmake
-        - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
-        - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
-        - travis_retry wget --no-check-certificate https://github.com/cyberium/prebuild/releases/download/v1.0/cmake-arm-3.16.2.tar.gz
-        - tar -xvf cmake-arm-3.16.2.tar.gz > /dev/null
-        - PATH=${DEPS_DIR}/cmake-install:${DEPS_DIR}/cmake-install/bin:$PATH
-        - cd ${TRAVIS_BUILD_DIR}
+#    # linux builds on gcc ARM64
+#    - os: linux
+#      arch: arm64
+#      compiler: gcc
+#      env:
+#        - CC=gcc-7
+#        - CXX=g++-7
+#      install:
+#        # Install newer cmake
+#        - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+#        - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+#        - travis_retry wget --no-check-certificate https://github.com/cyberium/prebuild/releases/download/v1.0/cmake-arm-3.16.2.tar.gz
+#        - tar -xvf cmake-arm-3.16.2.tar.gz > /dev/null
+#        - PATH=${DEPS_DIR}/cmake-install:${DEPS_DIR}/cmake-install/bin:$PATH
+#        - cd ${TRAVIS_BUILD_DIR}
 
     # osx builds on clang x64
     - os: osx
