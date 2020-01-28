@@ -15,6 +15,7 @@
 #define _NO_CVCONST_H
 #include "WheatyExceptionReport.h"
 #include "revision.h"
+#include "common.h"
 #define CrashFolder _T("Crashes")
 //#pragma comment(linker, "/defaultlib:dbghelp.lib")
 
