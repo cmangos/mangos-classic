@@ -6975,7 +6975,7 @@ void ObjectMgr::LoadBroadcastText()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 quest relations from %s. DB table `%s` is empty.", "broadcast_text", "broadcast_text");
+        sLog.outErrorDb(">> Loaded 0 entries from %s. DB table `%s` is empty.", "broadcast_text", "broadcast_text");
         return;
     }
 
@@ -7020,7 +7020,7 @@ void ObjectMgr::LoadBroadcastTextLocales()
 
         bar.step();
 
-        sLog.outErrorDb(">> Loaded 0 quest relations from broadcast_text_locales. DB table `broadcast_text_locale` is empty.");
+        sLog.outString(">> Loaded 0 entries from broadcast_text_locales.");
         return;
     }
 
