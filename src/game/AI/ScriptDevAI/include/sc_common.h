@@ -1,7 +1,7 @@
 // add here most rarely modified headers to speed up debug build compilation
 
-#ifndef PRECOMPILED_H
-#define PRECOMPILED_H
+#ifndef SC_COMMON_H
+#define SC_COMMON_H
 
 #include "AI/ScriptDevAI/include/sc_creature.h"
 #include "AI/ScriptDevAI/include/sc_gossip.h"

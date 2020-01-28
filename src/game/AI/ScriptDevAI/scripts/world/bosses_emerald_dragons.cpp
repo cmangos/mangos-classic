@@ -32,7 +32,7 @@ boss_taerar
 boss_ysondre
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "World/WorldState.h"
 
 /*######

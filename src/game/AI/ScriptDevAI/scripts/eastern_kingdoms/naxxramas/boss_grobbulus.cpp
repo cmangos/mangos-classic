@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"/*Poison Cloud 26590
+#include "AI/ScriptDevAI/include/sc_common.h"/*Poison Cloud 26590
 Slime Spray 28157
 Fallout slime 28218
 Mutating Injection 28169

@@ -23,7 +23,7 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "wailing_caverns.h"
 
 instance_wailing_caverns::instance_wailing_caverns(Map* pMap) : ScriptedInstance(pMap)
