@@ -59,7 +59,9 @@ enum MoamActions
 
 struct boss_moamAI : public CombatAI
 {
-    boss_moamAI(Creature* creature) : CombatAI(creature, MOAM_ACTION_MAX)
+    boss_moamAI(Creature* creature) :
+        CombatAI(creature, MOAM_ACTION_MAX),
+        m_uiPhase(0)
     {
         AddCombatAction(MOAM_ARCANE_ERUPTION, 0u);
         AddCombatAction(MOAM_TRAMPLE, 9000u);

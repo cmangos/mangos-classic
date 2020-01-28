@@ -67,6 +67,7 @@ SpellCastTargets::SpellCastTargets()
     m_unitTarget = nullptr;
     m_itemTarget = nullptr;
     m_GOTarget   = nullptr;
+    m_CorpseTarget = nullptr;
 
     m_itemTargetEntry  = 0;
 

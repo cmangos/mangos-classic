@@ -6022,7 +6022,7 @@ uint32 Spell::GetUsableHealthStoneItemType(Unit* target)
     if (!target || target->GetTypeId() != TYPEID_PLAYER)
         return 0;
 
-    uint32 itemtype;
+    uint32 itemtype = 0;
     uint32 rank = 0;
     Unit::AuraList const& mDummyAuras = target->GetAurasByType(SPELL_AURA_DUMMY);
     for (auto mDummyAura : mDummyAuras)

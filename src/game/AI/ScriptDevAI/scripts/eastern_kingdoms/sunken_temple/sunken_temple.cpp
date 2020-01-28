@@ -77,14 +77,15 @@ enum
 
 struct npc_malfurionAI : public ScriptedAI
 {
-    npc_malfurionAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_malfurionAI(Creature* pCreature) :
+        ScriptedAI(pCreature),
+        m_uiSpeech(0),
+        m_uiSayTimer(3000)
     {
         // Only in Sunken Temple
         if (m_creature->GetMap()->IsDungeon())
         {
             DoScriptText(EMOTE_MALFURION1, m_creature);
-            m_uiSpeech   = 0;
-            m_uiSayTimer = 3000;
         }
 
         DoCastSpellIfCan(m_creature, SPELL_SPIRIT_SPAWN_IN, TRIGGERED_OLD_TRIGGERED);

@@ -77,7 +77,10 @@ enum RoyaltyActions
 
 struct boss_silithidRoyaltyAI : public CombatAI
 {
-    boss_silithidRoyaltyAI(Creature* creature, uint32 actionCount) : CombatAI(creature, actionCount), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_silithidRoyaltyAI(Creature* creature, uint32 actionCount) :
+        CombatAI(creature, actionCount),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+        m_deathAbility(0)
     {
         AddCustomAction(ROYALTY_DEVOUR_DELAY, true, [&]() { HandleDevourDelay(); });
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit* unit, float x, float y, float z) -> bool

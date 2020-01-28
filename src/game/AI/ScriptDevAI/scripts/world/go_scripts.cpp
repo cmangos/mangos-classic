@@ -122,7 +122,7 @@ struct go_ai_bell : public GameObjectAI
 
     uint32 GetBellSound(GameObject* pGo) const
     {
-        uint32 soundId;
+        uint32 soundId = 0;
         switch (pGo->GetEntry())
         {
             case GO_HORDE_BELL:

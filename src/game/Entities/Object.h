@@ -649,7 +649,7 @@ struct TempSpawnSettings
     uint32 entry;
     float x, y, z, ori;
     TempSpawnType spawnType;
-    uint32 despawnTime;
+    uint32 despawnTime = 0;
     uint32 corpseDespawnTime = 0;
     bool activeObject = false;
     bool setRun = false;

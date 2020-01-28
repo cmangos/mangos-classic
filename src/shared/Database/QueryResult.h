@@ -27,7 +27,7 @@ class QueryResult
 {
     public:
         QueryResult(uint64 rowCount, uint32 fieldCount)
-            : mFieldCount(fieldCount), mRowCount(rowCount) {}
+            : mFieldCount(fieldCount), mRowCount(rowCount), mCurrentRow(nullptr) {}
 
         virtual ~QueryResult() {}
 

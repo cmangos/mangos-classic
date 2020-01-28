@@ -92,7 +92,9 @@ enum AyamissActions
 
 struct boss_ayamissAI : public CombatAI
 {
-    boss_ayamissAI(Creature* creature) : CombatAI(creature, AYAMISS_ACTION_MAX)
+    boss_ayamissAI(Creature* creature) :
+        CombatAI(creature, AYAMISS_ACTION_MAX),
+        m_phase(0)
     {
         AddTimerlessCombatAction(AYAMISS_FLY_UP, true);
         AddTimerlessCombatAction(AYAMISS_PHASE_2, true);

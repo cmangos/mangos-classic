@@ -1191,18 +1191,13 @@ void Aura::TriggerSpell()
             case 28084:                                     // Negative Charge
             {
                 uint32 buffAuraId;
-                float range;
-                switch (auraId)
-                {
-                    case 28059:
-                        buffAuraId = 29659;
-                        range = 13.f;
-                        break;
-                    case 28084:
-                        buffAuraId = 29660;
-                        range = 13.f;
-                        break;
-                }
+                float range = 13.f;
+
+                if (auraId == 28059)
+                    buffAuraId = 29659;
+                else
+                    buffAuraId = 29660;
+
                 uint32 curCount = 0;
                 PlayerList playerList;
                 GetPlayerListWithEntryInWorld(playerList, target, range); // official range
