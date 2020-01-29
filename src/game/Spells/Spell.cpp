@@ -1846,6 +1846,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->Id);
             if (bounds.first != bounds.second)
                 CheckSpellScriptTargets(bounds, tempTargetUnitMap, tempUnitList, effIndex);
+            else
+                tempUnitList.splice(tempUnitList.end(), tempTargetUnitMap);
             break;
         }
         case TARGET_UNIT_CASTER_PET:
@@ -1907,29 +1909,32 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 GetChainJumpRange(m_spellInfo, effIndex, minRadiusCaster, maxRadiusTarget);
 
                 // Filling target map
+                UnitList tempAoeList;
                 {
                     SpellNotifyPushType pushType = PUSH_TARGET_CENTER;
-                    FillAreaTargets(tempUnitList, maxRadiusTarget, cone, pushType, SPELL_TARGETS_AOE_ATTACKABLE);
+                    FillAreaTargets(tempAoeList, maxRadiusTarget, cone, pushType, SPELL_TARGETS_AOE_ATTACKABLE);
+                    tempAoeList.erase(std::remove(tempAoeList.begin(), tempAoeList.end(), newUnitTarget), tempAoeList.end());
                 }
 
                 // No targets. No need to process.
-                if (tempUnitList.empty())
+                if (tempAoeList.empty())
                     break;
 
                 if (minRadiusCaster)
                 {
                     float x, y, z;
                     m_caster->GetPosition(x, y, z);
-                    auto itr = tempUnitList.begin();
+                    auto itr = tempAoeList.begin();
                     ++itr; // start from 2nd
-                    for (; itr != tempUnitList.end();)
+                    for (; itr != tempAoeList.end();)
                     {
                         if ((*itr)->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH) < minRadiusCaster)
-                            itr = tempUnitList.erase(itr);
+                            itr = tempAoeList.erase(itr);
                         else
                             ++itr;
                     }
                 }
+                tempUnitList.splice(tempUnitList.end(), tempAoeList);
             }
             break;
         }
@@ -2216,15 +2221,15 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         }
         case TARGET_UNIT_FRIEND_CHAIN_HEAL:
         {
-            Unit* pUnitTarget = m_targets.getUnitTarget();
-            if (!pUnitTarget)
+            Unit* unitTarget = m_targets.getUnitTarget();
+            if (!unitTarget)
                 break;
 
-            if (!m_caster->CanAssistSpell(pUnitTarget, m_spellInfo))
+            if (!m_caster->CanAssistSpell(unitTarget, m_spellInfo))
                 break;
 
             if (targetingData.chainTargetCount[effIndex] <= 1)
-                tempUnitList.push_back(pUnitTarget);
+                tempUnitList.push_back(unitTarget);
             else
             {
                 float max_range = targetingData.chainTargetCount[effIndex] * CHAIN_SPELL_JUMP_RADIUS;
@@ -2237,18 +2242,18 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 {
                     if (Group* casterGroup = static_cast<Player*>(m_caster)->GetGroup())
                     {
-                        switch (pUnitTarget->GetTypeId())
+                        switch (unitTarget->GetTypeId())
                         {
                             case TYPEID_PLAYER:
                             {
-                                if (casterGroup == static_cast<Player*>(pUnitTarget)->GetGroup())
+                                if (casterGroup == static_cast<Player*>(unitTarget)->GetGroup())
                                     group = casterGroup;
 
                                 break;
                             }
                             case TYPEID_UNIT:
                             {
-                                Creature* creature = static_cast<Creature*>(pUnitTarget);
+                                Creature* creature = static_cast<Creature*>(unitTarget);
 
                                 if (Unit* owner = creature->GetOwner(nullptr, true))
                                 {
@@ -2264,10 +2269,14 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
 
                     }
                 }
-
+             
+                UnitList tempAoeList;
                 MaNGOS::AnyFriendlyOrGroupMemberUnitInUnitRangeCheck u_check(m_caster, group, m_spellInfo, max_range);
-                MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyOrGroupMemberUnitInUnitRangeCheck> searcher(tempUnitList, u_check);
+                MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyOrGroupMemberUnitInUnitRangeCheck> searcher(tempAoeList, u_check);
                 Cell::VisitAllObjects(m_caster, searcher, max_range);
+                tempAoeList.erase(std::remove(tempAoeList.begin(), tempAoeList.end(), unitTarget), tempAoeList.end());
+                if (!tempAoeList.empty())
+                    tempUnitList.splice(tempUnitList.end(), tempAoeList);
             }
             break;
         }
