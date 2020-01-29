@@ -114,7 +114,7 @@ static const uint32 wsStateUpdateId[PVP_TEAM_COUNT] = {
     BG_WS_FLAG_UNK_HORDE
 };
 
-BattleGroundWS::BattleGroundWS(): m_ReputationCapture(0), m_HonorWinKills(0), m_HonorEndKills(0)
+BattleGroundWS::BattleGroundWS() : m_ReputationCapture(0), m_HonorWinKills(0), m_HonorEndKills(0)
 {
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_WS_START_ONE_MINUTE;
@@ -261,7 +261,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player* player)
         m_TeamScores[teamIdx] += 1;
     
     PlaySoundToAll(wsSounds[teamIdx][BG_WS_FLAG_ACTION_CAPTURED]);
-    RewardReputationToTeam(890, m_ReputationCapture, team);
+    RewardReputationToTeam(team == ALLIANCE ? 890 : 889, m_ReputationCapture, team);
 
     // for flag capture is reward 2 honorable kills
     RewardHonorToTeam(GetBonusHonorFromKill(2), team);
