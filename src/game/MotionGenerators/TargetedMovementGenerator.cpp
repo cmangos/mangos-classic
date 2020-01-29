@@ -114,6 +114,8 @@ void ChaseMovementGenerator::_reachTarget(Unit& /*owner*/)
 
 void ChaseMovementGenerator::Initialize(Unit& owner)
 {
+    if (!i_target.isValid() || !i_target->IsInWorld())
+        return;
     owner.addUnitState(UNIT_STAT_CHASE);                    // _MOVE set in _SetTargetLocation after required checks
     _setLocation(owner);
     i_target->GetPosition(i_lastTargetPos.x, i_lastTargetPos.y, i_lastTargetPos.z);
@@ -648,6 +650,8 @@ bool FollowMovementGenerator::IsUnstuckAllowed(Unit &owner) const
 
 void FollowMovementGenerator::Initialize(Unit& owner)
 {
+    if (!i_target.isValid() || !i_target->IsInWorld())
+        return;
     owner.addUnitState(UNIT_STAT_FOLLOW);                   // _MOVE set in _SetTargetLocation after required checks
     HandleTargetedMovement(owner, 0);
 }
