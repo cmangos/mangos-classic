@@ -448,10 +448,35 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     *data << uint32(0);
                 }
 
-                // Gamemasters should be always able to select units - remove not selectable flag
-                else if (index == UNIT_FIELD_FLAGS && target->isGameMaster())
+                // Alter unit flags when required
+                else if (index == UNIT_FIELD_FLAGS)
                 {
-                    *data << (m_uint32Values[index] & ~UNIT_FLAG_NOT_SELECTABLE);
+                    uint32 value = m_uint32Values[index];
+
+                    // Gamemasters should be always able to select units - remove not selectable flag
+                    if (target->isGameMaster())
+                        value &= ~UNIT_FLAG_NOT_SELECTABLE;
+
+                    // Conceal "skinnable" hint for creatures when player doens't have appropriate skill for it
+                    // Gamemasters should see this hint regardless of skill
+                    if ((value & UNIT_FLAG_SKINNABLE) && !target->isGameMaster() && GetTypeId() == TYPEID_UNIT)
+                    {
+                        uint16 skillid = SKILL_SKINNING;
+
+                        const uint32 flags = static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags;
+
+                        if (flags & CREATURE_TYPEFLAGS_HERBLOOT)
+                            skillid = SKILL_HERBALISM;
+                        else if (flags & CREATURE_TYPEFLAGS_MININGLOOT)
+                            skillid = SKILL_MINING;
+                        else if (flags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
+                            skillid = SKILL_ENGINEERING;
+
+                        if (!target->HasSkill(skillid))
+                            value &= ~UNIT_FLAG_SKINNABLE;
+                    }
+
+                    *data << value;
                 }
                 // Hide lootable animation for unallowed players
                 // Handle tapped flag
