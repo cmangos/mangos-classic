@@ -182,7 +182,7 @@ void metric::metric::send()
         std::swap(measurements, m_measurementQueue);
     }
 
-    sLog.outBasic("Sending %u measurements!", measurements.size());
+    sLog.outBasic("Sending %zu measurements!", measurements.size());
 
     using boost::asio::ip::tcp;
     using namespace std::chrono_literals;

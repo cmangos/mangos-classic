@@ -713,7 +713,7 @@ void Map::Update(const uint32& t_diff)
         i_data->Update(t_diff);
 
     std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     measurement.add_field("duration", static_cast<uint64>(duration));
 
     if (duration < m_updateTimeMin)
