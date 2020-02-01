@@ -1,8 +1,8 @@
-CREATE DATABASE `classicmangos` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE DATABASE IF NOT EXISTS `classicmangos` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-CREATE DATABASE `classiccharacters` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE DATABASE IF NOT EXISTS `classiccharacters` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-CREATE DATABASE `classicrealmd` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE DATABASE IF NOT EXISTS `classicrealmd` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 CREATE USER IF NOT EXISTS 'mangos'@'localhost' IDENTIFIED BY 'mangos';
 
