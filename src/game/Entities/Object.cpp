@@ -457,23 +457,26 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     if (target->isGameMaster())
                         value &= ~UNIT_FLAG_NOT_SELECTABLE;
 
-                    // Conceal "skinnable" hint for creatures when player doens't have appropriate skill for it
+                    // Conceal gathering profession loot hint for creatures when player doens't have appropriate skill for it
                     // Gamemasters should see this hint regardless of skill
                     if ((value & UNIT_FLAG_SKINNABLE) && !target->isGameMaster() && GetTypeId() == TYPEID_UNIT)
                     {
-                        uint16 skillid = SKILL_SKINNING;
-
                         const uint32 flags = static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags;
 
-                        if (flags & CREATURE_TYPEFLAGS_HERBLOOT)
-                            skillid = SKILL_HERBALISM;
-                        else if (flags & CREATURE_TYPEFLAGS_MININGLOOT)
-                            skillid = SKILL_MINING;
-                        else if (flags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
-                            skillid = SKILL_ENGINEERING;
+                        if (flags & (CREATURE_TYPEFLAGS_HERBLOOT | CREATURE_TYPEFLAGS_MININGLOOT | CREATURE_TYPEFLAGS_ENGINEERLOOT))
+                        {
+                            uint16 skillid;
 
-                        if (!target->HasSkill(skillid))
-                            value &= ~UNIT_FLAG_SKINNABLE;
+                            if (flags & CREATURE_TYPEFLAGS_HERBLOOT)
+                                skillid = SKILL_HERBALISM;
+                            else if (flags & CREATURE_TYPEFLAGS_MININGLOOT)
+                                skillid = SKILL_MINING;
+                            else // (flags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
+                                skillid = SKILL_ENGINEERING;
+
+                            if (!target->HasSkill(skillid))
+                                value &= ~UNIT_FLAG_SKINNABLE;
+                        }
                     }
 
                     *data << value;
