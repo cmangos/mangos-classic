@@ -51,7 +51,7 @@ class AuctionHouseBot {
         uint32 getMinMaxConfig(const char* config, uint32 minValue, uint32 maxValue, uint32 defaultValue);
         void parseLootConfig(char const* fieldname, std::vector<int32>& lootConfig);
         void fillUintVectorFromQuery(char const* query, std::vector<uint32>& lootTemplates);
-        void parseItemPriceConfig(char const* fieldname, std::vector<uint32>& itemPrices);
+        void parseItemValueConfig(char const* fieldname, std::vector<uint32>& itemValues);
         void addLootToItemMap(LootStore* store, std::vector<int32>& lootConfig, std::vector<uint32>& lootTemplates, std::unordered_map<uint32, uint32>& itemMap);
         uint32 calculateBuyoutPrice(ItemPrototype const* prototype, uint32 count);
 
@@ -74,13 +74,14 @@ class AuctionHouseBot {
         std::vector<int32> m_skinningLootConfig;
         std::vector<int32> m_professionItemsConfig;
 
-        std::vector<std::vector<uint32>> m_itemPrice = std::vector<std::vector<uint32>>(MAX_ITEM_QUALITY, std::vector<uint32>(MAX_ITEM_CLASS));
-        uint32 m_vendorPrice;
-        uint32 m_itemPriceVariance;
+        std::vector<std::vector<uint32>> m_itemValue = std::vector<std::vector<uint32>>(MAX_ITEM_QUALITY, std::vector<uint32>(MAX_ITEM_CLASS));
+        bool m_vendorValue;
+        uint32 m_valueVariance;
         uint32 m_auctionBidMin;
         uint32 m_auctionBidMax;
         uint32 m_auctionTimeMin;
         uint32 m_auctionTimeMax;
+        uint32 m_buyValue;
 
         std::vector<uint32> m_creatureLootNormalTemplates;
         std::vector<uint32> m_creatureLootRareTemplates;
