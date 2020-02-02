@@ -1470,13 +1470,16 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
         target = !(procFlags & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS)) && IsPositiveSpellTargetMode(triggerEntry, this, pVictim) ? this : pVictim;
 
     // Quick check for target modes for procs: do not cast offensive procs on friendly targets and in reverse
-    if (!(procEx & PROC_EX_REFLECT))
+    if (target != nullptr)
     {
-        // TODO: add neutral target handling, neutral targets should still be able to go through
-        if (!(this == target && IsOnlySelfTargeting(triggerEntry)))
+        if (!(procEx & PROC_EX_REFLECT))
         {
-            if (IsPositiveSpellTargetMode(triggerEntry, this, target) != CanAssistSpell(target, triggerEntry))
-                return SPELL_AURA_PROC_FAILED;
+            // TODO: add neutral target handling, neutral targets should still be able to go through
+            if (!(this == target && IsOnlySelfTargeting(triggerEntry)))
+            {
+                if (IsPositiveSpellTargetMode(triggerEntry, this, target) != CanAssistSpell(target, triggerEntry))
+                    return SPELL_AURA_PROC_FAILED;
+            }
         }
     }
 
