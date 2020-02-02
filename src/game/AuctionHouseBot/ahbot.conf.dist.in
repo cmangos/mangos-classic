@@ -8,9 +8,11 @@ ConfVersion=2020010101
 ###################################################################################################################
 # Probability in percent of AHBot selling/buying items at the AH.
 #
+# Increase the Sell value to add more overall items to the AH, decrease to reduce overall amount.
+# Increasing/decreasing the Buy value makes the bot more/less eager to buy/bid on player items (or outbit player).
 # The bot checks each AH every second minute, unless the AHs are linked in which case the bot will check every
 # 40th second).
-# Values must be in range 0-100. Default values are Sell(100) and Buy(20).
+# Values must be in range 0-100. Default values are Sell(10) and Buy(10).
 ###################################################################################################################
 AuctionHouseBot.Chance.Sell = 10
 AuctionHouseBot.Chance.Buy  = 10
@@ -28,16 +30,16 @@ AuctionHouseBot.Chance.Buy  = 10
 #   maxLootings - Max repeated lootings of same source (0 or more, greater than or equal to minLootings)
 #
 # Example 1:
-#   AuctionHouseBot.Loot.Creature.WorldBoss = -100,3,1,1
-#   A random number between -100 and 3 is picked to simulate the amount of world bosses killed.
+#   AuctionHouseBot.Loot.Creature.WorldBoss = -20,1,1,1
+#   A random number between -20 and 1 is picked to simulate the amount of world bosses killed.
 #   Another random number between 1 and 1 (so, 1) determines how many times the killed world bosses are looted.
 #   Negative numbers equate 0, meaning that most of the time no creatures of rank world boss will be simulated
 #   killed, and thus no items from world bosses will be added to the Auction House this time.
 #
 # Example 2:
-#   AuctionHouseBot.Loot.Gameobject = -5,10,5,15
-#   A random number between -5 and 10 is picked to select a list of game objects (flowers, mines, chests, etc).
-#   Another random number between 5 and 15 for each game object is chosen to determine how many times the game
+#   AuctionHouseBot.Loot.Gameobject = 13,16,7,11
+#   A random number between 13 and 16 is picked to select a list of game objects (flowers, mines, chests, etc).
+#   Another random number between 7 and 11 for each game object is chosen to determine how many times the game
 #   object should be simulated looted.
 ###################################################################################################################
 AuctionHouseBot.Loot.Creature.Normal    =   30, 35,  8, 12
@@ -65,7 +67,14 @@ AuctionHouseBot.Loot.Skinning   =   -4,  1, 50, 50
 AuctionHouseBot.Items.Profession = 30, 50, 100, 100
 
 ###################################################################################################################
-# Item buyout price (0 = no sell/buy, otherwise percentage of item cost when bought from vendor)
+# Item value
+#
+# This determines the item value, as a percentage of item sell value (what a vendor would charge for the item).
+# Setting the value to 0 prevents the AHBot from selling and buying items of that quality and class.
+# A value of 100 means that the AHBot will sell/buy items for the same price as a vendor would sell the item.
+# 200 means twice as much, 300 three times as much, etc.
+# Do note that the AuctionHouseBot.Value.Vendor, AuctionHouseBot.Value.Variance and AuctionHouseBot.Buy.Value
+# settings also affects the item value.
 #
 # Class:
 #  0: Consumable
@@ -86,36 +95,33 @@ AuctionHouseBot.Items.Profession = 30, 50, 100, 100
 # 15: Misc
 ###################################################################################################################
 # Class                             0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
-AuctionHouseBot.Price.Poor      =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
-AuctionHouseBot.Price.Normal    = 100,100,  0,  0,  0,100,100,100,  0,100,  0,100,100,100,  0,100
-AuctionHouseBot.Price.Uncommon  = 200,200,200,  0,200,200,200,200,  0,200,  0,200,200,200,  0,200
-AuctionHouseBot.Price.Rare      = 400,400,400,  0,400,400,400,400,  0,400,  0,400,400,400,  0,400
-AuctionHouseBot.Price.Epic      = 800,800,800,  0,800,800,800,800,  0,800,  0,800,800,800,  0,800
-AuctionHouseBot.Price.Legendary =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
-AuctionHouseBot.Price.Artifact  =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+AuctionHouseBot.Value.Poor      =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+AuctionHouseBot.Value.Normal    = 100,100,  0,  0,  0,100,100,100,  0,100,  0,100,100,100,  0,100
+AuctionHouseBot.Value.Uncommon  = 200,200,200,  0,200,200,200,200,  0,200,  0,200,200,200,  0,200
+AuctionHouseBot.Value.Rare      = 400,400,400,  0,400,400,400,400,  0,400,  0,400,400,400,  0,400
+AuctionHouseBot.Value.Epic      = 800,800,800,  0,800,800,800,800,  0,800,  0,800,800,800,  0,800
+AuctionHouseBot.Value.Legendary =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+AuctionHouseBot.Value.Artifact  =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 
 ###################################################################################################################
-# Vendor item buyout price
+# Vendor item value override
 #
-# Override AuctionHouseBot.Price.<quality> for items that can be purchased from vendors.
+# Override AuctionHouseBot.Value.<quality> for items that can be purchased from vendors.
+# When enabled the item value will be set equal to vendor sell price.
 # The primary function of this is to prevent players from purchasing uncommon/rare/epic items from vendors and
 # selling them at the AH for a decent profit.
-# A value of 100 makes items bought from vendors sell for about the same price at AH. Greater values makes it
-# possible to earn money by buying items from vendor and selling them at the AH.
-# Setting this value to 0 disables the override for vendor sold items.
-# Values must be 0 or more. Default value is 100.
+# Value must be 0 or 1. Default value is 1 (enabled).
 ###################################################################################################################
-AuctionHouseBot.Price.Vendor = 100
+AuctionHouseBot.Value.Vendor = 1
 
 ###################################################################################################################
-# Item price variance (percent)
+# Item value variance (percent)
 #
-# Adds variance to item price so all items of same type won't be sold for exactly the same price.
-# This setting also affects buying items, items may be sold by players on AH for more than sell price multiplied
-# by the values in the Price.<quality> settings.
+# Adds variance to item value so all items of same type won't be sold for exactly the same price.
+# A value of 10 means items can be sold for ±10 percent of calculated item value.
 # Value must be in range 0-100. Default value is 10.
 ###################################################################################################################
-AuctionHouseBot.Price.Variance = 10
+AuctionHouseBot.Value.Variance = 10
 
 ###################################################################################################################
 # Auction min/max bid price (percent)
@@ -134,3 +140,15 @@ AuctionHouseBot.Bid.Max = 90
 ###################################################################################################################
 AuctionHouseBot.Time.Min = 2
 AuctionHouseBot.Time.Max = 24
+
+###################################################################################################################
+# AHBot buy item value (percent)
+#
+# When the AHBot buys or bids on items, the max price it's willing to spend is the item value (calculated by the
+# AuctionHouseBot.Value.<quality> settings) multiplied by this percentage value.
+# A value of 90 means that the AHBot will at most pay 9 gold for an item at the AH that the bot itself would put
+# up for auction at 10 gold (± AuctionHouseBot.Value.Variance).
+# Setting this lower than 100 also means that the AHBot is less likely to outbid players.
+# Value must be in range 0-200. Default value is 90.
+###################################################################################################################
+AuctionHouseBot.Buy.Value = 90

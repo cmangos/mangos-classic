@@ -87,16 +87,21 @@ void AuctionHouseBot::Initialize() {
         fillUintVectorFromQuery("SELECT item FROM npc_vendor", tmpVector);
         std::copy(tmpVector.begin(), tmpVector.end(), std::inserter(m_vendorItems, m_vendorItems.end()));
 
-        // item price
-        parseItemPriceConfig("AuctionHouseBot.Price.Poor", m_itemPrice[ITEM_QUALITY_POOR]);
-        parseItemPriceConfig("AuctionHouseBot.Price.Normal", m_itemPrice[ITEM_QUALITY_NORMAL]);
-        parseItemPriceConfig("AuctionHouseBot.Price.Uncommon", m_itemPrice[ITEM_QUALITY_UNCOMMON]);
-        parseItemPriceConfig("AuctionHouseBot.Price.Rare", m_itemPrice[ITEM_QUALITY_RARE]);
-        parseItemPriceConfig("AuctionHouseBot.Price.Epic", m_itemPrice[ITEM_QUALITY_EPIC]);
-        parseItemPriceConfig("AuctionHouseBot.Price.Legendary", m_itemPrice[ITEM_QUALITY_LEGENDARY]);
-        parseItemPriceConfig("AuctionHouseBot.Price.Artifact", m_itemPrice[ITEM_QUALITY_ARTIFACT]);
-        // item price variance
-        m_itemPriceVariance = getMinMaxConfig("AuctionHouseBot.Price.Variance", 0, 100, 10);
+        // item value
+        parseItemValueConfig("AuctionHouseBot.Value.Poor", m_itemValue[ITEM_QUALITY_POOR]);
+        parseItemValueConfig("AuctionHouseBot.Value.Normal", m_itemValue[ITEM_QUALITY_NORMAL]);
+        parseItemValueConfig("AuctionHouseBot.Value.Uncommon", m_itemValue[ITEM_QUALITY_UNCOMMON]);
+        parseItemValueConfig("AuctionHouseBot.Value.Rare", m_itemValue[ITEM_QUALITY_RARE]);
+        parseItemValueConfig("AuctionHouseBot.Value.Epic", m_itemValue[ITEM_QUALITY_EPIC]);
+        parseItemValueConfig("AuctionHouseBot.Value.Legendary", m_itemValue[ITEM_QUALITY_LEGENDARY]);
+        parseItemValueConfig("AuctionHouseBot.Value.Artifact", m_itemValue[ITEM_QUALITY_ARTIFACT]);
+
+        // item value for items sold by vendors
+        m_vendorValue = m_ahBotCfg.GetBoolDefault("AuctionHouseBot.Value.Vendor", true);
+
+        // item value variance
+        m_valueVariance = getMinMaxConfig("AuctionHouseBot.Value.Variance", 0, 100, 10);
+
         // auction min/max bid
         m_auctionBidMin = getMinMaxConfig("AuctionHouseBot.Bid.Min", 0, 100, 75);
         m_auctionBidMax = getMinMaxConfig("AuctionHouseBot.Bid.Max", 0, 100, 90);
@@ -104,6 +109,7 @@ void AuctionHouseBot::Initialize() {
             sLog.outError("AHBot error: AuctionHouseBot.Bid.Min must be less or equal to AuctionHouseBot.Bid.Max. Setting Bid.Min equal to Bid.Max.");
             m_auctionBidMin = m_auctionBidMax;
         }
+
         // auction min/max time
         m_auctionTimeMin = getMinMaxConfig("AuctionHouseBot.Time.Min", 1, 72, 2);
         m_auctionTimeMax = getMinMaxConfig("AuctionHouseBot.Time.Max", 1, 72, 24);
@@ -112,8 +118,8 @@ void AuctionHouseBot::Initialize() {
             m_auctionTimeMin = m_auctionTimeMax;
         }
 
-        // buyout price for items sold by vendors
-        m_vendorPrice = getMinMaxConfig("AuctionHouseBot.Price.Vendor", 0, 999, 100);
+        // buy item value
+        m_buyValue = getMinMaxConfig("AuctionHouseBot.Buy.Value", 0, 200, 90);
     }
 }
 
@@ -174,12 +180,12 @@ void AuctionHouseBot::fillUintVectorFromQuery(char const* query, std::vector<uin
     }
 }
 
-void AuctionHouseBot::parseItemPriceConfig(char const* fieldname, std::vector<uint32>& itemPrices) {
+void AuctionHouseBot::parseItemValueConfig(char const* fieldname, std::vector<uint32>& itemValues) {
     std::stringstream includeStream(m_ahBotCfg.GetStringDefault(fieldname));
     std::string temp;
     for (uint32 index = 0; getline(includeStream, temp, ','); ++index) {
-        if (index < itemPrices.size())
-            itemPrices[index] = atoi(temp.c_str());
+        if (index < itemValues.size())
+            itemValues[index] = atoi(temp.c_str());
     }
 }
 
@@ -283,9 +289,7 @@ void AuctionHouseBot::Update() {
                     ItemPrototype const* prototype = ObjectMgr::GetItemPrototype(item);
                     if (!prototype || prototype->Quality == 0 || urand(0, 1 << (prototype->Quality - 1)) > 0)
                         continue; // make it decreasingly likely that crafted items of higher quality is added to the auction house (white: 100%, green: 50%, blue: 25%, purple: 12.5%, ...)
-                    uint32 count = prototype->GetMaxStackSize() * urand(m_professionItemsConfig[2], m_professionItemsConfig[3] + 1) / 100 + 1;
-                    if (count > prototype->GetMaxStackSize())
-                        count = prototype->GetMaxStackSize(); // when adding from professions, we won't allow more than one stack at most
+                    uint32 count = (uint32) round(prototype->GetMaxStackSize() * urand(m_professionItemsConfig[2], m_professionItemsConfig[3] + 1) / 100.0);
                     itemMap[item] += count;
                 }
             }
@@ -299,7 +303,7 @@ void AuctionHouseBot::Update() {
                 continue; // nor BoP and quest items
             if (prototype->Flags & ITEM_FLAG_HAS_LOOT)
                 continue; // no items containing loot
-            if (m_itemPrice[prototype->Quality][prototype->Class] == 0)
+            if (m_itemValue[prototype->Quality][prototype->Class] == 0)
                 continue; // item class is filtered out
 
             for (uint32 stackCounter = 0; stackCounter < itemEntry.second; stackCounter += prototype->GetMaxStackSize()) {
@@ -322,7 +326,7 @@ void AuctionHouseBot::Update() {
             if (auction->owner == 0 && auction->bid == 0)
                 continue; // ignore bidding/buying auctions that were created by server and not bidded on by player
             Item* item = sAuctionMgr.GetAItem(auction->itemGuidLow);
-            uint32 buyItemCheck = urand(0, calculateBuyoutPrice(item->GetProto(), item->GetCount()));
+            uint32 buyItemCheck = urand(0, calculateBuyoutPrice(item->GetProto(), item->GetCount()) * m_buyValue / 100);
             uint32 bidPrice = auction->bid + auction->GetAuctionOutBid();
             if (auction->startbid > bidPrice)
                 bidPrice = auction->startbid;
@@ -343,9 +347,9 @@ uint32 AuctionHouseBot::calculateBuyoutPrice(ItemPrototype const* prototype, uin
     if (buyoutPrice == 0) // if no buy price then use sell price multiplied by 4 if white or gray item, 5 if green or better
         buyoutPrice = prototype->SellPrice * (prototype->Quality <= ITEM_QUALITY_NORMAL ? 4 : 5);
     // multiply buyoutPrice with count and item quality price percentage
-    // if item is sold by a vendor and the vendor price is set, then use this instead
-    buyoutPrice *= count * (m_vendorPrice == 0 || m_vendorItems.find(prototype->ItemId) == m_vendorItems.end() ? m_itemPrice[prototype->Quality][prototype->Class] : m_vendorPrice);
-    buyoutPrice += ((int32) urand(0, m_itemPriceVariance * 2 + 1) - (int32) m_itemPriceVariance) * (int32) (buyoutPrice / 100);
-    buyoutPrice /= 100; // since we multiplied with m_itemPrice
+    // if item is sold by a vendor and vendor value is forced, then multiply by 100 (setting vendor price)
+    buyoutPrice *= count * (m_vendorValue && m_vendorItems.find(prototype->ItemId) != m_vendorItems.end() ? 100 : m_itemValue[prototype->Quality][prototype->Class]);
+    buyoutPrice += ((int32) urand(0, m_valueVariance * 2 + 1) - (int32) m_valueVariance) * (int32) (buyoutPrice / 100);
+    buyoutPrice /= 100; // since we multiplied with m_itemValue
     return buyoutPrice;
 }
