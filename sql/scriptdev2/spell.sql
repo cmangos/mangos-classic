@@ -48,8 +48,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (6217,'spell_curse_of_agony'),
 (11711,'spell_curse_of_agony'),
 (11712,'spell_curse_of_agony'),
-(11713,'spell_curse_of_agony'),
-(27218,'spell_curse_of_agony');
+(11713,'spell_curse_of_agony');
 
 -- Alterac Valley
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
