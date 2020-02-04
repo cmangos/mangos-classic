@@ -2769,6 +2769,33 @@ INSERT INTO `item_template` VALUES
 UNLOCK TABLES;
 
 --
+-- Table structure for table `locales_areatrigger_teleport`
+--
+
+DROP TABLE IF EXISTS `locales_areatrigger_teleport`;
+CREATE TABLE `locales_areatrigger_teleport` (
+   `Entry` INT(11) UNSIGNED NOT NULL COMMENT 'Entry of Areatrigger Teleport',
+   `Text_loc1` LONGTEXT COMMENT 'Text of the status_failed locale 1',
+   `Text_loc2` LONGTEXT COMMENT 'Text of the status_failed locale 2',
+   `Text_loc3` LONGTEXT COMMENT 'Text of the status_failed locale 3',
+   `Text_loc4` LONGTEXT COMMENT 'Text of the status_failed locale 4',
+   `Text_loc5` LONGTEXT COMMENT 'Text of the status_failed locale 5',
+   `Text_loc6` LONGTEXT COMMENT 'Text of the status_failed locale 6',
+   `Text_loc7` LONGTEXT COMMENT 'Text of the status_failed locale 7',
+   `Text_loc8` LONGTEXT COMMENT 'Text of the status_failed locale 8',
+   PRIMARY KEY(`Entry`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Areatrigger System';
+
+--
+-- Dumping data for table `locales_areatrigger_teleport`
+--
+
+LOCK TABLES `locales_areatrigger_teleport` WRITE;
+/*!40000 ALTER TABLE `locales_areatrigger_teleport` DISABLE KEYS */;
+/*!40000 ALTER TABLE `locales_areatrigger_teleport` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `locales_creature`
 --
 
