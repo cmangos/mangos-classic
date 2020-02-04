@@ -78,7 +78,7 @@ struct ScriptedAI : public CreatureAI
         // Called at any Damage to any victim (before damage apply)
         // void DamageDeal(Unit* /*doneTo*/, uint32& /*damage*/, DamageEffectType damagetype) override {}
 
-        // Called at any Damage from any attacker (before damage apply)
+        // Called at any Damage from any attacker (before damage apply) - dealer can be nullptr during DOT tick
         // void DamageTaken(Unit* /*dealer*/, uint32& /*damage*/, DamageEffectType damagetype) override {}
 
         // Called at creature death
