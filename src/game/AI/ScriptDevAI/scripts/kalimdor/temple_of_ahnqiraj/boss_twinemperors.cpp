@@ -93,7 +93,7 @@ struct boss_twin_emperorsAI : public CombatAI
     instance_temple_of_ahnqiraj* m_instance;
 
     // Workaround for the shared health pool
-    void DamageTaken(Unit* /*doneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (!m_instance || (spellInfo && spellInfo->Id == SPELL_TWIN_EMPATHY))
             return;

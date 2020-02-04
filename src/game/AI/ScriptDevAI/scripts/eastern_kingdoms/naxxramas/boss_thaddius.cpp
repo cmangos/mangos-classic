@@ -444,7 +444,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 
-    void DamageTaken(Unit* killer, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (damage < m_creature->GetHealth())
             return;
@@ -472,7 +472,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
 
-        JustDied(killer);                                  // Texts
+        JustDied(dealer);                                  // Texts
     }
 };
 

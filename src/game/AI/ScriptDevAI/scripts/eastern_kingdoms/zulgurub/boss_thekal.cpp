@@ -74,7 +74,7 @@ struct boss_thekalBaseAI : public ScriptedAI
     virtual void OnFakeingDeath() {}
     virtual void OnRevive() {}
 
-    void DamageTaken(Unit* /*pKiller*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (damage < m_creature->GetHealth())
             return;

@@ -133,7 +133,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
             pSummoned->AI()->AttackStart(pPlayer);
     }
 
-    void DamageTaken(Unit* /*doneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
             return;

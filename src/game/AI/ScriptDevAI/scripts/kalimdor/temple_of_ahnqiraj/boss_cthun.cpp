@@ -315,7 +315,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
             m_uiPhaseTimer = 5 * IN_MILLISECONDS;
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         // Ignore damage reduction when vulnerable
         if (m_Phase == PHASE_CTHUN_WEAKENED)
