@@ -251,14 +251,18 @@ enum
     QUEST_FREEDOM_TO_RUUL   = 6482,
     NPC_T_URSA              = 3921,
     NPC_T_TOTEMIC           = 3922,
-    NPC_T_PATHFINDER        = 3926
+    NPC_T_PATHFINDER        = 3926,
+    SPELL_RUUL_SHAPECHANGE  = 20514
 };
 
 struct npc_ruul_snowhoofAI : public npc_escortAI
 {
     npc_ruul_snowhoofAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
-    void Reset() override {}
+    void Reset() override
+    {
+        DoCastSpellIfCan(m_creature, SPELL_RUUL_SHAPECHANGE, TRIGGERED_OLD_TRIGGERED);
+    }
 
     void WaypointReached(uint32 uiPointId) override
     {
