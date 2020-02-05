@@ -121,6 +121,19 @@ struct GYMidTrigger : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_OPENING_ANIM = 24390,
+};
+
+struct OpeningCapping : public SpellScript
+{
+    void OnSuccessfulStart(Spell* spell) const
+    {
+        spell->GetCaster()->CastSpell(nullptr, SPELL_OPENING_ANIM, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_battleground()
 {
     Script* pNewScript = new Script;
@@ -130,4 +143,5 @@ void AddSC_battleground()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<GYMidTrigger>("spell_gy_mid_trigger");
+    RegisterSpellScript<OpeningCapping>("spell_opening_capping");
 }
