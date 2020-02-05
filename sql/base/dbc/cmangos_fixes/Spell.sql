@@ -69,6 +69,8 @@ UPDATE spell_template SET EffectImplicitTargetA2=0,EffectImplicitTargetB2=0 WHER
 UPDATE spell_template SET EffectImplicitTargetA3=0,EffectImplicitTargetB3=0 WHERE Effect3=0;
 -- vanilla only - Blood Frenzy - talent targets self
 UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(16952,16954);
+-- vanilla only - seal fate
+UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(14186,14190,14193,14194,14195);
 
 -- Mangletooth - These spells need to ignore LOS
 UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (7764, 16618, 10767, 16610, 16612, 17013);
