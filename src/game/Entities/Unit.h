@@ -976,7 +976,7 @@ struct ProcExecutionData
 
     // Scripting data
     uint32 triggeredSpellId;
-    int32 basepoints[MAX_EFFECT_INDEX] = { 0, 0, 0 };
+    std::array<int32, MAX_EFFECT_INDEX> basepoints = { 0, 0, 0 };
 
     ProcExecutionData(ProcSystemArguments& data, bool isVictim);
 };
@@ -2212,8 +2212,8 @@ class Unit : public WorldObject
 
         bool IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder* holder, SpellProcEventEntry const*& spellProcEvent);
         // only to be used in proc handlers - basepoints is expected to be a MAX_EFFECT_INDEX sized array
-        SpellAuraProcResult TriggerProccedSpell(Unit* target, int32* basepoints, uint32 triggeredSpellId, Item* castItem, Aura* triggeredByAura, uint32 cooldown);
-        SpellAuraProcResult TriggerProccedSpell(Unit* target, int32* basepoints, SpellEntry const* spellInfo, Item* castItem, Aura* triggeredByAura, uint32 cooldown);
+        SpellAuraProcResult TriggerProccedSpell(Unit* target, std::array<int32, MAX_EFFECT_INDEX>& basepoints, uint32 triggeredSpellId, Item* castItem, Aura* triggeredByAura, uint32 cooldown);
+        SpellAuraProcResult TriggerProccedSpell(Unit* target, std::array<int32, MAX_EFFECT_INDEX>& basepoints, SpellEntry const* spellInfo, Item* castItem, Aura* triggeredByAura, uint32 cooldown);
         // Aura proc handlers
         SpellAuraProcResult HandleDummyAuraProc(ProcExecutionData& data);
         SpellAuraProcResult HandleHasteAuraProc(ProcExecutionData& data);
