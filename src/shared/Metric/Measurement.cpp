@@ -19,6 +19,7 @@
 #include <chrono>
 
 #include "Measurement.h"
+#include "Errors.h"
 
 Measurement::Measurement(std::string measurement, std::map<std::string, std::string> tags, std::map<std::string, boost::any> fields,uint64 timestamp)
     : _measurement(measurement), _tags(tags), _fields(fields)
@@ -40,6 +41,8 @@ std::stringstream& operator<<(std::stringstream& out, const Measurement& measure
         out << "," << tag.first << "=" << tag.second;
 
     out << " ";
+
+    MANGOS_ASSERT(measurement._fields.size() > 0);
     
     const auto& last = measurement._fields.rbegin()->first;
     for (const auto& field : measurement._fields)

@@ -32,8 +32,8 @@ struct Measurement
     friend std::stringstream& operator<<(std::stringstream &out, const Measurement &measurement);
 
     std::string _measurement;
-    std::map<std::string, std::string> _tags;
-    std::map<std::string, boost::any> _fields;
+    std::map<std::string, std::string> _tags; // tags are used for selecting queries
+    std::map<std::string, boost::any> _fields; // fields are used for displaying data
     uint64 _timestamp;
 };
 

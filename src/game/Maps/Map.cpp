@@ -686,7 +686,7 @@ void Map::Update(const uint32& t_diff)
         ++count;
     }
 
-    measurement.add_field("count", static_cast<int32>(count));
+    measurement.add_field("count", std::to_string(static_cast<int32>(count)));
 
     // Send world objects and item update field changes
     SendObjectUpdates();
@@ -714,7 +714,7 @@ void Map::Update(const uint32& t_diff)
 
     std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
     long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    measurement.add_field("duration", static_cast<uint64>(duration));
+    measurement.add_field("duration", std::to_string(static_cast<uint64>(duration)));
 
     if (duration < m_updateTimeMin)
         m_updateTimeMin = duration;

@@ -1546,15 +1546,13 @@ void World::Update(uint32 diff)
     long long singletons = (postSingletonTime - postMapTime).count();
     long long cleanup = (updateEndTime - postSingletonTime).count();
 
-    metric::measurement worldUpdate("world.update",
-        {
-            {"total", std::to_string(total)},
-            {"presession", std::to_string(presession)},
-            {"premap", std::to_string(premap)},
-            {"map", std::to_string(map)},
-            {"singletons", std::to_string(singletons)},
-            {"cleanup", std::to_string(cleanup)},
-        });
+    metric::measurement worldUpdate("world.update");
+    worldUpdate.add_field("total", std::to_string(total));
+    worldUpdate.add_field("presession", std::to_string(presession));
+    worldUpdate.add_field("premap", std::to_string(premap));
+    worldUpdate.add_field("map", std::to_string(map));
+    worldUpdate.add_field("singletons", std::to_string(singletons));
+    worldUpdate.add_field("cleanup", std::to_string(cleanup));
 }
 
 namespace MaNGOS
@@ -2396,14 +2394,12 @@ void World::GeneratePacketMetrics()
 
     for (uint32 i = 0; i < NUM_MSG_TYPES; ++i)
     {
-        packetCounterMeasurement.add_field(opcodeTable[i].name, static_cast<uint32>(m_opcodeCounters[i]));
+        packetCounterMeasurement.add_field(opcodeTable[i].name, std::to_string(static_cast<uint32>(m_opcodeCounters[i])));
         m_opcodeCounters[i] = 0;
     }
 
-    metric::measurement playerCountMeasurement("world.player",
-        {
-            {"online", std::to_string(m_uniqueSessionCount.size())},
-            {"queued", std::to_string(m_QueuedSessions.size())}
-        });
+    metric::measurement playerCountMeasurement("world.player");
+    playerCountMeasurement.add_field("online", std::to_string(m_uniqueSessionCount.size()));
+    playerCountMeasurement.add_field("queued", std::to_string(m_QueuedSessions.size()));
 }
 
