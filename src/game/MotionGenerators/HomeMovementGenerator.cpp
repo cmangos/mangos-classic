@@ -102,5 +102,7 @@ void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
 
         if (!wasActive)
             owner.SetActiveObjectState(false);
+
+        owner.SetCombatStartPosition(Position());
     }
 }
