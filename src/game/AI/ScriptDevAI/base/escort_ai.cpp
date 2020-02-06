@@ -158,7 +158,12 @@ void npc_escortAI::UpdateAI(const uint32 diff)
                     m_creature->Respawn();
                 }
                 else
-                    m_creature->ForcedDespawn();
+                {
+                    if (m_creature->IsPet())
+                        static_cast<Pet*>(m_creature)->Unsummon(PET_SAVE_AS_DELETED); // we assume escort AI pet to always be non-saved
+                    else
+                        m_creature->ForcedDespawn();
+                }
 
                 return;
             }
