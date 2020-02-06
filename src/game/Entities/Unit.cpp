@@ -478,7 +478,7 @@ void Unit::Update(const uint32 diff)
 
     if (AI() && IsAlive())
     {
-        metric::duration<std::chrono::microseconds> meas_ai("unitai.update.ai", {
+        metric::duration<std::chrono::microseconds> meas_ai("unit.update.ai", {
             { "entry", std::to_string(GetEntry()) },
             { "guid", std::to_string(GetGUIDLow()) },
             { "unit_type", std::to_string(GetGUIDHigh()) },
