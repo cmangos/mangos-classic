@@ -4343,6 +4343,9 @@ SpellCastResult Spell::CheckCast(bool strict)
         uint32 targetType = m_spellInfo->EffectImplicitTargetA[i];
         switch (targetType)
         {
+            case TARGET_UNIT_ENEMY_NEAR_CASTER:
+            case TARGET_UNIT_FRIEND_NEAR_CASTER:
+            case TARGET_UNIT_NEAR_CASTER:
             case TARGET_UNIT_CASTER_MASTER:
             case TARGET_UNIT_CASTER: break; // never check anything
             case TARGET_UNIT_CASTER_PET: // special pet checks
