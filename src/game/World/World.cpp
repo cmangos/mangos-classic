@@ -1546,13 +1546,13 @@ void World::Update(uint32 diff)
     long long singletons = (postSingletonTime - postMapTime).count();
     long long cleanup = (updateEndTime - postSingletonTime).count();
 
-    metric::measurement worldUpdate("world.update");
-    worldUpdate.add_field("total", std::to_string(total));
-    worldUpdate.add_field("presession", std::to_string(presession));
-    worldUpdate.add_field("premap", std::to_string(premap));
-    worldUpdate.add_field("map", std::to_string(map));
-    worldUpdate.add_field("singletons", std::to_string(singletons));
-    worldUpdate.add_field("cleanup", std::to_string(cleanup));
+    metric::measurement meas("world.update");
+    meas.add_field("total", std::to_string(total));
+    meas.add_field("presession", std::to_string(presession));
+    meas.add_field("premap", std::to_string(premap));
+    meas.add_field("map", std::to_string(map));
+    meas.add_field("singletons", std::to_string(singletons));
+    meas.add_field("cleanup", std::to_string(cleanup));
 }
 
 namespace MaNGOS
@@ -2390,16 +2390,21 @@ void World::IncrementOpcodeCounter(uint32 opcodeId)
 
 void World::GeneratePacketMetrics()
 {
-    metric::measurement packetCounterMeasurement("world.packet.counters");
-
     for (uint32 i = 0; i < NUM_MSG_TYPES; ++i)
     {
-        packetCounterMeasurement.add_field(opcodeTable[i].name, std::to_string(static_cast<uint32>(m_opcodeCounters[i])));
+        if (m_opcodeCounters[i] == 0)
+            continue;
+
+        metric::measurement meas("world.metrics.packets.received", { {"opcode", opcodeTable[i].name} });
+        meas.add_field("count", std::to_string(static_cast<uint32>(m_opcodeCounters[i])));
+
+        // Reset counter
         m_opcodeCounters[i] = 0;
     }
 
-    metric::measurement playerCountMeasurement("world.player");
-    playerCountMeasurement.add_field("online", std::to_string(m_uniqueSessionCount.size()));
-    playerCountMeasurement.add_field("queued", std::to_string(m_QueuedSessions.size()));
+    metric::measurement meas_players("world.metrics.players");
+    meas_players.add_field("online", std::to_string(GetActiveSessionCount()));
+    meas_players.add_field("unique", std::to_string(GetUniqueSessionCount()));
+    meas_players.add_field("queued", std::to_string(GetQueuedSessionCount()));
 }
 

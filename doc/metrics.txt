@@ -3,53 +3,92 @@ Tutorial:
 2. setup grafana - add dataset - influxdb - perfd - http://localhost:8086
 
 Logged Entities:
-map.update.objects:
-map_id
-instance_id
-count - count of updated objects
-duration
+map.update:
+ - fields:
+  * count - count of updated objects
+  * duration - duration of map update
+ - tags:
+  * map_id
+  * instance_id
 
 unit.update:
-entry
-guid
-unit_type
-map_id
-instance_id
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
 
-unit.ai.update:
-entry
-guid
-unit_type
-map_id
-instance_id
+unit.update.ai:
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
 
-unit.update.spline.movement:
-entry
-guid
-unit_type
-map_id
-instance_id
+unit.updatesplinemovement:
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
 
-motion.update:
-entry
-guid
-unit_type
-map_id
-instance_id
+motionmaster.updatemotion:
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
 
-world.packet.counters
-opcodename
+motionmaster.initialize:
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
 
-world.player
-online
-queued
+pathfinder.calculate:
+ - fields
+  * duration
+ - tags
+  * entry
+  * guid
+  * unit_type
+  * map_id
+  * instance_id
 
-world.update
-total
-presession
-premap
-map
-singletons
-cleanup
+world.update:
+ - fields
+  * total
+  * presession
+  * premap
+  * map
+  * singletons
+  * cleanup
 
+world.metrics.packets.received:
+  - fields:
+   * count
+  - tags:
+   * opcode
+
+world.metrics.packets.received:
+  - fields:
+   * online
+   * unique
+   * queued
 

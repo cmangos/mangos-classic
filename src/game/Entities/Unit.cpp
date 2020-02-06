@@ -478,7 +478,7 @@ void Unit::Update(const uint32 diff)
 
     if (AI() && IsAlive())
     {
-        metric::duration<std::chrono::microseconds> meas_ai("unit.ai.update", {
+        metric::duration<std::chrono::microseconds> meas_ai("unitai.update.ai", {
             { "entry", std::to_string(GetEntry()) },
             { "guid", std::to_string(GetGUIDLow()) },
             { "unit_type", std::to_string(GetGUIDHigh()) },
@@ -10310,7 +10310,7 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     if (movespline->Finalized())
         return;
 
-    metric::duration<std::chrono::microseconds> meas_ai("unit.update.spline.movement", {
+    metric::duration<std::chrono::microseconds> meas("unit.updatesplinemovement", {
         { "entry", std::to_string(GetEntry()) },
         { "guid", std::to_string(GetGUIDLow()) },
         { "unit_type", std::to_string(GetGUIDHigh()) },

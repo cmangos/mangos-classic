@@ -224,7 +224,6 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand debugPerformanceCommandTable[] =
     {
-        { "maps",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugMaps,                       "", nullptr },
         { "tempspawn",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleShowTemporarySpawnList,          "", nullptr },
         { "gridsloaded",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleGridsLoadedCount,                "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }

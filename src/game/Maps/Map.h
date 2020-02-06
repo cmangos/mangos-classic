@@ -314,10 +314,6 @@ class Map : public GridRefManager<NGridType>
         void AddToSpawnCount(const ObjectGuid& guid);
         void RemoveFromSpawnCount(const ObjectGuid& guid);
 
-        uint32 GetUpdateTimeMin() { return m_updateTimeMin; }
-        uint32 GetUpdateTimeMax() { return m_updateTimeMax; }
-        uint32 GetUpdateTimeAvg() { return uint32(m_updateTimeTotal / m_cycleCounter); }
-
         uint32 GetCurrentMSTime() const;
         TimePoint GetCurrentClockTime() const;
         uint32 GetCurrentDiff() const;
@@ -426,12 +422,6 @@ class Map : public GridRefManager<NGridType>
         WeatherSystem* m_weatherSystem;
 
         std::unordered_map<uint32, std::set<ObjectGuid>> m_spawnedCount;
-
-        // Map update performance logging
-        std::atomic<uint32> m_cycleCounter;
-        std::atomic<uint32> m_updateTimeMin;
-        std::atomic<uint32> m_updateTimeMax;
-        std::atomic<uint64> m_updateTimeTotal;
 };
 
 class WorldMap : public Map

@@ -147,10 +147,6 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         uint32 GetNumInstances();
         uint32 GetNumPlayersInInstances();
 
-        uint32 GetMapUpdateMinTime(uint32 mapId, uint32 instance = 0);
-        uint32 GetMapUpdateMaxTime(uint32 mapId, uint32 instance = 0);
-        uint32 GetMapUpdateAvgTime(uint32 mapId, uint32 instance = 0);
-
         // get list of all maps
         const MapMapType& Maps() const { return i_maps; }
 
