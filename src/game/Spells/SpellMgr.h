@@ -405,7 +405,9 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 12246:         // Infected Spine
         case 12529:         // Chilling Touch
         case 12539:         // Ghoul Rot
+        case 12544:         // Frost Armor
         case 12546:         // Spitelash (Spitelash)
+        case 12550:         // Lightning Shield
         case 12556:         // Frost Armor
         case 12627:         // Disease Cloud
         case 12787:         // Thrash
@@ -413,6 +415,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 13299:         // Poison Proc
         case 13616:         // Wracking Pains Proc
         case 13767:         // Hate to Zero (Hate to Zero)
+        case 13787:         // Demon Armor
         case 14178:         // Sticky Tar
         case 15088:         // Flurry
         case 15097:         // Enrage
