@@ -7004,11 +7004,9 @@ SpellCastResult Spell::OnCheckCast(bool strict)
         case 12699: // Summon Screecher Spirit
         {
             Unit* target = m_targets.getUnitTarget();
-            if (!target || !target->IsCreature())
+            if (!target || !target->IsCreature() || static_cast<Creature*>(target)->HasBeenHitBySpell(m_spellInfo->Id))
                 return SPELL_FAILED_BAD_TARGETS;
-            if (strict)
-                return static_cast<Creature*>(target)->HasBeenHitBySpell(m_spellInfo->Id) ? SPELL_FAILED_BAD_TARGETS : SPELL_CAST_OK;
-            else
+            if (!strict)
             {
                 static_cast<Creature*>(target)->RegisterHitBySpell(m_spellInfo->Id);
                 return SPELL_CAST_OK;
