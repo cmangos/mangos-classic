@@ -23,14 +23,18 @@ EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
+/* ContentData
 spell 10848
 spell 17327
 spell 19512
 spell 21050
 EndContentData */
 
-
+#include "AI/ScriptDevAI/include/sc_common.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
 
 /* When you make a spell effect:
 - always check spell id and effect index
@@ -184,6 +188,38 @@ struct spell_battleground_banner_trigger : public SpellScript
     }
 };
 
+struct GreaterInvisibilityMob : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->ForcePeriodicity(1 * IN_MILLISECONDS); // tick every second
+    }
+
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target->IsCreature())
+            return;
+
+        Creature* invisible = static_cast<Creature*>(target);
+        std::list<Unit*> nearbyTargets;
+        MaNGOS::AnyUnitInObjectRangeCheck u_check(invisible, float(invisible->GetDetectionRange()));
+        MaNGOS::UnitListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(nearbyTargets, u_check);
+        Cell::VisitGridObjects(invisible, searcher, invisible->GetDetectionRange());
+        for (Unit* nearby : nearbyTargets)
+        {
+            if (invisible->CanAttackOnSight(nearby))
+            {
+                invisible->AI()->AttackStart(nearby);
+                if (SpellAuraHolder* holder = aura->GetHolder())
+                    invisible->RemoveSpellAuraHolder(holder);
+                return;
+            }
+        }
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -193,5 +229,6 @@ void AddSC_spell_scripts()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<SpellStackingRulesOverride>("spell_stacking_rules_override");
+    RegisterAuraScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
     RegisterSpellScript<spell_battleground_banner_trigger>("spell_battleground_banner_trigger");
 }
