@@ -129,7 +129,7 @@ namespace metric
             bool m_enabled;
             MetricConnectionInfo m_connectionInfo;
 
-            std::recursive_mutex m_queueWriteLock;
+            std::mutex m_queueWriteLock;
             std::vector<std::unique_ptr<Measurement>> m_measurementQueue;
 
             void schedule_timer();

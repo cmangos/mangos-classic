@@ -140,9 +140,9 @@ void metric::metric::report(std::string measurement, std::map<std::string, boost
     if (!m_enabled)
         return;
 
-    m_queueService.post([&, measurement, fields, tags] {
-        std::unique_lock<std::recursive_mutex> guard(m_queueWriteLock);
-
+    m_queueService.post([&, measurement, fields, tags]
+    {
+        std::lock_guard<std::mutex> guard(m_queueWriteLock);
         m_measurementQueue.push_back(std::make_unique<Measurement>(measurement, tags, fields));
     });
 }
@@ -178,7 +178,7 @@ void metric::metric::send()
 
     // Scope swapping
     {
-        std::unique_lock<std::recursive_mutex> guard(m_queueWriteLock, std::try_to_lock);
+        std::lock_guard<std::mutex> guard(m_queueWriteLock);
         std::swap(measurements, m_measurementQueue);
     }
 
