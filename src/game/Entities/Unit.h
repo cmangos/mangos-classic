@@ -46,6 +46,7 @@
 #include "AI/BaseAI/UnitAI.h"
 
 #include <list>
+#include <array>
 
 enum SpellInterruptFlags
 {
