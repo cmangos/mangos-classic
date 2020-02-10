@@ -24,6 +24,7 @@
 #include "Server/DBCStructure.h"
 
 #include <list>
+#include <vector>
 
 bool IsAcceptableClientBuild(uint32 build);
 std::string AcceptableClientBuildsListStr();
@@ -39,7 +40,7 @@ TalentSpellPos const* GetTalentSpellPos(uint32 spellId);
 int32 GetAreaFlagByAreaID(uint32 area_id);                  // -1 if not found
 uint32 GetAreaFlagByMapId(uint32 mapid);
 
-WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid, int32 groupid);
+std::vector<WMOAreaTableEntry const*>& GetWMOAreaTableEntriesByTripple(int32 rootid, int32 adtid, int32 groupid);
 
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_id);

@@ -905,16 +905,21 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
 {
     uint32 mogpFlags;
     int32 adtId, rootId, groupId;
-    WMOAreaTableEntry const* wmoEntry = nullptr;
     AreaTableEntry const* atEntry = nullptr;
     bool haveAreaInfo = false;
 
     if (GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
     {
         haveAreaInfo = true;
-        wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId);
-        if (wmoEntry)
-            atEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
+        auto wmoEntries = GetWMOAreaTableEntriesByTripple(rootId, adtId, groupId);
+        for (auto wmoEntry : wmoEntries)
+        {
+            auto areaEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
+            if (areaEntry && areaEntry->mapid == GetMapId())
+            {
+                atEntry = areaEntry;
+            }
+        }
     }
 
     uint16 areaflag;
