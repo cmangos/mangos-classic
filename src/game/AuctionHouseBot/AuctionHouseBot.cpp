@@ -330,7 +330,7 @@ void AuctionHouseBot::Update() {
             uint32 bidPrice = auction->bid + auction->GetAuctionOutBid();
             if (auction->startbid > bidPrice)
                 bidPrice = auction->startbid;
-            if (buyItemCheck > auction->buyout)
+            if (auction->buyout > 0 && buyItemCheck > auction->buyout)
                 buyoutAuctions.push_back(auction); // can't buyout item here as that modifies the AuctionEntryMap, invalidating the iterator
             else if (buyItemCheck > bidPrice)
                 auction->UpdateBid(bidPrice);
