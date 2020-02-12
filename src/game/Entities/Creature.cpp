@@ -1488,6 +1488,7 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
     if (m_respawnTime > time(nullptr))                         // not ready to respawn
     {
         m_deathState = DEAD;
+        SetHealth(0);
         if (CanFly())
         {
             float tz = GetTerrain()->GetHeightStatic(data->posX, data->posY, data->posZ, false);
@@ -1508,6 +1509,7 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
         if (m_deathState == ALIVE && !GetMap()->GetCreatureLinkingHolder()->CanSpawn(this))
         {
             m_deathState = DEAD;
+            SetHealth(0);
 
             // Just set to dead, so need to relocate like above
             if (CanFly())
