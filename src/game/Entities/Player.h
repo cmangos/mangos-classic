@@ -639,7 +639,7 @@ enum BuyBackSlots                                           // 12 slots
     BUYBACK_SLOT_END            = 81
 };
 
-enum KeyRingSlots                                           // 32 slots
+enum KeyRingSlots                                           // 16 slots
 {
     KEYRING_SLOT_START          = 81,
     KEYRING_SLOT_END            = 97
