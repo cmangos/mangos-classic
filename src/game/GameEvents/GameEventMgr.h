@@ -100,7 +100,7 @@ class GameEventMgr
         uint32 Update(ActiveEvents const* activeAtShutdown = nullptr);
         bool IsValidEvent(uint16 event_id) const { return event_id < m_gameEvents.size() && m_gameEvents[event_id].isValid(); }
         bool IsActiveEvent(uint16 event_id) const { return (m_activeEvents.find(event_id) != m_activeEvents.end()); }
-        bool IsActiveHoliday(HolidayIds id);
+        bool IsActiveHoliday(HolidayIds id) const;
         uint32 Initialize();
         void StartEvent(uint16 event_id, bool overwrite = false, bool resume = false);
         void StopEvent(uint16 event_id, bool overwrite = false);

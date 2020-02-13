@@ -1042,7 +1042,7 @@ GameEventMgr::GameEventMgr()
     m_isGameEventsInit = false;
 }
 
-bool GameEventMgr::IsActiveHoliday(HolidayIds id)
+bool GameEventMgr::IsActiveHoliday(HolidayIds id) const
 {
     if (id == HOLIDAY_NONE)
         return false;
