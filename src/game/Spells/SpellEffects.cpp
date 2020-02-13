@@ -4208,6 +4208,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, roll_chance_i(50) ? 24714 : 24715, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 24935:                                 // Summon RC Tank
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 24934, TRIGGERED_OLD_TRIGGERED); // Summon RC Tank
+                    return;
+                }
                 case 25671:                                 // Drain Mana
                 case 25755:
                 {
@@ -4838,6 +4846,7 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
             {
                 case 17731:         // Onyxia - Eruption
                 case 24731:
+                case 24934:         // Summon RC Tank
                     gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
                     return;
             }
