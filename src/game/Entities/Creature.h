@@ -687,6 +687,7 @@ class Creature : public Unit
         uint32 GetShieldBlockValue() const override { return (getLevel() / 2 + uint32(GetStat(STAT_STRENGTH) / 20)); }
 
         bool HasSpell(uint32 spellID) const override;
+        void UpdateSpell(int32 index, int32 newSpellId) { m_spells[index] = newSpellId; }
         void UpdateSpellSet(uint32 spellSet);
 
         bool UpdateEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true);
