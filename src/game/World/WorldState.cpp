@@ -25,7 +25,7 @@
 
 WorldState::WorldState() : m_emeraldDragonsState(0xF), m_emeraldDragonsTimer(0), m_emeraldDragonsChosenPositions(4, 0)
 {
-
+    memset(m_loveIsInTheAirData.counters, 0, sizeof(LoveIsInTheAir));
 }
 
 
@@ -73,6 +73,23 @@ void WorldState::Load()
                 }
                 case SAVE_ID_AHN_QIRAJ: // TODO:
                     break;
+                case SAVE_ID_LOVE_IS_IN_THE_AIR:
+                    if (data.size())
+                    {
+                        try
+                        {
+                            for (uint32 i = 0; i < LOVE_LEADER_MAX; ++i)
+                                loadStream >> m_loveIsInTheAirData.counters[i];
+                        }
+                        catch (std::exception & e)
+                        {
+                            sLog.outError("%s", e.what());
+                            memset(m_loveIsInTheAirData.counters, 0, sizeof(LoveIsInTheAir));
+                        }
+                    }
+                    else
+                        memset(m_loveIsInTheAirData.counters, 0, sizeof(LoveIsInTheAir));
+                    break;
             }
         }
         while (result->NextRow());
@@ -105,7 +122,25 @@ void WorldState::Save(SaveIds saveId)
         case SAVE_ID_AHN_QIRAJ:
         // case SAVE_ID_QUEL_DANAS:
             break;
+        case SAVE_ID_LOVE_IS_IN_THE_AIR:
+        {
+            std::string loveData;
+            for (uint32 i = 0; i < LOVE_LEADER_MAX; ++i)
+            {
+                if (i != 0)
+                    loveData += " ";
+                loveData += std::to_string(m_loveIsInTheAirData.counters[i]);
+            }
+            SaveHelper(loveData, SAVE_ID_LOVE_IS_IN_THE_AIR);
+            break;
+        }
     }
+}
+
+void WorldState::SaveHelper(std::string& stringToSave, SaveIds saveId)
+{
+    CharacterDatabase.PExecute("DELETE FROM world_state WHERE Id='%u'", saveId);
+    CharacterDatabase.PExecute("INSERT INTO world_state(Id,Data) VALUES('%u','%s')", saveId, stringToSave.data());
 }
 
 void WorldState::HandleGameObjectUse(GameObject* go, Unit* user)
@@ -120,12 +155,34 @@ void WorldState::HandleGameObjectRevertState(GameObject* go)
 
 void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
 {
-
+    switch (zoneId)
+    {
+        case ZONEID_STORMWIND_CITY:
+        {
+            std::lock_guard<std::mutex> guard(m_loveIsInTheAirMutex);
+            m_loveIsInTheAirCapitalsPlayers.push_back(player->GetObjectGuid());
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
 {
-
+    switch (zoneId)
+    {
+        case ZONEID_STORMWIND_CITY:
+        {
+            std::lock_guard<std::mutex> guard(m_loveIsInTheAirMutex);
+            auto position = std::find(m_loveIsInTheAirCapitalsPlayers.begin(), m_loveIsInTheAirCapitalsPlayers.end(), player->GetObjectGuid());
+            if (position != m_loveIsInTheAirCapitalsPlayers.end())
+                m_loveIsInTheAirCapitalsPlayers.erase(position);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 //void WorldState::HandlePlayerEnterArea(Player* player, uint32 areaId)
@@ -148,7 +205,7 @@ void WorldState::HandleConditionStateChange(uint32 conditionId, uint32 state)
     m_transportStates[conditionId] = state;
 }
 
-void WorldState::HandleExternalEvent(uint32 eventId)
+void WorldState::HandleExternalEvent(uint32 eventId, uint32 param)
 {
     std::lock_guard<std::mutex> guard(m_mutex);
 
@@ -173,6 +230,13 @@ void WorldState::HandleExternalEvent(uint32 eventId)
             Save(SAVE_ID_EMERALD_DRAGONS); // save to DB right away
             break;
         }
+        case CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER:
+        {
+            MANGOS_ASSERT(param < LOVE_LEADER_MAX);
+            ++m_loveIsInTheAirData.counters[param];
+            Save(SAVE_ID_LOVE_IS_IN_THE_AIR);
+            break;
+        }
     }
 }
 
@@ -189,6 +253,15 @@ void WorldState::Update(const uint32 diff)
         }
         else m_emeraldDragonsTimer -= diff;
     }
+}
+
+void WorldState::SendLoveIsInTheAirWorldstateUpdate(uint32 param, uint32 worldStateId)
+{
+    MANGOS_ASSERT(param < LOVE_LEADER_MAX);
+    std::lock_guard<std::mutex> guard(m_loveIsInTheAirMutex);
+    for (ObjectGuid& guid : m_loveIsInTheAirCapitalsPlayers)
+        if (Player* player = sObjectMgr.GetPlayer(guid))
+            player->SendUpdateWorldState(worldStateId, m_loveIsInTheAirData.counters[param]);
 }
 
 void WorldState::ExecuteOnAreaPlayers(uint32 areaId, std::function<void(Player*)> executor)
@@ -258,4 +331,20 @@ void WorldState::RespawnEmeraldDragons()
         if (IsDragonSpawned(m_emeraldDragonsChosenPositions[3]))
             WorldObject::SummonCreature(TempSpawnSettings(nullptr, m_emeraldDragonsChosenPositions[3], emeraldDragonSpawns[3][0], emeraldDragonSpawns[3][1], emeraldDragonSpawns[3][2], emeraldDragonSpawns[3][3], TEMPSPAWN_DEAD_DESPAWN, 0, false, false, pathIds[3]), map);
     });
+}
+
+void WorldState::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId)
+{
+    if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LOVE_IS_IN_THE_AIR))
+    {
+        switch (zoneId)
+        {
+            case ZONEID_STORMWIND_CITY: // TODO: Add rest
+            {
+                // TODO: add worldstate sending
+                // FillInitialWorldStateData(data, count, WORLD_STATE_DEATHS_DOOR_NORTH_WARP_GATE_HEALTH, m_deathsDoorNorthHP);
+                break;
+            }
+        }
+    }
 }

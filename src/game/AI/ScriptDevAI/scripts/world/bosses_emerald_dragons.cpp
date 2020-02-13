@@ -93,7 +93,7 @@ struct boss_emerald_dragonAI : public ScriptedAI
 
     void JustDied(Unit* killer) override
     {
-        sWorldState.HandleExternalEvent(m_creature->GetEntry() - NPC_YSONDRE + CUSTOM_EVENT_YSONDRE_DIED);
+        sWorldState.HandleExternalEvent(m_creature->GetEntry() - NPC_YSONDRE + CUSTOM_EVENT_YSONDRE_DIED, 0);
     }
 
     // Return true, if succeeded

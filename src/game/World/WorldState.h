@@ -27,50 +27,71 @@
 #include <atomic>
 #include <string>
 
-//enum ZoneIds
-//{
-//
-//};
+enum ZoneIds
+{
+    ZONEID_STORMWIND_CITY       = 1519,
+};
 
 //enum AreaIds
 //{
-//
 //};
 
 //enum SpellId
 //{
-//
 //};
 
 //enum GoId
 //{
-//
 //};
 
 //enum Conditions
 //{
-//
 //};
 
 enum Events
 {
+    // vanilla
     CUSTOM_EVENT_YSONDRE_DIED,
     CUSTOM_EVENT_LETHON_DIED,
     CUSTOM_EVENT_EMERISS_DIED,
     CUSTOM_EVENT_TAERAR_DIED,
+    CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER,
 };
 
 enum SaveIds
 {
-    SAVE_ID_EMERALD_DRAGONS,
-    SAVE_ID_AHN_QIRAJ,
-    // SAVE_ID_QUEL_DANAS,
+    SAVE_ID_EMERALD_DRAGONS = 0,
+    SAVE_ID_AHN_QIRAJ = 1,
+    SAVE_ID_LOVE_IS_IN_THE_AIR = 2,
+
+    // SAVE_ID_QUEL_DANAS = 20,
+    // SAVE_ID_EXPANSION_RELEASE = 21,
+};
+
+enum GameEvents
+{
 };
 
 // To be used
 struct AhnQirajData
 {
     std::string GetData() { return ""; }
+};
+
+enum LoveIsInTheAirLeaders
+{
+    LOVE_LEADER_THRALL,
+    LOVE_LEADER_CAIRNE,
+    LOVE_LEADER_SYLVANAS,
+    LOVE_LEADER_BOLVAR,
+    LOVE_LEADER_MAGNI,
+    LOVE_LEADER_TYRANDE,
+    LOVE_LEADER_MAX,
+};
+
+struct LoveIsInTheAir
+{
+    uint32 counters[LOVE_LEADER_MAX]; // potential race condition which wont cause anything critical
 };
 
 // Intended for implementing server wide scripts, note: all behaviour must be safeguarded towards multithreading
@@ -82,6 +103,7 @@ class WorldState
 
         void Load();
         void Save(SaveIds saveId);
+        void SaveHelper(std::string& stringToSave, SaveIds saveId);
 
         // Called when a gameobject is created or removed
         void HandleGameObjectUse(GameObject* go, Unit* user);
@@ -96,10 +118,30 @@ class WorldState
         bool IsConditionFulfilled(uint32 conditionId, uint32 state) const;
         void HandleConditionStateChange(uint32 conditionId, uint32 state);
 
-        void HandleExternalEvent(uint32 eventId);
+        void HandleExternalEvent(uint32 eventId, uint32 param);
         void ExecuteOnAreaPlayers(uint32 areaId, std::function<void(Player*)> executor);
 
         void Update(const uint32 diff);
+
+        // vanilla section
+        void SendLoveIsInTheAirWorldstateUpdate(uint32 param, uint32 worldStateId);
+
+        void FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId);
+
+        // helper functions for world state list fill
+        inline void FillInitialWorldStateData(ByteBuffer& data, uint32& count, uint32 state, uint32 value)
+        {
+            data << uint32(state);
+            data << uint32(value);
+            ++count;
+        }
+
+        inline void FillInitialWorldStateData(ByteBuffer& data, uint32& count, uint32 state, int32 value)
+        {
+            data << uint32(state);
+            data << int32(value);
+            ++count;
+        }
     private:
         std::map<uint32, GuidVector> m_areaPlayers;
         std::map<uint32, std::atomic<uint32>> m_transportStates; // atomic to avoid having to lock
@@ -116,6 +158,10 @@ class WorldState
         std::vector<uint32> m_emeraldDragonsChosenPositions;
         AhnQirajData m_aqData;
 
+        LoveIsInTheAir m_loveIsInTheAirData;
+        GuidVector m_loveIsInTheAirCapitalsPlayers;
+
+        std::mutex m_loveIsInTheAirMutex; // capital cities optimization
 };
 
 #define sWorldState MaNGOS::Singleton<WorldState>::Instance()
