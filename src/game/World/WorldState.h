@@ -30,6 +30,11 @@
 enum ZoneIds
 {
     ZONEID_STORMWIND_CITY       = 1519,
+    ZONEID_DARNASSUS            = 1657,
+    ZONEID_IRONFORGE            = 1537,
+    ZONEID_ORGRIMMAR            = 1637,
+    ZONEID_THUNDER_BLUFF        = 1638,
+    ZONEID_UNDERCITY            = 1497,
 };
 
 //enum AreaIds
@@ -40,9 +45,15 @@ enum ZoneIds
 //{
 //};
 
-//enum GoId
-//{
-//};
+enum GoId
+{
+    OBJECT_EVENT_TRAP_THRALL    = 181088,
+    OBJECT_EVENT_TRAP_BOLVAR    = 181089,
+    OBJECT_EVENT_TRAP_MAGNI     = 181090,
+    OBJECT_EVENT_TRAP_TYRANDE   = 181091,
+    OBJECT_EVENT_TRAP_CAIRNE    = 181092,
+    OBJECT_EVENT_TRAP_SYLVANAS  = 181093,
+};
 
 //enum Conditions
 //{
@@ -86,6 +97,8 @@ enum LoveIsInTheAirLeaders
     LOVE_LEADER_BOLVAR,
     LOVE_LEADER_MAGNI,
     LOVE_LEADER_TYRANDE,
+    LOVE_LEADER_HORDE,
+    LOVE_LEADER_ALLIANCE,
     LOVE_LEADER_MAX,
 };
 
@@ -122,6 +135,8 @@ class WorldState
         void ExecuteOnAreaPlayers(uint32 areaId, std::function<void(Player*)> executor);
 
         void Update(const uint32 diff);
+
+        void SendWorldstateUpdate(std::mutex& mutex, uint32 value, uint32 worldStateId);
 
         // vanilla section
         void SendLoveIsInTheAirWorldstateUpdate(uint32 value, uint32 worldStateId);
