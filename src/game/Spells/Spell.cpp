@@ -2961,6 +2961,8 @@ uint64 Spell::handle_delayed(uint64 t_offset)
 
 void Spell::_handle_immediate_phase()
 {
+    m_spellState = SPELL_STATE_LANDING;
+
     if (IsMeleeAttackResetSpell())
     {
         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS))
