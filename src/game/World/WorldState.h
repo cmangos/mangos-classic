@@ -124,7 +124,8 @@ class WorldState
         void Update(const uint32 diff);
 
         // vanilla section
-        void SendLoveIsInTheAirWorldstateUpdate(uint32 param, uint32 worldStateId);
+        void SendLoveIsInTheAirWorldstateUpdate(uint32 value, uint32 worldStateId);
+        uint32 GetLoveIsInTheAirCounter(LoveIsInTheAirLeaders leader) { return m_loveIsInTheAirData.counters[leader]; }
 
         void FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId);
 

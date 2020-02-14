@@ -22,6 +22,7 @@
 #include "Entities/Object.h"
 #include <algorithm>
 #include <map>
+#include <World/WorldStateDefines.h>
 
 WorldState::WorldState() : m_emeraldDragonsState(0xF), m_emeraldDragonsTimer(0), m_emeraldDragonsChosenPositions(4, 0)
 {
@@ -145,7 +146,59 @@ void WorldState::SaveHelper(std::string& stringToSave, SaveIds saveId)
 
 void WorldState::HandleGameObjectUse(GameObject* go, Unit* user)
 {
-
+    switch (go->GetEntry())
+    {
+        case OBJECT_EVENT_TRAP_THRALL:
+        {
+            HandleExternalEvent(CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER, LOVE_LEADER_THRALL);
+            SendLoveIsInTheAirWorldstateUpdate(GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL), WORLD_STATE_LOVE_IS_IN_THE_AIR_THRALL);
+            uint32 hordeSum = GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE) + GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL) + GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS);
+            SendLoveIsInTheAirWorldstateUpdate(hordeSum, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_HORDE);
+            break;
+        }
+        case OBJECT_EVENT_TRAP_CAIRNE:
+        {
+            HandleExternalEvent(CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER, LOVE_LEADER_CAIRNE);
+            SendLoveIsInTheAirWorldstateUpdate(GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE), WORLD_STATE_LOVE_IS_IN_THE_AIR_CAIRNE);
+            uint32 hordeSum = GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE) + GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL) + GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS);
+            SendLoveIsInTheAirWorldstateUpdate(hordeSum, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_HORDE);
+            break;
+        }
+        case OBJECT_EVENT_TRAP_SYLVANAS:
+        {
+            HandleExternalEvent(CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER, LOVE_LEADER_SYLVANAS);
+            SendLoveIsInTheAirWorldstateUpdate(GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS), WORLD_STATE_LOVE_IS_IN_THE_AIR_SYLVANAS);
+            uint32 hordeSum = GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE) + GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL) + GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS);
+            SendLoveIsInTheAirWorldstateUpdate(hordeSum, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_HORDE);
+            break;
+        }
+        case OBJECT_EVENT_TRAP_BOLVAR:
+        {
+            HandleExternalEvent(CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER, LOVE_LEADER_BOLVAR);
+            SendLoveIsInTheAirWorldstateUpdate(GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR), WORLD_STATE_LOVE_IS_IN_THE_AIR_BOLVAR);
+            uint32 allianceSum = GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR) + GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE) + GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI);
+            SendLoveIsInTheAirWorldstateUpdate(allianceSum, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_ALLIANCE);
+            break;
+        }
+        case OBJECT_EVENT_TRAP_MAGNI:
+        {
+            HandleExternalEvent(CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER, LOVE_LEADER_MAGNI);
+            SendLoveIsInTheAirWorldstateUpdate(GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI), WORLD_STATE_LOVE_IS_IN_THE_AIR_MAGNI);
+            uint32 allianceSum = GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR) + GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE) + GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI);
+            SendLoveIsInTheAirWorldstateUpdate(allianceSum, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_ALLIANCE);
+            break;
+        }
+        case OBJECT_EVENT_TRAP_TYRANDE:
+        {
+            HandleExternalEvent(CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER, LOVE_LEADER_TYRANDE);
+            SendLoveIsInTheAirWorldstateUpdate(GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE), WORLD_STATE_LOVE_IS_IN_THE_AIR_TYRANDE);
+            uint32 allianceSum = GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR) + GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE) + GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI);
+            SendLoveIsInTheAirWorldstateUpdate(allianceSum, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_ALLIANCE);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 void WorldState::HandleGameObjectRevertState(GameObject* go)
@@ -255,13 +308,12 @@ void WorldState::Update(const uint32 diff)
     }
 }
 
-void WorldState::SendLoveIsInTheAirWorldstateUpdate(uint32 param, uint32 worldStateId)
+void WorldState::SendLoveIsInTheAirWorldstateUpdate(uint32 value, uint32 worldStateId)
 {
-    MANGOS_ASSERT(param < LOVE_LEADER_MAX);
     std::lock_guard<std::mutex> guard(m_loveIsInTheAirMutex);
     for (ObjectGuid& guid : m_loveIsInTheAirCapitalsPlayers)
         if (Player* player = sObjectMgr.GetPlayer(guid))
-            player->SendUpdateWorldState(worldStateId, m_loveIsInTheAirData.counters[param]);
+            player->SendUpdateWorldState(worldStateId, value);
 }
 
 void WorldState::ExecuteOnAreaPlayers(uint32 areaId, std::function<void(Player*)> executor)

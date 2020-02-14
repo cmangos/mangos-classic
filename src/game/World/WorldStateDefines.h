@@ -23,6 +23,17 @@
 // corresponds to clientside data indices
 enum WorldStateID : int32
 {
+    // Love is in the Air
+    WORLD_STATE_LOVE_IS_IN_THE_AIR_THRALL           = 2200,
+    WORLD_STATE_LOVE_IS_IN_THE_AIR_CAIRNE           = 2201,
+    WORLD_STATE_LOVE_IS_IN_THE_AIR_SYLVANAS         = 2202,
+    WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_HORDE      = 2207,
+
+    WORLD_STATE_LOVE_IS_IN_THE_AIR_BOLVAR           = 2203,
+    WORLD_STATE_LOVE_IS_IN_THE_AIR_MAGNI            = 2204,
+    WORLD_STATE_LOVE_IS_IN_THE_AIR_TYRANDE          = 2205,
+    WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_ALLIANCE   = 2206,
+
     // Eastern Plaguelands Outdoor PVP
     WORLD_STATE_EP_TOWER_COUNT_ALLIANCE = 2327,
     WORLD_STATE_EP_TOWER_COUNT_HORDE = 2328,
