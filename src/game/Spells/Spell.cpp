@@ -1323,10 +1323,15 @@ void Spell::DoAllTargetlessEffects(bool dest)
         }
     }
 
-    if (effectMask && unitCaster)
+    if (effectMask)
     {
-        PrepareMasksForProcSystem(effectMask, procAttacker, procVictim, caster, unitTarget);
-        Unit::ProcDamageAndSpell(ProcSystemArguments(unitCaster, procAttacker & PROC_FLAG_ON_TRAP_ACTIVATION ? m_targets.getUnitTarget() : nullptr, unitCaster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
+        OnHit();
+
+        if (unitCaster)
+        {
+            PrepareMasksForProcSystem(effectMask, procAttacker, procVictim, caster, unitTarget);
+            Unit::ProcDamageAndSpell(ProcSystemArguments(unitCaster, procAttacker & PROC_FLAG_ON_TRAP_ACTIVATION ? m_targets.getUnitTarget() : nullptr, unitCaster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
+        }
     }
 }
 
@@ -1344,7 +1349,11 @@ void Spell::DoAllEffectOnTarget(GOTargetInfo* target)
     if (!go)
         return;
 
+    gameObjTarget = go; // redundant but for safety against future change for hook functionality
+
     ExecuteEffects(nullptr, nullptr, go, effectMask);
+
+    OnHit();
 
     // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
     // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
@@ -1361,7 +1370,11 @@ void Spell::DoAllEffectOnTarget(ItemTargetInfo* target)
     if (!target->item || !effectMask)
         return;
 
+    itemTarget = target->item; // redundant but for safety against future change for hook functionality
+
     ExecuteEffects(nullptr, target->item, nullptr, effectMask);
+
+    OnHit();
 }
 
 void Spell::HandleImmediateEffectExecution(TargetInfo* target)
