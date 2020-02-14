@@ -1587,8 +1587,13 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
     {
         if (m_rangedMode && CanExecuteCombatAction())
         {
-            if (m_currentRangedMode && m_rangedModeSetting == TYPE_PROXIMITY && m_creature->CanReachWithMeleeAttack(victim))
-                SetCurrentRangedMode(false);
+            if (m_rangedModeSetting == TYPE_PROXIMITY)
+            {
+                if (m_currentRangedMode && m_creature->CanReachWithMeleeAttack(victim))
+                    SetCurrentRangedMode(false);
+                else if (!m_currentRangedMode && !m_creature->CanReachWithMeleeAttack(victim, 2.f))
+                    SetCurrentRangedMode(true);
+            }
         }
 
         if (!m_currentRangedMode)

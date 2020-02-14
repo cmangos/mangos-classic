@@ -191,8 +191,13 @@ void RangedCombatAI::UpdateAI(const uint32 diff)
 
     if (m_rangedMode && m_creature->GetVictim() && CanExecuteCombatAction())
     {
-        if (m_currentRangedMode && m_rangedModeSetting == TYPE_PROXIMITY && m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
-            SetCurrentRangedMode(false);
+        if (m_rangedModeSetting == TYPE_PROXIMITY)
+        {
+            if (m_currentRangedMode && m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+                SetCurrentRangedMode(false);
+            else if (!m_currentRangedMode && !m_creature->CanReachWithMeleeAttack(m_creature->getVictim(), 2.f))
+                SetCurrentRangedMode(true);
+        }
     }
 
     DoMeleeAttackIfReady();
