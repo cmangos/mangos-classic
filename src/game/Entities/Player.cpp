@@ -19707,7 +19707,7 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
         auto& cdData = cdDataItr->second;
         if (!cdData->IsPermanent())
         {
-            sLog.outError("Player::AddCooldown> Spell(%u) try to add and already existing cooldown?", spellEntry.Id);
+            sLog.outError("Player::AddCooldown> Spell(%u) try to add and already existing cooldown %u?", spellEntry.Id, forcedDuration);
             return;
         }
         m_cooldownMap.erase(cdDataItr);
