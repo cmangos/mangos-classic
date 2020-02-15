@@ -793,7 +793,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             ScriptMap emptyMap;
             scripts.second[tmp.id] = emptyMap;
         }
-        scripts.second[tmp.id].insert(ScriptMap::value_type(tmp.delay, tmp));
+        scripts.second[tmp.id].emplace(tmp.delay, tmp);
 
         ++count;
     }
