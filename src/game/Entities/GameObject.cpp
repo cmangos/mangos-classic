@@ -361,7 +361,7 @@ void GameObject::Update(const uint32 diff)
             {
                 // traps can have time and can not have
                 GameObjectInfo const* goInfo = GetGOInfo();
-                if (goInfo->type == GAMEOBJECT_TYPE_TRAP)   // traps
+                if (goInfo->type == GAMEOBJECT_TYPE_TRAP && GetGoState() == GO_STATE_READY)   // traps
                 {
                     if (m_cooldownTime < time(nullptr))
                     {
