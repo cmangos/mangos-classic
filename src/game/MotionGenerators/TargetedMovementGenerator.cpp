@@ -193,6 +193,8 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
 
     this->i_recheckDistance.Reset(250);
     G3D::Vector3 dest = owner.movespline->FinalDestination();
+    if (dest.x == 0 && dest.y == 0 && dest.z == 0)
+        owner.GetPosition(dest.x, dest.y, dest.z);
     if (m_currentMode != CHASE_MODE_DISTANCING)
     {
         targetMoved = this->RequiresNewPosition(owner, dest.x, dest.y, dest.z);
