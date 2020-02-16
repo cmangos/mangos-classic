@@ -4370,6 +4370,8 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 auto& data = SpellTargetInfoTable[targetType];
                 WorldObject* originalCaster = GetCastingObject();
+                if (!originalCaster)
+                    originalCaster = m_caster;
                 if (data.type == TARGET_TYPE_UNIT && data.filter != TARGET_SCRIPT && (data.enumerator == TARGET_ENUMERATOR_SINGLE || data.enumerator == TARGET_ENUMERATOR_CHAIN))
                 {
                     if (!target)
