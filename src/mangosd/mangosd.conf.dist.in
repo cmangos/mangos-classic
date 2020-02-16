@@ -77,7 +77,7 @@ BindIP = "0.0.0.0"
 SD2ErrorLogFile = "SD2Errors.log"
 
 ###################################################################################################################
-# PERFORMANCE SETINGS
+# PERFORMANCE SETTINGS
 #
 #    UseProcessors
 #        Used processors mask for multi-processors system (Used only at Windows)
