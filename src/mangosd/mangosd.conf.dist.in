@@ -37,14 +37,14 @@ ConfVersion=2020032801
 #                    hostname;port;username;password;database
 #                    .;/path/to/unix_socket/DIRECTORY or . for default path;username;password;database - use Unix sockets at Unix/Linux
 #
-#	LoginDatabaseConnections
-#	WorldDatabaseConnections
-#	CharacterDatabaseConnections
-#		 Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
-#		 Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
-#		 So formula to find out how many connections will be established: X = #_connections + 1
-#		 Default: 1 connection for SELECT statements
-#
+#    LoginDatabaseConnections
+#    WorldDatabaseConnections
+#    CharacterDatabaseConnections
+#        Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
+#        Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
+#        So formula to find out how many connections will be established: X = #_connections + 1
+#        Default: 1 connection for SELECT statements
+#   
 #    MaxPingTime
 #        Settings for maximum database-ping interval (minutes between pings)
 #
@@ -56,6 +56,9 @@ ConfVersion=2020032801
 #        This option is useful for running multiple worldd/realmd instances
 #        on different IP addresses using default ports.
 #        DO NOT CHANGE THIS UNLESS YOU _REALLY_ KNOW WHAT YOU'RE DOING
+#
+#    SD2ErrorLogFile
+#        Log File for SD2-Errors
 #
 ###################################################################################################################
 
@@ -71,8 +74,6 @@ CharacterDatabaseConnections = 1
 MaxPingTime = 30
 WorldServerPort = 8085
 BindIP = "0.0.0.0"
-
-# Log File for SD2-Errors
 SD2ErrorLogFile = "SD2Errors.log"
 
 ###################################################################################################################
@@ -430,35 +431,35 @@ LogColors = ""
 #    RealmZone
 #        Server realm zone (set allowed alphabet in character names/etc). See also Strict*Names options.
 #
-#    1 Development    - any language (Default)
-#    2 United States  - extended-Latin
-#    3 Oceanic        - extended-Latin
-#    4 Latin America  - extended-Latin
-#    5 Tournament     - basic-Latin at create, any at login
-#    6 Korea          - East-Asian
-#    7 Tournament     - basic-Latin at create, any at login
-#    8 English        - extended-Latin
-#    9 German         - extended-Latin
-#    10 French        - extended-Latin
-#    11 Spanish       - extended-Latin
-#    12 Russian       - Cyrillic
-#    13 Tournament    - basic-Latin at create, any at login
-#    14 Taiwan        - East-Asian
-#    15 Tournament    - basic-Latin at create, any at login
-#    16 China         - East-Asian
-#    17 CN1           - basic-Latin at create, any at login
-#    18 CN2           - basic-Latin at create, any at login
-#    19 CN3           - basic-Latin at create, any at login
-#    20 CN4           - basic-Latin at create, any at login
-#    21 CN5           - basic-Latin at create, any at login
-#    22 CN6           - basic-Latin at create, any at login
-#    23 CN7           - basic-Latin at create, any at login
-#    24 CN8           - basic-Latin at create, any at login
-#    25 Tournament    - basic-Latin at create, any at login
-#    26 Test Server   - any language
-#    27 Tournament    - basic-Latin at create, any at login
-#    28 QA Server     - any language
-#    29 CN9           - basic-Latin at create, any at login
+#        1 Development    - any language (Default)
+#        2 United States  - extended-Latin
+#        3 Oceanic        - extended-Latin
+#        4 Latin America  - extended-Latin
+#        5 Tournament     - basic-Latin at create, any at login
+#        6 Korea          - East-Asian
+#        7 Tournament     - basic-Latin at create, any at login
+#        8 English        - extended-Latin
+#        9 German         - extended-Latin
+#        10 French        - extended-Latin
+#        11 Spanish       - extended-Latin
+#        12 Russian       - Cyrillic
+#        13 Tournament    - basic-Latin at create, any at login
+#        14 Taiwan        - East-Asian
+#        15 Tournament    - basic-Latin at create, any at login
+#        16 China         - East-Asian
+#        17 CN1           - basic-Latin at create, any at login
+#        18 CN2           - basic-Latin at create, any at login
+#        19 CN3           - basic-Latin at create, any at login
+#        20 CN4           - basic-Latin at create, any at login
+#        21 CN5           - basic-Latin at create, any at login
+#        22 CN6           - basic-Latin at create, any at login
+#        23 CN7           - basic-Latin at create, any at login
+#        24 CN8           - basic-Latin at create, any at login
+#        25 Tournament    - basic-Latin at create, any at login
+#        26 Test Server   - any language
+#        27 Tournament    - basic-Latin at create, any at login
+#        28 QA Server     - any language
+#        29 CN9           - basic-Latin at create, any at login
 #
 #    DBC.Locale
 #        DBC Language Settings
@@ -563,6 +564,10 @@ LogColors = ""
 #        Enable or disable instant logout for security level (0..4) or high (NOT in combat/while dueling/while falling)
 #        Default: 1 (Mods/GMs/Admins)
 #
+#    DisableWaterBreath
+#        Enable or disable Waterbreathing
+#        Default: 4 (Console as noneone)
+#
 #    LongFlightPathsPersistence
 #        Controls whether logging out in multi-destination taxi flight will resume entire flight or the nearest destination only.
 #        Default: 0 (false)
@@ -594,7 +599,7 @@ LogColors = ""
 #                 0 (no limit)
 #        Default: 20
 #
-#   RabbitDay
+#    RabbitDay
 #        Set to Rabbit Day (date in unix time), only the day and month are considered, the year is not important
 #        Default: 0 (off)
 #        Suggested: 954547200 (April 1st, 2000)
@@ -921,8 +926,8 @@ TalentsInspecting = 1
 #        Default: 300, 900, 600, 1200, 3600
 #
 #    Rate.Corpse.Decay.Looted
-#         Controls how long the creature corpse stays after it had been looted, as a multiplier of its Corpse.Decay.* config.
-#         Default: 0.0 (will use modifier /3 of the creatures spawntimesecs when 0.0)
+#        Controls how long the creature corpse stays after it had been looted, as a multiplier of its Corpse.Decay.* config.
+#        Default: 0.0 (will use modifier /3 of the creatures spawntimesecs when 0.0)
 #
 #    Rate.Creature.Normal.Damage
 #    Rate.Creature.Elite.Elite.Damage
@@ -935,7 +940,7 @@ TalentsInspecting = 1
 #    Rate.Creature.Normal.SpellDamage
 #    Rate.Creature.Elite.Elite.SpellDamage
 #    Rate.Creature.Elite.RAREELITE.SpellDamage
-#    Rate.Creature.Elite.WORLDBOSS.SpellDamag
+#    Rate.Creature.Elite.WORLDBOSS.SpellDamage
 #    Rate.Creature.Elite.RARE.SpellDamage
 #        Creature Spell Damage Rates.
 #        Examples: 2 - creatures will damage with spells 2x, 1.7 - 1.7x.
@@ -1242,8 +1247,8 @@ Visibility.AIRelocationNotifyDelay = 1000
 #        Default: 1
 #
 #    Rate.Skill.Discovery
-#         Skill Discovery Rates
-#         Default: 1
+#        Skill Discovery Rates
+#        Default: 1
 #
 #    Rate.Drop.Item.Poor
 #    Rate.Drop.Item.Normal
@@ -1255,8 +1260,8 @@ Visibility.AIRelocationNotifyDelay = 1000
 #    Rate.Drop.Item.Referenced
 #    Rate.Drop.Item.Quest
 #    Rate.Drop.Money
-#         Drop rates (items by quality and money)
-#         Default: 1
+#        Drop rates (items by quality and money)
+#        Default: 1
 #
 #    Rate.Pet.XP.Kill
 #    Rate.XP.Kill
@@ -1295,16 +1300,16 @@ Visibility.AIRelocationNotifyDelay = 1000
 #        Default: 1
 #
 #    Rate.Reputation.Gain
-#         Reputation Gain rate
-#         Default: 1
+#        Reputation Gain rate
+#        Default: 1
 #
 #    Rate.Reputation.LowLevel.Kill
-#         Lowest Reputation Gain rate from low level kill
-#         Default: 0.2
+#        Lowest Reputation Gain rate from low level kill
+#        Default: 0.2
 #
 #    Rate.Reputation.LowLevel.Quest
-#         Lowest Reputation Gain rate from low level quest
-#         Default: 0.2
+#        Lowest Reputation Gain rate from low level quest
+#        Default: 0.2
 #
 #    Rate.InstanceResetTime
 #        Multiplier for the number of days in between global raid/heroic instance resets.
@@ -1314,8 +1319,8 @@ Visibility.AIRelocationNotifyDelay = 1000
 #    SkillGain.Defense
 #    SkillGain.Gathering
 #    SkillGain.Weapon
-#         crafting/defense/gathering/weapon skills gain at skill grow (1,2,...)
-#         Default: 1
+#        crafting/defense/gathering/weapon skills gain at skill grow (1,2,...)
+#        Default: 1
 #
 #    SkillChance.Orange
 #    SkillChance.Yellow
@@ -1326,58 +1331,58 @@ Visibility.AIRelocationNotifyDelay = 1000
 #
 #    SkillChance.MiningSteps
 #    SkillChance.SkinningSteps
-#         For skinning and Mining chance decrease with skill level.
-#         Default: 0  - no decrease
-#                  75 - in 2 times each 75 skill points
+#        For skinning and Mining chance decrease with skill level.
+#        Default: 0  - no decrease
+#                 75 - in 2 times each 75 skill points
 #
 #    SkillFail.Loot.Fishing
-#         For fishing instead fail provided junk loot
-#         Default: 0 (disabled)
-#                  1 (enabled)
+#        For fishing instead fail provided junk loot
+#        Default: 0 (disabled)
+#                 1 (enabled)
 #
 #    SkillFail.Gain.Fishing
-#         For fishing skill gain possible at fail also
-#         Default: 0 (disabled)
-#                  1 (enabled)
+#        For fishing skill gain possible at fail also
+#        Default: 0 (disabled)
+#                 1 (enabled)
 #
 #    SkillFail.Possible.FishingPool
-#         For fishing pool impossible fail from low skill by default
-#         Default: 1 (enabled)
-#                  0 (disabled)
+#        For fishing pool impossible fail from low skill by default
+#        Default: 1 (enabled)
+#                 0 (disabled)
 #
 #    DurabilityLossChance.Damage
-#         Chance lost one from equiped items durability point at damage apply or receive.
-#         Default: 0.5 (100/0.5 = 200) Each 200 damage apply one from 19 possible equipped items
+#        Chance lost one from equiped items durability point at damage apply or receive.
+#        Default: 0.5 (100/0.5 = 200) Each 200 damage apply one from 19 possible equipped items
 #
 #    DurabilityLossChance.Absorb
-#         Chance lost one from armor items durability point at damage absorb.
-#         Default: 0.5 (100/0.5 = 200) Each 200 absorbs apply one from 15 possible armor equipped items
+#        Chance lost one from armor items durability point at damage absorb.
+#        Default: 0.5 (100/0.5 = 200) Each 200 absorbs apply one from 15 possible armor equipped items
 #
 #    DurabilityLossChance.Parry
-#         Chance lost weapon durability point at parry.
-#         Default: 0.05 (100/0.05 = 2000) Each 2000 parry attacks main weapon lost point
+#        Chance lost weapon durability point at parry.
+#        Default: 0.05 (100/0.05 = 2000) Each 2000 parry attacks main weapon lost point
 #
 #    DurabilityLossChance.Block
-#         Chance lost sheild durability point at damage block.
-#         Default: 0.05 (100/0.05 = 2000) Each 2000 partly or full blocked attacks shield lost point
+#        Chance lost sheild durability point at damage block.
+#        Default: 0.05 (100/0.05 = 2000) Each 2000 partly or full blocked attacks shield lost point
 #
 #    Death.SicknessLevel
-#         Starting Character start gain sickness at spirit resurrection (1 min)
-#         Default: 11
-#                  -10 - character will have full time (10min) sickness at 1 level
-#                  maxplayerlevel+1 - character will not have sickness at any level
+#        Starting Character start gain sickness at spirit resurrection (1 min)
+#        Default: 11
+#                 -10 - character will have full time (10min) sickness at 1 level
+#                 maxplayerlevel+1 - character will not have sickness at any level
 #
 #    Death.CorpseReclaimDelay.PvP
 #    Death.CorpseReclaimDelay.PvE
-#         Enabled/disabled increase corpse reclaim delay at often PvP/PvE deaths
-#         Default: 1 (enabled)
-#                  0 (disabled)
+#        Enabled/disabled increase corpse reclaim delay at often PvP/PvE deaths
+#        Default: 1 (enabled)
+#                 0 (disabled)
 #
 #    Death.Bones.World
 #    Death.Bones.Battleground
-#         Enabled/disabled creating bones instead corpse at resurrection (in normal zones/instacnes, or battleground)
-#         Default: 1 (enabled)
-#                  0 (disabled)
+#        Enabled/disabled creating bones instead corpse at resurrection (in normal zones/instacnes, or battleground)
+#        Default: 1 (enabled)
+#                 0 (disabled)
 #
 #    Death.Ghost.RunSpeed.World
 #    Death.Ghost.RunSpeed.Battleground
@@ -1515,26 +1520,26 @@ OutdoorPvp.EPEnabled = 1
 # NETWORK CONFIG
 #
 #    Network.Threads
-#         Number of threads for network, recommend 1 thread per 1000 connections.
-#         Default: 1
+#        Number of threads for network, recommend 1 thread per 1000 connections.
+#        Default: 1
 #
 #    Network.OutKBuff
-#         The size of the output kernel buffer used ( SO_SNDBUF socket option, tcp manual ).
-#         Default: -1 (Use system default setting)
+#        The size of the output kernel buffer used ( SO_SNDBUF socket option, tcp manual ).
+#        Default: -1 (Use system default setting)
 #
 #    Network.OutUBuff
-#         Userspace buffer for output. This is amount of memory reserved per each connection.
-#         Default: 65536
+#        Userspace buffer for output. This is amount of memory reserved per each connection.
+#        Default: 65536
 #
-#    Network.TcpNoDelay:
-#         TCP Nagle algorithm setting
-#         Default: 0 (enable Nagle algorithm, less traffic, more latency)
-#                  1 (TCP_NO_DELAY, disable Nagle algorithm, more traffic but less latency)
+#    Network.TcpNodelay
+#        TCP Nagle algorithm setting
+#        Default: 0 (enable Nagle algorithm, less traffic, more latency)
+#                 1 (TCP_NO_DELAY, disable Nagle algorithm, more traffic but less latency)
 #
 #    Network.KickOnBadPacket
-#         Kick player on bad packet format.
-#         Default: 0 - do not kick
-#                  1 - kick
+#        Kick player on bad packet format.
+#        Default: 0 - do not kick
+#                 1 - kick
 #
 ###################################################################################################################
 
@@ -1579,7 +1584,7 @@ Network.KickOnBadPacket = 0
 #        Default: 1 - on
 #
 #
-#    SOAP.Enable
+#    SOAP.Enabled
 #        Enable soap service
 #        Default: 0 - off
 #                 1 - on
