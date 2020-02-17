@@ -718,7 +718,7 @@ void Creature::RegeneratePower()
                     float intellect = GetStat(STAT_INTELLECT);
                     addValue = sqrt(intellect) * OCTRegenMPPerSpirit() * ManaIncreaseRate;
                     if (!IsPet() && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && addValue == 0.f)
-                        addValue = 17.f * ManaIncreaseRate / 5.f * 2.f;
+                        addValue = (GetMaxPower(POWER_MANA) / 20) / 5.f * 2.f;
                 }
             }
             else
