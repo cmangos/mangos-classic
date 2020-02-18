@@ -234,7 +234,7 @@ void MotionMaster::MoveIdle()
         push(&si_idleMovement);
 }
 
-void MotionMaster::MoveRandomAroundPoint(float x, float y, float z, float radius, float verticalZ)
+void MotionMaster::MoveRandomAroundPoint(float x, float y, float z, float radius, float verticalZ, uint32 timer)
 {
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
     {
@@ -243,7 +243,10 @@ void MotionMaster::MoveRandomAroundPoint(float x, float y, float z, float radius
     else
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s move random.", m_owner->GetGuidStr().c_str());
-        Mutate(new WanderMovementGenerator(x, y, z, radius, verticalZ));
+        if (timer)
+            Mutate(new TimedWanderMovementGenerator(timer, x, y, z, radius, verticalZ));
+        else
+            Mutate(new WanderMovementGenerator(x, y, z, radius, verticalZ));
     }
 }
 

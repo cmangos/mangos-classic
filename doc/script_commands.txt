@@ -250,6 +250,7 @@ Defining a buddy could be done in several way:
 20 SCRIPT_COMMAND_MOVEMENT                  resultingSource = Creature
                                             * datalong = MovementType (0:idle, 1:random or 2:waypoint)
                                             * datalong2 = wanderDistance (for random movement), pathId (for waypoint movement)
+                                            * datalong3 = timer for timed random movement
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
 
 21 SCRIPT_COMMAND_SET_ACTIVEOBJECT          resultingSource = Creature

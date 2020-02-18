@@ -64,10 +64,11 @@ enum MovementGeneratorType
     CONFUSED_MOTION_TYPE            = 13,                   // RandomMovementGenerator.h
     EFFECT_MOTION_TYPE              = 14,                   // WrapperMovementGenerator.h
     TAXI_MOTION_TYPE                = 15,                   // WaypointMovementGenerator.h
+    TIMED_RANDOM_MOTION_TYPE        = 16,                   // RandomMovementGenerator.h
 
-    EXTERNAL_WAYPOINT_MOVE          = 16,                   // Only used in UnitAI::MovementInform when a waypoint is reached. The pathId >= 0 is added as additonal value
-    EXTERNAL_WAYPOINT_MOVE_START    = 17,                   // Only used in UnitAI::MovementInform when a waypoint is started. The pathId >= 0 is added as additional value
-    EXTERNAL_WAYPOINT_FINISHED_LAST = 18,                   // Only used in UnitAI::MovementInform when the waittime of the last wp is finished The pathId >= 0 is added as additional value
+    EXTERNAL_WAYPOINT_MOVE          = 17,                   // Only used in UnitAI::MovementInform when a waypoint is reached. The pathId >= 0 is added as additonal value
+    EXTERNAL_WAYPOINT_MOVE_START    = 18,                   // Only used in UnitAI::MovementInform when a waypoint is started. The pathId >= 0 is added as additional value
+    EXTERNAL_WAYPOINT_FINISHED_LAST = 19,                   // Only used in UnitAI::MovementInform when the waittime of the last wp is finished The pathId >= 0 is added as additional value
 };
 
 enum MMCleanFlag
@@ -124,7 +125,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
         }
 
         void MoveIdle();
-        void MoveRandomAroundPoint(float x, float y, float z, float radius, float verticalZ = 0.0f);
+        void MoveRandomAroundPoint(float x, float y, float z, float radius, float verticalZ = 0.0f, uint32 timer = 0);
         void MoveTargetedHome(bool runHome = true);
         void MoveFollow(Unit* target, float dist, float angle, bool asMain = false);
         void MoveStay(float x, float y, float z, float o = 0, bool asMain = false);

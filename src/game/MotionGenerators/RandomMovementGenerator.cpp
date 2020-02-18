@@ -195,6 +195,20 @@ void WanderMovementGenerator::Interrupt(Unit& owner)
         static_cast<Creature&>(owner).SetWalk(!owner.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
 }
 
+TimedWanderMovementGenerator::TimedWanderMovementGenerator(Creature const& npc, uint32 timer, float radius, float verticalZ)
+    : TimedWanderMovementGenerator(timer, npc.GetPositionX(), npc.GetPositionY(), npc.GetPositionZ(), radius, verticalZ)
+{
+}
+
+bool TimedWanderMovementGenerator::Update(Unit& owner, const uint32& diff)
+{
+    m_durationTimer.Update(diff);
+    if (m_durationTimer.Passed())
+        return false;
+
+    return WanderMovementGenerator::Update(owner, diff);
+}
+
 FleeingMovementGenerator::FleeingMovementGenerator(Unit const& source) :
     AbstractRandomMovementGenerator(UNIT_STAT_FLEEING, UNIT_STAT_FLEEING_MOVE, 500, 1500)
 {

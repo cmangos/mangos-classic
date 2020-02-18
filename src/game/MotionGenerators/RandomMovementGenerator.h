@@ -75,6 +75,24 @@ class WanderMovementGenerator : public AbstractRandomMovementGenerator
         MovementGeneratorType GetMovementGeneratorType() const override { return RANDOM_MOTION_TYPE; }
 };
 
+class TimedWanderMovementGenerator : public WanderMovementGenerator
+{
+    public:
+        explicit TimedWanderMovementGenerator(Creature const& npc, uint32 timer, float radius, float verticalZ = 0.0f);
+        TimedWanderMovementGenerator(uint32 timer, float x, float y, float z, float radius, float verticalZ = 0.0f)
+            : WanderMovementGenerator(x, y, z, radius, verticalZ), m_durationTimer(timer)
+        {
+
+        }
+
+        bool Update(Unit& owner, const uint32& diff) override;
+
+        MovementGeneratorType GetMovementGeneratorType() const override { return TIMED_RANDOM_MOTION_TYPE; }
+
+    private:
+        ShortTimeTracker m_durationTimer;
+};
+
 class FleeingMovementGenerator : public AbstractRandomMovementGenerator
 {
     public:
