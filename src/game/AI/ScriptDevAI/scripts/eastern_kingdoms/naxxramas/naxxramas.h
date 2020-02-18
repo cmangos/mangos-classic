@@ -179,15 +179,48 @@ enum
     AREATRIGGER_FROSTWYRM_TELE  = 4156,
     AREATRIGGER_FAERLINA_INTRO  = 4115,
 
+    // Gothik summon steps
+    STEP_TRAINEE                = 0,
+    STEP_KNIGHT                 = 1,
+    STEP_RIDER                  = 2,
+    SPELL_SUMMON_TRAINEE        = 28007,                    // Triggers 27884 every 20s
+    SPELL_SUMMON_KNIGHT         = 28009,                    // Triggers 28008 every 25s
+    SPELL_SUMMON_MOUNTED_KNIGHT = 28011,                    // Triggers 28010 every 30s
+    
+    SPELL_SPECTRAL_ASSAULT      = 28781,
+    SPELL_UNRELENTING_ASSAULT   = 29874,
+
     EVENT_ID_DECIMATE           = 10495,
 
-    SPELL_DARK_CHANNELING       = 21157   
+    SPELL_DARK_CHANNELING       = 21157
+};
+
+enum GothikSpellDummy
+{
+    SPELL_A_TO_ANCHOR_1         = 27892,
+    SPELL_B_TO_ANCHOR_1         = 27928,
+    SPELL_C_TO_ANCHOR_1         = 27935,
+
+    SPELL_A_TO_ANCHOR_2         = 27893,
+    SPELL_B_TO_ANCHOR_2         = 27929,
+    SPELL_C_TO_ANCHOR_2         = 27936,
+
+    SPELL_A_TO_SKULL            = 27915,
+    SPELL_B_TO_SKULL            = 27931,
+    SPELL_C_TO_SKULL            = 27937
+};
+
+enum GothikSummonFlag {
+    SUMMON_FLAG_TRAINEE         = 0x01,
+    SUMMON_FLAG_KNIGHT          = 0x02,
+    SUMMON_FLAG_RIDER           = 0x04
 };
 
 struct GothTrigger
 {
     bool bIsRightSide;
     bool bIsAnchorHigh;
+    int summonTypeFlag;
 };
 
 static const float aSapphPositions[4] = {3521.48f, -5234.87f, 137.626f, 4.53329f};
@@ -197,7 +230,7 @@ struct SpawnLocation
     float m_fX, m_fY, m_fZ, m_fO;
 };
 
-// Used in Construct Quarter for the deadly blobs continuously spawning in Patcherk corridor
+// Used in Construct Quarter for the deadly blobs continuously spawning in Patchwerk corridor
 static const SpawnLocation aLivingPoisonPositions[6] =
 {
     {3128.692f, -3119.211f, 293.346f, 4.725505f},
@@ -232,11 +265,12 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
 
         void Update(const uint32 diff) override;
 
-        // goth
-        void SetGothTriggers();
-        Creature* GetClosestAnchorForGoth(Creature* pSource, bool bRightSide);
-        void GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide);
-        bool IsInRightSideGothArea(Unit* pUnit);
+        // Gothik
+        void InitializeGothikTriggers();
+        bool IsSuitableTriggerForSummon(Unit* trigger, uint8 flag);
+        Creature* GetClosestAnchorForGothik(Creature* pSource, bool bRightSide);
+        void GetGothikSummonPoints(CreatureList& lList, bool bRightSide);
+        bool IsInRightSideGothikArea(Unit* pUnit);
 
         // kel
         void SetChamberCenterCoords(float fX, float fY, float fZ);
@@ -257,6 +291,8 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         GuidList m_lGothTriggerList;
         GuidList m_lZombieChowList;
         GuidList m_lFaerlinaFollowersList;
+        GuidList m_lUnrelentingSideList;
+        GuidList m_lSpectralSideList;
 
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
 

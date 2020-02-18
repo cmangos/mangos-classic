@@ -183,6 +183,17 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         }
         case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetObjectGuid()); break;
         case NPC_TESLA_COIL:        m_lThadTeslaCoilList.push_back(pCreature->GetObjectGuid()); break;
+        case NPC_UNREL_TRAINEE:
+        case NPC_UNREL_DEATH_KNIGHT:
+        case NPC_UNREL_RIDER:
+            m_lUnrelentingSideList.push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_SPECT_TRAINEE:
+        case NPC_SPECT_DEATH_KNIGHT:
+        case NPC_SPECT_RIDER:
+        case NPC_SPECT_HORSE:
+            m_lSpectralSideList.push_back(pCreature->GetObjectGuid());
+            break;
     }
 }
 
@@ -326,12 +337,43 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
 
 void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
 {
-    if (pCreature->GetEntry() == NPC_MR_BIGGLESWORTH && m_auiEncounter[TYPE_KELTHUZAD] != DONE)
-        DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_CAT_DIED, NPC_KELTHUZAD);
-    else if (pCreature->GetEntry() == NPC_ZOMBIE_CHOW)
+    switch (pCreature->GetEntry())
     {
-        pCreature->ForcedDespawn(2000);
-        m_lZombieChowList.remove(pCreature->GetObjectGuid());
+        case NPC_MR_BIGGLESWORTH:
+            if ( m_auiEncounter[TYPE_KELTHUZAD] != DONE)
+                DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_CAT_DIED, NPC_KELTHUZAD);
+            break;
+        case NPC_ZOMBIE_CHOW:
+            pCreature->ForcedDespawn(2000);
+            m_lZombieChowList.remove(pCreature->GetObjectGuid());
+            break;
+        case NPC_UNREL_TRAINEE:
+            if (Creature* anchor = GetClosestAnchorForGothik(pCreature, true))
+                pCreature->CastSpell(anchor, SPELL_A_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pCreature->GetObjectGuid());
+            m_lUnrelentingSideList.remove(pCreature->GetObjectGuid());
+            pCreature->ForcedDespawn(4000);
+            break;
+        case NPC_UNREL_DEATH_KNIGHT:
+            if (Creature* anchor = GetClosestAnchorForGothik(pCreature, true))
+                pCreature->CastSpell(anchor, SPELL_B_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pCreature->GetObjectGuid());
+            m_lUnrelentingSideList.remove(pCreature->GetObjectGuid());
+            pCreature->ForcedDespawn(4000);
+            break;
+        case NPC_UNREL_RIDER:
+            if (Creature* anchor = GetClosestAnchorForGothik(pCreature, true))
+                pCreature->CastSpell(anchor, SPELL_C_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pCreature->GetObjectGuid());
+            m_lUnrelentingSideList.remove(pCreature->GetObjectGuid());
+            pCreature->ForcedDespawn(4000);
+            break;
+        case NPC_SPECT_TRAINEE:
+        case NPC_SPECT_DEATH_KNIGHT:
+        case NPC_SPECT_RIDER:
+        case NPC_SPECT_HORSE:
+            m_lSpectralSideList.remove(pCreature->GetObjectGuid());
+            pCreature->ForcedDespawn(4000);
+            break;
+        default:
+            break;
     }
 }
 
@@ -416,28 +458,41 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
         case TYPE_GOTHIK:
             switch (uiData)
             {
+                m_auiEncounter[uiType] = uiData;
                 case IN_PROGRESS:
+                    // Encounter begins: close the gate and start timer to summon unrelenting trainees
                     DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
                     DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
+                    InitializeGothikTriggers();
                     break;
                 case SPECIAL:
                     DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
+                    for (auto& spectralGuid : m_lSpectralSideList)
+                    {
+                        if (Creature* spectral = instance->GetCreature(spectralGuid))
+                            spectral->CastSpell(spectral, SPELL_SPECTRAL_ASSAULT, TRIGGERED_OLD_TRIGGERED);
+                    }
+                    for (auto& unrelentingGuid : m_lUnrelentingSideList)
+                    {
+                        if (Creature* unrelenting = instance->GetCreature(unrelentingGuid))
+                            unrelenting->CastSpell(unrelenting, SPELL_UNRELENTING_ASSAULT, TRIGGERED_OLD_TRIGGERED);
+                    }
                     break;
                 case FAIL:
                     if (m_auiEncounter[uiType] == IN_PROGRESS)
                         DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
-
                     DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
                     break;
                 case DONE:
                     DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
                     DoUseDoorOrButton(GO_MILI_GOTH_EXIT_GATE);
                     DoUseDoorOrButton(GO_MILI_HORSEMEN_DOOR);
-
+                    // Open the central gate if Gothik is defeated before doing so
+                    if (m_auiEncounter[uiType] == IN_PROGRESS)
+                        DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
                     StartNextDialogueText(NPC_THANE);
                     break;
             }
-            m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_FOUR_HORSEMEN:
             // Skip if already set
@@ -680,27 +735,66 @@ void instance_naxxramas::Update(uint32 uiDiff)
     DialogueUpdate(uiDiff);
 }
 
-void instance_naxxramas::SetGothTriggers()
+// Initialize all triggers used in Gothik the Harvester encounter by flagging them with their position in the room and what kind of NPC they will summon
+void instance_naxxramas::InitializeGothikTriggers()
 {
-    Creature* pGoth = GetSingleCreatureFromStorage(NPC_GOTHIK);
+    Creature* gothik = GetSingleCreatureFromStorage(NPC_GOTHIK);
 
-    if (!pGoth)
+    if (!gothik)
         return;
 
-    for (GuidList::const_iterator itr = m_lGothTriggerList.begin(); itr != m_lGothTriggerList.end(); ++itr)
-    {
-        if (Creature* pTrigger = instance->GetCreature(*itr))
-        {
-            GothTrigger pGt;
-            pGt.bIsAnchorHigh = (pTrigger->GetPositionZ() >= (pGoth->GetPositionZ() - 5.0f));
-            pGt.bIsRightSide = IsInRightSideGothArea(pTrigger);
+    CreatureList summonList;
 
-            m_mGothTriggerMap[pTrigger->GetObjectGuid()] = pGt;
+    for (auto triggerGuid : m_lGothTriggerList)
+    {
+        if (Creature* trigger = instance->GetCreature(triggerGuid))
+        {
+            GothTrigger gt;
+            gt.bIsAnchorHigh = (trigger->GetPositionZ() >= (gothik->GetPositionZ() - 5.0f));
+            gt.bIsRightSide = IsInRightSideGothikArea(trigger);
+            gt.summonTypeFlag = 0x00;
+            m_mGothTriggerMap[trigger->GetObjectGuid()] = gt;
+
+            // Keep track of triggers that will be used as summon point
+            if (!gt.bIsAnchorHigh && gt.bIsRightSide)
+                summonList.push_back(trigger);
         }
     }
+
+    if (!summonList.empty())
+    {
+        // Sort summoning trigger NPCS by distance from Gothik
+        // and flag them regarding of what they will summon
+        summonList.sort(ObjectDistanceOrder(gothik));
+        uint8 index = 0;
+        for (auto trigger : summonList)
+        {
+            switch (index)
+            {
+                // Closest and furthest: Unrelenting Knights and Trainees
+                case 0:
+                case 3:
+                    m_mGothTriggerMap[trigger->GetObjectGuid()].summonTypeFlag = SUMMON_FLAG_TRAINEE | SUMMON_FLAG_KNIGHT;
+                    break;
+                // Middle: only Unrelenting Trainee
+                case 1:
+                    m_mGothTriggerMap[trigger->GetObjectGuid()].summonTypeFlag = SUMMON_FLAG_TRAINEE;
+                    break;
+                // Other middle: Unrelenting Rider
+                case 2:
+                    m_mGothTriggerMap[trigger->GetObjectGuid()].summonTypeFlag = SUMMON_FLAG_RIDER;
+                    break;
+                default:
+                    break;
+            }
+            ++index;
+        }
+    }
+    else
+        script_error_log("No suitable summon trigger found for Gothik combat area. Set up failed.");
 }
 
-Creature* instance_naxxramas::GetClosestAnchorForGoth(Creature* pSource, bool bRightSide)
+Creature* instance_naxxramas::GetClosestAnchorForGothik(Creature* pSource, bool bRightSide)
 {
     std::list<Creature* > lList;
 
@@ -725,7 +819,7 @@ Creature* instance_naxxramas::GetClosestAnchorForGoth(Creature* pSource, bool bR
     return nullptr;
 }
 
-void instance_naxxramas::GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide)
+void instance_naxxramas::GetGothikSummonPoints(CreatureList& lList, bool bRightSide)
 {
     for (auto& itr : m_mGothTriggerMap)
     {
@@ -740,14 +834,19 @@ void instance_naxxramas::GetGothSummonPointCreatures(CreatureList& lList, bool b
     }
 }
 
-// Right is right side from gothik (eastern)
-bool instance_naxxramas::IsInRightSideGothArea(Unit* pUnit)
+// Right is right side from gothik (eastern), i.e. right is living and left is spectral
+bool instance_naxxramas::IsInRightSideGothikArea(Unit* unit)
 {
-    if (GameObject* pCombatGate = GetSingleGameObjectFromStorage(GO_MILI_GOTH_COMBAT_GATE))
-        return (pCombatGate->GetPositionY() >= pUnit->GetPositionY());
+    if (GameObject* combatGate = GetSingleGameObjectFromStorage(GO_MILI_GOTH_COMBAT_GATE))
+        return (combatGate->GetPositionY() >= unit->GetPositionY());
 
     script_error_log("left/right side check, Gothik combat area failed.");
     return true;
+}
+
+bool instance_naxxramas::IsSuitableTriggerForSummon(Unit* trigger, uint8 flag)
+{
+    return m_mGothTriggerMap[trigger->GetObjectGuid()].summonTypeFlag & flag;
 }
 
 void instance_naxxramas::SetChamberCenterCoords(float fX, float fY, float fZ)

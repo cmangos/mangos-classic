@@ -30,7 +30,14 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28522,'spell_sapphiron_icebolt_aura'),
 (28526,'spell_sapphiron_icebolt'),
 (28560,'spell_sapphiron_blizzard'),
+(28007,'spell_summon_unrelenting'),
+(28009,'spell_summon_unrelenting'),
+(28011,'spell_summon_unrelenting'),
+(28749,'spell_check_gothik_side'),
+(28781,'spell_gothik_side_assault'),
 (29330,'spell_sapphiron_despawn_buffet'),
+(29874,'spell_gothik_side_assault'),
+(29875,'spell_check_gothik_side'),
 (30132,'spell_sapphiron_iceblock');
 
 -- TBC
