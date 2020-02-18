@@ -65,37 +65,37 @@ enum
 
 struct boss_gothikAI : public ScriptedAI
 {
-    boss_gothikAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_gothikAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
 
-    uint8 m_uiPhase;
-    uint8 m_uiSpeech;
+    uint8 m_phase;
+    uint8 m_speech;
     uint8 m_teleportCount;
     uint8 m_summonStep;
 
     uint32 m_summonTimer;
-    uint32 m_uiTeleportTimer;
-    uint32 m_uiShadowboltTimer;
-    uint32 m_uiHarvestSoulTimer;
-    uint32 m_uiPhaseTimer;
-    uint32 m_uiSpeechTimer;
+    uint32 m_teleportTimer;
+    uint32 m_shadowboltTimer;
+    uint32 m_harvestSoulTimer;
+    uint32 m_phaseTimer;
+    uint32 m_speechTimer;
 
     void Reset() override
     {
         // Remove immunity
-        m_uiPhase = PHASE_SPEECH;
-        m_uiSpeech = 1;
+        m_phase = PHASE_SPEECH;
+        m_speech = 1;
 
-        m_uiTeleportTimer = urand(30, 45) * IN_MILLISECONDS; // Teleport every 30-45 seconds.
-        m_uiShadowboltTimer = 2 * IN_MILLISECONDS;
-        m_uiHarvestSoulTimer = 2500;
-        m_uiPhaseTimer = (4 * MINUTE + 34) * IN_MILLISECONDS; // Teleport down at 4:34
-        m_uiSpeechTimer = 1 * IN_MILLISECONDS;
+        m_teleportTimer = urand(30, 45) * IN_MILLISECONDS; // Teleport every 30-45 seconds.
+        m_shadowboltTimer = 2 * IN_MILLISECONDS;
+        m_harvestSoulTimer = 2500;
+        m_phaseTimer = (4 * MINUTE + 34) * IN_MILLISECONDS; // Teleport down at 4:34
+        m_speechTimer = 1 * IN_MILLISECONDS;
         m_summonTimer = 0;
         m_teleportCount = 0;
         m_summonStep = STEP_TRAINEE;
@@ -106,12 +106,12 @@ struct boss_gothikAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_IMMUNE_ALL, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
-        m_pInstance->SetData(TYPE_GOTHIK, IN_PROGRESS);
+        m_instance->SetData(TYPE_GOTHIK, IN_PROGRESS);
         // Make immune if not already
         if (!m_creature->HasAura(SPELL_IMMUNE_ALL))
             DoCastSpellIfCan(m_creature, SPELL_IMMUNE_ALL, TRIGGERED_OLD_TRIGGERED);
@@ -122,16 +122,16 @@ struct boss_gothikAI : public ScriptedAI
 
     bool HasPlayersInLeftSide() const
     {
-        Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
+        Map::PlayerList const& players = m_instance->instance->GetPlayers();
 
-        if (lPlayers.isEmpty())
+        if (players.isEmpty())
             return false;
 
-        for (const auto& lPlayer : lPlayers)
+        for (const auto& playerGuid : players)
         {
-            if (Player* pPlayer = lPlayer.getSource())
+            if (Player* player = playerGuid.getSource())
             {
-                if (!m_pInstance->IsInRightSideGothikArea(pPlayer) && pPlayer->isAlive())
+                if (!m_instance->IsInRightSideGothikArea(player) && player->isAlive())
                     return true;
             }
         }
@@ -139,18 +139,18 @@ struct boss_gothikAI : public ScriptedAI
         return false;
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void KilledUnit(Unit* victim) override
     {
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+        if (victim->GetTypeId() == TYPEID_PLAYER)
             DoScriptText(SAY_KILL, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOTHIK, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_GOTHIK, DONE);
     }
 
     void EnterEvadeMode() override
@@ -163,8 +163,8 @@ struct boss_gothikAI : public ScriptedAI
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_MOUNTED_KNIGHT);
         m_creature->RemoveAurasDueToSpell(SPELL_IMMUNE_ALL);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOTHIK, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_GOTHIK, FAIL);
 
         m_creature->ForcedDespawn();
         m_creature->Respawn();
@@ -174,13 +174,13 @@ struct boss_gothikAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOTHIK, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_GOTHIK, FAIL);
 
         SetCombatMovement(false);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -188,7 +188,7 @@ struct boss_gothikAI : public ScriptedAI
         // Summoning auras handling
         if (m_summonTimer)
         {
-            if (m_summonTimer < uiDiff)
+            if (m_summonTimer < diff)
             {
                 switch (m_summonStep) {
                     case STEP_TRAINEE:
@@ -218,45 +218,45 @@ struct boss_gothikAI : public ScriptedAI
                 }
             }
             else
-                m_summonTimer -= uiDiff;
+                m_summonTimer -= diff;
         }
 
-        switch (m_uiPhase)
+        switch (m_phase)
         {
             case PHASE_SPEECH:
-                if (m_uiSpeechTimer < uiDiff)
+                if (m_speechTimer < diff)
                 {
-                    switch (m_uiSpeech)
+                    switch (m_speech)
                     {
-                        case 1: DoScriptText(SAY_SPEECH_1, m_creature); m_uiSpeechTimer = 4 * IN_MILLISECONDS; break;
-                        case 2: DoScriptText(SAY_SPEECH_2, m_creature); m_uiSpeechTimer = 6 * IN_MILLISECONDS; break;
-                        case 3: DoScriptText(SAY_SPEECH_3, m_creature); m_uiSpeechTimer = 5 * IN_MILLISECONDS; break;
-                        case 4: DoScriptText(SAY_SPEECH_4, m_creature); m_uiPhase = PHASE_BALCONY; break;
+                        case 1: DoScriptText(SAY_SPEECH_1, m_creature); m_speechTimer = 4 * IN_MILLISECONDS; break;
+                        case 2: DoScriptText(SAY_SPEECH_2, m_creature); m_speechTimer = 6 * IN_MILLISECONDS; break;
+                        case 3: DoScriptText(SAY_SPEECH_3, m_creature); m_speechTimer = 5 * IN_MILLISECONDS; break;
+                        case 4: DoScriptText(SAY_SPEECH_4, m_creature); m_phase = PHASE_BALCONY; break;
                     }
-                    m_uiSpeech++;
+                    m_speech++;
                 }
                 else
-                    m_uiSpeechTimer -= uiDiff;
+                    m_speechTimer -= diff;
 
             // No break here
 
             case PHASE_BALCONY:                            // Do nothing but wait to teleport down: summoning is handled by instance script
-                if (m_uiPhaseTimer < uiDiff)
+                if (m_phaseTimer < diff)
                 {
-                    m_uiPhase = PHASE_TELEPORT_DOWN;
-                    m_uiPhaseTimer = 0;
+                    m_phase = PHASE_TELEPORT_DOWN;
+                    m_phaseTimer = 0;
                 }
                 else
-                    m_uiPhaseTimer -= uiDiff;
+                    m_phaseTimer -= diff;
 
                 break;
 
             case PHASE_TELEPORT_DOWN:
-                if (m_uiPhaseTimer < uiDiff)
+                if (m_phaseTimer < diff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RIGHT, CAST_TRIGGERED) == CAST_OK)
                     {
-                        m_uiPhase = m_pInstance ? PHASE_TELEPORTING : PHASE_STOP_TELEPORTING;
+                        m_phase = m_instance ? PHASE_TELEPORTING : PHASE_STOP_TELEPORTING;
 
                         DoScriptText(SAY_TELEPORT, m_creature);
 
@@ -269,91 +269,91 @@ struct boss_gothikAI : public ScriptedAI
                     }
                 }
                 else
-                    m_uiPhaseTimer -= uiDiff;
+                    m_phaseTimer -= diff;
 
                 break;
 
-            case PHASE_TELEPORTING:                         // Phase is only reached if m_pInstance is valid
-                if (m_uiTeleportTimer < uiDiff)
+            case PHASE_TELEPORTING:                         // Phase is only reached if m_instance is valid
+                if (m_teleportTimer < diff)
                 {
-                    uint32 uiTeleportSpell = m_pInstance->IsInRightSideGothikArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
-                    if (DoCastSpellIfCan(m_creature, uiTeleportSpell) == CAST_OK)
+                    uint32 teleportSpellId = m_instance->IsInRightSideGothikArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
+                    if (DoCastSpellIfCan(m_creature, teleportSpellId) == CAST_OK)
                     {
-                        m_uiTeleportTimer = urand(30, 45) * IN_MILLISECONDS; // Teleports between 30 seconds and 45 seconds.
-                        m_uiShadowboltTimer = 2 * IN_MILLISECONDS;
+                        m_teleportTimer = urand(30, 45) * IN_MILLISECONDS; // Teleports between 30 seconds and 45 seconds.
+                        m_shadowboltTimer = 2 * IN_MILLISECONDS;
                         ++m_teleportCount;
                     }
                 }
                 else
-                    m_uiTeleportTimer -= uiDiff;
+                    m_teleportTimer -= diff;
 
                 // Second time that Gothik teleports back from dead side to living side: open the central gate
                 if (m_teleportCount >= 4)
                 {
-                    m_uiPhase = PHASE_STOP_TELEPORTING;
-                    m_pInstance->SetData(TYPE_GOTHIK, SPECIAL);
+                    m_phase = PHASE_STOP_TELEPORTING;
+                    m_instance->SetData(TYPE_GOTHIK, SPECIAL);
                 }
             // no break here
 
             case PHASE_STOP_TELEPORTING:
-                if (m_uiHarvestSoulTimer < uiDiff)
+                if (m_harvestSoulTimer < diff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
-                        m_uiHarvestSoulTimer = 15 * IN_MILLISECONDS;
+                        m_harvestSoulTimer = 15 * IN_MILLISECONDS;
                 }
                 else
-                    m_uiHarvestSoulTimer -= uiDiff;
+                    m_harvestSoulTimer -= diff;
 
-                if (m_uiShadowboltTimer)
+                if (m_shadowboltTimer)
                 {
-                    if (m_uiShadowboltTimer <= uiDiff)
-                        m_uiShadowboltTimer = 0;
+                    if (m_shadowboltTimer <= diff)
+                        m_shadowboltTimer = 0;
                     else
-                        m_uiShadowboltTimer -= uiDiff;
+                        m_shadowboltTimer -= diff;
                 }
                 // Shadowbolt cooldown finished, cast when ready
                 else if (!m_creature->IsNonMeleeSpellCasted(true))
                 {
                     // Select valid target
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOWBOLT, SELECT_FLAG_IN_LOS))
-                        DoCastSpellIfCan(pTarget, SPELL_SHADOWBOLT);
+                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOWBOLT, SELECT_FLAG_IN_LOS))
+                        DoCastSpellIfCan(target, SPELL_SHADOWBOLT);
                 }
                 break;
         }
     }
 };
 
-UnitAI* GetAI_boss_gothik(Creature* pCreature)
+UnitAI* GetAI_boss_gothik(Creature* creature)
 {
-    return new boss_gothikAI(pCreature);
+    return new boss_gothikAI(creature);
 }
 
-bool EffectDummyCreature_spell_anchor(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+bool EffectDummyCreature_spell_anchor(Unit* /*caster*/, uint32 spellId, SpellEffectIndex effIndex, Creature* creatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
-    if (uiEffIndex != EFFECT_INDEX_0 || pCreatureTarget->GetEntry() != NPC_SUB_BOSS_TRIGGER)
+    if (effIndex != EFFECT_INDEX_0 || creatureTarget->GetEntry() != NPC_SUB_BOSS_TRIGGER)
         return true;
 
-    instance_naxxramas* pInstance = (instance_naxxramas*)pCreatureTarget->GetInstanceData();
+    instance_naxxramas* instance = (instance_naxxramas*)creatureTarget->GetInstanceData();
 
-    if (!pInstance)
+    if (!instance)
         return true;
 
-    switch (uiSpellId)
+    switch (spellId)
     {
         case SPELL_A_TO_ANCHOR_1:                           // trigger mobs at high right side
         case SPELL_B_TO_ANCHOR_1:
         case SPELL_C_TO_ANCHOR_1:
         {
-            if (Creature* pAnchor2 = pInstance->GetClosestAnchorForGothik(pCreatureTarget, false))
+            if (Creature* pAnchor2 = instance->GetClosestAnchorForGothik(creatureTarget, false))
             {
-                uint32 uiTriggered = SPELL_A_TO_ANCHOR_2;
+                uint32 triggered = SPELL_A_TO_ANCHOR_2;
 
-                if (uiSpellId == SPELL_B_TO_ANCHOR_1)
-                    uiTriggered = SPELL_B_TO_ANCHOR_2;
-                else if (uiSpellId == SPELL_C_TO_ANCHOR_1)
-                    uiTriggered = SPELL_C_TO_ANCHOR_2;
+                if (spellId == SPELL_B_TO_ANCHOR_1)
+                    triggered = SPELL_B_TO_ANCHOR_2;
+                else if (spellId == SPELL_C_TO_ANCHOR_1)
+                    triggered = SPELL_C_TO_ANCHOR_2;
 
-                pCreatureTarget->CastSpell(pAnchor2, uiTriggered, TRIGGERED_OLD_TRIGGERED);
+                creatureTarget->CastSpell(pAnchor2, triggered, TRIGGERED_OLD_TRIGGERED);
             }
 
             return true;
@@ -362,25 +362,25 @@ bool EffectDummyCreature_spell_anchor(Unit* /*pCaster*/, uint32 uiSpellId, Spell
         case SPELL_B_TO_ANCHOR_2:
         case SPELL_C_TO_ANCHOR_2:
         {
-            CreatureList lTargets;
-            pInstance->GetGothikSummonPoints(lTargets, false);
+            CreatureList listTargets;
+            instance->GetGothikSummonPoints(listTargets, false);
 
-            if (!lTargets.empty())
+            if (!listTargets.empty())
             {
-                CreatureList::iterator itr = lTargets.begin();
-                uint32 uiPosition = urand(0, lTargets.size() - 1);
-                advance(itr, uiPosition);
+                CreatureList::iterator itr = listTargets.begin();
+                uint32 position = urand(0, listTargets.size() - 1);
+                advance(itr, position);
 
-                if (Creature* pTarget = (*itr))
+                if (Creature* target = (*itr))
                 {
-                    uint32 uiTriggered = SPELL_A_TO_SKULL;
+                    uint32 triggered = SPELL_A_TO_SKULL;
 
-                    if (uiSpellId == SPELL_B_TO_ANCHOR_2)
-                        uiTriggered = SPELL_B_TO_SKULL;
-                    else if (uiSpellId == SPELL_C_TO_ANCHOR_2)
-                        uiTriggered = SPELL_C_TO_SKULL;
+                    if (spellId == SPELL_B_TO_ANCHOR_2)
+                        triggered = SPELL_B_TO_SKULL;
+                    else if (spellId == SPELL_C_TO_ANCHOR_2)
+                        triggered = SPELL_C_TO_SKULL;
 
-                    pCreatureTarget->CastSpell(pTarget, uiTriggered, TRIGGERED_OLD_TRIGGERED);
+                    creatureTarget->CastSpell(target, triggered, TRIGGERED_OLD_TRIGGERED);
                 }
             }
             return true;
@@ -389,27 +389,27 @@ bool EffectDummyCreature_spell_anchor(Unit* /*pCaster*/, uint32 uiSpellId, Spell
         case SPELL_B_TO_SKULL:
         case SPELL_C_TO_SKULL:
         {
-            if (Creature* pGoth = pInstance->GetSingleCreatureFromStorage(NPC_GOTHIK))
+            if (Creature* gothik = instance->GetSingleCreatureFromStorage(NPC_GOTHIK))
             {
-                uint32 uiNpcEntry = NPC_SPECT_TRAINEE;
+                uint32 npcEntry = NPC_SPECT_TRAINEE;
 
-                if (uiSpellId == SPELL_B_TO_SKULL)
-                    uiNpcEntry = NPC_SPECT_DEATH_KNIGHT;
-                else if (uiSpellId == SPELL_C_TO_SKULL)
-                    uiNpcEntry = NPC_SPECT_RIDER;
+                if (spellId == SPELL_B_TO_SKULL)
+                    npcEntry = NPC_SPECT_DEATH_KNIGHT;
+                else if (spellId == SPELL_C_TO_SKULL)
+                    npcEntry = NPC_SPECT_RIDER;
 
-                pGoth->SummonCreature(uiNpcEntry, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
+                gothik->SummonCreature(npcEntry, creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(), creatureTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
 
-                if (uiNpcEntry == NPC_SPECT_RIDER)
-                    pGoth->SummonCreature(NPC_SPECT_HORSE, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
+                if (npcEntry == NPC_SPECT_RIDER)
+                    gothik->SummonCreature(NPC_SPECT_HORSE, creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(), creatureTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
             }
             return true;
         }
         case SPELL_RESET_GOTHIK_EVENT:
         {
-            pCreatureTarget->RemoveAurasDueToSpell(SPELL_SUMMON_TRAINEE);
-            pCreatureTarget->RemoveAurasDueToSpell(SPELL_SUMMON_KNIGHT);
-            pCreatureTarget->RemoveAurasDueToSpell(SPELL_SUMMON_MOUNTED_KNIGHT);
+            creatureTarget->RemoveAurasDueToSpell(SPELL_SUMMON_TRAINEE);
+            creatureTarget->RemoveAurasDueToSpell(SPELL_SUMMON_KNIGHT);
+            creatureTarget->RemoveAurasDueToSpell(SPELL_SUMMON_MOUNTED_KNIGHT);
             return true;
         }
 
@@ -514,15 +514,15 @@ struct GothikSideAssault : public SpellScript
 
 void AddSC_boss_gothik()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "boss_gothik";
-    pNewScript->GetAI = &GetAI_boss_gothik;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "boss_gothik";
+    newScript->GetAI = &GetAI_boss_gothik;
+    newScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "spell_anchor";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_anchor;
-    pNewScript->RegisterSelf();
+    newScript = new Script;
+    newScript->Name = "spell_anchor";
+    newScript->pEffectDummyNPC = &EffectDummyCreature_spell_anchor;
+    newScript->RegisterSelf();
 
     RegisterAuraScript<SummonUnrelenting>("spell_summon_unrelenting");
     RegisterSpellScript<CheckGothikSide>("spell_check_gothik_side");
