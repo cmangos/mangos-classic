@@ -651,7 +651,7 @@ uint32 GameEventMgr::Update(ActiveEvents const* activeAtShutdown /*= nullptr*/)
     uint32 nextEventDelay = max_ge_check_delay;             // 1 day
     for (uint16 itr = 1; itr < m_gameEvents.size(); ++itr)
     {
-        if (m_gameEvents[itr].occurence == 0 || m_gameEvents[itr].scheduleType == GAME_EVENT_SCHEDULE_SERVERSIDE)
+        if (m_gameEvents[itr].occurence == 0 || (m_gameEvents[itr].scheduleType == GAME_EVENT_SCHEDULE_SERVERSIDE && m_isGameEventsInit))
             continue;
         // sLog.outErrorDb("Checking event %u",itr);
         if (CheckOneGameEvent(itr, currenttime))

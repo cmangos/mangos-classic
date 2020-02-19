@@ -232,7 +232,7 @@ struct CreatureData
     uint32 curmana;
     bool  is_dead;
     uint8 movementType;
-    uint16 gameEvent;
+    int16 gameEvent;
     uint16 GuidPoolId;
     uint16 EntryPoolId;
     uint16 OriginalZoneId;
