@@ -31,6 +31,7 @@
 #include "Server/WorldSession.h"
 #include "Log.h"
 #include "Server/DBCStores.h"
+#include "CommonDefines.h"
 
 #include <chrono>
 #include <functional>
@@ -290,14 +291,14 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
                              "id, "                      //0
                              "gmlevel, "                 //1
                              "sessionkey, "              //2
-                             "last_ip, "                 //3
+                             "ip, "                      //3
                              "locked, "                  //4
                              "v, "                       //5
                              "s, "                       //6
                              "mutetime, "                //7
                              "locale "                   //8
-                             "FROM account "
-                             "WHERE username = '%s'",
+                             "FROM account a join account_logons b on (a.id=b.accountId) "
+                             "WHERE username = '%s' ORDER BY loginTime DESC LIMIT 1",
                              safe_account.c_str());
 
     // Stop if the account is not found
@@ -430,8 +431,8 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // No SQL injection, username escaped.
     static SqlStatementID updAccount;
 
-    SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "UPDATE account SET last_ip = ? WHERE username = ?");
-    stmt.PExecute(address.c_str(), account.c_str());
+    SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES(?,?,NOW(),?)");
+    stmt.PExecute(id, address.c_str(), std::to_string(LOGIN_TYPE_MANGOSD).data());
 
     m_crypt.Init(&K);
 

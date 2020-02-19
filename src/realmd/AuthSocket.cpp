@@ -30,6 +30,7 @@
 #include "AuthSocket.h"
 #include "AuthCodes.h"
 #include "SRP6/SRP6.h"
+#include "CommonDefines.h"
 
 #include <openssl/md5.h>
 #include <ctime>
@@ -367,7 +368,7 @@ bool AuthSocket::_HandleLogonChallenge()
     {
         ///- Get the account details from the account table
         // No SQL injection (escaped user name)
-        QueryResult* result = LoginDatabase.PQuery("SELECT id,locked,last_ip,gmlevel,v,s,token FROM account WHERE username = '%s'", _safelogin.c_str());
+        QueryResult* result = LoginDatabase.PQuery("SELECT id,locked,lockedIp,gmlevel,v,s,token FROM account WHERE username = '%s'", _safelogin.c_str());
         if (result)
         {
             Field* fields = result->Fetch();
@@ -568,10 +569,12 @@ bool AuthSocket::_HandleLogonProof()
 
         BASIC_LOG("User '%s' successfully authenticated", _login.c_str());
 
-        ///- Update the sessionkey, last_ip, last login time and reset number of failed logins in the account table for this account
+        ///- Update the sessionkey, current ip and login time and reset number of failed logins in the account table for this account
         // No SQL injection (escaped user name) and IP address as received by socket
         const char* K_hex = srp.GetStrongSessionKey().AsHexStr();
-        LoginDatabase.PExecute("UPDATE account SET sessionkey = '%s', last_ip = '%s', last_login = NOW(), locale = '%u', failed_logins = 0 WHERE username = '%s'", K_hex, m_address.c_str(), GetLocaleByName(_localizationName), _safelogin.c_str());
+        LoginDatabase.PExecute("UPDATE account SET sessionkey = '%s', locale = '%u', failed_logins = 0, os = %u WHERE username = '%s'", K_hex, GetLocaleByName(_localizationName), std::atoi(m_os.data()), _safelogin.c_str());
+        if (QueryResult* loginfail = LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", _safelogin.c_str()))
+            LoginDatabase.PExecute("INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES('%u','%s',NOW(),'%u')", loginfail->Fetch()[0].GetUInt32(), m_address.c_str(), LOGIN_TYPE_REALMD);
         OPENSSL_free((void*)K_hex);
 
         ///- Finish SRP6 and send the final result to the client
