@@ -86,12 +86,6 @@ typedef struct AUTH_LOGON_PIN_DATA_C
     uint8 hash[20];
 } sAuthLogonPinData_C;
 
-typedef struct AUTH_LOGON_AUTHENTICATOR_DATA_C
-{
-    uint8 unk; // Has to be 0x01
-    uint8 keys[6]; // Valid code must be 6 digits
-} sAuthLogonAuthenticatorData_C;
-
 // typedef sAuthLogonChallenge_C sAuthReconnectChallenge_C;
 /*
 typedef struct
@@ -535,16 +529,24 @@ bool AuthSocket::_HandleLogonProof()
     {
         if (lp.securityFlags & SECURITY_FLAG_AUTHENTICATOR || !_token.empty())
         {
-            sAuthLogonAuthenticatorData_C authData{};
-            if (!Read((char*) &authData, sizeof(sAuthLogonAuthenticatorData_C)))
+            uint8 pinCount;
+            if (!Read((char*)&pinCount, sizeof(uint8)))
             {
                 const char data[4] = {CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0};
                 Write(data, sizeof(data));
                 return true;
             }
+            std::vector<uint8> keys(pinCount);
+            if (!Read((char*)keys.data(), sizeof(uint8) * pinCount))
+            {
+                const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0 };
+                Write(data, sizeof(data));
+                return true;
+            }
+
 
             auto ServerToken = generateToken(_token.c_str());
-            auto clientToken = atoi((const char*) authData.keys);
+            auto clientToken = atoi((const char*)keys.data());
             if (ServerToken != clientToken)
             {
                 BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode! Given %u Expected %u", _login.c_str(), clientToken, ServerToken);
