@@ -389,20 +389,15 @@ bool EffectDummyCreature_spell_anchor(Unit* /*caster*/, uint32 spellId, SpellEff
         case SPELL_B_TO_SKULL:
         case SPELL_C_TO_SKULL:
         {
-            if (Creature* gothik = instance->GetSingleCreatureFromStorage(NPC_GOTHIK))
-            {
-                uint32 npcEntry = NPC_SPECT_TRAINEE;
+            uint32 summonSpellId = SPELL_SUMMON_SPECTRAL_TRAINEE;
 
-                if (spellId == SPELL_B_TO_SKULL)
-                    npcEntry = NPC_SPECT_DEATH_KNIGHT;
-                else if (spellId == SPELL_C_TO_SKULL)
-                    npcEntry = NPC_SPECT_RIDER;
+            if (spellId == SPELL_B_TO_SKULL)
+                summonSpellId = SPELL_SUMMON_SPECTRAL_KNIGHT;
+            else if (spellId == SPELL_C_TO_SKULL)
+                summonSpellId = SPELL_SUMMON_SPECTRAL_RIVENDARE;
 
-                gothik->SummonCreature(npcEntry, creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(), creatureTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
+            creatureTarget->CastSpell(creatureTarget, summonSpellId, TRIGGERED_OLD_TRIGGERED);
 
-                if (npcEntry == NPC_SPECT_RIDER)
-                    gothik->SummonCreature(NPC_SPECT_HORSE, creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(), creatureTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
-            }
             return true;
         }
         case SPELL_RESET_GOTHIK_EVENT:
