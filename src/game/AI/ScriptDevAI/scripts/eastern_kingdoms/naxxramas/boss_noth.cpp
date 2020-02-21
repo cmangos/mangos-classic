@@ -137,6 +137,9 @@ struct boss_nothAI : public ScriptedAI
         m_blinkTimer = 25 * IN_MILLISECONDS;
         m_curseTimer = 4 * IN_MILLISECONDS;
         m_summonTimer = 12 * IN_MILLISECONDS;
+
+        SetMeleeEnabled(true);
+        SetCombatMovement(true);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -232,9 +235,11 @@ struct boss_nothAI : public ScriptedAI
             {
                 if (m_phaseTimer <= diff)
                 {
+                    SetCombatMovement(false);
                     if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
                     {
                         DoCastSpellIfCan(m_creature, SPELL_IMMUNE_ALL, CAST_TRIGGERED); // Prevent players from damaging Noth when he is on the balcony
+                        SetMeleeEnabled(false);
                         m_creature->GetMotionMaster()->MoveIdle();
                         m_phase = PHASE_BALCONY;
                         m_summonTimer = 10 * IN_MILLISECONDS;                         // Summon first wave 10 seconds after teleport
@@ -248,6 +253,8 @@ struct boss_nothAI : public ScriptedAI
                         }
                         return;
                     }
+                    else
+                        SetCombatMovement(true);    // Restore combat movement on cast failure
                 }
                 else
                     m_phaseTimer -= diff;
@@ -293,6 +300,8 @@ struct boss_nothAI : public ScriptedAI
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RETURN, CAST_TRIGGERED) == CAST_OK)
                 {
                     m_creature->RemoveAurasDueToSpell(SPELL_IMMUNE_ALL);
+                    SetMeleeEnabled(true);
+                    SetCombatMovement(true);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                     m_summonTimer = 5 * IN_MILLISECONDS;                              // 5 seconds before summoning again Plagued Warriors
                     switch (m_phaseSub)
