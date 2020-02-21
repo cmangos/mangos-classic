@@ -2111,7 +2111,7 @@ void Player::RemoveFromWorld()
     if (IsInWorld())
     {
         ///- Release charmed creatures, unsummon totems and remove pets/guardians
-        sWorld.SetOnlinePlayer(GetTeam(), getRace(), getClass(), true);
+        sWorld.SetOnlinePlayer(GetTeam(), getRace(), getClass(), false);
         UnsummonAllTotems();
     }
 
