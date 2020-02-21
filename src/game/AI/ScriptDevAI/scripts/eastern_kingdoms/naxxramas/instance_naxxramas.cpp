@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Instance_Naxxramas
-SD%Complete: 90%
+SD%Complete: 100
 SDComment:
 SDCategory: Naxxramas
 EndScriptData
@@ -57,6 +57,7 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_uiSapphSpawnTimer(0),
     m_uiTauntTimer(0),
     m_uiHorseMenKilled(0),
+    m_uiHorsemenTauntTimer(30 * MINUTE * IN_MILLISECONDS),
     m_uiLivingPoisonTimer(0),
     m_uiScreamsTimer(2 * MINUTE * IN_MILLISECONDS),
     isFaerlinaIntroDone(false),
@@ -717,6 +718,36 @@ void instance_naxxramas::Update(uint32 uiDiff)
         }
         else
             m_uiTauntTimer -= uiDiff;
+    }
+
+    if (m_auiEncounter[TYPE_FOUR_HORSEMEN] == NOT_STARTED)
+    {
+        if (m_uiHorsemenTauntTimer <= uiDiff)
+        {
+            uint32 horsemenEntry;
+            int32 textId;
+            switch (urand(0, 3))
+            {
+                case 0:
+                    horsemenEntry = NPC_BLAUMEUX;
+                    textId = SAY_BLAU_TAUNT3;
+                    break;
+                case 1:
+                    horsemenEntry = NPC_THANE;
+                    textId = SAY_KORT_TAUNT3;
+                    break;
+                case 2:
+                    horsemenEntry = NPC_MOGRAINE;
+                    textId = SAY_MORG_TAUNT3;
+                case 3:
+                    horsemenEntry = NPC_ZELIEK;
+                    textId = SAY_ZELI_TAUNT3;
+            }
+            DoOrSimulateScriptTextForThisInstance(textId, horsemenEntry);
+            m_uiHorsemenTauntTimer = urand(30, 40) * MINUTE * IN_MILLISECONDS;
+        }
+        else
+            m_uiHorsemenTauntTimer -= uiDiff;
     }
 
     if (m_uiSapphSpawnTimer)

@@ -31,16 +31,16 @@ enum
     // Horsemen dialogue texts
     SAY_BLAU_TAUNT1             = -1533045,
     SAY_BLAU_TAUNT2             = -1533046,
-    SAY_BLAU_TAUNT3             = -1533047,             // NYI - requires additiona research
+    SAY_BLAU_TAUNT3             = -1533047,
     SAY_MORG_TAUNT1             = -1533071,
     SAY_MORG_TAUNT2             = -1533072,
-    SAY_MORG_TAUNT3             = -1533073,             // NYI - requires additiona research
+    SAY_MORG_TAUNT3             = -1533073,
     SAY_KORT_TAUNT1             = -1533052,
     SAY_KORT_TAUNT2             = -1533053,
-    SAY_KORT_TAUNT3             = -1533054,             // NYI - requires additiona research
+    SAY_KORT_TAUNT3             = -1533054,
     SAY_ZELI_TAUNT1             = -1533059,
     SAY_ZELI_TAUNT2             = -1533060,
-    SAY_ZELI_TAUNT3             = -1533061,             // NYI - requires additiona research
+    SAY_ZELI_TAUNT3             = -1533061,
     // Grand Widow Faerlina intro
     SAY_FAERLINA_INTRO          = -1533009,
     FOLLOWERS_STAND             = 1,
@@ -305,6 +305,7 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         uint8 m_uiHorseMenKilled;
         uint32 m_uiLivingPoisonTimer;
         uint32 m_uiScreamsTimer;
+        uint32 m_uiHorsemenTauntTimer;
 
         bool isFaerlinaIntroDone;
 
