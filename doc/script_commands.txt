@@ -225,6 +225,7 @@ Defining a buddy could be done in several way:
 
 14 SCRIPT_COMMAND_REMOVE_AURA               resultingSource = Unit
                                             * datalong = spell_id
+                                            warning - if used with a channeled spell will not interrupt channel
 
 15 SCRIPT_COMMAND_CAST_SPELL                resultingSource = Unit, cast spell at resultingTarget = Unit
                                             * datalong = spell id
