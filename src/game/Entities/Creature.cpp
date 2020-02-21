@@ -1582,6 +1582,13 @@ bool Creature::HasInvolvedQuest(uint32 quest_id) const
     return false;
 }
 
+bool Creature::IsRegeneratingPower() const
+{
+    if (IsInCombat())
+        return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_POWER_IN_COMBAT) != 0;
+    return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_POWER) != 0;
+}
+
 
 struct CreatureRespawnDeleteWorker
 {

@@ -378,8 +378,10 @@ enum SelectFlags
 
 enum RegenStatsFlags
 {
-    REGEN_FLAG_HEALTH               = 0x001,
-    REGEN_FLAG_POWER                = 0x002,
+    REGEN_FLAG_HEALTH_IN_COMBAT     = 0x001, // placeholder for future
+    REGEN_FLAG_HEALTH               = 0x002,
+    REGEN_FLAG_POWER_IN_COMBAT      = 0x004,
+    REGEN_FLAG_POWER                = 0x008,
 };
 
 // Vendors
@@ -807,7 +809,7 @@ class Creature : public Unit
 
         GridReference<Creature>& GetGridRef() { return m_gridRef; }
         bool IsRegeneratingHealth() const { return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_HEALTH) != 0; }
-        bool IsRegeneratingPower() const { return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_POWER) != 0; }
+        bool IsRegeneratingPower() const;
         virtual uint8 GetPetAutoSpellSize() const { return CREATURE_MAX_SPELLS; }
         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
         {
