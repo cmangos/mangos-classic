@@ -428,6 +428,11 @@ class World
         uint32 GetMaxQueuedSessionCount() const { return m_maxQueuedSessionCount; }
         uint32 GetMaxActiveSessionCount() const { return m_maxActiveSessionCount; }
         uint32 GetUniqueSessionCount() const { return m_uniqueSessionCount.size(); }
+        // player counts
+        void SetOnlinePlayer(Team team, uint8 race, uint8 plClass, bool apply); // threadsafe
+        uint32 GetOnlineTeamPlayers(bool alliance) const { return m_onlineTeams[alliance]; }
+        uint32 GetOnlineRacePlayers(uint8 race) const { return m_onlineRaces[race]; }
+        uint32 GetOnlineClassPlayers(uint8 plClass) const { return m_onlineClasses[plClass]; }
 
         /// Get the active session server limit (or security level limitations)
         uint32 GetPlayerAmountLimit() const { return m_playerLimit >= 0 ? m_playerLimit : 0; }
@@ -697,6 +702,10 @@ class World
 
         // Opcode logging
         std::vector<std::atomic<uint32>> m_opcodeCounters;
+        // online count logging
+        std::array<std::atomic<uint32>, 2> m_onlineTeams;
+        std::array<std::atomic<uint32>, MAX_RACES> m_onlineRaces;
+        std::array<std::atomic<uint32>, MAX_CLASSES> m_onlineClasses;
 };
 
 extern uint32 realmID;

@@ -2198,6 +2198,22 @@ void World::UpdateMaxSessionCounters()
     m_maxQueuedSessionCount = std::max(m_maxQueuedSessionCount, uint32(m_QueuedSessions.size()));
 }
 
+void World::SetOnlinePlayer(Team team, uint8 race, uint8 plClass, bool apply)
+{
+    if (apply)
+    {
+        ++m_onlineTeams[team == ALLIANCE ? 1 : 0];
+        ++m_onlineRaces[race];
+        ++m_onlineClasses[plClass];
+    }
+    else
+    {
+        --m_onlineTeams[team == ALLIANCE ? 1 : 0];
+        --m_onlineRaces[race];
+        --m_onlineClasses[plClass];
+    }
+}
+
 void World::LoadDBVersion()
 {
     QueryResult* result = WorldDatabase.Query("SELECT version, creature_ai_version FROM db_version LIMIT 1");
@@ -2406,5 +2422,28 @@ void World::GeneratePacketMetrics()
     meas_players.add_field("online", std::to_string(GetActiveSessionCount()));
     meas_players.add_field("unique", std::to_string(GetUniqueSessionCount()));
     meas_players.add_field("queued", std::to_string(GetQueuedSessionCount()));
+    // team
+    meas_players.add_field("alliance", std::to_string(GetOnlineTeamPlayers(true)));
+    meas_players.add_field("horde", std::to_string(GetOnlineTeamPlayers(false)));
+    // race
+    meas_players.add_field("human", std::to_string(GetOnlineRacePlayers(RACE_HUMAN)));
+    meas_players.add_field("dwarf", std::to_string(GetOnlineRacePlayers(RACE_DWARF)));
+    meas_players.add_field("gnome", std::to_string(GetOnlineRacePlayers(RACE_GNOME)));
+    meas_players.add_field("nelf", std::to_string(GetOnlineRacePlayers(RACE_NIGHTELF)));
+
+    meas_players.add_field("orc", std::to_string(GetOnlineRacePlayers(RACE_ORC)));
+    meas_players.add_field("undead", std::to_string(GetOnlineRacePlayers(RACE_UNDEAD)));
+    meas_players.add_field("tauren", std::to_string(GetOnlineRacePlayers(RACE_TAUREN)));
+    meas_players.add_field("troll", std::to_string(GetOnlineRacePlayers(RACE_TROLL)));
+    // class
+    meas_players.add_field("warrior", std::to_string(GetOnlineClassPlayers(CLASS_WARRIOR)));
+    meas_players.add_field("paladin", std::to_string(GetOnlineClassPlayers(CLASS_PALADIN)));
+    meas_players.add_field("hunter", std::to_string(GetOnlineClassPlayers(CLASS_HUNTER)));
+    meas_players.add_field("rogue", std::to_string(GetOnlineClassPlayers(CLASS_ROGUE)));
+    meas_players.add_field("priest", std::to_string(GetOnlineClassPlayers(CLASS_PRIEST)));
+    meas_players.add_field("shaman", std::to_string(GetOnlineClassPlayers(CLASS_SHAMAN)));
+    meas_players.add_field("mage", std::to_string(GetOnlineClassPlayers(CLASS_MAGE)));
+    meas_players.add_field("warlock", std::to_string(GetOnlineClassPlayers(CLASS_WARLOCK)));
+    meas_players.add_field("druid", std::to_string(GetOnlineClassPlayers(CLASS_DRUID)));
 }
 

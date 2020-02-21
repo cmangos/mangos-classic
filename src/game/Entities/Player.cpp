@@ -2091,6 +2091,8 @@ void Player::ProcessDelayedOperations()
 
 void Player::AddToWorld()
 {
+    if (!IsInWorld())
+        sWorld.SetOnlinePlayer(GetTeam(), getRace(), getClass(), true);
     ///- Do not add/remove the player from the object storage
     ///- It will crash when updating the ObjectAccessor
     ///- The player should only be added when logging in
@@ -2109,6 +2111,7 @@ void Player::RemoveFromWorld()
     if (IsInWorld())
     {
         ///- Release charmed creatures, unsummon totems and remove pets/guardians
+        sWorld.SetOnlinePlayer(GetTeam(), getRace(), getClass(), true);
         UnsummonAllTotems();
     }
 
