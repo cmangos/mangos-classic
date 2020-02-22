@@ -57,6 +57,8 @@ class RangedCombatAI : public CombatAI
         void SetRangedMode(bool state, float distance, RangeModeType type);
         void SetCurrentRangedMode(bool state);
 
+        bool GetCurrentRangedMode() { return m_currentRangedMode; }
+
         virtual void JustStoppedMovementOfTarget(SpellEntry const* spell, Unit* victim) override;
         virtual void OnSpellInterrupt(SpellEntry const* spellInfo) override;
 
