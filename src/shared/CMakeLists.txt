@@ -240,6 +240,7 @@ endif()
 
 if(POSTGRESQL AND POSTGRESQL_FOUND)
   target_include_directories(${LIBRARY_NAME} PUBLIC ${PostgreSQL_INCLUDE_DIRS})
+  target_link_libraries(${LIBRARY_NAME} PUBLIC ${PostgreSQL_LIBRARIES})
 else()
   target_include_directories(${LIBRARY_NAME} PUBLIC ${MYSQL_INCLUDE_DIR})
   target_link_libraries(${LIBRARY_NAME} PUBLIC ${MYSQL_LIBRARY})

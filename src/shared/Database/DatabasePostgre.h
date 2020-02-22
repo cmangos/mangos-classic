@@ -29,7 +29,7 @@
 #include <winsock2.h>
 #include <postgre/libpq-fe.h>
 #else
-#include <libpq-fe.h>
+#include <postgresql/libpq-fe.h>
 #endif
 
 class PostgreSQLConnection : public SqlConnection
@@ -52,7 +52,7 @@ class PostgreSQLConnection : public SqlConnection
 
     private:
         bool _TransactionCmd(const char* sql);
-        bool _Query(const char* sql, PGresult** pResult, uint64* pRowCount, uint32* pFieldCount) override;
+        bool _Query(const char* sql, PGresult** pResult, uint64* pRowCount, uint32* pFieldCount);
 
         PGconn* mPGconn;
 };
