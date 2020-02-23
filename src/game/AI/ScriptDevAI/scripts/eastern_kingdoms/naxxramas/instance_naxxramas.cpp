@@ -739,9 +739,11 @@ void instance_naxxramas::Update(uint32 uiDiff)
                 case 2:
                     horsemenEntry = NPC_MOGRAINE;
                     textId = SAY_MORG_TAUNT3;
+                    break;
                 case 3:
                     horsemenEntry = NPC_ZELIEK;
                     textId = SAY_ZELI_TAUNT3;
+                    break;
             }
             DoOrSimulateScriptTextForThisInstance(textId, horsemenEntry);
             m_uiHorsemenTauntTimer = urand(30, 40) * MINUTE * IN_MILLISECONDS;
