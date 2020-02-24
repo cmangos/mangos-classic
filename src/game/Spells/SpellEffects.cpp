@@ -1980,16 +1980,23 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)
         sLog.outError("Spell::EffectTeleportUnits - unknown EffectImplicitTargetB[%u] = %u for spell ID %u", eff_idx, m_spellInfo->EffectImplicitTargetB[eff_idx], m_spellInfo->Id);
         return;
     }
+
     // Init dest coordinates
-    float x = m_targets.m_destPos.x;
-    float y = m_targets.m_destPos.y;
-    float z = m_targets.m_destPos.z;
-    float orientation = unitTarget->GetOrientation();
+    Position position = m_targets.getDestination();
+    float orientation = m_targets.m_destPos.o;
+    if (orientation == 0.f) // not filled in spell targeting
+    {
+        if (m_caster != unitTarget)
+            orientation = position.GetAngle(m_caster->GetPositionX(), m_caster->GetPositionY());
+        else
+            orientation = unitTarget->GetOrientation();
+    }
+
     // Teleport
     if (m_targets.m_mapId == UINT32_MAX || m_targets.m_mapId == unitTarget->GetMapId())
-        unitTarget->NearTeleportTo(x, y, z, orientation, unitTarget == m_caster);
+        unitTarget->NearTeleportTo(position.x, position.y, position.z, orientation, unitTarget == m_caster);
     else if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)unitTarget)->TeleportTo(m_targets.m_mapId, x, y, z, m_targets.m_destPos.o, unitTarget == m_caster ? TELE_TO_SPELL : 0);
+        ((Player*)unitTarget)->TeleportTo(m_targets.m_mapId, position.x, position.y, position.z, orientation, unitTarget == m_caster ? TELE_TO_SPELL : 0);
 
     // post effects for TARGET_LOCATION_DATABASE
     switch (m_spellInfo->Id)

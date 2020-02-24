@@ -281,6 +281,7 @@ struct Position
     float GetPositionZ() const { return z; }
     float GetPositionO() const { return o; }
     bool IsEmpty() const { return x == 0.f && y == 0.f && z == 0.f; }
+    float GetAngle(const float x, const float y) const;
 };
 
 struct WorldLocation

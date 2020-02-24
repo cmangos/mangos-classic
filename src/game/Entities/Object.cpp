@@ -1305,7 +1305,7 @@ float WorldObject::GetAngleAt(float x, float y, float ox, float oy)
 
 float WorldObject::GetAngle(float x, float y) const
 {
-    return GetAngleAt(GetPositionX(), GetPositionY(), x, y);
+    return m_position.GetAngle(x, y);
 }
 
 float WorldObject::GetAngleAt(float x, float y, const WorldObject* obj) const
@@ -2546,4 +2546,14 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
         }
     }
     return value;
+}
+
+float Position::GetAngle(const float x, const float y) const
+{
+    float dx = x - GetPositionX();
+    float dy = y - GetPositionY();
+
+    float ang = atan2(dy, dx);                              // returns value between -Pi..Pi
+    ang = (ang >= 0) ? ang : 2 * M_PI_F + ang;
+    return ang;
 }
