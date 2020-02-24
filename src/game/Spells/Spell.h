@@ -511,7 +511,7 @@ class Spell
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
 
-        bool CheckTargetCreatureType(Unit* target) const;
+        static bool CheckTargetCreatureType(Unit* target, SpellEntry const* spellInfo);
 
         void AddTriggeredSpell(SpellEntry const* spellInfo) { m_TriggerSpells.push_back(spellInfo); }
         void AddPrecastSpell(SpellEntry const* spellInfo) { m_preCastSpells.push_back(spellInfo); }

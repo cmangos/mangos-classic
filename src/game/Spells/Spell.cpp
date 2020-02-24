@@ -4256,7 +4256,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             // ignore self casts (including area casts when caster selected as target)
             if (non_caster_target)
             {
-                if (!CheckTargetCreatureType(target))
+                if (!CheckTargetCreatureType(target, m_spellInfo))
                 {
                     if (target->GetTypeId() == TYPEID_PLAYER)
                         return SPELL_FAILED_TARGET_IS_PLAYER;
@@ -6172,12 +6172,12 @@ void Spell::UpdatePointers()
         m_CastItem = nullptr;
 }
 
-bool Spell::CheckTargetCreatureType(Unit* target) const
+bool Spell::CheckTargetCreatureType(Unit* target, SpellEntry const* spellInfo)
 {
-    uint32 spellCreatureTargetMask = m_spellInfo->TargetCreatureType;
+    uint32 spellCreatureTargetMask = spellInfo->TargetCreatureType;
 
     // Dismiss Pet and Taming Lesson skipped
-    if (m_spellInfo->Id == 2641 || m_spellInfo->Id == 23356)
+    if (spellInfo->Id == 2641 || spellInfo->Id == 23356)
         spellCreatureTargetMask =  0;
 
     if (spellCreatureTargetMask)
@@ -6205,7 +6205,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
     // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
     if (exception != EXCEPTION_MAGNET && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_UNIT_CASTER)
     {
-        if (!CheckTargetCreatureType(target))
+        if (!CheckTargetCreatureType(target, m_spellInfo))
             return false;
     }
 
