@@ -71,11 +71,9 @@ SpellCastTargets::SpellCastTargets()
 
     m_itemTargetEntry  = 0;
 
-    m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0.0f;
     m_strTarget.clear();
     m_targetMask = 0;
 
-    m_destOri = 0.f;
     m_mapId = UINT32_MAX;
 }
 
@@ -88,9 +86,7 @@ void SpellCastTargets::setUnitTarget(Unit* target)
     if (!target)
         return;
 
-    m_destX = target->GetPositionX();
-    m_destY = target->GetPositionY();
-    m_destZ = target->GetPositionZ();
+    m_destPos = target->GetPosition();
     m_unitTarget = target;
     m_unitTargetGUID = target->GetObjectGuid();
     m_targetMask |= TARGET_FLAG_UNIT;
@@ -98,17 +94,17 @@ void SpellCastTargets::setUnitTarget(Unit* target)
 
 void SpellCastTargets::setDestination(float x, float y, float z)
 {
-    m_destX = x;
-    m_destY = y;
-    m_destZ = z;
+    m_destPos.x = x;
+    m_destPos.y = y;
+    m_destPos.z = z;
     m_targetMask |= TARGET_FLAG_DEST_LOCATION;
 }
 
 void SpellCastTargets::setSource(float x, float y, float z)
 {
-    m_srcX = x;
-    m_srcY = y;
-    m_srcZ = z;
+    m_srcPos.x = x;
+    m_srcPos.y = y;
+    m_srcPos.z = z;
     m_targetMask |= TARGET_FLAG_SOURCE_LOCATION;
 }
 
@@ -178,9 +174,9 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
 
     if (m_targetMask == TARGET_FLAG_SELF)
     {
-        m_destX = caster->GetPositionX();
-        m_destY = caster->GetPositionY();
-        m_destZ = caster->GetPositionZ();
+        m_destPos.x = caster->GetPositionX();
+        m_destPos.y = caster->GetPositionY();
+        m_destPos.z = caster->GetPositionZ();
         return;
     }
 
@@ -196,15 +192,15 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
 
     if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
     {
-        data >> m_srcX >> m_srcY >> m_srcZ;
-        if (!MaNGOS::IsValidMapCoord(m_srcX, m_srcY, m_srcZ))
+        data >> m_srcPos.x >> m_srcPos.y >> m_srcPos.z;
+        if (!MaNGOS::IsValidMapCoord(m_srcPos.x, m_srcPos.y, m_srcPos.z))
             throw ByteBufferException(false, data.rpos(), 0, data.size());
     }
 
     if (m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        data >> m_destX >> m_destY >> m_destZ;
-        if (!MaNGOS::IsValidMapCoord(m_destX, m_destY, m_destZ))
+        data >> m_destPos.x >> m_destPos.y >> m_destPos.z;
+        if (!MaNGOS::IsValidMapCoord(m_destPos.x, m_destPos.y, m_destPos.z))
             throw ByteBufferException(false, data.rpos(), 0, data.size());
     }
 
@@ -253,10 +249,10 @@ void SpellCastTargets::write(ByteBuffer& data) const
     }
 
     if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
-        data << m_srcX << m_srcY << m_srcZ;
+        data << m_srcPos.x << m_srcPos.y << m_srcPos.z;
 
     if (m_targetMask & TARGET_FLAG_DEST_LOCATION)
-        data << m_destX << m_destY << m_destZ;
+        data << m_destPos.x << m_destPos.y << m_destPos.z;
 
     if (m_targetMask & TARGET_FLAG_STRING)
         data << m_strTarget;
@@ -1589,7 +1585,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             if (SpellTargetPosition const* st = sSpellMgr.GetSpellTargetPosition(m_spellInfo->Id))
             {
                 m_targets.setDestination(st->target_X, st->target_Y, st->target_Z);
-                m_targets.m_destOri = st->target_Orientation;
+                m_targets.m_destPos.o = st->target_Orientation;
                 m_targets.m_mapId = st->target_mapId;
 
                 // far-teleport spells are handled in SpellEffect, elsewise report an error about an unexpected map (spells are always locally)
@@ -5545,25 +5541,25 @@ SpellCastResult Spell::CheckRange(bool strict)
 
     if (m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION)
     {
-        float dist = m_caster->GetDistance(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, DIST_CALC_NONE);
+        float dist = m_caster->GetDistance(m_targets.m_destPos.x, m_targets.m_destPos.y, m_targets.m_destPos.z, DIST_CALC_NONE);
         if (dist > maxRange * maxRange)
             return SPELL_FAILED_OUT_OF_RANGE;
         if (minRange && dist < minRange * minRange)
             return SPELL_FAILED_TOO_CLOSE;
         if (!IsIgnoreLosSpell(m_spellInfo))
-            if (!m_caster->IsWithinLOS(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ + 1.f))
+            if (!m_caster->IsWithinLOS(m_targets.m_destPos.x, m_targets.m_destPos.y, m_targets.m_destPos.z + 1.f))
                 return SPELL_FAILED_LINE_OF_SIGHT;
     }
 
     if (m_targets.m_targetMask == TARGET_FLAG_SOURCE_LOCATION)
     {
-        float dist = m_caster->GetDistance(m_targets.m_srcX, m_targets.m_srcY, m_targets.m_srcZ, DIST_CALC_NONE);
+        float dist = m_caster->GetDistance(m_targets.m_srcPos.x, m_targets.m_srcPos.y, m_targets.m_srcPos.z, DIST_CALC_NONE);
         if (dist > maxRange* maxRange)
             return SPELL_FAILED_OUT_OF_RANGE;
         if (minRange && dist < minRange * minRange)
             return SPELL_FAILED_TOO_CLOSE;
         if (!IsIgnoreLosSpell(m_spellInfo))
-            if (!m_caster->IsWithinLOS(m_targets.m_srcX, m_targets.m_srcY, m_targets.m_srcZ + 1.f))
+            if (!m_caster->IsWithinLOS(m_targets.m_srcPos.x, m_targets.m_srcPos.y, m_targets.m_srcPos.z + 1.f))
                 return SPELL_FAILED_LINE_OF_SIGHT;
     }
 

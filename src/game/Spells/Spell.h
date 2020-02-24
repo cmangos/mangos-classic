@@ -110,19 +110,13 @@ class SpellCastTargets
 
             m_itemTargetEntry  = target.m_itemTargetEntry;
 
-            m_srcX = target.m_srcX;
-            m_srcY = target.m_srcY;
-            m_srcZ = target.m_srcZ;
-
-            m_destX = target.m_destX;
-            m_destY = target.m_destY;
-            m_destZ = target.m_destZ;
+            m_srcPos = target.m_srcPos;
+            m_destPos = target.m_destPos;
 
             m_strTarget = target.m_strTarget;
 
             m_targetMask = target.m_targetMask;
 
-            m_destOri = 0.f;
             m_mapId = target.m_mapId;
 
             return *this;
@@ -134,9 +128,10 @@ class SpellCastTargets
 
         void setDestination(float x, float y, float z);
         void setSource(float x, float y, float z);
-        void getDestination(float& x, float& y, float& z) const { x = m_destX; y = m_destY; z = m_destZ; }
-        void getDestination(WorldLocation& loc) { loc.coord_x = m_destX; loc.coord_y = m_destY; loc.coord_z = m_destZ; }
-        void getSource(float& x, float& y, float& z) const { x = m_srcX; y = m_srcY, z = m_srcZ; }
+        void getDestination(float& x, float& y, float& z) const { x = m_destPos.x; y = m_destPos.y; z = m_destPos.z; }
+        Position getDestination() const { return m_destPos; }
+        void getDestination(WorldLocation& loc) { loc.coord_x = m_destPos.x; loc.coord_y = m_destPos.y; loc.coord_z = m_destPos.z; }
+        void getSource(float& x, float& y, float& z) const { x = m_srcPos.x; y = m_srcPos.y; z = m_srcPos.z; }
 
         void setGOTarget(GameObject* target);
         ObjectGuid getGOTargetGuid() const { return m_GOTargetGUID; }
@@ -166,13 +161,12 @@ class SpellCastTargets
 
         void Update(Unit* caster);
 
-        float m_srcX, m_srcY, m_srcZ;
-        float m_destX, m_destY, m_destZ;
+        Position m_srcPos;
+        Position m_destPos;
         std::string m_strTarget;
 
         uint16 m_targetMask;
 
-        float m_destOri;
         uint32 m_mapId; // not to be written to packet in vanilla/tbc
 
     private:
@@ -806,7 +800,7 @@ namespace MaNGOS
                 if (!i_originalCaster->CanAttackSpell(pPlayer, i_spell.m_spellInfo))
                     continue;
 
-                if (pPlayer->IsWithinDist3d(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ, i_radius))
+                if (pPlayer->IsWithinDist3d(i_spell.m_targets.m_destPos.x, i_spell.m_targets.m_destPos.y, i_spell.m_targets.m_destPos.z, i_radius))
                     i_data.push_back(pPlayer);
             }
         }
