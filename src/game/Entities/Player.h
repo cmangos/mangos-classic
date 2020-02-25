@@ -1762,11 +1762,11 @@ class Player : public Unit
         template<typename T>
         bool CheckForGroup(T functor) const
         {
-            if (Group* group = GetGroup())
+            if (Group const* group = GetGroup())
             {
-                for (GroupReference* ref = group->GetFirstMember(); ref != nullptr; ref = ref->next())
+                for (GroupReference const* ref = group->GetFirstMember(); ref != nullptr; ref = ref->next())
                 {
-                    Player* member = ref->getSource();
+                    Player const* member = ref->getSource();
                     if (member && functor(member))
                         return true;
                 }

@@ -118,7 +118,7 @@ void npc_escortAI::CorpseRemoved(uint32& /*respawnDelay*/)
 bool npc_escortAI::IsPlayerOrGroupInRange()
 {
     if (Player* player = GetPlayerForEscort())
-        if (player->CheckForGroup([&](Player* player) -> bool { return m_creature->IsWithinDistInMap(player, MAX_PLAYER_DISTANCE); }))
+        if (player->CheckForGroup([&](Player const* player) -> bool { return m_creature->IsWithinDistInMap(player, MAX_PLAYER_DISTANCE); }))
             return true;
 
     return false;
