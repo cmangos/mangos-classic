@@ -1708,6 +1708,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 561:                                   // Judgement of command
+                {
+                    if (unitTarget)
+                    {
+                        if (SpellEntry const* spell_proto = sSpellTemplate.LookupEntry<SpellEntry>(m_currentBasePoints[eff_idx]))
+                            m_caster->CastSpell(unitTarget, spell_proto, TRIGGERED_OLD_TRIGGERED, nullptr);
+                    }
+
+                    return;
+                }
             }
 
             break;
