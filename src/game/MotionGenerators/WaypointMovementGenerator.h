@@ -64,7 +64,8 @@ class WaypointMovementGenerator<Creature>
       public PathMovementBase<Creature, WaypointPath const*>
 {
     public:
-        WaypointMovementGenerator(Creature&) : i_nextMoveTime(0), m_isArrivalDone(false), m_lastReachedWaypoint(0), m_pathId(0), m_PathOrigin()
+        WaypointMovementGenerator(Creature&) :
+            i_nextMoveTime(0), m_isArrivalDone(false), m_lastReachedWaypoint(0), m_pathId(0), m_PathOrigin(), m_nextNodeSplineIdx(-1)
         {}
         ~WaypointMovementGenerator() { i_path = nullptr; }
         void Initialize(Creature& creature);
@@ -97,6 +98,7 @@ class WaypointMovementGenerator<Creature>
 
         ShortTimeTracker i_nextMoveTime;
         bool m_isArrivalDone;
+        int32 m_nextNodeSplineIdx;
         uint32 m_lastReachedWaypoint;
 
         uint32 m_pathId;
