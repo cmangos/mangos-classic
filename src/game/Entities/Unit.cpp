@@ -7859,7 +7859,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             break;
         case MOVE_RUN:
         {
-            if (IsMounted()) // Use on mount auras
+            if (IsMounted() && !IsTaxiFlying()) // Use on mount auras
             {
                 main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
                 stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS);
