@@ -457,9 +457,9 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_GOTHIK:
+            m_auiEncounter[uiType] = uiData;
             switch (uiData)
             {
-                m_auiEncounter[uiType] = uiData;
                 case IN_PROGRESS:
                     // Encounter begins: close the gate and start timer to summon unrelenting trainees
                     DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
