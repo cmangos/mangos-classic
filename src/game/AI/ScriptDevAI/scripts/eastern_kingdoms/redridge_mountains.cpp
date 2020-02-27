@@ -92,6 +92,9 @@ struct npc_corporal_keeshan_escortAI : public npc_escortAI
                 m_creature->SetStandState(UNIT_STAND_STATE_SIT);
                 DoScriptText(SAY_CORPORAL_KEESHAN_2, m_creature);
                 break;
+            case 37:
+                SetRun(true);                               // run now until the destination
+                break;
             case 53:                                        // quest_complete
                 DoScriptText(SAY_CORPORAL_KEESHAN_4, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
