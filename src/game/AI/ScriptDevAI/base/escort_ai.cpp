@@ -143,6 +143,10 @@ void npc_escortAI::UpdateAI(const uint32 diff)
         {
             if (!HasEscortState(STATE_ESCORT_PAUSED) && !IsPlayerOrGroupInRange())
             {
+                // set the quest status as failed
+                FailQuestForPlayerAndGroup();
+
+                // TODO: i am not sure this is correct, isn't that the creature should continue until it get killed?
                 debug_log("SD2: EscortAI failed because player/group was to far away or not found");
 
                 if (m_canInstantRespawn)
