@@ -208,7 +208,7 @@ else()
     # Add provided dependency lib to dev folder
     string(REGEX REPLACE "/" "\\\\" LibFolder ${DEV_PROVIDED_LIBS_FOLDER})
     add_custom_command(TARGET ${LIBRARY_NAME} POST_BUILD
-      COMMAND copy \"${LibFolder}\\*.dll\" \"$(OutDir)\")
+      COMMAND copy \"${LibFolder}\\*.dll\" \"${DEV_BIN_DIR}\")
   endif()
 endif()
 
