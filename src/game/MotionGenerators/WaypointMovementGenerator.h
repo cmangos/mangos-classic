@@ -100,6 +100,7 @@ class WaypointMovementGenerator<Creature>
         bool m_isArrivalDone;
         int32 m_nextNodeSplineIdx;
         uint32 m_lastReachedWaypoint;
+        WorldLocation m_resetPoint;
 
         uint32 m_pathId;
         WaypointPathOrigin m_PathOrigin;
