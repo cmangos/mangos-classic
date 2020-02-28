@@ -214,27 +214,41 @@ void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
             nodeAfterItr = i_path->begin();
 
         auto const& nodeAfter = nodeAfterItr->second;
-        Vector3 nodeAfterCoord(nodeAfter.x, nodeAfter.y, nodeAfter.z);
 
-        // startPoint should contain current node destination that we are about to reach
-        Vector3 startPoint = genPath.back();
-
-        // we add artificially a point in the direction of next destination to avoid client making shortcut and avoiding current node destination
-        Vector3 intPoint = startPoint.lerp(nodeAfterCoord, 0.1f);
-        genPath.push_back(intPoint);
-        creature.UpdateAllowedPositionZ(intPoint.x, intPoint.y, intPoint.z);
-
-        // avoid computing path for near nodes
-        if ((nodeAfterCoord - startPoint).squaredMagnitude() > 10)
+        // extend path only if next node is different than current node
+        if (nodeAfterItr != currPoint)
         {
-            // compute path to next node from intermediate point and add it to generated path
-            pf.calculate(intPoint, nodeAfterCoord, true);
-            genPath.insert(genPath.end(), pf.getPath().begin() + 1, pf.getPath().end());
+            Vector3 nodeAfterCoord(nodeAfter.x, nodeAfter.y, nodeAfter.z);
+
+            // startPoint should contain current node destination that we are about to reach
+            Vector3 startPoint = genPath.back();
+
+            // we add artificially a point in the direction of next destination to avoid client making shortcut and avoiding current node destination
+            Vector3 intPoint = startPoint.lerp(nodeAfterCoord, 0.1f);
+            genPath.push_back(intPoint);
+            creature.UpdateAllowedPositionZ(intPoint.x, intPoint.y, intPoint.z);
+
+            // avoid computing path for near nodes
+            if ((nodeAfterCoord - startPoint).squaredMagnitude() > 10)
+            {
+                // compute path to next node from intermediate point and add it to generated path
+                pf.calculate(intPoint, nodeAfterCoord, true);
+                genPath.insert(genPath.end(), pf.getPath().begin() + 1, pf.getPath().end());
+            }
+            else
+            {
+                // add only node coord as we are near enough of it
+                genPath.push_back(nodeAfterCoord);
+            }
         }
         else
         {
-            // add only node coord as we are near enough of it
-            genPath.push_back(nodeAfterCoord);
+            // db dev seem to use one wp for some specific script without delay
+            sLog.outErrorDb("WaypointMovementGenerator::StartMove()> creature %s have only one wp and without any delay. Delay forced to 5 sec!",
+                creature.GetGuidStr().c_str());
+
+            // force delay
+            Stop(5000);
         }
     }
 
