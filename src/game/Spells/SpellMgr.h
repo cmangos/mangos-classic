@@ -810,6 +810,15 @@ inline bool HasMissingTargetFromClient(SpellEntry const* spellInfo)
     return false;
 }
 
+inline bool IsSpellRequireTarget(SpellEntry const* spellInfo)
+{
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (IsUnitTargetTarget(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_1]))
+            return true;
+
+    return false;
+}
+
 inline bool IsScriptTarget(uint32 target)
 {
     return (target < MAX_SPELL_TARGETS ? (SpellTargetInfoTable[target].filter == TARGET_SCRIPT) : false);
