@@ -3168,7 +3168,7 @@ bool ChatHandler::HandleLinkGraveCommand(char* args)
         return false;
     }
 
-    if (sObjectMgr.AddGraveYardLink(g_id, zoneId, g_team))
+    if (sObjectMgr.AddGraveYardLink(g_id, zoneId, GRAVEYARD_AREALINK, g_team))
         PSendSysMessage(LANG_COMMAND_GRAVEYARDLINKED, g_id, zoneId);
     else
         PSendSysMessage(LANG_COMMAND_GRAVEYARDALRLINKED, g_id, zoneId);
@@ -3193,6 +3193,7 @@ bool ChatHandler::HandleNearGraveCommand(char* args)
 
     Player* player = m_session->GetPlayer();
     uint32 zone_id = player->GetZoneId();
+    uint32 area_id = player->GetAreaId();
 
     WorldSafeLocsEntry const* graveyard = sObjectMgr.GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), g_team);
 
@@ -3200,7 +3201,10 @@ bool ChatHandler::HandleNearGraveCommand(char* args)
     {
         uint32 g_id = graveyard->ID;
 
-        GraveYardData const* data = sObjectMgr.FindGraveYardData(g_id, zone_id);
+        GraveYardData const* data = sObjectMgr.FindGraveYardData(g_id, area_id);
+        if (!data || (g_team != TEAM_BOTH_ALLOWED && data->team != g_team && data->team != TEAM_BOTH_ALLOWED))
+            data = sObjectMgr.FindGraveYardData(g_id, zone_id);
+
         if (!data)
         {
             PSendSysMessage(LANG_COMMAND_GRAVEYARDERROR, g_id);
