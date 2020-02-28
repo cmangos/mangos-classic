@@ -28,6 +28,7 @@
 #include "MovementGenerator.h"
 #include "WaypointManager.h"
 #include "Server/DBCStructure.h"
+#include "Entities/Object.h"
 
 #include <set>
 
