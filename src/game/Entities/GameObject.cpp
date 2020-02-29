@@ -1152,6 +1152,8 @@ bool GameObject::IsCollisionEnabled() const
     {
         case GAMEOBJECT_TYPE_DOOR:
             return GetGoState() == GO_STATE_READY;
+        case GAMEOBJECT_TYPE_TRAP:
+            return false;
         default:
             return true;
     }
