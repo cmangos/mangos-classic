@@ -2280,11 +2280,12 @@ bool Map::GetRandomPointUnderWater(float& x, float& y, float& z, float radius, G
         if (min_z > liquidLevel)
             return false;
 
-        float max_z = std::max(z + 0.7f * radius, min_z);
-        max_z = std::min(max_z, liquidLevel);
-        x = i_x;
-        y = i_y;
-        z = min_z + rand_norm_f() * (max_z - min_z);
+        // Mobs underwater do not move along Z axis
+        //float max_z = std::max(z + 0.7f * radius, min_z);
+        //max_z = std::min(max_z, liquidLevel);
+        //x = i_x;
+        //y = i_y;
+        //z = min_z + rand_norm_f() * (max_z - min_z);
         return true;
     }
     return false;
