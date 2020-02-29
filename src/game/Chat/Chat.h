@@ -202,15 +202,11 @@ class ChatHandler
         bool HandleAccountSetGmLevelCommand(char* args);
         bool HandleAccountSetPasswordCommand(char* args);
 
-        bool HandleAHBotItemsAmountCommand(char* args);
-        template <int Q>
-        bool HandleAHBotItemsAmountQualityCommand(char* args);
-        bool HandleAHBotItemsRatioCommand(char* args);
-        template <int H>
-        bool HandleAHBotItemsRatioHouseCommand(char* args);
+#ifdef BUILD_AHBOT
         bool HandleAHBotRebuildCommand(char* args);
         bool HandleAHBotReloadCommand(char* args);
         bool HandleAHBotStatusCommand(char* args);
+#endif
 
         bool HandleAuctionAllianceCommand(char* args);
         bool HandleAuctionGoblinCommand(char* args);
