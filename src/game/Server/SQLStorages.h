@@ -39,7 +39,6 @@ extern SQLStorage sWorldSafeLocsStore;
 
 
 extern SQLHashStorage sGOStorage;
-extern SQLHashStorage sCreatureTemplateSpellsStorage;
 
 extern SQLMultiStorage sSpellScriptTargetStorage;
 

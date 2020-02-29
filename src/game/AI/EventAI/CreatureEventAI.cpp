@@ -1278,6 +1278,11 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             }
             break;
         }
+        case ACTION_T_SET_SPELL_SET:
+        {
+            m_creature->UpdateSpellSet(action.spellSet.setId);
+            break;
+        }
         case ACTION_T_SET_WALK:
             switch (action.walkSetting.type)
             {

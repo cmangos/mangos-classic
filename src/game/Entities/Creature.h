@@ -186,6 +186,7 @@ struct CreatureInfo
 struct CreatureTemplateSpells
 {
     uint32 entry;
+    uint32 setId;
     uint32 spells[CREATURE_MAX_SPELLS];
 };
 
@@ -686,6 +687,7 @@ class Creature : public Unit
         uint32 GetShieldBlockValue() const override { return (getLevel() / 2 + uint32(GetStat(STAT_STRENGTH) / 20)); }
 
         bool HasSpell(uint32 spellID) const override;
+        void UpdateSpellSet(uint32 spellSet);
 
         bool UpdateEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true);
         void ResetEntry(bool respawn = false);

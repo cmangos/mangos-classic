@@ -140,6 +140,7 @@ enum EventAI_ActionType
     ACTION_T_SET_RANGED_MODE            = 57,               // type of ranged mode, distance to chase at
     ACTION_T_SET_WALK                   = 58,               // type of walking, unused, unused
     ACTION_T_SET_FACING                 = 59,               // Target, 0 - set, 1 - reset
+    ACTION_T_SET_SPELL_SET              = 60,               // SetId
 
     ACTION_T_END,
 };
@@ -535,6 +536,11 @@ struct CreatureEventAI_Action
             uint32 target;                                  // Target
             uint32 reset;                                   // 0 - set, 1 - reset
         } setFacing;
+        // ACTION_T_SET_SPELL_SET
+        struct
+        {
+            uint32 setId;                                   // creature_template_spells setId
+        } spellSet;
         // RAW
         struct
         {

@@ -3109,6 +3109,18 @@ void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, Play
     }
 }
 
+CreatureTemplateSpells const* ObjectMgr::GetCreatureTemplateSpellSet(uint32 entry, uint32 setId) const
+{
+    auto itr = m_creatureTemplateSpells.find(entry);
+    if (itr != m_creatureTemplateSpells.end())
+    {
+        auto itrSecond = (*itr).second.find(setId);
+        if (itrSecond != (*itr).second.end())
+            return &(*itrSecond).second;
+    }
+    return nullptr;
+}
+
 /* ********************************************************************************************* */
 /* *                                Static Wrappers                                              */
 /* ********************************************************************************************* */
@@ -8995,26 +9007,42 @@ bool LoadMangosStrings(DatabaseType& db, char const* table, int32 start_value, i
 
 void ObjectMgr::LoadCreatureTemplateSpells()
 {
-    sCreatureTemplateSpellsStorage.Load();
+    uint32 count = 0;
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT entry, setId, spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8 FROM creature_template_spells"));
 
-    for (SQLStorageBase::SQLSIterator<CreatureTemplateSpells> itr = sCreatureTemplateSpellsStorage.getDataBegin<CreatureTemplateSpells>(); itr < sCreatureTemplateSpellsStorage.getDataEnd<CreatureTemplateSpells>(); ++itr)
+    if (result)
     {
-        if (!sCreatureStorage.LookupEntry<CreatureInfo>(itr->entry))
+        do
         {
-            sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, but creature does not exist, skipping", itr->entry);
-            sCreatureTemplateSpellsStorage.EraseEntry(itr->entry);
-        }
-        for (uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
-        {
-            if (itr->spells[i] && !sSpellTemplate.LookupEntry<SpellEntry>(itr->spells[i]) && itr->spells[i] != 2) // 2 is attack which is hardcoded in client
+            Field* fields = result->Fetch();
+
+            CreatureTemplateSpells templateSpells;
+
+            templateSpells.entry = fields[0].GetUInt32();
+            templateSpells.setId = fields[1].GetUInt32();
+            templateSpells.spells[CREATURE_MAX_SPELLS];
+            for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+                templateSpells.spells[i] = fields[2 + i].GetUInt32();
+
+            if (!sCreatureStorage.LookupEntry<CreatureInfo>(templateSpells.entry))
             {
-                sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, assigned spell %u does not exist, set to 0", itr->entry, itr->spells[i]);
-                const_cast<CreatureTemplateSpells*>(*itr)->spells[i] = 0;
+                sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, but creature does not exist, skipping", templateSpells.entry);
+                continue;
             }
-        }
+            for (uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+            {
+                if (templateSpells.spells[i] && !sSpellTemplate.LookupEntry<SpellEntry>(templateSpells.spells[i]) && templateSpells.spells[i] != 2) // 2 is attack which is hardcoded in client
+                {
+                    sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, assigned spell %u does not exist, set to 0", templateSpells.entry, templateSpells.spells[i]);
+                    templateSpells.spells[i] = 0;
+                }
+            }
+
+            m_creatureTemplateSpells[templateSpells.entry].emplace(templateSpells.setId, templateSpells);
+        } while (result->NextRow());
     }
 
-    sLog.outString(">> Loaded %u creature_template_spells definitions", sCreatureTemplateSpellsStorage.GetRecordCount());
+    sLog.outString(">> Loaded %u creature_cooldowns definitions", count);
     sLog.outString();
 }
 

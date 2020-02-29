@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2762_01_mangos_gm_mountup_command` bit(1) DEFAULT NULL
+  `required_z2763_01_mangos_ability_sets` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1333,6 +1333,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_template_spells`;
 CREATE TABLE `creature_template_spells` (
   `entry` mediumint(8) unsigned NOT NULL,
+  `setId` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Id of set of spells'
   `spell1` mediumint(8) unsigned NOT NULL,
   `spell2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `spell3` mediumint(8) unsigned NOT NULL DEFAULT '0',
