@@ -49,6 +49,12 @@ else()
   message(STATUS "Build ScriptDev       : No")
 endif()
 
+if(BUILD_AHBOT)
+  message(STATUS "Build AHBot           : Yes")
+else()
+  message(STATUS "Build AHBot           : No  (default)")
+endif()
+
 if(BUILD_PLAYERBOT)
   message(STATUS "Build Playerbot       : Yes")
 else()

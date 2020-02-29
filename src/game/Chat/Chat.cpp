@@ -34,7 +34,6 @@
 #include "Spells/SpellMgr.h"
 #include "Pools/PoolManager.h"
 #include "GameEvents/GameEventMgr.h"
-#include "AuctionHouseBot/AuctionHouseBot.h"
 
 #include <cstdarg>
 
@@ -84,6 +83,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
+#ifdef BUILD_AHBOT
     static ChatCommand ahbotCommandTable[] =
     {
         { "rebuild",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotRebuildCommand,        "", nullptr },
@@ -91,6 +91,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "status",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotStatusCommand,         "", nullptr },
         { nullptr,          0,                  true,  nullptr,                                        "", nullptr }
     };
+#endif
 
     static ChatCommand auctionCommandTable[] =
     {
@@ -795,7 +796,9 @@ ChatCommand* ChatHandler::getCommandTable()
     {
         { "account",        SEC_PLAYER,         true,  nullptr,                                           "", accountCommandTable  },
         { "auction",        SEC_ADMINISTRATOR,  false, nullptr,                                           "", auctionCommandTable  },
+#ifdef BUILD_AHBOT
         { "ahbot",          SEC_ADMINISTRATOR,  true,  nullptr,                                           "", ahbotCommandTable    },
+#endif
         { "cast",           SEC_ADMINISTRATOR,  false, nullptr,                                           "", castCommandTable     },
         { "character",      SEC_GAMEMASTER,     true,  nullptr,                                           "", characterCommandTable},
         { "channel",        SEC_MODERATOR,      false, nullptr,                                           "", channelCommandTable  },

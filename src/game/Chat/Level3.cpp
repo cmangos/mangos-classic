@@ -51,9 +51,11 @@
 #include "Maps/InstanceData.h"
 #include "Server/DBCStores.h"
 #include "AI/EventAI/CreatureEventAIMgr.h"
-#include "AuctionHouseBot/AuctionHouseBot.h"
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
+
+#ifdef BUILD_AHBOT
+#include "AuctionHouseBot/AuctionHouseBot.h"
 
 bool ChatHandler::HandleAHBotRebuildCommand(char* args)
 {
@@ -110,6 +112,7 @@ bool ChatHandler::HandleAHBotStatusCommand(char* args)
 
     return true;
 }
+#endif
 
 // reload commands
 bool ChatHandler::HandleReloadAllCommand(char* /*args*/)
