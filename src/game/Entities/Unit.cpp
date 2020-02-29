@@ -7471,8 +7471,9 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         if (enemy)
         {
             // TODO: Unify this combat propagation with linking combat propagation in threat system
-            Unit* controller = HasCharmer() ? GetCharmer() : GetOwner();
-            if (controller && enemy->CanAttack(controller) && !hasUnitState(UNIT_STAT_FEIGN_DEATH))
+            Unit* controller = GetMaster();
+
+            if (controller && enemy->CanAttackOnSight(controller))
             {
                 if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                 {
