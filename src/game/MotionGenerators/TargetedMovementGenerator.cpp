@@ -591,6 +591,10 @@ bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
     if (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) != i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         return false;
 
+    // Do not allow boosting outside of pet/master relationship:
+    if (owner.GetMasterGuid() != i_target->GetObjectGuid())
+        return false;
+
     // Do not allow boosting if follower is already in front/back of target:
     if (i_target->HasInArc(&owner) == !i_target->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_BACKWARD)))
         return false;
