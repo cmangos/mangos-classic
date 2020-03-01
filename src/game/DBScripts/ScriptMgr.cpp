@@ -1883,7 +1883,17 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotCreature(pSource))
                 break;
 
-            ((Creature*)pSource)->SetWalk(!m_script->run.run, true);
+            Creature* creature = static_cast<Creature*>(pSource);
+            if (creature->IsWalking())
+            {
+                if (m_script->run.run)
+                    creature->SetWalk(false, true);
+            }
+            else
+            {
+                if (!m_script->run.run)
+                    creature->SetWalk(true, true);
+            }
 
             break;
         }
