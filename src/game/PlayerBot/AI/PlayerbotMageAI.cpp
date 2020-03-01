@@ -450,26 +450,30 @@ void PlayerbotMageAI::DoNonCombatActions()
     else if (Buff(&PlayerbotMageAI::BuffHelper, ARCANE_INTELLECT, JOB_MANAONLY) & RETURN_CONTINUE)
         return;
 
-    Item* gem = FindManaGem();
-    if (!gem && CONJURE_MANA_GEM && m_ai->CastSpell(CONJURE_MANA_GEM, *m_bot) == SPELL_CAST_OK)
+    // if there is space on bag try to conjure some consumables
+    if (m_ai->CanStore())
     {
-        m_ai->SetIgnoreUpdateTime(3);
-        return;
-    }
+        Item* gem = FindManaGem();
+        if (!gem && CONJURE_MANA_GEM && m_ai->CastSpell(CONJURE_MANA_GEM, *m_bot) == SPELL_CAST_OK)
+        {
+            m_ai->SetIgnoreUpdateTime(3);
+            return;
+        }
 
-    // TODO: The beauty of a mage is not only its ability to supply itself with water, but to share its water
-    // So, conjure at *least* 1.25 stacks, ready to trade a stack and still have some left for self
-    if (m_ai->FindDrink() == nullptr && CONJURE_WATER && m_ai->CastSpell(CONJURE_WATER, *m_bot) == SPELL_CAST_OK)
-    {
-        m_ai->TellMaster("I'm conjuring some water.");
-        m_ai->SetIgnoreUpdateTime(3);
-        return;
-    }
-    if (m_ai->FindFood() == nullptr && CONJURE_FOOD && m_ai->CastSpell(CONJURE_FOOD, *m_bot) == SPELL_CAST_OK)
-    {
-        m_ai->TellMaster("I'm conjuring some food.");
-        m_ai->SetIgnoreUpdateTime(3);
-        return;
+        // TODO: The beauty of a mage is not only its ability to supply itself with water, but to share its water
+        // So, conjure at *least* 1.25 stacks, ready to trade a stack and still have some left for self
+        if (m_ai->FindDrink() == nullptr && CONJURE_WATER && m_ai->CastSpell(CONJURE_WATER, *m_bot) == SPELL_CAST_OK)
+        {
+            m_ai->TellMaster("I'm conjuring some water.");
+            m_ai->SetIgnoreUpdateTime(3);
+            return;
+        }
+        if (m_ai->FindFood() == nullptr && CONJURE_FOOD && m_ai->CastSpell(CONJURE_FOOD, *m_bot) == SPELL_CAST_OK)
+        {
+            m_ai->TellMaster("I'm conjuring some food.");
+            m_ai->SetIgnoreUpdateTime(3);
+            return;
+        }
     }
 
     if (EatDrinkBandage())

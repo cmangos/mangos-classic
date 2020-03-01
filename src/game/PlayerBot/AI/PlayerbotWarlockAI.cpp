@@ -623,8 +623,12 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         Item* soulStone = m_ai->FindConsumable(SOULSTONE_DISPLAYID);
         if (!soulStone)
         {
-            if (shardCount > 0 && m_bot->IsSpellReady(CREATE_SOULSTONE) && m_ai->CastSpell(CREATE_SOULSTONE) == SPELL_CAST_OK)
-                return;
+            // try create one only if there is place on bags
+            if (m_ai->CanStore())
+            {
+                if (shardCount > 0 && m_bot->IsSpellReady(CREATE_SOULSTONE) && m_ai->CastSpell(CREATE_SOULSTONE) == SPELL_CAST_OK)
+                    return;
+            }
         }
         else
         {
