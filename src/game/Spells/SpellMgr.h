@@ -813,7 +813,7 @@ inline bool HasMissingTargetFromClient(SpellEntry const* spellInfo)
 inline bool IsSpellRequireTarget(SpellEntry const* spellInfo)
 {
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        if (IsUnitTargetTarget(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_1]))
+        if (IsUnitTargetTarget(spellInfo->EffectImplicitTargetA[i]))
             return true;
 
     return false;
