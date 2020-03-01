@@ -403,6 +403,7 @@ class UnitAI
 
 
         // TODO: Implement proper casterAI in EAI and remove this from Leotheras script
+        uint32 GetAttackDistance() { return m_attackDistance; }
         void SetMoveChaseParams(float dist, float angle, bool moveFurther) { m_attackDistance = dist; m_attackAngle = angle; m_moveFurther = moveFurther; }
 
         // Returns friendly unit with the most amount of hp missing from max hp - ignoreSelf - some spells cant target self
