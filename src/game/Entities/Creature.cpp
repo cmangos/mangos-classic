@@ -3020,9 +3020,20 @@ void Creature::ResetSpellHitCounter()
 
 void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto*/, bool /*permanent*/, uint32 forcedDuration)
 {
-    uint32 recTimeDuration = forcedDuration ? forcedDuration : spellEntry.RecoveryTime;
-    if (recTimeDuration || spellEntry.CategoryRecoveryTime)
-        m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTimeDuration, spellEntry.Category, spellEntry.CategoryRecoveryTime);
+    uint32 recTime = forcedDuration ? forcedDuration : spellEntry.RecoveryTime;
+    if (recTime || spellEntry.CategoryRecoveryTime)
+    {
+        uint32 categoryRecTime = spellEntry.CategoryRecoveryTime;
+        if (Player* modOwner = GetSpellModOwner())
+        {
+            if (recTime)
+                modOwner->ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, recTime);
+            else if (spellEntry.Category && categoryRecTime)
+                modOwner->ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, categoryRecTime);
+        }
+
+        m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTime, spellEntry.Category, categoryRecTime);
+    }
     else if (uint32 cooldown = sObjectMgr.GetCreatureCooldown(GetCreatureInfo()->Entry, spellEntry.Id))
     {
         m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, cooldown, 0, 0);
