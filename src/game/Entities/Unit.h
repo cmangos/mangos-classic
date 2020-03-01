@@ -2394,8 +2394,6 @@ class Unit : public WorldObject
         virtual UnitAI* AI() { return nullptr; }
         virtual CombatData* GetCombatData() { return m_combatData; }
 
-        virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0) override;
-
         virtual void SetBaseWalkSpeed(float speed) { m_baseSpeedWalk = speed; }
         virtual void SetBaseRunSpeed(float speed) { m_baseSpeedRun = speed; }
 

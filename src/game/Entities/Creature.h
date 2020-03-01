@@ -872,6 +872,8 @@ class Creature : public Unit
         bool IsNoReputation() { return m_noReputation; }
         void SetNoReputation(bool state) { m_noReputation = state; }
 
+        virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0) override;
+
         // spell scripting persistency
         bool HasBeenHitBySpell(uint32 spellId);
         void RegisterHitBySpell(uint32 spellId);
