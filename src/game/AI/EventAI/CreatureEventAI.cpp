@@ -1314,6 +1314,7 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
 
 void CreatureEventAI::JustRespawned()                       // NOTE that this is called from the AI's constructor as well
 {
+    SetReactState(REACT_AGGRESSIVE);
     m_EventUpdateTime = EVENT_UPDATE_TIME;
     m_EventDiff = 0;
     m_throwAIEventStep = 0;
