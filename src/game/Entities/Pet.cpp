@@ -607,25 +607,21 @@ Player* Pet::GetSpellModOwner() const
 void Pet::SetDeathState(DeathState s)                       // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
 {
     Creature::SetDeathState(s);
-    if (GetDeathState() == CORPSE)
+    if (GetDeathState() == CORPSE) // will despawn at corpse despawning (Pet::Update code)
     {
-        // remove summoned pet (no corpse)
-        if (getPetType() == SUMMON_PET)
-            Unsummon(PET_SAVE_NOT_IN_SLOT);
-        // other will despawn at corpse desppawning (Pet::Update code)
-        else
-        {
-            // pet corpse non lootable and non skinnable
-            SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
-            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+        // pet corpse non lootable and non skinnable
+        SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-            // lose happiness when died and not in BG
+        if (getPetType() != SUMMON_PET)
+        {
+            // lose happiness when died and not in BG/Arena
             MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
             if (!mapEntry || (mapEntry->map_type != MAP_BATTLEGROUND))
                 ModifyPower(POWER_HAPPINESS, -HAPPINESS_LEVEL_SIZE);
-
-            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
+
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
     }
     else if (GetDeathState() == ALIVE)
     {
