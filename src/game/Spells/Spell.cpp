@@ -4057,7 +4057,10 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (!m_ignoreCooldowns && !m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE)
             && !m_caster->IsSpellReady(*m_spellInfo, m_CastItem ? m_CastItem->GetProto() : nullptr))
     {
-        return m_triggeredByAuraSpell ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
+        if (m_triggeredByAuraSpell)
+            return SPELL_FAILED_DONT_REPORT;
+        else
+            return m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
     }
 
     if (!m_caster->IsAlive() && m_caster->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD) && !m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
