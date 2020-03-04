@@ -5895,14 +5895,14 @@ void Spell::EffectSummonDemon(SpellEffectIndex eff_idx)
 
     for (int i = 0; i < m_currentBasePoints[eff_idx]; i++)
     {
-        Creature* Charmed = WorldObject::SummonCreature(TempSpawnSettings(m_caster, m_spellInfo->EffectMiscValue[eff_idx], x, y, z, m_caster->GetOrientation(), TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 3600000, false,
+        Creature* summon = WorldObject::SummonCreature(TempSpawnSettings(m_caster, m_spellInfo->EffectMiscValue[eff_idx], x, y, z, m_caster->GetOrientation(), TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 3600000, false,
             IsSpellSetRun(m_spellInfo), 0, 0, false, false, m_spellInfo->Id), m_caster->GetMap());
 
-        if (!Charmed)
+        if (!summon)
             return;
 
         // might not always work correctly, maybe the creature that dies from CoD casts the effect on itself and is therefore the caster?
-        Charmed->SetLevel(m_caster->getLevel());
+        summon->SetLevel(m_caster->getLevel());
 
         // TODO: Add damage/mana/hp according to level
 
@@ -5910,13 +5910,13 @@ void Spell::EffectSummonDemon(SpellEffectIndex eff_idx)
         {
             case 1122: // Warlock Infernal - requires custom code - generalized in WOTLK
             {
-                Charmed->SelectLevel(m_caster->getLevel()); // needs to have casters level
+                summon->SelectLevel(m_caster->getLevel()); // needs to have casters level
                 // Enslave demon effect, without mana cost and cooldown
-                Charmed->CastSpell(Charmed, 22707, TRIGGERED_OLD_TRIGGERED);  // short root spell on infernal from sniffs
-                m_caster->CastSpell(Charmed, 20882, TRIGGERED_OLD_TRIGGERED);
-                Charmed->CastSpell(nullptr, 22699, TRIGGERED_NONE);  // Inferno effect
-                Charmed->CastSpell(x, y, z, 20310, TRIGGERED_NONE);  // Stun
-                Charmed->CastSpell(nullptr, 19483, TRIGGERED_NONE);  // Immolation - needs to be cast after level update
+                summon->CastSpell(nullptr, 22707, TRIGGERED_OLD_TRIGGERED);  // short root spell on infernal from sniffs
+                m_caster->CastSpell(summon, 20882, TRIGGERED_OLD_TRIGGERED);
+                summon->CastSpell(nullptr, 22699, TRIGGERED_NONE);  // Inferno effect
+                summon->CastSpell(x, y, z, 20310, TRIGGERED_NONE);  // Stun
+                summon->AI()->DoCastSpellIfCan(nullptr, 19483, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                 break;
             }
         }
