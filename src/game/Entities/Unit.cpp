@@ -7542,12 +7542,12 @@ void Unit::ClearInCombat()
         static_cast<Player*>(this)->pvpInfo.inPvPCombat = false;
 }
 
-void Unit::HandleExitCombat()
+void Unit::HandleExitCombat(bool pvpCombat)
 {
     if (AI() && !IsClientControlled())
         AI()->EnterEvadeMode();
     else
-        CombatStop();
+        CombatStop(false, !pvpCombat);
 
     CallForAllControlledUnits([](Unit* unit) { unit->HandleExitCombat(); }, CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_TOTEMS);
 }

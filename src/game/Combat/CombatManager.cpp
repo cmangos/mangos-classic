@@ -56,6 +56,7 @@ void CombatManager::Update(const uint32 diff)
                 m_evadeTimer -= diff;
         }
 
+        // disabled in instances except for players in BGs
         if (!m_owner->GetMap()->IsDungeon() || m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
             if (m_combatTimer)
@@ -79,7 +80,7 @@ void CombatManager::Update(const uint32 diff)
                     if (m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                     {
                         if (m_owner->getHostileRefManager().getSize() == 0)
-                            m_owner->HandleExitCombat();
+                            m_owner->HandleExitCombat(m_owner->IsPlayer());
                     }
                     else // if timer ran out and we are far away from homebox, evade
                     {
