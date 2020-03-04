@@ -2152,34 +2152,18 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             break;
         case TARGET_UNIT_FRIEND_AND_PARTY:
         {
-            Unit* owner = m_caster->GetMaster();
-            Player* pTarget = nullptr;
+            Unit* target = m_targets.getUnitTarget();
+            if (!target)
+                break;
 
-            if (owner)
-            {
-                tempUnitList.push_back(m_caster);
-                if (owner->GetTypeId() == TYPEID_PLAYER)
-                    pTarget = (Player*)owner;
-            }
-            else if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                if (Unit* target = m_targets.getUnitTarget())
-                {
-                    if (target->GetTypeId() != TYPEID_PLAYER)
-                    {
-                        if (((Creature*)target)->IsPet())
-                        {
-                            Unit* targetOwner = target->GetOwner();
-                            if (targetOwner->GetTypeId() == TYPEID_PLAYER)
-                                pTarget = (Player*)targetOwner;
-                        }
-                    }
-                    else
-                        pTarget = (Player*)target;
-                }
-            }
+            Player* pTarget = const_cast<Player*>(target->GetControllingPlayer());
+            if (!pTarget)
+                break;
 
-            Group* pGroup = pTarget ? pTarget->GetGroup() : nullptr;
+            if (pTarget != target)
+                tempUnitList.push_back(pTarget);
+
+            Group* pGroup = pTarget->GetGroup();
 
             if (pGroup)
             {
@@ -2187,29 +2171,25 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
 
                 for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
                 {
-                    Player* Target = itr->getSource();
+                    Player* groupTarget = itr->getSource();
+
+                    if (groupTarget == target || groupTarget == pTarget)
+                        continue;
 
                     // CanAssist check duel and controlled by enemy
-                    if (Target && Target->GetSubGroup() == subgroup && m_caster->CanAssistSpell(Target, m_spellInfo))
+                    if (groupTarget && groupTarget->GetSubGroup() == subgroup && m_caster->CanAssistSpell(groupTarget, m_spellInfo))
                     {
-                        if (pTarget->IsWithinDistInMap(Target, radius))
-                            tempUnitList.push_back(Target);
+                        if (pTarget->IsWithinDistInMap(groupTarget, radius))
+                            tempUnitList.push_back(groupTarget);
 
-                        if (Pet* pet = Target->GetPet())
+                        if (Pet* pet = groupTarget->GetPet())
                             if (pTarget->IsWithinDistInMap(pet, radius))
                                 tempUnitList.push_back(pet);
                     }
                 }
             }
-            else if (owner)
-            {
-                if (m_caster->IsWithinDistInMap(owner, radius))
-                    tempUnitList.push_back(owner);
-            }
             else if (pTarget)
             {
-                tempUnitList.push_back(pTarget);
-
                 if (Pet* pet = pTarget->GetPet())
                     if (m_caster->IsWithinDistInMap(pet, radius))
                         tempUnitList.push_back(pet);
