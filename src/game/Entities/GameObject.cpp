@@ -368,6 +368,12 @@ void GameObject::Update(const uint32 diff)
                         // FIXME: this is activation radius (in different casting radius that must be selected from spell data)
                         // TODO: move activated state code (cast itself) to GO_ACTIVATED, in this place only check activating and set state
                         float radius = float(goInfo->trap.diameter) / 2.0f;
+
+                        // behavior verified on classic
+                        // TODO: needs more research
+                        if (goInfo->GetLockId() == 12) // 21 objects currently (hunter traps), all with 5 or less for diameter -> use diameter as radius instead
+                            radius = float(goInfo->trap.diameter);
+
                         bool valid = true;
                         if (!radius)
                         {
