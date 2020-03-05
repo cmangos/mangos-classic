@@ -178,8 +178,19 @@ std::array<uint8, 16> VersionChallenge = { { 0xBA, 0xA3, 0x1E, 0x99, 0xA0, 0x0B,
 
 /// Constructor - set the N and g values for SRP6
 AuthSocket::AuthSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler)
-    : Socket(service, std::move(closeHandler)), _status(STATUS_CHALLENGE), _build(0), _accountSecurityLevel(SEC_PLAYER)
+    : Socket(service, std::move(closeHandler)), _status(STATUS_CHALLENGE), _build(0), _accountSecurityLevel(SEC_PLAYER), m_timeoutTimer(service)
 {
+    m_timeoutTimer.expires_from_now(boost::posix_time::seconds(30));
+    m_timeoutTimer.async_wait([&] (const boost::system::error_code& error)
+    {
+        // Timer was not cancelled, take necessary action.
+        if (error == boost::asio::error::operation_aborted)
+            return;
+
+        // Close socket if timer runs out
+        if (!IsClosed())
+            Close();
+    });
 }
 
 /// Read the packet from the client
@@ -241,6 +252,7 @@ bool AuthSocket::ProcessIncomingData()
         }
 
         // if we reach here, it means that a valid opcode was found and the handler completed successfully
+        m_timeoutTimer.cancel();
     }
 
     return true;

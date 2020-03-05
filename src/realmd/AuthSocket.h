@@ -87,6 +87,8 @@ class AuthSocket : public MaNGOS::Socket
         uint16 _build;
         AccountTypes _accountSecurityLevel;
 
+        boost::asio::deadline_timer m_timeoutTimer;
+
         virtual bool ProcessIncomingData() override;
 };
 #endif

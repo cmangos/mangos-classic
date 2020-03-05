@@ -2,7 +2,7 @@ ALTER TABLE realmd_db_version CHANGE COLUMN required_z2748_01_realmd_banning req
 
 DROP TABLE IF EXISTS account_logons;
 CREATE TABLE account_logons (
-id INT NOT NULL AUTO_INCREMENT,
+id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
 accountId INT UNSIGNED NOT NULL,
 ip varchar(30) NOT NULL,
 loginTime timestamp NOT NULL,
