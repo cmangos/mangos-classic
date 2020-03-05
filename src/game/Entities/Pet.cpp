@@ -2117,6 +2117,9 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* ci
     if (getPetType() == MINI_PET)                           // always non-attackable
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
+    if (getPetType() == SUMMON_PET)
+        SetCorpseDelay(5);
+
     return true;
 }
 
