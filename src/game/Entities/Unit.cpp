@@ -815,9 +815,22 @@ uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage c
         }
 
         if (victim->GetTypeId() == TYPEID_UNIT)
+        {
             if (Creature* creatureVictim = static_cast<Creature*>(victim))
+            {
                 if (!creatureVictim->IsPet() && !creatureVictim->HasLootRecipient())
                     creatureVictim->SetLootRecipient(dealer);
+
+                if (creatureVictim->HasLootRecipient())
+                {
+                    if (Player* player = creatureVictim->GetLootRecipient())
+                    {
+                        if (!dealer->IsInGroup(player))
+                            victim->m_damageByOthers += damage;
+                    }
+                }
+            }
+        }
     }
 
     if (health <= damage)
@@ -7483,6 +7496,8 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
     {
         Creature* creature = static_cast<Creature*>(this);
 
+        m_damageByOthers = 0;
+
         // clear stand state if set in addon - else script has to do it on its own
         CreatureDataAddon const* cainfo = creature->GetCreatureAddon();
         if (cainfo)
@@ -11179,4 +11194,18 @@ void Unit::ClearComboPoints()
 
     if (IsPlayer())
         static_cast<Player*>(this)->SendComboPoints();
+}
+
+uint32 Unit::GetModifierXpBasedOnDamageReceived(uint32 xp)
+{
+    if (xp && IsCreature() && GetDamageDoneByOthers())
+    {
+        uint32 health = GetMaxHealth();
+        float percentageHp = float(GetDamageDoneByOthers()) / health;
+        if (percentageHp >= 1.f)
+            xp = 0;
+        else
+            xp *= percentageHp;
+    }
+    return xp;
 }
