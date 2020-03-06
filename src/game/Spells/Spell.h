@@ -552,7 +552,9 @@ class Spell
         void SetJumpRadius(float newValue) { m_jumpRadius = newValue; }
         // warning - always set scheme for first unique target in a row
         void SetFilteringScheme(SpellEffectIndex effIdx, bool targetB, SpellTargetFilterScheme scheme) { m_filteringScheme[effIdx][uint32(targetB)] = scheme; }
-
+        // onsuccessfulspellstart
+        uint32 GetPowerCost() { return m_powerCost; }
+        void SetPowerCost(uint32 powerCost) { m_powerCost = powerCost; }
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
