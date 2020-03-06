@@ -1717,6 +1717,8 @@ inline bool IsSimilarExistingAuraStronger(const Unit* caster, uint32 spellid, co
 // Diminishing Returns interaction with spells
 DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto, bool triggered);
 bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group);
+bool IsDiminishingReturnsGroupDurationDiminished(DiminishingGroup group, bool pvp);
+uint32 GetDiminishingReturnsGroupResetTime(DiminishingGroup group, uint32 duration, bool pvp);
 DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group);
 bool IsCreatureDRSpell(SpellEntry const* spellInfo);
 
