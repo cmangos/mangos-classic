@@ -825,6 +825,7 @@ uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage c
                 {
                     if (Player* player = creatureVictim->GetLootRecipient())
                     {
+                        // Note: there is evidence that pre-mop this was split between player/nonplayer instead of group/nongroup
                         if (!dealer->IsInGroup(player))
                             victim->m_damageByOthers += damage;
                     }
