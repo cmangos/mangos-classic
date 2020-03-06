@@ -206,14 +206,12 @@ struct GreaterInvisibilityMob : public AuraScript
         std::list<Unit*> nearbyTargets;
         MaNGOS::AnyUnitInObjectRangeCheck u_check(invisible, float(invisible->GetDetectionRange()));
         MaNGOS::UnitListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(nearbyTargets, u_check);
-        Cell::VisitGridObjects(invisible, searcher, invisible->GetDetectionRange());
+        Cell::VisitWorldObjects(invisible, searcher, invisible->GetDetectionRange());
         for (Unit* nearby : nearbyTargets)
         {
             if (invisible->CanAttackOnSight(nearby))
             {
                 invisible->AI()->AttackStart(nearby);
-                if (SpellAuraHolder* holder = aura->GetHolder())
-                    invisible->RemoveSpellAuraHolder(holder);
                 return;
             }
         }
