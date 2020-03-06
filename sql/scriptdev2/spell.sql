@@ -79,7 +79,16 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (11688,'spell_life_tap'),
 (11689,'spell_life_tap');
 
+-- Warrior
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(5308,'spell_warrior_execute'),
+(20658,'spell_warrior_execute'),
+(20660,'spell_warrior_execute'),
+(20661,'spell_warrior_execute'),
+(20662,'spell_warrior_execute');
+
 -- Battleground and Outdoor PvP
+-- Alterac Valley
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- Arathi basin
 (23936,'spell_battleground_banner_trigger'),

@@ -6946,24 +6946,8 @@ void Spell::OnInit()
 
 void Spell::OnSuccessfulStart()
 {
-    switch (m_spellInfo->Id)
-    {
-        case 5308: // Warrior - Execute
-        case 20658:
-        case 20660:
-        case 20661:
-        case 20662:
-        {
-            int32 basePoints0 = m_caster->CalculateSpellEffectValue(m_targets.getUnitTarget(), m_spellInfo, SpellEffectIndex(0)) + int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[0]);
-            SpellCastResult result = m_caster->CastCustomSpell(m_targets.getUnitTarget(), 20647, &basePoints0, nullptr, nullptr, TRIGGERED_NONE, nullptr);
-            m_powerCost = 0;
-            break;
-        }
-        default:
-            if (SpellScript* script = GetSpellScript())
-                script->OnSuccessfulStart(this);
-            break;
-    }
+    if (SpellScript* script = GetSpellScript())
+        script->OnSuccessfulStart(this);
 }
 
 void Spell::OnSuccessfulFinish()
