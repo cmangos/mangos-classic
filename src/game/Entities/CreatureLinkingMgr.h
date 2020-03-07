@@ -171,6 +171,7 @@ class CreatureLinkingHolder
             uint16 linkingFlag: 16;
             uint16 searchRange: 16;
             GuidList linkedGuids;
+            bool inUse = false;
         };
         // Structure associated to a master (guid case)
         struct InfoAndGuid

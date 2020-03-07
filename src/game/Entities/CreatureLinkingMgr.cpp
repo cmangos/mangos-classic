@@ -432,12 +432,26 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
     // Process Slaves (by entry)
     HolderMapBounds bounds = m_holderMap.equal_range(pSource->GetEntry());
     for (HolderMap::iterator itr = bounds.first; itr != bounds.second; ++itr)
-        ProcessSlaveGuidList(eventType, pSource, itr->second.linkingFlag & eventFlagFilter, itr->second.searchRange, itr->second.linkedGuids, pEnemy);
+    {
+        if (!itr->second.inUse)
+        {
+            itr->second.inUse = true;
+            ProcessSlaveGuidList(eventType, pSource, itr->second.linkingFlag & eventFlagFilter, itr->second.searchRange, itr->second.linkedGuids, pEnemy);
+            itr->second.inUse = false;
+        }
+    }
 
     // Process Slaves (by guid)
     bounds = m_holderGuidMap.equal_range(pSource->GetGUIDLow());
     for (HolderMap::iterator itr = bounds.first; itr != bounds.second; ++itr)
-        ProcessSlaveGuidList(eventType, pSource, itr->second.linkingFlag & eventFlagFilter, itr->second.searchRange, itr->second.linkedGuids, pEnemy);
+    {
+        if (!itr->second.inUse)
+        {
+            itr->second.inUse = true;
+            ProcessSlaveGuidList(eventType, pSource, itr->second.linkingFlag & eventFlagFilter, itr->second.searchRange, itr->second.linkedGuids, pEnemy);
+            itr->second.inUse = false;
+        }
+    }
 
     // Process Master
     if (CreatureLinkingInfo const* pInfo = sCreatureLinkingMgr.GetLinkedTriggerInformation(pSource))
