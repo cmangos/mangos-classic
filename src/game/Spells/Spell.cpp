@@ -2153,8 +2153,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         case TARGET_UNIT_FRIEND_AND_PARTY:
         {
             Unit* target = m_targets.getUnitTarget();
-            if (!target)
+            if (!target || !m_caster->CanAssistSpell(target, m_spellInfo))
                 break;
+
+            tempUnitList.push_back(target);
 
             Player* pTarget = const_cast<Player*>(target->GetControllingPlayer());
             if (!pTarget)
