@@ -334,6 +334,10 @@ void ChaseMovementGenerator::DistanceYourself(Unit& owner, float distance)
 
 void ChaseMovementGenerator::Backpedal(Unit& owner)
 {
+    // do not allow backpedalling during scripts
+    if (owner.AI()->GetCombatScriptStatus())
+        return;
+
     m_closenessExpired = false;
     m_closenessAndFanningTimer = CHASE_CLOSENESS_TIMER; // Just in case path doesnt generate
     float targetDist = std::min(this->i_target->GetCombinedCombatReach(&owner, false), 3.75f);
