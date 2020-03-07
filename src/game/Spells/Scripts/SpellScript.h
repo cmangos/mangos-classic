@@ -113,13 +113,13 @@ class SpellScriptMgr
         static std::map<std::string, AuraScript*> m_auraScriptStringMap;
 };
 
-template <class T, class U>
+template <class T>
 void RegisterScript(std::string stringName)
 {
     static_assert(std::is_base_of<SpellScript, T>::value, "T not derived from SpellScript");
-    static_assert(std::is_base_of<AuraScript, U>::value, "T not derived from AuraScript");
+    static_assert(std::is_base_of<AuraScript, T>::value, "T not derived from AuraScript");
     SpellScriptMgr::SetSpellScript(stringName, new T());
-    SpellScriptMgr::SetAuraScript(stringName, new U());
+    SpellScriptMgr::SetAuraScript(stringName, new T());
 }
 
 template <class T>
