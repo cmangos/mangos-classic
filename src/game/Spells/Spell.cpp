@@ -413,6 +413,8 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
     m_needSpellLog = (m_spellInfo->Attributes & (SPELL_ATTR_HIDE_IN_COMBAT_LOG | SPELL_ATTR_HIDDEN_CLIENTSIDE)) == 0;
 
     m_targetlessMask = 0;
+
+    OnInit();
 }
 
 Spell::~Spell()
@@ -455,7 +457,7 @@ void Spell::FillTargetMap()
         SpellTargetImplicitType effectTargetType = data.implicitType[i]; // prefilled data on load
         auto& targetMask = data.targetMask[i];
         auto& ignoredTargets = data.ignoredTargets[i];
-        auto& filterScheme = data.filteringScheme[i];
+        auto& filterScheme = m_filteringScheme[i];
         targetingData.chainTargetCount[i] = m_spellInfo->EffectChainTarget[SpellEffectIndex(i)];
 
         if (effectTargetType == TARGET_TYPE_SPECIAL_UNIT) // area auras need custom handling
