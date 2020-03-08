@@ -120,6 +120,25 @@ void AuctionHouseBot::Initialize() {
 
         // buy item value
         m_buyValue = getMinMaxConfig("AuctionHouseBot.Buy.Value", 0, 200, 90);
+
+        // overridden items
+        QueryResult* result = CharacterDatabase.PQuery("SELECT item, value, add_chance, min_amount, max_amount FROM ahbot_items");
+        if (result)
+        {
+            do
+            {
+                Field* fields = result->Fetch();
+                uint32 itemId = fields[0].GetUInt32();
+                AuctionHouseBotItemData itemData;
+                itemData.Value = fields[1].GetUInt32();
+                itemData.AddChance = fields[2].GetUInt32();
+                itemData.MinAmount = fields[3].GetUInt32();
+                itemData.MaxAmount = fields[4].GetUInt32();
+                m_itemData[itemId] = itemData;
+            }
+            while (result->NextRow());
+            delete result;
+        }
     }
 }
 
@@ -259,6 +278,56 @@ void AuctionHouseBot::Rebuild(bool all) {
     }
 }
 
+void AuctionHouseBot::SetItemData(uint32 item, AuctionHouseBotItemData& itemData, bool reset)
+{
+    static SqlStatementID delItem;
+    SqlStatement stmt = CharacterDatabase.CreateStatement(delItem, "DELETE FROM ahbot_items WHERE item = ?");
+    stmt.PExecute(item);
+
+    if (reset)
+    {
+        m_itemData.erase(item);
+        return;
+    }
+    ItemPrototype const* prototype = ObjectMgr::GetItemPrototype(item);
+    if (!prototype)
+        return;
+
+    if (itemData.AddChance > 100)
+        itemData.AddChance = 100;
+
+    if (itemData.MinAmount == 0)
+        itemData.MinAmount = prototype->GetMaxStackSize();
+    if (itemData.MaxAmount == 0)
+        itemData.MaxAmount = prototype->GetMaxStackSize();
+    if (itemData.MaxAmount < itemData.MinAmount)
+        itemData.MaxAmount = itemData.MinAmount;
+
+    m_itemData[item] = itemData;
+
+    static SqlStatementID addItem;
+    stmt = CharacterDatabase.CreateStatement(addItem, "INSERT INTO ahbot_items (item, value, add_chance, min_amount, max_amount) VALUES (?, ?, ?, ?, ?)");
+    stmt.addUInt32(item);
+    stmt.addUInt32(itemData.Value);
+    stmt.addUInt32(itemData.AddChance);
+    stmt.addUInt32(itemData.MinAmount);
+    stmt.addUInt32(itemData.MaxAmount);
+    stmt.Execute();
+}
+
+AuctionHouseBotItemData AuctionHouseBot::GetItemData(uint32 item)
+{
+    auto iterator = m_itemData.find(item);
+    if (iterator != m_itemData.end())
+        return iterator->second;
+
+    // item data not overridden, set MinAmount/MaxAmount to 0 (those values can normally never be 0) as a means to alert requester that item data is not overridden
+    AuctionHouseBotItemData itemData;
+    ItemPrototype const* prototype = ObjectMgr::GetItemPrototype(item);
+    itemData.Value = prototype ? calculateBuyoutPrice(prototype) : 0;
+    return itemData;
+}
+
 void AuctionHouseBot::Update() {
     if (++m_houseAction >= MAX_AUCTION_HOUSE_TYPE * 2)
         m_houseAction = 0;
@@ -295,20 +364,34 @@ void AuctionHouseBot::Update() {
             }
         }
 
+        // remove items we've overridden (AddChance > 0) and add using given AddChance and stack size
+        for (auto itemData : m_itemData)
+        {
+            if (itemData.second.AddChance > 0) // replace normal loot sources with custom chance of adding item
+                itemMap[itemData.first] = urand(0, 100) < itemData.second.AddChance ? urand(itemData.second.MinAmount, itemData.second.MaxAmount + 1) : 0;
+        }
+
         for (auto itemEntry : itemMap) {
-            ItemPrototype const* prototype = sObjectMgr.GetItemPrototype(itemEntry.first);
+            ItemPrototype const* prototype = ObjectMgr::GetItemPrototype(itemEntry.first);
             if (!prototype || prototype->GetMaxStackSize() == 0)
                 continue; // really shouldn't happen, but better safe than sorry
-            if (prototype->Bonding == BIND_WHEN_PICKED_UP || prototype->Bonding == BIND_QUEST_ITEM)
-                continue; // nor BoP and quest items
-            if (prototype->Flags & ITEM_FLAG_HAS_LOOT)
-                continue; // no items containing loot
-            if (m_itemValue[prototype->Quality][prototype->Class] == 0)
-                continue; // item class is filtered out
+            auto iterator = m_itemData.find(prototype->ItemId);
+            if (iterator != m_itemData.end() && iterator->second.Value == 0)
+                continue; // item is blacklisted
+            if (iterator == m_itemData.end() || iterator->second.AddChance == 0)
+            {
+                if (prototype->Bonding == BIND_WHEN_PICKED_UP || prototype->Bonding == BIND_QUEST_ITEM)
+                    continue; // nor BoP and quest items
+                if (prototype->Flags & ITEM_FLAG_HAS_LOOT)
+                    continue; // no items containing loot
+                if (m_itemValue[prototype->Quality][prototype->Class] == 0)
+                    continue; // item class is filtered out
+            }
 
+            uint32 itemValue = ValueWithVariance(iterator != m_itemData.end() ? iterator->second.Value : calculateBuyoutPrice(prototype));
             for (uint32 stackCounter = 0; stackCounter < itemEntry.second; stackCounter += prototype->GetMaxStackSize()) {
                 uint32 count = itemEntry.second - stackCounter > prototype->GetMaxStackSize() ? prototype->GetMaxStackSize() : itemEntry.second - stackCounter;
-                uint32 buyoutPrice = calculateBuyoutPrice(prototype, count);
+                uint32 buyoutPrice = itemValue * count;
                 Item* item = Item::CreateItem(itemEntry.first, count);
                 if (buyoutPrice == 0 || !item)
                     continue; // don't put up items we don't know the value of
@@ -324,9 +407,17 @@ void AuctionHouseBot::Update() {
         for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr) {
             AuctionEntry* auction = itr->second;
             if (auction->owner == 0 && auction->bid == 0)
-                continue; // ignore bidding/buying auctions that were created by server and not bidded on by player
+                continue; // ignore bidding/buying auctions that were created by ahbot and not bidded on by player
             Item* item = sAuctionMgr.GetAItem(auction->itemGuidLow);
-            uint32 buyItemCheck = urand(0, calculateBuyoutPrice(item->GetProto(), item->GetCount()) * m_buyValue / 100);
+            auto prototype = item->GetProto();
+            if (!prototype)
+                continue; // shouldn't happen
+            auto iterator = m_itemData.find(prototype->ItemId);
+            if (iterator != m_itemData.end() && iterator->second.Value == 0)
+                continue; // item is blacklisted
+
+            uint32 buyItemCheck = ValueWithVariance(iterator != m_itemData.end() ? iterator->second.Value : calculateBuyoutPrice(prototype));
+            buyItemCheck *= item->GetCount();
             uint32 bidPrice = auction->bid + auction->GetAuctionOutBid();
             if (auction->startbid > bidPrice)
                 bidPrice = auction->startbid;
@@ -340,16 +431,13 @@ void AuctionHouseBot::Update() {
     }
 }
 
-uint32 AuctionHouseBot::calculateBuyoutPrice(ItemPrototype const* prototype, uint32 count) {
-    if (!prototype)
-        return 0;
+uint32 AuctionHouseBot::calculateBuyoutPrice(ItemPrototype const* prototype) {
     uint32 buyoutPrice = prototype->BuyPrice;
     if (buyoutPrice == 0) // if no buy price then use sell price multiplied by 4 if white or gray item, 5 if green or better
         buyoutPrice = prototype->SellPrice * (prototype->Quality <= ITEM_QUALITY_NORMAL ? 4 : 5);
-    // multiply buyoutPrice with count and item quality price percentage
+    // multiply buyoutPrice with item quality price percentage
     // if item is sold by a vendor and vendor value is forced, then multiply by 100 (setting vendor price)
-    buyoutPrice *= count * (m_vendorValue && m_vendorItems.find(prototype->ItemId) != m_vendorItems.end() ? 100 : m_itemValue[prototype->Quality][prototype->Class]);
-    buyoutPrice += ((int32) urand(0, m_valueVariance * 2 + 1) - (int32) m_valueVariance) * (int32) (buyoutPrice / 100);
+    buyoutPrice *= (m_vendorValue && m_vendorItems.find(prototype->ItemId) != m_vendorItems.end() ? 100 : m_itemValue[prototype->Quality][prototype->Class]);
     buyoutPrice /= 100; // since we multiplied with m_itemValue
     return buyoutPrice;
 }

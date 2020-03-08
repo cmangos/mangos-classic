@@ -83,7 +83,7 @@ bool ChatHandler::HandleAHBotReloadCommand(char* /*args*/)
     return false;
 }
 
-bool ChatHandler::HandleAHBotStatusCommand(char* args)
+bool ChatHandler::HandleAHBotStatusCommand(char* /*args*/)
 {
     AuctionHouseBotStatusInfo statusInfo;
     sAuctionHouseBot.PrepareStatusInfos(statusInfo);
@@ -110,6 +110,61 @@ bool ChatHandler::HandleAHBotStatusCommand(char* args)
     if (!m_session)
         SendSysMessage(LANG_AHBOT_STATUS_BAR_CONSOLE);
 
+    return true;
+}
+
+bool ChatHandler::HandleAHBotItemCommand(char* args)
+{
+    // .ahbot item #itemid [$itemvalue [$addchance [$minstack [$maxstack]]]] [reset]
+    char* cId = ExtractKeyFromLink(&args, "Hitem");
+    if (!cId)
+        return false;
+
+    uint32 itemId = 0;
+    if (!ExtractUInt32(&cId, itemId))                       // [name] manual form
+    {
+        std::string itemName = cId;
+        WorldDatabase.escape_string(itemName);
+        QueryResult* result = WorldDatabase.PQuery("SELECT entry FROM item_template WHERE name = '%s'", itemName.c_str());
+        if (!result)
+        {
+            PSendSysMessage(LANG_COMMAND_COULDNOTFIND, cId);
+            SetSentErrorMessage(true);
+            return false;
+        }
+        itemId = result->Fetch()->GetUInt16();
+        delete result;
+    }
+    ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId);
+    if (!proto)
+    {
+        PSendSysMessage(LANG_COMMAND_COULDNOTFIND, cId);
+        return false;
+    }
+
+    AuctionHouseBotItemData itemData;
+    bool reset = ExtractLiteralArg(&args, "reset") != nullptr;
+    bool setItemData = true;
+    if (!reset && !ExtractUInt32(&args, itemData.Value))
+    {
+        // only item id specified, show item data to player
+        itemData = sAuctionHouseBot.GetItemData(itemId);
+        setItemData = false;
+    }
+    else if (!reset && ExtractUInt32(&args, itemData.AddChance) && ExtractUInt32(&args, itemData.MinAmount))
+        ExtractUInt32(&args, itemData.MaxAmount);
+    if (setItemData)
+        sAuctionHouseBot.SetItemData(itemId, itemData, reset);
+
+    std::stringstream ss;
+    ss << itemData.Value / 10000 << "g, " << itemData.Value / 100 % 100 << "s, " << itemData.Value % 100 << "c. ";
+    if (itemData.MinAmount == 0)
+        ss << "Item data is not overridden by user.";
+    else if (itemData.AddChance == 0)
+        ss << "Item will be added using normal sources.";
+    else
+        ss << "Add chance: " << itemData.AddChance << "%, Min/Max amount: " << itemData.MinAmount << "/" << itemData.MaxAmount;
+    PSendSysMessage(LANG_ITEM_LIST_CHAT, itemId, itemId, proto->Name1, ss.str().c_str());
     return true;
 }
 #endif

@@ -89,6 +89,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "rebuild",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotRebuildCommand,        "", nullptr },
         { "reload",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotReloadCommand,         "", nullptr },
         { "status",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotStatusCommand,         "", nullptr },
+        { "item",           SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemCommand,           "", nullptr },
         { nullptr,          0,                  true,  nullptr,                                        "", nullptr }
     };
 #endif
