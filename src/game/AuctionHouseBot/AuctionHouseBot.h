@@ -24,6 +24,15 @@
 #include "Entities/ItemPrototype.h"
 #include "Globals/SharedDefines.h"
 #include "Loot/LootMgr.h"
+#include "Util.h"
+
+struct AuctionHouseBotItemData
+{
+    uint32 Value = 0;
+    uint32 AddChance = 0;
+    uint32 MinAmount = 0;
+    uint32 MaxAmount = 0;
+};
 
 struct AuctionHouseBotStatusInfoPerType
 {
@@ -46,6 +55,8 @@ class AuctionHouseBot {
         bool ReloadAllConfig();
         void Rebuild(bool all);
         void PrepareStatusInfos(AuctionHouseBotStatusInfo& statusInfo) const;
+        void SetItemData(uint32 item, AuctionHouseBotItemData& itemData, bool reset = false);
+        AuctionHouseBotItemData GetItemData(uint32 item);
 
     private:
         uint32 getMinMaxConfig(const char* config, uint32 minValue, uint32 maxValue, uint32 defaultValue);
@@ -53,7 +64,8 @@ class AuctionHouseBot {
         void fillUintVectorFromQuery(char const* query, std::vector<uint32>& lootTemplates);
         void parseItemValueConfig(char const* fieldname, std::vector<uint32>& itemValues);
         void addLootToItemMap(LootStore* store, std::vector<int32>& lootConfig, std::vector<uint32>& lootTemplates, std::unordered_map<uint32, uint32>& itemMap);
-        uint32 calculateBuyoutPrice(ItemPrototype const* prototype, uint32 count);
+        uint32 calculateBuyoutPrice(ItemPrototype const* prototype);
+        uint32 ValueWithVariance(uint32 itemValue) { return (uint32) (itemValue + ((int32) urand(0, m_valueVariance * 2 + 1) - (int32) m_valueVariance) * (int32) (itemValue / 100)); };
 
         std::string m_configFileName;
         Config m_ahBotCfg;
@@ -95,6 +107,8 @@ class AuctionHouseBot {
         std::vector<uint32> m_professionItems;
 
         std::unordered_set<uint32> m_vendorItems;
+
+        std::unordered_map<uint32, AuctionHouseBotItemData> m_itemData;
 };
 
 #define sAuctionHouseBot MaNGOS::Singleton<AuctionHouseBot>::Instance()
