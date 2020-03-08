@@ -98,6 +98,7 @@ struct BroadcastText
 
     std::string const& GetText(int32 locIdx, uint8 gender = GENDER_MALE, bool forceGender = false) const
     {
+        ++locIdx; // broadcast text has default at position 0
         if ((gender == GENDER_FEMALE || gender == GENDER_NONE) && (forceGender || !femaleText[DEFAULT_LOCALE].empty()))
         {
             if (locIdx >= 0 && femaleText.size() > size_t(locIdx) && !femaleText[locIdx].empty())

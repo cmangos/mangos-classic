@@ -7148,6 +7148,7 @@ void ObjectMgr::LoadBroadcastTextLocales()
         int idx = GetOrNewIndexForLocale(locale);
         if (idx >= 0)
         {
+            ++idx;
             if (bct.maleText.size() <= size_t(idx))
             {
                 bct.maleText.resize(idx + 1);
