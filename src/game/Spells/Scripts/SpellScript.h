@@ -78,7 +78,7 @@ struct AuraScript
     virtual void OnManaAbsorb(Aura* /*aura*/, int32& /*currentAbsorb*/) const {}
     // called on death prevention
     virtual void OnAuraDeathPrevention(Aura* /*aura*/, int32& /*remainingDamage*/) const {}
-    // called on aura dispel
+    // called on aura dispel - warning - auras of holder might be deleted
     virtual void OnDispel(SpellAuraHolder* /*holder*/, Unit* /*dispeller*/, uint32 /*dispellingSpellId*/, uint32 /*originalStacks*/) const {}
     // called on periodic auras which need amount calculation (damage, heal, burn, drain)
     virtual void OnPeriodicCalculateAmount(Aura* /*aura*/, uint32& /*amount*/) const {}
