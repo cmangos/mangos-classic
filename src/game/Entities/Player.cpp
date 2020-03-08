@@ -4310,7 +4310,7 @@ void Player::BuildPlayerRepop()
     // convert player body to ghost
     SetHealth(1);
 
-    if (!GetSession()->isLogingOut())
+    if (!IsImmobilizedState() && !GetSession()->isLogingOut())
         SendMoveRoot(false);
 
     // BG - remove insignia related

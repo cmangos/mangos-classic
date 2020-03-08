@@ -753,6 +753,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
 void WorldSession::HandlePlayerReconnect()
 {
+    const bool logout = isLogingOut();
+
     // stop logout timer if need
     LogoutRequest(0);
 
@@ -850,6 +852,19 @@ void WorldSession::HandlePlayerReconnect()
         _player->TaxiFlightResume(true);
     else if (!_player->IsClientControlled(_player))
         _player->UpdateClientControl(_player, false);
+
+    // Undo flags and states set by logout:
+    if (logout)
+    {
+        if (_player->getStandState() == UNIT_STAND_STATE_SIT)
+            _player->SetStandState(UNIT_STAND_STATE_STAND);
+
+        if (_player->HasMovementFlag(MOVEFLAG_ROOT) && !_player->IsImmobilizedState())
+            _player->SendMoveRoot(false);
+
+        if (!_player->hasUnitState(UNIT_STAT_STUNNED))
+            _player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+    }
 
     // initialize client pet bar if need
     _player->SendPetBar();

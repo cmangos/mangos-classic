@@ -288,15 +288,22 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
         return;
     }
 
-    // not set flags if player can't free move to prevent lost state at logout cancel
-    if (GetPlayer()->CanFreeMove())
-    {
-        float height = GetPlayer()->GetMap()->GetHeight(GetPlayer()->GetPositionX(), GetPlayer()->GetPositionY(), GetPlayer()->GetPositionZ());
-        if ((GetPlayer()->GetPositionZ() < height + 0.1f) && !(GetPlayer()->IsInWater()))
-            GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
+    Player* thisPlayer = GetPlayer();
 
-        GetPlayer()->SendMoveRoot(true);
-        GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+    // Set flags and states set by logout:
+    {
+        if (thisPlayer->getStandState() == UNIT_STAND_STATE_STAND || thisPlayer->getStandState() == UNIT_STAND_STATE_KNEEL)
+        {
+            float height = thisPlayer->GetMap()->GetHeight(thisPlayer->GetPositionX(), thisPlayer->GetPositionY(), thisPlayer->GetPositionZ());
+
+            if ((thisPlayer->GetPositionZ() < height + 0.1f) && !thisPlayer->IsInWater())
+                thisPlayer->SetStandState(UNIT_STAND_STATE_SIT);
+        }
+
+        if (!thisPlayer->HasMovementFlag(MOVEFLAG_ROOT))
+            thisPlayer->SendMoveRoot(true);
+
+        thisPlayer->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
     }
 
     WorldPacket data(SMSG_LOGOUT_RESPONSE, 5);
@@ -320,17 +327,18 @@ void WorldSession::HandleLogoutCancelOpcode(WorldPacket& /*recv_data*/)
     WorldPacket data(SMSG_LOGOUT_CANCEL_ACK, 0);
     SendPacket(data);
 
-    // not remove flags if can't free move - its not set in Logout request code.
-    if (GetPlayer()->CanFreeMove())
+    Player* thisPlayer = GetPlayer();
+
+    // Undo flags and states set by logout:
     {
-        //!we can move again
-        GetPlayer()->SendMoveRoot(false);
+        if (thisPlayer->getStandState() == UNIT_STAND_STATE_SIT)
+            thisPlayer->SetStandState(UNIT_STAND_STATE_STAND);
 
-        //! Stand Up
-        GetPlayer()->SetStandState(UNIT_STAND_STATE_STAND);
+        if (thisPlayer->HasMovementFlag(MOVEFLAG_ROOT) && !thisPlayer->IsImmobilizedState())
+            thisPlayer->SendMoveRoot(false);
 
-        //! DISABLE_ROTATE
-        GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+        if (!thisPlayer->hasUnitState(UNIT_STAT_STUNNED))
+            thisPlayer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
     }
 
     DEBUG_LOG("WORLD: sent SMSG_LOGOUT_CANCEL_ACK Message");

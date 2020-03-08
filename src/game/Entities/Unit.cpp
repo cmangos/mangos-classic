@@ -9420,7 +9420,7 @@ bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
             CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
-        else
+        else if (GetTypeId() != TYPEID_PLAYER || !static_cast<Player*>(this)->GetSession()->isLogingOut())
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
         SetImmobilizedState(apply, true);
@@ -9449,20 +9449,24 @@ bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
 void Unit::SetImmobilizedState(bool apply, bool stun)
 {
     const uint32 state = (stun ? UNIT_STAT_STUNNED : UNIT_STAT_ROOT);
+    const bool logout = (GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(this)->GetSession()->isLogingOut());
+
     if (apply)
     {
         addUnitState(state);
 
         if (!IsClientControlled())
             StopMoving();
-        SendMoveRoot(true);
+
+        if (!logout)
+            SendMoveRoot(true);
     }
     else
     {
         clearUnitState(state);
 
         // Prevent giving ability to move if more immobilizers are active
-        if (!IsImmobilizedState())
+        if (!IsImmobilizedState() && !logout)
             SendMoveRoot(false);
     }
 }
