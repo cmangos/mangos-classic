@@ -671,6 +671,7 @@ class Spell
             bool   processed: 1;
             bool   magnet: 1;
             bool   procReflect : 1; // Used to tell hit to proc reflect only and return reflect back
+            uint32 heartbeatResistChance;
         };
         uint8 m_needAliveTargetMask;                        // Mask req. alive targets
         void ProcReflectProcs(TargetInfo& targetInfo);
@@ -715,7 +716,7 @@ class Spell
         void HandleDelayedSpellLaunch(TargetInfo* target);
         void InitializeDamageMultipliers();
         void ResetEffectDamageAndHeal();
-        void DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected = false);
+        void DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, bool isReflected = false);
         void DoAllTargetlessEffects(bool dest);
         void DoAllEffectOnTarget(GOTargetInfo* target);
         void DoAllEffectOnTarget(ItemTargetInfo* target);
