@@ -42,7 +42,8 @@ struct AuctionHouseBotStatusInfoPerType
 
 typedef AuctionHouseBotStatusInfoPerType AuctionHouseBotStatusInfo[MAX_AUCTION_HOUSE_TYPE];
 
-class AuctionHouseBot {
+class AuctionHouseBot
+{
     public:
         AuctionHouseBot();
         ~AuctionHouseBot();
@@ -59,12 +60,12 @@ class AuctionHouseBot {
         AuctionHouseBotItemData GetItemData(uint32 item);
 
     private:
-        uint32 getMinMaxConfig(const char* config, uint32 minValue, uint32 maxValue, uint32 defaultValue);
-        void parseLootConfig(char const* fieldname, std::vector<int32>& lootConfig);
-        void fillUintVectorFromQuery(char const* query, std::vector<uint32>& lootTemplates);
-        void parseItemValueConfig(char const* fieldname, std::vector<uint32>& itemValues);
-        void addLootToItemMap(LootStore* store, std::vector<int32>& lootConfig, std::vector<uint32>& lootTemplates, std::unordered_map<uint32, uint32>& itemMap);
-        uint32 calculateBuyoutPrice(ItemPrototype const* prototype);
+        uint32 GetMinMaxConfig(const char* config, uint32 minValue, uint32 maxValue, uint32 defaultValue);
+        void ParseLootConfig(char const* fieldname, std::vector<int32>& lootConfig);
+        void FillUintVectorFromQuery(char const* query, std::vector<uint32>& lootTemplates);
+        void ParseItemValueConfig(char const* fieldname, std::vector<uint32>& itemValues);
+        void AddLootToItemMap(LootStore* store, std::vector<int32>& lootConfig, std::vector<uint32>& lootTemplates, std::unordered_map<uint32, uint32>& itemMap);
+        uint32 CalculateBuyoutPrice(ItemPrototype const* prototype);
         uint32 ValueWithVariance(uint32 itemValue) { return (uint32) (itemValue + ((int32) urand(0, m_valueVariance * 2 + 1) - (int32) m_valueVariance) * (int32) (itemValue / 100)); };
 
         std::string m_configFileName;
