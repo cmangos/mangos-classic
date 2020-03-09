@@ -856,9 +856,6 @@ void WorldSession::HandlePlayerReconnect()
     // Undo flags and states set by logout:
     if (logout)
     {
-        if (_player->getStandState() == UNIT_STAND_STATE_SIT)
-            _player->SetStandState(UNIT_STAND_STATE_STAND);
-
         if (_player->HasMovementFlag(MOVEFLAG_ROOT) && !_player->IsImmobilizedState())
             _player->SendMoveRoot(false);
 
@@ -871,6 +868,9 @@ void WorldSession::HandlePlayerReconnect()
 
     // send mirror timers
     _player->SendMirrorTimers(true);
+
+    if (_player->IsStandState() && !_player->hasUnitState(UNIT_STAT_STUNNED))
+        _player->SetStandState(UNIT_STAND_STATE_STAND);
 
     m_playerLoading = false;
 }
