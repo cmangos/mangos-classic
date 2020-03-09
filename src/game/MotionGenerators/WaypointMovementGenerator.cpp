@@ -520,63 +520,55 @@ bool WaypointMovementGenerator<Creature>::Update(Creature& creature, const uint3
         return true;
     }
 
-    if (i_path->size() > 1)
+    if (Stopped(creature))
     {
-        if (Stopped(creature))
+        // If a script just have set the waypoint to be paused or stopped we have to check
+        // if the client did get a path for this creature. If it is the case, we have to
+        // explicitly send stop so the client knows that we want that creature to be stopped
+        if (!creature.movespline->Finalized())
         {
-            // If a script just have set the waypoint to be paused or stopped we have to check
-            // if the client did get a path for this creature. If it is the case, we have to
-            // explicitly send stop so the client knows that we want that creature to be stopped
-            if (!creature.movespline->Finalized())
-            {
-                Movement::MoveSplineInit init(creature);
-                init.Stop();
-            }
-
-            if (CanMove(diff, creature))
-                SendNextWayPointPath(creature);
+            Movement::MoveSplineInit init(creature);
+            init.Stop();
         }
-        else
-        {
-            if (creature.IsStopped())
-                Stop(STOP_TIME_FOR_PLAYER);
-            else
-            {
-                if (creature.movespline->Finalized())
-                {
-                    // we arrived to a node either by movespline finalized or node reached while creature continue to move
-                    OnArrived(creature);                    // fire script events
-                    if (!Stopped(creature))                 // check if not stopped in OnArrived
-                        SendNextWayPointPath(creature);     // restart movement
-                }
-                else
-                {
-                    if (m_pathDuration <= 0)
-                    {
-                        // time to send new packet
-                        if (m_currentWaypointNode->second.delay == 0)
-                            SendNextWayPointPath(creature);
-                    }
-                    else
-                        m_pathDuration -= diff;
 
-                    if (!m_nodeIndexes.empty() && creature.movespline->currentPathIdx() >= m_nodeIndexes.front())
-                    {
-                        // node reached while moving
-                        m_nodeIndexes.pop_front();
-                        OnArrived(creature);                // fire script events
-                    }
-                }
-            }
-        }
+        if (CanMove(diff, creature))
+            SendNextWayPointPath(creature);
     }
     else
     {
-        // should be guaranteed that there is some delay in node script
-        if (!Stopped(creature) || CanMove(diff, creature))
+        if (creature.IsStopped())
         {
-            m_lastReachedWaypoint = 0;
-            OnArrived(creature);
+            if (creature.IsNonMeleeSpellCasted(false, false, true, true))
+                return true;
+            Stop(1000);
+        }
+        else
+        {
+            if (creature.movespline->Finalized())
+            {
+                // we arrived to a node either by movespline finalized or node reached while creature continue to move
+                OnArrived(creature);                    // fire script events
+                if (!Stopped(creature))                 // check if not stopped in OnArrived
+                    SendNextWayPointPath(creature);     // restart movement
+            }
+            else
+            {
+                if (m_pathDuration <= 0)
+                {
+                    // time to send new packet
+                    if (m_currentWaypointNode->second.delay == 0)
+                        SendNextWayPointPath(creature);
+                }
+                else
+                    m_pathDuration -= diff;
+
+                if (!m_nodeIndexes.empty() && creature.movespline->currentPathIdx() >= m_nodeIndexes.front())
+                {
+                    // node reached while moving
+                    m_nodeIndexes.pop_front();
+                    OnArrived(creature);                // fire script events
+                }
+            }
         }
     }
 

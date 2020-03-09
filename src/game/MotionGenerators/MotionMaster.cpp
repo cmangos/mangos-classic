@@ -589,6 +589,21 @@ void MotionMaster::InterruptPanic()
             MovementExpired(false);
 }
 
+void MotionMaster::PauseWaypoints(uint32 time)
+{
+    if (!m_owner->IsCreature())
+        return;
+
+    m_owner->StopMoving();
+
+    if (GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+    {
+        auto gen = (WaypointMovementGenerator<Creature>*)top();
+        gen->AddToWaypointPauseTime(time);
+        return;
+    }
+}
+
 void MotionMaster::propagateSpeedChange()
 {
     Impl::container_type::iterator it = Impl::c.begin();
