@@ -1036,7 +1036,7 @@ class Player : public Unit
         * \param: ObjectGuid interactObj > object that interact with this player
         **/
         void DoInteraction(ObjectGuid const& interactObjGuid);
-        RestType GetRestType() const { return rest_type; }
+        RestType GetRestType() const { return m_restType; }
         void SetRestType(RestType n_r_type, uint32 areaTriggerId = 0);
 
         time_t GetTimeInnEnter() const { return time_inn_enter; }
@@ -2415,7 +2415,7 @@ class Player : public Unit
         time_t time_inn_enter;
         uint32 inn_trigger_id;
         float m_rest_bonus;
-        RestType rest_type;
+        RestType m_restType;
         //////////////////// Rest System/////////////////////
 
         // Transports
