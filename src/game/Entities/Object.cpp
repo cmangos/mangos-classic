@@ -1567,12 +1567,12 @@ namespace MaNGOS
     {
         public:
             MonsterChatBuilder(WorldObject const& obj, ChatMsg msgtype, MangosStringLocale const* textData, Language language, Unit const* target)
-                : i_object(obj), i_msgtype(msgtype), i_textData(textData), i_language(language), i_target(target) {}
+                : i_object(obj), i_msgtype(msgtype), i_textData(textData), i_language(language), i_target(target), m_gender(obj.IsUnit() ? Gender(static_cast<Unit const&>(obj).getGender()) : GENDER_MALE) {}
             void operator()(WorldPacket& data, int32 loc_idx)
             {
                 char const* text = nullptr;
                 if (BroadcastText const* bct = i_textData->broadcastText)
-                    text = bct->GetText(loc_idx).data();
+                    text = bct->GetText(loc_idx, m_gender).data();
                 else
                 {
                     if ((int32)i_textData->Content.size() > loc_idx + 1 && !i_textData->Content[loc_idx + 1].empty())
@@ -1591,6 +1591,7 @@ namespace MaNGOS
             MangosStringLocale const* i_textData;
             Language i_language;
             Unit const* i_target;
+            Gender m_gender;
     };
 }                                                           // namespace MaNGOS
 
