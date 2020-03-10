@@ -288,7 +288,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     QueryResult* result =
         LoginDatabase.PQuery("SELECT "
-                             "id, "                      //0
+                             "a.id, "                    //0
                              "gmlevel, "                 //1
                              "sessionkey, "              //2
                              "ip, "                      //3
