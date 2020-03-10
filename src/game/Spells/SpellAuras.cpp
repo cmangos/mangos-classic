@@ -5776,7 +5776,7 @@ void SpellAuraHolder::Update(uint32 diff)
             }
         }
 
-        if (m_duration)
+        if (m_duration && !IsDeleted())
             UpdateHeartbeatResist(diff);
     }
 }
