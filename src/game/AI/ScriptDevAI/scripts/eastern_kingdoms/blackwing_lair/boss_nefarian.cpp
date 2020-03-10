@@ -171,7 +171,7 @@ struct boss_nefarianAI : public CombatAI
             case 1:
                 DoScriptText(SAY_AGGRO, m_creature);
                 break;
-            case 8:
+            case 9:
                 // Stop flying and land
                 m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
                 m_creature->SetLevitate(false);
