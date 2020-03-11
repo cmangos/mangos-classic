@@ -158,12 +158,18 @@ struct boss_nefarianAI : public CombatAI
     void StartLanding()
     {
         m_creature->SetWalk(false);
-        m_creature->GetMotionMaster()->MoveWaypoint(0);
+        auto wpPath = sWaypointMgr.GetPathFromOrigin(m_creature->GetEntry(), m_creature->GetGUIDLow(), 0, PATH_FROM_ENTRY);
+        std::vector<G3D::Vector3> path;
+        for (auto& data : *wpPath)
+        {
+            path.emplace_back(data.second.x, data.second.y, data.second.z);
+        }
+        m_creature->GetMotionMaster()->MovePath(path, FORCED_MOVEMENT_NONE, true);
     }
 
     void MovementInform(uint32 type, uint32 pointId) override
     {
-        if (type != WAYPOINT_MOTION_TYPE)
+        if (type != PATH_MOTION_TYPE)
             return;
 
         switch (pointId)
@@ -171,7 +177,7 @@ struct boss_nefarianAI : public CombatAI
             case 1:
                 DoScriptText(SAY_AGGRO, m_creature);
                 break;
-            case 9:
+            case 8:
                 // Stop flying and land
                 m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
                 m_creature->SetLevitate(false);
