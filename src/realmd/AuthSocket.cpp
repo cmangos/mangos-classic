@@ -566,7 +566,7 @@ bool AuthSocket::_HandleLogonProof()
             auto clientToken = atoi((const char*)keys.data());
             if (ServerToken != clientToken)
             {
-                BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode! Given %u Expected %u", _login.c_str(), clientToken, ServerToken);
+                BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode! Given %u Expected %u Pin Count: %u", _login.c_str(), clientToken, ServerToken, pinCount);
 
                 const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 0, 0};
                 Write(data, sizeof(data));
