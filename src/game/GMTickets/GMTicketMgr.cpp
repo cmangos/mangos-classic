@@ -152,10 +152,12 @@ void GMTicket::Save(SqlStatement& stmt) const
 
 void GMTicketMgr::Save(const GMTicket* ticket)
 {
+    CharacterDatabase.PExecute("DELETE FROM gm_tickets WHERE id=%u", ticket->GetId());
+
     static SqlStatementID id;
 
     SqlStatement stmt = CharacterDatabase.CreateStatement(id,
-        "REPLACE INTO gm_tickets ("
+        "INSERT INTO gm_tickets ("
         "id, category, state, status, level, author_guid, author_name, locale, mapid, x, y, z, o, text, created, updated, seen, answered, closed, assignee_guid, assignee_name, conclusion, notes"
         ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
@@ -292,46 +294,27 @@ GMSurveyResult::GMSurveyResult(const GMSurveyEntry &entry, uint32 ticketId, cons
     }
 }
 
-void GMSurveyResult::Save(SqlStatement &stmt) const
-{
-    stmt.addUInt32(m_ticketId);
-    stmt.addUInt32(m_surveyId);
-    for (uint8 i = 0; i < GetAnswersCount(); ++i)
-        stmt.addUInt8(m_answers[i]);
-    if (HasComment())
-        stmt.addString(m_comment);
-}
-
 void GMTicketMgr::Save(const GMSurveyResult* survey)
 {
     static SqlStatementID id;
 
-    std::ostringstream columns;
-    std::ostringstream values;
-
-    columns << "ticketid, surveyid";
-    values << "?, ?";
+    std::string columns = "ticketid, surveyid";
+    std::string values = std::to_string(survey->GetTicketId()) + ", " + std::to_string(survey->GetSurveyId());
 
     for (size_t i = 0; i < survey->GetAnswersCount(); ++i)
     {
-        columns << ", answer" + std::to_string(i + 1);
-        values << ", ?";
+        columns += ", answer" + std::to_string(i + 1);
+        values += ", " + std::to_string(survey->GetAnswers()[i]);
     }
 
     if (survey->HasComment())
     {
-        columns << ", comment";
-        values << ", ?";
+        columns += ", comment";
+        values += ", '" + survey->GetComment() + "'";
     }
 
-    std::ostringstream query;
-    query << "REPLACE INTO gm_surveys (" << columns.str() << ") VALUES (" << values.str() << ")";
-
-    SqlStatement stmt = CharacterDatabase.CreateStatement(id, query.str().c_str());
-
-    survey->Save(stmt);
-
-    stmt.Execute();
+    CharacterDatabase.PExecute("DELETE FROM gm_surveys WHERE ticketid=%u", survey->GetTicketId());
+    CharacterDatabase.PExecute("INSERT INTO gm_surveys (%s) VALUES(%s)", columns.data(), values.data());
 }
 
 INSTANTIATE_SINGLETON_1(GMTicketMgr);
@@ -457,11 +440,13 @@ const std::string GMTicketMgr::PrintMailResponse(GMTicket const& ticket, bool re
     ss << "\n\n\n\n";  // Vanilla spacer
 
     const std::string& conclusion = ticket.GetConclusion();
-    if (!conclusion.empty())
+    const std::string assignee = std::string(ticket.GetAssigneeName());
+
+    if (!conclusion.empty() && !assignee.empty())
     {
         ss << "\n________________________________\n";
         ss << sObjectMgr.GetMangosString(LANG_TICKET_CLOSED_LETTER_FOOTNOTE, localeIndex);
-        ss << "\n|c000000FF[" << ticket.GetAssigneeName() << "]: " << conclusion.c_str() << "|r";
+        ss << "\n|c000000FF[" << assignee.c_str() << "]: " << conclusion.c_str() << "|r";
     }
 
     return ss.str();

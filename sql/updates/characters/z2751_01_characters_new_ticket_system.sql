@@ -20,7 +20,7 @@ CREATE TABLE `gm_tickets` (
   `z` float NOT NULL DEFAULT '0' COMMENT 'Character\'s z coordinate on submission',
   `o` float NOT NULL DEFAULT '0' COMMENT 'Character\'s orientation angle on submission',
   `text` text NOT NULL COMMENT 'Ticket\'s message',
-  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Timestamp: ticket created by a player',
+  `created` bigint(40) unsigned NOT NULL COMMENT 'Timestamp: ticket created by a player',
   `updated` bigint(40) unsigned NOT NULL DEFAULT 0 COMMENT 'Timestamp: ticket text\'s last update',
   `seen` bigint(40) unsigned NOT NULL DEFAULT 0 COMMENT 'Timestamp: ticket\'s last time opened by a GM',
   `answered` bigint(40) unsigned NOT NULL DEFAULT 0 COMMENT 'Timestamp: ticket\'s last time answered by a GM',
@@ -78,7 +78,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `gm_tickets` WRITE, `characters` AS C WRITE, `character_ticket` AS T WRITE;
 /*!40000 ALTER TABLE `gm_tickets` DISABLE KEYS */;
-INSERT INTO `gm_tickets` (`author_guid`, `author_name`, `text`) SELECT T.`guid`, C.`name`, T.`ticket_text` FROM `character_ticket` T INNER JOIN `characters` C ON T.`guid` = C.`guid` ORDER BY T.`ticket_id`;
+INSERT INTO `gm_tickets` (`author_guid`, `author_name`, `text`, `created`) SELECT T.`guid`, C.`name`, T.`ticket_text`, UNIX_TIMESTAMP() FROM `character_ticket` T INNER JOIN `characters` C ON T.`guid` = C.`guid` ORDER BY T.`ticket_id`;
 /*!40000 ALTER TABLE `gm_tickets` ENABLE KEYS */;
 UNLOCK TABLES;
 

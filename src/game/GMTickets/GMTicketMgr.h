@@ -196,11 +196,13 @@ class GMSurveyResult
     public:
         explicit GMSurveyResult(const GMSurveyEntry &entry, uint32 ticketId, const std::map<uint32, uint8> &answers, const std::string &feedback);
 
-        void Save(SqlStatement& stmt) const;
-
         inline bool HasComment() const { return !m_comment.empty(); }
 
         inline size_t GetAnswersCount() const { return m_answers.size(); }
+        inline uint32 GetTicketId() const { return m_ticketId; }
+        inline uint32 GetSurveyId() const { return m_surveyId; }
+        inline std::vector<uint8> const& GetAnswers() const { return m_answers; }
+        inline std::string const& GetComment() const { return m_comment; }
 
     private:
         uint32      m_ticketId;                     // Unique id of the ticket surveyed
