@@ -20,7 +20,7 @@
 
 struct WarriorExecute : public SpellScript
 {
-    void OnHit(Spell* spell) const override // confirmed main spell can not hit and child still hits
+    void OnCast(Spell* spell) const override // confirmed main spell can not hit and child still hits
     {
         int32 basePoints0 = spell->GetCaster()->CalculateSpellEffectValue(spell->m_targets.getUnitTarget(), spell->m_spellInfo, SpellEffectIndex(0))
             + int32((spell->GetCaster()->GetPower(POWER_RAGE) - spell->GetPowerCost()) * spell->m_spellInfo->DmgMultiplier[0]);
@@ -28,7 +28,16 @@ struct WarriorExecute : public SpellScript
     }
 };
 
+struct WarriorExecuteDamage : public SpellScript
+{
+    void OnHit(Spell* spell) const override
+    {
+        spell->GetCaster()->SetPower(POWER_RAGE, 0);
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
+    RegisterSpellScript<WarriorExecuteDamage>("spell_warrior_execute_damage");
 }

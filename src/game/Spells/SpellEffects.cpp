@@ -324,8 +324,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 // Shield Slam
                 else if (m_spellInfo->SpellIconID == 413 && m_spellInfo->SpellFamilyFlags & uint64(0x2000000))
                     damage += int32(m_caster->GetShieldBlockValue());
-                if (m_spellInfo->Id == 20647)
-                    m_caster->SetPower(POWER_RAGE, 0);
                 break;
             }
             case SPELLFAMILY_WARLOCK:
