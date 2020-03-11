@@ -598,6 +598,13 @@ class World
         static TimePoint GetCurrentClockTime() { return m_currentTime; }
         static uint32 GetCurrentDiff() { return m_currentDiff; }
 
+        template<typename T>
+        void ExecuteForAllSessions(T executor)
+        {
+            for (auto& data : m_sessions)
+                executor(*data.second);
+        }
+
         Messager<World>& GetMessager() { return m_messager; }
 
         void IncrementOpcodeCounter(uint32 opcodeId); // thread safe due to atomics
