@@ -524,7 +524,8 @@ bool AuthSocket::_HandleLogonProof()
         pkt << (uint8) CMD_AUTH_LOGON_CHALLENGE;
         pkt << (uint8) 0x00;
         pkt << (uint8) WOW_FAIL_VERSION_INVALID;
-        DEBUG_LOG("[AuthChallenge] %u is not a valid client version!", _build);
+
+        BASIC_LOG("[AuthChallenge] Account %s tried to login with invalid client version %u!", _login.c_str(), _build);
         Write((const char*)pkt.contents(), pkt.size());
         return true;
     }
@@ -532,7 +533,10 @@ bool AuthSocket::_HandleLogonProof()
 
     ///- Continue the SRP6 calculation based on data received from the client
     if(!srp.CalculateSessionKey(lp.A, 32))
+    {
+        BASIC_LOG("[AuthChallenge] Session calculation failed for account %s!", _login.c_str());
         return false;
+    }
 
     srp.HashSessionKey();
     srp.CalculateProof(_login);
@@ -611,6 +615,7 @@ bool AuthSocket::_HandleLogonProof()
             const char data[2] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT};
             Write(data, sizeof(data));
         }
+
         BASIC_LOG("[AuthChallenge] account %s tried to login with wrong password!", _login.c_str());
 
         uint32 MaxWrongPassCount = sConfig.GetIntDefault("WrongPass.MaxCount", 0);
