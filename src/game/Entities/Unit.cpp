@@ -1921,7 +1921,19 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
         // If not immune
         if (calcDamageInfo->TargetState != VICTIMSTATE_IS_IMMUNE)
         {
-            EngageInCombatWithAggressor(victim);
+            if (CanEnterCombat() && victim->CanEnterCombat())
+            {
+                // if damage pVictim call AI reaction
+                victim->AttackedBy(this);
+
+                if (Unit* owner = GetOwner())
+                    if (owner->GetTypeId() == TYPEID_UNIT)
+                        owner->EngageInCombatWithAggressor(victim);
+
+                for (auto m_guardianPet : m_guardianPets)
+                    if (Unit* pet = (Unit*)GetMap()->GetPet(m_guardianPet))
+                        pet->EngageInCombatWithAggressor(victim);
+            }
         }
     }
 
@@ -2345,20 +2357,6 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     else
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
                          GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), meleeDamageInfo.totalDamage, totalAbsorb, meleeDamageInfo.blocked_amount, totalResist);
-
-    if (CanEnterCombat() && pVictim->CanEnterCombat())
-    {
-        // if damage pVictim call AI reaction
-        pVictim->AttackedBy(this);
-
-        if (Unit* owner = GetOwner())
-            if (owner->GetTypeId() == TYPEID_UNIT)
-                owner->EngageInCombatWith(pVictim);
-
-        for (auto m_guardianPet : m_guardianPets)
-            if (Unit* pet = (Unit*)GetMap()->GetPet(m_guardianPet))
-                pet->EngageInCombatWith(pVictim);
-    }
 }
 
 void Unit::DoExtraAttacks(Unit* pVictim)
