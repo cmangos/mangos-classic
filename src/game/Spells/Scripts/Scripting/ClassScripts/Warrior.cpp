@@ -24,7 +24,7 @@ struct WarriorExecute : public SpellScript
     {
         int32 basePoints0 = spell->GetCaster()->CalculateSpellEffectValue(spell->m_targets.getUnitTarget(), spell->m_spellInfo, SpellEffectIndex(0))
             + int32((spell->GetCaster()->GetPower(POWER_RAGE) - spell->GetPowerCost()) * spell->m_spellInfo->DmgMultiplier[0]);
-        spell->GetCaster()->CastCustomSpell(spell->m_targets.getUnitTarget(), 20647, &basePoints0, nullptr, nullptr, TRIGGERED_NONE);
+        spell->GetCaster()->CastCustomSpell(spell->m_targets.getUnitTarget(), 20647, &basePoints0, nullptr, nullptr, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
     }
 };
 
