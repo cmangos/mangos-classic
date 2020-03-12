@@ -396,6 +396,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
     m_ignoreGCD = m_IsTriggeredSpell | ((triggeredFlags & TRIGGERED_IGNORE_GCD) != 0);
     m_ignoreCosts = m_IsTriggeredSpell | ((triggeredFlags & TRIGGERED_IGNORE_COSTS) != 0);
     m_ignoreCooldowns = m_IsTriggeredSpell | ((triggeredFlags & TRIGGERED_IGNORE_COOLDOWNS) != 0);
+    m_ignoreConcurrentCasts = m_IsTriggeredSpell | ((triggeredFlags & TRIGGERED_IGNORE_CURRENT_CASTED_SPELL) != 0) | m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING);
 
     m_reflectable = IsReflectableSpell(m_spellInfo);
 
@@ -2628,7 +2629,7 @@ void Spell::Prepare()
     if (!m_IsTriggeredSpell)
     {
         // add to cast type slot
-        if((!m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING) || IsChanneledSpell(m_spellInfo)) && !m_triggerAutorepeat)
+        if((!m_ignoreConcurrentCasts || IsChanneledSpell(m_spellInfo)) && !m_triggerAutorepeat)
             m_caster->SetCurrentCastedSpell(this);
 
         // will show cast bar
@@ -5217,7 +5218,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
     if (!m_caster->IsAlive())
         return SPELL_FAILED_CASTER_DEAD;
 
-    if (m_caster->IsNonMeleeSpellCasted(false) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING)) // prevent spellcast interruption by another spellcast
+    if (m_caster->IsNonMeleeSpellCasted(false) && !m_ignoreConcurrentCasts)             // prevent spellcast interruption by another spellcast
         return SPELL_FAILED_SPELL_IN_PROGRESS;
     if (m_caster->IsInCombat() && IsNonCombatSpell(m_spellInfo))
         return SPELL_FAILED_AFFECTING_COMBAT;

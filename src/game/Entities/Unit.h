@@ -327,6 +327,7 @@ enum TriggerCastFlags : uint32
     TRIGGERED_IGNORE_GCD                        = 0x00000200,   // Ignores GCD - to be used in spell scripts
     TRIGGERED_IGNORE_COSTS                      = 0x00000400,   // Ignores spell costs
     TRIGGERED_IGNORE_COOLDOWNS                  = 0x00000800,   // Ignores cooldowns
+    TRIGGERED_IGNORE_CURRENT_CASTED_SPELL       = 0x00001000,   // Ignores concurrent casts and is not set as currently executed
     TRIGGERED_FULL_MASK                         = 0xFFFFFFFF
 };
 
