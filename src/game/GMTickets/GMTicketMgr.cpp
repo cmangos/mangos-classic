@@ -569,16 +569,30 @@ void GMTicketMgr::PrintTicketList(WorldSession* session, std::ostringstream& out
 
 bool GMTicketMgr::TicketChatIncoming(GMTicket* ticket, Player* player, WorldSession* gm, const std::string& message, bool addon/* = false*/)
 {
-    if (!player || !gm || message.empty() || !ticket)
+    if (!ticket || !player || !player->IsInWorld() || !gm || message.empty())
         return false;
 
-    ticket->UpdateStatsChat(true);
-
-    if (!addon && player->IsInWorld())
+    // Do not send confirmations, afk, dnd or system notifications for addon messages
+    if (!addon)
     {
+        ticket->UpdateStatsChat(true);
+
         WorldPacket inform;
         ChatHandler::BuildChatPacket(inform, CHAT_MSG_WHISPER_INFORM, message.c_str(), LANG_UNIVERSAL, CHAT_TAG_GM, ticket->GetAssigneeGuid(), ticket->GetAssigneeName());
         player->GetSession()->SendPacket(inform);
+
+        // Announce afk or dnd message
+        if (Player* client = gm->GetPlayer())
+        {
+            if (client->isAFK() || client->isDND())
+            {
+                const ChatMsg msgType = (client->isAFK() ? CHAT_MSG_AFK : CHAT_MSG_DND);
+
+                inform.clear();
+                ChatHandler::BuildChatPacket(inform, msgType, client->autoReplyMsg.c_str(), LANG_UNIVERSAL, CHAT_TAG_GM, ticket->GetAssigneeGuid());
+                player->GetSession()->SendPacket(inform);
+            }
+        }
     }
 
     const Language lang = (addon ? LANG_ADDON : LANG_UNIVERSAL);
@@ -587,7 +601,7 @@ bool GMTicketMgr::TicketChatIncoming(GMTicket* ticket, Player* player, WorldSess
     std::ostringstream ss;
 
     if (!addon)
-       ss << "|cFFFFFF00[" << ticket->GetIdTag() << "]:|r ";
+        ss << "|cFFFFFF00[" << ticket->GetIdTag() << "]:|r ";
 
     ss << message;
 
@@ -600,33 +614,43 @@ bool GMTicketMgr::TicketChatIncoming(GMTicket* ticket, Player* player, WorldSess
 
 bool GMTicketMgr::TicketChatOutgoing(GMTicket* ticket, WorldSession* gm, Player* player, const std::string& message, bool addon/* = false*/)
 {
-    if (!gm || !player || message.empty() || !ticket)
+    if (!ticket || !gm || !player || !player->IsInWorld() || message.empty())
         return false;
 
-    ticket->UpdateStatsChat(false);
+    // Do not send confirmations, afk, dnd or system notifications for addon messages
+    if (!addon)
+    {
+        ticket->UpdateStatsChat(false);
+
+        std::ostringstream ss;
+
+        ss << "|cFFFFFF00[" << ticket->GetIdTag() << "]:|r ";
+
+        ss << message;
+
+        WorldPacket inform;
+        ChatHandler::BuildChatPacket(inform, CHAT_MSG_WHISPER_INFORM, ss.str().c_str(), LANG_UNIVERSAL, CHAT_TAG_NONE, ticket->GetAuthorGuid(), ticket->GetAuthorName());
+        gm->SendPacket(inform);
+
+        // Announce afk or dnd message
+        if (player->isAFK() || player->isDND())
+        {
+            const ChatMsg msgType = (player->isAFK() ? CHAT_MSG_AFK : CHAT_MSG_DND);
+
+            inform.clear();
+            ChatHandler::BuildChatPacket(inform, msgType, player->autoReplyMsg.c_str(), LANG_UNIVERSAL, CHAT_TAG_NONE, ticket->GetAuthorGuid());
+            gm->SendPacket(inform);
+        }
+    }
+
+    Player* client = gm->GetPlayer();
 
     const Language lang = (addon ? LANG_ADDON : LANG_UNIVERSAL);
+    const ChatTagFlags tag = ((client ? client->GetChatTag() : CHAT_TAG_NONE) | CHAT_TAG_GM);
 
-    std::ostringstream ss;
-
-    if (!addon)
-       ss << "|cFFFFFF00[" << ticket->GetIdTag() << "]:|r ";
-
-    ss << message;
-
-    WorldPacket inform;
-    ChatHandler::BuildChatPacket(inform, CHAT_MSG_WHISPER_INFORM, ss.str().c_str(), lang, CHAT_TAG_NONE, ticket->GetAuthorGuid(), ticket->GetAuthorName());
-    gm->SendPacket(inform);
-
-    if (!addon && player->IsInWorld())
-    {
-        Player* character = gm->GetPlayer();
-        const ChatTagFlags tag = ((character ? character->GetChatTag() : CHAT_TAG_NONE) | CHAT_TAG_GM);
-
-        WorldPacket whisper;
-        ChatHandler::BuildChatPacket(whisper, CHAT_MSG_WHISPER, message.c_str(), LANG_UNIVERSAL, tag, ticket->GetAssigneeGuid(), ticket->GetAssigneeName());
-        player->GetSession()->SendPacket(whisper);
-    }
+    WorldPacket whisper;
+    ChatHandler::BuildChatPacket(whisper, CHAT_MSG_WHISPER, message.c_str(), lang, tag, ticket->GetAssigneeGuid(), ticket->GetAssigneeName());
+    player->GetSession()->SendPacket(whisper);
 
     return true;
 }

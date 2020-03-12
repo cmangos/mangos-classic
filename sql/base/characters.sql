@@ -747,7 +747,7 @@ CREATE TABLE `gm_tickets` (
   `z` float NOT NULL DEFAULT '0' COMMENT 'Character\'s z coordinate on submission',
   `o` float NOT NULL DEFAULT '0' COMMENT 'Character\'s orientation angle on submission',
   `text` text NOT NULL COMMENT 'Ticket\'s message',
-  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Timestamp: ticket created by a player',
+  `created` bigint(40) unsigned NOT NULL COMMENT 'Timestamp: ticket created by a player',
   `updated` bigint(40) unsigned NOT NULL DEFAULT 0 COMMENT 'Timestamp: ticket text\'s last update',
   `seen` bigint(40) unsigned NOT NULL DEFAULT 0 COMMENT 'Timestamp: ticket\'s last time opened by a GM',
   `answered` bigint(40) unsigned NOT NULL DEFAULT 0 COMMENT 'Timestamp: ticket\'s last time answered by a GM',
