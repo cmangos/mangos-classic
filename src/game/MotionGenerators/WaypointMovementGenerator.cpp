@@ -643,9 +643,11 @@ void WaypointMovementGenerator<Creature>::GetPathInformation(std::ostringstream&
     oss << "(Loaded path " << m_pathId << " from " << WaypointManager::GetOriginString(m_PathOrigin) << ")\n";
 }
 
-void WaypointMovementGenerator<Creature>::AddToWaypointPauseTime(int32 waitTimeDiff)
+void WaypointMovementGenerator<Creature>::AddToWaypointPauseTime(int32 waitTimeDiff, bool force)
 {
-    if (!i_nextMoveTime.Passed())
+    if (force)
+        Stop(waitTimeDiff);
+    else if (!i_nextMoveTime.Passed())
     {
         // creature is stopped already
         // Prevent <= 0, the code in Update requires to catch the change from moving to not moving

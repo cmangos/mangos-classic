@@ -599,7 +599,7 @@ void MotionMaster::PauseWaypoints(uint32 time)
     if (GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
     {
         auto gen = (WaypointMovementGenerator<Creature>*)top();
-        gen->AddToWaypointPauseTime(time);
+        gen->AddToWaypointPauseTime(time, true);
         return;
     }
 }

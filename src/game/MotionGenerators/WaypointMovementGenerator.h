@@ -90,7 +90,7 @@ class WaypointMovementGenerator<Creature>
         void GetPathInformation(uint32& pathId, WaypointPathOrigin& wpOrigin) const { pathId = m_pathId; wpOrigin = m_PathOrigin; }
         void GetPathInformation(std::ostringstream& oss) const;
 
-        void AddToWaypointPauseTime(int32 waitTimeDiff);
+        void AddToWaypointPauseTime(int32 waitTimeDiff, bool force = false);
         bool SetNextWaypoint(uint32 pointId);
 
     private:
