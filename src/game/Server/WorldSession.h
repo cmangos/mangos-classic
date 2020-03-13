@@ -29,6 +29,7 @@
 #include "AuctionHouse/AuctionHouseMgr.h"
 #include "Entities/Item.h"
 #include "Server/WorldSocket.h"
+#include "Multithreading/Messager.h"
 
 #include <deque>
 #include <mutex>
@@ -692,6 +693,9 @@ class WorldSession
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
         std::deque<uint32> GetOpcodeHistory();
+
+        Messager<WorldSession>& GetMessager() { return m_messager; }
+
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);
@@ -736,6 +740,8 @@ class WorldSession
 
         std::mutex m_recvQueueLock;
         std::deque<std::unique_ptr<WorldPacket>> m_recvQueue;
+
+        Messager<WorldSession> m_messager;
 };
 #endif
 /// @}

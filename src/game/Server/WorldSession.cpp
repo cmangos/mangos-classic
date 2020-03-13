@@ -43,6 +43,7 @@
 #include <deque>
 #include <memory>
 #include <cstdarg>
+#include <iostream>
 
 #ifdef BUILD_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotMgr.h"
@@ -256,14 +257,20 @@ void WorldSession::LogUnprocessedTail(WorldPacket const& packet) const
 /// Update the WorldSession (triggered by World update)
 bool WorldSession::Update(PacketFilter& updater)
 {
-    std::lock_guard<std::mutex> guard(m_recvQueueLock);
+    GetMessager().Execute(this);
+
+    std::deque<std::unique_ptr<WorldPacket>> recvQueueCopy;
+    {
+        std::lock_guard<std::mutex> guard(m_recvQueueLock);
+        std::swap(recvQueueCopy, m_recvQueue);
+    }
 
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not process packets if socket already closed
-    while (m_Socket && !m_Socket->IsClosed() && !m_recvQueue.empty())
+    while (m_Socket && !m_Socket->IsClosed() && !recvQueueCopy.empty())
     {
-        auto const packet = std::move(m_recvQueue.front());
-        m_recvQueue.pop_front();
+        auto const packet = std::move(recvQueueCopy.front());
+        recvQueueCopy.pop_front();
 
         /*#if 1
         sLog.outError( "MOEP: %s (0x%.4X)",
