@@ -1298,6 +1298,9 @@ void GameObject::Use(Unit* user)
                 StartEvents_Event(GetMap(), GetGOInfo()->chest.eventId, user, this);
             }
 
+            if (!GetGOInfo()->chest.lockId)
+                SetLootState(GO_JUST_DEACTIVATED);
+
             return;
         }
         case GAMEOBJECT_TYPE_GENERIC:                       // 5
