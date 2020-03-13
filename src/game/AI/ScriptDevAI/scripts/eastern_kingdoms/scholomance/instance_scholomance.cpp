@@ -141,7 +141,7 @@ void instance_scholomance::DoRespawnEntranceRoom(Player* pSummoner)
         }
 
         uiMobList.push_back(uiMobEntry);
-        std::random_shuffle(uiMobList.begin(), uiMobList.end());
+        std::shuffle(uiMobList.begin(), uiMobList.end(), *GetRandomGenerator());
 
         for (uint8 j = 0; j < MAX_NPC_PER_GROUP; ++j)
             pSummoner->SummonCreature(uiMobList[j], aEntranceRoomSpawnLocs[4 * i + j].m_fX, aEntranceRoomSpawnLocs[4 * i + j].m_fY, aEntranceRoomSpawnLocs[4 * i + j].m_fZ, aEntranceRoomSpawnLocs[4 * i + j].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);

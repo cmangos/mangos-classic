@@ -242,7 +242,7 @@ struct boss_heiganAI : public ScriptedAI
 
                     if (targets.size() > MAX_PLAYERS_TELEPORT)
                     {
-                        std::random_shuffle(targets.begin(), targets.end());
+                        std::shuffle(targets.begin(), targets.end(), *GetRandomGenerator());
                         targets.resize(MAX_PLAYERS_TELEPORT);
                     }
 

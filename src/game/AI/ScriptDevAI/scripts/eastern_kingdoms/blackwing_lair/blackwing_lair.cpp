@@ -561,7 +561,7 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
     if (m_uiDefenseTimer < uiDiff)
     {
         // Randomize generators
-        std::random_shuffle(m_vGeneratorGuids.begin(), m_vGeneratorGuids.end());
+        std::shuffle(m_vGeneratorGuids.begin(), m_vGeneratorGuids.end(), *GetRandomGenerator());
 
         // Spawn the defenders
         for (uint8 i = 0; i < MAX_EGGS_DEFENDERS; ++i)

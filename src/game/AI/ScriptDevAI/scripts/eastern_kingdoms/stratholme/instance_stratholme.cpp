@@ -826,7 +826,7 @@ void instance_stratholme::DoSpawnScourgeInvaders(uint8 uiStep, Player* pSummoner
     }
 
     uiMobList.push_back(uiMobEntry);
-    std::random_shuffle(uiMobList.begin(), uiMobList.end());
+    std::shuffle(uiMobList.begin(), uiMobList.end(), *GetRandomGenerator());
 
     // Define the correct index for the spawn/move coords table
     switch (uiStep)

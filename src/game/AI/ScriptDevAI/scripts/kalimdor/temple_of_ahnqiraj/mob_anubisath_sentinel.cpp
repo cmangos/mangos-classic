@@ -96,7 +96,7 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
     {
         if (!m_myAbility)
         {
-            std::random_shuffle(m_abilities.begin(), m_abilities.end());    // shuffle the abilities, they will be set to the current creature and its siblings
+            std::shuffle(m_abilities.begin(), m_abilities.end(), *GetRandomGenerator()); // shuffle the abilities, they will be set to the current creature and its siblings
             SetAbility();
             InitSentinelsNear(who);
         }

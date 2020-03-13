@@ -238,7 +238,7 @@ struct boss_skeramAI : public CombatAI
 */
     void HandleInitImages()
     {
-        std::random_shuffle(m_teleports.begin(), m_teleports.end()); // Shuffle the teleport spells to ensure that boss and images have a different location assigned randomly
+        std::shuffle(m_teleports.begin(), m_teleports.end(), *GetRandomGenerator()); // Shuffle the teleport spells to ensure that boss and images have a different location assigned randomly
         m_teleportCounter = 1;
         DoCastSpellIfCan(nullptr, SPELL_INITIALIZE_IMAGES, CAST_TRIGGERED);
         DoTeleport(false);
@@ -289,7 +289,7 @@ struct boss_skeramAI : public CombatAI
             }
             case SKERAM_BLINK:
             {
-                std::random_shuffle(m_teleports.begin(), m_teleports.end());    // Shuffle the teleport spells to ensure that boss and images have a different location assigned randomly
+                std::shuffle(m_teleports.begin(), m_teleports.end(), *GetRandomGenerator()); // Shuffle the teleport spells to ensure that boss and images have a different location assigned randomly
                 m_teleportCounter = 1;
                 DoTeleport(true);
                 for (auto guid : m_images)
