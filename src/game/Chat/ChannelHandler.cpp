@@ -278,7 +278,7 @@ void WorldSession::HandleChannelDisplayListQueryOpcode(WorldPacket& recvPacket)
     recvPacket >> channelname;
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->List(_player);
+            chn->List(_player, true);
 }
 
 void WorldSession::HandleGetChannelMemberCountOpcode(WorldPacket& recvPacket)

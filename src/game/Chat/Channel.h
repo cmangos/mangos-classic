@@ -181,7 +181,7 @@ class Channel
         void UnsetModerator(Player* player, const char* targetName) { SetMode(player, targetName, true, false); }
         void SetMute(Player* player, const char* targetName) { SetMode(player, targetName, false, true); }
         void UnsetMute(Player* player, const char* targetName) { SetMode(player, targetName, false, false); }
-        void List(Player* player);
+        void List(Player* player, bool display = false);
         void Announce(Player* player);
         void Moderate(Player* player);
         void Say(Player* player, const char* text, uint32 lang);
