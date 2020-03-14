@@ -384,7 +384,7 @@ void Unit::ProcDamageAndSpell(ProcSystemArguments&& data)
 
 ProcExecutionData::ProcExecutionData(ProcSystemArguments& data, bool isVictim) :
     isVictim(isVictim), procExtra(data.procExtra), attType(data.attType), damage(data.damage), procSpell(data.procSpell), spell(data.spell), healthGain(data.healthGain), triggeredByAura(nullptr), cooldown(0),
-    triggeredSpellId(0)
+    triggeredSpellId(0), procOnce(false)
 {
     if (isVictim)
     {
@@ -478,6 +478,8 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
                     procSuccess = false;
                     break;
                 case SPELL_AURA_PROC_OK:
+                    if (execData.procOnce && execData.spell)
+                        execData.spell->RegisterAuraProc(execData.triggeredByAura);
                     break;
             }
 
@@ -561,6 +563,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
                 return false;
         }
     }
+
     // Get chance from spell
     float chance = (float)spellProto->procChance;
     // If in spellProcEvent exist custom chance, chance = spellProcEvent->customChance;
@@ -576,9 +579,17 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
     if (Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CHANCE_OF_SUCCESS, chance);
 
-    if (data.spell && data.spell->IsTriggeredByAura() && data.procSpell->HasAttribute(SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL))
-        if (!spellProto->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED_SPECIAL))
-            return false;
+    if (data.spell)
+    {
+        if (data.spell->IsTriggeredByAura() && data.procSpell->HasAttribute(SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL))
+            if (!spellProto->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED_SPECIAL))
+                return false;
+
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            if (Aura* aura = holder->m_auras[i])
+                if (data.spell->IsAuraProcced(aura))
+                    return false;
+    }
 
     for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (Aura* aura = holder->m_auras[i])
@@ -838,7 +849,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
             // Master of Elements
             if (dummySpell->SpellIconID == 1920)
             {
-                if (!procSpell || data.spell->GetScriptValue() == 1)
+                if (!procSpell)
                     return SPELL_AURA_PROC_FAILED;
 
                 // mana cost save
@@ -849,7 +860,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
 
                 target = this;
                 triggered_spell_id = 29077;
-                data.spell->SetScriptValue(1); // can only happen once per spell
+                data.procOnce = true;
                 break;
             }
 

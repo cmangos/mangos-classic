@@ -521,6 +521,8 @@ class Spell
 
         uint64 GetScriptValue() const { return m_scriptValue; }
         void SetScriptValue(uint64 value) { m_scriptValue = value; }
+        void RegisterAuraProc(Aura* aura);
+        bool IsAuraProcced(Aura* aura);
 
         // Spell Target Subsystem - public part
         // Targets store structures and data
@@ -752,6 +754,8 @@ class Spell
         uint32 m_affectedTargetCount;
         float m_jumpRadius;
         SpellTargetFilterScheme m_filteringScheme[MAX_EFFECT_INDEX][2];
+
+        std::set<Aura*> m_procOnceHolder;
 
         // if need this can be replaced by Aura copy
         // we can't store original aura link to prevent access to deleted auras
