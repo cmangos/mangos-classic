@@ -596,10 +596,26 @@ void MotionMaster::PauseWaypoints(uint32 time)
 
     m_owner->StopMoving();
 
-    if (GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+    if (time == 0) // permanently
+        static_cast<Creature*>(m_owner)->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+    else if (GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
     {
         auto gen = (WaypointMovementGenerator<Creature>*)top();
         gen->AddToWaypointPauseTime(time, true);
+        return;
+    }
+}
+
+void MotionMaster::UnpauseWaypoints()
+{
+    if (!m_owner->IsCreature())
+        return;
+
+    static_cast<Creature*>(m_owner)->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+    if (GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+    {
+        auto gen = (WaypointMovementGenerator<Creature>*)top();
+        gen->AddToWaypointPauseTime(0, true);
         return;
     }
 }

@@ -1175,9 +1175,9 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         case ACTION_T_PAUSE_WAYPOINTS:
         {
             if (action.pauseWaypoint.doPause)
-                m_creature->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+                m_creature->GetMotionMaster()->PauseWaypoints(0);
             else
-                m_creature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+                m_creature->GetMotionMaster()->UnpauseWaypoints();
             break;
         }
         case ACTION_T_INTERRUPT_SPELL:
