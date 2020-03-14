@@ -53,7 +53,7 @@ struct SpellScript
     // called in Spell::cast on all successful checks and after taking reagents
     virtual void OnCast(Spell* /*spell*/) const {}
     // called on unit target hit before damage deal and proc or after effect execution for targetless, dest, item and go
-    virtual void OnHit(Spell* /*spell*/) const {}
+    virtual void OnHit(Spell* /*spell*/, SpellMissInfo /*missInfo*/) const {}
     // called on target hit after damage deal and proc
     virtual void OnAfterHit(Spell* /*spell*/) const {}
 };

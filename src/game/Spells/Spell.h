@@ -584,7 +584,7 @@ class Spell
         bool OnCheckTarget(GameObject* target, SpellEffectIndex eff) const;
         bool OnCheckTarget(Unit* target, SpellEffectIndex eff) const;
         void OnCast();
-        void OnHit();
+        void OnHit(SpellMissInfo missInfo);
         void OnAfterHit();
         // effect execution info access - only to be used in OnEffectExecute OnHit and OnAfterHit
         Unit* GetUnitTarget() { return unitTarget; }
