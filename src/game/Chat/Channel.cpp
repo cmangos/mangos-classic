@@ -105,10 +105,7 @@ void Channel::Join(Player* player, const char* password)
 
     // if no owner first logged will become
     if (!IsConstant() && !m_ownerGuid)
-    {
-        m_players[guid].SetModerator(true);
         SetOwner(guid, (m_players.size() > 1));
-    }
 }
 
 void Channel::Leave(Player* player, bool send)
@@ -149,16 +146,7 @@ void Channel::Leave(Player* player, bool send)
     LeaveNotify(guid);
 
     if (changeowner)
-    {
-        if (m_players.empty())
-            SetOwner(ObjectGuid());
-        else
-        {
-            auto& newowner = (m_players.begin()->second);
-            newowner.SetModerator(true);
-            SetOwner(newowner.player);
-        }
-    }
+        SetOwner(SelectNewOwner(), (m_players.size() > 1));
 }
 
 void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
@@ -225,16 +213,7 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
     target->LeftChannel(this);
 
     if (changeowner)
-    {
-        if (m_players.empty())
-            SetOwner(ObjectGuid());
-        else
-        {
-            auto& newowner = (m_players.begin()->second);
-            newowner.SetModerator(true);
-            SetOwner(newowner.player);
-        }
-    }
+        SetOwner(SelectNewOwner(), (m_players.size() > 1));
 }
 
 void Channel::UnBan(Player* player, const char* targetName)
@@ -425,8 +404,7 @@ void Channel::SetOwner(Player* player, const char* targetName)
     }
 
     // set channel owner
-    m_players[targetGuid].SetModerator(true);
-    SetOwner(targetGuid);
+    SetOwner(targetGuid, (m_players.size() > 1));
 }
 
 void Channel::SendWhoOwner(Player* player) const
@@ -441,9 +419,24 @@ void Channel::SendWhoOwner(Player* player) const
         return;
     }
 
+    ObjectGuid ownerGuid = m_ownerGuid;
+
+    if (const bool visibilityCheck = (player->GetSession()->GetSecurity() == SEC_PLAYER))
+    {
+        // PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
+        // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
+        const AccountTypes visibilityThreshold = AccountTypes(sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_WHO_LIST));
+
+        if (Player* owner = sObjectMgr.GetPlayer(ownerGuid))
+        {
+            if (owner->GetSession()->GetSecurity() > visibilityThreshold || !owner->IsVisibleGloballyFor(player))
+                ownerGuid = ObjectGuid();
+        }
+    }
+
     // send channel owner
     WorldPacket data;
-    MakeChannelOwner(data);
+    MakeChannelOwner(data, m_ownerGuid);
     SendToOne(data, guid);
 }
 
@@ -580,7 +573,9 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
         return;
     }
 
-    if (m_moderate && !m_players[guid].IsModerator() && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+    const bool moderator = m_players[guid].IsModerator();
+
+    if (m_moderate && !moderator && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
     {
         WorldPacket data;
         MakeNotModerator(data);
@@ -591,9 +586,10 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
     // send channel message
     if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
         lang = LANG_UNIVERSAL;
+
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_CHANNEL, text, Language(lang), player->GetChatTag(), guid, player->GetName(), ObjectGuid(), "", m_name.c_str(), player->GetHonorRankInfo().rank);
-    SendToAll(data, !m_players[guid].IsModerator() ? guid : ObjectGuid());
+    SendMessage(data, (moderator ? ObjectGuid() : guid));
 }
 
 void Channel::Invite(Player* player, const char* targetName)
@@ -655,47 +651,24 @@ void Channel::Invite(Player* player, const char* targetName)
     SendToOne(data, guid);
 }
 
-void Channel::SetOwner(ObjectGuid guid, bool exclaim)
+void Channel::SendToOne(WorldPacket const& data, ObjectGuid receiver) const
 {
-    if (m_ownerGuid)
-    {
-        // [] will re-add player after it possible removed
-        PlayerList::iterator p_itr = m_players.find(m_ownerGuid);
-        if (p_itr != m_players.end())
-            p_itr->second.SetOwner(false);
-    }
-
-    m_ownerGuid = guid;
-
-    if (m_ownerGuid)
-    {
-        uint8 oldFlag = GetPlayerFlags(m_ownerGuid);
-        m_players[m_ownerGuid].SetOwner(true);
-
-        WorldPacket data;
-        MakeModeChange(data, m_ownerGuid, oldFlag);
-        SendToAll(data);
-
-        if (exclaim)
-        {
-            MakeOwnerChanged(data, m_ownerGuid);
-            SendToAll(data);
-        }
-    }
+    if (Player* player = sObjectMgr.GetPlayer(receiver))
+        player->GetSession()->SendPacket(data);
 }
 
-void Channel::SendToAll(WorldPacket const& data, ObjectGuid guid) const
+void Channel::SendToAll(WorldPacket const& data) const
+{
+    for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
+        SendToOne(data, i->first);
+}
+
+void Channel::SendMessage(WorldPacket const& data, ObjectGuid sender) const
 {
     for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
         if (Player* plr = sObjectMgr.GetPlayer(i->first))
-            if (!guid || !plr->GetSocial()->HasIgnore(guid))
+            if (!sender || !plr->GetSocial()->HasIgnore(sender))
                 plr->GetSession()->SendPacket(data);
-}
-
-void Channel::SendToOne(WorldPacket const& data, ObjectGuid who) const
-{
-    if (Player* plr = ObjectMgr::GetPlayer(who))
-        plr->GetSession()->SendPacket(data);
 }
 
 void Channel::Voice(ObjectGuid /*guid1*/, ObjectGuid /*guid2*/) const
@@ -778,15 +751,15 @@ void Channel::MakeNotOwner(WorldPacket& data) const
     MakeNotifyPacket(data, CHAT_NOT_OWNER_NOTICE);
 }
 
-void Channel::MakeChannelOwner(WorldPacket& data) const
+void Channel::MakeChannelOwner(WorldPacket& data, ObjectGuid guid) const
 {
     std::string name;
 
-    if (!sObjectMgr.GetPlayerNameByGUID(m_ownerGuid, name) || name.empty())
+    if (!sObjectMgr.GetPlayerNameByGUID(guid, name) || name.empty())
         name = "PLAYER_NOT_FOUND";
 
     MakeNotifyPacket(data, CHAT_CHANNEL_OWNER_NOTICE);
-    data << ((IsConstant() || !m_ownerGuid) ? "Nobody" : name);
+    data << ((IsConstant() || !guid) ? "Nobody" : name);
 }
 
 void Channel::MakeModeChange(WorldPacket& data, ObjectGuid guid, uint8 oldflags) const
@@ -915,4 +888,49 @@ void Channel::JoinNotify(ObjectGuid guid)
 void Channel::LeaveNotify(ObjectGuid guid)
 {
     // [-ZERO] Feature doesn't exist in 1.x.
+}
+
+ObjectGuid Channel::SelectNewOwner() const
+{
+    // Prioritise moderators for owner appointment
+    for (auto itr = m_players.begin(); itr != m_players.end(); ++itr)
+    {
+        if ((*itr).second.IsModerator())
+            return (*itr).second.player;
+    }
+
+    return (m_players.empty() ? ObjectGuid() : m_players.begin()->second.player);
+}
+
+void Channel::SetOwner(ObjectGuid guid, bool exclaim)
+{
+    if (m_ownerGuid)
+    {
+        // [] will re-add player after it possible removed
+        PlayerList::iterator p_itr = m_players.find(m_ownerGuid);
+        if (p_itr != m_players.end())
+            p_itr->second.SetOwner(false);
+        // old owner keeps own moderator powers on transfer
+    }
+
+    m_ownerGuid = guid;
+
+    if (m_ownerGuid)
+    {
+        uint8 oldFlag = GetPlayerFlags(m_ownerGuid);
+        m_players[m_ownerGuid].SetOwner(true);
+
+        WorldPacket data;
+        MakeModeChange(data, m_ownerGuid, oldFlag);
+        SendToAll(data);
+
+        if (exclaim)
+        {
+            MakeOwnerChanged(data, m_ownerGuid);
+            SendToAll(data);
+        }
+
+        // new owner receives moderator powers as well
+        m_players[m_ownerGuid].SetModerator(true);
+    }
 }
