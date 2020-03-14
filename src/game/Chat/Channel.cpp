@@ -909,28 +909,38 @@ void Channel::SetOwner(ObjectGuid guid, bool exclaim)
         // [] will re-add player after it possible removed
         PlayerList::iterator p_itr = m_players.find(m_ownerGuid);
         if (p_itr != m_players.end())
+        {
+            // old owner retains own moderator powers on transfer to another player only
+            p_itr->second.SetModerator(bool(guid));
+
+            uint8 oldFlag = p_itr->second.flags;
             p_itr->second.SetOwner(false);
-        // old owner keeps own moderator powers on transfer
+
+            WorldPacket data;
+            MakeModeChange(data, m_ownerGuid, oldFlag);
+            SendToAll(data);
+        }
     }
 
     m_ownerGuid = guid;
 
     if (m_ownerGuid)
     {
+        // new owner receives moderator powers as well
+        m_players[m_ownerGuid].SetModerator(true);
+
         uint8 oldFlag = GetPlayerFlags(m_ownerGuid);
         m_players[m_ownerGuid].SetOwner(true);
 
         WorldPacket data;
         MakeModeChange(data, m_ownerGuid, oldFlag);
         SendToAll(data);
+    }
 
-        if (exclaim)
-        {
-            MakeOwnerChanged(data, m_ownerGuid);
-            SendToAll(data);
-        }
-
-        // new owner receives moderator powers as well
-        m_players[m_ownerGuid].SetModerator(true);
+    if (exclaim)
+    {
+        WorldPacket data;
+        MakeOwnerChanged(data, m_ownerGuid);
+        SendToAll(data);
     }
 }
