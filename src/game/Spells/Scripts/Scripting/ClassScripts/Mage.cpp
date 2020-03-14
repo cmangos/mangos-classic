@@ -18,7 +18,16 @@
 
 #include "Spells/Scripts/SpellScript.h"
 
+struct ArcaneConcentration : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* /*aura*/, ProcExecutionData& procData) const override
+    {
+        procData.procOnce = true;
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void LoadMageScripts()
 {
-
+    RegisterAuraScript<AuraScript>("spell_arcane_concentration");
 }

@@ -88,6 +88,14 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (20662,'spell_warrior_execute'),
 (20647,'spell_warrior_execute_damage');
 
+-- Mage
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(11213,'spell_arcane_concentration'),
+(12574,'spell_arcane_concentration'),
+(12575,'spell_arcane_concentration'),
+(12576,'spell_arcane_concentration'),
+(12577,'spell_arcane_concentration');
+
 -- Battleground and Outdoor PvP
 -- Alterac Valley
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
