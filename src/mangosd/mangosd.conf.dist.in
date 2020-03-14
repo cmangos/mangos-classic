@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2020021601
+ConfVersion=2020031501
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -1053,6 +1053,12 @@ CreaturePickpocketRestockDelay = 600
 #        Default: 0 (join announcement in normal way)
 #                 1 (GM join without announcement)
 #
+#    Channel.StaticAutoTreshold
+#        Static custom channels are custom channels pre-configured with global-like properties in a "world chat" manner.
+#        By default they have no owner, no moderators, no password and no premoderation (unless overriden by a GM).
+#        This setting is responsible for automatic conversion to static upon eligible channel reaching number of members.
+#        Default: 0 (disabled)
+#
 ###################################################################################################################
 
 ChatFakeMessagePreventing = 0
@@ -1062,6 +1068,7 @@ ChatFlood.MessageCount = 10
 ChatFlood.MessageDelay = 1
 ChatFlood.MuteTime = 10
 Channel.SilentlyGMJoin = 0
+Channel.StaticAutoTreshold = 0
 
 ###################################################################################################################
 # GAME MASTER SETTINGS

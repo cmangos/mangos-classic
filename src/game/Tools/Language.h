@@ -363,9 +363,9 @@ enum MangosStrings
     //                                    370 used in master branch
     //                                    371 used in master branch
     //                                    372 used in master branch
-    //                                    373, not used
-    //                                    374, not used
-    //                                    375, not used
+    LANG_COMMAND_CHAT_STATIC_PASSWORD   = 373,              // "Static custom chat: channel \'%s\' has password set."
+    LANG_COMMAND_CHAT_STATIC_NOT_CUSTOM = 374,              // "Static custom chat: channel \'%s\' is not eligible for conversion."
+    LANG_COMMAND_CHAT_STATIC_SUCCESS    = 375,              // "Static custom chat: channel \'%s\', new status: %s"
     LANG_POOL_ENTRY_LIST_CHAT           = 376,
     LANG_NO_POOL_FOR_MAP                = 377,
     LANG_POOL_LIST_NON_INSTANCE         = 378,

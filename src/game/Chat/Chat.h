@@ -243,6 +243,8 @@ class ChatHandler
         bool HandleCharacterRenameCommand(char* args);
         bool HandleCharacterReputationCommand(char* args);
 
+        bool HandleChatStaticCommand(char* args);
+
         bool HandleDebugAnimCommand(char* args);
         bool HandleDebugBattlegroundCommand(char* args);
         bool HandleDebugBattlegroundStartCommand(char* args);

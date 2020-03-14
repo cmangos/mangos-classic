@@ -157,6 +157,7 @@ class Channel
         std::string GetName() const { return m_name; }
         uint32 GetChannelId() const { return m_channelId; }
         bool IsConstant() const { return m_channelId != 0; }
+        bool IsStatic() const { return m_static; }
         bool IsAnnounce() const { return m_announce; }
         bool IsLFG() const { return (GetFlags() & CHANNEL_FLAG_LFG) != 0; }
         std::string GetPassword() const { return m_password; }
@@ -189,6 +190,9 @@ class Channel
         void DeVoice(ObjectGuid guid1, ObjectGuid guid2) const;
         void JoinNotify(ObjectGuid guid);                   // invisible notify
         void LeaveNotify(ObjectGuid guid);                  // invisible notify
+
+        // Make a custom channel acquire global-like properties
+        bool SetStatic(bool state, bool command = false);
 
     private:
         // initial packet data (notify type and channel name)
@@ -276,6 +280,7 @@ class Channel
     private:
         bool        m_announce;
         bool        m_moderate;
+        bool        m_static;
         std::string m_name;
         std::string m_password;
         uint8       m_flags;

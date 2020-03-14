@@ -23,7 +23,7 @@
 #include "Chat/Chat.h"
 
 Channel::Channel(const std::string& name)
-    : m_announce(true), m_moderate(false), m_name(name), m_flags(0), m_channelId(0)
+    : m_announce(true), m_moderate(false), m_static(false), m_name(name), m_flags(0), m_channelId(0)
 {
     // set special flags if built-in channel
     ChatChannelsEntry const* ch = GetChannelEntryFor(name);
@@ -104,8 +104,11 @@ void Channel::Join(Player* player, const char* password)
     JoinNotify(guid);
 
     // if no owner first logged will become
-    if (!IsConstant() && !m_ownerGuid)
+    if (!IsConstant() && !IsStatic() && !m_ownerGuid)
         SetOwner(guid, (m_players.size() > 1));
+
+    // try to auto-convert this channel to static upon reaching treshold
+    SetStatic(true);
 }
 
 void Channel::Leave(Player* player, bool send)
@@ -145,7 +148,7 @@ void Channel::Leave(Player* player, bool send)
 
     LeaveNotify(guid);
 
-    if (changeowner)
+    if (changeowner && !IsConstant() && !IsStatic())
         SetOwner(SelectNewOwner(), (m_players.size() > 1));
 }
 
@@ -212,7 +215,7 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
     m_players.erase(targetGuid);
     target->LeftChannel(this);
 
-    if (changeowner)
+    if (changeowner && !IsConstant() && !IsStatic())
         SetOwner(SelectNewOwner(), (m_players.size() > 1));
 }
 
@@ -943,4 +946,60 @@ void Channel::SetOwner(ObjectGuid guid, bool exclaim)
         MakeOwnerChanged(data, m_ownerGuid);
         SendToAll(data);
     }
+}
+
+bool Channel::SetStatic(bool state, bool command/* = false*/)
+{
+    // Only custom channels can be set to static
+    if (IsConstant() || !HasFlag(CHANNEL_FLAG_CUSTOM) || m_static == state)
+        return false;
+
+    // This conversion cannot be performed if password is set - it has to be removed first
+    if (state && !m_password.empty())
+        return false;
+
+    // Treshold for auto-conversion
+    const uint32 treshold = sWorld.getConfig(CONFIG_UINT32_CHAT_STATIC_AUTO_TRESHOLD);
+
+    // Detect auto-converion and reaching treshold
+    if (!command && (!treshold || state != (GetNumPlayers() >= treshold)))
+        return false;
+
+    // Disable premoderation mode on conversion to static
+    if (state && m_moderate)
+    {
+        m_moderate = false;
+
+        WorldPacket data;
+        MakeModerationOff(data, ObjectGuid());
+        SendToAll(data);
+    }
+
+    // Disable announcements on conversion to static
+    if (state && m_announce)
+    {
+        m_announce = false;
+
+        WorldPacket data;
+        MakeAnnouncementsOff(data, ObjectGuid());
+        SendToAll(data);
+    }
+
+    // Unset/Set channel owner
+    if (state == bool(m_ownerGuid))
+        SetOwner(state ? ObjectGuid() : SelectNewOwner());
+
+    // Strip moderator privileges
+    if (state)
+    {
+        for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
+        {
+            if (i->second.IsModerator())
+                SetModerator(i->second.player, false);
+        }
+    }
+
+    m_static = state;
+
+    return true;
 }

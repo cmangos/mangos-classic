@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2751_01_mangos_new_ticket_system` bit(1) DEFAULT NULL
+  `required_z2754_01_mangos_static_custom_chat` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -424,6 +424,7 @@ INSERT INTO `command` VALUES
 ('character level',3,'Syntax: .character level [$playername] [#level]\r\n\r\nSet the level of character with $playername (or the selected if not name provided) by #numberoflevels Or +1 if no #numberoflevels provided). If #numberoflevels is omitted, the level will be increase by 1. If #numberoflevels is 0, the same level will be restarted. If no character is selected and name not provided, increase your level. Command can be used for offline character. All stats and dependent values recalculated. At level decrease talents can be reset if need. Also at level decrease equipped items with greater level requirement can be lost.'),
 ('character rename',2,'Syntax: .character rename [$name]\r\n\r\nMark selected in game or by $name in command character for rename at next login.'),
 ('character reputation',2,'Syntax: .character reputation [$player_name]\r\n\r\nShow reputation information for selected player or player find by $player_name.'),
+('chat static',2,'Syntax: .chat static $channelname on|off\r\n\r\nEnable or disable static mode for a custom channel with name $channelname. Static custom channel upon conversion acquires a set of properties identical to global channes.'),
 ('combatstop',2,'Syntax: .combatstop [$playername]\r\nStop combat for selected character. If selected non-player then command applied to self. If $playername provided then attempt applied to online player $playername.'),
 ('commands',0,'Syntax: .commands\r\n\r\nDisplay a list of available commands for your account level.'),
 ('cooldown',3,'Syntax: .cooldown [#spell_id]\r\n\r\nRemove all (if spell_id not provided) or #spel_id spell cooldown from selected character or you (if no selection).'),
@@ -3620,9 +3621,9 @@ INSERT INTO `mangos_string` VALUES
 (367,'Required level %u',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (368,'Required Items:',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (369,'Required quest:',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(373,'UNUSED',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(374,'UNUSED',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(375,'UNUSED',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(373,'Static custom chat: channel \'%s\' has password set.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(374,'Static custom chat: channel \'%s\' is not eligible for conversion.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(375,'Static custom chat: channel \'%s\', new status: %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (376,'%u - |cffffffff|Hpool:%u|h[%s]|h|r AutoSpawn: %u MaxLimit: %u Creatures: %u GameObjecs: %u Pools %u',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (377,'No pools found for map \'%s\' (Id:%u)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (378,'You can\'t use this command at non-instanceable map \'%s\' (Id:%u). Use .lookup pool command instead.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
