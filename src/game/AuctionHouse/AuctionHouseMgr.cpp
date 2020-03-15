@@ -549,29 +549,37 @@ void AuctionHouseObject::Update()
     }
 }
 
-void AuctionHouseObject::BuildListBidderItems(WorldPacket& data, Player* player, uint32& count, uint32& totalcount)
+void AuctionHouseObject::BuildListBidderItems(WorldPacket& data, Player* player, uint32 listfrom, uint32& count, uint32& totalcount)
 {
     for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
     {
         AuctionEntry* Aentry = itr->second;
         if (Aentry->bidder == player->GetGUIDLow())
         {
-            if (itr->second->BuildAuctionInfo(data))
+            if (count < MAX_AUCTION_ITEMS_CLIENT_UI_PAGE && totalcount >= listfrom)
+            {
+                if (!Aentry->BuildAuctionInfo(data))
+                    continue;
                 ++count;
+            }
             ++totalcount;
         }
     }
 }
 
-void AuctionHouseObject::BuildListOwnerItems(WorldPacket& data, Player* player, uint32& count, uint32& totalcount)
+void AuctionHouseObject::BuildListOwnerItems(WorldPacket& data, Player* player, uint32 listfrom, uint32& count, uint32& totalcount)
 {
     for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
     {
         AuctionEntry* Aentry = itr->second;
         if (Aentry->owner == player->GetGUIDLow())
         {
-            if (Aentry->BuildAuctionInfo(data))
+            if (count < MAX_AUCTION_ITEMS_CLIENT_UI_PAGE && totalcount >= listfrom)
+            {
+                if (!Aentry->BuildAuctionInfo(data))
+                    continue;
                 ++count;
+            }
             ++totalcount;
         }
     }
@@ -630,7 +638,7 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
             if (!wsearchedname.empty() && !Utf8FitTo(name, wsearchedname))
                 continue;
 
-            if (count < 50 && totalcount >= listfrom)
+            if (count < MAX_AUCTION_ITEMS_CLIENT_UI_PAGE && totalcount >= listfrom)
             {
                 ++count;
                 Aentry->BuildAuctionInfo(data);
