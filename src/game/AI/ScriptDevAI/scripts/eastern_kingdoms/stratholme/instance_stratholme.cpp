@@ -37,7 +37,9 @@ instance_stratholme::instance_stratholme(Map* pMap) : ScriptedInstance(pMap),
     m_bIsSlaughterDoorOpen(false),
     m_uiYellCounter(0),
     m_uiMindlessCount(0),
-    m_uiPostboxesUsed(0)
+    m_uiPostboxesUsed(0),
+    m_jarienKilled(false),
+    m_sothosKilled(false)
 {
     Initialize();
 }
@@ -737,14 +739,36 @@ void instance_stratholme::OnCreatureDeath(Creature* pCreature)
         case NPC_BALNAZZAR:
             DoScarletBastionDefense(CRIMSON_THRONE, pCreature);
             break;
+        case NPC_JARIEN:
+            m_jarienKilled = true;
+            if (m_sothosKilled)
+                if (Unit* spawner = pCreature->GetSpawner())
+                    spawner->CastSpell(nullptr, SPELL_SUMMON_WINNER_BOX, TRIGGERED_OLD_TRIGGERED);
+            break;
+        case NPC_SOTHOS:
+            m_sothosKilled = true;
+            if (m_jarienKilled)
+                if (Unit* spawner = pCreature->GetSpawner())
+                    spawner->CastSpell(nullptr, SPELL_SUMMON_WINNER_BOX, TRIGGERED_OLD_TRIGGERED);
+            break;
     }
 }
 
 void instance_stratholme::OnCreatureRespawn(Creature* creature)
 {
-    if (creature->GetEntry() == NPC_BARTHILAS)
-        if (GetData(TYPE_BARTHILAS_RUN) != NOT_STARTED)
-            creature->NearTeleportTo(aStratholmeLocation[1].m_fX, aStratholmeLocation[1].m_fY, aStratholmeLocation[1].m_fZ, aStratholmeLocation[1].m_fO);
+    switch (creature->GetEntry())
+    {
+        case NPC_BARTHILAS:
+            if (GetData(TYPE_BARTHILAS_RUN) != NOT_STARTED)
+                creature->NearTeleportTo(aStratholmeLocation[1].m_fX, aStratholmeLocation[1].m_fY, aStratholmeLocation[1].m_fZ, aStratholmeLocation[1].m_fO);
+            break;
+        case NPC_JARIEN:
+            m_jarienKilled = false;
+            break;
+        case NPC_SOTHOS:
+            m_sothosKilled = false;
+            break;
+    }
 }
 
 void instance_stratholme::ThazudinAcolyteJustDied(Creature* pCreature)
