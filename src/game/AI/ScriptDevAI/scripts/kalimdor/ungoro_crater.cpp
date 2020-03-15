@@ -155,7 +155,11 @@ enum
 
 struct npc_ringoAI : public FollowerAI
 {
-    npc_ringoAI(Creature* pCreature) : FollowerAI(pCreature) { Reset(); }
+    npc_ringoAI(Creature* pCreature) : FollowerAI(pCreature)
+    {
+        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        Reset();
+    }
 
     uint32 m_uiFaintTimer;
     uint32 m_uiEndEventProgress;

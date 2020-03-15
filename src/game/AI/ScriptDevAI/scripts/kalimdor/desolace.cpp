@@ -181,7 +181,11 @@ enum
 
 struct npc_dalinda_malemAI : public npc_escortAI
 {
-    npc_dalinda_malemAI(Creature* m_creature) : npc_escortAI(m_creature) { Reset(); }
+    npc_dalinda_malemAI(Creature* m_creature) : npc_escortAI(m_creature)
+    {
+        m_creature->SetStandState(UNIT_STAND_STATE_KNEEL, true);
+        Reset();
+    }
 
     void Reset() override {}
 

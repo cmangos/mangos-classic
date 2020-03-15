@@ -438,7 +438,11 @@ enum
 
 struct npc_captured_arkonarinAI : public npc_escortAI
 {
-    npc_captured_arkonarinAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_captured_arkonarinAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        m_creature->SetStandState(UNIT_STAND_STATE_KNEEL, true);
+        Reset();
+    }
 
     ObjectGuid m_treyGuid;
 
@@ -480,7 +484,7 @@ struct npc_captured_arkonarinAI : public npc_escortAI
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-            m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+            m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN + TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
             Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
 
             if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_ARKONARIN_CAGE, 5.0f))
