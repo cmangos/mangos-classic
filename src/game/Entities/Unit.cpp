@@ -11207,8 +11207,8 @@ uint32 Unit::GetModifierXpBasedOnDamageReceived(uint32 xp)
         float percentageHp = float(GetDamageDoneByOthers()) / health;
         if (percentageHp >= 1.f)
             xp = 0;
-        else
-            xp *= percentageHp;
+        else if (percentageHp > 0.f)
+            xp *= (1.f - percentageHp);
     }
     return xp;
 }
