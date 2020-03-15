@@ -740,6 +740,13 @@ void instance_stratholme::OnCreatureDeath(Creature* pCreature)
     }
 }
 
+void instance_stratholme::OnCreatureRespawn(Creature* creature)
+{
+    if (creature->GetEntry() == NPC_BARTHILAS)
+        if (GetData(TYPE_BARTHILAS_RUN) != NOT_STARTED)
+            creature->NearTeleportTo(aStratholmeLocation[1].m_fX, aStratholmeLocation[1].m_fY, aStratholmeLocation[1].m_fZ, aStratholmeLocation[1].m_fO);
+}
+
 void instance_stratholme::ThazudinAcolyteJustDied(Creature* pCreature)
 {
     for (uint8 i = 0; i < MAX_ZIGGURATS; ++i)
@@ -1055,7 +1062,11 @@ void instance_stratholme::Update(uint32 uiDiff)
         {
             Creature* pBarthilas = GetSingleCreatureFromStorage(NPC_BARTHILAS);
             if (pBarthilas && pBarthilas->IsAlive() && !pBarthilas->IsInCombat())
+            {
+                pBarthilas->GetMotionMaster()->Clear(false, true);
+                pBarthilas->GetMotionMaster()->MoveIdle();
                 pBarthilas->NearTeleportTo(aStratholmeLocation[1].m_fX, aStratholmeLocation[1].m_fY, aStratholmeLocation[1].m_fZ, aStratholmeLocation[1].m_fO);
+            }
 
             SetData(TYPE_BARTHILAS_RUN, DONE);
             m_uiBarthilasRunTimer = 0;

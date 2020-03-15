@@ -235,6 +235,7 @@ class instance_stratholme : public ScriptedInstance
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureEvade(Creature* pCreature);
         void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* creature) override;
 
         void Update(const uint32 diff) override;
 

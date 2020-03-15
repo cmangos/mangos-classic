@@ -37,7 +37,11 @@ enum
 
 struct boss_baroness_anastariAI : public ScriptedAI
 {
-    boss_baroness_anastariAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    boss_baroness_anastariAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+
+        Reset();
+    }
 
     uint32 m_uiBansheeWailTimer;
     uint32 m_uiBansheeCurseTimer;
