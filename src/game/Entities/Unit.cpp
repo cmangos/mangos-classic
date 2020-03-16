@@ -1915,25 +1915,21 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
     CleanDamage cleanDamage(calcDamageInfo->cleanDamage, calcDamageInfo->attackType, calcDamageInfo->hitOutCome);
     DealDamage(this, victim, calcDamageInfo->totalDamage, &cleanDamage, DIRECT_DAMAGE, SpellSchoolMask(calcDamageInfo->subDamage[0].damageSchoolMask), nullptr, durabilityLoss);
 
-    // If not miss
-    if (!(calcDamageInfo->HitInfo & HITINFO_MISS))
+    // If not immune
+    if (calcDamageInfo->TargetState != VICTIMSTATE_IS_IMMUNE && calcDamageInfo->TargetState != VICTIMSTATE_EVADES)
     {
-        // If not immune
-        if (calcDamageInfo->TargetState != VICTIMSTATE_IS_IMMUNE)
+        if (CanEnterCombat() && victim->CanEnterCombat())
         {
-            if (CanEnterCombat() && victim->CanEnterCombat())
-            {
-                // if damage pVictim call AI reaction
-                victim->AttackedBy(this);
+            // if damage pVictim call AI reaction
+            victim->AttackedBy(this);
 
-                if (Unit* owner = GetOwner())
-                    if (owner->GetTypeId() == TYPEID_UNIT)
-                        owner->EngageInCombatWithAggressor(victim);
+            if (Unit* owner = GetOwner())
+                if (owner->GetTypeId() == TYPEID_UNIT)
+                    owner->EngageInCombatWithAggressor(victim);
 
-                for (auto m_guardianPet : m_guardianPets)
-                    if (Unit* pet = (Unit*)GetMap()->GetPet(m_guardianPet))
-                        pet->EngageInCombatWithAggressor(victim);
-            }
+            for (auto m_guardianPet : m_guardianPets)
+                if (Unit* pet = (Unit*)GetMap()->GetPet(m_guardianPet))
+                    pet->EngageInCombatWithAggressor(victim);
         }
     }
 
