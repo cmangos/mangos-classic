@@ -141,6 +141,8 @@ void CombatManager::SetEvadeState(EvadeState state)
     if (m_evadeState == state)
         return;
 
+    if (state == EVADE_NONE)
+        m_evadeTimer = 0;
     if (state == EVADE_NONE && m_evadeState == EVADE_HOME)
         m_owner->AI()->SetAIOrder(ORDER_NONE);
     else if (state == EVADE_HOME)
