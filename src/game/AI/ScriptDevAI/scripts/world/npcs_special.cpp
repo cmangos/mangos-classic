@@ -27,6 +27,9 @@ EndScriptData
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Globals/ObjectMgr.h"
 #include "GameEvents/GameEventMgr.h"
+#include "Entities/TemporarySpawn.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "World/WorldState.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 
 /* ContentData
@@ -37,6 +40,7 @@ npc_injured_patient     100%    patients for triage-quests (6622 and 6624)
 npc_doctor              100%    Gustaf Vanhowzen and Gregory Victor, quest 6622 and 6624 (Triage)
 npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
 npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
+npc_advanced_target_dummy
 EndContentData */
 
 /*########
@@ -1013,6 +1017,51 @@ struct npc_aoe_damage_triggerAI : public ScriptedAI, public TimerManager
     }
 };
 
+/*######
+## npc_advanced_target_dummy
+######*/
+
+enum
+{
+    SUICIDE                     = 7,
+    TARGET_DUMMY_SPAWN_EFFECT   = 4507
+};
+
+struct npc_advanced_target_dummyAI : public ScriptedAI, public TimerManager
+{
+    npc_advanced_target_dummyAI(Creature* creature) : ScriptedAI(creature), m_dieTimer(15000)
+    {
+        DoCastSpellIfCan(nullptr, TARGET_DUMMY_SPAWN_EFFECT);
+        SetReactState(REACT_PASSIVE);
+        Reset();
+    }
+
+    void Reset() override {}
+
+    uint32 m_dieTimer;
+
+    void JustRespawned() override
+    {
+        if (!m_creature->GetSpawner())
+            return;
+
+        m_creature->SetLootRecipient(m_creature->GetSpawner());
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (m_dieTimer)
+        {
+            if (m_dieTimer <= diff)
+            {
+                DoCastSpellIfCan(m_creature, SUICIDE);
+            }
+            else
+                m_dieTimer -= diff;
+        }
+    }
+};
+
 void AddSC_npcs_special()
 {
     Script* pNewScript;
@@ -1063,5 +1112,10 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_aoe_damage_trigger";
     pNewScript->GetAI = &GetNewAIInstance<npc_aoe_damage_triggerAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_advanced_target_dummy";
+    pNewScript->GetAI = &GetNewAIInstance<npc_advanced_target_dummyAI>;
     pNewScript->RegisterSelf();
 }
