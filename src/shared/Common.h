@@ -103,6 +103,8 @@ inline float finiteAlways(float f) { return std::isfinite(f) ? f : 0.0f; }
 #define PAIR32_HIPART(x)   uint16( ((uint32(x) >> 16) & 0x0000FFFF) )
 #define PAIR32_LOPART(x)   uint16( (uint32(x)         & 0x0000FFFF) )
 
+#define MAX_NETCLIENT_PACKET_SIZE (32767 - 1)               // Client hardcap: int16 with trailing zero space otherwise crash on memory free
+
 enum TimeConstants
 {
     MINUTE = 60,

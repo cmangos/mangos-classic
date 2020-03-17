@@ -38,6 +38,8 @@
 #include "Server/Opcodes.h"
 #include "Chat/Chat.h"
 
+#define MAX_INBOX_CLIENT_UI_CAPACITY 50
+
 bool WorldSession::CheckMailBox(ObjectGuid guid) const
 {
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(guid, GAMEOBJECT_TYPE_MAILBOX))
@@ -542,9 +544,6 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
     if (!CheckMailBox(mailboxGuid))
         return;
 
-    // client can't work with packets > max int16 value
-    const uint32 maxPacketSize = 32767;
-
     uint32 mailsCount = 0;                                  // send to client mails amount
 
     WorldPacket data(SMSG_MAIL_LIST_RESULT, (200));         // guess size
@@ -553,8 +552,8 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
 
     for (PlayerMails::iterator itr = _player->GetMailBegin(); itr != _player->GetMailEnd(); ++itr)
     {
-        // packet send mail count as uint8, prevent overflow
-        if (mailsCount >= 254)
+        // prevent client storage overflow
+        if (mailsCount >= MAX_INBOX_CLIENT_UI_CAPACITY)
             break;
 
         // skip deleted or not delivered (deliver delay not expired) mails
@@ -564,7 +563,7 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
         /*[-ZERO] TODO recheck this
         size_t next_mail_size = 4+1+8+((*itr)->subject.size()+1)+4*7+1+item_count*(1+4+4+6*3*4+4+4+1+4+4+4);
 
-        if(data.wpos()+next_mail_size > maxPacketSize)
+        if (data.wpos() + next_mail_size > MAX_NETCLIENT_PACKET_SIZE)
             break;
         */
 
@@ -614,7 +613,7 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
         mailsCount += 1;
     }
 
-    data.put<uint8>(0, mailsCount);                         // set real send mails to client
+    data.put<uint8>(0, uint8(mailsCount));                  // set real send mails to client
     SendPacket(data);
 
     // recalculate m_nextMailDelivereTime and unReadMails
