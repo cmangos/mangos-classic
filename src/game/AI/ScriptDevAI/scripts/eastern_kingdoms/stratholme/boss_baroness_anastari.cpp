@@ -39,7 +39,17 @@ struct boss_baroness_anastariAI : public ScriptedAI
 {
     boss_baroness_anastariAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-
+        // Note: This should be generic Player AI behaviour - if no target - break charm
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float, float, float) -> bool
+        {
+            if (unit->HasAura(SPELL_POSSESS_INV) && unit->getThreatManager().getThreatList().size() <= 1)
+            {
+                unit->RemoveAurasDueToSpell(SPELL_POSSESS_INV);
+                unit->BreakCharmOutgoing();
+                return true;
+            }
+            return false;
+        });
         Reset();
     }
 
