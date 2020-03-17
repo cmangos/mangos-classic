@@ -659,8 +659,15 @@ void WorldSession::LogoutPlayer()
 }
 
 /// Kick a player out of the World
-void WorldSession::KickPlayer()
+void WorldSession::KickPlayer(bool save, bool inPlace)
 {
+    m_playerSave = save;
+    if (inPlace)
+    {
+        LogoutPlayer();
+        return;
+    }
+
 #ifdef BUILD_PLAYERBOT
     if (!_player)
         return;

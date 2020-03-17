@@ -147,7 +147,7 @@ World::~World()
 /// Cleanups before world stop
 void World::CleanupsBeforeStop()
 {
-    KickAll();                                       // save and kick all players
+    KickAll(true);                                   // save and kick all players
     UpdateSessions(1);                               // real players unload required UpdateSessions call
     sBattleGroundMgr.DeleteAllBattleGrounds();       // unload battleground templates before different singletons destroyed
     sMapMgr.UnloadAll();                             // unload all grids (including locked in memory)
@@ -1756,13 +1756,13 @@ void World::SendDefenseMessageBroadcastText(uint32 zoneId, uint32 textId)
 }
 
 /// Kick (and save) all players
-void World::KickAll()
+void World::KickAll(bool save)
 {
     m_QueuedSessions.clear();                               // prevent send queue update packet and login queued sessions
 
     // session not removed at kick and will removed in next update tick
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-        itr->second->KickPlayer();
+        itr->second->KickPlayer(save, true);
 }
 
 /// Kick (and save) all players with security level less `sec`
