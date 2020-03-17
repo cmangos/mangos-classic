@@ -44,7 +44,9 @@ void UpdateData::AddOutOfRangeGUID(ObjectGuid const& guid)
 
 void UpdateData::AddUpdateBlock(const ByteBuffer& block)
 {
-    if (m_data[m_currentIndex].m_buffer.size() < 700)
+    const size_t existing = (128 + (9 * m_outOfRangeGUIDs.size()) + m_data[m_currentIndex].m_buffer.size());
+
+    if ((existing + block.size()) < MAX_NETCLIENT_PACKET_SIZE)
     {
         m_data[m_currentIndex].m_buffer.append(block);
         ++m_data[m_currentIndex].m_blockCount;
