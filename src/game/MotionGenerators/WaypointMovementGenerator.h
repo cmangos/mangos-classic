@@ -66,7 +66,7 @@ class WaypointMovementGenerator<Creature>
 {
     public:
         WaypointMovementGenerator(Creature&) :
-            i_nextMoveTime(0), m_isArrivalDone(false), m_lastReachedWaypoint(0), m_pathId(0), m_PathOrigin(), m_nextNodeSplineIdx(-1)
+            i_nextMoveTime(0), m_isArrivalDone(false), m_lastReachedWaypoint(0), m_pathId(0), m_PathOrigin(), m_nextNodeSplineIdx(-1), m_scriptTime(0)
         {}
         ~WaypointMovementGenerator() { i_path = nullptr; }
         void Initialize(Creature& creature);
@@ -100,6 +100,7 @@ class WaypointMovementGenerator<Creature>
         ShortTimeTracker i_nextMoveTime;
         bool m_isArrivalDone;
         int32 m_nextNodeSplineIdx;
+        int32 m_scriptTime;                                 // filled with delay change when script is instantly executed and want to change node delay
         uint32 m_lastReachedWaypoint;
         WorldLocation m_resetPoint;
 

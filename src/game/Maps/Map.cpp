@@ -1785,17 +1785,30 @@ bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* sourc
 
     ///- Schedule script execution for all scripts in the script map
     ScriptMap const& scriptMap = scriptInfoMapMapItr->second;
-    for (const auto& scriptInfoItr : scriptMap)
+
+    // first handle all scripts with 0 delay
+    auto scriptInfoItr = scriptMap.begin();
+    while (scriptInfoItr != scriptMap.end())
     {
-        auto const& scriptInfo = scriptInfoItr.second;
+        auto const& scriptInfo = scriptInfoItr->second;
+        if (scriptInfo.delay > 0)
+            break;
+
+        // fire script with 0 delay directly
         ScriptAction sa(scripts.first, this, sourceGuid, targetGuid, ownerGuid, &scriptInfo);
-        if (scriptInfo.delay)
-        {
-            m_scriptSchedule.emplace(GetCurrentClockTime() + std::chrono::milliseconds(scriptInfoItr.first), sa);
-            sScriptMgr.IncreaseScheduledScriptsCount();
-        }
-        else
-            sa.HandleScriptStep();
+        if (sa.HandleScriptStep())
+            return true;                    // script failed we should not continue further (command 31 or any error occured)
+
+        ++scriptInfoItr;
+    }
+
+    // add delayed script to script scheduler
+    for (; scriptInfoItr != scriptMap.end(); ++scriptInfoItr)
+    {
+        auto const& scriptInfo = scriptInfoItr->second;
+        ScriptAction sa(scripts.first, this, sourceGuid, targetGuid, ownerGuid, &scriptInfo);
+        m_scriptSchedule.emplace(GetCurrentClockTime() + std::chrono::milliseconds(scriptInfoItr->first), sa);
+        sScriptMgr.IncreaseScheduledScriptsCount();
     }
 
     return true;

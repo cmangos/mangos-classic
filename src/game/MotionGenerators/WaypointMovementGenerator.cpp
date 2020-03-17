@@ -138,8 +138,15 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     // save position and orientation in case of GetResetPosition() call
     creature.GetPosition(m_resetPoint);
 
+    // AI can modify node delay so we have to compute it
+    int32 newWaitTime = node.delay + m_scriptTime;
+    m_scriptTime = 0;
+
+    // be sure to not have negative value for wait time
+    newWaitTime = newWaitTime > 0 ? newWaitTime : 0;
+
     // Wait delay ms
-    Stop(node.delay);
+    Stop(newWaitTime);
 }
 
 void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
@@ -382,9 +389,15 @@ void WaypointMovementGenerator<Creature>::AddToWaypointPauseTime(int32 waitTimeD
 {
     if (!i_nextMoveTime.Passed())
     {
+        // creature is stopped already
         // Prevent <= 0, the code in Update requires to catch the change from moving to not moving
         int32 newWaitTime = i_nextMoveTime.GetExpiry() + waitTimeDiff;
         i_nextMoveTime.Reset(newWaitTime > 0 ? newWaitTime : 1);
+    }
+    else
+    {
+        // creature is not stopped yet (script with 0 delay may be calling this)
+        m_scriptTime = waitTimeDiff;
     }
 }
 
