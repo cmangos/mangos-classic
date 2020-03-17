@@ -778,7 +778,7 @@ uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage c
     if (damagetype != DOT && damagetype != INSTAKILL)
     {
         // Since patch 1.5.0 sitting characters always stand up on attack (even if stunned)
-        if (!victim->IsStandState() && (victim->GetTypeId() == TYPEID_PLAYER || !victim->hasUnitState(UNIT_STAT_STUNNED)))
+        if (!victim->IsStandState() && (victim->GetTypeId() == TYPEID_PLAYER || !victim->IsStunned()))
             victim->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
@@ -7784,7 +7784,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         return true;
 
     // If a mob or player is stunned he will not be able to detect stealth
-    if (u->hasUnitState(UNIT_STAT_STUNNED) && (u != this))
+    if (u->IsStunned() && (u != this))
         return false;
 
     // set max distance
@@ -9411,7 +9411,7 @@ bool Unit::SetFleeing(bool apply, ObjectGuid casterGuid/* = ObjectGuid()*/, uint
     return false;
 }
 
-bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
+bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID, bool logout/* = false*/)
 {
     if (apply != HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED))
     {
@@ -9420,10 +9420,10 @@ bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
             CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
-        else if (GetTypeId() != TYPEID_PLAYER || !static_cast<Player*>(this)->GetSession()->isLogingOut())
+        else if (!hasUnitState(logout ? UNIT_STAT_STUNNED : UNIT_STAT_LOGOUT_TIMER))
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
-        SetImmobilizedState(apply, true);
+        SetImmobilizedState(apply, true, logout);
 
         if (const bool requireTargetChange = (!IsControlledByPlayer() && AI()))
         {
@@ -9446,10 +9446,31 @@ bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
     return false;
 }
 
-void Unit::SetImmobilizedState(bool apply, bool stun)
+bool Unit::SetLoggingOutTimer(bool apply)
 {
-    const uint32 state = (stun ? UNIT_STAT_STUNNED : UNIT_STAT_ROOT);
-    const bool logout = (GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(this)->GetSession()->isLogingOut());
+    if (SetStunned(apply, ObjectGuid(), 0, true))
+    {
+        // Sit down when eligible:
+        if (apply)
+        {
+            if (IsStandState())
+            {
+                if (!m_movementInfo.HasMovementFlag(MovementFlags(movementFlagsMask | MOVEFLAG_SWIMMING | MOVEFLAG_SPLINE_ENABLED)))
+                    SetStandState(UNIT_STAND_STATE_SIT);
+            }
+        }
+        // Stand up on cancel
+        else if (getStandState() == UNIT_STAND_STATE_SIT)
+            SetStandState(UNIT_STAND_STATE_STAND);
+
+        return true;
+    }
+    return false;
+}
+
+void Unit::SetImmobilizedState(bool apply, bool stun, bool logout)
+{
+    const uint32 state = (stun ? (logout ? UNIT_STAT_LOGOUT_TIMER : UNIT_STAT_STUNNED) : UNIT_STAT_ROOT);
 
     if (apply)
     {
@@ -9458,15 +9479,14 @@ void Unit::SetImmobilizedState(bool apply, bool stun)
         if (!IsClientControlled())
             StopMoving();
 
-        if (!logout)
-            SendMoveRoot(true);
+        SendMoveRoot(true);
     }
     else
     {
         clearUnitState(state);
 
         // Prevent giving ability to move if more immobilizers are active
-        if (!IsImmobilizedState() && !logout)
+        if (!IsImmobilizedState())
             SendMoveRoot(false);
     }
 }

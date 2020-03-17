@@ -405,7 +405,7 @@ enum UnitState
 {
     // persistent state (applied by aura/etc until expire)
     UNIT_STAT_MELEE_ATTACKING = 0x00000001,                 // unit is melee attacking someone Unit::Attack
-    //UNIT_STAT_ATTACK_PLAYER = 0x00000002,                 // (Deprecated) unit attack player or player's controlled unit and have contested pvpv timer setup, until timer expire, combat end and etc
+    UNIT_STAT_LOGOUT_TIMER    = 0x00000002,                 // Unit is logging out
     UNIT_STAT_FEIGN_DEATH     = 0x00000004,                 // Unit::SetFeignDeath - a successful feign death is currently active
     UNIT_STAT_STUNNED         = 0x00000008,                 // Aura::HandleAuraModStun
     UNIT_STAT_ROOT            = 0x00000010,                 // Aura::HandleAuraModRoot
@@ -443,19 +443,19 @@ enum UnitState
     // masks (only for check)
 
     // can't move currently
-    UNIT_STAT_CAN_NOT_MOVE    = UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_FEIGN_DEATH,
+    UNIT_STAT_CAN_NOT_MOVE    = UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_LOGOUT_TIMER | UNIT_STAT_FEIGN_DEATH,
 
     // stay by different reasons
-    UNIT_STAT_NOT_MOVE        = UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_FEIGN_DEATH |
+    UNIT_STAT_NOT_MOVE        = UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_LOGOUT_TIMER | UNIT_STAT_FEIGN_DEATH |
                                 UNIT_STAT_DISTRACTED,
 
     // stay or scripted movement for effect( = in player case you can't move by client command)
-    UNIT_STAT_NO_FREE_MOVE    = UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_FEIGN_DEATH |
+    UNIT_STAT_NO_FREE_MOVE    = UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_LOGOUT_TIMER | UNIT_STAT_FEIGN_DEATH |
                                 UNIT_STAT_TAXI_FLIGHT |
                                 UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING | UNIT_STAT_PROPELLED,
 
     // not react at move in sight or other
-    UNIT_STAT_CAN_NOT_REACT   = UNIT_STAT_STUNNED | UNIT_STAT_FEIGN_DEATH |
+    UNIT_STAT_CAN_NOT_REACT   = UNIT_STAT_STUNNED | UNIT_STAT_LOGOUT_TIMER | UNIT_STAT_FEIGN_DEATH |
                                 UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING | UNIT_STAT_RETREATING,
 
     // AI disabled by some reason
@@ -2266,14 +2266,17 @@ class Unit : public WorldObject
         bool SetFleeing(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, uint32 duration = 0);
 
         inline bool IsStunned() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED); }
-        bool SetStunned(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0);
+        bool SetStunned(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, bool logout = false);
+
+        inline bool IsLoggingOutTimer() const { return hasUnitState(UNIT_STAT_LOGOUT_TIMER); }
+        bool SetLoggingOutTimer(bool apply);
 
         // Panic: AI reaction script, NPC flees (e.g. at low health)
         inline bool IsInPanic() const { return hasUnitState(UNIT_STAT_PANIC); }
         inline bool SetInPanic(uint32 duration) { return SetFleeing(true, GetObjectGuid(), 0, duration); }
 
-        inline bool IsImmobilizedState() const { return hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED); }
-        void SetImmobilizedState(bool apply, bool stun = false);
+        inline bool IsImmobilizedState() const { return hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_LOGOUT_TIMER); }
+        void SetImmobilizedState(bool apply, bool stun = false, bool logout = false);
         ///----------End of crowd control methods----------
 
         bool IsFeigningDeath() const { return ((HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD) || IsFeigningDeathSuccessfully()) && isAlive()); }

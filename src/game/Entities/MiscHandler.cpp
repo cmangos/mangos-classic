@@ -298,20 +298,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
     Player* thisPlayer = GetPlayer();
 
     // Set flags and states set by logout:
-    {
-        if (thisPlayer->getStandState() == UNIT_STAND_STATE_STAND || thisPlayer->getStandState() == UNIT_STAND_STATE_KNEEL)
-        {
-            float height = thisPlayer->GetMap()->GetHeight(thisPlayer->GetPositionX(), thisPlayer->GetPositionY(), thisPlayer->GetPositionZ());
-
-            if ((thisPlayer->GetPositionZ() < height + 0.1f) && !thisPlayer->IsInWater())
-                thisPlayer->SetStandState(UNIT_STAND_STATE_SIT);
-        }
-
-        if (!thisPlayer->HasMovementFlag(MOVEFLAG_ROOT))
-            thisPlayer->SendMoveRoot(true);
-
-        thisPlayer->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-    }
+    thisPlayer->SetLoggingOutTimer(true);
 
     WorldPacket data(SMSG_LOGOUT_RESPONSE, 5);
     data << uint32(0);
@@ -337,16 +324,7 @@ void WorldSession::HandleLogoutCancelOpcode(WorldPacket& /*recv_data*/)
     Player* thisPlayer = GetPlayer();
 
     // Undo flags and states set by logout:
-    {
-        if (thisPlayer->getStandState() == UNIT_STAND_STATE_SIT)
-            thisPlayer->SetStandState(UNIT_STAND_STATE_STAND);
-
-        if (thisPlayer->HasMovementFlag(MOVEFLAG_ROOT) && !thisPlayer->IsImmobilizedState())
-            thisPlayer->SendMoveRoot(false);
-
-        if (!thisPlayer->hasUnitState(UNIT_STAT_STUNNED))
-            thisPlayer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-    }
+    thisPlayer->SetLoggingOutTimer(false);
 
     DEBUG_LOG("WORLD: sent SMSG_LOGOUT_CANCEL_ACK Message");
 }

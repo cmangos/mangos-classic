@@ -748,7 +748,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     sLog.outChar("Account: %d (IP: %s) Login Character:[%s] (guid: %u)",
                  GetAccountId(), IP_str.c_str(), pCurrChar->GetName(), pCurrChar->GetGUIDLow());
 
-    if (!pCurrChar->IsStandState() && !pCurrChar->hasUnitState(UNIT_STAT_STUNNED))
+    if (!pCurrChar->IsStandState() && !pCurrChar->IsStunned())
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
 
     m_playerLoading = false;
@@ -757,8 +757,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
 void WorldSession::HandlePlayerReconnect()
 {
-    const bool logout = isLogingOut();
-
     // stop logout timer if need
     LogoutRequest(0);
 
@@ -860,24 +858,17 @@ void WorldSession::HandlePlayerReconnect()
     else if (!_player->IsClientControlled(_player))
         _player->UpdateClientControl(_player, false);
 
-    // Undo flags and states set by logout:
-    if (logout)
-    {
-        if (_player->HasMovementFlag(MOVEFLAG_ROOT) && !_player->IsImmobilizedState())
-            _player->SendMoveRoot(false);
-
-        if (!_player->hasUnitState(UNIT_STAT_STUNNED))
-            _player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-    }
-
     // initialize client pet bar if need
     _player->SendPetBar();
 
     // send mirror timers
     _player->SendMirrorTimers(true);
 
-    if (_player->IsStandState() && !_player->hasUnitState(UNIT_STAT_STUNNED))
+    if (!_player->IsStandState() && !_player->IsStunned())
         _player->SetStandState(UNIT_STAND_STATE_STAND);
+
+    // Undo flags and states set by logout if present:
+    _player->SetLoggingOutTimer(false);
 
     m_playerLoading = false;
 }
