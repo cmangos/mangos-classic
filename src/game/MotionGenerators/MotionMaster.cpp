@@ -527,6 +527,7 @@ void MotionMaster::MoveCharge(Unit& target, float speed, uint32 id/* = EVENT_CHA
     WorldLocation pos;
     target.GetFirstCollisionPosition(pos, target.GetCombatReach(), target.GetAngle(m_owner));
 
+    pos.coord_z += 1; // blizzlike
     Movement::MoveSplineInit init(*m_owner);
     init.SetWalk(false);
     init.SetVelocity(speed);
