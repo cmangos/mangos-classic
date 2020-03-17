@@ -493,6 +493,12 @@ namespace MMAP
                     continue;
                 }
 
+                if (!rcMedianFilterWalkableArea(m_rcContext, *tile.chf))
+                {
+                    printf("%s Failed filtering area!                             \n", tileString);
+                    continue;
+                }
+
                 if (!rcBuildDistanceField(m_rcContext, *tile.chf))
                 {
                     printf("%s Failed building distance field!                    \n", tileString);
