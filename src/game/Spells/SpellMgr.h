@@ -1072,13 +1072,6 @@ inline void GetChainJumpRange(SpellEntry const* spellInfo, SpellEffectIndex effI
 
     switch (spellInfo->Id)
     {
-        case 2643:  // Multi-shot
-        case 14288:
-        case 14289:
-        case 14290:
-        case 25294:
-        case 27021:
-            maxSearchRangeTarget = 8.f;
             break;
         default:   // default jump radius
             break;

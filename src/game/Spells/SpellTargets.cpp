@@ -481,13 +481,6 @@ SpellTargetFilterScheme SpellTargetMgr::GetSpellTargetingFilterScheme(SpellTarge
 {
     switch (spellId)
     {
-        case 2643:  // Multi-shot - chain spell but behaves like aoe
-        case 14288:
-        case 14289:
-        case 14290:
-        case 25294:
-        case 27021:
-            return SCHEME_RANDOM;
         case 26052: // Poison Bolt Volley (spell hits only the 15 closest targets)
         case 26180: // Wyvern Sting (spell hits only the 10 closest targets)
         case 30284: // Change Facing - Chess event - QOL to pick deterministically closest target
