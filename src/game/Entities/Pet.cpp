@@ -227,7 +227,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
 
     uint32 pet_number = fields[0].GetUInt32();
 
-    if (owner->IsPetNeedBeTemporaryUnsummoned())
+    if (owner->IsPetNeedBeTemporaryUnsummoned(nullptr))
     {
         // set temporary summon that way its possible if the player unmount to resummon it automaticaly
         owner->SetTemporaryUnsummonedPetNumber(pet_number);
