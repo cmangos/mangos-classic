@@ -399,6 +399,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 10095:         // Hate to Zero (Hate to Zero)
         case 11838:         // Hate to Zero (Hate to Zero)
         case 11919:         // Poison Proc
+        case 11964:         // Fevered Fatigue
         case 11966:         // Fire Shield
         case 11984:         // Immolate
         case 12099:         // Shield Spike
@@ -428,6 +429,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 17467:         // Unholy Aura
         case 18148:         // Static Field
         case 18268:         // Fire Shield
+        case 18847:         // Fevered Fatigue
         case 18943:         // Double Attack
         case 18968:         // Fire Shield
         case 19030:         // Bear Form (Shapeshift)
