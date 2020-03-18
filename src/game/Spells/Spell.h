@@ -760,6 +760,15 @@ class Spell
 
         std::set<Aura*> m_procOnceHolder;
 
+        struct EffectSkillInfo
+        {
+            SkillType skillId = SKILL_NONE;
+            int32 reqSkillValue = 0;
+            int32 skillValue = 0;
+        };
+
+        EffectSkillInfo m_effectSkillInfo[MAX_EFFECT_INDEX];
+
         // if need this can be replaced by Aura copy
         // we can't store original aura link to prevent access to deleted auras
         // and in same time need aura data and after aura deleting.

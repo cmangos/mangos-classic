@@ -2535,34 +2535,23 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
         return;
     }
 
-    SkillType skillId = SKILL_NONE;
-    int32 reqSkillValue = 0;
-    int32 skillValue;
-
-    SpellCastResult res = CanOpenLock(eff_idx, lockId, skillId, reqSkillValue, skillValue);
-    if (res != SPELL_CAST_OK)
-    {
-        SendCastResult(res);
-        return;
-    }
-
     // not allow use skill grow at item base open
-    if (!m_CastItem && skillId != SKILL_NONE)
+    if (m_effectSkillInfo[eff_idx].skillId != SKILL_NONE)
     {
         // update skill if really known
-        if (uint32 pureSkillValue = player->GetSkillValuePure(skillId))
+        if (uint32 pureSkillValue = player->GetSkillValuePure(m_effectSkillInfo[eff_idx].skillId))
         {
             if (gameObjTarget && !gameObjTarget->m_loot)
             {
                 // Allow one skill-up until respawned
                 if (!gameObjTarget->IsInSkillupList(player) &&
-                        player->UpdateGatherSkill(skillId, pureSkillValue, reqSkillValue))
+                        player->UpdateGatherSkill(m_effectSkillInfo[eff_idx].skillId, pureSkillValue, m_effectSkillInfo[eff_idx].reqSkillValue))
                     gameObjTarget->AddToSkillupList(player);
             }
             else if (itemTarget && !itemTarget->m_loot)
             {
                 // Do one skill-up
-                player->UpdateGatherSkill(skillId, pureSkillValue, reqSkillValue);
+                player->UpdateGatherSkill(m_effectSkillInfo[eff_idx].skillId, pureSkillValue, m_effectSkillInfo[eff_idx].reqSkillValue);
             }
         }
     }
