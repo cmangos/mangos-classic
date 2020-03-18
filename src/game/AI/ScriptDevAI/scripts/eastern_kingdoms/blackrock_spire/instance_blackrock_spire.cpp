@@ -579,6 +579,7 @@ void instance_blackrock_spire::JustDidDialogueStep(int32 iEntry)
                         pSpectator->SetFacingTo(aSpectatorsTargetLocs[i].m_fO);
                         pSpectator->SetWalk(false);
                         pSpectator->GetMotionMaster()->MovePoint(0, aSpectatorsTargetLocs[i].m_fX, aSpectatorsTargetLocs[i].m_fY, aSpectatorsTargetLocs[i].m_fZ);
+                        pSpectator->AI()->SetReactState(REACT_DEFENSIVE);
                         m_lStadiumSpectatorsGUIDList.push_back(pSpectator->GetObjectGuid());
                     }
                 }
