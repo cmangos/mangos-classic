@@ -199,7 +199,7 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
     {
         targetMoved = this->RequiresNewPosition(owner, dest.x, dest.y, dest.z);
 
-        if (this->i_speedChanged || targetMoved)
+        if ((this->i_speedChanged && !owner.movespline->Finalized()) || targetMoved)
         {
             float x, y, z;
 
