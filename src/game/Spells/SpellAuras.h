@@ -533,7 +533,7 @@ class AreaAura : public Aura
 {
     public:
         AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr, uint32 originalRankSpellId = 0);
-        ~AreaAura();
+        virtual ~AreaAura();
     protected:
         void Update(uint32 diff) override;
     private:
@@ -546,7 +546,7 @@ class PersistentAreaAura : public Aura
 {
     public:
         PersistentAreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
-        ~PersistentAreaAura();
+        virtual ~PersistentAreaAura();
     protected:
         void Update(uint32 diff) override;
 };
@@ -556,7 +556,7 @@ class SingleEnemyTargetAura : public Aura
         friend Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem);
 
     public:
-        ~SingleEnemyTargetAura();
+        virtual ~SingleEnemyTargetAura();
         Unit* GetTriggerTarget() const override;
 
     protected:
