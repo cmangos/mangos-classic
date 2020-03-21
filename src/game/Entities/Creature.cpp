@@ -2848,9 +2848,9 @@ void Creature::ReduceCorpseDecayTimer()
 }
 
 // Set loot status. Also handle remove corpse timer
-void Creature::SetLootStatus(CreatureLootStatus status)
+void Creature::SetLootStatus(CreatureLootStatus status, bool forced)
 {
-    if (status <= m_lootStatus)
+    if (!forced && status <= m_lootStatus)
         return;
 
     m_lootStatus = status;

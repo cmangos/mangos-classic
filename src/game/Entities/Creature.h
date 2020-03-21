@@ -742,7 +742,7 @@ class Creature : public Unit
         void PrepareBodyLootState();
         CreatureLootStatus GetLootStatus() const { return m_lootStatus; }
         virtual void InspectingLoot() override;
-        void SetLootStatus(CreatureLootStatus status);
+        void SetLootStatus(CreatureLootStatus status, bool forced = false);
         bool IsTappedBy(Player* plr) const;
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
