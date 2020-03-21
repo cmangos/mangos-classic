@@ -666,6 +666,17 @@ void PersistentAreaAura::Update(uint32 diff)
     Aura::Update(diff);
 }
 
+bool Aura::IsSaveToDbAura() const
+{
+    if (IsAreaAura() && GetHolder()->GetCasterGuid() != GetTarget()->GetObjectGuid())
+        return false;
+
+    if (IsPersistent())
+        return false;
+
+    return true;
+}
+
 void Aura::ApplyModifier(bool apply, bool Real)
 {
     AuraType aura = m_modifier.m_auraname;
@@ -5962,6 +5973,12 @@ bool SpellAuraHolder::IsEmptyHolder() const
         if (m_aura)
             return false;
     return true;
+}
+
+bool SpellAuraHolder::IsSaveToDbHolder() const
+{
+    return !IsPassive() && !IsChanneledSpell(GetSpellProto()) &&
+        (GetTrackedAuraType() == TRACK_AURA_TYPE_NOT_TRACKED || (GetTrackedAuraType() == TRACK_AURA_TYPE_SINGLE_TARGET && GetCasterGuid() == GetTarget()->GetObjectGuid()));
 }
 
 void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()

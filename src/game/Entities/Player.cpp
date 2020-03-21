@@ -15605,10 +15605,7 @@ void Player::_SaveAuras()
         SpellAuraHolder* holder = auraHolder.second;
         // skip all holders from spells that are passive or channeled
         // save singleTarget auras if self cast.
-        bool selfCastHolder = holder->GetCasterGuid() == GetObjectGuid();
-        TrackedAuraType trackedType = holder->GetTrackedAuraType();
-        if (!holder->IsPassive() && !IsChanneledSpell(holder->GetSpellProto()) &&
-                (trackedType == TRACK_AURA_TYPE_NOT_TRACKED || (trackedType == TRACK_AURA_TYPE_SINGLE_TARGET && selfCastHolder)))
+        if (holder->IsSaveToDbHolder())
         {
             int32  damage[MAX_EFFECT_INDEX];
             uint32 periodicTime[MAX_EFFECT_INDEX];
@@ -15622,7 +15619,7 @@ void Player::_SaveAuras()
                 if (Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
                 {
                     // don't save not own area auras
-                    if (aur->IsAreaAura() && holder->GetCasterGuid() != GetObjectGuid())
+                    if (!aur->IsSaveToDbAura())
                         continue;
 
                     damage[i] = aur->GetModifier()->m_amount;
