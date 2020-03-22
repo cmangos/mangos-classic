@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2754_01_mangos_static_custom_chat` bit(1) DEFAULT NULL
+  `required_z2755_01_mangos_broadcast_text` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -4329,20 +4329,21 @@ DROP TABLE IF EXISTS `npc_text_broadcast_text`;
 CREATE TABLE `npc_text_broadcast_text` (
 `Id` MEDIUMINT(8) UNSIGNED NOT NULL COMMENT 'Identifier',
 `Prob0` float NOT NULL,
-`Prob1` float NOT NULL,
-`Prob2` float NOT NULL,
-`Prob3` float NOT NULL,
-`Prob4` float NOT NULL,
-`Prob5` float NOT NULL,
-`Prob6` float NOT NULL,
-`Prob7` float NOT NULL,
-`BroadcastTextId1` INT(11) NOT NULL,
-`BroadcastTextId2` INT(11) NOT NULL,
-`BroadcastTextId3` INT(11) NOT NULL,
-`BroadcastTextId4` INT(11) NOT NULL,
-`BroadcastTextId5` INT(11) NOT NULL,
-`BroadcastTextId6` INT(11) NOT NULL,
-`BroadcastTextId7` INT(11) NOT NULL,
+`Prob1` float NOT NULL DEFAULT '0',
+`Prob2` float NOT NULL DEFAULT '0',
+`Prob3` float NOT NULL DEFAULT '0',
+`Prob4` float NOT NULL DEFAULT '0',
+`Prob5` float NOT NULL DEFAULT '0',
+`Prob6` float NOT NULL DEFAULT '0',
+`Prob7` float NOT NULL DEFAULT '0',
+`BroadcastTextId0` INT(11) NOT NULL,
+`BroadcastTextId1` INT(11) NOT NULL DEFAULT '0',
+`BroadcastTextId2` INT(11) NOT NULL DEFAULT '0',
+`BroadcastTextId3` INT(11) NOT NULL DEFAULT '0',
+`BroadcastTextId4` INT(11) NOT NULL DEFAULT '0',
+`BroadcastTextId5` INT(11) NOT NULL DEFAULT '0',
+`BroadcastTextId6` INT(11) NOT NULL DEFAULT '0',
+`BroadcastTextId7` INT(11) NOT NULL DEFAULT '0',
 PRIMARY KEY(`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT 'Broadcast Text npc_text equivalent';
 
