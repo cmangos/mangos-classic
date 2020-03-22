@@ -42,7 +42,7 @@ void PlayerbotMgr::SetInitialWorldSettings()
     if (!botConfig.SetSource(_PLAYERBOT_CONFIG))
         sLog.outError("Playerbot: Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
     else
-        sLog.outString("Playerbot: Using configuration file %s", _PLAYERBOT_CONFIG);
+        sLog.outString("Playerbot: Using configuration file %s", _PLAYERBOT_CONFIG.c_str());
 
     //Check playerbot config file version
     if (botConfig.GetIntDefault("ConfVersion", 0) != PLAYERBOT_CONF_VERSION)

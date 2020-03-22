@@ -28,6 +28,7 @@
 #include "Master.h"
 #include "SystemConfig.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
+#include "PlayerBot/config.h"
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
@@ -60,35 +61,18 @@ DatabaseType LoginDatabase;                                 ///< Accessor to the
 
 uint32 realmID;                                             ///< Id of the realm
 
-/// Print out the usage string for this program on the console.
-void usage(const char* prog)
-{
-    sLog.outString("Usage: \n %s [<options>]\n"
-                   "    -v, --version            print version and exist\n\r"
-                   "    -c config_file           use config_file as configuration file\n\r"
-                   "    -a, --ahbot config_file  use config_file as ahbot configuration file\n\r"
-#ifdef _WIN32
-                   "    Running as service functions:\n\r"
-                   "    -s run                   run as service\n\r"
-                   "    -s install               install service\n\r"
-                   "    -s uninstall             uninstall service\n\r"
-#else
-                   "    Running as daemon functions:\n\r"
-                   "    -s run                   run as daemon\n\r"
-                   "    -s stop                  stop daemon\n\r"
-#endif
-                   , prog);
-}
-
 /// Launch the mangos server
 int main(int argc, char* argv[])
 {
-    std::string auctionBotConfig, configFile, serviceParameter;
+    std::string auctionBotConfig, configFile, playerBotConfig, serviceParameter;
 
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
     ("ahbot,a", boost::program_options::value<std::string>(&auctionBotConfig), "ahbot configuration file")
     ("config,c", boost::program_options::value<std::string>(&configFile)->default_value(_MANGOSD_CONFIG), "configuration file")
+#ifdef BUILD_PLAYERBOT
+    ("playerbot,p", boost::program_options::value<std::string>(&playerBotConfig)->default_value(_D_PLAYERBOT_CONFIG), "playerbot configuration file")
+#endif
     ("help,h", "prints usage")
     ("version,v", "print version and exit")
 #ifdef _WIN32
@@ -127,6 +111,11 @@ int main(int argc, char* argv[])
 
     if (vm.count("ahbot"))
         sAuctionHouseBot.SetConfigFileName(auctionBotConfig);
+
+#ifdef BUILD_PLAYERBOT
+    if (vm.count("playerbot"))
+        _PLAYERBOT_CONFIG = playerBotConfig;
+#endif
 
 #ifdef _WIN32                                                // windows service command need execute before config read
     if (vm.count("s"))
