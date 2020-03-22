@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2020031501
+ConfVersion=2020032201
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -1091,11 +1091,25 @@ Channel.StaticAutoTreshold = 0
 #                 0 (disable)
 #                 1 (enable)
 #
+#    GM.AcceptTicketsLevel
+#        Min GM account security level required for accepting ticket notifications, alerts and using some commands.
+#                 0 (disabled for everyone)
+#                 1 (only moderators and above)
+#        Default: 2 (only gamemasters and above)
+#                 3 (only administrators)
+#
 #    GM.Chat
 #        GM chat mode at login
 #        Default: 2 (last save state)
 #                 0 (disable)
 #                 1 (enable)
+#
+#    GM.ChatLevel
+#        Min GM account security level required to be eligible for using GM chat tag.
+#                 0 (disabled for everyone)
+#        Default: 1 (only moderators and above)
+#                 2 (only gamemasters and above)
+#                 3 (only administrators)
 #
 #    GM.WhisperingTo
 #        Is GM accepting whispers from player by default or not.
@@ -1104,14 +1118,14 @@ Channel.StaticAutoTreshold = 0
 #                 1 (enable)
 #
 #    GM.InGMList.Level
-#        Max GM level showed in GM list (if visible) in non-GM state (.gm off)
+#        Max GM account security level showed in GM list (if visible) in non-GM state (.gm off)
 #                 0 (none)
 #                 1 (only moderators)
 #                 2 (only gamemasters)
 #        Default: 3 (anyone)
 #
 #    GM.InWhoList.Level
-#        Max GM level showed in who list (if visible).
+#        Max GM account security level showed in who list (if visible).
 #                 0 (only players)
 #                 1 (only moderators)
 #                 2 (only gamemasters)
@@ -1146,7 +1160,9 @@ Channel.StaticAutoTreshold = 0
 GM.LoginState            = 2
 GM.Visible               = 2
 GM.AcceptTickets         = 2
+GM.AcceptTicketsLevel    = 2
 GM.Chat                  = 2
+GM.ChatLevel             = 1
 GM.WhisperingTo          = 2
 GM.InGMList.Level        = 3
 GM.InWhoList.Level       = 3

@@ -542,11 +542,13 @@ void World::LoadConfigSettings(bool reload)
 
     setConfigMinMax(CONFIG_UINT32_MIN_PETITION_SIGNS, "MinPetitionSigns", 9, 0, 9);
 
-    setConfig(CONFIG_UINT32_GM_LOGIN_STATE,    "GM.LoginState",    2);
-    setConfig(CONFIG_UINT32_GM_VISIBLE_STATE,  "GM.Visible",       2);
-    setConfig(CONFIG_UINT32_GM_ACCEPT_TICKETS, "GM.AcceptTickets", 2);
-    setConfig(CONFIG_UINT32_GM_CHAT,           "GM.Chat",          2);
-    setConfig(CONFIG_UINT32_GM_WISPERING_TO,   "GM.WhisperingTo",  2);
+    setConfig(CONFIG_UINT32_GM_LOGIN_STATE,          "GM.LoginState",         2);
+    setConfig(CONFIG_UINT32_GM_VISIBLE_STATE,        "GM.Visible",            2);
+    setConfig(CONFIG_UINT32_GM_ACCEPT_TICKETS,       "GM.AcceptTickets",      2);
+    setConfig(CONFIG_UINT32_GM_LEVEL_ACCEPT_TICKETS, "GM.AcceptTicketsLevel", 2);
+    setConfig(CONFIG_UINT32_GM_CHAT,                 "GM.Chat",               2);
+    setConfig(CONFIG_UINT32_GM_LEVEL_CHAT,           "GM.ChatLevel",          1);
+    setConfig(CONFIG_UINT32_GM_WISPERING_TO,         "GM.WhisperingTo",       2);
 
     setConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST,  "GM.InGMList.Level",  SEC_ADMINISTRATOR);
     setConfig(CONFIG_UINT32_GM_LEVEL_IN_WHO_LIST, "GM.InWhoList.Level", SEC_ADMINISTRATOR);
