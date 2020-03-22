@@ -2,8 +2,8 @@ ALTER TABLE db_version CHANGE COLUMN required_z2750_01_mangos_graveyard_map_link
 
 LOCK TABLES `command` WRITE;
 /*!40000 ALTER TABLE `command` DISABLE KEYS */;
-DELETE FROM `command` WHERE `name` = 'delticket';
-REPLACE INTO `command` VALUES
+DELETE FROM `command` WHERE `name` = 'delticket' OR `name` LIKE 'ticket%';
+INSERT INTO `command` VALUES
 ('ticket',2,'Syntax: .ticket #id\r\n\r\nAlias of: .ticket read #id\r\n\r\n'),
 ('ticket discard',2,'Syntax: .ticket discard #id [$conclusion]\r\n\r\nClose GM ticket with number #id as discarded. If $conclusion is provided, it will be visible to the author as well.'),
 ('ticket escalate',2,'Syntax: .ticket escalate #id\r\n\r\nAttempt to escalate GM ticket with number #id. Current assignee will be unassigned on success.'),
@@ -22,7 +22,8 @@ UNLOCK TABLES;
 
 LOCK TABLES `mangos_string` WRITE;
 /*!40000 ALTER TABLE `mangos_string` DISABLE KEYS */;
-REPLACE INTO `mangos_string` VALUES
+DELETE FROM `mangos_string` WHERE (`entry` > 287 AND `entry` < 297) OR `entry` IN (373, 374, 375) OR (`entry` > 1509 AND `entry` < 1581);
+INSERT INTO `mangos_string` VALUES
 (288,'UNUSED',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (289,'UNUSED',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (290,'UNUSED',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -73,7 +74,7 @@ REPLACE INTO `mangos_string` VALUES
 (1545,'[Tickets]: [%s] has been escalated (L%u) by %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1546,'[Tickets]: [%s] has been de-escalated by the author\'s edits',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1547,'[Tickets]: [%s] has been closed by %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(1548,'[Tickets]: [%s] has been successfuly surveyed',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1548,'[Tickets]: [%s] has been successfully surveyed',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1549,'RESERVED',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1550,'Open',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1551,'New',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),

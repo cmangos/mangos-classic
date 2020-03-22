@@ -1028,8 +1028,9 @@ enum MangosStrings
     LANG_COMMAND_TICKETS_NO_NEW_TICKETS = 1521,             // "No new tickets found"
     LANG_COMMAND_TICKETS_NO_TICKETS     = 1522,             // "No tickets found matching criterea"
     LANG_COMMAND_TICKETS_LISTING        = 1523,             // "Listing up to %u tickets matching criterea:"
-    LANG_COMMAND_TICKETS_LISTING_HEADER = 1524,             // "|       Id:   Lvl:  Locale: Category:  Status:"
-    //                                  = 1525-1530,        // Reserved for possible ticket commands and results
+    LANG_COMMAND_TICKETS_LISTING_FOOTER = 1524,             // "| Quick actions: |c00FFFFFF<Shift+click>|r on ticket id tag to read the ticket"
+    //                                  = 1525-1529,        // Reserved for possible ticket commands and results
+    LANG_TICKETS_PRINT_SPACER           = 1530,             // "|========================================================|"
     LANG_TICKET_ASSIGNEE_ALERT_ONLINE   = 1531,             // "Player is now online"
     LANG_TICKET_ASSIGNEE_ALERT_OFFLINE  = 1532,             // "Player is now offline"
     LANG_TICKET_ASSIGNEE_ALERT_UPDATED  = 1533,             // "Ticket was updated"
@@ -1047,7 +1048,7 @@ enum MangosStrings
     LANG_TICKET_BROADCAST_ESCALATION    = 1545,             // "[Tickets]: [%s] has been escalated (L%u) by %s"
     LANG_TICKET_BROADCAST_DEESCALATION  = 1546,             // "[Tickets]: [%s] has been de-escalated by the author\'s edits"
     LANG_TICKET_BROADCAST_CLOSED        = 1547,             // "[Tickets]: [%s] has been closed by %s"
-    LANG_TICKET_BROADCAST_SURVEY        = 1548,             // "[Tickets]: [%s] has been successfuly surveyed"
+    LANG_TICKET_BROADCAST_SURVEY        = 1548,             // "[Tickets]: [%s] has been successfully surveyed"
     //                                  = 1549              // Reserved for potential ticket broadcast
     LANG_TICKET_STATUS_BRIEF_OPEN       = 1550,             // "Open"
     LANG_TICKET_STATUS_BRIEF_UNSEEN     = 1551,             // "New"
@@ -1073,14 +1074,16 @@ enum MangosStrings
     LANG_TICKET_DETAILS_LINE_GM_NOTES   = 1571,             // "| GM notes:"
     LANG_TICKET_DETAILS_LINE_QUOTE      = 1572,             // "| >> |c00FF80FF%s|r"
     LANG_TICKET_DETAILS_LINE_QUOTE_GM   = 1573,             // "| >> |c000000FF%s|r"
-    LANG_TICKET_DETAILS_LINE_ACTIONS    = 1574,             // "| Quick actions: |c00FF80FF%s|r |c001AFF1A%s|r |c00FF1A1A%s|r |c0069CCF0%s|r"
+    LANG_TICKET_DETAILS_LINE_ACTIONS    = 1574,             // "| Quick actions: %s %s %s %s %s"
     LANG_TICKET_DETAILS_ACTION_WHISPER  = 1575,             // "WHISPER"
     LANG_TICKET_DETAILS_ACTION_RESOLVE  = 1576,             // "RESOLVE"
     LANG_TICKET_DETAILS_ACTION_DISCARD  = 1577,             // "DISCARD"
-    LANG_TICKET_DETAILS_ACTION_NOTE     = 1578,             // "NOTE"
-    LANG_TICKETS_PRINT_SPACER           = 1579,             // "|========================================================|"
-    LANG_TICKETS_NOTIFICATIONS          = 1580,             // "Ticket notifications"
-    // Room for more Level 2              1581-1599 not used
+    LANG_TICKET_DETAILS_ACTION_SORT     = 1578,             // "SORT"
+    LANG_TICKET_DETAILS_ACTION_NOTE     = 1579,             // "NOTE"
+    //                                  = 1580              // Reserved for potential ticket action string
+    LANG_TICKETS_NOTIFICATIONS          = 1581,             // "Ticket notifications"
+    //                                  = 1582-1590,        // Reserved for possible strings related to tickets
+    // Room for more Level 2              1591-1599 not used
 
     // Outdoor PvP
     LANG_OPVP_EP_CAPTURE_NPT_H          = 1600,

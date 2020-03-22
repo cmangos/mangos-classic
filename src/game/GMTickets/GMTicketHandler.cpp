@@ -32,7 +32,7 @@ void WorldSession::SendGMTicketResult(uint32 opcode, uint32 result) const
     SendPacket(data);
 }
 
-void WorldSession::SendGMTicket(GMTicket& ticket, time_t now/* = time(nullptr)*/) const
+void WorldSession::SendGMTicket(const GMTicket& ticket, time_t now/* = time(nullptr)*/) const
 {
     float daysTicketAge = sTicketMgr.GetTicketAgeDays(now, ticket.GetCreatedAt());
     float daysOldestTicketAge = sTicketMgr.GetOldestTicketAgeDays();

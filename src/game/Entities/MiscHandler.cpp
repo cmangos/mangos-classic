@@ -90,6 +90,10 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     if (zones_count > 10)
         return;                                             // can't be received from real client or broken packet
 
+    // GM ticket hook shift+click to read
+    if (sTicketMgr.HookGMTicketWhoQuery(player_name, GetPlayer()))
+        return;
+
     for (uint32 i = 0; i < zones_count; ++i)
     {
         uint32 temp;
@@ -102,9 +106,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
 
     if (str_count > 4)
         return;                                             // can't be received from real client or broken packet
-
-    // GM ticket chat: who request pre-hook
-    std::string gmticket_tag = sTicketMgr.HookGMTicketWhoQueryPreHook(player_name, GetPlayer());
 
     DEBUG_LOG("Minlvl %u, maxlvl %u, name %s, guild %s, racemask %u, classmask %u, zones %u, strings %u", level_min, level_max, player_name.c_str(), guild_name.c_str(), racemask, classmask, zones_count, str_count);
 
@@ -241,9 +242,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
         }
         if (!s_show)
             continue;
-
-        // GM ticket chat: who request post-hook
-        pname = sTicketMgr.HookGMTicketWhoQueryPostHook(gmticket_tag, player_name, pname);
 
         // 49 is maximum player count sent to client
         if (++matchcount > 49)

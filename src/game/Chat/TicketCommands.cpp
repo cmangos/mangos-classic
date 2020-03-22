@@ -248,26 +248,34 @@ bool ChatHandler::HandleTicketCommand(char* args)
 
 bool ChatHandler::HandleTicketsListCommand(char* args)
 {
-    const uint32 max = 10;
     std::ostringstream output;
 
-    if (char* categoryIdStr = ExtractOptNotLastArg(&args))
-    {
-        uint32 categoryId;
-        if (!ExtractUInt32(&args, categoryId))
-            return false;
+    uint32 arg1;
+    uint32 max = 10;
 
-        if (GMTicketCategoryEntry const* category = sGMTicketCategoryStore.LookupEntry(categoryId))
-            sTicketMgr.PrintTicketList(m_session, output, max, category);
+    const bool first = ExtractUInt32(&args, arg1);
+    const bool last = ExtractUInt32(&args, max);
+    const bool online = ExtractLiteralArg(&args, "online");
+
+    GMTicketCategoryEntry const* category = nullptr;
+
+    if (first)
+    {
+        if (!last)
+            max = arg1;
         else
         {
-            PSendSysMessage(LANG_COMMAND_TICKETS_BAD_CATEGORY, categoryId);
-            SetSentErrorMessage(true);
-            return false;
+            category = sGMTicketCategoryStore.LookupEntry(arg1);
+
+            if (!category)
+            {
+                PSendSysMessage(LANG_COMMAND_TICKETS_BAD_CATEGORY, arg1);
+                SetSentErrorMessage(true);
+                return false;
+            }
         }
     }
-    else
-        sTicketMgr.PrintTicketList(m_session, output, max);
+    sTicketMgr.PrintTicketList(m_session, output, max, category, online);
 
     std::string string = output.str();
     if (string.empty())
@@ -284,6 +292,7 @@ bool ChatHandler::HandleTicketsListCommand(char* args)
 bool ChatHandler::HandleTicketsQueueCommand(char *args)
 {
     bool value;
+
     if (!ExtractOnOff(&args, value))
     {
         SendSysMessage(LANG_USE_BOL);
@@ -298,10 +307,38 @@ bool ChatHandler::HandleTicketsQueueCommand(char *args)
 
 bool ChatHandler::HandleTicketsCommand(char* args)
 {
-    if (!*args)
-        return HandleTicketsListCommand(args);
+    // Detect cases when used as an alias for "ticket list"
+    {
+        if (!args || !*args)
+            return HandleTicketsListCommand(args);
+
+        std::string string = args;
+        char* input = const_cast<char*>(string.c_str());
+
+        uint32 arg;
+
+        bool listing = ExtractUInt32(&input, arg);
+
+        if (!listing)
+        {
+            if (char* literal = ExtractLiteralArg(&input))
+            {
+                std::string online = literal;
+                strToLower(online);
+                listing = (strcmp(online.c_str(), "online") == 0);
+            }
+            else
+                listing = true;
+        }
+
+        const bool result = (listing ? HandleTicketsListCommand(args) : false);
+
+        if (listing)
+            return result;
+    }
 
     bool value;
+
     if (!ExtractOnOff(&args, value))
     {
         SendSysMessage(LANG_USE_BOL);

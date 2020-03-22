@@ -238,10 +238,10 @@ class GMTicketMgr
         static inline const char* PrintTicketCategory(GMTicket const& ticket, LocaleConstant locale = LOCALE_enUS);
         static inline const char* PrintTicketChatAlert(GMTicketMgrChatAlert alert, LocaleConstant locale = LOCALE_enUS);
         static inline const char* PrintTicketStatus(GMTicket const& ticket, LocaleConstant locale = LOCALE_enUS);
-        static inline const char* PrintTicketStatusBullet(GMTicket const& ticket);
+        static inline const char* PrintTicketStatusColorSequence(GMTicket const& ticket);
         static inline const std::string PrintTicketSummaryLine(GMTicket const& ticket, LocaleConstant locale = LOCALE_enUS);
 
-        void PrintTicketList(WorldSession* session, std::ostringstream& output, size_t max, const GMTicketCategoryEntry* category = nullptr) const;
+        void PrintTicketList(WorldSession* session, std::ostringstream& output, size_t max, const GMTicketCategoryEntry* category = nullptr, bool online = false) const;
 
         static bool TicketChatIncoming(GMTicket* ticket, Player* player, WorldSession* gm, const std::string& message, bool addon = false);
         static bool TicketChatOutgoing(GMTicket* ticket, WorldSession* gm, Player* player, const std::string& message, bool addon = false);
@@ -250,9 +250,8 @@ class GMTicketMgr
         void OnPlayerOnlineState(Player &player, bool online) const;
         void ShowMOTD(Player &gm) const;
 
-        std::pair<bool, bool> HookGMTicketWhisper(Player* sender, const std::string& recepient, Player *character, const std::string &msg, bool addon);
-        const std::string HookGMTicketWhoQueryPreHook(std::string& query, Player* gm) const;
-        const std::string HookGMTicketWhoQueryPostHook(const std::string& tag, const std::string& name, const std::string& pname) const;
+        std::pair<bool, bool> HookGMTicketWhisper(Player* sender, const std::string& recepient, Player* character, const std::string &msg, bool addon);
+        bool HookGMTicketWhoQuery(const std::string& query, Player* gm) const;
 
         GMTicket* GetTicketById(uint32 id, GMTicketState state = GMTICKET_STATE_OPEN) const;
         GMTicket* GetTicketByPlayer(ObjectGuid playerGuid, GMTicketState state = GMTICKET_STATE_OPEN, ObjectGuid assigneeGuid = ObjectGuid()) const;
@@ -286,6 +285,7 @@ class GMTicketMgr
     private:
         static inline CommandResult CanComment(const GMTicket* ticket, WorldSession* who);
         static inline CommandResult CanClose(const GMTicket* ticket, bool resolve, WorldSession* who);
+        static inline CommandResult CanSort(const GMTicket* ticket, WorldSession* who);
         static inline CommandResult CanWhisper(const GMTicket* ticket, WorldSession* who);
 
         std::pair<GMTicket*, std::string> GetTicketByIdTag(const std::string& tag, GMTicketState state = GMTICKET_STATE_OPEN, ObjectGuid assigneeGuid = ObjectGuid()) const;
