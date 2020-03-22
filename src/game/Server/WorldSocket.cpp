@@ -56,6 +56,19 @@ struct ServerPktHeader
 #pragma pack(pop)
 #endif
 
+std::vector<uint32> InitOpcodeCooldowns()
+{
+    std::vector<uint32> data(NUM_MSG_TYPES, 0);
+
+    data[CMSG_WHO] = 5000;
+    data[CMSG_WHOIS] = 5000;
+    data[CMSG_INSPECT] = 5000;
+
+    return data;
+}
+
+std::vector<uint32> WorldSocket::m_packetCooldowns = InitOpcodeCooldowns();
+
 std::deque<uint32> WorldSocket::GetOpcodeHistory()
 {
     return m_opcodeHistory;
@@ -187,6 +200,15 @@ bool WorldSocket::ProcessIncomingData()
     }
 
     sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct->GetOpcode(), pct->GetOpcodeName(), *pct, true);
+
+    if (WorldSocket::m_packetCooldowns[opcode])
+    {
+        auto now = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
+        if (now < m_lastPacket[opcode]) // packet on cooldown
+            return true;
+        else // start cooldown and allow execution
+            m_lastPacket[opcode] = now + std::chrono::milliseconds(WorldSocket::m_packetCooldowns[opcode]);
+    }
 
     try
     {

@@ -137,6 +137,9 @@ class WorldSocket : public MaNGOS::Socket
         BigNumber& GetSessionKey() { return m_s; }
 
         std::deque<uint32> GetOpcodeHistory();
+
+        static std::vector<uint32> m_packetCooldowns;
+        std::map<uint32, TimePoint> m_lastPacket;
 };
 
 #endif  /* _WORLDSOCKET_H */
