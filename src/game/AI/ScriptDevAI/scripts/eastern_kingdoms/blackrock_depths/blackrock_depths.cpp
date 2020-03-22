@@ -1859,6 +1859,9 @@ struct npc_ironhand_guardianAI : public ScriptedAI
     void Reset() override
     {
         m_goutOfFlameTimer = urand(4, 30) * IN_MILLISECONDS;
+        m_creature->SetCanEnterCombat(false);
+        SetCombatMovement(false);
+        SetReactState(REACT_PASSIVE);
     }
 
     void UpdateAI(const uint32 diff) override
