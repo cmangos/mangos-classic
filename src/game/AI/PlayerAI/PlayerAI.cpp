@@ -20,9 +20,14 @@
 #include "Entities/Player.h"
 #include "Spells/SpellMgr.h"
 
-PlayerAI::PlayerAI(Player* player, uint32 maxSpells) : UnitAI(player), m_player(player), m_playerSpellActions(maxSpells)
+enum GenericPlayerAIActions
 {
+    GENERIC_ACTION_RESET = 1000,
+};
 
+PlayerAI::PlayerAI(Player* player, uint32 maxSpells) : UnitAI(player), m_player(player), m_playerSpellActions(maxSpells), m_spellsDisabled(false)
+{
+    AddCustomAction(GENERIC_ACTION_RESET, true, [&]() { m_spellsDisabled = false; });
 }
 
 uint32 PlayerAI::LookupHighestLearnedRank(uint32 spellId)
@@ -47,9 +52,17 @@ void PlayerAI::AddPlayerSpellAction(uint32 priority, uint32 spellId, std::functi
 
 void PlayerAI::ExecuteSpells()
 {
+    bool success = false;
     for (auto& data : m_playerSpellActions)
         if (Unit* target = data.second())
-            DoCastSpellIfCan(target, data.first);
+            if (DoCastSpellIfCan(target, data.first) == CAST_OK)
+                success = true;
+
+    if (success)
+    {
+        m_spellsDisabled = false;
+        ResetTimer(GENERIC_ACTION_RESET, urand(5000, 10000));
+    }
 }
 
 void PlayerAI::JustGotCharmed(Unit* charmer)

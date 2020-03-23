@@ -20,13 +20,14 @@
 #define MANGOS_PLAYER_AI_H
 
 #include "AI/BaseAI/UnitAI.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 #include <functional>
 #include <vector>
 
 class Player;
 
 // for future use - in case PlayerAI needs a different purpose from control during charms split them
-class PlayerAI : public UnitAI
+class PlayerAI : public UnitAI, public TimerManager
 {
     public:
         PlayerAI(Player* player, uint32 maxSpells);
@@ -41,6 +42,7 @@ class PlayerAI : public UnitAI
     private:
         void ExecuteSpells();
         std::vector<std::pair<uint32, std::function<Unit*()>>> m_playerSpellActions;
+        bool m_spellsDisabled;
 };
 
 UnitAI* GetClassAI(Classes playerClass, Player* player);
