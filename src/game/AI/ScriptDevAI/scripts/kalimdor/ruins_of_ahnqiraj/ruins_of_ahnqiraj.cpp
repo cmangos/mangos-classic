@@ -349,11 +349,12 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
             pRajaxx->SetInCombatWithZone();
             pRajaxx->AI()->AttackClosestEnemy();
         }
+        m_uiArmyDelayTimer = 0;
     }
     else
     {
         // Increase the wave id if some are already dead
-        while (m_sArmyWavesGuids[m_uiCurrentArmyWave].empty() && m_uiCurrentArmyWave < MAX_ARMY_WAVES)
+        while (m_uiCurrentArmyWave < MAX_ARMY_WAVES && m_sArmyWavesGuids[m_uiCurrentArmyWave].empty())
             ++m_uiCurrentArmyWave;
 
         if (m_uiCurrentArmyWave == MAX_ARMY_WAVES)
@@ -382,10 +383,10 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
             if (Creature* pRajaxx = GetSingleCreatureFromStorage(NPC_RAJAXX))
                 DoScriptText(aArmySortingParameters[m_uiCurrentArmyWave].m_uiYellEntry, pRajaxx);
         }
+        // on wowwiki it states that there were 3 min between the waves, but this was reduced in later patches
+        m_uiArmyDelayTimer = 2 * MINUTE * IN_MILLISECONDS;
     }
 
-    // on wowwiki it states that there were 3 min between the waves, but this was reduced in later patches
-    m_uiArmyDelayTimer = 2 * MINUTE * IN_MILLISECONDS;
     ++m_uiCurrentArmyWave;
 }
 
