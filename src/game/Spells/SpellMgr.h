@@ -420,6 +420,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 14178:         // Sticky Tar
         case 15088:         // Flurry
         case 15097:         // Enrage
+        case 15506:         // Immolate
         case 15876:         // Ice Blast
         case 16140:         // Exploding Cadaver (Exploding Cadaver)
         case 16563:         // Drowning Death
