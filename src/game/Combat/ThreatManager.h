@@ -176,7 +176,7 @@ class ThreatContainer
         void addReference(HostileReference* hostileReference) { iThreatList.push_back(hostileReference); }
         void clearReferences();
         // Sort the list if necessary
-        void update(bool force);
+        void update(bool force, bool isPlayer);
 
         ThreatList iThreatList;
     private:

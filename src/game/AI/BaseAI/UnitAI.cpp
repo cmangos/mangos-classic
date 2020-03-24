@@ -670,21 +670,16 @@ void UnitAI::DistancingEnded()
 
 void UnitAI::AttackClosestEnemy()
 {
-    Unit* closestEnemy = nullptr;
     float distance = FLT_MAX;
-    ThreatList const& list = m_unit->getThreatManager().getThreatList();
-    for (auto& data : list)
+    AttackSpecificEnemy([&](Unit* enemy, Unit*& closestEnemy) mutable
     {
-        Unit* enemy = data->getTarget();
         float curDistance = enemy->GetDistance(m_unit, true, DIST_CALC_NONE);
         if (!closestEnemy || curDistance < distance)
         {
             closestEnemy = enemy;
             distance = curDistance;
         }
-    }
-
-    AttackStart(closestEnemy);
+    });
 }
 
 void UnitAI::SetRootSelf(bool apply, bool combatOnly)

@@ -78,7 +78,21 @@ void PlayerAI::EnterEvadeMode()
         m_player->GetMotionMaster()->MoveFollow(charmer, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, true);
 }
 
-void PlayerAI::UpdateAI(const uint32 diff)
+void PlayerAI::AttackClosestEnemy()
+{
+    float distance = FLT_MAX;
+    AttackSpecificEnemy([&](Unit* enemy, Unit*& closestEnemy) mutable
+    {
+        float curDistance = enemy->GetDistance(m_unit, true, DIST_CALC_NONE);
+        if (!closestEnemy || (!closestEnemy->IsPlayer() && enemy->IsPlayer()) || curDistance < distance)
+        {
+            closestEnemy = enemy;
+            distance = curDistance;
+        }
+    });
+}
+
+void PlayerAI::UpdateAI(const uint32 /*diff*/)
 {
     // Check if we have a current target
     if (!m_player->SelectHostileTarget() || !m_player->GetVictim())
