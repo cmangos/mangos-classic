@@ -96,7 +96,7 @@ static const DialogueEntry aStadiumDialogue[] =
     {0, 0, 0},
 };
 
-static const float rookeryEventSpawnPos[3] = {43.7685f, -259.82f, 91.6483f};
+static const float rookeryEventSpawnPos[3] = {51.11098f, -266.0549f, 92.87846f};
 
 instance_blackrock_spire::instance_blackrock_spire(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aStadiumDialogue),
     m_bUpperDoorOpened(false),
@@ -691,8 +691,8 @@ void instance_blackrock_spire::DoSendNextFlamewreathWave()
             pSummoned = pSummoner->SummonCreature(urand(0, 1) && m_uiFlamewreathWaveCount ? NPC_ROOKERY_GUARDIAN : NPC_ROOKERY_HATCHER, fX, fY, fZ, 0.0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 300000);
             if (pSummoned)
             {
-                pSummoner->GetContactPoint(pSummoned, fX, fY, fZ);
-                pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, pSummoner->GetPositionZ());
+                //pSummoner->GetContactPoint(pSummoned, fX, fY, fZ);
+                //pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, pSummoner->GetPositionZ());
             }
         }
         if (pSummoned && m_uiFlamewreathWaveCount == 0)
@@ -710,7 +710,7 @@ void instance_blackrock_spire::DoSendNextFlamewreathWave()
     else                                                    // Send Flamewreath
     {
         if (Creature* pSolakar = pSummoner->SummonCreature(NPC_SOLAKAR_FLAMEWREATH, rookeryEventSpawnPos[0], rookeryEventSpawnPos[1], rookeryEventSpawnPos[2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, HOUR * IN_MILLISECONDS))
-            pSolakar->GetMotionMaster()->MovePoint(1, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ());
+            //pSolakar->GetMotionMaster()->MovePoint(1, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ());
         SetData(TYPE_FLAMEWREATH, SPECIAL);
         m_uiFlamewreathEventTimer = 0;
     }
