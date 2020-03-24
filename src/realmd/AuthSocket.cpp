@@ -250,10 +250,10 @@ bool AuthSocket::ProcessIncomingData()
             DEBUG_LOG("[Auth] Got unknown packet %u", cmd);
             return false;
         }
-
-        // if we reach here, it means that a valid opcode was found and the handler completed successfully
-        m_timeoutTimer.cancel();
     }
+
+    // if we reach here, it means that a valid opcode was found and the handler completed successfully
+    m_timeoutTimer.cancel();
 
     return true;
 }
