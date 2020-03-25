@@ -65,6 +65,8 @@ class ScriptedInstance : public InstanceData
         }
 
     protected:
+        void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents
+
         // Storage for GO-Guids and NPC-Guids
         EntryGuidMap m_goEntryGuidStore;                   // Store unique GO-Guids by entry
         EntryGuidMap m_npcEntryGuidStore;                  // Store unique NPC-Guids by entry

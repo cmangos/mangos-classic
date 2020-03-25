@@ -147,6 +147,14 @@ Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBe
     return nullptr;
 }
 
+void ScriptedInstance::DespawnGuids(GuidVector& spawns)
+{
+    for (ObjectGuid& guid : spawns)
+        if (Creature* spawn = instance->GetAnyTypeCreature(guid))
+            spawn->ForcedDespawn();
+    spawns.clear();
+}
+
 /// Returns a pointer to a loaded GameObject that was stored in m_goEntryGuidStore. Can return nullptr
 GameObject* ScriptedInstance::GetSingleGameObjectFromStorage(uint32 entry)
 {
