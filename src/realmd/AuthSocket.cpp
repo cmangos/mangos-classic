@@ -553,7 +553,7 @@ bool AuthSocket::_HandleLogonProof()
                 Write(data, sizeof(data));
                 return true;
             }
-            std::vector<uint8> keys(pinCount);
+            std::vector<uint8> keys(pinCount + 1);
             if (!Read((char*)keys.data(), sizeof(uint8) * pinCount))
             {
                 const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0 };
@@ -561,7 +561,7 @@ bool AuthSocket::_HandleLogonProof()
                 return true;
             }
 
-
+            keys[pinCount] = '\0';
             auto ServerToken = generateToken(_token.c_str());
             auto clientToken = atoi((const char*)keys.data());
             if (ServerToken != clientToken)
