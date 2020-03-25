@@ -668,10 +668,24 @@ void UnitAI::DistancingEnded()
     SetCombatScriptStatus(false);
 }
 
+void UnitAI::AttackSpecificEnemy(std::function<void(Unit*, Unit*&)> check)
+{
+    Unit* chosenEnemy = nullptr;
+    float distance = FLT_MAX;
+    ThreatList const& list = m_unit->getThreatManager().getThreatList();
+    for (auto& data : list)
+    {
+        Unit* enemy = data->getTarget();
+        check(enemy, chosenEnemy);
+    }
+
+    AttackStart(chosenEnemy);
+}
+
 void UnitAI::AttackClosestEnemy()
 {
     float distance = FLT_MAX;
-    AttackSpecificEnemy([&](Unit* enemy, Unit*& closestEnemy) mutable
+    AttackSpecificEnemy([&](Unit* enemy, Unit*& closestEnemy)
     {
         float curDistance = enemy->GetDistance(m_unit, true, DIST_CALC_NONE);
         if (!closestEnemy || curDistance < distance)

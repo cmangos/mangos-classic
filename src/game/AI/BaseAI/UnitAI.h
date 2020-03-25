@@ -459,20 +459,7 @@ class UnitAI
         virtual void DistancingStarted();
         virtual void DistancingEnded();
 
-        template <typename T>
-        void AttackSpecificEnemy(T check)
-        {
-            Unit* chosenEnemy = nullptr;
-            float distance = FLT_MAX;
-            ThreatList const& list = m_unit->getThreatManager().getThreatList();
-            for (auto& data : list)
-            {
-                Unit* enemy = data->getTarget();
-                check(enemy, chosenEnemy);
-            }
-
-            AttackStart(chosenEnemy);
-        }
+        void AttackSpecificEnemy(std::function<void(Unit*,Unit*&)> check);
         virtual void AttackClosestEnemy();
 
         void SetRootSelf(bool apply, bool combatOnly = false);
