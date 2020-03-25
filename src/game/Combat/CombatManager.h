@@ -52,6 +52,7 @@ class CombatManager
         void TriggerCombatTimer(Unit* target);
         void TriggerCombatTimer(bool pvp);
         void StopCombatTimer() { m_combatTimer = 0; }
+        bool IsLeashingDisabled() { return m_leashingDisabled; }
         void SetLeashingDisable(bool apply) { m_leashingDisabled = apply; }
         void SetLeashingCheck(std::function<bool(Unit*, float x, float y, float z)> check) { m_leashingCheck = check; } // if check evals as true - evade
     private:

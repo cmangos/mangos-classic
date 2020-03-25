@@ -56,6 +56,9 @@ void CombatManager::Update(const uint32 diff)
                 m_evadeTimer -= diff;
         }
 
+        if (m_leashingDisabled)
+            return;
+
         // disabled in instances except for players in BGs
         if (!m_owner->GetMap()->IsDungeon() || m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
