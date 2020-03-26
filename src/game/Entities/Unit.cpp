@@ -7563,7 +7563,7 @@ void Unit::ClearInCombat()
 
 void Unit::HandleExitCombat(bool pvpCombat)
 {
-    if (AI() && !IsClientControlled())
+    if (AI() && !GetClientControlling())
         AI()->EnterEvadeMode();
     else
         CombatStop(false, !pvpCombat);
