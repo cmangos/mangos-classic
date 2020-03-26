@@ -298,6 +298,7 @@ class Pet : public Creature
 
         virtual void RegenerateHealth() override;
 
+        void ResetCorpseRespawn();
     protected:
         uint32  m_happinessTimer;
         uint32  m_loyaltyTimer;

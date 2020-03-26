@@ -2267,3 +2267,8 @@ void Pet::RegenerateHealth()
 
     ModifyHealth(addvalue);
 }
+
+void Pet::ResetCorpseRespawn()
+{
+    m_corpseExpirationTime = GetMap()->GetCurrentClockTime();
+}

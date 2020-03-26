@@ -5643,6 +5643,7 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
 
     if (_player->GetDistance(pet) >= 2.0f)
     {
+        pet->ResetCorpseRespawn(); // need to absolutely make sure pet is visible - despawned corpse - invisible - assert
         float x, y, z; // this effect is destination targeted
         m_targets.getDestination(x, y, z);
         pet->NearTeleportTo(x, y, z, -m_caster->GetOrientation());
