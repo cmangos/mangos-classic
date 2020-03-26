@@ -10800,11 +10800,26 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
     else
         m_charmedUnitsPrivate.erase(charmedGuid);
 
-    // may be not correct we have to remove only some generator taking account of the current situation
+    // Update movement of the victim
+    // Update crowd controlled movement if required:
+    // TODO: requires motionmster upgrade for proper handling past this line
+    // We are effectively rebuilding motion master contents: confused > fleeing > panic
     if (!IsPossessCharmType(spellId))
     {
+        const bool panic = charmed->IsInPanic(), fleeing = charmed->IsFleeing(), confused = charmed->IsConfused();
+
+        // stop any generated movement: current solution
         charmed->StopMoving(true);
-        charmed->GetMotionMaster()->Clear();
+        charmed->GetMotionMaster()->Initialize();
+
+        if (confused)
+            charmed->GetMotionMaster()->MoveConfused();
+        else if (fleeing && !panic)
+        {
+            AuraList const& fears = charmed->GetAurasByType(SPELL_AURA_MOD_FEAR);
+            Unit* source = (fears.empty() ? nullptr : fears.back()->GetCaster());
+            charmed->GetMotionMaster()->MoveFleeing(source ? source : this);
+        }
     }
 
     Creature* charmedCreature = nullptr;
@@ -10850,8 +10865,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
             }
 
             // we have to restore initial MotionMaster
-            while (charmed->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
-                charmed->GetMotionMaster()->MovementExpired(true);
+            charmed->GetMotionMaster()->UnMarkFollowMovegens();
         }
         else
         {
@@ -10887,6 +10901,8 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         charmed->DeleteThreatList();
 
         charmed->SetTarget(nullptr);
+
+        charmed->GetMotionMaster()->UnMarkFollowMovegens();
     }
 
     // Update possessed's client control status after altering flags

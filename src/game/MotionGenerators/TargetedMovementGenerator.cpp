@@ -567,6 +567,12 @@ bool FollowMovementGenerator::EnableWalking() const
     return (i_target.isValid() && i_target->IsWalking());
 }
 
+void FollowMovementGenerator::MarkMovegen()
+{
+    if (m_possess)
+        m_main = false;
+}
+
 float FollowMovementGenerator::GetSpeed(Unit& owner) const
 {
     const UnitMoveType type = i_target->m_movementInfo.GetSpeedType();
@@ -624,7 +630,7 @@ bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
     return (i_target->HasInArc(&owner) != !i_target->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_BACKWARD)));
 }
 
-bool FollowMovementGenerator::IsUnstuckAllowed(Unit &owner) const
+bool FollowMovementGenerator::IsUnstuckAllowed(Unit& owner) const
 {
     // Do not try to unstuck if in combat
     if (owner.IsInCombat() || !i_target.isValid() || i_target->IsInCombat())
@@ -645,6 +651,9 @@ bool FollowMovementGenerator::IsUnstuckAllowed(Unit &owner) const
 void FollowMovementGenerator::Initialize(Unit& owner)
 {
     if (!i_target.isValid() || !i_target->IsInWorld())
+        return;
+
+    if (i_target->GetMap() != owner.GetMap())
         return;
 
     owner.addUnitState(UNIT_STAT_FOLLOW);                   // _MOVE set in _SetTargetLocation after required checks
@@ -922,7 +931,7 @@ void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& 
             targetOrientation = (!targetRelocation && !m_targetMoving && !m_targetFaced);
             targetSpeedChanged = (targetSpeedChanged && !targetRelocation && !targetOrientation);
             i_lastTargetPos = currentTargetPos;
-       }
+        }
     }
 
     // Decide whether it's suitable time to update position or orientation

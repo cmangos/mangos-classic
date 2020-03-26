@@ -190,7 +190,7 @@ void MotionMaster::DirectExpire(bool reset)
     // also drop stored under top() targeted motions
     if (!onlyRemoveOne)
     {
-        while (!empty() && (top()->IsRemovedOnDirectExpire()))
+        while (!empty() && (top()->IsRemovedOnExpire()))
         {
             MovementGenerator* temp = top();
             pop();
@@ -232,7 +232,7 @@ void MotionMaster::DelayedExpire(bool reset)
         m_expList = new ExpireList();
 
     // also drop stored under top() targeted motions
-    while (!empty() && (top()->GetMovementGeneratorType() == CHASE_MOTION_TYPE || top()->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE))
+    while (!empty() && (top()->IsRemovedOnExpire()))
     {
         MovementGenerator* temp = top();
         pop();
@@ -280,7 +280,7 @@ void MotionMaster::MoveTargetedHome(bool runHome)
         if (Unit* target = m_owner->GetMaster())
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
-            Mutate(new FollowMovementGenerator(*target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, false));
+            Mutate(new FollowMovementGenerator(*target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, false, m_owner->IsPlayer() && !m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)));
         }
         // Manual exception for linked mobs
         else if (m_owner->IsLinkingEventTrigger() && m_owner->GetMap()->GetCreatureLinkingHolder()->TryFollowMaster((Creature*)m_owner))
@@ -347,7 +347,7 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, bool asMain
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
 
-    Mutate(new FollowMovementGenerator(*target, dist, angle, asMain));
+    Mutate(new FollowMovementGenerator(*target, dist, angle, asMain, m_owner->IsPlayer() && !m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)));
 }
 
 void MotionMaster::MoveStay(float x, float y, float z, float o, bool asMain)
@@ -619,6 +619,20 @@ void MotionMaster::UnpauseWaypoints()
         gen->AddToWaypointPauseTime(0, true);
         return;
     }
+}
+
+void MotionMaster::UnMarkFollowMovegens()
+{
+    Impl::container_type::iterator it = Impl::c.begin();
+    for (; it != end(); ++it)
+    {
+        if ((*it)->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+        {
+            static_cast<FollowMovementGenerator*>((*it))->MarkMovegen();
+        }
+    }
+    if (top()->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+        MovementExpired();
 }
 
 void MotionMaster::propagateSpeedChange()

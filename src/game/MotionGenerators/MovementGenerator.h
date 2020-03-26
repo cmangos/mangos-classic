@@ -57,7 +57,7 @@ class MovementGenerator
         // given destination unreachable? due to pathfinsing or other
         virtual bool IsReachable() const { return true; }
 
-        virtual bool IsRemovedOnDirectExpire() const { return false; }
+        virtual bool IsRemovedOnExpire() const { return false; }
 
         // used for check from Update call is movegen still be active (top movement generator)
         // after some not safe for this calls

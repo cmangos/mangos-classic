@@ -164,6 +164,8 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void PauseWaypoints(uint32 time = MINUTE * IN_MILLISECONDS);
         void UnpauseWaypoints();
 
+        void UnMarkFollowMovegens();
+
     private:
         void Mutate(MovementGenerator* m);                  // use Move* functions instead
 
