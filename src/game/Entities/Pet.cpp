@@ -2270,5 +2270,5 @@ void Pet::RegenerateHealth()
 
 void Pet::ResetCorpseRespawn()
 {
-    m_corpseExpirationTime = GetMap()->GetCurrentClockTime();
+    m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(1000); // rudimentary value - just need more than now
 }
