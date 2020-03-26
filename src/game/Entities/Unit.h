@@ -739,7 +739,7 @@ enum DiminishingLevels
 struct DiminishingReturn
 {
     DiminishingReturn(DiminishingGroup group, uint32 t, uint32 count, uint32 duration)
-        : DRGroup(group), stack(0), hitTime(t), hitCount(count), lastDuration(duration)
+        : DRGroup(group), stack(0), hitTime(t), hitCount(count)
     {}
 
     /**
@@ -763,10 +763,6 @@ struct DiminishingReturn
      * decides how how long the duration of the stun etc is.
      */
     uint32                  hitCount;
-    /**
-     * Records nominal duration of the last applied spell entry of this DiminishingGroup
-     */
-    uint32                  lastDuration;
 };
 
 // At least some values expected fixed and used in auras field, other custom

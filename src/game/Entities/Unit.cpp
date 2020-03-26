@@ -8275,8 +8275,11 @@ DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
         if (!i.hitTime)
             return DIMINISHING_LEVEL_1;
 
+        const bool pvp = (GetTypeId() == TYPEID_PLAYER);
+        const bool diminished = IsDiminishingReturnsGroupDurationDiminished(group, pvp);
+
         // If enough time has passed sinc the last spell from this group was casted - reset the count
-        if (i.stack == 0 && WorldTimer::getMSTimeDiff(i.hitTime, WorldTimer::getMSTime()) > GetDiminishingReturnsGroupResetTime(group, i.lastDuration, (GetTypeId() == TYPEID_PLAYER)))
+        if (diminished && i.stack == 0 && WorldTimer::getMSTimeDiff(i.hitTime, WorldTimer::getMSTime()) > (15 * IN_MILLISECONDS))
         {
             i.hitCount = DIMINISHING_LEVEL_1;
             return DIMINISHING_LEVEL_1;
@@ -8303,9 +8306,6 @@ void Unit::IncrDiminishing(DiminishingGroup group, uint32 duration, bool pvp)
             i.hitCount += 1;
         else
             i.hitCount = DIMINISHING_LEVEL_IMMUNE;
-
-        if (i.lastDuration != duration)
-            i.lastDuration = duration;
 
         return;
     }
