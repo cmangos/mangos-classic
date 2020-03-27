@@ -466,51 +466,51 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
         } break;
 
         case CHAT_MSG_AFK:
-        {
-            std::string msg;
-            recv_data >> msg;
-
-            if (!_player->isInCombat())
-            {
-                if (_player->isAFK())                       // Already AFK
-                {
-                    if (msg.empty())
-                        _player->ToggleAFK();               // Remove AFK
-                    else
-                        _player->autoReplyMsg = msg;        // Update message
-                }
-                else                                        // New AFK mode
-                {
-                    _player->autoReplyMsg = msg.empty() ? GetMangosString(LANG_PLAYER_AFK_DEFAULT) : msg;
-
-                    if (_player->isDND())
-                        _player->ToggleDND();
-
-                    _player->ToggleAFK();
-                }
-            }
-            break;
-        }
         case CHAT_MSG_DND:
         {
             std::string msg;
             recv_data >> msg;
 
-            if (_player->isDND())                           // Already DND
+            const bool flagged = (type == CHAT_MSG_AFK ? _player->isAFK() : _player->isDND());
+
+            if (flagged)                            // Already flagged
             {
-                if (msg.empty())
-                    _player->ToggleDND();                   // Remove DND
-                else
-                    _player->autoReplyMsg = msg;            // Update message
+                if (msg.empty())                    // Remove flag
+                {
+                    if (type == CHAT_MSG_AFK)
+                        _player->ToggleAFK();
+                    else
+                        _player->ToggleDND();
+                }
+                else                                // Update message
+                {
+                    if (!processChatmessageFurtherAfterSecurityChecks(msg, LANG_UNIVERSAL))
+                        msg = GetMangosString(type == CHAT_MSG_AFK ? LANG_PLAYER_AFK_DEFAULT : LANG_PLAYER_DND_DEFAULT);
+
+                    _player->autoReplyMsg = msg;
+                }
             }
-            else                                            // New DND mode
+            else                                    // New AFK/DND mode
             {
-                _player->autoReplyMsg = msg.empty() ? GetMangosString(LANG_PLAYER_DND_DEFAULT) : msg;
+                if (msg.empty() || !processChatmessageFurtherAfterSecurityChecks(msg, LANG_UNIVERSAL))
+                    msg = GetMangosString(type == CHAT_MSG_AFK ? LANG_PLAYER_AFK_DEFAULT : LANG_PLAYER_DND_DEFAULT);
 
-                if (_player->isAFK())
+                _player->autoReplyMsg = msg;
+
+                if (type == CHAT_MSG_AFK)
+                {
+                    if (_player->isDND())
+                        _player->ToggleDND();
+
                     _player->ToggleAFK();
+                }
+                else
+                {
+                    if (_player->isAFK())
+                        _player->ToggleAFK();
 
-                _player->ToggleDND();
+                    _player->ToggleDND();
+                }
             }
             break;
         }
