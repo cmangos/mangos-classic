@@ -104,7 +104,7 @@ void Channel::Join(Player* player, const char* password)
     JoinNotify(guid);
 
     // if no owner first logged will become
-    if (!IsConstant() && !IsStatic() && !m_ownerGuid)
+    if (!IsPublic() && !m_ownerGuid)
         SetOwner(guid, (m_players.size() > 1));
 
     // try to auto-convert this channel to static upon reaching treshold
@@ -148,7 +148,7 @@ void Channel::Leave(Player* player, bool send)
 
     LeaveNotify(guid);
 
-    if (changeowner && !IsConstant() && !IsStatic())
+    if (changeowner && !IsPublic())
         SetOwner(SelectNewOwner(), (m_players.size() > 1));
 }
 
@@ -215,7 +215,7 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
     m_players.erase(targetGuid);
     target->LeftChannel(this);
 
-    if (changeowner && !IsConstant() && !IsStatic())
+    if (changeowner && !IsPublic())
         SetOwner(SelectNewOwner(), (m_players.size() > 1));
 }
 
@@ -965,6 +965,20 @@ bool Channel::SetStatic(bool state, bool command/* = false*/)
     if (!command && (!treshold || state != (GetNumPlayers() >= treshold)))
         return false;
 
+    // Strip moderator privileges
+    if (state)
+    {
+        for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
+        {
+            if (i->second.IsModerator())
+                SetModerator(i->second.player, false);
+        }
+    }
+
+    // Unset/Set channel owner
+    if (state == bool(m_ownerGuid))
+        SetOwner(state ? ObjectGuid() : SelectNewOwner());
+
     // Disable premoderation mode on conversion to static
     if (state && m_moderate)
     {
@@ -983,20 +997,6 @@ bool Channel::SetStatic(bool state, bool command/* = false*/)
         WorldPacket data;
         MakeAnnouncementsOff(data, ObjectGuid());
         SendToAll(data);
-    }
-
-    // Unset/Set channel owner
-    if (state == bool(m_ownerGuid))
-        SetOwner(state ? ObjectGuid() : SelectNewOwner());
-
-    // Strip moderator privileges
-    if (state)
-    {
-        for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
-        {
-            if (i->second.IsModerator())
-                SetModerator(i->second.player, false);
-        }
     }
 
     m_static = state;
