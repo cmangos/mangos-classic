@@ -216,7 +216,7 @@ class SpellAuraHolder
         int32 m_duration;                                   // Current time
         int32 m_timeCla;                                    // Timer for power per sec calculation
 
-        uint32 m_heartbeatResistChance;                     // Chance to break this spell due to heartbeat resistance (converted to 1-10000 range for roll)
+        float m_heartbeatResistChance;                      // Chance to break this spell due to heartbeat resistance
         int32 m_heartbeatResistInterval;                    // Heartbeat resistance periodic interval
         int32 m_heartbeatResistTimer;                       // Timer for heartbeat resistance
 

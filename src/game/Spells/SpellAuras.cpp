@@ -5982,14 +5982,14 @@ void SpellAuraHolder::SetHeartbeatResist(uint32 chance, int32 originalDuration, 
     // Main points in common cited by independent sources:
     // * Break attempts become more frequent as hit count rises
     // * Break chance becomes higher as hit count rises
-    m_heartbeatResistChance = std::min(chance * (1 + drLevel), 10000u);
-    m_heartbeatResistInterval = std::max(1000, int32(float(originalDuration) / (2 + drLevel)));
+    m_heartbeatResistChance = (0.01f * chance * (1 + drLevel));
+    m_heartbeatResistInterval = std::max(1000, int32(uint32(originalDuration) / (2 + drLevel)));
     m_heartbeatResistTimer = m_heartbeatResistInterval;
 }
 
 void SpellAuraHolder::UpdateHeartbeatResist(uint32 diff)
 {
-    if (!m_heartbeatResistChance || !m_heartbeatResistInterval || m_heartbeatResistTimer <= 0)
+    if (m_heartbeatResistChance == 0.0f || !m_heartbeatResistInterval || m_heartbeatResistTimer <= 0)
         return;
 
     m_heartbeatResistTimer -= diff;
@@ -6000,10 +6000,9 @@ void SpellAuraHolder::UpdateHeartbeatResist(uint32 diff)
 
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "UpdateHeartbeatResist: Update tick for spell %u with %i ms interval", m_spellProto->Id, m_heartbeatResistInterval);
 
-        const uint32 random = urand(1, 10000);
-        const bool resist = (random <= m_heartbeatResistChance);
+        const bool resist = roll_chance_f(m_heartbeatResistChance);
 
-        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "UpdateHeartbeatResist: Rolled %u, result: %s (chance %u)", random, (resist ? "RESIST" : "HIT"), m_heartbeatResistChance);
+        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "UpdateHeartbeatResist: Result: %s (chance %.2f)", (resist ? "RESIST" : "HIT"), double(m_heartbeatResistChance));
 
         if (resist)
         {
