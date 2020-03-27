@@ -1,9 +1,9 @@
 #ifndef RECASTDEMOSHARED_H
 #define RECASTDEMOSHARED_H
 
-#ifdef WIN32
-#	define snprintf _snprintf
-#endif
+//#ifdef WIN32
+//#	define snprintf _snprintf
+//#endif
 
 #include <cstddef>
 
@@ -35,12 +35,15 @@ enum SamplePartitionType
     SAMPLE_PARTITION_LAYERS,
 };
 
-const static float BLOCK_SIZE = 533 + 1 / 3.0f;
-const static float BASE_UNIT_DIM = BLOCK_SIZE / 2000.0f;
+namespace RecastDemo
+{
+    const static float BLOCK_SIZE = 533 + 1 / 3.0f;
+    const static float BASE_UNIT_DIM = BLOCK_SIZE / 2000.0f;
 
-// All are in UNIT metrics!
-const static int VERTEX_PER_MAP = int(BLOCK_SIZE / BASE_UNIT_DIM + 0.5f);
-const static int VERTEX_PER_TILE = 80; // must divide VERTEX_PER_MAP
-const static int TILES_PER_MAP = VERTEX_PER_MAP / VERTEX_PER_TILE;
+    // All are in UNIT metrics!
+    const static int VERTEX_PER_MAP = int(BLOCK_SIZE / BASE_UNIT_DIM + 0.5f);
+    const static int VERTEX_PER_TILE = 80; // must divide VERTEX_PER_MAP
+    const static int TILES_PER_MAP = VERTEX_PER_MAP / VERTEX_PER_TILE;
+}
 
 #endif

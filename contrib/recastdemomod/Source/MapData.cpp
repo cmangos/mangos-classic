@@ -87,10 +87,10 @@ void MapInfos::BuildNavMeshOfTile(unsigned int tx, unsigned int ty, rcConfig* cf
         float const* bmax = mo->BMax();
         // convert coord bounds to grid bounds
         unsigned int minX, minY, maxX, maxY;
-        maxX = 32 - bmin[0] / BLOCK_SIZE;
-        maxY = 32 - bmin[2] / BLOCK_SIZE;
-        minX = 32 - bmax[0] / BLOCK_SIZE;
-        minY = 32 - bmax[2] / BLOCK_SIZE;
+        maxX = 32 - bmin[0] / RecastDemo::BLOCK_SIZE;
+        maxY = 32 - bmin[2] / RecastDemo::BLOCK_SIZE;
+        minX = 32 - bmax[0] / RecastDemo::BLOCK_SIZE;
+        minY = 32 - bmax[2] / RecastDemo::BLOCK_SIZE;
 
         // add all tiles within bounds to tile list.
         for (unsigned int i = minX; i <= maxX; ++i)

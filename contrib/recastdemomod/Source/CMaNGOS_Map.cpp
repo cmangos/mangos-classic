@@ -1166,8 +1166,8 @@ bool CMaNGOS_Map::LoadTileData(unsigned int tx, unsigned int ty)
         {
             float border = (m_agentRadius + 3) / 2;
             rcVcopy(m_GridBMin, m_MapInfos->BMin());
-            m_GridBMin[0] -= BLOCK_SIZE + border;
-            m_GridBMin[2] -= BLOCK_SIZE + border;
+            m_GridBMin[0] -= RecastDemo::BLOCK_SIZE + border;
+            m_GridBMin[2] -= RecastDemo::BLOCK_SIZE + border;
             m_GeomChanged = true;
         }
         return true;
@@ -1245,7 +1245,7 @@ void CMaNGOS_Map::handleRender()
     duDebugDrawBoxWire(&dd, bmin[0], bmin[1], bmin[2], bmax[0], bmax[1], bmax[2], duRGBA(255, 255, 255, 128), 2.0f);
 
     // Tiles grid
-    duDebugDrawGridXZ(&dd, m_GridBMin[0], m_GridBMin[1], m_GridBMin[2], 3, 3, BLOCK_SIZE, duRGBA(255, 0, 0, 128), 2.0f);
+    duDebugDrawGridXZ(&dd, m_GridBMin[0], m_GridBMin[1], m_GridBMin[2], 3, 3, RecastDemo::BLOCK_SIZE, duRGBA(255, 0, 0, 128), 2.0f);
 
     // Draw active tile
     if (m_SelectedTile)
@@ -1457,7 +1457,7 @@ bool CMaNGOS_Map::GetGridCoord(float const* pos, unsigned int &tx, unsigned int 
 {
     // calculate and store temporary values in double format for having same result as same mySQL calculations
 
-    tx = 32 - pos[0] / BLOCK_SIZE;
-    ty = 32 - pos[2] / BLOCK_SIZE;
+    tx = 32 - pos[0] / RecastDemo::BLOCK_SIZE;
+    ty = 32 - pos[2] / RecastDemo::BLOCK_SIZE;
     return false;
 }
