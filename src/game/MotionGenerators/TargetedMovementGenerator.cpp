@@ -216,19 +216,31 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
                 z = end.z;
             }
 
-            if (DispatchSplineToPosition(owner, x, y, z, EnableWalking(), true, true))
+            if (owner.GetDistance(x, y, z, DIST_CALC_NONE) > 0.3f)
             {
-                this->i_targetReached = false;
-                this->i_speedChanged = false;
-                /* m_prevTargetPos is updated on making new spline (normal and distancing) and also on reaching target
-                is used for determining if player moved towards target whilst the spline was going on to stop the spline prematurely
-                and prevent it going behind targets back - it will still occur in rare cases due to PF and lag */
-                this->i_target->GetPosition(this->i_lastTargetPos.x, this->i_lastTargetPos.y, this->i_lastTargetPos.z);
-                m_closenessAndFanningTimer = 0;
-                return;
+                if (DispatchSplineToPosition(owner, x, y, z, EnableWalking(), true, true))
+                {
+                    this->i_targetReached = false;
+                    this->i_speedChanged = false;
+                    /* m_prevTargetPos is updated on making new spline (normal and distancing) and also on reaching target
+                    is used for determining if player moved towards target whilst the spline was going on to stop the spline prematurely
+                    and prevent it going behind targets back - it will still occur in rare cases due to PF and lag */
+                    this->i_target->GetPosition(this->i_lastTargetPos.x, this->i_lastTargetPos.y, this->i_lastTargetPos.z);
+                    m_closenessAndFanningTimer = 0;
+                    return;
+                }
             }
             // if we arrived here something failed in PF dispatch and target is not reachable
-            m_reachable = false;
+            if (this->i_offset == 0.f)
+            {
+                if (!owner.CanReachWithMeleeAttack(this->i_target.getTarget()))
+                    m_reachable = false;
+            }
+            else
+            {
+                if (owner.GetDistance(this->i_target.getTarget(), true, DIST_CALC_COMBAT_REACH) > this->i_offset)
+                    m_reachable = false;
+            }
             return;
         }
         else if (!targetMoved) // we do not need new position and we are reachable
