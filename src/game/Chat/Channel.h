@@ -281,12 +281,14 @@ class Channel
     private:
         bool        m_announce;
         bool        m_moderate;
-        bool        m_static;
         std::string m_name;
         std::string m_password;
         uint8       m_flags;
         uint32      m_channelId;
         ObjectGuid  m_ownerGuid;
+
+        bool        m_static;
+        bool        m_realmzone;
 
         typedef     std::map<ObjectGuid, PlayerInfo> PlayerList;
         PlayerList  m_players;

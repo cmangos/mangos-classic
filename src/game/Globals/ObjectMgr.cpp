@@ -7414,6 +7414,46 @@ bool isValidString(const std::wstring& wstr, uint32 strictMask, bool numericOrSp
     return false;
 }
 
+bool ObjectMgr::CheckPublicMessageLanguage(const std::string& message)
+{
+    LanguageType lt = GetRealmLanguageType(false);
+
+    if (lt == LT_ANY)
+        return true;
+
+    std::wstring wstr;
+
+    if (!Utf8toWStr(message, wstr))
+        return false;
+
+    for (wchar_t c : wstr)
+    {
+        if (c <= 127)                               // Whitelisted in all locales (basic ASCII)
+            continue;
+        else
+        {
+            if (lt & LT_EXTENDEN_LATIN)             // Extended latin locales
+            {
+                if (!isExtendedLatinCharacter(c))
+                    return false;
+            }
+
+            if (lt & LT_CYRILLIC)                   // Cyrillic locales
+            {
+                if (!isCyrillicCharacter(c))
+                    return false;
+            }
+
+            if (lt & LT_EAST_ASIA)                  // East asian locales
+            {
+                if (!isEastAsianCharacter(c))
+                    return false;
+            }
+        }
+    }
+    return true;
+}
+
 uint8 ObjectMgr::CheckPlayerName(const std::string& name, bool create)
 {
     std::wstring wname;

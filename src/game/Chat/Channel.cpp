@@ -23,7 +23,7 @@
 #include "Chat/Chat.h"
 
 Channel::Channel(const std::string& name)
-    : m_announce(true), m_moderate(false), m_static(false), m_name(name), m_flags(0), m_channelId(0)
+    : m_announce(true), m_moderate(false), m_name(name), m_flags(0), m_static(false), m_realmzone(false)
 {
     // set special flags if built-in channel
     ChatChannelsEntry const* ch = GetChannelEntryFor(name);
@@ -44,10 +44,13 @@ Channel::Channel(const std::string& name)
             m_flags |= CHANNEL_FLAG_LFG;
         else                                                // for all other channels
             m_flags |= CHANNEL_FLAG_NOT_LFG;
+
+        m_realmzone = true;
     }
     else                                                    // it's custom channel
     {
         m_flags |= CHANNEL_FLAG_CUSTOM;
+        m_realmzone = sObjectMgr.CheckPublicMessageLanguage(m_name);
     }
 }
 
@@ -584,6 +587,26 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
         MakeNotModerator(data);
         SendToOne(data, guid);
         return;
+    }
+
+    if (uint32 restriction = sWorld.getConfig(CONFIG_UINT32_CHANNEL_RESTRICTED_LANGUAGE_MODE))
+    {
+        bool restricted = false;
+
+        switch (restriction)
+        {
+            case 1: restricted = IsConstant();                  break;
+            case 2: restricted = (IsPublic() && m_realmzone);   break;
+            case 3: restricted = true;                          break;
+        }
+
+        if (restricted && !sObjectMgr.CheckPublicMessageLanguage(text))
+        {
+            WorldPacket data;
+            MakeMuted(data);
+            SendToOne(data, guid);
+            return;
+        }
     }
 
     // send channel message

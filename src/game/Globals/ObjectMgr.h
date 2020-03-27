@@ -1093,6 +1093,8 @@ class ObjectMgr
         void LoadReservedPlayersNames();
         bool IsReservedName(const std::string& name) const;
 
+        static bool CheckPublicMessageLanguage(const std::string& message);
+
         // name with valid structure and symbols
         static uint8 CheckPlayerName(const std::string& name, bool create = false);
         static PetNameInvalidReason CheckPetName(const std::string& name);

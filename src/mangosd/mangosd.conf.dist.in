@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2020032201
+ConfVersion=2020032801
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -1048,6 +1048,13 @@ CreaturePickpocketRestockDelay = 600
 #        Chat anti-flood protection, mute time at activation flood protection (not saved)
 #        Default: 10 (in secs)
 #
+#    Channel.RestrictedLanguageMode
+#        Restrict usage of non-latin characters according to RealmZone
+#        Default: 0 (no restrictions, any characters in all channels)
+#                 1 (characters limited by RealmZone language in global channels only)
+#                 2 (characters limited by RealmZone language in global and custom static channels)
+#                 3 (characters limited by RealmZone language in global and all custom channels)
+#
 #    Channel.SilentlyGMJoin
 #        Silently join GM characters (security level > 1) to channels
 #        Default: 0 (join announcement in normal way)
@@ -1067,6 +1074,7 @@ ChatStrictLinkChecking.Kick = 0
 ChatFlood.MessageCount = 10
 ChatFlood.MessageDelay = 1
 ChatFlood.MuteTime = 10
+Channel.RestrictedLanguageMode = 0
 Channel.SilentlyGMJoin = 0
 Channel.StaticAutoTreshold = 0
 
