@@ -613,6 +613,9 @@ void GroupLootRoll::SendLootRollWon(ObjectGuid const& targetGuid, uint32 rollNum
             case ROLL_NOT_VALID:
                 SendRoll(itr->first, 128, 128);
                 break;
+            case ROLL_GREED:
+                if (rollType == ROLL_NEED)
+                    break;
             default:
                 SendRoll(itr->first, itr->second.number, itr->second.vote);
                 break;
