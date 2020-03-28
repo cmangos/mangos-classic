@@ -3822,6 +3822,21 @@ bool ChatHandler::HandleCombatStopCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleCombatListCommand(char* args)
+{
+    Player* player = GetSession()->GetPlayer();
+    if (!player)
+        return false;
+
+    SendSysMessage("In Combat With:");
+    for (auto& ref : player->getHostileRefManager())
+    {
+        Unit* refOwner = ref.getSource()->getOwner();
+        PSendSysMessage("%s Entry: %u Counter: %u", refOwner->GetName(), refOwner->GetEntry(), refOwner->GetGUIDLow());
+    }
+    return true;
+}
+
 void ChatHandler::HandleLearnSkillRecipesHelper(Player* player, uint32 skill_id)
 {
     uint32 classmask = player->getClassMask();
