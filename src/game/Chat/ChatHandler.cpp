@@ -56,13 +56,14 @@ bool WorldSession::CheckChatMessage(std::string& msg, bool addon/* = false*/)
     // check links
     if (sWorld.getConfig(CONFIG_UINT32_CHAT_STRICT_LINK_CHECKING_SEVERITY))
     {
-        if (!ChatHandler(this).CheckChatMessageEscapeSequences(msg.c_str()))
+        if (!ChatHandler::CheckEscapeSequences(msg.c_str()))
         {
-            sLog.outError("Player %s (GUID: %u) sent a chatmessage with an invalid link: %s", GetPlayer()->GetName(),
+            sLog.outError("Player %s (GUID: %u) sent a chat message with an invalid escape sequence: \"%s\"", GetPlayer()->GetName(),
                           GetPlayer()->GetGUIDLow(), msg.c_str());
 
             if (sWorld.getConfig(CONFIG_UINT32_CHAT_STRICT_LINK_CHECKING_KICK))
                 KickPlayer();
+
             return false;
         }
     }

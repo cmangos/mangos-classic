@@ -19,6 +19,42 @@
 #include "Globals/ObjectMgr.h"                                      // for normalizePlayerName
 #include "Chat/ChannelMgr.h"
 
+bool WorldSession::CheckChatChannelNameAndPassword(std::string& name, std::string& pass)
+{
+    // check name max length and truncate if needed
+    if (name.length() > 128)
+        utf8limit(name, 128);
+
+    // strip invisible characters
+    stripLineInvisibleChars(name);
+
+    // check if password is too long
+    if (pass.length() > 128)
+    {
+        WorldPacket data(SMSG_CHANNEL_NOTIFY, (1 + name.size() + 1));
+        data << uint8(CHAT_WRONG_PASSWORD_NOTICE) << name;
+        SendPacket(data);
+        return false;
+    }
+
+    // skip remaining checks for higher sec level accounts
+    if (GetSecurity() > SEC_PLAYER)
+        return true;
+
+    // check for presence of escape sequences
+    if (ChatHandler::HasEscapeSequences(name.c_str()))
+    {
+        sLog.outError("Player %s (GUID: %u) attempted to join a chat channel with name containing escape sequence: \"%s\"", GetPlayer()->GetName(),
+                      GetPlayer()->GetGUIDLow(), name.c_str());
+
+        WorldPacket data(SMSG_CHANNEL_NOTIFY, (1 + name.size() + 1));
+        data << uint8(CHAT_INVALID_NAME_NOTICE) << name;
+        SendPacket(data);
+        return false;
+    }
+    return true;
+}
+
 void WorldSession::HandleJoinChannelOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -31,6 +67,10 @@ void WorldSession::HandleJoinChannelOpcode(WorldPacket& recvPacket)
         return;
 
     recvPacket >> pass;
+
+    if (!CheckChatChannelNameAndPassword(channelname, pass))
+        return;
+
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetJoinChannel(channelname))
             chn->Join(_player, pass.c_str());

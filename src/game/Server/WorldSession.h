@@ -610,6 +610,7 @@ class WorldSession
         void HandleResurrectResponseOpcode(WorldPacket& recvPacket);
         void HandleSummonResponseOpcode(WorldPacket& recv_data);
 
+        bool CheckChatChannelNameAndPassword(std::string& name, std::string& pass);
         void HandleJoinChannelOpcode(WorldPacket& recvPacket);
         void HandleLeaveChannelOpcode(WorldPacket& recvPacket);
         void HandleChannelListOpcode(WorldPacket& recvPacket);

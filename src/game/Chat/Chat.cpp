@@ -1530,7 +1530,30 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand* table, const char* cmd)
     return command || childCommands;
 }
 
-bool ChatHandler::CheckChatMessageEscapeSequences(const char* message) const
+bool ChatHandler::HasEscapeSequences(const char* message)
+{
+    while (*message)
+    {
+        // find next pipe command
+        message = strchr(message, '|');
+
+        if (!message)
+            return false;
+
+        ++message;
+
+        char commandChar = *message;
+
+        // ignore escaped pipe
+        if (commandChar != '|')
+            return true;
+
+        ++message;
+    }
+    return false;
+}
+
+bool ChatHandler::CheckEscapeSequences(const char* message)
 {
     /*
 
