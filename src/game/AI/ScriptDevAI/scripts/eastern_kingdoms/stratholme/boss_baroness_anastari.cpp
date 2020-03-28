@@ -24,6 +24,8 @@ EndScriptData
 */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -161,9 +163,6 @@ struct boss_baroness_anastariAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_POSSESS) == CAST_OK)
                 {
-                    DoCastSpellIfCan(pTarget, SPELL_POSSESSED, CAST_TRIGGERED);
-                    DoCastSpellIfCan(m_creature, SPELL_POSSESS_INV, CAST_TRIGGERED);
-
                     m_possessedPlayer = pTarget->GetObjectGuid();
                     m_uiPossessEndTimer = 1000;
                     m_uiPossessTimer = 30000;
@@ -177,15 +176,41 @@ struct boss_baroness_anastariAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_baroness_anastari(Creature* pCreature)
+struct AnastariPossess : public AuraScript
 {
-    return new boss_baroness_anastariAI(pCreature);
-}
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+        {
+            Unit* caster = aura->GetCaster();
+            if (caster)
+            {
+                caster->CastSpell(aura->GetTarget(), SPELL_POSSESSED, TRIGGERED_OLD_TRIGGERED);
+                caster->CastSpell(nullptr, SPELL_POSSESS_INV, TRIGGERED_OLD_TRIGGERED);
+            }
+            aura->ForcePeriodicity(1000);
+        }
+        else
+        {
+            if (Unit* caster = aura->GetCaster())
+                caster->RemoveAurasDueToSpell(SPELL_POSSESS_INV);
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_POSSESSED);
+        }
+    }
+
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        if (aura->GetTarget()->GetHealthPercent() < 50.f)
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_POSSESS);
+    }
+};
 
 void AddSC_boss_baroness_anastari()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_baroness_anastari";
-    pNewScript->GetAI = &GetAI_boss_baroness_anastari;
+    pNewScript->GetAI = &GetNewAIInstance<boss_baroness_anastariAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<AnastariPossess>("spell_anastari_possess");
 }
