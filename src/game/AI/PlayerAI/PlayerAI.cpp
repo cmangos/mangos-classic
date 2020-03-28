@@ -25,7 +25,7 @@ enum GenericPlayerAIActions
     GENERIC_ACTION_RESET = 1000,
 };
 
-PlayerAI::PlayerAI(Player* player, uint32 maxSpells) : UnitAI(player), m_player(player), m_playerSpellActions(maxSpells), m_spellsDisabled(false)
+PlayerAI::PlayerAI(Player* player) : UnitAI(player), m_player(player), m_spellsDisabled(false)
 {
     AddCustomAction(GENERIC_ACTION_RESET, true, [&]() { m_spellsDisabled = false; });
 }
@@ -47,15 +47,15 @@ uint32 PlayerAI::LookupHighestLearnedRank(uint32 spellId)
 
 void PlayerAI::AddPlayerSpellAction(uint32 priority, uint32 spellId, std::function<Unit*()> selector)
 {
-    m_playerSpellActions[priority] = { spellId, selector ? selector : [&]()->Unit* { return m_player->GetVictim(); } };
+    m_playerSpellActions.emplace_back(spellId, (selector ? selector : [&]()->Unit* { return m_player->GetVictim(); }));
 }
 
 void PlayerAI::ExecuteSpells()
 {
     bool success = false;
     for (auto& data : m_playerSpellActions)
-        if (Unit* target = data.second())
-            if (DoCastSpellIfCan(target, data.first) == CAST_OK)
+        if (Unit* target = data.targetFinder())
+            if (DoCastSpellIfCan(target, data.spellId) == CAST_OK)
                 success = true;
 
     if (success)

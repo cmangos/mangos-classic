@@ -31,7 +31,7 @@ enum PriestPriorities
 
 struct PriestAI : public PlayerAI
 {
-    PriestAI(Player* player) : PlayerAI(player, PRIEST_SPELL_MAX)
+    PriestAI(Player* player) : PlayerAI(player)
     {
         if (uint32 mindBlast = LookupHighestLearnedRank(SPELL_MIND_BLAST))
             AddPlayerSpellAction(PRIORITY_MIND_BLAST, mindBlast);
@@ -51,7 +51,7 @@ enum MagePriorities
 
 struct MageAI : public PlayerAI
 {
-    MageAI(Player* player) : PlayerAI(player, MAGE_SPELL_MAX)
+    MageAI(Player* player) : PlayerAI(player)
     {
         if (uint32 fireball = LookupHighestLearnedRank(SPELL_FIREBALL))
             AddPlayerSpellAction(PRIORITY_FIREBALL, fireball);
@@ -71,7 +71,7 @@ enum WarlockPriorities
 
 struct WarlockAI : public PlayerAI
 {
-    WarlockAI(Player* player) : PlayerAI(player, WARLOCK_SPELL_MAX)
+    WarlockAI(Player* player) : PlayerAI(player)
     {
         if (uint32 shadowBolt = LookupHighestLearnedRank(SPELL_SHADOW_BOLT))
             AddPlayerSpellAction(PRIORITY_SHADOW_BOLT, shadowBolt);
@@ -91,7 +91,7 @@ enum RoguePriorities
 
 struct RogueAI : public PlayerAI
 {
-    RogueAI(Player* player) : PlayerAI(player, ROGUE_SPELL_MAX)
+    RogueAI(Player* player) : PlayerAI(player)
     {
         if (uint32 sinisterStrike = LookupHighestLearnedRank(SPELL_SINISTER_STRIKE))
             AddPlayerSpellAction(PRIORITY_SINISTER_STRIKE, sinisterStrike);
@@ -111,7 +111,7 @@ enum DruidPriorities
 
 struct DruidAI : public PlayerAI
 {
-    DruidAI(Player* player) : PlayerAI(player, DRUID_SPELL_MAX)
+    DruidAI(Player* player) : PlayerAI(player)
     {
         if (uint32 moonfire = LookupHighestLearnedRank(SPELL_MOONFIRE))
             AddPlayerSpellAction(PRIORITY_MOONFIRE, moonfire);
@@ -131,7 +131,7 @@ enum ShamanPriorities
 
 struct ShamanAI : public PlayerAI
 {
-    ShamanAI(Player* player) : PlayerAI(player, SHAMAN_SPELL_MAX)
+    ShamanAI(Player* player) : PlayerAI(player)
     {
         if (uint32 flameShock = LookupHighestLearnedRank(SPELL_FLAME_SHOCK))
             AddPlayerSpellAction(PRIORITY_FLAME_SHOCK, flameShock);
@@ -151,7 +151,7 @@ enum HunterPriorities
 
 struct HunterAI : public PlayerAI
 {
-    HunterAI(Player* player) : PlayerAI(player, HUNTER_SPELL_MAX)
+    HunterAI(Player* player) : PlayerAI(player)
     {
         if (uint32 raptorStrike = LookupHighestLearnedRank(SPELL_RAPTOR_STRIKE))
             AddPlayerSpellAction(PRIORITY_RAPTOR_STRIKE, raptorStrike);
@@ -171,7 +171,7 @@ enum WarriorPriorities
 
 struct WarriorAI : public PlayerAI
 {
-    WarriorAI(Player* player) : PlayerAI(player, WARRIOR_SPELL_MAX)
+    WarriorAI(Player* player) : PlayerAI(player)
     {
         if (uint32 heroicStrike = LookupHighestLearnedRank(SPELL_HEROIC_STRIKE))
             AddPlayerSpellAction(PRIORITY_HEROIC_STRIKE, heroicStrike);
@@ -190,7 +190,7 @@ enum PaladinPriorities
 
 struct PaladinAI : public PlayerAI
 {
-    PaladinAI(Player* player) : PlayerAI(player, PALADIN_SPELL_MAX)
+    PaladinAI(Player* player) : PlayerAI(player)
     {
 
     }
@@ -209,6 +209,6 @@ UnitAI* GetClassAI(Classes playerClass, Player* player)
         case CLASS_MAGE:    return new MageAI(player);
         case CLASS_WARLOCK: return new WarlockAI(player);
         case CLASS_DRUID:   return new DruidAI(player);
-        default: return new PlayerAI(player, 0);
+        default: return new PlayerAI(player);
     }
 }
