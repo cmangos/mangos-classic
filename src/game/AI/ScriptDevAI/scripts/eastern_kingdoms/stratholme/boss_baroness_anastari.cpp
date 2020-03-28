@@ -212,5 +212,5 @@ void AddSC_boss_baroness_anastari()
     pNewScript->GetAI = &GetNewAIInstance<boss_baroness_anastariAI>;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<AnastariPossess>("spell_anastari_possess");
+    RegisterAuraScript<AnastariPossess>("spell_anastari_possess");
 }
