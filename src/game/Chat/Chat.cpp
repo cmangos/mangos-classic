@@ -901,13 +901,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "unmute",         SEC_MODERATOR,      true,  &ChatHandler::HandleUnmuteCommand,              "", nullptr },
         { "movement",       SEC_PLAYER,         true,  nullptr,                                        "", movementCommandTable },
         { "damage",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDamageCommand,              "", nullptr },
-<<<<<<< HEAD
-        { "combatstop",     SEC_GAMEMASTER,     false, &ChatHandler::HandleCombatStopCommand,          "", nullptr },
-=======
         { "combat",         SEC_PLAYER,         false, nullptr,                                        "", combatCommandTable },
-        { "arena",          SEC_ADMINISTRATOR,  false, nullptr,                                        "", arenaCommandTable },
-        { "flusharenapoints", SEC_ADMINISTRATOR, false, &ChatHandler::HandleArenaFlushPointsCommand,   "", nullptr },
->>>>>>> c0f6c1578d... Implement combat list command for diagnosing combat bugging
         { "repairitems",    SEC_GAMEMASTER,     true,  &ChatHandler::HandleRepairitemsCommand,         "", nullptr },
         { "stable",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleStableCommand,              "", nullptr },
         { "waterwalk",      SEC_GAMEMASTER,     false, &ChatHandler::HandleWaterwalkCommand,           "", nullptr },
