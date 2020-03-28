@@ -195,9 +195,10 @@ class Pet : public Creature
 
         bool CanSwim() const
         {
-            Unit const* owner = GetOwner();
-            if (owner)
-                return owner->GetTypeId() == TYPEID_PLAYER ? true : ((Creature const*)owner)->CanSwim();
+            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                return true;
+            if (Unit const* owner = GetOwner())
+                return static_cast<Creature const*>(owner)->CanSwim();
             return Creature::CanSwim();
         }
 
