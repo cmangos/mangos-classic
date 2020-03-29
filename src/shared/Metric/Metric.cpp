@@ -204,8 +204,7 @@ void metric::metric::send()
 
     if (error)
     {
-        sLog.outError("metric::metric::send aborted, %s", error.message().c_str());
-
+        sLog.outError("metric::metric::send connect aborted, %s", error.message().c_str());
         return;
     }
 
@@ -229,13 +228,23 @@ void metric::metric::send()
     request_stream << payload.rdbuf();
 
     // Send the request.
-    boost::asio::write(socket, request);
+    boost::asio::write(socket, request, error);
+    if (error)
+    {
+        sLog.outError("metric::metric::send write aborted, %s", error.message().c_str());
+        return;
+    }
 
     // Read the response status line. The response streambuf will automatically
     // grow to accommodate the entire line. The growth may be limited by passing
     // a maximum size to the streambuf constructor.
     boost::asio::streambuf response;
-    boost::asio::read_until(socket, response, "\r\n");
+    boost::asio::read_until(socket, response, "\r\n", error);
+    if (error)
+    {
+        sLog.outError("metric::metric::send read_until aborted, %s", error.message().c_str());
+        return;
+    }
 
     // Check that response is OK.
     std::string http_version;
@@ -250,7 +259,6 @@ void metric::metric::send()
     if (!response_stream || http_version.substr(0, 5) != "HTTP/")
     {
         sLog.outError("metric::metric::send received invalid response");
-
         return;
     }
 
@@ -261,7 +269,8 @@ void metric::metric::send()
         sLog.outError("metric::metric::send response returned with status code %u", status_code);
 
         // Read the response headers, which are terminated by a blank line.
-        boost::asio::read_until(socket, response, "\r\n\r\n");
+        // if this errors out its ok
+        boost::asio::read_until(socket, response, "\r\n\r\n", error);
 
         // Process the response headers.
         std::string header;
