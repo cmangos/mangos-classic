@@ -141,6 +141,7 @@ enum EventAI_ActionType
     ACTION_T_SET_WALK                   = 58,               // type of walking, unused, unused
     ACTION_T_SET_FACING                 = 59,               // Target, 0 - set, 1 - reset
     ACTION_T_SET_SPELL_SET              = 60,               // SetId
+    ACTION_T_SET_IMMOBILIZED_STATE      = 61,               // state (true - rooted), combatonly (true - autoremoved on combat stop)
 
     ACTION_T_END,
 };
@@ -541,6 +542,12 @@ struct CreatureEventAI_Action
         {
             uint32 setId;                                   // creature_template_spells setId
         } spellSet;
+        // ACTION_T_SET_IMMOBILIZED_STATE
+        struct
+        {
+            uint32 apply;
+            uint32 combatOnly;
+        } immobilizedState;
         // RAW
         struct
         {

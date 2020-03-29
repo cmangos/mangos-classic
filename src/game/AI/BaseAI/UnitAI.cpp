@@ -88,6 +88,7 @@ void UnitAI::MoveInLineOfSight(Unit* who)
 
 void UnitAI::EnterEvadeMode()
 {
+    ClearSelfRoot();
     m_unit->RemoveAllAurasOnEvade();
     m_unit->CombatStopWithPets(true);
 
@@ -691,3 +692,18 @@ void UnitAI::AttackClosestEnemy()
     AttackStart(closestEnemy);
 }
 
+void UnitAI::SetRootSelf(bool apply, bool combatOnly)
+{
+    if (combatOnly)
+        m_selfRooted = apply;
+    m_unit->SetImmobilizedState(apply);
+}
+
+void UnitAI::ClearSelfRoot()
+{
+    if (m_selfRooted)
+    {
+        m_unit->SetImmobilizedState(false);
+        m_selfRooted = false;
+    }
+}

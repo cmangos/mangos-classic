@@ -172,6 +172,8 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 57  ACTION_T_SET_RANGED_MODE                RangeModeType,chaseDistance         Enables RangeModeType AI (0 off, 1 = caster, 2 = hunter), distance to chase at
 58  ACTION_T_SET_WALK                       WalkSetting                         Enables Walk (0 off, 1 on) or enables chase walk (2 off, 3 on)
 59  ACTION_T_SET_FACING                     Target, Reset                       Set 0, Reset 1
+60  ACTION_T_SET_SPELL_SET                  SetId                               Set for possess
+61  ACTION_T_SET_IMMOBILIZED_STATE          Apply, CombatOnly                   CombatOnly is autoremoved on combat stop (death, evade, despawn)
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -1096,6 +1098,17 @@ Parameter 1: Target type
 Parameter 2: Reset boolean, 0 sets and 1 resets
 
 Sets facing, i.e. orientation to target, or resets it to last waypoint hit, or to respawn position.
+
+--------------------------------
+60 - ACTION_T_SET_SPELL_SET
+--------------------------------
+Parameter 1: creature_template_spells setid
+
+--------------------------------
+61 - ACTION_T_SET_IMMOBILIZED_STATE
+--------------------------------
+Parameter 1: apply
+Parameter 2: combatOnly - autoremoved on combat stop
 
 =========================================
 Target Types

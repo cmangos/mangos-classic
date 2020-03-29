@@ -460,6 +460,9 @@ class UnitAI
 
         void AttackClosestEnemy();
 
+        void SetRootSelf(bool apply, bool combatOnly = false);
+        void ClearSelfRoot();
+
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }
 
@@ -482,6 +485,7 @@ class UnitAI
         bool m_dismountOnAggro;
 
         bool m_meleeEnabled;                              // If we allow melee auto attack
+        bool m_selfRooted;
 
         ReactStates m_reactState;
 
