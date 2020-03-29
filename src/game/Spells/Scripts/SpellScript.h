@@ -60,8 +60,8 @@ struct SpellScript
 
 struct AuraScript
 {
-    // called on SpellAuraHolder creation
-    virtual void OnHolderInit(SpellAuraHolder* /*holder*/) const {}
+    // called on SpellAuraHolder creation - caster can be nullptr
+    virtual void OnHolderInit(SpellAuraHolder* /*holder*/, WorldObject* /*caster*/) const {}
     // called during any event that calculates aura modifier amount - caster can be nullptr
     virtual int32 OnAuraValueCalculate(Aura* /*aura*/, Unit* /*caster*/, int32 value) const { return value; }
     // called during done/taken damage calculation

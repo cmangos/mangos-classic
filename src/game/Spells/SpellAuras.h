@@ -194,8 +194,10 @@ class SpellAuraHolder
         // Scripting system
         AuraScript* GetAuraScript() const { return m_auraScript; }
         // hooks
-        void OnHolderInit();
+        void OnHolderInit(WorldObject* caster);
         void OnDispel(Unit* dispeller, uint32 dispellingSpellId, uint32 originalStacks);
+        // helpers
+        void PresetAuraStacks(uint32 stacks) { m_stackAmount = stacks; } // use only in OnHolderInit
     private:
         void UpdateAuraApplication();                       // called at charges or stack changes
         void UpdateHeartbeatResist(uint32 diff);
