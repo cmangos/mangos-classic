@@ -62,6 +62,8 @@ void CombatManager::Update(const uint32 diff)
         // disabled in instances except for players in BGs
         if (!m_owner->GetMap()->IsDungeon() || m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
+            if (!m_owner->GetMap()->IsDungeon() && m_owner->IsImmobilizedState())
+                m_owner->getThreatManager().DeleteOutOfRangeReferences();
             if (m_combatTimer)
             {
                 if (m_combatTimer <= diff)

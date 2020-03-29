@@ -230,6 +230,8 @@ class ThreatManager
         // Don't must be used for explicit modify threat values in iterator return pointers
         ThreatList const& getThreatList() const { return iThreatContainer.getThreatList(); }
 
+        void DeleteOutOfRangeReferences();
+
         // When a target is unreachable, we need to set someone as low priority
         void SetTargetSuppressed(Unit* target);
         void ClearSuppressed(HostileReference* except);
