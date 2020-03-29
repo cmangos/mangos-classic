@@ -214,6 +214,7 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
         virtual bool _getLocation(Unit& owner, float& x, float& y, float& z) const;
         virtual void _setOrientation(Unit& owner);
         virtual void _setLocation(Unit& owner, bool catchup);
+        virtual uint32 _getPollRate(Unit& owner, bool movingNow, bool movingBefore) const;
 
         bool m_main;
         bool m_targetMoving;
