@@ -293,16 +293,16 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
         return;
     }
 
-    Player* thisPlayer = GetPlayer();
-
-    // Set flags and states set by logout:
-    thisPlayer->SetLoggingOutTimer(true);
-
     WorldPacket data(SMSG_LOGOUT_RESPONSE, 5);
     data << uint32(0);
     data << uint8(0);
     SendPacket(data);
     LogoutRequest(time(nullptr));
+
+    // Set flags and states set by logout:
+    GetPlayer()->SetStunnedByLogout(true);
+
+    DEBUG_LOG("WORLD: Sent SMSG_LOGOUT_RESPONSE Message");
 }
 
 void WorldSession::HandlePlayerLogoutOpcode(WorldPacket& /*recv_data*/)
@@ -319,12 +319,10 @@ void WorldSession::HandleLogoutCancelOpcode(WorldPacket& /*recv_data*/)
     WorldPacket data(SMSG_LOGOUT_CANCEL_ACK, 0);
     SendPacket(data);
 
-    Player* thisPlayer = GetPlayer();
-
     // Undo flags and states set by logout:
-    thisPlayer->SetLoggingOutTimer(false);
+    GetPlayer()->SetStunnedByLogout(false);
 
-    DEBUG_LOG("WORLD: sent SMSG_LOGOUT_CANCEL_ACK Message");
+    DEBUG_LOG("WORLD: Sent SMSG_LOGOUT_CANCEL_ACK Message");
 }
 
 void WorldSession::HandleTogglePvP(WorldPacket& recv_data)

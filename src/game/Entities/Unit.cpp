@@ -631,10 +631,10 @@ void Unit::SendHeartBeat()
 
 void Unit::SendMoveRoot(bool state, bool broadcastOnly)
 {
-    const Player* player = GetClientControlling();
+    const Player* client = GetClientControlling();
 
     // Apply flags in-place when unit currently is not controlled by a player
-    if (!player && !broadcastOnly)
+    if (!client && !broadcastOnly)
     {
         if (state)
         {
@@ -647,7 +647,7 @@ void Unit::SendMoveRoot(bool state, bool broadcastOnly)
 
     const PackedGuid &guid = GetPackGUID();
     // Pre-Wrath spline root: when unit is currently not controlled by a player, or broadcasting to others
-    if (!player || broadcastOnly)
+    if (!client || broadcastOnly)
     {
         WorldPacket data(state ? SMSG_SPLINE_MOVE_ROOT : SMSG_SPLINE_MOVE_UNROOT, guid.size());
         data << guid;
@@ -659,7 +659,7 @@ void Unit::SendMoveRoot(bool state, bool broadcastOnly)
         WorldPacket data(state ? SMSG_FORCE_MOVE_ROOT : SMSG_FORCE_MOVE_UNROOT, guid.size() + 4);
         data << guid;
         data << uint32(0);
-        player->GetSession()->SendPacket(data);
+        client->GetSession()->SendPacket(data);
     }
 }
 
@@ -9413,22 +9413,20 @@ bool Unit::SetFleeing(bool apply, ObjectGuid casterGuid/* = ObjectGuid()*/, uint
 
 bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID, bool logout/* = false*/)
 {
-    if (apply != HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED))
+    const bool initial = (apply && !IsStunned());
+    const bool update = (apply != hasUnitState(logout ? UNIT_STAT_LOGOUT_TIMER : UNIT_STAT_STUNNED));
+
+    if (initial || update || (logout && !apply))
     {
-        if (apply)
-        {
+        if (initial)
             CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
-            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-        }
-        else if (!hasUnitState(logout ? UNIT_STAT_STUNNED : UNIT_STAT_LOGOUT_TIMER))
-            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
         SetImmobilizedState(apply, true, logout);
 
-        if (const bool requireTargetChange = (!IsControlledByPlayer() && AI()))
+        if (initial)
         {
             // Non-client controlled unit with an AI should drop target
-            if (apply)
+            if (const bool requireTargetChange = (!IsControlledByPlayer() && AI()))
             {
                 if (!GetTargetGuid().IsEmpty())
                     SetTargetGuid(ObjectGuid());
@@ -9439,17 +9437,17 @@ bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID, bool lo
             }
         }
 
-        if (logout)
-            return true;
+        ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED, hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_LOGOUT_TIMER));
 
-        ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29, (IsStunned() || IsFeigningDeath()));
+        if (!logout)
+            ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29, (IsStunned() || IsFeigningDeath()));
 
         return true;
     }
     return false;
 }
 
-bool Unit::SetLoggingOutTimer(bool apply)
+bool Unit::SetStunnedByLogout(bool apply)
 {
     if (SetStunned(apply, ObjectGuid(), 0, true))
     {

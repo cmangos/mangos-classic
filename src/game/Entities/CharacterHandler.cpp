@@ -868,7 +868,7 @@ void WorldSession::HandlePlayerReconnect()
         _player->SetStandState(UNIT_STAND_STATE_STAND);
 
     // Undo flags and states set by logout if present:
-    _player->SetLoggingOutTimer(false);
+    _player->SetStunnedByLogout(false);
 
     m_playerLoading = false;
 }

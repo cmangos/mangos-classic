@@ -2264,8 +2264,8 @@ class Unit : public WorldObject
         inline bool IsStunned() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED); }
         bool SetStunned(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, bool logout = false);
 
-        inline bool IsLoggingOutTimer() const { return hasUnitState(UNIT_STAT_LOGOUT_TIMER); }
-        bool SetLoggingOutTimer(bool apply);
+        inline bool IsStunnedByLogout() const { return hasUnitState(UNIT_STAT_LOGOUT_TIMER); }
+        bool SetStunnedByLogout(bool apply);
 
         // Panic: AI reaction script, NPC flees (e.g. at low health)
         inline bool IsInPanic() const { return hasUnitState(UNIT_STAT_PANIC); }
