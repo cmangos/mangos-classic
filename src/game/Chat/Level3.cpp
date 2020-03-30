@@ -3904,6 +3904,12 @@ bool ChatHandler::HandleListAurasCommand(char* args)
 
     uint32 auraNameId;
     ExtractOptUInt32(&args, auraNameId, 0);
+    if (auraNameId >= TOTAL_AURAS)
+    {
+        PSendSysMessage("Need to use aura name id below %u.", TOTAL_AURAS);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     char const* talentStr = GetMangosString(LANG_TALENT);
     char const* passiveStr = GetMangosString(LANG_PASSIVE);
