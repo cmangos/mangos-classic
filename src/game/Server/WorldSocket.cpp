@@ -313,14 +313,14 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
                              "a.id, "                    //0
                              "gmlevel, "                 //1
                              "sessionkey, "              //2
-                             "ip, "                      //3
+                             "lockedIp, "                //3
                              "locked, "                  //4
                              "v, "                       //5
                              "s, "                       //6
                              "mutetime, "                //7
                              "locale "                   //8
-                             "FROM account a join account_logons b on (a.id=b.accountId) "
-                             "WHERE username = '%s' ORDER BY loginTime DESC LIMIT 1",
+                             "FROM account a "
+                             "WHERE username = '%s'",
                              safe_account.c_str());
 
     // Stop if the account is not found
