@@ -52,6 +52,9 @@ void PlayerAI::AddPlayerSpellAction(uint32 priority, uint32 spellId, std::functi
 
 void PlayerAI::ExecuteSpells()
 {
+    if (m_spellsDisabled)
+        return;
+
     bool success = false;
     for (auto& data : m_playerSpellActions)
         if (Unit* target = data.targetFinder())
@@ -60,7 +63,7 @@ void PlayerAI::ExecuteSpells()
 
     if (success)
     {
-        m_spellsDisabled = false;
+        m_spellsDisabled = true;
         ResetTimer(GENERIC_ACTION_RESET, urand(5000, 10000));
     }
 }
