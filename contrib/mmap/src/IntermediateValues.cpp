@@ -267,7 +267,7 @@ namespace MMAP
         fwrite(&b, sizeof(char), 1, objFile);
         fclose(objFile);
 
-        sprintf(objFileName, "%s/meshes/%03u%02u%02u.mesh", mapID, tileY, tileX);
+        sprintf(objFileName, "%s/meshes/%03u%02u%02u.mesh", m_workdir, mapID, tileY, tileX);
         objFile = fopen(objFileName, "wb");
         if (!objFile)
         {
