@@ -4793,6 +4793,25 @@ void Player::UpdateLocalChannels(uint32 newZone)
     DEBUG_LOG("Player: channels cleaned up!");
 }
 
+void Player::JoinLFGChannel()
+{
+    // Find built-in LFG channel and try joining it
+    for (uint32 id = 0; id < sChatChannelsStore.GetNumRows(); ++id)
+    {
+        if (ChatChannelsEntry const* entry = sChatChannelsStore.LookupEntry(id))
+        {
+            if (entry->flags & 0x40000)                     // CHANNEL_DBC_FLAG_LFG
+            {
+                if (ChannelMgr* cMgr = channelMgr(GetTeam()))
+                {
+                    if (Channel* channel = cMgr->GetJoinChannel(entry->pattern[m_session->GetSessionDbcLocale()]))
+                        channel->Join(this, "");
+                }
+            }
+        }
+    }
+}
+
 void Player::LeaveLFGChannel()
 {
     for (auto& m_channel : m_channels)
