@@ -96,8 +96,10 @@ void PlayerAI::AttackClosestEnemy()
     });
 }
 
-void PlayerAI::UpdateAI(const uint32 /*diff*/)
+void PlayerAI::UpdateAI(const uint32 diff)
 {
+    UpdateTimers(diff);
+
     // Check if we have a current target
     if (!m_player->SelectHostileTarget() || !m_player->GetVictim())
         return;
