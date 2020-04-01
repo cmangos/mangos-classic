@@ -1428,6 +1428,7 @@ class Player : public Unit
 
         ObjectGuid const& GetSelectionGuid() const override { return m_curSelectionGuid; }
         void SetSelectionGuid(ObjectGuid guid) override { m_curSelectionGuid = guid; SetTargetGuid(guid); }
+        void ClearSelectionGuid();
 
         void SendComboPoints();
 

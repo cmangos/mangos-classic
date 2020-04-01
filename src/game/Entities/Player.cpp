@@ -17668,6 +17668,17 @@ void Player::InitPrimaryProfessions()
     SetFreePrimaryProfessions(maxProfs);
 }
 
+void Player::ClearSelectionGuid()
+{
+    if (m_curSelectionGuid)
+    {
+        WorldPacket data(SMSG_CLEAR_TARGET, 4);
+        data << m_curSelectionGuid;
+        GetSession()->SendPacket(data);
+        m_curSelectionGuid = ObjectGuid();
+    }
+}
+
 void Player::SendComboPoints()
 {
     Unit* combotarget = ObjectAccessor::GetUnit(*this, GetComboTargetGuid());
