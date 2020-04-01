@@ -5791,7 +5791,7 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     return true;
 }
 
-bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= false*/, bool includingCombo /*= false*/)
+bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= false*/, bool includingCombo /*= false*/, bool clientInitiated /*= false*/)
 {
     if (includingCombo)
         ClearComboPoints();
@@ -5804,6 +5804,8 @@ bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= fals
     if (targetSwitch && GetTypeId() != TYPEID_PLAYER)
         SetTargetGuid(ObjectGuid());
 
+    if (!clientInitiated && IsPlayer())
+        ((Player*)this)->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
     MeleeAttackStop(m_attacking);
 
     if (m_attacking)
@@ -5817,10 +5819,16 @@ bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= fals
 
 void Unit::CombatStop(bool includingCast, bool includingCombo)
 {
-    if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
-
-    AttackStop(true, includingCast, includingCombo);
+    if (!IsPlayer()) // client requests this on its own
+        AttackStop(true, includingCast, includingCombo);
+    else
+    {
+        if (m_attacking)
+        {
+            m_attacking->_removeAttacker(this);
+            m_attacking = nullptr;
+        }
+    }
     RemoveAllAttackers();
     DeleteThreatList();
 
@@ -10158,10 +10166,6 @@ void Unit::StopAttackFaction(uint32 faction_id)
             AttackStop();
             if (IsNonMeleeSpellCasted(false))
                 InterruptNonMeleeSpells(false);
-
-            // melee and ranged forced attack cancel
-            if (GetTypeId() == TYPEID_PLAYER)
-                ((Player*)this)->SendAttackSwingCancelAttack();
         }
     }
 
