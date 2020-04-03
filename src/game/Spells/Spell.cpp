@@ -6368,7 +6368,7 @@ SpellEvent::~SpellEvent()
     if (m_Spell->getState() != SPELL_STATE_FINISHED)
         m_Spell->cancel();
 
-    if (m_Spell->IsDeletable())
+    if (m_Spell->IsDeletable() || World::IsStopped())
     {
         delete m_Spell;
     }
