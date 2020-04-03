@@ -1925,11 +1925,13 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
 
             if (Unit* owner = GetOwner())
                 if (owner->GetTypeId() == TYPEID_UNIT)
-                    owner->EngageInCombatWithAggressor(victim);
+                    if (owner->CanJoinInAttacking(victim))
+                        owner->EngageInCombatWithAggressor(victim);
 
             for (auto m_guardianPet : m_guardianPets)
                 if (Unit* pet = (Unit*)GetMap()->GetPet(m_guardianPet))
-                    pet->EngageInCombatWithAggressor(victim);
+                    if (pet->CanJoinInAttacking(victim))
+                        pet->EngageInCombatWithAggressor(victim);
         }
     }
 
@@ -7449,7 +7451,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
             // TODO: Unify this combat propagation with linking combat propagation in threat system
             Unit* controller = GetMaster();
 
-            if (controller && enemy->CanAttackOnSight(controller))
+            if (controller && controller->CanJoinInAttacking(enemy))
             {
                 if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                 {

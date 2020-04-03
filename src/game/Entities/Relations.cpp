@@ -1314,3 +1314,26 @@ bool Unit::CanAssistInCombatAgainst(Unit const* who, Unit const* enemy) const
 
     return false;
 }
+
+/////////////////////////////////////////////////
+/// [Serverside] Opposition: this can join combat against enemy
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// A helper function used to determine if current unit can join combat against enemy
+/// Used in several assistance checks
+/////////////////////////////////////////////////
+bool Unit::CanJoinInAttacking(Unit const* enemy) const
+{
+    if (!CanEnterCombat())
+        return false;
+
+    if (IsFeigningDeathSuccessfully())
+        return false;
+
+    if (!CanAttack(enemy))
+        return false;
+
+    return true;
+}
