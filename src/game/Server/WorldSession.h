@@ -219,7 +219,8 @@ class WorldSession
 
         void QueuePacket(std::unique_ptr<WorldPacket> new_packet);
 
-        bool Update(PacketFilter& updater);
+        bool Update(uint32 diff);
+        void UpdateMap(uint32 diff);
 
         /// Handle the authentication waiting queue (to be completed)
         void SendAuthWaitQue(uint32 position) const;
@@ -711,7 +712,9 @@ class WorldSession
         void LogUnexpectedOpcode(WorldPacket const& packet, const char* reason) const;
         void LogUnprocessedTail(WorldPacket const& packet) const;
 
-        std::mutex m_logoutMutex;                           // this mutex is necessary to avoid two simultaneous logouts due to a valid logout request and socket error
+        void ProcessByteBufferException(WorldPacket const& packet);
+
+        uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player* _player;
         std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it
         std::shared_ptr<WorldSocket> m_requestSocket;       // a new socket for this session is requested (double connection)
@@ -742,7 +745,9 @@ class WorldSession
         bool m_initialZoneUpdated = false;
 
         std::mutex m_recvQueueLock;
+        std::mutex m_recvQueueMapLock;
         std::deque<std::unique_ptr<WorldPacket>> m_recvQueue;
+        std::deque<std::unique_ptr<WorldPacket>> m_recvQueueMap;
 
         Messager<WorldSession> m_messager;
 };
