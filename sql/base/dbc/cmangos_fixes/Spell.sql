@@ -131,3 +131,5 @@ UPDATE spell_template SET DurationIndex=9 WHERE id=28561;
 
 -- Classic section
 
+-- Remove incorrect channel spell attribute for spell 29422 (Kel'Thuzad Channel Effect) used in Kel'Thuzad encounter
+UPDATE spell_template SET AttributesEx=(AttributesEx&~0x00000040) WHERE id=29422;
