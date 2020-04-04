@@ -28,26 +28,26 @@ EndScriptData
 
 static const DialogueEntry aNaxxDialogue[] =
 {
-    {NPC_KELTHUZAD,         0,                  10000},
-    {SAY_SAPP_DIALOG1,      NPC_KELTHUZAD,      5000},
-    {SAY_SAPP_DIALOG2_LICH, NPC_THE_LICHKING,   17000},
-    {SAY_SAPP_DIALOG3,      NPC_KELTHUZAD,      6000},
-    {SAY_SAPP_DIALOG4_LICH, NPC_THE_LICHKING,   8000},
-    {SAY_SAPP_DIALOG5,      NPC_KELTHUZAD,      0},
-    {NPC_THANE,             0,                  10000},
-    {SAY_KORT_TAUNT1,       NPC_THANE,          5000},
-    {SAY_ZELI_TAUNT1,       NPC_ZELIEK,         6000},
-    {SAY_BLAU_TAUNT1,       NPC_BLAUMEUX,       6000},
-    {SAY_MORG_TAUNT1,       NPC_MOGRAINE,       7000},
-    {SAY_BLAU_TAUNT2,       NPC_BLAUMEUX,       6000},
-    {SAY_ZELI_TAUNT2,       NPC_ZELIEK,         5000},
-    {SAY_KORT_TAUNT2,       NPC_THANE,          7000},
-    {SAY_MORG_TAUNT2,       NPC_MOGRAINE,       0},
-    {SAY_FAERLINA_INTRO,    NPC_FAERLINA,       10000},
-    {FOLLOWERS_STAND,       0,                  3000},
-    {FOLLOWERS_AURA,        0,                  30000},
-    {FOLLOWERS_KNEEL,       0,                  0},
-    {0, 0, 0}
+    {NPC_KELTHUZAD,         0,                10000},
+    {SAY_SAPP_DIALOG1,      NPC_KELTHUZAD,    5000},
+    {SAY_SAPP_DIALOG2_LICH, NPC_THE_LICHKING, 17000},
+    {SAY_SAPP_DIALOG3,      NPC_KELTHUZAD,    6000},
+    {SAY_SAPP_DIALOG4_LICH, NPC_THE_LICHKING, 8000},
+    {SAY_SAPP_DIALOG5,      NPC_KELTHUZAD,    0},
+    {NPC_THANE,             0,                10000},
+    {SAY_KORT_TAUNT1,       NPC_THANE,        5000},
+    {SAY_ZELI_TAUNT1,       NPC_ZELIEK,       6000},
+    {SAY_BLAU_TAUNT1,       NPC_BLAUMEUX,     6000},
+    {SAY_MORG_TAUNT1,       NPC_MOGRAINE,     7000},
+    {SAY_BLAU_TAUNT2,       NPC_BLAUMEUX,     6000},
+    {SAY_ZELI_TAUNT2,       NPC_ZELIEK,       5000},
+    {SAY_KORT_TAUNT2,       NPC_THANE,        7000},
+    {SAY_MORG_TAUNT2,       NPC_MOGRAINE,     0},
+    {SAY_FAERLINA_INTRO,    NPC_FAERLINA,     10000},
+    {FOLLOWERS_STAND,       0,                3000},
+    {FOLLOWERS_AURA,        0,                30000},
+    {FOLLOWERS_KNEEL,       0,                0},
+    {0,                     0,                0}
 };
 
 instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
@@ -59,6 +59,7 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_uiHorseMenKilled(0),
     m_uiHorsemenTauntTimer(30 * MINUTE * IN_MILLISECONDS),
     m_uiLivingPoisonTimer(0),
+    m_uiKTDespawnTriggerTimer(0),
     m_uiScreamsTimer(2 * MINUTE * IN_MILLISECONDS),
     isFaerlinaIntroDone(false),
     DialogueHelper(aNaxxDialogue)
@@ -195,6 +196,21 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_SPECT_HORSE:
             m_lSpectralSideList.push_back(pCreature->GetObjectGuid());
             break;
+        case NPC_SOUL_WEAVER:
+        case NPC_UNSTOPPABLE_ABOM:
+        case NPC_SOLDIER_FROZEN:
+            if (pCreature->IsTemporarySummon())
+            {
+                if (pCreature->GetSpawnerGuid().IsCreature())
+                {
+                    if (Creature* pSummoner = pCreature->GetMap()->GetCreature(pCreature->GetSpawnerGuid()))
+                    {
+                        if (pSummoner->GetEntry() == NPC_KELTHUZAD)
+                            return;
+                    }
+                }
+                pCreature->SetInCombatWithZone();
+            }
     }
 }
 
@@ -289,6 +305,10 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
         case GO_KELTHUZAD_WINDOW_3:
         case GO_KELTHUZAD_WINDOW_4:
             break;
+        case GO_KELTHUZAD_TRIGGER:
+            if (m_auiEncounter[TYPE_KELTHUZAD] != NOT_STARTED) // Only spawn the visual trigger for Kel'Thuzad when encounter is not started
+                pGo->SetLootState(GO_JUST_DEACTIVATED);
+            break;
 
         // Eyes
         case GO_ARAC_EYE_RAMP:
@@ -341,7 +361,7 @@ void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
     switch (pCreature->GetEntry())
     {
         case NPC_MR_BIGGLESWORTH:
-            if ( m_auiEncounter[TYPE_KELTHUZAD] != DONE)
+            if (m_auiEncounter[TYPE_KELTHUZAD] != DONE)
                 DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_CAT_DIED, NPC_KELTHUZAD);
             break;
         case NPC_ZOMBIE_CHOW:
@@ -372,6 +392,11 @@ void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
         case NPC_SPECT_HORSE:
             m_lSpectralSideList.remove(pCreature->GetObjectGuid());
             pCreature->ForcedDespawn(4000);
+            break;
+        case NPC_SOLDIER_FROZEN:
+        case NPC_UNSTOPPABLE_ABOM:
+        case NPC_SOUL_WEAVER:
+            pCreature->ForcedDespawn(2000);
             break;
         default:
             break;
@@ -609,7 +634,20 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
         case TYPE_KELTHUZAD:
             m_auiEncounter[uiType] = uiData;
             DoUseDoorOrButton(GO_KELTHUZAD_EXIT_DOOR);
-            if (uiData == NOT_STARTED)
+            if (uiData == IN_PROGRESS)
+            {
+                if (Creature* kelthuzad = GetSingleCreatureFromStorage(NPC_KELTHUZAD))
+                {
+                    if (kelthuzad->isAlive())
+                        kelthuzad->CastSpell(kelthuzad, SPELL_CHANNEL_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                }
+                if (GameObject* trigger = GetSingleGameObjectFromStorage(GO_KELTHUZAD_TRIGGER))
+                {
+                    DoUseDoorOrButton(GO_KELTHUZAD_TRIGGER);
+                    m_uiKTDespawnTriggerTimer = 5 * IN_MILLISECONDS;
+                }
+            }
+            if (uiData == FAIL)
             {
                 if (GameObject* pWindow = GetSingleGameObjectFromStorage(GO_KELTHUZAD_WINDOW_1))
                     pWindow->ResetDoorOrButton();
@@ -619,6 +657,11 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                     pWindow->ResetDoorOrButton();
                 if (GameObject* pWindow = GetSingleGameObjectFromStorage(GO_KELTHUZAD_WINDOW_4))
                     pWindow->ResetDoorOrButton();
+                if (GameObject* trigger = GetSingleGameObjectFromStorage(GO_KELTHUZAD_TRIGGER))
+                {
+                    trigger->SetRespawnTime(5);
+                    trigger->Respawn();
+                }
             }
             break;
     }
@@ -695,6 +738,22 @@ void instance_naxxramas::Update(uint32 uiDiff)
         }
         else
             m_uiLivingPoisonTimer -= uiDiff;
+    }
+
+    if (m_uiKTDespawnTriggerTimer)
+    {
+        if (m_uiKTDespawnTriggerTimer < uiDiff)
+        {
+            if (GameObject* trigger = GetSingleGameObjectFromStorage(GO_KELTHUZAD_TRIGGER))
+            {
+                trigger->ResetDoorOrButton();
+                trigger->SetLootState(GO_JUST_DEACTIVATED);
+                trigger->SetForcedDespawn();
+            }
+            m_uiKTDespawnTriggerTimer = 0;
+        }
+        else
+            m_uiKTDespawnTriggerTimer -= uiDiff;
     }
 
     if (m_uiScreamsTimer && m_auiEncounter[TYPE_THADDIUS] != DONE)
@@ -829,7 +888,7 @@ void instance_naxxramas::InitializeGothikTriggers()
 
 Creature* instance_naxxramas::GetClosestAnchorForGothik(Creature* pSource, bool bRightSide)
 {
-    std::list<Creature* > lList;
+    std::list<Creature*> lList;
 
     for (auto& itr : m_mGothTriggerMap)
     {
@@ -952,17 +1011,8 @@ bool instance_naxxramas::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger
     {
         SetChamberCenterCoords(areaTrigger->x, areaTrigger->y, areaTrigger->z);
 
-        if (GetData(TYPE_KELTHUZAD) == NOT_STARTED)
-        {
-            if (Creature* kelthuzad = GetSingleCreatureFromStorage(NPC_KELTHUZAD))
-            {
-                if (kelthuzad->isAlive())
-                {
-                    SetData(TYPE_KELTHUZAD, IN_PROGRESS);
-                    kelthuzad->SetInCombatWithZone();
-                }
-            }
-        }
+        if (GetData(TYPE_KELTHUZAD) == NOT_STARTED || GetData(TYPE_KELTHUZAD) == FAIL)
+            SetData(TYPE_KELTHUZAD, IN_PROGRESS);
     }
 
     if (areaTrigger->id == AREATRIGGER_FAERLINA_INTRO)

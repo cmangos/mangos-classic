@@ -154,6 +154,7 @@ enum
     GO_KELTHUZAD_WINDOW_2       = 181403,
     GO_KELTHUZAD_WINDOW_3       = 181404,
     GO_KELTHUZAD_WINDOW_4       = 181405,
+    GO_KELTHUZAD_TRIGGER        = 181444,
 
     // Eyes
     GO_ARAC_EYE_RAMP            = 181212,
@@ -192,7 +193,8 @@ enum
 
     EVENT_ID_DECIMATE           = 10495,
 
-    SPELL_DARK_CHANNELING       = 21157
+    SPELL_DARK_CHANNELING       = 21157,
+    SPELL_CHANNEL_VISUAL        = 29423,            // Periodically trigger 29422
 };
 
 enum GothikSpellDummy
@@ -272,7 +274,7 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         void GetGothikSummonPoints(CreatureList& lList, bool bRightSide);
         bool IsInRightSideGothikArea(Unit* pUnit);
 
-        // kel
+        // Kel'Thuzad
         void SetChamberCenterCoords(float fX, float fY, float fZ);
         void GetChamberCenterCoords(float& fX, float& fY, float& fZ) const
         { fX = m_fChamberCenterX; fY = m_fChamberCenterY; fZ = m_fChamberCenterZ; }
@@ -306,6 +308,7 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         uint32 m_uiLivingPoisonTimer;
         uint32 m_uiScreamsTimer;
         uint32 m_uiHorsemenTauntTimer;
+        uint32 m_uiKTDespawnTriggerTimer;
 
         bool isFaerlinaIntroDone;
 

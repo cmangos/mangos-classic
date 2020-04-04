@@ -1118,6 +1118,9 @@ inline uint32 GetAffectedTargets(SpellEntry const* spellInfo, WorldObject* caste
                 case 24781:                                 // Dream Fog (Emerald Dragons)
                 case 26080:                                 // Stinger Charge Primer (AQ40, Vekniss Stinger)
                 case 26524:                                 // Sand Trap (AQ20 - Kurinnaxx)
+                case 28415:                                 // Summon Type A Trigger (Naxxramas, Kel'Thuzad)
+                case 28416:                                 // Summon Type B Trigger (Naxxramas, Kel'Thuzad)
+                case 28417:                                 // Summon Type C Trigger (Naxxramas, Kel'Thuzad)
                 case 28560:                                 // Summon Blizzard (Naxx, Sapphiron)
                     return 1;
                 case 10258:                                 // Awaken Vault Warder (Uldaman)
