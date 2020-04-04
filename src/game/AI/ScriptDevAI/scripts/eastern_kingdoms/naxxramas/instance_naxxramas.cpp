@@ -242,9 +242,6 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
         case GO_PLAG_NOTH_ENTRY_DOOR:
             break;
         case GO_PLAG_NOTH_EXIT_DOOR:
-            if (m_auiEncounter[TYPE_NOTH] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
         case GO_PLAG_HEIG_ENTRY_DOOR:
             if (m_auiEncounter[TYPE_NOTH] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
@@ -278,17 +275,11 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_CONS_GLUT_EXIT_DOOR:
-            if (m_auiEncounter[TYPE_GLUTH] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
         case GO_CONS_THAD_DOOR:
             if (m_auiEncounter[TYPE_GLUTH] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_CONS_NOX_TESLA_FEUGEN:
-            if (m_auiEncounter[TYPE_THADDIUS] == DONE)
-                pGo->SetGoState(GO_STATE_READY);
-            break;
         case GO_CONS_NOX_TESLA_STALAGG:
             if (m_auiEncounter[TYPE_THADDIUS] == DONE)
                 pGo->SetGoState(GO_STATE_READY);
@@ -641,11 +632,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                     if (kelthuzad->isAlive())
                         kelthuzad->CastSpell(kelthuzad, SPELL_CHANNEL_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 }
-                if (GameObject* trigger = GetSingleGameObjectFromStorage(GO_KELTHUZAD_TRIGGER))
-                {
-                    DoUseDoorOrButton(GO_KELTHUZAD_TRIGGER);
-                    m_uiKTDespawnTriggerTimer = 5 * IN_MILLISECONDS;
-                }
+                DoUseDoorOrButton(GO_KELTHUZAD_TRIGGER);
+                m_uiKTDespawnTriggerTimer = 5 * IN_MILLISECONDS;
             }
             if (uiData == FAIL)
             {
@@ -783,8 +771,8 @@ void instance_naxxramas::Update(uint32 uiDiff)
     {
         if (m_uiHorsemenTauntTimer <= uiDiff)
         {
-            uint32 horsemenEntry;
-            int32 textId;
+            uint32 horsemenEntry = 0;
+            int32 textId = 0;
             switch (urand(0, 3))
             {
                 case 0:
@@ -1051,7 +1039,7 @@ bool AreaTrigger_at_naxxramas(Player* player, AreaTriggerEntry const* areaTrigge
     if (player->isGameMaster() || !player->isAlive())
         return false;
 
-    if (instance_naxxramas* instance = (instance_naxxramas*)player->GetInstanceData())
+    if (auto* instance = (instance_naxxramas*)player->GetInstanceData())
         return instance->DoHandleAreaTrigger(areaTrigger);
 
     return false;
@@ -1059,7 +1047,7 @@ bool AreaTrigger_at_naxxramas(Player* player, AreaTriggerEntry const* areaTrigge
 
 bool ProcessEventId_decimate(uint32 eventId, Object* source, Object* /*target*/, bool /*isStart*/)
 {
-    if (instance_naxxramas* instance = (instance_naxxramas*)((Creature*)source)->GetInstanceData())
+    if (auto* instance = (instance_naxxramas*)((Creature*)source)->GetInstanceData())
     {
         if (eventId == EVENT_ID_DECIMATE)
             instance->HandleDecimateEvent();
