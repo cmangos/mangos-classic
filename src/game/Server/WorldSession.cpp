@@ -143,7 +143,16 @@ void WorldSession::SetOffline()
 void WorldSession::SetOnline()
 {
     if (_player && m_Socket && !m_Socket->IsClosed())
+    {
         m_sessionState = WORLD_SESSION_STATE_READY;
+        m_kickTime = 0;
+    }
+}
+
+void WorldSession::SetInCharSelection()
+{
+    m_sessionState = WORLD_SESSION_STATE_CHAR_SELECTION;
+    m_kickTime = time(nullptr) + 15 * 60;
 }
 
 bool WorldSession::RequestNewSocket(WorldSocket* socket)
@@ -418,7 +427,7 @@ bool WorldSession::Update(PacketFilter& updater)
                     else
                         SendAuthOk();
                 }
-                m_sessionState = WORLD_SESSION_STATE_CHAR_SELECTION;
+                SetInCharSelection();
                 return true;
             }
 
@@ -434,6 +443,9 @@ bool WorldSession::Update(PacketFilter& updater)
 
                 if (ShouldLogOut(time(nullptr)) && !m_playerLoading)   // check if delayed logout is fired
                     LogoutPlayer();
+
+                if (m_kickTime && m_kickTime <= time(nullptr))
+                    KickPlayer(true);
 
                 return true;
 
@@ -654,6 +666,8 @@ void WorldSession::LogoutPlayer()
 
     m_playerLogout = false;
     m_playerRecentlyLogout = true;
+
+    SetInCharSelection();
 
     LogoutRequest(0);
 }
