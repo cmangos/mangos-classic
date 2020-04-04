@@ -550,7 +550,7 @@ bool Unit::UpdateMeleeAttackingState()
     if (!victim || IsNonMeleeSpellCasted(false))
         return false;
 
-    if (GetTypeId() != TYPEID_PLAYER && (!static_cast<Creature*>(this)->CanInitiateAttack() || !victim->isInAccessablePlaceFor(static_cast<Creature*>(this))))
+    if (GetTypeId() != TYPEID_PLAYER && (!static_cast<Creature*>(this)->CanInitiateAttack()))
         return false;
 
     if (!isAttackReady(BASE_ATTACK) && !(isAttackReady(OFF_ATTACK) && hasOffhandWeaponForAttack()))
@@ -8409,9 +8409,6 @@ bool Unit::IsOfflineTarget(Unit* victim) const
         return true;
 
     if (!CanAttack(victim))
-        return true;
-
-    if (!victim->isInAccessablePlaceFor(this))
         return true;
 
     return false;
