@@ -220,12 +220,12 @@ enum GothikSummonFlag {
 
 struct GothTrigger
 {
-    bool bIsRightSide;
-    bool bIsAnchorHigh;
+    bool isRightSide;
+    bool isAnchorHigh;
     int summonTypeFlag;
 };
 
-static const float aSapphPositions[4] = {3521.48f, -5234.87f, 137.626f, 4.53329f};
+static const float sapphironPositions[4] = {3521.48f, -5234.87f, 137.626f, 4.53329f};
 
 struct SpawnLocation
 {
@@ -233,7 +233,7 @@ struct SpawnLocation
 };
 
 // Used in Construct Quarter for the deadly blobs continuously spawning in Patchwerk corridor
-static const SpawnLocation aLivingPoisonPositions[6] =
+static const SpawnLocation livingPoisonPositions[6] =
 {
     {3128.692f, -3119.211f, 293.346f, 4.725505f},
     {3154.432f, -3125.669f, 293.408f, 4.456693f},
@@ -253,14 +253,14 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
 
         bool IsEncounterInProgress() const override;
 
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
+        void OnPlayerEnter(Player* player) override;
+        void OnCreatureCreate(Creature* creature) override;
+        void OnObjectCreate(GameObject* gameObject) override;
 
-        void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureDeath(Creature* creature) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
@@ -270,14 +270,11 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         // Gothik
         void InitializeGothikTriggers();
         bool IsSuitableTriggerForSummon(Unit* trigger, uint8 flag);
-        Creature* GetClosestAnchorForGothik(Creature* pSource, bool bRightSide);
-        void GetGothikSummonPoints(CreatureList& lList, bool bRightSide);
+        Creature* GetClosestAnchorForGothik(Creature* source, bool rightSide);
+        void GetGothikSummonPoints(CreatureList& lList, bool rightSide);
         bool IsInRightSideGothikArea(Unit* pUnit);
 
         // Kel'Thuzad
-        void SetChamberCenterCoords(float fX, float fY, float fZ);
-        void GetChamberCenterCoords(float& fX, float& fY, float& fZ) const
-        { fX = m_fChamberCenterX; fY = m_fChamberCenterY; fZ = m_fChamberCenterZ; }
         void DoTaunt();
 
         // Gluth
@@ -289,26 +286,22 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
-        GuidList m_lThadTeslaCoilList;
-        GuidList m_lGothTriggerList;
-        GuidList m_lZombieChowList;
-        GuidList m_lFaerlinaFollowersList;
-        GuidList m_lUnrelentingSideList;
-        GuidList m_lSpectralSideList;
+        GuidList m_thaddiusTeslaCoilList;
+        GuidList m_gothikTriggerList;
+        GuidList m_zombieChowList;
+        GuidList m_faerlinaFollowersList;
+        GuidList m_unrelentingSideList;
+        GuidList m_spectralSideList;
 
-        std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
+        std::unordered_map<ObjectGuid, GothTrigger> m_gothikTriggerMap;
 
-        float m_fChamberCenterX;
-        float m_fChamberCenterY;
-        float m_fChamberCenterZ;
-
-        uint32 m_uiSapphSpawnTimer;
-        uint32 m_uiTauntTimer;
-        uint8 m_uiHorseMenKilled;
-        uint32 m_uiLivingPoisonTimer;
-        uint32 m_uiScreamsTimer;
-        uint32 m_uiHorsemenTauntTimer;
-        uint32 m_uiKTDespawnTriggerTimer;
+        uint32 m_sapphironSpawnTimer;
+        uint32 m_tauntTimer;
+        uint8 m_horsemenKilled;
+        uint32 m_livingPoisonTimer;
+        uint32 m_screamsTimer;
+        uint32 m_horsemenTauntTimer;
+        uint32 m_despawnKTTriggerTimer;
 
         bool isFaerlinaIntroDone;
 
