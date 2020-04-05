@@ -7953,9 +7953,20 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
     SetSpeedRate(mtype, speed * ratio, forced);
 }
 
+float Unit::GetSpeedInMotion() const
+{
+    return (movespline->Finalized() ? GetSpeed(m_movementInfo.GetSpeedType()) : movespline->Speed());
+}
+
 float Unit::GetSpeed(UnitMoveType mtype) const
 {
     return m_speed_rate[mtype] * baseMoveSpeed[mtype];
+}
+
+float Unit::GetSpeedRateInMotion() const
+{
+    const UnitMoveType type = m_movementInfo.GetSpeedType();
+    return (movespline->Finalized() ? GetSpeedRate(type) : (movespline->Speed() / GetSpeed(type)));
 }
 
 struct SetSpeedRateHelper

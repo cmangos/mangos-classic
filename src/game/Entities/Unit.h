@@ -35,6 +35,7 @@
 #include "Combat/ThreatManager.h"
 #include "Combat/HostileRefManager.h"
 #include "Combat/CombatManager.h"
+#include "Maps/MapManager.h"
 #include "MotionGenerators/FollowerReference.h"
 #include "MotionGenerators/FollowerRefManager.h"
 #include "Utilities/EventProcessor.h"
@@ -632,7 +633,7 @@ class MovementInfo
         void SetMovementFlags(MovementFlags f) { moveFlags = f; }
 
         // Deduce speed type by current movement flags:
-        inline UnitMoveType GetSpeedType() { return GetSpeedType(MovementFlags(moveFlags)); }
+        inline UnitMoveType GetSpeedType() const { return GetSpeedType(MovementFlags(moveFlags)); }
         static inline UnitMoveType GetSpeedType(MovementFlags f)
         {
             if (f & MOVEFLAG_SWIMMING)
@@ -642,6 +643,20 @@ class MovementInfo
             else if (f & MOVEFLAG_BACKWARD)
                 return MOVE_RUN_BACK;
             return MOVE_RUN;
+        }
+
+        inline float GetOrientationInMotion(float o) const { return GetOrientationInMotion(MovementFlags(moveFlags), o); }
+        static inline float GetOrientationInMotion(MovementFlags flags, float orientation)
+        {
+            float mod = ((flags & MOVEFLAG_BACKWARD) ? M_PI_F : 0);
+
+            if (flags & (MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT))
+            {
+                float flip = (M_PI_F * ((flags & MOVEFLAG_STRAFE_LEFT) ? 0.5f : -0.5f));
+                flip = ((flags & MOVEFLAG_BACKWARD) ? -flip : flip);
+                mod += (flip * ((flags & (MOVEFLAG_FORWARD | MOVEFLAG_BACKWARD)) ? 0.5f : 1));
+            }
+            return MapManager::NormalizeOrientation(orientation + mod);
         }
 
         // Position manipulations
@@ -2232,7 +2247,9 @@ class Unit : public WorldObject
         void CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* spellDamageInfo, SpellEntry const* spellProto, WeaponAttackType attType = BASE_ATTACK);
 
         void  UpdateSpeed(UnitMoveType mtype, bool forced, float ratio = 1.0f);
+        float GetSpeedInMotion() const;
         float GetSpeed(UnitMoveType mtype) const;
+        float GetSpeedRateInMotion() const;
         float GetSpeedRate(UnitMoveType mtype) const { return m_speed_rate[mtype]; }
         void SetSpeedRate(UnitMoveType mtype, float rate, bool forced = false);
 
