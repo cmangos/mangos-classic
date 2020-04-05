@@ -808,15 +808,18 @@ class WorldObject : public Object
         bool IsInRange2d(float x, float y, float minRange, float maxRange, bool combat = false) const;
         bool IsInRange3d(float x, float y, float z, float minRange, float maxRange, bool combat = false) const;
 
+        static float GetAngleAt(float x, float y, float ox, float oy);
+        float GetAngle(float x, float y) const;
+        float GetAngleAt(float x, float y, const WorldObject* obj) const;
         float GetAngle(const WorldObject* obj) const;
-        float GetAngle(const float x, const float y) const;
-        bool HasInArc(const WorldObject* target, const float arc = M_PI) const;
-        bool isInFrontInMap(WorldObject const* target, float distance, float arc = M_PI) const;
-        bool isInBackInMap(WorldObject const* target, float distance, float arc = M_PI) const;
+        bool HasInArcAt(float x, float y, float o, const WorldObject* target, float arc = M_PI_F) const;
+        bool HasInArc(const WorldObject* target, float arc = M_PI_F) const;
+        bool isInFrontInMap(WorldObject const* target, float distance, float arc = M_PI_F) const;
+        bool isInBackInMap(WorldObject const* target, float distance, float arc = M_PI_F) const;
         // Used in AOE - meant to ignore bounding radius of source
-        bool isInFront(WorldObject const* target, float distance, float arc = M_PI) const;
+        bool isInFront(WorldObject const* target, float distance, float arc = M_PI_F) const;
         // Used in AOE - meant to ignore bounding radius of source
-        bool isInBack(WorldObject const* target, float distance, float arc = M_PI) const;
+        bool isInBack(WorldObject const* target, float distance, float arc = M_PI_F) const;
         bool IsFacingTargetsBack(const WorldObject* target, float arc = M_PI_F) const;
         bool IsFacingTargetsFront(const WorldObject* target, float arc = M_PI_F) const;
 

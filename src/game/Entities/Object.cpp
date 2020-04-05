@@ -1266,7 +1266,23 @@ bool WorldObject::IsInRange3d(float x, float y, float z, float minRange, float m
     return distsq < maxdist * maxdist;
 }
 
-float WorldObject::GetAngle(const WorldObject* obj) const
+// Return angle in range 0..2*pi
+float WorldObject::GetAngleAt(float x, float y, float ox, float oy)
+{
+    float dx = (ox - x);
+    float dy = (oy - y);
+
+    float ang = std::atan2(dy, dx);                              // returns value between -Pi..Pi
+    ang = (ang >= 0) ? ang : 2 * M_PI_F + ang;
+    return ang;
+}
+
+float WorldObject::GetAngle(float x, float y) const
+{
+    return GetAngleAt(GetPositionX(), GetPositionY(), x, y);
+}
+
+float WorldObject::GetAngleAt(float x, float y, const WorldObject* obj) const
 {
     if (!obj)
         return 0.0f;
@@ -1278,21 +1294,18 @@ float WorldObject::GetAngle(const WorldObject* obj) const
         sLog.outError("INVALID CALL for GetAngle for %s", obj->GetGuidStr().c_str());
         return 0.0f;
     }
-    return GetAngle(obj->GetPositionX(), obj->GetPositionY());
+    return GetAngleAt(x, y, obj->GetPositionX(), obj->GetPositionY());
 }
 
-// Return angle in range 0..2*pi
-float WorldObject::GetAngle(const float x, const float y) const
+float WorldObject::GetAngle(const WorldObject* obj) const
 {
-    float dx = x - GetPositionX();
-    float dy = y - GetPositionY();
+    if (!obj)
+        return 0.0f;
 
-    float ang = atan2(dy, dx);                              // returns value between -Pi..Pi
-    ang = (ang >= 0) ? ang : 2 * M_PI_F + ang;
-    return ang;
+    return GetAngleAt(GetPositionX(), GetPositionY(), obj->GetPositionX(), obj->GetPositionY());
 }
 
-bool WorldObject::HasInArc(const WorldObject* target, float arc /*= M_PI*/) const
+bool WorldObject::HasInArcAt(float x, float y, float o, const WorldObject* target, float arc/* = M_PI_F*/) const
 {
     // always have self in arc
     if (target == this)
@@ -1301,8 +1314,8 @@ bool WorldObject::HasInArc(const WorldObject* target, float arc /*= M_PI*/) cons
     // move arc to range 0.. 2*pi
     arc = MapManager::NormalizeOrientation(arc);
 
-    float angle = GetAngle(target);
-    angle -= m_position.o;
+    float angle = GetAngleAt(x, y, target);
+    angle -= o;
 
     // move angle to range -pi ... +pi
     angle = MapManager::NormalizeOrientation(angle);
@@ -1312,6 +1325,11 @@ bool WorldObject::HasInArc(const WorldObject* target, float arc /*= M_PI*/) cons
     float lborder =  -1 * (arc / 2.0f);                     // in range -pi..0
     float rborder = (arc / 2.0f);                           // in range 0..pi
     return ((angle >= lborder) && (angle <= rborder));
+}
+
+bool WorldObject::HasInArc(const WorldObject* target, float arc/* = M_PI_F*/) const
+{
+    return HasInArcAt(GetPositionX(), GetPositionY(), GetOrientation(), target, arc);
 }
 
 bool WorldObject::IsFacingTargetsBack(const WorldObject* target, float arc /*= M_PI_F*/) const
