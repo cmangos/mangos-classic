@@ -111,7 +111,7 @@ bool ChatHandler::HandleAccountDeleteCommand(char* args)
  * @param searchString the search string which either contains a player GUID (low part) or a part of the character-name
  * @return             returns false if there was a problem while selecting the characters (e.g. player name not normalizeable)
  */
-bool ChatHandler::GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::string searchString) const
+bool ChatHandler::GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::string searchString)
 {
     QueryResult* resultChar;
     if (!searchString.empty())
@@ -133,6 +133,14 @@ bool ChatHandler::GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::s
 
     if (resultChar)
     {
+        if (resultChar->GetRowCount() > 100)
+        {
+            PSendSysMessage("Too many results %u. Narrow it down.", resultChar->GetRowCount());
+            SetSentErrorMessage(true);
+            delete resultChar;
+            return false;
+        }
+
         do
         {
             Field* fields = resultChar->Fetch();
