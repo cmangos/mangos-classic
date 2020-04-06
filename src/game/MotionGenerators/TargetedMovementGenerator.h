@@ -207,13 +207,16 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Fol
         virtual bool IsBoostAllowed(Unit& owner) const;
         virtual bool IsUnstuckAllowed(Unit& owner) const;
 
-        virtual void Move(Unit& owner, float x, float y, float z);
+        virtual bool Move(Unit& owner, float x, float y, float z);
 
     private:
         virtual bool _getOrientation(Unit& owner, float& o) const;
-        virtual bool _getLocation(Unit& owner, float& x, float& y, float& z, bool movingNow, bool movingBefore) const;
+        virtual bool _getLocation(Unit& owner, float& x, float& y, float& z, bool movingNow) const;
         virtual void _setOrientation(Unit& owner);
-        virtual void _setLocation(Unit& owner, bool movingNow, bool movingBefore);
+        virtual void _setLocation(Unit& owner, bool movingNow);
+
+        static inline uint32 _getPollRateBase() { return 250; }
+        static inline uint32 _getPollRateMax() { return 1000; }
         virtual uint32 _getPollRateMultiplier(Unit& owner, bool targetMovingNow, bool targetMovedBefore = true) const;
         virtual uint32 _getPollRate(Unit& owner, bool movingNow, bool movingBefore = true) const;
 

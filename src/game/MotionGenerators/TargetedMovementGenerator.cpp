@@ -558,7 +558,7 @@ float FollowMovementGenerator::GetSpeed(Unit& owner) const
         return speed;
 
     // Use default speed when debuffed or somehow constrained in speed
-    if (owner.GetSpeedRate(type) < 1.0f)
+    if (owner.GetSpeedRate(type) < 1.0f || owner.HasAuraType(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED))
         return speed;
 
     // Followers sync with master's speed when not in combat
@@ -570,12 +570,12 @@ float FollowMovementGenerator::GetSpeed(Unit& owner) const
     if (i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && IsBoostAllowed(owner))
     {
         const float bonus = (i_target->GetDistance(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), DIST_CALC_NONE) / speed);
-        speed += bonus;
+        speed = std::max(owner.GetSpeed(MOVE_WALK), std::min((speed + bonus), 40.0f));
     }
     else if (IsBoostAllowed(owner))
         speed = std::max(speed, owner.GetSpeed(MOVE_RUN));
 
-    return std::max(owner.GetSpeed(MOVE_WALK), std::min(speed, 50.0f));
+    return speed;
 }
 
 bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
@@ -646,7 +646,7 @@ void FollowMovementGenerator::Reset(Unit& owner)
 
 bool FollowMovementGenerator::GetResetPosition(Unit& owner, float& x, float& y, float& z, float& o) const
 {
-    if (!_getLocation(owner, x, y, z, m_targetMoving, false))
+    if (!_getLocation(owner, x, y, z, m_targetMoving))
         return false;
 
     if (!_getOrientation(owner, o))
@@ -655,26 +655,67 @@ bool FollowMovementGenerator::GetResetPosition(Unit& owner, float& x, float& y, 
     return true;
 }
 
-void FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
+bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
 {
+    if (!owner.movespline->Finalized())
+    {
+        auto loc = owner.movespline->ComputePosition();
+
+        if (owner.movespline->isFacing())
+        {
+            float angle = atan2((loc.y - owner.GetPositionY()), (loc.x - owner.GetPositionX()));
+            loc.orientation = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
+        }
+
+        owner.Relocate(loc.x, loc.y, loc.z, loc.orientation);
+    }
+
     if (!i_path)
         i_path = new PathFinder(&owner);
 
-    bool unstuck = false;
+    bool stuck = false;
 
-    i_path->calculate(x, y, z, false);
+    i_path->calculate(x, y, z);
 
     auto& path = i_path->getPath();
 
-    if (i_path->getPathType() & PATHFIND_NOPATH)
+    if (i_path->getPathType() & (PATHFIND_NOPATH | PATHFIND_SHORTCUT))
     {
         if (!IsUnstuckAllowed(owner))
-            return;
+            return false;
 
-        unstuck = true;
+        stuck = true;
+    }
+    else if (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    {
+        // Trim path according to LoS when follower or target is a PC unit
+        // Follower needs to be able to see predicted location to prevent issues and exploits
+        const Map* map = owner.GetMap();
+        const float height = owner.GetCollisionHeight();
+
+        for (size_t i = 1; i < path.size(); ++i)
+        {
+            if (map->IsInLineOfSight(path[i - 1].x, path[i - 1].y, (path[i - 1].z + height), path[i].x, path[i].y, (path[i].z + height), true))
+                continue;
+
+            if (i != 1)
+                path.resize(i + 1);
+            else if (!IsUnstuckAllowed(owner))
+                return false;
+            else
+                stuck = true;
+            break;
+        }
     }
 
-    const float speed = (unstuck ? FLT_EPSILON : GetSpeed(owner));
+    if (stuck)
+    {
+        _getLocation(owner, x, y, z, false);
+        path.resize(2);
+        path[1] = {x, y, z};
+    }
+
+    const float speed = (stuck ? FLT_EPSILON : GetSpeed(owner));
 
     _addUnitStateMove(owner);
 
@@ -683,6 +724,8 @@ void FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
     init.SetWalk(EnableWalking());
     init.SetVelocity(speed);
     init.Launch();
+
+    return !stuck;
 }
 
 bool FollowMovementGenerator::_getOrientation(Unit& owner, float& o) const
@@ -694,7 +737,7 @@ bool FollowMovementGenerator::_getOrientation(Unit& owner, float& o) const
     return true;
 }
 
-bool FollowMovementGenerator::_getLocation(Unit& owner, float& x, float& y, float& z, bool movingNow, bool/* movingBefore*/) const
+bool FollowMovementGenerator::_getLocation(Unit& owner, float& x, float& y, float& z, bool movingNow) const
 {
     if (!i_target.isValid())
         return false;
@@ -705,25 +748,40 @@ bool FollowMovementGenerator::_getLocation(Unit& owner, float& x, float& y, floa
     const float range = GetDynamicTargetDistance(owner, false);
     const float angle = (i_target->GetOrientation() + GetAngle());
 
-    if (!i_target->movespline->Finalized()) // Server-controlled moving unit: use destination
+    float tx = i_target->GetPositionX(), ty = i_target->GetPositionY(), tz = i_target->GetPositionZ();
+
+    // Server-controlled moving unit: use destination
+    if (!i_target->movespline->Finalized() && movingNow)
     {
         auto const& dest = i_target->movespline->CurrentDestination();
-        i_target->GetNearPointAt(dest.x, dest.y, dest.z, &owner, x, y, z, radius, range, angle);
+        tx = dest.x;
+        ty = dest.y;
+        tz = dest.z;
     }
-    else if (movingNow)                     // Client-controlled moving unit: use simple prediction
+    // Client-controlled moving unit: use simple prediction
+    else if (movingNow)
     {
-        float tx = i_target->GetPositionX(), ty = i_target->GetPositionY(), tz = i_target->GetPositionZ();
-        float to = i_target->m_movementInfo.GetOrientationInMotion(i_target->GetOrientation());
-        float speed = i_target->GetSpeedInMotion();
+        const float speed = i_target->GetSpeedInMotion();
+        const float to = i_target->m_movementInfo.GetOrientationInMotion(i_target->GetOrientation());
 
         float dx = (speed * cos(to)), dy = (speed * sin(to));
-        float nx = (tx + dx), ny = (ty + dy);
 
-        i_target->GetNearPointAt(nx, ny, tz, &owner, x, y, z, radius, range, angle);
+        float nx = (tx + dx), ny = (ty + dy), nz = tz;
+        i_target->UpdateAllowedPositionZ(nx, ny, nz);
+
+        const float height = owner.GetCollisionHeight();
+
+        // Attempt to trim predicted path according to LoS when following client controlled unit
+        // Target needs to be able to see predicted location to prevent issues and exploits
+        if (i_target->GetMap()->IsInLineOfSight(x, y, (z + height), nx, ny, (nz + height), true))
+        {
+            tx = nx;
+            ty = ny;
+            tz = nz;
+        }
     }
-    else                                    // Non-moving unit: use current position
-        i_target->GetNearPoint(&owner, x, y, z, radius, range, angle);
 
+    i_target->GetNearPointAt(tx, ty, tz, &owner, x, y, z, radius, range, angle);
     return true;
 }
 
@@ -740,7 +798,7 @@ void FollowMovementGenerator::_setOrientation(Unit& owner)
     }
 }
 
-void FollowMovementGenerator::_setLocation(Unit& owner, bool movingNow, bool movingBefore)
+void FollowMovementGenerator::_setLocation(Unit& owner, bool movingNow)
 {
     if (!i_target.isValid() || !i_target->IsInWorld())
         return;
@@ -750,12 +808,9 @@ void FollowMovementGenerator::_setLocation(Unit& owner, bool movingNow, bool mov
 
     float x, y, z;
 
-    if (_getLocation(owner, x, y, z, movingNow, movingBefore))
-        Move(owner, x, y, z);
-    else
-        return;
+    _getLocation(owner, x, y, z, movingNow);
 
-    i_targetReached = false;
+    i_targetReached = !Move(owner, x, y, z);
     i_speedChanged = false;
     m_targetFaced = false;
 }
@@ -767,17 +822,14 @@ uint32 FollowMovementGenerator::_getPollRateMultiplier(Unit& owner, bool targetM
     if (!targetMovingNow)
         multiplier *= 2;
 
-    if (!owner.movespline->Finalized())
-        multiplier *= uint32(std::roundf(owner.GetSpeedRateInMotion()));
-
     return multiplier;
 }
 
 uint32 FollowMovementGenerator::_getPollRate(Unit& owner, bool movingNow, bool movingBefore/* = true*/) const
 {
     const uint32 multiplier = _getPollRateMultiplier(owner, movingNow, movingBefore);
-    uint32 rate = 250u, max = 1000u;              // 250ms, 1000ms
-    max *= uint32(owner.GetSpeedRateInMotion());
+    const uint32 rate = (_getPollRateBase() * uint32(owner.GetSpeedRateInMotion()));    // Default: 250ms, pushed up for extreme speeds
+    const uint32 max = (_getPollRateMax() * uint32(owner.GetSpeedRateInMotion()));      // Default: 1000ms, pushed up for extreme speeds
     return std::min(std::max(rate, (rate * multiplier)), max);
 }
 
@@ -809,7 +861,7 @@ float FollowMovementGenerator::GetDynamicTargetDistance(Unit& owner, bool forRan
 void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& time_diff)
 {
     static const MovementFlags detected = MovementFlags(MOVEFLAG_MASK_MOVING_FORWARD | MOVEFLAG_BACKWARD | MOVEFLAG_PITCH_UP | MOVEFLAG_PITCH_DOWN);
-    static const MovementFlags ignored = MOVEFLAG_FALLINGFAR;
+    static const MovementFlags ignored = MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR);
 
     // Detect target movement and relocation (ignore jumping in place and long falls)
     const bool targetMovingLast = m_targetMoving;
@@ -844,10 +896,10 @@ void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& 
     }
 
     // Decide whether it's suitable time to update position or orientation
-    if ((targetSpeedChanged && !i_targetReached) || targetRelocation)
+    if (targetRelocation)
     {
         i_recheckDistance.Reset(_getPollRate(owner, m_targetMoving, targetMovingLast));
-        _setLocation(owner, m_targetMoving, targetMovingLast);
+        _setLocation(owner, m_targetMoving);
     }
     else if (targetOrientation && !i_faceTarget && i_targetReached)
         _setOrientation(owner);
