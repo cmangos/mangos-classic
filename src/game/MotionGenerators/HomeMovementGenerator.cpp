@@ -42,7 +42,6 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
 
-    Movement::MoveSplineInit init(owner);
     float x, y, z, o;
     // at apply we can select more nice return points base at current movegen
     if (owner.GetMotionMaster()->empty() || !owner.GetMotionMaster()->top()->GetResetPosition(owner, x, y, z, o))
@@ -51,9 +50,22 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
     if (x == 0 && x == y && y == z)
         owner.GetRespawnCoord(x, y, z, &o);
 
-    init.SetFacing(o);
-    init.MoveTo(x, y, z, true);
+    PathFinder path(&owner);
+
+    path.calculate(x, y, z, true);
+
+    if (path.getPathType() & PATHFIND_NOPATH)
+    {
+        arrived = true;
+        owner.NearTeleportTo(x, y, z, false);
+        Finalize(owner);
+        return;
+    }
+
+    Movement::MoveSplineInit init(owner);
+    init.MovebyPath(path.getPath());
     init.SetWalk(!runHome);
+    init.SetFacing(o);
     init.Launch();
 
     arrived = false;
