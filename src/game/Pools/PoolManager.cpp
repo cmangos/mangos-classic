@@ -192,13 +192,6 @@ void PoolGroup<T>::SetExcludeObject(uint32 guid, bool state)
     }
 }
 
-bool CanSpawnDueToLinking(uint32 lowGuid, MapPersistentState& mapState)
-{
-    if (Map* map = mapState.GetMap()) // for world maps this will fail on world start
-        return map->GetCreatureLinkingHolder()->CanSpawn(lowGuid, map, nullptr, 0.f, 0.f);
-    return true;
-}
-
 template <class T>
 PoolObject* PoolGroup<T>::RollOne(SpawnedPoolData& spawns, uint32 triggerFrom, MapPersistentState& mapState)
 {
@@ -225,7 +218,7 @@ PoolObject* PoolGroup<T>::RollOne(SpawnedPoolData& spawns, uint32 triggerFrom, M
             if (obj->exclude)
                 continue;
 
-            if (!CanSpawnDueToLinking(obj->guid, mapState))
+            if (!CanSpawn(obj, mapState))
                 continue;
 
             if (obj->guid != triggerFrom && spawns.IsSpawnedObject<T>(obj->guid))
@@ -258,7 +251,7 @@ PoolObject* PoolGroup<T>::RollOne(SpawnedPoolData& spawns, uint32 triggerFrom, M
             if (obj->exclude)
                 continue;
 
-            if (!CanSpawnDueToLinking(obj->guid, mapState))
+            if (!CanSpawn(obj, mapState))
                 continue;
 
             if (obj->guid != triggerFrom && spawns.IsSpawnedObject<T>(obj->guid))
@@ -370,6 +363,26 @@ void PoolGroup<Pool>::RemoveOneRelation(uint16 child_pool_id)
             break;
         }
     }
+}
+
+template<>
+bool PoolGroup<Creature>::CanSpawn(PoolObject* object, MapPersistentState& mapState)
+{
+    if (Map* map = mapState.GetMap()) // for world maps this will fail on world start
+        return map->GetCreatureLinkingHolder()->CanSpawn(object->guid, map, nullptr, 0.f, 0.f);
+    return true;
+}
+
+template<>
+bool PoolGroup<GameObject>::CanSpawn(PoolObject* object, MapPersistentState& mapState)
+{
+    return true;
+}
+
+template<>
+bool PoolGroup<Pool>::CanSpawn(PoolObject* object, MapPersistentState& mapState)
+{
+    return true;
 }
 
 template <class T>
