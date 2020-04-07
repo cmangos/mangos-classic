@@ -52,6 +52,7 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
         owner.GetRespawnCoord(pos.x, pos.y, pos.z, &pos.o);
     if (owner.GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), DIST_CALC_NONE) > 150.f * 150.f)
     {
+        arrived = true;
         Finalize(owner);
         owner.SetRespawnDelay(30, true);
         owner.ForcedDespawn(1);
