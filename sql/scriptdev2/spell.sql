@@ -27,6 +27,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26591,'spell_teleport_image'),
 (26619,'spell_periodic_scarab_trigger'),
 (26686,'spell_aq_whirlwind'),
+(27808,'spell_kel_thuzad_frost_blast'),
 (28522,'spell_sapphiron_icebolt_aura'),
 (28526,'spell_sapphiron_icebolt'),
 (28560,'spell_sapphiron_blizzard'),

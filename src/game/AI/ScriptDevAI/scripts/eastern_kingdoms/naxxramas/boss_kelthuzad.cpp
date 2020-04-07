@@ -93,7 +93,8 @@ enum
 
     SPELL_MANA_DETONATION               = 27819,
     SPELL_SHADOW_FISSURE                = 27810,
-    SPELL_FROST_BLAST                   = 27808,
+    SPELL_FROST_BLAST                   = 27808,            // Frost Blast: stun spell
+    SPELL_FROST_BLAST_DAMAGE            = 29879,            // Frost Blast: damage spell
 };
 
 static const uint32 phaseOneAdds[] = {NPC_SOLDIER_FROZEN, NPC_UNSTOPPABLE_ABOM, NPC_SOUL_WEAVER};
@@ -571,6 +572,23 @@ struct TriggerKTAdd :
     }
 };
 
+// Do damage onto the player equal to 26% of his/her full hit points on every tick
+struct FrostBlast : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+
+        if (Unit* target =  aura->GetTarget())
+        {
+            int32 basePointsDamage = target->GetMaxHealth() * 26 / 100;
+            caster->CastCustomSpell(target, SPELL_FROST_BLAST_DAMAGE, &basePointsDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_boss_kelthuzad()
 {
     Script* newScript = new Script;
@@ -579,4 +597,5 @@ void AddSC_boss_kelthuzad()
     newScript->RegisterSelf();
 
     RegisterSpellScript<TriggerKTAdd>("spell_trigger_KT_add");
+    RegisterAuraScript<FrostBlast>("spell_kel_thuzad_frost_blast");
 }
