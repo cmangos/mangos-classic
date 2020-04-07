@@ -857,7 +857,7 @@ class WorldObject : public Object
         void SetMap(Map* map);
         Map* GetMap() const { MANGOS_ASSERT(m_currMap); return m_currMap; }
         // used to check all object's GetMap() calls when object is not in world!
-        void ResetMap() { m_currMap = nullptr; }
+        virtual void ResetMap() { m_currMap = nullptr; }
 
         // obtain terrain data for map where this object belong...
         TerrainInfo const* GetTerrain() const;

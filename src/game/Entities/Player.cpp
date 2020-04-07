@@ -16710,6 +16710,12 @@ void Player::SetRestBonus(float rest_bonus_new)
     SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, uint32(m_rest_bonus));
 }
 
+void Player::ResetMap()
+{
+    Unit::ResetMap();
+    m_clientGUIDs.clear();
+}
+
 void Player::HandleStealthedUnitsDetection()
 {
     UnitList stealthedUnits;

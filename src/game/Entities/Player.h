@@ -2105,6 +2105,8 @@ class Player : public Unit
         template<class T>
         void UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateData& data, WorldObjectSet& visibleNow);
 
+        void ResetMap() override;
+
         // Stealth detection system
         void HandleStealthedUnitsDetection();
 
