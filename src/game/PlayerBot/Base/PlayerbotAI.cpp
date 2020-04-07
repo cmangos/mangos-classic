@@ -5480,22 +5480,22 @@ void PlayerbotAI::findNearbyCreature()
  * Playerbot wrapper to know if a target is elite or not. This is used by the AI to switch from one action to another
  * return bool Returns true if bot's target is a creature with elite rank (elite rare, elite, worldboss)
  *
- * params:pTarget Unit* the target to check if it is elite
+ * params:target Unit* the target to check if it is elite
  * params:isWorldBoss bool if true, the function will return true only if the target is a worldboss. This allow to enable specific code if the target is a worldboss
  * return false if the target is not elite/rare elite/worldboss or if isWorldBoss was provided as true and that the target is not a worldboss
  *
  */
-bool PlayerbotAI::IsElite(Unit* pTarget, bool isWorldBoss) const
+bool PlayerbotAI::IsElite(Unit* target, bool isWorldBoss) const
 {
-    if (!pTarget)
+    if (!target || target->GetTypeId() == TYPEID_PLAYER)
         return false;
 
-    if (Creature* pCreature = (Creature*) pTarget)
+    if (Creature* creature = (Creature*) target)
     {
         if (isWorldBoss)
-            return pCreature->IsWorldBoss();
+            return creature->IsWorldBoss();
         else
-            return (pCreature->IsElite() || pCreature->IsWorldBoss());
+            return (creature->IsElite() || creature->IsWorldBoss());
     }
 
     return false;
