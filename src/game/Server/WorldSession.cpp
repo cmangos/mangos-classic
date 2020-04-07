@@ -253,6 +253,26 @@ void WorldSession::QueuePacket(std::unique_ptr<WorldPacket> new_packet)
     }
 }
 
+void WorldSession::DeleteMovementPackets()
+{
+    std::lock_guard<std::mutex> guard(m_recvQueueMapLock);
+    for (auto itr = m_recvQueueMap.begin(); itr != m_recvQueueMap.end();)
+    {
+        switch ((*itr)->GetOpcode())
+        {
+            case MSG_MOVE_SET_FACING:
+            case MSG_MOVE_HEARTBEAT:
+            {
+                itr = m_recvQueueMap.erase(itr);
+                break;
+            }
+            default:
+                ++itr;
+                break;
+        }
+    }
+}
+
 /// Logging helper for unexpected opcodes
 void WorldSession::LogUnexpectedOpcode(WorldPacket const& packet, const char* reason) const
 {

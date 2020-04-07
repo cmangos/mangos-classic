@@ -1732,11 +1732,11 @@ class Player : public Unit
         virtual uint32 GetSpellRank(SpellEntry const* spellInfo) override;
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
-        bool IsBeingTeleported() const { return mSemaphoreTeleport_Near || mSemaphoreTeleport_Far; }
-        bool IsBeingTeleportedNear() const { return mSemaphoreTeleport_Near; }
-        bool IsBeingTeleportedFar() const { return mSemaphoreTeleport_Far; }
-        void SetSemaphoreTeleportNear(bool semphsetting) { mSemaphoreTeleport_Near = semphsetting; }
-        void SetSemaphoreTeleportFar(bool semphsetting) { mSemaphoreTeleport_Far = semphsetting; }
+        bool IsBeingTeleported() const { return m_semaphoreTeleport_Near || m_semaphoreTeleport_Far; }
+        bool IsBeingTeleportedNear() const { return m_semaphoreTeleport_Near; }
+        bool IsBeingTeleportedFar() const { return m_semaphoreTeleport_Far; }
+        void SetSemaphoreTeleportNear(bool semphsetting);
+        void SetSemaphoreTeleportFar(bool semphsetting);
         void ProcessDelayedOperations();
         void SetDelayedZoneUpdate(bool state, uint32 newZone) { m_needsZoneUpdate = state; m_newZone = newZone; }
 
@@ -2505,8 +2505,8 @@ class Player : public Unit
         // Current teleport data
         WorldLocation m_teleport_dest;
         uint32 m_teleport_options;
-        bool mSemaphoreTeleport_Near;
-        bool mSemaphoreTeleport_Far;
+        bool m_semaphoreTeleport_Near;
+        bool m_semaphoreTeleport_Far;
 
         uint32 m_DelayedOperations;
         bool m_bCanDelayTeleport;

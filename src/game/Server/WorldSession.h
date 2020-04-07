@@ -219,6 +219,8 @@ class WorldSession
 
         void QueuePacket(std::unique_ptr<WorldPacket> new_packet);
 
+        void DeleteMovementPackets();
+
         bool Update(uint32 diff);
         void UpdateMap(uint32 diff);
 
