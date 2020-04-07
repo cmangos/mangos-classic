@@ -5819,16 +5819,8 @@ bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= fals
 
 void Unit::CombatStop(bool includingCast, bool includingCombo)
 {
-    if (!IsPlayer()) // client requests this on its own
-        AttackStop(true, includingCast, includingCombo);
-    else
-    {
-        if (m_attacking)
-        {
-            m_attacking->_removeAttacker(this);
-            m_attacking = nullptr;
-        }
-    }
+    AttackStop(true, includingCast, includingCombo);
+
     RemoveAllAttackers();
     DeleteThreatList();
 
@@ -5888,12 +5880,6 @@ void Unit::RemoveAllAttackers()
     {
         AttackerSet::iterator iter = m_attackers.begin();
         (*iter)->AttackStop();
-
-        if (m_attacking)
-        {
-            sLog.outError("WORLD: Unit has an attacker that isn't attacking it!");
-            m_attackers.erase(iter);
-        }
     }
 }
 
@@ -9524,10 +9510,7 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, u
                     getHostileRefManager().updateOnlineOfflineState(false);
                 }
                 else
-                {
-                    AttackStop(true, false, true);
                     CombatStop();
-                }
             }
             else
             {
