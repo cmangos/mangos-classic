@@ -89,12 +89,15 @@ enum
     SPELL_FROST_BOLT_NOVA               = 28479,
 
     SPELL_CHAINS_OF_KELTHUZAD           = 28408,
+    SPELL_CHAINS_OF_KELTHUZAD_SCALE     = 28409,
     SPELL_CHAINS_OF_KELTHUZAD_TARGET    = 28410,
 
     SPELL_MANA_DETONATION               = 27819,
     SPELL_SHADOW_FISSURE                = 27810,
     SPELL_FROST_BLAST                   = 27808,            // Frost Blast: stun spell
     SPELL_FROST_BLAST_DAMAGE            = 29879,            // Frost Blast: damage spell
+
+    MAX_CONTROLLED_TARGETS              = 4,                // 5 targets are mind controlled by Chains of Kel'Thuzad but the main tank is always the fifth one
 };
 
 static const uint32 phaseOneAdds[] = {NPC_SOLDIER_FROZEN, NPC_UNSTOPPABLE_ABOM, NPC_SOUL_WEAVER};
@@ -490,11 +493,7 @@ struct boss_kelthuzadAI : public ScriptedAI
         if (m_chainsTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAINS_OF_KELTHUZAD) == CAST_OK)
-            {
-                DoScriptText(urand(0, 1) ? SAY_CHAIN1 : SAY_CHAIN2, m_creature);
-
                 m_chainsTimer = urand(60, 120) * IN_MILLISECONDS;
-            }
         }
         else
             m_chainsTimer -= diff;
@@ -572,6 +571,50 @@ struct TriggerKTAdd :
     }
 };
 
+// Select four random players plus the main tank and mind control them all. Evil.
+struct ChainsKelThuzad : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
+    {
+        Creature* caster = (Creature*)spell->GetCaster();
+
+        if (!caster)
+            return;
+
+        SelectAttackingTargetParams chainsParams;
+        chainsParams.range.minRange = 0;
+        chainsParams.range.maxRange = 100;
+
+        std::vector<Unit*> targets;
+        // Skip the main tank because we will add it later
+        caster->SelectAttackingTargets(targets, ATTACKING_TARGET_ALL_SUITABLE, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK, chainsParams);
+
+        if (targets.size() > MAX_CONTROLLED_TARGETS)
+        {
+            std::random_shuffle(targets.begin(), targets.end());
+            targets.resize(MAX_CONTROLLED_TARGETS);
+        }
+        else
+            return; // Prevent the mind control to happen if all remaining players would be targeted
+
+        DoScriptText(urand(0, 1) ? SAY_CHAIN1 : SAY_CHAIN2, caster);
+
+        // Mind control the random targets
+        if (!targets.empty())
+        {
+            for (auto& target : targets)
+            {
+                caster->CastSpell(target, SPELL_CHAINS_OF_KELTHUZAD_TARGET, TRIGGERED_OLD_TRIGGERED);
+                target->CastSpell(target, SPELL_CHAINS_OF_KELTHUZAD_SCALE, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+
+        // Mind control the main tank
+        caster->CastSpell(caster->getVictim(), SPELL_CHAINS_OF_KELTHUZAD_TARGET, TRIGGERED_OLD_TRIGGERED);
+        caster->getVictim()->CastSpell(caster->getVictim(), SPELL_CHAINS_OF_KELTHUZAD_SCALE, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 // Do damage onto the player equal to 26% of his/her full hit points on every tick
 struct FrostBlast : public AuraScript
 {
@@ -597,5 +640,6 @@ void AddSC_boss_kelthuzad()
     newScript->RegisterSelf();
 
     RegisterSpellScript<TriggerKTAdd>("spell_trigger_KT_add");
+    RegisterSpellScript<ChainsKelThuzad>("spell_chains_kel_thuzad");
     RegisterAuraScript<FrostBlast>("spell_kel_thuzad_frost_blast");
 }
