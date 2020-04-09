@@ -583,12 +583,12 @@ bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
     if (owner.isInCombat() || !i_target.isValid())
         return false;
 
-    // Boost speed only if follower is too far behind
-    if (!RequiresNewPosition(owner, owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ()))
-        return false;
-
     // Do not allow boosting outside of pet/master relationship:
     if (owner.GetMasterGuid() != i_target->GetObjectGuid())
+        return false;
+
+    // Boost speed only if follower is too far behind
+    if (!RequiresNewPosition(owner, owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ()))
         return false;
 
     // Do not allow speed boosting when in pvp instances
@@ -600,7 +600,8 @@ bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
     if (!i_target->IsWithinLOSInMap(&owner))
         return true;
 
-    return true;
+    // Do not allow boosting if follower is already in front/back of target:
+    return (i_target->HasInArc(&owner) != !i_target->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_BACKWARD)));
 }
 
 bool FollowMovementGenerator::IsUnstuckAllowed(Unit &owner) const
@@ -617,6 +618,7 @@ bool FollowMovementGenerator::IsUnstuckAllowed(Unit &owner) const
     if (!i_target->GetTerrain()->IsOutdoors(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ()))
         return false;
 
+    // Do not try to unstuck if boost is not allowed either:
     return IsBoostAllowed(owner);
 }
 
