@@ -564,18 +564,20 @@ float FollowMovementGenerator::GetSpeed(Unit& owner) const
     // Followers sync with master's speed when not in combat
     speed = i_target->GetSpeedInMotion();
 
+    // Catchup boost is not allowed, stop here:
+    if (!IsBoostAllowed(owner))
+        return speed;
+
     // Catch-up speed boost if allowed:
-    // * When following PC units: boost up to max hardcoded speed
-    // * When following NPC units: try to boost up to own run speed
-    if (i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && IsBoostAllowed(owner))
+    // * When following client-controlled units: boost up to max hardcoded speed
+    // * When following server-controlled units: try to boost up to own run speed
+    if (i_target->IsClientControlled())
     {
         const float bonus = (i_target->GetDistance(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), DIST_CALC_NONE) / speed);
-        speed = std::max(owner.GetSpeed(MOVE_WALK), std::min((speed + bonus), 40.0f));
+        return std::max(owner.GetSpeed(MOVE_WALK), std::min((speed + bonus), 40.0f));
     }
-    else if (IsBoostAllowed(owner))
-        speed = std::max(speed, owner.GetSpeed(MOVE_RUN));
 
-    return speed;
+    return std::max(speed, owner.GetSpeed(MOVE_RUN));
 }
 
 bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
