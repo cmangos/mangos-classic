@@ -46,6 +46,14 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     if (!i_target.isValid() || !i_target->IsInWorld())
         return false;
 
+    // Trying to detect error
+    if (i_target->GetMap() != owner.GetMap())
+    {
+        sLog.outCustomLog("TargetedMovementGeneratorMedium::Update(): Target %s left map id %u for map id %u out of order!",
+                      i_target->GetGuidStr().c_str(), i_target->GetMapId(), owner.GetMapId());
+        return false;
+    }
+
     if (!owner.IsAlive())
         return true;
 
@@ -116,6 +124,11 @@ void ChaseMovementGenerator::Initialize(Unit& owner)
 {
     if (!i_target.isValid() || !i_target->IsInWorld())
         return;
+    if (i_target->GetMap() != owner.GetMap())
+    {
+        sLog.outCustomLog("ChaseMovementGenerator: Owner and target are not in the same map.");
+        return;
+    }
     owner.addUnitState(UNIT_STAT_CHASE);                    // _MOVE set in _SetTargetLocation after required checks
     _setLocation(owner);
     i_target->GetPosition(i_lastTargetPos.x, i_lastTargetPos.y, i_lastTargetPos.z);
@@ -668,7 +681,10 @@ void FollowMovementGenerator::Initialize(Unit& owner)
         return;
 
     if (i_target->GetMap() != owner.GetMap())
+    {
+        sLog.outCustomLog("FollowMovementGenerator: Owner and target are not in the same map.");
         return;
+    }
 
     owner.addUnitState(UNIT_STAT_FOLLOW);                   // _MOVE set in _SetTargetLocation after required checks
 }
