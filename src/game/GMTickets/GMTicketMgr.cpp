@@ -598,7 +598,7 @@ bool GMTicketMgr::TicketChatIncoming(GMTicket* ticket, Player* player, WorldSess
                 const ChatMsg msgType = (client->isAFK() ? CHAT_MSG_AFK : CHAT_MSG_DND);
 
                 inform.clear();
-                ChatHandler::BuildChatPacket(inform, msgType, client->autoReplyMsg.c_str(), LANG_UNIVERSAL, CHAT_TAG_GM, ticket->GetAssigneeGuid());
+                ChatHandler::BuildChatPacket(inform, msgType, client->autoReplyMsg.c_str(), LANG_UNIVERSAL, CHAT_TAG_GM, ticket->GetAssigneeGuid(), ticket->GetAssigneeName());
                 player->GetSession()->SendPacket(inform);
             }
         }
