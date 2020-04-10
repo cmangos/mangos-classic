@@ -5659,7 +5659,13 @@ Unit* SpellAuraHolder::GetCaster() const
     if (GetCasterGuid() == m_target->GetObjectGuid())
         return m_target;
 
-    return ObjectAccessor::GetUnit(*m_target, m_casterGuid);// player will search at any maps
+    if (m_casterGuid.IsGameObject())
+        return nullptr;
+
+    if (!m_target->IsInWorld())
+        return nullptr;
+
+    return m_target->GetMap()->GetUnit(m_casterGuid);
 }
 
 bool SpellAuraHolder::IsWeaponBuffCoexistableWith(SpellAuraHolder const* ref) const
