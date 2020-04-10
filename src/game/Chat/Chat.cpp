@@ -187,9 +187,10 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
-    static ChatCommand chatCommandTable[] =
+    static ChatCommand channelCommandTable[] =
     {
-        { "static",         SEC_GAMEMASTER,     false, &ChatHandler::HandleChatStaticCommand,               "", nullptr },
+        { "list",           SEC_MODERATOR,      false, &ChatHandler::HandleChannelListCommand,              "", nullptr },
+        { "static",         SEC_MODERATOR,      false, &ChatHandler::HandleChannelStaticCommand,            "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
@@ -825,7 +826,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "ahbot",          SEC_ADMINISTRATOR,  true,  nullptr,                                           "", ahbotCommandTable    },
         { "cast",           SEC_ADMINISTRATOR,  false, nullptr,                                           "", castCommandTable     },
         { "character",      SEC_GAMEMASTER,     true,  nullptr,                                           "", characterCommandTable},
-        { "chat",           SEC_GAMEMASTER,     false, nullptr,                                        "", chatCommandTable     },
+        { "channel",        SEC_MODERATOR,      false, nullptr,                                           "", channelCommandTable  },
         { "debug",          SEC_MODERATOR,      true,  nullptr,                                           "", debugCommandTable    },
         { "event",          SEC_GAMEMASTER,     false, nullptr,                                           "", eventCommandTable    },
         { "gm",             SEC_PLAYER,         true,  nullptr,                                           "", gmCommandTable       },

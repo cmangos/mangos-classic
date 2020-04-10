@@ -26,6 +26,7 @@
 #include "Entities/Player.h"
 #include "Server/Opcodes.h"
 #include "Chat/Chat.h"
+#include "Chat/ChannelMgr.h"
 #include "Log.h"
 #include "Maps/MapManager.h"
 #include "Globals/ObjectAccessor.h"
@@ -2113,6 +2114,95 @@ bool ChatHandler::HandleSetViewCommand(char* /*args*/)
         PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
         SetSentErrorMessage(true);
         return false;
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleChannelListCommand(char* args)
+{
+    uint32 max = 10;
+
+    ExtractUInt32(&args, max);
+    const bool statics = ExtractLiteralArg(&args, "static");
+
+    auto const& map = channelMgr(GetPlayer()->GetTeam())->GetChannels();
+
+    std::list<Channel const*> list;
+
+    for (auto const& pair : map)
+    {
+        if (pair.second->IsConstant() || pair.second->IsStatic() != statics)
+            continue;
+
+        list.push_back(pair.second);
+    }
+
+    if (list.empty())
+        PSendSysMessage(LANG_COMMAND_CHANNELS_NO_CHANNELS);
+    else
+    {
+        PSendSysMessage(LANG_COMMAND_CHANNELS_LIST_HEADER, max);
+
+        list.sort([] (Channel const* a, Channel const* b) { return (a->GetNumPlayers() > b->GetNumPlayers()); });
+
+        const size_t count = std::min(list.size(), size_t(max));
+
+        size_t i = 0;
+
+        for (auto itr = list.begin(); (itr != list.end() && i < count); ++itr, ++i)
+        {
+            std::ostringstream output;
+
+            output << "* " << '"' << (*itr)->GetName() << '"' << " - "  << (*itr)->GetNumPlayers();
+
+            if ((*itr)->IsStatic())
+                output << " " << GetMangosString(LANG_CHANNEL_CUSTOM_DETAILS_STATIC);
+
+            if (!(*itr)->GetPassword().empty())
+                output << " " << GetMangosString(LANG_CHANNEL_CUSTOM_DETAILS_PASSWORD);
+
+            PSendSysMessage("%s", output.str().c_str());
+        }
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleChannelStaticCommand(char* args)
+{
+    char* name = ExtractLiteralArg(&args);
+
+    if (!name)
+        return false;
+
+    bool state;
+
+    if (!ExtractOnOff(&args, state))
+        return false;
+
+    Player* player = GetPlayer();
+    ChannelMgr* manager = (player ? channelMgr(player->GetTeam()) : nullptr);
+    Channel* channel = (name && manager ? manager->GetChannel(name, player) : nullptr);
+
+    if (!channel)
+    {
+        // Error sent via packet by ChannelMgr::GetChannel()
+        SetSentErrorMessage(true);
+        return false;
+    }
+    else if (channel->IsStatic() != state)
+    {
+        if (!channel->SetStatic(state, true))
+        {
+            if (!channel->GetPassword().empty())
+                PSendSysMessage(LANG_COMMAND_CHANNEL_STATIC_PASSWORD, channel->GetName().c_str());
+            else
+                PSendSysMessage(LANG_COMMAND_CHANNEL_STATIC_GLOBAL, channel->GetName().c_str());
+            SetSentErrorMessage(true);
+            return false;
+        }
+        PSendSysMessage(LANG_COMMAND_CHANNEL_STATIC_SUCCESS, channel->GetName().c_str(), GetMangosString((state ? LANG_ON : LANG_OFF)));
     }
 
     return true;

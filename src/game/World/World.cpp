@@ -625,10 +625,10 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_BOOL_DETECT_POS_COLLISION, "DetectPosCollision", true);
 
-    setConfig(CONFIG_UINT32_CHANNEL_RESTRICTED_LANGUAGE_MODE, "Channel.RestrictedLanguageMode", 0);
-    setConfig(CONFIG_BOOL_RESTRICTED_LFG_CHANNEL,      "Channel.RestrictedLfg", true);
-    setConfig(CONFIG_BOOL_SILENTLY_GM_JOIN_TO_CHANNEL, "Channel.SilentlyGMJoin", false);
-    setConfig(CONFIG_UINT32_CHAT_STATIC_AUTO_TRESHOLD, "Channel.StaticAutoTreshold", 0);
+    setConfig(CONFIG_UINT32_CHANNEL_RESTRICTED_LANGUAGE_MODE,   "Channel.RestrictedLanguageMode", 0);
+    setConfig(CONFIG_BOOL_CHANNEL_RESTRICTED_LFG,               "Channel.RestrictedLfg", false);
+    setConfig(CONFIG_BOOL_CHANNEL_GM_JOIN_SILENTLY,             "Channel.SilentlyGMJoin", false);
+    setConfig(CONFIG_UINT32_CHANNEL_STATIC_AUTO_TRESHOLD,       "Channel.StaticAutoTreshold", 0);
 
     setConfig(CONFIG_BOOL_CHAT_FAKE_MESSAGE_PREVENTING, "ChatFakeMessagePreventing", false);
 
