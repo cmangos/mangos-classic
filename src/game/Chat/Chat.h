@@ -316,6 +316,7 @@ class ChatHandler
         bool HandleGameObjectTargetCommand(char* args);
         bool HandleGameObjectTurnCommand(char* args);
         bool HandleGameObjectActivateCommand(char* args);
+        bool HandleGameObjectForcedDespawnCommand(char* args);
         bool HandleGameObjectRespawnCommand(char* args);
 
         bool HandleGMCommand(char* args);
