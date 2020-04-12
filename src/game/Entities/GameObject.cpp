@@ -602,21 +602,14 @@ void GameObject::Update(const uint32 diff)
             if (!m_respawnOverriden)
             {
                 // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
-                if (GameObjectData const* data = sObjectMgr.GetGOData(GetObjectGuid().GetCounter()))
-                    m_respawnDelay = data->GetRandomRespawnTime();
+                if (IsSpawnedByDefault())
+                    if (GameObjectData const* data = sObjectMgr.GetGOData(GetObjectGuid().GetCounter()))
+                        m_respawnDelay = data->GetRandomRespawnTime();
             }
             else if (m_respawnOverrideOnce)
                 m_respawnOverriden = false;
 
-            switch (GetGoType()) // TODO: check, very experimental
-            {
-                case GAMEOBJECT_TYPE_BUTTON: // if button and not spawned by default, do not despawn
-                    m_respawnTime = time(nullptr) + m_respawnDelay;
-                    break;
-                default: // Old logic, if !m_spawnedByDefault despawn on first usage
-                    m_respawnTime = m_spawnedByDefault ? time(nullptr) + m_respawnDelay : 0;
-                    break;
-            }
+            m_respawnTime = m_spawnedByDefault ? time(nullptr) + m_respawnDelay : 0;
 
             // if option not set then object will be saved at grid unload
             if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
