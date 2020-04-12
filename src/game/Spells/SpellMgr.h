@@ -387,6 +387,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 6718:          // Phasing Stealth
         case 6752:          // Weak Poison Proc
         case 6947:          // Curse of the Bleakheart Proc
+        case 7056:          // Pacified
         case 7090:          // Bear Form (Shapeshift)
         case 7165:          // Battle Stance (Rank 1)
         case 7276:          // Poison Proc
