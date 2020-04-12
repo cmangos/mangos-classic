@@ -54,18 +54,12 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
 
     path.calculate(x, y, z, true);
 
-    if (path.getPathType() & PATHFIND_NOPATH)
-    {
-        arrived = true;
-        owner.NearTeleportTo(x, y, z, false);
-        Finalize(owner);
-        return;
-    }
-
     Movement::MoveSplineInit init(owner);
     init.MovebyPath(path.getPath());
     init.SetWalk(!runHome);
     init.SetFacing(o);
+    if (path.getPathType() & (PATHFIND_NOPATH | PATHFIND_SHORTCUT))
+        init.SetVelocity(400.f);
     init.Launch();
 
     arrived = false;
