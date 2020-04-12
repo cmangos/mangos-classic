@@ -727,22 +727,22 @@ bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
 
     if (stuck)
     {
+        float o;
+        _getOrientation(owner, o);
         _getLocation(owner, x, y, z, false);
-        path.resize(2);
-        path[1] = {x, y, z};
+        owner.NearTeleportTo(x, y, z, o);
+        return false;
     }
-
-    const float speed = (stuck ? FLT_EPSILON : GetSpeed(owner));
 
     _addUnitStateMove(owner);
 
     Movement::MoveSplineInit init(owner);
     init.MovebyPath(path);
     init.SetWalk(EnableWalking());
-    init.SetVelocity(speed);
+    init.SetVelocity(GetSpeed(owner));
     init.Launch();
 
-    return !stuck;
+    return true;
 }
 
 bool FollowMovementGenerator::_getOrientation(Unit& owner, float& o) const
