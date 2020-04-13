@@ -652,7 +652,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
     if (!m_ai)   return;
     if (!m_bot)  return;
 
-    if (!m_bot->isAlive() || m_bot->IsInDuel()) return;
+    if (!m_bot->IsAlive() || m_bot->IsInDuel()) return;
 
     // Revive
     // No auto-revive out of combat to preserve cooldown. Let master explicitly ask bot to cast Rebirth if needed

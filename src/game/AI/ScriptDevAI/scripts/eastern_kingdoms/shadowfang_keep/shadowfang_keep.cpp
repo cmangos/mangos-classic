@@ -218,7 +218,7 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
         m_bWPDone = true;
 
         Creature* pLeader = m_creature->GetMap()->GetCreature(m_leaderGuid);
-        if (pLeader && pLeader->isAlive())
+        if (pLeader && pLeader->IsAlive())
         {
             m_creature->GetMotionMaster()->MoveFollow(pLeader, 1.0f, M_PI / 2 * m_uiPosition);
         }
@@ -230,7 +230,7 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
             GetCreatureListWithEntryInGrid(lVoidwalkerList, m_creature, NPC_VOIDWALKER, 50.0f);
             for (auto& itr : lVoidwalkerList)
             {
-                if (itr->isAlive())
+                if (itr->IsAlive())
                 {
                     if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(itr->AI()))
                     {
@@ -354,7 +354,7 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
         GetCreatureListWithEntryInGrid(lVoidwalkerList, m_creature, NPC_VOIDWALKER, 50.0f);
         for (auto& itr : lVoidwalkerList)
         {
-            if (itr->isAlive())
+            if (itr->IsAlive())
                 if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(itr->AI()))
                     pVoidwalkerAI->ReceiveWaypoint(m_uiCurrentPoint, m_bReverse);
         }

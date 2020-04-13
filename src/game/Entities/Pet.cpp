@@ -436,7 +436,7 @@ void Pet::SavePetToDB(PetSaveMode mode, Player* owner)
         if (mode == PET_SAVE_AS_CURRENT)
         {
             // pet is dead so it doesn't have to be shown at character login
-            if (!isAlive())
+            if (!IsAlive())
                 mode = PET_SAVE_NOT_IN_SLOT;
         }
         else
@@ -1081,7 +1081,7 @@ void Pet::GivePetXP(uint32 xp)
     if (xp < 1)
         return;
 
-    if (!isAlive())
+    if (!IsAlive())
         return;
 
     uint32 level = getLevel();

@@ -95,7 +95,7 @@ bool AreaTrigger_at_zulfarrak(Player* pPlayer, AreaTriggerEntry const* pAt)
         {
             if (Creature* pAntuSul = pInstance->GetSingleCreatureFromStorage(NPC_ANTUSUL))
             {
-                if (pAntuSul->isAlive())
+                if (pAntuSul->IsAlive())
                     pAntuSul->AI()->AttackStart(pPlayer);
             }
         }

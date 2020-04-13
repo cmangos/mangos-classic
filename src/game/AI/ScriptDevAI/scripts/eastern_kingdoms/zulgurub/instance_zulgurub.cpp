@@ -174,7 +174,7 @@ void instance_zulgurub::DoLowerHakkarHitPoints()
 {
     if (Creature* pHakkar = GetSingleCreatureFromStorage(NPC_HAKKAR))
     {
-        if (pHakkar->isAlive() && pHakkar->GetMaxHealth() > HP_LOSS_PER_PRIEST)
+        if (pHakkar->IsAlive() && pHakkar->GetMaxHealth() > HP_LOSS_PER_PRIEST)
         {
             pHakkar->SetMaxHealth(pHakkar->GetMaxHealth() - HP_LOSS_PER_PRIEST);
             pHakkar->SetHealth(pHakkar->GetHealth() - HP_LOSS_PER_PRIEST);

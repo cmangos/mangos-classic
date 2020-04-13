@@ -44,7 +44,7 @@ void TemporarySpawn::Update(const uint32 diff)
 
         case TEMPSPAWN_TIMED_OOC_DESPAWN:
         {
-            if (isAlive())
+            if (IsAlive())
             {
                 if (!isInCombat())
                 {
@@ -135,7 +135,7 @@ void TemporarySpawn::Update(const uint32 diff)
                 return;
             }
 
-            if (!isInCombat() && isAlive() && !GetCharmerGuid())
+            if (!isInCombat() && IsAlive() && !GetCharmerGuid())
             {
                 if (IsExpired())
                 {

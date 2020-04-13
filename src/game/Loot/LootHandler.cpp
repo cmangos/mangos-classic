@@ -93,7 +93,7 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
     recv_data >> lguid;
 
     // Check possible cheat
-    if (!_player->isAlive())
+    if (!_player->IsAlive())
         return;
 
     if (Loot* loot = sLootMgr.GetLoot(_player, lguid))

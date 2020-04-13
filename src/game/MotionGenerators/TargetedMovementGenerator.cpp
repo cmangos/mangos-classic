@@ -46,7 +46,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     if (!i_target.isValid() || !i_target->IsInWorld())
         return false;
 
-    if (!owner.isAlive())
+    if (!owner.IsAlive())
         return true;
 
     // prevent movement while casting spells with cast time or channel time

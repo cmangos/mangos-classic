@@ -157,7 +157,7 @@ void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
     if (Stopped(creature))
         return;
 
-    if (!creature.isAlive() || creature.hasUnitState(UNIT_STAT_NOT_MOVE))
+    if (!creature.IsAlive() || creature.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
 
     WaypointPath::const_iterator currPoint = i_path->find(i_currentNode);

@@ -128,7 +128,7 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
             return;
 
         Creature* pWhitemane = m_pInstance->GetSingleCreatureFromStorage(NPC_WHITEMANE);
-        if (pWhitemane && !pWhitemane->isAlive())
+        if (pWhitemane && !pWhitemane->IsAlive())
             pWhitemane->Respawn();
     }
 
@@ -265,7 +265,7 @@ struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
 
         if (Creature* pMograine = m_pInstance->GetSingleCreatureFromStorage(NPC_MOGRAINE))
         {
-            if (m_creature->isAlive() && !pMograine->isAlive())
+            if (m_creature->IsAlive() && !pMograine->IsAlive())
                 pMograine->Respawn();
         }
     }

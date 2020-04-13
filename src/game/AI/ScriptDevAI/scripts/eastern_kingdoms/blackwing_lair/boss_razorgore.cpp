@@ -187,7 +187,7 @@ struct npc_blackwing_orbAI : public ScriptedAI
                 // If Razorgore is not respawned yet: wait
                 if (Creature* pRazorgore = m_instance->GetSingleCreatureFromStorage(NPC_RAZORGORE))
                 {
-                    if (!(pRazorgore->isAlive()))
+                    if (!(pRazorgore->IsAlive()))
                     {
                         m_uiIntroVisualTimer = 2000;
                         return;
@@ -197,7 +197,7 @@ struct npc_blackwing_orbAI : public ScriptedAI
                 // If Grethok the Controller is here and spawned, start the visual, else wait for him
                 if (Creature* grethok = GetClosestCreatureWithEntry(m_creature, NPC_GRETHOK_CONTROLLER, 2.0f))
                 {
-                    if (grethok->isAlive())
+                    if (grethok->IsAlive())
                     {
                         m_creature->CastSpell(m_creature, SPELL_POSSESS_VISUAL, TRIGGERED_OLD_TRIGGERED);
                         grethok->CastSpell(grethok, SPELL_CONTROL_ORB, TRIGGERED_OLD_TRIGGERED);

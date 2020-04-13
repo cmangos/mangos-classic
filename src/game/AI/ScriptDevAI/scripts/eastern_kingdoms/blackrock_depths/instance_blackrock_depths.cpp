@@ -264,7 +264,7 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pDwarf = GetSingleCreatureFromStorage(aTombDwarfe))
                     {
-                        if (!pDwarf->isAlive())
+                        if (!pDwarf->IsAlive())
                             pDwarf->Respawn();
                     }
                 }
@@ -556,7 +556,7 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
             // of Shadowforge Senators in the Throne Room
             if (Creature* pDagran = GetSingleCreatureFromStorage(NPC_EMPEROR))
             {
-                if (!pDagran->isAlive())
+                if (!pDagran->IsAlive())
                     return;
 
                 if (m_uiDagranTimer > 0)

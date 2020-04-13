@@ -69,7 +69,7 @@ PetAI::PetAI(Unit* unit) : UnitAI(unit), inCombat(false), m_followAngle(PET_FOLL
 void PetAI::MoveInLineOfSight(Unit* who)
 {
     if (Unit* victim = m_unit->getVictim())
-        if (victim->isAlive())
+        if (victim->IsAlive())
             return;
 
     Pet* pet = (m_unit->GetTypeId() == TYPEID_UNIT && static_cast<Creature*>(m_unit)->IsPet()) ? static_cast<Pet*>(m_unit) : nullptr;
@@ -119,7 +119,7 @@ void PetAI::EnterEvadeMode()
 
 void PetAI::UpdateAI(const uint32 diff)
 {
-    if (!m_unit->isAlive())
+    if (!m_unit->IsAlive())
         return;
     Creature* creature = (m_unit->GetTypeId() == TYPEID_UNIT) ? static_cast<Creature*>(m_unit) : nullptr;
     Pet* pet = (creature && creature->IsPet()) ? static_cast<Pet*>(m_unit) : nullptr;

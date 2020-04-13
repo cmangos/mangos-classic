@@ -94,7 +94,7 @@ VendorItem const* VendorItemData::FindItem(uint32 item_id) const
 
 bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
-    if (m_onlyAlive && !m_owner.isAlive())
+    if (m_onlyAlive && !m_owner.IsAlive())
         return true; // still successful, just not executed
 
     m_owner.ForcedDespawn();
@@ -665,11 +665,11 @@ void Creature::Update(const uint32 diff)
 
             // creature can be dead after Unit::Update call
             // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
-            if (!isAlive())
+            if (!IsAlive())
                 break;
 
             // Creature can be dead after unit update
-            if (isAlive())
+            if (IsAlive())
                 RegenerateAll(diff);
 
             break;
@@ -1526,11 +1526,11 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
     AIM_Initialize();
 
     // Creature Linking, Initial load is handled like respawn
-    if (m_isCreatureLinkingTrigger && isAlive())
+    if (m_isCreatureLinkingTrigger && IsAlive())
         GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, this);
 
     // check if it is rabbit day
-    if (isAlive() && sWorld.getConfig(CONFIG_UINT32_RABBIT_DAY))
+    if (IsAlive() && sWorld.getConfig(CONFIG_UINT32_RABBIT_DAY))
     {
         time_t rabbit_day = time_t(sWorld.getConfig(CONFIG_UINT32_RABBIT_DAY));
         tm rabbit_day_tm = *localtime(&rabbit_day);
@@ -1720,7 +1720,7 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn, bool onlyAlive)
     if (IsDespawned())
         return;
 
-    if (isAlive())
+    if (IsAlive())
         SetDeathState(JUST_DIED);
 
     RemoveCorpse(true);                                     // force corpse removal in the same grid
@@ -1872,13 +1872,13 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
         return false;
 
     // Live player (or with not release body see live creatures or death creatures with corpse disappearing time > 0
-    if (pl->isAlive() || !pl->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    if (pl->IsAlive() || !pl->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
     {
-        return (isAlive() || !IsCorpseExpired() || (m_isDeadByDefault && m_deathState == CORPSE));
+        return (IsAlive() || !IsCorpseExpired() || (m_isDeadByDefault && m_deathState == CORPSE));
     }
 
     // Dead player see live creatures near own corpse
-    if (isAlive())
+    if (IsAlive())
     {
         Corpse* corpse = pl->GetCorpse();
         if (corpse)
@@ -1925,7 +1925,7 @@ void Creature::CallForHelp(float radius)
 bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /*= true*/) const
 {
     // we don't need help from zombies :)
-    if (!isAlive())
+    if (!IsAlive())
         return false;
 
     // we don't need help from non-combatant ;)
@@ -2088,7 +2088,7 @@ void Creature::SetInCombatWithZone(bool checkAttackability)
             if (pPlayer->isGameMaster())
                 continue;
 
-            if (pPlayer->isAlive())
+            if (pPlayer->IsAlive())
             {
                 if (checkAttackability && !CanAttack(pPlayer))
                     continue;
@@ -2124,7 +2124,7 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
         if ((selectFlags & SELECT_FLAG_IN_LOS) && !IsWithinLOSInMap(pTarget))
             return false;
 
-        if (!pTarget->isAlive())
+        if (!pTarget->IsAlive())
             return false;
 
         if ((selectFlags & SELECT_FLAG_RANGE_RANGE))

@@ -415,7 +415,7 @@ bool PlayerbotWarlockAI::CheckCurse(Unit* pTarget)
             for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
             {
                 Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-                if (!groupMember || !groupMember->isAlive())
+                if (!groupMember || !groupMember->IsAlive())
                     continue;
                 switch (groupMember->getClass())
                 {

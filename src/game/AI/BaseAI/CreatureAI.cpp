@@ -113,7 +113,7 @@ void CreatureAI::RetreatingEnded()
         return; // prevent stack overflow by cyclic calls - TODO: remove once Motion Master is human again
     SetAIOrder(ORDER_NONE);
     SetCombatScriptStatus(false);
-    if (!m_creature->isAlive())
+    if (!m_creature->IsAlive())
         return;
     DoStartMovement(m_creature->getVictim());
 }

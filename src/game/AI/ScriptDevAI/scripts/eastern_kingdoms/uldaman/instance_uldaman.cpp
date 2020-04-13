@@ -210,7 +210,7 @@ void instance_uldaman::DoResetKeeperEvent()
     {
         if (Creature* pKeeper = instance->GetCreature(*itr))
         {
-            if (!pKeeper->isAlive())
+            if (!pKeeper->IsAlive())
                 pKeeper->Respawn();
         }
     }
@@ -224,7 +224,7 @@ Creature* instance_uldaman::GetClosestDwarfNotInCombat(Creature* pSearcher)
     {
         Creature* pTemp = instance->GetCreature(*itr);
 
-        if (pTemp && pTemp->isAlive() && !pTemp->getVictim())
+        if (pTemp && pTemp->IsAlive() && !pTemp->getVictim())
             lTemp.push_back(pTemp);
     }
 
@@ -269,12 +269,12 @@ void instance_uldaman::Update(uint32 uiDiff)
         {
             // Get Keeper which is alive and out of combat
             Creature* pKeeper = instance->GetCreature(*itr);
-            if (!pKeeper || !pKeeper->isAlive() || pKeeper->getVictim())
+            if (!pKeeper || !pKeeper->IsAlive() || pKeeper->getVictim())
                 continue;
 
             // Get starter player for attack
             Player* pPlayer = pKeeper->GetMap()->GetPlayer(m_playerGuid);
-            if (!pPlayer || !pPlayer->isAlive())
+            if (!pPlayer || !pPlayer->IsAlive())
             {
                 // If he's not available, then get a random player, within a reasonamble distance in map
                 pPlayer = GetPlayerInMap(true, false);

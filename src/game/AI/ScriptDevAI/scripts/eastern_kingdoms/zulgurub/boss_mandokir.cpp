@@ -158,7 +158,7 @@ struct boss_mandokirAI : public ScriptedAI
         m_creature->LoadCreatureAddon(true);
 
         // should evade to bottom of the stairs when raid fail
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
             m_creature->GetMotionMaster()->MovePoint(0, aMandokirDownstairsPos[0], aMandokirDownstairsPos[1], aMandokirDownstairsPos[2]);
 
         m_creature->SetLootRecipient(nullptr);
@@ -180,7 +180,7 @@ struct boss_mandokirAI : public ScriptedAI
                 {
                     if (Creature* pJindo = m_pInstance->GetSingleCreatureFromStorage(NPC_JINDO))
                     {
-                        if (pJindo->isAlive())
+                        if (pJindo->IsAlive())
                             DoScriptText(SAY_GRATS_JINDO, pJindo);
                     }
                 }
@@ -257,7 +257,7 @@ struct boss_mandokirAI : public ScriptedAI
                 Player* pWatchTarget = m_creature->GetMap()->GetPlayer(m_watchTargetGuid);
 
                 // If threat is higher that previously saved, mandokir will act
-                if (pWatchTarget && pWatchTarget->isAlive() && m_creature->getThreatManager().getThreat(pWatchTarget) > m_fTargetThreat)
+                if (pWatchTarget && pWatchTarget->IsAlive() && m_creature->getThreatManager().getThreat(pWatchTarget) > m_fTargetThreat)
                 {
                     if (!m_creature->IsWithinLOSInMap(pWatchTarget))
                         m_creature->CastSpell(pWatchTarget, SPELL_SUMMON_PLAYER, TRIGGERED_OLD_TRIGGERED);

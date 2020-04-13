@@ -610,7 +610,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
-    if (!pCurrChar->isAlive())
+    if (!pCurrChar->IsAlive())
         pCurrChar->SendCorpseReclaimDelay(true);
 
     pCurrChar->SendInitialPacketsBeforeAddToMap();
@@ -811,7 +811,7 @@ void WorldSession::HandlePlayerReconnect()
         }
     }
 
-    if (!_player->isAlive())
+    if (!_player->IsAlive())
         _player->SendCorpseReclaimDelay(true);
 
     _player->SendInitialPacketsBeforeAddToMap();

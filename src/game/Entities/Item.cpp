@@ -1037,9 +1037,9 @@ bool ItemRequiredTarget::IsFitToRequirements(Unit* pUnitTarget) const
     switch (m_uiType)
     {
         case ITEM_TARGET_TYPE_CREATURE:
-            return pUnitTarget->isAlive();
+            return pUnitTarget->IsAlive();
         case ITEM_TARGET_TYPE_DEAD:
-            return !pUnitTarget->isAlive();
+            return !pUnitTarget->IsAlive();
         default:
             return false;
     }

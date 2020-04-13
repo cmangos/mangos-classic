@@ -2932,7 +2932,7 @@ bool ChatHandler::HandleDieCommand(char* args)
     ExtractOptUInt32(&args, param, 0);
     if (param != 0)
     {
-        if (target->isAlive())
+        if (target->IsAlive())
         {
             DamageEffectType damageType = DIRECT_DAMAGE;
             uint32 absorb = 0;
@@ -2943,7 +2943,7 @@ bool ChatHandler::HandleDieCommand(char* args)
     }
     else
     {
-        if (target->isAlive())
+        if (target->IsAlive())
         {
             Unit::DealDamage(player, target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }
@@ -2967,7 +2967,7 @@ bool ChatHandler::HandleDamageCommand(char* args)
         return false;
     }
 
-    if (!target->isAlive())
+    if (!target->IsAlive())
         return true;
 
     int32 damage_int;

@@ -572,7 +572,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     if (!m_ai)   return;
     if (!m_bot)  return;
 
-    if (!m_bot->isAlive() || m_bot->IsInDuel()) return;
+    if (!m_bot->IsAlive() || m_bot->IsInDuel()) return;
 
     CheckAuras();
 

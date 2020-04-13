@@ -79,7 +79,7 @@ void GuardianAI::CombatStop()
         return;
 
     // only alive creatures that are not on transport can return to home position
-    if (m_creature->isAlive() && GetDefaultMovement() == FOLLOW_MOTION_TYPE)
+    if (m_creature->IsAlive() && GetDefaultMovement() == FOLLOW_MOTION_TYPE)
         m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 }
 

@@ -246,7 +246,7 @@ struct npc_daphne_stilwellAI : public npc_escortAI
 
     void SummonedCreatureDespawn(Creature* pSummoned) override // just in case this happens somehow
     {
-        if (pSummoned->isAlive())
+        if (pSummoned->IsAlive())
             m_lSummonedRaidersGUIDs.remove(pSummoned->GetObjectGuid());
     }
 

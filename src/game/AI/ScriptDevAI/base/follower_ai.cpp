@@ -120,7 +120,7 @@ void FollowerAI::EnterEvadeMode()
     }
     else
     {
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
             m_creature->GetMotionMaster()->MoveTargetedHome();
     }
 
@@ -258,7 +258,7 @@ Player* FollowerAI::GetLeaderForFollower()
 {
     if (Player* leader = m_creature->GetMap()->GetPlayer(m_leaderGuid))
     {
-        if (leader->isAlive())
+        if (leader->IsAlive())
             return leader;
         if (Group* group = leader->GetGroup())
         {
@@ -266,7 +266,7 @@ Player* FollowerAI::GetLeaderForFollower()
             {
                 Player* member = ref->getSource();
 
-                if (member && member->isAlive() && m_creature->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
+                if (member && member->IsAlive() && m_creature->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
                 {
                     debug_log("SD2: FollowerAI GetLeader changed and returned new leader.");
                     m_leaderGuid = member->GetObjectGuid();

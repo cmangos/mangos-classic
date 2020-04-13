@@ -338,12 +338,12 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
     void FailEvent()
     {
         if (Creature* bigWill = m_creature->GetMap()->GetCreature(m_bigWillGuid))
-            if (bigWill->isAlive())
+            if (bigWill->IsAlive())
                 bigWill->ForcedDespawn();
 
         for (ObjectGuid guid : m_vAffrayChallengerGuidsVector)
             if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
-                if (creature->isAlive())
+                if (creature->IsAlive())
                     creature->ForcedDespawn();
 
         Reset();
@@ -436,7 +436,7 @@ struct npc_twiggy_flatheadAI : public ScriptedAI
         {
             Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
-            if (!pPlayer || !pPlayer->isAlive())
+            if (!pPlayer || !pPlayer->IsAlive())
             {
                 FailEvent();
                 return;
@@ -489,7 +489,7 @@ UnitAI* GetAI_npc_twiggy_flathead(Creature* pCreature)
 
 bool AreaTrigger_at_twiggy_flathead(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
-    if (pPlayer->isAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_AFFRAY) == QUEST_STATUS_INCOMPLETE)
+    if (pPlayer->IsAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_AFFRAY) == QUEST_STATUS_INCOMPLETE)
     {
         Creature* pCreature = GetClosestCreatureWithEntry(pPlayer, NPC_TWIGGY, 30.0f);
         if (!pCreature)

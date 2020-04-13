@@ -238,7 +238,7 @@ struct npc_ringoAI : public FollowerAI
             {
                 if (m_uiEndEventTimer < uiDiff)
                 {
-                    if (!pSpraggle || !pSpraggle->isAlive())
+                    if (!pSpraggle || !pSpraggle->IsAlive())
                     {
                         SetFollowComplete();
                         return;
@@ -371,7 +371,7 @@ struct npc_precious_the_devourerAI : public ScriptedAI
     {
         if (Creature* pSimone = m_creature->GetMap()->GetCreature(m_simoneGuid))
         {
-            if (pSimone->isAlive())
+            if (pSimone->IsAlive())
             {
                 pSimone->AI()->AttackStart(pWho);
             }
@@ -382,7 +382,7 @@ struct npc_precious_the_devourerAI : public ScriptedAI
     {
         if (Creature* pSimone = m_creature->GetMap()->GetCreature(m_simoneGuid))
         {
-            if (!pSimone->isAlive())
+            if (!pSimone->IsAlive())
             {
                 m_creature->ForcedDespawn();
             }
@@ -458,7 +458,7 @@ struct npc_simone_seductressAI : public ScriptedAI
     {
         if (Creature* pPrecious = m_creature->GetMap()->GetCreature(m_preciousGuid))
         {
-            if (!pPrecious->isAlive())
+            if (!pPrecious->IsAlive())
             {
                 pPrecious->ForcedDespawn();
                 Creature* pPreciousNew = m_creature->SummonCreature(NPC_PRECIOUS_THE_DEVOURER,
@@ -494,7 +494,7 @@ struct npc_simone_seductressAI : public ScriptedAI
     {
         if (Creature* pPrecious = m_creature->GetMap()->GetCreature(m_preciousGuid))
         {
-            if (pPrecious->isAlive())
+            if (pPrecious->IsAlive())
             {
                 if (pWho)
                     pPrecious->AI()->AttackStart(pWho);
@@ -540,7 +540,7 @@ struct npc_simone_seductressAI : public ScriptedAI
                 {
                     if (Unit* pUnit = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                     {
-                        if (pUnit->isAlive())
+                        if (pUnit->IsAlive())
                             pCleaner->AI()->AttackStart(pUnit);
                     }
                 }
@@ -553,7 +553,7 @@ struct npc_simone_seductressAI : public ScriptedAI
                     {
                         if (Unit* pUnit = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                         {
-                            if (pUnit->isAlive())
+                            if (pUnit->IsAlive())
                                 pCleaner->AI()->AttackStart(pUnit);
                         }
                     }
@@ -586,7 +586,7 @@ struct npc_simone_seductressAI : public ScriptedAI
     {
         if (m_uiDespawn_Timer < uiDiff)
         {
-            if (m_creature->isAlive() && !m_creature->isInCombat())
+            if (m_creature->IsAlive() && !m_creature->isInCombat())
                 DemonDespawn(false);
         }
         else

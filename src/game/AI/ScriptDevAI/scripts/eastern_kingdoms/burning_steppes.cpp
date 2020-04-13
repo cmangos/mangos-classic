@@ -463,7 +463,7 @@ struct npc_klinfranAI : public ScriptedAI
                 {
                     if (Unit* pUnit = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                     {
-                        if (pUnit->isAlive())
+                        if (pUnit->IsAlive())
                             pCleaner->AI()->AttackStart(pUnit);
                     }
                 }
@@ -512,7 +512,7 @@ struct npc_klinfranAI : public ScriptedAI
         {
             if (m_uiDespawn_Timer <= uiDiff)
             {
-                if (m_creature->isAlive() && !m_creature->isInCombat())
+                if (m_creature->IsAlive() && !m_creature->isInCombat())
                     DemonDespawn(false);
             }
             else

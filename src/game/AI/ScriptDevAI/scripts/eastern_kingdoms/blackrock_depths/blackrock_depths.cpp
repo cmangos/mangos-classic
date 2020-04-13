@@ -116,7 +116,7 @@ bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* 
 {
     if (instance_blackrock_depths* pInstance = (instance_blackrock_depths*)pPlayer->GetInstanceData())
     {
-        if (pPlayer->isGameMaster() || !pPlayer->isAlive() || pInstance->GetData(TYPE_BRIDGE) == DONE)
+        if (pPlayer->isGameMaster() || !pPlayer->IsAlive() || pInstance->GetData(TYPE_BRIDGE) == DONE)
             return false;
 
         Creature* pPyromancer = pInstance->GetSingleCreatureFromStorage(NPC_LOREGRAIN);
@@ -1516,7 +1516,7 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
                     GetCreatureListWithEntryInGrid(lCroniesList, m_creature, NPC_BLACKBREATH_CRONY, 30.0f);
                     for (auto& itr : lCroniesList)
                     {
-                        if (itr->isAlive())
+                        if (itr->IsAlive())
                             itr->SetImmuneToPlayer(false);
                     }
                     break;

@@ -126,7 +126,7 @@ void instance_shadowfang_keep::DoSpeech()
     Creature* pAda = GetSingleCreatureFromStorage(NPC_ADA);
     Creature* pAsh = GetSingleCreatureFromStorage(NPC_ASH);
 
-    if (pAda && pAda->isAlive() && pAsh && pAsh->isAlive())
+    if (pAda && pAda->IsAlive() && pAsh && pAsh->IsAlive())
     {
         DoScriptText(SAY_BOSS_DIE_AD, pAda);
         DoScriptText(SAY_BOSS_DIE_AS, pAsh);

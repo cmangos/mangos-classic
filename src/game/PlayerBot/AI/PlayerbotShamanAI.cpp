@@ -454,7 +454,7 @@ void PlayerbotShamanAI::DoNonCombatActions()
     if (!m_ai)   return;
     if (!m_bot)  return;
 
-    if (!m_bot->isAlive() || m_bot->IsInDuel()) return;
+    if (!m_bot->IsAlive() || m_bot->IsInDuel()) return;
 
     // Dispel disease/poison
     if (m_ai->HasDispelOrder() && DispelPlayer() & RETURN_CONTINUE)

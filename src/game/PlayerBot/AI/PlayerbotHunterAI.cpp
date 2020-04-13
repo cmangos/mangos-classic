@@ -195,7 +195,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // check for pet and heal if neccessary
     Pet* pet = m_bot->GetPet();
     // TODO: clarify/simplify: !pet->getDeathState() != ALIVE
-    if (pet && PET_MEND > 0 && pet->isAlive() && pet->GetHealthPercent() < 50 && pVictim != m_bot && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && m_ai->CastSpell(PET_MEND, *m_bot) == SPELL_CAST_OK)
+    if (pet && PET_MEND > 0 && pet->IsAlive() && pet->GetHealthPercent() < 50 && pVictim != m_bot && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && m_ai->CastSpell(PET_MEND, *m_bot) == SPELL_CAST_OK)
     {
         m_ai->TellMaster("healing pet.");
         return RETURN_CONTINUE;
@@ -459,14 +459,14 @@ void PlayerbotHunterAI::DoNonCombatActions()
                     break;
             }
         }
-        else if (!(pet->isAlive()))
+        else if (!(pet->IsAlive()))
         {
             if (PET_REVIVE > 0 && m_ai->CastSpell(PET_REVIVE, *m_bot) == SPELL_CAST_OK)
                 m_ai->TellMaster("reviving pet.");
         }
         else if (pet->GetHealthPercent() < 50)
         {
-            if (PET_MEND > 0 && pet->isAlive() && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && m_ai->CastSpell(PET_MEND, *m_bot) == SPELL_CAST_OK)
+            if (PET_MEND > 0 && pet->IsAlive() && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && m_ai->CastSpell(PET_MEND, *m_bot) == SPELL_CAST_OK)
                 m_ai->TellMaster("healing pet.");
         }
         else if (pet->GetHappinessState() != HAPPY) // if pet is hungry

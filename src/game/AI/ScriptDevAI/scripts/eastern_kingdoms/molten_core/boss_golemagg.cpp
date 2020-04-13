@@ -85,7 +85,7 @@ struct boss_golemaggAI : public CombatAI
         GetCreatureListWithEntryInGrid(lCoreRagerList, m_creature, NPC_CORE_RAGER, 100.0f);
         for (auto& itr : lCoreRagerList)
         {
-            if (itr->isAlive())
+            if (itr->IsAlive())
                 m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, itr);
         }
         if (m_instance)

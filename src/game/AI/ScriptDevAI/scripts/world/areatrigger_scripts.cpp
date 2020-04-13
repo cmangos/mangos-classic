@@ -96,7 +96,7 @@ enum
 
 bool AreaTrigger_at_scent_larkorwi(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (pPlayer->isAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_SCENT_OF_LARKORWI) == QUEST_STATUS_INCOMPLETE)
+    if (pPlayer->IsAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_SCENT_OF_LARKORWI) == QUEST_STATUS_INCOMPLETE)
     {
         if (!GetClosestCreatureWithEntry(pPlayer, NPC_LARKORWI_MATE, 25.0f, false, false))
             pPlayer->SummonCreature(NPC_LARKORWI_MATE, pAt->x, pAt->y, pAt->z, 3.3f, TEMPSPAWN_TIMED_OOC_DESPAWN, 2 * MINUTE * IN_MILLISECONDS);
@@ -113,7 +113,7 @@ bool AreaTrigger_at_murkdeep(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
     // Handle Murkdeep event start
     // The area trigger summons 3 Greymist Coastrunners; The rest of the event is handled by world map scripts
-    if (pPlayer->isAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_WANTED_MURKDEEP) == QUEST_STATUS_INCOMPLETE)
+    if (pPlayer->IsAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_WANTED_MURKDEEP) == QUEST_STATUS_INCOMPLETE)
     {
         ScriptedMap* pScriptedMap = (ScriptedMap*)pPlayer->GetInstanceData();
         if (!pScriptedMap)
@@ -176,7 +176,7 @@ static const AncientSpawn afSpawnLocations[MAX_ANCIENTS] =
 
 bool AreaTrigger_at_ancient_leaf(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
-    if (pPlayer->isGameMaster() || !pPlayer->isAlive())
+    if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
         return false;
 
     // Handle Call Ancients event start - The area trigger summons 3 ancients
@@ -225,7 +225,7 @@ static const Location m_miranAmbushSpawns[] =
 bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
     // Player is deaed, a GM, quest complete or no quest, do nothing
-    if (!pPlayer->isAlive() || pPlayer->isGameMaster() ||
+    if (!pPlayer->IsAlive() || pPlayer->isGameMaster() ||
             pPlayer->GetQuestStatus(QUEST_RESUPPLYING_THE_EXCAVATION) == QUEST_STATUS_COMPLETE ||
             pPlayer->GetQuestStatus(QUEST_RESUPPLYING_THE_EXCAVATION) == QUEST_STATUS_NONE)
         return false;
@@ -287,10 +287,10 @@ static const Location m_twilightCorrupterSpawn = { -10326.3f, -487.423f, 50.1127
 bool AreaTrigger_at_twilight_grove(Player* player, AreaTriggerEntry const* /*pAt*/)
 {
     // Player is deaed, a GM, quest complete, no quest or already got item: do nothing
-    if (!player->isAlive() || player->isGameMaster() ||
+    if (!player->IsAlive() || player->isGameMaster() ||
             player->GetQuestStatus(QUEST_NIGHTMARE_CORRUPTION) == QUEST_STATUS_COMPLETE ||
             player->GetQuestStatus(QUEST_NIGHTMARE_CORRUPTION) == QUEST_STATUS_NONE ||
-            player->HasItemCount(ITEM_FRAGMENT_NIGHTMARE, 1))
+        player->HasItemCount(ITEM_FRAGMENT_NIGHTMARE, 1))
         return false;
 
     ScriptedMap* scriptedMap = (ScriptedMap*)player->GetInstanceData();
@@ -324,7 +324,7 @@ bool AreaTrigger_at_hive_tower(Player* player, AreaTriggerEntry const* /*pAt*/)
     if (scriptedMap->GetData(TYPE_HIVE) != NOT_STARTED) // Only summon more Hive'Ashi Drones if the 5 minutes timer is elapsed
         return false;
 
-    if (player->isAlive() && !player->isGameMaster())
+    if (player->IsAlive() && !player->isGameMaster())
     {
         // spawn three Hive'Ashi Drones for 5 minutes (timer is guesswork)
         for (uint8 i = POS_IDX_HIVE_DRONES_START; i <= POS_IDX_HIVE_DRONES_STOP; ++i)

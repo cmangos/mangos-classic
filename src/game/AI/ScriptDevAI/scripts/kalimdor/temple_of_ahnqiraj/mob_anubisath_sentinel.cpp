@@ -149,7 +149,7 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
         {
             if (Creature* buddy = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (*itr == m_creature->GetObjectGuid() || !buddy->isAlive())
+                if (*itr == m_creature->GetObjectGuid() || !buddy->IsAlive())
                     continue;
 
                 if (!hasDoneEmote)
@@ -175,7 +175,7 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
 
                 if (Creature* buddy = m_creature->GetMap()->GetCreature(*itr))
                 {
-                    if (buddy->isAlive())
+                    if (buddy->IsAlive())
                     {
                         npc_anubisath_sentinelAI* buddyAI = static_cast<npc_anubisath_sentinelAI*>(buddy->AI());
                         buddyAI->SetAbility(true, m_abilities[buddyCount]);

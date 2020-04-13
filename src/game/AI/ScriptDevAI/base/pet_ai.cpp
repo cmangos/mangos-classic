@@ -57,7 +57,7 @@ void ScriptedPetAI::UpdatePetAI(const uint32 /*diff*/)
 
 void ScriptedPetAI::UpdateAI(const uint32 diff)
 {
-    if (!m_creature->isAlive())                             // should not be needed, isAlive is checked in mangos before calling UpdateAI
+    if (!m_creature->IsAlive())                             // should not be needed, IsAlive is checked in mangos before calling UpdateAI
         return;
 
     // UpdateAllies() is done in the generic PetAI in Mangos, but we can't do this from script side.

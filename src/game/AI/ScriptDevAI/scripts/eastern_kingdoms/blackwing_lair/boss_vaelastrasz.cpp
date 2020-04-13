@@ -192,7 +192,7 @@ struct boss_vaelastraszAI : public CombatAI
                 for (CreatureList::const_iterator itr = lTechniciansList.begin(); itr != lTechniciansList.end(); ++itr)
                 {
                     // Ignore Blackwing Technicians on upper floors and dead ones
-                    if (!((*itr)->isAlive()) || (*itr)->GetPositionZ() > m_creature->GetPositionZ() + 1)
+                    if (!((*itr)->IsAlive()) || (*itr)->GetPositionZ() > m_creature->GetPositionZ() + 1)
                         continue;
 
                     // Each fleeing part and despawn is handled in DB, we only need to make them run

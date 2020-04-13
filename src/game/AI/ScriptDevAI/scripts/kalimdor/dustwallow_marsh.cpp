@@ -99,7 +99,7 @@ struct npc_morokkAI : public npc_escortAI
             {
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
-                    if (pPlayer->isAlive() && pPlayer->IsInRange(m_creature, 0, 70))
+                    if (pPlayer->IsAlive() && pPlayer->IsInRange(m_creature, 0, 70))
                     {
                         m_bIsSuccess = false;
                         DoScriptText(SAY_MOR_CHALLENGE, m_creature, pPlayer);
@@ -251,7 +251,7 @@ struct npc_ogronAI : public npc_escortAI
         {
             for (auto& itr : lCreatureList)
             {
-                if (itr->GetEntry() == uiCreatureEntry && itr->isAlive())
+                if (itr->GetEntry() == uiCreatureEntry && itr->IsAlive())
                     return itr;
             }
         }
@@ -304,7 +304,7 @@ struct npc_ogronAI : public npc_escortAI
                 if (itr->GetEntry() == NPC_REETHE)
                     continue;
 
-                if (itr->isAlive())
+                if (itr->IsAlive())
                 {
                     itr->setFaction(FACTION_THER_HOSTILE);
                     itr->AI()->AttackStart(m_creature);
@@ -561,7 +561,7 @@ struct npc_private_hendelAI : public ScriptedAI
 
             for (CreatureList::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
             {
-                if ((*itr)->isAlive())
+                if ((*itr)->IsAlive())
                 {
                     (*itr)->RemoveAllAurasOnEvade();
                     (*itr)->CombatStop(true);
@@ -609,7 +609,7 @@ bool QuestAccept_npc_private_hendel(Player* pPlayer, Creature* pCreature, const 
 
         for (CreatureList::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
         {
-            if ((*itr)->isAlive())
+            if ((*itr)->IsAlive())
             {
                 (*itr)->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
                 (*itr)->AI()->AttackStart(pPlayer);

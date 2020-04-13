@@ -380,7 +380,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
                 return;                                 // cheating?
 
             // resurrect the player
-            if (!_player->isAlive())
+            if (!_player->IsAlive())
             {
                 _player->ResurrectPlayer(1.0f);
                 _player->SpawnCorpseBones();

@@ -178,7 +178,7 @@ struct npc_general_andorovAI : public CombatAI, private DialogueHelper
         m_creature->RemoveAllAurasOnEvade();
         m_creature->CombatStop(true);
 
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
         {
             // reset to combat position
             if (m_pointId >= 4)
@@ -342,11 +342,11 @@ struct npc_kaldorei_eliteAI : public CombatAI
         m_creature->CombatStop(true);
 
         // reset only to the last position
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
         {
             if (Creature* andorov = m_instance->GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
             {
-                if (andorov->isAlive())
+                if (andorov->IsAlive())
                     m_creature->GetMotionMaster()->MoveFollow(andorov, m_creature->GetDistance(andorov), m_creature->GetAngle(andorov));
             }
         }

@@ -79,7 +79,7 @@ struct boss_emperor_dagran_thaurissanAI : public ScriptedAI
             if (pPrincess->GetEntry() != NPC_PRINCESS)
                 return;
 
-            if (pPrincess->isAlive())
+            if (pPrincess->IsAlive())
             {
                 pPrincess->SetFactionTemporary(FACTION_NEUTRAL, TEMPFACTION_NONE);
                 pPrincess->AI()->EnterEvadeMode();
@@ -175,7 +175,7 @@ struct boss_moira_bronzebeardAI : public ScriptedAI
             if (Creature* pEmperor = m_pInstance->GetSingleCreatureFromStorage(NPC_EMPEROR))
             {
                 // if evade, then check if he is alive. If not, start make portal
-                if (!pEmperor->isAlive())
+                if (!pEmperor->IsAlive())
                     DoCastSpellIfCan(m_creature, SPELL_OPEN_PORTAL);
             }
         }
@@ -219,7 +219,7 @@ struct boss_moira_bronzebeardAI : public ScriptedAI
         {
             if (Creature* pEmperor = m_pInstance->GetSingleCreatureFromStorage(NPC_EMPEROR))
             {
-                if (pEmperor->isAlive() && pEmperor->GetHealthPercent() != 100.0f)
+                if (pEmperor->IsAlive() && pEmperor->GetHealthPercent() != 100.0f)
                 {
                     if (DoCastSpellIfCan(pEmperor, SPELL_HEAL) == CAST_OK)
                         m_uiHealTimer = 10000;

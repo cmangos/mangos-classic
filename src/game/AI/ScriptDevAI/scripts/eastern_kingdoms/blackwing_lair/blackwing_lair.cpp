@@ -192,7 +192,7 @@ void instance_blackwing_lair::SetData(uint32 uiType, uint32 uiData)
                 DoToggleGameObjectFlags(GO_ORB_OF_DOMINATION, GO_FLAG_NO_INTERACT, true);
                 if (Creature* pOrb = GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
                 {
-                    if (pOrb->isAlive())
+                    if (pOrb->IsAlive())
                         pOrb->AI()->EnterEvadeMode();
                 }
 
@@ -535,7 +535,7 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
             // Respawn Razorgore
             if (Creature* pRazorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
             {
-                if (!pRazorgore->isAlive())
+                if (!pRazorgore->IsAlive())
                     pRazorgore->Respawn();
             }
 

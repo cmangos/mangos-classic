@@ -265,7 +265,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                     if (Creature* pAbom = instance->GetCreature(*itr))
                     {
                         ++itr;
-                        if (!pAbom->isAlive())
+                        if (!pAbom->IsAlive())
                             --uiCount;
                     }
                     else
@@ -394,7 +394,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                     // Baron killed and Aurius is alive: give him his NPC Flags back, so players can complete the quest and fake his death
                     if (Creature* pAurius = GetSingleCreatureFromStorage(NPC_AURIUS))
                     {
-                        if (pAurius->isAlive())
+                        if (pAurius->IsAlive())
                         {
                             DoScriptText(SAY_AURIUS_DEATH, pAurius);
                             pAurius->StopMoving();
@@ -421,7 +421,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
             if (uiData == IN_PROGRESS)
             {
                 Creature* pBarthilas = GetSingleCreatureFromStorage(NPC_BARTHILAS);
-                if (pBarthilas && pBarthilas->isAlive() && !pBarthilas->isInCombat())
+                if (pBarthilas && pBarthilas->IsAlive() && !pBarthilas->isInCombat())
                 {
                     DoScriptText(SAY_WARN_BARON, pBarthilas);
                     pBarthilas->SetWalk(false);
@@ -580,7 +580,7 @@ void instance_stratholme::DoSortZiggurats()
         {
             if (GameObject* pZigguratDoor = instance->GetGameObject(i.m_doorGuid))
             {
-                if ((*itr)->isAlive() && (*itr)->IsWithinDistInMap(pZigguratDoor, 35.0f, false))
+                if ((*itr)->IsAlive() && (*itr)->IsWithinDistInMap(pZigguratDoor, 35.0f, false))
                 {
                     i.m_lZigguratAcolyteGuid.push_back((*itr)->GetObjectGuid());
                     itr = lAcolytes.erase(itr);
@@ -879,7 +879,7 @@ void instance_stratholme::DoMoveBackDefenders(uint8 uiStep, Creature* pCreature)
     for (GuidList::const_iterator itr = m_suiCrimsonDefendersLowGuids[uiIndex].begin(); itr != m_suiCrimsonDefendersLowGuids[uiIndex].end(); ++itr)
     {
         Creature* pGuard = instance->GetCreature(*itr);
-        if (pGuard && pGuard->isAlive() && !pGuard->isInCombat())
+        if (pGuard && pGuard->IsAlive() && !pGuard->isInCombat())
         {
             pGuard->GetMotionMaster()->MoveIdle();
             pGuard->SetWalk(false);
@@ -1025,7 +1025,7 @@ void instance_stratholme::Update(uint32 uiDiff)
             for (GuidList::const_iterator itr = m_luiGuardGUIDs.begin(); itr != m_luiGuardGUIDs.end(); ++itr)
             {
                 Creature* pGuard = instance->GetCreature(*itr);
-                if (pGuard && pGuard->isAlive() && !pGuard->isInCombat())
+                if (pGuard && pGuard->IsAlive() && !pGuard->isInCombat())
                 {
                     float fX, fY, fZ;
                     pGuard->GetRandomPoint(aStratholmeLocation[5].m_fX, aStratholmeLocation[5].m_fY, aStratholmeLocation[5].m_fZ, 10.0f, fX, fY, fZ);
@@ -1054,7 +1054,7 @@ void instance_stratholme::Update(uint32 uiDiff)
         if (m_uiBarthilasRunTimer <= uiDiff)
         {
             Creature* pBarthilas = GetSingleCreatureFromStorage(NPC_BARTHILAS);
-            if (pBarthilas && pBarthilas->isAlive() && !pBarthilas->isInCombat())
+            if (pBarthilas && pBarthilas->IsAlive() && !pBarthilas->isInCombat())
                 pBarthilas->NearTeleportTo(aStratholmeLocation[1].m_fX, aStratholmeLocation[1].m_fY, aStratholmeLocation[1].m_fZ, aStratholmeLocation[1].m_fO);
 
             SetData(TYPE_BARTHILAS_RUN, DONE);
@@ -1071,7 +1071,7 @@ void instance_stratholme::Update(uint32 uiDiff)
         {
             // Teleport Aurius from the Chapel and spawn it in the Slaughter House to engage Baron
             Creature* pAurius = GetSingleCreatureFromStorage(NPC_AURIUS);
-            if (pAurius && pAurius->isAlive() && !pAurius->isInCombat())
+            if (pAurius && pAurius->IsAlive() && !pAurius->isInCombat())
             {
                 if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
                 {
@@ -1183,7 +1183,7 @@ void instance_stratholme::Update(uint32 uiDiff)
             {
                 Creature* pAbom = instance->GetCreature(itr);
                 // Skip killed and already walking Abomnations
-                if (!pAbom || !pAbom->isAlive() || pAbom->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
+                if (!pAbom || !pAbom->IsAlive() || pAbom->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                     continue;
 
                 // Let Move to somewhere in the middle

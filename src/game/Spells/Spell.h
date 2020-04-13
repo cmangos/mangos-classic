@@ -789,7 +789,7 @@ namespace MaNGOS
             for (auto& itr : m)
             {
                 Player* pPlayer = itr.getSource();
-                if (!pPlayer->isAlive() || pPlayer->IsTaxiFlying())
+                if (!pPlayer->IsAlive() || pPlayer->IsTaxiFlying())
                     continue;
 
                 if (!i_originalCaster->CanAttackSpell(pPlayer, i_spell.m_spellInfo))

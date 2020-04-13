@@ -8156,7 +8156,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             switch (m_value1)
             {
                 case 0:                                     // Player dead or out of range
-                    return !player || !player->isAlive() || (m_value2 && source && !source->IsWithinDistInMap(player, m_value2));
+                    return !player || !player->IsAlive() || (m_value2 && source && !source->IsWithinDistInMap(player, m_value2));
                 case 1:                                     // All players in Group dead or out of range
                     if (!player)
                         return true;
@@ -8165,22 +8165,22 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                         for (GroupReference const* itr = grp->GetFirstMember(); itr != nullptr; itr = itr->next())
                         {
                             Player const* pl = itr->getSource();
-                            if (pl && pl->isAlive() && !pl->isGameMaster() && (!m_value2 || !source || source->IsWithinDistInMap(pl, m_value2)))
+                            if (pl && pl->IsAlive() && !pl->isGameMaster() && (!m_value2 || !source || source->IsWithinDistInMap(pl, m_value2)))
                                 return false;
                         }
                         return true;
                     }
-                    return !player->isAlive() || (m_value2 && source && !source->IsWithinDistInMap(player, m_value2));
+                    return !player->IsAlive() || (m_value2 && source && !source->IsWithinDistInMap(player, m_value2));
                 case 2:                                     // All players in instance dead or out of range
                     for (const auto& itr : map->GetPlayers())
                     {
                         Player const* plr = itr.getSource();
-                        if (plr && plr->isAlive() && !plr->isGameMaster() && (!m_value2 || !source || source->IsWithinDistInMap(plr, m_value2)))
+                        if (plr && plr->IsAlive() && !plr->isGameMaster() && (!m_value2 || !source || source->IsWithinDistInMap(plr, m_value2)))
                             return false;
                     }
                     return true;
                 case 3:                                     // Creature source is dead
-                    return !source || source->GetTypeId() != TYPEID_UNIT || !((Unit*)source)->isAlive();
+                    return !source || source->GetTypeId() != TYPEID_UNIT || !((Unit*) source)->IsAlive();
             }
         case CONDITION_CREATURE_IN_RANGE:
         {

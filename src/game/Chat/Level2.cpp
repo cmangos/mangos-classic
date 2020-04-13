@@ -1855,7 +1855,7 @@ bool ChatHandler::HandleNpcMoveCommand(char* args)
         }
         pCreature->GetMap()->CreatureRelocation(pCreature, x, y, z, o);
         pCreature->GetMotionMaster()->Initialize();
-        if (pCreature->isAlive())                           // dead creature will reset movement generator at respawn
+        if (pCreature->IsAlive())                           // dead creature will reset movement generator at respawn
         {
             pCreature->SetDeathState(JUST_DIED);
             pCreature->Respawn();
@@ -1949,7 +1949,7 @@ bool ChatHandler::HandleNpcSetMoveTypeCommand(char* args)
     {
         pCreature->SetDefaultMovementType(move_type);
         pCreature->GetMotionMaster()->Initialize();
-        if (pCreature->isAlive())                           // dead creature will reset movement generator at respawn
+        if (pCreature->IsAlive())                           // dead creature will reset movement generator at respawn
         {
             pCreature->SetDeathState(JUST_DIED);
             pCreature->Respawn();
@@ -2059,7 +2059,7 @@ bool ChatHandler::HandleNpcSpawnDistCommand(char* args)
     }
 
     // respawn alive creature to reinitialize everything including movement generator (dead one will do it anyway at respawn)
-    if (pCreature->isAlive())
+    if (pCreature->IsAlive())
     {
         pCreature->SetDeathState(JUST_DIED);
         pCreature->Respawn();
@@ -2895,7 +2895,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
         {
             wpOwner->SetDefaultMovementType(RANDOM_MOTION_TYPE);
             wpOwner->GetMotionMaster()->Initialize();
-            if (wpOwner->isAlive())                         // Dead creature will reset movement generator at respawn
+            if (wpOwner->IsAlive())                         // Dead creature will reset movement generator at respawn
             {
                 wpOwner->SetDeathState(JUST_DIED);
                 wpOwner->Respawn();

@@ -96,7 +96,7 @@ void instance_onyxias_lair::SetData(uint32 uiType, uint32 uiData)
             {
                 if (Creature* pWarder = instance->GetCreature(*itr))
                 {
-                    if (!pWarder->isAlive())
+                    if (!pWarder->IsAlive())
                         pWarder->Respawn();
                 }
             }

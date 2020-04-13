@@ -290,7 +290,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                 // change faction to certian ogres
                 if (Creature* pOgre = GetSingleCreatureFromStorage(NPC_CAPTAIN_KROMCRUSH))
                 {
-                    if (pOgre->isAlive())
+                    if (pOgre->IsAlive())
                     {
                         pOgre->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
 
@@ -303,7 +303,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                 if (Creature* pOgre = GetSingleCreatureFromStorage(NPC_CHORUSH))
                 {
                     // Chorush evades and yells on king death (if alive)
-                    if (pOgre->isAlive())
+                    if (pOgre->IsAlive())
                     {
                         DoScriptText(SAY_CHORUSH_KING_DEAD, pOgre);
                         pOgre->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);

@@ -104,7 +104,7 @@ inline void CreatureVisitCreatureWorker(Creature* c1, Creature* c2)
 template<>
 inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(CreatureMapType& m)
 {
-    if (!i_player.isAlive() || i_player.IsTaxiFlying())
+    if (!i_player.IsAlive() || i_player.IsTaxiFlying())
         return;
 
     bool playerHasAI = i_player.AI() != nullptr;
@@ -112,7 +112,7 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(CreatureMapType& m)
     for (auto& iter : m)
     {
         Creature* creature = iter.getSource();
-        if (!creature->isAlive())
+        if (!creature->IsAlive())
             continue;
 
         UnitVisitObjectsNotifierWorker(creature, &i_player);
@@ -125,7 +125,7 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(CreatureMapType& m)
 template<>
 inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(PlayerMapType& m)
 {
-    if (!i_player.isAlive() || i_player.IsTaxiFlying())
+    if (!i_player.IsAlive() || i_player.IsTaxiFlying())
         return;
 
     bool playerHasAI = i_player.AI() != nullptr;
@@ -133,7 +133,7 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(PlayerMapType& m)
     for (auto& iter : m)
     {
         Player* player = iter.getSource();
-        if (player->isAlive() && !player->IsTaxiFlying())
+        if (player->IsAlive() && !player->IsTaxiFlying())
             continue;
 
         if (player->AI())
@@ -147,13 +147,13 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(PlayerMapType& m)
 template<>
 inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(PlayerMapType& m)
 {
-    if (!i_creature.isAlive())
+    if (!i_creature.IsAlive())
         return;
 
     for (auto& iter : m)
     {
         Player* player = iter.getSource();
-        if (!player->isAlive() || player->IsTaxiFlying())
+        if (!player->IsAlive() || player->IsTaxiFlying())
             continue;
 
         if (player->AI())
@@ -166,13 +166,13 @@ inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(PlayerMapType& m)
 template<>
 inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(CreatureMapType& m)
 {
-    if (!i_creature.isAlive())
+    if (!i_creature.IsAlive())
         return;
 
     for (auto& iter : m)
     {
         Creature* creature = iter.getSource();
-        if (creature == &i_creature || !creature->isAlive())
+        if (creature == &i_creature || !creature->IsAlive())
             continue;
 
         UnitVisitObjectsNotifierWorker(creature, &i_creature);
@@ -183,7 +183,7 @@ inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(CreatureMapType& m)
 
 inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
 {
-    if (!target->isAlive() || target->IsTaxiFlying())
+    if (!target->IsAlive() || target->IsTaxiFlying())
         return;
 
     if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsTotem())
@@ -221,7 +221,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
             {
                 if (i_spellST->type == SPELL_TARGET_TYPE_DEAD && ((Creature*)target)->IsCorpse())
                     found = true;
-                else if (i_spellST->type == SPELL_TARGET_TYPE_CREATURE && target->isAlive())
+                else if (i_spellST->type == SPELL_TARGET_TYPE_CREATURE && target->IsAlive())
                     found = true;
 
                 break;

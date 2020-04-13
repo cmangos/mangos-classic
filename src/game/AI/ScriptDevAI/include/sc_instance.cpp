@@ -140,7 +140,7 @@ Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBe
     for (const auto& lPlayer : lPlayers)
     {
         Player* pPlayer = lPlayer.getSource();
-        if (pPlayer && (!bOnlyAlive || pPlayer->isAlive()) && (bCanBeGamemaster || !pPlayer->isGameMaster()))
+        if (pPlayer && (!bOnlyAlive || pPlayer->IsAlive()) && (bCanBeGamemaster || !pPlayer->isGameMaster()))
             return pPlayer;
     }
 

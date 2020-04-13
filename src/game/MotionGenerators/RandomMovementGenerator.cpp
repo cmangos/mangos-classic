@@ -80,7 +80,7 @@ void AbstractRandomMovementGenerator::Reset(Unit& owner)
 
 bool AbstractRandomMovementGenerator::Update(Unit& owner, const uint32& diff)
 {
-    if (!owner.isAlive())
+    if (!owner.IsAlive())
         return false;
 
     if (owner.hasUnitState(UNIT_STAT_NO_FREE_MOVE & ~i_stateActive))

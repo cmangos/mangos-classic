@@ -161,7 +161,7 @@ struct boss_ossirianAI : public CombatAI
             // iterate from random roll until either one (should always occur) is found or we run out of crystals
             if (Creature* creature = m_creature->GetMap()->GetCreature(vector[i]))
             {
-                if (!creature->isAlive())
+                if (!creature->IsAlive())
                 {
                     creature->Respawn();
                     ++spawned;
@@ -180,7 +180,7 @@ struct boss_ossirianAI : public CombatAI
             return;
 
         if (Creature* creature = m_creature->GetMap()->GetCreature(vector[0]))
-            if (!creature->isAlive())
+            if (!creature->IsAlive())
                 creature->Respawn();
     }
 

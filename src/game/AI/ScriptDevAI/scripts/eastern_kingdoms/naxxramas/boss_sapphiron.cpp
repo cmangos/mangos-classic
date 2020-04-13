@@ -349,7 +349,7 @@ struct PeriodicIceBolt : public AuraScript
     {
         if (Unit* target =  aura->GetTarget())
         {
-            if (target->isAlive() && !target->HasAura(SPELL_ICEBOLT_IMMUNITY))
+            if (target->IsAlive() && !target->HasAura(SPELL_ICEBOLT_IMMUNITY))
             {
                 target->CastSpell(target, SPELL_ICEBOLT_IMMUNITY, TRIGGERED_OLD_TRIGGERED);     // Icebolt which causes immunity to frost dmg
                 data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_ICEBLOCK_SUMMON); // Summon Ice Block

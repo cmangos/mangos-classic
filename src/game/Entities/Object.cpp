@@ -461,7 +461,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     uint32 dynflagsValue = m_uint32Values[index];
                     bool setTapFlags = false;
 
-                    if (creature->isAlive())
+                    if (creature->IsAlive())
                     {
                         // creature is alive so, not lootable
                         dynflagsValue = dynflagsValue & ~UNIT_DYNFLAG_LOOTABLE;

@@ -388,7 +388,7 @@ struct npc_toogaAI : public FollowerAI
                 {
                     m_uiPostEventTimer = 5000;
 
-                    if (!pTorta || !pTorta->isAlive())
+                    if (!pTorta || !pTorta->IsAlive())
                     {
                         // something happened, so just complete
                         SetFollowComplete();

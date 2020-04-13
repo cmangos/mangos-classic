@@ -220,7 +220,7 @@ void instance_blackrock_spire::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pIncarcerator = instance->GetCreature(*itr))
                     {
-                        if (!pIncarcerator->isAlive())
+                        if (!pIncarcerator->IsAlive())
                             pIncarcerator->Respawn();
                         pIncarcerator->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         pIncarcerator->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
@@ -348,7 +348,7 @@ void instance_blackrock_spire::DoSortRoomEventMobs()
             for (GuidList::const_iterator itr = m_lRoomEventMobGUIDList.begin(); itr != m_lRoomEventMobGUIDList.end(); ++itr)
             {
                 Creature* pCreature = instance->GetCreature(*itr);
-                if (pCreature && pCreature->isAlive() && pCreature->GetDistance(pRune) < 10.0f)
+                if (pCreature && pCreature->IsAlive() && pCreature->GetDistance(pRune) < 10.0f)
                     m_alRoomEventMobGUIDSorted[i].push_back(*itr);
             }
         }
@@ -531,7 +531,7 @@ void instance_blackrock_spire::DoProcessEmberseerEvent()
     {
         if (Creature* pCreature = instance->GetCreature(*itr))
         {
-            if (pCreature->isAlive())
+            if (pCreature->IsAlive())
             {
                 pCreature->InterruptNonMeleeSpells(false);
                 pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
@@ -792,7 +792,7 @@ InstanceData* GetInstanceData_instance_blackrock_spire(Map* pMap)
 
 bool AreaTrigger_at_blackrock_spire(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (!pPlayer->isAlive() || pPlayer->isGameMaster())
+    if (!pPlayer->IsAlive() || pPlayer->isGameMaster())
         return false;
 
     switch (pAt->id)

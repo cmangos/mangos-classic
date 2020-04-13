@@ -628,7 +628,7 @@ bool WorldSession::CanInteractWithQuestGiver(ObjectGuid guid, char const* descr)
             return false;
         }
     }
-    else if (!_player->isAlive())
+    else if (!_player->IsAlive())
     {
         DEBUG_LOG("WORLD: %s - %s is dead, requested guid was %s", descr, _player->GetGuidStr().c_str(), guid.GetString().c_str());
         return false;

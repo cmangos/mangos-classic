@@ -436,7 +436,7 @@ bool Unit::CanAttackNow(const Unit* unit) const
     // Original logic
 
     // We can't initiate attack while dead or ghost
-    if (!isAlive())
+    if (!IsAlive())
         return false;
 
     // We can't initiate attack while mounted
@@ -444,7 +444,7 @@ bool Unit::CanAttackNow(const Unit* unit) const
         return false;
 
     // We can't initiate attack on dead units
-    if (!unit->isAlive())
+    if (!unit->IsAlive())
         return false;
 
     return CanAttack(unit);
@@ -632,7 +632,7 @@ bool Unit::CanInteractNow(const Unit* unit) const
         return false;
 
     // We can't interact with anyone while being dead (this does not apply to player ghosts, which allow very limited interactions)
-    if (!isAlive() && (GetTypeId() == TYPEID_UNIT || !(static_cast<const Player*>(this)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))))
+    if (!IsAlive() && (GetTypeId() == TYPEID_UNIT || !(static_cast<const Player*>(this)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))))
         return false;
 
     // We can't interact with anyone while being shapeshifted, unless form flags allow us to do so
@@ -646,7 +646,7 @@ bool Unit::CanInteractNow(const Unit* unit) const
     }
 
     // We can't interact with dead units, unless it's a creature with special flag
-    if (!unit->isAlive())
+    if (!unit->IsAlive())
     {
         if (GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_INTERACT_DEAD))
             return false;
@@ -1072,7 +1072,7 @@ bool Unit::CanAttackSpell(Unit const* target, SpellEntry const* spellInfo, bool 
     if (spellInfo)
     {
         // inversealive is needed for some spells which need to be casted at dead targets (aoe)
-        if (!target->isAlive() && !spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD))
+        if (!target->IsAlive() && !spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD))
             return false;
     }
 

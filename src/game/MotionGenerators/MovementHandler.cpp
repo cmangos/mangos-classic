@@ -470,7 +470,7 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
 {
-    if (!_player->isAlive() || _player->isInCombat())
+    if (!_player->IsAlive() || _player->isInCombat())
         return;
 
     ObjectGuid summonerGuid;
@@ -583,11 +583,11 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
                 // NOTE: this is actually called many times while falling
                 // even after the player has been teleported away
                 // TODO: discard movement packets after the player is rooted
-                if (plMover->isAlive())
+                if (plMover->IsAlive())
                 {
                     plMover->EnvironmentalDamage(DAMAGE_FALL_TO_VOID, plMover->GetMaxHealth());
                     // pl can be alive if GM/etc
-                    if (!plMover->isAlive())
+                    if (!plMover->IsAlive())
                     {
                         // change the death state to CORPSE to prevent the death timer from
                         // starting in the next player update

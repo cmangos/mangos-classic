@@ -304,7 +304,7 @@ struct npc_zulian_prowlerAI : public ScriptedAI
             for (GuidList::const_iterator itr = m_lProwlerGUIDList.begin(); itr != m_lProwlerGUIDList.end(); ++itr)
             {
                 if (Unit* pProwler = m_creature->GetMap()->GetUnit(*itr))
-                    if (pProwler->isAlive())
+                    if (pProwler->IsAlive())
                         count++;
             }
 

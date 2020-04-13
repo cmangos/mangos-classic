@@ -216,13 +216,13 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                 Creature* deadGuy = GetSingleCreatureFromStorage(uiData);
                 // notify bugs on death to heal / remove invul
                 if (Creature* vem = GetSingleCreatureFromStorage(NPC_VEM))
-                    if (vem->isAlive())
+                    if (vem->IsAlive())
                         vem->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, deadGuy, vem, m_uiBugTrioDeathCount);
                 if (Creature* yauj = GetSingleCreatureFromStorage(NPC_YAUJ))
-                    if (yauj->isAlive())
+                    if (yauj->IsAlive())
                         yauj->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, deadGuy, yauj, m_uiBugTrioDeathCount);
                 if (Creature* kri = GetSingleCreatureFromStorage(NPC_KRI))
-                    if (kri->isAlive())
+                    if (kri->IsAlive())
                         kri->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, deadGuy, kri, m_uiBugTrioDeathCount);
 
                 // don't store any special data
@@ -242,7 +242,7 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                     yauj->ForcedDespawn();
                 if (Creature* kri = GetSingleCreatureFromStorage(NPC_KRI))
                 {
-                    if (kri->isAlive())
+                    if (kri->IsAlive())
                         kri->AI()->EnterEvadeMode();
                     else
                         kri->Respawn();
@@ -403,7 +403,7 @@ bool AreaTrigger_at_temple_ahnqiraj(Player* player, AreaTriggerEntry const* at)
 {
     if (at->id == AREATRIGGER_TWIN_EMPERORS || at->id == AREATRIGGER_SARTURA)
     {
-        if (player->isGameMaster() || !player->isAlive())
+        if (player->isGameMaster() || !player->IsAlive())
             return false;
 
         if (instance_temple_of_ahnqiraj* pInstance = (instance_temple_of_ahnqiraj*)player->GetInstanceData())

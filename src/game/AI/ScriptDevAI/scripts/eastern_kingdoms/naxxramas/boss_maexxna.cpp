@@ -87,7 +87,7 @@ struct npc_web_wrapAI : public ScriptedAI
         // Remove polymporph and DoT auras from web wrapped player
         if (m_player)
         {
-            if (m_player->isAlive())
+            if (m_player->IsAlive())
                 DoCastSpellIfCan(m_player, SPELL_CLEAR_WEB_WRAP_TARGET, CAST_TRIGGERED);
         }
         m_creature->ForcedDespawn(5000);
@@ -109,7 +109,7 @@ struct npc_web_wrapAI : public ScriptedAI
             // Check if the web wrapped player is still alive, if not, clear ourselves
             if (m_checkVictimAliveTimer <= diff)
             {
-                if (!m_player->isAlive())
+                if (!m_player->IsAlive())
                     DoCastSpellIfCan(m_creature, SPELL_CLEAR_WEB_WRAP_SELF, CAST_TRIGGERED);
                 m_checkVictimAliveTimer = 1 * IN_MILLISECONDS;
             }
@@ -335,7 +335,7 @@ struct npc_invisible_manAI : public ScriptedAI
             {
                 if (Player* victim = m_creature->GetMap()->GetPlayer(m_victimGuid))
                 {
-                    if (victim->isAlive())
+                    if (victim->IsAlive())
                     {
                         // Make the player cast the visual effects spells with a delay to ensure he/she has reach his/her destination
                         victim->CastSpell(victim, SPELL_WEB_WRAP_SUMMON, TRIGGERED_OLD_TRIGGERED);
