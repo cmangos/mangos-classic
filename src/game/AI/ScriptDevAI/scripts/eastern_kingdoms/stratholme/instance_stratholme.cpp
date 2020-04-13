@@ -421,7 +421,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
             if (uiData == IN_PROGRESS)
             {
                 Creature* pBarthilas = GetSingleCreatureFromStorage(NPC_BARTHILAS);
-                if (pBarthilas && pBarthilas->IsAlive() && !pBarthilas->isInCombat())
+                if (pBarthilas && pBarthilas->IsAlive() && !pBarthilas->IsInCombat())
                 {
                     DoScriptText(SAY_WARN_BARON, pBarthilas);
                     pBarthilas->SetWalk(false);
@@ -879,7 +879,7 @@ void instance_stratholme::DoMoveBackDefenders(uint8 uiStep, Creature* pCreature)
     for (GuidList::const_iterator itr = m_suiCrimsonDefendersLowGuids[uiIndex].begin(); itr != m_suiCrimsonDefendersLowGuids[uiIndex].end(); ++itr)
     {
         Creature* pGuard = instance->GetCreature(*itr);
-        if (pGuard && pGuard->IsAlive() && !pGuard->isInCombat())
+        if (pGuard && pGuard->IsAlive() && !pGuard->IsInCombat())
         {
             pGuard->GetMotionMaster()->MoveIdle();
             pGuard->SetWalk(false);
@@ -1025,7 +1025,7 @@ void instance_stratholme::Update(uint32 uiDiff)
             for (GuidList::const_iterator itr = m_luiGuardGUIDs.begin(); itr != m_luiGuardGUIDs.end(); ++itr)
             {
                 Creature* pGuard = instance->GetCreature(*itr);
-                if (pGuard && pGuard->IsAlive() && !pGuard->isInCombat())
+                if (pGuard && pGuard->IsAlive() && !pGuard->IsInCombat())
                 {
                     float fX, fY, fZ;
                     pGuard->GetRandomPoint(aStratholmeLocation[5].m_fX, aStratholmeLocation[5].m_fY, aStratholmeLocation[5].m_fZ, 10.0f, fX, fY, fZ);
@@ -1054,7 +1054,7 @@ void instance_stratholme::Update(uint32 uiDiff)
         if (m_uiBarthilasRunTimer <= uiDiff)
         {
             Creature* pBarthilas = GetSingleCreatureFromStorage(NPC_BARTHILAS);
-            if (pBarthilas && pBarthilas->IsAlive() && !pBarthilas->isInCombat())
+            if (pBarthilas && pBarthilas->IsAlive() && !pBarthilas->IsInCombat())
                 pBarthilas->NearTeleportTo(aStratholmeLocation[1].m_fX, aStratholmeLocation[1].m_fY, aStratholmeLocation[1].m_fZ, aStratholmeLocation[1].m_fO);
 
             SetData(TYPE_BARTHILAS_RUN, DONE);
@@ -1071,7 +1071,7 @@ void instance_stratholme::Update(uint32 uiDiff)
         {
             // Teleport Aurius from the Chapel and spawn it in the Slaughter House to engage Baron
             Creature* pAurius = GetSingleCreatureFromStorage(NPC_AURIUS);
-            if (pAurius && pAurius->IsAlive() && !pAurius->isInCombat())
+            if (pAurius && pAurius->IsAlive() && !pAurius->IsInCombat())
             {
                 if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
                 {
@@ -1187,7 +1187,7 @@ void instance_stratholme::Update(uint32 uiDiff)
                     continue;
 
                 // Let Move to somewhere in the middle
-                if (!pAbom->isInCombat())
+                if (!pAbom->IsInCombat())
                 {
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_PORT_SLAUGTHER))
                     {

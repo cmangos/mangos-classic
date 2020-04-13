@@ -35,7 +35,7 @@ void CritterAI::EnterCombat(Unit* /*enemy*/)
 
 void CritterAI::UpdateAI(const uint32 /*diff*/)
 {
-    if (m_creature->isInCombat())
+    if (m_creature->IsInCombat())
         if (!m_creature->hasUnitState(UNIT_STAT_FLEEING))
             CreatureAI::EnterEvadeMode();
 }

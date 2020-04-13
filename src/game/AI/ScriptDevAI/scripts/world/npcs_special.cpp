@@ -555,7 +555,7 @@ struct npc_garments_of_questsAI : public npc_escortAI
         if (pSpell->Id == SPELL_LESSER_HEAL_R2 || pSpell->Id == SPELL_FORTITUDE_R1)
         {
             // not while in combat
-            if (m_creature->isInCombat())
+            if (m_creature->IsInCombat())
                 return;
 
             // nothing to be done now
@@ -664,7 +664,7 @@ struct npc_garments_of_questsAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (m_bCanRun && !m_creature->isInCombat())
+        if (m_bCanRun && !m_creature->IsInCombat())
         {
             if (m_uiRunAwayTimer <= uiDiff)
             {

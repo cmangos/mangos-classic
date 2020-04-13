@@ -37,7 +37,7 @@ void CombatAI::ExecuteActions()
 
 void CombatAI::UpdateAI(const uint32 diff)
 {
-    UpdateTimers(diff, m_creature->isInCombat());
+    UpdateTimers(diff, m_creature->IsInCombat());
 
     if (!m_creature->SelectHostileTarget())
         return;
@@ -77,7 +77,7 @@ void RangedCombatAI::SetRangedMode(bool state, float distance, RangeModeType typ
     m_rangedModeSetting = type;
     m_meleeEnabled = !state;
 
-    if (m_creature->isInCombat())
+    if (m_creature->IsInCombat())
         SetCurrentRangedMode(state);
     else
     {
@@ -182,7 +182,7 @@ CanCastResult RangedCombatAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uin
 
 void RangedCombatAI::UpdateAI(const uint32 diff)
 {
-    UpdateTimers(diff, m_creature->isInCombat());
+    UpdateTimers(diff, m_creature->IsInCombat());
 
     if (!m_creature->SelectHostileTarget())
         return;

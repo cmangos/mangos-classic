@@ -114,7 +114,7 @@ struct boss_broodlordAI : public CombatAI
     void UpdateAI(const uint32 diff) override
     {
         CombatAI::UpdateAI(diff);
-        if (m_creature->isInCombat())
+        if (m_creature->IsInCombat())
             if (EnterEvadeIfOutOfCombatArea(diff))
                 DoScriptText(SAY_LEASH, m_creature);
     }

@@ -726,7 +726,7 @@ struct npc_rabid_bearAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiDespawnTimer && !m_creature->isInCombat())
+        if (m_uiDespawnTimer && !m_creature->IsInCombat())
         {
             if (m_uiDespawnTimer <= uiDiff)
             {

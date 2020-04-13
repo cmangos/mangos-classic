@@ -672,7 +672,7 @@ struct npc_kernobeeAI : public FollowerAI
     {
         FollowerAI::UpdateFollowerAI(uiDiff);               // Do combat handling
 
-        if (m_creature->isInCombat() || !HasFollowState(STATE_FOLLOW_INPROGRESS) || HasFollowState(STATE_FOLLOW_COMPLETE))
+        if (m_creature->IsInCombat() || !HasFollowState(STATE_FOLLOW_INPROGRESS) || HasFollowState(STATE_FOLLOW_COMPLETE))
             return;
 
         if (m_uiCheckEndposTimer < uiDiff)

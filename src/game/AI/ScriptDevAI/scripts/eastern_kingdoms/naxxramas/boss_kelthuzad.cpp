@@ -337,7 +337,7 @@ struct boss_kelthuzadAI : public ScriptedAI
             {
                 if (Creature* creature = m_instance->instance->GetCreature(itr))
                 {
-                    if (creature->IsAlive() && !creature->isInCombat())
+                    if (creature->IsAlive() && !creature->IsInCombat())
                         creature->ForcedDespawn();
                 }
             }

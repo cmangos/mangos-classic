@@ -43,7 +43,7 @@ CombatManager::CombatManager(Unit* owner) : m_owner(owner), m_evadeTimer(0), m_e
 
 void CombatManager::Update(const uint32 diff)
 {
-    if (m_owner->isInCombat())
+    if (m_owner->IsInCombat())
     {
         if (m_evadeTimer)
         {

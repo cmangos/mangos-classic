@@ -335,7 +335,7 @@ void PetAI::UpdateAI(const uint32 diff)
         const bool following = (!staying && charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW));
 
         // If not commanded to stay, try to assist owner first
-        if (!staying && owner->isInCombat() && !HasReactState(REACT_PASSIVE))
+        if (!staying && owner->IsInCombat() && !HasReactState(REACT_PASSIVE))
         {
             AttackStart(owner->getAttackerForHelper());
 

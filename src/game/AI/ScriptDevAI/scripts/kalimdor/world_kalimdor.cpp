@@ -251,7 +251,7 @@ struct world_map_kalimdor : public ScriptedMap
                 if (Creature* pOmen = GetSingleCreatureFromStorage(NPC_OMEN))
                 {
                     // Return is Omen is in fight
-                    if (pOmen->isInCombat())
+                    if (pOmen->IsInCombat())
                         return;
                     pOmen->ForcedDespawn();
                 }

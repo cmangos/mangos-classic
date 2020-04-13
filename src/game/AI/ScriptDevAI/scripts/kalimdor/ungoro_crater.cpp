@@ -400,7 +400,7 @@ struct npc_precious_the_devourerAI : public ScriptedAI
                 m_uiSplitCheck_Timer = 2500;
                 if (Creature* pSimone = m_creature->GetMap()->GetCreature(m_simoneGuid))
                 {
-                    if (pSimone->isInCombat())
+                    if (pSimone->IsInCombat())
                         pSimone->AI()->EnterEvadeMode();
                 }
             }
@@ -586,7 +586,7 @@ struct npc_simone_seductressAI : public ScriptedAI
     {
         if (m_uiDespawn_Timer < uiDiff)
         {
-            if (m_creature->IsAlive() && !m_creature->isInCombat())
+            if (m_creature->IsAlive() && !m_creature->IsInCombat())
                 DemonDespawn(false);
         }
         else
@@ -599,7 +599,7 @@ struct npc_simone_seductressAI : public ScriptedAI
                 m_uiSplitCheck_Timer = 2500;
                 if (Creature* pPrecious = m_creature->GetMap()->GetCreature(m_preciousGuid))
                 {
-                    if (pPrecious->isInCombat())
+                    if (pPrecious->IsInCombat())
                         pPrecious->AI()->EnterEvadeMode();
                 }
             }

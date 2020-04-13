@@ -189,7 +189,7 @@ struct boss_mandokirAI : public ScriptedAI
                 m_uiKillCount = 0;
             }
 
-            if (m_creature->isInCombat())
+            if (m_creature->IsInCombat())
             {
                 if (Creature* pSpirit = GetClosestCreatureWithEntry(pVictim, NPC_CHAINED_SPIRIT, 50.0f))
                     pSpirit->CastSpell(pVictim, SPELL_REVIVE, TRIGGERED_NONE);
@@ -356,7 +356,7 @@ struct mob_ohganAI : public ScriptedAI
     {
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
         {
-            if (m_creature->isInCombat())
+            if (m_creature->IsInCombat())
             {
                 if (Creature* pSpirit = GetClosestCreatureWithEntry(pVictim, NPC_CHAINED_SPIRIT, 50.0f))
                     pSpirit->CastSpell(pVictim, SPELL_REVIVE, TRIGGERED_NONE);

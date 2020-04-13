@@ -84,7 +84,7 @@ void instance_naxxramas::JustDidDialogueStep(int32 entry)
             {
                 if (Creature* follower = instance->GetCreature(followerGuid))
                 {
-                    if (follower->IsAlive() && !follower->isInCombat())
+                    if (follower->IsAlive() && !follower->IsInCombat())
                         follower->SetStandState(UNIT_STAND_STATE_STAND);
                 }
             }
@@ -96,7 +96,7 @@ void instance_naxxramas::JustDidDialogueStep(int32 entry)
             {
                 if (Creature* follower = instance->GetCreature(followerGuid))
                 {
-                    if (follower->IsAlive() && !follower->isInCombat())
+                    if (follower->IsAlive() && !follower->IsInCombat())
                         follower->CastSpell(follower, SPELL_DARK_CHANNELING, TRIGGERED_OLD_TRIGGERED);
                 }
             }
@@ -108,7 +108,7 @@ void instance_naxxramas::JustDidDialogueStep(int32 entry)
             {
                 if (Creature* follower = instance->GetCreature(followerGuid))
                 {
-                    if (follower->IsAlive() && !follower->isInCombat())
+                    if (follower->IsAlive() && !follower->IsInCombat())
                     {
                         follower->RemoveAurasDueToSpell(SPELL_DARK_CHANNELING);
                         follower->SetStandState(UNIT_STAND_STATE_KNEEL);

@@ -69,7 +69,7 @@ void guardAI::UpdateAI(const uint32 diff)
         m_globalCooldown = 0;
 
     // Buff timer (only buff when we are alive and not in combat
-    if (m_creature->IsAlive() && !m_creature->isInCombat())
+    if (m_creature->IsAlive() && !m_creature->IsInCombat())
     {
         if (m_buffTimer < diff)
         {

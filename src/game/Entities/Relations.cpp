@@ -1306,7 +1306,7 @@ bool Unit::CanAssistInCombatAgainst(Unit const* who, Unit const* enemy) const
     if (GetMap()->Instanceable()) // in dungeons nothing else needs to be evaluated
         return true;
 
-    if (isInCombat()) // if fighting something else, do not assist
+    if (IsInCombat()) // if fighting something else, do not assist
         return false;
 
     if (CanAssist(who) && CanAttackOnSight(enemy))

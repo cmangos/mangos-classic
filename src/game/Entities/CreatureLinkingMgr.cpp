@@ -473,7 +473,7 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
                         if (pMaster->IsControlledByPlayer())
                             return;
 
-                        if (pMaster->isInCombat()) // TODO: Add group leashing
+                        if (pMaster->IsInCombat()) // TODO: Add group leashing
                         {
                             pMaster->AddThreat(pEnemy);
                             pEnemy->AddThreat(pMaster);
@@ -539,7 +539,7 @@ void CreatureLinkingHolder::ProcessSlave(CreatureLinkingEvent eventType, Creatur
                 if (pSlave->IsControlledByPlayer())
                     return;
 
-                if (pSlave->isInCombat())
+                if (pSlave->IsInCombat())
                 {
                     pSlave->AddThreat(pEnemy);
                     pEnemy->AddThreat(pSlave);
@@ -574,7 +574,7 @@ void CreatureLinkingHolder::ProcessSlave(CreatureLinkingEvent eventType, Creatur
             else if (flag & FLAG_DESPAWN_ON_RESPAWN && pSlave->IsAlive())
                 pSlave->ForcedDespawn();
 
-            if (flag & FLAG_FOLLOW && pSlave->IsAlive() && !pSlave->isInCombat())
+            if (flag & FLAG_FOLLOW && pSlave->IsAlive() && !pSlave->IsInCombat())
                 SetFollowing(pSlave, pSource);
 
             break;

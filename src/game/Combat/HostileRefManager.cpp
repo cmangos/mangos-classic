@@ -109,7 +109,7 @@ void HostileRefManager::updateOnlineOfflineState(bool pIsOnline)
     if (pIsOnline && iOwner)
     {
         // Do not set online while feigning death in combat
-        if (iOwner->IsFeigningDeathSuccessfully() && iOwner->isInCombat())
+        if (iOwner->IsFeigningDeathSuccessfully() && iOwner->IsInCombat())
             return;
     }
     setOnlineOfflineState(pIsOnline);

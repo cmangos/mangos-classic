@@ -466,7 +466,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                         // creature is alive so, not lootable
                         dynflagsValue = dynflagsValue & ~UNIT_DYNFLAG_LOOTABLE;
 
-                        if (creature->isInCombat())
+                        if (creature->IsInCombat())
                         {
                             // as creature is in combat we have to manage tap flags
                             setTapFlags = true;

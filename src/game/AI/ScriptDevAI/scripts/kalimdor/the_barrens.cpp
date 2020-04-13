@@ -910,7 +910,7 @@ private:
         {
             if (Creature * creature = m_creature->GetMap()->GetCreature(spawnItr.first))
             {
-                if (creature->isInCombat())
+                if (creature->IsInCombat())
                 {
                     // Give one minute to the NPCs still fighting before despawning them
                     creature->ForcedDespawn(MINUTE * IN_MILLISECONDS);

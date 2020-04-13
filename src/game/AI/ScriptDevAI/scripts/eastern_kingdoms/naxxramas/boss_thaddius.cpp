@@ -328,7 +328,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
 
         if (Creature* otherAdd = GetOtherAdd())
         {
-            if (!otherAdd->isInCombat())
+            if (!otherAdd->IsInCombat())
                 otherAdd->SetInCombatWithZone();
         }
     }

@@ -140,7 +140,7 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
     if (!m_bot->IsAlive() || m_bot->IsInDuel()) return RETURN_NO_ACTION_ERROR;
-    if (bMustBeOOC && m_bot->isInCombat()) return RETURN_NO_ACTION_ERROR;
+    if (bMustBeOOC && m_bot->IsInCombat()) return RETURN_NO_ACTION_ERROR;
 
     if (spellId == 0) return RETURN_NO_ACTION_OK;
 
@@ -597,7 +597,7 @@ Player* PlayerbotClassAI::GetDispelTarget(DispelType dispelType, JOB_TYPE type, 
     if (!m_ai)  return nullptr;
     if (!m_bot) return nullptr;
     if (!m_bot->IsAlive() || m_bot->IsInDuel()) return nullptr;
-    if (bMustBeOOC && m_bot->isInCombat()) return nullptr;
+    if (bMustBeOOC && m_bot->IsInCombat()) return nullptr;
 
     // First, fill the list of targets
     if (m_bot->GetGroup())
@@ -644,7 +644,7 @@ Player* PlayerbotClassAI::GetResurrectionTarget(JOB_TYPE type, bool bMustBeOOC)
     if (!m_ai)  return nullptr;
     if (!m_bot) return nullptr;
     if (!m_bot->IsAlive() || m_bot->IsInDuel()) return nullptr;
-    if (bMustBeOOC && m_bot->isInCombat()) return nullptr;
+    if (bMustBeOOC && m_bot->IsInCombat()) return nullptr;
 
     // First, fill the list of targets
     if (m_bot->GetGroup())

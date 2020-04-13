@@ -46,7 +46,7 @@ void TemporarySpawn::Update(const uint32 diff)
         {
             if (IsAlive())
             {
-                if (!isInCombat())
+                if (!IsInCombat())
                 {
                     if (IsExpired())
                     {
@@ -113,7 +113,7 @@ void TemporarySpawn::Update(const uint32 diff)
                 return;
             }
 
-            if (!isInCombat())
+            if (!IsInCombat())
             {
                 if (IsExpired())
                 {
@@ -135,7 +135,7 @@ void TemporarySpawn::Update(const uint32 diff)
                 return;
             }
 
-            if (!isInCombat() && IsAlive() && !GetCharmerGuid())
+            if (!IsInCombat() && IsAlive() && !GetCharmerGuid())
             {
                 if (IsExpired())
                 {

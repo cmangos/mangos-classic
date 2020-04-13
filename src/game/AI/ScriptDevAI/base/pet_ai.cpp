@@ -79,7 +79,7 @@ void ScriptedPetAI::UpdateAI(const uint32 diff)
     }
     else if (m_creature->GetCharmInfo())
     {
-        if (m_creature->isInCombat())
+        if (m_creature->IsInCombat())
             m_creature->CombatStop(true, true);
 
         Unit* owner = m_creature->GetMaster();
@@ -87,7 +87,7 @@ void ScriptedPetAI::UpdateAI(const uint32 diff)
         if (!owner)
             return;
 
-        if (owner->isInCombat() && !HasReactState(REACT_PASSIVE))
+        if (owner->IsInCombat() && !HasReactState(REACT_PASSIVE))
         {
             // Not correct in all cases.
             // When mob initiate attack by spell, pet should not start attack before spell landed.

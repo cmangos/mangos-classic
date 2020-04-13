@@ -2955,7 +2955,7 @@ void Spell::EffectPull(SpellEffectIndex /*eff_idx*/)
 void Spell::EffectDistract(SpellEffectIndex /*eff_idx*/)
 {
     // Check for possible target
-    if (!unitTarget || unitTarget->isInCombat())
+    if (!unitTarget || unitTarget->IsInCombat())
         return;
 
     // target must be OK to do this
@@ -3917,7 +3917,7 @@ void Spell::EffectThreat(SpellEffectIndex /*eff_idx*/)
     if (!unitTarget->CanHaveThreatList())
         return;
 
-    if (!m_caster->isInCombat() || !unitTarget->isInCombat())
+    if (!m_caster->IsInCombat() || !unitTarget->IsInCombat())
     {
         if (unitTarget->AI())
             unitTarget->AI()->AttackStart(m_caster);

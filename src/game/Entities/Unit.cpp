@@ -5482,7 +5482,7 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
             realCaster->SetOutOfCombatWithVictim(target);
         }
     }
-    else if (realCaster->CanAssist(target) && target->isInCombat())
+    else if (realCaster->CanAssist(target) && target->IsInCombat())
     {
         // assisting case, healing and resurrection
         if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) && CanEnterCombat() && target->CanEnterCombat())
@@ -7491,7 +7491,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                     controller->SetInCombatWith(enemy); // player only enters combat
                     enemy->AddThreat(controller);
                 }
-                else if (controller->isInCombat())
+                else if (controller->IsInCombat())
                 {
                     controller->AddThreat(enemy);
                     enemy->AddThreat(controller);
@@ -8246,7 +8246,7 @@ bool Unit::SelectHostileTarget()
     // return true but no target
 
     // no target but something prevent go to evade mode
-    if (!isInCombat())
+    if (!IsInCombat())
         return false;
 
     // last case when creature don't must go to evade mode:
@@ -10536,7 +10536,7 @@ bool Unit::TakePossessOf(Unit* possessed)
     if (possessed->IsImmuneToNPC() != immuneNPC)
         possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
-    if (!isInCombat())
+    if (!IsInCombat())
     {
         possessed->GetCombatManager().StopCombatTimer();
         possessed->ClearInCombat();
@@ -10683,7 +10683,7 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
             charmed->AddThreat(enemy, 0.f);
     }
 
-    if (!isInCombat())
+    if (!IsInCombat())
     {
         charmed->GetCombatManager().StopCombatTimer();
         charmed->ClearInCombat();
@@ -10880,7 +10880,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
     {
         if (charmed->CanAttack(this))
         {
-            if (!charmed->isInCombat())
+            if (!charmed->IsInCombat())
                 EngageInCombatWithAggressor(charmed);
             else
             {

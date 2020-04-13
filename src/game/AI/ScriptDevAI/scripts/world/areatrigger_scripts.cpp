@@ -247,7 +247,7 @@ bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*
     pPlayer->SendQuestCompleteEvent(QUEST_RESUPPLYING_THE_EXCAVATION);
 
     // Quest NPCs in combat, skip the rest, prevent double spawns
-    if (m_miran->isInCombat() || m_huldar->isInCombat())
+    if (m_miran->IsInCombat() || m_huldar->IsInCombat())
         return true;
 
     // Check if Saean is spawned and set his faction to hostile - summon him if not spawned

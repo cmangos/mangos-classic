@@ -137,7 +137,7 @@ struct boss_ouroAI : public CombatAI
         CombatAI::JustRespawned();
         m_creature->CastSpell(nullptr, SPELL_SUMMON_BASE, TRIGGERED_OLD_TRIGGERED);
         m_creature->SetInCombatWithZone();
-        if (!m_creature->isInCombat()) // noone left alive
+        if (!m_creature->IsInCombat()) // noone left alive
             JustReachedHome(); // handles fail
     }
 
