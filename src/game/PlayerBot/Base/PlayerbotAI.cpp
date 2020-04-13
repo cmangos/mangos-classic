@@ -2735,16 +2735,26 @@ bool PlayerbotAI::CastNeutralize()
     if (!GetClassAI()) return false;
     if (!m_targetGuidCommand) return false;
 
-    Unit* pTarget = ObjectAccessor::GetUnit(*m_bot, m_targetGuidCommand);
-    if (!pTarget) return false;
+    Unit* target = ObjectAccessor::GetUnit(*m_bot, m_targetGuidCommand);
+    if (!target) return false;
 
-    Creature* pCreature = (Creature*) pTarget;
-    if (!pCreature) return false;
-
-    // Define the target's creature type, so the bot AI will now if
-    // it can neutralize it
     uint8 creatureType = 0;
-    creatureType = pCreature->GetCreatureInfo()->CreatureType;
+    if (target->GetTypeId() == TYPEID_UNIT)
+    {
+        // Define the target's creature type, so the bot AI will now if
+        // it can neutralize it
+        auto* creature = (Creature*) target;
+        creatureType = creature->GetCreatureInfo()->CreatureType;
+    }
+    else    // Target is a player
+    {
+        // Shapeshifted druids are considered as beasts
+        if (target->getClass() == CLASS_DRUID && target->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
+            creatureType = CREATURE_TYPE_BEAST;
+        // Else, players are humanoids
+        else
+            creatureType = CREATURE_TYPE_HUMANOID;
+    }
 
     switch (m_bot->getClass())
     {
@@ -2765,10 +2775,7 @@ bool PlayerbotAI::CastNeutralize()
     }
 
     // A spellId was found
-    if (m_spellIdCommand != 0)
-        return true;
-
-    return false;
+    return m_spellIdCommand != 0;
 }
 
 void PlayerbotAI::SetQuestNeedCreatures()
@@ -5504,7 +5511,7 @@ bool PlayerbotAI::IsElite(Unit* target, bool isWorldBoss) const
 // Check if bot target has one of the following auras: Sap, Polymorph, Shackle Undead, Banish, Seduction, Freezing Trap, Hibernate
 // This is used by the AI to prevent bots from attacking crowd control targets
 
-static const uint32 uAurasIds[21] =
+static const uint32 aurasIds[21] =
 {
     118, 12824, 12825, 12826,   // polymorph
     28272, 28271,               // polymorph pig, turtle
@@ -5516,14 +5523,14 @@ static const uint32 uAurasIds[21] =
     2637, 18657, 18658          // hibernate
 };
 
-bool PlayerbotAI::IsNeutralized(Unit* pTarget)
+bool PlayerbotAI::IsNeutralized(Unit* target)
 {
-    if (!pTarget)
+    if (!target)
         return false;
 
-    for (uint8 i = 0; i < countof(uAurasIds); ++i)
+    for (auto aura : aurasIds)
     {
-        if (pTarget->HasAura(uAurasIds[i], EFFECT_INDEX_0))
+        if (target->HasAura(aura, EFFECT_INDEX_0))
             return true;
     }
 
@@ -5533,16 +5540,14 @@ bool PlayerbotAI::IsNeutralized(Unit* pTarget)
 // Utility function to make the bots face their target
 // Useful to ensure bots can cast spells/abilities
 // without getting facing target errors
-void PlayerbotAI::FaceTarget(Unit* pTarget)
+void PlayerbotAI::FaceTarget(Unit* target)
 {
-    if (!pTarget)
+    if (!target)
         return;
 
     // Only update orientation if not already facing target
-    if (!m_bot->HasInArc(pTarget))
-        m_bot->SetFacingTo(m_bot->GetAngle(pTarget));
-
-    return;
+    if (!m_bot->HasInArc(target))
+        m_bot->SetFacingTo(m_bot->GetAngle(target));
 }
 
 /**
@@ -5557,7 +5562,7 @@ void PlayerbotAI::FaceTarget(Unit* pTarget)
  */
 bool PlayerbotAI::IsImmuneToSchool(Unit* target, SpellSchoolMask schoolMask)
 {
-    if (!target)
+    if (!target || target->GetTypeId() == TYPEID_PLAYER)
         return false;
 
     if (Creature* creature = (Creature*) target)
@@ -8079,7 +8084,7 @@ void PlayerbotAI::_HandleCommandSkill(std::string& text, Player& fromPlayer)
 
 void PlayerbotAI::_HandleCommandStats(std::string& text, Player& fromPlayer)
 {
-    if (text != "")
+    if (!text.empty())
     {
         SendWhisper("'stats' does not have subcommands", fromPlayer);
         return;
@@ -8123,68 +8128,6 @@ void PlayerbotAI::_HandleCommandStats(std::string& text, Player& fromPlayer)
     ch.SendSysMessage(out.str().c_str());
 }
 
-/*    else
-    {
-        // if this looks like an item link, reward item it completed quest and talking to NPC
-        std::list<uint32> itemIds;
-        extractItemIds(text, itemIds);
-        if (!itemIds.empty()) {
-            uint32 itemId = itemIds.front();
-            bool wasRewarded = false;
-            ObjectGuid questRewarderGUID = m_bot->GetSelectionGuid();
-            Object* const pNpc = (WorldObject *) m_bot->GetObjectByTypeMask(questRewarderGUID, TYPEMASK_CREATURE_OR_GAMEOBJECT);
-            if (!pNpc)
-                return;
-
-            QuestMenu& questMenu = m_bot->PlayerTalkClass->GetQuestMenu();
-            for (uint32 iI = 0; !wasRewarded && iI < questMenu.MenuItemCount(); ++iI)
-            {
-                QuestMenuItem const& qItem = questMenu.GetItem(iI);
-
-                uint32 questID = qItem.m_qId;
-                Quest const* pQuest = sObjectMgr.GetQuestTemplate(questID);
-                QuestStatus status = m_bot->GetQuestStatus(questID);
-
-                // if quest is complete, turn it in
-                if (status == QUEST_STATUS_COMPLETE &&
-                    !m_bot->GetQuestRewardStatus(questID) &&
-                    pQuest->GetRewChoiceItemsCount() > 1 &&
-                    m_bot->CanRewardQuest(pQuest, false))
-                    for (uint8 rewardIdx = 0; !wasRewarded && rewardIdx < pQuest->GetRewChoiceItemsCount(); ++rewardIdx)
-                    {
-                        ItemPrototype const * const pRewardItem = sObjectMgr.GetItemPrototype(pQuest->RewChoiceItemId[rewardIdx]);
-                        if (itemId == pRewardItem->ItemId)
-                        {
-                            m_bot->RewardQuest(pQuest, rewardIdx, pNpc, false);
-
-                            std::string questTitle  = pQuest->GetTitle();
-                            m_bot->GetPlayerbotAI()->QuestLocalization(questTitle, questID);
-                            std::string itemName = pRewardItem->Name1;
-                            m_bot->GetPlayerbotAI()->ItemLocalization(itemName, pRewardItem->ItemId);
-
-                            std::ostringstream out;
-                            out << "|cffffffff|Hitem:" << pRewardItem->ItemId << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r rewarded";
-                            SendWhisper(out.str(), fromPlayer);
-                            wasRewarded = true;
-                        }
-                    }
-            }
-        }
-        else
-        {
-            std::ostringstream msg;
-            msg << "What? |cff339900attack auction |cffffffff| |cffFFB6C1(|cff1E90FFa|cffFFB6C1)|cff1E90FFdd |cffFFB6C1[Item link] |cffffffff| |cffFFB6C1(|cff1E90FFr|cffFFB6C1)|cff1E90FFemove |cffFFB6C1[Auction link]\r"
-                << "|cff339900bank |cffffffff| |cffFFB6C1(|cff1E90FFd|cffFFB6C1)|cff1E90FFeposit |cffffffff| |cffFFB6C1(|cff1E90FFw|cffFFB6C1)|cff1E90FFithdraw |cffFFB6C1[Item link] |cffFFB6C1(|cffff4500c|cffFFB6C1)|cff339900ast |cffFFB6C1[Spell link] |cff339900collect |cffffffff<|cffffff00all none combat loot objects profession quest|cffffffff> "
-                << "|cffFFB6C1(|cffff4500e|cffFFB6C1)|cff339900quip |cffFFB6C1[Item link] |cffFFB6C1(|cffff4500f|cffFFB6C1)|cff339900ind |cffFFB6C1[GO link] |cff339900follow |cffFFB6C1(|cffff4500g|cffFFB6C1)|cff339900et |cffffffff<|cffa52a2aTARGET |cffffffff| |cffFFB6C1[GO link] |cff339900orders "
-                << "|cff339900pet |cff1E90FFspells |cffffffff| <|cff1E90FFcast |cffffffff| |cff1E90FFtoggle|cffffffff> |cffFFB6C1[Spell link] |cffffffff| |cff1E90FFstate |cffffffff| |cff1E90FFreact |cffffffff<|cffFFB6C1(|cffffff00a|cffFFB6C1)|cffffff00ggresive |cffffffff| |cffFFB6C1(|cffffff00d|cffFFB6C1)|cffffff00efensive |cffffffff| |cffFFB6C1(|cffffff00p|cffFFB6C1)|cffffff00assive|cffffffff> "
-                << "|cff339900quest |cffFFB6C1(|cff1E90FFa|cffFFB6C1) |cff1E90FFdd |cffffffff| |cffFFB6C1(|cff1E90FFd|cffFFB6C1)|cff1E90FFrop |cffffffff| |cffFFB6C1(|cff1E90FFe|cffFFB6C1)|cff1E90FFnd |cffffffff| |cffFFB6C1(|cff1E90FFl|cffFFB6C1)|cff1E90FFist\r|cff339900repair |cffFFB6C1[Item Link] |cff339900report |cff339900reset |cffFFB6C1(|cffff4500s|cffFFB6C1)|cff339900ell |cffFFB6C1[Item link] "
-                << "|cff339900skill |cffffffff| |cffFFB6C1(|cff1E90FFt|cffFFB6C1)|cff1E90FFrain |cffa52a2aTARGET |cffffffff| |cffFFB6C1(|cff1E90FFl|cffFFB6C1)|cff1E90FFearn |cffFFB6C1[Training link] |cffffffff| |cffFFB6C1(|cff1E90FFu|cffFFB6C1)|cff1E90FFnlearn |cffFFB6C1[Profession link] |cff339900spells stats stay survey use |cffffffff<|cffa52a2aTARGET|cffffffff> |cffFFB6C1[Item link]";
-            TellMaster(msg.str());
-            m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
-        }
-    }
-}*/
-
 void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 {
     // "help help"? Seriously?
@@ -8194,7 +8137,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
         return;
     }
 
-    bool bMainHelp = (text == "") ? true : false;
+    bool bMainHelp = (text.empty()) ? true : false;
     const std::string sInvalidSubcommand = "That's not a valid subcommand.";
     std::string msg = "";
     // All of these must contain the 'bMainHelp' clause -> help lists all major commands
@@ -8205,7 +8148,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8217,7 +8161,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
         {
             SendWhisper(_HandleCommandHelpHelper("pull test", "I'll tell you if I could pull at all. Can be used anywhere."), fromPlayer);
             SendWhisper(_HandleCommandHelpHelper("pull ready", "I'll tell you if I'm ready to pull *right now*. To be used on location with valid target."), fromPlayer);
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8227,7 +8172,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8237,7 +8183,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8247,7 +8194,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8257,7 +8205,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8267,7 +8216,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8277,7 +8227,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8287,7 +8238,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8297,7 +8249,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8307,7 +8260,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8317,7 +8271,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8327,7 +8282,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8337,7 +8293,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8347,7 +8304,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8357,7 +8315,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8378,7 +8337,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
             else if (ExtractCommand("end", text, true)) {}
             else if (ExtractCommand("list", text, true)) {}
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8407,12 +8367,14 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
                 else if (ExtractCommand("protect", text, true)) {}
                 else if (ExtractCommand("reset", text, true)) {}
 
-                else if (text != "") SendWhisper(sInvalidSubcommand.c_str(), fromPlayer);
+                else if (!text.empty())
+                    SendWhisper(sInvalidSubcommand.c_str(), fromPlayer);
             }
             else if (ExtractCommand("delay", text, true)) {}
             else if (ExtractCommand("resume", text, true)) {}
 
-            else if (text != "") SendWhisper(sInvalidSubcommand.c_str(), fromPlayer);
+            else if (!text.empty())
+                SendWhisper(sInvalidSubcommand.c_str(), fromPlayer);
             return;
         }
     }
@@ -8420,7 +8382,7 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
     {
         if (bMainHelp)
             SendWhisper(_HandleCommandHelpHelper("pet", "Helps command my pet. Must always be used with a subcommand."), fromPlayer);
-        else if (text == "") // not "help" AND "help pet"
+        else if (text.empty()) // not "help" AND "help pet"
             SendWhisper(_HandleCommandHelpHelper("pet", "This by itself is not a valid command. Just so you know. To be used with a subcommand, such as..."), fromPlayer);
 
         if (!bMainHelp)
@@ -8447,11 +8409,12 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
                 if (ExtractCommand("aggressive", text, true)) {}
                 else if (ExtractCommand("defensive", text, true)) {}
                 else if (ExtractCommand("passive", text, true)) {}
-                if (text != "")
+                if (!text.empty())
                     SendWhisper(sInvalidSubcommand, fromPlayer);
             }
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8462,7 +8425,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8472,7 +8436,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
 
         if (!bMainHelp)
         {
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8489,13 +8454,14 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
             if (ExtractCommand("add", text, true)) {}
             else if (ExtractCommand("remove", text, true)) {}
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
     if (bMainHelp || ExtractCommand("repair", text))
     {
-        if (!bMainHelp && text == "")
+        if (!bMainHelp && text.empty())
             SendWhisper(_HandleCommandHelpHelper("repair", "This by itself is not a valid command. Just so you know. To be used with a subcommand, such as..."), fromPlayer);
 
         if (!bMainHelp)
@@ -8506,7 +8472,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
             // Catches all valid subcommands, also placeholders for potential future sub-subcommands
             if (ExtractCommand("all", text)) {}
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8543,7 +8510,8 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
             else if (ExtractCommand("learn", text)) {}
             else if (ExtractCommand("unlearn", text)) {}
 
-            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            if (!text.empty())
+                SendWhisper(sInvalidSubcommand, fromPlayer);
             return;
         }
     }
@@ -8551,13 +8519,13 @@ void PlayerbotAI::_HandleCommandHelp(std::string& text, Player& fromPlayer)
     if (bMainHelp)
         SendWhisper(_HandleCommandHelpHelper("help", "Gives you this listing of main commands... But then, you know that already don't you."), fromPlayer);
 
-    if (text != "")
+    if (!text.empty())
         SendWhisper("Either that is not a valid command, or someone forgot to add it to my help journal. I mean seriously, they can't expect me to remember *all* this stuff, can they?", fromPlayer);
 }
 
 std::string PlayerbotAI::_HandleCommandHelpHelper(std::string sCommand, std::string sExplain, HELPERLINKABLES reqLink, bool bReqLinkMultiples, bool bCommandShort)
 {
-    if (sCommand == "")
+    if (sCommand.empty())
     {
         DEBUG_LOG("[PlayerbotAI] _HandleCommandHelpHelper called with an empty sCommand. Ignoring call.");
         return "";
