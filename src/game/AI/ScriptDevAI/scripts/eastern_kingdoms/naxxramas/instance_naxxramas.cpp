@@ -59,6 +59,8 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_despawnKTTriggerTimer(0),
     m_screamsTimer(2 * MINUTE * IN_MILLISECONDS),
     isFaerlinaIntroDone(false),
+    m_shackledGuardians(0),
+    m_checkGuardiansTimer(0),
     DialogueHelper(naxxDialogue)
 {
     Initialize();
@@ -208,6 +210,11 @@ void instance_naxxramas::OnCreatureCreate(Creature* creature)
                 }
                 creature->SetInCombatWithZone();
             }
+            break;
+        case NPC_GUARDIAN:
+            m_icrecrownGuardianList.push_back(creature->GetObjectGuid());
+            creature->SetInCombatWithZone();
+            break;
     }
 }
 
@@ -647,6 +654,22 @@ void instance_naxxramas::SetData(uint32 type, uint32 data)
                     trigger->SetRespawnTime(5);
                     trigger->Respawn();
                 }
+                // Clear everything related to Guardians of Icecrown
+                m_icrecrownGuardianList.clear();
+                m_checkGuardiansTimer = 0;
+                m_shackledGuardians = 0;
+            }
+            if (data == DONE)
+            {
+                for (auto guardianGuid : m_icrecrownGuardianList)
+                {
+                    if (Creature* guardian = instance->GetCreature(guardianGuid))
+                    {
+                        if (guardian->AI())
+                            guardian->AI()->EnterEvadeMode();
+                        DoScriptText(EMOTE_FLEE, guardian);
+                    }
+                }
             }
             break;
     }
@@ -762,6 +785,25 @@ void instance_naxxramas::Update(uint32 diff)
         }
         else
             m_tauntTimer -= diff;
+    }
+
+    if (m_checkGuardiansTimer)
+    {
+        if (m_checkGuardiansTimer <= diff)
+        {
+            if (m_shackledGuardians > MAX_SHACKLES)
+            {
+                if (Creature* kelthuzad = GetSingleCreatureFromStorage(NPC_KELTHUZAD))
+                {
+                    DoScriptText((urand(0, 1) ? SAY_KELTHUZAD_SHACKLES_1: SAY_KELTHUZAD_SHACKLES_2), kelthuzad);
+                    kelthuzad->CastSpell(nullptr, SPELL_CLEAR_ALL_SHACKLES, TRIGGERED_OLD_TRIGGERED);
+                }
+            }
+            m_shackledGuardians = 0;
+            m_checkGuardiansTimer = 2 * IN_MILLISECONDS;
+        }
+        else
+            m_checkGuardiansTimer -= diff;
     }
 
     if (m_auiEncounter[TYPE_FOUR_HORSEMEN] == NOT_STARTED)
@@ -950,32 +992,49 @@ void instance_naxxramas::DoTaunt()
             case 2: DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_TAUNT2, NPC_KELTHUZAD); break;
             case 3: DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_TAUNT3, NPC_KELTHUZAD); break;
             case 4: DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_TAUNT4, NPC_KELTHUZAD); break;
+            default:
+                break;
         }
     }
 }
 
 // Used in Gluth fight: move all spawned Zombie Chow towards Gluth to be devoured
-void instance_naxxramas::HandleDecimateEvent()
+bool instance_naxxramas::DoHandleEvent(uint32 eventId)
 {
-    if (Creature* gluth = GetSingleCreatureFromStorage(NPC_GLUTH))
+    switch (eventId)
     {
-        for (auto& zombieGuid : m_zombieChowList)
-        {
-            if (Creature* zombie = instance->GetCreature(zombieGuid))
+        case EVENT_ID_DECIMATE:
+            if (Creature* gluth = GetSingleCreatureFromStorage(NPC_GLUTH))
             {
-                if (zombie->isAlive())
+                for (auto& zombieGuid : m_zombieChowList)
                 {
-                    zombie->AI()->SetReactState(REACT_PASSIVE);
-                    zombie->AttackStop();
-                    zombie->SetTarget(nullptr);
-                    zombie->AI()->DoResetThreat();
-                    zombie->GetMotionMaster()->Clear();
-                    zombie->SetWalk(true);
-                    zombie->GetMotionMaster()->MoveFollow(gluth, ATTACK_DISTANCE, 0);
+                    if (Creature* zombie = instance->GetCreature(zombieGuid))
+                    {
+                        if (zombie->isAlive())
+                        {
+                            zombie->AI()->SetReactState(REACT_PASSIVE);
+                            zombie->AttackStop();
+                            zombie->SetTarget(nullptr);
+                            zombie->AI()->DoResetThreat();
+                            zombie->GetMotionMaster()->Clear();
+                            zombie->SetWalk(true);
+                            zombie->GetMotionMaster()->MoveFollow(gluth, ATTACK_DISTANCE, 0);
+                        }
+                    }
                 }
+                return true;
             }
-        }
+        case EVENT_CLEAR_SHACKLES:
+            m_shackledGuardians = 0;
+            m_checkGuardiansTimer = 2 * IN_MILLISECONDS;    // Check every two seconds how many Guardians of Icecrown are shackled
+            return true;
+        case EVENT_GUARDIAN_SHACKLE:
+            ++m_shackledGuardians;
+            return true;
+        default:
+            break;
     }
+    return false;
 }
 
 InstanceData* GetInstanceData_instance_naxxramas(Map* pMap)
@@ -1033,14 +1092,12 @@ bool AreaTrigger_at_naxxramas(Player* player, AreaTriggerEntry const* areaTrigge
     return false;
 }
 
-bool ProcessEventId_decimate(uint32 eventId, Object* source, Object* /*target*/, bool /*isStart*/)
+bool ProcessEventId_naxxramas(uint32 eventId, Object* source, Object* /*target*/, bool /*isStart*/)
 {
     if (auto* instance = (instance_naxxramas*)((Creature*)source)->GetInstanceData())
-    {
-        if (eventId == EVENT_ID_DECIMATE)
-            instance->HandleDecimateEvent();
-    }
-    return false;   // return false so DBScripts can be triggered
+        return instance->DoHandleEvent(eventId);
+
+    return false;
 }
 
 void AddSC_instance_naxxramas()
@@ -1056,7 +1113,7 @@ void AddSC_instance_naxxramas()
     newScript->RegisterSelf();
 
     newScript = new Script;
-    newScript->Name = "event_decimate";
-    newScript->pProcessEventId = &ProcessEventId_decimate;
+    newScript->Name = "event_naxxramas";
+    newScript->pProcessEventId = &ProcessEventId_naxxramas;
     newScript->RegisterSelf();
 }

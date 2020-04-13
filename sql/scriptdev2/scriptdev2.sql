@@ -394,8 +394,11 @@ UPDATE gameobject_template SET ScriptName='go_anub_door' WHERE entry=181126;
 UPDATE creature_template SET ScriptName='boss_kelthuzad' WHERE entry=15990;
 UPDATE creature_template SET ScriptName='npc_diseased_maggot' WHERE entry IN (16056, 16057);
 UPDATE creature_template SET ScriptName='npc_invible_man' WHERE entry=17286;
+UPDATE creature_template SET ScriptName='npc_icecrown_guardian' WHERE entry=16441;
 INSERT INTO scripted_event_id VALUES
-(10495,'event_decimate');
+(10495,'event_naxxramas'),
+(10536,'event_naxxramas'),
+(10537,'event_naxxramas');
 
 /* ONYXIA'S LAIR */
 UPDATE instance_template SET ScriptName='instance_onyxias_lair' WHERE map=249;
@@ -2450,7 +2453,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1533095','Scream your dying breath!','8810','1','0','0','0','kelthuzad SAY_AGGRO2'),
 ('-1533096','The end is upon you!','8811','1','0','0','0','kelthuzad SAY_AGGRO3'),
 ('-1533097','The dark void awaits you!','8817','1','0','0','0','kelthuzad SAY_SLAY1'),
-('-1533098','<Kel''Thuzad cackles maniacally!>','8818','1','0','0','0','kelthuzad SAY_SLAY2'),
+('-1533098','%s cackles maniacally.','8818','7','0','0','0','kelthuzad SAY_SLAY2'),
 ('-1533099','AAAAGHHH!... Do not rejoice... your victory is a hollow one... for I shall return with powers beyond your imagining!','8814','1','0','0','0','kelthuzad SAY_DEATH'),
 ('-1533100','Your soul, is bound to me now!','8812','1','0','0','0','kelthuzad SAY_CHAIN1'),
 ('-1533101','There will be no escape!','8813','1','0','0','0','kelthuzad SAY_CHAIN2'),
@@ -2524,7 +2527,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1533156','%s casts Unyielding Pain on everyone!','0','3','0','0','0','lady_blaumeux EMOTE_UNYIELDING_PAIN'),
 ('-1533157','%s casts Condemation on everyone!','0','3','0','0','0','sir_zeliek EMOTE_CONDEMATION'),
 
-('-1533158','%s lets loose a triumphant shoot.','0','2','0','0','0','instructor_razuvious EMOTE_TRIUMPHANT_SHOOT');
+('-1533158','%s lets loose a triumphant shoot.','0','2','0','0','0','instructor_razuvious EMOTE_TRIUMPHANT_SHOOT'),
+
+('-1533159','%s flees after seeing Kel\'Thuzad fall!','0','7','0','0','0','guardian_icecrown EMOTE_FLEE');
 
 -- -1 999 900 EXAMPLE TEXT
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

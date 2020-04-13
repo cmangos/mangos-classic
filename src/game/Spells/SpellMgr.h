@@ -1121,6 +1121,7 @@ inline uint32 GetAffectedTargets(SpellEntry const* spellInfo, WorldObject* caste
                 case 28415:                                 // Summon Type A Trigger (Naxxramas, Kel'Thuzad)
                 case 28416:                                 // Summon Type B Trigger (Naxxramas, Kel'Thuzad)
                 case 28417:                                 // Summon Type C Trigger (Naxxramas, Kel'Thuzad)
+                case 28455:                                 // Summon Type D Trigger (Naxxramas, Kel'Thuzad)
                 case 28560:                                 // Summon Blizzard (Naxx, Sapphiron)
                     return 1;
                 case 10258:                                 // Awaken Vault Warder (Uldaman)

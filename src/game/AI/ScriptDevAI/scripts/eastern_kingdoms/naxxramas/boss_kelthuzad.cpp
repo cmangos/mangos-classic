@@ -41,16 +41,9 @@ enum
 
     SAY_CHAIN1                          = -1533100,
     SAY_CHAIN2                          = -1533101,
-    SAY_FROST_BLAST                     = -1533102,
 
     SAY_REQUEST_AID                     = -1533103,         // Start of phase 3
     SAY_ANSWER_REQUEST                  = -1533104,         // Lich King answer
-
-    SAY_SPECIAL1_MANA_DET               = -1533106,
-    SAY_SPECIAL3_MANA_DET               = -1533107,
-    SAY_SPECIAL2_DISPELL                = -1533108,
-
-    EMOTE_GUARDIAN                      = -1533134,         // At each guardian summon
 
     // Phase 1 spells
     SPELL_SUMMON_TYPE_A                 = 28421,            // Summon 1 Soldier of the Frozen Waste
@@ -96,6 +89,10 @@ enum
     SPELL_SHADOW_FISSURE                = 27810,
     SPELL_FROST_BLAST                   = 27808,            // Frost Blast: stun spell
     SPELL_FROST_BLAST_DAMAGE            = 29879,            // Frost Blast: damage spell
+
+    SPELL_SUMMON_TYPE_D                 = 28454,            // Summon 1 Guardian of Icecrown
+    SPELL_SUMMON_PERIODIC_D             = 28453,            // One Guardian of Icecrown summoned every 10 secs
+    SPELL_GUARDIAN_INIT                 = 29898,            // Cast at start of phase 3 by Kel'Thuzad (start of phase 2 in sniffs but this way we avoid running a timer needlessly)
 
     MAX_CONTROLLED_TARGETS              = 4,                // 5 targets are mind controlled by Chains of Kel'Thuzad but the main tank is always the fifth one
 };
@@ -148,15 +145,12 @@ struct boss_kelthuzadAI : public ScriptedAI
     {
         m_instance = (instance_naxxramas*)creature->GetInstanceData();
 
-        m_guardiansCountMax = 4;
         Reset();
     }
 
     instance_naxxramas* m_instance;
 
-    uint32 m_guardiansCount;
-    uint32 m_guardiansCountMax;
-    uint32 m_guardiansTimer;
+    uint32 m_guardiansSummonTimer;
     uint32 m_lichKingAnswerTimer;
     uint32 m_frostBoltTimer;
     uint32 m_frostBoltNovaTimer;
@@ -174,15 +168,14 @@ struct boss_kelthuzadAI : public ScriptedAI
 
     void Reset() override
     {
-        m_frostBoltTimer       = urand(1, 60) * IN_MILLISECONDS;    // It won't be more than a minute without cast it
-        m_frostBoltNovaTimer   = 15 * IN_MILLISECONDS;              // Cast every 15 seconds
-        m_chainsTimer          = urand(60, 120) * IN_MILLISECONDS;  // Cast every 60 - 120 seconds
-        m_manaDetonationTimer  = 20 * IN_MILLISECONDS;              // Seems to cast about every 20 seconds
-        m_shadowFissureTimer   = urand(10, 12) * IN_MILLISECONDS;   // Cast every 10 - 12 seconds
-        m_frostBlastTimer      = urand(30, 40) * IN_MILLISECONDS;   // Cast every 30 - 40 seconds
-        m_guardiansTimer       = 5 * IN_MILLISECONDS;               // 5 seconds for summoning each Guardian of Icecrown in phase 3
+        m_frostBoltTimer       = urand(5, 8) * IN_MILLISECONDS;
+        m_frostBoltNovaTimer   = 20 * IN_MILLISECONDS;
+        m_chainsTimer          = urand(60, 120) * IN_MILLISECONDS;
+        m_manaDetonationTimer  = urand(27, 40) * IN_MILLISECONDS;
+        m_shadowFissureTimer   = urand(15, 25) * IN_MILLISECONDS;
+        m_frostBlastTimer      = urand(40, 60) * IN_MILLISECONDS;
+        m_guardiansSummonTimer = 61 * IN_MILLISECONDS;      // One Guardian of Icecrown is summoned every 10 sec ; five of them in total
         m_lichKingAnswerTimer  = 4 * IN_MILLISECONDS;
-        m_guardiansCount       = 0;
         m_summonTicks = 0;
 
         m_phase                = PHASE_NORMAL;
@@ -254,7 +247,19 @@ struct boss_kelthuzadAI : public ScriptedAI
                     SummonIntroCreatures(NPC_SOUL_WEAVER, 1);
                     break;
                 case MAX_SUMMON_TICKS:
-                    DespawnIntroCreatures();    // Will leave those in combat for some reason
+                    DespawnIntroCreatures();    // Will leave those that for some reason are in combat
+                    switch (urand(0, 2))
+                    {
+                        case 0:
+                            DoScriptText(SAY_AGGRO1, m_creature);
+                            break;
+                        case 1:
+                            DoScriptText(SAY_AGGRO2, m_creature);
+                            break;
+                        case 2:
+                            DoScriptText(SAY_AGGRO3, m_creature);
+                            break;
+                    }
                     break;
                 case MAX_CHANNEL_TICKS:
                     StartPhase2();
@@ -321,22 +326,6 @@ struct boss_kelthuzadAI : public ScriptedAI
             // Clear all summoning auras for current add before applying the new one (especially needed in case new one is NULL)
             StopAllSummoningForNPC(add);
             DoCastSpellIfCan(m_creature, summoningAura, CAST_TRIGGERED);
-        }
-    }
-
-    void Aggro(Unit* /*who*/) override
-    {
-        switch (urand(0, 2))
-        {
-            case 0:
-                DoScriptText(SAY_AGGRO1, m_creature);
-                break;
-            case 1:
-                DoScriptText(SAY_AGGRO2, m_creature);
-                break;
-            case 2:
-                DoScriptText(SAY_AGGRO3, m_creature);
-                break;
         }
     }
 
@@ -429,71 +418,66 @@ struct boss_kelthuzadAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
+        // Frostbolt: main target
         if (m_frostBoltTimer < diff)
         {
-           if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BOLT) == CAST_OK)
-               m_frostBoltTimer = urand(1, 60) * IN_MILLISECONDS;
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BOLT) == CAST_OK)
+                m_frostBoltTimer = urand(5, 25) * IN_MILLISECONDS;
         }
         else
             m_frostBoltTimer -= diff;
 
+        // Frostbolt volley: all targets (about 30% chance every 20 seconds)
         if (m_frostBoltNovaTimer < diff)
         {
-          if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BOLT_NOVA) == CAST_OK)
-              m_frostBoltNovaTimer = 15 * IN_MILLISECONDS;
+            if (urand(0, 2) > 1)
+                DoCastSpellIfCan(m_creature, SPELL_FROST_BOLT_NOVA);
+            m_frostBoltNovaTimer = 20 * IN_MILLISECONDS;
         }
         else
             m_frostBoltNovaTimer -= diff;
 
+        // Mana Detonation: only target players with mana
         if (m_manaDetonationTimer < diff)
         {
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MANA_DETONATION, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
             {
                 if (DoCastSpellIfCan(target, SPELL_MANA_DETONATION) == CAST_OK)
-                {
-                    if (urand(0, 1))
-                        DoScriptText(SAY_SPECIAL1_MANA_DET, m_creature);
-
-                    m_manaDetonationTimer = 20 * IN_MILLISECONDS;
-                }
+                    m_manaDetonationTimer = urand(27, 40) * IN_MILLISECONDS;
             }
         }
         else
             m_manaDetonationTimer -= diff;
 
+        // Shadow Fissure: random target
         if (m_shadowFissureTimer < diff)
         {
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(target, SPELL_SHADOW_FISSURE) == CAST_OK)
-                {
-                    if (urand(0, 1))
-                        DoScriptText(SAY_SPECIAL3_MANA_DET, m_creature);
-
-                    m_shadowFissureTimer = urand(10, 12) * IN_MILLISECONDS;
-                }
+                    m_shadowFissureTimer = urand(15, 25) * IN_MILLISECONDS;
             }
         }
         else
             m_shadowFissureTimer -= diff;
 
+        // Frostblast: random target
         if (m_frostBlastTimer < diff)
         {
-           if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BLAST) == CAST_OK)
-           {
-              if (urand(0, 1))
-                   DoScriptText(SAY_FROST_BLAST, m_creature);
-
-               m_frostBlastTimer = urand(30, 40) * IN_MILLISECONDS;
-           }
+            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
+                if (DoCastSpellIfCan(target, SPELL_FROST_BLAST) == CAST_OK)
+                    m_frostBlastTimer = urand(40, 60) * IN_MILLISECONDS;
+            }
         }
         else
             m_frostBlastTimer -= diff;
 
+        // Chains of Kel'Thuzad: main targets and four random ones
         if (m_chainsTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAINS_OF_KELTHUZAD) == CAST_OK)
-                m_chainsTimer = urand(60, 120) * IN_MILLISECONDS;
+                m_chainsTimer = urand(60, 220) * IN_MILLISECONDS;
         }
         else
             m_chainsTimer -= diff;
@@ -506,34 +490,42 @@ struct boss_kelthuzadAI : public ScriptedAI
                 DoScriptText(SAY_REQUEST_AID, m_creature);
             }
         }
-        if (m_phase == PHASE_GUARDIANS && m_guardiansCount < m_guardiansCountMax)
+        if (m_phase == PHASE_GUARDIANS)
         {
-            if (m_guardiansTimer < diff)
+            if (m_lichKingAnswerTimer && m_instance)
             {
-            // Summon a Guardian of Icecrown in a random alcove
-            //   SummonMob(NPC_GUARDIAN);
-               m_guardiansTimer = 5 * IN_MILLISECONDS;
-           }
-           else
-                m_guardiansTimer -= diff;
+                if (m_lichKingAnswerTimer <= diff)
+                {
+                    // Start summoning Guardians of Icecrown
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_PERIODIC_D, CAST_TRIGGERED);
+                    // Start checking if Guardians are shackled or not
+                    DoCastSpellIfCan(m_creature, SPELL_GUARDIAN_INIT, CAST_TRIGGERED);
 
-           if (m_lichKingAnswerTimer && m_instance)
-           {
-               if (m_lichKingAnswerTimer <= diff)
-               {
-                   if (Creature* lichKing = m_instance->GetSingleCreatureFromStorage(NPC_THE_LICHKING))
-                       DoScriptText(SAY_ANSWER_REQUEST, lichKing);
+                    if (Creature* lichKing = m_instance->GetSingleCreatureFromStorage(NPC_THE_LICHKING))
+                        DoScriptText(SAY_ANSWER_REQUEST, lichKing);
 
-                   m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_1);
-                   m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_2);
-                   m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_3);
-                   m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_4);
+                    m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_1);
+                    m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_2);
+                    m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_3);
+                    m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_4);
 
-                   m_lichKingAnswerTimer = 0;
-               }
-               else
-                   m_lichKingAnswerTimer -= diff;
-           }
+                    m_lichKingAnswerTimer = 0;
+                }
+                else
+                    m_lichKingAnswerTimer -= diff;
+            }
+
+            // Stop summoning Guardians of Icecrown once five of them are spawned
+            if (m_guardiansSummonTimer)
+            {
+                if (m_guardiansSummonTimer <= diff)
+                {
+                    m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_PERIODIC_D);
+                    m_guardiansSummonTimer = 0;
+                }
+                else
+                    m_guardiansSummonTimer -= diff;
+            }
         }
 
         DoMeleeAttackIfReady();
@@ -545,9 +537,88 @@ UnitAI* GetAI_boss_kelthuzad(Creature* creature)
     return new boss_kelthuzadAI(creature);
 }
 
+/*########################
+#   npc_icecrown_guardian
+########################*/
+
+enum {
+    SPELL_GUARDIAN_PASSIVE      = 29897,
+    SPELL_GUARDIAN_SHACKLE      = 29899,
+    SPELL_BLOOD_TAP             = 28470,
+};
+
+// This NPC handles the spell sync between the player that is web wrapped (with a DoT) and the related Web Wrap NPC
+struct npc_icecrown_guardianAI : public ScriptedAI
+{
+    npc_icecrown_guardianAI(Creature* creature) : ScriptedAI(creature)
+    {
+        m_instance = (instance_naxxramas*)creature->GetInstanceData();
+        Reset();
+    }
+
+    instance_naxxramas* m_instance;
+
+    ObjectGuid m_victimGuid;
+    uint32 m_checkCurrentVictimTimer;
+
+    void Reset() override
+    {
+        m_victimGuid.Clear();
+        m_checkCurrentVictimTimer = 2 * IN_MILLISECONDS;    // Check every 2 seconds that we still have the same target
+
+        DoCastSpellIfCan(m_creature,SPELL_GUARDIAN_PASSIVE,CAST_AURA_NOT_PRESENT);
+    }
+
+    void JustReachedHome() override
+    {
+        m_creature->ForcedDespawn();
+    }
+
+    void EnterEvadeMode() override
+    {
+         m_creature->RemoveAurasDueToSpell(SPELL_BLOOD_TAP);
+
+        ScriptedAI::EnterEvadeMode();
+    }
+
+    void KilledUnit(Unit* /*victim*/) override
+    {
+        DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLOOD_TAP);
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_checkCurrentVictimTimer < diff)
+        {
+            // Get current victim GUID if not already assigned
+            if (!m_victimGuid && m_creature->getVictim())
+                m_victimGuid = m_creature->getVictim()->GetObjectGuid();
+
+            // If we changed our target: cast Blood Tap
+            if (m_victimGuid != m_creature->getVictim()->GetObjectGuid())
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLOOD_TAP);
+                m_victimGuid = m_creature->getVictim()->GetObjectGuid();
+            }
+            m_checkCurrentVictimTimer = 2 * IN_MILLISECONDS;    // Check every 2 seconds that we still have the same target
+        }
+        else
+            m_checkCurrentVictimTimer -= diff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAI_npc_icecrown_guardian(Creature* creature)
+{
+    return new npc_icecrown_guardianAI(creature);
+}
+
 // Summon one add (which type depends on spell)
-struct TriggerKTAdd :
-        public SpellScript
+struct TriggerKTAdd : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
     {
@@ -563,6 +634,9 @@ struct TriggerKTAdd :
                     break;
                 case 28417:
                     unitTarget->CastSpell(unitTarget, SPELL_SUMMON_TYPE_C, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid(), nullptr);
+                    break;
+                case 28455:
+                    unitTarget->CastSpell(unitTarget, SPELL_SUMMON_TYPE_D, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid(), nullptr);
                     break;
                 default:
                     break;
@@ -589,24 +663,20 @@ struct ChainsKelThuzad : public SpellScript
         // Skip the main tank because we will add it later
         caster->SelectAttackingTargets(targets, ATTACKING_TARGET_ALL_SUITABLE, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK, chainsParams);
 
-        if (targets.size() > MAX_CONTROLLED_TARGETS)
-        {
-            std::random_shuffle(targets.begin(), targets.end());
-            targets.resize(MAX_CONTROLLED_TARGETS);
-        }
-        else
-            return; // Prevent the mind control to happen if all remaining players would be targeted
+        // Prevent the mind control to happen if all remaining players would be targeted
+        if (targets.size() <= MAX_CONTROLLED_TARGETS)
+            return;
+
+        std::random_shuffle(targets.begin(), targets.end());
+        targets.resize(MAX_CONTROLLED_TARGETS);
 
         DoScriptText(urand(0, 1) ? SAY_CHAIN1 : SAY_CHAIN2, caster);
 
         // Mind control the random targets
-        if (!targets.empty())
+        for (auto& target : targets)
         {
-            for (auto& target : targets)
-            {
-                caster->CastSpell(target, SPELL_CHAINS_OF_KELTHUZAD_TARGET, TRIGGERED_OLD_TRIGGERED);
-                target->CastSpell(target, SPELL_CHAINS_OF_KELTHUZAD_SCALE, TRIGGERED_OLD_TRIGGERED);
-            }
+            caster->CastSpell(target, SPELL_CHAINS_OF_KELTHUZAD_TARGET, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(target, SPELL_CHAINS_OF_KELTHUZAD_SCALE, TRIGGERED_OLD_TRIGGERED);
         }
 
         // Mind control the main tank
@@ -618,7 +688,7 @@ struct ChainsKelThuzad : public SpellScript
 // Do damage onto the player equal to 26% of his/her full hit points on every tick
 struct FrostBlast : public AuraScript
 {
-    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /* data */) const override
     {
         Unit* caster = aura->GetCaster();
         if (!caster)
@@ -632,6 +702,19 @@ struct FrostBlast : public AuraScript
     }
 };
 
+// Periodically inform the instance if the target is controlled through Shackle Undead or not
+struct GuardianPeriodic : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        if (Unit* target = aura->GetTarget())
+        {
+            if (target->HasAuraType(SPELL_AURA_MOD_STUN))   // Shackle Undead applies SPELL_AURA_MOD_STUN, so we cover all ranks of the spell this way
+                data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_GUARDIAN_SHACKLE); // Summon Ice Block
+        }
+    }
+};
+
 void AddSC_boss_kelthuzad()
 {
     Script* newScript = new Script;
@@ -639,7 +722,13 @@ void AddSC_boss_kelthuzad()
     newScript->GetAI = &GetAI_boss_kelthuzad;
     newScript->RegisterSelf();
 
+    newScript = new Script;
+    newScript->Name = "npc_icecrown_guardian";
+    newScript->GetAI = &GetAI_npc_icecrown_guardian;
+    newScript->RegisterSelf();
+
     RegisterSpellScript<TriggerKTAdd>("spell_trigger_KT_add");
     RegisterSpellScript<ChainsKelThuzad>("spell_chains_kel_thuzad");
     RegisterAuraScript<FrostBlast>("spell_kel_thuzad_frost_blast");
+    RegisterAuraScript<GuardianPeriodic>("spell_icecrown_guardian_periodic");
 }

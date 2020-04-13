@@ -17,11 +17,14 @@ enum
 
     // Kel'Thuzad
     SAY_KELTHUZAD_CAT_DIED      = -1533089,
+    SAY_KELTHUZAD_SHACKLES_1    = -1533106,
+    SAY_KELTHUZAD_SHACKLES_2    = -1533108,
     // Kel'Thuzad's taunts after killing Wing Bosses
     SAY_KELTHUZAD_TAUNT1        = -1533090,
     SAY_KELTHUZAD_TAUNT2        = -1533091,
     SAY_KELTHUZAD_TAUNT3        = -1533092,
     SAY_KELTHUZAD_TAUNT4        = -1533093,
+    EMOTE_FLEE                  = -1533159,
     // Dialogues with Lich King
     SAY_SAPP_DIALOG1            = -1533084,
     SAY_SAPP_DIALOG2_LICH       = -1533085,
@@ -192,9 +195,14 @@ enum
     SPELL_UNRELENTING_ASSAULT   = 29874,
 
     EVENT_ID_DECIMATE           = 10495,
+    EVENT_CLEAR_SHACKLES        = 10536,
+    EVENT_GUARDIAN_SHACKLE      = 10537,
 
     SPELL_DARK_CHANNELING       = 21157,
-    SPELL_CHANNEL_VISUAL        = 29423,            // Periodically trigger 29422
+    SPELL_CHANNEL_VISUAL        = 29423,                    // Periodically trigger 29422
+    SPELL_CLEAR_ALL_SHACKLES    = 29910,                    // Cast by Kel'Thuzad if more than three Guardians of Icecrown are controlled
+
+    MAX_SHACKLES                = 3,                        // How many Guardians of Icecrown can be crowed control without Kel'Thuzad dispelling the shackles
 };
 
 enum GothikSpellDummy
@@ -277,8 +285,7 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         // Kel'Thuzad
         void DoTaunt();
 
-        // Gluth
-        void HandleDecimateEvent();
+        bool DoHandleEvent(uint32 eventId);
 
         bool DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger);
 
@@ -292,6 +299,7 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         GuidList m_faerlinaFollowersList;
         GuidList m_unrelentingSideList;
         GuidList m_spectralSideList;
+        GuidList m_icrecrownGuardianList;
 
         std::unordered_map<ObjectGuid, GothTrigger> m_gothikTriggerMap;
 
@@ -302,6 +310,8 @@ class instance_naxxramas : public ScriptedInstance, private DialogueHelper
         uint32 m_screamsTimer;
         uint32 m_horsemenTauntTimer;
         uint32 m_despawnKTTriggerTimer;
+        uint32 m_checkGuardiansTimer;
+        uint32 m_shackledGuardians;
 
         bool isFaerlinaIntroDone;
 
