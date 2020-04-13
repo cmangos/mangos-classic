@@ -730,7 +730,15 @@ bool FollowMovementGenerator::Move(Unit& owner, float x, float y, float z)
         float o;
         _getOrientation(owner, o);
         _getLocation(owner, x, y, z, false);
-        owner.NearTeleportTo(x, y, z, o);
+
+        if (owner.GetTypeId() == TYPEID_PLAYER)
+            owner.NearTeleportTo(x, y, z, o);
+        else
+        {
+            owner.GetMap()->CreatureRelocation(static_cast<Creature*>(&owner), x, y, z, o);
+            owner.SendHeartBeat();
+        }
+
         return false;
     }
 
