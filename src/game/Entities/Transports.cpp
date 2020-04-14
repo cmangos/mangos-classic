@@ -444,7 +444,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
             continue;
         }
 
-        if (plr->isDead() && !plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        if (plr->IsDead() && !plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         {
             plr->ResurrectPlayer(1.0);
         }

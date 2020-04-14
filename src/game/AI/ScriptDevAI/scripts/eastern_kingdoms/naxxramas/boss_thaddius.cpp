@@ -362,7 +362,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
 
     bool IsCountingDead() const
     {
-        return m_isFakingDeath || m_creature->isDead();
+        return m_isFakingDeath || m_creature->IsDead();
     }
 
 

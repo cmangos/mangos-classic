@@ -66,7 +66,7 @@ void OutdoorPvPSI::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 // Handle case when player returns a silithyst
 bool OutdoorPvPSI::HandleAreaTrigger(Player* player, uint32 triggerId)
 {
-    if (player->isGameMaster() || player->isDead())
+    if (player->isGameMaster() || player->IsDead())
         return false;
 
     switch (triggerId)

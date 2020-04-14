@@ -1108,7 +1108,7 @@ namespace MaNGOS
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Creature* u)
             {
-                if (u == i_obj || u->isDead() || u->IsInCombat())
+                if (u == i_obj || u->IsDead() || u->IsInCombat())
                     return false;
 
                 if (!u->CanAssist(i_obj) || !u->CanAttack(i_enemy))

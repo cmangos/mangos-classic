@@ -184,7 +184,7 @@ void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
 
             InformAI(creature, type, currPoint->first);
 
-            if (creature.isDead() || !creature.IsInWorld()) // Might have happened with above calls
+            if (creature.IsDead() || !creature.IsInWorld()) // Might have happened with above calls
                 return;
         }
 

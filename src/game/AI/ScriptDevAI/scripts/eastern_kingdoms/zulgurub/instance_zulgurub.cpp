@@ -240,7 +240,7 @@ bool AreaTrigger_at_zulgurub(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     if (pAt->id == AREATRIGGER_ENTER || pAt->id == AREATRIGGER_ALTAR)
     {
-        if (pPlayer->isGameMaster() || pPlayer->isDead())
+        if (pPlayer->isGameMaster() || pPlayer->IsDead())
             return false;
 
         if (instance_zulgurub* pInstance = (instance_zulgurub*)pPlayer->GetInstanceData())

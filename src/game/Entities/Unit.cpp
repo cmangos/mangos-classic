@@ -1163,7 +1163,7 @@ struct PetOwnerKilledUnitHelper
 
 void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsiblePlayer)
 {
-    victim->m_deathState = DEAD; // so that IsAlive, isDead return expected results in the called hooks of JustKilledCreature
+    victim->m_deathState = DEAD; // so that IsAlive, IsDead return expected results in the called hooks of JustKilledCreature
     // must be used only shortly before SetDeathState(JUST_DIED) and only for Creatures or Pets
 
     // some critters required for quests (need normal entry instead possible heroic in any cases)
@@ -7926,7 +7926,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
     // for player case, we look for some custom rates
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        if (getDeathState() == CORPSE)
+        if (GetDeathState() == CORPSE)
             speed *= sWorld.getConfig(((Player*)this)->InBattleGround() ? CONFIG_FLOAT_GHOST_RUN_SPEED_BG : CONFIG_FLOAT_GHOST_RUN_SPEED_WORLD);
     }
 

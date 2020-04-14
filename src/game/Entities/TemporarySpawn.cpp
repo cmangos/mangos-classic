@@ -85,7 +85,7 @@ void TemporarySpawn::Update(const uint32 diff)
         case TEMPSPAWN_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
-            if (isDead())
+            if (IsDead())
             {
                 UnSummon();
                 return;
@@ -107,7 +107,7 @@ void TemporarySpawn::Update(const uint32 diff)
         case TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
-            if (isDead())
+            if (IsDead())
             {
                 UnSummon();
                 return;
@@ -151,7 +151,7 @@ void TemporarySpawn::Update(const uint32 diff)
         case TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
-            if (isDead())
+            if (IsDead())
             {
                 UnSummon();
                 return;

@@ -41,7 +41,7 @@ GroupMemberStatus GetGroupMemberStatus(const Player* member = nullptr)
     uint8 flags = MEMBER_STATUS_ONLINE;
     if (member->IsPvP())
         flags |= MEMBER_STATUS_PVP;
-    if (member->isDead())
+    if (member->IsDead())
         flags |= MEMBER_STATUS_DEAD;
     if (member->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         flags |= MEMBER_STATUS_GHOST;

@@ -194,7 +194,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit* pTarget)
 
     // check for pet and heal if neccessary
     Pet* pet = m_bot->GetPet();
-    // TODO: clarify/simplify: !pet->getDeathState() != ALIVE
+    // TODO: clarify/simplify: !pet->GetDeathState() != ALIVE
     if (pet && PET_MEND > 0 && pet->IsAlive() && pet->GetHealthPercent() < 50 && pVictim != m_bot && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && m_ai->CastSpell(PET_MEND, *m_bot) == SPELL_CAST_OK)
     {
         m_ai->TellMaster("healing pet.");

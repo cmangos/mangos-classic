@@ -1848,8 +1848,8 @@ class Unit : public WorldObject
         void SetFacingToObject(WorldObject* pObject);
 
         bool IsAlive() const { return (m_deathState == ALIVE); }
-        bool isDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); }
-        DeathState getDeathState() const { return m_deathState; }
+        bool IsDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); }
+        DeathState GetDeathState() const { return m_deathState; }
         virtual void SetDeathState(DeathState s);           // overwritten in Creature/Player/Pet
 
         bool IsTargetUnderControl(Unit const& target) const;

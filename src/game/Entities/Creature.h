@@ -614,8 +614,8 @@ class Creature : public Unit
         void LoadBotMenu(Player* pPlayer);
 #endif
 
-        bool IsCorpse() const { return getDeathState() ==  CORPSE; }
-        bool IsDespawned() const { return getDeathState() ==  DEAD; }
+        bool IsCorpse() const { return GetDeathState() == CORPSE; }
+        bool IsDespawned() const { return GetDeathState() == DEAD; }
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         void ReduceCorpseDecayTimer();
         TimePoint GetCorpseDecayTimer() const { return m_corpseExpirationTime; }

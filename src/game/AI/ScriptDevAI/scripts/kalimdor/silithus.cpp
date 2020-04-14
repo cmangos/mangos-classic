@@ -999,7 +999,7 @@ struct npc_solenorAI : public ScriptedAI
         if (m_creature->HasAura(SPELL_SOUL_FLAME) && m_creature->HasAura(SPELL_FROST_TRAP))
             m_creature->RemoveAurasDueToSpell(SPELL_SOUL_FLAME);
 
-        if (m_creature->getThreatManager().getThreatList().size() > 1 /*|| pHunter->isDead()*/)
+        if (m_creature->getThreatManager().getThreatList().size() > 1 /*|| pHunter->IsDead()*/)
             DemonDespawn();
 
         if (m_uiCreepingDoom_Timer < uiDiff)

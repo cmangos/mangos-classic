@@ -243,7 +243,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit* pTarget)
         return RETURN_CONTINUE;
 
     // Rogue like behaviour ^^
-    /*if (VANISH > 0 && GetMaster()->isDead()) { //Causes the server to crash :( removed for now.
+    /*if (VANISH > 0 && GetMaster()->IsDead()) { //Causes the server to crash :( removed for now.
         m_bot->AttackStop();
         m_bot->RemoveAllAttackers();
         m_ai->CastSpell(VANISH);

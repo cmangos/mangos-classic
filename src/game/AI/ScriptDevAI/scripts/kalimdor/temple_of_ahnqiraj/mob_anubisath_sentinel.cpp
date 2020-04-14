@@ -86,7 +86,7 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
 
             if (Creature* buddy = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (buddy->isDead())
+                if (buddy->IsDead())
                     buddy->Respawn();
             }
         }
