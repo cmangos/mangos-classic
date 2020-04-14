@@ -94,7 +94,7 @@ struct npc_chicken_cluckAI : public ScriptedAI
                 m_uiResetFlagTimer -= uiDiff;
         }
 
-        if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+        if (m_creature->SelectHostileTarget() && m_creature->GetVictim())
             DoMeleeAttackIfReady();
     }
 };
@@ -690,7 +690,7 @@ struct npc_garments_of_questsAI : public npc_escortAI
                 m_uiRunAwayTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -719,12 +719,12 @@ struct npc_guardianAI : public ScriptedAI
 
     void UpdateAI(const uint32 /*diff*/) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_creature->isAttackReady())
         {
-            m_creature->CastSpell(m_creature->getVictim(), SPELL_DEATHTOUCH, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(m_creature->GetVictim(), SPELL_DEATHTOUCH, TRIGGERED_OLD_TRIGGERED);
             m_creature->resetAttackTimer();
         }
     }
@@ -990,7 +990,7 @@ struct npc_the_cleanerAI : public ScriptedAI
         else
             m_uiDespawnTimer -= uiDiff;
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

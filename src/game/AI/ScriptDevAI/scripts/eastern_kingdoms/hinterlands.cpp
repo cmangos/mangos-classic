@@ -298,7 +298,7 @@ struct npc_rinjiAI : public npc_escortAI
     void UpdateEscortAI(const uint32 uiDiff) override
     {
         // Check if we have a current target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (HasEscortState(STATE_ESCORT_ESCORTING) && m_uiPostEventCount)
             {

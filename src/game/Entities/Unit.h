@@ -1350,8 +1350,8 @@ class Unit : public WorldObject
         }
         Unit* getAttackerForHelper()                        //< Return a possible enemy from this unit to help in combat
         {
-            if (getVictim() != nullptr)
-                return getVictim();
+            if (GetVictim() != nullptr)
+                return GetVictim();
 
             if (!m_attackers.empty())
                 return *(m_attackers.begin());
@@ -1400,7 +1400,7 @@ class Unit : public WorldObject
         /// Returns the Unit::m_attackers, that stores the units that are attacking you
         AttackerSet const& getAttackers() const { return m_attackers; }
 
-        Unit* getVictim() const { return m_attacking; }     //< Returns the victim that this unit is currently attacking
+        Unit* GetVictim() const { return m_attacking; }     //< Returns the victim that this unit is currently attacking
         void CombatStop(bool includingCast = false, bool includingCombo = true);        //< Stop this unit from combat, if includingCast==true, also interrupt casting
         void CombatStopWithPets(bool includingCast = false, bool includingCombo = true);
         void StopAttackFaction(uint32 faction_id);

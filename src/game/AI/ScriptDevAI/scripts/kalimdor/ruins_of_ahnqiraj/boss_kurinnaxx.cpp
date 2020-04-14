@@ -98,13 +98,13 @@ struct boss_kurinnaxxAI : public CombatAI
             }
             case KURINNAXX_MORTAL_WOUND:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_WOUND) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTAL_WOUND) == CAST_OK)
                     ResetCombatAction(action, urand(8000, 10000));
                 break;
             }
             case KURINNAXX_SAND_TRAP:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SANDTRAP) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SANDTRAP) == CAST_OK)
                     ResetCombatAction(action, urand(10000, 15000));
                 break;
             }
@@ -116,7 +116,7 @@ struct boss_kurinnaxxAI : public CombatAI
             }
             case KURINNAXX_WIDE_SLASH:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WIDE_SLASH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_WIDE_SLASH) == CAST_OK)
                     ResetCombatAction(action, urand(12000, 15000));
                 break;
             }

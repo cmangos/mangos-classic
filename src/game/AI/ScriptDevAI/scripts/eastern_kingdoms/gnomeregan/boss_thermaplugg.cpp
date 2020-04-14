@@ -152,7 +152,7 @@ struct boss_thermapluggAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Movement of Summoned mobs
@@ -181,7 +181,7 @@ struct boss_thermapluggAI : public ScriptedAI
             }
             else
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
                     m_uiKnockAwayTimer = urand(17000, 20000);
             }
         }

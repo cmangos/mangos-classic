@@ -275,7 +275,7 @@ struct boss_ossirianAI : public CombatAI
             }
             case OSSIRIAN_CYCLONE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CYCLONE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CYCLONE) == CAST_OK)
                     ResetCombatAction(action, 20000);
                 break;
             }

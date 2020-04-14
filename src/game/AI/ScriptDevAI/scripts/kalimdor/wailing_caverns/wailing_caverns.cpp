@@ -428,7 +428,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
         else
             m_uiPotionTimer -= uiDiff;
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiSleepTimer < uiDiff)

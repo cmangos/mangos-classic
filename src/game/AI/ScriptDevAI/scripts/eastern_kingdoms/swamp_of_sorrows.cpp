@@ -125,7 +125,7 @@ struct npc_galen_goodwardAI : public npc_escortAI
         else
             m_uiPeriodicSay -= uiDiff;
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

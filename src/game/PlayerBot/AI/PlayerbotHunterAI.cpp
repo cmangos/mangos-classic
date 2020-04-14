@@ -190,7 +190,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit* pTarget)
     if (!m_bot)   return RETURN_NO_ACTION_ERROR;
     if (!pTarget) return RETURN_NO_ACTION_ERROR;
 
-    Unit* pVictim = pTarget->getVictim();
+    Unit* pVictim = pTarget->GetVictim();
 
     // check for pet and heal if neccessary
     Pet* pet = m_bot->GetPet();

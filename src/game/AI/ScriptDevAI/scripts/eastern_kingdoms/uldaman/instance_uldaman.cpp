@@ -224,7 +224,7 @@ Creature* instance_uldaman::GetClosestDwarfNotInCombat(Creature* pSearcher)
     {
         Creature* pTemp = instance->GetCreature(*itr);
 
-        if (pTemp && pTemp->IsAlive() && !pTemp->getVictim())
+        if (pTemp && pTemp->IsAlive() && !pTemp->GetVictim())
             lTemp.push_back(pTemp);
     }
 
@@ -269,7 +269,7 @@ void instance_uldaman::Update(uint32 uiDiff)
         {
             // Get Keeper which is alive and out of combat
             Creature* pKeeper = instance->GetCreature(*itr);
-            if (!pKeeper || !pKeeper->IsAlive() || pKeeper->getVictim())
+            if (!pKeeper || !pKeeper->IsAlive() || pKeeper->GetVictim())
                 continue;
 
             // Get starter player for attack

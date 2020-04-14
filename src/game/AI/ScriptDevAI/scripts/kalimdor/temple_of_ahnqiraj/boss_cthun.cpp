@@ -210,7 +210,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
     bool SelectHostileTarget()
     {
         Unit* pTarget = nullptr;
-        Unit* pOldTarget = m_creature->getVictim();
+        Unit* pOldTarget = m_creature->GetVictim();
 
         if (!m_creature->getThreatManager().isThreatListEmpty())
             pTarget = m_creature->getThreatManager().getHostileTarget();
@@ -264,7 +264,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
                     {
                         // Remove the target focus but allow the boss to face the current victim
                         m_creature->SetTarget(nullptr);
-                        m_creature->SetFacingToObject(m_creature->getVictim());
+                        m_creature->SetFacingToObject(m_creature->GetVictim());
 
                         // Switch to Dark Glare phase
                         m_uiDarkGlareTimer    = 45000;
@@ -507,7 +507,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
     bool SelectHostileTarget()
     {
         Unit* pTarget = nullptr;
-        Unit* pOldTarget = m_creature->getVictim();
+        Unit* pOldTarget = m_creature->GetVictim();
 
         if (!m_creature->getThreatManager().isThreatListEmpty())
             pTarget = m_creature->getThreatManager().getHostileTarget();
@@ -701,7 +701,7 @@ struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Check if we have a target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiDistCheckTimer < uiDiff)
@@ -732,7 +732,7 @@ struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
 
         if (m_uiThrashTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_THRASH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THRASH) == CAST_OK)
                 m_uiThrashTimer = 10000;
         }
         else
@@ -740,7 +740,7 @@ struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
 
         if (m_uiHamstringTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAMSTRING) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMSTRING) == CAST_OK)
                 m_uiHamstringTimer = 10000;
         }
         else

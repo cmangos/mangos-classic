@@ -170,7 +170,7 @@ struct boss_jeklikAI : public ScriptedAI
             return;
 
         SetCombatMovement(true);
-        DoStartMovement(m_creature->getVictim());
+        DoStartMovement(m_creature->GetVictim());
     }
 
     // Wrapper to despawn the bomb riders on evade / death
@@ -188,7 +188,7 @@ struct boss_jeklikAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Bat phase
@@ -217,7 +217,7 @@ struct boss_jeklikAI : public ScriptedAI
 
             if (m_uiSwoopTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SWOOP) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SWOOP) == CAST_OK)
                     m_uiSwoopTimer = urand(4000, 9000);
             }
             else
@@ -258,7 +258,7 @@ struct boss_jeklikAI : public ScriptedAI
 
             if (m_uiMindFlayTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MIND_FLAY) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MIND_FLAY) == CAST_OK)
                     m_uiMindFlayTimer = 16000;
             }
             else
@@ -361,7 +361,7 @@ struct npc_gurubashi_bat_riderAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_bHasDoneConcoction && m_creature->GetHealthPercent() < 40.0f)
@@ -375,7 +375,7 @@ struct npc_gurubashi_bat_riderAI : public ScriptedAI
 
         if (m_uiInfectedBiteTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_INFECTED_BITE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_INFECTED_BITE) == CAST_OK)
                 m_uiInfectedBiteTimer = 6500;
         }
         else

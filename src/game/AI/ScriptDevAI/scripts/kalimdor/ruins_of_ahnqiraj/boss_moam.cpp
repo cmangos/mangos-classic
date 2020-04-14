@@ -134,7 +134,7 @@ struct boss_moamAI : public CombatAI
             }
             case MOAM_TRAMPLE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRAMPLE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TRAMPLE) == CAST_OK)
                     ResetCombatAction(action, 15000);
                 break;
             }

@@ -3021,7 +3021,7 @@ void Spell::_handle_finish_phase()
 
     if (m_caster->m_extraAttacks && IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
     {
-        if (Unit* target = m_caster->getVictim())
+        if (Unit* target = m_caster->GetVictim())
             m_caster->DoExtraAttacks(target);
         else
             m_caster->m_extraAttacks = 0;

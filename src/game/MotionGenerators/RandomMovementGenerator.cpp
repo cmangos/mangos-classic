@@ -33,7 +33,7 @@ void AbstractRandomMovementGenerator::Initialize(Unit& owner)
     else if (owner.AI())
     {
         owner.SetTarget(nullptr);
-        owner.SendMeleeAttackStop(owner.getVictim());
+        owner.SendMeleeAttackStop(owner.GetVictim());
     }
 
     // Stop any previously dispatched splines no matter the source

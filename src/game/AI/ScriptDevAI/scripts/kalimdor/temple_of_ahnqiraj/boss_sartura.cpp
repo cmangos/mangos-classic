@@ -117,7 +117,7 @@ struct boss_sarturaAI : public CombatAI
             }
             case SARTURA_SUNDERING_CLEAVE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUNDERING_CLEAVE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SUNDERING_CLEAVE) == CAST_OK)
                     ResetCombatAction(action, urand(2, 5) * IN_MILLISECONDS);
                 break;
             }

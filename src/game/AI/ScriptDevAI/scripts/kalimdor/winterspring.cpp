@@ -445,7 +445,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
                 m_uiDelayTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -675,7 +675,7 @@ struct npc_artoriusAI : public ScriptedAI
                 m_uiDespawn_Timer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_creature->getThreatManager().getThreatList().size() > 1)
@@ -694,8 +694,8 @@ struct npc_artoriusAI : public ScriptedAI
             m_uiDemonic_Doom_Timer = 7500;
             // only attempt to cast this once every 7.5 seconds to give the hunter some leeway
             // LOWER max range for lag...
-            if (m_creature->IsWithinDistInMap(m_creature->getVictim(), 25))
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_DEMONIC_DOOM);
+            if (m_creature->IsWithinDistInMap(m_creature->GetVictim(), 25))
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DEMONIC_DOOM);
         }
         else
             m_uiDemonic_Doom_Timer -= uiDiff;

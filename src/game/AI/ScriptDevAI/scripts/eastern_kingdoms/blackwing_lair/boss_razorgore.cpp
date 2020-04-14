@@ -136,7 +136,7 @@ struct boss_razorgoreAI : public CombatAI
             }
             case RAZORGORE_CLEAVE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                     ResetCombatAction(action, urand(4000, 8000));
                 break;
             }

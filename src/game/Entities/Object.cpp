@@ -304,8 +304,8 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 
     if (updateFlags & UPDATEFLAG_FULLGUID)
     {
-        if (unit && unit->getVictim())
-            *data << unit->getVictim()->GetPackGUID();
+        if (unit && unit->GetVictim())
+            *data << unit->GetVictim()->GetPackGUID();
         else
             data->appendPackGUID(0);
     }

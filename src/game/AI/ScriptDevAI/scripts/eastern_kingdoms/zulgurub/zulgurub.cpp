@@ -81,7 +81,7 @@ struct npc_soulflayerAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Check if we have a valid target, otherwise do nothing
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Check if we are casting / channelling, return to not interrupt process and pause CDs
@@ -101,7 +101,7 @@ struct npc_soulflayerAI : public ScriptedAI
         // Lightning Breath
         if (m_uiLightingBreathTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_LIGHTNING_BREATH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_LIGHTNING_BREATH) == CAST_OK)
                 m_uiLightingBreathTimer = urand(10000, 15000);
         }
         else
@@ -111,9 +111,9 @@ struct npc_soulflayerAI : public ScriptedAI
         // Either Fear or Knockdown
         if (m_uiRandomCcAbilityTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_uiRandomCcAbility) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_uiRandomCcAbility) == CAST_OK)
             {
-                m_creature->getVictim()->DeleteThreatList(); // TODO: This is simply WTF
+                m_creature->GetVictim()->DeleteThreatList(); // TODO: This is simply WTF
                 m_uiRandomCcAbilityTimer = urand(8000, 10000);
             }
         }
@@ -125,7 +125,7 @@ struct npc_soulflayerAI : public ScriptedAI
         if (m_uiRandomBuffAbility != SPELL_THRASH)
             if (m_creature->GetHealthPercent() <= 30.0f)
                 if (!m_creature->HasAura(m_uiRandomBuffAbility))
-                    DoCastSpellIfCan(m_creature->getVictim(), m_uiRandomBuffAbility);
+                    DoCastSpellIfCan(m_creature->GetVictim(), m_uiRandomBuffAbility);
 
         DoMeleeAttackIfReady();
     }

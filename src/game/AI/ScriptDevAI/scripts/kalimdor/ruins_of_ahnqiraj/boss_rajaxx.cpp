@@ -256,13 +256,13 @@ struct npc_general_andorovAI : public CombatAI, private DialogueHelper
             }
             case ANDOROV_BASH:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BASH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BASH) == CAST_OK)
                     ResetCombatAction(action, urand(12000, 15000));
                 break;
             }
             case ANDOROV_STRIKE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STRIKE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_STRIKE) == CAST_OK)
                     ResetCombatAction(action, urand(4000, 6000));
                 break;
             }
@@ -362,13 +362,13 @@ struct npc_kaldorei_eliteAI : public CombatAI
         {
             case KALDOREI_CLEAVE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                     ResetCombatAction(action, urand(5000, 7000));
                 break;
             }
             case KALDOREI_STRIKE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
                     ResetCombatAction(action, urand(9000, 13000));
                 break;
             }

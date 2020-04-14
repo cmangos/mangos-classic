@@ -260,7 +260,7 @@ struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
                 m_uiDieTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

@@ -266,7 +266,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
             if (pTemp && pTemp->GetEntry() == NPC_SCOURGE_ARCHER)
             {
                 // Archer has a victim and is in range, keep on attacking it
-                if (pTemp->getVictim() && pTemp->IsWithinDistInMap(pTemp->getVictim(), 30.0f))
+                if (pTemp->GetVictim() && pTemp->IsWithinDistInMap(pTemp->GetVictim(), 30.0f))
                     continue;
                 // Else, find a new target in range
                 // First look for an Injured Peasant in range (arbitrary choice), if none look for a Plagued Peasant

@@ -80,7 +80,7 @@ struct npc_kittenAI : public FollowerAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         // should not have npcflag by default, so set when expected
-        if (!m_creature->getVictim() && !m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && HasFollowState(STATE_FOLLOW_INPROGRESS) && pWho->GetEntry() == NPC_WINNA)
+        if (!m_creature->GetVictim() && !m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && HasFollowState(STATE_FOLLOW_INPROGRESS) && pWho->GetEntry() == NPC_WINNA)
         {
             if (m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -89,7 +89,7 @@ struct npc_kittenAI : public FollowerAI
 
     void UpdateFollowerAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (HasFollowState(STATE_FOLLOW_PAUSED))
             {
@@ -367,12 +367,12 @@ struct npc_kroshiusAI : public ScriptedAI
         }
         else
         {
-            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
                 return;
 
             if (m_uiKnockBackTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCKBACK);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KNOCKBACK);
                 m_uiKnockBackTimer = urand(9000, 12000);
             }
             else
@@ -555,14 +555,14 @@ struct npc_captured_arkonarinAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_bCanAttack)
         {
             if (m_uiMortalStrikeTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
                     m_uiMortalStrikeTimer = urand(7000, 10000);
             }
             else
@@ -570,7 +570,7 @@ struct npc_captured_arkonarinAI : public npc_escortAI
 
             if (m_uiCleaveTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                     m_uiCleaveTimer = urand(3000, 6000);
             }
             else
@@ -751,12 +751,12 @@ struct npc_areiAI : public npc_escortAI, private DialogueHelper
     {
         DialogueUpdate(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiWitherStrikeTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WITHER_STRIKE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_WITHER_STRIKE) == CAST_OK)
                 m_uiWitherStrikeTimer = urand(3000, 6000);
         }
         else

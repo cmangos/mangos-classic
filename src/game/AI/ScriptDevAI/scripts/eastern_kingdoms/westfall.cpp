@@ -265,17 +265,17 @@ struct npc_daphne_stilwellAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiShootTimer < uiDiff)
         {
             m_uiShootTimer = DAPHNE_SHOOT_CD;
 
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT) != CanCastResult::CAST_OK && !IsCombatMovement())
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOOT) != CanCastResult::CAST_OK && !IsCombatMovement())
             {
                 SetCombatMovement(true);
-                DoStartMovement(m_creature->getVictim());
+                DoStartMovement(m_creature->GetVictim());
             }
         }
         else

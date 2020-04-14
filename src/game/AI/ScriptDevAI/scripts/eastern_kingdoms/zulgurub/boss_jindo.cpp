@@ -90,7 +90,7 @@ struct boss_jindoAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Brain Wash Totem Timer
@@ -117,7 +117,7 @@ struct boss_jindoAI : public ScriptedAI
         // Hex Timer
         if (m_uiHexTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEX) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HEX) == CAST_OK)
                 m_uiHexTimer = urand(12000, 20000);
         }
         else
@@ -129,7 +129,7 @@ struct boss_jindoAI : public ScriptedAI
             // random target except the tank
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
             if (!pTarget)
-                pTarget = m_creature->getVictim();
+                pTarget = m_creature->GetVictim();
 
             if (DoCastSpellIfCan(pTarget, SPELL_DELUSIONS_OF_JINDO) == CAST_OK)
             {

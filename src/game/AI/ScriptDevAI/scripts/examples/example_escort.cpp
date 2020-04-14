@@ -134,12 +134,12 @@ struct example_escortAI : public npc_escortAI
     void UpdateEscortAI(const uint32 uiDiff) override
     {
         // Combat check
-        if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+        if (m_creature->SelectHostileTarget() && m_creature->GetVictim())
         {
             if (m_uiDeathCoilTimer < uiDiff)
             {
                 DoScriptText(SAY_SPELL, m_creature);
-                m_creature->CastSpell(m_creature->getVictim(), SPELL_DEATH_COIL, TRIGGERED_NONE);
+                m_creature->CastSpell(m_creature->GetVictim(), SPELL_DEATH_COIL, TRIGGERED_NONE);
                 m_uiDeathCoilTimer = 4000;
             }
             else

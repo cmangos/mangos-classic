@@ -294,13 +294,13 @@ struct boss_ayamissAI : public CombatAI
             }
             case AYAMISS_LASH:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_LASH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_LASH) == CAST_OK)
                     ResetCombatAction(action, urand(8000, 15000));
                 break;
             }
             case AYAMISS_THRASH:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_THRASH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THRASH) == CAST_OK)
                     ResetCombatAction(action, urand(5000, 7000));
                 break;
             }
@@ -328,7 +328,7 @@ struct npc_hive_zara_larvaAI : public ScriptedAI
         {
             if (m_instance->GetData(TYPE_AYAMISS) == IN_PROGRESS)
             {
-                if (m_creature->CanReachWithMeleeAttack(who) && who == m_creature->getVictim())
+                if (m_creature->CanReachWithMeleeAttack(who) && who == m_creature->GetVictim())
                 {
                     m_creature->CastSpell(who, SPELL_FEED, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                 }
@@ -347,7 +347,7 @@ struct npc_hive_zara_larvaAI : public ScriptedAI
                 return;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

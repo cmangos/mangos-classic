@@ -3417,7 +3417,7 @@ void PlayerbotAI::UpdateAttackersForTarget(Unit* victim)
         ThreatManager* target = ref->getSource();
         ObjectGuid guid = target->getOwner()->GetObjectGuid();
         m_attackerInfo[guid].attacker = target->getOwner();
-        m_attackerInfo[guid].victim = target->getOwner()->getVictim();
+        m_attackerInfo[guid].victim = target->getOwner()->GetVictim();
         m_attackerInfo[guid].threat = target->getThreat(victim);
         m_attackerInfo[guid].count = 1;
         //m_attackerInfo[guid].source = 1; // source is not used so far.

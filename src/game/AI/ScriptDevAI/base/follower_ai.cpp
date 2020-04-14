@@ -32,7 +32,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
     if (!HasFollowState(STATE_FOLLOW_INPROGRESS))
         return false;
 
-    if (!who->getVictim())
+    if (!who->GetVictim())
         return false;
 
     // experimental (unknown) flag not present
@@ -44,7 +44,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
         return false;
 
     // victim of pWho is not a player
-    if (!who->getVictim()->GetBeneficiaryPlayer())
+    if (!who->GetVictim()->GetBeneficiaryPlayer())
         return false;
 
     // never attack friendly
@@ -55,7 +55,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* who)
     if (m_creature->IsWithinDistInMap(who, MAX_PLAYER_DISTANCE) && m_creature->IsWithinLOSInMap(who))
     {
         // already fighting someone?
-        if (!m_creature->getVictim())
+        if (!m_creature->GetVictim())
         {
             AttackStart(who);
             return true;
@@ -131,7 +131,7 @@ void FollowerAI::EnterEvadeMode()
 
 void FollowerAI::UpdateAI(const uint32 diff)
 {
-    if (HasFollowState(STATE_FOLLOW_INPROGRESS) && !m_creature->getVictim())
+    if (HasFollowState(STATE_FOLLOW_INPROGRESS) && !m_creature->GetVictim())
     {
         if (m_updateFollowTimer < diff)
         {
@@ -193,7 +193,7 @@ void FollowerAI::UpdateAI(const uint32 diff)
 
 void FollowerAI::UpdateFollowerAI(const uint32 /*diff*/)
 {
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         return;
 
     DoMeleeAttackIfReady();
@@ -218,7 +218,7 @@ void FollowerAI::MovementInform(uint32 motionType, uint32 pointId)
 
 void FollowerAI::StartFollow(Player* leader, uint32 factionForFollower, const Quest* quest)
 {
-    if (m_creature->getVictim())
+    if (m_creature->GetVictim())
     {
         debug_log("SD2: FollowerAI attempt to StartFollow while in combat.");
         return;

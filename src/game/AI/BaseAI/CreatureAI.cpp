@@ -115,12 +115,12 @@ void CreatureAI::RetreatingEnded()
     SetCombatScriptStatus(false);
     if (!m_creature->IsAlive())
         return;
-    DoStartMovement(m_creature->getVictim());
+    DoStartMovement(m_creature->GetVictim());
 }
 
 bool CreatureAI::DoRetreat()
 {
-    Unit* victim = m_creature->getVictim();
+    Unit* victim = m_creature->GetVictim();
     if (!victim)
         return false;
 

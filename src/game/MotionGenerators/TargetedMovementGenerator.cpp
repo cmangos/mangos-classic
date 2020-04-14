@@ -104,7 +104,7 @@ void ChaseMovementGenerator::_addUnitStateMove(Unit& u) { u.addUnitState(UNIT_ST
 
 bool ChaseMovementGenerator::_lostTarget(Unit& u) const
 {
-    return m_combat && u.getVictim() != this->GetCurrentTarget();
+    return m_combat && u.GetVictim() != this->GetCurrentTarget();
 }
 
 void ChaseMovementGenerator::_reachTarget(Unit& /*owner*/)
@@ -370,7 +370,7 @@ void ChaseMovementGenerator::FanOut(Unit& owner)
     Unit* collider = nullptr;
     MaNGOS::AnyUnitFulfillingConditionInRangeCheck collisionCheck(&owner, [&](Unit* unit)->bool
     {
-        return &owner != unit && unit->getVictim() && unit->getVictim() == this->i_target.getTarget() && !unit->IsMoving() && !unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        return &owner != unit && unit->GetVictim() && unit->GetVictim() == this->i_target.getTarget() && !unit->IsMoving() && !unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }, fanningRadius * fanningRadius, DIST_CALC_NONE);
     MaNGOS::UnitSearcher<MaNGOS::AnyUnitFulfillingConditionInRangeCheck> checker(collider, collisionCheck);
     Cell::VisitAllObjects(&owner, checker, fanningRadius);
@@ -507,7 +507,7 @@ bool ChaseMovementGenerator::_getLocation(Unit& owner, float& x, float& y, float
 
     // Chase Movement and angle == 0 case: Chase to current angle
     // Need to avoid readjustment when target is attacking owner
-    const bool currentAngle = (i_angle == 0.f || (i_target->getVictim() && i_target->getVictim() == &owner));
+    const bool currentAngle = (i_angle == 0.f || (i_target->GetVictim() && i_target->GetVictim() == &owner));
 
     float angle = (currentAngle ? i_target->GetAngle(&owner) : (i_target->GetOrientation() + i_angle));
 

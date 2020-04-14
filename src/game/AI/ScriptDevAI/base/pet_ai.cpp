@@ -23,7 +23,7 @@ void ScriptedPetAI::AttackStart(Unit* who)
 
 void ScriptedPetAI::AttackedBy(Unit* attacker)
 {
-    if (m_creature->getVictim())
+    if (m_creature->GetVictim())
         return;
 
     if (!HasReactState(REACT_PASSIVE) && m_creature->CanReachWithMeleeAttack(attacker))
@@ -63,9 +63,9 @@ void ScriptedPetAI::UpdateAI(const uint32 diff)
     // UpdateAllies() is done in the generic PetAI in Mangos, but we can't do this from script side.
     // Unclear what side effects this has, but is something to be resolved from Mangos.
 
-    if (m_creature->getVictim())                            // in combat
+    if (m_creature->GetVictim())                            // in combat
     {
-        if (!m_creature->CanAttack(m_creature->getVictim()))
+        if (!m_creature->CanAttack(m_creature->GetVictim()))
         {
             // target no longer valid for pet, so either attack stops or new target are selected
             // doesn't normally reach this, because of how petAi is designed in Mangos. CombatStop

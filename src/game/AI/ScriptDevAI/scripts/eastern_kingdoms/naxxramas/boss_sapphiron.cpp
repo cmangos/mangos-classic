@@ -163,7 +163,7 @@ struct boss_sapphironAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_phase)
@@ -171,7 +171,7 @@ struct boss_sapphironAI : public ScriptedAI
             case PHASE_GROUND:
                 if (m_cleaveTimer < diff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                         m_cleaveTimer = urand(5, 10) * IN_MILLISECONDS;
                 }
                 else
@@ -282,7 +282,7 @@ struct boss_sapphironAI : public ScriptedAI
                     m_creature->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
                     m_creature->SetHover(false);
                     m_creature->GetMotionMaster()->Clear(false);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 
                     m_flyTimer = 67 * IN_MILLISECONDS;
                     m_landTimer = 0;

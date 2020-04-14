@@ -168,7 +168,7 @@ struct boss_heiganAI : public ScriptedAI
     void UpdateAI(const uint32 diff) override
     {
         // Do nothing if no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_entranceDoorTimer)
@@ -264,7 +264,7 @@ struct boss_heiganAI : public ScriptedAI
             if (m_phaseTimer <= diff)                   // Return to fight
             {
                 m_creature->InterruptNonMeleeSpells(true);
-                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 
                 m_phase = PHASE_GROUND;
                 ResetPhase();
@@ -333,7 +333,7 @@ struct npc_diseased_maggotAI : public ScriptedAI
     void UpdateAI(const uint32 diff) override
     {
         // Do nothing if no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_resetCheckTimer < diff)

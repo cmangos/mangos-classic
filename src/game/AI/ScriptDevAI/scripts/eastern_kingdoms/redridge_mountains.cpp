@@ -106,12 +106,12 @@ struct npc_corporal_keeshan_escortAI : public npc_escortAI
     void UpdateEscortAI(const uint32 uiDiff) override
     {
         // Combat check
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiMockingBlowTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_MOCKING_BLOW);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MOCKING_BLOW);
             m_uiMockingBlowTimer = 5000;
         }
         else
@@ -119,7 +119,7 @@ struct npc_corporal_keeshan_escortAI : public npc_escortAI
 
         if (m_uiShieldBashTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHIELD_BASH);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHIELD_BASH);
             m_uiShieldBashTimer = 8000;
         }
         else

@@ -251,13 +251,13 @@ struct boss_nefarianAI : public CombatAI
             }
             case NEFARIAN_VEIL_OF_SHADOW:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VEIL_OF_SHADOW) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_VEIL_OF_SHADOW) == CAST_OK)
                     ResetCombatAction(action, 15000);
                 break;
             }
             case NEFARIAN_CLEAVE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                     ResetCombatAction(action, 7000);
                 break;
             }

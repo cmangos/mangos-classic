@@ -92,7 +92,7 @@ struct boss_herodAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // If we are < 30% hp enrage
@@ -109,7 +109,7 @@ struct boss_herodAI : public ScriptedAI
         // Cleave
         if (m_uiCleaveTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE);
             m_uiCleaveTimer = urand(7500, 17500);
         }
         else
@@ -117,7 +117,7 @@ struct boss_herodAI : public ScriptedAI
 
         if (m_uiWhirlwindTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WHIRLWIND) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_WHIRLWIND) == CAST_OK)
             {
                 DoScriptText(SAY_WHIRLWIND, m_creature);
                 m_uiWhirlwindTimer = urand(15000, 25000);
@@ -161,7 +161,7 @@ struct mob_scarlet_traineeAI : public npc_escortAI
                 m_uiStartTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

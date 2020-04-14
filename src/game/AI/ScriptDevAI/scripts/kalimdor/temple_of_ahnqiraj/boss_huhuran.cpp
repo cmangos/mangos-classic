@@ -113,7 +113,7 @@ struct boss_huhuranAI : public CombatAI
             }
             case HUHURAN_SPIT:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ACID_SPIT) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ACID_SPIT) == CAST_OK)
                     ResetCombatAction(action, urand(5, 10) * IN_MILLISECONDS);
                 break;
             }

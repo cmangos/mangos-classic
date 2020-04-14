@@ -262,7 +262,7 @@ struct boss_veknilashAI : public boss_twin_emperorsAI
             }
             case VEKNILASH_UNBALANCING_STRIKE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
                     ResetCombatAction(action, urand(8000, 20000));
                 break;
             }
@@ -375,7 +375,7 @@ struct boss_veklorAI : public boss_twin_emperorsAI
         {
             case VEKLOR_SHADOWBOLT:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
                     ResetCombatAction(action, 2000);
                 break;
             }

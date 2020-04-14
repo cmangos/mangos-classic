@@ -106,7 +106,7 @@ struct boss_buruAI : public CombatAI
     void KilledUnit(Unit* victim) override
     {
         // Attack a new random target when a player is killed
-        if (victim == m_creature->getVictim())
+        if (victim == m_creature->GetVictim())
             ScheduleNewTarget();
     }
 
@@ -201,7 +201,7 @@ struct boss_buruAI : public CombatAI
             }
             case BURU_DISMEMBER:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISMEMBER) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DISMEMBER) == CAST_OK)
                     ResetCombatAction(action, 5000);
                 break;
             }

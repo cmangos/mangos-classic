@@ -91,7 +91,7 @@ struct boss_loathebAI : public ScriptedAI
     void UpdateAI(const uint32 diff) override
     {
         // Do nothing if no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Inevitable Doom

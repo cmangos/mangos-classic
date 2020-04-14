@@ -1262,7 +1262,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 24781:                                 // Dream Fog
                 {
                     // Let the current target be and move to the new one
-                    if (m_caster->getVictim())
+                    if (m_caster->GetVictim())
                     {
                         m_caster->DeleteThreatList();
                         m_caster->AttackStop(true, false, false);
@@ -3757,7 +3757,7 @@ void Spell::EffectTaunt(SpellEffectIndex eff_idx)
     // for spell as marked "non effective at already attacking target"
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
     {
-        if (unitTarget->getVictim() == m_caster)
+        if (unitTarget->GetVictim() == m_caster)
         {
             SendCastResult(SPELL_FAILED_DONT_REPORT);
             return;
@@ -4516,8 +4516,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 28338:                                 // Magnetic Pull
                 case 28339:                                 // Magnetic Pull
                 {
-                    if (unitTarget && m_caster->getVictim())
-                        unitTarget->CastSpell(m_caster->getVictim(), 28337, TRIGGERED_OLD_TRIGGERED);   // target cast actual Magnetic Pull on caster's victim
+                    if (unitTarget && m_caster->GetVictim())
+                        unitTarget->CastSpell(m_caster->GetVictim(), 28337, TRIGGERED_OLD_TRIGGERED);   // target cast actual Magnetic Pull on caster's victim
                         // ToDo research if target should also get the threat of the caster for caster's victim.
                         // This is the case in WotLK version but we have no proof of this in Classic/TBC
                         // and it was common at these times to let players manage threat and tank transitions by themselves

@@ -104,7 +104,7 @@ struct boss_baroness_anastariAI : public ScriptedAI
                 m_uiPossessEndTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // BansheeWail

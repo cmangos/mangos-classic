@@ -657,7 +657,7 @@ bool Unit::CanInteractNow(const Unit* unit) const
         return false;
 
     // We can't interact with units who are currently fighting
-    if (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT) ||  unit->getVictim())
+    if (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT) || unit->GetVictim())
         return false;
 
     return CanInteract(unit);

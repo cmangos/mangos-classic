@@ -319,7 +319,7 @@ struct boss_ragnarosAI : public CombatAI
             {
                 uint32 timer = 500;
                 // If victim exists we have a target in melee range
-                if (m_creature->getVictim() && m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+                if (m_creature->GetVictim() && m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
                     m_rangeCheckState = -1;
                 // Spam Waterbolt spell when not tanked
                 else

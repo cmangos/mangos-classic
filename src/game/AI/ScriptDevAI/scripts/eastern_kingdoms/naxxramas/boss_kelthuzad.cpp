@@ -415,13 +415,13 @@ struct boss_kelthuzadAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Frostbolt: main target
         if (m_frostBoltTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BOLT) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROST_BOLT) == CAST_OK)
                 m_frostBoltTimer = urand(5, 25) * IN_MILLISECONDS;
         }
         else
@@ -476,7 +476,7 @@ struct boss_kelthuzadAI : public ScriptedAI
         // Chains of Kel'Thuzad: main targets and four random ones
         if (m_chainsTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAINS_OF_KELTHUZAD) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHAINS_OF_KELTHUZAD) == CAST_OK)
                 m_chainsTimer = urand(60, 220) * IN_MILLISECONDS;
         }
         else
@@ -583,25 +583,25 @@ struct npc_icecrown_guardianAI : public ScriptedAI
 
     void KilledUnit(Unit* /*victim*/) override
     {
-        DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLOOD_TAP);
+        DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BLOOD_TAP);
     }
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_checkCurrentVictimTimer < diff)
         {
             // Get current victim GUID if not already assigned
-            if (!m_victimGuid && m_creature->getVictim())
-                m_victimGuid = m_creature->getVictim()->GetObjectGuid();
+            if (!m_victimGuid && m_creature->GetVictim())
+                m_victimGuid = m_creature->GetVictim()->GetObjectGuid();
 
             // If we changed our target: cast Blood Tap
-            if (m_victimGuid != m_creature->getVictim()->GetObjectGuid())
+            if (m_victimGuid != m_creature->GetVictim()->GetObjectGuid())
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLOOD_TAP);
-                m_victimGuid = m_creature->getVictim()->GetObjectGuid();
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BLOOD_TAP);
+                m_victimGuid = m_creature->GetVictim()->GetObjectGuid();
             }
             m_checkCurrentVictimTimer = 2 * IN_MILLISECONDS;    // Check every 2 seconds that we still have the same target
         }
@@ -680,8 +680,8 @@ struct ChainsKelThuzad : public SpellScript
         }
 
         // Mind control the main tank
-        caster->CastSpell(caster->getVictim(), SPELL_CHAINS_OF_KELTHUZAD_TARGET, TRIGGERED_OLD_TRIGGERED);
-        caster->getVictim()->CastSpell(caster->getVictim(), SPELL_CHAINS_OF_KELTHUZAD_SCALE, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(caster->GetVictim(), SPELL_CHAINS_OF_KELTHUZAD_TARGET, TRIGGERED_OLD_TRIGGERED);
+        caster->GetVictim()->CastSpell(caster->GetVictim(), SPELL_CHAINS_OF_KELTHUZAD_SCALE, TRIGGERED_OLD_TRIGGERED);
     }
 };
 

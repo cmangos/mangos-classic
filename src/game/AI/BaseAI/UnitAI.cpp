@@ -59,7 +59,7 @@ void UnitAI::MoveInLineOfSight(Unit* who)
         if (m_unit->GetDistanceZ(who) > (IsRangedUnit() ? CREATURE_Z_ATTACK_RANGE_RANGED : CREATURE_Z_ATTACK_RANGE_MELEE))
             return;
 
-    if (m_unit->getVictim() && !m_unit->GetMap()->IsDungeon())
+    if (m_unit->GetVictim() && !m_unit->GetMap()->IsDungeon())
         return;
 
     if (m_unit->IsNeutralToAll())
@@ -106,7 +106,7 @@ void UnitAI::EnterEvadeMode()
 
 void UnitAI::AttackedBy(Unit* attacker)
 {
-    if (!m_unit->IsInCombat() && !m_unit->getVictim())
+    if (!m_unit->IsInCombat() && !m_unit->GetVictim())
         AttackStart(attacker);
 }
 
@@ -251,12 +251,12 @@ void UnitAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=false*/)
     else
         m_unit->addUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
 
-    if (stopOrStartMovement && m_unit->getVictim())     // Only change current movement while in combat
+    if (stopOrStartMovement && m_unit->GetVictim())     // Only change current movement while in combat
     {
         if (!m_unit->IsCrowdControlled())
         {
             if (enable)
-                DoStartMovement(m_unit->getVictim());
+                DoStartMovement(m_unit->GetVictim());
             else if (m_unit->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
                 m_unit->StopMoving();
         }
@@ -335,8 +335,8 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
     }
     else
     {
-        if (m_unit->getVictim() && !GetCombatScriptStatus())
-            m_unit->SetTarget(m_unit->getVictim());
+        if (m_unit->GetVictim() && !GetCombatScriptStatus())
+            m_unit->SetTarget(m_unit->GetVictim());
         else
             m_unit->SetTarget(nullptr);
     }
@@ -392,8 +392,8 @@ void UnitAI::OnChannelStateChange(Spell const* spell, bool state, WorldObject* t
     }
     else
     {
-        if (m_unit->getVictim() && !GetCombatScriptStatus())
-            m_unit->SetTarget(m_unit->getVictim());
+        if (m_unit->GetVictim() && !GetCombatScriptStatus())
+            m_unit->SetTarget(m_unit->GetVictim());
         else
             m_unit->SetTarget(nullptr);
     }
@@ -439,7 +439,7 @@ void UnitAI::DetectOrAttack(Unit* who)
     if (!m_unit->IsWithinLOSInMap(who))
         return;
 
-    if (!m_unit->getVictim() && !m_unit->IsInCombat())
+    if (!m_unit->GetVictim() && !m_unit->IsInCombat())
     {
         if (CanTriggerStealthAlert(who, attackRadius))
         {
@@ -616,11 +616,11 @@ void UnitAI::SetMeleeEnabled(bool state)
     {
         if (m_meleeEnabled)
         {
-            if (m_unit->getVictim())
-                m_unit->MeleeAttackStart(m_unit->getVictim());
+            if (m_unit->GetVictim())
+                m_unit->MeleeAttackStart(m_unit->GetVictim());
         }
         else
-            m_unit->MeleeAttackStop(m_unit->getVictim());
+            m_unit->MeleeAttackStop(m_unit->GetVictim());
     }
 }
 
@@ -643,12 +643,12 @@ void UnitAI::TimedFleeingEnded()
     SetCombatScriptStatus(false);
     if (!m_unit->IsAlive())
         return;
-    DoStartMovement(m_unit->getVictim());
+    DoStartMovement(m_unit->GetVictim());
 }
 
 bool UnitAI::DoFlee()
 {
-    Unit* victim = m_unit->getVictim();
+    Unit* victim = m_unit->GetVictim();
     if (!victim)
         return false;
 

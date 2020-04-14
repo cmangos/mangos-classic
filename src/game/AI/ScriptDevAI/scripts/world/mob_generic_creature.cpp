@@ -82,7 +82,7 @@ struct generic_creatureAI : public ScriptedAI
         }
 
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Return if we already cast a spell
@@ -90,7 +90,7 @@ struct generic_creatureAI : public ScriptedAI
             return;
 
         // If we are within range melee the target
-        if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+        if (m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
         {
             // Make sure our attack is ready
             if (m_creature->isAttackReady())
@@ -104,7 +104,7 @@ struct generic_creatureAI : public ScriptedAI
 
                 // No healing spell available, select a hostile spell
                 if (info) Healing = true;
-                else info = SelectSpell(m_creature->getVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, 0, 0, SELECT_EFFECT_DONTCARE);
+                else info = SelectSpell(m_creature->GetVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, 0, 0, SELECT_EFFECT_DONTCARE);
 
                 // 50% chance if elite or higher, 20% chance if not, to replace our white hit with a spell
                 if (info && (rand() % (m_creature->GetCreatureInfo()->Rank > 1 ? 2 : 5) == 0) && !GlobalCooldown)
@@ -113,12 +113,12 @@ struct generic_creatureAI : public ScriptedAI
                     if (Healing)
                         m_creature->CastSpell(m_creature, info, TRIGGERED_NONE);
                     else
-                        m_creature->CastSpell(m_creature->getVictim(), info, TRIGGERED_NONE);
+                        m_creature->CastSpell(m_creature->GetVictim(), info, TRIGGERED_NONE);
 
                     // Set our global cooldown
                     GlobalCooldown = GENERIC_CREATURE_COOLDOWN;
                 }
-                else m_creature->AttackerStateUpdate(m_creature->getVictim());
+                else m_creature->AttackerStateUpdate(m_creature->GetVictim());
 
                 m_creature->resetAttackTimer();
             }
@@ -134,7 +134,7 @@ struct generic_creatureAI : public ScriptedAI
 
             // No healing spell available, See if we can cast a ranged spell (Range must be greater than ATTACK_DISTANCE)
             if (info) Healing = true;
-            else info = SelectSpell(m_creature->getVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, ATTACK_DISTANCE, 0, SELECT_EFFECT_DONTCARE);
+            else info = SelectSpell(m_creature->GetVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, ATTACK_DISTANCE, 0, SELECT_EFFECT_DONTCARE);
 
             // Found a spell, check if we arn't on cooldown
             if (info && !GlobalCooldown)
@@ -149,7 +149,7 @@ struct generic_creatureAI : public ScriptedAI
                 if (Healing)
                     m_creature->CastSpell(m_creature, info, TRIGGERED_NONE);
                 else
-                    m_creature->CastSpell(m_creature->getVictim(), info, TRIGGERED_NONE);
+                    m_creature->CastSpell(m_creature->GetVictim(), info, TRIGGERED_NONE);
 
                 // Set our global cooldown
                 GlobalCooldown = GENERIC_CREATURE_COOLDOWN;

@@ -47,7 +47,7 @@ void ScriptedAI::EnterCombat(Unit* enemy)
 void ScriptedAI::UpdateAI(const uint32 /*diff*/)
 {
     // Check if we have a current target
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         return;
 
     DoMeleeAttackIfReady();
@@ -93,7 +93,7 @@ void ScriptedAI::DoStartNoMovement(Unit* victim)
 
 void ScriptedAI::DoStopAttack()
 {
-    if (m_creature->getVictim())
+    if (m_creature->GetVictim())
         m_creature->AttackStop();
 }
 
@@ -400,7 +400,7 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
         return false;
     }
 
-    if (m_creature->GetCombatManager().IsInEvadeMode() || !m_creature->getVictim())
+    if (m_creature->GetCombatManager().IsInEvadeMode() || !m_creature->GetVictim())
         return false;
 
     float x = m_creature->GetPositionX();

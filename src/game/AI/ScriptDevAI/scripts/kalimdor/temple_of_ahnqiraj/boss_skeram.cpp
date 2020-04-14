@@ -269,7 +269,7 @@ struct boss_skeramAI : public CombatAI
             {
                 // Arcane Explosion is done if more than a set number of people are in melee range
                 PlayerList meleePlayerList;
-                float meleeRange = m_creature->GetCombinedCombatReach(m_creature->getVictim(), true);
+                float meleeRange = m_creature->GetCombinedCombatReach(m_creature->GetVictim(), true);
                 GetPlayerListWithEntryInWorld(meleePlayerList, m_creature, meleeRange);
                 if (meleePlayerList.size() >= m_maxMeleeAllowed)
                 {
@@ -302,14 +302,14 @@ struct boss_skeramAI : public CombatAI
             {
                 uint32 timer = 500;
                 // If victim exists we have a target in melee range
-                if (m_creature->getVictim() && m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+                if (m_creature->GetVictim() && m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
                     m_rangeCheckState = -1;
                 // Spam Waterbolt spell when not tanked
                 else
                 {
                     ++m_rangeCheckState;
                     if (m_rangeCheckState > 1)
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EARTH_SHOCK) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_EARTH_SHOCK) == CAST_OK)
                             timer = 2500;
                 }
                 ResetCombatAction(action, timer);

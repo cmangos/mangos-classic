@@ -106,7 +106,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     if (targetUnit && targetUnit != petUnit && petUnit->CanAttack(targetUnit))
                     {
                         // This is true if pet has no target or has target but targets differs.
-                        if (petUnit->getVictim() != targetUnit)
+                        if (petUnit->GetVictim() != targetUnit)
                             petUnit->Attack(targetUnit, true);
                     }
                     break;
@@ -154,7 +154,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     if (targetUnit && targetUnit != petUnit && petUnit->CanAttack(targetUnit))
                     {
                         // This is true if pet has no target or has target but targets differs.
-                        if (petUnit->getVictim() != targetUnit)
+                        if (petUnit->GetVictim() != targetUnit)
                         {
                             if (petUnit->hasUnitState(UNIT_STAT_POSSESSED))
                             {

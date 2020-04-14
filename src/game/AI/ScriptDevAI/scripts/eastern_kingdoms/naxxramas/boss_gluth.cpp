@@ -122,13 +122,13 @@ struct boss_gluthAI : public ScriptedAI
     void UpdateAI(const uint32 diff) override
     {
         // Do nothing if no target or if we are currently stunned (Decimate effect)
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || m_creature->HasAuraType(SPELL_AURA_MOD_STUN))
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim() || m_creature->HasAuraType(SPELL_AURA_MOD_STUN))
             return;
 
         // Mortal Wound
         if (m_mortalWoundTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTALWOUND) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTALWOUND) == CAST_OK)
                 m_mortalWoundTimer = 10 * IN_MILLISECONDS;
         }
         else

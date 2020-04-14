@@ -295,7 +295,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                         pOgre->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
 
                         // only evade if required
-                        if (pOgre->getVictim())
+                        if (pOgre->GetVictim())
                             pOgre->AI()->EnterEvadeMode();
                     }
                 }

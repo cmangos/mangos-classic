@@ -124,8 +124,8 @@ struct boss_thekalBaseAI : public ScriptedAI
         Reset();
 
         // Assume Attack
-        if (m_creature->getVictim())
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+        if (m_creature->GetVictim())
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 
         OnRevive();
     }
@@ -256,7 +256,7 @@ struct boss_thekalAI : public boss_thekalBaseAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)
@@ -284,7 +284,7 @@ struct boss_thekalAI : public boss_thekalBaseAI
             case PHASE_NORMAL:
                 if (m_uiMortalCleaveTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_CLEAVE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTAL_CLEAVE) == CAST_OK)
                         m_uiMortalCleaveTimer = urand(15000, 20000);
                 }
                 else
@@ -405,7 +405,7 @@ struct mob_zealot_lorkhanAI : public boss_thekalBaseAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)
@@ -493,7 +493,7 @@ struct mob_zealot_lorkhanAI : public boss_thekalBaseAI
                 // Disarm_Timer
                 if (m_uiDisarmTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISARM) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DISARM) == CAST_OK)
                         m_uiDisarmTimer = urand(15000, 25000);
                 }
                 else
@@ -558,7 +558,7 @@ struct mob_zealot_zathAI : public boss_thekalBaseAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)
@@ -588,7 +588,7 @@ struct mob_zealot_zathAI : public boss_thekalBaseAI
                 // SinisterStrike_Timer
                 if (m_uiSinisterStrikeTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SINISTER_STRIKE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SINISTER_STRIKE) == CAST_OK)
                         m_uiSinisterStrikeTimer = urand(8000, 16000);
                 }
                 else
@@ -597,10 +597,10 @@ struct mob_zealot_zathAI : public boss_thekalBaseAI
                 // Gouge_Timer
                 if (m_uiGougeTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GOUGE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_GOUGE) == CAST_OK)
                     {
-                        if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                            m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -100);
+                        if (m_creature->getThreatManager().getThreat(m_creature->GetVictim()))
+                            m_creature->getThreatManager().modifyThreatPercent(m_creature->GetVictim(), -100);
 
                         m_uiGougeTimer = urand(17000, 27000);
                     }
@@ -611,7 +611,7 @@ struct mob_zealot_zathAI : public boss_thekalBaseAI
                 // Kick_Timer
                 if (m_uiKickTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KICK) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KICK) == CAST_OK)
                         m_uiKickTimer = urand(15000, 25000);
                 }
                 else
@@ -620,7 +620,7 @@ struct mob_zealot_zathAI : public boss_thekalBaseAI
                 // Blind_Timer
                 if (m_uiBlindTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLIND) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BLIND) == CAST_OK)
                         m_uiBlindTimer = urand(10000, 20000);
                 }
                 else

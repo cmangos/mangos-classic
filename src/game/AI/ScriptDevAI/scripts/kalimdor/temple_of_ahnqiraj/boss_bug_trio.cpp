@@ -235,7 +235,7 @@ struct boss_kriAI : public boss_silithidRoyaltyAI
         {
             case KRI_CLEAVE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                     ResetCombatAction(action, urand(5, 12) * IN_MILLISECONDS);
                 break;
             }
@@ -297,13 +297,13 @@ struct boss_vemAI : public boss_silithidRoyaltyAI
             }
             case VEM_KNOCK_AWAY:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
                     ResetCombatAction(action, urand(10, 20) * IN_MILLISECONDS);
                 break;
             }
             case VEM_KNOCK_DOWN:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCKDOWN) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KNOCKDOWN) == CAST_OK)
                     ResetCombatAction(action, urand(15, 20) * IN_MILLISECONDS);
                 break;
             }
@@ -375,7 +375,7 @@ struct boss_yaujAI : public boss_silithidRoyaltyAI
             }
             case YAUJ_RAVAGE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAVAGE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RAVAGE) == CAST_OK)
                     ResetCombatAction(action, urand(10, 15) * IN_MILLISECONDS);
                 break;
             }

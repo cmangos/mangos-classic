@@ -90,7 +90,7 @@ struct boss_lucifronAI : public CombatAI
             }
             case LUCIFRON_SHADOWSHOCK:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWSHOCK) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOWSHOCK) == CAST_OK)
                     ResetCombatAction(action, urand(3 * IN_MILLISECONDS, 6 * IN_MILLISECONDS));
                 break;
             }

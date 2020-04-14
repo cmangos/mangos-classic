@@ -1144,7 +1144,7 @@ Another example: the number "5" (101 in Binary, selecting first and third option
 8   128         CAST_SWITCH_CASTER_TARGET           Switches target and caster for spell cast - enables casting by spawner on AI owner for example
 9   256         CAST_MAIN_SPELL                     Marks main spell for ranged mode. When this spell is interrupted or goes OOM, the AI owner goes into melee mode. Connected to ACTION_T_SET_RANGED_MODE
 10  512         CAST_PLAYER_ONLY                    To be used in connection with targets. Restricts targeting to player only
-11  1024        CAST_DISTANCE_YOURSELF              Marks spell which stuns or immobilizes, so that creature distances itself from target, when main aggro target is hit (getVictim()). Connected to ACTION_T_SET_RANGED_MODE.
+11  1024        CAST_DISTANCE_YOURSELF              Marks spell which stuns or immobilizes, so that creature distances itself from target, when main aggro target is hit (GetVictim()). Connected to ACTION_T_SET_RANGED_MODE.
 
 NOTE: You can add the numbers in the decimal column to combine flags.
 For example if you wanted to use CAST_NO_MELEE_IF_OOM(8) and CAST_TRIGGERED(2) you would simply use 10 in the cast flags field (8 + 2 = 10).

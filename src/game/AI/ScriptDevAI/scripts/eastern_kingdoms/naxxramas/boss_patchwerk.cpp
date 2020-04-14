@@ -101,7 +101,7 @@ struct boss_patchwerkAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Hateful Strike
@@ -145,7 +145,7 @@ struct boss_patchwerkAI : public ScriptedAI
             // Slimebolt - casted only 30 seconds after Berserking to prevent kiting
             if (m_slimeboltTimer < diff)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_SLIMEBOLT);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SLIMEBOLT);
                 m_slimeboltTimer = 1 * IN_MILLISECONDS;
             }
             else

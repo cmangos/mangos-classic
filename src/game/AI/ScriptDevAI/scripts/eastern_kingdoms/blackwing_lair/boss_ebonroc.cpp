@@ -86,7 +86,7 @@ struct boss_ebonrocAI : public CombatAI
         {
             case EBONROC_SHADOW_OF_EBONROC:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_OF_EBONROC) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_OF_EBONROC) == CAST_OK)
                     ResetCombatAction(action, urand(25 * IN_MILLISECONDS, 35 * IN_MILLISECONDS));
                 break;
             }

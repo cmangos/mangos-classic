@@ -88,7 +88,7 @@ struct npc_kerlonianAI : public FollowerAI
     {
         FollowerAI::MoveInLineOfSight(pWho);
 
-        if (!m_creature->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && pWho->GetEntry() == NPC_LILADRIS)
+        if (!m_creature->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && pWho->GetEntry() == NPC_LILADRIS)
         {
             if (m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE * 5))
             {
@@ -151,7 +151,7 @@ struct npc_kerlonianAI : public FollowerAI
 
     void UpdateFollowerAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (!HasFollowState(STATE_FOLLOW_INPROGRESS))
                 return;
@@ -361,7 +361,7 @@ struct npc_threshwackonatorAI : public FollowerAI
     {
         FollowerAI::MoveInLineOfSight(pWho);
 
-        if (!m_creature->getVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && pWho->GetEntry() == NPC_GELKAK)
+        if (!m_creature->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && pWho->GetEntry() == NPC_GELKAK)
         {
             if (m_creature->IsWithinDistInMap(pWho, 10.0f))
             {
@@ -736,7 +736,7 @@ struct npc_rabid_bearAI : public ScriptedAI
             m_uiDespawnTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiRabiesTimer < uiDiff)

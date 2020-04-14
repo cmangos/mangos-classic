@@ -190,7 +190,7 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
 
     void UpdateAI(const uint32 /*uiDiff*/) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_isEnraged && m_creature->GetHealthPercent() < 30.0f)

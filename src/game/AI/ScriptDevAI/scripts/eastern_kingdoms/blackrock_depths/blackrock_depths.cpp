@@ -643,11 +643,11 @@ struct npc_phalanxAI : public npc_escortAI
         }
 
         // Combat check
-        if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+        if (m_creature->SelectHostileTarget() && m_creature->GetVictim())
         {
             if (uiThunderclapTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_THUNDERCLAP) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THUNDERCLAP) == CAST_OK)
                     uiThunderclapTimer = 10000;
             }
             else
@@ -655,7 +655,7 @@ struct npc_phalanxAI : public npc_escortAI
 
             if (uiMightyBlowTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MIGHTY_BLOW) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MIGHTY_BLOW) == CAST_OK)
                     uiMightyBlowTimer = 10000;
             }
             else
@@ -1343,7 +1343,7 @@ struct npc_marshal_windsorAI : public npc_escortAI
             m_pInstance->SetData(TYPE_QUEST_JAIL_BREAK, IN_PROGRESS);
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -1530,11 +1530,11 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
             return;
 
         // Combat check
-        if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+        if (m_creature->SelectHostileTarget() && m_creature->GetVictim())
         {
             if (uiFlameBreathTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLAME_BREATH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FLAME_BREATH) == CAST_OK)
                     uiFlameBreathTimer = 10000;
             }
             else
@@ -1724,7 +1724,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Combat check
-        if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+        if (m_creature->SelectHostileTarget() && m_creature->GetVictim())
         {
             if (m_uiBanishTimer < uiDiff)
             {
@@ -1739,7 +1739,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
 
             if (m_uiImmolateTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_IMMOLATE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_IMMOLATE) == CAST_OK)
                     m_uiImmolateTimer = 25000;
             }
             else
@@ -1747,7 +1747,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
 
             if (m_uiShadowBoltTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
                     m_uiShadowBoltTimer = urand(36, 63) * 100;
             }
             else

@@ -191,7 +191,7 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVE(Unit* pTarget)
     else    // ranged combat in all other cases
         m_ai->SetCombatStyle(PlayerbotAI::COMBAT_RANGED);
 
-    //Unit* pVictim = pTarget->getVictim();
+    //Unit* pVictim = pTarget->GetVictim();
     uint32 BEAR = (DIRE_BEAR_FORM > 0 ? DIRE_BEAR_FORM : BEAR_FORM);
 
     // TODO: do something to allow emergency heals for non-healers?

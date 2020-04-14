@@ -59,13 +59,13 @@ struct boss_darkmaster_gandlingAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Arcane Missiles Timer
         if (m_uiArcaneMissilesTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_MISSILES) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ARCANE_MISSILES) == CAST_OK)
                 m_uiArcaneMissilesTimer = 8000;
         }
         else
@@ -83,7 +83,7 @@ struct boss_darkmaster_gandlingAI : public ScriptedAI
         // Curse Timer
         if (m_uiCurseTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CURSE_SD) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CURSE_SD) == CAST_OK)
                 m_uiCurseTimer = urand(15000, 27000);
         }
         else

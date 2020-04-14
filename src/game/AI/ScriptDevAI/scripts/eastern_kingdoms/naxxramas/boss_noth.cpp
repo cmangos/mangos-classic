@@ -226,7 +226,7 @@ struct boss_nothAI : public ScriptedAI
     void UpdateAI(const uint32 diff) override
     {
     	// Do nothing if no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_phase == PHASE_GROUND)
@@ -302,7 +302,7 @@ struct boss_nothAI : public ScriptedAI
                     m_creature->RemoveAurasDueToSpell(SPELL_IMMUNE_ALL);
                     SetMeleeEnabled(true);
                     SetCombatMovement(true);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                     m_summonTimer = 5 * IN_MILLISECONDS;                              // 5 seconds before summoning again Plagued Warriors
                     switch (m_phaseSub)
                     {

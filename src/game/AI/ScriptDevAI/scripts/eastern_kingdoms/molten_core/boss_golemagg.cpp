@@ -177,7 +177,7 @@ struct mob_core_ragerAI : public CombatAI
             }
             case CORE_RAGER_MANGLE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MANGLE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MANGLE) == CAST_OK)
                     ResetCombatAction(action, 10 * IN_MILLISECONDS);
                 break;
             }

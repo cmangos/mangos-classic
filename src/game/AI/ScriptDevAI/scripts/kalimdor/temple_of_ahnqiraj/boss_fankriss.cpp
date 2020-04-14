@@ -123,7 +123,7 @@ struct boss_fankrissAI : public CombatAI
         {
             case FANKRISS_MORTAL_WOUND:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_WOUND) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTAL_WOUND) == CAST_OK)
                     ResetCombatAction(action, urand(7000, 14000));
                 break;
             }

@@ -215,7 +215,7 @@ void instance_zulfarrak::Update(uint32 uiDiff)
             if (Creature* pTroll = instance->GetCreature(selectedGuid))
             {
                 // Pick another one if already in combat or already killed
-                if (pTroll->getVictim() || !pTroll->IsAlive())
+                if (pTroll->GetVictim() || !pTroll->IsAlive())
                 {
                     m_uiPyramidEventTimer = urand(0, 2) ? urand(3000, 10000) : 1000;
                     return;
