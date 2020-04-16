@@ -442,6 +442,8 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
         {
             return sWorldState.IsConditionFulfilled(m_value1, m_value2);
         }
+        default:
+            break;
     }
     return false;
 }
