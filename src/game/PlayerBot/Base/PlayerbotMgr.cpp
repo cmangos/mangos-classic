@@ -339,10 +339,11 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 
                 // If player and bot are on different maps: then player was teleported by GameObject
                 // let's return and let playerbot summon do its job by teleporting bots
-                if (bot->GetMap() != m_master->GetMap())
+                Map* masterMap = m_master->IsInWorld() ? m_master->GetMap() : nullptr;
+                if (!masterMap || bot->GetMap() != masterMap || m_master->IsBeingTeleported())
                     return;
 
-                GameObject* obj = m_master->GetMap()->GetGameObject(objGUID);
+                GameObject* obj = masterMap->GetGameObject(objGUID);
                 if (!obj)
                     return;
 
