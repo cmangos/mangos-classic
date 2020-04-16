@@ -240,7 +240,16 @@ void WorldSession::SendPacket(WorldPacket const& packet, bool forcedSend /*= fal
 /// Add an incoming packet to the queue
 void WorldSession::QueuePacket(std::unique_ptr<WorldPacket> new_packet)
 {
+    sWorld.IncrementOpcodeCounter(new_packet->GetOpcode());
     OpcodeHandler const& opHandle = opcodeTable[new_packet->GetOpcode()];
+    if (opHandle.packetProcessing == PROCESS_IMMEDIATE)
+    {
+        (this->*opHandle.handler)(*new_packet);
+        if (new_packet->rpos() < new_packet->wpos() && sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))
+            LogUnprocessedTail(*new_packet);
+        return;
+    }
+
     if (opHandle.packetProcessing == PROCESS_MAP_THREAD)
     {
         std::lock_guard<std::mutex> guard(m_recvQueueMapLock);

@@ -320,6 +320,10 @@ class WorldSession
         void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
         uint32 getDialogStatus(const Player* pPlayer, const Object* questgiver, uint32 defstatus) const;
 
+        // Thread safety
+        uint32 GetCurrentPlayerLevel() { return m_currentPlayerLevel; }
+        void SetCurrentPlayerLevel(uint32 level) { m_currentPlayerLevel = level; }
+
         // Misc
         void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed) const;
         void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) const;
@@ -746,12 +750,15 @@ class WorldSession
 
         bool m_initialZoneUpdated = false;
 
+        // Thread safety mechanisms
         std::mutex m_recvQueueLock;
         std::mutex m_recvQueueMapLock;
         std::deque<std::unique_ptr<WorldPacket>> m_recvQueue;
         std::deque<std::unique_ptr<WorldPacket>> m_recvQueueMap;
 
         Messager<WorldSession> m_messager;
+
+        std::atomic<uint32> m_currentPlayerLevel;
 };
 #endif
 /// @}

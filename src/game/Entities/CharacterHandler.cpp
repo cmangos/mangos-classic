@@ -552,6 +552,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         return;
     }
 
+    m_currentPlayerLevel = pCurrChar->getLevel();
+
     pCurrChar->GetMotionMaster()->Initialize();
 
     Group* group = pCurrChar->GetGroup();
