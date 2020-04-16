@@ -72,6 +72,7 @@ enum SpellSpecific
     SPELL_MAGE_ARMOR,
     SPELL_WARLOCK_ARMOR,
     SPELL_ELEMENTAL_SHIELD,
+    SPELL_BUFF_CASTER_POWER,
 };
 
 SpellSpecific GetSpellSpecific(uint32 spellId);
@@ -1352,6 +1353,7 @@ inline bool IsSpellSpecificUniquePerTarget(SpellSpecific specific)
         case SPELL_WARLOCK_ARMOR:
         case SPELL_MAGE_ARMOR:
         case SPELL_ELEMENTAL_SHIELD:
+        case SPELL_BUFF_CASTER_POWER:
         case SPELL_WELL_FED:
         case SPELL_FLASK_ELIXIR:
         case SPELL_FOOD:
