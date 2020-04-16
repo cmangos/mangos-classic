@@ -4820,6 +4820,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!strict && go->IsInUse())
                         return SPELL_FAILED_CHEST_IN_USE;
 
+                    if (!strict && go->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE))
+                        return SPELL_FAILED_CHEST_IN_USE;
+
                     // done in client but we need to recheck anyway
                     if (go->GetGOInfo()->CannotBeUsedUnderImmunity() && m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
                         return SPELL_FAILED_DAMAGE_IMMUNE;
