@@ -1055,18 +1055,21 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         spellDamageInfo.damage = m_damage;
         spellDamageInfo.HitInfo = target->HitInfo;
-        if (target->isCrit)
+        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
         {
-            spellDamageInfo.HitInfo |= SPELL_HIT_TYPE_CRIT;
-            spellDamageInfo.damage = caster->CalculateCritAmount(unitTarget, spellDamageInfo.damage, m_spellInfo);
-        }
+            if (target->isCrit)
+            {
+                spellDamageInfo.HitInfo |= SPELL_HIT_TYPE_CRIT;
+                spellDamageInfo.damage = caster->CalculateCritAmount(unitTarget, spellDamageInfo.damage, m_spellInfo);
+            }
 
-        // damage mitigation
-        if (spellDamageInfo.damage > 0)
-        {
-            // physical damage => armor
-            if (m_spellSchoolMask & SPELL_SCHOOL_MASK_NORMAL)
-                spellDamageInfo.damage = caster->CalcArmorReducedDamage(unitTarget, spellDamageInfo.damage);
+            // damage mitigation
+            if (spellDamageInfo.damage > 0)
+            {
+                // physical damage => armor
+                if (m_spellSchoolMask & SPELL_SCHOOL_MASK_NORMAL)
+                    spellDamageInfo.damage = caster->CalcArmorReducedDamage(unitTarget, spellDamageInfo.damage);
+            }
         }
 
         unitTarget->CalculateAbsorbResistBlock(caster, &spellDamageInfo, m_spellInfo);
