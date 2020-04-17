@@ -247,13 +247,13 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
             if (this->i_offset == 0.f)
             {
                 if (!owner.CanReachWithMeleeAttack(this->i_target.getTarget()))
-                    if (!owner.IsFalling())
+                    if (!i_target->IsFalling())
                         m_reachable = false;
             }
             else
             {
                 if (owner.GetDistance(this->i_target.getTarget(), true, DIST_CALC_COMBAT_REACH) > this->i_offset)
-                    if (!owner.IsFalling())
+                    if (!i_target->IsFalling())
                         m_reachable = false;
             }
             return;
