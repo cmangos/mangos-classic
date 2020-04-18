@@ -5316,6 +5316,29 @@ bool ChatHandler::HandleMovespeedShowCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleDebugMovement(char* args)
+{
+    Unit* unit = getSelectedUnit();
+    if (!unit)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    bool value;
+    if (!ExtractOnOff(&args, value))
+    {
+        SendSysMessage(LANG_USE_BOL);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    unit->SetDebuggingMovement(value);
+    PSendSysMessage("New value: %s", value ? "true" : false);
+    return true;
+}
+
 bool ChatHandler::HandleServerPLimitCommand(char* args)
 {
     if (*args)

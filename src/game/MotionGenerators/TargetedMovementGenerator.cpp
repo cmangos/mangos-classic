@@ -468,6 +468,18 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
     if (cutPath)
         CutPath(owner, path);
 
+    if (owner.IsDebuggingMovement())
+    {
+        for (ObjectGuid guid : m_spawns)
+            if (Creature* whisp = owner.GetMap()->GetCreature(guid))
+                whisp->ForcedDespawn();
+
+        m_spawns.clear();
+
+        for (auto& point : path)
+            m_spawns.push_back(owner.SummonCreature(2, point.x, point.y, point.z, 0.f, TEMPSPAWN_TIMED_DESPAWN, 5000)->GetObjectGuid());
+    }
+
     _addUnitStateMove(owner);
 
     Movement::MoveSplineInit init(owner);

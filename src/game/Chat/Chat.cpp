@@ -665,9 +665,10 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand movementCommandTable[] =
     {
-        { "movegens",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMovegensCommand,            "", nullptr },
+        { "movegens",       SEC_GAMEMASTER,     false, &ChatHandler::HandleMovegensCommand,            "", nullptr },
         { "cometome",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleComeToMeCommand,            "", nullptr },
-        { "movespeed",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMovespeedShowCommand,       "", nullptr },
+        { "movespeed",      SEC_GAMEMASTER,     false, &ChatHandler::HandleMovespeedShowCommand,       "", nullptr },
+        { "debug",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugMovement,              "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
