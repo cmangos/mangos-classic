@@ -847,10 +847,10 @@ namespace MMAP
             {"maxSimplificationError", 1.8f},
             {"mergeRegionArea", 10},
             {"minRegionArea", 30},
-            {"walkableClimb", 8},
-            {"walkableHeight", 6},
+            {"walkableClimb", 4},
+            {"walkableHeight", 5},
             {"walkableRadius", 2},
-            {"walkableSlopeAngle", 70.0f},
+            {"walkableSlopeAngle", 60.0f},
         };
     }
 
