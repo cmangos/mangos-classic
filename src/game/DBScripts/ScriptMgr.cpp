@@ -999,7 +999,13 @@ void ScriptMgr::LoadDbScriptRandomTemplates()
             int32 targetId = fields[2].GetInt32();
             uint32 chance = fields[3].GetUInt32();
             if (type < MAX_TYPE)
-                m_scriptTemplates[type][id].push_back({ targetId, chance });
+            {
+                m_scriptTemplates[type][id].emplace_back(targetId, chance);
+                if (chance)
+                    m_scriptTemplatesExplicitlyChanced[type][id].emplace_back(targetId, chance);
+                else
+                    m_scriptTemplatesEquallyChanced[type][id].emplace_back(targetId, chance);
+            }
             else
                 sLog.outErrorDb("Table `dbscript_random_templates` entry (%u) uses invalid type (%u). Won't be used.", id, type);
         }
@@ -2383,28 +2389,29 @@ bool ScriptAction::HandleScriptStep()
 
 int32 ScriptMgr::GetRandomScriptTemplateId(uint32 id, uint8 templateType)
 {
-    auto& scriptTemplate = m_scriptTemplates[templateType][id];
-    if (scriptTemplate.empty())
+    if (m_scriptTemplates[templateType][id].empty())
         return 0;
 
-    uint32 totalChance = 0;
-    for (auto& data : scriptTemplate)
-        totalChance += data.second;
+    auto& randomChanced = m_scriptTemplatesExplicitlyChanced[templateType][id];
+    if (!randomChanced.empty())
+    {
+        float random = (float)rand_chance();
+        uint32 cumulativeChance = 0;
+        for (auto& data : randomChanced)
+        {
+            cumulativeChance += data.second;
+            if (cumulativeChance >= random)
+                return data.first;
+        }
+    }
 
-    if (totalChance == 0)
+    auto& equallyChanced = m_scriptTemplatesEquallyChanced[templateType][id];
+    if (!equallyChanced.empty())
     {
-        uint32 random = urand(0, scriptTemplate.size() - 1);
-        return scriptTemplate[random].first;
+        uint32 random = urand(0, equallyChanced.size() - 1);
+        return equallyChanced[random].first;
     }
-    uint32 random = urand(0, totalChance);
-    uint32 cumulativeChance = 0;
-    for (auto& data : scriptTemplate)
-    {
-        cumulativeChance += data.second;
-        if (cumulativeChance >= random)
-            return data.first;
-    }
-    return 0; // should never get here - error suppression
+    return 0;
 }
 
 int32 ScriptMgr::GetRandomScriptStringFromTemplate(uint32 id)
