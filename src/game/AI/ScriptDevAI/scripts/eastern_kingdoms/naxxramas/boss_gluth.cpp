@@ -92,6 +92,7 @@ struct boss_gluthAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_CALL_ALL_ZOMBIE_CHOW, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);   // Aura periodically calling all NPCs 16360
 
         // Add zombies summoning aura to the three triggers
+        m_summoningTriggers.clear();
         GetCreatureListWithEntryInGrid(m_summoningTriggers, m_creature, NPC_WORLD_TRIGGER, 100.0f);
         for (auto& trigger : m_summoningTriggers)
             trigger->CastSpell(trigger, SPELL_SUMMON_ZOMBIE_CHOW, TRIGGERED_OLD_TRIGGERED);
