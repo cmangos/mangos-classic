@@ -5335,7 +5335,7 @@ bool ChatHandler::HandleDebugMovement(char* args)
     }
 
     unit->SetDebuggingMovement(value);
-    PSendSysMessage("New value: %s", value ? "true" : false);
+    PSendSysMessage("New value: %s", (value ? "true" : "false"));
     return true;
 }
 
