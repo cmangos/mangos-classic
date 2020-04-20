@@ -262,9 +262,8 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // Bot's target is casting a spell: try to interrupt it
     if (pTarget->IsNonMeleeSpellCasted(true))
     {
-        if (KIDNEY_SHOT > 0 && m_bot->IsSpellReady(KIDNEY_SHOT) && m_bot->GetComboPoints() >= 1 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget) == SPELL_CAST_OK)
-            return RETURN_CONTINUE;
-        else if (KICK > 0 && m_bot->IsSpellReady(KICK) && m_ai->CastSpell(KICK, *pTarget) == SPELL_CAST_OK)
+        if ((KIDNEY_SHOT > 0 && m_bot->IsSpellReady(KIDNEY_SHOT) && m_bot->GetComboPoints() >= 1 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget) == SPELL_CAST_OK) ||
+            (KICK > 0 && m_bot->IsSpellReady(KICK) && m_ai->CastSpell(KICK, *pTarget) == SPELL_CAST_OK))
             return RETURN_CONTINUE;
     }
 
@@ -273,7 +272,6 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // TODO : define combo points treshold depending on target rank and HP
     if (m_bot->GetComboPoints() >= 4)
     {
-        Creature* pCreature = (Creature*) pTarget;
         // wait for energy
         if (m_ai->GetEnergyAmount() < 25 && (KIDNEY_SHOT || SLICE_DICE || EXPOSE_ARMOR || RUPTURE))
             return RETURN_NO_ACTION_OK;
@@ -283,7 +281,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVE(Unit* pTarget)
             return RETURN_CONTINUE;
 
         // If target is a warrior or paladin type (high armor): expose its armor unless already tanked by a warrior (Sunder Armor > Expose Armor)
-        if (m_ai->IsElite(pTarget) && pCreature && pCreature->GetCreatureInfo()->UnitClass != 8)
+        if (m_ai->IsElite(pTarget) && ((Creature*)pTarget)->GetCreatureInfo()->UnitClass != 8)
         {
             if  (!m_ai->GetGroupTank() || (m_ai->GetGroupTank() && m_ai->GetGroupTank()->GetVictim() != pTarget))
             {
@@ -374,9 +372,8 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuverPVP(Unit* pTarget)
             break;
 
         case RogueSpellPreventing:
-            if (KIDNEY_SHOT > 0 && m_bot->GetComboPoints() >= 2 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget) == SPELL_CAST_OK)
-                return RETURN_CONTINUE;
-            else if (KICK > 0 && m_ai->CastSpell(KICK, *pTarget) == SPELL_CAST_OK)
+            if ((KIDNEY_SHOT > 0 && m_bot->GetComboPoints() >= 2 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget) == SPELL_CAST_OK) ||
+                (KICK > 0 && m_ai->CastSpell(KICK, *pTarget) == SPELL_CAST_OK))
                 return RETURN_CONTINUE;
         // break; // No action? Go combat!
 
@@ -462,9 +459,9 @@ static const uint32 uPriorizedPoisonIds[3] =
 Item* PlayerbotRogueAI::FindPoison() const
 {
     Item* poison;
-    for (uint8 i = 0; i < countof(uPriorizedPoisonIds); ++i)
+    for (unsigned int priorizedPoisonId : uPriorizedPoisonIds)
     {
-        poison = m_ai->FindConsumable(uPriorizedPoisonIds[i]);
+        poison = m_ai->FindConsumable(priorizedPoisonId);
         if (poison)
             return poison;
     }

@@ -60,10 +60,10 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
 
     // TALENTS
     IMPROVED_SCORCH         = 0;
-    for (uint8 i = 0; i < 3; i++)
+    for (unsigned int i : uiImprovedScorch)
     {
-        if (m_ai->initSpell(uiImprovedScorch[i]))
-            IMPROVED_SCORCH = m_ai->initSpell(uiImprovedScorch[i]);
+        if (m_ai->initSpell(i))
+            IMPROVED_SCORCH = m_ai->initSpell(i);
     }
     FIRE_VULNERABILITY      = 22959;
 
@@ -117,10 +117,7 @@ CombatManeuverReturns PlayerbotMageAI::DoFirstCombatManeuver(Unit* pTarget)
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoFirstCombatManeuverPVE(pTarget);
-            break;
     }
-
-    return RETURN_NO_ACTION_ERROR;
 }
 
 CombatManeuverReturns PlayerbotMageAI::DoFirstCombatManeuverPVE(Unit* /*pTarget*/)
@@ -150,10 +147,7 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuver(Unit* pTarget)
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoNextCombatManeuverPVE(pTarget);
-            break;
     }
-
-    return RETURN_NO_ACTION_ERROR;
 }
 
 CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
@@ -181,7 +175,7 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
     if (m_ai->HasDispelOrder() && DispelPlayer(GetDispelTarget(DISPEL_CURSE)) & RETURN_CONTINUE)
         return RETURN_CONTINUE;
 
-    if (newTarget && !m_ai->IsNeutralized(newTarget)) // Bot has aggro and the mob is not already crowd controled
+    if (newTarget && !PlayerbotAI::IsNeutralized(newTarget)) // Bot has aggro and the mob is not already crowd controled
     {
         if (newTarget->GetHealthPercent() > 25)
         {
@@ -189,10 +183,11 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
             if (m_ai->IsElite(newTarget))
             {
                 // If the attacker is a beast or humanoid, let's the bot give it a form more suited to the low intellect of something fool enough to attack a mage
-                Creature* pCreature = (Creature*) newTarget;
-                if (pCreature && (pCreature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_HUMANOID || pCreature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_BEAST))
+                // No need to check if target is a player as IsElite() returns false for players
+                Creature* creature = (Creature*) newTarget;
+                if (creature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_HUMANOID || creature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_BEAST)
                 {
-                    if (POLYMORPH > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_ARCANE) && CastSpell(POLYMORPH, newTarget))
+                    if (POLYMORPH > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_ARCANE) && CastSpell(POLYMORPH, newTarget))
                         return RETURN_CONTINUE;
                 }
 
@@ -238,7 +233,7 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // If Clearcasting is active, cast arcane missiles
     // Bot could also cast flamestrike or blizzard for free, but the AoE could break some crowd control
     // or add threat on mobs ignoring the bot currently, so only focus on the bot's current target
-    if (m_bot->HasAura(CLEARCASTING_1) && ARCANE_MISSILES > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_ARCANE) && CastSpell(ARCANE_MISSILES, pTarget))
+    if (m_bot->HasAura(CLEARCASTING_1) && ARCANE_MISSILES > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_ARCANE) && CastSpell(ARCANE_MISSILES, pTarget))
     {
         m_ai->SetIgnoreUpdateTime(3);
         return RETURN_CONTINUE;
@@ -249,19 +244,19 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
         case MAGE_SPEC_FROST:
             if (COLD_SNAP && m_bot->IsSpellReady(COLD_SNAP) && CheckFrostCooldowns() > 2 && m_ai->SelfBuff(COLD_SNAP) == SPELL_CAST_OK)  // Clear frost spell cooldowns if bot has more than 2 active
                 return RETURN_CONTINUE;
-            if (CONE_OF_COLD > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_bot->IsSpellReady(CONE_OF_COLD) && meleeReach)
+            if (CONE_OF_COLD > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_bot->IsSpellReady(CONE_OF_COLD) && meleeReach)
             {
                 // Cone of Cold does not require a target, so ensure that the bot faces the current one before casting
                 m_ai->FaceTarget(pTarget);
                 if (m_ai->CastSpell(CONE_OF_COLD) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
             }
-            if (FROSTBOLT > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_ai->In_Reach(pTarget, FROSTBOLT) && !pTarget->HasAura(FROSTBOLT, EFFECT_INDEX_0) && CastSpell(FROSTBOLT, pTarget))
+            if (FROSTBOLT > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_ai->In_Reach(pTarget, FROSTBOLT) && !pTarget->HasAura(FROSTBOLT, EFFECT_INDEX_0) && CastSpell(FROSTBOLT, pTarget))
                 return RETURN_CONTINUE;
-            if (FROST_NOVA > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_bot->IsSpellReady(FROST_NOVA) && meleeReach && !pTarget->HasAura(FROST_NOVA, EFFECT_INDEX_0) && CastSpell(FROST_NOVA, pTarget))
+            if (FROST_NOVA > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_bot->IsSpellReady(FROST_NOVA) && meleeReach && !pTarget->HasAura(FROST_NOVA, EFFECT_INDEX_0) && CastSpell(FROST_NOVA, pTarget))
                 return RETURN_CONTINUE;
             // Default frost spec action
-            if (FROSTBOLT > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_ai->In_Reach(pTarget, FROSTBOLT))
+            if (FROSTBOLT > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_ai->In_Reach(pTarget, FROSTBOLT))
                 return CastSpell(FROSTBOLT, pTarget);
             /*
             if (BLIZZARD > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_ai->In_Reach(pTarget,BLIZZARD) && m_ai->GetAttackerCount() >= 5 && CastSpell(BLIZZARD, pTarget))
@@ -275,10 +270,10 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
         case MAGE_SPEC_FIRE:
             if (COMBUSTION > 0 && m_ai->SelfBuff(COMBUSTION) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (BLAST_WAVE > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->GetAttackerCount() >= 3 && meleeReach && CastSpell(BLAST_WAVE, pTarget))
+            if (BLAST_WAVE > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->GetAttackerCount() >= 3 && meleeReach && CastSpell(BLAST_WAVE, pTarget))
                 return RETURN_CONTINUE;
             // Try to have 3 scorch stacks to let tank build aggro while getting a nice crit% bonus
-            if (IMPROVED_SCORCH > 0 && SCORCH > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE))
+            if (IMPROVED_SCORCH > 0 && SCORCH > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE))
             {
                 if (!pTarget->HasAura(FIRE_VULNERABILITY, EFFECT_INDEX_0) && CastSpell(SCORCH, pTarget))   // no stacks: cast it
                     return RETURN_CONTINUE;
@@ -290,20 +285,20 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
                 }
             }
             // At least 3 stacks of Scorch: cast an opening fireball
-            if (FIREBALL > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && !pTarget->HasAura(FIREBALL, EFFECT_INDEX_1) && CastSpell(FIREBALL, pTarget))
+            if (FIREBALL > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && !pTarget->HasAura(FIREBALL, EFFECT_INDEX_1) && CastSpell(FIREBALL, pTarget))
                 return RETURN_CONTINUE;
             // 3 stacks of Scorch and fireball DoT: use fire blast if available
-            if (FIRE_BLAST > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_bot->IsSpellReady(FIRE_BLAST) && CastSpell(FIRE_BLAST, pTarget))
+            if (FIRE_BLAST > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_bot->IsSpellReady(FIRE_BLAST) && CastSpell(FIRE_BLAST, pTarget))
                 return RETURN_CONTINUE;
             // All DoTs, cooldowns used, try to maximise scorch stacks (5) to get a even nicer crit% bonus
-            if (IMPROVED_SCORCH > 0 && SCORCH > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE))
+            if (IMPROVED_SCORCH > 0 && SCORCH > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE))
             {
                 SpellAuraHolder* holder = pTarget->GetSpellAuraHolder(FIRE_VULNERABILITY);
                 if (holder && (holder->GetStackAmount() < 5) && CastSpell(SCORCH, pTarget))
                     return RETURN_CONTINUE;
             }
             // Default fire spec action
-            if (FIREBALL > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIREBALL))
+            if (FIREBALL > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIREBALL))
                 return CastSpell(FIREBALL, pTarget);
             /*
             if (FLAMESTRIKE > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget,FLAMESTRIKE) && CastSpell(FLAMESTRIKE, pTarget))
@@ -320,20 +315,20 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
             if (PRESENCE_OF_MIND && m_bot->HasAura(PRESENCE_OF_MIND))
             {
                 // Instant Pyroblast, yeah! Tanks will probably hate this, but what do they know about power? Nothing...
-                if (PYROBLAST > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && CastSpell(PYROBLAST, pTarget))
+                if (PYROBLAST > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && CastSpell(PYROBLAST, pTarget))
                     return RETURN_CONTINUE;
-                if (FIREBALL > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && CastSpell(FIREBALL, pTarget))
+                if (FIREBALL > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && CastSpell(FIREBALL, pTarget))
                     return RETURN_CONTINUE;
             }
-            if (ARCANE_EXPLOSION > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_ARCANE) && m_ai->GetAttackerCount() >= 3 && meleeReach && CastSpell(ARCANE_EXPLOSION, pTarget))
+            if (ARCANE_EXPLOSION > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_ARCANE) && m_ai->GetAttackerCount() >= 3 && meleeReach && CastSpell(ARCANE_EXPLOSION, pTarget))
                 return RETURN_CONTINUE;
             // Default arcane spec actions (yes, two fire spells)
-            if (FIRE_BLAST > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_bot->IsSpellReady(FIRE_BLAST) && CastSpell(FIRE_BLAST, pTarget))
+            if (FIRE_BLAST > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_bot->IsSpellReady(FIRE_BLAST) && CastSpell(FIRE_BLAST, pTarget))
                 return RETURN_CONTINUE;
-            if (FIREBALL > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIREBALL))
+            if (FIREBALL > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIREBALL))
                 return CastSpell(FIREBALL, pTarget);
             // If no fireball, arcane missiles
-            if (ARCANE_MISSILES > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_ARCANE) && CastSpell(ARCANE_MISSILES, pTarget))
+            if (ARCANE_MISSILES > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_ARCANE) && CastSpell(ARCANE_MISSILES, pTarget))
             {
                 m_ai->SetIgnoreUpdateTime(3);
                 return RETURN_CONTINUE;
@@ -342,20 +337,18 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
     }
 
     // No spec due to low level OR no spell found yet
-    if (FROSTBOLT > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_ai->In_Reach(pTarget, FROSTBOLT) && !pTarget->HasAura(FROSTBOLT, EFFECT_INDEX_0) && CastSpell(FROSTBOLT, pTarget))
+    if (FROSTBOLT > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FROST) && m_ai->In_Reach(pTarget, FROSTBOLT) && !pTarget->HasAura(FROSTBOLT, EFFECT_INDEX_0) && CastSpell(FROSTBOLT, pTarget))
         return RETURN_CONTINUE;
-    if (FIREBALL > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIREBALL) && CastSpell(FIREBALL, pTarget)) // Very low levels
+    if (FIREBALL > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIREBALL) && CastSpell(FIREBALL, pTarget)) // Very low levels
         return RETURN_CONTINUE;
 
     // Default: shoot with wand
     return CastSpell(SHOOT, pTarget);
-
-    return RETURN_NO_ACTION_ERROR; // What? Not even Fireball or wand are available?
 } // end DoNextCombatManeuver
 
 CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVP(Unit* pTarget)
 {
-    if (FIREBALL && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIREBALL) && m_ai->CastSpell(FIREBALL) == SPELL_CAST_OK)
+    if (FIREBALL && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIREBALL) && m_ai->CastSpell(FIREBALL) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative
@@ -388,9 +381,9 @@ static const uint32 uPriorizedManaGemIds[4] =
 Item* PlayerbotMageAI::FindManaGem() const
 {
     Item* gem;
-    for (uint8 i = 0; i < countof(uPriorizedManaGemIds); ++i)
+    for (unsigned int priorizedManaGemId : uPriorizedManaGemIds)
     {
-        gem = m_ai->FindConsumable(uPriorizedManaGemIds[i]);
+        gem = m_ai->FindConsumable(priorizedManaGemId);
         if (gem)
             return gem;
     }
@@ -491,10 +484,7 @@ bool PlayerbotMageAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target)
     if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet) == SPELL_CAST_OK)
         return true;
 
-    if (ai->Buff(spellId, target) == SPELL_CAST_OK)
-        return true;
-
-    return false;
+    return ai->Buff(spellId, target) == SPELL_CAST_OK;
 }
 
 // Return to UpdateAI the spellId usable to neutralize a target with creaturetype
@@ -514,6 +504,4 @@ uint32 PlayerbotMageAI::Neutralize(uint8 creatureType)
         return POLYMORPH;
     else
         return 0;
-
-    return 0;
 }

@@ -135,10 +135,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoFirstCombatManeuver(Unit* pTarget)
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoFirstCombatManeuverPVE(pTarget);
-            break;
     }
-
-    return RETURN_NO_ACTION_ERROR;
 }
 
 CombatManeuverReturns PlayerbotHunterAI::DoFirstCombatManeuverPVE(Unit* /*pTarget*/)
@@ -150,10 +147,7 @@ bool PlayerbotHunterAI::HasPet(Player* bot)
 {
     QueryResult* result = CharacterDatabase.PQuery("SELECT * FROM character_pet WHERE owner = '%u' AND (slot = '%u' OR slot = '%u')", bot->GetGUIDLow(), PET_SAVE_AS_CURRENT, PET_SAVE_NOT_IN_SLOT);
 
-    if (result)
-        return true;  //hunter has current pet
-    else
-        return false;  //hunter either has no pet or stabled
+    return result != nullptr;  //hunter either has no pet or stabled
 } // end HasPet
 
 CombatManeuverReturns PlayerbotHunterAI::DoFirstCombatManeuverPVP(Unit* /*pTarget*/)
@@ -178,10 +172,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuver(Unit* pTarget)
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoNextCombatManeuverPVE(pTarget);
-            break;
     }
-
-    return RETURN_NO_ACTION_ERROR;
 }
 
 CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit* pTarget)
@@ -244,7 +235,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit* pTarget)
     //Used to determine if this bot has highest threat
     Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE)(PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
     // Aggro management
-    if (newTarget && !m_ai->IsNeutralized(newTarget)) // TODO: && party has a tank
+    if (newTarget && !PlayerbotAI::IsNeutralized(newTarget)) // TODO: && party has a tank
     {
         // Aggroed by an elite
         if (m_ai->IsElite(newTarget))
@@ -264,7 +255,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // Distance management: avoid to be in the dead zone where neither melee nor range can be used: keep distance whenever possible
     // If not in range: come closer
     // Do not do it if passive or stay orders.
-    if (pTarget && !m_ai->In_Reach(pTarget, AUTO_SHOT) &&
+    if (!m_ai->In_Reach(pTarget, AUTO_SHOT) &&
             !(m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_PASSIVE) &&
             (m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY))
     {
@@ -385,7 +376,7 @@ bool PlayerbotHunterAI::IsTargetEnraged(Unit* pTarget)
     if (!pTarget) return false;
 
     Unit::SpellAuraHolderMap const& auras = pTarget->GetSpellAuraHolderMap();
-    for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+    for (auto itr = auras.begin(); itr != auras.end(); ++itr)
     {
         SpellAuraHolder* holder = itr->second;
         // Return true is target unit has aura with DISPEL_ENRAGE dispel type

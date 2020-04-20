@@ -137,10 +137,7 @@ CombatManeuverReturns PlayerbotShamanAI::DoFirstCombatManeuver(Unit* pTarget)
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoFirstCombatManeuverPVE(pTarget);
-            break;
     }
-
-    return RETURN_NO_ACTION_ERROR;
 }
 
 CombatManeuverReturns PlayerbotShamanAI::DoFirstCombatManeuverPVE(Unit* /*pTarget*/)
@@ -170,10 +167,7 @@ CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuver(Unit* pTarget)
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoNextCombatManeuverPVE(pTarget);
-            break;
     }
-
-    return RETURN_NO_ACTION_ERROR;
 }
 
 CombatManeuverReturns PlayerbotShamanAI::DoNextCombatManeuverPVE(Unit* pTarget)
