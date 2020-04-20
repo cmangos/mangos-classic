@@ -203,7 +203,7 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit* pTarget)
 
     //Used to determine if this bot is highest on threat
     Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE)(PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
-    if (newTarget && !m_ai->IsNeutralized(newTarget)) // TODO: && party has a tank
+    if (newTarget && !PlayerbotAI::IsNeutralized(newTarget)) // TODO: && party has a tank
     {
         // Have threat, can't quickly lower it. 3 options remain: Stop attacking, lowlevel damage (wand), keep on keeping on.
         if (newTarget->GetHealthPercent() > 25)
@@ -212,7 +212,8 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit* pTarget)
             if (m_ai->IsElite(newTarget))
             {
                 // let warlock pet handle it to win some time
-                Creature* pCreature = (Creature*) newTarget;
+                // no need to check if newTarget can be a player because IsElite() returns false for players
+                auto* creature = (Creature*) newTarget;
                 if (pet)
                 {
                     switch (pet->GetEntry())
@@ -223,14 +224,14 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit* pTarget)
                                 return RETURN_NO_ACTION_OK;
                         // maybe give it some love?
                         case DEMON_SUCCUBUS:
-                            if (pCreature && pCreature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_HUMANOID)
+                            if (creature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_HUMANOID)
                                 if (SEDUCTION && !newTarget->HasAura(SEDUCTION) && m_ai->CastPetSpell(SEDUCTION, newTarget) == SPELL_CAST_OK)
                                     return RETURN_NO_ACTION_OK;
                     }
 
                 }
                 // if aggroed mob is a demon or an elemental: banish it
-                if (pCreature && (pCreature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_DEMON || pCreature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_ELEMENTAL))
+                if (creature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_DEMON || creature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_ELEMENTAL)
                 {
                     if (BANISH && !newTarget->HasAura(BANISH) && CastSpell(BANISH, newTarget))
                         return RETURN_CONTINUE;
@@ -281,79 +282,51 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit* pTarget)
         switch (spec)
         {
             case WARLOCK_SPEC_AFFLICTION:
-                if (CORRUPTION && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+                if (CORRUPTION && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
                     return RETURN_CONTINUE;
-                if (IMMOLATE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, IMMOLATE) && !pTarget->HasAura(IMMOLATE) && CastSpell(IMMOLATE, pTarget))
+                if (IMMOLATE && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, IMMOLATE) && !pTarget->HasAura(IMMOLATE) && CastSpell(IMMOLATE, pTarget))
                     return RETURN_CONTINUE;
-                if (SIPHON_LIFE > 0 && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SIPHON_LIFE) && !pTarget->HasAura(SIPHON_LIFE) && CastSpell(SIPHON_LIFE, pTarget))
+                if (SIPHON_LIFE > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SIPHON_LIFE) && !pTarget->HasAura(SIPHON_LIFE) && CastSpell(SIPHON_LIFE, pTarget))
                     return RETURN_CONTINUE;
                 break;
 
             case WARLOCK_SPEC_DEMONOLOGY:
-                if (CORRUPTION && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+                if (CORRUPTION && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
                     return RETURN_CONTINUE;
-                if (IMMOLATE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, IMMOLATE) && !pTarget->HasAura(IMMOLATE) && CastSpell(IMMOLATE, pTarget))
+                if (IMMOLATE && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, IMMOLATE) && !pTarget->HasAura(IMMOLATE) && CastSpell(IMMOLATE, pTarget))
                     return RETURN_CONTINUE;
                 break;
 
             case WARLOCK_SPEC_DESTRUCTION:
-                if (SHADOWBURN && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && pTarget->GetHealthPercent() < (HPThreshold / 2.0) && m_ai->In_Reach(pTarget, SHADOWBURN) && !pTarget->HasAura(SHADOWBURN) && CastSpell(SHADOWBURN, pTarget))
+                if (SHADOWBURN && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && pTarget->GetHealthPercent() < (HPThreshold / 2.0) && m_ai->In_Reach(pTarget, SHADOWBURN) && !pTarget->HasAura(SHADOWBURN) && CastSpell(SHADOWBURN, pTarget))
                     return RETURN_CONTINUE;
-                if (CORRUPTION && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+                if (CORRUPTION && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
                     return RETURN_CONTINUE;
-                if (IMMOLATE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, IMMOLATE) && !pTarget->HasAura(IMMOLATE) && CastSpell(IMMOLATE, pTarget))
+                if (IMMOLATE && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, IMMOLATE) && !pTarget->HasAura(IMMOLATE) && CastSpell(IMMOLATE, pTarget))
                     return RETURN_CONTINUE;
-                if (CONFLAGRATE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, CONFLAGRATE) && pTarget->HasAura(IMMOLATE) && m_bot->IsSpellReady(CONFLAGRATE) && CastSpell(CONFLAGRATE, pTarget))
+                if (CONFLAGRATE && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, CONFLAGRATE) && pTarget->HasAura(IMMOLATE) && m_bot->IsSpellReady(CONFLAGRATE) && CastSpell(CONFLAGRATE, pTarget))
                     return RETURN_CONTINUE;
                 break;
         }
 
         // Shadow bolt is common to all specs
-        if (SHADOW_BOLT && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
+        if (SHADOW_BOLT && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
             return RETURN_CONTINUE;
 
         // Default: shoot with wand
         return CastSpell(SHOOT, pTarget);
-
-        return RETURN_NO_ACTION_OK;
-
-        //if (DRAIN_LIFE && LastSpellAffliction < 4 && !pTarget->HasAura(DRAIN_SOUL) && !pTarget->HasAura(DRAIN_LIFE) && !pTarget->HasAura(DRAIN_MANA) && m_ai->GetHealthPercent() <= 70)
-        //    m_ai->CastSpell(DRAIN_LIFE, *pTarget);
-        //    //m_ai->SetIgnoreUpdateTime(5);
-        //else if (HOWL_OF_TERROR && !pTarget->HasAura(HOWL_OF_TERROR) && m_ai->GetAttackerCount() > 3 && LastSpellAffliction < 8)
-        //    m_ai->CastSpell(HOWL_OF_TERROR, *pTarget);
-        //    m_ai->TellMaster("casting howl of terror!");
-        //else if (FEAR && !pTarget->HasAura(FEAR) && pVictim == m_bot && m_ai->GetAttackerCount() >= 2 && LastSpellAffliction < 9)
-        //    m_ai->CastSpell(FEAR, *pTarget);
-        //    //m_ai->TellMaster("casting fear!");
-        //    //m_ai->SetIgnoreUpdateTime(1.5);
-        //else if (RAIN_OF_FIRE && LastSpellDestruction < 3 && m_ai->GetAttackerCount() >= 3)
-        //    m_ai->CastSpell(RAIN_OF_FIRE, *pTarget);
-        //    //m_ai->TellMaster("casting rain of fire!");
-        //    //m_ai->SetIgnoreUpdateTime(8);
-        //else if (SEARING_PAIN && LastSpellDestruction < 8)
-        //    m_ai->CastSpell(SEARING_PAIN, *pTarget);
-        //else if (SOUL_FIRE && LastSpellDestruction < 9)
-        //    m_ai->CastSpell(SOUL_FIRE, *pTarget);
-        //    //m_ai->SetIgnoreUpdateTime(6);
-        //else if (HELLFIRE && LastSpellDestruction < 12 && !m_bot->HasAura(HELLFIRE) && m_ai->GetAttackerCount() >= 5 && m_ai->GetHealthPercent() >= 50)
-        //    m_ai->CastSpell(HELLFIRE);
-        //    m_ai->TellMaster("casting hellfire!");
-        //    //m_ai->SetIgnoreUpdateTime(15);
     }
 
     // No spec due to low level OR no spell found yet
-    if (CORRUPTION && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+    if (CORRUPTION && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
         return RETURN_CONTINUE;
-    if (IMMOLATE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, IMMOLATE) && !pTarget->HasAura(IMMOLATE) && CastSpell(IMMOLATE, pTarget))
+    if (IMMOLATE && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, IMMOLATE) && !pTarget->HasAura(IMMOLATE) && CastSpell(IMMOLATE, pTarget))
         return RETURN_CONTINUE;
-    if (SHADOW_BOLT && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SHADOW_BOLT))
+    if (SHADOW_BOLT && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SHADOW_BOLT))
         return CastSpell(SHADOW_BOLT, pTarget);
 
     // Default: shoot with wand
     return CastSpell(SHOOT, pTarget);
-
-    return RETURN_NO_ACTION_OK;
 } // end DoNextCombatManeuver
 
 CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVP(Unit* pTarget)
@@ -367,117 +340,112 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVP(Unit* pTarget)
 }
 
 // Decision tree for putting a curse on the current target
-bool PlayerbotWarlockAI::CheckCurse(Unit* pTarget)
+bool PlayerbotWarlockAI::CheckCurse(Unit* target)
 {
-    // Target is immune to shadow, no need to apply a curse
-    if (m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW))
-        return false;
-
-    Creature* pCreature = (Creature*) pTarget;
-    uint32 CurseToCast = 0;
-
-    // Prevent low health humanoid from fleeing or fleeing too fast
-    // Curse of Exhaustion first to avoid increasing damage output on tank
-    if (pCreature && pCreature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_HUMANOID && pTarget->GetHealthPercent() < 20 && !pCreature->IsWorldBoss())
+    uint32 curseToCast = 0;
+    if (target->GetTypeId() == TYPEID_UNIT)
     {
-        if (CURSE_OF_EXHAUSTION && m_ai->In_Reach(pTarget, CURSE_OF_EXHAUSTION) && !pTarget->HasAura(CURSE_OF_EXHAUSTION))
-        {
-            if (AMPLIFY_CURSE && m_bot->IsSpellReady(AMPLIFY_CURSE))
-                CastSpell(AMPLIFY_CURSE, m_bot);
+        // Target is immune to shadow, no need to apply a curse
+        if (PlayerbotAI::IsImmuneToSchool(target, SPELL_SCHOOL_MASK_SHADOW))
+            return false;
 
-            if (CastSpell(CURSE_OF_EXHAUSTION, pTarget))
+        auto* creature = (Creature*) target;
+        // Prevent low health humanoid from fleeing or fleeing too fast
+        // Curse of Exhaustion first to avoid increasing damage output on tank
+        if (creature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_HUMANOID && target->GetHealthPercent() < 20 && !creature->IsWorldBoss())
+        {
+            if (CURSE_OF_EXHAUSTION && m_ai->In_Reach(target, CURSE_OF_EXHAUSTION) && !target->HasAura(CURSE_OF_EXHAUSTION))
             {
-                m_CurrentCurse = CURSE_OF_EXHAUSTION;
+                if (AMPLIFY_CURSE && m_bot->IsSpellReady(AMPLIFY_CURSE))
+                    CastSpell(AMPLIFY_CURSE, m_bot);
+
+                if (CastSpell(CURSE_OF_EXHAUSTION, target))
+                {
+                    m_CurrentCurse = CURSE_OF_EXHAUSTION;
+                    return true;
+                }
+            }
+            else if (CURSE_OF_RECKLESSNESS && m_ai->In_Reach(target, CURSE_OF_RECKLESSNESS) && !target->HasAura(CURSE_OF_RECKLESSNESS) && !target->HasAura(CURSE_OF_EXHAUSTION) && CastSpell(CURSE_OF_RECKLESSNESS, target))
+            {
+                m_CurrentCurse = CURSE_OF_RECKLESSNESS;
                 return true;
             }
-        }
-        else if (CURSE_OF_RECKLESSNESS && m_ai->In_Reach(pTarget, CURSE_OF_RECKLESSNESS) && !pTarget->HasAura(CURSE_OF_RECKLESSNESS) && !pTarget->HasAura(CURSE_OF_EXHAUSTION) && CastSpell(CURSE_OF_RECKLESSNESS, pTarget))
-        {
-            m_CurrentCurse = CURSE_OF_RECKLESSNESS;
-            return true;
         }
     }
 
     // If bot already put a curse and curse is still active on target: no need to go further
-    if (m_CurrentCurse > 0 && pTarget->HasAura(m_CurrentCurse))
+    if (m_CurrentCurse > 0 && target->HasAura(m_CurrentCurse))
         return false;
 
     // No curse or effect worn off: choose again which curse to use
 
-    // Target is a boss
-    if (pCreature && pCreature->IsWorldBoss())
+    // Target is a boss and bot is part of a group
+    if (m_ai->IsElite(target, true) && m_bot->GetGroup())
     {
-        if (m_bot->GetGroup())
+        uint8 mages = 0;
+        uint8 warlocks = 1;
+        Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
+        for (auto itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
-            uint8 mages = 0;
-            uint8 warlocks = 1;
-            Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
-            for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember || !groupMember->IsAlive())
+                continue;
+            switch (groupMember->getClass())
             {
-                Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-                if (!groupMember || !groupMember->IsAlive())
+                case CLASS_WARLOCK:
+                    warlocks++;
                     continue;
-                switch (groupMember->getClass())
-                {
-                    case CLASS_WARLOCK:
-                        warlocks++;
-                        continue;
-                    case CLASS_MAGE:
-                        mages++;
-                        continue;
-                }
+                case CLASS_MAGE:
+                    mages++;
+                    continue;
             }
-            if (warlocks > 1 && warlocks > mages)
-                CurseToCast = CURSE_OF_SHADOW;
-            else if (mages > warlocks)
-                CurseToCast = CURSE_OF_THE_ELEMENTS;
-            else
-                CurseToCast = CURSE_OF_AGONY;
         }
-        // If target is not elite, no need to put a curse useful
-        // in the long run: go for direct damage
+        if (warlocks > 1 && warlocks > mages)
+            curseToCast = CURSE_OF_SHADOW;
+        else if (mages > warlocks)
+            curseToCast = CURSE_OF_THE_ELEMENTS;
+        else
+            curseToCast = CURSE_OF_AGONY;
     }
-    else if (!m_ai->IsElite(pTarget))
-        CurseToCast = CURSE_OF_AGONY;
-    // Enemy elite mages have low health but can cast dangerous spells: group safety before bot DPS
-    else if (pCreature && pCreature->GetCreatureInfo()->UnitClass == 8)
-        CurseToCast = CURSE_OF_TONGUES;
-    // Default case: Curse of Agony
-    else
-        CurseToCast = CURSE_OF_AGONY;
+    // Enemy elite mages have low health but can cast dangerous spells: group safety before bot DPS OR if facing mana user player
+    else if ((target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->GetCreatureInfo()->UnitClass == 8) ||
+             (target->GetTypeId() == TYPEID_PLAYER && ((Player*)target)->GetPowerType() == POWER_MANA))
+        curseToCast = CURSE_OF_TONGUES;
 
     // Try to curse the target with the selected curse
-    if (CurseToCast && m_ai->In_Reach(pTarget, CurseToCast) && !pTarget->HasAura(CurseToCast))
+    if (curseToCast && m_ai->In_Reach(target, curseToCast) && !target->HasAura(curseToCast))
     {
-        if (CurseToCast == CURSE_OF_AGONY)
+        if (curseToCast == CURSE_OF_AGONY)
+        {
             if (AMPLIFY_CURSE && m_bot->IsSpellReady(AMPLIFY_CURSE))
                 CastSpell(AMPLIFY_CURSE, m_bot);
+        }
 
-        if (CastSpell(CurseToCast, pTarget))
+        if (CastSpell(curseToCast, target))
         {
-            m_CurrentCurse = CurseToCast;
+            m_CurrentCurse = curseToCast;
             return true;
         }
     }
-    // else: go for Curse of Agony
-    else if (CURSE_OF_AGONY && m_ai->In_Reach(pTarget, CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_AGONY))
+    // else: go for Curse of Agony: in the long run: go for direct damage
+    else if (CURSE_OF_AGONY && m_ai->In_Reach(target, CURSE_OF_AGONY) && !target->HasAura(CURSE_OF_AGONY))
     {
         if (AMPLIFY_CURSE && m_bot->IsSpellReady(AMPLIFY_CURSE))
             CastSpell(AMPLIFY_CURSE, m_bot);
 
-        if (CastSpell(CURSE_OF_AGONY, pTarget))
+        if (CastSpell(CURSE_OF_AGONY, target))
         {
             m_CurrentCurse = CURSE_OF_AGONY;
             return true;
         }
     }
     // else: go for Curse of Weakness
-    else if (CURSE_OF_WEAKNESS && !pTarget->HasAura(CURSE_OF_WEAKNESS) && !pTarget->HasAura(CURSE_OF_AGONY))
+    else if (CURSE_OF_WEAKNESS && !target->HasAura(CURSE_OF_WEAKNESS) && !target->HasAura(CURSE_OF_AGONY))
     {
         if (AMPLIFY_CURSE && m_bot->IsSpellReady(AMPLIFY_CURSE))
             CastSpell(AMPLIFY_CURSE, m_bot);
 
-        if (CastSpell(CURSE_OF_WEAKNESS, pTarget))
+        if (CastSpell(CURSE_OF_WEAKNESS, target))
         {
             m_CurrentCurse = CURSE_OF_WEAKNESS;
             return true;
@@ -539,17 +507,12 @@ void PlayerbotWarlockAI::CheckDemon()
 
         if (!pet && SUMMON_IMP && m_ai->CastSpell(SUMMON_IMP) == SPELL_CAST_OK)
         {
-            if (demonOfChoice != DEMON_IMP)
-                m_isTempImp = true;
-            else
-                m_isTempImp = false;
+            m_isTempImp = demonOfChoice != DEMON_IMP;
 
             //m_ai->TellMaster("Summoning Imp...");
             return;
         }
     }
-
-    return;
 }
 
 void PlayerbotWarlockAI::DoNonCombatActions()
@@ -675,9 +638,8 @@ void PlayerbotWarlockAI::DoNonCombatActions()
             firestone_count = m_bot->GetItemCount(MAJOR_FIRESTONE, false, nullptr);
         if (spellstone_count == 0 && firestone_count == 0)
         {
-            if (CREATE_SPELLSTONE && shardCount > 0 && m_ai->CastSpell(CREATE_SPELLSTONE) == SPELL_CAST_OK)
-                return;
-            else if (CREATE_SPELLSTONE == 0 && CREATE_FIRESTONE > 0 && shardCount > 0 && m_ai->CastSpell(CREATE_FIRESTONE) == SPELL_CAST_OK)
+            if ((CREATE_SPELLSTONE && shardCount > 0 && m_ai->CastSpell(CREATE_SPELLSTONE) == SPELL_CAST_OK) ||
+                (CREATE_SPELLSTONE == 0 && CREATE_FIRESTONE > 0 && shardCount > 0 && m_ai->CastSpell(CREATE_FIRESTONE) == SPELL_CAST_OK))
                 return;
         }
         else if (stone)
@@ -728,6 +690,4 @@ uint32 PlayerbotWarlockAI::Neutralize(uint8 creatureType)
         return BANISH;
     else
         return 0;
-
-    return 0;
 }

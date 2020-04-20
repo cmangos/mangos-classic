@@ -156,7 +156,7 @@ class MANGOS_DLL_SPEC PlayerbotWarlockAI : PlayerbotClassAI
 
         CombatManeuverReturns CastSpell(uint32 nextAction, Unit* pTarget = nullptr) { return CastSpellWand(nextAction, pTarget, SHOOT); }
 
-        bool CheckCurse(Unit* pTarget);
+        bool CheckCurse(Unit* target);
         void CheckDemon();
 
         // CURSES
