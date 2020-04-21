@@ -200,7 +200,7 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
         }
         case CONDITION_QUESTTAKEN:
         {
-            static_cast<Player const*>(target)->IsCurrentQuest(m_value1, m_value2);
+            return static_cast<Player const*>(target)->IsCurrentQuest(m_value1, m_value2);
         }
         case CONDITION_AD_COMMISSION_AURA:
         {
