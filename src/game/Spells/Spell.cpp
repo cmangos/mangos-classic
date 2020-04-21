@@ -366,6 +366,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
     unitTarget = nullptr;
     itemTarget = nullptr;
     gameObjTarget = nullptr;
+    corpseTarget = nullptr;
     focusObject = nullptr;
     m_triggeredByAuraSpell  = nullptr;
     m_spellAuraHolder = nullptr;
@@ -514,11 +515,18 @@ void Spell::FillTargetMap()
                 OnDestTarget();
                 AddDestExecution(SpellEffectIndex(i));
                 break;
+            case TARGET_TYPE_CORPSE: // can be unit and corpse
+                if (!targetingData.data[i].tempCorpseList.empty())
+                {
+                    CorpseList& corpseTargetList = targetingData.data[i].tempCorpseList;
+                    uint8 effectMask = targetMask[0] | targetMask[1];
+                    for (Corpse* corpse : corpseTargetList)
+                        AddCorpseTarget(corpse, effectMask);
+                }
             case TARGET_TYPE_UNIT:
             case TARGET_TYPE_UNIT_DEST:
             case TARGET_TYPE_PLAYER: // for now player handled here
             case TARGET_TYPE_SPECIAL_UNIT:
-            case TARGET_TYPE_CORPSE:
                 processedUnits = true;
                 for (uint8 rightTarget = 0; rightTarget < 2; ++rightTarget) // need to process target A and B separately due to effect masks
                 {
@@ -892,6 +900,27 @@ void Spell::AddGOTarget(GameObject* target, uint8 effectMask)
 
     // Add target to list
     m_UniqueGOTargetInfo.push_back(targetInfo);
+}
+
+void Spell::AddCorpseTarget(Corpse* target, uint8 effectMask)
+{
+    m_targets.m_targetMask |= m_spellInfo->Targets;
+
+    // Lookup target in already in list
+    for (auto& ihit : m_uniqueCorpseTargetInfo)
+    {
+        if (target->GetObjectGuid() == ihit.corpseGUID) // Found in list
+        {
+            ihit.effectMask |= effectMask;            // Add only effect mask
+            return;
+        }
+    }
+
+    CorpseTargetInfo info;
+    info.corpseGUID = target->GetObjectGuid();
+    info.effectMask = effectMask;
+
+    m_uniqueCorpseTargetInfo.push_back(info);
 }
 
 void Spell::AddItemTarget(Item* item, uint8 effectMask)
@@ -1374,6 +1403,20 @@ void Spell::DoAllEffectOnTarget(ItemTargetInfo* target)
     ExecuteEffects(nullptr, target->item, nullptr, effectMask);
 
     OnHit(SPELL_MISS_NONE);
+}
+
+void Spell::DoAllEffectOnTarget(CorpseTargetInfo* target)
+{
+    uint32 effectMask = target->effectMask;
+    if (!target->corpseGUID || !effectMask)
+        return;
+
+    Corpse* corpse = ObjectAccessor::GetCorpseInMap(target->corpseGUID, m_caster->GetMapId());
+    if (!corpse)
+        return;
+
+    corpseTarget = corpse;
+    ExecuteEffects(nullptr, nullptr, nullptr, effectMask);
 }
 
 void Spell::HandleImmediateEffectExecution(TargetInfo* target)
@@ -2877,6 +2920,9 @@ void Spell::handle_immediate()
     for (auto& ihit : m_UniqueTargetInfo)
         DoAllEffectOnTarget(&ihit);
 
+    for (auto& ihit : m_uniqueCorpseTargetInfo)
+        DoAllEffectOnTarget(&ihit);
+
     for (auto& ihit : m_UniqueGOTargetInfo)
         DoAllEffectOnTarget(&ihit);
 
@@ -3702,24 +3748,6 @@ void Spell::SendChannelStart(uint32 duration)
 
     if (m_caster->AI())
         m_caster->AI()->OnChannelStateChange(this, true, target);
-}
-
-void Spell::SendResurrectRequest(Player* target) const
-{
-    // Both players and NPCs can resurrect using spells - have a look at creature 28487 for example
-    // However, the packet structure differs slightly
-
-    const char* sentName = m_caster->GetTypeId() == TYPEID_PLAYER ? "" : m_caster->GetNameForLocaleIdx(target->GetSession()->GetSessionDbLocaleIndex());
-
-    WorldPacket data(SMSG_RESURRECT_REQUEST, (8 + 4 + strlen(sentName) + 1 + 1 + 1));
-    data << m_caster->GetObjectGuid();
-    data << uint32(strlen(sentName) + 1);
-
-    data << sentName;
-    data << uint8(m_caster->isSpiritHealer());
-    // override delay sent with SMSG_CORPSE_RECLAIM_DELAY, set instant resurrection for spells with this attribute
-    data << uint8(!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_RESURRECTION_TIMER));
-    target->GetSession()->SendPacket(data);
 }
 
 void Spell::TakeCastItem()
@@ -6938,8 +6966,7 @@ void Spell::FillFromTargetFlags(TempTargetingData& targetingData, SpellEffectInd
         else if (m_targets.getCorpseTargetGuid())
         {
             if (Corpse* corpse = m_targets.getCorpseTarget())
-                if (Player* owner = ObjectAccessor::FindPlayer(corpse->GetOwnerGuid()))
-                    targetingData.data[effIdx].tmpUnitList[false].push_back(owner);
+                targetingData.data[effIdx].tempCorpseList.push_back(corpse);
         }
     }
     else if (m_spellInfo->Targets & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM))
