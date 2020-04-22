@@ -390,7 +390,8 @@ bool ChatHandler::HandleNamegoCommand(char* args)
         if (HasLowerSecurity(target))
             return false;
 
-        if (target->IsBeingTeleported())
+        // make sure player is in world
+        if (!target->IsInWorld() || target->IsBeingTeleported())
         {
             PSendSysMessage(LANG_IS_TELEPORTED, nameLink.c_str());
             SetSentErrorMessage(true);
