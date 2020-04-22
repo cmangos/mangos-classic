@@ -299,15 +299,20 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
 
     bool forceTarget = false;
 
-    // Targeting seems to be directly affected by eff index 0 targets, client does the same thing
-    switch (spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])
+    // Targeting seems to be directly affected by eff index 0 targets, client does the same thing (spell id 38523 exception)
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24: // ignores everything and keeps turning
-            return;
-        case TARGET_UNIT_FRIEND:
-        case TARGET_UNIT_ENEMY: forceTarget = true; break;
-        case TARGET_UNIT_SCRIPT_NEAR_CASTER:
-        default: break;
+        switch (spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])
+        {
+            case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24: // ignores everything and keeps turning
+                return;
+            case TARGET_UNIT_FRIEND:
+            case TARGET_UNIT_ENEMY: forceTarget = true; break;
+            case TARGET_UNIT_SCRIPT_NEAR_CASTER:
+            default: break;
+        }
+        if (forceTarget)
+            break;
     }
 
     if (state)
