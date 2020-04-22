@@ -311,20 +311,16 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player* player)
             player->RemoveAurasDueToSpell(wsSpellTypes[teamIdx][BG_WS_FLAG_ACTION_PICKEDUP]);
         }
     }
-    else if (IsFlagPickedUp(otherTeamIdx))
+    else if (IsFlagPickedUp(otherTeamIdx) && GetFlagCarrierGuid(otherTeamIdx) == player->GetObjectGuid())
     {
-        if (GetFlagCarrierGuid(otherTeamIdx) == player->GetObjectGuid())
-        {
-            ClearFlagCarrier(otherTeamIdx);
-            player->RemoveAurasDueToSpell(wsSpellTypes[otherTeamIdx][BG_WS_FLAG_ACTION_PICKEDUP]);
-            m_FlagState[otherTeamIdx] = BG_WS_FLAG_STATE_ON_GROUND;
-            player->CastSpell(player, wsSpellTypes[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED], TRIGGERED_OLD_TRIGGERED);
-        }
+        ClearFlagCarrier(otherTeamIdx);
+        player->RemoveAurasDueToSpell(wsSpellTypes[otherTeamIdx][BG_WS_FLAG_ACTION_PICKEDUP]);
+        m_FlagState[otherTeamIdx] = BG_WS_FLAG_STATE_ON_GROUND;
+        player->CastSpell(player, wsSpellTypes[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED], TRIGGERED_OLD_TRIGGERED);
 
         UpdateFlagState(team, 1);
 
-        SendMessageToAll(wsMessageIds[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED],
-                         wsChatMessageTypes[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED], player);
+        SendMessageToAll(wsMessageIds[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED], wsChatMessageTypes[otherTeamIdx][BG_WS_FLAG_ACTION_DROPPED], player);
         UpdateWorldState(wsStateUpdateId[otherTeamIdx], uint32(-1));
         m_FlagsDropTimer[otherTeamIdx] = BG_WS_FLAG_DROP_TIME;
     }
