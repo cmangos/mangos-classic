@@ -641,8 +641,8 @@ void FollowMovementGenerator::Initialize(Unit& owner)
 {
     if (!i_target.isValid() || !i_target->IsInWorld())
         return;
+
     owner.addUnitState(UNIT_STAT_FOLLOW);                   // _MOVE set in _SetTargetLocation after required checks
-    HandleTargetedMovement(owner, 0);
 }
 
 void FollowMovementGenerator::Finalize(Unit& owner)
