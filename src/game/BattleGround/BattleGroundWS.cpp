@@ -396,14 +396,15 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* player, GameObject* target
 
     uint8 event = sBattleGroundMgr.GetGameObjectEventIndex(target->GetGUIDLow()).event1;
 
+    uint8 state = (event == WS_EVENT_FLAG_A ? GetFlagState(ALLIANCE) : GetFlagState(HORDE));
+
     // Check if the flag is being picked up from base
-    if ((event == WS_EVENT_FLAG_A && GetFlagState(ALLIANCE) == BG_WS_FLAG_STATE_ON_BASE) ||
-        (event == WS_EVENT_FLAG_H && GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_BASE))
+    if (state == BG_WS_FLAG_STATE_ON_BASE)
     {
         PickUpFlagFromBase(player);
     }
     // Check if we are trying to pick up or return a flag from the ground
-    else if (player->IsWithinDistInMap(target, 10) && GroundFlagInteraction(player, target) == BG_WS_FLAG_ACTION_NONE)
+    else if (state == BG_WS_FLAG_STATE_ON_GROUND && target->IsAtInteractDistance(player) && GroundFlagInteraction(player, target) == BG_WS_FLAG_ACTION_NONE)
     {
         sLog.outError("Failed to action the WS flag from event '%d'.", event);
     }
