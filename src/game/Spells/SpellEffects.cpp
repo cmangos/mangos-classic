@@ -175,7 +175,7 @@ pEffect SpellEffects[MAX_SPELL_EFFECTS] =
     &Spell::EffectSpiritHeal,                               // 117 SPELL_EFFECT_SPIRIT_HEAL              one spell: Spirit Heal
     &Spell::EffectSkill,                                    // 118 SPELL_EFFECT_SKILL                    professions and more
     &Spell::EffectApplyAreaAura,                            // 119 SPELL_EFFECT_APPLY_AREA_AURA_PET
-    &Spell::EffectUnused,                                   // 120 SPELL_EFFECT_TELEPORT_GRAVEYARD       one spell: Graveyard Teleport Test
+    &Spell::EffectTeleportGraveyard,                        // 120 SPELL_EFFECT_TELEPORT_GRAVEYARD       one spell: Graveyard Teleport Test
     &Spell::EffectWeaponDmg,                                // 121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG
     &Spell::EffectUnused,                                   // 122 SPELL_EFFECT_122                      unused
     &Spell::EffectSendTaxi,                                 // 123 SPELL_EFFECT_SEND_TAXI                taxi/flight related (misc value is taxi path id)
@@ -5980,6 +5980,17 @@ void Spell::EffectBind(SpellEffectIndex /*eff_idx*/)
     data << m_caster->GetObjectGuid();
     data << uint32(area_id);
     player->SendDirectMessage(data);
+}
+
+void Spell::EffectTeleportGraveyard(SpellEffectIndex eff_idx)
+{
+    if (!unitTarget || !unitTarget->IsPlayer())
+        return;
+
+    Player* player = static_cast<Player*>(unitTarget);
+    if (BattleGround* bg = player->GetBattleGround())
+        if (WorldSafeLocsEntry const* entry = bg->GetClosestGraveYard(player))
+            player->NearTeleportTo(entry->x, entry->y, entry->z, entry->o, unitTarget == m_caster);
 }
 
 uint32 Spell::GetUsableHealthStoneItemType(Unit* target)
