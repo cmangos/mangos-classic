@@ -392,7 +392,23 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* player, GameObject* target
 
     uint8 event = sBattleGroundMgr.GetGameObjectEventIndex(target->GetGUIDLow()).event1;
 
-    uint8 state = (event == WS_EVENT_FLAG_A ? GetFlagState(ALLIANCE) : GetFlagState(HORDE));
+    uint8 state = 255;
+    if (event == WS_EVENT_FLAG_A)
+        state = GetFlagState(ALLIANCE);
+    else if (event == WS_EVENT_FLAG_H)
+        state = GetFlagState(HORDE);
+    else // ground flag
+    {
+        Team team = player->GetTeam();
+        PvpTeamIndex teamIdx = GetTeamIndexByTeamId(team);
+        PvpTeamIndex otherTeamIdx = GetOtherTeamIndex(teamIdx);
+        uint32 displayId = target->GetDisplayId();
+        if (wsFlagIds[teamIdx] == displayId)
+            state = GetFlagState(team);
+        else if (wsFlagIds[otherTeamIdx] == displayId)
+            state = team == ALLIANCE ? GetFlagState(HORDE) : GetFlagState(ALLIANCE);
+    }
+
 
     // Check if the flag is being picked up from base
     if (state == BG_WS_FLAG_STATE_ON_BASE)
