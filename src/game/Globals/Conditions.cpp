@@ -25,6 +25,8 @@
 #include "World/WorldState.h"
 #include "Maps/InstanceData.h"
 #include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
 #include "Spells/SpellMgr.h"
 
 // Attention: make sure to keep this list in sync with ConditionSource to avoid array
