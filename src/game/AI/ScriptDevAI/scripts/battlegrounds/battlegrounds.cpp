@@ -64,6 +64,15 @@ struct npc_spirit_guideAI : public ScriptedAI
             m_creature->CastSpell(m_creature, SPELL_SPIRIT_HEAL_CHANNEL, TRIGGERED_NONE);
     }
 
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            m_creature->InterruptSpell(CURRENT_CHANNELED_SPELL);
+            m_creature->CastSpell(nullptr, SPELL_GRAVEYARD_TELEPORT, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+
     void CorpseRemoved(uint32&) override
     {
         // TODO: would be better to cast a dummy spell
