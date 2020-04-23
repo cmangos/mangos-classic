@@ -25,6 +25,7 @@
 #include "Tools/Language.h"
 #include "WorldPacket.h"
 #include "Globals/ObjectMgr.h"
+#include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 
 BattleGroundAV::BattleGroundAV(): m_HonorMapComplete(0), m_RepTowerDestruction(0), m_RepCaptain(0), m_RepBoss(0), m_RepOwnedGrave(0), m_RepOwnedMine(0), m_RepSurviveCaptain(0), m_RepSurviveTower(0)
 {
