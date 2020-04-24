@@ -1699,7 +1699,16 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotUnit(pSource))
                 break;
 
-            ((Unit*)pSource)->RemoveAurasDueToSpell(m_script->removeAura.spellId);
+            // Flag Command Additional removes aura by caster
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+            {
+                if (LogIfNotUnit(pTarget))
+                    break;
+
+                ((Unit*)pSource)->RemoveAurasByCasterSpell(m_script->removeAura.spellId, pTarget->GetObjectGuid());
+            }
+            else
+                ((Unit*)pSource)->RemoveAurasDueToSpell(m_script->removeAura.spellId);
             break;
         }
         case SCRIPT_COMMAND_CAST_SPELL:                     // 15
