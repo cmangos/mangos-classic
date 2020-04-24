@@ -33,6 +33,7 @@ class PlayerAI : public UnitAI
 
         void UpdateAI(const uint32 diff) override;
         void JustGotCharmed(Unit* charmer) override;
+        void EnterEvadeMode() override;
     protected:
         uint32 LookupHighestLearnedRank(uint32 spellId);
         void AddPlayerSpellAction(uint32 priority, uint32 spellId, std::function<Unit*()> selector = nullptr);
