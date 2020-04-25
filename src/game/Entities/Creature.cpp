@@ -774,15 +774,6 @@ void Creature::RegenerateHealth()
 
 bool Creature::AIM_Initialize()
 {
-    /*
-    // TODO:: implement this lock with proper guard when we'll support multimap or such
-    // make sure nothing can change the AI during AI update
-    if (m_AI_locked)
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "AIM_Initialize: failed to init, locked.");
-        return false;
-    }*/
-
     i_motionMaster.Initialize();
     m_ai.reset(FactorySelector::selectAI(this));
 
