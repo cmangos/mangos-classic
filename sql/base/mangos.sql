@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2758_01_mangos_conditions_upgrade` bit(1) DEFAULT NULL
+  `required_z2759_01_mangos_gameobjet_template` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -2006,12 +2006,12 @@ CREATE TABLE `gameobject_template` (
   `ExtraFlags` int(10) unsigned NOT NULL DEFAULT '0',
   `size` float NOT NULL DEFAULT '1',
   `data0` int(10) unsigned NOT NULL DEFAULT '0',
-  `data1` int(10) unsigned NOT NULL DEFAULT '0',
+  `data1` int(10) NOT NULL DEFAULT '0',
   `data2` int(10) unsigned NOT NULL DEFAULT '0',
   `data3` int(10) unsigned NOT NULL DEFAULT '0',
   `data4` int(10) unsigned NOT NULL DEFAULT '0',
   `data5` int(10) unsigned NOT NULL DEFAULT '0',
-  `data6` int(10) unsigned NOT NULL DEFAULT '0',
+  `data6` int(10) NOT NULL DEFAULT '0',
   `data7` int(10) unsigned NOT NULL DEFAULT '0',
   `data8` int(10) unsigned NOT NULL DEFAULT '0',
   `data9` int(10) unsigned NOT NULL DEFAULT '0',

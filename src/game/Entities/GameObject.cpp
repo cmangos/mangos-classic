@@ -428,13 +428,11 @@ void GameObject::Update(const uint32 diff)
                     }
                 }
 
-                if (uint32 max_charges = goInfo->GetCharges())
+                int32 max_charges = goInfo->GetCharges();   // Only check usable (positive) charges; 0 : no charge; -1 : infinite charges
+                if (max_charges > 0 && m_useTimes >= max_charges)
                 {
-                    if (m_useTimes >= max_charges)
-                    {
-                        m_useTimes = 0;
-                        SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
-                    }
+                    m_useTimes = 0;
+                    SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
                 }
             }
             break;
@@ -1065,7 +1063,8 @@ bool GameObject::ActivateToQuest(Player* pTarget) const
         }
         case GAMEOBJECT_TYPE_GOOBER:
         {
-            if (pTarget->GetQuestStatus(GetGOInfo()->goober.questId) == QUEST_STATUS_INCOMPLETE)
+            // Quest ID can be negative, so prevent error in Player::GetQuestStatus by providing only positive value
+            if (GetGOInfo()->goober.questId > 0 && pTarget->GetQuestStatus(GetGOInfo()->goober.questId) == QUEST_STATUS_INCOMPLETE)
                 return true;
             break;
         }
@@ -1216,7 +1215,8 @@ void GameObject::Use(Unit* user)
             user->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
     // test only for exist cooldown data (cooldown timer used for door/buttons reset that not have use cooldown)
-    if (uint32 cooldown = GetGOInfo()->GetCooldown())
+    uint32 cooldown = GetGOInfo()->GetCooldown();
+    if ( cooldown > 0)
     {
         if (m_cooldownTime > sWorld.GetGameTime())
             return;
@@ -1278,7 +1278,7 @@ void GameObject::Use(Unit* user)
             TriggerLinkedGameObject(user);
 
             // TODO: possible must be moved to loot release (in different from linked triggering)
-            if (GetGOInfo()->chest.eventId)
+            if (GetGOInfo()->chest.eventId > 0)
             {
                 DEBUG_LOG("Chest ScriptStart id %u for %s (opened by %s)", GetGOInfo()->chest.eventId, GetGuidStr().c_str(), user->GetGuidStr().c_str());
                 StartEvents_Event(GetMap(), GetGOInfo()->chest.eventId, user, this);
@@ -1456,7 +1456,7 @@ void GameObject::Use(Unit* user)
                 }
 
                 // possible quest objective for active quests
-                if (info->goober.questId && sObjectMgr.GetQuestTemplate(info->goober.questId))
+                if (info->goober.questId > 0 && sObjectMgr.GetQuestTemplate(info->goober.questId))
                 {
                     // Quest require to be active for GO using
                     if (player->GetQuestStatus(info->goober.questId) != QUEST_STATUS_INCOMPLETE)
@@ -1680,7 +1680,7 @@ void GameObject::Use(Unit* user)
             // Previously we locked all spellcasters on use with no real indication why
             // or timeout of the locking. Now only doing it on it being consumed to prevent further use.
             // spellcaster GOs like city portals should never be locked
-            if (info->spellcaster.charges && !GetUseCount())
+            if (info->spellcaster.charges > 0 && !GetUseCount())
                 SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
             return;
         }

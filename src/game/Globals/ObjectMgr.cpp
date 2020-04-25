@@ -7626,7 +7626,7 @@ void ObjectMgr::LoadGameObjectForQuests()
             }
             case GAMEOBJECT_TYPE_GOOBER:
             {
-                if (itr->goober.questId)                    // quests objects
+                if (itr->goober.questId != 0)               // quests objects
                 {
                     mGameObjectForQuestSet.insert(itr->id);
                     ++count;
