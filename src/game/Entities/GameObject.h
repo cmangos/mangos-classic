@@ -797,7 +797,7 @@ class GameObject : public WorldObject
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
-        uint32      m_respawnDelay;                     // (secs) if 0 then current GO state no dependent from timer
+        uint32      m_respawnDelay;                         // (secs) if 0 then current GO state no dependent from timer
         bool        m_respawnOverriden;
         bool        m_respawnOverrideOnce;
         bool        m_forcedDespawn;

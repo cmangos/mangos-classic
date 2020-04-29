@@ -281,7 +281,6 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                     ProcessForceFieldOpening();
             }
             break;
-
         // North
         case TYPE_KING_GORDOK:
             m_auiEncounter[uiType] = uiData;
@@ -644,6 +643,16 @@ bool EffectDummyCreature_spell_guard_slip_kik(Unit* pCaster, uint32 uiSpellId, S
     return false;
 }
 
+struct DreadsteedQuestObjects : public GameObjectAI
+{
+    DreadsteedQuestObjects(GameObject* go) : GameObjectAI(go) {}
+
+    void JustSpawned() override
+    {
+        m_go->SetRespawnDelay(0);
+    }
+};
+
 void AddSC_instance_dire_maul()
 {
     Script* pNewScript = new Script;
@@ -659,5 +668,10 @@ void AddSC_instance_dire_maul()
     pNewScript = new Script;
     pNewScript->Name = "npc_mizzle_crafty";
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_guard_slip_kik;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_dreadsteed_quest_objects";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<DreadsteedQuestObjects>;
     pNewScript->RegisterSelf();
 }
