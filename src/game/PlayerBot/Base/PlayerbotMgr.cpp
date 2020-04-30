@@ -78,7 +78,7 @@ PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
 
 PlayerbotMgr::~PlayerbotMgr()
 {
-    LogoutAllBots();
+    LogoutAllBots(true);
 }
 
 void PlayerbotMgr::UpdateAI(const uint32 /*diff*/) {}
@@ -725,19 +725,33 @@ void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& /*packet*/)
      */
 }
 
-void PlayerbotMgr::LogoutAllBots()
+void PlayerbotMgr::RemoveBots()
 {
-    while (true)
+    for (auto& guid : m_botToRemove)
     {
-        PlayerBotMap::const_iterator itr = GetPlayerBotsBegin();
-        if (itr == GetPlayerBotsEnd()) break;
-        Player* bot = itr->second;
-        LogoutPlayerBot(bot->GetObjectGuid());
+        Player* bot = GetPlayerBot(guid);
+        if (bot)
+        {
+            WorldSession* botWorldSessionPtr = bot->GetSession();
+            m_playerBots.erase(guid);                               // deletes bot player ptr inside this WorldSession PlayerBotMap
+            botWorldSessionPtr->LogoutPlayer();                     // this will delete the bot Player object and PlayerbotAI object
+            delete botWorldSessionPtr;                              // finally delete the bot's WorldSession
+        }
     }
-    RemoveAllBotsFromGroup();
+
+    m_botToRemove.clear();
 }
 
+void PlayerbotMgr::LogoutAllBots(bool fullRemove /*= false*/)
+{
+    for (auto itr : m_playerBots)
+        m_botToRemove.insert(itr.first);
 
+    RemoveAllBotsFromGroup();
+
+    if (fullRemove)
+        RemoveBots();
+}
 
 void PlayerbotMgr::Stay()
 {
@@ -752,14 +766,7 @@ void PlayerbotMgr::Stay()
 // Playerbot mod: logs out a Playerbot.
 void PlayerbotMgr::LogoutPlayerBot(ObjectGuid guid)
 {
-    Player* bot = GetPlayerBot(guid);
-    if (bot)
-    {
-        WorldSession* botWorldSessionPtr = bot->GetSession();
-        m_playerBots.erase(guid);    // deletes bot player ptr inside this WorldSession PlayerBotMap
-        botWorldSessionPtr->LogoutPlayer(); // this will delete the bot Player object and PlayerbotAI object
-        delete botWorldSessionPtr;  // finally delete the bot's WorldSession
-    }
+    m_botToRemove.insert(guid);
 }
 
 // Playerbot mod: Gets a player bot Player object for this WorldSession master

@@ -381,8 +381,8 @@ bool WorldSession::Update(PacketFilter& updater)
                 OpcodeHandler const& opHandle = opcodeTable[botpacket->GetOpcode()];
                 pBotWorldSession->ExecuteOpcode(opHandle, *botpacket);
             }
-            pBotWorldSession->m_recvQueue.clear();
         }
+        GetPlayer()->GetPlayerbotMgr()->RemoveBots();
     }
 #endif
 
@@ -485,7 +485,7 @@ void WorldSession::LogoutPlayer()
 #ifdef BUILD_PLAYERBOT
         // Log out all player bots owned by this toon
         if (_player->GetPlayerbotMgr())
-            _player->GetPlayerbotMgr()->LogoutAllBots();
+            _player->GetPlayerbotMgr()->LogoutAllBots(true);
 #endif
 
         sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName(), _player->GetGUIDLow());
@@ -651,7 +651,19 @@ void WorldSession::LogoutPlayer()
 /// Kick a player out of the World
 void WorldSession::KickPlayer()
 {
+#ifdef BUILD_PLAYERBOT
+    if (_player->GetPlayerbotAI())
+    {
+        auto master = _player->GetPlayerbotAI()->GetMaster();
+        auto botMgr = master->GetPlayerbotMgr();
+        if (botMgr)
+            botMgr->LogoutPlayerBot(_player->GetObjectGuid());
+    }
+    else
+        LogoutRequest(time(nullptr) - 20, false);
+#else
     LogoutRequest(time(nullptr) - 20, false);
+#endif
 }
 
 void WorldSession::SendExpectedSpamRecords()
