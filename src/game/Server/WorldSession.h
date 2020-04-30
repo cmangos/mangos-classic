@@ -192,9 +192,10 @@ class WorldSession
         bool isLogingOut() const { return _logoutTime || m_playerLogout; }
 
         /// Engage the logout process for the user
-        void LogoutRequest(time_t requestTime)
+        void LogoutRequest(time_t requestTime, bool saveToDB = true)
         {
             _logoutTime = requestTime;
+            m_playerSave = saveToDB;
         }
 
         /// Is logout cooldown expired?
@@ -208,7 +209,7 @@ class WorldSession
             return (_logoutTime > 0 && currTime >= _logoutTime + 60);
         }
 
-        void LogoutPlayer(bool save);
+        void LogoutPlayer();
         void KickPlayer();
 
         void QueuePacket(std::unique_ptr<WorldPacket> new_packet);
@@ -710,14 +711,14 @@ class WorldSession
         AccountTypes _security;
         uint32 _accountId;
 
-        time_t _logoutTime;
+        time_t _logoutTime;                                 // when logout will be processed after a logout request
+        bool m_playerSave;                                  // should we have to save the player after logout request
         bool m_inQueue;                                     // session wait in auth.queue
         bool m_playerLoading;                               // code processed in LoginPlayer
 
         // True when the player is in the process of logging out (WorldSession::LogoutPlayer is currently executing)
         bool m_playerLogout;
         bool m_playerRecentlyLogout;
-        bool m_playerSave;                                  // code processed in LogoutPlayer with save request
         LocaleConstant m_sessionDbcLocale;
         int m_sessionDbLocaleIndex;
         uint32 m_latency;

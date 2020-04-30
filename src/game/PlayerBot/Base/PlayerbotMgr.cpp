@@ -757,7 +757,7 @@ void PlayerbotMgr::LogoutPlayerBot(ObjectGuid guid)
     {
         WorldSession* botWorldSessionPtr = bot->GetSession();
         m_playerBots.erase(guid);    // deletes bot player ptr inside this WorldSession PlayerBotMap
-        botWorldSessionPtr->LogoutPlayer(true); // this will delete the bot Player object and PlayerbotAI object
+        botWorldSessionPtr->LogoutPlayer(); // this will delete the bot Player object and PlayerbotAI object
         delete botWorldSessionPtr;  // finally delete the bot's WorldSession
     }
 }
