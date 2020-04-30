@@ -3393,16 +3393,18 @@ bool PlayerbotAI::IsInCombat()
 
 bool PlayerbotAI::IsRegenerating()
 {
+    // Return true is our mana is already regenerating by spell
+    if (m_bot->HasAuraType(SPELL_AURA_MOD_POWER_REGEN))
+        return true;
+    // We need to check spell category for health regeneration because some passive auras like troll racial would return true on SPELL_AURA_MOD_HEALTH_REGEN
     Unit::SpellAuraHolderMap& auras = m_bot->GetSpellAuraHolderMap();
-    for (Unit::SpellAuraHolderMap::iterator aura = auras.begin(); aura != auras.end(); aura++)
+    for (auto aura = auras.begin(); aura != auras.end(); aura++)
     {
         SpellEntry const* spell = aura->second->GetSpellProto();
         if (!spell)
             continue;
         if (spell->Category == 59 || spell->Category == 11)
-        {
             return true;
-        }
     }
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
         m_bot->SetStandState(UNIT_STAND_STATE_STAND);
