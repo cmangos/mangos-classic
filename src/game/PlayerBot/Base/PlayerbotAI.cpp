@@ -1618,10 +1618,10 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 return;
 
             uint8 bagslot;
-            uint32 itemslot, itemid, count, totalcount;
+            uint32 itemslot, itemid, count, totalcount, received, created;
 
-            p.read_skip<uint32>();  // 4 0=looted, 1=from npc
-            p.read_skip<uint32>();  // 4 0=received, 1=created
+            p >> received;          // 4 0=looted, 1=from npc
+            p >> created;           // 4 0=received, 1=created
             p.read_skip<uint32>();  // 4 IsShowChatMessage
             p >> bagslot;           // 1 bagslot
             p >> itemslot;          // 4 item slot, but when added to stack: 0xFFFFFFFF
@@ -1630,6 +1630,22 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             p.read_skip<uint32>();  // 4 random item property id
             p >> count;             // 4 count of items
             p >> totalcount;        // 4 count of items in inventory
+
+            ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid);
+            if (pProto)
+            {
+                std::ostringstream out;
+                if (received == 1)
+                {
+                    if (created == 1)
+                        out << "|cff009900" << "I created: |r";
+                    else
+                        out << "|cff009900" << "I received: |r";
+                    MakeItemLink(pProto, out);
+                    TellMaster(out.str().c_str());
+                    SetState(BOTSTATE_DELAYED);
+                }
+            }
 
             if (IsInQuestItemList(itemid))
             {
