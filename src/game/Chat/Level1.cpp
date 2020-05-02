@@ -403,7 +403,7 @@ bool ChatHandler::HandleNamegoCommand(char* args)
         if (pMap->IsBattleGround())
         {
             // only allow if gm mode is on
-            if (!target->isGameMaster())
+            if (!player->isGameMaster())
             {
                 PSendSysMessage(LANG_CANNOT_GO_TO_BG_GM, nameLink.c_str());
                 SetSentErrorMessage(true);
