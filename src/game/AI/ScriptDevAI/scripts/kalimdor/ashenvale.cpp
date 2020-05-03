@@ -249,57 +249,92 @@ bool GOUse_go_naga_brazier(Player* /*pPlayer*/, GameObject* pGo)
 enum
 {
     QUEST_FREEDOM_TO_RUUL   = 6482,
-    NPC_T_URSA              = 3921,
-    NPC_T_TOTEMIC           = 3922,
+    NPC_T_AVENGER           = 3925,
+    NPC_T_SHAMAN            = 3924,
     NPC_T_PATHFINDER        = 3926,
-    SPELL_RUUL_SHAPECHANGE  = 20514
+    SPELL_RUUL_SHAPECHANGE  = 20514,
+    SAY_RUUL_COMPLETE       = -1010022
 };
+
+static uint32 m_ruulAmbushers[3] = { NPC_T_AVENGER, NPC_T_SHAMAN, NPC_T_PATHFINDER};
+
+static float m_ruulAmbushCoords[2][3] =
+        {
+                {3425.33f, -595.93f, 178.31f},    // First ambush
+                {3245.34f, -506.66f, 150.05f},    // Second ambush
+        };
 
 struct npc_ruul_snowhoofAI : public npc_escortAI
 {
-    npc_ruul_snowhoofAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_ruul_snowhoofAI(Creature* creature) : npc_escortAI(creature) { Reset(); }
 
     void Reset() override
     {
         DoCastSpellIfCan(m_creature, SPELL_RUUL_SHAPECHANGE, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void WaypointReached(uint32 uiPointId) override
+    void DoSpawnAmbush(uint8 index)
     {
-        switch (uiPointId)
+        for (auto ambusherEntry : m_ruulAmbushers)
         {
-            case 13:
-                m_creature->SummonCreature(NPC_T_TOTEMIC, 3449.218018f, -587.825073f, 174.978867f, 4.714445f, TEMPSPAWN_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_T_URSA, 3446.384521f, -587.830872f, 175.186279f, 4.714445f, TEMPSPAWN_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_T_PATHFINDER, 3444.218994f, -587.835327f, 175.380600f, 4.714445f, TEMPSPAWN_DEAD_DESPAWN, 60000);
-                break;
-            case 19:
-                m_creature->SummonCreature(NPC_T_TOTEMIC, 3508.344482f, -492.024261f, 186.929031f, 4.145029f, TEMPSPAWN_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_T_URSA, 3506.265625f, -490.531006f, 186.740128f, 4.239277f, TEMPSPAWN_DEAD_DESPAWN, 60000);
-                m_creature->SummonCreature(NPC_T_PATHFINDER, 3503.682373f, -489.393799f, 186.629684f, 4.349232f, TEMPSPAWN_DEAD_DESPAWN, 60000);
-                break;
-            case 21:
-                if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_FREEDOM_TO_RUUL, m_creature);
-                break;
+            float fx, fy, fz;
+            m_creature->GetRandomPoint(m_ruulAmbushCoords[index][0], m_ruulAmbushCoords[index][1], m_ruulAmbushCoords[index][2], 7.0f, fx, fy, fz);
+            if (Creature* ambusher = m_creature->SummonCreature(ambusherEntry, fx, fy, fz, 0, TEMPSPAWN_DEAD_DESPAWN, 60 * IN_MILLISECONDS))
+            {
+                ambusher->SetWalk(false);
+                ambusher->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+            }
         }
     }
 
-    void JustSummoned(Creature* summoned) override
+    void WaypointReached(uint32 pointId) override
     {
-        summoned->AI()->AttackStart(m_creature);
+        switch (pointId)
+        {
+            case 13:
+                DoSpawnAmbush(0);
+                break;
+            case 30:
+                DoSpawnAmbush(1);
+                break;
+            case 31:
+                m_creature->SetImmuneToNPC(true);
+                m_creature->RemoveAurasDueToSpell(SPELL_RUUL_SHAPECHANGE);
+                if (Player* player = GetPlayerForEscort())
+                {
+                    m_creature->SetFacingToObject(player);
+                    player->RewardPlayerAndGroupAtEventExplored(QUEST_FREEDOM_TO_RUUL, m_creature);
+                }
+                break;
+            case 32:
+                if (Player* player = GetPlayerForEscort())
+                {
+                    DoScriptText(SAY_RUUL_COMPLETE, m_creature, player);
+                    m_creature->SetFacingToObject(player);
+                }
+                m_creature->HandleEmote(EMOTE_ONESHOT_BOW);
+                m_creature->SetWalk(false);
+                break;
+            case 33:
+                DoCastSpellIfCan(m_creature, SPELL_RUUL_SHAPECHANGE);
+                break;
+            case 35:
+                m_creature->SetImmuneToNPC(false);
+                m_creature->SetWalk(true);
+                m_creature->ForcedDespawn();
+        }
     }
 };
 
-bool QuestAccept_npc_ruul_snowhoof(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_ruul_snowhoof(Player* player, Creature* creature, const Quest* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_FREEDOM_TO_RUUL)
+    if (quest->GetQuestId() == QUEST_FREEDOM_TO_RUUL)
     {
-        pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-        pCreature->SetStandState(UNIT_STAND_STATE_STAND);
+        creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+        creature->SetStandState(UNIT_STAND_STATE_STAND);
 
-        if (npc_ruul_snowhoofAI* pEscortAI = dynamic_cast<npc_ruul_snowhoofAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer, pQuest);
+        if (npc_ruul_snowhoofAI* escortAI = dynamic_cast<npc_ruul_snowhoofAI*>(creature->AI()))
+            escortAI->Start(false, player, quest);
     }
     return true;
 }
