@@ -20,6 +20,16 @@
 #define MANGOS_TIMER_H
 
 #include "Common.h"
+#include "chrono"
+
+inline std::chrono::steady_clock::time_point GetApplicationStartTime()
+{
+    using namespace std::chrono;
+
+    static const steady_clock::time_point ApplicationStartTime = steady_clock::now();
+
+    return ApplicationStartTime;
+}
 
 class WorldTimer
 {
