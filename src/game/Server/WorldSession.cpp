@@ -652,6 +652,9 @@ void WorldSession::LogoutPlayer()
 void WorldSession::KickPlayer()
 {
 #ifdef BUILD_PLAYERBOT
+    if (!_player)
+        return;
+
     if (_player->GetPlayerbotAI())
     {
         auto master = _player->GetPlayerbotAI()->GetMaster();
