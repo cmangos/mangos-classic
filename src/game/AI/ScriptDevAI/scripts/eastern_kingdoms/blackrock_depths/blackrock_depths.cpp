@@ -1845,56 +1845,56 @@ enum
 
 struct npc_ironhand_guardianAI : public ScriptedAI
 {
-    npc_ironhand_guardianAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_ironhand_guardianAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        instance = (ScriptedInstance*)creature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* instance;
 
-    uint32 m_uiGoutOfFlameTimer;
-    uint8 m_uiPhase;
+    uint32 m_goutOfFlameTimer;
+    uint8 m_phase;
 
     void Reset() override
     {
-        m_uiGoutOfFlameTimer    = urand(4, 8) * 1000;
+        m_goutOfFlameTimer = urand(4, 30) * IN_MILLISECONDS;
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
-        if (!m_pInstance)
+        if (!instance)
             return;
 
-        if (m_pInstance->GetData(TYPE_IRON_HALL) == NOT_STARTED)
+        if (instance->GetData(TYPE_IRON_HALL) == NOT_STARTED)
         {
-            m_uiPhase = 0;
+            m_phase = 0;
             return;
         }
 
-        switch (m_uiPhase)
+        switch (m_phase)
         {
             case 0:
                 m_creature->RemoveAurasDueToSpell(SPELL_STONED);
                 if (DoCastSpellIfCan(m_creature, SPELL_STONED_VISUAL) == CAST_OK)
-                    m_uiPhase = 1;
+                    m_phase = 1;
                 break;
             case 1:
-                if (m_uiGoutOfFlameTimer < uiDiff)
+                if (m_goutOfFlameTimer < diff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_GOUT_OF_FLAME) == CAST_OK)
-                        m_uiGoutOfFlameTimer = urand(13, 18) * 1000;
+                        m_goutOfFlameTimer = urand(20, 40) * IN_MILLISECONDS;
                 }
                 else
-                    m_uiGoutOfFlameTimer -= uiDiff;
+                    m_goutOfFlameTimer -= diff;
                 break;
         }
     }
 };
 
-UnitAI* GetAI_npc_ironhand_guardian(Creature* pCreature)
+UnitAI* GetAI_npc_ironhand_guardian(Creature* creature)
 {
-    return new npc_ironhand_guardianAI(pCreature);
+    return new npc_ironhand_guardianAI(creature);
 }
 
 void AddSC_blackrock_depths()

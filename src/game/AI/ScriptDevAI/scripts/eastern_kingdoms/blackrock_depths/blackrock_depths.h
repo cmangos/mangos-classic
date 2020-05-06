@@ -139,7 +139,9 @@ enum
     YELL_SENATOR_1          = -1230060,
     YELL_SENATOR_2          = -1230061,
     YELL_SENATOR_3          = -1230062,
-    YELL_SENATOR_4          = -1230063
+    YELL_SENATOR_4          = -1230063,
+
+    YELL_MAGMUS_INTRO        = -1230070
 };
 
 // Random emotes for Grim Guzzler patrons

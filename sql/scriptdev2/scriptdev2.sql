@@ -2033,7 +2033,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1230066','Hey, Rocknot!','0','0','0','0','0','Nagmara SAY_NAGMARA_1'),
 ('-1230067','Let''s go, honey.','0','0','0','0','0','Nagmara SAY_NAGMARA_2'),
 ('-1230068','%s kisses her lover.','0','2','0','0','0','Nagmara TEXTEMOTE_NAGMARA'),
-('-1230069','%s kisses Mistress Nagmara','0','2','0','17','0','Rocknot TEXTEMOTE_ROCKNOT');
+('-1230069','%s kisses Mistress Nagmara','0','2','0','17','0','Rocknot TEXTEMOTE_ROCKNOT'),
+('-1230070','Emperor Thaurissan does not wish to be disturbed! Turn back now or face your doom, weak mortals!','0','6','0','0','5430','Magmus YELL_MAGMUS_INTRO');
 
 -- -1 249 000 ONYXIA'S LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
