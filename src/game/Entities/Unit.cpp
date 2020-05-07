@@ -7706,8 +7706,9 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         if (u->GetTypeId() != TYPEID_PLAYER || !((Player*)u)->isGameMaster())
             return false;
 
-    // Visible units, always are visible for all units, except for units under invisibility
-    if (m_Visibility == VISIBILITY_ON && u->GetVisibilityData().GetInvisibilityMask() == 0)
+    // Visible units, always are visible for all units
+    // Prior to TBC, invisible units could see visible units without restriction
+    if (m_Visibility == VISIBILITY_ON)
         return true;
 
     // GMs see any players, not higher GMs and all units
@@ -7742,9 +7743,9 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
                 // Invisible units, always are visible for units under same invisibility type
                 (GetVisibilityData().GetInvisibilityMask() & u->GetVisibilityData().GetInvisibilityMask()) != 0 ||
                 // Invisible units, always are visible for unit that can detect this invisibility (have appropriate level for detect)
-                u->GetVisibilityData().CanDetectInvisibilityOf(this) ||
-                // Units that can detect invisibility always are visible for units that can be detected
-                GetVisibilityData().CanDetectInvisibilityOf(u)))
+                u->GetVisibilityData().CanDetectInvisibilityOf(this))
+                // Unlike TBC and beyond, unit with invisibility detection are not always visible for units that can be detected
+                )
     {
         invisible = false;
     }
