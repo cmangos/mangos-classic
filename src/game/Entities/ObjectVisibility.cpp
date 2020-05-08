@@ -75,10 +75,10 @@ bool VisibilityData::CanDetectInvisibilityOf(WorldObject const* target) const
             if (((1 << i) & mask) == 0)
                 continue;
 
-            // find invisibility level
-            int32 invLevel = GetInvisibilityValue(i);
+            // Find target's invisibility level to compare it with caster invisibility detection level
+            int32 invLevel = target->GetVisibilityData().GetInvisibilityValue(i);
 
-            // find invisibility detect level - this is taken from controlling player or self
+            // Find invisibility detection level - this is taken from controlling player or self
             int32 detectLevel = GetInvisibilityDetectValue(i);
 
             if (invLevel <= detectLevel)

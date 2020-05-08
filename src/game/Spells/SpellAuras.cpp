@@ -2714,16 +2714,42 @@ void Aura::HandleInvisibility(bool apply, bool Real)
 
 void Aura::HandleInvisibilityDetect(bool apply, bool Real)
 {
+    // In Classic: multiple invisibility detection auras can apply at the same type but only the highest rank one for a given invisibility type (mask) is used
     Unit* target = GetTarget();
-
-    target->GetVisibilityData().SetInvisibilityDetectMask(m_modifier.m_miscvalue, apply);
-    target->GetVisibilityData().AddInvisibilityDetectValue(m_modifier.m_miscvalue, apply ? m_modifier.m_amount : -m_modifier.m_amount);
-    if (!apply)
+    uint32 detectValue = m_modifier.m_amount;
+    // Aura appliance
+    if (apply)
     {
+        // Update invisibility detection value for this invisibility mask only if new value if higher than current
+        // to prevent lower detection ranks from erasing higher ranks
+        target->GetVisibilityData().SetInvisibilityDetectMask(m_modifier.m_miscvalue, apply);
+        if (target->GetVisibilityData().GetInvisibilityDetectValue(m_modifier.m_miscvalue) <= detectValue)
+            target->GetVisibilityData().SetInvisibilityDetectValue(m_modifier.m_miscvalue, apply ? m_modifier.m_amount : -m_modifier.m_amount);
+    }
+    // Aura removal
+    else
+    {
+        // Check if other auras for the same invisibility mask exist and update invisibility detection value to the highest one
+        uint32 maxDetectValue = 0;
         Unit::AuraList const& auras = target->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
         for (auto aura : auras)
-            target->GetVisibilityData().SetInvisibilityDetectMask(aura->GetModifier()->m_miscvalue, true);
+        {
+            if (aura->GetModifier()->m_miscvalue == m_modifier.m_miscvalue
+                    && aura->GetModifier()->m_amount != detectValue
+                    && aura->GetModifier()->m_amount > maxDetectValue)
+                maxDetectValue = aura->GetModifier()->m_amount;
+        }
+
+        if (maxDetectValue)
+            target->GetVisibilityData().SetInvisibilityDetectValue(m_modifier.m_miscvalue, maxDetectValue);
+        // No other aura: remove invisibility detection for this invisibility mask
+        else
+        {
+            target->GetVisibilityData().SetInvisibilityDetectMask(m_modifier.m_miscvalue, false);
+            target->GetVisibilityData().SetInvisibilityDetectValue(m_modifier.m_miscvalue, 0);
+        }
     }
+
     if (Real && target->GetTypeId() == TYPEID_PLAYER)
         ((Player*)target)->GetCamera().UpdateVisibilityForOwner();
 }

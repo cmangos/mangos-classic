@@ -7740,11 +7740,9 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 
     // detectable invisibility case
     if (invisible && (
-                // Invisible units, always are visible for units under same invisibility type
-                (GetVisibilityData().GetInvisibilityMask() & u->GetVisibilityData().GetInvisibilityMask()) != 0 ||
                 // Invisible units, always are visible for unit that can detect this invisibility (have appropriate level for detect)
                 u->GetVisibilityData().CanDetectInvisibilityOf(this))
-                // Unlike TBC and beyond, unit with invisibility detection are not always visible for units that can be detected
+                // Prior to TBC units with invisibility detection and units with same invisibility type are not always visible for units that can be detected
                 )
     {
         invisible = false;
