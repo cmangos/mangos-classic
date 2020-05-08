@@ -4683,7 +4683,7 @@ void ObjectMgr::LoadGossipText()
         }
         GossipText& gText = mGossipText[id];
         if (!gText.Options[0].Text_0.empty() || !gText.Options[0].Text_1.empty())
-            sLog.outErrorDb("Table `npc_text_broadcast_text` has record in `npc_text` as well. Overwriting.");
+            sLog.outErrorDb("Table `npc_text_broadcast_text` has record in `npc_text` (ID %u) as well. Overwriting.", id);
 
         for (uint32 i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
         {
