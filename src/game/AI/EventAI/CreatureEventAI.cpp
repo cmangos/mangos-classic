@@ -344,9 +344,14 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
             break;
         case EVENT_T_DEATH:
             if (event.death.conditionId)
+            {
+                if (!actionInvoker)
+                    return false;
+
                 if (Player* player = actionInvoker->GetBeneficiaryPlayer())
                     if (!sObjectMgr.IsConditionSatisfied(event.death.conditionId, player, player->GetMap(), m_creature, CONDITION_FROM_EVENTAI))
                         return false;
+            }
             break;
         case EVENT_T_EVADE:
             break;
