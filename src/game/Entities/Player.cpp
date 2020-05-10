@@ -13153,6 +13153,7 @@ void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
             {
                 uint32 reqitemcount = qInfo->ReqItemCount[j];
                 uint32 curitemcount = q_status.m_itemcount[j];
+
                 if (curitemcount < reqitemcount)
                 {
                     uint32 additemcount = (curitemcount + count <= reqitemcount ? count : reqitemcount - curitemcount);
@@ -13167,9 +13168,6 @@ void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
                     CompleteQuest(questid); // will call UpdateForQuestWorldObjects to clean sparkles for this quest on client
                 else if (q_status.m_itemcount[j] == reqitemcount)
                     UpdateForQuestWorldObjects(); // call UpdateForQuestWorldObjects to remove sparkles from finished objective on client
-
-                // we should remove this return if there is possibility that an quest item can be used in more than one quest
-                return;
             }
         }
     }
@@ -13197,23 +13195,25 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
 
                 uint32 reqitemcount = qInfo->ReqItemCount[j];
                 uint32 curitemcount;
+
                 if (q_status.m_status != QUEST_STATUS_COMPLETE)
                     curitemcount = q_status.m_itemcount[j];
                 else
                     curitemcount = GetItemCount(entry, true);
+
                 if (curitemcount < reqitemcount + count)
                 {
                     uint32 remitemcount = (curitemcount <= reqitemcount ? count : count + reqitemcount - curitemcount);
                     q_status.m_itemcount[j] = curitemcount - remitemcount;
-                    if (q_status.uState != QUEST_NEW) q_status.uState = QUEST_CHANGED;
+                    if (q_status.uState != QUEST_NEW)
+                        q_status.uState = QUEST_CHANGED;
 
                     IncompleteQuest(questid);
+                    UpdateForQuestWorldObjects();
                 }
-                return;
             }
         }
     }
-    UpdateForQuestWorldObjects();
 }
 
 void Player::KilledMonster(CreatureInfo const* cInfo, ObjectGuid guid)
