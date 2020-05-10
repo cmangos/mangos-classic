@@ -380,7 +380,8 @@ void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket& recv_data)
         return;
     }
 
-    _player->m_movementInfo = mi;
+    if (!_player->IsTaxiFlying())
+        _player->m_movementInfo = mi;
 }
 
 void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvdata*/)
