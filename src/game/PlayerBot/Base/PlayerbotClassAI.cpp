@@ -134,13 +134,25 @@ CombatManeuverReturns PlayerbotClassAI::DispelPlayer(Player* target)
     return RETURN_NO_ACTION_OK;
 }
 
-// Please note that job_type JOB_MANAONLY is a cumulative restriction. JOB_TANK | JOB_HEAL means both; JOB_TANK | JOB_MANAONLY means tanks with powertype MANA (paladins, druids)
-CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, uint32, Unit*), uint32 spellId, uint32 type, bool bMustBeOOC)
+/**
+ * Buff()
+ * return CombatManeuverReturns Returns RETURN_CONTINUE and buff unit target if it meets criteria to be buffed by bot with spell, else returns RETURN_NO_ACTION_OK
+ *
+ * params:BuffHelper boolean function that will be called back if buffing criteria are met
+ * params:spellId uint32 the spell ID of the spell buff
+ * params:type uint32, optional: default: JOB_ALL, the JOB_TYPE that target must have to be eligible for buffing
+ *        Please note that job_type JOB_MANAONLY is a cumulative restriction. JOB_TANK | JOB_HEAL means both;
+ *        JOB_TANK | JOB_MANAONLY means tanks with powertype MANA (paladins, druids)
+ * params: mustBeOOC boolean, optional: default: false, will return RETURN_NO_ACTION_OK if set to true and bot is in combat
+ * If false is returned, the bot is expected to perform a buff check for the single target version of the group buff.
+ *
+ */
+CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, uint32, Unit*), uint32 spellId, uint32 type, bool mustBeOOC)
 {
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
     if (!m_bot->IsAlive() || m_bot->IsInDuel()) return RETURN_NO_ACTION_ERROR;
-    if (bMustBeOOC && m_bot->IsInCombat()) return RETURN_NO_ACTION_ERROR;
+    if (mustBeOOC && m_bot->IsInCombat()) return RETURN_NO_ACTION_ERROR;
 
     if (spellId == 0) return RETURN_NO_ACTION_OK;
 
@@ -148,23 +160,28 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
     if (m_bot->GetGroup())
     {
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        for (const auto & memberItr : groupSlot)
         {
-            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!groupMember || !groupMember->IsAlive() || groupMember->IsInDuel())
+            Player* member = sObjectMgr.GetPlayer(memberItr.guid);
+            if (!member || !member->IsAlive() || member->IsInDuel())
                 continue;
-            JOB_TYPE job = GetTargetJob(groupMember);
-            if (job & type && (!(job & JOB_MANAONLY) || groupMember->getClass() == CLASS_DRUID || groupMember->GetPowerType() == POWER_MANA))
+            // Guess the job of current member
+            JOB_TYPE job = GetTargetJob(member);
+            // If job matches requested job type or (mana target is requested and member is mana user (or shapeshift druid)): buff it
+            if (job & type ||
+                (type & JOB_MANAONLY && (member->getClass() == CLASS_DRUID || member->GetPowerType() == POWER_MANA)))
             {
-                if (BuffHelper(m_ai, spellId, groupMember))
+                if (BuffHelper(m_ai, spellId, member))
                     return RETURN_CONTINUE;
             }
         }
     }
     else
     {
+        // Buff master if he/she is eligible
         if (m_master && !m_master->IsInDuel()
-                && (!(GetTargetJob(m_master) & JOB_MANAONLY) || m_master->getClass() == CLASS_DRUID || m_master->GetPowerType() == POWER_MANA))
+            && (GetTargetJob(m_master) & type
+                || (type & JOB_MANAONLY && (m_master->getClass() == CLASS_DRUID || m_master->GetPowerType() == POWER_MANA))))
             if (BuffHelper(m_ai, spellId, m_master))
                 return RETURN_CONTINUE;
         // Do not check job or power type - any buff you have is always useful to self
