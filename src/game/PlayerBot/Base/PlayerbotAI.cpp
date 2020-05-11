@@ -3407,16 +3407,22 @@ bool PlayerbotAI::IsInCombat()
     return inCombat;
 }
 
+/**
+ * IsRegenerating()
+ * return boolean Returns true if bot is having at least one aura associated with regenerating mana (drinking) or health (food)
+ *
+ * params: null
+ * If false is returned, the bot will change his/her stand state to STAND if not already standing.
+ *
+ */
 bool PlayerbotAI::IsRegenerating()
 {
-    // Return true is our mana is already regenerating by spell
-    if (m_bot->HasAuraType(SPELL_AURA_MOD_POWER_REGEN))
-        return true;
-    // We need to check spell category for health regeneration because some passive auras like troll racial would return true on SPELL_AURA_MOD_HEALTH_REGEN
+    // We check spell category to know if bot is drinking (spell category 59, at least for conjured water)
+    // or eating (spell category 11, at least for conjured food or season/battle ground items triggering both food and drink auras)
     Unit::SpellAuraHolderMap& auras = m_bot->GetSpellAuraHolderMap();
-    for (auto aura = auras.begin(); aura != auras.end(); aura++)
+    for (auto & aura : auras)
     {
-        SpellEntry const* spell = aura->second->GetSpellProto();
+        SpellEntry const* spell = aura.second->GetSpellProto();
         if (!spell)
             continue;
         if (spell->Category == 59 || spell->Category == 11)
