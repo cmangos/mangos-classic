@@ -177,45 +177,40 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
 
 /**
  * NeedGroupBuff()
- * return boolean Returns true if more than two targets in the bot's group need the group buff.
+ * return boolean Returns true if more than two targets in the bot's group need the group buff, else returns false
  *
  * params:groupBuffSpellId uint32 the spell ID of the group buff like Arcane Brillance
  * params:singleBuffSpellId uint32 the spell ID of the single target buff equivalent of the group buff like Arcane Intellect for group buff Arcane Brillance
- * return false if false is returned, the bot is expected to perform a buff check for the single target buff of the group buff.
+ * If false is returned, the bot is expected to perform a buff check for the single target version of the group buff.
  *
  */
 bool PlayerbotClassAI::NeedGroupBuff(uint32 groupBuffSpellId, uint32 singleBuffSpellId)
 {
     if (!m_bot) return false;
 
-    uint8 numberOfGroupTargets = 0;
-    // Check group players to avoid using regeant and mana with an expensive group buff
+    uint8 unbuffedTargets = 0;
+    // Check group players to avoid using reagent and mana with an expensive group buff
     // when only two players or less need it
     if (m_bot->GetGroup())
     {
         Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        for (const auto& memberItr : groupSlot)
         {
-            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!groupMember || !groupMember->IsAlive())
+            Player* member = sObjectMgr.GetPlayer(memberItr.guid);
+            if (!member || !member->IsAlive())
                 continue;
             // Check if group member needs buff
-            if (!groupMember->HasAura(groupBuffSpellId, EFFECT_INDEX_0) && !groupMember->HasAura(singleBuffSpellId, EFFECT_INDEX_0))
-                numberOfGroupTargets++;
+            if (!member->HasAura(groupBuffSpellId, EFFECT_INDEX_0) && !member->HasAura(singleBuffSpellId, EFFECT_INDEX_0))
+                unbuffedTargets++;
             // Don't forget about pet
-            Pet* pet = groupMember->GetPet();
-            if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && (pet->HasAura(groupBuffSpellId, EFFECT_INDEX_0) || pet->HasAura(singleBuffSpellId, EFFECT_INDEX_0)))
-                numberOfGroupTargets++;
+            Pet* pet = member->GetPet();
+            if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && !(pet->HasAura(groupBuffSpellId, EFFECT_INDEX_0) || pet->HasAura(singleBuffSpellId, EFFECT_INDEX_0)))
+                unbuffedTargets++;
         }
-        // treshold set to 2 targets because beyond that value, the group buff cost is cheaper in mana
-        if (numberOfGroupTargets < 3)
-            return false;
-
-        // In doubt, buff everyone
-        return true;
+        // threshold is set to 2 targets because beyond that value, the group buff cost is cheaper in mana
+        return unbuffedTargets >= 3;
     }
-    else
-        return false;   // no group, no group buff
+    return false;   // no group, no group buff
 }
 
 /**
