@@ -112,7 +112,7 @@ class Channel
             CHANNEL_DBC_FLAG_LFG        = 0x40000           // LookingForGroup
         };
 
-        enum ChannelMemberFlags
+        enum ChannelMemberFlags : uint8
         {
             MEMBER_FLAG_NONE        = 0x00,
             MEMBER_FLAG_OWNER       = 0x01,
@@ -130,26 +130,14 @@ class Channel
             ObjectGuid player;
             uint8 flags;
 
-            bool HasFlag(uint8 flag) const { return (flags & flag) != 0; }
-            void SetFlag(uint8 flag) { if (!HasFlag(flag)) flags |= flag; }
-            bool IsOwner() const { return (flags & MEMBER_FLAG_OWNER) != 0; }
-            void SetOwner(bool state)
-            {
-                if (state) flags |= MEMBER_FLAG_OWNER;
-                else flags &= ~MEMBER_FLAG_OWNER;
-            }
-            bool IsModerator() const { return (flags & MEMBER_FLAG_MODERATOR) != 0; }
-            void SetModerator(bool state)
-            {
-                if (state) flags |= MEMBER_FLAG_MODERATOR;
-                else flags &= ~MEMBER_FLAG_MODERATOR;
-            }
-            bool IsMuted() const { return (flags & MEMBER_FLAG_MUTED) != 0; }
-            void SetMuted(bool state)
-            {
-                if (state) flags |= MEMBER_FLAG_MUTED;
-                else flags &= ~MEMBER_FLAG_MUTED;
-            }
+            inline bool HasFlag(uint8 flag) const { return (flags & flag) != 0; }
+            void SetFlag(uint8 flag, bool state) { if (state) flags |= flag; else flags &= ~flag; }
+            inline bool IsOwner() const { return HasFlag(MEMBER_FLAG_OWNER); }
+            inline void SetOwner(bool state) { SetFlag(MEMBER_FLAG_OWNER, state); }
+            inline bool IsModerator() const { return HasFlag(MEMBER_FLAG_MODERATOR); }
+            inline void SetModerator(bool state) { SetFlag(MEMBER_FLAG_MODERATOR, state); }
+            inline bool IsMuted() const { return HasFlag(MEMBER_FLAG_MUTED); }
+            inline void SetMuted(bool state) { SetFlag(MEMBER_FLAG_MUTED, state); }
         };
 
     public:
