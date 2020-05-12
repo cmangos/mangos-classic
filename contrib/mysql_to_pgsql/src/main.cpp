@@ -18,7 +18,7 @@
 
 #include "defines.h"
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     char sPGhost[26], sPGport[26], sPGdb[26], sPGuser[26], sPGpass[26];
     printf("Postgres connection settings\n Host>");
@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     ///////////////////////////////
     ///////PGSQL Connect///////////
     ///////////////////////////////
-    PGconn* mPGconn = NULL;
+    PGconn *mPGconn = NULL;
     mPGconn = PQsetdbLogin(sPGhost, sPGport, NULL, NULL, sPGdb, sPGuser, sPGpass);
 
     if (PQstatus(mPGconn) != CONNECTION_OK)
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     ///////////////////////////////
     ///////MySQL Connect///////////
     ///////////////////////////////
-    MYSQL* mysqlInit;
+    MYSQL *mysqlInit;
     mysqlInit = mysql_init(NULL);
     if (!mysqlInit)
     {
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
     }
 
     char sMYhost[26], sMYdb[26], sMYuser[26], sMYpass[26];
-    int    iMYport;
+    int iMYport;
     printf("Mysql connection settings \n Host>");
     scanf("%s", sMYhost);
     printf(" Port>");
@@ -79,8 +79,12 @@ int main(int argc, char* argv[])
 
     mysql_options(mysqlInit, MYSQL_SET_CHARSET_NAME, "utf8");
 
-    MYSQL* mMysql;
-    mMysql = mysql_real_connect(mysqlInit, sMYhost, sMYuser,  sMYpass, sMYdb, iMYport, NULL, 0);
+    // allow mysql auto reconnect
+    my_bool reconnect = 1;
+    mysql_options(mysqlInit, MYSQL_OPT_RECONNECT, &reconnect);
+
+    MYSQL *mMysql;
+    mMysql = mysql_real_connect(mysqlInit, sMYhost, sMYuser, sMYpass, sMYdb, iMYport, NULL, 0);
 
     if (mMysql)
     {
@@ -90,20 +94,20 @@ int main(int argc, char* argv[])
     }
     else
     {
-        printf("Could not connect to MySQL database at [%s]:\n %s\n", sMYhost , mysql_error(mysqlInit));
+        printf("Could not connect to MySQL database at [%s]:\n %s\n", sMYhost, mysql_error(mysqlInit));
         mysql_close(mysqlInit);
         return 1;
     }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
-    MYSQL_RES* result = NULL;
+    MYSQL_RES *result = NULL;
     MYSQL_ROW row;
-    MYSQL_FIELD* fields = NULL;
+    MYSQL_FIELD *fields = NULL;
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
-    result = mysql_list_tables(mMysql , NULL);
-    rowCount   = mysql_num_rows(result);
+    result = mysql_list_tables(mMysql, NULL);
+    rowCount = mysql_num_rows(result);
 
     /***********************/
     /* get list of tables  */
@@ -127,14 +131,14 @@ int main(int argc, char* argv[])
     m_DataBase_Map.clear();
     for (uint32 j = 0; j < mTableList.size(); ++j)
     {
-        result     = mysql_list_fields(mMysql, mTableList[j].c_str(), NULL);
+        result = mysql_list_fields(mMysql, mTableList[j].c_str(), NULL);
         fieldCount = mysql_num_fields(result);
-        fields     = mysql_fetch_fields(result);
+        fields = mysql_fetch_fields(result);
 
         for (uint32 i = 0; i < fieldCount; ++i)
         {
             sField mfield;
-            mfield.name   = fields[i].name;
+            mfield.name = fields[i].name;
             if (!fields[i].def)
             {
                 mfield.def = "NULL";
@@ -152,7 +156,7 @@ int main(int argc, char* argv[])
                 mfield.def.append("'");
             }
             mfield.type = ConvertNativeType(fields[i].type, fields[i].length);
-            mfield.flags  = fields[i].flags;
+            mfield.flags = fields[i].flags;
             m_Table.push_back(mfield);
         }
         m_DataBase_Map[mTableList[j]] = m_Table;
@@ -176,8 +180,8 @@ int main(int argc, char* argv[])
         ostringstream prim_key_str;
         ostringstream index_str;
         for (v_iter = (*citr).second.begin();
-                v_iter != (*citr).second.end();
-                ++v_iter)
+             v_iter != (*citr).second.end();
+             ++v_iter)
         {
             sql_str << " " << (*v_iter).name;
             if (((*v_iter).flags & AUTO_INCREMENT_FLAG) != 0)
@@ -284,8 +288,8 @@ int main(int argc, char* argv[])
             insert_str << " VALUES (";
 
             fieldCount = mysql_num_fields(result);
-            fields     = mysql_fetch_fields(result);
-            for (uint32 i = 0 ; i < fieldCount ; ++i)
+            fields = mysql_fetch_fields(result);
+            for (uint32 i = 0; i < fieldCount; ++i)
             {
                 if (!row[i])
                     insert_str << "NULL";
