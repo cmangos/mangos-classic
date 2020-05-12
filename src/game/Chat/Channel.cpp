@@ -314,8 +314,14 @@ void Channel::SetPassword(Player* player, const char* password)
     SendToAll(data);
 }
 
-void Channel::SetMode(Player* player, const char* targetName, bool moderator, bool set)
+void Channel::SetModeFlags(Player* player, const char* targetName, ChannelMemberFlags flags, bool set)
 {
+    // Restrict input flags to currently supported by this method
+    flags = ChannelMemberFlags(uint8(flags) & (MEMBER_FLAG_MODERATOR | MEMBER_FLAG_MUTED));
+
+    if (!flags)
+        return;
+
     ObjectGuid guid = player->GetObjectGuid();
 
     if (!IsOn(guid))
@@ -347,7 +353,8 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
     }
 
     ObjectGuid targetGuid = target->GetObjectGuid();
-    if (moderator && guid == m_ownerGuid && targetGuid == m_ownerGuid)
+
+    if ((flags & MEMBER_FLAG_MODERATOR) && guid == m_ownerGuid && targetGuid == m_ownerGuid)
         return;
 
     if (!IsOn(targetGuid))
@@ -378,11 +385,7 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
         return;
     }
 
-    // set channel moderator
-    if (moderator)
-        SetModerator(targetGuid, set);
-    else
-        SetMute(targetGuid, set);
+    SetModeFlags(targetGuid, flags, set);
 }
 
 void Channel::SetOwner(Player* player, const char* targetName)
@@ -944,6 +947,22 @@ ObjectGuid Channel::SelectNewOwner() const
     return (m_players.empty() ? ObjectGuid() : m_players.begin()->second.player);
 }
 
+void Channel::SetModeFlags(ObjectGuid guid, ChannelMemberFlags flags, bool set)
+{
+    // Restrict input flags to currently supported by this method
+    flags = ChannelMemberFlags(uint8(flags) & (MEMBER_FLAG_MODERATOR | MEMBER_FLAG_MUTED));
+
+    if (flags && m_players[guid].HasFlag(flags) != set)
+    {
+        uint8 oldFlag = GetPlayerFlags(guid);
+        m_players[guid].SetFlag(flags, set);
+
+        WorldPacket data;
+        MakeModeChange(data, m_name, guid, oldFlag, GetPlayerFlags(guid));
+        SendToAll(data);
+    }
+}
+
 void Channel::SetOwner(ObjectGuid guid, bool exclaim)
 {
     if (m_ownerGuid)
@@ -1010,7 +1029,7 @@ bool Channel::SetStatic(bool state, bool command/* = false*/)
         for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
         {
             if (i->second.IsModerator())
-                SetModerator(i->second.player, false);
+                SetModeFlags(i->second.player, MEMBER_FLAG_MODERATOR, false);
         }
     }
 

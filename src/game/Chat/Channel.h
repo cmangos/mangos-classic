@@ -160,9 +160,9 @@ class Channel
         void Ban(Player* player, const char* targetName) { KickOrBan(player, targetName, true); }
         void UnBan(Player* player, const char* targetName);
         void SetPassword(Player* player, const char* password);
-        void SetMode(Player* player, const char* targetName, bool moderator, bool set);
-        inline void SetModerator(Player* player, const char* targetName, bool set) { SetMode(player, targetName, true, set); }
-        inline void SetMute(Player* player, const char* targetName, bool set) { SetMode(player, targetName, false, set); }
+        void SetModeFlags(Player* player, const char* targetName, ChannelMemberFlags flags, bool set);
+        inline void SetModerator(Player* player, const char* targetName, bool set) { SetModeFlags(player, targetName, MEMBER_FLAG_MODERATOR, set); }
+        inline void SetMute(Player* player, const char* targetName, bool set) { SetModeFlags(player, targetName, MEMBER_FLAG_MUTED, set); }
         void SetOwner(Player* player, const char* targetName);
         void SendChannelOwnerResponse(Player* player) const;
         void SendChannelListResponse(Player* player, bool display = false);
@@ -233,32 +233,7 @@ class Channel
 
         ObjectGuid SelectNewOwner() const;
 
-        void SetModerator(ObjectGuid guid, bool set)
-        {
-            if (m_players[guid].IsModerator() != set)
-            {
-                uint8 oldFlag = GetPlayerFlags(guid);
-                m_players[guid].SetModerator(set);
-
-                WorldPacket data;
-                MakeModeChange(data, m_name, guid, oldFlag, GetPlayerFlags(guid));
-                SendToAll(data);
-            }
-        }
-
-        void SetMute(ObjectGuid guid, bool set)
-        {
-            if (m_players[guid].IsMuted() != set)
-            {
-                uint8 oldFlag = GetPlayerFlags(guid);
-                m_players[guid].SetMuted(set);
-
-                WorldPacket data;
-                MakeModeChange(data, m_name, guid, oldFlag, GetPlayerFlags(guid));
-                SendToAll(data);
-            }
-        }
-
+        void SetModeFlags(ObjectGuid guid, ChannelMemberFlags flags, bool set);
         void SetOwner(ObjectGuid guid, bool exclaim = true);
 
     private:
