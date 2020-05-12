@@ -3419,13 +3419,16 @@ bool PlayerbotAI::IsRegenerating()
 {
     // We check spell category to know if bot is drinking (spell category 59, at least for conjured water)
     // or eating (spell category 11, at least for conjured food or season/battle ground items triggering both food and drink auras)
+    // or we check is spell is castable while sitting and provide health/power regen like food/drink spells do
     Unit::SpellAuraHolderMap& auras = m_bot->GetSpellAuraHolderMap();
     for (auto & aura : auras)
     {
         SpellEntry const* spell = aura.second->GetSpellProto();
         if (!spell)
             continue;
-        if (spell->Category == 59 || spell->Category == 11)
+        if (spell->Category == 59 || spell->Category == 11
+            || ((m_bot->HasAuraType(SPELL_AURA_MOD_POWER_REGEN) || m_bot->HasAuraType(SPELL_AURA_MOD_REGEN))
+                && spell->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_SITTING)))
             return true;
     }
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
