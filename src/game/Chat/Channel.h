@@ -158,12 +158,9 @@ class Channel
         uint32 GetChannelId() const { return m_channelId; }
         bool IsConstant() const { return m_channelId != 0; }
         bool IsStatic() const { return m_static; }
-        bool IsAnnounce() const { return m_announce; }
         bool IsLFG() const { return (GetFlags() & CHANNEL_FLAG_LFG) != 0; }
         inline bool IsPublic() const { return (IsConstant() || IsStatic()); }
         std::string GetPassword() const { return m_password; }
-        void SetPassword(const std::string& npassword) { m_password = npassword; }
-        void SetAnnounce(bool nannounce) { m_announce = nannounce; }
         size_t GetNumPlayers() const { return m_players.size(); }
         uint8 GetFlags() const { return m_flags; }
         bool HasFlag(uint8 flag) const { return (m_flags & flag) != 0; }
@@ -174,17 +171,15 @@ class Channel
         void Kick(Player* player, const char* targetName) { KickOrBan(player, targetName, false); }
         void Ban(Player* player, const char* targetName) { KickOrBan(player, targetName, true); }
         void UnBan(Player* player, const char* targetName);
-        void Password(Player* player, const char* password);
+        void SetPassword(Player* player, const char* password);
         void SetMode(Player* player, const char* targetName, bool moderator, bool set);
+        inline void SetModerator(Player* player, const char* targetName, bool set) { SetMode(player, targetName, true, set); }
+        inline void SetMute(Player* player, const char* targetName, bool set) { SetMode(player, targetName, false, set); }
         void SetOwner(Player* player, const char* targetName);
-        void SendWhoOwner(Player* player) const;
-        void SetModerator(Player* player, const char* targetName) { SetMode(player, targetName, true, true); }
-        void UnsetModerator(Player* player, const char* targetName) { SetMode(player, targetName, true, false); }
-        void SetMute(Player* player, const char* targetName) { SetMode(player, targetName, false, true); }
-        void UnsetMute(Player* player, const char* targetName) { SetMode(player, targetName, false, false); }
-        void List(Player* player, bool display = false);
-        void Announce(Player* player);
-        void Moderate(Player* player);
+        void SendChannelOwnerResponse(Player* player) const;
+        void SendChannelListResponse(Player* player, bool display = false);
+        void ToggleAnnouncements(Player* player);
+        void ToggleModeration(Player* player);
         void Say(Player* player, const char* text, uint32 lang);
         void Invite(Player* player, const char* targetName);
 

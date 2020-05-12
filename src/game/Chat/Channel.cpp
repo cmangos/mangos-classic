@@ -283,7 +283,7 @@ void Channel::UnBan(Player* player, const char* targetName)
     SendToAll(data);
 }
 
-void Channel::Password(Player* player, const char* password)
+void Channel::SetPassword(Player* player, const char* password)
 {
     ObjectGuid guid = player->GetObjectGuid();
 
@@ -438,7 +438,7 @@ void Channel::SetOwner(Player* player, const char* targetName)
     SetOwner(targetGuid, (m_players.size() > 1));
 }
 
-void Channel::SendWhoOwner(Player* player) const
+void Channel::SendChannelOwnerResponse(Player* player) const
 {
     ObjectGuid guid = player->GetObjectGuid();
 
@@ -471,7 +471,7 @@ void Channel::SendWhoOwner(Player* player) const
     SendToOne(data, guid);
 }
 
-void Channel::List(Player* player, bool/* display = false*/)
+void Channel::SendChannelListResponse(Player* player, bool/* display = false*/)
 {
     ObjectGuid guid = player->GetObjectGuid();
 
@@ -515,7 +515,7 @@ void Channel::List(Player* player, bool/* display = false*/)
     SendToOne(data, guid);
 }
 
-void Channel::Announce(Player* player)
+void Channel::ToggleAnnouncements(Player* player)
 {
     ObjectGuid guid = player->GetObjectGuid();
 
@@ -550,7 +550,7 @@ void Channel::Announce(Player* player)
     SendToAll(data);
 }
 
-void Channel::Moderate(Player* player)
+void Channel::ToggleModeration(Player* player)
 {
     ObjectGuid guid = player->GetObjectGuid();
 
