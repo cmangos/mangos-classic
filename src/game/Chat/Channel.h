@@ -140,8 +140,10 @@ class Channel
             inline void SetMuted(bool state) { SetFlag(MEMBER_FLAG_MUTED, state); }
         };
 
+        typedef std::map<ObjectGuid, PlayerInfo> PlayerList;
+
     public:
-        Channel(const std::string& name);
+        Channel(const std::string& name, uint32 channel_id = 0);
         std::string GetName() const { return m_name; }
         uint32 GetChannelId() const { return m_channelId; }
         bool IsConstant() const { return m_channelId != 0; }
@@ -237,19 +239,17 @@ class Channel
         void SetOwner(ObjectGuid guid, bool exclaim = true);
 
     private:
-        bool        m_announce;
-        bool        m_moderate;
         std::string m_name;
         std::string m_password;
-        uint8       m_flags;
         uint32      m_channelId;
         ObjectGuid  m_ownerGuid;
-
-        bool        m_static;
-        bool        m_realmzone;
-
-        typedef     std::map<ObjectGuid, PlayerInfo> PlayerList;
         PlayerList  m_players;
-        GuidSet m_banned;
+        GuidSet     m_banned;
+        bool        m_announcements = false;
+        bool        m_moderation = false;
+        uint8       m_flags = CHANNEL_FLAG_NONE;
+        // Custom features:
+        bool        m_static = false;
+        bool        m_realmzone = false;
 };
 #endif
