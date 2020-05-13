@@ -758,8 +758,7 @@ void Channel::MakeLeft(WorldPacket& data, const std::string& channel, const Obje
 void Channel::MakeYouJoined(WorldPacket& data, const std::string& channel, const Channel& which)
 {
     MakeNotifyPacket(data, channel, CHAT_YOU_JOINED_NOTICE);
-    data << uint8(which.GetFlags());
-    data << uint32(which.GetChannelId());
+    data << uint32(which.GetFlags());
     data << uint32(0);                                      // channel index (when split occurs due to player count)
 }
 
