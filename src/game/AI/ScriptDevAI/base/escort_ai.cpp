@@ -100,6 +100,9 @@ void npc_escortAI::JustDied(Unit* /*killer*/)
 
 void npc_escortAI::FailQuestForPlayerAndGroup()
 {
+    if (!m_questForEscort)
+        return;
+
     if (Player* player = GetPlayerForEscort())
         player->FailQuestForGroup(m_questForEscort->GetQuestId());
 }
@@ -137,7 +140,7 @@ bool npc_escortAI::IsPlayerOrGroupInRange()
 void npc_escortAI::UpdateAI(const uint32 diff)
 {
     // Check if player or any member of his group is within range
-    if (HasEscortState(STATE_ESCORT_ESCORTING) && m_playerGuid && !m_creature->GetVictim() && !HasEscortState(STATE_ESCORT_RETURNING))
+    if (m_questForEscort && HasEscortState(STATE_ESCORT_ESCORTING) && m_playerGuid && !m_creature->GetVictim() && !HasEscortState(STATE_ESCORT_RETURNING))
     {
         if (m_playerCheckTimer < diff)
         {
