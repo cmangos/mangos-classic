@@ -2402,9 +2402,12 @@ bool ChatHandler::ExtractOnOff(char** args, bool& value)
     if (!arg)
         return false;
 
-    if (strncmp(arg, "on", 3) == 0)
+    std::string lowercase(arg);
+    std::transform(lowercase.begin(), lowercase.end(), lowercase.begin(), [](char c) { return std::tolower(c); });
+
+    if (strncmp(lowercase.c_str(), "on", 3) == 0)
         value = true;
-    else if (strncmp(arg, "off", 4) == 0)
+    else if (strncmp(lowercase.c_str(), "off", 4) == 0)
         value = false;
     else
         return false;
