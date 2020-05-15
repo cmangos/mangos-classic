@@ -31,6 +31,7 @@ npc_kindal_moonweaver
 EndContentData */
 
 #include "Grids/GridNotifiers.h"
+#include "Grids/CellImpl.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/follower_ai.h"
