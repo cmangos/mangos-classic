@@ -317,6 +317,9 @@ UPDATE creature_template SET ScriptName='npc_arei' WHERE entry=9598;
 /* FERALAS */
 UPDATE creature_template SET ScriptName='npc_oox22fe' WHERE entry=7807;
 UPDATE creature_template SET ScriptName='npc_shay_leafrunner' WHERE entry=7774;
+UPDATE creature_template SET ScriptName='npc_captured_sprite_darter' WHERE entry=7997;
+UPDATE creature_template SET ScriptName='npc_kindal_moonweaver' WHERE entry=7956;
+UPDATE gameobject_template SET ScriptName='go_cage_door' WHERE entry=143979;
 
 /* GNOMEREGAN */
 UPDATE creature_template SET ScriptName='boss_thermaplugg' WHERE entry=7800;
@@ -1708,7 +1711,12 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1010020','Measuring by Kraklenheit, it is 428,000 degrees! That''s Krakley!','0','0','0','0','0','Krakles Thermometer'),
 ('-1010021','Holy Krakle! The temperature is 428,000 degrees Kraklenheit!','0','0','0','0','0','Krakles Thermometer'),
 
-('-1010022','Thank you for freeing me.  Speak with my sister in Splintertree.  I... I must find a place to rest...','0','0','0','0','8265','Ruul Snowhoof');
+('-1010022','Thank you for freeing me.  Speak with my sister in Splintertree.  I... I must find a place to rest...','0','0','0','0','8265','Ruul Snowhoof'),
+
+('-1010023','I\'m ready when you are, $N. Lead the way!','0','0','0','0','4079','Kindal Moonweaver SAY_QUEST_START'),
+('-1010024','Die, $n. Elune will not have you harm her creatures any longer!','0','0','0','0','4123','Kindal Moonweaver SAY_INITIAL_AGGRO'),
+('-1010025','You dare touch me?!','0','0','0','0','4125','Kindal Moonweaver SAY_AGGRO'),
+('-1010026','We\'ve done it! Meet me back by Jer\'kai above the Grim Totem camp.','0','0','0','0','4080','Kindal Moonweaver SAY_QUEST_COMPLETE');
 
 -- -1 015 000 TBC texts
 
@@ -3561,6 +3569,38 @@ INSERT INTO script_waypoint VALUES
 (7807,0,35,-4416.71,2209.76,7.36,0,0,0,''),
 (7807,0,36,-4405.25,2231.77,5.94,0,0,0,''),
 (7807,0,37,-4377.61,2265.45,6.71,0,15000,0,'complete quest SAY_END'),
+(7997,0,1,-4531.98,807.74,59.96,5.584005,0,0,'Captured Sprite Darter leaves cage'),
+(7997,0,2,-4531.45,804.41,59.76,4.426328,0,0,''),
+(7997,0,3,-4536.84,803.49,60.26,3.159480,0,0,''),
+(7997,0,4,-4548.07,807.62,60.73,2.631692,0,0,''),
+(7997,0,5,-4554.02,815.75,61.37,2.092124,0,0,''),
+(7997,0,6,-4558.88,824.21,60.99,2.092124,0,0,''),
+(7997,0,7,-4568.32,837.43,59.12,2.052068,0,0,''),
+(7997,0,8,-4569.90,841.76,59.74,1.858860,0,0,'Captured Sprite Darter despawn and send kill credit'),
+(7997,1,1,-4531.98,807.74,59.96,5.584005,0,0,'Captured Sprite Darter leaves cage'),
+(7997,1,2,-4528.44,818.16,60.29,1.924052,0,0,''),
+(7997,1,3,-4532.99,823.72,60.45,2.576718,0,0,''),
+(7997,1,4,-4540.03,826.10,60.51,3.184616,0,0,''),
+(7997,1,5,-4548.23,824.09,60.47,3.479141,0,0,''),
+(7997,1,6,-4554.04,823.40,61.07,3.047957,0,0,''),
+(7997,1,7,-4559.95,827.46,60.28,2.211508,0,0,''),
+(7997,1,8,-4568.80,840.24,59.62,2.044218,0,0,'Captured Sprite Darter despawn and send kill credit'),
+(7997,2,1,-4531.98,807.74,59.96,5.584005,0,0,'Captured Sprite Darter leaves cage'),
+(7997,2,2,-4527.93,805.21,59.68,5.517247,0,0,''),
+(7997,2,3,-4523.21,801.48,59.55,6.002624,0,0,''),
+(7997,2,4,-4517.49,800.73,59.44,0.331263,0,0,''),
+(7997,2,5,-4510.99,803.04,60.55,0.489129,0,0,''),
+(7997,2,6,-4505.74,805.83,62.06,0.689405,0,0,''),
+(7997,2,7,-4502.42,810.73,62.92,1.054615,0,0,''),
+(7997,2,8,-4497.04,819.50,63.52,1.000423,0,0,'Captured Sprite Darter despawn and send kill credit'),
+(7997,3,1,-4531.98,807.74,59.96,5.584005,0,0,'Captured Sprite Darter leaves cage'),
+(7997,3,2,-4524.90,798.40,59.44,5.259637,0,0,''),
+(7997,3,3,-4518.62,787.26,59.91,4.854371,0,0,''),
+(7997,3,4,-4516.15,768.63,60.59,4.738918,0,0,''),
+(7997,3,5,-4514.92,755.28,60.38,4.599902,0,0,''),
+(7997,3,6,-4515.78,744.25,60.54,4.599902,0,0,''),
+(7997,3,7,-4514.10,727.70,62.07,4.825312,0,0,''),
+(7997,3,8,-4510.50,696.02,64.68,4.825312,0,0,'Captured Sprite Darter despawn and send kill credit'),
 (7998,0,1,-510.13,-132.69,-152.5,0,0,0,''),
 (7998,0,2,-511.099,-129.74,-153.845,0,0,0,''),
 (7998,0,3,-511.79,-127.476,-155.551,0,0,0,''),

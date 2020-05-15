@@ -48,6 +48,7 @@ struct world_map_kalimdor : public ScriptedMap
     bool b_isOmenSpellCreditDone;
     std::array<std::vector<ObjectGuid>, MAX_ELEMENTS> m_aElementalRiftGUIDs;
     uint32 m_uiDronesTimer;
+    uint32 m_freedSpriteDarter;
 
     void Initialize()
     {
@@ -56,6 +57,7 @@ struct world_map_kalimdor : public ScriptedMap
         m_uiOmenResetTimer = 0;
         m_uiOmenMoonlightTimer = 0;
         m_uiRocketsCounter = 0;
+        m_freedSpriteDarter = 0;
         b_isOmenSpellCreditDone = false;
         for (auto& riftList : m_aElementalRiftGUIDs)
             riftList.clear();
@@ -342,6 +344,17 @@ struct world_map_kalimdor : public ScriptedMap
         {
             if (uiData == IN_PROGRESS)
             	m_uiDronesTimer = 5 * MINUTE * IN_MILLISECONDS;
+        }
+        else if (uiType == TYPE_FREEDOM_CREATURES)
+        {
+            if (uiData == IN_PROGRESS)
+                m_freedSpriteDarter = 0;
+            else if (uiData == SPECIAL)
+            {
+                ++m_freedSpriteDarter;
+                if (m_freedSpriteDarter >= 6)
+                    uiData = DONE;
+            }
         }
         m_encounter[uiType] = uiData;
     }

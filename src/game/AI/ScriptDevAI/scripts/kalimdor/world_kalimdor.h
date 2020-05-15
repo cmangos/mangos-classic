@@ -29,9 +29,10 @@ enum
 
 enum Encounters
 {
-    TYPE_OMEN = 0, // Quest 8868
-    TYPE_HIVE = 1, // Quest 1126
-    // TYPE_TETHYR = 2, // Quest 11198 - tbc+
+    TYPE_OMEN               = 0, // Quest 8868
+    TYPE_HIVE               = 1, // Quest 1126
+    // TYPE_TETHYR          = 2, // Quest 11198 - tbc+
+    TYPE_FREEDOM_CREATURES  = 3, // Quest 2969
     MAX_ENCOUNTER
 };
 
