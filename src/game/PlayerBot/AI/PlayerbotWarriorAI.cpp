@@ -592,18 +592,21 @@ bool PlayerbotWarriorAI::Pull()
         }
     }
     else
+    {
+        m_ai->TellMaster("Can't pull: equiped range item is unkown.");
         return false;
+    }
 
     if (m_bot->GetDistance(m_ai->GetCurrentTarget(), true, DIST_CALC_COMBAT_REACH_WITH_MELEE) > ATTACK_DISTANCE)
     {
         if (!m_ai->In_Reach(m_ai->GetCurrentTarget(), SHOOT))
         {
-            m_ai->TellMaster("I'm out of range.");
+            m_ai->TellMaster("Can't pull: I'm out of range.");
             return false;
         }
         if (!m_bot->IsWithinLOSInMap(m_ai->GetCurrentTarget()))
         {
-            m_ai->TellMaster("Target is out of sight.");
+            m_ai->TellMaster("Can't pull: target is out of sight.");
             return false;
         }
 
@@ -618,4 +621,7 @@ bool PlayerbotWarriorAI::Pull()
         m_ai->Attack(m_ai->GetCurrentTarget());
         return true;
     }
+
+    m_ai->TellMaster("I cannot pull my target for an unkown reason.");
+        return false;
 }
