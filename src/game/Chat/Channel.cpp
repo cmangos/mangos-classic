@@ -23,11 +23,11 @@
 #include "Chat/Chat.h"
 
 Channel::Channel(const std::string& name, uint32 channel_id/* = 0*/)
-    : m_name(name), m_channelId(channel_id)
+    : m_name(name)
 {
-    if (ChatChannelsEntry const* builtin = GetChannelEntryFor(name))
+    if (ChatChannelsEntry const* builtin = GetChatChannelsEntryFor(name, channel_id))
     {
-        m_channelId = builtin->ChannelID;                               // built-in channel id
+        m_entry = builtin;                                              // built-in channel entry
         m_announcements = false;                                        // no join/leave announcements by default
         m_flags = CHANNEL_FLAG_GENERAL;                                 // default for all built-in channels
 
@@ -47,7 +47,6 @@ Channel::Channel(const std::string& name, uint32 channel_id/* = 0*/)
     }
     else // it's custom channel
     {
-        m_channelId = 0;                                                // no channel id
         m_announcements = true;                                         // join/leave announcements enabled by default
         m_flags = CHANNEL_FLAG_CUSTOM;                                  // default for all custom channels
 

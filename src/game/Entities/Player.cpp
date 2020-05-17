@@ -4763,15 +4763,10 @@ void Player::UpdateLocalChannels(uint32 newZone)
     {
         next = i; ++next;
 
-        // skip non built-in channels
-        if (!(*i)->IsConstant())
-            continue;
+        ChatChannelsEntry const* ch = (*i)->GetChannelEntry();
 
-        ChatChannelsEntry const* ch = GetChannelEntryFor((*i)->GetChannelId());
-        if (!ch)
-            continue;
-
-        if ((ch->flags & 4) == 4)                           // global channel without zone name in pattern
+        // skip non built-in channels or global channel without zone name in pattern
+        if (!ch || (ch->flags & 4) == 4)
             continue;
 
         //  new channel

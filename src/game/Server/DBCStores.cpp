@@ -20,6 +20,7 @@
 #include "Policies/Singleton.h"
 #include "Log.h"
 #include "ProgressBar.h"
+#include "Util.h"
 #include "Globals/SharedDefines.h"
 #include "Server/SQLStorages.h"
 
@@ -648,23 +649,51 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
     return nullptr;
 }
 
-ChatChannelsEntry const* GetChannelEntryFor(const std::string& name)
+ChatChannelsEntry const* GetChatChannelsEntryFor(const std::string& name, uint32 channel_id/* = 0*/)
 {
+    std::wstring wname;
+
+    Utf8toWStr(name, wname);
+
+    if (!channel_id && wname.empty())
+        return nullptr;
+
     // not sorted, numbering index from 0
     for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
     {
-        ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
-        if (ch)
+        if (ChatChannelsEntry const* entry = sChatChannelsStore.LookupEntry(i))
         {
-            // need to remove %s from entryName if it exists before we match
-            std::string entryName(ch->pattern[0]);
-            std::size_t removeString = entryName.find("%s");
+            std::wstring wpattern;
 
-            if (removeString != std::string::npos)
-                entryName.replace(removeString, 2, "");
+            // try to match by name first, avoid creating custom channels with same name
+            if (!wname.empty())
+            {
+                for (uint32 i = 0; i < MAX_LOCALE; ++i)
+                {
+                    Utf8toWStr(entry->pattern[i], wpattern);
 
-            if (name.find(entryName) != std::string::npos)
-                return ch;
+                    if (wpattern.empty())
+                        continue;
+
+                    size_t argpos = wpattern.find(L"%s");
+
+                    // formatting arg present: strip and attempt partial match
+                    if (argpos != std::wstring::npos)
+                    {
+                        wpattern.replace(argpos, 2, L"");
+
+                        if (wname.find(wpattern) != std::wstring::npos)
+                            return entry;
+                    }
+                    // attempt full match
+                    else if (wname.compare(wpattern) == 0)
+                        return entry;
+                }
+            }
+
+            // name still not found, but channel id is provided: possibly no dbc data for client locale
+            if (channel_id && channel_id == entry->ChannelID)
+                return entry;
         }
     }
     return nullptr;

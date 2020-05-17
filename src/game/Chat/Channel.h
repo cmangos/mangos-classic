@@ -145,8 +145,9 @@ class Channel
     public:
         Channel(const std::string& name, uint32 channel_id = 0);
         std::string GetName() const { return m_name; }
-        uint32 GetChannelId() const { return m_channelId; }
-        bool IsConstant() const { return m_channelId != 0; }
+        uint32 GetChannelId() const { return (m_entry ? m_entry->ChannelID : 0); }
+        const ChatChannelsEntry* GetChannelEntry() const { return m_entry; }
+        bool IsConstant() const { return m_entry; }
         bool IsStatic() const { return m_static; }
         bool IsLFG() const { return (GetFlags() & CHANNEL_FLAG_LFG) != 0; }
         inline bool IsPublic() const { return (IsConstant() || IsStatic()); }
@@ -239,17 +240,17 @@ class Channel
         void SetOwner(ObjectGuid guid, bool exclaim = true);
 
     private:
-        std::string m_name;
-        std::string m_password;
-        uint32      m_channelId;
-        ObjectGuid  m_ownerGuid;
-        PlayerList  m_players;
-        GuidSet     m_banned;
-        bool        m_announcements = false;
-        bool        m_moderation = false;
-        uint8       m_flags = CHANNEL_FLAG_NONE;
+        std::string                 m_name;
+        std::string                 m_password;
+        ObjectGuid                  m_ownerGuid;
+        PlayerList                  m_players;
+        GuidSet                     m_banned;
+        const ChatChannelsEntry*    m_entry = nullptr;
+        bool                        m_announcements = false;
+        bool                        m_moderation = false;
+        uint8                       m_flags = CHANNEL_FLAG_NONE;
         // Custom features:
-        bool        m_static = false;
-        bool        m_realmzone = false;
+        bool                        m_static = false;
+        bool                        m_realmzone = false;
 };
 #endif
