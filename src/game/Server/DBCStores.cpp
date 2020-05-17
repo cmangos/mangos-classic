@@ -636,19 +636,6 @@ uint32 GetAreaFlagByMapId(uint32 mapid)
     return i->second;
 }
 
-
-ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
-{
-    // not sorted, numbering index from 0
-    for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
-    {
-        ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
-        if (ch && ch->ChannelID == channel_id)
-            return ch;
-    }
-    return nullptr;
-}
-
 ChatChannelsEntry const* GetChatChannelsEntryFor(const std::string& name, uint32 channel_id/* = 0*/)
 {
     std::wstring wname;

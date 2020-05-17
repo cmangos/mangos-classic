@@ -47,7 +47,6 @@ AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_
 uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
 
 ChatChannelsEntry const* GetChatChannelsEntryFor(const std::string& name, uint32 channel_id = 0);
-ChatChannelsEntry const* GetChannelEntryFor(const std::string& name);
 
 // [-ZERO] bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
 
