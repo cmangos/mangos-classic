@@ -361,7 +361,7 @@ struct InitializeImage : public SpellScript
                 maxHealthPct = 0.10f;
 
             // Set the same health percent as the original boss
-            spell->GetCaster()->SetMaxHealth(unitTarget->GetMaxHealth() * 0.1f); // 10% of boss max health
+            spell->GetCaster()->SetMaxHealth(unitTarget->GetMaxHealth() * maxHealthPct);
             spell->GetCaster()->SetHealthPercent(healthPct);
         }
     }
