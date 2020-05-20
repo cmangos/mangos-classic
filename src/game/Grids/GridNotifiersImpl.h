@@ -254,7 +254,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (target->IsImmuneToSpell(spellInfo, false, eff_index) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))
         return;
 
-    if (!i_dynobject.IsWithinLOSInMap(target))
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !i_dynobject.IsWithinLOSInMap(target))
         return;
 
     // Apply PersistentAreaAura on target
