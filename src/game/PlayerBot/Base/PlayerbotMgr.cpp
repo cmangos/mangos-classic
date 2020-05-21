@@ -747,8 +747,6 @@ void PlayerbotMgr::LogoutAllBots(bool fullRemove /*= false*/)
     for (auto itr : m_playerBots)
         m_botToRemove.insert(itr.first);
 
-    RemoveAllBotsFromGroup();
-
     if (fullRemove)
         RemoveBots();
 }
