@@ -95,7 +95,7 @@ namespace Movement
         data << destination;
 
         Vector3 offset;             // offset that will be computed from intermediate point to destination
-        uint32 offsetSent = 0;      // count of offset sent
+        uint32 offsetSent = 1;      // count of offset sent (destination should be considered too thats why its 1)
 
         // loop for intermediates points sending
         for (int32 i = loIdx; i < hiIdx; ++i) // stop before hiIdx as its the destination and is already sent
