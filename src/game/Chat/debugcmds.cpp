@@ -1506,3 +1506,90 @@ bool ChatHandler::HandleDebugChatFreezeCommand(char* /*args*/)
 
     return true;
 }
+
+bool ChatHandler::HandleDebugObjectFlags(char* args)
+{
+    char* debugCmd = ExtractLiteralArg(&args);
+    std::string debugCmdStr;
+    CMDebugCommandTableStruct const* foundCommand = nullptr;
+
+    if (debugCmd)
+    {
+        debugCmdStr = debugCmd;
+        uint32 bestMaches = 0;
+        for (std::vector < CMDebugCommandTableStruct>::const_iterator itr = CMDebugCommandTable.begin(); itr < CMDebugCommandTable.end(); ++itr)
+        {
+            CMDebugCommandTableStruct const* cmd = &*itr;
+            for (uint32 i = 0; i < debugCmdStr.length(); ++i)
+            {
+                if (i < cmd->command.length() && cmd->command[i] == debugCmdStr[i])
+                {
+                    if (bestMaches < i + 1)
+                    {
+                        bestMaches = i + 1;
+                        foundCommand = cmd;
+                    }
+                }
+                else
+                    break;
+            }
+            if (bestMaches == debugCmdStr.length())
+                break;
+        }
+    }
+
+    if (!debugCmd || !foundCommand)
+    {
+        if (debugCmd && !foundCommand)
+            PSendSysMessage("%s is not a valid command", debugCmdStr.c_str());
+
+        PSendSysMessage("Commands available...");
+
+        for (auto c : CMDebugCommandTable)
+            PSendSysMessage("%s > %s", c.command.c_str(), c.description.c_str());
+
+        PSendSysMessage("for all command if you dont specify on/off the flag will be toggled");
+        PSendSysMessage("ex: .debug debugobject intPoins on");
+        return false;
+    }
+
+    Player* player = m_session->GetPlayer();
+    Unit* target = getSelectedUnit();
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return false;
+    }
+
+    if (foundCommand->flag != CMDEBUGFLAG_NONE)
+    {
+        bool onOff = false;
+        if (!ExtractOnOff(&args, onOff))
+            onOff = !target->HaveDebugFlag(foundCommand->flag);
+
+        if (onOff)
+        {
+            PSendSysMessage("%s enabled for %s.", foundCommand->command.c_str(), target->GetGuidStr().c_str());
+            target->SetDebugFlag(CMDEBUGFLAG_INTERMEDIATES_POINTS);
+        }
+        else
+        {
+            PSendSysMessage("%s disabled for %s.", foundCommand->command.c_str(), target->GetGuidStr().c_str());
+            target->ClearDebugFlag(CMDEBUGFLAG_INTERMEDIATES_POINTS);
+        }
+    }
+    else
+    {
+        if (foundCommand->command == CMDebugCommandTable[0].command)
+        {
+            // clear all
+            target->ClearDebugFlag(CMDebugFlags(~CMDEBUGFLAG_NONE));
+        }
+        else if (foundCommand->command == CMDebugCommandTable[1].command)
+        {
+            // set all
+            target->SetDebugFlag(CMDebugFlags(~CMDEBUGFLAG_NONE));
+        }
+    }
+    return true;
+}

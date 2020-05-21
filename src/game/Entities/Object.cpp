@@ -1003,7 +1003,8 @@ WorldObject::WorldObject() :
     m_isOnEventNotified(false),
     m_currMap(nullptr), m_mapId(0),
     m_InstanceId(0), m_isActiveObject(false),
-    m_visibilityData(this)
+    m_visibilityData(this),
+    m_debugFlags(0)
 {
 }
 
