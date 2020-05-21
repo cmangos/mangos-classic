@@ -35,7 +35,7 @@ enum
     SPELL_FULL_HEAL         = 17683,
 
     // Lord Kri
-    SPELL_CLEAVE            = 40504,            // TBC uses different spell from vanilla 26350
+    SPELL_CLEAVE            = 26350,
     SPELL_TOXIC_VOLLEY      = 25812,
     SPELL_SUMMON_CLOUD      = 26590,            // summons 15933
     SPELL_THRASH            = 3391,
