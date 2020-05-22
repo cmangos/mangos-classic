@@ -1553,7 +1553,6 @@ bool ChatHandler::HandleDebugObjectFlags(char* args)
         return false;
     }
 
-    Player* player = m_session->GetPlayer();
     Unit* target = getSelectedUnit();
     if (!target)
     {
@@ -1570,12 +1569,12 @@ bool ChatHandler::HandleDebugObjectFlags(char* args)
         if (onOff)
         {
             PSendSysMessage("%s enabled for %s.", foundCommand->command.c_str(), target->GetGuidStr().c_str());
-            target->SetDebugFlag(CMDEBUGFLAG_INTERMEDIATES_POINTS);
+            target->SetDebugFlag(foundCommand->flag);
         }
         else
         {
             PSendSysMessage("%s disabled for %s.", foundCommand->command.c_str(), target->GetGuidStr().c_str());
-            target->ClearDebugFlag(CMDEBUGFLAG_INTERMEDIATES_POINTS);
+            target->ClearDebugFlag(foundCommand->flag);
         }
     }
     else

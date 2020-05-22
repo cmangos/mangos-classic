@@ -202,7 +202,7 @@ inline char* mangos_strdup(const char* source)
 enum CMDebugFlags
 {
     CMDEBUGFLAG_NONE                        = 0x00000000,
-    CMDEBUGFLAG_INTERMEDIATES_POINTS        = 0x00000001, // show intermediates point in gm mode (waypoints) TODO: we can add more case like leap forward
+    CMDEBUGFLAG_WP_PATH                     = 0x00000001, // show intermediates point in gm mode (waypoints)
 
 
 
@@ -225,7 +225,7 @@ static const std::vector<CMDebugCommandTableStruct> CMDebugCommandTable =
     { "clearall"                , "reset all flags"                         , CMDEBUGFLAG_NONE                  },
     { "setall"                  , "set all flags"                           , CMDEBUGFLAG_NONE                  },
 
-    { "intpoints"               , "show intermediate point"                 , CMDEBUGFLAG_INTERMEDIATES_POINTS  },
+    { "wppath"                  , "show waypoint path send to client"       , CMDEBUGFLAG_WP_PATH               },
 
     { "dev1"                    , "for general use during development"      , CMDEBUGFLAG_DEV_USE1              },
     { "dev2"                    , "for general use during development"      , CMDEBUGFLAG_DEV_USE2              }
