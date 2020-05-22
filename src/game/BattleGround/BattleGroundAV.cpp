@@ -595,7 +595,8 @@ void BattleGroundAV::EventPlayerAssaultsPoint(Player* player, BG_AV_Nodes node)
                        (teamIdx == TEAM_INDEX_ALLIANCE) ? LANG_BG_ALLY : LANG_BG_HORDE);
         UpdatePlayerScore(player, SCORE_TOWERS_ASSAULTED, 1);
         // these markers are spawned on retail on each GY/Tower and then their guid is used
-        player->RewardPlayerAndGroupAtEventCredit(NPC_PVP_TOWER_CREDIT_MARKER, nullptr);
+        // TODO: Add all markers and fetch them for rewardSource instead
+        player->RewardPlayerAndGroupAtEventCredit(NPC_PVP_TOWER_CREDIT_MARKER, player);
     }
     else
     {
@@ -605,7 +606,7 @@ void BattleGroundAV::EventPlayerAssaultsPoint(Player* player, BG_AV_Nodes node)
                        (teamIdx == TEAM_INDEX_ALLIANCE) ? LANG_BG_ALLY : LANG_BG_HORDE);
         // update the statistic for the assaulting player
         UpdatePlayerScore(player, SCORE_GRAVEYARDS_ASSAULTED, 1);
-        player->RewardPlayerAndGroupAtEventCredit(NPC_PVP_GRAVEYARD_CREDIT_MARKER, nullptr);
+        player->RewardPlayerAndGroupAtEventCredit(NPC_PVP_GRAVEYARD_CREDIT_MARKER, player);
     }
 
     PlaySoundToAll((teamIdx == TEAM_INDEX_ALLIANCE) ? BG_AV_SOUND_ALLIANCE_ASSAULTS : BG_AV_SOUND_HORDE_ASSAULTS);
