@@ -462,6 +462,16 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                             value |= UNIT_FLAG_UNK_0;
                     }
 
+                    // Client bug workaround: Fix for missing chat channels when resuming taxi flight on login
+                    // Client does not send any chat joining attempts by itself when taxi flag is on
+                    if (target == this && (value & UNIT_FLAG_TAXI_FLIGHT))
+                    {
+                        if (sWorld.getConfig(CONFIG_BOOL_TAXI_FLIGHT_CHAT_FIX))
+                            if (WorldSession* session = static_cast<Player const*>(this)->GetSession())
+                                if (!session->IsInitialZoneUpdated())
+                                    value &= ~UNIT_FLAG_TAXI_FLIGHT;
+                    }
+
                     *data << value;
                 }
                 // Hide lootable animation for unallowed players

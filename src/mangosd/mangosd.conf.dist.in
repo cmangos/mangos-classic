@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2020051801
+ConfVersion=2020052301
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -568,6 +568,12 @@ LogColors = ""
 #        Enable or disable Waterbreathing
 #        Default: 4 (Console as noneone)
 #
+#    TaxiFlightChatFix
+#        Workaround for client bug: resuming taxi flight on login causes missing chat channels until the flight ends.
+#        When enabled allows clients to join local channels of the zone they are flying over on login and all custom channels.
+#        Default: 0 (disabled, original client behavior)
+#                 1 (enabled)
+#
 #    LongFlightPathsPersistence
 #        Controls whether logging out in multi-destination taxi flight will resume entire flight or the nearest destination only.
 #        Default: 0 (false)
@@ -772,6 +778,7 @@ StartHonorPoints = 0
 MinHonorKills = 15
 MaintenanceDay = 3
 InstantLogout = 1
+TaxiFlightChatFix = 0
 LongFlightPathsPersistence = 0
 AllFlightPaths = 0
 AlwaysMaxSkillForLevel = 0

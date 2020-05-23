@@ -533,6 +533,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     SetPlayer(pCurrChar);
     m_playerLoading = true;
 
+    m_initialZoneUpdated = false;
+
     SetOnline();
 
     // "GetAccountId()==db stored account id" checked in LoadFromDB (prevent login not own character using cheating tools)
@@ -768,6 +770,8 @@ void WorldSession::HandlePlayerReconnect()
 
     // reset all visible objects to be able to resend them
     _player->m_clientGUIDs.clear();
+
+    m_initialZoneUpdated = false;
 
     SetOnline();
 
