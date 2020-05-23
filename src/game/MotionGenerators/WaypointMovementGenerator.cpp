@@ -248,7 +248,7 @@ uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Crea
     float creatureSpeed = creature.GetSpeed(speedType);
 
     float dist = (endPos - startPos).magnitude();
-    if (dist >= MinimumDistance)
+    if (dist >= MinimumDistance && !creature.IsFlying())
     {
         // compute direction to end position
         Vector3 direction = (endPos - startPos).unit();
