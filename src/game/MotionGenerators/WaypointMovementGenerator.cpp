@@ -26,6 +26,7 @@
 #include "DBScripts/ScriptMgr.h"
 #include "Movement/MoveSplineInit.h"
 #include "Movement/MoveSpline.h"
+#include "Maps/GridDefines.h"
 
 #include <cassert>
 

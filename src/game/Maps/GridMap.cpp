@@ -18,6 +18,7 @@
 
 #include "Log.h"
 #include "Grids/CellImpl.h"
+#include "GridDefines.h"
 #include "Maps/Map.h"
 #include "Server/DBCEnums.h"
 #include "Server/DBCStores.h"

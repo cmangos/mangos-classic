@@ -20,6 +20,7 @@
 #define _OBJECT_H
 
 #include "Common.h"
+#include "ObjectDefines.h"
 #include "ByteBuffer.h"
 #include "Entities/UpdateFields.h"
 #include "Entities/UpdateData.h"
@@ -27,39 +28,10 @@
 #include "Entities/EntitiesMgr.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/Camera.h"
-#include "Camera.h"
 #include "Server/DBCStructure.h"
 #include "Entities/ObjectVisibility.h"
 
 #include <set>
-
-#define CONTACT_DISTANCE                0.5f
-#define INTERACTION_DISTANCE            5.0f
-#define ATTACK_DISTANCE                 5.0f
-#define MELEE_LEEWAY                    8.0f / 3.0f // Melee attack and melee spell leeway when moving
-#define AOE_LEEWAY                      2.0f        // AOE leeway when moving
-#define INSPECT_DISTANCE                28.0f
-#define TRADE_DISTANCE                  11.11f
-
-#define MAX_VISIBILITY_DISTANCE         SIZE_OF_GRIDS               // max distance for visible object show, limited in 533 yards
-#define VISIBILITY_DISTANCE_GIGANTIC    400.0f
-#define VISIBILITY_DISTANCE_LARGE       200.0f
-#define VISIBILITY_DISTANCE_NORMAL      100.0f
-#define VISIBILITY_DISTANCE_SMALL       50.0f
-#define VISIBILITY_DISTANCE_TINY        25.0f
-#define DEFAULT_VISIBILITY_DISTANCE     VISIBILITY_DISTANCE_NORMAL  // default visible distance, 100 yards on continents
-#define DEFAULT_VISIBILITY_INSTANCE     170.0f                      // default visible distance in instances, 170 yards
-#define DEFAULT_VISIBILITY_BG           533.0f                      // default visible distance in BG/Arenas, 533 yards
-
-
-#define DEFAULT_WORLD_OBJECT_SIZE       0.388999998569489f      // currently used (correctly?) for any non Unit world objects. This is actually the bounding_radius, like player/creature from creature_model_data
-#define DEFAULT_OBJECT_SCALE            1.0f                    // player/item scale as default, npc/go from database, pets from dbc
-#define DEFAULT_TAUREN_MALE_SCALE       1.35f                   // Tauren male player scale by default
-#define DEFAULT_TAUREN_FEMALE_SCALE     1.25f                   // Tauren female player scale by default
-float const DEFAULT_COLLISION_HEIGHT = 2.03128f; // Most common value in dbc
-
-#define MAX_STEALTH_DETECT_RANGE        45.0f
-#define GRID_ACTIVATION_RANGE           45.0f
 
 enum TempSpawnType
 {

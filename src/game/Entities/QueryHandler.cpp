@@ -31,6 +31,7 @@
 #include "Entities/Corpse.h"
 #include "Entities/NPCHandler.h"
 #include "Server/SQLStorages.h"
+#include "Maps/GridDefines.h"
 
 void WorldSession::SendNameQueryResponse(CharacterNameQueryResponse& response) const
 {

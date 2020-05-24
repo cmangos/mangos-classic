@@ -23,6 +23,7 @@
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include "Maps/GridDefines.h"
+#include "Entities/ObjectDefines.h"
 
 #include "Maps/GridMapDefines.h"
 
@@ -130,13 +131,6 @@ class Referencable
 
         Countable m_count;
 };
-
-#define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
-#define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
-#define INVALID_HEIGHT_VALUE -200000.0f                     // for return, must be equal to VMAP_INVALID_HEIGHT_VALUE, check value for unknown height is VMAP_INVALID_HEIGHT
-#define MAX_FALL_DISTANCE     250000.0f                     // "unlimited fall" to find VMap ground if it is available, just larger than MAX_HEIGHT - INVALID_HEIGHT
-#define DEFAULT_HEIGHT_SEARCH     10.0f                     // default search distance to find height at nearby locations
-#define DEFAULT_WATER_SEARCH      50.0f                     // default search distance to case detection water level
 
 // class for sharing and managin GridMap objects
 class TerrainInfo : public Referencable<std::atomic_long>

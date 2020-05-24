@@ -27,6 +27,7 @@
 #include "MotionGenerators/WrapperMovementGenerator.h"
 #include "Movement/MoveSpline.h"
 #include "Movement/MoveSplineInit.h"
+#include "Maps/GridDefines.h"
 #include "Maps/Map.h"
 #include "AI/CreatureAISelector.h"
 #include "Entities/Creature.h"
