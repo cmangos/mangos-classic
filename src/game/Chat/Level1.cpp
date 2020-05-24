@@ -184,38 +184,10 @@ bool ChatHandler::HandleGMCommand(char* args)
     return true;
 }
 
-// Enables or disables hiding of the staff badge
-bool ChatHandler::HandleGMChatCommand(char* args)
+// Acquire random unusual land mount
+bool ChatHandler::HandleGMMountUpCommand(char* args)
 {
-    if (!*args)
-    {
-        if (m_session->GetPlayer()->isGMChat())
-            m_session->SendNotification(LANG_GM_CHAT_ON);
-        else
-            m_session->SendNotification(LANG_GM_CHAT_OFF);
-        return true;
-    }
-
-    bool value;
-    if (!ExtractOnOff(&args, value))
-    {
-        SendSysMessage(LANG_USE_BOL);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    if (value)
-    {
-        m_session->GetPlayer()->SetGMChat(true);
-        m_session->SendNotification(LANG_GM_CHAT_ON);
-    }
-    else
-    {
-        m_session->GetPlayer()->SetGMChat(false);
-        m_session->SendNotification(LANG_GM_CHAT_OFF);
-    }
-
-    return true;
+    return ModifyMountCommandHelper(m_session->GetPlayer(), args);
 }
 
 // Enable\Dissable Invisible mode
@@ -1138,253 +1110,10 @@ bool ChatHandler::HandleModifyScaleCommand(char* args)
     return true;
 }
 
-// Enable Player mount
+// Provide Player a random unusual mount
 bool ChatHandler::HandleModifyMountCommand(char* args)
 {
-    if (!*args)
-        return false;
-
-    uint16 mId;
-    float speed = (float)15;
-    uint32 num = atoi(args);
-    switch (num)
-    {
-        case 1:
-            mId = 14340;
-            break;
-        case 2:
-            mId = 4806;
-            break;
-        case 3:
-            mId = 6471;
-            break;
-        case 4:
-            mId = 12345;
-            break;
-        case 5:
-            mId = 6472;
-            break;
-        case 6:
-            mId = 6473;
-            break;
-        case 7:
-            mId = 10670;
-            break;
-        case 8:
-            mId = 10719;
-            break;
-        case 9:
-            mId = 10671;
-            break;
-        case 10:
-            mId = 10672;
-            break;
-        case 11:
-            mId = 10720;
-            break;
-        case 12:
-            mId = 14349;
-            break;
-        case 13:
-            mId = 11641;
-            break;
-        case 14:
-            mId = 12244;
-            break;
-        case 15:
-            mId = 12242;
-            break;
-        case 16:
-            mId = 14578;
-            break;
-        case 17:
-            mId = 14579;
-            break;
-        case 18:
-            mId = 14349;
-            break;
-        case 19:
-            mId = 12245;
-            break;
-        case 20:
-            mId = 14335;
-            break;
-        case 21:
-            mId = 207;
-            break;
-        case 22:
-            mId = 2328;
-            break;
-        case 23:
-            mId = 2327;
-            break;
-        case 24:
-            mId = 2326;
-            break;
-        case 25:
-            mId = 14573;
-            break;
-        case 26:
-            mId = 14574;
-            break;
-        case 27:
-            mId = 14575;
-            break;
-        case 28:
-            mId = 604;
-            break;
-        case 29:
-            mId = 1166;
-            break;
-        case 30:
-            mId = 2402;
-            break;
-        case 31:
-            mId = 2410;
-            break;
-        case 32:
-            mId = 2409;
-            break;
-        case 33:
-            mId = 2408;
-            break;
-        case 34:
-            mId = 2405;
-            break;
-        case 35:
-            mId = 14337;
-            break;
-        case 36:
-            mId = 6569;
-            break;
-        case 37:
-            mId = 10661;
-            break;
-        case 38:
-            mId = 10666;
-            break;
-        case 39:
-            mId = 9473;
-            break;
-        case 40:
-            mId = 9476;
-            break;
-        case 41:
-            mId = 9474;
-            break;
-        case 42:
-            mId = 14374;
-            break;
-        case 43:
-            mId = 14376;
-            break;
-        case 44:
-            mId = 14377;
-            break;
-        case 45:
-            mId = 2404;
-            break;
-        case 46:
-            mId = 2784;
-            break;
-        case 47:
-            mId = 2787;
-            break;
-        case 48:
-            mId = 2785;
-            break;
-        case 49:
-            mId = 2736;
-            break;
-        case 50:
-            mId = 2786;
-            break;
-        case 51:
-            mId = 14347;
-            break;
-        case 52:
-            mId = 14346;
-            break;
-        case 53:
-            mId = 14576;
-            break;
-        case 54:
-            mId = 9695;
-            break;
-        case 55:
-            mId = 9991;
-            break;
-        case 56:
-            mId = 6448;
-            break;
-        case 57:
-            mId = 6444;
-            break;
-        case 58:
-            mId = 6080;
-            break;
-        case 59:
-            mId = 6447;
-            break;
-        case 60:
-            mId = 4805;
-            break;
-        case 61:
-            mId = 9714;
-            break;
-        case 62:
-            mId = 6448;
-            break;
-        case 63:
-            mId = 6442;
-            break;
-        case 64:
-            mId = 14632;
-            break;
-        case 65:
-            mId = 14332;
-            break;
-        case 66:
-            mId = 14331;
-            break;
-        case 67:
-            mId = 8469;
-            break;
-        case 68:
-            mId = 2830;
-            break;
-        case 69:
-            mId = 2346;
-            break;
-        default:
-            SendSysMessage(LANG_NO_MOUNT);
-            SetSentErrorMessage(true);
-            return false;
-    }
-
-    Player* chr = getSelectedPlayer();
-    if (!chr)
-    {
-        SendSysMessage(LANG_NO_CHAR_SELECTED);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    // check online security
-    if (HasLowerSecurity(chr))
-        return false;
-
-    PSendSysMessage(LANG_YOU_GIVE_MOUNT, GetNameLink(chr).c_str());
-    if (needReportToTarget(chr))
-        ChatHandler(chr).PSendSysMessage(LANG_MOUNT_GIVED, GetNameLink().c_str());
-
-    chr->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
-    chr->Mount(mId);
-
-    chr->SetSpeedRate(MOVE_RUN, speed, true);
-    chr->SetSpeedRate(MOVE_SWIM, speed, true);
-
-    return true;
+    return ModifyMountCommandHelper(getSelectedPlayer(), args);
 }
 
 // Edit Player money
@@ -2105,6 +1834,205 @@ bool ChatHandler::HandleModifyDrunkCommand(char* args)
     m_session->GetPlayer()->SetDrunkValue(drunkMod);
 
     return true;
+}
+
+// Enables or disables hiding of the staff badge
+bool ChatHandler::HandleGMChatCommand(char* args)
+{
+    if (!*args)
+    {
+        if (m_session->GetPlayer()->isGMChat())
+            m_session->SendNotification(LANG_GM_CHAT_ON);
+        else
+            m_session->SendNotification(LANG_GM_CHAT_OFF);
+        return true;
+    }
+
+    bool value;
+    if (!ExtractOnOff(&args, value))
+    {
+        SendSysMessage(LANG_USE_BOL);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (value)
+    {
+        m_session->GetPlayer()->SetGMChat(true);
+        m_session->SendNotification(LANG_GM_CHAT_ON);
+    }
+    else
+    {
+        m_session->GetPlayer()->SetGMChat(false);
+        m_session->SendNotification(LANG_GM_CHAT_OFF);
+    }
+
+    return true;
+}
+
+bool ChatHandler::ModifyMountCommandHelper(Player* target, char* args)
+{
+    if (!target)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (HasLowerSecurity(target))
+        return false;
+
+    if (target->IsTaxiFlying() || target->IsFlying())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    bool fast = false, slow = false;
+
+    if (ExtractLiteralArg(&args, "fast"))
+        fast = true;
+    else if (ExtractLiteralArg(&args, "slow"))
+        slow = true;
+    else
+    {
+        const uint32 level = target->getLevel();
+        fast = (level >= 60);
+        slow = (!fast && level >= 40);
+    }
+
+    std::deque<uint32> pool;
+
+    // Land mounts - rarity is proportional to security level of the invoker
+    switch (m_session->GetSecurity())
+    {
+        case SEC_ADMINISTRATOR:     // Mounts that were never obtainable and have unique properties
+        {
+            if (fast)
+                pool.push_back(24576);      // Chromatic Mount
+        }
+        case SEC_GAMEMASTER:        // Mounts that were never obtainable by players, cut during development
+        {
+            if (fast)
+            {
+                if (target->GetTeam() == ALLIANCE)
+                    pool.push_back(23220);  // Swift Dawnsaber
+            }
+            else if (slow)
+            {
+                if (target->GetTeam() == ALLIANCE)
+                {
+                    pool.push_back(468);    // White Stallion
+                    pool.push_back(471);    // Palomino Stallion
+                    pool.push_back(6896);   // Black Ram
+                    pool.push_back(6897);   // Blue Ram
+                    pool.push_back(10787);  // Panther
+                    pool.push_back(10788);  // Leopard
+                    pool.push_back(10790);  // Tiger
+                    pool.push_back(10792);  // Spotted Panther
+                    pool.push_back(15781);  // Steel Mechanostrider
+                    pool.push_back(16058);  // Primal Leopard
+                    pool.push_back(16059);  // Tawny Sabercat
+                    pool.push_back(16060);  // Golden Sabercat
+                    pool.push_back(17455);  // Purple Mechanostrider
+                    pool.push_back(17456);  // Red & Blue Mechanostrider
+                    pool.push_back(17458);  // Fluorescent Green Mechanostrider
+                }
+                else
+                {
+                    pool.push_back(459);    // Gray Wolf
+                    pool.push_back(578);    // Black Wolf
+                    pool.push_back(581);    // Winter Wolf
+                    pool.push_back(8980);   // Skeletal Horse
+                    pool.push_back(10795);  // Ivory Raptor
+                    pool.push_back(10798);  // Obsidian Raptor
+                    pool.push_back(18363);  // Riding Kodo
+                }
+
+                pool.push_back(25675);      // Reindeer
+            }
+            else
+            {
+                pool.push_back(10800);      // Summon Brown Tallstrider
+                pool.push_back(10801);      // Summon Gray Tallstrider
+                pool.push_back(10802);      // Summon Pink Tallstrider
+                pool.push_back(10803);      // Summon Purple Tallstrider
+                pool.push_back(10804);      // Summon Turquoise Tallstrider
+            }
+        }
+        case SEC_MODERATOR:         // Mounts that were obtainable by players at some pont in the past and now extremely rare
+        {
+            if (fast)
+            {
+                if (target->GetTeam() == ALLIANCE)
+                {
+                    pool.push_back(15779);  // White Mechanostrider
+                    pool.push_back(16055);  // Nightsaber
+                    pool.push_back(16056);  // Frostsaber
+                    pool.push_back(16082);  // Palomino Stallion
+                    pool.push_back(16083);  // White Stallion
+                    pool.push_back(17459);  // Icy Blue Mechanostrider
+                    pool.push_back(17460);  // Frost Ram
+                    pool.push_back(17461);  // Black Ram
+                }
+                else
+                {
+                    pool.push_back(16080);  // Red Wolf
+                    pool.push_back(16081);  // Arctic Wolf
+                    pool.push_back(16084);  // Mottled Red Raptor
+                    pool.push_back(17450);  // Ivory Raptor
+                    pool.push_back(18991);  // Green Kodo
+                    pool.push_back(18992);  // Teal Kodo
+                };
+
+                pool.push_back(26656);      // Summon Black Qiraji Battle Tank
+            }
+        }
+        default:                        // Mounts that are obtainable by players but rare or somewhat restricted
+        {
+            if (fast)
+            {
+                pool.push_back(17229);      // Winterspring Frostsaber
+                pool.push_back(17481);      // Deathcharger
+                pool.push_back(24242);      // Swift Razzashi Raptor
+                pool.push_back(24252);      // Swift Zulian Tiger
+                pool.push_back(25859);      // Reindeer
+            }
+            else if (slow)
+                pool.push_back(25858);      // Reindeer
+            else
+                pool.push_back(30174);      // Riding Turtle
+        }
+    }
+
+    const uint32 flags = (TRIGGERED_OLD_TRIGGERED | TRIGGERED_INSTANT_CAST | TRIGGERED_DO_NOT_PROC);
+
+    // Cast a random unusual in-game mount
+    while (!pool.empty())
+    {
+        uint32 index = urand(0, (pool.size() - 1));
+        uint32 spellid = pool.at(index);
+
+        if (!target->HasAura(spellid))
+        {
+            if (SPELL_CAST_OK == target->CastSpell(target, spellid, flags))
+            {
+                PSendSysMessage(LANG_YOU_GIVE_MOUNT, GetNameLink(target).c_str());
+
+                if (needReportToTarget(target))
+                    ChatHandler(target).PSendSysMessage(LANG_MOUNT_GIVED, GetNameLink().c_str());
+
+                return true;
+            }
+        }
+
+        pool.erase(pool.begin() + index);
+    }
+
+    SendSysMessage(LANG_NO_MOUNT);
+    SetSentErrorMessage(true);
+    return false;
 }
 
 bool ChatHandler::HandleSetViewCommand(char* /*args*/)
