@@ -5364,28 +5364,26 @@ bool ChatHandler::HandleServerPLimitCommand(char* args)
         if (!param)
             return false;
 
-        int l = strlen(param);
-
-        int val;
-        if (strncmp(param, "player", l) == 0)
-            sWorld.SetPlayerLimit(-SEC_PLAYER);
-        else if (strncmp(param, "moderator", l) == 0)
-            sWorld.SetPlayerLimit(-SEC_MODERATOR);
-        else if (strncmp(param, "gamemaster", l) == 0)
-            sWorld.SetPlayerLimit(-SEC_GAMEMASTER);
-        else if (strncmp(param, "administrator", l) == 0)
-            sWorld.SetPlayerLimit(-SEC_ADMINISTRATOR);
-        else if (strncmp(param, "reset", l) == 0)
-            sWorld.SetPlayerLimit(sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT));
+        int32 val;
+        if (param[0] =='p' || param[0] == 'P')
+            val = -int32(SEC_PLAYER);
+        else if (param[0] == 'm' || param[0] == 'M')
+            val = -int32(SEC_MODERATOR);
+        else if (param[0] == 'g' || param[0] == 'G')
+            val = -int32(SEC_GAMEMASTER);
+        else if (param[0] == 'a' || param[0] == 'A')
+            val = -int32(SEC_ADMINISTRATOR);
+        else if (param[0] == 'r' || param[0] == 'R')
+            val = sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT);
         else if (ExtractInt32(&param, val))
         {
-            if (val < -SEC_ADMINISTRATOR)
-                val = -SEC_ADMINISTRATOR;
-
-            sWorld.SetPlayerLimit(val);
+            if (val < -int32(SEC_ADMINISTRATOR))
+                val = -int32(SEC_ADMINISTRATOR);
         }
         else
             return false;
+
+        sWorld.SetPlayerLimit(val);
 
         // kick all low security level players
         if (sWorld.GetPlayerAmountLimit() > SEC_PLAYER)
