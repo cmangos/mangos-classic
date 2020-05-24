@@ -6658,7 +6658,7 @@ bool ChatHandler::ModifyStatCommandHelper(char* args, char const* statName, uint
 
     if (spellId == SPELL_MOD_STAMINA)
         target->SetHealthPercent(100);
-    else if (spellId = SPELL_MOD_INTELLECT)
+    else if (spellId == SPELL_MOD_INTELLECT)
         target->SetPower(POWER_MANA, target->GetMaxPower(POWER_MANA));
 
     PSendSysMessage("You changed %s of %s to %i.", statName, target->GetName(), amount);
