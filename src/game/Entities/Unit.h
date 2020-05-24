@@ -1545,8 +1545,8 @@ class Unit : public WorldObject
 
         bool IsMounted() const { return !!GetMountID(); }
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
-        void Mount(uint32 mount, uint32 spellId = 0);
-        void Unmount(bool from_aura = false);
+        virtual bool Mount(uint32 displayid, const Aura* aura = nullptr);
+        virtual bool Unmount(const Aura* aura = nullptr);
 
         uint16 GetSkillMaxForLevel(Unit const* target = nullptr) const { return (target ? GetLevelForTarget(target) : getLevel()) * 5; }
 
