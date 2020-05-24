@@ -81,12 +81,94 @@ enum SaveIds
 
 enum GameEvents
 {
+    // Prepatch event
+    //GAME_EVENT_BEFORE_THE_STORM = 100,
+
+    // Isle phases
+    //GAME_EVENT_QUEL_DANAS_PHASE_1               = 101,
+    //GAME_EVENT_QUEL_DANAS_PHASE_2               = 102,
+    //GAME_EVENT_QUEL_DANAS_PHASE_2_PORTAL        = 103,
+    //GAME_EVENT_QUEL_DANAS_PHASE_3               = 104,
+    //GAME_EVENT_QUEL_DANAS_PHASE_3_ANVIL         = 105,
+    //GAME_EVENT_QUEL_DANAS_PHASE_4               = 106,
+    //GAME_EVENT_QUEL_DANAS_PHASE_4_MONUMENT      = 107,
+    //GAME_EVENT_QUEL_DANAS_PHASE_4_ALCHEMY_LAB   = 108,
+
+    // AQ
+    // giving items
+    GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_1 = 120,
+    // done with items - 5 days
+    GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_2 = 121,
+    // gong enabled
+    GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_3 = 122,
+    // 10 hour war
+    GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_4 = 123,
+    // base perpetual state
+    GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_5 = 124,
+};
+
+enum AQResources
+{
+    // Horde
+    AQ_PEACEBLOOM,
+    AQ_LEAN_WOLF_STEAK,
+    AQ_TIN_BAR,
+    AQ_WOOL_BANDAGE,
+    AQ_FIREBLOOM,
+    AQ_HEAVY_LEATHER,
+    AQ_MITHRIL_BAR,
+    AQ_MAGEWEAVE_BANDAGE,
+    AQ_RUGGED_LEATHER,
+    AQ_BAKED_SALMON,
+    // Alliance
+    AQ_LIGHT_LEATHER,
+    AQ_LINEN_BANDAGE,
+    AQ_MEDIUM_LEATHER,
+    AQ_STRANGLEKELP,
+    AQ_RAINBOW_FIN_ALBACORE,
+    AQ_IRON_BAR,
+    AQ_ROAST_RAPTOR,
+    AQ_SILK_BANDAGE,
+    AQ_THORIUM_BAR,
+    AQ_ARTHAS_TEARS,
+    // Common
+    AQ_COPPER_BAR_ALLY,
+    AQ_PURPLE_LOTUS_ALLY,
+    AQ_THICK_LEATHER_ALLY,
+    AQ_SPOTTED_YELLOWTAIL_ALLY,
+    AQ_RUNECLOTH_BANDAGE_ALLY,
+    RESOURCE_UNIQUE_MAX = AQ_RUNECLOTH_BANDAGE_ALLY,
+    AQ_COPPER_BAR_HORDE,
+    AQ_PURPLE_LOTUS_HORDE,
+    AQ_THICK_LEATHER_HORDE,
+    AQ_SPOTTED_YELLOWTAIL_HORDE,
+    AQ_RUNECLOTH_BANDAGE_HORDE,
+    RESOURCE_MAX,
+};
+
+enum AQPhase
+{
+    PHASE_0_DISABLED,
+    PHASE_1_GATHERING_RESOURCES,
+    PHASE_2_TRANSPORTING_RESOURCES,
+    PHASE_3_GONG_TIME,
+    PHASE_4_10_HOUR_WAR,
+    PHASE_5_DONE,
 };
 
 // To be used
 struct AhnQirajData
 {
-    std::string GetData() { return ""; }
+    uint32 m_phase;
+    uint64 m_timer;
+    uint32 m_WarEffortCounters[RESOURCE_MAX];
+    GuidVector m_warEffortWorldstatesPlayers;
+    std::mutex m_warEffortMutex;
+    AhnQirajData() : m_phase(PHASE_0_DISABLED), m_timer(0)
+    {
+        memset(m_WarEffortCounters, 0, sizeof(m_WarEffortCounters));
+    }
+    std::string GetData();
 };
 
 enum LoveIsInTheAirLeaders
@@ -141,6 +223,12 @@ class WorldState
         // vanilla section
         void SendLoveIsInTheAirWorldstateUpdate(uint32 value, uint32 worldStateId);
         uint32 GetLoveIsInTheAirCounter(LoveIsInTheAirLeaders leader) { return m_loveIsInTheAirData.counters[leader]; }
+
+        void AddWarEffortProgress(AQResources resource, uint32 count);
+        void HandleWarEffortPhaseTransition(uint32 newPhase);
+        void StopWarEffortEvent();
+        void StartWarEffortEvent();
+        std::string GetAQPrintout();
 
         void FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId);
 

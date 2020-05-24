@@ -770,6 +770,12 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
+    static ChatCommand worldStateTable[] =
+    {
+        { "wareffort",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWarEffortCommand,           "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                        "", nullptr }
+    };
+
     static ChatCommand ticketCommandTable[] =
     {
         { "discard",        SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketDiscardCommand,       "", nullptr },

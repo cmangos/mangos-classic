@@ -718,6 +718,9 @@ class ChatHandler
         bool HandleLinkToggleCommand(char* args);
         bool HandleLinkCheckCommand(char* args);
 
+        // worldstate
+        bool HandleWarEffortCommand(char* args);
+
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
 

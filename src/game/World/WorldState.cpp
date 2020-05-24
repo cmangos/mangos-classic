@@ -65,15 +65,33 @@ void WorldState::Load()
                         }
                         else m_emeraldDragonsTimer = 0;
                     }
-                    else
+                    break;
+                }
+                case SAVE_ID_AHN_QIRAJ:
+                {
+                    if (data.size())
                     {
-                        m_emeraldDragonsState = 0xF;
-                        m_emeraldDragonsTimer = 0;
+                        auto curTime = World::GetCurrentClockTime();
+                        uint64 time;
+                        try
+                        {
+                            loadStream >> m_aqData.m_phase >> time;
+                            if (time)
+                            {
+                                TimePoint timePoint = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::from_time_t(time));
+                                m_aqData.m_timer = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint - curTime).count();
+                            }
+                            for (uint32 i = 0; i < RESOURCE_MAX; ++i)
+                                loadStream >> m_aqData.m_WarEffortCounters[i];
+                        }
+                        catch (std::exception& e)
+                        {
+                            sLog.outError("%s", e.what());
+                            memset(m_loveIsInTheAirData.counters, 0, sizeof(LoveIsInTheAir));
+                        }
                     }
                     break;
                 }
-                case SAVE_ID_AHN_QIRAJ: // TODO:
-                    break;
                 case SAVE_ID_LOVE_IS_IN_THE_AIR:
                     if (data.size())
                     {
@@ -95,6 +113,7 @@ void WorldState::Load()
         }
         while (result->NextRow());
     }
+    StartWarEffortEvent();
     RespawnEmeraldDragons();
 }
 
@@ -119,10 +138,12 @@ void WorldState::Save(SaveIds saveId)
             CharacterDatabase.PExecute("INSERT INTO world_state(Id,Data) VALUES('%u','%s')", SAVE_ID_EMERALD_DRAGONS, dragonsData.data());
             break;
         }
-        // TODO: Add saving for AQ and QD
         case SAVE_ID_AHN_QIRAJ:
-        // case SAVE_ID_QUEL_DANAS:
+        {
+            std::string expansionData = m_aqData.GetData();
+            SaveHelper(expansionData, SAVE_ID_AHN_QIRAJ);
             break;
+        }
         case SAVE_ID_LOVE_IS_IN_THE_AIR:
         {
             std::string loveData;
@@ -217,8 +238,14 @@ void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
         case ZONEID_THUNDER_BLUFF:
         case ZONEID_UNDERCITY:
         {
-            std::lock_guard<std::mutex> guard(m_loveIsInTheAirMutex);
-            m_loveIsInTheAirCapitalsPlayers.push_back(player->GetObjectGuid());
+            {
+                std::lock_guard<std::mutex> guard(m_loveIsInTheAirMutex);
+                m_loveIsInTheAirCapitalsPlayers.push_back(player->GetObjectGuid());
+            }
+            {
+                std::lock_guard<std::mutex> guard(m_aqData.m_warEffortMutex);
+                m_aqData.m_warEffortWorldstatesPlayers.push_back(player->GetObjectGuid());
+            }
             break;
         }
         default:
@@ -237,10 +264,18 @@ void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
         case ZONEID_THUNDER_BLUFF:
         case ZONEID_UNDERCITY:
         {
-            std::lock_guard<std::mutex> guard(m_loveIsInTheAirMutex);
-            auto position = std::find(m_loveIsInTheAirCapitalsPlayers.begin(), m_loveIsInTheAirCapitalsPlayers.end(), player->GetObjectGuid());
-            if (position != m_loveIsInTheAirCapitalsPlayers.end())
-                m_loveIsInTheAirCapitalsPlayers.erase(position);
+            {
+                std::lock_guard<std::mutex> guard(m_loveIsInTheAirMutex);
+                auto position = std::find(m_loveIsInTheAirCapitalsPlayers.begin(), m_loveIsInTheAirCapitalsPlayers.end(), player->GetObjectGuid());
+                if (position != m_loveIsInTheAirCapitalsPlayers.end())
+                    m_loveIsInTheAirCapitalsPlayers.erase(position);
+            }
+            {
+                std::lock_guard<std::mutex> guard(m_aqData.m_warEffortMutex);
+                auto position = std::find(m_aqData.m_warEffortWorldstatesPlayers.begin(), m_aqData.m_warEffortWorldstatesPlayers.end(), player->GetObjectGuid());
+                if (position != m_aqData.m_warEffortWorldstatesPlayers.end())
+                    m_aqData.m_warEffortWorldstatesPlayers.erase(position);
+            }
             break;
         }
         default:
@@ -315,6 +350,16 @@ void WorldState::Update(const uint32 diff)
             RespawnEmeraldDragons();
         }
         else m_emeraldDragonsTimer -= diff;
+    }
+
+    if (m_aqData.m_timer)
+    {
+        if (m_aqData.m_timer <= diff)
+        {
+            m_aqData.m_timer = 0;
+            HandleWarEffortPhaseTransition(m_aqData.m_phase + 1);
+        }
+        else m_aqData.m_timer -= diff;
     }
 }
 
@@ -403,6 +448,161 @@ void WorldState::RespawnEmeraldDragons()
     });
 }
 
+// AQ War Effort code
+std::map<AQResources, WorldStateID> aqWorldstateMap =
+{
+    {AQ_PEACEBLOOM, WORLD_STATE_AQ_PEACEBLOOM_NOW},
+    {AQ_LEAN_WOLF_STEAK, WORLD_STATE_AQ_LEAN_WOLF_STEAK_NOW},
+    {AQ_TIN_BAR, WORLD_STATE_AQ_TIN_BARS_NOW},
+    {AQ_WOOL_BANDAGE, WORLD_STATE_AQ_WOOL_BANDAGE_NOW},
+    {AQ_FIREBLOOM, WORLD_STATE_AQ_FIREBLOOM_NOW},
+    {AQ_HEAVY_LEATHER, WORLD_STATE_AQ_HEAVY_LEATHER_NOW},
+    {AQ_MITHRIL_BAR, WORLD_STATE_AQ_MITHRIL_BARS_NOW},
+    {AQ_MAGEWEAVE_BANDAGE, WORLD_STATE_AQ_MAGEWEAVE_BANDAGE_NOW},
+    {AQ_RUGGED_LEATHER, WORLD_STATE_AQ_RUGGED_LEATHER_NOW},
+    {AQ_BAKED_SALMON, WORLD_STATE_AQ_BAKED_SALMON_NOW},
+    {AQ_LIGHT_LEATHER, WORLD_STATE_AQ_LIGHT_LEATHER_NOW},
+    {AQ_LINEN_BANDAGE, WORLD_STATE_AQ_LINEN_BANDAGE_NOW},
+    {AQ_MEDIUM_LEATHER, WORLD_STATE_AQ_MEDIUM_LEATHER_NOW},
+    {AQ_STRANGLEKELP, WORLD_STATE_AQ_STRANGLEKELP_NOW},
+    {AQ_RAINBOW_FIN_ALBACORE, WORLD_STATE_AQ_RAINBOW_FIN_ALBACORE_NOW},
+    {AQ_IRON_BAR, WORLD_STATE_AQ_IRON_BARS_NOW},
+    {AQ_ROAST_RAPTOR, WORLD_STATE_AQ_ROAST_RAPTOR_NOW},
+    {AQ_SILK_BANDAGE, WORLD_STATE_AQ_SILK_BANDAGE_NOW},
+    {AQ_THORIUM_BAR, WORLD_STATE_AQ_THORIUM_BARS_NOW},
+    {AQ_ARTHAS_TEARS, WORLD_STATE_AQ_ARTHAS_TEARS_NOW},
+    {AQ_COPPER_BAR_ALLY, WORLD_STATE_AQ_COPPER_BARS_ALLY_NOW},
+    {AQ_PURPLE_LOTUS_ALLY, WORLD_STATE_AQ_PURPLE_LOTUS_ALLY_NOW},
+    {AQ_THICK_LEATHER_ALLY, WORLD_STATE_AQ_THICK_LEATHER_ALLY_NOW},
+    {AQ_SPOTTED_YELLOWTAIL_ALLY, WORLD_STATE_AQ_SPOTTED_YELLOWTAIL_ALLY_NOW},
+    {AQ_RUNECLOTH_BANDAGE_ALLY, WORLD_STATE_AQ_RUNECLOTH_BANDAGE_ALLY_NOW},
+    {AQ_COPPER_BAR_HORDE, WORLD_STATE_AQ_COPPER_BARS_HORDE_NOW},
+    {AQ_PURPLE_LOTUS_HORDE, WORLD_STATE_AQ_PURPLE_LOTUS_HORDE_NOW},
+    {AQ_THICK_LEATHER_HORDE, WORLD_STATE_AQ_THICK_LEATHER_HORDE_NOW},
+    {AQ_SPOTTED_YELLOWTAIL_HORDE, WORLD_STATE_AQ_SPOTTED_YELLOWTAIL_HORDE_NOW},
+    {AQ_RUNECLOTH_BANDAGE_HORDE, WORLD_STATE_AQ_RUNECLOTH_BANDAGE_HORDE_NOW},
+};
+
+std::vector<std::pair<WorldStateID, uint32>> aqWorldStateTotalsMap =
+{
+    {WORLD_STATE_AQ_PEACEBLOOM_TOTAL, 96000},
+    {WORLD_STATE_AQ_LEAN_WOLF_STEAK_TOTAL, 10000},
+    {WORLD_STATE_AQ_TIN_BARS_TOTAL, 22000},
+    {WORLD_STATE_AQ_WOOL_BANDAGE_TOTAL, 250000},
+    {WORLD_STATE_AQ_FIREBLOOM_TOTAL, 19000},
+    {WORLD_STATE_AQ_HEAVY_LEATHER_TOTAL, 60000},
+    {WORLD_STATE_AQ_MITHRIL_BARS_TOTAL, 18000},
+    {WORLD_STATE_AQ_MAGEWEAVE_BANDAGE_TOTAL, 250000},
+    {WORLD_STATE_AQ_RUGGED_LEATHER_TOTAL, 60000},
+    {WORLD_STATE_AQ_BAKED_SALMON_TOTAL, 10000},
+    {WORLD_STATE_AQ_LIGHT_LEATHER_TOTAL, 180000},
+    {WORLD_STATE_AQ_LINEN_BANDAGE_TOTAL, 800000},
+    {WORLD_STATE_AQ_MEDIUM_LEATHER_TOTAL, 110000},
+    {WORLD_STATE_AQ_STRANGLEKELP_TOTAL, 33000},
+    {WORLD_STATE_AQ_RAINBOW_FIN_ALBACORE_TOTAL, 14000},
+    {WORLD_STATE_AQ_IRON_BARS_TOTAL, 28000},
+    {WORLD_STATE_AQ_ROAST_RAPTOR_TOTAL, 20000},
+    {WORLD_STATE_AQ_SILK_BANDAGE_TOTAL, 600000},
+    {WORLD_STATE_AQ_THORIUM_BARS_TOTAL, 24000},
+    {WORLD_STATE_AQ_ARTHAS_TEARS_TOTAL, 20000},
+    {WORLD_STATE_AQ_COPPER_BARS_TOTAL, 45000},
+    {WORLD_STATE_AQ_PURPLE_LOTUS_TOTAL, 13000},
+    {WORLD_STATE_AQ_THICK_LEATHER_TOTAL, 40000},
+    {WORLD_STATE_AQ_SPOTTED_YELLOWTAIL_TOTAL, 8500},
+    {WORLD_STATE_AQ_RUNECLOTH_BANDAGE_TOTAL, 200000},
+};
+
+void WorldState::AddWarEffortProgress(AQResources resource, uint32 count)
+{
+    std::lock_guard<std::mutex> guard(m_aqData.m_warEffortMutex);
+    if (m_aqData.m_phase != PHASE_1_GATHERING_RESOURCES)
+        return;
+    m_aqData.m_WarEffortCounters[resource] += count;
+    Save(SAVE_ID_AHN_QIRAJ);
+    for (ObjectGuid& guid : m_aqData.m_warEffortWorldstatesPlayers)
+        if (Player* player = sObjectMgr.GetPlayer(guid))
+            player->SendUpdateWorldState(aqWorldstateMap[resource], m_aqData.m_WarEffortCounters[resource]);
+    uint32 id = uint32(resource);
+    if (id >= aqWorldStateTotalsMap.size())
+        id -= 5;
+    if (m_aqData.m_WarEffortCounters[resource] >= aqWorldStateTotalsMap[id].second) // fulfilled this condition - check all
+    {
+        bool success = true;
+        for (uint32 i = 0; i < RESOURCE_MAX; ++i)
+        {
+            uint32 id = i > RESOURCE_UNIQUE_MAX ? i - 5 : i;
+            if (m_aqData.m_WarEffortCounters[i] < aqWorldStateTotalsMap[id].second)
+            {
+                success = false;
+                break;
+            }
+        }
+        if (success)
+            HandleWarEffortPhaseTransition(PHASE_2_TRANSPORTING_RESOURCES);
+    }
+}
+
+void WorldState::HandleWarEffortPhaseTransition(uint32 newPhase)
+{
+    StopWarEffortEvent();
+    m_aqData.m_phase = newPhase;
+    switch (m_aqData.m_phase)
+    {
+        case PHASE_2_TRANSPORTING_RESOURCES:
+            m_aqData.m_phase = PHASE_2_TRANSPORTING_RESOURCES;
+            m_aqData.m_timer = 5 * DAY * IN_MILLISECONDS;
+            break;
+        case PHASE_4_10_HOUR_WAR:
+            m_aqData.m_phase = PHASE_4_10_HOUR_WAR;
+            m_aqData.m_timer = 10 * HOUR * IN_MILLISECONDS;
+            break;
+        default: break;
+    }
+    StartWarEffortEvent();
+}
+
+void WorldState::StopWarEffortEvent()
+{
+    switch (m_aqData.m_phase)
+    {
+        case PHASE_1_GATHERING_RESOURCES: sGameEventMgr.StopEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_1); break;
+        case PHASE_2_TRANSPORTING_RESOURCES: sGameEventMgr.StopEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_2); break;
+        case PHASE_3_GONG_TIME: sGameEventMgr.StopEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_3); break;
+        case PHASE_4_10_HOUR_WAR: sGameEventMgr.StopEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_4); break;
+        case PHASE_5_DONE: sGameEventMgr.StopEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_5); break;
+        default: break;
+    }
+}
+
+void WorldState::StartWarEffortEvent()
+{
+    switch (m_aqData.m_phase)
+    {
+        case PHASE_1_GATHERING_RESOURCES: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_1); break;
+        case PHASE_2_TRANSPORTING_RESOURCES: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_2); break;
+        case PHASE_3_GONG_TIME: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_3); break;
+        case PHASE_4_10_HOUR_WAR: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_4); break;
+        case PHASE_5_DONE: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_5); break;
+        default: break;
+    }
+}
+
+std::string WorldState::GetAQPrintout()
+{
+    std::string output = "Phase: " + std::to_string(m_aqData.m_phase) + " Timer: " + std::to_string(m_aqData.m_timer) + "\nValues:";
+    for (uint32 value : m_aqData.m_WarEffortCounters)
+        output += " " + std::to_string(value);
+    return output;
+}
+
+std::string AhnQirajData::GetData()
+{
+    std::string output = std::to_string(m_phase) + " " + std::to_string(m_timer);
+    for (uint32 value : m_WarEffortCounters)
+        output += " " + std::to_string(value);
+    return output;
+}
+
 void WorldState::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId)
 {
     if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LOVE_IS_IN_THE_AIR))
@@ -411,8 +611,30 @@ void WorldState::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 
         {
             case ZONEID_STORMWIND_CITY: // TODO: Add rest
             {
-                // TODO: add worldstate sending
-                // FillInitialWorldStateData(data, count, WORLD_STATE_DEATHS_DOOR_NORTH_WARP_GATE_HEALTH, m_deathsDoorNorthHP);
+                if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LOVE_IS_IN_THE_AIR))
+                {
+                    uint32 allianceSum = GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR) + GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE) + GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI);
+                    uint32 hordeSum = GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE) + GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL) + GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS);
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_BOLVAR, GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TYRANDE, GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_MAGNI, GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_ALLIANCE, allianceSum);
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_CAIRNE, GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_THRALL, GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_SYLVANAS, GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_HORDE, hordeSum);
+                }
+
+                if (m_aqData.m_phase == PHASE_1_GATHERING_RESOURCES)
+                {
+                    // totals first
+                    for (auto itr = aqWorldStateTotalsMap.begin(); itr != aqWorldStateTotalsMap.end(); ++itr)
+                        FillInitialWorldStateData(data, count, (*itr).first, (*itr).second);
+                    for (auto itr = aqWorldstateMap.begin(); itr != aqWorldstateMap.end(); ++itr)
+                        FillInitialWorldStateData(data, count, m_aqData.m_WarEffortCounters[(*itr).first], (*itr).second);
+                }
+                else if (m_aqData.m_phase == PHASE_2_TRANSPORTING_RESOURCES)
+                    FillInitialWorldStateData(data, count, WORLD_STATE_AQ_DAYS_LEFT, uint32(m_aqData.m_timer / DAY * IN_MILLISECONDS));
                 break;
             }
         }

@@ -53,6 +53,7 @@
 #include "AI/EventAI/CreatureEventAIMgr.h"
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
+#include "World/WorldState.h"
 
 #ifdef BUILD_AHBOT
 #include "AuctionHouseBot/AuctionHouseBot.h"
@@ -6507,6 +6508,18 @@ bool ChatHandler::HandleLinkCheckCommand(char* args)
     if (!found)
         PSendSysMessage("Link for guids = %u , %u not found", masterCounter, player->GetSelectionGuid().GetCounter());
 
+    return true;
+}
+
+bool ChatHandler::HandleWarEffortCommand(char* args)
+{
+    uint32 param;
+    if (!ExtractUInt32(&args, param))
+    {
+        PSendSysMessage("%s", sWorldState.GetAQPrintout().data());
+        return true;
+    }
+    sWorldState.HandleWarEffortPhaseTransition(param);
     return true;
 }
 
