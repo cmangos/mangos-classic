@@ -7288,7 +7288,7 @@ float Unit::GetPPMProcChance(uint32 WeaponSpeed, float PPM) const
 bool Unit::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
 {
     // Custom mount (non-aura such as taxi or command) overwrites aura mounts
-    if (!displayid || (IsMounted() && aura && uint32(aura->GetMiscValue()) != GetMountID()))
+    if (!displayid || (IsMounted() && aura && uint32(aura->GetAmount()) != GetMountID()))
         return false;
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNTING);
@@ -7299,7 +7299,7 @@ bool Unit::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
 bool Unit::Unmount(const Aura* aura/* = nullptr*/)
 {
     // Custom mount (non-aura such as taxi or command) overwrites aura mounts, do not dismount on aura removal
-    if (!IsMounted() || (aura && uint32(aura->GetMiscValue()) != GetMountID()))
+    if (!IsMounted() || (aura && uint32(aura->GetAmount()) != GetMountID()))
         return false;
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_MOUNTED);

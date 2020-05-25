@@ -1723,7 +1723,7 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
 
 bool Player::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
 {
-    if (Unit::Mount(displayid, aura))
+    if (!Unit::Mount(displayid, aura))
         return false;
 
     // Custom mount (non-aura such as taxi or command) or in flight: unsummon any pet
