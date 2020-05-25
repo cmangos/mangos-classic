@@ -238,8 +238,8 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
 uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Creature& creature, Vector3 const& endPos) const
 {
     static const float  MinimumDistance = 4;                // minimum distance to work with in yard (shortcut if under this)
-    static const float  TerrainStep = 2;                    // min step for each int point in yard
-    static const float  MaxZVariation = 0.3f;               // over this value an intermediate point is generated to make unit stick the ground
+    static const float  TerrainStep     = 2.5;              // min step between each int point in yard
+    static const float  MaxZVariation   = 0.5f;             // over this value an intermediate point is generated to make unit stick the ground
     static const uint32 MaxSkippedPoint = 5;                // max intermediate points can be skipped (its better to send a bit more than needed in some cases
 
     Vector3 startPos = path.back();
@@ -248,8 +248,9 @@ uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Crea
     auto speedType = MovementInfo::GetSpeedType(creature.m_movementInfo.GetMovementFlags());
     float creatureSpeed = creature.GetSpeed(speedType);
 
+    bool onTheGround = !creature.IsFlying() && !creature.IsSwimming();
     float dist = (endPos - startPos).magnitude();
-    if (dist >= MinimumDistance && !creature.IsFlying() && !creature.IsSwimming())
+    if (dist >= MinimumDistance)
     {
         // compute direction to end position
         Vector3 direction = (endPos - startPos).unit();
@@ -258,20 +259,67 @@ uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Crea
         // total points that will be processed (only intermediates points and stop 2 yard before the end)
         uint32 totalPoints = uint32((dist - 2) / TerrainStep);
 
-        Vector3 currPos = startPos;
-        Vector3 lastPos = startPos;
-        uint32 pointsCount = 1;
-        uint32 skippedPoints = 0;
-        float lastZDiff = INVALID_HEIGHT;
+        Vector3 currPos = startPos;                         // computed position (start position + step in desired direction)
+        Vector3 lastPos = startPos;                         // previous position in the loop
+        uint32 pointsCount = 1;                             // point counter
+        uint32 skippedPoints = 0;                           // skipped points used to force adding some intermediate points each interval
+        float lastZDiff = INVALID_HEIGHT;                   // previous z difference
+        bool needToUpdateDirection = false;                 // true when z changed for swim/flying creature (if z go up we have to change direction or we will miss the end pos)
+        float generatePoint = false;                        // true when we have to add a point in the path
+        float colHeight = creature.GetCollisionHeight();    // needed to handle shallow water
+        float currGroundZ = 0;                              // computed ground for current position
+        Map* map = creature.GetMap();
         while (true)
         {
             currPos += direction;                           // move by step toward the end position
+            currGroundZ = map->GetHeight(currPos.x, currPos.y, currPos.z + 1.0f) + 0.2f;
 
-            currPos.z += 1.0f;                              // avoid being under texture and miss vmap height
-            // fix z to follow the terrain
-            creature.UpdateAllowedPositionZ(currPos.x, currPos.y, currPos.z);
+            if (onTheGround)
+            {
+                // fix z to follow the terrain
+                if (currPos.z < currGroundZ)
+                    currPos.z = currGroundZ;
+                else if (std::abs(currPos.z - currGroundZ) > 0.5f)
+                    currPos.z = currGroundZ;
+            }
+            else
+            {
+                float rawZ = currPos.z;
+                if (currPos.z < currGroundZ)                // check if we are under ground
+                    rawZ = currGroundZ;
+                else
+                {
+                    // we need liquid data to be able to clamp position between ground and liquid level
+                    if (creature.IsSwimming())
+                    {
+                        GridMapLiquidData liquidData;
+                        GridMapLiquidStatus liqStatus = map->GetTerrain()->getLiquidStatus(currPos.x, currPos.y, rawZ + 1.0f, MAP_ALL_LIQUIDS, &liquidData);
 
-            float generatePoint = false;
+                        if (liqStatus != LIQUID_MAP_NO_WATER)
+                        {
+                            if (liquidData.level - currGroundZ > colHeight)  // check if its shallow water
+                            {
+                                float maxZ = liquidData.level - colHeight;
+                                if (rawZ > maxZ)
+                                    rawZ = maxZ;
+                            }
+                        }
+                    }
+
+                    // TODO:: Maybe also limit flying creature to liquid level?
+                }
+
+                // we have to update direction to keep focus on end position if z is changed
+                if (rawZ != currPos.z)
+                {
+                    needToUpdateDirection = true;
+                    currPos.z = rawZ;
+                }
+
+                // we don't need to force generate point in swim/fly cases
+                skippedPoints = 0;
+            }
+
             float currZDiff = std::abs(currPos.z - lastPos.z);
             if (lastZDiff == INVALID_HEIGHT)
             {
@@ -302,6 +350,14 @@ uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Crea
                 path.push_back(currPos);                    // push current position
                 lastZDiff = currZDiff;
                 skippedPoints = 0;
+
+                if (needToUpdateDirection)                  // only case is swimming and flying too near of ground
+                {
+                    direction = (endPos - currPos).unit();
+                    direction *= TerrainStep;
+                    needToUpdateDirection = false;
+                }
+                generatePoint = false;
             }
             else
                 ++skippedPoints;
