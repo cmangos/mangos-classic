@@ -10865,7 +10865,9 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         }
         else
         {
-            charmed->setFaction(charmedCreature->GetOwner()->getFaction());
+            // safeguard against nullptr on totem elemental despawn
+            if (Unit* owner = charmedCreature->GetOwner())
+                charmed->setFaction(owner->getFaction());
 
             charmInfo->ResetCharmState();
 
