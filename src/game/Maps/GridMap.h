@@ -19,7 +19,6 @@
 #ifndef MANGOS_GRIDMAP_H
 #define MANGOS_GRIDMAP_H
 
-#include "Entities/Object.h"
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include "Maps/GridDefines.h"
