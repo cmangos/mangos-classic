@@ -502,7 +502,7 @@ bool PlayerbotPaladinAI::CheckSealAndJudgement(Unit* target)
     // Judgement is still active on target: refresh seal on bot if needed
     if (m_CurrentJudgement > 0 && m_CurrentSeal > 0 && !m_bot->HasAura(m_CurrentSeal, EFFECT_INDEX_0))
     {
-        if (m_CurrentSeal > 0 && !m_bot->HasAura(m_CurrentSeal, EFFECT_INDEX_0) && m_ai->CastSpell(m_CurrentSeal, *m_bot) == SPELL_CAST_OK)
+        if (m_ai->CastSpell(m_CurrentSeal, *m_bot) == SPELL_CAST_OK)
             return true;
     }
 
@@ -540,7 +540,7 @@ bool PlayerbotPaladinAI::CheckSealAndJudgement(Unit* target)
 
     if (m_CurrentJudgement == 0)
     {
-        if (spec == PALADIN_SPEC_HOLY || m_ai->IsHealer())
+        if (spec == PALADIN_SPEC_HOLY)
             m_CurrentSeal = SEAL_OF_WISDOM;
         else
             m_CurrentSeal = SEAL_OF_THE_CRUSADER;
