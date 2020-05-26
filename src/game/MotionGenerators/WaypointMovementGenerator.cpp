@@ -249,15 +249,17 @@ uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Crea
     float creatureSpeed = creature.GetSpeed(speedType);
 
     bool onTheGround = !creature.IsFlying() && !creature.IsSwimming();
-    float dist = (endPos - startPos).magnitude();
-    if (dist >= MinimumDistance)
+    // cache offset for direction
+    const Vector3 offset = endPos - startPos;
+    const float distance = offset.magnitude();
+    if (distance >= MinimumDistance)
     {
         // compute direction to end position
-        Vector3 direction = (endPos - startPos).unit();
+        Vector3 direction = offset * (1.f / distance);
         direction *= TerrainStep;                           // add wanted step size
 
         // total points that will be processed (only intermediates points and stop 2 yard before the end)
-        uint32 totalPoints = uint32((dist - 2) / TerrainStep);
+        uint32 totalPoints = uint32((distance - 2) / TerrainStep);
 
         Vector3 currPos = startPos;                         // computed position (start position + step in desired direction)
         Vector3 lastPos = startPos;                         // previous position in the loop
@@ -371,7 +373,7 @@ uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Crea
 
     path.push_back(endPos);
     // add last point to end point travel time
-    travelTime = dist / creatureSpeed * 1000;
+    travelTime = distance / creatureSpeed * 1000;
 
     return travelTime;
 }
