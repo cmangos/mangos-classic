@@ -61,7 +61,7 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature, int32 pat
         return;
     // Initialize the i_currentNode to point to the first node
     i_currentNode = i_path->begin()->first;
-    m_lastReachedWaypoint = i_path->rbegin()->first;
+    m_lastReachedWaypoint = 0;
     m_currentWaypointNode = i_path->begin();
 
     if (i_path->size() < 2)
@@ -122,7 +122,7 @@ void WaypointMovementGenerator<Creature>::InitializeWaypointPath(Creature& u, in
         m_lastReachedWaypoint = lastNode->first;
     }
     else
-        m_lastReachedWaypoint = i_path->rbegin()->first;
+        m_lastReachedWaypoint = 0;
 
     // Start moving if possible
     SendNextWayPointPath(u);
@@ -513,44 +513,57 @@ bool WaypointMovementGenerator<Creature>::Update(Creature& creature, const uint3
         return true;
     }
 
-    if (Stopped(creature))
+    if (i_path->size() > 1)
     {
-        if (CanMove(diff, creature))
-            SendNextWayPointPath(creature);
-    }
-    else
-    {
-        if (creature.IsStopped())
-            Stop(STOP_TIME_FOR_PLAYER);
+        if (Stopped(creature))
+        {
+            if (CanMove(diff, creature))
+                SendNextWayPointPath(creature);
+        }
         else
         {
-            if (creature.movespline->Finalized())
-            {
-                // we arrived to a node either by movespline finalized or node reached while creature continue to move
-                OnArrived(creature);                        // fire script events
-                if (!Stopped(creature))                     // check if not stopped in OnArrived
-                    SendNextWayPointPath(creature);         // restart movement
-            }
+            if (creature.IsStopped())
+                Stop(STOP_TIME_FOR_PLAYER);
             else
             {
-                if (m_pathDuration <= 0)
+                if (creature.movespline->Finalized())
                 {
-                    // time to send new packet
-                    if (m_currentWaypointNode->second.delay == 0)
-                        SendNextWayPointPath(creature);
+                    // we arrived to a node either by movespline finalized or node reached while creature continue to move
+                    OnArrived(creature);                    // fire script events
+                    if (!Stopped(creature))                 // check if not stopped in OnArrived
+                        SendNextWayPointPath(creature);     // restart movement
                 }
                 else
-                    m_pathDuration -= diff;
-
-                if (!m_nodeIndexes.empty() && creature.movespline->currentPathIdx() >= m_nodeIndexes.front())
                 {
-                    // node reached while moving
-                    m_nodeIndexes.pop_front();
-                    OnArrived(creature);                    // fire script events
+                    if (m_pathDuration <= 0)
+                    {
+                        // time to send new packet
+                        if (m_currentWaypointNode->second.delay == 0)
+                            SendNextWayPointPath(creature);
+                    }
+                    else
+                        m_pathDuration -= diff;
+
+                    if (!m_nodeIndexes.empty() && creature.movespline->currentPathIdx() >= m_nodeIndexes.front())
+                    {
+                        // node reached while moving
+                        m_nodeIndexes.pop_front();
+                        OnArrived(creature);                // fire script events
+                    }
                 }
             }
         }
     }
+    else
+    {
+        // should be guaranteed that there is some delay in node script
+        if (!Stopped(creature) || CanMove(diff, creature))
+        {
+            m_lastReachedWaypoint = 0;
+            OnArrived(creature);
+        }
+    }
+
     return true;
 }
 
