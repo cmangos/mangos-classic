@@ -9010,7 +9010,7 @@ bool LoadMangosStrings(DatabaseType& db, char const* table, int32 start_value, i
 void ObjectMgr::LoadCreatureTemplateSpells()
 {
     uint32 count = 0;
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT entry, setId, spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8 FROM creature_template_spells"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT entry, setId, spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, spell9, spell10 FROM creature_template_spells"));
 
     if (result)
     {
