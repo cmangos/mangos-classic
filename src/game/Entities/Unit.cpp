@@ -8323,7 +8323,7 @@ void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, U
 
     float mod = 1.0f;
 
-    const bool pvp = (GetTypeId() == TYPEID_PLAYER && caster->GetTypeId() == TYPEID_PLAYER);
+    const bool pvp = (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
 
     // Some diminishings applies to mobs too (for example, Stun)
     if ((GetDiminishingReturnsGroupType(group) == DRTYPE_PLAYER && pvp) || GetDiminishingReturnsGroupType(group) == DRTYPE_ALL)
