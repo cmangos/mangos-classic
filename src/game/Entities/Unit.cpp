@@ -10408,7 +10408,6 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
     possessed->addUnitState(UNIT_STAT_POSSESSED);                       // also set internal unit state flag
     possessed->SelectLevel(getLevel());                                 // set level to same level than summoner TODO:: not sure its always the case...
     possessed->SetLinkedToOwnerAura(TEMPSPAWN_LINKED_AURA_OWNER_CHECK | TEMPSPAWN_LINKED_AURA_REMOVE_OWNER); // set what to do if linked aura is removed or the creature is dead.
-    possessed->SetWalk(IsWalking(), true);                              // sync the walking state with the summoner
 
     // important before adding to the map!
     SetCharmGuid(possessed->GetObjectGuid());                           // save guid of charmed creature
@@ -10434,6 +10433,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
 
     // set temp possess ai (creature will not be able to react by itself)
     charmInfo->SetCharmState("PossessedAI");
+    possessed->SetWalk(IsWalking(), true);                              // sync the walking state with the summoner - after SetCharmState
 
     // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
@@ -10502,8 +10502,9 @@ bool Unit::TakePossessOf(Unit* possessed)
         possessedCreature = static_cast<Creature*>(possessed);
         possessedCreature->GetCombatStartPosition(combatStartPosition);
         possessedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
-        possessedCreature->SetWalk(IsWalking(), true);
+
         charmInfo->SetCharmState("PossessedAI");
+        possessedCreature->SetWalk(IsWalking(), true);
         getHostileRefManager().deleteReference(possessedCreature);
     }
     else if (possessed->GetTypeId() == TYPEID_PLAYER)
@@ -10647,11 +10648,11 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
         else
             charmInfo->SetCharmState("PetAI");
 
+        charmedCreature->SetWalk(IsWalking(), true);
+
         getHostileRefManager().deleteReference(charmedCreature);
 
         charmedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
-
-        charmedCreature->SetWalk(IsWalking(), true);
 
         if (isPossessCharm)
             charmInfo->InitPossessCreateSpells();
