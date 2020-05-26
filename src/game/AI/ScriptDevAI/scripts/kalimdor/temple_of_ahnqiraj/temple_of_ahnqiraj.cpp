@@ -354,12 +354,9 @@ void instance_temple_of_ahnqiraj::Update(uint32 uiDiff)
     {
         if (m_uiSkeramProphecyTimer < uiDiff)
         {
-            if (Creature* skeram = GetSingleCreatureFromStorage(NPC_SKERAM))
-            {
-                if (Player* player = GetPlayerInMap())
-                    player->GetMap()->PlayDirectSoundToMap(sound_skeram_prophecy[urand(0,4)]);
-                m_uiSkeramProphecyTimer = urand(3, 4) * MINUTE * IN_MILLISECONDS;   // Timer is guesswork
-            }
+            if (Player* player = GetPlayerInMap())
+                player->GetMap()->PlayDirectSoundToMap(sound_skeram_prophecy[urand(0, 4)]);
+            m_uiSkeramProphecyTimer = urand(3, 4) * MINUTE * IN_MILLISECONDS;   // Timer is guesswork
         }
         else
             m_uiSkeramProphecyTimer -= uiDiff;
