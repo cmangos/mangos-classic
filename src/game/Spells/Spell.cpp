@@ -4335,8 +4335,8 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (non_caster_target && m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET) && target->IsInCombat())
                 return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
 
-            // check if target is affected by Spirit of Redemption (Aura: 27827)
-            if (target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
+            // check if target is affected by Spirit of Redemption (Aura: 27827) unless death persistent
+            if (target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_DEATH_PERSISTENT))
                 return SPELL_FAILED_BAD_TARGETS;
 
             // Check if more powerful spell applied on target (if spell only contains non-aoe auras)
