@@ -1331,13 +1331,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 23183:                             // Mark of Frost
                     {
                         if (target->HasAura(23182))
-                            target->CastSpell(target, 23186, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
+                            target->CastSpell(target, 23186, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCasterGuid());
                         return;
                     }
                     case 25042:                             // Mark of Nature
                     {
                         if (target->HasAura(25040))
-                            target->CastSpell(target, 25043, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
+                            target->CastSpell(target, 25043, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCasterGuid());
                         return;
                     }
                     case 25471:                             // Attack Order
