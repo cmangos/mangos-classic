@@ -150,7 +150,7 @@ struct AQWhirlwind : public SpellScript
         SpellAuraHolder* holder = spell->GetCaster()->GetSpellAuraHolder(spell->GetTriggeredByAuraSpellInfo()->Id);
         if (holder->m_auras[EFFECT_INDEX_0]->GetAuraTicks() != holder->m_auras[EFFECT_INDEX_0]->GetAuraMaxTicks())
         {
-            if (spell->m_spellInfo->Id == 26686)
+            if (spell->m_spellInfo->Id == SPELL_OTHER_WHIRLWIND_TRIGGER)
                 if (urand(0, 2))
                     return;
 
