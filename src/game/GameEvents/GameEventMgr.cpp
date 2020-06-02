@@ -161,7 +161,7 @@ void GameEventMgr::LoadFromDB()
                 gameEvent.occurence = gameEvent.length;
             }
 			
-            if (gameEvent.length == 0)                     // length>0 is validity check
+            if (gameEvent.length == 0 && gameEvent.scheduleType != GAME_EVENT_SCHEDULE_SERVERSIDE) // length>0 is validity check
             {
                 sLog.outErrorDb("`game_event` game event id (%i) have length 0 and can't be used.", event_id);
                 gameEvent.start = time_t(FAR_FUTURE);

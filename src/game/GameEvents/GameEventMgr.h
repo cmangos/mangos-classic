@@ -58,7 +58,7 @@ struct GameEventData
     uint32 linkedTo;
     std::string description;
 
-    bool isValid() const { return length > 0; }
+    bool isValid() const { return scheduleType == GAME_EVENT_SCHEDULE_SERVERSIDE || length > 0; }
 };
 
 struct GameEventCreatureData
