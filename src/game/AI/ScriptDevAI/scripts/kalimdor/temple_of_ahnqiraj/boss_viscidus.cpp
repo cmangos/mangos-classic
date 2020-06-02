@@ -89,6 +89,13 @@ enum
 
 static const uint32 auiGlobSummonSpells[MAX_VISCIDUS_GLOBS] = { 25865, 25866, 25867, 25868, 25869, 25870, 25871, 25872, 25873, 25874, 25875, 25876, 25877, 25878, 25879, 25880, 25881, 25882, 25883, 25884 };
 
+struct Location
+{
+    float m_fX, m_fY, m_fZ;
+};
+
+static const Location resetPoint = { -7992.0f, 1041.0f, -23.84f };
+
 enum ViscidusActions
 {
     VISCIDUS_TOXIN,
@@ -106,6 +113,10 @@ struct boss_viscidusAI : public CombatAI
         AddCombatAction(VISCIDUS_POISON_SHOCK, 7000, 12000);
         AddCombatAction(VISCIDUS_POISON_BOLT_VOLLEY, 10000, 15000);
         AddCustomAction(VISCIDUS_EXPLODE, true, [&]() { HandleExplode(); });
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit* unit, float x, float y, float z) -> bool
+        {
+            return m_creature->GetDistance(resetPoint.m_fX, resetPoint.m_fY, resetPoint.m_fZ, DIST_CALC_COMBAT_REACH) < 10.0f;
+        });
     }
 
     ScriptedInstance* m_instance;
