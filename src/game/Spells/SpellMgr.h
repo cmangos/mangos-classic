@@ -445,6 +445,8 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 19194:         // Double Attack
         case 19195:         // Hate to 90% (Hate to 90%)
         case 19396:         // Incinerate (Incinerate)
+        case 19483:         // Immolation
+        case 19514:         // Lightning Shield
         case 19626:         // Fire Shield (Fire Shield)
         case 19640:         // Pummel (Pummel)
         case 19817:         // Double Attack
