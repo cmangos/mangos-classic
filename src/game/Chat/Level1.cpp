@@ -184,9 +184,45 @@ bool ChatHandler::HandleGMCommand(char* args)
     return true;
 }
 
-// Acquire random unusual land mount
+// Acquire random unusual land mount or visually mount displayid or selected creature
 bool ChatHandler::HandleGMMountUpCommand(char* args)
 {
+    if (*args)
+    {
+        if (ExtractLiteralArg(&args, "target"))
+        {
+            if (Unit* unit = getSelectedUnit())
+            {
+                if (unit->GetTypeId() == TYPEID_UNIT)
+                {
+                    m_session->GetPlayer()->Mount(unit->GetDisplayId());
+                    return true;
+                }
+            }
+
+            SendSysMessage(LANG_COMMAND_NOCREATUREFOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+        else
+        {
+            uint32 displayid;
+
+            if (ExtractUInt32(&args, displayid))
+            {
+                if (sCreatureDisplayInfoStore.LookupEntry(displayid))
+                {
+                    m_session->GetPlayer()->Mount(displayid);
+                    return true;
+                }
+
+                SendSysMessage(LANG_BAD_VALUE);
+                SetSentErrorMessage(true);
+                return false;
+            }
+        }
+    }
+
     return ModifyMountCommandHelper(m_session->GetPlayer(), args);
 }
 
