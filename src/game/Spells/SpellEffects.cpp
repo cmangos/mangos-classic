@@ -1969,7 +1969,11 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)
 
     // Teleport
     if (m_targets.m_mapId == UINT32_MAX || m_targets.m_mapId == unitTarget->GetMapId())
+    {
+        if (unitTarget->IsPlayer() && unitTarget->IsMoving())
+            position.z += 0.5f;
         unitTarget->NearTeleportTo(position.x, position.y, position.z, orientation, unitTarget == m_caster);
+    }
     else if (unitTarget->GetTypeId() == TYPEID_PLAYER)
         ((Player*)unitTarget)->TeleportTo(m_targets.m_mapId, position.x, position.y, position.z, orientation, unitTarget == m_caster ? TELE_TO_SPELL : 0);
 

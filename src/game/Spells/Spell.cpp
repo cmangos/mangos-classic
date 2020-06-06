@@ -1610,13 +1610,13 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 case TARGET_LOCATION_CASTER_RIGHT:       angle -= M_PI_F / 2;     break;
             }
 
-            float x, y;
             float z = m_caster->GetPositionZ();
             if (radius == 0.f) // All shaman totems have 0 radius - need to override with proper value
                 radius = 2.f;
 
-            m_caster->GetNearPoint(m_caster, x, y, z, m_caster->GetObjectBoundingRadius(), radius, angle, m_caster->IsInWater());
-            m_targets.setDestination(x, y, z);
+            WorldLocation loc;
+            m_caster->GetFirstCollisionPosition(loc, radius, angle);
+            m_targets.setDestination(loc.coord_x, loc.coord_y, loc.coord_z);
             break;
         }
         case TARGET_LOCATION_CASTER_DEST:
