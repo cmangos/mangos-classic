@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2020052301
+ConfVersion=2020060701
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -1060,6 +1060,11 @@ CreaturePickpocketRestockDelay = 600
 #        Chat anti-flood protection, mute time at activation flood protection (not saved)
 #        Default: 10 (in secs)
 #
+#    Chat.RestrictedRaidWarnings
+#        Chat anti-flood protection, mute time at activation flood protection (not saved)
+#                 0 (unrestricted: allow use in parties by all members of the group) (2.0.0 - 3.3.0 behavior)
+#        Default: 1 (restricted: only allow use in raids by leader and assitants)
+#
 #    Channel.RestrictedLanguageMode
 #        Restrict usage of non-latin characters according to RealmZone
 #        Default: 0 (no restrictions, any characters in all channels)
@@ -1081,6 +1086,7 @@ ChatStrictLinkChecking.Kick = 0
 ChatFlood.MessageCount = 10
 ChatFlood.MessageDelay = 1
 ChatFlood.MuteTime = 10
+Chat.RestrictedRaidWarnings = 1
 Channel.RestrictedLanguageMode = 0
 Channel.StaticAutoTreshold = 0
 

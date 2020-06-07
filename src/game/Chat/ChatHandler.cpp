@@ -257,14 +257,15 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (!CheckChatMessage(msg, (lang == LANG_ADDON)))
                 return;
 
-            // if player is in battleground, he cannot say to battleground members by /p
-            Group* group = GetPlayer()->GetOriginalGroup();
+            // if player is in battleground, party chat is sent only to members of normal group
+            // battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
+            Group* group = _player->GetGroup();
+
+            if (group->isBattleGroup())
+                group = _player->GetOriginalGroup();
+
             if (!group)
-            {
-                group = _player->GetGroup();
-                if (!group || group->isBattleGroup())
-                    return;
-            }
+                return;
 
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, ChatMsg(type), msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
@@ -338,14 +339,15 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (!CheckChatMessage(msg, (lang == LANG_ADDON)))
                 return;
 
-            // if player is in battleground, he cannot say to battleground members by /ra
-            Group* group = GetPlayer()->GetOriginalGroup();
-            if (!group)
-            {
-                group = GetPlayer()->GetGroup();
-                if (!group || group->isBattleGroup() || !group->isRaidGroup())
-                    return;
-            }
+            // if player is in battleground, raid chat is sent only to members of normal group
+            // battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
+            Group* group = _player->GetGroup();
+
+            if (group->isBattleGroup())
+                group = _player->GetOriginalGroup();
+
+            if (!group || !group->isRaidGroup())
+                return;
 
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID, msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
@@ -365,14 +367,15 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (!CheckChatMessage(msg))
                 return;
 
-            // if player is in battleground, he cannot say to battleground members by /ra
-            Group* group = GetPlayer()->GetOriginalGroup();
-            if (!group)
-            {
-                group = GetPlayer()->GetGroup();
-                if (!group || group->isBattleGroup() || !group->isRaidGroup() || !group->IsLeader(_player->GetObjectGuid()))
-                    return;
-            }
+            // if player is in battleground, raid chat is sent only to members of normal group
+            // battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
+            Group* group = _player->GetGroup();
+
+            if (group->isBattleGroup())
+                group = _player->GetOriginalGroup();
+
+            if (!group || !group->isRaidGroup() || !group->IsLeader(_player->GetObjectGuid()))
+                return;
 
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_LEADER, msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
@@ -390,15 +393,23 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (!CheckChatMessage(msg))
                 return;
 
-            Group* group = GetPlayer()->GetGroup();
-            if (!group || !group->isRaidGroup() ||
-                    !(group->IsLeader(GetPlayer()->GetObjectGuid()) || group->IsAssistant(GetPlayer()->GetObjectGuid())))
+            // if player is in battleground, raid warning is sent only to players in battleground
+            // battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
+            Group* group = _player->GetGroup();
+
+            if (!group)
+                return;
+            else if (group->isRaidGroup())
+            {
+                if (!group->IsLeader(_player->GetObjectGuid()) && !group->IsAssistant(_player->GetObjectGuid()))
+                    return;
+            }
+            else if (sWorld.getConfig(CONFIG_BOOL_CHAT_RESTRICTED_RAID_WARNINGS))
                 return;
 
             WorldPacket data;
-            // in battleground, raid warning is sent only to players in battleground - code is ok
             ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_WARNING, msg.c_str(), Language(lang), _player->GetChatTag(), _player->GetObjectGuid(), _player->GetName());
-            group->BroadcastPacket(data, false);
+            group->BroadcastPacket(data, true);
         } break;
 
         case CHAT_MSG_BATTLEGROUND:
@@ -416,8 +427,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (!CheckChatMessage(msg, (lang == LANG_ADDON)))
                 return;
 
+            // battleground chat is sent only to players in battleground
             // battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
-            Group* group = GetPlayer()->GetGroup();
+            Group* group = _player->GetGroup();
+
             if (!group || !group->isBattleGroup())
                 return;
 
@@ -437,9 +450,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (!CheckChatMessage(msg))
                 return;
 
+            // battleground chat is sent only to players in battleground
             // battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
-            Group* group = GetPlayer()->GetGroup();
-            if (!group || !group->isBattleGroup() || !group->IsLeader(GetPlayer()->GetObjectGuid()))
+            Group* group = _player->GetGroup();
+
+            if (!group || !group->isBattleGroup() || !group->IsLeader(_player->GetObjectGuid()))
                 return;
 
             WorldPacket data;
