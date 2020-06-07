@@ -1613,6 +1613,30 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleNpcTempSpawn(char* args)
+{
+    Player* player = GetSession()->GetPlayer();
+
+    uint32 entry;
+    if (!ExtractUInt32(&args, entry))
+    {
+        SendSysMessage("Enter proper creature entry.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 timer;
+    if (!ExtractUInt32(&args, timer))
+    {
+        SendSysMessage("Enter timer for despawn.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    player->SummonCreature(entry, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), TEMPSPAWN_TIMED_OOC_DESPAWN, timer);
+    return true;
+}
+
 // add item in vendorlist
 bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
 {
