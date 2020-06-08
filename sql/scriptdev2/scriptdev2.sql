@@ -258,6 +258,13 @@ UPDATE creature_template SET ScriptName='npc_threshwackonator' WHERE entry=6669;
 UPDATE creature_template SET ScriptName='npc_volcor' WHERE entry=3692;
 UPDATE creature_template SET ScriptName='npc_therylune' WHERE entry=3584;
 UPDATE creature_template SET ScriptName='npc_rabid_bear' WHERE entry=2164;
+UPDATE creature_template SET ScriptName='npc_blackwood_warrior' WHERE entry=2168;
+UPDATE creature_template SET ScriptName='npc_blackwood_totemic' WHERE entry=2169;
+UPDATE gameobject_template SET ScriptName='go_furbolg_food' WHERE entry=175329;
+UPDATE gameobject_template SET ScriptName='go_furbolg_food' WHERE entry=175330;
+UPDATE gameobject_template SET ScriptName='go_furbolg_food' WHERE entry=175331;
+INSERT INTO scripted_event_id VALUES
+(3938,'event_purify_food');
 
 /* DARNASSUS */
 
@@ -665,7 +672,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000003','%s becomes enraged!','0','2','0','0','0','EMOTE_GENERIC_ENRAGED'),
 ('-1000004','%s goes into a berserker rage!','0','2','0','0','0','EMOTE_GENERIC_BERSERK'),
 ('-1000005','%s goes into a frenzy!','0','3','0','0','0','EMOTE_BOSS_GENERIC_FRENZY'),
-('-1000006','%s becomes enraged!','0','3','0','0','0','EMOTE_BOSS_GENERIC_ENRAGED');
+('-1000006','%s becomes enraged!','0','3','0','0','0','EMOTE_BOSS_GENERIC_ENRAGED'),
+('-1000007','%s attempts to run away in fear!','0','2','0','0','1150','EMOTE_GENERIC_FLEE');
 
 --
 -- Normal text entries below. Say/Yell/Whisper/Emote for any regular world object.
@@ -1716,7 +1724,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1010023','I\'m ready when you are, $N. Lead the way!','0','0','0','0','4079','Kindal Moonweaver SAY_QUEST_START'),
 ('-1010024','Die, $n. Elune will not have you harm her creatures any longer!','0','0','0','0','4123','Kindal Moonweaver SAY_INITIAL_AGGRO'),
 ('-1010025','You dare touch me?!','0','0','0','0','4125','Kindal Moonweaver SAY_AGGRO'),
-('-1010026','We\'ve done it! Meet me back by Jer\'kai above the Grim Totem camp.','0','0','0','0','4080','Kindal Moonweaver SAY_QUEST_COMPLETE');
+('-1010026','We\'ve done it! Meet me back by Jer\'kai above the Grim Totem camp.','0','0','0','0','4080','Kindal Moonweaver SAY_QUEST_COMPLETE'),
+
+('-1010027','%s is lured out by the sweet scent of the purified food.','0','2','0','0','5617','Blackwood Furbolg - on event 3938'),
+('-1010028','%s begins to greedily devour the food.','0','2','0','0','5618','Blackwood Furbolg - on event 3938');
 
 -- -1 015 000 TBC texts
 

@@ -17,24 +17,33 @@
 /* ScriptData
 SDName: Darkshore
 SD%Complete: 100
-SDComment: Quest support: 731, 945, 994, 995, 2078, 2118, 5321
+SDComment: Quest support: 731, 945, 994, 995, 2078, 2118, 4763, 5321
 SDCategory: Darkshore
 EndScriptData
 
 */
 
-#include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
+#include "AI/ScriptDevAI/include/sc_common.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/CellImpl.h"
+#include "AI/ScriptDevAI/base/escort_ai.h"
+#include "AI/ScriptDevAI/base/follower_ai.h"
+#include "Entities/UpdateData.h"
+
+/* ContentData
 npc_kerlonian
 npc_prospector_remtravel
 npc_threshwackonator
 npc_volcor
 npc_therylune
 npc_rabid_bear
+npc_corrupted_furbolg
+npc_blackwood_warrior
+npc_blackwood_totemic
+event_purify_food
+go_furbolg_food
 EndContentData */
 
-
-#include "AI/ScriptDevAI/base/escort_ai.h"
-#include "AI/ScriptDevAI/base/follower_ai.h"
 
 /*####
 # npc_kerlonian
@@ -757,6 +766,260 @@ UnitAI* GetAI_npc_rabid_bear(Creature* pCreature)
     return new npc_rabid_bearAI(pCreature);
 }
 
+/*######
+## npc_corrupted_furbolg
+######*/
+
+enum {
+    NPC_BLACKWOOD_WARRIOR = 2168,
+    NPC_BLACKWOOD_TOTEMIC = 2169,
+
+    GO_PURIFIED_FOOD      = 175336,
+
+    FACTION_BLACKWOOD     = 35,         // Faction guessed
+
+    EMOTE_LURED           = -1010027,
+    EMOTE_PURIFIED        = -1010028,
+    EMOTE_GENERIC_FLEE    = -1000007,
+
+    SPELL_BATTLE_STANCE   = 7165,
+    SPELL_THUNDERCLAP     = 8078,
+    SPELL_HEALING_WARD    = 5605,
+};
+
+static const uint32 furbolgList[2] = { NPC_BLACKWOOD_WARRIOR, NPC_BLACKWOOD_TOTEMIC };
+
+struct npc_corrupted_furbolgAI : public ScriptedAI
+{
+    npc_corrupted_furbolgAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
+
+    bool m_isMovementActive;
+    bool m_hasFleed;
+    uint32 m_purifyTimer;
+
+    void Reset() override
+    {
+        m_isMovementActive  = false;
+        m_hasFleed          = false;
+        m_purifyTimer       = 0;
+        SetReactState(REACT_AGGRESSIVE);
+    }
+
+    void SeekPurification()
+    {
+        if (GameObject* bowl = GetClosestGameObjectWithEntry(m_creature, GO_PURIFIED_FOOD, 60.0f))
+        {
+            m_isMovementActive = true;
+            SetReactState(REACT_PASSIVE);
+            DoScriptText(EMOTE_LURED, m_creature);
+            float x, y, z;
+            bowl->GetContactPoint(m_creature, x, y, z, 1.0f);
+            m_creature->SetWalk(false);
+            m_creature->GetMotionMaster()->MovePoint(1, x, y, z);
+        }
+    }
+
+    void MovementInform(uint32 moveType, uint32 pointId) override
+    {
+        if (moveType != POINT_MOTION_TYPE || !pointId)
+            return;
+
+        m_creature->GetMotionMaster()->MoveIdle();
+        m_isMovementActive  = false;
+        m_purifyTimer = 5 * IN_MILLISECONDS;
+    }
+
+    // Return true to handle shared timers and MeleeAttack
+    virtual bool UpdateFurbolgAI(const uint32 /*diff*/) { return true; }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (m_isMovementActive)
+            return;
+
+        if (m_purifyTimer)
+        {
+            if (m_purifyTimer < diff)
+            {
+                m_purifyTimer = 0;
+                DoScriptText(EMOTE_PURIFIED, m_creature);
+                m_isMovementActive = false;
+                m_creature->SetFactionTemporary(FACTION_BLACKWOOD, TEMPFACTION_RESTORE_RESPAWN);
+                m_creature->GetMotionMaster()->MoveTargetedHome();
+                m_creature->SetWalk(true);
+                m_creature->ForcedDespawn(2 * MINUTE * IN_MILLISECONDS);
+            }
+            else
+            {
+                m_purifyTimer -= diff;
+                return;
+            }
+        }
+
+        // Return since we have no target
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+            return;
+
+        // Flee at 15% HP
+        if (m_creature->GetHealthPercent() <= 10.0f && !m_hasFleed)
+        {
+            DoScriptText(EMOTE_GENERIC_FLEE, m_creature);
+            if (m_creature->AI()->DoFlee())
+                m_hasFleed = true;
+        }
+
+        // Call furbolg specific virtual function
+        if (!UpdateFurbolgAI(diff))
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+/*######
+## npc_blackwood_warrior
+######*/
+
+struct npc_blackwood_warriorAI : public npc_corrupted_furbolgAI
+{
+    npc_blackwood_warriorAI(Creature* creature) : npc_corrupted_furbolgAI(creature) { Reset(); }
+
+    uint32 m_thunderclapTimer;
+
+    void Reset() override
+    {
+        npc_corrupted_furbolgAI::Reset();
+
+        DoCastSpellIfCan(m_creature, SPELL_BATTLE_STANCE);
+
+        m_thunderclapTimer = urand(16, 21) * IN_MILLISECONDS;
+    }
+
+    bool UpdateFurbolgAI(const uint32 diff)
+    {
+        if (m_thunderclapTimer < diff)
+        {
+            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_THUNDERCLAP) == CAST_OK)
+                    m_thunderclapTimer = urand(16, 21) * IN_MILLISECONDS;
+            }
+        }
+        else
+            m_thunderclapTimer -= diff;
+
+        return true;
+    }
+};
+
+UnitAI* GetAI_npc_blackwood_warrior(Creature* creature)
+{
+    return new npc_blackwood_warriorAI(creature);
+}
+
+/*######
+## npc_blackwood_totemic
+######*/
+
+struct npc_blackwood_totemicAI : public npc_corrupted_furbolgAI
+{
+    npc_blackwood_totemicAI(Creature* creature) : npc_corrupted_furbolgAI(creature) { Reset(); }
+
+    uint32 m_healingWardTimer;
+
+    void Reset() override
+    {
+        npc_corrupted_furbolgAI::Reset();
+
+        m_healingWardTimer = urand(6, 12) * IN_MILLISECONDS;
+    }
+
+    bool UpdateFurbolgAI(const uint32 diff)
+    {
+        if (m_healingWardTimer < diff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_HEALING_WARD) == CAST_OK)
+                m_healingWardTimer = urand(30, 36) * IN_MILLISECONDS;
+        }
+        else
+            m_healingWardTimer -= diff;
+
+        return true;
+    }
+};
+
+UnitAI* GetAI_npc_blackwood_totemic(Creature* creature)
+{
+    return new npc_blackwood_totemicAI(creature);
+}
+
+/*######
+## EventId_event_purify_food
+######*/
+
+bool ProcessEventId_event_purify_food(uint32 /*eventId*/, Object* source, Object* target, bool /*isStart*/)
+{
+    if (source->GetTypeId() == TYPEID_PLAYER && target->GetTypeId() == TYPEID_GAMEOBJECT)
+    {
+        GameObject* bowl = (GameObject*)target;
+        CreatureList furbolgs;
+        // Get all nearby Blackwood Furbolgs
+        for (auto entry : furbolgList)
+        {
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(((GameObject*)target), entry, 40.0f);
+            MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(furbolgs, check);
+            Cell::VisitGridObjects(((Player*)source), searcher, 40.0f);
+        }
+
+        // Spawn two extra Blackwood Warriors
+        float x, y, z;
+        for (int8 i = 0; i < 2; ++i)
+        {
+            bowl->GetRandomPoint(bowl->GetPositionX(), bowl->GetPositionY(), bowl->GetPositionZ(), 30.0f, x, y, z);
+            if (Creature* warrior = bowl->SummonCreature(NPC_BLACKWOOD_WARRIOR, x, y, z, 0.0f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 120000))
+                furbolgs.push_back(warrior);
+        }
+
+        // Activate the purification sequence for all hostile furbolgs (prevent attracting already purified ones)
+        for (auto& furbolg : furbolgs)
+        {
+            if (furbolg->IsInCombat() || !furbolg->IsAlive() || !((Unit*)source)->IsEnemy(furbolg))
+                continue;
+
+            if (auto* furbolgAI = dynamic_cast<npc_corrupted_furbolgAI*>(furbolg->AI()))
+                furbolgAI->SeekPurification();
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
+/*######
+## go_furbolg_food
+######*/
+
+bool GOUse_go_furbolg_food(Player* player, GameObject* go)
+{
+    // Search for a nearby Blackwood Warrior and make it attack
+    if (Creature* warrior = GetClosestCreatureWithEntry(go, NPC_BLACKWOOD_WARRIOR, 20.0f))
+    {
+        if (warrior->IsInCombat() || !warrior->IsAlive() || !player->IsEnemy(warrior))
+            warrior->AI()->AttackStart(player);
+    }
+    // Else spawn a new one (and make it attack)
+    else
+    {
+        float x, y, z;
+        go->GetRandomPoint(go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 20.0f, x, y, z);
+        if (Creature* warrior = go->SummonCreature(NPC_BLACKWOOD_WARRIOR, x, y, z, 0.0f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 120000))
+            warrior->AI()->AttackStart(player);
+    }
+
+    return true;
+}
+
 void AddSC_darkshore()
 {
     Script* pNewScript = new Script;
@@ -794,5 +1057,25 @@ void AddSC_darkshore()
     pNewScript = new Script;
     pNewScript->Name = "npc_rabid_bear";
     pNewScript->GetAI = &GetAI_npc_rabid_bear;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_blackwood_warrior";
+    pNewScript->GetAI = &GetAI_npc_blackwood_warrior;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_blackwood_totemic";
+    pNewScript->GetAI = &GetAI_npc_blackwood_totemic;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "event_purify_food";
+    pNewScript->pProcessEventId = &ProcessEventId_event_purify_food;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_furbolg_food";
+    pNewScript->pGOUse = &GOUse_go_furbolg_food;
     pNewScript->RegisterSelf();
 }
