@@ -164,7 +164,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recv_data)
                     {
                         Player* pPlayer = itr->getSource();
 
-                        if (!pPlayer || pPlayer == _player) // not self
+                        if (!pPlayer || pPlayer == _player || !pPlayer->IsInWorld()) // not self
                             continue;
 
                         if (pPlayer->CanTakeQuest(qInfo, true))
@@ -540,7 +540,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
             {
                 Player* pPlayer = itr->getSource();
 
-                if (!pPlayer || pPlayer == _player)         // skip self
+                if (!pPlayer || pPlayer == _player || !pPlayer->IsInWorld())         // skip self
                     continue;
 
                 _player->SendPushToPartyResponse(pPlayer, QUEST_PARTY_MSG_SHARING_QUEST);
