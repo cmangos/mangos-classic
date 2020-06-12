@@ -473,7 +473,8 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
         }
 
         owner.Relocate(loc.x, loc.y, loc.z, loc.orientation);
-        m_spawns.push_back(owner.SummonCreature(2, loc.x, loc.y, loc.z, loc.orientation, TEMPSPAWN_TIMED_DESPAWN, 5000)->GetObjectGuid());
+        if (owner.IsDebuggingMovement())
+            m_spawns.push_back(owner.SummonCreature(1, loc.x, loc.y, loc.z, loc.orientation, TEMPSPAWN_TIMED_DESPAWN, 5000)->GetObjectGuid());
     }
 
     if (!this->i_path)
