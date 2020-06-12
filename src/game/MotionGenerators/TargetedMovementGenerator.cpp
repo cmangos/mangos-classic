@@ -167,6 +167,18 @@ void ChaseMovementGenerator::SetOffsetAndAngle(float offset, float angle, bool m
 #define CHASE_RECHASE_RANGE_FACTOR                        0.75f
 #define CHASE_MOVE_CLOSER_FACTOR                          0.875f
 
+std::string ChaseMovementGenerator::GetPrintout() const
+{
+    std::string output;
+    auto& path = this->i_path->getPath();
+    if (path.size() > 0)
+    {
+        output += "Start:" + std::to_string(path[0].x) + " " + std::to_string(path[0].y) + " " + std::to_string(path[0].z);
+        output += "End:" + std::to_string(path[path.size() - 1].x) + " " + std::to_string(path[path.size() - 1].y) + " " + std::to_string(path[path.size() - 1].z);
+    }
+    return output;
+}
+
 float ChaseMovementGenerator::GetDynamicTargetDistance(Unit& owner, bool forRangeCheck) const
 {
     if (m_moveFurther)
@@ -442,6 +454,14 @@ void ChaseMovementGenerator::FanOut(Unit& owner)
 
 bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, float y, float z, bool walk, bool cutPath, bool target)
 {
+    if (owner.IsDebuggingMovement())
+    {
+        for (ObjectGuid guid : m_spawns)
+            if (Creature* whisp = owner.GetMap()->GetCreature(guid))
+                whisp->ForcedDespawn();
+        m_spawns.clear();
+    }
+
     if (!owner.movespline->Finalized())
     {
         auto loc = owner.movespline->ComputePosition();
@@ -453,6 +473,7 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
         }
 
         owner.Relocate(loc.x, loc.y, loc.z, loc.orientation);
+        m_spawns.push_back(owner.SummonCreature(2, loc.x, loc.y, loc.z, loc.orientation, TEMPSPAWN_TIMED_DESPAWN, 5000)->GetObjectGuid());
     }
 
     if (!this->i_path)
@@ -470,14 +491,8 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
 
     if (owner.IsDebuggingMovement())
     {
-        for (ObjectGuid guid : m_spawns)
-            if (Creature* whisp = owner.GetMap()->GetCreature(guid))
-                whisp->ForcedDespawn();
-
-        m_spawns.clear();
-
         for (auto& point : path)
-            m_spawns.push_back(owner.SummonCreature(2, point.x, point.y, point.z, 0.f, TEMPSPAWN_TIMED_DESPAWN, 5000)->GetObjectGuid());
+            m_spawns.push_back(owner.SummonCreature(1, point.x, point.y, point.z, 0.f, TEMPSPAWN_TIMED_DESPAWN, 5000)->GetObjectGuid());
     }
 
     _addUnitStateMove(owner);

@@ -5339,6 +5339,24 @@ bool ChatHandler::HandleDebugMovement(char* args)
     return true;
 }
 
+bool ChatHandler::HandlePrintMovement(char* args)
+{
+    Creature* unit = getSelectedCreature();
+    if (!unit)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    MotionMaster* mm = unit->GetMotionMaster();
+    if (mm->top()->GetMovementGeneratorType() == CHASE_MOTION_TYPE)
+    {
+        ChaseMovementGenerator* chaseM = static_cast<ChaseMovementGenerator*>(mm->top());
+    }
+    return true;
+}
+
 bool ChatHandler::HandleServerPLimitCommand(char* args)
 {
     if (*args)
