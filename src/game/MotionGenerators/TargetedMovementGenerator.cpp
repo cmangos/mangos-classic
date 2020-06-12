@@ -480,10 +480,14 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
     if (!this->i_path)
         this->i_path = new PathFinder(&owner);
 
-    this->i_path->calculate(x, y, z, false);
+    this->i_path->calculate(x, y, z, false, true);
 
     if (this->i_path->getPathType() & PATHFIND_NOPATH)
-        return false;
+    {
+        this->i_path->calculate(x, y, z);
+        if (this->i_path->getPathType() & PATHFIND_NOPATH)
+            return false;
+    }
 
     auto& path = this->i_path->getPath();
 
