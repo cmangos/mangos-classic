@@ -73,6 +73,9 @@ void VisibleNotifier::Notify()
     i_data.AddOutOfRangeGUID(i_clientGUIDs);
     for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end(); ++itr)
     {
+        if (WorldObject* target = player.GetMap()->GetWorldObject(*itr))
+            if (target->GetTypeId() == TYPEID_UNIT)
+                player.BeforeVisibilityDestroy(static_cast<Creature*>(target));
         player.m_clientGUIDs.erase(*itr);
 
         DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is out of range (no in active cells set) now for %s",
