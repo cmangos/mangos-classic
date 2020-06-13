@@ -67,11 +67,11 @@ class PathFinder
         // Calculate the path from owner to given destination
         // return: true if new path was calculated, false otherwise (no change needed)
         bool calculate(float destX, float destY, float destZ, bool forceDest = false, bool straightLine = false);
-        bool calculate(const Vector3& start, const Vector3& dest, bool forceDest = false, bool straightLine = false);
+        bool calculate(const Vector3& start, Vector3& dest, bool forceDest = false, bool straightLine = false);
 
         // option setters - use optional
         void setUseStrightPath(bool useStraightPath) { m_useStraightPath = useStraightPath; };
-        void setPathLengthLimit(float distance) { m_pointPathLimit = std::min<uint32>(uint32(distance / SMOOTH_PATH_STEP_SIZE), MAX_POINT_PATH_LENGTH); };
+        void setPathLengthLimit(float distance) { m_pointPathLimit = std::min<uint32>(uint32(distance / SMOOTH_PATH_STEP_SIZE * 1.25f), MAX_POINT_PATH_LENGTH); };
 
         // result getters
         Vector3 getStartPosition()      const { return m_startPosition; }
@@ -94,8 +94,9 @@ class PathFinder
         uint32         m_pointPathLimit;   // limit point path size; min(this, MAX_POINT_PATH_LENGTH)
         std::vector<float> m_cachedPoints; // caching for BuildPointPath - must be after m_pointPathLimit
 
-        std::vector<dtPolyRef> m_pathPolyRefs; // array of detour polygon references
-        uint32         m_polyLength;                      // number of polygons in the path
+        std::vector<dtPolyRef> m_pathPolyRefs;       // array of detour polygon references
+        uint32         m_polyLength;                 // number of polygons in the path
+        std::vector<dtPolyRef> m_smoothPathPolyRefs; // caching for findSmoothPath
 
         Vector3        m_startPosition;    // {x, y, z} of current location
         Vector3        m_endPosition;      // {x, y, z} of the destination
@@ -105,12 +106,16 @@ class PathFinder
         const dtNavMesh*        m_navMesh;          // the nav mesh
         const dtNavMeshQuery*   m_navMeshQuery;     // the nav mesh query used to find the path
 
+        const dtNavMeshQuery*   m_defaultNavMeshQuery;     // the nav mesh query used to find the path
+        uint32                  m_defaultMapId;
+
         dtQueryFilter m_filter;                     // use single filter for all movements, update it when needed
 
         void setStartPosition(const Vector3& point) { m_startPosition = point; }
         void setEndPosition(const Vector3& point) { m_actualEndPosition = point; m_endPosition = point; }
         void setActualEndPosition(const Vector3& point) { m_actualEndPosition = point; }
         void NormalizePath();
+        void SetCurrentNavMesh();
 
         void clear()
         {
