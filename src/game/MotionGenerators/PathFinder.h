@@ -66,8 +66,8 @@ class PathFinder
 
         // Calculate the path from owner to given destination
         // return: true if new path was calculated, false otherwise (no change needed)
-        bool calculate(float destX, float destY, float destZ, bool forceDest = false);
-        bool calculate(const Vector3& start, const Vector3& dest, bool forceDest = false);
+        bool calculate(float destX, float destY, float destZ, bool forceDest = false, bool straightLine = false);
+        bool calculate(const Vector3& start, const Vector3& dest, bool forceDest = false, bool straightLine = false);
 
         // option setters - use optional
         void setUseStrightPath(bool useStraightPath) { m_useStraightPath = useStraightPath; };
@@ -83,15 +83,19 @@ class PathFinder
 
     private:
 
-        dtPolyRef      m_pathPolyRefs[MAX_PATH_LENGTH];   // array of detour polygon references
-        uint32         m_polyLength;                      // number of polygons in the path
+
 
         PointsArray    m_pathPoints;       // our actual (x,y,z) path to the target
         PathType       m_type;             // tells what kind of path this is
 
         bool           m_useStraightPath;  // type of path will be generated
         bool           m_forceDestination; // when set, we will always arrive at given point
+        bool           m_straightLine;     // use raycast if true for a straight line path
         uint32         m_pointPathLimit;   // limit point path size; min(this, MAX_POINT_PATH_LENGTH)
+        std::vector<float> m_cachedPoints; // caching for BuildPointPath - must be after m_pointPathLimit
+
+        std::vector<dtPolyRef> m_pathPolyRefs; // array of detour polygon references
+        uint32         m_polyLength;                      // number of polygons in the path
 
         Vector3        m_startPosition;    // {x, y, z} of current location
         Vector3        m_endPosition;      // {x, y, z} of the destination
