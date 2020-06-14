@@ -5353,6 +5353,9 @@ bool ChatHandler::HandlePrintMovement(char* args)
     if (mm->top()->GetMovementGeneratorType() == CHASE_MOTION_TYPE)
     {
         ChaseMovementGenerator* chaseM = static_cast<ChaseMovementGenerator*>(mm->top());
+        auto data = chaseM->GetPrintout();
+        PSendSysMessage("%s", data.first.data());
+        sLog.outCustomLog("%s", data.second.data());
     }
     return true;
 }
