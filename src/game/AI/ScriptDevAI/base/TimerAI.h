@@ -80,6 +80,7 @@ class TimerManager
         }
         virtual void ReduceTimer(uint32 index, uint32 timer);
         virtual void DelayTimer(uint32 index, uint32 timer);
+        virtual void ResetIfNotStarted(uint32 index, uint32 timer);
 
         virtual void UpdateTimers(const uint32 diff);
         virtual void ResetAllTimers();
@@ -111,6 +112,7 @@ class CombatActions : public TimerManager
         virtual void DisableTimer(uint32 index) override;
         virtual void ReduceTimer(uint32 index, uint32 timer) override;
         virtual void DelayTimer(uint32 index, uint32 timer) override;
+        virtual void ResetIfNotStarted(uint32 index, uint32 timer) override;
 
         void DisableCombatAction(uint32 index)
         {
