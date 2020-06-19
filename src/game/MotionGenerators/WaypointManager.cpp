@@ -91,6 +91,7 @@ void WaypointManager::Load()
 
         // error after load, we check if creature guid corresponding to the path id has proper MovementType
         std::set<uint32> creatureNoMoveType;
+        std::set<uint32> blacklistWaypoints;
 
         do
         {
@@ -99,6 +100,13 @@ void WaypointManager::Load()
 
             uint32 id           = fields[0].GetUInt32();
             uint32 point        = fields[1].GetUInt32();
+
+            // sanitize waypoints
+            if (point == 0)
+            {
+                blacklistWaypoints.insert(id);
+                sLog.outErrorDb("Table `creature_movement` has invalid point 0 for id %u. Skipping.", id);
+            }
 
             const CreatureData* cData = sObjectMgr.GetCreatureData(id);
 
@@ -157,6 +165,10 @@ void WaypointManager::Load()
         }
         while (result->NextRow());
 
+        // sanitize waypoints
+        for (uint32 itr : blacklistWaypoints)
+            m_pathMap.erase(itr);
+
         if (!creatureNoMoveType.empty())
         {
             for (uint32 itr : creatureNoMoveType)
@@ -212,6 +224,7 @@ void WaypointManager::Load()
         result = WorldDatabase.Query("SELECT entry, pathId, point, position_x, position_y, position_z, orientation, waittime, script_id FROM creature_movement_template");
 
         BarGoLink bar(result->GetRowCount());
+        std::set<uint32> blacklistWaypoints;
 
         do
         {
@@ -223,6 +236,12 @@ void WaypointManager::Load()
             uint32 point        = fields[2].GetUInt32();
 
             const CreatureInfo* cInfo = ObjectMgr::GetCreatureTemplate(entry);
+
+            if (point == 0)
+            {
+                blacklistWaypoints.insert((entry << 8) + pathId);
+                sLog.outErrorDb("Table `creature_movement_template` has invalid point 0 for entry %u in path %u. Skipping.`", entry, pathId);
+            }
 
             if (!cInfo)
             {
@@ -269,6 +288,10 @@ void WaypointManager::Load()
         while (result->NextRow());
 
         delete result;
+
+        // sanitize waypoints
+        for (uint32 itr : blacklistWaypoints)
+            m_pathTemplateMap.erase(itr);
 
         sLog.outString(">> Loaded %u path templates with %u nodes and %u behaviors from waypoint templates", total_paths, total_nodes, total_behaviors);
         sLog.outString();

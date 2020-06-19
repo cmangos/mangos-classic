@@ -81,13 +81,22 @@ void SystemMgr::LoadScriptWaypoints()
     {
         BarGoLink bar(result->GetRowCount());
         uint32 nodeCount = 0;
+        std::set<uint32> blacklistWaypoints;
 
         do
         {
             bar.step();
             Field* fields = result->Fetch();
 
-            uint32 entry  = fields[0].GetUInt32();
+            uint32 entry = fields[0].GetUInt32();
+            uint32 pathId = fields[1].GetUInt32();
+            uint32 pointId = fields[2].GetUInt32();
+
+            if (pointId == 0)
+            {
+                blacklistWaypoints.insert((entry << 8) + pathId);
+                error_db_log("SD2: DB table `script_waypoint` has invalid point 0 for entry %u in path %u. Skipping.", entry, pathId);
+            }
 
             CreatureInfo const* info = GetCreatureTemplateStore(entry);
             if (!info)
@@ -96,8 +105,6 @@ void SystemMgr::LoadScriptWaypoints()
                 continue;
             }
 
-            uint32 pathId       = fields[1].GetUInt32();
-            uint32 pointId      = fields[2].GetUInt32();
             float position_x    = fields[3].GetFloat();
             float position_y    = fields[4].GetFloat();
             float position_z    = fields[5].GetFloat();
@@ -105,7 +112,9 @@ void SystemMgr::LoadScriptWaypoints()
             uint32 waitTime     = fields[7].GetUInt32();
             uint32 scriptId     = fields[8].GetUInt32();
 
-            sWaypointMgr.AddExternalNode(entry, pathId, pointId, position_x, position_y, position_z, orientation, waitTime, scriptId);
+            // sanitize waypoints
+            if (blacklistWaypoints.find((entry << 8) + pathId) == blacklistWaypoints.end())
+                sWaypointMgr.AddExternalNode(entry, pathId, pointId, position_x, position_y, position_z, orientation, waitTime, scriptId);
 
             ++nodeCount;
         }
