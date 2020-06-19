@@ -594,6 +594,7 @@ bool Creature::UpdateAllStats()
 {
     UpdateMaxHealth();
     UpdateAttackPowerAndDamage();
+    UpdateAttackPowerAndDamage(true);
 
     for (int i = POWER_MANA; i < MAX_POWERS; ++i)
         UpdateMaxPower(Powers(i));
@@ -669,7 +670,10 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
     SetFloatValue(index_mult, attPowerMultiplier);          // UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
 
     if (ranged)
+    {
+        UpdateDamagePhysical(OFF_ATTACK);
         return;
+    }
 
     // automatically update weapon damage after attack power modification
     UpdateDamagePhysical(BASE_ATTACK);
@@ -678,12 +682,27 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
 
 void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 {
-    if (attType > OFF_ATTACK)
-        return;
+    UnitMods unitMod;
+    UnitMods attPower;
 
-    UnitMods unitMod = (attType == BASE_ATTACK ? UNIT_MOD_DAMAGE_MAINHAND : UNIT_MOD_DAMAGE_OFFHAND);
+    switch (attType)
+    {
+        case BASE_ATTACK:
+        default:
+            unitMod = UNIT_MOD_DAMAGE_MAINHAND;
+            attPower = UNIT_MOD_ATTACK_POWER;
+            break;
+        case OFF_ATTACK:
+            unitMod = UNIT_MOD_DAMAGE_OFFHAND;
+            attPower = UNIT_MOD_ATTACK_POWER;
+            break;
+        case RANGED_ATTACK:
+            unitMod = UNIT_MOD_DAMAGE_RANGED;
+            attPower = UNIT_MOD_ATTACK_POWER_RANGED;
+            break;
+    }
 
-    float att_pwr = (GetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE) * GetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_PCT) + GetModifierValue(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE)) * GetModifierValue(UNIT_MOD_ATTACK_POWER, TOTAL_PCT);
+    float att_pwr = (GetModifierValue(attPower, BASE_VALUE) * GetModifierValue(attPower, BASE_PCT) + GetModifierValue(attPower, TOTAL_VALUE)) * GetModifierValue(attPower, TOTAL_PCT);
     float base_value  = GetModifierValue(unitMod, BASE_VALUE) + (att_pwr * GetAPMultiplier(attType, false) / 14.0f);
     float base_pct    = GetModifierValue(unitMod, BASE_PCT);
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);
