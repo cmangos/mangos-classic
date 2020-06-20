@@ -71,7 +71,7 @@ struct npc_dorius_stonetenderAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 20:
+            case 21:
                 // ToDo: research if there is any text here!
                 float fX, fY, fZ;
                 for (uint8 i = 0; i < MAX_STEELSHIFTERS; ++i)
@@ -80,7 +80,7 @@ struct npc_dorius_stonetenderAI : public npc_escortAI
                     m_creature->SummonCreature(NPC_DARK_IRON_STEELSHIFTER, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 }
                 break;
-            case 33:
+            case 34:
                 // ToDo: research if there is any event and text here!
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_SUNTARA_STONES, m_creature);
