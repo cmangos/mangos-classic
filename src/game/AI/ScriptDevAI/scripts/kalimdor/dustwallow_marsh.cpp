@@ -728,7 +728,7 @@ struct npc_stinky_ignatzAI : public npc_escortAI
 
     void WaypointStart(uint32 uiPointId)
     {
-        if (uiPointId == 30)
+        if (uiPointId == 31)
         {
             if (GameObject* pBogbeanPlant = m_creature->GetMap()->GetGameObject(m_bogbeanPlantGuid))
                 pBogbeanPlant->Use(m_creature);
