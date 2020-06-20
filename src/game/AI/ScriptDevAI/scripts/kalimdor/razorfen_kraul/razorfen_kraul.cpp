@@ -92,34 +92,34 @@ struct npc_willix_the_importerAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 2:
+            case 3:
                 DoScriptText(SAY_WILLIX_1, m_creature);
                 break;
-            case 6:
+            case 7:
                 DoScriptText(SAY_WILLIX_2, m_creature);
                 break;
-            case 9:
+            case 10:
                 DoScriptText(SAY_WILLIX_3, m_creature);
                 break;
-            case 14:
+            case 15:
                 DoScriptText(SAY_WILLIX_4, m_creature);
                 // Summon 2 boars on the pathway
                 m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[0][0], aBoarSpawn[0][1], aBoarSpawn[0][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
                 m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[1][0], aBoarSpawn[1][1], aBoarSpawn[1][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
                 break;
-            case 25:
+            case 26:
                 DoScriptText(SAY_WILLIX_5, m_creature);
                 break;
-            case 33:
+            case 34:
                 DoScriptText(SAY_WILLIX_6, m_creature);
                 break;
-            case 44:
+            case 45:
                 DoScriptText(SAY_WILLIX_7, m_creature);
                 // Summon 2 boars at the end
                 m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[2][0], aBoarSpawn[2][1], aBoarSpawn[2][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
                 m_creature->SummonCreature(NPC_RAGING_AGAMAR, aBoarSpawn[3][0], aBoarSpawn[3][1], aBoarSpawn[3][2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
                 break;
-            case 45:
+            case 46:
                 DoScriptText(SAY_WILLIX_END, m_creature);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                 // Complete event
