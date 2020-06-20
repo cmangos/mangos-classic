@@ -224,14 +224,14 @@ struct npc_paoka_swiftmountainAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 15:
+            case 16:
                 DoScriptText(SAY_WYVERN, m_creature);
                 DoSpawnWyvern();
                 break;
-            case 26:
+            case 27:
                 DoScriptText(SAY_COMPLETE, m_creature);
                 break;
-            case 27:
+            case 28:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_HOMEWARD, m_creature);
                 break;
