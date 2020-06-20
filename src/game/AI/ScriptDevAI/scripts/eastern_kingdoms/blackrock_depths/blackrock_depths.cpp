@@ -919,34 +919,34 @@ struct npc_rocknotAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 0:     // if Nagmara and Potion of Love event is in progress, switch to second part of the escort
+            case 1:     // if Nagmara and Potion of Love event is in progress, switch to second part of the escort
                 SetEscortPaused(true);
                 if (m_pInstance->GetData(TYPE_NAGMARA) == IN_PROGRESS)
                     SetCurrentWaypoint(9);
 
                 SetEscortPaused(false);
                 break;
-            case 2:
-                DoScriptText(SAY_BARREL_1, m_creature);
-                break;
             case 3:
-                DoScriptText(SAY_BARREL_2, m_creature);
+                DoScriptText(SAY_BARREL_1, m_creature);
                 break;
             case 4:
                 DoScriptText(SAY_BARREL_2, m_creature);
                 break;
             case 5:
-                DoScriptText(SAY_BARREL_1, m_creature);
+                DoScriptText(SAY_BARREL_2, m_creature);
                 break;
             case 6:
+                DoScriptText(SAY_BARREL_1, m_creature);
+                break;
+            case 7:
                 DoCastSpellIfCan(m_creature, SPELL_DRUNKEN_RAGE, false);
                 m_uiBreakKegTimer = 2000;
                 break;
-            case 8:     // Back home stop here
+            case 9:     // Back home stop here
                 SetEscortPaused(true);
                 m_creature->SetFacingTo(m_fInitialOrientation);
                 break;
-            case 9:     // This step is the start of the "alternate" waypoint path used with Nagmara
+            case 10:     // This step is the start of the "alternate" waypoint path used with Nagmara
                 // Make Nagmara follow Rocknot
                 if (!pNagmara)
                 {
@@ -956,7 +956,7 @@ struct npc_rocknotAI : public npc_escortAI
                 else
                     pNagmara->GetMotionMaster()->MoveFollow(m_creature, 2.0f, 0);
                 break;
-            case 16:
+            case 17:
                 // Open the bar back door if relevant
                 m_pInstance->GetBarDoorIsOpen(m_bIsDoorOpen);
                 if (!m_bIsDoorOpen)
@@ -967,7 +967,7 @@ struct npc_rocknotAI : public npc_escortAI
                 if (pNagmara)
                     pNagmara->GetMotionMaster()->MoveFollow(m_creature, 2.0f, 0);
                 break;
-            case 33: // Reach under the stair, make Nagmara move to her position and give the handle back to Nagmara AI script
+            case 34: // Reach under the stair, make Nagmara move to her position and give the handle back to Nagmara AI script
                 if (!pNagmara)
                     break;
 
