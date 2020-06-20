@@ -672,7 +672,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 if (!m_pScriptedMap)
                     break;
                 // Prepare Jonathan for the first event
@@ -690,14 +690,14 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                     pJonathan->GetMotionMaster()->MovePoint(0, aMoveLocations[0][0], aMoveLocations[0][1], aMoveLocations[0][2]);
                 }
                 break;
-            case 1:
+            case 2:
                 StartNextDialogueText(SAY_JON_DIALOGUE_1);
                 SetEscortPaused(true);
                 break;
-            case 3:
+            case 4:
                 m_bCanGuardSalute = true;
                 break;
-            case 11:
+            case 12:
                 if (!m_pScriptedMap)
                     break;
                 // We can reset Jonathan now
@@ -708,15 +708,15 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                     pJonathan->GetMotionMaster()->MoveTargetedHome();
                 }
                 break;
-            case 22:
+            case 23:
                 SetEscortPaused(true);
                 m_creature->SetFacingTo(5.41f);
                 StartNextDialogueText(NPC_GUARD_ROYAL);
                 break;
-            case 24:
+            case 25:
                 m_bCanGuardSalute = false;
                 break;
-            case 25:
+            case 26:
                 StartNextDialogueText(NPC_WRYNN);
                 SetEscortPaused(true);
                 m_bCanGuardSalute = false;
