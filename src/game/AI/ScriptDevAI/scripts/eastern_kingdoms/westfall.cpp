@@ -121,43 +121,43 @@ struct npc_daphne_stilwellAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 4:
+            case 5:
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING_NOSHEATHE);
                 break;
-            case 5:
+            case 6:
                 SetEquipmentSlots(false, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE, EQUIP_ID_RIFLE);
                 m_creature->SetSheath(SHEATH_STATE_RANGED);
                 m_creature->HandleEmote(EMOTE_STATE_STAND);
                 break;
-            case 7:
+            case 8:
                 DoSendWave(Wave::FIRST);
                 break;
-            case 8:
+            case 9:
                 DoSendWave(Wave::SECOND);
                 break;
-            case 9:
+            case 10:
                 DoSendWave(Wave::THIRD);
                 SetEscortPaused(true);
                 break;
-            case 10:
+            case 11:
                 SetRun(false);
                 break;
-            case 11:
+            case 12:
                 DoScriptText(SAY_DS_PROLOGUE, m_creature);
                 break;
-            case 13:
+            case 14:
                 SetEquipmentSlots(true);
                 m_creature->SetSheath(SHEATH_STATE_UNARMED);
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING);
                 break;
-            case 14:
+            case 15:
                 m_creature->HandleEmote(EMOTE_STATE_STAND);
                 break;
-            case 17:
+            case 18:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TOME_VALOR, m_creature);
                 break;
-            case 18:
+            case 19:
                 DoEndEscort();
                 break;
         }
