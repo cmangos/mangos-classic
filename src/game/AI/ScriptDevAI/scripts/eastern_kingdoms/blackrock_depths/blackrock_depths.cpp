@@ -1503,11 +1503,11 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 1:
+            case 2:
                 DoScriptText(YELL_HURLEY_SPAWN, m_creature);
                 SetRun(true);
                 break;
-            case 5:
+            case 6:
                 {
                     SetEscortPaused(true);
                     // Make Hurley and his cronies able to attack players (and be attacked)
