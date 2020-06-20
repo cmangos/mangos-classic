@@ -98,6 +98,10 @@ CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
     m_rangedModeSetting(TYPE_NONE),
     m_chaseDistance(0.f),
     m_currentRangedMode(false),
+    m_mainSpellId(0),
+    m_mainSpellCost(0),
+    m_mainSpellInfo(nullptr),
+    m_mainSpellMinRange(0.f),
     m_defaultMovement(IDLE_MOTION_TYPE),
     m_mainAttackMask(SPELL_SCHOOL_MASK_NONE)
 {
@@ -154,6 +158,7 @@ void CreatureEventAI::InitAI()
                                     m_mainSpellCost = Spell::CalculatePowerCost(spellInfo, m_creature);
                                     m_mainSpellMinRange = GetSpellMinRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex));
                                     m_mainAttackMask = SpellSchoolMask(m_mainAttackMask + GetSchoolMask(spellInfo->School));
+                                    m_mainSpellInfo = spellInfo;
                                 }
                                 m_mainSpells.insert(i.action[actionIdx].cast.spellId);
                             }
@@ -1591,7 +1596,7 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
             {
                 if (m_currentRangedMode && m_creature->CanReachWithMeleeAttack(victim))
                     SetCurrentRangedMode(false);
-                else if (!m_currentRangedMode && !m_creature->CanReachWithMeleeAttack(victim, 2.f))
+                else if (!m_currentRangedMode && !m_creature->CanReachWithMeleeAttack(victim, 2.f) && m_mainSpellInfo && m_mainSpellCost * 2 < m_creature->GetPower(POWER_MANA) && m_creature->IsSpellReady(*m_mainSpellInfo))
                     SetCurrentRangedMode(true);
             }
         }

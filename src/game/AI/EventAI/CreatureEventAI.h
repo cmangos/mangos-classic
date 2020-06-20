@@ -902,6 +902,7 @@ class CreatureEventAI : public CreatureAI
         std::unordered_set<uint32> m_distanceSpells;
         uint32 m_mainSpellId;
         uint32 m_mainSpellCost;
+        SpellEntry const* m_mainSpellInfo;
         float m_mainSpellMinRange;
         SpellSchoolMask m_mainAttackMask;
 

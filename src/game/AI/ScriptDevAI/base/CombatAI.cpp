@@ -63,6 +63,7 @@ void RangedCombatAI::AddMainSpell(uint32 spellId)
         m_mainSpellCost = Spell::CalculatePowerCost(spellInfo, m_creature);
         m_mainSpellMinRange = GetSpellMinRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex));
         m_mainAttackMask = SpellSchoolMask(m_mainAttackMask + GetSchoolMask(spellInfo->School));
+        m_mainSpellInfo = spellInfo;
     }
     m_mainSpells.insert(spellId);
 }
@@ -193,9 +194,9 @@ void RangedCombatAI::UpdateAI(const uint32 diff)
     {
         if (m_rangedModeSetting == TYPE_PROXIMITY)
         {
-            if (m_currentRangedMode && m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+            if (m_currentRangedMode && m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
                 SetCurrentRangedMode(false);
-            else if (!m_currentRangedMode && !m_creature->CanReachWithMeleeAttack(m_creature->getVictim(), 2.f))
+            else if (!m_currentRangedMode && !m_creature->CanReachWithMeleeAttack(m_creature->GetVictim(), 2.f) && m_mainSpellInfo && m_mainSpellCost * 2 < m_creature->GetPower(POWER_MANA) && m_creature->IsSpellReady(*m_mainSpellInfo))
                 SetCurrentRangedMode(true);
         }
     }
