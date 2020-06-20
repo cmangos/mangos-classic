@@ -123,11 +123,11 @@ struct npc_muglashAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_MUG_START2, m_creature, pPlayer);
                 break;
-            case 24:
+            case 25:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_MUG_BRAZIER, m_creature, pPlayer);
 
@@ -138,16 +138,16 @@ struct npc_muglashAI : public npc_escortAI
                     SetEscortPaused(true);
                 }
                 break;
-            case 25:
+            case 26:
                 DoScriptText(SAY_MUG_GRATITUDE, m_creature);
 
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_VORSHA, m_creature);
                 break;
-            case 26:
+            case 27:
                 DoScriptText(SAY_MUG_PATROL, m_creature);
                 break;
-            case 27:
+            case 28:
                 DoScriptText(SAY_MUG_RETURN, m_creature);
                 break;
         }
