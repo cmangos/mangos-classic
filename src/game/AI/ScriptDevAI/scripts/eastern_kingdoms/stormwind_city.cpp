@@ -330,14 +330,14 @@ struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
     {
         switch (uiPointId)
         {
-            case 2:
+            case 3:
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 break;
-            case 3:
+            case 4:
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                 m_creature->SummonCreature(NPC_WINDSOR, aWindsorSpawnLoc[0], aWindsorSpawnLoc[1], aWindsorSpawnLoc[2], 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
                 break;
-            case 6:
+            case 7:
                 DoScriptText(SAY_SIGNAL_SENT, m_creature);
                 m_creature->SetFacingTo(2.15f);
                 SetEscortPaused(true);
