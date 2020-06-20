@@ -558,21 +558,21 @@ struct npc_wizzlecranks_shredderAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_STARTUP1, m_creature, pPlayer);
                 break;
-            case 9:
+            case 10:
                 SetRun(false);
                 break;
-            case 17:
+            case 18:
                 if (Creature* pTemp = m_creature->SummonCreature(NPC_MERCENARY, 1128.489f, -3037.611f, 92.701f, 1.472f, TEMPSPAWN_TIMED_OOC_DESPAWN, 120000))
                 {
                     DoScriptText(SAY_MERCENARY, pTemp);
                     m_creature->SummonCreature(NPC_MERCENARY, 1160.172f, -2980.168f, 97.313f, 3.690f, TEMPSPAWN_TIMED_OOC_DESPAWN, 120000);
                 }
                 break;
-            case 24:
+            case 25:
                 m_bIsPostEvent = true;
                 break;
         }
@@ -582,11 +582,11 @@ struct npc_wizzlecranks_shredderAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 9:
+            case 10:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_STARTUP2, m_creature, pPlayer);
                 break;
-            case 18:
+            case 19:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_PROGRESS_1, m_creature, pPlayer);
                 SetRun();
