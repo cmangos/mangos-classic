@@ -58,13 +58,13 @@ struct npc_ame01AI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 DoScriptText(SAY_AME_START, m_creature);
                 break;
-            case 19:
+            case 20:
                 DoScriptText(SAY_AME_PROGRESS, m_creature);
                 break;
-            case 37:
+            case 38:
                 DoScriptText(SAY_AME_END, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_CHASING_AME, m_creature);
