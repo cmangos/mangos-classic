@@ -335,11 +335,11 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
     {
         switch (uiPointId)
         {
-            case 25:
+            case 26:
                 SetEscortPaused(true);
                 StartNextDialogueText(SAY_EXIT_KEEP);
                 break;
-            case 55:
+            case 56:
                 SetEscortPaused(true);
                 StartNextDialogueText(SAY_REACH_TOWER);
                 break;
