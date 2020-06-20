@@ -291,13 +291,13 @@ struct npc_ruul_snowhoofAI : public npc_escortAI
     {
         switch (pointId)
         {
-            case 13:
+            case 14:
                 DoSpawnAmbush(0);
                 break;
-            case 30:
+            case 31:
                 DoSpawnAmbush(1);
                 break;
-            case 31:
+            case 32:
                 m_creature->SetImmuneToNPC(true);
                 m_creature->RemoveAurasDueToSpell(SPELL_RUUL_SHAPECHANGE);
                 if (Player* player = GetPlayerForEscort())
@@ -306,7 +306,7 @@ struct npc_ruul_snowhoofAI : public npc_escortAI
                     player->RewardPlayerAndGroupAtEventExplored(QUEST_FREEDOM_TO_RUUL, m_creature);
                 }
                 break;
-            case 32:
+            case 33:
                 if (Player* player = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_RUUL_COMPLETE, m_creature, player);
@@ -315,10 +315,10 @@ struct npc_ruul_snowhoofAI : public npc_escortAI
                 m_creature->HandleEmote(EMOTE_ONESHOT_BOW);
                 m_creature->SetWalk(false);
                 break;
-            case 33:
+            case 34:
                 DoCastSpellIfCan(m_creature, SPELL_RUUL_SHAPECHANGE);
                 break;
-            case 35:
+            case 36:
                 m_creature->SetImmuneToNPC(false);
                 m_creature->SetWalk(true);
                 m_creature->ForcedDespawn();
