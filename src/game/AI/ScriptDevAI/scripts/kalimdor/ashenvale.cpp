@@ -530,26 +530,26 @@ struct npc_feero_ironhandAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 14:
+            case 15:
                 // Prepare the first ambush
                 DoScriptText(SAY_FIRST_AMBUSH_START, m_creature);
                 for (uint8 i = 0; i < 4; ++i)
                     DoSpawnMob(NPC_DARK_STRAND_ASSASSIN, aSummonPositions[0][0], aSummonPositions[0][1] - M_PI_F / 4 * i);
                 break;
-            case 20:
+            case 21:
                 // Prepare the second ambush
                 DoScriptText(SAY_SECOND_AMBUSH_START, m_creature);
                 for (uint8 i = 0; i < 3; ++i)
                     DoSpawnMob(NPC_FORSAKEN_SCOUT, aSummonPositions[1][0], aSummonPositions[1][1] - M_PI_F / 3 * i);
                 break;
-            case 29:
+            case 30:
                 // Final ambush
                 DoScriptText(SAY_FINAL_AMBUSH_START, m_creature);
                 m_creature->SummonCreature(NPC_BALIZAR_THE_UMBRAGE, aEliteSummonPositions[0][0], aEliteSummonPositions[0][1], aEliteSummonPositions[0][2], aEliteSummonPositions[0][3], TEMPSPAWN_TIMED_OOC_DESPAWN, 20000);
                 m_creature->SummonCreature(NPC_ALIGAR_THE_TORMENTOR, aEliteSummonPositions[1][0], aEliteSummonPositions[1][1], aEliteSummonPositions[1][2], aEliteSummonPositions[1][3], TEMPSPAWN_TIMED_OOC_DESPAWN, 20000);
                 m_creature->SummonCreature(NPC_CAEDAKAR_THE_VICIOUS, aEliteSummonPositions[2][0], aEliteSummonPositions[2][1], aEliteSummonPositions[2][2], aEliteSummonPositions[2][3], TEMPSPAWN_TIMED_OOC_DESPAWN, 20000);
                 break;
-            case 30:
+            case 31:
                 // Complete the quest
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_SUPPLIES_TO_AUBERDINE, m_creature);
