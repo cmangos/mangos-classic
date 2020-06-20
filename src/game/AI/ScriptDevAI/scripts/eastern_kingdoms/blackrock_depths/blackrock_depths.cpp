@@ -922,7 +922,7 @@ struct npc_rocknotAI : public npc_escortAI
             case 1:     // if Nagmara and Potion of Love event is in progress, switch to second part of the escort
                 SetEscortPaused(true);
                 if (m_pInstance->GetData(TYPE_NAGMARA) == IN_PROGRESS)
-                    SetCurrentWaypoint(9);
+                    SetCurrentWaypoint(10);
 
                 SetEscortPaused(false);
                 break;
@@ -951,7 +951,7 @@ struct npc_rocknotAI : public npc_escortAI
                 if (!pNagmara)
                 {
                     SetEscortPaused(true);
-                    SetCurrentWaypoint(8);
+                    SetCurrentWaypoint(9);
                 }
                 else
                     pNagmara->GetMotionMaster()->MoveFollow(m_creature, 2.0f, 0);
