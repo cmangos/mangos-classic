@@ -77,22 +77,22 @@ struct npc_giltharesAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 16:
+            case 17:
                 DoScriptText(SAY_GIL_AT_LAST, m_creature, pPlayer);
                 break;
-            case 17:
+            case 18:
                 DoScriptText(SAY_GIL_PROCEED, m_creature, pPlayer);
                 break;
-            case 18:
+            case 19:
                 DoScriptText(SAY_GIL_FREEBOOTERS, m_creature, pPlayer);
                 break;
-            case 37:
+            case 38:
                 DoScriptText(SAY_GIL_ALMOST, m_creature, pPlayer);
                 break;
-            case 47:
+            case 48:
                 DoScriptText(SAY_GIL_SWEET, m_creature, pPlayer);
                 break;
-            case 53:
+            case 54:
                 DoScriptText(SAY_GIL_FREED, m_creature, pPlayer);
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_FREE_FROM_HOLD, m_creature);
                 break;
