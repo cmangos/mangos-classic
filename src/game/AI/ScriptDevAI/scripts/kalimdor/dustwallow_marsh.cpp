@@ -689,16 +689,16 @@ struct npc_stinky_ignatzAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 5:
+            case 6:
                 DoScriptText(SAY_STINKY_FIRST_STOP, m_creature);
                 break;
-            case 10:
+            case 11:
                 DoScriptText(SAY_STINKY_SECOND_STOP, m_creature);
                 break;
-            case 24:
+            case 25:
                 DoScriptText(SAY_STINKY_THIRD_STOP_1, m_creature);
                 break;
-            case 25:
+            case 26:
                 DoScriptText(SAY_STINKY_THIRD_STOP_2, m_creature);
                 if (GameObject* pBogbeanPlant = GetClosestGameObjectWithEntry(m_creature, GO_BOGBEAN_PLANT, DEFAULT_VISIBILITY_DISTANCE))
                 {
@@ -706,17 +706,17 @@ struct npc_stinky_ignatzAI : public npc_escortAI
                     m_creature->SetFacingToObject(pBogbeanPlant);
                 }
                 break;
-            case 26:
+            case 27:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_STINKY_THIRD_STOP_3, m_creature, pPlayer);
                 break;
-            case 29:
+            case 30:
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING);
                 break;
-            case 30:
+            case 31:
                 DoScriptText(SAY_STINKY_PLANT_GATHERED, m_creature);
                 break;
-            case 39:
+            case 40:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     pPlayer->RewardPlayerAndGroupAtEventExplored(pPlayer->GetTeam() == ALLIANCE ? QUEST_ID_STINKYS_ESCAPE_ALLIANCE : QUEST_ID_STINKYS_ESCAPE_HORDE, m_creature);
