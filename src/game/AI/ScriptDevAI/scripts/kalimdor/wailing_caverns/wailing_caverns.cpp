@@ -176,23 +176,23 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 7:
+            case 8:
                 DoScriptText(SAY_FIRST_CORNER, m_creature);
                 m_uiSubeventPhase = 0;
                 m_uiEventTimer = 2000;
                 m_uiPoint = uiPointId;
                 SetEscortPaused(true);
                 break;
-            case 15:
+            case 16:
                 m_uiSubeventPhase = 0;
                 m_uiEventTimer = 2000;
                 m_uiPoint = uiPointId;
                 SetEscortPaused(true);
                 break;
-            case 26:
+            case 27:
                 DoScriptText(SAY_NARALEX_CHAMBER, m_creature);
                 break;
-            case 32:
+            case 33:
                 if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
                     m_creature->SetFacingToObject(pNaralex);
 
@@ -243,7 +243,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                 switch (m_uiPoint)
                 {
                     // Corner stop -> raptors
-                    case 7:
+                    case 8:
                         switch (m_uiSubeventPhase)
                         {
                             case 0:
@@ -262,7 +262,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                         }
                         break;
                     // Circle stop -> vipers
-                    case 15:
+                    case 16:
                         switch (m_uiSubeventPhase)
                         {
                             case 0:
@@ -296,7 +296,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                         }
                         break;
                     // Chamber stop -> ritual and final boss
-                    case 32:
+                    case 33:
                         switch (m_uiSubeventPhase)
                         {
                             case 0:
