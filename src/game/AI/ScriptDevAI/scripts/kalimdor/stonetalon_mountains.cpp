@@ -59,7 +59,7 @@ struct npc_kayaAI : public npc_escortAI
         switch (uiPointId)
         {
             // Ambush
-            case 16:
+            case 17:
                 // note about event here:
                 // apparently NPC say _after_ the ambush is over, and is most likely a bug at you-know-where.
                 // we simplify this, and make say when the ambush actually start.
@@ -69,7 +69,7 @@ struct npc_kayaAI : public npc_escortAI
                 m_creature->SummonCreature(NPC_GRIMTOTEM_SORCERER, -32.21f, -499.20f, -45.35f, 2.8f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 break;
             // Award quest credit
-            case 18:
+            case 19:
                 DoScriptText(SAY_END, m_creature);
 
                 if (Player* pPlayer = GetPlayerForEscort())
