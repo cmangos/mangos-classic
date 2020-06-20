@@ -263,14 +263,14 @@ struct npc_ogronAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 9:
+            case 10:
                 DoScriptText(SAY_OGR_SPOT, m_creature);
                 break;
-            case 10:
+            case 11:
                 if (Creature* pReethe = GetCreature(NPC_REETHE))
                     DoScriptText(SAY_OGR_RET_WHAT, pReethe);
                 break;
-            case 11:
+            case 12:
                 SetEscortPaused(true);
                 break;
         }
