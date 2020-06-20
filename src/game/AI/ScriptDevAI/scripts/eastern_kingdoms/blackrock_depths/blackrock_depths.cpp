@@ -599,10 +599,10 @@ struct npc_phalanxAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 DoScriptText(YELL_PHALANX_AGGRO, m_creature);
                 break;
-            case 1:
+            case 2:
                 SetEscortPaused(true);
                 // There are two ways of activating Phalanx: completing Rocknot event, making Phalanx hostile to anyone
                 // killing Plugger making Phalanx hostile to Horde (do not ask why)
