@@ -255,54 +255,54 @@ struct npc_prospector_remtravelAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 DoScriptText(SAY_REM_START, m_creature, pPlayer);
                 break;
-            case 5:
+            case 6:
                 DoScriptText(SAY_REM_RAMP1_1, m_creature, pPlayer);
                 break;
-            case 6:
+            case 7:
                 m_creature->SummonCreature(NPC_GRAVEL_SCOUT, -10.0f, 5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_GRAVEL_BONE, -10.0f, 7.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
                 break;
-            case 9:
+            case 10:
                 DoScriptText(SAY_REM_RAMP1_2, m_creature, pPlayer);
                 break;
-            case 14:
+            case 15:
                 // depend quest rewarded?
                 DoScriptText(SAY_REM_BOOK, m_creature, pPlayer);
                 break;
-            case 15:
+            case 16:
                 DoScriptText(SAY_REM_TENT1_1, m_creature, pPlayer);
                 break;
-            case 16:
+            case 17:
                 m_creature->SummonCreature(NPC_GRAVEL_SCOUT, -10.0f, 5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_GRAVEL_BONE, -10.0f, 7.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
                 break;
-            case 17:
+            case 18:
                 DoScriptText(SAY_REM_TENT1_2, m_creature, pPlayer);
                 break;
-            case 26:
+            case 27:
                 DoScriptText(SAY_REM_MOSS, m_creature, pPlayer);
                 break;
-            case 27:
+            case 28:
                 DoScriptText(EMOTE_REM_MOSS, m_creature, pPlayer);
                 break;
-            case 28:
+            case 29:
                 DoScriptText(SAY_REM_MOSS_PROGRESS, m_creature, pPlayer);
                 break;
-            case 29:
+            case 30:
                 m_creature->SummonCreature(NPC_GRAVEL_SCOUT, -15.0f, 3.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_GRAVEL_BONE, -15.0f, 5.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_GRAVEL_GEO, -15.0f, 7.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 30000);
                 break;
-            case 31:
+            case 32:
                 DoScriptText(SAY_REM_PROGRESS, m_creature, pPlayer);
                 break;
-            case 41:
+            case 42:
                 DoScriptText(SAY_REM_REMEMBER, m_creature, pPlayer);
                 break;
-            case 42:
+            case 43:
                 DoScriptText(EMOTE_REM_END, m_creature, pPlayer);
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ABSENT_MINDED_PT2, m_creature);
                 break;
