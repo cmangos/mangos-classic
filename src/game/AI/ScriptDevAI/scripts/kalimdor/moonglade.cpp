@@ -254,22 +254,22 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_REMULOS_INTRO_1, m_creature, pPlayer);
                 break;
-            case 1:
+            case 2:
                 DoScriptText(SAY_REMULOS_INTRO_2, m_creature);
                 break;
-            case 13:
+            case 14:
                 StartNextDialogueText(NPC_REMULOS);
                 SetEscortPaused(true);
                 break;
-            case 17:
+            case 18:
                 StartNextDialogueText(SAY_REMULOS_DEFEND_2);
                 SetEscortPaused(true);
                 break;
-            case 18:
+            case 19:
                 SetEscortPaused(true);
                 break;
         }
