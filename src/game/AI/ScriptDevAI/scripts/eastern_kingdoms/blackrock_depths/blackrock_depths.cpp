@@ -343,28 +343,28 @@ struct npc_grimstoneAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:                                         // Middle reached first time
+            case 1:                                         // Middle reached first time
                 DoScriptText(SAY_START_1, m_creature);
                 SetEscortPaused(true);
                 m_uiEventTimer = 5000;
                 break;
-            case 1:                                         // Reached wall again
+            case 2:                                         // Reached wall again
                 DoScriptText(SAY_OPEN_EAST_GATE, m_creature);
                 SetEscortPaused(true);
                 m_uiEventTimer = 5000;
                 break;
-            case 2:                                         // walking along the wall, while door opened
+            case 3:                                         // walking along the wall, while door opened
                 SetEscortPaused(true);
                 break;
-            case 3:                                         // Middle reached second time
+            case 4:                                         // Middle reached second time
                 DoScriptText(SAY_SUMMON_BOSS_1, m_creature);
                 break;
-            case 4:                                         // Reached North Gate
+            case 5:                                         // Reached North Gate
                 DoScriptText(SAY_OPEN_NORTH_GATE, m_creature);
                 SetEscortPaused(true);
                 m_uiEventTimer = 5000;
                 break;
-            case 5:
+            case 6:
                 if (m_pInstance)
                 {
                     m_pInstance->SetData(TYPE_RING_OF_LAW, DONE);
