@@ -620,11 +620,11 @@ struct npc_theryluneAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 17:
+            case 18:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_THERYLUNE_ESCAPE, m_creature);
                 break;
-            case 19:
+            case 20:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_THERYLUNE_FINISH, m_creature, pPlayer);
                 SetRun();
