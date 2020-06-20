@@ -330,14 +330,14 @@ struct npc_defias_traitorAI : public npc_escortAI
     {
         switch (pointId)
         {
-            case 35:
+            case 36:
                 SetRun(false);
                 break;
-            case 36:
+            case 37:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_PROGRESS, m_creature, pPlayer);
                 break;
-            case 44:
+            case 45:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_END, m_creature, pPlayer);
