@@ -277,16 +277,16 @@ struct npc_rinjiAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 1:
+            case 2:
                 DoScriptText(SAY_RIN_FREE, m_creature, pPlayer);
                 break;
-            case 7:
+            case 8:
                 DoSpawnAmbush(true);
                 break;
-            case 13:
+            case 14:
                 DoSpawnAmbush(false);
                 break;
-            case 17:
+            case 18:
                 DoScriptText(SAY_RIN_COMPLETE, m_creature, pPlayer);
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_RINJI_TRAPPED, m_creature);
                 SetRun();
