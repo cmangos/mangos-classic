@@ -85,7 +85,7 @@ struct npc_morokkAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 SetEscortPaused(true);
                 break;
         }
