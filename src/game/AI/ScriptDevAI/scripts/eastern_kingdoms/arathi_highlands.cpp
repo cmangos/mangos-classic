@@ -160,23 +160,23 @@ struct npc_kineloryAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 9:
+            case 10:
                 DoScriptText(SAY_REACH_BOTTOM, m_creature);
                 break;
-            case 16:
+            case 17:
                 DoScriptText(SAY_WATCH_BACK, m_creature);
                 DoScriptText(EMOTE_BELONGINGS, m_creature);
                 break;
-            case 17:
+            case 18:
                 DoScriptText(SAY_DATA_FOUND, m_creature);
                 break;
-            case 18:
+            case 19:
                 DoScriptText(SAY_ESCAPE, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                     m_creature->SetFacingToObject(pPlayer);
                 SetRun();
                 break;
-            case 33:
+            case 34:
                 DoScriptText(SAY_FINISH, m_creature);
                 m_creature->SetImmuneToNPC(true);
                 if (Creature* pQuae = GetClosestCreatureWithEntry(m_creature, NPC_QUAE, 10.0f))
@@ -185,7 +185,7 @@ struct npc_kineloryAI : public npc_escortAI
                     m_creature->SetFacingToObject(pQuae);
                 }
                 break;
-            case 34:
+            case 35:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_HINTS_NEW_PLAGUE, m_creature);
                 break;
