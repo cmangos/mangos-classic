@@ -888,7 +888,7 @@ struct npc_tirion_fordringAI: public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 2:
+            case 3:
                 SetEscortPaused(true);
 
                 // unmount and go to Taelan
@@ -906,7 +906,7 @@ struct npc_tirion_fordringAI: public npc_escortAI
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         // custom points; ignore in escort AI
-        if (uiPointId == 100 || uiPointId == 200)
+        if (uiPointId == 101 || uiPointId == 201)
             return;
 
         npc_escortAI::MovementInform(uiMoveType, uiPointId);
