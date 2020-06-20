@@ -69,13 +69,13 @@ struct npc_00x09hlAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 26:
+            case 27:
                 DoScriptText(SAY_OOX_AMBUSH, m_creature);
                 break;
-            case 43:
+            case 44:
                 DoScriptText(SAY_OOX_AMBUSH, m_creature);
                 break;
-            case 64:
+            case 65:
                 DoScriptText(SAY_OOX_END, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_RESQUE_OOX_09, m_creature);
@@ -87,7 +87,7 @@ struct npc_00x09hlAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 27:
+            case 28:
                 if (m_uiSummonCount >= 3)
                     break;
 
@@ -100,7 +100,7 @@ struct npc_00x09hlAI : public npc_escortAI
                     ++m_uiSummonCount;
                 }
                 break;
-            case 44:
+            case 45:
                 if (m_uiSummonCount >= 6)
                     break;
 
