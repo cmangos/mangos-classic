@@ -389,23 +389,23 @@ struct npc_torekAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 1:
+            case 2:
                 DoScriptText(SAY_MOVE, m_creature, pPlayer);
                 break;
-            case 8:
+            case 9:
                 DoScriptText(SAY_PREPARE, m_creature, pPlayer);
                 break;
-            case 19:
+            case 20:
                 // TODO: verify location and creatures amount.
                 m_creature->SummonCreature(NPC_DURIEL, 1776.73f, -2049.06f, 109.83f, 1.54f, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
                 m_creature->SummonCreature(NPC_SILVERWING_SENTINEL, 1774.64f, -2049.41f, 109.83f, 1.40f, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
                 m_creature->SummonCreature(NPC_SILVERWING_WARRIOR, 1778.73f, -2049.50f, 109.83f, 1.67f, TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
                 break;
-            case 20:
+            case 21:
                 DoScriptText(SAY_WIN, m_creature, pPlayer);
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TOREK_ASSULT, m_creature);
                 break;
-            case 21:
+            case 22:
                 DoScriptText(SAY_END, m_creature, pPlayer);
                 break;
         }
