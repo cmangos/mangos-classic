@@ -866,7 +866,7 @@ struct npc_tirion_fordringAI: public npc_escortAI
         {
             float fX, fY, fZ;
             pTaelan->GetContactPoint(m_creature, fX, fY, fZ);
-            m_creature->GetMotionMaster()->MovePoint(200, fX, fY, fZ);
+            m_creature->GetMotionMaster()->MovePoint(201, fX, fY, fZ);
         }
 
         Reset();
@@ -897,7 +897,7 @@ struct npc_tirion_fordringAI: public npc_escortAI
                 {
                     float fX, fY, fZ;
                     pTaelan->GetContactPoint(m_creature, fX, fY, fZ);
-                    m_creature->GetMotionMaster()->MovePoint(100, fX, fY, fZ);
+                    m_creature->GetMotionMaster()->MovePoint(101, fX, fY, fZ);
                 }
                 break;
         }
