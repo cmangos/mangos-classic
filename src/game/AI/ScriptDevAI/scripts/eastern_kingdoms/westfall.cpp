@@ -96,14 +96,14 @@ struct npc_daphne_stilwellAI : public npc_escortAI
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING))
         {
-            if (m_uiWPHolder >= 5)
+            if (m_uiWPHolder >= 6)
                 m_creature->SetSheath(SHEATH_STATE_RANGED);
 
             switch (m_uiWPHolder)
             {
-                case 7: DoScriptText(SAY_DS_DOWN_1, m_creature); break;
-                case 8: DoScriptText(SAY_DS_DOWN_2, m_creature); break;
-                case 9:
+                case 8: DoScriptText(SAY_DS_DOWN_1, m_creature); break;
+                case 9: DoScriptText(SAY_DS_DOWN_2, m_creature); break;
+                case 10:
                     if (m_lSummonedRaidersGUIDs.empty())
                         DoScriptText(SAY_DS_DOWN_3, m_creature);
                     break;
@@ -224,7 +224,7 @@ struct npc_daphne_stilwellAI : public npc_escortAI
 
     void JustReachedHome() override
     {
-        if (HasEscortState(STATE_ESCORT_ESCORTING) && m_uiWPHolder >= 5)
+        if (HasEscortState(STATE_ESCORT_ESCORTING) && m_uiWPHolder >= 6)
             m_creature->SetSheath(SHEATH_STATE_RANGED);
     }
 
@@ -240,7 +240,7 @@ struct npc_daphne_stilwellAI : public npc_escortAI
     {
         m_lSummonedRaidersGUIDs.remove(pSummoned->GetObjectGuid());
 
-        if (m_uiWPHolder >= 9 && m_lSummonedRaidersGUIDs.empty())
+        if (m_uiWPHolder >= 10 && m_lSummonedRaidersGUIDs.empty())
             SetEscortPaused(false);
     }
 
