@@ -59,8 +59,8 @@ enum
     PHASE_AIR               = 0,
     PHASE_GROUND            = 1,
 
-    POINT_AIR               = 1,
-    POINT_GROUND            = 2,
+    POINT_AIR               = 2,
+    POINT_GROUND            = 3,
 };
 
 struct SummonLocation
