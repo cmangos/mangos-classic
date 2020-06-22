@@ -102,9 +102,9 @@ enum
     SAY_REMULOS_OUTRO_1         = -1000704,        // remulos outro
     SAY_REMULOS_OUTRO_2         = -1000705,
 
-    POINT_ID_ERANIKUS_FLIGHT    = 0,
-    POINT_ID_ERANIKUS_COMBAT    = 1,
-    POINT_ID_ERANIKUS_REDEEMED  = 2,
+    POINT_ID_ERANIKUS_FLIGHT    = 1,
+    POINT_ID_ERANIKUS_COMBAT    = 2,
+    POINT_ID_ERANIKUS_REDEEMED  = 3,
 
     MAX_SHADOWS                 = 3,                // the max shadows summoned per turn
     MAX_SUMMON_TURNS            = 10,               // There are about 10 summoned shade waves
