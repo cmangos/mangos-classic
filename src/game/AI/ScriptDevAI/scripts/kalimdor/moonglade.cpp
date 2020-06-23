@@ -261,15 +261,15 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
             case 2:
                 DoScriptText(SAY_REMULOS_INTRO_2, m_creature);
                 break;
-            case 14:
+            case 13:
                 StartNextDialogueText(NPC_REMULOS);
                 SetEscortPaused(true);
                 break;
-            case 18:
+            case 17:
                 StartNextDialogueText(SAY_REMULOS_DEFEND_2);
                 SetEscortPaused(true);
                 break;
-            case 19:
+            case 18:
                 SetEscortPaused(true);
                 break;
         }
