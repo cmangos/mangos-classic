@@ -1333,7 +1333,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_template_spells`;
 CREATE TABLE `creature_template_spells` (
   `entry` mediumint(8) unsigned NOT NULL,
-  `setId` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Id of set of spells'
+  `setId` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Id of set of spells',
   `spell1` mediumint(8) unsigned NOT NULL,
   `spell2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `spell3` mediumint(8) unsigned NOT NULL DEFAULT '0',
