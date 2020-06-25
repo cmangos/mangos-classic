@@ -186,6 +186,13 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     // AI can modify node delay so we have to compute it
     int32 newWaitTime = node.delay + m_scriptTime;
 
+    // switch to next node
+    ++m_currentWaypointNode;
+    if (m_currentWaypointNode == i_path->end())
+    {
+        m_currentWaypointNode = i_path->begin();
+    }
+
     // Wait delay ms
     if (newWaitTime > 0)
     {
@@ -203,13 +210,6 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     {
         // we have to manually restart movement as script changed the node delay to 0
         SendNextWayPointPath(creature);
-    }
-
-    // switch to next node
-    ++m_currentWaypointNode;
-    if (m_currentWaypointNode == i_path->end())
-    {
-        m_currentWaypointNode = i_path->begin();
     }
 
     // Fire event only if it is already moving to the next node (for normal start it is already done in SendNewPath)
@@ -524,6 +524,15 @@ bool WaypointMovementGenerator<Creature>::Update(Creature& creature, const uint3
     {
         if (Stopped(creature))
         {
+            // If a script just have set the waypoint to be paused or stopped we have to check
+            // if the client did get a path for this creature. If it is the case, we have to
+            // explicitly send stop so the client knows that we want that creature to be stopped
+            if (!creature.movespline->Finalized())
+            {
+                Movement::MoveSplineInit init(creature);
+                init.Stop();
+            }
+
             if (CanMove(diff, creature))
                 SendNextWayPointPath(creature);
         }
