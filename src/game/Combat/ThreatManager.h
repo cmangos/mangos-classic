@@ -206,6 +206,7 @@ class ThreatManager
         void modifyAllThreatPercent(int32 threatPercent);
 
         float getThreat(Unit* victim, bool alsoSearchOfflineList = false);
+        float GetHighestThreat(); // for purpose of taunt effect
 
         bool HasThreat(Unit* victim, bool alsoSearchOfflineList = false);
 
