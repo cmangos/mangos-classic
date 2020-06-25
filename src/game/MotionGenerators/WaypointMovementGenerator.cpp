@@ -180,21 +180,6 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
         InformAI(creature, type, i_currentNode);
     }
 
-    // Inform AI
-    if (creature.AI() && m_PathOrigin == PATH_FROM_EXTERNAL)
-    {
-        uint32 type;
-        if (i_path->rbegin()->first != m_currentWaypointNode->first)
-            type = EXTERNAL_WAYPOINT_MOVE_START;
-        else
-            type = EXTERNAL_WAYPOINT_FINISHED_LAST;
-
-        InformAI(creature, type, m_currentWaypointNode->first);
-
-        if (creature.IsDead() || !creature.IsInWorld()) // Might have happened with above calls
-            return;
-    }
-
     // save position and orientation in case of GetResetPosition() call
     creature.GetPosition(m_resetPoint);
 
@@ -227,8 +212,15 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
         m_currentWaypointNode = i_path->begin();
     }
 
-    i_currentNode = m_currentWaypointNode->first;
+    // Fire event only if it is already moving to the next node (for normal start it is already done in SendNewPath)
+    if (!m_nodeIndexes.empty() && !Stopped(creature))
+    {
+        // Inform AI that we start to move
+        if (creature.AI() && m_PathOrigin == PATH_FROM_EXTERNAL)
+            InformAI(creature, uint32(EXTERNAL_WAYPOINT_MOVE_START), m_currentWaypointNode->first);
+    }
 
+    i_currentNode = m_currentWaypointNode->first;
     m_scriptTime = 0;
 }
 
@@ -405,6 +397,19 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
     creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
 
     WaypointNode const* nextNode = &m_currentWaypointNode->second;
+
+    // Inform AI that we start to move or reached last node
+    if (creature.AI() && m_PathOrigin == PATH_FROM_EXTERNAL)
+    {
+        uint32 type = uint32(EXTERNAL_WAYPOINT_MOVE_START);
+        if (i_path->begin()->first == i_currentNode && i_path->rbegin()->first == m_lastReachedWaypoint)
+            type = uint32(EXTERNAL_WAYPOINT_FINISHED_LAST);
+
+        InformAI(creature, type, i_currentNode);
+
+        if (creature.IsDead() || !creature.IsInWorld()) // Might have happened with above calls
+            return;
+    }
 
     // will contain generated path
     PointsArray genPath;
