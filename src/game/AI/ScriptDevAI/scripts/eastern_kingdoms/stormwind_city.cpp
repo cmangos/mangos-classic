@@ -260,6 +260,10 @@ enum
 
     NPC_WINDSOR_MOUNT           = 12581,
 
+    SPELL_BLUE_FIREWORK         = 11540,
+    SPELL_DISMISS_HORSE         = 20000,
+    SPELL_WINDSOR_INSPIRATION   = 20273,
+
     QUEST_STORMWIND_RENDEZVOUS  = 6402,
     QUEST_THE_GREAT_MASQUERADE  = 6403,
 };
@@ -289,7 +293,6 @@ struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
     bool m_bIsEventInProgress;
 
     ObjectGuid m_windsorGuid;
-    ObjectGuid m_horseGuid;
 
     void Reset() override { }
 
@@ -303,8 +306,6 @@ struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
             m_windsorGuid = pSummoned->GetObjectGuid();
             m_bIsEventInProgress = true;
         }
-        else if (pSummoned->GetEntry() == NPC_WINDSOR_MOUNT)
-            m_horseGuid = pSummoned->GetObjectGuid();
     }
 
     void SummonedCreatureDespawn(Creature* pSummoned) override
@@ -334,12 +335,13 @@ struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 break;
             case 4:
+                DoCastSpellIfCan(m_creature, SPELL_BLUE_FIREWORK, CAST_TRIGGERED);
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-                m_creature->SummonCreature(NPC_WINDSOR, aWindsorSpawnLoc[0], aWindsorSpawnLoc[1], aWindsorSpawnLoc[2], 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
+                if (Creature* windsor = m_creature->SummonCreature(NPC_WINDSOR, aWindsorSpawnLoc[0], aWindsorSpawnLoc[1], aWindsorSpawnLoc[2], 0, TEMPSPAWN_CORPSE_DESPAWN, 0))
+                    windsor->SetWalk(false);
                 break;
             case 7:
                 DoScriptText(SAY_SIGNAL_SENT, m_creature);
-                m_creature->SetFacingTo(2.15f);
                 SetEscortPaused(true);
                 break;
         }
@@ -354,16 +356,8 @@ struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
                 if (Creature* pWindsor = m_creature->GetMap()->GetCreature(m_windsorGuid))
                 {
                     pWindsor->Unmount();
-                    m_creature->SummonCreature(NPC_WINDSOR_MOUNT, pWindsor->GetPositionX() - 1.0f, pWindsor->GetPositionY() + 1.0f, pWindsor->GetPositionZ(), pWindsor->GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 30000);
-                }
-                break;
-            }
-            case SAY_DISMOUNT:
-            {
-                if (Creature* pHorse = m_creature->GetMap()->GetCreature(m_horseGuid))
-                {
-                    pHorse->SetWalk(false);
-                    pHorse->GetMotionMaster()->MovePoint(1, aWindsorSpawnLoc[0], aWindsorSpawnLoc[1], aWindsorSpawnLoc[2]);
+                    pWindsor->SetFacingTo(1.5636f);
+                    pWindsor->CastSpell(pWindsor, SPELL_DISMISS_HORSE, TRIGGERED_NONE);
                 }
                 break;
             }
@@ -508,7 +502,7 @@ enum
 
     GOSSIP_TEXT_ID_MASQUERADE   = 5633,
 
-    // SPELL_ONYXIA_TRANSFORM    = 20409,            // removed from DBC
+    SPELL_ONYXIA_TRANSFORM      = 20409,
     SPELL_WINDSOR_READ          = 20358,
     SPELL_WINDSOR_DEATH         = 20465,
     SPELL_ONYXIA_DESPAWN        = 20466,
@@ -522,10 +516,8 @@ enum
     NPC_GUARD_CITY              = 68,
     NPC_GUARD_PATROLLER         = 1976,
     NPC_GUARD_ONYXIA            = 12739,
-    NPC_LADY_ONYXIA             = 12756,
 
     MAX_ROYAL_GUARDS            = 6,
-    MAX_GUARD_SALUTES           = 7,
 };
 
 static const float aGuardLocations[MAX_ROYAL_GUARDS][4] =
@@ -570,7 +562,7 @@ static const DialogueEntry aMasqueradeDialogue[] =
     {SAY_JON_DIALOGUE_10,       NPC_JONATHAN,   5000},
     {EMOTE_ONESHOT_SALUTE,      0,              4000},
     {SAY_JON_DIALOGUE_11,       NPC_JONATHAN,   3000},
-    {NPC_JONATHAN,              0,              2000},
+    {NPC_JONATHAN,              0,              6000},
     {EMOTE_ONESHOT_KNEEL,       0,              3000},
     {SAY_WINDSOR_DIALOGUE_12,   NPC_WINDSOR,    5000},
     {SAY_WINDSOR_DIALOGUE_13,   NPC_WINDSOR,    3000},
@@ -610,8 +602,6 @@ static const DialogueEntry aMasqueradeDialogue[] =
     {0, 0, 0},
 };
 
-static const int32 aGuardSalute[MAX_GUARD_SALUTES] = { -1000842, -1000843, -1000844, -1000845, -1000846, -1000847, -1000848};
-
 struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
 {
     npc_reginald_windsorAI(Creature* m_creature) : npc_escortAI(m_creature),
@@ -627,25 +617,21 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
     ScriptedMap* m_pScriptedMap;
 
     uint32 m_uiGuardCheckTimer;
-    uint8 m_uiOnyxiaGuardCount;
 
     uint32 m_uiHammerTimer;
     uint32 m_uiCleaveTimer;
 
     bool m_bIsKeepReady;
-    bool m_bCanGuardSalute;
 
     ObjectGuid m_playerGuid;
     ObjectGuid m_guardsGuid[MAX_ROYAL_GUARDS];
 
     GuidList m_lRoyalGuardsGuidList;
-    GuidSet m_sGuardsSalutedGuidSet;
 
     void Reset() override
     {
         m_uiGuardCheckTimer  = 0;
         m_bIsKeepReady       = false;
-        m_bCanGuardSalute    = false;
 
         m_uiHammerTimer      = urand(0, 1000);
         m_uiCleaveTimer      = urand(1000, 3000);
@@ -654,18 +640,6 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
     void Aggro(Unit* /*pWho*/) override
     {
         DoCastSpellIfCan(m_creature, SPELL_SHIELD_WALL);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // Note: this implementation is not the best; It should be better handled by the guard script
-        if (m_bCanGuardSalute && (pWho->GetEntry() == NPC_GUARD_CITY || pWho->GetEntry() == NPC_GUARD_ROYAL ||
-                                  pWho->GetEntry() == NPC_GUARD_PATROLLER) && pWho->IsWithinDistInMap(m_creature, 15.0f) &&
-                m_sGuardsSalutedGuidSet.find(pWho->GetObjectGuid()) == m_sGuardsSalutedGuidSet.end() && pWho->IsWithinLOSInMap(m_creature))
-        {
-            DoScriptText(aGuardSalute[urand(0, MAX_GUARD_SALUTES - 1)], pWho);
-            m_sGuardsSalutedGuidSet.insert(pWho->GetObjectGuid());
-        }
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -695,7 +669,8 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 SetEscortPaused(true);
                 break;
             case 4:
-                m_bCanGuardSalute = true;
+                // Periodically triggers 20275 that is used in guardAI_stormwind to trigger random text and emotes
+                DoCastSpellIfCan(m_creature, SPELL_WINDSOR_INSPIRATION, CAST_TRIGGERED);
                 break;
             case 12:
                 if (!m_pScriptedMap)
@@ -710,16 +685,11 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 break;
             case 23:
                 SetEscortPaused(true);
-                m_creature->SetFacingTo(5.41f);
                 StartNextDialogueText(NPC_GUARD_ROYAL);
-                break;
-            case 25:
-                m_bCanGuardSalute = false;
                 break;
             case 26:
                 StartNextDialogueText(NPC_WRYNN);
                 SetEscortPaused(true);
-                m_bCanGuardSalute = false;
                 break;
         }
     }
@@ -815,12 +785,14 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                     m_creature->SetFacingToObject(pJonathan);
                 break;
             case SAY_WINDSOR_DIALOGUE_13:
-                m_creature->SetFacingTo(0.6f);
+                m_creature->SetFacingTo(0.08f);
                 break;
             case EMOTE_ONESHOT_POINT:
                 m_creature->HandleEmote(EMOTE_ONESHOT_POINT);
                 break;
             case NPC_WINDSOR:
+                // Stop triggering texts and emotes from nearby guards
+                m_creature->RemoveAurasDueToSpell(SPELL_WINDSOR_INSPIRATION);
                 SetEscortPaused(false);
                 break;
             case SAY_WINDSOR_BEFORE_KEEP:
@@ -860,8 +832,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
             case EMOTE_BOLVAR_GASP:
                 if (Creature* pOnyxia = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
                 {
-                    pOnyxia->UpdateEntry(NPC_LADY_ONYXIA);
-
+                    pOnyxia->CastSpell(pOnyxia, SPELL_ONYXIA_TRANSFORM, TRIGGERED_NONE);
                     if (Creature* pBolvar = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_BOLVAR))
                         pBolvar->SetFacingToObject(pOnyxia);
                 }
@@ -881,6 +852,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                         pBolvar->SetFacingToObject(pOnyxia);
                         DoScriptText(EMOTE_PRESTOR_LAUGH, pOnyxia);
                     }
+                    pBolvar->SetFactionTemporary(11, TEMPFACTION_RESTORE_REACH_HOME);   // Change Faction so he can fight Onyxia's Guards
                 }
                 break;
             case SAY_PRESTOR_KEEP_11:
@@ -917,8 +889,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_creature->ClearAllReactives();
-                m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MoveIdle();
+                m_creature->SetImmobilizedState(true, true);
                 m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
                 break;
             case SAY_PRESTOR_KEEP_14:
@@ -956,7 +927,9 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 {
                     pBolvar->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                     pBolvar->SetStandState(UNIT_STAND_STATE_STAND);
+                    pBolvar->GetMotionMaster()->Clear();
                     pBolvar->GetMotionMaster()->MoveTargetedHome();
+                    pBolvar->ClearTemporaryFaction();
                 }
                 if (Creature* pWrynn = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_WRYNN))
                 {

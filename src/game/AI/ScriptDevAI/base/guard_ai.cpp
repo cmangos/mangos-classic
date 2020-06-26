@@ -201,9 +201,3 @@ void guardAI_orgrimmar::ReceiveEmote(Player* player, uint32 textEmote)
     if (player->GetTeam() == HORDE)
         DoReplyToTextEmote(textEmote);
 }
-
-void guardAI_stormwind::ReceiveEmote(Player* player, uint32 textEmote)
-{
-    if (player->GetTeam() == ALLIANCE)
-        DoReplyToTextEmote(textEmote);
-}
