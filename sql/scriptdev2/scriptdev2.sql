@@ -111,7 +111,7 @@ UPDATE creature_template SET ScriptName='npc_the_cleaner' WHERE entry=14503;
 /* SPELL */
 UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
 -- eastern kingdoms
-1200,8888,13016,
+8888,13016,
 -- kalimdor
 9299,12296,12298);
 
