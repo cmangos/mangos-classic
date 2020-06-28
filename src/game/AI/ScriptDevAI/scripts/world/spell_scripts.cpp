@@ -24,7 +24,6 @@ EndScriptData
 */
 
 #include "AI/ScriptDevAI/include/sc_common.h"/* ContentData
-spell 8913
 spell 10848
 spell 17327
 spell 19512
@@ -49,11 +48,6 @@ enum
 
     NPC_CURED_DEER                      = 12299,
     NPC_CURED_GAZELLE                   = 12297,
-
-    // target morbent fel
-    SPELL_SACRED_CLEANSING              = 8913,
-    NPC_MORBENT                         = 1200,
-    NPC_WEAKENED_MORBENT                = 24782,
 
     // npcs that are only interactable while dead
     SPELL_SHROUD_OF_DEATH               = 10848,
@@ -114,18 +108,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                 pCreatureTarget->SetImmuneToPlayer(true);
                 pCreatureTarget->ForcedDespawn(20000);
 
-                return true;
-            }
-            return true;
-        }
-        case SPELL_SACRED_CLEANSING:
-        {
-            if (uiEffIndex == EFFECT_INDEX_1)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_MORBENT)
-                    return true;
-
-                pCreatureTarget->UpdateEntry(NPC_WEAKENED_MORBENT);
                 return true;
             }
             return true;
