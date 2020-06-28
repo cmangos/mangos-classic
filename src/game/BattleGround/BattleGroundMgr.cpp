@@ -813,30 +813,33 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
 */
 bool BgQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
-    Player* plr = sObjectMgr.GetPlayer(m_playerGuid);
-    // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
-    if (!plr)
-        return true;
-
-    BattleGround* bg = sBattleGroundMgr.GetBattleGround(m_bgInstanceGuid, m_bgTypeId);
-    // if battleground ended and its instance deleted - do nothing
-    if (!bg)
-        return true;
-
-    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BgQueueTypeId(bg->GetTypeId());
-    uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
-    if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue or in battleground
+    sWorld.GetMessager().AddMessage([=](World* world)
     {
-        // check if player is invited to this bg
-        BattleGroundQueue& bgQueue = sBattleGroundMgr.m_battleGroundQueues[bgQueueTypeId];
-        if (bgQueue.IsPlayerInvited(m_playerGuid, m_bgInstanceGuid, m_removeTime))
+        Player* plr = sObjectMgr.GetPlayer(m_playerGuid);
+        // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
+        if (!plr)
+            return;
+
+        BattleGround* bg = sBattleGroundMgr.GetBattleGround(m_bgInstanceGuid, m_bgTypeId);
+        // if battleground ended and its instance deleted - do nothing
+        if (!bg)
+            return;
+
+        BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BgQueueTypeId(bg->GetTypeId());
+        uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
+        if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue or in battleground
         {
-            WorldPacket data;
-            // we must send remaining time in queue
-            sBattleGroundMgr.BuildBattleGroundStatusPacket(data, bg, queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME - INVITATION_REMIND_TIME, 0);
-            plr->GetSession()->SendPacket(data);
+            // check if player is invited to this bg
+            BattleGroundQueue& bgQueue = sBattleGroundMgr.m_battleGroundQueues[bgQueueTypeId];
+            if (bgQueue.IsPlayerInvited(m_playerGuid, m_bgInstanceGuid, m_removeTime))
+            {
+                WorldPacket data;
+                // we must send remaining time in queue
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(data, bg, queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME - INVITATION_REMIND_TIME, 0);
+                plr->GetSession()->SendPacket(data);
+            }
         }
-    }
+    });
     return true;                                            // event will be deleted
 }
 
@@ -857,36 +860,39 @@ void BgQueueInviteEvent::Abort(uint64 /*e_time*/)
 */
 bool BgQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
-    Player* plr = sObjectMgr.GetPlayer(m_playerGuid);
-    if (!plr)
-        // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
-        return true;
-
-    BattleGround* bg = sBattleGroundMgr.GetBattleGround(m_bgInstanceGuid, m_bgTypeId);
-    // battleground can be deleted already when we are removing queue info
-    // bg pointer can be nullptr! so use it carefully!
-
-    uint32 queueSlot = plr->GetBattleGroundQueueIndex(m_bgQueueTypeId);
-    if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue, or in Battleground
+    sWorld.GetMessager().AddMessage([=](World* world)
     {
-        // check if player is in queue for this BG and if we are removing his invite event
-        BattleGroundQueue& bgQueue = sBattleGroundMgr.m_battleGroundQueues[m_bgQueueTypeId];
-        if (bgQueue.IsPlayerInvited(m_playerGuid, m_bgInstanceGuid, m_removeTime))
+        Player* plr = sObjectMgr.GetPlayer(m_playerGuid);
+        if (!plr)
+            // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
+            return;
+
+        BattleGround* bg = sBattleGroundMgr.GetBattleGround(m_bgInstanceGuid, m_bgTypeId);
+        // battleground can be deleted already when we are removing queue info
+        // bg pointer can be nullptr! so use it carefully!
+
+        uint32 queueSlot = plr->GetBattleGroundQueueIndex(m_bgQueueTypeId);
+        if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue, or in Battleground
         {
-            DEBUG_LOG("Battleground: removing player %u from bg queue for instance %u because of not pressing enter battle in time.", plr->GetGUIDLow(), m_bgInstanceGuid);
+            // check if player is in queue for this BG and if we are removing his invite event
+            BattleGroundQueue& bgQueue = sBattleGroundMgr.m_battleGroundQueues[m_bgQueueTypeId];
+            if (bgQueue.IsPlayerInvited(m_playerGuid, m_bgInstanceGuid, m_removeTime))
+            {
+                DEBUG_LOG("Battleground: removing player %u from bg queue for instance %u because of not pressing enter battle in time.", plr->GetGUIDLow(), m_bgInstanceGuid);
 
-            plr->RemoveBattleGroundQueueId(m_bgQueueTypeId);
-            bgQueue.RemovePlayer(m_playerGuid, true);
+                plr->RemoveBattleGroundQueueId(m_bgQueueTypeId);
+                bgQueue.RemovePlayer(m_playerGuid, true);
 
-            // update queues if battleground isn't ended
-            if (bg && bg->GetStatus() != STATUS_WAIT_LEAVE)
+                // update queues if battleground isn't ended
+                if (bg && bg->GetStatus() != STATUS_WAIT_LEAVE)
                 sBattleGroundMgr.ScheduleQueueUpdate(m_bgQueueTypeId, m_bgTypeId, bg->GetBracketId());
 
-            WorldPacket data;
-            sBattleGroundMgr.BuildBattleGroundStatusPacket(data, bg, queueSlot, STATUS_NONE, 0, 0);
-            plr->GetSession()->SendPacket(data);
+                WorldPacket data;
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(data, bg, queueSlot, STATUS_NONE, 0, 0);
+                plr->GetSession()->SendPacket(data);
+            }
         }
-    }
+    });
 
     // event will be deleted
     return true;
