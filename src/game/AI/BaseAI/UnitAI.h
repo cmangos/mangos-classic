@@ -467,6 +467,7 @@ class UnitAI
 
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }
+        void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents
 
         ///== Fields =======================================
 

@@ -174,6 +174,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 59  ACTION_T_SET_FACING                     Target, Reset                       Set 0, Reset 1
 60  ACTION_T_SET_SPELL_SET                  SetId                               Set for possess
 61  ACTION_T_SET_IMMOBILIZED_STATE          Apply, CombatOnly                   CombatOnly is autoremoved on combat stop (death, evade, despawn)
+62  ACTION_T_SET_DESPAWN_AGGREGATION        Mask, Entry1, Entry2                Enable aggregation of guids for despawn on event (death, evade). To be used mostly on spawn.
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -1109,6 +1110,12 @@ Parameter 1: creature_template_spells setid
 --------------------------------
 Parameter 1: apply
 Parameter 2: combatOnly - autoremoved on combat stop
+
+--------------------------------
+62 - ACTION_T_SET_DESPAWN_AGGREGATION
+--------------------------------
+Parameter 1: Mask - 0x1 - enabled, 0x2 - despawn on evade, 0x4 - despawn on death
+Parameter 2 and 3: Creature Entry - in case only specific entries should be despawned, else all despawn, can be appended over multiple action calls
 
 =========================================
 Target Types

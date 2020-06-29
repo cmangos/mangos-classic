@@ -716,3 +716,11 @@ void UnitAI::ClearSelfRoot()
         m_selfRooted = false;
     }
 }
+
+void UnitAI::DespawnGuids(GuidVector& spawns)
+{
+    for (ObjectGuid& guid : spawns)
+        if (Creature* spawn = m_unit->GetMap()->GetAnyTypeCreature(guid))
+            spawn->ForcedDespawn();
+    spawns.clear();
+}

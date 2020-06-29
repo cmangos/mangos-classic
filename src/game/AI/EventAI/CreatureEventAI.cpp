@@ -1309,6 +1309,17 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             SetRootSelf(action.immobilizedState.apply, action.immobilizedState.combatOnly);
             break;
         }
+        case ACTION_T_SET_DESPAWN_AGGREGATION:
+        {
+            m_despawnAggregationMask = action.despawnAggregation.mask;
+            if ((action.despawnAggregation.mask & AGGREGATION_ENABLED) == 0)
+                m_despawnGuids.clear();
+            if (action.despawnAggregation.entry)
+                m_entriesForDespawn.insert(action.despawnAggregation.entry);
+            if (action.despawnAggregation.entry2)
+                m_entriesForDespawn.insert(action.despawnAggregation.entry2);
+            break;
+        }
         default:
             sLog.outError("%s::ProcessAction(): action(%u) not implemented", GetAIName().data(), static_cast<uint32>(action.type));
             return false;
@@ -1416,6 +1427,9 @@ void CreatureEventAI::EnterEvadeMode()
             CheckAndReadyEventForExecution(i);
     }
     ProcessEvents();
+
+    if ((m_despawnAggregationMask & AGGREGATION_EVADE) != 0)
+        DespawnGuids(m_despawnGuids);
 }
 
 void CreatureEventAI::JustDied(Unit* killer)
@@ -1436,6 +1450,9 @@ void CreatureEventAI::JustDied(Unit* killer)
 
     // reset phase after any death state events
     m_Phase = 0;
+
+    if ((m_despawnAggregationMask & AGGREGATION_DEATH) != 0)
+        DespawnGuids(m_despawnGuids);
 }
 
 void CreatureEventAI::KilledUnit(Unit* victim)
@@ -1458,6 +1475,9 @@ void CreatureEventAI::JustSummoned(Creature* summoned)
             CheckAndReadyEventForExecution(i, summoned);
     }
     ProcessEvents(summoned);
+    if ((m_despawnAggregationMask & AGGREGATION_ENABLED) != 0)
+        if (m_entriesForDespawn.empty() || m_entriesForDespawn.find(summoned->GetEntry()) != m_entriesForDespawn.end())
+            m_despawnGuids.push_back(summoned->GetObjectGuid());
 }
 
 void CreatureEventAI::SummonedCreatureJustDied(Creature* summoned)
