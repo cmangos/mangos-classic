@@ -632,7 +632,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     uint32 miscRequirement = 0;
     AreaLockStatus lockStatus = AREA_LOCKSTATUS_OK;
     if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(pCurrChar->GetMapId()))
-        lockStatus = pCurrChar->GetAreaTriggerLockStatus(at, miscRequirement);
+        lockStatus = pCurrChar->GetAreaTriggerLockStatus(at, miscRequirement, true);
     else
     {
         // Some basic checks in case of a map without areatrigger
