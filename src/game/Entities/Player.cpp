@@ -17599,8 +17599,14 @@ bool Player::IsVisibleGloballyFor(Player* u) const
 
 void Player::BeforeVisibilityDestroy(Creature* creature)
 {
-    if (!creature->GetMap()->IsDungeon() && creature->IsInCombat() && IsInCombat() && creature->getThreatManager().HasThreat(this, true))
-        getHostileRefManager().deleteReference(creature);
+    if (creature->IsInCombat() && IsInCombat())
+    {
+        if (!creature->GetMap()->IsDungeon() && creature->getThreatManager().HasThreat(this, true))
+            getHostileRefManager().deleteReference(creature);
+        if (Pet* pet = GetPet())
+            if (pet->GetVictim() == creature)
+                pet->AttackStop();
+    }
     if (GetPetGuid() == creature->GetObjectGuid() && static_cast<Creature*>(creature)->IsPet())
         static_cast<Pet*>(creature)->Unsummon(PET_SAVE_REAGENTS);
 }
