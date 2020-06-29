@@ -166,7 +166,7 @@ enum
     NPC_TAELAN_FORDRING             = 1842,
     NPC_SCARLET_CAVALIER            = 1836,
     NPC_ISILLIEN                    = 1840,
-    NPC_TIRION_FORDRING             = 12126,                    // Todo: add mount
+    NPC_TIRION_FORDRING             = 12126,
     NPC_CRIMSON_ELITE               = 12128,
 
     MODEL_TAELAN_MOUNT              = 2410,                     // ToDo: fix id!
@@ -174,6 +174,8 @@ enum
     // quests
     QUEST_ID_SCARLET_SUBTERFUGE     = 5862,
     QUEST_ID_IN_DREAMS              = 5944,
+
+    TIRION_KNEELS_1                 = 1,
 };
 
 static const int32 aCavalierYells[] = { -1001072, -1001073, -1001074, -1001075 };
@@ -191,9 +193,9 @@ static const DialogueEntry aScarletDialogue[] =
     {SAY_EXIT_KEEP,                 NPC_TAELAN_FORDRING,        6000},
     {EMOTE_MOUNT,                   NPC_TAELAN_FORDRING,        4000},
     {MODEL_TAELAN_MOUNT,            0,                          0},
-    {SAY_REACH_TOWER,               NPC_TAELAN_FORDRING,        4000},
-    {SAY_ISILLIEN_1,                NPC_ISILLIEN,               2000},
-    {SAY_ISILLIEN_2,                NPC_TAELAN_FORDRING,        3000},
+    {SAY_REACH_TOWER,               NPC_TAELAN_FORDRING,        2000},
+    {SAY_ISILLIEN_1,                NPC_ISILLIEN,               5000},
+    {SAY_ISILLIEN_2,                NPC_TAELAN_FORDRING,        4000},
     {SAY_ISILLIEN_3,                NPC_TAELAN_FORDRING,        10000},
     {SAY_ISILLIEN_4,                NPC_ISILLIEN,               7000},
     {SAY_ISILLIEN_5,                NPC_ISILLIEN,               5000},
@@ -212,6 +214,8 @@ static const DialogueEntry aScarletDialogue[] =
     {SAY_TIRION_3,                  NPC_TIRION_FORDRING,        4000},
     {SAY_TIRION_4,                  NPC_TIRION_FORDRING,        3000},
     {SAY_TIRION_5,                  NPC_ISILLIEN,               0},
+    {SAY_EPILOG_1,                  NPC_TIRION_FORDRING,        3000},
+    {TIRION_KNEELS_1,               0,                          3000},
     {EMOTE_KNEEL,                   NPC_TIRION_FORDRING,        4000},
     {SAY_EPILOG_2,                  NPC_TIRION_FORDRING,        5000},
     {EMOTE_HOLD_TAELAN,             NPC_TIRION_FORDRING,        5000},
@@ -289,8 +293,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
             m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->ClearAllReactives();
-            m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->SetImmobilizedState(true, true);
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
 
             Reset();
@@ -327,7 +330,10 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
         {
             StartNextDialogueText(NPC_TIRION_FORDRING);
             if (Creature* pTirion = m_creature->SummonCreature(NPC_TIRION_FORDRING, 2620.273f, -1920.917f, 74.25f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS))
+            {
                 pTirion->SetWalk(false);
+                pTirion->SetImmuneToNPC(true);  // Temporary make Tirion immune to nearby Scarlet NPCs so the script can run smoothly
+            }
         }
     }
 
@@ -341,6 +347,8 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                 break;
             case 56:
                 SetEscortPaused(true);
+                m_creature->GetMotionMaster()->Clear();
+                m_creature->GetMotionMaster()->MoveIdle();
                 StartNextDialogueText(SAY_REACH_TOWER);
                 break;
         }
@@ -368,15 +376,6 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
         }
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_ISILLIEN)
-        {
-            if (Creature* pTirion = m_creature->GetMap()->GetCreature(m_tirionGuid))
-                DoScriptText(SAY_EPILOG_1, pTirion);
-        }
-    }
-
     void SummonedMovementInform(Creature* pSummoned, uint32 /*uiMotionType*/, uint32 uiPointId) override
     {
         if (pSummoned->GetEntry() != NPC_TIRION_FORDRING)
@@ -384,12 +383,12 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
 
         if (uiPointId == 100)
         {
-            StartNextDialogueText(SAY_TIRION_1);
-            if (Creature* pIsillien = m_creature->GetMap()->GetCreature(m_isillenGuid))
-                pSummoned->SetFacingToObject(pIsillien);
+            StartNextDialogueText(NPC_ISILLIEN);
+            pSummoned->SetFacingToObject(m_creature);
+            pSummoned->SetStandState(UNIT_STAND_STATE_KNEEL);
         }
         else if (uiPointId == 200)
-            StartNextDialogueText(EMOTE_KNEEL);
+            StartNextDialogueText(SAY_EPILOG_1);
     }
 
     void JustDidDialogueStep(int32 iEntry) override
@@ -406,12 +405,15 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                 GetCreatureListWithEntryInGrid(lCavaliersInRange, m_creature, NPC_SCARLET_CAVALIER, 10.0f);
 
                 uint8 uiIndex = 0;
-                for (CreatureList::const_iterator itr = lCavaliersInRange.begin(); itr != lCavaliersInRange.end(); ++itr)
+                for (auto* cavalier : lCavaliersInRange)
                 {
-                    m_lCavalierGuids.push_back((*itr)->GetObjectGuid());
-                    (*itr)->SetFacingToObject(m_creature);
-                    DoScriptText(aCavalierYells[uiIndex], (*itr));
-                    ++uiIndex;
+                    if (cavalier->IsAlive() && !cavalier->IsInCombat() && cavalier->GetPositionZ() > 164.0f) // Prevent picking NPC from another floor
+                    {
+                        m_lCavalierGuids.push_back(cavalier->GetObjectGuid());
+                        cavalier->SetFacingToObject(m_creature);
+                        DoScriptText(aCavalierYells[uiIndex], cavalier);
+                        ++uiIndex;
+                    }
                 }
                 break;
             }
@@ -435,6 +437,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                 break;
             case QUEST_ID_IN_DREAMS:
                 // force attack
+                m_creature->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
                 for (GuidList::const_iterator itr = m_lCavalierGuids.begin(); itr != m_lCavalierGuids.end(); ++itr)
                 {
                     if (Creature* pCavalier = m_creature->GetMap()->GetCreature(*itr))
@@ -453,12 +456,16 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                 break;
             case SAY_REACH_TOWER:
                 // start fight event
+                if (Player* player = GetPlayerForEscort())
+                    m_creature->SetFacingToObject(player);
                 m_creature->SummonCreature(NPC_ISILLIEN, 2693.12f, -1943.04f, 72.04f, 2.11f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * MINUTE * IN_MILLISECONDS);
                 break;
             case SAY_ISILLIEN_2:
-                m_creature->Unmount();
                 if (Creature* pIsillien = m_creature->GetMap()->GetCreature(m_isillenGuid))
                     m_creature->SetFacingToObject(pIsillien);
+                break;
+            case SAY_ISILLIEN_3:
+                m_creature->Unmount();
                 break;
             case SPELL_CRUSADER_STRIKE:
             {
@@ -484,40 +491,63 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                 }
 
                 // Isillien only attacks Taelan
-                if (Creature* pIsillien = m_creature->GetMap()->GetCreature(m_isillenGuid))
+                if (Creature* isillien = m_creature->GetMap()->GetCreature(m_isillenGuid))
                 {
-                    pIsillien->AI()->AttackStart(m_creature);
-                    AttackStart(pIsillien);
+                    isillien->AI()->AttackStart(m_creature);
+                    AttackStart(isillien);
                 }
 
                 m_bFightStarted = true;
                 break;
             }
             case SAY_KILL_TAELAN_1:
-                // kill taelan and attack players
-                if (Creature* pIsillien = m_creature->GetMap()->GetCreature(m_isillenGuid))
-                    SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pIsillien);
+                // Kill Taelan and attack players
+                if (Creature* isillien = m_creature->GetMap()->GetCreature(m_isillenGuid))
+                    SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, isillien);
                 break;
             case EMOTE_ATTACK_PLAYER:
-                // attack players
+                // Attack players
                 if (Creature* pIsillien = m_creature->GetMap()->GetCreature(m_isillenGuid))
                 {
                     if (Player* pPlayer = GetPlayerForEscort())
                         pIsillien->AI()->AttackStart(pPlayer);
                 }
                 break;
-            // tirion event
+            // Tirion event
+            case SAY_TIRION_1:
+                if (Creature* tirion = m_creature->GetMap()->GetCreature(m_tirionGuid))
+                {
+                    tirion->SetStandState(UNIT_STAND_STATE_STAND);
+                    if (Creature* isillien = m_creature->GetMap()->GetCreature(m_isillenGuid))
+                    {
+                        tirion->SetFacingToObject(isillien);
+                        isillien->CombatStop();
+                    }
+                }
+                break;
             case SAY_TIRION_5:
                 if (Creature* pIsillien = m_creature->GetMap()->GetCreature(m_isillenGuid))
                 {
                     if (Creature* pTirion = m_creature->GetMap()->GetCreature(m_tirionGuid))
                     {
+                        pTirion->SetImmuneToNPC(false);
                         pTirion->AI()->AttackStart(pIsillien);
                         pIsillien->AI()->AttackStart(pTirion);
                     }
                 }
                 break;
-            // epilog dialogue
+            // Epilogue dialogue
+            case SAY_EPILOG_1:
+                if (Creature* isillien = m_creature->GetMap()->GetCreature(m_isillenGuid))
+                {
+                    if (Creature* tirion = m_creature->GetMap()->GetCreature(m_tirionGuid))
+                        tirion->SetFacingToObject(isillien);
+                }
+                break;
+            case TIRION_KNEELS_1:
+                if (Creature* tirion = m_creature->GetMap()->GetCreature(m_tirionGuid))
+                    tirion->SetFacingToObject(m_creature);
+                break;
             case EMOTE_HOLD_TAELAN:
                 if (Creature* pTirion = m_creature->GetMap()->GetCreature(m_tirionGuid))
                     pTirion->SetStandState(UNIT_STAND_STATE_KNEEL);
@@ -530,10 +560,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                 if (Creature* pTirion = m_creature->GetMap()->GetCreature(m_tirionGuid))
                 {
                     if (Player* pPlayer = GetPlayerForEscort())
-                    {
                         pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_IN_DREAMS, m_creature);
-                        pTirion->SetFacingToObject(pPlayer);
-                    }
 
                     pTirion->ForcedDespawn(3 * MINUTE * IN_MILLISECONDS);
                     pTirion->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
@@ -866,7 +893,7 @@ struct npc_tirion_fordringAI: public npc_escortAI
         {
             float fX, fY, fZ;
             pTaelan->GetContactPoint(m_creature, fX, fY, fZ);
-            m_creature->GetMotionMaster()->MovePoint(201, fX, fY, fZ);
+            m_creature->GetMotionMaster()->MovePoint(200, fX, fY, fZ);
         }
 
         Reset();
@@ -893,11 +920,13 @@ struct npc_tirion_fordringAI: public npc_escortAI
 
                 // unmount and go to Taelan
                 m_creature->Unmount();
+                m_creature->GetMotionMaster()->Clear();
+                m_creature->GetMotionMaster()->MoveIdle();
                 if (Creature* pTaelan = m_creature->GetMap()->GetCreature(m_taelanGuid))
                 {
                     float fX, fY, fZ;
                     pTaelan->GetContactPoint(m_creature, fX, fY, fZ);
-                    m_creature->GetMotionMaster()->MovePoint(101, fX, fY, fZ);
+                    m_creature->GetMotionMaster()->MovePoint(100, fX, fY, fZ);
                 }
                 break;
         }
@@ -906,7 +935,7 @@ struct npc_tirion_fordringAI: public npc_escortAI
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         // custom points; ignore in escort AI
-        if (uiPointId == 101 || uiPointId == 201)
+        if (uiPointId == 100 || uiPointId == 200)
             return;
 
         npc_escortAI::MovementInform(uiMoveType, uiPointId);
