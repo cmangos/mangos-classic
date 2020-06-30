@@ -1904,7 +1904,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
                 uint32 aurMechMask = GetAllSpellMechanicMask(aurSpellInfo);
 
-                if ((*iter)->IsPositive())
+                if ((*iter)->IsPositive() || aurSpellInfo->HasAttribute(SPELL_ATTR_AURA_IS_DEBUFF))
                 {
                     ++iter;
                     continue;
