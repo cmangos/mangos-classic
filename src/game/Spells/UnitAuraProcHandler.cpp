@@ -593,7 +593,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
 
     for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (Aura* aura = holder->m_auras[i])
-            if (!aura->OnCheckProc())
+            if (!aura->OnCheckProc(data))
                 return false;
 
     return roll_chance_f(chance);

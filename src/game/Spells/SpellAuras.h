@@ -478,7 +478,7 @@ class Aura
         int32 OnAuraValueCalculate(Unit* caster, int32 currentValue);
         void OnDamageCalculate(int32& advertisedBenefit, float& totalMod);
         void OnApply(bool apply);
-        bool OnCheckProc();
+        bool OnCheckProc(ProcExecutionData& data);
         SpellAuraProcResult OnProc(ProcExecutionData& data);
         void OnAbsorb(int32& currentAbsorb, uint32& reflectedSpellId, int32& reflectDamage, bool& preventedDeath);
         void OnManaAbsorb(int32& currentAbsorb);
