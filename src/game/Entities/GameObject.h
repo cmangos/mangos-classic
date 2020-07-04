@@ -793,6 +793,7 @@ class GameObject : public WorldObject
         GameObjectAI* AI() const { return m_AI.get(); }
 
         GameObjectModel* m_model;
+        void UpdateModelPosition();
 
     protected:
         uint32      m_spellId;

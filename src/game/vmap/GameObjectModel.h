@@ -60,5 +60,7 @@ class GameObjectModel
         bool intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, bool ignoreM2Model) const;
 
         static GameObjectModel* construct(const GameObject* const pGo);
+
+        bool Relocate(GameObject const& go);
 };
 #endif

@@ -28,6 +28,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Entities/UpdateData.h"
 #include "Entities/UpdateMask.h"
+#include "Entities/Transports.h"
 #include "Util.h"
 #include "Grids/CellImpl.h"
 #include "Grids/GridNotifiers.h"
@@ -316,7 +317,13 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
     }
 
     if (updateFlags & UPDATEFLAG_TRANSPORT)
-        *data << uint32(WorldTimer::getMSTime());
+    {
+        GameObject const* go = static_cast<GameObject const*>(this);
+        if (go && go->IsTransport())
+            *data << uint32(static_cast<Transport const*>(go)->GetPathProgress());
+        else
+            *data << uint32(WorldTimer::getMSTime());
+    }
 }
 
 void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* updateMask, Player* target) const

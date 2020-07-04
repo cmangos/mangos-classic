@@ -173,6 +173,13 @@ namespace Movement
             void init_spline(const Vector3* controls, index_type count, EvaluationMode m) { SplineBase::init_spline(controls, count, m);}
             void init_cyclic_spline(const Vector3* controls, index_type count, EvaluationMode m, index_type cyclic_point) { SplineBase::init_cyclic_spline(controls, count, m, cyclic_point);}
 
+            /** As i can see there are a lot of ways how spline can be initialized
+                would be no harm to have some custom initializers. */
+            template<class Init> inline void init_spline_custom(Init& initializer)
+            {
+                initializer(m_mode, cyclic, points, index_lo, index_hi);
+            }
+
             /**  Initializes lengths with SplineBase::SegLength method. */
             void initLengths();
 
