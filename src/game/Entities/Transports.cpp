@@ -55,7 +55,7 @@ void MapManager::LoadTransports()
 
         uint32 entry = fields[0].GetUInt32();
         std::string name = fields[1].GetCppString();
-        t->m_period = fields[2].GetUInt32();
+        t->SetPeriod(fields[2].GetUInt32());
 
         const GameObjectInfo* goinfo = ObjectMgr::GetGameObjectInfo(entry);
 
@@ -85,7 +85,8 @@ void MapManager::LoadTransports()
             continue;
         }
 
-        float x = t->m_WayPoints[0].x; float y = t->m_WayPoints[0].y; float z = t->m_WayPoints[0].z; uint32 mapid = t->m_WayPoints[0].mapid; float o = 1;
+        auto waypoints = t->GetWaypointMap();
+        float x = waypoints[0].x; float y = waypoints[0].y; float z = waypoints[0].z; uint32 mapid = waypoints[0].mapid; float o = 1;
 
         // current code does not support transports in dungeon!
         const MapEntry* pMapInfo = sMapStore.LookupEntry(mapid);
