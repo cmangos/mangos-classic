@@ -111,7 +111,15 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
 
     for (uint32 guid : guid_set)
     {
-        T* obj = new T;
+        T* obj;
+        if constexpr (std::is_same_v<T, GameObject>)
+        {
+            GameObjectData const* data = sObjectMgr.GetGOData(guid);
+            MANGOS_ASSERT(data);
+            obj = GameObject::CreateGameObject(data->id);
+        }
+        else
+            obj = new T;
         // sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);
         if (!obj->LoadFromDB(guid, map))
         {

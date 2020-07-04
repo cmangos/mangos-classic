@@ -41,7 +41,7 @@ void VisibleNotifier::Notify()
     Player& player = *i_camera.GetOwner();
     // at this moment i_clientGUIDs have guids that not iterate at grid level checks
     // but exist one case when this possible and object not out of range: transports
-    if (Transport* transport = player.GetTransport())
+    if (GenericTransport* transport = player.GetTransport())
     {
         for (auto itr : transport->GetPassengers())
         {

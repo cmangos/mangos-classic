@@ -14052,37 +14052,38 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         }
     }
 
+    // load the player's map here if it's not already loaded
+    SetMap(sMapMgr.CreateMap(GetMapId(), this));
+
     if (transGUID != 0)
     {
-        for (MapManager::TransportSet::const_iterator iter = sMapMgr.m_Transports.begin(); iter != sMapMgr.m_Transports.end(); ++iter)
+        ObjectGuid guid(HIGHGUID_MO_TRANSPORT, transGUID);
+        if (GameObjectData const* data = sObjectMgr.GetGOData(transGUID))
+            guid = ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, transGUID);
+        if (GenericTransport* transport = GetMap()->GetTransport(guid))
         {
-            if ((*iter)->GetGUIDLow() == transGUID)
-            {
-                m_transport = *iter;
-                m_transport->AddPassenger(this);
-                SetLocationMapId(m_transport->GetMapId());
-                break;
-            }
+            m_transport = transport;
+            transport->AddPassenger(this);
+            SetLocationMapId(m_transport->GetMapId());
+            transport->UpdatePassengerPosition(this);
         }
 
-        if (!m_transport)
+        if (!m_transport && guid.GetHigh() == HIGHGUID_MO_TRANSPORT)
         {
             sLog.outError("%s have problems with transport guid (%u). Teleport to default race/class locations.",
-                          guid.GetString().c_str(), transGUID);
+                guid.GetString().c_str(), transGUID);
 
             RelocateToHomebind();
 
             m_movementInfo.ClearTransportData();
 
-            transGUID = 0;
+            SetMap(sMapMgr.CreateMap(GetMapId(), this));
+            SaveRecallPosition();                           // save as recall also to prevent recall and fall from sky
         }
     }
 
     // player bounded instance saves loaded in _LoadBoundInstances, group versions at group loading
     DungeonPersistentState* state = GetBoundInstanceSaveForSelfOrGroup(GetMapId());
-
-    // load the player's map here if it's not already loaded
-    SetMap(sMapMgr.CreateMap(GetMapId(), this));
 
     time_t now = time(nullptr);
     time_t logoutTime = time_t(fields[22].GetUInt64());
@@ -19449,6 +19450,7 @@ Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
             if ((typemask & TYPEMASK_PLAYER) && IsInWorld())
                 return ObjectAccessor::FindPlayer(guid);
             break;
+        case HIGHGUID_TRANSPORT:
         case HIGHGUID_GAMEOBJECT:
             if ((typemask & TYPEMASK_GAMEOBJECT) && IsInWorld())
                 return GetMap()->GetGameObject(guid);
@@ -19465,7 +19467,6 @@ Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
             if ((typemask & TYPEMASK_DYNAMICOBJECT) && IsInWorld())
                 return GetMap()->GetDynamicObject(guid);
             break;
-        case HIGHGUID_TRANSPORT:
         case HIGHGUID_CORPSE:
         case HIGHGUID_MO_TRANSPORT:
             break;

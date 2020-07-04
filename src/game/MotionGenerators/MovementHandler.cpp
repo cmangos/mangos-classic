@@ -550,15 +550,10 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
         {
             if (!plMover->m_transport)
             {
-                // elevators also cause the client to send MOVEFLAG_ONTRANSPORT - just unmount if the guid can be found in the transport list
-                for (MapManager::TransportSet::const_iterator iter = sMapMgr.m_Transports.begin(); iter != sMapMgr.m_Transports.end(); ++iter)
+                if (GenericTransport* transport = plMover->GetMap()->GetTransport(movementInfo.GetTransportGuid()))
                 {
-                    if ((*iter)->GetObjectGuid() == movementInfo.GetTransportGuid())
-                    {
-                        plMover->m_transport = (*iter);
-                        (*iter)->AddPassenger(plMover);
-                        break;
-                    }
+                    plMover->m_transport = transport;
+                    transport->AddPassenger(plMover);
                 }
             }
         }

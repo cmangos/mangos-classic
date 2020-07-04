@@ -44,7 +44,7 @@
 #include <G3D/Box.h>
 #include <G3D/CoordinateFrame.h>
 #include <G3D/Quat.h>
-#include "Maps/TransportMgr.h"
+#include "Entities/Transports.h"
 
 bool QuaternionData::isUnit() const
 {
@@ -100,6 +100,14 @@ GameObject::GameObject() : WorldObject(),
 GameObject::~GameObject()
 {
     delete m_model;
+}
+
+GameObject* GameObject::CreateGameObject(uint32 entry)
+{
+    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
+    if (goinfo && goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+        return new ElevatorTransport;
+    return new GameObject;
 }
 
 void GameObject::AddToWorld()
@@ -237,9 +245,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
             SetUInt32Value(GAMEOBJECT_LEVEL, goinfo->transport.pause);
             SetGoState(goinfo->transport.startOpen ? GO_STATE_ACTIVE : GO_STATE_READY);
             SetGoAnimProgress(animprogress);
-            m_pathProgress = 0;
-            m_animationInfo = sTransportMgr.GetTransportAnimInfo(goinfo->id);
-            m_currentSeg = 0;
             break;
         default:
             break;
@@ -461,48 +466,6 @@ void GameObject::Update(const uint32 diff)
                             if (target && (!goInfo->trapCustom.triggerOn || !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))) // do not trigger on hostile traps if not selectable
                                 Use(target);
                         }
-                    }
-                }
-                if (goInfo->type == GAMEOBJECT_TYPE_TRANSPORT)
-                {
-                    if (!m_animationInfo)
-                        break;
-
-                    if (GetGoState() == GO_STATE_READY)
-                    {
-                        m_pathProgress += diff;
-                        // TODO: Fix movement in unloaded grid - currently GO will just disappear
-                        uint32 timer = GetMap()->GetCurrentMSTime() % m_animationInfo->TotalTime;
-                        TransportAnimationEntry const* nodeNext = m_animationInfo->GetNextAnimNode(timer);
-                        TransportAnimationEntry const* nodePrev = m_animationInfo->GetPrevAnimNode(timer);
-                        if (nodeNext && nodePrev)
-                        {
-                            m_currentSeg = nodePrev->TimeSeg;
-
-                            G3D::Vector3 posPrev = G3D::Vector3(nodePrev->X, nodePrev->Y, nodePrev->Z);
-                            G3D::Vector3 posNext = G3D::Vector3(nodeNext->X, nodeNext->Y, nodeNext->Z);
-                            G3D::Vector3 currentPos;
-                            if (posPrev == posNext)
-                                currentPos = posPrev;
-                            else
-                            {
-                                uint32 timeElapsed = timer - nodePrev->TimeSeg;
-                                uint32 timeDiff = nodeNext->TimeSeg - nodePrev->TimeSeg;
-                                G3D::Vector3 segmentDiff = posNext - posPrev;
-                                float velocityX = float(segmentDiff.x) / timeDiff, velocityY = float(segmentDiff.y) / timeDiff, velocityZ = float(segmentDiff.z) / timeDiff;
-
-                                currentPos = G3D::Vector3(timeElapsed* velocityX, timeElapsed* velocityY, timeElapsed* velocityZ);
-                                currentPos += posPrev;
-                            }
-
-                            currentPos += G3D::Vector3(m_stationaryPosition.x, m_stationaryPosition.y, m_stationaryPosition.z);
-
-                            Relocate(currentPos.x, currentPos.y, currentPos.z, GetOrientation());
-                            UpdateModelPosition();
-
-                            // SummonCreature(1, currentPos.x, currentPos.y, currentPos.z, GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 5000);
-                        }
-
                     }
                 }
 
@@ -2081,7 +2044,9 @@ struct SpawnGameObjectInMapsWorker
         // Spawn if necessary (loaded grids only)
         if (map->IsLoaded(i_data->posX, i_data->posY))
         {
-            GameObject* pGameobject = new GameObject;
+            GameObjectData const* data = sObjectMgr.GetGOData(i_guid);
+            MANGOS_ASSERT(data);
+            GameObject* pGameobject = GameObject::CreateGameObject(data->id);
             // DEBUG_LOG("Spawning gameobject %u", *itr);
             if (!pGameobject->LoadFromDB(i_guid, map))
             {
