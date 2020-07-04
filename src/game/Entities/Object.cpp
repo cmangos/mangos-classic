@@ -24,6 +24,7 @@
 #include "World/World.h"
 #include "Entities/Creature.h"
 #include "Entities/Player.h"
+#include "Entities/GameObject.h"
 #include "Globals/ObjectMgr.h"
 #include "Entities/ObjectGuid.h"
 #include "Entities/UpdateData.h"
@@ -296,10 +297,22 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
     }
     else if (updateFlags & UPDATEFLAG_HAS_POSITION)
     {
-        *data << ((WorldObject*)this)->GetPositionX();
-        *data << ((WorldObject*)this)->GetPositionY();
-        *data << ((WorldObject*)this)->GetPositionZ();
-        *data << ((WorldObject*)this)->GetOrientation();
+        // 0x02
+        if (updateFlags & UPDATEFLAG_TRANSPORT)
+        {
+            GameObject const* go = static_cast<GameObject const*>(this);
+            *data << float(go->GetStationaryX());
+            *data << float(go->GetStationaryY());
+            *data << float(go->GetStationaryZ());
+            *data << float(go->GetStationaryO());
+        }
+        else
+        {
+            *data << float(((WorldObject*)this)->GetPositionX());
+            *data << float(((WorldObject*)this)->GetPositionY());
+            *data << float(((WorldObject*)this)->GetPositionZ());
+            *data << float(((WorldObject*)this)->GetOrientation());
+        }
     }
 
     if (updateFlags & UPDATEFLAG_HIGHGUID)
@@ -319,10 +332,10 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
     if (updateFlags & UPDATEFLAG_TRANSPORT)
     {
         GameObject const* go = static_cast<GameObject const*>(this);
-        if (go && go->IsTransport())
+        if (go && go->IsMoTransport())
             *data << uint32(static_cast<Transport const*>(go)->GetPathProgress());
         else
-            *data << uint32(WorldTimer::getMSTime());
+            *data << uint32(go->GetMap()->GetCurrentMSTime());
     }
 }
 

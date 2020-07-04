@@ -41,6 +41,26 @@
 #include "vmap/GameObjectModel.h"
 #include "Server/SQLStorages.h"
 #include "World/WorldState.h"
+#include <G3D/Box.h>
+#include <G3D/CoordinateFrame.h>
+#include <G3D/Quat.h>
+#include "Maps/TransportMgr.h"
+
+bool QuaternionData::isUnit() const
+{
+    return fabs(x * x + y * y + z * z + w * w - 1.0f) < 1e-5f;
+}
+
+void QuaternionData::toEulerAnglesZYX(float& Z, float& Y, float& X) const
+{
+    G3D::Matrix3(G3D::Quat(x, y, z, w)).toEulerAnglesZYX(Z, Y, X);
+}
+
+QuaternionData QuaternionData::fromEulerAnglesZYX(float Z, float Y, float X)
+{
+    G3D::Quat quat(G3D::Matrix3::fromEulerAnglesZYX(Z, Y, X));
+    return QuaternionData(quat.x, quat.y, quat.z, quat.w);
+}
 
 GameObject::GameObject() : WorldObject(),
     m_model(nullptr),
@@ -142,6 +162,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
     Relocate(x, y, z, ang);
     SetMap(map);
 
+    m_stationaryPosition = Position(x, y, z, ang);
+
     if (!IsPositionValid())
     {
         sLog.outError("Gameobject (GUID: %u Entry: %u ) not created. Suggested coordinates are invalid (X: %f Y: %f)", guidlow, name_id, x, y);
@@ -207,8 +229,17 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
                 GetVisibilityData().SetInvisibilityMask(INVISIBILITY_TRAP, true);
                 GetVisibilityData().AddInvisibilityValue(INVISIBILITY_TRAP, 300);
             }
+            // [[fallthrough]]
         case GAMEOBJECT_TYPE_FISHINGNODE:
             m_lootState = GO_NOT_READY;                     // Initialize Traps and Fishingnode delayed in ::Update
+            break;
+        case GAMEOBJECT_TYPE_TRANSPORT:
+            SetUInt32Value(GAMEOBJECT_LEVEL, goinfo->transport.pause);
+            SetGoState(goinfo->transport.startOpen ? GO_STATE_ACTIVE : GO_STATE_READY);
+            SetGoAnimProgress(animprogress);
+            m_pathProgress = 0;
+            m_animationInfo = sTransportMgr.GetTransportAnimInfo(goinfo->id);
+            m_currentSeg = 0;
             break;
         default:
             break;
@@ -432,9 +463,51 @@ void GameObject::Update(const uint32 diff)
                         }
                     }
                 }
+                if (goInfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+                {
+                    if (!m_animationInfo)
+                        break;
+
+                    if (GetGoState() == GO_STATE_READY)
+                    {
+                        m_pathProgress += diff;
+                        // TODO: Fix movement in unloaded grid - currently GO will just disappear
+                        uint32 timer = GetMap()->GetCurrentMSTime() % m_animationInfo->TotalTime;
+                        TransportAnimationEntry const* nodeNext = m_animationInfo->GetNextAnimNode(timer);
+                        TransportAnimationEntry const* nodePrev = m_animationInfo->GetPrevAnimNode(timer);
+                        if (nodeNext && nodePrev)
+                        {
+                            m_currentSeg = nodePrev->TimeSeg;
+
+                            G3D::Vector3 posPrev = G3D::Vector3(nodePrev->X, nodePrev->Y, nodePrev->Z);
+                            G3D::Vector3 posNext = G3D::Vector3(nodeNext->X, nodeNext->Y, nodeNext->Z);
+                            G3D::Vector3 currentPos;
+                            if (posPrev == posNext)
+                                currentPos = posPrev;
+                            else
+                            {
+                                uint32 timeElapsed = timer - nodePrev->TimeSeg;
+                                uint32 timeDiff = nodeNext->TimeSeg - nodePrev->TimeSeg;
+                                G3D::Vector3 segmentDiff = posNext - posPrev;
+                                float velocityX = float(segmentDiff.x) / timeDiff, velocityY = float(segmentDiff.y) / timeDiff, velocityZ = float(segmentDiff.z) / timeDiff;
+
+                                currentPos = G3D::Vector3(timeElapsed* velocityX, timeElapsed* velocityY, timeElapsed* velocityZ);
+                                currentPos += posPrev;
+                            }
+
+                            currentPos += G3D::Vector3(m_stationaryPosition.x, m_stationaryPosition.y, m_stationaryPosition.z);
+
+                            Relocate(currentPos.x, currentPos.y, currentPos.z, GetOrientation());
+                            UpdateModelPosition();
+
+                            // SummonCreature(1, currentPos.x, currentPos.y, currentPos.z, GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 5000);
+                        }
+
+                    }
+                }
 
                 int32 max_charges = goInfo->GetCharges();   // Only check usable (positive) charges; 0 : no charge; -1 : infinite charges
-                if (max_charges > 0 && m_useTimes >= max_charges)
+                if (max_charges > 0 && m_useTimes >= uint32(max_charges))
                 {
                     m_useTimes = 0;
                     SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
@@ -892,6 +965,13 @@ bool GameObject::IsTransport() const
     return gInfo->type == GAMEOBJECT_TYPE_TRANSPORT || gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT;
 }
 
+bool GameObject::IsMoTransport() const
+{
+    GameObjectInfo const* gInfo = GetGOInfo();
+    if (!gInfo) return false;
+    return gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT;
+}
+
 void GameObject::SaveRespawnTime()
 {
     if (m_respawnTime > time(nullptr) && m_spawnedByDefault)
@@ -905,7 +985,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         return false;
 
     // Transport always visible at this step implementation
-    if (IsTransport() && IsInMap(u))
+    if (IsMoTransport() && IsInMap(u))
         return true;
 
     // quick check visibility false cases for non-GM-mode
@@ -2322,4 +2402,26 @@ uint32 GameObject::GetScriptId() const
 void GameObject::AIM_Initialize()
 {
     m_AI.reset(sScriptDevAIMgr.GetGameObjectAI(this));
+}
+
+QuaternionData GameObject::GetWorldRotation() const
+{
+    QuaternionData localRotation = GetLocalRotation();
+    //if (Transport * transport = GetTransport()) - for wotlk
+    //{
+    //    QuaternionData worldRotation = transport->GetWorldRotation();
+
+    //    G3D::Quat worldRotationQuat(worldRotation.x, worldRotation.y, worldRotation.z, worldRotation.w);
+    //    G3D::Quat localRotationQuat(localRotation.x, localRotation.y, localRotation.z, localRotation.w);
+
+    //    G3D::Quat resultRotation = localRotationQuat * worldRotationQuat;
+
+    //    return QuaternionData(resultRotation.x, resultRotation.y, resultRotation.z, resultRotation.w);
+    //}
+    return localRotation;
+}
+
+const QuaternionData GameObject::GetLocalRotation() const
+{
+    return QuaternionData(GetFloatValue(GAMEOBJECT_ROTATION), GetFloatValue(GAMEOBJECT_ROTATION + 1), GetFloatValue(GAMEOBJECT_ROTATION + 2), GetFloatValue(GAMEOBJECT_ROTATION + 3));
 }
