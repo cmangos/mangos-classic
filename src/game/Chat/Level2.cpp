@@ -49,6 +49,7 @@
 #include "MotionGenerators/MoveMap.h"                       // for mmap manager
 #include "MotionGenerators/PathFinder.h"                    // for mmap commands
 #include "Movement/MoveSplineInit.h"
+#include "Entities/Transports.h"
 
 #include <fstream>
 #include <map>
@@ -4588,16 +4589,27 @@ bool ChatHandler::HandleWaterwalkCommand(char* args)
 
 bool ChatHandler::HandleMmapPathCommand(char* args)
 {
-    if (!MMAP::MMapFactory::createOrGetMMapManager()->GetNavMesh(m_session->GetPlayer()->GetMapId()))
+    Player* player = m_session->GetPlayer();
+    if (GenericTransport* transport = player->GetTransport())
     {
-        PSendSysMessage("NavMesh not loaded for current map.");
-        return true;
+        if (!MMAP::MMapFactory::createOrGetMMapManager()->GetGONavMesh(transport->GetDisplayId()))
+        {
+            PSendSysMessage("NavMesh not loaded for current map.");
+            return true;
+        }
+    }
+    else
+    {
+        if (!MMAP::MMapFactory::createOrGetMMapManager()->GetNavMesh(m_session->GetPlayer()->GetMapId()))
+        {
+            PSendSysMessage("NavMesh not loaded for current map.");
+            return true;
+        }
     }
 
     PSendSysMessage("mmap path:");
 
     // units
-    Player* player = m_session->GetPlayer();
     Unit* target = getSelectedUnit();
     if (!player || !target)
     {

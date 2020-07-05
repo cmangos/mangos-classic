@@ -49,6 +49,7 @@ namespace MMAP
         void debugWrite(FILE* file, const rcPolyMeshDetail* mesh);
 
         void generateObjFile(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData);
+        void generateObjFile(std::string filename, MeshData& meshData);
     };
 }
 #endif

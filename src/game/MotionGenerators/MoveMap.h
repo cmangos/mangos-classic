@@ -42,6 +42,7 @@ namespace MMAP
 {
     typedef std::unordered_map<uint32, dtTileRef> MMapTileSet;
     typedef std::unordered_map<uint32, dtNavMeshQuery*> NavMeshQuerySet;
+    typedef std::unordered_map<std::thread::id, dtNavMeshQuery*> NavMeshGOQuerySet;
 
     // dummy struct to hold map's mmap data
     struct MMapData
@@ -63,6 +64,24 @@ namespace MMAP
         MMapTileSet mmapLoadedTiles;        // maps [map grid coords] to [dtTile]
     };
 
+    struct MMapGOData
+    {
+        MMapGOData(dtNavMesh* mesh) : navMesh(mesh) {}
+        ~MMapGOData()
+        {
+            for (auto& navMeshQuerie : navMeshGOQueries)
+                dtFreeNavMeshQuery(navMeshQuerie.second);
+
+            if (navMesh)
+                dtFreeNavMesh(navMesh);
+        }
+
+        dtNavMesh* navMesh;
+
+        // we have to use single dtNavMeshQuery for every instance, since those are not thread safe
+        NavMeshGOQuerySet navMeshGOQueries;  // instanceId to query
+    };
+
 
     typedef std::unordered_map<uint32, MMapData*> MMapDataSet;
 
@@ -75,6 +94,7 @@ namespace MMAP
             ~MMapManager();
 
             bool loadMap(uint32 mapId, int32 x, int32 y);
+            bool loadGameObject(uint32 displayId);
             bool unloadMap(uint32 mapId, int32 x, int32 y);
             bool unloadMap(uint32 mapId);
             bool unloadMapInstance(uint32 mapId, uint32 instanceId);
@@ -82,7 +102,9 @@ namespace MMAP
 
             // the returned [dtNavMeshQuery const*] is NOT threadsafe
             dtNavMeshQuery const* GetNavMeshQuery(uint32 mapId, uint32 instanceId);
+            dtNavMeshQuery const* GetModelNavMeshQuery(uint32 displayId);
             dtNavMesh const* GetNavMesh(uint32 mapId);
+            dtNavMesh const* GetGONavMesh(uint32 displayId);
 
             uint32 getLoadedTilesCount() const { return loadedTiles; }
             uint32 getLoadedMapsCount() const { return loadedMMaps.size(); }
@@ -92,6 +114,9 @@ namespace MMAP
 
             MMapDataSet loadedMMaps;
             uint32 loadedTiles;
+
+            std::unordered_map<uint32, MMapGOData*> m_loadedModels;
+            std::mutex m_modelsMutex;
     };
 
     // static class

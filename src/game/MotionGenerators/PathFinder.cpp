@@ -40,7 +40,13 @@ PathFinder::PathFinder(const Unit* owner) :
     if (MMAP::MMapFactory::IsPathfindingEnabled(m_sourceUnit->GetMapId(), m_sourceUnit))
     {
         MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
-        m_defaultNavMeshQuery = mmap->GetNavMeshQuery(m_sourceUnit->GetMapId(), m_sourceUnit->GetInstanceId());
+        if (GenericTransport* transport = owner->GetTransport())
+            m_navMeshQuery = mmap->GetModelNavMeshQuery(transport->GetDisplayId());
+        else
+            m_navMeshQuery = mmap->GetNavMeshQuery(m_sourceUnit->GetMapId(), m_sourceUnit->GetInstanceId());
+
+        if (m_navMeshQuery)
+            m_navMesh = m_navMeshQuery->getAttachedNavMesh();
     }
 
     createFilter();

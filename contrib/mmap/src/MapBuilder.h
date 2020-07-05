@@ -94,6 +94,10 @@ namespace MMAP
             // builds list of maps, then builds all of mmap tiles (based on the skip settings)
             void buildAllMaps();
 
+            // builds all GO models needed for pathfinding
+            void buildGameObject(std::string modelName, uint32 displayId);
+            void buildTransports();
+
         private:
             // detect maps and tiles
             void discoverTiles();

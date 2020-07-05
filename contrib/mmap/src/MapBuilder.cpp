@@ -170,6 +170,279 @@ namespace MMAP
         }
     }
 
+    void MapBuilder::buildGameObject(std::string modelName, uint32 displayId)
+    {
+        printf("Building GameObject model %s\n", modelName.c_str());
+        WorldModel m;
+        MeshData meshData;
+        if (!m.readFile("vmaps/" + modelName))
+        {
+            printf("* Unable to open file\n");
+            return;
+        }
+
+        // Load model data into navmesh
+        vector<GroupModel> groupModels;
+        m.getGroupModels(groupModels);
+
+        // all M2s need to have triangle indices reversed
+        bool isM2 = modelName.find(".m2") != modelName.npos || modelName.find(".M2") != modelName.npos;
+
+        for (vector<GroupModel>::iterator it = groupModels.begin(); it != groupModels.end(); ++it)
+        {
+            // transform data
+            vector<Vector3> tempVertices;
+            vector<MeshTriangle> tempTriangles;
+            WmoLiquid* liquid = nullptr;
+
+            (*it).getMeshData(tempVertices, tempTriangles, liquid);
+
+            int offset = meshData.solidVerts.size() / 3;
+
+            TerrainBuilder::copyVertices(tempVertices, meshData.solidVerts);
+            TerrainBuilder::copyIndices(tempTriangles, meshData.solidTris, offset, isM2);
+        }
+        // if there is no data, give up now
+        if (!meshData.solidVerts.size())
+        {
+            printf("* no solid vertices found\n");
+            return;
+        }
+        TerrainBuilder::cleanVertices(meshData.solidVerts, meshData.solidTris);
+
+        // gather all mesh data for final data check, and bounds calculation
+        G3D::Array<float> allVerts;
+        allVerts.append(meshData.solidVerts);
+
+        if (!allVerts.size())
+            return;
+
+        printf("* Model opened (%u vertices)\n", allVerts.size());
+
+        float* verts = meshData.solidVerts.getCArray();
+        int nverts = meshData.solidVerts.size() / 3;
+        int* tris = meshData.solidTris.getCArray();
+        int ntris = meshData.solidTris.size() / 3;
+
+        // get bounds of current tile
+        rcConfig config;
+        memset(&config, 0, sizeof(rcConfig));
+        config = getDefaultConfig();
+
+        // this sets the dimensions of the heightfield - should maybe happen before border padding
+        rcCalcBounds(verts, nverts, config.bmin, config.bmax);
+        rcCalcGridSize(config.bmin, config.bmax, config.cs, &config.width, &config.height);
+
+        Tile tile;
+        tile.solid = rcAllocHeightfield();
+        if (!tile.solid || !rcCreateHeightfield(m_rcContext, *tile.solid, config.width, config.height, config.bmin, config.bmax, config.cs, config.ch))
+        {
+            printf("* Failed building heightfield!            \n");
+            return;
+        }
+        unsigned char* m_triareas = new unsigned char[ntris];
+        memset(m_triareas, 0, ntris * sizeof(unsigned char));
+        rcMarkWalkableTriangles(m_rcContext, config.walkableSlopeAngle, verts, nverts, tris, ntris, m_triareas);
+        rcRasterizeTriangles(m_rcContext, verts, nverts, tris, m_triareas, ntris, *tile.solid, config.walkableClimb);
+        rcFilterLowHangingWalkableObstacles(m_rcContext, config.walkableClimb, *tile.solid);
+        rcFilterLedgeSpans(m_rcContext, config.walkableHeight, config.walkableClimb, *tile.solid);
+        rcFilterWalkableLowHeightSpans(m_rcContext, config.walkableHeight, *tile.solid);
+        tile.chf = rcAllocCompactHeightfield();
+
+        if (!tile.chf || !rcBuildCompactHeightfield(m_rcContext, config.walkableHeight, config.walkableClimb, *tile.solid, *tile.chf))
+        {
+            printf("Failed compacting heightfield!            \n");
+            return;
+        }
+
+        // Erode the walkable area by agent radius.
+        if (!rcErodeWalkableArea(m_rcContext, config.walkableRadius, *tile.chf))
+        {
+            printf("Failed eroding heightfield!            \n");
+            return;
+        }
+
+        if (!rcMedianFilterWalkableArea(m_rcContext, *tile.chf))
+        {
+            printf("%s Failed filtering area!              \n");
+            return;
+        }
+
+        if (!rcBuildDistanceField(m_rcContext, *tile.chf))
+        {
+            printf("Failed building distance field!         \n");
+            return;
+        }
+
+        if (!rcBuildRegions(m_rcContext, *tile.chf, 0, config.minRegionArea, config.mergeRegionArea))
+        {
+            printf("Failed building regions!                \n");
+            return;
+        }
+
+        tile.cset = rcAllocContourSet();
+        if (!tile.cset || !rcBuildContours(m_rcContext, *tile.chf, config.maxSimplificationError, config.maxEdgeLen, *tile.cset))
+        {
+            printf("Failed building contours!               \n");
+            return;
+        }
+
+        // build polymesh
+        tile.pmesh = rcAllocPolyMesh();
+        if (!tile.pmesh || !rcBuildPolyMesh(m_rcContext, *tile.cset, config.maxVertsPerPoly, *tile.pmesh))
+        {
+            printf("Failed building polymesh!               \n");
+            return;
+        }
+
+        tile.dmesh = rcAllocPolyMeshDetail();
+        if (!tile.dmesh || !rcBuildPolyMeshDetail(m_rcContext, *tile.pmesh, *tile.chf, config.detailSampleDist, config.detailSampleMaxError, *tile.dmesh))
+        {
+            printf("Failed building polymesh detail!        \n");
+            return;
+        }
+
+        rcFreeHeightField(tile.solid);
+        tile.solid = nullptr;
+        rcFreeCompactHeightfield(tile.chf);
+        tile.chf = nullptr;
+        rcFreeContourSet(tile.cset);
+        tile.cset = nullptr;
+
+        IntermediateValues iv;
+        iv.polyMesh = tile.pmesh;
+        iv.polyMeshDetail = tile.dmesh;
+        for (int i = 0; i < iv.polyMesh->npolys; ++i)
+        {
+            if (iv.polyMesh->areas[i] == RC_WALKABLE_AREA)
+            {
+                iv.polyMesh->areas[i] = 0; // =SAMPLE_POLYAREA_GROUND in RecastDemo
+                iv.polyMesh->flags[i] = NAV_GROUND;
+            }
+            else
+            {
+                iv.polyMesh->areas[i] = 0;
+                iv.polyMesh->flags[i] = 0;
+            }
+        }
+
+        // Will be deleted by IntermediateValues
+        tile.pmesh = nullptr;
+        tile.dmesh = nullptr;
+        // setup mesh parameters
+        dtNavMeshCreateParams params;
+        memset(&params, 0, sizeof(params));
+        params.verts = iv.polyMesh->verts;
+        params.vertCount = iv.polyMesh->nverts;
+        params.polys = iv.polyMesh->polys;
+        params.polyAreas = iv.polyMesh->areas;
+        params.polyFlags = iv.polyMesh->flags;
+        params.polyCount = iv.polyMesh->npolys;
+        params.nvp = iv.polyMesh->nvp;
+        params.detailMeshes = iv.polyMeshDetail->meshes;
+        params.detailVerts = iv.polyMeshDetail->verts;
+        params.detailVertsCount = iv.polyMeshDetail->nverts;
+        params.detailTris = iv.polyMeshDetail->tris;
+        params.detailTriCount = iv.polyMeshDetail->ntris;
+
+        params.walkableHeight = BASE_UNIT_DIM * config.walkableHeight;
+        params.walkableRadius = BASE_UNIT_DIM * config.walkableRadius;
+        params.walkableClimb = BASE_UNIT_DIM * config.walkableClimb;
+
+        rcVcopy(params.bmin, iv.polyMesh->bmin);
+        rcVcopy(params.bmax, iv.polyMesh->bmax);
+        params.cs = config.cs;
+        params.ch = config.ch;
+        params.buildBvTree = true;
+
+        unsigned char* navData = nullptr;
+        int navDataSize = 0;
+        printf("* Building navmesh tile [%f %f %f to %f %f %f]\n",
+            params.bmin[0], params.bmin[1], params.bmin[2],
+            params.bmax[0], params.bmax[1], params.bmax[2]);
+        printf(" %u triangles (%u vertices)\n", params.polyCount, params.vertCount);
+        printf(" %u polygons (%u vertices)\n", params.detailTriCount, params.detailVertsCount);
+        if (params.nvp > DT_VERTS_PER_POLYGON)
+        {
+            printf("Invalid verts-per-polygon value!        \n");
+            return;
+        }
+        if (params.vertCount >= 0xffff)
+        {
+            printf("Too many vertices! (0x%8x)        \n", params.vertCount);
+            return;
+        }
+        if (!params.vertCount || !params.verts)
+        {
+            printf("No vertices to build tile!              \n");
+            return;
+        }
+        if (!params.polyCount || !params.polys)
+        {
+            // we have flat tiles with no actual geometry - don't build those, its useless
+            // keep in mind that we do output those into debug info
+            // drop tiles with only exact count - some tiles may have geometry while having less tiles
+            printf("No polygons to build on tile!              \n");
+            return;
+        }
+        if (!params.detailMeshes || !params.detailVerts || !params.detailTris)
+        {
+            printf("No detail mesh to build tile!           \n");
+            return;
+        }
+        if (!dtCreateNavMeshData(&params, &navData, &navDataSize))
+        {
+            printf("Failed building navmesh tile!           \n");
+            return;
+        }
+        char fileName[255];
+        sprintf(fileName, "mmaps/go%4u.mmap", displayId);
+        FILE* file = fopen(fileName, "wb");
+        if (!file)
+        {
+            char message[1024];
+            sprintf(message, "Failed to open %s for writing!\n", fileName);
+            perror(message);
+            return;
+        }
+
+        printf("* Writing to file \"%s\" [size=%u]\n", fileName, navDataSize);
+
+        // write header
+        MmapTileHeader header;
+        header.usesLiquids = false;
+        header.size = uint32(navDataSize);
+        fwrite(&header, sizeof(MmapTileHeader), 1, file);
+
+        // write data
+        fwrite(navData, sizeof(unsigned char), navDataSize, file);
+        fclose(file);
+        if (m_debug)
+        {
+            iv.generateObjFile(modelName, meshData);
+            // Write navmesh data
+            std::string fname = "meshes/" + modelName + ".nav";
+            FILE* file = fopen(fname.c_str(), "wb");
+            if (file)
+            {
+                fwrite(&navDataSize, sizeof(uint32), 1, file);
+                fwrite(navData, sizeof(unsigned char), navDataSize, file);
+                fclose(file);
+            }
+        }
+    }
+
+    void MapBuilder::buildTransports()
+    {
+        // List of MO Transport gameobjects
+        buildGameObject("Transportship.wmo.vmo", 3015);
+        buildGameObject("Transport_Zeppelin.wmo.vmo", 3031);
+        buildGameObject("Transportship_Ne.wmo.vmo", 7087);
+        // List of Transport gameobjects
+        buildGameObject("Elevatorcar.m2.vmo", 360);
+        buildGameObject("Subwaycar.m2.vmo", 3831);
+    }
+
     /**************************************************************************/
     void MapBuilder::getGridBounds(uint32 mapID, uint32& minX, uint32& minY, uint32& maxX, uint32& maxY)
     {
@@ -537,11 +810,11 @@ namespace MMAP
                 // we may want to keep them in the future for debug
                 // but right now, we don't have the code to merge them
                 rcFreeHeightField(tile.solid);
-                tile.solid = NULL;
+                tile.solid = nullptr;
                 rcFreeCompactHeightfield(tile.chf);
-                tile.chf = NULL;
+                tile.chf = nullptr;
                 rcFreeContourSet(tile.cset);
-                tile.cset = NULL;
+                tile.cset = nullptr;
             }
         }
 

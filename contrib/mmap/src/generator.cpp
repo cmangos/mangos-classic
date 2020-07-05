@@ -229,7 +229,10 @@ int main(int argc, char** argv)
     else if (mapId >= 0)
         builder.buildMap(uint32(mapId));
     else
+    {
         builder.buildAllMaps();
+        builder.buildTransports();
+    }
 
     return silent ? 1 : finish("Movemap build is complete!", 1);
 }
