@@ -512,6 +512,18 @@ bool GenericTransport::AddPassenger(Unit* passenger)
     {
         DETAIL_LOG("Unit %s boarded transport %s.", passenger->GetName(), GetName());
         m_passengers.insert(passenger);
+        passenger->SetTransport(this);
+        passenger->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
+        passenger->m_movementInfo.t_guid = GetObjectGuid();
+        passenger->m_movementInfo.t_time = GetPathProgress();
+        if (!passenger->m_movementInfo.t_pos.x)
+        {
+            passenger->m_movementInfo.t_pos.x = passenger->GetPositionX();
+            passenger->m_movementInfo.t_pos.y = passenger->GetPositionY();
+            passenger->m_movementInfo.t_pos.z = passenger->GetPositionZ();
+            passenger->m_movementInfo.t_pos.o = passenger->GetOrientation();
+            CalculatePassengerOffset(passenger->m_movementInfo.t_pos.x, passenger->m_movementInfo.t_pos.y, passenger->m_movementInfo.t_pos.z, &passenger->m_movementInfo.t_pos.o);
+        }
     }
     return true;
 }
@@ -519,7 +531,10 @@ bool GenericTransport::AddPassenger(Unit* passenger)
 bool GenericTransport::RemovePassenger(Unit* passenger)
 {
     if (m_passengers.erase(passenger))
+    {
         DETAIL_LOG("Unit %s removed from transport %s.", passenger->GetName(), GetName());
+        passenger->SetTransport(nullptr);
+    }
     return true;
 }
 
@@ -665,8 +680,11 @@ void ElevatorTransport::Update(const uint32 diff)
 
             currentPos += G3D::Vector3(m_stationaryPosition.x, m_stationaryPosition.y, m_stationaryPosition.z);
 
-            UpdatePosition(currentPos.x, currentPos.y, currentPos.z, GetOrientation());
-            SummonCreature(1, currentPos.x, currentPos.y, currentPos.z, GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 5000);
+            GetMap()->GameObjectRelocation(this, currentPos.x, currentPos.y, currentPos.z, GetOrientation());
+            // SummonCreature(1, currentPos.x, currentPos.y, currentPos.z, GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 5000);
+            UpdateModelPosition();
+
+            UpdatePassengerPositions(GetPassengers());
         }
 
     }
@@ -720,7 +738,10 @@ void GenericTransport::UpdatePassengerPosition(WorldObject* passenger)
         case TYPEID_UNIT:
         {
             Creature* creature = dynamic_cast<Creature*>(passenger);
-            GetMap()->CreatureRelocation(creature, x, y, z, o);
+            if (passenger->IsInWorld())
+                GetMap()->CreatureRelocation(creature, x, y, z, o);
+            else
+                passenger->Relocate(x, y, z, o);
             creature->m_movementInfo.t_time = GetPathProgress();
             break;
         }

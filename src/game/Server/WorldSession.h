@@ -701,6 +701,11 @@ class WorldSession
 
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
+#define MOVEMENT_PACKET_TIME_DELAY 0
+
+        // Movement
+        void SynchronizeMovement(MovementInfo& movementInfo);
+
         std::deque<uint32> GetOpcodeHistory();
 
         Messager<WorldSession>& GetMessager() { return m_messager; }

@@ -228,6 +228,7 @@ namespace MMAP
         rcConfig config;
         memset(&config, 0, sizeof(rcConfig));
         config = getDefaultConfig();
+        config.detailSampleDist = config.cs * 6.0f;
 
         // this sets the dimensions of the heightfield - should maybe happen before border padding
         rcCalcBounds(tVerts, tVertCount, config.bmin, config.bmax);
@@ -240,18 +241,8 @@ namespace MMAP
         iv.polyMesh = tile.pmesh;
         iv.polyMeshDetail = tile.dmesh;
         for (int i = 0; i < iv.polyMesh->npolys; ++i)
-        {
-            if (iv.polyMesh->areas[i] == RC_WALKABLE_AREA)
-            {
-                iv.polyMesh->areas[i] = 0; // =SAMPLE_POLYAREA_GROUND in RecastDemo
-                iv.polyMesh->flags[i] = NAV_GROUND;
-            }
-            else
-            {
-                iv.polyMesh->areas[i] = 0;
-                iv.polyMesh->flags[i] = 0;
-            }
-        }
+            if (iv.polyMesh->areas[i] & RC_WALKABLE_AREA)
+                iv.polyMesh->flags[i] = iv.polyMesh->areas[i];
 
         // Will be deleted by IntermediateValues
         tile.pmesh = nullptr;
@@ -322,8 +313,44 @@ namespace MMAP
             printf("Failed building navmesh tile!           \n");
             return;
         }
+
+        // TODO: extract additional data that will enable RecastDemo viewing of transport mmaps
+        // navmesh creation params
+        //dtNavMeshParams navMeshParams;
+        //memset(&navMeshParams, 0, sizeof(dtNavMeshParams));
+        //navMeshParams.tileWidth = GRID_SIZE;
+        //navMeshParams.tileHeight = GRID_SIZE;
+        //rcVcopy(navMeshParams.orig, config.bmin);
+        //navMeshParams.maxTiles = 1;
+        //navMeshParams.maxPolys = 1 << DT_POLY_BITS;
+
+        //dtNavMesh* navMesh = nullptr;
+        //navMesh = dtAllocNavMesh();
+        //printf("[Map %03i] Creating navMesh...                        \r", displayId);
+        //if (!navMesh->init(&navMeshParams))
+        //{
+        //    printf("[Map %03i] Failed creating navmesh!                   \n", displayId);
+        //    return;
+        //}
+
+        //sprintf(fileName, "mmaps/%03u.mmap", displayId);
+
+        //FILE* file = fopen(fileName, "wb");
+        //if (!file)
+        //{
+        //    dtFreeNavMesh(navMesh);
+        //    char message[1024];
+        //    sprintf(message, "[Map %03i] Failed to open %s for writing!             \n", displayId, fileName);
+        //    perror(message);
+        //    return;
+        //}
+
+        //// now that we know navMesh params are valid, we can write them to file
+        //fwrite(&navMeshParams, sizeof(dtNavMeshParams), 1, file);
+        //fclose(file);
+
         char fileName[255];
-        sprintf(fileName, "mmaps/go%4u.mmap", displayId);
+        sprintf(fileName, "mmaps/go%04u.mmtile", displayId);
         FILE* file = fopen(fileName, "wb");
         if (!file)
         {
@@ -452,7 +479,7 @@ namespace MMAP
             return;
 
         // build navMesh
-        dtNavMesh* navMesh = NULL;
+        dtNavMesh* navMesh = nullptr;
         buildNavMesh(mapID, navMesh);
         if (!navMesh)
         {

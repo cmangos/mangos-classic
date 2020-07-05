@@ -104,9 +104,9 @@ class GenericTransport : public GameObject
         static void CalculatePassengerOffset(float& x, float& y, float& z, float* o, float transX, float transY, float transZ, float transO);
 
         virtual uint32 GetPathProgress() const = 0;
-    private:
+    protected:
         void UpdatePassengerPositions(PassengerSet& passengers);
-
+    private:
         PassengerSet m_passengers;
 };
 

@@ -40,13 +40,7 @@ PathFinder::PathFinder(const Unit* owner) :
     if (MMAP::MMapFactory::IsPathfindingEnabled(m_sourceUnit->GetMapId(), m_sourceUnit))
     {
         MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
-        if (GenericTransport* transport = owner->GetTransport())
-            m_navMeshQuery = mmap->GetModelNavMeshQuery(transport->GetDisplayId());
-        else
-            m_navMeshQuery = mmap->GetNavMeshQuery(m_sourceUnit->GetMapId(), m_sourceUnit->GetInstanceId());
-
-        if (m_navMeshQuery)
-            m_navMesh = m_navMeshQuery->getAttachedNavMesh();
+        m_defaultNavMeshQuery = mmap->GetNavMeshQuery(m_sourceUnit->GetMapId(), m_sourceUnit->GetInstanceId());
     }
 
     createFilter();
@@ -75,9 +69,9 @@ void PathFinder::SetCurrentNavMesh()
 bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest/* = false*/, bool straightLine/* = false*/)
 {
     float x, y, z;
-    m_sourceUnit->GetPosition(x, y, z);
-    Vector3 dest(destX, destY, destZ);
-    return calculate(Vector3(x, y, z), dest, forceDest, straightLine);
+    m_sourceUnit->GetPosition(x, y, z, m_sourceUnit->GetTransport());
+
+    return calculate(Vector3(x, y, z), Vector3(destX, destY, destZ), forceDest, straightLine);
 }
 
 bool PathFinder::calculate(const Vector3& start, Vector3& dest, bool forceDest/* = false*/, bool straightLine/* = false*/)
@@ -780,6 +774,9 @@ NavTerrain PathFinder::getNavTerrain(float x, float y, float z) const
 
 bool PathFinder::HaveTile(const Vector3& p) const
 {
+    if (m_sourceUnit->GetTransport())
+        return true;
+
     int tx = -1, ty = -1;
     float point[VERTEX_SIZE] = {p.y, p.z, p.x};
 

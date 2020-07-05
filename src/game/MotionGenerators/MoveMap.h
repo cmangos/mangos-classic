@@ -94,6 +94,7 @@ namespace MMAP
             ~MMapManager();
 
             bool loadMap(uint32 mapId, int32 x, int32 y);
+            void loadAllGameObjectModels(std::vector<uint32> const& displayIds);
             bool loadGameObject(uint32 displayId);
             bool unloadMap(uint32 mapId, int32 x, int32 y);
             bool unloadMap(uint32 mapId);

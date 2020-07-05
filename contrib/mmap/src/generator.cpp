@@ -172,7 +172,7 @@ bool handleArgs(int argc, char** argv,
             int map = atoi(argv[i]);
             if (map > 0 || (map == 0 && (strcmp(argv[i], "0") == 0)))
                 mapId = map;
-            else
+            else if (!buildOnlyGameobjectModels)
             {
                 printf("invalid map id\n");
                 return false;
@@ -213,7 +213,7 @@ int main(int argc, char** argv)
     if (!validParam)
         return silent ? -1 : finish("You have specified invalid parameters (use -? for more help)", -1);
 
-    if (mapId == -1 && debug)
+    if (mapId == -1 && debug && !buildOnlyGameobjectModels)
     {
         if (silent)
             return -2;

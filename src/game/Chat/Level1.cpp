@@ -598,8 +598,10 @@ bool ChatHandler::HandleGonameCommand(char* args)
         // to point to see at target with same orientation
         float x, y, z;
         target->GetContactPoint(_player, x, y, z);
-
-        _player->TeleportTo(target->GetMapId(), x, y, z, _player->GetAngle(target), TELE_TO_GM_MODE);
+        
+        if (target->GetTransport())
+            _player->m_movementInfo.SetTransportData(target->m_movementInfo.t_guid, target->m_movementInfo.t_pos.x, target->m_movementInfo.t_pos.y, target->m_movementInfo.t_pos.z, target->m_movementInfo.t_pos.o, target->m_movementInfo.t_time);
+        _player->TeleportTo(target->GetMapId(), x, y, z, _player->GetAngle(target), TELE_TO_GM_MODE, nullptr, target->GetTransport());
     }
     else
     {

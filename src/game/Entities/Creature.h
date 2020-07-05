@@ -23,7 +23,6 @@
 #include "Entities/Unit.h"
 #include "Globals/SharedDefines.h"
 #include "Server/DBCEnums.h"
-#include "Grids/Cell.h"
 #include "Util.h"
 
 #include <list>
@@ -768,10 +767,6 @@ class Creature : public Unit
         MovementGeneratorType GetDefaultMovementType() const { return m_defaultMovementType; }
         void SetDefaultMovementType(MovementGeneratorType mgt) { m_defaultMovementType = mgt; }
 
-        // for use only in LoadHelper, Map::Add Map::CreatureCellRelocation
-        Cell const& GetCurrentCell() const { return m_currentCell; }
-        void SetCurrentCell(Cell const& cell) { m_currentCell = cell; }
-
         bool IsVisibleInGridForPlayer(Player* pl) const override;
 
         void RemoveCorpse(bool inPlace = false);
@@ -914,7 +909,6 @@ class Creature : public Unit
         void RegeneratePower();
         virtual void RegenerateHealth();
         MovementGeneratorType m_defaultMovementType;
-        Cell m_currentCell;                                 // store current cell where creature listed
         uint32 m_equipmentId;
 
         // below fields has potential for optimization

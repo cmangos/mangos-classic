@@ -97,6 +97,13 @@ template<class T> void addUnitState(T* /*obj*/, CellPair const& /*cell_pair*/)
 {
 }
 
+template<> void addUnitState(GameObject* obj, CellPair const& cell_pair)
+{
+    Cell cell(cell_pair);
+
+    obj->SetCurrentCell(cell);
+}
+
 template<> void addUnitState(Creature* obj, CellPair const& cell_pair)
 {
     Cell cell(cell_pair);

@@ -1032,6 +1032,13 @@ void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) cons
     SendPacket(data);
 }
 
+void WorldSession::SynchronizeMovement(MovementInfo& movementInfo)
+{
+    if (m_clientTimeDelay == 0)
+        m_clientTimeDelay = WorldTimer::getMSTime() - movementInfo.ctime;
+    movementInfo.stime = movementInfo.ctime + m_clientTimeDelay + MOVEMENT_PACKET_TIME_DELAY;
+}
+
 std::deque<uint32> WorldSession::GetOpcodeHistory()
 {
     if (m_Socket)

@@ -4658,7 +4658,7 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
 
     // unit locations
     float x, y, z;
-    destinationUnit->GetPosition(x, y, z);
+    destinationUnit->GetPosition(x, y, z, originUnit->GetTransport());
 
     // path
     PathFinder path(originUnit);

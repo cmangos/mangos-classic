@@ -243,7 +243,6 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 {
     Unit const* unit = nullptr;
     uint32 highGuid = 0;
-    MovementFlags moveflags = MOVEFLAG_NONE;
 
     switch (m_objectTypeId)
     {
@@ -265,7 +264,6 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 
         case TYPEID_UNIT:
             unit = static_cast<Unit const*>(this);
-            moveflags = unit->m_movementInfo.GetMovementFlags();
             break;
 
         default:
@@ -283,6 +281,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
             ((Unit*)this)->m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
         }
 
+        // Write movement info
         *data << unit->m_movementInfo;
         // Unit speeds
         *data << float(unit->GetSpeed(MOVE_WALK));
@@ -1038,7 +1037,7 @@ WorldObject::WorldObject() :
     m_currMap(nullptr), m_mapId(0),
     m_InstanceId(0), m_isActiveObject(false),
     m_visibilityData(this),
-    m_debugFlags(0)
+    m_debugFlags(0), m_transport(nullptr)
 {
 }
 
@@ -1756,6 +1755,22 @@ void WorldObject::AddObjectToRemoveList()
     GetMap()->AddObjectToRemoveList(this);
 }
 
+void WorldObject::GetPosition(float& x, float& y, float& z, GenericTransport* transport) const
+{
+    if (transport && m_movementInfo.t_guid == transport->GetObjectGuid())
+    {
+        x = m_movementInfo.t_pos.x;
+        y = m_movementInfo.t_pos.y;
+        z = m_movementInfo.t_pos.z;
+        return;
+    }
+    x = GetPositionX();
+    y = GetPositionY();
+    z = GetPositionZ();
+    if (transport)
+        transport->CalculatePassengerOffset(x, y, z);
+}
+
 Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
 {
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(settings.entry);
@@ -1767,7 +1782,14 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
 
     TemporarySpawn* creature = new TemporarySpawn(settings.spawner ? settings.spawner->GetObjectGuid() : ObjectGuid());
 
-    CreatureCreatePos pos(map, settings.x, settings.y, settings.z, settings.ori);
+    GenericTransport* transport = nullptr;
+    if (settings.spawner)
+        transport = settings.spawner->GetTransport();
+    float x = settings.x, y = settings.y, z = settings.z;
+    if (transport)
+        transport->CalculatePassengerPosition(x, y, z);
+
+    CreatureCreatePos pos(map, x, y, z, settings.ori);
 
     if (settings.x == 0.0f && settings.y == 0.0f && settings.z == 0.0f && settings.spawner)
     {
@@ -1782,6 +1804,13 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
     }
 
     creature->SetRespawnCoord(pos);
+    if (transport)
+    {
+        creature->m_movementInfo.t_pos.x = settings.x;
+        creature->m_movementInfo.t_pos.y = settings.y;
+        creature->m_movementInfo.t_pos.z = settings.z;
+        creature->m_movementInfo.t_pos.o = settings.ori;
+    }
 
     // Set run or walk before any other movement starts
     creature->SetWalk(!settings.setRun);
@@ -1799,6 +1828,15 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
         creature->SetSpawnCounting(true);
 
     creature->GetMotionMaster()->SetDefaultPathId(settings.pathId);
+
+    if (settings.spawner)
+    {
+        if (GenericTransport* transport = settings.spawner->GetTransport())
+        {
+            transport->AddPassenger(creature);
+            transport->UpdatePassengerPosition(creature);
+        }
+    }
 
     creature->Summon(settings.spawnType, settings.despawnTime);                  // Also initializes the AI and MMGen
     if (settings.corpseDespawnTime)

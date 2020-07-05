@@ -30,6 +30,7 @@
 #include "Entities/Camera.h"
 #include "Server/DBCStructure.h"
 #include "Entities/ObjectVisibility.h"
+#include "Grids/Cell.h"
 
 #include <set>
 
@@ -106,6 +107,7 @@ class Loot;
 struct ItemPrototype;
 class ChatHandler;
 struct SpellEntry;
+class GenericTransport;
 
 typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
@@ -657,6 +659,164 @@ struct TempSpawnSettings
     {}
 };
 
+enum UnitMoveType
+{
+    MOVE_WALK           = 0,
+    MOVE_RUN            = 1,
+    MOVE_RUN_BACK       = 2,
+    MOVE_SWIM           = 3,
+    MOVE_SWIM_BACK      = 4,
+    MOVE_TURN_RATE      = 5,
+};
+
+#define MAX_MOVE_TYPE     6
+
+// [-ZERO] Need check and update
+// used in most movement packets (send and received)
+enum MovementFlags
+{
+    MOVEFLAG_NONE               = 0x00000000,
+    MOVEFLAG_FORWARD            = 0x00000001,
+    MOVEFLAG_BACKWARD           = 0x00000002,
+    MOVEFLAG_STRAFE_LEFT        = 0x00000004,
+    MOVEFLAG_STRAFE_RIGHT       = 0x00000008,
+    MOVEFLAG_TURN_LEFT          = 0x00000010,
+    MOVEFLAG_TURN_RIGHT         = 0x00000020,
+    MOVEFLAG_PITCH_UP           = 0x00000040,
+    MOVEFLAG_PITCH_DOWN         = 0x00000080,
+    MOVEFLAG_WALK_MODE          = 0x00000100,               // Walking
+
+    MOVEFLAG_LEVITATING         = 0x00000400,
+    MOVEFLAG_FLYING             = 0x00000800,               // [-ZERO] is it really need and correct value
+    MOVEFLAG_FALLING            = 0x00002000,
+    MOVEFLAG_FALLINGFAR         = 0x00004000,
+    MOVEFLAG_SWIMMING           = 0x00200000,               // appears with fly flag also
+    MOVEFLAG_SPLINE_ENABLED     = 0x00400000,               // [-ZERO] is it really need and correct value
+    MOVEFLAG_CAN_FLY            = 0x00800000,               // [-ZERO] is it really need and correct value
+    MOVEFLAG_FLYING_OLD         = 0x01000000,               // [-ZERO] is it really need and correct value
+
+    MOVEFLAG_ONTRANSPORT        = 0x02000000,               // Used for flying on some creatures
+    MOVEFLAG_SPLINE_ELEVATION   = 0x04000000,               // used for flight paths
+    MOVEFLAG_ROOT               = 0x08000000,               // used for flight paths
+    MOVEFLAG_WATERWALKING       = 0x10000000,               // prevent unit from falling through water
+    MOVEFLAG_SAFE_FALL          = 0x20000000,               // active rogue safe fall spell (passive)
+    MOVEFLAG_HOVER              = 0x40000000,
+
+    MOVEFLAG_MASK_MOVING_FORWARD = MOVEFLAG_FORWARD | MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT | MOVEFLAG_FALLING,
+};
+
+// flags that use in movement check for example at spell casting
+MovementFlags const movementFlagsMask = MovementFlags(
+        MOVEFLAG_FORWARD | MOVEFLAG_BACKWARD  | MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT |
+        MOVEFLAG_PITCH_UP | MOVEFLAG_PITCH_DOWN | MOVEFLAG_FALLING |
+        MOVEFLAG_FALLINGFAR | MOVEFLAG_SPLINE_ELEVATION
+                                        );
+
+MovementFlags const movementOrTurningFlagsMask = MovementFlags(
+            movementFlagsMask | MOVEFLAG_TURN_LEFT | MOVEFLAG_TURN_RIGHT
+        );
+
+class MovementInfo
+{
+    public:
+        MovementInfo() : moveFlags(MOVEFLAG_NONE), ctime(0), stime(0),
+            t_time(0), s_pitch(0.0f), fallTime(0), u_unk1(0.0f) {}
+
+        // Read/Write methods
+        void Read(ByteBuffer& data);
+        void Write(ByteBuffer& data) const;
+
+        // Movement flags manipulations
+        void AddMovementFlag(MovementFlags f) { moveFlags |= f; }
+        void RemoveMovementFlag(MovementFlags f) { moveFlags &= ~f; }
+        bool HasMovementFlag(MovementFlags f) const { return (moveFlags & f) != 0; }
+        MovementFlags GetMovementFlags() const { return MovementFlags(moveFlags); }
+        void SetMovementFlags(MovementFlags f) { moveFlags = f; }
+
+        // Deduce speed type by current movement flags:
+        inline UnitMoveType GetSpeedType() const { return GetSpeedType(MovementFlags(moveFlags)); }
+        static inline UnitMoveType GetSpeedType(MovementFlags f)
+        {
+            if (f & MOVEFLAG_SWIMMING)
+                return (f & MOVEFLAG_BACKWARD ? MOVE_SWIM_BACK : MOVE_SWIM);
+            else if (f & MOVEFLAG_WALK_MODE)
+                return MOVE_WALK;
+            else if (f & MOVEFLAG_BACKWARD)
+                return MOVE_RUN_BACK;
+            return MOVE_RUN;
+        }
+
+        inline float GetOrientationInMotion(float o) const { return GetOrientationInMotion(MovementFlags(moveFlags), o); }
+        static float GetOrientationInMotion(MovementFlags flags, float orientation);
+
+        // Position manipulations
+        Position const* GetPos() const { return &pos; }
+        void SetTransportData(ObjectGuid guid, float x, float y, float z, float o, uint32 time)
+        {
+            t_guid = guid;
+            t_pos.x = x;
+            t_pos.y = y;
+            t_pos.z = z;
+            t_pos.o = o;
+            t_time = time;
+        }
+        void ClearTransportData()
+        {
+            t_guid = ObjectGuid();
+            t_pos.x = 0.0f;
+            t_pos.y = 0.0f;
+            t_pos.z = 0.0f;
+            t_pos.o = 0.0f;
+            t_time = 0;
+        }
+        ObjectGuid const& GetTransportGuid() const { return t_guid; }
+        Position const* GetTransportPos() const { return &t_pos; }
+        uint32 GetTransportTime() const { return t_time; }
+        uint32 GetFallTime() const { return fallTime; }
+        void ChangeOrientation(float o) { pos.o = o; }
+        void ChangePosition(float x, float y, float z, float o) { pos.x = x; pos.y = y; pos.z = z; pos.o = o; }
+
+        struct JumpInfo
+        {
+            JumpInfo() : velocity(0.f), sinAngle(0.f), cosAngle(0.f), xyspeed(0.f) {}
+            float   velocity, sinAngle, cosAngle, xyspeed;
+            Position start;
+            uint32 startClientTime;
+        };
+
+        JumpInfo const& GetJumpInfo() const { return jump; }
+
+        // common
+        uint32   moveFlags;                                 // see enum MovementFlags
+        uint32   ctime;     // client time
+        uint32   stime;     // server time
+        Position pos;
+        // transport
+        ObjectGuid t_guid;
+        Position t_pos;
+        uint32   t_time;
+        // swimming and unknown
+        float    s_pitch;
+        // last fall time
+        uint32   fallTime;
+        // jumping
+        JumpInfo jump;
+        // spline
+        float    u_unk1;
+};
+
+inline ByteBuffer& operator<< (ByteBuffer& buf, MovementInfo const& mi)
+{
+    mi.Write(buf);
+    return buf;
+}
+
+inline ByteBuffer& operator>> (ByteBuffer& buf, MovementInfo& mi)
+{
+    mi.Read(buf);
+    return buf;
+}
+
 class WorldObject : public Object
 {
         friend struct WorldObjectChangeAccumulator;
@@ -676,8 +836,8 @@ class WorldObject : public Object
         float GetPositionX() const { return m_position.x; }
         float GetPositionY() const { return m_position.y; }
         float GetPositionZ() const { return m_position.z; }
-        void GetPosition(float& x, float& y, float& z) const
-        { x = m_position.x; y = m_position.y; z = m_position.z; }
+        void GetPosition(float& x, float& y, float& z, GenericTransport* transport = nullptr) const;
+        
         void GetPosition(WorldLocation& loc) const
         { loc.mapid = m_mapId; GetPosition(loc.coord_x, loc.coord_y, loc.coord_z); loc.orientation = GetOrientation(); }
         Position const& GetPosition() const { return m_position; }
@@ -915,6 +1075,18 @@ class WorldObject : public Object
         void SetDebugFlag(CMDebugFlags flag) { m_debugFlags |= uint64(flag); }
         void ClearDebugFlag(CMDebugFlags flag) { m_debugFlags &= ~(uint64(flag)); }
 
+        // for use only in LoadHelper, Map::Add Map::CreatureCellRelocation
+        Cell const& GetCurrentCell() const { return m_currentCell; }
+        void SetCurrentCell(Cell const& cell) { m_currentCell = cell; }
+
+        // Transports
+        GenericTransport* GetTransport() const { return m_transport; }
+        void SetTransport(GenericTransport* t) { m_transport = t; }
+
+        // only needed for unit+ but put here due to hiding and wotlk
+        MovementInfo m_movementInfo;
+        GenericTransport* m_transport;
+
     protected:
         explicit WorldObject();
 
@@ -934,6 +1106,8 @@ class WorldObject : public Object
         CooldownContainer m_cooldownMap;
 
         std::string m_name;
+
+        Cell m_currentCell;                                 // store current cell where creature listed
 
         bool m_isOnEventNotified;
 
