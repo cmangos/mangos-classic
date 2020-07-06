@@ -79,6 +79,7 @@ typedef std::set<WorldObject*> PassengerSet;
 class GenericTransport : public GameObject
 {
     public:
+        GenericTransport() : m_passengerTeleportIterator(m_passengers.end()) {}
         bool AddPassenger(Unit* passenger);
         bool RemovePassenger(Unit* passenger);
 
@@ -106,8 +107,9 @@ class GenericTransport : public GameObject
         virtual uint32 GetPathProgress() const = 0;
     protected:
         void UpdatePassengerPositions(PassengerSet& passengers);
-    private:
+
         PassengerSet m_passengers;
+        PassengerSet::iterator m_passengerTeleportIterator;
 };
 
 class ElevatorTransport : public GenericTransport

@@ -1004,6 +1004,9 @@ void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& 
     static const MovementFlags detected = MovementFlags(MOVEFLAG_MASK_MOVING_FORWARD | MOVEFLAG_BACKWARD | MOVEFLAG_PITCH_UP | MOVEFLAG_PITCH_DOWN);
     static const MovementFlags ignored = MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR);
 
+    if (owner.GetTransport())
+        return;
+
     // Detect target movement and relocation (ignore jumping in place and long falls)
     const bool targetMovingLast = m_targetMoving;
     const bool targetIgnore = i_target->m_movementInfo.HasMovementFlag(ignored);

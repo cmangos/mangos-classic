@@ -56,10 +56,15 @@ void PathFinder::SetCurrentNavMesh()
     if (MMAP::MMapFactory::IsPathfindingEnabled(m_sourceUnit->GetMapId(), m_sourceUnit))
     {
         MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
-        if (m_defaultMapId != m_sourceUnit->GetMapId())
-            m_defaultNavMeshQuery = mmap->GetNavMeshQuery(m_sourceUnit->GetMapId(), m_sourceUnit->GetInstanceId());
+        if (GenericTransport* transport = m_sourceUnit->GetTransport())
+            m_navMeshQuery = mmap->GetModelNavMeshQuery(transport->GetDisplayId());
+        else
+        {
+            if (m_defaultMapId != m_sourceUnit->GetMapId())
+                m_defaultNavMeshQuery = mmap->GetNavMeshQuery(m_sourceUnit->GetMapId(), m_sourceUnit->GetInstanceId());
 
-        m_navMeshQuery = m_defaultNavMeshQuery;
+            m_navMeshQuery = m_defaultNavMeshQuery;
+        }
 
         if (m_navMeshQuery)
             m_navMesh = m_navMeshQuery->getAttachedNavMesh();

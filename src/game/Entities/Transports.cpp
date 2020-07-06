@@ -460,20 +460,12 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
     Relocate(x, y, z);
 
     auto& passengers = GetPassengers();
-    for (auto itr = passengers.begin(); itr != passengers.end();)
+    for (m_passengerTeleportIterator = passengers.begin(); m_passengerTeleportIterator != passengers.end();)
     {
-        auto it2 = itr;
-        ++itr;
-
-        WorldObject* obj = *it2;
-        if (!obj)
-        {
-            passengers.erase(it2);
-            continue;
-        }
+        WorldObject* obj = (*m_passengerTeleportIterator++);
 
         if (!obj->IsUnit())
-            return;
+            return; // should never happen on tbc
 
         Unit* passengerUnit = static_cast<Unit*>(obj);
 
@@ -484,12 +476,21 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
         destO = passengerUnit->GetTransOffsetO();
         CalculatePassengerPosition(destX, destY, destZ, &destO, x, y, z, o);
 
-        if (obj->IsPlayer())
+        switch (obj->GetTypeId())
         {
-            Player* player = static_cast<Player*>(obj);
-            if (player->IsDead() && !player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-                player->ResurrectPlayer(1.0);
-            player->TeleportTo(newMapid, destX, destY, destZ, destO, TELE_TO_NOT_LEAVE_TRANSPORT);
+            case TYPEID_UNIT:
+            {
+                RemovePassenger(passengerUnit);
+                break;
+            }
+            case TYPEID_PLAYER:
+            {
+                Player* player = static_cast<Player*>(obj);
+                if (player->IsDead() && !player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+                    player->ResurrectPlayer(1.0);
+                player->TeleportTo(newMapid, destX, destY, destZ, destO, TELE_TO_NOT_LEAVE_TRANSPORT);
+                break;
+            }
         }
     }
 
@@ -524,16 +525,45 @@ bool GenericTransport::AddPassenger(Unit* passenger)
             passenger->m_movementInfo.t_pos.o = passenger->GetOrientation();
             CalculatePassengerOffset(passenger->m_movementInfo.t_pos.x, passenger->m_movementInfo.t_pos.y, passenger->m_movementInfo.t_pos.z, &passenger->m_movementInfo.t_pos.o);
         }
+
+        if (Pet* pet =passenger->GetPet())
+        {
+            AddPassenger(pet);
+            pet->m_movementInfo.SetTransportData(GetObjectGuid(), passenger->m_movementInfo.t_pos.x, passenger->m_movementInfo.t_pos.y, passenger->m_movementInfo.t_pos.z, passenger->m_movementInfo.t_pos.o, GetPathProgress());
+            pet->NearTeleportTo(passenger->m_movementInfo.pos.x, passenger->m_movementInfo.pos.y, passenger->m_movementInfo.pos.z, passenger->m_movementInfo.pos.o);
+        }
     }
     return true;
 }
 
 bool GenericTransport::RemovePassenger(Unit* passenger)
 {
-    if (m_passengers.erase(passenger))
+    bool erased = false;
+    if (m_passengerTeleportIterator != m_passengers.end())
+    {
+        PassengerSet::iterator itr = m_passengers.find(passenger);
+        if (itr != m_passengers.end())
+        {
+            if (itr == m_passengerTeleportIterator)
+                ++m_passengerTeleportIterator;
+
+            m_passengers.erase(itr);
+            erased = true;
+        }
+    }
+    else
+        erased = m_passengers.erase(passenger) > 0;
+
+    if (erased)
     {
         DETAIL_LOG("Unit %s removed from transport %s.", passenger->GetName(), GetName());
         passenger->SetTransport(nullptr);
+        passenger->m_movementInfo.SetTransportData(ObjectGuid(), 0, 0, 0, 0, 0);
+        if (Pet* pet = passenger->GetPet())
+        {
+            RemovePassenger(pet);
+            pet->NearTeleportTo(passenger->m_movementInfo.pos.x, passenger->m_movementInfo.pos.y, passenger->m_movementInfo.pos.z, passenger->m_movementInfo.pos.o);
+        }
     }
     return true;
 }
