@@ -229,6 +229,7 @@ namespace MMAP
         memset(&config, 0, sizeof(rcConfig));
         config = getDefaultConfig();
         config.detailSampleDist = config.cs * 6.0f;
+        config.minRegionArea = config.minRegionArea / 2;
 
         // this sets the dimensions of the heightfield - should maybe happen before border padding
         rcCalcBounds(tVerts, tVertCount, config.bmin, config.bmax);
@@ -1082,7 +1083,7 @@ namespace MMAP
             {"mergeRegionArea", 10},
             {"minRegionArea", 30},
             {"walkableClimb", 4},
-            {"walkableHeight", 5},
+            {"walkableHeight", 3},
             {"walkableRadius", 2},
             {"walkableSlopeAngle", 60.0f},
         };
