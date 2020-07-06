@@ -8884,6 +8884,8 @@ void Unit::RemoveFromWorld()
         if (!IsPlayer())
             if (GenericTransport* transport = GetTransport())
                 transport->RemovePassenger(this);
+
+        m_FollowingRefManager.clearReferences();
     }
 
     Object::RemoveFromWorld();

@@ -63,6 +63,8 @@ class TargetedMovementGeneratorMedium
 
         virtual void UnitSpeedChanged() override { i_speedChanged = true; }
 
+        virtual bool RemoveOnInvalid() const { return true; };
+
     protected:
         virtual bool RequiresNewPosition(T& owner, float x, float y, float z) const;
         virtual float GetDynamicTargetDistance(T& /*owner*/, bool /*forRangeCheck*/) const { return i_offset; }
@@ -126,6 +128,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
 
         bool EnableWalking() const { return m_walk;}
         bool _lostTarget(Unit& u) const;
+        bool RemoveOnInvalid() const override { return true; }
         void _reachTarget(Unit&);
         bool GetResetPosition(Unit& /*u*/, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const override { return false; }
         void HandleMovementFailure(Unit& owner) override;
