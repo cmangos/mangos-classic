@@ -23,6 +23,7 @@
 #include <Detour/Include/DetourAlloc.h>
 #include <Detour/Include/DetourNavMesh.h>
 #include <Detour/Include/DetourNavMeshQuery.h>
+#include <mutex>
 
 class Unit;
 

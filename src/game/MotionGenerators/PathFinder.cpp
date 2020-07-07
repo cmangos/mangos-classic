@@ -75,8 +75,8 @@ bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest
 {
     float x, y, z;
     m_sourceUnit->GetPosition(x, y, z, m_sourceUnit->GetTransport());
-
-    return calculate(Vector3(x, y, z), Vector3(destX, destY, destZ), forceDest, straightLine);
+    Vector3 dest(destX, destY, destZ);
+    return calculate(Vector3(x, y, z), dest, forceDest, straightLine);
 }
 
 bool PathFinder::calculate(const Vector3& start, Vector3& dest, bool forceDest/* = false*/, bool straightLine/* = false*/)

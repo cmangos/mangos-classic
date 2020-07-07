@@ -506,16 +506,18 @@ namespace MMAP
             if (mmap->navMeshGOQueries.find(threadId) == mmap->navMeshGOQueries.end())
             {
                 // allocate mesh query
+                std::stringstream ss;
+                ss << threadId;
                 dtNavMeshQuery* query = dtAllocNavMeshQuery();
                 MANGOS_ASSERT(query);
                 if (dtStatusFailed(query->init(mmap->navMesh, 2048)))
                 {
                     dtFreeNavMeshQuery(query);
-                    sLog.outError("MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for displayid %03u tid %u", displayId, threadId);
+                    sLog.outError("MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
                     return nullptr;
                 }
 
-                DETAIL_LOG("MMAP:GetNavMeshQuery: created dtNavMeshQuery for displayid %03u tid %u", displayId, threadId);
+                DETAIL_LOG("MMAP:GetNavMeshQuery: created dtNavMeshQuery for displayid %03u tid %s", displayId, ss.str().data());
                 mmap->navMeshGOQueries.insert(std::pair<std::thread::id, dtNavMeshQuery*>(threadId, query));
             }
         }

@@ -17,6 +17,7 @@
 */
 
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellMgr.h"
 
 struct ArcaneConcentration : public AuraScript
 {
