@@ -20,59 +20,10 @@
 #define TRANSPORTS_H
 
 #include "Entities/GameObject.h"
-#include "Movement/spline.h"
+#include "Maps/TransportMgr.h"
 
 #include <map>
 #include <set>
-
-typedef Movement::Spline<double>                 TransportSpline;
-
-struct KeyFrame
-{
-    explicit KeyFrame(TaxiPathNodeEntry const& _node) : Index(0), Node(&_node), InitialOrientation(0.0f),
-        DistSinceStop(-1.0f), DistUntilStop(-1.0f), DistFromPrev(-1.0f), TimeFrom(0.0f), TimeTo(0.0f),
-        Teleport(false), Update(false), ArriveTime(0), DepartureTime(0), Spline(nullptr), NextDistFromPrev(0.0f), NextArriveTime(0)
-    {
-    }
-
-    uint32 Index;
-    TaxiPathNodeEntry const* Node;
-    float InitialOrientation;
-    float DistSinceStop;
-    float DistUntilStop;
-    float DistFromPrev;
-    float TimeFrom;
-    float TimeTo;
-    bool Teleport;
-    bool Update;
-    uint32 ArriveTime;
-    uint32 DepartureTime;
-    TransportSpline* Spline;
-
-    // Data needed for next frame
-    float NextDistFromPrev;
-    uint32 NextArriveTime;
-
-    bool IsTeleportFrame() const { return Teleport; }
-    bool IsUpdateFrame() const { return Update; }
-    bool IsStopFrame() const { return Node->actionFlag == 2; }
-};
-
-typedef std::vector<KeyFrame>  KeyFrameVec;
-
-struct TransportTemplate
-{
-    TransportTemplate() : inInstance(false), pathTime(0), accelTime(0.0f), accelDist(0.0f), entry(0) { }
-    ~TransportTemplate();
-
-    std::set<uint32> mapsUsed;
-    bool inInstance;
-    uint32 pathTime;
-    KeyFrameVec keyFrames;
-    float accelTime;
-    float accelDist;
-    uint32 entry;
-};
 
 typedef std::set<WorldObject*> PassengerSet;
 
@@ -129,10 +80,9 @@ class ElevatorTransport : public GenericTransport
 class Transport : public GenericTransport
 {
     public:
-        explicit Transport();
+        explicit Transport(TransportTemplate const& transportTemplate);
 
         bool Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress);
-        bool GenerateWaypoints(GameObjectInfo const* goinfo, std::set<uint32>& mapsUsed);
         void Update(const uint32 diff) override;
 
         uint32 GetPeriod() const { return m_period; }
@@ -140,7 +90,7 @@ class Transport : public GenericTransport
 
         uint32 GetPathProgress() const override { return m_pathProgress; }
 
-        KeyFrameVec& GetKeyFrames() { return m_keyFrames; }
+        KeyFrameVec const& GetKeyFrames() const { return m_transportTemplate.keyFrames; }
     private:
         void TeleportTransport(uint32 newMapid, float x, float y, float z, float o);
         void UpdateForMap(Map const* targetMap);
@@ -161,7 +111,6 @@ class Transport : public GenericTransport
 
         uint32 m_period;
 
-        KeyFrameVec m_keyFrames;
-        TransportTemplate m_transportTemplate;
+        TransportTemplate const& m_transportTemplate;
 };
 #endif
