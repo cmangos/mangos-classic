@@ -19,7 +19,10 @@
 #include "TransportMgr.h"
 
 #include "Server/DBCStores.h"
+#include "Server/SQLStorages.h"
 #include "Movement/MoveSpline.h"
+#include "Entities/GameObject.h"
+#include "Maps/MapManager.h"
 #include <algorithm>
 
 void TransportMgr::LoadTransportAnimationAndRotation()

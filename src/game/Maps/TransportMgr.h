@@ -25,6 +25,8 @@
 
 #include <map>
 
+struct GameObjectInfo;
+
 typedef std::map<uint32, TransportAnimationEntry const*> TransportPathContainer;
 // typedef std::map<uint32, TransportRotationEntry const*> TransportPathRotationContainer;
 
