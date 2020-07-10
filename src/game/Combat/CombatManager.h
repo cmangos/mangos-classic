@@ -64,6 +64,7 @@ class CombatManager
 
         // combat timer handling
         uint32 m_combatTimer;
+        Position m_lastRefreshPos;
         bool m_leashingDisabled;                            // disables leashing timer for script mobs
         std::function<bool(Unit*, float x, float y, float z)> m_leashingCheck;
 };

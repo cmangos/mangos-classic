@@ -87,13 +87,11 @@ void CombatManager::Update(const uint32 diff)
                         if (m_owner->getHostileRefManager().getSize() == 0)
                             m_owner->HandleExitCombat(m_owner->IsPlayer());
                     }
-                    else // if timer ran out and we are far away from homebox, evade
+                    // if timer ran out and we are far away from last refresh pos, evade
+                    else if (!m_owner->GetVictim() || !m_owner->GetVictim()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                     {
                         Creature* creatureOwner = static_cast<Creature*>(m_owner);
-                        Position pos;
-                        creatureOwner->GetCombatStartPosition(pos);
-                        // homebox not confirmed on classic
-                        if (creatureOwner->GetDistance2d(pos.GetPositionX(), pos.GetPositionY()) > 30.0f)
+                        if (creatureOwner->GetDistance2d(m_lastRefreshPos.GetPositionX(), m_lastRefreshPos.GetPositionY()) > 20.0f)
                             creatureOwner->HandleExitCombat();
                     }
                 }
@@ -168,4 +166,5 @@ void CombatManager::TriggerCombatTimer(Unit* target)
 void CombatManager::TriggerCombatTimer(bool pvp)
 {
     m_combatTimer = pvp ? 5000 : 15000;
+    m_lastRefreshPos = m_owner->GetPosition();
 }
