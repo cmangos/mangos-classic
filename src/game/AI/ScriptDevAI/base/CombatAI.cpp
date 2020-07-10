@@ -76,7 +76,6 @@ void RangedCombatAI::SetRangedMode(bool state, float distance, RangeModeType typ
     m_rangedMode = state;
     m_chaseDistance = distance;
     m_rangedModeSetting = type;
-    m_meleeEnabled = !state;
 
     if (m_creature->IsInCombat())
         SetCurrentRangedMode(state);
@@ -92,7 +91,6 @@ void RangedCombatAI::SetCurrentRangedMode(bool state)
     if (state)
     {
         m_currentRangedMode = true;
-        m_meleeEnabled = false;
         m_attackDistance = m_chaseDistance;
         m_creature->MeleeAttackStop(m_creature->GetVictim());
         DoStartMovement(m_creature->GetVictim());
