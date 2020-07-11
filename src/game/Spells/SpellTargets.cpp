@@ -441,6 +441,7 @@ void SpellTargetMgr::Initialize()
                             case TARGET_UNIT_FRIEND_NEAR_CASTER:
                             case TARGET_UNIT_NEAR_CASTER:
                             case TARGET_UNIT_ENEMY: scheme = SCHEME_CLOSEST_CHAIN; break;
+                            case TARGET_UNIT: scheme = SCHEME_RANDOM_CHAIN; break;
                             default: break;
                         }
                     }
