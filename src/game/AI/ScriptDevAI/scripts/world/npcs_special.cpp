@@ -263,7 +263,7 @@ struct npc_injured_patientAI : public ScriptedAI
         if (pCaster->GetTypeId() == TYPEID_PLAYER && m_creature->IsAlive() && pSpell->Id == 20804)
         {
             Player* pPlayer = static_cast<Player*>(pCaster);
-            if (pPlayer->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE)
+            if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
             {
                 if (Creature* pDoctor = m_creature->GetMap()->GetCreature(m_doctorGuid))
                 {
@@ -371,7 +371,7 @@ void npc_doctorAI::PatientDied(Location* pPoint)
 {
     Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
-    if (pPlayer && (pPlayer->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE))
+    if (pPlayer && (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE))
     {
         ++m_uiPatientDiedCount;
 
@@ -455,6 +455,7 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
             {
                 // 2.4.3, this flag appear to be required for client side item->spell to work (TARGET_UNIT_FRIEND)
                 Patient->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+                Patient->SetOwnerGuid(m_creature->GetObjectGuid());
 
                 m_lPatientGuids.push_back(Patient->GetObjectGuid());
 
