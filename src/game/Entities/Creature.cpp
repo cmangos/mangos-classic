@@ -533,12 +533,13 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
 
 void Creature::ResetEntry(bool respawn)
 {
-    CreatureData const* data = sObjectMgr.GetCreatureData(m_dbGuid);
-    GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(m_dbGuid);
+    bool isPet = GetObjectGuid().GetHigh() == HIGHGUID_PET;
+    CreatureData const* data = isPet ? nullptr : sObjectMgr.GetCreatureData(m_dbGuid);
+    GameEventCreatureData const* eventData = isPet ? nullptr : sGameEventMgr.GetCreatureUpdateDataForActiveEvent(m_dbGuid);
 
     if (respawn)
     {
-        uint32 newEntry = sObjectMgr.GetRandomEntry(m_dbGuid);
+        uint32 newEntry = isPet ? 0 : sObjectMgr.GetRandomEntry(m_dbGuid);
         if (newEntry)
         {
             UpdateEntry(newEntry, data, eventData, false);
@@ -651,8 +652,9 @@ void Creature::Update(const uint32 diff)
 
                 GetMap()->Add(this);
 
-                if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(m_dbGuid))
-                    sPoolMgr.UpdatePool<Creature>(*GetMap()->GetPersistentState(), poolid, m_dbGuid);
+                if (GetObjectGuid().GetHigh() != HIGHGUID_PET)
+                    if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(m_dbGuid))
+                        sPoolMgr.UpdatePool<Creature>(*GetMap()->GetPersistentState(), poolid, m_dbGuid);
             }
             break;
         }
@@ -2012,7 +2014,7 @@ void Creature::SaveRespawnTime()
 
 CreatureDataAddon const* Creature::GetCreatureAddon() const
 {
-    if (!(GetObjectGuid().GetHigh() == HIGHGUID_PET)) // pets have guidlow that is conflicting with normal guidlows hence GetGUIDLow() gives wrong info
+    if (GetObjectGuid().GetHigh() != HIGHGUID_PET) // pets have guidlow that is conflicting with normal guidlows hence GetGUIDLow() gives wrong info
         if (CreatureDataAddon const* addon = ObjectMgr::GetCreatureAddon(GetGUIDLow()))
             return addon;
 
@@ -2432,6 +2434,9 @@ void Creature::GetRespawnCoord(float& x, float& y, float& z, float* ori, float* 
 
 void Creature::ResetRespawnCoord()
 {
+    if (GetObjectGuid().GetHigh() == HIGHGUID_PET)
+        return;
+
     if (CreatureData const* data = sObjectMgr.GetCreatureData(m_dbGuid))
     {
         m_respawnPos.x = data->posX;
@@ -2708,6 +2713,8 @@ void Creature::SpawnInMaps(uint32 db_guid, CreatureData const* data)
 
 bool Creature::HasStaticDBSpawnData() const
 {
+    if (GetObjectGuid().GetHigh() == HIGHGUID_PET)
+        return false;
     return sObjectMgr.GetCreatureData(m_dbGuid) != nullptr;
 }
 

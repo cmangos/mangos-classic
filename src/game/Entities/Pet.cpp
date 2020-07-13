@@ -2276,3 +2276,22 @@ void Pet::ResetCorpseRespawn()
 {
     m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(1000); // rudimentary value - just need more than now
 }
+
+void Pet::ForcedDespawn(uint32 timeMSToDespawn, bool onlyAlive)
+{
+    if (timeMSToDespawn)
+    {
+        Creature::ForcedDespawn(timeMSToDespawn, onlyAlive);
+        return;
+    }
+
+    if (IsDespawned())
+        return;
+
+    if (IsAlive())
+        SetDeathState(JUST_DIED);
+
+    RemoveCorpse(true);                                     // force corpse removal in the same grid
+
+    Unsummon(PET_SAVE_NOT_IN_SLOT);
+}
