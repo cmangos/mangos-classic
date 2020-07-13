@@ -228,6 +228,12 @@ struct npc_injured_patientAI : public ScriptedAI
     Location* m_pCoord;
     bool isSaved;
 
+    void EnterEvadeMode() override
+    {
+        if (isSaved)
+            ScriptedAI::EnterEvadeMode();
+    }
+
     void Reset() override
     {
         m_doctorGuid.Clear();
@@ -455,7 +461,6 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
             {
                 // 2.4.3, this flag appear to be required for client side item->spell to work (TARGET_UNIT_FRIEND)
                 Patient->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
-                Patient->SetOwnerGuid(m_creature->GetObjectGuid());
 
                 m_lPatientGuids.push_back(Patient->GetObjectGuid());
 
