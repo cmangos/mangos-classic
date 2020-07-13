@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include <functional>
+#include "Entities/Object.h"
 
 enum EvadeState
 {
