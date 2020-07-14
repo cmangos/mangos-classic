@@ -88,11 +88,10 @@ void CombatManager::Update(const uint32 diff)
                             m_owner->HandleExitCombat(m_owner->IsPlayer());
                     }
                     // if timer ran out and we are far away from last refresh pos, evade
-                    else if (!m_owner->GetVictim() || !m_owner->GetVictim()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                    else if (m_owner->GetVictim() && m_owner->GetVictim()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                     {
-                        Creature* creatureOwner = static_cast<Creature*>(m_owner);
-                        if (creatureOwner->GetDistance2d(m_lastRefreshPos.GetPositionX(), m_lastRefreshPos.GetPositionY()) > 20.0f)
-                            creatureOwner->HandleExitCombat();
+                        if (m_owner->GetVictim()->GetDistance2d(m_lastRefreshPos.GetPositionX(), m_lastRefreshPos.GetPositionY()) > 20.0f)
+                            m_owner->HandleExitCombat();
                     }
                 }
             }
