@@ -68,7 +68,7 @@ class MANGOS_DLL_SPEC PlayerbotClassAI
         virtual CombatManeuverReturns DoFirstCombatManeuver(Unit*);
         virtual CombatManeuverReturns DoNextCombatManeuver(Unit*);
         bool Pull() { DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::Pull() rather than class specific function"); return false; }
-        bool Neutralize() { DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::Neutralize() rather than class specific function"); return false; }
+        virtual uint32 Neutralize(uint8 creatureType) {return 0;}
 
         // all non combat actions go here, ex buffs, heals, rezzes
         virtual void DoNonCombatActions();

@@ -488,7 +488,7 @@ bool PlayerbotMageAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target)
 }
 
 // Return to UpdateAI the spellId usable to neutralize a target with creaturetype
-uint32 PlayerbotMageAI::Neutralize(uint8 creatureType)
+uint32 PlayerbotMageAI::Neutralize(uint8 creatureType) override
 {
     if (!m_bot)         return 0;
     if (!m_ai)          return 0;

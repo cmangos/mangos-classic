@@ -580,7 +580,7 @@ bool PlayerbotPriestAI::CastHoTOnTank()
 }
 
 // Return to UpdateAI the spellId usable to neutralize a target with creaturetype
-uint32 PlayerbotPriestAI::Neutralize(uint8 creatureType)
+uint32 PlayerbotPriestAI::Neutralize(uint8 creatureType) override
 {
     if (!m_bot)         return 0;
     if (!m_ai)          return 0;
