@@ -89,6 +89,7 @@ class MANGOS_DLL_SPEC PlayerbotDruidAI : PlayerbotClassAI
         // all combat actions go here
         CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
         CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
+        bool CanPull();
         bool Pull();
         uint32 Neutralize(uint8 creatureType);
 
@@ -96,7 +97,6 @@ class MANGOS_DLL_SPEC PlayerbotDruidAI : PlayerbotClassAI
         void DoNonCombatActions();
 
         // Utility Functions
-        bool CanPull();
         bool CastHoTOnTank();
 
     private:

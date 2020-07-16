@@ -734,13 +734,13 @@ void PlayerbotDruidAI::GoBuffForm(Player* self)
 }
 
 // Match up with "Pull()" below
-bool PlayerbotDruidAI::CanPull()
+bool PlayerbotDruidAI::CanPull() override
 {
     return BEAR_FORM > 0 && FAERIE_FIRE_FERAL;
 }
 
 // Match up with "CanPull()" above
-bool PlayerbotDruidAI::Pull()
+bool PlayerbotDruidAI::Pull() override
 {
     return BEAR_FORM > 0 && (CastSpell(FAERIE_FIRE_FERAL) & RETURN_CONTINUE);
 }

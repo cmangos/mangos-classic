@@ -2656,39 +2656,14 @@ bool PlayerbotAI::CanPull(Player& fromPlayer)
 
     if (!IsTank())
     {
-        SendWhisper("I cannot pull as I do not have combat orders to tank.", fromPlayer);
+        SendWhisper("I cannot pull as I do not have combat orders to tank or I am not of the proper class.", fromPlayer);
         return false;
     }
 
-    switch (m_bot->getClass())
+    if (((PlayerbotClassAI*)GetClassAI())->CanPull() == false)
     {
-        case CLASS_PALADIN:
-            if (((PlayerbotPaladinAI*)GetClassAI())->CanPull() == false)
-            {
-                SendWhisper("I cannot pull, I do not have the proper spell or it's not ready yet.", fromPlayer);
-                return false;
-            }
-            break;
-
-        case CLASS_DRUID:
-            if (((PlayerbotDruidAI*)GetClassAI())->CanPull() == false)
-            {
-                SendWhisper("I cannot pull, I do not have the proper spell or it's not ready yet.", fromPlayer);
-                return false;
-            }
-            break;
-
-        case CLASS_WARRIOR:
-            if (((PlayerbotWarriorAI*)GetClassAI())->CanPull() == false)
-            {
-                SendWhisper("I cannot pull, I do not have the proper weapon and/or ammo.", fromPlayer);
-                return false;
-            }
-            break;
-
-        default:
-            SendWhisper("I cannot pull, I am not a tanking class.", fromPlayer);
-            return false;
+        SendWhisper("I cannot pull, I do not have the proper spell or it's not ready yet.", fromPlayer);
+        return false;
     }
 
     return true;
@@ -2703,22 +2678,7 @@ bool PlayerbotAI::CastPull()
 
     if (!IsTank()) return false;
 
-    switch (m_bot->getClass())
-    {
-        case CLASS_PALADIN:
-            return ((PlayerbotPaladinAI*)GetClassAI())->Pull();
-
-        case CLASS_DRUID:
-            return ((PlayerbotDruidAI*)GetClassAI())->Pull();
-
-        case CLASS_WARRIOR:
-            return ((PlayerbotWarriorAI*)GetClassAI())->Pull();
-
-        default:
-            return false;
-    }
-
-    return false;
+    return ((PlayerbotClassAI*)GetClassAI())->Pull();
 }
 
 bool PlayerbotAI::GroupTankHoldsAggro()

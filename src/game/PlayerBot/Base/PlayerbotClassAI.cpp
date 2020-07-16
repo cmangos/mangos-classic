@@ -89,12 +89,6 @@ bool PlayerbotClassAI::EatDrinkBandage(bool bMana, unsigned char foodPercent, un
     return false;
 }
 
-bool PlayerbotClassAI::CanPull()
-{
-    DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::CanPull() rather than class specific function");
-    return false;
-}
-
 bool PlayerbotClassAI::CastHoTOnTank()
 {
     DEBUG_LOG("[PlayerbotAI]: Warning: Using PlayerbotClassAI::CastHoTOnTank() rather than class specific function");
