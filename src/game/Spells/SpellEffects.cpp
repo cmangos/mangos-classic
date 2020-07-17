@@ -2580,6 +2580,9 @@ void Spell::EffectSummonChangeItem(SpellEffectIndex eff_idx)
 
     Item* oldItem = m_CastItem;
 
+    if (m_CastItem)
+        m_CastItem->SetUsedInSpell(false);
+
     // prevent crash at access and unexpected charges counting with item update queue corrupt
     ClearCastItem();
 

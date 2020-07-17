@@ -7387,6 +7387,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets& targets, uint8 spell
 
         Spell* spell = new Spell(this, spellInfo, (count > 0));
         spell->m_CastItem = item;
+        item->SetUsedInSpell(true);
         spell->SpellStart(&targets);
 
         ++count;
