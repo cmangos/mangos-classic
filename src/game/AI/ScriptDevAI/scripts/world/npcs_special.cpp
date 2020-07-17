@@ -228,6 +228,12 @@ struct npc_injured_patientAI : public ScriptedAI
     Location* m_pCoord;
     bool isSaved;
 
+    void EnterEvadeMode() override
+    {
+        if (isSaved)
+            ScriptedAI::EnterEvadeMode();
+    }
+
     void Reset() override
     {
         m_doctorGuid.Clear();
@@ -263,7 +269,7 @@ struct npc_injured_patientAI : public ScriptedAI
         if (pCaster->GetTypeId() == TYPEID_PLAYER && m_creature->IsAlive() && pSpell->Id == 20804)
         {
             Player* pPlayer = static_cast<Player*>(pCaster);
-            if (pPlayer->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE)
+            if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
             {
                 if (Creature* pDoctor = m_creature->GetMap()->GetCreature(m_doctorGuid))
                 {
@@ -371,7 +377,7 @@ void npc_doctorAI::PatientDied(Location* pPoint)
 {
     Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
-    if (pPlayer && (pPlayer->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE))
+    if (pPlayer && (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE))
     {
         ++m_uiPatientDiedCount;
 
