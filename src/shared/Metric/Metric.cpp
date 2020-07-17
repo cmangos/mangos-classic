@@ -187,12 +187,21 @@ void metric::metric::send()
     using boost::asio::ip::tcp;
     using namespace std::chrono_literals;
 
-    boost::system::error_code error = boost::asio::error::host_not_found;
+    boost::system::error_code error;
 
     // Hostname resolution
     tcp::resolver resolver(m_writeService);
     tcp::resolver::query query(m_connectionInfo.hostname, std::to_string(m_connectionInfo.port));
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query, error);
+
+    if (error)
+    {
+        sLog.outError("metric::metric::send resolve aborted, %s", error.message().c_str());
+        return;
+    }
+
+    error = boost::asio::error::host_not_found;
+
     tcp::resolver::iterator end;
 
     tcp::socket socket(m_writeService);
