@@ -24,6 +24,8 @@ Note that these commands work both in whisper and in party chat (assuming the bo
 /t BOTNAME spells (replies with all spells known to bot)
 /t BOTNAME neutralize (bot will try to neutralize/crowd control its master's target: polymorph, shackle, hibernate...)
 /t BOTNAME pull (bot will try pull it's master's target if it has already tank orders)
+/t BOTNAME pull test (bot will perform basic checks to see if it has pull capability and tell result to its master)
+/t BOTNAME pull ready (bot will perform basic checks to see if it can pull master's target and tell result to its master)
 /t BOTNAME cast <SPELLID | (part of) SPELLNAME | [SPELLLINK]>
 /t BOTNAME craft < alchemy | a >                  (List all learnt alchemy [RECIPE]..)
                  < blacksmithing | b >            (List all learnt blacksmith [RECIPE]..)
@@ -196,17 +198,21 @@ Combat Orders explained:
   selected by bots master.
   Available Combat Orders:
     combat tank         primary     try to bind all targets involved in combat by gaining highest threat
+    combat maintank     primary     try to bind all targets involved in combat by gaining highest threat and bot is flagged as top priority target for healing
     combat assist       primary     do damage on selected targets attacker without getting highest threat
-    combat heal         primary     concentrate on healing - no offensive spells, try to keep threat low
+    combat heal         primary     concentrate on healing - few offensive spells, try to keep threat low
+    combat mainheal     primary     concentrate on healing main tank (bots with maintank orders) above every other targets including self - few offensive spells, try to keep threat low
+    combat notmainheal  primary     concentrate on healing with the exclusion of main tanks (bots with maintank orders) - few offensive spells, try to keep threat low, ideal to heal its own group while in raid
     combat nodispell    secondary   concentrate on healing - no offensive spells, try to keep threat low but will not dispel friendlies
     combat protect      secondary   if target of protect get's directly attacked gain higher threat on attacker
-    combat passive      primary     bot will not engage combat: no attack or spell cast
+    combat passive      primary     bot will not engage combat: no attack nor spell cast even when attacked
     combat resistfire   secondary   bot will try to equip resist fire equipment and use resist fire spells/auras
     combat resistfrost  secondary   bot will try to equip resist frost equipment and use resist frost spells/auras
     combat resistnature secondary   bot will try to equip resist nature equipment and use resist nature spells/auras
     combat resistshadow secondary   bot will try to equip resist shadow equipment and use resist shadow spells/auras
 
     combat reset       -       clear out assist and protect targets and set combat order to nothing
+
   Examples:
     /t TheTank orders combat tank
     /t MyHealer orders combat heal
@@ -239,9 +245,11 @@ If specifying a spell substring, the spell chosen will be in priority of exact n
 - OR -
 /w BOTNAME c <SPELLID>
 
-Also all commands can be broadcast to the party. For example:
+Also all commands can be broadcast to the party or raid. For example:
 /p follow
 /p spells
+/ra orders combat resistfire
+/ra equip [ITEMLINK1]
 
 To use or equip items for your bot say:
 /w BOTNAME use [ITEMLINK1][ITEMLINK2]
