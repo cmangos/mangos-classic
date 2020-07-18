@@ -734,13 +734,13 @@ void PlayerbotDruidAI::GoBuffForm(Player* self)
 }
 
 // Match up with "Pull()" below
-bool PlayerbotDruidAI::CanPull() override
+bool PlayerbotDruidAI::CanPull()
 {
     return BEAR_FORM > 0 && FAERIE_FIRE_FERAL;
 }
 
 // Match up with "CanPull()" above
-bool PlayerbotDruidAI::Pull() override
+bool PlayerbotDruidAI::Pull()
 {
     return BEAR_FORM > 0 && (CastSpell(FAERIE_FIRE_FERAL) & RETURN_CONTINUE);
 }
@@ -759,7 +759,7 @@ bool PlayerbotDruidAI::CastHoTOnTank()
 }
 
 // Return to UpdateAI the spellId usable to neutralize a target with creaturetype
-uint32 PlayerbotDruidAI::Neutralize(uint8 creatureType) override
+uint32 PlayerbotDruidAI::Neutralize(uint8 creatureType)
 {
     if (!m_bot)         return 0;
     if (!m_ai)          return 0;

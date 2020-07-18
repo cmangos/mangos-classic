@@ -673,7 +673,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
 } // end DoNonCombatActions
 
 // Return to UpdateAI the spellId usable to neutralize a target with creaturetype
-uint32 PlayerbotWarlockAI::Neutralize(uint8 creatureType) override
+uint32 PlayerbotWarlockAI::Neutralize(uint8 creatureType)
 {
     if (!m_bot)         return 0;
     if (!m_ai)          return 0;

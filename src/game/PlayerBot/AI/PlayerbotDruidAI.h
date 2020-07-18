@@ -89,9 +89,9 @@ class MANGOS_DLL_SPEC PlayerbotDruidAI : PlayerbotClassAI
         // all combat actions go here
         CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
         CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
-        virtual bool CanPull() override;
-        virtual bool Pull() override;
-        virtual uint32 Neutralize(uint8 creatureType) override;
+        bool CanPull();
+        bool Pull();
+        uint32 Neutralize(uint8 creatureType);
 
         // all non combat actions go here, ex buffs, heals, rezzes
         void DoNonCombatActions();
