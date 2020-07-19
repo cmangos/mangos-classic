@@ -1601,8 +1601,7 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
             }
         }
 
-        if (!m_currentRangedMode)
-            DoMeleeAttackIfReady();
+        DoMeleeAttackIfReady();
     }
 }
 
@@ -1907,7 +1906,6 @@ void CreatureEventAI::SetRangedMode(bool state, float distance, RangeModeType ty
     m_rangedMode = state;
     m_chaseDistance = distance;
     m_rangedModeSetting = type;
-    m_meleeEnabled = !state;
 
     if (m_creature->IsInCombat())
         SetCurrentRangedMode(state);
@@ -1924,7 +1922,6 @@ void CreatureEventAI::SetCurrentRangedMode(bool state)
     {
         m_currentRangedMode = true;
         m_attackDistance = m_chaseDistance;
-        m_creature->MeleeAttackStop(m_creature->GetVictim());
         DoStartMovement(m_creature->GetVictim());
     }
     else
@@ -1934,7 +1931,6 @@ void CreatureEventAI::SetCurrentRangedMode(bool state)
 
         m_currentRangedMode = false;
         m_attackDistance = 0.f;
-        m_creature->MeleeAttackStart(m_creature->GetVictim());
         DoStartMovement(m_creature->GetVictim());
     }
 }
