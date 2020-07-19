@@ -94,6 +94,8 @@ void PointMovementGenerator::Move(Unit& unit)
     init.MoveTo(m_x, m_y, m_z, m_generatePath);
     if (m_forcedMovement == FORCED_MOVEMENT_WALK)
         init.SetWalk(true);
+    else if (m_forcedMovement == FORCED_MOVEMENT_RUN)
+        init.SetWalk(false);
     else
         init.SetWalk(!unit.hasUnitState(UNIT_STAT_RUNNING));
     if (m_forcedMovement == FORCED_MOVEMENT_FLIGHT)

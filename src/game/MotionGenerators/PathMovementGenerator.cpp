@@ -202,6 +202,8 @@ bool FixedPathMovementGenerator::Move(Unit& unit) const
     init.MovebyPath(m_spline);
     if (m_forcedMovement == FORCED_MOVEMENT_WALK)
         init.SetWalk(true);
+    else if (m_forcedMovement == FORCED_MOVEMENT_RUN)
+        init.SetWalk(false);
     else
         init.SetWalk(!unit.hasUnitState(UNIT_STAT_RUNNING));
     if (m_flying)
