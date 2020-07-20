@@ -336,14 +336,23 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
     }
     else
     {
-        if (m_unit->GetVictim() && !GetCombatScriptStatus())
-            m_unit->SetTarget(m_unit->GetVictim());
+        if (spellInfo->Id == 31306)
+        {
+            HandleDelayedInstantAnimation(spellInfo);
+        }
         else
-            m_unit->SetTarget(nullptr);
+        {
+            if (m_unit->GetVictim() && !GetCombatScriptStatus())
+                m_unit->SetTarget(m_unit->GetVictim());
+            else
+                m_unit->SetTarget(nullptr);
+        }
     }
 
     if (state)
+    {
         m_currentSpell = spell;
+    }
 }
 
 void UnitAI::OnChannelStateChange(Spell const* spell, bool state, WorldObject* target)

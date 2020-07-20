@@ -8233,11 +8233,14 @@ bool Unit::SelectHostileTarget()
 
     if (target)
     {
-        // needs a much better check, seems to cause quite a bit of trouble
-        SetInFront(target);
+        if (!AI()->IsTargetingRestricted())
+        {
+            // needs a much better check, seems to cause quite a bit of trouble
+            SetInFront(target);
 
-        if (oldTarget != target || GetTarget() != target)
-            AI()->AttackStart(target);
+            if (oldTarget != target || GetTarget() != target)
+                AI()->AttackStart(target);
+        }
 
         // check if currently selected target is reachable
         // NOTE: path alrteady generated from AttackStart()
