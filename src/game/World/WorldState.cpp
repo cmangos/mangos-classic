@@ -101,8 +101,11 @@ void WorldState::Save(SaveIds saveId)
             CharacterDatabase.PExecute("INSERT INTO world_state(Id,Data) VALUES('%u','%s')", SAVE_ID_EMERALD_DRAGONS, dragonsData.data());
             break;
         }
+        // TODO: Add saving for AQ and QD
+        case SAVE_ID_AHN_QIRAJ:
+        // case SAVE_ID_QUEL_DANAS:
+            break;
     }
-    // TODO: Add saving for AQ and QD
 }
 
 void WorldState::HandleGameObjectUse(GameObject* go, Unit* user)
