@@ -40,6 +40,7 @@
 #include "Globals/SharedDefines.h"
 #include "Entities/Creature.h"
 #include "AI/BaseAI/UnitAI.h"
+#include "Maps/InstanceData.h"
 
 INSTANTIATE_SINGLETON_1(CreatureLinkingMgr);
 
@@ -711,7 +712,13 @@ bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingI
             return false;                                   // This should never happen
 
         if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_DEAD)
+        {
+            if (InstanceData* data = _map->GetInstanceData())
+                if (data->IsEncounterInProgress())
+                    return false;
+
             return IsRespawnReady(pInfo->masterDBGuid, _map);
+        }
         if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_ALIVE)
             return !IsRespawnReady(pInfo->masterDBGuid, _map);
         return true;
