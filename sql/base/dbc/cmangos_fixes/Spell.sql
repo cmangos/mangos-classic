@@ -133,3 +133,6 @@ UPDATE spell_template SET DurationIndex=9 WHERE id=28561;
 
 -- Remove incorrect channel spell attribute for spell 29422 (Kel'Thuzad Channel Effect) used in Kel'Thuzad encounter
 UPDATE spell_template SET AttributesEx=(AttributesEx&~0x00000040) WHERE id=29422;
+
+-- Remove incorrect interrupt flag for Bellowing Roar spells used in various dragon encounters
+UPDATE spell_template SET InterruptFlags=0 WHERE Id IN (18431, 22686);
