@@ -261,10 +261,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             // battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
             Group* group = _player->GetGroup();
 
-            if (!group)
-                return;
-
-            if (group->isBattleGroup())
+            if (group && group->isBattleGroup())
                 group = _player->GetOriginalGroup();
 
             if (!group)
