@@ -184,11 +184,14 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, std::m
         bool HasLogLevelOrHigher(LogLevel loglvl) const { return m_logLevel >= loglvl || (m_logFileLevel >= loglvl && logfile); }
         bool IsOutCharDump() const { return m_charLog_Dump; }
         bool IsIncludeTime() const { return m_includeTime; }
+        std::string GetTraceLog();
 
         static void WaitBeforeContinueIfNeed();
 
         // Set filename for scriptlibrary error output
         void setScriptLibraryErrorFile(char const* fname, char const* libName);
+
+        void traceLog();
 
     private:
         FILE* openLogFile(char const* configFileName, char const* configTimeStampFlag, char const* mode);
@@ -203,7 +206,9 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, std::m
         FILE* scriptErrLogFile;
         FILE* worldLogfile;
         FILE* customLogFile;
+
         std::mutex m_worldLogMtx;
+        std::mutex m_traceLogMtx;
 
         // log/console control
         LogLevel m_logLevel;
