@@ -129,7 +129,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
 
         bool EnableWalking() const { return m_walk;}
         bool _lostTarget(Unit& u) const;
-        bool RemoveOnInvalid() const override { return true; }
+        bool RemoveOnInvalid() const override { return false; }
         void _reachTarget(Unit&);
         bool GetResetPosition(Unit& /*u*/, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const override { return false; }
         void HandleMovementFailure(Unit& owner) override;
