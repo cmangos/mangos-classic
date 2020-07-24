@@ -156,6 +156,7 @@ struct npc_lakota_windsongAI : public npc_escortAI
                 DoSpawnBandits(ID_AMBUSH_3);
                 break;
             case 46:
+                DoScriptText(SAY_LAKO_END, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_FREE_AT_LAST, m_creature);
                 break;
@@ -168,6 +169,11 @@ struct npc_lakota_windsongAI : public npc_escortAI
             m_creature->SummonCreature(NPC_GRIM_BANDIT,
                                        m_afBanditLoc[i + uiAmbushId][0], m_afBanditLoc[i + uiAmbushId][1], m_afBanditLoc[i + uiAmbushId][2], 0.0f,
                                        TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        pSummoned->AI()->AttackStart(m_creature);
     }
 };
 
