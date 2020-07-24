@@ -726,14 +726,30 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 case 18765:
                 {
                     // prevent chain of triggered spell from same triggered spell
-                    if (procSpell && procSpell->Id == 26654)
+                    if (procSpell && (procSpell->Id == 26654 || procSpell->Id == 12723))
                         return SPELL_AURA_PROC_FAILED;
 
                     target = SelectRandomUnfriendlyTarget(pVictim);
                     if (!target)
                         return SPELL_AURA_PROC_FAILED;
 
-                    triggered_spell_id = 26654;
+                    if (procSpell)
+                    {
+                        if (procSpell->Id == 1680) // whirlwind procs normalized damage
+                            triggered_spell_id = 26654;
+                        else if (procSpell->TargetAuraState == AURA_STATE_HEALTHLESS_20_PERCENT)
+                        {
+                            if (target->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
+                                triggered_spell_id = 12723;
+                            else // execute procs normalized damage if target is above 20 percent
+                                triggered_spell_id = 26654;
+                        }
+                        else
+                            triggered_spell_id = 12723;
+                    }
+
+                    if (triggered_spell_id == 12723)
+                        basepoints[0] = damage;
                     break;
                 }
                 // Retaliation
