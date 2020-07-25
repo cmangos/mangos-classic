@@ -747,6 +747,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         else
                             triggered_spell_id = 12723;
                     }
+                    else
+                        triggered_spell_id = 12723;
 
                     if (triggered_spell_id == 12723)
                         basepoints[0] = damage;
