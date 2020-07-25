@@ -56,46 +56,47 @@ void CombatManager::Update(const uint32 diff)
                 m_evadeTimer -= diff;
         }
 
-        if (m_leashingDisabled)
-            return;
-
-        // disabled in instances except for players in BGs
-        if (!m_owner->GetMap()->IsDungeon() || m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        if (!m_leashingDisabled)
         {
-            if (!m_owner->GetMap()->IsDungeon() && m_owner->IsImmobilizedState())
-                m_owner->getThreatManager().DeleteOutOfRangeReferences();
-            if (m_combatTimer)
+            // disabled in instances except for players in BGs
+            if (!m_owner->GetMap()->IsDungeon() || m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
             {
-                if (m_combatTimer <= diff)
-                    m_combatTimer = 0;
-                else
-                    m_combatTimer -= diff;
-            }
-            else
-            {
-                bool check = !m_owner->HasMaster();
-                if (!check)
+                if (!m_owner->GetMap()->IsDungeon() && m_owner->IsImmobilizedState())
+                    m_owner->getThreatManager().DeleteOutOfRangeReferences();
+                if (m_combatTimer)
                 {
-                    Unit* master = m_owner->GetMaster();
-                    if (!master || !master->IsAlive()) // if charmer alive, he will evade this charm
-                        check = true;
+                    if (m_combatTimer <= diff)
+                        m_combatTimer = 0;
+                    else
+                        m_combatTimer -= diff;
                 }
-                if (check)
+                else
                 {
-                    if (m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                    bool check = !m_owner->HasMaster();
+                    if (!check)
                     {
-                        if (m_owner->getHostileRefManager().getSize() == 0)
-                            m_owner->HandleExitCombat(m_owner->IsPlayer());
+                        Unit* master = m_owner->GetMaster();
+                        if (!master || !master->IsAlive()) // if charmer alive, he will evade this charm
+                            check = true;
                     }
-                    // if timer ran out and we are far away from last refresh pos, evade
-                    else if (m_owner->GetVictim() && m_owner->GetVictim()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                    if (check)
                     {
-                        if (m_owner->GetVictim()->GetDistance2d(m_lastRefreshPos.GetPositionX(), m_lastRefreshPos.GetPositionY()) > 20.0f)
-                            m_owner->HandleExitCombat();
+                        if (m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                        {
+                            if (m_owner->getHostileRefManager().getSize() == 0)
+                                m_owner->HandleExitCombat(m_owner->IsPlayer());
+                        }
+                        // if timer ran out and we are far away from last refresh pos, evade
+                        else if (m_owner->GetVictim() && m_owner->GetVictim()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                        {
+                            if (m_owner->GetVictim()->GetDistance2d(m_lastRefreshPos.GetPositionX(), m_lastRefreshPos.GetPositionY()) > 20.0f)
+                                m_owner->HandleExitCombat();
+                        }
                     }
                 }
             }
         }
+
         if (m_owner->IsCreature() && !m_owner->HasCharmer()) // charmer should have leashing check or leash set
         {
             Creature* creatureOwner = static_cast<Creature*>(m_owner);
