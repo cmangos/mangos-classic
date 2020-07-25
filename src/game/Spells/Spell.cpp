@@ -6419,9 +6419,16 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
         if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD) && target->IsAlive())
             return false;
 
-        if (!IsAllowingDeadTarget(m_spellInfo) && !target->IsAlive() && !(target == m_caster && m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD)))
-            if (m_caster->GetTypeId() == TYPEID_PLAYER || info.filter == TARGET_HELPFUL)
-                return false;
+        if (!IsAllowingDeadTarget(m_spellInfo) && !target->IsAlive())
+        {
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                if (target != m_caster || m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD))
+                    return false;
+
+            if (target != m_caster)
+				if (info.filter == TARGET_HELPFUL)
+					return false;
+        }
     }
 
     if (target->IsCreature() && target != m_targets.getUnitTarget() && info.enumerator == TARGET_ENUMERATOR_CHAIN && info.filter == TARGET_HARMFUL) // TODO: Mother Shahraz beams can target totems
