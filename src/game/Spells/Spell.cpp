@@ -6422,7 +6422,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
         if (!IsAllowingDeadTarget(m_spellInfo) && !target->IsAlive())
         {
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                if (target != m_caster || m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD))
+                if (target != m_caster || !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD))
                     return false;
 
             if (target != m_caster)
