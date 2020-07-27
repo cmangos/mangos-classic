@@ -1979,10 +1979,9 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
 
                 Unit::DealDamageMods(victim, this, damage, nullptr, SPELL_DIRECT_DAMAGE, spellProto);
 
-                WorldPacket data(SMSG_SPELLDAMAGESHIELD, (8 + 8 + 4 + 4 + 4));
+                WorldPacket data(SMSG_SPELLDAMAGESHIELD, (8 + 8 + 4 + 4));
                 data << victim->GetObjectGuid();
                 data << GetObjectGuid();
-                data << uint32(spellProto->Id);
                 data << uint32(damage);                  // Damage
                 data << uint32(spellProto->School);
                 victim->SendMessageToSet(data, true);
