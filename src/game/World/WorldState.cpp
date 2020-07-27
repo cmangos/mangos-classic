@@ -244,7 +244,10 @@ void WorldState::RespawnEmeraldDragons()
     sMapMgr.DoForAllMapsWithMapId(0, [&](Map* map)
     {
         if (IsDragonSpawned(m_emeraldDragonsChosenPositions[0]))
-            WorldObject::SummonCreature(TempSpawnSettings(nullptr, m_emeraldDragonsChosenPositions[0], emeraldDragonSpawns[0][0], emeraldDragonSpawns[0][1], emeraldDragonSpawns[0][2], emeraldDragonSpawns[0][3], TEMPSPAWN_DEAD_DESPAWN, 0, false, false, pathIds[0]), map);
+        {
+            if (Creature* duskwoodDragon = WorldObject::SummonCreature(TempSpawnSettings(nullptr, m_emeraldDragonsChosenPositions[0], emeraldDragonSpawns[0][0], emeraldDragonSpawns[0][1], emeraldDragonSpawns[0][2], emeraldDragonSpawns[0][3], TEMPSPAWN_DEAD_DESPAWN, 0, false, false, pathIds[0]), map))
+                duskwoodDragon->GetMotionMaster()->MoveWaypoint(pathIds[0]);
+        }
         if (IsDragonSpawned(m_emeraldDragonsChosenPositions[1]))
             WorldObject::SummonCreature(TempSpawnSettings(nullptr, m_emeraldDragonsChosenPositions[1], emeraldDragonSpawns[1][0], emeraldDragonSpawns[1][1], emeraldDragonSpawns[1][2], emeraldDragonSpawns[1][3], TEMPSPAWN_DEAD_DESPAWN, 0, false, false, pathIds[1]), map);
     });
