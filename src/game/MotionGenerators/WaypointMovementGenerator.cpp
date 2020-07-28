@@ -138,7 +138,7 @@ void WaypointMovementGenerator<Creature>::Finalize(Creature& creature)
 void WaypointMovementGenerator<Creature>::Interrupt(Creature& creature)
 {
     // be sure we are not already interrupted before saving current pos
-    if (creature.hasUnitState(UNIT_STAT_ROAMING))
+    if (creature.hasUnitState(UNIT_STAT_ROAMING_MOVE))
     {
         // save the current position in case of reset
         creature.GetPosition(m_resetPoint);
