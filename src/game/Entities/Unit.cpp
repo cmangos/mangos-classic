@@ -318,6 +318,7 @@ Unit::Unit() :
     i_motionMaster(this),
     m_regenTimer(0),
     m_combatData(new CombatData(this)),
+    m_guardianPetsIterator(m_guardianPets.end()),
     m_spellUpdateHappening(false),
     m_spellProcsHappening(false),
     m_auraUpdateMask(0),
@@ -534,13 +535,7 @@ void Unit::TriggerEvadeEvents()
     if (m_isCreatureLinkingTrigger)
         GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_EVADE, static_cast<Creature*>(this));
 
-
-    for (auto &guardianGuid : m_guardianPets)
-    {
-        if (auto pet = GetMap()->GetPet(guardianGuid))
-            if (pet->AI())
-                pet->AI()->EnterEvadeMode();
-    }
+    CallForAllControlledUnits([](Unit* unit) { unit->HandleExitCombat(); }, CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_TOTEMS);
 }
 
 void Unit::EvadeTimerExpired()
@@ -1966,10 +1961,10 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
                     if (owner->CanJoinInAttacking(victim))
                         owner->EngageInCombatWithAggressor(victim);
 
-            for (auto m_guardianPet : m_guardianPets)
-                if (Unit* pet = (Unit*)GetMap()->GetPet(m_guardianPet))
-                    if (pet->CanJoinInAttacking(victim))
-                        pet->EngageInCombatWithAggressor(victim);
+            for (m_guardianPetsIterator = m_guardianPets.begin(); m_guardianPetsIterator != m_guardianPets.end();)
+                if (Pet* guardian = GetMap()->GetPet(*(m_guardianPetsIterator++)))
+                    if (guardian->CanJoinInAttacking(victim))
+                        guardian->EngageInCombatWithAggressor(victim);
         }
     }
 
@@ -6289,6 +6284,8 @@ void Unit::AddGuardian(Pet* pet)
 
 void Unit::RemoveGuardian(Pet* pet)
 {
+    if (m_guardianPetsIterator != m_guardianPets.end() && *m_guardianPetsIterator == pet->GetObjectGuid())
+        ++m_guardianPetsIterator;
     m_guardianPets.erase(pet->GetObjectGuid());
 }
 
@@ -6308,11 +6305,23 @@ void Unit::RemoveGuardians()
 Pet* Unit::FindGuardianWithEntry(uint32 entry)
 {
     for (auto m_guardianPet : m_guardianPets)
-        if (Pet* pet = GetMap()->GetPet(m_guardianPet))
-            if (pet->GetEntry() == entry)
-                return pet;
+        if (Pet* guardian = GetMap()->GetPet(m_guardianPet))
+            if (guardian->GetEntry() == entry)
+                return guardian;
 
     return nullptr;
+}
+
+uint32 Unit::CountGuardiansWithEntry(uint32 entry)
+{
+    uint32 count = 0;
+
+    for (auto m_guardianPet : m_guardianPets)
+        if (Pet* guardian = GetMap()->GetPet(m_guardianPet))
+            if (guardian->GetEntry() == entry)
+                count++;
+
+    return count;
 }
 
 Unit* Unit::_GetTotem(TotemSlot slot) const
