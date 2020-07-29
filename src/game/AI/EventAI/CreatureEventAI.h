@@ -104,7 +104,7 @@ enum EventAI_ActionType
     ACTION_T_COMBAT_MOVEMENT            = 21,               // AllowCombatMovement (0 = stop combat based movement, anything else continue attacking)
     ACTION_T_SET_PHASE                  = 22,               // Phase
     ACTION_T_INC_PHASE                  = 23,               // Value (may be negative to decrement phase, should not be 0)
-    ACTION_T_EVADE                      = 24,               // No Params
+    ACTION_T_EVADE                      = 24,               // CombatOnly
     ACTION_T_FLEE_FOR_ASSIST            = 25,               // No Params
     ACTION_T_QUEST_EVENT_ALL            = 26,               // QuestID, UseThreatList (1 = true, 0 = false)
     ACTION_T_CAST_EVENT_ALL             = 27,               // CreatureId, SpellId
@@ -341,6 +341,11 @@ struct CreatureEventAI_Action
             uint32 phase;
         } set_phase;
         // ACTION_T_INC_PHASE                               = 23
+        struct
+        {
+            uint32 combatOnly;
+        } evade;
+        // ACTION_T_EVADE                                   = 24
         struct
         {
             int32 step;

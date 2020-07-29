@@ -936,7 +936,10 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             break;
         }
         case ACTION_T_EVADE:
-            EnterEvadeMode();
+            if (action.evade.combatOnly)
+                m_creature->CombatStopWithPets(true);
+            else
+                EnterEvadeMode();
             break;
         case ACTION_T_FLEE_FOR_ASSIST:
             if (!DoFlee())
