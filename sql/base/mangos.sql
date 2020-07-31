@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2769_01_mangos_creature_template_spells_extension` bit(1) DEFAULT NULL
+  `required_z2771_01_mangos_creature_spawn_data` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -926,6 +926,25 @@ LOCK TABLES `creature_spawn_entry` WRITE;
 /*!40000 ALTER TABLE `creature_spawn_entry` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_spawn_entry` ENABLE KEYS */;
 UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `creature_spawn_data_template`;
+CREATE TABLE creature_spawn_data_template(
+Entry INT UNSIGNED NOT NULL COMMENT 'ID of template',
+UnitFlags BIGINT NOT NULL DEFAULT '-1',
+ModelId MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+EquipmentId MEDIUMINT NOT NULL DEFAULT '0',
+CurHealth INT UNSIGNED NOT NULL DEFAULT '1',
+CurMana INT UNSIGNED NOT NULL DEFAULT '0',
+SpawnFlags INT UNSIGNED NOT NULL DEFAULT '0',
+PRIMARY KEY(Id,UnitFlags,ModelId,EquipmentId,CurHealth,CurMana,SpawnFlags)
+);
+
+DROP TABLE IF EXISTS `creature_spawn_data`;
+CREATE TABLE creature_spawn_data(
+Guid INT UNSIGNED NOT NULL COMMENT 'guid of creature',
+Id INT UNSIGNED NOT NULL COMMENT 'ID of template',
+PRIMARY KEY(Guid)
+);
 
 --
 -- Table structure for table `creature_equip_template`

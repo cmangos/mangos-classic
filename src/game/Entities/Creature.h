@@ -212,6 +212,27 @@ struct EquipmentInfoRaw
     uint32  equipslot[3];
 };
 
+enum SpawnFlags
+{
+    SPAWN_FLAG_RUN_ON_SPAWN = 0x01,
+    SPAWN_FLAG_HOVER        = 0x02,
+};
+
+struct CreatureSpawnTemplate
+{
+    uint32 entry;
+    int64 unitFlags;
+    uint32 faction;
+    uint32 modelId;
+    uint32 equipmentId;
+    uint32 curHealth;
+    uint32 curMana;
+    uint32 spawnFlags;
+
+    bool IsRunning() const { return (spawnFlags & SPAWN_FLAG_RUN_ON_SPAWN) != 0; }
+    bool IsHovering() const { return (spawnFlags & SPAWN_FLAG_HOVER) != 0; }
+};
+
 // from `creature` table
 struct CreatureData
 {
@@ -235,6 +256,7 @@ struct CreatureData
     uint16 GuidPoolId;
     uint16 EntryPoolId;
     uint16 OriginalZoneId;
+    CreatureSpawnTemplate const* spawnTemplate;
 
     // helper function
     ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(CreatureInfo::GetHighGuid(), id, lowguid); }

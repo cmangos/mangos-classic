@@ -30,7 +30,7 @@ class AbstractPathMovementGenerator : public MovementGenerator
 {
     public:
         explicit AbstractPathMovementGenerator(const Movement::PointsArray& path, float orientation = 0, int32 offset = 0);
-        explicit AbstractPathMovementGenerator(const WaypointPath& path, int32 offset = 0);
+        explicit AbstractPathMovementGenerator(const WaypointPath* path, int32 offset = 0, bool cyclic = false);
 
         void Initialize(Unit& owner) override;
         void Finalize(Unit& owner) override;
@@ -44,11 +44,14 @@ class AbstractPathMovementGenerator : public MovementGenerator
         virtual void MovementInform(Unit& unit);
 
     protected:
-        std::vector<WaypointNode> m_path;
+        WaypointPath m_path;
         int32 m_pathIndex;
         Movement::PointsArray m_spline;
         float m_orientation;
         ShortTimeTracker m_timer;
+        bool m_cyclic;
+        bool m_firstCycle;
+        uint32 m_startPoint;
 
     private:
         bool m_speedChanged;
@@ -61,16 +64,17 @@ class FixedPathMovementGenerator : public AbstractPathMovementGenerator
             AbstractPathMovementGenerator(path, orientation, offset), m_flying(flying), m_speed(speed), m_forcedMovement(forcedMovement) {}
         FixedPathMovementGenerator(const Movement::PointsArray& path, uint32 forcedMovement, bool flying = false, float speed = 0, int32 offset = 0) :
             FixedPathMovementGenerator(path, 0, forcedMovement, flying, speed, offset) {}
-        FixedPathMovementGenerator(WaypointPath& path, uint32 forcedMovement, bool flying = false, float speed = 0, int32 offset = 0) :
-            AbstractPathMovementGenerator(path, offset), m_flying(flying), m_speed(speed), m_forcedMovement(forcedMovement) {}
+        FixedPathMovementGenerator(Unit& unit, int32 pathId, WaypointPathOrigin wpOrigin, ForcedMovement forcedMovement, bool flying = false, float speed = 0, int32 offset = 0, bool cyclic = false);
+        FixedPathMovementGenerator(Creature& creature);
 
         void Initialize(Unit& unit) override;
         void Finalize(Unit& unit) override;
         void Interrupt(Unit& unit) override;
         void Reset(Unit& unit) override;
-        bool Update(Unit& unit, const uint32& diff) override;
 
         MovementGeneratorType GetMovementGeneratorType() const override { return PATH_MOTION_TYPE; }
+
+        void AddToPathPauseTime(int32 waitTimeDiff, bool force);
 
     protected:
         virtual bool Move(Unit& unit) const;
@@ -79,6 +83,7 @@ class FixedPathMovementGenerator : public AbstractPathMovementGenerator
         bool m_flying;
         float m_speed;
         uint32 m_forcedMovement;
+        ShortTimeTracker m_flightSplineSyncTimer;
 };
 
 class TaxiMovementGenerator : public AbstractPathMovementGenerator

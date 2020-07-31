@@ -367,15 +367,18 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
         else if (eventData->entry_id)
             LoadEquipment(cinfo->EquipmentTemplateId, true);     // use changed entry default template
     }
-    else if (!data || data->equipmentId == 0)
+    else if (!data || (data->equipmentId == 0 && data->spawnTemplate->equipmentId == 0))
     {
         // use default from the template
         LoadEquipment(cinfo->EquipmentTemplateId);
     }
-    else if (data && data->equipmentId != -1)
+    else if (data)
     {
         // override, -1 means no equipment
-        LoadEquipment(data->equipmentId);
+        if (data->spawnTemplate->equipmentId != -1)
+            LoadEquipment(data->spawnTemplate->equipmentId);
+        else if (data->equipmentId != -1)
+            LoadEquipment(data->equipmentId);        
     }
 
     SetName(normalInfo->Name);                              // at normal entry always
@@ -393,7 +396,13 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
 
     // checked at loading
     if (data)
+    {
+        if (data->spawnTemplate->IsRunning())
+            SetWalk(false);
+        if (data->spawnTemplate->IsHovering())
+            SetHover(true);
         m_defaultMovementType = MovementGeneratorType(data->movementType);
+    }
     else
         m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
 
@@ -430,15 +439,20 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
         SelectLevel();
         if (data)
         {
-            uint32 curhealth = data->curhealth ? data->curhealth : GetMaxHealth();
+            uint32 curhealth = data->curhealth > 1 ? data->curhealth : GetMaxHealth();
+            if (data->spawnTemplate->curHealth > 0)
+                curhealth = data->spawnTemplate->curHealth;
             SetHealth(m_deathState == ALIVE ? curhealth : 0);
             if (GetPowerType() == POWER_MANA)
             {
                 uint32 curmana;
+                uint32 newPossibleData = data->curmana;
+                if (data->spawnTemplate->curMana > 0)
+                    newPossibleData = data->spawnTemplate->curMana;
                 if (IsRegeneratingPower()) // bypass so that 0 mana is possible TODO: change this to -1 in DB
-                    curmana = data->curmana ? data->curmana : GetMaxPower(POWER_MANA);
+                    curmana = newPossibleData ? newPossibleData : GetMaxPower(POWER_MANA);
                 else
-                    curmana = data->curmana;
+                    curmana = newPossibleData;
                 SetPower(POWER_MANA, curmana);
             }
         }
@@ -455,6 +469,8 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     SetAttackTime(RANGED_ATTACK, GetCreatureInfo()->RangedBaseAttackTime);
 
     uint32 unitFlags = GetCreatureInfo()->UnitFlags;
+    if (data && data->spawnTemplate->unitFlags != -1)
+        unitFlags = uint32(data->spawnTemplate->unitFlags);
 
     // we may need to append or remove additional flags
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT))
@@ -495,8 +511,12 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     SetCanModifyStats(true);
     UpdateAllStats();
 
+    uint32 faction = GetCreatureInfo()->Faction;
+    if (data && data->spawnTemplate->faction)
+        faction = data->spawnTemplate->faction;
+
     // checked and error show at loading templates
-    if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->Faction))
+    if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
     {
         if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_PVP)
             SetPvP(true);
@@ -538,8 +558,13 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
         return eventData->modelid;
 
     // Use creature model explicit, override template (creature.modelid)
-    if (data && data->modelid_override)
-        return data->modelid_override;
+    if (data)
+    {
+        if (data->spawnTemplate->modelId)
+            return data->spawnTemplate->modelId;
+        if (data->modelid_override)
+            return data->modelid_override;
+    }
 
     // use defaults from the template
     uint32 display_id = 0;
@@ -1146,6 +1171,7 @@ void Creature::SaveToDB(uint32 mapid)
     // prevent add data integrity problems
     data.movementType = !m_respawnradius && GetDefaultMovementType() == RANDOM_MOTION_TYPE
                         ? IDLE_MOTION_TYPE : GetDefaultMovementType();
+    data.spawnTemplate = sObjectMgr.GetCreatureSpawnTemplate(0);
 
     // updated in DB
     WorldDatabase.BeginTransaction();
@@ -1663,6 +1689,7 @@ void Creature::SetDeathState(DeathState s)
 
         Unit::SetDeathState(ALIVE);
 
+        SetWalk(true, true);
         ResetEntry(true);
 
         ResetSpellHitCounter();
@@ -1683,7 +1710,6 @@ void Creature::SetDeathState(DeathState s)
         SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->NpcFlags);
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-        SetWalk(true, true);
         i_motionMaster.Initialize();
     }
 }

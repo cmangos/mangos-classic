@@ -212,6 +212,7 @@ Defining a buddy could be done in several way:
                                             * dataint = (bool) setRun; 0 = off (default), 1 = on
                                             * dataint2 = factionId - if 0 is set, faction is from DB entry
                                             * dataint3 = modelId - if 0 is set, model is from DB entry
+                                            * dataint4 = spawndatatemplate - if > 0 uses settings from creature_spawn_data_template
 
 11 SCRIPT_COMMAND_OPEN_DOOR                 source = any
                                             * datalong = db_guid (can be skipped for buddy)

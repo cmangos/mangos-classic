@@ -1838,6 +1838,29 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
         }
     }
 
+    if (settings.spawnDataEntry)
+    {
+        if (CreatureSpawnTemplate const* templateData = sObjectMgr.GetCreatureSpawnTemplate(settings.spawnDataEntry))
+        {
+            if (templateData->unitFlags != -1)
+                creature->SetUInt32Value(UNIT_FIELD_FLAGS, uint32(templateData->unitFlags));
+            if (templateData->faction > 0)
+                creature->SetPower(POWER_MANA, templateData->curMana);
+            if (templateData->modelId > 0)
+                creature->SetDisplayId(templateData->modelId);
+            if (templateData->equipmentId)
+                creature->LoadEquipment(templateData->equipmentId == -1 ? 0 : templateData->equipmentId, true);
+            if (templateData->curHealth > 1)
+                creature->SetHealth(templateData->curHealth);
+            if (templateData->curMana > 0)
+                creature->SetPower(POWER_MANA, templateData->curMana);
+            if (templateData->IsRunning())
+                creature->SetWalk(false);
+            if (templateData->IsHovering())
+                creature->SetHover(true);
+        }
+    }
+
     creature->Summon(settings.spawnType, settings.despawnTime);                  // Also initializes the AI and MMGen
     if (settings.corpseDespawnTime)
         creature->SetCorpseDelay(settings.corpseDespawnTime);

@@ -109,7 +109,7 @@ enum ScriptCommand                                          // resSource, resTar
     // datalong: Send mailTemplateId from resSource (if provided) to player resTarget
     // datalong2: AlternativeSenderEntry. Use as sender-Entry
     // dataint1: Delay (>= 0) in Seconds
-    SCRIPT_COMMAND_SET_FLY                  = 39,           // resSource = Creature
+    SCRIPT_COMMAND_SET_HOVER                  = 39,           // resSource = Creature
     // datalong = bool 0=off, 1=on
     // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL set/unset byte flag UNIT_BYTE1_FLAG_ALWAYS_STAND
     SCRIPT_COMMAND_DESPAWN_GO               = 40,           // resTarget = GameObject
@@ -378,7 +378,7 @@ struct ScriptInfo
             uint32 altSender;                               // datalong2;
         } sendMail;
 
-        struct                                              // SCRIPT_COMMAND_SET_FLY (39)
+        struct                                              // SCRIPT_COMMAND_SET_HOVER (39)
         {
             uint32 fly;                                     // datalong
             uint32 empty;                                   // datalong2
@@ -494,7 +494,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_TERMINATE_COND:
             case SCRIPT_COMMAND_SET_FACING:
             case SCRIPT_COMMAND_MOVE_DYNAMIC:
-            case SCRIPT_COMMAND_SET_FLY:
+            case SCRIPT_COMMAND_SET_HOVER:
                 return true;
             default:
                 return false;

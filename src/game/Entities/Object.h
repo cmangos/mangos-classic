@@ -651,6 +651,7 @@ struct TempSpawnSettings
     bool forcedOnTop = false;
     bool spellId = 0;
     ObjectGuid ownerGuid;
+    uint32 spawnDataEntry = 0;
     TempSpawnSettings() {}
     TempSpawnSettings(WorldObject* spawner, uint32 entry, float x, float y, float z, float ori, TempSpawnType spawnType, uint32 despawnTime, bool activeObject = false, bool setRun = false, uint32 pathId = 0, uint32 faction = 0,
         uint32 modelId = 0, bool spawnCounting = false, bool forcedOnTop = false, bool spellId = 0) :
