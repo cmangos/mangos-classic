@@ -365,7 +365,7 @@ void MotionMaster::MoveStay(float x, float y, float z, float o, bool asMain)
     Mutate(new StayMovementGenerator(x, y, z, o));
 }
 
-void MotionMaster::MovePoint(uint32 id, Position position, ForcedMovement forcedMovement, bool generatePath)
+void MotionMaster::MovePoint(uint32 id, Position& position, ForcedMovement forcedMovement, bool generatePath)
 {
     MovePoint(id, position.x, position.y, position.z, position.o, forcedMovement, generatePath);
 }
