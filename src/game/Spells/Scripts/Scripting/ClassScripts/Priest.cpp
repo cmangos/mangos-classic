@@ -17,8 +17,18 @@
  */
 
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
+
+struct SpiritOfRedemptionHeal : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+            spell->SetDamage(spell->GetCaster()->GetMaxHealth());
+    }
+};
 
 void LoadPriestScripts()
 {
-
+    RegisterSpellScript<SpiritOfRedemptionHeal>("spell_spirit_of_redemption_heal");
 }

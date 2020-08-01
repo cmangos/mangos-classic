@@ -4571,6 +4571,8 @@ void Aura::HandleSpiritOfRedemption(bool apply, bool Real)
 
     Unit* target = GetTarget();
 
+    target->ApplySpellImmune(this, IMMUNITY_DAMAGE, 255, apply); // wotlk style hack - immunity against all damage
+
     // prepare spirit state
     if (apply)
     {
@@ -4585,8 +4587,7 @@ void Aura::HandleSpiritOfRedemption(bool apply, bool Real)
         if (target->IsNonMeleeSpellCasted(false))
             target->InterruptNonMeleeSpells(false);
 
-        // set health and mana to maximum
-        target->SetHealth(target->GetMaxHealth());
+        // set health and mana to maximum        
         target->SetPower(POWER_MANA, target->GetMaxPower(POWER_MANA));
     }
     // die at aura end
