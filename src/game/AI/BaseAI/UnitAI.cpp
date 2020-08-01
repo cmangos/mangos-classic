@@ -202,6 +202,9 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
                         return CAST_FAIL_NOT_IN_LOS;
                     case SPELL_FAILED_PACIFIED:
                     case SPELL_FAILED_SILENCED:
+                    case SPELL_FAILED_STUNNED:
+                    case SPELL_FAILED_CONFUSED:
+                    case SPELL_FAILED_FLEEING:
                         return CAST_FAIL_STATE;
                     case SPELL_FAILED_NOT_READY:
                         return CAST_FAIL_COOLDOWN;
