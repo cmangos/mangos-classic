@@ -1077,7 +1077,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 }
             }
 
-            Unit::ProcDamageAndSpell(ProcSystemArguments(caster, unitTarget, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, addhealth, m_attackType, m_spellInfo, this, gain));
+            Unit::ProcDamageAndSpell(ProcSystemArguments(caster, unitTarget, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, addhealth, m_attackType, m_spellInfo, this, gain, true));
         }
     }
     // Do damage and triggers

@@ -756,10 +756,11 @@ struct ProcSystemArguments
 
     // Healing specific information
     uint32 healthGain;
+    bool isHeal;
 
     explicit ProcSystemArguments(Unit* attacker, Unit* victim, uint32 procFlagsAttacker, uint32 procFlagsVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType = BASE_ATTACK,
-        SpellEntry const* procSpell = nullptr, Spell* spell = nullptr, uint32 healthGain = 0) : attacker(attacker), victim(victim), procFlagsAttacker(procFlagsAttacker), procFlagsVictim(procFlagsVictim), procExtra(procExtra), damage(amount),
-        procSpell(procSpell), attType(attType), spell(spell), healthGain(healthGain)
+        SpellEntry const* procSpell = nullptr, Spell* spell = nullptr, uint32 healthGain = 0, bool isHeal = false) : attacker(attacker), victim(victim), procFlagsAttacker(procFlagsAttacker), procFlagsVictim(procFlagsVictim), procExtra(procExtra), damage(amount),
+        procSpell(procSpell), attType(attType), spell(spell), healthGain(healthGain), isHeal(isHeal)
     {
     }
 };
@@ -783,6 +784,7 @@ struct ProcExecutionData
 
     // Healing specific information
     uint32 healthGain;
+    bool isHeal;
 
     Aura* triggeredByAura;
     uint32 cooldown;
