@@ -5620,10 +5620,22 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
 
 void Spell::EffectKnockBack(SpellEffectIndex eff_idx)
 {
-    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+    if (!unitTarget)
         return;
 
-    ((Player*)unitTarget)->KnockBackFrom(m_caster, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10, float(damage) / 10);
+    Player* target = nullptr;
+    if (unitTarget->IsPlayer())
+        target = static_cast<Player*>(unitTarget);
+    else if (Unit* charmer = unitTarget->GetCharmer())
+    {
+        if (charmer->IsPlayer())
+            target = static_cast<Player*>(charmer);
+    }
+
+    if (!target)
+        return;
+
+    target->KnockBackFrom(unitTarget, m_caster, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10, float(damage) / 10);
 }
 
 void Spell::EffectSendTaxi(SpellEffectIndex eff_idx)
@@ -5636,7 +5648,19 @@ void Spell::EffectSendTaxi(SpellEffectIndex eff_idx)
 
 void Spell::EffectPullTowards(SpellEffectIndex eff_idx)
 {
-    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+    if (!unitTarget)
+        return;
+
+    Player* target = nullptr;
+    if (unitTarget->IsPlayer())
+        target = static_cast<Player*>(unitTarget);
+    else if (Unit* charmer = unitTarget->GetCharmer())
+    {
+        if (charmer->IsPlayer())
+            target = static_cast<Player*>(charmer);
+    }
+
+    if (!target)
         return;
 
     float x, y, z, dist;
@@ -5663,7 +5687,7 @@ void Spell::EffectPullTowards(SpellEffectIndex eff_idx)
     float time = dist / speedXY;
     float speedZ = ((z - unitTarget->GetPositionZ()) + 0.5f * time * time * Movement::gravity) / time;
 
-    ((Player*)unitTarget)->KnockBackFrom(m_caster, -speedXY, speedZ);
+    target->KnockBackFrom(unitTarget, m_caster, -speedXY, speedZ);
 }
 
 void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)

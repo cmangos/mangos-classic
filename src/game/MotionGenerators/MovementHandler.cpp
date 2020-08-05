@@ -299,6 +299,10 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     /* process position-change */
     HandleMoverRelocation(movementInfo);
 
+    // just landed from a knockback? update status
+    if (plMover && plMover->IsLaunched() && (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND || recv_data.GetOpcode() == MSG_MOVE_START_SWIM))
+        plMover->SetLaunched(false);
+
     if (plMover)
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
@@ -428,10 +432,9 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
     DEBUG_LOG("CMSG_MOVE_KNOCK_BACK_ACK");
 
     Unit* mover = _player->GetMover();
-    Player* plMover = mover->GetTypeId() == TYPEID_PLAYER ? (Player*)mover : nullptr;
 
     // ignore, waiting processing in WorldSession::HandleMoveWorldportAckOpcode and WorldSession::HandleMoveTeleportAck
-    if (plMover && plMover->IsBeingTeleported())
+    if (mover->IsPlayer() && static_cast<Player*>(mover)->IsBeingTeleported())
     {
         recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
         return;
@@ -449,6 +452,9 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
 
     HandleMoverRelocation(movementInfo);
 
+    if (mover->IsPlayer() && static_cast<Player*>(mover)->IsFreeFlying())
+        mover->SetCanFly(true);
+
     WorldPacket data(MSG_MOVE_KNOCK_BACK, recv_data.size() + 15);
     data << mover->GetObjectGuid();
     data << movementInfo;
@@ -459,19 +465,21 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
     mover->SendMessageToSetExcept(data, _player);
 }
 
-void WorldSession::SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed) const
+void WorldSession::SendKnockBack(Unit* who, float angle, float horizontalSpeed, float verticalSpeed)
 {
+    GetPlayer()->SetLaunched(true);
     float vsin = sin(angle);
     float vcos = cos(angle);
 
     WorldPacket data(SMSG_MOVE_KNOCK_BACK, 9 + 4 + 4 + 4 + 4 + 4);
-    data << GetPlayer()->GetPackGUID();
-    data << uint32(0);                                  // Sequence
+    data << who->GetPackGUID();
+    data << GetOrderCounter();
     data << float(vcos);                                // x direction
     data << float(vsin);                                // y direction
     data << float(horizontalSpeed);                     // Horizontal speed
     data << float(-verticalSpeed);                      // Z Movement speed (vertical)
     SendPacket(data);
+    IncrementOrderCounter();
 }
 
 void WorldSession::HandleMoveHoverAck(WorldPacket& recv_data)
