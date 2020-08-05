@@ -288,7 +288,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (!i_dynobject.IsAffecting(target))
     {
         i_dynobject.AddAffected(target);
-        caster->CasterHitTargetWithSpell(caster, target, spellInfo);
+        caster->CasterHitTargetWithSpell(caster, target, spellInfo, false);
     }
 }
 
