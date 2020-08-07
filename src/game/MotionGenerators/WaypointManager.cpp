@@ -44,6 +44,107 @@ char const* waypointKeyColumn[] =
     "entry",
 };
 
+void CheckDbscript(WaypointNode& node, uint32 entry, uint32 point, std::set<uint32>& movementScriptSet, std::string const& tablename)
+{
+    auto iter = sCreatureMovementScripts.second.find(node.script_id);
+    if (iter == sCreatureMovementScripts.second.end())
+    {
+        sLog.outErrorDb("Table %s for entry %u, point %u have script_id %u that does not exist in `dbscripts_on_creature_movement`, ignoring", tablename.data(), entry, point, node.script_id);
+        return;
+    }
+    else if (!node.delay)
+    {
+        auto& data = *iter;
+        bool delay = false;
+        for (auto& item : data.second)
+        {
+            if (item.second.delay != 0)
+                break;
+
+            if (item.second.command == SCRIPT_COMMAND_DESPAWN_SELF && item.second.delay == 0 && item.second.despawn.despawnDelay == 0)
+            {
+                delay = true;
+                sLog.outErrorDb("Table %s entry %u point %u has no delay and no delay despawn script. Adding delay to point.", tablename.data(), entry, point);
+                break;
+            }
+            else if (item.second.command == SCRIPT_COMMAND_MOVEMENT)
+            {
+                delay = true;
+                sLog.outErrorDb("Table %s entry %u point %u has no delay but changes movegen. Adding delay to point.", tablename.data(), entry, point);
+                break;
+            }
+            else if (item.second.command == SCRIPT_COMMAND_START_RELAY_SCRIPT)
+            {
+                auto iter = sRelayScripts.second.find(item.second.relayScript.relayId);
+                if (iter == sRelayScripts.second.end())
+                {
+                    if (item.second.relayScript.templateId)
+                    {
+                        ScriptMgr::ScriptTemplateVector scriptTemplate;
+                        sScriptMgr.GetScriptRelayTemplate(item.second.relayScript.templateId, scriptTemplate);
+                        for (auto& item : scriptTemplate)
+                        {
+                            auto iter = sRelayScripts.second.find(item.first);
+                            if (iter != sRelayScripts.second.end())
+                            {
+                                auto& data = *iter;
+                                for (auto& item : data.second)
+                                {
+                                    if (item.second.delay != 0)
+                                        break;
+                                    if (item.second.command == SCRIPT_COMMAND_DESPAWN_SELF && item.second.delay == 0 && item.second.despawn.despawnDelay == 0)
+                                    {
+                                        delay = true;
+                                        sLog.outErrorDb("Table %s entry %u point %u has no delay and no delay despawn script. Adding delay to point.", tablename.data(), entry, point);
+                                        break;
+                                    }
+                                    else if (item.second.command == SCRIPT_COMMAND_MOVEMENT)
+                                    {
+                                        delay = true;
+                                        sLog.outErrorDb("Table %s entry %u point %u has no delay but changes movegen. Adding delay to point.", tablename.data(), entry, point);
+                                        break;
+                                    }
+                                }
+                                if (delay)
+                                    break;
+                            }
+                        }
+                    }
+                    else
+                        continue;
+                }
+                else
+                {
+                    auto& data = *iter;
+                    for (auto& item : data.second)
+                    {
+                        if (item.second.delay != 0)
+                            break;
+                        if (item.second.command == SCRIPT_COMMAND_DESPAWN_SELF && item.second.delay == 0 && item.second.despawn.despawnDelay == 0)
+                        {
+                            delay = true;
+                            sLog.outErrorDb("Table %s entry %u point %u has no delay and no delay despawn script. Adding delay to point.", tablename.data(), entry, point);
+                            break;
+                        }
+                        else if (item.second.command == SCRIPT_COMMAND_MOVEMENT)
+                        {
+                            delay = true;
+                            sLog.outErrorDb("Table %s entry %u point %u has no delay but changes movegen. Adding delay to point.", tablename.data(), entry, point);
+                            break;
+                        }
+                    }
+                }
+                if (delay)
+                    break;
+            }
+        }
+        if (delay)
+            node.delay = 1000;
+    }
+
+    movementScriptSet.erase(node.script_id);
+}
+
 void WaypointManager::Load()
 {
     uint32 total_paths = 0;
@@ -153,15 +254,7 @@ void WaypointManager::Load()
             }
 
             if (node.script_id)
-            {
-                if (sCreatureMovementScripts.second.find(node.script_id) == sCreatureMovementScripts.second.end())
-                {
-                    sLog.outErrorDb("Table creature_movement for id %u, point %u have script_id %u that does not exist in `dbscripts_on_creature_movement`, ignoring", id, point, node.script_id);
-                    continue;
-                }
-
-                movementScriptSet.erase(node.script_id);
-            }
+                CheckDbscript(node, id, point, movementScriptSet, "creature_movement");
         }
         while (result->NextRow());
 
@@ -275,15 +368,7 @@ void WaypointManager::Load()
             }
 
             if (node.script_id)
-            {
-                if (sCreatureMovementScripts.second.find(node.script_id) == sCreatureMovementScripts.second.end())
-                {
-                    sLog.outErrorDb("Table creature_movement_template for entry %u, point %u have script_id %u that does not exist in `dbscripts_on_creature_movement`, ignoring", entry, point, node.script_id);
-                    continue;
-                }
-
-                movementScriptSet.erase(node.script_id);
-            }
+                CheckDbscript(node, entry, point, movementScriptSet, "creature_movement_template");
         }
         while (result->NextRow());
 
