@@ -13260,6 +13260,9 @@ void Player::KilledMonster(CreatureInfo const* cInfo, ObjectGuid guid)
     if (cInfo->Entry)
         KilledMonsterCredit(cInfo->Entry, guid);
 
+    if (guid.GetEntry() && guid.GetEntry() != cInfo->Entry)
+        KilledMonsterCredit(guid.GetEntry(), guid);
+
     for (unsigned int i : cInfo->KillCredit)
         if (i)
             KilledMonsterCredit(i, guid);
