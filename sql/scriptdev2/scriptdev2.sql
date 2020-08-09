@@ -348,6 +348,8 @@ UPDATE instance_template SET ScriptName='instance_gnomeregan' WHERE map=90;
 /* HINTERLANDS */
 UPDATE creature_template SET ScriptName='npc_00x09hl' WHERE entry=7806;
 UPDATE creature_template SET ScriptName='npc_rinji' WHERE entry=7780;
+INSERT INTO scripted_event_id VALUES
+(8608,'event_wildhammer_message');
 
 /* IRONFORGE */
 
