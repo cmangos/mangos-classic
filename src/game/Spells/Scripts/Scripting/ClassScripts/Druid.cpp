@@ -18,7 +18,22 @@
 
 #include "Spells/Scripts/SpellScript.h"
 
+enum
+{
+    SPELL_BLESSING_OF_THE_CLAW = 28750,
+};
+
+struct Regrowth : public AuraScript
+{
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        if (Unit* caster = aura->GetCaster())
+            if (caster->HasOverrideScript(4537))
+                caster->CastSpell(aura->GetTarget(), SPELL_BLESSING_OF_THE_CLAW, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void LoadDruidScripts()
 {
-
+    RegisterAuraScript<Regrowth>("spell_regrowth");
 }
