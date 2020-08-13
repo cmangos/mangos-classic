@@ -4691,6 +4691,23 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 break;
             }
+            case SPELL_EFFECT_CREATE_ITEM:
+            {
+                if (Unit* target = m_targets.getUnitTarget())
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                        return SPELL_FAILED_BAD_TARGETS;
+
+                    uint32 count = CalculateSpellEffectValue(SpellEffectIndex(i), target);
+                    ItemPosCountVec dest;
+                    uint32 no_space = 0;
+                    InventoryResult msg = static_cast<Player*>(target)->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, m_spellInfo->EffectItemType[i], count, &no_space);
+                    if (msg != EQUIP_ERR_OK)
+                        return SPELL_FAILED_TOO_MANY_OF_ITEM;
+                }
+
+                break;
+            }
             case SPELL_EFFECT_TAMECREATURE:
             {
                 // Spell can be triggered, we need to check original caster prior to caster
