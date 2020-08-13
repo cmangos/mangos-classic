@@ -815,7 +815,7 @@ class Creature : public Unit
 
         void SendZoneUnderAttackMessage(Player* attacker) const;
 
-        void SetInCombatWithZone(bool checkAttackability = false);
+        void SetInCombatWithZone(bool checkAttackability = true);
 
         Unit* SelectAttackingTarget(AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams()) const;
         Unit* SelectAttackingTarget(AttackingTarget target, uint32 position, SpellEntry const* spellInfo = nullptr, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams()) const;
