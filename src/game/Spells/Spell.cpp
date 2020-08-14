@@ -5685,25 +5685,29 @@ SpellCastResult Spell::CheckItems()
         if (!proto)
             return SPELL_FAILED_ITEM_NOT_READY;
 
-        for (int i = 0; i < 5; ++i)
+        for (uint32 i = 0; i < 5; ++i)
             if (proto->Spells[i].SpellCharges)
                 if (m_CastItem->GetSpellCharges(i) == 0)
                     return SPELL_FAILED_NO_CHARGES_REMAIN;
 
         // consumable cast item checks
-        if (proto->Class == ITEM_CLASS_CONSUMABLE && m_targets.getUnitTarget())
+        if (proto->Class == ITEM_CLASS_CONSUMABLE)
         {
             // such items should only fail if there is no suitable effect at all - see Rejuvenation Potions for example
             SpellCastResult failReason = SPELL_CAST_OK;
-            for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
                 // skip check, pet not required like checks, and for TARGET_UNIT_CASTER_PET m_targets.getUnitTarget() is not the real target but the caster
                 if (m_spellInfo->EffectImplicitTargetA[i] == TARGET_UNIT_CASTER_PET)
                     continue;
 
+                Unit* target = m_spellInfo->EffectImplicitTargetA[i] == TARGET_UNIT_CASTER ? m_caster : m_targets.getUnitTarget();
+                if (!target)
+                    continue;
+
                 if (m_spellInfo->Effect[i] == SPELL_EFFECT_HEAL)
                 {
-                    if (m_targets.getUnitTarget()->GetHealth() == m_targets.getUnitTarget()->GetMaxHealth())
+                    if (target->GetHealth() == target->GetMaxHealth())
                     {
                         failReason = SPELL_FAILED_ALREADY_AT_FULL_HEALTH;
                         continue;
@@ -5722,7 +5726,7 @@ SpellCastResult Spell::CheckItems()
                     }
 
                     Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
-                    if (m_targets.getUnitTarget()->GetPower(power) == m_targets.getUnitTarget()->GetMaxPower(power))
+                    if (target->GetPower(power) == target->GetMaxPower(power))
                     {
                         failReason = SPELL_FAILED_ALREADY_AT_FULL_POWER;
                     }
