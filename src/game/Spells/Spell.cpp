@@ -2367,204 +2367,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         case TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER:
         case TARGET_LOCATION_SCRIPT_NEAR_CASTER:
         {
-            SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->Id);
-
-            if (bounds.first == bounds.second)
+            SpellCastResult result = CheckScriptTargeting(effIndex, targetingData.chainTargetCount[effIndex], radius, targetMode, tempUnitList, tempGOList);
+            if (result != SPELL_CAST_OK)
             {
-                if (m_spellInfo->EffectImplicitTargetA[effIndex] == TARGET_UNIT_SCRIPT_NEAR_CASTER || m_spellInfo->EffectImplicitTargetB[effIndex] == TARGET_UNIT_SCRIPT_NEAR_CASTER)
-                    sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_UNIT_SCRIPT_NEAR_CASTER, but creature are not defined in `spell_script_target`", m_spellInfo->Id, effIndex);
-
-                if (m_spellInfo->EffectImplicitTargetA[effIndex] == TARGET_LOCATION_SCRIPT_NEAR_CASTER || m_spellInfo->EffectImplicitTargetB[effIndex] == TARGET_LOCATION_SCRIPT_NEAR_CASTER)
-                    sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_LOCATION_SCRIPT_NEAR_CASTER, but gameobject or creature are not defined in `spell_script_target`", m_spellInfo->Id, effIndex);
-
-                if (m_spellInfo->EffectImplicitTargetA[effIndex] == TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER || m_spellInfo->EffectImplicitTargetB[effIndex] == TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER)
-                    sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER, but gameobject are not defined in `spell_script_target`", m_spellInfo->Id, effIndex);
-
-                break;
-            }
-
-            CreatureList foundScriptCreatureTargets;
-            GameObjectList foundScriptGOTargets;
-            std::set<uint32> entriesToUse;
-            uint32 type = MAX_SPELL_TARGET_TYPE;
-            bool foundButOutOfRange = false;
-            // corrections for numerous spells missing it
-            uint32 targetCount = std::max(targetingData.chainTargetCount[effIndex], uint32(1));
-
-            for (SQLMultiStorage::SQLMultiSIterator<SpellTargetEntry> i_spellST = bounds.first; i_spellST != bounds.second; ++i_spellST)
-            {
-                if (i_spellST->CanNotHitWithSpellEffect(effIndex))
-                    continue;
-
-                type = i_spellST->type;
-                switch (i_spellST->type)
-                {
-                    case SPELL_TARGET_TYPE_GAMEOBJECT:
-                    case SPELL_TARGET_TYPE_CREATURE:
-                    case SPELL_TARGET_TYPE_DEAD:
-                    case SPELL_TARGET_TYPE_CREATURE_GUID:
-                    case SPELL_TARGET_TYPE_GAMEOBJECT_GUID:
-                    default:
-                        entriesToUse.insert(i_spellST->targetEntry);
-                        break;
-                }
-            }
-
-            if (radius == 50000.f)
-            {
-                if (type != SPELL_TARGET_TYPE_CREATURE_GUID && type != SPELL_TARGET_TYPE_GAMEOBJECT_GUID)
-                    radius = 200.f;
-            }
-            else if (radius == 0.f)
-                radius = m_caster->GetMap()->IsDungeon() ? DEFAULT_VISIBILITY_INSTANCE : DEFAULT_VISIBILITY_DISTANCE;
-
-            WorldObject* caster = GetAffectiveCasterObject();
-
-            switch (type) // TODO: Unify logic with all other spell_script_target uses
-            {
-                case SPELL_TARGET_TYPE_GAMEOBJECT:
-                case SPELL_TARGET_TYPE_GAMEOBJECT_GUID:
-                {
-                    if (type == SPELL_TARGET_TYPE_GAMEOBJECT_GUID)
-                    {
-                        for (uint32 guid : entriesToUse)
-                        {
-                            GameObjectData const* data = sObjectMgr.GetGOData(guid);
-                            if (GameObject* go = m_caster->GetMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, guid)))
-                                if (go->IsWithinDist(m_caster, radius))
-                                    foundScriptGOTargets.push_back(go);
-                        }
-                    }
-                    else
-                    {
-                        MaNGOS::AllGameObjectEntriesListInObjectRangeCheck go_check(*m_caster, entriesToUse, radius);
-                        MaNGOS::GameObjectListSearcher<MaNGOS::AllGameObjectEntriesListInObjectRangeCheck> checker(foundScriptGOTargets, go_check);
-                        Cell::VisitGridObjects(m_caster, checker, radius);
-                    }
-                    for (auto itr = foundScriptGOTargets.begin(); itr != foundScriptGOTargets.end();)
-                    {
-                        if (!OnCheckTarget(*itr, effIndex))
-                            itr = foundScriptGOTargets.erase(itr);
-                        else
-                            ++itr;
-                    }
-                    foundScriptGOTargets.sort([=](const GameObject * a, const GameObject * b) -> bool
-                    {
-                        return caster->GetDistance(a, true, DIST_CALC_NONE) < caster->GetDistance(b, true, DIST_CALC_NONE);
-                    });
-
-                    if (foundScriptGOTargets.size() > targetCount) // if we have too many targets, we need to trim the list
-                        foundScriptGOTargets.resize(targetCount);
-                    break;
-                }
-                case SPELL_TARGET_TYPE_CREATURE:
-                case SPELL_TARGET_TYPE_DEAD:
-                case SPELL_TARGET_TYPE_CREATURE_GUID:
-                {
-                    if (Unit* target = m_targets.getUnitTarget())
-                    {
-                        if (target->GetTypeId() == TYPEID_UNIT && entriesToUse.find(type == SPELL_TARGET_TYPE_CREATURE_GUID ? target->GetGUIDLow() : target->GetEntry()) != entriesToUse.end())
-                        {
-                            if ((type == SPELL_TARGET_TYPE_CREATURE && target->IsAlive()) ||
-                                (type == SPELL_TARGET_TYPE_DEAD && ((Creature*)target)->IsCorpse()))
-                            {
-                                if (target->IsWithinDistInMap(caster, radius) && OnCheckTarget(target, effIndex))
-                                    foundScriptCreatureTargets.push_back((Creature*)target);
-                                else
-                                    foundButOutOfRange = true;
-                            }
-                        }
-                    }
-                    if (foundScriptCreatureTargets.size() < targetCount)
-                    {
-                        if (radius == 50000.f) // only guid scripting
-                        {
-                            for (uint32 guid : entriesToUse)
-                            {
-                                CreatureData const* data = sObjectMgr.GetCreatureData(guid);
-                                CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(data->id);
-                                if (Creature* creature = m_caster->GetMap()->GetCreature(ObjectGuid(cinfo->GetHighGuid(), data->id, guid)))
-                                    foundScriptCreatureTargets.push_back(creature);
-                            }
-                        }
-                        else
-                        {
-                            MaNGOS::AllCreatureEntriesWithLiveStateInObjectRangeCheck u_check(*caster, entriesToUse, type != SPELL_TARGET_TYPE_DEAD, radius, type == SPELL_TARGET_TYPE_CREATURE_GUID, false, true);
-                            MaNGOS::CreatureListSearcher<MaNGOS::AllCreatureEntriesWithLiveStateInObjectRangeCheck> searcher(foundScriptCreatureTargets, u_check);
-                            Cell::VisitAllObjects(caster, searcher, radius); // Visit all, need to find also Pet* objects
-
-                            if (u_check.FoundOutOfRange())
-                                foundButOutOfRange = true;
-                        }
-                        for (auto iter = foundScriptCreatureTargets.begin(); iter != foundScriptCreatureTargets.end();)
-                        {
-                            bool failed = false;
-                            if (!OnCheckTarget(*iter, effIndex))
-                                failed = true;
-                            else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF) && m_caster == (*iter))
-                                failed = true;
-                            if (failed)
-                                iter = foundScriptCreatureTargets.erase(iter);
-                            else
-                                ++iter;
-                        }
-
-                        foundScriptCreatureTargets.sort([=](const Creature * a, const Creature * b) -> bool
-                        {
-                            return caster->GetDistance(a, true, DIST_CALC_NONE) < caster->GetDistance(b, true, DIST_CALC_NONE);
-                        });
-
-                        if (foundScriptCreatureTargets.size() > targetCount) // if we have too many targets, we need to trim the list
-                            foundScriptCreatureTargets.resize(targetCount);
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
-
-            if (!foundScriptCreatureTargets.empty())
-            {
-                // store coordinates for TARGET_LOCATION_SCRIPT_NEAR_CASTER
-                if (targetMode == TARGET_LOCATION_SCRIPT_NEAR_CASTER)
-                {
-                    Creature* creatureScriptTarget = foundScriptCreatureTargets.front(); // can only have one target in this case
-                    m_targets.setDestination(creatureScriptTarget->GetPositionX(), creatureScriptTarget->GetPositionY(), creatureScriptTarget->GetPositionZ());
-                }
-                // store explicit target for TARGET_UNIT_SCRIPT_NEAR_CASTER
-                else
-                    for (Creature* creature : foundScriptCreatureTargets)
-                        tempUnitList.push_back(creature);
-            }
-            else if (!foundScriptGOTargets.empty())
-            {
-                // store coordinates for TARGET_LOCATION_SCRIPT_NEAR_CASTER
-                if (targetMode == TARGET_LOCATION_SCRIPT_NEAR_CASTER)
-                {
-                    GameObject* goScriptTarget = foundScriptGOTargets.front(); // can only have one target in this case
-                    m_targets.setDestination(goScriptTarget->GetPositionX(), goScriptTarget->GetPositionY(), goScriptTarget->GetPositionZ());
-                }
-                // store explicit target for TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER
-                else
-                    tempGOList.splice(tempGOList.end(), foundScriptGOTargets);
-            }
-            // Missing DB Entry or targets for this spellEffect.
-            else
-            {
-                /* For TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER makes DB targets optional not required for now
-                 * TODO: Makes more research for this target type
-                 */
-                if (targetMode != TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER)
-                {
-                    // not report target not existence for triggered spells
-                    SpellCastResult result = SPELL_CAST_OK;
-                    if (m_triggeredByAuraSpell || m_IsTriggeredSpell)
-                        result = SPELL_FAILED_DONT_REPORT;
-                    result = foundButOutOfRange ? SPELL_FAILED_OUT_OF_RANGE : SPELL_FAILED_BAD_TARGETS;
-                    SendCastResult(result);
-                    finish(false);
-                    return;
-                }
+                SendCastResult(result);
+                finish(false);
+                return;
             }
             break;
         }
@@ -2577,6 +2385,203 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
         if (targetMode != TARGET_UNIT_CASTER)
             tempUnitList.remove(m_caster);
+}
+
+SpellCastResult Spell::CheckScriptTargeting(SpellEffectIndex effIndex, uint32 chainTargets, float radius, uint32 targetMode, UnitList& tempUnitList, GameObjectList& tempGOList)
+{
+    SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->Id);
+
+    if (bounds.first == bounds.second)
+    {
+        if (m_spellInfo->EffectImplicitTargetA[effIndex] == TARGET_UNIT_SCRIPT_NEAR_CASTER || m_spellInfo->EffectImplicitTargetB[effIndex] == TARGET_UNIT_SCRIPT_NEAR_CASTER)
+            sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_UNIT_SCRIPT_NEAR_CASTER, but creature are not defined in `spell_script_target`", m_spellInfo->Id, effIndex);
+
+        if (m_spellInfo->EffectImplicitTargetA[effIndex] == TARGET_LOCATION_SCRIPT_NEAR_CASTER || m_spellInfo->EffectImplicitTargetB[effIndex] == TARGET_LOCATION_SCRIPT_NEAR_CASTER)
+            sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_LOCATION_SCRIPT_NEAR_CASTER, but gameobject or creature are not defined in `spell_script_target`", m_spellInfo->Id, effIndex);
+
+        if (m_spellInfo->EffectImplicitTargetA[effIndex] == TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER || m_spellInfo->EffectImplicitTargetB[effIndex] == TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER)
+            sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER, but gameobject are not defined in `spell_script_target`", m_spellInfo->Id, effIndex);
+
+        return SPELL_FAILED_BAD_TARGETS;
+    }
+
+    CreatureList foundScriptCreatureTargets;
+    GameObjectList foundScriptGOTargets;
+    std::set<uint32> entriesToUse;
+    uint32 type = MAX_SPELL_TARGET_TYPE;
+    bool foundButOutOfRange = false;
+    // corrections for numerous spells missing it
+    uint32 targetCount = std::max(chainTargets, uint32(1));
+
+    for (SQLMultiStorage::SQLMultiSIterator<SpellTargetEntry> i_spellST = bounds.first; i_spellST != bounds.second; ++i_spellST)
+    {
+        if (i_spellST->CanNotHitWithSpellEffect(effIndex))
+            continue;
+
+        type = i_spellST->type;
+        switch (i_spellST->type)
+        {
+            case SPELL_TARGET_TYPE_GAMEOBJECT:
+            case SPELL_TARGET_TYPE_CREATURE:
+            case SPELL_TARGET_TYPE_DEAD:
+            case SPELL_TARGET_TYPE_CREATURE_GUID:
+            case SPELL_TARGET_TYPE_GAMEOBJECT_GUID:
+            default:
+                entriesToUse.insert(i_spellST->targetEntry);
+                break;
+        }
+    }
+
+    if (radius == 50000.f)
+    {
+        if (type != SPELL_TARGET_TYPE_CREATURE_GUID && type != SPELL_TARGET_TYPE_GAMEOBJECT_GUID)
+            radius = 200.f;
+    }
+    else if (radius == 0.f)
+        radius = m_caster->GetMap()->IsDungeon() ? DEFAULT_VISIBILITY_INSTANCE : DEFAULT_VISIBILITY_DISTANCE;
+
+    WorldObject* caster = GetAffectiveCasterObject();
+
+    switch (type) // TODO: Unify logic with all other spell_script_target uses
+    {
+        case SPELL_TARGET_TYPE_GAMEOBJECT:
+        case SPELL_TARGET_TYPE_GAMEOBJECT_GUID:
+        {
+            if (type == SPELL_TARGET_TYPE_GAMEOBJECT_GUID)
+            {
+                for (uint32 guid : entriesToUse)
+                {
+                    GameObjectData const* data = sObjectMgr.GetGOData(guid);
+                    if (GameObject* go = m_caster->GetMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, guid)))
+                        if (go->IsWithinDist(m_caster, radius))
+                            foundScriptGOTargets.push_back(go);
+                }
+            }
+            else
+            {
+                MaNGOS::AllGameObjectEntriesListInObjectRangeCheck go_check(*m_caster, entriesToUse, radius);
+                MaNGOS::GameObjectListSearcher<MaNGOS::AllGameObjectEntriesListInObjectRangeCheck> checker(foundScriptGOTargets, go_check);
+                Cell::VisitGridObjects(m_caster, checker, radius);
+            }
+            for (auto itr = foundScriptGOTargets.begin(); itr != foundScriptGOTargets.end();)
+            {
+                if (!OnCheckTarget(*itr, effIndex))
+                    itr = foundScriptGOTargets.erase(itr);
+                else
+                    ++itr;
+            }
+            foundScriptGOTargets.sort([=](const GameObject* a, const GameObject* b) -> bool
+            {
+                return caster->GetDistance(a, true, DIST_CALC_NONE) < caster->GetDistance(b, true, DIST_CALC_NONE);
+            });
+
+            if (foundScriptGOTargets.size() > targetCount) // if we have too many targets, we need to trim the list
+                foundScriptGOTargets.resize(targetCount);
+            break;
+        }
+        case SPELL_TARGET_TYPE_CREATURE:
+        case SPELL_TARGET_TYPE_DEAD:
+        case SPELL_TARGET_TYPE_CREATURE_GUID:
+        {
+            if (Unit* target = m_targets.getUnitTarget())
+            {
+                if (target->GetTypeId() == TYPEID_UNIT && entriesToUse.find(type == SPELL_TARGET_TYPE_CREATURE_GUID ? target->GetGUIDLow() : target->GetEntry()) != entriesToUse.end())
+                {
+                    if ((type == SPELL_TARGET_TYPE_CREATURE && target->IsAlive()) ||
+                        (type == SPELL_TARGET_TYPE_DEAD && ((Creature*)target)->IsCorpse()))
+                    {
+                        if (target->IsWithinDistInMap(caster, radius) && OnCheckTarget(target, effIndex))
+                            foundScriptCreatureTargets.push_back((Creature*)target);
+                        else
+                            foundButOutOfRange = true;
+                    }
+                }
+            }
+            if (foundScriptCreatureTargets.size() < targetCount)
+            {
+                if (radius == 50000.f) // only guid scripting
+                {
+                    for (uint32 guid : entriesToUse)
+                    {
+                        CreatureData const* data = sObjectMgr.GetCreatureData(guid);
+                        CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(data->id);
+                        if (Creature* creature = m_caster->GetMap()->GetCreature(ObjectGuid(cinfo->GetHighGuid(), data->id, guid)))
+                            foundScriptCreatureTargets.push_back(creature);
+                    }
+                }
+                else
+                {
+                    MaNGOS::AllCreatureEntriesWithLiveStateInObjectRangeCheck u_check(*caster, entriesToUse, type != SPELL_TARGET_TYPE_DEAD, radius, type == SPELL_TARGET_TYPE_CREATURE_GUID, false, true);
+                    MaNGOS::CreatureListSearcher<MaNGOS::AllCreatureEntriesWithLiveStateInObjectRangeCheck> searcher(foundScriptCreatureTargets, u_check);
+                    Cell::VisitAllObjects(caster, searcher, radius); // Visit all, need to find also Pet* objects
+                    if (u_check.FoundOutOfRange())
+                        foundButOutOfRange = true;
+                }
+                for (auto iter = foundScriptCreatureTargets.begin(); iter != foundScriptCreatureTargets.end();)
+                {
+                    bool failed = false;
+                    if (!OnCheckTarget(*iter, effIndex))
+                        failed = true;
+                    else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF) && m_caster == (*iter))
+                        failed = true;
+                    if (failed)
+                        iter = foundScriptCreatureTargets.erase(iter);
+                    else
+                        ++iter;
+                }
+
+                foundScriptCreatureTargets.sort([=](const Creature* a, const Creature* b) -> bool
+                {
+                    return caster->GetDistance(a, true, DIST_CALC_NONE) < caster->GetDistance(b, true, DIST_CALC_NONE);
+                });
+
+                if (foundScriptCreatureTargets.size() > targetCount) // if we have too many targets, we need to trim the list
+                    foundScriptCreatureTargets.resize(targetCount);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    if (!foundScriptCreatureTargets.empty())
+    {
+        // store coordinates for TARGET_LOCATION_SCRIPT_NEAR_CASTER
+        if (targetMode == TARGET_LOCATION_SCRIPT_NEAR_CASTER)
+        {
+            Creature* creatureScriptTarget = foundScriptCreatureTargets.front(); // can only have one target in this case
+            m_targets.setDestination(creatureScriptTarget->GetPositionX(), creatureScriptTarget->GetPositionY(), creatureScriptTarget->GetPositionZ());
+        }
+        // store explicit target for TARGET_UNIT_SCRIPT_NEAR_CASTER
+        else
+            for (Creature* creature : foundScriptCreatureTargets)
+                tempUnitList.push_back(creature);
+    }
+    else if (!foundScriptGOTargets.empty())
+    {
+        // store coordinates for TARGET_LOCATION_SCRIPT_NEAR_CASTER
+        if (targetMode == TARGET_LOCATION_SCRIPT_NEAR_CASTER)
+        {
+            GameObject* goScriptTarget = foundScriptGOTargets.front(); // can only have one target in this case
+            m_targets.setDestination(goScriptTarget->GetPositionX(), goScriptTarget->GetPositionY(), goScriptTarget->GetPositionZ());
+        }
+        // store explicit target for TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER
+        else
+            tempGOList.splice(tempGOList.end(), foundScriptGOTargets);
+    }
+    // Missing DB Entry or targets for this spellEffect.
+    else
+    {
+        /* For TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER makes DB targets optional not required for now
+         * TODO: Makes more research for this target type
+         */
+        if (targetMode != TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER)
+        {
+            // not report target not existence for triggered spells
+            return foundButOutOfRange ? SPELL_FAILED_OUT_OF_RANGE : SPELL_FAILED_BAD_TARGETS;
+        }
+    }
+    return SPELL_CAST_OK;
 }
 
 void Spell::CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex)
