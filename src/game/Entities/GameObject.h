@@ -740,7 +740,7 @@ class GameObject : public WorldObject
 
         float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
 
-        void Use(Unit* user);
+        void Use(Unit* user, SpellEntry const* spellInfo = nullptr);
 
         LootState GetLootState() const { return m_lootState; }
         void SetLootState(LootState state);
