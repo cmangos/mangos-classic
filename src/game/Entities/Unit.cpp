@@ -9903,7 +9903,7 @@ bool Unit::HasDamageInterruptibleStunAura() const
 
 void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
 {
-    float oldVal = m_modAttackSpeedPct[att];
+    float oldVal = GetFloatValue(UNIT_FIELD_BASEATTACKTIME + att);
     if (val > 0)
     {
         ApplyPercentModFloatVar(m_modAttackSpeedPct[att], val, !apply);
@@ -9914,7 +9914,10 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply
         ApplyPercentModFloatVar(m_modAttackSpeedPct[att], -val, apply);
         ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME + att, -val, apply);
     }
-    setAttackTimer(att, getAttackTimer(att) * m_modAttackSpeedPct[att] / oldVal);
+    float newVal = GetFloatValue(UNIT_FIELD_BASEATTACKTIME + att);
+    uint32 attackTimer = getAttackTimer(att);
+    int32 diff = newVal - oldVal;
+    setAttackTimer(att, diff < -int32(attackTimer) ? 0 : attackTimer + diff);
 }
 
 void Unit::ApplyCastTimePercentMod(float val, bool apply)
