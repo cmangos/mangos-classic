@@ -177,7 +177,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 
     if (!lootItem->IsAllowed(target, pLoot))
     {
-        _player->SendEquipError(EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, nullptr, nullptr);
+        _player->SendLootError(lootguid, LOOT_ERROR_MASTER_OTHER);
         return;
     }
 

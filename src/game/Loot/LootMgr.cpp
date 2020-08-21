@@ -396,7 +396,7 @@ LootItem::LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _r
 
 
 // Basic checks for player/item compatibility - if false no chance to see the item in the loot
-bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTarget) const
+bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTarget, Player const* masterLooter) const
 {
     if (!itemProto)
         return false;
@@ -423,7 +423,7 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
     }
 
     // Not quest only drop (check quest starting items for already accepted non-repeatable quests)
-    if (itemProto->StartQuest && player->GetQuestStatus(itemProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemId))
+    if (player != masterLooter && itemProto->StartQuest && player->GetQuestStatus(itemProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemId))
         return false;
 
     return true;
@@ -448,6 +448,9 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
                 return LOOT_SLOT_NORMAL;
 
             default:
+                if (!isUnderThreshold && lootItemType == LOOTITEM_TYPE_CONDITIONNAL && loot->m_lootMethod == MASTER_LOOT)
+                    break;
+
                 if (loot->m_isChest)
                     return LOOT_SLOT_NORMAL;
 
@@ -525,7 +528,7 @@ bool LootItem::IsAllowed(Player const* player, Loot const* loot) const
         return allowedGuid.find(player->GetObjectGuid()) != allowedGuid.end();
 
     if (allowedGuid.empty() || (freeForAll && allowedGuid.find(player->GetObjectGuid()) == allowedGuid.end()))
-        return AllowedForPlayer(player, loot->GetLootTarget());
+        return AllowedForPlayer(player, loot->GetLootTarget(), nullptr);
 
     return false;
 }
@@ -910,7 +913,7 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, b
         // assign permission for non chest items
         for (auto lootItem : m_lootItems)
         {
-            if (player && (lootItem->AllowedForPlayer(player, GetLootTarget())))
+            if (player && (lootItem->AllowedForPlayer(player, GetLootTarget(), masterLooter)))
             {
                 if (!m_isChest)
                     lootItem->allowedGuid.emplace(player->GetObjectGuid());
@@ -1926,7 +1929,7 @@ InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
     return SendItem(target, lootItem);
 }
 
-InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
+InventoryResult Loot::SendItem(Player* target, LootItem* lootItem, bool sendError)
 {
     if (!target)
         return EQUIP_ERR_OUT_OF_RANGE;
@@ -1975,7 +1978,7 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
             playerGotItem = true;
             m_isChanged = true;
         }
-        else
+        else if (sendError)
             target->SendEquipError(msg, nullptr, nullptr, lootItem->itemId);
     }
 
