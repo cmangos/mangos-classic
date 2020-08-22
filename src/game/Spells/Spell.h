@@ -463,6 +463,7 @@ class Spell
         bool m_ignoreCosts;
         bool m_ignoreCooldowns;
         bool m_ignoreConcurrentCasts;
+        bool m_hideInCombatLog;
 
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() const { return m_timer; }
