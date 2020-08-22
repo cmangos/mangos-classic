@@ -41,6 +41,33 @@ void ScriptedInstance::DoUseDoorOrButton(uint32 entry, uint32 withRestoreTime /*
         debug_log("SD2: Script call DoUseDoorOrButton(by Entry), but no gameobject of entry %u was created yet, or it was not stored by script for map %u.", entry, instance->GetId());
 }
 
+void ScriptedInstance::DoUseOpenableObject(uint32 entry, bool open, uint32 withRestoreTime, bool useAlternativeState)
+{
+    if (GameObject* go = GetSingleGameObjectFromStorage(entry))
+    {
+        if (open)
+        {
+            if (go->GetGoState() == GO_STATE_READY)
+            {
+                if (go->GetLootState() == GO_READY)
+                    go->UseDoorOrButton(withRestoreTime, useAlternativeState);
+                else
+                    go->ResetDoorOrButton();
+            }
+        }
+        else
+        {
+            if (go->GetGoState() == GO_STATE_ACTIVE)
+            {
+                if (go->GetLootState() == GO_READY)
+                    go->UseDoorOrButton(withRestoreTime, useAlternativeState);
+                else
+                    go->ResetDoorOrButton();
+            }
+        }
+    }
+}
+
 /**
    Function that respawns a despawned GameObject with given time
 

@@ -42,6 +42,7 @@ class ScriptedInstance : public InstanceData
         // Change active state of doors or buttons
         void DoUseDoorOrButton(ObjectGuid guid, uint32 withRestoreTime = 0, bool useAlternativeState = false);
         void DoUseDoorOrButton(uint32 entry, uint32 withRestoreTime = 0, bool useAlternativeState = false);
+        void DoUseOpenableObject(uint32 entry, bool open, uint32 withRestoreTime = 0, bool useAlternativeState = false);
 
         // Respawns a GO having negative spawntimesecs in gameobject-table
         void DoRespawnGameObject(ObjectGuid guid, uint32 timeToDespawn = MINUTE);
