@@ -42,7 +42,8 @@ UnitAI::UnitAI(Unit* unit) :
     m_meleeEnabled(true),
     m_reactState(REACT_AGGRESSIVE),
     m_combatScriptHappening(false),
-    m_currentAIOrder(ORDER_NONE)
+    m_currentAIOrder(ORDER_NONE),
+    m_selfRooted(false)
 {
 }
 
