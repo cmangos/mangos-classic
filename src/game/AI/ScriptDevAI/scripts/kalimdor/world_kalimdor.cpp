@@ -62,6 +62,7 @@ struct world_map_kalimdor : public ScriptedMap
         for (auto& riftList : m_aElementalRiftGUIDs)
             riftList.clear();
         m_uiDronesTimer = 0;
+        memset(&m_encounter, 0, sizeof(m_encounter));
     }
 
     void OnCreatureCreate(Creature* pCreature)
