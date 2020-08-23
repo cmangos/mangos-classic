@@ -102,6 +102,8 @@ struct npc_dashel_stonefistAI : public ScriptedAI
 {
     npc_dashel_stonefistAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
+        m_uiStartEventTimer = 0;
+        m_uiEndEventTimer = 0;
         Reset();
     }
 
