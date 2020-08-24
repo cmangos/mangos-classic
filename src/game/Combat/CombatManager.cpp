@@ -65,10 +65,13 @@ void CombatManager::Update(const uint32 diff)
                     m_owner->getThreatManager().DeleteOutOfRangeReferences();
                 if (m_combatTimer)
                 {
-                    if (m_combatTimer <= diff)
-                        m_combatTimer = 0;
-                    else
-                        m_combatTimer -= diff;
+                    if (m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || !m_owner->IsCrowdControlled())
+                    {
+                        if (m_combatTimer <= diff)
+                            m_combatTimer = 0;
+                        else
+                            m_combatTimer -= diff;
+                    }
                 }
                 else
                 {
@@ -89,7 +92,7 @@ void CombatManager::Update(const uint32 diff)
                         // if timer ran out and we are far away from last refresh pos, evade
                         else if (m_owner->GetVictim() && m_owner->GetVictim()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                         {
-                            if (m_owner->GetVictim()->GetDistance2d(m_lastRefreshPos.GetPositionX(), m_lastRefreshPos.GetPositionY()) > 20.0f)
+                            if (m_owner->GetVictim()->GetDistance2d(m_lastRefreshPos.GetPositionX(), m_lastRefreshPos.GetPositionY()) > 30.0f)
                                 m_owner->HandleExitCombat();
                         }
                     }
