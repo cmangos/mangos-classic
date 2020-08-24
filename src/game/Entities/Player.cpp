@@ -4470,6 +4470,52 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     }
 }
 
+std::pair<bool, AreaTrigger const*> Player::CheckAndRevivePlayerOnDungeonEnter(MapEntry const* targetMapEntry, uint32 targetMapId)
+{
+    AreaTrigger const* resultingAt = nullptr;
+
+    uint32 corpseMapId = 0;
+    if (Corpse* corpse = GetCorpse())
+        corpseMapId = corpse->GetMapId();
+
+    // check back way from corpse to entrance
+    uint32 instance_map = corpseMapId;
+    do
+    {
+        // most often fast case
+        if (instance_map == targetMapEntry->MapID)
+            break;
+
+        InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(instance_map);
+        instance_map = instance ? instance->parent : 0;
+    } while (instance_map);
+
+    // corpse not in dungeon or some linked deep dungeons
+    if (!instance_map)
+    {
+        GetSession()->SendAreaTriggerMessage("You cannot enter %s while in a ghost mode",
+            targetMapEntry->name[GetSession()->GetSessionDbcLocale()]);
+        return { false, nullptr };
+    }
+
+    // need find areatrigger to inner dungeon for landing point
+    if (targetMapId != corpseMapId)
+    {
+        if (AreaTrigger const* corpseAt = sObjectMgr.GetMapEntranceTrigger(corpseMapId))
+        {
+            resultingAt = corpseAt;
+            targetMapEntry = sMapStore.LookupEntry(targetMapId);
+            if (!targetMapEntry)
+                return { false, nullptr };
+        }
+    }
+
+    // now we can resurrect player, and then check teleport requirements
+    ResurrectPlayer(0.5f);
+    SpawnCorpseBones();
+    return { true, resultingAt };
+}
+
 void Player::KillPlayer()
 {
     SendMoveRoot(true);
