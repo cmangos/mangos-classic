@@ -269,7 +269,7 @@ bool AuctionHouseBot::ReloadAllConfig()
 
 void AuctionHouseBot::Rebuild(bool all)
 {
-    sLog.outError("AHBot: Rebuilding auction house items");
+    sLog.outString("AHBot: Rebuilding auction house items");
     for (uint32 i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
     {
         AuctionHouseObject::AuctionEntryMapBounds bounds = sAuctionMgr.GetAuctionsMap(AuctionHouseType(i))->GetAuctionsBounds();
