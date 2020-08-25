@@ -156,7 +156,7 @@ void AuctionHouseBot::Update()
 
     AuctionHouseType houseType = AuctionHouseType(m_houseAction % MAX_AUCTION_HOUSE_TYPE);
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(houseType);
-    if (m_houseAction < MAX_AUCTION_HOUSE_TYPE && urand(0, 100) < m_chanceSell)
+    if (m_houseAction < MAX_AUCTION_HOUSE_TYPE && urand(0, 99) < m_chanceSell)
     {
         // Sell items
         std::unordered_map<uint32, uint32> itemMap;
@@ -175,16 +175,16 @@ void AuctionHouseBot::Update()
         // profession items are a bit different (not looted)
         if (m_professionItemsConfig[1] > 0 && m_professionItemsConfig[3] > 0 && m_professionItems.size() > 0)
         {
-            int32 maxTemplates = m_professionItemsConfig[0] < 0 ? urand(0, m_professionItemsConfig[1] + 1 - m_professionItemsConfig[0]) + m_professionItemsConfig[0] : urand(m_professionItemsConfig[0], m_professionItemsConfig[1] + 1);
+            int32 maxTemplates = m_professionItemsConfig[0] < 0 ? urand(0, m_professionItemsConfig[1] - m_professionItemsConfig[0]) + m_professionItemsConfig[0] : urand(m_professionItemsConfig[0], m_professionItemsConfig[1]);
             if (maxTemplates > 0)
             {
                 for (uint32 templateCounter = 0; templateCounter < maxTemplates; ++templateCounter)
                 {
-                    uint32 item = m_professionItems[urand(0, m_professionItems.size())];
+                    uint32 item = m_professionItems[urand(0, m_professionItems.size() - 1)];
                     ItemPrototype const* prototype = ObjectMgr::GetItemPrototype(item);
-                    if (!prototype || prototype->Quality == 0 || urand(0, 1 << (prototype->Quality - 1)) > 0)
+                    if (!prototype || prototype->Quality == 0 || urand(0, (1 << (prototype->Quality - 1)) - 1) > 0)
                         continue; // make it decreasingly likely that crafted items of higher quality is added to the auction house (white: 100%, green: 50%, blue: 25%, purple: 12.5%, ...)
-                    uint32 count = (uint32) round(prototype->GetMaxStackSize() * urand(m_professionItemsConfig[2], m_professionItemsConfig[3] + 1) / 100.0);
+                    uint32 count = (uint32) round(prototype->GetMaxStackSize() * urand(m_professionItemsConfig[2], m_professionItemsConfig[3]) / 100.0);
                     itemMap[item] += count;
                 }
             }
@@ -194,7 +194,7 @@ void AuctionHouseBot::Update()
         for (auto itemData : m_itemData)
         {
             if (itemData.second.AddChance > 0) // replace normal loot sources with custom chance of adding item
-                itemMap[itemData.first] = urand(0, 100) < itemData.second.AddChance ? urand(itemData.second.MinAmount, itemData.second.MaxAmount + 1) : 0;
+                itemMap[itemData.first] = urand(0, 99) < itemData.second.AddChance ? urand(itemData.second.MinAmount, itemData.second.MaxAmount) : 0;
         }
 
         for (auto itemEntry : itemMap)
@@ -223,12 +223,12 @@ void AuctionHouseBot::Update()
                 Item* item = Item::CreateItem(itemEntry.first, count);
                 if (buyoutPrice == 0 || !item)
                     continue; // don't put up items we don't know the value of
-                uint32 bidPrice = buyoutPrice * (urand(m_auctionBidMin, m_auctionBidMax + 1)) / 100;
+                uint32 bidPrice = buyoutPrice * (urand(m_auctionBidMin, m_auctionBidMax)) / 100;
                 if (item)
-                    auctionHouse->AddAuction(sAuctionHouseStore.LookupEntry(houseType == AUCTION_HOUSE_ALLIANCE ? 1 : (houseType == AUCTION_HOUSE_HORDE ? 6 : 7)), item, urand(m_auctionTimeMin, m_auctionTimeMax + 1) * HOUR, bidPrice, buyoutPrice);
+                    auctionHouse->AddAuction(sAuctionHouseStore.LookupEntry(houseType == AUCTION_HOUSE_ALLIANCE ? 1 : (houseType == AUCTION_HOUSE_HORDE ? 6 : 7)), item, urand(m_auctionTimeMin, m_auctionTimeMax) * HOUR, bidPrice, buyoutPrice);
             }
         }
-    } else if (m_houseAction >= MAX_AUCTION_HOUSE_TYPE && urand(0, 100) < m_chanceBuy)
+    } else if (m_houseAction >= MAX_AUCTION_HOUSE_TYPE && urand(0, 99) < m_chanceBuy)
     {
         // Buy items
         AuctionHouseObject::AuctionEntryMapBounds bounds = auctionHouse->GetAuctionsBounds();
@@ -457,17 +457,17 @@ void AuctionHouseBot::AddLootToItemMap(LootStore* store, std::vector<int32>& loo
 {
     if (lootConfig[1] <= 0 || lootConfig[3] <= 0 || lootTemplates.size() <= 0)
         return;
-    int32 maxTemplates = lootConfig[0] < 0 ? urand(0, lootConfig[1] + 1 - lootConfig[0]) + lootConfig[0] : urand(lootConfig[0], lootConfig[1] + 1);
+    int32 maxTemplates = lootConfig[0] < 0 ? urand(0, lootConfig[1] - lootConfig[0]) + lootConfig[0] : urand(lootConfig[0], lootConfig[1]);
     if (maxTemplates <= 0)
         return;
     for (uint32 templateCounter = 0; templateCounter < maxTemplates; ++templateCounter)
     {
-        uint32 lootTemplate = urand(0, lootTemplates.size());
+        uint32 lootTemplate = urand(0, lootTemplates.size() - 1);
         LootTemplate const* lootTable = store->GetLootFor(lootTemplates[lootTemplate]);
         if (!lootTable)
             continue;
         std::unique_ptr<Loot> loot = std::unique_ptr<Loot>(new Loot(LOOT_DEBUG));
-        for (uint32 repeat = urand(lootConfig[2], lootConfig[3] + 1); repeat > 0; --repeat)
+        for (uint32 repeat = urand(lootConfig[2], lootConfig[3]); repeat > 0; --repeat)
             lootTable->Process(*loot, nullptr, *store, store->IsRatesAllowed());
 
         LootItem* lootItem;
