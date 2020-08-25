@@ -173,7 +173,7 @@ void AuctionHouseBot::Update()
         AddLootToItemMap(&LootTemplates_Skinning, m_skinningLootConfig, m_skinningLootTemplates, itemMap);                   // skinning loot
 
         // profession items are a bit different (not looted)
-        if (m_professionItemsConfig[1] > 0 && m_professionItemsConfig[3] > 0)
+        if (m_professionItemsConfig[1] > 0 && m_professionItemsConfig[3] > 0 && m_professionItems.size() > 0)
         {
             int32 maxTemplates = m_professionItemsConfig[0] < 0 ? urand(0, m_professionItemsConfig[1] + 1 - m_professionItemsConfig[0]) + m_professionItemsConfig[0] : urand(m_professionItemsConfig[0], m_professionItemsConfig[1] + 1);
             if (maxTemplates > 0)
@@ -455,7 +455,7 @@ void AuctionHouseBot::ParseItemValueConfig(char const* fieldname, std::vector<ui
 
 void AuctionHouseBot::AddLootToItemMap(LootStore* store, std::vector<int32>& lootConfig, std::vector<uint32>& lootTemplates, std::unordered_map<uint32, uint32>& itemMap)
 {
-    if (lootConfig[1] <= 0 || lootConfig[3] <= 0)
+    if (lootConfig[1] <= 0 || lootConfig[3] <= 0 || lootTemplates.size() <= 0)
         return;
     int32 maxTemplates = lootConfig[0] < 0 ? urand(0, lootConfig[1] + 1 - lootConfig[0]) + lootConfig[0] : urand(lootConfig[0], lootConfig[1] + 1);
     if (maxTemplates <= 0)
