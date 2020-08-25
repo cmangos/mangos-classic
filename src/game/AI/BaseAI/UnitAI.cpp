@@ -43,7 +43,8 @@ UnitAI::UnitAI(Unit* unit) :
     m_reactState(REACT_AGGRESSIVE),
     m_combatScriptHappening(false),
     m_currentAIOrder(ORDER_NONE),
-    m_selfRooted(false)
+    m_selfRooted(false),
+    m_currentSpell(nullptr)
 {
 }
 
