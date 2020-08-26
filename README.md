@@ -86,7 +86,7 @@ To be able to accomplish these goals, we support and promote:
   CMaNGOS project is not affiliated with Blizzard or its licensors.
 
   Some third-party libraries CMaNGOS uses have other licenses, that must be
-  uphold.  These libraries are located within the dep/ directory
+  upheld.  These libraries are located within the dep/ directory
 
   In addition, as a special exception, the CMaNGOS project
   gives permission to link the code of its release of MaNGOS with the
