@@ -3,7 +3,7 @@
 ## Warning
 The code of CMaNGOS is shipped as it is without any form of warranty,
 and - except for third party libraries - licensed under the GPL 2.0,
-which you can read from the file "COPYING"
+which you can read from the file "LICENCE"
 
 ## Point of current development
 The project is currently hosted at http://cmangos.net and developed under https://github.com/cmangos
@@ -13,17 +13,17 @@ Development of this project dates back to 2004, and was developed under various 
 * WoW Daemon Team, 2004
 * MaNGOS project, 2005-2008, located at http://www.mangosproject.org
 * MaNGOS project, 2008-2012, located at http://getmangos.com
-* CMaNGOS project, 2012-2018, located at http://cmangos.net
+* CMaNGOS project, from 2012 located at http://cmangos.net
 
 ## Authorship of the code
 Authorship is assigned for each commit within the git history, which is stored in these git repositories:
 * github.com/cmangos/mangos-svn (History from MaNGOS project from 2005-2008, originally hosted at http://mangos.svn.sourceforge.net)
-* github.com/cmangos/mangos-wotlk (History since then)
-Unfortunately we have no detailed information of the history of the WoWD project;
+* github.com/cmangos/mangos-classic (History since then)
+Unfortunately, we have no detailed information of the history of the WoWD project;
 if somebody can provide information, please contact us, so that we can make this history available
 
 ## Exceptions with third party libraries
-The third party libraries have their own way of addressing authorship, and the authorship of commits importing/ updating
+The third party libraries have their own way of addressing authorship, and the authorship of commits importing/updating
 a third party library reflects who did the importing instead of who wrote the code within the commit.
 
 The Authors of third party libraries are not explicitly mentioned, and usually are possible to obtain from the files belonging to the third party libraries.
