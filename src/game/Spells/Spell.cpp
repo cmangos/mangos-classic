@@ -5152,6 +5152,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (player->IsInDisallowedMountForm() || player->IsMounted())
                         return SPELL_FAILED_BAD_TARGETS;
                 }
+
+                break;
             }
             case SPELL_AURA_MOD_DISARM:
             {
