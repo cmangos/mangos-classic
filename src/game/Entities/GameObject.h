@@ -737,6 +737,7 @@ class GameObject : public WorldObject
         void SetGoAnimProgress(uint32 animprogress) { SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, animprogress); }
         uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
         void SetDisplayId(uint32 modelId);
+        uint32 GetLevel() const { return GetUInt32Value(GAMEOBJECT_LEVEL); }
 
         float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
 
