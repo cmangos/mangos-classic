@@ -6650,18 +6650,41 @@ SpellCastResult Spell::CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, Ski
 
                 skillId = SkillByLockType(LockType(lockInfo->Index[j]));
 
+                bool oldCalc = true;
+                if (skillId == SKILL_NONE)
+                {
+                    SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(m_spellInfo->Id);
+                    if (bounds.first != bounds.second)
+                    {
+                        SkillLineAbilityEntry const* skillInfo = bounds.first->second;
+                        skillId = SkillType(skillInfo->skillId);
+                        oldCalc = false;
+                    }
+                }
+
                 if (skillId != SKILL_NONE)
                 {
-                    // skill bonus provided by casting spell (mostly item spells)
-                    // add the damage modifier from the spell casted (cheat lock / skeleton key etc.) (use m_currentBasePoints, CalculateDamage returns wrong value)
-                    uint32 spellSkillBonus = uint32(m_currentBasePoints[effIndex]);
-                    reqSkillValue = lockInfo->Skill[j];
+                    uint32 spellSkillBonus = 0;
+                    if (oldCalc) // still correct but not usable for spell skill ids
+                    {
+                        // skill bonus provided by casting spell (mostly item spells)
+                        // add the damage modifier from the spell casted (cheat lock / skeleton key etc.) (use m_currentBasePoints, CalculateDamage returns wrong value)
+                        uint32 spellSkillBonus = uint32(m_currentBasePoints[effIndex]);
+                        reqSkillValue = lockInfo->Skill[j];
 
-                    // castitem check: rogue using skeleton keys. the skill values should not be added in this case.
-                    skillValue = m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER ?
-                                 0 : ((Player*)m_caster)->GetSkillValue(skillId);
+                        // castitem check: rogue using skeleton keys. the skill values should not be added in this case.
+                        skillValue = m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER ?
+                            0 : ((Player*)m_caster)->GetSkillValue(skillId);
 
-                    skillValue += spellSkillBonus;
+                        skillValue += spellSkillBonus;
+                    }
+                    else if (lockInfo->Index[j] == LOCKTYPE_DISARM_TRAP)
+                    {
+                        reqSkillValue = INT32_MAX;
+                        if (GameObject* go = m_targets.getGOTarget())
+                            reqSkillValue = go->GetLevel() * 5;
+                        skillValue = CalculateSpellEffectValue(effIndex, nullptr);
+                    }
 
                     if (skillValue < reqSkillValue)
                         return SPELL_FAILED_LOW_CASTLEVEL;
