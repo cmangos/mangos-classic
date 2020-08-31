@@ -33,7 +33,68 @@ struct CurseOfAgony : public AuraScript
     }
 };
 
+struct LifeTap : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        float cost = spell->m_currentBasePoints[EFFECT_INDEX_0];
+
+        Unit* caster = spell->GetCaster();
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(spell->m_spellInfo->Id, SPELLMOD_COST, cost, spell->m_usedAuraCharges);
+
+        int32 dmg = caster->SpellDamageBonusDone(caster, spell->m_spellInfo, uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE, spell->m_damageInfo);
+        dmg = caster->SpellDamageBonusTaken(caster, spell->m_spellInfo, dmg, SPELL_DIRECT_DAMAGE, spell->m_damageInfo);
+        spell->SetScriptValue(dmg);
+    }
+
+    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
+    {
+        if (spell->GetScriptValue() > int32(spell->GetCaster()->GetHealth()))
+            return SPELL_FAILED_FIZZLE;
+
+        if (!strict)
+        {
+            int32 dmg = spell->GetScriptValue();
+            if (Aura* aura = spell->GetCaster()->GetAura(28830, EFFECT_INDEX_0))
+                dmg += dmg * aura->GetModifier()->m_amount / 100;
+            spell->SetPowerCost(dmg);
+        }
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        int32 mana = spell->GetScriptValue();
+
+        Unit::AuraList const& auraDummy = caster->GetAurasByType(SPELL_AURA_DUMMY);
+        for (Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
+        {
+            if ((*itr)->isAffectedOnSpell(spell->m_spellInfo))
+            {
+                switch ((*itr)->GetSpellProto()->Id)
+                {
+                    case 28830: // Plagueheart Rainment - reduce hp cost
+                        break;
+                        // Improved Life Tap
+                    default: mana = ((*itr)->GetModifier()->m_amount + 100) * mana / 100; break;
+                }
+            }
+        }
+
+        caster->CastCustomSpell(nullptr, 31818, &mana, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+
+        // Mana Feed
+        int32 manaFeedVal = caster->CalculateSpellEffectValue(caster, spell->m_spellInfo, EFFECT_INDEX_1, spell->m_damageInfo);
+        manaFeedVal = manaFeedVal * mana / 100;
+        if (manaFeedVal > 0)
+            caster->CastCustomSpell(nullptr, 32553, &manaFeedVal, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);            
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterAuraScript<CurseOfAgony>("spell_curse_of_agony");
+    RegisterSpellScript<LifeTap>("spell_life_tap");
 }

@@ -1530,49 +1530,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
             break;
         }
-        case SPELLFAMILY_WARLOCK:
-        {
-            // Life Tap
-            if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000040000))
-            {
-                float cost = m_currentBasePoints[EFFECT_INDEX_0];
-
-                if (Player* modOwner = m_caster->GetSpellModOwner())
-                    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost, this);
-
-                int32 dmg = m_caster->SpellDamageBonusTaken(m_caster, m_spellInfo, (m_caster->SpellDamageBonusDone(m_caster, m_spellInfo, uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE)), SPELL_DIRECT_DAMAGE);
-
-                if (int32(m_caster->GetHealth()) > dmg)
-                {
-                    int32 mana = dmg;
-
-                    Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                    for (Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
-                    {
-                        if ((*itr)->isAffectedOnSpell(m_spellInfo))
-                        {
-                            switch ((*itr)->GetSpellProto()->Id)
-                            {
-                                case 28830: // Plagueheart Rainment - reduce hp cost
-                                    dmg += dmg * (*itr)->GetModifier()->m_amount / 100; break;
-                                    // Improved Life Tap
-                                default: mana = ((*itr)->GetModifier()->m_amount + 100) * mana / 100; break;
-                            }
-                        }
-                    }
-
-                    // Shouldn't Appear in Combat Log
-                    m_caster->ModifyHealth(-dmg);
-
-                    m_caster->CastCustomSpell(m_caster, 31818, &mana, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-                }
-                else
-                    SendCastResult(SPELL_FAILED_FIZZLE);
-
-                return;
-            }
-            break;
-        }
         case SPELLFAMILY_PRIEST:
         {
             switch (m_spellInfo->Id)
