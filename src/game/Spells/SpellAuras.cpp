@@ -3860,6 +3860,7 @@ void Aura::HandleAuraModIncreaseEnergyPercent(bool apply, bool /*Real*/)
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + powerType);
 
     target->HandleStatModifier(unitMod, TOTAL_PCT, float(m_modifier.m_amount), apply);
+    target->ModifyPower(powerType, apply ? m_modifier.m_amount : -m_modifier.m_amount);
 }
 
 void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool /*Real*/)
