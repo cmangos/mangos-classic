@@ -501,8 +501,6 @@ class Spell
         Unit* GetAffectiveCaster() const { return m_originalCasterGUID ? m_originalCaster : m_caster; }
         // m_originalCasterGUID can store GO guid, and in this case this is visual caster
         WorldObject* GetCastingObject() const;
-
-        uint32 GetPowerCost() const { return m_powerCost; }
         // channels are generally instant - until more research provided all need to have speed 0
         float GetSpellSpeed() const;
 
@@ -553,7 +551,7 @@ class Spell
         // warning - always set scheme for first unique target in a row
         void SetFilteringScheme(SpellEffectIndex effIdx, bool targetB, SpellTargetFilterScheme scheme) { m_filteringScheme[effIdx][uint32(targetB)] = scheme; }
         // onsuccessfulspellstart
-        uint32 GetPowerCost() { return m_powerCost; }
+        uint32 GetPowerCost() const { return m_powerCost; }
         void SetPowerCost(uint32 powerCost) { m_powerCost = powerCost; }
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
