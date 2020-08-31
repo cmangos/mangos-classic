@@ -145,7 +145,10 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
         if (m_pInstance)
         {
             if (Creature* pCthun = m_pInstance->GetSingleCreatureFromStorage(NPC_CTHUN))
+            {
+                pCthun->AI()->SetReactState(REACT_AGGRESSIVE);
                 pCthun->AI()->AttackStart(pKiller);
+            }
             else
                 script_error_log("C'thun could not be found. Please check your database!");
         }
@@ -170,10 +173,12 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
             case NPC_CLAW_TENTACLE:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     pSummoned->AI()->AttackStart(pTarget);
-
-                pSummoned->SummonCreature(NPC_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
                 break;
         }
+        if (Creature* portal = pSummoned->SummonCreature(NPC_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0))
+            portal->AI()->SetReactState(REACT_PASSIVE);
+
+        pSummoned->AI()->SetCombatMovement(false);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -384,6 +389,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
 
         // Reset flags
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        SetReactState(REACT_PASSIVE);
     }
 
     void DamageTaken(Unit* /*pDealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
@@ -432,16 +438,19 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                     pSummoned->AI()->AttackStart(pTarget);
 
                 m_lEyeTentaclesList.push_back(pSummoned->GetObjectGuid());
-                pSummoned->SummonCreature(NPC_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
+                if (Creature* portal = pSummoned->SummonCreature(NPC_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0))
+                    portal->AI()->SetReactState(REACT_PASSIVE);
                 break;
             case NPC_GIANT_EYE_TENTACLE:
             case NPC_GIANT_CLAW_TENTACLE:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     pSummoned->AI()->AttackStart(pTarget);
 
-                pSummoned->SummonCreature(NPC_GIANT_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
+                if (Creature* portal = pSummoned->SummonCreature(NPC_GIANT_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0))
+                    portal->AI()->SetReactState(REACT_PASSIVE);
                 break;
         }
+        pSummoned->AI()->SetCombatMovement(false);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -704,31 +713,38 @@ struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
-        if (m_uiDistCheckTimer < uiDiff)
+        if (m_uiDistCheckTimer)
         {
-            // If there is nobody in range, spawn a new tentacle at a new target location
-            if (!m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE) && m_pInstance)
+            if (m_uiDistCheckTimer < uiDiff)
             {
-                if (Creature* pCthun = m_pInstance->GetSingleCreatureFromStorage(NPC_CTHUN))
+                // If there is nobody in range, spawn a new tentacle at a new target location
+                if (!m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE) && m_pInstance)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_NOT_IN_MELEE_RANGE))
+                    if (Creature* pCthun = m_pInstance->GetSingleCreatureFromStorage(NPC_CTHUN))
                     {
-                        pCthun->SummonCreature(NPC_GIANT_CLAW_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_NOT_IN_MELEE_RANGE))
+                        {
+                            pCthun->SummonCreature(NPC_GIANT_CLAW_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
-                        // Self kill when a new tentacle is spawned
-                        SetCombatScriptStatus(true);
-                        m_creature->SetTarget(nullptr);
-                        m_creature->CastSpell(nullptr, SPELL_SUBMERGE_VISUAL, TRIGGERED_OLD_TRIGGERED);
-                        m_creature->ForcedDespawn(1500);
-                        return;
+                            m_uiDistCheckTimer = 0;
+
+                            // Self kill when a new tentacle is spawned
+                            SetCombatScriptStatus(true);
+                            m_creature->SetTarget(nullptr);
+                            m_creature->CastSpell(nullptr, SPELL_SUBMERGE_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                            m_creature->ForcedDespawn(1500);
+                            if (Creature* portal = GetClosestCreatureWithEntry(m_creature, NPC_GIANT_TENTACLE_PORTAL, 5.0f))
+                                portal->ForcedDespawn(1500);
+                            return;
+                        }
                     }
                 }
+                else
+                    m_uiDistCheckTimer = 5000;
             }
             else
-                m_uiDistCheckTimer = 5000;
+                m_uiDistCheckTimer -= uiDiff;
         }
-        else
-            m_uiDistCheckTimer -= uiDiff;
 
         if (m_uiThrashTimer < uiDiff)
         {
