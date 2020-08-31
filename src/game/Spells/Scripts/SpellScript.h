@@ -35,59 +35,59 @@ struct PeriodicTriggerData
 struct SpellScript
 {
     // called on spell init
-    virtual void OnInit(Spell* spell) const {}
+    virtual void OnInit(Spell* /*spell*/) const {}
     // called on success during Spell::Prepare
-    virtual void OnSuccessfulStart(Spell* spell) const {}
+    virtual void OnSuccessfulStart(Spell* /*spell*/) const {}
     // called on success inside Spell::finish - for channels this only happens if whole channel went through
-    virtual void OnSuccessfulFinish(Spell* spell) const {}
+    virtual void OnSuccessfulFinish(Spell* /*spell*/) const {}
     // called at end of Spell::CheckCast - strict is true in Spell::Prepare
-    virtual SpellCastResult OnCheckCast(Spell* spell, bool strict) const { return SPELL_CAST_OK; }
+    virtual SpellCastResult OnCheckCast(Spell* /*spell*/, bool /*strict*/) const { return SPELL_CAST_OK; }
     // called before effect execution
-    virtual void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const {}
+    virtual void OnEffectExecute(Spell* /*spell*/, SpellEffectIndex /*effIdx*/) const {}
     // called on adding dest target
-    virtual void OnDestTarget(Spell* spell) const {}
+    virtual void OnDestTarget(Spell* /*spell*/) const {}
     // called on Unit Spell::CheckTarget
-    virtual bool OnCheckTarget(const Spell* spell, GameObject* target, SpellEffectIndex eff) const { return true; }
+    virtual bool OnCheckTarget(const Spell* /*spell*/, GameObject* /*target*/, SpellEffectIndex /*eff*/) const { return true; }
     // called on GameObject target checking
-    virtual bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const { return true; }
+    virtual bool OnCheckTarget(const Spell* /*spell*/, Unit* /*target*/, SpellEffectIndex /*eff*/) const { return true; }
     // called in Spell::cast on all successful checks and after taking reagents
-    virtual void OnCast(Spell* spell) const {}
+    virtual void OnCast(Spell* /*spell*/) const {}
     // called on target hit before damage deal and proc
-    virtual void OnHit(Spell* spell) const {}
+    virtual void OnHit(Spell* /*spell*/) const {}
     // called on target hit after damage deal and proc
-    virtual void OnAfterHit(Spell* spell) const {}
+    virtual void OnAfterHit(Spell* /*spell*/) const {}
 };
 
 struct AuraScript
 {
     // called on SpellAuraHolder creation
-    virtual void OnHolderInit(SpellAuraHolder* holder) const {}
+    virtual void OnHolderInit(SpellAuraHolder* /*holder*/) const {}
     // called during any event that calculates aura modifier amount - caster can be nullptr
-    virtual int32 OnAuraValueCalculate(Aura* aura, Unit* caster, int32 damage) const { return damage; }
+    virtual int32 OnAuraValueCalculate(Aura* /*aura*/, Unit* /*caster*/, int32 value) const { return value; }
     // called during done/taken damage calculation
     virtual void OnDamageCalculate(Aura* /*aura*/, int32& /*advertisedBenefit*/, float& /*totalMod*/) const {}
     // called before aura apply and after aura unapply
-    virtual void OnApply(Aura* aura, bool apply) const {}
+    virtual void OnApply(Aura* /*aura*/, bool /*apply*/) const {}
     // called during proc eligibility checking
-    virtual bool OnCheckProc(Aura* aura) const { return true; }
+    virtual bool OnCheckProc(Aura* /*aura*/) const { return true; }
     // called before proc handler
-    virtual SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const { return SPELL_AURA_PROC_OK; }
+    virtual SpellAuraProcResult OnProc(Aura* /*aura*/, ProcExecutionData& /*procData*/) const { return SPELL_AURA_PROC_OK; }
     // called on absorb of this aura
-    virtual void OnAbsorb(Aura* aura, int32& currentAbsorb, uint32& reflectedSpellId, int32& reflectDamage, bool& preventedDeath) const {}
+    virtual void OnAbsorb(Aura* /*aura*/, int32& /*currentAbsorb*/, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/) const {}
     // called on mana shield absorb of this aura
-    virtual void OnManaAbsorb(Aura* aura, int32& currentAbsorb) const {}
+    virtual void OnManaAbsorb(Aura* /*aura*/, int32& /*currentAbsorb*/) const {}
     // called on death prevention
-    virtual void OnAuraDeathPrevention(Aura* aura, int32& remainingDamage) const {}
+    virtual void OnAuraDeathPrevention(Aura* /*aura*/, int32& /*remainingDamage*/) const {}
     // called on aura dispel
-    virtual void OnDispel(SpellAuraHolder* holder, Unit* dispeller, uint32 dispellingSpellId, uint32 originalStacks) const {}
+    virtual void OnDispel(SpellAuraHolder* /*holder*/, Unit* /*dispeller*/, uint32 /*dispellingSpellId*/, uint32 /*originalStacks*/) const {}
     // called on periodic auras which need amount calculation (damage, heal, burn, drain)
-    virtual void OnPeriodicCalculateAmount(Aura* aura, uint32& amount) const {}
+    virtual void OnPeriodicCalculateAmount(Aura* /*aura*/, uint32& /*amount*/) const {}
     // called on periodic spell trigger
-    virtual void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const {}
+    virtual void OnPeriodicTrigger(Aura* /*aura*/, PeriodicTriggerData& /*data*/) const {}
     // called on periodic dummy
-    virtual void OnPeriodicDummy(Aura* aura) const {}
+    virtual void OnPeriodicDummy(Aura* /*aura*/) const {}
     // called on periodic tick end
-    virtual void OnPeriodicTickEnd(Aura* aura) const {}
+    virtual void OnPeriodicTickEnd(Aura* /*aura*/) const {}
 };
 
 class SpellScriptMgr
