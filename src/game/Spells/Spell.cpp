@@ -6648,21 +6648,22 @@ SpellCastResult Spell::CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, Ski
                 if (uint32(m_spellInfo->EffectMiscValue[effIndex]) != lockInfo->Index[j])
                     continue;
 
-                skillId = SkillByLockType(LockType(lockInfo->Index[j]));
+                SkillType tempSkillId = SkillByLockType(LockType(lockInfo->Index[j]));
+                skillId = tempSkillId;
 
                 bool oldCalc = true;
-                if (skillId == SKILL_NONE)
+                if (tempSkillId == SKILL_NONE) // these must not be carried over to the reference variable - unless more research comes up
                 {
                     SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(m_spellInfo->Id);
                     if (bounds.first != bounds.second)
                     {
                         SkillLineAbilityEntry const* skillInfo = bounds.first->second;
-                        skillId = SkillType(skillInfo->skillId);
+                        tempSkillId = SkillType(skillInfo->skillId);
                         oldCalc = false;
                     }
                 }
 
-                if (skillId != SKILL_NONE)
+                if (tempSkillId != SKILL_NONE)
                 {
                     uint32 spellSkillBonus = 0;
                     if (oldCalc) // still correct but not usable for spell skill ids
@@ -6674,7 +6675,7 @@ SpellCastResult Spell::CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, Ski
 
                         // castitem check: rogue using skeleton keys. the skill values should not be added in this case.
                         skillValue = m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER ?
-                            0 : ((Player*)m_caster)->GetSkillValue(skillId);
+                            0 : ((Player*)m_caster)->GetSkillValue(tempSkillId);
 
                         skillValue += spellSkillBonus;
                     }
