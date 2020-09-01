@@ -136,7 +136,7 @@ bool Tracker::AddRoute(const TaxiPathEntry *entry, float discountMulti /*= 0.0f*
     const bool commercial = int32(discountMulti) != 0;
 
     // Can't add taxi path without mount display id unless specified otherwise
-    uint32 displayId = sObjectMgr.GetTaxiMountDisplayId(entry->from, m_owner.GetTeam(), commercial);
+    uint32 displayId = sObjectMgr.GetTaxiMountDisplayId(entry->from, m_owner.GetTeam());
     if (requireModel && !displayId)
         return false;
 
