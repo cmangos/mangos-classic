@@ -883,6 +883,7 @@ class CharmInfo
         ~CharmInfo();
 
         void SetCharmState(std::string const& ainame, bool withNewThreatList = true);
+        void SetCharmState(UnitAI* ai, bool withNewThreatList = true);
         void ResetCharmState();
         uint32 GetPetNumber() const { return m_petnumber; }
         void SetPetNumber(uint32 petnumber, bool statwindow);

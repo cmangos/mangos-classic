@@ -8947,8 +8947,12 @@ CharmInfo::~CharmInfo()
 
 void CharmInfo::SetCharmState(std::string const& ainame, bool withNewThreatList /*= true*/)
 {
-    if (!ainame.empty())
-        m_ai = FactorySelector::GetSpecificAI(m_unit, ainame);
+    SetCharmState(((!ainame.empty()) ? FactorySelector::GetSpecificAI(m_unit, ainame) : nullptr), withNewThreatList);
+}
+
+void CharmInfo::SetCharmState(UnitAI* ai, bool withNewThreatList /*= true*/)
+{
+    m_ai = ai;
 
     if (withNewThreatList)
         m_combatData = new CombatData(m_unit);
