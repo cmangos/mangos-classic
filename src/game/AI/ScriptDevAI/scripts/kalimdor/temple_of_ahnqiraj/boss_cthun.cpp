@@ -39,6 +39,15 @@ enum
 
     SPELL_SUMMON_HOOK_TENTACLE      = 26140,
 
+    SPELL_SUMMON_EYE_TENTACLE_1     = 26144,
+    SPELL_SUMMON_EYE_TENTACLE_2     = 26145,
+    SPELL_SUMMON_EYE_TENTACLE_3     = 26146,
+    SPELL_SUMMON_EYE_TENTACLE_4     = 26147,
+    SPELL_SUMMON_EYE_TENTACLE_5     = 26148,
+    SPELL_SUMMON_EYE_TENTACLE_6     = 26149,
+    SPELL_SUMMON_EYE_TENTACLE_7     = 26150,
+    SPELL_SUMMON_EYE_TENTACLE_8     = 26151,
+
     // ***** Phase 2 ******
     SPELL_CARAPACE_CTHUN            = 26156,                // Was removed from client dbcs
     SPELL_TRANSFORM                 = 26232,
@@ -836,6 +845,26 @@ struct SummonHookTentacle : public SpellScript
     }
 };
 
+struct PeriodicSummonEyeTrigger : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        if (Unit* caster = aura->GetCaster())
+        {
+            if (caster->GetEntry() != NPC_EYE_OF_CTHUN)
+                return;
+            if (auto* eyeOfCThunAI = dynamic_cast<boss_eye_of_cthunAI*>(caster->AI()))
+                eyeOfCThunAI->DoDespawnEyeTentacles();
+            else
+                return; // Something went wrong
+
+            uint32 eyeTentaclesSpells[] = { SPELL_SUMMON_EYE_TENTACLE_1, SPELL_SUMMON_EYE_TENTACLE_2, SPELL_SUMMON_EYE_TENTACLE_3, SPELL_SUMMON_EYE_TENTACLE_4, SPELL_SUMMON_EYE_TENTACLE_5, SPELL_SUMMON_EYE_TENTACLE_6, SPELL_SUMMON_EYE_TENTACLE_7, SPELL_SUMMON_EYE_TENTACLE_8 };
+            for (auto spellId:eyeTentaclesSpells)
+                caster->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_boss_cthun()
 {
     Script* pNewScript = new Script;
@@ -859,4 +888,5 @@ void AddSC_boss_cthun()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<SummonHookTentacle>("spell_cthun_hook_tentacle");
+    RegisterAuraScript<PeriodicSummonEyeTrigger>("spell_cthun_periodic_eye_trigger");
 }

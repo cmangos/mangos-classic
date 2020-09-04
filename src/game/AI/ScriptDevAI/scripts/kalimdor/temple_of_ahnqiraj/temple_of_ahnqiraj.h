@@ -30,7 +30,7 @@ enum
     NPC_MASTERS_EYE             = 15963,
     NPC_OURO_SPAWNER            = 15957,
     NPC_VISCIDUS                = 15299,
-    // NPC_EYE_OF_CTHUN          = 15589,
+    NPC_EYE_OF_CTHUN            = 15589,
     NPC_CTHUN                   = 15727,
 
     GO_SKERAM_GATE              = 180636,
