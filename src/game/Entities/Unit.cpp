@@ -10808,8 +10808,6 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
             charmInfo->SetCommandState(COMMAND_FOLLOW);
             charmInfo->SetIsRetreating(true);
         }
-
-        charmInfo->ProcessUnattackableTargets();
     }
 
     // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
