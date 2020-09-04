@@ -30,8 +30,17 @@ enum
     NPC_MASTERS_EYE             = 15963,
     NPC_OURO_SPAWNER            = 15957,
     NPC_VISCIDUS                = 15299,
+
+    // C'Thun encounter
     NPC_EYE_OF_CTHUN            = 15589,
     NPC_CTHUN                   = 15727,
+    NPC_CLAW_TENTACLE           = 15725,
+    NPC_EYE_TENTACLE            = 15726,
+    NPC_TENTACLE_PORTAL         = 15904,
+    NPC_GIANT_CLAW_TENTACLE     = 15728,
+    NPC_GIANT_EYE_TENTACLE      = 15334,
+    NPC_FLESH_TENTACLE          = 15802,
+    NPC_GIANT_TENTACLE_PORTAL   = 15910,
 
     GO_SKERAM_GATE              = 180636,
     GO_TWINS_ENTER_DOOR         = 180634,
@@ -69,6 +78,9 @@ enum
     SPELL_WHISPERINGS_CTHUN_4   = 26258,
     SPELL_WHISPERINGS_CTHUN_5   = 26259,
 
+    SPELL_SUMMON_PORTAL         = 26396,
+    SPELL_SUMMON_GIANT_PORTAL   = 26477,
+
     NPC_VISCIDUS_TRIGGER        = 15925,
     NPC_POISON_CLOUD            = 15933,
 
@@ -93,6 +105,7 @@ class instance_temple_of_ahnqiraj : public ScriptedInstance, private DialogueHel
         bool IsEncounterInProgress() const override;
 
         void OnCreatureCreate(Creature* creature) override;
+        void OnCreatureDeath(Creature* creature) override;
         void OnObjectCreate(GameObject* pGo) override;
         void OnCreatureRespawn(Creature* creature) override;
 

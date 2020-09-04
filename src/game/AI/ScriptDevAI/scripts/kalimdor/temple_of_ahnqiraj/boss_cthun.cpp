@@ -70,17 +70,6 @@ enum
     SPELL_THRASH                    = 3391,
     SPELL_SUBMERGE_VISUAL           = 28819,
 
-    // Npcs
-    // Phase 1 npcs
-    NPC_CLAW_TENTACLE               = 15725,                // summoned by missing spell 26140
-    NPC_EYE_TENTACLE                = 15726,                // summoned by spells 26144 - 26151; script effect of 26152 - triggered every 45 secs
-    NPC_TENTACLE_PORTAL             = 15904,                // summoned by missing spell 26396
-
-    // Phase 2 npcs
-    NPC_GIANT_CLAW_TENTACLE         = 15728,                // summoned by missing spell 26216 every 60 secs - also teleported by spell 26191
-    NPC_GIANT_EYE_TENTACLE          = 15334,                // summoned by missing spell 26768 every 60 secs
-    NPC_FLESH_TENTACLE              = 15802,                // summoned by missing spell 26237 every 10 secs
-    NPC_GIANT_TENTACLE_PORTAL       = 15910,                // summoned by missing spell 26477
     NPC_EXIT_TRIGGER                = 15800,
 
     DISPLAY_ID_CTHUN_BODY           = 15786,                // Helper display id; This is needed in order to have the proper transform animation. ToDo: remove this when auras are fixed in core.
@@ -186,17 +175,6 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
                     pSummoned->AI()->AttackStart(pTarget);
                 break;
         }
-        if (Creature* portal = pSummoned->SummonCreature(NPC_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0))
-            portal->AI()->SetReactState(REACT_PASSIVE);
-
-        pSummoned->AI()->SetCombatMovement(false);
-    }
-
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        // Despawn the tentacle portal - this applies to all the summoned tentacles
-        if (Creature* pPortal = GetClosestCreatureWithEntry(pSummoned, NPC_TENTACLE_PORTAL, 5.0f))
-            pPortal->ForcedDespawn();
     }
 
     void SummonedCreatureDespawn(Creature* pSummoned) override
@@ -204,10 +182,6 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
         // Used only after evade
         if (SelectHostileTarget())
             return;
-
-        // Despawn the tentacle portal - this applies to all the summoned tentacles for evade case (which is handled by creature linking)
-        if (Creature* pPortal = GetClosestCreatureWithEntry(pSummoned, NPC_TENTACLE_PORTAL, 5.0f))
-            pPortal->ForcedDespawn();
     }
 
     // Wrapper to kill the eye tentacles before summoning new ones - Note: based on sniff I think this is a bad approach
@@ -449,35 +423,19 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                     pSummoned->AI()->AttackStart(pTarget);
 
                 m_lEyeTentaclesList.push_back(pSummoned->GetObjectGuid());
-                if (Creature* portal = pSummoned->SummonCreature(NPC_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0))
-                    portal->AI()->SetReactState(REACT_PASSIVE);
                 break;
             case NPC_GIANT_EYE_TENTACLE:
             case NPC_GIANT_CLAW_TENTACLE:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     pSummoned->AI()->AttackStart(pTarget);
-
-                if (Creature* portal = pSummoned->SummonCreature(NPC_GIANT_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0))
-                    portal->AI()->SetReactState(REACT_PASSIVE);
                 break;
         }
-        pSummoned->AI()->SetCombatMovement(false);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
     {
         switch (pSummoned->GetEntry())
         {
-            // Handle portal despawn on tentacle kill
-            case NPC_EYE_TENTACLE:
-                if (Creature* pPortal = GetClosestCreatureWithEntry(pSummoned, NPC_TENTACLE_PORTAL, 5.0f))
-                    pPortal->ForcedDespawn();
-                break;
-            case NPC_GIANT_EYE_TENTACLE:
-            case NPC_GIANT_CLAW_TENTACLE:
-                if (Creature* pPortal = GetClosestCreatureWithEntry(pSummoned, NPC_GIANT_TENTACLE_PORTAL, 5.0f))
-                    pPortal->ForcedDespawn();
-                break;
             // Handle the stomach tentacles kill
             case NPC_FLESH_TENTACLE:
                 ++m_uiFleshTentaclesKilled;

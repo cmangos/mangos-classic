@@ -127,6 +127,23 @@ void instance_temple_of_ahnqiraj::DoHandleTempleAreaTrigger(uint32 triggerId, Pl
     }
 }
 
+void instance_temple_of_ahnqiraj::OnCreatureDeath(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_CLAW_TENTACLE:
+        case NPC_EYE_TENTACLE:
+            if (Creature* portal = GetClosestCreatureWithEntry(creature, NPC_TENTACLE_PORTAL, 5.0f))
+                portal->ForcedDespawn();
+        break;
+        case NPC_GIANT_CLAW_TENTACLE:
+        case NPC_GIANT_EYE_TENTACLE:
+            if (Creature* portal = GetClosestCreatureWithEntry(creature, NPC_GIANT_TENTACLE_PORTAL, 5.0f))
+                portal->ForcedDespawn();
+        break;
+    }
+}
+
 void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* creature)
 {
     switch (creature->GetEntry())
@@ -153,6 +170,18 @@ void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* creature)
             break;
         case NPC_POISON_CLOUD:
             m_bugTrioSpawns.push_back(creature->GetObjectGuid());
+            break;
+        case NPC_CLAW_TENTACLE:
+        case NPC_EYE_TENTACLE:
+            if (creature->AI())
+                creature->AI()->SetCombatMovement(false);
+            creature->CastSpell(creature, SPELL_SUMMON_PORTAL, TRIGGERED_OLD_TRIGGERED);
+            break;
+        case NPC_GIANT_CLAW_TENTACLE:
+        case NPC_GIANT_EYE_TENTACLE:
+            if (creature->AI())
+                creature->AI()->SetCombatMovement(false);
+            creature->CastSpell(creature, SPELL_SUMMON_GIANT_PORTAL, TRIGGERED_OLD_TRIGGERED);
             break;
     }
 }
