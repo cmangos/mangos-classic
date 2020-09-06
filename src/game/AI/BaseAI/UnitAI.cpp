@@ -218,6 +218,8 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
                         return CAST_FAIL_TOO_FAR;
                     case SPELL_FAILED_TOO_CLOSE:
                         return CAST_FAIL_TOO_CLOSE;
+                    case SPELL_FAILED_BAD_TARGETS:
+                        return CAST_FAIL_OTHER;
                 }
                 sLog.outBasic("DoCastSpellIfCan by %s attempt to cast spell %u but spell failed due to unknown result %u.", m_unit->GetObjectGuid().GetString().c_str(), spellId, result);
                 return CAST_FAIL_OTHER;
