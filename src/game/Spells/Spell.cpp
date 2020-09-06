@@ -4703,6 +4703,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (target->GetTypeId() != TYPEID_PLAYER)
                         return SPELL_FAILED_BAD_TARGETS;
 
+                    if (i != EFFECT_INDEX_0) // TODO: Partial application
+                        break;
+
                     uint32 count = CalculateSpellEffectValue(SpellEffectIndex(i), target);
                     ItemPosCountVec dest;
                     uint32 no_space = 0;
