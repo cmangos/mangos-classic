@@ -515,15 +515,7 @@ class AiDelayEventAround : public BasicEvent
                     pReceiver->AI()->ReceiveAIEvent(m_eventType, &m_owner, pInvoker, m_miscValue);
                     // Special case for type 0 (call-assistance)
                     if (m_eventType == AI_EVENT_CALL_ASSISTANCE)
-                    {
-                        if (pReceiver->IsInCombat() || !pInvoker)
-                            continue;
-                        if (pReceiver->CanAssist(&m_owner) && pReceiver->CanAttackOnSight(pInvoker))
-                        {
-                            pReceiver->SetNoCallAssistance(true);
-                            pReceiver->AI()->AttackStart(pInvoker);
-                        }
-                    }
+                        pReceiver->AI()->HandleAssistanceCall(&m_owner, pInvoker);
                 }
             }
             m_receiverGuids.clear();
@@ -553,19 +545,32 @@ void UnitAI::SendAIEventAround(AIEventType eventType, Unit* invoker, uint32 dela
         {
             MaNGOS::AnyUnitInObjectRangeCheck u_check(m_unit, radius);
             MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(receiverList, u_check);
-            Cell::VisitGridObjects(m_unit, searcher, radius);
+            Cell::VisitAllObjects(m_unit, searcher, radius);
         }
         else // TODO: Expand functionality in future if needed
         {
             MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_unit, invoker, radius);
             MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(receiverList, u_check);
-            Cell::VisitGridObjects(m_unit, searcher, radius);
+            Cell::VisitAllObjects(m_unit, searcher, radius);
         }
 
         if (!receiverList.empty())
         {
-            AiDelayEventAround* e = new AiDelayEventAround(eventType, invoker ? invoker->GetObjectGuid() : ObjectGuid(), *m_unit, receiverList, miscValue);
-            m_unit->m_events.AddEvent(e, m_unit->m_events.CalculateTime(delay));
+            if (delay)
+            {
+                AiDelayEventAround* e = new AiDelayEventAround(eventType, invoker ? invoker->GetObjectGuid() : ObjectGuid(), *m_unit, receiverList, miscValue);
+                m_unit->m_events.AddEvent(e, m_unit->m_events.CalculateTime(delay));
+            }
+            else
+            {
+                for (Creature* receiver : receiverList)
+                {
+                    receiver->AI()->ReceiveAIEvent(eventType, m_unit, invoker, miscValue);
+                    // Special case for type 0 (call-assistance)
+                    if (eventType == AI_EVENT_CALL_ASSISTANCE)
+                        receiver->AI()->HandleAssistanceCall(m_unit, invoker);
+                }
+            }
         }
     }
 }

@@ -43,6 +43,8 @@ class CreatureAI : public UnitAI
         void RetreatingArrived() override;
         void RetreatingEnded() override;
 
+        void HandleAssistanceCall(Unit* sender, Unit* invoker) override;
+
     protected:
         Creature* m_creature;
         bool m_deathPrevention;

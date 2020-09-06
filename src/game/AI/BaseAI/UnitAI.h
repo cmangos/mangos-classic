@@ -469,6 +469,8 @@ class UnitAI
         virtual void HandleDelayedInstantAnimation(SpellEntry const* spellInfo) {}
         virtual bool IsTargetingRestricted() { return false; }
 
+        virtual void HandleAssistanceCall(Unit* sender, Unit* invoker) {} // implemented for creatures
+
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }
         void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents

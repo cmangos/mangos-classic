@@ -153,3 +153,14 @@ void CreatureAI::DoCallForHelp(float radius)
 {
     m_creature->CallForHelp(radius);
 }
+
+void CreatureAI::HandleAssistanceCall(Unit* sender, Unit* invoker)
+{
+    if (m_creature->IsInCombat() || !invoker)
+        return;
+    if (m_creature->CanAssist(sender) && m_creature->CanAttackOnSight(invoker))
+    {
+        m_creature->SetNoCallAssistance(true);
+        AttackStart(invoker);
+    }
+}
