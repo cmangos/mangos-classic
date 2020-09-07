@@ -36,7 +36,6 @@ npc_injured_patient     100%    patients for triage-quests (6622 and 6624)
 npc_doctor              100%    Gustaf Vanhowzen and Gregory Victor, quest 6622 and 6624 (Triage)
 npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
 npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
-npc_aoe_damage_trigger   75%    Used for passive aoe damage triggers in various encounters with overlapping usage of entries: 16697
 EndContentData */
 
 /*########
@@ -907,53 +906,6 @@ bool EffectDummyCreature_npc_redemption_target(Unit* pCaster, uint32 uiSpellId, 
 }
 
 /*######
-## npc_aoe_damage_trigger
-######*/
-
-enum npc_aoe_damage_trigger
-{
-    // trigger npcs
-    NPC_VOID_ZONE = 16697,
-
-    // m_uiAuraPassive
-    SPELL_CONSUMPTION_NPC_16697 = 28874,
-    SPELL_CONSUMPTION_NPC_17471 = 30497,
-    SPELL_CONSUMPTION_NPC_20570 = 35952,
-};
-
-struct npc_aoe_damage_triggerAI : public Scripted_NoMovementAI
-{
-    npc_aoe_damage_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature), m_uiAuraPassive(SetAuraPassive()) { }
-
-    uint32 m_uiAuraPassive;
-
-    inline uint32 SetAuraPassive()
-    {
-        switch (m_creature->GetCreatureInfo()->Entry)
-        {
-            case NPC_VOID_ZONE:
-                return SPELL_CONSUMPTION_NPC_16697;
-            default:
-                return SPELL_CONSUMPTION_NPC_16697;
-        }
-    }
-
-    void Reset() override
-    {
-        DoCastSpellIfCan(m_creature, m_uiAuraPassive, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 uiDiff) override {}
-};
-
-UnitAI* GetAI_npc_aoe_damage_trigger(Creature* pCreature)
-{
-    return new npc_aoe_damage_triggerAI(pCreature);
-}
-
-/*######
 ## npc_the_cleaner
 ######*/
 enum
@@ -1053,10 +1005,5 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_the_cleaner";
     pNewScript->GetAI = &GetAI_npc_the_cleaner;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_aoe_damage_trigger";
-    pNewScript->GetAI = &GetAI_npc_aoe_damage_trigger;
     pNewScript->RegisterSelf();
 }
