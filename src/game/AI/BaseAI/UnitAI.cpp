@@ -189,7 +189,11 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
             if (flags == TRIGGERED_NONE)
                 flags |= TRIGGERED_NORMAL_COMBAT_CAST;
 
-            SpellCastResult result = caster->CastSpell(target, spellInfo, flags);
+            SpellCastResult result;
+            if (castFlags & CAST_ONLY_XYZ)
+                result = caster->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), spellInfo, flags);
+            else
+                result = caster->CastSpell(target, spellInfo, flags);
             if (result != SPELL_CAST_OK)
             {
                 switch (result) // temporary adapter
