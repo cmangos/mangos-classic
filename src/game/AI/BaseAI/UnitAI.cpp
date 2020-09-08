@@ -433,7 +433,7 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
     if (me->GetMap()->Instanceable())
         distance = distance / 2.5f;
 
-    if (me->CanInitiateAttack() && me->CanAttackOnSight(victim) && victim->isInAccessablePlaceFor(me))
+    if (me->CanInitiateAttack() && me->CanAttackOnSight(victim) && victim->isInAccessablePlaceFor(me) && victim->IsVisibleForOrDetect(me, me, false))
     {
         if (me->IsWithinDistInMap(who, distance) && me->IsWithinLOSInMap(who, true))
         {
