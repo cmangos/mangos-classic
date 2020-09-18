@@ -32,7 +32,7 @@ enum
 
     // ***** Phase 1 ********
     SPELL_EYE_BEAM                  = 26134,
-    // SPELL_DARK_GLARE              = 26029,
+    SPELL_DARK_GLARE                = 26029,
     SPELL_ROTATE_TRIGGER            = 26137,                // phase switch spell - triggers 26009 or 26136. These trigger the Dark Glare spell - 26029
     SPELL_ROTATE_360_LEFT           = 26009,
     SPELL_ROTATE_360_RIGHT          = 26136,
@@ -823,6 +823,46 @@ struct PeriodicSummonEyeTrigger : public AuraScript
     }
 };
 
+struct RotateTrigger : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* target = spell->GetUnitTarget())
+            {
+                // Clear target before changing orientation
+                target->SetTarget(nullptr);
+                target->CastSpell(target, urand(0, 1) ? SPELL_ROTATE_360_LEFT : SPELL_ROTATE_360_RIGHT, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+};
+
+struct PeriodicRotate : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        if (Unit* target = aura->GetTarget())
+        {
+            // Clear target before changing orientation
+            target->SetTarget(nullptr);
+
+            float newAngle = target->GetOrientation();
+            if (aura->GetId() == SPELL_ROTATE_360_RIGHT)
+                newAngle -= M_PI_F / 40;
+            else
+                newAngle += M_PI_F / 40;
+            newAngle = MapManager::NormalizeOrientation(newAngle);
+            target->SetFacingTo(newAngle);
+
+            data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_DARK_GLARE);
+            data.caster = aura->GetCaster();
+            data.target = nullptr;
+        }
+    }
+};
+
 void AddSC_boss_cthun()
 {
     Script* pNewScript = new Script;
@@ -846,5 +886,7 @@ void AddSC_boss_cthun()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<SummonHookTentacle>("spell_cthun_hook_tentacle");
+    RegisterSpellScript<RotateTrigger>("spell_cthun_rotate_trigger");
     RegisterAuraScript<PeriodicSummonEyeTrigger>("spell_cthun_periodic_eye_trigger");
+    RegisterAuraScript<PeriodicRotate>("spell_cthun_periodic_rotate");
 }
