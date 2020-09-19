@@ -73,13 +73,14 @@ class PlayerbotChatHandler : protected ChatHandler
         bool dropQuest(char* str) { return HandleQuestRemoveCommand(str); }
 };
 
-PlayerbotAI::PlayerbotAI(PlayerbotMgr &mgr, Player* const bot) :
+PlayerbotAI::PlayerbotAI(PlayerbotMgr &mgr, Player* const bot, bool debugWhisper) :
     m_mgr(mgr), m_bot(bot), m_classAI(0), m_ignoreAIUpdatesUntilTime(CurrentTime()),
     m_combatOrder(ORDERS_NONE), m_ScenarioType(SCENARIO_PVE),
     m_CurrentlyCastingSpellId(0), m_spellIdCommand(0),
     m_targetGuidCommand(ObjectGuid()),
     m_taxiMaster(ObjectGuid()),
-    m_ignoreNeutralizeEffect(false)
+    m_ignoreNeutralizeEffect(false),
+    m_debugWhisper(debugWhisper)
 {
     // set bot state and needed item list
     m_botState = BOTSTATE_LOADING;
@@ -1489,13 +1490,13 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     ItemPosCountVec dest;
                     if (m_bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, itemcount) == EQUIP_ERR_INVENTORY_FULL)
                     {
-                        if (GetManager().m_confDebugWhisper)
+                        if (m_debugWhisper)
                             TellMaster("I can't take %; my inventory is full.", pProto->Name1);
                         m_inventory_full = true;
                         continue;
                     }
 
-                    if (GetManager().m_confDebugWhisper)
+                    if (m_debugWhisper)
                         TellMaster("Store loot item %s", pProto->Name1);
 
                     WorldPacket* const packet = new WorldPacket(CMSG_AUTOSTORE_LOOT_ITEM, 1);
@@ -1504,12 +1505,12 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 }
                 else
                 {
-                    if (GetManager().m_confDebugWhisper)
+                    if (m_debugWhisper)
                         TellMaster("Skipping loot item %s", pProto->Name1);
                 }
             }
 
-            if (GetManager().m_confDebugWhisper)
+            if (m_debugWhisper)
                 TellMaster("Releasing loot");
             // release loot
             m_lootPrev = m_lootCurrent;
@@ -1546,7 +1547,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         if (skillValue >= reqSkillValue)
                         {
                             m_lootCurrent = m_lootPrev;
-                            if (GetManager().m_confDebugWhisper)
+                            if (m_debugWhisper)
                                 TellMaster("I will try to skin next loot attempt.");
 
                             SetIgnoreUpdateTime(1);
@@ -1672,7 +1673,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 MovementInfo mi;
                 rp >> mi;
 
-                if (GetManager().m_confDebugWhisper)
+                if (m_debugWhisper)
                     TellMaster("Preparing to teleport");
 
                 if (m_bot->IsBeingTeleportedNear())
@@ -1701,7 +1702,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             }
             case SMSG_TRANSFER_PENDING:
             {
-                if (GetManager().m_confDebugWhisper)
+                if (m_debugWhisper)
                     TellMaster("World transfer is pending");
                 SetState(BOTSTATE_LOADING);
                 SetIgnoreUpdateTime(1);
@@ -1710,7 +1711,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             }
             case SMSG_NEW_WORLD:
             {
-                if (GetManager().m_confDebugWhisper)
+                if (m_debugWhisper)
                     TellMaster("Preparing to teleport far");
 
                 if (m_bot->IsBeingTeleportedFar())
@@ -2863,7 +2864,7 @@ void PlayerbotAI::DoLoot()
     if (!wo || GetMaster()->GetDistance(wo) > float(m_mgr.m_confCollectDistanceMax))
     {
         m_lootCurrent = ObjectGuid();
-        if (GetManager().m_confDebugWhisper)
+        if (m_debugWhisper)
             TellMaster("Object is too far away.");
         return;
     }
@@ -2879,7 +2880,7 @@ void PlayerbotAI::DoLoot()
     if ((c && c->IsDespawned()) || (go && !go->IsSpawned()) || (!c && !go))
     {
         m_lootCurrent = ObjectGuid();
-        if (GetManager().m_confDebugWhisper)
+        if (m_debugWhisper)
             TellMaster("Object is not spawned.");
         return;
     }
@@ -2904,7 +2905,7 @@ void PlayerbotAI::DoLoot()
         }
         else if (c->m_loot && !c->m_loot->CanLoot(m_bot) && !c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
         {
-            if (GetManager().m_confDebugWhisper)
+            if (m_debugWhisper)
                 TellMaster("%s is not lootable by me.", wo->GetName());
             m_lootCurrent = ObjectGuid();
             // clear movement target, take next target on next update
@@ -2919,7 +2920,7 @@ void PlayerbotAI::DoLoot()
         m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), wo->GetPositionX(), wo->GetPositionY(), wo->GetPositionZ());
         // give time to move to point before trying again
         SetIgnoreUpdateTime(1);
-        if (GetManager().m_confDebugWhisper)
+        if (m_debugWhisper)
             TellMaster("Moving to loot %s", go ? go->GetName() : wo->GetName());
     }
 
@@ -2931,7 +2932,7 @@ void PlayerbotAI::DoLoot()
         bool skillFailed = false;
         bool forceFailed = false;
 
-        if (GetManager().m_confDebugWhisper)
+        if (m_debugWhisper)
             TellMaster("Beginning to loot %s", go ? go->GetName() : wo->GetName());
 
         if (c)  // creature
@@ -6569,12 +6570,12 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (text == "debug")
     {
         TellMaster("Debugging is on. Type 'no debug' to disable.");
-        GetManager().m_confDebugWhisper = true;
+        m_debugWhisper = true;
     }
     else if (text == "no debug")
     {
         TellMaster("Debugging is off.");
-        GetManager().m_confDebugWhisper = false;
+        m_debugWhisper = false;
     }
     else if (ExtractCommand("reset", input))
         _HandleCommandReset(input, fromPlayer);
