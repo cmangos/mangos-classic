@@ -388,10 +388,6 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->Dispel == DISPEL_CURSE)
                 return SPELL_CURSE;
 
-            // Drain Soul and Shadowburn
-            if (IsSpellHaveAura(spellInfo, SPELL_AURA_CHANNEL_DEATH_ITEM))
-                return SPELL_SOUL_CAPTURE;
-
             break;
         }
         case SPELLFAMILY_PRIEST:
