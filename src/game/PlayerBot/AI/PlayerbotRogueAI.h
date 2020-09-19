@@ -77,7 +77,7 @@ enum RogueSpells
 class MANGOS_DLL_SPEC PlayerbotRogueAI : PlayerbotClassAI
 {
     public:
-        PlayerbotRogueAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotRogueAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotRogueAI();
 
         // all combat actions go here

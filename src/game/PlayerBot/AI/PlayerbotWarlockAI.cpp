@@ -19,7 +19,7 @@
 #include "PlayerbotWarlockAI.h"
 
 class PlayerbotAI;
-PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotWarlockAI::PlayerbotWarlockAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
     // DESTRUCTION
     SHADOW_BOLT           = m_ai->initSpell(SHADOW_BOLT_1);

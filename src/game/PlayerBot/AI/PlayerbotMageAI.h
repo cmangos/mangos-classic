@@ -96,7 +96,7 @@ static const uint32 uiImprovedScorch[3] =
 class MANGOS_DLL_SPEC PlayerbotMageAI : PlayerbotClassAI
 {
     public:
-        PlayerbotMageAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotMageAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotMageAI();
 
         // all combat actions go here

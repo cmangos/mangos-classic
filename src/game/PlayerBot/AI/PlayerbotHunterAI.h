@@ -91,7 +91,7 @@ enum HunterSpells
 class MANGOS_DLL_SPEC PlayerbotHunterAI : PlayerbotClassAI
 {
     public:
-        PlayerbotHunterAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotHunterAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotHunterAI();
         static bool HasPet(Player* bot);
 

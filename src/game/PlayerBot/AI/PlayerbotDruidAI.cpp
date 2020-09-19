@@ -20,7 +20,7 @@
 
 class PlayerbotAI;
 
-PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotDruidAI::PlayerbotDruidAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
     MOONFIRE                      = m_ai->initSpell(MOONFIRE_1); // attacks
     STARFIRE                      = m_ai->initSpell(STARFIRE_1);

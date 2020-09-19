@@ -83,7 +83,7 @@ enum WarriorSpells
 class MANGOS_DLL_SPEC PlayerbotWarriorAI : PlayerbotClassAI
 {
     public:
-        PlayerbotWarriorAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotWarriorAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotWarriorAI();
 
         // all combat actions go here

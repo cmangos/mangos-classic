@@ -20,7 +20,7 @@
 #include "../../Entities/Totem.h"
 
 class PlayerbotAI;
-PlayerbotShamanAI::PlayerbotShamanAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotShamanAI::PlayerbotShamanAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
     // restoration
     CHAIN_HEAL               = m_ai->initSpell(CHAIN_HEAL_1);
