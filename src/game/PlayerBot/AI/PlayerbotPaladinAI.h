@@ -68,7 +68,7 @@ enum PaladinSpells
 class MANGOS_DLL_SPEC PlayerbotPaladinAI : PlayerbotClassAI
 {
     public:
-        PlayerbotPaladinAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotPaladinAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotPaladinAI();
 
         // all combat actions go here

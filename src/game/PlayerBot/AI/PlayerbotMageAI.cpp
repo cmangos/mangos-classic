@@ -20,7 +20,7 @@
 
 class PlayerbotAI;
 
-PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotMageAI::PlayerbotMageAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
     ARCANE_MISSILES         = m_ai->initSpell(ARCANE_MISSILES_1);
     ARCANE_EXPLOSION        = m_ai->initSpell(ARCANE_EXPLOSION_1);

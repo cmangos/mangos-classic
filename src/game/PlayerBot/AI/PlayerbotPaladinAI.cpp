@@ -21,7 +21,7 @@
 
 class PlayerbotAI;
 
-PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotPaladinAI::PlayerbotPaladinAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
     RETRIBUTION_AURA              = m_ai->initSpell(RETRIBUTION_AURA_1);
     SEAL_OF_COMMAND               = m_ai->initSpell(SEAL_OF_COMMAND_1);

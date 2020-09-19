@@ -21,7 +21,7 @@
 
 class PlayerbotAI;
 
-PlayerbotHunterAI::PlayerbotHunterAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotHunterAI::PlayerbotHunterAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
     // PET CTRL
     PET_SUMMON                    = m_ai->initSpell(CALL_PET_1);

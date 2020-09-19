@@ -20,7 +20,7 @@
 
 class PlayerbotAI;
 
-PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotPriestAI::PlayerbotPriestAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
     RENEW                         = m_ai->initSpell(RENEW_1);
     LESSER_HEAL                   = m_ai->initSpell(LESSER_HEAL_1);

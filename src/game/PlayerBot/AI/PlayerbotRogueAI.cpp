@@ -20,7 +20,7 @@
 #include "../Base/PlayerbotMgr.h"
 
 class PlayerbotAI;
-PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotRogueAI::PlayerbotRogueAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
     ADRENALINE_RUSH          = m_ai->initSpell(ADRENALINE_RUSH_1);
     SINISTER_STRIKE          = m_ai->initSpell(SINISTER_STRIKE_1);
