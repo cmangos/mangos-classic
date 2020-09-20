@@ -139,6 +139,9 @@ struct npc_miranAI: public npc_escortAI
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_PROTECTING_THE_SHIPMENT, m_creature);
                 break;
+            case 24:
+                m_creature->ForcedDespawn(5000);
+                break;
         }
     }
 
