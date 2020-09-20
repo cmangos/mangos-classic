@@ -207,7 +207,9 @@ enum
     NPC_HULDAR                          = 2057,
     NPC_DARK_IRON_AMBUSHER              = 1981,
 
-    FACTION_HOSTILE                     = 14
+    FACTION_HOSTILE                     = 14,
+
+    SAY_MIRAN_AMBUSH                    = -1010029,
 };
 
 struct Location
@@ -241,6 +243,8 @@ bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*
     // Quest NPCs not availble, do noting
     if (!m_miran || !m_huldar)
         return false;
+
+    DoScriptText(SAY_MIRAN_AMBUSH, m_miran);
 
     // complete quest
     pPlayer->CompleteQuest(QUEST_RESUPPLYING_THE_EXCAVATION);
