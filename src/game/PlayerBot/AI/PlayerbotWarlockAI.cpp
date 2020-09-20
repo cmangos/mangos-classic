@@ -590,11 +590,10 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         else
         {
             uint32 soulStoneSpell = soulStone->GetProto()->Spells[0].SpellId;
-            Player* master = GetMaster();
-            if (!master->HasAura(soulStoneSpell) && m_bot.IsSpellReady(soulStoneSpell))
+            if (!m_master.HasAura(soulStoneSpell) && m_bot.IsSpellReady(soulStoneSpell))
             {
                 // TODO: first choice: healer. Second choice: anyone else with revive spell. Third choice: self or master.
-                m_ai.UseItem(soulStone, master);
+                m_ai.UseItem(soulStone, &m_master);
                 return;
             }
         }

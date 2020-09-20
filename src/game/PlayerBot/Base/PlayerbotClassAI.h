@@ -76,9 +76,6 @@ class MANGOS_DLL_SPEC PlayerbotClassAI
         bool EatDrinkBandage(bool bMana = true, unsigned char foodPercent = 50, unsigned char drinkPercent = 50, unsigned char bandagePercent = 70);
 
         // Utilities
-        Player* GetMaster() { return &m_master; }
-        Player* GetPlayerBot() { return &m_bot; }
-        PlayerbotAI* GetAI() { return &m_ai; }
         bool CastHoTOnTank();
         JOB_TYPE GetBotJob(Player* target);
         JOB_TYPE GetTargetJob(Player* target);

@@ -399,15 +399,15 @@ void PlayerbotShamanAI::CheckShields()
 
     if (spec == SHAMAN_SPEC_ENHANCEMENT && LIGHTNING_SHIELD > 0 && !m_bot.HasAura(LIGHTNING_SHIELD, EFFECT_INDEX_0))
         m_ai.CastSpell(LIGHTNING_SHIELD, m_bot);
-    if (EARTH_SHIELD > 0 && !GetMaster()->HasAura(EARTH_SHIELD, EFFECT_INDEX_0))
-        m_ai.CastSpell(EARTH_SHIELD, *(GetMaster()));
+    if (EARTH_SHIELD > 0 && !m_master.HasAura(EARTH_SHIELD, EFFECT_INDEX_0))
+        m_ai.CastSpell(EARTH_SHIELD, m_master);
 }
 
 void PlayerbotShamanAI::UseCooldowns()
 {
     uint32 spec = m_bot.GetSpec();
 
-    if (BLOODLUST > 0 && (!GetMaster()->HasAura(BLOODLUST, EFFECT_INDEX_0)) && m_ai.CastSpell(BLOODLUST) == SPELL_CAST_OK)
+    if (BLOODLUST > 0 && (!m_master.HasAura(BLOODLUST, EFFECT_INDEX_0)) && m_ai.CastSpell(BLOODLUST) == SPELL_CAST_OK)
         return;
 
     switch (spec)
