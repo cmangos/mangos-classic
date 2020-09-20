@@ -145,14 +145,11 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
 
     void JustDied(Unit* pKiller) override
     {
-        // Allow the body to begin the transition
+        // Allow the body to begin the transition (internal 5 secs delay)
         if (m_pInstance)
         {
             if (Creature* pCthun = m_pInstance->GetSingleCreatureFromStorage(NPC_CTHUN))
-            {
-                pCthun->AI()->SetReactState(REACT_AGGRESSIVE);
-                pCthun->AI()->AttackStart(pKiller);
-            }
+                m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pCthun);
             else
                 script_error_log("C'Thun could not be found. Please check your database!");
         }
@@ -293,7 +290,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         // Phase information
         m_Phase                     = PHASE_TRANSITION;
 
-        m_uiPhaseTimer              = 5000;
+        m_uiPhaseTimer              = 0;
         m_uiFleshTentaclesKilled    = 0;
         m_uiEyeTentacleTimer        = 35000;
         m_uiGiantClawTentacleTimer  = 20000;
@@ -310,6 +307,12 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         // Reset flags
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         SetReactState(REACT_PASSIVE);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            m_uiPhaseTimer = 5 * IN_MILLISECONDS;
     }
 
     void DamageTaken(Unit* /*pDealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
@@ -446,33 +449,35 @@ struct boss_cthunAI : public Scripted_NoMovementAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        if (m_Phase == PHASE_TRANSITION && m_uiPhaseTimer)
+        {
+            if (m_uiPhaseTimer < uiDiff)
+            {
+                // Note: we need to set the display id before casting the transform spell, in order to get the proper animation
+                m_creature->SetDisplayId(DISPLAY_ID_CTHUN_BODY);
+
+                // Transform and start C'thun phase
+                if (DoCastSpellIfCan(m_creature, SPELL_TRANSFORM) == CAST_OK)
+                {
+                    m_creature->CastSpell(nullptr, SPELL_CARAPACE_CTHUN, TRIGGERED_OLD_TRIGGERED);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    SetReactState(REACT_AGGRESSIVE);
+                    m_creature->SetInCombatWithZone();
+                    DoSpawnFleshTentacles();
+
+                    m_Phase        = PHASE_CTHUN;
+                    m_uiPhaseTimer = 0;
+                }
+            }
+            else
+                m_uiPhaseTimer -= uiDiff;
+        }
+
         if (!SelectHostileTarget())
             return;
 
         switch (m_Phase)
         {
-            case PHASE_TRANSITION:
-
-                if (m_uiPhaseTimer < uiDiff)
-                {
-                    // Note: we need to set the display id before casting the transform spell, in order to get the proper animation
-                    m_creature->SetDisplayId(DISPLAY_ID_CTHUN_BODY);
-
-                    // Transform and start C'thun phase
-                    if (DoCastSpellIfCan(m_creature, SPELL_TRANSFORM) == CAST_OK)
-                    {
-                        m_creature->CastSpell(nullptr, SPELL_CARAPACE_CTHUN, TRIGGERED_OLD_TRIGGERED);
-                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        DoSpawnFleshTentacles();
-
-                        m_Phase        = PHASE_CTHUN;
-                        m_uiPhaseTimer = 0;
-                    }
-                }
-                else
-                    m_uiPhaseTimer -= uiDiff;
-
-                break;
             case PHASE_CTHUN:
 
                 if (m_uiMouthTentacleTimer < uiDiff)
