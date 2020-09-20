@@ -195,11 +195,8 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
                 return RETURN_CONTINUE;
         }
         // Else try to buff master
-        else if (GetMaster())
-        {
-            if (m_ai.In_Reach(GetMaster(), FEAR_WARD) && !GetMaster()->HasAura(FEAR_WARD, EFFECT_INDEX_0) && CastSpell(FEAR_WARD, GetMaster()))
-                return RETURN_CONTINUE;
-        }
+        if (m_ai.In_Reach(&m_master, FEAR_WARD) && !m_master.HasAura(FEAR_WARD, EFFECT_INDEX_0) && CastSpell(FEAR_WARD, &m_master))
+            return RETURN_CONTINUE;
     }
 
     //Used to determine if this bot is highest on threat
@@ -312,7 +309,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
             break;
 
         case PRIEST_SPEC_DISCIPLINE:
-            if (POWER_INFUSION > 0 && m_ai.In_Reach(GetMaster(), POWER_INFUSION) && CastSpell(POWER_INFUSION, GetMaster())) // TODO: just master?
+            if (POWER_INFUSION > 0 && m_ai.In_Reach(&m_master, POWER_INFUSION) && CastSpell(POWER_INFUSION, &m_master)) // TODO: just master?
                 return RETURN_CONTINUE;
             if (INNER_FOCUS > 0 && m_ai.In_Reach(&m_bot, INNER_FOCUS) && !m_bot.HasAura(INNER_FOCUS, EFFECT_INDEX_0) && CastSpell(INNER_FOCUS, &m_bot))
                 return RETURN_CONTINUE;
