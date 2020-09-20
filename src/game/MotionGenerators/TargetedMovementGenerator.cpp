@@ -570,10 +570,6 @@ float FollowMovementGenerator::GetSpeed(Unit& owner) const
     if (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) != i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         return speed;
 
-    // Use default speed when debuffed or somehow constrained in speed
-    if (owner.GetSpeedRate(type) < 1.0f || owner.HasAuraType(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED))
-        return speed;
-
     // Followers sync with master's speed when not in combat
     speed = i_target->GetSpeedInMotion();
 
