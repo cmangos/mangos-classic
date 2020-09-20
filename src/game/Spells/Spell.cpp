@@ -4286,26 +4286,21 @@ SpellCastResult Spell::CheckCast(bool strict)
             // Check if more powerful spell applied on target (if spell only contains non-aoe auras)
             if (IsAuraApplyEffects(m_spellInfo, EFFECT_MASK_ALL) && !IsAreaOfEffectSpell(m_spellInfo) && !HasAreaAuraEffect(m_spellInfo))
             {
-                const ObjectGuid casterGuid = m_caster->GetObjectGuid();
-                Unit::SpellAuraHolderMap const& spair = target->GetSpellAuraHolderMap();
-                for (Unit::SpellAuraHolderMap::const_iterator iter = spair.begin(); iter != spair.end(); ++iter)
+                for (auto const& pair : target->GetSpellAuraHolderMap())
                 {
-                    const SpellAuraHolder* existing = iter->second;
-                    // We can overwrite own auras at all times
-                    if (casterGuid == existing->GetCasterGuid())
+                    const SpellAuraHolder* existing = pair.second;
+                    const SpellEntry* existingSpell = existing->GetSpellProto();
+
+                    if (m_caster->GetObjectGuid() != existing->GetCasterGuid() && sSpellMgr.IsSpellStackableWithSpellForDifferentCasters(m_spellInfo, existingSpell))
                         continue;
-                    const SpellEntry* entry = existing->GetSpellProto();
-                    // Cannot overwrite someone else's auras
-                    if (!sSpellMgr.IsSpellStackableWithSpellForDifferentCasters(m_spellInfo, entry))
-                    {
-                        bool bounce = false;
-                        if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing))
-                            bounce = true;
-                        if (!bounce && sSpellMgr.IsSpellAnotherRankOfSpell(m_spellInfo->Id, entry->Id) && sSpellMgr.IsSpellHigherRankOfSpell(entry->Id, m_spellInfo->Id))
-                            bounce = true;
-                        if (bounce)
-                            return SPELL_FAILED_AURA_BOUNCED;
-                    }
+
+                    bool bounce = false;
+                    if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing))
+                        bounce = true;
+                    if (!bounce && sSpellMgr.IsSpellAnotherRankOfSpell(m_spellInfo->Id, existingSpell->Id) && sSpellMgr.IsSpellHigherRankOfSpell(existingSpell->Id, m_spellInfo->Id))
+                        bounce = true;
+                    if (bounce)
+                        return SPELL_FAILED_AURA_BOUNCED;
                 }
             }
 
