@@ -187,7 +187,7 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
                 Creature* creature = (Creature*) newTarget;
                 if (creature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_HUMANOID || creature->GetCreatureInfo()->CreatureType == CREATURE_TYPE_BEAST)
                 {
-                    if (POLYMORPH > 0 && !PlayerbotAI::IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_ARCANE) && CastSpell(POLYMORPH, newTarget))
+                    if (POLYMORPH > 0 && !PlayerbotAI::IsImmuneToSchool(newTarget, SPELL_SCHOOL_MASK_ARCANE) && CastSpell(POLYMORPH, newTarget))
                         return RETURN_CONTINUE;
                 }
 
