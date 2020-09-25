@@ -316,7 +316,7 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
             break;
         case EVENT_T_HP:
         {
-            if (!m_creature->IsInCombat() || !m_creature->GetMaxHealth())
+            if (!event.percent_range.allowOutOfCombat && (!m_creature->IsInCombat() || !m_creature->GetMaxHealth()))
                 return false;
 
             uint32 perc = (m_creature->GetHealth() * 100) / m_creature->GetMaxHealth();
