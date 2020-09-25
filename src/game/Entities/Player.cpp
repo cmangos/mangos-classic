@@ -17682,13 +17682,14 @@ void Player::SendComboPoints()
         SetGuidValue(PLAYER_FIELD_COMBO_TARGET, combotarget->GetObjectGuid());
         SetByteValue(PLAYER_FIELD_BYTES, 1, GetComboPoints());
     }
-    /*else
+    else
     {
-        // can be nullptr, and then points=0. Use unknown; to reset points of some sort?
-        data << PackedGuid();
-        data << uint8(0);
-        GetSession()->SendPacket(data);
-    }*/
+		// can be nullptr, and then points=0. Use unknown; to reset points of some sort?		
+		// Overpower should be disabled after use (0 combo points) or when ReactiveTimer finishes.
+		// Spell grayed/notproced on client side as it should be if the warrior has no combo points, which they use for this spell to proc after victim dodges.
+		if (getClass() == CLASS_WARRIOR)
+			SetByteValue(PLAYER_FIELD_BYTES, 1, GetComboPoints());
+    }
 }
 
 void Player::SetGroup(Group* group, int8 subgroup)
