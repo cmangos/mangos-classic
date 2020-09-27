@@ -416,7 +416,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* player, GameObject* target
         PickUpFlagFromBase(player);
     }
     // Check if we are trying to pick up or return a flag from the ground
-    else if (state == BG_WS_FLAG_STATE_ON_GROUND && target->IsAtInteractDistance(player) && GroundFlagInteraction(player, target) == BG_WS_FLAG_ACTION_NONE)
+    else if (state == BG_WS_FLAG_STATE_ON_GROUND && target->IsWithinDistInMap(player, target->GetInteractionDistance()) && GroundFlagInteraction(player, target) == BG_WS_FLAG_ACTION_NONE)
     {
         sLog.outError("Failed to action the WS flag from event '%d'.", event);
     }
