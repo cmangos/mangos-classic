@@ -323,8 +323,8 @@ namespace MaNGOS
                     nLevelDiff = 4;
                 return nBaseExp * (1.0f + (0.05f * nLevelDiff));
             }
-            uint32 gray_level = GetGrayLevel(unit_level);
-            if (mob_level > gray_level)
+
+            if (!IsTrivialLevelDifference(unit_level, mob_level))
             {
                 uint32 ZD = GetZeroDifference(unit_level);
                 uint32 nLevelDiff = unit_level - mob_level;

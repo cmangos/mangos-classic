@@ -474,13 +474,17 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid targetGuid)
 
 static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level)
 {
-    sum_level += player->getLevel();
-    if (!member_with_max_level || member_with_max_level->getLevel() < player->getLevel())
+    const uint32 level = player->getLevel();
+
+    sum_level += level;
+
+    if (!member_with_max_level || member_with_max_level->getLevel() < level)
         member_with_max_level = player;
 
-    uint32 gray_level = MaNGOS::XP::GetGrayLevel(player->getLevel());
-    if (victim->getLevel() > gray_level && (!not_gray_member_with_max_level
-                                            || not_gray_member_with_max_level->getLevel() < player->getLevel()))
+    if (MaNGOS::XP::IsTrivialLevelDifference(level, victim->GetLevelForTarget(player)))
+        return;
+
+    if (!not_gray_member_with_max_level || not_gray_member_with_max_level->getLevel() < level)
         not_gray_member_with_max_level = player;
 }
 
