@@ -20,6 +20,7 @@
 #include "World/World.h"
 #include "Maps/MapManager.h"
 #include "Entities/Object.h"
+#include "GameEvents/GameEventMgr.h"
 #include <algorithm>
 #include <map>
 #include <World/WorldStateDefines.h>
