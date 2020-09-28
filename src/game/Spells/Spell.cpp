@@ -4437,7 +4437,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                                 if (m_auraScript)
                                 {
                                     AuraCalcData data(nullptr, m_caster, target, m_spellInfo, SpellEffectIndex(i));
-                                    amounts[i] = m_auraScript->OnAuraValueCalculate(nullptr, m_caster, amounts[i]);
+                                    amounts[i] = m_auraScript->OnAuraValueCalculate(data, amounts[i]);
                                 }
                             }
                         }

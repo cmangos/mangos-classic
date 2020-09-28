@@ -6062,7 +6062,10 @@ uint32 Aura::CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry con
 int32 Aura::OnAuraValueCalculate(Unit* caster, int32 currentValue)
 {
     if (AuraScript* script = GetAuraScript())
-        return script->OnAuraValueCalculate(this, caster, currentValue);
+    {
+        AuraCalcData data(this, caster, GetTarget(), GetSpellProto(), GetEffIndex());
+        return script->OnAuraValueCalculate(data, currentValue);
+    }
     return currentValue;
 }
 
