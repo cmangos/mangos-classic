@@ -1082,7 +1082,7 @@ class WorldObject : public Object
         virtual bool CanAttackSpell(Unit const* /*target*/, SpellEntry const* /*spellInfo*/ = nullptr, bool /*isAOE*/ = false) const { return true; }
         virtual bool CanAssistSpell(Unit const* /*target*/, SpellEntry const* /*spellInfo*/ = nullptr) const { return true; }
 
-        int32 CalculateSpellEffectValue(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* basePoints = nullptr, bool maximum = false) const;
+        int32 CalculateSpellEffectValue(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* basePoints = nullptr, bool maximum = false, bool finalUse = true) const;
 
         VisibilityData const& GetVisibilityData() const { return m_visibilityData; }
         VisibilityData& GetVisibilityData() { return m_visibilityData; }

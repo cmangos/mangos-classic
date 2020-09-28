@@ -38,6 +38,7 @@ class Group;
 class Aura;
 struct SpellTargetEntry;
 struct SpellScript;
+struct AuraScript;
 
 enum SpellCastFlags
 {
@@ -398,7 +399,8 @@ class Spell
         SpellCastResult CheckPower(bool strict);
         SpellCastResult CheckCasterAuras() const;
 
-        int32 CalculateSpellEffectValue(SpellEffectIndex i, Unit* target, bool maximum = false) { return m_caster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i], maximum); }
+        int32 CalculateSpellEffectValue(SpellEffectIndex i, Unit* target, bool maximum = false, bool finalUse = true)
+        { return m_trueCaster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i], maximum, finalUse); }
         int32 CalculateSpellEffectDamage(Unit* unitTarget, int32 damage);
         static uint32 CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell* spell = nullptr, Item* castItem = nullptr, bool finalUse = false);
 
@@ -765,6 +767,7 @@ class Spell
         // Scripting System
         uint64 m_scriptValue; // persistent value for spell script state
         SpellScript* m_spellScript;
+        AuraScript* m_auraScript; // needed for some checks for value calculation
 
         uint32 m_spellState;
         uint32 m_timer;

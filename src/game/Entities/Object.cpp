@@ -2646,7 +2646,7 @@ void WorldObject::PrintCooldownList(ChatHandler& chat) const
     chat.PSendSysMessage("Found %u permanent cooldown%s.", permCDCount, (permCDCount > 1) ? "s" : "");
 }
 
-int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* effBasePoints, bool maximum) const
+int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* effBasePoints, bool maximum, bool finalUse) const
 {
     Unit const* unitCaster = dynamic_cast<Unit const*>(this);
     Player const* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? static_cast<Player const*>(this) : nullptr;
@@ -2703,7 +2703,7 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
 
     if (unitCaster)
         if (Player* modOwner = unitCaster->GetSpellModOwner())
-            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ALL_EFFECTS, value);
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ALL_EFFECTS, value, nullptr, finalUse);
 
     if (unitCaster && spellProto->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION) && spellProto->spellLevel)
     {

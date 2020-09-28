@@ -64,6 +64,13 @@ struct SpellScript
     virtual void OnSummon(Spell* spell, GameObject* summon) const {}
 };
 
+struct AuraCalcData
+{
+    Unit* caster; Unit* target; SpellEntry const* spellProto; SpellEffectIndex effIdx;
+    Aura* aura; // cannot be used in auras that utilize stacking in checkcast - can be nullptr
+    AuraCalcData(Aura* aura, Unit* caster, Unit* target, SpellEntry const* spellProto, SpellEffectIndex effIdx) : aura(aura), caster(caster), target(target), spellProto(spellProto), effIdx(effIdx) {}
+};
+
 struct AuraScript
 {
     // called on SpellAuraHolder creation - caster can be nullptr

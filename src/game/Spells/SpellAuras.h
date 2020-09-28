@@ -471,6 +471,8 @@ class Aura
         void UseMagnet() { m_magnetUsed = true; }
         bool IsMagnetUsed() const { return m_magnetUsed; }
 
+        static uint32 CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry const* spellProto, SpellEffectIndex effIdx, uint32 value);
+
         // Scripting system
         AuraScript* GetAuraScript() const { return GetHolder()->GetAuraScript(); }
         // hooks

@@ -319,7 +319,7 @@ void SpellLog::SendToSet()
 // ***********
 
 Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy) :
-    m_spellLog(this), m_spellScript(SpellScriptMgr::GetSpellScript(info->Id)), m_trueCaster(caster)
+    m_spellLog(this), m_spellScript(SpellScriptMgr::GetSpellScript(info->Id)), m_auraScript(SpellScriptMgr::GetAuraScript(info->Id)), m_trueCaster(caster)
 {
     MANGOS_ASSERT(caster != nullptr && info != nullptr);
     MANGOS_ASSERT(info == sSpellTemplate.LookupEntry<SpellEntry>(info->Id) && "`info` must be pointer to sSpellTemplate element");
@@ -4266,6 +4266,20 @@ SpellCastResult Spell::CheckCast(bool strict)
         return SPELL_FAILED_CASTER_AURASTATE;
 
     Unit* target = m_targets.getUnitTarget();
+    uint32 affectedMask = GetCheckCastEffectMask(m_spellInfo);
+
+    bool selfTargeting = false;
+    if (!target)
+    {
+        uint32 selfImmuneMask = GetCheckCastSelfEffectMask(m_spellInfo);
+        if (selfImmuneMask)
+        {
+            target = m_caster;
+            affectedMask = selfImmuneMask;
+            selfTargeting = true;
+        }
+    }
+
     if (target)
     {
         // TARGET_UNIT_SCRIPT_NEAR_CASTER fills unit target per client requirement but should not be checked against common things
@@ -4365,8 +4379,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
             }
 
+            uint32 affectedMask = GetCheckCastEffectMask(m_spellInfo);
             if (IsPositiveSpell(m_spellInfo->Id) && !m_spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
-                if (target->IsImmuneToSpell(m_spellInfo, target == m_caster, 7) && !target->hasUnitState(UNIT_STAT_ISOLATED))
+                if (target->IsImmuneToSpell(m_spellInfo, target == m_caster, affectedMask) && !target->hasUnitState(UNIT_STAT_ISOLATED))
                     return SPELL_FAILED_TARGET_AURASTATE;
 
             // Must be behind the target.
@@ -4392,22 +4407,44 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_BAD_TARGETS;
 
             // Check if more powerful spell applied on target (if spell only contains non-aoe auras)
-            if (IsAuraApplyEffects(m_spellInfo, EFFECT_MASK_ALL) && !IsAreaOfEffectSpell(m_spellInfo) && !HasAreaAuraEffect(m_spellInfo))
+            if (IsAuraApplyEffects(m_spellInfo, SpellEffectIndexMask(affectedMask)) && !IsAreaOfEffectSpell(m_spellInfo) && !HasAreaAuraEffect(m_spellInfo) && !selfTargeting)
             {
+                bool computed = false; // optimization
+                int32 amounts[MAX_EFFECT_INDEX];
                 for (auto const& pair : target->GetSpellAuraHolderMap())
                 {
                     const SpellAuraHolder* existing = pair.second;
                     const SpellEntry* existingSpell = existing->GetSpellProto();
 
-                    if (m_caster->GetObjectGuid() != existing->GetCasterGuid())
+                    if (m_trueCaster->GetObjectGuid() != existing->GetCasterGuid())
                     {
                         if (sSpellMgr.IsSpellStackableWithSpellForDifferentCasters(m_spellInfo, existingSpell))
                             continue;
                     }
+                    else if (m_spellInfo == existingSpell && m_spellInfo->HasAttribute(SPELL_ATTR_EX4_NOT_CHECK_SELFCAST_POWER))
+                        continue;
                     else if (sSpellMgr.IsSpellStackableWithSpell(m_spellInfo, existingSpell))
                         continue;
 
-                    if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing))
+                    if (!computed)
+                    {
+                        for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                        {
+                            if (affectedMask & (1 << i))
+                            {
+                                amounts[i] = CalculateSpellEffectValue(SpellEffectIndex(i), target, true, false);
+                                amounts[i] = Aura::CalculateAuraEffectValue(m_caster, target, m_spellInfo, SpellEffectIndex(i), amounts[i]);
+                                if (m_auraScript)
+                                {
+                                    AuraCalcData data(nullptr, m_caster, target, m_spellInfo, SpellEffectIndex(i));
+                                    amounts[i] = m_auraScript->OnAuraValueCalculate(nullptr, m_caster, amounts[i]);
+                                }
+                            }
+                        }
+                        computed = true;
+                    }
+
+                    if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo, existing, affectedMask, amounts))
                         return SPELL_FAILED_AURA_BOUNCED;
 
                     if (sSpellMgr.IsSpellAnotherRankOfSpell(m_spellInfo->Id, existingSpell->Id))
