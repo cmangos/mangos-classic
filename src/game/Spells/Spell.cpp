@@ -529,6 +529,8 @@ void Spell::FillTargetMap()
             case TARGET_TYPE_UNIT_DEST:
             case TARGET_TYPE_PLAYER: // for now player handled here
             case TARGET_TYPE_SPECIAL_UNIT:
+                if (effectTargetType == TARGET_TYPE_UNIT_DEST)
+                    OnDestTarget();
                 processedUnits = true;
                 for (uint8 rightTarget = 0; rightTarget < 2; ++rightTarget) // need to process target A and B separately due to effect masks
                 {
