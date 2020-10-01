@@ -145,10 +145,17 @@ set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/${LIBS_FOLDER_NAME})
 
 # On windows define more developpement folders and install provided libs
 if(WIN32)
+  # Determine whether generator generates multiple builds or only one
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.9)
+	get_property(IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+  elseif(CMAKE_CONFIGURATION_TYPES)
+	set(IS_MULTI_CONFIG TRUE)
+  endif()
+
   set(BIN_DIR ${CMAKE_INSTALL_PREFIX})
   set(LIBS_DIR ${BIN_DIR})
   set(CONF_DIR ${BIN_DIR})
-  if(MSVC)
+  if(MSVC AND IS_MULTI_CONFIG)
     set(DEV_BIN_DIR ${CMAKE_SOURCE_DIR}/${BIN_FOLDER_NAME}/${DEP_ARCH}_$(Configuration))
     set(DEV_PROVIDED_LIBS_FOLDER ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_$(Configuration))
   else()
