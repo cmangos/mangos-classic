@@ -18,6 +18,7 @@ enum
     TYPE_OHGAN              = 5,                            // Do not change, used by Acid
     TYPE_LORKHAN            = 6,
     TYPE_ZATH               = 7,
+    TYPE_HAKKAR             = 8,
 
     NPC_LORKHAN             = 11347,
     NPC_ZATH                = 11348,
@@ -35,10 +36,10 @@ enum
     SAY_MINION_DESTROY      = -1309022,
     SAY_HAKKAR_PROTECT      = -1309023,
 
-    HP_LOSS_PER_PRIEST      = 60000,
-
     AREATRIGGER_ENTER       = 3958,
     AREATRIGGER_ALTAR       = 3960,
+
+    SPELL_HAKKAR_POWER      = 24692,
 };
 
 static const float aMandokirDownstairsPos[3] = { -12196.30f, -1948.37f, 130.31f};
@@ -67,7 +68,7 @@ class instance_zulgurub : public ScriptedInstance
         Creature* SelectRandomPantherTrigger(bool bIsLeft);
 
     protected:
-        void DoLowerHakkarHitPoints();
+        void DoHakkarPowerStacks();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;

@@ -82,6 +82,13 @@ struct boss_hakkarAI : public ScriptedAI
         m_uiAspectOfArlokkTimer    = 18000;
     }
 
+    void JustReachedHome() override
+    {
+        // have to redo Hakkar Power stacks after reset
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_HAKKAR, FAIL);
+    }
+
     void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
