@@ -4299,13 +4299,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                     else if (sSpellMgr.IsSpellStackableWithSpell(m_spellInfo, existingSpell))
                         continue;
 
-                    bool bounce = false;
                     if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing))
-                        bounce = true;
-                    if (!bounce && sSpellMgr.IsSpellAnotherRankOfSpell(m_spellInfo->Id, existingSpell->Id) && sSpellMgr.IsSpellHigherRankOfSpell(existingSpell->Id, m_spellInfo->Id))
-                        bounce = true;
-                    if (bounce)
                         return SPELL_FAILED_AURA_BOUNCED;
+
+                    if (sSpellMgr.IsSpellAnotherRankOfSpell(m_spellInfo->Id, existingSpell->Id))
+                        if (sSpellMgr.IsSpellHigherRankOfSpell(existingSpell->Id, m_spellInfo->Id))
+                            return SPELL_FAILED_AURA_BOUNCED;
                 }
             }
 
