@@ -104,9 +104,9 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, WorldObject* caster, Spell*
         /*switch (spellInfo->Id)
         {
             case 3366: // Opening - seems to have a settable timer per usage
-                if (spell->m_CastItem)
+                if (spell->GetCastItem())
                 {
-                    switch (spell->m_CastItem->GetEntry())
+                    switch (spell->GetCastItem()->GetEntry())
                     {
                         default:
                             break;

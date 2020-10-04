@@ -318,7 +318,7 @@ void SpellLog::SendToSet()
 // Spell class
 // ***********
 
-Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy) :
+Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy) :
     m_spellLog(this), m_spellScript(SpellScriptMgr::GetSpellScript(info->Id)), m_auraScript(SpellScriptMgr::GetAuraScript(info->Id)), m_trueCaster(caster)
 {
     MANGOS_ASSERT(caster != nullptr && info != nullptr);
@@ -326,7 +326,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
 
     m_spellInfo = info;
     m_triggeredBySpellInfo = triggeredBy;
-    m_caster = caster;
+    m_caster = dynamic_cast<Unit*>(caster);
     m_referencedFromCurrentSpell = false;
     m_executedCurrently = false;
     m_delayStart = 0;
@@ -2638,6 +2638,8 @@ SpellCastResult Spell::PreCastCheck(Aura* triggeredByAura /*= nullptr*/)
 
 SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura)
 {
+    if (!m_trueCaster)
+        m_trueCaster = m_caster;
     m_spellState = SPELL_STATE_TARGETING;
     m_targets = *targets;
 
@@ -3075,6 +3077,13 @@ void Spell::_handle_finish_phase()
     }
 }
 
+void Spell::SetCastItem(Item* item)
+{
+    m_CastItem = item;
+    if (item)
+        m_itemCastSpell = true;
+}
+
 void Spell::SendSpellCooldown()
 {
     // (SPELL_ATTR_DISABLED_WHILE_ACTIVE) have infinity cooldown, (SPELL_ATTR_PASSIVE) passive cooldown at triggering
@@ -3450,6 +3459,8 @@ void Spell::SendSpellStart() const
     WorldPacket data(SMSG_SPELL_START, (8 + 8 + 4 + 2 + 4));
     if (m_CastItem)
         data << m_CastItem->GetPackGUID();
+    if (m_CastItem)
+        data << m_CastItem->GetPackGUID();
     else
         data << m_trueCaster->GetPackGUID();
 
@@ -3501,7 +3512,7 @@ void Spell::SendSpellGo()
     if (m_trueCaster->IsGameObject()) // write empty guid if GO
         data << ObjectGuid().WriteAsPacked();
     else
-        data << m_caster->GetPackGUID();
+        data << m_caster->GetObjectGuid();
     data << uint32(m_spellInfo->Id);                        // spellId
     data << uint16(castFlags);                              // cast flags
 

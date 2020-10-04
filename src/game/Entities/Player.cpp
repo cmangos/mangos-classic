@@ -7466,7 +7466,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets& targets, uint8 spell
             targets.setUnitTarget(GetTarget());
 
         Spell* spell = new Spell(this, spellInfo, (count > 0));
-        spell->m_CastItem = item;
+        spell->SetCastItem(item);
         item->SetUsedInSpell(true);
         spell->SpellStart(&targets);
 
