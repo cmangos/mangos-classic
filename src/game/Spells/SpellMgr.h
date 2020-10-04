@@ -1094,18 +1094,6 @@ inline void GetChainJumpRange(SpellEntry const* spellInfo, SpellEffectIndex effI
     }
 }
 
-// Research function for spells that should be send as GO caster in packet
-inline bool IsGOCastSpell(SpellEntry const* spellInfo)
-{
-    switch (spellInfo->Id)
-    {
-        case 30979:  // Flames
-            return true;
-        default:
-            return false;
-    }
-}
-
 inline bool IsDispelSpell(SpellEntry const* spellInfo)
 {
     return IsSpellHaveEffect(spellInfo, SPELL_EFFECT_DISPEL);
