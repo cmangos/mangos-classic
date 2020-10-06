@@ -416,7 +416,7 @@ void BattleGroundAB::Reset()
     }
 
     m_IsInformedNearVictory = false;
-    bool isBGWeekend = BattleGroundMgr::IsBGWeekend(GetTypeId());
+    bool isBGWeekend = BattleGroundMgr::IsBgWeekend(GetTypeId());
     m_honorTicks = isBGWeekend ? AB_WEEKEND_HONOR_INTERVAL : AB_NORMAL_HONOR_INTERVAL;
     m_ReputationTics = isBGWeekend ? AB_WEEKEND_REPUTATION_INTERVAL : AB_NORMAL_REPUTATION_INTERVAL;
 

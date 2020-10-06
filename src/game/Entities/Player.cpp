@@ -13977,7 +13977,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
         if (player_at_bg && currentBg->GetStatus() != STATUS_WAIT_LEAVE)
         {
-            BattleGroundQueueTypeId bgQueueTypeId = sBattleGroundMgr.BGQueueTypeId(currentBg->GetTypeId());
+            BattleGroundQueueTypeId bgQueueTypeId = sBattleGroundMgr.BgQueueTypeId(currentBg->GetTypeId());
             AddBattleGroundQueueId(bgQueueTypeId);
 
             m_bgData.bgTypeID = currentBg->GetTypeId();     // bg data not marked as modified

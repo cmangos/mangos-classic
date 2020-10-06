@@ -532,7 +532,7 @@ void WorldSession::LogoutPlayer()
             if (BattleGroundQueueTypeId bgQueueTypeId = _player->GetBattleGroundQueueTypeId(i))
             {
                 _player->RemoveBattleGroundQueueId(bgQueueTypeId);
-                sBattleGroundMgr.m_BattleGroundQueues[ bgQueueTypeId ].RemovePlayer(_player->GetObjectGuid(), true);
+                sBattleGroundMgr.m_battleGroundQueues[ bgQueueTypeId ].RemovePlayer(_player->GetObjectGuid(), true);
             }
         }
 
