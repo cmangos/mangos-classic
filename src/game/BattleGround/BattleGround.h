@@ -48,8 +48,8 @@ struct BattleGroundEventIdx
 
 enum SpritiHealers
 {
-    NPC_SPIRIT_GUIDE_A = 13116,
-    NPC_SPIRIT_GUIDE_H = 13117,
+    NPC_SPIRIT_GUIDE_A              = 13116,
+    NPC_SPIRIT_GUIDE_H              = 13117,
 };
 
 enum BattleGroundSounds
