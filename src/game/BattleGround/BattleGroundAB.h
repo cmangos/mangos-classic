@@ -22,7 +22,7 @@
 #include "Common.h"
 #include "BattleGround.h"
 
-enum BG_AB_WorldStates
+enum ABWorldStates
 {
     BG_AB_OP_OCCUPIED_BASES_HORDE       = 1778,
     BG_AB_OP_OCCUPIED_BASES_ALLY        = 1779,
@@ -68,31 +68,31 @@ const uint32 BG_AB_OP_NODEICONS[5]  =    {1842, 1846, 1845, 1844, 1843};
 // node-events are just event1=BG_AB_Nodes, event2=BG_AB_NodeStatus
 // so we don't need to define the constants here :)
 
-enum BG_AB_Timers
+enum ABTimers
 {
     BG_AB_FLAG_CAPTURING_TIME           = 60000,
 };
 
-enum BG_AB_Score
+enum ABScores
 {
     BG_AB_WARNING_NEAR_VICTORY_SCORE    = 1800,
     BG_AB_MAX_TEAM_SCORE                = 2000
 };
 
 /* do NOT change the order, else wrong behaviour */
-enum BG_AB_Nodes
+enum ABNodes
 {
     BG_AB_NODE_STABLES          = 0,
     BG_AB_NODE_BLACKSMITH       = 1,
     BG_AB_NODE_FARM             = 2,
     BG_AB_NODE_LUMBER_MILL      = 3,
     BG_AB_NODE_GOLD_MINE        = 4,
-    BG_AB_NODES_ERROR           = 255
+    BG_AB_NODES_ERROR           = 255,
+
+    BG_AB_MAX_NODES             = 5,
 };
 
-#define BG_AB_NODES_MAX   5
-
-enum BG_AB_NodeStatus
+enum ABNodeStatus
 {
     BG_AB_NODE_TYPE_NEUTRAL             = 0,
     BG_AB_NODE_TYPE_CONTESTED           = 1,
@@ -103,7 +103,7 @@ enum BG_AB_NodeStatus
     BG_AB_NODE_STATUS_HORDE_OCCUPIED    = 4
 };
 
-enum BG_AB_Sounds
+enum ABSounds
 {
     BG_AB_SOUND_NODE_CLAIMED            = 8192,
     BG_AB_SOUND_NODE_CAPTURED_ALLIANCE  = 8173,
@@ -130,7 +130,7 @@ const uint32 BG_AB_WinMatchHonor[MAX_BATTLEGROUND_BRACKETS] = {24, 41, 68, 113, 
 const uint32 BG_AB_GraveyardIds[7] = {895, 894, 893, 897, 896, 898, 899};
 
 // x, y, z, o
-const float BG_AB_BuffPositions[BG_AB_NODES_MAX][4] =
+const float BG_AB_BuffPositions[BG_AB_MAX_NODES][4] =
 {
     {1185.71f, 1185.24f, -56.36f, 2.56f},                   // stables
     {990.75f, 1008.18f, -42.60f, 2.43f},                    // blacksmith
@@ -139,7 +139,7 @@ const float BG_AB_BuffPositions[BG_AB_NODES_MAX][4] =
     {1146.62f, 816.94f, -98.49f, 6.14f}                     // gold mine
 };
 
-struct BG_AB_BannerTimer
+struct ArathiBannerTimer
 {
     uint32      timer;
     uint8       type;
@@ -149,14 +149,14 @@ struct BG_AB_BannerTimer
 class BattleGroundABScore : public BattleGroundScore
 {
     public:
-        BattleGroundABScore(): BasesAssaulted(0), BasesDefended(0) {};
+        BattleGroundABScore(): basesAssaulted(0), basesDefended(0) {};
         virtual ~BattleGroundABScore() {};
 
-        uint32 GetAttr1() const { return BasesAssaulted; }
-        uint32 GetAttr2() const { return BasesDefended; }
+        uint32 GetAttr1() const { return basesAssaulted; }
+        uint32 GetAttr2() const { return basesDefended; }
 
-        uint32 BasesAssaulted;
-        uint32 BasesDefended;
+        uint32 basesAssaulted;
+        uint32 basesDefended;
 };
 
 class BattleGroundAB : public BattleGround
@@ -165,26 +165,24 @@ class BattleGroundAB : public BattleGround
 
     public:
         BattleGroundAB();
-        ~BattleGroundAB();
 
         void Update(uint32 diff) override;
         void AddPlayer(Player* plr) override;
-        virtual void StartingEventOpenDoors() override;
-        void RemovePlayer(Player* plr, ObjectGuid guid) override;
+        void StartingEventOpenDoors() override;
         bool HandleAreaTrigger(Player* source, uint32 trigger) override;
-        virtual void Reset() override;
+        void Reset() override;
         void EndBattleGround(Team winner) override;
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
+        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
 
         /* Scorekeeping */
-        virtual void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
 
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
         /* Nodes occupying */
-        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
 
-        virtual Team GetPrematureWinner() override;
+        Team GetPrematureWinner() override;
 
     private:
         /* Gameobject spawning/despawning */
@@ -203,15 +201,15 @@ class BattleGroundAB : public BattleGround
             2: horde contested
             3: ally occupied
             4: horde occupied     */
-        uint8               m_Nodes[BG_AB_NODES_MAX];
-        uint8               m_prevNodes[BG_AB_NODES_MAX];   // used for performant wordlstate-updating
-        BG_AB_BannerTimer   m_BannerTimers[BG_AB_NODES_MAX];
-        uint32              m_NodeTimers[BG_AB_NODES_MAX];
+        uint8               m_nodes[BG_AB_MAX_NODES];
+        uint8               m_prevNodes[BG_AB_MAX_NODES];   // used for performant wordlstate-updating
+        ArathiBannerTimer   m_bannerTimers[BG_AB_MAX_NODES];
+        uint32              m_nodeTimers[BG_AB_MAX_NODES];
         uint32              m_lastTick[PVP_TEAM_COUNT];
         uint32              m_honorScoreTicks[PVP_TEAM_COUNT];
-        uint32              m_ReputationScoreTics[PVP_TEAM_COUNT];
-        bool                m_IsInformedNearVictory;
+        uint32              m_reputationScoreTics[PVP_TEAM_COUNT];
+        bool                m_isInformedNearVictory;
         uint32              m_honorTicks;
-        uint32              m_ReputationTics;
+        uint32              m_reputationTics;
 };
 #endif

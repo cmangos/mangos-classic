@@ -375,19 +375,19 @@ void BattleGroundAV::UpdatePlayerScore(Player* source, uint32 type, uint32 value
     switch (type)
     {
         case SCORE_GRAVEYARDS_ASSAULTED:
-            ((BattleGroundAVScore*)itr->second)->GraveyardsAssaulted += value;
+            ((BattleGroundAVScore*)itr->second)->graveyardsAssaulted += value;
             break;
         case SCORE_GRAVEYARDS_DEFENDED:
-            ((BattleGroundAVScore*)itr->second)->GraveyardsDefended += value;
+            ((BattleGroundAVScore*)itr->second)->graveyardsDefended += value;
             break;
         case SCORE_TOWERS_ASSAULTED:
-            ((BattleGroundAVScore*)itr->second)->TowersAssaulted += value;
+            ((BattleGroundAVScore*)itr->second)->towersAssaulted += value;
             break;
         case SCORE_TOWERS_DEFENDED:
-            ((BattleGroundAVScore*)itr->second)->TowersDefended += value;
+            ((BattleGroundAVScore*)itr->second)->towersDefended += value;
             break;
         case SCORE_SECONDARY_OBJECTIVES:
-            ((BattleGroundAVScore*)itr->second)->SecondaryObjectives += value;
+            ((BattleGroundAVScore*)itr->second)->secondaryObjectives += value;
             break;
         default:
             BattleGround::UpdatePlayerScore(source, type, value);

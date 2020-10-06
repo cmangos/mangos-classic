@@ -1049,23 +1049,23 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
         {
             case BATTLEGROUND_AV:
                 data << (uint32)0x00000007;                // count of next fields
-                data << (uint32)((BattleGroundAVScore*)score)->GraveyardsAssaulted;  // GraveyardsAssaulted
-                data << (uint32)((BattleGroundAVScore*)score)->GraveyardsDefended;   // GraveyardsDefended
-                data << (uint32)((BattleGroundAVScore*)score)->TowersAssaulted;      // TowersAssaulted
-                data << (uint32)((BattleGroundAVScore*)score)->TowersDefended;       // TowersDefended
-                data << (uint32)((BattleGroundAVScore*)score)->SecondaryObjectives;  // Mines Taken
-                data << (uint32)((BattleGroundAVScore*)score)->LieutnantCount;       // Lieutnant kills
-                data << (uint32)((BattleGroundAVScore*)score)->SecondaryNPC;         // Secondary unit summons
+                data << (uint32)((BattleGroundAVScore*)score)->graveyardsAssaulted;  // GraveyardsAssaulted
+                data << (uint32)((BattleGroundAVScore*)score)->graveyardsDefended;   // GraveyardsDefended
+                data << (uint32)((BattleGroundAVScore*)score)->towersAssaulted;      // TowersAssaulted
+                data << (uint32)((BattleGroundAVScore*)score)->towersDefended;       // TowersDefended
+                data << (uint32)((BattleGroundAVScore*)score)->secondaryObjectives;  // Mines Taken
+                data << (uint32)((BattleGroundAVScore*)score)->lieutnantCount;       // Lieutnant kills
+                data << (uint32)((BattleGroundAVScore*)score)->secondaryNPC;         // Secondary unit summons
                 break;
             case BATTLEGROUND_WS:
                 data << (uint32)0x00000002;                // count of next fields
-                data << (uint32)((BattleGroundWGScore*)score)->FlagCaptures;         // flag captures
-                data << (uint32)((BattleGroundWGScore*)score)->FlagReturns;          // flag returns
+                data << (uint32)((BattleGroundWGScore*)score)->flagCaptures;         // flag captures
+                data << (uint32)((BattleGroundWGScore*)score)->flagReturns;          // flag returns
                 break;
             case BATTLEGROUND_AB:
                 data << (uint32)0x00000002;                // count of next fields
-                data << (uint32)((BattleGroundABScore*)score)->BasesAssaulted;       // bases asssulted
-                data << (uint32)((BattleGroundABScore*)score)->BasesDefended;        // bases defended
+                data << (uint32)((BattleGroundABScore*)score)->basesAssaulted;       // bases asssulted
+                data << (uint32)((BattleGroundABScore*)score)->basesDefended;        // bases defended
                 break;
             default:
                 DEBUG_LOG("Unhandled MSG_PVP_LOG_DATA for BG id %u", bg->GetTypeId());

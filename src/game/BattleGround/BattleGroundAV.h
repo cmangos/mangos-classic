@@ -302,22 +302,22 @@ inline BG_AV_Nodes& operator++(BG_AV_Nodes& i)
 class BattleGroundAVScore : public BattleGroundScore
 {
     public:
-        BattleGroundAVScore() : GraveyardsAssaulted(0), GraveyardsDefended(0), TowersAssaulted(0), TowersDefended(0), SecondaryObjectives(0), LieutnantCount(0), SecondaryNPC(0) {};
+        BattleGroundAVScore() : graveyardsAssaulted(0), graveyardsDefended(0), towersAssaulted(0), towersDefended(0), secondaryObjectives(0) {};
         virtual ~BattleGroundAVScore() {};
 
-        uint32 GetAttr1() const { return GraveyardsAssaulted; }
-        uint32 GetAttr2() const { return GraveyardsDefended; }
-        uint32 GetAttr3() const { return TowersAssaulted; }
-        uint32 GetAttr4() const { return TowersDefended; }
-        uint32 GetAttr5() const { return SecondaryObjectives; }
+        uint32 GetAttr1() const { return graveyardsAssaulted; }
+        uint32 GetAttr2() const { return graveyardsDefended; }
+        uint32 GetAttr3() const { return towersAssaulted; }
+        uint32 GetAttr4() const { return towersDefended; }
+        uint32 GetAttr5() const { return secondaryObjectives; }
 
-        uint32 GraveyardsAssaulted;
-        uint32 GraveyardsDefended;
-        uint32 TowersAssaulted;
-        uint32 TowersDefended;
-        uint32 SecondaryObjectives;
-        uint32 LieutnantCount;
-        uint32 SecondaryNPC;
+        uint32 graveyardsAssaulted;
+        uint32 graveyardsDefended;
+        uint32 towersAssaulted;
+        uint32 towersDefended;
+        uint32 secondaryObjectives;
+        uint32 lieutnantCount;
+        uint32 secondaryNPC;
 };
 
 class BattleGroundAV : public BattleGround
