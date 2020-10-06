@@ -434,6 +434,23 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
             }
             break;
         }
+        case CONDITION_PVP_SCRIPT:
+        {
+            if (target->GetTypeId() != TYPEID_PLAYER)
+            {
+                sLog.outErrorDb("CONDITION_PVP_SCRIPT (entry %u) is used on non player target. Target is %s", m_entry, target->GetGuidStr().c_str());
+                return false;
+            }
+
+            Player const* player = static_cast<Player const*>(target);
+            if (player->InBattleGround() && player->GetZoneId() == m_value1)
+            {
+                if (BattleGround* bg = player->GetBattleGround())
+                    return bg->IsConditionFulfilled(player, m_value2, source, conditionSourceType);
+            }
+
+            return false;
+        }
         case CONDITION_SPAWN_COUNT:
         {
             if (!map)

@@ -531,6 +531,9 @@ class BattleGround
         // checke if player is inside battleground
         bool IsPlayerInBattleGround(ObjectGuid /*playerGuid*/);
 
+        // Handle script condition fulfillment
+        virtual bool IsConditionFulfilled(Player const* /*source*/, uint32 /*conditionId*/, WorldObject const* /*conditionSource*/, uint32 /*conditionSourceType*/) { return false; }
+
         /* virtual score-array - get's used in bg-subclasses */
         int32 m_teamScores[PVP_TEAM_COUNT];
 
