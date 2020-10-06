@@ -2498,10 +2498,10 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
                 opvp = sOutdoorPvPMgr.GetScript(((GameObject*)source)->GetZoneId());
         }
 
-        if (bg && bg->HandleEvent(id, static_cast<GameObject*>(source)))
+        if (bg && bg->HandleEvent(id, static_cast<GameObject*>(source), forwardToPvp))
             return true;
 
-        if (opvp && opvp->HandleEvent(id, static_cast<GameObject*>(source)))
+        if (opvp && opvp->HandleEvent(id, static_cast<GameObject*>(source), forwardToPvp))
             return true;
     }
 

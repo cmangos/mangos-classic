@@ -279,7 +279,7 @@ void BattleGroundQueue::RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount)
     // mostly people with the highest levels are in battlegrounds, thats why
     // we count from MAX_BATTLEGROUND_QUEUES - 1 to 0
     // variable index removes useless searching in other team's queue
-    uint32 index = BattleGround::GetTeamIndexByTeamId(group->GroupTeam);
+    uint32 index = GetTeamIndexByTeamId(group->GroupTeam);
 
     for (int8 bracket_id_tmp = MAX_BATTLEGROUND_BRACKETS - 1; bracket_id_tmp >= 0 && bracket_id == -1; --bracket_id_tmp)
     {
@@ -367,8 +367,8 @@ bool BattleGroundQueue::InviteGroupToBG(GroupQueueInfo* ginfo, BattleGround* bg,
     {
         // not yet invited
         // set invitation
-        ginfo->IsInvitedToBGInstanceGUID = bg->GetInstanceID();
-        BattleGroundTypeId bgTypeId = bg->GetTypeID();
+        ginfo->IsInvitedToBGInstanceGUID = bg->GetInstanceId();
+        BattleGroundTypeId bgTypeId = bg->GetTypeId();
         BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bgTypeId);
         BattleGroundBracketId bracket_id = bg->GetBracketId();
 
@@ -404,7 +404,7 @@ bool BattleGroundQueue::InviteGroupToBG(GroupQueueInfo* ginfo, BattleGround* bg,
             uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
 
             DEBUG_LOG("Battleground: invited %s to BG instance %u queueindex %u bgtype %u, I can't help it if they don't press the enter battle button.",
-                      plr->GetGuidStr().c_str(), bg->GetInstanceID(), queueSlot, bg->GetTypeID());
+                      plr->GetGuidStr().c_str(), bg->GetInstanceId(), queueSlot, bg->GetTypeId());
 
             // send status packet
             sBattleGroundMgr.BuildBattleGroundStatusPacket(data, bg, queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, 0);
@@ -621,7 +621,7 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
         next = itr;
         ++next;
         // battleground is running, so if:
-        if ((*itr)->GetTypeID() == bgTypeId && (*itr)->GetBracketId() == bracket_id &&
+        if ((*itr)->GetTypeId() == bgTypeId && (*itr)->GetBracketId() == bracket_id &&
                 (*itr)->GetStatus() > STATUS_WAIT_QUEUE && (*itr)->GetStatus() < STATUS_WAIT_LEAVE)
         {
             BattleGround* bg = *itr; // we have to store battleground pointer here, because when battleground is full, it is removed from free queue (not yet implemented!!)
@@ -643,7 +643,7 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
             if (!bg->HasFreeSlots())
             {
                 // remove BG from BGFreeSlotQueue
-                bg->RemoveFromBGFreeSlotQueue();
+                bg->RemoveFromBgFreeSlotQueue();
             }
         }
     }
@@ -658,17 +658,17 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
     }
 
     // get the min. players per team, properly for larger arenas as well.
-    uint32 MinPlayersPerTeam = bg_template->GetMinPlayersPerTeam();
-    uint32 MaxPlayersPerTeam = bg_template->GetMaxPlayersPerTeam();
+    uint32 minPlayersPerTeam = bg_template->GetMinPlayersPerTeam();
+    uint32 maxPlayersPerTeam = bg_template->GetMaxPlayersPerTeam();
     if (sBattleGroundMgr.isTesting())
-        MinPlayersPerTeam = 1;
+        minPlayersPerTeam = 1;
 
     m_SelectionPools[TEAM_INDEX_ALLIANCE].Init();
     m_SelectionPools[TEAM_INDEX_HORDE].Init();
 
     {
         // check if there is premade against premade match
-        if (CheckPremadeMatch(bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam))
+        if (CheckPremadeMatch(bracket_id, minPlayersPerTeam, maxPlayersPerTeam))
         {
             // create new battleground
             BattleGround* bg2 = sBattleGroundMgr.CreateNewBattleGround(bgTypeId, bracket_id);
@@ -692,7 +692,7 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
     // now check if there are in queues enough players to start new game of (normal battleground)
     {
         // if there are enough players in pools, start new battleground or non rated arena
-        if (CheckNormalMatch(bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam))
+        if (CheckNormalMatch(bracket_id, minPlayersPerTeam, maxPlayersPerTeam))
         {
             // we successfully created a pool
             BattleGround* bg2 = sBattleGroundMgr.CreateNewBattleGround(bgTypeId, bracket_id);
@@ -728,7 +728,7 @@ bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     if (!bg)
         return true;
 
-    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bg->GetTypeID());
+    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bg->GetTypeId());
     uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
     if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue or in battleground
     {
@@ -873,7 +873,7 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket& data, BattleGro
     // uint64 in client
     data << uint32(bg->GetMapId());                        // MapID
     data << uint8(0);                                      // Unknown
-    data << uint32(bg->GetClientInstanceID());
+    data << uint32(bg->GetClientInstanceId());
     data << uint32(StatusID);                              // status
     switch (StatusID)
     {
@@ -919,12 +919,13 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
         Player* plr = sObjectMgr.GetPlayer(itr->first);
 
         data << uint32(plr ? plr->GetHonorRankInfo().visualRank : 0);
-        data << uint32(itr->second->KillingBlows);
-        data << uint32(itr->second->HonorableKills);
-        data << uint32(itr->second->Deaths);
-        data << uint32(itr->second->BonusHonor);
+        data << uint32(itr->second->killingBlows);
+        data << uint32(itr->second->honorableKills);
+        data << uint32(itr->second->dishonorableKills);
+        data << uint32(itr->second->deaths);
+        data << uint32(itr->second->bonusHonor);
 
-        switch (bg->GetTypeID())                            // battleground specific things
+        switch (bg->GetTypeId())                            // battleground specific things
         {
             case BATTLEGROUND_AV:
                 data << (uint32)0x00000007;                // count of next fields
@@ -947,7 +948,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
                 data << (uint32)((BattleGroundABScore*)score)->BasesDefended;        // bases defended
                 break;
             default:
-                DEBUG_LOG("Unhandled MSG_PVP_LOG_DATA for BG id %u", bg->GetTypeID());
+                DEBUG_LOG("Unhandled MSG_PVP_LOG_DATA for BG id %u", bg->GetTypeId());
                 data << (uint32)0;
                 break;
         }
@@ -1000,7 +1001,7 @@ BattleGround* BattleGroundMgr::GetBattleGroundThroughClientInstance(uint32 insta
 
     for (auto& itr : m_BattleGrounds[bgTypeId])
     {
-        if (itr.second->GetClientInstanceID() == instanceId)
+        if (itr.second->GetClientInstanceId() == instanceId)
             return itr.second;
     }
     return nullptr;
@@ -1082,7 +1083,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
     // will also set m_bgMap, instanceid
     sMapMgr.CreateBgMap(bg->GetMapId(), bg);
 
-    bg->SetClientInstanceID(CreateClientVisibleInstanceId(bgTypeId, bracket_id));
+    bg->SetClientInstanceId(CreateClientVisibleInstanceId(bgTypeId, bracket_id));
 
     // reset the new bg (set status to status_wait_queue from status_none)
     bg->Reset();
@@ -1120,7 +1121,7 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 M
     bg->SetLevelRange(LevelMin, LevelMax);
 
     // add bg to update list
-    AddBattleGround(bg->GetInstanceID(), bg->GetTypeID(), bg);
+    AddBattleGround(bg->GetInstanceId(), bg->GetTypeId(), bg);
 
     // return some not-null value, bgTypeId is good enough for me
     return bgTypeId;
