@@ -114,7 +114,7 @@ struct GYMidTrigger : public SpellScript
             {
                 // check if it's correct bg
                 if (bg->GetTypeId() == BATTLEGROUND_AV)
-                    bg->EventPlayerClickedOnFlag(player, static_cast<GameObject*>(obj));
+                    bg->HandlePlayerClickedOnFlag(player, static_cast<GameObject*>(obj));
                 return;
             }
         }

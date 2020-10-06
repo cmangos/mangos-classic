@@ -525,6 +525,10 @@ void GameObject::Update(const uint32 diff)
                     // any return here in case battleground traps
                     break;
                 case GAMEOBJECT_TYPE_CAPTURE_POINT:
+                    // there are some capture points which are used as visual GOs; we allow these to be despawned
+                    if (!GetGOInfo()->capturePoint.radius)
+                        break;
+
                     // remove capturing players because slider wont be displayed if capture point is being locked
                     for (auto m_UniqueUser : m_UniqueUsers)
                     {
@@ -1243,6 +1247,17 @@ void GameObject::Use(Unit* user)
         }
         case GAMEOBJECT_TYPE_BUTTON:                        // 1
         {
+            // objects used mostly in battlegrounds; there are only a few exceptions to this rule
+            // CanUseBattleGroundObject() is already checked in the spell cast; all of these objects use the 1479 lock id
+            if (GetGOInfo()->button.noDamageImmune && user->GetTypeId() == TYPEID_PLAYER)
+            {
+                Player* player = (Player*)user;
+                if (BattleGround* bg = player->GetBattleGround())
+                    bg->HandlePlayerClickedOnFlag(player, this);
+
+                // note: additional scripts and actions are allowed
+            }
+
             // buttons never really despawn, only reset to default state/flags
             UseDoorOrButton();
 
@@ -1403,29 +1418,48 @@ void GameObject::Use(Unit* user)
         }
         case GAMEOBJECT_TYPE_GOOBER:                        // 10
         {
-            // Handle OutdoorPvP use cases
+            GameObjectInfo const* info = GetGOInfo();
+            if (!info)
+                return;
+
+            bool pvpFlagUsed = false;
+
+            // Handle OutdoorPvP and Battleground use cases
             // Note: this may be also handled by DB spell scripts in the future, when the world state manager is implemented
+            // CanUseBattleGroundObject() is already checked in the spell cast; all of these objects use the 1479 lock id
             if (user->GetTypeId() == TYPEID_PLAYER)
             {
                 Player* player = (Player*)user;
-                if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
-                    outdoorPvP->HandleGameObjectUse(player, this);
+
+                // PvP goobers are only used in battlegrounds: Isle of Conquest and Arathi Basin
+                if (info->goober.isPvPObject)
+                {
+                    if (BattleGround* bg = player->GetBattleGround())
+                    {
+                        bg->HandlePlayerClickedOnFlag(player, this);
+                        pvpFlagUsed = true;
+                    }
+                }
+                else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
+                    pvpFlagUsed = outdoorPvP->HandleGameObjectUse(player, this);
             }
 
             // exception - 180619 - ossirian crystal - supposed to be kept from despawning by a pending spellcast - to be implemented, done in db for now
-
-            GameObjectInfo const* info = GetGOInfo();
 
             TriggerLinkedGameObject(user);
 
             SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
             SetLootState(GO_ACTIVATED);
 
-            // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
-            if (info->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_CUSTOM_ANIM_ON_USE)
-                SendGameObjectCustomAnim(GetObjectGuid(), info->goober.customAnim);
-            else
-                SetGoState(GO_STATE_ACTIVE);
+            // flags used in PvP are despawned automatically after click and won't change state; extra autoClose time will delay the animation
+            if (!pvpFlagUsed)
+            {
+                // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
+                if (info->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_CUSTOM_ANIM_ON_USE)
+                    SendGameObjectCustomAnim(GetObjectGuid(), info->goober.customAnim);
+                else
+                    SetGoState(GO_STATE_ACTIVE);
+            }
 
             m_cooldownTime = time(nullptr) + info->GetAutoCloseTime();
 
@@ -1722,19 +1756,19 @@ void GameObject::Use(Unit* user)
 
             if (player->CanUseBattleGroundObject())
             {
-                // in battleground check
+                // Note: object is used in battlegrounds;
+                // it's spawned by default in Warsong Gulch, Arathi Basin and Eye of the Storm
                 BattleGround* bg = player->GetBattleGround();
-                if (!bg)
-                    return;
-                // BG flag click
-                // AB:
-                // 15001
-                // 15002
-                // 15003
-                // 15004
-                // 15005
-                bg->EventPlayerClickedOnFlag(player, this);
-                return;                                     // we don't need to delete flag ... it is despawned!
+                if (bg)
+                    bg->HandlePlayerClickedOnFlag(player, this);
+
+                // handle spell data if available; this usually marks the player as the flag carrier in a battleground
+                GameObjectInfo const* info = GetGOInfo();
+                if (info && info->flagstand.pickupSpell)
+                    spellId = info->flagstand.pickupSpell;
+
+                // when clicked the flag despawns
+                SetLootState(GO_JUST_DEACTIVATED);
             }
             break;
         }
@@ -1758,32 +1792,22 @@ void GameObject::Use(Unit* user)
 
             Player* player = (Player*)user;
 
-            if (player->CanUseBattleGroundObject())
+            if (player->CanUseBattleGroundObject() && player->GetMap()->IsBattleGround())
             {
-                // in battleground check
-                BattleGround* bg = player->GetBattleGround();
-                if (!bg)
-                    return;
-                // BG flag dropped
-                // WS:
-                // 179785 - Silverwing Flag
-                // 179786 - Warsong Flag
+                // Note: object is used in battlegrounds; object only summoned by spells, doesn't have static spawn data
+                // summon is triggered by aura removal or aura death proc when player drop the main flag (type 24) in Warsong Gulch and Eye of the Storm
+                // clicking on the flag triggers an event which is handled by battleground script
                 GameObjectInfo const* info = GetGOInfo();
-                if (info)
+                if (info && info->flagdrop.eventID)
                 {
-                    switch (info->id)
-                    {
-                        case 179785:                        // Silverwing Flag
-                        case 179786:                        // Warsong Flag
-                            // check if it's correct bg
-                            if (bg->GetTypeId() == BATTLEGROUND_WS)
-                                bg->EventPlayerClickedOnFlag(player, this);
-                            break;
-                    }
+                    StartEvents_Event(GetMap(), info->flagdrop.eventID, this, player, true, player);
+
+                    // handle spell data if available; this usually marks the player as the flag carrier in a battleground
+                    spellId = info->flagdrop.pickupSpell;
+
+                    // despawn the flag after click
+                    SetLootState(GO_JUST_DEACTIVATED);
                 }
-                // this cause to call return, all flags must be deleted here!!
-                spellId = 0;
-                Delete();
             }
             break;
         }

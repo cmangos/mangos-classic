@@ -264,7 +264,7 @@ void BattleGroundAV::Update(uint32 diff)
             if (m_Nodes[i].Timer > diff)
                 m_Nodes[i].Timer -= diff;
             else
-                EventPlayerDestroyedPoint(i);
+                ProcessPlayerDestroyedPoint(i);
         }
     }
 }
@@ -395,7 +395,7 @@ void BattleGroundAV::UpdatePlayerScore(Player* source, uint32 type, uint32 value
     }
 }
 
-void BattleGroundAV::EventPlayerDestroyedPoint(BG_AV_Nodes node)
+void BattleGroundAV::ProcessPlayerDestroyedPoint(BG_AV_Nodes node)
 {
     DEBUG_LOG("BattleGroundAV: player destroyed point node %i", node);
 
@@ -488,7 +488,7 @@ void BattleGroundAV::PopulateNode(BG_AV_Nodes node)
 }
 
 /// called when using a banner
-void BattleGroundAV::EventPlayerClickedOnFlag(Player* source, GameObject* target_obj)
+void BattleGroundAV::HandlePlayerClickedOnFlag(Player* source, GameObject* target_obj)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -500,17 +500,17 @@ void BattleGroundAV::EventPlayerClickedOnFlag(Player* source, GameObject* target
     switch ((sBattleGroundMgr.GetGameObjectEventIndex(target_obj->GetGUIDLow())).event2 % BG_AV_MAX_STATES)
     {
         case POINT_CONTROLLED:
-            EventPlayerAssaultsPoint(source, node);
+            ProcessPlayerAssaultsPoint(source, node);
             break;
         case POINT_ASSAULTED:
-            EventPlayerDefendsPoint(source, node);
+            ProcessPlayerDefendsPoint(source, node);
             break;
         default:
             break;
     }
 }
 
-void BattleGroundAV::EventPlayerDefendsPoint(Player* player, BG_AV_Nodes node)
+void BattleGroundAV::ProcessPlayerDefendsPoint(Player* player, BG_AV_Nodes node)
 {
     MANGOS_ASSERT(GetStatus() == STATUS_IN_PROGRESS);
 
@@ -523,7 +523,7 @@ void BattleGroundAV::EventPlayerDefendsPoint(Player* player, BG_AV_Nodes node)
         // until snowfall doesn't belong to anyone it is better handled in assault - code (best would be to have a special function
         // for neutral nodes.. but doing this just for snowfall will be a bit to much i think
         MANGOS_ASSERT(node == BG_AV_NODES_SNOWFALL_GRAVE);  // currently the only neutral grave
-        EventPlayerAssaultsPoint(player, node);
+        ProcessPlayerAssaultsPoint(player, node);
         return;
     }
 
@@ -563,7 +563,7 @@ enum CreditMarkers
     NPC_PVP_TOWER_CREDIT_MARKER = 13778,
 };
 
-void BattleGroundAV::EventPlayerAssaultsPoint(Player* player, BG_AV_Nodes node)
+void BattleGroundAV::ProcessPlayerAssaultsPoint(Player* player, BG_AV_Nodes node)
 {
     PvpTeamIndex teamIdx  = GetTeamIndexByTeamId(player->GetTeam());
     DEBUG_LOG("BattleGroundAV: player assaults node %i", node);

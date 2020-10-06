@@ -18269,7 +18269,7 @@ void Player::SummonIfPossible(bool agree)
     // drop flag at summon
     // this code can be reached only when GM is summoning player who carries flag, because player should be immune to summoning spells when he carries flag
     if (BattleGround* bg = GetBattleGround())
-        bg->EventPlayerDroppedFlag(this);
+        bg->HandlePlayerDroppedFlag(this);
 
     m_summon_expire = 0;
 

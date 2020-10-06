@@ -465,13 +465,10 @@ class BattleGround
         virtual void HandleGameObjectCreate(GameObject* /*go*/) {}
 
         // Called when player drops flag
-        virtual void EventPlayerDroppedFlag(Player* /*player*/) {}
+        virtual void HandlePlayerDroppedFlag(Player* /*player*/) {}
 
         // Called when player clicks on flag
-        virtual void EventPlayerClickedOnFlag(Player* /*player*/, GameObject* /*target_obj*/) {}
-
-        // Called when player captures flag
-        virtual void EventPlayerCapturedFlag(Player* /*player*/) {}
+        virtual void HandlePlayerClickedOnFlag(Player* /*player*/, GameObject* /*target_obj*/) {}
 
         // Called when player logs in / out
         void EventPlayerLoggedIn(Player* /*player*/);

@@ -175,7 +175,7 @@ struct GameObjectInfo
             uint32 large;                                   // 13
             uint32 openTextID;                              // 14 can be used to replace castBarCaption?
             uint32 closeTextID;                             // 15
-            uint32 losOK;                                   // 16 isBattlegroundObject
+            uint32 isPvPObject;                             // 16 flags used only in battlegrounds
             uint32 allowMounted;                            // 17
             uint32 floatingTooltip;                         // 18
             uint32 gossipID;                                // 19

@@ -329,21 +329,21 @@ class BattleGroundAV : public BattleGround
         void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr) override;
+        void AddPlayer(Player* plr) override;
 
-        virtual void StartingEventOpenDoors() override;
+        void StartingEventOpenDoors() override;
         // world states
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
         bool HandleAreaTrigger(Player* source, uint32 trigger) override;
-        virtual void Reset() override;
+        void Reset() override;
 
         /*general stuff*/
         void UpdateScore(PvpTeamIndex teamIdx, int32 points);
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
 
         /*handle stuff*/ // these are functions which get called from extern scripts
-        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        void HandlePlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
         void HandleKillPlayer(Player* player, Player* killer) override;
         void HandleKillUnit(Creature* creature, Player* killer) override;
         void HandleQuestComplete(uint32 questid, Player* player);
@@ -351,17 +351,17 @@ class BattleGroundAV : public BattleGround
 
         void EndBattleGround(Team winner) override;
 
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* plr) override;
+        WorldSafeLocsEntry const* GetClosestGraveYard(Player* plr) override;
 
         static BattleGroundAVTeamIndex GetAVTeamIndexByTeamId(Team team) { return BattleGroundAVTeamIndex(GetTeamIndexByTeamId(team)); }
 
-        virtual Team GetPrematureWinner() override;
+        Team GetPrematureWinner() override;
 
     private:
         /* Nodes occupying */
-        void EventPlayerAssaultsPoint(Player* player, BG_AV_Nodes node);
-        void EventPlayerDefendsPoint(Player* player, BG_AV_Nodes node);
-        void EventPlayerDestroyedPoint(BG_AV_Nodes node);
+        void ProcessPlayerAssaultsPoint(Player* player, BG_AV_Nodes node);
+        void ProcessPlayerDefendsPoint(Player* player, BG_AV_Nodes node);
+        void ProcessPlayerDestroyedPoint(BG_AV_Nodes node);
 
         void AssaultNode(BG_AV_Nodes node, PvpTeamIndex teamIdx);
         void DestroyNode(BG_AV_Nodes node);

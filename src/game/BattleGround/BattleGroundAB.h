@@ -180,7 +180,7 @@ class BattleGroundAB : public BattleGround
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
         /* Nodes occupying */
-        void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        void HandlePlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
 
         Team GetPrematureWinner() override;
 
