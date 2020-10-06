@@ -46,12 +46,6 @@ struct BattleGroundEventIdx
     uint8 event2;
 };
 
-enum SpritiHealers
-{
-    NPC_SPIRIT_GUIDE_A              = 13116,
-    NPC_SPIRIT_GUIDE_H              = 13117,
-};
-
 enum BattleGroundSounds
 {
     SOUND_HORDE_WINS                = 8454,
