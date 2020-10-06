@@ -112,13 +112,15 @@ enum ABNodeStatus
 
 enum ABBanners
 {
-    BG_AB_BANNER_MINE                   = 180091,           // neutral banners; all are GO type 10
-    BG_AB_BANNER_LUMBER_MILL            = 180090,
-    BG_AB_BANNER_FARM                   = 180089,
-    BG_AB_BANNER_BLACKSMITH             = 180088,
-    BG_AB_BANNER_STABLE                 = 180087,
+    // neutral banners; all are GO type 10
+    BG_AB_BANNER_MINE                   = 180091,           // triggers spell 23937 
+    BG_AB_BANNER_LUMBER_MILL            = 180090,           // triggers spell 23938
+    BG_AB_BANNER_FARM                   = 180089,           // triggers spell 23935
+    BG_AB_BANNER_BLACKSMITH             = 180088,           // triggers spell 23936
+    BG_AB_BANNER_STABLE                 = 180087,           // triggers spell 23932
 
-    BG_AB_BANNER_ALLIANCE               = 180058,           // faction banners; all GO type 1; can be clicked by the opposite faction only
+    // team banners; all are GO type 1; can be clicked by the opposite faction only
+    BG_AB_BANNER_ALLIANCE               = 180058,
     BG_AB_BANNER_CONTESTED_A            = 180059,
     BG_AB_BANNER_HORDE                  = 180060,
     BG_AB_BANNER_CONTESTED_H            = 180061,
