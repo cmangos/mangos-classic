@@ -3459,8 +3459,6 @@ void Spell::SendSpellStart() const
     WorldPacket data(SMSG_SPELL_START, (8 + 8 + 4 + 2 + 4));
     if (m_CastItem)
         data << m_CastItem->GetPackGUID();
-    if (m_CastItem)
-        data << m_CastItem->GetPackGUID();
     else
         data << m_trueCaster->GetPackGUID();
 
@@ -3512,7 +3510,7 @@ void Spell::SendSpellGo()
     if (m_trueCaster->IsGameObject()) // write empty guid if GO
         data << ObjectGuid().WriteAsPacked();
     else
-        data << m_caster->GetObjectGuid();
+        data << m_caster->GetPackGUID();
     data << uint32(m_spellInfo->Id);                        // spellId
     data << uint16(castFlags);                              // cast flags
 
