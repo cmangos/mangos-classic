@@ -5904,6 +5904,14 @@ bool SpellAuraHolder::IsSaveToDbHolder() const
         (GetTrackedAuraType() == TRACK_AURA_TYPE_NOT_TRACKED || (GetTrackedAuraType() == TRACK_AURA_TYPE_SINGLE_TARGET && GetCasterGuid() == GetTarget()->GetObjectGuid()));
 }
 
+bool SpellAuraHolder::IsCharm() const
+{
+    for (auto m_aura : m_auras)
+        if (m_aura && IsCharmAura(m_spellProto, m_aura->GetEffIndex()))
+            return true;
+    return false;
+}
+
 void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
 {
     TrackedAuraType trackedType = GetTrackedAuraType();
