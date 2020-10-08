@@ -367,37 +367,6 @@ enum ChatType
     CHAT_TYPE_MAX
 };
 
-// Selection method used by SelectAttackingTarget
-enum AttackingTarget
-{
-    ATTACKING_TARGET_RANDOM = 0,                            // Just selects a random target
-    ATTACKING_TARGET_TOPAGGRO,                              // Selects targes from top aggro to bottom
-    ATTACKING_TARGET_BOTTOMAGGRO,                           // Selects targets from bottom aggro to top
-    ATTACKING_TARGET_NEAREST_BY,                            // Selects the nearest by target
-    ATTACKING_TARGET_FARTHEST_AWAY,                         // Selects the farthest away target
-    ATTACKING_TARGET_ALL_SUITABLE,
-};
-
-enum SelectFlags
-{
-    SELECT_FLAG_IN_LOS              = 0x0001,               // Default Selection Requirement for Spell-targets
-    SELECT_FLAG_PLAYER              = 0x0002,
-    SELECT_FLAG_POWER_MANA          = 0x0004,               // For mana based spells, like manaburn
-    SELECT_FLAG_POWER_RAGE          = 0x0008,
-    SELECT_FLAG_POWER_ENERGY        = 0x0010,
-    SELECT_FLAG_IN_MELEE_RANGE      = 0x0040,
-    SELECT_FLAG_NOT_IN_MELEE_RANGE  = 0x0080,
-    SELECT_FLAG_HAS_AURA            = 0x0100,
-    SELECT_FLAG_NOT_AURA            = 0x0200,
-    SELECT_FLAG_RANGE_RANGE         = 0x0400,               // For direct targeted abilities like charge or frostbolt
-    SELECT_FLAG_RANGE_AOE_RANGE     = 0x0800,               // For AOE targeted abilities like frost nova
-    SELECT_FLAG_POWER_NOT_MANA      = 0x1000,               // Used in some dungeon encounters
-    SELECT_FLAG_USE_EFFECT_RADIUS   = 0x2000,               // For AOE targeted abilities which have correct data in effect index 0
-    SELECT_FLAG_SKIP_TANK           = 0x4000,               // Not GetVictim - tank is not always top threat
-    SELECT_FLAG_PLAYER_CASTING      = 0x8000,               // For Interupts on casting targets
-    SELECT_FLAG_SKIP_CUSTOM         = 0x10000,              // skips custom target
-};
-
 enum RegenStatsFlags
 {
     REGEN_FLAG_HEALTH_IN_COMBAT     = 0x001, // placeholder for future
@@ -579,26 +548,6 @@ enum TemporaryFactionFlags                                  // Used at real fact
     TEMPFACTION_TOGGLE_PACIFIED         = 0x40,             // Remove UNIT_FLAG_PACIFIED(0x20000) when faction is changed (reapply when temp-faction is removed)
     TEMPFACTION_TOGGLE_NOT_SELECTABLE   = 0x80,             // Remove UNIT_FLAG_NOT_SELECTABLE(0x2000000) when faction is changed (reapply when temp-faction is removed)
     TEMPFACTION_ALL,
-};
-
-struct SelectAttackingTargetParams
-{
-    union
-    {
-        struct
-        {
-            uint32 minRange;
-            uint32 maxRange;
-        } range;
-        struct
-        {
-            uint64 guid;
-        } skip;
-        struct
-        {
-            uint32 params[2];
-        } raw;
-    };
 };
 
 class Creature : public Unit
@@ -817,11 +766,6 @@ class Creature : public Unit
 
         void SetInCombatWithZone(bool checkAttackability = true);
 
-        Unit* SelectAttackingTarget(AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams()) const;
-        Unit* SelectAttackingTarget(AttackingTarget target, uint32 position, SpellEntry const* spellInfo = nullptr, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams()) const;
-        void SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams()) const;
-        void SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, SpellEntry const* spellInfo = nullptr, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams()) const;
-
         bool HasQuest(uint32 quest_id) const override;
         bool HasInvolvedQuest(uint32 quest_id)  const override;
 
@@ -899,8 +843,6 @@ class Creature : public Unit
 
         uint32 GetDbGuid() const { return m_dbGuid; }
     protected:
-        bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
-
         bool CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
 
