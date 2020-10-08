@@ -24,11 +24,19 @@
 enum GenericPlayerAIActions
 {
     GENERIC_ACTION_RESET = 1000,
+    GENERIC_THREAT_CHANGE = 1001,
 };
 
 PlayerAI::PlayerAI(Player* player) : UnitAI(player), m_player(player), m_spellsDisabled(false)
 {
     AddCustomAction(GENERIC_ACTION_RESET, true, [&]() { m_spellsDisabled = false; });
+    AddCustomAction(GENERIC_THREAT_CHANGE, true, [&]()
+    {
+        if (Unit* target = m_player->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+            AttackStart(target);
+
+        ResetTimer(GENERIC_THREAT_CHANGE, urand(10000, 20000));
+    });
 }
 
 uint32 PlayerAI::LookupHighestLearnedRank(uint32 spellId)
@@ -46,15 +54,30 @@ uint32 PlayerAI::LookupHighestLearnedRank(uint32 spellId)
     return ownedRank;
 }
 
-void PlayerAI::AddPlayerSpellAction(uint32 priority, uint32 spellId, std::function<Unit*()> selector)
+void PlayerAI::AddPlayerSpellAction(uint32 spellId, std::function<Unit*()> selector)
 {
-    m_playerSpellActions.emplace_back(spellId, (selector ? selector : [&]()->Unit* { return m_player->GetVictim(); }));
+    if (!selector)
+    {
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+        if (spellInfo)
+        {
+            if (HasSpellTarget(spellInfo, TARGET_UNIT_ENEMY) || (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)) // always random
+                selector = [&]()->Unit* { return m_player->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, spellInfo, SELECT_FLAG_PLAYER); };
+            if (HasSpellTarget(spellInfo, TARGET_UNIT_FRIEND) || HasSpellTarget(spellInfo, TARGET_UNIT_FRIEND_CHAIN_HEAL)) // heals only target self
+                selector = [&]()->Unit* { return m_player; };
+        }
+        if (!selector) // fallback
+            selector = [&]()->Unit* { return nullptr; };
+    }
+    m_playerSpellActions.emplace_back(spellId, selector);
 }
 
 void PlayerAI::ExecuteSpells()
 {
     if (m_spellsDisabled)
         return;
+
+    std::shuffle(m_playerSpellActions.begin(), m_playerSpellActions.end(), *GetRandomGenerator());
 
     bool success = false;
     for (auto& data : m_playerSpellActions)
@@ -64,8 +87,12 @@ void PlayerAI::ExecuteSpells()
 
     if (success)
     {
-        m_spellsDisabled = true;
-        ResetTimer(GENERIC_ACTION_RESET, urand(5000, 10000));
+        uint32 randomInterval = urand(0, 5);
+        if (randomInterval != 0)
+        {
+            m_spellsDisabled = true;
+            ResetTimer(GENERIC_ACTION_RESET, urand(6000, 12000));
+        }
     }
 }
 

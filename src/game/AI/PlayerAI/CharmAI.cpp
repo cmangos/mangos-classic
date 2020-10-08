@@ -20,13 +20,9 @@
 
 enum PriestSpells
 {
+    SPELL_PSYCHIC_SCREAM = 8122,
+    SPELL_SHADOW_WORD_PAIN = 589,
     SPELL_MIND_BLAST = 8092,
-};
-
-enum PriestPriorities
-{
-    PRIORITY_MIND_BLAST,
-    PRIEST_SPELL_MAX,
 };
 
 struct PriestAI : public PlayerAI
@@ -34,19 +30,19 @@ struct PriestAI : public PlayerAI
     PriestAI(Player* player) : PlayerAI(player)
     {
         if (uint32 mindBlast = LookupHighestLearnedRank(SPELL_MIND_BLAST))
-            AddPlayerSpellAction(PRIORITY_MIND_BLAST, mindBlast);
+            AddPlayerSpellAction(mindBlast);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_SHADOW_WORD_PAIN))
+            AddPlayerSpellAction(spell);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_PSYCHIC_SCREAM))
+            AddPlayerSpellAction(spell);
     }
 };
 
 enum MageSpells
 {
+    SPELL_BLIZZARD = 10,
+    SPELL_FROSTBOLT = 116,
     SPELL_FIREBALL = 133,
-};
-
-enum MagePriorities
-{
-    PRIORITY_FIREBALL,
-    MAGE_SPELL_MAX,
 };
 
 struct MageAI : public PlayerAI
@@ -54,19 +50,19 @@ struct MageAI : public PlayerAI
     MageAI(Player* player) : PlayerAI(player)
     {
         if (uint32 fireball = LookupHighestLearnedRank(SPELL_FIREBALL))
-            AddPlayerSpellAction(PRIORITY_FIREBALL, fireball);
+            AddPlayerSpellAction(fireball);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_BLIZZARD))
+            AddPlayerSpellAction(spell);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_FROSTBOLT))
+            AddPlayerSpellAction(spell);
     }
 };
 
 enum WarlockSpells
 {
+    SPELL_RAIN_OF_FIRE = 5740,
+    SPELL_FEAR = 5782,
     SPELL_SHADOW_BOLT = 686,
-};
-
-enum WarlockPriorities
-{
-    PRIORITY_SHADOW_BOLT,
-    WARLOCK_SPELL_MAX,
 };
 
 struct WarlockAI : public PlayerAI
@@ -74,19 +70,19 @@ struct WarlockAI : public PlayerAI
     WarlockAI(Player* player) : PlayerAI(player)
     {
         if (uint32 shadowBolt = LookupHighestLearnedRank(SPELL_SHADOW_BOLT))
-            AddPlayerSpellAction(PRIORITY_SHADOW_BOLT, shadowBolt);
+            AddPlayerSpellAction(shadowBolt);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_RAIN_OF_FIRE))
+            AddPlayerSpellAction(spell);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_FEAR))
+            AddPlayerSpellAction(spell);
     }
 };
 
 enum RogueSpells
 {
+    SPELL_BLIND = 2094,
+    SPELL_EVISCERATE = 2098,
     SPELL_SINISTER_STRIKE = 1752,
-};
-
-enum RoguePriorities
-{
-    PRIORITY_SINISTER_STRIKE,
-    ROGUE_SPELL_MAX,
 };
 
 struct RogueAI : public PlayerAI
@@ -94,19 +90,19 @@ struct RogueAI : public PlayerAI
     RogueAI(Player* player) : PlayerAI(player)
     {
         if (uint32 sinisterStrike = LookupHighestLearnedRank(SPELL_SINISTER_STRIKE))
-            AddPlayerSpellAction(PRIORITY_SINISTER_STRIKE, sinisterStrike);
+            AddPlayerSpellAction(sinisterStrike);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_BLIND))
+            AddPlayerSpellAction(spell);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_EVISCERATE))
+            AddPlayerSpellAction(spell);
     }
 };
 
 enum DruidSpells
 {
+    SPELL_WRATH = 5176,
+    SPELL_HURRICANE = 16914,
     SPELL_MOONFIRE = 8921,
-};
-
-enum DruidPriorities
-{
-    PRIORITY_MOONFIRE,
-    DRUID_SPELL_MAX,
 };
 
 struct DruidAI : public PlayerAI
@@ -114,19 +110,20 @@ struct DruidAI : public PlayerAI
     DruidAI(Player* player) : PlayerAI(player)
     {
         if (uint32 moonfire = LookupHighestLearnedRank(SPELL_MOONFIRE))
-            AddPlayerSpellAction(PRIORITY_MOONFIRE, moonfire);
+            AddPlayerSpellAction(moonfire);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_WRATH))
+            AddPlayerSpellAction(spell);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_HURRICANE))
+            AddPlayerSpellAction(spell);
     }
 };
 
 enum ShamanSpells
 {
+    SPELL_HEROISM = 32182,
+    SPELL_BLOODLUST = 2825,
+    SPELL_LIGHTNING_BOLT = 403,
     SPELL_FLAME_SHOCK = 8050,
-};
-
-enum ShamanPriorities
-{
-    PRIORITY_FLAME_SHOCK,
-    SHAMAN_SPELL_MAX,
 };
 
 struct ShamanAI : public PlayerAI
@@ -134,19 +131,21 @@ struct ShamanAI : public PlayerAI
     ShamanAI(Player* player) : PlayerAI(player)
     {
         if (uint32 flameShock = LookupHighestLearnedRank(SPELL_FLAME_SHOCK))
-            AddPlayerSpellAction(PRIORITY_FLAME_SHOCK, flameShock);
+            AddPlayerSpellAction(flameShock);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_HEROISM))
+            AddPlayerSpellAction(spell);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_BLOODLUST))
+            AddPlayerSpellAction(spell);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_LIGHTNING_BOLT))
+            AddPlayerSpellAction(spell);
     }
 };
 
 enum HunterSpells
 {
+    SPELL_VOLLEY = 1510,
+    SPELL_EXPLOSIVE_TRAP = 13813,
     SPELL_RAPTOR_STRIKE = 2973,
-};
-
-enum HunterPriorities
-{
-    PRIORITY_RAPTOR_STRIKE,
-    HUNTER_SPELL_MAX,
 };
 
 struct HunterAI : public PlayerAI
@@ -154,19 +153,19 @@ struct HunterAI : public PlayerAI
     HunterAI(Player* player) : PlayerAI(player)
     {
         if (uint32 raptorStrike = LookupHighestLearnedRank(SPELL_RAPTOR_STRIKE))
-            AddPlayerSpellAction(PRIORITY_RAPTOR_STRIKE, raptorStrike);
+            AddPlayerSpellAction(raptorStrike);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_VOLLEY))
+            AddPlayerSpellAction(spell);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_EXPLOSIVE_TRAP))
+            AddPlayerSpellAction(spell);
     }
 };
 
 enum WarriorSpells
 {
+    SPELL_INTIMIDATING_SHOUT = 5246,
+    SPELL_HAMSTRING = 1715,
     SPELL_HEROIC_STRIKE = 78,
-};
-
-enum WarriorPriorities
-{
-    PRIORITY_HEROIC_STRIKE = 0,
-    WARRIOR_SPELL_MAX,
 };
 
 struct WarriorAI : public PlayerAI
@@ -174,25 +173,31 @@ struct WarriorAI : public PlayerAI
     WarriorAI(Player* player) : PlayerAI(player)
     {
         if (uint32 heroicStrike = LookupHighestLearnedRank(SPELL_HEROIC_STRIKE))
-            AddPlayerSpellAction(PRIORITY_HEROIC_STRIKE, heroicStrike);
+            AddPlayerSpellAction(heroicStrike);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_INTIMIDATING_SHOUT))
+            AddPlayerSpellAction(spell);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_HAMSTRING))
+            AddPlayerSpellAction(spell);
     }
 };
 
 enum PaladinSpells
 {
-
-};
-
-enum PaladinPriorities
-{
-    PALADIN_SPELL_MAX,
+    SPELL_FLASH_OF_LIGHT = 19750,
+    SPELL_HAMMER_OF_JUSTICE = 853,
+    SPELL_CONSECRATION = 26573,
 };
 
 struct PaladinAI : public PlayerAI
 {
     PaladinAI(Player* player) : PlayerAI(player)
     {
-
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_FLASH_OF_LIGHT))
+            AddPlayerSpellAction(spell);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_HAMMER_OF_JUSTICE))
+            AddPlayerSpellAction(spell);
+        if (uint32 spell = LookupHighestLearnedRank(SPELL_CONSECRATION))
+            AddPlayerSpellAction(spell);
     }
 };
 

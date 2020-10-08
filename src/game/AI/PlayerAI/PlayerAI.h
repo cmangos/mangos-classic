@@ -38,7 +38,7 @@ class PlayerAI : public UnitAI, public TimerManager
         void AttackClosestEnemy() override;
     protected:
         uint32 LookupHighestLearnedRank(uint32 spellId);
-        void AddPlayerSpellAction(uint32 priority, uint32 spellId, std::function<Unit*()> selector = nullptr);
+        void AddPlayerSpellAction(uint32 spellId, std::function<Unit*()> selector = nullptr);
         Player* m_player;
     private:
         struct SpellData
