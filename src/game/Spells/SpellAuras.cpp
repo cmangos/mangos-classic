@@ -1657,9 +1657,37 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         {
             uint32 zone, area;
             target->GetZoneAndAreaId(zone, area);
+            std::set<uint32> appliedSpells;
+            std::set<uint32> removedSpells;
 
+            Player* player = static_cast<Player*>(target);
+
+            // custom loop for evaluation reasons
             for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-                itr->second->ApplyOrRemoveSpellIfCan((Player*)target, zone, area, false);
+            {
+                auto data = (*itr).second;
+                uint32 spellId = data->spellId;
+                // one success trumps multiple failures
+                if (appliedSpells.find(spellId) != appliedSpells.end())
+                    continue;
+
+                if (data->IsFitToRequirements(player, zone, area))
+                {
+                    if (data->autocast && !player->HasAura(spellId))
+                    {
+                        appliedSpells.insert(spellId);
+                        removedSpells.erase(spellId);
+                    }
+                }
+                else if (player->HasAura(spellId))
+                    removedSpells.insert(spellId);
+            }
+
+            for (auto spellId : appliedSpells)
+                player->CastSpell(player, spellId, TRIGGERED_OLD_TRIGGERED);
+
+            for (auto spellId : removedSpells)
+                player->RemoveAurasDueToSpell(spellId);
         }
     }
 
