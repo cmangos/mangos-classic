@@ -51,6 +51,7 @@ class PlayerAI : public UnitAI, public TimerManager
         void ExecuteSpells();
         std::vector<SpellData> m_playerSpellActions;
         bool m_spellsDisabled;
+        bool m_executeTargetChange;
 };
 
 UnitAI* GetClassAI(Classes playerClass, Player* player);

@@ -30,13 +30,7 @@ enum GenericPlayerAIActions
 PlayerAI::PlayerAI(Player* player) : UnitAI(player), m_player(player), m_spellsDisabled(false)
 {
     AddCustomAction(GENERIC_ACTION_RESET, true, [&]() { m_spellsDisabled = false; });
-    AddCustomAction(GENERIC_THREAT_CHANGE, true, [&]()
-    {
-        if (Unit* target = m_player->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            AttackStart(target);
-
-        ResetTimer(GENERIC_THREAT_CHANGE, urand(10000, 20000));
-    });
+    AddCustomAction(GENERIC_THREAT_CHANGE, true, [&]() { m_executeTargetChange = true; });
 }
 
 uint32 PlayerAI::LookupHighestLearnedRank(uint32 spellId)
@@ -74,6 +68,14 @@ void PlayerAI::AddPlayerSpellAction(uint32 spellId, std::function<Unit*()> selec
 
 void PlayerAI::ExecuteSpells()
 {
+    if (m_executeTargetChange && CanExecuteCombatAction())
+    {
+        if (Unit* target = m_player->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+            AttackStart(target);
+
+        ResetTimer(GENERIC_THREAT_CHANGE, urand(10000, 20000));
+    }
+
     if (m_spellsDisabled)
         return;
 
@@ -81,9 +83,8 @@ void PlayerAI::ExecuteSpells()
 
     bool success = false;
     for (auto& data : m_playerSpellActions)
-        if (Unit* target = data.targetFinder())
-            if (DoCastSpellIfCan(target, data.spellId) == CAST_OK)
-                success = true;
+        if (DoCastSpellIfCan(data.targetFinder(), data.spellId) == CAST_OK)
+            success = true;            
 
     if (success)
     {
