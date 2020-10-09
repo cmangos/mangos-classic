@@ -62,7 +62,7 @@ void PlayerAI::AddPlayerSpellAction(uint32 spellId, std::function<Unit*()> selec
         if (spellInfo)
         {
             if (HasSpellTarget(spellInfo, TARGET_UNIT_ENEMY) || (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)) // always random
-                selector = [&]()->Unit* { return m_player->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, spellInfo, SELECT_FLAG_PLAYER); };
+                selector = [&, spellId = spellInfo->Id]()->Unit* { return m_player->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, spellId, SELECT_FLAG_PLAYER); };
             if (HasSpellTarget(spellInfo, TARGET_UNIT_FRIEND) || HasSpellTarget(spellInfo, TARGET_UNIT_FRIEND_CHAIN_HEAL)) // heals only target self
                 selector = [&]()->Unit* { return m_player; };
         }
