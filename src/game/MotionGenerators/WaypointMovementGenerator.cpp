@@ -382,7 +382,7 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
     m_nodeIndexes.clear();
 
     // prevent movement while casting spells with cast time or channel time
-    if (!creature.IsAlive() || creature.IsNonMeleeSpellCasted(false, false, true, true))
+    if (!creature.IsAlive() || creature.IsImmobilizedState() || creature.IsNonMeleeSpellCasted(false, false, true, true))
     {
         if (!creature.movespline->Finalized())
         {
