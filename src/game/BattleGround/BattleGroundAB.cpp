@@ -255,9 +255,9 @@ void BattleGroundAB::ProcessNodeCapture(uint8 node, PvpTeamIndex teamIdx)
     DEBUG_LOG("BattleGroundAB: Node with id %u was captured by team %u.", node, team);
 
     if (m_capturedNodeCount[teamIdx] >= 5)
-        CastSpellOnTeam(SPELL_AB_QUEST_REWARD_5_BASES, team);
+        CastSpellOnTeam(BG_AB_SPELL_QUEST_REWARD_5_BASES, team);
     else if (m_capturedNodeCount[teamIdx] >= 4)
-        CastSpellOnTeam(SPELL_AB_QUEST_REWARD_4_BASES, team);
+        CastSpellOnTeam(BG_AB_SPELL_QUEST_REWARD_4_BASES, team);
 }
 
 // Method that handles the banner click

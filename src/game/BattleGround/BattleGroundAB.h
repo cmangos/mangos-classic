@@ -126,6 +126,12 @@ enum ABBanners
     BG_AB_BANNER_CONTESTED_H            = 180061,
 };
 
+enum ABSpells
+{
+    BG_AB_SPELL_QUEST_REWARD_4_BASES    = 24061,                // quests 8114 and 8121
+    BG_AB_SPELL_QUEST_REWARD_5_BASES    = 24064,                // quests 8115 and 8122
+};
+
 enum ABSounds
 {
     BG_AB_SOUND_NODE_CLAIMED            = 8192,
