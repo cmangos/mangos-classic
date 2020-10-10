@@ -477,9 +477,6 @@ class BattleGround
         void EventPlayerLoggedIn(Player* /*player*/);
         void EventPlayerLoggedOut(Player* /*player*/);
 
-        // Called when required
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* /*player*/);
-
         // Called when player joins the battleground after the initial load
         virtual void AddPlayer(Player* /*player*/);                     // must be implemented in BG subclass
 

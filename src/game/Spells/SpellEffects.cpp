@@ -5942,13 +5942,11 @@ void Spell::EffectBind(SpellEffectIndex /*eff_idx*/)
 
 void Spell::EffectTeleportGraveyard(SpellEffectIndex eff_idx)
 {
-    if (!unitTarget || !unitTarget->IsPlayer())
+    if (!unitTarget || !unitTarget->IsPlayer() || !unitTarget->GetMap()->IsBattleGround())
         return;
 
     Player* player = static_cast<Player*>(unitTarget);
-    if (BattleGround* bg = player->GetBattleGround())
-        if (WorldSafeLocsEntry const* entry = bg->GetClosestGraveYard(player))
-            player->NearTeleportTo(entry->x, entry->y, entry->z, entry->o, unitTarget == m_caster);
+    player->RepopAtGraveyard();
 }
 
 uint32 Spell::GetUsableHealthStoneItemType(Unit* target)
