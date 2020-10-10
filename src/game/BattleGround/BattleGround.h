@@ -342,6 +342,11 @@ class BattleGround
         // Function which starts the battleground
         void StartBattleGround();
 
+        // Functions that handle gameobject storage
+        typedef std::map<uint32, ObjectGuid> EntryGuidMap;
+        GameObject* GetSingleGameObjectFromStorage(uint32 entry) const;
+        Creature* GetSingleCreatureFromStorage(uint32 entry, bool skipDebugLog = false) const;
+
         // Function that set and get battleground map id
         void SetMapId(uint32 mapId) { m_mapId = mapId; }
         uint32 GetMapId() const { return m_mapId; }
@@ -417,14 +422,15 @@ class BattleGround
         // Function that blocks movement at the end of the battleground
         static void BlockMovement(Player* /*player*/);
 
-        // Functions that handle messaging
+        // Functions that handle battleground announcements; Used usually when players capture battleground objectives
         void SendMessageToAll(int32 /*entry*/, ChatMsg /*type*/, Player const* source = nullptr);
-        void SendYellToAll(int32 /*entry*/, uint32 /*language*/, ObjectGuid /*guid*/);
+        void SendMessageToAll(int32 /*entry*/, ChatMsg /*type*/, uint32 /*language*/, ObjectGuid /*guid*/);
         void PSendMessageToAll(int32 /*entry*/, ChatMsg /*type*/, Player const* /*source*/, ...);
-
-        // Functions to send messages and yells to all battleground players
         void SendMessage2ToAll(int32 /*entry*/, ChatMsg /*type*/, Player const* /*source*/, int32 arg1 = 0, int32 arg2 = 0);
-        void SendYell2ToAll(int32 /*entry*/, uint32 /*language*/, ObjectGuid /*guid*/, int32 /*arg1*/, int32 /*arg2*/);
+
+        // Functions that handle creature yells in battleground; Used specifically in Alterac Valley
+        void SendYellToAll(int32 /*entry*/, uint32 /*language*/, Creature const* /*source*/);
+        void SendYell2ToAll(int32 /*entry*/, uint32 /*language*/, Creature const* /*source*/, int32 /*arg1*/, int32 /*arg2*/);
 
         // Handle raid groups
         Group* GetBgRaid(Team team) const { return m_bgRaids[GetTeamIndexByTeamId(team)]; }
@@ -576,6 +582,10 @@ class BattleGround
         uint32 m_startMessageIds[BG_STARTING_EVENT_COUNT];
 
         bool   m_buffChange;
+
+        /* Storage lists */
+        EntryGuidMap m_goEntryGuidStore;                   // Store unique GO-Guids by entry
+        EntryGuidMap m_npcEntryGuidStore;                  // Store unique NPC-Guids by entry
 
     private:
         /* Battleground */

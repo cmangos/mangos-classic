@@ -1623,14 +1623,10 @@ void BattleGround::SendMessageToAll(int32 entry, ChatMsg type, Player const* sou
 
   @param    text entry
   @param    language
-  @param    creature guid
+  @param    creature source
 */
-void BattleGround::SendYellToAll(int32 entry, uint32 language, ObjectGuid guid)
+void BattleGround::SendYellToAll(int32 entry, uint32 language, Creature const* source)
 {
-    Creature* source = GetBgMap()->GetCreature(guid);
-    if (!source)
-        return;
-
     MaNGOS::BattleGroundYellBuilder bg_builder(Language(language), entry, source);
     MaNGOS::LocalizedPacketDo<MaNGOS::BattleGroundYellBuilder> bg_do(bg_builder);
     BroadcastWorker(bg_do);
@@ -1673,11 +1669,8 @@ void BattleGround::SendMessage2ToAll(int32 entry, ChatMsg type, Player const* so
   @param    arg1
   @param    arg2
 */
-void BattleGround::SendYell2ToAll(int32 entry, uint32 language, ObjectGuid guid, int32 arg1, int32 arg2)
+void BattleGround::SendYell2ToAll(int32 entry, uint32 language, Creature const* source, int32 arg1, int32 arg2)
 {
-    Creature* source = GetBgMap()->GetCreature(guid);
-    if (!source)
-        return;
     MaNGOS::BattleGround2YellBuilder bg_builder(Language(language), entry, source, arg1, arg2);
     MaNGOS::LocalizedPacketDo<MaNGOS::BattleGround2YellBuilder> bg_do(bg_builder);
     BroadcastWorker(bg_do);
@@ -1829,4 +1822,40 @@ void BattleGround::SetBgRaid(Team team, Group* bgRaid)
 WorldSafeLocsEntry const* BattleGround::GetClosestGraveYard(Player* player)
 {
     return sObjectMgr.GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
+}
+
+/**
+  Function that returns the gameobject pointer that was stored in m_goEntryGuidStore. Can return nullptr
+
+  @param    gameobject entry
+*/
+GameObject* BattleGround::GetSingleGameObjectFromStorage(uint32 entry) const
+{
+    auto iter = m_goEntryGuidStore.find(entry);
+    if (iter != m_goEntryGuidStore.end())
+        return GetBgMap()->GetGameObject(iter->second);
+
+    // Output log, possible reason is not added GO to map, or not yet loaded;
+    sLog.outError("BattleGround requested gameobject with entry %u, but no gameobject of this entry was created yet, or it was not stored by battleground script for map %u.", entry, GetBgMap()->GetId());
+
+    return nullptr;
+}
+
+/**
+  Function that returns pointer to a loaded Creature that was stored in m_goEntryGuidStore. Can return nullptr
+
+  @param    creature entry
+  @param    skip debug log
+*/
+Creature* BattleGround::GetSingleCreatureFromStorage(uint32 entry, bool skipDebugLog /*=false*/) const
+{
+    auto iter = m_npcEntryGuidStore.find(entry);
+    if (iter != m_npcEntryGuidStore.end())
+        return GetBgMap()->GetCreature(iter->second);
+
+    // Output log, possible reason is not added GO to map, or not yet loaded;
+    if (!skipDebugLog)
+        script_error_log("BattleGround requested creature with entry %u, but no npc of this entry was created yet, or it was not stored by script for map %u.", entry, GetBgMap()->GetId());
+
+    return nullptr;
 }
