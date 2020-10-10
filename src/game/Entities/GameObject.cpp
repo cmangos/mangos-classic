@@ -1411,28 +1411,6 @@ void GameObject::Use(Unit* user)
             if (!info)
                 return;
 
-            bool pvpFlagUsed = false;
-
-            // Handle OutdoorPvP and Battleground use cases
-            // Note: this may be also handled by DB spell scripts in the future, when the world state manager is implemented
-            // CanUseBattleGroundObject() is already checked in the spell cast; all of these objects use the 1479 lock id
-            if (user->GetTypeId() == TYPEID_PLAYER)
-            {
-                Player* player = (Player*)user;
-
-                // PvP goobers are only used in battlegrounds: Isle of Conquest and Arathi Basin
-                if (info->goober.isPvPObject)
-                {
-                    if (BattleGround* bg = player->GetBattleGround())
-                    {
-                        bg->HandlePlayerClickedOnFlag(player, this);
-                        pvpFlagUsed = true;
-                    }
-                }
-                else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
-                    pvpFlagUsed = outdoorPvP->HandleGameObjectUse(player, this);
-            }
-
             // exception - 180619 - ossirian crystal - supposed to be kept from despawning by a pending spellcast - to be implemented, done in db for now
 
             TriggerLinkedGameObject(user);
@@ -1440,15 +1418,11 @@ void GameObject::Use(Unit* user)
             SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
             SetLootState(GO_ACTIVATED);
 
-            // flags used in PvP are despawned automatically after click and won't change state; extra autoClose time will delay the animation
-            if (!pvpFlagUsed)
-            {
-                // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
-                if (info->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_CUSTOM_ANIM_ON_USE)
-                    SendGameObjectCustomAnim(GetObjectGuid(), info->goober.customAnim);
-                else
-                    SetGoState(GO_STATE_ACTIVE);
-            }
+            // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
+            if (info->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_CUSTOM_ANIM_ON_USE)
+                SendGameObjectCustomAnim(GetObjectGuid(), info->goober.customAnim);
+            else
+                SetGoState(GO_STATE_ACTIVE);
 
             m_cooldownTime = time(nullptr) + info->GetAutoCloseTime();
 
