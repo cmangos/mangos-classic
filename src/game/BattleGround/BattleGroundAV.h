@@ -285,13 +285,17 @@ enum AVGraveyards
     BG_AV_GRAVE_STORM_AID               = 751,
     BG_AV_GRAVE_STORM_GRAVE             = 689,
     BG_AV_GRAVE_STONE_GRAVE             = 729,
+
     BG_AV_GRAVE_SNOWFALL                = 169,
+
     BG_AV_GRAVE_ICE_GRAVE               = 749,
     BG_AV_GRAVE_FROSTWOLF               = 690,
     BG_AV_GRAVE_FROST_HUT               = 750,
 
     BG_AV_GRAVE_MAIN_ALLIANCE           = 611,
     BG_AV_GRAVE_MAIN_HORDE              = 610,
+
+    BG_AV_ZONE_MAIN                     = 2597,
 };
 
 enum AVStates
@@ -576,7 +580,6 @@ class BattleGroundAV : public BattleGround
         // General functions
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-        WorldSafeLocsEntry const* GetClosestGraveYard(Player* plr) override;
         Team GetPrematureWinner() override;
 
         // Battleground event handlers

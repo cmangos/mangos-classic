@@ -99,7 +99,9 @@ enum WSGraveyards
     WS_GRAVEYARD_FLAGROOM_ALLIANCE      = 769,
     WS_GRAVEYARD_FLAGROOM_HORDE         = 770,
     WS_GRAVEYARD_MAIN_ALLIANCE          = 771,
-    WS_GRAVEYARD_MAIN_HORDE             = 772
+    WS_GRAVEYARD_MAIN_HORDE             = 772,
+
+    BG_WS_ZONE_ID_MAIN                  = 3277,
 };
 
 enum WSEventIds
@@ -199,7 +201,6 @@ class BattleGroundWS : public BattleGround
         // General functions
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
         Team GetPrematureWinner() override;
 
         // Battleground event handlers

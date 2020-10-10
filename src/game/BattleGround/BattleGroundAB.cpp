@@ -258,6 +258,9 @@ void BattleGroundAB::ProcessNodeCapture(uint8 node, PvpTeamIndex teamIdx)
         CastSpellOnTeam(BG_AB_SPELL_QUEST_REWARD_5_BASES, team);
     else if (m_capturedNodeCount[teamIdx] >= 4)
         CastSpellOnTeam(BG_AB_SPELL_QUEST_REWARD_4_BASES, team);
+
+    // setup graveyard
+    sObjectMgr.SetGraveYardLinkTeam(abGraveyardIds[node], BG_AB_ZONE_MAIN, team);
 }
 
 // Method that handles the banner click
@@ -350,6 +353,8 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
 
         PvpTeamIndex otherTeamIndex = GetOtherTeamIndex(teamIndex);
         --m_capturedNodeCount[otherTeamIndex];
+
+        sObjectMgr.SetGraveYardLinkTeam(abGraveyardIds[node], BG_AB_ZONE_MAIN, TEAM_INVALID);
     }
 
     // update score
@@ -403,7 +408,12 @@ void BattleGroundAB::Reset()
 
         // all nodes owned by neutral team at beginning
         m_activeEvents[i] = BG_AB_NODE_TYPE_NEUTRAL;
+
+        sObjectMgr.SetGraveYardLinkTeam(abGraveyardIds[i], BG_AB_ZONE_MAIN, TEAM_INVALID);
     }
+
+    sObjectMgr.SetGraveYardLinkTeam(AB_GRAVEYARD_ALLIANCE, BG_AB_ZONE_MAIN, ALLIANCE);
+    sObjectMgr.SetGraveYardLinkTeam(AB_GRAVEYARD_HORDE, BG_AB_ZONE_MAIN, HORDE);
 }
 
 void BattleGroundAB::EndBattleGround(Team winner)
@@ -416,45 +426,6 @@ void BattleGroundAB::EndBattleGround(Team winner)
     RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
 
     BattleGround::EndBattleGround(winner);
-}
-
-WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
-{
-    PvpTeamIndex teamIndex = GetTeamIndexByTeamId(player->GetTeam());
-
-    // Is there any occupied node for this team?
-    std::vector<uint8> nodes;
-    for (uint8 i = 0; i < BG_AB_MAX_NODES; ++i)
-        if (m_nodeStatus[i] == teamIndex + BG_AB_NODE_TYPE_OCCUPIED)
-            nodes.push_back(i);
-
-    WorldSafeLocsEntry const* good_entry = nullptr;
-    // If so, select the closest node to place ghost on
-    if (!nodes.empty())
-    {
-        float plr_x = player->GetPositionX();
-        float plr_y = player->GetPositionY();
-
-        float mindist = 999999.0f;
-        for (unsigned char node : nodes)
-        {
-            WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(abGraveyardIds[node]);
-            if (!entry)
-                continue;
-            float dist = (entry->x - plr_x) * (entry->x - plr_x) + (entry->y - plr_y) * (entry->y - plr_y);
-            if (mindist > dist)
-            {
-                mindist = dist;
-                good_entry = entry;
-            }
-        }
-        nodes.clear();
-    }
-    // If not, place ghost on starting location
-    if (!good_entry)
-        good_entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(abGraveyardIds[teamIndex + 5]);
-
-    return good_entry;
 }
 
 void BattleGroundAB::UpdatePlayerScore(Player* source, uint32 type, uint32 value)

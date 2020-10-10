@@ -491,7 +491,12 @@ void BattleGroundAV::ProcessPlayerDestroyedPoint(AVNodeIds node)
         --m_homeTowersControlled[otherTeamIdx];
     }
     else
+    {
         DoSendYellToTeam(ownerTeamIdx, LANG_BG_AV_GRAVE_TAKEN, node);
+
+        // setup graveyard to new team
+        sObjectMgr.SetGraveYardLinkTeam(avNodeDefaults[node].graveyardId, BG_AV_ZONE_MAIN, GetTeamIdByTeamIndex(ownerTeamIdx));
+    }
 }
 
 // Process mine owner change; mineId = 0 => Irondeep Mine; mineId = 1 => Coldtooth Mine;
@@ -672,6 +677,9 @@ void BattleGroundAV::ProcessPlayerAssaultsPoint(Player* player, AVNodeIds node)
         // before despawn of GY spirit healer - need to TP players - must be after AssaultNode; opposite team of current player
         if (Creature* spiritHealer = GetClosestCreatureWithEntry(player, teamIdx == TEAM_INDEX_ALLIANCE ? BG_NPC_SPIRIT_GUIDE_HORDE : BG_NPC_SPIRIT_GUIDE_ALLIANCE, 100.f))
             spiritHealer->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spiritHealer, spiritHealer);
+
+        // make graveyard invalid
+        sObjectMgr.SetGraveYardLinkTeam(avNodeDefaults[node].graveyardId, BG_AV_ZONE_MAIN, TEAM_INVALID);
     }
 
     // send yell and sound
@@ -717,41 +725,6 @@ void BattleGroundAV::UpdateNodeWorldState(AVNodeIds node, uint32 newState)
     UpdateWorldState(m_nodes[node].worldState, WORLD_STATE_REMOVE);
     m_nodes[node].worldState = newState;
     UpdateWorldState(m_nodes[node].worldState, WORLD_STATE_ADD);
-}
-
-WorldSafeLocsEntry const* BattleGroundAV::GetClosestGraveYard(Player* plr)
-{
-    float x = plr->GetPositionX();
-    float y = plr->GetPositionY();
-    PvpTeamIndex teamIdx = GetTeamIndexByTeamId(plr->GetTeam());
-    WorldSafeLocsEntry const* good_entry = nullptr;
-
-    if (GetStatus() == STATUS_IN_PROGRESS)
-    {
-        // Is there any occupied node for this team?
-        float mindist = 9999999.0f;
-        for (uint8 i = BG_AV_NODES_FIRSTAID_STATION; i <= BG_AV_NODES_FROSTWOLF_HUT; ++i)
-        {
-            if (m_nodes[i].owner != teamIdx || m_nodes[i].state != POINT_CONTROLLED)
-                continue;
-            WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(avGraveyardEntries[i]);
-            if (!entry)
-                continue;
-
-            float dist = (entry->x - x) * (entry->x - x) + (entry->y - y) * (entry->y - y);
-            if (mindist > dist)
-            {
-                mindist = dist;
-                good_entry = entry;
-            }
-        }
-    }
-
-    // If not, place ghost in the starting-cave
-    if (!good_entry)
-        good_entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(avGraveyardEntries[teamIdx + 7]);
-
-    return good_entry;
 }
 
 // Get text message id for each node
@@ -820,7 +793,17 @@ void BattleGroundAV::InitializeNode(AVNodeIds node)
     m_activeEvents[node] = avNodeDefaults[node].initialOwner * BG_AV_MAX_STATES + m_nodes[node].state;
 
     if (avNodeDefaults[node].graveyardId)                                      // grave-creatures are special cause of a quest
+    {
         m_activeEvents[node + BG_AV_MAX_NODES]  = avNodeDefaults[node].initialOwner * BG_AV_MAX_GRAVETYPES;
+
+        // initialize graveyards
+        Team team = TEAM_INVALID;
+        if (avNodeDefaults[node].initialOwner != TEAM_INDEX_NEUTRAL)
+            team = GetTeamIdByTeamIndex(avNodeDefaults[node].initialOwner);
+
+        // initalize graveyard
+        sObjectMgr.SetGraveYardLinkTeam(avNodeDefaults[node].graveyardId, BG_AV_ZONE_MAIN, team);
+    }
 }
 
 void BattleGroundAV::DefendNode(AVNodeIds node, PvpTeamIndex teamIdx)
@@ -886,6 +869,10 @@ void BattleGroundAV::Reset()
     // initialize all nodes
     for (uint8 i = 0; i < BG_AV_MAX_NODES; ++i)
         InitializeNode(AVNodeIds(i));
+
+    // setup graveyards
+    sObjectMgr.SetGraveYardLinkTeam(BG_AV_GRAVE_MAIN_ALLIANCE, BG_AV_ZONE_MAIN, ALLIANCE);
+    sObjectMgr.SetGraveYardLinkTeam(BG_AV_GRAVE_MAIN_HORDE, BG_AV_ZONE_MAIN, HORDE);
 }
 
 // Handle battleground yells

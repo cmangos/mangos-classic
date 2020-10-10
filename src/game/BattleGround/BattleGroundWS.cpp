@@ -78,6 +78,12 @@ void BattleGroundWS::StartingEventOpenDoors()
     SpawnEvent(WS_EVENT_SPIRITGUIDES_SPAWN, 0, true);
     SpawnEvent(WS_EVENT_FLAG_A, 0, true);
     SpawnEvent(WS_EVENT_FLAG_H, 0, true);
+
+    // setup graveyard
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_MAIN_ALLIANCE,     BG_WS_ZONE_ID_MAIN, ALLIANCE);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_MAIN_HORDE,        BG_WS_ZONE_ID_MAIN, HORDE);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_FLAGROOM_ALLIANCE, BG_WS_ZONE_ID_MAIN, TEAM_INVALID);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_FLAGROOM_HORDE,    BG_WS_ZONE_ID_MAIN, TEAM_INVALID);
 }
 
 void BattleGroundWS::AddPlayer(Player* player)
@@ -444,13 +450,16 @@ void BattleGroundWS::Reset()
         m_flagsTimer[i]     = 0;
     }
 
-    m_flagCarrier[TEAM_INDEX_ALLIANCE].Clear();
-    m_flagCarrier[TEAM_INDEX_HORDE].Clear();
+    bool isBgWeekend = BattleGroundMgr::IsBgWeekend(GetTypeId());
+    m_reputationCapture = (isBgWeekend) ? BG_WS_WEEKEND_FLAG_CAPTURE_REPUTATION : BG_WS_NORMAL_FLAG_CAPTURE_REPUTATION;
+    m_honorWinKills = (isBgWeekend) ? BG_WS_WEEKEND_WIN_KILLS : BG_WS_NORMAL_WIN_KILLS;
+    m_honorEndKills = (isBgWeekend) ? BG_WS_WEEKEND_MAP_COMPLETE_KILLS : BG_WS_NORMAL_MAP_COMPLETE_KILLS;
 
-    bool isBGWeekend = BattleGroundMgr::IsBgWeekend(GetTypeId());
-    m_reputationCapture = (isBGWeekend) ? BG_WS_WEEKEND_FLAG_CAPTURE_REPUTATION : BG_WS_NORMAL_FLAG_CAPTURE_REPUTATION;
-    m_honorWinKills = (isBGWeekend) ? BG_WS_WEEKEND_WIN_KILLS : BG_WS_NORMAL_WIN_KILLS;
-    m_honorEndKills = (isBGWeekend) ? BG_WS_WEEKEND_MAP_COMPLETE_KILLS : BG_WS_NORMAL_MAP_COMPLETE_KILLS;
+    // setup graveyard
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_MAIN_ALLIANCE,     BG_WS_ZONE_ID_MAIN, TEAM_INVALID);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_MAIN_HORDE,        BG_WS_ZONE_ID_MAIN, TEAM_INVALID);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_FLAGROOM_ALLIANCE, BG_WS_ZONE_ID_MAIN, ALLIANCE);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_FLAGROOM_HORDE,    BG_WS_ZONE_ID_MAIN, HORDE);
 }
 
 void BattleGroundWS::EndBattleGround(Team winner)
@@ -489,26 +498,6 @@ void BattleGroundWS::UpdatePlayerScore(Player* player, uint32 type, uint32 value
             BattleGround::UpdatePlayerScore(player, type, value);
             break;
     }
-}
-
-WorldSafeLocsEntry const* BattleGroundWS::GetClosestGraveYard(Player* player)
-{
-    // if status in progress, it returns main graveyards with spiritguides
-    // else it will return the graveyard in the flagroom - this is especially good
-    // if a player dies in preparation phase - then the player can't cheat
-    // and teleport to the graveyard outside the flagroom
-    // and start running around, while the doors are still closed
-    if (player->GetTeam() == ALLIANCE)
-    {
-        if (GetStatus() == STATUS_IN_PROGRESS)
-            return sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(WS_GRAVEYARD_MAIN_ALLIANCE);
-
-        return sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(WS_GRAVEYARD_FLAGROOM_ALLIANCE);
-    }
-    if (GetStatus() == STATUS_IN_PROGRESS)
-        return sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(WS_GRAVEYARD_MAIN_HORDE);
-
-    return sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(WS_GRAVEYARD_FLAGROOM_HORDE);
 }
 
 void BattleGroundWS::FillInitialWorldStates(WorldPacket& data, uint32& count)
