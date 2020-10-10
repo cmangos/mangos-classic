@@ -354,11 +354,6 @@ void BattleGroundAV::EndBattleGround(Team winner)
     uint32 gravesOwned[PVP_TEAM_COUNT]    = {0, 0};
     uint32 minesOwned[PVP_TEAM_COUNT]     = {0, 0};
 
-    // handle quest completion
-    CastSpellOnTeam(BG_AV_SPELL_COMPLETE_DAILY_1, winner);
-    CastSpellOnTeam(BG_AV_SPELL_COMPLETE_DAILY_2, winner);
-    CastSpellOnTeam(BG_AV_SPELL_COMPLETE_DAILY_3, winner);
-
     // graves all controlled
     for (uint8 i = 0; i < BG_AV_MAX_NODES; ++i)
         if (m_nodes[i].state == POINT_CONTROLLED && m_nodes[i].owner != TEAM_INDEX_NEUTRAL)

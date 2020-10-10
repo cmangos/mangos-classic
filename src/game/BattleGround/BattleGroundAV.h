@@ -93,11 +93,6 @@ enum AVSpells
     BG_AV_SPELL_MARK_HONOR_WINNER       = 24955,
 
     BG_AV_SPELL_MINE_CAPTURE            = 43941,
-
-    // cast when battleground is won (no matter which way is won)
-    BG_AV_SPELL_COMPLETE_DAILY_1        = 43475,            // spells that complete daily quests; they both work for both teams
-    BG_AV_SPELL_COMPLETE_DAILY_2        = 69160,
-    BG_AV_SPELL_COMPLETE_DAILY_3        = 69501,
 };
 
 enum AVAreaTriggers
