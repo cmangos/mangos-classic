@@ -77,7 +77,13 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (11688,'spell_life_tap'),
 (11689,'spell_life_tap');
 
--- Alterac Valley
+-- Battleground and Outdoor PvP
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
-(24677,'spell_gy_mid_trigger');
-
+-- Arathi basin
+(23936,'spell_battleground_banner_trigger'),
+(23932,'spell_battleground_banner_trigger'),
+(23938,'spell_battleground_banner_trigger'),
+(23935,'spell_battleground_banner_trigger'),
+(23937,'spell_battleground_banner_trigger'),
+-- Alterac Valley
+(24677,'spell_battleground_banner_trigger');

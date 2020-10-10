@@ -101,26 +101,6 @@ bool GossipHello_npc_spirit_guide(Player* pPlayer, Creature* /*pCreature*/)
     return true;
 }
 
-struct GYMidTrigger : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
-    {
-        // TODO: Fix when go casting is fixed
-        WorldObject* obj = spell->GetAffectiveCasterObject();
-        if (obj->IsGameObject() && spell->GetUnitTarget()->IsPlayer())
-        {
-            Player* player = static_cast<Player*>(spell->GetUnitTarget());
-            if (BattleGround* bg = player->GetBattleGround())
-            {
-                // check if it's correct bg
-                if (bg->GetTypeId() == BATTLEGROUND_AV)
-                    bg->HandlePlayerClickedOnFlag(player, static_cast<GameObject*>(obj));
-                return;
-            }
-        }
-    }
-};
-
 enum
 {
     SPELL_OPENING_ANIM = 24390,
@@ -142,6 +122,5 @@ void AddSC_battleground()
     pNewScript->pGossipHello = &GossipHello_npc_spirit_guide;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<GYMidTrigger>("spell_gy_mid_trigger");
     RegisterSpellScript<OpeningCapping>("spell_opening_capping");
 }

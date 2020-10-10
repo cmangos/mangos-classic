@@ -834,7 +834,7 @@ bool Creature::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo cons
     }
 
     // Notify the pvp script
-    if (GetMap()->IsBattleGroundOrArena())
+    if (GetMap()->IsBattleGround())
         static_cast<BattleGroundMap*>(GetMap())->GetBG()->HandleCreatureCreate(this);
     else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
         outdoorPvP->HandleCreatureCreate(this);
