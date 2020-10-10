@@ -38,6 +38,7 @@ enum AVGenericVariables
     BG_AV_MAX_GRAVEYARDS                = 9,
     BG_AV_MAX_STATES                    = 2,
     BG_AV_MAX_NODES                     = 15,
+    BG_AV_MAX_TOWERS_PER_TEAM           = 4,
     BG_AV_TEAMS_COUNT                   = PVP_TEAM_COUNT + 1,
 
     BG_AV_MAX_NODE_DISTANCE             = 25,              // distance in which players are still counted in range of a banner (for alliance towers this is calculated from the center of the tower)
@@ -81,13 +82,22 @@ enum AVGenericVariables
     BG_AV_REP_OWNED_MINE                = 24,
     BG_AV_REP_OWNED_MINE_HOLIDAY        = 36,
 
-    BG_AV_NORTH_MINE                    = 0,
-    BG_AV_SOUTH_MINE                    = 1,
+    BG_AV_AREA_ID_FIELD_OF_STRIFE       = 3057,             // area check for achievs
 };
 
 enum AVSpells
 {
-    BG_AV_SPELL_COMPLETE_AV_QUEST       = 23658,
+    BG_AV_SPELL_COMPLETE_AV_QUEST       = 23658,            // complete quests 7141 and 7142; cast individually per team, because spell completes both quests at once
+
+    BG_AV_SPELL_MARK_HONOR_LOSER        = 24954,
+    BG_AV_SPELL_MARK_HONOR_WINNER       = 24955,
+
+    BG_AV_SPELL_MINE_CAPTURE            = 43941,
+
+    // cast when battleground is won (no matter which way is won)
+    BG_AV_SPELL_COMPLETE_DAILY_1        = 43475,            // spells that complete daily quests; they both work for both teams
+    BG_AV_SPELL_COMPLETE_DAILY_2        = 69160,
+    BG_AV_SPELL_COMPLETE_DAILY_3        = 69501,
 };
 
 enum AVAreaTriggers
@@ -99,8 +109,9 @@ enum AVAreaTriggers
 
 enum AVFactions
 {
-    BG_AV_FACTION_A                     = 730,
-    BG_AV_FACTION_H                     = 729,
+    // factions ids used only to reward reputation;
+    BG_AV_FACTION_ID_STORMPIKE          = 730,
+    BG_AV_FACTION_ID_FROSTWOLF          = 729,
 };
 
 enum AVSounds
@@ -160,7 +171,7 @@ enum AVCreatures
     BG_AV_NPC_NORTH_MARSHAL             = 14762,
     BG_AV_NPC_SOUTH_MARSHAL             = 14763,
 
-    BG_AV_NPC_CAPTAIN_STONEHEARTH       = 11949,            // middle boss
+    BG_AV_NPC_CAPTAIN_STONEHEARTH       = 11949,            // middle alliance boss
 
     // horde bosses
     BG_AV_NPC_DREKTHAR                  = 11946,            // main boss with the 2 wolf pets and the warmasters
@@ -171,17 +182,28 @@ enum AVCreatures
     BG_AV_NPC_TOWERPOINT_WARMASTER      = 14776,
     BG_AV_NPC_WEST_WARMASTER            = 14777,
 
-    BG_AV_NPC_CAPTAIN_GALVANGAR         = 11947,            // middle boss
+    BG_AV_NPC_CAPTAIN_GALVANGAR         = 11947,            // middle horde boss
 
     // mine creatures north - irondeep
-    BG_AV_NPC_MORLOCH                   = 11657,
-    BG_AV_NPC_UMI_THORSON               = 13078,
-    BG_AV_NPC_KEETAR                    = 13079,
+    BG_AV_NPC_MORLOCH                   = 11657,            // neutral mine leader
+    BG_AV_NPC_UMI_THORSON               = 13078,            // alliance mine leader
+    BG_AV_NPC_KEETAR                    = 13079,            // horde mine leader
 
     // mine creatures south - coldtooth
-    BG_AV_NPC_MASHA_SWIFTCUT            = 13088,
-    BG_AV_NPC_AGGI_RUMBLESTOMP          = 13086,
-    BG_AV_NPC_TASKMASTER_SNIVVLE        = 11677,
+    BG_AV_NPC_TASKMASTER_SNIVVLE        = 11677,            // neutral leader
+    BG_AV_NPC_AGGI_RUMBLESTOMP          = 13086,            // alliance mine leader
+    BG_AV_NPC_MASHA_SWIFTCUT            = 13088,            // horde mine leader
+
+    // creatures used to yell on the map
+    BG_AV_NPC_STORMPIKE_HERALD          = 11997,
+    BG_AV_NPC_FROSTWOLF_HERALD          = 11998,
+};
+
+enum AVKillCredits
+{
+    BG_AV_NPC_PVP_MINE_CREDIT           = 13796,
+    BG_AV_NPC_PVP_GRAVEYARD_CREDIT      = 13756,
+    BG_AV_NPC_PVP_TOWER_CREDIT          = 13778,
 };
 
 enum AVNodeIds
@@ -189,14 +211,18 @@ enum AVNodeIds
     BG_AV_NODES_FIRSTAID_STATION        = 0,
     BG_AV_NODES_STORMPIKE_GRAVE         = 1,
     BG_AV_NODES_STONEHEART_GRAVE        = 2,
+
     BG_AV_NODES_SNOWFALL_GRAVE          = 3,
+
     BG_AV_NODES_ICEBLOOD_GRAVE          = 4,
     BG_AV_NODES_FROSTWOLF_GRAVE         = 5,
     BG_AV_NODES_FROSTWOLF_HUT           = 6,
+
     BG_AV_NODES_DUNBALDAR_SOUTH         = 7,
     BG_AV_NODES_DUNBALDAR_NORTH         = 8,
     BG_AV_NODES_ICEWING_BUNKER          = 9,
     BG_AV_NODES_STONEHEART_BUNKER       = 10,
+
     BG_AV_NODES_ICEBLOOD_TOWER          = 11,
     BG_AV_NODES_TOWER_POINT             = 12,
     BG_AV_NODES_FROSTWOLF_ETOWER        = 13,
@@ -219,6 +245,13 @@ enum AVNodeStatus
     BG_AV_NODE_STATUS_HORDE_OCCUPIED    = 3,
     BG_AV_NODE_STATUS_NEUTRAL_CONTESTED = 4,
     BG_AV_NODE_STATUS_NEUTRAL_OCCUPIED  = 5,
+};
+
+// virtual ids for the north (0) and south (1) mines
+enum AVMineIds
+{
+    BG_AV_IRONDEEP_MINE_ID              = 0,
+    BG_AV_COLDTOOTH_MINE_ID             = 1,
 };
 
 // graves have special creatures - their defenders can be in 4 different states
@@ -261,6 +294,7 @@ enum AVGraveyards
     BG_AV_GRAVE_ICE_GRAVE               = 749,
     BG_AV_GRAVE_FROSTWOLF               = 690,
     BG_AV_GRAVE_FROST_HUT               = 750,
+
     BG_AV_GRAVE_MAIN_ALLIANCE           = 611,
     BG_AV_GRAVE_MAIN_HORDE              = 610,
 };
@@ -295,80 +329,83 @@ enum AVWorldStates
     BG_AV_STATE_COLDTOOTH_MINE_N        = 1357,
 
     // graveyard world states
-    BG_AV_STATE_GY_DUN_BALDAR_A         = 1326,
-    BG_AV_STATE_GY_DUN_BALDAR_A_GREY    = 1325,
-    BG_AV_STATE_GY_DUN_BALDAR_H         = 1328,
-    BG_AV_STATE_GY_DUN_BALDAR_H_GREY    = 1327,
+    BG_AV_STATE_GY_DUN_BALDAR_A_GREY    = 1326,
+    BG_AV_STATE_GY_DUN_BALDAR_A         = 1325,
+    BG_AV_STATE_GY_DUN_BALDAR_H_GREY    = 1328,
+    BG_AV_STATE_GY_DUN_BALDAR_H         = 1327,
 
-    BG_AV_STATE_GY_STORMPIKE_A          = 1335,
-    BG_AV_STATE_GY_STORMPIKE_A_GREY     = 1333,
-    BG_AV_STATE_GY_STORMPIKE_H          = 1336,
-    BG_AV_STATE_GY_STORMPIKE_H_GREY     = 1334,
+    BG_AV_STATE_GY_STORMPIKE_A_GREY     = 1335,
+    BG_AV_STATE_GY_STORMPIKE_A          = 1333,
+    BG_AV_STATE_GY_STORMPIKE_H_GREY     = 1336,
+    BG_AV_STATE_GY_STORMPIKE_H          = 1334,
 
-    BG_AV_STATE_GY_STONEHEARTH_A        = 1304,
-    BG_AV_STATE_GY_STONEHEARTH_A_GREY   = 1302,
-    BG_AV_STATE_GY_STONEHEARTH_H        = 1303,
-    BG_AV_STATE_GY_STONEHEARTH_H_GREY   = 1301,
+    BG_AV_STATE_GY_STONEHEARTH_A_GREY   = 1304,
+    BG_AV_STATE_GY_STONEHEARTH_A        = 1302,
+    BG_AV_STATE_GY_STONEHEARTH_H_GREY   = 1303,
+    BG_AV_STATE_GY_STONEHEARTH_H        = 1301,
 
-    BG_AV_STATE_GY_ICEBLOOD_A           = 1348,
-    BG_AV_STATE_GY_ICEBLOOD_A_GREY      = 1346,
-    BG_AV_STATE_GY_ICEBLOOD_H           = 1349,
-    BG_AV_STATE_GY_ICEBLOOD_H_GREY      = 1347,
+    BG_AV_STATE_GY_ICEBLOOD_A_GREY      = 1348,
+    BG_AV_STATE_GY_ICEBLOOD_A           = 1346,
+    BG_AV_STATE_GY_ICEBLOOD_H_GREY      = 1349,
+    BG_AV_STATE_GY_ICEBLOOD_H           = 1347,
 
-    BG_AV_STATE_GY_FROSTWOLF_A          = 1339,
-    BG_AV_STATE_GY_FROSTWOLF_A_GREY     = 1337,
-    BG_AV_STATE_GY_FROSTWOLF_H          = 1340,
-    BG_AV_STATE_GY_FROSTWOLF_H_GREY     = 1338,
+    BG_AV_STATE_GY_FROSTWOLF_A_GREY     = 1339,
+    BG_AV_STATE_GY_FROSTWOLF_A          = 1337,
+    BG_AV_STATE_GY_FROSTWOLF_H_GREY     = 1340,
+    BG_AV_STATE_GY_FROSTWOLF_H          = 1338,
 
-    BG_AV_STATE_GY_FROST_KEEP_A         = 1331,
-    BG_AV_STATE_GY_FROST_KEEP_A_GREY    = 1329,
-    BG_AV_STATE_GY_FROST_KEEP_H         = 1332,
-    BG_AV_STATE_GY_FROST_KEEP_H_GREY    = 1330,
+    BG_AV_STATE_GY_FROST_KEEP_A_GREY    = 1331,
+    BG_AV_STATE_GY_FROST_KEEP_A         = 1329,
+    BG_AV_STATE_GY_FROST_KEEP_H_GREY    = 1332,
+    BG_AV_STATE_GY_FROST_KEEP_H         = 1330,
 
     // tower world states
-    BG_AV_STATE_SOUTH_BUNKER_A          = 1375,
-    BG_AV_STATE_SOUTH_BUNKER_A_GREY     = 1361,
-    BG_AV_STATE_SOUTH_BUNKER_H          = 1378,
-    BG_AV_STATE_SOUTH_BUNKER_H_GREY     = 1370,
+    BG_AV_STATE_SOUTH_BUNKER_A_GREY     = 1375,
+    BG_AV_STATE_SOUTH_BUNKER_A          = 1361,
+    BG_AV_STATE_SOUTH_BUNKER_H_GREY     = 1378,
+    BG_AV_STATE_SOUTH_BUNKER_H          = 1370,
 
-    BG_AV_STATE_NORTH_BUNKER_A          = 1374,
-    BG_AV_STATE_NORTH_BUNKER_A_GREY     = 1362,
-    BG_AV_STATE_NORTH_BUNKER_H          = 1379,
-    BG_AV_STATE_NORTH_BUNKER_H_GREY     = 1371,
+    BG_AV_STATE_NORTH_BUNKER_A_GREY     = 1374,
+    BG_AV_STATE_NORTH_BUNKER_A          = 1362,
+    BG_AV_STATE_NORTH_BUNKER_H_GREY     = 1379,
+    BG_AV_STATE_NORTH_BUNKER_H          = 1371,
 
-    BG_AV_STATE_ICEWING_BUNKER_A        = 1376,
-    BG_AV_STATE_ICEWING_BUNKER_A_GREY   = 1363,
-    BG_AV_STATE_ICEWING_BUNKER_H        = 1380,
-    BG_AV_STATE_ICEWING_BUNKER_H_GREY   = 1372,
+    BG_AV_STATE_ICEWING_BUNKER_A_GREY   = 1376,
+    BG_AV_STATE_ICEWING_BUNKER_A        = 1363,
+    BG_AV_STATE_ICEWING_BUNKER_H_GREY   = 1380,
+    BG_AV_STATE_ICEWING_BUNKER_H        = 1372,
 
-    BG_AV_STATE_STONE_BUNKER_A          = 1377,
     BG_AV_STATE_STONE_BUNKER_A_GREY     = 1377,
-    BG_AV_STATE_STONE_BUNKER_H          = 1377,
-    BG_AV_STATE_STONE_BUNKER_H_GREY     = 1377,
+    BG_AV_STATE_STONE_BUNKER_A          = 1364,
+    BG_AV_STATE_STONE_BUNKER_H_GREY     = 1381,
+    BG_AV_STATE_STONE_BUNKER_H          = 1373,
 
-    BG_AV_STATE_ICEBLOOD_TOWER_A        = 1390,
-    BG_AV_STATE_ICEBLOOD_TOWER_A_GREY   = 1368,
-    BG_AV_STATE_ICEBLOOD_TOWER_H        = 1395,
-    BG_AV_STATE_ICEBLOOD_TOWER_H_GREY   = 1385,
+    BG_AV_STATE_ICEBLOOD_TOWER_A_GREY   = 1390,
+    BG_AV_STATE_ICEBLOOD_TOWER_A        = 1368,
+    BG_AV_STATE_ICEBLOOD_TOWER_H_GREY   = 1395,
+    BG_AV_STATE_ICEBLOOD_TOWER_H        = 1385,
 
-    BG_AV_STATE_TOWER_POINT_A           = 1389,
-    BG_AV_STATE_TOWER_POINT_A_GREY      = 1367,
-    BG_AV_STATE_TOWER_POINT_H           = 1394,
-    BG_AV_STATE_TOWER_POINT_H_GREY      = 1384,
+    BG_AV_STATE_TOWER_POINT_A_GREY      = 1389,
+    BG_AV_STATE_TOWER_POINT_A           = 1367,
+    BG_AV_STATE_TOWER_POINT_H_GREY      = 1394,
+    BG_AV_STATE_TOWER_POINT_H           = 1384,
 
-    BG_AV_STATE_FROSTWOLF_EAST_A        = 1388,
-    BG_AV_STATE_FROSTWOLF_EAST_A_GREY   = 1366,
-    BG_AV_STATE_FROSTWOLF_EAST_H        = 1393,
-    BG_AV_STATE_FROSTWOLF_EAST_H_GREY   = 1383,
+    BG_AV_STATE_FROSTWOLF_EAST_A_GREY   = 1388,
+    BG_AV_STATE_FROSTWOLF_EAST_A        = 1366,
+    BG_AV_STATE_FROSTWOLF_EAST_H_GREY   = 1393,
+    BG_AV_STATE_FROSTWOLF_EAST_H        = 1383,
 
-    BG_AV_STATE_FROSTWOLF_WEST_A        = 1387,
-    BG_AV_STATE_FROSTWOLF_WEST_A_GREY   = 1365,
-    BG_AV_STATE_FROSTWOLF_WEST_H        = 1392,
-    BG_AV_STATE_FROSTWOLF_WEST_H_GREY   = 1382,
+    BG_AV_STATE_FROSTWOLF_WEST_A_GREY   = 1387,
+    BG_AV_STATE_FROSTWOLF_WEST_A        = 1365,
+    BG_AV_STATE_FROSTWOLF_WEST_H_GREY   = 1392,
+    BG_AV_STATE_FROSTWOLF_WEST_H        = 1382,
 };
 
 enum AVQuestIds
 {
+    BG_AV_QUEST_CAPTURE_MINE_A          = 7122,
+    BG_AV_QUEST_CAPTURE_MINE_H          = 7124,
+
     BG_AV_QUEST_ARMOR_SCRAPS_A          = 7223,             // first quest
     BG_AV_QUEST_ARMOR_SCRAPS_A_REPEAT   = 6781,             // repeatable
 
@@ -422,8 +459,13 @@ const uint32 avMineWorldStates[BG_AV_MAX_MINES][BG_AV_TEAMS_COUNT] =
     {BG_AV_STATE_COLDTOOTH_MINE_A, BG_AV_STATE_COLDTOOTH_MINE_H, BG_AV_STATE_COLDTOOTH_MINE_N}
 };
 
-// alliance_control alliance_assault h_control h_assault
-const uint32 avNodeWorldStates[BG_AV_MAX_NODES][4] =
+struct AlteracNodeStates
+{
+    uint32 worldStateAlly, worldStateAllyGrey, worldStateHorde, worldStateHordeGrey;
+};
+
+// alliance; alliance_grey; horde; horde_grey
+const AlteracNodeStates avNodeWorldStates[BG_AV_MAX_NODES] =
 {
     // Alliance graveyards
     {BG_AV_STATE_GY_DUN_BALDAR_A,  BG_AV_STATE_GY_DUN_BALDAR_A_GREY,  BG_AV_STATE_GY_DUN_BALDAR_H,  BG_AV_STATE_GY_DUN_BALDAR_H_GREY},
@@ -451,6 +493,42 @@ const uint32 avNodeWorldStates[BG_AV_MAX_NODES][4] =
     {BG_AV_STATE_FROSTWOLF_WEST_A, BG_AV_STATE_FROSTWOLF_WEST_A_GREY, BG_AV_STATE_FROSTWOLF_WEST_H, BG_AV_STATE_FROSTWOLF_WEST_H_GREY},
 };
 
+// *** Battleground factions *** //
+const uint32 avTeamFactions[PVP_TEAM_COUNT] = { BG_AV_FACTION_ID_STORMPIKE, BG_AV_FACTION_ID_FROSTWOLF };
+
+// *** Battleground factions *** //
+const uint32 avTeamCaptains[PVP_TEAM_COUNT] = { BG_AV_NPC_CAPTAIN_STONEHEARTH, BG_AV_NPC_CAPTAIN_GALVANGAR };
+
+struct AlteracNodeData
+{
+    uint32 defaultWorldState;
+    PvpTeamIndex initialOwner;
+    uint32 graveyardId;
+};
+
+const AlteracNodeData avNodeDefaults[BG_AV_MAX_NODES] =
+{
+    {BG_AV_STATE_GY_DUN_BALDAR_A,  TEAM_INDEX_ALLIANCE, BG_AV_GRAVE_STORM_AID},
+    {BG_AV_STATE_GY_STORMPIKE_A,   TEAM_INDEX_ALLIANCE, BG_AV_GRAVE_STORM_GRAVE},
+    {BG_AV_STATE_GY_STONEHEARTH_A, TEAM_INDEX_ALLIANCE, BG_AV_GRAVE_STONE_GRAVE},
+
+    {BG_AV_STATE_GY_SNOWFALL_N,    TEAM_INDEX_NEUTRAL, BG_AV_GRAVE_SNOWFALL},
+
+    {BG_AV_STATE_GY_ICEBLOOD_H,    TEAM_INDEX_HORDE, BG_AV_GRAVE_ICE_GRAVE},
+    {BG_AV_STATE_GY_FROSTWOLF_H,   TEAM_INDEX_HORDE, BG_AV_GRAVE_FROSTWOLF},
+    {BG_AV_STATE_GY_FROST_KEEP_H,  TEAM_INDEX_HORDE, BG_AV_GRAVE_FROST_HUT},
+
+    {BG_AV_STATE_SOUTH_BUNKER_A,   TEAM_INDEX_ALLIANCE, 0},
+    {BG_AV_STATE_NORTH_BUNKER_A,   TEAM_INDEX_ALLIANCE, 0},
+    {BG_AV_STATE_ICEWING_BUNKER_A, TEAM_INDEX_ALLIANCE, 0},
+    {BG_AV_STATE_STONE_BUNKER_A,   TEAM_INDEX_ALLIANCE, 0},
+
+    {BG_AV_STATE_ICEBLOOD_TOWER_H, TEAM_INDEX_HORDE, 0},
+    {BG_AV_STATE_TOWER_POINT_H,    TEAM_INDEX_HORDE, 0},
+    {BG_AV_STATE_FROSTWOLF_EAST_H, TEAM_INDEX_HORDE, 0},
+    {BG_AV_STATE_FROSTWOLF_WEST_H, TEAM_INDEX_HORDE, 0},
+};
+
 struct AVNodeInfo
 {
     PvpTeamIndex totalOwner;
@@ -462,13 +540,8 @@ struct AVNodeInfo
 
     uint32 worldState;
     uint32 timer;
-    bool   isTower;
+    uint32 graveyardId;
 };
-
-inline AVNodeIds& operator++(AVNodeIds& i)
-{
-    return i = AVNodeIds(i + 1);
-}
 
 class BattleGroundAVScore : public BattleGroundScore
 {
@@ -512,6 +585,8 @@ class BattleGroundAV : public BattleGround
         Team GetPrematureWinner() override;
 
         // Battleground event handlers
+        void HandleCreatureCreate(Creature* /*creature*/) override;
+        void HandleGameObjectCreate(GameObject* /*go*/) override;
         bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         void HandlePlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
         void HandleKillPlayer(Player* player, Player* killer) override;
@@ -531,23 +606,23 @@ class BattleGroundAV : public BattleGround
         void ProcessPlayerDefendsPoint(Player* player, AVNodeIds node);
         void ProcessPlayerDestroyedPoint(AVNodeIds node);
 
-        void InitNode(AVNodeIds node, PvpTeamIndex teamIdx, bool isTower);
+        void InitializeNode(AVNodeIds node);
         void AssaultNode(AVNodeIds node, PvpTeamIndex teamIdx);
         void DestroyNode(AVNodeIds node);
         void DefendNode(AVNodeIds node, PvpTeamIndex teamIdx);
 
         void PopulateNode(AVNodeIds node);
         int32 GetNodeMessageId(AVNodeIds node) const;
-        bool IsTower(AVNodeIds node) const { return (node == BG_EVENT_NONE) ? false : m_nodes[node].isTower; }
-        bool IsGrave(AVNodeIds node) const { return (node == BG_EVENT_NONE) ? false : !m_nodes[node].isTower; }
 
         // Mine related functions
-        void ChangeMineOwner(uint8 mineId, PvpTeamIndex teamIdx);
+        void ChangeMineOwner(AVMineIds mineId, PvpTeamIndex newOwnerTeamIdx);
 
         // World state helpers
         uint8 GetWorldStateType(uint8 state, PvpTeamIndex teamIdx) const { return teamIdx * BG_AV_MAX_STATES + state; }
-        void SendMineWorldStates(uint32 mine);
-        void UpdateNodeWorldState(AVNodeIds node);
+        void UpdateNodeWorldState(AVNodeIds node, uint32 newState);
+
+        // Herald announcements
+        void DoSendYellToTeam(PvpTeamIndex teamIdx, int32 textId, uint8 nodeId, bool useNode = true, int32 mineLangId = 0);
 
         uint32 m_teamQuestStatus[PVP_TEAM_COUNT][9];       // [x][y] x=team y=questcounter
 
@@ -555,9 +630,11 @@ class BattleGroundAV : public BattleGround
 
         // mine variables
         PvpTeamIndex m_mineOwner[BG_AV_MAX_MINES];
-        PvpTeamIndex m_minePrevOwner[BG_AV_MAX_MINES];
-        int32 m_mineTimer[BG_AV_MAX_MINES];
+        uint32 m_mineTimer[BG_AV_MAX_MINES];
         uint32 m_mineReclaimTimer[BG_AV_MAX_MINES];
+
+        uint8 m_homeTowersControlled[PVP_TEAM_COUNT];
+        uint8 m_enemyTowersDestroyed[PVP_TEAM_COUNT];
 
         bool m_wasInformedNearLose[PVP_TEAM_COUNT];
 

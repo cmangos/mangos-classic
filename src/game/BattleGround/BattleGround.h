@@ -461,6 +461,9 @@ class BattleGround
         // handle event sent from gameobjects
         virtual bool HandleEvent(uint32 /*eventId*/, GameObject* /*go*/, Unit* /*invoker*/) { return false; }
 
+        // Called when a creature is created
+        virtual void HandleCreatureCreate(Creature* /*creature*/) {}
+
         // Called when a gameobject is created
         virtual void HandleGameObjectCreate(GameObject* /*go*/) {}
 
