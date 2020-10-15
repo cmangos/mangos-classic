@@ -71,6 +71,8 @@ UPDATE spell_template SET EffectImplicitTargetA3=0,EffectImplicitTargetB3=0 WHER
 UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(16952,16954);
 -- vanilla only - seal fate
 UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(14186,14190,14193,14194,14195);
+-- Sticky Tar - proc aura meant to be cast on self
+UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(14178);
 
 -- Mangletooth - These spells need to ignore LOS
 UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (7764, 16618, 10767, 16610, 16612, 17013);
@@ -144,3 +146,40 @@ UPDATE spell_template SET Attributes=320 WHERE id=28282; -- This makes Ashbringe
 UPDATE spell_template SET AttributesEx=32, AttributesEx3=131072 WHERE id=28441; -- AB Effect 000, critters/neutral no longer attack
 
 UPDATE `spell_template` SET `EffectImplicitTargetA1` = 6 WHERE `Id` IN (25744,25787);
+
+-- Draco-Incarcinatrix 900
+UPDATE spell_template SET EffectImplicitTargetA1=38 WHERE id=16007; -- 46
+
+-- Stationary Dark Iron Land Mine 8035
+UPDATE `spell_template` SET `EffectMiscValueB1` = 64 WHERE `Id` = 11802;
+
+-- Flare - no delay is present here for stealth breaking - confirmed on classic
+UPDATE spell_template SET Speed=0 WHERE id=1543; -- 5
+
+-- Eye of Kilrogg - should not spawn 100 yards away from player
+UPDATE spell_template SET EffectRadiusIndex1=15 WHERE Id IN(126);
+
+-- Warrior - Execute damage spell - get rid of cost so normal handling does it without errors
+UPDATE spell_template SET ManaCost=0 WHERE Id IN(20647);
+
+-- Stationary Advanced Target Dummy 2674
+UPDATE `spell_template` SET `EffectMiscValueB1` = 64 WHERE `Id` = 4072;
+
+-- Baron Rivendare 10440 does not enter combat and move while "channeling" Unholy Aura 17467
+UPDATE `spell_template` SET `AttributesEx3`=AttributesEx3|0x00020000 WHERE `Id` = 17466; -- SPELL_ATTR_EX3_NO_INITIAL_AGGRO
+UPDATE `spell_template` SET `AttributesEx` = `AttributesEx`&~0x00000004 WHERE `Id` = 17467; -- SPELL_ATTR_EX_CHANNELED_1
+
+-- Stationary Scarshield Portal 9707
+UPDATE `spell_template` SET `EffectMiscValueB1` = 64 WHERE `Id` = 15125;
+
+-- Remove SPELL_INTERRUPT_FLAG_ABORT_ON_DMG from Spells falsly interrupted by damage
+UPDATE `spell_template` SET `InterruptFlags` = `InterruptFlags`&~0x00000010 WHERE `Id` IN (
+13583, -- Curse of the Deadwood
+26134, -- Eye Beam
+28099, -- Shock
+28440, -- Veil of Shadow
+32950 -- Eye Beam
+);
+
+-- Fix periodic trigger pet buffing item auras giving threat - this fix is evidenced by 28757 which already has it
+UPDATE spell_template SET AttributesEx=AttributesEx|1024 WHERE Id IN(21740,21921,21925,21927,20988,29233,27039,27042,27205,27208,18350,30023);
