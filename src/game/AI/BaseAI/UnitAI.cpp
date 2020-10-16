@@ -513,6 +513,8 @@ class AiDelayEventAround : public BasicEvent
         bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) override
         {
             Unit* pInvoker = m_owner.GetMap()->GetUnit(m_invokerGuid);
+            if (!pInvoker)
+                return true;
 
             for (GuidVector::const_reverse_iterator itr = m_receiverGuids.rbegin(); itr != m_receiverGuids.rend(); ++itr)
             {
