@@ -74,6 +74,7 @@ void PlayerAI::ExecuteSpells()
             AttackStart(target);
 
         ResetTimer(GENERIC_THREAT_CHANGE, urand(10000, 20000));
+        m_executeTargetChange = false;
     }
 
     if (m_spellsDisabled)
