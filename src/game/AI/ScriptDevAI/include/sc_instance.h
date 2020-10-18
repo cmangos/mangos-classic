@@ -119,6 +119,9 @@ class DialogueHelper
 
         void DialogueUpdate(uint32 diff);
 
+        // for use on death or respawn applicably
+        void DisableDialogue() { m_timer = 0; }
+
     protected:
         /// Will be called when a dialogue step was done
         virtual void JustDidDialogueStep(int32 /*entry*/) {}
