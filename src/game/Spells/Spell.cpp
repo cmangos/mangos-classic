@@ -6683,7 +6683,9 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
         switch (data.type)
         {
             case TARGET_TYPE_LOCATION_DEST:
-                if (radius == 50000.f)
+                if (data.filter == TARGET_SCRIPT) // TODO: Fix this whole shebang
+                    radius = 100.f;
+                else
                     radius = 3.0f;
                 break;
             case TARGET_TYPE_UNIT:
