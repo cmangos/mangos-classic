@@ -37,7 +37,7 @@ namespace Movement
         if (transport)
             transport->CalculatePassengerOffset(real_position.x, real_position.y, real_position.z, &real_position.orientation);
 
-        // there is a big chane that current position is unknown if current state is not finalized, need compute it
+        // there is a big chance that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
         if (!move_spline.Finalized())
             real_position = move_spline.ComputePosition();
@@ -110,7 +110,7 @@ namespace Movement
 
         // there is a big chane that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
-        if (!move_spline.Finalized() /*&& !transportInfo*/)
+        if (!move_spline.Finalized())
             real_position = move_spline.ComputePosition();
 
         if (args.path.empty())
