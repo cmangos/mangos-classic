@@ -10348,6 +10348,27 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     }
 }
 
+void Unit::UpdateSplinePosition()
+{
+    auto loc = movespline->ComputePosition();
+
+    if (movespline->isFacing() && movespline->isFacingTarget())
+    {
+        if (Unit const* target = ObjectAccessor::GetUnit(*this, ObjectGuid(movespline->GetFacing().target)))
+            loc.orientation = GetAngle(target);
+        else
+        {
+            float angle = atan2((loc.y - GetPositionY()), (loc.x - GetPositionX()));
+            loc.orientation = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
+        }
+    }
+
+    if (IsPlayer())
+        static_cast<Player*>(this)->SetPosition(loc.x, loc.y, loc.z, loc.orientation);
+    else
+        GetMap()->CreatureRelocation((Creature*)this, loc.x, loc.y, loc.z, loc.orientation);
+}
+
 void Unit::DisableSpline()
 {
     m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));

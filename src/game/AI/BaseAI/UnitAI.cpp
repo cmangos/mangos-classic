@@ -253,7 +253,7 @@ void UnitAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=false*/)
             if (enable)
                 DoStartMovement(m_unit->GetVictim());
             else if (m_unit->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-                m_unit->StopMoving();
+                m_unit->InterruptMoving();
         }
     }
 }
@@ -278,7 +278,7 @@ void UnitAI::HandleMovementOnAttackStart(Unit* victim) const
         else if (creatureMotion->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || creatureMotion->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
         {
             creatureMotion->MoveIdle();
-            m_unit->StopMoving();
+            m_unit->InterruptMoving();
         }
     }
 }
@@ -295,7 +295,7 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
     // Creature should always stop before it will cast a non-instant spell
     if (state)
         if ((spell->GetCastTime() && spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT) || (IsChanneledSpell(spellInfo) && spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT))
-            m_unit->StopMoving();
+            m_unit->InterruptMoving();
 
     bool forceTarget = false;
 

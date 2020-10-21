@@ -87,7 +87,7 @@ void CreatureAI::SetDeathPrevention(bool state)
 void CreatureAI::DoFakeDeath(uint32 spellId)
 {
     m_creature->InterruptNonMeleeSpells(false);
-    m_creature->StopMoving();
+    m_creature->InterruptMoving();
     m_creature->ClearComboPointHolders();
     m_creature->RemoveAllAurasOnDeath();
     m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
