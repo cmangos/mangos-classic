@@ -17905,6 +17905,9 @@ void Player::SendInitialPacketsAfterAddToMap()
             auraList.front()->ApplyModifier(true, true);
     }
 
+    if (IsImmobilizedState()) // TODO: Figure out if this protocol is correct
+        SendMoveRoot(true);
+
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
 }
