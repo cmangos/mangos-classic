@@ -598,7 +598,7 @@ class World
         static TimePoint GetCurrentClockTime() { return m_currentTime; }
         static uint32 GetCurrentDiff() { return m_currentDiff; }
 
-        auto& GetMessager() { return m_messager; }
+        Messager<World>& GetMessager() { return m_messager; }
 
         void IncrementOpcodeCounter(uint32 opcodeId); // thread safe due to atomics
     protected:

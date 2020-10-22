@@ -108,9 +108,9 @@ void metric::metric::initialize()
         sConfig.GetStringDefault("Metric.Password", "")
     };
 
-    m_sendTimer = std::make_unique<boost::asio::deadline_timer>(m_writeService);
-    m_queueServiceWork = std::make_unique<boost::asio::io_service::work>(m_queueService);
-    m_writeServiceWork = std::make_unique<boost::asio::io_service::work>(m_writeService);
+    m_sendTimer.reset(new boost::asio::deadline_timer(m_writeService));
+    m_queueServiceWork.reset(new boost::asio::io_service::work(m_queueService));
+    m_writeServiceWork.reset(new boost::asio::io_service::work(m_writeService));
 
     // Start up service thread that will process all queued tasks
     m_queueServiceThread = std::thread([&] {
@@ -143,7 +143,7 @@ void metric::metric::report(std::string measurement, std::map<std::string, boost
     m_queueService.post([&, measurement, fields, tags]
     {
         std::lock_guard<std::mutex> guard(m_queueWriteLock);
-        m_measurementQueue.push_back(std::make_unique<Measurement>(measurement, tags, fields));
+        m_measurementQueue.push_back(std::unique_ptr<Measurement>(new Measurement(measurement, tags, fields)));
     });
 }
 
@@ -185,7 +185,6 @@ void metric::metric::send()
     sLog.outDetail("Sending %zu measurements!", measurements.size());
 
     using boost::asio::ip::tcp;
-    using namespace std::chrono_literals;
 
     boost::system::error_code error;
 
