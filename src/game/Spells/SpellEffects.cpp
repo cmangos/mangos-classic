@@ -1657,9 +1657,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
     }
 }
 
-void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
+void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
 {
-    uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[eff_idx];
+    uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[effIndex];
 
     // special cases
     switch (triggered_spell_id)
@@ -1792,10 +1792,13 @@ void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
 
     SpellCastTargets targets;
 
-    switch (m_spellInfo->EffectImplicitTargetA[eff_idx])
+    switch (m_spellInfo->EffectImplicitTargetA[effIndex])
     {
         case TARGET_LOCATION_UNIT_MINION_POSITION: break; // confirmed by 31348 nothing is forwarded
-        default: targets.setUnitTarget(unitTarget);
+        default:
+            if (IsSpellRequireTarget(spellInfo))
+                targets.setUnitTarget(unitTarget);
+            break;
     }
 
     if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
