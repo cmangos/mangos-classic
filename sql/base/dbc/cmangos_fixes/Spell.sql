@@ -131,6 +131,12 @@ UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(30469);
 -- Fix duration of spell 28561 (Summon Blizzard): NPC should despawn after 30 seconds, not 5 minutes
 UPDATE spell_template SET DurationIndex=9 WHERE id=28561;
 
+-- Add SPELL_ATTR_EX3_DEATH_PERSISTENT to several non-passive spells which are triggered by items on equip
+UPDATE spell_template SET AttributesEx3=AttributesEx3|0x00100000 WHERE Id IN(
+'7363','16611','19307','17619','21079','22618','22620','23930','22988','23101','24198','28142','28143','28144','28145','28347','29112','29113',
+'29162');
+
+-- ============================================================
 -- Classic section
 
 -- Remove incorrect channel spell attribute for spell 29422 (Kel'Thuzad Channel Effect) used in Kel'Thuzad encounter
