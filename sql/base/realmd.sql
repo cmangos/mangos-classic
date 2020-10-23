@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `realmd_db_version`;
 CREATE TABLE `realmd_db_version` (
-  `required_z2768_01_realmd_account_locale_agnostic` bit(1) DEFAULT NULL
+  `required_z2775_01_realmd_raf` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -111,6 +111,13 @@ CREATE TABLE `account_logons` (
 `ip` varchar(30) NOT NULL,
 `loginTime` timestamp NOT NULL,
 `loginSource` INT UNSIGNED NOT NULL
+);
+
+DROP TABLE IF EXISTS account_raf;
+CREATE TABLE account_raf(
+referrer INT UNSIGNED NOT NULL DEFAULT '0',
+referred INT UNSIGNED NOT NULL DEFAULT '0',
+PRIMARY KEY(referrer, referred)
 );
 
 --
