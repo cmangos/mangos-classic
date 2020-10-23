@@ -4475,8 +4475,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
             instanceData->OnPlayerResurrect(this);
 
     // reapplies certain item equip spells which didn't last on death
-    _RemoveAllItemMods();
-    _ApplyAllItemMods();
+    UpdateEquipSpellsAtFormChange();
 
     if (!applySickness)
         return;
