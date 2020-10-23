@@ -617,7 +617,8 @@ struct npc_wizzlecranks_shredderAI : public npc_escortAI
                             DoScriptText(SAY_PROGRESS_2, m_creature);
                             break;
                         case 1:
-                            DoScriptText(SAY_PROGRESS_3, m_creature);
+                            if (Player* pPlayer = GetPlayerForEscort())
+                                DoScriptText(SAY_PROGRESS_3, m_creature, pPlayer);
                             break;
                         case 2:
                             DoScriptText(SAY_END, m_creature);
