@@ -115,6 +115,15 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (15326,'spell_blackout'),
 (27827,'spell_spirit_of_redemption_heal');
 
+-- Paladin
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(21082,'spell_seal_of_the_crusader'),
+(20162,'spell_seal_of_the_crusader'),
+(20305,'spell_seal_of_the_crusader'),
+(20306,'spell_seal_of_the_crusader'),
+(20307,'spell_seal_of_the_crusader'),
+(20308,'spell_seal_of_the_crusader');
+
 -- Warlock
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (980,'spell_curse_of_agony'),
