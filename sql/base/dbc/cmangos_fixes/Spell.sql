@@ -151,7 +151,7 @@ UPDATE `spell_template` SET `EffectImplicitTargetA1` = 6 WHERE `Id` IN (25744,25
 UPDATE spell_template SET EffectImplicitTargetA1=38 WHERE id=16007; -- 46
 
 -- Stationary Dark Iron Land Mine 8035
-UPDATE `spell_template` SET `EffectMiscValueB1` = 64 WHERE `Id` = 11802;
+UPDATE `spell_template` SET Effect1=41 WHERE `Id` = 11802;
 
 -- Flare - no delay is present here for stealth breaking - confirmed on classic
 UPDATE spell_template SET Speed=0 WHERE id=1543; -- 5
@@ -163,14 +163,14 @@ UPDATE spell_template SET EffectRadiusIndex1=15 WHERE Id IN(126);
 UPDATE spell_template SET ManaCost=0 WHERE Id IN(20647);
 
 -- Stationary Advanced Target Dummy 2674
-UPDATE `spell_template` SET `EffectMiscValueB1` = 64 WHERE `Id` = 4072;
+UPDATE `spell_template` SET Effect1=41 WHERE `Id` = 4072;
 
 -- Baron Rivendare 10440 does not enter combat and move while "channeling" Unholy Aura 17467
 UPDATE `spell_template` SET `AttributesEx3`=AttributesEx3|0x00020000 WHERE `Id` = 17466; -- SPELL_ATTR_EX3_NO_INITIAL_AGGRO
 UPDATE `spell_template` SET `AttributesEx` = `AttributesEx`&~0x00000004 WHERE `Id` = 17467; -- SPELL_ATTR_EX_CHANNELED_1
 
 -- Stationary Scarshield Portal 9707
-UPDATE `spell_template` SET `EffectMiscValueB1` = 64 WHERE `Id` = 15125;
+UPDATE `spell_template` SET Effect1=41 WHERE `Id` = 15125;
 
 -- Remove SPELL_INTERRUPT_FLAG_ABORT_ON_DMG from Spells falsly interrupted by damage
 UPDATE `spell_template` SET `InterruptFlags` = `InterruptFlags`&~0x00000010 WHERE `Id` IN (
