@@ -292,7 +292,7 @@ class BattleGround
         uint32 GetMinPlayersPerTeam() const { return m_minPlayersPerTeam; }
 
         int32 GetStartDelayTime() const     { return m_startDelayTime; }
-        Team GetWinner() const              { return m_winner; }
+        BattleGroundWinner GetWinner() const{ return m_winner; }
         uint32 GetBattlemasterEntry() const;
         uint32 GetBonusHonorFromKill(uint32 kills) const;
 
@@ -307,7 +307,7 @@ class BattleGround
         void SetMaxPlayers(uint32 maxPlayers) { m_maxPlayers = maxPlayers; }
         void SetMinPlayers(uint32 minPlayers) { m_minPlayers = minPlayers; }
         void SetLevelRange(uint32 min, uint32 max) { m_levelMin = min; m_levelMax = max; }
-        void SetWinner(Team winner)         { m_winner = winner; }
+        void SetWinner(BattleGroundWinner winner) { m_winner = winner; }
 
         void ModifyStartDelayTime(int diff) { m_startDelayTime -= diff; }
         void SetStartDelayTime(int time)    { m_startDelayTime = time; }
@@ -591,13 +591,14 @@ class BattleGround
         /* Battleground */
         BattleGroundTypeId m_typeId;
         BattleGroundStatus m_status;
+        BattleGroundWinner m_winner;
+
         uint32 m_clientInstanceId;                          // the instance-id which is sent to the client and without any other internal use
         uint32 m_startTime;
         uint32 m_validStartPositionTimer;
         int32 m_endTime;                                    // it is set to 120000 when bg is ending and it decreases itself
         BattleGroundBracketId m_bracketId;
-        bool   m_hasBgFreeSlotQueue;                         // used to make sure that BG is only once inserted into the BattleGroundMgr.BGFreeSlotQueue[bgTypeId] deque
-        Team   m_winner;                                    // 0=alliance, 1=horde, 2=none
+        bool   m_hasBgFreeSlotQueue;                        // used to make sure that BG is only once inserted into the BattleGroundMgr.BGFreeSlotQueue[bgTypeId] deque
         int32  m_startDelayTime;
         bool   m_prematureCountDown;
         uint32 m_prematureCountDownTimer;

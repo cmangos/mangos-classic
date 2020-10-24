@@ -517,6 +517,13 @@ enum Team
     ALLIANCE            = 469,
 };
 
+enum BattleGroundWinner
+{
+    WINNER_HORDE        = 0,
+    WINNER_ALLIANCE     = 1,
+    WINNER_NONE         = 2
+};
+
 enum PvpTeamIndex
 {
     TEAM_INDEX_ALLIANCE = 0,
