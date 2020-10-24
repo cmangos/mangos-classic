@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "BattleGround.h"
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Globals/ObjectMgr.h"
@@ -4773,5 +4774,48 @@ bool ChatHandler::HandleBagsCommand(char* args)
                 player->SendNewItem(item, 1, false, true);
         }
     }
+
+    return true;
+}
+
+bool ChatHandler::HandleBattlegroundStartCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+
+    if (!player)
+        return false;
+
+    BattleGround* bg = player->GetBattleGround();
+    if (!bg)
+    {
+        SendSysMessage("You are not in a battleground.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    bg->SetStartDelayTime(0);
+    PSendSysMessage("Battleground started [%s][%u]", bg->GetName(), bg->GetInstanceId());
+
+    return true;
+}
+
+bool ChatHandler::HandleBattlegroundStopCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+
+    if (!player)
+        return false;
+
+    BattleGround* bg = player->GetBattleGround();
+    if (!bg)
+    {
+        SendSysMessage("You are not in a battleground.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    bg->EndBattleGround(TEAM_NONE);
+    PSendSysMessage("Battleground stopped [%s][%u]", bg->GetName(), bg->GetInstanceId());
+
     return true;
 }

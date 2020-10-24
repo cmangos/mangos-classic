@@ -726,6 +726,10 @@ class ChatHandler
         // worldstate
         bool HandleWarEffortCommand(char* args);
 
+        // Battleground
+        bool HandleBattlegroundStartCommand(char* args);
+        bool HandleBattlegroundStopCommand(char* args);
+
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
 
