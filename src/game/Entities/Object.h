@@ -556,7 +556,7 @@ class Object
 
         void ClearUpdateMask(bool remove);
 
-        bool LoadValues(const char* data);
+        void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
 
         uint16 GetValuesCount() const { return m_valuesCount; }
 

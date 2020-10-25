@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_z2764_01_characters_ahbot_items` bit(1) DEFAULT NULL
+  `required_z2765_01_characters_item_instance_data_drop` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -1072,7 +1072,17 @@ DROP TABLE IF EXISTS `item_instance`;
 CREATE TABLE `item_instance` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0',
   `owner_guid` int(11) unsigned NOT NULL DEFAULT '0',
-  `data` longtext,
+  `itemEntry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `creatorGuid` int(10) unsigned NOT NULL default '0',
+  `giftCreatorGuid` int(10) unsigned NOT NULL default '0',
+  `count` int(10) unsigned NOT NULL default '1',
+  `duration` int(10) unsigned NOT NULL default '0',
+  `charges` text NOT NULL,
+  `flags` int(8) unsigned NOT NULL default '0',
+  `enchantments` text NOT NULL,
+  `randomPropertyId` smallint(5) NOT NULL default '0',
+  `durability` int(5) unsigned NOT NULL default '0',
+  `itemTextId` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY (`guid`),
   KEY `idx_owner_guid` (`owner_guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Item System';
