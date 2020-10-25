@@ -687,23 +687,22 @@ void Object::ClearUpdateMask(bool remove)
     }
 }
 
-bool Object::LoadValues(const char* data)
+void Object::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 count)
 {
-    if (!m_uint32Values) _InitValues();
+    if (!data)
+        return;
 
     Tokens tokens = StrSplit(data, " ");
 
-    if (tokens.size() != m_valuesCount)
-        return false;
+    if (tokens.size() != count)
+        return;
 
-    Tokens::iterator iter;
-    int index;
-    for (iter = tokens.begin(), index = 0; index < m_valuesCount; ++iter, ++index)
+    Tokens::const_iterator iter;
+    uint32 index;
+    for (iter = tokens.begin(), index = 0; index < count; ++iter, ++index)
     {
-        m_uint32Values[index] = std::stoul(*iter);
+        m_uint32Values[startOffset + index] = atol((*iter).c_str());
     }
-
-    return true;
 }
 
 void Object::_SetUpdateBits(UpdateMask* updateMask, Player* /*target*/) const

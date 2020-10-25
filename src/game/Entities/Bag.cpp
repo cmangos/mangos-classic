@@ -97,6 +97,13 @@ bool Bag::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
     if (!Item::LoadFromDB(guidLow, fields, ownerGuid))
         return false;
 
+    ItemPrototype const* itemProto = sObjectMgr.GetItemPrototype(GetEntry());
+    if (!itemProto || itemProto->ContainerSlots > MAX_BAG_SIZE)
+        return false;
+
+    // Setting the number of Slots the Container has
+    SetUInt32Value(CONTAINER_FIELD_NUM_SLOTS, itemProto->ContainerSlots);
+
     // cleanup bag content related item value fields (its will be filled correctly from `character_inventory`)
     for (int i = 0; i < MAX_BAG_SIZE; ++i)
     {
