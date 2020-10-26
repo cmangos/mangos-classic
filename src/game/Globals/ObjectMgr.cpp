@@ -4559,19 +4559,19 @@ void ObjectMgr::LoadInstanceTemplate()
         }
 
         // if ghost entrance coordinates provided, can't be not exist for instance without ground entrance
-        if (temp->ghostEntranceMap >= 0)
+        if (temp->ghost_entrance_map >= 0)
         {
-            if (!MapManager::IsValidMapCoord(temp->ghostEntranceMap, temp->ghostEntranceX, temp->ghostEntranceY))
+            if (!MapManager::IsValidMapCoord(temp->ghost_entrance_map, temp->ghost_entrance_x, temp->ghost_entrance_y))
             {
                 sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: ghost entrance coordinates invalid for instance template %d template, ignored, need be set only for non-continent parents!", temp->map);
                 sInstanceTemplate.EraseEntry(i);
                 continue;
             }
 
-            MapEntry const* ghostEntry = sMapStore.LookupEntry(temp->ghostEntranceMap);
+            MapEntry const* ghostEntry = sMapStore.LookupEntry(temp->ghost_entrance_map);
             if (!ghostEntry)
             {
-                sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad ghost entrance map id %u for instance template %d template!", temp->ghostEntranceMap, temp->map);
+                sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad ghost entrance map id %u for instance template %d template!", temp->ghost_entrance_map, temp->map);
                 sInstanceTemplate.EraseEntry(i);
                 continue;
             }
@@ -5608,7 +5608,7 @@ void ObjectMgr::LoadGraveyardZones()
     // mGraveYardMap has records by both map id and area id. map ID records have their
     // most significant bit set. If you want to query for a map id you must
     // query map_id | (1 << 31) instead.
-    mGraveYardMap.clear();
+    m_graveYardMap.clear();
 
     QueryResult* result = WorldDatabase.Query("SELECT id,ghost_loc,link_kind,faction FROM game_graveyard_zone");
 
@@ -5668,10 +5668,18 @@ void ObjectMgr::LoadGraveyardZones()
             continue;
         }
 
-        if (!AddGraveYardLink(safeLocId, locId, linkKind, Team(team), false))
+        uint32 locKey = GraveyardManager::GraveyardLinkKey(locId, linkKind);
+        if (!GraveyardManager::FindGraveYardData(m_graveYardMap, locId, locKey))
             sLog.outErrorDb("Table `game_graveyard_zone` has a duplicate record"
-                    " for Graveyard (ID: %u) and location (ID: %u, kind: %u), "
-                    "skipped.", safeLocId, locId, linkKind);
+                " for Graveyard (ID: %u) and location (ID: %u, kind: %u), "
+                "skipped.", safeLocId, locId, linkKind);
+        else
+        {
+            GraveYardData data;
+            data.safeLocId = locId;
+            data.team = Team(team);
+            m_graveYardMap.insert(GraveYardMap::value_type(locKey, data));
+        }
     }
     while (result->NextRow());
 
@@ -5679,249 +5687,6 @@ void ObjectMgr::LoadGraveyardZones()
 
     sLog.outString(">> Loaded %u graveyard-zone links", count);
     sLog.outString();
-}
-
-
-WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveyardHelper(
-        GraveYardMapBounds bounds, float x, float y, float z, uint32 mapId,
-        Team team) const
-{
-    // Simulate std. algorithm:
-    //   found some graveyard associated to (ghost_zone,ghost_map)
-    //
-    //   if mapId == graveyard.mapId (ghost in plain zone or city or battleground) and search graveyard at same map
-    //     then check faction
-    //   if mapId != graveyard.mapId (ghost in instance) and search any graveyard associated
-    //     then check faction
-
-    // at corpse map
-    bool foundNear = false;
-    float distNear = std::numeric_limits<float>::max();
-    WorldSafeLocsEntry const* entryNear = nullptr;
-
-    // at entrance map for corpse map
-    bool foundEntr = false;
-    float distEntr = std::numeric_limits<float>::max();
-    WorldSafeLocsEntry const* entryEntr = nullptr;
-
-    // some where other
-    WorldSafeLocsEntry const* entryFar = nullptr;
-
-    InstanceTemplate const* tempEntry = GetInstanceTemplate(mapId);
-
-    for (GraveYardMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
-    {
-        GraveYardData const& data = itr->second;
-
-        // Checked on load
-        WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(data.safeLocId);
-
-        // skip enemy faction graveyard
-        // team == TEAM_BOTH_ALLOWED case can be at call from .neargrave
-        // TEAM_INVALID != team for all teams
-        if (data.team != TEAM_BOTH_ALLOWED && data.team != team && team != TEAM_BOTH_ALLOWED)
-            continue;
-
-        // find now nearest graveyard at other (continent) map
-        if (mapId != entry->map_id)
-        {
-            // if find graveyard at different map from where entrance placed (or no entrance data), use any first
-            if (!tempEntry ||
-                    tempEntry->ghostEntranceMap < 0 ||
-                    uint32(tempEntry->ghostEntranceMap) != entry->map_id ||
-                    (tempEntry->ghostEntranceX == 0.0f && tempEntry->ghostEntranceY == 0.0f))
-            {
-                // not have any coordinates for check distance anyway
-                entryFar = entry;
-                continue;
-            }
-
-            // at entrance map calculate distance (2D);
-            float dist2 = (entry->x - tempEntry->ghostEntranceX) * (entry->x - tempEntry->ghostEntranceX)
-                          + (entry->y - tempEntry->ghostEntranceY) * (entry->y - tempEntry->ghostEntranceY);
-            if (foundEntr)
-            {
-                if (dist2 < distEntr)
-                {
-                    distEntr = dist2;
-                    entryEntr = entry;
-                }
-            }
-            else
-            {
-                foundEntr = true;
-                distEntr = dist2;
-                entryEntr = entry;
-            }
-        }
-        // find now nearest graveyard at same map
-        else
-        {
-            float dist2 = (entry->x - x) * (entry->x - x) + (entry->y - y) * (entry->y - y) + (entry->z - z) * (entry->z - z);
-            if (foundNear)
-            {
-                if (dist2 < distNear)
-                {
-                    distNear = dist2;
-                    entryNear = entry;
-                }
-            }
-            else
-            {
-                foundNear = true;
-                distNear = dist2;
-                entryNear = entry;
-            }
-        }
-    }
-
-    if (entryNear)
-        return entryNear;
-
-    if (entryEntr)
-        return entryEntr;
-
-    return entryFar;
-}
-
-WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(
-        float x, float y, float z, uint32 mapId, Team team) const
-{
-    // Search for the closest linked graveyard by decreasing priority:
-    //  - First try linked to the current area id (if we have one)
-    //  - Then try linked to the current zone id (if we have one)
-    //  - Then try linked to the current map id
-    const uint32 zoneId = sTerrainMgr.GetZoneId(mapId, x, y, z);
-    const uint32 areaId = sTerrainMgr.GetAreaId(mapId, x, y, z);
-
-    WorldSafeLocsEntry const* graveyard = nullptr;
-    if (zoneId != 0)
-    {
-        auto bounds = mGraveYardMap.equal_range(GraveyardLinkKey(areaId, GRAVEYARD_AREALINK));
-        graveyard = GetClosestGraveyardHelper(bounds, x, y, z, mapId, team);
-    }
-
-    if (zoneId != 0 && graveyard == nullptr)
-    {
-        auto bounds = mGraveYardMap.equal_range(GraveyardLinkKey(zoneId, GRAVEYARD_AREALINK));
-        graveyard = GetClosestGraveyardHelper(bounds, x, y, z, mapId, team);
-    }
-
-    if (graveyard == nullptr)
-    {
-        auto bounds = mGraveYardMap.equal_range(GraveyardLinkKey(mapId, GRAVEYARD_MAPLINK));
-        graveyard = GetClosestGraveyardHelper(bounds, x, y, z, mapId, team);
-    }
-
-    if (graveyard == nullptr)
-        sLog.outErrorDb("Table `game_graveyard_zone` incomplete: Map %u Zone "
-                        "%u Area %u Team %u does not have a linked graveyard.",
-                        mapId, zoneId, areaId, uint32(team));
-    return graveyard;
-}
-
-/*!
- * Return the Graveyard link data for a given graveyard and location
- * combination.
- *
- * \param id        The id of a graveyard. This is an index to the graveyard in
- *                  sWorldSafeLocsStore which holds data from WorldSafeLocs.dbc
- * \param locKey    A location key as returned by ObjectMgr::GraveyardLinkKey
- */
-GraveYardData const* ObjectMgr::FindGraveYardData(uint32 id, uint32 locKey) const
-{
-    GraveYardMapBounds bounds = mGraveYardMap.equal_range(locKey);
-
-    for (GraveYardMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
-    {
-        if (itr->second.safeLocId == id)
-            return &itr->second;
-    }
-
-    return nullptr;
-}
-
-/*!
- * Turn a location id and a link kind into a location key that indexes the
- * graveyard link map.
- *
- * \param locationId    The id of an area or a map.
- * \param linkKind      The kind of id, either GRAVEYARD_MAPLINK or
- *                      GRAVEYARD_AREALINK
- * \return The location key composed of the given data.
- */
-uint32 ObjectMgr::GraveyardLinkKey(uint32 locationId, uint32 linkKind)
-{
-    return locationId | (linkKind << 31);
-}
-
-/*!
- * Adds a given graveyard link to the currently active graveyard links.
- * Optionally add it into the database too.
- *
- * \param id        The id of a graveyard. This is an index to the graveyard in
- *                  sWorldSafeLocsStore which holds data from WorldSafeLocs.dbc
- *
- * \param locId     The id of a location. This is either an area id or a map id
- *                  based on the value of linkKind
- *
- * \param linkKind  The kind of the graveyard link to be added. Kind is either
- *                  GRAVEYARD_MAPLINK or GRAVEYARD_AREALINK
- *
- * \param team      The team that is allowed to use this graveyard link. Can be
- *                  TEAM_BOTH_ALLOWED, HORDE or ALLIANCE.
- *
- * \param inDB      True if the given graveyard link needs to be added to the
- *                  database. False otherwise.
- *
- * \return          Whether or not the link was added (False only if the link
- *                  was already added added).
- */
-bool ObjectMgr::AddGraveYardLink(uint32 id, uint32 locId, uint32 linkKind, Team team, bool inDB)
-{
-    uint32 locKey = GraveyardLinkKey(locId, linkKind);
-    if (FindGraveYardData(id, locKey))
-        return false;
-
-    GraveYardData data;
-    data.safeLocId = id;
-    data.team = team;
-    mGraveYardMap.insert(GraveYardMap::value_type(locKey, data));
-
-    if (inDB)
-        WorldDatabase.PExecuteLog("INSERT INTO game_graveyard_zone "
-            "(id, ghost_loc, link_kind, faction) VALUES "
-            "('%u', '%u','%u', '%u')", id, locId, linkKind, uint32(team));
-
-    return true;
-}
-
-void ObjectMgr::SetGraveYardLinkTeam(uint32 id, uint32 locKey, Team team)
-{
-    auto bounds = mGraveYardMap.equal_range(locKey);
-
-    for (GraveYardMap::iterator itr = bounds.first; itr != bounds.second; ++itr)
-    {
-        GraveYardData& data = itr->second;
-
-        // skip not matching safezone id
-        if (data.safeLocId != id)
-            continue;
-
-        data.team = team;                                   // Validate link
-        return;
-    }
-
-    if (team == TEAM_INVALID)
-        return;
-
-    // No graveyard link found but one was expected. Log it and add one to
-    // prevent further errors.
-    uint32 locId = locKey & 0x7FFFFFFF;
-    uint32 linkKind = locKey & 0x80000000;
-    sLog.outErrorDb("ObjectMgr::SetGraveYardLinkTeam called for safeLoc %u, "
-            "locKey %u, but no graveyard link for this found in database.", id, locKey);
-    AddGraveYardLink(id, locId, linkKind, team);
 }
 
 void ObjectMgr::LoadWorldSafeLocs() const
@@ -6053,7 +5818,7 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
     AreaTrigger const* compareTrigger = nullptr;
     for (const auto& mAreaTrigger : mAreaTriggers)
     {
-        if (mAreaTrigger.second.target_mapId == uint32(temp->ghostEntranceMap))
+        if (mAreaTrigger.second.target_mapId == uint32(temp->ghost_entrance_map))
         {
             ghostTrigger.push_back(&mAreaTrigger.second);
             // First run, only consider AreaTrigger that teleport in the proper map

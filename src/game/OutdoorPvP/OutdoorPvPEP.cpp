@@ -38,7 +38,7 @@ OutdoorPvPEP::OutdoorPvPEP() : OutdoorPvP(),
         i = TEAM_NONE;
 
     // initially set graveyard owner to neither faction
-    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, TEAM_INVALID);
+    SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, TEAM_INVALID, 0);
 }
 
 void OutdoorPvPEP::FillInitialWorldStates(WorldPacket& data, uint32& count)
@@ -282,7 +282,7 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
                 RespawnGO(go, team == ALLIANCE ? m_lordaeronShrineAlliance : m_lordaeronShrineHorde, true);
                 break;
             case TOWER_ID_CROWNGUARD:
-                sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, team);
+                SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, team, 0);
                 break;
             case TOWER_ID_EASTWALL:
                 // Return false - allow the DB to handle summons
@@ -304,7 +304,7 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
                 RespawnGO(go, m_towerOwner[TOWER_ID_NORTHPASS] == ALLIANCE ? m_lordaeronShrineAlliance : m_lordaeronShrineHorde, false);
                 break;
             case TOWER_ID_CROWNGUARD:
-                sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, TEAM_INVALID);
+                SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, TEAM_INVALID, 0);
                 break;
             case TOWER_ID_EASTWALL:
                 UnsummonSoldiers(go);

@@ -153,6 +153,10 @@ void BattleGroundAB::Update(uint32 diff)
 void BattleGroundAB::StartingEventOpenDoors()
 {
     OpenDoorEvent(BG_EVENT_DOOR);
+
+    // setup graveyards
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(AB_GRAVEYARD_ALLIANCE, BG_AB_ZONE_MAIN, ALLIANCE);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(AB_GRAVEYARD_HORDE, BG_AB_ZONE_MAIN, HORDE);
 }
 
 void BattleGroundAB::AddPlayer(Player* player)
@@ -259,8 +263,8 @@ void BattleGroundAB::ProcessNodeCapture(uint8 node, PvpTeamIndex teamIdx)
     else if (m_capturedNodeCount[teamIdx] >= 4)
         CastSpellOnTeam(BG_AB_SPELL_QUEST_REWARD_4_BASES, team);
 
-    // setup graveyard
-    sObjectMgr.SetGraveYardLinkTeam(abGraveyardIds[node], BG_AB_ZONE_MAIN, team);
+    // setup graveyards
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(abGraveyardIds[node], BG_AB_ZONE_MAIN, team);
 }
 
 // Method that handles the banner click
@@ -354,7 +358,7 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
         PvpTeamIndex otherTeamIndex = GetOtherTeamIndex(teamIndex);
         --m_capturedNodeCount[otherTeamIndex];
 
-        sObjectMgr.SetGraveYardLinkTeam(abGraveyardIds[node], BG_AB_ZONE_MAIN, TEAM_INVALID);
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(abGraveyardIds[node], BG_AB_ZONE_MAIN, TEAM_INVALID);
     }
 
     // update score
@@ -409,11 +413,12 @@ void BattleGroundAB::Reset()
         // all nodes owned by neutral team at beginning
         m_activeEvents[i] = BG_AB_NODE_TYPE_NEUTRAL;
 
-        sObjectMgr.SetGraveYardLinkTeam(abGraveyardIds[i], BG_AB_ZONE_MAIN, TEAM_INVALID);
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(abGraveyardIds[i], BG_AB_ZONE_MAIN, TEAM_INVALID);
     }
 
-    sObjectMgr.SetGraveYardLinkTeam(AB_GRAVEYARD_ALLIANCE, BG_AB_ZONE_MAIN, ALLIANCE);
-    sObjectMgr.SetGraveYardLinkTeam(AB_GRAVEYARD_HORDE, BG_AB_ZONE_MAIN, HORDE);
+    // setup graveyards
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(AB_GRAVEYARD_ALLIANCE, BG_AB_ZONE_MAIN, ALLIANCE);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(AB_GRAVEYARD_HORDE, BG_AB_ZONE_MAIN, HORDE);
 }
 
 void BattleGroundAB::EndBattleGround(Team winner)

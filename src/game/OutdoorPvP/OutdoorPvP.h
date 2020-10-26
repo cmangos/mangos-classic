@@ -85,6 +85,13 @@ class OutdoorPvP
         // Handle player kill
         void HandlePlayerKill(Player* killer, Player* victim);
 
+        // Handle script condition fulfillment
+        virtual bool IsConditionFulfilled(Player const* /*source*/, uint32 /*conditionId*/, WorldObject const* /*conditionSource*/, uint32 /*conditionSourceType*/) { return false; }
+
+        // Handle script condition state change by an external factor
+        virtual void HandleConditionStateChange(uint32 /*conditionId*/, bool /*state*/) {}
+
+        void SetGraveYardLinkTeam(uint32 id, uint32 locKey, Team team, uint32 mapId);
     protected:
 
         // Player related stuff
