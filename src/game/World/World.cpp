@@ -850,12 +850,12 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading spell_template...");
     sObjectMgr.LoadSpellTemplate();
 
-    sLog.outString("Loading world safe locs ...");
-    sObjectMgr.LoadWorldSafeLocs();
-
     // Load before npc_text, gossip_menu_option, script_texts, creature_ai_texts, dbscript_string
     sLog.outString("Loading broadcast_text...");
     sObjectMgr.LoadBroadcastText();
+
+    sLog.outString("Loading world safe locs ...");
+    LoadWorldSafeLocs();
 
     ///- Load the DBC files
     sLog.outString("Initialize DBC data stores...");
@@ -1075,7 +1075,7 @@ void World::SetInitialWorldSettings()
     sScriptDevAIMgr.LoadEventIdScripts();
 
     sLog.outString("Loading Graveyard-zone links...");
-    sObjectMgr.LoadGraveyardZones();
+    LoadGraveyardZones();
 
     sLog.outString("Loading taxi flight shortcuts...");
     sObjectMgr.LoadTaxiShortcuts();
@@ -2465,3 +2465,98 @@ void World::GeneratePacketMetrics()
     meas_players.add_field("druid", std::to_string(GetOnlineClassPlayers(CLASS_DRUID)));
 }
 #endif
+
+// Load or reload the graveyard links from the data
+void World::LoadGraveyardZones()
+{
+    // Clear the map (in case we're reloading) and then add all the entries from
+    // the database.
+
+    // mGraveYardMap has records by both map id and area id. map ID records have their
+    // most significant bit set. If you want to query for a map id you must
+    // query map_id | (1 << 31) instead.
+    auto& graveyardMap = GetGraveyardManager().GetGraveyardMap();
+
+    QueryResult* result = WorldDatabase.Query("SELECT id,ghost_loc,link_kind,faction FROM game_graveyard_zone");
+
+    uint32 count = 0;
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outString(">> Loaded %u graveyard-zone links", count);
+        sLog.outString();
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        ++count;
+        bar.step();
+
+        Field* fields = result->Fetch();
+
+        uint32 safeLocId = fields[0].GetUInt32();
+        uint32 locId = fields[1].GetUInt32();
+        uint32 linkKind = fields[2].GetUInt32();
+        uint32 team = fields[3].GetUInt32();
+
+        if (linkKind != 0 && linkKind != 1)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` has record with invalid `link_kind`=%d state, skipped.", linkKind);
+            continue;
+        }
+
+        WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(safeLocId);
+        if (!entry)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` has record for nonexistent graveyard (WorldSafeLocs.dbc id) %u, skipped.", safeLocId);
+            continue;
+        }
+
+        if (linkKind == GRAVEYARD_AREALINK && GetAreaEntryByAreaID(locId) == nullptr)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` has record for nonexistent area id (%u), skipped.", locId);
+            continue;
+        }
+
+        if (linkKind == GRAVEYARD_MAPLINK && sMapStore.LookupEntry(locId) == nullptr)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` has record for nonexistent map id (%u), skipped.", locId);
+            continue;
+        }
+
+        if (team != TEAM_BOTH_ALLOWED && team != HORDE && team != ALLIANCE)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` has record for non player faction (%u), skipped.", team);
+            continue;
+        }
+
+        uint32 locKey = GraveyardManager::GraveyardLinkKey(locId, linkKind);
+        if (!GraveyardManager::FindGraveYardData(graveyardMap, locId, locKey))
+            sLog.outErrorDb("Table `game_graveyard_zone` has a duplicate record"
+                " for Graveyard (ID: %u) and location (ID: %u, kind: %u), "
+                "skipped.", safeLocId, locId, linkKind);
+        else
+        {
+            GraveYardData data;
+            data.safeLocId = locId;
+            data.team = Team(team);
+            graveyardMap.insert(GraveYardMap::value_type(locKey, data));
+        }
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString(">> Loaded %u graveyard-zone links", count);
+    sLog.outString();
+}
+
+void World::LoadWorldSafeLocs() const
+{
+    sWorldSafeLocsStore.Load(true);
+    sLog.outString(">> Loaded %u world safe locs", sWorldSafeLocsStore.GetRecordCount());
+}

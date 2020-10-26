@@ -57,10 +57,13 @@ class GraveyardManager
         static GraveYardData const* FindGraveYardData(GraveYardMap const& map, uint32 id, uint32 zoneId);
 
         static uint32 GraveyardLinkKey(uint32 locId, uint32 linkKind);
+
+        // Only for use in Map
+        GraveYardMap& GetGraveyardMap() { return m_graveyardMap; }
     private:
         WorldSafeLocsEntry const* GetClosestGraveyardHelper(GraveYardMapBounds bounds, float x, float y, float z, uint32 mapId, Team team) const;
 
-        GraveYardMap m_graveYardMap;
+        GraveYardMap m_graveyardMap;
 };
 
 #endif

@@ -960,7 +960,7 @@ bool ChatHandler::HandleReloadGameGraveyardZoneCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading Graveyard-zone links...");
 
-    sObjectMgr.LoadGraveyardZones();
+    sWorld.LoadGraveyardZones();
 
     SendGlobalSysMessage("DB table `game_graveyard_zone` reloaded.");
 

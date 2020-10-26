@@ -22,6 +22,7 @@
 #include "Server/SQLStorages.h"
 #include "Maps/GridMap.h"
 #include "Maps/Map.h"
+#include "World/World.h"
 
 WorldSafeLocsEntry const* GraveyardManager::GetClosestGraveyardHelper(GraveYardMapBounds bounds, float x, float y, float z, uint32 mapId, Team team) const
 {
@@ -129,7 +130,7 @@ void GraveyardManager::Init(Map* map)
 {
     // TODO: Only load relevant ones for specific map - warning: for example TK needs to have netherstorm
     // For now its likely not that harmful, its not that big
-    m_graveYardMap = sObjectMgr.GetGraveYardMap();
+    m_graveyardMap = sWorld.GetGraveyardManager().GetGraveyardMap();
 }
 
 WorldSafeLocsEntry const* GraveyardManager::GetClosestGraveYard(float x, float y, float z, uint32 mapId, Team team) const
@@ -144,19 +145,19 @@ WorldSafeLocsEntry const* GraveyardManager::GetClosestGraveYard(float x, float y
     WorldSafeLocsEntry const* graveyard = nullptr;
     if (zoneId != 0)
     {
-        auto bounds = m_graveYardMap.equal_range(GraveyardLinkKey(areaId, GRAVEYARD_AREALINK));
+        auto bounds = m_graveyardMap.equal_range(GraveyardLinkKey(areaId, GRAVEYARD_AREALINK));
         graveyard = GetClosestGraveyardHelper(bounds, x, y, z, mapId, team);
     }
 
     if (zoneId != 0 && graveyard == nullptr)
     {
-        auto bounds = m_graveYardMap.equal_range(GraveyardLinkKey(zoneId, GRAVEYARD_AREALINK));
+        auto bounds = m_graveyardMap.equal_range(GraveyardLinkKey(zoneId, GRAVEYARD_AREALINK));
         graveyard = GetClosestGraveyardHelper(bounds, x, y, z, mapId, team);
     }
 
     if (graveyard == nullptr)
     {
-        auto bounds = m_graveYardMap.equal_range(GraveyardLinkKey(mapId, GRAVEYARD_MAPLINK));
+        auto bounds = m_graveyardMap.equal_range(GraveyardLinkKey(mapId, GRAVEYARD_MAPLINK));
         graveyard = GetClosestGraveyardHelper(bounds, x, y, z, mapId, team);
     }
 
@@ -227,13 +228,13 @@ uint32 GraveyardManager::GraveyardLinkKey(uint32 locationId, uint32 linkKind)
 bool GraveyardManager::AddGraveYardLink(uint32 id, uint32 locId, uint32 linkKind, Team team, bool inDB)
 {
     uint32 locKey = GraveyardLinkKey(locId, linkKind);
-    if (FindGraveYardData(m_graveYardMap, id, locKey))
+    if (FindGraveYardData(m_graveyardMap, id, locKey))
         return false;
 
     GraveYardData data;
     data.safeLocId = id;
     data.team = team;
-    m_graveYardMap.insert(GraveYardMap::value_type(locKey, data));
+    m_graveyardMap.insert(GraveYardMap::value_type(locKey, data));
 
     if (inDB)
         WorldDatabase.PExecuteLog("INSERT INTO game_graveyard_zone "
@@ -245,7 +246,7 @@ bool GraveyardManager::AddGraveYardLink(uint32 id, uint32 locId, uint32 linkKind
 
 void GraveyardManager::SetGraveYardLinkTeam(uint32 id, uint32 locKey, Team team)
 {
-    auto bounds = m_graveYardMap.equal_range(locKey);
+    auto bounds = m_graveyardMap.equal_range(locKey);
 
     for (GraveYardMap::iterator itr = bounds.first; itr != bounds.second; ++itr)
     {
@@ -273,5 +274,5 @@ void GraveyardManager::SetGraveYardLinkTeam(uint32 id, uint32 locKey, Team team)
 
 GraveYardData const* GraveyardManager::FindGraveYardData(uint32 id, uint32 zoneId)
 {
-    return FindGraveYardData(m_graveYardMap, id, zoneId);
+    return FindGraveYardData(m_graveyardMap, id, zoneId);
 }
