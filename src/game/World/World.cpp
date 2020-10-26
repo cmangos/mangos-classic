@@ -2536,14 +2536,14 @@ void World::LoadGraveyardZones()
         }
 
         uint32 locKey = GraveyardManager::GraveyardLinkKey(locId, linkKind);
-        if (!GraveyardManager::FindGraveYardData(graveyardMap, locId, locKey))
+        if (GraveyardManager::FindGraveYardData(graveyardMap, safeLocId, locKey))
             sLog.outErrorDb("Table `game_graveyard_zone` has a duplicate record"
                 " for Graveyard (ID: %u) and location (ID: %u, kind: %u), "
                 "skipped.", safeLocId, locId, linkKind);
         else
         {
             GraveYardData data;
-            data.safeLocId = locId;
+            data.safeLocId = safeLocId;
             data.team = Team(team);
             graveyardMap.insert(GraveYardMap::value_type(locKey, data));
         }
