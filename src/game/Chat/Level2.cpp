@@ -1639,6 +1639,22 @@ bool ChatHandler::HandleNpcTempSpawn(char* args)
     return true;
 }
 
+bool ChatHandler::HandleNpcEvade(char* args)
+{
+    Creature* target = getSelectedCreature();
+
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (target->AI())
+        target->AI()->EnterEvadeMode();
+    return true;
+}
+
 // add item in vendorlist
 bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
 {
