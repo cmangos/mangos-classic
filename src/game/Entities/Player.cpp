@@ -13355,13 +13355,14 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
     }
 }
 
-void Player::KilledMonster(CreatureInfo const* cInfo, ObjectGuid guid)
+void Player::KilledMonster(CreatureInfo const* cInfo, Creature const* creature)
 {
+    ObjectGuid guid = creature ? creature->GetObjectGuid() : ObjectGuid();
     if (cInfo->Entry)
         KilledMonsterCredit(cInfo->Entry, guid);
 
-    if (GetEntry() && GetEntry() != cInfo->Entry)
-        KilledMonsterCredit(GetEntry(), guid);
+    if (creature && creature->GetEntry() && creature->GetEntry() != cInfo->Entry)
+        KilledMonsterCredit(creature->GetEntry(), guid);
 
     for (unsigned int i : cInfo->KillCredit)
         if (i)
@@ -18630,7 +18631,7 @@ void Player::RewardSinglePlayerAtKill(Unit* pVictim)
 
         // normal creature (not pet/etc) can be only in !PvP case
         if (CreatureInfo const* normalInfo = creatureVictim->GetCreatureInfo())
-            KilledMonster(normalInfo, creatureVictim->GetObjectGuid());
+            KilledMonster(normalInfo, creatureVictim);
     }
 }
 
