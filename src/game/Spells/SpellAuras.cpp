@@ -794,7 +794,7 @@ void Aura::ReapplyAffectedPassiveAuras()
     GetTarget()->CallForAllControlledUnits(ReapplyAffectedPassiveAurasHelper(this), CONTROLLED_PET | CONTROLLED_TOTEMS);
 }
 
-void Aura::PickTargetsForSpellTrigger(Unit *& triggerCaster, Unit *& triggerTarget, WorldObject *& triggerTargetObject, SpellEntry const* spellInfo)
+void Aura::PickTargetsForSpellTrigger(Unit*& triggerCaster, Unit*& triggerTarget, WorldObject*& triggerTargetObject, SpellEntry const* spellInfo)
 {
     // automatic caster - target resolution
     switch (spellInfo->EffectImplicitTargetA[0])
@@ -802,6 +802,8 @@ void Aura::PickTargetsForSpellTrigger(Unit *& triggerCaster, Unit *& triggerTarg
         case TARGET_UNIT_ENEMY:
         case TARGET_UNIT:
             triggerCaster = GetCaster();
+            if (!triggerCaster)
+                triggerCaster = triggerTarget;
             triggerTarget = triggerCaster->GetTarget(); // This will default to channel target for channels
             break;
         case TARGET_UNIT_FRIEND: // Abolish Disease / Poison confirms this
@@ -809,8 +811,9 @@ void Aura::PickTargetsForSpellTrigger(Unit *& triggerCaster, Unit *& triggerTarg
             triggerCaster = GetTarget();
             triggerTarget = GetTarget();
             break;
-        case TARGET_LOCATION_CASTER_DEST:
         case TARGET_LOCATION_CASTER_SRC: // TODO: this needs to be done whenever target isnt important, doing it per case for safety
+            //[[fallthrough]]
+        case TARGET_LOCATION_CASTER_DEST:
         case TARGET_UNIT_SCRIPT_NEAR_CASTER:
         default:
             triggerTarget = nullptr;
