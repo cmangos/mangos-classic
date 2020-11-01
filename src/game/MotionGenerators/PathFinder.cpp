@@ -26,6 +26,7 @@
 
 #include <Detour/Include/DetourCommon.h>
 #include <Detour/Include/DetourMath.h>
+#include <limits>
 
 ////////////////// PathFinder //////////////////
 PathFinder::PathFinder(const Unit* owner) :
@@ -105,7 +106,7 @@ dtPolyRef PathFinder::getPathPolyByPosition(const dtPolyRef* polyPath, uint32 po
         return INVALID_POLYREF;
 
     dtPolyRef nearestPoly = INVALID_POLYREF;
-    float minDist2d = FLT_MAX;
+    float minDist2d = std::numeric_limits<float>::max();
     float minDist3d = 0.0f;
 
     for (uint32 i = 0; i < polyPathSize; ++i)

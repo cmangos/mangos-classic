@@ -26,7 +26,7 @@
 #include "Grids/CellImpl.h"
 #include "Spells/SpellMgr.h"
 #include "World/World.h"
-#include <float.h>
+#include <limits>
 
 static_assert(MAXIMAL_AI_EVENT_EVENTAI <= 32, "Maximal 32 AI_EVENTs supported with EventAI");
 
@@ -671,7 +671,7 @@ void UnitAI::DistancingEnded()
 void UnitAI::AttackSpecificEnemy(std::function<void(Unit*, Unit*&)> check)
 {
     Unit* chosenEnemy = nullptr;
-    float distance = FLT_MAX;
+    float distance = std::numeric_limits<float>::max();
     ThreatList const& list = m_unit->getThreatManager().getThreatList();
     for (auto& data : list)
     {
@@ -684,7 +684,7 @@ void UnitAI::AttackSpecificEnemy(std::function<void(Unit*, Unit*&)> check)
 
 void UnitAI::AttackClosestEnemy()
 {
-    float distance = FLT_MAX;
+    float distance = std::numeric_limits<float>::max();
     AttackSpecificEnemy([&](Unit* enemy, Unit*& closestEnemy)
     {
         float curDistance = enemy->GetDistance(m_unit, true, DIST_CALC_NONE);
