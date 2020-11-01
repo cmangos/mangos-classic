@@ -104,6 +104,15 @@ LOCK TABLES `account_banned` WRITE;
 /*!40000 ALTER TABLE `account_banned` ENABLE KEYS */;
 UNLOCK TABLES;
 
+DROP TABLE IF EXISTS `account_logons`;
+CREATE TABLE `account_logons` (
+`id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+`accountId` INT UNSIGNED NOT NULL,
+`ip` varchar(30) NOT NULL,
+`loginTime` timestamp NOT NULL,
+`loginSource` INT UNSIGNED NOT NULL
+);
+
 --
 -- Table structure for table `ip_banned`
 --
