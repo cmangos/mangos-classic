@@ -4758,7 +4758,7 @@ bool ChatHandler::HandleMmapStatsCommand(char* /*args*/)
 
 bool ChatHandler::HandleBagsCommand(char* args)
 {
-    Player* player = GetPlayer();
+    Player* player = GetSession()->GetPlayer();
 
     uint32 bagEntries[] = { 19914,22679,21876,14156 };
     for (uint32 entry : bagEntries)

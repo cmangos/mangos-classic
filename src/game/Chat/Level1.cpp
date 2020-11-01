@@ -2092,7 +2092,7 @@ bool ChatHandler::HandleChannelListCommand(char* args)
     ExtractUInt32(&args, max);
     const bool statics = ExtractLiteralArg(&args, "static");
 
-    auto const& map = channelMgr(GetPlayer()->GetTeam())->GetChannels();
+    auto const& map = channelMgr(GetSession()->GetPlayer()->GetTeam())->GetChannels();
 
     std::list<Channel const*> list;
 
@@ -2147,7 +2147,7 @@ bool ChatHandler::HandleChannelStaticCommand(char* args)
     if (!ExtractOnOff(&args, state))
         return false;
 
-    Player* player = GetPlayer();
+    Player* player = GetSession()->GetPlayer();
     ChannelMgr* manager = (player ? channelMgr(player->GetTeam()) : nullptr);
     Channel* channel = (name && manager ? manager->GetChannel(name, player) : nullptr);
 
