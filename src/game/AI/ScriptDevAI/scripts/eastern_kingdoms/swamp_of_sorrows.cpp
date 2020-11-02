@@ -18,7 +18,7 @@
 SDName: Swamp_of_Sorrows
 SD%Complete: 100
 SDComment: Quest support: 1393
-SDCategory: Swap of Sorrows
+SDCategory: Swamp of Sorrows
 EndScriptData
 
 */
@@ -51,79 +51,83 @@ enum Galen
 
 struct npc_galen_goodwardAI : public npc_escortAI
 {
-    npc_galen_goodwardAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_galen_goodwardAI(Creature* creature) : npc_escortAI(creature) { Reset(); }
 
     ObjectGuid m_galensCageGuid;
-    uint32 m_uiPeriodicSay;
+    uint32 m_periodicSay;
 
     void Reset() override
     {
-        m_uiPeriodicSay = 6000;
+        m_periodicSay = 6000;
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* who) override
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING))
-            DoScriptText(urand(0, 1) ? SAY_ATTACKED_1 : SAY_ATTACKED_2, m_creature, pWho);
+            DoScriptText(urand(0, 1) ? SAY_ATTACKED_1 : SAY_ATTACKED_2, m_creature, who);
     }
 
-    void WaypointStart(uint32 uiPointId) override
+    void WaypointStart(uint32 pointId) override
     {
-        switch (uiPointId)
+        if (pointId == 1)
+        {
+            GameObject* cage;
+            if (m_galensCageGuid)
+                cage = m_creature->GetMap()->GetGameObject(m_galensCageGuid);
+            else
+                cage = GetClosestGameObjectWithEntry(m_creature, GO_GALENS_CAGE, INTERACTION_DISTANCE);
+
+            if (cage)
+            {
+                cage->UseDoorOrButton();
+                m_galensCageGuid = cage->GetObjectGuid();
+            }
+        }
+    }
+
+    void WaypointReached(uint32 pointId) override
+    {
+        switch (pointId)
         {
             case 1:
-            {
-                GameObject* pCage = nullptr;
-                if (m_galensCageGuid)
-                    pCage = m_creature->GetMap()->GetGameObject(m_galensCageGuid);
-                else
-                    pCage = GetClosestGameObjectWithEntry(m_creature, GO_GALENS_CAGE, INTERACTION_DISTANCE);
+                if (GameObject* cage = m_creature->GetMap()->GetGameObject(m_galensCageGuid))
+                    cage->ResetDoorOrButton();
+                break;
+            case 20:
+                SetRun(true);
+                break;
+            case 21:
 
-                if (pCage)
+                if (Player* player = GetPlayerForEscort())
                 {
-                    pCage->UseDoorOrButton();
-                    m_galensCageGuid = pCage->GetObjectGuid();
+                    DoScriptText(SAY_QUEST_COMPLETE, m_creature, player);
+                    DoScriptText(EMOTE_WHISPER, m_creature, player);
+                    player->RewardPlayerAndGroupAtEventExplored(QUEST_GALENS_ESCAPE, m_creature);
                 }
                 break;
-            }
             case 22:
                 DoScriptText(EMOTE_DISAPPEAR, m_creature);
                 break;
-        }
-    }
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
-        {
-            case 1:
-                if (GameObject* pCage = m_creature->GetMap()->GetGameObject(m_galensCageGuid))
-                    pCage->ResetDoorOrButton();
+            case 23:
+                SetEscortPaused(true);
+                m_creature->ForcedDespawn(1000);
                 break;
-            case 21:
-                if (Player* pPlayer = GetPlayerForEscort())
-                {
-                    m_creature->SetFacingToObject(pPlayer);
-                    DoScriptText(SAY_QUEST_COMPLETE, m_creature, pPlayer);
-                    DoScriptText(EMOTE_WHISPER, m_creature, pPlayer);
-                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_GALENS_ESCAPE, m_creature);
-                }
-                SetRun(true);
+            default:
                 break;
         }
     }
 
-    void UpdateEscortAI(const uint32 uiDiff) override
+    void UpdateEscortAI(const uint32 diff) override
     {
 
-        if (m_uiPeriodicSay < uiDiff)
+        if (m_periodicSay < diff)
         {
             if (HasEscortState(STATE_ESCORT_NONE))
                 DoScriptText(SAY_PERIODIC, m_creature);
-            m_uiPeriodicSay = 6000;
+            m_periodicSay = 6000;
         }
         else
-            m_uiPeriodicSay -= uiDiff;
+            m_periodicSay -= diff;
 
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
@@ -132,31 +136,31 @@ struct npc_galen_goodwardAI : public npc_escortAI
     }
 };
 
-bool QuestAccept_npc_galen_goodward(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_galen_goodward(Player* player, Creature* creature, const Quest* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_GALENS_ESCAPE)
+    if (quest->GetQuestId() == QUEST_GALENS_ESCAPE)
     {
 
-        if (npc_galen_goodwardAI* pEscortAI = dynamic_cast<npc_galen_goodwardAI*>(pCreature->AI()))
+        if (auto* escortAI = dynamic_cast<npc_galen_goodwardAI*>(creature->AI()))
         {
-            pEscortAI->Start(false, pPlayer, pQuest);
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
-            DoScriptText(SAY_QUEST_ACCEPTED, pCreature);
+            escortAI->Start(false, player, quest);
+            creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
+            DoScriptText(SAY_QUEST_ACCEPTED, creature);
         }
     }
     return true;
 }
 
-UnitAI* GetAI_npc_galen_goodward(Creature* pCreature)
+UnitAI* GetAI_npc_galen_goodward(Creature* creature)
 {
-    return new npc_galen_goodwardAI(pCreature);
+    return new npc_galen_goodwardAI(creature);
 }
 
 void AddSC_swamp_of_sorrows()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "npc_galen_goodward";
-    pNewScript->GetAI = &GetAI_npc_galen_goodward;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_galen_goodward;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "npc_galen_goodward";
+    newScript->GetAI = &GetAI_npc_galen_goodward;
+    newScript->pQuestAcceptNPC = &QuestAccept_npc_galen_goodward;
+    newScript->RegisterSelf();
 }
