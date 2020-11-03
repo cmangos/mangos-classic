@@ -4379,9 +4379,6 @@ void Player::BuildPlayerRepop()
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 {
-    // remove death flag + set aura
-    SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_VIS_FLAG, 0x00);
-
     SetDeathState(ALIVE);
 
     if (getRace() == RACE_NIGHTELF)
