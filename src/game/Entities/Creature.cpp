@@ -2067,7 +2067,7 @@ bool Creature::LoadCreatureAddon(bool reload)
         // 0 StandState
         // 1 LoyaltyLevel  Pet only, so always 0 for default creature
         // 2 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
-        // 3 StandMiscFlags
+        // 3 VisFlags
 
         SetByteValue(UNIT_FIELD_BYTES_1, 0, uint8(cainfo->bytes1 & 0xFF));
         // SetByteValue(UNIT_FIELD_BYTES_1, 1, uint8((cainfo->bytes1 >> 8) & 0xFF));
@@ -2080,7 +2080,7 @@ bool Creature::LoadCreatureAddon(bool reload)
     // 0 SheathState
     // 1 Bytes2Flags, in 3.x used UnitPVPStateFlags, that have different meaning
     // 2 UnitRename         Pet only, so always 0 for default creature
-    // 3 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
+    // 3 Unknown
     SetByteValue(UNIT_FIELD_BYTES_2, 0, cainfo->sheath_state);
 
     if (cainfo->flags != 0)
