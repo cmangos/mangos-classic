@@ -5775,7 +5775,7 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit* target, SpellSchoolMask d
 void Unit::SetPowerType(Powers new_powertype)
 {
     // set power type
-    SetByteValue(UNIT_FIELD_BYTES_0, 3, new_powertype);
+    SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_POWER_TYPE, new_powertype);
 
     // group updates
     if (GetTypeId() == TYPEID_PLAYER)
@@ -9112,7 +9112,7 @@ void CharmInfo::SetCharmState(UnitAI* ai, bool withNewThreatList /*= true*/)
 
     // Save specific pre-charm flags
     // Save entire bytes2_1
-    m_unitFieldBytes2_1 = m_unit->GetByteValue(UNIT_FIELD_BYTES_2, 1);
+    m_unitFieldBytes2_1 = m_unit->GetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_MISC_FLAGS);
     // Save unit flags
     m_unitFieldFlags = m_unit->GetUInt32Value(UNIT_FIELD_FLAGS);
     SetWalk(m_unit->IsWalking());
@@ -9122,7 +9122,7 @@ void CharmInfo::ResetCharmState()
 {
     // Restore specific pre-charm flags
     // Restore entire bytes2_1
-    m_unit->SetByteValue(UNIT_FIELD_BYTES_2, 1, m_unitFieldBytes2_1);
+    m_unit->SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_MISC_FLAGS, m_unitFieldBytes2_1);
     // Restore unit flags
     uint32 savedUnitFlags = m_unitFieldFlags;
     if (savedUnitFlags & UNIT_FLAG_PLAYER_CONTROLLED)
@@ -9821,7 +9821,7 @@ void Unit::SetStandState(uint8 state, bool acknowledge/* = false*/)
     if (getStandState() == state)
         return;
 
-    SetByteValue(UNIT_FIELD_BYTES_1, 0, state);
+    SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_STAND_STATE, state);
 
     if (!IsSeatedState())
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_SEATED);

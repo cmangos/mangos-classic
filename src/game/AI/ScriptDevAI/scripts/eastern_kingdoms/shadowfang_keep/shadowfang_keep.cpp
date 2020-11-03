@@ -589,7 +589,7 @@ struct npc_deathstalker_vincentAI : public ScriptedAI
     void Reset() override
     {
         // Set the proper stand state (standing or dead) depending on the intro event having been played or not
-        if (m_instance && m_instance->GetData(TYPE_INTRO) == DONE && !m_creature->GetByteValue(UNIT_FIELD_BYTES_1, 0))
+        if (m_instance && m_instance->GetData(TYPE_INTRO) == DONE && !m_creature->GetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_STAND_STATE))
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
 
         if (m_instance && (m_instance->GetData(TYPE_INTRO) == NOT_STARTED || m_instance->GetData(TYPE_INTRO) == IN_PROGRESS))
