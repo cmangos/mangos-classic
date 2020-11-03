@@ -1459,11 +1459,11 @@ class Unit : public WorldObject
         void SetLevel(uint32 lvl);
 
         uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
-        uint8 getRace() const { return GetByteValue(UNIT_FIELD_BYTES_0, 0); }
+        uint8 getRace() const { return GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_RACE); }
         uint32 getRaceMask() const { return 1 << (getRace() - 1); }
-        uint8 getClass() const { return GetByteValue(UNIT_FIELD_BYTES_0, 1); }
+        uint8 getClass() const { return GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_CLASS); }
         uint32 getClassMask() const { return 1 << (getClass() - 1); }
-        uint8 getGender() const { return GetByteValue(UNIT_FIELD_BYTES_0, 2); }
+        uint8 getGender() const { return GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_GENDER); }
 
         float GetStat(Stats stat) const { return float(GetUInt32Value(UNIT_FIELD_STAT0 + stat)); }
         void SetStat(Stats stat, int32 val) { SetStatInt32Value(UNIT_FIELD_STAT0 + stat, val); }
@@ -1484,7 +1484,7 @@ class Unit : public WorldObject
         float OCTRegenHPPerSpirit() const;
         float OCTRegenMPPerSpirit() const;
 
-        Powers GetPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
+        Powers GetPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_POWER_TYPE)); }
         void SetPowerType(Powers new_powertype);
         uint32 GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 + power); }
         uint32 GetMaxPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_MAXPOWER1 + power); }
@@ -1501,8 +1501,8 @@ class Unit : public WorldObject
         void ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply);
         void ApplyCastTimePercentMod(float val, bool apply);
 
-        SheathState GetSheath() const { return SheathState(GetByteValue(UNIT_FIELD_BYTES_2, 0)); }
-        virtual void SetSheath(SheathState sheathed) { SetByteValue(UNIT_FIELD_BYTES_2, 0, sheathed); }
+        SheathState GetSheath() const { return SheathState(GetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_SHEATH_STATE)); }
+        virtual void SetSheath(SheathState sheathed) { SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_SHEATH_STATE, sheathed); }
 
         // faction template id
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
@@ -1576,7 +1576,7 @@ class Unit : public WorldObject
             return (creatureType >= 1) ? (1 << (creatureType - 1)) : 0;
         }
 
-        uint8 getStandState() const { return GetByteValue(UNIT_FIELD_BYTES_1, 0); }
+        uint8 getStandState() const { return GetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_STAND_STATE); }
         bool IsSitState() const;
         bool IsStandState() const;
         bool IsSeatedState() const;
@@ -2048,8 +2048,8 @@ class Unit : public WorldObject
 
         ObjectGuid m_ObjectSlotGuid[4];
 
-        ShapeshiftForm GetShapeshiftForm() const { return ShapeshiftForm(GetByteValue(UNIT_FIELD_BYTES_1, 2)); }
-        void  SetShapeshiftForm(ShapeshiftForm form) { SetByteValue(UNIT_FIELD_BYTES_1, 2, form); }
+        ShapeshiftForm GetShapeshiftForm() const { return ShapeshiftForm(GetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_SHAPESHIFT_FORM)); }
+        void  SetShapeshiftForm(ShapeshiftForm form) { SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_SHAPESHIFT_FORM, form); }
 
         bool IsShapeShifted() const;
         bool IsInFeralForm() const

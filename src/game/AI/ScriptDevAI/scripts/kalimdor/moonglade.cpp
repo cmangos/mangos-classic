@@ -400,7 +400,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
 
                     if (Creature* pEranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
                     {
-                        pEranikus->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
+                        // pEranikus->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0); wotlk+
                         pEranikus->SetLevitate(false);
                         pEranikus->GetMotionMaster()->MovePoint(POINT_ID_ERANIKUS_COMBAT, aEranikusLocations[2].m_fX, aEranikusLocations[2].m_fY, aEranikusLocations[2].m_fZ);
                     }

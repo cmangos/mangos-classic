@@ -312,10 +312,10 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
     SetObjectScale(cinfo->Scale);
 
     // equal to player Race field, but creature does not have race
-    SetByteValue(UNIT_FIELD_BYTES_0, 0, 0);
+    SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_RACE, 0);
 
     // known valid are: CLASS_WARRIOR,CLASS_PALADIN,CLASS_ROGUE,CLASS_MAGE
-    SetByteValue(UNIT_FIELD_BYTES_0, 1, uint8(cinfo->UnitClass));
+    SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_CLASS, uint8(cinfo->UnitClass));
 
     uint32 display_id = ChooseDisplayId(GetCreatureInfo(), data, eventData);
     if (!display_id)                                        // Cancel load if no display id
@@ -339,7 +339,7 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
     // also recalculates speed since speed is based on Model and/or template
     SetDisplayId(display_id);
 
-    SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
+    SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_GENDER, minfo->gender);
 
     // set PowerType based on unit class
     switch (cinfo->UnitClass)
@@ -416,7 +416,7 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
 
     // creatures always have melee weapon ready if any
     SetSheath(SHEATH_STATE_MELEE);
-    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_AURAS);
+    SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_MISC_FLAGS, UNIT_BYTE2_FLAG_AURAS);
 
     if (preserveHPAndPower)
     {
@@ -2009,11 +2009,10 @@ bool Creature::LoadCreatureAddon(bool reload)
         // 2 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
         // 3 VisFlags
 
-        SetByteValue(UNIT_FIELD_BYTES_1, 0, uint8(cainfo->bytes1 & 0xFF));
-        // SetByteValue(UNIT_FIELD_BYTES_1, 1, uint8((cainfo->bytes1 >> 8) & 0xFF));
-        // SetByteValue(UNIT_FIELD_BYTES_1, 1, 0);
-        // SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
-        SetByteValue(UNIT_FIELD_BYTES_1, 3, uint8((cainfo->bytes1 >> 24) & 0xFF));
+        SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_STAND_STATE, uint8(cainfo->bytes1 & 0xFF));
+        // SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_PET_LOYALTY, uint8((cainfo->bytes1 >> 8) & 0xFF));
+        // SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_PET_FLAGS, 0);
+        SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_VIS_FLAG, uint8((cainfo->bytes1 >> 24) & 0xFF));
     }
 
     // UNIT_FIELD_BYTES_2
@@ -2021,13 +2020,13 @@ bool Creature::LoadCreatureAddon(bool reload)
     // 1 Bytes2Flags, in 3.x used UnitPVPStateFlags, that have different meaning
     // 2 UnitRename         Pet only, so always 0 for default creature
     // 3 Unknown
-    SetByteValue(UNIT_FIELD_BYTES_2, 0, cainfo->sheath_state);
+    SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_SHEATH_STATE, cainfo->sheath_state);
 
     if (cainfo->flags != 0)
-        SetByteValue(UNIT_FIELD_BYTES_2, 1, cainfo->flags);
+        SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_MISC_FLAGS, cainfo->flags);
 
-    // SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
-    // SetByteValue(UNIT_FIELD_BYTES_2, 3, 0);
+    // SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_PET_FLAGS, 0);
+    // SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_UNKNOWN, 0);
 
     if (cainfo->emote != 0)
         SetUInt32Value(UNIT_NPC_EMOTESTATE, cainfo->emote);

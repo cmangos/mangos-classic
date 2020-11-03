@@ -837,7 +837,7 @@ struct npc_deathstalker_vincentAI : public ScriptedAI
 
     void Reset() override
     {
-        if (m_pInstance && m_pInstance->GetData(TYPE_INTRO) == DONE && !m_creature->GetByteValue(UNIT_FIELD_BYTES_1, 0))
+        if (m_pInstance && m_pInstance->GetData(TYPE_INTRO) == DONE && !m_creature->GetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_STAND_STATE))
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
     }
 

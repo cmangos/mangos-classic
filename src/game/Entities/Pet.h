@@ -209,7 +209,7 @@ class Pet : public Creature
         uint32 GetMaxLoyaltyPoints(uint32 level) const;
         uint32 GetStartLoyaltyPoints(uint32 level) const;
         void KillLoyaltyBonus(uint32 level);
-        uint32 GetLoyaltyLevel() { return GetByteValue(UNIT_FIELD_BYTES_1, 1); }
+        uint32 GetLoyaltyLevel() { return GetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_PET_LOYALTY); }
         void SetLoyaltyLevel(LoyaltyLevel level);
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);
