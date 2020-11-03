@@ -107,7 +107,7 @@ struct boss_nefarianAI : public CombatAI
         m_creature->SetHover(true);
         SetMeleeEnabled(false);
         SetCombatMovement(false);
-        // m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+        // m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND); // wotlk+
     }
 
     ScriptedInstance* m_instance;

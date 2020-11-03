@@ -2248,7 +2248,8 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotCreature(pSource))
                 break;
 
-            // enable / disable the fly anim flag
+            // enable / disable the fly anim flag (wotlk+)
+            /*
             if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
             {
                 if (m_script->fly.fly)
@@ -2256,6 +2257,7 @@ bool ScriptAction::HandleScriptStep()
                 else
                     pSource->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
             }
+            */
 
             ((Creature*)pSource)->SetLevitate(m_script->fly.fly != 0);
             break;

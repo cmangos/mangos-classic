@@ -209,7 +209,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                 m_eranikusGuid = pSummoned->GetObjectGuid();
                 // Make Eranikus unattackable first
                 // ToDo: uncomment the fly effect when it will be possible to cancel it properly
-                // pSummoned->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                // pSummoned->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2); // wotlk+
                 pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 pSummoned->SetLevitate(true);
                 break;
