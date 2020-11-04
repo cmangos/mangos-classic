@@ -3200,6 +3200,8 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
     Unit* petInvoker = responsibleCaster ? responsibleCaster : m_caster;
     // Guardian pets use their creature template level by default
     uint32 level = urand(cInfo->MinLevel, cInfo->MaxLevel);
+    if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry))
+        level = std::max(std::min(petInvoker->getLevel(), cInfo->MaxLevel), cInfo->MinLevel);
     if (petInvoker->GetTypeId() != TYPEID_PLAYER)
     {
         // If EffectMultipleValue <= 0, guardian pets use their caster level modified by EffectMultipleValue for their own level
