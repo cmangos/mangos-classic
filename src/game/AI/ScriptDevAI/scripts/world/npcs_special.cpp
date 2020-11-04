@@ -27,6 +27,7 @@ EndScriptData
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Globals/ObjectMgr.h"
 #include "GameEvents/GameEventMgr.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 /* ContentData
 npc_chicken_cluck       100%    support for quest 3861 (Cluck!)
@@ -960,6 +961,58 @@ UnitAI* GetAI_npc_the_cleaner(Creature* pCreature)
     return new npc_the_cleanerAI(pCreature);
 }
 
+/*######
+## npc_aoe_damage_trigger
+######*/
+
+enum npc_aoe_damage_trigger
+{
+    // trigger npcs
+    NPC_VOID_ZONE = 16697,
+
+    // m_uiAuraPassive
+    SPELL_CONSUMPTION_NPC_16697 = 28874,
+};
+
+struct npc_aoe_damage_triggerAI : public ScriptedAI, public TimerManager
+{
+    npc_aoe_damage_triggerAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiAuraPassive(SetAuraPassive())
+    {
+        AddCustomAction(1, GetTimer(), [&]() {CastConsumption(); });
+        SetReactState(REACT_PASSIVE);
+    }
+
+    uint32 m_uiAuraPassive;
+
+    inline uint32 GetTimer()
+    {
+        return 2500; // adjust in future if other void zones are different this is for NPC_VOID_ZONE
+    }
+
+    inline uint32 SetAuraPassive()
+    {
+        switch (m_creature->GetCreatureInfo()->Entry)
+        {
+            case NPC_VOID_ZONE:
+                return SPELL_CONSUMPTION_NPC_16697;
+            default:
+                return SPELL_CONSUMPTION_NPC_16697;
+        }
+    }
+
+    void CastConsumption()
+    {
+        DoCastSpellIfCan(m_creature, m_uiAuraPassive, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void Reset() override {}
+
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff);
+    }
+};
+
 void AddSC_npcs_special()
 {
     Script* pNewScript;
@@ -1005,5 +1058,10 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_the_cleaner";
     pNewScript->GetAI = &GetAI_npc_the_cleaner;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_aoe_damage_trigger";
+    pNewScript->GetAI = &GetNewAIInstance<npc_aoe_damage_triggerAI>;
     pNewScript->RegisterSelf();
 }
