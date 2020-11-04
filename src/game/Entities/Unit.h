@@ -1849,6 +1849,7 @@ class Unit : public WorldObject
         bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING); }
         bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE); }
         bool IsRooted() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT); }
+        bool IsFalling() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING); }
 
         virtual void SetLevitate(bool /*enabled*/) {}
         virtual void SetSwim(bool /*enabled*/) {}
