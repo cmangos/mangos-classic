@@ -1604,12 +1604,6 @@ class Player : public Unit
         bool UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator = 1);
         bool UpdateFishingSkill();
 
-        uint32 GetBaseDefenseSkillValue() const { return GetSkillValueBase(SKILL_DEFENSE); }
-        uint32 GetBaseWeaponSkillValue(WeaponAttackType attType) const;
-
-        uint32 GetPureDefenseSkillValue() const { return GetSkillValuePure(SKILL_DEFENSE); }
-        uint32 GetPureWeaponSkillValue(WeaponAttackType attType) const;
-
         float GetHealthBonusFromStamina() const;
         float GetManaBonusFromIntellect() const;
 
@@ -1711,6 +1705,7 @@ class Player : public Unit
         void UpdateDefense();
         void UpdateWeaponSkill(WeaponAttackType attType);
         void UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence);
+        uint16 GetWeaponSkillIdForAttack(WeaponAttackType attType) const;
 
         SkillRaceClassInfoEntry const* GetSkillInfo(uint16 id, std::function<bool (SkillRaceClassInfoEntry const&)> filterfunc = nullptr) const;
         bool HasSkill(uint16 id) const;
@@ -1732,6 +1727,7 @@ class Player : public Unit
         void UpdateSkillTrainedSpells(uint16 id, uint16 currVal);                                   // learns/unlearns spells dependent on a skill
         void UpdateSpellTrainedSkills(uint32 spellId, bool apply);                                  // learns/unlearns skills dependent on a spell
         void LearnDefaultSkills();
+
         virtual uint32 GetSpellRank(SpellEntry const* spellInfo) override;
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }

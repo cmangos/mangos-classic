@@ -5207,32 +5207,25 @@ void Player::UpdateWeaponSkill(WeaponAttackType attType)
 
 void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence)
 {
-    uint32 plevel = getLevel();                             // if defense than pVictim == attacker
-    uint32 greylevel = MaNGOS::XP::GetGrayLevel(plevel);
-    uint32 moblevel = pVictim->GetLevelForTarget(this);
+    const uint16 skillId = (defence ? SKILL_DEFENSE : GetWeaponSkillIdForAttack(attType));
+    const uint16 skill = GetSkillValuePure(skillId);
+    const uint16 cap = GetSkillMaxPure(skillId);
+    const int32 room = int32(cap - skill);
 
-    if (moblevel < greylevel)
-        moblevel = greylevel;
-
-    if (moblevel > plevel + 5)
-        moblevel = plevel + 5;
-
-    uint32 lvldif = moblevel - greylevel;
-    if (lvldif < 3)
-        lvldif = 3;
-
-    int32 skilldif = 5 * plevel - (defence ? GetPureDefenseSkillValue() : GetPureWeaponSkillValue(attType));
-
-    // Max skill reached for level.
-    // Can in some cases be less than 0: having max skill and then .level -1 as example.
-    if (skilldif <= 0)
+    // Max skill reached: nothing to gain
+    if (room <= 0)
         return;
 
-    float chance = float(3 * lvldif * skilldif) / plevel;
-    if (!defence)
-        chance *= 0.1f * GetStat(STAT_INTELLECT);
+    // Target is less proficient than player (i.e. trivial): nothing to gain
+    if (defence && pVictim->GetSkillMaxForLevel(this) <= skill)
+        return;
 
-    chance = chance < 1.0f ? 1.0f : chance;                 // minimum chance to increase skill is 1%
+    // The farther player is from the cap, the easier it gets to level up the skill
+    float chance = ((float(std::max(1, (room / 5))) / (cap / 5)) * 100);
+
+    // Weapon skills: increase chance by intellect
+    if (!defence)
+        chance += ((chance * 0.02f) * GetStat(STAT_INTELLECT));
 
     if (roll_chance_f(chance))
     {
@@ -5241,8 +5234,18 @@ void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool de
         else
             UpdateWeaponSkill(attType);
     }
-    else
-        return;
+}
+
+uint16 Player::GetWeaponSkillIdForAttack(WeaponAttackType attType) const
+{
+    Item* item = GetWeaponForAttack(attType, true, true);
+
+    // unarmed only with base attack
+    if (attType != BASE_ATTACK && !item)
+        return 0;
+
+    // weapon skill or (unarmed for base attack)
+    return (item ? item->GetSkill() : uint16(SKILL_UNARMED));
 }
 
 SkillRaceClassInfoEntry const* Player::GetSkillInfo(uint16 id, std::function<bool (SkillRaceClassInfoEntry const&)> filterfunc/* = nullptr*/) const
@@ -18547,32 +18550,6 @@ bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
         return false;
 
     return corpse->IsInWorld() && pRewardSource->GetMap() == corpse->GetMap() && (corpse->GetMap()->IsDungeon() || pRewardSource->IsWithinDistInMap(corpse, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE)));
-}
-
-uint32 Player::GetBaseWeaponSkillValue(WeaponAttackType attType) const
-{
-    Item* item = GetWeaponForAttack(attType, true, true);
-
-    // unarmed only with base attack
-    if (attType != BASE_ATTACK && !item)
-        return 0;
-
-    // weapon skill or (unarmed for base attack)
-    uint32  skill = item ? item->GetSkill() : uint32(SKILL_UNARMED);
-    return GetSkillValueBase(skill);
-}
-
-uint32 Player::GetPureWeaponSkillValue(WeaponAttackType attType) const
-{
-    Item* item = GetWeaponForAttack(attType, true, true);
-
-    // unarmed only with base attack
-    if (attType != BASE_ATTACK && !item)
-        return 0;
-
-    // weapon skill or (unarmed for base attack)
-    uint32  skill = item ? item->GetSkill() : uint32(SKILL_UNARMED);
-    return GetSkillValuePure(skill);
 }
 
 void Player::ResurrectUsingRequestDataInit()
