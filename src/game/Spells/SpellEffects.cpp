@@ -480,7 +480,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!unitTarget || !unitTarget->HasAura(9032))
                         return;
 
-                    unitTarget->CastSpell(unitTarget, 9010, TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->CastSpell(unitTarget, 9010, TRIGGERED_NONE);
                     return;
                 }
                 case 9204:                                  // Hate to Zero
