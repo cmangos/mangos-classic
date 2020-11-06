@@ -92,7 +92,7 @@ void BattleGroundAB::Update(uint32 diff)
         // for each occupied node we add team points; 
         // this influences the abTickPoints and the abTickIntervals values
         for (uint8 teamIndex = 0; teamIndex < PVP_TEAM_COUNT; ++teamIndex)
-            if (m_nodeStatus[node] == teamIndex + BG_AB_NODE_TYPE_OCCUPIED)
+            if (m_nodeStatus[node] == ABNodeStatus(teamIndex + BG_AB_NODE_TYPE_OCCUPIED))
                 ++team_points[teamIndex];
     }
 
@@ -288,7 +288,7 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
     player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 
     // Node is NEUTRAL -> change to CONTESTED
-    if (m_nodeStatus[node] == BG_AB_NODE_TYPE_NEUTRAL)
+    if (m_nodeStatus[node] == ABNodeStatus(BG_AB_NODE_TYPE_NEUTRAL))
     {
         scoreType              = SCORE_BASES_ASSAULTED;
         worldState             = abContestedStates[teamIndex][node];
@@ -303,10 +303,10 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
         soundId                = BG_AB_SOUND_NODE_CLAIMED;
     }
     // Node is CONTESTED -> change depends on previous status
-    else if (m_nodeStatus[node] == BG_AB_NODE_STATUS_ALLY_CONTESTED || m_nodeStatus[node] == BG_AB_NODE_STATUS_HORDE_CONTESTED)
+    else if (m_nodeStatus[node] == ABNodeStatus(BG_AB_NODE_STATUS_ALLY_CONTESTED) || m_nodeStatus[node] == ABNodeStatus(BG_AB_NODE_STATUS_HORDE_CONTESTED))
     {
         // Last state is CONTESTED -> change to CONTESTED (change owner team)
-        if (m_prevNodeStatus[node] < BG_AB_NODE_TYPE_OCCUPIED)
+        if (m_prevNodeStatus[node] < ABNodeStatus(BG_AB_NODE_TYPE_OCCUPIED))
         {
             scoreType               = SCORE_BASES_ASSAULTED;
             worldState              = abContestedStates[teamIndex][node];
