@@ -161,15 +161,15 @@ void ScriptedInstance::DoUpdateWorldState(uint32 stateId, uint32 stateData)
 }
 
 /// Get the first found Player* (with requested properties) in the map. Can return nullptr.
-Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBeGamemaster /*=true*/) const
+Player* ScriptedInstance::GetPlayerInMap(bool onlyAlive /*=false*/, bool canBeGamemaster /*=true*/) const
 {
-    Map::PlayerList const& lPlayers = instance->GetPlayers();
+    Map::PlayerList const& players = instance->GetPlayers();
 
-    for (const auto& lPlayer : lPlayers)
+    for (const auto& playerRef : players)
     {
-        Player* pPlayer = lPlayer.getSource();
-        if (pPlayer && (!bOnlyAlive || pPlayer->IsAlive()) && (bCanBeGamemaster || !pPlayer->IsGameMaster()))
-            return pPlayer;
+        Player* player = playerRef.getSource();
+        if (player && (!onlyAlive || (player->IsAlive() && player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !player->IsFeigningDeathSuccessfully() && !player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2))) && (canBeGamemaster || !player->IsGameMaster()))
+            return player;
     }
 
     return nullptr;
