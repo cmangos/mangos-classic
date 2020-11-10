@@ -1765,7 +1765,10 @@ bool ChatHandler::HandleGoXYZCommand(char* args)
 
     Player* _player = m_session->GetPlayer();
 
-    char* px = strtok((char*)args, " ");
+    std::string argsStr(args);
+    std::replace(argsStr.begin(), argsStr.end(), ',', ' ');
+
+    char* px = strtok((char*)argsStr.c_str(), " ");
     char* py = strtok(nullptr, " ");
     char* pz = strtok(nullptr, " ");
     char* pmapid = strtok(nullptr, " ");
