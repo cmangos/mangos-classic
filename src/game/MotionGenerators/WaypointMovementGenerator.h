@@ -93,6 +93,8 @@ class WaypointMovementGenerator<Creature>
         void AddToWaypointPauseTime(int32 waitTimeDiff, bool force = false);
         bool SetNextWaypoint(uint32 pointId);
 
+        void UnitSpeedChanged() override { m_speedChanged = true; }
+
     private:
         void LoadPath(Creature& creature, int32 pathId, WaypointPathOrigin wpOrigin, uint32 overwriteEntry);
         uint32 BuildIntPath(Movement::PointsArray& path, Creature& creature, G3D::Vector3 const& endPos);
@@ -115,6 +117,8 @@ class WaypointMovementGenerator<Creature>
         int32 m_pathDuration;
         std::list<int32> m_nodeIndexes;
         WaypointPathOrigin m_PathOrigin;
+
+        bool m_speedChanged;
 };
 
 #endif

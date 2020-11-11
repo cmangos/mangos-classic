@@ -285,6 +285,7 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
     }
 
     creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
+    m_speedChanged = false;
 
     WaypointNode const* nextNode = &m_currentWaypointNode->second;
 
@@ -411,7 +412,7 @@ bool WaypointMovementGenerator<Creature>::Update(Creature& creature, const uint3
         return true;
     }
 
-    if (Stopped(creature))
+    if (Stopped(creature) || m_speedChanged)
     {
         // If a script just have set the waypoint to be paused or stopped we have to check
         // if the client did get a path for this creature. If it is the case, we have to
