@@ -43,6 +43,7 @@
 #include "Chat/Chat.h"
 #include "Loot/LootMgr.h"
 #include "Spells/SpellMgr.h"
+#include "MotionGenerators/PathFinder.h"
 
 Object::Object(): m_updateFlag(0), m_itsNewObject(false)
 {
@@ -1478,45 +1479,78 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
         z = ground_z;
 }
 
-void WorldObject::MovePositionToFirstCollision(WorldLocation &pos, float dist, float angle)
+void WorldObject::MovePositionToFirstCollision(Position& pos, float dist, float angle)
 {
-    float destX = pos.coord_x + dist * cos(angle);
-    float destY = pos.coord_y + dist * sin(angle);
-    float destZ = pos.coord_z;
+    float destX = pos.x + dist * cos(angle);
+    float destY = pos.y + dist * sin(angle);
+    float destZ = pos.z;
+
+    GenericTransport* transport = GetTransport();
+
+    float halfHeight = GetCollisionHeight();
+    if (IsUnit())
+    {
+        PathFinder path(static_cast<Unit*>(this));
+        path.calculate(destX, destY, destZ + halfHeight, false, true);
+        if (path.getPathType())
+        {
+            G3D::Vector3 result = path.getPath().back();
+            destX = result.x;
+            destY = result.y;
+            destZ = result.z;
+            if (transport) // transport produces offset, but we need global pos
+                transport->CalculatePassengerPosition(destX, destY, destZ);
+        }
+    }
 
     UpdateAllowedPositionZ(destX, destY, destZ);
-    bool colPoint = GetMap()->GetHitPosition(pos.coord_x, pos.coord_y, pos.coord_z + 0.5f, destX, destY, destZ, -0.5f);
+    destZ += halfHeight;
+    bool colPoint = GetMap()->GetHitPosition(pos.x, pos.y, pos.z + halfHeight, destX, destY, destZ, -0.5f);
+    destZ -= halfHeight;
 
     if (colPoint)
     {
         destX -= CONTACT_DISTANCE * cos(angle);
         destY -= CONTACT_DISTANCE * sin(angle);
-        dist = sqrt((pos.coord_x - destX)*(pos.coord_x - destX) + (pos.coord_y - destY)*(pos.coord_y - destY));
+        dist = sqrt((pos.x - destX) * (pos.x - destX) + (pos.y - destY) * (pos.y - destY));
     }
 
+    colPoint = GetMap()->GetHitPosition(destX, destY, destZ + halfHeight, destX, destY, destZ, -0.5f);
+    if (colPoint)
+        dist = sqrt((pos.x - destX) * (pos.x - destX) + (pos.y - destY) * (pos.y - destY));
+
     float step = dist / 10.0f;
+    Position tempPos(destX, destY, destZ, 0.f);
+    bool distanceZSafe = true;
+    float previousZ = destZ;
 
     for (int i = 0; i < 10; i++)
     {
-        if (fabs(pos.coord_z - destZ) > ATTACK_DISTANCE)
+        if (fabs(pos.z - destZ) > ATTACK_DISTANCE)
         {
+            previousZ = destZ;
             destX -= step * cos(angle);
             destY -= step * sin(angle);
             UpdateAllowedPositionZ(destX, destY, destZ);
+            if (fabs(previousZ - destZ) > (ATTACK_DISTANCE / 2))
+                distanceZSafe = false;
         }
         else
         {
-            pos.coord_x = destX;
-            pos.coord_y = destY;
-            pos.coord_z = destZ;
+            pos.x = destX;
+            pos.y = destY;
+            pos.z = destZ;
             break;
         }
     }
 
-    MaNGOS::NormalizeMapCoord(pos.coord_x);
-    MaNGOS::NormalizeMapCoord(pos.coord_y);
-    UpdateAllowedPositionZ(pos.coord_x, pos.coord_y, pos.coord_z);
-    pos.orientation = m_position.o;
+    if (distanceZSafe)
+        pos = tempPos;
+
+    MaNGOS::NormalizeMapCoord(pos.x);
+    MaNGOS::NormalizeMapCoord(pos.y);
+    UpdateAllowedPositionZ(pos.x, pos.y, pos.z);
+    pos.o = m_position.o;
 }
 
 float WorldObject::GetCombinedCombatReach(WorldObject const* pVictim, bool forMeleeRange, float flat_mod) const

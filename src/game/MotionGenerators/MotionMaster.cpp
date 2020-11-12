@@ -494,15 +494,15 @@ void MotionMaster::MoveCharge(Unit& target, float speed, uint32 id/* = EVENT_CHA
     if (m_owner->hasUnitState(UNIT_STAT_NO_FREE_MOVE))
         return;
 
-    WorldLocation pos;
+    Position pos;
     target.GetFirstCollisionPosition(pos, target.GetCombatReach(), target.GetAngle(m_owner));
 
-    pos.coord_z += 1; // blizzlike
+    pos.z += 1; // blizzlike
     Movement::MoveSplineInit init(*m_owner);
     init.SetWalk(false);
     init.SetVelocity(speed);
     init.SetFacing(&target);
-    init.MoveTo(pos.coord_x, pos.coord_y, pos.coord_z, true);
+    init.MoveTo(pos.x, pos.y, pos.z, true);
 
     Mutate(new EffectMovementGenerator(init, id, false));
 }

@@ -245,11 +245,11 @@ bool FleeingMovementGenerator::_getLocation(Unit& owner, float& x, float& y, flo
     if (owner.IsPlayer())
     {
         float angle = 2.0f * M_PI_F * rand_norm_f();
-        WorldLocation pos(owner.GetMapId(), owner.GetPosition());
+        Position pos(owner.GetPosition());
         owner.MovePositionToFirstCollision(pos, i_radius, angle);
-        x = pos.coord_x;
-        y = pos.coord_y;
-        z = pos.coord_z + 1;
+        x = pos.x;
+        y = pos.y;
+        z = pos.z + 1;
         return true;
     }
 

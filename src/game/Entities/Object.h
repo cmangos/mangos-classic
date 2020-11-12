@@ -897,10 +897,10 @@ class WorldObject : public Object
         void UpdateGroundPositionZ(float x, float y, float& z) const;
         virtual void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const;
 
-        void MovePositionToFirstCollision(WorldLocation &pos, float dist, float angle);
-        void GetFirstCollisionPosition(WorldLocation &pos, float dist, float angle)
+        void MovePositionToFirstCollision(Position &pos, float dist, float angle);
+        void GetFirstCollisionPosition(Position&pos, float dist, float angle)
         {
-            GetPosition(pos);
+            pos = GetPosition();
             MovePositionToFirstCollision(pos, dist, angle);
         }
         void GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist = 0.0f, float const* ori = nullptr) const;

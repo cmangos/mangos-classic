@@ -1616,9 +1616,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             if (radius == 0.f) // All shaman totems have 0 radius - need to override with proper value
                 radius = 2.f;
 
-            WorldLocation loc;
-            m_caster->GetFirstCollisionPosition(loc, radius, angle);
-            m_targets.setDestination(loc.coord_x, loc.coord_y, loc.coord_z);
+            Position pos;
+            m_trueCaster->GetFirstCollisionPosition(pos, radius, angle);
+            m_targets.setDestination(pos.x, pos.y, pos.z);
             break;
         }
         case TARGET_LOCATION_CASTER_DEST:
@@ -4790,7 +4790,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     float range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 
-                    WorldLocation pos;
+                    Position pos;
                     target->GetFirstCollisionPosition(pos, target->GetCombatReach(), target->GetAngle(m_caster));
 
                     // TODO: Implement jumpin case check
@@ -4798,7 +4798,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     //{
                     PathFinder pathFinder(m_caster);
                     pathFinder.setPathLengthLimit(range * 1.5f);
-                    bool result = pathFinder.calculate(pos.coord_x, pos.coord_y, pos.coord_z);
+                    bool result = pathFinder.calculate(pos.x, pos.y, pos.z);
 
                     if (pathFinder.getPathType() & PATHFIND_SHORT)
                         return SPELL_FAILED_OUT_OF_RANGE;
