@@ -233,18 +233,19 @@ bool FleeingMovementGenerator::_getLocation(Unit& owner, float& x, float& y, flo
 
     owner.GetPosition(x, y, z);
 
-    if (owner.IsPlayer())
+    float angle = 2.0f * M_PI_F * rand_norm_f();
+    Position pos;
+    for (uint32 i = 0; i < 10; ++i)
     {
-        float angle = 2.0f * M_PI_F * rand_norm_f();
-        Position pos(owner.GetPosition());
-        owner.MovePositionToFirstCollision(pos, i_radius, angle);
-        x = pos.x;
-        y = pos.y;
-        z = pos.z + 1;
-        return true;
+        owner.GetFirstCollisionPosition(pos, i_radius, angle);
+        if (owner.GetPosition().GetDistance(pos) > i_radius * 0.8f) // if at least 80% distance, good enough
+            break;
+        angle += (M_PI_F / 5); // else try slightly different angle
     }
-
-    return owner.GetMap()->GetReachableRandomPosition(&owner, x, y, z, i_radius, false);
+    x = pos.x;
+    y = pos.y;
+    z = pos.z + 1;
+    return true;
 }
 
 void PanicMovementGenerator::Initialize(Unit& owner)
