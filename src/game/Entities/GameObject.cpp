@@ -1373,9 +1373,8 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             float radius = float(goInfo->trap.diameter) / 2.0f;
             bool IsBattleGroundTrap = !radius && goInfo->trap.cooldown == 3 && m_respawnTime == 0;
 
-            // FIXME: when GO casting will be implemented trap must cast spell to target
             if (goInfo->trap.spellId)
-                if (caster->CastSpell(user, goInfo->trap.spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid()) != SPELL_CAST_OK)
+                if (CastSpell(caster, user, goInfo->trap.spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid()) != SPELL_CAST_OK)
                     return;
             // use template cooldown if provided
             m_cooldownTime = time(nullptr) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));
