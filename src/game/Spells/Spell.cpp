@@ -5206,6 +5206,9 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                     if (int32(expectedTarget->getLevel()) > CalculateSpellEffectValue(SpellEffectIndex(i), expectedTarget))
                         return SPELL_FAILED_HIGHLEVEL;
+
+                    if (expectedTarget->GetOwner() && expectedTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                        return SPELL_FAILED_TARGET_IS_PLAYER_CONTROLLED;
                 }
                 break;
             }
@@ -5227,6 +5230,9 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                     if (int32(expectedTarget->getLevel()) > CalculateSpellEffectValue(SpellEffectIndex(i), expectedTarget))
                         return SPELL_FAILED_HIGHLEVEL;
+
+                    if (expectedTarget->GetOwner() && expectedTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                        return SPELL_FAILED_TARGET_IS_PLAYER_CONTROLLED;
                 }
                 break;
             }
