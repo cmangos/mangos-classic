@@ -29,11 +29,10 @@
    @param   player to add
    @param   whether zone is main outdoor pvp zone or a affected zone
  */
-void OutdoorPvP::SetGraveYardLinkTeam(uint32 id, uint32 locKey, Team team, std::vector<uint32> mapIds)
+void OutdoorPvP::SetGraveYardLinkTeam(uint32 id, uint32 locKey, Team team, uint32 mapId)
 {
     sWorld.GetMessager().AddMessage([=](World* world) { world->GetGraveyardManager().SetGraveYardLinkTeam(id, locKey, team); });
-    for (uint32 mapId : mapIds)
-        sMapMgr.DoForAllMapsWithMapId(mapId, [=](Map* map) { map->GetMessager().AddMessage([=](Map* map) {map->GetGraveyardManager().SetGraveYardLinkTeam(id, locKey, team); }); });
+    sMapMgr.DoForAllMapsWithMapId(mapId, [=](Map* map) { map->GetMessager().AddMessage([=](Map* map) {map->GetGraveyardManager().SetGraveYardLinkTeam(id, locKey, team); }); });
 }
 
 void OutdoorPvP::HandlePlayerEnterZone(Player* player, bool isMainZone)
