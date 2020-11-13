@@ -2881,6 +2881,11 @@ void Spell::cast(bool skipCheck)
 
     m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
+    if (Unit* unitCaster = dynamic_cast<Unit*>(m_trueCaster))
+        if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISMISS_PET))
+            if (Pet* pet = unitCaster->GetPet())
+                pet->Unsummon(PET_SAVE_NOT_IN_SLOT, unitCaster);
+
     // CAST SPELL
     SendSpellCooldown();
     if (m_notifyAI && m_caster->AI())
@@ -5079,7 +5084,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                             ((Player*)m_caster)->SendPetTameFailure(PETTAME_DEAD);
                             return SPELL_FAILED_DONT_REPORT;
                         }
-                        return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+                        else if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISMISS_PET))
+                            return SPELL_FAILED_ALREADY_HAVE_SUMMON;
                     }
                     SpellCastResult result = Pet::TryLoadFromDB(m_caster);
                     if (result == SPELL_FAILED_TARGETS_DEAD)
@@ -5092,9 +5098,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 else if (m_caster->GetPetGuid())
                 {
-                    if (plClass == CLASS_WARLOCK)                  // let warlock do a replacement summon
-                        static_cast<Player*>(m_caster)->UnsummonPetIfAny();
-                    else
+                    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISMISS_PET))
                         return SPELL_FAILED_ALREADY_HAVE_SUMMON;
                 }
 
@@ -5186,7 +5190,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
                     return SPELL_FAILED_UNKNOWN;
 
-                if (m_caster->HasCharm())
+                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISMISS_PET) && m_caster->HasCharm())
                     return SPELL_FAILED_ALREADY_HAVE_CHARM;
 
                 if (m_caster->HasCharmer())
@@ -5207,10 +5211,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_AURA_MOD_CHARM:
             {
-                if (expectedTarget == m_caster)
-                    return SPELL_FAILED_BAD_TARGETS;
-
-                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->HasCharm())
+                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISMISS_PET) && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->HasCharm())
                     return SPELL_FAILED_ALREADY_HAVE_CHARM;
 
                 if (m_caster->HasCharmer())

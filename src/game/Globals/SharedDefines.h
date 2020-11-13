@@ -300,7 +300,7 @@ enum SpellAttributes
 
 enum SpellAttributesEx
 {
-    SPELL_ATTR_EX_UNK0                         = 0x00000001,// 0
+    SPELL_ATTR_EX_DISMISS_PET                  = 0x00000001,// 0
     SPELL_ATTR_EX_DRAIN_ALL_POWER              = 0x00000002,// 1 use all power (Only paladin Lay of Hands and Bunyanize)
     SPELL_ATTR_EX_CHANNELED_1                  = 0x00000004,// 2 channeled 1
     SPELL_ATTR_EX_CANT_BE_REDIRECTED           = 0x00000008,// 3
