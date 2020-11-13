@@ -55,6 +55,10 @@ struct boss_broodlordAI : public CombatAI
         AddCombatAction(BROODLORD_KNOCK_AWAY, 12000u);
         AddCombatAction(BROODLORD_BLAST_WAVE, 20000u);
         AddCombatAction(BROODLORD_MORTAL_STRIKE, 30000u);
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        {
+            return z < 448.60f;
+        });        
         Reset();
     }
 
@@ -78,6 +82,11 @@ struct boss_broodlordAI : public CombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_LASHLAYER, FAIL);
+    }
+
+    void OnLeash() override
+    {
+        DoScriptText(SAY_LEASH, m_creature);
     }
 
     void ExecuteAction(uint32 action) override
@@ -109,14 +118,6 @@ struct boss_broodlordAI : public CombatAI
                 break;
             }
         }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        CombatAI::UpdateAI(diff);
-        if (m_creature->IsInCombat())
-            if (EnterEvadeIfOutOfCombatArea(diff))
-                DoScriptText(SAY_LEASH, m_creature);
     }
 };
 UnitAI* GetAI_boss_broodlord(Creature* creature)
