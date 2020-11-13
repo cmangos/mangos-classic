@@ -4347,6 +4347,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                         if (Creature const* targetCreature = dynamic_cast<Creature*>(target))
                             if ((!targetCreature->GetLootRecipientGuid().IsEmpty()) && !targetCreature->IsTappedBy((Player*)m_caster))
                                 return SPELL_FAILED_CANT_CAST_ON_TAPPED;
+                    
+                    // Do not allow spells to complete which are targeting players that are invisible to the caster since the time of cast start
+                    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !IsPositiveEffectMask(m_spellInfo, affectedMask, m_caster, target) && !target->IsVisibleForOrDetect(m_caster, m_caster, false))
+                        return SPELL_FAILED_BAD_TARGETS;
                 }
 
                 if (strict && m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER && !IsAreaOfEffectSpell(m_spellInfo))
