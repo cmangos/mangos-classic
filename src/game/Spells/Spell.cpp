@@ -6679,7 +6679,12 @@ WorldObject* Spell::GetCastingObject() const
 
 float Spell::GetSpellSpeed() const
 {
-    if (IsChanneledSpell(m_spellInfo)) return 0.f; return m_spellInfo->speed;
+    if (m_trueCaster->IsGameObject()) // 4 spells in all of wotlk and doesnt seem like GO casting supports travelling delay from sniffs
+        return 0.f;
+    if (IsChanneledSpell(m_spellInfo))
+        return 0.f;
+    
+    return m_spellInfo->speed;
 }
 
 void Spell::ResetEffectDamageAndHeal()
