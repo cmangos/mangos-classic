@@ -203,8 +203,6 @@ struct ScriptedAI : public CreatureAI
 
         void SetEquipmentSlots(bool loadDefault, int32 mainHand = EQUIP_NO_CHANGE, int32 offHand = EQUIP_NO_CHANGE, int32 ranged = EQUIP_NO_CHANGE);
 
-        bool EnterEvadeIfOutOfCombatArea(const uint32 diff);
-
     protected:
         std::string GetAIName() override { return m_creature->GetAIName(); }
 
