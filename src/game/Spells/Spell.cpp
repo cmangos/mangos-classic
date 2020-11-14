@@ -4277,10 +4277,6 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    // Spells like Disengage are allowed only in combat
-    if (!m_caster->IsInCombat() && m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET) && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_UNAFFECTED_BY_AURA_SCHOOL_IMMUNE))
-        return SPELL_FAILED_CASTER_AURASTATE;
-
     Unit* target = m_targets.getUnitTarget();
     uint32 affectedMask = GetCheckCastEffectMask(m_spellInfo);
 
