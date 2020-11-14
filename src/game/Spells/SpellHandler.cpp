@@ -391,6 +391,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         targets.setUnitTarget(mover->GetTarget());
 
     Spell* spell = new Spell(mover, spellInfo, TRIGGERED_NONE);
+    spell->m_clientCast = true;
     spell->SpellStart(&targets);
 }
 

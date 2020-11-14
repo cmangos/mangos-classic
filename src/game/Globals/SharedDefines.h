@@ -423,7 +423,7 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_UNK12                       = 0x00001000,// 12
     SPELL_ATTR_EX4_UNK13                       = 0x00002000,// 13
     SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS   = 0x00004000,// 14
-    SPELL_ATTR_EX4_UNK15                       = 0x00008000,// 15
+    SPELL_ATTR_EX4_UNK15                       = 0x00008000,// 15 Dont add to spellbook
     SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA         = 0x00010000,// 16 not usable in arena
     SPELL_ATTR_EX4_USABLE_IN_ARENA             = 0x00020000,// 17 usable in arena
     SPELL_ATTR_EX4_UNK18                       = 0x00040000,// 18

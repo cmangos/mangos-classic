@@ -385,6 +385,66 @@ inline bool IsPossessCharmType(uint32 spellId)
     }
 }
 
+inline uint32 GetAllowedMechanicMask(SpellEntry const* spellProto)
+{
+    uint32 mask = 0;
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (!spellProto->Effect[i])
+            continue;
+
+        if (spellProto->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
+            mask |= 1 << uint32(spellProto->EffectMiscValue[i] - 1);
+        else if (spellProto->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY_MASK)
+            mask |= uint32(spellProto->EffectMiscValue[i]);
+    }
+    return mask;
+}
+
+// based on client Spell_C::CancelsAuraEffect
+inline bool SpellCancelsAuraEffect(SpellEntry const* spellInfo, SpellEntry const* auraSpellInfo, uint8 auraEffIndex)
+{
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
+        return false;
+
+    if (auraSpellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+        return false;
+
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        if (spellInfo->Effect[i] != SPELL_EFFECT_APPLY_AURA)
+            continue;
+
+        uint32 const miscValue = static_cast<uint32>(spellInfo->EffectMiscValue[i]);
+        switch (spellInfo->EffectApplyAuraName[i])
+        {
+            case SPELL_AURA_STATE_IMMUNITY:
+                if (miscValue != auraSpellInfo->EffectApplyAuraName[auraEffIndex])
+                    continue;
+                break;
+            case SPELL_AURA_SCHOOL_IMMUNITY:
+                if (auraSpellInfo->HasAttribute(SPELL_ATTR_EX2_UNAFFECTED_BY_AURA_SCHOOL_IMMUNE) || !(GetSchoolMask(auraSpellInfo->School) & miscValue))
+                    continue;
+                break;
+            case SPELL_AURA_DISPEL_IMMUNITY:
+                if (miscValue != auraSpellInfo->Dispel)
+                    continue;
+                break;
+            case SPELL_AURA_MECHANIC_IMMUNITY:
+                if (miscValue != auraSpellInfo->Mechanic)
+                    if (miscValue != auraSpellInfo->EffectMechanic[auraEffIndex])
+                        continue;
+                break;
+            default:
+                continue;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 inline bool IsDeathOnlySpell(SpellEntry const* spellInfo)
 {
     return spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD) || spellInfo->Id == 2584;
