@@ -424,7 +424,7 @@ class Spell
         bool CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckException exception = EXCEPTION_NONE) const;
         bool CanAutoCast(Unit* target);
 
-        static void SendCastResult(Player const* caster, SpellEntry const* spellInfo, SpellCastResult result, bool isPetCastResult = false);
+        static void SendCastResult(Player const* caster, SpellEntry const* spellInfo, SpellCastResult result, bool isPetCastResult = false, uint32 param1 = 0, uint32 param2 = 0);
         void SendCastResult(SpellCastResult result) const;
         void SendSpellStart() const;
         void SendSpellGo();
@@ -803,6 +803,10 @@ class Spell
 
         // needed to store all log for this spell
         SpellLog m_spellLog;
+
+        // spell cast results
+        uint32 m_param1;
+        uint32 m_param2;
 
         // GO casting preparations
         WorldObject* m_trueCaster;
