@@ -5541,7 +5541,7 @@ SpellCastResult Spell::CheckCasterAuras() const
                 SpellAuraHolder* holder = itr.second;
                 SpellEntry const* pEntry = holder->GetSpellProto();
 
-                if ((GetSpellSchoolMask(pEntry) & school_immune) && !pEntry->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE))
+                if ((GetSpellSchoolMask(pEntry) & school_immune) && !pEntry->HasAttribute(SPELL_ATTR_EX2_UNAFFECTED_BY_AURA_SCHOOL_IMMUNE))
                     continue;
                 if ((1 << (pEntry->Dispel)) & dispel_immune)
                     continue;
