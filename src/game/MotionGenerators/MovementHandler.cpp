@@ -22,6 +22,7 @@
 #include "Server/Opcodes.h"
 #include "Log.h"
 #include "Entities/Player.h"
+#include "Movement/MoveSpline.h"
 #include "Maps/MapManager.h"
 #include "Entities/Transports.h"
 #include "BattleGround/BattleGround.h"
@@ -293,6 +294,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     /*----------------*/
 
     if (!VerifyMovementInfo(movementInfo))
+        return;
+
+    if (!mover->movespline->Finalized())
         return;
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
