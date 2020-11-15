@@ -568,7 +568,7 @@ enum DiminishingLevels
  */
 struct DiminishingReturn
 {
-    DiminishingReturn(DiminishingGroup group, uint32 t, uint32 count, uint32 duration)
+    DiminishingReturn(DiminishingGroup group, uint32 t, uint32 count)
         : DRGroup(group), stack(0), hitTime(t), hitCount(count)
     {}
 
@@ -1105,7 +1105,7 @@ class Unit : public WorldObject
          * that DiminishingGroup
          * @param group The group to increase the level for by one
          */
-        void IncrDiminishing(DiminishingGroup group, uint32 duration, bool pvp);
+        void IncrDiminishing(DiminishingGroup group, bool pvp);
         /**
          * Calculates how long the duration of a spell should be considering
          * diminishing returns, ie, if the Level passed in is DIMINISHING_LEVEL_IMMUNE

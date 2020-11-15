@@ -559,8 +559,9 @@ class Spell
             bool   procReflect : 1; // Used to tell hit to proc reflect only and return reflect back
             bool   isCrit : 1;
             uint32 heartbeatResistChance;
-            uint32 diminishedChannelDuration; // Store duration after diminishing returns are applied
-            bool   isDiminishedChannel;
+            uint32 diminishDuration; // Store duration after diminishing returns are applied
+            DiminishingLevels diminishLevel;
+            DiminishingGroup diminishGroup;
         };
         uint8 m_needAliveTargetMask;                        // Mask req. alive targets
         void ProcReflectProcs(TargetInfo& targetInfo);
@@ -703,10 +704,6 @@ class Spell
         Corpse* corpseTarget;
         SpellAuraHolder* m_spellAuraHolder;                 // spell aura holder for current target, created only if spell has aura applying effect
         int32 damage;
-
-        // this is set in Spell Hit, but used in Apply Aura handler
-        DiminishingLevels m_diminishLevel;
-        DiminishingGroup m_diminishGroup;
 
         // -------------------------------------------
         GameObject* focusObject;

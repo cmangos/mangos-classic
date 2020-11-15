@@ -797,8 +797,9 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     targetInfo.procReflect = false;
     targetInfo.isCrit = false;
     targetInfo.heartbeatResistChance = 0;
-    targetInfo.isDiminishedChannel = false;
-    targetInfo.diminishedChannelDuration = 0;
+    targetInfo.diminishDuration = 0;
+    targetInfo.diminishLevel = DIMINISHING_LEVEL_1;
+    targetInfo.diminishGroup = DIMINISHING_NONE;
 
     // Calculate hit result
     targetInfo.missCondition = (m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(target, m_spellInfo, targetInfo.effectMask, m_reflectable, false, &targetInfo.heartbeatResistChance));
@@ -1252,24 +1253,13 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
         }
     }
 
-    // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
-    if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || IsCreatureDRSpell(m_spellInfo))
-    {
-        m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell != nullptr || (m_IsTriggeredSpell && m_CastItem));
-        m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
-        // Increase Diminishing on unit, current informations for actually casts will use values above
-        if ((GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) ||
-            GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_ALL)
-            unit->IncrDiminishing(m_diminishGroup, uint32(GetSpellDuration(m_spellInfo)), (unit->GetTypeId() == TYPEID_PLAYER && m_caster->GetTypeId() == TYPEID_PLAYER));
-    }
-
     // Apply additional spell effects to target
     CastPreCastSpells(unit);
 
     if (IsSpellAppliesAura(m_spellInfo, effectMask))
     {
         m_spellAuraHolder = CreateSpellAuraHolder(m_spellInfo, unit, realCaster, m_CastItem, m_triggeredBySpellInfo);
-        m_spellAuraHolder->setDiminishGroup(m_diminishGroup);
+        m_spellAuraHolder->setDiminishGroup(target->diminishGroup);
     }
     else
         m_spellAuraHolder = nullptr;
@@ -1288,10 +1278,9 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
             int32 duration = m_spellAuraHolder->GetAuraMaxDuration();
             int32 originalDuration = duration;
 
-            if (duration > 0)
+            if (target->diminishGroup > DIMINISHING_NONE)
             {
-                unit->ApplyDiminishingToDuration(m_diminishGroup, duration, m_caster, m_diminishLevel, isReflected);
-
+                duration = target->diminishDuration;
                 // Fully diminished
                 if (duration == 0)
                 {
@@ -1311,7 +1300,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
             {
                 // Pre-TBC: heartbeat is enabled in both pve and pvp
                 if (bool heartbeat = true)
-                    m_spellAuraHolder->SetHeartbeatResist(target->heartbeatResistChance, originalDuration, uint32(m_diminishLevel));
+                    m_spellAuraHolder->SetHeartbeatResist(target->heartbeatResistChance, originalDuration, uint32(target->diminishLevel));
             }
 
             if (!unit->AddSpellAuraHolder(m_spellAuraHolder))
@@ -1457,17 +1446,21 @@ void Spell::HandleImmediateEffectExecution(TargetInfo* target)
         ExecuteEffects(unit, nullptr, nullptr, mask);
     }
 
-    if (m_duration >= 0 && IsChanneledSpell(m_spellInfo) && (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || IsCreatureDRSpell(m_spellInfo)))
+    // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
+    if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || IsCreatureDRSpell(m_spellInfo))
     {
-        // TODO: Fill all spells with this
-        DiminishingGroup group = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell != nullptr || (m_IsTriggeredSpell && m_CastItem));
-        DiminishingLevels level = unit->GetDiminishing(group);
-        if ((GetDiminishingReturnsGroupType(group) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) || GetDiminishingReturnsGroupType(group) == DRTYPE_ALL)
+        target->diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell != nullptr || (m_IsTriggeredSpell && m_CastItem));
+        target->diminishLevel = unit->GetDiminishing(target->diminishGroup);
+        // Increase Diminishing on unit, current informations for actually casts will use values above
+        if ((GetDiminishingReturnsGroupType(target->diminishGroup) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) ||
+            GetDiminishingReturnsGroupType(target->diminishGroup) == DRTYPE_ALL)
+            unit->IncrDiminishing(target->diminishGroup, (unit->GetTypeId() == TYPEID_PLAYER && m_caster->GetTypeId() == TYPEID_PLAYER));
+
+        if (m_duration > 0)
         {
             int32 duration = m_duration;
-            unit->ApplyDiminishingToDuration(group, duration, m_caster, level, missInfo == SPELL_MISS_REFLECT);
-            target->diminishedChannelDuration = duration;
-            target->isDiminishedChannel = true;
+            unit->ApplyDiminishingToDuration(target->diminishGroup, duration, m_caster, target->diminishLevel, (missInfo == SPELL_MISS_REFLECT && target->reflectResult == SPELL_MISS_NONE));
+            target->diminishDuration = duration;
         }
     }
 
@@ -3049,11 +3042,7 @@ void Spell::_handle_immediate_phase()
     // handle some immediate features of the spell here
     HandleThreatSpells();
 
-    // initialize Diminishing Returns Data
-    m_diminishLevel = DIMINISHING_LEVEL_1;
-    m_diminishGroup = DIMINISHING_NONE;
-
-    // handle none targeted effects
+    // handle none and dest targeted effects
     DoAllTargetlessEffects(false);
 
     // process items
@@ -3760,8 +3749,10 @@ void Spell::SendChannelUpdate(uint32 time, uint32 lastTick) const
 void Spell::SendChannelStart(uint32 duration)
 {
     WorldObject* target = nullptr;
-    uint32 diminishedChannelDuration = 0;
-    bool isDiminishedChannel = false;
+
+    uint32 diminishDuration = duration;
+    DiminishingGroup diminishGroup = DIMINISHING_NONE;
+    DiminishingLevels diminishLevel = DIMINISHING_LEVEL_1;
 
     // select dynobject created by first effect if any
     if (m_spellInfo->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
@@ -3774,10 +3765,11 @@ void Spell::SendChannelStart(uint32 duration)
             if (((itr->effectHitMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE &&
                     m_CastItem) || itr->targetGUID != m_caster->GetObjectGuid())
             {
-                if (itr->isDiminishedChannel)
+                if ((itr->diminishGroup > DIMINISHING_NONE && itr->diminishDuration != duration))
                 {
-                    isDiminishedChannel = itr->isDiminishedChannel;
-                    diminishedChannelDuration = itr->diminishedChannelDuration;
+                    diminishDuration = itr->diminishDuration;
+                    diminishGroup = itr->diminishGroup;
+                    diminishLevel = itr->diminishLevel;
                 }
                 target = ObjectAccessor::GetUnit(*m_caster, itr->targetGUID);
                 break;
@@ -3796,8 +3788,21 @@ void Spell::SendChannelStart(uint32 duration)
         }
     }
 
-    if (isDiminishedChannel)
-        duration = diminishedChannelDuration;
+    // change channel duration to account for DR if neccessary, also store in caster's targetInfo to use later for setting aura duration
+    if (diminishDuration != duration)
+    {
+        duration = diminishDuration;
+        for (auto& target : m_UniqueTargetInfo)
+        {
+            if (target.targetGUID == m_caster->GetObjectGuid())
+            {
+                target.diminishDuration = diminishDuration;
+                target.diminishGroup = diminishGroup;
+                target.diminishLevel = diminishLevel;
+                break;
+            }
+        }
+    }
 
     if (m_caster->IsPlayer())
     {
