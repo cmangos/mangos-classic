@@ -797,6 +797,8 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     targetInfo.procReflect = false;
     targetInfo.isCrit = false;
     targetInfo.heartbeatResistChance = 0;
+    targetInfo.isDiminishedChannel = false;
+    targetInfo.diminishedChannelDuration = 0;
 
     // Calculate hit result
     targetInfo.missCondition = (m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(target, m_spellInfo, targetInfo.effectMask, m_reflectable, false, &targetInfo.heartbeatResistChance));
@@ -1457,6 +1459,7 @@ void Spell::HandleImmediateEffectExecution(TargetInfo* target)
 
     if (m_duration >= 0 && IsChanneledSpell(m_spellInfo) && (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || IsCreatureDRSpell(m_spellInfo)))
     {
+        // TODO: Fill all spells with this
         DiminishingGroup group = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell != nullptr || (m_IsTriggeredSpell && m_CastItem));
         DiminishingLevels level = unit->GetDiminishing(group);
         if ((GetDiminishingReturnsGroupType(group) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) || GetDiminishingReturnsGroupType(group) == DRTYPE_ALL)
