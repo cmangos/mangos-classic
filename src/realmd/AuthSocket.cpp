@@ -347,8 +347,8 @@ bool AuthSocket::_HandleLogonChallenge()
     _build = ch->build;
 
     // Convert uint8[4] to string, restore string order as its byte order is reversed
-    m_os.resize(sizeof(ch->os));
-    m_os.assign(ch->os, (ch->os + sizeof(ch->os)));
+    ch->os[3] = '\0';
+    m_os = (char*)ch->os;
     std::reverse(m_os.begin(), m_os.end());
 
     m_locale.resize(sizeof(ch->country));
