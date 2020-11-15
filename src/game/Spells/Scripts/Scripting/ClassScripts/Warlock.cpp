@@ -93,8 +93,18 @@ struct LifeTap : public SpellScript
     }
 };
 
+struct SoulLink : public AuraScript
+{
+    void OnAuraInit(Aura* aura) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetModifier()->m_auraname = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterAuraScript<CurseOfAgony>("spell_curse_of_agony");
     RegisterSpellScript<LifeTap>("spell_life_tap");
+    RegisterAuraScript<SoulLink>("spell_soul_link");
 }
