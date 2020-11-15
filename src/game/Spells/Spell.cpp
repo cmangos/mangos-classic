@@ -6860,7 +6860,7 @@ void Spell::ClearCastItem()
     m_CastItemGuid.Clear();
 }
 
-void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, bool targetB, uint32& EffectChainTarget) const
+void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, bool targetB, uint32& EffectChainTarget)
 {
     if (m_spellInfo->EffectRadiusIndex[effIndex])
         radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
@@ -6929,6 +6929,8 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
         default:
             break;
     }
+
+    OnRadiusCalculate(effIndex, targetB, radius);
 }
 
 float Spell::GetCone()
@@ -7276,6 +7278,12 @@ void Spell::OnEffectExecute(SpellEffectIndex effIndex)
 {
     if (SpellScript* script = GetSpellScript())
         script->OnEffectExecute(this, effIndex);
+}
+
+void Spell::OnRadiusCalculate(SpellEffectIndex effIndex, bool targetB, float& radius)
+{
+    if (SpellScript* script = GetSpellScript())
+        script->OnRadiusCalculate(this, effIndex, targetB, radius);
 }
 
 void Spell::OnDestTarget() // TODO
