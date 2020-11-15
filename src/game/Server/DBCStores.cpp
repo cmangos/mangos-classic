@@ -21,6 +21,7 @@
 #include "Log.h"
 #include "ProgressBar.h"
 #include "Util.h"
+#include "Globals/Locales.h"
 #include "Globals/SharedDefines.h"
 #include "Server/SQLStorages.h"
 

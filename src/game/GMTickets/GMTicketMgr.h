@@ -235,11 +235,11 @@ class GMTicketMgr
 
         static void Print(GMTicket const& ticket, WorldSession* session, time_t now = time(nullptr));
         static inline const std::string PrintMailResponse(GMTicket const& ticket, bool resolved);
-        static inline const char* PrintTicketCategory(GMTicket const& ticket, LocaleConstant locale = LOCALE_enUS);
-        static inline const char* PrintTicketChatAlert(GMTicketMgrChatAlert alert, LocaleConstant locale = LOCALE_enUS);
-        static inline const char* PrintTicketStatus(GMTicket const& ticket, LocaleConstant locale = LOCALE_enUS);
+        static inline const char* PrintTicketCategory(GMTicket const& ticket, LocaleConstant locale = DEFAULT_LOCALE);
+        static inline const char* PrintTicketChatAlert(GMTicketMgrChatAlert alert, LocaleConstant locale = DEFAULT_LOCALE);
+        static inline const char* PrintTicketStatus(GMTicket const& ticket, LocaleConstant locale = DEFAULT_LOCALE);
         static inline const char* PrintTicketStatusColorSequence(GMTicket const& ticket);
-        static inline const std::string PrintTicketSummaryLine(GMTicket const& ticket, LocaleConstant locale = LOCALE_enUS);
+        static inline const std::string PrintTicketSummaryLine(GMTicket const& ticket, LocaleConstant locale = DEFAULT_LOCALE);
 
         void PrintTicketList(WorldSession* session, std::ostringstream& output, size_t max, const GMTicketCategoryEntry* category = nullptr, bool online = false) const;
 

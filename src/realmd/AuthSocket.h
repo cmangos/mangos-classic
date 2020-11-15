@@ -80,10 +80,8 @@ class AuthSocket : public MaNGOS::Socket
         std::string _safelogin;
         std::string _token;
         std::string m_os;
-
-        // Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ
-        // between enUS and enGB, which is important for the patch system
-        std::string _localizationName;
+        std::string m_locale;
+        std::string _safelocale;
         uint16 _build;
         AccountTypes _accountSecurityLevel;
 

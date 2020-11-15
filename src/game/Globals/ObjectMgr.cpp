@@ -128,7 +128,7 @@ ObjectMgr::ObjectMgr() :
     m_GroupIds("Group ids"),
     m_FirstTemporaryCreatureGuid(1),
     m_FirstTemporaryGameObjectGuid(1),
-    DBCLocaleIndex(LOCALE_enUS)
+    DBCLocaleIndex(DEFAULT_LOCALE)
 {
 }
 

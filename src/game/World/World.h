@@ -25,6 +25,7 @@
 
 #include "Common.h"
 #include "Timer.h"
+#include "Globals/Locales.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/Object.h"
 #include "Multithreading/Messager.h"

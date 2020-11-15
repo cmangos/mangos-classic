@@ -346,22 +346,24 @@ bool AuthSocket::_HandleLogonChallenge()
     _login = (const char*)ch->I;
     _build = ch->build;
 
-    // convert uint8[4] to string and storing to m_os
-    std::array<char, 5> os;
-    os.fill('\0');
-    memcpy(os.data(), ch->os, sizeof(ch->os));
-    m_os = os.data();
-
-    // Restore string order as its byte order is reversed
+    // Convert uint8[4] to string, restore string order as its byte order is reversed
+    m_os.resize(sizeof(ch->os));
+    m_os.assign(ch->os, (ch->os + sizeof(ch->os)));
     std::reverse(m_os.begin(), m_os.end());
+
+    m_locale.resize(sizeof(ch->country));
+    m_locale.assign(ch->country, (ch->country + sizeof(ch->country)));
+    std::reverse(m_locale.begin(), m_locale.end());
 
     ///- Normalize account name
     // utf8ToUpperOnlyLatin(_login); -- client already send account in expected form
 
-    // Escape the user login to avoid further SQL injection
+    // Escape the user input used in DB to avoid further SQL injection
     // Memory will be freed on AuthSocket object destruction
     _safelogin = _login;
     LoginDatabase.escape_string(_safelogin);
+    _safelocale = m_locale;
+    LoginDatabase.escape_string(_safelocale);
 
     pkt << (uint8) CMD_AUTH_LOGON_CHALLENGE;
     pkt << (uint8) 0x00;
@@ -484,12 +486,6 @@ bool AuthSocket::_HandleLogonChallenge()
                     uint8 secLevel = fields[3].GetUInt8();
                     _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
-                    _localizationName.resize(4);
-                    for (int i = 0; i < 4; ++i)
-                        _localizationName[i] = ch->country[4 - i - 1];
-
-                    BASIC_LOG("[AuthChallenge] account %s is using '%c%c%c%c' locale (%u)", _login.c_str(), ch->country[3], ch->country[2], ch->country[1], ch->country[0], GetLocaleByName(_localizationName));
-
                     ///- All good, await client's proof
                     _status = STATUS_LOGON_PROOF;
                 }
@@ -586,9 +582,9 @@ bool AuthSocket::_HandleLogonProof()
         BASIC_LOG("User '%s' successfully authenticated", _login.c_str());
 
         ///- Update the sessionkey, current ip and login time and reset number of failed logins in the account table for this account
-        // No SQL injection (escaped user name) and IP address as received by socket
+        // No SQL injection (escaped user input) and IP address as received by socket
         const char* K_hex = srp.GetStrongSessionKey().AsHexStr();
-        LoginDatabase.PExecute("UPDATE account SET sessionkey = '%s', locale = '%u', failed_logins = 0 WHERE username = '%s'", K_hex, GetLocaleByName(_localizationName), _safelogin.c_str());
+        LoginDatabase.PExecute("UPDATE account SET sessionkey = '%s', locale = '%s', failed_logins = 0 WHERE username = '%s'", K_hex, _safelocale.c_str(), _safelogin.c_str());
         if (QueryResult* loginfail = LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", _safelogin.c_str()))
             LoginDatabase.PExecute("INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES('%u','%s',NOW(),'%u')", loginfail->Fetch()[0].GetUInt32(), m_address.c_str(), LOGIN_TYPE_REALMD);
         OPENSSL_free((void*)K_hex);

@@ -2360,7 +2360,7 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
         SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(id);
         if (spellInfo)
         {
-            int loc = int(LOCALE_enUS);
+            int loc = int(DEFAULT_LOCALE);
             std::string name = spellInfo->SpellName[loc];
             if (name.empty())
                 continue;
