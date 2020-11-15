@@ -650,6 +650,8 @@ class Spell
         void SetPowerCost(uint32 powerCost) { m_powerCost = powerCost; }
         // access to targets
         TargetList& GetTargetList() { return m_UniqueTargetInfo; }
+        // enables customizing auras after creation - use only in OnEffectExecute and with aura effects
+        SpellAuraHolder* GetSpellAuraHolder() { return m_spellAuraHolder; }
 
         // GO casting preparations
         void SetFakeCaster(Unit* caster) { m_caster = caster; }
