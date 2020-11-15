@@ -1285,7 +1285,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
             int32 duration = m_spellAuraHolder->GetAuraMaxDuration();
             int32 originalDuration = duration;
 
-            if (target->diminishGroup > DIMINISHING_NONE)
+            if (duration > 0 && target->diminishGroup > DIMINISHING_NONE)
             {
                 duration = target->diminishDuration;
                 // Fully diminished
