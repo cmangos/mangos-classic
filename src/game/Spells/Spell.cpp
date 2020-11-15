@@ -1293,9 +1293,6 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
                 // Fully diminished
                 if (duration == 0)
                 {
-                    if (IsChanneledSpell(m_spellInfo) && !IsAreaOfEffectSpell(m_spellInfo))
-                        m_caster->InterruptSpell(CURRENT_CHANNELED_SPELL);
-
                     delete m_spellAuraHolder;
                     m_spellAuraHolder = nullptr;
                     return;
@@ -1304,9 +1301,6 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
 
             if (duration != originalDuration)
             {
-                if (IsChanneledSpell(m_spellInfo) && !IsAreaOfEffectSpell(m_spellInfo))
-                    SendChannelStart(duration);
-
                 m_spellAuraHolder->SetAuraMaxDuration(duration);
                 m_spellAuraHolder->SetAuraDuration(duration);
             }
@@ -1459,6 +1453,19 @@ void Spell::HandleImmediateEffectExecution(TargetInfo* target)
             if (!IsEffectHandledImmediatelySpellLaunch(m_spellInfo, SpellEffectIndex(i)))
                 mask &= ~(mask & (1 << i));
         ExecuteEffects(unit, nullptr, nullptr, mask);
+    }
+
+    if (m_duration >= 0 && IsChanneledSpell(m_spellInfo) && (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || IsCreatureDRSpell(m_spellInfo)))
+    {
+        DiminishingGroup group = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell != nullptr || (m_IsTriggeredSpell && m_CastItem));
+        DiminishingLevels level = unit->GetDiminishing(group);
+        if ((GetDiminishingReturnsGroupType(group) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) || GetDiminishingReturnsGroupType(group) == DRTYPE_ALL)
+        {
+            int32 duration = m_duration;
+            unit->ApplyDiminishingToDuration(group, duration, m_caster, level, missInfo == SPELL_MISS_REFLECT);
+            target->diminishedChannelDuration = duration;
+            target->isDiminishedChannel = true;
+        }
     }
 
     target->damage = m_damage;
@@ -3750,6 +3757,8 @@ void Spell::SendChannelUpdate(uint32 time, uint32 lastTick) const
 void Spell::SendChannelStart(uint32 duration)
 {
     WorldObject* target = nullptr;
+    uint32 diminishedChannelDuration = 0;
+    bool isDiminishedChannel = false;
 
     // select dynobject created by first effect if any
     if (m_spellInfo->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
@@ -3762,6 +3771,11 @@ void Spell::SendChannelStart(uint32 duration)
             if (((itr->effectHitMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE &&
                     m_CastItem) || itr->targetGUID != m_caster->GetObjectGuid())
             {
+                if (itr->isDiminishedChannel)
+                {
+                    isDiminishedChannel = itr->isDiminishedChannel;
+                    diminishedChannelDuration = itr->diminishedChannelDuration;
+                }
                 target = ObjectAccessor::GetUnit(*m_caster, itr->targetGUID);
                 break;
             }
@@ -3779,7 +3793,10 @@ void Spell::SendChannelStart(uint32 duration)
         }
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (isDiminishedChannel)
+        duration = diminishedChannelDuration;
+
+    if (m_caster->IsPlayer())
     {
         WorldPacket data(MSG_CHANNEL_START, (4 + 4));
         data << uint32(m_spellInfo->Id);

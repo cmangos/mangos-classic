@@ -559,6 +559,8 @@ class Spell
             bool   procReflect : 1; // Used to tell hit to proc reflect only and return reflect back
             bool   isCrit : 1;
             uint32 heartbeatResistChance;
+            uint32 diminishedChannelDuration; // Store duration after diminishing returns are applied
+            bool   isDiminishedChannel;
         };
         uint8 m_needAliveTargetMask;                        // Mask req. alive targets
         void ProcReflectProcs(TargetInfo& targetInfo);
