@@ -135,10 +135,19 @@ inline bool IsAuraApplyEffects(SpellEntry const* entry, SpellEffectIndexMask mas
 
 inline bool IsSpellAppliesAura(SpellEntry const* spellInfo, uint32 effectMask = ((1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)))
 {
-    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (effectMask & (1 << i))
             if (IsAuraApplyEffect(spellInfo, SpellEffectIndex(i)))
                 return true;
+
+    return false;
+}
+
+inline bool IsSpellWithNonAuraEffect(SpellEntry const* spellInfo)
+{
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (!IsAuraApplyEffect(spellInfo, SpellEffectIndex(i)))
+            return true;
 
     return false;
 }
