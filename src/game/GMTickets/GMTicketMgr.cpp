@@ -208,7 +208,7 @@ LocaleConstant GMTicket::GetDbcLocale() const
 
 int GMTicket::GetDbLocaleIndex() const
 {
-    return sObjectMgr.GetIndexForLocale(GetDbcLocale());
+    return sObjectMgr.GetStorageLocaleIndexFor(GetDbcLocale());
 }
 
 void GMTicket::SetState(GMTicketState state, time_t when)
@@ -460,7 +460,7 @@ const char* GMTicketMgr::PrintTicketCategory(GMTicket const& ticket, LocaleConst
         if (!std::string(entry->name[locale]).empty())
             return entry->name[locale];
         else
-            return PrintTicketCategory(ticket, sObjectMgr.GetLocaleForIndex(sObjectMgr.GetDBCLocaleIndex()));
+            return PrintTicketCategory(ticket, sWorld.GetDefaultDbcLocale());
     }
 
     return sObjectMgr.GetMangosString(LANG_UNKNOWN, locale);
@@ -1084,7 +1084,7 @@ GMTicketMgr::CommandResult GMTicketMgr::Sort(GMTicket* ticket, const GMTicketCat
 
         Save(ticket);
 
-        sWorld.SendWorldTextToAcceptingTickets(LANG_TICKET_BROADCAST_CATEGORY, ticket->GetIdTag().c_str(), PrintTicketCategory(*ticket, sObjectMgr.GetLocaleForIndex(sObjectMgr.GetDBCLocaleIndex())), category.ID, session->GetPlayerName());
+        sWorld.SendWorldTextToAcceptingTickets(LANG_TICKET_BROADCAST_CATEGORY, ticket->GetIdTag().c_str(), PrintTicketCategory(*ticket, sWorld.GetDefaultDbcLocale()), category.ID, session->GetPlayerName());
 
         if (Player* character = sObjectMgr.GetPlayer(ticket->GetAuthorGuid()))
             character->GetSession()->SendGMTicketResult(SMSG_GM_TICKET_STATUS_UPDATE, GMTICKET_STATUS_UPDATED);

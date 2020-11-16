@@ -976,9 +976,13 @@ class ObjectMgr
         }
 
         const char* GetMangosString(int32 entry, int locale_idx) const;
-        const char* GetMangosStringForDBCLocale(int32 entry) const { return GetMangosString(entry, DBCLocaleIndex); }
-        int32 GetDBCLocaleIndex() const { return DBCLocaleIndex; }
-        void SetDBCLocaleIndex(uint32 lang) { DBCLocaleIndex = GetIndexForLocale(LocaleConstant(lang)); }
+        inline const char* GetMangosStringForDbcLocale(int32 entry) const { return GetMangosString(entry, m_Dbc2StorageLocaleIndex); }
+
+        int GetDbc2StorageLocaleIndex() const { return m_Dbc2StorageLocaleIndex; }
+        void SetDbc2StorageLocaleIndex(LocaleConstant loc) { m_Dbc2StorageLocaleIndex = GetStorageLocaleIndexFor(loc); }
+
+        int GetStorageLocaleIndexFor(LocaleConstant loc);
+        int GetOrNewStorageLocaleIndexFor(LocaleConstant loc);
 
         // global grid objects state (static DB spawns, global spawn mods from gameevent system)
         CellObjectGuids const& GetCellObjectGuids(uint16 mapid, uint32 cell_id)
@@ -1005,9 +1009,6 @@ class ObjectMgr
         static uint8 CheckPlayerName(const std::string& name, bool create = false);
         static PetNameInvalidReason CheckPetName(const std::string& name);
         static bool IsValidCharterName(const std::string& name);
-
-        int GetIndexForLocale(LocaleConstant loc);
-        LocaleConstant GetLocaleForIndex(int i);
 
         // Check if a player meets condition conditionId
         bool IsConditionSatisfied(uint32 conditionId, WorldObject const* target, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
@@ -1072,8 +1073,6 @@ class ObjectMgr
         void AddVendorItem(uint32 entry, uint32 item, uint32 maxcount, uint32 incrtime);
         bool RemoveVendorItem(uint32 entry, uint32 item);
         bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item_id, uint32 maxcount, uint32 incrtime, uint16 conditionId, Player* pl = nullptr, std::set<uint32>* skip_vendors = nullptr) const;
-
-        int GetOrNewIndexForLocale(LocaleConstant loc);
 
         ItemRequiredTargetMapBounds GetItemRequiredTargetMapBounds(uint32 uiItemEntry) const
         {
@@ -1151,6 +1150,9 @@ class ObjectMgr
         CreatureClassLvlStats const* GetCreatureClassLvlStats(uint32 level, uint32 unitClass) const;
     protected:
 
+        // current locale settings
+        uint8   m_Dbc2StorageLocaleIndex;
+
         // first free id for selected id type
         IdGenerator<uint32> m_AuctionIds;
         IdGenerator<uint32> m_GuildIds;
@@ -1224,8 +1226,6 @@ class ObjectMgr
         QuestRelationsMap       m_CreatureQuestInvolvedRelations;
         QuestRelationsMap       m_GOQuestRelations;
         QuestRelationsMap       m_GOQuestInvolvedRelations;
-
-        int DBCLocaleIndex;
 
     private:
         void LoadCreatureAddons(SQLStorage& creatureaddons, char const* entryName, char const* comment);

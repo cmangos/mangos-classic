@@ -67,7 +67,7 @@ bool RASocket::Open()
     ///- print Motd
     Send(sWorld.GetMotd());
     Send("\r\n");
-    Send(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_USER));
+    Send(sObjectMgr.GetMangosStringForDbcLocale(LANG_RA_USER));
 
     return true;
 }
@@ -124,7 +124,7 @@ bool RASocket::HandleInput()
                     return false;
 
                 Send("\r\n");
-                Send(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_USER));
+                Send(sObjectMgr.GetMangosStringForDbcLocale(LANG_RA_USER));
                 break;
             }
 
@@ -140,7 +140,7 @@ bool RASocket::HandleInput()
                     return false;
 
                 Send("\r\n");
-                Send(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_USER));
+                Send(sObjectMgr.GetMangosStringForDbcLocale(LANG_RA_USER));
                 break;
             }
 
@@ -149,7 +149,7 @@ bool RASocket::HandleInput()
                 m_accountLevel = SEC_CONSOLE;
 
             m_authLevel = AuthLevel::HaveUsername;
-            Send(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_PASS));
+            Send(sObjectMgr.GetMangosStringForDbcLocale(LANG_RA_PASS));
             break;
         }
         ///<li> If the input is '<password>' (and the user already gave his username)
@@ -174,7 +174,7 @@ bool RASocket::HandleInput()
                     return false;
 
                 Send("\r\n");
-                Send(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_PASS));
+                Send(sObjectMgr.GetMangosStringForDbcLocale(LANG_RA_PASS));
             }
             break;
         }
