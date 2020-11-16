@@ -1258,7 +1258,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
 
     if (IsSpellAppliesAura(m_spellInfo, effectMask))
     {
-        if (m_duration != target->diminishDuration && target->diminishDuration == 0 && !IsSpellWithNonAuraEffect(m_spellInfo))
+        if (m_duration != target->diminishDuration && target->diminishDuration == 0 && target->diminishLevel > DIMINISHING_LEVEL_1 && !IsSpellWithNonAuraEffect(m_spellInfo))
         {
             realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
             ResetEffectDamageAndHeal();
