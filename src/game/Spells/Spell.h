@@ -774,6 +774,9 @@ class Spell
         bool CanExecuteTriggersOnHit(uint8 effMask, SpellEntry const* triggeredByAura) const;
         // -------------------------------------------
 
+        // Diminishing returns
+        bool CanSpellDiminish() const;
+
         // List For Triggered Spells
         typedef std::list<SpellEntry const*> SpellInfoList;
         SpellInfoList m_TriggerSpells;                      // casted by caster to same targets settings in m_targets at success finish of current spell
