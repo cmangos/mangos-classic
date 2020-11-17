@@ -10640,6 +10640,7 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
 
         charmedPlayer->ClearSelectionGuid();
 
+        // vanilla core only code - what is this for?
         charmedPlayer->ForceHealAndPowerUpdateInZone();
 
         charmedPlayer->SendForcedObjectUpdate();

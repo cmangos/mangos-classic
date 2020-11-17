@@ -4699,7 +4699,7 @@ void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
         MANGOS_ASSERT(m_caster->GetTypeId() == TYPEID_PLAYER);
         Player* casterPlayer = static_cast<Player*>(m_caster);
         casterPlayer->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
-        casterPlayer->SetCannotBeDetectedTimer(1000);
+        casterPlayer->SetCannotBeDetectedTimer(1000); // vanilla core only code - what is this for?
     }
     m_spellLog.AddLog(uint32(SPELL_EFFECT_SANCTUARY), unitTarget->GetObjectGuid());
 }
