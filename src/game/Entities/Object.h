@@ -117,7 +117,7 @@ class CooldownData
             m_spellId(spellId),
             m_category(spellCategory),
             m_expireTime(duration ? std::chrono::milliseconds(duration) + clockNow : TimePoint()),
-            m_catExpireTime(spellCategory && categoryDuration ? std::chrono::milliseconds(categoryDuration) + clockNow : TimePoint()),
+            m_catExpireTime((spellCategory&& categoryDuration) ? (std::chrono::milliseconds(categoryDuration) + clockNow) : TimePoint()),
             m_typePermanent(isPermanent),
             m_itemId(itemId)
         {}
@@ -201,7 +201,10 @@ class CooldownContainer
                 else
                 {
                     if (cd->m_category && cd->IsCatCDExpired(now))
+                    {
                         m_categoryMap.erase(cd->m_category);
+                        cd->m_category = 0;
+                    }
                     ++spellCDItr;
                 }
             }
@@ -209,9 +212,13 @@ class CooldownContainer
 
         bool AddCooldown(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory = 0, uint32 categoryDuration = 0, uint32 itemId = 0, bool onHold = false)
         {
-            auto resultItr = m_spellIdMap.emplace(spellId, std::unique_ptr<CooldownData>(new CooldownData(clockNow, spellId, duration, spellCategory, categoryDuration, itemId, onHold)));
+            RemoveBySpellId(spellId);
+            auto resultItr = m_spellIdMap.emplace(spellId, std::move(std::unique_ptr<CooldownData>(new CooldownData(clockNow, spellId, duration, spellCategory, categoryDuration, itemId, onHold))));
             if (resultItr.second && spellCategory && categoryDuration)
+            {
+                RemoveByCategory(spellCategory);
                 m_categoryMap.emplace(spellCategory, resultItr.first);
+            }
 
             return resultItr.second;
         }
@@ -236,7 +243,10 @@ class CooldownContainer
         {
             auto spellCDItr = m_categoryMap.find(category);
             if (spellCDItr != m_categoryMap.end())
+            {
+                spellCDItr->second->second->m_category = 0;
                 m_categoryMap.erase(spellCDItr);
+            }
         }
 
         Iterator erase(ConstIterator spellCDItr)
@@ -878,6 +888,7 @@ class WorldObject : public Object
         // cooldown system
         virtual void AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration = 0, bool updateClient = false);
         virtual bool HasGCD(SpellEntry const* spellEntry) const;
+        TimePoint GetGCD(SpellEntry const* spellEntry) const;
         void ResetGCD(SpellEntry const* spellEntry = nullptr);
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0);
         virtual void RemoveSpellCooldown(SpellEntry const& spellEntry, bool updateClient = true);
@@ -914,7 +925,7 @@ class WorldObject : public Object
 
         // cooldown system
         void UpdateCooldowns(TimePoint const& now);
-        bool CheckLockout(SpellSchoolMask schoolMask) const;
+        bool CheckLockout(SpellSchoolMask schoolMask, TimePoint const& now) const;
         bool GetExpireTime(SpellEntry const& spellEntry, TimePoint& expireTime, bool& isPermanent) const;
 
         GCDMap            m_GCDCatMap;

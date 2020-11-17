@@ -495,15 +495,6 @@ bool WorldSession::Update(uint32 diff)
 
 void WorldSession::UpdateMap(uint32 diff)
 {
-    // Send time sync packet every 10s.
-    if (m_timeSyncTimer > 0)
-    {
-        if (diff >= m_timeSyncTimer)
-            SendTimeSync();
-        else
-            m_timeSyncTimer -= diff;
-    }
-
     std::deque<std::unique_ptr<WorldPacket>> recvQueueMapCopy;
     {
         std::lock_guard<std::mutex> guard(m_recvQueueMapLock);
