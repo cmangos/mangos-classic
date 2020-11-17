@@ -5606,43 +5606,16 @@ SpellCastResult Spell::CheckCasterAuras(uint32& param1) const
         return SPELL_CAST_OK;
     };
 
-    if (unitflag & UNIT_FLAG_STUNNED)
-    {
-        if (usableWhileStunned)
-        {
-            SpellCastResult mechanicResult = mechanicCheck(SPELL_AURA_MOD_STUN);
-            if (mechanicResult != SPELL_CAST_OK)
-                result = mechanicResult;
-        }
-        else if (!CheckSpellCancelsStun(param1))
-            result = SPELL_FAILED_STUNNED;
-    }
+    if (unitflag & UNIT_FLAG_STUNNED && !usableWhileStunned && !CheckSpellCancelsStun(param1))
+        result = SPELL_FAILED_STUNNED;
     else if (unitflag & UNIT_FLAG_SILENCED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && !CheckSpellCancelsSilence(param1))
         result = SPELL_FAILED_SILENCED;
     else if (unitflag & UNIT_FLAG_PACIFIED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY && !CheckSpellCancelsPacify(param1))
         result = SPELL_FAILED_PACIFIED;
-    else if (unitflag & UNIT_FLAG_FLEEING)
-    {
-        if (usableWhileFeared)
-        {
-            SpellCastResult mechanicResult = mechanicCheck(SPELL_AURA_MOD_FEAR);
-            if (mechanicResult != SPELL_CAST_OK)
-                result = mechanicResult;
-        }
-        else if (!CheckSpellCancelsFear(param1))
-            result = SPELL_FAILED_FLEEING;
-    }
-    else if (unitflag & UNIT_FLAG_CONFUSED)
-    {
-        if (usableWhileConfused)
-        {
-            SpellCastResult mechanicResult = mechanicCheck(SPELL_AURA_MOD_CONFUSE);
-            if (mechanicResult != SPELL_CAST_OK)
-                result = mechanicResult;
-        }
-        else if (!CheckSpellCancelsConfuse(param1))
-            result = SPELL_FAILED_CONFUSED;
-    }
+    else if (unitflag & UNIT_FLAG_FLEEING && !usableWhileFeared && !CheckSpellCancelsFear(param1))
+        result = SPELL_FAILED_FLEEING;
+    else if (unitflag & UNIT_FLAG_CONFUSED && !usableWhileConfused && !CheckSpellCancelsConfuse(param1))
+        result = SPELL_FAILED_CONFUSED;
 
     // Attr must make flag drop spell totally immune from all effects
     if (result != SPELL_CAST_OK)
