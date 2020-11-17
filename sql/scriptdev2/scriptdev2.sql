@@ -498,6 +498,7 @@ UPDATE creature_template SET ScriptName='npc_deathstalker_faerleia' WHERE entry=
 
 /* STONETALON MOUNTAINS */
 UPDATE creature_template SET ScriptName='npc_kaya' WHERE entry=11856;
+UPDATE gameobject_template SET ScriptName = 'go_covert_ops' WHERE entry=19590;
 
 /* STORMWIND CITY */
 UPDATE creature_template SET ScriptName='npc_bartleby' WHERE entry=6090;
