@@ -656,6 +656,7 @@ class Spell
         // GO casting preparations
         void SetFakeCaster(Unit* caster) { m_caster = caster; }
         WorldObject* GetTrueCaster() const { return m_trueCaster; }
+        Unit* GetAffectiveCasterOrOwner() const;
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data

@@ -863,20 +863,24 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     else
         targetInfo.reflectResult = SPELL_MISS_NONE;
 
-    bool isReflected = targetInfo.missCondition == SPELL_MISS_REFLECT && targetInfo.reflectResult == SPELL_MISS_NONE;
-    if ((targetInfo.missCondition == SPELL_MISS_NONE || isReflected) && CanSpellDiminish())
+    // only check DR for units and unit owned GOs
+    if (Unit* realCaster = GetAffectiveCasterOrOwner())
     {
-        Unit* targetForDiminish = isReflected ? m_caster : target;
-        targetInfo.diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell != nullptr || (m_IsTriggeredSpell && m_CastItem));
-        targetInfo.diminishLevel = targetForDiminish->GetDiminishing(targetInfo.diminishGroup);
-
-        if (m_duration > 0)
+        bool isReflected = targetInfo.missCondition == SPELL_MISS_REFLECT && targetInfo.reflectResult == SPELL_MISS_NONE;
+        if ((targetInfo.missCondition == SPELL_MISS_NONE || isReflected) && CanSpellDiminish())
         {
-            int32 duration = m_duration;
-            targetForDiminish->ApplyDiminishingToDuration(targetInfo.diminishGroup, duration, m_caster, targetInfo.diminishLevel, isReflected);
-            targetInfo.diminishDuration = duration;
-            if (targetInfo.diminishDuration == 0 && targetInfo.diminishLevel == DIMINISHING_LEVEL_IMMUNE)
-                targetInfo.effectHitMask &= ~GetAuraEffectMask(m_spellInfo);
+            Unit* targetForDiminish = isReflected ? m_caster : target;
+            targetInfo.diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell != nullptr || (m_IsTriggeredSpell && m_CastItem));
+            targetInfo.diminishLevel = targetForDiminish->GetDiminishing(targetInfo.diminishGroup);
+
+            if (m_duration > 0)
+            {
+                int32 duration = m_duration;
+                targetForDiminish->ApplyDiminishingToDuration(targetInfo.diminishGroup, duration, realCaster, targetInfo.diminishLevel, isReflected);
+                targetInfo.diminishDuration = duration;
+                if (targetInfo.diminishDuration == 0 && targetInfo.diminishLevel == DIMINISHING_LEVEL_IMMUNE)
+                    targetInfo.effectHitMask &= ~GetAuraEffectMask(m_spellInfo);
+            }
         }
     }
 
@@ -1220,7 +1224,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
     if (!unit)
         return;
 
-    Unit* realCaster = GetAffectiveCaster();
+    Unit* realCaster = GetAffectiveCasterOrOwner();
 
     const bool traveling = m_spellState == SPELL_STATE_TRAVELING;
 
@@ -1267,30 +1271,34 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
 
     if (IsSpellAppliesAura(m_spellInfo, effectMask))
     {
-        if (traveling) // if travelling, need to recalculate diminishing level and duration
+        if (realCaster)
         {
-            target->diminishLevel = unit->GetDiminishing(target->diminishGroup);
-            if (m_duration > 0)
+            if (traveling) // if travelling, need to recalculate diminishing level and duration
             {
-                int32 duration = m_duration;
-                unit->ApplyDiminishingToDuration(target->diminishGroup, duration, m_caster, target->diminishLevel, isReflected);
-                target->diminishDuration = duration;
+                target->diminishLevel = unit->GetDiminishing(target->diminishGroup);
+                if (m_duration > 0)
+                {
+                    int32 duration = m_duration;
+                    unit->ApplyDiminishingToDuration(target->diminishGroup, duration, m_caster, target->diminishLevel, isReflected);
+                    target->diminishDuration = duration;
+                }
             }
+
+            if (m_duration != target->diminishDuration && target->diminishDuration == 0 && target->diminishLevel > DIMINISHING_LEVEL_1 && !IsSpellWithNonAuraEffect(m_spellInfo))
+            {
+                realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
+                ResetEffectDamageAndHeal();
+                return;
+            }
+
+            const bool pvp = (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && realCaster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
+            // Increase Diminishing on unit, actual durations are already calculated
+            if (IsSubjectToDiminishingLevels(target->diminishGroup, pvp))
+                unit->IncrDiminishing(target->diminishGroup, pvp);
         }
 
-        if (m_duration != target->diminishDuration && target->diminishDuration == 0 && target->diminishLevel > DIMINISHING_LEVEL_1 && !IsSpellWithNonAuraEffect(m_spellInfo))
-        {
-            realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
-            ResetEffectDamageAndHeal();
-            return;
-        }
-
-        const bool pvp = (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && realCaster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
-        // Increase Diminishing on unit, actual durations are already calculated
-        if (IsSubjectToDiminishingLevels(target->diminishGroup, pvp))
-            unit->IncrDiminishing(target->diminishGroup, pvp);
-
-        m_spellAuraHolder = CreateSpellAuraHolder(m_spellInfo, unit, realCaster, m_CastItem, m_triggeredBySpellInfo);
+        // Only unit caster to be passed here
+        m_spellAuraHolder = CreateSpellAuraHolder(m_spellInfo, unit, m_caster, m_CastItem, m_triggeredBySpellInfo);
         m_spellAuraHolder->setDiminishGroup(target->diminishGroup);
     }
     else
@@ -6893,6 +6901,11 @@ WorldObject* Spell::GetAffectiveCasterObject() const
     if (m_originalCasterGUID.IsGameObject() && m_caster->IsInWorld())
         return m_caster->GetMap()->GetGameObject(m_originalCasterGUID);
     return m_originalCaster;
+}
+
+Unit* Spell::GetAffectiveCasterOrOwner() const
+{
+    return m_trueCaster->IsUnit() ? m_caster : static_cast<GameObject*>(m_trueCaster)->GetOwner();
 }
 
 WorldObject* Spell::GetCastingObject() const
