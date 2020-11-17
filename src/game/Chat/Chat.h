@@ -20,6 +20,7 @@
 #define MANGOSSERVER_CHAT_H
 
 #include "Common.h"
+#include "Globals/Locales.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/ObjectGuid.h"
 
