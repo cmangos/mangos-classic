@@ -2046,7 +2046,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
                 // Damage shield can be resisted...
                 if (SpellMissInfo missInfo = victim->SpellHitResult(this, spellProto, uint8(1 << (*i)->GetEffIndex()), false))
                 {
-                    victim->SendSpellMiss(this, spellProto->Id, missInfo);
+                    Unit::SendSpellMiss(victim, this, spellProto->Id, missInfo);
                     continue;
                 }
 
@@ -2138,6 +2138,7 @@ float Unit::CalcArmorReducedDamage(Unit* pVictim, const float damage)
     return (newdamage > 1) ? newdamage : 1.0f;
 }
 
+// TODO: Fix for GOcasting
 void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, int32* resist, bool canReflect, bool canResist, bool binary)
 {
     if (!IsAlive() || !damage)
@@ -2309,18 +2310,18 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
 
             if (caster->IsImmuneToDamage(schoolMask))
             {
-                SendSpellMiss(caster, (*i)->GetSpellProto()->Id, SPELL_MISS_IMMUNE);
+                Unit::SendSpellMiss(this, caster, (*i)->GetSpellProto()->Id, SPELL_MISS_IMMUNE);
                 return;
             }
 
             uint32 splitted = currentAbsorb;
             uint32 splitted_absorb = 0;
-            Unit::DealDamageMods(caster, caster, splitted, &splitted_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
+            Unit::DealDamageMods(this, caster, splitted, &splitted_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
 
-            caster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, splitted_absorb, 0, (damagetype == DOT), 0, false, true);
+            Unit::SendSpellNonMeleeDamageLog(this, caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, splitted_absorb, 0, (damagetype == DOT), 0, false, true);
 
             CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
-            DealDamage(caster, caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
+            Unit::DealDamage(this, caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
         }
 
         AuraList const& vSplitDamagePct = GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_PCT);
@@ -2343,17 +2344,17 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
 
             if (caster->IsImmuneToDamage(schoolMask))
             {
-                SendSpellMiss(caster, (*i)->GetSpellProto()->Id, SPELL_MISS_IMMUNE);
+                Unit::SendSpellMiss(this, caster, (*i)->GetSpellProto()->Id, SPELL_MISS_IMMUNE);
                 return;
             }
 
             uint32 split_absorb = 0;
-            Unit::DealDamageMods(caster, caster, splitted, &split_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
+            Unit::DealDamageMods(this, caster, splitted, &split_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
 
-            caster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, split_absorb, 0, (damagetype == DOT), 0, false, true);
+            Unit::SendSpellNonMeleeDamageLog(this, caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, split_absorb, 0, (damagetype == DOT), 0, false, true);
 
             CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
-            Unit::DealDamage(caster, caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
+            Unit::DealDamage(this, caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
         }
     }
 
@@ -5386,7 +5387,7 @@ void Unit::RemoveAllGameObjects()
     m_wildGameObjs.clear();
 }
 
-void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log) const
+void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
 {
     WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (8 + 8 + 4 + 4 + 1 + 4 + 4 + 1 + 1 + 4 + 4 + 1));
     data << log->target->GetPackGUID();
@@ -5431,12 +5432,12 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log) const
         }
     }
 
-    SendMessageToSet(data, true);
+    log->attacker->SendMessageToSet(data, true);
 }
 
-void Unit::SendSpellNonMeleeDamageLog(Unit* target, uint32 spellID, uint32 damage, SpellSchoolMask damageSchoolMask, uint32 absorbedDamage, int32 resist, bool isPeriodic, uint32 blocked, bool criticalHit, bool split)
+void Unit::SendSpellNonMeleeDamageLog(WorldObject* attacker, Unit* target, uint32 spellID, uint32 damage, SpellSchoolMask damageSchoolMask, uint32 absorbedDamage, int32 resist, bool isPeriodic, uint32 blocked, bool criticalHit, bool split)
 {
-    SpellNonMeleeDamage log(this, target, spellID, GetFirstSchoolInMask(damageSchoolMask));
+    SpellNonMeleeDamage log(attacker, target, spellID, GetFirstSchoolInMask(damageSchoolMask));
     log.damage = damage;
     log.damage += (resist < 0 ? uint32(std::abs(resist)) : 0);
     log.damage -= (absorbedDamage + (resist > 0 ? uint32(resist) : 0) + blocked);
@@ -5494,18 +5495,18 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo) const
     aura->GetTarget()->SendMessageToSet(data, true);
 }
 
-void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo) const
+void Unit::SendSpellMiss(WorldObject* caster, Unit* target, uint32 spellID, SpellMissInfo missInfo)
 {
     WorldPacket data(SMSG_SPELLLOGMISS, (4 + 8 + 1 + 4 + 8 + 1));
     data << uint32(spellID);
-    data << GetObjectGuid();
+    data << caster->GetObjectGuid();
     data << uint8(0);                                       // can be 0 or 1
     data << uint32(1);                                      // target count
     // for(i = 0; i < target count; ++i)
     data << target->GetObjectGuid();                        // target GUID
     data << uint8(missInfo);
     // end loop
-    SendMessageToSet(data, true);
+    caster->SendMessageToSet(data, true);
 }
 
 void Unit::SendSpellDamageResist(Unit* target, uint32 spellId) const

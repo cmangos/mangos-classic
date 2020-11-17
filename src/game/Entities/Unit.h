@@ -686,13 +686,13 @@ struct CalcDamageInfo
 // Spell damage info structure based on structure sending in SMSG_SPELLNONMELEEDAMAGELOG opcode
 struct SpellNonMeleeDamage
 {
-    SpellNonMeleeDamage(Unit* _attacker, Unit* _target, uint32 _SpellID, SpellSchools _school)
+    SpellNonMeleeDamage(WorldObject* _attacker, Unit* _target, uint32 _SpellID, SpellSchools _school)
         : target(_target), attacker(_attacker), SpellID(_SpellID), damage(0), school(_school),
           absorb(0), resist(0), periodicLog(false), unused(false), blocked(0), HitInfo(0)
     {}
 
     Unit*   target;
-    Unit*   attacker;
+    WorldObject* attacker;
     uint32 SpellID;
     uint32 damage;
     SpellSchools school;
@@ -1694,10 +1694,10 @@ class Unit : public WorldObject
         void SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype) const;
         void SendEnvironmentalDamageLog(uint8 type, uint32 damage, uint32 absorb, int32 resist) const;
         void SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, bool critical = false);
-        void SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log) const;
-        void SendSpellNonMeleeDamageLog(Unit* target, uint32 spellID, uint32 damage, SpellSchoolMask damageSchoolMask, uint32 absorbedDamage, int32 resist, bool isPeriodic, uint32 blocked, bool criticalHit = false, bool split = false);
+        static void SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log);
+        static void SendSpellNonMeleeDamageLog(WorldObject* attacker, Unit* target, uint32 spellID, uint32 damage, SpellSchoolMask damageSchoolMask, uint32 absorbedDamage, int32 resist, bool isPeriodic, uint32 blocked, bool criticalHit = false, bool split = false);
         void SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo) const;
-        void SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo) const;
+        static void SendSpellMiss(WorldObject* caster, Unit* target, uint32 spellID, SpellMissInfo missInfo);
         void SendSpellDamageResist(Unit* target, uint32 spellId) const;
         static void SendSpellOrDamageImmune(ObjectGuid casterGuid, Unit* target, uint32 spellId);
 

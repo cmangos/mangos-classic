@@ -1224,31 +1224,34 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
     if (!unit)
         return;
 
-    Unit* realCaster = GetAffectiveCasterOrOwner();
-
     const bool traveling = m_spellState == SPELL_STATE_TRAVELING;
 
     // Recheck immune (only for delayed spells)
     if (traveling && !m_spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
     {
-        if (unit->IsImmuneToDamage(GetSpellSchoolMask(m_spellInfo)) ||
-            unit->IsImmuneToSpell(m_spellInfo, unit == realCaster, effectMask))
+        uint8 notImmunedMask = 0;
+        for (uint8 effIndex = 0; effIndex < MAX_EFFECT_INDEX; ++effIndex)
+            if ((target->effectHitMask & (1 << effIndex)) != 0)
+                if (!unit->IsImmuneToSpellEffect(m_spellInfo, SpellEffectIndex(effIndex), unit == m_trueCaster))
+                    notImmunedMask |= (1 << effIndex);
+        effectMask = notImmunedMask & ~target->effectMaskProcessed;
+        if (!notImmunedMask ||
+            unit->IsImmuneToDamage(GetSpellSchoolMask(m_spellInfo)) ||
+            unit->IsImmuneToSpell(m_spellInfo, unit == m_trueCaster, effectMask))
         {
-            if (realCaster)
-                realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
+            Unit::SendSpellMiss(m_trueCaster, unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
 
             ResetEffectDamageAndHeal();
             return;
         }
     }
 
-    if (traveling && realCaster && realCaster != unit)
+    if (traveling && m_trueCaster != unit)
     {
-        if (realCaster->CanAttack(unit))
+        if (m_trueCaster->CanAttackSpell(unit, m_spellInfo))
         {
             // for delayed spells ignore not visible explicit target, if caster is dead, nothing is visible for him
-            if (traveling && unit == m_targets.getUnitTarget() &&
-                !unit->IsVisibleForOrDetect(m_caster, m_caster, false, false, true, true) && m_caster->IsAlive())
+            if (unit == m_targets.getUnitTarget() && ((m_trueCaster->IsGameObject() && !unit->IsAlive()) || (!unit->IsVisibleForOrDetect(m_caster, m_caster, false, false, true, true))))
             {
                 ResetEffectDamageAndHeal();
                 return;
@@ -1257,9 +1260,9 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
         else
         {
             // for delayed spells ignore negative spells (after duel end) for friendly targets
-            if (!IsPositiveSpell(m_spellInfo->Id, realCaster, unit))
+            if (!IsPositiveSpell(m_spellInfo->Id, m_trueCaster, unit))
             {
-                realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
+                Unit::SendSpellMiss(m_trueCaster, unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
                 ResetEffectDamageAndHeal();
                 return;
             }
@@ -1269,6 +1272,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
     // Apply additional spell effects to target
     CastPreCastSpells(unit);
 
+    Unit* realCaster = GetAffectiveCasterOrOwner();
     if (IsSpellAppliesAura(m_spellInfo, effectMask))
     {
         if (realCaster)
@@ -1286,7 +1290,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
 
             if (m_duration != target->diminishDuration && target->diminishDuration == 0 && target->diminishLevel > DIMINISHING_LEVEL_1 && !IsSpellWithNonAuraEffect(m_spellInfo))
             {
-                realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
+                Unit::SendSpellMiss(m_trueCaster, unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
                 ResetEffectDamageAndHeal();
                 return;
             }
