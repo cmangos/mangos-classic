@@ -969,7 +969,9 @@ void ScriptMgr::LoadRelayScripts()
 
 void ScriptMgr::LoadDbScriptStrings()
 {
+    // load both dbscript_strings and creature_ai_texts here because either may be referenced by dbscript_random_templates
     sObjectMgr.LoadMangosStrings(WorldDatabase, "dbscript_string", MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID, true);
+    sObjectMgr.LoadMangosStrings(WorldDatabase, "creature_ai_texts", MIN_CREATURE_AI_TEXT_STRING_ID, MAX_CREATURE_AI_TEXT_STRING_ID, true);
 
     std::set<int32> ids;
 
@@ -1064,7 +1066,7 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32
                     for (auto& data : vector)
                     {
                         if (!sObjectMgr.GetMangosStringLocale(data.first))
-                            sLog.outErrorDb("Table `dbscript_string` is missing string id %d, used in database script template table dbscript_string_template id %u.", data.first, itrM->second.talk.stringTemplateId);
+                            sLog.outErrorDb("Table `%s` is missing string id %d, used in database script template table dbscript_random_templates id %u.", itrM->second.talk.stringTemplateId > 0 ? "dbscript_string" : "creature_ai_texts", data.first, itrM->second.talk.stringTemplateId);
                     }
                 }
             }

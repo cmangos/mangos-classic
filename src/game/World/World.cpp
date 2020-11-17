@@ -1220,9 +1220,6 @@ void World::SetInitialWorldSettings()
     sTicketMgr.LoadGMTickets();
 
     ///- Load and initialize EventAI Scripts
-    sLog.outString("Loading CreatureEventAI Texts...");
-    sEventAIMgr.LoadCreatureEventAI_Texts(false);           // false, will checked in LoadCreatureEventAI_Scripts
-
     sLog.outString("Loading CreatureEventAI Summons...");
     sEventAIMgr.LoadCreatureEventAI_Summons(false);         // false, will checked in LoadCreatureEventAI_Scripts
 
