@@ -171,7 +171,7 @@ struct go_covertopsAI : public GameObjectAI
                 {
                     for (auto ventureNpc:m_ventureNpcList)
                     {
-                        if (!ventureNpc || !ventureNpc->IsAlive())
+                        if (!ventureNpc || !ventureNpc->IsAlive() || ventureNpc->IsInCombat())
                             continue;
                         float x, y, z;
                         m_go->GetContactPoint(ventureNpc, x, y, z, 10.0f);
@@ -190,7 +190,7 @@ struct go_covertopsAI : public GameObjectAI
                 {
                     for (auto ventureNpc:m_ventureNpcList)
                     {
-                        if (!ventureNpc || !ventureNpc->IsAlive())
+                        if (!ventureNpc || !ventureNpc->IsAlive() || ventureNpc->IsInCombat())
                             continue;
                         ventureNpc->SetWalk(true);
                         ventureNpc->AI()->EnterEvadeMode();
