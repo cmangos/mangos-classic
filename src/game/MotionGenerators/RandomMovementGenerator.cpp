@@ -234,14 +234,7 @@ bool FleeingMovementGenerator::_getLocation(Unit& owner, float& x, float& y, flo
     owner.GetPosition(x, y, z);
 
     float angle = 2.0f * M_PI_F * rand_norm_f();
-    Position pos;
-    for (uint32 i = 0; i < 10; ++i)
-    {
-        owner.GetFirstCollisionPosition(pos, i_radius, angle);
-        if (owner.GetPosition().GetDistance(pos) > i_radius * 0.8f) // if at least 80% distance, good enough
-            break;
-        angle += (M_PI_F / 5); // else try slightly different angle
-    }
+    Position pos = owner.GetFirstRandomAngleCollisionPosition(i_radius, angle);
     x = pos.x;
     y = pos.y;
     z = pos.z + 1;
