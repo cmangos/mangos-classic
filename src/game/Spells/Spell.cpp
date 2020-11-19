@@ -2014,6 +2014,14 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                     SpellNotifyPushType pushType = PUSH_TARGET_CENTER;
                     FillAreaTargets(tempAoeList, maxRadiusTarget, cone, pushType, SPELL_TARGETS_AOE_ATTACKABLE);
                     tempAoeList.erase(std::remove(tempAoeList.begin(), tempAoeList.end(), newUnitTarget), tempAoeList.end());
+
+                    for (auto itr = tempAoeList.begin(); itr != tempAoeList.end();)
+                    {
+                        if(!(*itr)->IsVisibleForOrDetect(m_caster, m_originalCaster, false))
+                            itr = tempAoeList.erase(itr);
+                        else
+                            ++itr;
+                    }
                 }
 
                 // No targets. No need to process.
