@@ -187,7 +187,11 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 uint32 spellId = charminfo->GetSpellOpener();
                 SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-                Spell* spell = new Spell(m_unit, spellInfo, TRIGGERED_NONE);
+                uint32 flags = TRIGGERED_NORMAL_COMBAT_CAST;
+                if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                    flags |= TRIGGERED_PET_CAST;
+
+                Spell* spell = new Spell(m_unit, spellInfo, flags);
 
                 // Push back stored spell
                 targetSpellStore.push_back(TargetSpellList::value_type(victim, spell));
@@ -235,7 +239,11 @@ void PetAI::UpdateAI(const uint32 diff)
                 else if (IsNonCombatSpell(spellInfo))
                     continue;
 
-                Spell* spell = new Spell(m_unit, spellInfo, TRIGGERED_NONE);
+                uint32 flags = TRIGGERED_NORMAL_COMBAT_CAST;
+                if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                    flags |= TRIGGERED_PET_CAST;
+
+                Spell* spell = new Spell(m_unit, spellInfo, flags);
 
                 if (inCombat && spell->CanAutoCast(victim))
                 {

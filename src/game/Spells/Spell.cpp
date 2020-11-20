@@ -5735,13 +5735,7 @@ bool Spell::CanAutoCast(Unit* target)
     SpellCastResult result = CheckPetCast(target);
 
     if (result == SPELL_CAST_OK || result == SPELL_FAILED_UNIT_NOT_INFRONT)
-    {
-        FillTargetMap();
-        // check if among target units, our WANTED target is as well (->only self cast spells return false)
-        for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-            if (ihit->targetGUID == targetguid)
-                return true;
-    }
+        return true;
     return false;                                           // target invalid
 }
 
