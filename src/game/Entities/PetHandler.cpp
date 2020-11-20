@@ -317,7 +317,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     return;
             }
 
-            uint32 flags = TRIGGERED_NONE;
+            petUnit->clearUnitState(UNIT_STAT_MOVING);
+
+            uint32 flags = TRIGGERED_NORMAL_COMBAT_CAST;
             if (!petUnit->hasUnitState(UNIT_STAT_POSSESSED))
                 flags |= TRIGGERED_PET_CAST;
 
