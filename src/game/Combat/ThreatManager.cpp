@@ -676,10 +676,10 @@ void ThreatManager::DeleteOutOfRangeReferences()
 {
     std::vector<HostileReference*> m_refs;
     for (auto& ref : iThreatContainer.getThreatList())
-        if (ref->getTarget()->GetDistance(getOwner(), true, DIST_CALC_COMBAT_REACH) > 60.f)
+        if (ref->isValid() && ref->getTarget()->GetDistance(getOwner(), true, DIST_CALC_COMBAT_REACH) > 60.f)
             m_refs.push_back(ref);
     for (auto& ref : iThreatOfflineContainer.getThreatList())
-        if (ref->getTarget()->GetDistance(getOwner(), true, DIST_CALC_COMBAT_REACH) > 60.f)
+        if (ref->isValid() && ref->getTarget()->GetDistance(getOwner(), true, DIST_CALC_COMBAT_REACH) > 60.f)
             m_refs.push_back(ref);
     for (auto& ref : m_refs)
     {
