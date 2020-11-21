@@ -56,6 +56,7 @@ enum
     SPELL_CARAPACE_CTHUN            = 26156,                // Was removed from client dbcs
     SPELL_TRANSFORM                 = 26232,
     SPELL_CTHUN_VULNERABLE          = 26235,
+    SPELL_SUMMON_EYE_TENTACLES_P2   = 26769,
     SPELL_SUMMON_GIANT_EYE_TENTACLES= 26766,                // Periodically triggers 26767 that cast 26768 on random target to summon NPC 15334
     SPELL_SUMMON_GIANT_EYE_TENTACLE = 26768,                // Summon NPC 15334
     SPELL_MOUTH_TENTACLE            = 26332,                // prepare target to teleport to stomach
@@ -183,18 +184,6 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
         }
     }
 
-    // Wrapper to kill the eye tentacles before summoning new ones - Note: based on sniff I think this is a bad approach
-    void DoDespawnEyeTentacles()
-    {
-        for (GuidList::const_iterator itr = m_lEyeTentaclesList.begin(); itr != m_lEyeTentaclesList.end(); ++itr)
-        {
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                pTemp->Suicide();
-        }
-
-        m_lEyeTentaclesList.clear();
-    }
-
     void UpdateAI(const uint32 uiDiff) override
     {
         // We ignore targets during Dark Glare to control Eye of C'Thun's orientation ourselves
@@ -273,7 +262,6 @@ struct boss_cthunAI : public Scripted_NoMovementAI
     // Global variables
     uint32 m_uiPhaseTimer;
     uint8 m_uiFleshTentaclesKilled;
-    uint32 m_uiEyeTentacleTimer;
     uint32 m_uiGiantClawTentacleTimer;
     uint32 m_uiDigestiveAcidTimer;
 
@@ -293,7 +281,6 @@ struct boss_cthunAI : public Scripted_NoMovementAI
 
         m_uiPhaseTimer              = 0;
         m_uiFleshTentaclesKilled    = 0;
-        m_uiEyeTentacleTimer        = 35000;
         m_uiGiantClawTentacleTimer  = 20000;
         m_uiDigestiveAcidTimer      = 4000;
 
@@ -328,7 +315,8 @@ struct boss_cthunAI : public Scripted_NoMovementAI
 
     void Aggro(Unit* /*who*/) override
     {
-        // Start periodically summoning Giant Eye Tentacles
+        // Start periodically summoning Eye, Giant Eye Tentacles
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_EYE_TENTACLES_P2, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_EYE_TENTACLES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
     }
 
@@ -342,6 +330,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         }
 
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_GIANT_EYE_TENTACLES);
+        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_EYE_TENTACLES_P2);
 
         Scripted_NoMovementAI::EnterEvadeMode();
     }
@@ -411,18 +400,6 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         // Spawn 2 flesh tentacles
         for (uint8 i = 0; i < MAX_FLESH_TENTACLES; ++i)
             m_creature->SummonCreature(NPC_FLESH_TENTACLE, afCthunLocations[i][0], afCthunLocations[i][1], afCthunLocations[i][2], afCthunLocations[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
-    }
-
-    // Wrapper to kill the eye tentacles before summoning new ones - Note: based on sniff I think this is a bad approach
-    void DoDespawnEyeTentacles()
-    {
-        for (GuidList::const_iterator itr = m_lEyeTentaclesList.begin(); itr != m_lEyeTentaclesList.end(); ++itr)
-        {
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                pTemp->Suicide();
-        }
-
-        m_lEyeTentaclesList.clear();
     }
 
     // Wrapper to remove a stored player from the stomach
@@ -557,23 +534,6 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         }
         else
             m_uiGiantClawTentacleTimer -= uiDiff;
-
-        if (m_uiEyeTentacleTimer < uiDiff)
-        {
-            DoDespawnEyeTentacles();
-
-            // Spawn 8 Eye Tentacles every 30 seconds
-            float fX, fY, fZ;
-            for (uint8 i = 0; i < MAX_EYE_TENTACLES; ++i)
-            {
-                m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 30.0f, M_PI_F / 4 * i);
-                m_creature->SummonCreature(NPC_EYE_TENTACLE, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-            }
-
-            m_uiEyeTentacleTimer = 30000;
-        }
-        else
-            m_uiEyeTentacleTimer -= uiDiff;
 
         // Note: this should be applied by the teleport spell
         if (m_uiDigestiveAcidTimer < uiDiff)
@@ -751,13 +711,6 @@ struct PeriodicSummonEyeTrigger : public AuraScript
     {
         if (Unit* caster = aura->GetCaster())
         {
-            if (caster->GetEntry() != NPC_EYE_OF_CTHUN)
-                return;
-            if (auto* eyeOfCThunAI = dynamic_cast<boss_eye_of_cthunAI*>(caster->AI()))
-                eyeOfCThunAI->DoDespawnEyeTentacles();
-            else
-                return; // Something went wrong
-
             uint32 eyeTentaclesSpells[] = { SPELL_SUMMON_EYE_TENTACLE_1, SPELL_SUMMON_EYE_TENTACLE_2, SPELL_SUMMON_EYE_TENTACLE_3, SPELL_SUMMON_EYE_TENTACLE_4, SPELL_SUMMON_EYE_TENTACLE_5, SPELL_SUMMON_EYE_TENTACLE_6, SPELL_SUMMON_EYE_TENTACLE_7, SPELL_SUMMON_EYE_TENTACLE_8 };
             for (auto spellId:eyeTentaclesSpells)
                 caster->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);

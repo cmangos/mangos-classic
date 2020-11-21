@@ -39,6 +39,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26619,'spell_periodic_scarab_trigger'),
 (26686,'spell_aq_whirlwind'),
 (26767,'spell_cthun_giant_eye_tentacle'),
+(26769,'spell_cthun_periodic_eye_trigger'),
 (28282,'spell_ashbringer_item'),
 (27808,'spell_kel_thuzad_frost_blast'),
 (28522,'spell_sapphiron_icebolt_aura'),
