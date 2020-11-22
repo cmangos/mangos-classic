@@ -249,10 +249,15 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
     // player far teleport would try to create same instance, but we need it NOW for transport...
     // correct me if I'm wrong O.o
     Map* newMap = sMapMgr.CreateMap(newMapid, this);
+    // TODO: Reimplement transports inside map rather than MapManager and use AddMessage
+    if (oldMap != newMap)
+        RemoveModelFromMap();
+
     SetMap(newMap);
 
     if (oldMap != newMap)
     {
+        AddModelToMap();
         UpdateForMap(oldMap);
         UpdateForMap(newMap);
     }

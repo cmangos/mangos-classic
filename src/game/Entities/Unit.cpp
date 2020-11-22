@@ -11074,9 +11074,6 @@ void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=null
     if (!atMap)
         atMap = GetMap();
 
-    if (GenericTransport* transport = GetTransport())
-        return;
-
     // non fly unit don't must be in air
     // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
     if (!CanFly())

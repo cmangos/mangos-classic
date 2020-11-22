@@ -1922,6 +1922,27 @@ void GameObject::UpdateModel()
         GetMap()->InsertGameObjectModel(*m_model);
 }
 
+void GameObject::AddModelToMap()
+{
+    if (!m_model)
+        return;
+
+    if (!GetMap()->ContainsGameObjectModel(*m_model))
+    {
+        m_model->Relocate(*this);
+        GetMap()->InsertGameObjectModel(*m_model);
+    }
+}
+
+void GameObject::RemoveModelFromMap()
+{
+    if (!m_model)
+        return;
+
+    if (GetMap()->ContainsGameObjectModel(*m_model))
+        GetMap()->RemoveGameObjectModel(*m_model);
+}
+
 void GameObject::UpdateModelPosition()
 {
     if (!m_model)

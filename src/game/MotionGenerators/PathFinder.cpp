@@ -76,6 +76,8 @@ bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest
     float x, y, z;
     m_sourceUnit->GetPosition(x, y, z, m_sourceUnit->GetTransport());
     Vector3 dest(destX, destY, destZ);
+    if (GenericTransport* transport = m_sourceUnit->GetTransport())
+        transport->CalculatePassengerOffset(dest.x, dest.y, dest.z);
     return calculate(Vector3(x, y, z), dest, forceDest, straightLine);
 }
 
@@ -693,8 +695,16 @@ void PathFinder::NormalizePath()
     if (!sWorld.getConfig(CONFIG_BOOL_PATH_FIND_NORMALIZE_Z))
         return;
 
+    GenericTransport* transport = m_sourceUnit->GetTransport();
+
     for (auto& m_pathPoint : m_pathPoints)
+    {
+        if (transport)
+            transport->CalculatePassengerPosition(m_pathPoint.x, m_pathPoint.y, m_pathPoint.z);
         m_sourceUnit->UpdateAllowedPositionZ(m_pathPoint.x, m_pathPoint.y, m_pathPoint.z);
+        if (transport)
+            transport->CalculatePassengerOffset(m_pathPoint.x, m_pathPoint.y, m_pathPoint.z);
+    }
 }
 
 void PathFinder::BuildShortcut()

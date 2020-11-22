@@ -20,6 +20,7 @@
 #include "MoveSpline.h"
 #include "packet_builder.h"
 #include "Entities/Unit.h"
+#include "Entities/Transports.h"
 
 namespace Movement
 {
@@ -28,6 +29,13 @@ namespace Movement
     int32 MoveSplineInit::Launch()
     {
         MoveSpline& move_spline = *unit.movespline;
+        GenericTransport* transport = unit.GetTransport();
+
+        Location real_position(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetOrientation());
+
+        // If boarded use current local position
+        if (transport)
+            transport->CalculatePassengerOffset(real_position.x, real_position.y, real_position.z, &real_position.orientation);
 
         Vector3 real_position(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ());
         // there is a big chane that current position is unknown if current state is not finalized, need compute it
@@ -65,6 +73,14 @@ namespace Movement
 
         WorldPacket data(SMSG_MONSTER_MOVE, 64);
         data << unit.GetPackGUID();
+
+        if (transport)
+        {
+            data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
+            if (transport)
+                data << transport->GetPackGUID();
+        }
+
         PacketBuilder::WriteMonsterMove(move_spline, data);
         unit.SendMessageToSet(data, true);
 

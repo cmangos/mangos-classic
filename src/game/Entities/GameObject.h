@@ -813,6 +813,8 @@ class GameObject : public WorldObject
         GameObjectAI* AI() const { return m_AI.get(); }
 
         GameObjectModel* m_model;
+        void AddModelToMap();
+        void RemoveModelFromMap();
         void UpdateModelPosition();
 
         float GetStationaryX() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionX(); return 0.f; }
