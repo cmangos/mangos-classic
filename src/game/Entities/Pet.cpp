@@ -1015,12 +1015,18 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
                     p_owner->GetTemporaryUnsummonedPetNumber() != GetCharmInfo()->GetPetNumber())
                 mode = PET_SAVE_NOT_IN_SLOT;
 
-            if (mode == PET_SAVE_REAGENTS)
+            uint32 spellId = GetUInt32Value(UNIT_CREATED_BY_SPELL);
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+            // save minion for resummoning at resurrection in BGs
+            // only save the summon spell in the case where the minion did not die before the warlock, otherwise reset it
+            if (mode == PET_SAVE_REAGENTS && p_owner->getClass() == CLASS_WARLOCK && p_owner->InBattleGround() && isControlled() && !isTemporarySummoned() && spellInfo)
+                p_owner->SetBGPetSpell(spellId);
+            else
+                p_owner->SetBGPetSpell(0);
+
+            if (mode == PET_SAVE_REAGENTS && !p_owner->InBattleGround()) // don't restore reagents in BGs - minion will be automatically ressurected
             {
                 // returning of reagents only for players, so best done here
-                uint32 spellId = GetUInt32Value(UNIT_CREATED_BY_SPELL);
-                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-
                 if (spellInfo)
                 {
                     for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
