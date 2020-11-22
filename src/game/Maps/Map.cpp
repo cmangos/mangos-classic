@@ -2303,9 +2303,9 @@ bool Map::GetHeightInRange(float x, float y, float& z, float maxSearchDist /*= 4
     return true;
 }
 
-float Map::GetHeight(float x, float y, float z) const
+float Map::GetHeight(float x, float y, float z, bool swim) const
 {
-    float staticHeight = m_TerrainData->GetHeightStatic(x, y, z);
+    float staticHeight = m_TerrainData->GetHeightStatic(x, y, z, true, (swim ? DEFAULT_WATER_SEARCH : DEFAULT_HEIGHT_SEARCH));
 
     // Get Dynamic Height around static Height (if valid)
     float dynSearchHeight = 2.0f + (z < staticHeight ? staticHeight : z);

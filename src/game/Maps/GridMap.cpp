@@ -1091,7 +1091,7 @@ bool TerrainInfo::IsUnderWater(float x, float y, float z) const
  *
  * @param x, y, z    Coordinates original point at floor level
  *
- * @param pGround    optional arg for return calculated by function work ground height, it let avoid in caller code recalculate height for point if it need
+ * @param groundZ    precalculated Z through getHeight
  *
  * @param swim       z coordinate can be calculated for select above/at or under z coordinate (for fly or swim/walking by bottom)
  *                   in last cases for in water returned under water height for avoid client set swimming unit as stay at water.
@@ -1100,34 +1100,29 @@ bool TerrainInfo::IsUnderWater(float x, float y, float z) const
  *
  * @return           calculated z coordinate
  */
-float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float* pGround /*= nullptr*/, bool swim /*= false*/, float minWaterDeep /*= DEFAULT_COLLISION_HEIGHT*/) const
+float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float& groundZ, bool swim /*= false*/, float minWaterDeep /*= DEFAULT_COLLISION_HEIGHT*/) const
 {
     if (const_cast<TerrainInfo*>(this)->GetGrid(x, y))
     {
-        // we need ground level (including grid height version) for proper return water level in point
-        float ground_z = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
-        if (pGround)
-            *pGround = ground_z;
-
         GridMapLiquidData liquid_status;
 
-        GridMapLiquidStatus res = getLiquidStatus(x, y, ground_z, MAP_ALL_LIQUIDS, &liquid_status);
+        GridMapLiquidStatus res = getLiquidStatus(x, y, groundZ, MAP_ALL_LIQUIDS, &liquid_status);
 
         if (res)
         {
             if (swim)
             {
-                if (liquid_status.level - ground_z > minWaterDeep)  // check if its shallow water
+                if (liquid_status.level - groundZ > minWaterDeep)  // check if its shallow water
                     return liquid_status.level - minWaterDeep;
 
                 // its shallow water so return ground under it
-                return ground_z;
+                return groundZ;
             }
 
             return liquid_status.level;
         }
 
-        return ground_z;
+        return groundZ;
     }
 
     return VMAP_INVALID_HEIGHT_VALUE;

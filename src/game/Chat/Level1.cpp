@@ -1656,7 +1656,8 @@ bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y,
         }
 
         TerrainInfo const* map = sTerrainMgr.LoadTerrain(mapid);
-        z = map->GetWaterOrGroundLevel(x, y, MAX_HEIGHT);
+        float groundZ = player->GetMap()->GetHeight(x, y, z);
+        z = map->GetWaterOrGroundLevel(x, y, MAX_HEIGHT, groundZ);
     }
 
     // stop flight if need
