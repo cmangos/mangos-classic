@@ -128,7 +128,7 @@ class RegularGrid2D
         }
 
         bool contains(const T& value) const { return memberTable.count(&value) > 0; }
-        int size() const { return uint32(memberTable.size()); }	    bool empty() const { return memberTable.empty(); }
+        int size() const { return uint32(memberTable.size()); }
 
         struct Cell
         {
