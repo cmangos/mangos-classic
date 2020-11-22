@@ -1597,8 +1597,8 @@ void Player::SetDeathState(DeathState s)
         // remove form before other mods to prevent incorrect stats calculation
         RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
 
-        // FIXME: is pet dismissed at dying or releasing spirit? if second, add SetDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
-        RemovePet(PET_SAVE_REAGENTS);
+        if (Pet* pet = GetPet())
+            RemovePet(pet->IsAlive() ? PET_SAVE_REAGENTS : PET_SAVE_AS_CURRENT);
 
         // Remove guardians (only players are supposed to have pets/guardians removed on death)
         RemoveGuardians();
