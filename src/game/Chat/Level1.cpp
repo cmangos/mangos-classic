@@ -342,6 +342,13 @@ bool ChatHandler::HandleGPSCommand(char* args)
                     cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
                     zone_x, zone_y, ground_z, floor_z, have_map, have_vmap);
 
+    if (GenericTransport* transport = obj->GetTransport())
+    {
+        Position pos;
+        obj->GetPosition(pos.x, pos.y, pos.z, transport);
+        PSendSysMessage("Transport coords: %f %f %f", pos.x, pos.y, pos.z);
+    }
+
     DEBUG_LOG("Player %s GPS call for %s '%s' (%s: %u):",
               m_session ? GetNameLink().c_str() : GetMangosString(LANG_CONSOLE_COMMAND),
               (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetName(),
