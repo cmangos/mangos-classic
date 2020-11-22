@@ -277,12 +277,18 @@ bool GenericTransport::AddPassenger(Unit* passenger)
             CalculatePassengerOffset(passenger->m_movementInfo.t_pos.x, passenger->m_movementInfo.t_pos.y, passenger->m_movementInfo.t_pos.z, &passenger->m_movementInfo.t_pos.o);
         }
 
-        if (Pet* pet =passenger->GetPet())
+        auto addPetFunc = [&](Pet* pet)
         {
             AddPassenger(pet);
             pet->m_movementInfo.SetTransportData(GetObjectGuid(), passenger->m_movementInfo.t_pos.x, passenger->m_movementInfo.t_pos.y, passenger->m_movementInfo.t_pos.z, passenger->m_movementInfo.t_pos.o, GetPathProgress());
             pet->NearTeleportTo(passenger->m_movementInfo.pos.x, passenger->m_movementInfo.pos.y, passenger->m_movementInfo.pos.z, passenger->m_movementInfo.pos.o);
-        }
+        };
+
+        if (Pet* pet = passenger->GetPet())
+            addPetFunc(pet);
+
+        if (Pet* miniPet = passenger->GetMiniPet())
+            addPetFunc(miniPet);
     }
     return true;
 }
