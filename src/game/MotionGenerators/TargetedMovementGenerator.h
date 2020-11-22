@@ -66,7 +66,7 @@ class TargetedMovementGeneratorMedium
         virtual bool RemoveOnInvalid() const { return true; };
 
     protected:
-        virtual bool RequiresNewPosition(T& owner, float x, float y, float z) const;
+        virtual bool RequiresNewPosition(T& owner, Position pos) const;
         virtual float GetDynamicTargetDistance(T& /*owner*/, bool /*forRangeCheck*/) const { return i_offset; }
         virtual bool ShouldFaceTarget() const { return i_faceTarget; }
         virtual void HandleTargetedMovement(T& owner, const uint32& time_diff) = 0;
@@ -80,7 +80,7 @@ class TargetedMovementGeneratorMedium
         ShortTimeTracker i_recheckDistance;
         float i_offset;
         float i_angle;
-        G3D::Vector3 i_lastTargetPos;
+        Position i_lastTargetPos;
         bool i_speedChanged : 1;
         bool i_targetReached : 1;
         bool i_faceTarget : 1;
@@ -144,7 +144,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
         float GetDynamicTargetDistance(Unit& owner, bool forRangeCheck) const override;
         void HandleTargetedMovement(Unit& owner, const uint32& time_diff) override;
         void HandleFinalizedMovement(Unit& owner) override;
-        bool RequiresNewPosition(Unit& owner, float x, float y, float z) const override;
+        bool RequiresNewPosition(Unit& owner, Position pos) const override;
 
         bool _hasUnitStateNotMove(Unit& u) override;
         void _clearUnitStateMove(Unit& u) override;

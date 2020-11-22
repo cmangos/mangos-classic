@@ -27,6 +27,7 @@
 #include "Movement/MoveSplineInit.h"
 #include "Movement/MoveSpline.h"
 #include "Maps/GridDefines.h"
+#include "Entities/Transports.h"
 
 #include <cassert>
 
@@ -419,7 +420,11 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
 
     Vector3 startPos(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ());
     if (!creature.movespline->Finalized())
+    {
+        if (GenericTransport* transport = creature.GetTransport())
+            transport->CalculatePassengerPosition(startPos.x, startPos.y, startPos.z, nullptr);
         startPos = creature.movespline->ComputePosition();
+    }
 
     genPath.push_back(startPos);
 

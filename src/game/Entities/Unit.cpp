@@ -9229,6 +9229,8 @@ void CharmInfo::SetStayPosition()
     if (!m_unit->movespline->Finalized())
     {
         Movement::Location loc = m_unit->movespline->ComputePosition();
+        if (GenericTransport* transport = m_unit->GetTransport())
+            transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, &loc.orientation);
         m_stayPosX = loc.x;
         m_stayPosY = loc.y;
         m_stayPosZ = loc.z;
@@ -9340,21 +9342,27 @@ void Unit::InterruptMoving(bool forceSendStop /*=false*/)
 
     if (!movespline->Finalized())
     {
-        Movement::Location loc = movespline->ComputePosition();
+        Movement::Location computedLoc = movespline->ComputePosition();
+        Position pos(computedLoc.x, computedLoc.y, computedLoc.z, computedLoc.orientation);
+        if (GenericTransport* transport = GetTransport())
+        {
+            m_movementInfo.UpdateTransportData(pos);
+            transport->CalculatePassengerPosition(pos.x, pos.y, pos.z, &pos.o);
+        }
 
         if (movespline->isFacing() && movespline->isFacingTarget())
         {
             if (Unit const* target = ObjectAccessor::GetUnit(*this, ObjectGuid(movespline->GetFacing().target)))
-                loc.orientation = GetAngle(target);
+                pos.o = GetAngle(target);
             else
             {
-                float angle = atan2((loc.y - GetPositionY()), (loc.x - GetPositionX()));
-                loc.orientation = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
+                float angle = atan2((pos.y - GetPositionY()), (pos.x - GetPositionX()));
+                pos.o = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
             }
         }
 
         movespline->_Interrupt();
-        Relocate(loc.x, loc.y, loc.z, loc.orientation);
+        Relocate(pos.x, pos.y, pos.z, pos.o);
         isMoving = true;
     }
 
@@ -10351,45 +10359,59 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     if (m_movesplineTimer.Passed() || arrived)
     {
         m_movesplineTimer.Reset(POSITION_UPDATE_DELAY);
-        Movement::Location loc = movespline->ComputePosition();
+        Movement::Location computedLoc = movespline->ComputePosition();
+        Position pos(computedLoc.x, computedLoc.y, computedLoc.z, computedLoc.orientation);
+        if (GenericTransport* transport = GetTransport())
+        {
+            m_movementInfo.UpdateTransportData(pos);
+            transport->CalculatePassengerPosition(pos.x, pos.y, pos.z, &pos.o);
+        }
 
         if (movespline->isFacing() && movespline->isFacingTarget())
         {
             if (Unit const* target = ObjectAccessor::GetUnit(*this, ObjectGuid(movespline->GetFacing().target)))
-                loc.orientation = GetAngle(target);
+                pos.o = GetAngle(target);
             else
             {
-                float angle = atan2((loc.y - GetPositionY()), (loc.x - GetPositionX()));
-                loc.orientation = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
+                float angle = atan2((pos.y - GetPositionY()), (pos.x - GetPositionX()));
+                pos.o = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
             }
         }
 
         if (GetTypeId() == TYPEID_PLAYER)
-            ((Player*)this)->SetPosition(loc.x, loc.y, loc.z, loc.orientation);
+            ((Player*)this)->SetPosition(pos.x, pos.y, pos.z, pos.o);
         else
-            GetMap()->CreatureRelocation((Creature*)this, loc.x, loc.y, loc.z, loc.orientation);
+            GetMap()->CreatureRelocation((Creature*)this, pos.x, pos.y, pos.z, pos.o);
     }
 }
 
 void Unit::UpdateSplinePosition()
 {
-    auto loc = movespline->ComputePosition();
+    Movement::Location computedLoc = movespline->ComputePosition();
+    Position pos(computedLoc.x, computedLoc.y, computedLoc.z, computedLoc.orientation);
+    if (GenericTransport* transport = GetTransport())
+    {
+        m_movementInfo.UpdateTransportData(pos);
+        transport->CalculatePassengerPosition(pos.x, pos.y, pos.z, &pos.o);
+    }
+    if (GenericTransport* transport = GetTransport())
+        transport->CalculatePassengerPosition(pos.x, pos.y, pos.z, &pos.o);
 
     if (movespline->isFacing() && movespline->isFacingTarget())
     {
         if (Unit const* target = ObjectAccessor::GetUnit(*this, ObjectGuid(movespline->GetFacing().target)))
-            loc.orientation = GetAngle(target);
+            pos.o = GetAngle(target);
         else
         {
-            float angle = atan2((loc.y - GetPositionY()), (loc.x - GetPositionX()));
-            loc.orientation = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
+            float angle = atan2((pos.y - GetPositionY()), (pos.x - GetPositionX()));
+            pos.o = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
         }
     }
 
     if (IsPlayer())
-        static_cast<Player*>(this)->SetPosition(loc.x, loc.y, loc.z, loc.orientation);
+        static_cast<Player*>(this)->SetPosition(pos.x, pos.y, pos.z, pos.o);
     else
-        GetMap()->CreatureRelocation((Creature*)this, loc.x, loc.y, loc.z, loc.orientation);
+        GetMap()->CreatureRelocation((Creature*)this, pos.x, pos.y, pos.z, pos.o);
 }
 
 void Unit::DisableSpline()

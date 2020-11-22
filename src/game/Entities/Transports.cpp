@@ -559,6 +559,11 @@ void GenericTransport::UpdatePassengerPosition(WorldObject* passenger)
     }
 }
 
+void GenericTransport::CalculatePassengerOrientation(float& o) const
+{
+    o = MapManager::NormalizeOrientation(GetOrientation() + o);
+}
+
 void GenericTransport::CalculatePassengerPosition(float& x, float& y, float& z, float* o, float transX, float transY, float transZ, float transO)
 {
     float inx = x, iny = y, inz = z;

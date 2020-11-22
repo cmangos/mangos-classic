@@ -1132,11 +1132,16 @@ float WorldObject::GetDistance(const WorldObject* obj, bool is3D, DistanceCalcul
     }
 }
 
-float WorldObject::GetDistance(float x, float y, float z, DistanceCalculation distcalc) const
+float WorldObject::GetDistance(float x, float y, float z, DistanceCalculation distcalc, bool transport) const
 {
-    float dx = GetPositionX() - x;
-    float dy = GetPositionY() - y;
-    float dz = GetPositionZ() - z;
+    Position pos;
+    if (!transport)
+        pos = GetPosition();
+    else
+        pos = GetTransportPosition();
+    float dx = pos.x - x;
+    float dy = pos.y - y;
+    float dz = pos.z - z;
     float dist = dx * dx + dy * dy + dz * dz;
 
     switch (distcalc)
@@ -2699,4 +2704,21 @@ float Position::GetAngle(const float x, const float y) const
     float ang = atan2(dy, dx);                              // returns value between -Pi..Pi
     ang = (ang >= 0) ? ang : 2 * M_PI_F + ang;
     return ang;
+}
+
+float Position::GetDistance(Position const& other) const
+{
+    float dx = GetPositionX() - other.GetPositionX();
+    float dy = GetPositionY() - other.GetPositionY();
+    float distsq = dx * dx + dy * dy;
+
+    float dz = GetPositionZ() - other.GetPositionZ();
+    distsq += dz * dz;
+
+    return distsq;
+}
+
+bool operator!=(const Position& left, const Position& right)
+{
+    return left.x != right.x || left.y != right.y || left.z != right.z || left.o != right.o;
 }

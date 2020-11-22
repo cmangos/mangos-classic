@@ -294,7 +294,10 @@ struct Position
     float GetPositionO() const { return o; }
     bool IsEmpty() const { return x == 0.f && y == 0.f && z == 0.f; }
     float GetAngle(const float x, const float y) const;
+    float GetDistance(Position const& other) const; // WARNING: Returns squared distance for performance reasons
 };
+
+bool operator!=(const Position& left, const Position& right);
 
 struct WorldLocation
 {
@@ -761,6 +764,7 @@ class MovementInfo
             t_pos.o = o;
             t_time = time;
         }
+        void UpdateTransportData(Position pos) { t_pos = pos; }
         void ClearTransportData()
         {
             t_guid = ObjectGuid();
@@ -842,6 +846,7 @@ class WorldObject : public Object
         void GetPosition(WorldLocation& loc) const
         { loc.mapid = m_mapId; GetPosition(loc.coord_x, loc.coord_y, loc.coord_z); loc.orientation = GetOrientation(); }
         Position const& GetPosition() const { return m_position; }
+        Position const& GetTransportPosition() const { return m_movementInfo.GetTransportPos(); }
         float GetOrientation() const { return m_position.o; }
 
         /// Gives a 2d-point in distance distance2d in direction absAngle around the current position (point-to-point)
@@ -923,7 +928,7 @@ class WorldObject : public Object
         virtual void SetOwnerGuid(ObjectGuid /*guid*/) { }
 
         float GetDistance(const WorldObject* obj, bool is3D = true, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS) const;
-        float GetDistance(float x, float y, float z, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS) const;
+        float GetDistance(float x, float y, float z, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS, bool transport = false) const;
         float GetDistance2d(float x, float y, DistanceCalculation distcalc = DIST_CALC_BOUNDING_RADIUS) const;
         float GetDistanceZ(const WorldObject* obj) const;
         bool IsInMap(const WorldObject* obj) const
