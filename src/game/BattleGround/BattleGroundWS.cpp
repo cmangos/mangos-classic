@@ -277,6 +277,9 @@ void BattleGroundWS::ProcessDroppedFlagActions(Player* player, GameObject* targe
     // check if we are returning our flag
     if (wsDroppedFlagId[teamIdx] == target->GetEntry())
     {
+        if (m_flagState[teamIdx] != BG_WS_FLAG_STATE_ON_GROUND)
+            return;
+
         DEBUG_LOG("BattleGroundWS: Team %u has returned the dropped flag %u.", player->GetTeam(), target->GetEntry());
 
         actionId = BG_WS_FLAG_ACTION_RETURNED;
@@ -293,6 +296,9 @@ void BattleGroundWS::ProcessDroppedFlagActions(Player* player, GameObject* targe
     // check if we are picking up enemy flag
     else if (wsDroppedFlagId[otherTeamIdx] == target->GetEntry())
     {
+        if (m_flagState[otherTeamIdx] != BG_WS_FLAG_STATE_ON_GROUND)
+            return;
+
         DEBUG_LOG("BattleGroundWS: Team %u has recaptured the dropped flag %u.", player->GetTeam(), target->GetEntry());
 
         actionId = BG_WS_FLAG_ACTION_PICKEDUP;
