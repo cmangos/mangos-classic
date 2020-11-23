@@ -65,6 +65,8 @@ void BattleGroundWS::Update(uint32 diff)
                 m_flagsDropTimer[i] = 0;
                 RespawnDroppedFlag(playerTeam);
             }
+            else
+                m_flagsDropTimer[i] -= diff;
         }
     }
 }
