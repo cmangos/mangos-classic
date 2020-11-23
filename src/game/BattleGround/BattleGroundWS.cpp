@@ -242,10 +242,13 @@ void BattleGroundWS::HandlePlayerDroppedFlag(Player* player)
 // Function that handles the flag pick up from the base
 void BattleGroundWS::ProcessFlagPickUpFromBase(Player* player, Team attackerTeam)
 {
-    DEBUG_LOG("BattleGroundWS: Team %u has taken the enemy flag.", attackerTeam);
-
     PvpTeamIndex teamIdx = GetTeamIndexByTeamId(attackerTeam);
     PvpTeamIndex otherTeamIdx = GetOtherTeamIndex(teamIdx);
+
+    if (m_flagState[otherTeamIdx] != BG_WS_FLAG_STATE_ON_BASE)
+        return;
+
+    DEBUG_LOG("BattleGroundWS: Team %u has taken the enemy flag.", attackerTeam);
 
     SpawnEvent(otherTeamIdx, 0, false);
     SetFlagCarrier(otherTeamIdx, player->GetObjectGuid());
