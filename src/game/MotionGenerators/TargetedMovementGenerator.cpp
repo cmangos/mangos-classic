@@ -235,10 +235,10 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
     auto vectorDest = owner.movespline->FinalDestination();
     Position dest(vectorDest.x, vectorDest.y, vectorDest.z, 0.f);
     if (dest.x == 0 && dest.y == 0 && dest.z == 0)
-        owner.GetPosition(dest.x, dest.y, dest.z);
+        owner.GetPosition(dest.x, dest.y, dest.z, owner.GetTransport());
     if (m_currentMode != CHASE_MODE_DISTANCING)
     {
-        targetMoved = this->RequiresNewPosition(owner, dest);
+        targetMoved = this->RequiresNewPosition(owner, dest); // uses transport coordinates
 
         if ((this->i_speedChanged && !owner.movespline->Finalized()) || targetMoved)
         {
@@ -251,10 +251,12 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
             else
             {
                 // the destination has not changed, we just need to refresh the path (usually speed change)
-                G3D::Vector3 end = this->i_path->getEndPosition();
+                G3D::Vector3 end = this->i_path->getEndPosition(); // supplies transport coordinates when on a transport
                 x = end.x;
                 y = end.y;
                 z = end.z;
+                if (GenericTransport* transport = owner.GetTransport()) // dispatch spline position needs global coordinates
+                    transport->CalculatePassengerPosition(dest.x, dest.y, dest.z);
             }
 
             if (owner.GetDistance(x, y, z, DIST_CALC_NONE) > 0.3f)
@@ -291,6 +293,8 @@ void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& t
     }
     else if (this->i_speedChanged)
     {
+        if (GenericTransport* transport = owner.GetTransport()) // dispatch spline position needs global coordinates
+            transport->CalculatePassengerPosition(dest.x, dest.y, dest.z);
         if (DispatchSplineToPosition(owner, dest.x, dest.y, dest.z, false, false, true))
         {
             this->i_speedChanged = false;
@@ -595,7 +599,7 @@ bool ChaseMovementGenerator::RequiresNewPosition(Unit& owner, Position pos) cons
 {
     float dist = this->GetDynamicTargetDistance(owner, true);
     dist *= dist;
-    float distanceToCoords = i_target->GetDistance(pos.x, pos.y, pos.z, DIST_CALC_NONE); // raw squared istance
+    float distanceToCoords = i_target->GetDistance(pos.x, pos.y, pos.z, DIST_CALC_NONE, owner.GetTransport()); // raw squared istance
     if (m_moveFurther)
     {
         // need a small window for running further/closer
