@@ -343,15 +343,16 @@ void BattleGroundWS::RemovePlayer(Player* player, ObjectGuid guid)
 {
     Team playerTeam = player->GetTeam();
     PvpTeamIndex playerTeamIndex = GetTeamIndexByTeamId(playerTeam);
+    PvpTeamIndex otherTeamIdx = GetOtherTeamIndex(playerTeamIndex);
 
     // Clear flag carrier and respawn main flag
-    if (IsFlagPickedUp(playerTeamIndex) && m_flagCarrier[playerTeamIndex] == guid)
+    if (IsFlagPickedUp(otherTeamIdx) && m_flagCarrier[otherTeamIdx] == guid)
     {
         if (!player)
         {
             sLog.outError("BattleGroundWS: Removing offline player who unexpectendly carries the flag!");
 
-            ClearFlagCarrier(playerTeamIndex);
+            ClearFlagCarrier(otherTeamIdx);
             RespawnFlagAtBase(playerTeam, false);
         }
         else
