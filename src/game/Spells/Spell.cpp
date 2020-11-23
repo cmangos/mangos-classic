@@ -4214,6 +4214,17 @@ SpellCastResult Spell::CheckCast(bool strict)
         return SPELL_FAILED_CASTER_AURASTATE;
 
     Unit* target = m_targets.getUnitTarget();
+    uint32 affectedMask = GetCheckCastEffectMask(m_spellInfo);
+    // Check if caster is prevented from entering stealth/invisibility (e.g. Faerie Fire)
+    if (!target)
+    {
+        uint32 selfImmuneMask = GetCheckCastSelfEffectMask(m_spellInfo);
+        if (selfImmuneMask)
+        {
+            target = m_caster;
+            affectedMask = selfImmuneMask;
+        }
+    }
     if (target)
     {
         // TARGET_UNIT_SCRIPT_NEAR_CASTER fills unit target per client requirement but should not be checked against common things

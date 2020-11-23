@@ -383,6 +383,53 @@ class Spell
         void TakeReagents();
         void TakeCastItem();
 
+        inline bool HasSpellTarget(SpellEntry const* spellInfo, uint32 target)
+        {
+            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                if (spellInfo->EffectImplicitTargetA[i] == target)
+                    return true;
+
+            return false;
+        }
+
+        inline uint32 GetCheckCastSelfEffectMask(SpellEntry const* spellInfo)
+        {
+            uint32 resultingMask = 0;
+            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                if (HasSpellTarget(spellInfo, TARGET_UNIT_CASTER))
+                    resultingMask |= (1 << i);
+            return resultingMask;
+        }
+
+        inline uint32 GetCheckCastEffectMask(SpellEntry const* spellInfo)
+        {
+            uint32 resultingMask = 0;
+            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                if (IsCheckCastTarget(spellInfo->EffectImplicitTargetA[i]) || IsCheckCastTarget(spellInfo->EffectImplicitTargetB[i]))
+                    resultingMask |= (1 << i);
+            return resultingMask;
+        }
+
+        inline bool IsCheckCastTarget(uint32 target)
+        {
+            // copy of checkcast block for attackability and assistability
+            auto& data = SpellTargetInfoTable[target];
+            if (data.type == TARGET_TYPE_UNIT && data.filter != TARGET_SCRIPT && (data.enumerator == TARGET_ENUMERATOR_SINGLE || data.enumerator == TARGET_ENUMERATOR_CHAIN))
+            {
+                switch (target)
+                {
+                    case TARGET_UNIT_ENEMY_NEAR_CASTER:
+                    case TARGET_UNIT_FRIEND_NEAR_CASTER:
+                    case TARGET_UNIT_NEAR_CASTER:
+                    case TARGET_UNIT_CASTER_MASTER:
+                    case TARGET_UNIT_CASTER: break; // never check anything
+                    default: return true;
+                }
+            }
+
+            return false;
+        }
+
         SpellCastResult CheckCast(bool strict);
         SpellCastResult CheckPetCast(Unit* target);
 
