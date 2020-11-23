@@ -152,7 +152,7 @@ inline bool IsSpellWithNonAuraEffect(SpellEntry const* spellInfo)
     return false;
 }
 
-inline bool GetAuraEffectMask(SpellEntry const* spellInfo)
+inline uint32 GetAuraEffectMask(SpellEntry const* spellInfo)
 {
     uint32 mask = 0;
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
