@@ -33,6 +33,7 @@ class GenericTransport : public GameObject
         GenericTransport() : m_passengerTeleportIterator(m_passengers.end()) {}
         bool AddPassenger(Unit* passenger);
         bool RemovePassenger(Unit* passenger);
+        bool AddPetToTransport(Unit* passenger, Pet* pet);
 
         void UpdatePosition(float x, float y, float z, float o);
         void UpdatePassengerPosition(WorldObject* object);

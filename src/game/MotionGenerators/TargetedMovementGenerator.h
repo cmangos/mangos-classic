@@ -24,6 +24,7 @@
 #include "MotionGenerators/FollowerReference.h"
 #include <G3D/Vector3.h>
 #include "Entities/ObjectGuid.h"
+#include "Entities/Object.h"
 
 class PathFinder;
 

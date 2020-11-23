@@ -25,6 +25,7 @@
 #include "Tools/Formulas.h"
 #include "Spells/SpellAuras.h"
 #include "Entities/Unit.h"
+#include "Entities/Transports.h"
 
 // numbers represent minutes * 100 while happy (you get 100 loyalty points per min while happy)
 uint32 const LevelUpLoyalty[6] =
@@ -399,6 +400,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     SynchronizeLevelWithOwner();
 
     SavePetToDB(PET_SAVE_AS_CURRENT, owner);
+
+    if (GenericTransport* transport = owner->GetTransport())
+        transport->AddPetToTransport(owner, this);
     return true;
 }
 

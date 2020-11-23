@@ -51,6 +51,7 @@
 #include "G3D/Vector3.h"
 #include "Loot/LootMgr.h"
 #include "Movement/MoveSpline.h"
+#include "Entities/Transports.h"
 
 pEffect SpellEffects[MAX_SPELL_EFFECTS] =
 {
@@ -3697,6 +3698,9 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         else if (m_caster->AI())
             m_caster->AI()->JustSummoned(NewSummon);
     }
+
+    if (GenericTransport* transport = m_caster->GetTransport())
+        transport->AddPetToTransport(m_caster, NewSummon);
 }
 
 void Spell::EffectLearnPetSpell(SpellEffectIndex eff_idx)
