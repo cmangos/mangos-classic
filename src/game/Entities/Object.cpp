@@ -1134,11 +1134,7 @@ float WorldObject::GetDistance(const WorldObject* obj, bool is3D, DistanceCalcul
 
 float WorldObject::GetDistance(float x, float y, float z, DistanceCalculation distcalc, bool transport) const
 {
-    Position pos;
-    if (!transport)
-        pos = GetPosition();
-    else
-        pos = GetTransportPosition();
+    Position pos = GetPosition(transport ? GetTransport() : nullptr);
     float dx = pos.x - x;
     float dy = pos.y - y;
     float dz = pos.z - z;

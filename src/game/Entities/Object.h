@@ -845,8 +845,7 @@ class WorldObject : public Object
         
         void GetPosition(WorldLocation& loc) const
         { loc.mapid = m_mapId; GetPosition(loc.coord_x, loc.coord_y, loc.coord_z); loc.orientation = GetOrientation(); }
-        Position const& GetPosition() const { return m_position; }
-        Position const& GetTransportPosition() const { return m_movementInfo.GetTransportPos(); }
+        Position const& GetPosition(GenericTransport* transport = nullptr) const { if (transport) return m_movementInfo.GetTransportPos(); return m_position; }
         float GetOrientation() const { return m_position.o; }
 
         /// Gives a 2d-point in distance distance2d in direction absAngle around the current position (point-to-point)

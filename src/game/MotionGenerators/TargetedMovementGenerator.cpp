@@ -642,11 +642,7 @@ void ChaseMovementGenerator::_setLocation(Unit& owner)
         return;
 
     Position pos = owner.GetPosition();
-    Position actualPos = pos;
-    if (GenericTransport* transport = owner.GetTransport())
-        actualPos = owner.GetTransportPosition();
-
-    if (RequiresNewPosition(owner, actualPos) && _getLocation(owner, pos.x, pos.y, pos.z))
+    if (RequiresNewPosition(owner, owner.GetPosition(owner.GetTransport())) && _getLocation(owner, pos.x, pos.y, pos.z))
     {
         if (DispatchSplineToPosition(owner, pos.x, pos.y, pos.z, EnableWalking(), true, true))
             this->i_target->GetPosition(this->i_lastTargetPos.x, this->i_lastTargetPos.y, this->i_lastTargetPos.z, owner.GetTransport());
@@ -724,10 +720,7 @@ bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
         return false;
 
     // Boost speed only if follower is too far behind
-    Position actualPos = owner.GetPosition();
-    if (GenericTransport* transport = owner.GetTransport())
-        actualPos = owner.GetTransportPosition();
-    if (!RequiresNewPosition(owner, actualPos))
+    if (!RequiresNewPosition(owner, owner.GetPosition(owner.GetTransport())))
         return false;
 
     // Do not allow speed boosting when in pvp instances
@@ -1048,9 +1041,7 @@ void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& 
             Position currentTargetPos;
 
             i_target->GetPosition(currentTargetPos.x, currentTargetPos.y, currentTargetPos.z, owner.GetTransport());
-            Position actualPos = owner.GetPosition();
-            if (GenericTransport* transport = owner.GetTransport())
-                actualPos = owner.GetTransportPosition();
+            Position actualPos = owner.GetPosition(owner.GetTransport());
             currentTargetPos.o = actualPos.o;
             targetRelocation = (currentTargetPos != i_lastTargetPos || RequiresNewPosition(owner, actualPos));
             targetOrientation = (!targetRelocation && !m_targetMoving && !m_targetFaced);
