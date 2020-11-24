@@ -175,6 +175,9 @@ void BattleGroundWS::ProcessPlayerFlagScoreEvent(Player* player)
     // for flag capture is reward 2 honorable kills
     RewardHonorToTeam(GetBonusHonorFromKill(2), team);
 
+    // update score
+    m_teamScores[teamIdx] += 1;
+
     // despawn flags
     SpawnEvent(WS_EVENT_FLAG_A, 0, false);
     SpawnEvent(WS_EVENT_FLAG_H, 0, false);
@@ -188,7 +191,6 @@ void BattleGroundWS::ProcessPlayerFlagScoreEvent(Player* player)
     UpdatePlayerScore(player, SCORE_FLAG_CAPTURES, 1);      // +1 flag captures
 
     // Process match winner
-    m_teamScores[teamIdx] += 1;
     Team winner = m_teamScores[teamIdx] == BG_WS_MAX_TEAM_SCORE ? GetTeamIdByTeamIndex(teamIdx) : TEAM_NONE;
 
     // end battleground or set respawn timer
