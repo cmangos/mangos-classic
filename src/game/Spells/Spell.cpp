@@ -319,7 +319,8 @@ void SpellLog::SendToSet()
 // ***********
 
 Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy) :
-    m_spellLog(this), m_spellScript(SpellScriptMgr::GetSpellScript(info->Id)), m_auraScript(SpellScriptMgr::GetAuraScript(info->Id)), m_param1(0), m_param2(0), m_trueCaster(caster)
+    m_spellLog(this), m_spellScript(SpellScriptMgr::GetSpellScript(info->Id)), m_auraScript(SpellScriptMgr::GetAuraScript(info->Id)),
+    m_partialApplicationMask(0), m_param1(0), m_param2(0), m_trueCaster(caster)
 {
     MANGOS_ASSERT(caster != nullptr && info != nullptr);
     MANGOS_ASSERT(info == sSpellTemplate.LookupEntry<SpellEntry>(info->Id) && "`info` must be pointer to sSpellTemplate element");
@@ -763,6 +764,8 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
 {
     if (m_caster != target)
         m_targets.m_targetMask |= TARGET_FLAG_UNIT; // all spells with unit target must have this flag
+
+    effectMask &= (~m_partialApplicationMask); // remove partially immuned out effects
 
     // Check for effect immune skip if immuned
     uint8 notImmunedMask = 0;
@@ -4679,7 +4682,12 @@ SpellCastResult Spell::CheckCast(bool strict)
             return castResult;
     }
 
-    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    uint32 availableEffectMask = 0;
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (m_spellInfo->Effect[i])
+            availableEffectMask |= (1 << i);
+
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         // for effects of spells that have only one target
         switch (m_spellInfo->Effect[i])
@@ -5243,7 +5251,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         // Do not check in case of junk in DBC
         if (!IsAuraApplyEffect(m_spellInfo, SpellEffectIndex(i)))
@@ -5423,7 +5431,13 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     // Target must be a weapon wielder
                     if (!expectedTarget->hasMainhandWeapon())
-                        return SPELL_FAILED_BAD_TARGETS;
+                    {
+                        availableEffectMask &= (~(1 << i));
+                        if (availableEffectMask == 0)
+                            return SPELL_FAILED_BAD_TARGETS;
+                        else
+                            m_partialApplicationMask |= (1 << i);
+                    }
                 }
                 break;
             }

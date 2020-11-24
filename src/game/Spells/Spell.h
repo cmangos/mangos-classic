@@ -753,6 +753,7 @@ class Spell
         uint32         m_targetlessMask;
         DestTargetInfo m_destTargetInfo;
         CorpseTargetList m_uniqueCorpseTargetInfo;
+        uint32 m_partialApplicationMask;
 
         void AddUnitTarget(Unit* target, uint8 effectMask, CheckException exception = EXCEPTION_NONE);
         void AddGOTarget(GameObject* target, uint8 effectMask);
