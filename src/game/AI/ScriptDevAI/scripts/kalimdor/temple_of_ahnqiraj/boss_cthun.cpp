@@ -59,6 +59,8 @@ enum
     SPELL_SUMMON_EYE_TENTACLES_P2   = 26769,
     SPELL_SUMMON_GIANT_EYE_TENTACLES= 26766,                // Periodically triggers 26767 that cast 26768 on random target to summon NPC 15334
     SPELL_SUMMON_GIANT_EYE_TENTACLE = 26768,                // Summon NPC 15334
+    SPELL_SUMMON_GIANT_HOOKS        = 26213,                // Periodically triggers 26217 that cast 26216 on random target to summon NPC 15728
+    SPELL_SUMMON_GIANT_HOOK_TENTACLE= 26216,                // Summon NPC 15728
     SPELL_MOUTH_TENTACLE            = 26332,                // prepare target to teleport to stomach
     SPELL_DIGESTIVE_ACID_TELEPORT   = 26220,                // stomach teleport spell
     SPELL_EXIT_STOMACH_KNOCKBACK    = 25383,                // spell id is wrong
@@ -262,7 +264,6 @@ struct boss_cthunAI : public Scripted_NoMovementAI
     // Global variables
     uint32 m_uiPhaseTimer;
     uint8 m_uiFleshTentaclesKilled;
-    uint32 m_uiGiantClawTentacleTimer;
     uint32 m_uiDigestiveAcidTimer;
 
     // Body Phase
@@ -281,7 +282,6 @@ struct boss_cthunAI : public Scripted_NoMovementAI
 
         m_uiPhaseTimer              = 0;
         m_uiFleshTentaclesKilled    = 0;
-        m_uiGiantClawTentacleTimer  = 20000;
         m_uiDigestiveAcidTimer      = 4000;
 
         // Body Phase
@@ -318,6 +318,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         // Start periodically summoning Eye, Giant Eye Tentacles
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_EYE_TENTACLES_P2, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_EYE_TENTACLES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_HOOKS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
     }
 
     void EnterEvadeMode() override
@@ -331,6 +332,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
 
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_GIANT_EYE_TENTACLES);
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_EYE_TENTACLES_P2);
+        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_GIANT_HOOKS);
 
         Scripted_NoMovementAI::EnterEvadeMode();
     }
@@ -523,17 +525,6 @@ struct boss_cthunAI : public Scripted_NoMovementAI
             default:
                 break;
         }
-
-        if (m_uiGiantClawTentacleTimer < uiDiff)
-        {
-            // Summon 1 Giant Claw Tentacle every 60 seconds
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_LOS))
-                m_creature->SummonCreature(NPC_GIANT_CLAW_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-
-            m_uiGiantClawTentacleTimer = 60000;
-        }
-        else
-            m_uiGiantClawTentacleTimer -= uiDiff;
 
         // Note: this should be applied by the teleport spell
         if (m_uiDigestiveAcidTimer < uiDiff)
@@ -730,6 +721,18 @@ struct SummonGiantEyeTentacle : public SpellScript
     }
 };
 
+struct SummonGiantHookTentacle : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* target = spell->GetUnitTarget())
+                target->CastSpell(nullptr, SPELL_SUMMON_GIANT_HOOK_TENTACLE, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 struct RotateTrigger : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -795,6 +798,7 @@ void AddSC_boss_cthun()
     RegisterSpellScript<SummonHookTentacle>("spell_cthun_hook_tentacle");
     RegisterSpellScript<RotateTrigger>("spell_cthun_rotate_trigger");
     RegisterSpellScript<SummonGiantEyeTentacle>("spell_cthun_giant_eye_tentacle");
+    RegisterSpellScript<SummonGiantHookTentacle>("spell_cthun_giant_hook_tentacle");
     RegisterAuraScript<PeriodicSummonEyeTrigger>("spell_cthun_periodic_eye_trigger");
     RegisterAuraScript<PeriodicRotate>("spell_cthun_periodic_rotate");
 }

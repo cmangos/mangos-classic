@@ -33,6 +33,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26137,'spell_cthun_rotate_trigger'),
 (26152,'spell_cthun_periodic_eye_trigger'),
 (26180,'spell_huhuran_wyvern_string'),
+(26217,'spell_cthun_giant_hook_tentacle'),
 (26398,'spell_cthun_hook_tentacle'),
 (26584,'spell_summon_toxic_slime'),
 (26591,'spell_teleport_image'),
