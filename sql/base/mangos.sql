@@ -1329,7 +1329,7 @@ CREATE TABLE `creature_template_spells` (
   `spell8` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `spell9` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `spell10` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`entry`)
+  PRIMARY KEY (`entry`,`setId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System (Spells used by creature)';
 
 --
