@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2020060701
+ConfVersion=2020112401
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -122,6 +122,11 @@ SD2ErrorLogFile = "SD2Errors.log"
 #        Default: "" (don't load all grids at startup)
 #                 "mapId1[,mapId2[..]]" (DO load all grids on the given maps- Experimental and very resource consumming)
 #
+#    Autoload.Active
+#        Load active creatures that have ExtraFlags CREATURE_EXTRA_FLAG_ACTIVE or movementType WAYPOINT_MOTION_TYPE
+#        This will allow creatures having these conditions to update their grid without any player around. Useful for running in debug mode.
+#        Default: True
+#
 #    GridCleanUpDelay
 #        Grid clean up delay (in milliseconds)
 #        Default: 300000 (5 min)
@@ -230,6 +235,7 @@ SaveRespawnTimeImmediately = 1
 MaxOverspeedPings = 2
 GridUnload = 1
 LoadAllGridsOnMaps = ""
+Autoload.Active = 1
 GridCleanUpDelay = 300000
 MapUpdateInterval = 100
 ChangeWeatherInterval = 600000

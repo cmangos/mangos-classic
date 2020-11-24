@@ -1202,7 +1202,7 @@ void ObjectMgr::LoadCreatures()
         {
             AddCreatureToGrid(guid, &data);
 
-            if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE)
+            if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE) && cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE)
                 m_activeCreatures.insert(ActiveCreatureGuidsOnMap::value_type(data.mapid, guid));
         }
 
