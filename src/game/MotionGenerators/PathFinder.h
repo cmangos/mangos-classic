@@ -67,7 +67,7 @@ class PathFinder
         // Calculate the path from owner to given destination
         // return: true if new path was calculated, false otherwise (no change needed)
         bool calculate(float destX, float destY, float destZ, bool forceDest = false, bool straightLine = false); // transfers coorddinates from global to local space if on transport - use other func if coords are already in transport space
-        bool calculate(const Vector3& start, Vector3& dest, bool forceDest = false, bool straightLine = false);
+        bool calculate(Vector3 const& start, Vector3 const& dest, bool forceDest = false, bool straightLine = false);
 
         // option setters - use optional
         void setUseStrightPath(bool useStraightPath) { m_useStraightPath = useStraightPath; };

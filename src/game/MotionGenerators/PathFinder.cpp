@@ -81,7 +81,7 @@ bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest
     return calculate(Vector3(x, y, z), dest, forceDest, straightLine);
 }
 
-bool PathFinder::calculate(const Vector3& start, Vector3& dest, bool forceDest/* = false*/, bool straightLine/* = false*/)
+bool PathFinder::calculate(Vector3 const& start, Vector3 const& dest, bool forceDest/* = false*/, bool straightLine/* = false*/)
 {
     if (!MaNGOS::IsValidMapCoord(dest.x, dest.y, dest.z))
         return false;
