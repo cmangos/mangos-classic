@@ -2570,23 +2570,20 @@ bool ChatHandler::HandlePInfoCommand(char* args)
 /// Helper function
 inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin wpOrigin, int32 pathId, uint32 wpId, WaypointNode const* wpNode, CreatureInfo const* waypointInfo)
 {
-    TemporarySpawnWaypoint* wpCreature = new TemporarySpawnWaypoint(wpOwner->GetObjectGuid(), wpId, pathId, (uint32)wpOrigin);
+    TempSpawnSettings settings;
+    settings.spawner = wpOwner;
+    settings.entry = VISUAL_WAYPOINT;
+    settings.x = wpNode->x; settings.y = wpNode->y; settings.z = wpNode->z; settings.ori = wpNode->orientation;
+    settings.activeObject = true;
+    settings.despawnTime = 5 * MINUTE * IN_MILLISECONDS;
 
-    CreatureCreatePos pos(wpOwner->GetMap(), wpNode->x, wpNode->y, wpNode->z, wpNode->orientation);
+    settings.tempSpawnMovegen = true;
+    settings.waypointId = wpId;
+    settings.spawnPathId = pathId;
+    settings.pathOrigin = uint32(wpOrigin);
 
-    if (!wpCreature->Create(wpOwner->GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
-    {
-        delete wpCreature;
-        return nullptr;
-    }
+    Creature* wpCreature = WorldObject::SummonCreature(settings, wpOwner->GetMap());
 
-    wpCreature->SetVisibility(VISIBILITY_OFF);
-    wpCreature->SetRespawnCoord(pos);
-    wpCreature->SetLevel(wpId);
-
-    wpCreature->SetActiveObjectState(true);
-
-    wpCreature->Summon(TEMPSPAWN_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS); // Also initializes the AI and MMGen
     return wpCreature;
 }
 inline void UnsummonVisualWaypoints(Player const* player, ObjectGuid ownerGuid)

@@ -463,24 +463,19 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
         for (uint32 ptIdx = 0; ptIdx < genPath.size(); ++ptIdx)
         {
             auto pt = genPath[ptIdx];
-            TemporarySpawnWaypoint* wpCreature = new TemporarySpawnWaypoint(creature.GetObjectGuid(), i_currentNode, m_pathId, (uint32)m_PathOrigin);
+            TempSpawnSettings settings;
+            settings.spawner = &creature;
+            settings.entry = VISUAL_WAYPOINT;
+            settings.x = pt.x; settings.y = pt.y; settings.z = pt.z; settings.ori = 0.0f;
+            settings.activeObject = true;
+            settings.despawnTime = 10 * IN_MILLISECONDS;
 
-            CreatureCreatePos pos(creature.GetMap(), pt.x, pt.y, pt.z, 0.0f);
-            CreatureInfo const* waypointInfo = ObjectMgr::GetCreatureTemplate(VISUAL_WAYPOINT);
-            if (!wpCreature->Create(creature.GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
-            {
-                delete wpCreature;
-                continue;
-            }
+            settings.tempSpawnMovegen = true;
+            settings.waypointId = i_currentNode;
+            settings.spawnPathId = m_pathId;
+            settings.pathOrigin = uint32(m_PathOrigin);
 
-            wpCreature->SetVisibility(VISIBILITY_OFF);
-            wpCreature->SetObjectScale(0.2f);
-            wpCreature->SetRespawnCoord(pos);
-            wpCreature->SetLevel(ptIdx);
-            wpCreature->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
-            wpCreature->SetActiveObjectState(true);
-
-            wpCreature->Summon(TEMPSPAWN_TIMED_DESPAWN, 10 * IN_MILLISECONDS); // Also initializes the AI and MMGen
+            WorldObject::SummonCreature(settings, creature.GetMap());
         }
     }
 
