@@ -345,22 +345,35 @@ void BattleGroundWS::HandlePlayerClickedOnFlag(Player* player, GameObject* goTar
 // Handle player exit
 void BattleGroundWS::RemovePlayer(Player* player, ObjectGuid guid)
 {
-    Team playerTeam = player->GetTeam();
-    PvpTeamIndex playerTeamIndex = GetTeamIndexByTeamId(playerTeam);
-    PvpTeamIndex otherTeamIdx = GetOtherTeamIndex(playerTeamIndex);
-
-    // Clear flag carrier and respawn main flag
-    if (IsFlagPickedUp(otherTeamIdx) && m_flagCarrier[otherTeamIdx] == guid)
+    std::vector<std::pair<Team, PvpTeamIndex>> checkIndex;
+    if (player)
     {
-        if (!player)
-        {
-            sLog.outError("BattleGroundWS: Removing offline player who unexpectendly carries the flag!");
+        Team playerTeam = player->GetTeam();
+        PvpTeamIndex playerTeamIndex = GetTeamIndexByTeamId(playerTeam);
+        PvpTeamIndex otherTeamIdx = GetOtherTeamIndex(playerTeamIndex);
+        checkIndex.emplace_back(playerTeam, otherTeamIdx);
+    }
+    else // if no player, check both
+    {
+        checkIndex.push_back({ HORDE, TEAM_INDEX_ALLIANCE });
+        checkIndex.push_back({ ALLIANCE, TEAM_INDEX_HORDE });
+    }
 
-            ClearFlagCarrier(otherTeamIdx);
-            RespawnFlagAtBase(playerTeam, false);
+    for (auto& data : checkIndex)
+    {
+        // Clear flag carrier and respawn main flag
+        if (IsFlagPickedUp(data.second) && m_flagCarrier[data.second] == guid)
+        {
+            if (!player) // recheck the validity of this, shouldnt flag be dropped when player is logged out?
+            {
+                sLog.outError("BattleGroundWS: Removing offline player who unexpectendly carries the flag!");
+
+                ClearFlagCarrier(data.second);
+                RespawnFlagAtBase(data.first, false);
+            }
+            else
+                HandlePlayerDroppedFlag(player);
         }
-        else
-            HandlePlayerDroppedFlag(player);
     }
 }
 
