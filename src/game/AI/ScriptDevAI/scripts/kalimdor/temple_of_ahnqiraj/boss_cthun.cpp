@@ -70,15 +70,6 @@ enum
     SPELL_DIGESTIVE_ACID            = 26476,                // damage spell - should be handled by the map
     // SPELL_EXIT_STOMACH            = 26221,               // summons 15800
 
-    // ***** Summoned spells *****
-    // Giant Claw tentacles
-    SPELL_GIANT_GROUND_RUPTURE      = 26478,
-    // SPELL_MASSIVE_GROUND_RUPTURE  = 26100,               // spell not confirmed
-    SPELL_GROUND_TREMOR             = 6524,
-    SPELL_HAMSTRING                 = 26211,
-    SPELL_THRASH                    = 3391,
-    SPELL_SUBMERGE_VISUAL           = 28819,
-
     NPC_EXIT_TRIGGER                = 15800,
 
     DISPLAY_ID_CTHUN_BODY           = 15786,                // Helper display id; This is needed in order to have the proper transform animation. ToDo: remove this when auras are fixed in core.
@@ -546,6 +537,16 @@ struct boss_cthunAI : public Scripted_NoMovementAI
 ## npc_giant_claw_tentacle
 ######*/
 
+enum {
+    SPELL_GIANT_GROUND_RUPTURE        = 26478,
+    // SPELL_MASSIVE_GROUND_RUPTURE    = 26100,               // spell not confirmed
+    SPELL_HAMSTRING                   = 26211,
+    SPELL_THRASH                      = 3391,
+    SPELL_SUBMERGE_VISUAL             = 28819,
+    SPELL_TELEPORT_GIANT_HOOK         = 26191,
+    SPELL_TELEPORT_GIANT_HOOK_TRIGGER = 26205
+};
+
 struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
 {
     npc_giant_claw_tentacleAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
@@ -560,11 +561,15 @@ struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
     uint32 m_uiHamstringTimer;
     uint32 m_uiDistCheckTimer;
 
+    bool m_isLookingForMeleeTarget;
+
     void Reset() override
     {
-        m_uiHamstringTimer  = 2000;
-        m_uiThrashTimer     = 5000;
-        m_uiDistCheckTimer  = 5000;
+        m_uiHamstringTimer  = 2 * IN_MILLISECONDS;
+        m_uiThrashTimer     = 5 * IN_MILLISECONDS;
+        m_uiDistCheckTimer  = 5 * IN_MILLISECONDS;
+
+        m_isLookingForMeleeTarget = false;
 
         DoCastSpellIfCan(m_creature, SPELL_GIANT_GROUND_RUPTURE);
     }
@@ -575,6 +580,8 @@ struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
+        // Check every second if we are tanked
+        // If not, give 5 seconds to be tanked before teleporting to a target
         if (m_uiDistCheckTimer)
         {
             if (m_uiDistCheckTimer < uiDiff)
@@ -582,27 +589,20 @@ struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
                 // If there is nobody in range, spawn a new tentacle at a new target location
                 if (!m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE) && m_pInstance)
                 {
-                    if (Creature* pCthun = m_pInstance->GetSingleCreatureFromStorage(NPC_CTHUN))
+                    if (m_isLookingForMeleeTarget)
                     {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_NOT_IN_MELEE_RANGE))
-                        {
-                            pCthun->SummonCreature(NPC_GIANT_CLAW_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-
-                            m_uiDistCheckTimer = 0;
-
-                            // Self kill when a new tentacle is spawned
-                            SetCombatScriptStatus(true);
-                            m_creature->SetTarget(nullptr);
-                            m_creature->CastSpell(nullptr, SPELL_SUBMERGE_VISUAL, TRIGGERED_OLD_TRIGGERED);
-                            m_creature->ForcedDespawn(1500);
-                            if (Creature* portal = GetClosestCreatureWithEntry(m_creature, NPC_GIANT_TENTACLE_PORTAL, 5.0f))
-                                portal->ForcedDespawn(1500);
-                            return;
-                        }
+                        m_creature->CastSpell(m_creature->GetVictim(), SPELL_TELEPORT_GIANT_HOOK_TRIGGER, TRIGGERED_OLD_TRIGGERED);
+                        m_isLookingForMeleeTarget = false;
+                        m_uiDistCheckTimer = 0;
+                    }
+                    else
+                    {
+                        m_isLookingForMeleeTarget = true;
+                        m_uiDistCheckTimer = 5 * IN_MILLISECONDS;
                     }
                 }
                 else
-                    m_uiDistCheckTimer = 5000;
+                    m_uiDistCheckTimer = 1 * IN_MILLISECONDS;
             }
             else
                 m_uiDistCheckTimer -= uiDiff;
@@ -611,7 +611,7 @@ struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
         if (m_uiThrashTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THRASH) == CAST_OK)
-                m_uiThrashTimer = 10000;
+                m_uiThrashTimer = 10 * IN_MILLISECONDS;
         }
         else
             m_uiThrashTimer -= uiDiff;
@@ -619,7 +619,7 @@ struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
         if (m_uiHamstringTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMSTRING) == CAST_OK)
-                m_uiHamstringTimer = 10000;
+                m_uiHamstringTimer = 10 * IN_MILLISECONDS;
         }
         else
             m_uiHamstringTimer -= uiDiff;
@@ -773,6 +773,36 @@ struct PeriodicRotate : public AuraScript
     }
 };
 
+struct HookTentacleTrigger : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                // Caster will need to despawn and players cannot despawn
+                if (caster->GetTypeId() != TYPEID_UNIT)
+                    return;
+
+                if (Unit* target = spell->GetUnitTarget())
+                {
+                    caster->CastSpell(target, SPELL_TELEPORT_GIANT_HOOK, TRIGGERED_OLD_TRIGGERED);
+
+                    // Self kill after spawning new tentacle
+                    caster->AI()->SetCombatScriptStatus(true);
+                    caster->SetTarget(nullptr);
+                    caster->CastSpell(nullptr, SPELL_SUBMERGE_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                    ((Creature*) caster)->ForcedDespawn(1500);
+                    if (Creature* portal = GetClosestCreatureWithEntry(caster, NPC_GIANT_TENTACLE_PORTAL, 5.0f))
+                        portal->ForcedDespawn(1500);
+                    return;
+                }
+            }
+        }
+    }
+};
+
 void AddSC_boss_cthun()
 {
     Script* pNewScript = new Script;
@@ -799,6 +829,7 @@ void AddSC_boss_cthun()
     RegisterSpellScript<RotateTrigger>("spell_cthun_rotate_trigger");
     RegisterSpellScript<SummonGiantEyeTentacle>("spell_cthun_giant_eye_tentacle");
     RegisterSpellScript<SummonGiantHookTentacle>("spell_cthun_giant_hook_tentacle");
+    RegisterSpellScript<HookTentacleTrigger>("spell_hook_tentacle_trigger");
     RegisterAuraScript<PeriodicSummonEyeTrigger>("spell_cthun_periodic_eye_trigger");
     RegisterAuraScript<PeriodicRotate>("spell_cthun_periodic_rotate");
 }
