@@ -518,6 +518,8 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 5111:          // Living Flame Passive
         case 5301:          // Defensive State (DND)
         case 5680:          // Torch Burn
+        case 6488:          // Sarilus's Elementals Passive
+        case 6498:          // Feed Sarilus Passive
         case 6718:          // Phasing Stealth
         case 6752:          // Weak Poison Proc
         case 6947:          // Curse of the Bleakheart Proc
