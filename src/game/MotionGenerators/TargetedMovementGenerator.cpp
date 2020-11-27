@@ -919,8 +919,6 @@ bool FollowMovementGenerator::_getLocation(Unit& owner, float& x, float& y, floa
     {
         const float speed = i_target->GetSpeedInMotion();
         float to = i_target->m_movementInfo.GetOrientationInMotion(i_target->GetOrientation());
-        if (GenericTransport* transport = owner.GetTransport())
-            transport->CalculatePassengerOrientation(to);
 
         float dx = (speed * cos(to)), dy = (speed * sin(to));
 
