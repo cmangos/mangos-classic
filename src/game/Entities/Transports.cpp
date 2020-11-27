@@ -319,6 +319,12 @@ bool GenericTransport::RemovePassenger(Unit* passenger)
             RemovePassenger(pet);
             pet->NearTeleportTo(passenger->m_movementInfo.pos.x, passenger->m_movementInfo.pos.y, passenger->m_movementInfo.pos.z, passenger->m_movementInfo.pos.o);
         }
+
+        if (Pet* pet = passenger->GetMiniPet())
+        {
+            RemovePassenger(pet);
+            pet->NearTeleportTo(passenger->m_movementInfo.pos.x, passenger->m_movementInfo.pos.y, passenger->m_movementInfo.pos.z, passenger->m_movementInfo.pos.o);
+        }
     }
     return true;
 }
