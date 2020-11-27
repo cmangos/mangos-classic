@@ -77,8 +77,7 @@ namespace Movement
         if (transport)
         {
             data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
-            if (transport)
-                data << transport->GetPackGUID();
+            data << transport->GetPackGUID();
         }
 
         PacketBuilder::WriteMonsterMove(move_spline, data);
@@ -95,14 +94,13 @@ namespace Movement
         if (!forceSend && move_spline.Finalized())
             return;
 
-        // ToDo: update transport info if required
-        // TransportInfo* transportInfo = unit.GetTransportInfo();
+        GenericTransport* transport = unit.GetTransport();
 
         Location real_position(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetOrientation());
 
         // If boarded use current local position
-        // if (transportInfo)
-        //    transportInfo->GetLocalPosition(real_position.x, real_position.y, real_position.z, real_position.orientation);
+        if (transport)
+            transport->CalculatePassengerOffset(real_position.x, real_position.y, real_position.z, &real_position.orientation);
 
         // there is a big chane that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
@@ -125,12 +123,11 @@ namespace Movement
         WorldPacket data(SMSG_MONSTER_MOVE, 64);
         data << unit.GetPackGUID();
 
-        // ToDo: update transport info if required
-        /*if (transportInfo)
+        if (transport)
         {
             data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
-            data << transportInfo->GetTransportGuid().WriteAsPacked();
-        }*/
+            data << transport->GetPackGUID();
+        }
 
         data << real_position.x << real_position.y << real_position.z;
         data << move_spline.GetId();
