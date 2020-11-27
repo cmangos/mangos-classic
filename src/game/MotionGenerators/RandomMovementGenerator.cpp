@@ -137,17 +137,8 @@ int32 AbstractRandomMovementGenerator::_setLocation(Unit& owner)
     if (pf.getPathType() & PATHFIND_NOPATH)
         return 0;
 
-    auto& path = pf.getPath();
-    if (owner.IsPlayer()) // fix last point
-    {
-        G3D::Vector3 lastPoint = path[path.size() - 1];
-        owner.UpdateAllowedPositionZ(lastPoint.x, lastPoint.y, lastPoint.z);
-        lastPoint.z += 1.f;
-        path[path.size() - 1] = lastPoint;
-    }
-
     Movement::MoveSplineInit init(owner);
-    init.MovebyPath(path);
+    init.MovebyPath(pf.getPath());
     init.SetWalk(i_walk);
 
     int32 duration = init.Launch();
