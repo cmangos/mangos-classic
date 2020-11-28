@@ -257,12 +257,6 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
             break;
 
         case TYPEID_PLAYER:
-            // TODO: this code must not be here
-            if (static_cast<Player const*>(this)->GetTransport())
-                ((Unit*)this)->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
-            else
-                ((Unit*)this)->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
-
         case TYPEID_UNIT:
             unit = static_cast<Unit const*>(this);
             break;
@@ -281,6 +275,12 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
             sLog.outError("%s is not moving but have spline movement enabled!", GetGuidStr().c_str());
             ((Unit*)this)->m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
         }
+
+        // TODO: Remove this when moveflag is properly used
+        if (unit->GetTransport())
+            const_cast<Unit*>(unit)->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
+        else
+            const_cast<Unit*>(unit)->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
 
         // Write movement info
         *data << unit->m_movementInfo;
@@ -507,12 +507,22 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     uint32 dynflagsValue = m_uint32Values[index];
                     bool setTapFlags = false;
 
+<<<<<<< HEAD
                     if (creature->IsAlive())
                     {
                         // creature is alive so, not lootable
                         dynflagsValue = dynflagsValue & ~UNIT_DYNFLAG_LOOTABLE;
 
                         if (creature->IsInCombat())
+=======
+                    // Checking SPELL_AURA_EMPATHY and caster
+                    if (dynflagsValue & UNIT_DYNFLAG_SPECIALINFO && static_cast<const Unit*>(this)->IsAlive())
+                    {
+                        bool bIsEmpathy = false;
+                        bool bIsCaster = false;
+                        Unit::AuraList const& mAuraEmpathy = static_cast<const Unit*>(this)->GetAurasByType(SPELL_AURA_EMPATHY);
+                        for (Unit::AuraList::const_iterator itr = mAuraEmpathy.begin(); !bIsCaster && itr != mAuraEmpathy.end(); ++itr)
+>>>>>>> 200addae186... Transport: Clean up code that typecasts to unit in Object.cpp mostly relating to movement
                         {
                             // as creature is in combat we have to manage tap flags
                             setTapFlags = true;
@@ -563,7 +573,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
 
                     if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER)
                     {
-                        Unit* unit = (Unit*)this; // hunters mark effects should only be visible to owners and not all players
+                        Unit const* unit = static_cast<const Unit*>(this); // hunters mark effects should only be visible to owners and not all players
                         if (!unit->HasAuraTypeWithCaster(SPELL_AURA_MOD_STALKED, target->GetObjectGuid()))
                             dynflagsValue &= ~UNIT_DYNFLAG_TRACK_UNIT;
                     }
@@ -1060,7 +1070,7 @@ void WorldObject::Relocate(float x, float y, float z, float orientation)
     m_position.o = orientation;
 
     if (isType(TYPEMASK_UNIT))
-        ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, orientation);
+        m_movementInfo.ChangePosition(x, y, z, orientation);
 }
 
 void WorldObject::Relocate(float x, float y, float z)
@@ -1070,7 +1080,7 @@ void WorldObject::Relocate(float x, float y, float z)
     m_position.z = z;
 
     if (isType(TYPEMASK_UNIT))
-        ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, GetOrientation());
+        m_movementInfo.ChangePosition(x, y, z, GetOrientation());
 }
 
 void WorldObject::SetOrientation(float orientation)
@@ -1078,7 +1088,7 @@ void WorldObject::SetOrientation(float orientation)
     m_position.o = orientation;
 
     if (isType(TYPEMASK_UNIT))
-        ((Unit*)this)->m_movementInfo.ChangeOrientation(orientation);
+        m_movementInfo.ChangeOrientation(orientation);
 }
 
 uint32 WorldObject::GetZoneId() const
