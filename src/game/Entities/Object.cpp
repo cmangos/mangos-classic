@@ -308,10 +308,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
         }
         else
         {
-            *data << float(((WorldObject*)this)->GetPositionX());
-            *data << float(((WorldObject*)this)->GetPositionY());
-            *data << float(((WorldObject*)this)->GetPositionZ());
-            *data << float(((WorldObject*)this)->GetOrientation());
+            WorldObject const* wo = static_cast<WorldObject const*>(this);
+            *data << float(wo->GetPositionX());
+            *data << float(wo->GetPositionY());
+            *data << float(wo->GetPositionZ());
+            *data << float(wo->GetOrientation());
         }
     }
 
