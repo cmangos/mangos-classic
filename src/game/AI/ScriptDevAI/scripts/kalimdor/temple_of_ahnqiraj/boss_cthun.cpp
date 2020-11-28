@@ -307,9 +307,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
     void Aggro(Unit* /*who*/) override
     {
         // Start periodically summoning Eye, Giant Eye Tentacles
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_EYE_TENTACLES_P2, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_EYE_TENTACLES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_HOOKS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
+        DoSpawnTentacles();
     }
 
     void EnterEvadeMode() override
@@ -321,9 +319,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                 pPlayer->CastSpell(pPlayer, SPELL_PORT_OUT_STOMACH_EFFECT, TRIGGERED_OLD_TRIGGERED);
         }
 
-        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_GIANT_EYE_TENTACLES);
-        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_EYE_TENTACLES_P2);
-        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_GIANT_HOOKS);
+        StopSpawningTentacles();
 
         Scripted_NoMovementAI::EnterEvadeMode();
     }
@@ -377,6 +373,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                     if (DoCastSpellIfCan(m_creature, SPELL_CTHUN_VULNERABLE, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                     {
                         DoScriptText(EMOTE_WEAKENED, m_creature);
+                        StopSpawningTentacles();
                         m_uiPhaseTimer = 45000;
                         m_Phase        = PHASE_CTHUN_WEAKENED;
                     }
@@ -400,6 +397,22 @@ struct boss_cthunAI : public Scripted_NoMovementAI
     {
         if (pPlayer)
             m_lPlayersInStomachList.remove(pPlayer->GetObjectGuid());
+    }
+
+    void DoSpawnTentacles()
+    {
+        // Tentacles Party... Pleasure !
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_EYE_TENTACLES_P2, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_EYE_TENTACLES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_HOOKS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
+    }
+
+    void StopSpawningTentacles()
+    {
+        // End of the tentacles everywhere. No more pleasure.
+        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_GIANT_EYE_TENTACLES);
+        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_EYE_TENTACLES_P2);
+        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_GIANT_HOOKS);
     }
 
     // Custom threat management
@@ -508,6 +521,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
 
                     m_uiPhaseTimer = 0;
                     m_Phase        = PHASE_CTHUN;
+                    DoSpawnTentacles();
                 }
                 else
                     m_uiPhaseTimer -= uiDiff;
