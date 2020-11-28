@@ -6189,7 +6189,10 @@ void Aura::OnPeriodicCalculateAmount(uint32& amount)
 
 void Aura::ForcePeriodicity(uint32 periodicTime)
 {
-    m_isPeriodic = true;
+    if (periodicTime == 0)
+        m_isPeriodic = false;
+    else
+        m_isPeriodic = true;
     m_modifier.periodictime = periodicTime;
     m_periodicTimer = periodicTime;
 }
