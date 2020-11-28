@@ -122,6 +122,7 @@ class WorldSocket : public MaNGOS::Socket
         bool HandlePing(WorldPacket& recvPacket);
 
         std::deque<uint32> m_opcodeHistory;
+        std::mutex m_worldSocketMutex;
 
     public:
         WorldSocket(boost::asio::io_service& service, std::function<void (Socket*)> closeHandler);

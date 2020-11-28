@@ -87,6 +87,9 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
     // Dump outgoing packet.
     sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct.GetOpcode(), pct.GetOpcodeName(), pct, false);
 
+    // encrypt thread unsafe due to being executed from map contexts frequently - TODO: move to post service context in future
+    std::lock_guard<std::mutex> guard(m_worldSocketMutex);
+
     ServerPktHeader header;
 
     header.cmd = pct.GetOpcode();
@@ -151,6 +154,7 @@ bool WorldSocket::ProcessIncomingData()
             return false;
         }
 
+        // thread safe due to always being called from service context
         m_crypt.DecryptRecv((uint8*)&header, sizeof(ClientPktHeader));
 
         EndianConvertReverse(header.size);
