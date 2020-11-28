@@ -42,7 +42,7 @@ uint32 PlayerAI::LookupHighestLearnedRank(uint32 spellId)
         else
             break;
     }
-    while (higherRank = sSpellMgr.GetNextSpellInChain(ownedRank));
+    while ((higherRank = sSpellMgr.GetNextSpellInChain(ownedRank)));
     return ownedRank;
 }
 
