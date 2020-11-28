@@ -5926,8 +5926,30 @@ bool SpellAuraHolder::IsEmptyHolder() const
 
 bool SpellAuraHolder::IsSaveToDbHolder() const
 {
-    return !IsPassive() && !IsChanneledSpell(GetSpellProto()) &&
-        (GetTrackedAuraType() == TRACK_AURA_TYPE_NOT_TRACKED || (GetTrackedAuraType() == TRACK_AURA_TYPE_SINGLE_TARGET && GetCasterGuid() == GetTarget()->GetObjectGuid()));
+    if (IsPassive() || IsChanneledSpell(GetSpellProto()))
+        return false;
+
+    if (GetTrackedAuraType() == TRACK_AURA_TYPE_SINGLE_TARGET)
+        return false;
+
+
+    if (IsPermanent())
+    {
+        // world buff auras should not be saved
+        switch (m_spellProto->Id)
+        {
+            case 11413: // echoes of lordaeron
+            case 11414: // echoes of lordaeron
+            case 11415: // echoes of lordaeron
+            case 1386: // echoes of lordaeron
+            case 30880: // echoes of lordaeron
+            case 30683: // echoes of lordaeron
+            case 30682: // echoes of lordaeron
+            case 29520: // echoes of lordaeron
+                return false;
+        }
+    }
+    return true;
 }
 
 bool SpellAuraHolder::IsCharm() const
