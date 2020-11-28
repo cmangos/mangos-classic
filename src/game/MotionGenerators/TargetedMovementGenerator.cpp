@@ -521,7 +521,7 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
         }
     }
 
-    if (!gen || ((this->i_path->getPathType() & PATHFIND_NOPATH) | PATHFIND_INCOMPLETE))
+    if (!gen || (this->i_path->getPathType() & (PATHFIND_NOPATH | PATHFIND_INCOMPLETE)))
     {
         this->i_path->calculate(x, y, z);
         if (this->i_path->getPathType() & PATHFIND_NOPATH)
