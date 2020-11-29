@@ -671,7 +671,7 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
 
     if (ranged)
     {
-        UpdateDamagePhysical(OFF_ATTACK);
+        UpdateDamagePhysical(RANGED_ATTACK);
         return;
     }
 
