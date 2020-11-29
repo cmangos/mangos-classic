@@ -37,8 +37,9 @@ enum
     SPELL_ROTATE_360_LEFT           = 26009,
     SPELL_ROTATE_360_RIGHT          = 26136,
 
-    SPELL_SUMMON_HOOK_TENTACLES     = 26397,                // Periodically triggers spell 26398 which cast spell 26140 to summon NPC 15725
-    SPELL_SUMMON_HOOK_TENTACLE      = 26140,
+    SPELL_SUMMON_HOOK_TENTACLES_1   = 26397,                // Periodically triggers spell 26398 which cast spell 26140 to summon NPC 15725
+    SPELL_SUMMON_HOOK_TENTACLES_2   = 26398,
+    SPELL_SUMMON_HOOK_TENTACLE      = 26140,                // Summon NPC 15725
 
     SPELL_SUMMON_EYE_TENTACLES      = 26152,
     SPELL_SUMMON_EYE_TENTACLE_1     = 26144,
@@ -57,11 +58,14 @@ enum
     SPELL_TRANSFORM                 = 26232,
     SPELL_CTHUN_VULNERABLE          = 26235,
     SPELL_SUMMON_EYE_TENTACLES_P2   = 26769,
-    SPELL_SUMMON_GIANT_EYE_TENTACLES= 26766,                // Periodically triggers 26767 that cast 26768 on random target to summon NPC 15334
+    SPELL_GIANT_EYE_TENTACLES_1     = 26766,                // Periodically triggers 26767 that cast 26768 on random target to summon NPC 15334
+    SPELL_GIANT_EYE_TENTACLES_2     = 26767,
     SPELL_SUMMON_GIANT_EYE_TENTACLE = 26768,                // Summon NPC 15334
-    SPELL_SUMMON_GIANT_HOOKS        = 26213,                // Periodically triggers 26217 that cast 26216 on random target to summon NPC 15728
+    SPELL_SUMMON_GIANT_HOOKS_1      = 26213,                // Periodically triggers 26217 that cast 26216 on random target to summon NPC 15728
+    SPELL_SUMMON_GIANT_HOOKS_2      = 26217,
     SPELL_SUMMON_GIANT_HOOK_TENTACLE= 26216,                // Summon NPC 15728
-    SPELL_SUMMON_MOUTH_TENTACLES    = 26236,                // Periodically triggers 26237 that cast 26332 on random target to summon NPC 15910
+    SPELL_SUMMON_MOUTH_TENTACLES_1  = 26236,                // Periodically triggers 26237 that cast 26332 on random target to summon NPC 15910
+    SPELL_SUMMON_MOUTH_TENTACLES_2  = 26237,
     SPELL_SUMMON_MOUTH_TENTACLE     = 26332,                // Summon NPC 15910 and prepare target to be teleported to stomach
     SPELL_DIGESTIVE_ACID_TELEPORT   = 26220,                // stomach teleport spell
     SPELL_EXIT_STOMACH_KNOCKBACK    = 25383,                // spell id is wrong
@@ -137,7 +141,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
 
         // Start periodically summoning Eye and Claw (Hook) Tentacles
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_EYE_TENTACLES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_HOOK_TENTACLES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_HOOK_TENTACLES_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustDied(Unit* pKiller) override
@@ -157,7 +161,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
         // Despawn all tentacles and portals
         DoCastSpellIfCan(m_creature, SPELL_DESPAWN_TENTACLES, TRIGGERED_OLD_TRIGGERED);
 
-        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_HOOK_TENTACLES);
+        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_HOOK_TENTACLES_1);
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_EYE_TENTACLES);
 
         if (m_pInstance)
@@ -402,18 +406,18 @@ struct boss_cthunAI : public Scripted_NoMovementAI
     {
         // Tentacles Party... Pleasure !
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_EYE_TENTACLES_P2, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_EYE_TENTACLES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_HOOKS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_MOUTH_TENTACLES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
+        DoCastSpellIfCan(m_creature, SPELL_GIANT_EYE_TENTACLES_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_HOOKS_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_MOUTH_TENTACLES_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
     }
 
     void StopSpawningTentacles()
     {
         // End of the tentacles everywhere. No more pleasure.
-        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_GIANT_EYE_TENTACLES);
+        m_creature->RemoveAurasDueToSpell(SPELL_GIANT_EYE_TENTACLES_1);
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_EYE_TENTACLES_P2);
-        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_GIANT_HOOKS);
-        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_MOUTH_TENTACLES);
+        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_GIANT_HOOKS_1);
+        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_MOUTH_TENTACLES_1);
     }
 
     // Custom threat management
@@ -682,18 +686,6 @@ UnitAI* GetAI_npc_giant_claw_tentacle(Creature* pCreature)
     return new npc_giant_claw_tentacleAI(pCreature);
 }
 
-struct SummonHookTentacle : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
-    {
-        if (effIdx == EFFECT_INDEX_0)
-        {
-            if (Unit* target = spell->GetUnitTarget())
-                target->CastSpell(target, SPELL_SUMMON_HOOK_TENTACLE, TRIGGERED_OLD_TRIGGERED);
-        }
-    }
-};
-
 struct PeriodicSummonEyeTrigger : public AuraScript
 {
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
@@ -707,38 +699,26 @@ struct PeriodicSummonEyeTrigger : public AuraScript
     }
 };
 
-struct SummonGiantEyeTentacle : public SpellScript
+struct SummonCThunTentacles : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx == EFFECT_INDEX_0)
         {
             if (Unit* target = spell->GetUnitTarget())
-                target->CastSpell(nullptr, SPELL_SUMMON_GIANT_EYE_TENTACLE, TRIGGERED_OLD_TRIGGERED);
-        }
-    }
-};
-
-struct SummonGiantHookTentacle : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
-    {
-        if (effIdx == EFFECT_INDEX_0)
-        {
-            if (Unit* target = spell->GetUnitTarget())
-                target->CastSpell(nullptr, SPELL_SUMMON_GIANT_HOOK_TENTACLE, TRIGGERED_OLD_TRIGGERED);
-        }
-    }
-};
-
-struct SummonMouthTentacle : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
-    {
-        if (effIdx == EFFECT_INDEX_0)
-        {
-            if (Unit* target = spell->GetUnitTarget())
-                target->CastSpell(nullptr, SPELL_SUMMON_MOUTH_TENTACLE, TRIGGERED_OLD_TRIGGERED);
+            {
+                uint32 spellId;
+                switch (spell->m_spellInfo->Id)
+                {
+                    case SPELL_SUMMON_MOUTH_TENTACLES_2:    spellId = SPELL_SUMMON_MOUTH_TENTACLE;      break;
+                    case SPELL_GIANT_EYE_TENTACLES_2:       spellId = SPELL_SUMMON_GIANT_EYE_TENTACLE;  break;
+                    case SPELL_SUMMON_HOOK_TENTACLES_2:     spellId = SPELL_SUMMON_HOOK_TENTACLE;       break;
+                    case SPELL_SUMMON_GIANT_HOOKS_2:        spellId = SPELL_SUMMON_GIANT_HOOK_TENTACLE; break;
+                    default:
+                        return;
+                }
+                target->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
+            }
         }
     }
 };
@@ -835,11 +815,8 @@ void AddSC_boss_cthun()
     pNewScript->pAreaTrigger = &AreaTrigger_at_stomach_cthun;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<SummonHookTentacle>("spell_cthun_hook_tentacle");
     RegisterSpellScript<RotateTrigger>("spell_cthun_rotate_trigger");
-    RegisterSpellScript<SummonGiantEyeTentacle>("spell_cthun_giant_eye_tentacle");
-    RegisterSpellScript<SummonGiantHookTentacle>("spell_cthun_giant_hook_tentacle");
-    RegisterSpellScript<SummonMouthTentacle>("spell_cthun_mouth_tentacle");
+    RegisterSpellScript<SummonCThunTentacles>("spell_cthun_tentacles_summon");
     RegisterSpellScript<HookTentacleTrigger>("spell_hook_tentacle_trigger");
     RegisterAuraScript<PeriodicSummonEyeTrigger>("spell_cthun_periodic_eye_trigger");
     RegisterAuraScript<PeriodicRotate>("spell_cthun_periodic_rotate");
