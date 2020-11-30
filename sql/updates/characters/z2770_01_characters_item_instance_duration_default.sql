@@ -1,0 +1,3 @@
+ALTER TABLE character_db_version CHANGE COLUMN required_z2765_01_characters_item_instance_data_drop required_z2770_01_characters_item_instance_duration_default bit;
+
+ALTER TABLE item_instance ALTER duration SET DEFAULT 0;
