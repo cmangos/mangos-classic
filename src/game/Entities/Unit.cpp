@@ -8067,35 +8067,31 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
 
         propagateSpeedChange();
 
-        typedef const uint16 SpeedOpcodePair[2];
-        SpeedOpcodePair SetSpeed2Opc_table[MAX_MOVE_TYPE] =
-        {
-            {SMSG_FORCE_WALK_SPEED_CHANGE,        SMSG_SPLINE_SET_WALK_SPEED},
-            {SMSG_FORCE_RUN_SPEED_CHANGE,         SMSG_SPLINE_SET_RUN_SPEED},
-            {SMSG_FORCE_RUN_BACK_SPEED_CHANGE,    SMSG_SPLINE_SET_RUN_BACK_SPEED},
-            {SMSG_FORCE_SWIM_SPEED_CHANGE,        SMSG_SPLINE_SET_SWIM_SPEED},
-            {SMSG_FORCE_SWIM_BACK_SPEED_CHANGE,   SMSG_SPLINE_SET_SWIM_BACK_SPEED},
-            {SMSG_FORCE_TURN_RATE_CHANGE,         SMSG_SPLINE_SET_TURN_RATE},
-        };
-
         const SpeedOpcodePair& speedOpcodes = SetSpeed2Opc_table[mtype];
 
-        if (forced && GetTypeId() == TYPEID_PLAYER)
+        if (forced && IsClientControlled())
         {
+            Player* player = const_cast<Player*>(GetControllingPlayer());
+            auto const counter = player->GetSession()->GetOrderCounter();
+
             // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
             // and do it only for real sent packets and use run for run/mounted as client expected
-            ++((Player*)this)->m_forced_speed_changes[mtype];
+            ++player->m_forced_speed_changes[mtype];
 
             WorldPacket data(speedOpcodes[0], 18);
             data << GetPackGUID();
-            data << (uint32)0;                              // moveEvent, NUM_PMOVE_EVTS = 0x39
-            data << float(GetSpeed(mtype));
-            ((Player*)this)->GetSession()->SendPacket(data);
+            data << counter;
+            data << GetSpeed(mtype);
+            player->GetSession()->SendPacket(data);
+            player->GetSession()->IncrementOrderCounter();
         }
-        WorldPacket data(speedOpcodes[1], 12);
-        data << GetPackGUID();
-        data << float(GetSpeed(mtype));
-        SendMessageToSet(data, false);
+        else
+        {
+            WorldPacket data(speedOpcodes[1], 12);
+            data << GetPackGUID();
+            data << float(GetSpeed(mtype));
+            SendMessageToSet(data, true);
+        }
     }
 
     CallForAllControlledUnits(SetSpeedRateHelper(mtype, forced), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_MINIPET);

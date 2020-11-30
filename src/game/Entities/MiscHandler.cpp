@@ -818,14 +818,6 @@ void WorldSession::HandleNextCinematicCamera(WorldPacket& /*recv_data*/)
     GetPlayer()->StartCinematic();
 }
 
-void WorldSession::HandleFeatherFallAck(WorldPacket& recv_data)
-{
-    DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_FEATHER_FALL_ACK");
-
-    // no used
-    recv_data.rpos(recv_data.wpos());                       // prevent warnings spam
-}
-
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_FORCE_MOVE_UNROOT_ACK");

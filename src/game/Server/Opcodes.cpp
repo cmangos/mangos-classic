@@ -23,9 +23,9 @@
 #include "Server/Opcodes.h"
 #include "Policies/Singleton.h"
 
-INSTANTIATE_SINGLETON_1(Opcodes);
+INSTANTIATE_SINGLETON_1(OpcodeHandler);
 
-OpcodeHandler const Opcodes::emptyHandler =
+OpcodeHandler const OpcodeStore::emptyHandler =
 {
     "<none>",
     STATUS_UNHANDLED,
@@ -34,20 +34,20 @@ OpcodeHandler const Opcodes::emptyHandler =
 };
 
 
-Opcodes::Opcodes()
+OpcodeStore::OpcodeStore()
 {
     /// Build Opcodes map
     BuildOpcodeList();
 }
 
-Opcodes::~Opcodes()
+OpcodeStore::~OpcodeStore()
 {
     /// Clear Opcodes
     mOpcodeMap.clear();
 }
 
 
-void Opcodes::BuildOpcodeList()
+void OpcodeStore::BuildOpcodeList()
 {
     /// Correspondence between opcodes and their names
     /*0x000*/  StoreOpcode(MSG_NULL_ACTION,                   "MSG_NULL_ACTION",                  STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
@@ -296,7 +296,7 @@ void Opcodes::BuildOpcodeList()
     /*0x0F3*/  StoreOpcode(SMSG_MOVE_NORMAL_FALL,             "SMSG_MOVE_NORMAL_FALL",            STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x0F4*/  StoreOpcode(SMSG_MOVE_SET_HOVER,               "SMSG_MOVE_SET_HOVER",              STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x0F5*/  StoreOpcode(SMSG_MOVE_UNSET_HOVER,             "SMSG_MOVE_UNSET_HOVER",            STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x0F6*/  StoreOpcode(CMSG_MOVE_HOVER_ACK,               "CMSG_MOVE_HOVER_ACK",              STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveHoverAck);
+    /*0x0F6*/  StoreOpcode(CMSG_MOVE_HOVER_ACK,               "CMSG_MOVE_HOVER_ACK",              STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveFlagChangeOpcode);
     /*0x0F7*/  StoreOpcode(MSG_MOVE_HOVER,                    "MSG_MOVE_HOVER",                   STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
     /*0x0F8*/  StoreOpcode(CMSG_TRIGGER_CINEMATIC_CHEAT,      "CMSG_TRIGGER_CINEMATIC_CHEAT",     STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
     /*0x0F9*/  StoreOpcode(CMSG_OPENING_CINEMATIC,            "CMSG_OPENING_CINEMATIC",           STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
@@ -767,8 +767,8 @@ void Opcodes::BuildOpcodeList()
     /*0x2CC*/  StoreOpcode(SMSG_RAID_INSTANCE_INFO,           "SMSG_RAID_INSTANCE_INFO",          STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x2CD*/  StoreOpcode(CMSG_REQUEST_RAID_INFO,            "CMSG_REQUEST_RAID_INFO",           STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRequestRaidInfoOpcode);
     /*0x2CE*/  StoreOpcode(CMSG_MOVE_TIME_SKIPPED,            "CMSG_MOVE_TIME_SKIPPED",           STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleMoveTimeSkippedOpcode);
-    /*0x2CF*/  StoreOpcode(CMSG_MOVE_FEATHER_FALL_ACK,        "CMSG_MOVE_FEATHER_FALL_ACK",       STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleFeatherFallAck);
-    /*0x2D0*/  StoreOpcode(CMSG_MOVE_WATER_WALK_ACK,          "CMSG_MOVE_WATER_WALK_ACK",         STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveWaterWalkAck);
+    /*0x2CF*/  StoreOpcode(CMSG_MOVE_FEATHER_FALL_ACK,        "CMSG_MOVE_FEATHER_FALL_ACK",       STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveFlagChangeOpcode);
+    /*0x2D0*/  StoreOpcode(CMSG_MOVE_WATER_WALK_ACK,          "CMSG_MOVE_WATER_WALK_ACK",         STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveFlagChangeOpcode);
     /*0x2D1*/  StoreOpcode(CMSG_MOVE_NOT_ACTIVE_MOVER,        "CMSG_MOVE_NOT_ACTIVE_MOVER",       STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveNotActiveMoverOpcode);
     /*0x2D2*/  StoreOpcode(SMSG_PLAY_SOUND,                   "SMSG_PLAY_SOUND",                  STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x2D3*/  StoreOpcode(CMSG_BATTLEFIELD_STATUS,           "CMSG_BATTLEFIELD_STATUS",          STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldStatusOpcode);

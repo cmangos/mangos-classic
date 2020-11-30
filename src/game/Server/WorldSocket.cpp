@@ -193,8 +193,8 @@ bool WorldSocket::ProcessIncomingData()
         return false;
     }
 
-    Opcodes x;
-    const OpcodesList opcode = static_cast<OpcodesList>(header.cmd);
+    OpcodeHandler x;
+    const Opcodes opcode = static_cast<Opcodes>(header.cmd);
 
     if (IsClosed())
         return false;

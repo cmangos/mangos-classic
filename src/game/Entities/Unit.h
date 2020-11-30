@@ -461,6 +461,47 @@ enum UnitState
 
 #define BASE_CHARGE_SPEED 27.0f
 
+typedef const Opcodes SpeedOpcodePair[3];
+SpeedOpcodePair SetSpeed2Opc_table[MAX_MOVE_TYPE] =
+{
+    {SMSG_FORCE_WALK_SPEED_CHANGE,        SMSG_SPLINE_SET_WALK_SPEED,           MSG_MOVE_SET_WALK_SPEED},
+    {SMSG_FORCE_RUN_SPEED_CHANGE,         SMSG_SPLINE_SET_RUN_SPEED,            MSG_MOVE_SET_RUN_SPEED},
+    {SMSG_FORCE_RUN_BACK_SPEED_CHANGE,    SMSG_SPLINE_SET_RUN_BACK_SPEED,       MSG_MOVE_SET_RUN_BACK_SPEED},
+    {SMSG_FORCE_SWIM_SPEED_CHANGE,        SMSG_SPLINE_SET_SWIM_SPEED,           MSG_MOVE_SET_SWIM_SPEED},
+    {SMSG_FORCE_SWIM_BACK_SPEED_CHANGE,   SMSG_SPLINE_SET_SWIM_BACK_SPEED,      MSG_MOVE_SET_SWIM_BACK_SPEED},
+    {SMSG_FORCE_TURN_RATE_CHANGE,         SMSG_SPLINE_SET_TURN_RATE,            MSG_MOVE_SET_TURN_RATE},
+};
+
+enum CombatRating
+{
+    CR_WEAPON_SKILL             = 0,
+    CR_DEFENSE_SKILL            = 1,
+    CR_DODGE                    = 2,
+    CR_PARRY                    = 3,
+    CR_BLOCK                    = 4,
+    CR_HIT_MELEE                = 5,
+    CR_HIT_RANGED               = 6,
+    CR_HIT_SPELL                = 7,
+    CR_CRIT_MELEE               = 8,
+    CR_CRIT_RANGED              = 9,
+    CR_CRIT_SPELL               = 10,
+    CR_HIT_TAKEN_MELEE          = 11,
+    CR_HIT_TAKEN_RANGED         = 12,
+    CR_HIT_TAKEN_SPELL          = 13,
+    CR_CRIT_TAKEN_MELEE         = 14,
+    CR_CRIT_TAKEN_RANGED        = 15,
+    CR_CRIT_TAKEN_SPELL         = 16,
+    CR_HASTE_MELEE              = 17,
+    CR_HASTE_RANGED             = 18,
+    CR_HASTE_SPELL              = 19,
+    CR_WEAPON_SKILL_MAINHAND    = 20,
+    CR_WEAPON_SKILL_OFFHAND     = 21,
+    CR_WEAPON_SKILL_RANGED      = 22,
+    CR_EXPERTISE                = 23
+};
+
+#define MAX_COMBAT_RATING         24
+
 /// internal used flags for marking special auras - for example some dummy-auras
 enum UnitAuraFlags
 {

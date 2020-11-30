@@ -27,7 +27,7 @@
 
 void WorldSession::SendGMTicketResult(uint32 opcode, uint32 result) const
 {
-    WorldPacket data(uint16(opcode), 4);
+    WorldPacket data(Opcodes(opcode), 4);
     data << result;
     SendPacket(data);
 }

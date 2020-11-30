@@ -33,7 +33,7 @@
 #include "Policies/Singleton.h"
 
 /// List of Opcodes
-enum OpcodesList
+enum Opcodes
 {
     MSG_NULL_ACTION                                 = 0x000,
     CMSG_BOOTME                                     = 0x001,
@@ -979,11 +979,11 @@ struct OpcodeHandler
 
 typedef std::map< uint16, OpcodeHandler> OpcodeMap;
 
-class Opcodes
+class OpcodeStore
 {
     public:
-        Opcodes();
-        ~Opcodes();
+        OpcodeStore();
+        ~OpcodeStore();
     public:
         void BuildOpcodeList();
         void StoreOpcode(uint16 Opcode, char const* name, SessionStatus status, PacketProcessing process, void (WorldSession::*handler)(WorldPacket& recvPacket))
@@ -1019,7 +1019,7 @@ class Opcodes
         OpcodeMap mOpcodeMap;
 };
 
-#define opcodeTable MaNGOS::Singleton<Opcodes>::Instance()
+#define opcodeTable MaNGOS::Singleton<OpcodeStore>::Instance()
 
 /// Lookup opcode name for human understandable logging
 inline char const* LookupOpcodeName(uint16 id)

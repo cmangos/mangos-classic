@@ -137,7 +137,7 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
         return false;
     }
 
-    WorldPacket data(opcode, 0);
+    WorldPacket data((Opcodes)opcode, 0);
 
     std::string type;
     while (stream >> type)
@@ -1126,7 +1126,7 @@ bool ChatHandler::HandleDebugSpellModsCommand(char* args)
     if (!typeStr)
         return false;
 
-    uint16 opcode;
+    Opcodes opcode;
     if (strncmp(typeStr, "flat", strlen(typeStr)) == 0)
         opcode = SMSG_SET_FLAT_SPELL_MODIFIER;
     else if (strncmp(typeStr, "pct", strlen(typeStr)) == 0)
@@ -1470,7 +1470,7 @@ bool ChatHandler::HandleDebugChatFreezeCommand(char* /*args*/)
 bool ChatHandler::HandleDebugPacketHistory(char* args)
 {
     auto history = m_session->GetOpcodeHistory();
-    std::string output = "Opcodes (reverse order):\n";
+    std::string output = "OpcodeStore (reverse order):\n";
     for (auto itr = history.rbegin(); itr != history.rend(); ++itr)
     {
         output += LookupOpcodeName(*itr);
