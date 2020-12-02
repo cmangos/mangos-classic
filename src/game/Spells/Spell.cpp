@@ -6581,7 +6581,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                 break;
             default:                                            // normal case
                 // Get GO cast coordinates if original caster -> GO
-                if (!IsIgnoreLosSpellEffect(m_spellInfo, eff) && target != m_caster)
+                if (exception != EXCEPTION_MAGNET && !IsIgnoreLosSpellEffect(m_spellInfo, eff) && target != m_caster)
                     if (WorldObject* caster = GetCastingObject())
                         if (!target->IsWithinLOSInMap(caster, true))
                             return false;
