@@ -212,7 +212,7 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recv_data)
     }
 
     if (Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest))
-        _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetObjectGuid(), true);
+        _player->PlayerTalkClass->SendQuestGiverQuestDetails(_player, pQuest, pObject->GetObjectGuid(), true);
 }
 
 void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
@@ -224,6 +224,7 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
     Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest);
     if (pQuest)
     {
+
         std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
         std::string Title = pQuest->GetTitle();
         std::string Details = pQuest->GetDetails();
@@ -274,9 +275,9 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
         if (pQuest->HasQuestFlag(QUEST_FLAGS_HIDDEN_REWARDS))
             data << uint32(0);                                  // Hide money rewarded
         else
-            data << uint32(pQuest->GetRewOrReqMoney());
+            data << uint32(pQuest->GetRewOrReqMoney(_player));
 
-        data << uint32(pQuest->GetRewMoneyMaxLevel());          // used in XP calculation at client
+        data << uint32(pQuest->GetRewMoneyMaxLevel(_player));          // used in XP calculation at client
 
         data << uint32(pQuest->GetRewSpell());                  // reward spell, this spell will display (icon) (casted if RewSpellCast==0)
 
@@ -338,6 +339,9 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
         SendPacket(data);
 
         DEBUG_LOG("WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u", pQuest->GetQuestId());
+
+        //_player->PlayerTalkClass->SendQuestQueryResponse(_player,pQuest);
+
     }
 }
 
@@ -374,10 +378,10 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recv_data)
 
             // Send next quest
             if (Quest const* nextquest = _player->GetNextQuest(guid, pQuest))
-                _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextquest, guid, true);
+                _player->PlayerTalkClass->SendQuestGiverQuestDetails(_player,nextquest, guid, true);
         }
         else
-            _player->PlayerTalkClass->SendQuestGiverOfferReward(pQuest, guid, true);
+            _player->PlayerTalkClass->SendQuestGiverOfferReward(_player,pQuest, guid, true);
     }
 }
 
@@ -403,7 +407,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode(WorldPacket& recv_data)
         return;
 
     if (Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest))
-        _player->PlayerTalkClass->SendQuestGiverOfferReward(pQuest, guid, true);
+        _player->PlayerTalkClass->SendQuestGiverOfferReward(_player,pQuest, guid, true);
 }
 
 void WorldSession::HandleQuestgiverCancel(WorldPacket& /*recv_data*/)
@@ -505,12 +509,12 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recv_data)
         if (_player->GetQuestStatus(quest) != QUEST_STATUS_COMPLETE)
         {
             if (pQuest->IsRepeatable())
-                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanCompleteRepeatableQuest(pQuest), false);
+                _player->PlayerTalkClass->SendQuestGiverRequestItems(_player, pQuest, guid, _player->CanCompleteRepeatableQuest(pQuest), false);
             else
-                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
+                _player->PlayerTalkClass->SendQuestGiverRequestItems(_player, pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
         }
         else
-            _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
+            _player->PlayerTalkClass->SendQuestGiverRequestItems(_player, pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
     }
 }
 
@@ -582,7 +586,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
                 }
 
 #ifndef BUILD_PLAYERBOT
-                pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, _player->GetObjectGuid(), true);
+                pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails(_player, pQuest, _player->GetObjectGuid(), true);
 #endif
                 pPlayer->SetDividerGuid(_player->GetObjectGuid());
 

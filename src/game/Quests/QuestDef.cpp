@@ -166,26 +166,28 @@ Quest::Quest(Field* questRecord)
     }
 }
 
-uint32 Quest::XPValue(Player* pPlayer) const
+uint32 Quest::XPValue(Player* pPlayer) const  // To Check !!!
 {
     if (pPlayer)
     {
-        if (RewMoneyMaxLevel > 0)
+        uint32 RewMoneyMaxLevelS = GetRewMoneyMaxLevel(pPlayer); //Rochenoire //RCS
+        if (RewMoneyMaxLevelS > 0)    //G: if (RewMoneyMaxLevel > 0)
         {
             uint32 pLevel = pPlayer->getLevel();
-            uint32 qLevel = QuestLevel;
+            uint32 qLevel_old = QuestLevel;  //RCS  //G : uint32 qLevel = QuestLevel;
+            uint32 qLevel = pPlayer->GetQuestLevelForPlayer(this); // RCS
             float fullxp = 0;
-            if (qLevel >= 65)
+            if (qLevel_old >= 65)
                 fullxp = RewMoneyMaxLevel / 6.0f;
-            else if (qLevel == 64)
+            else if (qLevel_old == 64)
                 fullxp = RewMoneyMaxLevel / 4.8f;
-            else if (qLevel == 63)
+            else if (qLevel_old == 63)
                 fullxp = RewMoneyMaxLevel / 3.6f;
-            else if (qLevel == 62)
+            else if (qLevel_old == 62)
                 fullxp = RewMoneyMaxLevel / 2.4f;
-            else if (qLevel == 61)
+            else if (qLevel_old == 61)
                 fullxp = RewMoneyMaxLevel / 1.2f;
-            else if (qLevel > 0 && qLevel <= 60)
+            else if (qLevel_old > 0 && qLevel_old <= 60)
                 fullxp = RewMoneyMaxLevel / 0.6f;
 
             if (pLevel <= qLevel +  5)
@@ -206,13 +208,56 @@ uint32 Quest::XPValue(Player* pPlayer) const
     return 0;
 }
 
-int32  Quest::GetRewOrReqMoney() const
+int32  Quest::GetRewOrReqMoney(Player* pPlayer) const
 {
+    /* Genuine
+    
     if (RewOrReqMoney <= 0)
         return RewOrReqMoney;
 
     return int32(RewOrReqMoney * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
+    */
+
+    //Rochnoire RCS
+
+    int32 sRewOrReqMoney = RewOrReqMoney;
+    if (pPlayer)
+    {
+        /* if (RewOrReqMoney <= 0)
+            return RewOrReqMoney; */
+
+        uint32 pQuest_slevel = pPlayer->GetQuestLevelForPlayer(this);
+
+        int32 expected_RewOrReqMoney = int32(0.0472 * pow(QuestLevel, 3) + 1.894 * pow(QuestLevel, 2) + 8.6352 * (QuestLevel));
+        float difference_RewOrReqMoney = (float)RewOrReqMoney / (float)expected_RewOrReqMoney;
+        int32 leveled_RewOrReqMoney = int32(0.0472 * pow(pQuest_slevel, 3) + 1.894 * pow(pQuest_slevel, 2) + 8.6352 * (pQuest_slevel));
+
+        sRewOrReqMoney = difference_RewOrReqMoney * (float)leveled_RewOrReqMoney;
+    }
+    return sRewOrReqMoney * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY);
+
+
 }
+
+//Rochenoire start RCS
+uint32 Quest::GetRewMoneyMaxLevel(Player* pPlayer) const
+{
+    if (pPlayer)
+    {
+        uint32 pQuest_slevel = pPlayer->GetQuestLevelForPlayer(this);
+
+        uint32 expected_RewMoneyMaxLevel = uint32(0.0212 * pow(QuestLevel, 3) - 0.3874 * pow(QuestLevel, 2) + 32.809 * (QuestLevel));
+        float difference_RewMoneyMaxLevel = (float)RewMoneyMaxLevel / (float)expected_RewMoneyMaxLevel;
+        uint32 leveled_RewMoneyMaxLevel = uint32(0.0212 * pow(pQuest_slevel, 3) - 0.3874 * pow(pQuest_slevel, 2) + 32.809 * (pQuest_slevel));
+
+        double scaled_RewMoneyMaxLevel = difference_RewMoneyMaxLevel * (float)leveled_RewMoneyMaxLevel;
+
+        return uint32(scaled_RewMoneyMaxLevel);
+    }
+    return RewMoneyMaxLevel;
+}
+
+//Rochenoire end
 
 bool Quest::IsAllowedInRaid() const
 {

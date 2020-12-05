@@ -500,11 +500,28 @@ void AreaAura::Update(uint32 diff)
                 // flag for selection is need apply aura to current iteration target
                 bool apply = true;
 
+                //Rochenoire RCS
+                /* PARTY AURAS should not be downscaled on target level
+                switch (m_areaAuraType)
+                {
+                    case AREA_AURA_PARTY:
+                    case AREA_AURA_FRIEND:
+                    case AREA_AURA_OWNER:
+                    case AREA_AURA_PET:
+                    {
+                        target_level = caster->getLevel();
+                        break;
+                    }
+                } */
+
+                //Rochenoire end
+
+
                 SpellEntry const* actualSpellInfo;
                 if (GetCasterGuid() == target->GetObjectGuid()) // if caster is same as target then no need to change rank of the spell
                     actualSpellInfo = GetSpellProto();
                 else
-                    actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(GetSpellProto(), target->getLevel()); // use spell id according level of the target
+                    actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(GetSpellProto(), target->GetLevelForTarget(caster)); //RCS //G ->getLevel() // use spell id according level of the target
                 if (!actualSpellInfo)
                     continue;
 
@@ -1146,6 +1163,37 @@ void Aura::TriggerSpell()
         // Spell exist but require custom code
         switch (auraId)
         {
+            //Rochenoire start RCS or FRS
+            case 28007:                                      // Summon Trainee              Every 20 secs
+            case 28009:                                      // Summon Knight               Every 25 secs
+            case 28011:                                      // Summon Mounted Knight       Every 30 secs
+            case 28216:                                      // Summon Zombie Chow          Every 06 secs
+            case 28453:                                      // Summon Guardian of Icecrown Every 10 secs
+            // Soldier of the Frozen Waste
+            case 29410:                                      // Every 5 secs
+            case 29391:                                      // Every 4 secs
+            case 28425:                                      // Every 3 secs
+            case 29392:                                      // Every 2 secs
+            case 29409:                                      // Every 1 secs
+            // Unstoppable Abomination
+            case 28426:                                      // Every 30 secs
+            case 29393:                                      // Every 25 secs
+            case 29394:                                      // Every 20 secs
+            case 29398:                                      // Every 15 secs
+            case 29411:                                      // Every 10 secs
+            // Soul Weaver
+            case 29399:                                      // Every 40 secs
+            case 29400:                                      // Every 35 secs
+            case 28427:                                      // Every 30 secs
+            case 29401:                                      // Every 20 secs
+            case 29412:                                      // Every 15 secs
+            {
+                if (target->GetTypeId() != TYPEID_UNIT)
+                    return;
+
+                m_periodicTimer = sObjectMgr.GetScaleSpellTimer(((Creature*)target), m_modifier.periodictime); //Rochenoire FRS
+            }
+            break; //Rochenoire end
             case 9347:                                      // Mortal Strike
             {
                 if (target->GetTypeId() != TYPEID_UNIT)
@@ -4653,6 +4701,7 @@ void Aura::PeriodicTick()
         return;
 
     SpellEntry const* spellProto = GetSpellProto();
+    bool m_isScaled = m_modifier.m_isScaled; //Rochenoire RCS
 
     switch (m_modifier.m_auraname)
     {
@@ -4705,12 +4754,12 @@ void Aura::PeriodicTick()
                 pdamage = target->MeleeDamageBonusTaken(caster, pdamage, attackType, GetSpellSchoolMask(spellProto), spellProto, DOT, GetStackAmount());
             }
 
-            target->CalculateDamageAbsorbAndResist(caster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto));
+            target->CalculateDamageAbsorbAndResist(caster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto),/*RCS*/ false, nullptr, m_isScaled); //RCS rochenoire
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
 
-            Unit::DealDamageMods(caster, target, pdamage, &absorb, DOT, spellProto);
+            Unit::DealDamageMods(caster, target, pdamage, &absorb, DOT, spellProto,/*RCS*/ m_isScaled); //Rochenoire RCS
 
             // Set trigger flag
             uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC; //  | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
@@ -4721,14 +4770,14 @@ void Aura::PeriodicTick()
             const uint32 malus = (resist > 0 ? (absorb + uint32(resist)) : absorb);
             pdamage = (pdamage <= malus ? 0 : (pdamage - malus));
 
-            SpellPeriodicAuraLogInfo pInfo(this, pdamage, absorb, resist, 0.0f);
+            SpellPeriodicAuraLogInfo pInfo(this, pdamage, absorb, resist, 0.0f,/*RCS*/ m_isScaled); //Rochenoire RCS
             target->SendPeriodicAuraLog(&pInfo);
 
             if (pdamage)
                 procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
             CleanDamage cleanDamage =  CleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL);
-            Unit::DealDamage(caster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, true);
+            Unit::DealDamage(caster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, true, m_isScaled); //Rochenoire RCS
 
             Unit::ProcDamageAndSpell(ProcSystemArguments(caster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto));
 
@@ -4777,7 +4826,7 @@ void Aura::PeriodicTick()
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s health leech of %s for %u dmg inflicted by %u abs is %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId(), absorb);
 
-            Unit::DealDamageMods(pCaster, target, pdamage, &absorb, DOT, spellProto);
+            Unit::DealDamageMods(pCaster, target, pdamage, &absorb, DOT, spellProto,/*RCS*/ m_isScaled); //Rochenoire RCS
 
             pCaster->SendSpellNonMeleeDamageLog(target, GetId(), pdamage, GetSpellSchoolMask(spellProto), absorb, resist, true, 0);
 
@@ -4792,13 +4841,23 @@ void Aura::PeriodicTick()
             const uint32 malus = (resist > 0 ? (absorb + uint32(resist)) : absorb);
             pdamage = (pdamage <= malus ? 0 : (pdamage - malus));
 
+            //Rochenoire RCS
+            pdamage = sObjectMgr.ScaleDamage(pCaster, target, pdamage, m_isScaled, spellProto);
+            //Rochenoire end
+
             pdamage = std::min(pdamage, target->GetHealth());
 
             if (pdamage)
                 procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
+            /* Rochenoire 
             CleanDamage cleanDamage =  CleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL);
             int32 new_damage = Unit::DealDamage(pCaster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, false);
+            */
+            //Rochenoire RCS 
+            CleanDamage cleanDamage = CleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL, m_isScaled);
+            int32 new_damage = Unit::DealDamage(pCaster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, false, m_isScaled);
+            //Rochenoire RCS end
             Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto));
 
             if (!target->IsAlive() && pCaster->IsNonMeleeSpellCasted(false))
@@ -4813,13 +4872,24 @@ void Aura::PeriodicTick()
                 modOwner->ApplySpellMod(GetId(), SPELLMOD_MULTIPLE_VALUE, multiplier);
             }
 
+            /*Rochenoire
             uint32 heal = pCaster->SpellHealingBonusTaken(pCaster, spellProto, int32(new_damage * multiplier), DOT, GetStackAmount());
 
             int32 gain = pCaster->DealHeal(pCaster, heal, spellProto);
+            */
+            //Rochenoire start RCS
+            uint32 heal = pCaster->SpellHealingBonusTaken(pCaster, spellProto, int32(pdamage * multiplier), DOT, GetStackAmount());
+            bool invertedScaled = !m_isScaled;
+            heal = sObjectMgr.ScaleDamage(target, pCaster, heal, invertedScaled, spellProto);
+
+            int32 gain = pCaster->DealHeal(pCaster, heal, spellProto, false, m_isScaled);
+            invertedScaled = !m_isScaled;
+            gain = sObjectMgr.ScaleDamage(target, pCaster, gain, invertedScaled, spellProto);
+            //Rochenoire end
             // Health Leech effects do not generate healing aggro
             if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_LEECH)
                 break;
-            pCaster->getHostileRefManager().threatAssist(pCaster, gain * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true);
+            pCaster->getHostileRefManager().threatAssist(pCaster, gain * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true,/*RCS*/ m_isScaled, pCaster); //Rochenoire RCS
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
@@ -4861,7 +4931,7 @@ void Aura::PeriodicTick()
                 GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
 
             int32 gain = target->ModifyHealth(pdamage);
-            SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
+            SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f,/*RCS*/ m_isScaled); //RCS Rochenoire
             target->SendPeriodicAuraLog(&pInfo);
 
             // Set trigger flag
@@ -4870,7 +4940,7 @@ void Aura::PeriodicTick()
             uint32 procEx = PROC_EX_NORMAL_HIT | PROC_EX_INTERNAL_HOT;
 
             if (pCaster->IsInCombat() && !pCaster->IsCrowdControlled())
-                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true);
+                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true,/*RCS*/ m_isScaled, target); //Rochenoire RCS
 
             Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, procEx, gain, BASE_ATTACK, spellProto, nullptr, gain));
 
@@ -4885,7 +4955,7 @@ void Aura::PeriodicTick()
                 {
                     pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(spellProto), absorb, 0, true, 0, false);
                     CleanDamage cleanDamage = CleanDamage(damage, BASE_ATTACK, MELEE_HIT_NORMAL);
-                    Unit::DealDamage(pCaster, pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
+                    Unit::DealDamage(pCaster, pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true, m_isScaled);
                 }
                 else
                 {
@@ -4938,13 +5008,19 @@ void Aura::PeriodicTick()
                     return;
                 }
             }
-
+            //Rochenoire RCS
+            uint32 sdamage = sObjectMgr.ScaleDamage(pCaster, target, pdamage, m_isScaled, spellProto);
+            //Rochenoire end
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s power leech of %s for %u dmg inflicted by %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
 
             int32 drain_amount = target->GetPower(power) > pdamage ? pdamage : target->GetPower(power);
-
-            target->ModifyPower(power, -drain_amount);
+            //Rochenoire RCS
+            int32 scaled_amount = target->GetPower(power) > sdamage ? sdamage : target->GetPower(power);
+            
+            //Rochenoire RCS //G : target->ModifyPower(power, -drain_amount);
+            target->ModifyPower(power, -scaled_amount); //Rochenoire RCS
+            //Rochenoire end
 
             float gain_multiplier = 0;
 
@@ -4956,7 +5032,7 @@ void Aura::PeriodicTick()
                     modOwner->ApplySpellMod(GetId(), SPELLMOD_MULTIPLE_VALUE, gain_multiplier);
             }
 
-            SpellPeriodicAuraLogInfo pInfo(this, drain_amount, 0, 0, gain_multiplier);
+            SpellPeriodicAuraLogInfo pInfo(this, drain_amount, 0, 0, gain_multiplier,/*RCS*/ m_isScaled);//Rochenoire RCS
             target->SendPeriodicAuraLog(&pInfo);
 
             int32 gain_amount = int32(drain_amount * gain_multiplier);
@@ -4964,7 +5040,7 @@ void Aura::PeriodicTick()
             if (gain_amount)
             {
                 int32 gain = pCaster->ModifyPower(power, gain_amount);
-                target->AddThreat(pCaster, float(gain) * 0.5f, false, GetSpellSchoolMask(spellProto), spellProto);
+                target->AddThreat(pCaster, float(gain) * 0.5f, false, GetSpellSchoolMask(spellProto), spellProto,/*RCS*/ m_isScaled); //Rochenoire RCS
             }
 
             // Some special cases
@@ -5012,13 +5088,13 @@ void Aura::PeriodicTick()
             if (target->GetMaxPower(power) == 0)
                 break;
 
-            SpellPeriodicAuraLogInfo info(this, pdamage, 0, 0, 0.0f);
+            SpellPeriodicAuraLogInfo info(this, pdamage, 0, 0, 0.0f,/*RCS*/ m_isScaled);//Rochenoire RCS
             target->SendPeriodicAuraLog(&info);
 
             int32 gain = target->ModifyPower(power, pdamage);
 
             if (pCaster)
-                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true);
+                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true,/*RCS*/ m_isScaled, target);//Rochenoire RCS
 
             if (GetId() == 25685) // Moam - Energize
                 if (target->GetPower(POWER_MANA) > 24000)
@@ -5054,13 +5130,13 @@ void Aura::PeriodicTick()
             if (target->GetMaxPower(POWER_MANA) == 0)
                 break;
 
-            SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
+            SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f,/*RCS*/ m_isScaled); //Rochenoire RCS
             target->SendPeriodicAuraLog(&pInfo);
 
             int32 gain = target->ModifyPower(POWER_MANA, pdamage);
 
             if (pCaster)
-                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true);
+                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true,/*RCS*/ m_isScaled, target);//Rochenoire RCS
             break;
         }
         case SPELL_AURA_POWER_BURN_MANA:
@@ -5127,7 +5203,7 @@ void Aura::PeriodicTick()
 
             int32 gain = target->ModifyHealth(m_modifier.m_amount);
             if (Unit* caster = GetCaster())
-                target->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f  * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true);
+                target->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f  * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true,/*RCS*/ m_isScaled, target); //Rochenoire RCS
             break;
         }
         case SPELL_AURA_MOD_POWER_REGEN:
@@ -5256,9 +5332,12 @@ void Aura::HandleManaShield(bool apply, bool Real)
                 case SPELLFAMILY_MAGE:
                     if (GetSpellProto()->SpellFamilyFlags & uint64(0x0000000000008000))
                     {
+                        //Rochenoire 
+                        Unit* target = GetTarget(); //Rochenoire
                         // Mana Shield
                         // +50% from +spd bonus
                         DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(GetSpellProto())) * 0.5f;
+                        DoneActualBenefit = sObjectMgr.ScaleDamage(caster, target, DoneActualBenefit); //Rochenoire RCS
                         break;
                     }
                     break;
@@ -5449,7 +5528,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     {
         SetAura(slot, false);
         SetAuraFlag(slot, true);
-        SetAuraLevel(slot, caster ? caster->getLevel() : sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
+        SetAuraLevel(slot, caster ? caster->getLevel() : sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));  //GetCurrentMaxLevel() Rochenoire TBC
         UpdateAuraApplication();
 
         // update for out of range group members
@@ -5510,7 +5589,7 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
 
     SetAura(slot, true);
     SetAuraFlag(slot, false);
-    SetAuraLevel(slot, caster ? caster->getLevel() : sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
+    SetAuraLevel(slot, caster ? caster->getLevel() : sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));  //ROchenoire TBC  GetCurrentMaxLevel()
 
     m_procCharges = 0;
     m_stackAmount = 1;
@@ -5858,7 +5937,7 @@ void SpellAuraHolder::Update(uint32 diff)
                 if (GetSpellProto()->SpellVisual != 163)
                 {
                     Powers powertype = Powers(GetSpellProto()->powerType);
-                    int32 manaPerSecond = GetSpellProto()->manaPerSecond + GetSpellProto()->manaPerSecondPerLevel * caster->getLevel();
+                    int32 manaPerSecond = GetSpellProto()->manaPerSecond + GetSpellProto()->manaPerSecondPerLevel * caster->GetLevelForTarget(GetTarget());  //Rochenoire RCS G : ->getLevel()
                     m_timeCla = 1 * IN_MILLISECONDS;
 
                     if (manaPerSecond)

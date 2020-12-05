@@ -576,6 +576,12 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_FOGOFWAR_HEALTH, "Visibility.FogOfWar.Health", 0);
     setConfig(CONFIG_UINT32_FOGOFWAR_STATS, "Visibility.FogOfWar.Stats", 0);
 
+    //Rochenoire RCS start
+    setConfig(CONFIG_BOOL_CALCULATE_CREATURE_ZONE_AREA_DATA, "Calculate.Creature.Zone.Area.Data", false);
+    setConfig(CONFIG_BOOL_CALCULATE_GAMEOBJECT_ZONE_AREA_DATA, "Calculate.Gameoject.Zone.Area.Data", false);
+    //Rochenoire end
+
+
     setConfig(CONFIG_UINT32_MAIL_DELIVERY_DELAY, "MailDeliveryDelay", HOUR);
 
     setConfigMin(CONFIG_UINT32_MASS_MAILER_SEND_PER_TICK, "MassMailer.SendPerTick", 10, 1);
@@ -1149,6 +1155,11 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Waypoints...");
     sWaypointMgr.Load();
+
+    //Rochenoire start RCS
+    sLog.outString("Load Zone Flex Details...");
+    sObjectMgr.LoadZoneScale();
+    //Rochenoire end
 
     sLog.outString("Loading ReservedNames...");
     sObjectMgr.LoadReservedPlayersNames();

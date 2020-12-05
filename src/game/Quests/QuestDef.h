@@ -28,7 +28,7 @@ class Player;
 
 class ObjectMgr;
 
-#define MAX_QUEST_LOG_SIZE 20
+#define MAX_QUEST_LOG_SIZE 25   // TBC value !!
 
 #define QUEST_OBJECTIVES_COUNT 4
 #define QUEST_ITEM_OBJECTIVES_COUNT QUEST_OBJECTIVES_COUNT
@@ -155,9 +155,11 @@ enum QuestSpecialFlags
     QUEST_SPECIAL_FLAG_SPEAKTO              = 0x010,        // Internal flag computed only
     QUEST_SPECIAL_FLAG_KILL_OR_CAST         = 0x020,        // Internal flag computed only
     QUEST_SPECIAL_FLAG_TIMED                = 0x040,        // Internal flag computed only
+    QUEST_SPECIAL_FLAG_DISABLED = 0x080,        //Rochenoire // Internal flag computed only
 };
 
-#define QUEST_SPECIAL_FLAG_DB_ALLOWED (QUEST_SPECIAL_FLAG_REPEATABLE | QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT)
+// Rochenoire G : #define QUEST_SPECIAL_FLAG_DB_ALLOWED (QUEST_SPECIAL_FLAG_REPEATABLE | QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT)
+#define QUEST_SPECIAL_FLAG_DB_ALLOWED (QUEST_SPECIAL_FLAG_REPEATABLE | QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT | QUEST_SPECIAL_FLAG_DISABLED)
 
 struct QuestLocale
 {
@@ -194,6 +196,7 @@ class Quest
         uint32 GetMinLevel() const { return MinLevel; }
         uint32 GetMaxLevel() const { return MaxLevel; }
         uint32 GetQuestLevel() const { return QuestLevel; }
+        int32  GetQuestRelativeLevel() const { return QuestLevel - MinLevel; }  //Rochenoire RCS
         uint32 GetType() const { return Type; }
         uint32 GetRequiredClasses() const { return RequiredClasses; }
         uint32 GetRequiredRaces() const { return RequiredRaces; }
@@ -222,8 +225,8 @@ class Quest
         std::string GetOfferRewardText() const { return OfferRewardText; }
         std::string GetRequestItemsText() const { return RequestItemsText; }
         std::string GetEndText() const { return EndText; }
-        int32  GetRewOrReqMoney() const;
-        uint32 GetRewMoneyMaxLevel() const { return RewMoneyMaxLevel; }
+        int32  GetRewOrReqMoney(Player *P) const;  //RCS
+        uint32 GetRewMoneyMaxLevel(Player* p) const; //RCS
         // use in XP calculation at client
         uint32 GetRewSpell() const { return RewSpell; }
         uint32 GetRewSpellCast() const { return RewSpellCast; }
@@ -249,6 +252,11 @@ class Quest
         // quest can be fully deactivated and will not be available for any player
         void SetQuestActiveState(bool state) { m_isActive = state; }
         bool IsActive() const { return m_isActive; }
+
+        //Rochenoire scaling
+        bool IsSpecificQuest() const { return (Type == 62 /* RAID */ || Type == 41 /* PVP */ || GetRequiredClasses() == 1 || GetRequiredClasses() == 2 || GetRequiredClasses() == 4 || GetRequiredClasses() == 8 || GetRequiredClasses() == 16 || GetRequiredClasses() == 32 || GetRequiredClasses() == 64 || GetRequiredClasses() == 128 || GetRequiredClasses() == 256 || GetRequiredClasses() == 512 || GetRequiredClasses() == 1024); }
+
+        //Rochenoire scaling end
 
         // multiple values
         std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
@@ -293,6 +301,7 @@ class Quest
         // table data
     protected:
         uint32 QuestId;
+        //uint32 patch
         uint32 QuestMethod;
         int32  ZoneOrSort;
         uint32 MinLevel;

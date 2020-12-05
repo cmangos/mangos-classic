@@ -450,7 +450,7 @@ void ThreatManager::clearReferences()
 
 //============================================================
 
-void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell)
+void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell,/*RCS*/ bool isScaled, Unit* pSpellTarget) //RCS
 {
     // function deals with adding threat and adding players and pets into ThreatList
     // mobs, NPCs, guards have ThreatList and HateOfflineList
@@ -469,7 +469,20 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
     if (!victim->IsAlive() || !getOwner()->IsAlive())
         return;
 
-    float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, threat, crit, schoolMask, threatSpell);
+    
+
+    //Rochenoire start
+    //float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, threat, crit, schoolMask, threatSpell);
+
+    Unit* real_target = pSpellTarget ? pSpellTarget : victim;
+    isScaled = pSpellTarget ? false : isScaled;
+
+    float scaledThreat = sObjectMgr.ScaleDamage(getOwner(), real_target, threat, isScaled, threatSpell, EFFECT_INDEX_0, true); // revert
+
+    float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, scaledThreat, crit, schoolMask, threatSpell);
+
+    //Rochenoire end
+
 
     addThreatDirectly(victim, calculatedThreat);
 }

@@ -41,6 +41,7 @@
 #include "Chat/Chat.h"
 #include "Loot/LootMgr.h"
 #include "Spells/SpellMgr.h"
+#include "Spells/Spell.h"
 
 Object::Object(): m_updateFlag(0), m_itsNewObject(false)
 {
@@ -422,6 +423,14 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 {
                     *data << uint32(m_floatValues[index]);
                 }
+                //Rochenoire start RCS
+                else if (index == UNIT_FIELD_LEVEL)
+                {
+                    //Unit* creature = ((Unit*)this);  //Rochenoire //RCS
+                    //*data << uint32(((Unit*)this)->GetLevelForTarget(target));
+                    *data << uint32(static_cast<const Unit*>(this)->GetLevelForTarget(target)); //RCS
+                }
+                //Rochenoire end RCS
                 else if (index == UNIT_FIELD_HEALTH || index == UNIT_FIELD_MAXHEALTH)
                 {
                     uint32 value = m_uint32Values[index];
@@ -571,6 +580,97 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                                     case HORDE:     value = 1495;   break;  // "Horde Generic"
                                 }
                             }
+                        }
+                    }
+
+                    *data << value;
+                }
+                //Rochenoire start
+                                else if (index == UNIT_FIELD_FACTIONTEMPLATE)
+                {
+                    uint32 value = m_uint32Values[index];
+
+                    // [XFACTION]: Alter faction if detected crossfaction group interaction when updating faction field:
+                    if (this != target && GetTypeId() == TYPEID_PLAYER && sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                    {
+                        Player const* thisPlayer = static_cast<Player const*>(this);
+                        const uint32 targetTeam = target->GetTeam();
+
+                        if (thisPlayer->GetTeam() != targetTeam && !thisPlayer->HasCharmer() && target->IsInGroup(thisPlayer))
+                        {
+                            switch (targetTeam)
+                            {
+                                case ALLIANCE:  value = 1054;   break;  // "Alliance Generic"
+                                case HORDE:     value = 1495;   break;  // "Horde Generic"
+                            }
+                        }
+                    }
+
+                    *data << value;
+                }
+                // [XFACTION]: Alter faction if detected crossfaction group interaction when updating faction field:
+                else if (index == UNIT_FIELD_FACTIONTEMPLATE && target != this && sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                {
+                    uint32 value = m_uint32Values[index];
+                    Unit const* thisUnit = static_cast<Unit const*>(this);
+
+                    if (!thisUnit->HasCharmer() && target->IsInGroup(thisUnit) && !target->CanCooperate(thisUnit))
+                    {
+                        switch (uint32(target->GetTeam()))
+                        {
+                            case ALLIANCE:  value = 1054;   break;  // "Alliance Generic"
+                            case HORDE:     value = 1495;   break;  // "Horde Generic"
+                        }
+                    }
+
+                    *data << value;
+                }
+                // [XFACTION]: Alter faction if detected crossfaction group interaction when updating faction field:
+                else if (index == UNIT_FIELD_FACTIONTEMPLATE && target != this && sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                {
+                    uint32 value = m_uint32Values[index];
+                    Unit const* thisUnit = static_cast<Unit const*>(this);
+
+                    if (!thisUnit->HasCharmer() && target->IsInGroup(thisUnit) && !target->CanCooperate(thisUnit))
+                    {
+                        switch (uint32(target->GetTeam()))
+                        {
+                            case ALLIANCE:  value = 1054;   break;  // "Alliance Generic"
+                            case HORDE:     value = 1495;   break;  // "Horde Generic"
+                        }
+                    }
+
+                    *data << value;
+                }
+                // [XFACTION]: Alter faction if detected crossfaction group interaction when updating faction field:
+                else if (index == UNIT_FIELD_FACTIONTEMPLATE && target != this && sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                {
+                    uint32 value = m_uint32Values[index];
+                    Unit const* thisUnit = static_cast<Unit const*>(this);
+
+                    if (!thisUnit->HasCharmer() && target->IsInGroup(thisUnit) && !target->CanCooperate(thisUnit))
+                    {
+                        switch (uint32(target->GetTeam()))
+                        {
+                            case ALLIANCE:  value = 1054;   break;  // "Alliance Generic"
+                            case HORDE:     value = 1495;   break;  // "Horde Generic"
+                        }
+                    }
+
+                    *data << value;
+                }
+                // [XFACTION]: Alter faction if detected crossfaction group interaction when updating faction field:
+                else if (index == UNIT_FIELD_FACTIONTEMPLATE && target != this && sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                {
+                    uint32 value = m_uint32Values[index];
+                    Unit const* thisUnit = static_cast<Unit const*>(this);
+
+                    if (!thisUnit->HasCharmer() && target->IsInGroup(thisUnit) && !target->CanCooperate(thisUnit))
+                    {
+                        switch (uint32(target->GetTeam()))
+                        {
+                            case ALLIANCE:  value = 1054;   break;  // "Alliance Generic"
+                            case HORDE:     value = 1495;   break;  // "Horde Generic"
                         }
                     }
 
@@ -1003,7 +1103,7 @@ void Object::MarkForClientUpdate()
     }
 }
 
-void Object::ForceValuesUpdateAtIndex(uint16 index)
+void Object::ForceValuesUpdateAtIndex(uint32 index) //Rochenoire  //G : uint16
 {
     m_changedValues[index] = true;
     if (m_inWorld && !m_objectUpdated)
@@ -1808,6 +1908,30 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     return WorldObject::SummonCreature(TempSpawnSettings(this, id, x, y, z, ang, spwtype, despwtime, asActiveObject, setRun, pathId, faction, modelId, spawnCounting, forcedOnTop), GetMap());
 }
 
+//Rochenoire start RCS
+
+Creature* WorldObject::SummonTrigger(float x, float y, float z, float ang, uint32 duration, uint32 faction, uint32 level)
+{
+    TempSpawnType spwtype = (duration == 0) ? TEMPSPAWN_DEAD_DESPAWN : TEMPSPAWN_TIMED_DESPAWN;
+    Creature* summon = SummonCreature(WORLD_TRIGGER, x, y, z, ang, spwtype, duration);
+    if (!summon)
+        return NULL;
+
+    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+
+    if (faction != 0)
+        summon->setFaction(faction);
+
+    if (level != 0)
+        summon->SetLevel(level);
+
+    summon->SetName(GetName());
+
+    return summon;
+}
+
+//Rochenoire end
+
 // how much space should be left in front of/ behind a mob that already uses a space
 #define OCCUPY_POS_DEPTH_FACTOR                          1.8f
 
@@ -2477,7 +2601,7 @@ void WorldObject::PrintCooldownList(ChatHandler& chat) const
     chat.PSendSysMessage("Found %u permanent cooldown%s.", permCDCount, (permCDCount > 1) ? "s" : "");
 }
 
-int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* effBasePoints) const
+int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* effBasePoints,/*RCS*/ Spell* spell) const
 {
     Unit const* unitCaster = dynamic_cast<Unit const*>(this);
     Player const* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? static_cast<Player const*>(this) : nullptr;
@@ -2495,8 +2619,9 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
     int32 randomPoints = spellProto->EffectDieSides[effect_index];
     if (unitCaster && basePointsPerLevel != 0.f)
     {
-        int32 level = int32(unitCaster->getLevel());
-        if (level > (int32)spellProto->maxLevel&& spellProto->maxLevel > 0)
+        //int32 level = int32(unitCaster->getLevel());  //Rochenoire RCS
+        int32 level = int32(/*target ? unitCaster->GetLevelForTarget(target) :*/ unitCaster->getLevel());  //RCS
+        if (level > (int32)spellProto->maxLevel && spellProto->maxLevel > 0)
             level = (int32)spellProto->maxLevel;
         else if (level < (int32)spellProto->baseLevel)
             level = (int32)spellProto->baseLevel;
@@ -2531,14 +2656,19 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
         if (Player* modOwner = unitCaster->GetSpellModOwner())
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ALL_EFFECTS, value);
 
-    if (unitCaster && spellProto->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION) && spellProto->spellLevel)
+
+
+    // Rochenoire RCS G: if (unitCaster && spellProto->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION) && spellProto->spellLevel)
+    //bool damage = false;  //RCS
+    if (unitCaster && spellProto->spellLevel)  //RCS
     {
         // TODO: Drastically beter than before, but still needs some additional aura scaling research
-        bool damage = false;
+        bool damage = false;  //RCS
         if (uint32 aura = spellProto->EffectApplyAuraName[effect_index])
         {
             // TODO: to be incorporated into the main per level calculation after research
-            value += int32(std::max(0, int32(unitCaster->getLevel() - spellProto->maxLevel)) * basePointsPerLevel);
+            //Rocehnoire RCS //G : value += int32(std::max(0, int32(unitCaster->getLevel() - spellProto->maxLevel)) * basePointsPerLevel);
+            value += int32(std::max(0, int32((target ? unitCaster->GetLevelForTarget(target) : unitCaster->getLevel()) - spellProto->maxLevel)) * basePointsPerLevel); //RCS
 
             switch (aura)
             {
@@ -2564,15 +2694,96 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
                 case SPELL_EFFECT_WEAPON_DAMAGE:
                 case SPELL_EFFECT_POWER_BURN:
                 case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                //case SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE:
                     damage = true;
             }
         }
 
+        //Rochenoire Start RCS
+        //G
+        /*
         if (damage)
         {
             value = int32(value * 0.25f * exp(unitCaster->getLevel() * (70 - spellProto->spellLevel) / 1000.0f));
         }
+        */
+
+        //Obsolete Rochenoire
+        /*if (damage && spellProto->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION))
+        {
+            GtNPCManaCostScalerEntry const* spellScaler = sGtNPCManaCostScalerStore.LookupEntry(spellProto->spellLevel - 1);
+            GtNPCManaCostScalerEntry const* casterScaler = sGtNPCManaCostScalerStore.LookupEntry((target ? unitCaster->GetLevelForTarget(target) : unitCaster->getLevel()) - 1);
+            if (spellScaler && casterScaler)
+            {
+                value *= casterScaler->ratio / spellScaler->ratio;
+                spell->EffectScaled[effect_index] = true;
+            }
+        }
+        else
+        {
+            if (spell && target && target->GetObjectGuid() != unitCaster->GetObjectGuid())
+            {
+                if (value == 0)
+                    return value;
+
+                if (!sObjectMgr.IsScalable((Unit*)target, (Unit*)unitCaster))
+                    return value;
+
+                Unit* uTarget = (Unit*)target->GetBeneficiary();
+                Unit* uCaster = (Unit*)unitCaster->GetBeneficiary();
+
+                bool canKeep = false;
+
+                if ((uTarget->IsFriend(uCaster) && uCaster->IsPlayer() && uTarget->IsPlayer()) && ((spell && spell->IsReferencedFromCurrent()) || !spell)) // PvP
+                    canKeep = uCaster->hasZoneLevel();
+                else if (uCaster->IsPlayer() || uTarget->IsPlayer())
+                    canKeep = sObjectMgr.isAuraRestricted(spellProto->EffectApplyAuraName[effect_index]);
+
+                if (canKeep)
+                {
+                    if (spellProto->Effect[effect_index] == SPELL_EFFECT_APPLY_AURA || spellProto->Effect[effect_index] == SPELL_EFFECT_APPLY_AREA_AURA_PARTY || spellProto->Effect[effect_index] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+                        canKeep = sObjectMgr.isAuraSafe(spellProto->EffectApplyAuraName[effect_index]);
+                    else
+                        canKeep = sObjectMgr.isEffectRestricted(spellProto->Effect[effect_index]);
+                }
+
+                if (canKeep)
+                    value = sObjectMgr.ScaleDamage((Unit*)unitCaster, (Unit*)target, value, spell->EffectScaled[effect_index], true);
+            }
+        }*/
+
+
+        if (spell && spell->IsReferencedFromCurrent())
+        {
+            if (value == 0)
+                return value;
+
+            if (!target || !unitCaster || target->GetObjectGuid() == unitCaster->GetObjectGuid())
+                return value;
+
+            if (!sObjectMgr.IsScalable((Unit*)target, (Unit*)unitCaster))
+                return value;
+
+            Unit* uTarget = (Unit*)target->GetBeneficiary();
+            Unit* uCaster = (Unit*)unitCaster->GetBeneficiary();
+
+            if (uCaster->IsPlayer() || uTarget->IsPlayer())
+            {
+                bool canKeep = false;
+
+                if (uint32 aura = spellProto->EffectApplyAuraName[effect_index])
+                    canKeep = sObjectMgr.isAuraSafe(aura);
+                else if (uint32 effect = spellProto->Effect[effect_index])
+                    canKeep = sObjectMgr.isEffectRestricted(effect);
+
+                if (canKeep)
+                    value = sObjectMgr.ScaleDamage((Unit*)unitCaster, (Unit*)target, value, spell->EffectScaled[effect_index], spellProto, effect_index);
+            }
+        }
+
+
     }
+
     return value;
 }
 

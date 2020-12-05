@@ -742,9 +742,34 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType, ObjectGuid casterGuid)
     }
 }
 
-void Unit::DealDamageMods(Unit* dealer, Unit* victim, uint32& damage, uint32* absorb, DamageEffectType damagetype, SpellEntry const* spellProto)
+void Unit::DealDamageMods(Unit* dealer, Unit* victim, uint32& damage, uint32* absorb, DamageEffectType damagetype, SpellEntry const* spellProto,/*RCS*/ bool isScaled) //RCS
 {
     if (!victim->IsAlive() || victim->IsTaxiFlying() || victim->GetCombatManager().IsInEvadeMode())
+    {
+        if (absorb)
+            *absorb += damage;
+
+        damage = 0;
+        return;
+    }
+
+    uint32 originalDamage = damage;
+    uint32 scaledDamage = sObjectMgr.ScaleDamage(dealer, victim, damage, isScaled, spellProto); //RCS
+
+    if (dealer) // dealer is optional
+    {
+        if (UnitAI* ai = dealer->AI()) // Script Event damage Deal
+            ai->DamageDeal(victim, scaledDamage, damagetype, spellProto);  //RCS
+    }
+    // Script Event damage taken
+    if (victim->AI())
+        victim->AI()->DamageTaken(dealer, scaledDamage, damagetype, spellProto);  //RCS
+
+    // todo ???
+    if (absorb && originalDamage > damage)//RCS
+        *absorb += (originalDamage - damage);//RCS
+
+   /* if (!victim->IsAlive() || victim->IsTaxiFlying() || victim->GetCombatManager().IsInEvadeMode())
     {
         if (absorb)
             *absorb += damage;
@@ -766,6 +791,7 @@ void Unit::DealDamageMods(Unit* dealer, Unit* victim, uint32& damage, uint32* ab
 
     if (absorb && originalDamage > damage)
         *absorb += (originalDamage - damage);
+    */
 }
 
 void Unit::Suicide()
@@ -773,8 +799,77 @@ void Unit::Suicide()
     DealDamage(this, this, this->GetHealth(), nullptr, INSTAKILL, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
 }
 
-uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss)
+uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, bool isScaled)
 {
+    //Rochenoire start RCS
+    uint32 olddamage = damage;  //RCS
+    CleanDamage const* oldcleanDamage = cleanDamage;  //RCS
+
+    if (cleanDamage)  //RCS
+    {
+        bool cleanDamageScaled = isScaled;
+        uint32 cdamage = sObjectMgr.ScaleDamage(dealer, victim, cleanDamage->damage, cleanDamageScaled, spellProto);
+        cleanDamage = &CleanDamage(cdamage, cleanDamage->attackType, cleanDamage->hitOutCome);
+    }
+
+    damage = sObjectMgr.ScaleDamage(dealer, victim, olddamage, isScaled, spellProto);
+    //Rochenoire end
+
+    // remove affects from attacker at any non-DoT damage (including 0 damage)
+    if (damagetype != DOT && damagetype != INSTAKILL)
+    {
+        // Since patch 1.5.0 sitting characters always stand up on attack (even if stunned)
+        if (!victim->IsStandState() && (victim->GetTypeId() == TYPEID_PLAYER || !victim->IsStunned()))
+            victim->SetStandState(UNIT_STAND_STATE_STAND);
+    }
+
+    if (!damage)
+    {
+        // Rage from physical damage received - extend to all units
+        if (cleanDamage && cleanDamage->damage && (damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL) && victim->GetTypeId() == TYPEID_PLAYER && (victim->GetPowerType() == POWER_RAGE))
+            static_cast<Player*>(victim)->RewardRage(cleanDamage->damage, false);
+
+        return 0;
+    }
+
+    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageStart");
+
+    uint32 health = victim->GetHealth();
+    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "deal dmg:%d to health:%d ", damage, health);
+
+    // duel ends when player has 1 or less hp
+    bool duel_hasEnded = false;
+    if (dealer)
+    {
+        // Rage from Damage made (only from direct weapon damage)
+        if (cleanDamage && damagetype == DIRECT_DAMAGE && dealer != victim && dealer->GetTypeId() == TYPEID_PLAYER && dealer->GetPowerType() == POWER_RAGE && cleanDamage->attackType != RANGED_ATTACK)
+            static_cast<Player*>(dealer)->RewardRage(olddamage, true); //RCS
+
+        if (dealer->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->duel && damage >= (health - 1))
+        {
+            // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
+            Player* playerVictim = static_cast<Player*>(victim);
+            if (playerVictim->duel->opponent == dealer || playerVictim->duel->opponent->GetObjectGuid() == dealer->GetControllingPlayer()->GetObjectGuid())
+                damage = health - 1;
+
+            duel_hasEnded = true;
+        }
+
+        if (victim->GetTypeId() == TYPEID_UNIT)
+            if (Creature* creatureVictim = static_cast<Creature*>(victim))
+                if (!creatureVictim->IsPet() && !creatureVictim->HasLootRecipient())
+                    creatureVictim->SetLootRecipient(dealer);
+    }
+
+    if (health <= damage)
+        Kill(dealer, victim, damagetype, spellProto, durabilityLoss, duel_hasEnded);
+    else                                                    // if (health <= damage)
+        HandleDamageDealt(dealer, victim, damage, cleanDamage, damagetype, damageSchoolMask, spellProto, duel_hasEnded, isScaled); //RCS
+
+    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageEnd returned %d damage", damage);
+
+    return damage;
+    /*
     // remove affects from attacker at any non-DoT damage (including 0 damage)
     if (damagetype != DOT && damagetype != INSTAKILL)
     {
@@ -843,6 +938,7 @@ uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage c
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageEnd returned %d damage", damage);
 
     return damage;
+    */
 }
 
 void Unit::Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEntry const* spellProto, bool durabilityLoss, bool duel_hasEnded)
@@ -1021,8 +1117,9 @@ void Unit::Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEn
     victim->CombatStop();
 }
 
-void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool duel_hasEnded)
+void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool duel_hasEnded,/*RCS*/ bool isScaled)
 {
+    
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAlive");
 
     victim->ModifyHealth(-(int32)damage);
@@ -1033,7 +1130,8 @@ void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDa
             !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))) && dealer->CanEnterCombat() && victim->CanEnterCombat())
         {
             float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
-            victim->AddThreat(dealer, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
+            //victim->AddThreat(dealer, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
+            victim->AddThreat(dealer, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto, isScaled);  // Rochenoire Threat Scaling
             if (damagetype != DOT) // DOTs dont put in combat but still cause threat
             {
                 dealer->SetInCombatWith(victim);
@@ -1115,6 +1213,7 @@ void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDa
         he->CastSpell(he, 7267, TRIGGERED_OLD_TRIGGERED);                  // beg
         he->DuelComplete(DUEL_WON);
     }
+    
 }
 
 void Unit::InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype)
@@ -1266,6 +1365,36 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
 
     // only lootable if it has loot or can drop gold
     victim->PrepareBodyLootState();
+
+    //Rochenoire start  RCS
+    // prepare body for herbalism | mining | skinning
+    /*if (uint32 skill = victim->GetCreatureInfo()->GetRequiredLootSkill())
+    {
+        if (responsiblePlayer && responsiblePlayer->HasSkill(skill))
+        {
+            uint32 ReqLevel = 10;
+
+            
+                if (uint16 skillValue = responsiblePlayer->GetSkillValue(skill))
+                {
+                    if (skillValue > 100 && skillValue <= 200)
+                        ReqLevel = ((skillValue + 100) / 10);
+                    else if (skillValue > 200)
+                        ReqLevel = skillValue / 5;
+
+                    if (ReqLevel > responsiblePlayer->getLevel())
+                        ReqLevel = responsiblePlayer->getLevel();
+                }
+
+                victim->SetVisibility(VISIBILITY_OFF);
+                victim->SetLevel(ReqLevel);
+                victim->SetVisibility(VISIBILITY_ON);
+            
+        }
+    }*/
+
+    //Rochenoire End
+
 }
 
 void Unit::PetOwnerKilledUnit(Unit* pVictim)
@@ -1483,19 +1612,29 @@ SpellCastResult Unit::CastSpell(SpellCastTargets& targets, SpellEntry const* spe
 }
 
 // Obsolete func need remove, here only for comotability vs another patches
-uint32 Unit::SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage)
+uint32 Unit::SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage, bool isScaled) //RCS
 {
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellID);
-    SpellNonMeleeDamage spellDamageInfo(this, pVictim, spellInfo->Id, SpellSchools(spellInfo->School));
+
+    //Rochenoire Start RCS
+    //SpellNonMeleeDamage spellDamageInfo(this, pVictim, spellInfo->Id, SpellSchools(spellInfo->School));
+    SpellNonMeleeDamage spellDamageInfo(this, pVictim, spellInfo->Id, SpellSchools(spellInfo->School), nullptr, isScaled); //RCS
+    //Rochenoire End
+    
     CalculateSpellDamage(&spellDamageInfo, damage, spellInfo);
     spellDamageInfo.target->CalculateAbsorbResistBlock(this, &spellDamageInfo, spellInfo);
-    Unit::DealDamageMods(this, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE);
+
+    //Rochenoire Start RCS
+    //Unit::DealDamageMods(this, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE);
+    Unit::DealDamageMods(this, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE, nullptr, spellDamageInfo.scaled);  //RCS
+    //Rochenoire End
+
     SendSpellNonMeleeDamageLog(&spellDamageInfo);
     DealSpellDamage(&spellDamageInfo, true);
     return spellDamageInfo.damage;
 }
 
-void Unit::CalculateSpellDamage(SpellNonMeleeDamage* spellDamageInfo, int32 damage, SpellEntry const* spellInfo, WeaponAttackType attackType)
+void Unit::CalculateSpellDamage(SpellNonMeleeDamage* spellDamageInfo, int32 damage, SpellEntry const* spellInfo, WeaponAttackType attackType, Spell* spell)   //RCS
 {
     SpellSchoolMask damageSchoolMask = GetSchoolMask(spellDamageInfo->school);
     Unit* pVictim = spellDamageInfo->target;
@@ -1578,7 +1717,12 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* spellDamageInfo, bool durability
 
     // Call default DealDamage (send critical in hit info for threat calculation)
     CleanDamage cleanDamage(spellDamageInfo->damage, BASE_ATTACK, spellDamageInfo->HitInfo & SPELL_HIT_TYPE_CRIT ? MELEE_HIT_CRIT : MELEE_HIT_NORMAL);
-    DealDamage(this, pVictim, spellDamageInfo->damage, &cleanDamage, SPELL_DIRECT_DAMAGE, GetSchoolMask(spellDamageInfo->school), spellProto, durabilityLoss);
+    
+    //Rochenoire Start RCS
+    //DealDamage(this, pVictim, spellDamageInfo->damage, &cleanDamage, SPELL_DIRECT_DAMAGE, GetSchoolMask(spellDamageInfo->school), spellProto, durabilityLoss);
+    
+    DealDamage(this, pVictim, spellDamageInfo->damage, &cleanDamage, SPELL_DIRECT_DAMAGE, GetSchoolMask(spellDamageInfo->school), spellProto, durabilityLoss, spellDamageInfo->scaled);
+    //Rochenoire End
 }
 
 // TODO for melee need create structure as in
@@ -2049,6 +2193,9 @@ void Unit::HandleEmote(uint32 emote_id)
 float Unit::CalcArmorReducedDamage(Unit* pVictim, const float damage)
 {
     float armor = (float)pVictim->GetArmor();
+    //Rochenoire start RCS
+    armor = sObjectMgr.ScaleArmor(this, pVictim, armor); 
+    //Rochenoire end
 
     // Ignore enemy armor by armor penetration
     armor -= GetResistancePenetration(SPELL_SCHOOL_NORMAL);
@@ -2071,7 +2218,7 @@ float Unit::CalcArmorReducedDamage(Unit* pVictim, const float damage)
     return (newdamage > 1) ? newdamage : 1.0f;
 }
 
-void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, int32* resist, bool canReflect, bool canResist, bool binary)
+void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, int32* resist, bool canReflect, bool canResist, bool binary, Spell* spell, bool isScaled)
 {
     if (!IsAlive() || !damage)
         return;
@@ -2132,20 +2279,30 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
             continue;
         }
 
-        // currentAbsorb - damage can be absorbed by shield
+        // Rochenoire start RCS
+        int32 s_currentAbsorb = isScaled ? currentAbsorb : sObjectMgr.ScaleDamage(caster, this, currentAbsorb);
+        int32 s_RemainingDamage = isScaled ? RemainingDamage : sObjectMgr.ScaleDamage(caster, this, RemainingDamage);
+      
+        // currentAbsorb - damage can be absorbed by shield RCS
         // If need absorb less damage
-        if (RemainingDamage < currentAbsorb)
+        if (s_RemainingDamage >= currentAbsorb)
+            s_currentAbsorb = currentAbsorb;
+        else
+        {
             currentAbsorb = RemainingDamage;
+            s_currentAbsorb = isScaled ? currentAbsorb : sObjectMgr.ScaleDamage(caster, this, currentAbsorb);
+        }
 
+        //Rochenoire end
         bool preventedDeath = false;
-        (*i)->OnAbsorb(currentAbsorb, reflectSpell, reflectDamage, preventedDeath);
+        (*i)->OnAbsorb(s_currentAbsorb, reflectSpell, reflectDamage, preventedDeath);  //RCS
         if (preventedDeath)
             preventDeathAura = (*i);
 
         RemainingDamage -= currentAbsorb;
 
         // Reduce shield amount
-        mod->m_amount -= currentAbsorb;
+        mod->m_amount -= s_currentAbsorb; //Scaled value RCS
         if ((*i)->GetHolder()->DropAuraCharge())
             mod->m_amount = 0;
         // Need remove it later
@@ -2184,28 +2341,37 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
         if (((*i)->GetModifier()->m_miscvalue & schoolMask) == 0)
             continue;
 
+        //Rochenoire scaling
         int32 currentAbsorb;
-        if (RemainingDamage >= (*i)->GetModifier()->m_amount)
+        int32 s_currentAbsorb;
+        int32 s_RemainingDamage = isScaled ? RemainingDamage : sObjectMgr.ScaleDamage(caster, this, RemainingDamage);   //Scaled RCS
+        if (s_RemainingDamage >= (*i)->GetModifier()->m_amount)
+        {
             currentAbsorb = (*i)->GetModifier()->m_amount;
+            s_currentAbsorb = currentAbsorb;
+        }
         else
+        {
             currentAbsorb = RemainingDamage;
+            s_currentAbsorb = isScaled ? currentAbsorb : sObjectMgr.ScaleDamage(caster, this, currentAbsorb);     //Scaled RCS
+        }
 
         if (float manaMultiplier = (*i)->GetSpellProto()->EffectMultipleValue[(*i)->GetEffIndex()])
         {
-            if (Player* modOwner = GetSpellModOwner())
+            if (Player *modOwner = GetSpellModOwner())
                 modOwner->ApplySpellMod((*i)->GetId(), SPELLMOD_MULTIPLE_VALUE, manaMultiplier);
 
             int32 maxAbsorb = int32(GetPower(POWER_MANA) / manaMultiplier);
-            if (currentAbsorb > maxAbsorb)
+            if (s_currentAbsorb > maxAbsorb)  //Scaled RCS
                 currentAbsorb = maxAbsorb;
 
-            int32 manaReduction = int32(currentAbsorb * manaMultiplier);
+            int32 manaReduction = int32(s_currentAbsorb * manaMultiplier);
             ApplyPowerMod(POWER_MANA, manaReduction, false);
         }
 
-        (*i)->OnManaAbsorb(currentAbsorb);
+        (*i)->OnManaAbsorb(s_currentAbsorb); //RCS
 
-        (*i)->GetModifier()->m_amount -= currentAbsorb;
+        (*i)->GetModifier()->m_amount -= s_currentAbsorb;  //Scaled RCS
         if ((*i)->GetModifier()->m_amount <= 0)
         {
             RemoveAurasDueToSpell((*i)->GetId());
@@ -2233,6 +2399,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
                 continue;
 
             int32 currentAbsorb;
+            int32 s_currentAbsorb; //RCS
             if (RemainingDamage >= (*i)->GetModifier()->m_amount)
                 currentAbsorb = (*i)->GetModifier()->m_amount;
             else
@@ -2299,7 +2466,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
     *absorb = damage - RemainingDamage - *resist;
 }
 
-void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damageInfo, SpellEntry const* spellProto, WeaponAttackType attType)
+void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damageInfo, SpellEntry const* spellProto, WeaponAttackType attType, Spell* spell)
 {
     if (RollAbilityPartialBlockOutcome(pCaster, attType, spellProto))
     {
@@ -2307,7 +2474,8 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
         damageInfo->damage -= damageInfo->blocked;
     }
 
-    CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto), IsBinarySpell(*spellProto));
+    bool isScaled = spell ? spell->IsScaled() : false; //Rochenoire scaling RCS
+    CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto), IsBinarySpell(*spellProto), /*Roche*/spell, isScaled);
 
     const uint32 bonus = (damageInfo->resist < 0 ? uint32(std::abs(damageInfo->resist)) : 0);
     damageInfo->damage += bonus;
@@ -5318,11 +5486,22 @@ void Unit::RemoveAllGameObjects()
 
 void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log) const
 {
+    //Rochenoire start RCS
+    SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(log->SpellID);
+
+    bool IsScaled = log->scaled;
+    uint32 damage = sObjectMgr.ScaleDamage(log->attacker, log->target, log->damage, IsScaled, spellProto);
+
+    bool r_Scaled = !IsScaled;
+    if (log->attacker->IsPlayer())
+        damage = sObjectMgr.ScaleDamage(log->attacker, log->target, damage, r_Scaled, spellProto, EFFECT_INDEX_0, true); // revert
+    //Rochenoire end RCS
+
     WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (8 + 8 + 4 + 4 + 1 + 4 + 4 + 1 + 1 + 4 + 4 + 1));
     data << log->target->GetPackGUID();
     data << log->attacker->GetPackGUID();
     data << uint32(log->SpellID);
-    data << uint32(log->damage);                            // damage amount
+    data << uint32(damage);                                 // damage amount   // Genuin : log->damage  //Rochenoire RCS
     data << uint8(log->school);                             // damage school
     data << uint32(log->absorb);                            // AbsorbedDamage
     data << int32(log->resist);                             // resist
@@ -5387,6 +5566,13 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo) const
     Aura* aura = pInfo->aura;
     Modifier* mod = aura->GetModifier();
 
+    //Rochenoire start RCS
+    SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(aura->GetId());
+    bool IsScaled = pInfo->scaled;
+    uint32 damage = sObjectMgr.ScaleDamage(aura->GetCaster(), aura->GetTarget(), pInfo->damage, IsScaled, spellProto);
+
+    //Rochenoire end
+
     WorldPacket data(SMSG_PERIODICAURALOG, 30);
     data << aura->GetTarget()->GetPackGUID();
     data << aura->GetCasterGuid().WriteAsPacked();
@@ -5397,23 +5583,23 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo) const
     {
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
-            data << uint32(pInfo->damage);                  // damage
+            data << uint32(damage);                         // damage  //G : pInfo->damage //Rochenoire RCS
             data << uint32(aura->GetSpellProto()->School);
             data << uint32(pInfo->absorb);                  // absorb
             data << int32(pInfo->resist);                   // resist
             break;
         case SPELL_AURA_PERIODIC_HEAL:
         case SPELL_AURA_OBS_MOD_HEALTH:
-            data << uint32(pInfo->damage);                  // damage
+            data << uint32(damage);                         // damage //G : pInfo->damage //Rochenoire RCS
             break;
         case SPELL_AURA_OBS_MOD_MANA:
         case SPELL_AURA_PERIODIC_ENERGIZE:
             data << uint32(mod->m_miscvalue);               // power type
-            data << uint32(pInfo->damage);                  // damage
+            data << uint32(damage);                         // damage //G : pInfo->damage //Rochenoire RCS
             break;
         case SPELL_AURA_PERIODIC_MANA_LEECH:
             data << uint32(mod->m_miscvalue);               // power type
-            data << uint32(pInfo->damage);                  // amount
+            data << uint32(damage);                         // amount //G : pInfo->damage //Rochenoire RCS
             data << float(pInfo->multiplier);               // gain multiplier
             break;
         default:
@@ -5515,7 +5701,7 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
         if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) && CanEnterCombat() && target->CanEnterCombat())
         {
             realCaster->SetInCombatWithAssisted(target);
-            target->getHostileRefManager().threatAssist(realCaster, 0.0f, spellInfo, false);
+            target->getHostileRefManager().threatAssist(realCaster, 0.0f, spellInfo, false, false, false, target); //RCS
         }
 
         if (spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
@@ -5554,6 +5740,13 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
 {
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
 
+    //Rochenoire start RCS
+
+    bool s_totalDamage = calcDamageInfo->attacker->IsPlayer();
+    uint32 totalDamage = sObjectMgr.ScaleDamage(calcDamageInfo->attacker, calcDamageInfo->target, calcDamageInfo->totalDamage, s_totalDamage);
+
+    //Rochenoire end
+
     // Subdamage count:
     uint32 lines = m_weaponDamageInfo.weapon[calcDamageInfo->attackType].lines;
 
@@ -5562,7 +5755,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
     data << uint32(calcDamageInfo->HitInfo);
     data << calcDamageInfo->attacker->GetPackGUID();
     data << calcDamageInfo->target->GetPackGUID();
-    data << uint32(calcDamageInfo->totalDamage);                // Total damage
+    data << uint32(totalDamage);                // Total damage // G : calcDamageInfo->totalDamage //Rochenoire RCS
 
     data << uint8(lines);
 
@@ -5571,9 +5764,16 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
     {
         auto &line = calcDamageInfo->subDamage[i];
 
+        //Rochenoire start RCS
+
+        bool s_subDamaged = calcDamageInfo->attacker->IsPlayer();
+        uint32 subDamaged = sObjectMgr.ScaleDamage(calcDamageInfo->attacker, calcDamageInfo->target, line.damage, s_subDamaged);
+
+        //Rochenoire end
+
         data << uint32(GetFirstSchoolInMask(line.damageSchoolMask));
-        data << float(line.damage) / float(calcDamageInfo->totalDamage);   // Float coefficient of subdamage
-        data << uint32(line.damage);
+        data << float(subDamaged) / float(totalDamage);   // Float coefficient of subdamage  // G : line.damage  and calcDamageInfo->totalDamage // RCS
+        data << uint32(subDamaged);                        // G : line.damage  // RCS
         data << uint32(line.absorb);
         data << int32(line.resist);
     }
@@ -6332,7 +6532,7 @@ void Unit::UnsummonAllTotems() const
             totem->UnSummon();
 }
 
-int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical)
+int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical,/*RCS*/ bool isScaled)
 {
     int32 gain = pVictim->ModifyHealth(int32(addhealth));
 
@@ -6342,7 +6542,7 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
         unit = GetOwner();
 
     if (unit->GetTypeId() == TYPEID_PLAYER)
-        unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, critical);
+        unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, critical, isScaled); //RCS
 
     // Script Event HealedBy
     if (pVictim->AI())
@@ -6379,8 +6579,15 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell)
     return nullptr;
 }
 
-void Unit::SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, bool critical)
+void Unit::SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, bool critical,/*RCS*/ bool isScaled)
 {
+    //Rochenoire start RCS
+    SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(SpellID);
+    if (pVictim->IsPlayer())
+        Damage = sObjectMgr.ScaleDamage((Unit*)this, pVictim, Damage, isScaled, spellProto);
+
+    //Rochenoire end
+
     WorldPacket data(SMSG_SPELLHEALLOG, (8 + 8 + 4 + 4 + 1));
     data << pVictim->GetPackGUID();
     data << GetPackGUID();
@@ -6390,8 +6597,11 @@ void Unit::SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, bool c
     SendMessageToSet(data, true);
 }
 
-void Unit::SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype) const
+void Unit::SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype,/*RCS*/ bool isScaled) const
 {
+    SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(SpellID); //RCS
+    Damage = sObjectMgr.ScaleDamage((Unit*)this, pVictim, Damage, isScaled, spellProto); //RCS
+
     WorldPacket data(SMSG_SPELLENERGIZELOG, (8 + 8 + 4 + 4 + 4));
     data << pVictim->GetPackGUID();
     data << GetPackGUID();
@@ -6412,12 +6622,12 @@ void Unit::SendEnvironmentalDamageLog(uint8 type, uint32 damage, uint32 absorb, 
     SendMessageToSet(data, true);
 }
 
-void Unit::EnergizeBySpell(Unit* victim, SpellEntry const* spellInfo, uint32 damage, Powers powerType)
+void Unit::EnergizeBySpell(Unit* victim, SpellEntry const* spellInfo, uint32 damage, Powers powerType,/*RCS*/ bool isScaled)
 {
-    SendEnergizeSpellLog(victim, spellInfo->Id, damage, powerType);
+    SendEnergizeSpellLog(victim, spellInfo->Id, damage, powerType, isScaled); //RCS
     // needs to be called after sending spell log
     victim->ModifyPower(powerType, damage);
-    victim->getHostileRefManager().threatAssist(this, float(damage) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellInfo), spellInfo);
+    victim->getHostileRefManager().threatAssist(this, float(damage) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellInfo), spellInfo, false, false, isScaled);
 }
 
 /** Calculate spell coefficents and level penalties for spell/melee damage or heal
@@ -6480,7 +6690,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
  * Calculates caster part of spell damage bonuses,
  * also includes different bonuses dependent from target auras
  */
-uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
+uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack,/*RCS*/ bool IsScaled)
 {
     if (!spellProto || !victim || damagetype == DIRECT_DAMAGE)
         return pdamage;
@@ -6570,6 +6780,9 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
 
     // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
     DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
+    //Rochenoire start RCS
+    DoneTotal = sObjectMgr.ScaleDamage(this, victim, DoneTotal);
+    //Rochenoire end
 
     float tmpDamage = (int32(pdamage) + DoneTotal * int32(stack)) * DoneTotalMod;
     // apply spellmod to Done damage (flat and pct)
@@ -6583,7 +6796,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
  * Calculates target part of spell damage bonuses,
  * will be called on each tick for periodic damage over time auras
  */
-uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
+uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack,/*RCS*/ bool IsScaled)
 {
     if (!spellProto || damagetype == DIRECT_DAMAGE)
         return pdamage;
@@ -6613,8 +6826,13 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, u
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
     if (caster)
+    {
         TakenTotal = caster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
-
+        //Rochenoire start RCS
+        bool tmp_scale = false;
+        TakenTotal = sObjectMgr.ScaleDamage(caster, this, TakenTotal, tmp_scale, spellProto);
+        //Rochenoire end
+    }
     float tmpDamage = (int32(pdamage) + TakenTotal * int32(stack)) * TakenTotalMod;
 
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;
@@ -6741,6 +6959,9 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, i
 
     // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
     DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
+    //Rochenoire start RCS
+    DoneTotal = sObjectMgr.ScaleDamage(this, victim, DoneTotal);
+    //Rochenoire end
 
     // use float as more appropriate for negative values and percent applying
     float heal = (healamount + DoneTotal * int32(stack)) * DoneTotalMod;
@@ -6809,6 +7030,10 @@ uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto,
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
     TakenTotal = pCaster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
+    //Rochenoire start RCS
+    bool tmp_scale = false;
+    TakenTotal = sObjectMgr.ScaleDamage(pCaster, this, TakenTotal, tmp_scale, spellProto); // revert
+    //Rochenoire end
 
     // Taken mods
     // Healing Wave cast
@@ -6980,7 +7205,7 @@ bool Unit::IsImmuneToSchool(SpellEntry const* spellInfo, uint8 effectMask) const
  * Calculates caster part of melee damage bonuses,
  * also includes different bonuses dependent from target auras
  */
-uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto, DamageEffectType damagetype, uint32 stack, bool flat)
+uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto, DamageEffectType damagetype, uint32 stack, bool flat,/*RCS*/ bool IsScaled)
 {
     if (!victim || pdamage == 0)
         return pdamage;
@@ -7134,6 +7359,9 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
     {
         // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
         DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneFlat, APbonus, damagetype, true);
+        //Rochenoire start RCS
+        DoneTotal = sObjectMgr.ScaleDamage(this, victim, DoneTotal);
+        //Rochenoire end
     }
     // weapon damage based spells
     else if (isWeaponDamageBasedSpell && (APbonus || DoneFlat))
@@ -7178,7 +7406,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
  * Calculates target part of melee damage bonuses,
  * will be called on each tick for periodic damage over time auras
  */
-uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto, DamageEffectType damagetype, uint32 stack, bool flat)
+uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto, DamageEffectType damagetype, uint32 stack, bool flat,/*RCS*/ bool IsScaled)
 {
     if (pdamage == 0)
         return pdamage;
@@ -7243,7 +7471,11 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackTyp
 
     if (!flat)
         TakenFlat = 0.0f;
-
+    
+    //Rochenoire start RCS
+    bool tmp_scale = false;
+    TakenFlat = sObjectMgr.ScaleDamage(caster, this, TakenFlat, tmp_scale, spellProto); // revert
+    //Rochenoire end
     float tmpDamage = (int32(pdamage) + (TakenFlat + TakenAdvertisedBenefit) * int32(stack)) * TakenTotalMod;
 
     // bonus result can be negative
@@ -8133,11 +8365,11 @@ float Unit::ApplyTotalThreatModifier(float threat, SpellSchoolMask schoolMask)
 
 //======================================================================
 
-void Unit::AddThreat(Unit* pVictim, float threat /*= 0.0f*/, bool crit /*= false*/, SpellSchoolMask schoolMask /*= SPELL_SCHOOL_MASK_NONE*/, SpellEntry const* threatSpell /*= nullptr*/)
+void Unit::AddThreat(Unit* pVictim, float threat /*= 0.0f*/, bool crit /*= false*/, SpellSchoolMask schoolMask /*= SPELL_SCHOOL_MASK_NONE*/, SpellEntry const* threatSpell /*= nullptr*/,/*RCS*/ bool isScaled /*= false*/)
 {
     // Only mobs can manage threat lists
     if (CanHaveThreatList())
-        getThreatManager().addThreat(pVictim, threat, crit, schoolMask, threatSpell);
+        getThreatManager().addThreat(pVictim, threat, crit, schoolMask, threatSpell, isScaled); //RCS
 }
 
 //======================================================================
@@ -8664,6 +8896,55 @@ void Unit::SetAttackDamageSchool(WeaponAttackType attType, SpellSchools school)
     for (uint8 i = 0; i < m_weaponDamageInfo.weapon[attType].lines; i++)
         m_weaponDamageInfo.weapon[attType].damage[i].school = school;
 }
+
+//Rochenoire start
+uint32 Unit::GetLevelForTarget(Unit const* target) const
+{
+    Unit* owner = ((Unit*)this);
+    Unit* victim = ((Unit*)target);
+
+    if (sObjectMgr.IsScalable(owner, victim))
+        return sObjectMgr.getLevelScaled(owner, victim);
+    else
+        return getLevel();
+}
+
+
+bool Unit::hasZoneLevel(uint32 AreaID) const
+{
+    uint32 Id = AreaID != 0 ? AreaID : GetTerrain() ? GetZoneId() : 0;
+
+    if (const ZoneFlex* thisZone = sObjectMgr.GetZoneFlex(Id))
+    {
+        uint32 pLevel = getLevel();
+        if (pLevel < thisZone->LevelRangeMin || pLevel > thisZone->LevelRangeMax)
+            return false;
+    }
+
+    return true;
+}
+
+uint32 Unit::getZoneLevel(uint32 AreaID) const
+{
+    uint32 Id = AreaID != 0 ? AreaID : GetTerrain() ? GetZoneId() : 0;
+
+    uint32 pLevel = getLevel();
+    if (const ZoneFlex* thisZone = sObjectMgr.GetZoneFlex(Id))
+    {
+        // should not happen
+        if (thisZone->LevelRangeMin == 0 && thisZone->LevelRangeMax == 0)
+            return pLevel;
+        else if (pLevel < thisZone->LevelRangeMin || pLevel > thisZone->LevelRangeMax)
+            return pLevel > thisZone->LevelRangeMax ? thisZone->LevelRangeMax : thisZone->LevelRangeMin;
+        else
+            return pLevel;
+    }
+
+    return pLevel;
+}
+
+
+//Rochenoire end
 
 void Unit::SetLevel(uint32 lvl)
 {
@@ -10982,7 +11263,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
     }
 }
 
-float Unit::GetAttackDistance(Unit const* pl) const
+float Unit::GetAttackDistance(Unit const* pl) const //Rochenoire TO CHECK
 {
     float aggroRate = sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
     if (aggroRate == 0)

@@ -1054,10 +1054,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         m_healing = addhealth; // update value so that script handler has access
         OnHit(missInfo); // TODO: After spell damage calc is moved to proper handler - move this before the first if
 
-        int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo, target->isCrit);
+        int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo, target->isCrit, IsScaled());  //RCS
 
         if (real_caster)
-            unitTarget->getHostileRefManager().threatAssist(real_caster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(m_spellInfo), m_spellInfo);
+            unitTarget->getHostileRefManager().threatAssist(real_caster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(m_spellInfo), m_spellInfo, false, false, IsScaled(), unitTarget); //RCS
 
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
@@ -1082,7 +1082,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     else if (m_damage)
     {
         // Fill base damage struct (unitTarget - is real spell target)
-        SpellNonMeleeDamage spellDamageInfo(caster, unitTarget, m_spellInfo->Id, GetFirstSchoolInMask(m_spellSchoolMask));
+        SpellNonMeleeDamage spellDamageInfo(caster, unitTarget, m_spellInfo->Id, GetFirstSchoolInMask(m_spellSchoolMask), this);
 
         spellDamageInfo.damage = m_damage;
         spellDamageInfo.HitInfo = target->HitInfo;
@@ -1103,9 +1103,14 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             }
         }
 
+        //Rochenoire start RCS
+        // Save scaling
+        spellDamageInfo.scaled = IsScaled();
+        //Rochenoire end
+
         unitTarget->CalculateAbsorbResistBlock(caster, &spellDamageInfo, m_spellInfo);
 
-        Unit::DealDamageMods(caster, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE, m_spellInfo);
+        Unit::DealDamageMods(caster, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE, m_spellInfo, IsScaled());
 
         // Send log damage message to client        
         if (reflectTarget)
@@ -3972,7 +3977,9 @@ void Spell::HandleThreatSpells()
         // positive spells distribute threat among all units that are in combat with target, like healing
         if (positive)
         {
-            target->getHostileRefManager().threatAssist(m_caster /*real_caster ??*/, threat, m_spellInfo, false, true);
+
+            target->getHostileRefManager().threatAssist(m_caster /*real_caster ??*/, threat, m_spellInfo, false, true, IsScaled()); //RCS
+
         }
         // for negative spells threat gets distributed among affected targets
         else
@@ -3980,7 +3987,7 @@ void Spell::HandleThreatSpells()
             if (!target->CanHaveThreatList())
                 continue;
 
-            target->AddThreat(m_caster, threat, false, GetSpellSchoolMask(m_spellInfo), m_spellInfo);
+            target->AddThreat(m_caster, threat, false, GetSpellSchoolMask(m_spellInfo), m_spellInfo, IsScaled()); //RCS
         }
     }
 
@@ -4266,7 +4273,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     // this case can be triggered if rank not found (too low-level target for first rank)
                     if (!m_CastItem && !m_IsTriggeredSpell)
                         // spell expected to be auto-downranking in cast handle, so must be same
-                        if (m_spellInfo != sSpellMgr.SelectAuraRankForLevel(m_spellInfo, target->getLevel()))
+                        if (m_spellInfo != sSpellMgr.SelectAuraRankForLevel(m_spellInfo, target->GetLevelForTarget(m_caster)))  //RCS
                             return SPELL_FAILED_LOWLEVEL;
 
                     // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
@@ -4660,7 +4667,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_DONT_REPORT;
                 }
 
-                if (target->getLevel() > plrCaster->getLevel() && !gmmode)
+                //Rochenoire RCS // G :if (target->getLevel() > plrCaster->getLevel() && !gmmode)
+                if ((!sObjectMgr.IsScalable(target, plrCaster) && (target->getLevel() > plrCaster->getLevel()) && !gmmode)) //RCS
                 {
                     plrCaster->SendPetTameFailure(PETTAME_TOOHIGHLEVEL);
                     return SPELL_FAILED_DONT_REPORT;
@@ -5003,7 +5011,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
                     if (instance->levelMin > target->getLevel())
                         return SPELL_FAILED_LOWLEVEL;
-                    if (instance->levelMax && instance->levelMax < target->getLevel())
+                    if (instance->levelMax && instance->levelMax < target->GetLevelForTarget(m_caster)) // m_targets.getUnitTarget() ?//Rochenoire RCS //G :  if (instance->levelMax && instance->levelMax < target->getLevel())
                         return SPELL_FAILED_HIGHLEVEL;
 
                     if (InstancePlayerBind* targetBind = target->GetBoundInstance(mapId))
@@ -5081,7 +5089,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (expectedTarget->HasCharmer())
                         return SPELL_FAILED_CHARMED;
 
-                    if (int32(expectedTarget->getLevel()) > CalculateSpellEffectValue(SpellEffectIndex(i), expectedTarget))
+                    //ROchenoire RCS // G : if (int32(expectedTarget->getLevel()) > CalculateSpellEffectValue(SpellEffectIndex(i), expectedTarget))
+                    if (int32(expectedTarget->GetLevelForTarget(m_caster)) > CalculateSpellEffectValue(SpellEffectIndex(i), expectedTarget))
                         return SPELL_FAILED_HIGHLEVEL;
                 }
                 break;
@@ -5105,7 +5114,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (expectedTarget->HasCharmer())
                         return SPELL_FAILED_CHARMED;
 
-                    if (int32(expectedTarget->getLevel()) > CalculateSpellEffectValue(SpellEffectIndex(i), expectedTarget))
+                    //Rochenoire RCS //G : if (int32(expectedTarget->getLevel()) > CalculateSpellEffectValue(SpellEffectIndex(i), expectedTarget))
+                    if (int32(expectedTarget->GetLevelForTarget(m_caster)) > CalculateSpellEffectValue(SpellEffectIndex(i), expectedTarget))
                         return SPELL_FAILED_HIGHLEVEL;
                 }
                 break;
@@ -5638,7 +5648,7 @@ int32 Spell::CalculateSpellEffectDamage(Unit* unitTarget, int32 damage)
         case SPELL_DAMAGE_CLASS_MELEE:
         {
             // Calculate damage bonus
-            damage = m_caster->MeleeDamageBonusDone(unitTarget, damage, m_attackType, m_spellSchoolMask, m_spellInfo, SPELL_DIRECT_DAMAGE);
+            damage = m_caster->MeleeDamageBonusDone(unitTarget, damage, m_attackType, m_spellSchoolMask, m_spellInfo, SPELL_DIRECT_DAMAGE,/*RCS*/ 1U, true);// , IsScaled);
             damage = unitTarget->MeleeDamageBonusTaken(m_caster, damage, m_attackType, m_spellSchoolMask, m_spellInfo, SPELL_DIRECT_DAMAGE);
         }
         break;
@@ -5647,7 +5657,7 @@ int32 Spell::CalculateSpellEffectDamage(Unit* unitTarget, int32 damage)
         case SPELL_DAMAGE_CLASS_MAGIC:
         {
             // Calculate damage bonus
-            damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, damage, SPELL_DIRECT_DAMAGE);
+            damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, damage, SPELL_DIRECT_DAMAGE,/*RCS*/ 1U);//, &IsScaled);
             damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, damage, SPELL_DIRECT_DAMAGE);
         }
         break;
@@ -6362,7 +6372,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
         && targetType != TARGET_UNIT_CASTER)
         return false;
 
-    if (m_spellInfo->MaxTargetLevel && target->getLevel() > m_spellInfo->MaxTargetLevel)
+    if (m_spellInfo->MaxTargetLevel && target->GetLevelForTarget(m_caster) > m_spellInfo->MaxTargetLevel)
         return false;
 
     return OnCheckTarget(target, eff);
@@ -6704,7 +6714,7 @@ void Spell::ProcSpellAuraTriggers()
                 const uint32 procid = auraSpellInfo->EffectTriggerSpell[auraSpellIdx];
                 int32 auraBasePoints = targetTrigger->GetBasePoints();
                 // Calculate chance at that moment (can be depend for example from combo points)
-                int32 chance = m_caster->CalculateSpellEffectValue(target, auraSpellInfo, auraSpellIdx, &auraBasePoints);
+                int32 chance = m_caster->CalculateSpellEffectValue(target, auraSpellInfo, auraSpellIdx, &auraBasePoints, this);  //RCS
                 if (roll_chance_i(chance))
                     m_caster->CastSpell(target, procid, TRIGGERED_OLD_TRIGGERED, nullptr, targetTrigger);
             }
@@ -6821,7 +6831,7 @@ void Spell::ProcReflectProcs(TargetInfo& targetInfo)
         Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, m_caster, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
 }
 
-void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex, SpellTargetFilterScheme scheme, uint32 chainTargetCount)
+void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex /*effIndex*/, SpellTargetFilterScheme scheme, uint32 chainTargetCount)
 {
     switch (scheme)
     {

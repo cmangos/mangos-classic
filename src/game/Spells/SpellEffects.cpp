@@ -367,7 +367,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
         }
 
         if (damage >= 0)
-            m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage);
+            m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage); //Rochenoire RCS
     }
 }
 
@@ -1686,8 +1686,18 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     // found spelldamage coefficients of 0.381% per 0.1 speed and 15.244 per 4.0 speed
                     // but own calculation say 0.385 gives at most one point difference to published values
-                    int32 bonusDamage = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo))
-                                        + unitTarget->SpellBaseDamageBonusTaken(GetSpellSchoolMask(m_spellInfo));
+                    //Rochenoire RCS 
+                    //G : int32 bonusDamage = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo))+ unitTarget->SpellBaseDamageBonusTaken(GetSpellSchoolMask(m_spellInfo));
+                    bool tmp_scale = false;
+                    int32 DoneTotal = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo));
+                    DoneTotal = sObjectMgr.ScaleDamage(m_caster, unitTarget, DoneTotal, tmp_scale, m_spellInfo, eff_idx);
+
+                    tmp_scale = false;
+                    int32 TakenTotal = unitTarget->SpellBaseDamageBonusTaken(GetSpellSchoolMask(m_spellInfo));
+                    TakenTotal = sObjectMgr.ScaleDamage(m_caster, unitTarget, TakenTotal, tmp_scale, m_spellInfo, eff_idx);
+
+                    int32 bonusDamage = DoneTotal + TakenTotal;
+                    //Rochenoire end
                     // Does Amplify Magic/Dampen Magic influence flametongue? If not, the above addition must be removed.
                     float weaponSpeed = float(m_CastItem->GetProto()->Delay) / IN_MILLISECONDS;
                     bonusDamage = m_caster->SpellBonusWithCoeffs(m_spellInfo, 0, bonusDamage, 0, SPELL_DIRECT_DAMAGE, false); // apply spell coeff
@@ -2020,6 +2030,31 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[eff_idx]);
 
+    //Rochenoire RCS start
+    /*if (EffectScaled[eff_idx])
+    {
+        
+        switch (m_spellInfo->EffectApplyAuraName[eff_idx])
+        {
+            // unidirectional auras
+        case SPELL_AURA_MOD_STAT:
+            break;
+
+            // bidirectional auras
+        case SPELL_AURA_PERIODIC_LEECH:
+        case SPELL_AURA_PERIODIC_HEALTH_FUNNEL:
+        case SPELL_AURA_PERIODIC_MANA_FUNNEL:
+        case SPELL_AURA_PERIODIC_MANA_LEECH:
+        case SPELL_AURA_SCHOOL_ABSORB:
+        case SPELL_AURA_MANA_SHIELD:
+        default:
+            bool invertedScaled = !EffectScaled[eff_idx];
+            damage = sObjectMgr.ScaleDamage(m_caster, unitTarget, damage, invertedScaled, m_spellInfo, eff_idx, true); // reverted
+            break;
+        }
+    }*/
+    //Rochenoire end
+
     Aura* aur = CreateAura(m_spellInfo, eff_idx, &damage, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, caster, m_CastItem);
     m_spellAuraHolder->AddAura(aur, eff_idx);
 }
@@ -2046,11 +2081,16 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
     damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
     damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
 
+    //Rochenoire RCS
+    uint32 power = damage;
+    int32 scaled_power = sObjectMgr.ScaleDamage(m_caster, unitTarget, power, EffectScaled[eff_idx], m_spellInfo);
+
     int32 new_damage;
-    if (curPower < uint32(damage)) // damage should not be under zero at this point (checked above)
+    if (curPower < uint32(scaled_power)) // damage should not be under zero at this point (checked above)
         new_damage = curPower;
     else
-        new_damage = damage;
+        new_damage = scaled_power;
+    //Rochenoire end
 
     unitTarget->ModifyPower(powerType, -new_damage);
 
@@ -2100,9 +2140,16 @@ void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
 
     int32 curPower = int32(unitTarget->GetPower(powertype));
 
+    /*//Rochenoire 
+    int32 power = damage;
+    int32 new_damage = (curPower < power) ? curPower : power;*/
+
     int32 new_damage = (curPower < damage) ? curPower : damage;
 
     unitTarget->ModifyPower(powertype, -new_damage);
+    //Rochenoire RCS
+    //new_damage = (curPower < damage) ? curPower : damage; // But returns the original value for health damage
+    //Rochenoire end
     float multiplier = m_spellInfo->EffectMultipleValue[eff_idx];
 
     if (Player* modOwner = m_caster->GetSpellModOwner())
@@ -2201,7 +2248,7 @@ void Spell::EffectHealthLeech(SpellEffectIndex eff_idx)
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "HealthLeech :%i", damage);
 
     uint32 curHealth = unitTarget->GetHealth();
-    damage = m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
+    damage = m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage,/*RCS*/ EffectScaled[eff_idx]);  //RCS Rochenoire
     if ((int32)curHealth < damage)
         damage = curHealth;
 
@@ -2214,6 +2261,12 @@ void Spell::EffectHealthLeech(SpellEffectIndex eff_idx)
     if (m_caster->IsAlive())
     {
         heal = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, heal, HEAL);
+        //Rochenoire RCS
+        bool invertedScaled = !EffectScaled[eff_idx];
+        heal = sObjectMgr.ScaleDamage(m_caster, unitTarget, heal, invertedScaled, m_spellInfo, eff_idx, true); // revert
+        m_caster->DealHeal(m_caster, heal, m_spellInfo, false, EffectScaled[eff_idx]);
+
+        //Rochenoire end
 
         m_caster->DealHeal(m_caster, heal, m_spellInfo);
     }
@@ -2408,7 +2461,7 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
     if (unitTarget->GetMaxPower(power) == 0)
         return;
 
-    m_caster->EnergizeBySpell(unitTarget, m_spellInfo, damage, power);
+    m_caster->EnergizeBySpell(unitTarget, m_spellInfo, damage, power, EffectScaled[eff_idx]); //RCS
 }
 
 void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
@@ -2967,8 +3020,8 @@ void Spell::EffectPickPocket(SpellEffectIndex /*eff_idx*/)
     //if (m_caster->IsFacingTargetsFront(unitTarget))
     //    chance *= 4; //base chance is 20% from the front
 
-    int casterLevel = int32(m_caster->getLevel());
-    int targetLevel = int32(unitTarget->getLevel());
+    int casterLevel = int32(m_caster->GetLevelForTarget(unitTarget));  //RCS  //G : getLevel()
+    int targetLevel = int32(unitTarget->GetLevelForTarget(unitTarget));  //RCS  //G : getLevel()
 
     //we need to increase the base chance for failure if target is higher level then caster
     //incremental chance to fail based on level. maximum is 97% chance if level difference is dramatic (give it 3% chance to succeed?).
@@ -3215,6 +3268,8 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
     float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
 
     int32 amount = damage > 0 ? damage : 1;
+
+    //Rochenoire raid flex creature invoc scaling
 
     for (int32 count = 0; count < amount; ++count)
     {
@@ -3512,7 +3567,8 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
 
     pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), (m_caster->GetTypeId() == TYPEID_PLAYER));
 
-    uint32 level = creatureTarget->getLevel();
+    //uint32 level = creatureTarget->getLevel();  //Rochenoire
+    uint32 level = creatureTarget->GetLevelForTarget(plr);//Rochenoire
     pet->SetCanModifyStats(true);
     pet->InitStatsForLevel(level);
 
@@ -5869,6 +5925,14 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
                 pGameObj->AddUniqueUse(player);
                 pGameObj->SetActionTarget(player->GetSelectionGuid());
                 m_caster->AddGameObject(pGameObj);          // will removed at spell cancel
+
+                //Rochenoire RCS
+                if (sWorld.getConfig(CONFIG_BOOL_SUMMONINGRITUAL_ALLOW_SELF))
+                    pGameObj->Use(m_caster);
+                //Rochenoire
+
+
+
             }
             break;
         }

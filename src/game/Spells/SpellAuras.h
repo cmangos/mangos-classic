@@ -71,6 +71,10 @@ struct Modifier
     * Set at the beginning so that stack increases dont need to calculate spell values
     */
     int32 m_baseAmount;
+    /** Rochenoire RCS 
+    * Is the aura scaled ?
+    */
+    bool m_isScaled = false;
 };
 
 class Unit;

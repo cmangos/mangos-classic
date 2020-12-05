@@ -196,7 +196,7 @@ class ThreatManager
 
         void clearReferences();
 
-        void addThreat(Unit* victim, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell);
+        void addThreat(Unit* victim, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell, bool isScaled = false, Unit* pSpellTarget = nullptr);
         void addThreat(Unit* victim, float threat) { addThreat(victim, threat, false, SPELL_SCHOOL_MASK_NONE, nullptr); }
 
         // add threat as raw value (ignore redirections and expection all mods applied already to it
