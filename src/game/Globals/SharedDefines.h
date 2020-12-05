@@ -79,6 +79,7 @@ enum Classes
 };
 
 // max+1 for player class
+#define MIN_CLASSES       1
 #define MAX_CLASSES       12
 
 #define CLASSMASK_ALL_PLAYABLE \

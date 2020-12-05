@@ -263,6 +263,12 @@ class Map : public GridRefManager<NGridType>
             i_objectsToClientUpdate.erase(obj);
         }
 
+        //Rochenoire RCS and FRS (Flexible Raid Sys)
+        void UpdateCreature(uint32 guid, Creature* cr, bool erased = false);
+        void InsertCreature(uint32 guid, Creature* cr);
+        //void EraseCreature(uint32 guid, Creature* cr);
+        //Rochenoire end
+
         // DynObjects currently
         uint32 GenerateLocalLowGuid(HighGuid guidhigh);
 
@@ -321,6 +327,10 @@ class Map : public GridRefManager<NGridType>
         void CreatePlayerOnClient(Player* player);
 
         uint32 GetLoadedGridsCount();
+
+        //Rochenoire ZoneID and AreaID submodule for Creature Scaling (RCS) and FRS
+        MapEntry const* GetMapEntry() { return i_mapEntry; }
+
 
         Messager<Map>& GetMessager() { return m_messager; }
 

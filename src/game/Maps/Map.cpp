@@ -40,6 +40,7 @@
 #include "Chat/Chat.h"
 #include "Weather/Weather.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
+#include "Tools/Language.h"
 
 Map::~Map()
 {
@@ -2020,6 +2021,36 @@ void Map::SendObjectUpdates()
         }
     }
 }
+
+
+//Rochenoire RCS and FlexRaidSys (FRS)
+/*
+void Map::UpdateCreature(uint32 guid, Creature* cr, bool erased)
+{
+    uint32 mapId = GetId() * 1000;
+    if (cr->IsTemporarySummon()) guid += mapId;
+    uint32 packId = sObjectMgr.GetCreaturePool(guid);
+
+    std::string s_entry = std::to_string(cr->GetEntry()) + ":" + std::to_string(packId);
+    CreatureRatio& cdata = m_creaturesRatio[s_entry];
+
+    if (erased)
+        cdata.removed = true;
+    else
+        cdata.added = true;
+
+    m_creaturesStore_buffer.insert(std::make_pair(cr->GetEntry(), cr));
+}
+
+void Map::InsertCreature(uint32 guid, Creature* cr)
+{
+    UpdateCreature(guid, cr, false);
+
+    if (m_creaturesStore.find(guid) == m_creaturesStore.end())
+        m_creaturesStore.insert(std::make_pair(guid, cr));
+}
+*/
+//Rochenoire end
 
 uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
 {

@@ -474,7 +474,9 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid targetGuid)
 
 static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level)
 {
-    const uint32 level = player->getLevel();
+    //Rochenoire RCS G : const uint32 level = player->getLevel();
+    const uint32 level = player->GetLevelForTarget(victim);
+    const uint32 v_level = victim->GetLevelForTarget(player);
 
     sum_level += level;
 
@@ -484,7 +486,7 @@ static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32
     if (MaNGOS::XP::IsTrivialLevelDifference(level, victim->GetLevelForTarget(player)))
         return;
 
-    if (!not_gray_member_with_max_level || not_gray_member_with_max_level->getLevel() < level)
+    if (!not_gray_member_with_max_level || not_gray_member_with_max_level->getLevel() < v_level) //RCS G : level
         not_gray_member_with_max_level = player;
 }
 
@@ -1371,8 +1373,8 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
             pGroupGuy->RewardReputation(creatureVictim, is_dungeon ? 1.0f : 1.0f / count);
 
             // XP updated only for alive group member
-            if (pGroupGuy->IsAlive() && not_gray_member_with_max_level &&
-                pGroupGuy->getLevel() <= not_gray_member_with_max_level->getLevel())
+            // Rochenoire RCS G : if (pGroupGuy->IsAlive() && not_gray_member_with_max_level && pGroupGuy->getLevel() <= not_gray_member_with_max_level->getLevel())
+            if (pGroupGuy->IsAlive() && not_gray_member_with_max_level && pGroupGuy->getLevel() <= not_gray_member_with_max_level->getLevel()) //RCS
             {
                 float itr_xp = (member_with_max_level == not_gray_member_with_max_level) ? xp * rate : (xp * rate * 0.5f) + 1.0f;
 

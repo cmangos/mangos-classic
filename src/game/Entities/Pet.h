@@ -266,6 +266,9 @@ class Pet : public Creature
         TeachSpellMap   m_teachspells;
         AutoSpellList   m_autospells;
 
+        //Rochenoire RCS
+        uint32 ScalePetCreateSpells(uint32 spellid, uint32 plevel); //RCS
+
         void InitPetCreateSpells();
         void CheckLearning(uint32 spellid);
         uint32 resetTalentsCost() const;

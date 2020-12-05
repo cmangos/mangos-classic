@@ -36,7 +36,7 @@ HostileRefManager::~HostileRefManager()
 // The pVictim is hated than by them as well
 // use for buffs and healing threat functionality
 
-void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry const* threatSpell, bool singleTarget, bool ignoreTimer)
+void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry const* threatSpell, bool singleTarget, bool ignoreTimer, bool isScaled, Unit* pSpellTarget) //Rochenoire //RCS
 {
     if (threatSpell->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) || threatSpell->HasAttribute(SPELL_ATTR_EX_NO_THREAT) || !getOwner()->CanEnterCombat() || !victim->CanEnterCombat())
         return;
@@ -58,7 +58,7 @@ void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry cons
     float threatPerTarget = threat / size;
     for (HostileReference* validReference : validRefs)
     {
-        validReference->getSource()->addThreat(victim, threatPerTarget, false, (threatSpell ? GetSpellSchoolMask(threatSpell) : SPELL_SCHOOL_MASK_NORMAL), threatSpell);
+        validReference->getSource()->addThreat(victim, threatPerTarget, false, (threatSpell ? GetSpellSchoolMask(threatSpell) : SPELL_SCHOOL_MASK_NORMAL), threatSpell,/*RCS*/ isScaled, pSpellTarget);  //RCS
         if (!ignoreTimer)
             victim->GetCombatManager().TriggerCombatTimer(validReference->getSource()->getOwner());
     }

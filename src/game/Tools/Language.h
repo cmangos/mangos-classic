@@ -1108,6 +1108,18 @@ enum MangosStrings
 
     // Use for custom patches             11000-11999
 
+    //Rochenoire Start
+    LANG_PROGRESS_CONGRATS_H2 = 11019,
+    LANG_PROGRESS_CONGRATS_A2 = 11020,
+    LANG_PROGRESS_SUBJECT_H2 = 11021,
+    LANG_PROGRESS_SUBJECT_A2 = 11022,
+    LANG_WELCOME_SUBJECT = 11023,
+    LANG_WELCOME_CONTENT = 11024,
+    LANG_FLEXIBLE_CORE_INC = 11036,
+    LANG_FLEXIBLE_CORE_DEC = 11037,
+    LANG_FLEXIBLE_CORE_FORCED = 11038,
+    //Rochoire End
+
     // NOT RESERVED IDS                   12000-1999999999
     // `dbscript_string` table index     2000000000-2000999999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
     // For other tables maybe             2001000000-2147483647 (max index)

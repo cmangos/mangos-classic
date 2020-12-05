@@ -69,6 +69,9 @@
 
 #include <cmath>
 
+//#include <Entities\ItemHandler.cpp>
+
+
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
 #define PLAYER_SKILL_INDEX(x)       (PLAYER_SKILL_INFO_1_1 + ((x)*3))
@@ -892,6 +895,14 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
         }
     }
     // all item positions resolved
+
+    //Rochnoire Start : welcome letter
+    std::string letterText = this->GetSession()->GetMangosString(LANG_WELCOME_CONTENT);
+    std::string letterSubject = this->GetSession()->GetMangosString(LANG_WELCOME_SUBJECT);
+
+    MailDraft(letterSubject.c_str(), letterText.c_str())
+        .SendMailTo(this, MailSender(this, MAIL_STATIONERY_GM));
+    //Rochenoire End
 
     return true;
 }
@@ -6099,7 +6110,7 @@ void Player::CheckAreaExploreAndOutdoor()
             }
             else
             {
-                int32 diff = int32(getLevel()) - p->area_level;
+                int32 diff = 0; // A revoir ! int32(getLevel()) - p->area_level;
                 uint32 XP = 0;
                 if (diff < -5)
                 {
@@ -6254,7 +6265,7 @@ void Player::RewardReputation(Creature* victim, float rate)
 
     if (Rep->repfaction1 && (!Rep->team_dependent || GetTeam() == ALLIANCE))
     {
-        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, Rep->repvalue1, Rep->repfaction1, victim->getLevel());
+        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, Rep->repvalue1, Rep->repfaction1, victim->GetLevelForTarget(this)); //RCS
         donerep1 = int32(donerep1 * rate);
         FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(Rep->repfaction1);
         uint32 current_reputation_rank1 = GetReputationMgr().GetRank(factionEntry1);
@@ -6272,7 +6283,7 @@ void Player::RewardReputation(Creature* victim, float rate)
 
     if (Rep->repfaction2 && (!Rep->team_dependent || GetTeam() == HORDE))
     {
-        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, Rep->repvalue2, Rep->repfaction2, victim->getLevel());
+        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, Rep->repvalue2, Rep->repfaction2, victim->GetLevelForTarget(this));
         donerep2 = int32(donerep2 * rate);
         FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(Rep->repfaction2);
         uint32 current_reputation_rank2 = GetReputationMgr().GetRank(factionEntry2);
@@ -11562,7 +11573,7 @@ void Player::SendPreparedGossip(WorldObject* pSource)
     if (uint32 menuId = gossipMenu.GetMenuId())
         textId = GetGossipTextId(menuId, pSource);
 
-    PlayerTalkClass->SendGossipMenu(textId, pSource->GetObjectGuid());
+    PlayerTalkClass->SendGossipMenu(textId, pSource->GetObjectGuid(), this); //Rochenoire //RCS
 }
 
 void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
@@ -11896,7 +11907,7 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
         std::string title = data->text;
         int loc_idx = GetSession()->GetSessionDbLocaleIndex();
         sObjectMgr.GetQuestgiverGreetingLocales(guid.GetEntry(), type, loc_idx, &title);
-        PlayerTalkClass->SendQuestGiverQuestList(qe, title, guid);
+        PlayerTalkClass->SendQuestGiverQuestList(qe, title, guid, this);  //Rochenoire //RCS
     }
     else
     {
@@ -11910,14 +11921,14 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
             if (pQuest)
             {
                 if (status == DIALOG_STATUS_REWARD_REP && !GetQuestRewardStatus(quest_id))
-                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanRewardQuest(pQuest, false), true);
+                    PlayerTalkClass->SendQuestGiverRequestItems(this, pQuest, guid, CanRewardQuest(pQuest, false), true);  //Rochenoire //RCS
                 else if (status == DIALOG_STATUS_INCOMPLETE)
-                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, false, true);
+                    PlayerTalkClass->SendQuestGiverRequestItems(this, pQuest, guid, false, true);//Rochenoire //RCS
                 // Send completable on repeatable quest if player don't have quest
                 else if (pQuest->IsRepeatable() && pQuest->IsAutoComplete())
-                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanCompleteRepeatableQuest(pQuest), true);
+                    PlayerTalkClass->SendQuestGiverRequestItems(this, pQuest, guid, CanCompleteRepeatableQuest(pQuest), true); //Rochenoire //RCS
                 else
-                    PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, guid, true);
+                    PlayerTalkClass->SendQuestGiverQuestDetails(this, pQuest, guid, true); //Rochenoire //RCS
             }
         }
         // multiply entries
@@ -11960,7 +11971,7 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
                     }
                 }
             }
-            PlayerTalkClass->SendQuestGiverQuestList(qe, title, guid);
+            PlayerTalkClass->SendQuestGiverQuestList(qe, title, guid, this); //Rochenoire //RCS
         }
     }
 }
@@ -12040,11 +12051,33 @@ bool Player::CanSeeStartQuest(Quest const* pQuest) const
         int32 highLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_HIGH_LEVEL_HIDE_DIFF);
         if (highLevelDiff < 0)
             return true;
-        return getLevel() + uint32(highLevelDiff) >= pQuest->GetMinLevel();
+        
+        //Rochenoire RCS start
+        if (pQuest->IsSpecificQuest())
+            return getLevel() + uint32(highLevelDiff) >= pQuest->GetMinLevel();
+        else
+        {
+            //To change ROCHENOIRE
+            //return (hasZoneLevel(pQuest->GetZoneOrSort()) ||
+              //  (!hasZoneLevel(pQuest->GetZoneOrSort()) && getLevel() + uint32(highLevelDiff) >= GetQuestLevelForPlayer(pQuest)));
+            return true;
+        }
+
     }
 
     return false;
 }
+
+//Rochenoire RCS start
+uint32 Player::GetQuestLevelForPlayer(Quest const* pQuest) const
+{
+    if (pQuest->IsSpecificQuest())
+        return pQuest && (pQuest->GetQuestLevel() > 0) ? (uint32)pQuest->GetQuestLevel() : getLevel();
+    else
+        return getZoneLevel(pQuest->GetZoneOrSort()) + pQuest->GetQuestRelativeLevel();   // #RochenoireQuestLevel
+}
+
+//Rochenoire end
 
 bool Player::CanTakeQuest(Quest const* pQuest, bool msg) const
 {
@@ -12130,9 +12163,9 @@ bool Player::CanCompleteQuest(uint32 quest_id) const
     if (qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAG_TIMED) && q_status.m_timer == 0)
         return false;
 
-    if (qInfo->GetRewOrReqMoney() < 0)
+    if (qInfo->GetRewOrReqMoney((Player*)this) < 0) //RCS
     {
-        if (GetMoney() < uint32(-qInfo->GetRewOrReqMoney()))
+        if (GetMoney() < uint32(-qInfo->GetRewOrReqMoney((Player*)this)))  //RCS
             return false;
     }
 
@@ -12189,7 +12222,7 @@ bool Player::CanRewardQuest(Quest const* pQuest, bool msg) const
     }
 
     // prevent receive reward with low money and GetRewOrReqMoney() < 0
-    if (pQuest->GetRewOrReqMoney() < 0 && GetMoney() < uint32(-pQuest->GetRewOrReqMoney()))
+    if (pQuest->GetRewOrReqMoney((Player*)this) < 0 && GetMoney() < uint32(-pQuest->GetRewOrReqMoney((Player*)this))) //RCS
         return false;
 
     return true;
@@ -12398,6 +12431,10 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
             DestroyItemCount(pQuest->ReqItemId[i], pQuest->ReqItemCount[i], true);
     }
 
+    //Rochenoire QUEST_SPECIAL_FLAG_TIMED : Timer donjon quests
+
+    //ROchenoire end
+
     RemoveTimedQuest(quest_id);
 
     if (pQuest->GetRewChoiceItemsCount() > 0)
@@ -12443,10 +12480,10 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     if (getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         GiveXP(xp, nullptr);
     else
-        ModifyMoney(int32(pQuest->GetRewMoneyMaxLevel() * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY)));
+        ModifyMoney(int32(pQuest->GetRewMoneyMaxLevel((Player*)this) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY))); //RCS
 
     // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
-    ModifyMoney(pQuest->GetRewOrReqMoney());
+    ModifyMoney(pQuest->GetRewOrReqMoney((Player*)this)); //RCS
 
     // Send reward mail
     if (uint32 mail_template_id = pQuest->GetRewMailTemplateId())
@@ -12635,8 +12672,10 @@ bool Player::SatisfyQuestCondition(Quest const* qInfo, bool msg) const
 
 bool Player::SatisfyQuestLevel(Quest const* qInfo, bool msg) const
 {
-    uint32 level = getLevel();
-    if (level < qInfo->GetMinLevel() || level > qInfo->GetMaxLevel())
+    //Rochenoire  //G : uint32 level = getLevel();
+    //Rochenoire  //G :if (level < qInfo->GetMinLevel() || level > qInfo->GetMaxLevel())
+    if ((qInfo->IsSpecificQuest() && getLevel() < qInfo->GetMinLevel()) ||
+        (!qInfo->IsSpecificQuest() /*&& !hasZoneLevel(qInfo->GetZoneOrSort())*/ && getLevel() < GetQuestLevelForPlayer(qInfo)))  //RCS
     {
         if (msg)
             SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
@@ -13442,13 +13481,13 @@ void Player::MoneyChanged(uint32 count)
             continue;
 
         Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
-        if (qInfo && qInfo->GetRewOrReqMoney() < 0)
+        if (qInfo && qInfo->GetRewOrReqMoney((Player*)this) < 0)  //RCS
         {
             QuestStatusData& q_status = mQuestStatus[questid];
 
             if (q_status.m_status == QUEST_STATUS_INCOMPLETE)
             {
-                if (int32(count) >= -qInfo->GetRewOrReqMoney())
+                if (int32(count) >= -qInfo->GetRewOrReqMoney((Player*)this))  //RCS
                 {
                     if (CanCompleteQuest(questid))
                         CompleteQuest(questid);
@@ -13456,7 +13495,7 @@ void Player::MoneyChanged(uint32 count)
             }
             else if (q_status.m_status == QUEST_STATUS_COMPLETE)
             {
-                if (int32(count) < -qInfo->GetRewOrReqMoney())
+                if (int32(count) < -qInfo->GetRewOrReqMoney((Player*)this))  //RCS
                     IncompleteQuest(questid);
             }
         }
@@ -13572,12 +13611,12 @@ void Player::SendQuestReward(Quest const* pQuest, uint32 XP) const
     if (getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
     {
         data << uint32(XP);
-        data << uint32(pQuest->GetRewOrReqMoney());
+        data << uint32(pQuest->GetRewOrReqMoney((Player*)this)); //RCS
     }
     else
     {
         data << uint32(0);
-        data << uint32(pQuest->GetRewOrReqMoney() + int32(pQuest->GetRewMoneyMaxLevel() * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY)));
+        data << uint32(pQuest->GetRewOrReqMoney((Player*)this) + int32(pQuest->GetRewMoneyMaxLevel((Player*)this) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY))); //RCS
     }
     data << uint32(pQuest->GetRewItemsCount());             // max is 5
 
@@ -18452,8 +18491,14 @@ uint32 Player::GetResurrectionSpellId() const
 // Used in triggers for check "Only to targets that grant experience or honor" req
 bool Player::isHonorOrXPTarget(Unit* pVictim) const
 {
+    //Rochenoire RCS PVP
+    uint32 v_level = pVictim->GetLevelForTarget(this);
+    uint32 k_grey = GetLevelForTarget(pVictim);
+    //Rochenoire end
+
     // Victim level less gray level
-    if (MaNGOS::XP::IsTrivialLevelDifference(getLevel(), pVictim->GetLevelForTarget(this)))
+    //Rochenoire RCS G: if (MaNGOS::XP::IsTrivialLevelDifference(getLevel(), pVictim->GetLevelForTarget(this)))
+    if (MaNGOS::XP::IsTrivialLevelDifference(k_grey, v_level))
         return false;
 
     if (pVictim->GetTypeId() == TYPEID_UNIT)

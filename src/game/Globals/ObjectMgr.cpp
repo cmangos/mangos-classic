@@ -774,6 +774,643 @@ CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, u
     return nullptr;
 }
 
+//Rochenoire Start
+
+//Gold scale
+const float mingold_array[65] = { 1.33f,5.09f,6.4f,6.5f,7.28f,8.98f,9.4f,9.42f,14.26f,17.76f,19.84f,20.27f,20.35f,33.44f,42.58f,43.04f,50.08f,50.26f,59.76f,60.73f,61.03f,71.05f,79.18f,79.51f,80.94f,83.08f,88.93f,90.86f,92.47f,99.63f,100.31f,103.96f,110.63f,115.4f,131.43f,133.72f,135.77f,139.42f,151.96f,170.22f,170.48f,175.41f,176.06f,179.42f,181.38f,187.58f,190.36f,193.57f,201.26f,201.54f,212.49f,221.2f,225.94f,286.99f,297.95f,369.16f,442.04f,515.1f,588.1f,661.1f,734.1f,807.1f,880.1f,953.1f,1024.1f };
+const float maxgold_array[65] = { 7.08f,11.96f,12.13f,13.15f,14.81f,17.12f,17.66f,18.75f,25.95f,31.68f,38.27f,38.86f,46.84f,48.81f,62.52f,66.07f,76.91f,86.15f,87.94f,100.73f,104.82f,106.03f,111.34f,118.17f,126.29f,130.69f,143.12f,152.31f,155.17f,157.88f,161.5f,176.44f,178.51f,204.82f,205.48f,206.91f,220.09f,230.24f,233.94f,278.17f,306.00f,306.71f,309.74f,327.00f,339.45f,341.09f,351.8f,359.08f,370.32f,488.16f,499.34f,514.34f,524.28f,550.51f,695.23f,850.22f,894.25f,1250.6f,1427.9f,1605.2f,1782.5f,1959.7f,2137.0f,2314.3f,2491.6f };
+void ObjectMgr::ScaleGold(uint32 in_level, uint32 ou_level, uint32& mingold, uint32& maxgold) const
+{
+    in_level = in_level < 1 ? in_level : in_level > countof(mingold_array) ? countof(mingold_array) - 1 : in_level - 1;
+    ou_level = ou_level < 1 ? ou_level : ou_level > countof(mingold_array) ? countof(mingold_array) - 1 : ou_level - 1;
+
+    uint32 ex_mingold = mingold_array[in_level];
+    uint32 ex_maxgold = maxgold_array[in_level];
+    uint32 sc_mingold = mingold_array[ou_level];
+    uint32 sc_maxgold = maxgold_array[ou_level];
+
+    float di_mingold = float((float)mingold / (float)ex_mingold);
+    float di_maxgold = float((float)maxgold / (float)ex_maxgold);
+
+    mingold = float((float)sc_mingold * (float)di_mingold);
+    maxgold = float((float)sc_maxgold * (float)di_maxgold);
+}
+
+bool ObjectMgr::IsScalable(Unit* owner, Unit* target) const
+{
+    if (!owner || !target)
+        return false;
+
+    // Mind Controlled creatures should not have scaled damage dealt/received
+    if (owner->IsCreature() && target->IsCreature())
+        if (owner->HasCharmer() || target->HasCharmer())
+            return false;
+
+    owner = owner->GetBeneficiary();
+    target = target->GetBeneficiary();
+
+    if (owner->IsCreature() && target->IsCreature())
+        return false;
+
+    bool IsForcePVP = true;// sWorld.getConfig(CONFIG_BOOL_SCALE_FORCE_PVP);
+    bool IsBattleGround = owner->GetMap() ? owner->GetMap()->IsBattleGround() : false;
+
+    Creature* creature;
+    Player* player;
+
+    if (owner->IsCreature() && target->IsPlayer())
+    {
+        creature = (Creature*)owner;
+        player = (Player*)target;
+    }
+    else if (target->IsCreature() && owner->IsPlayer())
+    {
+        player = (Player*)owner;
+        creature = (Creature*)target;
+    }
+    else if (owner->IsPlayer() && target->IsPlayer())
+        return (IsBattleGround || IsForcePVP || owner->IsFriend(target));
+    else
+        return false;
+
+    if (!player->isGameMaster() && creature->GetReactionTo(player) >= REP_NEUTRAL && !player->CanAttack(creature))
+        return false;
+
+    // Check creatures flags_extra for disable block
+    if (creature->GetTypeId() == TYPEID_UNIT)
+    {
+        if (creature->IsGuard())
+            return false;
+
+        if (creature->IsCivilian())
+            return false;
+
+        if (creature->GetCreatureType() == CREATURE_TYPE_CRITTER)
+            return false;
+
+        if (creature->IsDead())
+            return false;
+    }
+
+    return true;
+}
+
+
+bool ObjectMgr::isAuraSafe(uint32 EffectApplyAuraName) const
+{
+    int AURA_SAFE[] = { SPELL_AURA_BIND_SIGHT, SPELL_AURA_PERIODIC_DAMAGE,
+            SPELL_AURA_DUMMY, SPELL_AURA_MOD_CHARM, SPELL_AURA_PERIODIC_HEAL, SPELL_AURA_MOD_DAMAGE_DONE,
+            SPELL_AURA_OBS_MOD_HEALTH, SPELL_AURA_OBS_MOD_MANA,
+            SPELL_AURA_PERIODIC_TRIGGER_SPELL, SPELL_AURA_PERIODIC_ENERGIZE, SPELL_AURA_MOD_STAT,
+            SPELL_AURA_MOD_SKILL, SPELL_AURA_MOD_INCREASE_HEALTH, SPELL_AURA_MOD_INCREASE_ENERGY,
+            SPELL_AURA_MOD_STALKED,
+            SPELL_AURA_MOD_POWER_COST_SCHOOL, SPELL_AURA_MOD_BASE_RESISTANCE, SPELL_AURA_MOD_REGEN, SPELL_AURA_MOD_POWER_REGEN,
+            SPELL_AURA_CHANNEL_DEATH_ITEM, SPELL_AURA_PREVENTS_FLEEING, SPELL_AURA_MOD_UNATTACKABLE,
+            SPELL_AURA_GHOST,
+            SPELL_AURA_MOD_SKILL_TALENT, SPELL_AURA_MOD_ATTACK_POWER,
+            SPELL_AURA_MOD_TOTAL_THREAT, SPELL_AURA_WATER_WALK, SPELL_AURA_FEATHER_FALL, SPELL_AURA_HOVER,
+            SPELL_AURA_ADD_FLAT_MODIFIER, SPELL_AURA_OVERRIDE_CLASS_SCRIPTS,
+            SPELL_AURA_UNTRACKABLE, SPELL_AURA_EMPATHY, SPELL_AURA_MOD_TARGET_RESISTANCE,
+            SPELL_AURA_MOD_RANGED_ATTACK_POWER,
+            SPELL_AURA_MOD_MANA_REGEN_INTERRUPT, SPELL_AURA_MOD_HEALING_DONE, SPELL_AURA_FORCE_REACTION,
+            SPELL_AURA_SAFE_FALL, SPELL_AURA_MECHANIC_IMMUNITY_MASK,
+            SPELL_AURA_MOD_SHIELD_BLOCKVALUE,
+            SPELL_AURA_POWER_BURN_MANA,
+            SPELL_AURA_DETECT_AMORE, SPELL_AURA_AOE_CHARM };
+    return std::find(std::begin(AURA_SAFE), std::end(AURA_SAFE), EffectApplyAuraName) != std::end(AURA_SAFE);
+}
+
+
+bool ObjectMgr::isEffectRestricted(uint32 Effect) const
+{
+    int SPELL_EFFECT_RESTRICTED[] = { SPELL_EFFECT_MODIFY_THREAT_PERCENT, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE,
+        SPELL_EFFECT_LEARN_SPELL, SPELL_EFFECT_SKILL_STEP, SPELL_EFFECT_KNOCK_BACK, SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL,
+        SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG, SPELL_EFFECT_DISPEL };
+    return std::find(std::begin(SPELL_EFFECT_RESTRICTED), std::end(SPELL_EFFECT_RESTRICTED), Effect) == std::end(SPELL_EFFECT_RESTRICTED);
+}
+
+/*
+
+
+float ObjectMgr::GetFactorNHT(float u_MaxPlayer, float u_nbr_players, float f_softness, float NT) const
+{
+    return NT + 1.0f / (std::exp((0.7375f * u_MaxPlayer - u_nbr_players) / f_softness * 100.0f) + 1.0f) + 1.0f / (std::exp((0.5125f * u_MaxPlayer - u_nbr_players) / f_softness * 100.0f) + 1.0f);
+}
+
+float ObjectMgr::GetFactorNHR(float u_MaxPlayer, float u_nbr_players, float NT, float f_ratio_heal_dps, float f_softness) const
+{
+    // dirty dungeon fix
+    if (u_MaxPlayer == 5)
+    {
+        u_MaxPlayer *= 2;
+        u_nbr_players *= 2;
+    }
+
+    float NDPS = GetFactorNDPS(u_MaxPlayer, u_nbr_players, NT, f_ratio_heal_dps, f_softness);
+    float NHT = GetFactorNHT(u_MaxPlayer, u_nbr_players, f_softness, NT);
+    return u_nbr_players - NHT - NT - NDPS;
+}
+
+float ObjectMgr::GetFactorNDPS(float u_MaxPlayer, float u_nbr_players, float NT, float f_ratio_heal_dps, float f_softness) const
+{
+    float NHT = GetFactorNHT(u_MaxPlayer, u_nbr_players, f_softness, NT);
+    float left = std::max(1.0f, (float)(u_nbr_players - NHT - NT));
+    return left / (1.0f + f_ratio_heal_dps);
+}
+
+float ObjectMgr::GetFactorHP(float u_MaxPlayer, float u_nbr_players, float NT, float f_ratio_heal_dps, float f_softness) const
+{
+    return GetFactorNDPS(u_MaxPlayer, u_nbr_players, NT, f_ratio_heal_dps, f_softness) / GetFactorNDPS(u_MaxPlayer, u_MaxPlayer, NT, f_ratio_heal_dps, f_softness);
+}
+
+float ObjectMgr::GetFactorDPS(float u_MaxPlayer, float u_nbr_players, float NT, float f_ratio_heal_dps, float f_softness, float Ratio_Bascule_HR_HT) const
+{
+    return (GetFactorNHT(u_MaxPlayer, u_nbr_players, f_softness, NT) + Ratio_Bascule_HR_HT * GetFactorNHR(u_MaxPlayer, u_nbr_players, NT, f_ratio_heal_dps, f_softness)) / (GetFactorNHT(u_MaxPlayer, u_MaxPlayer, f_softness, NT) + Ratio_Bascule_HR_HT * GetFactorNHR(u_MaxPlayer, u_MaxPlayer, NT, f_ratio_heal_dps, f_softness));
+}
+
+float ObjectMgr::GetFactorAdds(float u_MaxPlayer, float u_nbr_players, float NT, float f_ratio_heal_dps, float f_softness, float Nadds, float f_min_red_health) const
+{
+    float FinalNAdds = Nadds;
+
+    // dirty dungeon fix
+    if (u_MaxPlayer == 5)
+    {
+        u_MaxPlayer *= 2;
+        u_nbr_players *= 2;
+    }
+
+    while (((GetFactorHP(u_MaxPlayer, u_nbr_players, NT, f_ratio_heal_dps, f_softness)) * Nadds / FinalNAdds < f_min_red_health) && FinalNAdds > 1)
+        FinalNAdds = FinalNAdds - 1;
+
+    return FinalNAdds;
+}
+*/
+float ObjectMgr::GetSpellCoeffRatio(uint32 spellId) const
+{
+    float CoeffSpellRatio = 1.0f;
+
+    if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId))
+    {
+        float min_range = std::min(100.0f, GetSpellMinRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex)));
+        float max_range = std::min(100.0f, GetSpellMaxRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex)));
+
+        bool isHarmful = false;
+        float current_radius = 0.0f;
+        int current_targets = 1;
+
+        for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
+            if (spellInfo->Effect[i] == 0)
+                continue;
+
+            bool damage = false;
+            if (spellInfo->spellLevel)
+            {
+                if (uint32 aura = spellInfo->EffectApplyAuraName[i])
+                {
+                    switch (aura)
+                    {
+                    case SPELL_AURA_PERIODIC_DAMAGE:
+                    case SPELL_AURA_PERIODIC_LEECH:
+                        //   SPELL_AURA_PERIODIC_DAMAGE_PERCENT: excluded, abs values only
+                    case SPELL_AURA_POWER_BURN_MANA:
+                        damage = true;
+                    }
+                }
+                else if (uint32 effect = spellInfo->Effect[i])
+                {
+                    switch (effect)
+                    {
+                    case SPELL_EFFECT_SCHOOL_DAMAGE:
+                    case SPELL_EFFECT_POWER_DRAIN:
+                    case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+                    case SPELL_EFFECT_HEALTH_LEECH:
+                    case SPELL_EFFECT_HEAL:
+                    case SPELL_EFFECT_SUMMON:
+                    case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                        //   SPELL_EFFECT_WEAPON_PERCENT_DAMAGE: excluded, abs values only
+                    case SPELL_EFFECT_WEAPON_DAMAGE:
+                    case SPELL_EFFECT_POWER_BURN:
+                    case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                        damage = true;
+                    }
+                }
+            }
+
+            float max_radius = std::min(100.0f, GetSpellRadius(sSpellRadiusStore.LookupEntry(spellInfo->EffectRadiusIndex[i])));
+            if (max_radius > current_radius)
+                current_radius = max_radius;
+
+            auto& data = SpellTargetMgr::GetSpellTargetingData(spellId);
+            auto& ignoredTargets = data.ignoredTargets[i];
+
+            uint32 targetModeA = spellInfo->EffectImplicitTargetA[i];
+            uint32 targetModeB = spellInfo->EffectImplicitTargetB[i];
+
+            SpellTargetInfo& dataA = SpellTargetInfoTable[targetModeA];
+            SpellTargetInfo& dataB = SpellTargetInfoTable[targetModeB];
+
+            if (targetModeA && !ignoredTargets.first)
+                if (dataA.filter == TARGET_HARMFUL)
+                {
+                    isHarmful = true;
+                    switch (dataA.enumerator)
+                    {
+                    case TARGET_ENUMERATOR_CONE:
+                    case TARGET_ENUMERATOR_AOE:
+                        if (!damage)
+                            CoeffSpellRatio -= current_radius / 100.0f;
+                        else
+                            CoeffSpellRatio += current_radius / 100.0f;
+                        break;
+                    case TARGET_ENUMERATOR_CHAIN: // more target = lower value
+                        current_targets = spellInfo->EffectChainTarget[i] > current_targets ? spellInfo->EffectChainTarget[i] : current_targets;
+                        if (!damage)
+                            CoeffSpellRatio -= current_targets / 10.0f;
+                        else
+                            CoeffSpellRatio += current_targets / 10.0f;
+                        break;
+                    default: break;
+                    }
+                }
+
+            if (targetModeB && !ignoredTargets.second)
+                if (dataB.filter == TARGET_HARMFUL)
+                {
+                    isHarmful = true;
+                    switch (dataB.enumerator)
+                    {
+                    case TARGET_ENUMERATOR_CONE:
+                    case TARGET_ENUMERATOR_AOE:
+                        if (!damage)
+                            CoeffSpellRatio -= current_radius / 100.0f;
+                        else
+                            CoeffSpellRatio += current_radius / 100.0f;
+                        break;
+                    case TARGET_ENUMERATOR_CHAIN: // more target = lower value
+                        current_targets = spellInfo->EffectChainTarget[i] > current_targets ? spellInfo->EffectChainTarget[i] : current_targets;
+                        if (!damage)
+                            CoeffSpellRatio -= current_targets / 10.0f;
+                        else
+                            CoeffSpellRatio += current_targets / 10.0f;
+                        break;
+                    default: break;
+                    }
+                }
+        }
+
+        if (min_range > ATTACK_DISTANCE)
+            CoeffSpellRatio -= 0.5f;
+
+        CoeffSpellRatio -= max_range / 100.0f;
+        CoeffSpellRatio = std::min(1.0f, CoeffSpellRatio);
+    }
+
+    return std::max(0.0f, CoeffSpellRatio);
+}
+
+
+
+uint32 ObjectMgr::GetScaleSpellTimer(Creature* creature, uint32 timer, uint32 spellid) const
+{
+    float RatioDps = creature->GetInstanceDps();
+    float NbrAdds = creature->GetInstanceAdds();
+    float NbrAddsKeep = creature->GetInstanceAddsKeep();
+    float Coeff = GetScaleSpellTimer(RatioDps, NbrAdds, NbrAddsKeep, GetSpellCoeffRatio(spellid));
+    return (uint32)timer / Coeff;
+}
+
+
+float ObjectMgr::GetScaleSpellTimer(float Ratio_DPS, float Nadds, float FinalNAdds, float CoeffSpellRatio) const
+{
+    return 1 - (1 - Ratio_DPS * Nadds / FinalNAdds) * CoeffSpellRatio;
+}
+
+
+uint32 ObjectMgr::getLevelScaled(Unit* owner, Unit* target) const
+{
+    owner = owner ? owner->GetBeneficiary() : owner;
+    target = target ? target->GetBeneficiary() : target;
+
+    if (!owner || !target)
+        return owner ? owner->getLevel() : target ? target->getLevel() : 0;
+
+    if (!IsScalable(owner, target))
+        return target->getLevel();
+
+    Creature* creature;
+    Player* player;
+
+    if (owner->IsCreature() && target->IsPlayer())
+    {
+        creature = (Creature*)owner;
+        player = (Player*)target;
+    }
+    else if (target->IsCreature() && owner->IsPlayer())
+    {
+        player = (Player*)owner;
+        creature = (Creature*)target;
+    }
+    else if (target->IsPlayer() && owner->IsPlayer())
+    {
+        return target->getLevel() > owner->getLevel() ? target->getLevel() : owner->getLevel();
+    }
+    else
+        return target->getLevel();
+
+    uint32 p_level = player->getLevel();
+
+    if (owner->IsCreature())
+    {   
+        // #CreatureLevel
+        p_level = player->getZoneLevel(); //getLevel();   //Creature has same player level by default. Change relative level here !!!
+
+        if (creature->IsWorldBoss())
+            p_level += sWorld.getConfig(CONFIG_UINT32_WORLD_BOSS_LEVEL_DIFF);
+        else
+        {
+            int v_level = creature->GetLevelVar();
+
+            // skip negative level
+            if ((int)p_level + v_level <= 0)
+                return 1;
+
+            p_level += v_level;
+        }
+    }
+
+    return p_level;
+}
+
+uint32 ObjectMgr::ScaleArmor(Unit* owner, Unit* target, uint32 oldarmor) const
+{
+    if (oldarmor == 0)
+        return oldarmor;
+
+    owner = owner ? owner->GetBeneficiary() : owner;
+    target = target ? target->GetBeneficiary() : target;
+
+    if (!owner || !target)
+        return oldarmor;
+
+    uint32 armor = oldarmor;
+
+    if (!IsScalable(owner, target))
+        return oldarmor;
+
+    Creature* creature;
+    Player* player;
+
+    int pAggro = 0;
+
+    if (owner->IsCreature() && target->IsPlayer())
+    {
+        creature = (Creature*)owner;
+        player = (Player*)target;
+        pAggro = 2; // Creature is the attacker
+    }
+    else if (target->IsCreature() && owner->IsPlayer())
+    {
+        player = (Player*)owner;
+        creature = (Creature*)target;
+        pAggro = 1; // Player is the attacker
+    }
+    else
+        return oldarmor;
+
+    int32 scaled_level = creature->GetLevelForTarget(player);
+    int32 origin_level = creature->getLevel();
+
+    if (pAggro == 1)
+    {
+        // Scale creature armor based on player level
+        uint32 max_armor = (float)creature->GetArmor();
+
+        if (max_armor <= 1)
+            return armor;
+
+        float ratio_armor = 1.0f;
+
+        // Check creatures flags_extra for disable block
+        if (creature->GetTypeId() == TYPEID_UNIT)
+        {
+            CreatureInfo const* cinfo = creature->GetCreatureInfo();
+            if (cinfo && cinfo->UnitClass != 0)
+            {
+                if (CreatureClassLvlStats const* cCLSS = sObjectMgr.GetCreatureClassLvlStats(origin_level, cinfo->UnitClass))
+                    ratio_armor = armor / (cCLSS->BaseArmor * cinfo->ArmorMultiplier);
+
+                if (CreatureClassLvlStats const* cCLSS = sObjectMgr.GetCreatureClassLvlStats(scaled_level, cinfo->UnitClass))
+                    armor = cCLSS->BaseArmor * cinfo->ArmorMultiplier * ratio_armor;
+            }
+        }
+    }
+
+    return armor;
+}
+
+
+SpellType ObjectMgr::GetSpellDamageType(SpellEntry const* spellProto, SpellEffectIndex eff_idx) const
+{
+    SpellType type = SPELLTYPE_UNK;
+
+    if (uint32 aura = spellProto->EffectApplyAuraName[eff_idx])
+    {
+        switch (aura)
+        {
+        case SPELL_AURA_MOD_STAT:
+            type = SPELLTYPE_CHARSTAT;
+            break;
+        case SPELL_AURA_POWER_BURN_MANA:
+        case SPELL_AURA_MANA_SHIELD:
+        case SPELL_AURA_PERIODIC_MANA_FUNNEL:
+        case SPELL_AURA_PERIODIC_MANA_LEECH:
+            type = SPELLTYPE_POWER;
+            break;
+        case SPELL_AURA_PERIODIC_DAMAGE:
+        case SPELL_AURA_PERIODIC_LEECH:
+            //   SPELL_AURA_PERIODIC_DAMAGE_PERCENT: excluded, abs values only
+        //case SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE:
+            type = SPELLTYPE_DAMAGE;
+            break;
+        }
+    }
+    else if (uint32 effect = spellProto->Effect[eff_idx])
+    {
+        switch (effect)
+        {
+        case SPELL_EFFECT_HEALTH_LEECH:
+        case SPELL_EFFECT_HEAL:
+            type = SPELLTYPE_HEAL;
+            break;
+        case SPELL_EFFECT_POWER_DRAIN:
+        case SPELL_EFFECT_POWER_BURN:
+            type = SPELLTYPE_POWER;
+            break;
+        case SPELL_EFFECT_SCHOOL_DAMAGE:
+        case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+        case SPELL_EFFECT_SUMMON:
+        case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+            //   SPELL_EFFECT_WEAPON_PERCENT_DAMAGE: excluded, abs values only
+        case SPELL_EFFECT_WEAPON_DAMAGE:
+        case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+        //case SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE:
+            type = SPELLTYPE_DAMAGE;
+            break;
+        }
+    }
+
+    return type;
+}
+
+
+float ObjectMgr::ScaleDamage(Unit* owner, Unit* target, float olddamage, bool& isScaled, SpellEntry const* spellProto, SpellEffectIndex eff_idx, bool isRevert) const
+{
+    if (isScaled || olddamage == 0)
+        return olddamage;
+
+    if (!IsScalable(owner, target))
+        return olddamage;
+
+    owner = owner ? owner->GetBeneficiary() : owner;
+    target = target ? target->GetBeneficiary() : target;
+
+    if (!owner || !target)
+        return olddamage;
+
+    Creature* creature;
+    Player* player;
+    Player* player2;
+
+    uint32 pAggro = 0;
+    bool isPvP = false;
+
+    if (owner->IsCreature() && target->IsPlayer())
+    {
+        creature = (Creature*)owner;
+        player = (Player*)target;
+        pAggro = 2; // PvE : Creature is the attacker
+    }
+    else if (target->IsCreature() && owner->IsPlayer())
+    {
+        player = (Player*)owner;
+        creature = (Creature*)target;
+        pAggro = 1; // PvE : Player is the attacker
+    }
+    else if (target->IsPlayer() && owner->IsPlayer())
+    {
+        player = (Player*)owner;
+        player2 = (Player*)target;
+        pAggro = 3; // PvP : Not important ?
+        isPvP = true;
+    }
+    else
+        return olddamage;
+
+    float damage = olddamage;
+    bool value_neg = (olddamage < 0) ? true : false;
+
+    // Avoid breaking calculation
+    if (value_neg)
+        damage *= -1;
+
+    int32 scaled_level = isPvP ? player2->getLevel() : creature->GetLevelForTarget(player);
+    int32 origin_level = isPvP ? player->getLevel() : creature->getLevel();
+
+    SpellType spellType = spellProto ? GetSpellDamageType(spellProto, eff_idx) : SPELLTYPE_UNK;
+
+    if (spellType == SPELLTYPE_CHARSTAT)
+    {
+        uint32 caster_level = owner->getLevel();
+        float caster_funct = (0.0072 * pow(caster_level, 2) + 1.2594 * (caster_level)+21.718);
+        float caster_ratio = damage / caster_funct;
+
+        float target_value = (0.0072 * pow(scaled_level, 2) + 1.2594 * (scaled_level)+21.718);
+        damage = target_value * caster_ratio;
+    }
+    else if (spellType == SPELLTYPE_HEAL)
+    {
+        uint32 caster_level = owner->getLevel();
+        float caster_funct = (0.0792541 * pow(caster_level, 2) + 1.93556 * (caster_level)+4.56252);
+        float caster_ratio = damage / caster_funct;
+
+        float target_value = (0.0792541 * pow(scaled_level, 2) + 1.93556 * (scaled_level)+4.56252);
+        damage = target_value * caster_ratio;
+    }
+    else if (pAggro == 1)
+    {
+        uint32 max_value = spellType == SPELLTYPE_POWER ? creature->GetMaxPower(POWER_MANA) : creature->GetMaxHealth();
+
+        if (max_value <= 1)
+            return damage;
+
+        if (creature->GetTypeId() == TYPEID_UNIT)
+        {
+            if (CreatureInfo const* cinfo = creature->GetCreatureInfo())
+            {
+                if (CreatureClassLvlStats const* cCLSS = sObjectMgr.GetCreatureClassLvlStats(scaled_level, cinfo->UnitClass))
+                {
+                    float scaled_value = spellType == SPELLTYPE_POWER ? cCLSS->BaseMana * cinfo->PowerMultiplier : cCLSS->BaseHealth * cinfo->HealthMultiplier;
+                    float ratio = float((float)max_value / (float)scaled_value);
+
+                    if (!isRevert)
+                        damage *= ratio;
+                    else
+                        damage /= ratio;
+                }
+            }
+        }
+    }
+    else if (pAggro >= 2)
+    {
+        PlayerClassLevelInfo target_classInfo;
+        PlayerClassLevelInfo owner_classInfo;
+
+        float targetBaseValue = 0.0f;
+        float ownerBaseValue = 0.0f;
+        int incBaseValue = 0;
+
+        // need optimization (sql table)
+        for (uint32 i = MIN_CLASSES; i < MAX_CLASSES; i++)
+        {
+            if (i == 6 || i == 10)
+                continue;
+
+            sObjectMgr.GetPlayerClassLevelInfo(i, scaled_level, &target_classInfo);
+            sObjectMgr.GetPlayerClassLevelInfo(i, origin_level, &owner_classInfo);
+
+            targetBaseValue += spellType == SPELLTYPE_POWER ? target_classInfo.basemana : target_classInfo.basehealth;
+            ownerBaseValue += spellType == SPELLTYPE_POWER ? target_classInfo.basemana : owner_classInfo.basehealth;
+
+
+
+            incBaseValue++;
+        }
+
+        targetBaseValue /= incBaseValue;
+        ownerBaseValue /= incBaseValue;
+
+        float ratio = targetBaseValue / ownerBaseValue;
+
+        if (!isRevert)
+            damage *= ratio;
+        else
+            damage /= ratio;
+    }
+
+    if (value_neg)
+        damage *= -1;
+
+    isScaled = (damage != olddamage);
+    return ceil(damage);
+}
+
+
+
+
+//Rochenoire End
+
+
 void ObjectMgr::LoadEquipmentTemplates()
 {
     sEquipmentStorage.Load(true);
@@ -1521,6 +2158,53 @@ uint32 ObjectMgr::GetPlayerAccountIdByPlayerName(const std::string& name) const
 
     return 0;
 }
+
+//Rochenoire FlexRaidSys and RCS
+void ObjectMgr::LoadZoneScale()
+{
+    mZoneFlexMap.clear();
+    QueryResult* result = WorldDatabase.Query("SELECT * FROM scale_zone");
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outString();
+        sLog.outString(">> Loaded 0 Zone scaling details. DB table `scale_zone` is empty.");
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+
+        std::string AreaName = fields[0].GetString();
+        uint32 MapID = fields[1].GetUInt32();
+        uint32 AreaID = fields[2].GetUInt32();
+        uint32 ParentWorldMapID = fields[3].GetUInt32();
+        uint32 LevelRangeMin = fields[4].GetUInt32();
+        uint32 LevelRangeMax = fields[5].GetUInt32();
+
+        ZoneFlex& data = mZoneFlexMap[AreaID];
+        data.AreaName = AreaName;
+        data.MapID = MapID;
+        data.AreaID = AreaID;
+        data.ParentWorldMapID = ParentWorldMapID;
+        data.LevelRangeMin = LevelRangeMin;
+        data.LevelRangeMax = LevelRangeMax;
+
+    } while (result->NextRow());
+
+    delete result;
+    sLog.outString();
+    sLog.outString(">> Loaded %lu Zone scaling details", (unsigned long)mZoneFlexMap.size());
+}
+
+
+//Rochenoire end
 
 void ObjectMgr::LoadItemLocales()
 {

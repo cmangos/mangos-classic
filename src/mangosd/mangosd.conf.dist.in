@@ -253,6 +253,134 @@ CleanCharacterDB = 1
 MaxWhoListReturns = 49
 
 ###################################################################################################################
+# ROCHENOIRE SETINGS
+#
+#    WowPatch
+#        Set the server progressive patch
+#        Default: 15 (2.4)
+#                 0  (1.2)
+#
+#    Rochenoire.Scaling.PvP.Enabled
+#        Enable/Disable PvP level scaling
+#        Default: 0 (disable)
+#                 1 (enable)
+#
+#    Rochenoire.Scaling.Vendor.Consumable
+#    Rochenoire.Scaling.Vendor.Container
+#    Rochenoire.Scaling.Vendor.Weapon
+#    Rochenoire.Scaling.Vendor.Gem
+#    Rochenoire.Scaling.Vendor.Armor
+#    Rochenoire.Scaling.Vendor.Reagent
+#    Rochenoire.Scaling.Vendor.Projectile
+#    Rochenoire.Scaling.Vendor.TradeGoods
+#    Rochenoire.Scaling.Vendor.Generic
+#    Rochenoire.Scaling.Vendor.Recipe
+#    Rochenoire.Scaling.Vendor.Money
+#    Rochenoire.Scaling.Vendor.Quiver
+#    Rochenoire.Scaling.Vendor.Quest
+#    Rochenoire.Scaling.Vendor.Key
+#    Rochenoire.Scaling.Vendor.Permanent
+#    Rochenoire.Scaling.Vendor.Misc
+#        Enable/Disable Vendor item scaling
+#        Default: 0 (disable)
+#                 1 (enable)
+#
+#    Rochenoire.Rate.Drop.Item.Group
+#         Group drop rates bonus
+#         Default: 0.5
+#
+#    Rochenoire.Rate.XP.Group
+#         Group XP rates bonus
+#         Default: 0.5
+#
+#    Rochenoire.Flexible.Core.MapType
+#        Enable/Disable map size scaling
+#        Default: 2
+#                 4 (Arena)
+#                 3 (Battleground)
+#                 2 (Raid)
+#                 1 (Instance)
+#                 0 (Common)
+#
+#    Rochenoire.Flexible.Core.Ratio
+#        Set the flexible raids players ratio
+#        Default:     2 - (raid 40 become raid 20, raid 20 become raid 10)
+#
+#    Rochenoire.Flexible.Core.MinSize.Common
+#    Rochenoire.Flexible.Core.MinSize.Instance
+#    Rochenoire.Flexible.Core.MinSize.Raid
+#    Rochenoire.Flexible.Core.MinSize.Battleground
+#    Rochenoire.Flexible.Core.MinSize.Arena
+#        Minimum rescaled map size (number of players)
+#        Default:     5
+#
+#    Rochenoire.SmartLoot.Enabled
+#        Enable/Disable smart loot algorithm
+#        Default: 1 (enable)
+#                 0 (disable)
+#
+#    Rate.Weight.Item.Poor
+#    Rate.Weight.Item.Normal
+#    Rate.Weight.Item.Uncommon
+#    Rate.Weight.Item.Rare
+#    Rate.Weight.Item.Epic
+#    Rate.Weight.Item.Legendary
+#    Rate.Weight.Item.Artifact
+#         Equipment level rates coeff (used by smart loot)
+#         Default: 1
+#
+#     Calculate.Creature.Zone.Area.Data
+#        Description: Calculate at loading creature zoneId / areaId and save in creature table (WARNING: SLOW WORLD SERVER STARTUP)
+#        Default:     0  - (Do not show)
+#
+#     Calculate.Gameoject.Zone.Area.Data
+#        Description: Calculate at loading gameobject zoneId / areaId and save in gameobject table (WARNING: SLOW WORLD SERVER STARTUP)
+#        Default:     0  - (Do not show)
+#
+###################################################################################################################
+
+WowPatch = 15
+Rochenoire.Scaling.PvP.Enabled = 0
+Rochenoire.Scaling.Vendor.Consumable = 0
+Rochenoire.Scaling.Vendor.Container = 0
+Rochenoire.Scaling.Vendor.Weapon = 1
+Rochenoire.Scaling.Vendor.Gem = 0
+Rochenoire.Scaling.Vendor.Armor = 1
+Rochenoire.Scaling.Vendor.Reagent = 0
+Rochenoire.Scaling.Vendor.Projectile = 0
+Rochenoire.Scaling.Vendor.TradeGoods = 0
+Rochenoire.Scaling.Vendor.Generic = 0
+Rochenoire.Scaling.Vendor.Recipe = 0
+Rochenoire.Scaling.Vendor.Money = 0
+Rochenoire.Scaling.Vendor.Quiver = 0
+Rochenoire.Scaling.Vendor.Quest = 0
+Rochenoire.Scaling.Vendor.Key = 0
+Rochenoire.Scaling.Vendor.Permanent = 0
+Rochenoire.Scaling.Vendor.Misc = 0
+Rochenoire.Rate.Drop.Item.Group = 0.5
+Rochenoire.Rate.XP.Group = 0.5
+Rochenoire.Flexible.Core.MapType = 2
+Rochenoire.Flexible.Core.Ratio = 4
+Rochenoire.Flexible.Core.MinSize.Common = 5
+Rochenoire.Flexible.Core.MinSize.Instance = 2
+Rochenoire.Flexible.Core.MinSize.Raid = 5
+Rochenoire.Flexible.Core.MinSize.Battleground = 5
+Rochenoire.Flexible.Core.MinSize.Arena = 5
+Rochenoire.SmartLoot.Enabled = 1
+Rochenoire.SmartLoot.Amount = 4
+Rate.Weight.Item.Poor = 1.0
+Rate.Weight.Item.Normal = 1.0
+Rate.Weight.Item.Uncommon = 1.0
+Rate.Weight.Item.Rare = 1.0
+Rate.Weight.Item.Epic = 1.0
+Rate.Weight.Item.Legendary = 1.0
+Rate.Weight.Item.Artifact = 1.0
+Calculate.Creature.Zone.Area.Data = 0
+Calculate.Gameoject.Zone.Area.Data = 0
+SummoningRitual.ReqParticipants = 1
+SummoningRitual.AllowSelfUse = 1
+
+###################################################################################################################
 # SERVER LOGGING
 #
 #    LogSQL
@@ -537,6 +665,10 @@ LogColors = ""
 #    StartPlayerLevel
 #        Staring level that have character at creating (in range 1 to MaxPlayerLevel)
 #        Default: 1
+#
+#    StartPlayerILevel
+#        Starting ilevel that have character at creating (in range 1 to MaxPlayerLevel)
+#        Default: 5
 #
 #    StartPlayerMoney
 #        Amount of money that new players will start with.
@@ -1283,6 +1415,7 @@ Visibility.AIRelocationNotifyDelay = 1000
 #    Rate.Drop.Item.Legendary
 #    Rate.Drop.Item.Artifact
 #    Rate.Drop.Item.Referenced
+#    Rate.Drop.Item.ReferencedAmount
 #    Rate.Drop.Item.Quest
 #    Rate.Drop.Money
 #        Drop rates (items by quality and money)
@@ -1432,6 +1565,7 @@ Rate.Drop.Item.Epic = 1
 Rate.Drop.Item.Legendary = 1
 Rate.Drop.Item.Artifact = 1
 Rate.Drop.Item.Referenced = 1
+Rate.Drop.Item.ReferencedAmount = 1
 Rate.Drop.Item.Quest = 1
 Rate.Drop.Money = 1
 Rate.Pet.XP.Kill = 1

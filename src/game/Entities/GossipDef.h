@@ -283,7 +283,7 @@ class PlayerMenu
         uint32 GossipOptionAction(unsigned int Selection);
         bool GossipOptionCoded(unsigned int Selection);
 
-        void SendGossipMenu(uint32 TitleTextId, ObjectGuid objectGuid);
+        void SendGossipMenu(uint32 TitleTextId, ObjectGuid objectGuid, Player* pPlayer = nullptr); //Rochenoire RCS
         void CloseGossip() const;
         void SendPointOfInterest(float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const char* locName) const;
         void SendPointOfInterest(uint32 poi_id) const;
@@ -293,12 +293,12 @@ class PlayerMenu
         /*********************************************************/
         void SendQuestGiverStatus(uint8 questStatus, ObjectGuid npcGUID) const;
 
-        void SendQuestGiverQuestList(QEmote eEmote, const std::string& Title, ObjectGuid npcGUID);
+        void SendQuestGiverQuestList(QEmote eEmote, const std::string& Title, ObjectGuid npcGUID, const Player* pPlayer = nullptr); //Rochenoire RCS
+         
+        void SendQuestQueryResponse(Player const* pPlayer, Quest const* pQuest) const;
+        void SendQuestGiverQuestDetails(Player const* pPlayer, Quest const* pQuest, ObjectGuid guid, bool ActivateAccept) const;
 
-        void SendQuestQueryResponse(Quest const* pQuest) const;
-        void SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid, bool ActivateAccept) const;
-
-        void SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGUID, bool EnableNext) const;
-        void SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcGUID, bool Completable, bool CloseOnCancel) const;
+        void SendQuestGiverOfferReward(Player const* pPlayer, Quest const* pQuest, ObjectGuid npcGUID, bool EnableNext) const;
+        void SendQuestGiverRequestItems(Player const* pPlayer, Quest const* pQuest, ObjectGuid npcGUID, bool Completable, bool CloseOnCancel) const;
 };
 #endif

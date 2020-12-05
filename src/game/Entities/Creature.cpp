@@ -166,8 +166,30 @@ void Creature::CleanupsBeforeDelete()
 void Creature::AddToWorld()
 {
     ///- Register the creature for guid lookup
-    if (!IsInWorld() && GetObjectGuid().GetHigh() == HIGHGUID_UNIT)
+    /*if (!IsInWorld() && GetObjectGuid().GetHigh() == HIGHGUID_UNIT)
         GetMap()->GetObjectsStore().insert<Creature>(GetObjectGuid(), (Creature*)this);
+        */
+
+    //Rochenoire start RCS
+    
+    if (!IsInWorld() && GetObjectGuid().GetHigh() == HIGHGUID_UNIT)
+	{
+		//uint32 mapType = GetMap()->GetMapEntry() ? GetMap()->GetMapEntry()->map_type : 0;
+        /*if (mapType > 0 && mapType <= sWorld.getConfig(CONFIG_UINT32_FLEXIBLE_CORE_MAPTYPE))
+			GetMap()->InsertCreature(GetGUIDLow(), (Creature*)this);*/
+
+		GetMap()->GetObjectsStore().insert<Creature>(GetObjectGuid(), (Creature*)this);
+	}
+
+    if (sWorld.getConfig(CONFIG_BOOL_CALCULATE_CREATURE_ZONE_AREA_DATA))
+    {
+        uint32 zone_id, area_id;
+        GetZoneAndAreaId(zone_id, area_id);
+        WorldDatabase.PExecute("UPDATE creature SET zoneId = %u, areaId = %u WHERE guid = %u", zone_id, area_id, GetGUIDLow());
+    }
+
+    //Rochenoire end
+
 
     switch (GetSubtype())
     {
@@ -208,6 +230,19 @@ void Creature::RemoveFromWorld()
     {
         if (GetObjectGuid().GetHigh() == HIGHGUID_UNIT)
             GetMap()->GetObjectsStore().erase<Creature>(GetObjectGuid(), (Creature*)nullptr);
+
+        //Rochenoire start
+        /*
+        if (GetObjectGuid().GetHigh() == HIGHGUID_UNIT)
+        {
+            uint32 mapType = GetMap()->GetMapEntry() ? GetMap()->GetMapEntry()->map_type : 0;
+            if (mapType > 0 && mapType <= sWorld.getConfig(CONFIG_UINT32_FLEXIBLE_CORE_MAPTYPE))
+                GetMap()->EraseCreature(GetGUIDLow(), (Creature*)this);
+
+            GetMap()->GetObjectsStore().erase<Creature>(GetObjectGuid(), (Creature*)nullptr);
+        }
+        */
+        //Rochenoire end
 
         switch (GetSubtype())
         {
@@ -886,15 +921,15 @@ bool Creature::IsTrainerOf(Player* pPlayer, bool msg) const
                     pPlayer->PlayerTalkClass->ClearMenus();
                     switch (GetCreatureInfo()->TrainerClass)
                     {
-                        case CLASS_DRUID:  pPlayer->PlayerTalkClass->SendGossipMenu(4913, GetObjectGuid()); break;
-                        case CLASS_HUNTER: pPlayer->PlayerTalkClass->SendGossipMenu(10090, GetObjectGuid()); break;
-                        case CLASS_MAGE:   pPlayer->PlayerTalkClass->SendGossipMenu(328, GetObjectGuid()); break;
-                        case CLASS_PALADIN: pPlayer->PlayerTalkClass->SendGossipMenu(1635, GetObjectGuid()); break;
-                        case CLASS_PRIEST: pPlayer->PlayerTalkClass->SendGossipMenu(4436, GetObjectGuid()); break;
-                        case CLASS_ROGUE:  pPlayer->PlayerTalkClass->SendGossipMenu(4797, GetObjectGuid()); break;
-                        case CLASS_SHAMAN: pPlayer->PlayerTalkClass->SendGossipMenu(5003, GetObjectGuid()); break;
-                        case CLASS_WARLOCK: pPlayer->PlayerTalkClass->SendGossipMenu(5836, GetObjectGuid()); break;
-                        case CLASS_WARRIOR: pPlayer->PlayerTalkClass->SendGossipMenu(4985, GetObjectGuid()); break;
+                        case CLASS_DRUID:  pPlayer->PlayerTalkClass->SendGossipMenu(4913, GetObjectGuid(), pPlayer); break;  //RCS
+                        case CLASS_HUNTER: pPlayer->PlayerTalkClass->SendGossipMenu(10090, GetObjectGuid(), pPlayer); break;  //RCS
+                        case CLASS_MAGE:   pPlayer->PlayerTalkClass->SendGossipMenu(328, GetObjectGuid(), pPlayer); break;  //RCS
+                        case CLASS_PALADIN: pPlayer->PlayerTalkClass->SendGossipMenu(1635, GetObjectGuid(), pPlayer); break;  //RCS
+                        case CLASS_PRIEST: pPlayer->PlayerTalkClass->SendGossipMenu(4436, GetObjectGuid(), pPlayer); break;  //RCS
+                        case CLASS_ROGUE:  pPlayer->PlayerTalkClass->SendGossipMenu(4797, GetObjectGuid(), pPlayer); break;  //RCS
+                        case CLASS_SHAMAN: pPlayer->PlayerTalkClass->SendGossipMenu(5003, GetObjectGuid(), pPlayer); break;  //RCS
+                        case CLASS_WARLOCK: pPlayer->PlayerTalkClass->SendGossipMenu(5836, GetObjectGuid(), pPlayer); break;  //RCS
+                        case CLASS_WARRIOR: pPlayer->PlayerTalkClass->SendGossipMenu(4985, GetObjectGuid(), pPlayer); break;  //RCS
                     }
                 }
                 return false;
@@ -906,7 +941,7 @@ bool Creature::IsTrainerOf(Player* pPlayer, bool msg) const
                 if (msg)
                 {
                     pPlayer->PlayerTalkClass->ClearMenus();
-                    pPlayer->PlayerTalkClass->SendGossipMenu(3620, GetObjectGuid());
+                    pPlayer->PlayerTalkClass->SendGossipMenu(3620, GetObjectGuid(), pPlayer);  //RCS
                 }
                 return false;
             }
@@ -926,14 +961,14 @@ bool Creature::IsTrainerOf(Player* pPlayer, bool msg) const
                     pPlayer->PlayerTalkClass->ClearMenus();
                     switch (GetCreatureInfo()->TrainerClass)
                     {
-                        case RACE_DWARF:        pPlayer->PlayerTalkClass->SendGossipMenu(5865, GetObjectGuid()); break;
-                        case RACE_GNOME:        pPlayer->PlayerTalkClass->SendGossipMenu(4881, GetObjectGuid()); break;
-                        case RACE_HUMAN:        pPlayer->PlayerTalkClass->SendGossipMenu(5861, GetObjectGuid()); break;
-                        case RACE_NIGHTELF:     pPlayer->PlayerTalkClass->SendGossipMenu(5862, GetObjectGuid()); break;
-                        case RACE_ORC:          pPlayer->PlayerTalkClass->SendGossipMenu(5863, GetObjectGuid()); break;
-                        case RACE_TAUREN:       pPlayer->PlayerTalkClass->SendGossipMenu(5864, GetObjectGuid()); break;
-                        case RACE_TROLL:        pPlayer->PlayerTalkClass->SendGossipMenu(5816, GetObjectGuid()); break;
-                        case RACE_UNDEAD:       pPlayer->PlayerTalkClass->SendGossipMenu(624, GetObjectGuid()); break;
+                        case RACE_DWARF:        pPlayer->PlayerTalkClass->SendGossipMenu(5865, GetObjectGuid(), pPlayer); break; //RCS
+                        case RACE_GNOME:        pPlayer->PlayerTalkClass->SendGossipMenu(4881, GetObjectGuid(), pPlayer); break; //RCS
+                        case RACE_HUMAN:        pPlayer->PlayerTalkClass->SendGossipMenu(5861, GetObjectGuid(), pPlayer); break; //RCS
+                        case RACE_NIGHTELF:     pPlayer->PlayerTalkClass->SendGossipMenu(5862, GetObjectGuid(), pPlayer); break; //RCS
+                        case RACE_ORC:          pPlayer->PlayerTalkClass->SendGossipMenu(5863, GetObjectGuid(), pPlayer); break; //RCS
+                        case RACE_TAUREN:       pPlayer->PlayerTalkClass->SendGossipMenu(5864, GetObjectGuid(), pPlayer); break; //RCS
+                        case RACE_TROLL:        pPlayer->PlayerTalkClass->SendGossipMenu(5816, GetObjectGuid(), pPlayer); break; //RCS
+                        case RACE_UNDEAD:       pPlayer->PlayerTalkClass->SendGossipMenu(624, GetObjectGuid(), pPlayer); break; //RCS
                     }
                 }
                 return false;
@@ -945,7 +980,7 @@ bool Creature::IsTrainerOf(Player* pPlayer, bool msg) const
                 if (msg)
                 {
                     pPlayer->PlayerTalkClass->ClearMenus();
-                    pPlayer->PlayerTalkClass->SendGossipMenu(11031, GetObjectGuid());
+                    pPlayer->PlayerTalkClass->SendGossipMenu(11031, GetObjectGuid(), pPlayer); //RCS
                 }
                 return false;
             }
@@ -973,9 +1008,9 @@ bool Creature::CanInteractWithBattleMaster(Player* pPlayer, bool msg) const
         pPlayer->PlayerTalkClass->ClearMenus();
         switch (bgTypeId)
         {
-            case BATTLEGROUND_AV:  pPlayer->PlayerTalkClass->SendGossipMenu(7616, GetObjectGuid()); break;
-            case BATTLEGROUND_WS:  pPlayer->PlayerTalkClass->SendGossipMenu(7599, GetObjectGuid()); break;
-            case BATTLEGROUND_AB:  pPlayer->PlayerTalkClass->SendGossipMenu(7642, GetObjectGuid()); break;
+            case BATTLEGROUND_AV:  pPlayer->PlayerTalkClass->SendGossipMenu(7616, GetObjectGuid(), pPlayer); break;  //RCS
+            case BATTLEGROUND_WS:  pPlayer->PlayerTalkClass->SendGossipMenu(7599, GetObjectGuid(), pPlayer); break;  //RCS
+            case BATTLEGROUND_AB:  pPlayer->PlayerTalkClass->SendGossipMenu(7642, GetObjectGuid(), pPlayer); break;  //RCS
             default: break;
         }
         return false;
@@ -1166,6 +1201,8 @@ void Creature::SaveToDB(uint32 mapid)
        << GetGUIDLow() << ","
        << data.id << ","
        << data.mapid << ","
+       << GetZoneId() << ","  //RCS
+       << GetAreaId() << ","  //RCS
        << data.modelid_override << ","
        << data.equipmentId << ","
        << data.posX << ","
@@ -1201,6 +1238,37 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
 
     if (level == USE_DEFAULT_DATABASE_LEVEL)
         level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
+
+    //Rochenoire Start Creature scaling
+    // 
+    if (CreatureDataAddon const* cainfo = GetCreatureAddon())
+    {
+        int lvar = 0;
+        if (cainfo->lvar != 0)
+            lvar = cainfo->lvar;
+
+        // keep relative difficulty
+        if (CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow()))
+        {
+            if (minlevel > DEFAULT_MAX_LEVEL)
+                lvar += (minlevel - DEFAULT_MAX_LEVEL);
+            else
+            {
+                if (rand() % 2 == 0)
+                    lvar += (maxlevel - level);
+                else
+                    lvar += (minlevel - level);
+            }
+        }
+
+        // temporary
+        lvar = std::max(-3, lvar);
+        lvar = std::min(3, lvar);
+
+        SetLevelVar(lvar);
+    }
+    
+    //Rochenoire End Creature scaling
 
     SetLevel(level);
 
@@ -1444,6 +1512,13 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
         sLog.outErrorDb("Creature (GUID: %u) not found in table `creature`, can't load. ", guidlow);
         return false;
     }
+
+    //Rochenoire start ?PaSy?
+    /*
+    if (data->spawnFlags & SPAWN_FLAG_DISABLED)
+        return false;
+        */
+    //Rochenoire
 
     uint32 entry = data->id;
 
@@ -1709,6 +1784,10 @@ void Creature::Respawn()
             GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), 0);
         m_respawnTime = time(nullptr);                         // respawn at next tick
     }
+
+    //Rochenoire start FRSys  ??
+    //RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SCALED);
+    //Rochenoire end
 }
 
 void Creature::ForcedDespawn(uint32 timeMSToDespawn, bool onlyAlive)
@@ -2419,6 +2498,8 @@ void Creature::ResetRespawnCoord()
     }
 }
 
+//Rochenoire start
+/*
 uint32 Creature::GetLevelForTarget(Unit const* target) const
 {
     if (!IsWorldBoss())
@@ -2431,6 +2512,8 @@ uint32 Creature::GetLevelForTarget(Unit const* target) const
         return 255;
     return level;
 }
+*/
+//Rochenoire end
 
 std::string Creature::GetAIName() const
 {

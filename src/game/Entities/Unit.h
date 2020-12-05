@@ -48,6 +48,10 @@
 #include <list>
 #include <array>
 
+//Rochenoire start
+#define WORLD_TRIGGER   12999  //RCS
+//Rochenoire end
+
 enum SpellInterruptFlags
 {
     SPELL_INTERRUPT_FLAG_MOVEMENT     = 0x01,
@@ -835,10 +839,11 @@ inline const char* UnitCombatDieSideText(UnitCombatDieSide side)
 
 struct CleanDamage
 {
-    CleanDamage(uint32 _damage, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome) :
-        damage(_damage), attackType(_attackType), hitOutCome(_hitOutCome) {}
+    CleanDamage(uint32 _damage, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome,/*RCS*/ bool _isScaled = false) :
+        damage(_damage), attackType(_attackType), hitOutCome(_hitOutCome),/*RCS*/ isScaled(_isScaled) {}
 
     uint32 damage; // only used for rage generation
+    bool isScaled; //RCS
     WeaponAttackType attackType;
     MeleeHitOutcome hitOutCome;
 };
@@ -874,9 +879,9 @@ struct CalcDamageInfo
 // Spell damage info structure based on structure sending in SMSG_SPELLNONMELEEDAMAGELOG opcode
 struct SpellNonMeleeDamage
 {
-    SpellNonMeleeDamage(Unit* _attacker, Unit* _target, uint32 _SpellID, SpellSchools _school)
+    SpellNonMeleeDamage(Unit* _attacker, Unit* _target, uint32 _SpellID, SpellSchools _school,/*RCS*/ Spell* _spell = nullptr, bool _scaled = false)
         : target(_target), attacker(_attacker), SpellID(_SpellID), damage(0), school(_school),
-          absorb(0), resist(0), periodicLog(false), unused(false), blocked(0), HitInfo(0)
+          absorb(0), resist(0), periodicLog(false), unused(false), blocked(0), HitInfo(0),/*RCS*/ spell(_spell), scaled(_scaled)
     {}
 
     Unit*   target;
@@ -890,18 +895,21 @@ struct SpellNonMeleeDamage
     bool   unused;
     uint32 blocked;
     uint32 HitInfo;
+    Spell* spell;  //RCS
+    bool scaled; //RCS
 };
 
 struct SpellPeriodicAuraLogInfo
 {
-    SpellPeriodicAuraLogInfo(Aura* _aura, uint32 _damage, uint32 _absorb, int32 _resist, float _multiplier)
-        : aura(_aura), damage(_damage), absorb(_absorb), resist(_resist), multiplier(_multiplier) {}
+    SpellPeriodicAuraLogInfo(Aura* _aura, uint32 _damage, uint32 _absorb, int32 _resist, float _multiplier,/*RCS*/ bool _scaled = false)
+        : aura(_aura), damage(_damage), absorb(_absorb), resist(_resist), multiplier(_multiplier),/*RCS*/ scaled(_scaled) {}
 
     Aura*   aura;
     uint32 damage;
     uint32 absorb;
     int32 resist;
     float  multiplier;
+    bool scaled; /*RCS*/
 };
 
 uint32 createProcExtendMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missCondition);
@@ -1428,10 +1436,16 @@ class Unit : public WorldObject
         void clearUnitState(uint32 f) { m_state &= ~f; }
         bool CanFreeMove() const { return !hasUnitState(UNIT_STAT_NO_FREE_MOVE) && !GetOwnerGuid(); }
 
-        virtual uint32 GetLevelForTarget(Unit const* /*target*/) const { return getLevel(); }
+        virtual uint32 GetLevelForTarget(Unit const* /*target*/) const; //Rochenoire { return getLevel(); }
         bool IsTrivialForTarget(Unit const* pov) const;
 
         void SetLevel(uint32 lvl);
+
+        //Rochenoire RCS
+        bool hasZoneLevel(uint32 AreaID = 0) const;
+        uint32 getZoneLevel(uint32 AreaID = 0) const;
+        //Rochenoire RCS
+
 
         uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
         uint8 getRace() const { return GetByteValue(UNIT_FIELD_BYTES_0, 0); }
@@ -1562,14 +1576,67 @@ class Unit : public WorldObject
         virtual bool Mount(uint32 displayid, const Aura* aura = nullptr);
         virtual bool Unmount(const Aura* aura = nullptr);
 
+        //Rochenoire Custom start
+        
+        //Creature Scaling
+        int level_var = 0;
+        int GetLevelVar() const { return level_var; };
+        void SetLevelVar(int var) { level_var = var; };
+
+        //Item Scaling
+        /*
+        uint32 ilevel_avg = 5;
+        uint32 GetItemLevel() const { return ilevel_avg; };
+        void SetItemLevel(uint32 ilevel) { ilevel_avg = ilevel; };
+        */
+
+        //Flexible Core
+        
+        float instance_ratio_dmg        = 1.0f;
+        float instance_ratio_health     = 1.0f;
+        float instance_ratio_attacktime = 1.0f;
+        float instance_ratio_dps        = 1.0f;
+        int instance_number_adds        = 1;
+        int instance_number_adds_keep   = 1;
+        int instance_number_players     = 1;
+        int instance_number_tanks       = 1;
+        
+
+        //float GetInstanceDmg() const { return instance_ratio_dmg; };
+        //void SetInstanceDmg(float value) { instance_ratio_dmg = value; };
+
+        //float GetInstanceHealth() const { return instance_ratio_health; };
+        //void SetInstanceHealth(float value) { instance_ratio_health = value; };
+
+        //float GetInstanceAttackTime() const { return instance_ratio_attacktime; };
+        //void SetInstanceAttackTime(float value) { instance_ratio_attacktime = value; };
+
+        float GetInstanceDps() const { return instance_ratio_dps; };
+        void SetInstanceDps(float value) { instance_ratio_dps = value; };
+
+        int GetInstanceAdds() const { return instance_number_adds; };
+        void SetInstanceAdds(int value) { instance_number_adds = value; };
+
+        //int GetInstanceTanks() const { return instance_number_tanks; };
+        //void SetInstanceTanks(int value) { instance_number_tanks = value; };
+
+        int GetInstanceAddsKeep() const { return instance_number_adds_keep; };
+        void SetInstanceAddsKeep(int value) { instance_number_adds_keep = value; };
+
+        //int GetInstanceSize() const { return instance_number_players; };
+        //void SetInstanceSize(int value) { instance_number_players = value; };
+        
+
+        //Rochenoire Custom end
+
         uint16 GetSkillMaxForLevel(Unit const* target = nullptr) const { return (target ? GetLevelForTarget(target) : getLevel()) * 5; }
 
         void Suicide();
-        static void DealDamageMods(Unit* dealer, Unit* victim, uint32& damage, uint32* absorb, DamageEffectType damagetype, SpellEntry const* spellProto = nullptr);
-        static uint32 DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss);
-        int32 DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical = false);
+        static void DealDamageMods(Unit* dealer, Unit* victim, uint32& damage, uint32* absorb, DamageEffectType damagetype, SpellEntry const* spellProto = nullptr, bool isScaled = false);
+        static uint32 DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss, bool isScaled = false);
+        int32 DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical = false, bool isScaled = false);
         static void Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEntry const* spellProto, bool durabilityLoss, bool duel_hasEnded);
-        static void HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool duel_hasEnded);
+        static void HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool duel_hasEnded, bool isScaled = false);
         void InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype);
 
         void PetOwnerKilledUnit(Unit* pVictim);
@@ -1586,7 +1653,7 @@ class Unit : public WorldObject
         void CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, WeaponAttackType attackType = BASE_ATTACK);
         void DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss);
 
-        void CalculateSpellDamage(SpellNonMeleeDamage* spellDamageInfo, int32 damage, SpellEntry const* spellInfo, WeaponAttackType attackType = BASE_ATTACK);
+        void CalculateSpellDamage(SpellNonMeleeDamage* spellDamageInfo, int32 damage, SpellEntry const* spellInfo, WeaponAttackType attackType = BASE_ATTACK, Spell* spell = nullptr);
         void DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss);
 
         SpellMissInfo MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell, uint32* heartbeatResistChance = nullptr);
@@ -1773,8 +1840,8 @@ class Unit : public WorldObject
         virtual bool IsUnderwater() const;
         bool isInAccessablePlaceFor(Unit const* unit) const;
 
-        void EnergizeBySpell(Unit* victim, SpellEntry const* spellInfo, uint32 damage, Powers powerType);
-        uint32 SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage);
+        void EnergizeBySpell(Unit* victim, SpellEntry const* spellInfo, uint32 damage, Powers powerType, bool isScaled = false);
+        uint32 SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage, bool isScaled = false);
 
         SpellCastResult CastSpell(Unit* Victim, uint32 spellId, uint32 triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
         SpellCastResult CastSpell(Unit* Victim, SpellEntry const* spellInfo, uint32 triggeredFlags, Item* castItem = nullptr, Aura* triggeredByAura = nullptr, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
@@ -1818,9 +1885,9 @@ class Unit : public WorldObject
 
         void SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const;
         void SendAttackStateUpdate(uint32 HitInfo, Unit* target, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, int32 Resist, VictimState TargetState, uint32 BlockedAmount);
-        void SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype) const;
+        void SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype, bool isScaled = false) const;
         void SendEnvironmentalDamageLog(uint8 type, uint32 damage, uint32 absorb, int32 resist) const;
-        void SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, bool critical = false);
+        void SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, bool critical = false, bool isScaled = false);
         void SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log) const;
         void SendSpellNonMeleeDamageLog(Unit* target, uint32 spellID, uint32 damage, SpellSchoolMask damageSchoolMask, uint32 absorbedDamage, int32 resist, bool isPeriodic, uint32 blocked, bool criticalHit = false, bool split = false);
         void SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo) const;
@@ -2120,7 +2187,7 @@ class Unit : public WorldObject
 
         // Threat related methods
         bool CanHaveThreatList(bool ignoreAliveState = false) const;
-        void AddThreat(Unit* pVictim, float threat = 0.0f, bool crit = false, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NONE, SpellEntry const* threatSpell = nullptr);
+        void AddThreat(Unit* pVictim, float threat = 0.0f, bool crit = false, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NONE, SpellEntry const* threatSpell = nullptr, bool isScaled = false);
         float ApplyTotalThreatModifier(float threat, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NORMAL);
         void DeleteThreatList();
         bool SelectHostileTarget();
@@ -2204,14 +2271,14 @@ class Unit : public WorldObject
         int32 SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int32 benefit, int32 ap_benefit, DamageEffectType damagetype, bool donePart);
         int32 SpellBaseDamageBonusDone(SpellSchoolMask schoolMask);
         int32 SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask) const;
-        uint32 SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1);
-        uint32 SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1);
+        uint32 SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1, bool IsScaled = false);
+        uint32 SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1, bool IsScaled = false);
         int32 SpellBaseHealingBonusDone(SpellSchoolMask schoolMask);
         int32 SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask) const;
         uint32 SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack = 1);
         uint32 SpellHealingBonusTaken(Unit* caster, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack = 1);
-        uint32 MeleeDamageBonusDone(Unit* victim, uint32 damage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto = nullptr, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1, bool flat = true);
-        uint32 MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto = nullptr, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1, bool flat = true);
+        uint32 MeleeDamageBonusDone(Unit* victim, uint32 damage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto = nullptr, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1, bool flat = true, bool IsScaled = false);
+        uint32 MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto = nullptr, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1, bool flat = true, bool IsScaled = false);
 
         bool IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder* holder, SpellProcEventEntry const*& spellProcEvent);
         // only to be used in proc handlers - basepoints is expected to be a MAX_EFFECT_INDEX sized array
@@ -2258,8 +2325,8 @@ class Unit : public WorldObject
         bool IsImmuneToSchool(SpellEntry const* spellInfo, uint8 effectMask) const;
 
         float CalcArmorReducedDamage(Unit* pVictim, const float damage);
-        void CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, int32* resist, bool canReflect = false, bool canResist = true, bool binary = false);
-        void CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* spellDamageInfo, SpellEntry const* spellProto, WeaponAttackType attType = BASE_ATTACK);
+        void CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, int32* resist, bool canReflect = false, bool canResist = true, bool binary = false, Spell* spell = nullptr, bool isScaled = false);
+        void CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* spellDamageInfo, SpellEntry const* spellProto, WeaponAttackType attType = BASE_ATTACK, Spell* spell = nullptr);
 
         void  UpdateSpeed(UnitMoveType mtype, bool forced, float ratio = 1.0f);
         float GetSpeedInMotion() const;

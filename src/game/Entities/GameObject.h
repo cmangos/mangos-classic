@@ -581,6 +581,7 @@ struct GameObjectData
     uint16 GuidPoolId;
     uint16 EntryPoolId;
     uint16 OriginalZoneId;
+    uint32 spawnFlags; //Rochenoire
 
     uint32 GetRandomRespawnTime() const { return urand(uint32(spawntimesecsmin), uint32(spawntimesecsmax)); }
 
@@ -718,6 +719,13 @@ class GameObject : public WorldObject
         float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
 
         void Use(Unit* user);
+
+        //Rochenoire start 
+        void CastSpell(Unit* target, uint32 spell, bool triggered = true);
+        void CastSpell(Unit* target, uint32 spell, TriggerCastFlags triggered);
+        //Rochenoire end
+
+
 
         LootState GetLootState() const { return m_lootState; }
         void SetLootState(LootState state);

@@ -211,7 +211,7 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recv_data)
     }
 
     if (Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest))
-        _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetObjectGuid(), true);
+        _player->PlayerTalkClass->SendQuestGiverQuestDetails(_player, pQuest, pObject->GetObjectGuid(), true);
 }
 
 void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
@@ -223,7 +223,7 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
     Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest);
     if (pQuest)
     {
-        _player->PlayerTalkClass->SendQuestQueryResponse(pQuest);
+        _player->PlayerTalkClass->SendQuestQueryResponse(_player,pQuest);
     }
 }
 
@@ -260,10 +260,10 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recv_data)
 
             // Send next quest
             if (Quest const* nextquest = _player->GetNextQuest(guid, pQuest))
-                _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextquest, guid, true);
+                _player->PlayerTalkClass->SendQuestGiverQuestDetails(_player,nextquest, guid, true);
         }
         else
-            _player->PlayerTalkClass->SendQuestGiverOfferReward(pQuest, guid, true);
+            _player->PlayerTalkClass->SendQuestGiverOfferReward(_player,pQuest, guid, true);
     }
 }
 
@@ -289,7 +289,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode(WorldPacket& recv_data)
         return;
 
     if (Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest))
-        _player->PlayerTalkClass->SendQuestGiverOfferReward(pQuest, guid, true);
+        _player->PlayerTalkClass->SendQuestGiverOfferReward(_player,pQuest, guid, true);
 }
 
 void WorldSession::HandleQuestgiverCancel(WorldPacket& /*recv_data*/)
@@ -391,12 +391,12 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recv_data)
         if (_player->GetQuestStatus(quest) != QUEST_STATUS_COMPLETE)
         {
             if (pQuest->IsRepeatable())
-                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanCompleteRepeatableQuest(pQuest), false);
+                _player->PlayerTalkClass->SendQuestGiverRequestItems(_player, pQuest, guid, _player->CanCompleteRepeatableQuest(pQuest), false);
             else
-                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
+                _player->PlayerTalkClass->SendQuestGiverRequestItems(_player, pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
         }
         else
-            _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
+            _player->PlayerTalkClass->SendQuestGiverRequestItems(_player, pQuest, guid, _player->CanRewardQuest(pQuest, false), false);
     }
 }
 
@@ -468,7 +468,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
                 }
 
 #ifndef BUILD_PLAYERBOT
-                pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, _player->GetObjectGuid(), true);
+                pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails(_player, pQuest, _player->GetObjectGuid(), true);
 #endif
                 pPlayer->SetDividerGuid(_player->GetObjectGuid());
 

@@ -521,6 +521,11 @@ class ChatHandler
         bool HandleReloadGOQuestInvRelationsCommand(char* args);
         bool HandleReloadItemEnchantementsCommand(char* args);
         bool HandleReloadItemRequiredTragetCommand(char* args);
+
+        //Rochenoire FlexRaidSys and RCS
+        bool HandleReloadZoneFlexCommand(char* args);
+        //Rochenoire end
+
         bool HandleReloadLocalesCreatureCommand(char* args);
         bool HandleReloadLocalesGameobjectCommand(char* args);
         bool HandleReloadLocalesGossipMenuOptionCommand(char* args);

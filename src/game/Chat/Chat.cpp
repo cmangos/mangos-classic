@@ -628,6 +628,10 @@ ChatCommand* ChatHandler::getCommandTable()
         { "taxi_shortcuts",              SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadTaxiShortcuts,              "", nullptr },
         { "trainer_greeting",            SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadTrainerGreetingCommand,         "", nullptr },
 
+        //Rochenoire
+        { "scale_zone",				     SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadZoneFlexCommand,                "", nullptr },
+        //Rochenoire end
+
         { nullptr,                       0,                 false, nullptr,                                                  "", nullptr }
     };
 

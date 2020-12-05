@@ -387,6 +387,11 @@ class Spell
         SpellCastResult CheckCast(bool strict);
         SpellCastResult CheckPetCast(Unit* target);
 
+        //Rochenoire scaling start
+        bool EffectScaled[MAX_EFFECT_INDEX] = { false };
+        bool IsScaled() { for (int i = 0; i < MAX_EFFECT_INDEX; i++) { if (EffectScaled[i]) return true; }  return false; };
+        //Rochenoire scaling end
+
         // handlers
         void handle_immediate();
         uint64 handle_delayed(uint64 t_offset);
@@ -399,8 +404,8 @@ class Spell
         SpellCastResult CheckPower(bool strict);
         SpellCastResult CheckCasterAuras() const;
 
-        int32 CalculateSpellEffectValue(SpellEffectIndex i, Unit* target) { return m_caster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i]); }
-        int32 CalculateSpellEffectDamage(Unit* unitTarget, int32 damage);
+        int32 CalculateSpellEffectValue(SpellEffectIndex i, Unit* target) { return m_caster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i], (Spell*)this); } //RCS
+        int32 CalculateSpellEffectDamage(Unit* unitTarget, int32 damage);  
         static uint32 CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell* spell = nullptr, Item* castItem = nullptr, bool finalUse = false);
 
         bool HaveTargetsForEffect(SpellEffectIndex effect) const;
@@ -478,6 +483,10 @@ class Spell
         bool IsMeleeAttackResetSpell() const { return !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT);  }
         bool IsRangedAttackResetSpell() const { return !m_IsTriggeredSpell && IsRangedSpell() && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT); }
         bool IsEffectWithImplementedMultiplier(uint32 effectId) const;
+
+        //Rochenoire start RCS
+        bool IsReferencedFromCurrent() const { return m_referencedFromCurrentSpell; }
+        //Rochenoire end RCS
 
         bool IsDeletable() const { return !m_referencedFromCurrentSpell && !m_executedCurrently; }
         void SetReferencedFromCurrent(bool yes) { m_referencedFromCurrentSpell = yes; }

@@ -91,6 +91,15 @@ void GameObject::AddToWorld()
     if (m_model)
         GetMap()->InsertGameObjectModel(*m_model);
 
+    //Rochenoire RCS : Zone ID and Area ID
+    if (sWorld.getConfig(CONFIG_BOOL_CALCULATE_GAMEOBJECT_ZONE_AREA_DATA))
+    {
+        uint32 zone_id, area_id;
+        GetZoneAndAreaId(zone_id, area_id);
+        WorldDatabase.PExecute("UPDATE gameobject SET zoneId = %u, areaId = %u WHERE guid = %u", zone_id, area_id, GetGUIDLow());
+    }
+    //Rochenoire end
+
     WorldObject::AddToWorld();
 
     // After Object::AddToWorld so that for initial state the GO is added to the world (and hence handled correctly)
@@ -737,6 +746,8 @@ void GameObject::SaveToDB(uint32 mapid) const
        << GetGUIDLow() << ", "
        << GetEntry() << ", "
        << mapid << ", "
+       << GetZoneId() << ","  //RCS
+       << GetAreaId() << ","  //RCS
        << GetFloatValue(GAMEOBJECT_POS_X) << ", "
        << GetFloatValue(GAMEOBJECT_POS_Y) << ", "
        << GetFloatValue(GAMEOBJECT_POS_Z) << ", "
@@ -1202,6 +1213,59 @@ void GameObject::SwitchDoorOrButton(bool activate, bool alternative /* = false *
         SetGoState(GO_STATE_READY);
 }
 
+//Rochenoire start ??RCS??
+void GameObject::CastSpell(Unit* target, uint32 spellId, bool triggered /* = true*/)
+{
+    CastSpell(target, spellId, triggered ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
+}
+
+void GameObject::CastSpell(Unit* target, uint32 spellId, TriggerCastFlags triggered)
+{
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+    if (!spellInfo)
+        return;
+
+    bool self = false;
+
+    for (uint8 j = 0; j < 3; ++j)
+        if (spellInfo->EffectImplicitTargetA[j] == TARGET_UNIT_CASTER)
+            self = true;
+
+    if (self)
+    {
+        if (target)
+            target->CastSpell(target, spellInfo, triggered);
+        return;
+    }
+
+    //summon world trigger
+    Creature* trigger = SummonTrigger(GetPositionX(), GetPositionY(), GetPositionZ(), 0, GetSpellCastTime(spellInfo, nullptr) + 100);
+    if (!trigger)
+        return;
+
+    // remove immunity flags, to allow spell to target anything
+    trigger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+
+    if (Unit* owner = GetOwner())
+    {
+        trigger->setFaction(owner->getFaction());
+        if (owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP))
+            trigger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+        // needed for GO casts for proper target validation checks
+        trigger->SetOwnerGuid(owner->GetObjectGuid());
+        trigger->CastSpell(target ? target : trigger, spellInfo, triggered, nullptr, nullptr, owner->GetObjectGuid());
+    }
+    else
+    {
+        trigger->setFaction(IsPositiveSpell(spellInfo->Id) ? 35 : 14);
+        // Set owner guid for target if no owner available - needed by trigger auras
+        // - trigger gets despawned and there's no caster avalible (see AuraEffect::TriggerSpell())
+        trigger->CastSpell(target ? target : trigger, spellInfo, triggered, nullptr, nullptr, target ? target->GetObjectGuid() : GetObjectGuid());
+    }
+}
+
+//Rochenoire end
+
 void GameObject::Use(Unit* user)
 {
     // user must be provided
@@ -1326,8 +1390,11 @@ void GameObject::Use(Unit* user)
 
             // FIXME: when GO casting will be implemented trap must cast spell to target
             if (goInfo->trap.spellId)
-                if (caster->CastSpell(user, goInfo->trap.spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid()) != SPELL_CAST_OK)
-                    return;
+                CastSpell(user, goInfo->trap.spellId, TRIGGERED_OLD_TRIGGERED);
+
+
+                // Rochenoire G :if (caster->CastSpell(user, goInfo->trap.spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid()) != SPELL_CAST_OK) 
+                // Rochenoire G :     return;
             // use template cooldown if provided
             m_cooldownTime = time(nullptr) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));
 
@@ -1629,6 +1696,8 @@ void GameObject::Use(Unit* user)
                     return;
 
                 // accept only use by player from same group as owner, excluding owner itself (unique use already added in spell effect)
+                //bool AllowSelf = sWorld.getConfig(CONFIG_BOOL_SUMMONINGRITUAL_ALLOW_SELF); //Rochenoire
+                //if ((player == (Player*)owner && !AllowSelf) || (info->summoningRitual.castersGrouped && !player->IsInGroup(owner))) //Rochenoire
                 if (player == (Player*)owner || (info->summoningRitual.castersGrouped && !player->IsInGroup(owner)))
                     return;
 
@@ -1711,12 +1780,20 @@ void GameObject::Use(Unit* user)
 
             // required lvl checks!
             uint8 level = player->getLevel();
+            //Rochenoire RCS
+            if (player && !player->hasZoneLevel(info->meetingstone.areaID))
+                return;
+            //Rochenoire end
+
+            //G : 
+            /*
             if (level < info->meetingstone.minLevel || level > info->meetingstone.maxLevel)
                 return;
 
             level = targetPlayer->getLevel();
             if (level < info->meetingstone.minLevel || level > info->meetingstone.maxLevel)
                 return;
+                */
 
             spellId = 23598;
 

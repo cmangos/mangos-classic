@@ -255,6 +255,7 @@ enum SplineFlags
 struct CreatureDataAddon
 {
     uint32 guidOrEntry;
+    uint32 lvar;                                            //Rochenoire Level variation
     uint32 mount;
     uint32 bytes1;
     uint8  sheath_state;                                    // SheathState
@@ -661,7 +662,7 @@ class Creature : public Unit
             return GetCreatureInfo()->Rank == CREATURE_ELITE_WORLDBOSS;
         }
 
-        uint32 GetLevelForTarget(Unit const* target) const override; // overwrite Unit::GetLevelForTarget for boss level support
+        //uint32 GetLevelForTarget(Unit const* target) const override; // overwrite Unit::GetLevelForTarget for boss level support
 
         bool AIM_Initialize();
 

@@ -215,6 +215,47 @@ typedef std::pair<ExclusiveQuestGroupsMap::const_iterator, ExclusiveQuestGroupsM
 typedef std::pair<ItemRequiredTargetMap::const_iterator, ItemRequiredTargetMap::const_iterator> ItemRequiredTargetMapBounds;
 typedef std::pair<QuestRelationsMap::const_iterator, QuestRelationsMap::const_iterator> QuestRelationsMapBounds;
 
+//Rochenoire RCS and FlexRaidSys
+
+struct ZoneFlex
+{
+    std::string AreaName;
+    uint32 AreaID;
+    uint32 MapID;
+    uint32 ParentWorldMapID;
+    uint32 LevelRangeMin;
+    uint32 LevelRangeMax;
+};
+
+typedef std::unordered_map<uint32, CreatureLocale> CreatureLocaleMap;
+typedef std::unordered_map<uint32, GameObjectLocale> GameObjectLocaleMap;
+typedef std::unordered_map<uint32, ItemLocale> ItemLocaleMap;
+typedef std::unordered_map<uint32, QuestLocale> QuestLocaleMap;
+typedef std::unordered_map<uint32, uint32> CreaturePoolMap;
+typedef std::unordered_map<uint32, ZoneFlex> ZoneFlexMap;
+//typedef std::unordered_map<std::string, CreatureFlex> CreatureFlexMap;
+//typedef std::unordered_map<std::string, ItemLootScale> LootScaleMap;
+//typedef std::unordered_map<uint32, ItemLootScale> LootScaleParentingMap;
+typedef std::unordered_map<uint32, NpcTextLocale> NpcTextLocaleMap;
+typedef std::unordered_map<uint32, PageTextLocale> PageTextLocaleMap;
+typedef std::unordered_map<int32, MangosStringLocale> MangosStringLocaleMap;
+typedef std::unordered_map<uint32, GossipMenuItemsLocale> GossipMenuItemsLocaleMap;
+typedef std::unordered_map<uint32, PointOfInterestLocale> PointOfInterestLocaleMap;
+typedef std::unordered_map<uint32, AreaTriggerLocale> AreaTriggerLocaleMap;
+
+typedef std::multimap<int32, uint32> ExclusiveQuestGroupsMap;
+typedef std::multimap<uint32, ItemRequiredTarget> ItemRequiredTargetMap;
+typedef std::multimap<uint32, uint32> QuestRelationsMap;
+typedef std::pair<ExclusiveQuestGroupsMap::const_iterator, ExclusiveQuestGroupsMap::const_iterator> ExclusiveQuestGroupsMapBounds;
+typedef std::pair<ItemRequiredTargetMap::const_iterator, ItemRequiredTargetMap::const_iterator> ItemRequiredTargetMapBounds;
+typedef std::pair<QuestRelationsMap::const_iterator, QuestRelationsMap::const_iterator> QuestRelationsMapBounds;
+
+
+
+//Rochenoire end
+
+
+
 struct PetLevelInfo
 {
     PetLevelInfo() : health(0), mana(0), armor(0) { for (unsigned short& stat : stats) stat = 0; }
@@ -382,6 +423,17 @@ typedef std::unordered_map<uint32, uint32> CacheNpcTextIdMap;
 
 typedef std::unordered_map<uint32, VendorItemData> CacheVendorItemMap;
 typedef std::unordered_map<uint32, TrainerSpellData> CacheTrainerSpellMap;
+
+//Rochenoire RCS
+enum SpellType
+{
+    SPELLTYPE_UNK,
+    SPELLTYPE_DAMAGE,
+    SPELLTYPE_POWER,
+    SPELLTYPE_CHARSTAT,
+    SPELLTYPE_HEAL,
+};
+//Rochenoire end
 
 enum SkillRangeType
 {
@@ -686,6 +738,11 @@ class ObjectMgr
         void LoadItemPrototypes();
         void LoadItemRequiredTarget();
         void LoadItemLocales();
+
+        //Rochenoire FlexRaidSys and RCS
+        void LoadZoneScale();
+        //Rochenoire end
+
         void LoadQuestLocales();
         void LoadGossipTextLocales();
         void LoadQuestgiverGreeting();
@@ -861,6 +918,18 @@ class ObjectMgr
         }
 
         void GetItemLocaleStrings(uint32 entry, int32 loc_idx, std::string* namePtr, std::string* descriptionPtr = nullptr) const;
+
+        //Rochenoire Raid Flex and RCS
+        ZoneFlex const* GetZoneFlex(uint32 AreaID) const
+        {
+            ZoneFlexMap::const_iterator itr = mZoneFlexMap.find(AreaID);
+            if (itr == mZoneFlexMap.end()) return nullptr;
+            return &itr->second;
+        }
+
+
+        //Rochenoire end
+
 
         QuestLocale const* GetQuestLocale(uint32 entry) const
         {
@@ -1149,8 +1218,40 @@ class ObjectMgr
         * Qualifier: const
         **/
         CreatureClassLvlStats const* GetCreatureClassLvlStats(uint32 level, uint32 unitClass) const;
-    protected:
+    
 
+        //Rochnoire start
+            /**
+            Scaling functions
+            **/
+        SpellType GetSpellDamageType(SpellEntry const* spellProto, SpellEffectIndex eff_idx) const;
+        float ScaleDamage(Unit* owner, Unit* target, float damage) const { bool isScaled = false; return ScaleDamage(owner, target, damage, isScaled); };
+        float ScaleDamage(Unit* owner, Unit* target, float damage, bool& isScaled, SpellEntry const* spellProto = nullptr, SpellEffectIndex eff_idx = EFFECT_INDEX_0, bool isRevert = false) const;
+        uint32 ScaleArmor(Unit* owner, Unit* target, uint32 armor) const;
+        uint32 getLevelScaled(Unit* owner, Unit* target) const;
+        void ScaleGold(uint32 in_level, uint32 ou_level, uint32& mingold, uint32& maxgold) const;
+        bool IsScalable(Unit* owner, Unit* target) const;
+
+        bool isAuraSafe(uint32 EffectApplyAuraName) const;
+        bool isEffectRestricted(uint32 Effect) const;
+
+        int sign(int x) const { return (x > 0) - (x < 0); };
+
+        float GetSpellCoeffRatio(uint32 spellid) const;
+        uint32 GetScaleSpellTimer(Creature* creature, uint32 timer, uint32 spellid = 0) const;
+        float GetScaleSpellTimer(float Ratio_DPS, float Nadds, float FinalNAdds, float CoeffSpellRatio) const;
+        //float GetFactorNHT(float Nmax, float Np, float f_softness, float NT) const;
+        //float GetFactorNHR(float Nmax, float Np, float NT, float f_ratio_heal_dps, float f_softness) const;
+        //float GetFactorHP(float Nmax, float Np, float NT, float f_ratio_heal_dps, float f_softness) const;
+        //float GetFactorNDPS(float Nmax, float Np, float NT, float f_ratio_heal_dps, float f_softness) const;
+        //float GetFactorDPS(float Nmax, float Np, float NT, float f_ratio_heal_dps, float f_softness, float Ratio_Bascule_HR_HT) const;
+        //float GetFactorAdds(float Nmax, float Np, float NT, float f_ratio_heal_dps, float f_softness, float Nadds, float MinAddShrinkDPS) const;
+
+
+
+        //Rochenoire end
+
+    protected:
         // first free id for selected id type
         IdGenerator<uint32> m_AuctionIds;
         IdGenerator<uint32> m_GuildIds;
@@ -1280,6 +1381,12 @@ class ObjectMgr
         GameObjectDataMap mGameObjectDataMap;
         GameObjectLocaleMap mGameObjectLocaleMap;
         ItemLocaleMap mItemLocaleMap;
+
+        //Rochenoire start
+        ZoneFlexMap mZoneFlexMap;
+
+        //Rochenoire end
+
         QuestLocaleMap mQuestLocaleMap;
         NpcTextLocaleMap mNpcTextLocaleMap;
         PageTextLocaleMap mPageTextLocaleMap;

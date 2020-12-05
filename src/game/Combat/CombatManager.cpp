@@ -20,6 +20,7 @@
 
 #include "Entities/Pet.h"
 #include "Maps/Map.h"
+#include "World/World.h"  //RCS
 
 CombatManager::CombatManager(Unit* owner) : m_owner(owner), m_evadeTimer(0), m_evadeState(EVADE_NONE), m_combatTimer(0), m_leashingDisabled(false), m_leashingCheck(nullptr)
 {
@@ -93,8 +94,9 @@ void CombatManager::Update(const uint32 diff)
                         Position pos;
                         creatureOwner->GetCombatStartPosition(pos);
                         // homebox not confirmed on classic
-                        if (creatureOwner->GetDistance2d(pos.GetPositionX(), pos.GetPositionY()) > 30.0f)
+                        if (creatureOwner->GetDistance2d(pos.GetPositionX(), pos.GetPositionY()) >  30.0f)
                             creatureOwner->HandleExitCombat();
+                        
                     }
                 }
             }

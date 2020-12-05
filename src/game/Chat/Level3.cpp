@@ -754,6 +754,17 @@ bool ChatHandler::HandleReloadItemRequiredTragetCommand(char* /*args*/)
     return true;
 }
 
+//Rochenoire FlexRaidSys and RCS
+
+bool ChatHandler::HandleReloadZoneFlexCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading Zone Scaling Details ... ");
+    sObjectMgr.LoadZoneScale();
+    SendSysMessage("DB table `scale_zone` reloaded.");
+    return true;
+}
+//Rochenoire end
+
 bool ChatHandler::HandleReloadBattleEventCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading BattleGround Eventindexes...");
@@ -2889,15 +2900,15 @@ bool ChatHandler::HandleDieCommand(char* args)
             DamageEffectType damageType = DIRECT_DAMAGE;
             uint32 absorb = 0;
             uint32 damage = target->GetHealth();
-            Unit::DealDamageMods(player, target, damage, &absorb, damageType);
-            Unit::DealDamage(player, target, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+            Unit::DealDamageMods(player, target, damage, &absorb, damageType, nullptr, true); //RCS
+            Unit::DealDamage(player, target, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false, true); //RCS
         }
     }
     else
     {
         if (target->IsAlive())
         {
-            Unit::DealDamage(player, target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+            Unit::DealDamage(player, target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false, true); //RCS
         }
     }
 
@@ -3263,7 +3274,8 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     std::string curCorpseDecayStr = secsToTimeString(std::chrono::system_clock::to_time_t(target->GetCorpseDecayTimer()), true);
 
     PSendSysMessage(LANG_NPCINFO_CHAR, target->GetGuidStr().c_str(), faction, npcflags, Entry, displayid, nativeid);
-    PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
+    //Rochenoire RCS // G :PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());  //RCS
+    PSendSysMessage("Level: %u (%i).", target->getLevel(), target->GetLevelVar()); //RCS
     PSendSysMessage(LANG_NPCINFO_HEALTH, target->GetCreateHealth(), target->GetMaxHealth(), target->GetHealth());
     PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->getFaction());
     PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(), curRespawnDelayStr.c_str());
@@ -4505,7 +4517,7 @@ bool ChatHandler::HandleQuestCompleteCommand(char* args)
     }
 
     // If the quest requires money
-    int32 ReqOrRewMoney = pQuest->GetRewOrReqMoney();
+    int32 ReqOrRewMoney = pQuest->GetRewOrReqMoney(player); //RCS
     if (ReqOrRewMoney < 0)
         player->ModifyMoney(-ReqOrRewMoney);
 
