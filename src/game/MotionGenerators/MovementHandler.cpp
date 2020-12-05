@@ -661,7 +661,7 @@ bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, 
     if (plMover && plMover->IsLaunched() && (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND || recv_data.GetOpcode() == MSG_MOVE_START_SWIM))
         plMover->SetLaunched(false);
 
-    if (plMover && recv_data.GetOpcode() == CMSG_MOVE_KNOCK_BACK_ACK)
+    if (plMover && recv_data.GetOpcode() != CMSG_MOVE_KNOCK_BACK_ACK)
         plMover->UpdateFallInformationIfNeed(movementInfo, recv_data.GetOpcode());
 
     return true;
