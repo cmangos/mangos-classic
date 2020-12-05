@@ -3896,12 +3896,17 @@ bool ChatHandler::HandleCombatStopCommand(char* args)
 
 bool ChatHandler::HandleCombatListCommand(char* args)
 {
-    Player* player = GetSession()->GetPlayer();
-    if (!player)
-        return false;
+    Unit* target = getSelectedUnit();
+    if (!target)
+    {
+        target = GetSession()->GetPlayer();
+        if (!target)
+            return false;
+    }
 
+    PSendSysMessage("Combat timer: %u", target->GetCombatManager().GetCombatTimer());
     SendSysMessage("In Combat With:");
-    for (auto& ref : player->getHostileRefManager())
+    for (auto& ref : target->getHostileRefManager())
     {
         Unit* refOwner = ref.getSource()->getOwner();
         PSendSysMessage("%s Entry: %u Counter: %u", refOwner->GetName(), refOwner->GetEntry(), refOwner->GetGUIDLow());
