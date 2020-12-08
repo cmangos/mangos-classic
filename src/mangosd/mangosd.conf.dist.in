@@ -899,6 +899,10 @@ TalentsInspecting = 1
 #        The delay between when a creature spawns and when it can be aggroed by nearby movement.
 #        Default: 5000 (5s)
 #
+#    LeashRadius
+#        Radius for default leash due to being too far from refresh position
+#        Default: 30 (yards)
+#
 #    CreatureFamilyFleeAssistanceRadius
 #        Radius which creature will use to seek for a near creature for assistance. Creature will flee to this creature.
 #        Default: 30
@@ -995,6 +999,7 @@ TalentsInspecting = 1
 
 Rate.Creature.Aggro = 1
 CreatureRespawnAggroDelay = 5000
+LeashRadius = 30
 CreatureFamilyFleeAssistanceRadius = 30
 CreatureFamilyAssistanceRadius = 10
 CreatureFamilyAssistanceDelay = 1500
