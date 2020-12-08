@@ -96,7 +96,7 @@ class Transport : public GenericTransport
         KeyFrameVec const& GetKeyFrames() const { return m_transportTemplate.keyFrames; }
     private:
         void TeleportTransport(uint32 newMapid, float x, float y, float z, float o);
-        void UpdateForMap(Map const* targetMap);
+        void UpdateForMap(Map const* targetMap, bool newMap);
         void MoveToNextWayPoint();                          // move m_next/m_cur to next points
         float CalculateSegmentPos(float perc);
 

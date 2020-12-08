@@ -14072,12 +14072,39 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             if (transportInfo->type == GAMEOBJECT_TYPE_TRANSPORT)
                 guid = ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, transGUID);
         }
-        if (GenericTransport* transport = GetMap()->GetTransport(guid))
+        GenericTransport* transport = GetMap()->GetTransport(guid);
+        Map* map = GetMap();
+        if (!transport)
         {
+            if (TransportTemplate const* transportTemplate = sTransportMgr.GetTransportTemplate(guid.GetCounter()))
+            {
+                uint32 mapId = *transportTemplate->mapsUsed.begin();
+                if (mapId == map->GetId()) // only two maps max
+                    mapId = *transportTemplate->mapsUsed.rbegin();
+                map = sMapMgr.CreateMap(mapId, this);
+                transport = map->GetTransport(guid);
+            }
+        }
+        if (transport)
+        {
+<<<<<<< HEAD
             transport->AddPassenger(this);
             SetLocationMapId(transport->GetMapId());
             transport->UpdatePassengerPosition(this);
             SetMap(sMapMgr.CreateMap(GetMapId(), this));
+=======
+            MapEntry const* transMapEntry = sMapStore.LookupEntry(transport->GetMapId());
+            // client without expansion support
+            if (GetSession()->GetExpansion() < transMapEntry->Expansion())
+                DEBUG_LOG("Player %s using client without required expansion tried login at transport at non accessible map %u", GetName(), transport->GetMapId());
+            else
+            {
+                transport->AddPassenger(this);
+                SetLocationMapId(transport->GetMapId());
+                transport->UpdatePassengerPosition(this);
+                SetMap(map);
+            }
+>>>>>>> eacf7237fd0... Transport: Move transports from map manager to map
         }
 
         if (!m_transport && guid.GetHigh() == HIGHGUID_MO_TRANSPORT)

@@ -49,6 +49,7 @@ void TransportMgr::LoadTransportTemplates()
         if (data && data->type == GAMEOBJECT_TYPE_MO_TRANSPORT)
         {
             TransportTemplate& transportTemplate = m_transportTemplates[entry];
+            transportTemplate.entry = entry;
             if (!GenerateWaypoints(data, transportTemplate))
                 m_transportTemplates.erase(entry);
         }

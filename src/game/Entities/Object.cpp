@@ -508,22 +508,12 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     uint32 dynflagsValue = m_uint32Values[index];
                     bool setTapFlags = false;
 
-<<<<<<< HEAD
                     if (creature->IsAlive())
                     {
                         // creature is alive so, not lootable
                         dynflagsValue = dynflagsValue & ~UNIT_DYNFLAG_LOOTABLE;
 
                         if (creature->IsInCombat())
-=======
-                    // Checking SPELL_AURA_EMPATHY and caster
-                    if (dynflagsValue & UNIT_DYNFLAG_SPECIALINFO && static_cast<const Unit*>(this)->IsAlive())
-                    {
-                        bool bIsEmpathy = false;
-                        bool bIsCaster = false;
-                        Unit::AuraList const& mAuraEmpathy = static_cast<const Unit*>(this)->GetAurasByType(SPELL_AURA_EMPATHY);
-                        for (Unit::AuraList::const_iterator itr = mAuraEmpathy.begin(); !bIsCaster && itr != mAuraEmpathy.end(); ++itr)
->>>>>>> 200addae186... Transport: Clean up code that typecasts to unit in Object.cpp mostly relating to movement
                         {
                             // as creature is in combat we have to manage tap flags
                             setTapFlags = true;

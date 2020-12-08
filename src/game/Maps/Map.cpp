@@ -63,6 +63,9 @@ Map::~Map()
 
     delete m_weatherSystem;
     m_weatherSystem = nullptr;
+
+    for (auto m_Transport : m_transports)
+        delete m_Transport;
 }
 
 uint32 Map::GetCurrentMSTime() const
@@ -83,11 +86,11 @@ uint32 Map::GetCurrentDiff() const
 GenericTransport* Map::GetTransport(ObjectGuid guid)
 {
     // elevators also cause the client to send MOVEFLAG_ONTRANSPORT - just unmount if the guid can be found in the transport list
-    for (MapManager::TransportSet::const_iterator iter = sMapMgr.m_Transports.begin(); iter != sMapMgr.m_Transports.end(); ++iter)
+    for (auto& transport : m_transports)
     {
-        if ((*iter)->GetObjectGuid() == guid)
+        if (transport->GetObjectGuid() == guid)
         {
-            return (*iter);
+            return transport;
         }
     }
     if (guid.GetEntry())
@@ -95,6 +98,16 @@ GenericTransport* Map::GetTransport(ObjectGuid guid)
             if (go->IsTransport())
                 return static_cast<GenericTransport*>(go);
     return nullptr;
+}
+
+void Map::AddTransport(Transport* transport)
+{
+    m_transports.insert(transport);
+}
+
+void Map::RemoveTransport(Transport* transport)
+{
+    m_transports.erase(transport);
 }
 
 void Map::LoadMapAndVMap(int gx, int gy)
@@ -144,6 +157,8 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
     m_persistentState->InitPools();
 
     sObjectMgr.LoadActiveEntities(this);
+
+    LoadTransports();
 }
 
 void Map::InitVisibilityDistance()
@@ -626,6 +641,9 @@ void Map::Update(const uint32& t_diff)
     TypeContainerVisitor<MaNGOS::ObjectUpdater, GridTypeMapContainer  > grid_object_update(obj_updater);    // For creature
     TypeContainerVisitor<MaNGOS::ObjectUpdater, WorldTypeMapContainer > world_object_update(obj_updater);   // For pets
 
+    for (Transport* m_Transport : m_transports)
+        m_Transport->Update(t_diff);
+
     // the player iterator is stored in the map object
     // to make sure calls to Map::Remove don't invalidate it
     {
@@ -1091,19 +1109,15 @@ void Map::SendInitSelf(Player* player) const
 void Map::SendInitTransports(Player* player) const
 {
     // Hack to send out transports
-    MapManager::TransportMap& tmap = sMapMgr.m_TransportsByMap;
-
     // no transports at map
-    if (tmap.find(player->GetMapId()) == tmap.end())
+    if (m_transports.size() == 0)
         return;
 
     UpdateData updateData;
 
-    MapManager::TransportSet& tset = tmap[player->GetMapId()];
-
     bool hasTransport = false;
 
-    for (auto i : tset)
+    for (auto i : m_transports)
     {
         // send data for current transport in other place
         if (i != player->GetTransport() && i->GetMapId() == i_id)
@@ -1123,18 +1137,14 @@ void Map::SendInitTransports(Player* player) const
 void Map::SendRemoveTransports(Player* player) const
 {
     // Hack to send out transports
-    MapManager::TransportMap& tmap = sMapMgr.m_TransportsByMap;
-
     // no transports at map
-    if (tmap.find(player->GetMapId()) == tmap.end())
+    if (m_transports.size() == 0)
         return;
 
     UpdateData updateData;
 
-    MapManager::TransportSet& tset = tmap[player->GetMapId()];
-
     // except used transport
-    for (auto i : tset)
+    for (auto i : m_transports)
         if (i != player->GetTransport() && i->GetMapId() != i_id)
             i->BuildOutOfRangeUpdateBlock(&updateData);
 
@@ -1142,6 +1152,37 @@ void Map::SendRemoveTransports(Player* player) const
     {
         WorldPacket packet = updateData.BuildPacket(i);
         player->GetSession()->SendPacket(packet);
+    }
+}
+
+void Map::LoadTransports()
+{
+    uint32 mapId = GetId();
+    for (TransportTemplate const* transportTemplate : sMapMgr.m_transportsByMap[mapId])
+    {
+        Transport* t = new Transport(*transportTemplate);
+
+        t->SetPeriod(transportTemplate->pathTime);
+
+        // sLog.outString("Loading transport %d between %s, %s", entry, name.c_str(), goinfo->name);
+
+        TaxiPathNodeEntry const* startNode = transportTemplate->keyFrames.begin()->Node;
+        float x = startNode->x;
+        float y = startNode->y;
+        float z = startNode->z;
+        float o = t->GetKeyFrames().begin()->InitialOrientation;
+
+        // If we someday decide to use the grid to track transports, here:
+        t->SetMap(this);
+
+        // creates the Gameobject
+        if (!t->Create(transportTemplate->entry, mapId, x, y, z, o, GO_ANIMPROGRESS_DEFAULT))
+        {
+            delete t;
+            continue;
+        }
+
+        AddTransport(t);
     }
 }
 
