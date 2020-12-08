@@ -11498,10 +11498,10 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
         if ((selectFlags & SELECT_FLAG_SKIP_TANK) && target == GetVictim())
             return false;
 
-        if ((selectFlags & SELECT_FLAG_PLAYER_CASTING) && !target->IsNonMeleeSpellCasted(false))
+        if ((selectFlags & SELECT_FLAG_SKIP_CUSTOM) && target->GetObjectGuid() == params.skip.guid)
             return false;
 
-        if ((selectFlags & SELECT_FLAG_SKIP_CUSTOM) && target->GetObjectGuid() == params.skip.guid)
+        if ((selectFlags & SELECT_FLAG_CASTING) && !target->IsNonMeleeSpellCasted(false))
             return false;
     }
 

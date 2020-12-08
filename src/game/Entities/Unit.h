@@ -1084,7 +1084,7 @@ enum SelectFlags
     SELECT_FLAG_POWER_NOT_MANA      = 0x1000,               // Used in some dungeon encounters
     SELECT_FLAG_USE_EFFECT_RADIUS   = 0x2000,               // For AOE targeted abilities which have correct data in effect index 0
     SELECT_FLAG_SKIP_TANK           = 0x4000,               // Not GetVictim - tank is not always top threat
-    SELECT_FLAG_PLAYER_CASTING      = 0x8000,               // For Interupts on casting targets
+    SELECT_FLAG_CASTING             = 0x8000,               // Selects only targets that are casting
     SELECT_FLAG_SKIP_CUSTOM         =0x10000,               // skips custom target
 };
 

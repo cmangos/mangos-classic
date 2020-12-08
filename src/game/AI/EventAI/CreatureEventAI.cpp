@@ -804,7 +804,7 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 if (action.cast.castFlags & CAST_AURA_NOT_PRESENT)
                     selectFlags |= SELECT_FLAG_NOT_AURA;
                 if (action.cast.castFlags & CAST_TARGET_CASTING)
-                    selectFlags |= SELECT_FLAG_PLAYER_CASTING;
+                    selectFlags |= SELECT_FLAG_CASTING;
             }
 
             Unit* target = GetTargetByType(action.cast.target, actionInvoker, AIEventSender, eventTarget, failedTargetSelection, spellId, selectFlags);
