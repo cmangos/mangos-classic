@@ -119,11 +119,11 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
     for (uint32 guid : guid_set)
     {
         T* obj;
-        if constexpr (std::is_same_v<T, GameObject>)
+        if (std::is_same<T, GameObject>::value) // TODO: When c++17 is added change to constexpr
         {
             GameObjectData const* data = sObjectMgr.GetGOData(guid);
             MANGOS_ASSERT(data);
-            obj = GameObject::CreateGameObject(data->id);
+            obj = (T*)GameObject::CreateGameObject(data->id);
         }
         else
             obj = new T;
