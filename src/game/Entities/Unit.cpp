@@ -11232,10 +11232,10 @@ void Unit::ClearComboPoints()
     if (Unit* target = ObjectAccessor::GetUnit(*this, m_comboTargetGuid))
         target->RemoveComboPointHolder(GetGUIDLow());
 
-    m_comboTargetGuid.Clear();
-
     if (IsPlayer())
         static_cast<Player*>(this)->SendComboPoints();
+
+    m_comboTargetGuid.Clear();
 }
 
 uint32 Unit::GetModifierXpBasedOnDamageReceived(uint32 xp)
