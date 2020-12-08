@@ -72,6 +72,7 @@ void printUsage()
     printf("--silent : Make script friendly. No wait for user input, error, completion.\n");
     printf("--offMeshInput [file.*] : Path to file containing off mesh connections data.\n\n");
     printf("--configInputPath [file.*] : Path to json configuration file.\n\n");
+    printf("--onlyGO : builds only gameobject models for transports\n\n");
     printf("Example:\nmovemapgen (generate all mmap with default arg\n"
            "movemapgen 0 (generate map 0)\n"
            "movemapgen 0 --tile 34,46 (builds only tile 34,46 of map 0)\n\n");
