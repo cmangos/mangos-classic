@@ -27,7 +27,6 @@ struct ArcaneConcentration : public AuraScript
         {
             if (IsChanneledSpell(spell->m_spellInfo))
                 return false; // these never proc
-            bool registered = false;
             if (SpellEntry const* spellInfo = spell->GetTriggeredByAuraSpellInfo())
             {
                 if (IsChanneledSpell(spellInfo))
@@ -38,7 +37,6 @@ struct ArcaneConcentration : public AuraScript
                             return false;
 
                         channeledSpell->RegisterAuraProc(aura);
-                        registered = true;
                     }
                 }
             }
