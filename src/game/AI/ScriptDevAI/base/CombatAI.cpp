@@ -22,11 +22,13 @@
 enum
 {
     ACTION_CASTING_RESTORE = 1000,
+    ACTION_ON_KILL_COOLDOWN = 1001,
 };
 
-CombatAI::CombatAI(Creature* creature, uint32 combatActions) : ScriptedAI(creature), CombatActions(combatActions)
+CombatAI::CombatAI(Creature* creature, uint32 combatActions) : ScriptedAI(creature), CombatActions(combatActions), m_onKillCooldown(false)
 {
     AddCustomAction(ACTION_CASTING_RESTORE, true, [&]() { HandleTargetRestoration(); });
+    AddCustomAction(ACTION_ON_KILL_COOLDOWN, true, [&]() { m_onKillCooldown = false; });
 }
 
 void CombatAI::ExecuteActions()
@@ -72,6 +74,29 @@ void CombatAI::HandleTargetRestoration()
 bool CombatAI::IsTargetingRestricted()
 {
     return m_storedTarget;
+}
+
+void CombatAI::AddOnKillText(int32 text)
+{
+    m_onDeathTexts.push_back(text);
+}
+
+void CombatAI::AddOnKillText(std::vector<int32> texts)
+{
+    m_onDeathTexts.insert(m_onDeathTexts.end(), texts.begin(), texts.end());
+}
+
+void CombatAI::KilledUnit(Unit* victim)
+{
+    if (!victim->IsPlayer())
+        return;
+
+    if (!m_onKillCooldown && m_onDeathTexts.size() > 0)
+    {
+        m_onKillCooldown = true;
+        DoScriptText(m_onDeathTexts[urand(0, m_onDeathTexts.size() - 1)], m_creature, victim);
+        ResetTimer(ACTION_CASTING_RESTORE, 5000);
+    }
 }
 
 void CombatAI::UpdateAI(const uint32 diff)

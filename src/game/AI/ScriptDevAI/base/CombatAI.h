@@ -42,9 +42,16 @@ class CombatAI : public ScriptedAI, public CombatActions
         void HandleTargetRestoration();
         bool IsTargetingRestricted();
 
+        void AddOnKillText(int32 text);
+        void AddOnKillText(std::vector<int32> texts);
+        void KilledUnit(Unit* /*victim*/) override;
+
         void UpdateAI(const uint32 diff) override;
     private:
         ObjectGuid m_storedTarget;
+
+        std::vector<int32> m_onDeathTexts;
+        bool m_onKillCooldown;
 };
 
 // Implementation is identical to EAI
