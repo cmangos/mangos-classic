@@ -18,6 +18,7 @@
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Spell.h"
 #include "Spells/SpellMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
 enum
 {
