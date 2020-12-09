@@ -345,11 +345,14 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
     if (!ProcessMovementInfo(movementInfo, _player, _player, recv_data))
         return;
 
+    Unit* mover = _player->GetMover();
+
     const SpeedOpcodePair& speedOpcodes = SetSpeed2Opc_table[move_type];
     WorldPacket data(speedOpcodes[2], 18);
     data << guid;
     data << movementInfo;
     data << newspeed;
+    mover->SendMessageToSetExcept(data, _player);
 
     // skip all forced speed changes except last and unexpected
     // in run/mounted case used one ACK and it must be skipped.m_forced_speed_changes[MOVE_RUN} store both.
@@ -508,6 +511,30 @@ void WorldSession::HandleMoveFlagChangeOpcode(WorldPacket& recv_data)
     Unit* mover = _player->GetMover();
 
     WorldPacket data(response, 8);
+    data << guid;
+    data << movementInfo;
+    mover->SendMessageToSetExcept(data, _player);
+}
+
+void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
+{
+    DEBUG_LOG("WORLD: Received opcode %s", recv_data.GetOpcodeName());
+    // Pre-Wrath: broadcast root
+    ObjectGuid guid;
+    uint32 counter;
+    MovementInfo movementInfo;
+    recv_data >> guid;
+    recv_data >> counter;
+    recv_data >> movementInfo;
+
+    _anticheat->OrderAck(recv_data.GetOpcode(), counter);
+
+    if (!ProcessMovementInfo(movementInfo, _player, _player, recv_data))
+        return;
+
+    Unit* mover = _player->GetMover();
+
+    WorldPacket data(recv_data.GetOpcode() == CMSG_FORCE_MOVE_UNROOT_ACK ? MSG_MOVE_UNROOT : MSG_MOVE_ROOT);
     data << guid;
     data << movementInfo;
     mover->SendMessageToSetExcept(data, _player);

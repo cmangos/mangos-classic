@@ -285,7 +285,7 @@ void OpcodeStore::BuildOpcodeList()
     /*0x0E8*/  StoreOpcode(SMSG_FORCE_MOVE_ROOT,              "SMSG_FORCE_MOVE_ROOT",             STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*0x0E9*/  StoreOpcode(CMSG_FORCE_MOVE_ROOT_ACK,          "CMSG_FORCE_MOVE_ROOT_ACK",         STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveRootAck);
     /*0x0EA*/  StoreOpcode(SMSG_FORCE_MOVE_UNROOT,            "SMSG_FORCE_MOVE_UNROOT",           STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*0x0EB*/  StoreOpcode(CMSG_FORCE_MOVE_UNROOT_ACK,        "CMSG_FORCE_MOVE_UNROOT_ACK",       STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveUnRootAck);
+    /*0x0EB*/  StoreOpcode(CMSG_FORCE_MOVE_UNROOT_ACK,        "CMSG_FORCE_MOVE_UNROOT_ACK",       STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveRootAck);
     /*0x0EC*/  StoreOpcode(MSG_MOVE_ROOT,                     "MSG_MOVE_ROOT",                    STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
     /*0x0ED*/  StoreOpcode(MSG_MOVE_UNROOT,                   "MSG_MOVE_UNROOT",                  STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL);
     /*0x0EE*/  StoreOpcode(MSG_MOVE_HEARTBEAT,                "MSG_MOVE_HEARTBEAT",               STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes);
