@@ -1274,6 +1274,9 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
     if (!scriptReturnValue)
         GetMap()->ScriptsStart(sGameObjectTemplateScripts, GetEntry(), spellCaster, this);
 
+    if (AI())
+        AI()->OnUse(user, spellInfo);
+
     sWorldState.HandleGameObjectUse(this, user);
 
     switch (GetGoType())
