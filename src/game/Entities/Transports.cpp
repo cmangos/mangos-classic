@@ -581,7 +581,7 @@ void Transport::UpdateForMap(Map const* targetMap, bool newMap)
     if (pl.isEmpty())
         return;
 
-    if (!newMap)
+    if (newMap)
     {
         for (const auto& itr : pl)
         {
