@@ -9,7 +9,7 @@ EquipmentId MEDIUMINT NOT NULL DEFAULT '0',
 CurHealth INT UNSIGNED NOT NULL DEFAULT '1',
 CurMana INT UNSIGNED NOT NULL DEFAULT '0',
 SpawnFlags INT UNSIGNED NOT NULL DEFAULT '0',
-PRIMARY KEY(Id,UnitFlags,ModelId,EquipmentId,CurHealth,CurMana,SpawnFlags)
+PRIMARY KEY(Entry,UnitFlags,ModelId,EquipmentId,CurHealth,CurMana,SpawnFlags)
 );
 
 DROP TABLE IF EXISTS `creature_spawn_data`;
