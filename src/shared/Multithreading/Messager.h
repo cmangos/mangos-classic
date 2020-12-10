@@ -34,11 +34,15 @@ class Messager
         }
         void Execute(T* object)
         {
-            std::lock_guard<std::mutex> guard(m_messageMutex);
-            for (auto& message : m_messageVector)
+            std::vector<std::function<void(T*)>> messageVectorCopy;
+            {
+                std::lock_guard<std::mutex> guard(m_messageMutex);
+                std::swap(m_messageVector, messageVectorCopy);
+            }
+            for (auto& message : messageVectorCopy)
                 message(object);
 
-            m_messageVector.clear();
+            messageVectorCopy.clear();
         }
     private:
         std::vector<std::function<void(T*)>> m_messageVector;
