@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS `creature_spawn_data_template`;
 CREATE TABLE creature_spawn_data_template(
 Entry INT UNSIGNED NOT NULL COMMENT 'ID of template',
 UnitFlags BIGINT NOT NULL DEFAULT '-1',
+Faction INT UNSIGNED NOT NULL DEFAULT '0',
 ModelId MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 EquipmentId MEDIUMINT NOT NULL DEFAULT '0',
 CurHealth INT UNSIGNED NOT NULL DEFAULT '1',
@@ -19,3 +20,4 @@ Id INT UNSIGNED NOT NULL COMMENT 'ID of template',
 PRIMARY KEY(Guid)
 );
 
+INSERT INTO creature_spawn_data_template(entry) VALUES(0);
