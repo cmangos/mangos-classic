@@ -815,7 +815,7 @@ namespace MaNGOS
         SpellNotifierPlayer(Spell& spell, UnitList& data, const uint32& i, float radius)
             : i_data(data), i_spell(spell), i_index(i), i_radius(radius)
         {
-            i_originalCaster = i_spell.GetAffectiveCasterObject();
+            i_originalCaster = i_spell.GetCastingObject();
         }
 
         void Visit(PlayerMapType& m)
