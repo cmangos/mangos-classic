@@ -69,6 +69,12 @@ void AbstractPathMovementGenerator::Initialize(Unit& unit)
             unit.InterruptMoving();
     }
 
+    if (m_path.empty())
+    {
+        sLog.outError("AbstractPathMovementGenerator::Initialize Path empty for unit name %s entry %u counter %u.", unit.GetName(), unit.GetEntry(), unit.GetGUIDLow());
+        return;
+    }
+
     // Reload current spline points array and end orientation from path:
     m_spline.clear();
     m_spline.push_back(Vector3()); // will be set to current position
@@ -146,6 +152,8 @@ bool AbstractPathMovementGenerator::Update(Unit& unit, const uint32& diff)
                 if (!m_firstCycle || m_pathIndex != 0)
                     MovementInform(unit);
                 m_pathIndex = (m_pathIndex + 1) % (m_path.size() + 1);
+                if (unit.movespline->Finalized())
+                    return true;
             }
             if (m_pathIndex == m_startPoint)
                 m_firstCycle = false;
@@ -230,7 +238,7 @@ void FixedPathMovementGenerator::Initialize(Unit& unit)
 
     AbstractPathMovementGenerator::Initialize(unit);
 
-    if (Move(unit))
+    if (m_spline.size() && Move(unit))
     {
         m_firstCycle = true;
         m_startPoint = m_pathIndex;
