@@ -770,6 +770,9 @@ bool GameObject::LoadFromDB(uint32 guid, Map* map)
         return false;
     }
 
+    /*if (data->spawnFlags & SPAWN_FLAG_DISABLED) //Rochenoire, patch system maybe ?
+        return false;*/
+
     uint32 entry = data->id;
     // uint32 map_id = data->mapid;                         // already used before call
     float x = data->posX;
@@ -1383,7 +1386,8 @@ void GameObject::Use(Unit* user)
 
             // FIXME: when GO casting will be implemented trap must cast spell to target
             if (goInfo->trap.spellId)
-                CastSpell(user, goInfo->trap.spellId, TRIGGERED_OLD_TRIGGERED);
+                if (caster->CastSpell(user, goInfo->trap.spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid()) != SPELL_CAST_OK)  //Rochenoire
+                    return;//CastSpell(user, goInfo->trap.spellId, TRIGGERED_OLD_TRIGGERED);
 
 
                 // Rochenoire G :if (caster->CastSpell(user, goInfo->trap.spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid()) != SPELL_CAST_OK) 

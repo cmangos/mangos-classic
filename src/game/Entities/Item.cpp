@@ -25,6 +25,7 @@
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
 #include "Spells/SpellTargetDefines.h"
+#include "World/World.h" //Rochenoire
 
 void AddItemsSetItem(Player* player, Item* item)
 {
@@ -682,6 +683,193 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
 
     return 0;
 }
+
+//Rochenoire loot system
+uint32 Item::ComputeRequiredLevel(uint32 quality, uint32 ilevel)
+{
+    uint32 RequiredLevel = ilevel;
+    if (quality <= 2) // green
+    {
+        if (ilevel <= 70)
+            RequiredLevel = ilevel - 5; // vanilla
+        else
+            RequiredLevel = std::min((int)((ilevel - 90) / 3 + 60), 70); // tbc
+    }
+    else if (quality == 3) // blue
+    {
+        if (ilevel <= 80)
+            RequiredLevel = std::min((int)ilevel - 5, 60); // vanilla
+        else
+            RequiredLevel = std::min((int)((ilevel - 85) / 3 + 60), 70); // tbc
+    }
+    else if (quality >= 4) // orange / red
+    {
+        if (ilevel <= 93)
+            RequiredLevel = std::min((int)ilevel - 5, 60); // vanilla
+        else
+            RequiredLevel = std::min((int)(10 + 0.6 * (int)ilevel), 70); // tbc
+    }
+    return RequiredLevel;
+}
+
+uint32 Item::LoadScaledParent(uint32 itemid)
+{
+    ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype>(itemid);
+
+    if (!pProto)
+        return itemid;
+
+    if (pProto->Class == ITEM_CLASS_CONSUMABLE || pProto->Class == ITEM_CLASS_MISC)
+    {
+        if (ItemLootScale const* sItem = sObjectMgr.GetItemLootParentingScale(itemid))
+            return sItem->ItemId;
+    }
+    else
+    {
+        uint32 scaleid = std::floor((itemid - 41000 - 1) / (2 * 180));
+
+        if (ItemPrototype const* pProtoScale = sItemStorage.LookupEntry<ItemPrototype>(scaleid))
+            return scaleid;
+    }
+
+    return itemid;
+}
+
+uint32 Item::LoadScaledLoot(uint32 ItemId, Player* pPlayer)
+{
+    if (ItemId && pPlayer)
+    {
+        // Checking if player has appropriate level for current zone
+        uint32 pLevel = pPlayer->getZoneLevel();
+
+        // Filter specific items
+        switch (ItemId)
+        {
+            // Badge of Justice -> Colossal Bag of Loot
+        case 29434: if (pPlayer->getLevel() > pLevel) ItemId = 21528; break;
+        }
+
+        // We need to make sure we're not replacing a currently needed quest item
+        for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+        {
+            uint32 quest = pPlayer->GetQuestSlotQuestId(slot);
+
+            if (!quest)
+                continue;
+
+            Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest);
+
+            if (!pQuest)
+                continue;
+
+            for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
+            {
+                if (!pQuest->ReqItemId[i])
+                    continue;
+
+                if (pQuest->ReqItemId[i] == ItemId)
+                    return ItemId;
+            }
+        }
+
+        // We need to make sure we're not replacing a currently needed reagent
+        PlayerSpellMap spells = pPlayer->GetSpellMap();
+        for (PlayerSpellMap::iterator itr = spells.begin(); itr != spells.end(); ++itr)
+        {
+            if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.disabled)
+                continue;
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(itr->first);
+            if (!spellInfo)
+                continue;
+
+            for (uint32 x = 0; x < MAX_SPELL_REAGENTS; ++x)
+            {
+                if (spellInfo->Reagent[x] <= 0)
+                    continue;
+
+                uint32 s_Reagent = spellInfo->Reagent[x];
+                uint32 s_ReagentCount = spellInfo->ReagentCount[x];
+
+                if (s_Reagent == ItemId)
+                    return ItemId;
+            }
+        }
+
+        return LoadScaledLoot(ItemId, pLevel);
+    }
+    return ItemId;
+}
+
+uint32 Item::LoadScaledLoot(uint32 ItemId, uint32 pLevel)
+{
+    if (pLevel > CONFIG_UINT32_MAX_PLAYER_LEVEL)
+        pLevel = CONFIG_UINT32_MAX_PLAYER_LEVEL;
+
+    if (pLevel <= 0)
+        return ItemId;
+
+    ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype>(ItemId);
+
+    if (!pProto)
+        return ItemId;
+
+    if (pProto->Class == ITEM_CLASS_CONSUMABLE || pProto->Class == ITEM_CLASS_MISC)
+    {
+        // skip if correct
+        if (abs((int)pLevel - (int)pProto->RequiredLevel) < 5)
+            return ItemId;
+
+        // look for an item below player level
+        for (uint32 j = pLevel; j > 0; j--)
+        {
+            std::string s = std::to_string(ItemId) + ":" + std::to_string(j);
+
+            if (ItemLootScale const* sItem = sObjectMgr.GetItemLootScale(s))
+                return sItem->ReplacementId;
+        }
+
+        // look for the closest item above player level (backup)
+        for (uint32 j = pLevel; j < CONFIG_UINT32_MAX_PLAYER_LEVEL; j++)
+        {
+            std::string s = std::to_string(ItemId) + ":" + std::to_string(j);
+
+            if (ItemLootScale const* sItem = sObjectMgr.GetItemLootScale(s))
+                return sItem->ReplacementId;
+        }
+    }
+    else
+    {
+        uint32 ItemLevel = pProto->ItemLevel;
+
+        if (pLevel <= 60)
+            ItemLevel = pLevel + 5;
+        /*else if (pLevel > 60 && pLevel < 70)
+        {
+            if (pProto->Quality < 3) // gray, white, green
+                ItemLevel = (pLevel - 60) * 3 + 90;
+            else if (pProto->Quality == 3) // blue
+                ItemLevel = (pLevel - 60) * 3 + 85;
+            else if (pProto->Quality > 3) // purple, yellow, orange
+                ItemLevel = (uint32)round((pLevel - 10) / 0.6f);
+        }
+        else if (pLevel == 70)
+        {
+            if (pProto->Quality >= 3)
+                ItemLevel = 115 + std::max(0, int32(pProto->ItemLevel - 115));
+            else
+                ItemLevel = 120;
+        }*/
+
+        uint32 ScaleId = (41000 + ItemId * 2 * 180 + ItemLevel);
+
+        if (ItemPrototype const* pProtoScale = sItemStorage.LookupEntry<ItemPrototype>(ScaleId))
+            return ScaleId;
+    }
+
+    return ItemId;
+}
+
+//Rochenoire end
 
 void Item::SetItemRandomProperties(int32 randomPropId)
 {

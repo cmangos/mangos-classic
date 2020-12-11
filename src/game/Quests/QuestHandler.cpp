@@ -256,9 +256,11 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
 
         WorldPacket data(SMSG_QUEST_QUERY_RESPONSE, 100);       // guess size
 
+        uint32 pQuest_slevel = _player ? _player->GetQuestLevelForPlayer(pQuest) : pQuest->GetQuestLevel(); //Rochenoire
+
         data << uint32(pQuest->GetQuestId());                   // quest id
         data << uint32(pQuest->GetQuestMethod());               // Accepted values: 0, 1 or 2. 0==IsAutoComplete() (skip objectives/details)
-        data << uint32(pQuest->GetQuestLevel());                // may be 0, static data, in other cases must be used dynamic level: Player::GetQuestLevelForPlayer
+        data << uint32(pQuest_slevel);                // may be 0, static data, in other cases must be used dynamic level: Player::GetQuestLevelForPlayer  //Rochenoire pQuest->GetQuestLevel()
         data << uint32(pQuest->GetZoneOrSort());                // zone or sort to display in quest log
 
         data << uint32(pQuest->GetType());
@@ -297,12 +299,18 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
         {
             for (iI = 0; iI < QUEST_REWARDS_COUNT; ++iI)
             {
-                data << uint32(pQuest->RewItemId[iI]);
+                uint32 pQuestItem = pQuest->RewItemId[iI]; //RLS
+                pQuestItem = Item::LoadScaledLoot(pQuest->RewItemId[iI], _player); //RLS
+
+                data << uint32(pQuestItem); //RLS  //g pQuest->RewChoiceItemId[iI]
                 data << uint32(pQuest->RewItemCount[iI]);
             }
             for (iI = 0; iI < QUEST_REWARD_CHOICES_COUNT; ++iI)
             {
-                data << uint32(pQuest->RewChoiceItemId[iI]);
+                uint32 pQuestItem = pQuest->RewChoiceItemId[iI];//RLS
+                pQuestItem = Item::LoadScaledLoot(pQuest->RewChoiceItemId[iI], _player);//RLS
+
+                data << uint32(pQuestItem);//RLS
                 data << uint32(pQuest->RewChoiceItemCount[iI]);
             }
         }
@@ -329,7 +337,7 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
                 data << uint32(pQuest->ReqCreatureOrGOId[iI]);
             }
             data << uint32(pQuest->ReqCreatureOrGOCount[iI]);
-            data << uint32(pQuest->ReqItemId[iI]);
+            data << uint32(_player->HasScaledItemCount(pQuest->ReqItemId[iI], pQuest->ReqItemCount[iI]));  // RLS /G : pQuest->ReqItemId[iI]);
             data << uint32(pQuest->ReqItemCount[iI]);
         }
 

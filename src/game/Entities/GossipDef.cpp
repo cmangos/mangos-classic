@@ -150,7 +150,7 @@ bool PlayerMenu::GossipOptionCoded(unsigned int Selection)
     return mGossipMenu.MenuItemCoded(Selection);
 }
 
-void PlayerMenu::SendGossipMenu(uint32 TitleTextId, ObjectGuid objectGuid, Player* pPlayer)
+void PlayerMenu::SendGossipMenu(uint32 TitleTextId, ObjectGuid objectGuid,/*Rochenoire*/ Player* pPlayer)
 {
     WorldPacket data(SMSG_GOSSIP_MESSAGE, (100));           // guess size
     data << ObjectGuid(objectGuid);
@@ -286,7 +286,7 @@ void QuestMenu::ClearMenu()
     m_qItems.clear();
 }
 
-void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title, ObjectGuid npcGUID, const Player* pPlayer)
+void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title, ObjectGuid npcGUID,/*Rochenoire*/ const Player* pPlayer)
 {
     WorldPacket data(SMSG_QUESTGIVER_QUEST_LIST, 100);      // guess size
     data << ObjectGuid(npcGUID);
@@ -378,10 +378,18 @@ void PlayerMenu::SendQuestGiverQuestDetails(Player const* pPlayer, Quest const* 
 
         for (uint32 i = 0; i < rewChocieItemCount; ++i)
         {
-            data << uint32(pQuest->RewChoiceItemId[i]);
+            if (!pQuest->RewItemId[i])
+                continue;
+
+            //Rochenoire loot system
+            uint32 pQuestItem = pQuest->RewChoiceItemId[i];
+            pQuestItem = Item::LoadScaledLoot(pQuest->RewChoiceItemId[i], ((Player*)pPlayer));
+            //ROchenoire end
+
+            data << uint32(pQuestItem);
             data << uint32(pQuest->RewChoiceItemCount[i]);
 
-            IProto = ObjectMgr::GetItemPrototype(pQuest->RewChoiceItemId[i]);
+            IProto = ObjectMgr::GetItemPrototype(pQuestItem);//RLS
 
             if (IProto)
                 data << uint32(IProto->DisplayInfoID);
@@ -394,10 +402,18 @@ void PlayerMenu::SendQuestGiverQuestDetails(Player const* pPlayer, Quest const* 
 
         for (uint32 i = 0; i < rewItemCount; ++i)
         {
-            data << uint32(pQuest->RewItemId[i]);
+            if (!pQuest->RewItemId[i])
+                continue;
+
+            //Rochenoire Loot system
+            uint32 pQuestItem = pQuest->RewItemId[i];
+            pQuestItem = Item::LoadScaledLoot(pQuest->RewItemId[i], ((Player*)pPlayer));
+            //Rochenoire end
+
+            data << uint32(pQuestItem);
             data << uint32(pQuest->RewItemCount[i]);
 
-            IProto = ObjectMgr::GetItemPrototype(pQuest->RewItemId[i]);
+            IProto = ObjectMgr::GetItemPrototype(pQuestItem);//RLS
 
             if (IProto)
                 data << uint32(IProto->DisplayInfoID);
@@ -597,9 +613,14 @@ void PlayerMenu::SendQuestGiverOfferReward(Player const* pPlayer, Quest const* p
     data << uint32(pQuest->GetRewChoiceItemsCount());
     for (uint32 i = 0; i < pQuest->GetRewChoiceItemsCount(); ++i)
     {
-        pItem = ObjectMgr::GetItemPrototype(pQuest->RewChoiceItemId[i]);
+        //Rochenoire loot system
+        uint32 pQuestItem = pQuest->RewChoiceItemId[i];
+        pQuestItem = Item::LoadScaledLoot(pQuest->RewChoiceItemId[i], ((Player*)pPlayer));
+        //Rochenoire end
 
-        data << uint32(pQuest->RewChoiceItemId[i]);
+        pItem = ObjectMgr::GetItemPrototype(pQuestItem); //RLS
+
+        data << uint32(pQuestItem); //RLS
         data << uint32(pQuest->RewChoiceItemCount[i]);
 
         if (pItem)
@@ -611,8 +632,13 @@ void PlayerMenu::SendQuestGiverOfferReward(Player const* pPlayer, Quest const* p
     data << uint32(pQuest->GetRewItemsCount());
     for (uint32 i = 0; i < pQuest->GetRewItemsCount(); ++i)
     {
-        pItem = ObjectMgr::GetItemPrototype(pQuest->RewItemId[i]);
-        data << uint32(pQuest->RewItemId[i]);
+        //Rochenoire loot system
+        uint32 pQuestItem = pQuest->RewItemId[i];
+        pQuestItem = Item::LoadScaledLoot(pQuest->RewItemId[i], ((Player*)pPlayer));
+        //Rochenoire end
+
+        pItem = ObjectMgr::GetItemPrototype(pQuestItem); //RLS
+        data << uint32(pQuestItem);  //RLS
         data << uint32(pQuest->RewItemCount[i]);
 
         if (pItem)
@@ -680,12 +706,23 @@ void PlayerMenu::SendQuestGiverRequestItems(Player const* pPlayer, Quest const* 
     data << uint32(pQuest->GetRewOrReqMoney((Player*)pPlayer) < 0 ? -pQuest->GetRewOrReqMoney((Player*)pPlayer) : 0);
 
     data << uint32(pQuest->GetReqItemsCount());
+
+    //Rochenoire loot system
+    ItemPrototype const* pItem;
+    //Rochenoire end
     for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
     {
         if (!pQuest->ReqItemId[i])
             continue;
-        ItemPrototype const* pItem = ObjectMgr::GetItemPrototype(pQuest->ReqItemId[i]);
-        data << uint32(pQuest->ReqItemId[i]);
+
+        //Rochenoire loot system
+        uint32 ReqItemId = pPlayer->HasScaledItemCount(pQuest->ReqItemId[i], pQuest->ReqItemCount[i]);
+        pItem = ObjectMgr::GetItemPrototype(ReqItemId);
+        data << uint32(ReqItemId);
+        //Rochenoire end
+
+        //ItemPrototype const* pItem = ObjectMgr::GetItemPrototype(pQuest->ReqItemId[i]);
+        //data << uint32(pQuest->ReqItemId[i]);
         data << uint32(pQuest->ReqItemCount[i]);
 
         if (pItem)

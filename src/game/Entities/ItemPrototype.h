@@ -436,6 +436,13 @@ struct _Socket
 #define MAX_ITEM_PROTO_SPELLS  5
 #define MAX_ITEM_PROTO_STATS  10
 
+struct ItemLootScale
+{
+    uint32 ItemId;
+    uint32 ReplacementId;
+    uint32 plevel;
+};
+
 struct ItemPrototype
 {
     uint32 ItemId;

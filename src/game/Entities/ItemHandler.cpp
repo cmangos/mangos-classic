@@ -26,6 +26,7 @@
 #include "Entities/Item.h"
 #include "Entities/UpdateData.h"
 #include "Chat/Chat.h"
+#include "World/World.h" //Rochenoire
 
 void WorldSession::HandleSplitItemOpcode(WorldPacket& recv_data)
 {
@@ -295,6 +296,8 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
         std::string description = pProto->Description;
         sObjectMgr.GetItemLocaleStrings(pProto->ItemId, loc_idx, &name, &description);
 
+        //RLS
+        int RequiredLevel = pProto->RequiredLevel;
 
         // guess size
         WorldPacket data(SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);
@@ -315,7 +318,7 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
         data << pProto->AllowableClass;
         data << pProto->AllowableRace;
         data << pProto->ItemLevel;
-        data << pProto->RequiredLevel;
+        data << RequiredLevel; //Rochenoire /g pProto->
         data << pProto->RequiredSkill;
         data << pProto->RequiredSkillRank;
         data << pProto->RequiredSpell;
@@ -694,6 +697,29 @@ void WorldSession::HandleListInventoryOpcode(WorldPacket& recv_data)
 
     SendListInventory(guid);
 }
+
+//Rochenorie vendor Scale
+/*
+static eConfigUInt32Values const TypeToScale[16] =
+{
+    CONFIG_UINT32_SCALE_VENDOR_CONSUMABLE,
+    CONFIG_UINT32_SCALE_VENDOR_CONTAINER,
+    CONFIG_UINT32_SCALE_VENDOR_WEAPON,
+    CONFIG_UINT32_SCALE_VENDOR_GEM,
+    CONFIG_UINT32_SCALE_VENDOR_ARMOR,
+    CONFIG_UINT32_SCALE_VENDOR_REAGENT,
+    CONFIG_UINT32_SCALE_VENDOR_PROJECTILE,
+    CONFIG_UINT32_SCALE_VENDOR_TRADE_GOODS,
+    CONFIG_UINT32_SCALE_VENDOR_GENERIC,
+    CONFIG_UINT32_SCALE_VENDOR_RECIPE,
+    CONFIG_UINT32_SCALE_VENDOR_MONEY,
+    CONFIG_UINT32_SCALE_VENDOR_QUIVER,
+    CONFIG_UINT32_SCALE_VENDOR_QUEST,
+    CONFIG_UINT32_SCALE_VENDOR_KEY,
+    CONFIG_UINT32_SCALE_VENDOR_PERMANENT,
+    CONFIG_UINT32_SCALE_VENDOR_MISC,
+};*/
+//Rochenoire end
 
 void WorldSession::SendListInventory(ObjectGuid vendorguid) const
 {

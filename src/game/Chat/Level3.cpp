@@ -295,6 +295,7 @@ bool ChatHandler::HandleReloadAllItemCommand(char* /*args*/)
     HandleReloadPageTextsCommand((char*)"a");
     HandleReloadItemEnchantementsCommand((char*)"a");
     HandleReloadItemRequiredTragetCommand((char*)"a");
+    HandleReloadLootScaleCommand((char*)"a"); //RLS
     return true;
 }
 
@@ -751,6 +752,15 @@ bool ChatHandler::HandleReloadItemRequiredTragetCommand(char* /*args*/)
     sLog.outString("Re-Loading Item Required Targets Table...");
     sObjectMgr.LoadItemRequiredTarget();
     SendGlobalSysMessage("DB table `item_required_target` reloaded.");
+    return true;
+}
+
+//RLS
+bool ChatHandler::HandleReloadLootScaleCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading Item Loot Scale ... ");
+    sObjectMgr.LoadLootScale();
+    SendSysMessage("DB table `scale_loot` reloaded.");
     return true;
 }
 
@@ -1658,6 +1668,16 @@ bool ChatHandler::HandleAddItemCommand(char* args)
     if (!plTarget)
         plTarget = pl;
 
+    //Rochenoire RLS
+    int32 plevel;
+    if (!ExtractOptInt32(&args, plevel, pl->getLevel()))
+        return false;
+
+    if (plevel != -1)
+        itemId = Item::LoadScaledLoot(itemId, plevel);
+
+    //Rochenoire end
+
     DETAIL_LOG(GetMangosString(LANG_ADDITEM), itemId, count);
 
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemId);
@@ -2141,7 +2161,7 @@ bool ChatHandler::HandleLookupItemCommand(char* args)
     for (uint32 id = 0; id < sItemStorage.GetMaxEntry(); ++id)
     {
         ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype >(id);
-        if (!pProto)
+        if (!pProto ||/*RLS*/ (pProto && pProto->ItemId < 41000)) //RLS MIN_ENTRY_SCALE
             continue;
 
         int loc_idx = GetSessionDbLocaleIndex();

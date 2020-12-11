@@ -68,7 +68,7 @@
 #endif
 
 #include <cmath>
-
+#include <Entities\ItemHandler.cpp> //Rochenoire
 //#include <Entities\ItemHandler.cpp>
 
 
@@ -133,6 +133,31 @@ enum CharacterFlags
 #define MAX_DEATH_COUNT 3
 
 static const uint32 corpseReclaimDelay[MAX_DEATH_COUNT] = {30, 60, 120};
+
+//Rochenoire loot system
+static eConfigFloatValues const qualityToRate[MAX_ITEM_QUALITY] =
+{
+    CONFIG_FLOAT_RATE_DROP_ITEM_POOR,                       // ITEM_QUALITY_POOR
+    CONFIG_FLOAT_RATE_DROP_ITEM_NORMAL,                     // ITEM_QUALITY_NORMAL
+    CONFIG_FLOAT_RATE_DROP_ITEM_UNCOMMON,                   // ITEM_QUALITY_UNCOMMON
+    CONFIG_FLOAT_RATE_DROP_ITEM_RARE,                       // ITEM_QUALITY_RARE
+    CONFIG_FLOAT_RATE_DROP_ITEM_EPIC,                       // ITEM_QUALITY_EPIC
+    CONFIG_FLOAT_RATE_DROP_ITEM_LEGENDARY,                  // ITEM_QUALITY_LEGENDARY
+    CONFIG_FLOAT_RATE_DROP_ITEM_ARTIFACT,                   // ITEM_QUALITY_ARTIFACT
+};
+
+static eConfigFloatValues const qualityToCoeff[MAX_ITEM_QUALITY] =
+{
+    CONFIG_FLOAT_RATE_WEIGHT_ITEM_POOR,                       // ITEM_QUALITY_POOR
+    CONFIG_FLOAT_RATE_WEIGHT_ITEM_NORMAL,                     // ITEM_QUALITY_NORMAL
+    CONFIG_FLOAT_RATE_WEIGHT_ITEM_UNCOMMON,                   // ITEM_QUALITY_UNCOMMON
+    CONFIG_FLOAT_RATE_WEIGHT_ITEM_RARE,                       // ITEM_QUALITY_RARE
+    CONFIG_FLOAT_RATE_WEIGHT_ITEM_EPIC,                       // ITEM_QUALITY_EPIC
+    CONFIG_FLOAT_RATE_WEIGHT_ITEM_LEGENDARY,                  // ITEM_QUALITY_LEGENDARY
+    CONFIG_FLOAT_RATE_WEIGHT_ITEM_ARTIFACT,                   // ITEM_QUALITY_ARTIFACT
+};
+
+//Rochenoire end
 
 // Number of slots in keyring depending on the player's level
 // Values taken from Vanilla 1.11 / 1.12 Client :
@@ -7990,6 +8015,8 @@ bool Player::ViableEquipSlots(ItemPrototype const* proto, uint8* viable_slots) c
 
 InventoryResult Player::CanUnequipItems(uint32 item, uint32 count) const
 {
+    item = Item::LoadScaledParent(item); //RLS
+
     Item* pItem;
     uint32 tempcount = 0;
 
@@ -7998,7 +8025,7 @@ InventoryResult Player::CanUnequipItems(uint32 item, uint32 count) const
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_BAG_END; ++i)
     {
         pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pItem && pItem->GetEntry() == item)
+        if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item)  //RLS /G pItem->GetEntry()
         {
             InventoryResult ires = CanUnequipItem(INVENTORY_SLOT_BAG_0 << 8 | i, false);
             if (ires == EQUIP_ERR_OK)
@@ -8014,7 +8041,7 @@ InventoryResult Player::CanUnequipItems(uint32 item, uint32 count) const
     for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
     {
         pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pItem && pItem->GetEntry() == item)
+        if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item)  //RLS /G pItem->GetEntry()
         {
             tempcount += pItem->GetCount();
             if (tempcount >= count)
@@ -8024,7 +8051,7 @@ InventoryResult Player::CanUnequipItems(uint32 item, uint32 count) const
     for (int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
     {
         pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pItem && pItem->GetEntry() == item)
+        if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item) //RLS /G pItem->GetEntry()
         {
             tempcount += pItem->GetCount();
             if (tempcount >= count)
@@ -8040,7 +8067,7 @@ InventoryResult Player::CanUnequipItems(uint32 item, uint32 count) const
             for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
             {
                 pItem = GetItemByPos(i, j);
-                if (pItem && pItem->GetEntry() == item)
+                if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item) //RLS /G pItem->GetEntry()
                 {
                     tempcount += pItem->GetCount();
                     if (tempcount >= count)
@@ -8056,17 +8083,19 @@ InventoryResult Player::CanUnequipItems(uint32 item, uint32 count) const
 
 uint32 Player::GetItemCount(uint32 item, bool inBankAlso, Item* skipItem) const
 {
+    item = Item::LoadScaledParent(item); //RLS
+
     uint32 count = 0;
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
     {
         Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pItem && pItem != skipItem &&  pItem->GetEntry() == item)
+        if (pItem && pItem != skipItem && Item::LoadScaledParent(pItem->GetEntry()) == item)  //RLS /G pItem->GetEntry()
             count += pItem->GetCount();
     }
     for (int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
     {
         Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pItem && pItem != skipItem && pItem->GetEntry() == item)
+        if (pItem && pItem != skipItem && Item::LoadScaledParent(pItem->GetEntry()) == item) //RLS /G pItem->GetEntry()
             count += pItem->GetCount();
     }
     for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
@@ -8081,7 +8110,7 @@ uint32 Player::GetItemCount(uint32 item, bool inBankAlso, Item* skipItem) const
         for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
         {
             Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-            if (pItem && pItem != skipItem && pItem->GetEntry() == item)
+            if (pItem && pItem != skipItem && Item::LoadScaledParent(pItem->GetEntry()) == item) //RLS /G pItem->GetEntry()
                 count += pItem->GetCount();
         }
         for (int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
@@ -8128,6 +8157,43 @@ Item* Player::GetItemByGuid(ObjectGuid guid) const
 
     return nullptr;
 }
+
+//Rochenoire RLS
+Item* Player::GetItemByEntry(uint32 item) const
+{
+    for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (pItem->GetProto()->ItemId == item)
+                return pItem;
+
+    /* for (int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
+        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (pItem->GetProto()->ItemId == item)
+                return pItem;
+
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+        if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                if (Item* pItem = pBag->GetItemByPos(j))
+                    if (pItem->GetProto()->ItemId == item)
+                        return pItem;
+
+    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
+        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (pItem->GetProto()->ItemId == item)
+                return pItem;
+
+    for (int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
+        if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                if (Item* pItem = pBag->GetItemByPos(j))
+                    if (pItem->GetProto()->ItemId == item)
+                        return pItem; */
+
+    return NULL;
+}
+//Rochenoire end
+
 
 Item* Player::GetItemByPos(uint16 pos) const
 {
@@ -8318,11 +8384,13 @@ bool Player::IsValidPos(uint8 bag, uint8 slot, bool explicit_pos) const
 
 bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
 {
+    item = Item::LoadScaledParent(item); //RLS
+
     uint32 tempcount = 0;
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
     {
         Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
+        if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item && !pItem->IsInTrade())   //Roche //G if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
         {
             tempcount += pItem->GetCount();
             if (tempcount >= count)
@@ -8332,7 +8400,7 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
     for (int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
     {
         Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
+        if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item && !pItem->IsInTrade())  //Roche //G if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
         {
             tempcount += pItem->GetCount();
             if (tempcount >= count)
@@ -8346,7 +8414,7 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
             for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
             {
                 Item* pItem = GetItemByPos(i, j);
-                if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
+                if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item && !pItem->IsInTrade())  //Roche //G if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
                 {
                     tempcount += pItem->GetCount();
                     if (tempcount >= count)
@@ -8361,7 +8429,7 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
         for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
         {
             Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-            if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
+            if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item && !pItem->IsInTrade())    //Roche //g            if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
             {
                 tempcount += pItem->GetCount();
                 if (tempcount >= count)
@@ -8375,7 +8443,7 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
                 for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
                 {
                     Item* pItem = GetItemByPos(i, j);
-                    if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
+                    if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item && !pItem->IsInTrade()) //roche //G if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
                     {
                         tempcount += pItem->GetCount();
                         if (tempcount >= count)
@@ -8389,8 +8457,85 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
     return false;
 }
 
+//Rochenoire loot systeme
+uint32 Player::HasScaledItemCount(uint32 item, uint32 count, bool inBankAlso) const
+{
+    item = Item::LoadScaledParent(item);
+    uint32 tempcount = 0;
+    for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item && !pItem->IsInTrade())
+        {
+            tempcount += pItem->GetCount();
+            if (tempcount >= count)
+                return pItem->GetEntry();
+        }
+    }
+    for (int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
+    {
+        Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item && !pItem->IsInTrade())
+        {
+            tempcount += pItem->GetCount();
+            if (tempcount >= count)
+                return pItem->GetEntry();
+        }
+    }
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
+                Item* pItem = GetItemByPos(i, j);
+                if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item && !pItem->IsInTrade())
+                {
+                    tempcount += pItem->GetCount();
+                    if (tempcount >= count)
+                        return pItem->GetEntry();
+                }
+            }
+        }
+    }
+
+    if (inBankAlso)
+    {
+        for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_BAG_END; ++i)
+        {
+            Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+            if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item && !pItem->IsInTrade())
+            {
+                tempcount += pItem->GetCount();
+                if (tempcount >= count)
+                    return pItem->GetEntry();
+            }
+        }
+        for (int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
+        {
+            if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            {
+                for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                {
+                    Item* pItem = GetItemByPos(i, j);
+                    if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item && !pItem->IsInTrade())
+                    {
+                        tempcount += pItem->GetCount();
+                        if (tempcount >= count)
+                            return pItem->GetEntry();
+                    }
+                }
+            }
+        }
+    }
+    return item;
+}
+//Rochenoire end
+
 bool Player::HasItemWithIdEquipped(uint32 item, uint32 count, uint8 except_slot) const
 {
+    item = Item::LoadScaledParent(item);//RLS
+
     uint32 tempcount = 0;
     for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
     {
@@ -8398,7 +8543,7 @@ bool Player::HasItemWithIdEquipped(uint32 item, uint32 count, uint8 except_slot)
             continue;
 
         Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pItem && pItem->GetEntry() == item)
+        if (pItem && Item::LoadScaledParent(pItem->GetEntry()) == item) //Roche G : if (pItem && pItem->GetEntry() == item)
         {
             tempcount += pItem->GetCount();
             if (tempcount >= count)
@@ -8409,7 +8554,7 @@ bool Player::HasItemWithIdEquipped(uint32 item, uint32 count, uint8 except_slot)
     return false;
 }
 
-InventoryResult Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count) const
+InventoryResult Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count,/*Roche*/ bool swap) const
 {
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(entry);
     if (!pProto)
@@ -8424,7 +8569,7 @@ InventoryResult Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Ite
     {
         uint32 curcount = GetItemCount(pProto->ItemId, true, pItem);
 
-        if (curcount + count > uint32(pProto->MaxCount))
+        if (curcount + count > uint32(pProto->MaxCount) && !swap) //RLS
         {
             if (no_space_count)
                 *no_space_count = count + curcount - pProto->MaxCount;
@@ -8465,6 +8610,39 @@ bool Player::HasItemTotemCategory(uint32 /*TotemCategory*/) const
      } */
     return false;
 }
+
+//Rochenoire loot system
+bool Player::HasItemCategory(uint32 ItemCategory, uint32 ItemSubCategory) const
+{
+    Item* pItem;
+    for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (pItem && pItem->GetProto()->Class == ItemCategory && pItem->GetProto()->SubClass == ItemSubCategory)
+            return true;
+    }
+    /*for (uint8 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
+    {
+        pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (pItem && pItem->GetProto()->Class == ItemCategory && pItem->GetProto()->SubClass == ItemSubCategory)
+            return true;
+    }
+    for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
+                pItem = GetItemByPos(i, j);
+                if (pItem && pItem->GetProto()->Class == ItemCategory && pItem->GetProto()->SubClass == ItemSubCategory)
+                    return true;
+            }
+        }
+    }*/
+    return false;
+}
+
+//Rochenoire end
 
 InventoryResult Player::_CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const* pProto, uint32& count, bool swap, Item* pSrcItem) const
 {
@@ -8678,7 +8856,7 @@ InventoryResult Player::_CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& de
 
     // check count of items (skip for auto move for same player from bank)
     uint32 no_similar_count = 0;                            // can't store this amount similar items
-    InventoryResult res = _CanTakeMoreSimilarItems(entry, count, pItem, &no_similar_count);
+    InventoryResult res = _CanTakeMoreSimilarItems(entry, count, pItem, &no_similar_count, swap); //RLS
     if (res != EQUIP_ERR_OK)
     {
         if (count == no_similar_count)
@@ -9889,6 +10067,275 @@ Item* Player::EquipNewItem(uint16 pos, uint32 item, bool update)
 
     return nullptr;
 }
+
+//Rochenoire loot system
+void Player::UpdateItemLevel(bool inventory)
+{
+    float iLevel = 0.0f;
+    float nbItem = 0;
+
+    for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+        if (Item const* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (ItemPrototype const* pProto = pItem->GetProto())
+                if ((pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR) && CanUseItem(pProto) == EQUIP_ERR_OK)
+                {
+                    nbItem++;
+                    iLevel += std::max((float)pProto->ItemLevel * sWorld.getConfig(qualityToCoeff[pProto->Quality]), 1.0f);
+                }
+
+    if (inventory)
+    {
+        for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+            if (Item const* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                if (ItemPrototype const* pProto = pItem->GetProto())
+                    if ((pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR) && CanUseItem(pProto) == EQUIP_ERR_OK)
+                    {
+                        nbItem++;
+                        iLevel += std::max((float)pProto->ItemLevel * sWorld.getConfig(qualityToCoeff[pProto->Quality]), 1.0f);
+                    }
+
+        for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+            if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                    if (Item const* pItem = GetItemByPos(i, j))
+                        if (ItemPrototype const* pProto = pItem->GetProto())
+                            if ((pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR) && CanUseItem(pProto) == EQUIP_ERR_OK)
+                            {
+                                nbItem++;
+                                iLevel += std::max((float)pProto->ItemLevel * sWorld.getConfig(qualityToCoeff[pProto->Quality]), 1.0f);
+                            }
+    }
+
+    iLevel /= std::max(nbItem, (float)getExpItemCount());
+    iLevel = std::max(iLevel, 5.0f);
+
+    if (GetItemLevel() < (uint32)iLevel)
+        SetItemLevel((uint32)iLevel);
+}
+
+
+float Player::countRelevant(uint32 pQuality, bool inventory) const
+{
+    float nbItem = 0;
+
+    for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+        if (Item const* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (ItemPrototype const* pProto = pItem->GetProto())
+                if ((pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR) && IsRelevant(pItem))
+                    if (pProto->Quality == pQuality)
+                        nbItem++;
+
+    if (inventory)
+    {
+        for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+            if (Item const* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                if (ItemPrototype const* pProto = pItem->GetProto())
+                    if ((pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR) && IsRelevant(pItem))
+                        if (pProto->Quality == pQuality)
+                            nbItem++;
+
+        for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+            if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                    if (Item const* pItem = GetItemByPos(i, j))
+                        if (ItemPrototype const* pProto = pItem->GetProto())
+                            if ((pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR) && IsRelevant(pItem))
+                                if (pProto->Quality == pQuality)
+                                    nbItem++;
+    }
+
+    return nbItem;
+}
+
+uint32 Player::getExpItemCount() const
+{
+    switch (getLevel())
+    {
+    case 1: return 4;
+    case 2: return 4;
+    case 3: return 5;
+    case 4: return 5;
+    case 5: return 6;
+    case 6: return 7;
+    case 7: return 7;
+    case 8: return 8;
+    case 9: return 8;
+    case 10: return 8;
+    case 11: return 8;
+    case 12: return 9;
+    case 13: return 9;
+    case 14: return 9;
+    case 15: return 9;
+    case 16: return 9;
+    case 17: return 9;
+    case 18: return 10;
+    case 19: return 10;
+    case 20: return 10;
+    case 21: return 11;
+    case 22: return 11;
+    case 23: return 11;
+    case 24: return 11;
+    case 25: return 12;
+    case 26: return 12;
+    case 27: return 12;
+    case 28: return 12;
+    case 29: return 12;
+    case 30: return 12;
+    case 31: return 13;
+    case 32: return 13;
+    case 33: return 13;
+    case 34: return 13;
+    case 35: return 13;
+    case 36: return 14;
+    case 37: return 14;
+    case 38: return 14;
+    case 39: return 14;
+    case 40: return 14;
+    case 41: return 14;
+    case 42: return 14;
+    case 43: return 14;
+    case 44: return 14;
+    case 45: return 14;
+    case 46: return 15;
+    case 47: return 15;
+    case 48: return 15;
+    case 49: return 15;
+    case 50: return 15;
+    case 51: return 15;
+    case 52: return 15;
+    case 53: return 15;
+    case 54: return 15;
+    case 55: return 15;
+    case 56: return 15;
+    case 57: return 15;
+    case 58: return 15;
+    case 59: return 15;
+    case 60: return 15;
+    case 61: return 15;
+    case 62: return 15;
+    case 63: return 15;
+    case 64: return 15;
+    case 65: return 15;
+    case 66: return 15;
+    case 67: return 16;
+    case 68: return 16;
+    case 69: return 16;
+    case 70: return 16;
+    default: return 4;
+    }
+}
+
+uint32 Player::getExpItemLevel() const
+{
+    switch (getLevel())
+    {
+    case 70: return 112;
+    case 69: return 85;
+    case 68: return 83;
+    case 67: return 81;
+    case 66: return 79;
+    case 65: return 76;
+    case 64: return 74;
+    case 63: return 71;
+    case 62: return 67;
+    case 61: return 62;
+    case 60: return 50;
+    case 59: return 46;
+    case 58: return 45;
+    case 57: return 44;
+    case 56: return 43;
+    case 55: return 43;
+    case 54: return 43;
+    case 53: return 42;
+    case 52: return 42;
+    case 51: return 41;
+    case 50: return 40;
+    case 49: return 40;
+    case 48: return 39;
+    case 47: return 38;
+    case 46: return 37;
+    case 45: return 37;
+    case 44: return 36;
+    case 43: return 35;
+    case 42: return 35;
+    case 41: return 34;
+    case 40: return 33;
+    case 39: return 33;
+    case 38: return 31;
+    case 37: return 30;
+    case 36: return 29;
+    case 35: return 28;
+    case 34: return 27;
+    case 33: return 27;
+    case 32: return 26;
+    case 31: return 25;
+    case 30: return 23;
+    case 29: return 23;
+    case 28: return 23;
+    case 27: return 22;
+    case 26: return 21;
+    case 25: return 20;
+    case 24: return 19;
+    case 23: return 19;
+    case 22: return 18;
+    case 21: return 17;
+    case 20: return 16;
+    case 19: return 15;
+    case 18: return 14;
+    case 17: return 13;
+    case 16: return 12;
+    case 15: return 11;
+    case 14: return 10;
+    case 13: return 9;
+    case 12: return 8;
+    case 11: return 8;
+    case 10: return 7;
+    case 9: return 6;
+    case 8: return 6;
+    default: return 5;
+    }
+}
+
+std::map<uint32, std::vector<uint32>> drop_map = {
+    //						  01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70
+    {ITEM_QUALITY_UNCOMMON, { 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1 }},
+    {ITEM_QUALITY_RARE,     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9 }},
+    {ITEM_QUALITY_EPIC,     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7 }},
+};
+
+float Player::getItemLevelCoeff(uint32 pQuality) const
+{
+    bool IsEnabled = sWorld.getConfig(CONFIG_BOOL_SMART_LOOT);
+
+    if (!IsEnabled)
+        return 1.0f;
+
+    float qualityModifier = std::max((float)getExpItemLevel() / (float)GetItemLevel(), 1.0f);
+    qualityModifier *= sWorld.getConfig(qualityToRate[pQuality]);
+
+    float quantityModifier = 1.0f;
+    float pCount = countRelevant(pQuality, true);
+    uint32 mLevel = CONFIG_UINT32_MAX_PLAYER_LEVEL;
+    uint32 pLevel = std::min((float)mLevel, (float)getLevel());
+
+    switch (pQuality)
+    {
+    case ITEM_QUALITY_UNCOMMON: // GREEN
+    case ITEM_QUALITY_RARE:     // BLUE
+    case ITEM_QUALITY_EPIC:     // PURPLE
+        float drop_value = (float)drop_map[pQuality][pLevel - 1];
+        quantityModifier = drop_value - pCount;
+        break;
+    }
+
+    uint32 coeffMaxAmount = sWorld.getConfig(CONFIG_UINT32_SMART_LOOT_AMOUNT);
+    float coeffModifier = std::max(qualityModifier, quantityModifier);
+
+    return std::min(coeffModifier, (float)coeffMaxAmount);
+}
+
+//Rochenoire end
+
 
 Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 {
@@ -13708,14 +14155,16 @@ void Player::SendPushToPartyResponse(Player* pPlayer, uint32 msg) const
     }
 }
 
-void Player::SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32 current, uint32 count)
+void Player::SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32 current, uint32 count, uint32 ReqItemId)
 {
     MANGOS_ASSERT(count < 64 && "Quest slot count store is limited to 6 bits 2^6 = 64 (0..63)");
+
+    ReqItemId = ReqItemId != 0 ? ReqItemId : pQuest->ReqItemId[item_idx]; //RLS
 
     // Update quest watcher and fire QUEST_WATCH_UPDATE
     DEBUG_LOG("WORLD: Sent SMSG_QUESTUPDATE_ADD_ITEM");
     WorldPacket data(SMSG_QUESTUPDATE_ADD_ITEM, (4 + 4));
-    data << pQuest->ReqItemId[item_idx];
+    data << ReqItemId;  //RLS
     data << count;
     GetSession()->SendPacket(data);
 
@@ -17255,6 +17704,13 @@ void Player::InitDisplayIds()
             sLog.outError("Invalid gender %u for player", gender);
     }
 }
+
+// Return true if the item is relevant for the player //RLS
+bool Player::IsRelevant(const Item* item) const
+{
+    return (((float)item->GetProto()->RequiredLevel / float(getLevel()) >= 0.75f) && CanUseItem(item->GetProto()) == EQUIP_ERR_OK);
+}
+
 
 // Return true is the bought item has a max count to force refresh of window by caller
 bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, uint8 bag, uint8 slot)

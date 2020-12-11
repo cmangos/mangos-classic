@@ -182,8 +182,9 @@ bool Bag::IsEmpty() const
 
 Item* Bag::GetItemByEntry(uint32 item) const
 {
+    item = Item::LoadScaledParent(item); //RLS
     for (uint32 i = 0; i < GetBagSize(); ++i)
-        if (m_bagslot[i] && m_bagslot[i]->GetEntry() == item)
+        if (m_bagslot[i] && /*RLS*/ Item::LoadScaledParent(m_bagslot[i]->GetEntry()) == item)   // Rochenoire RLS G : if (m_bagslot[i] && m_bagslot[i]->GetEntry() == item)
             return m_bagslot[i];
 
     return nullptr;
@@ -191,6 +192,7 @@ Item* Bag::GetItemByEntry(uint32 item) const
 
 uint32 Bag::GetItemCount(uint32 item, Item* skipItem) const
 {
+    item = Item::LoadScaledParent(item); //RLS
     uint32 count = 0;
 
     if (this != skipItem && GetEntry() == item)
@@ -198,7 +200,7 @@ uint32 Bag::GetItemCount(uint32 item, Item* skipItem) const
 
     for (uint32 i = 0; i < GetBagSize(); ++i)
         if (m_bagslot[i])
-            if (m_bagslot[i] != skipItem && m_bagslot[i]->GetEntry() == item)
+            if (m_bagslot[i] != skipItem &&/*RLS*/ Item::LoadScaledParent(m_bagslot[i]->GetEntry()) == item) // Rochenoire RLS G :if (m_bagslot[i] != skipItem && m_bagslot[i]->GetEntry() == item)
                 count += m_bagslot[i]->GetCount();
 
     return count;

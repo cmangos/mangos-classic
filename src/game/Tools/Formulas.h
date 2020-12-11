@@ -338,7 +338,7 @@ namespace MaNGOS
             if (target->IsTotem() || target->IsPet() || target->IsNoXp() || target->IsCritter())
                 return 0;
 
-            float xp_gain = BaseGain(unit->getLevel(), target->getLevel());
+            float xp_gain = BaseGain(unit->getLevel(), target->GetLevelForTarget(unit));
             if (xp_gain == 0.0f)
                 return 0;
 
@@ -374,6 +374,27 @@ namespace MaNGOS
                     return 1.4f;
                 default:
                     return std::max(1.f - count * 0.05f, 0.01f);
+            }
+        }
+    }
+    //RLS
+    namespace DROP
+    {
+        inline float drop_in_group_rate(uint32 count, bool /*isRaid*/)
+        {
+            float drop_group = sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_ITEM_GROUP);
+
+            switch (count)
+            {
+            default:
+            case 0:
+            case 1:
+                return 1;
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+                return 1 + ((float)count * drop_group);
             }
         }
     }

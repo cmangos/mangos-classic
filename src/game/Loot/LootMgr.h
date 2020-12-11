@@ -169,15 +169,16 @@ struct LootStoreItem
     bool    needs_quest : 1;                                // quest drop (negative ChanceOrQuestChance in DB)
     uint8   maxcount    : 8;                                // max drop count for the item (mincountOrRef positive) or Ref multiplicator (mincountOrRef negative)
     uint16  conditionId : 16;                               // additional loot condition Id
+    uint32  qualityId = 0;                                  // used by smart loot //RLS
 
     // Constructor, converting ChanceOrQuestChance -> (chance, needs_quest)
     // displayid is filled in IsValid() which must be called after
-    LootStoreItem(uint32 _itemid, float _chanceOrQuestChance, int8 _group, uint16 _conditionId, int32 _mincountOrRef, uint8 _maxcount)
+    LootStoreItem(uint32 _itemid, float _chanceOrQuestChance, int8 _group, uint16 _conditionId, int32 _mincountOrRef, uint8 _maxcount,/*RLS*/ uint32 _qualityId)
         : itemid(_itemid), chance(fabs(_chanceOrQuestChance)), mincountOrRef(_mincountOrRef),
-          group(_group), needs_quest(_chanceOrQuestChance < 0), maxcount(_maxcount), conditionId(_conditionId)
+          group(_group), needs_quest(_chanceOrQuestChance < 0), maxcount(_maxcount), conditionId(_conditionId),/*RLS*/ qualityId(_qualityId)
     {}
 
-    bool Roll(bool rate) const;                             // Checks if the entry takes it's chance (at loot generation)
+    bool Roll(bool rate,/*RLS*/ Player const* lootOwner) const;                             // Checks if the entry takes it's chance (at loot generation)
     bool IsValid(LootStore const& store, uint32 entry) const;
     // Checks correctness of values
 };
@@ -198,6 +199,9 @@ struct LootItem
     bool         isUnderThreshold  : 1;
     bool         currentLooterPass : 1;
     bool         isReleased        : 1;                             // true if item is released by looter or by roll system
+    bool         isScaled = false;                         // true if item is scaled //RLS
+    std::map<uint32, uint32> randomPropertyIdArray;  //RLS
+    //std::map<uint32, uint32> randomSuffixIdArray;   //RLS
 
     // storing item prototype for fast access
     ItemPrototype const* itemProto;
@@ -207,6 +211,14 @@ struct LootItem
     explicit LootItem(LootStoreItem const& li, uint32 _lootSlot, uint32 threshold);
 
     LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId, uint32 _lootSlot);
+
+    //Rochenoire loot system
+    int32 getRandomPropertyScaled(uint32 ilevel, bool won = false, bool display = true);
+    void setRandomPropertyScaled();
+    //int32 getRandomSuffixScaled(uint32 ilevel, bool won = false, bool display = true);
+    //void setRandomSuffixScaled();
+    uint32 loot_level = 0;
+    //Rochenoire end
 
     // Basic checks for player/item compatibility - if false no chance to see the item in the loot
     bool AllowedForPlayer(Player const* player, WorldObject const* lootTarget) const;

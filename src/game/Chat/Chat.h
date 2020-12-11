@@ -160,6 +160,11 @@ class ChatHandler
         std::string ExtractPlayerNameFromLink(char** text);
         bool ExtractPlayerTarget(char** args, Player** player, ObjectGuid* player_guid = nullptr, std::string* player_name = nullptr);
 
+        //Rochenoire LootSystem
+        Player* GetPlayer();
+        std::string GetLocalItemLink(Item* pItem) const;
+        //Rochenoire end
+
         WorldSession* GetSession() const { return m_session; }
     protected:
         explicit ChatHandler() : m_session(nullptr), sentErrorMessage(false)
@@ -526,7 +531,9 @@ class ChatHandler
         bool HandleReloadItemRequiredTragetCommand(char* args);
 
         //Rochenoire FlexRaidSys and RCS
+        //bool HandleReloadCreatureFlexCommand(char* args);
         bool HandleReloadZoneFlexCommand(char* args);
+        bool HandleReloadLootScaleCommand(char* args);
         //Rochenoire end
 
         bool HandleReloadLocalesCreatureCommand(char* args);

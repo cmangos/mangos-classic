@@ -288,6 +288,14 @@ class Item : public Object
         uint32 GetItemSuffixFactor() const { return GetUInt32Value(ITEM_FIELD_PROPERTY_SEED); }
         void SetItemRandomProperties(int32 randomPropId);
         static int32 GenerateItemRandomPropertyId(uint32 item_id);
+
+        //Rochenoire loot system
+        static uint32 LoadScaledLoot(uint32 itemid, Player* pPlayer);
+        static uint32 LoadScaledLoot(uint32 itemid, uint32 plevel);
+        static uint32 LoadScaledParent(uint32 itemid);
+        static uint32 ComputeRequiredLevel(uint32 quality, uint32 ilevel);
+        //Rochenoire end
+
         void SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges, ObjectGuid caster = ObjectGuid());
         void SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration);
         void SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges);

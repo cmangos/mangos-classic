@@ -1094,6 +1094,7 @@ class Player : public Unit
         uint8 FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) const;
         uint32 GetItemCount(uint32 item, bool inBankAlso = false, Item* skipItem = nullptr) const;
         Item* GetItemByGuid(ObjectGuid guid) const;
+        Item* GetItemByEntry(uint32 item) const; //RLS 
         Item* GetItemByPos(uint16 pos) const;
         Item* GetItemByPos(uint8 bag, uint8 slot) const;
         Item* GetWeaponForAttack(WeaponAttackType attackType) const { return GetWeaponForAttack(attackType, false, false); }
@@ -1113,6 +1114,7 @@ class Player : public Unit
         uint8 GetBankBagSlotCount() const { return GetByteValue(PLAYER_BYTES_2, 2); }
         void SetBankBagSlotCount(uint8 count) { SetByteValue(PLAYER_BYTES_2, 2, count); }
         bool HasItemCount(uint32 item, uint32 count, bool inBankAlso = false) const;
+        uint32 HasScaledItemCount(uint32 item, uint32 count = 1, bool inBankAlso = false) const; //RLS
         bool HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item const* ignoreItem = nullptr) const;
         bool CanNoReagentCast(SpellEntry const* spellInfo) const;
         bool HasItemWithIdEquipped(uint32 item, uint32 count, uint8 except_slot = NULL_SLOT) const;
@@ -1140,6 +1142,7 @@ class Player : public Unit
         InventoryResult CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap, bool not_loading = true) const;
         InventoryResult CanUseItem(Item* pItem, bool direct_action = true) const;
         bool HasItemTotemCategory(uint32 TotemCategory) const;
+        bool HasItemCategory(uint32 ItemCategory, uint32 ItemSubCategory) const; //RLS
         InventoryResult CanUseItem(ItemPrototype const* pProto, bool direct_action = true) const;
         InventoryResult CanUseAmmo(uint32 item) const;
         Item* StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update, int32 randomPropertyId = 0);
@@ -1155,7 +1158,7 @@ class Player : public Unit
 
         Item* ConvertItem(Item* item, uint32 newItemId);
 
-        InventoryResult _CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count = nullptr) const;
+        InventoryResult _CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count = nullptr,/*RLS*/ bool swap = false) const;
         InventoryResult _CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, Item* pItem = nullptr, bool swap = false, uint32* no_space_count = nullptr) const;
 
         void ApplyEquipCooldown(Item* pItem);
@@ -1203,6 +1206,8 @@ class Player : public Unit
         }
         void SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast = false, bool showInChat = true);
         bool BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, uint8 bag, uint8 slot);
+        
+        bool IsRelevant(const Item* item) const; //RLS Vendor System
 
         float GetReputationPriceDiscount(Creature const* creature) const;
         float GetReputationPriceDiscount(FactionTemplateEntry const* factionTemplate) const;
@@ -1226,6 +1231,14 @@ class Player : public Unit
         void LoadCorpse();
         void LoadPet();
 
+        //Rochenoire
+        void UpdateItemLevel(bool inventory);
+        uint32 getExpItemCount() const;
+        uint32 getExpItemLevel() const;
+        float countRelevant(uint32 pQuality, bool inventory) const;
+        float  getItemLevelCoeff(uint32 pQuality) const;
+        //Rochenoire end
+
         uint32 m_stableSlots;
 
         /*********************************************************/
@@ -1246,7 +1259,7 @@ class Player : public Unit
 
         //Rochenoire RCS G: uint32 GetQuestLevelForPlayer(Quest const* pQuest) const { return pQuest && (pQuest->GetQuestLevel() > 0) ? pQuest->GetQuestLevel() : getLevel(); }
         // Return player level when QuestLevel is dynamic (-1)
-        uint32 GetQuestLevelForPlayer(Quest const* pQuest) const;
+        uint32 GetQuestLevelForPlayer(Quest const* pQuest) const; //Rochenoire
 
         void PrepareQuestMenu(ObjectGuid guid) const;
         void SendPreparedQuest(ObjectGuid guid) const;
@@ -1350,7 +1363,7 @@ class Player : public Unit
         void SendCanTakeQuestResponse(uint32 msg) const;
         void SendQuestConfirmAccept(Quest const* pQuest, Player* pReceiver) const;
         void SendPushToPartyResponse(Player* pPlayer, uint32 msg) const;
-        void SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32 current, uint32 count);
+        void SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32 current, uint32 count, uint32 ReqItemId = 0);
         void SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, ObjectGuid guid, uint32 creatureOrGO_idx, uint32 count);
         void SendQuestGiverStatusMultiple() const;
 

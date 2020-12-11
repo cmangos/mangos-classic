@@ -388,7 +388,15 @@ void World::LoadConfigSettings(bool reload)
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_EPIC,                       "Rate.Drop.Item.Epic",                       1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_LEGENDARY,                  "Rate.Drop.Item.Legendary",                  1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_ARTIFACT,                   "Rate.Drop.Item.Artifact",                   1.0f);
+    setConfigPos(CONFIG_FLOAT_RATE_WEIGHT_ITEM_POOR,                     "Rate.Weight.Item.Poor",                     1.0f);
+    setConfigPos(CONFIG_FLOAT_RATE_WEIGHT_ITEM_NORMAL,                   "Rate.Weight.Item.Normal",                   1.0f);
+    setConfigPos(CONFIG_FLOAT_RATE_WEIGHT_ITEM_UNCOMMON,                 "Rate.Weight.Item.Uncommon",                 1.0f);
+    setConfigPos(CONFIG_FLOAT_RATE_WEIGHT_ITEM_RARE,                     "Rate.Weight.Item.Rare",                     1.0f);
+    setConfigPos(CONFIG_FLOAT_RATE_WEIGHT_ITEM_EPIC,                     "Rate.Weight.Item.Epic",                     1.0f);
+    setConfigPos(CONFIG_FLOAT_RATE_WEIGHT_ITEM_LEGENDARY,                "Rate.Weight.Item.Legendary",                1.0f);
+    setConfigPos(CONFIG_FLOAT_RATE_WEIGHT_ITEM_ARTIFACT,                 "Rate.Weight.Item.Artifact",                 1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_REFERENCED,                 "Rate.Drop.Item.Referenced",                 1.0f);
+    setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_REFERENCED_AMOUNT,          "Rate.Drop.Item.ReferencedAmount",           1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_QUEST,                      "Rate.Drop.Item.Quest",                      1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_MONEY,                           "Rate.Drop.Money",                           1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_PET_XP_KILL,                          "Rate.Pet.XP.Kill",                          1.0f);
@@ -579,6 +587,47 @@ void World::LoadConfigSettings(bool reload)
     //Rochenoire RCS start
     setConfig(CONFIG_BOOL_CALCULATE_CREATURE_ZONE_AREA_DATA, "Calculate.Creature.Zone.Area.Data", false);
     setConfig(CONFIG_BOOL_CALCULATE_GAMEOBJECT_ZONE_AREA_DATA, "Calculate.Gameoject.Zone.Area.Data", false);
+
+
+    //setConfig(CONFIG_BOOL_SCALE_FORCE_PVP, "Rochenoire.Scaling.PvP.Enabled", false);
+    /*
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_CONSUMABLE, "Rochenoire.Scaling.Vendor.Consumable", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_CONTAINER, "Rochenoire.Scaling.Vendor.Container", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_WEAPON, "Rochenoire.Scaling.Vendor.Weapon", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_GEM, "Rochenoire.Scaling.Vendor.Gem", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_ARMOR, "Rochenoire.Scaling.Vendor.Armor", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_REAGENT, "Rochenoire.Scaling.Vendor.Reagent", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_PROJECTILE, "Rochenoire.Scaling.Vendor.Projectile", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_TRADE_GOODS, "Rochenoire.Scaling.Vendor.TradeGoods", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_GENERIC, "Rochenoire.Scaling.Vendor.Generic", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_RECIPE, "Rochenoire.Scaling.Vendor.Recipe", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_MONEY, "Rochenoire.Scaling.Vendor.Money", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_QUIVER, "Rochenoire.Scaling.Vendor.Quiver", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_QUEST, "Rochenoire.Scaling.Vendor.Quest", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_KEY, "Rochenoire.Scaling.Vendor.Key", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_PERMANENT, "Rochenoire.Scaling.Vendor.Permanent", 0);
+    setConfig(CONFIG_UINT32_SCALE_VENDOR_MISC, "Rochenoire.Scaling.Vendor.Misc", 0);
+    */
+
+    setConfig(CONFIG_BOOL_SMART_LOOT, "Rochenoire.SmartLoot.Enabled", true);
+    setConfig(CONFIG_UINT32_SMART_LOOT_AMOUNT, "Rochenoire.SmartLoot.Amount", 4);
+
+    setConfig(CONFIG_FLOAT_RATE_DROP_ITEM_GROUP, "Rochenoire.Rate.Drop.Item.Group", 1.0f);
+    //setConfig(CONFIG_FLOAT_RATE_XP_GROUP, "Rochenoire.Rate.XP.Group", 1.0f);
+
+    //Rochenoire Flexible Raid sys
+    /*
+    setConfig(CONFIG_UINT32_FLEXIBLE_CORE_MAPTYPE, "Rochenoire.Flexible.Core.MapType", 2);
+    setConfig(CONFIG_FLOAT_FLEXIBLE_CORE_RATIO, "Rochenoire.Flexible.Core.Ratio", 2);
+    setConfig(CONFIG_UINT32_FLEXIBLE_CORE_MINSIZE_COMMON, "Rochenoire.Flexible.Core.MinSize.Common", 5);
+    setConfig(CONFIG_UINT32_FLEXIBLE_CORE_MINSIZE_INSTANCE, "Rochenoire.Flexible.Core.MinSize.Instance", 5);
+    setConfig(CONFIG_UINT32_FLEXIBLE_CORE_MINSIZE_RAID, "Rochenoire.Flexible.Core.MinSize.Raid", 5);
+    setConfig(CONFIG_UINT32_FLEXIBLE_CORE_MINSIZE_BATTLEGROUND, "Rochenoire.Flexible.Core.MinSize.Battleground", 5);
+    setConfig(CONFIG_UINT32_FLEXIBLE_CORE_MINSIZE_ARENA, "Rochenoire.Flexible.Core.MinSize.Arena", 5);
+    */
+
+
+
     //Rochenoire end
 
 
@@ -1156,6 +1205,11 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Waypoints...");
     sWaypointMgr.Load();
 
+    //Rochenoire start RLS
+
+    sLog.outString("Loading Item Loot Scale...");
+    sObjectMgr.LoadLootScale();
+    
     //Rochenoire start RCS
     sLog.outString("Load Zone Flex Details...");
     sObjectMgr.LoadZoneScale();

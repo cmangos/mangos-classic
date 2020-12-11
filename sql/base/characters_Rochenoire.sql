@@ -602,6 +602,7 @@ CREATE TABLE `characters` (
   `class` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `gender` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `level` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `ilevel` tinyint(3) unsigned NOT NULL DEFAULT '5',
   `xp` int(10) unsigned NOT NULL DEFAULT '0',
   `money` int(10) unsigned NOT NULL DEFAULT '0',
   `playerBytes` int(10) unsigned NOT NULL DEFAULT '0',

@@ -2203,6 +2203,50 @@ void ObjectMgr::LoadZoneScale()
     sLog.outString(">> Loaded %lu Zone scaling details", (unsigned long)mZoneFlexMap.size());
 }
 
+//Rochenoire loot system
+void ObjectMgr::LoadLootScale()
+{
+    mLootScaleMap.clear();
+    mLootScaleParentingMap.clear();
+    QueryResult* result = WorldDatabase.Query("SELECT * FROM scale_loot");
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outString();
+        sLog.outString(">> Loaded 0 Item loot scale. DB table `scale_loot` is empty.");
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+        uint32 item = fields[1].GetUInt32();
+        uint32 level = fields[2].GetUInt32();
+
+        ItemLootScale& data = mLootScaleParentingMap[item];
+        data.ItemId = entry;
+        data.ReplacementId = item;
+        data.plevel = level;
+
+        std::string s = std::to_string(entry) + ":" + std::to_string(level);
+        ItemLootScale& data2 = mLootScaleMap[s];
+        data2.ItemId = entry;
+        data2.ReplacementId = item;
+        data2.plevel = level;
+
+    } while (result->NextRow());
+
+    delete result;
+    sLog.outString();
+    sLog.outString(">> Loaded %lu Item Loot Scale", (unsigned long)mLootScaleMap.size());
+}
 
 //Rochenoire end
 

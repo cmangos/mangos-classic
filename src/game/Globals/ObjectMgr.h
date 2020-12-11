@@ -234,8 +234,8 @@ typedef std::unordered_map<uint32, QuestLocale> QuestLocaleMap;
 typedef std::unordered_map<uint32, uint32> CreaturePoolMap;
 typedef std::unordered_map<uint32, ZoneFlex> ZoneFlexMap;
 //typedef std::unordered_map<std::string, CreatureFlex> CreatureFlexMap;
-//typedef std::unordered_map<std::string, ItemLootScale> LootScaleMap;
-//typedef std::unordered_map<uint32, ItemLootScale> LootScaleParentingMap;
+typedef std::unordered_map<std::string, ItemLootScale> LootScaleMap;
+typedef std::unordered_map<uint32, ItemLootScale> LootScaleParentingMap;
 typedef std::unordered_map<uint32, NpcTextLocale> NpcTextLocaleMap;
 typedef std::unordered_map<uint32, PageTextLocale> PageTextLocaleMap;
 typedef std::unordered_map<int32, MangosStringLocale> MangosStringLocaleMap;
@@ -741,6 +741,8 @@ class ObjectMgr
 
         //Rochenoire FlexRaidSys and RCS
         void LoadZoneScale();
+        //Rochenoire loot sys
+        void LoadLootScale();
         //Rochenoire end
 
         void LoadQuestLocales();
@@ -927,6 +929,20 @@ class ObjectMgr
             return &itr->second;
         }
 
+        //Rochenoire loot system
+        ItemLootScale const* GetItemLootScale(std::string entry) const
+        {
+            LootScaleMap::const_iterator itr = mLootScaleMap.find(entry);
+            if (itr == mLootScaleMap.end()) return nullptr;
+            return &itr->second;
+        }
+
+        ItemLootScale const* GetItemLootParentingScale(uint32 entry) const
+        {
+            LootScaleParentingMap::const_iterator itr = mLootScaleParentingMap.find(entry);
+            if (itr == mLootScaleParentingMap.end()) return nullptr;
+            return &itr->second;
+        }
 
         //Rochenoire end
 
@@ -1382,7 +1398,8 @@ class ObjectMgr
 
         //Rochenoire start
         ZoneFlexMap mZoneFlexMap;
-
+        LootScaleMap mLootScaleMap;
+        LootScaleParentingMap mLootScaleParentingMap;
         //Rochenoire end
 
         QuestLocaleMap mQuestLocaleMap;

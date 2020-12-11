@@ -1584,11 +1584,11 @@ class Unit : public WorldObject
         void SetLevelVar(int var) { level_var = var; };
 
         //Item Scaling
-        /*
+        
         uint32 ilevel_avg = 5;
         uint32 GetItemLevel() const { return ilevel_avg; };
         void SetItemLevel(uint32 ilevel) { ilevel_avg = ilevel; };
-        */
+        
 
         //Flexible Core
         
