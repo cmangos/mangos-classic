@@ -166,6 +166,12 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         }
     }
 
+    if (isType(TYPEMASK_UNIT))
+    {
+        if (static_cast<Unit const*>(this)->GetVictim() && static_cast<Unit const*>(this)->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
+            updateFlags |= UPDATEFLAG_HAS_ATTACKING_TARGET;
+    }
+
     // DEBUG_LOG("BuildCreateUpdate: update-type: %u, object-type: %u got updateFlags: %X", updatetype, m_objectTypeId, updateFlags);
 
     ByteBuffer buf(500);
@@ -322,10 +328,10 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
     if (updateFlags & UPDATEFLAG_ALL)
         *data << (uint32)0x1;
 
-    if (updateFlags & UPDATEFLAG_FULLGUID)
+    if (updateFlags & UPDATEFLAG_HAS_ATTACKING_TARGET) // packed guid (current melee attack target guid)
     {
-        if (unit && unit->GetVictim())
-            *data << unit->GetVictim()->GetPackGUID();
+        if (static_cast<Unit const*>(this)->GetVictim())
+            *data << static_cast<Unit const*>(this)->GetVictim()->GetPackGUID();
         else
             data->appendPackGUID(0);
     }
