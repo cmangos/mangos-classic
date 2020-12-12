@@ -135,9 +135,8 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void DistanceYourself(float dist);
         void MoveConfused();
         void MoveFleeing(Unit* enemy, uint32 time = 0);
-        void MovePoint(uint32 id, Position& position, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, bool generatePath = true);
+        void MovePoint(uint32 id, Position const& position, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, float speed = 0.f, bool generatePath = true);
         void MovePoint(uint32 id, float x, float y, float z, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, bool generatePath = true);
-        void MovePoint(uint32 id, float x, float y, float z, float o, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, bool generatePath = true);
         void MovePointTOL(uint32 id, float x, float y, float z, bool takeOff, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE);
         void MovePath(std::vector<G3D::Vector3>& path, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, bool flying = false);
         void MovePath(std::vector<G3D::Vector3>& path, float o, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, bool flying = false);
