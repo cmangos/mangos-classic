@@ -408,7 +408,7 @@ struct boss_onyxiaAI : public CombatAI
                 m_creature->SetTarget(nullptr);
                 SetCombatScriptStatus(true);
 
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFTOFF, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, -84.25523f, 6.248279f);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFTOFF, Position(aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, -84.25523f, 6.248279f));
                 SetActionReadyStatus(action, false);
                 break;
             }

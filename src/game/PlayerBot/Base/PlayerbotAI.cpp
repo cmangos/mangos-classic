@@ -5308,7 +5308,7 @@ void PlayerbotAI::findNearbyCreature()
             {
                 float x, y, z;
                 wo->GetContactPoint(m_bot, x, y, z, wo->GetObjectBoundingRadius());
-                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z, false);
+                m_bot->GetMotionMaster()->MovePoint(wo->GetMapId(), x, y, z, FORCED_MOVEMENT_NONE, false);
                 // give time to move to point before trying again
                 SetIgnoreUpdateTime(1);
             }
