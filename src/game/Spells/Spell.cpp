@@ -3081,7 +3081,7 @@ void Spell::_handle_immediate_phase()
     // handle some immediate features of the spell here
     HandleThreatSpells();
 
-    // handle none and dest targeted effects
+    // handle none targeted effects
     DoAllTargetlessEffects(false);
 
     // process items
