@@ -14087,24 +14087,10 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         }
         if (transport)
         {
-<<<<<<< HEAD
             transport->AddPassenger(this);
             SetLocationMapId(transport->GetMapId());
             transport->UpdatePassengerPosition(this);
-            SetMap(sMapMgr.CreateMap(GetMapId(), this));
-=======
-            MapEntry const* transMapEntry = sMapStore.LookupEntry(transport->GetMapId());
-            // client without expansion support
-            if (GetSession()->GetExpansion() < transMapEntry->Expansion())
-                DEBUG_LOG("Player %s using client without required expansion tried login at transport at non accessible map %u", GetName(), transport->GetMapId());
-            else
-            {
-                transport->AddPassenger(this);
-                SetLocationMapId(transport->GetMapId());
-                transport->UpdatePassengerPosition(this);
-                SetMap(map);
-            }
->>>>>>> eacf7237fd0... Transport: Move transports from map manager to map
+            SetMap(map);
         }
 
         if (!m_transport && guid.GetHigh() == HIGHGUID_MO_TRANSPORT)
