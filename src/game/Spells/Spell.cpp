@@ -3017,7 +3017,7 @@ void Spell::_handle_immediate_phase()
     m_diminishLevel = DIMINISHING_LEVEL_1;
     m_diminishGroup = DIMINISHING_NONE;
 
-    // handle none and dest targeted effects
+    // handle none targeted effects
     DoAllTargetlessEffects(false);
 
     // process items
@@ -3027,6 +3027,16 @@ void Spell::_handle_immediate_phase()
     // fill initial spell damage from caster for immediate effects
     for (auto& ihit : m_UniqueTargetInfo)
         HandleImmediateEffectExecution(&ihit);
+
+    // process self immediately
+    for (auto& ihit : m_UniqueTargetInfo)
+    {
+        if (ihit.targetGUID == m_caster->GetObjectGuid())
+        {
+            DoAllEffectOnTarget(&ihit);
+            break;
+        }
+    }
 
     // start channeling if applicable (after _handle_immediate_phase for get persistent effect dynamic object for channel target
     if (IsChanneledSpell(m_spellInfo) && m_duration)
