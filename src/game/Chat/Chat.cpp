@@ -987,6 +987,38 @@ std::string ChatHandler::GetNameLink() const
     return GetNameLink(m_session->GetPlayer());
 }
 
+//Rochenoire LootScaling : Bonus Upgrade
+std::string ChatHandler::GetLocalItemQuality(Item* pItem) const
+{
+    ItemPrototype const* pProto = pItem->GetProto();
+
+    if (pProto)
+    {
+        std::string Quality;
+
+        switch (pProto->Quality) // cffa335ee
+        {
+        default:
+        case ITEM_QUALITY_NORMAL: Quality = "Normal"; break;
+        case ITEM_QUALITY_POOR: Quality = "Poor"; break;
+        case ITEM_QUALITY_UNCOMMON: Quality = "Uncommon"; break;
+        case ITEM_QUALITY_RARE: Quality = "Rare"; break;
+        case ITEM_QUALITY_EPIC: Quality = "Epic"; break;
+        case ITEM_QUALITY_LEGENDARY: Quality = "Legendary"; break;
+        case ITEM_QUALITY_ARTIFACT: Quality = "Artifact"; break;
+        }
+
+        return Quality;
+    }
+
+    return "";
+}
+
+
+
+//Rochenoire end
+
+
 bool ChatHandler::HasLowerSecurity(Player* target, ObjectGuid guid, bool strong)
 {
     WorldSession* target_session = nullptr;
@@ -3360,7 +3392,29 @@ std::string ChatHandler::GetLocalItemLink(Item* pItem) const
             }
         }
 
-        return m_session ? "|cffffffff|Hitem:" + std::to_string(pProto->ItemId) + ":0:" + std::to_string(pItem->GetItemRandomPropertyId()) + ":0|h[" + Name + "]|h|r" : Name;
+        //return m_session ? "|cffffffff|Hitem:" + std::to_string(pProto->ItemId) + ":0:" + std::to_string(pItem->GetItemRandomPropertyId()) + ":0|h[" + Name + "]|h|r" : Name;
+
+
+        //Rochenoire Loot scaling system : bonus upgrade
+        std::string Quality;
+        switch (pProto->Quality) // cffa335ee
+        {
+        default:
+        case ITEM_QUALITY_NORMAL: Quality = "ffffff"; break;
+        case ITEM_QUALITY_POOR: Quality = "9d9d9d"; break;
+        case ITEM_QUALITY_UNCOMMON: Quality = "1eff00"; break;
+        case ITEM_QUALITY_RARE: Quality = "0070dd"; break;
+        case ITEM_QUALITY_EPIC: Quality = "a335ee"; break;
+        case ITEM_QUALITY_LEGENDARY: Quality = "ff8000"; break;
+        case ITEM_QUALITY_ARTIFACT: Quality = "e6cc80"; break;
+        }
+
+        return m_session ? "|cff" + Quality + "|Hitem:" + std::to_string(pProto->ItemId) + ":0:" + std::to_string(pItem->GetItemRandomPropertyId()) + ":0|h[" + Name + "]|h|r" : Name;
+
+
+        //Rochenoire end
+
+
     }
 
     return "";

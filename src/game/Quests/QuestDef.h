@@ -268,8 +268,10 @@ class Quest
         uint32 ReqCreatureOrGOCount[QUEST_OBJECTIVES_COUNT];
         uint32 ReqSpell[QUEST_OBJECTIVES_COUNT];
         uint32 RewChoiceItemId[QUEST_REWARD_CHOICES_COUNT];
+        Item* RewChoiceItemIdUp[QUEST_REWARD_CHOICES_COUNT]; //RLS  //Rochenoire
         uint32 RewChoiceItemCount[QUEST_REWARD_CHOICES_COUNT];
         uint32 RewItemId[QUEST_REWARDS_COUNT];
+        Item* RewItemIdUp[QUEST_REWARDS_COUNT]; //RLS  //Rochenoire
         uint32 RewItemCount[QUEST_REWARDS_COUNT];
         uint32 RewRepFaction[QUEST_REPUTATIONS_COUNT];
         int32  RewRepValue[QUEST_REPUTATIONS_COUNT];

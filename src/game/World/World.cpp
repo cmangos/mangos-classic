@@ -523,8 +523,12 @@ void World::LoadConfigSettings(bool reload)
 
     setConfigMinMax(CONFIG_UINT32_SKIP_CINEMATICS, "SkipCinematics", 0, 0, 2);
 
+    //setConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL, "MaxPlayerLevel", DEFAULT_MAX_LEVEL);
+
     if (configNoReload(reload, CONFIG_UINT32_MAX_PLAYER_LEVEL, "MaxPlayerLevel", DEFAULT_MAX_LEVEL))
         setConfigMinMax(CONFIG_UINT32_MAX_PLAYER_LEVEL, "MaxPlayerLevel", DEFAULT_MAX_LEVEL, 1, MAX_LEVEL);
+
+   
 
     setConfigMinMax(CONFIG_UINT32_START_PLAYER_LEVEL, "StartPlayerLevel", 1, 1, getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
 
@@ -624,9 +628,22 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_FLEXIBLE_CORE_MINSIZE_RAID, "Rochenoire.Flexible.Core.MinSize.Raid", 5);
     setConfig(CONFIG_UINT32_FLEXIBLE_CORE_MINSIZE_BATTLEGROUND, "Rochenoire.Flexible.Core.MinSize.Battleground", 5);
     setConfig(CONFIG_UINT32_FLEXIBLE_CORE_MINSIZE_ARENA, "Rochenoire.Flexible.Core.MinSize.Arena", 5);
+
+
+
+    //Rochenoire other
+     setConfig(CONFIG_BOOL_CALCULATE_CREATURE_ZONE_AREA_DATA, "Calculate.Creature.Zone.Area.Data", false);
+    setConfig(CONFIG_BOOL_CALCULATE_GAMEOBJECT_ZONE_AREA_DATA, "Calculate.Gameoject.Zone.Area.Data", false);
+    setConfig(CONFIG_UINT32_SUMMONINGRITUAL_REQPARTICIPANTS, "SummoningRitual.ReqParticipants", 4);
+    setConfig(CONFIG_BOOL_SUMMONINGRITUAL_ALLOW_SELF, "SummoningRitual.AllowSelfUse", false);
     */
 
+    //Rochenoire Bonus loot : RLS
+    setConfig(CONFIG_FLOAT_RATE_UPGRADE_ITEM_RARE, "BonusUpgrade.Rate.Rare", 1.0f);
+    setConfig(CONFIG_FLOAT_RATE_UPGRADE_ITEM_EPIC, "BonusUpgrade.Rate.Epic", 1.0f);
 
+    setConfig(CONFIG_BOOL_BONUS_UPGRADE_QUEST, "BonusUpgrade.Quest", false);
+    setConfig(CONFIG_BOOL_BONUS_UPGRADE_CRAFTING, "BonusUpgrade.Crafting", false);
 
     //Rochenoire end
 
@@ -2466,6 +2483,14 @@ void World::InvalidatePlayerDataToAllClient(ObjectGuid guid) const
     data << guid;
     SendGlobalMessage(data);
 }
+
+//Rochenoire
+/*
+uint32 World::GetCurrentMaxLevel() const
+{
+    return getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
+}*/
+//Rochenoire end
 
 void World::IncrementOpcodeCounter(uint32 opcodeId)
 {

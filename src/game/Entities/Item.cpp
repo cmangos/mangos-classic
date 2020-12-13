@@ -27,6 +27,20 @@
 #include "Spells/SpellTargetDefines.h"
 #include "World/World.h" //Rochenoire
 
+
+static eConfigFloatValues const qualityToUpgrade[MAX_ITEM_QUALITY] =
+{
+    CONFIG_FLOAT_RATE_DROP_ITEM_POOR,                       // PLACEHOLDER: ITEM_QUALITY_POOR
+    CONFIG_FLOAT_RATE_DROP_ITEM_NORMAL,                     // PLACEHOLDER: ITEM_QUALITY_NORMAL
+    CONFIG_FLOAT_RATE_DROP_ITEM_UNCOMMON,                   // PLACEHOLDER: ITEM_QUALITY_UNCOMMON
+    CONFIG_FLOAT_RATE_UPGRADE_ITEM_RARE,                    // ITEM_QUALITY_RARE
+    CONFIG_FLOAT_RATE_UPGRADE_ITEM_EPIC,                    // ITEM_QUALITY_EPIC
+    CONFIG_FLOAT_RATE_DROP_ITEM_LEGENDARY,                  // PLACEHOLDER: ITEM_QUALITY_LEGENDARY
+    CONFIG_FLOAT_RATE_DROP_ITEM_ARTIFACT,                   // PLACEHOLDER: ITEM_QUALITY_ARTIFACT
+};
+
+
+
 void AddItemsSetItem(Player* player, Item* item)
 {
     ItemPrototype const* proto = item->GetProto();
@@ -712,33 +726,38 @@ uint32 Item::ComputeRequiredLevel(uint32 quality, uint32 ilevel)
     return RequiredLevel;
 }
 
-uint32 Item::LoadScaledParent(uint32 itemid)
+uint32 Item::LoadScaledParent(uint32 ItemId)
 {
-    ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype>(itemid);
+    ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype>(ItemId);
 
     if (!pProto)
-        return itemid;
+        return ItemId;
 
     if (pProto->Class == ITEM_CLASS_CONSUMABLE || pProto->Class == ITEM_CLASS_MISC)
     {
-        if (ItemLootScale const* sItem = sObjectMgr.GetItemLootParentingScale(itemid))
+        if (ItemLootScale const* sItem = sObjectMgr.GetItemLootParentingScale(ItemId))
             return sItem->ItemId;
     }
     else
     {
-        uint32 scaleid = std::floor((itemid - 41000 - 1) / (2 * 180));
+        uint32 ScaleId = std::floor((ItemId - MIN_ENTRY_SCALE - 1) / (MAX_QUALITY_SCALE * MAX_ILEVEL_SCALE));
 
-        if (ItemPrototype const* pProtoScale = sItemStorage.LookupEntry<ItemPrototype>(scaleid))
-            return scaleid;
+        if (ItemPrototype const* pProtoScale = sItemStorage.LookupEntry<ItemPrototype>(ScaleId))
+            return ScaleId;
     }
 
-    return itemid;
+    return ItemId;
 }
 
-uint32 Item::LoadScaledLoot(uint32 ItemId, Player* pPlayer)
+uint32 Item::LoadScaledLoot(uint32 ItemId, Player* pPlayer, bool upgrade)
 {
     if (ItemId && pPlayer)
     {
+        //Rochenoire RLS
+        // Restore default item
+        ItemId = LoadScaledParent(ItemId);
+        //End RLS
+
         // Checking if player has appropriate level for current zone
         uint32 pLevel = pPlayer->getZoneLevel();
 
@@ -795,15 +814,15 @@ uint32 Item::LoadScaledLoot(uint32 ItemId, Player* pPlayer)
             }
         }
 
-        return LoadScaledLoot(ItemId, pLevel);
+        return LoadScaledLoot(ItemId, pLevel, upgrade, pPlayer);
     }
     return ItemId;
 }
 
-uint32 Item::LoadScaledLoot(uint32 ItemId, uint32 pLevel)
+uint32 Item::LoadScaledLoot(uint32 ItemId, uint32 pLevel, bool upgrade, Player* pPlayer)
 {
-    if (pLevel > CONFIG_UINT32_MAX_PLAYER_LEVEL)
-        pLevel = CONFIG_UINT32_MAX_PLAYER_LEVEL;
+    if (pLevel > sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+        pLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
 
     if (pLevel <= 0)
         return ItemId;
@@ -813,7 +832,7 @@ uint32 Item::LoadScaledLoot(uint32 ItemId, uint32 pLevel)
     if (!pProto)
         return ItemId;
 
-    if (pProto->Class == ITEM_CLASS_CONSUMABLE || pProto->Class == ITEM_CLASS_MISC)
+    if (pProto->Class == ITEM_CLASS_CONSUMABLE || pProto->Class == ITEM_CLASS_CONTAINER || pProto->Class == ITEM_CLASS_MISC)
     {
         // skip if correct
         if (abs((int)pLevel - (int)pProto->RequiredLevel) < 5)
@@ -829,7 +848,7 @@ uint32 Item::LoadScaledLoot(uint32 ItemId, uint32 pLevel)
         }
 
         // look for the closest item above player level (backup)
-        for (uint32 j = pLevel; j < CONFIG_UINT32_MAX_PLAYER_LEVEL; j++)
+        for (uint32 j = pLevel; j < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL); j++)
         {
             std::string s = std::to_string(ItemId) + ":" + std::to_string(j);
 
@@ -837,12 +856,74 @@ uint32 Item::LoadScaledLoot(uint32 ItemId, uint32 pLevel)
                 return sItem->ReplacementId;
         }
     }
-    else
+    else if (pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR)
     {
+        uint32 BonusQuality = 0;
+
+        //Choose if upgrade
+        if (upgrade)
+        {
+            if (pProto->Quality >= ITEM_QUALITY_EPIC)
+                BonusQuality = 0; // Do not create Legendary, Artifacts
+            else if (pProto->Quality <= ITEM_QUALITY_NORMAL)
+                BonusQuality = 0; // Do not upgrade Poor, Common
+            else
+            {
+                bool UpgradeToEpic = false;
+                bool UpgradeToRare = false;
+
+                switch (pProto->Quality)
+                {
+                case ITEM_QUALITY_UNCOMMON:
+                    UpgradeToRare = roll_chance_f(sWorld.getConfig(qualityToUpgrade[ITEM_QUALITY_RARE]) * (pPlayer ? pPlayer->getItemLevelCoeff(ITEM_QUALITY_RARE) : 1.0f));
+                case ITEM_QUALITY_RARE:
+                    UpgradeToEpic = roll_chance_f(sWorld.getConfig(qualityToUpgrade[ITEM_QUALITY_EPIC]) * (pPlayer ? pPlayer->getItemLevelCoeff(ITEM_QUALITY_EPIC) : 1.0f));
+                    break;
+                }
+            BonusQuality = UpgradeToEpic ? 2 : UpgradeToRare ? 1 : 0;
+            }
+        }
+
         uint32 ItemLevel = pProto->ItemLevel;
 
-        if (pLevel <= 60)
+
+
+        // Choose the Ilevel scaled
+        if (pLevel < 45)
+        {
+            int DiffReste = ((pLevel + 5) % 3) - (ItemLevel % 3);
+            switch (DiffReste)
+            {
+            case 0: ItemLevel = pLevel + 5;
+                break;
+            case  1: ItemLevel = pLevel + 5 - 1;
+                break;
+            case -2: ItemLevel = pLevel + 5 - 1;
+                break;
+            case  2: ItemLevel = pLevel + 5 + 1;
+                break;
+            case -1: ItemLevel = pLevel + 5 + 1;
+                break;
+            default:ItemLevel = pLevel + 5;
+            }
+
+        }
+        else
+        {
+        if (pLevel < 60)
             ItemLevel = pLevel + 5;
+        else
+            {
+                if (ItemLevel < pLevel + 5)
+                    ItemLevel = pLevel + 5;
+            }
+        }
+
+
+       
+
+
+
         /*else if (pLevel > 60 && pLevel < 70)
         {
             if (pProto->Quality < 3) // gray, white, green
@@ -860,10 +941,23 @@ uint32 Item::LoadScaledLoot(uint32 ItemId, uint32 pLevel)
                 ItemLevel = 120;
         }*/
 
-        uint32 ScaleId = (41000 + ItemId * 2 * 180 + ItemLevel);
+
+
+
+        uint32 ScaleId = (MIN_ENTRY_SCALE + ItemId * MAX_QUALITY_SCALE * MAX_ILEVEL_SCALE + ItemLevel);
 
         if (ItemPrototype const* pProtoScale = sItemStorage.LookupEntry<ItemPrototype>(ScaleId))
+        {
+            if (BonusQuality)
+            {
+                uint32 UpgradeId = ScaleId + BonusQuality * MAX_ILEVEL_SCALE;
+                if (sItemStorage.LookupEntry<ItemPrototype>(UpgradeId))
+                    return UpgradeId;
+            }
+
             return ScaleId;
+        }
+
     }
 
     return ItemId;

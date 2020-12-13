@@ -247,6 +247,11 @@ enum ItemQualities
 };
 
 #define MAX_ITEM_QUALITY                 7
+//Rochenoire loot system : bonus quality
+#define MIN_ENTRY_SCALE                  41000
+#define MAX_ILEVEL_SCALE                 100  
+#define MAX_QUALITY_SCALE                3
+//Rochenoire end
 
 const uint32 ItemQualityColors[MAX_ITEM_QUALITY] =
 {

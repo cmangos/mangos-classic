@@ -333,7 +333,7 @@ MaxWhoListReturns = 49
 #    Rate.Weight.Item.Legendary
 #    Rate.Weight.Item.Artifact
 #         Equipment level rates coeff (used by smart loot)
-#         Default: 1
+#         Default: 1.0
 #
 #     Calculate.Creature.Zone.Area.Data
 #        Description: Calculate at loading creature zoneId / areaId and save in creature table (WARNING: SLOW WORLD SERVER STARTUP)
@@ -342,6 +342,18 @@ MaxWhoListReturns = 49
 #     Calculate.Gameoject.Zone.Area.Data
 #        Description: Calculate at loading gameobject zoneId / areaId and save in gameobject table (WARNING: SLOW WORLD SERVER STARTUP)
 #        Default:     0  - (Do not show)
+#
+#    BonusUpgrade.Rate.Rare
+#    BonusUpgrade.Rate.Epic
+#        Upgrade rates (items by quality)
+#        Default: 1.0
+#
+#    BonusUpgrade.Quest
+#    BonusUpgrade.Crafting
+#        Enable/Disable item bonus upgrade
+#        Default: 0 (disable)
+#                 1 (enable)
+#
 #
 ###################################################################################################################
 
@@ -385,6 +397,10 @@ Calculate.Creature.Zone.Area.Data = 0
 Calculate.Gameoject.Zone.Area.Data = 0
 SummoningRitual.ReqParticipants = 1
 SummoningRitual.AllowSelfUse = 1
+BonusUpgrade.Rate.Rare = 17.0
+BonusUpgrade.Rate.Epic = 10.0
+BonusUpgrade.Quest = 0
+BonusUpgrade.Crafting = 0
 
 ###################################################################################################################
 # SERVER LOGGING

@@ -2349,6 +2349,12 @@ bool Spell::DoCreateItem(SpellEffectIndex /*eff_idx*/, uint32 itemtype, bool rep
 
     if (num_to_add)
     {
+        //Rochenoire loot system : bonus upgrade
+        // bonus upgrade : is enabled ?
+        bool CanUpgrade = sWorld.getConfig(CONFIG_BOOL_BONUS_UPGRADE_CRAFTING);
+        newitemid = Item::LoadScaledLoot(newitemid, pProto->RequiredLevel, CanUpgrade);
+        //Rochenoire end
+
         // create the new item and store it
         Item* pItem = player->StoreNewItem(dest, newitemid, true, Item::GenerateItemRandomPropertyId(newitemid));
 
@@ -2366,6 +2372,19 @@ bool Spell::DoCreateItem(SpellEffectIndex /*eff_idx*/, uint32 itemtype, bool rep
 
         // send info to the client
         player->SendNewItem(pItem, num_to_add, true, !bgType);
+
+        //Rochenoire loot system : bonus upgrade
+        // bonus upgrade: send sound and message
+        if (CanUpgrade)
+        {
+            uint32 itemid = Item::LoadScaledLoot(newitemid, pProto->RequiredLevel, false);
+            if (newitemid != itemid)
+            {
+                ChatHandler(player).PSendSysMessage(11200, ChatHandler(player).GetLocalItemQuality(pItem).c_str(), ChatHandler(player).GetLocalItemLink(pItem).c_str());
+                player->PlayDirectSound(8960, PlayPacketParameters(PLAY_TARGET, player));
+            }
+        }
+        //Rochenoire end
 
         // we succeeded in creating at least one item, so a levelup is possible
         if (!bgType)

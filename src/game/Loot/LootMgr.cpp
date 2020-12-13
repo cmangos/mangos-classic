@@ -461,7 +461,7 @@ int32 LootItem::getRandomPropertyScaled(uint32 ilevel, bool won, bool display)
         return 0;
 
     uint32 level = loot_level;
-    uint32 mLevel = CONFIG_UINT32_MAX_PLAYER_LEVEL;
+    uint32 mLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
     ilevel = std::min((float)mLevel, (float)ilevel);
 
     if (loot_level == 0 || won)
@@ -488,7 +488,7 @@ void LootItem::setRandomPropertyScaled()
     if (!randomPropertyIdArray.empty())
         return;
 
-    for (int plevel = 0; plevel <= CONFIG_UINT32_MAX_PLAYER_LEVEL; plevel++)
+    for (int plevel = 0; plevel <= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL); plevel++)
     {
         uint32 itemid = Item::LoadScaledLoot(itemId, plevel);
         if (uint32 rproperty = Item::GenerateItemRandomPropertyId(itemid))

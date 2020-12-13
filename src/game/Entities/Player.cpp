@@ -10305,33 +10305,29 @@ std::map<uint32, std::vector<uint32>> drop_map = {
 
 float Player::getItemLevelCoeff(uint32 pQuality) const
 {
-    bool IsEnabled = sWorld.getConfig(CONFIG_BOOL_SMART_LOOT);
 
-    if (!IsEnabled)
+    if (!sWorld.getConfig(CONFIG_BOOL_SMART_LOOT))
         return 1.0f;
 
-    float qualityModifier = std::max((float)getExpItemLevel() / (float)GetItemLevel(), 1.0f);
-    qualityModifier *= sWorld.getConfig(qualityToRate[pQuality]);
-
+    float qualityModifier = std::max((float)getExpItemLevel() / (float)GetItemLevel(), 1.0f) * sWorld.getConfig(qualityToRate[pQuality]);
     float quantityModifier = 1.0f;
+
     float pCount = countRelevant(pQuality, true);
-    uint32 mLevel = CONFIG_UINT32_MAX_PLAYER_LEVEL;
-    uint32 pLevel = std::min((float)mLevel, (float)getLevel());
+    uint32 pLevel = std::min((float)sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL), (float)getLevel());
 
     switch (pQuality)
     {
     case ITEM_QUALITY_UNCOMMON: // GREEN
     case ITEM_QUALITY_RARE:     // BLUE
     case ITEM_QUALITY_EPIC:     // PURPLE
-        float drop_value = (float)drop_map[pQuality][pLevel - 1];
-        quantityModifier = drop_value - pCount;
+        quantityModifier = drop_map[pQuality][pLevel - 1] - pCount;
         break;
     }
 
-    uint32 coeffMaxAmount = sWorld.getConfig(CONFIG_UINT32_SMART_LOOT_AMOUNT);
+    float coeffMaxAmount = (float)sWorld.getConfig(CONFIG_UINT32_SMART_LOOT_AMOUNT);
     float coeffModifier = std::max(qualityModifier, quantityModifier);
 
-    return std::min(coeffModifier, (float)coeffMaxAmount);
+    return std::min(coeffModifier, coeffMaxAmount);
 }
 
 //Rochenoire end
@@ -12702,7 +12698,10 @@ bool Player::CanRewardQuest(Quest const* pQuest, uint32 reward, bool msg) const
     {
         if (pQuest->RewChoiceItemId[reward])
         {
-            InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, pQuest->RewChoiceItemId[reward], pQuest->RewChoiceItemCount[reward]);
+            uint32 pQuestItem = pQuest->RewChoiceItemId[reward]; //RLS
+            pQuestItem = Item::LoadScaledLoot(pQuest->RewChoiceItemId[reward], (Player*)this);//RLS
+
+            InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, pQuestItem, pQuest->RewChoiceItemCount[reward]);
             if (res != EQUIP_ERR_OK)
             {
                 SendEquipError(res, nullptr, nullptr, pQuest->RewChoiceItemId[reward]);
@@ -12717,7 +12716,10 @@ bool Player::CanRewardQuest(Quest const* pQuest, uint32 reward, bool msg) const
         {
             if (pQuest->RewItemId[i])
             {
-                InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, pQuest->RewItemId[i], pQuest->RewItemCount[i]);
+                uint32 pQuestItem = pQuest->RewItemId[i];//RLS
+                pQuestItem = Item::LoadScaledLoot(pQuest->RewItemId[i], (Player*)this);//RLS
+
+                InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, pQuestItem, pQuest->RewItemCount[i]);
                 if (res != EQUIP_ERR_OK)
                 {
                     SendEquipError(res, nullptr, nullptr);
@@ -12884,8 +12886,9 @@ void Player::IncompleteQuest(uint32 quest_id)
     }
 }
 
-void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver, bool announce)
+void Player::RewardQuest(Quest const* pQuest_ori, uint32 reward, Object* questGiver, bool announce)
 {
+    Quest* pQuest = (Quest*)pQuest_ori; //RLS
     uint32 quest_id = pQuest->GetQuestId();
 
     for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
@@ -12896,7 +12899,16 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
 
     //Rochenoire QUEST_SPECIAL_FLAG_TIMED : Timer donjon quests
 
-    //ROchenoire end
+    //Rochenoire loot system
+    
+    bool CanUpgrade = sWorld.getConfig(CONFIG_BOOL_BONUS_UPGRADE_QUEST);
+    for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
+        pQuest->RewChoiceItemIdUp[i] = nullptr;
+    for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
+        pQuest->RewItemIdUp[i] = nullptr;
+        
+    //Rochenoire end
+
 
     RemoveTimedQuest(quest_id);
 
@@ -12904,11 +12916,21 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     {
         if (uint32 itemId = pQuest->RewChoiceItemId[reward])
         {
+            itemId = Item::LoadScaledLoot(pQuest->RewChoiceItemId[reward], (Player*)this, CanUpgrade); //RLS
+
             ItemPosCountVec dest;
             if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, pQuest->RewChoiceItemCount[reward]) == EQUIP_ERR_OK)
             {
                 Item* item = StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
                 SendNewItem(item, pQuest->RewChoiceItemCount[reward], true, false, false, false);
+
+                //Rochenoire loot system : bonus upgrade
+                if (ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype>(pQuest->RewChoiceItemId[reward]))
+                    if (ItemPrototype const* pProtoUp = sItemStorage.LookupEntry<ItemPrototype>(itemId))
+                        pQuest->RewChoiceItemIdUp[reward] = pProto->Quality != pProtoUp->Quality ? item : 0;
+
+                //Rochenoire end
+
             }
         }
     }
@@ -12919,11 +12941,19 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         {
             if (uint32 itemId = pQuest->RewItemId[i])
             {
+                itemId = Item::LoadScaledLoot(pQuest->RewItemId[i], (Player*)this, CanUpgrade); //RLS
+
                 ItemPosCountVec dest;
                 if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, pQuest->RewItemCount[i]) == EQUIP_ERR_OK)
                 {
                     Item* item = StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
                     SendNewItem(item, pQuest->RewItemCount[i], true, false, false, false);
+
+                    //Rochenoire loot system : bonus upgrade
+                    if (ItemPrototype const* pProto = sItemStorage.LookupEntry<ItemPrototype>(pQuest->RewItemId[i]))
+                        if (ItemPrototype const* pProtoUp = sItemStorage.LookupEntry<ItemPrototype>(itemId))
+                            pQuest->RewItemIdUp[i] = pProto->Quality != pProtoUp->Quality ? item : 0;
+                    //Rochenoire end
                 }
             }
         }
@@ -12948,6 +12978,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
     ModifyMoney(pQuest->GetRewOrReqMoney((Player*)this)); //RCS
 
+
     // Send reward mail
     if (uint32 mail_template_id = pQuest->GetRewMailTemplateId())
         MailDraft(mail_template_id).SendMailTo(this, questGiver, MAIL_CHECK_MASK_HAS_BODY, pQuest->GetRewMailDelaySecs());
@@ -12965,7 +12996,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         q_status.uState = QUEST_CHANGED;
 
     if (announce)
-        SendQuestReward(pQuest, xp);
+        SendQuestReward(pQuest, reward, xp);   //SendQuestReward(pQuest, xp);
 
     bool handled = false;
 
@@ -14063,7 +14094,7 @@ void Player::SendQuestCompleteEvent(uint32 quest_id) const
     }
 }
 
-void Player::SendQuestReward(Quest const* pQuest, uint32 XP) const
+void Player::SendQuestReward(Quest const* pQuest, uint32 reward, uint32 XP) const //RLS
 {
     uint32 questid = pQuest->GetQuestId();
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", questid);
@@ -14085,12 +14116,37 @@ void Player::SendQuestReward(Quest const* pQuest, uint32 XP) const
 
     for (uint32 i = 0; i < pQuest->GetRewItemsCount(); ++i)
     {
+        uint32 itemId = pQuest->RewItemId[i]; //RLS
+
         if (pQuest->RewItemId[i] > 0)
             data << pQuest->RewItemId[i] << pQuest->RewItemCount[i];
         else
             data << uint32(0) << uint32(0);
     }
     GetSession()->SendPacket(data);
+
+    //Rochenoire loot system : bonus upgrade
+    // bonus upgrade : is enabled ?
+    if (sWorld.getConfig(CONFIG_BOOL_BONUS_UPGRADE_QUEST))
+    {
+        // bonus upgrade : scroll RewChoiceItems
+        if (Item* pItem = pQuest->RewChoiceItemIdUp[reward])
+        {
+            ChatHandler((Player*)this).PSendSysMessage(11200, ChatHandler((Player*)this).GetLocalItemQuality(pItem).c_str(), ChatHandler((Player*)this).GetLocalItemLink(pItem).c_str());
+            PlayDirectSound(8960, PlayPacketParameters(PLAY_TARGET, this));
+        }
+
+        // bonus upgrade : scroll RewItems
+        for (uint32 i = 0; i < pQuest->GetRewItemsCount(); ++i)
+            if (Item* pItem = pQuest->RewItemIdUp[i])
+            {
+                ChatHandler((Player*)this).PSendSysMessage(11200, ChatHandler((Player*)this).GetLocalItemQuality(pItem).c_str(), ChatHandler((Player*)this).GetLocalItemLink(pItem).c_str());
+                PlayDirectSound(8960, PlayPacketParameters(PLAY_TARGET, this)); // dirty : temp
+            }
+    }
+    //Rochenoire end
+
+
 }
 
 void Player::SendQuestFailed(uint32 quest_id, uint32 reason) const

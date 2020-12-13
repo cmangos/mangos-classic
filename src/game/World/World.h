@@ -284,6 +284,8 @@ enum eConfigFloatValues
     CONFIG_FLOAT_GHOST_RUN_SPEED_WORLD,
     CONFIG_FLOAT_GHOST_RUN_SPEED_BG,
     CONFIG_FLOAT_RATE_DROP_ITEM_GROUP,
+    CONFIG_FLOAT_RATE_UPGRADE_ITEM_RARE, //RLS
+    CONFIG_FLOAT_RATE_UPGRADE_ITEM_EPIC, //RLS
     CONFIG_FLOAT_VALUE_COUNT
 };
 
@@ -371,6 +373,8 @@ enum eConfigBoolValues
     CONFIG_BOOL_CALCULATE_CREATURE_ZONE_AREA_DATA,
     CONFIG_BOOL_CALCULATE_GAMEOBJECT_ZONE_AREA_DATA,
     CONFIG_BOOL_SUMMONINGRITUAL_ALLOW_SELF,
+    CONFIG_BOOL_BONUS_UPGRADE_QUEST, //RLS
+    CONFIG_BOOL_BONUS_UPGRADE_CRAFTING, //RLS
     //Rochenoire End
     CONFIG_BOOL_VALUE_COUNT
 };
@@ -632,6 +636,10 @@ class World
         static uint32 GetCurrentMSTime() { return m_currentMSTime; }
         static TimePoint GetCurrentClockTime() { return m_currentTime; }
         static uint32 GetCurrentDiff() { return m_currentDiff; }
+
+        //Rochenoire
+        //uint32 GetCurrentMaxLevel() const;
+        //Rochenoire end
 
         template<typename T>
         void ExecuteForAllSessions(T executor)

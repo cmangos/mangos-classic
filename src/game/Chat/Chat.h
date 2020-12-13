@@ -163,6 +163,7 @@ class ChatHandler
         //Rochenoire LootSystem
         Player* GetPlayer();
         std::string GetLocalItemLink(Item* pItem) const;
+        std::string GetLocalItemQuality(Item* pItem) const;
         //Rochenoire end
 
         WorldSession* GetSession() const { return m_session; }
