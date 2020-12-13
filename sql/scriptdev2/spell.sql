@@ -24,6 +24,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (19873,'spell_destroy_egg'),
 (20038,'spell_explosion_razorgore'),
 (21651,'spell_opening_capping'),
+(23226,'spell_ritual_candle_aura'),
 (25684,'spell_summon_mana_fiends_moam'),
 (25937,'spell_viscidus_freeze'),
 (26009,'spell_cthun_periodic_rotate'),
