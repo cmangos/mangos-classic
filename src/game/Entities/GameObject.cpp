@@ -132,6 +132,10 @@ void GameObject::AddToWorld()
         if (AI())
             AI()->JustSpawned();
     }
+
+    // Make active if required
+    if (GetGOInfo()->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_ACTIVE)
+        SetActiveObjectState(true);
 }
 
 void GameObject::RemoveFromWorld()
