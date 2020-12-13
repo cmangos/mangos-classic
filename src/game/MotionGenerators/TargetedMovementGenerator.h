@@ -81,7 +81,7 @@ class TargetedMovementGeneratorMedium
         ShortTimeTracker i_recheckDistance;
         float i_offset;
         float i_angle;
-        Position i_lastTargetPos;
+        G3D::Vector3 i_lastTargetPos;
         bool i_speedChanged : 1;
         bool i_targetReached : 1;
         bool i_faceTarget : 1;

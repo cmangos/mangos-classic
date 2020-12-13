@@ -216,7 +216,7 @@ float ChaseMovementGenerator::GetDynamicTargetDistance(Unit& owner, bool forRang
 void ChaseMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& time_diff)
 {
     bool targetMoved = false;
-    Position currentTargetPos;
+    G3D::Vector3 currentTargetPos;
     this->i_target->GetPosition(currentTargetPos.x, currentTargetPos.y, currentTargetPos.z, owner.GetTransport());
     this->i_recheckDistance.Update(time_diff);
     if (m_closenessAndFanningTimer) // here because always need to update timer, cant reuse the timer class because we need a disablable timer
@@ -1040,11 +1040,10 @@ void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& 
         {
             i_recheckDistance.Reset(_getPollRate(owner, m_targetMoving, targetMovingLast));
 
-            Position currentTargetPos;
-
+            G3D::Vector3 currentTargetPos;
             i_target->GetPosition(currentTargetPos.x, currentTargetPos.y, currentTargetPos.z, owner.GetTransport());
+
             Position actualPos = owner.GetPosition(owner.GetTransport());
-            currentTargetPos.o = actualPos.o;
             targetRelocation = (currentTargetPos != i_lastTargetPos || RequiresNewPosition(owner, actualPos));
             targetOrientation = (!targetRelocation && !m_targetMoving && !m_targetFaced);
             targetSpeedChanged = (targetSpeedChanged && !targetRelocation && !targetOrientation);
