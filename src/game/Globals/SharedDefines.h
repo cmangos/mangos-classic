@@ -271,11 +271,11 @@ enum SpellAttributes
     SPELL_ATTR_ABILITY                         = 0x00000010,// 4 Displays ability instead of spell clientside
     SPELL_ATTR_TRADESPELL                      = 0x00000020,// 5 trade spells, will be added by client to a sublist of profession spell
     SPELL_ATTR_PASSIVE                         = 0x00000040,// 6 Passive spell
-    SPELL_ATTR_HIDDEN_CLIENTSIDE               = 0x00000080,// 7 Aura is hidden (not visible in spellbook or aura bar)
-    SPELL_ATTR_CAST_TIME_IS_HIDDEN             = 0x00000100,// 8 Cast time is hidden
+    SPELL_ATTR_HIDDEN_CLIENTSIDE               = 0x00000080,// 7 TODO: check usage - Aura is hidden (not visible in spellbook or aura bar) 
+    SPELL_ATTR_CAST_TIME_IS_HIDDEN             = 0x00000100,// 8 TODO: implement - Cast time is hidden 
     SPELL_ATTR_TARGET_MAINHAND_ITEM            = 0x00000200,// 9 Client automatically selects item from mainhand slot as a cast target TODO: Implement
     SPELL_ATTR_ON_NEXT_NPC_SWING               = 0x00000400,// 10 on next swing (npcs)
-    SPELL_ATTR_PERIODICALLY_TRIGGER            = 0x00000800,// 11 periodically trigger spell
+    SPELL_ATTR_PERIODICALLY_TRIGGER            = 0x00000800,// 11 TODO: confirm & implement: periodically trigger spell
     SPELL_ATTR_DAYTIME_ONLY                    = 0x00001000,// 12 only useable at daytime, not set in 2.4.2
     SPELL_ATTR_NIGHT_ONLY                      = 0x00002000,// 13 only useable at night, not set in 2.4.2
     SPELL_ATTR_INDOORS_ONLY                    = 0x00004000,// 14 only useable indoors, not set in 2.4.2
@@ -287,7 +287,7 @@ enum SpellAttributes
     SPELL_ATTR_STOP_ATTACK_TARGET              = 0x00100000,// 20 Stop attack after use this spell (and not begin attack if use)
     SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK    = 0x00200000,// 21 Cannot be dodged/parried/blocked
     SPELL_ATTR_SET_TRACKING_TARGET             = 0x00400000,// 22 SetTrackingTarget
-    SPELL_ATTR_CASTABLE_WHILE_DEAD             = 0x00800000,// 23 Can be used while dead
+    SPELL_ATTR_CASTABLE_WHILE_DEAD             = 0x00800000,// 23 TODO: Implement - Can be used while dead
     SPELL_ATTR_CASTABLE_WHILE_MOUNTED          = 0x01000000,// 24 Can be used while mounted
     SPELL_ATTR_DISABLED_WHILE_ACTIVE           = 0x02000000,// 25 Activate and start cooldown after aura fade or remove summoned creature or go
     SPELL_ATTR_AURA_IS_DEBUFF                  = 0x04000000,// 26
@@ -318,7 +318,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY     = 0x00008000,// 15 remove auras on immunity
     SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE  = 0x00010000,// 16 unaffected by school immunity
     SPELL_ATTR_EX_UNAUTOCASTABLE_BY_CHARMED    = 0x00020000,// 17 TODO: Investigate more: SPELL_ATTR_EX_PLAYER_CANT_CAST_CHARMED, likely related to MC
-    SPELL_ATTR_EX_STOPS_AUTO_ATTACK            = 0x00040000,// 18 Stops auto-attack (stun, polymorph, daze, sleep)
+    SPELL_ATTR_EX_STOPS_AUTO_ATTACK            = 0x00040000,// 18 TODO: confirm & implement - Stops auto-attack (stun, polymorph, daze, sleep)
     SPELL_ATTR_EX_CANT_TARGET_SELF             = 0x00080000,// 19 spells with area effect or friendly targets that exclude the caster
     SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS      = 0x00100000,// 20 Requires combo points on target
     SPELL_ATTR_EX_UNK21                        = 0x00200000,// 21
@@ -410,7 +410,7 @@ enum SpellAttributesEx4
 {
     SPELL_ATTR_EX4_IGNORE_RESISTANCES          = 0x00000001,// 0
     SPELL_ATTR_EX4_PROC_ONLY_ON_CASTER         = 0x00000002,// 1 Only proc on self-cast
-    SPELL_ATTR_EX4_REAL_TIME_DURATION          = 0x00000004,// 2 aura continues to expire while player is offline
+    SPELL_ATTR_EX4_REAL_TIME_DURATION          = 0x00000004,// 2 TODO: implement - aura continues to expire while player is offline (used by VMangos)
     SPELL_ATTR_EX4_UNK3                        = 0x00000008,// 3 Uses resource: Energy? / Rogue only?
     SPELL_ATTR_EX4_UNK4                        = 0x00000010,// 4 This will no longer cause guards to attack on use??
     SPELL_ATTR_EX4_UNK5                        = 0x00000020,// 5
