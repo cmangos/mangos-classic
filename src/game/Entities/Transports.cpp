@@ -144,8 +144,7 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
     m_nextFrame = GetKeyFrames().begin();
     m_currentFrame = m_nextFrame++;
 
-    m_pathProgress = time(nullptr) % (m_transportTemplate.pathTime / 1000);
-    m_pathProgress *= 1000;
+    m_pathProgress = GetMap()->GetCurrentMSTime();
 
     SetObjectScale(goinfo->size);
 
