@@ -5254,7 +5254,7 @@ void Unit::AddGameObject(GameObject* gameObj)
     {
         SpellEntry const* createBySpell = sSpellTemplate.LookupEntry<SpellEntry>(gameObj->GetSpellId());
         // Need disable spell use for owner
-        if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_COOLDOWN_AFTER_AURA_FADES))
+        if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
             // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
             AddCooldown(*createBySpell);
     }
@@ -5293,7 +5293,7 @@ void Unit::RemoveGameObject(GameObject* gameObj, bool del)
         {
             SpellEntry const* createBySpell = sSpellTemplate.LookupEntry<SpellEntry>(spellid);
             // Need activate spell use for owner
-            if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_COOLDOWN_AFTER_AURA_FADES))
+            if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
                 // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
                 AddCooldown(*createBySpell);
         }
