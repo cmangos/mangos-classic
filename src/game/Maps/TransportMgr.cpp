@@ -32,7 +32,7 @@ void TransportMgr::LoadTransportAnimationAndRotation()
             AddPathNodeToTransport(anim->TransportEntry, anim->TimeSeg, anim);
 }
 
-TransportTemplate const* TransportMgr::GetTransportTemplate(uint32 entry)
+TransportTemplate* TransportMgr::GetTransportTemplate(uint32 entry)
 {
     auto itr = m_transportTemplates.find(entry);
     if (itr != m_transportTemplates.end())

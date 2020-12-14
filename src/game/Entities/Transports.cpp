@@ -57,6 +57,7 @@ void MapManager::LoadTransports()
 
         uint32 entry = fields[0].GetUInt32();
         std::string name = fields[1].GetCppString();
+        uint32 period = fields[2].GetUInt32();
 
         const GameObjectInfo* goinfo = ObjectMgr::GetGameObjectInfo(entry);
 
@@ -72,7 +73,7 @@ void MapManager::LoadTransports()
             continue;
         }
 
-        TransportTemplate const* transportTemplate = sTransportMgr.GetTransportTemplate(entry);
+        TransportTemplate* transportTemplate = sTransportMgr.GetTransportTemplate(entry);
         if (!transportTemplate)
         {
             sLog.outErrorDb("Transport ID:%u, Name: %s, will not be loaded, transport template missing (core generated)", entry, name.c_str());
@@ -82,6 +83,8 @@ void MapManager::LoadTransports()
         const MapEntry* pMapInfo = sMapStore.LookupEntry(transportTemplate->keyFrames.begin()->Node->mapid);
         if (!pMapInfo)
             continue;
+
+        transportTemplate->pathTime = period;
 
         m_transportsByMap[pMapInfo->MapID].push_back(transportTemplate);
 
