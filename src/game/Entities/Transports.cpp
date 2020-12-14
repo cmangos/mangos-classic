@@ -347,7 +347,7 @@ void Transport::Update(const uint32 diff)
         // first check help in case client-server transport coordinates de-synchronization
         if (m_currentFrame->Node->mapid != GetMapId() || m_currentFrame->IsTeleportFrame())
         {
-            TeleportTransport(m_nextFrame->Node->mapid, m_currentFrame->Node->x, m_currentFrame->Node->y, m_currentFrame->Node->z, m_currentFrame->InitialOrientation);
+            TeleportTransport(m_nextFrame->Node->mapid, m_nextFrame->Node->x, m_nextFrame->Node->y, m_nextFrame->Node->z, m_nextFrame->InitialOrientation);
             return;
         }
 
