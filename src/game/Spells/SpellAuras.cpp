@@ -5555,7 +5555,7 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
         }
 
         // reset cooldown state for spells
-        if (caster && GetSpellProto()->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+        if (caster && GetSpellProto()->HasAttribute(SPELL_ATTR_COOLDOWN_AFTER_AURA_FADES))
         {
             // some spells need to start cooldown at aura fade (like stealth)
             caster->AddCooldown(*GetSpellProto());

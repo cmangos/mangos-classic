@@ -407,7 +407,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
     CleanupTargetList();
 
     m_spellLog.Initialize();
-    m_needSpellLog = (m_spellInfo->Attributes & (SPELL_ATTR_HIDE_IN_COMBAT_LOG | SPELL_ATTR_HIDDEN_CLIENTSIDE)) == 0;
+    m_needSpellLog = (m_spellInfo->Attributes & (SPELL_ATTR_CAST_TIME_IS_HIDDEN | SPELL_ATTR_HIDDEN_CLIENTSIDE)) == 0;
 
     m_targetlessMask = 0;
 
@@ -2709,7 +2709,7 @@ void Spell::cancel()
                         unit->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
                 }
             }
-            if (m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_AFTER_AURA_FADES))
                 m_caster->RemoveSpellCooldown(*m_spellInfo, true); // need to clear cooldown in client
 
             SendChannelUpdate(0);
@@ -3070,7 +3070,7 @@ void Spell::SendSpellCooldown()
     if (m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
         return;
 
-    m_caster->AddCooldown(*m_spellInfo, m_CastItem ? m_CastItem->GetProto() : nullptr, m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE));
+    m_caster->AddCooldown(*m_spellInfo, m_CastItem ? m_CastItem->GetProto() : nullptr, m_spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_AFTER_AURA_FADES));
 }
 
 void Spell::update(uint32 difftime)
@@ -4125,7 +4125,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_triggeredByAuraSpell)
             return SPELL_FAILED_DONT_REPORT;
         else
-            return m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
+            return m_spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_AFTER_AURA_FADES) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
     }
 
     if (!m_caster->IsAlive() && m_caster->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD) && !m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
@@ -4136,7 +4136,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // check global cooldown
     if (strict && !m_ignoreGCD && m_caster->HasGCD(m_spellInfo))
-        return m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
+        return m_spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_AFTER_AURA_FADES) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
 
     // only allow triggered spells if at an ended battleground
     if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -4231,7 +4231,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // Spells like Disengage are allowed only in combat
-    if (!m_caster->IsInCombat() && m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET) && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_UNK26))
+    if (!m_caster->IsInCombat() && m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET) && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_MODIFY_THREAD))
         return SPELL_FAILED_CASTER_AURASTATE;
 
     Unit* target = m_targets.getUnitTarget();
