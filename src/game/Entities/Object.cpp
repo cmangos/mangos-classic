@@ -339,8 +339,8 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
     if (updateFlags & UPDATEFLAG_TRANSPORT)
     {
         GameObject const* go = static_cast<GameObject const*>(this);
-        if (go && go->IsMoTransport())
-            *data << uint32(static_cast<Transport const*>(go)->GetPathProgress());
+        if (go && go->IsTransport())
+            *data << uint32(static_cast<GenericTransport const*>(go)->GetPathProgress());
         else
             *data << uint32(go->GetMap()->GetCurrentMSTime());
     }
