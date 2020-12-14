@@ -289,7 +289,7 @@ enum SpellAttributes
     SPELL_ATTR_SET_TRACKING_TARGET             = 0x00400000,// 22 SetTrackingTarget
     SPELL_ATTR_CASTABLE_WHILE_DEAD             = 0x00800000,// 23 Can be used while dead
     SPELL_ATTR_CASTABLE_WHILE_MOUNTED          = 0x01000000,// 24 Can be used while mounted
-    SPELL_ATTR_COOLDOWN_AFTER_AURA_FADES       = 0x02000000,// 25 Starts cooldown after aura fades
+    SPELL_ATTR_DISABLED_WHILE_ACTIVE           = 0x02000000,// 25 Activate and start cooldown after aura fade or remove summoned creature or go
     SPELL_ATTR_AURA_IS_DEBUFF                  = 0x04000000,// 26
     SPELL_ATTR_CASTABLE_WHILE_SITTING          = 0x08000000,// 27 Can be used while sitting
     SPELL_ATTR_CANT_USED_IN_COMBAT             = 0x10000000,// 28 Cannot be used in combat
@@ -362,7 +362,7 @@ enum SpellAttributesEx2
     SPELL_ATTR_EX2_IS_ARCANE_CONCENTRATION     = 0x00800000,// 23 Only mage Arcane Concentration have this flag
     SPELL_ATTR_EX2_UNK24                       = 0x01000000,// 24
     SPELL_ATTR_EX2_UNK25                       = 0x02000000,// 25
-    SPELL_ATTR_EX2_MODIFY_THREAD               = 0x04000000,// 26 modifies thread - not 100% sure (unaffected by school immunity)
+    SPELL_ATTR_EX2_UNK26                       = 0x04000000,// 26 unaffected by school immunity
     SPELL_ATTR_EX2_UNK27                       = 0x08000000,// 27
     SPELL_ATTR_EX2_UNK28                       = 0x10000000,// 28 no breaks stealth if it fails??
     SPELL_ATTR_EX2_CANT_CRIT                   = 0x20000000,// 29 Spell can't crit
@@ -411,7 +411,7 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_IGNORE_RESISTANCES          = 0x00000001,// 0
     SPELL_ATTR_EX4_PROC_ONLY_ON_CASTER         = 0x00000002,// 1 Only proc on self-cast
     SPELL_ATTR_EX4_REAL_TIME_DURATION          = 0x00000004,// 2 aura continues to expire while player is offline
-    SPELL_ATTR_EX4_UNK3                        = 0x00000008,// 3 Uses resource: Energy? / Rouge only?
+    SPELL_ATTR_EX4_UNK3                        = 0x00000008,// 3 Uses resource: Energy? / Rogue only?
     SPELL_ATTR_EX4_UNK4                        = 0x00000010,// 4 This will no longer cause guards to attack on use??
     SPELL_ATTR_EX4_UNK5                        = 0x00000020,// 5
     SPELL_ATTR_EX4_NOT_STEALABLE               = 0x00000040,// 6 although such auras might be dispellable, they cannot be stolen
