@@ -1806,7 +1806,7 @@ uint32 BattleGround::GetAlivePlayersCountByTeam(Team team) const
         if (m_Player.second.playerTeam == team)
         {
             Player* pl = sObjectMgr.GetPlayer(m_Player.first);
-            if (pl && pl->IsAlive())
+            if (pl && pl->IsAlive() && pl->GetShapeshiftForm() != FORM_SPIRITOFREDEMPTION)
                 ++count;
         }
     }
