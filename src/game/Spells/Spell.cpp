@@ -7405,3 +7405,15 @@ void Spell::OnAfterHit()
     if (SpellScript* script = GetSpellScript())
         return script->OnAfterHit(this);
 }
+
+void Spell::OnSummon(GameObject* summon)
+{
+    if (SpellScript* script = GetSpellScript())
+        return script->OnSummon(this, summon);
+}
+
+void Spell::OnSummon(Creature* summon)
+{
+    if (SpellScript* script = GetSpellScript())
+        return script->OnSummon(this, summon);
+}

@@ -2734,6 +2734,8 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
         m_originalCaster->AI()->JustSummoned(spawnCreature);
     else if (m_caster->AI())
         m_caster->AI()->JustSummoned(spawnCreature);
+
+    OnSummon(spawnCreature);
 }
 
 void Spell::EffectLearnSpell(SpellEffectIndex eff_idx)
@@ -3315,6 +3317,8 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
             m_originalCaster->AI()->JustSummoned(spawnCreature);
         else if (m_caster->AI())
             m_caster->AI()->JustSummoned(spawnCreature);
+
+        OnSummon(spawnCreature);
     }
 }
 
@@ -3585,7 +3589,10 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         {
             case CLASS_HUNTER:
             {
-                NewSummon->LoadPetFromDB(_player);
+                if (NewSummon->LoadPetFromDB(_player))
+                    OnSummon(NewSummon);
+                else
+                    delete NewSummon;
                 return;
             }
             case CLASS_WARLOCK:
@@ -3604,6 +3611,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
                 {
                     NewSummon->SetHealth(NewSummon->GetMaxHealth());
                     NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
+                    OnSummon(NewSummon);
                     return;
                 }
 
@@ -3718,6 +3726,8 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     if (GenericTransport* transport = m_caster->GetTransport())
         transport->AddPetToTransport(m_caster, NewSummon);
+
+    OnSummon(NewSummon);
 }
 
 void Spell::EffectLearnPetSpell(SpellEffectIndex eff_idx)
@@ -4006,6 +4016,10 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
         m_originalCaster->AI()->JustSummoned(pGameObj);
     else if (m_caster->AI())
         m_caster->AI()->JustSummoned(pGameObj);
+
+    OnSummon(pGameObj);
+    if (GameObject* linkedGO = pGameObj->GetLinkedTrap())
+        OnSummon(linkedGO);
 }
 
 void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
@@ -5061,6 +5075,7 @@ void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)
         pTotem->SetPvP(true);
 
     pTotem->Summon(m_caster);
+    OnSummon(pTotem);
     m_spellLog.AddLog(uint32(SPELL_EFFECT_SUMMON), pTotem->GetPackGUID());
 }
 
@@ -5930,6 +5945,10 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
         m_originalCaster->AI()->JustSummoned(pGameObj);
     else if (m_caster->AI())
         m_caster->AI()->JustSummoned(pGameObj);
+
+    OnSummon(pGameObj);
+    if (GameObject* linkedGO = pGameObj->GetLinkedTrap())
+        OnSummon(linkedGO);
 }
 
 void Spell::EffectSkill(SpellEffectIndex /*eff_idx*/)
