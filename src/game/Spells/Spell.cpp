@@ -1054,10 +1054,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         m_healing = addhealth; // update value so that script handler has access
         OnHit(missInfo); // TODO: After spell damage calc is moved to proper handler - move this before the first if
 
-        int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo, target->isCrit, IsScaled());  //RCS
+        int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo, target->isCrit, IsScaledForTarget(unitTarget->GetGUIDLow()));       //RCS
 
         if (real_caster)
-            unitTarget->getHostileRefManager().threatAssist(real_caster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(m_spellInfo), m_spellInfo, false, false, IsScaled(), unitTarget); //RCS
+            unitTarget->getHostileRefManager().threatAssist(real_caster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(m_spellInfo), m_spellInfo, false, false, IsScaledForTarget(unitTarget->GetGUIDLow()), unitTarget);  //RCS
 
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
@@ -1105,12 +1105,12 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         //Rochenoire start RCS
         // Save scaling
-        spellDamageInfo.scaled = IsScaled();
+        spellDamageInfo.scaled = IsScaledForTarget(unitTarget->GetGUIDLow());
         //Rochenoire end
 
         unitTarget->CalculateAbsorbResistBlock(caster, &spellDamageInfo, m_spellInfo);
 
-        Unit::DealDamageMods(caster, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE, m_spellInfo, IsScaled());
+        Unit::DealDamageMods(caster, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE, m_spellInfo, IsScaledForTarget(unitTarget->GetGUIDLow()));
 
         // Send log damage message to client        
         if (reflectTarget)
@@ -2914,6 +2914,21 @@ void Spell::cast(bool skipCheck)
     SetExecutedCurrently(false);
 }
 
+//Rochenoire creature scaling
+bool Spell::IsScaledForTarget(uint32 guid, int eff_idx)
+{
+    if (eff_idx >= 0)
+        return m_effectScaled[std::make_pair(m_spellInfo->Effect[eff_idx], guid)];
+
+    for (int i = 0; i < MAX_EFFECT_INDEX; i++)
+        if (m_effectScaled[std::make_pair(m_spellInfo->Effect[i], guid)])
+            return true;
+
+    return false;
+}
+//Rochenoire end
+
+
 void Spell::handle_immediate()
 {
     if (m_spellState != SPELL_STATE_CHANNELING)
@@ -3286,7 +3301,8 @@ void Spell::finish(bool ok)
 
     // Heal caster for all health leech from all targets
     if (m_healthLeech)
-        m_caster->DealHeal(m_caster, uint32(m_healthLeech), m_spellInfo);
+        m_caster->DealHeal(m_caster, uint32(m_healthLeech), m_spellInfo, IsScaledForTarget(unitTarget->GetGUIDLow())); //RCS
+
 
     if (m_spellInfo->AttributesEx & SPELL_ATTR_EX_REFUND_POWER)
     {
@@ -3978,7 +3994,7 @@ void Spell::HandleThreatSpells()
         if (positive)
         {
 
-            target->getHostileRefManager().threatAssist(m_caster /*real_caster ??*/, threat, m_spellInfo, false, true, IsScaled()); //RCS
+            target->getHostileRefManager().threatAssist(m_caster /*real_caster ??*/, threat, m_spellInfo, false, true, IsScaledForTarget(target->GetGUIDLow()));//RCS
 
         }
         // for negative spells threat gets distributed among affected targets
@@ -3987,7 +4003,7 @@ void Spell::HandleThreatSpells()
             if (!target->CanHaveThreatList())
                 continue;
 
-            target->AddThreat(m_caster, threat, false, GetSpellSchoolMask(m_spellInfo), m_spellInfo, IsScaled()); //RCS
+            target->AddThreat(m_caster, threat, false, GetSpellSchoolMask(m_spellInfo), m_spellInfo, IsScaledForTarget(target->GetGUIDLow())); //RCS
         }
     }
 

@@ -2777,7 +2777,7 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
                     canKeep = sObjectMgr.isEffectRestricted(effect);
 
                 if (canKeep)
-                    value = sObjectMgr.ScaleDamage((Unit*)unitCaster, (Unit*)target, value, spell->EffectScaled[effect_index], spellProto, effect_index);
+                    value = sObjectMgr.ScaleDamage((Unit*)unitCaster, (Unit*)target, value, spell->m_effectScaled[std::make_pair(effect_index, target->GetGUIDLow())], spellProto, effect_index);
             }
         }
 

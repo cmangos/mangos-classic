@@ -2474,7 +2474,7 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
         damageInfo->damage -= damageInfo->blocked;
     }
 
-    bool isScaled = spell ? spell->IsScaled() : false; //Rochenoire scaling RCS
+    bool isScaled = spell ? spell->IsScaledForTarget(GetGUIDLow()) : false; //Rochenoire scaling RCS
     CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto), IsBinarySpell(*spellProto), /*Roche*/spell, isScaled);
 
     const uint32 bonus = (damageInfo->resist < 0 ? uint32(std::abs(damageInfo->resist)) : 0);
