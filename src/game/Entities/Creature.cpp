@@ -138,7 +138,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_equipmentId(0), m_AlreadyCallAssistance(false),
     m_isDeadByDefault(false),
     m_temporaryFactionFlags(TEMPFACTION_NONE),
-    m_originalEntry(0), m_ai(nullptr),
+    m_originalEntry(0), m_dbGuid(0), m_ai(nullptr),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false), m_countSpawns(false),
     m_creatureInfo(nullptr),
     m_noXP(false), m_noLoot(false), m_noReputation(false)
@@ -1446,19 +1446,19 @@ bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const 
 
     Object::_Create(guidlow, newEntry, cinfo->GetHighGuid());
 
-    if (uint32 entry = sObjectMgr.GetRandomEntry(guidlow))
+    if (uint32 entry = sObjectMgr.GetRandomEntry(data ? data->id : guidlow))
         newEntry = entry;
 
     return UpdateEntry(newEntry, data, eventData, false);
 }
 
-bool Creature::LoadFromDB(uint32 guidlow, Map* map)
+bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransport* transport)
 {
-    CreatureData const* data = sObjectMgr.GetCreatureData(guidlow);
+    CreatureData const* data = sObjectMgr.GetCreatureData(dbGuid);
 
     if (!data)
     {
-        sLog.outErrorDb("Creature (GUID: %u) not found in table `creature`, can't load. ", guidlow);
+        sLog.outErrorDb("Creature (GUID: %u) not found in table `creature`, can't load. ", dbGuid);
         return false;
     }
 
@@ -1466,7 +1466,7 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
 
     // get data for dual spawn instances
     if (entry == 0)
-        entry = GetCreatureConditionalSpawnEntry(guidlow, map);
+        entry = GetCreatureConditionalSpawnEntry(dbGuid, map);
 
     if (!entry)
         return false;
@@ -1478,16 +1478,18 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
         return false;
     }
 
-    GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(guidlow);
+    GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(dbGuid);
 
     // Creature can be loaded already in map if grid has been unloaded while creature walk to another grid
-    if (map->GetCreature(cinfo->GetObjectGuid(guidlow)))
+    if (map->GetCreature(cinfo->GetObjectGuid(dbGuid)))
         return false;
 
     CreatureCreatePos pos(map, data->posX, data->posY, data->posZ, data->orientation);
 
-    if (!Create(guidlow, pos, cinfo, data, eventData))
+    if (!Create(newGuid, pos, cinfo, data, eventData))
         return false;
+
+    m_dbGuid = dbGuid;
 
     SetRespawnCoord(pos);
     m_respawnradius = data->spawndist;
@@ -2687,7 +2689,7 @@ struct SpawnCreatureInMapsWorker
         {
             Creature* pCreature = new Creature;
             // DEBUG_LOG("Spawning creature %u",*itr);
-            if (!pCreature->LoadFromDB(i_guid, map))
+            if (!pCreature->LoadFromDB(i_guid, map, i_guid))
             {
                 delete pCreature;
             }

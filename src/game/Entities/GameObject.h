@@ -680,7 +680,7 @@ class GameObject : public WorldObject
 
         void SaveToDB() const;
         void SaveToDB(uint32 mapid) const;
-        bool LoadFromDB(uint32 guid, Map* map);
+        bool LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid);
         void DeleteFromDB() const;
 
         ObjectGuid const& GetOwnerGuid() const override { return GetGuidValue(OBJECT_FIELD_CREATED_BY); }
@@ -884,6 +884,8 @@ class GameObject : public WorldObject
         ObjectGuid m_linkedTrap;
 
         std::unique_ptr<GameObjectAI> m_AI;
+
+        uint32 m_dbGuid;
 
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);

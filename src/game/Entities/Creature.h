@@ -754,7 +754,7 @@ class Creature : public Unit
 
         void SetDeathState(DeathState s) override;          // overwrite virtual Unit::SetDeathState
 
-        bool LoadFromDB(uint32 guidlow, Map* map);
+        bool LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransport* transport = nullptr);
         virtual void SaveToDB();
         // overwrited in Pet
         virtual void SaveToDB(uint32 mapid);
@@ -940,6 +940,7 @@ class Creature : public Unit
         uint32 m_temporaryFactionFlags;                     // used for real faction changes (not auras etc)
 
         uint32 m_originalEntry;
+        uint32 m_dbGuid;
 
         Position m_combatStartPos;                          // after combat contains last position
         Position m_respawnPos;
