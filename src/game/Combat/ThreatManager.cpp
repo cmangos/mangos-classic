@@ -474,12 +474,21 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
     //Rochenoire start
     //float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, threat, crit, schoolMask, threatSpell);
 
-    Unit* real_target = pSpellTarget ? pSpellTarget : victim;
-    isScaled = pSpellTarget ? false : isScaled;
+    Unit* redirectedTarget = pSpellTarget ? pSpellTarget : victim;
 
-    float scaledThreat = sObjectMgr.ScaleDamage(getOwner(), real_target, threat, isScaled, threatSpell, EFFECT_INDEX_0, true); // revert
+    if (redirectedTarget->GetGUIDLow() == victim->GetGUIDLow())
+        isScaled = true; // no scaling to self
+    else if (pSpellTarget)
+    {
+        isScaled = false; // ignore scaling
+        threat = sObjectMgr.ScaleDamage(redirectedTarget, victim, threat, isScaled, threatSpell, EFFECT_INDEX_0, true); // original threat
+        isScaled = false; // ignore scaling
+    }
 
-    float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, scaledThreat, crit, schoolMask, threatSpell);
+    float s_threat = sObjectMgr.ScaleDamage(redirectedTarget, iOwner, threat, isScaled);
+    float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, s_threat, crit, schoolMask, threatSpell);
+
+
 
     //Rochenoire end
 

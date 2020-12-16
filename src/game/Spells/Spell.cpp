@@ -2918,7 +2918,7 @@ void Spell::cast(bool skipCheck)
 bool Spell::IsScaledForTarget(uint32 guid, int eff_idx)
 {
     if (eff_idx >= 0)
-        return m_effectScaled[std::make_pair(m_spellInfo->Effect[eff_idx], guid)];
+        return m_effectScaled[std::make_pair(eff_idx, guid)];
 
     for (int i = 0; i < MAX_EFFECT_INDEX; i++)
         if (m_effectScaled[std::make_pair(m_spellInfo->Effect[i], guid)])

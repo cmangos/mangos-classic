@@ -1121,10 +1121,8 @@ uint32 ObjectMgr::getLevelScaled(Unit* owner, Unit* target) const
         player = (Player*)owner;
         creature = (Creature*)target;
     }
-   /* else if (target->IsPlayer() && owner->IsPlayer())
-    {
-        return target->getLevel() > owner->getLevel() ? target->getLevel() : owner->getLevel();
-    }*/
+    else if (target->IsPlayer() && owner->IsPlayer())
+        return owner->getLevel();
     else
         return target->getLevel();
 
@@ -1242,6 +1240,9 @@ SpellType ObjectMgr::GetSpellDamageType(SpellEntry const* spellProto, SpellEffec
             //   SPELL_AURA_PERIODIC_DAMAGE_PERCENT: excluded, abs values only
         //case SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE:
             type = SPELLTYPE_DAMAGE;
+            break;
+        case SPELL_AURA_PERIODIC_HEAL:
+            type = SPELLTYPE_HEAL;
             break;
         }
     }

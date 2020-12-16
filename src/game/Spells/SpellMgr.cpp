@@ -1427,7 +1427,11 @@ SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, 
     }
 
     // Recipient is too low level
-    return nullptr;
+    //return nullptr;
+    if (sWorld.getConfig(CONFIG_BOOL_SCALE_PVP_FRIENDLY))
+        return spellInfo;
+    else
+        return nullptr; // Recipient is too low level
 }
 
 typedef std::unordered_map<uint32, uint32> AbilitySpellPrevMap;
