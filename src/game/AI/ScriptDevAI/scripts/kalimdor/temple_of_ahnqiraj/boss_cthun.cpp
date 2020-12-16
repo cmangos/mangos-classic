@@ -261,6 +261,8 @@ struct boss_cthunAI : public Scripted_NoMovementAI
     uint32 m_uiPhaseTimer;
     uint8 m_uiFleshTentaclesKilled;
     uint32 m_uiDigestiveAcidTimer;
+    uint32 m_giantClawTentaclesDelay;
+    uint32 m_giantEyeTentaclesDelay;
 
     // Body Phase
     uint32 m_uiStomachEnterTimer;
@@ -278,6 +280,8 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         m_uiPhaseTimer              = 0;
         m_uiFleshTentaclesKilled    = 0;
         m_uiDigestiveAcidTimer      = 4000;
+        m_giantClawTentaclesDelay   = 0;
+        m_giantEyeTentaclesDelay    = 0;
 
         // Body Phase
         m_uiStomachEnterTimer       = 0;
@@ -406,9 +410,9 @@ struct boss_cthunAI : public Scripted_NoMovementAI
     {
         // Tentacles Party... Pleasure !
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_EYE_TENTACLES_P2, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
-        DoCastSpellIfCan(m_creature, SPELL_GIANT_EYE_TENTACLES_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_HOOKS_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_MOUTH_TENTACLES_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
+        m_giantClawTentaclesDelay = 10 * IN_MILLISECONDS;
+        m_giantEyeTentaclesDelay = 40 * IN_MILLISECONDS;    // There are 30 seconds offset between Giant Eye and Giant Claw Tentacles which are both on a 60 seconds period
     }
 
     void StopSpawningTentacles()
@@ -497,6 +501,41 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                     }
                     else
                         m_uiStomachEnterTimer -= uiDiff;
+                }
+
+                // The first Giant Claw Tentacle (at phase 2 start of after weakened state) is a single isolated cast, all after are on periodic timer through dedicated spell
+                if (m_giantClawTentaclesDelay)
+                {
+                    if (m_giantClawTentaclesDelay <= uiDiff)
+                    {
+                        // Check for valid player
+                        if (Unit* player = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_LOS | SELECT_FLAG_PLAYER))
+                        {
+                            player->CastSpell(player, SPELL_SUMMON_GIANT_HOOK_TENTACLE, TRIGGERED_OLD_TRIGGERED);
+                            DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_HOOKS_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
+                            m_giantClawTentaclesDelay = 0;   // All further summons are handled in periodic spell SPELL_SUMMON_GIANT_HOOKS_1
+                        }
+                    }
+                    else
+                        m_giantClawTentaclesDelay -= uiDiff;
+                }
+
+                // The first Giant Eye Tentacle (at phase 2 start of after weakened state, 30 after first Giant Claw Tentacle) is a single isolated cast,
+                // all after are on periodic timer through dedicated spell
+                if (m_giantEyeTentaclesDelay)
+                {
+                    if (m_giantEyeTentaclesDelay <= uiDiff)
+                    {
+                        // Check for valid player
+                        if (Unit* player = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_LOS | SELECT_FLAG_PLAYER))
+                        {
+                            player->CastSpell(player, SPELL_SUMMON_GIANT_EYE_TENTACLE, TRIGGERED_OLD_TRIGGERED);
+                            DoCastSpellIfCan(m_creature, SPELL_GIANT_EYE_TENTACLES_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
+                            m_giantEyeTentaclesDelay = 0;   // All further summons are handled in periodic spell SPELL_GIANT_EYE_TENTACLES_1
+                        }
+                    }
+                    else
+                        m_giantEyeTentaclesDelay -= uiDiff;
                 }
 
                 break;
