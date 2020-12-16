@@ -129,6 +129,9 @@ void GameObject::AddToWorld()
         if (GameObject* linkedGO = SummonLinkedTrapIfAny())
             SetLinkedTrap(linkedGO);
 
+        if (InstanceData* iData = GetMap()->GetInstanceData())
+            iData->OnObjectSpawn(this);
+
         if (AI())
             AI()->JustSpawned();
     }

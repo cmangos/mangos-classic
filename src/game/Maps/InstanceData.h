@@ -88,6 +88,9 @@ class InstanceData
         // Called when a gameobject is created
         virtual void OnObjectCreate(GameObject*) {}
 
+        // Called when a gameobject is spawned into map
+        virtual void OnObjectSpawn(GameObject*) {}
+
         // called on creature creation
         virtual void OnCreatureCreate(Creature* /*creature*/) {}
 
