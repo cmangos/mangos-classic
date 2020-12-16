@@ -61,11 +61,11 @@ void AuctionHouseBot::Initialize()
         ParseLootConfig("AuctionHouseBot.Loot.Creature.RareElite", m_creatureLootRareEliteConfig);
         ParseLootConfig("AuctionHouseBot.Loot.Creature.WorldBoss", m_creatureLootWorldBossConfig);
         ParseLootConfig("AuctionHouseBot.Loot.Creature.Rare", m_creatureLootRareConfig);
-        FillUintVectorFromQuery("SELECT entry FROM creature_template WHERE rank = 0 AND entry IN (SELECT entry FROM creature_loot_template)", m_creatureLootNormalTemplates);
-        FillUintVectorFromQuery("SELECT entry FROM creature_template WHERE rank = 1 AND entry IN (SELECT entry FROM creature_loot_template)", m_creatureLootEliteTemplates);
-        FillUintVectorFromQuery("SELECT entry FROM creature_template WHERE rank = 2 AND entry IN (SELECT entry FROM creature_loot_template)", m_creatureLootRareEliteTemplates);
-        FillUintVectorFromQuery("SELECT entry FROM creature_template WHERE rank = 3 AND entry IN (SELECT entry FROM creature_loot_template)", m_creatureLootWorldBossTemplates);
-        FillUintVectorFromQuery("SELECT entry FROM creature_template WHERE rank = 4 AND entry IN (SELECT entry FROM creature_loot_template)", m_creatureLootRareTemplates);
+        FillUintVectorFromQuery("SELECT entry FROM creature_template WHERE `rank` = 0 AND entry IN (SELECT entry FROM creature_loot_template)", m_creatureLootNormalTemplates);
+        FillUintVectorFromQuery("SELECT entry FROM creature_template WHERE `rank` = 1 AND entry IN (SELECT entry FROM creature_loot_template)", m_creatureLootEliteTemplates);
+        FillUintVectorFromQuery("SELECT entry FROM creature_template WHERE `rank` = 2 AND entry IN (SELECT entry FROM creature_loot_template)", m_creatureLootRareEliteTemplates);
+        FillUintVectorFromQuery("SELECT entry FROM creature_template WHERE `rank` = 3 AND entry IN (SELECT entry FROM creature_loot_template)", m_creatureLootWorldBossTemplates);
+        FillUintVectorFromQuery("SELECT entry FROM creature_template WHERE `rank` = 4 AND entry IN (SELECT entry FROM creature_loot_template)", m_creatureLootRareTemplates);
 
         // disenchant loot
         ParseLootConfig("AuctionHouseBot.Loot.Disenchant", m_disenchantLootConfig);
