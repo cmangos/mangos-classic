@@ -796,7 +796,7 @@ void ObjectMgr::ScaleGold(uint32 in_level, uint32 ou_level, uint32& mingold, uin
     maxgold = float((float)sc_maxgold * (float)di_maxgold);
 }
 
-bool ObjectMgr::IsScalable(Unit* owner, Unit* target) const
+bool ObjectMgr::IsScalable(Unit *owner, Unit *target) const
 {
     if (!owner || !target)
         return false;
@@ -812,8 +812,8 @@ bool ObjectMgr::IsScalable(Unit* owner, Unit* target) const
     if (owner->IsCreature() && target->IsCreature())
         return false;
 
-    bool IsForcePVP = true;// sWorld.getConfig(CONFIG_BOOL_SCALE_FORCE_PVP);
-    bool IsBattleGround = owner->GetMap() ? owner->GetMap()->IsBattleGround() : false;
+    //bool IsForcePVP = true;// sWorld.getConfig(CONFIG_BOOL_SCALE_FORCE_PVP);
+    //bool IsBattleGround = owner->GetMap() ? owner->GetMap()->IsBattleGround() : false;
 
     Creature* creature;
     Player* player;
@@ -829,7 +829,17 @@ bool ObjectMgr::IsScalable(Unit* owner, Unit* target) const
         creature = (Creature*)target;
     }
     else if (owner->IsPlayer() && target->IsPlayer())
-        return (IsBattleGround || IsForcePVP || owner->IsFriend(target));
+    {//Rochenoire start
+        // never scale an upranked or downranked spell.
+        if (/*sWorld.getConfig(CONFIG_BOOL_AUTO_UPRANK) ||*/ sWorld.getConfig(CONFIG_BOOL_AUTO_DOWNRANK))
+            return false;
+
+        if (owner->IsEnemy(target))
+            return sWorld.getConfig(CONFIG_BOOL_SCALE_PVP_HOSTILE);
+
+        if (owner->IsFriend(target))
+            return sWorld.getConfig(CONFIG_BOOL_SCALE_PVP_FRIENDLY);
+    }//Rochenoire end
     else
         return false;
 
@@ -1111,10 +1121,10 @@ uint32 ObjectMgr::getLevelScaled(Unit* owner, Unit* target) const
         player = (Player*)owner;
         creature = (Creature*)target;
     }
-    else if (target->IsPlayer() && owner->IsPlayer())
+   /* else if (target->IsPlayer() && owner->IsPlayer())
     {
         return target->getLevel() > owner->getLevel() ? target->getLevel() : owner->getLevel();
-    }
+    }*/
     else
         return target->getLevel();
 

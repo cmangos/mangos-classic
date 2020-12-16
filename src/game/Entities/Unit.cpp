@@ -8900,8 +8900,8 @@ void Unit::SetAttackDamageSchool(WeaponAttackType attType, SpellSchools school)
 //Rochenoire start
 uint32 Unit::GetLevelForTarget(Unit const* target) const
 {
-    Unit* owner = ((Unit*)this);
-    Unit* victim = ((Unit*)target);
+    Unit* owner = (Unit*)this;
+    Unit* victim = (Unit*)target;
 
     if (sObjectMgr.IsScalable(owner, victim))
         return sObjectMgr.getLevelScaled(owner, victim);

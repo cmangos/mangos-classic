@@ -65,9 +65,9 @@ ConfVersion=2020112401
 RealmID = 1
 DataDir = "."
 LogsDir = ""
-LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicrealmd"
-WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;classicmangos"
-CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;classiccharacters"
+LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;rochenoire_classicrealmd"
+WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;rochenoire_classicmangos"
+CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;rochenoire_classiccharacters"
 LoginDatabaseConnections = 1
 WorldDatabaseConnections = 1
 CharacterDatabaseConnections = 1
@@ -266,7 +266,8 @@ MaxWhoListReturns = 49
 #        Default: 15 (2.4)
 #                 0  (1.2)
 #
-#    Rochenoire.Scaling.PvP.Enabled
+#    Rochenoire.Scaling.PvP.Enemy
+#    Rochenoire.Scaling.PvP.Friendly
 #        Enable/Disable PvP level scaling
 #        Default: 0 (disable)
 #                 1 (enable)
@@ -358,7 +359,8 @@ MaxWhoListReturns = 49
 ###################################################################################################################
 
 WowPatch = 15
-Rochenoire.Scaling.PvP.Enabled = 0
+Rochenoire.Scaling.PvP.Enemy = 0
+Rochenoire.Scaling.PvP.Friendly = 0
 Rochenoire.Scaling.Vendor.Consumable = 0
 Rochenoire.Scaling.Vendor.Container = 0
 Rochenoire.Scaling.Vendor.Weapon = 1
