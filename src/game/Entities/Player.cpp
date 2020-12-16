@@ -12533,7 +12533,7 @@ uint32 Player::GetQuestLevelForPlayer(Quest const* pQuest) const
     if (pQuest->IsSpecificQuest())
         return pQuest && (pQuest->GetQuestLevel() > 0) ? (uint32)pQuest->GetQuestLevel() : getLevel();
     else
-        return getZoneLevel(pQuest->GetZoneOrSort()) + pQuest->GetQuestRelativeLevel();   // #RochenoireQuestLevel
+        return getZoneLevel(pQuest->GetZoneOrSort());// +pQuest->GetQuestRelativeLevel();   // #RochenoireQuestLevel
 }
 
 //Rochenoire end

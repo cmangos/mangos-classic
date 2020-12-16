@@ -880,7 +880,7 @@ uint32 Item::LoadScaledLoot(uint32 ItemId, uint32 pLevel, bool upgrade, Player* 
                     UpgradeToEpic = roll_chance_f(sWorld.getConfig(qualityToUpgrade[ITEM_QUALITY_EPIC]) * (pPlayer ? pPlayer->getItemLevelCoeff(ITEM_QUALITY_EPIC) : 1.0f));
                     break;
                 }
-            BonusQuality = UpgradeToEpic ? 2 : UpgradeToRare ? 1 : 0;
+            BonusQuality = UpgradeToEpic ? 1 : UpgradeToRare ? 1 : 0;
             }
         }
 
@@ -889,7 +889,7 @@ uint32 Item::LoadScaledLoot(uint32 ItemId, uint32 pLevel, bool upgrade, Player* 
 
 
         // Choose the Ilevel scaled
-        if (pLevel < 45)
+        if (pLevel < 54)
         {
             int DiffReste = ((pLevel + 5) % 3) - (ItemLevel % 3);
             switch (DiffReste)

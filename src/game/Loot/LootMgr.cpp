@@ -1741,7 +1741,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
 
             if ((creatureInfo->LootId && FillLoot(creatureInfo->LootId, LootTemplates_Creature, player, false)) || creatureInfo->MaxLootGold > 0)
             {
-                //ROchenoire loot system
+                //Rochenoire loot system
                 uint32 mingold = creature->GetCreatureInfo()->MinLootGold;
                 uint32 maxgold = creature->GetCreatureInfo()->MaxLootGold;
 
@@ -1770,7 +1770,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
 
                         if (!player->GetGroup() || (player->GetGroup() && lootItem->isUnderThreshold))
                         {
-                            lootItemId = Item::LoadScaledLoot(lootItem->itemId, player);
+                            lootItemId = Item::LoadScaledLoot(lootItem->itemId, player, true); //RLS
 
                             if (lootItem->itemId != lootItemId)
                             {
@@ -1969,7 +1969,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
 
                         if (!player->GetGroup() || (player->GetGroup() && lootItem->isUnderThreshold))
                         {
-                            lootItemId = Item::LoadScaledLoot(lootItem->itemId, player);
+                            lootItemId = Item::LoadScaledLoot(lootItem->itemId, player, true); //RLS
 
                             if (lootItem->itemId != lootItemId)
                             {
@@ -2105,7 +2105,7 @@ Loot::Loot(Player* player, Item* item, LootType type) :
 
                 if (!player->GetGroup() || (player->GetGroup() && lootItem->isUnderThreshold))
                 {
-                    lootItemId = Item::LoadScaledLoot(lootItem->itemId, player);
+                    lootItemId = Item::LoadScaledLoot(lootItem->itemId, player, true); //RLS
 
                     if (lootItem->itemId != lootItemId)
                     {
@@ -2211,7 +2211,7 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
         ItemPosCountVec dest;
         //Rochenoire loot system
         if (lootItem->IsAllowed(target, this) && !lootItem->isScaled)
-            itemId = Item::LoadScaledLoot(itemId, target);
+            itemId = Item::LoadScaledLoot(itemId, target, true);
         msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, lootItem->count);
         //Rochenoire end
         //Roche /G : msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, lootItem->itemId, lootItem->count);
@@ -2533,7 +2533,7 @@ void Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
         LootItem* lootItem_tmp = new LootItem(lootItem->itemId, lootItem->count, lootItem->randomSuffix, lootItem->randomPropertyId, lootItem->lootSlot);
 
         if (lootItem->IsAllowed(player, this) && !lootItem->isScaled)
-            lootItem_tmp->itemId = Item::LoadScaledLoot(lootItem_tmp->itemId, player);
+            lootItem_tmp->itemId = Item::LoadScaledLoot(lootItem_tmp->itemId, player, true);
         //Rochenoire end
 
         LootSlotType slot_type = lootItem->GetSlotTypeForSharedLoot(player, this);

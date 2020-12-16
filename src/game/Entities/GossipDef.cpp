@@ -378,7 +378,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Player const* pPlayer, Quest const* 
 
         for (uint32 i = 0; i < rewChocieItemCount; ++i)
         {
-            if (!pQuest->RewItemId[i])
+            if (!pQuest->RewChoiceItemId[i])
                 continue;
 
             //Rochenoire loot system
