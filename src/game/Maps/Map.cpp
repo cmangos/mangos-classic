@@ -706,6 +706,8 @@ void Map::Update(const uint32& t_diff)
             if (!obj->IsInWorld() || !obj->IsPositionValid())
                 continue;
 
+            objToUpdate.insert(obj);
+
             // lets update mobs/objects in ALL visible cells around player!
             CellArea area = Cell::CalculateCellArea(obj->GetPositionX(), obj->GetPositionY(), GetVisibilityDistance());
 
