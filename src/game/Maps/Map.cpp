@@ -1163,31 +1163,7 @@ void Map::LoadTransports()
 {
     uint32 mapId = GetId();
     for (TransportTemplate const* transportTemplate : sMapMgr.m_transportsByMap[mapId])
-    {
-        Transport* t = new Transport(*transportTemplate);
-
-        t->SetPeriod(transportTemplate->pathTime);
-
-        // sLog.outString("Loading transport %d between %s, %s", entry, name.c_str(), goinfo->name);
-
-        TaxiPathNodeEntry const* startNode = transportTemplate->keyFrames.begin()->Node;
-        float x = startNode->x;
-        float y = startNode->y;
-        float z = startNode->z;
-        float o = t->GetKeyFrames().begin()->InitialOrientation;
-
-        // If we someday decide to use the grid to track transports, here:
-        t->SetMap(this);
-
-        // creates the Gameobject
-        if (!t->Create(transportTemplate->entry, mapId, x, y, z, o, GO_ANIMPROGRESS_DEFAULT))
-        {
-            delete t;
-            continue;
-        }
-
-        AddTransport(t);
-    }
+        Transport::LoadTransport(*transportTemplate, this);
 }
 
 inline void Map::setNGrid(NGridType* grid, uint32 x, uint32 y)
