@@ -923,8 +923,8 @@ struct TransportAnimationEntry
     //uint32  Id;
     uint32  TransportEntry;
     uint32  TimeSeg;
-    float   Y;
     float   X;
+    float   Y;
     float   Z;
     //uint32  MovementId;
 };

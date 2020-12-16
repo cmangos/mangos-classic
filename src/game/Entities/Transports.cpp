@@ -438,8 +438,8 @@ void ElevatorTransport::Update(const uint32 /*diff*/)
         {
             m_currentSeg = nodePrev->TimeSeg;
 
-            G3D::Vector3 posPrev = G3D::Vector3(nodePrev->X, -nodePrev->Y, nodePrev->Z);
-            G3D::Vector3 posNext = G3D::Vector3(nodeNext->X, -nodeNext->Y, nodeNext->Z);
+            G3D::Vector3 posPrev = G3D::Vector3(nodePrev->X, nodePrev->Y, nodePrev->Z);
+            G3D::Vector3 posNext = G3D::Vector3(nodeNext->X, nodeNext->Y, nodeNext->Z);
             G3D::Vector3 currentPos;
             if (posPrev == posNext)
                 currentPos = posPrev;
