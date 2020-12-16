@@ -1955,14 +1955,14 @@ Creature* WorldObject::SpawnCreature(uint32 dbGuid, Map* map)
     if (!data)
     {
         sLog.outErrorDb("Creature (GUID: %u) not found in table `creature`, can't load. ", dbGuid);
-        return false;
+        return nullptr;
     }
 
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(data->id);
     if (!cinfo)
     {
         sLog.outErrorDb("Creature (Entry: %u) not found in table `creature_template`, can't load. ", data->id);
-        return false;
+        return nullptr;
     }
 
     Creature* creature = new Creature;
