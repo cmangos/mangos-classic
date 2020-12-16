@@ -832,6 +832,21 @@ struct HookTentacleTrigger : public SpellScript
     }
 };
 
+struct CThunMouthTentacle : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+        {
+            if (Unit* target = aura->GetTarget())
+            {
+                if (!apply)
+                    target->CastSpell(target, SPELL_DIGESTIVE_ACID_TELEPORT, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+};
+
 void AddSC_boss_cthun()
 {
     Script* pNewScript = new Script;
@@ -859,4 +874,5 @@ void AddSC_boss_cthun()
     RegisterSpellScript<HookTentacleTrigger>("spell_hook_tentacle_trigger");
     RegisterAuraScript<PeriodicSummonEyeTrigger>("spell_cthun_periodic_eye_trigger");
     RegisterAuraScript<PeriodicRotate>("spell_cthun_periodic_rotate");
+    RegisterAuraScript<CThunMouthTentacle>("spell_cthun_mouth_tentacle");
 }
