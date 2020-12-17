@@ -214,7 +214,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
                 continue;
 
             // only creature entries supported for this target type
-            if (i_spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT)
+            if (i_spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT || i_spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT_GUID)
                 continue;
 
             if (target->GetEntry() == i_spellST->targetEntry)
