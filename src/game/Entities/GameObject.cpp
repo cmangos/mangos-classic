@@ -818,10 +818,10 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid)
     uint32 animprogress = data->animprogress;
     GOState go_state = data->go_state;
 
+    m_dbGuid = dbGuid;
+
     if (!Create(newGuid, entry, map, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state))
         return false;
-
-    m_dbGuid = dbGuid;
 
     if (!GetGOInfo()->GetDespawnPossibility() && !GetGOInfo()->IsDespawnAtAction() && data->spawntimesecsmin >= 0)
     {
