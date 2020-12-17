@@ -2604,15 +2604,8 @@ void Creature::ReduceCorpseDecayTimer()
     if (!IsInWorld())
         return;
 
-    bool isDungeonEncounter = false;
-    if (GetMap()->IsDungeon())
-    {
-        if (sObjectMgr.IsEncounter(GetEntry(), GetMapId()))
-            isDungeonEncounter = true;
-    }
-
-    if (!isDungeonEncounter && m_corpseExpirationTime > GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(2 * MINUTE * IN_MILLISECONDS))
-        m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(2 * MINUTE * IN_MILLISECONDS);  // 2 minutes for a creature
+    if (m_corpseExpirationTime > GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(MINIMUM_LOOTING_TIME))
+        m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(MINIMUM_LOOTING_TIME);  // 2 minutes for a creature
 }
 
 // Set loot status. Also handle remove corpse timer
