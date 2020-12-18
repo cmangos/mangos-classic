@@ -1267,7 +1267,7 @@ void ObjectMgr::LoadCreatures()
             AddCreatureToGrid(guid, &data);
 
             if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE) && cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE)
-                m_activeCreatures.insert(ActiveCreatureGuidsOnMap::value_type(data.mapid, guid));
+                m_activeCreatures.emplace(data.mapid, guid);
         }
 
         // reset the entry to 0; this will be processed by Creature::GetCreatureConditionalSpawnEntry
@@ -1440,7 +1440,12 @@ void ObjectMgr::LoadGameObjects()
             data.OriginalZoneId = 0;
 
         if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
+        {
             AddGameobjectToGrid(guid, &data);
+
+            if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE) && gInfo->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_ACTIVE)
+                m_activeGameObjects.emplace(data.mapid, guid);
+        }
 
         ++count;
     }
@@ -8452,10 +8457,17 @@ void ObjectMgr::LoadActiveEntities(Map* _map)
     }
     else                                                    // Normal case - Load all npcs that are active
     {
-        std::pair<ActiveCreatureGuidsOnMap::const_iterator, ActiveCreatureGuidsOnMap::const_iterator> bounds = m_activeCreatures.equal_range(_map->GetId());
-        for (ActiveCreatureGuidsOnMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+        auto bounds = m_activeCreatures.equal_range(_map->GetId());
+        for (auto itr = bounds.first; itr != bounds.second; ++itr)
         {
             CreatureData const& data = mCreatureDataMap[itr->second];
+            _map->ForceLoadGrid(data.posX, data.posY);
+        }
+
+        bounds = m_activeGameObjects.equal_range(_map->GetId());
+        for (auto itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            GameObjectData const& data = mGameObjectDataMap[itr->second];
             _map->ForceLoadGrid(data.posX, data.posY);
         }
     }
