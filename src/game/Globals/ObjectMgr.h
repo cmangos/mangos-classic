@@ -219,10 +219,12 @@ typedef std::pair<QuestRelationsMap::const_iterator, QuestRelationsMap::const_it
 
 struct ZoneFlex
 {
-    std::string AreaName;
-    uint32 AreaID;
+    //std::string AreaName;
+    //uint32 AreaID;
+    std::string ZoneName;
+    uint32 ZoneID;
     uint32 MapID;
-    uint32 ParentWorldMapID;
+    //uint32 ParentWorldMapID;
     uint32 LevelRangeMin;
     uint32 LevelRangeMax;
 };
@@ -922,9 +924,10 @@ class ObjectMgr
         void GetItemLocaleStrings(uint32 entry, int32 loc_idx, std::string* namePtr, std::string* descriptionPtr = nullptr) const;
 
         //Rochenoire Raid Flex and RCS
-        ZoneFlex const* GetZoneFlex(uint32 AreaID) const
+        ZoneFlex const* getAreaZone(uint32 AreaID = 0, uint32 ZoneID = 0) const;
+        ZoneFlex const* GetZoneFlex(uint32 ZoneID) const
         {
-            ZoneFlexMap::const_iterator itr = mZoneFlexMap.find(AreaID);
+            ZoneFlexMap::const_iterator itr = mZoneFlexMap.find(ZoneID);
             if (itr == mZoneFlexMap.end()) return nullptr;
             return &itr->second;
         }
@@ -943,6 +946,8 @@ class ObjectMgr
             if (itr == mLootScaleParentingMap.end()) return nullptr;
             return &itr->second;
         }
+
+
 
         //Rochenoire end
 

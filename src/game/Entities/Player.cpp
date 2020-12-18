@@ -6709,10 +6709,24 @@ uint32 Player::GetLevelFromDB(ObjectGuid guid)
 
 void Player::UpdateArea(uint32 newArea)
 {
-    m_areaUpdateId    = newArea;
-
+    //m_areaUpdateId    = newArea;
     AreaTableEntry const* area = GetAreaEntryByAreaID(newArea);
 
+    if (m_areaUpdateId != newArea)
+    {
+        std::string current_zone_name = area->area_name[GetSession()->GetSessionDbcLocale()];
+        if (const ZoneFlex* thisZone = sObjectMgr.getAreaZone(newArea, m_zoneUpdateId))
+        {
+            GetSession()->SendAreaTriggerMessage("%s: [%u-%u]", current_zone_name.c_str(), thisZone->LevelRangeMin, thisZone->LevelRangeMax);
+            ChatHandler(this).PSendSysMessage("Entered %s: [%u-%u]", current_zone_name.c_str(), thisZone->LevelRangeMin, thisZone->LevelRangeMax);
+        }
+        else
+            ChatHandler(this).PSendSysMessage("Entered %s: (missing details for entry %u)", current_zone_name.c_str(), newArea);
+    }
+
+    m_areaUpdateId = newArea;
+
+    
     // FFA_PVP flags are area and not zone id dependent
     // so apply them accordingly
     if (area && (area->flags & AREA_FLAG_ARENA))
@@ -12519,7 +12533,9 @@ bool Player::CanSeeStartQuest(Quest const* pQuest) const
             //To change ROCHENOIRE
             //return (hasZoneLevel(pQuest->GetZoneOrSort()) ||
               //  (!hasZoneLevel(pQuest->GetZoneOrSort()) && getLevel() + uint32(highLevelDiff) >= GetQuestLevelForPlayer(pQuest)));
-            return true;
+            return (hasAreaZoneLevel(0 /* AreaID */, pQuest->GetZoneOrSort()) ||
+                (!hasAreaZoneLevel(0 /* AreaID */, pQuest->GetZoneOrSort()) && getLevel() + uint32(highLevelDiff) >= GetQuestLevelForPlayer(pQuest)));
+
         }
 
     }
@@ -12533,7 +12549,7 @@ uint32 Player::GetQuestLevelForPlayer(Quest const* pQuest) const
     if (pQuest->IsSpecificQuest())
         return pQuest && (pQuest->GetQuestLevel() > 0) ? (uint32)pQuest->GetQuestLevel() : getLevel();
     else
-        return getZoneLevel(pQuest->GetZoneOrSort());// +pQuest->GetQuestRelativeLevel();   // #RochenoireQuestLevel
+        return getAreaZoneLevel(0 /* AreadID */, pQuest->GetZoneOrSort()) + pQuest->GetQuestRelativeLevel();  // +pQuest->GetQuestRelativeLevel();   // #RochenoireQuestLevel
 }
 
 //Rochenoire end
@@ -13169,7 +13185,7 @@ bool Player::SatisfyQuestLevel(Quest const* qInfo, bool msg) const
     //Rochenoire  //G : uint32 level = getLevel();
     //Rochenoire  //G :if (level < qInfo->GetMinLevel() || level > qInfo->GetMaxLevel())
     if ((qInfo->IsSpecificQuest() && getLevel() < qInfo->GetMinLevel()) ||
-        (!qInfo->IsSpecificQuest() /*&& !hasZoneLevel(qInfo->GetZoneOrSort())*/ && getLevel() < GetQuestLevelForPlayer(qInfo)))  //RCS
+        (!qInfo->IsSpecificQuest() && !hasAreaZoneLevel(0 /* AreaID */, qInfo->GetZoneOrSort()) && getLevel() < GetQuestLevelForPlayer(qInfo)))
     {
         if (msg)
             SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);

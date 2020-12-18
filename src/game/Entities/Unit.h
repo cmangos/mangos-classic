@@ -1442,8 +1442,8 @@ class Unit : public WorldObject
         void SetLevel(uint32 lvl);
 
         //Rochenoire RCS
-        bool hasZoneLevel(uint32 AreaID = 0) const;
-        uint32 getZoneLevel(uint32 AreaID = 0) const;
+        bool hasAreaZoneLevel(uint32 AreaID = 0, uint32 ZoneID = 0) const;
+        uint32 getAreaZoneLevel(uint32 AreaID = 0, uint32 ZoneID = 0) const;
         //Rochenoire RCS
 
 

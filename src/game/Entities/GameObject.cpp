@@ -1778,7 +1778,7 @@ void GameObject::Use(Unit* user)
             // required lvl checks!
             uint8 level = player->getLevel();
             //Rochenoire RCS
-            if (player && !player->hasZoneLevel(info->meetingstone.areaID))
+            if (player && !player->hasAreaZoneLevel(info->meetingstone.areaID))
                 return;
             //Rochenoire end
 

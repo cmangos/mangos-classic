@@ -1368,13 +1368,14 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
 
     //Rochenoire start  RCS
     // prepare body for herbalism | mining | skinning
-    /*if (uint32 skill = victim->GetCreatureInfo()->GetRequiredLootSkill())
+    /**/if (uint32 skill = victim->GetCreatureInfo()->GetRequiredLootSkill())
     {
         if (responsiblePlayer && responsiblePlayer->HasSkill(skill))
         {
             uint32 ReqLevel = 10;
 
-            
+            if (responsiblePlayer->hasAreaZoneLevel())
+            {
                 if (uint16 skillValue = responsiblePlayer->GetSkillValue(skill))
                 {
                     if (skillValue > 100 && skillValue <= 200)
@@ -1389,9 +1390,9 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
                 victim->SetVisibility(VISIBILITY_OFF);
                 victim->SetLevel(ReqLevel);
                 victim->SetVisibility(VISIBILITY_ON);
-            
+            }
         }
-    }*/
+    }
 
     //Rochenoire End
 
@@ -8910,7 +8911,7 @@ uint32 Unit::GetLevelForTarget(Unit const* target) const
 }
 
 
-bool Unit::hasZoneLevel(uint32 AreaID) const
+/*bool Unit::hasZoneLevel(uint32 AreaID) const
 {
     uint32 Id = AreaID != 0 ? AreaID : GetTerrain() ? GetZoneId() : 0;
 
@@ -8941,8 +8942,50 @@ uint32 Unit::getZoneLevel(uint32 AreaID) const
     }
 
     return pLevel;
+}*/
+
+
+bool Unit::hasAreaZoneLevel(uint32 AreaID, uint32 ZoneID) const
+{
+    uint32 area = AreaID != 0 ? AreaID : GetTerrain() ? GetAreaId() : 0;
+    uint32 zone = ZoneID != 0 ? ZoneID : GetTerrain() ? GetZoneId() : 0;
+
+    uint32 pLevel = getLevel();
+
+    if (const ZoneFlex* thisArea = sObjectMgr.GetZoneFlex(area))
+    {
+        if (pLevel < thisArea->LevelRangeMin || pLevel > thisArea->LevelRangeMax)
+            return false;
+    }
+    else if (const ZoneFlex* thisZone = sObjectMgr.GetZoneFlex(zone))
+    {
+        if (pLevel < thisZone->LevelRangeMin || pLevel > thisZone->LevelRangeMax)
+            return false;
+    }
+
+    return true;
 }
 
+uint32 Unit::getAreaZoneLevel(uint32 AreaID, uint32 ZoneID) const
+{
+    uint32 area = AreaID != 0 ? AreaID : GetTerrain() ? GetAreaId() : 0;
+    uint32 zone = ZoneID != 0 ? ZoneID : GetTerrain() ? GetZoneId() : 0;
+
+    uint32 pLevel = getLevel();
+
+    if (const ZoneFlex* thisArea = sObjectMgr.GetZoneFlex(area))
+    {
+        if (pLevel < thisArea->LevelRangeMin || pLevel > thisArea->LevelRangeMax)
+            return pLevel > thisArea->LevelRangeMax ? thisArea->LevelRangeMax : thisArea->LevelRangeMin;
+    }
+    else if (const ZoneFlex* thisZone = sObjectMgr.GetZoneFlex(zone))
+    {
+        if (pLevel < thisZone->LevelRangeMin || pLevel > thisZone->LevelRangeMax)
+            return pLevel > thisZone->LevelRangeMax ? thisZone->LevelRangeMax : thisZone->LevelRangeMin;
+    }
+
+    return pLevel;
+}
 
 //Rochenoire end
 

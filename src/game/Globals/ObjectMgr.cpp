@@ -775,6 +775,16 @@ CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, u
 }
 
 //Rochenoire Start
+ZoneFlex const* ObjectMgr::getAreaZone(uint32 AreaID, uint32 ZoneID) const
+{
+    if (const ZoneFlex* thisArea = sObjectMgr.GetZoneFlex(AreaID))
+        return thisArea;
+    else if (const ZoneFlex* thisZone = sObjectMgr.GetZoneFlex(ZoneID))
+        return thisZone;
+
+    return nullptr;
+}
+
 
 //Gold scale
 const float mingold_array[65] = { 1.33f,5.09f,6.4f,6.5f,7.28f,8.98f,9.4f,9.42f,14.26f,17.76f,19.84f,20.27f,20.35f,33.44f,42.58f,43.04f,50.08f,50.26f,59.76f,60.73f,61.03f,71.05f,79.18f,79.51f,80.94f,83.08f,88.93f,90.86f,92.47f,99.63f,100.31f,103.96f,110.63f,115.4f,131.43f,133.72f,135.77f,139.42f,151.96f,170.22f,170.48f,175.41f,176.06f,179.42f,181.38f,187.58f,190.36f,193.57f,201.26f,201.54f,212.49f,221.2f,225.94f,286.99f,297.95f,369.16f,442.04f,515.1f,588.1f,661.1f,734.1f,807.1f,880.1f,953.1f,1024.1f };
@@ -1131,7 +1141,8 @@ uint32 ObjectMgr::getLevelScaled(Unit* owner, Unit* target) const
     if (owner->IsCreature())
     {   
         // #CreatureLevel
-        p_level = player->getZoneLevel(); //getLevel();   //Creature has same player level by default. Change relative level here !!!
+        uint32 AreaID = creature->GetTerrain() ? creature->GetAreaId() : 0;
+        p_level = player->getAreaZoneLevel(AreaID);//getLevel();   //Creature has same player level by default. Change relative level here !!!
 
         if (creature->IsWorldBoss())
             p_level += sWorld.getConfig(CONFIG_UINT32_WORLD_BOSS_LEVEL_DIFF);
@@ -2192,18 +2203,24 @@ void ObjectMgr::LoadZoneScale()
         Field* fields = result->Fetch();
         bar.step();
 
-        std::string AreaName = fields[0].GetString();
+        std::string ZoneName = fields[0].GetString();
         uint32 MapID = fields[1].GetUInt32();
-        uint32 AreaID = fields[2].GetUInt32();
+        /*uint32 AreaID = fields[2].GetUInt32();
         uint32 ParentWorldMapID = fields[3].GetUInt32();
         uint32 LevelRangeMin = fields[4].GetUInt32();
-        uint32 LevelRangeMax = fields[5].GetUInt32();
+        uint32 LevelRangeMax = fields[5].GetUInt32();*/
+        uint32 ZoneID = fields[2].GetUInt32();
+        uint32 LevelRangeMin = fields[3].GetUInt32();
+        uint32 LevelRangeMax = fields[4].GetUInt32();
 
-        ZoneFlex& data = mZoneFlexMap[AreaID];
-        data.AreaName = AreaName;
+        //ZoneFlex& data = mZoneFlexMap[AreaID];
+        //data.AreaName = AreaName;
+        ZoneFlex& data = mZoneFlexMap[ZoneID];
+        data.ZoneName = ZoneName;
         data.MapID = MapID;
-        data.AreaID = AreaID;
-        data.ParentWorldMapID = ParentWorldMapID;
+        //data.AreaID = AreaID;
+        //data.ParentWorldMapID = ParentWorldMapID;
+        data.ZoneID = ZoneID;
         data.LevelRangeMin = LevelRangeMin;
         data.LevelRangeMax = LevelRangeMax;
 
