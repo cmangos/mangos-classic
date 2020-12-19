@@ -1645,7 +1645,7 @@ class Unit : public WorldObject
         void CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo, bool success = true);
         bool CanInitiateAttack() const;
 
-        void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
+        void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false, bool transportLeave = false);
         // do not use - kept only for cinematics
         void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);
 

@@ -1973,7 +1973,9 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)
     {
         if (unitTarget->IsPlayer() && unitTarget->IsMoving())
             position.z += 0.5f;
-        unitTarget->NearTeleportTo(position.x, position.y, position.z, orientation, unitTarget == m_caster);
+        unitTarget->NearTeleportTo(position.x, position.y, position.z, orientation, unitTarget == m_caster,
+            m_spellInfo->EffectImplicitTargetA[eff_idx] == TARGET_LOCATION_DATABASE ||
+            m_spellInfo->EffectImplicitTargetB[eff_idx] == TARGET_LOCATION_DATABASE);
     }
     else if (unitTarget->GetTypeId() == TYPEID_PLAYER)
         ((Player*)unitTarget)->TeleportTo(m_targets.m_mapId, position.x, position.y, position.z, orientation, unitTarget == m_caster ? TELE_TO_SPELL : 0);
