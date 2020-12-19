@@ -19,7 +19,7 @@ SDName: dire_maul
 SD%Complete: 100%
 SDComment: Quest support: 7631.
 SDCategory: Dire Maul
-EndScriptData
+EndScriptData */
 
 /* ContentData
 event_spells_warlock_dreadsteed
