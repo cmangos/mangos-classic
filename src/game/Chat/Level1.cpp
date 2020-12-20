@@ -36,7 +36,9 @@
 #include "Maps/MapPersistentStateMgr.h"
 #include "Mails/Mail.h"
 #include "Util.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Spells/SpellMgr.h"
+#include "Entities/Transports.h"
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
 #endif
@@ -604,10 +606,10 @@ bool ChatHandler::HandleGonameCommand(char* args)
 
         // to point to see at target with same orientation
         float x, y, z;
-        target->GetContactPoint(_player, x, y, z);
+        target->GetContactPoint(target, x, y, z);
         
-        if (target->GetTransport())
-            _player->m_movementInfo.SetTransportData(target->m_movementInfo.t_guid, target->m_movementInfo.t_pos.x, target->m_movementInfo.t_pos.y, target->m_movementInfo.t_pos.z, target->m_movementInfo.t_pos.o, target->m_movementInfo.t_time);
+        if (GenericTransport* transport = target->GetTransport())
+            transport->CalculatePassengerOffset(x, y, z);
         _player->TeleportTo(target->GetMapId(), x, y, z, _player->GetAngle(target), TELE_TO_GM_MODE, nullptr, target->GetTransport());
     }
     else

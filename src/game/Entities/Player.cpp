@@ -1922,26 +1922,27 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             currentTransport = GetMap()->GetTransport(m_teleportTransport);
         if (currentTransport)
         {
-            x = m_movementInfo.t_pos.x;
-            y = m_movementInfo.t_pos.y;
-            z = m_movementInfo.t_pos.z;
-            currentTransport->CalculatePassengerPosition(x, y, z, &orientation);
             m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
             m_movementInfo.t_guid = GetObjectGuid();
             m_movementInfo.t_time = currentTransport->GetPathProgress();
+
+            if (!HaveAtClient(currentTransport)) // in sniff, this aggregates all surroundings and sends them at once
+            {
+                m_clientGUIDs.insert(currentTransport->GetObjectGuid());
+                currentTransport->SendCreateUpdateToPlayer(this);
+            }
         }
 
         // this will be used instead of the current location in SaveToDB
         m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
         SetFallInformation(0, z);
 
-
         // code for finish transfer called in WorldSession::HandleMovementOpcodes()
         // at client packet MSG_MOVE_TELEPORT_ACK
         SetSemaphoreTeleportNear(true);
         // near teleport, triggering send MSG_MOVE_TELEPORT_ACK from client at landing
         if (!GetSession()->PlayerLogout())
-            SendTeleportPacket(x, y, z, orientation);
+            SendTeleportPacket(x, y, z, orientation, currentTransport);
     }
     else
     {

@@ -222,12 +222,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
 
         Unit* passengerUnit = static_cast<Unit*>(obj);
 
-        float destX, destY, destZ, destO;
-        destX = passengerUnit->GetTransOffsetX();
-        destY = passengerUnit->GetTransOffsetY();
-        destZ = passengerUnit->GetTransOffsetZ();
-        destO = passengerUnit->GetTransOffsetO();
-        CalculatePassengerPosition(destX, destY, destZ, &destO, x, y, z, o);
+        Position pos = passengerUnit->m_movementInfo.GetTransportPos();
 
         switch (obj->GetTypeId())
         {
@@ -246,7 +241,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
                 Player* player = static_cast<Player*>(obj);
                 if (player->IsDead() && !player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
                     player->ResurrectPlayer(1.0);
-                player->TeleportTo(newMapid, destX, destY, destZ, destO, TELE_TO_NOT_LEAVE_TRANSPORT);
+                player->TeleportTo(newMapid, pos.x, pos.y, pos.z, pos.o, TELE_TO_NOT_LEAVE_TRANSPORT, nullptr, this);
                 break;
             }
         }
