@@ -999,6 +999,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature Data...");
     sObjectMgr.LoadCreatures();
 
+    sLog.outString("Loading Gameobject Data...");
+    sObjectMgr.LoadGameObjects();
+
     sLog.outString("Loading SpellsScriptTarget...");
     sSpellMgr.LoadSpellScriptTarget();                      // must be after LoadCreatureTemplates, LoadCreatures and LoadGameobjectInfo
 
@@ -1009,9 +1012,6 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadCreatureAddons();                        // must be after LoadCreatureTemplates() and LoadCreatures()
     sLog.outString(">>> Creature Addon Data loaded");
     sLog.outString();
-
-    sLog.outString("Loading Gameobject Data...");
-    sObjectMgr.LoadGameObjects();
 
     sLog.outString("Loading CreatureLinking Data...");      // must be after Creatures
     sCreatureLinkingMgr.LoadFromDB();
