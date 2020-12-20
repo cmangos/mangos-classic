@@ -153,7 +153,7 @@ void WaypointMovementGenerator<Creature>::Interrupt(Creature& creature)
 void WaypointMovementGenerator<Creature>::Reset(Creature& creature)
 {
     creature.addUnitState(UNIT_STAT_ROAMING);
-    if (!i_path)
+    if (!i_path || Stopped(creature))
         return;
     SendNextWayPointPath(creature);
 }
