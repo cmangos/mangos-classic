@@ -520,8 +520,6 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
     recv_data >> counter;
     recv_data >> movementInfo;
 
-    _anticheat->OrderAck(recv_data.GetOpcode(), counter);
-
     Unit* mover = _player->GetMover();
 
     if (mover->GetObjectGuid() != guid)

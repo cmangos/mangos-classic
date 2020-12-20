@@ -10142,12 +10142,14 @@ void Unit::SendTeleportPacket(float x, float y, float z, float ori, GenericTrans
     if (GetTypeId() == TYPEID_PLAYER)
     {
         player = static_cast<Player*>(this);
+        auto const counter = player->GetSession()->GetOrderCounter();
         WorldPacket data;
         data.Initialize(MSG_MOVE_TELEPORT_ACK, 41);
         data << GetPackGUID();
-        data << uint32(0); // this value increments every time
+        data << uint32(counter); // this value increments every time
         data << teleportMovementInfo;
         player->GetSession()->SendPacket(data);
+        player->GetSession()->IncrementOrderCounter();
     }
 
     WorldPacket moveUpdateTeleport(MSG_MOVE_TELEPORT, 38);
