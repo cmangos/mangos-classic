@@ -816,7 +816,8 @@ class Creature : public Unit
 
         void SetSpawnCounting(bool state) { m_countSpawns = state; }
 
-        uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }
+        uint32 GetDetectionRange() const override { return m_detectionRange; }
+        void SetDetectionRange(uint32 range) { m_detectionRange = range; }
 
         void SetBaseWalkSpeed(float speed) override;
         void SetBaseRunSpeed(float speed) override;
@@ -876,6 +877,7 @@ class Creature : public Unit
         virtual void RegenerateHealth();
         MovementGeneratorType m_defaultMovementType;
         uint32 m_equipmentId;
+        uint32 m_detectionRange;
 
         // below fields has potential for optimization
         bool m_AlreadyCallAssistance;
