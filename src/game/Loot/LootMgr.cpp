@@ -410,10 +410,11 @@ LootItem::LootItem(LootStoreItem const& li, uint32 _lootSlot, uint32 threshold)
 
     itemId            = li.itemid;
     conditionId       = li.conditionId;
+    loot_level        = 0; //RLS
     lootSlot          = _lootSlot;
     count             = urand(li.mincountOrRef, li.maxcount);     // constructor called for mincountOrRef > 0 only
     randomSuffix      = 0; // TODO:: do we need to implement it? GenerateEnchSuffixFactor(itemId);
-    randomPropertyId  = Item::GenerateItemRandomPropertyId(itemId);
+    randomPropertyId = Item::GenerateItemRandomPropertyId(itemId, suffixvalue);
     isBlocked         = false;
     currentLooterPass = false;
     isReleased        = false;
@@ -422,7 +423,7 @@ LootItem::LootItem(LootStoreItem const& li, uint32 _lootSlot, uint32 threshold)
     //setRandomSuffixScaled();  //RLS TBC
 }
 
-LootItem::LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId, uint32 _lootSlot)
+LootItem::LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId, uint32 _lootSlot, uint32 _suffixvalue)
 {
     itemProto = ObjectMgr::GetItemPrototype(_itemId);
     if (itemProto)
@@ -438,6 +439,8 @@ LootItem::LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _r
     }
 
     itemId            = _itemId;
+    loot_level        = 0;  //RLS
+    suffixvalue       = _suffixvalue;  //RLS
     lootSlot          = _lootSlot;
     conditionId       = 0;
     lootItemType      = LOOTITEM_TYPE_NORMAL;
@@ -457,14 +460,14 @@ LootItem::LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _r
 //Rochenoire loot system 
 int32 LootItem::getRandomPropertyScaled(uint32 ilevel, bool won, bool display)
 {
-    if (randomPropertyId == 0)
-        return 0;
+    if (!randomPropertyId)
+        return randomPropertyId;
 
     uint32 level = loot_level;
     uint32 mLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
     ilevel = std::min((float)mLevel, (float)ilevel);
 
-    if (loot_level == 0 || won)
+    if (!loot_level || won)
     {
         loot_level = ilevel;
         level = ilevel;
@@ -473,16 +476,15 @@ int32 LootItem::getRandomPropertyScaled(uint32 ilevel, bool won, bool display)
     if (display)
         level = ilevel;
 
-    if (!randomPropertyIdArray.empty())
-        if (randomPropertyIdArray.find(level) != randomPropertyIdArray.end())
-            return randomPropertyIdArray[level];
+    if (randomPropertyIdArray.find(level) != randomPropertyIdArray.end())
+        return randomPropertyIdArray[level];
 
     return 0;
 }
 
 void LootItem::setRandomPropertyScaled()
 {
-    if (randomPropertyId == 0)
+    if (!randomPropertyId)
         return;
 
     if (!randomPropertyIdArray.empty())
@@ -491,7 +493,7 @@ void LootItem::setRandomPropertyScaled()
     for (int plevel = 0; plevel <= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL); plevel++)
     {
         uint32 itemid = Item::LoadScaledLoot(itemId, plevel);
-        if (uint32 rproperty = Item::GenerateItemRandomPropertyId(itemid))
+        if (uint32 rproperty = Item::GenerateItemRandomPropertyId(itemid, suffixvalue))
             randomPropertyIdArray[plevel] = rproperty;
     }
 }
@@ -649,14 +651,14 @@ void GroupLootRoll::SendStartRoll()  //ROCHENOIRE loot system
             continue;
 
         uint32 itemId = Item::LoadScaledLoot(m_lootItem->itemId, plr);
-        uint32 plevel = plr->getLevel();
+        uint32 plevel = plr->getAreaZoneLevel();
 
         WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4 + 1));
         data << m_loot->GetLootGuid();												// creature guid what we're looting
         data << uint32(m_itemSlot);													// item slot in loot
         data << uint32(itemId);														// the itemEntryId for the item that shall be rolled for
         data << uint32(m_lootItem->randomSuffix);		// randomSuffix
-        data << uint32(m_lootItem->getRandomPropertyScaled(plevel, false, true));	// item random property ID
+        data << uint32(m_lootItem->getRandomPropertyScaled(plevel, false, true));		// item random property ID
         data << uint32(LOOT_ROLL_TIMEOUT);											// the countdown time to choose "need" or "greed"
 
         size_t voteMaskPos = data.wpos();
@@ -733,15 +735,21 @@ void GroupLootRoll::SendLootRollWon(ObjectGuid const& targetGuid, uint32 rollNum
         if (!plr || !plr->GetSession())
             continue;
 
-        uint32 itemId = Item::LoadScaledLoot(m_lootItem->itemId, plr);
-        uint32 plevel = plr->getLevel();
+        Player* winner = sObjectMgr.GetPlayer(targetGuid);
+        if (!winner || !winner->GetSession())
+            continue;
+
+        uint32 plevel = winner->getAreaZoneLevel();
+
+        m_lootItem->itemId = Item::LoadScaledLoot(m_lootItem->itemId, winner);
+        m_lootItem->randomPropertyId = m_lootItem->getRandomPropertyScaled(plevel, false, true);
 
         WorldPacket data(SMSG_LOOT_ROLL_WON, (8 + 4 + 4 + 4 + 4 + 8 + 1 + 1));
         data << m_loot->GetLootGuid();												// creature guid what we're looting
         data << uint32(m_itemSlot);													// item slot in loot
-        data << uint32(itemId);														// the itemEntryId for the item that shall be rolled for
-        data << uint32(m_lootItem->randomSuffix);		// randomSuffix
-        data << uint32(m_lootItem->getRandomPropertyScaled(plevel, false, true));	// item random property ID
+        data << uint32(m_lootItem->itemId);											// the itemEntryId for the item that shall be rolled for
+        data << uint32(m_lootItem->randomSuffix);		                            // randomSuffix
+        data << uint32(m_lootItem->randomPropertyId);	                        	// item random property ID
         data << targetGuid;															// guid of the player who won.
         data << uint8(rollNumber);													// rollnumber related to SMSG_LOOT_ROLL
         data << uint8(rollType);													// Rolltype related to SMSG_LOOT_ROLL
@@ -762,16 +770,17 @@ void GroupLootRoll::SendRoll(ObjectGuid const& targetGuid, uint32 rollNumber, ui
         if (!plr || !plr->GetSession())
             continue;
 
+        uint32 plevel = plr->getAreaZoneLevel();
         uint32 itemId = Item::LoadScaledLoot(m_lootItem->itemId, plr);
-        uint32 plevel = plr->getLevel();
+        uint32 randomPropertyId = m_lootItem->getRandomPropertyScaled(plevel, false, true);
 
         WorldPacket data(SMSG_LOOT_ROLL, (8 + 4 + 8 + 4 + 4 + 4 + 1 + 1 + 1));
         data << m_loot->GetLootGuid();												// creature guid what we're looting
         data << uint32(m_itemSlot);													// item slot in loot
         data << targetGuid;
         data << uint32(itemId);														// the itemEntryId for the item that shall be rolled for
-        data << uint32(m_lootItem->randomSuffix);		// randomSuffix
-        data << uint32(m_lootItem->getRandomPropertyScaled(plevel, false, true));	// item random property ID
+        data << uint32(m_lootItem->randomSuffix);		                            // randomSuffix
+        data << uint32(randomPropertyId);	                                    	// item random property ID
         data << uint8(rollNumber);													// 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
         data << uint8(rollType);													// 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
         data << uint8(0);															// auto pass on loot
@@ -1748,7 +1757,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
                 if (sObjectMgr.IsScalable(creature, player))
                 {
                     uint32 mob_level = creature->getLevel();
-                    uint32 avg_level = player->getLevel();
+                    uint32 avg_level = player->getAreaZoneLevel();
 
                     if (Group const* grp = player->GetGroup())
                     {
@@ -1763,7 +1772,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
 
                     sObjectMgr.ScaleGold(mob_level, avg_level, mingold, maxgold);
 
-                    for (uint8 itemSlot = 0; itemSlot < m_lootItems.size(); ++itemSlot)
+                    /*for (uint8 itemSlot = 0; itemSlot < m_lootItems.size(); ++itemSlot)
                     {
                         LootItem* lootItem = m_lootItems[itemSlot];
                         uint32 lootItemId = lootItem->itemId;
@@ -1780,7 +1789,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
                             lootItem->randomPropertyId = lootItem->getRandomPropertyScaled(player->getLevel());
                             lootItem->randomSuffix = lootItem->randomSuffix;
                         }
-                    }
+                    }*/
                 }
 
                 GenerateMoneyLoot(mingold, maxgold);
@@ -1932,7 +1941,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
 
                     uint32 loot_level = 1;
                     uint32 loot_count = 1;
-                    uint32 avg_level = player->getLevel();
+                    uint32 avg_level = player->getAreaZoneLevel();
 
                     if (Group const* grp = player->GetGroup())
                     {
@@ -1962,7 +1971,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
 
                     GenerateMoneyLoot(mingold, maxgold);
 
-                    for (uint8 itemSlot = 0; itemSlot < m_lootItems.size(); ++itemSlot)
+                    /*for (uint8 itemSlot = 0; itemSlot < m_lootItems.size(); ++itemSlot)
                     {
                         LootItem* lootItem = m_lootItems[itemSlot];
                         uint32 lootItemId = lootItem->itemId;
@@ -1979,7 +1988,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
                             lootItem->randomPropertyId = lootItem->getRandomPropertyScaled(player->getLevel());
                             lootItem->randomSuffix = lootItem->randomSuffix;
                         }
-                    }
+                    }*/
                     //Rochenoire end
 
                     //Roche //G GenerateMoneyLoot(gameObject->GetGOInfo()->MinMoneyLoot, gameObject->GetGOInfo()->MaxMoneyLoot);
@@ -2078,7 +2087,7 @@ Loot::Loot(Player* player, Item* item, LootType type) :
             FillLoot(item->GetEntry(), LootTemplates_Item, player, true, item->GetProto()->MaxMoneyLoot == 0);
             //Rochenoire loot system
             uint32 item_level = item->GetProto()->RequiredLevel != 0 ? item->GetProto()->RequiredLevel : item->GetProto()->ItemLevel;
-            uint32 avg_level = player->getLevel();
+            uint32 avg_level = player->getAreaZoneLevel();
 
             if (Group const* grp = player->GetGroup())
             {
@@ -2098,24 +2107,7 @@ Loot::Loot(Player* player, Item* item, LootType type) :
 
             GenerateMoneyLoot(mingold, maxgold);
 
-            for (uint8 itemSlot = 0; itemSlot < m_lootItems.size(); ++itemSlot)
-            {
-                LootItem* lootItem = m_lootItems[itemSlot];
-                uint32 lootItemId = lootItem->itemId;
-
-                if (!player->GetGroup() || (player->GetGroup() && lootItem->isUnderThreshold))
-                {
-                    lootItemId = Item::LoadScaledLoot(lootItem->itemId, player, true); //RLS
-
-                    if (lootItem->itemId != lootItemId)
-                    {
-                        lootItem->itemId = lootItemId;
-                        lootItem->isScaled = true;
-                    }
-                    lootItem->randomPropertyId = lootItem->getRandomPropertyScaled(player->getLevel());
-                    lootItem->randomSuffix = lootItem->randomSuffix;
-                }
-            }
+          
             //Rochenoire end
             //Roche G :GenerateMoneyLoot(item->GetProto()->MinMoneyLoot, item->GetProto()->MaxMoneyLoot);
             item->SetLootState(ITEM_LOOT_CHANGED);
@@ -2210,8 +2202,12 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
     {
         ItemPosCountVec dest;
         //Rochenoire loot system
-        if (lootItem->IsAllowed(target, this) && !lootItem->isScaled)
-            itemId = Item::LoadScaledLoot(itemId, target, true);
+        if (lootItem->IsAllowed(target, this))
+        {
+            itemId = Item::LoadScaledLoot(itemId, target);
+            lootItem->randomPropertyId = lootItem->getRandomPropertyScaled(target->getAreaZoneLevel(), true, true); // because of won
+
+        }
         msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, lootItem->count);
         //Rochenoire end
         //Roche /G : msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, lootItem->itemId, lootItem->count);
@@ -2314,7 +2310,7 @@ bool Loot::AutoStore(Player* player, bool broadcast /*= false*/, uint32 bag /*= 
         else
             lootItem->allowedGuid.clear();
 
-        Item* pItem = player->StoreNewItem(dest, itemId, true, lootItem->getRandomPropertyScaled(player->getLevel(), true));
+        Item* pItem = player->StoreNewItem(dest, itemId, true, lootItem->getRandomPropertyScaled(player->getAreaZoneLevel(), true));
         player->SendNewItem(pItem, lootItem->count, false, false, broadcast);
         m_isChanged = true;
     }
@@ -2385,16 +2381,6 @@ void Loot::GetLootItemsListFor(Player* player, LootItemList& lootList)
 Loot::~Loot()
 {
     SendReleaseForAll();
-
-    //Rochenoire loot system
-
-    for (auto& m_lootItem : m_lootItems)
-    {
-        m_lootItem->setRandomPropertyScaled();
-        //m_lootItem->setRandomSuffixScaled();
-    }
-
-    //Rochenoire end
 
     for (auto& m_lootItem : m_lootItems)
         delete m_lootItem;
@@ -2530,10 +2516,13 @@ void Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
         LootItem* lootItem = *lootItemItr;
 
         //Rochenoire loot system
-        LootItem* lootItem_tmp = new LootItem(lootItem->itemId, lootItem->count, lootItem->randomSuffix, lootItem->randomPropertyId, lootItem->lootSlot);
+        
+        if (lootItem->IsAllowed(player, this))
+        {
+            lootItem->itemId = Item::LoadScaledLoot(lootItem->itemId, player);
+            lootItem->randomPropertyId = lootItem->getRandomPropertyScaled(player->getAreaZoneLevel(), false, true); // because of buffer
 
-        if (lootItem->IsAllowed(player, this) && !lootItem->isScaled)
-            lootItem_tmp->itemId = Item::LoadScaledLoot(lootItem_tmp->itemId, player, true);
+        }
         //Rochenoire end
 
         LootSlotType slot_type = lootItem->GetSlotTypeForSharedLoot(player, this);
@@ -2544,7 +2533,7 @@ void Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
         }
 
         buffer << uint8(lootItem->lootSlot);
-        buffer << *lootItem_tmp; //RLS
+        buffer << *lootItem; //RLS
         buffer << uint8(slot_type);                              // 0 - get 1 - look only 2 - master selection
         ++itemsShown;
 

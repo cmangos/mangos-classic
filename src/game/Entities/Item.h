@@ -288,6 +288,7 @@ class Item : public Object
         uint32 GetItemSuffixFactor() const { return GetUInt32Value(ITEM_FIELD_PROPERTY_SEED); }
         void SetItemRandomProperties(int32 randomPropId);
         static int32 GenerateItemRandomPropertyId(uint32 item_id);
+        static int32 GenerateItemRandomPropertyId(uint32 item_id, uint32& suffixvalue); //RLS
 
         //Rochenoire loot system
         static uint32 LoadScaledLoot(uint32 ItemId, Player* pPlayer, bool upgrade = false);

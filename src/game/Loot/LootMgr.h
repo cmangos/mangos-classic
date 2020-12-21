@@ -199,7 +199,8 @@ struct LootItem
     bool         isUnderThreshold  : 1;
     bool         currentLooterPass : 1;
     bool         isReleased        : 1;                             // true if item is released by looter or by roll system
-    bool         isScaled = false;                         // true if item is scaled //RLS
+    uint32       loot_level; //RLS
+    uint32       suffixvalue; //RLS
     std::map<uint32, uint32> randomPropertyIdArray;  //RLS
     //std::map<uint32, uint32> randomSuffixIdArray;   //RLS
 
@@ -210,14 +211,14 @@ struct LootItem
     // Should be called for non-reference LootStoreItem entries only (mincountOrRef > 0)
     explicit LootItem(LootStoreItem const& li, uint32 _lootSlot, uint32 threshold);
 
-    LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId, uint32 _lootSlot);
+    LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId, uint32 _lootSlot, uint32 suffixvalue = 0); //RLS
+
 
     //Rochenoire loot system
     int32 getRandomPropertyScaled(uint32 ilevel, bool won = false, bool display = true);
     void setRandomPropertyScaled();
     //int32 getRandomSuffixScaled(uint32 ilevel, bool won = false, bool display = true);
     //void setRandomSuffixScaled();
-    uint32 loot_level = 0;
     //Rochenoire end
 
     // Basic checks for player/item compatibility - if false no chance to see the item in the loot

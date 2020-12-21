@@ -676,6 +676,12 @@ uint32 Item::GetSpell() const
 
 int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
 {
+    uint32 suffixvalue;
+    return GenerateItemRandomPropertyId(item_id, suffixvalue);
+}
+
+int32 Item::GenerateItemRandomPropertyId(uint32 item_id, uint32& suffixvalue)
+{
     ItemPrototype const* itemProto = sItemStorage.LookupEntry<ItemPrototype>(item_id);
 
     if (!itemProto)
@@ -684,7 +690,7 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
     // Random Property case
     if (itemProto->RandomProperty)
     {
-        uint32 randomPropId = GetItemEnchantMod(itemProto->RandomProperty);
+        uint32 randomPropId = GetItemEnchantMod(itemProto->RandomProperty, suffixvalue);
         ItemRandomPropertiesEntry const* random_id = sItemRandomPropertiesStore.LookupEntry(randomPropId);
         if (!random_id)
         {
