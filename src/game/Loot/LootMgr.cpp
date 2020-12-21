@@ -289,12 +289,14 @@ bool LootStoreItem::Roll(bool rate, /*RLS*/ Player const* lootOwner) const
 
     float qualityModifier = 1.0f;
 
-    if (ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid))
-    {
-        qualityModifier = rate ? sWorld.getConfig(qualityToRate[pProto->Quality]) : 1.0f;
+    ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid);
 
-        if (pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR)
+    if (pProto)
+    {
+        if ((pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR) && (pProto->Quality > ITEM_QUALITY_NORMAL))
         {
+            qualityModifier = rate ? sWorld.getConfig(qualityToRate[pProto->Quality]) : 1.0f;
+
             float ilevelModifier = lootOwner ? lootOwner->getItemLevelCoeff(pProto->Quality) : 1.0f;
             n_chance *= ilevelModifier; // increase drop chance when average item level is lagging behind
         }
@@ -304,7 +306,15 @@ bool LootStoreItem::Roll(bool rate, /*RLS*/ Player const* lootOwner) const
 
     if (mincountOrRef < 0)                                  // reference case
     {
-        float ilevelModifier = lootOwner ? lootOwner->getItemLevelCoeff(qualityId) : 1.0f; //RLS
+        float ilevelModifier = 1;
+        if (pProto)
+        {
+            if ((pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR) && (pProto->Quality>ITEM_QUALITY_NORMAL ) )
+            {
+                ilevelModifier = lootOwner ? lootOwner->getItemLevelCoeff(qualityId) : 1.0f; //RLS
+               
+            }
+        }
         return roll_chance_f(n_chance * ilevelModifier * (rate ? sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_ITEM_REFERENCED) : 1.0f));
     }
 
