@@ -36,7 +36,7 @@ class CombatAI : public ScriptedAI, public CombatActions
 
         virtual void ExecuteActions() override;
 
-        virtual void ExecuteAction(uint32 action) = 0;
+        virtual void ExecuteAction(uint32 action) {}
 
         void HandleDelayedInstantAnimation(SpellEntry const* spellInfo) override;
         void HandleTargetRestoration();
