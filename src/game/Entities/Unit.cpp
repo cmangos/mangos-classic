@@ -11717,3 +11717,151 @@ void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, Attacking
             break;
     }
 }
+
+void Unit::SetLevitate(bool enable)
+{
+    if (!IsClientControlled())
+    {
+        if (enable)
+            m_movementInfo.AddMovementFlag(MOVEFLAG_LEVITATING);
+        else
+            m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
+    }
+
+    // Rest is wotlk+
+}
+
+void Unit::SetSwim(bool enable)
+{
+    if (IsClientControlled())
+        return;
+
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+
+    if (!IsInWorld()) // is sent on add to map
+        return;
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_START_SWIM : SMSG_SPLINE_MOVE_STOP_SWIM);
+    data << GetPackGUID();
+    SendMessageToSet(data, true);
+}
+
+void Unit::SetCanFly(bool enable)
+{
+    // TBC+
+}
+
+void Unit::SetFeatherFall(bool enable)
+{
+    bool isClientControlled = IsClientControlled();
+
+    if (!isClientControlled)
+    {
+        if (enable)
+            m_movementInfo.AddMovementFlag(MOVEFLAG_SAFE_FALL);
+        else
+            m_movementInfo.RemoveMovementFlag(MOVEFLAG_SAFE_FALL);
+    }
+
+    if (!IsInWorld()) // is sent on add to map
+        return;
+
+    if (isClientControlled)
+    {
+        if (Player const* player = GetControllingPlayer())
+        {
+            auto const counter = player->GetSession()->GetOrderCounter();
+
+            WorldPacket data(enable ? SMSG_MOVE_FEATHER_FALL : SMSG_MOVE_NORMAL_FALL, GetPackGUID().size() + 4);
+
+            data << GetPackGUID();
+            data << counter;
+            player->GetSession()->SendPacket(data);
+            player->GetSession()->IncrementOrderCounter();
+
+            // start fall from current height
+            if (!enable)
+                const_cast<Player*>(player)->SetFallInformation(0, GetPositionZ());
+
+            return;
+        }
+    }
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_FEATHER_FALL : SMSG_SPLINE_MOVE_NORMAL_FALL);
+    data << GetPackGUID();
+    SendMessageToSet(data, true);
+}
+
+void Unit::SetHover(bool enable)
+{
+    bool isClientControlled = IsClientControlled();
+
+    if (!isClientControlled)
+    {
+        if (enable)
+            m_movementInfo.AddMovementFlag(MOVEFLAG_HOVER);
+        else
+            m_movementInfo.RemoveMovementFlag(MOVEFLAG_HOVER);
+    }
+
+    if (!IsInWorld()) // is sent on add to map
+        return;
+
+    if (isClientControlled)
+    {
+        if (Player const* player = GetControllingPlayer())
+        {
+            WorldPacket data(enable ? SMSG_MOVE_SET_HOVER : SMSG_MOVE_UNSET_HOVER, GetPackGUID().size() + 4);
+
+            auto const counter = player->GetSession()->GetOrderCounter();
+
+            data << GetPackGUID();
+            data << counter;
+            player->GetSession()->SendPacket(data);
+            player->GetSession()->IncrementOrderCounter();
+            return;
+        }
+    }
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, 9);
+    data << GetPackGUID();
+    SendMessageToSet(data, false);
+}
+
+void Unit::SetWaterWalk(bool enable)
+{
+    bool isClientControlled = IsClientControlled();
+
+    if (!isClientControlled)
+    {
+        if (enable)
+            m_movementInfo.AddMovementFlag(MOVEFLAG_WATERWALKING);
+        else
+            m_movementInfo.RemoveMovementFlag(MOVEFLAG_WATERWALKING);
+    }
+
+    if (!IsInWorld()) // is sent on add to map
+        return;
+
+    if (isClientControlled)
+    {
+        if (Player const* player = GetControllingPlayer())
+        {
+            auto const counter = player->GetSession()->GetOrderCounter();
+
+            WorldPacket data(enable ? SMSG_MOVE_WATER_WALK : SMSG_MOVE_LAND_WALK, GetPackGUID().size() + 4);
+            data << GetPackGUID();
+            data << counter;
+            player->GetSession()->SendPacket(data);
+            player->GetSession()->IncrementOrderCounter();
+            return;
+        }
+    }
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_WATER_WALK : SMSG_SPLINE_MOVE_LAND_WALK, 9);
+    data << GetPackGUID();
+    SendMessageToSet(data, true);
+}

@@ -649,12 +649,6 @@ class Creature : public Unit
         }
 
         void SetWalk(bool enable, bool asDefault = true);
-        void SetLevitate(bool enable) override;
-        void SetSwim(bool enable) override;
-        void SetCanFly(bool enable) override;
-        void SetFeatherFall(bool enable) override;
-        void SetHover(bool enable) override;
-        void SetWaterWalk(bool enable) override;
 
         // TODO: Research mob shield block values
         uint32 GetShieldBlockValue() const override { return (getLevel() / 2 + uint32(GetStat(STAT_STRENGTH) / 20)); }

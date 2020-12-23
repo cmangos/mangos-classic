@@ -1773,12 +1773,12 @@ class Unit : public WorldObject
         bool IsDebuggingMovement() const { return m_debuggingMovement; }
         void SetDebuggingMovement(bool state) { m_debuggingMovement = state; }
 
-        virtual void SetLevitate(bool /*enabled*/) {}
-        virtual void SetSwim(bool /*enabled*/) {}
-        virtual void SetCanFly(bool /*enabled*/) {}
-        virtual void SetFeatherFall(bool /*enabled*/) {}
-        virtual void SetHover(bool /*enabled*/) {}
-        virtual void SetWaterWalk(bool /*enabled*/) {}
+        void SetLevitate(bool enabled);
+        void SetSwim(bool enabled);
+        void SetCanFly(bool enabled);
+        void SetFeatherFall(bool enabled);
+        void SetHover(bool enabled);
+        void SetWaterWalk(bool enabled);
 
         void SetInFront(Unit const* target);
         void SetFacingTo(float ori);
