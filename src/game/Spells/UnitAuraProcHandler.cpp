@@ -581,9 +581,11 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
 
     if (data.spell)
     {
-        if (data.spell->IsTriggeredByAura() && data.procSpell->HasAttribute(SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL))
-            if (!spellProto->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED_SPECIAL))
+        if (data.spell->m_IsTriggeredSpell && !spellProto->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED))
+        {
+            if (!data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TRIGGERED_CAN_TRIGGER_PROC) && !data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL))
                 return false;
+        }
 
         for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
             if (Aura* aura = holder->m_auras[i])

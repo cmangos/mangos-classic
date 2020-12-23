@@ -381,7 +381,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_UNK6                        = 0x00000040,// 6
     SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS      = 0x00000080,// 7 create a separate (de)buff stack for each caster
     SPELL_ATTR_EX3_TARGET_ONLY_PLAYER          = 0x00000100,// 8 Can target only player
-    SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL = 0x00000200,// 9 Can only proc auras with SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED_SPECIAL
+    SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL = 0x00000200,// 9 Can only proc auras
     SPELL_ATTR_EX3_MAIN_HAND                   = 0x00000400,// 10 Main hand weapon required
     SPELL_ATTR_EX3_BATTLEGROUND                = 0x00000800,// 11 Can casted only on battleground
     SPELL_ATTR_EX3_CAST_ON_DEAD                = 0x00001000,// 12 target is a dead player (not every spell has this flag)
@@ -398,7 +398,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_UNK23                       = 0x00800000,// 23
     SPELL_ATTR_EX3_REQ_OFFHAND                 = 0x01000000,// 24 Req offhand weapon
     SPELL_ATTR_EX3_TREAT_AS_PERIODIC           = 0x02000000,// 25 Treated as periodic spell
-    SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED_SPECIAL = 0x04000000,// 26 Auras with this attribute can proc off SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL
+    SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED     = 0x04000000,// 26 Auras with this attribute can proc off SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL
     SPELL_ATTR_EX3_DRAIN_SOUL                  = 0x08000000,// 27
     SPELL_ATTR_EX3_UNK28                       = 0x10000000,// 28 always cast ok ? (requires more research)
     SPELL_ATTR_EX3_NO_DONE_BONUS               = 0x20000000,// 29 Resistances should still affect damage
