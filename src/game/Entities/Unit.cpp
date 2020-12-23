@@ -1127,7 +1127,7 @@ void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDa
     }
 
     if (dealer)
-        dealer->InterruptOrDelaySpell(victim, damagetype);
+        dealer->InterruptOrDelaySpell(victim, damagetype, spellProto);
 
     // last damage from duel opponent
     if (duel_hasEnded)
@@ -1147,9 +1147,12 @@ void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDa
     }
 }
 
-void Unit::InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype)
+void Unit::InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype, SpellEntry const* spellProto)
 {
     if (damagetype == NODAMAGE || damagetype == DOT)
+        return;
+
+    if (spellProto && spellProto->HasAttribute(SPELL_ATTR_EX3_TREAT_AS_PERIODIC))
         return;
 
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)

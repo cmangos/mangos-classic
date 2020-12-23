@@ -750,6 +750,12 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
         procAttacker |= PROC_FLAG_SUCCESSFUL_MELEE_HIT;
         procVictim |= PROC_FLAG_TAKEN_MELEE_HIT;
     }
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TREAT_AS_PERIODIC))
+    {
+        procAttacker = PROC_FLAG_ON_DO_PERIODIC;
+        procVictim = PROC_FLAG_ON_TAKE_PERIODIC;
+    }
 }
 
 void Spell::CleanupTargetList()

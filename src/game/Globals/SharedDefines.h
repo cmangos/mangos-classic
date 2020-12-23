@@ -397,7 +397,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_REQ_WAND                    = 0x00400000,// 22 Req wand
     SPELL_ATTR_EX3_UNK23                       = 0x00800000,// 23
     SPELL_ATTR_EX3_REQ_OFFHAND                 = 0x01000000,// 24 Req offhand weapon
-    SPELL_ATTR_EX3_UNK25                       = 0x02000000,// 25 no cause spell pushback ?
+    SPELL_ATTR_EX3_TREAT_AS_PERIODIC           = 0x02000000,// 25 Treated as periodic spell
     SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED_SPECIAL = 0x04000000,// 26 Auras with this attribute can proc off SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL
     SPELL_ATTR_EX3_DRAIN_SOUL                  = 0x08000000,// 27
     SPELL_ATTR_EX3_UNK28                       = 0x10000000,// 28 always cast ok ? (requires more research)
