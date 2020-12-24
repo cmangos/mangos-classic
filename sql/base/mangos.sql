@@ -23,7 +23,11 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2774_01_mangos_column_fix` bit(1) DEFAULT NULL
+<<<<<<< HEAD
+  `required_z2776_01_mangos_creature_immunity` bit(1) DEFAULT NULL
+=======
+  `required_s2430_01_mangos_creature_immunity` bit(1) DEFAULT NULL
+>>>>>>> cf56d57e9d3... [s2430] Implement creature_immunities and ACTION_T_SET_IMMUNITY_SET
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1373,7 +1377,23 @@ CREATE TABLE creature_cooldowns (
 );
 
 --
+<<<<<<< HEAD
 -- Dumping data for table `custom_texts`
+=======
+-- Table structure for table `creature_immunities`
+--
+
+CREATE TABLE creature_immunities(
+`Entry` INT UNSIGNED NOT NULL COMMENT 'creature_template entry',
+`SetId` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT 'immunity set ID',
+`Type` TINYINT UNSIGNED NOT NULL COMMENT 'enum SpellImmunity',
+`Value` INT UNSIGNED NOT NULL COMMENT 'value depending on type',
+PRIMARY KEY(`Entry`,`SetId`,`Type`,`Value`)
+);
+
+--
+-- Table structure for table `custom_texts`
+>>>>>>> cf56d57e9d3... [s2430] Implement creature_immunities and ACTION_T_SET_IMMUNITY_SET
 --
 
 DROP TABLE IF EXISTS `custom_texts`;

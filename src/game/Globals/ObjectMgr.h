@@ -438,6 +438,16 @@ class IdGenerator
         T m_nextGuid;
 };
 
+struct CreatureImmunity
+{
+    uint32 type;
+    uint32 value;
+};
+
+typedef std::vector<CreatureImmunity> CreatureImmunityVector;
+typedef std::map<uint32, CreatureImmunityVector> CreatureImmunitySetMap;
+typedef std::map<uint32, CreatureImmunitySetMap> CreatureImmunityContainer;
+
 class ObjectMgr
 {
         friend class PlayerDumpReader;
@@ -703,6 +713,7 @@ class ObjectMgr
 
         void LoadCreatureTemplateSpells();
         void LoadCreatureCooldowns();
+        void LoadCreatureImmunities();
 
         void LoadGameTele();
 
@@ -1127,6 +1138,8 @@ class ObjectMgr
         * Qualifier: const
         **/
         CreatureClassLvlStats const* GetCreatureClassLvlStats(uint32 level, uint32 unitClass) const;
+
+        CreatureImmunityVector const* GetCreatureImmunitySet(uint32 entry, uint32 setId) const;
     protected:
 
         // current locale settings
@@ -1280,6 +1293,8 @@ class ObjectMgr
         CacheTrainerSpellMap m_mCacheTrainerSpellMap;
 
         BroadcastTextMap m_broadcastTextMap;
+
+        CreatureImmunityContainer m_creatureImmunities;
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

@@ -774,6 +774,55 @@ CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, u
     return nullptr;
 }
 
+CreatureImmunityVector const* ObjectMgr::GetCreatureImmunitySet(uint32 entry, uint32 setId) const
+{
+    auto itr = m_creatureImmunities.find(entry);
+    if (itr == m_creatureImmunities.end())
+        return nullptr;
+
+    auto& setIds = (*itr).second;
+    auto setItr = setIds.find(setId);
+    if (setItr == setIds.end())
+        return nullptr;
+
+    return &(*setItr).second;
+}
+
+void ObjectMgr::LoadCreatureImmunities()
+{
+    uint32 count = 0;
+    QueryResult* result = WorldDatabase.Query("SELECT Entry, SetId, Type, Value FROM creature_immunities");
+
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 entry = fields[0].GetUInt32();
+            if (!sCreatureStorage.LookupEntry<CreatureInfo>(entry))
+            {
+                sLog.outErrorDb("LoadCreatureImmunities: Entry %u does not exist.", entry);
+                continue;
+            }
+            uint32 setId = fields[1].GetUInt32();
+            uint32 type = fields[2].GetUInt32();
+            if (type >= MAX_SPELL_IMMUNITY)
+            {
+                sLog.outErrorDb("LoadCreatureImmunities: Invalid type %u.", type);
+                continue;
+            }
+            uint32 value = fields[3].GetUInt32();
+            m_creatureImmunities[entry][setId].push_back({ type, value });
+            ++count;
+        } while (result->NextRow());
+    }
+    delete result;
+
+    sLog.outString(">> Loaded %u creature_immunities definitions", count);
+    sLog.outString();
+}
+
 void ObjectMgr::LoadEquipmentTemplates()
 {
     sEquipmentStorage.Load(true);

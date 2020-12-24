@@ -1080,6 +1080,14 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_SET_IMMOBILIZED_STATE:
                     case ACTION_T_SET_DESPAWN_AGGREGATION:
                         break;
+                    case ACTION_T_SET_IMMUNITY_SET:
+                        if (!sObjectMgr.GetCreatureImmunitySet(creature_id, action.immunitySet.setId))
+                        {
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid immunity set %u. Setting to 0.", i, j + 1, action.immunitySet.setId);
+                            action.immunitySet.setId = 0;
+                            break;
+                        }
+                        break;
                     default:
                         sLog.outErrorEventAI("Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j + 1, temp.action[j].type);
                         break;

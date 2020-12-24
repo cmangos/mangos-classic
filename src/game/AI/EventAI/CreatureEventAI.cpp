@@ -1344,6 +1344,11 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 m_entriesForDespawn.insert(action.despawnAggregation.entry2);
             break;
         }
+        case ACTION_T_SET_IMMUNITY_SET:
+        {
+            m_creature->UpdateImmunitiesSet(action.immunitySet.setId);
+            break;
+        }
         default:
             sLog.outError("%s::ProcessAction(): action(%u) not implemented", GetAIName().data(), static_cast<uint32>(action.type));
             return false;

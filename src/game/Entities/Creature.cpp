@@ -141,7 +141,8 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_originalEntry(0), m_dbGuid(0), m_ai(nullptr),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false), m_countSpawns(false),
     m_creatureInfo(nullptr),
-    m_noXP(false), m_noLoot(false), m_noReputation(false)
+    m_noXP(false), m_noLoot(false), m_noReputation(false),
+    m_immunitySet(UINT32_MAX)
 {
     m_regenTimer = 200;
     m_valuesCount = UNIT_END;
@@ -501,15 +502,7 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     m_isInvisible = (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_INVISIBLE) != 0;
     m_ignoreMMAP = (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE) != 0;
     m_countSpawns = (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_COUNT_SPAWNS) != 0;
-    if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NOT_TAUNTABLE)\
-    {
-        ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
-        ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-    }
-    if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_HASTE_SPELL_IMMUNITY)
-        ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK, true);
-    if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_POISON_IMMUNITY)
-        ApplySpellImmune(nullptr, IMMUNITY_DISPEL, DISPEL_POISON, true);
+
     if (IsWorldBoss())
         ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, true);
 
@@ -528,6 +521,7 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     }
 
     UpdateSpellSet(0); // by default always 0
+    UpdateImmunitiesSet(0);
 
     // if eventData set then event active and need apply spell_start
     if (eventData)
@@ -2144,6 +2138,27 @@ void Creature::UpdateSpellSet(uint32 spellSet)
     if (templateSpells)
         for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
             m_spells[i] = templateSpells->spells[i];
+}
+
+void Creature::UpdateImmunitiesSet(uint32 immunitySet)
+{
+    if (m_immunitySet == immunitySet)
+        return;
+
+    auto set = sObjectMgr.GetCreatureImmunitySet(GetCreatureInfo()->Entry, immunitySet);
+    if (!set)
+        return;
+
+    if (auto oldSet = sObjectMgr.GetCreatureImmunitySet(GetCreatureInfo()->Entry, m_immunitySet))
+    {
+        for (auto& data : *oldSet)
+            ApplySpellImmune(nullptr, data.type, data.value, false);
+    }
+
+    for (auto& data : *set)
+        ApplySpellImmune(nullptr, data.type, data.value, true);
+
+    m_immunitySet = immunitySet;
 }
 
 time_t Creature::GetRespawnTimeEx() const

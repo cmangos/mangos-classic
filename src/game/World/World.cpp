@@ -971,6 +971,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature cooldowns...");
     sObjectMgr.LoadCreatureCooldowns();
 
+    sLog.outString("Loading Creature immunities...");
+    sObjectMgr.LoadCreatureImmunities();
+
     sLog.outString("Loading ItemRequiredTarget...");
     sObjectMgr.LoadItemRequiredTarget();
 
