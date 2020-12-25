@@ -383,8 +383,8 @@ void Unit::ProcDamageAndSpell(ProcSystemArguments&& data)
 }
 
 ProcExecutionData::ProcExecutionData(ProcSystemArguments& data, bool isVictim) :
-    isVictim(isVictim), procExtra(data.procExtra), attType(data.attType), damage(data.damage), procSpell(data.procSpell), spell(data.spell), healthGain(data.healthGain), triggeredByAura(nullptr), cooldown(0),
-    triggeredSpellId(0), procOnce(false), isHeal(data.isHeal)
+    isVictim(isVictim), procExtra(data.procExtra), attType(data.attType), damage(data.damage), procSpell(data.procSpell), spell(data.spell), healthGain(data.healthGain), isHeal(data.isHeal),
+    triggeredByAura(nullptr), cooldown(0), triggeredSpellId(0), procOnce(false), triggerTarget(nullptr)
 {
     if (isVictim)
     {
