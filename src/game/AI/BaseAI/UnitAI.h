@@ -95,7 +95,13 @@ enum RangeModeType : uint32 // maybe can be substituted for class checks
     TYPE_FULL_CASTER = 1,
     TYPE_PROXIMITY = 2,
     TYPE_NO_MELEE_MODE = 3,
+    TYPE_DISTANCER = 4,
     TYPE_MAX,
+};
+
+enum GenericAIActions
+{
+    GENERIC_ACTION_DISTANCE = 2000,
 };
 
 class UnitAI

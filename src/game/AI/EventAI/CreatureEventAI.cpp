@@ -103,10 +103,12 @@ CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
     m_mainSpellCost(0),
     m_mainSpellInfo(nullptr),
     m_mainSpellMinRange(0.f),
+    m_mainAttackMask(SPELL_SCHOOL_MASK_NONE),
     m_defaultMovement(IDLE_MOTION_TYPE),
-    m_mainAttackMask(SPELL_SCHOOL_MASK_NONE)
+    m_distancingCooldown(false)
 {
     InitAI();
+    AddCustomAction(GENERIC_ACTION_DISTANCE, true, [&]() { m_distancingCooldown = false; });
 }
 
 void CreatureEventAI::InitAI()
@@ -1655,12 +1657,25 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
     {
         if (m_rangedMode && CanExecuteCombatAction())
         {
-            if (m_rangedModeSetting == TYPE_PROXIMITY)
+            if (m_rangedModeSetting == TYPE_PROXIMITY || m_rangedModeSetting == TYPE_DISTANCER)
             {
                 if (m_currentRangedMode && m_creature->CanReachWithMeleeAttack(victim))
                     SetCurrentRangedMode(false);
                 else if (!m_currentRangedMode && !m_creature->CanReachWithMeleeAttack(victim, 2.f) && m_mainSpellInfo && m_mainSpellCost * 2 < m_creature->GetPower(POWER_MANA) && m_creature->IsSpellReady(*m_mainSpellInfo))
                     SetCurrentRangedMode(true);
+                else if (m_rangedModeSetting == TYPE_DISTANCER && !m_distancingCooldown)
+                {
+                    m_distancingCooldown = true;
+                    ResetTimer(GENERIC_ACTION_DISTANCE, 5000);
+                }
+            }
+            // casters only display melee animation when in ranged mode when someone is actually close enough
+            else if (m_rangedModeSetting == TYPE_FULL_CASTER && m_currentRangedMode)
+            {
+                if (m_unit->hasUnitState(UNIT_STAT_MELEE_ATTACKING) && !m_creature->CanReachWithMeleeAttack(victim))
+                    SetMeleeEnabled(false);
+                else if (!m_unit->hasUnitState(UNIT_STAT_MELEE_ATTACKING) && m_creature->CanReachWithMeleeAttack(victim))
+                    SetMeleeEnabled(true);
             }
         }
 

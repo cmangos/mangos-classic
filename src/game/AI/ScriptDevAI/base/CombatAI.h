@@ -58,9 +58,7 @@ class CombatAI : public ScriptedAI, public CombatActions
 class RangedCombatAI : public CombatAI
 {
     public:
-        RangedCombatAI(Creature* creature, uint32 combatActions) : CombatAI(creature, combatActions),
-            m_rangedMode(false), m_rangedModeSetting(TYPE_NONE), m_chaseDistance(0.f), m_currentRangedMode(false), m_mainSpellId(0), m_mainSpellCost(0), m_mainSpellInfo(nullptr), m_mainSpellMinRange(0.f),
-            m_mainAttackMask(SPELL_SCHOOL_MASK_NONE) {}
+        RangedCombatAI(Creature* creature, uint32 combatActions);
 
         virtual void OnSpellCooldownAdded(SpellEntry const* spellInfo) override;
 
@@ -98,6 +96,7 @@ class RangedCombatAI : public CombatAI
         SpellEntry const* m_mainSpellInfo;
         float m_mainSpellMinRange;
         SpellSchoolMask m_mainAttackMask;
+        bool m_distancingCooldown;
 };
 
 #endif
