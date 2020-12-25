@@ -32,6 +32,12 @@ CombatAI::CombatAI(Creature* creature, uint32 combatActions) : ScriptedAI(creatu
     AddCustomAction(ACTION_ON_KILL_COOLDOWN, true, [&]() { m_onKillCooldown = false; });
 }
 
+void CombatAI::Reset()
+{
+    ResetAllTimers();
+    m_onKillCooldown = false;
+}
+
 void CombatAI::ExecuteActions()
 {
     if (!CanExecuteCombatAction())
@@ -96,7 +102,7 @@ void CombatAI::KilledUnit(Unit* victim)
     {
         m_onKillCooldown = true;
         DoScriptText(m_onDeathTexts[urand(0, m_onDeathTexts.size() - 1)], m_creature, victim);
-        ResetTimer(ACTION_ON_KILL_COOLDOWN, 5000);
+        ResetTimer(ACTION_ON_KILL_COOLDOWN, 10000);
     }
 }
 

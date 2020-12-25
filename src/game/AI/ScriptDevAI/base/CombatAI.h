@@ -29,10 +29,7 @@ class CombatAI : public ScriptedAI, public CombatActions
     public:
         CombatAI(Creature* creature, uint32 combatActions);
 
-        void Reset() override
-        {
-            ResetAllTimers();
-        }
+        void Reset() override;
 
         virtual void ExecuteActions() override;
 
