@@ -61,6 +61,7 @@ struct boss_sarturaAI : public CombatAI
         AddCombatAction(SARTURA_WHIRLWIND, 10000, 20000);
         AddCombatAction(SARTURA_SUNDERING_CLEAVE, 2000, 5000);
         AddCombatAction(SARTURA_BERSERK, uint32(10 * MINUTE * IN_MILLISECONDS));
+        AddOnKillText(SAY_SLAY);
         Reset();
     }
 
@@ -72,11 +73,6 @@ struct boss_sarturaAI : public CombatAI
 
         if (m_instance)
             m_instance->SetData(TYPE_SARTURA, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(SAY_SLAY, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override

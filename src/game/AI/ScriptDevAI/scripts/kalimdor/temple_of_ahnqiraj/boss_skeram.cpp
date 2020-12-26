@@ -74,6 +74,7 @@ struct boss_skeramAI : public CombatAI
         AddCombatAction(SKERAM_TRUE_FULFILMENT, uint32(15) * IN_MILLISECONDS);
         AddCombatAction(SKERAM_EARTH_SHOCK, 1200u);
         AddCustomAction(SKERAM_BLINK_DELAY, true, [&]() { HandleBlinkDelay(); });
+        AddOnKillText(SAY_SLAY);
     }
 
     ScriptedInstance* m_instance;
@@ -108,11 +109,6 @@ struct boss_skeramAI : public CombatAI
         if (m_isImage)
             StopAttacking();
         DoCastSpellIfCan(nullptr, SPELL_BIRTH);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(SAY_SLAY, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override

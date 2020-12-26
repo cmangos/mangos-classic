@@ -290,6 +290,7 @@ struct boss_veklorAI : public boss_twin_emperorsAI
         AddCombatAction(VEKLOR_BLIZZARD, urand(15000, 20000));
         AddCombatAction(VEKLOR_ARCANE_BURST, 1000u);
         AddCombatAction(VEKLOR_TELEPORT, 35000u);
+        AddOnKillText(SAY_VEKLOR_SLAY);
     }
 
     void Reset() override
@@ -319,11 +320,6 @@ struct boss_veklorAI : public boss_twin_emperorsAI
             case 2: DoScriptText(SAY_VEKLOR_AGGRO_3, m_creature); break;
             case 3: DoScriptText(SAY_VEKLOR_AGGRO_4, m_creature); break;
         }
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(SAY_VEKLOR_SLAY, m_creature);
     }
 
     void JustDied(Unit* killer) override
