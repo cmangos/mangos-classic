@@ -88,11 +88,6 @@ void CombatAI::AddOnKillText(int32 text)
     m_onDeathTexts.push_back(text);
 }
 
-void CombatAI::AddOnKillText(std::vector<int32> texts)
-{
-    m_onDeathTexts.insert(m_onDeathTexts.end(), texts.begin(), texts.end());
-}
-
 void CombatAI::KilledUnit(Unit* victim)
 {
     if (!m_creature->IsAlive() || !victim->IsPlayer())

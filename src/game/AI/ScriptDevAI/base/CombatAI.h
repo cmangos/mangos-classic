@@ -40,7 +40,12 @@ class CombatAI : public ScriptedAI, public CombatActions
         bool IsTargetingRestricted();
 
         void AddOnKillText(int32 text);
-        void AddOnKillText(std::vector<int32> texts);
+        template<typename... Targs>
+        void AddOnKillText(int32 value, Targs... fargs)
+        {
+            AddOnKillText(value);
+            AddOnKillText(fargs...);
+        }
         void KilledUnit(Unit* /*victim*/) override;
 
         void UpdateAI(const uint32 diff) override;
