@@ -86,6 +86,7 @@ struct boss_ragnarosAI : public CombatAI
         AddCombatAction(RAGNAROS_MIGHT_OF_RAGNAROS, 11000u);
         AddCombatAction(RAGNAROS_MAGMA_BLAST, 2000u);
         AddCombatAction(RAGNAROS_LAVA_BURST, uint32(20 * IN_MILLISECONDS));
+        AddOnKillText(SAY_KILL);
         m_bHasAggroYelled = false;
     }
 
@@ -121,17 +122,6 @@ struct boss_ragnarosAI : public CombatAI
         DoCastSpellIfCan(nullptr, SPELL_ELEMENTAL_FIRE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
         DespawnGuids(m_spawns);
-    }
-
-    void KilledUnit(Unit* victim) override
-    {
-        if (victim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        if (urand(0, 3))
-            return;
-
-        DoScriptText(SAY_KILL, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override

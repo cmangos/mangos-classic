@@ -125,15 +125,10 @@ struct boss_shazzrahAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_shazzrah(Creature* creature)
-{
-    return new boss_shazzrahAI(creature);
-}
-
 void AddSC_boss_shazzrah()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_shazzrah";
-    pNewScript->GetAI = &GetAI_boss_shazzrah;
+    pNewScript->GetAI = &GetNewAIInstance<boss_shazzrahAI>;
     pNewScript->RegisterSelf();
 }

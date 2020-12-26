@@ -182,25 +182,15 @@ struct mob_flamewaker_priestAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_sulfuron(Creature* creature)
-{
-    return new boss_sulfuronAI(creature);
-}
-
-UnitAI* GetAI_mob_flamewaker_priest(Creature* creature)
-{
-    return new mob_flamewaker_priestAI(creature);
-}
-
 void AddSC_boss_sulfuron()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_sulfuron";
-    pNewScript->GetAI = &GetAI_boss_sulfuron;
+    pNewScript->GetAI = &GetNewAIInstance<boss_sulfuronAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_flamewaker_priest";
-    pNewScript->GetAI = &GetAI_mob_flamewaker_priest;
+    pNewScript->GetAI = &GetNewAIInstance<mob_flamewaker_priestAI>;
     pNewScript->RegisterSelf();
 }

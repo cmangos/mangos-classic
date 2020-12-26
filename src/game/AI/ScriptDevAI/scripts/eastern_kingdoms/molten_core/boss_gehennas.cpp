@@ -109,15 +109,10 @@ struct boss_gehennasAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_gehennas(Creature* creature)
-{
-    return new boss_gehennasAI(creature);
-}
-
 void AddSC_boss_gehennas()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_gehennas";
-    pNewScript->GetAI = &GetAI_boss_gehennas;
+    pNewScript->GetAI = &GetNewAIInstance<boss_gehennasAI>;
     pNewScript->RegisterSelf();
 }

@@ -117,15 +117,10 @@ struct boss_baron_geddonAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_baron_geddon(Creature* creature)
-{
-    return new boss_baron_geddonAI(creature);
-}
-
 void AddSC_boss_baron_geddon()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_baron_geddon";
-    pNewScript->GetAI = &GetAI_boss_baron_geddon;
+    pNewScript->GetAI = &GetNewAIInstance<boss_baron_geddonAI>;
     pNewScript->RegisterSelf();
 }
