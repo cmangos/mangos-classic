@@ -120,15 +120,11 @@ struct boss_broodlordAI : public CombatAI
         }
     }
 };
-UnitAI* GetAI_boss_broodlord(Creature* creature)
-{
-    return new boss_broodlordAI(creature);
-}
 
 void AddSC_boss_broodlord()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_broodlord";
-    pNewScript->GetAI = &GetAI_boss_broodlord;
+    pNewScript->GetAI = &GetNewAIInstance<boss_broodlordAI>;
     pNewScript->RegisterSelf();
 }

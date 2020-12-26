@@ -148,15 +148,10 @@ struct boss_chromaggusAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_chromaggus(Creature* creature)
-{
-    return new boss_chromaggusAI(creature);
-}
-
 void AddSC_boss_chromaggus()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_chromaggus";
-    pNewScript->GetAI = &GetAI_boss_chromaggus;
+    pNewScript->GetAI = &GetNewAIInstance<boss_chromaggusAI>;
     pNewScript->RegisterSelf();
 }
