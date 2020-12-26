@@ -95,7 +95,7 @@ void CombatAI::AddOnKillText(std::vector<int32> texts)
 
 void CombatAI::KilledUnit(Unit* victim)
 {
-    if (!victim->IsPlayer())
+    if (!m_creature->IsAlive() || !victim->IsPlayer())
         return;
 
     if (!m_onKillCooldown && m_onDeathTexts.size() > 0)
