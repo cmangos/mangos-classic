@@ -41,12 +41,25 @@ void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-        case NPC_MOGRAINE:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-            if (GetData(TYPE_ASHBRINGER_EVENT) == IN_PROGRESS)
-                DoOrSimulateScriptTextForThisInstance(SAY_ASHBRINGER_ENTRANCE, NPC_MOGRAINE);
+        case NPC_SORCERER:
+        case NPC_MYRMIDON:
+        case NPC_DEFENDER:
+        case NPC_CHAPLAIN: 
+        case NPC_WIZARD:
+        case NPC_CENTURION:
+        case NPC_CHAMPION: 
+        case NPC_ABBOT:    
+        case NPC_MONK:
+        case NPC_FAIRBANKS:
+            m_sAshbringerFriendlyGuids.insert(pCreature->GetObjectGuid());
             break;
         case NPC_WHITEMANE:
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        case NPC_MOGRAINE:
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_sAshbringerFriendlyGuids.insert(pCreature->GetObjectGuid());
+            break;
         case NPC_VORREL:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
@@ -67,12 +80,8 @@ void instance_scarlet_monastery::OnObjectCreate(GameObject* pGo)
 {
     if (pGo->GetEntry() == GO_WHITEMANE_DOOR)
         m_goEntryGuidStore[GO_WHITEMANE_DOOR] = pGo->GetObjectGuid();
-}
-
-void instance_scarlet_monastery::OnPlayerEnter(Player* pPlayer)
-{
-    if (pPlayer->HasItemWithIdEquipped(ITEM_CORRUPTED_ASHRBRINGER, 1) && GetData(TYPE_ASHBRINGER_EVENT) == NOT_STARTED)
-        SetData(TYPE_ASHBRINGER_EVENT, IN_PROGRESS);
+    else if (pGo->GetEntry() == GO_CHAPEL_DOOR)
+        m_goEntryGuidStore[GO_CHAPEL_DOOR] = pGo->GetObjectGuid();
 }
 
 void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
@@ -118,7 +127,22 @@ void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
         m_auiEncounter[0] = uiData;
     }
     else if (uiType == TYPE_ASHBRINGER_EVENT)
+    {
+        if (uiData == IN_PROGRESS)
+        {
+            DoUseDoorOrButton(GO_CHAPEL_DOOR);
+
+            Creature* whitemane = GetSingleCreatureFromStorage(NPC_WHITEMANE);
+            if (whitemane && whitemane->IsAlive() && !whitemane->IsInCombat())
+                whitemane->ForcedDespawn();
+
+            for (auto scarletCathedralNpcGuid : m_sAshbringerFriendlyGuids)
+                if (Creature* scarletNpc = instance->GetCreature(scarletCathedralNpcGuid))
+                    if (scarletNpc->IsAlive() && !scarletNpc->IsInCombat())
+                        scarletNpc->setFaction(35);
+        }
         m_auiEncounter[1] = uiData;
+    }
 }
 
 uint32 instance_scarlet_monastery::GetData(uint32 uiData) const
@@ -136,10 +160,40 @@ InstanceData* GetInstanceData_instance_scarlet_monastery(Map* pMap)
     return new instance_scarlet_monastery(pMap);
 }
 
+bool instance_scarlet_monastery::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger)
+{
+    if (areaTrigger->id == AREATRIGGER_CATHEDRAL_ENTRANCE)
+    {
+        if (GetData(TYPE_ASHBRINGER_EVENT) == NOT_STARTED)
+        {
+            SetData(TYPE_ASHBRINGER_EVENT, IN_PROGRESS);
+            DoOrSimulateScriptTextForThisInstance(SAY_ASHBRINGER_ENTRANCE, NPC_MOGRAINE);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AreaTrigger_at_cathedral_entrance(Player* player, AreaTriggerEntry const* areaTrigger)
+{
+    if (player->IsGameMaster() || !player->IsAlive() || !player->HasItemCount(ITEM_CORRUPTED_ASHRBRINGER, 1))
+        return false;
+
+    if (auto* instance = (instance_scarlet_monastery*)player->GetInstanceData())
+        return instance->DoHandleAreaTrigger(areaTrigger);
+
+    return false;
+}
+
 void AddSC_instance_scarlet_monastery()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_scarlet_monastery";
     pNewScript->GetInstanceData = &GetInstanceData_instance_scarlet_monastery;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_cathedral_entrance";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_cathedral_entrance;
     pNewScript->RegisterSelf();
 }
