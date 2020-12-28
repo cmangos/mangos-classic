@@ -5663,8 +5663,9 @@ bool SpellAuraHolder::IsNeedVisibleSlot(Unit const* caster) const
         // special area auras cases
         switch (m_spellProto->Effect[i])
         {
+            case SPELL_EFFECT_APPLY_AREA_AURA_PARTY: // passive party auras shown even on caster
+                return m_auras[i]->GetModifier()->m_auraname != SPELL_AURA_NONE;
             case SPELL_EFFECT_APPLY_AREA_AURA_PET:
-            case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
                 // passive auras (except totem auras) do not get placed in caster slot
                 return (m_target != caster || totemAura || !m_isPassive) && m_auras[i]->GetModifier()->m_auraname != SPELL_AURA_NONE;
             default:
