@@ -897,6 +897,7 @@ class Creature : public Unit
         void RegisterHitBySpell(uint32 spellId);
         void ResetSpellHitCounter();
 
+        uint32 GetDbGuid() const { return m_dbGuid; }
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 

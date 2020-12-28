@@ -40,11 +40,11 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature, int32 pat
         overwriteEntry = creature.GetEntry();
 
     if (wpOrigin == PATH_NO_PATH && pathId == 0)
-        i_path = sWaypointMgr.GetDefaultPath(overwriteEntry, creature.GetGUIDLow(), &m_PathOrigin);
+        i_path = sWaypointMgr.GetDefaultPath(overwriteEntry, creature.GetDbGuid(), &m_PathOrigin);
     else
     {
         m_PathOrigin = wpOrigin == PATH_NO_PATH ? PATH_FROM_ENTRY : wpOrigin;
-        i_path = sWaypointMgr.GetPathFromOrigin(overwriteEntry, creature.GetGUIDLow(), pathId, m_PathOrigin);
+        i_path = sWaypointMgr.GetPathFromOrigin(overwriteEntry, creature.GetDbGuid(), pathId, m_PathOrigin);
     }
     m_pathId = pathId;
 
