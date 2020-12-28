@@ -1447,6 +1447,8 @@ inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
     // TODO: Move this to target logic
     switch (spellInfo->EffectImplicitTargetA[effIdx])
     {
+        case TARGET_UNIT_FRIEND_CHAIN_HEAL: // checked for LOS but in a custom chain way
+        case TARGET_UNIT_FRIEND_AND_PARTY:
         case TARGET_UNIT_RAID_AND_CLASS: return true;
         default: break;
     }
