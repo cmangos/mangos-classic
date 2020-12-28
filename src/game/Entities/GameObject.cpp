@@ -1031,9 +1031,6 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
             return false;
     }
 
-    if (IsTransport())
-        printf("");
-
     // check distance
     return IsWithinDistInMap(viewPoint, GetVisibilityData().GetVisibilityDistance(), false);
 }
