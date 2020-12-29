@@ -84,6 +84,14 @@ void instance_scarlet_monastery::OnObjectCreate(GameObject* pGo)
         m_goEntryGuidStore[GO_CHAPEL_DOOR] = pGo->GetObjectGuid();
 }
 
+void instance_scarlet_monastery::OnCreatureRespawn(Creature* creature)
+{
+    if (GetData(TYPE_ASHBRINGER_EVENT) == IN_PROGRESS)
+        if (creature->IsAlive() && !creature->IsInCombat() && creature->getFaction() != 35)
+            if (m_sAshbringerFriendlyGuids.find(creature->GetObjectGuid()) != m_sAshbringerFriendlyGuids.end())
+                creature->setFaction(35);
+}
+
 void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
 {
     if (uiType == TYPE_MOGRAINE_AND_WHITE_EVENT)
@@ -132,7 +140,7 @@ void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
         {
             DoUseDoorOrButton(GO_CHAPEL_DOOR);
 
-            Creature* whitemane = GetSingleCreatureFromStorage(NPC_WHITEMANE);
+            Creature* whitemane = GetSingleCreatureFromStorage(NPC_WHITEMANE, true);
             if (whitemane && whitemane->IsAlive() && !whitemane->IsInCombat())
                 whitemane->ForcedDespawn();
 

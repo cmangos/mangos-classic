@@ -48,6 +48,7 @@ class instance_scarlet_monastery : public ScriptedInstance
         void OnCreatureCreate(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureRespawn(Creature* creature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiData) const override;
