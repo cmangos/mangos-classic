@@ -92,6 +92,13 @@ void instance_scarlet_monastery::OnCreatureRespawn(Creature* creature)
                 creature->setFaction(35);
 }
 
+void instance_scarlet_monastery::OnObjectSpawn(GameObject* go)
+{
+    if (go->GetEntry() == GO_CHAPEL_DOOR)
+        if (GetData(TYPE_ASHBRINGER_EVENT) == IN_PROGRESS)
+            DoUseDoorOrButton(GO_CHAPEL_DOOR);
+}
+
 void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
 {
     if (uiType == TYPE_MOGRAINE_AND_WHITE_EVENT)
