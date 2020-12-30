@@ -2604,6 +2604,9 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
 
     Creature* wpCreature = WorldObject::SummonCreature(settings, wpOwner->GetMap());
 
+    if (wpCreature)
+        wpCreature->SetLevel(wpId);
+
     return wpCreature;
 }
 inline void UnsummonVisualWaypoints(Player const* player, ObjectGuid ownerGuid)
