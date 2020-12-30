@@ -63,6 +63,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28416,'spell_trigger_KT_add'),
 (28417,'spell_trigger_KT_add'),
 (28455,'spell_trigger_KT_add'),
+(28441,'spell_ab_effect_000'),
 (28749,'spell_check_gothik_side'),
 (28781,'spell_gothik_side_assault'),
 (29330,'spell_sapphiron_despawn_buffet'),

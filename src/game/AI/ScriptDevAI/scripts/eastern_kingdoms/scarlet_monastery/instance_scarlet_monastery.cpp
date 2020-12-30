@@ -200,6 +200,16 @@ bool AreaTrigger_at_cathedral_entrance(Player* player, AreaTriggerEntry const* a
     return false;
 }
 
+struct ABEffect000 : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (WorldObject* caster = spell->GetCastingObject())
+            if (!target->IsWithinLOSInMap(caster, true))
+                return false;
+    }
+};
+
 void AddSC_instance_scarlet_monastery()
 {
     Script* pNewScript = new Script;
@@ -211,4 +221,6 @@ void AddSC_instance_scarlet_monastery()
     pNewScript->Name = "at_cathedral_entrance";
     pNewScript->pAreaTrigger = &AreaTrigger_at_cathedral_entrance;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ABEffect000>("spell_ab_effect_000");
 }
