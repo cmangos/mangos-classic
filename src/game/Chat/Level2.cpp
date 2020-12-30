@@ -2595,6 +2595,7 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
     settings.spawnDataEntry = 2;
     settings.spawnType = TEMPSPAWN_TIMED_DESPAWN;
     settings.despawnTime = 5 * MINUTE * IN_MILLISECONDS;
+    settings.spawnType = TEMPSPAWN_TIMED_DESPAWN;
 
     settings.tempSpawnMovegen = true;
     settings.waypointId = wpId;
