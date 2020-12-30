@@ -65,6 +65,19 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // get the destination map entry, not the current one, this will fix homebind and reset greeting
     MapEntry const* mEntry = sMapStore.LookupEntry(loc.mapid);
 
+    auto returnHomeFunc = [player = GetPlayer(), old_loc]()
+    {
+        player->SetSemaphoreTeleportFar(false);
+
+        // Teleport to previous place, if cannot be ported back TP to homebind place
+        if (!player->TeleportTo(old_loc))
+        {
+            DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s cannot be ported to his previous place, teleporting him to his homebind place...",
+                player->GetGuidStr().c_str());
+            player->TeleportToHomebind();
+        }
+    };
+
     Map* map = nullptr;
 
     // prevent crash at attempt landing to not existed battleground instance
@@ -79,18 +92,15 @@ void WorldSession::HandleMoveWorldportAckOpcode()
                        " (map:%u, x:%f, y:%f, z:%f) Trying to port him to his previous place..",
                        GetPlayer()->GetGuidStr().c_str(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
 
-            GetPlayer()->SetSemaphoreTeleportFar(false);
-
-            // Teleport to previous place, if cannot be ported back TP to homebind place
-            if (!GetPlayer()->TeleportTo(old_loc))
-            {
-                DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s cannot be ported to his previous place, teleporting him to his homebind place...",
-                           GetPlayer()->GetGuidStr().c_str());
-                GetPlayer()->TeleportToHomebind();
-            }
+            returnHomeFunc();
             return;
         }
     }
+
+    uint32 miscRequirement = 0;
+    if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(loc.mapid))
+        if (AREA_LOCKSTATUS_OK != GetPlayer()->GetAreaTriggerLockStatus(at, miscRequirement))
+            returnHomeFunc();
 
     InstanceTemplate const* mInstance = ObjectMgr::GetInstanceTemplate(loc.mapid);
 
