@@ -31,7 +31,7 @@ class GenericTransport : public GameObject
 {
     public:
         GenericTransport() : m_passengerTeleportIterator(m_passengers.end()), m_pathProgress(0), m_movementStarted(0) {}
-        bool AddPassenger(Unit* passenger);
+        bool AddPassenger(Unit* passenger, bool adjustCoords = true);
         bool RemovePassenger(Unit* passenger);
         bool AddPetToTransport(Unit* passenger, Pet* pet);
 

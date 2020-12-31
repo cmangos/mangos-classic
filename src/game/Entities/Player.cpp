@@ -2028,6 +2028,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             Position const& transportPosition = m_movementInfo.GetTransportPos();
 
             m_teleport_dest = WorldLocation(mapid, final_x, final_y, final_z, final_o);
+            if (targetTransport)
+                m_teleportTransport = targetTransport->GetObjectGuid();
             SetFallInformation(0, final_z);
             // if the player is saved before worldport ack (at logout for example)
             // this will be used instead of the current location in SaveToDB

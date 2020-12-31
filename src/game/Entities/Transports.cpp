@@ -270,7 +270,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
         UpdateModelPosition();
 }
 
-bool GenericTransport::AddPassenger(Unit* passenger)
+bool GenericTransport::AddPassenger(Unit* passenger, bool adjustCoords)
 {
     if (m_passengers.find(passenger) == m_passengers.end())
     {
@@ -278,9 +278,10 @@ bool GenericTransport::AddPassenger(Unit* passenger)
         m_passengers.insert(passenger);
         passenger->SetTransport(this);
         passenger->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
+        bool changedTransports = passenger->m_movementInfo.t_guid != GetObjectGuid();
         passenger->m_movementInfo.t_guid = GetObjectGuid();
         passenger->m_movementInfo.t_time = GetPathProgress();
-        if (!passenger->m_movementInfo.t_pos.x)
+        if (changedTransports && adjustCoords)
         {
             passenger->m_movementInfo.t_pos.x = passenger->GetPositionX();
             passenger->m_movementInfo.t_pos.y = passenger->GetPositionY();
