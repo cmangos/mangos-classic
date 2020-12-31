@@ -434,6 +434,7 @@ class Map : public GridRefManager<NGridType>
         // Transports
         typedef std::set<Transport*> TransportSet;
         TransportSet m_transports;
+        TransportSet::iterator m_transportsIterator;
 
         std::unordered_map<uint32, std::set<ObjectGuid>> m_spawnedCount;
 };

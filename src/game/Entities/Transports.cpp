@@ -252,21 +252,18 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
     // correct me if I'm wrong O.o
     if (mapChange)
     {
-        oldMap->GetMessager().AddMessage([transport = this, newMapid](Map* map)
-        {
-            transport->RemoveModelFromMap();
-            map->RemoveTransport(transport);
-            transport->UpdateForMap(map, false);
-            transport->ResetMap();
+        RemoveModelFromMap();
+        oldMap->RemoveTransport(this);
+        UpdateForMap(oldMap, false);
+        ResetMap();
 
-            Map* newMap = sMapMgr.CreateMap(newMapid, transport);
-            newMap->GetMessager().AddMessage([transport = transport](Map* map)
-            {
-                transport->SetMap(map);
-                map->AddTransport(transport);
-                transport->AddModelToMap();
-                transport->UpdateForMap(map, true);
-            });
+        Map* newMap = sMapMgr.CreateMap(newMapid, this);
+        newMap->GetMessager().AddMessage([transport = this](Map* map)
+        {
+            transport->SetMap(map);
+            map->AddTransport(transport);
+            transport->AddModelToMap();
+            transport->UpdateForMap(map, true);
         });
     }
     else

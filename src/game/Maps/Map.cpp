@@ -107,7 +107,15 @@ void Map::AddTransport(Transport* transport)
 
 void Map::RemoveTransport(Transport* transport)
 {
-    m_transports.erase(transport);
+    if (m_transportsIterator != m_transports.end())
+    {
+        auto itr = m_transports.find(transport);
+        if (itr == m_transportsIterator)
+            ++m_transportsIterator;
+        m_transports.erase(transport);
+    }
+    else
+        m_transports.erase(transport);
 }
 
 void Map::LoadMapAndVMap(int gx, int gy)
@@ -125,7 +133,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
       m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE), m_persistentState(nullptr),
       m_activeNonPlayersIter(m_activeNonPlayers.end()), m_onEventNotifiedIter(m_onEventNotifiedObjects.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
-      i_data(nullptr), i_script_id(0)
+      i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin())
 {
     m_weatherSystem = new WeatherSystem(this);
 }
@@ -641,8 +649,12 @@ void Map::Update(const uint32& t_diff)
     TypeContainerVisitor<MaNGOS::ObjectUpdater, GridTypeMapContainer  > grid_object_update(obj_updater);    // For creature
     TypeContainerVisitor<MaNGOS::ObjectUpdater, WorldTypeMapContainer > world_object_update(obj_updater);   // For pets
 
-    for (Transport* m_Transport : m_transports)
-        m_Transport->Update(t_diff);
+    for (m_transportsIterator = m_transports.begin(); m_transportsIterator != m_transports.end();)
+    {
+        Transport* transport = *m_transportsIterator;
+        ++m_transportsIterator;
+        transport->Update(t_diff);
+    }
 
     // the player iterator is stored in the map object
     // to make sure calls to Map::Remove don't invalidate it
