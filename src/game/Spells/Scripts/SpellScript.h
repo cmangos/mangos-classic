@@ -113,6 +113,8 @@ class SpellScriptMgr
         static std::map<std::string, AuraScript*> m_auraScriptStringMap;
 };
 
+// note - linux name mangling bugs out if two script templates have same class name - avoid it
+
 template <class T>
 void RegisterScript(std::string stringName)
 {
