@@ -72,23 +72,13 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
-<<<<<<< HEAD
-(10060,'spell_stacking_rules_override');
-(27827,'spell_spirit_of_redemption_heal');
-=======
-(10060,'spell_stacking_rules_override'),
+(10060,'spell_stacking_rules_override')
 (15268,'spell_blackout'),
 (15323,'spell_blackout'),
 (15324,'spell_blackout'),
 (15325,'spell_blackout'),
 (15326,'spell_blackout'),
-(27827,'spell_spirit_of_redemption_heal'),
-(32676,'spell_consume_magic');
-
--- Paladin
-INSERT INTO spell_scripts(Id, ScriptName) VALUES
-(31789,'spell_righteous_defense');
->>>>>>> bb0a3d8693b5... Add script to Blackout to prevent proccing from non damage spells
+(27827,'spell_spirit_of_redemption_heal');
 
 -- Warlock
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
