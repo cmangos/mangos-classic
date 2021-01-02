@@ -72,7 +72,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
-(10060,'spell_stacking_rules_override')
+(10060,'spell_stacking_rules_override'),
 (15268,'spell_blackout'),
 (15323,'spell_blackout'),
 (15324,'spell_blackout'),
