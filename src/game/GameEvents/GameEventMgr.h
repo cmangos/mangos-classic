@@ -24,7 +24,7 @@
 #include "Platform/Define.h"
 
 #define max_ge_check_delay 86400                            // 1 day in seconds
-#define FAR_FUTURE 1609459200                               // 2021, January 1st
+#define FAR_FUTURE 4102444800                               // 2100, January 1st
 
 class Creature;
 class GameObject;
