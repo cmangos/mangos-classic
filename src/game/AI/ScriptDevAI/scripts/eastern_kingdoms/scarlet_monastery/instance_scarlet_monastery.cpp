@@ -207,6 +207,7 @@ struct ABEffect000 : public SpellScript
         if (WorldObject* caster = spell->GetCastingObject())
             if (!target->IsWithinLOSInMap(caster, true))
                 return false;
+        return true;
     }
 };
 
