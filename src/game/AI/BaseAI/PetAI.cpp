@@ -114,7 +114,17 @@ void PetAI::AttackStart(Unit* who)
 
 void PetAI::EnterEvadeMode()
 {
-    m_unit->CombatStop();
+    // check for "chain pull" scenario - pet has already been sent to attack while exiting from an earlier combat
+    // avoid AttackStop in CombatStop so that pet doesn't lose current target and return to follow owner in this case
+    if (m_unit->GetTarget() && m_unit->GetVictim())
+    {
+        m_unit->RemoveAllAttackers();
+        m_unit->DeleteThreatList();
+        m_unit->GetCombatManager().StopCombatTimer();
+        m_unit->ClearInCombat();
+    }
+    else
+        m_unit->CombatStop();
 }
 
 void PetAI::UpdateAI(const uint32 diff)
