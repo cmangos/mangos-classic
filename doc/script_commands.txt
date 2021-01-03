@@ -223,6 +223,8 @@ Defining a buddy could be done in several way:
                                             * datalong2 = reset_delay
 
 13 SCRIPT_COMMAND_ACTIVATE_OBJECT           source = unit, target=GO
+                                            * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: send gameobject custom anim instead of Use()
+                                            * datalong = anim Id
 
 14 SCRIPT_COMMAND_REMOVE_AURA               resultingSource = Unit
                                             * datalong = spell_id

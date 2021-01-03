@@ -52,7 +52,7 @@ enum ScriptCommand                                          // resSource, resTar
     // dataint = (bool) setRun; 0 = off (default), 1 = on
     SCRIPT_COMMAND_OPEN_DOOR                = 11,           // datalong=db_guid (or not provided), datalong2=reset_delay
     SCRIPT_COMMAND_CLOSE_DOOR               = 12,           // datalong=db_guid (or not provided), datalong2=reset_delay
-    SCRIPT_COMMAND_ACTIVATE_OBJECT          = 13,           // source = unit, target=GO
+    SCRIPT_COMMAND_ACTIVATE_OBJECT          = 13,           // source = unit, target=GO; data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL send gameobject custom anim, datalong = animId
     SCRIPT_COMMAND_REMOVE_AURA              = 14,           // resSource = Unit, datalong = spell_id
     SCRIPT_COMMAND_CAST_SPELL               = 15,           // resSource = Unit, cast spell at resTarget = Unit
     // datalong=spellid
@@ -230,7 +230,7 @@ struct ScriptInfo
 
         struct                                              // SCRIPT_COMMAND_ACTIVATE_OBJECT (13)
         {
-            uint32 empty1;                                  // datalong
+            uint32 animId;                                  // datalong
             uint32 empty2;                                  // datalong;
         } activateObject;
 
@@ -485,6 +485,7 @@ struct ScriptInfo
         {
             case SCRIPT_COMMAND_MOVE_TO:
             case SCRIPT_COMMAND_TEMP_SPAWN_CREATURE:
+            case SCRIPT_COMMAND_ACTIVATE_OBJECT:
             case SCRIPT_COMMAND_CAST_SPELL:
             case SCRIPT_COMMAND_CREATE_ITEM:
             case SCRIPT_COMMAND_MOVEMENT:

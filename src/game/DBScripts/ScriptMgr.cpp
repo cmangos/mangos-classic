@@ -1694,7 +1694,12 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotGameObject(pTarget))
                 break;
 
-            ((GameObject*)pTarget)->Use((Unit*)pSource);
+            GameObject* go = static_cast<GameObject*>(pTarget);
+
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+                go->SendGameObjectCustomAnim(go->GetObjectGuid(), m_script->activateObject.animId);
+            else
+                go->Use((Unit*)pSource);
             break;
         }
         case SCRIPT_COMMAND_REMOVE_AURA:                    // 14
