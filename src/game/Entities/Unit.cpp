@@ -11827,7 +11827,7 @@ void Unit::SetHover(bool enable)
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, 9);
     data << GetPackGUID();
-    SendMessageToSet(data, false);
+    SendMessageToSet(data, true);
 }
 
 void Unit::SetWaterWalk(bool enable)
