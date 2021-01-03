@@ -791,6 +791,8 @@ class Spell
 
         uint32 m_spellState;
         uint32 m_timer;
+        uint32 m_creationTime;
+        bool m_updated;
 
         float m_castPositionX;
         float m_castPositionY;

@@ -5779,7 +5779,8 @@ void SpellAuraHolder::Update(uint32 diff)
     if (m_skipUpdate)
     {
         m_skipUpdate = false;
-        return;
+        if (m_applyMSTime == GetTarget()->GetMap()->GetCurrentMSTime()) // do not tick in same tick as created
+            return;
     }
 
     for (auto aura : m_auras)
