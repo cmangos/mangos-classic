@@ -21,7 +21,7 @@
 
 #include "Maps/GridDefines.h"
 
-static constexpr float const CONTACT_DISTANCE               = 0.5f;
+static constexpr float const CONTACT_DISTANCE               = 1.f;
 static constexpr float const INTERACTION_DISTANCE           = 5.0f;
 static constexpr float const ATTACK_DISTANCE                = 5.0f;
 static constexpr float const MELEE_LEEWAY                   = 8.0f / 3.0f;                  // Melee attack and melee spell leeway when moving
