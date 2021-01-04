@@ -550,7 +550,7 @@ void Pet::SavePetToDB(PetSaveMode mode, Player* owner)
 Position Pet::GetPetSpawnPosition(Player* owner)
 {
     Position pos;
-    owner->GetFirstCollisionPosition(pos, 2.f, owner->GetOrientation() + M_PI_F * 0.25f);
+    owner->GetFirstCollisionPosition(pos, 2.f, owner->GetOrientation() + M_PI_F / 2);
     return pos;
 }
 
