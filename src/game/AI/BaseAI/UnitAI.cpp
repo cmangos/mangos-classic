@@ -640,12 +640,12 @@ void UnitAI::SetMeleeEnabled(bool state)
     m_meleeEnabled = state;
     if (m_unit->IsInCombat())
     {
-        if (m_meleeEnabled)
+        if (m_meleeEnabled && !m_unit->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
         {
             if (m_unit->GetVictim())
                 m_unit->MeleeAttackStart(m_unit->GetVictim());
         }
-        else
+        else if (m_unit->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
             m_unit->MeleeAttackStop(m_unit->GetVictim());
     }
 }

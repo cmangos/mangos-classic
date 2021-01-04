@@ -1670,12 +1670,12 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                 }
             }
             // casters only display melee animation when in ranged mode when someone is actually close enough
-            else if (m_rangedModeSetting == TYPE_FULL_CASTER && m_currentRangedMode)
+            else if (m_rangedModeSetting == TYPE_FULL_CASTER && m_currentRangedMode && m_meleeEnabled)
             {
                 if (m_unit->hasUnitState(UNIT_STAT_MELEE_ATTACKING) && !m_creature->CanReachWithMeleeAttack(victim))
-                    SetMeleeEnabled(false);
+                    m_unit->MeleeAttackStop(m_unit->GetVictim());
                 else if (!m_unit->hasUnitState(UNIT_STAT_MELEE_ATTACKING) && m_creature->CanReachWithMeleeAttack(victim))
-                    SetMeleeEnabled(true);
+                    m_unit->MeleeAttackStart(m_unit->GetVictim());
             }
         }
 
@@ -2020,6 +2020,8 @@ void CreatureEventAI::SetCurrentRangedMode(bool state)
         m_currentRangedMode = false;
         m_attackDistance = 0.f;
         DoStartMovement(m_creature->GetVictim());
+        if (m_meleeEnabled && !m_unit->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
+            m_unit->MeleeAttackStart(m_unit->GetVictim());
     }
 }
 
