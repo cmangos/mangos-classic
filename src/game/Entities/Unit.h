@@ -929,6 +929,8 @@ class CharmInfo
         void ResetCharmState();
         uint32 GetPetNumber() const { return m_petnumber; }
         void SetPetNumber(uint32 petnumber, bool statwindow);
+        uint32 GetPetLastAttackCommandTime() const { return m_petLastAttackCommandTime; }
+        void SetPetLastAttackCommandTime(uint32 time) { m_petLastAttackCommandTime = time; }
 
         void SetCommandState(CommandStates st);
         CommandStates GetCommandState() { return m_CommandState; }
@@ -998,6 +1000,7 @@ class CharmInfo
         CharmSpellEntry     m_charmspells[CREATURE_MAX_SPELLS];
         CommandStates       m_CommandState;
         uint32              m_petnumber;
+        uint32              m_petLastAttackCommandTime;
         uint32              m_opener;
         uint32              m_openerMinRange;
         uint32              m_openerMaxRange;
@@ -1333,6 +1336,9 @@ class Unit : public WorldObject
         Unit* SelectRandomUnfriendlyTarget(Unit* except = nullptr, float radius = ATTACK_DISTANCE) const;
         Unit* SelectRandomFriendlyTarget(Unit* except = nullptr, float radius = ATTACK_DISTANCE) const;
         bool HasDamageInterruptibleStunAura() const;
+        bool HasBreakableByDamageCrowdControlAura(Unit* excludeCasterChannel = nullptr, uint32 excludeAuraApplyMSTimeCutoff = 0) const;
+        bool HasBreakableByDamageAuraType(AuraType type, uint32 excludeAura, uint32 excludeAuraApplyMSTimeCutoff) const;
+        bool HasAuraPetShouldAvoidBreaking(Unit* excludeCasterChannel = nullptr, uint32 excludeAuraApplyMSTimeCutoff = 0) const;
         void SendMeleeAttackStop(Unit* victim) const;
         void SendMeleeAttackStart(Unit* pVictim) const;
 

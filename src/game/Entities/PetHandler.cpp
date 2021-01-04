@@ -213,6 +213,8 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                         }
                         else
                         {
+                            charmInfo->SetPetLastAttackCommandTime(petUnit->GetMap()->GetCurrentMSTime());
+
                             // Send pet response regardless of command result as acknowledgement of command being processed
                             if (pet)
                             {

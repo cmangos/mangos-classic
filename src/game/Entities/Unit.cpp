@@ -8977,7 +8977,7 @@ CharmInfo* Unit::InitCharmInfo(Unit* charm)
 CharmInfo::CharmInfo(Unit* unit) :
     m_unit(unit), m_ai(nullptr), m_combatData(nullptr),
     m_CommandState(COMMAND_FOLLOW),
-    m_petnumber(0), m_opener(0), m_openerMinRange(0),
+    m_petnumber(0), m_petLastAttackCommandTime(0), m_opener(0), m_openerMinRange(0),
     m_openerMaxRange(0), m_unitFieldFlags(0), m_unitFieldBytes2_1(0), m_retreating(false), m_stayPosSet(false),
     m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0),
     m_stayPosO(0), m_walk(true), m_deleted(false)
@@ -9973,6 +9973,33 @@ bool Unit::HasDamageInterruptibleStunAura() const
             return true;
 
     return false;
+}
+
+bool Unit::HasAuraPetShouldAvoidBreaking(Unit* excludeCasterChannel, uint32 excludeAuraApplyMSTimeCutoff) const
+{
+    return HasBreakableByDamageCrowdControlAura(excludeCasterChannel, excludeAuraApplyMSTimeCutoff);
+}
+
+bool Unit::HasBreakableByDamageAuraType(AuraType type, uint32 excludeAura, uint32 excludeAuraApplyMSTimeCutoff) const
+{
+    AuraList const& auras = GetAurasByType(type);
+    for (const auto& itr : auras)
+        if (((!excludeAura || excludeAura != itr->GetSpellProto()->Id) && // Avoid self interrupt of channeled Crowd Control spells like Seduction
+            (!excludeAuraApplyMSTimeCutoff || itr->GetHolder()->GetAuraApplyMSTime() >= excludeAuraApplyMSTimeCutoff)) && // Filter out CC effects which were applied before pet was last sent to attack
+            (itr->GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE))
+            return true;
+    return false;
+}
+
+bool Unit::HasBreakableByDamageCrowdControlAura(Unit* excludeCasterChannel, uint32 excludeAuraApplyMSTimeCutoff) const
+{
+    uint32 excludeAura = 0;
+    if (Spell* currentChanneledSpell = excludeCasterChannel ? excludeCasterChannel->GetCurrentSpell(CURRENT_CHANNELED_SPELL) : nullptr)
+        excludeAura = currentChanneledSpell->m_spellInfo->Id; // Avoid self interrupt of channeled Crowd Control spells like Seduction
+
+    return (HasBreakableByDamageAuraType(SPELL_AURA_MOD_CONFUSE, excludeAura, excludeAuraApplyMSTimeCutoff)
+        || HasBreakableByDamageAuraType(SPELL_AURA_MOD_STUN, excludeAura, excludeAuraApplyMSTimeCutoff)
+        || HasBreakableByDamageAuraType(SPELL_AURA_TRANSFORM, excludeAura, excludeAuraApplyMSTimeCutoff));
 }
 
 void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
