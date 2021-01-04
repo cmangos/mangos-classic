@@ -14905,7 +14905,7 @@ void Player::LoadPet()
     if (IsInWorld())
     {
         Pet* pet = new Pet;
-        if (!pet->LoadPetFromDB(this, 0, 0, true, 0, true))
+        if (!pet->LoadPetFromDB(this, pet->GetPetSpawnPosition(this), 0, 0, true, 0, true))
         {
             delete pet;
             return;
@@ -19415,7 +19415,7 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
         return;
 
     Pet* NewPet = new Pet;
-    if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true))
+    if (!NewPet->LoadPetFromDB(this, NewPet->GetPetSpawnPosition(this), 0, m_temporaryUnsummonedPetNumber, true))
         delete NewPet;
 
     m_temporaryUnsummonedPetNumber = 0;

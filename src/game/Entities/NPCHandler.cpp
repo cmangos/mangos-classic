@@ -819,7 +819,7 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
     }
 
     Pet* newpet = new Pet(HUNTER_PET);
-    if (!newpet->LoadPetFromDB(_player, creature_id, petnumber))
+    if (!newpet->LoadPetFromDB(_player, newpet->GetPetSpawnPosition(_player), creature_id, petnumber))
     {
         delete newpet;
         newpet = nullptr;
@@ -965,7 +965,7 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
 
     // summon unstabled pet
     Pet* newpet = new Pet;
-    if (!newpet->LoadPetFromDB(_player, creature_id, pet_number))
+    if (!newpet->LoadPetFromDB(_player, newpet->GetPetSpawnPosition(_player), creature_id, pet_number))
     {
         delete newpet;
 
