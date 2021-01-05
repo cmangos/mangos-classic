@@ -369,13 +369,15 @@ template<>
 bool PoolGroup<Creature>::CanSpawn(PoolObject* object, MapPersistentState& mapState)
 {
     if (Map* map = mapState.GetMap()) // for world maps this will fail on world start
-        return map->GetCreatureLinkingHolder()->CanSpawn(object->guid, map, nullptr, 0.f, 0.f);
+        map->CanSpawn(TYPEID_UNIT, object->guid);
     return true;
 }
 
 template<>
 bool PoolGroup<GameObject>::CanSpawn(PoolObject* object, MapPersistentState& mapState)
 {
+    if (Map* map = mapState.GetMap()) // for world maps this will fail on world start
+        return map->CanSpawn(TYPEID_GAMEOBJECT, object->guid);
     return true;
 }
 

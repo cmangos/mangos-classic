@@ -118,6 +118,15 @@ void Map::RemoveTransport(Transport* transport)
         m_transports.erase(transport);
 }
 
+bool Map::CanSpawn(TypeID typeId, uint32 dbGuid)
+{
+    if (typeId == TYPEID_UNIT)
+        return GetCreatureLinkingHolder()->CanSpawn(dbGuid, this, nullptr, 0.f, 0.f);
+    else if (TYPEID_GAMEOBJECT)
+        return true;
+    return false;
+}
+
 void Map::LoadMapAndVMap(int gx, int gy)
 {
     if (m_bLoadedGrids[gx][gy])

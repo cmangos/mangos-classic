@@ -332,6 +332,8 @@ class Map : public GridRefManager<NGridType>
         void AddTransport(Transport* transport);
         void RemoveTransport(Transport* transport);
 
+        bool CanSpawn(TypeID typeId, uint32 dbGuid);
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 
