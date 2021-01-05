@@ -1960,7 +1960,9 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 GameObject* WorldObject::SpawnGameObject(uint32 dbGuid, Map* map)
 {
     GameObjectData const* data = sObjectMgr.GetGOData(dbGuid);
-    MANGOS_ASSERT(data);
+    if (!data)
+        return nullptr;
+
     GameObject* gameobject = GameObject::CreateGameObject(data->id);
     if (!gameobject->LoadFromDB(dbGuid, map, map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT)))
     {
