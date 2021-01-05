@@ -81,7 +81,11 @@ void ScriptedInstance::DoRespawnGameObject(ObjectGuid guid, uint32 timeToDespawn
 
     if (GameObject* pGo = instance->GetGameObject(guid))
     {
-        if (pGo->IsSpawnedByDefault()) // static spawned go - can only respawn
+        if (pGo->IsSpawned())
+            return;
+
+        // static spawned go - can only respawn
+        if (pGo->IsSpawnedByDefault())
             pGo->Respawn();
         else
         {
