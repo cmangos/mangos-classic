@@ -796,6 +796,10 @@ bool FollowMovementGenerator::GetResetPosition(Unit& owner, float& x, float& y, 
     if (!_getOrientation(owner, o))
         o = owner.GetAngle(x, y);
 
+    // must return local coords
+    if (GenericTransport* transport = owner.GetTransport())
+        transport->CalculatePassengerOffset(x, y, z, &o);
+
     return true;
 }
 

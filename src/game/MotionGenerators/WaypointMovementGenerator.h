@@ -109,7 +109,7 @@ class WaypointMovementGenerator<Creature>
         ShortTimeTracker i_nextMoveTime;
         int32 m_scriptTime;                                 // filled with delay change when script is instantly executed and want to change node delay
         uint32 m_lastReachedWaypoint;
-        WorldLocation m_resetPoint;
+        Position m_resetPoint;
 
         uint32 m_pathId;
         int32 m_pathDuration;

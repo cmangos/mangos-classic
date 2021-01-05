@@ -127,7 +127,7 @@ void WaypointMovementGenerator<Creature>::InitializeWaypointPath(Creature& u, in
 
     // Start moving if possible
     SendNextWayPointPath(u);
-    u.GetPosition(m_resetPoint);
+    m_resetPoint = u.GetPosition(u.GetTransport());
 }
 
 void WaypointMovementGenerator<Creature>::Finalize(Creature& creature)
@@ -142,7 +142,7 @@ void WaypointMovementGenerator<Creature>::Interrupt(Creature& creature)
     if (creature.hasUnitState(UNIT_STAT_ROAMING_MOVE))
     {
         // save the current position in case of reset
-        creature.GetPosition(m_resetPoint);
+        m_resetPoint = creature.GetPosition(creature.GetTransport());
     }
 
     creature.InterruptMoving();
@@ -184,7 +184,7 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     }
 
     // save position and orientation in case of GetResetPosition() call
-    creature.GetPosition(m_resetPoint);
+    m_resetPoint = creature.GetPosition(creature.GetTransport());
 
     // AI can modify node delay so we have to compute it
     int32 newWaitTime = node.delay + m_scriptTime;
@@ -482,10 +482,10 @@ bool WaypointMovementGenerator<Creature>::CanMove(int32 diff, Creature& u)
 
 bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, float& y, float& z, float& o) const
 {
-    x = m_resetPoint.coord_x;
-    y = m_resetPoint.coord_y;
-    z = m_resetPoint.coord_z;
-    o = m_resetPoint.orientation;
+    x = m_resetPoint.x;
+    y = m_resetPoint.y;
+    z = m_resetPoint.z;
+    o = m_resetPoint.o;
 
     return true;
     // prevent a crash at empty waypoint path.
