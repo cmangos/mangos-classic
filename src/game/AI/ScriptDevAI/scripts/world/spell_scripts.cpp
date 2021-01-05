@@ -136,33 +136,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
     return false;
 }
 
-struct SpellStackingRulesOverride : public SpellScript
-{
-    enum : uint32
-    {
-        SPELL_POWER_INFUSION        = 10060,
-        SPELL_ARCANE_POWER          = 12042,
-    };
-
-    SpellCastResult OnCheckCast(Spell* spell, bool/* strict*/) const override
-    {
-        switch (spell->m_spellInfo->Id)
-        {
-            case SPELL_POWER_INFUSION:
-            {
-                // Patch 1.10.2 (2006-05-02):
-                // Power Infusion: This aura will no longer stack with Arcane Power. If you attempt to cast it on someone with Arcane Power, the spell will fail.
-                if (Unit* target = spell->m_targets.getUnitTarget())
-                    if (target->GetAuraCount(SPELL_ARCANE_POWER))
-                        return SPELL_FAILED_AURA_BOUNCED;
-                break;
-            }
-        }
-
-        return SPELL_CAST_OK;
-    }
-};
-
 struct GreaterInvisibilityMob : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -201,6 +174,5 @@ void AddSC_spell_scripts()
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_npc;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<SpellStackingRulesOverride>("spell_stacking_rules_override");
     RegisterAuraScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
 }
