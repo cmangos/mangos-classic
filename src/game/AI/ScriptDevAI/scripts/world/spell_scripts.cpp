@@ -163,31 +163,6 @@ struct SpellStackingRulesOverride : public SpellScript
     }
 };
 
-/*#####
-# spell_battleground_banner_trigger
-#
-# These are generic spells that handle player click on battleground banners; All spells are triggered by GO type 10
-# Contains following spells:
-# Arathi Basin: 23932, 23935, 23936, 23937, 23938
-# Alterac Valley: 24677
-# Isle of Conquest: 35092, 65825, 65826, 66686, 66687
-#####*/
-struct spell_battleground_banner_trigger : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
-    {
-        // TODO: Fix when go casting is fixed
-        WorldObject* obj = spell->GetAffectiveCasterObject();
-
-        if (obj->IsGameObject() && spell->GetUnitTarget()->IsPlayer())
-        {
-            Player* player = static_cast<Player*>(spell->GetUnitTarget());
-            if (BattleGround* bg = player->GetBattleGround())
-                bg->HandlePlayerClickedOnFlag(player, static_cast<GameObject*>(obj));
-        }
-    }
-};
-
 struct GreaterInvisibilityMob : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -228,5 +203,4 @@ void AddSC_spell_scripts()
 
     RegisterSpellScript<SpellStackingRulesOverride>("spell_stacking_rules_override");
     RegisterAuraScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
-    RegisterSpellScript<spell_battleground_banner_trigger>("spell_battleground_banner_trigger");
 }
