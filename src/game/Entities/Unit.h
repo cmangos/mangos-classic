@@ -2093,6 +2093,9 @@ class Unit : public WorldObject
         float GetSpeedRate(UnitMoveType mtype) const { return m_speed_rate[mtype]; }
         void SetSpeedRate(UnitMoveType mtype, float rate, bool forced = false);
 
+        void KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed);
+        void KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed);
+
         bool isHover() const { return HasAuraType(SPELL_AURA_HOVER); }
 
         void _RemoveAllAuraMods();

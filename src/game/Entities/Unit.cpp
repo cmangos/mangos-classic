@@ -10246,6 +10246,27 @@ void Unit::SetPvPContested(bool state)
     }
 }
 
+void Unit::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed)
+{
+    float angle = this == target ? GetOrientation() + M_PI_F : target->GetAngle(this);
+    KnockBackWithAngle(angle, horizontalSpeed, verticalSpeed);
+}
+
+void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed)
+{
+    if (IsClientControlled())
+    {
+        if (Player const* player = GetControllingPlayer())
+        {
+            player->GetSession()->SendKnockBack(this, angle, horizontalSpeed, verticalSpeed);
+            return;
+        }
+    }
+
+    // no non player controlled pre-wotlk
+    return;
+}
+
 struct StopAttackFactionHelper
 {
     explicit StopAttackFactionHelper(uint32 _faction_id) : faction_id(_faction_id) {}
