@@ -67,20 +67,19 @@ enum
     SPELL_SUMMON_MOUTH_TENTACLES_1  = 26236,                // Periodically triggers 26237 that cast 26332 on random target to summon NPC 15910
     SPELL_SUMMON_MOUTH_TENTACLES_2  = 26237,
     SPELL_SUMMON_MOUTH_TENTACLE     = 26332,                // Summon NPC 15910 and prepare target to be teleported to stomach
-    SPELL_DIGESTIVE_ACID_TELEPORT   = 26220,                // stomach teleport spell
-    SPELL_EXIT_STOMACH_KNOCKBACK    = 25383,                // spell id is wrong
-    SPELL_EXIT_STOMACH_JUMP         = 26224,                // should make the player jump to the ceiling - not used yet
-    SPELL_EXIT_STOMACH_EFFECT       = 26230,                // used to complete the eject effect from the stomach - not used yet
+    SPELL_DIGESTIVE_ACID_TELEPORT   = 26220,                // Stomach teleport spell
+    SPELL_EXIT_STOMACH_EFFECT       = 26230,                // Complete the eject effect from the stomach towards a random location in the room
     SPELL_PORT_OUT_STOMACH_EFFECT   = 26648,                // used to kill players inside the stomach on evade
     SPELL_DIGESTIVE_ACID            = 26476,                // damage spell - should be handled by the map
-    // SPELL_EXIT_STOMACH            = 26221,               // summons 15800
+    SPELL_EXIT_STOMACH              = 26221,                // Summon NPC 15800 that will handle the initial knockback outside the stomach through spell 26224 (EventAI)
 
-    NPC_EXIT_TRIGGER                = 15800,
+    NPC_WORLD_TRIGGER               = 15384,
 
     DISPLAY_ID_CTHUN_BODY           = 15786,                // Helper display id; This is needed in order to have the proper transform animation. ToDo: remove this when auras are fixed in core.
 
     AREATRIGGER_STOMACH_1           = 4033,
     AREATRIGGER_STOMACH_2           = 4034,
+    AREATRIGGER_STOMACH_3           = 4036,
 
     MAX_FLESH_TENTACLES             = 2,
     MAX_EYE_TENTACLES               = 8,
@@ -88,10 +87,10 @@ enum
 
 static const float afCthunLocations[4][4] =
 {
-    { -8571.0f, 1990.0f, -98.0f, 1.22f},        // flesh tentacles locations
-    { -8525.0f, 1994.0f, -98.0f, 2.12f},
-    { -8562.0f, 2037.0f, -70.0f, 5.05f},        // stomach teleport location
-    { -8545.6f, 1987.7f, -32.9f, 0.0f},         // stomach eject location
+    { -8571.0f,  1990.0f,    -98.0f,  1.22f},       // Flesh Tentacles locations
+    { -8525.0f,  1994.0f,    -98.0f,  2.12f},
+    { -8563.56f, 2040.69f,   -97.0f,  4.9426f},     // Stomach teleport location (in)
+    { -8576.06f, 1985.8359f, 100.23f, 6.10865f},    // Stomach eject location (out)
 };
 
 enum CThunPhase
@@ -673,40 +672,46 @@ struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
 ## at_stomach_cthun
 ######*/
 
-bool AreaTrigger_at_stomach_cthun(Player* pPlayer, AreaTriggerEntry const* pAt)
+bool AreaTrigger_at_stomach_cthun(Player* player, AreaTriggerEntry const* at)
 {
-    if (pAt->id == AREATRIGGER_STOMACH_1)
+    // Area trigger on the plateform at the end of C'Thun's stomach
+    if (at->id == AREATRIGGER_STOMACH_1)
     {
-        if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
+        if (player->isGameMaster() || !player->IsAlive())
             return false;
 
-        // Summon the exit trigger which should push the player outside the stomach - not used because missing eject spells
-        // if (!GetClosestCreatureWithEntry(pPlayer, NPC_EXIT_TRIGGER, 10.0f))
-        //    pPlayer->CastSpell(pPlayer, SPELL_EXIT_STOMACH, TRIGGERED_OLD_TRIGGERED);
+        // Summon the Exit Trigger NPC which will knockback the player outside the stomach
+        if (Creature* trigger = GetClosestCreatureWithEntry(player, NPC_WORLD_TRIGGER, 20.0f))
+            trigger->CastSpell(trigger, SPELL_EXIT_STOMACH, TRIGGERED_OLD_TRIGGERED);
 
-        // Note: because of the missing spell id 26224, we will use basic jump movement
-        // Disabled because of the missing jump effect
-        // pPlayer->GetMotionMaster()->MoveJump(afCthunLocations[3][0], afCthunLocations[3][1], afCthunLocations[3][2], pPlayer->GetSpeed(MOVE_RUN)*5, 0);
-
-        // Note: this should actually be handled by at_stomach_2!
-        if (ScriptedInstance* pInstance = (ScriptedInstance*)pPlayer->GetInstanceData())
-        {
-            if (Creature* pCthun = pInstance->GetSingleCreatureFromStorage(NPC_CTHUN))
-            {
-                // Remove player from the Stomach
-                if (boss_cthunAI* pBossAI = dynamic_cast<boss_cthunAI*>(pCthun->AI()))
-                    pBossAI->DoRemovePlayerFromStomach(pPlayer);
-
-                // Teleport back to C'thun and remove the Digestive Acid
-                pPlayer->RemoveAurasDueToSpell(SPELL_DIGESTIVE_ACID);
-                pPlayer->NearTeleportTo(pCthun->GetPositionX(), pCthun->GetPositionY(), pCthun->GetPositionZ() + 15.0f, frand(0, 2 * M_PI_F));
-
-                // Note: the real knockback spell id should be 26230
-                pPlayer->CastSpell(pPlayer, SPELL_EXIT_STOMACH_KNOCKBACK, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pCthun->GetObjectGuid());
-            }
-        }
+        return true;
     }
 
+    // Area trigger at the ceiling of C'Thun's stomach (exit or entrance, depending on which way the "food" is going)
+    if (at->id == AREATRIGGER_STOMACH_2)
+    {
+        if (player->isGameMaster() || !player->IsAlive())
+            return false;
+
+        // Teleport player near the third area trigger
+        player->NearTeleportTo(afCthunLocations[3][0], afCthunLocations[3][1], afCthunLocations[3][2], afCthunLocations[3][3]);
+        return true;
+    }
+
+    // Area trigger located at C'Thun feet (foot?)
+    if (at->id == AREATRIGGER_STOMACH_3)
+    {
+        // We need to check for the presence of Digestive Acid aura on player so the area trigger will only activate and knockback players coming from C'Thun's stomach
+        // The knockback spell will remove the Digestive Acid aura
+        if (player->isGameMaster() || !player->IsAlive() || !player->HasAura(SPELL_DIGESTIVE_ACID))
+            return false;
+
+        // Check for the trigger NPC that will cast the knockback spell
+        if (Creature* trigger = GetClosestCreatureWithEntry(player, NPC_WORLD_TRIGGER, 20.0f))
+            trigger->CastSpell(player, SPELL_EXIT_STOMACH_EFFECT, TRIGGERED_OLD_TRIGGERED);
+
+        return true;
+    }
     return false;
 }
 

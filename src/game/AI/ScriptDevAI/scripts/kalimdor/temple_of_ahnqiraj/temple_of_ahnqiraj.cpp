@@ -183,6 +183,11 @@ void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* creature)
                 creature->AI()->SetCombatMovement(false);
             creature->CastSpell(creature, SPELL_SUMMON_GIANT_PORTAL, TRIGGERED_OLD_TRIGGERED);
             break;
+        case NPC_EXIT_TRIGGER:
+            creature->SetInCombatWithZone(false);
+            if (creature->AI())
+                creature->AI()->SetCombatMovement(false);
+            break;
     }
 }
 
