@@ -2015,7 +2015,7 @@ void Creature::SaveRespawnTime()
 CreatureDataAddon const* Creature::GetCreatureAddon() const
 {
     if (GetObjectGuid().GetHigh() != HIGHGUID_PET) // pets have guidlow that is conflicting with normal guidlows hence GetGUIDLow() gives wrong info
-        if (CreatureDataAddon const* addon = ObjectMgr::GetCreatureAddon(GetGUIDLow()))
+        if (CreatureDataAddon const* addon = ObjectMgr::GetCreatureAddon(m_dbGuid))
             return addon;
 
     return ObjectMgr::GetCreatureTemplateAddon(GetCreatureInfo()->Entry);
