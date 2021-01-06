@@ -2412,6 +2412,28 @@ bool ScriptAction::HandleScriptStep()
             unitSource->InterruptSpell((CurrentSpellTypes)m_script->interruptSpell.currentSpellType);
             break;
         }
+        case SCRIPT_COMMAND_MODIFY_UNIT_FLAGS:              // 48
+        {
+            if (LogIfNotCreature(pSource))
+                break;
+
+            // Add Flags
+            if (m_script->unitFlag.change_flag & 0x01)
+                pSource->SetFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
+            // Remove Flags
+            else if (m_script->unitFlag.change_flag & 0x02)
+                pSource->RemoveFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
+            // Toggle Flags
+            else
+            {
+                if (pSource->HasFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag))
+                    pSource->RemoveFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
+                else
+                    pSource->SetFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
+            }
+
+            break;
+        }
         default:
             sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u unknown command used.", m_table, m_script->id, m_script->command);
             break;

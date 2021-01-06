@@ -374,3 +374,7 @@ Defining a buddy could be done in several way:
 47 SCRIPT_COMMAND_INTERRUPT_SPELL           Interrupt spell in specific slot
                                             * source must be unit
                                             * datalong = SpellType enum CurrentSpellTypes
+
+48 SCRIPT_COMMAND_MODIFY_UNIT_FLAGS         resultingSource = Creature
+                                            * datalong = UnitFlags
+                                            * datalong2 = 0x00=toggle, 0x01=add, 0x02=remove

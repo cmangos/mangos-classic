@@ -127,6 +127,9 @@ enum ScriptCommand                                          // resSource, resTar
     // datalong2=castFlags, enum TriggerCastFlags
     // dataint1-3 define the &bp value for the spell. At least one field is required.
     SCRIPT_COMMAND_INTERRUPT_SPELL          = 47,           // datalong = SpellType enum CurrentSpellTypes
+    SCRIPT_COMMAND_MODIFY_UNIT_FLAGS        = 48,           // resSource = Creature
+    // datalong=UnitFlags
+    // datalong2:0x00=toggle, 0x01=add, 0x02=remove
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -416,6 +419,12 @@ struct ScriptInfo
         {
             uint32 currentSpellType;                        // datalong
         } interruptSpell;
+
+        struct                                              // SCRIPT_COMMAND_MODIFY_UNIT_FLAGS (48)
+        {
+            uint32 flag;                                    // datalong
+            uint32 change_flag;                             // datalong2
+        } unitFlag;
 
         struct
         {
