@@ -345,8 +345,11 @@ void Unit::ProcSkillsAndReactives(bool isVictim, Unit* target, uint32 procFlags,
 void Unit::ProcDamageAndSpell(ProcSystemArguments&& data)
 {
     // First lets get skills and reactives out of the way
+    bool currentLevel = true;
     if (data.attacker)
     {
+        if (data.attacker->m_spellProcsHappening)
+            currentLevel = false; // triggered spell in proc system should not make holders ready
         data.attacker->m_spellProcsHappening = true;
         if (data.procFlagsAttacker)
             data.attacker->ProcSkillsAndReactives(false, data.victim, data.procFlagsAttacker, data.procExtra, data.attType);
@@ -371,14 +374,18 @@ void Unit::ProcDamageAndSpell(ProcSystemArguments&& data)
             if ((data.procFlagsAttacker & PROC_FLAG_ON_DO_PERIODIC) == 0) // do not proc this on DOTs
 			    if (!data.procSpell || (data.procSpell->EquippedItemClass == ITEM_CLASS_WEAPON && !data.procSpell->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET)))
 				    static_cast<Player*>(data.attacker)->CastItemCombatSpell(data.victim, data.attType, data.procSpell ? !IsNextMeleeSwingSpell(data.procSpell) : false);
-        data.attacker->m_spellProcsHappening = false;
 
-        // Mark auras created during proccing as ready
-        for (SpellAuraHolder* holder : data.attacker->m_delayedSpellAuraHolders)
-            if (holder->GetState() == SPELLAURAHOLDER_STATE_CREATED) // if deleted by some unknown circumstance
-                holder->SetState(SPELLAURAHOLDER_STATE_READY);
+        if (currentLevel)
+        {
+            data.attacker->m_spellProcsHappening = false;
 
-        data.attacker->m_delayedSpellAuraHolders.clear();
+            // Mark auras created during proccing as ready
+            for (SpellAuraHolder* holder : data.attacker->m_delayedSpellAuraHolders)
+                if (holder->GetState() == SPELLAURAHOLDER_STATE_CREATED) // if deleted by some unknown circumstance
+                    holder->SetState(SPELLAURAHOLDER_STATE_READY);
+
+            data.attacker->m_delayedSpellAuraHolders.clear();
+        }
     }
 }
 
