@@ -618,7 +618,11 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 break;
             }
             case SCRIPT_COMMAND_MODIFY_NPC_FLAGS:           // 29
+            {
+                if (tmp.npcFlag.change_flag > 2)
+                    sLog.outErrorDb("Table `%s` has invalid change flag (datalong2 = %u) in SCRIPT_COMMAND_MODIFY_NPC_FLAGS for script id %u", tablename, tmp.npcFlag.change_flag, tmp.id);
                 break;
+            }
             case SCRIPT_COMMAND_SEND_TAXI_PATH:             // 30
             {
                 if (!sTaxiPathStore.LookupEntry(tmp.sendTaxiPath.taxiPathId))
@@ -779,6 +783,12 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                     sLog.outErrorDb("Table `%s` uses invalid current spell type %u (must be smaller or equal to %u) for script id %u.", tablename, tmp.interruptSpell.currentSpellType, CURRENT_MAX_SPELL - 1, tmp.id);
                     continue;
                 }
+                break;
+            }
+            case SCRIPT_COMMAND_MODIFY_UNIT_FLAGS:          // 48
+            {
+                if (tmp.unitFlag.change_flag > 2)
+                    sLog.outErrorDb("Table `%s` has invalid change flag (datalong2 = %u) in SCRIPT_COMMAND_MODIFY_UNIT_FLAGS for script id %u", tablename, tmp.unitFlag.change_flag, tmp.id);
                 break;
             }
             default:
@@ -1996,20 +2006,22 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotCreature(pSource))
                 break;
 
-            // Add Flags
-            if (m_script->npcFlag.change_flag & 0x01)
-                pSource->SetFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
             // Remove Flags
-            else if (m_script->npcFlag.change_flag & 0x02)
+            if (m_script->npcFlag.change_flag == 0)
                 pSource->RemoveFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
+            // Add Flags
+            else if (m_script->npcFlag.change_flag == 1)
+                pSource->SetFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
             // Toggle Flags
-            else
+            else if (m_script->npcFlag.change_flag == 2)
             {
                 if (pSource->HasFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag))
                     pSource->RemoveFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
                 else
                     pSource->SetFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
             }
+            else
+                sLog.outErrorDb(" DB-SCRIPTS: Unexpected value %u used for script id %u, command %u.", m_script->npcFlag.flag, m_script->id, m_script->command);
 
             break;
         }
@@ -2417,20 +2429,22 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotCreature(pSource))
                 break;
 
-            // Add Flags
-            if (m_script->unitFlag.change_flag & 0x01)
-                pSource->SetFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
             // Remove Flags
-            else if (m_script->unitFlag.change_flag & 0x02)
+            if (m_script->unitFlag.change_flag == 0)
                 pSource->RemoveFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
+            // Add Flags
+            else if (m_script->unitFlag.change_flag == 1)
+                pSource->SetFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
             // Toggle Flags
-            else
+            else if (m_script->unitFlag.change_flag == 2)
             {
                 if (pSource->HasFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag))
                     pSource->RemoveFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
                 else
                     pSource->SetFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
             }
+            else
+                sLog.outErrorDb(" DB-SCRIPTS: Unexpected value %u used for script id %u, command %u.", m_script->unitFlag.flag, m_script->id, m_script->command);
 
             break;
         }

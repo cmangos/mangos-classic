@@ -296,7 +296,7 @@ Defining a buddy could be done in several way:
 
 29 SCRIPT_COMMAND_MODIFY_NPC_FLAGS          resultingSource = Creature
                                             * datalong=NPCFlags
-                                            * datalong2= 0x00=toggle, 0x01=add, 0x02=remove
+                                            * datalong2 => 0=remove, 1=add, 2=toggle
 
 30 SCRIPT_COMMAND_SEND_TAXI_PATH            resultingTarget or Source must be Player
                                             * datalong = taxi path id
@@ -377,4 +377,4 @@ Defining a buddy could be done in several way:
 
 48 SCRIPT_COMMAND_MODIFY_UNIT_FLAGS         resultingSource = Creature
                                             * datalong = UnitFlags
-                                            * datalong2 = 0x00=toggle, 0x01=add, 0x02=remove
+                                            * datalong2 => 0=remove, 1=add, 2=toggle
