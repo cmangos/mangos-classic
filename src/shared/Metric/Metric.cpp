@@ -130,6 +130,26 @@ metric::metric& metric::metric::instance()
     return instance;
 }
 
+void metric::metric::reload_config()
+{
+    if (!m_enabled)
+    {
+        initialize();
+        return;
+    }
+
+    m_writeService.post([&]
+    {
+        m_connectionInfo = {
+            sConfig.GetStringDefault("Metric.Address", "127.0.0.1"),
+            sConfig.GetIntDefault("Metric.Port", 8086),
+            sConfig.GetStringDefault("Metric.Database", "perfd"),
+            sConfig.GetStringDefault("Metric.Username", ""),
+            sConfig.GetStringDefault("Metric.Password", "")
+        };
+    });
+}
+
 void metric::metric::report(std::string measurement, std::string key, boost::any value, std::map<std::string, std::string> tags)
 {
     report(measurement, { { key, value } }, tags);

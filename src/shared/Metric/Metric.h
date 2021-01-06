@@ -114,6 +114,8 @@ namespace metric
             void initialize();
             static metric& instance();
 
+            void reload_config();
+
             void report(std::string measurement, std::string key, boost::any value, std::map<std::string, std::string> tags = {});
             void report(std::string measurement, std::map<std::string, boost::any> fields, std::map<std::string, std::string> tags = {});
 
