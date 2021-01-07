@@ -152,7 +152,7 @@ int32 AbstractRandomMovementGenerator::_setLocation(Unit& owner)
 ConfusedMovementGenerator::ConfusedMovementGenerator(float x, float y, float z) :
     AbstractRandomMovementGenerator(UNIT_STAT_CONFUSED, UNIT_STAT_CONFUSED_MOVE, 500, 1500)
 {
-    i_radius = 10.0f;
+    i_radius = 2.5f;
     i_x = x;
     i_y = y;
     i_z = z;
