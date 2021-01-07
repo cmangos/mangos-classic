@@ -1449,7 +1449,8 @@ inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
     {
         case TARGET_UNIT_FRIEND_CHAIN_HEAL: // checked for LOS but in a custom chain way
         case TARGET_UNIT_FRIEND_AND_PARTY:
-        case TARGET_UNIT_RAID_AND_CLASS: return true;
+        case TARGET_UNIT_RAID_AND_CLASS:
+        case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE: return true;
         default: break;
     }
 
