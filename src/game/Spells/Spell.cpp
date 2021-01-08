@@ -398,6 +398,7 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
     m_ignoreCooldowns = m_IsTriggeredSpell || ((triggeredFlags & TRIGGERED_IGNORE_COOLDOWNS) != 0);
     m_ignoreConcurrentCasts = m_IsTriggeredSpell || ((triggeredFlags & TRIGGERED_IGNORE_CURRENT_CASTED_SPELL) != 0) || m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING);
     m_hideInCombatLog = (m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo)) || ((triggeredFlags & TRIGGERED_HIDE_CAST_IN_COMBAT_LOG) != 0);
+    m_resetLeash = (triggeredFlags & TRIGGERED_DO_NOT_RESET_LEASH) == 0;
 
     m_clientCast = false;
 
@@ -413,6 +414,8 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
 
     m_spellLog.Initialize();
     m_needSpellLog = (m_spellInfo->Attributes & (SPELL_ATTR_HIDE_IN_COMBAT_LOG | SPELL_ATTR_HIDDEN_CLIENTSIDE)) == 0;
+
+    m_travellingStart = UINT32_MAX;
 
     m_targetlessMask = 0;
 
@@ -1088,7 +1091,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     else if (m_damage)
     {
         // Fill base damage struct (unitTarget - is real spell target)
-        SpellNonMeleeDamage spellDamageInfo(caster, unitTarget, m_spellInfo->Id, GetFirstSchoolInMask(m_spellSchoolMask));
+        SpellNonMeleeDamage spellDamageInfo(caster, unitTarget, m_spellInfo->Id, GetFirstSchoolInMask(m_spellSchoolMask), this);
 
         spellDamageInfo.damage = m_damage;
         spellDamageInfo.HitInfo = target->HitInfo;
@@ -1126,9 +1129,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         OnHit(missInfo); // TODO: After spell damage calc is moved to proper handler - move this before the first if
 
         if (reflectTarget)
-            reflectTarget->DealSpellDamage(&spellDamageInfo, true);
+            reflectTarget->DealSpellDamage(&spellDamageInfo, true, m_resetLeash);
         else
-            caster->DealSpellDamage(&spellDamageInfo, true);
+            caster->DealSpellDamage(&spellDamageInfo, true, m_resetLeash);
 
         // Bloodthirst
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && m_spellInfo->SpellFamilyFlags & uint64(0x0000000002000000))
@@ -2940,6 +2943,7 @@ void Spell::cast(bool skipCheck)
             // Okay, maps created, now prepare flags
             m_spellState = SPELL_STATE_TRAVELING;
             SetDelayStart(0);
+            SetSpellStartTravelling(m_caster->GetMap()->GetCurrentMSTime());
         }
     }
     else // Immediate spell, no big deal
@@ -3293,6 +3297,7 @@ void Spell::update(uint32 difftime)
                     // Okay, maps created, now prepare flags
                     m_spellState = SPELL_STATE_TRAVELING;
                     SetDelayStart(0);
+                    SetSpellStartTravelling(m_trueCaster->GetMap()->GetCurrentMSTime());
                 }
                 else
                     finish();

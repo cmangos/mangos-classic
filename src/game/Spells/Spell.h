@@ -474,6 +474,7 @@ class Spell
         bool m_ignoreCooldowns;
         bool m_ignoreConcurrentCasts;
         bool m_hideInCombatLog;
+        bool m_resetLeash;
         // Not a trigger flag but same type of information
         bool m_clientCast;
 
@@ -498,6 +499,8 @@ class Spell
         uint64 GetDelayStart() const { return m_delayStart; }
         void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
         uint64 GetDelayMoment() const { return m_delayMoment; }
+        void SetSpellStartTravelling(uint32 time) { m_travellingStart = time; }
+        uint32 GetSpellStartTravelling() const { return m_travellingStart; }
 
         bool IsNeedSendToClient() const;                    // use for hide spell cast for client in case when cast not have client side affect (animation or log entries)
         bool IsTriggeredSpellWithRedundantCastTime() const; // use for ignore some spell data for triggered spells like cast time, some triggered spells have redundent copy data from main spell for client use purpose
@@ -692,6 +695,7 @@ class Spell
         // Delayed spells system
         uint64 m_delayStart;                                // time of spell delay start, filled by event handler, zero = just started
         uint64 m_delayMoment;                               // moment of next delay call, used internally
+        uint32 m_travellingStart;                           // moment when spell travel starts - used in checks for aura interruption
 
         // These vars are used in both delayed spell system and modified immediate spell system
         bool m_referencedFromCurrentSpell;                  // mark as references to prevent deleted and access by dead pointers

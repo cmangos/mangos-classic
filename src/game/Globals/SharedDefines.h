@@ -866,6 +866,7 @@ enum DamageEffectType
     SELF_DAMAGE_ROGUE_FALL  = 5,                            //< used to avoid rogue losing stealth on falling damage
     SELF_DAMAGE             = 6,
     INSTAKILL               = 7,                            //< used to instakill - no message
+    SPELL_DAMAGE_SHIELD     = 8,                            // doesnt put in combat
 };
 
 enum GameobjectTypes

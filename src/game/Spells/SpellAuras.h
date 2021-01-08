@@ -168,7 +168,7 @@ class SpellAuraHolder
 
         bool DropAuraCharge();                               // return true if last charge dropped
 
-        time_t GetAuraApplyTime() const { return m_applyTime; }
+        uint32 GetAuraApplyTime() const { return m_applyTime; }
         uint32 GetAuraApplyMSTime() const { return m_applyMSTime; } // milliseconds time
 
         void SetRemoveMode(AuraRemoveMode mode) { m_removeMode = mode; }
