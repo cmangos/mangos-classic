@@ -837,6 +837,23 @@ struct HookTentacleTrigger : public SpellScript
     }
 };
 
+struct ExitStomach : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_1)
+        {
+            if (Unit* target = spell->GetUnitTarget())
+            {
+                // Remove Digestive Acid aura when player is ejected from C'Thun's stomach
+                if (target->HasAura(SPELL_DIGESTIVE_ACID))
+                    target->RemoveAurasDueToSpell(SPELL_DIGESTIVE_ACID);
+                return;
+            }
+        }
+    }
+};
+
 struct CThunMouthTentacle : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -877,6 +894,7 @@ void AddSC_boss_cthun()
     RegisterSpellScript<RotateTrigger>("spell_cthun_rotate_trigger");
     RegisterSpellScript<SummonCThunTentacles>("spell_cthun_tentacles_summon");
     RegisterSpellScript<HookTentacleTrigger>("spell_hook_tentacle_trigger");
+    RegisterSpellScript<ExitStomach>("spell_cthun_exit_stomach");
     RegisterAuraScript<PeriodicSummonEyeTrigger>("spell_cthun_periodic_eye_trigger");
     RegisterAuraScript<PeriodicRotate>("spell_cthun_periodic_rotate");
     RegisterAuraScript<CThunMouthTentacle>("spell_cthun_mouth_tentacle");
