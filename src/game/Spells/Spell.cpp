@@ -5702,8 +5702,6 @@ bool Spell::CheckSpellCancelsConfuse(uint32& param1) const
 
 bool Spell::CanAutoCast(Unit* target)
 {
-    ObjectGuid targetguid = target->GetObjectGuid();
-
     for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
     {
         if (m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA)

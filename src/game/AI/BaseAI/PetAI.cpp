@@ -251,7 +251,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
                 Spell* spell = new Spell(m_unit, spellInfo, TRIGGERED_NORMAL_COMBAT_CAST);
 
-                if (inCombat && spell->CanAutoCast(victim))
+                if (inCombat && spell->CanAutoCast(IsOnlySelfTargeting(spellInfo) ? m_unit : victim))
                 {
                     targetSpellStore.push_back(TargetSpellList::value_type(victim, spell));
                 }
