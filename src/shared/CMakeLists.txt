@@ -247,6 +247,11 @@ else()
   endif()
 endif()
 
+# Specific definition for an issue with boost/stacktrace when building on macOS
+if(APPLE)
+  add_compile_definitions(_GNU_SOURCE)
+endif()
+
 # Generate precompiled header
 if(PCH)
   target_precompile_headers(${LIBRARY_NAME} PRIVATE "${PCH_FILE_HEADER}")
