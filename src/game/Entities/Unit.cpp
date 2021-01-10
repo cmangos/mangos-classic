@@ -1158,10 +1158,8 @@ void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDa
 
 void Unit::InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype, SpellEntry const* spellProto)
 {
-    if (damagetype == NODAMAGE || damagetype == DOT)
-        return;
-
-    if (spellProto && spellProto->HasAttribute(SPELL_ATTR_EX3_TREAT_AS_PERIODIC))
+    bool dotDamage = (damagetype == DOT || spellProto && spellProto->HasAttribute(SPELL_ATTR_EX3_TREAT_AS_PERIODIC));
+    if (damagetype == NODAMAGE)
         return;
 
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
@@ -1172,7 +1170,7 @@ void Unit::InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype, Spe
             {
                 if (spell->m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
                     pVictim->InterruptSpell(CurrentSpellTypes(i));
-                else
+                else if (!dotDamage)
                     spell->Delayed();
             }
 
@@ -1184,7 +1182,7 @@ void Unit::InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype, Spe
                     if (spell->CanBeInterrupted())
                     {
                         uint32 channelInterruptFlags = spell->m_spellInfo->ChannelInterruptFlags;
-                        if (channelInterruptFlags & CHANNEL_FLAG_DELAY)
+                        if (!dotDamage && (channelInterruptFlags & CHANNEL_FLAG_DELAY) != 0) // DOTs do not delay channels
                         {
                             if (pVictim != this)                // don't shorten the duration of channeling if you damage yourself
                                 spell->DelayedChannel();
