@@ -183,6 +183,17 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (14093,'spell_improved_sap'),
 (14185,'spell_preparation');
 
+-- Shaman
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(324,'spell_damage_trigger_shield'),
+(325,'spell_damage_trigger_shield'),
+(905,'spell_damage_trigger_shield'),
+(945,'spell_damage_trigger_shield'),
+(8134,'spell_damage_trigger_shield'),
+(8788,'spell_damage_trigger_shield'),
+(10431,'spell_damage_trigger_shield'),
+(10432,'spell_damage_trigger_shield');
+
 -- Battleground and Outdoor PvP
 -- Alterac Valley
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
