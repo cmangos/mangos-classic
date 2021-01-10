@@ -1958,6 +1958,12 @@ void CreatureEventAI::UpdateEventTimers(const uint32 diff)
         IncreaseDepthIfNecessary();
         for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
         {
+            if (i->event.event_type == EVENT_T_TARGET_NOT_REACHABLE)
+            {
+                CheckAndReadyEventForExecution(*i);
+                continue;
+            }
+
             // Decrement Timers
             if (i->timer)
             {
