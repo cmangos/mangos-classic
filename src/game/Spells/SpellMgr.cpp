@@ -103,10 +103,10 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, WorldObject* caster, Spell*
         // Workaround for custom cast time
         /*switch (spellInfo->Id)
         {
-            case 3366: // Opening - seems to have a settable timer per usage
-                if (spell->GetCastItem())
+            case 3366:  // Opening - seems to have a settable timer per usage
+                if (Item* item = spell->GetCastItem())
                 {
-                    switch (spell->GetCastItem()->GetEntry())
+                    switch (item->GetEntry())
                     {
                         default:
                             break;

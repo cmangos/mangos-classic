@@ -456,7 +456,6 @@ class Spell
         SpellEntry const* m_triggeredBySpellInfo;
         int32 m_currentBasePoints[MAX_EFFECT_INDEX];        // cache SpellEntry::CalculateSimpleValue and use for set custom base points
 
-        ObjectGuid m_CastItemGuid;
         SpellCastTargets m_targets;
 
         // Trigger flag system

@@ -363,6 +363,7 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
     m_IsTriggeredSpell = triggeredFlags & TRIGGERED_OLD_TRIGGERED;
     // m_AreaAura = false;
     m_CastItem = nullptr;
+    m_itemCastSpell = false;
 
     unitTarget = nullptr;
     itemTarget = nullptr;
@@ -2672,9 +2673,6 @@ SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* trigger
     m_spellState = SPELL_STATE_TARGETING;
     m_targets = *targets;
 
-    if (m_CastItem)
-        m_CastItemGuid = m_CastItem->GetObjectGuid();
-
     if (triggeredByAura)
         m_triggeredByAuraSpell = triggeredByAura->GetSpellProto();
 
@@ -3783,7 +3781,7 @@ void Spell::SendChannelStart(uint32 duration)
         for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
         {
             if (((itr->effectHitMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE &&
-                    m_CastItem) || itr->targetGUID != m_caster->GetObjectGuid())
+                    m_itemCastSpell) || itr->targetGUID != m_caster->GetObjectGuid())
             {
                 // when immune, duration is already 0, still need to fetch data for caster
                 if (itr->diminishGroup > DIMINISHING_NONE && (itr->diminishDuration != duration || diminishLevel == DIMINISHING_LEVEL_IMMUNE))
@@ -4033,7 +4031,6 @@ void Spell::TakeReagents()
 
                 m_CastItem->SetUsedInSpell(false);
                 m_CastItem = nullptr;
-                m_CastItemGuid.Clear();
             }
         }
 
@@ -6445,11 +6442,6 @@ void Spell::UpdatePointers()
     UpdateOriginalCasterPointer();
 
     m_targets.Update(m_caster);
-
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        m_CastItem = ((Player*)m_caster)->GetItemByGuid(m_CastItemGuid);
-    else
-        m_CastItem = nullptr;
 }
 
 bool Spell::CheckTargetCreatureType(Unit* target, SpellEntry const* spellInfo)
@@ -6992,7 +6984,6 @@ void Spell::ClearCastItem()
         m_targets.setItemTarget(nullptr);
 
     m_CastItem = nullptr;
-    m_CastItemGuid.Clear();
 }
 
 void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, bool targetB, uint32& EffectChainTarget)
