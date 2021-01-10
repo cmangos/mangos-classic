@@ -558,6 +558,10 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
         }
         case EVENT_T_DEATH_PREVENTED:
             break;
+        case EVENT_T_TARGET_NOT_REACHABLE:
+            if (!m_creature->GetVictim() || !IsCombatMovement() || m_creature->GetMotionMaster()->GetCurrent()->IsReachable())
+                return false;
+            break;
         default:
             sLog.outErrorEventAI("Creature %u using Event %u has invalid Event Type(%u), missing from ProcessEvent() Switch.", m_creature->GetEntry(), holder.event.event_id, holder.event.event_type);
             return false;

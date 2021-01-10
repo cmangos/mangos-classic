@@ -101,6 +101,7 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 33  EVENT_T_FACING_TARGET               BackOrFront, unused, RepeatMin, RepeatMax                               Expires when the NPC is in back (Param1=0) or in front (Param1=1) of its current target. Will repeat after Param3 and Param4.
 34  EVENT_T_SPELLHIT_TARGET             SpellID, Schoolmask, RepeatMin, RepeatMax                               Expires upon Spell Hit of the NPC. When (param1) is set, it is the specific Spell ID used as the trigger. With (param2) specified, the expiration is limited to specific spell schools (-1 for all) and Spell ID value is ignored. Will repeat Event Conditions Check between every (Param3) and (Param4). Only A Spell ID or Spell School may be Specified but NOT both.
 35  EVENT_T_DEATH_PREVENTED             NONE                                                                    Expires when Death prevention kicks in
+36  EVENT_T_TARGET_NOT_REACHABLE        NONE                                                                    Expires when target is not reachable
 
 =========================================
 Action Types
@@ -542,6 +543,11 @@ NOTE: For Repeat Events the Repeat Timer ONLY Re-Check's Event Conditions to see
 35 = EVENT_T_DEATH_PREVENTED:
 -----------------------------
 Expires when death prevention kicks in. It expires once, and then death prevention has to be reset for it to happen again.
+
+---------------------------------
+36 = EVENT_T_TARGET_NOT_REACHABLE
+---------------------------------
+Expires when main aggro target is not reachable by ChaseMovementGenerator - example of usage is teleporting player to creature
 
 (Name ==> School ==> School Bitmask Values)
 -------------------------------------------
