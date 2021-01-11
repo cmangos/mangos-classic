@@ -677,7 +677,7 @@ bool AreaTrigger_at_stomach_cthun(Player* player, AreaTriggerEntry const* at)
     // Area trigger on the plateform at the end of C'Thun's stomach
     if (at->id == AREATRIGGER_STOMACH_1)
     {
-        if (player->isGameMaster() || !player->IsAlive())
+        if (player->IsGameMaster() || !player->IsAlive())
             return false;
 
         // Summon the Exit Trigger NPC which will knockback the player outside the stomach
@@ -690,7 +690,7 @@ bool AreaTrigger_at_stomach_cthun(Player* player, AreaTriggerEntry const* at)
     // Area trigger at the ceiling of C'Thun's stomach (exit or entrance, depending on which way the "food" is going)
     if (at->id == AREATRIGGER_STOMACH_2)
     {
-        if (player->isGameMaster() || !player->IsAlive())
+        if (player->IsGameMaster() || !player->IsAlive())
             return false;
 
         // Teleport player near the third area trigger
@@ -703,7 +703,7 @@ bool AreaTrigger_at_stomach_cthun(Player* player, AreaTriggerEntry const* at)
     {
         // We need to check for the presence of Digestive Acid aura on player so the area trigger will only activate and knockback players coming from C'Thun's stomach
         // The knockback spell will remove the Digestive Acid aura
-        if (player->isGameMaster() || !player->IsAlive() || !player->HasAura(SPELL_DIGESTIVE_ACID))
+        if (player->IsGameMaster() || !player->IsAlive() || !player->HasAura(SPELL_DIGESTIVE_ACID))
             return false;
 
         // Check for the trigger NPC that will cast the knockback spell
