@@ -1253,7 +1253,7 @@ uint32 Map::GetPlayersCountExceptGMs() const
 {
     uint32 count = 0;
     for (const auto& itr : m_mapRefManager)
-        if (!itr.getSource()->isGameMaster())
+        if (!itr.getSource()->IsGameMaster())
             ++count;
     return count;
 }

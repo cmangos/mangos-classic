@@ -1009,11 +1009,11 @@ void instance_stratholme::Update(uint32 uiDiff)
             {
                 if (Player* pPlayer = player.getSource())
                 {
-                    if (!pPlayer->isGameMaster() && pPlayer->IsWithinDist2d(aGateTrap[i].m_fX, aGateTrap[i].m_fY, 5.5f))
+                    if (!pPlayer->IsGameMaster() && pPlayer->IsWithinDist2d(aGateTrap[i].m_fX, aGateTrap[i].m_fY, 5.5f))
                         DoGateTrap(i);
 
                     Pet* pet = pPlayer->GetPet();
-                    if (!pPlayer->isGameMaster() && pet && pet->IsWithinDist2d(aGateTrap[i].m_fX, aGateTrap[i].m_fY, 5.5f))
+                    if (!pPlayer->IsGameMaster() && pet && pet->IsWithinDist2d(aGateTrap[i].m_fX, aGateTrap[i].m_fY, 5.5f))
                         DoGateTrap(i);
                 }
             }

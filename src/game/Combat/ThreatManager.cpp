@@ -462,7 +462,7 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
         return;
 
     // not to GM
-    if (!victim || (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->isGameMaster()))
+    if (!victim || (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->IsGameMaster()))
         return;
 
     // not to dead and not for dead
@@ -490,7 +490,7 @@ void ThreatManager::addThreatDirectly(Unit* victim, float threat)
         Unit* victim_owner = victim->GetMaster();
         if (victim_owner && victim_owner->IsAlive() && victim_owner->CanJoinInAttacking(getOwner()) && !victim_owner->hasUnitState(UNIT_STAT_FEIGN_DEATH))
             addThreat(victim_owner, 0.0f); // create a threat to the owner of a pet, if the pet attacks
-        if (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->isGameMaster())
+        if (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->IsGameMaster())
             hostileReference->setOnlineOfflineState(false); // GM is always offline
     }
 }

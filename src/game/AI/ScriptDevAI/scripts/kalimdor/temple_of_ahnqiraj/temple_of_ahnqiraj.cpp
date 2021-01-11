@@ -434,7 +434,7 @@ bool AreaTrigger_at_temple_ahnqiraj(Player* player, AreaTriggerEntry const* at)
 {
     if (at->id == AREATRIGGER_TWIN_EMPERORS || at->id == AREATRIGGER_SARTURA)
     {
-        if (player->isGameMaster() || !player->IsAlive())
+        if (player->IsGameMaster() || !player->IsAlive())
             return false;
 
         if (instance_temple_of_ahnqiraj* pInstance = (instance_temple_of_ahnqiraj*)player->GetInstanceData())

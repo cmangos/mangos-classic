@@ -962,7 +962,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         return true;
 
     // quick check visibility false cases for non-GM-mode
-    if (!u->isGameMaster())
+    if (!u->IsGameMaster())
     {
         // despawned and then not visible for non-GM in GM-mode
         if (!IsSpawned())

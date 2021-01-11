@@ -1083,7 +1083,7 @@ bool instance_naxxramas::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger
 
 bool AreaTrigger_at_naxxramas(Player* player, AreaTriggerEntry const* areaTrigger)
 {
-    if (player->isGameMaster() || !player->IsAlive())
+    if (player->IsGameMaster() || !player->IsAlive())
         return false;
 
     if (auto* instance = (instance_naxxramas*)player->GetInstanceData())
