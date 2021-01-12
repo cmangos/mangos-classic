@@ -339,9 +339,6 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
     recv_data >> movementInfo;
     recv_data >> newspeed;
 
-    // now can skip not our packet
-    if (_player->GetObjectGuid() != guid)
-        return;
     /*----------------*/
 
     // client ACK send one packet for mounted/run case and need skip all except last from its
@@ -611,7 +608,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
     mover->SendMessageToSetExcept(data, _player);
 }
 
-bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, Unit* mover) const
+bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, Unit* mover, bool unroot) const
 {
     // ignore wrong guid (player attempt cheating own session for not own guid possible...)
     if (mover->GetObjectGuid() != _player->GetMover()->GetObjectGuid())
@@ -621,8 +618,9 @@ bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, Unit* mo
         return false;
 
     // rooted mover sent packet without root or moving AND root - ignore, due to client crash possibility
-    if (mover->IsRooted() && (!movementInfo.HasMovementFlag(MOVEFLAG_ROOT) || movementInfo.HasMovementFlag(MOVEFLAG_MASK_MOVING)))
-        return false;
+    if (!unroot)
+        if (mover->IsRooted() && (!movementInfo.HasMovementFlag(MOVEFLAG_ROOT) || movementInfo.HasMovementFlag(MOVEFLAG_MASK_MOVING)))
+            return false;
 
     if (movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
     {
@@ -707,7 +705,7 @@ bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, 
     if (plMover && plMover->IsBeingTeleported())
         return false;
 
-    if (!VerifyMovementInfo(movementInfo, mover))
+    if (!VerifyMovementInfo(movementInfo, mover, recv_data.GetOpcode() == CMSG_FORCE_MOVE_UNROOT_ACK))
         return false;
 
     if (!mover->movespline->Finalized())
