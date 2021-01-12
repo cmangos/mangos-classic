@@ -123,8 +123,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (9750,'spell_regrowth'),
 (9856,'spell_regrowth'),
 (9857,'spell_regrowth'),
-(9858,'spell_regrowth'),
-(26980,'spell_regrowth');
+(9858,'spell_regrowth');
 
 -- Rogue
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
