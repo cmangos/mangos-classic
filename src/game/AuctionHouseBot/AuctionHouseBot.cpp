@@ -26,7 +26,7 @@
 
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.
-#define AUCTIONHOUSEBOT_CONF_VERSION    2020010101
+#define AUCTIONHOUSEBOT_CONF_VERSION    2021011201
 
 INSTANTIATE_SINGLETON_1(AuctionHouseBot);
 
@@ -42,6 +42,9 @@ void AuctionHouseBot::Initialize()
 {
     if (!m_ahBotCfg.SetSource(m_configFileName))
     {
+        // set buy/sell chance to 0, this prevents Update() from accessing uninitialized variables
+        m_chanceBuy = 0;
+        m_chanceSell = 0;
         sLog.outString("AHBot is disabled. Unable to open configuration file(%s).", m_configFileName.c_str());
         return;
     }
@@ -185,19 +188,21 @@ void AuctionHouseBot::Update()
                     if (!prototype || prototype->Quality == 0 || urand(0, (1 << (prototype->Quality - 1)) - 1) > 0)
                         continue; // make it decreasingly likely that crafted items of higher quality is added to the auction house (white: 100%, green: 50%, blue: 25%, purple: 12.5%, ...)
                     uint32 count = (uint32) round((uint64)prototype->GetMaxStackSize() * urand(m_professionItemsConfig[2], m_professionItemsConfig[3]) / 100.0);
+                    if (count <= 0)
+                        count = 1;
                     itemMap[item] += count;
                 }
             }
         }
 
         // remove items we've overridden (AddChance > 0) and add using given AddChance and stack size
-        for (auto itemData : m_itemData)
+        for (auto& itemData : m_itemData)
         {
             if (itemData.second.AddChance > 0) // replace normal loot sources with custom chance of adding item
                 itemMap[itemData.first] = urand(0, 99) < itemData.second.AddChance ? urand(itemData.second.MinAmount, itemData.second.MaxAmount) : 0;
         }
 
-        for (auto itemEntry : itemMap)
+        for (auto& itemEntry : itemMap)
         {
             ItemPrototype const* prototype = ObjectMgr::GetItemPrototype(itemEntry.first);
             if (!prototype || prototype->GetMaxStackSize() == 0)
@@ -208,9 +213,9 @@ void AuctionHouseBot::Update()
             if (iterator == m_itemData.end() || iterator->second.AddChance == 0)
             {
                 if (prototype->Bonding == BIND_WHEN_PICKED_UP || prototype->Bonding == BIND_QUEST_ITEM)
-                    continue; // nor BoP and quest items
+                    continue; // no BoP and quest items
                 if (prototype->Flags & ITEM_FLAG_HAS_LOOT)
-                    continue; // no items containing loot
+                    continue; // nor items containing loot
                 if (m_itemValue[prototype->Quality][prototype->Class] == 0)
                     continue; // item class is filtered out
             }
@@ -239,6 +244,8 @@ void AuctionHouseBot::Update()
             if (auction->owner == 0 && auction->bid == 0)
                 continue; // ignore bidding/buying auctions that were created by ahbot and not bidded on by player
             Item* item = sAuctionMgr.GetAItem(auction->itemGuidLow);
+            if (!item)
+                continue; // shouldn't happen, but apparently it does(?)
             auto prototype = item->GetProto();
             if (!prototype)
                 continue; // shouldn't happen
@@ -479,7 +486,9 @@ void AuctionHouseBot::AddLootToItemMap(LootStore* store, std::vector<int32>& loo
 uint32 AuctionHouseBot::CalculateBuyoutPrice(ItemPrototype const* prototype)
 {
     uint32 buyoutPrice = prototype->BuyPrice;
-    if (buyoutPrice == 0) // if no buy price then use sell price multiplied by 4 if white or gray item, 5 if green or better
+    // test whether we have a buy price or if buy price greatly exceed sell price (causes item to be valued too high, notably arrows/shells do this)
+    // if using sell price then price must be multiplied by 4 if white or gray item, 5 if green or better to match expected buy price
+    if (buyoutPrice == 0 || (prototype->SellPrice > 0 && buyoutPrice / prototype->SellPrice > 5))
         buyoutPrice = prototype->SellPrice * (prototype->Quality <= ITEM_QUALITY_NORMAL ? 4 : 5);
     // multiply buyoutPrice with item quality price percentage
     // if item is sold by a vendor and vendor value is forced, then multiply by 100 (setting vendor price)

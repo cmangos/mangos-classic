@@ -3,7 +3,7 @@
 ################################################
 
 [AhbotConf]
-ConfVersion=2020010101
+ConfVersion=2021011201
 
 ###################################################################################################################
 # Probability in percent of AHBot selling/buying items at the AH.
@@ -48,10 +48,10 @@ AuctionHouseBot.Loot.Creature.Elite     =    30, 34,  1,  2
 AuctionHouseBot.Loot.Creature.RareElite =  -10,  2,  1,  1
 AuctionHouseBot.Loot.Creature.WorldBoss =  -20,  1,  1,  1
 
-AuctionHouseBot.Loot.Disenchant =    0,  2,  1,  1
-AuctionHouseBot.Loot.Fishing    =    0,  1, 30, 40
+AuctionHouseBot.Loot.Disenchant =   10, 12,  1,  1
+AuctionHouseBot.Loot.Fishing    =    3,  5, 30, 40
 AuctionHouseBot.Loot.Gameobject =   13, 16,  7, 11
-AuctionHouseBot.Loot.Skinning   =   -4,  1, 50, 50
+AuctionHouseBot.Loot.Skinning   =    3,  5, 50, 50
 
 ###################################################################################################################
 # Profession craftable items added to AH.
@@ -62,9 +62,12 @@ AuctionHouseBot.Loot.Skinning   =   -4,  1, 50, 50
 #
 # This setting is slightly different from the Loot.* settings, the 4 values are:
 #   <min items>, <max items>, <min percent stack size>, <max percent stack size>
-# Default values are: 30, 50, 100, 100
+# A stack will always contain at least 1 item, hence setting <min/max percent stack size> to 0 will not prevent
+# craftable items from being added to the Auction House.
+# To prevent craftable items from being added to the Auction House set <min items> and <max items> to 0.
+# Default values are: 80, 90, 0, 50
 ###################################################################################################################
-AuctionHouseBot.Items.Profession = 30, 50, 100, 100
+AuctionHouseBot.Items.Profession = 80, 90, 0, 50
 
 ###################################################################################################################
 # Item value
@@ -93,15 +96,16 @@ AuctionHouseBot.Items.Profession = 30, 50, 100, 100
 # 13: Key
 # 14: Permanent (obsolete, value ignored)
 # 15: Misc
+# 16: Glyph
 ###################################################################################################################
-# Class                             0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
-AuctionHouseBot.Value.Poor      =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
-AuctionHouseBot.Value.Normal    = 100,100,  0,  0,  0,100,100,100,  0,100,  0,100,100,100,  0,100
-AuctionHouseBot.Value.Uncommon  = 200,200,200,  0,200,200,200,200,  0,200,  0,200,200,200,  0,200
-AuctionHouseBot.Value.Rare      = 400,400,400,  0,400,400,400,400,  0,400,  0,400,400,400,  0,400
-AuctionHouseBot.Value.Epic      = 800,800,800,  0,800,800,800,800,  0,800,  0,800,800,800,  0,800
-AuctionHouseBot.Value.Legendary =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
-AuctionHouseBot.Value.Artifact  =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+# Class                             0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16
+AuctionHouseBot.Value.Poor      =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+AuctionHouseBot.Value.Normal    = 100,100,  0,100,  0,100,100,100,  0,100,  0,100,100,100,  0,100,100
+AuctionHouseBot.Value.Uncommon  = 200,200,200,200,200,200,200,200,  0,200,  0,200,200,200,  0,200,200
+AuctionHouseBot.Value.Rare      = 400,400,400,400,400,400,400,400,  0,400,  0,400,400,400,  0,400,400
+AuctionHouseBot.Value.Epic      = 800,800,800,800,800,800,800,800,  0,800,  0,800,800,800,  0,800,800
+AuctionHouseBot.Value.Legendary =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+AuctionHouseBot.Value.Artifact  =   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 
 ###################################################################################################################
 # Vendor item value override
@@ -149,6 +153,6 @@ AuctionHouseBot.Time.Max = 24
 # A value of 90 means that the AHBot will at most pay 9 gold for an item at the AH that the bot itself would put
 # up for auction at 10 gold (± AuctionHouseBot.Value.Variance).
 # Setting this lower than 100 also means that the AHBot is less likely to outbid players.
-# Value must be in range 0-200. Default value is 90.
+# Value must be in range 0-200. Default value is 80.
 ###################################################################################################################
-AuctionHouseBot.Buy.Value = 90
+AuctionHouseBot.Buy.Value = 80
