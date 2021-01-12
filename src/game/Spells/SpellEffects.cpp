@@ -585,17 +585,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 14185:                                 // Preparation Rogue
-                {
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        // immediately finishes the cooldown on certain Rogue abilities
-                        auto cdCheck = [](SpellEntry const & spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_ROGUE && (spellEntry.SpellFamilyFlags & uint64(0x0000026000000860))); };
-                        static_cast<Player*>(m_caster)->RemoveSomeCooldown(cdCheck);
-                    }
-
-                    return;
-                }
                 case 14537:                                 // Six Demon Bag
                 {
                     if (unitTarget)

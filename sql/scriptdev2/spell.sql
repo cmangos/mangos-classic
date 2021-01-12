@@ -126,6 +126,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (9858,'spell_regrowth'),
 (26980,'spell_regrowth');
 
+-- Rogue
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(14185,'spell_preparation');
+
 -- Battleground and Outdoor PvP
 -- Alterac Valley
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
