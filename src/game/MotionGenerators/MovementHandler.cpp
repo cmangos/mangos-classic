@@ -611,18 +611,17 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
     mover->SendMessageToSetExcept(data, _player);
 }
 
-bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGuid const& guid) const
+bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, Unit* mover) const
 {
     // ignore wrong guid (player attempt cheating own session for not own guid possible...)
-    if (guid != _player->GetMover()->GetObjectGuid())
+    if (mover->GetObjectGuid() != _player->GetMover()->GetObjectGuid())
         return false;
 
-    return VerifyMovementInfo(movementInfo);
-}
-
-bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo) const
-{
     if (!MaNGOS::IsValidMapCoord(movementInfo.GetPos().x, movementInfo.GetPos().y, movementInfo.GetPos().z, movementInfo.GetPos().o))
+        return false;
+
+    // rooted mover sent packet without root or moving AND root - ignore, due to client crash possibility
+    if (mover->IsRooted() && (!movementInfo.HasMovementFlag(MOVEFLAG_ROOT) || movementInfo.HasMovementFlag(MOVEFLAG_MASK_MOVING)))
         return false;
 
     if (movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
@@ -708,7 +707,7 @@ bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, 
     if (plMover && plMover->IsBeingTeleported())
         return false;
 
-    if (!VerifyMovementInfo(movementInfo))
+    if (!VerifyMovementInfo(movementInfo, mover))
         return false;
 
     if (!mover->movespline->Finalized())
