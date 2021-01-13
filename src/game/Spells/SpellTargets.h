@@ -35,8 +35,9 @@ struct SpellTargetInfo
     SpellTargetImplicitType type;
     SpellTargetFilter filter;
     SpellTargetEnumerator enumerator;
+    SpellTargetLOS los;
 
-    SpellTargetInfo(char const* name = "", SpellTargetImplicitType type = TARGET_TYPE_UNKNOWN, SpellTargetFilter filter = TARGET_NEUTRAL, SpellTargetEnumerator enumerator = TARGET_ENUMERATOR_UNKNOWN);
+    SpellTargetInfo(char const* name = "", SpellTargetImplicitType type = TARGET_TYPE_UNKNOWN, SpellTargetFilter filter = TARGET_NEUTRAL, SpellTargetEnumerator enumerator = TARGET_ENUMERATOR_UNKNOWN, SpellTargetLOS los = TARGET_LOS_CASTER);
 };
 
 extern SpellTargetInfo SpellTargetInfoTable[MAX_SPELL_TARGETS];

@@ -6551,11 +6551,30 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                 // all ok by some way or another, skip normal check
                 break;
             default:                                            // normal case
-                // Get GO cast coordinates if original caster -> GO
-                if (exception != EXCEPTION_MAGNET && !IsIgnoreLosSpellEffect(m_spellInfo, eff) && target != m_caster)
-                    if (WorldObject* caster = GetCastingObject())
-                        if (!target->IsWithinLOSInMap(caster, true))
-                            return false;
+                if (exception != EXCEPTION_MAGNET && !IsIgnoreLosSpellEffect(m_spellInfo, eff))
+                {
+                    float x, y, z;
+                    switch (info.los)
+                    {
+                        case TARGET_LOS_DEST:
+                            m_targets.getDestination(x, y, z);
+                            if (!target->IsWithinLOS(x, y, z + target->GetCollisionHeight(), true))
+                                return false;
+                            break;
+                        case TARGET_LOS_SRC:
+                            m_targets.getSource(x, y, z);
+                            if (!target->IsWithinLOS(x, y, z + target->GetCollisionHeight(), true))
+                                return false;
+                            break;
+                        case TARGET_LOS_CASTER:
+                            if (WorldObject* caster = GetCastingObject())
+                            {
+                                if (!target->IsWithinLOSInMap(caster, true))
+                                    return false;
+                            }
+                            break;
+                    }
+                }
                 break;
         }
 
