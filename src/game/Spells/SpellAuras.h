@@ -389,7 +389,6 @@ class Aura
         void HandleAuraModPacifyAndSilence(bool apply, bool Real);
         void HandleAuraModResistenceOfStatPercent(bool apply, bool Real);
         void HandleAuraPowerBurn(bool apply, bool Real);
-        void HandleSchoolAbsorb(bool apply, bool Real);
         void HandlePreventFleeing(bool apply, bool Real);
         void HandleManaShield(bool apply, bool Real);
         void HandleInterruptRegen(bool apply, bool Real);
