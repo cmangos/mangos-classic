@@ -1408,7 +1408,6 @@ class Player : public Unit
         void Regenerate(Powers power);
         void RegenerateHealth();
         void setRegenTimer(uint32 time) {m_regenTimer = time;}
-        void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
 
         uint32 GetMoney() const { return GetUInt32Value(PLAYER_FIELD_COINAGE); }
         void ModifyMoney(int32 d)
@@ -2387,7 +2386,6 @@ class Player : public Unit
 
         uint32 m_drunkTimer;
         uint16 m_drunk;
-        uint32 m_weaponChangeTimer;
 
         uint32 m_zoneUpdateId;
         uint32 m_zoneUpdateTimer;
