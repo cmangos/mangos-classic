@@ -6993,15 +6993,13 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool /*castOnSelf*/, uin
             return true;
 
     {
-        if (!spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) &&
-                !spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
-        {
-            bool isPositive = IsPositiveEffectMask(spellInfo, effectMask);
-            SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
-            for (auto itr : schoolList)
-                if ((itr.type & GetSpellSchoolMask(spellInfo)) && !(itr.aura && IsPositiveEffectMask(itr.aura->GetSpellProto(), uint8(1 << (itr.aura->GetEffIndex() - 1))) && isPositive && !CanPierceImmuneAura(spellInfo, itr.aura->GetSpellProto())))
-                    return true;
-        }
+        bool isPositive = IsPositiveEffectMask(spellInfo, effectMask);
+        if (IsAuraApplyEffects(spellInfo, SpellEffectIndexMask(effectMask)) && spellInfo->HasAttribute(SPELL_ATTR_AURA_IS_DEBUFF))
+            isPositive = false;
+        SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
+        for (auto itr : schoolList)
+            if ((itr.type & GetSpellSchoolMask(spellInfo)) && !(itr.aura && itr.aura->IsPositive() && isPositive) && !CanPierceImmuneAura(spellInfo, itr.aura ? itr.aura->GetSpellProto() : nullptr, effectMask, itr.aura ? itr.aura->GetEffIndex() : EFFECT_INDEX_0))
+                return true;
     }
 
     if (uint32 mechanic = spellInfo->Mechanic)
@@ -7057,18 +7055,15 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
 
 bool Unit::IsImmuneToSchool(SpellEntry const* spellInfo, uint8 effectMask) const
 {
-    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))           // can remove immune (by dispell or immune it)
+    SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
+    for (auto itr : schoolList)
     {
-        SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
-        for (auto itr : schoolList)
-        {
-            if (itr.aura && itr.aura->GetSpellProto() == spellInfo) // do not let itself immune out - fixes 39872 - Tidal Shield
-                continue;
+        if (itr.aura && itr.aura->GetSpellProto() == spellInfo) // do not let itself immune out - fixes 39872 - Tidal Shield
+            continue;
 
-            if (!(itr.aura && IsPositiveEffect(itr.aura->GetSpellProto(), itr.aura->GetEffIndex()) && IsPositiveEffectMask(spellInfo, effectMask) && !CanPierceImmuneAura(spellInfo, itr.aura->GetSpellProto())) &&
-                (itr.type & GetSpellSchoolMask(spellInfo)))
-                return true;
-        }
+        if (!(itr.aura && IsPositiveEffect(itr.aura->GetSpellProto(), itr.aura->GetEffIndex()) && IsPositiveEffectMask(spellInfo, effectMask) && !CanPierceImmuneAura(spellInfo, itr.aura->GetSpellProto())) &&
+            (itr.type & GetSpellSchoolMask(spellInfo)))
+            return true;
     }
 
     return false;

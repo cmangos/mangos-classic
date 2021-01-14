@@ -1273,15 +1273,18 @@ inline bool IsPositiveSpell(uint32 spellId, const WorldObject* caster = nullptr,
     return IsPositiveSpell(sSpellTemplate.LookupEntry<SpellEntry>(spellId), caster, target);
 }
 
-inline bool CanPierceImmuneAura(SpellEntry const* spellInfo, SpellEntry const* auraSpellInfo)
+inline bool CanPierceImmuneAura(SpellEntry const* spellInfo, SpellEntry const* auraSpellInfo, uint8 effectMask = 0, SpellEffectIndex effIdx = EFFECT_INDEX_0)
 {
     // aura can't be pierced
-    if (!auraSpellInfo || auraSpellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+    if (auraSpellInfo && auraSpellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
         return false;
 
     // these spells pierce all available spells (Resurrection Sickness for example)
     if (spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
         return true;
+
+    if (!auraSpellInfo)
+        return false;
 
     // these spells (Cyclone for example) can pierce all...
     if (spellInfo->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE) || spellInfo->HasAttribute(SPELL_ATTR_EX2_UNAFFECTED_BY_AURA_SCHOOL_IMMUNE))
@@ -1291,6 +1294,18 @@ inline bool CanPierceImmuneAura(SpellEntry const* spellInfo, SpellEntry const* a
             auraSpellInfo->Mechanic != MECHANIC_INVULNERABILITY &&
             auraSpellInfo->Mechanic != MECHANIC_BANISH)
             return true;
+    }
+
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
+    {
+        for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
+            uint32 miscValue = (uint32)spellInfo->EffectMiscValue[i];
+            if (spellInfo->Effect[i] && spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY_MASK)
+                if (effectMask & (1 << i))
+                    if (miscValue & (1 << auraSpellInfo->Mechanic) || miscValue & (1 << auraSpellInfo->EffectMechanic[effIdx]))
+                        return true;
+        }
     }
 
     // TODO: Add SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY logic
