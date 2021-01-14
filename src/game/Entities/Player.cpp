@@ -9928,6 +9928,11 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
             // Weapons and also Totem/Relic/Sigil/etc
             if (pProto && IsInCombat() && (pProto->Class == ITEM_CLASS_WEAPON || pProto->InventoryType == INVTYPE_RELIC))
             {
+                if (slot == SLOT_MAIN_HAND)
+                    resetAttackTimer(BASE_ATTACK);
+                else if (slot == SLOT_OFF_HAND)
+                    resetAttackTimer(OFF_ATTACK);
+
                 uint32 cooldownSpell = SPELL_ID_WEAPON_SWITCH_COOLDOWN_1_5s;
 
                 if (getClass() == CLASS_ROGUE)
@@ -9938,9 +9943,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
                 if (!spellProto)
                     sLog.outError("Weapon switch cooldown spell %u couldn't be found in Spell.dbc", cooldownSpell);
                 else
-                {
                     AddGCD(*spellProto, 0, true);
-                }
             }
         }
 
