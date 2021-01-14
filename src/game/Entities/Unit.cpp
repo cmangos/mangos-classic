@@ -2013,6 +2013,8 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
             // if damage pVictim call AI reaction
             victim->AttackedBy(this);
 
+            EngageInCombatWithAggressor(victim);
+
             if (Unit* owner = GetOwner())
                 if (owner->GetTypeId() == TYPEID_UNIT)
                     if (owner->CanJoinInAttacking(victim))
