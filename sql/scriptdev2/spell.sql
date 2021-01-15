@@ -138,7 +138,13 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (1456,'spell_life_tap'),
 (11687,'spell_life_tap'),
 (11688,'spell_life_tap'),
-(11689,'spell_life_tap');
+(11689,'spell_life_tap'),
+(19505,'spell_devour_magic'),
+(19731,'spell_devour_magic'),
+(19734,'spell_devour_magic'),
+(19736,'spell_devour_magic'),
+(27276,'spell_devour_magic'),
+(27277,'spell_devour_magic');
 
 -- Warrior
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
