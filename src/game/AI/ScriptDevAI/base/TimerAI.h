@@ -114,11 +114,7 @@ class CombatActions : public TimerManager
         virtual void DelayTimer(uint32 index, uint32 timer) override;
         virtual void ResetIfNotStarted(uint32 index, uint32 timer) override;
 
-        void DisableCombatAction(uint32 index)
-        {
-            DisableTimer(index);
-            SetActionReadyStatus(index, false);
-        }
+        void DisableCombatAction(uint32 index);
 
         void ResetCombatAction(uint32 index, uint32 timer)
         {

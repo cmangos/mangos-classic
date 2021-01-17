@@ -238,6 +238,13 @@ void CombatActions::ResetIfNotStarted(uint32 index, uint32 timer)
     }
 }
 
+void CombatActions::DisableCombatAction(uint32 index)
+{
+    if (m_timerlessActionSettings.find(index) == m_timerlessActionSettings.end())
+        DisableTimer(index);
+    SetActionReadyStatus(index, false);
+}
+
 void CombatActions::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage("Combat Timers:");
