@@ -25,6 +25,7 @@
 #include "Dynamic/FactoryHolder.h"
 #include "Entities/ObjectGuid.h"
 #include "AI/BaseAI/AIDefines.h"
+#include <functional>
 
 class WorldObject;
 class GameObject;
