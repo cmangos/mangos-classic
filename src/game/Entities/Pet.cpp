@@ -2247,9 +2247,6 @@ void Pet::RegenerateHealth()
         {
             addvalue = OCTRegenHPPerSpirit() * HealthIncreaseRate * 4; // pets regen per 4 seconds
             break;
-            // HACK: increase warlock pet regen *5 until formula is found
-            if (m_petType == SUMMON_PET)
-                addvalue *= 5;
         }
 
         case GUARDIAN_PET:
