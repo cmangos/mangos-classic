@@ -2079,10 +2079,13 @@ void Loot::ForceLootAnimationClientUpdate() const
             break;
         case TYPEID_GAMEOBJECT:
             return;
+            // No sparkles in Classic when a GameObject is lootable. The code below is for WotLK
+            /*
             // we have to update sparkles/loot for this object
             if (m_isChest)
                 m_lootTarget->ForceValuesUpdateAtIndex(GAMEOBJECT_DYN_FLAGS);
             break;
+            */
         default:
             break;
     }
