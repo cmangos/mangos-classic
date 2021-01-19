@@ -78,6 +78,14 @@ DBCStorage <DurabilityCostsEntry> sDurabilityCostsStore(DurabilityCostsfmt);
 DBCStorage <EmotesEntry> sEmotesStore(EmotesEntryfmt);
 DBCStorage <EmotesTextEntry> sEmotesTextStore(EmotesTextEntryfmt);
 
+#ifdef ENABLE_PLAYERBOTS
+typedef std::tuple<uint32, uint32, uint32> EmotesTextSoundKey;
+static std::map<EmotesTextSoundKey, EmotesTextSoundEntry const*> sEmotesTextSoundMap;
+DBCStorage <EmotesTextSoundEntry> sEmotesTextSoundStore(EmotesTextSoundEntryfmt);
+DBCStorage <CharSectionsEntry> sCharSectionsStore(CharSectionsEntryfmt);
+CharSectionsMap sCharSectionMap;
+#endif
+
 typedef std::map<uint32, SimpleFactionsList> FactionTeamMap;
 static FactionTeamMap sFactionTeamMap;
 DBCStorage <FactionEntry> sFactionStore(FactionEntryfmt);
@@ -272,6 +280,18 @@ void LoadDBCStores(const std::string& dataPath)
             flist.push_back(i);
         }
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sEmotesTextSoundStore, dbcPath, "EmotesTextSound.dbc");
+    for (uint32 i = 0; i < sEmotesTextSoundStore.GetNumRows(); ++i)
+        if (EmotesTextSoundEntry const* entry = sEmotesTextSoundStore.LookupEntry(i))
+            sEmotesTextSoundMap[EmotesTextSoundKey(entry->EmotesTextId, entry->RaceId, entry->SexId)] = entry;
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCharSectionsStore, dbcPath, "CharSections.dbc");
+    for (uint32 i = 0; i < sCharSectionsStore.GetNumRows(); ++i)
+        if (CharSectionsEntry const* entry = sCharSectionsStore.LookupEntry(i))
+            if (entry->Race && ((1 << (entry->Race - 1)) & RACEMASK_ALL_PLAYABLE) != 0) //ignore Nonplayable races
+                sCharSectionMap.insert({ entry->GenType | (entry->Gender << 8) | (entry->Race << 16), entry });
+#endif
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sFactionTemplateStore,     dbcPath, "FactionTemplate.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sGameObjectDisplayInfoStore, dbcPath, "GameObjectDisplayInfo.dbc");
@@ -847,3 +867,22 @@ DBCStorage <FactionEntry>       const* GetFactionStore()        { return &sFacti
 DBCStorage <CreatureDisplayInfoEntry> const* GetCreatureDisplayStore() { return &sCreatureDisplayInfoStore; }
 DBCStorage <EmotesEntry>        const* GetEmotesStore()         { return &sEmotesStore;         }
 DBCStorage <EmotesTextEntry>    const* GetEmotesTextStore()     { return &sEmotesTextStore;     }
+
+#ifdef ENABLE_PLAYERBOTS
+EmotesTextSoundEntry const* FindTextSoundEmoteFor(uint32 emote, uint32 race, uint32 gender)
+{
+    auto itr = sEmotesTextSoundMap.find(EmotesTextSoundKey(emote, race, gender));
+    return itr != sEmotesTextSoundMap.end() ? itr->second : nullptr;
+}
+CharSectionsEntry const* GetCharSectionEntry(uint8 race, CharSectionType genType, uint8 gender, uint8 type, uint8 color)
+{
+    std::pair<CharSectionsMap::const_iterator, CharSectionsMap::const_iterator> eqr = sCharSectionMap.equal_range(uint32(genType) | uint32(gender << 8) | uint32(race << 16));
+    for (CharSectionsMap::const_iterator itr = eqr.first; itr != eqr.second; ++itr)
+    {
+        if (itr->second->Type == type && itr->second->Color == color)
+            return itr->second;
+    }
+
+    return NULL;
+}
+#endif

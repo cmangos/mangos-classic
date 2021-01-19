@@ -692,6 +692,11 @@ class WorldSession
 
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
+#ifdef ENABLE_PLAYERBOTS
+        // Playerbots
+        void HandleBotPackets();
+#endif
+
         std::deque<uint32> GetOpcodeHistory();
 
         Messager<WorldSession>& GetMessager() { return m_messager; }

@@ -214,6 +214,13 @@ class BattleGroundWS : public BattleGround
         // Flag handler
         ObjectGuid const& GetFlagCarrierGuid(uint8 teamIdx) const { return m_flagCarrier[teamIdx]; }
 
+#ifdef ENABLE_PLAYERBOTS
+        uint8 GetFlagState(Team team) { return m_flagState[GetTeamIndexByTeamId(team)]; }
+        ObjectGuid GetAllianceFlagCarrierGuid() const { return GetFlagCarrierGuid(TEAM_INDEX_ALLIANCE); }
+        ObjectGuid GetHordeFlagCarrierGuid() const { return GetFlagCarrierGuid(TEAM_INDEX_HORDE); }
+        ObjectGuid const& GetDroppedFlagGuid(Team team) const { return m_droppedFlagGuid[GetTeamIndexByTeamId(team)]; }
+#endif
+
     private:
 
         // Flag Carrier functions
@@ -223,11 +230,13 @@ class BattleGroundWS : public BattleGround
 
         // Flag interactions
         void ClearDroppedFlagGuid(Team team)  { m_droppedFlagGuid[GetTeamIndexByTeamId(team)].Clear();}
-        ObjectGuid const& GetDroppedFlagGuid(Team team) const { return m_droppedFlagGuid[GetTeamIndexByTeamId(team)];}
 
         void RespawnFlagAtBase(Team team, bool wasCaptured);
         void RespawnDroppedFlag(Team team);
+#ifndef ENABLE_PLAYERBOTS
+        ObjectGuid const& GetDroppedFlagGuid(Team team) const { return m_droppedFlagGuid[GetTeamIndexByTeamId(team)]; }
         uint8 GetFlagState(Team team) { return m_flagState[GetTeamIndexByTeamId(team)]; }
+#endif
 
         void ProcessFlagPickUpFromBase(Player* player, Team attackerTeam);
         void ProcessDroppedFlagActions(Player* player, GameObject* target);

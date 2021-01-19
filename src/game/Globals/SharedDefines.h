@@ -2441,4 +2441,7 @@ enum MovementEvent
     EVENT_JUMP   = 10001, // TODO: Implement knockback using this
 };
 
+#define MANGOSBOT_ZERO
+#define CMANGOS
+
 #endif

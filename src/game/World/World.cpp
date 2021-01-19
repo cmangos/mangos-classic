@@ -70,6 +70,12 @@
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #endif
 
+#ifdef ENABLE_PLAYERBOTS
+#include "AhBot.h"
+#include "PlayerbotAIConfig.h"
+#include "RandomPlayerbotMgr.h"
+#endif
+
 #include "Metric/Metric.h"
 
 #include <algorithm>
@@ -1336,6 +1342,12 @@ void World::SetInitialWorldSettings()
 #ifdef BUILD_PLAYERBOT
     PlayerbotMgr::SetInitialWorldSettings();
 #endif
+
+#ifdef ENABLE_PLAYERBOTS
+    sPlayerbotAIConfig.Initialize();
+    auctionbot.Init();
+#endif
+
     sLog.outString("---------------------------------------");
     sLog.outString("      CMANGOS: World initialized       ");
     sLog.outString("---------------------------------------");
@@ -1444,6 +1456,19 @@ void World::Update(uint32 diff)
         sAuctionHouseBot.Update();
         m_timers[WUPDATE_AHBOT].Reset();
     }
+#endif
+
+#ifdef ENABLE_PLAYERBOTS
+#ifndef BUILD_AHBOT
+    /// <li> Handle AHBot operations
+    if (m_timers[WUPDATE_AHBOT].Passed())
+    {
+        auctionbot.Update();
+        m_timers[WUPDATE_AHBOT].Reset();
+    }
+#endif
+    sRandomPlayerbotMgr.UpdateAI(diff);
+    sRandomPlayerbotMgr.UpdateSessions(diff);
 #endif
 
     /// <li> Handle session updates
@@ -1938,6 +1963,10 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
         m_ShutdownTimer = time;
         ShutdownMsg(true);
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    sRandomPlayerbotMgr.LogoutAllBots();
+#endif
 }
 
 /// Display a shutdown message to the user(s)
@@ -2087,6 +2116,7 @@ void World::UpdateResultQueue()
     CharacterDatabase.ProcessResultQueue();
     WorldDatabase.ProcessResultQueue();
     LoginDatabase.ProcessResultQueue();
+    PlayerbotDatabase.ProcessResultQueue();
 }
 
 void World::UpdateRealmCharCount(uint32 accountId)

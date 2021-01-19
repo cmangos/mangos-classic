@@ -264,6 +264,10 @@ class Group
         InstanceGroupBind* GetBoundInstance(uint32 mapid);
         BoundInstancesMap& GetBoundInstances() { return m_boundInstances; }
 
+#ifdef ENABLE_PLAYERBOTS
+        ObjectGuid GetTargetIcon(int index) { return m_targetIcons[index]; }
+#endif
+
     protected:
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant = false);
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant, uint8 group);
