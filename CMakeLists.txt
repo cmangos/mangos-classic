@@ -339,6 +339,21 @@ if(NOT BUILD_GAME_SERVER AND BUILD_PLAYERBOT)
   message(STATUS "BUILD_PLAYERBOT forced to OFF due to BUILD_GAME_SERVER is not set")
 endif()
 
+if(NOT BUILD_GAME_SERVER AND BUILD_IKE3_BOTS)
+  set(BUILD_IKE3_BOTS OFF)
+  message(STATUS "BUILD_PLAYERBOTS forced to OFF due to BUILD_GAME_SERVER is not set")
+endif()
+
+if(BUILD_IKE3_BOTS)
+  set(BUILD_PLAYERBOT OFF)
+  message(STATUS "CMaNGOS bots DISABLED because Ike3 bots enabled")
+endif()
+
+if(BUILD_PLAYERBOT)
+  set(BUILD_IKE3_BOTS OFF)
+  message(STATUS "Ike3 bots DISABLED because CMaNGOS bots enabled")
+endif()
+
 if(PCH)
   if(${CMAKE_VERSION} VERSION_LESS "3.16") 
     message("PCH is not supported by your CMake version")
