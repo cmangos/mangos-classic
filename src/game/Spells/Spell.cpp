@@ -1707,7 +1707,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                     m_caster->GetMap()->GetHeightInRange(nextPos.x, nextPos.y, nextPos.z, 10.0f);
                 }
 
-                if (abs(prevPos.z - nextPos.z) > 40.f) // dont move too high - magical constant - might need verification
+                if (fabs(prevPos.z - nextPos.z) > 40.f) // dont move too high - magical constant - might need verification
                 {
                     nextPos.x = prevPos.x;
                     nextPos.y = prevPos.y;
