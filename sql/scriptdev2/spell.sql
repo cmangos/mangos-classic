@@ -15,6 +15,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (1121,'spell_entangle_fankriss'),
 (3730,'spell_initialize_image'),
 (7054,'spell_forsaken_skill'),
+(12948,'spell_hakkar_summoned'),
 (13278,'spell_gdr_channel'),
 (13493,'spell_gdr_periodic'),
 (16380,'spell_greater_invisibility_mob'),

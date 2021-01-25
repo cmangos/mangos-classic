@@ -251,6 +251,28 @@ bool EffectDummyCreature_summon_hakkar(Unit* pCaster, uint32 uiSpellId, SpellEff
     return false;
 }
 
+struct HakkarSummoned : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                GameObjectList evilCirclesInRange;
+                GetGameObjectListWithEntryInGrid(evilCirclesInRange, caster, GO_EVIL_CIRCLE, 40.0f);
+                // Despawn all evil summoning circles now that Avatar of Hakkar is summmoned
+                for (auto evilCircle : evilCirclesInRange)
+                {
+                    evilCircle->SetForcedDespawn();
+                    evilCircle->SetLootState(GO_JUST_DEACTIVATED);
+                }
+            }
+            return;
+        }
+    }
+};
+
 void AddSC_sunken_temple()
 {
     Script* pNewScript = new Script;
@@ -282,4 +304,6 @@ void AddSC_sunken_temple()
     pNewScript->Name = "npc_shade_of_hakkar";
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_summon_hakkar;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<HakkarSummoned>("spell_hakkar_summoned");
 }

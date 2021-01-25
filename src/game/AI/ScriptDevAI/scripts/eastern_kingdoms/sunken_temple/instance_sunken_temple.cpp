@@ -60,7 +60,7 @@ void instance_sunken_temple::OnObjectCreate(GameObject* pGo)
             m_luiBigLightGUIDs.push_back(pGo->GetObjectGuid());
             return;
         case GO_EVIL_CIRCLE:
-            m_vuiCircleGUIDs.push_back(pGo->GetObjectGuid());
+            m_evilCircleGuidList.push_back(pGo->GetObjectGuid());
             return;
         case GO_ETERNAL_FLAME_1:
         case GO_ETERNAL_FLAME_2:
@@ -228,9 +228,9 @@ void instance_sunken_temple::SetData(uint32 uiType, uint32 uiData)
                     pShade->SetRespawnDelay(DAY);
                 }
 
-                // Respawn circles
-                for (GuidVector::const_iterator itr = m_vuiCircleGUIDs.begin(); itr != m_vuiCircleGUIDs.end(); ++itr)
-                    DoRespawnGameObject(*itr, 30 * MINUTE);
+                // Respawn evil circle visuals
+                for (auto evilCircleGuid : m_evilCircleGuidList)
+                    DoRespawnGameObject(evilCircleGuid, 30 * MINUTE);
             }
             else if (uiData == FAIL)
             {
@@ -243,6 +243,16 @@ void instance_sunken_temple::SetData(uint32 uiType, uint32 uiData)
 
                 // Reset flames
                 DoUpdateFlamesFlags(true);
+
+                // Despawn the evil circle visuals
+                for (auto evilCircleGuid : m_evilCircleGuidList)
+                {
+                    if (GameObject* evilCircle = instance->GetGameObject(evilCircleGuid))
+                    {
+                        evilCircle->SetForcedDespawn();
+                        evilCircle->SetLootState(GO_JUST_DEACTIVATED);
+                    }
+                }
             }
 
             // Use combat doors
@@ -369,20 +379,20 @@ void instance_sunken_temple::Update(uint32 uiDiff)
                 return;
 
             // If no summon circles are spawned then return
-            if (m_vuiCircleGUIDs.empty())
+            if (m_evilCircleGuidList.empty())
                 return;
 
             if (m_bIsFirstHakkarWave)                       // First wave summoned
             {
                 // Summon at all circles
-                for (GuidVector::const_iterator itr = m_vuiCircleGUIDs.begin(); itr != m_vuiCircleGUIDs.end(); ++itr)
+                for (GuidVector::const_iterator itr = m_evilCircleGuidList.begin(); itr != m_evilCircleGuidList.end(); ++itr)
                 {
                     if (GameObject* pCircle = instance->GetGameObject(*itr))
                         pShade->SummonCreature(NPC_HAKKARI_MINION, pCircle->GetPositionX(), pCircle->GetPositionY(), pCircle->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
 
                 // Summon Bloodkeeper at random circle
-                if (GameObject* pCircle = instance->GetGameObject(m_vuiCircleGUIDs[urand(0, m_vuiCircleGUIDs.size() - 1)]))
+                if (GameObject* pCircle = instance->GetGameObject(m_evilCircleGuidList[urand(0, m_evilCircleGuidList.size() - 1)]))
                     pShade->SummonCreature(NPC_BLOODKEEPER, pCircle->GetPositionX(), pCircle->GetPositionY(), pCircle->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                 m_bCanSummonBloodkeeper = false;
@@ -397,7 +407,7 @@ void instance_sunken_temple::Update(uint32 uiDiff)
                 if (m_bCanSummonBloodkeeper && roll_chance_i(30))
                 {
                     // Summon a Bloodkeeper
-                    if (GameObject* pCircle = instance->GetGameObject(m_vuiCircleGUIDs[urand(0, m_vuiCircleGUIDs.size() - 1)]))
+                    if (GameObject* pCircle = instance->GetGameObject(m_evilCircleGuidList[urand(0, m_evilCircleGuidList.size() - 1)]))
                         pShade->SummonCreature(NPC_BLOODKEEPER, pCircle->GetPositionX(), pCircle->GetPositionY(), pCircle->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                     m_bCanSummonBloodkeeper = false;
@@ -406,7 +416,7 @@ void instance_sunken_temple::Update(uint32 uiDiff)
 
                 for (uint8 i = 0; i < uiMaxSummons; ++i)
                 {
-                    if (GameObject* pCircle = instance->GetGameObject(m_vuiCircleGUIDs[urand(0, m_vuiCircleGUIDs.size() - 1)]))
+                    if (GameObject* pCircle = instance->GetGameObject(m_evilCircleGuidList[urand(0, m_evilCircleGuidList.size() - 1)]))
                         pShade->SummonCreature(NPC_HAKKARI_MINION, pCircle->GetPositionX(), pCircle->GetPositionY(), pCircle->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 m_uiAvatarSummonTimer = urand(3000, 15000);
