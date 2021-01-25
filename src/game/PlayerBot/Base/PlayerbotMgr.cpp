@@ -786,7 +786,7 @@ void PlayerbotMgr::OnBotLogin(Player* const bot)
     bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(pMSG_MOVE_FALL_LAND)));
 
     // give the bot some AI, object is owned by the player class
-    PlayerbotAI* ai = new PlayerbotAI(this, bot);
+    PlayerbotAI* ai = new PlayerbotAI(*this, bot, m_confDebugWhisper);
     bot->SetPlayerbotAI(ai);
 
     // tell the world session that they now manage this new bot

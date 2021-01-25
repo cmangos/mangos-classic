@@ -21,6 +21,7 @@
 
 NullCreatureAI::NullCreatureAI(Creature* creature) : CreatureAI(creature)
 {
+    m_creature->SetCanEnterCombat(false);
 }
 
 NullCreatureAI::~NullCreatureAI()

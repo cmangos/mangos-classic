@@ -28,7 +28,6 @@ EndScriptData
 
 instance_dire_maul::instance_dire_maul(Map* pMap) : ScriptedInstance(pMap),
     m_bWallDestroyed(false),
-    m_uiDreadsteedEventTimer(0),
     m_bDoNorthBeforeWest(false)
 {
     Initialize();
@@ -37,6 +36,27 @@ instance_dire_maul::instance_dire_maul(Map* pMap) : ScriptedInstance(pMap),
 void instance_dire_maul::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+}
+
+void instance_dire_maul::Update(uint32 uiDiff)
+{
+    if (GetData(TYPE_DREADSTEED) == IN_PROGRESS)
+    {
+        // While J'eevee is spawned, failure condition is simply no players found
+        if (Creature* imp = instance->GetCreature(m_npcEntryGuidStore[NPC_JEEVEE]))
+        {
+            if (instance->GetPlayersCountExceptGMs() == 0)
+                SetData(TYPE_DREADSTEED, FAIL);
+        }
+        else
+        {
+            GameObject* bell = instance->GetGameObject(m_goEntryGuidStore[GO_BELL_OF_DETHMOORA]);
+            GameObject* wheel = instance->GetGameObject(m_goEntryGuidStore[GO_WHEEL_OF_BLACK_MARCH]);
+            GameObject* candle = instance->GetGameObject(m_goEntryGuidStore[GO_DOOMSDAY_CANDLE]);
+            if (bell && bell->GetGoState() != GO_STATE_ACTIVE && wheel && wheel->GetGoState() != GO_STATE_ACTIVE && candle && candle->GetGoState() != GO_STATE_ACTIVE)
+                SetData(TYPE_DREADSTEED, FAIL);
+        }
+    }
 }
 
 void instance_dire_maul::OnPlayerEnter(Player* pPlayer)
@@ -77,6 +97,7 @@ void instance_dire_maul::OnCreatureCreate(Creature* pCreature)
             return;
         case NPC_IMMOLTHAR:
         case NPC_WARLOCK_DUMMY_INFERNAL:
+        case NPC_JEEVEE:
             break;
         case NPC_HIGHBORNE_SUMMONER:
             m_luiHighborneSummonerGUIDs.push_back(pCreature->GetObjectGuid());
@@ -160,8 +181,17 @@ void instance_dire_maul::OnObjectCreate(GameObject* pGo)
             // exclude the central portal
             if (pGo->GetPositionZ() > -29.0f)
                 m_lDreadsteedPortalsGUIDs.push_back(pGo->GetObjectGuid());
-            return;
+            return; 
+        case GO_BELL_OF_DETHMOORA:
+        case GO_WHEEL_OF_BLACK_MARCH:
+        case GO_DOOMSDAY_CANDLE:
         case GO_WARLOCK_RITUAL_CIRCLE:
+        case GO_RITUAL_CANDLE_AURA:
+            break;
+        case GO_MOUNT_QUEST_SYMBOL1:
+        case GO_MOUNT_QUEST_SYMBOL2:
+        case GO_MOUNT_QUEST_SYMBOL3:
+            m_lRitualSymbolGUIDs.push_back(pGo->GetObjectGuid());
             break;
 
         // North
@@ -242,32 +272,6 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
         case TYPE_PRINCE:
             m_auiEncounter[uiType] = uiData;
             break;
-        case TYPE_DREADSTEED:
-            // start timer
-            if (uiData == IN_PROGRESS)
-                m_uiDreadsteedEventTimer = 390000;
-            else if (uiData == SPECIAL)
-            {
-                // set animation for next stage
-                if (GameObject* pCircle = GetSingleGameObjectFromStorage(GO_WARLOCK_RITUAL_CIRCLE))
-                    pCircle->SetGoState(GO_STATE_ACTIVE);
-
-                // despawn the controller; Inform the attackers to teleport
-                if (Creature* pDummy = GetSingleCreatureFromStorage(NPC_WARLOCK_DUMMY_INFERNAL))
-                {
-                    pDummy->AI()->SendAIEventAround(AI_EVENT_CUSTOM_EVENTAI_A, pDummy, 4000, 100.0f);
-                    pDummy->ForcedDespawn(5000);
-                }
-
-                // despawn side portals
-                for (GuidList::const_iterator itr = m_lDreadsteedPortalsGUIDs.begin(); itr != m_lDreadsteedPortalsGUIDs.end(); ++itr)
-                {
-                    if (GameObject* pGo = instance->GetGameObject(*itr))
-                        pGo->SetLootState(GO_JUST_DEACTIVATED);
-                }
-            }
-            m_auiEncounter[uiType] = uiData;
-            break;
         case TYPE_PYLON_1:
         case TYPE_PYLON_2:
         case TYPE_PYLON_3:
@@ -281,7 +285,33 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                     ProcessForceFieldOpening();
             }
             break;
+        case TYPE_DREADSTEED:
+            m_auiEncounter[uiType] = uiData;
+            if (uiData == FAIL)
+            {
+                if (Creature* pRitual = GetSingleCreatureFromStorage(NPC_WARLOCK_DUMMY_INFERNAL))
+                    pRitual->ForcedDespawn();
 
+                for (auto portal : m_lDreadsteedPortalsGUIDs)
+                    instance->GetGameObject(portal)->SetLootState(GO_JUST_DEACTIVATED);
+
+                for (auto symbol : m_lRitualSymbolGUIDs)
+                    instance->GetGameObject(symbol)->SetLootState(GO_JUST_DEACTIVATED);
+
+                std::vector<uint32> ids = { GO_BELL_OF_DETHMOORA , GO_DOOMSDAY_CANDLE , GO_WHEEL_OF_BLACK_MARCH };
+                for (uint32 id : ids)
+                {
+                    if (GameObject* pGo = GetSingleGameObjectFromStorage(id))
+                    {
+                        pGo->SetLootState(GO_JUST_DEACTIVATED);
+                        pGo->SetRespawnDelay(1);
+                    }
+                }
+
+                if (GameObject *pGo = GetSingleGameObjectFromStorage(GO_WARLOCK_RITUAL_CIRCLE))
+                    pGo->SetLootState(GO_JUST_DEACTIVATED);
+            }
+            break;
         // North
         case TYPE_KING_GORDOK:
             m_auiEncounter[uiType] = uiData;
@@ -401,6 +431,9 @@ void instance_dire_maul::OnCreatureDeath(Creature* pCreature)
         case NPC_IMMOLTHAR:
             SetData(TYPE_IMMOLTHAR, DONE);
             break;
+        case NPC_LORD_HELNURATH:
+            SetData(TYPE_DREADSTEED, DONE);
+            break;
 
         // North
         // - Handling of Ogre Boss (Assume boss can be handled in Acid)
@@ -482,6 +515,11 @@ bool instance_dire_maul::CheckConditionCriteriaMeet(Player const* pPlayer, uint3
     script_error_log("instance_dire_maul::CheckConditionCriteriaMeet called with unsupported Id %u. Called with param plr %s, src %s, condition source type %u",
                      uiInstanceConditionId, pPlayer ? pPlayer->GetGuidStr().c_str() : "nullptr", pConditionSource ? pConditionSource->GetGuidStr().c_str() : "nullptr", conditionSourceType);
     return false;
+}
+
+GuidVector instance_dire_maul::GetRitualSymbolGuids()
+{
+    return m_lRitualSymbolGUIDs;
 }
 
 bool instance_dire_maul::CheckAllGeneratorsDestroyed()
@@ -571,19 +609,16 @@ void instance_dire_maul::PylonGuardJustDied(Creature* pCreature)
     }
 }
 
-void instance_dire_maul::Update(uint32 uiDiff)
+void instance_dire_maul::ProcessDreadsteedRitualStart()
 {
-    if (m_uiDreadsteedEventTimer)
+    if (GameObject* go = GetSingleGameObjectFromStorage(GO_WARLOCK_RITUAL_CIRCLE))
     {
-        if (m_uiDreadsteedEventTimer <= uiDiff)
-        {
-            // set encounter to special to allow the next event to proceed
-            SetData(TYPE_DREADSTEED, SPECIAL);
-            m_uiDreadsteedEventTimer = 0;
-        }
-        else
-            m_uiDreadsteedEventTimer -= uiDiff;
+        go->SetRespawnTime(900);
+        go->Refresh();
     }
+    for (auto portal : m_lDreadsteedPortalsGUIDs)
+        if (GameObject* go = instance->GetGameObject(portal))
+            DoRespawnGameObject(portal, 360);
 }
 
 InstanceData* GetInstanceData_instance_dire_maul(Map* pMap)

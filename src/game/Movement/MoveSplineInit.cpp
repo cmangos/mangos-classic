@@ -20,14 +20,23 @@
 #include "MoveSpline.h"
 #include "packet_builder.h"
 #include "Entities/Unit.h"
+#include "Entities/Transports.h"
 
 namespace Movement
 {
+    static thread_local uint32 splineCounter = 1;
+
     int32 MoveSplineInit::Launch()
     {
         MoveSpline& move_spline = *unit.movespline;
+        GenericTransport* transport = unit.GetTransport();
 
-        Vector3 real_position(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ());
+        Location real_position(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetOrientation());
+
+        // If boarded use current local position
+        if (transport)
+            transport->CalculatePassengerOffset(real_position.x, real_position.y, real_position.z, &real_position.orientation);
+
         // there is a big chane that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
         if (!move_spline.Finalized())
@@ -41,6 +50,7 @@ namespace Movement
 
         // corrent first vertex
         args.path[0] = real_position;
+        args.flags.enter_cycle = args.flags.cyclic;
         uint32 moveFlags = unit.m_movementInfo.GetMovementFlags();
         if (args.flags.runmode)
             moveFlags &= ~MOVEFLAG_WALK_MODE;
@@ -55,11 +65,20 @@ namespace Movement
         if (!args.Validate(&unit))
             return 0;
 
+        args.splineId = splineCounter++;
+
         unit.m_movementInfo.SetMovementFlags(MovementFlags(moveFlags));
         move_spline.Initialize(args);
 
         WorldPacket data(SMSG_MONSTER_MOVE, 64);
         data << unit.GetPackGUID();
+
+        if (transport)
+        {
+            data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
+            data << transport->GetPackGUID();
+        }
+
         PacketBuilder::WriteMonsterMove(move_spline, data);
         unit.SendMessageToSet(data, true);
 
@@ -74,14 +93,13 @@ namespace Movement
         if (!forceSend && move_spline.Finalized())
             return;
 
-        // ToDo: update transport info if required
-        // TransportInfo* transportInfo = unit.GetTransportInfo();
+        GenericTransport* transport = unit.GetTransport();
 
         Location real_position(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetOrientation());
 
         // If boarded use current local position
-        // if (transportInfo)
-        //    transportInfo->GetLocalPosition(real_position.x, real_position.y, real_position.z, real_position.orientation);
+        if (transport)
+            transport->CalculatePassengerOffset(real_position.x, real_position.y, real_position.z, &real_position.orientation);
 
         // there is a big chane that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
@@ -104,12 +122,11 @@ namespace Movement
         WorldPacket data(SMSG_MONSTER_MOVE, 64);
         data << unit.GetPackGUID();
 
-        // ToDo: update transport info if required
-        /*if (transportInfo)
+        if (transport)
         {
             data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
-            data << transportInfo->GetTransportGuid().WriteAsPacked();
-        }*/
+            data << transport->GetPackGUID();
+        }
 
         data << real_position.x << real_position.y << real_position.z;
         data << move_spline.GetId();

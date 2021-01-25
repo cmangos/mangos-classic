@@ -213,12 +213,19 @@ namespace VMAP
     float StaticMapTree::getHeight(const Vector3& pPos, float maxSearchDist) const
     {
         float height = G3D::inf();
-        Vector3 dir = Vector3(0, 0, -1);
-        G3D::Ray ray(pPos, dir);   // direction with length of 1
-        float maxDist = maxSearchDist;
+        Vector3 dir;
+        if (maxSearchDist >= 0.f)
+            dir = Vector3(0, 0, -1);
+        else
+            dir = Vector3(0, 0, 1);
+        G3D::Ray ray(pPos, dir); // direction with length of 1
+        float maxDist = std::abs(maxSearchDist);
         if (getIntersectionTime(ray, maxDist))
         {
-            height = pPos.z - maxDist;
+            if (maxSearchDist >= 0.f)
+                height = pPos.z - maxDist;
+            else
+                height = pPos.z + maxDist;
         }
         return height;
     }

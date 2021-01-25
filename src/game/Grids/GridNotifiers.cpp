@@ -41,14 +41,15 @@ void VisibleNotifier::Notify()
     Player& player = *i_camera.GetOwner();
     // at this moment i_clientGUIDs have guids that not iterate at grid level checks
     // but exist one case when this possible and object not out of range: transports
-    if (Transport* transport = player.GetTransport())
+    if (GenericTransport* transport = player.GetTransport())
     {
         for (auto itr : transport->GetPassengers())
         {
             if (i_clientGUIDs.find(itr->GetObjectGuid()) != i_clientGUIDs.end())
             {
                 // ignore far sight case
-                itr->UpdateVisibilityOf(itr, &player);
+                if (itr->IsPlayer())
+                    static_cast<Player*>(itr)->UpdateVisibilityOf(static_cast<Player*>(itr), &player);
                 player.UpdateVisibilityOf(&player, itr, i_data, i_visibleNow);
                 i_clientGUIDs.erase(itr->GetObjectGuid());
             }
@@ -73,6 +74,9 @@ void VisibleNotifier::Notify()
     i_data.AddOutOfRangeGUID(i_clientGUIDs);
     for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end(); ++itr)
     {
+        if (WorldObject* target = player.GetMap()->GetWorldObject(*itr))
+            if (target->GetTypeId() == TYPEID_UNIT)
+                player.BeforeVisibilityDestroy(static_cast<Creature*>(target));
         player.m_clientGUIDs.erase(*itr);
 
         DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is out of range (no in active cells set) now for %s",

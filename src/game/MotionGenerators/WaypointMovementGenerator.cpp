@@ -27,6 +27,7 @@
 #include "Movement/MoveSplineInit.h"
 #include "Movement/MoveSpline.h"
 #include "Maps/GridDefines.h"
+#include "Entities/Transports.h"
 
 #include <cassert>
 
@@ -39,11 +40,11 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature, int32 pat
         overwriteEntry = creature.GetEntry();
 
     if (wpOrigin == PATH_NO_PATH && pathId == 0)
-        i_path = sWaypointMgr.GetDefaultPath(overwriteEntry, creature.GetGUIDLow(), &m_PathOrigin);
+        i_path = sWaypointMgr.GetDefaultPath(overwriteEntry, creature.GetDbGuid(), &m_PathOrigin);
     else
     {
         m_PathOrigin = wpOrigin == PATH_NO_PATH ? PATH_FROM_ENTRY : wpOrigin;
-        i_path = sWaypointMgr.GetPathFromOrigin(overwriteEntry, creature.GetGUIDLow(), pathId, m_PathOrigin);
+        i_path = sWaypointMgr.GetPathFromOrigin(overwriteEntry, creature.GetDbGuid(), pathId, m_PathOrigin);
     }
     m_pathId = pathId;
 
@@ -126,7 +127,7 @@ void WaypointMovementGenerator<Creature>::InitializeWaypointPath(Creature& u, in
 
     // Start moving if possible
     SendNextWayPointPath(u);
-    u.GetPosition(m_resetPoint);
+    m_resetPoint = u.GetPosition(u.GetTransport());
 }
 
 void WaypointMovementGenerator<Creature>::Finalize(Creature& creature)
@@ -138,10 +139,10 @@ void WaypointMovementGenerator<Creature>::Finalize(Creature& creature)
 void WaypointMovementGenerator<Creature>::Interrupt(Creature& creature)
 {
     // be sure we are not already interrupted before saving current pos
-    if (creature.hasUnitState(UNIT_STAT_ROAMING))
+    if (creature.hasUnitState(UNIT_STAT_ROAMING_MOVE))
     {
         // save the current position in case of reset
-        creature.GetPosition(m_resetPoint);
+        m_resetPoint = creature.GetPosition(creature.GetTransport());
     }
 
     creature.InterruptMoving();
@@ -152,7 +153,7 @@ void WaypointMovementGenerator<Creature>::Interrupt(Creature& creature)
 void WaypointMovementGenerator<Creature>::Reset(Creature& creature)
 {
     creature.addUnitState(UNIT_STAT_ROAMING);
-    if (!i_path)
+    if (!i_path || Stopped(creature))
         return;
     SendNextWayPointPath(creature);
 }
@@ -183,7 +184,7 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     }
 
     // save position and orientation in case of GetResetPosition() call
-    creature.GetPosition(m_resetPoint);
+    m_resetPoint = creature.GetPosition(creature.GetTransport());
 
     // AI can modify node delay so we have to compute it
     int32 newWaitTime = node.delay + m_scriptTime;
@@ -226,147 +227,34 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     m_scriptTime = 0;
 }
 
-// a way to build path from two near points in LOS without using mmap, this may need to be moved in map
-// start position should be the last element of path container
-// return added travel time
-uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Creature& creature, Vector3 const& endPos) const
+// return added travel time - TODO: implement caching of path
+uint32 WaypointMovementGenerator<Creature>::BuildIntPath(PointsArray& path, Creature& creature, Vector3 const& endPos)
 {
-    static const float  MinimumDistance = 4;                // minimum distance to work with in yard (shortcut if under this)
-    static const float  TerrainStep     = 2.5;              // min step between each int point in yard
-    static const float  MaxZVariation   = 0.5f;             // over this value an intermediate point is generated to make unit stick the ground
-    static const uint32 MaxSkippedPoint = 5;                // max intermediate points can be skipped (its better to send a bit more than needed in some cases
-
     Vector3 startPos = path.back();
     uint32 travelTime = 0;
-
     auto speedType = MovementInfo::GetSpeedType(creature.m_movementInfo.GetMovementFlags());
     float creatureSpeed = creature.GetSpeed(speedType);
 
-    bool onTheGround = !creature.IsFlying() && !creature.IsSwimming();
-    // cache offset for direction
-    const Vector3 offset = endPos - startPos;
-    const float distance = offset.magnitude();
-    if (distance >= MinimumDistance)
+    PathFinder pathfinder(&creature);
+    pathfinder.calculate(startPos, endPos, true);
+    auto genPath = pathfinder.getPath();
+
+    Vector3 firstPoint = startPos;
+    bool first = true;
+    for (auto& point : genPath)
     {
-        // compute direction to end position
-        Vector3 direction = offset * (1.f / distance);
-        direction *= TerrainStep;                           // add wanted step size
-
-        // total points that will be processed (only intermediates points and stop 2 yard before the end)
-        uint32 totalPoints = uint32((distance - 2) / TerrainStep);
-
-        Vector3 currPos = startPos;                         // computed position (start position + step in desired direction)
-        Vector3 lastPos = startPos;                         // previous position in the loop
-        uint32 pointsCount = 1;                             // point counter
-        uint32 skippedPoints = 0;                           // skipped points used to force adding some intermediate points each interval
-        float lastZDiff = INVALID_HEIGHT;                   // previous z difference
-        bool needToUpdateDirection = false;                 // true when z changed for swim/flying creature (if z go up we have to change direction or we will miss the end pos)
-        float generatePoint = false;                        // true when we have to add a point in the path
-        float colHeight = creature.GetCollisionHeight();    // needed to handle shallow water
-        float currGroundZ = 0;                              // computed ground for current position
-        Map* map = creature.GetMap();
-        while (true)
+        if (first) // first point is already in path
         {
-            currPos += direction;                           // move by step toward the end position
-            currGroundZ = map->GetHeight(currPos.x, currPos.y, currPos.z + 1.0f) + 0.2f;
-
-            if (onTheGround)
-            {
-                // fix z to follow the terrain
-                if (currPos.z < currGroundZ)
-                    currPos.z = currGroundZ;
-                else if (std::abs(currPos.z - currGroundZ) > 0.5f)
-                    currPos.z = currGroundZ;
-            }
-            else
-            {
-                float rawZ = currPos.z;
-                if (currPos.z < currGroundZ)                // check if we are under ground
-                    rawZ = currGroundZ;
-                else
-                {
-                    // we need liquid data to be able to clamp position between ground and liquid level
-                    if (creature.IsSwimming())
-                    {
-                        GridMapLiquidData liquidData;
-                        GridMapLiquidStatus liqStatus = map->GetTerrain()->getLiquidStatus(currPos.x, currPos.y, rawZ + 1.0f, MAP_ALL_LIQUIDS, &liquidData);
-
-                        if (liqStatus != LIQUID_MAP_NO_WATER)
-                        {
-                            if (liquidData.level - currGroundZ > colHeight)  // check if its shallow water
-                            {
-                                float maxZ = liquidData.level - colHeight;
-                                if (rawZ > maxZ)
-                                    rawZ = maxZ;
-                            }
-                        }
-                    }
-
-                    // TODO:: Maybe also limit flying creature to liquid level?
-                }
-
-                // we have to update direction to keep focus on end position if z is changed
-                if (rawZ != currPos.z)
-                {
-                    needToUpdateDirection = true;
-                    currPos.z = rawZ;
-                }
-
-                // we don't need to force generate point in swim/fly cases
-                skippedPoints = 0;
-            }
-
-            float currZDiff = std::abs(currPos.z - lastPos.z);
-            if (lastZDiff == INVALID_HEIGHT)
-            {
-                // first iteration check if z difference is big enough to generate a point
-                if (currZDiff > MaxZVariation)
-                    generatePoint = true;
-                else
-                    lastZDiff = currZDiff;                  // set lastZDiff here for first iteration
-            }
-            else
-            {
-                float currZVariation = std::abs(lastZDiff - currZDiff);
-
-                // if z variation is bigger than wanted maximum generate the point
-                if (currZVariation > MaxZVariation)
-                    generatePoint = true;
-            }
-
-            // check if we skipped already max skipped point
-            if (!generatePoint && skippedPoints >= MaxSkippedPoint)
-            {
-                generatePoint = true;
-                skippedPoints = 0;
-            }
-
-            if (generatePoint)
-            {
-                path.push_back(currPos);                    // push current position
-                lastZDiff = currZDiff;
-                skippedPoints = 0;
-
-                if (needToUpdateDirection)                  // only case is swimming and flying too near of ground
-                {
-                    direction = (endPos - currPos).unit();
-                    direction *= TerrainStep;
-                    needToUpdateDirection = false;
-                }
-                generatePoint = false;
-            }
-            else
-                ++skippedPoints;
-
-            lastPos = currPos;
-            ++pointsCount;
-            if (pointsCount > totalPoints)
-                break;
+            first = false;
+            continue;
         }
+        const Vector3 offset = point - firstPoint;
+        const float distance = offset.magnitude();
+        travelTime += distance / creatureSpeed * 1000;
+        path.push_back(point);
     }
-
-    path.push_back(endPos);
-    // add last point to end point travel time
+    const Vector3 offset = endPos - firstPoint;
+    const float distance = offset.magnitude();
     travelTime = distance / creatureSpeed * 1000;
 
     return travelTime;
@@ -419,7 +307,11 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
 
     Vector3 startPos(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ());
     if (!creature.movespline->Finalized())
+    {
+        if (GenericTransport* transport = creature.GetTransport())
+            transport->CalculatePassengerPosition(startPos.x, startPos.y, startPos.z, nullptr);
         startPos = creature.movespline->ComputePosition();
+    }
 
     genPath.push_back(startPos);
 
@@ -458,24 +350,19 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
         for (uint32 ptIdx = 0; ptIdx < genPath.size(); ++ptIdx)
         {
             auto pt = genPath[ptIdx];
-            TemporarySpawnWaypoint* wpCreature = new TemporarySpawnWaypoint(creature.GetObjectGuid(), i_currentNode, m_pathId, (uint32)m_PathOrigin);
+            TempSpawnSettings settings;
+            settings.spawner = &creature;
+            settings.entry = VISUAL_WAYPOINT;
+            settings.x = pt.x; settings.y = pt.y; settings.z = pt.z; settings.ori = 0.0f;
+            settings.activeObject = true;
+            settings.despawnTime = 10 * IN_MILLISECONDS;
 
-            CreatureCreatePos pos(creature.GetMap(), pt.x, pt.y, pt.z, 0.0f);
-            CreatureInfo const* waypointInfo = ObjectMgr::GetCreatureTemplate(VISUAL_WAYPOINT);
-            if (!wpCreature->Create(creature.GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
-            {
-                delete wpCreature;
-                continue;
-            }
+            settings.tempSpawnMovegen = true;
+            settings.waypointId = i_currentNode;
+            settings.spawnPathId = m_pathId;
+            settings.pathOrigin = uint32(m_PathOrigin);
 
-            wpCreature->SetVisibility(VISIBILITY_OFF);
-            wpCreature->SetObjectScale(0.2f);
-            wpCreature->SetRespawnCoord(pos);
-            wpCreature->SetLevel(ptIdx);
-            wpCreature->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
-            wpCreature->SetActiveObjectState(true);
-
-            wpCreature->Summon(TEMPSPAWN_TIMED_DESPAWN, 10 * IN_MILLISECONDS); // Also initializes the AI and MMGen
+            WorldObject::SummonCreature(settings, creature.GetMap());
         }
     }
 
@@ -483,7 +370,7 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
     init.MovebyPath(genPath);
     if (nextNode->orientation != 100 && nextNode->delay != 0)
         init.SetFacing(nextNode->orientation);
-    creature.SetWalk(!creature.hasUnitState(UNIT_STAT_RUNNING_STATE) && !creature.IsLevitating(), false);
+    init.SetWalk(!creature.hasUnitState(UNIT_STAT_RUNNING));
 
     // send path to client
     m_pathDuration = init.Launch();
@@ -595,10 +482,10 @@ bool WaypointMovementGenerator<Creature>::CanMove(int32 diff, Creature& u)
 
 bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, float& y, float& z, float& o) const
 {
-    x = m_resetPoint.coord_x;
-    y = m_resetPoint.coord_y;
-    z = m_resetPoint.coord_z;
-    o = m_resetPoint.orientation;
+    x = m_resetPoint.x;
+    y = m_resetPoint.y;
+    z = m_resetPoint.z;
+    o = m_resetPoint.o;
 
     return true;
     // prevent a crash at empty waypoint path.

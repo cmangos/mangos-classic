@@ -618,7 +618,11 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 break;
             }
             case SCRIPT_COMMAND_MODIFY_NPC_FLAGS:           // 29
+            {
+                if (tmp.npcFlag.change_flag > 2)
+                    sLog.outErrorDb("Table `%s` has invalid change flag (datalong2 = %u) in SCRIPT_COMMAND_MODIFY_NPC_FLAGS for script id %u", tablename, tmp.npcFlag.change_flag, tmp.id);
                 break;
+            }
             case SCRIPT_COMMAND_SEND_TAXI_PATH:             // 30
             {
                 if (!sTaxiPathStore.LookupEntry(tmp.sendTaxiPath.taxiPathId))
@@ -710,7 +714,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
-            case SCRIPT_COMMAND_SET_FLY:                    // 39
+            case SCRIPT_COMMAND_SET_HOVER:                    // 39
             case SCRIPT_COMMAND_DESPAWN_GO:                 // 40
             case SCRIPT_COMMAND_RESPAWN:                    // 41
                 break;
@@ -779,6 +783,12 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                     sLog.outErrorDb("Table `%s` uses invalid current spell type %u (must be smaller or equal to %u) for script id %u.", tablename, tmp.interruptSpell.currentSpellType, CURRENT_MAX_SPELL - 1, tmp.id);
                     continue;
                 }
+                break;
+            }
+            case SCRIPT_COMMAND_MODIFY_UNIT_FLAGS:          // 48
+            {
+                if (tmp.unitFlag.change_flag > 2)
+                    sLog.outErrorDb("Table `%s` has invalid change flag (datalong2 = %u) in SCRIPT_COMMAND_MODIFY_UNIT_FLAGS for script id %u", tablename, tmp.unitFlag.change_flag, tmp.id);
                 break;
             }
             default:
@@ -999,7 +1009,13 @@ void ScriptMgr::LoadDbScriptRandomTemplates()
             int32 targetId = fields[2].GetInt32();
             uint32 chance = fields[3].GetUInt32();
             if (type < MAX_TYPE)
-                m_scriptTemplates[type][id].push_back({ targetId, chance });
+            {
+                m_scriptTemplates[type][id].emplace_back(targetId, chance);
+                if (chance)
+                    m_scriptTemplatesExplicitlyChanced[type][id].emplace_back(targetId, chance);
+                else
+                    m_scriptTemplatesEquallyChanced[type][id].emplace_back(targetId, chance);
+            }
             else
                 sLog.outErrorDb("Table `dbscript_random_templates` entry (%u) uses invalid type (%u). Won't be used.", id, type);
         }
@@ -1114,28 +1130,33 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
 {
     WorldObject* pBuddy = nullptr;
 
-    if (m_script->buddyEntry || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_POOL) != 0)
+    if (m_script->buddyEntry || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_POOL) != 0 || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) != 0)
     {
         if (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID)
         {
             if (m_script->IsCreatureBuddy())
             {
-                CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(m_script->buddyEntry);
-                pBuddy = m_map->GetCreature(cinfo->GetObjectGuid(m_script->searchRadiusOrGuid));
+                CreatureData const* cData = sObjectMgr.GetCreatureData(m_script->searchRadiusOrGuid);
+                pBuddy = m_map->GetCreature(cData->GetObjectGuid(m_script->searchRadiusOrGuid));
 
-                if (pBuddy && ((Creature*) pBuddy)->IsAlive() == m_script->IsDeadOrDespawnedBuddy())
+                if (pBuddy && ((Creature*)pBuddy)->IsAlive() == m_script->IsDeadOrDespawnedBuddy())
                 {
-                    sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u by guid %u but buddy is dead, skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry, m_script->searchRadiusOrGuid);
-                    return false;
+                    if (m_script->command != SCRIPT_COMMAND_TERMINATE_SCRIPT)
+                    {
+                        sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u by guid %u but buddy is dead, skipping.", m_table, m_script->id, m_script->command, pBuddy->GetEntry(), m_script->searchRadiusOrGuid);
+                        return false;
+                    }
+                    else
+                        pBuddy = nullptr;
                 }
             }
             else
             {
-                // GameObjectInfo const* ginfo = ObjectMgr::GetGameObjectInfo(m_script->buddyEntry);
-                pBuddy = m_map->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, m_script->buddyEntry, m_script->searchRadiusOrGuid));
+                GameObjectData const* oData = sObjectMgr.GetGOData(m_script->searchRadiusOrGuid);
+                pBuddy = m_map->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, oData->id, m_script->searchRadiusOrGuid));
             }
             // TODO Maybe load related grid if not already done? How to handle multi-map case?
-            if (!pBuddy)
+            if (!pBuddy && m_script->command != SCRIPT_COMMAND_TERMINATE_SCRIPT)
             {
                 sLog.outDetail(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy by guid %u not loaded in map %u (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->searchRadiusOrGuid, m_map->GetId(), m_script->data_flags);
                 return false;
@@ -1238,7 +1259,7 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
                 pBuddy = pGOBuddy;
             }
 
-            if (!pBuddy)
+            if (!pBuddy && m_script->command != SCRIPT_COMMAND_TERMINATE_SCRIPT)
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u not found in range %u of searcher %s (data-flags %u), skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry, m_script->searchRadiusOrGuid, pSearcher->GetGuidStr().c_str(), m_script->data_flags);
                 return false;
@@ -1618,7 +1639,10 @@ bool ScriptAction::HandleScriptStep()
             uint32 factionId = m_script->textId[1];
             uint32 modelId = m_script->textId[2];
 
-            Creature* pCreature = pSource->SummonCreature(m_script->summonCreature.creatureEntry, x, y, z, o, m_script->summonCreature.despawnDelay ? TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN : TEMPSPAWN_DEAD_DESPAWN, m_script->summonCreature.despawnDelay, (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) ? true : false, run, m_script->summonCreature.pathId, factionId, modelId);
+            TempSpawnSettings settings(pSource, m_script->summonCreature.creatureEntry, x, y, z, o, m_script->summonCreature.despawnDelay ? TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN : TEMPSPAWN_DEAD_DESPAWN, m_script->summonCreature.despawnDelay, (m_script->data_flags& SCRIPT_FLAG_COMMAND_ADDITIONAL) != 0, run, m_script->summonCreature.pathId, factionId, modelId);
+            settings.spawnDataEntry = m_script->textId[3];
+
+            Creature* pCreature = WorldObject::SummonCreature(settings, pSource->GetMap());
             if (!pCreature)
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed for creature (entry: %u).", m_table, m_script->id, m_script->command, m_script->summonCreature.creatureEntry);
@@ -1680,7 +1704,12 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotGameObject(pTarget))
                 break;
 
-            ((GameObject*)pTarget)->Use((Unit*)pSource);
+            GameObject* go = static_cast<GameObject*>(pTarget);
+
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+                go->SendGameObjectCustomAnim(go->GetObjectGuid(), m_script->activateObject.animId);
+            else
+                go->Use((Unit*)pSource);
             break;
         }
         case SCRIPT_COMMAND_REMOVE_AURA:                    // 14
@@ -1688,7 +1717,16 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotUnit(pSource))
                 break;
 
-            ((Unit*)pSource)->RemoveAurasDueToSpell(m_script->removeAura.spellId);
+            // Flag Command Additional removes aura by caster
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+            {
+                if (LogIfNotUnit(pTarget))
+                    break;
+
+                ((Unit*)pSource)->RemoveAurasByCasterSpell(m_script->removeAura.spellId, pTarget->GetObjectGuid());
+            }
+            else
+                ((Unit*)pSource)->RemoveAurasDueToSpell(m_script->removeAura.spellId);
             break;
         }
         case SCRIPT_COMMAND_CAST_SPELL:                     // 15
@@ -1968,20 +2006,22 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotCreature(pSource))
                 break;
 
-            // Add Flags
-            if (m_script->npcFlag.change_flag & 0x01)
-                pSource->SetFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
             // Remove Flags
-            else if (m_script->npcFlag.change_flag & 0x02)
+            if (m_script->npcFlag.change_flag == 0)
                 pSource->RemoveFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
+            // Add Flags
+            else if (m_script->npcFlag.change_flag == 1)
+                pSource->SetFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
             // Toggle Flags
-            else
+            else if (m_script->npcFlag.change_flag == 2)
             {
                 if (pSource->HasFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag))
                     pSource->RemoveFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
                 else
                     pSource->SetFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
             }
+            else
+                sLog.outErrorDb(" DB-SCRIPTS: Unexpected value %u used for script id %u, command %u.", m_script->npcFlag.flag, m_script->id, m_script->command);
 
             break;
         }
@@ -1997,8 +2037,14 @@ bool ScriptAction::HandleScriptStep()
         }
         case SCRIPT_COMMAND_TERMINATE_SCRIPT:               // 31
         {
+            if (!pSource && (!pTarget && (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) == 0))
+            {
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u call for nullptr, skipping.", m_table, m_script->id, m_script->command);
+                return true;
+            }
+
             bool result = false;
-            if (m_script->terminateScript.npcEntry || m_script->terminateScript.poolId)
+            if (m_script->terminateScript.npcEntry || m_script->terminateScript.poolId || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID))
             {
                 Creature* pCreatureBuddy = nullptr;
                 WorldObject* pSearcher = pSource ? pSource : pTarget;
@@ -2011,7 +2057,12 @@ bool ScriptAction::HandleScriptStep()
                 if (pSearcher->GetTypeId() == TYPEID_PLAYER && pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
                     pSearcher = pTarget;
 
-                if (m_script->terminateScript.npcEntry)
+                if (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID)
+                {
+                    if (pTarget && pTarget->IsUnit() && pTarget->GetGUIDLow() == m_script->searchRadiusOrGuid)
+                        pCreatureBuddy = static_cast<Creature*>(pTarget);
+                }
+                else if (m_script->terminateScript.npcEntry)
                 {
                     // npc entry is provided
                     MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, true, false, m_script->terminateScript.searchDist, true);
@@ -2088,7 +2139,7 @@ bool ScriptAction::HandleScriptStep()
                 {
                     Creature* cSource = static_cast<Creature*>(pSource);
                     if (cSource->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-                        (static_cast<WaypointMovementGenerator<Creature>* >(cSource->GetMotionMaster()->top()))->AddToWaypointPauseTime(m_script->textId[0]);
+                        (static_cast<WaypointMovementGenerator<Creature>*>(cSource->GetMotionMaster()->top()))->AddToWaypointPauseTime(m_script->textId[0]);
                 }
 
                 return true;
@@ -2243,7 +2294,7 @@ bool ScriptAction::HandleScriptStep()
             MailDraft(m_script->sendMail.mailTemplateId).SendMailTo(static_cast<Player*>(pTarget), sender, MAIL_CHECK_MASK_HAS_BODY, deliverDelay);
             break;
         }
-        case SCRIPT_COMMAND_SET_FLY:                        // 39
+        case SCRIPT_COMMAND_SET_HOVER:                      // 39
         {
             if (LogIfNotCreature(pSource))
                 break;
@@ -2257,7 +2308,7 @@ bool ScriptAction::HandleScriptStep()
                     pSource->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
             }
 
-            ((Creature*)pSource)->SetLevitate(m_script->fly.fly != 0);
+            ((Creature*)pSource)->SetHover(m_script->fly.fly);
             break;
         }
         case SCRIPT_COMMAND_DESPAWN_GO:                     // 40
@@ -2373,6 +2424,30 @@ bool ScriptAction::HandleScriptStep()
             unitSource->InterruptSpell((CurrentSpellTypes)m_script->interruptSpell.currentSpellType);
             break;
         }
+        case SCRIPT_COMMAND_MODIFY_UNIT_FLAGS:              // 48
+        {
+            if (LogIfNotCreature(pSource))
+                break;
+
+            // Remove Flags
+            if (m_script->unitFlag.change_flag == 0)
+                pSource->RemoveFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
+            // Add Flags
+            else if (m_script->unitFlag.change_flag == 1)
+                pSource->SetFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
+            // Toggle Flags
+            else if (m_script->unitFlag.change_flag == 2)
+            {
+                if (pSource->HasFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag))
+                    pSource->RemoveFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
+                else
+                    pSource->SetFlag(UNIT_FIELD_FLAGS, m_script->unitFlag.flag);
+            }
+            else
+                sLog.outErrorDb(" DB-SCRIPTS: Unexpected value %u used for script id %u, command %u.", m_script->unitFlag.flag, m_script->id, m_script->command);
+
+            break;
+        }
         default:
             sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u unknown command used.", m_table, m_script->id, m_script->command);
             break;
@@ -2383,28 +2458,29 @@ bool ScriptAction::HandleScriptStep()
 
 int32 ScriptMgr::GetRandomScriptTemplateId(uint32 id, uint8 templateType)
 {
-    auto& scriptTemplate = m_scriptTemplates[templateType][id];
-    if (scriptTemplate.empty())
+    if (m_scriptTemplates[templateType][id].empty())
         return 0;
 
-    uint32 totalChance = 0;
-    for (auto& data : scriptTemplate)
-        totalChance += data.second;
+    auto& randomChanced = m_scriptTemplatesExplicitlyChanced[templateType][id];
+    if (!randomChanced.empty())
+    {
+        float random = (float)rand_chance();
+        uint32 cumulativeChance = 0;
+        for (auto& data : randomChanced)
+        {
+            cumulativeChance += data.second;
+            if (cumulativeChance >= random)
+                return data.first;
+        }
+    }
 
-    if (totalChance == 0)
+    auto& equallyChanced = m_scriptTemplatesEquallyChanced[templateType][id];
+    if (!equallyChanced.empty())
     {
-        uint32 random = urand(0, scriptTemplate.size() - 1);
-        return scriptTemplate[random].first;
+        uint32 random = urand(0, equallyChanced.size() - 1);
+        return equallyChanced[random].first;
     }
-    uint32 random = urand(0, totalChance);
-    uint32 cumulativeChance = 0;
-    for (auto& data : scriptTemplate)
-    {
-        cumulativeChance += data.second;
-        if (cumulativeChance >= random)
-            return data.first;
-    }
-    return 0; // should never get here - error suppression
+    return 0;
 }
 
 int32 ScriptMgr::GetRandomScriptStringFromTemplate(uint32 id)

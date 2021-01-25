@@ -97,6 +97,13 @@ template<class T> void addUnitState(T* /*obj*/, CellPair const& /*cell_pair*/)
 {
 }
 
+template<> void addUnitState(GameObject* obj, CellPair const& cell_pair)
+{
+    Cell cell(cell_pair);
+
+    obj->SetCurrentCell(cell);
+}
+
 template<> void addUnitState(Creature* obj, CellPair const& cell_pair)
 {
     Cell cell(cell_pair);
@@ -111,17 +118,29 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
 
     for (uint32 guid : guid_set)
     {
-        T* obj = new T;
+        T* obj;
+        if (std::is_same<T, GameObject>::value) // TODO: When c++17 is added change to constexpr
+        {
+            GameObjectData const* data = sObjectMgr.GetGOData(guid);
+            MANGOS_ASSERT(data);
+            obj = (T*)GameObject::CreateGameObject(data->id);
+        }
+        else
+            obj = new T;
         // sLog.outString("DEBUG: LoadHelper from table: %s for (guid: %u) Loading",table,guid);
-        if (!obj->LoadFromDB(guid, map))
+        if (!obj->LoadFromDB(guid, map, guid))
         {
             delete obj;
             continue;
         }
 
-        grid.AddGridObject(obj);
+        if (!obj->IsCreature())
+        {
+            grid.AddGridObject(obj);
 
-        addUnitState(obj, cell);
+            addUnitState(obj, cell);
+        }
+
         obj->SetMap(map);
         obj->AddToWorld();
         if (obj->isActiveObject())

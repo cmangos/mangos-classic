@@ -136,7 +136,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 21  ACTION_T_COMBAT_MOVEMENT                AllowCombatMovement                 Stop combat based movement when (Param1) is zero, otherwise continue/allow combat based movement (targeted movement generator).
 22  ACTION_T_SET_PHASE                      Phase                               Sets the current phase to (Param1).
 23  ACTION_T_INC_PHASE                      Value                               Increments the phase by (Param1). May be negative to decrement, but should not be zero.
-24  ACTION_T_EVADE                          No Params                           Forces the creature to evade, wiping all threat and dropping combat.
+24  ACTION_T_EVADE                          No Params                           Forces the creature to evade, wiping all threat and dropping combat. Param1 - combat drop only
 25  ACTION_T_FLEE_FOR_ASSIST                No Params                           Causes the creature to flee for assistence (often at low health).
 26  ACTION_T_QUEST_EVENT_ALL                QuestId, UseThreatList              Calls GroupEventHappens with (Param1). Only used if it's _expected_ event should call quest completion for all players in a current party. Can be used for the creature's threat list, for complex scripted events.
 27  ACTION_T_CASTCREATUREGO_ALL             QuestId, SpellId                    Calls CastedCreatureOrGo for all players on the threat list with quest id specified in (Param1) and spell id in (Param2).
@@ -174,6 +174,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 59  ACTION_T_SET_FACING                     Target, Reset                       Set 0, Reset 1
 60  ACTION_T_SET_SPELL_SET                  SetId                               Set for possess
 61  ACTION_T_SET_IMMOBILIZED_STATE          Apply, CombatOnly                   CombatOnly is autoremoved on combat stop (death, evade, despawn)
+62  ACTION_T_SET_DESPAWN_AGGREGATION        Mask, Entry1, Entry2                Enable aggregation of guids for despawn on event (death, evade). To be used mostly on spawn.
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -769,7 +770,7 @@ This can be used instead of ACTION_T_SET_PHASE to change phases in scripts. Just
 24 = ACTION_T_EVADE:
 --------------------
 When activated, the creature will immediately exit out of combat, clear its threat list, and move back to its spawn point. Basically, this action will reset the whole encounter.
-NOTE: All Param Values Are 0 for this Action.
+Parameter 1: CombatOnly - of true (1) only cancels combat and does not move home. Warning: only use this if sniff verifies to drop combat. Many cases do not.
 
 -------------------
 25 = ACTION_T_FLEE:
@@ -1109,6 +1110,12 @@ Parameter 1: creature_template_spells setid
 --------------------------------
 Parameter 1: apply
 Parameter 2: combatOnly - autoremoved on combat stop
+
+--------------------------------
+62 - ACTION_T_SET_DESPAWN_AGGREGATION
+--------------------------------
+Parameter 1: Mask - 0x1 - enabled, 0x2 - despawn on evade, 0x4 - despawn on death
+Parameter 2 and 3: Creature Entry - in case only specific entries should be despawned, else all despawn, can be appended over multiple action calls
 
 =========================================
 Target Types

@@ -212,6 +212,7 @@ Defining a buddy could be done in several way:
                                             * dataint = (bool) setRun; 0 = off (default), 1 = on
                                             * dataint2 = factionId - if 0 is set, faction is from DB entry
                                             * dataint3 = modelId - if 0 is set, model is from DB entry
+                                            * dataint4 = spawndatatemplate - if > 0 uses settings from creature_spawn_data_template
 
 11 SCRIPT_COMMAND_OPEN_DOOR                 source = any
                                             * datalong = db_guid (can be skipped for buddy)
@@ -222,6 +223,8 @@ Defining a buddy could be done in several way:
                                             * datalong2 = reset_delay
 
 13 SCRIPT_COMMAND_ACTIVATE_OBJECT           source = unit, target=GO
+                                            * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: send gameobject custom anim instead of Use()
+                                            * datalong = anim Id
 
 14 SCRIPT_COMMAND_REMOVE_AURA               resultingSource = Unit
                                             * datalong = spell_id
@@ -293,7 +296,7 @@ Defining a buddy could be done in several way:
 
 29 SCRIPT_COMMAND_MODIFY_NPC_FLAGS          resultingSource = Creature
                                             * datalong=NPCFlags
-                                            * datalong2= 0x00=toggle, 0x01=add, 0x02=remove
+                                            * datalong2 => 0=remove, 1=add, 2=toggle
 
 30 SCRIPT_COMMAND_SEND_TAXI_PATH            resultingTarget or Source must be Player
                                             * datalong = taxi path id
@@ -371,3 +374,7 @@ Defining a buddy could be done in several way:
 47 SCRIPT_COMMAND_INTERRUPT_SPELL           Interrupt spell in specific slot
                                             * source must be unit
                                             * datalong = SpellType enum CurrentSpellTypes
+
+48 SCRIPT_COMMAND_MODIFY_UNIT_FLAGS         resultingSource = Creature
+                                            * datalong = UnitFlags
+                                            * datalong2 => 0=remove, 1=add, 2=toggle

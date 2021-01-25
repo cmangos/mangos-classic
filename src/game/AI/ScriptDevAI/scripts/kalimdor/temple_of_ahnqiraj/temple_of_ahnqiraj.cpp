@@ -183,6 +183,20 @@ void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* creature)
                 creature->AI()->SetCombatMovement(false);
             creature->CastSpell(creature, SPELL_SUMMON_GIANT_PORTAL, TRIGGERED_OLD_TRIGGERED);
             break;
+        case NPC_EXIT_TRIGGER:
+            creature->SetInCombatWithZone(false);
+            if (creature->AI())
+                creature->AI()->SetCombatMovement(false);
+            break;
+        case NPC_EYE_OF_CTHUN:
+            // Safeguard for C'Thun encounter in case of fight abruptly ended during phase 2
+            if (GetData(TYPE_CTHUN) != DONE)
+            {
+                if (!creature->IsAlive())
+                    creature->Respawn();
+            }
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
+            break;
     }
 }
 
@@ -322,6 +336,17 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_CTHUN:
+            if (uiData == FAIL)
+            {
+                // Respawn the Eye of C'Thun when failing in phase 2
+                if (Creature* eyeOfCthun = GetSingleCreatureFromStorage(NPC_EYE_OF_CTHUN))
+                {
+                    if (!eyeOfCthun->IsAlive())
+                        eyeOfCthun->Respawn();
+                }
+            }
+            m_auiEncounter[uiType] = uiData;
+            break;
         case TYPE_TWINS_INTRO:
             m_auiEncounter[uiType] = uiData;
             break;
@@ -429,7 +454,7 @@ bool AreaTrigger_at_temple_ahnqiraj(Player* player, AreaTriggerEntry const* at)
 {
     if (at->id == AREATRIGGER_TWIN_EMPERORS || at->id == AREATRIGGER_SARTURA)
     {
-        if (player->isGameMaster() || !player->IsAlive())
+        if (player->IsGameMaster() || !player->IsAlive())
             return false;
 
         if (instance_temple_of_ahnqiraj* pInstance = (instance_temple_of_ahnqiraj*)player->GetInstanceData())

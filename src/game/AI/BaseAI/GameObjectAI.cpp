@@ -27,3 +27,7 @@ GameObjectAI::GameObjectAI(GameObject* go) : m_go(go)
 GameObjectAI::~GameObjectAI()
 {
 }
+
+void GameObjectAI::OnUse(Unit*, SpellEntry const*)
+{
+}

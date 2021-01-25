@@ -87,7 +87,7 @@ void CreatureAI::SetDeathPrevention(bool state)
 void CreatureAI::DoFakeDeath(uint32 spellId)
 {
     m_creature->InterruptNonMeleeSpells(false);
-    m_creature->StopMoving();
+    m_creature->InterruptMoving();
     m_creature->ClearComboPointHolders();
     m_creature->RemoveAllAurasOnDeath();
     m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
@@ -140,9 +140,9 @@ bool CreatureAI::DoRetreat()
 
     uint32 delay = sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY);
 
-    WorldLocation pos;
+    Position pos;
     ally->GetFirstCollisionPosition(pos, ally->GetCombatReach(), ally->GetAngle(m_creature));
-    m_creature->GetMotionMaster()->MoveRetreat(pos.coord_x, pos.coord_y, pos.coord_z, ally->GetAngle(victim), delay);
+    m_creature->GetMotionMaster()->MoveRetreat(pos.x, pos.y, pos.z, ally->GetAngle(victim), delay);
 
     SetAIOrder(ORDER_RETREATING);
     SetCombatScriptStatus(true);
@@ -152,4 +152,15 @@ bool CreatureAI::DoRetreat()
 void CreatureAI::DoCallForHelp(float radius)
 {
     m_creature->CallForHelp(radius);
+}
+
+void CreatureAI::HandleAssistanceCall(Unit* sender, Unit* invoker)
+{
+    if (m_creature->IsInCombat() || !invoker)
+        return;
+    if (m_creature->CanAssist(sender) && m_creature->CanAttackOnSight(invoker) && invoker->IsVisibleForOrDetect(m_creature, m_creature, false))
+    {
+        m_creature->SetNoCallAssistance(true);
+        AttackStart(invoker);
+    }
 }

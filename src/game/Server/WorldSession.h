@@ -24,6 +24,7 @@
 #define __WORLDSESSION_H
 
 #include "Common.h"
+#include "Globals/Locales.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/ObjectGuid.h"
 #include "AuctionHouse/AuctionHouseMgr.h"
@@ -149,6 +150,7 @@ class WorldSession
         // Set this session have no attached socket but keep it alive for short period of time to permit a possible reconnection
         void SetOffline();
         void SetOnline();
+        void SetInCharSelection();
 
         // Request set offline, close socket and put session offline
         bool RequestNewSocket(WorldSocket* socket);
@@ -217,7 +219,10 @@ class WorldSession
 
         void QueuePacket(std::unique_ptr<WorldPacket> new_packet);
 
-        bool Update(PacketFilter& updater);
+        void DeleteMovementPackets();
+
+        bool Update(uint32 diff);
+        void UpdateMap(uint32 diff);
 
         /// Handle the authentication waiting queue (to be completed)
         void SendAuthWaitQue(uint32 position) const;
@@ -315,8 +320,15 @@ class WorldSession
         void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
         uint32 getDialogStatus(const Player* pPlayer, const Object* questgiver, uint32 defstatus) const;
 
+        uint32 GetOrderCounter() const { return m_orderCounter; }
+        void IncrementOrderCounter() { ++m_orderCounter; }
+
+        // Thread safety
+        uint32 GetCurrentPlayerLevel() { return m_currentPlayerLevel; }
+        void SetCurrentPlayerLevel(uint32 level) { m_currentPlayerLevel = level; }
+
         // Misc
-        void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed) const;
+        void SendKnockBack(Unit* who, float angle, float horizontalSpeed, float verticalSpeed);
         void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) const;
 
         void SendAuthOk() const;
@@ -697,6 +709,11 @@ class WorldSession
         void HandleBotPackets();
 #endif
 
+#define MOVEMENT_PACKET_TIME_DELAY 0
+
+        // Movement
+        void SynchronizeMovement(MovementInfo& movementInfo);
+
         std::deque<uint32> GetOpcodeHistory();
 
         Messager<WorldSession>& GetMessager() { return m_messager; }
@@ -714,7 +731,9 @@ class WorldSession
         void LogUnexpectedOpcode(WorldPacket const& packet, const char* reason) const;
         void LogUnprocessedTail(WorldPacket const& packet) const;
 
-        std::mutex m_logoutMutex;                           // this mutex is necessary to avoid two simultaneous logouts due to a valid logout request and socket error
+        void ProcessByteBufferException(WorldPacket const& packet);
+
+        uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player* _player;
         std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it
         std::shared_ptr<WorldSocket> m_requestSocket;       // a new socket for this session is requested (double connection)
@@ -723,7 +742,11 @@ class WorldSession
         AccountTypes _security;
         uint32 _accountId;
 
+        // Anticheat
+        uint32 m_orderCounter;
+
         time_t _logoutTime;                                 // when logout will be processed after a logout request
+        time_t m_kickTime;
         bool m_playerSave;                                  // should we have to save the player after logout request
         bool m_inQueue;                                     // session wait in auth.queue
         bool m_playerLoading;                               // code processed in LoginPlayer
@@ -743,10 +766,15 @@ class WorldSession
 
         bool m_initialZoneUpdated = false;
 
+        // Thread safety mechanisms
         std::mutex m_recvQueueLock;
+        std::mutex m_recvQueueMapLock;
         std::deque<std::unique_ptr<WorldPacket>> m_recvQueue;
+        std::deque<std::unique_ptr<WorldPacket>> m_recvQueueMap;
 
         Messager<WorldSession> m_messager;
+
+        std::atomic<uint32> m_currentPlayerLevel;
 };
 #endif
 /// @}

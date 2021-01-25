@@ -183,3 +183,6 @@ UPDATE `spell_template` SET `InterruptFlags` = `InterruptFlags`&~0x00000010 WHER
 
 -- Fix periodic trigger pet buffing item auras giving threat - this fix is evidenced by 28757 which already has it
 UPDATE spell_template SET AttributesEx=AttributesEx|1024 WHERE Id IN(21740,21921,21925,21927,20988,29233,27039,27042,27205,27208,18350,30023);
+
+-- AQ40 - C'Thun - Summon Mouth Tentacles - restricted to one target
+UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id=26237;

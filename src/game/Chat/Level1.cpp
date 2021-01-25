@@ -36,7 +36,9 @@
 #include "Maps/MapPersistentStateMgr.h"
 #include "Mails/Mail.h"
 #include "Util.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Spells/SpellMgr.h"
+#include "Entities/Transports.h"
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
 #endif
@@ -155,7 +157,7 @@ bool ChatHandler::HandleGMCommand(char* args)
 {
     if (!*args)
     {
-        if (m_session->GetPlayer()->isGameMaster())
+        if (m_session->GetPlayer()->IsGameMaster())
             m_session->SendNotification(LANG_GM_ON);
         else
             m_session->SendNotification(LANG_GM_OFF);
@@ -342,6 +344,13 @@ bool ChatHandler::HandleGPSCommand(char* args)
                     cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
                     zone_x, zone_y, ground_z, floor_z, have_map, have_vmap);
 
+    if (GenericTransport* transport = obj->GetTransport())
+    {
+        Position pos;
+        obj->GetPosition(pos.x, pos.y, pos.z, transport);
+        PSendSysMessage("Transport coords: %f %f %f", pos.x, pos.y, pos.z);
+    }
+
     DEBUG_LOG("Player %s GPS call for %s '%s' (%s: %u):",
               m_session ? GetNameLink().c_str() : GetMangosString(LANG_CONSOLE_COMMAND),
               (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetName(),
@@ -409,10 +418,13 @@ bool ChatHandler::HandleNamegoCommand(char* args)
 
         Map* pMap = player->GetMap();
 
+        if (!pMap)
+            return false;
+
         if (pMap->IsBattleGround())
         {
             // only allow if gm mode is on
-            if (!player->isGameMaster())
+            if (!player->IsGameMaster())
             {
                 PSendSysMessage(LANG_CANNOT_GO_TO_BG_GM, nameLink.c_str());
                 SetSentErrorMessage(true);
@@ -519,7 +531,7 @@ bool ChatHandler::HandleGonameCommand(char* args)
         if (cMap->IsBattleGround())
         {
             // only allow if gm mode is on
-            if (!_player->isGameMaster())
+            if (!_player->IsGameMaster())
             {
                 PSendSysMessage(LANG_CANNOT_GO_TO_BG_GM, chrNameLink.c_str());
                 SetSentErrorMessage(true);
@@ -557,7 +569,7 @@ bool ChatHandler::HandleGonameCommand(char* args)
             else
             {
                 // we are not in group, let's verify our GM mode
-                if (!_player->isGameMaster())
+                if (!_player->IsGameMaster())
                 {
                     PSendSysMessage(LANG_CANNOT_GO_TO_INST_GM, chrNameLink.c_str());
                     SetSentErrorMessage(true);
@@ -597,9 +609,11 @@ bool ChatHandler::HandleGonameCommand(char* args)
 
         // to point to see at target with same orientation
         float x, y, z;
-        target->GetContactPoint(_player, x, y, z);
-
-        _player->TeleportTo(target->GetMapId(), x, y, z, _player->GetAngle(target), TELE_TO_GM_MODE);
+        target->GetContactPoint(target, x, y, z);
+        
+        if (GenericTransport* transport = target->GetTransport())
+            transport->CalculatePassengerOffset(x, y, z);
+        _player->TeleportTo(target->GetMapId(), x, y, z, _player->GetAngle(target), TELE_TO_GM_MODE, nullptr, target->GetTransport());
     }
     else
     {
@@ -1654,7 +1668,8 @@ bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y,
         }
 
         TerrainInfo const* map = sTerrainMgr.LoadTerrain(mapid);
-        z = map->GetWaterOrGroundLevel(x, y, MAX_HEIGHT);
+        float groundZ = player->GetMap()->GetHeight(x, y, 0.f);
+        z = map->GetWaterOrGroundLevel(x, y, MAX_HEIGHT, groundZ);
     }
 
     // stop flight if need

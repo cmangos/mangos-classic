@@ -79,6 +79,8 @@ class TimerManager
             (*data).second.timer = 0; (*data).second.disabled = true;
         }
         virtual void ReduceTimer(uint32 index, uint32 timer);
+        virtual void DelayTimer(uint32 index, uint32 timer);
+        virtual void ResetIfNotStarted(uint32 index, uint32 timer);
 
         virtual void UpdateTimers(const uint32 diff);
         virtual void ResetAllTimers();
@@ -109,17 +111,26 @@ class CombatActions : public TimerManager
         virtual void ResetTimer(uint32 index, uint32 timer) override;
         virtual void DisableTimer(uint32 index) override;
         virtual void ReduceTimer(uint32 index, uint32 timer) override;
+        virtual void DelayTimer(uint32 index, uint32 timer) override;
+        virtual void ResetIfNotStarted(uint32 index, uint32 timer) override;
 
-        void DisableCombatAction(uint32 index)
-        {
-            DisableTimer(index);
-            SetActionReadyStatus(index, false);
-        }
+        void DisableCombatAction(uint32 index);
 
         void ResetCombatAction(uint32 index, uint32 timer)
         {
             ResetTimer(index, timer);
             SetActionReadyStatus(index, false);
+        }
+
+        void DelayCombatAction(uint32 index, uint32 timer)
+        {
+            if (GetActionReadyStatus(index))
+            {
+                SetActionReadyStatus(index, false);
+                ResetTimer(index, timer);
+            }
+            else
+                DelayTimer(index, timer);
         }
 
         inline void SetActionReadyStatus(uint32 index, bool state) { m_actionReadyStatus[index] = state; }

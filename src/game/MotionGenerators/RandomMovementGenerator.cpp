@@ -33,7 +33,7 @@ void AbstractRandomMovementGenerator::Initialize(Unit& owner)
     else if (owner.AI())
     {
         owner.SetTarget(nullptr);
-        owner.SendMeleeAttackStop(owner.GetVictim());
+        owner.MeleeAttackStop(owner.GetVictim());
     }
 
     // Stop any previously dispatched splines no matter the source
@@ -137,17 +137,8 @@ int32 AbstractRandomMovementGenerator::_setLocation(Unit& owner)
     if (pf.getPathType() & PATHFIND_NOPATH)
         return 0;
 
-    auto& path = pf.getPath();
-    if (owner.IsPlayer()) // fix last point
-    {
-        G3D::Vector3 lastPoint = path[path.size() - 1];
-        owner.UpdateAllowedPositionZ(lastPoint.x, lastPoint.y, lastPoint.z);
-        lastPoint.z += 1.f;
-        path[path.size() - 1] = lastPoint;
-    }
-
     Movement::MoveSplineInit init(owner);
-    init.MovebyPath(path);
+    init.MovebyPath(pf.getPath());
     init.SetWalk(i_walk);
 
     int32 duration = init.Launch();
@@ -245,11 +236,11 @@ bool FleeingMovementGenerator::_getLocation(Unit& owner, float& x, float& y, flo
     if (owner.IsPlayer())
     {
         float angle = 2.0f * M_PI_F * rand_norm_f();
-        WorldLocation pos(owner.GetMapId(), owner.GetPosition());
+        Position pos(owner.GetPosition());
         owner.MovePositionToFirstCollision(pos, i_radius, angle);
-        x = pos.coord_x;
-        y = pos.coord_y;
-        z = pos.coord_z + 1;
+        x = pos.x;
+        y = pos.y;
+        z = pos.z + 1;
         return true;
     }
 

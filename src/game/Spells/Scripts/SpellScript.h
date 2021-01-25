@@ -44,6 +44,8 @@ struct SpellScript
     virtual SpellCastResult OnCheckCast(Spell* /*spell*/, bool /*strict*/) const { return SPELL_CAST_OK; }
     // called before effect execution
     virtual void OnEffectExecute(Spell* /*spell*/, SpellEffectIndex /*effIdx*/) const {}
+    // called in targeting to determine radius for spell
+    virtual void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex /*effIdx*/, bool /*targetB*/, float& /*radius*/) {}
     // called on adding dest target
     virtual void OnDestTarget(Spell* /*spell*/) const {}
     // called on Unit Spell::CheckTarget
@@ -56,6 +58,10 @@ struct SpellScript
     virtual void OnHit(Spell* /*spell*/, SpellMissInfo /*missInfo*/) const {}
     // called on target hit after damage deal and proc
     virtual void OnAfterHit(Spell* /*spell*/) const {}
+    // called after summoning a creature
+    virtual void OnSummon(Spell* spell, Creature* summon) const {}
+    // called after summoning a gameobject
+    virtual void OnSummon(Spell* spell, GameObject* summon) const {}
 };
 
 struct AuraScript
@@ -66,10 +72,16 @@ struct AuraScript
     virtual int32 OnAuraValueCalculate(Aura* /*aura*/, Unit* /*caster*/, int32 value) const { return value; }
     // called during done/taken damage calculation
     virtual void OnDamageCalculate(Aura* /*aura*/, int32& /*advertisedBenefit*/, float& /*totalMod*/) const {}
+    // the following two hooks are done in an alternative fashion due to how they are usually used
+    // if an aura is applied before, its removed after, and if some aura needs to do something after aura effect is applied, need to revert that change before its removed
     // called before aura apply and after aura unapply
     virtual void OnApply(Aura* /*aura*/, bool /*apply*/) const {}
+    // the following two hooks are done in an alternative fashion due to how they are usually used
+    // if an aura is applied before, its removed after, and if some aura needs to do something after aura effect is applied, need to revert that change before its removed
+    // called after aura apply and before aura unapply
+    virtual void OnAfterApply(Aura* /*aura*/, bool /*apply*/) const {}
     // called during proc eligibility checking
-    virtual bool OnCheckProc(Aura* /*aura*/) const { return true; }
+    virtual bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& /*data*/) const { return true; }
     // called before proc handler
     virtual SpellAuraProcResult OnProc(Aura* /*aura*/, ProcExecutionData& /*procData*/) const { return SPELL_AURA_PROC_OK; }
     // called on absorb of this aura
@@ -112,6 +124,8 @@ class SpellScriptMgr
         static std::map<std::string, SpellScript*> m_spellScriptStringMap;
         static std::map<std::string, AuraScript*> m_auraScriptStringMap;
 };
+
+// note - linux name mangling bugs out if two script templates have same class name - avoid it
 
 template <class T>
 void RegisterScript(std::string stringName)

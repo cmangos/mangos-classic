@@ -274,4 +274,78 @@ namespace MMAP
 
         fclose(objFile);
     }
+    void IntermediateValues::generateObjFile(std::string filename, MeshData& meshData)
+    {
+        std::string realFileName = "meshes/" + filename + ".obj";
+        FILE* objFile = fopen(realFileName.c_str(), "wb");
+        if (!objFile)
+        {
+            char message[1024];
+            sprintf(message, "Failed to open %s for writing!\n", realFileName.c_str());
+            perror(message);
+            return;
+        }
+
+        G3D::Array<float> allVerts;
+        G3D::Array<int> allTris;
+
+        allTris.append(meshData.liquidTris);
+        allVerts.append(meshData.liquidVerts);
+        TerrainBuilder::copyIndices(meshData.solidTris, allTris, allVerts.size() / 3);
+        allVerts.append(meshData.solidVerts);
+
+        float* verts = allVerts.getCArray();
+        int* tris = allTris.getCArray();
+
+        for (int i = 0; i < allVerts.size() / 3; i++)
+            fprintf(objFile, "v %f %f %f\n", verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]);
+
+        for (int i = 0; i < allTris.size() / 3; i++)
+            fprintf(objFile, "f %i %i %i\n", tris[i * 3] + 1, tris[i * 3 + 1] + 1, tris[i * 3 + 2] + 1);
+
+        fclose(objFile);
+
+#if 0
+        printf("%sWriting debug output...                       \r", filename.c_str());
+
+        realFileName = "meshes/" + filename + ".map";
+
+        objFile = fopen(realFileName.c_str(), "wb");
+        if (!objFile)
+        {
+            char message[1024];
+            sprintf(message, "Failed to open %s for writing!\n", realFileName.c_str());
+            perror(message);
+            return;
+        }
+
+        char b = '\0';
+        fwrite(&b, sizeof(char), 1, objFile);
+        fclose(objFile);
+
+        realFileName = "meshes/" + filename + ".mesh";
+        objFile = fopen(realFileName.c_str(), "wb");
+        if (!objFile)
+        {
+            char message[1024];
+            sprintf(message, "Failed to open %s for writing!\n", realFileName.c_str());
+            perror(message);
+            return;
+        }
+
+        int vertCount = allVerts.size() / 3;
+
+        fwrite(&vertCount, sizeof(int), 1, objFile);
+        fwrite(verts, sizeof(float), vertCount * 3, objFile);
+        fflush(objFile);
+
+        int triCount = allTris.size() / 3;
+
+        fwrite(&triCount, sizeof(int), 1, objFile);
+        fwrite(tris, sizeof(int), triCount * 3, objFile);
+        fflush(objFile);
+
+        fclose(objFile);
+#endif
+    }
 }

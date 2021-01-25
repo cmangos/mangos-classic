@@ -173,7 +173,7 @@ float VisibilityData::GetStealthVisibilityDistance(Unit const* target, bool aler
     detectionValue -= GetStealthStrength(STEALTH_UNIT);
 
     // Calculate max distance
-    float visibilityRange = float(detectionValue) * 0.3f + target->GetCombatReach();
+    float visibilityRange = float(detectionValue) * 0.3f;
 
     // If this unit is an NPC then player detect range doesn't apply
     if (target->GetTypeId() == TYPEID_PLAYER && visibilityRange > MAX_PLAYER_STEALTH_DETECT_RANGE)

@@ -310,6 +310,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "target",         SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectTargetCommand,    "", nullptr },
         { "turn",           SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectTurnCommand,      "", nullptr },
         { "activate",       SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectActivateCommand,  "", nullptr },
+        { "despawn",        SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectForcedDespawnCommand, "", nullptr },
         { "respawn",        SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectRespawnCommand,   "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
@@ -501,6 +502,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "tame",           SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcTameCommand,             "", nullptr },
         { "setdeathstate",  SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcSetDeathStateCommand,    "", nullptr },
         { "showloot",       SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcShowLootCommand,         "", nullptr },
+        { "tempspawn",      SEC_GAMEMASTER,     false, &ChatHandler::HandleNpcTempSpawn,               "", nullptr },
 
         //{ TODO: fix or remove this commands
         { "addweapon",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleNpcAddWeaponCommand,        "", nullptr },
@@ -671,9 +673,11 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand movementCommandTable[] =
     {
-        { "movegens",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMovegensCommand,            "", nullptr },
+        { "movegens",       SEC_GAMEMASTER,     false, &ChatHandler::HandleMovegensCommand,            "", nullptr },
         { "cometome",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleComeToMeCommand,            "", nullptr },
-        { "movespeed",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMovespeedShowCommand,       "", nullptr },
+        { "movespeed",      SEC_GAMEMASTER,     false, &ChatHandler::HandleMovespeedShowCommand,       "", nullptr },
+        { "debug",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugMovement,              "", nullptr },
+        { "print",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandlePrintMovement,              "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
@@ -2010,7 +2014,7 @@ bool ChatHandler::CheckEscapeSequences(const char* message)
                             bool foundName = false;
                             for (uint8 i = LOCALE_koKR; i < MAX_LOCALE; ++i)
                             {
-                                int8 dbIndex = sObjectMgr.GetIndexForLocale(LocaleConstant(i));
+                                int8 dbIndex = sObjectMgr.GetStorageLocaleIndexFor(LocaleConstant(i));
                                 if (dbIndex == -1 || il == nullptr || (size_t)dbIndex >= il->Name.size())
                                     // using strange database/client combinations can lead to this case
                                     expectedName = linkedItem->Name1;
@@ -3363,7 +3367,7 @@ int ChatHandler::GetSessionDbLocaleIndex() const
 
 const char* CliHandler::GetMangosString(int32 entry) const
 {
-    return sObjectMgr.GetMangosStringForDBCLocale(entry);
+    return sObjectMgr.GetMangosStringForDbcLocale(entry);
 }
 
 uint32 CliHandler::GetAccountId() const
@@ -3409,7 +3413,7 @@ LocaleConstant CliHandler::GetSessionDbcLocale() const
 
 int CliHandler::GetSessionDbLocaleIndex() const
 {
-    return sObjectMgr.GetDBCLocaleIndex();
+    return sObjectMgr.GetDbc2StorageLocaleIndex();
 }
 
 // Check/ Output if a NPC or GO (by guid) is part of a pool or game event

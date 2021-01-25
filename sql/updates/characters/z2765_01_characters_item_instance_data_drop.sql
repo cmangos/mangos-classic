@@ -9,7 +9,7 @@ ALTER TABLE `item_instance`
  ADD `creatorGuid` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `itemEntry`,
  ADD `giftCreatorGuid` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `creatorGuid`,
  ADD `count` INT(10) UNSIGNED NOT NULL DEFAULT '1' AFTER `giftCreatorGuid`,
- ADD `duration` INT(10) UNSIGNED NOT NULL AFTER `count`,
+ ADD `duration` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `count`,
  ADD `charges` TEXT NOT NULL AFTER `duration`,
  ADD `flags` INT(8) UNSIGNED NOT NULL DEFAULT '0' AFTER `charges`,
  ADD `enchantments` TEXT NOT NULL AFTER `flags`,

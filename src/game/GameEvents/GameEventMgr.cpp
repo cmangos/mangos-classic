@@ -161,7 +161,7 @@ void GameEventMgr::LoadFromDB()
                 gameEvent.occurence = gameEvent.length;
             }
 			
-            if (gameEvent.length == 0)                     // length>0 is validity check
+            if (gameEvent.length == 0 && gameEvent.scheduleType != GAME_EVENT_SCHEDULE_SERVERSIDE) // length>0 is validity check
             {
                 sLog.outErrorDb("`game_event` game event id (%i) have length 0 and can't be used.", event_id);
                 gameEvent.start = time_t(FAR_FUTURE);
@@ -651,7 +651,7 @@ uint32 GameEventMgr::Update(ActiveEvents const* activeAtShutdown /*= nullptr*/)
     uint32 nextEventDelay = max_ge_check_delay;             // 1 day
     for (uint16 itr = 1; itr < m_gameEvents.size(); ++itr)
     {
-        if (m_gameEvents[itr].occurence == 0 || (m_gameEvents[itr].scheduleType == GAME_EVENT_SCHEDULE_SERVERSIDE && m_isGameEventsInit))
+        if ((m_gameEvents[itr].occurence == 0 && m_gameEvents[itr].scheduleType != GAME_EVENT_SCHEDULE_SERVERSIDE) || (m_gameEvents[itr].scheduleType == GAME_EVENT_SCHEDULE_SERVERSIDE && m_isGameEventsInit))
             continue;
         // sLog.outErrorDb("Checking event %u",itr);
         if (CheckOneGameEvent(itr, currenttime))

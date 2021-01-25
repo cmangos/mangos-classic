@@ -89,6 +89,23 @@ void TimerManager::ReduceTimer(uint32 index, uint32 timer)
     (*data).second.timer = std::min((*data).second.timer, timer);
 }
 
+void TimerManager::DelayTimer(uint32 index, uint32 timer)
+{
+    auto data = m_timers.find(index);
+    if (!(*data).second.disabled)
+        (*data).second.timer = (*data).second.timer > timer ? (*data).second.timer : timer;
+}
+
+void TimerManager::ResetIfNotStarted(uint32 index, uint32 timer)
+{
+    auto data = m_timers.find(index);
+    if ((*data).second.disabled)
+    {
+        (*data).second.timer = timer;
+        (*data).second.disabled = false;
+    }
+}
+
 void TimerManager::UpdateTimers(const uint32 diff)
 {
     for (auto& data : m_timers)
@@ -198,6 +215,34 @@ void CombatActions::ReduceTimer(uint32 index, uint32 timer)
         TimerManager::ReduceTimer(index, timer);
     else
         (*data).second.timer = std::min((*data).second.timer, timer);
+}
+
+void CombatActions::DelayTimer(uint32 index, uint32 timer)
+{
+    auto data = m_CombatActions.find(index);
+    if (data == m_CombatActions.end())
+        TimerManager::DelayTimer(index, timer);
+    else if (!(*data).second.disabled)
+        (*data).second.timer = (*data).second.timer > timer ? (*data).second.timer : timer;
+}
+
+void CombatActions::ResetIfNotStarted(uint32 index, uint32 timer)
+{
+    auto data = m_CombatActions.find(index);
+    if (data == m_CombatActions.end())
+        TimerManager::ResetIfNotStarted(index, timer);
+    else if ((*data).second.disabled)
+    {
+        (*data).second.timer = timer;
+        (*data).second.disabled = false;
+    }
+}
+
+void CombatActions::DisableCombatAction(uint32 index)
+{
+    if (m_timerlessActionSettings.find(index) == m_timerlessActionSettings.end())
+        DisableTimer(index);
+    SetActionReadyStatus(index, false);
 }
 
 void CombatActions::GetAIInformation(ChatHandler& reader)

@@ -293,6 +293,8 @@ UPDATE creature_template SET ScriptName='npc_magrami_spectre' WHERE entry=11560;
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
 UPDATE gameobject_template SET ScriptName='go_fixed_trap' WHERE entry=179512;
 UPDATE creature_template SET ScriptName='npc_mizzle_crafty' WHERE entry=14353;
+UPDATE creature_template SET ScriptName='npc_warlock_mount_ritual' WHERE entry=14501;
+UPDATE gameobject_template SET ScriptName='go_dreadsteed_quest_objects' WHERE entry IN(179672,179673,179674);
 INSERT INTO scripted_event_id VALUES
 (8420,'event_spells_warlock_dreadsteed'),
 (8428,'event_spells_warlock_dreadsteed');
@@ -346,6 +348,8 @@ UPDATE instance_template SET ScriptName='instance_gnomeregan' WHERE map=90;
 /* HINTERLANDS */
 UPDATE creature_template SET ScriptName='npc_00x09hl' WHERE entry=7806;
 UPDATE creature_template SET ScriptName='npc_rinji' WHERE entry=7780;
+INSERT INTO scripted_event_id VALUES
+(8608,'event_wildhammer_message');
 
 /* IRONFORGE */
 
@@ -498,6 +502,7 @@ UPDATE creature_template SET ScriptName='npc_deathstalker_faerleia' WHERE entry=
 
 /* STONETALON MOUNTAINS */
 UPDATE creature_template SET ScriptName='npc_kaya' WHERE entry=11856;
+UPDATE gameobject_template SET ScriptName = 'go_covert_ops' WHERE entry=19590;
 
 /* STORMWIND CITY */
 UPDATE creature_template SET ScriptName='npc_bartleby' WHERE entry=6090;
@@ -575,7 +580,8 @@ UPDATE creature_template SET ScriptName='mob_giant_claw_tentacle' WHERE entry=15
 UPDATE creature_template SET ScriptName='mob_anubisath_sentinel' WHERE entry=15264;
 INSERT INTO scripted_areatrigger VALUES
 (4033,'at_stomach_cthun'),
-(4034,'at_stomach_cthun');
+(4034,'at_stomach_cthun'),
+(4036,'at_stomach_cthun');
 
 /* THOUSAND NEEDLES */
 UPDATE creature_template SET ScriptName='npc_kanati' WHERE entry=10638;

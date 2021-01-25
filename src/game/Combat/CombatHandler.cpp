@@ -58,7 +58,7 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleAttackStopOpcode(WorldPacket& /*recv_data*/)
 {
-    GetPlayer()->AttackStop();
+    GetPlayer()->AttackStop(false, false, false, true);
 }
 
 void WorldSession::HandleSetSheathedOpcode(WorldPacket& recv_data)

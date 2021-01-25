@@ -94,6 +94,10 @@ void PointMovementGenerator::Move(Unit& unit)
     init.MoveTo(m_x, m_y, m_z, m_generatePath);
     if (m_forcedMovement == FORCED_MOVEMENT_WALK)
         init.SetWalk(true);
+    else if (m_forcedMovement == FORCED_MOVEMENT_RUN)
+        init.SetWalk(false);
+    else
+        init.SetWalk(!unit.hasUnitState(UNIT_STAT_RUNNING));
     if (m_forcedMovement == FORCED_MOVEMENT_FLIGHT)
         init.SetFly();
     if (m_o != 0.f)
@@ -212,9 +216,12 @@ void PointTOLMovementGenerator::Move(Unit& unit)
     init.MoveTo(m_x, m_y, m_z, false);
     if (m_forcedMovement == FORCED_MOVEMENT_WALK)
         init.SetWalk(true);
+    else
+        init.SetWalk(!unit.hasUnitState(UNIT_STAT_RUNNING));
     if (m_o != 0.f)
         init.SetFacing(m_o);
     init.SetVelocity(m_speed);
     init.SetFly();
+    init.SetWalk(!unit.hasUnitState(UNIT_STAT_RUNNING));
     init.Launch();
 }

@@ -107,9 +107,8 @@ namespace Movement
         if (args.flags.cyclic)
         {
             uint32 cyclic_point = 0;
-            // MoveSplineFlag::Enter_Cycle support dropped
-            // if (splineflags & SPLINEFLAG_ENTER_CYCLE)
-            // cyclic_point = 1;   // shouldn't be modified, came from client
+            if (splineflags.enter_cycle)
+                cyclic_point = 1;   // shouldn't be modified, came from client
             spline.init_cyclic_spline(&args.path[0], args.path.size(), modes[args.flags.isSmooth()], cyclic_point);
         }
         else
@@ -233,6 +232,38 @@ namespace Movement
                     point_Idx = spline.first();
                     time_passed = time_passed % Duration();
                     result = Result_NextSegment;
+
+                    // Remove first point from the path after one full cycle.
+                    // That point was the position of the unit prior to entering the cycle and it shouldn't be repeated with continuous cycles.
+                    if (splineflags.enter_cycle)
+                    {
+                        splineflags.enter_cycle = false;
+
+                        MoveSplineInitArgs args{ (size_t)spline.getPointCount() };
+                        args.path.assign(spline.getPoints().begin() + spline.first() + 1, spline.getPoints().begin() + spline.last());
+                        args.facing = facing;
+                        args.flags = splineflags;
+                        args.path_Idx_offset = point_Idx_offset;
+                        // MoveSplineFlag::Parabolic | MoveSplineFlag::Animation not supported currently
+                            //args.parabolic_amplitude = ?;
+                            //args.time_perc = ?;
+                        args.splineId = m_Id;
+                        args.velocity = 1.0f; // Calculated below
+                        if (args.Validate(nullptr))
+                        {
+                            // New cycle should preserve previous cycle's duration for some weird reason, even though
+                            // the path is really different now. Blizzard is weird. Or this was just a simple oversight.
+                            // Since our splines precalculate length with velocity in mind, if we want to find the desired
+                            // velocity, we have to make a fake spline, calculate its duration and then compare it to the
+                            // desired duration, thus finding out how much the velocity has to be increased for them to match.
+                            MoveSpline tempSpline;
+                            tempSpline.Initialize(args);
+                            args.velocity = (float)tempSpline.Duration() / Duration();
+
+                            if (args.Validate(nullptr))
+                                init_spline(args);
+                        }
+                    }
                 }
                 else
                 {
@@ -272,6 +303,18 @@ namespace Movement
         splineflags.done = true;
         point_Idx = spline.last() - 1;
         time_passed = Duration();
+    }
+
+    const Vector3 MoveSpline::FinalDestination() const
+    {
+        if (Initialized())
+        {
+            if (isCyclic())
+                return spline.getPoint(spline.last() - 1);
+            else
+                return spline.getPoint(spline.last());
+        }
+        return Vector3();
     }
 
     int32 MoveSpline::currentPathIdx() const

@@ -194,7 +194,7 @@ struct boss_ayamissAI : public CombatAI
 
     void StartLanding()
     {
-        m_creature->GetMotionMaster()->MoveWaypoint(1);
+        m_creature->GetMotionMaster()->MovePath(1, PATH_FROM_ENTRY, FORCED_MOVEMENT_NONE, true);
     }
 
     void ExecuteAction(uint32 action) override

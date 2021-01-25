@@ -41,6 +41,33 @@ void ScriptedInstance::DoUseDoorOrButton(uint32 entry, uint32 withRestoreTime /*
         debug_log("SD2: Script call DoUseDoorOrButton(by Entry), but no gameobject of entry %u was created yet, or it was not stored by script for map %u.", entry, instance->GetId());
 }
 
+void ScriptedInstance::DoUseOpenableObject(uint32 entry, bool open, uint32 withRestoreTime, bool useAlternativeState)
+{
+    if (GameObject* go = GetSingleGameObjectFromStorage(entry))
+    {
+        if (open)
+        {
+            if (go->GetGoState() == GO_STATE_READY)
+            {
+                if (go->GetLootState() == GO_READY)
+                    go->UseDoorOrButton(withRestoreTime, useAlternativeState);
+                else
+                    go->ResetDoorOrButton();
+            }
+        }
+        else
+        {
+            if (go->GetGoState() == GO_STATE_ACTIVE)
+            {
+                if (go->GetLootState() == GO_READY)
+                    go->UseDoorOrButton(withRestoreTime, useAlternativeState);
+                else
+                    go->ResetDoorOrButton();
+            }
+        }
+    }
+}
+
 /**
    Function that respawns a despawned GameObject with given time
 
@@ -54,16 +81,17 @@ void ScriptedInstance::DoRespawnGameObject(ObjectGuid guid, uint32 timeToDespawn
 
     if (GameObject* pGo = instance->GetGameObject(guid))
     {
-        // not expect any of these should ever be handled
-        if (pGo->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE || pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR ||
-                pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON || pGo->GetGoType() == GAMEOBJECT_TYPE_TRAP)
-            return;
-
         if (pGo->IsSpawned())
             return;
 
-        pGo->SetRespawnTime(timeToDespawn);
-        pGo->Refresh();
+        // static spawned go - can only respawn
+        if (pGo->IsSpawnedByDefault())
+            pGo->Respawn();
+        else
+        {
+            pGo->SetRespawnTime(timeToDespawn);
+            pGo->Refresh();
+        }
     }
 }
 
@@ -140,7 +168,7 @@ Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBe
     for (const auto& lPlayer : lPlayers)
     {
         Player* pPlayer = lPlayer.getSource();
-        if (pPlayer && (!bOnlyAlive || pPlayer->IsAlive()) && (bCanBeGamemaster || !pPlayer->isGameMaster()))
+        if (pPlayer && (!bOnlyAlive || pPlayer->IsAlive()) && (bCanBeGamemaster || !pPlayer->IsGameMaster()))
             return pPlayer;
     }
 

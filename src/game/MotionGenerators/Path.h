@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include <deque>
+#include <iterator>
 
 struct PathNode
 {
@@ -89,10 +90,20 @@ class Path
         void push_back(const PathElem& node) { i_nodes.push_back(node); }
         void pop_back() { i_nodes.pop_back(); }
 
+        auto& front() const { return i_nodes.front(); }
+        auto& back() const { return i_nodes.back(); }
+
         PathNode& operator[](size_t idx) { return i_nodes[idx]; }
         PathNode const& operator[](size_t idx) const { return i_nodes[idx]; }
 
         void set(size_t idx, PathElem elem) { i_nodes[idx] = elem; }
+
+        auto begin() const { return i_nodes.begin(); }
+        auto end() const { return i_nodes.end(); }
+        auto rbegin() const { return i_nodes.rbegin(); }
+        auto rend() const { return i_nodes.rend(); }
+
+        bool operator!=(Path<PathElem, PathNode> const& other) const { return i_nodes != other.i_nodes; }
 
     protected:
         std::deque<PathElem> i_nodes;

@@ -17,17 +17,38 @@
 */
 
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellMgr.h"
 
 struct ArcaneConcentration : public AuraScript
 {
-    SpellAuraProcResult OnProc(Aura* /*aura*/, ProcExecutionData& procData) const override
+    bool OnCheckProc(Aura* aura, ProcExecutionData& procData) const override
     {
-        procData.procOnce = true;
-        return SPELL_AURA_PROC_OK;
+        if (Spell* spell = procData.spell)
+        {
+            if (IsChanneledSpell(spell->m_spellInfo))
+                return false; // these never proc
+            bool registered = false;
+            if (SpellEntry const* spellInfo = spell->GetTriggeredByAuraSpellInfo())
+            {
+                if (IsChanneledSpell(spellInfo))
+                {
+                    if (Spell* channeledSpell = spell->GetCaster()->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                    {
+                        if (channeledSpell->IsAuraProcced(aura))
+                            return false;
+
+                        channeledSpell->RegisterAuraProc(aura);
+                        registered = true;
+                    }
+                }
+            }
+            spell->RegisterAuraProc(aura);
+        }
+        return true;
     }
 };
 
 void LoadMageScripts()
 {
-    RegisterAuraScript<AuraScript>("spell_arcane_concentration");
+    RegisterAuraScript<ArcaneConcentration>("spell_arcane_concentration");
 }

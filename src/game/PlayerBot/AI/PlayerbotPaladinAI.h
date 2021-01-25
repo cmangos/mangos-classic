@@ -68,31 +68,31 @@ enum PaladinSpells
 class MANGOS_DLL_SPEC PlayerbotPaladinAI : PlayerbotClassAI
 {
     public:
-        PlayerbotPaladinAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotPaladinAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotPaladinAI();
 
         // all combat actions go here
-        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
-        bool CanPull();
-        bool Pull();
+        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget) override;
+        bool CanPull() override;
+        bool Pull() override;
 
         // all non combat actions go here, ex buffs, heals, rezzes
-        void DoNonCombatActions();
+        void DoNonCombatActions() override;
 
         // Utility Functions
         bool CastHoTOnTank();
 
     private:
-        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
-        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget) override;
+        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget) override;
 
         // Heals the target based off its hps
-        CombatManeuverReturns HealPlayer(Player* target);
+        CombatManeuverReturns HealPlayer(Player* target) override;
         // Resurrects the target
-        CombatManeuverReturns ResurrectPlayer(Player* target);
+        CombatManeuverReturns ResurrectPlayer(Player* target) override;
         // Dispel disease or negative magic effects from an internally selected target
         CombatManeuverReturns DispelPlayer(Player* target = nullptr);
 

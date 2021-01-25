@@ -87,6 +87,9 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
     // Dump outgoing packet.
     sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct.GetOpcode(), pct.GetOpcodeName(), pct, false);
 
+    // encrypt thread unsafe due to being executed from map contexts frequently - TODO: move to post service context in future
+    std::lock_guard<std::mutex> guard(m_worldSocketMutex);
+
     ServerPktHeader header;
 
     header.cmd = pct.GetOpcode();
@@ -151,6 +154,7 @@ bool WorldSocket::ProcessIncomingData()
             return false;
         }
 
+        // thread safe due to always being called from service context
         m_crypt.DecryptRecv((uint8*)&header, sizeof(ClientPktHeader));
 
         EndianConvertReverse(header.size);
@@ -378,11 +382,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     time_t mutetime = time_t (fields[7].GetUInt64());
 
-    uint8 tempLoc = LocaleConstant(fields[8].GetUInt8());
-    if (tempLoc >= static_cast<uint8>(MAX_LOCALE))
-        locale = LOCALE_enUS;
-    else
-        locale = LocaleConstant(tempLoc);
+    locale = GetLocaleByName(fields[8].GetString());
 
     delete result;
 
@@ -470,13 +470,16 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         if (!m_session->RequestNewSocket(this))
             return false;
 
+        uint32 counter = 0;
+
         // wait session going to be ready
         while (m_session->GetState() != WORLD_SESSION_STATE_CHAR_SELECTION)
         {
+            ++counter;
             // just wait
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-            if (IsClosed())
+            if (IsClosed() || counter > 20)
                 return false;
         }
     }

@@ -339,7 +339,7 @@ struct boss_onyxiaAI : public CombatAI
                 ResetTimer(ONYXIA_SUMMON_WHELPS, 3000);
                 if (m_instance)
                     m_instance->SetData(TYPE_ONYXIA, DATA_LIFTOFF);
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_INIT_NORTH, aMoveData[POINT_ID_NORTH].fX, aMoveData[POINT_ID_NORTH].fY, aMoveData[POINT_ID_NORTH].fZ, true, FORCED_MOVEMENT_FLIGHT);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_INIT_NORTH, aMoveData[POINT_ID_NORTH].fX, aMoveData[POINT_ID_NORTH].fY, aMoveData[POINT_ID_NORTH].fZ, FORCED_MOVEMENT_FLIGHT);
                 break;
             case PHASE_BREATH_POST:
                 m_uiPhase = PHASE_END;
@@ -408,7 +408,7 @@ struct boss_onyxiaAI : public CombatAI
                 m_creature->SetTarget(nullptr);
                 SetCombatScriptStatus(true);
 
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFTOFF, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, -84.25523f, 6.248279f);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFTOFF, Position(aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, -84.25523f, 6.248279f));
                 SetActionReadyStatus(action, false);
                 break;
             }
@@ -424,7 +424,7 @@ struct boss_onyxiaAI : public CombatAI
                 SetCombatScriptStatus(true);
                 m_creature->SetTarget(nullptr);
                 m_creature->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LAND, landPoints[0][0], landPoints[0][1], landPoints[0][2], true, FORCED_MOVEMENT_FLIGHT);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LAND, landPoints[0][0], landPoints[0][1], landPoints[0][2], FORCED_MOVEMENT_FLIGHT);
                 SetActionReadyStatus(action, false);
                 break;
             }
@@ -531,7 +531,7 @@ struct boss_onyxiaAI : public CombatAI
 
                 ResetCombatAction(action, urand(15000, 25000));
                 m_creature->RemoveAurasDueToSpell(SPELL_DRAGON_HOVER);
-                m_creature->GetMotionMaster()->MovePoint(m_uiMovePoint, aMoveData[m_uiMovePoint].fX, aMoveData[m_uiMovePoint].fY, aMoveData[m_uiMovePoint].fZ, true, FORCED_MOVEMENT_FLIGHT);
+                m_creature->GetMotionMaster()->MovePoint(m_uiMovePoint, aMoveData[m_uiMovePoint].fX, aMoveData[m_uiMovePoint].fY, aMoveData[m_uiMovePoint].fZ, FORCED_MOVEMENT_FLIGHT);
                 break;
             }
         }

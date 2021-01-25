@@ -42,7 +42,6 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
 
-    Movement::MoveSplineInit init(owner);
     Position pos;
     // at apply we can select more nice return points base at current movegen
     if (owner.GetMotionMaster()->empty() || !owner.GetMotionMaster()->top()->GetResetPosition(owner, pos.x, pos.y, pos.z, pos.o))
@@ -50,20 +49,26 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
 
     if (pos.IsEmpty())
         owner.GetRespawnCoord(pos.x, pos.y, pos.z, &pos.o);
-    if (owner.GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), DIST_CALC_NONE) > 150.f * 150.f)
+    if (owner.GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), DIST_CALC_NONE, owner.GetTransport()) > 150.f * 150.f)
     {
-        Finalize(owner);
-        owner.SetRespawnDelay(30, true);
-        owner.ForcedDespawn(1);
-        return;
+        if (!owner.IsInWorld() || !owner.GetMap()->IsDungeon())
+        {
+            arrived = true;
+            Finalize(owner);
+            owner.SetRespawnDelay(5, true);
+            owner.ForcedDespawn(1);
+            return;
+        }
     }
 
     PathFinder path(&owner);
 
-    path.calculate(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), true);
+    Position curPos = owner.GetPosition(owner.GetTransport());
+    // source and target pos must be local coords
+    path.calculate(G3D::Vector3(curPos.GetPositionX(), curPos.GetPositionY(), curPos.GetPositionZ()), G3D::Vector3(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()), true);
 
-    init.SetFacing(pos.GetPositionO());
-    init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), true);
+    Movement::MoveSplineInit init(owner);
+    init.MovebyPath(path.getPath());
     init.SetWalk(!runHome);
     init.SetFacing(pos.GetPositionO());
     if (path.getPathType() & (PATHFIND_NOPATH | PATHFIND_SHORTCUT))
@@ -88,7 +93,6 @@ void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
         if (owner.GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_REACH_HOME)
             owner.ClearTemporaryFaction();
 
-        owner.SetWalk(!owner.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
         owner.LoadCreatureAddon(true);
         owner.AI()->JustReachedHome();
 

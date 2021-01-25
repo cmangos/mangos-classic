@@ -2057,6 +2057,18 @@ void SpellMgr::LoadSpellScriptTarget()
                 }
                 break;
             }
+            case SPELL_TARGET_TYPE_GAMEOBJECT_GUID:
+            {
+                if (!itr->targetEntry)
+                    break;
+
+                if (!sObjectMgr.GetGOData(itr->targetEntry))
+                {
+                    sLog.outErrorDb("Table `spell_script_target`: gameobject entry %u does not exist.", itr->targetEntry);
+                    sSpellScriptTargetStorage.EraseEntry(itr->spellId);
+                }
+                break;
+            }
             case SPELL_TARGET_TYPE_CREATURE_GUID:
             {
                 if (!sObjectMgr.GetCreatureData(itr->targetEntry))

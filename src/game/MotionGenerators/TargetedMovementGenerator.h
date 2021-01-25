@@ -23,6 +23,8 @@
 #include "MotionGenerators/MovementGenerator.h"
 #include "MotionGenerators/FollowerReference.h"
 #include <G3D/Vector3.h>
+#include "Entities/ObjectGuid.h"
+#include "Entities/Object.h"
 
 class PathFinder;
 
@@ -62,8 +64,10 @@ class TargetedMovementGeneratorMedium
 
         virtual void UnitSpeedChanged() override { i_speedChanged = true; }
 
+        virtual bool RemoveOnInvalid() const { return true; };
+
     protected:
-        virtual bool RequiresNewPosition(T& owner, float x, float y, float z) const;
+        virtual bool RequiresNewPosition(T& owner, Position pos) const;
         virtual float GetDynamicTargetDistance(T& /*owner*/, bool /*forRangeCheck*/) const { return i_offset; }
         virtual bool ShouldFaceTarget() const { return i_faceTarget; }
         virtual void HandleTargetedMovement(T& owner, const uint32& time_diff) = 0;
@@ -125,6 +129,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
 
         bool EnableWalking() const { return m_walk;}
         bool _lostTarget(Unit& u) const;
+        bool RemoveOnInvalid() const override { return false; }
         void _reachTarget(Unit&);
         bool GetResetPosition(Unit& /*u*/, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const override { return false; }
         void HandleMovementFailure(Unit& owner) override;
@@ -134,11 +139,13 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
 
         virtual bool IsRemovedOnExpire() const override { return true; }
 
+        std::pair<std::string, std::string> GetPrintout() const;
+
     protected:
         float GetDynamicTargetDistance(Unit& owner, bool forRangeCheck) const override;
         void HandleTargetedMovement(Unit& owner, const uint32& time_diff) override;
         void HandleFinalizedMovement(Unit& owner) override;
-        bool RequiresNewPosition(Unit& owner, float x, float y, float z) const override;
+        bool RequiresNewPosition(Unit& owner, Position pos) const override;
 
         bool _hasUnitStateNotMove(Unit& u) override;
         void _clearUnitStateMove(Unit& u) override;
@@ -162,6 +169,8 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
         bool m_closenessExpired;
 
         ChaseMovementMode m_currentMode;
+
+        GuidVector m_spawns;
 };
 
 class FollowMovementGenerator : public TargetedMovementGeneratorMedium<Unit, FollowMovementGenerator>

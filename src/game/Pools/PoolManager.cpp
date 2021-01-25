@@ -369,13 +369,15 @@ template<>
 bool PoolGroup<Creature>::CanSpawn(PoolObject* object, MapPersistentState& mapState)
 {
     if (Map* map = mapState.GetMap()) // for world maps this will fail on world start
-        return map->GetCreatureLinkingHolder()->CanSpawn(object->guid, map, nullptr, 0.f, 0.f);
+        map->CanSpawn(TYPEID_UNIT, object->guid);
     return true;
 }
 
 template<>
 bool PoolGroup<GameObject>::CanSpawn(PoolObject* object, MapPersistentState& mapState)
 {
+    if (Map* map = mapState.GetMap()) // for world maps this will fail on world start
+        return map->CanSpawn(TYPEID_GAMEOBJECT, object->guid);
     return true;
 }
 
@@ -448,7 +450,7 @@ void PoolGroup<Creature>::Spawn1Object(MapPersistentState& mapState, PoolObject*
         if (dataMap && dataMap->IsLoaded(data->posX, data->posY))
         {
             Creature* pCreature = new Creature;
-            if (!pCreature->LoadFromDB(obj->guid, dataMap))
+            if (!pCreature->LoadFromDB(obj->guid, dataMap, obj->guid))
                 delete pCreature;
             else
             {
@@ -481,8 +483,10 @@ void PoolGroup<GameObject>::Spawn1Object(MapPersistentState& mapState, PoolObjec
         // We use spawn coords to spawn
         if (dataMap && dataMap->IsLoaded(data->posX, data->posY))
         {
-            GameObject* pGameobject = new GameObject;
-            if (!pGameobject->LoadFromDB(obj->guid, dataMap))
+            GameObjectData const* data = sObjectMgr.GetGOData(obj->guid);
+            MANGOS_ASSERT(data);
+            GameObject* pGameobject = GameObject::CreateGameObject(data->id);
+            if (!pGameobject->LoadFromDB(obj->guid, dataMap, obj->guid))
                 delete pGameobject;
             else
             {

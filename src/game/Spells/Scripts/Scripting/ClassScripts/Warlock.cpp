@@ -88,7 +88,7 @@ struct LifeTap : public SpellScript
         // Mana Feed
         int32 manaFeedVal = caster->CalculateSpellEffectValue(caster, spell->m_spellInfo, EFFECT_INDEX_1);
         manaFeedVal = manaFeedVal * mana / 100;
-        if (manaFeedVal > 0)
+        if (manaFeedVal > 0 && caster->GetPet())
             caster->CastCustomSpell(nullptr, 32553, &manaFeedVal, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);            
     }
 };

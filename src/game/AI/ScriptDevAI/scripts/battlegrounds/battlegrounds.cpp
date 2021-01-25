@@ -114,6 +114,30 @@ struct OpeningCapping : public SpellScript
     }
 };
 
+/*#####
+# spell_battleground_banner_trigger
+#
+# These are generic spells that handle player click on battleground banners; All spells are triggered by GO type 10
+# Contains following spells:
+# Arathi Basin: 23932, 23935, 23936, 23937, 23938
+# Alterac Valley: 24677
+#####*/
+struct spell_battleground_banner_trigger : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        // TODO: Fix when go casting is fixed
+        WorldObject* obj = spell->GetAffectiveCasterObject();
+
+        if (obj->IsGameObject() && spell->GetUnitTarget()->IsPlayer())
+        {
+            Player* player = static_cast<Player*>(spell->GetUnitTarget());
+            if (BattleGround* bg = player->GetBattleGround())
+                bg->HandlePlayerClickedOnFlag(player, static_cast<GameObject*>(obj));
+        }
+    }
+};
+
 void AddSC_battleground()
 {
     Script* pNewScript = new Script;
@@ -123,4 +147,5 @@ void AddSC_battleground()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<OpeningCapping>("spell_opening_capping");
+    RegisterSpellScript<spell_battleground_banner_trigger>("spell_battleground_banner_trigger");
 }

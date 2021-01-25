@@ -9,6 +9,7 @@ enum
 {
     MAX_ENCOUNTER               = 19,
     MAX_GENERATORS              = 5,
+    MAX_PORTALS                 = 19,
 
     // East
     TYPE_ALZZIN                 = 0,                        // Do not change - Handled with Acid
@@ -55,6 +56,7 @@ enum
     NPC_MANA_REMNANT            = 11483,
     NPC_HIGHBORNE_SUMMONER      = 11466,
     NPC_WARLOCK_DUMMY_INFERNAL  = 14501,
+    NPC_JEEVEE                  = 14500,
 
     GO_PRINCES_CHEST            = 179545,
     GO_PRINCES_CHEST_AURA       = 179563,
@@ -66,8 +68,28 @@ enum
     GO_FORCEFIELD               = 179503,
     GO_WARPWOOD_DOOR            = 177221,
     GO_WEST_LIBRARY_DOOR        = 179550,
+
+    GO_BELL_OF_DETHMOORA        = 179674,
+    GO_DOOMSDAY_CANDLE          = 179673,
+    GO_WHEEL_OF_BLACK_MARCH     = 179672,
     GO_DREADSTEED_PORTAL        = 179681,
     GO_WARLOCK_RITUAL_CIRCLE    = 179668,
+    GO_MOUNT_QUEST_SYMBOL1      = 179669,
+    GO_MOUNT_QUEST_SYMBOL2      = 179670,
+    GO_MOUNT_QUEST_SYMBOL3      = 179671,
+    GO_RITUAL_CANDLE_AURA       = 179688, // invis trap - true caster of 23226
+
+    SPELL_BLACK_MARCH_BLESSING  = 23120,
+    SPELL_RITUAL_CANDLE_AURA    = 23226,
+    SPELL_RITUAL_BELL_AURA      = 23117,
+
+    SPELL_TELEPORT              = 29216,
+
+    NPC_XOROTHIAN_IMP           = 14482,
+    NPC_DREAD_GUARD             = 14483,
+    NPC_LORD_HELNURATH          = 14506,
+
+    SAY_UNSUMMON_DEMON          = -1429004,
 
     // North
     NPC_GUARD_MOLDAR            = 14326,
@@ -126,7 +148,9 @@ class instance_dire_maul : public ScriptedInstance
 
         bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
+        GuidVector GetRitualSymbolGuids();
+        void ProcessDreadsteedRitualStart();
 
     protected:
         bool CheckAllGeneratorsDestroyed();
@@ -149,7 +173,7 @@ class instance_dire_maul : public ScriptedInstance
         GuidList m_lDreadsteedPortalsGUIDs;
         std::set<uint32> m_sSortedGeneratorGuards[MAX_GENERATORS];
 
-        uint32 m_uiDreadsteedEventTimer;
+        GuidVector m_lRitualSymbolGUIDs;
 
         // North
         bool m_bDoNorthBeforeWest;

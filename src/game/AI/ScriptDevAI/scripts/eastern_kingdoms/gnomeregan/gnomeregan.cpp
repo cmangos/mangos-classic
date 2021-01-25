@@ -683,7 +683,7 @@ struct npc_kernobeeAI : public FollowerAI
                 SetFollowComplete(true);
                 if (Player* pPlayer = GetLeaderForFollower())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_A_FINE_MESS, m_creature);
-                m_creature->GetMotionMaster()->MovePoint(1, aKernobeePositions[1][0], aKernobeePositions[1][1], aKernobeePositions[1][2], false);
+                m_creature->GetMotionMaster()->MovePoint(1, aKernobeePositions[1][0], aKernobeePositions[1][1], aKernobeePositions[1][2]);
                 m_creature->ForcedDespawn(2000);
             }
         }

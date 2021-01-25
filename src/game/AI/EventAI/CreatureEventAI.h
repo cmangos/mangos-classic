@@ -104,7 +104,7 @@ enum EventAI_ActionType
     ACTION_T_COMBAT_MOVEMENT            = 21,               // AllowCombatMovement (0 = stop combat based movement, anything else continue attacking)
     ACTION_T_SET_PHASE                  = 22,               // Phase
     ACTION_T_INC_PHASE                  = 23,               // Value (may be negative to decrement phase, should not be 0)
-    ACTION_T_EVADE                      = 24,               // No Params
+    ACTION_T_EVADE                      = 24,               // CombatOnly
     ACTION_T_FLEE_FOR_ASSIST            = 25,               // No Params
     ACTION_T_QUEST_EVENT_ALL            = 26,               // QuestID, UseThreatList (1 = true, 0 = false)
     ACTION_T_CAST_EVENT_ALL             = 27,               // CreatureId, SpellId
@@ -142,6 +142,7 @@ enum EventAI_ActionType
     ACTION_T_SET_FACING                 = 59,               // Target, 0 - set, 1 - reset
     ACTION_T_SET_SPELL_SET              = 60,               // SetId
     ACTION_T_SET_IMMOBILIZED_STATE      = 61,               // state (true - rooted), combatonly (true - autoremoved on combat stop)
+    ACTION_T_SET_DESPAWN_AGGREGATION    = 62,               // mask, entry, entry2
 
     ACTION_T_END,
 };
@@ -214,6 +215,13 @@ enum WalkSetting : uint32
     WALK_DEFAULT = 1,
     RUN_CHASE    = 2, // Default for combat
     WALK_CHASE   = 3,
+};
+
+enum DespawnAggregation : uint32
+{
+    AGGREGATION_ENABLED = 0x1,
+    AGGREGATION_EVADE   = 0x2,
+    AGGREGATION_DEATH   = 0x4,
 };
 
 struct CreatureEventAI_Action
@@ -333,6 +341,11 @@ struct CreatureEventAI_Action
             uint32 phase;
         } set_phase;
         // ACTION_T_INC_PHASE                               = 23
+        struct
+        {
+            uint32 combatOnly;
+        } evade;
+        // ACTION_T_EVADE                                   = 24
         struct
         {
             int32 step;
@@ -548,6 +561,13 @@ struct CreatureEventAI_Action
             uint32 apply;
             uint32 combatOnly;
         } immobilizedState;
+        // ACTION_T_SET_DESPAWN_AGGREGATION
+        struct
+        {
+            uint32 mask;
+            uint32 entry;
+            uint32 entry2;
+        } despawnAggregation;
         // RAW
         struct
         {
@@ -893,6 +913,10 @@ class CreatureEventAI : public CreatureAI
         // Steps 0..2 correspond to AI_EVENT_LOST_SOME_HEALTH(90%), AI_EVENT_LOST_HEALTH(50%), AI_EVENT_CRITICAL_HEALTH(10%)
         uint32 m_throwAIEventStep;                          // Used for damage taken/ received heal
         float m_LastSpellMaxRange;                          // Maximum spell range that was cast during dynamic movement
+
+        uint32 m_despawnAggregationMask;
+        std::set<uint32> m_entriesForDespawn;
+        GuidVector m_despawnGuids;
 
         // Caster ai support
         bool m_rangedMode;

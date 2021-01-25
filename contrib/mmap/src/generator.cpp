@@ -72,6 +72,7 @@ void printUsage()
     printf("--silent : Make script friendly. No wait for user input, error, completion.\n");
     printf("--offMeshInput [file.*] : Path to file containing off mesh connections data.\n\n");
     printf("--configInputPath [file.*] : Path to json configuration file.\n\n");
+    printf("--onlyGO : builds only gameobject models for transports\n\n");
     printf("Example:\nmovemapgen (generate all mmap with default arg\n"
            "movemapgen 0 (generate map 0)\n"
            "movemapgen 0 --tile 34,46 (builds only tile 34,46 of map 0)\n\n");
@@ -88,6 +89,7 @@ bool handleArgs(int argc, char** argv,
                 bool& skipBattlegrounds,
                 bool& debugOutput,
                 bool& silent,
+                bool& buildOnlyGameobjectModels,
                 char*& offMeshInputPath,
                 char*& configInputPath)
 {
@@ -141,6 +143,10 @@ bool handleArgs(int argc, char** argv,
         {
             silent = true;
         }
+        else if (strcmp(argv[i], "--onlyGO") == 0)
+        {
+            buildOnlyGameobjectModels = true;
+        }
         else if (strcmp(argv[i], "--offMeshInput") == 0)
         {
             param = argv[++i];
@@ -167,7 +173,7 @@ bool handleArgs(int argc, char** argv,
             int map = atoi(argv[i]);
             if (map > 0 || (map == 0 && (strcmp(argv[i], "0") == 0)))
                 mapId = map;
-            else
+            else if (!buildOnlyGameobjectModels)
             {
                 printf("invalid map id\n");
                 return false;
@@ -196,18 +202,19 @@ int main(int argc, char** argv)
     bool skipBattlegrounds = false;
     bool debug = false;
     bool silent = false;
+    bool buildOnlyGameobjectModels = false;
 
     char* offMeshInputPath = "offmesh.txt";
     char* configInputPath = "config.json";
 
     bool validParam = handleArgs(argc, argv, mapId, tileX, tileY, skipLiquid,
                                  skipContinents, skipJunkMaps, skipBattlegrounds,
-                                 debug, silent, offMeshInputPath, configInputPath);
+                                 debug, silent, buildOnlyGameobjectModels, offMeshInputPath, configInputPath);
 
     if (!validParam)
         return silent ? -1 : finish("You have specified invalid parameters (use -? for more help)", -1);
 
-    if (mapId == -1 && debug)
+    if (mapId == -1 && debug && !buildOnlyGameobjectModels)
     {
         if (silent)
             return -2;
@@ -224,12 +231,17 @@ int main(int argc, char** argv)
 
     MapBuilder builder(configInputPath, skipLiquid, skipContinents, skipJunkMaps, skipBattlegrounds, debug, offMeshInputPath);
 
-    if (tileX > -1 && tileY > -1 && mapId >= 0)
+    if (buildOnlyGameobjectModels)
+        builder.buildTransports();
+    else if (tileX > -1 && tileY > -1 && mapId >= 0)
         builder.buildSingleTile(mapId, tileX, tileY);
     else if (mapId >= 0)
         builder.buildMap(uint32(mapId));
     else
+    {
         builder.buildAllMaps();
+        builder.buildTransports();
+    }
 
     return silent ? 1 : finish("Movemap build is complete!", 1);
 }

@@ -44,9 +44,6 @@ MapManager::~MapManager()
     for (auto& i_map : i_maps)
         delete i_map.second;
 
-    for (auto m_Transport : m_Transports)
-        delete m_Transport;
-
     DeleteStateMachine();
 }
 
@@ -206,9 +203,6 @@ void MapManager::Update(uint32 diff)
 
     if (m_updater.activated())
         m_updater.wait();
-
-    for (Transport* m_Transport : m_Transports)
-        m_Transport->Update((uint32)i_timer.GetCurrent());
 
     // remove all maps which can be unloaded
     MapMapType::iterator iter = i_maps.begin();

@@ -24,6 +24,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (19873,'spell_destroy_egg'),
 (20038,'spell_explosion_razorgore'),
 (21651,'spell_opening_capping'),
+(23226,'spell_ritual_candle_aura'),
 (25684,'spell_summon_mana_fiends_moam'),
 (25937,'spell_viscidus_freeze'),
 (26009,'spell_cthun_periodic_rotate'),
@@ -32,11 +33,18 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26137,'spell_cthun_rotate_trigger'),
 (26152,'spell_cthun_periodic_eye_trigger'),
 (26180,'spell_huhuran_wyvern_string'),
-(26398,'spell_cthun_hook_tentacle'),
+(26205,'spell_hook_tentacle_trigger'),
+(26217,'spell_cthun_tentacles_summon'),
+(26230,'spell_cthun_exit_stomach'),
+(26237,'spell_cthun_tentacles_summon'),
+(26332,'spell_cthun_mouth_tentacle'),
+(26398,'spell_cthun_tentacles_summon'),
 (26584,'spell_summon_toxic_slime'),
 (26591,'spell_teleport_image'),
 (26619,'spell_periodic_scarab_trigger'),
 (26686,'spell_aq_whirlwind'),
+(26767,'spell_cthun_tentacles_summon'),
+(26769,'spell_cthun_periodic_eye_trigger'),
 (28282,'spell_ashbringer_item'),
 (27808,'spell_kel_thuzad_frost_blast'),
 (28522,'spell_sapphiron_icebolt_aura'),
@@ -65,7 +73,13 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
-(10060,'spell_stacking_rules_override');
+(10060,'spell_power_infusion'),
+(15268,'spell_blackout'),
+(15323,'spell_blackout'),
+(15324,'spell_blackout'),
+(15325,'spell_blackout'),
+(15326,'spell_blackout'),
+(27827,'spell_spirit_of_redemption_heal');
 
 -- Warlock
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
@@ -98,6 +112,22 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (12575,'spell_arcane_concentration'),
 (12576,'spell_arcane_concentration'),
 (12577,'spell_arcane_concentration');
+
+-- Druid
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(8936,'spell_regrowth'),
+(8938,'spell_regrowth'),
+(8939,'spell_regrowth'),
+(8940,'spell_regrowth'),
+(8941,'spell_regrowth'),
+(9750,'spell_regrowth'),
+(9856,'spell_regrowth'),
+(9857,'spell_regrowth'),
+(9858,'spell_regrowth');
+
+-- Rogue
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(14185,'spell_preparation');
 
 -- Battleground and Outdoor PvP
 -- Alterac Valley

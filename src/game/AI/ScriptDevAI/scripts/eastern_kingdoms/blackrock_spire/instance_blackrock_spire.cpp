@@ -793,7 +793,7 @@ InstanceData* GetInstanceData_instance_blackrock_spire(Map* pMap)
 
 bool AreaTrigger_at_blackrock_spire(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (!pPlayer->IsAlive() || pPlayer->isGameMaster())
+    if (!pPlayer->IsAlive() || pPlayer->IsGameMaster())
         return false;
 
     switch (pAt->id)

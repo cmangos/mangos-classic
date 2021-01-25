@@ -207,7 +207,6 @@ struct ScriptedAI : public CreatureAI
 
     protected:
         std::string GetAIName() override { return m_creature->GetAIName(); }
-        void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents
 
     private:
         uint32 m_uiEvadeCheckCooldown;

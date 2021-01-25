@@ -61,7 +61,7 @@ struct heal_priority
 class MANGOS_DLL_SPEC PlayerbotClassAI
 {
     public:
-        PlayerbotClassAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotClassAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotClassAI();
 
         // all combat actions go here
@@ -76,14 +76,11 @@ class MANGOS_DLL_SPEC PlayerbotClassAI
         bool EatDrinkBandage(bool bMana = true, unsigned char foodPercent = 50, unsigned char drinkPercent = 50, unsigned char bandagePercent = 70);
 
         // Utilities
-        Player* GetMaster() { return m_master; }
-        Player* GetPlayerBot() { return m_bot; }
-        PlayerbotAI* GetAI() { return m_ai; }
         bool CastHoTOnTank();
         JOB_TYPE GetBotJob(Player* target);
         JOB_TYPE GetTargetJob(Player* target);
         time_t GetWaitUntil() { return m_WaitUntil; }
-        void SetWait(uint8 t) { m_WaitUntil = m_ai->CurrentTime() + t; }
+        void SetWait(uint8 t) { m_WaitUntil = m_ai.CurrentTime() + t; }
         void ClearWait() { m_WaitUntil = 0; }
         //void SetWaitUntil(time_t t) { m_WaitUntil = t; }
 
@@ -118,9 +115,9 @@ class MANGOS_DLL_SPEC PlayerbotClassAI
 
         time_t m_WaitUntil;
 
-        Player* m_master;
-        Player* m_bot;
-        PlayerbotAI* m_ai;
+        Player& m_master;
+        Player& m_bot;
+        PlayerbotAI& m_ai;
 
         // first aid
         uint32 RECENTLY_BANDAGED;

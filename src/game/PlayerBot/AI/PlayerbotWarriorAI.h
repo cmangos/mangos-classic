@@ -83,26 +83,26 @@ enum WarriorSpells
 class MANGOS_DLL_SPEC PlayerbotWarriorAI : PlayerbotClassAI
 {
     public:
-        PlayerbotWarriorAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotWarriorAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotWarriorAI();
 
         // all combat actions go here
-        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
-        bool CanPull();
-        bool Pull();
+        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget) override;
+        bool CanPull() override;
+        bool Pull() override;
 
         // all non combat actions go here, ex buffs, heals, rezzes
-        void DoNonCombatActions();
+        void DoNonCombatActions() override;
 
         //Buff/rebuff shouts
         void CheckShouts();
 
     private:
-        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
-        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget) override;
+        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget) override;
 
         // ARMS
         uint32 BATTLE_STANCE,

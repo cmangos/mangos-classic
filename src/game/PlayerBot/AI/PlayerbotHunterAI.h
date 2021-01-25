@@ -91,25 +91,25 @@ enum HunterSpells
 class MANGOS_DLL_SPEC PlayerbotHunterAI : PlayerbotClassAI
 {
     public:
-        PlayerbotHunterAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotHunterAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotHunterAI();
         static bool HasPet(Player* bot);
 
         // all combat actions go here
-        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget) override;
 
         // all non combat actions go here, ex buffs, heals, rezzes
-        void DoNonCombatActions();
+        void DoNonCombatActions() override;
 
         // buff a specific player, usually a real PC who is not in group
         //void BuffPlayer(Player *target);
 
     private:
-        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
-        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget) override;
+        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget) override;
 
         // Hunter
         bool IsTargetEnraged(Unit* pTarget);

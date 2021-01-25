@@ -462,7 +462,7 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
         return;
 
     // not to GM
-    if (!victim || (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->isGameMaster()))
+    if (!victim || (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->IsGameMaster()))
         return;
 
     // not to dead and not for dead
@@ -487,10 +487,10 @@ void ThreatManager::addThreatDirectly(Unit* victim, float threat)
         iThreatContainer.addReference(hostileReference);
         hostileReference->addThreat(threat); // now we add the real threat
         getOwner()->TriggerAggroLinkingEvent(victim);
-        Unit* victim_owner = victim->GetOwner();
-        if (victim_owner && victim_owner->IsAlive() && getOwner()->CanAttack(victim_owner) && !victim_owner->hasUnitState(UNIT_STAT_FEIGN_DEATH))
+        Unit* victim_owner = victim->GetMaster();
+        if (victim_owner && victim_owner->IsAlive() && victim_owner->CanJoinInAttacking(getOwner()) && !victim_owner->hasUnitState(UNIT_STAT_FEIGN_DEATH))
             addThreat(victim_owner, 0.0f); // create a threat to the owner of a pet, if the pet attacks
-        if (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->isGameMaster())
+        if (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->IsGameMaster())
             hostileReference->setOnlineOfflineState(false); // GM is always offline
     }
 }
@@ -536,6 +536,18 @@ float ThreatManager::getThreat(Unit* victim, bool alsoSearchOfflineList)
         threat = iThreatOfflineContainer.getReferenceByTarget(victim)->getThreat();
 
     return threat;
+}
+
+float ThreatManager::GetHighestThreat()
+{
+    float value = 0.f;
+    for (auto& ref : iThreatContainer.getThreatList())
+        if (ref->getThreat() > value)
+            value = ref->getThreat();
+    for (auto& ref : iThreatOfflineContainer.getThreatList())
+        if (ref->getThreat() > value)
+            value = ref->getThreat();
+    return value;
 }
 
 bool ThreatManager::HasThreat(Unit * victim, bool alsoSearchOfflineList)

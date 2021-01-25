@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Stonetalon_Mountains
 SD%Complete: 100
-SDComment: Quest support: 6523.
+SDComment: Quest support: 1079, 1080, 6523.
 SDCategory: Stonetalon Mountains
 EndScriptData
 
@@ -25,6 +25,8 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/CellImpl.h"
 
 /*######
 ## npc_kaya
@@ -99,6 +101,117 @@ bool QuestAccept_npc_kaya(Player* pPlayer, Creature* pCreature, Quest const* pQu
     return true;
 }
 
+/*######################
+# Covert Ops: Alpha/Beta
+######################*/
+
+enum CovertOpsAlphaBetaMisc
+{
+    // Creatures
+    NPC_VENTURE_DEFORESTER = 3991,
+    NPC_VENTURE_LOGGER = 3989,
+    NPC_VENTURE_DIGGER = 3999,
+    NPC_VENTURE_OVERLORD = 4004,
+    NPC_VENTURE_OPERATOR = 3988,
+
+    // Phase
+    PHASE_INACTIVE = 0,
+    PHASE_CALLING  = 1,
+    PHASE_HOMING   = 2
+};
+
+static const uint32 ventureCoList[5] = { NPC_VENTURE_DEFORESTER, NPC_VENTURE_LOGGER, NPC_VENTURE_DIGGER, NPC_VENTURE_OVERLORD, NPC_VENTURE_OPERATOR };
+
+struct go_covertopsAI : public GameObjectAI
+{
+    go_covertopsAI(GameObject* go) : GameObjectAI(go)
+    {
+        Reset();
+    }
+    uint32 m_phase;
+    uint32 m_callTimer;		    // call Venture Co. NPCs to wagon
+    uint32 m_returnTimer;		// Send Venture Co. NPCs back to spawn points
+
+    CreatureList m_ventureNpcList;
+
+    void Reset()
+    {
+        m_phase = PHASE_INACTIVE;
+        m_callTimer = 2 * IN_MILLISECONDS;
+        m_returnTimer = 45 * IN_MILLISECONDS;
+    }
+
+    void OnLootStateChange() override
+    {
+        if (m_go->GetLootState() == GO_JUST_DEACTIVATED)
+        {
+            m_phase = PHASE_CALLING;    // Calling Venture Co. NPCs
+
+            // Get all nearby Venture Co. NPCs
+            for (auto entry : ventureCoList)
+            {
+                MaNGOS::AllCreaturesOfEntryInRangeCheck check(((GameObject*) m_go), entry, 100.0f);
+                MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(m_ventureNpcList, check);
+                Cell::VisitGridObjects(((GameObject*) m_go), searcher, 100.0f);
+            }
+        }
+    }
+
+    void JustSpawned() override
+    {
+        Reset();
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        switch (m_phase)
+        {
+            case PHASE_CALLING:
+                if (m_callTimer < diff)
+                {
+                    for (auto ventureNpc:m_ventureNpcList)
+                    {
+                        if (!ventureNpc || !ventureNpc->IsAlive() || ventureNpc->IsInCombat())
+                            continue;
+                        float x, y, z;
+                        m_go->GetContactPoint(ventureNpc, x, y, z, 10.0f);
+                        ventureNpc->SetWalk(false);
+                        ventureNpc->GetMotionMaster()->MoveIdle();
+                        ventureNpc->GetMotionMaster()->MovePoint(1, x, y, z);
+                    }
+                    m_callTimer = 0;
+                    m_phase = PHASE_HOMING;
+                }
+                else
+                    m_callTimer -= diff;
+                break;
+            case PHASE_HOMING:
+                if (m_returnTimer < diff)
+                {
+                    for (auto ventureNpc:m_ventureNpcList)
+                    {
+                        if (!ventureNpc || !ventureNpc->IsAlive() || ventureNpc->IsInCombat())
+                            continue;
+                        ventureNpc->SetWalk(true);
+                        ventureNpc->AI()->EnterEvadeMode();
+                    }
+                    m_returnTimer = 0;
+                    m_phase = PHASE_INACTIVE;
+                }
+                else
+                    m_returnTimer -= diff;
+                break;
+            default:
+                break;
+        }
+    }
+};
+
+GameObjectAI* GetAIgo_covertops(GameObject* pGo)
+{
+    return new go_covertopsAI(pGo);
+}
+
 /*######
 ## AddSC
 ######*/
@@ -109,5 +222,10 @@ void AddSC_stonetalon_mountains()
     pNewScript->Name = "npc_kaya";
     pNewScript->GetAI = &GetAI_npc_kaya;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_kaya;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_covert_ops";
+    pNewScript->GetGameObjectAI = &GetAIgo_covertops;
     pNewScript->RegisterSelf();
 }

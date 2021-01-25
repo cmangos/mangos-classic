@@ -45,6 +45,7 @@ typedef std::unordered_set<WorldObject*> WorldObjectUnSet;
 typedef std::list<Unit*> UnitList;
 typedef std::list<Creature*> CreatureList;
 typedef std::list<GameObject*> GameObjectList;
+typedef std::list<Corpse*> CorpseList;
 typedef std::list<Player*> PlayerList;
 typedef std::unordered_set<Player*> PlayerSet;
 typedef std::map<uint64, Player*> PlayersMap;
