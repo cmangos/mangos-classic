@@ -745,7 +745,20 @@ void UnitAI::ClearSelfRoot()
 void UnitAI::DespawnGuids(GuidVector& spawns)
 {
     for (ObjectGuid& guid : spawns)
-        if (Creature* spawn = m_unit->GetMap()->GetAnyTypeCreature(guid))
-            spawn->ForcedDespawn();
+    {
+        if (guid.IsCreature())
+        {
+            if (Creature* spawn = m_unit->GetMap()->GetAnyTypeCreature(guid))
+                spawn->ForcedDespawn();
+        }
+        else if (guid.IsGameObject())
+        {
+            if (GameObject* spawn = m_unit->GetMap()->GetGameObject(guid))
+            {
+                spawn->SetLootState(GO_JUST_DEACTIVATED);
+                spawn->SetForcedDespawn();
+            }
+        }
+    }
     spawns.clear();
 }
