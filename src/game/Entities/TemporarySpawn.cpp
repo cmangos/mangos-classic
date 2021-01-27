@@ -276,6 +276,13 @@ void TemporarySpawn::SaveToDB()
 {
 }
 
+void TemporarySpawn::SetDeathState(DeathState state)
+{
+    if (state == JUST_DIED && m_type == TEMPSPAWN_CORPSE_TIMED_DESPAWN)
+        m_expirationTimestamp = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_lifetime);
+    Creature::SetDeathState(state);
+}
+
 bool TemporarySpawn::IsExpired() const
 {
     auto now = GetMap()->GetCurrentClockTime();
