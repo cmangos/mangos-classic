@@ -145,7 +145,7 @@ class instance_sunken_temple : public ScriptedInstance
 
         GuidList m_luiFlameGUIDs;
         GuidList m_luiBigLightGUIDs;
-        GuidVector m_vuiCircleGUIDs;
+        GuidVector m_evilCircleGuidList;
 };
 
 #endif

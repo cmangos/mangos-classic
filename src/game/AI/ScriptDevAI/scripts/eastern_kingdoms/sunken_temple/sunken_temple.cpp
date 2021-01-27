@@ -228,28 +228,47 @@ bool GOUse_go_eternal_flame(Player* /*pPlayer*/, GameObject* pGo)
     return true;
 }
 
-/*######
-## effectDummy_summon_hakkar
-######*/
-bool EffectDummyCreature_summon_hakkar(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* /*pCreatureTarget*/, ObjectGuid /*originalCasterGuid*/)
+struct SummonHakkar : public SpellScript
 {
-    // Always check spellid and effectindex
-    if (uiSpellId == SPELL_SUMMON_AVATAR && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (!pCaster || pCaster->GetTypeId() != TYPEID_UNIT)
-            return true;
-
-        // Update entry to avatar of Hakkar and cast some visuals
-        ((Creature*)pCaster)->UpdateEntry(NPC_AVATAR_OF_HAKKAR);
-        pCaster->CastSpell(pCaster, SPELL_AVATAR_SUMMONED, TRIGGERED_OLD_TRIGGERED);
-        DoScriptText(SAY_AVATAR_SPAWN, pCaster);
-
-        // Always return true when we are handling this spell and effect
-        return true;
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                // Update entry to Avatar of Hakkar
+                if (caster->GetTypeId() != TYPEID_UNIT)
+                    return;
+                ((Creature*)caster)->UpdateEntry(NPC_AVATAR_OF_HAKKAR);
+                DoScriptText(SAY_AVATAR_SPAWN, caster);
+                caster->CastSpell(nullptr, SPELL_AVATAR_SUMMONED, TRIGGERED_OLD_TRIGGERED);
+            }
+            return;
+        }
     }
+};
 
-    return false;
-}
+struct HakkarSummoned : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                GameObjectList evilCirclesInRange;
+                GetGameObjectListWithEntryInGrid(evilCirclesInRange, caster, GO_EVIL_CIRCLE, 40.0f);
+                // Despawn all evil summoning circles now that Avatar of Hakkar is summmoned
+                for (auto evilCircle : evilCirclesInRange)
+                {
+                    evilCircle->SetForcedDespawn();
+                    evilCircle->SetLootState(GO_JUST_DEACTIVATED);
+                }
+            }
+            return;
+        }
+    }
+};
 
 void AddSC_sunken_temple()
 {
@@ -278,8 +297,6 @@ void AddSC_sunken_temple()
     pNewScript->pGOUse = &GOUse_go_eternal_flame;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_shade_of_hakkar";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_summon_hakkar;
-    pNewScript->RegisterSelf();
+    RegisterSpellScript<SummonHakkar>("spell_summon_hakkar");
+    RegisterSpellScript<HakkarSummoned>("spell_hakkar_summoned");
 }
