@@ -419,8 +419,9 @@ enum UnitState
 
     // High-Level states (usually only with Creatures)
     UNIT_STAT_NO_COMBAT_MOVEMENT    = 0x01000000,           // Combat Movement for MoveChase stopped
-    UNIT_STAT_RUNNING               = 0x02000000,           // SetRun for waypoints and such
-    UNIT_STAT_WAYPOINT_PAUSED       = 0x04000000,           // Waypoint-Movement paused genericly (ie by script)
+    UNIT_STAT_NO_FOLLOW_MOVEMENT    = 0x02000000,
+    UNIT_STAT_RUNNING               = 0x04000000,           // SetRun for waypoints and such
+    UNIT_STAT_WAYPOINT_PAUSED       = 0x08000000,           // Waypoint-Movement paused genericly (ie by script)
 
     UNIT_STAT_IGNORE_PATHFINDING    = 0x10000000,           // do not use pathfinding in any MovementGenerator
 

@@ -267,6 +267,17 @@ void UnitAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=false*/)
     }
 }
 
+void UnitAI::SetFollowMovement(bool enable)
+{
+    if (enable)
+        m_unit->clearUnitState(UNIT_STAT_NO_FOLLOW_MOVEMENT);
+    else
+        m_unit->addUnitState(UNIT_STAT_NO_FOLLOW_MOVEMENT);
+
+    if (m_unit->IsMoving() && m_unit->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+        m_unit->InterruptMoving();
+}
+
 bool UnitAI::IsCombatMovement() const
 {
     return m_unit && !m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);

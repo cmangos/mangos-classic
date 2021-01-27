@@ -332,6 +332,7 @@ class UnitAI
         /// Set combat movement (on/off), also sets UNIT_STAT_NO_COMBAT_MOVEMENT
         void SetCombatMovement(bool enable, bool stopOrStartMovement = false);
         bool IsCombatMovement() const;
+        void SetFollowMovement(bool enable);
 
         ///== Event Handling ===============================
 
