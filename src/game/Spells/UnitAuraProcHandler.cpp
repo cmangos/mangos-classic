@@ -396,13 +396,13 @@ ProcExecutionData::ProcExecutionData(ProcSystemArguments& data, bool isVictim) :
     if (isVictim)
     {
         source = data.victim;
-        victim = data.attacker;
+        attacker = data.attacker;
         procFlags = data.procFlagsVictim;
     }
     else
     {
         source = data.attacker;
-        victim = data.victim;
+        attacker = data.victim;
         procFlags = data.procFlagsAttacker;
     }
 }
