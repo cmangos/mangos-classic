@@ -812,10 +812,14 @@ struct ProcSystemArguments
 // Internal struct for passing data to execution
 struct ProcExecutionData
 {
-    bool isVictim;
-
+    // these are same for proc on attackers auras and victims auras
     Unit* attacker;
     Unit* victim;
+
+    // these change based on isVictim
+    bool isVictim;
+    Unit* source;
+    Unit* target;
 
     uint32 procFlags;
     uint32 procExtra;
