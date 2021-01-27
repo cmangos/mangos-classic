@@ -396,13 +396,13 @@ ProcExecutionData::ProcExecutionData(ProcSystemArguments& data, bool isVictim) :
     if (isVictim)
     {
         source = data.victim;
-        attacker = data.attacker;
+        target = data.attacker;
         procFlags = data.procFlagsVictim;
     }
     else
     {
         source = data.attacker;
-        attacker = data.victim;
+        target = data.victim;
         procFlags = data.procFlagsAttacker;
     }
 }
@@ -527,7 +527,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
     // In most cases req get honor or XP from kill
     if (EventProcFlag & PROC_FLAG_KILL && GetTypeId() == TYPEID_PLAYER)
     {
-        bool allow = ((Player*)this)->isHonorOrXPTarget(data.victim);
+        bool allow = ((Player*)this)->isHonorOrXPTarget(data.target);
         if (!allow)
             return false;
     }
@@ -647,7 +647,7 @@ SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, std::array<int32, MA
 
 SpellAuraProcResult Unit::HandleHasteAuraProc(ProcExecutionData& data)
 {
-    Unit* pVictim = data.victim; uint32 damage = data.damage; Aura* triggeredByAura = data.triggeredByAura; uint32 cooldown = data.cooldown;
+    Unit* pVictim = data.target; uint32 damage = data.damage; Aura* triggeredByAura = data.triggeredByAura; uint32 cooldown = data.cooldown;
     SpellEntry const* hasteSpell = triggeredByAura->GetSpellProto();
 
     Item* castItem = triggeredByAura->GetCastItemGuid() && GetTypeId() == TYPEID_PLAYER
@@ -694,7 +694,7 @@ SpellAuraProcResult Unit::HandleHasteAuraProc(ProcExecutionData& data)
 
 SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
 {
-    Unit* pVictim = data.victim; uint32 damage = data.damage; Aura* triggeredByAura = data.triggeredByAura; SpellEntry const* procSpell = data.procSpell; uint32 procFlags = data.procFlags; uint32 procEx = data.procExtra; uint32 cooldown = data.cooldown;
+    Unit* pVictim = data.target; uint32 damage = data.damage; Aura* triggeredByAura = data.triggeredByAura; SpellEntry const* procSpell = data.procSpell; uint32 procFlags = data.procFlags; uint32 procEx = data.procExtra; uint32 cooldown = data.cooldown;
     SpellEntry const* dummySpell = triggeredByAura->GetSpellProto();
     SpellEffectIndex effIndex = triggeredByAura->GetEffIndex();
     int32  triggerAmount = triggeredByAura->GetModifier()->m_amount;
@@ -1175,7 +1175,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
 
 SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data)
 {
-    Unit* pVictim = data.victim; uint32 damage = data.damage; Aura* triggeredByAura = data.triggeredByAura; SpellEntry const* procSpell = data.procSpell; uint32 procFlags = data.procFlags; uint32 procEx = data.procExtra; uint32 cooldown = data.cooldown;
+    Unit* pVictim = data.target; uint32 damage = data.damage; Aura* triggeredByAura = data.triggeredByAura; SpellEntry const* procSpell = data.procSpell; uint32 procFlags = data.procFlags; uint32 procEx = data.procExtra; uint32 cooldown = data.cooldown;
     // Get triggered aura spell info
     SpellEntry const* auraSpellInfo = triggeredByAura->GetSpellProto();
 
@@ -1531,7 +1531,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
 
 SpellAuraProcResult Unit::HandleProcTriggerDamageAuraProc(ProcExecutionData& data)
 {
-    Unit* victim = data.victim; Aura* triggeredByAura = data.triggeredByAura;
+    Unit* victim = data.target; Aura* triggeredByAura = data.triggeredByAura;
     SpellEntry const* spellInfo = triggeredByAura->GetSpellProto();
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: doing %u damage from spell id %u (triggered by auratype %u of spell %u)",
         triggeredByAura->GetModifier()->m_amount, spellInfo->Id, triggeredByAura->GetModifier()->m_auraname, triggeredByAura->GetId());
@@ -1552,7 +1552,7 @@ SpellAuraProcResult Unit::HandleProcTriggerDamageAuraProc(ProcExecutionData& dat
 
 SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(ProcExecutionData& data)
 {
-    Unit* pVictim = data.victim; Aura* triggeredByAura = data.triggeredByAura; SpellEntry const* procSpell = data.procSpell; uint32 cooldown = data.cooldown;
+    Unit* pVictim = data.target; Aura* triggeredByAura = data.triggeredByAura; SpellEntry const* procSpell = data.procSpell; uint32 cooldown = data.cooldown;
     int32 scriptId = triggeredByAura->GetModifier()->m_miscvalue;
 
     if (!pVictim || !pVictim->IsAlive())
