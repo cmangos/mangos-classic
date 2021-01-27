@@ -16,6 +16,7 @@
 
 #include "TimerAI.h"
 #include "Chat/Chat.h"
+#include "Log.h"
 #include <string>
 
 Timer::Timer(uint32 id, std::function<void()> functor, uint32 timerMin, uint32 timerMax, bool disabled)
@@ -83,15 +84,47 @@ void TimerManager::AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, 
     m_timers.emplace(id, Timer(id, functor, timerMin, timerMax, false));
 }
 
+void TimerManager::ResetTimer(uint32 index, uint32 timer)
+{
+    auto data = m_timers.find(index);
+    if (data == m_timers.end())
+    {
+        sLog.outError("Timer index %u does not exist.", index);
+        return;
+    }
+    (*data).second.timer = timer; (*data).second.disabled = false;
+}
+
+void TimerManager::DisableTimer(uint32 index)
+{
+    auto data = m_timers.find(index);
+    if (data == m_timers.end())
+    {
+        sLog.outError("Timer index %u does not exist.", index);
+        return;
+    }
+    (*data).second.timer = 0; (*data).second.disabled = true;
+}
+
 void TimerManager::ReduceTimer(uint32 index, uint32 timer)
 {
     auto data = m_timers.find(index);
+    if (data == m_timers.end())
+    {
+        sLog.outError("Timer index %u does not exist.", index);
+        return;
+    }
     (*data).second.timer = std::min((*data).second.timer, timer);
 }
 
 void TimerManager::DelayTimer(uint32 index, uint32 timer)
 {
     auto data = m_timers.find(index);
+    if (data == m_timers.end())
+    {
+        sLog.outError("Timer index %u does not exist.", index);
+        return;
+    }
     if (!(*data).second.disabled)
         (*data).second.timer = (*data).second.timer > timer ? (*data).second.timer : timer;
 }
@@ -99,6 +132,11 @@ void TimerManager::DelayTimer(uint32 index, uint32 timer)
 void TimerManager::ResetIfNotStarted(uint32 index, uint32 timer)
 {
     auto data = m_timers.find(index);
+    if (data == m_timers.end())
+    {
+        sLog.outError("Timer index %u does not exist.", index);
+        return;
+    }
     if ((*data).second.disabled)
     {
         (*data).second.timer = timer;

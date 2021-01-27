@@ -68,16 +68,8 @@ class TimerManager
         void AddCustomAction(uint32 id, uint32 timer, std::function<void()> functor);
         void AddCustomAction(uint32 id, uint32 timerMin, uint32 timerMax, std::function<void()> functor);
 
-        virtual void ResetTimer(uint32 index, uint32 timer)
-        {
-            auto data = m_timers.find(index);
-            (*data).second.timer = timer; (*data).second.disabled = false;
-        }
-        virtual void DisableTimer(uint32 index)
-        {
-            auto data = m_timers.find(index);
-            (*data).second.timer = 0; (*data).second.disabled = true;
-        }
+        virtual void ResetTimer(uint32 index, uint32 timer);
+        virtual void DisableTimer(uint32 index);
         virtual void ReduceTimer(uint32 index, uint32 timer);
         virtual void DelayTimer(uint32 index, uint32 timer);
         virtual void ResetIfNotStarted(uint32 index, uint32 timer);
