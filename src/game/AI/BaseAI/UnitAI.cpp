@@ -757,7 +757,7 @@ void UnitAI::DespawnGuids(GuidVector& spawns)
 {
     for (ObjectGuid& guid : spawns)
     {
-        if (guid.IsCreature())
+        if (guid.IsAnyTypeCreature())
         {
             if (Creature* spawn = m_unit->GetMap()->GetAnyTypeCreature(guid))
                 spawn->ForcedDespawn();
