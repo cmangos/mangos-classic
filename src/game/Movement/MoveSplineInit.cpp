@@ -65,6 +65,13 @@ namespace Movement
         if (!args.Validate(&unit))
             return 0;
 
+        if (moveFlags & MOVEFLAG_ROOT && !args.path.empty())
+        {
+            sLog.outCustomLog("Invalid movement during root.");
+            sLog.traceLog();
+            return 0;
+        }
+
         args.splineId = splineCounter++;
 
         unit.m_movementInfo.SetMovementFlags(MovementFlags(moveFlags));
