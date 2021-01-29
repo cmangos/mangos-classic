@@ -190,17 +190,17 @@ bool ProcessEventId_event_antalarion_statue_activation(uint32 uiEventId, Object*
 /*######
 ## event_avatar_of_hakkar
 ######*/
-bool ProcessEventId_event_avatar_of_hakkar(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+bool ProcessEventId_event_avatar_of_hakkar(uint32 /*eventId*/, Object* source, Object* /*target*/, bool /*isStart*/)
 {
-    if (pSource->GetTypeId() == TYPEID_PLAYER)
+    if (source->GetTypeId() == TYPEID_PLAYER)
     {
-        if (instance_sunken_temple* pInstance = (instance_sunken_temple*)((Player*)pSource)->GetInstanceData())
+        if (instance_sunken_temple* instance = (instance_sunken_temple*)((Player*)source)->GetInstanceData())
         {
-            // return if not NOT_STARTED
-            if (pInstance->GetData(TYPE_AVATAR) != NOT_STARTED)
+            // return if not NOT_STARTED or FAILED
+            if (instance->GetData(TYPE_AVATAR) != NOT_STARTED && instance->GetData(TYPE_AVATAR) != FAIL)
                 return true;
 
-            pInstance->SetData(TYPE_AVATAR, IN_PROGRESS);
+            instance->SetData(TYPE_AVATAR, IN_PROGRESS);
 
             return true;
         }

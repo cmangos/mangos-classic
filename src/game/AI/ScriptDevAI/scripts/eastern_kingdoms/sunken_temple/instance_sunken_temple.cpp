@@ -32,6 +32,7 @@ instance_sunken_temple::instance_sunken_temple(Map* pMap) : ScriptedInstance(pMa
     m_uiFlameCounter(0),
     m_uiAvatarSummonTimer(0),
     m_uiSupressorTimer(0),
+    m_suppressionTimer(0),
     m_bIsFirstHakkarWave(false),
     m_bCanSummonBloodkeeper(false)
 {
@@ -174,23 +175,29 @@ void instance_sunken_temple::SetData(uint32 uiType, uint32 uiData)
         case TYPE_AVATAR:
             if (uiData == SPECIAL)
             {
-                ++m_uiFlameCounter;
-
-                Creature* pShade = GetSingleCreatureFromStorage(NPC_SHADE_OF_HAKKAR);
-                if (!pShade)
+                Creature* shadeofHakkar = GetSingleCreatureFromStorage(NPC_SHADE_OF_HAKKAR);
+                if (!shadeofHakkar)
                     return;
+
+                if (shadeofHakkar->HasAura(SPELL_SUPPRESSION) && !m_suppressionTimer)
+                {
+                    m_suppressionTimer = 20 * IN_MILLISECONDS;
+                    return; // Return to avoid handling one of the flames dousing
+                }
+
+                ++m_uiFlameCounter;
 
                 switch (m_uiFlameCounter)
                 {
                     // Yells on each flame
                     // TODO It might be possible that these yells should be ordered randomly, however this is the seen state
-                    case 1: DoScriptText(SAY_AVATAR_BRAZIER_1, pShade); break;
-                    case 2: DoScriptText(SAY_AVATAR_BRAZIER_2, pShade); break;
-                    case 3: DoScriptText(SAY_AVATAR_BRAZIER_3, pShade); break;
-                    // Summon the avatar of all flames are used
+                    case 1: DoScriptText(SAY_AVATAR_BRAZIER_1, shadeofHakkar); break;
+                    case 2: DoScriptText(SAY_AVATAR_BRAZIER_2, shadeofHakkar); break;
+                    case 3: DoScriptText(SAY_AVATAR_BRAZIER_3, shadeofHakkar); break;
+                    // Summon the avatar when all flames are used
                     case MAX_FLAMES:
-                        DoScriptText(SAY_AVATAR_BRAZIER_4, pShade);
-                        pShade->CastSpell(pShade, SPELL_SUMMON_AVATAR, TRIGGERED_OLD_TRIGGERED);
+                        DoScriptText(SAY_AVATAR_BRAZIER_4, shadeofHakkar);
+                        shadeofHakkar->CastSpell(shadeofHakkar, SPELL_SUMMON_AVATAR, TRIGGERED_OLD_TRIGGERED);
                         m_uiAvatarSummonTimer = 0;
                         m_uiSupressorTimer = 0;
                         break;
@@ -235,14 +242,15 @@ void instance_sunken_temple::SetData(uint32 uiType, uint32 uiData)
             else if (uiData == FAIL)
             {
                 // In case of wipe during the summoning ritual the shade is despawned
-                // The trash mobs stay in place, they are not despawned; the avatar is not sure if it's despawned or not but most likely he'll stay in place
+                // The trash mobs stay in place, they are not despawned
 
-                // Despawn the shade and the avatar if needed -- TODO, avatar really?
+                // Despawn the shade and the avatar if needed
                 if (Creature* pShade = GetSingleCreatureFromStorage(NPC_SHADE_OF_HAKKAR))
                     pShade->ForcedDespawn();
 
                 // Reset flames
                 DoUpdateFlamesFlags(true);
+                m_uiFlameCounter = 0;
 
                 // Despawn the evil circle visuals
                 for (auto evilCircleGuid : m_evilCircleGuidList)
@@ -369,6 +377,22 @@ void instance_sunken_temple::Update(uint32 uiDiff)
     if (m_auiEncounter[TYPE_AVATAR] != IN_PROGRESS)
         return;
 
+    if (m_suppressionTimer)
+    {
+        if (m_suppressionTimer < uiDiff)
+        {
+            // At the end of the suppression timer, if Shade of Hakkar still has suppression aura : reset event
+            if (Creature* shadeOfHakkar = GetSingleCreatureFromStorage(NPC_SHADE_OF_HAKKAR))
+            {
+                if (shadeOfHakkar->HasAura(SPELL_SUPPRESSION))
+                    SetData(TYPE_AVATAR, FAIL);
+            }
+            m_suppressionTimer = 0;
+        }
+        else
+            m_suppressionTimer -= uiDiff;
+    }
+
     // Summon random mobs around the circles
     if (m_uiAvatarSummonTimer)
     {
@@ -440,7 +464,27 @@ void instance_sunken_temple::Update(uint32 uiDiff)
 
             // Summon npc at random door; movement and script handled in DB
             uint8 uiSummonLoc = urand(0, 1);
-            pShade->SummonCreature(NPC_SUPPRESSOR, aHakkariDoorLocations[uiSummonLoc].m_fX, aHakkariDoorLocations[uiSummonLoc].m_fY, aHakkariDoorLocations[uiSummonLoc].m_fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            if (Creature* suppressor = pShade->SummonCreature(NPC_SUPPRESSOR, aHakkariDoorLocations[uiSummonLoc].m_fX, aHakkariDoorLocations[uiSummonLoc].m_fY, aHakkariDoorLocations[uiSummonLoc].m_fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+            {
+                suppressor->GetMotionMaster()->MoveWaypoint(uiSummonLoc);
+                uint32 sayTextId;
+                switch (urand(0, 3))
+                {
+                    case 0:
+                        sayTextId = SAY_SUPPRESSOR_1;
+                        break;
+                    case 1:
+                        sayTextId = SAY_SUPPRESSOR_2;
+                        break;
+                    case 2:
+                        sayTextId = SAY_SUPPRESSOR_3;
+                        break;
+                    default:
+                        sayTextId = SAY_SUPPRESSOR_4;
+                        break;
+                }
+                DoScriptText(sayTextId, suppressor, nullptr);
+            }
 
             // This timer is finished now
             m_uiSupressorTimer = 0;
