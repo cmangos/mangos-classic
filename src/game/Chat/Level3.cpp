@@ -1054,6 +1054,14 @@ bool ChatHandler::HandleReloadExpectedSpamRecords(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadCreatureCooldownsCommand(char* /*args*/)
+{
+    sLog.outString("Reloading creature cooldowns...");
+    sObjectMgr.LoadCreatureCooldowns();
+    SendGlobalSysMessage("Reloaded creature cooldowns.");
+    return true;
+}
+
 bool ChatHandler::HandleLoadScriptsCommand(char* args)
 {
     return *args != 0;
