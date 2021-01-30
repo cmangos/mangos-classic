@@ -1230,10 +1230,6 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
             if (traveling && unit == m_targets.getUnitTarget() &&
                 !unit->IsVisibleForOrDetect(m_caster, m_caster, false, false, true, true) && m_caster->IsAlive())
             {
-                // Workaround: do not send evade if caster/unit are dead to prevent combat log errors
-                // TODO: Visibility check clearly lackluster if we end up here like this, to be fixed later
-                if (unit->IsAlive() && realCaster->IsAlive())
-                    realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
                 ResetEffectDamageAndHeal();
                 return;
             }
