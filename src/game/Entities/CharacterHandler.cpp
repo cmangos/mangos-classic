@@ -876,12 +876,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             pCurrChar->CastSpell(pCurrChar, invisibleAuraInfo, TRIGGERED_OLD_TRIGGERED);
     }
 
-    std::string IP_str =
-#ifdef ENABLE_PLAYERBOTS
-        m_Socket ? m_Socket->GetRemoteAddress() : "bot";
-#else
-        GetRemoteAddress();
-#endif
+    std::string IP_str = GetRemoteAddress();
     sLog.outChar("Account: %d (IP: %s) Login Character:[%s] (guid: %u)",
                  GetAccountId(), IP_str.c_str(), pCurrChar->GetName(), pCurrChar->GetGUIDLow());
 

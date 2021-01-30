@@ -839,6 +839,8 @@ void Map::Remove(Player* player, bool remove)
 #ifdef ENABLE_PLAYERBOTS
     if (!player->GetPlayerbotAI())
         player->ResetMap();
+#else
+    player->ResetMap();
 #endif
     if (remove)
         DeleteFromWorld(player);
