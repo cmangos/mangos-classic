@@ -2224,6 +2224,8 @@ class Player : public Unit
 
         // Public Save system functions
         void SaveItemToInventory(Item* item); // optimization for gift wrapping
+
+        void BanPlayer(std::string const& reason);
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

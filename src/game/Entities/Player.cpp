@@ -18968,6 +18968,15 @@ bool Player::isTotalImmune() const
     return false;
 }
 
+void Player::BanPlayer(std::string const& reason)
+{
+    std::string reasonCopy = reason;
+    sWorld.GetMessager().AddMessage([sessionId = GetSession()->GetAccountId(), reasonCopy](World* world)
+    {
+        sWorld.BanAccount(world->FindSession(sessionId), 0, reasonCopy, "Automatic script ban.");
+    });
+}
+
 Item* Player::ConvertItem(Item* item, uint32 newItemId)
 {
     uint16 pos = item->GetPos();
