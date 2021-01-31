@@ -85,6 +85,7 @@ enum
     SAY_SUPPRESSOR_2      = -1109012,
     SAY_SUPPRESSOR_3      = -1109013,
     SAY_SUPPRESSOR_4      = -1109014,
+    SAY_AVATAR_DESPAWN    = -1109015,
 };
 
 // This is also the needed order for activation: S, N, SW, SE, NW, NE

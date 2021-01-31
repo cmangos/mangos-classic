@@ -385,7 +385,10 @@ void instance_sunken_temple::Update(uint32 uiDiff)
             if (Creature* shadeOfHakkar = GetSingleCreatureFromStorage(NPC_SHADE_OF_HAKKAR))
             {
                 if (shadeOfHakkar->HasAura(SPELL_SUPPRESSION))
+                {
+                    DoScriptText(SAY_AVATAR_DESPAWN, shadeOfHakkar, nullptr);
                     SetData(TYPE_AVATAR, FAIL);
+                }
             }
             m_suppressionTimer = 0;
         }

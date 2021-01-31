@@ -1878,15 +1878,16 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1109005','The shield be down! Rise up Atal''ai! Rise up!','5861','6','0','0','0','jammalan SAY_JAMMALAN_INTRO'),
 
-('-1109006','HAKKAR LIVES!','5870','1','0','0','0','avatar SAY_AVATAR_BRAZIER_1'),
-('-1109007','I TASTE THE BLOOD OF LIFE!','5868','1','0','0','0','avatar SAY_AVATAR_BRAZIER_2'),
-('-1109008','I DRAW CLOSER TO YOUR WORLD!','5867','1','0','0','0','avatar SAY_AVATAR_BRAZIER_3'),
-('-1109009','I AM NEAR!','5869','1','0','0','0','avatar SAY_AVATAR_BRAZIER_4'),
-('-1109010','I AM HERE!','0','1','0','0','0','avatar SAY_AVATAR_SPAWN'),
+('-1109006','HAKKAR LIVES!','5870','1','0','0','6254','avatar SAY_AVATAR_BRAZIER_1'),
+('-1109007','I TASTE THE BLOOD OF LIFE!','5868','1','0','0','6252','avatar SAY_AVATAR_BRAZIER_2'),
+('-1109008','I DRAW CLOSER TO THIS WORLD!','5867','1','0','0','4543','avatar SAY_AVATAR_BRAZIER_3'),
+('-1109009','I AM NEAR!','5869','1','0','0','6253','avatar SAY_AVATAR_BRAZIER_4'),
+('-1109010','I AM HERE!','0','1','0','0','4545','avatar SAY_AVATAR_SPAWN'),
 ('-1109011','You must not summon our god!','0','1','0','0','4530','Nightmare Suppressor SAY_SPAWN_1'),
 ('-1109012','Stop!  Infidels!','0','1','0','0','4532','Nightmare Suppressor SAY_SPAWN_2'),
 ('-1109013','No!  We cannot allow you to summon Hakkar!','0','1','0','0','4529','Nightmare Suppressor SAY_SPAWN_3'),
-('-1109014','You must not summon our god!','0','1','0','0','4531','Nightmare Suppressor SAY_SPAWN_4');
+('-1109014','You must not summon our god!','0','1','0','0','4531','Nightmare Suppressor SAY_SPAWN_4'),
+('-1109015','NOOOO!!','0','1','0','0','4544','avatar SAY_AVATAR_DESPAWN');
 
 -- -1 129 000 RAZORFEN DOWNS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
