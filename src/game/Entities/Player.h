@@ -2447,7 +2447,7 @@ class Player : public Unit
         {
             // we should not execute delayed teleports for now dead players but has been alive at teleport
             // because we don't want player's ghost teleported from graveyard
-            return m_bHasDelayedTeleport && (IsAlive() || !m_bHasBeenAliveAtDelayedTeleport);
+            return m_bHasDelayedTeleport && (IsAlive() || !m_bHasBeenAliveAtDelayedTeleport || GetDeathState() == JUST_DIED);
         }
 
         bool SetDelayedTeleportFlagIfCan()
