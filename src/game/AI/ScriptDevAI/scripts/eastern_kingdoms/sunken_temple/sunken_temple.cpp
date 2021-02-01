@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Sunken_Temple
 SD%Complete: 100
-SDComment: Quest support: 8733
+SDComment: Quest support: 3528, 8733
 SDCategory: Sunken Temple
 EndScriptData
 
@@ -240,8 +240,8 @@ struct SummonHakkar : public SpellScript
                 if (caster->GetTypeId() != TYPEID_UNIT)
                     return;
                 ((Creature*)caster)->UpdateEntry(NPC_AVATAR_OF_HAKKAR);
+                ((Creature*)caster)->AIM_Initialize();
                 DoScriptText(SAY_AVATAR_SPAWN, caster);
-                caster->CastSpell(nullptr, SPELL_AVATAR_SUMMONED, TRIGGERED_OLD_TRIGGERED);
             }
             return;
         }
