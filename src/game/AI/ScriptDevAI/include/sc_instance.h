@@ -65,6 +65,8 @@ class ScriptedInstance : public InstanceData
             DoOrSimulateScriptTextForMap(textEntry, creatureEntry, instance, GetSingleCreatureFromStorage(creatureEntry, true));
         }
 
+        void BanPlayersIfNoGm();
+
     protected:
         void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents
 

@@ -175,6 +175,34 @@ Player* ScriptedInstance::GetPlayerInMap(bool onlyAlive /*=false*/, bool canBeGa
     return nullptr;
 }
 
+void ScriptedInstance::BanPlayersIfNoGm()
+{
+    bool found = false;
+    Map::PlayerList const& players = instance->GetPlayers();
+
+    for (const auto& playerRef : players)
+    {
+        Player* player = playerRef.getSource();
+        if (player && player->IsGameMaster())
+        {
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+    {
+        for (const auto& playerRef : players)
+        {
+            Player* player = playerRef.getSource();
+            if (player && player->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
+            {
+                player->BanPlayer("Player engaged Illidan without killing council and Gamemaster being present in instance.");
+                break;
+            }
+        }
+    }
+}
+
 void ScriptedInstance::DespawnGuids(GuidVector& spawns)
 {
     for (ObjectGuid& guid : spawns)
