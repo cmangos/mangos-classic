@@ -1239,7 +1239,7 @@ void Aura::TriggerSpell()
     {
         CastTriggeredSpell(data);
     }
-    else
+    else if (!GetAuraScript()) // if scripter scripted spell, it is handled somehow
     {
         if (Unit* caster = GetCaster())
         {
