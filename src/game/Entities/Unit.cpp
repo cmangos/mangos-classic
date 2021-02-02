@@ -1583,12 +1583,6 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* spellDamageInfo, int32 dama
     if (!pVictim)
         return;
 
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
-    {
-        spellDamageInfo->damage = damage;
-        return;
-    }
-
     // Check spell crit chance
     bool crit = RollSpellCritOutcome(pVictim, damageSchoolMask, spellInfo);
 
@@ -1616,7 +1610,7 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* spellDamageInfo, int32 dama
     }
 
     // if crit add critical bonus
-    if (crit)
+    if (crit && !spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
     {
         spellDamageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT;
         damage = CalculateCritAmount(pVictim, damage, spellInfo);
@@ -6689,10 +6683,6 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, u
     if (!spellProto || damagetype == DIRECT_DAMAGE)
         return pdamage;
 
-    // Some spells don't benefit from taken mods
-    if (spellProto->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
-        return pdamage;
-
     uint32 schoolMask = GetSpellSchoolMask(spellProto);
 
     // Taken total percent damage auras
@@ -7276,10 +7266,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto, DamageEffectType damagetype, uint32 stack, bool flat)
 {
     if (pdamage == 0)
-        return pdamage;
-
-    // Some spells don't benefit from taken mods
-    if (spellProto && spellProto->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS))
         return pdamage;
 
     // differentiate for weapon damage based spells
