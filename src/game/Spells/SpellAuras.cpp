@@ -2560,6 +2560,10 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
 
+        // Creature specific
+        if (target->GetTypeId() != TYPEID_PLAYER && !target->IsStunned())
+            target->SetFacingTo(target->GetOrientation());
+
         Unit* caster = GetCaster();
         target->SetStunned(true, (caster ? caster->GetObjectGuid() : ObjectGuid()), GetSpellProto()->Id);
 
