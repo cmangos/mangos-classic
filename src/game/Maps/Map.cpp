@@ -1121,6 +1121,7 @@ void Map::SendInitSelf(Player* player) const
     if (GenericTransport* transport = player->GetTransport())
     {
         hasTransport = true;
+        player->m_clientGUIDs.insert(transport->GetObjectGuid());
         transport->BuildCreateUpdateBlockForPlayer(&updateData, player);
     }
 
