@@ -36,6 +36,7 @@ void CombatAI::Reset()
 {
     ResetAllTimers();
     m_onKillCooldown = false;
+    m_storedTarget = ObjectGuid();
 }
 
 void CombatAI::ExecuteActions()
