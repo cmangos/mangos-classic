@@ -107,7 +107,7 @@ void Camera::Event_AddedToWorld()
     MANGOS_ASSERT(grid);
     grid->AddWorldObject(this);
 
-    UpdateVisibilityForOwner();
+    UpdateVisibilityForOwner(true);
 }
 
 void Camera::Event_RemovedFromWorld()
@@ -144,10 +144,10 @@ template void Camera::UpdateVisibilityOf(Corpse*, UpdateData&, WorldObjectSet&);
 template void Camera::UpdateVisibilityOf(GameObject*, UpdateData&, WorldObjectSet&);
 template void Camera::UpdateVisibilityOf(DynamicObject*, UpdateData&, WorldObjectSet&);
 
-void Camera::UpdateVisibilityForOwner()
+void Camera::UpdateVisibilityForOwner(bool addToWorld)
 {
     MaNGOS::VisibleNotifier notifier(*this);
-    Cell::VisitAllObjects(m_source, notifier, m_source->GetVisibilityData().GetVisibilityDistance(), false);
+    Cell::VisitAllObjects(m_source, notifier, addToWorld ? MAX_VISIBILITY_DISTANCE : m_source->GetVisibilityData().GetVisibilityDistance(), false);
     notifier.Notify();
 }
 
