@@ -54,7 +54,7 @@ enum EventAI_Type
     EVENT_T_TARGET_CASTING          = 13,                   // RepeatMin, RepeatMax
     EVENT_T_FRIENDLY_HP             = 14,                   // HPDeficit, Radius, RepeatMin, RepeatMax
     EVENT_T_FRIENDLY_IS_CC          = 15,                   // DispelType, Radius, RepeatMin, RepeatMax
-    EVENT_T_FRIENDLY_MISSING_BUFF   = 16,                   // SpellId, Radius, RepeatMin, RepeatMax
+    EVENT_T_FRIENDLY_MISSING_BUFF   = 16,                   // SpellId, Radius, RepeatMin, RepeatMax, InCombat
     EVENT_T_SUMMONED_UNIT           = 17,                   // CreatureId, RepeatMin, RepeatMax
     EVENT_T_TARGET_MANA             = 18,                   // ManaMax%, ManaMin%, RepeatMin, RepeatMax
     EVENT_T_QUEST_ACCEPT            = 19,                   // QuestID
@@ -688,6 +688,7 @@ struct CreatureEventAI_Event
             uint32 radius;
             uint32 repeatMin;
             uint32 repeatMax;
+            uint32 inCombat;
         } friendly_buff;
         // EVENT_T_SUMMONED_UNIT                            = 17
         // EVENT_T_SUMMONED_JUST_DIED                       = 25
@@ -867,7 +868,7 @@ class CreatureEventAI : public CreatureAI
 
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event) const;
 
-        void DoFindFriendlyMissingBuff(CreatureList& list, float range, uint32 spellId) const;
+        void DoFindFriendlyMissingBuff(CreatureList& list, float range, uint32 spellId, bool inCombat) const;
         void DoFindFriendlyCC(CreatureList& list, float range) const;
 
         void SetRangedMode(bool state, float distance, RangeModeType type);

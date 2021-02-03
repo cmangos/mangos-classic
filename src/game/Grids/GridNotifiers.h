@@ -854,10 +854,10 @@ namespace MaNGOS
             float i_range;
     };
 
-    class FriendlyMissingBuffInRangeCheck
+    class FriendlyMissingBuffInRangeInCombatCheck
     {
         public:
-            FriendlyMissingBuffInRangeCheck(Unit const* obj, float range, uint32 spellid) : i_obj(obj), i_range(range), i_spell(spellid) {}
+            FriendlyMissingBuffInRangeInCombatCheck(Unit const* obj, float range, uint32 spellid) : i_obj(obj), i_range(range), i_spell(spellid) {}
             Unit const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
@@ -867,6 +867,21 @@ namespace MaNGOS
             Unit const* i_obj;
             float i_range;
             uint32 i_spell;
+    };
+
+    class FriendlyMissingBuffInRangeNotInCombatCheck
+    {
+    public:
+        FriendlyMissingBuffInRangeNotInCombatCheck(Unit const* obj, float range, uint32 spellid) : i_obj(obj), i_range(range), i_spell(spellid) {}
+        Unit const& GetFocusObject() const { return *i_obj; }
+        bool operator()(Unit* u)
+        {
+            return u->IsAlive() && i_obj->CanAssist(u) && i_obj->IsWithinDistInMap(u, i_range) && !(u->HasAura(i_spell, EFFECT_INDEX_0) || u->HasAura(i_spell, EFFECT_INDEX_1) || u->HasAura(i_spell, EFFECT_INDEX_2));
+        }
+    private:
+        Unit const* i_obj;
+        float i_range;
+        uint32 i_spell;
     };
 
     class AnyUnfriendlyUnitInObjectRangeCheck

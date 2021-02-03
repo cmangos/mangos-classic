@@ -94,7 +94,7 @@ struct boss_sulfuronAI : public CombatAI
             case SULFURON_INSPIRE:
             {
                 Creature* target = nullptr;
-                CreatureList pList = DoFindFriendlyMissingBuff(45.0f, SPELL_INSPIRE);
+                CreatureList pList = DoFindFriendlyMissingBuff(45.0f, SPELL_INSPIRE, false);
                 if (!pList.empty())
                 {
                     CreatureList::iterator i = pList.begin();

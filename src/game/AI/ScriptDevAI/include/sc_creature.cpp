@@ -330,14 +330,23 @@ CreatureList ScriptedAI::DoFindFriendlyCC(float range)
     return creatureList;
 }
 
-CreatureList ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 spellId)
+CreatureList ScriptedAI::DoFindFriendlyMissingBuff(float range, uint32 spellId, bool inCombat)
 {
     CreatureList creatureList;
+    
+    if (inCombat == false)
+    {
+        MaNGOS::FriendlyMissingBuffInRangeInCombatCheck u_check(m_creature, range, spellId);
+        MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRangeInCombatCheck> searcher(creatureList, u_check);
+        Cell::VisitGridObjects(m_creature, searcher, range);
+    }
+    else if (inCombat == true)
+    {
+        MaNGOS::FriendlyMissingBuffInRangeNotInCombatCheck u_check(m_creature, range, spellId);
+        MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRangeNotInCombatCheck> searcher(creatureList, u_check);
 
-    MaNGOS::FriendlyMissingBuffInRangeCheck u_check(m_creature, range, spellId);
-    MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRangeCheck> searcher(creatureList, u_check);
-
-    Cell::VisitGridObjects(m_creature, searcher, range);
+        Cell::VisitGridObjects(m_creature, searcher, range);
+    }    
 
     return creatureList;
 }
