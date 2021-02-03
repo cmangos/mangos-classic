@@ -408,6 +408,8 @@ bool Map::Add(Player* player)
     EnsureGridLoadedAtEnter(cell, player);
     player->AddToWorld();
 
+    // TODO: Aggregate all of these into one packet
+
     SendInitSelf(player);
     SendInitTransports(player);
 
