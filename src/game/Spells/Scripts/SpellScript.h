@@ -45,7 +45,7 @@ struct SpellScript
     // called before effect execution
     virtual void OnEffectExecute(Spell* /*spell*/, SpellEffectIndex /*effIdx*/) const {}
     // called in targeting to determine radius for spell
-    virtual void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex /*effIdx*/, bool /*targetB*/, float& /*radius*/) {}
+    virtual void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex /*effIdx*/, bool /*targetB*/, float& /*radius*/) const {}
     // called on adding dest target
     virtual void OnDestTarget(Spell* /*spell*/) const {}
     // called on Unit Spell::CheckTarget
