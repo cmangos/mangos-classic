@@ -175,7 +175,7 @@ Player* ScriptedInstance::GetPlayerInMap(bool onlyAlive /*=false*/, bool canBeGa
     return nullptr;
 }
 
-void ScriptedInstance::BanPlayersIfNoGm()
+void ScriptedInstance::BanPlayersIfNoGm(const std::string& reason)
 {
     bool found = false;
     Map::PlayerList const& players = instance->GetPlayers();
@@ -183,7 +183,7 @@ void ScriptedInstance::BanPlayersIfNoGm()
     for (const auto& playerRef : players)
     {
         Player* player = playerRef.getSource();
-        if (player && player->IsGameMaster())
+        if (player && player->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
         {
             found = true;
             break;
@@ -194,9 +194,9 @@ void ScriptedInstance::BanPlayersIfNoGm()
         for (const auto& playerRef : players)
         {
             Player* player = playerRef.getSource();
-            if (player && player->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
+            if (player && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
             {
-                player->BanPlayer("Player engaged Illidan without killing council and Gamemaster being present in instance.");
+                player->BanPlayer(reason);
                 break;
             }
         }

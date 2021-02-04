@@ -65,7 +65,7 @@ class ScriptedInstance : public InstanceData
             DoOrSimulateScriptTextForMap(textEntry, creatureEntry, instance, GetSingleCreatureFromStorage(creatureEntry, true));
         }
 
-        void BanPlayersIfNoGm();
+        void BanPlayersIfNoGm(const std::string& reason);
 
     protected:
         void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents
