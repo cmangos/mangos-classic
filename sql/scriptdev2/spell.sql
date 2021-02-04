@@ -39,6 +39,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26217,'spell_cthun_tentacles_summon'),
 (26230,'spell_cthun_exit_stomach'),
 (26237,'spell_cthun_tentacles_summon'),
+(26256,'spell_cthun_check_reset'),
 (26332,'spell_cthun_mouth_tentacle'),
 (26398,'spell_cthun_tentacles_summon'),
 (26584,'spell_summon_toxic_slime'),

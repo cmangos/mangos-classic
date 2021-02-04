@@ -581,6 +581,8 @@ INSERT INTO scripted_areatrigger VALUES
 (4033,'at_stomach_cthun'),
 (4034,'at_stomach_cthun'),
 (4036,'at_stomach_cthun');
+INSERT INTO scripted_event_id VALUES
+(9738, 'event_cthun_reset');
 
 /* THOUSAND NEEDLES */
 UPDATE creature_template SET ScriptName='npc_kanati' WHERE entry=10638;

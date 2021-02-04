@@ -30,6 +30,9 @@ enum
 {
     EMOTE_WEAKENED                  = -1531011,
 
+    SPELL_CHECK_RESET_AURA          = 26255,
+    SPELL_RESET_ENCOUNTER           = 26257,
+
     // ***** Phase 1 ********
     SPELL_EYE_BEAM                  = 26134,
     SPELL_DARK_GLARE                = 26029,
@@ -141,6 +144,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
         // Start periodically summoning Eye and Claw (Hook) Tentacles
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_EYE_TENTACLES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_HOOK_TENTACLES_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, SPELL_CHECK_RESET_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustDied(Unit* pKiller) override
@@ -162,6 +166,7 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
 
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_HOOK_TENTACLES_1);
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_EYE_TENTACLES);
+        m_creature->RemoveAurasDueToSpell(SPELL_CHECK_RESET_AURA);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_CTHUN, FAIL);
@@ -204,8 +209,8 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
             return;
         }
 
-        // No target: do nothing more
-        if (!m_creature->SelectHostileTarget())
+        // No check reset aura: do nothing more as we are not in combat
+        if (!m_creature->HasAura(SPELL_CHECK_RESET_AURA))
             return;
 
         // Eye Beam
@@ -314,6 +319,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
     {
         // Start periodically summoning Eye, Giant Eye Tentacles
         DoSpawnTentacles();
+        DoCastSpellIfCan(m_creature, SPELL_CHECK_RESET_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void EnterEvadeMode() override
@@ -325,6 +331,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                 pPlayer->CastSpell(pPlayer, SPELL_PORT_OUT_STOMACH_EFFECT, TRIGGERED_OLD_TRIGGERED);
         }
 
+        m_creature->RemoveAurasDueToSpell(SPELL_CHECK_RESET_AURA);
         StopSpawningTentacles();
 
         Scripted_NoMovementAI::EnterEvadeMode();
@@ -378,6 +385,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_CTHUN_VULNERABLE, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                     {
+                        m_creature->RemoveAurasDueToSpell(SPELL_CHECK_RESET_AURA);
                         DoScriptText(EMOTE_WEAKENED, m_creature);
                         StopSpawningTentacles();
                         m_uiPhaseTimer = 45000;
@@ -423,34 +431,6 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_MOUTH_TENTACLES_1);
     }
 
-    // Custom threat management
-    bool SelectHostileTarget()
-    {
-        Unit* pTarget = nullptr;
-        Unit* pOldTarget = m_creature->GetVictim();
-
-        if (!m_creature->getThreatManager().isThreatListEmpty())
-            pTarget = m_creature->getThreatManager().getHostileTarget();
-
-        if (pTarget)
-        {
-            if (pOldTarget != pTarget)
-                AttackStart(pTarget);
-
-            // Set victim to old target
-            if (pOldTarget && pOldTarget->IsAlive())
-            {
-                m_creature->SetTarget(pOldTarget);
-                m_creature->SetInFront(pOldTarget);
-            }
-
-            return true;
-        }
-
-        // Will call EnterEvadeMode if fit
-        return m_creature->SelectHostileTarget();
-    }
-
     void UpdateAI(const uint32 uiDiff) override
     {
         if (m_Phase == PHASE_TRANSITION && m_uiPhaseTimer)
@@ -477,7 +457,8 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                 m_uiPhaseTimer -= uiDiff;
         }
 
-        if (!SelectHostileTarget())
+        // No check reset aura and not weakened: do nothing more as we are not in combat
+        if (!m_creature->HasAura(SPELL_CHECK_RESET_AURA) && m_Phase != PHASE_CTHUN_WEAKENED)
             return;
 
         switch (m_Phase)
@@ -547,6 +528,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
 
                     m_uiPhaseTimer = 0;
                     m_Phase        = PHASE_CTHUN;
+                    DoCastSpellIfCan(m_creature, SPELL_CHECK_RESET_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                     DoSpawnTentacles();
                 }
                 else
@@ -854,6 +836,19 @@ struct ExitStomach : public SpellScript
     }
 };
 
+struct CheckReset : public SpellScript
+{
+    void OnSuccessfulFinish(Spell* spell) const override
+    {
+            // If we have at least one target, do nothing
+            if (Unit* target = spell->GetUnitTarget())
+                return;
+            // Else: reset the encounter
+            if (Unit* caster = spell->GetCaster())
+                caster->CastSpell(caster, SPELL_RESET_ENCOUNTER, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 struct CThunMouthTentacle : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -895,6 +890,7 @@ void AddSC_boss_cthun()
     RegisterSpellScript<SummonCThunTentacles>("spell_cthun_tentacles_summon");
     RegisterSpellScript<HookTentacleTrigger>("spell_hook_tentacle_trigger");
     RegisterSpellScript<ExitStomach>("spell_cthun_exit_stomach");
+    RegisterSpellScript<CheckReset>("spell_cthun_check_reset");
     RegisterAuraScript<PeriodicSummonEyeTrigger>("spell_cthun_periodic_eye_trigger");
     RegisterAuraScript<PeriodicRotate>("spell_cthun_periodic_rotate");
     RegisterAuraScript<CThunMouthTentacle>("spell_cthun_mouth_tentacle");
