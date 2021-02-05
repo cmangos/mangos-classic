@@ -20,6 +20,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (13278,'spell_gdr_channel'),
 (13493,'spell_gdr_periodic'),
 (16380,'spell_greater_invisibility_mob'),
+(17016,'spell_placing_beacon_torch'),
 (17244,'spell_anastari_possess'),
 (19832,'spell_possess_razorgore'),
 (19872,'spell_calm_dragonkin'),

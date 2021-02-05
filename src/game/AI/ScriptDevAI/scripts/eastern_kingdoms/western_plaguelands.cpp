@@ -32,6 +32,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "Spells/Scripts/SpellScript.h"
 
 /*######
 ## npc_the_scourge_cauldron
@@ -979,6 +980,22 @@ UnitAI* GetAI_npc_tirion_fordring(Creature* creature)
     return new npc_tirion_fordringAI(creature);
 }
 
+/*######
+## spell_placing_beacon_torch
+######*/
+
+struct spell_placing_beacon_torch : public SpellScript
+{
+    void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex effIdx, bool /*targetB*/, float& radius) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+            radius = 0.f;
+        if (effIdx == EFFECT_INDEX_1)
+            radius = 10.f;
+    }
+};
+
+
 void AddSC_western_plaguelands()
 {
     Script* pNewScript = new Script;
@@ -1003,4 +1020,6 @@ void AddSC_western_plaguelands()
     pNewScript->Name = "npc_tirion_fordring";
     pNewScript->GetAI = &GetAI_npc_tirion_fordring;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_placing_beacon_torch>("spell_placing_beacon_torch");
 }
