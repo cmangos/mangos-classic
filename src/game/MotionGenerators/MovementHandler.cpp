@@ -272,6 +272,8 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 
     plMover->SetPosition(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation, true);
 
+    plMover->SetFallInformation(0, dest.coord_z);
+
     GenericTransport* currentTransport = nullptr;
     if (plMover->m_teleportTransport)
         currentTransport = plMover->GetMap()->GetTransport(plMover->m_teleportTransport);
