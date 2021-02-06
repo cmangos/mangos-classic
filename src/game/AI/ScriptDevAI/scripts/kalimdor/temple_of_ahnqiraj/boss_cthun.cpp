@@ -228,7 +228,6 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
                     {
                         m_uiBeamTimer = urand(2 * IN_MILLISECONDS, 3 * IN_MILLISECONDS);
                         ++m_eyeBeamCount;
-                        DoScriptText(-1000234, m_creature);
                     }
                 }
             }
