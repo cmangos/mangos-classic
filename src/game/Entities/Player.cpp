@@ -1899,7 +1899,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         {
             if (Unit* charm = GetCharm())
             {
-                if (!charm->IsWithinDist3d(x, y, z, 50.f))
+                if (!charm->IsWithinDist3d(x, y, z, 100.f))
                     BreakCharmOutgoing(charm);
             }
 
