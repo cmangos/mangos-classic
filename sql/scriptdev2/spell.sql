@@ -42,6 +42,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26256,'spell_cthun_check_reset'),
 (26332,'spell_cthun_mouth_tentacle'),
 (26398,'spell_cthun_tentacles_summon'),
+(26476,'spell_cthun_digestive_acid_periodic'),
 (26584,'spell_summon_toxic_slime'),
 (26591,'spell_teleport_image'),
 (26619,'spell_periodic_scarab_trigger'),

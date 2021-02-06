@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Cthun
 SD%Complete: 95
-SDComment: Transform spell has some minor core issues. Eject from stomach event contains workarounds because of the missing spells. Digestive Acid should be handled in core.
+SDComment: Transform spell has some minor core issues. Digestive Acid should be handled in core.
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData
 
@@ -880,6 +880,22 @@ struct CThunMouthTentacle : public AuraScript
     }
 };
 
+struct DigestiveAcidPeriodic : public AuraScript
+{
+    void OnPeriodicCalculateAmount(Aura* aura, uint32& /*amount*/) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+        {
+            if (Unit* target = aura->GetTarget())
+            {
+                // On every tick of the periodic damage, a new stack of Digestive Acid is applied
+                if (Unit* caster = aura->GetCaster())
+                    caster->CastSpell(target, SPELL_DIGESTIVE_ACID, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+};
+
 void AddSC_boss_cthun()
 {
     Script* pNewScript = new Script;
@@ -910,4 +926,5 @@ void AddSC_boss_cthun()
     RegisterAuraScript<PeriodicSummonEyeTrigger>("spell_cthun_periodic_eye_trigger");
     RegisterAuraScript<PeriodicRotate>("spell_cthun_periodic_rotate");
     RegisterAuraScript<CThunMouthTentacle>("spell_cthun_mouth_tentacle");
+    RegisterAuraScript<DigestiveAcidPeriodic>("spell_cthun_digestive_acid_periodic");
 }
