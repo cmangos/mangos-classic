@@ -2793,6 +2793,11 @@ float Position::GetDistance(Position const& other) const
     return distsq;
 }
 
+std::string Position::to_string() const
+{
+    return "X: " + std::to_string(x) + " Y: " + std::to_string(y) + " Z: " + std::to_string(z) + " O: " + std::to_string(o);
+}
+
 bool operator!=(const Position& left, const Position& right)
 {
     return left.x != right.x || left.y != right.y || left.z != right.z || left.o != right.o;

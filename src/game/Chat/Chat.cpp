@@ -252,6 +252,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "utf8overflow",   SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugOverflowCommand,            "", nullptr },
         { "chatfreeze",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugChatFreezeCommand,          "", nullptr },
         { "opcodehistory",  SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugPacketHistory,              "", nullptr },
+        { "transports",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugTransports,                 "", nullptr },
         { "debugflags",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugObjectFlags,                "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
