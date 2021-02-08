@@ -4495,39 +4495,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 int32 spellid = m_spellInfo->Id;            // send main spell id as basepoints for not used effect
                 m_caster->CastCustomSpell(unitTarget, 19993, &heal, &spellid, nullptr, TRIGGERED_OLD_TRIGGERED);
             }
-            else if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000800000))
-            {
-                if (!unitTarget || !unitTarget->IsAlive())
-                    return;
-
-                uint32 spellId2 = 0;
-
-                // all seals have aura dummy
-                Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                for (Unit::AuraList::const_iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
-                {
-                    SpellEntry const* spellInfo = (*itr)->GetSpellProto();
-
-                    // search seal (all seals have judgement's aura dummy spell id in 2 effect
-                    if (!spellInfo || !IsSealSpell((*itr)->GetSpellProto()) || (*itr)->GetEffIndex() != 2)
-                        continue;
-
-                    // must be calculated base at raw base points in spell proto, GetModifier()->m_value for S.Righteousness modified by SPELLMOD_DAMAGE
-                    spellId2 = (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
-
-                    if (spellId2 <= 1)
-                        continue;
-
-                    // found, remove seal
-                    m_caster->RemoveAurasDueToSpell((*itr)->GetId());
-
-                    break;
-                }
-
-                m_caster->CastSpell(unitTarget, spellId2, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_HIT_CALCULATION);
-
-                return;
-            }
             break;
         }
     }
