@@ -707,7 +707,8 @@ class WorldSession
         // Movement
         void SynchronizeMovement(MovementInfo& movementInfo);
 
-        std::deque<uint32> GetOpcodeHistory();
+        std::deque<uint32> GetOutOpcodeHistory();
+        std::deque<uint32> GetIncOpcodeHistory();
 
         Messager<WorldSession>& GetMessager() { return m_messager; }
 

@@ -1570,6 +1570,42 @@ bool ChatHandler::HandleDebugObjectFlags(char* args)
     return true;
 }
 
+bool ChatHandler::HandleDebugOutPacketHistory(char* args)
+{
+    Player* player = getSelectedPlayer();
+    if (player == nullptr)
+        player = m_session->GetPlayer();
+
+    auto history = player->GetSession()->GetOutOpcodeHistory();
+    std::string output = "Opcodes (reverse order):\n";
+    for (auto itr = history.rbegin(); itr != history.rend(); ++itr)
+    {
+        output += LookupOpcodeName(*itr);
+        output += "\n";
+    }
+
+    SendSysMessage(output.data());
+    return true;
+}
+
+bool ChatHandler::HandleDebugIncPacketHistory(char* args)
+{
+    Player* player = getSelectedPlayer();
+    if (player == nullptr)
+        player = m_session->GetPlayer();
+
+    auto history = player->GetSession()->GetIncOpcodeHistory();
+    std::string output = "Opcodes (reverse order):\n";
+    for (auto itr = history.rbegin(); itr != history.rend(); ++itr)
+    {
+        output += LookupOpcodeName(*itr);
+        output += "\n";
+    }
+
+    SendSysMessage(output.data());
+    return true;
+}
+
 bool ChatHandler::HandleDebugTransports(char* args)
 {
     Player* player = GetSession()->GetPlayer();

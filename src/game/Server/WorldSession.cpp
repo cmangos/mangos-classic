@@ -1039,10 +1039,18 @@ void WorldSession::SynchronizeMovement(MovementInfo& movementInfo)
     movementInfo.stime = movementInfo.ctime + m_clientTimeDelay + MOVEMENT_PACKET_TIME_DELAY;
 }
 
-std::deque<uint32> WorldSession::GetOpcodeHistory()
+std::deque<uint32> WorldSession::GetOutOpcodeHistory()
 {
     if (m_Socket)
-        return m_Socket->GetOpcodeHistory();
+        return m_Socket->GetOutOpcodeHistory();
+    else
+        return std::deque<uint32>();
+}
+
+std::deque<uint32> WorldSession::GetIncOpcodeHistory()
+{
+    if (m_Socket)
+        return m_Socket->GetIncOpcodeHistory();
     else
         return std::deque<uint32>();
 }
