@@ -44,18 +44,19 @@ void GuardianAI::JustRespawned()
 
 void GuardianAI::UpdateAI(const uint32 diff)
 {
-    Unit* owner = m_creature->GetOwner();
-
-    if (!owner)
-        return;
-
     switch (m_reactState)
     {
         case REACT_AGGRESSIVE:
         case REACT_DEFENSIVE:
+        {
+            Unit* owner = m_creature->GetOwner();
+            if (!owner)
+                break;
+
             if (!m_creature->IsInCombat() && owner->IsInCombat() && !(m_creature->IsPet() && ((Pet*)m_creature)->getPetType() == MINI_PET))
                 AttackStart(owner->getAttackerForHelper());   // check for getAttackerForHelper() == nullpter in AttackStart()
             break;
+        }
         default:
             break;
     }
