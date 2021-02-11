@@ -615,7 +615,7 @@ uint32 GetAreaIdByLocalizedName(const std::string& name)
     {
         if (AreaTableEntry const* AreaEntry = sAreaStore.LookupEntry(i))
         {
-            for (uint32 i = 0; i < MAX_LOCALE; ++i)
+            for (uint32 i = 0; i < MAX_DBC_LOCALE; ++i)
             {
                 std::string area_name(AreaEntry->area_name[i]);
                 if (area_name.size() > 0 && name.find(" - " + area_name) != std::string::npos)
@@ -696,7 +696,7 @@ ChatChannelsEntry const* GetChatChannelsEntryFor(const std::string& name, uint32
             // try to match by name first, avoid creating custom channels with same name
             if (!wname.empty())
             {
-                for (uint32 i = 0; i < MAX_LOCALE; ++i)
+                for (uint32 i = 0; i < MAX_DBC_LOCALE; ++i)
                 {
                     Utf8toWStr(entry->pattern[i], wpattern);
 
