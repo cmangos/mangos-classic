@@ -77,7 +77,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
         return true;
     }
 
-    if (_hasUnitStateNotMove(owner))
+    if (_hasUnitStateNotMove(owner) || owner.IsImmobilizedState())
     {
         HandleMovementFailure(owner);
         return true;
