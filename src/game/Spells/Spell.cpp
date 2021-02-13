@@ -3622,9 +3622,28 @@ void Spell::WriteSpellGoTargets(WorldPacket& data)
     size_t count_pos = data.wpos();
     data << uint8(0);                                      // placeholder
 
+    if (m_UniqueTargetInfo.size() > 255)
+    {
+        sLog.outError("Spell ID %u cast by %s hit/missed too many unit targets %u. Ignored after 255.", m_spellInfo->Id, m_caster->GetObjectGuid().GetString().c_str(), (uint32)m_UniqueTargetInfo.size());
+        m_UniqueTargetInfo.resize(255);
+    }
+
+    if (m_UniqueGOTargetInfo.size() > 255)
+    {
+        sLog.outError("Spell ID %u cast by %s hit/missed too many GO targets %u. Ignored after 255.", m_spellInfo->Id, m_caster->GetObjectGuid().GetString().c_str(), (uint32)m_UniqueGOTargetInfo.size());
+        m_UniqueGOTargetInfo.resize(255);
+    }
+
+    if (m_UniqueGOTargetInfo.size() + m_UniqueTargetInfo.size() > 255)
+    {
+        sLog.outError("Spell ID %u cast by %s hit/missed too many targets %u. Ignored after 255.", m_spellInfo->Id, m_caster->GetObjectGuid().GetString().c_str(), (uint32)(m_UniqueGOTargetInfo.size() + m_UniqueTargetInfo.size()));
+        m_UniqueTargetInfo.resize(127);
+        m_UniqueGOTargetInfo.resize(127);
+    }
+
     // This function also fill data for channeled spells:
     // m_needAliveTargetMask req for stop channeling if one target die
-    uint32 hit  = m_UniqueGOTargetInfo.size();              // Always hits on GO
+    uint32 hit = m_UniqueGOTargetInfo.size();              // Always hits on GO
     uint32 miss = 0;
 
     for (auto& ihit : m_UniqueTargetInfo)
@@ -3632,6 +3651,8 @@ void Spell::WriteSpellGoTargets(WorldPacket& data)
         if (ihit.effectHitMask == 0)                       // No effect apply - all immuned add state
         {
             // possibly SPELL_MISS_IMMUNE2 for this??
+            if (IsChanneledSpell(m_spellInfo) && ihit.targetGUID == m_targets.getUnitTargetGuid()) // can happen due to DR
+                m_duration = 0;                            // cancel aura to avoid visual effect continue
             ihit.missCondition = SPELL_MISS_IMMUNE2;
             ++miss;
         }
@@ -3649,20 +3670,20 @@ void Spell::WriteSpellGoTargets(WorldPacket& data)
         }
     }
 
-    for (GOTargetList::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end(); ++ighit)
-        data << ighit->targetGUID;                         // Always hits
+    for (auto& ighit : m_UniqueGOTargetInfo)
+        data << ighit.targetGUID;                         // Always hits
 
     data.put<uint8>(count_pos, hit);
 
     data << (uint8)miss;
-    for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+    for (auto& ihit : m_UniqueTargetInfo)
     {
-        if (ihit->missCondition != SPELL_MISS_NONE)         // Add only miss
+        if (ihit.missCondition != SPELL_MISS_NONE)         // Add only miss
         {
-            data << ihit->targetGUID;
-            data << uint8(ihit->missCondition);
-            if (ihit->missCondition == SPELL_MISS_REFLECT)
-                data << uint8(ihit->reflectResult);
+            data << ihit.targetGUID;
+            data << uint8(ihit.missCondition);
+            if (ihit.missCondition == SPELL_MISS_REFLECT)
+                data << uint8(ihit.reflectResult);
         }
     }
     // Reset m_needAliveTargetMask for non channeled spell
