@@ -311,7 +311,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET         = 0x00000100,// 8 Spell req target not to be in combat state
     SPELL_ATTR_EX_FACING_TARGET                = 0x00000200,// 9 TODO: CONFIRM!
     SPELL_ATTR_EX_NO_THREAT                    = 0x00000400,// 10 no generates threat on cast 100%
-    SPELL_ATTR_EX_UNK11                        = 0x00000800,// 11
+    SPELL_ATTR_EX_DONT_REFRESH_DURATION_ON_RECAST = 0x00000800,// 11 Aura will not refresh its duration when recast
     SPELL_ATTR_EX_IS_PICKPOCKET                = 0x00001000,// 12
     SPELL_ATTR_EX_FARSIGHT                     = 0x00002000,// 13 related to farsight
     SPELL_ATTR_EX_CHANNEL_TRACK_TARGET         = 0x00004000,// 14
