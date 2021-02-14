@@ -1283,10 +1283,9 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
         if (map->IsDungeon())
         {
             Player* creditedPlayer = killer ? killer->GetBeneficiaryPlayer() : nullptr; // TODO: do instance binding anyway if the charmer/owner is offline
-            if (map->IsRaid() && creditedPlayer)
+            if (map->IsRaid() && victim->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_INSTANCE_BIND)
             {
-                if (victim->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_INSTANCE_BIND)
-                    static_cast<DungeonMap*>(map)->PermBindAllPlayers(creditedPlayer);
+                static_cast<DungeonMap*>(map)->PermBindAllPlayers(creditedPlayer);
             }
             static_cast<DungeonMap*>(map)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, victim->GetEntry());
         }

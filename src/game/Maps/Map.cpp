@@ -1731,7 +1731,21 @@ bool DungeonMap::Reset(InstanceResetMethod method)
 
 void DungeonMap::PermBindAllPlayers(Player* player)
 {
-    Group* group = player->GetGroup();
+    Group* group = nullptr;
+    if (player)
+        group = player->GetGroup();
+    else
+    {
+        for (auto& itr : m_mapRefManager)
+        {
+            Player* plr = itr.getSource();
+            if (plr->GetGroup() && !plr->isGameMaster())
+            {
+                group = plr->GetGroup();
+                break;
+            }
+        }
+    }
     // group members outside the instance group don't get bound
     for (auto& itr : m_mapRefManager)
     {
