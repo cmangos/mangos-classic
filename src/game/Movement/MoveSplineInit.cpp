@@ -69,7 +69,7 @@ namespace Movement
 
         if (moveFlags & MOVEFLAG_ROOT && !pathEmpty)
         {
-            sLog.outCustomLog("Invalid movement during root.");
+            sLog.outCustomLog("Invalid movement during root. Entry: %u IsImmobilized %s, moveflags %u", unit.GetEntry(), unit.IsImmobilizedState() ? "true" : "false", moveFlags);
             sLog.traceLog();
             return 0;
         }
