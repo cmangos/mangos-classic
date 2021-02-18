@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2020112401
+ConfVersion=2021021901
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -288,6 +288,12 @@ MaxWhoListReturns = 49
 #        Default: "Server.log"
 #                 "" - Empty name disable creating log file
 #
+#    PacketLogFile
+#        Description: Binary packet logging file for the world server.
+#                     Filename extension must be .pkt to be parsable with WowPacketParser.
+#        Example:     "World.pkt" - (Enabled)
+#        Default:     ""          - (Disabled)
+#
 #    LogTimestamp
 #        Logfile with timestamp of server start in name
 #        Default: 0 - no timestamp in name
@@ -393,6 +399,7 @@ PidFile = ""
 LogLevel = 1
 LogTime = 0
 LogFile = "Server.log"
+PacketLogFile = ""
 LogTimestamp = 0
 LogFileLevel = 0
 LogFilter_TransportMoves = 1
