@@ -855,6 +855,48 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         SendNotification("Your taxi nodes have been reset.");
     }
 
+    // create collector's edition reward
+    if (sWorld.getConfig(CONFIG_BOOL_COLLECTORS_EDITION))
+        if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
+        {
+            uint32 itemid = 0;
+            switch (pCurrChar->getRace())
+            {
+            case RACE_HUMAN:
+                itemid = 14646;
+                break;
+            case RACE_ORC:
+            case RACE_TROLL:
+                itemid = 14649;
+                break;
+            case RACE_DWARF:
+            case RACE_GNOME:
+                itemid = 14647;
+                break;
+            case RACE_NIGHTELF:
+                itemid = 14648;
+                break;
+            case RACE_UNDEAD:
+                itemid = 14651;
+                break;
+            case RACE_TAUREN:
+                itemid = 14650;
+                break;
+            }
+            
+            if (itemid)
+            {
+                ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid);
+                if (pProto)
+                {
+                    uint32 noSpaceForCount = 0;
+                    ItemPosCountVec dest;
+                    uint8 msg = pCurrChar->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, 1, &noSpaceForCount);
+                    Item* item = pCurrChar->StoreNewItem(dest, itemid, true);
+                }
+            }
+        }
+
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
 

@@ -1544,6 +1544,18 @@ OutdoorPvp.SIEnabled = 1
 OutdoorPvp.EPEnabled = 1
 
 ###################################################################################################################
+# CUSTOM SETTINGS CONFIG
+#
+#    Custom.CollectorsEdition
+#        Add WoW Collector's Edition reward on first login (Choice between 3 pets)
+#        Default: 0 (disable)
+#                 1 (enable)
+#
+###################################################################################################################
+
+Custom.CollectorsEdition = 0
+
+###################################################################################################################
 # NETWORK CONFIG
 #
 #    Network.Threads
