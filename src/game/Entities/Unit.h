@@ -1097,6 +1097,7 @@ enum SelectFlags
     SELECT_FLAG_SKIP_TANK           = 0x4000,               // Not GetVictim - tank is not always top threat
     SELECT_FLAG_CASTING             = 0x8000,               // Selects only targets that are casting
     SELECT_FLAG_SKIP_CUSTOM         =0x10000,               // skips custom target
+    SELECT_FLAG_NOT_IMMUNE          =0x20000,
 };
 
 struct SelectAttackingTargetParams

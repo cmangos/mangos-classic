@@ -11552,6 +11552,10 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
             return true;
         }
 
+        if (selectFlags & SELECT_FLAG_NOT_IMMUNE)
+            if (target->IsImmuneToSpell(spellInfo, false, GetCheckCastEffectMask(spellInfo)))
+                return false;
+
         if (spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER)
             return false;
 
