@@ -27,6 +27,10 @@
 
 #include <mysql.h>
 
+#if MYSQL_VERSION_ID >= 80001
+typedef bool my_bool;
+#endif
+
 // MySQL prepared statement class
 class MySqlPreparedStatement : public SqlPreparedStatement
 {
