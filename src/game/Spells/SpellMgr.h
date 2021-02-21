@@ -542,6 +542,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 10095:         // Hate to Zero (Hate to Zero)
         case 11838:         // Hate to Zero (Hate to Zero)
         case 11919:         // Poison Proc
+        case 11959:         // Poison Proc
         case 11964:         // Fevered Fatigue
         case 11966:         // Fire Shield
         case 11984:         // Immolate
