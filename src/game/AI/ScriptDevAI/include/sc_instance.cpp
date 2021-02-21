@@ -206,8 +206,21 @@ void ScriptedInstance::BanPlayersIfNoGm(const std::string& reason)
 void ScriptedInstance::DespawnGuids(GuidVector& spawns)
 {
     for (ObjectGuid& guid : spawns)
-        if (Creature* spawn = instance->GetAnyTypeCreature(guid))
-            spawn->ForcedDespawn();
+    {
+        if (guid.IsAnyTypeCreature())
+        {
+            if (Creature* spawn = instance->GetAnyTypeCreature(guid))
+                spawn->ForcedDespawn();
+        }
+        else if (guid.IsGameObject())
+        {
+            if (GameObject* spawn = instance->GetGameObject(guid))
+            {
+                spawn->SetLootState(GO_JUST_DEACTIVATED);
+                spawn->SetForcedDespawn();
+            }
+        }
+    }
     spawns.clear();
 }
 
