@@ -264,6 +264,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* curr
     m_currentBasePoints = currentBasePoints ? *currentBasePoints : spellproto->CalculateSimpleValue(eff);
 
     m_positive = IsPositiveAuraEffect(spellproto, m_effIndex, caster, target);
+
     m_applyTime = time(nullptr);
 
     int32 damage = currentDamage ? *currentDamage : m_currentBasePoints;
