@@ -399,7 +399,7 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
         int LIQU_h[] = {0x5551494C, int(sizeof(WMOLiquidHeader) + LiquEx_size + hlq->xtiles * hlq->ytiles)}; // "LIQU"
         fwrite(LIQU_h, 4, 2, output);
 
-        // according to WoW.Dev Wiki:
+        // according to https://wowdev.wiki/
         uint32 liquidEntry;
         if (rootWMO->liquidType & 4)
             liquidEntry = liquidType;

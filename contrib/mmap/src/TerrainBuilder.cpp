@@ -455,7 +455,7 @@ namespace MMAP
     /**************************************************************************/
     void TerrainBuilder::getHeightCoord(int index, Grid grid, float xOffset, float yOffset, float* coord, float* v)
     {
-        // wow coords: x, y, height
+        // world coords: x, y, height
         // coord is mirroed about the horizontal axes
         switch (grid)
         {
@@ -523,7 +523,7 @@ namespace MMAP
     /**************************************************************************/
     void TerrainBuilder::getLiquidCoord(int index, int index2, float xOffset, float yOffset, float* coord, float* v)
     {
-        // wow coords: x, y, height
+        // world coords: x, y, height
         // coord is mirroed about the horizontal axes
         coord[0] = (xOffset + index % (V9_SIZE) * GRID_PART_SIZE) * -1.f;
         coord[1] = (yOffset + (int)(index / (V9_SIZE)) * GRID_PART_SIZE) * -1.f;

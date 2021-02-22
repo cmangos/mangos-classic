@@ -290,7 +290,7 @@ MaxWhoListReturns = 49
 #
 #    PacketLogFile
 #        Description: Binary packet logging file for the world server.
-#                     Filename extension must be .pkt to be parsable with WowPacketParser.
+#                     Filename extension must be .pkt to be parsable with WPP.
 #        Example:     "World.pkt" - (Enabled)
 #        Default:     ""          - (Disabled)
 #

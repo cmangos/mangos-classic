@@ -160,7 +160,7 @@ ModelInstance::ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID
     f.read(&scale, 2);
     f.read(&dummyFlags, 2);   // unknown but flag 1 is used for biodome in Outland, currently this value is not used
 
-    // scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
+    // scale factor - divide by 1024. game devs must be on crack, why not just use a float?
     sc = scale / 1024.0f;
 
     char tempname[512];

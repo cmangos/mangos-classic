@@ -31,7 +31,7 @@ INSTANTIATE_SINGLETON_1(RealmList);
 
 extern DatabaseType LoginDatabase;
 
-// will only support WoW 1.12.1/1.12.2/1.12.3 , WoW:TBC 2.4.3 and official release for WoW:WotLK and later, client builds 10505, 8606, 6141, 6005, 5875
+// will only support 1.12.1/1.12.2/1.12.3, TBC 2.4.3 and official release for WotLK and later, client builds 10505, 8606, 6141, 6005, 5875
 // if you need more from old build then add it in cases in realmd sources code
 // list sorted from high to low build and first build used as low bound for accepted by default range (any > it will accepted by realmd at least)
 

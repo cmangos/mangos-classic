@@ -252,7 +252,7 @@ namespace Movement
                         if (args.Validate(nullptr))
                         {
                             // New cycle should preserve previous cycle's duration for some weird reason, even though
-                            // the path is really different now. Blizzard is weird. Or this was just a simple oversight.
+                            // the path is really different now. Developers are weird. Or this was just a simple oversight.
                             // Since our splines precalculate length with velocity in mind, if we want to find the desired
                             // velocity, we have to make a fake spline, calculate its duration and then compare it to the
                             // desired duration, thus finding out how much the velocity has to be increased for them to match.

@@ -148,7 +148,7 @@ enum AuraType
     /**
      * Changes whether the target is pacified or not depending on the apply flag.
      * Pacify makes the target silenced and have all it's attack skill disabled.
-     * See: http://www.wowhead.com/spell=6462/pacified
+     * See: http://classic.wowhead.com/spell=6462
      */
     SPELL_AURA_MOD_PACIFY = 25,
     /**

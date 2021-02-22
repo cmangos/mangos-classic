@@ -365,8 +365,8 @@ bool AuthSocket::_HandleLogonChallenge()
     _safelocale = m_locale;
     LoginDatabase.escape_string(_safelocale);
 
-    pkt << (uint8) CMD_AUTH_LOGON_CHALLENGE;
-    pkt << (uint8) 0x00;
+    pkt << uint8(CMD_AUTH_LOGON_CHALLENGE);
+    pkt << uint8(0x00);
 
     ///- Verify that this IP is not in the ip_banned table
     // No SQL injection possible (paste the IP address as passed by the socket)
@@ -375,7 +375,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
     if (ip_banned_result)
     {
-        pkt << (uint8)WOW_FAIL_FAIL_NOACCESS;
+        pkt << uint8(AUTH_LOGON_FAILED_FAIL_NOACCESS);
         BASIC_LOG("[AuthChallenge] Banned ip %s tries to login!", m_address.c_str());
     }
     else
@@ -396,7 +396,7 @@ bool AuthSocket::_HandleLogonChallenge()
                 if (strcmp(fields[2].GetString(), m_address.c_str()))
                 {
                     DEBUG_LOG("[AuthChallenge] Account IP differs");
-                    pkt << (uint8) WOW_FAIL_SUSPENDED;
+                    pkt << uint8(AUTH_LOGON_FAILED_SUSPENDED);
                     locked = true;
                 }
                 else
@@ -411,7 +411,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
             if (!srp.SetVerifier(databaseV.c_str()) || !srp.SetSalt(databaseS.c_str()))
             {
-                pkt << (uint8)WOW_FAIL_FAIL_NOACCESS;
+                pkt << uint8(AUTH_LOGON_FAILED_FAIL_NOACCESS);
                 DEBUG_LOG("[AuthChallenge] Broken v/s values in database for account %s!", _login.c_str());
                 broken = true;
             }
@@ -425,12 +425,12 @@ bool AuthSocket::_HandleLogonChallenge()
                 {
                     if ((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
                     {
-                        pkt << (uint8) WOW_FAIL_BANNED;
+                        pkt << uint8(AUTH_LOGON_FAILED_BANNED);
                         BASIC_LOG("[AuthChallenge] Banned account %s tries to login!", _login.c_str());
                     }
                     else
                     {
-                        pkt << (uint8) WOW_FAIL_SUSPENDED;
+                        pkt << uint8(AUTH_LOGON_FAILED_SUSPENDED);
                         BASIC_LOG("[AuthChallenge] Temporarily banned account %s tries to login!", _login.c_str());
                     }
 
@@ -446,7 +446,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     srp.CalculateHostPublicEphemeral();
 
                     ///- Fill the response packet with the result
-                    pkt << uint8(WOW_SUCCESS);
+                    pkt << uint8(AUTH_LOGON_SUCCESS);
 
                     // B may be calculated < 32B so we force minimal length to 32B
                     pkt.append(srp.GetHostPublicEphemeral().AsByteArray(32), 32);      // 32 bytes
@@ -493,7 +493,7 @@ bool AuthSocket::_HandleLogonChallenge()
             delete result;
         }
         else                                                // no account
-            pkt << (uint8) WOW_FAIL_UNKNOWN_ACCOUNT;
+            pkt << uint8(AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT);
     }
 
     Write((const char*)pkt.contents(), pkt.size());
@@ -517,9 +517,9 @@ bool AuthSocket::_HandleLogonProof()
     {
         // no patch found
         ByteBuffer pkt;
-        pkt << (uint8) CMD_AUTH_LOGON_CHALLENGE;
-        pkt << (uint8) 0x00;
-        pkt << (uint8) WOW_FAIL_VERSION_INVALID;
+        pkt << uint8(CMD_AUTH_LOGON_CHALLENGE);
+        pkt << uint8(0x00);
+        pkt << uint8(AUTH_LOGON_FAILED_VERSION_INVALID);
 
         BASIC_LOG("[AuthChallenge] Account %s tried to login with invalid client version %u!", _login.c_str(), _build);
         Write((const char*)pkt.contents(), pkt.size());
@@ -545,14 +545,14 @@ bool AuthSocket::_HandleLogonProof()
             uint8 pinCount;
             if (!Read((char*)&pinCount, sizeof(uint8)))
             {
-                const char data[4] = {CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0};
+                const char data[4] = { CMD_AUTH_LOGON_PROOF, AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT, 3, 0 };
                 Write(data, sizeof(data));
                 return true;
             }
             std::vector<uint8> keys(pinCount + 1);
             if (!Read((char*)keys.data(), sizeof(uint8) * pinCount))
             {
-                const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0 };
+                const char data[4] = { CMD_AUTH_LOGON_PROOF, AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT, 3, 0 };
                 Write(data, sizeof(data));
                 return true;
             }
@@ -564,7 +564,7 @@ bool AuthSocket::_HandleLogonProof()
             {
                 BASIC_LOG("[AuthChallenge] Account %s tried to login with wrong pincode! Given %u Expected %u Pin Count: %u", _login.c_str(), clientToken, ServerToken, pinCount);
 
-                const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 0, 0};
+                const char data[4] = { CMD_AUTH_LOGON_PROOF, AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT, 0, 0 };
                 Write(data, sizeof(data));
                 return true;
             }
@@ -574,7 +574,7 @@ bool AuthSocket::_HandleLogonProof()
         {
             BASIC_LOG("[AuthChallenge] Account %s tried to login with modified client!", _login.c_str());
 
-            const char data[2] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_VERSION_INVALID };
+            const char data[2] = { CMD_AUTH_LOGON_PROOF, AUTH_LOGON_FAILED_VERSION_INVALID };
             Write(data, sizeof(data));
             return true;
         }
@@ -602,13 +602,13 @@ bool AuthSocket::_HandleLogonProof()
     {
         if (_build > 6005)                                  // > 1.12.2
         {
-            const char data[4] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 0, 0};
+            const char data[4] = { CMD_AUTH_LOGON_PROOF, AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT, 0, 0 };
             Write(data, sizeof(data));
         }
         else
         {
             // 1.x not react incorrectly at 4-byte message use 3 as real error
-            const char data[2] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT};
+            const char data[2] = { CMD_AUTH_LOGON_PROOF, AUTH_LOGON_FAILED_UNKNOWN_ACCOUNT };
             Write(data, sizeof(data));
         }
 
@@ -757,16 +757,16 @@ bool AuthSocket::_HandleReconnectProof()
         if (!VerifyVersion(lp.R1, sizeof(lp.R1), lp.R3, true))
         {
             ByteBuffer pkt;
-            pkt << (uint8)CMD_AUTH_RECONNECT_PROOF;
-            pkt << (uint8)WOW_FAIL_VERSION_INVALID;
+            pkt << uint8(CMD_AUTH_RECONNECT_PROOF);
+            pkt << uint8(AUTH_LOGON_FAILED_VERSION_INVALID);
             Write((const char*)pkt.contents(), pkt.size());
             return true;
         }
         ///- Sending response
         ByteBuffer pkt;
-        pkt << (uint8)  CMD_AUTH_RECONNECT_PROOF;
-        pkt << (uint8)  WOW_SUCCESS;
-        pkt << (uint16) 0x00;                               // 2 bytes zeros
+        pkt << uint8(CMD_AUTH_RECONNECT_PROOF);
+        pkt << uint8(AUTH_LOGON_SUCCESS);
+        pkt << uint16(0x00);                                // 2 bytes zeros
         Write((const char*)pkt.contents(), pkt.size());
 
         ///- Set _status to authed!

@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
         "     | |ontinued| |\\/| | __ _| . ` | | |_ | |  | |\\___ \\ \n"
         "     | |____    | |  | |/ _` | |\\  | |__| | |__| |____) |\n"
         "      \\_____|   |_|  |_| (_| |_| \\_|\\_____|\\____/ \\____/ \n"
-        "      http://cmangos.net\\__,_|     Doing things right!\n\n");
+        "      http://cmangos.net\\__,_|     Doing emulation right!\n\n");
 
     sLog.outString("Built on %s at %s", __DATE__, __TIME__);
     sLog.outString("Built for %s", _ENDIAN_PLATFORM);

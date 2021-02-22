@@ -7,19 +7,19 @@ This file is part of the CMaNGOS Project. See [AUTHORS](AUTHORS.md) and [COPYRIG
 
 CMaNGOS is a free project with the following goal:
 
-  **Doing WoW-Emulation Right!**
+  **Doing Emulation Right!**
 
 This means, we want to focus on:
 
-* WoW-Emulation
-    This project is about developing a server software that is able to
-    emulate a well known MMORPG service.
-
 * Doing
-  * This project is focused on developing content!
+  * This project is focused on developing software!
   * Also there are many other aspects that need to be done and are
     considered equally important.
   * Anyone who wants to do stuff is very welcome to do so!
+
+* Emulation
+    This project is about developing a server software that is able to
+    emulate a well known MMORPG service.
 
 * Right
   * Our goal must always be to provide the best code that we can.
@@ -81,8 +81,9 @@ To be able to accomplish these goals, we support and promote:
 
 ### Exceptions to GPL
 
-  World of Warcraft content and materials are trademarks and copyrights of Blizzard or its licensors. All rights reserved.
-  CMaNGOS project is not affiliated with Blizzard or its licensors.
+  World of Warcraft® ©2004 Blizzard Entertainment, Inc. All rights reserved. World of Warcraft, Warcraft and Blizzard Entertainment are trademarks or registered trademarks of Blizzard Entertainment, Inc. in the U.S. and/or other countries.
+  World of Warcraft® content and materials are trademarks and copyrights of Blizzard Entertainment, Inc. or its licensors.
+  CMaNGOS project is not affiliated with Blizzard Entertainment, Inc. or its licensors.
 
   Some third-party libraries CMaNGOS uses have other licenses, that must be
   upheld.  These libraries are located within the dep/ directory

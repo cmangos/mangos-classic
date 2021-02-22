@@ -2386,7 +2386,7 @@ void PlayerbotAI::DoNextCombatManeuver()
 
     // check for new targets
     if (m_ScenarioType == SCENARIO_PVP_DUEL)
-        GetDuelTarget(GetMaster()); // TODO: Wow... wait... what? So not right.
+        GetDuelTarget(GetMaster()); // TODO: Woah... wait... what? So not right.
     else
         Attack();
 
