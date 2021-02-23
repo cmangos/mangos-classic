@@ -1739,7 +1739,7 @@ void DungeonMap::PermBindAllPlayers(Player* player)
         for (auto& itr : m_mapRefManager)
         {
             Player* plr = itr.getSource();
-            if (plr->GetGroup() && !plr->isGameMaster())
+            if (plr->GetGroup() && !plr->IsGameMaster())
             {
                 group = plr->GetGroup();
                 break;

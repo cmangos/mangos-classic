@@ -72,7 +72,6 @@ struct spell_judgement : public SpellScript
         }
 
         caster->CastSpell(unitTarget, spellId2, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_HIT_CALCULATION);
-
     }
 };
 

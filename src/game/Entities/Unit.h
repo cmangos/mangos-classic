@@ -781,7 +781,7 @@ enum SpellAuraProcResult
     SPELL_AURA_PROC_CANT_TRIGGER    = 2,                    // aura can't trigger - skip charges taking, move to next aura if exists
 };
 
-// Unit* victim, uint32 procAttacker, uint32 procVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType, SpellEntry const* procSpell, bool dontTriggerSpecial
+// Unit* victim, uint32 procAttacker, uint32 procVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType, SpellEntry const* spellInfo, bool dontTriggerSpecial
 
 // External struct for passing on data
 struct ProcSystemArguments
@@ -794,7 +794,7 @@ struct ProcSystemArguments
     uint32 procExtra;
 
     uint32 damage; // contains full heal or full damage
-    SpellEntry const* procSpell;
+    SpellEntry const* spellInfo;
     WeaponAttackType attType;
 
     Spell* spell;
@@ -804,8 +804,8 @@ struct ProcSystemArguments
     bool isHeal;
 
     explicit ProcSystemArguments(Unit* attacker, Unit* victim, uint32 procFlagsAttacker, uint32 procFlagsVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType = BASE_ATTACK,
-        SpellEntry const* procSpell = nullptr, Spell* spell = nullptr, uint32 healthGain = 0, bool isHeal = false) : attacker(attacker), victim(victim), procFlagsAttacker(procFlagsAttacker), procFlagsVictim(procFlagsVictim), procExtra(procExtra), damage(amount),
-        procSpell(procSpell), attType(attType), spell(spell), healthGain(healthGain), isHeal(isHeal)
+        SpellEntry const* spellInfo = nullptr, Spell* spell = nullptr, uint32 healthGain = 0, bool isHeal = false) : attacker(attacker), victim(victim), procFlagsAttacker(procFlagsAttacker), procFlagsVictim(procFlagsVictim), procExtra(procExtra), damage(amount),
+        spellInfo(spellInfo), attType(attType), spell(spell), healthGain(healthGain), isHeal(isHeal)
     {
     }
 };
@@ -827,9 +827,9 @@ struct ProcExecutionData
 
     WeaponAttackType attType;
     uint32 damage; // contains full heal or full damage
-    SpellEntry const* procSpell;
+    SpellEntry const* spellInfo; // filled always even on aura tick
 
-    Spell* spell;
+    Spell* spell; // only filled on direct spell execution
 
     // Healing specific information
     uint32 healthGain;

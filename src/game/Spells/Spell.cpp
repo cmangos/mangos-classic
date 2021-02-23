@@ -4287,7 +4287,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     {
         // cancel autorepeat spells if cast start when moving
         // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
-        if (m_caster->IsMovingIgnoreFlying())
+        if (m_caster->IsMoving())
         {
             // skip stuck spell to allow use it in falling case and apply spell limitations at movement
             if ((!m_caster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR) || m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK) &&

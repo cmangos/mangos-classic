@@ -2518,7 +2518,7 @@ class SpellMgr
             return itr->second;
         }
 
-        static bool IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellEntry const* procSpell, uint32 procFlags, uint32 procExtra);
+        static bool IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellEntry const* spellInfo, uint32 procFlags, uint32 procExtra);
 
         // Spell bonus data
         SpellBonusEntry const* GetSpellBonusData(uint32 spellId) const
