@@ -11208,14 +11208,14 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
     }
 }
 
-float Unit::GetAttackDistance(Unit const* pl) const
+float Unit::GetAttackDistance(Unit const* target) const
 {
     float aggroRate = sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
     if (aggroRate == 0)
         return 0.0f;
 
-    uint32 playerlevel = pl->GetLevelForTarget(this);
-    uint32 creaturelevel = GetLevelForTarget(pl);
+    uint32 playerlevel = target->GetLevelForTarget(this);
+    uint32 creaturelevel = GetLevelForTarget(target);
 
     int32 leveldif = int32(playerlevel) - int32(creaturelevel);
 
@@ -11236,11 +11236,14 @@ float Unit::GetAttackDistance(Unit const* pl) const
     RetDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
 
     // detected range auras
-    RetDistance += pl->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
+    RetDistance += target->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
 
     // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
     if (RetDistance < 5)
         RetDistance = 5;
+
+    if (target->IsPlayerControlled() && target->IsCreature() && !target->IsClientControlled()) // player pets do not aggro from so afar
+        RetDistance * 0.65f;
 
     return (RetDistance * aggroRate);
 }

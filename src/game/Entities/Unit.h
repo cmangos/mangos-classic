@@ -2337,7 +2337,7 @@ class Unit : public WorldObject
         void SetIgnoreRangedTargets(bool state) { m_ignoreRangedTargets = state; }
         bool IsIgnoringRangedTargets() { return m_ignoreRangedTargets; }
 
-        float GetAttackDistance(Unit const* pl) const;
+        float GetAttackDistance(Unit const* target) const;
         virtual uint32 GetDetectionRange() const { return 20.f; }
 
         virtual UnitAI* AI() { return nullptr; }
