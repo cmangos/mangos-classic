@@ -964,7 +964,25 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         return SPELL_AURA_PROC_FAILED;
 
                     // heal amount
-                    basepoints[0] = triggerAmount * damage / 100;                    pVictim->CastCustomSpell(pVictim, 15290, &basepoints[0], nullptr, nullptr, true, castItem, triggeredByAura);                    return SPELL_AURA_PROC_OK;                                // no hidden cooldown
+                    basepoints[0] = triggerAmount * damage / 100;
+                    pVictim->CastCustomSpell(nullptr, 15290, &basepoints[0], nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+                    return SPELL_AURA_PROC_OK;              // no hidden cooldown
+                }
+                // Priest Tier 6 Trinket (Ashtongue Talisman of Acumen)
+                case 40438:
+                {
+                    // Shadow Word: Pain
+                    if (spellInfo->SpellFamilyFlags & uint64(0x0000000000008000))
+                        triggered_spell_id = 40441;
+                    // Renew
+                    else if (spellInfo->SpellFamilyFlags & uint64(0x0000000000000040))
+                        triggered_spell_id = 40440;
+                    else
+                        return SPELL_AURA_PROC_FAILED;
+
+                    target = this;
+                    break;
+>>>>>>> fd0ef44bc4e... Priest: Vampiric Embrace and Touch should not be triggered casts
                 }
                 // Oracle Healing Bonus ("Garments of the Oracle" set)
                 case 26169:
