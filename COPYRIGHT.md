@@ -4,8 +4,8 @@ Copyright
 Definition of copyrighted materials
 -----------------------------------
 
-World of Warcraft® ©2004 Blizzard Entertainment, Inc. All rights reserved. World of Warcraft, Warcraft and Blizzard Entertainment are trademarks or registered trademarks of Blizzard Entertainment, Inc. in the U.S. and/or other countries.
-World of Warcraft® content and materials are trademarks and copyrights of Blizzard Entertainment, Inc. or its licensors.
+World of Warcraft® ©2004 Blizzard Entertainment, Inc. All rights reserved.
+World of Warcraft, WoW, Warcraft, The Frozen Throne, The Burning Crusade, Wrath of the Lich King, Cataclysm, Mists of Pandaria, Ashbringer, Dark Portal, Darkmoon Faire, Frostmourne, Onyxia's Lair, Diablo, Hearthstone, Heroes of Azeroth, Reaper of Souls, Starcraft, Battle Net, Blizzcon, Glider, Blizzard and Blizzard Entertainment are trademarks or registered trademarks of Blizzard Entertainment, Inc. in the U.S. and/or other countries.
 
 All content and materials protected by copyright are here after called Copyrighted Material.
 
