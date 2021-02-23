@@ -792,9 +792,9 @@ struct PeriodicRotate : public AuraScript
 
             float newAngle = target->GetOrientation();
             if (aura->GetId() == SPELL_ROTATE_360_RIGHT)
-                newAngle -= M_PI_F / 40;
+                newAngle -= M_PI_F / 35;
             else
-                newAngle += M_PI_F / 40;
+                newAngle += M_PI_F / 35;
             newAngle = MapManager::NormalizeOrientation(newAngle);
             target->SetFacingTo(newAngle);
 
