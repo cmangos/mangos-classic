@@ -982,7 +982,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
 
                     target = this;
                     break;
->>>>>>> fd0ef44bc4e... Priest: Vampiric Embrace and Touch should not be triggered casts
                 }
                 // Oracle Healing Bonus ("Garments of the Oracle" set)
                 case 26169:

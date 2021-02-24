@@ -714,6 +714,8 @@ class Creature : public Unit
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
         Player* GetLootRecipient() const;                   // use group cases as prefered
         Group* GetGroupLootRecipient() const;
+        void SetCorpseAccelerationDelay(uint32 delay) { m_corpseAccelerationDecayDelay = delay; } // in miliseconds
+
         bool HasLootRecipient() const { return m_lootGroupRecipientId || m_lootRecipientGuid; }
         bool IsGroupLootRecipient() const { return m_lootGroupRecipientId != 0; }
         void SetLootRecipient(Unit* unit);
@@ -855,6 +857,7 @@ class Creature : public Unit
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
         CreatureLootStatus m_lootStatus;                    // loot status (used to know when we could loot, pickpocket or skin)
+        uint32 m_corpseAccelerationDecayDelay;              // time for ReduceCorpseDecayTimer
 
         /// Timers
         TimePoint m_corpseExpirationTime;                   // (msecs) time point of corpse decay
