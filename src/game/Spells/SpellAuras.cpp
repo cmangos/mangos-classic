@@ -5251,6 +5251,9 @@ inline bool IsRemovedOnShapeshiftLost(SpellEntry const* spellproto, ObjectGuid c
 {
     if (casterGuid == targetGuid)
     {
+        if (spellproto->HasAttribute(SPELL_ATTR_AURA_IS_DEBUFF))
+            return false;
+
         if (spellproto->Stances)
         {
             switch (spellproto->Id)
