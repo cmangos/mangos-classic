@@ -154,7 +154,7 @@ struct boss_eye_of_cthunAI : public CombatAI
         DoCastSpellIfCan(m_creature, SPELL_CHECK_RESET_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void JustDied(Unit* killer) override
+    void JustDied(Unit* /*killer*/) override
     {
         // Allow the body to begin the transition (internal 5 secs delay)
         if (m_instance)
@@ -701,11 +701,6 @@ bool AreaTrigger_at_stomach_cthun(Player* player, AreaTriggerEntry const* at)
         return true;
     }
     return false;
-}
-
-UnitAI* GetAI_boss_eye_of_cthun(Creature* pCreature)
-{
-    return new boss_eye_of_cthunAI(pCreature);
 }
 
 UnitAI* GetAI_boss_cthun(Creature* pCreature)
