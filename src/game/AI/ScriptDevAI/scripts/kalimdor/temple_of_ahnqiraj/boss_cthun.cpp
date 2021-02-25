@@ -25,6 +25,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "temple_of_ahnqiraj.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -86,7 +87,6 @@ enum
     AREATRIGGER_STOMACH_3           = 4036,
 
     MAX_FLESH_TENTACLES             = 2,
-    MAX_EYE_TENTACLES               = 8,
 };
 
 static const float afCthunLocations[4][4] =
@@ -99,50 +99,54 @@ static const float afCthunLocations[4][4] =
 
 enum CThunPhase
 {
-    PHASE_EYE_NORMAL            = 0,
-    PHASE_EYE_DARK_GLARE        = 1,
-    PHASE_TRANSITION            = 2,
-    PHASE_CTHUN                 = 3,
-    PHASE_CTHUN_WEAKENED        = 4,
+    PHASE_TRANSITION            = 0,
+    PHASE_CTHUN                 = 1,
+    PHASE_CTHUN_WEAKENED        = 2,
 };
 
 /*######
 ## boss_eye_of_cthun
 ######*/
 
-struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
+enum EyeCthunActions
 {
-    boss_eye_of_cthunAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    EYECTHUN_EYEBEAM,
+    EYECTHUN_DARKGLARE,
+    EYECTHUN_ACTION_MAX,
+    EYECTHUN_END_DARKGLARE,
+};
+
+struct boss_eye_of_cthunAI : public CombatAI
+{
+    boss_eye_of_cthunAI(Creature* creature) : CombatAI(creature, EYECTHUN_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        AddCombatAction(EYECTHUN_EYEBEAM, 2 * IN_MILLISECONDS, 3 * IN_MILLISECONDS);
+        AddCombatAction(EYECTHUN_DARKGLARE, 45000u);
+        AddCustomAction(EYECTHUN_END_DARKGLARE, true, [&]() { HandleEndDarkGlare(); });
     }
 
-    ScriptedInstance* m_pInstance;
-
-    CThunPhase m_Phase;
+    ScriptedInstance* m_instance;
 
     uint8 m_eyeBeamCount;
-    uint32 m_uiBeamTimer;
-    uint32 m_uiDarkGlareTimer;
-    uint32 m_uiDarkGlareEndTimer;
-
-    GuidList m_lEyeTentaclesList;
 
     void Reset() override
     {
-        m_Phase                 = PHASE_EYE_NORMAL;
+        CombatAI::Reset();
 
-        m_uiDarkGlareTimer      = 45 * IN_MILLISECONDS;
-        m_uiDarkGlareEndTimer   = 40 * IN_MILLISECONDS;
-        m_uiBeamTimer           = 0;
-        m_eyeBeamCount          = 0;
+        SetMeleeEnabled(false);
+        SetCombatScriptStatus(false);
+        SetCombatMovement(false);
+
+        m_eyeBeamCount = 0;
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_CTHUN, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_CTHUN, IN_PROGRESS);
+
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
 
         // Start periodically summoning Eye and Claw (Hook) Tentacles
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_EYE_TENTACLES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
@@ -150,13 +154,13 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
         DoCastSpellIfCan(m_creature, SPELL_CHECK_RESET_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void JustDied(Unit* pKiller) override
+    void JustDied(Unit* killer) override
     {
         // Allow the body to begin the transition (internal 5 secs delay)
-        if (m_pInstance)
+        if (m_instance)
         {
-            if (Creature* pCthun = m_pInstance->GetSingleCreatureFromStorage(NPC_CTHUN))
-                m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pCthun);
+            if (Creature* cthun = m_instance->GetSingleCreatureFromStorage(NPC_CTHUN))
+                m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, cthun);
             else
                 script_error_log("C'Thun could not be found. Please check your database!");
         }
@@ -171,91 +175,77 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_EYE_TENTACLES);
         m_creature->RemoveAurasDueToSpell(SPELL_CHECK_RESET_AURA);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_CTHUN, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_CTHUN, FAIL);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        switch (pSummoned->GetEntry())
+        switch (summoned->GetEntry())
         {
-            case NPC_EYE_TENTACLE:
-                m_lEyeTentaclesList.push_back(pSummoned->GetObjectGuid());
-            // no break;
             case NPC_CLAW_TENTACLE:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    pSummoned->AI()->AttackStart(pTarget);
+                    summoned->AI()->AttackStart(pTarget);
                 break;
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleEndDarkGlare()
     {
-        // We ignore targets during Dark Glare to control Eye of C'Thun's orientation ourselves
-        // So we need custom AI management for this sub phase
-        if (m_Phase == PHASE_EYE_DARK_GLARE)
+        // Remove rotation auras
+        m_creature->RemoveAurasDueToSpell(SPELL_ROTATE_360_LEFT);
+        m_creature->RemoveAurasDueToSpell(SPELL_ROTATE_360_RIGHT);
+
+        // Switch to Eye Beam and resume targeting
+        SetCombatScriptStatus(false);
+        if (m_creature->GetVictim())
+            m_creature->SetTarget(m_creature->GetVictim());
+
+        ResetCombatAction(EYECTHUN_EYEBEAM, urand(2, 3) * IN_MILLISECONDS);
+        ResetCombatAction(EYECTHUN_DARKGLARE, 45 * IN_MILLISECONDS);
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (m_uiDarkGlareEndTimer < uiDiff)
-            {
-                // Remove rotation auras
-                m_creature->RemoveAurasDueToSpell(SPELL_ROTATE_360_LEFT);
-                m_creature->RemoveAurasDueToSpell(SPELL_ROTATE_360_RIGHT);
-
-                // Switch to Eye Beam
-                m_uiDarkGlareEndTimer = 40 * IN_MILLISECONDS;
-                m_uiBeamTimer         = 1 * IN_MILLISECONDS;
-                m_Phase               = PHASE_EYE_NORMAL;
-            }
-            else
-                m_uiDarkGlareEndTimer -= uiDiff;
-
-            return;
-        }
-
-        // No check reset aura: do nothing more as we are not in combat
-        if (!m_creature->HasAura(SPELL_CHECK_RESET_AURA))
-            return;
-
-        // Eye Beam
-        if (m_uiBeamTimer < uiDiff)
-        {
-            // The first three casts of "Eye Beam" use a specific spell that always target Eye of C'Thun's victim
-            if (m_eyeBeamCount < 3)
-            {
-                if (m_creature->GetVictim())
+            case EYECTHUN_EYEBEAM:
+                // The first three casts of "Eye Beam" use a specific spell that always targets Eye of C'Thun's victim
+                if (m_eyeBeamCount < 3)
                 {
-                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_EYE_BEAM_INIT) == CAST_OK)
+                    if (m_creature->GetVictim())
                     {
-                        m_uiBeamTimer = urand(2 * IN_MILLISECONDS, 3 * IN_MILLISECONDS);
-                        ++m_eyeBeamCount;
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_EYE_BEAM_INIT) == CAST_OK)
+                        {
+                            ResetCombatAction(action, urand(2, 3) * IN_MILLISECONDS);
+                            ++m_eyeBeamCount;
+                        }
                     }
                 }
-            }
-            // After the first three cast, random player is targeted with a second specific spell
-            else if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(target, SPELL_EYE_BEAM) == CAST_OK)
-                    m_uiBeamTimer = urand(2 * IN_MILLISECONDS, 3 * IN_MILLISECONDS);
-            }
-        }
-        else
-            m_uiBeamTimer -= uiDiff;
+                // After the first three casts, random player is targeted with a second specific spell
+                else if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_EYE_BEAM) == CAST_OK)
+                        ResetCombatAction(action, urand(2, 3) * IN_MILLISECONDS);
+                }
+                break;
+            case EYECTHUN_DARKGLARE:
+                // Cast the rotation spell
+                if (DoCastSpellIfCan(m_creature, SPELL_ROTATE_TRIGGER) == CAST_OK)
+                {
+                    // We ignore targets during Dark Glare to control Eye of C'Thun's orientation ourselves in spells
+                    // So we need custom AI management for this sub phase
+                    SetCombatScriptStatus(true);
+                    m_creature->SetTarget(nullptr);
 
-        // Dark Glare
-        if (m_uiDarkGlareTimer < uiDiff)
-        {
-            // Cast the rotation spell
-            if (DoCastSpellIfCan(m_creature, SPELL_ROTATE_TRIGGER) == CAST_OK)
-            {
-                // Switch to Dark Glare phase
-                m_uiDarkGlareTimer    = 45 * IN_MILLISECONDS;
-                m_Phase               = PHASE_EYE_DARK_GLARE;
-            }
+                    // Switch to Dark Glare phase for 40 seconds
+                    ResetTimer(EYECTHUN_END_DARKGLARE, 40 * IN_MILLISECONDS);
+                }
+                break;
+            default:
+                break;
         }
-        else
-            m_uiDarkGlareTimer -= uiDiff;
 
-        // No melee cast: Eye of C'Thun does not melee
     }
 };
 
@@ -772,11 +762,7 @@ struct RotateTrigger : public SpellScript
         if (effIdx == EFFECT_INDEX_0)
         {
             if (Unit* target = spell->GetUnitTarget())
-            {
-                // Clear target before changing orientation
-                target->SetTarget(nullptr);
-                target->CastSpell(target, urand(0, 1) ? SPELL_ROTATE_360_LEFT : SPELL_ROTATE_360_RIGHT, TRIGGERED_OLD_TRIGGERED);
-            }
+                target->CastSpell(nullptr, urand(0, 1) ? SPELL_ROTATE_360_LEFT : SPELL_ROTATE_360_RIGHT, TRIGGERED_OLD_TRIGGERED);
         }
     }
 };
@@ -797,6 +783,7 @@ struct PeriodicRotate : public AuraScript
                 newAngle += M_PI_F / 35;
             newAngle = MapManager::NormalizeOrientation(newAngle);
             target->SetFacingTo(newAngle);
+            target->SetOrientation(newAngle);
 
             data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_DARK_GLARE);
             data.caster = aura->GetCaster();
@@ -856,12 +843,12 @@ struct CheckReset : public SpellScript
 {
     void OnSuccessfulFinish(Spell* spell) const override
     {
-            // If we have at least one target, do nothing
-            if (Unit* target = spell->GetUnitTarget())
-                return;
-            // Else: reset the encounter
-            if (Unit* caster = spell->GetCaster())
-                caster->CastSpell(caster, SPELL_RESET_ENCOUNTER, TRIGGERED_OLD_TRIGGERED);
+        // If we have at least one target, do nothing
+        if (Unit* target = spell->GetUnitTarget())
+            return;
+        // Else: reset the encounter
+        if (Unit* caster = spell->GetCaster())
+            caster->CastSpell(caster, SPELL_RESET_ENCOUNTER, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -900,7 +887,7 @@ void AddSC_boss_cthun()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_eye_of_cthun";
-    pNewScript->GetAI = &GetAI_boss_eye_of_cthun;
+    pNewScript->GetAI = &GetNewAIInstance<boss_eye_of_cthunAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
