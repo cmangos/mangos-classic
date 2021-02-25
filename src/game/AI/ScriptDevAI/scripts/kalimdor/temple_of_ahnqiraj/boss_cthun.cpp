@@ -575,84 +575,75 @@ enum {
     SPELL_TELEPORT_GIANT_HOOK_TRIGGER = 26205
 };
 
-struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
+enum GiantClawActions
 {
-    npc_giant_claw_tentacleAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    GIANTCLAW_TRASH,
+    GIANTCLAW_HAMSTRING,
+    GIANTCLAW_CHECKTARGET,
+    GIANTCLAW_ACTION_MAX,
+};
+
+struct npc_giant_claw_tentacleAI : public CombatAI
+{
+    npc_giant_claw_tentacleAI(Creature* creature) : CombatAI(creature, GIANTCLAW_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        AddCombatAction(GIANTCLAW_TRASH, 5000u);
+        AddCombatAction(GIANTCLAW_HAMSTRING, 2000u);
+        AddCombatAction(GIANTCLAW_CHECKTARGET, 5000u);
+
+        m_instance = (ScriptedInstance*)creature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_uiThrashTimer;
-    uint32 m_uiHamstringTimer;
-    uint32 m_uiDistCheckTimer;
 
     bool m_isLookingForMeleeTarget;
 
     void Reset() override
     {
-        m_uiHamstringTimer  = 2 * IN_MILLISECONDS;
-        m_uiThrashTimer     = 5 * IN_MILLISECONDS;
-        m_uiDistCheckTimer  = 5 * IN_MILLISECONDS;
-
         m_isLookingForMeleeTarget = false;
 
+        m_creature->SetImmobilizedState(true);
         DoCastSpellIfCan(m_creature, SPELL_GIANT_GROUND_RUPTURE);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        // Check if we have a target
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Check every second if we are tanked
-        // If not, give 5 seconds to be tanked before teleporting to a target
-        if (m_uiDistCheckTimer)
+        switch (action)
         {
-            if (m_uiDistCheckTimer < uiDiff)
-            {
+            case GIANTCLAW_HAMSTRING:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMSTRING) == CAST_OK)
+                    ResetCombatAction(action, 10 * IN_MILLISECONDS);
+                break;
+            case GIANTCLAW_TRASH:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THRASH) == CAST_OK)
+                    ResetCombatAction(action, 10 * IN_MILLISECONDS);
+                break;
+            case GIANTCLAW_CHECKTARGET:
+                // Check every second if we are tanked
+                // If not, give 5 seconds to be tanked before teleporting to a target
                 // If there is nobody in range, spawn a new tentacle at a new target location
-                if (!m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE) && m_pInstance)
+                if (!m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE) && m_instance)
                 {
                     if (m_isLookingForMeleeTarget)
                     {
                         m_creature->CastSpell(m_creature->GetVictim(), SPELL_TELEPORT_GIANT_HOOK_TRIGGER, TRIGGERED_OLD_TRIGGERED);
                         m_isLookingForMeleeTarget = false;
-                        m_uiDistCheckTimer = 0;
+                        DisableCombatAction(action);
                     }
                     else
                     {
                         m_isLookingForMeleeTarget = true;
-                        m_uiDistCheckTimer = 5 * IN_MILLISECONDS;
+                        ResetCombatAction(action, 5 * IN_MILLISECONDS);
                     }
                 }
                 else
-                    m_uiDistCheckTimer = 1 * IN_MILLISECONDS;
-            }
-            else
-                m_uiDistCheckTimer -= uiDiff;
+                    ResetCombatAction(action, 1 * IN_MILLISECONDS);
+                break;
+            default:
+                break;
         }
-
-        if (m_uiThrashTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THRASH) == CAST_OK)
-                m_uiThrashTimer = 10 * IN_MILLISECONDS;
-        }
-        else
-            m_uiThrashTimer -= uiDiff;
-
-        if (m_uiHamstringTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMSTRING) == CAST_OK)
-                m_uiHamstringTimer = 10 * IN_MILLISECONDS;
-        }
-        else
-            m_uiHamstringTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
@@ -706,11 +697,6 @@ bool AreaTrigger_at_stomach_cthun(Player* player, AreaTriggerEntry const* at)
 UnitAI* GetAI_boss_cthun(Creature* pCreature)
 {
     return new boss_cthunAI(pCreature);
-}
-
-UnitAI* GetAI_npc_giant_claw_tentacle(Creature* pCreature)
-{
-    return new npc_giant_claw_tentacleAI(pCreature);
 }
 
 struct PeriodicSummonEyeTrigger : public AuraScript
@@ -892,7 +878,7 @@ void AddSC_boss_cthun()
 
     pNewScript = new Script;
     pNewScript->Name = "mob_giant_claw_tentacle";
-    pNewScript->GetAI = &GetAI_npc_giant_claw_tentacle;
+    pNewScript->GetAI = &GetNewAIInstance<npc_giant_claw_tentacleAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
