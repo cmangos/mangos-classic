@@ -145,7 +145,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
       m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE), m_persistentState(nullptr),
       m_activeNonPlayersIter(m_activeNonPlayers.end()), m_onEventNotifiedIter(m_onEventNotifiedObjects.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
-      i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin())
+      i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin()), m_spawnManager(*this)
 {
     m_weatherSystem = new WeatherSystem(this);
 }
@@ -424,8 +424,7 @@ bool Map::Add(Player* player)
 }
 
 template<class T>
-void
-Map::Add(T* obj)
+void Map::Add(T* obj)
 {
     MANGOS_ASSERT(obj);
 
@@ -452,6 +451,9 @@ Map::Add(T* obj)
 
     if (obj->isActiveObject())
         AddToActive(obj);
+
+    if (obj->GetDbGuid())
+        AddDbGuidObject(obj);
 
     DEBUG_FILTER_LOG(LOG_FILTER_CREATURE_MOVES, "%s enters grid[%u,%u]", obj->GetGuidStr().c_str(), cell.GridX(), cell.GridY());
 
@@ -662,6 +664,7 @@ void Map::Update(const uint32& t_diff)
     m_dyn_tree.update(t_diff);
 
     GetMessager().Execute(this);
+    m_spawnManager.Update();
 
     /// update active cells around players and active objects
     resetMarkedCells();
@@ -860,8 +863,7 @@ void Map::Remove(Player* player, bool remove)
 }
 
 template<class T>
-void
-Map::Remove(T* obj, bool remove)
+void Map::Remove(T* obj, bool remove)
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     if (p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
@@ -880,6 +882,9 @@ Map::Remove(T* obj, bool remove)
 
     if (obj->isActiveObject())
         RemoveFromActive(obj);
+
+    if (obj->GetDbGuid())
+        RemoveDbGuidObject(obj);
 
     if (remove)
         obj->CleanupsBeforeDelete();
@@ -901,8 +906,7 @@ Map::Remove(T* obj, bool remove)
     }
 }
 
-void
-Map::PlayerRelocation(Player* player, float x, float y, float z, float orientation)
+void Map::PlayerRelocation(Player* player, float x, float y, float z, float orientation)
 {
     MANGOS_ASSERT(player);
 
@@ -2166,6 +2170,46 @@ void Map::SendObjectUpdates()
             update_player.first->GetSession()->SendPacket(packet);
         }
     }
+}
+
+Creature* Map::GetCreature(uint32 dbguid)
+{
+    auto itr = m_dbGuidObjects.find(std::make_pair(HIGHGUID_UNIT, dbguid));
+    if (itr == m_dbGuidObjects.end())
+        return nullptr;
+
+    if ((*itr).second.empty())
+        return nullptr;
+
+    // prioritize alive one
+    for (auto data : (*itr).second)
+        if (static_cast<Creature*>(data)->IsAlive())
+            return static_cast<Creature*>(data);
+
+    return static_cast<Creature*>((*itr).second.front());
+}
+
+GameObject* Map::GetGameObject(uint32 dbguid)
+{
+    auto itr = m_dbGuidObjects.find(std::make_pair(HIGHGUID_GAMEOBJECT, dbguid));
+    if (itr == m_dbGuidObjects.end())
+        return nullptr;
+
+    if ((*itr).second.empty())
+        return nullptr;
+
+    return static_cast<GameObject*>((*itr).second.front());
+}
+
+void Map::AddDbGuidObject(WorldObject* obj)
+{
+    m_dbGuidObjects[std::make_pair(HighGuid(obj->GetParentHigh()), obj->GetDbGuid())].push_back(obj);
+}
+
+void Map::RemoveDbGuidObject(WorldObject* obj)
+{
+    auto& vec = m_dbGuidObjects[std::make_pair(HighGuid(obj->GetParentHigh()), obj->GetDbGuid())];
+    vec.erase(std::remove(vec.begin(), vec.end(), obj), vec.end());
 }
 
 uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)

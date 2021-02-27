@@ -279,7 +279,7 @@ bool CreatureLinkingMgr::IsLinkedEventTrigger(Creature* pCreature) const
         return true;
 
     // Guid case
-    if (m_eventGuidTriggers.find(pCreature->GetGUIDLow()) != m_eventGuidTriggers.end())
+    if (m_eventGuidTriggers.find(pCreature->GetDbGuid()) != m_eventGuidTriggers.end())
         return true;
 
     // Also return true for npcs that trigger reverse actions, or for followers(needed in respawn)
@@ -310,13 +310,13 @@ bool CreatureLinkingMgr::IsSpawnedByLinkedMob(CreatureLinkingInfo const* pInfo) 
 // Depends of the map
 CreatureLinkingInfo const* CreatureLinkingMgr::GetLinkedTriggerInformation(Creature* pCreature) const
 {
-    return GetLinkedTriggerInformation(pCreature->GetEntry(), pCreature->GetGUIDLow(), pCreature->GetMapId());
+    return GetLinkedTriggerInformation(pCreature->GetEntry(), pCreature->GetDbGuid(), pCreature->GetMapId());
 }
-CreatureLinkingInfo const* CreatureLinkingMgr::GetLinkedTriggerInformation(uint32 entry, uint32 lowGuid, uint32 mapId) const
+CreatureLinkingInfo const* CreatureLinkingMgr::GetLinkedTriggerInformation(uint32 entry, uint32 dbGuid, uint32 mapId) const
 {
     // guid case
-    CreatureLinkingMapBounds bounds = m_creatureLinkingGuidMap.equal_range(lowGuid);
-    for (CreatureLinkingMap::const_iterator iter = bounds.first; iter != bounds.second;)
+    CreatureLinkingMapBounds bounds = m_creatureLinkingGuidMap.equal_range(dbGuid);
+    for (CreatureLinkingMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
         return &(iter->second);
 
     // entry case
@@ -443,7 +443,7 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
     }
 
     // Process Slaves (by guid)
-    bounds = m_holderGuidMap.equal_range(pSource->GetGUIDLow());
+    bounds = m_holderGuidMap.equal_range(pSource->GetDbGuid());
     for (HolderMap::iterator itr = bounds.first; itr != bounds.second; ++itr)
     {
         if (!itr->second.inUse)
@@ -585,7 +585,7 @@ void CreatureLinkingHolder::ProcessSlave(CreatureLinkingEvent eventType, Creatur
             if (flag & FLAG_RESPAWN_ON_RESPAWN)
             {
                 // Additional check to prevent endless loops (in case whole group respawns on first respawn)
-                if (!pSlave->IsAlive() && pSlave->GetRespawnTime() > time(nullptr))
+                if (!pSlave->IsAlive() && (!pSlave->GetRespawnDelay() || pSlave->GetRespawnTime() > time(nullptr)))
                     pSlave->Respawn();
             }
             else if (flag & FLAG_DESPAWN_ON_RESPAWN && pSlave->IsAlive())
@@ -652,13 +652,13 @@ bool CreatureLinkingHolder::IsSlaveInRangeOfMaster(Creature const* pBoss, float 
 }
 
 // helper function to check if a lowguid can respawn
-bool CreatureLinkingHolder::IsRespawnReady(uint32 dbLowGuid, Map* _map) const
+bool CreatureLinkingHolder::IsRespawnReady(uint32 dbGuid, Map* _map) const
 {
-    time_t respawnTime = _map->GetPersistentState()->GetCreatureRespawnTime(dbLowGuid);
-    if ((!respawnTime || respawnTime <= time(nullptr)) && CanSpawn(dbLowGuid, _map, nullptr, 0.0f, 0.0f))
+    time_t respawnTime = _map->GetPersistentState()->GetCreatureRespawnTime(dbGuid);
+    if ((!respawnTime || respawnTime <= time(nullptr)) && CanSpawn(dbGuid, _map, nullptr, 0.0f, 0.0f))
     {
-        if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(dbLowGuid))
-            if (!_map->GetPersistentState()->IsSpawnedPoolObject<Creature>(dbLowGuid))
+        if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(dbGuid))
+            if (!_map->GetPersistentState()->IsSpawnedPoolObject<Creature>(dbGuid))
                 return false;
 
         return true;
@@ -675,30 +675,30 @@ bool CreatureLinkingHolder::CanSpawn(Creature* pCreature) const
 
     float sx, sy, sz;
     pCreature->GetRespawnCoord(sx, sy, sz);
-    return CanSpawn(0, pCreature->GetMap(), pInfo, sx, sy);
+    return CanSpawn(pCreature->GetDbGuid(), pCreature->GetMap(), pInfo, sx, sy);
 }
 
 /** Worker function to check if a spawning condition is met
  *
  *  This function is used directly from above function, and for recursive use
- *   in case of recursive use it is used only on _map with information of lowGuid.
+ *   in case of recursive use it is used only on _map with information of dbGuid.
  *
- *  @param lowGuid (only relevant in case of recursive uses) -- db-guid of the npc that is checked
+ *  @param dbGuid (only relevant in case of recursive uses) -- db-guid of the npc that is checked
  *  @param _map Map on which things are checked
  *  @param pInfo (only shipped in case of initial use) -- used as marker of first use, also in first use filled directly
  *  @param sx, sy (spawn position of the checked npc with initial use)
  */
-bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingInfo const*  pInfo, float sx, float sy) const
+bool CreatureLinkingHolder::CanSpawn(uint32 dbGuid, Map* _map, CreatureLinkingInfo const*  pInfo, float sx, float sy) const
 {
     if (!pInfo)                                             // Prepare data for recursive use
     {
-        CreatureData const* data = sObjectMgr.GetCreatureData(lowGuid);
+        CreatureData const* data = sObjectMgr.GetCreatureData(dbGuid);
         if (!data)
             return true;
-        pInfo = sCreatureLinkingMgr.GetLinkedTriggerInformation(data->id, lowGuid, data->mapid);
+        pInfo = sCreatureLinkingMgr.GetLinkedTriggerInformation(data->id, dbGuid, data->mapid);
         if (!pInfo)
             return true;
-        // Has lowGuid npc actually spawning linked?
+        // Has dbGuid npc actually spawning linked?
         if (!sCreatureLinkingMgr.IsSpawnedByLinkedMob(pInfo))
             return true;
 
