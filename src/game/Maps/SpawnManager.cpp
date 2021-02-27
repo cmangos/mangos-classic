@@ -46,7 +46,7 @@ void SpawnManager::RespawnCreature(uint32 dbguid)
 
 void SpawnManager::Update()
 {
-    auto& now = m_map.GetCurrentClockTime();
+    auto now = m_map.GetCurrentClockTime();
     for (auto itr = m_spawns.begin(); itr != m_spawns.end();)
     {
         auto& spawnInfo = *itr;
