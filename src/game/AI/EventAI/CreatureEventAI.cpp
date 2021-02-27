@@ -1469,6 +1469,7 @@ void CreatureEventAI::EnterEvadeMode()
 
 void CreatureEventAI::JustDied(Unit* killer)
 {
+    CreatureAI::JustDied(killer);
     Reset();
 
     if (m_throwAIEventMask & (1 << AI_EVENT_JUST_DIED))

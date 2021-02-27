@@ -179,7 +179,7 @@ class UnitAI
          * Called when the creature is killed
          * @param pKiller Unit* who killed the creature
          */
-        virtual void JustDied(Unit* /*killer*/) {}
+        virtual void JustDied(Unit* /*killer*/);
 
         /**
          * Called when the corpse of this creature gets removed
@@ -472,7 +472,7 @@ class UnitAI
         void AttackSpecificEnemy(std::function<void(Unit*,Unit*&)> check);
         virtual void AttackClosestEnemy();
 
-        void SetRootSelf(bool apply, bool combatOnly = false);
+        void SetRootSelf(bool apply, bool combatOnly = false); // must call parent JustDied if this is used
         void ClearSelfRoot();
 
         virtual void HandleDelayedInstantAnimation(SpellEntry const* spellInfo) {}

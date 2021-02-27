@@ -107,6 +107,11 @@ void UnitAI::EnterEvadeMode()
     m_unit->TriggerEvadeEvents();
 }
 
+void UnitAI::JustDied(Unit* killer)
+{
+    ClearSelfRoot();
+}
+
 void UnitAI::AttackedBy(Unit* attacker)
 {
     if (!m_unit->IsInCombat() && !m_unit->GetVictim())
