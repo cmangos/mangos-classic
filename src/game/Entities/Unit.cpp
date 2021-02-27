@@ -9065,13 +9065,13 @@ void CharmInfo::InitEmptyActionBar()
         SetActionBar(x, 0, ACT_PASSIVE);
 }
 
-void CharmInfo::ProcessUnattackableTargets()
+void CharmInfo::ProcessUnattackableTargets(CombatData* combatData)
 {
     // if after faction change and combat init cant attack target, remove it
-    if (!m_unit->getThreatManager().getThreatList().empty()) // threat list case
+    if (!combatData->threatManager.getThreatList().empty()) // threat list case
     {
         Unit::AttackerSet friendlyTargets;
-        for (auto itr = m_unit->getThreatManager().getThreatList().begin(); itr != m_unit->getThreatManager().getThreatList().end(); ++itr)
+        for (auto itr = combatData->threatManager.getThreatList().begin(); itr != combatData->threatManager.getThreatList().end(); ++itr)
         {
             Unit* attacker = (*itr)->getTarget();
             if (attacker->GetTypeId() != TYPEID_UNIT)
@@ -9087,12 +9087,12 @@ void CharmInfo::ProcessUnattackableTargets()
             attacker->getThreatManager().modifyThreatPercent(m_unit, -101);
         }
     }
-    else // attacker set case
+    else // hostile refs case
     {
         Unit::AttackerSet friendlyTargets;
-        for (Unit::AttackerSet::const_iterator itr = m_unit->getAttackers().begin(); itr != m_unit->getAttackers().end(); ++itr)
+        for (auto itr = combatData->hostileRefManager.begin(); itr != combatData->hostileRefManager.end(); ++itr)
         {
-            Unit* attacker = (*itr);
+            Unit* attacker = (*itr).getSource()->getOwner();
             if (attacker->GetTypeId() != TYPEID_UNIT)
                 continue;
 
@@ -10670,7 +10670,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
     if (possessed->IsImmuneToNPC() != immuneNPC)
         possessed->SetImmuneToNPC(immuneNPC);
 
-    charmInfo->ProcessUnattackableTargets();
+    charmInfo->ProcessUnattackableTargets(possessed->m_combatData);
 
     if (player)
     {
@@ -10764,7 +10764,7 @@ bool Unit::TakePossessOf(Unit* possessed)
 
     charmInfo->SetCharmStartPosition(combatStartPosition.IsEmpty() ? possessed->GetPosition(possessed->GetTransport()) : combatStartPosition);
 
-    charmInfo->ProcessUnattackableTargets();
+    charmInfo->ProcessUnattackableTargets(possessed->m_combatData);
 
     if (!IsInCombat())
     {
@@ -10918,7 +10918,7 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
     if (charmInfo->GetUnit() != charmed)
         sLog.outCustomLog("Unit didnt equal in Unit::TakeCharmOf after flag changes.");
 
-    charmInfo->ProcessUnattackableTargets();
+    charmInfo->ProcessUnattackableTargets(charmed->m_combatData);
 
     if (charmInfo->GetUnit() != charmed)
         sLog.outCustomLog("Unit didnt equal in Unit::TakeCharmOf after attackability changes.");
@@ -11243,7 +11243,7 @@ float Unit::GetAttackDistance(Unit const* target) const
         RetDistance = 5;
 
     if (target->IsPlayerControlled() && target->IsCreature() && !target->IsClientControlled()) // player pets do not aggro from so afar
-        RetDistance * 0.65f;
+        RetDistance = RetDistance * 0.65f;
 
     return (RetDistance * aggroRate);
 }
@@ -11485,7 +11485,7 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
 {
     if (selectFlags)
     {
-        if ((selectFlags & SELECT_FLAG_PLAYER) && target->GetTypeId() != TYPEID_PLAYER)
+        if ((selectFlags & SELECT_FLAG_PLAYER) && (!target->IsPlayer() || !target->IsPlayerControlled()))
             return false;
 
         if ((selectFlags & SELECT_FLAG_POWER_MANA) && target->GetPowerType() != POWER_MANA)
