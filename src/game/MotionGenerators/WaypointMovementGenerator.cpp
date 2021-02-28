@@ -371,7 +371,12 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
     init.MovebyPath(genPath);
     if (nextNode->orientation != 100 && nextNode->delay != 0)
         init.SetFacing(nextNode->orientation);
-    init.SetWalk(!creature.hasUnitState(UNIT_STAT_RUNNING));
+    if (m_forcedMovement == FORCED_MOVEMENT_WALK)
+        init.SetWalk(true);
+    else if (m_forcedMovement == FORCED_MOVEMENT_RUN)
+        init.SetWalk(false);
+    else
+        init.SetWalk(!creature.hasUnitState(UNIT_STAT_RUNNING));
 
     // send path to client
     m_pathDuration = init.Launch();

@@ -92,6 +92,7 @@ class WaypointMovementGenerator<Creature>
 
         void AddToWaypointPauseTime(int32 waitTimeDiff, bool force = false);
         bool SetNextWaypoint(uint32 pointId);
+        void SetForcedMovement(ForcedMovement forcedMovement) { m_forcedMovement = forcedMovement; }
 
         void UnitSpeedChanged() override { m_speedChanged = true; }
 
@@ -119,6 +120,7 @@ class WaypointMovementGenerator<Creature>
         WaypointPathOrigin m_PathOrigin;
 
         bool m_speedChanged;
+        ForcedMovement m_forcedMovement;
 };
 
 #endif
