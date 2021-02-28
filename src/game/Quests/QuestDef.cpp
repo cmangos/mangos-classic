@@ -221,3 +221,11 @@ bool Quest::IsAllowedInRaid() const
 
     return sWorld.getConfig(CONFIG_BOOL_QUEST_IGNORE_RAID);
 }
+
+uint32 Quest::GetRewMoneyMaxLevel() const
+{
+    if (HasQuestFlag(QUEST_FLAGS_NO_MONEY_FROM_XP))
+        return 0;
+
+    return RewMoneyMaxLevel;
+}
