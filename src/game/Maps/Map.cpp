@@ -452,9 +452,6 @@ void Map::Add(T* obj)
     if (obj->isActiveObject())
         AddToActive(obj);
 
-    if (obj->GetDbGuid())
-        AddDbGuidObject(obj);
-
     DEBUG_FILTER_LOG(LOG_FILTER_CREATURE_MOVES, "%s enters grid[%u,%u]", obj->GetGuidStr().c_str(), cell.GridX(), cell.GridY());
 
     obj->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()));
@@ -882,9 +879,6 @@ void Map::Remove(T* obj, bool remove)
 
     if (obj->isActiveObject())
         RemoveFromActive(obj);
-
-    if (obj->GetDbGuid())
-        RemoveDbGuidObject(obj);
 
     if (remove)
         obj->CleanupsBeforeDelete();
