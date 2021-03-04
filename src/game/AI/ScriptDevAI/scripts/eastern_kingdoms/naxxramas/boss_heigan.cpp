@@ -59,11 +59,19 @@ enum
     NPC_WORLD_TRIGGER       = 15384
 };
 
+static const float resetX = 2825.0f;                // Beyond this X-line, Heigan is outside his room and should reset (leashing)
+
 struct boss_heiganAI : public ScriptedAI
 {
     boss_heiganAI(Creature* creature) : ScriptedAI(creature)
     {
         m_instance = (instance_naxxramas*)creature->GetInstanceData();
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float /*y*/, float /*z*/)
+        {
+            float respawnX, respawnY, respawnZ;
+            m_creature->GetRespawnCoord(respawnX, respawnY, respawnZ);
+            return m_creature->GetDistance2d(respawnX, respawnY) > 90.f || x > resetX;
+        });
         Reset();
     }
 

@@ -47,11 +47,17 @@ enum
     SPELL_WIDOWS_EMBRACE_2      = 28797,                    // Cast onto herself by Faerlina and handle all the cooldown and enrage debuff
 };
 
+static const float resetZ = 266.0f;                         // Above this altitude, Faerlina is outside her room and should reset (leashing)
+
 struct boss_faerlinaAI : public ScriptedAI
 {
     boss_faerlinaAI(Creature* creature) : ScriptedAI(creature)
     {
         m_instance = (instance_naxxramas*)creature->GetInstanceData();
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float, float, float z)
+        {
+            return z > resetZ;
+        });
         Reset();
     }
 

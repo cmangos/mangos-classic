@@ -47,11 +47,17 @@ enum
     SPELL_TAUNT              = 29060        // Used by Deathknight Understudy
 };
 
+static const float resetZ = 285.0f;         // Above this altitude, Razuvious is outside his combat area (in the stairs) and should reset (leashing)
+
 struct boss_razuviousAI : public ScriptedAI
 {
     boss_razuviousAI(Creature* creature) : ScriptedAI(creature)
     {
         m_instance = (instance_naxxramas*)creature->GetInstanceData();
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float, float, float z)
+        {
+            return z > resetZ;
+        });
         Reset();
     }
 
