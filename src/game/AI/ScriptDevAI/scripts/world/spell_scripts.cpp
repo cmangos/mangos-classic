@@ -158,7 +158,7 @@ struct GreaterInvisibilityMob : public AuraScript
         Cell::VisitWorldObjects(invisible, searcher, invisible->GetDetectionRange());
         for (Unit* nearby : nearbyTargets)
         {
-            if (invisible->CanAttackOnSight(nearby))
+            if (invisible->CanAttackOnSight(nearby) && invisible->IsWithinLOSInMap(nearby, true))
             {
                 invisible->AI()->AttackStart(nearby);
                 return;
