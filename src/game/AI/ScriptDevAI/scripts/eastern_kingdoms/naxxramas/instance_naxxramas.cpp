@@ -516,6 +516,7 @@ void instance_naxxramas::SetData(uint32 type, uint32 data)
             }
             break;
         case TYPE_FOUR_HORSEMEN:
+        {
             // Skip if already set
             if (m_auiEncounter[type] == data)
                 return;
@@ -530,21 +531,29 @@ void instance_naxxramas::SetData(uint32 type, uint32 data)
                 break;
             }
             if (data == FAIL)
+            {
                 m_horsemenKilled = 0;
+                std::vector<uint32> entries = {NPC_BLAUMEUX, NPC_MOGRAINE, NPC_ZELIEK, NPC_THANE};
+                for (uint32 entry : entries)
+                {
+                    if (Creature* creature = GetSingleCreatureFromStorage(entry))
+                    {
+                        if (creature->IsInCombat())
+                            creature->AI()->EnterEvadeMode();
+                    }
+                }
+            }
             m_auiEncounter[type] = data;
             DoUseDoorOrButton(GO_MILI_HORSEMEN_DOOR);
+            // Despawn Horsemen's spirit on FAIL or DONE
+            std::vector<uint32> entries = {NPC_SPIRIT_OF_BLAUMEUX, NPC_SPIRIT_OF_MOGRAINE, NPC_SPIRIT_OF_KORTHAZZ, NPC_SPIRIT_OF_ZELIREK};
+            for (uint32 entry : entries)
+            {
+                if (Creature* spirit = GetSingleCreatureFromStorage(entry))
+                    spirit->ForcedDespawn();
+            }
             if (data == DONE)
             {
-                // Despawn spirits
-                if (Creature* spirit = GetSingleCreatureFromStorage(NPC_SPIRIT_OF_BLAUMEUX))
-                    spirit->ForcedDespawn();
-                if (Creature* spirit = GetSingleCreatureFromStorage(NPC_SPIRIT_OF_MOGRAINE))
-                    spirit->ForcedDespawn();
-                if (Creature* spirit = GetSingleCreatureFromStorage(NPC_SPIRIT_OF_KORTHAZZ))
-                    spirit->ForcedDespawn();
-                if (Creature* spirit = GetSingleCreatureFromStorage(NPC_SPIRIT_OF_ZELIREK))
-                    spirit->ForcedDespawn();
-
                 DoUseDoorOrButton(GO_MILI_EYE_RAMP);
                 DoUseDoorOrButton(GO_MILI_EYE_BOSS);
                 DoRespawnGameObject(GO_MILI_PORTAL, 30 * MINUTE);
@@ -553,6 +562,7 @@ void instance_naxxramas::SetData(uint32 type, uint32 data)
                 m_tauntTimer = 5000;
             }
             break;
+        }
         case TYPE_PATCHWERK:
             m_auiEncounter[type] = data;
             if (data == DONE)
