@@ -147,6 +147,9 @@ UPDATE spell_template SET AttributesEx=32, AttributesEx3=131072 WHERE id=28441; 
 
 UPDATE `spell_template` SET `EffectImplicitTargetA1` = 6 WHERE `Id` IN (25744,25787);
 
+-- Cantation of Manifestation 9095 - insane radius 12 - 100y reduced to 13-10y
+UPDATE spell_template SET EffectRadiusIndex1=13 WHERE id=9095;
+
 -- Draco-Incarcinatrix 900
 UPDATE spell_template SET EffectImplicitTargetA1=38 WHERE id=16007; -- 46
 
