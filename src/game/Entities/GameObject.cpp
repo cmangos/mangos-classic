@@ -2452,6 +2452,11 @@ SpellCastResult GameObject::CastSpell(Unit* temporaryCaster, Unit* Victim, Spell
     return spell->SpellStart(&targets, triggeredByAura);
 }
 
+void GameObject::SetCooldown(uint32 cooldown)
+{
+    m_cooldownTime = time(nullptr) + cooldown;
+}
+
 QuaternionData GameObject::GetWorldRotation() const
 {
     QuaternionData localRotation = GetLocalRotation();

@@ -837,6 +837,8 @@ class GameObject : public WorldObject
 
         uint32 GetDbGuid() const override { return m_dbGuid; }
         HighGuid GetParentHigh() const override { return HIGHGUID_GAMEOBJECT; }
+
+        void SetCooldown(uint32 cooldown); // seconds
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
