@@ -731,7 +731,7 @@ class Creature : public Unit
         void SetNoCallAssistance(bool val) { m_AlreadyCallAssistance = val; }
         bool CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction = true) const;
         bool CanInitiateAttack() const;
-        bool CanCallForAssistance() const { return m_canCallForAssistance; }
+        bool CanCallForAssistance() const override { return m_canCallForAssistance; }
         void SetCanCallForAssistance(bool state) { m_canCallForAssistance = state; }
         bool IsInGroup(Unit const* other, bool party/* = false*/, bool ignoreCharms/* = false*/) const override;
 
