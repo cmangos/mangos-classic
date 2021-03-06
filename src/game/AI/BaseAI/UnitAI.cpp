@@ -441,7 +441,7 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
     if (!victim)
         return;
 
-    if (me->IsInCombat())
+    if (me->IsInCombat() || !me->CanCallForAssistance())
         return;
 
     // pulling happens once panic/retreating ends

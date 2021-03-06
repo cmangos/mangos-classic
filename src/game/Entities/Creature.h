@@ -731,6 +731,8 @@ class Creature : public Unit
         void SetNoCallAssistance(bool val) { m_AlreadyCallAssistance = val; }
         bool CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction = true) const;
         bool CanInitiateAttack() const;
+        bool CanCallForAssistance() const { return m_canCallForAssistance; }
+        void SetCanCallForAssistance(bool state) { m_canCallForAssistance = state; }
         bool IsInGroup(Unit const* other, bool party/* = false*/, bool ignoreCharms/* = false*/) const override;
 
         MovementGeneratorType GetDefaultMovementType() const { return m_defaultMovementType; }
@@ -882,6 +884,7 @@ class Creature : public Unit
 
         // below fields has potential for optimization
         bool m_AlreadyCallAssistance;
+        bool m_canCallForAssistance;
         bool m_isDeadByDefault;
         uint32 m_temporaryFactionFlags;                     // used for real faction changes (not auras etc)
 

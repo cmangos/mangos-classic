@@ -2376,6 +2376,8 @@ class Unit : public WorldObject
         uint32 GetModifierXpBasedOnDamageReceived(uint32 xp);
 
         void UpdateSplinePosition(bool relocateOnly = false);
+
+        virtual bool CanCallForAssistance() const { return true; }
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 
