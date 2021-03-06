@@ -378,3 +378,10 @@ Defining a buddy could be done in several way:
 48 SCRIPT_COMMAND_MODIFY_UNIT_FLAGS         resultingSource = Creature
                                             * datalong = UnitFlags
                                             * datalong2 => 0=remove, 1=add, 2=toggle
+
+49 SCRIPT_COMMAND_SET_DATA_64               Set instance data if it exists
+                                            * datalong - param1
+                                            * datalong2 - param2
+
+50 SCRIPT_COMMAND_ZONE_PULSE                Pulses zone for combat and attacks closest enemy
+

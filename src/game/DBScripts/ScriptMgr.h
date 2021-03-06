@@ -130,6 +130,8 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_MODIFY_UNIT_FLAGS        = 48,           // resSource = Creature
     // datalong=UnitFlags
     // datalong2:0x00=toggle, 0x01=add, 0x02=remove
+    SCRIPT_COMMAND_SET_DATA_64              = 49,           // datalong = set data param 1, datalong2 = set data param 2
+    SCRIPT_COMMAND_ZONE_PULSE               = 50,           // 
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -425,6 +427,18 @@ struct ScriptInfo
             uint32 flag;                                    // datalong
             uint32 change_flag;                             // datalong2
         } unitFlag;
+
+        struct                                              // SCRIPT_COMMAND_SET_DATA_64 (49)
+        {
+            uint32 param1;                                  // datalong
+            uint32 param2;                                  // datalong2
+        } setData64;
+
+        struct                                              // SCRIPT_COMMAND_LOG_KILL (99)
+        {
+            uint32 empty1;                                  // datalong
+            uint32 empty2;                                  // datalong2
+        } logKill;
 
         struct
         {

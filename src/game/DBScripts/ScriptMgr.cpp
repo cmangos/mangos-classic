@@ -33,6 +33,7 @@
 #include "MotionGenerators/WaypointMovementGenerator.h"
 #include "Mails/Mail.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
+#include "Maps/InstanceData.h"
 
 ScriptMapMapName sQuestEndScripts;
 ScriptMapMapName sQuestStartScripts;
@@ -791,6 +792,10 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                     sLog.outErrorDb("Table `%s` has invalid change flag (datalong2 = %u) in SCRIPT_COMMAND_MODIFY_UNIT_FLAGS for script id %u", tablename, tmp.unitFlag.change_flag, tmp.id);
                 break;
             }
+            case SCRIPT_COMMAND_SET_DATA_64:                // 49
+                break;
+            case SCRIPT_COMMAND_ZONE_PULSE:                 // 50
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -2448,6 +2453,23 @@ bool ScriptAction::HandleScriptStep()
             else
                 sLog.outErrorDb(" DB-SCRIPTS: Unexpected value %u used for script id %u, command %u.", m_script->unitFlag.flag, m_script->id, m_script->command);
 
+            break;
+        }
+        case SCRIPT_COMMAND_SET_DATA_64:                    // 49
+        {
+            InstanceData* data = pSource->GetInstanceData();
+            if (data)
+                data->SetData64(m_script->setData64.param1, m_script->setData64.param2);
+            break;
+        }
+        case SCRIPT_COMMAND_ZONE_PULSE:                     // 50
+        {
+            if (LogIfNotCreature(pSource))
+                break;
+
+            Creature* creature = static_cast<Creature*>(pSource);
+            creature->SetInCombatWithZone();
+            creature->AI()->AttackClosestEnemy();
             break;
         }
         default:
