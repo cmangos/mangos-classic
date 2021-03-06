@@ -94,7 +94,7 @@ matrix:
 
     # osx builds on clang x64
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode10.2
       arch: amd64
       compiler: clang
       env:
