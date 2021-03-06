@@ -415,6 +415,7 @@ UPDATE creature_template SET ScriptName='boss_kelthuzad' WHERE entry=15990;
 UPDATE creature_template SET ScriptName='npc_diseased_maggot' WHERE entry IN (16056, 16057);
 UPDATE creature_template SET ScriptName='npc_invible_man' WHERE entry=17286;
 UPDATE creature_template SET ScriptName='npc_icecrown_guardian' WHERE entry=16441;
+UPDATE creature_template SET ScriptName='npc_stoneskin_gargoyle' WHERE entry=16168;
 INSERT INTO scripted_event_id VALUES
 (10495,'event_naxxramas'),
 (10536,'event_naxxramas'),
@@ -2558,7 +2559,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1533158','%s lets loose a triumphant shoot.','0','2','0','0','0','instructor_razuvious EMOTE_TRIUMPHANT_SHOOT'),
 
-('-1533159','%s flees after seeing Kel\'Thuzad fall!','0','7','0','0','0','guardian_icecrown EMOTE_FLEE');
+('-1533159','%s flees after seeing Kel\'Thuzad fall!','0','7','0','0','0','guardian_icecrown EMOTE_FLEE'),
+
+('-1533160','%s emits a strange noise.','0','7','0','0','0','stoneskin_gargoyle EMOTE_STONESKIN');
 
 -- -1 999 900 EXAMPLE TEXT
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

@@ -1052,6 +1052,123 @@ InstanceData* GetInstanceData_instance_naxxramas(Map* pMap)
     return new instance_naxxramas(pMap);
 }
 
+struct Location3DPoint
+{
+    float x, y, z;
+};
+
+static const Location3DPoint gargoyleResetCoords = {2963.f, -3476.f, 297.6f};
+
+enum
+{
+    SAY_GARGOYLE_NOISE      = -1533160, // %s emits a strange noise.
+
+    SPELL_STONEFORM         = 29154,
+    SPELL_STEALTH_DETECTION = 18950,
+    SPELL_STONESKIN         = 28995,
+    SPELL_ACID_VOLLEY       = 29325,
+};
+
+struct npc_stoneskin_gargoyleAI : public ScriptedAI
+{
+    npc_stoneskin_gargoyleAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return x > gargoyleResetCoords.x && y > gargoyleResetCoords.y && z > gargoyleResetCoords.z;
+        });
+        Reset();
+    }
+
+    uint32 acidVolleyTimer;
+    bool canCastVolley;
+
+    void Reset() override
+    {
+        acidVolleyTimer = 4000;
+        canCastVolley = false;
+        TryStoneForm();
+
+        DoCastSpellIfCan(m_creature, SPELL_STEALTH_DETECTION, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void TryStoneForm()
+    {
+        if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_STONEFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT) == CAST_OK)
+            {
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetImmuneToPlayer(true);
+            }
+        }
+    }
+
+    void JustReachedHome() override
+    {
+        TryStoneForm();
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+        {
+            if (pWho->GetTypeId() == TYPEID_PLAYER
+                && !m_creature->IsInCombat()
+                && m_creature->IsWithinDistInMap(pWho, 17.0f)
+                && !pWho->HasAuraType(SPELL_AURA_FEIGN_DEATH)
+                && m_creature->IsWithinLOSInMap(pWho))
+            {
+                AttackStart(pWho);
+            }
+        }
+        else
+            ScriptedAI::MoveInLineOfSight(pWho);
+    }
+
+    void Aggro(Unit*) override
+    {
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE))
+        {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetImmuneToPlayer(false);
+        }
+
+        // All Stoneskin Gargoyles cast Acid Volley but the first one encountered
+        float respawnX, respawnY, respawnZ;
+        m_creature->GetRespawnCoord(respawnX, respawnY, respawnZ);
+        if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE || respawnZ < gargoyleResetCoords.z)
+            canCastVolley = true;
+    }
+
+    void UpdateAI(uint32 const diff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+            return;
+
+        // Stoneskin at 30% HP
+        if (m_creature->GetHealthPercent() < 30.0f && !m_creature->HasAura(SPELL_STONESKIN))
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_STONESKIN) == CAST_OK)
+                DoScriptText(SAY_GARGOYLE_NOISE, m_creature);
+        }
+
+        // Acid Volley
+        if (canCastVolley)
+        {
+            if (acidVolleyTimer < diff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_ACID_VOLLEY) == CAST_OK)
+                    acidVolleyTimer = 8000;
+            }
+            else
+                acidVolleyTimer -= diff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
 bool instance_naxxramas::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger)
 {
     if (areaTrigger->id == AREATRIGGER_KELTHUZAD)
@@ -1115,6 +1232,11 @@ void AddSC_instance_naxxramas()
     Script* newScript = new Script;
     newScript->Name = "instance_naxxramas";
     newScript->GetInstanceData = &GetInstanceData_instance_naxxramas;
+    newScript->RegisterSelf();
+
+    newScript = new Script;
+    newScript->Name = "npc_stoneskin_gargoyle";
+    newScript->GetAI = &GetNewAIInstance<npc_stoneskin_gargoyleAI>;
     newScript->RegisterSelf();
 
     newScript = new Script;
