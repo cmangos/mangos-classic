@@ -224,7 +224,7 @@ struct CreatureSpawnTemplate
     int64 unitFlags;
     uint32 faction;
     uint32 modelId;
-    uint32 equipmentId;
+    int32 equipmentId;
     uint32 curHealth;
     uint32 curMana;
     uint32 spawnFlags;

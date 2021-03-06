@@ -999,7 +999,7 @@ void ObjectMgr::LoadCreatureSpawnDataTemplates()
         int64 unitFlags =   int64(fields[1].GetUInt64());
         uint32 faction =    fields[2].GetUInt32();
         uint32 modelId =    fields[3].GetUInt32();
-        uint32 equipmentId = fields[4].GetUInt32();
+        int32 equipmentId = fields[4].GetInt32();
         uint32 curHealth =  fields[5].GetUInt32();
         uint32 curMana =    fields[6].GetUInt32();
         uint32 spawnFlags = fields[7].GetUInt32();
