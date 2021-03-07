@@ -13,7 +13,7 @@ UPDATE world_template SET ScriptName='';
 
 /* AREATRIGGER */
 INSERT INTO scripted_areatrigger VALUES
-(171, 'at_huldar_miran'),
+(171,'at_huldar_miran'),
 (1726,'at_scent_larkorwi'),
 (1727,'at_scent_larkorwi'),
 (1728,'at_scent_larkorwi'),
@@ -36,12 +36,18 @@ INSERT INTO scripted_areatrigger VALUES
 (2067,'at_blackrock_spire'),
 (3066,'at_ravenholdt'),
 (3146,'at_hive_tower'),
-(3546,'at_childrens_week_spot'), -- Darnassian bank
-(3547,'at_childrens_week_spot'), -- Undercity - thone room
-(3548,'at_childrens_week_spot'), -- Stonewrought Dam
-(3549,'at_childrens_week_spot'), -- The Mor'shan Rampart
-(3550,'at_childrens_week_spot'), -- Ratchet Docks
-(3552,'at_childrens_week_spot'), -- Westfall Lighthouse
+-- Darnassian bank
+(3546,'at_childrens_week_spot'),
+-- Undercity - Throne Room
+(3547,'at_childrens_week_spot'),
+-- Stonewrought Dam
+(3548,'at_childrens_week_spot'),
+-- The Mor'shan Rampart
+(3549,'at_childrens_week_spot'),
+-- Ratchet Docks
+(3550,'at_childrens_week_spot'),
+-- Westfall Lighthouse
+(3552,'at_childrens_week_spot'),
 (3587,'at_ancient_leaf'),
 (3626,'at_vaelastrasz'),
 (3958,'at_zulgurub'),
@@ -120,8 +126,8 @@ UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
 /* WORLD MAP SCRIPTS */
 DELETE FROM world_template WHERE map IN (0, 1, 530);
 INSERT INTO world_template VALUES
-(0, 'world_map_eastern_kingdoms'),
-(1, 'world_map_kalimdor');
+(0,'world_map_eastern_kingdoms'),
+(1,'world_map_kalimdor');
 
 /* War Effort*/
 UPDATE creature_template SET ScriptName='npc_war_effort' WHERE
@@ -228,26 +234,26 @@ UPDATE creature_template SET ScriptName='boss_chromaggus' WHERE entry=14020;
 UPDATE creature_template SET ScriptName='boss_victor_nefarius' WHERE entry=10162;
 UPDATE creature_template SET ScriptName='boss_nefarian' WHERE entry=11583;
 INSERT INTO scripted_event_id VALUES
-(8446, 'event_weekly_chromatic_selection'),
-(8447, 'event_weekly_chromatic_selection'),
-(8448, 'event_weekly_chromatic_selection'),
-(8449, 'event_weekly_chromatic_selection'),
-(8450, 'event_weekly_chromatic_selection'),
-(8451, 'event_weekly_chromatic_selection'),
-(8452, 'event_weekly_chromatic_selection'),
-(8453, 'event_weekly_chromatic_selection'),
-(8454, 'event_weekly_chromatic_selection'),
-(8455, 'event_weekly_chromatic_selection'),
-(8520, 'event_weekly_chromatic_selection'),
-(8521, 'event_weekly_chromatic_selection'),
-(8522, 'event_weekly_chromatic_selection'),
-(8523, 'event_weekly_chromatic_selection'),
-(8524, 'event_weekly_chromatic_selection'),
-(8525, 'event_weekly_chromatic_selection'),
-(8526, 'event_weekly_chromatic_selection'),
-(8527, 'event_weekly_chromatic_selection'),
-(8528, 'event_weekly_chromatic_selection'),
-(8529, 'event_weekly_chromatic_selection');
+(8446,'event_weekly_chromatic_selection'),
+(8447,'event_weekly_chromatic_selection'),
+(8448,'event_weekly_chromatic_selection'),
+(8449,'event_weekly_chromatic_selection'),
+(8450,'event_weekly_chromatic_selection'),
+(8451,'event_weekly_chromatic_selection'),
+(8452,'event_weekly_chromatic_selection'),
+(8453,'event_weekly_chromatic_selection'),
+(8454,'event_weekly_chromatic_selection'),
+(8455,'event_weekly_chromatic_selection'),
+(8520,'event_weekly_chromatic_selection'),
+(8521,'event_weekly_chromatic_selection'),
+(8522,'event_weekly_chromatic_selection'),
+(8523,'event_weekly_chromatic_selection'),
+(8524,'event_weekly_chromatic_selection'),
+(8525,'event_weekly_chromatic_selection'),
+(8526,'event_weekly_chromatic_selection'),
+(8527,'event_weekly_chromatic_selection'),
+(8528,'event_weekly_chromatic_selection'),
+(8529,'event_weekly_chromatic_selection');
 
 
 /* BLASTED LANDS */
@@ -321,7 +327,7 @@ UPDATE creature_template SET ScriptName='npc_eris_havenfire' WHERE entry=14494;
 
 /* FELWOOD */
 INSERT INTO scripted_event_id VALUES
-(8328, 'npc_kroshius');
+(8328,'npc_kroshius');
 UPDATE creature_template SET ScriptName='npc_kitten' WHERE entry=9937;
 UPDATE creature_template SET ScriptName='npc_corrupt_saber' WHERE entry=10042;
 UPDATE creature_template SET ScriptName='npc_niby_the_almighty' WHERE entry=14469;
@@ -583,7 +589,7 @@ INSERT INTO scripted_areatrigger VALUES
 (4034,'at_stomach_cthun'),
 (4036,'at_stomach_cthun');
 INSERT INTO scripted_event_id VALUES
-(9738, 'event_cthun_reset');
+(9738,'event_cthun_reset');
 
 /* THOUSAND NEEDLES */
 UPDATE creature_template SET ScriptName='npc_kanati' WHERE entry=10638;
@@ -1735,10 +1741,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1010022','Thank you for freeing me.  Speak with my sister in Splintertree.  I... I must find a place to rest...','0','0','0','0','8265','Ruul Snowhoof'),
 
-('-1010023','I\'m ready when you are, $N. Lead the way!','0','0','0','0','4079','Kindal Moonweaver SAY_QUEST_START'),
+('-1010023','I''m ready when you are, $N. Lead the way!','0','0','0','0','4079','Kindal Moonweaver SAY_QUEST_START'),
 ('-1010024','Die, $n. Elune will not have you harm her creatures any longer!','0','0','0','0','4123','Kindal Moonweaver SAY_INITIAL_AGGRO'),
 ('-1010025','You dare touch me?!','0','0','0','0','4125','Kindal Moonweaver SAY_AGGRO'),
-('-1010026','We\'ve done it! Meet me back by Jer\'kai above the Grim Totem camp.','0','0','0','0','4080','Kindal Moonweaver SAY_QUEST_COMPLETE'),
+('-1010026','We''ve done it! Meet me back by Jer''kai above the Grim Totem camp.','0','0','0','0','4080','Kindal Moonweaver SAY_QUEST_COMPLETE'),
 
 ('-1010027','%s is lured out by the sweet scent of the purified food.','0','2','0','0','5617','Blackwood Furbolg - on event 3938'),
 ('-1010028','%s begins to greedily devour the food.','0','2','0','0','5618','Blackwood Furbolg - on event 3938'),
@@ -2305,7 +2311,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1509029','Come get some!','0','0','0','0','0','andorov SAY_ANDOROV_INTRO_4'),
 ('-1509030','Kill first, ask questions later... Incoming!','0','1','0','0','0','andorov SAY_ANDOROV_ATTACK_START'),
 ('-1509031','I lied...','0','1','0','0','0','andorov SAY_ANDOROV_INTRO_2'),
-('-1509032','My work here is done. I\'ll be sure to let Mar\'alith and the others at Cenarion Hold know that you helped me out a little. Be careful in here, you don\'t have me holdin\' your hand past this point.','0','0','0','0','11560','andorov SAY_ANDOROV_DESPAWN');
+('-1509032','My work here is done. I''ll be sure to let Mar''alith and the others at Cenarion Hold know that you helped me out a little. Be careful in here, you don''t have me holdin'' your hand past this point.','0','0','0','0','11560','andorov SAY_ANDOROV_DESPAWN');
 
 -- -1 531 000 TEMPLE OF AHN'QIRAJ
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
@@ -2559,7 +2565,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1533158','%s lets loose a triumphant shoot.','0','2','0','0','0','instructor_razuvious EMOTE_TRIUMPHANT_SHOOT'),
 
-('-1533159','%s flees after seeing Kel\'Thuzad fall!','0','7','0','0','0','guardian_icecrown EMOTE_FLEE'),
+('-1533159','%s flees after seeing Kel''Thuzad fall!','0','7','0','0','0','guardian_icecrown EMOTE_FLEE'),
 
 ('-1533160','%s emits a strange noise.','0','7','0','0','0','stoneskin_gargoyle EMOTE_STONESKIN');
 
@@ -2617,7 +2623,7 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3000107,'I am ready, as are my forces. Let us end this masquerade!','reginald windsor GOSSIP_ITEM_START'),
 (-3000108,'I need a moment of your time, sir.','prospector anvilward GOSSIP_ITEM_MOMENT'),
 (-3000109,'I am ready, Oronok. Let us destroy Cyrukh and free the elements!','oronok torn-heart GOSSIP_ITEM_FIGHT'),
-(-3000110,'Why... yes, of course. I\'ve something to show you right inside this building, Mr. Anvilward.','prospector anvilward GOSSIP_ITEM_SHOW'),
+(-3000110,'Why... yes, of course. I''ve something to show you right inside this building, Mr. Anvilward.','prospector anvilward GOSSIP_ITEM_SHOW'),
 (-3000111,'Turn the key to start the machine.','threshwackonator  GOSSIP_ITEM_TURN_KEY');
 
 -- -3 033 000 SHADOWFANG KEEP
@@ -2634,10 +2640,10 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 
 -- -3 230 000 BLACKROCK DEPTHS
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3230000,'You\'re free, Dughal! Get out of here!','dughal GOSSIP_ITEM_DUGHAL'),
-(-3230001,'Get out of here, Tobias, you\'re free!','tobias GOSSIP_ITEM_TOBIAS'),
-(-3230002,'Your bondage is at an end, Doom\'rel. I challenge you!','doomrel GOSSIP_ITEM_CHALLENGE'),
-(-3230003,'Why don\'t you and Rocknot go find somewhere private...','nagmara GOSSIP_ITEM_NAGMARA');
+(-3230000,'You''re free, Dughal! Get out of here!','dughal GOSSIP_ITEM_DUGHAL'),
+(-3230001,'Get out of here, Tobias, you''re free!','tobias GOSSIP_ITEM_TOBIAS'),
+(-3230002,'Your bondage is at an end, Doom''rel. I challenge you!','doomrel GOSSIP_ITEM_CHALLENGE'),
+(-3230003,'Why don''t you and Rocknot go find somewhere private...','nagmara GOSSIP_ITEM_NAGMARA');
 
 -- -3 409 000 MOLTEN CORE
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
@@ -2647,7 +2653,7 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 
 -- -3 469 000 BLACKWING LAIR
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3469000,'I\'ve made no mistakes.','victor_nefarius GOSSIP_ITEM_NEFARIUS_1'),
+(-3469000,'I''ve made no mistakes.','victor_nefarius GOSSIP_ITEM_NEFARIUS_1'),
 (-3469001,'You have lost your mind, Nefarius. You speak in riddles.','victor_nefarius GOSSIP_ITEM_NEFARIUS_2'),
 (-3469002,'Please do.','victor_nefarius GOSSIP_ITEM_NEFARIUS_3'),
 
@@ -2656,8 +2662,8 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 
 -- -3 509 000 RUINS OF AHN'QIRAJ
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3509000,'Let\'s find out.','andorov GOSSIP_ITEM_START'),
-(-3509001,'Let\'s see what you have.','andorov GOSSIP_ITEM_TRADE');
+(-3509000,'Let''s find out.','andorov GOSSIP_ITEM_START'),
+(-3509001,'Let''s see what you have.','andorov GOSSIP_ITEM_TRADE');
 
 --
 -- Below just for beautiful view in table, run at own desire
@@ -2672,7 +2678,7 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 --
 
 TRUNCATE script_waypoint;
-INSERT INTO `script_waypoint` (`entry`, `pathId`, `pointid`, `position_x`, `position_y`, `position_z`, `orientation`, `waittime`, `script_id`, `comment`) VALUES
+INSERT INTO script_waypoint (entry, pathId, pointid, position_x, position_y, position_z, orientation, waittime, script_id, comment) VALUES
 (349,0,1,-8769.59,-2185.73,141.975,0,0,0,''),
 (349,0,2,-8776.54,-2193.78,140.96,0,0,0,''),
 (349,0,3,-8783.29,-2194.82,140.462,0,0,0,''),
@@ -3599,15 +3605,15 @@ INSERT INTO `script_waypoint` (`entry`, `pathId`, `pointid`, `position_x`, `posi
 (7997,0,5,-4554.02,815.75,61.37,2.09212,0,0,''),
 (7997,0,6,-4558.88,824.21,60.99,2.09212,0,0,''),
 (7997,0,7,-4568.32,837.43,59.12,2.05207,0,0,''),
-(7997,0,8,-4569.90,841.76,59.74,1.85886,0,0,'Captured Sprite Darter despawn and send kill credit'),
+(7997,0,8,-4569.9,841.76,59.74,1.85886,0,0,'Captured Sprite Darter despawn and send kill credit'),
 (7997,1,1,-4531.98,807.74,59.96,5.584,0,0,'Captured Sprite Darter leaves cage'),
 (7997,1,2,-4528.44,818.16,60.29,1.92405,0,0,''),
 (7997,1,3,-4532.99,823.72,60.45,2.57672,0,0,''),
-(7997,1,4,-4540.03,826.10,60.51,3.18462,0,0,''),
+(7997,1,4,-4540.03,826.1,60.51,3.18462,0,0,''),
 (7997,1,5,-4548.23,824.09,60.47,3.47914,0,0,''),
-(7997,1,6,-4554.04,823.40,61.07,3.04796,0,0,''),
+(7997,1,6,-4554.04,823.4,61.07,3.04796,0,0,''),
 (7997,1,7,-4559.95,827.46,60.28,2.21151,0,0,''),
-(7997,1,8,-4568.80,840.24,59.62,2.04422,0,0,'Captured Sprite Darter despawn and send kill credit'),
+(7997,1,8,-4568.8,840.24,59.62,2.04422,0,0,'Captured Sprite Darter despawn and send kill credit'),
 (7997,2,1,-4531.98,807.74,59.96,5.584,0,0,'Captured Sprite Darter leaves cage'),
 (7997,2,2,-4527.93,805.21,59.68,5.51725,0,0,''),
 (7997,2,3,-4523.21,801.48,59.55,6.00262,0,0,''),
@@ -3615,15 +3621,15 @@ INSERT INTO `script_waypoint` (`entry`, `pathId`, `pointid`, `position_x`, `posi
 (7997,2,5,-4510.99,803.04,60.55,0.489129,0,0,''),
 (7997,2,6,-4505.74,805.83,62.06,0.689405,0,0,''),
 (7997,2,7,-4502.42,810.73,62.92,1.05462,0,0,''),
-(7997,2,8,-4497.04,819.50,63.52,1.00042,0,0,'Captured Sprite Darter despawn and send kill credit'),
+(7997,2,8,-4497.04,819.5,63.52,1.00042,0,0,'Captured Sprite Darter despawn and send kill credit'),
 (7997,3,1,-4531.98,807.74,59.96,5.584,0,0,'Captured Sprite Darter leaves cage'),
-(7997,3,2,-4524.90,798.40,59.44,5.25964,0,0,''),
+(7997,3,2,-4524.9,798.4,59.44,5.25964,0,0,''),
 (7997,3,3,-4518.62,787.26,59.91,4.85437,0,0,''),
 (7997,3,4,-4516.15,768.63,60.59,4.73892,0,0,''),
 (7997,3,5,-4514.92,755.28,60.38,4.5999,0,0,''),
 (7997,3,6,-4515.78,744.25,60.54,4.5999,0,0,''),
-(7997,3,7,-4514.10,727.70,62.07,4.82531,0,0,''),
-(7997,3,8,-4510.50,696.02,64.68,4.82531,0,0,'Captured Sprite Darter despawn and send kill credit'),
+(7997,3,7,-4514.1,727.7,62.07,4.82531,0,0,''),
+(7997,3,8,-4510.5,696.02,64.68,4.82531,0,0,'Captured Sprite Darter despawn and send kill credit'),
 (7998,0,1,-510.13,-132.69,-152.5,0,0,0,''),
 (7998,0,2,-511.099,-129.74,-153.845,0,0,0,''),
 (7998,0,3,-511.79,-127.476,-155.551,0,0,0,''),
@@ -4321,7 +4327,7 @@ INSERT INTO `script_waypoint` (`entry`, `pathId`, `pointid`, `position_x`, `posi
 (12818,0,24,3449.15,-471.29,168.49,0,0,0,''),
 (12818,0,25,3426.67,-456.34,158.85,0,0,0,''),
 (12818,0,26,3406.53,-446.61,153.57,0,0,0,''),
-(12818,0,27,3386.20,-437.82,151.93,0,0,0,''),
+(12818,0,27,3386.2,-437.82,151.93,0,0,0,''),
 (12818,0,28,3349.5782,-439.28,151.92,0,0,0,''),
 (12818,0,29,3310.3,-467.28,152.24,0,0,0,''),
 (12818,0,30,3290.63,-507.6,153.61,0,0,0,''),
