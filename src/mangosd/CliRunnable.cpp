@@ -135,7 +135,7 @@ bool ChatHandler::GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::s
     {
         if (resultChar->GetRowCount() > 100)
         {
-            PSendSysMessage("Too many results %llu. Narrow it down.", resultChar->GetRowCount());
+            PSendSysMessage("Too many results %u. Narrow it down.", (uint32)resultChar->GetRowCount());
             SetSentErrorMessage(true);
             delete resultChar;
             return false;

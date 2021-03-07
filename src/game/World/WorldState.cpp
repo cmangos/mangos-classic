@@ -157,6 +157,7 @@ void WorldState::Save(SaveIds saveId)
             SaveHelper(loveData, SAVE_ID_LOVE_IS_IN_THE_AIR);
             break;
         }
+        default: break;
     }
 }
 

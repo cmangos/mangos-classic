@@ -399,6 +399,7 @@ void SpellTargetMgr::Initialize()
                                         ignore = true;
                                         break;
                                     }
+                                    default: break;
                                 }
                                 if (ignore)
                                     data.targetMask[effIdxSource][rightSource] |= (1 << effIdxTarget);
