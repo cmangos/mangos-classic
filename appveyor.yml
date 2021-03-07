@@ -2,7 +2,7 @@
 version: "0.18.{build}"
 
 # Operating system (build VM template)
-os: Visual Studio 2015
+os: Visual Studio 2019
  
 # build platform, i.e. Win32 (instead of x86), x64, Any CPU. This setting is optional.
 platform:
@@ -12,9 +12,8 @@ platform:
 environment:
   CMANGOS_PROJECT_NAME: "CMaNGOS_Classic" # should be same as root CMakeList.txt
   MSVC_DEFAULT_OPTIONS: ON
-  BOOST_ROOT: C:\Libraries\boost_1_63_0
-  BOOST_LIBRARYDIR_WIN32: C:\Libraries\boost_1_63_0\lib32-msvc-14.0
-  BOOST_LIBRARYDIR_WIN64: C:\Libraries\boost_1_63_0\lib64-msvc-14.0
+  BOOST_ROOT: C:\Libraries\boost_1_73_0
+  BOOST_LIBRARYDIR_WIN64: C:\Libraries\boost_1_73_0\lib64-msvc-14.2
   SNAPSHOT_TAG: "Last_$(APPVEYOR_PROJECT_NAME)_PreBuild"
   SEC_ACCESS_TOKEN:
         secure: GXsXxwHSSt1y+ae3C6A0csN+dCQxPW8w98SGwl8cqzqPDhKKbvFJ37eJCCDeNIm2
@@ -66,12 +65,11 @@ skip_tags: true
 
 # scripts to run before build
 before_build:
-  - cmd: if "%platform%"=="Win32" set BOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN32%"
   - cmd: if "%platform%"=="x64" set BOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN64%"
   - cmd: set BUILD_DIR="%APPVEYOR_BUILD_FOLDER%\BuildDir"
   - cmd: mkdir "%BUILD_DIR%"
   - cmd: cd "%BUILD_DIR%"
-  - cmd: cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX=/"%APPVEYOR_BUILD_FOLDER%"/installed -DBUILD_EXTRACTORS=ON ..
+  - cmd: cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX=/"%APPVEYOR_BUILD_FOLDER%"/installed -DBUILD_EXTRACTORS=ON ..
 
 # build script
 build_script:
