@@ -795,7 +795,7 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     targetInfo.heartbeatResistChance = 0;
 
     // Calculate hit result
-    targetInfo.missCondition = (m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(target, m_spellInfo, targetInfo.effectMask, m_reflectable, &targetInfo.heartbeatResistChance));
+    targetInfo.missCondition = (m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(target, m_spellInfo, targetInfo.effectMask, m_reflectable, false, &targetInfo.heartbeatResistChance));
 
     // spell fly from visual cast object
     WorldObject* affectiveObject = GetAffectiveCasterObject();
