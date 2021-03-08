@@ -86,9 +86,18 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
         AddCombatAction(MOGRAINE_ACTION_CRUSADER_STRIKE, 8400u);
         AddCombatAction(MOGRAINE_ACTION_HAMMER_OF_JUSTICE, 9600u);
         AddCombatAction(MOGRAINE_ACTION_DIVINE_SHIELD, 40000u);
-        AddCustomAction(MOGRAINE_ACTION_LAY_ON_HANDS, false, [&]() { HandleLayOnHandsTimer(); });
-        AddCustomAction(MOGRAINE_ACTION_REVIVED, true, [&]() { HandleRevivedTimer(); });
-        AddCustomAction(MOGRAINE_ACTION_ROAR, true, [&]() { HandleRoar(); });
+        AddCustomAction(MOGRAINE_ACTION_LAY_ON_HANDS, false, [&]()
+        {
+            HandleLayOnHandsTimer(); 
+        });
+        AddCustomAction(MOGRAINE_ACTION_REVIVED, true, [&]()
+        {
+            HandleRevivedTimer();
+        });
+        AddCustomAction(MOGRAINE_ACTION_ROAR, true, [&]()
+        {
+            HandleRoar();
+        });
     }
 
     instance_scarlet_monastery* m_instance;
@@ -324,20 +333,31 @@ enum WhitemaneActions
     WHITEMANE_ACTION_SCARLET_RESURRECTION_ENTER_COMBAT,
 };
 
-struct boss_high_inquisitor_whitemaneAI : public CombatAI
+struct boss_high_inquisitor_whitemaneAI : public RangedCombatAI
 {
-    boss_high_inquisitor_whitemaneAI(Creature* creature) : CombatAI(creature, WHITEMANE_ACTION_MAX), m_instance(static_cast<instance_scarlet_monastery*>(creature->GetInstanceData()))
+    boss_high_inquisitor_whitemaneAI(Creature* creature) : RangedCombatAI(creature, WHITEMANE_ACTION_MAX), m_instance(static_cast<instance_scarlet_monastery*>(creature->GetInstanceData()))
     {
         AddTimerlessCombatAction(WHITEMANE_ACTION_DEEP_SLEEP, true);
         AddCombatAction(WHITEMANE_ACTION_HEAL, true);
         AddCombatAction(WHITEMANE_ACTION_POWERWORD_SHIELD, true);
         AddCombatAction(WHITEMANE_ACTION_HOLY_SMITE, true);
-        AddCustomAction(WHITEMANE_ACTION_SCARLET_RESURRECTION, true, [&]() { HandleResurrection(); });
-        AddCustomAction(WHITEMANE_ACTION_SCARLET_RESURRECTION_ENTER_COMBAT, true, [&]() { HandleResurrectionCombat(); });
-        AddCustomAction(WHITEMANE_ACTION_SALUTE, true, [&]() { HandleSalute(); });
+        AddCustomAction(WHITEMANE_ACTION_SCARLET_RESURRECTION, true, [&]()
+        {
+            HandleResurrection();
+        });
+        AddCustomAction(WHITEMANE_ACTION_SCARLET_RESURRECTION_ENTER_COMBAT, true, [&]()
+        {
+            HandleResurrectionCombat();
+        });
+        AddCustomAction(WHITEMANE_ACTION_SALUTE, true, [&]()
+        {
+            HandleSalute();
+        });
         AddCombatAction(WHITEMANE_ACTION_DOMINATE_MIND, true);
         SetMeleeEnabled(false);
         SetReactState(REACT_PASSIVE);
+        AddMainSpell(SPELL_HOLYSMITE);
+        SetRangedMode(true, 25.f, TYPE_PROXIMITY);
     }
 
     uint32 GetSubsequentActionTimer(uint32 id)
@@ -346,7 +366,7 @@ struct boss_high_inquisitor_whitemaneAI : public CombatAI
         {
             case WHITEMANE_ACTION_HEAL: return 13000u;
             case WHITEMANE_ACTION_POWERWORD_SHIELD: return urand(22000, 45000);
-            case WHITEMANE_ACTION_HOLY_SMITE: return urand(3500, 5000);
+            case WHITEMANE_ACTION_HOLY_SMITE: return GetCurrentRangedMode() ? urand(2000, 3000) : urand(3500, 8000);
             case WHITEMANE_ACTION_DOMINATE_MIND: return urand(5000, 10000);
             default: return 0; // never occurs but for compiler
         }
@@ -369,12 +389,15 @@ struct boss_high_inquisitor_whitemaneAI : public CombatAI
 
     void EnterCombat(Unit* /*enemy*/) override
     {
-        SetCombatScriptStatus(false);
-        ResetCombatAction(WHITEMANE_ACTION_HEAL, 10000u);
-        ResetCombatAction(WHITEMANE_ACTION_POWERWORD_SHIELD, 15000u);
-        ResetCombatAction(WHITEMANE_ACTION_HOLY_SMITE, 100u);
-        SetMeleeEnabled(true);
-        SetReactState(REACT_AGGRESSIVE);
+        if (m_instance && m_instance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) == IN_PROGRESS)
+        {
+            SetCombatScriptStatus(false);
+            ResetCombatAction(WHITEMANE_ACTION_HEAL, 10000u);
+            ResetCombatAction(WHITEMANE_ACTION_POWERWORD_SHIELD, 15000u);
+            ResetCombatAction(WHITEMANE_ACTION_HOLY_SMITE, 100u);
+            SetMeleeEnabled(true);
+            SetReactState(REACT_AGGRESSIVE);
+        }
     }
 
     void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
@@ -477,7 +500,7 @@ struct boss_high_inquisitor_whitemaneAI : public CombatAI
             }
             case WHITEMANE_ACTION_DOMINATE_MIND:
             {
-                if (!urand(0, 10))
+                if (!urand(0, 50))
                     if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DOMINATEMIND, SELECT_FLAG_PLAYER))
                         if (DoCastSpellIfCan(target, SPELL_DOMINATEMIND))
                             ResetCombatAction(action, urand(20000, 30000));
