@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Mograine_And_Whitemane
-SD%Complete: 90
+SD%Complete: 95
 SDComment:
 SDCategory: Scarlet Monastery
 EndScriptData
@@ -24,7 +24,9 @@ EndScriptData
 */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Globals/SharedDefines.h"
 #include "scarlet_monastery.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -43,6 +45,7 @@ enum
     SPELL_HAMMEROFJUSTICE        = 5589,
     SPELL_LAYONHANDS             = 9257,
     SPELL_RETRIBUTIONAURA        = 8990,
+    SPELL_DIVINESHIELD           = 642,
 
     // Whitemanes Spells
     SPELL_DEEPSLEEP              = 9256,
@@ -52,50 +55,91 @@ enum
     SPELL_HEAL                   = 12039,
     SPELL_POWERWORDSHIELD        = 22187,
 
+    NPC_SCARLET_ABBOT               = 4303,
+    NPC_SCARLET_MONK                = 4540,
+    NPC_SCARLET_CHAMPION            = 4302,
+    NPC_SCARLET_WIZARD              = 4300,
+    NPC_SCARLET_CENTURION           = 4301,
+    NPC_SCARLET_CHAPLAIN            = 4299,
+
     ASHBRINGER_RELAY_SCRIPT_ID   = 9001,
     ITEM_CORRUPTED_ASHBRINGER    = 22691,
 
     SOUND_MOGRAINE_FAKE_DEATH    = 1326,
 };
 
-struct boss_scarlet_commander_mograineAI : public ScriptedAI
+enum MograineActions
 {
-    boss_scarlet_commander_mograineAI(Creature* pCreature) : ScriptedAI(pCreature)
+    MOGRAINE_ACTION_CRUSADER_STRIKE,
+    MOGRAINE_ACTION_HAMMER_OF_JUSTICE,
+    MOGRAINE_ACTION_DIVINE_SHIELD,
+    MOGRAINE_ACTION_MAX,
+    MOGRAINE_ACTION_LAY_ON_HANDS,
+    MOGRAINE_ACTION_REVIVED,
+    MOGRAINE_ACTION_ROAR,
+};
+
+struct boss_scarlet_commander_mograineAI : public CombatAI
+{
+    boss_scarlet_commander_mograineAI(Creature* creature) : CombatAI(creature, MOGRAINE_ACTION_MAX), m_instance(static_cast<instance_scarlet_monastery*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        AddCombatAction(MOGRAINE_ACTION_CRUSADER_STRIKE, 8400u);
+        AddCombatAction(MOGRAINE_ACTION_HAMMER_OF_JUSTICE, 9600u);
+        AddCombatAction(MOGRAINE_ACTION_DIVINE_SHIELD, 40000u);
+        AddCustomAction(MOGRAINE_ACTION_LAY_ON_HANDS, false, [&]() { HandleLayOnHandsTimer(); });
+        AddCustomAction(MOGRAINE_ACTION_REVIVED, true, [&]() { HandleRevivedTimer(); });
+        AddCustomAction(MOGRAINE_ACTION_ROAR, true, [&]() { HandleRoar(); });
     }
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiCrusaderStrike_Timer;
-    uint32 m_uiHammerOfJustice_Timer;
+    instance_scarlet_monastery* m_instance;
 
     bool m_bHasDied;
     bool m_bHeal;
-    bool m_bFakeDeath;
 
     void Reset() override
     {
-        m_uiCrusaderStrike_Timer  = 8400;
-        m_uiHammerOfJustice_Timer = 9600;
-
-        m_bHasDied                = false;
-        m_bHeal                   = false;
-        m_bFakeDeath              = false;
+        CombatAI::Reset();
+        m_bHasDied = false;
+        m_bHeal = false;
 
         // Incase wipe during phase that mograine fake death
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+        SetDeathPrevention(true);
+        SetCombatScriptStatus(false);
+    }
+
+    uint32 GetSubsequentActionTimer(uint32 id)
+    {
+        switch (id)
+        {
+            case MOGRAINE_ACTION_CRUSADER_STRIKE: return urand(6000, 15000);
+            case MOGRAINE_ACTION_HAMMER_OF_JUSTICE: return urand(7000, 18500);
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    void EnterEvadeMode() override
+    {
+        if (m_instance)
+        {
+            if (m_instance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) == NOT_STARTED)
+            {
+                CombatAI::EnterEvadeMode();
+                return;
+            }
+            if (m_instance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) != NOT_STARTED && m_instance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) != FAIL)
+                m_instance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, FAIL);
+        }
     }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
-        if (m_pInstance->GetData(TYPE_ASHBRINGER_EVENT) == IN_PROGRESS)
+        if (m_instance->GetData(TYPE_ASHBRINGER_EVENT) == IN_PROGRESS)
         {
             if (pWho->GetTypeId() == TYPEID_PLAYER)
             {
@@ -103,10 +147,11 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
                 if (player->HasItemWithIdEquipped(ITEM_CORRUPTED_ASHBRINGER, 1) && m_creature->IsWithinDist(player, 20.0f))
                 {
                     player->GetMap()->ScriptsStart(sRelayScripts, ASHBRINGER_RELAY_SCRIPT_ID, m_creature, player);
-                    m_pInstance->SetData(TYPE_ASHBRINGER_EVENT, DONE);
+                    m_instance->SetData(TYPE_ASHBRINGER_EVENT, DONE);
                 }
             }
         }
+        ScriptedAI::MoveInLineOfSight(pWho);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -114,7 +159,7 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
         DoScriptText(SAY_MO_AGGRO, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_RETRIBUTIONAURA);
 
-        m_creature->CallForHelp(VISIBLE_RANGE);
+        MograineCallForHelp();
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -122,30 +167,19 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
         DoScriptText(SAY_MO_KILL, m_creature);
     }
 
-    void JustReachedHome() override
+    void JustPreventedDeath(Unit* /*attacker*/) override
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
-        Creature* pWhitemane = m_pInstance->GetSingleCreatureFromStorage(NPC_WHITEMANE);
-        if (pWhitemane && !pWhitemane->IsAlive())
-            pWhitemane->Respawn();
-    }
-
-    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
-    {
-        if (damage < m_creature->GetHealth() || m_bHasDied)
-            return;
-
-        if (!m_pInstance)
-            return;
-
-        // On first death, fake death and open door, as well as initiate whitemane if exist
-        if (Creature* pWhitemane = m_pInstance->GetSingleCreatureFromStorage(NPC_WHITEMANE))
+        if (Creature* pWhitemane = m_instance->GetSingleCreatureFromStorage(NPC_WHITEMANE))
         {
-            m_pInstance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, IN_PROGRESS);
+            m_instance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, IN_PROGRESS);
 
-            pWhitemane->GetMotionMaster()->MovePoint(1, 1163.113370f, 1398.856812f, 32.527786f);
+            pWhitemane->GetMotionMaster()->MovePoint(1, 1163.113370f, 1398.856812f, 32.527786f, FORCED_MOVEMENT_RUN);
+            pWhitemane->AI()->SetCombatScriptStatus(true);
+
+            DoScriptText(SAY_WH_INTRO, pWhitemane);
 
             m_creature->GetMotionMaster()->MovementExpired();
             m_creature->GetMotionMaster()->MoveIdle();
@@ -156,6 +190,10 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
             m_creature->ClearComboPointHolders();
             m_creature->RemoveAllAurasOnDeath();
             m_creature->ClearAllReactives();
+            m_creature->AttackStop(true, true, true);
+
+            SetCombatScriptStatus(true);
+            m_creature->SetTarget(nullptr);
 
             m_creature->PlayDistanceSound(SOUND_MOGRAINE_FAKE_DEATH);
 
@@ -164,9 +202,6 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
 
             m_bHasDied = true;
-            m_bFakeDeath = true;
-
-            damage = std::min(damage, m_creature->GetHealth() - 1);
         }
     }
 
@@ -175,138 +210,191 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
         // When hit with ressurection say text
         if (pSpell->Id == SPELL_SCARLETRESURRECTION)
         {
-            DoScriptText(SAY_MO_RESSURECTED, m_creature);
-            m_bFakeDeath = false;
-
-            if (m_pInstance)
-                m_pInstance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, SPECIAL);
+            if (m_instance)
+                m_instance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, SPECIAL);
+            ResetTimer(MOGRAINE_ACTION_LAY_ON_HANDS, 3000u);
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleLayOnHandsTimer()
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        if (m_bHasDied && !m_bHeal && m_instance && m_instance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) == SPECIAL)
+        {
+            if (Creature* pWhitemane = m_instance->GetSingleCreatureFromStorage(NPC_WHITEMANE))
+            {
+                // On resurrection, stop fake death and heal whitemane and resume fight
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                DoScriptText(SAY_MO_RESSURECTED, m_creature);
+                SetDeathPrevention(false);
+
+                // spell has script target on Whitemane but sometimes wouldn't work
+                m_creature->CastSpell(nullptr, SPELL_LAYONHANDS, TRIGGERED_OLD_TRIGGERED);
+
+                m_creature->GetMotionMaster()->Clear();
+                ResetTimer(MOGRAINE_ACTION_ROAR, 500u);
+
+                ResetTimer(MOGRAINE_ACTION_REVIVED, 2000u);
+
+                m_bHeal = true;
+            }
+        }
+    }
+
+    void MograineCallForHelp()
+    {
+        std::vector<uint32> entries = {NPC_SCARLET_ABBOT, NPC_SCARLET_CENTURION, NPC_SCARLET_CHAMPION, NPC_SCARLET_CHAPLAIN, NPC_SCARLET_MONK, NPC_SCARLET_WIZARD};
+        for (uint32 entry : entries)
+        {
+            CreatureList scarletTrash;
+            GetCreatureListWithEntryInGrid(scarletTrash, m_creature, entry, 80.f);
+            for (Creature* creature : scarletTrash)
+            {
+                if (creature && creature->IsAlive())
+                {
+                    creature->SetInCombatWithZone();
+                    creature->AI()->AttackClosestEnemy();
+                }
+            }
+        }
+    }
+
+    void HandleRoar()
+    {
+        m_creature->HandleEmote(EMOTE_ONESHOT_ROAR);
+    }
+
+    void HandleRevivedTimer()
+    {
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+        SetActionReadyStatus(MOGRAINE_ACTION_DIVINE_SHIELD, true);
+
+        ResetCombatAction(MOGRAINE_ACTION_CRUSADER_STRIKE, GetSubsequentActionTimer(MOGRAINE_ACTION_CRUSADER_STRIKE));
+        ResetCombatAction(MOGRAINE_ACTION_HAMMER_OF_JUSTICE, GetSubsequentActionTimer(MOGRAINE_ACTION_HAMMER_OF_JUSTICE));
+
+        DoCastSpellIfCan(m_creature, SPELL_RETRIBUTIONAURA);
+
+        SetCombatScriptStatus(false);
+
+        if (m_creature->GetVictim())
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        if (!m_instance)
             return;
 
-        if (m_bHasDied && !m_bHeal && m_pInstance && m_pInstance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) == SPECIAL)
+        switch (action)
         {
-            // On ressurection, stop fake death and heal whitemane and resume fight
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-            // spell has script target on Whitemane
-            DoCastSpellIfCan(m_creature, SPELL_LAYONHANDS);
-
-            m_uiCrusaderStrike_Timer = 8400;
-            m_uiHammerOfJustice_Timer = 9600;
-
-            if (m_creature->GetVictim())
-                m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-
-            m_bHeal = true;
+            case MOGRAINE_ACTION_CRUSADER_STRIKE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CRUSADERSTRIKE) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case MOGRAINE_ACTION_HAMMER_OF_JUSTICE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMMEROFJUSTICE) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case MOGRAINE_ACTION_DIVINE_SHIELD:
+            {
+                if (m_creature->GetHealthPercent() <= 50.f)
+                    if (DoCastSpellIfCan(nullptr, SPELL_DIVINESHIELD) == CAST_OK)
+                        DisableCombatAction(action);
+                return;
+            }
         }
-
-        // This if-check to make sure mograine does not attack while fake death
-        if (m_bFakeDeath)
-            return;
-
-        // m_uiCrusaderStrike_Timer
-        if (m_uiCrusaderStrike_Timer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CRUSADERSTRIKE) == CAST_OK)
-                m_uiCrusaderStrike_Timer = urand(6000, 15000);
-        }
-        else
-            m_uiCrusaderStrike_Timer -= uiDiff;
-
-        // m_uiHammerOfJustice_Timer
-        if (m_uiHammerOfJustice_Timer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMMEROFJUSTICE) == CAST_OK)
-                m_uiHammerOfJustice_Timer = urand(7000, 18500);
-        }
-        else
-            m_uiHammerOfJustice_Timer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
+enum WhitemaneActions
 {
-    boss_high_inquisitor_whitemaneAI(Creature* pCreature) : ScriptedAI(pCreature)
+    WHITEMANE_ACTION_DEEP_SLEEP,
+    WHITEMANE_ACTION_SCARLET_RESURRECTION,
+    WHITEMANE_ACTION_DOMINATE_MIND,
+    WHITEMANE_ACTION_HOLY_SMITE,
+    WHITEMANE_ACTION_HEAL,
+    WHITEMANE_ACTION_POWERWORD_SHIELD,
+    WHITEMANE_ACTION_MAX,
+    WHITEMANE_ACTION_SALUTE,
+    WHITEMANE_ACTION_SCARLET_RESURRECTION_ENTER_COMBAT,
+};
+
+struct boss_high_inquisitor_whitemaneAI : public CombatAI
+{
+    boss_high_inquisitor_whitemaneAI(Creature* creature) : CombatAI(creature, WHITEMANE_ACTION_MAX), m_instance(static_cast<instance_scarlet_monastery*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        AddTimerlessCombatAction(WHITEMANE_ACTION_DEEP_SLEEP, true);
+        AddCombatAction(WHITEMANE_ACTION_HEAL, true);
+        AddCombatAction(WHITEMANE_ACTION_POWERWORD_SHIELD, true);
+        AddCombatAction(WHITEMANE_ACTION_HOLY_SMITE, true);
+        AddCustomAction(WHITEMANE_ACTION_SCARLET_RESURRECTION, true, [&]() { HandleResurrection(); });
+        AddCustomAction(WHITEMANE_ACTION_SCARLET_RESURRECTION_ENTER_COMBAT, true, [&]() { HandleResurrectionCombat(); });
+        AddCustomAction(WHITEMANE_ACTION_SALUTE, true, [&]() { HandleSalute(); });
+        AddCombatAction(WHITEMANE_ACTION_DOMINATE_MIND, true);
+        SetMeleeEnabled(false);
+        SetReactState(REACT_PASSIVE);
     }
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiHeal_Timer;
-    uint32 m_uiPowerWordShield_Timer;
-    uint32 m_uiHolySmite_Timer;
-    uint32 m_uiWait_Timer;
-
-    bool m_bCanResurrectCheck;
-    bool m_bCanResurrect;
-
-    void Reset() override
+    uint32 GetSubsequentActionTimer(uint32 id)
     {
-        m_uiWait_Timer            = 7000;
-        m_uiHeal_Timer            = 10000;
-        m_uiPowerWordShield_Timer = 15000;
-        m_uiHolySmite_Timer       = 4000;
-
-        m_bCanResurrectCheck      = false;
-        m_bCanResurrect           = false;
-
-        if (!m_pInstance)
-            return;
-
-        if (Creature* pMograine = m_pInstance->GetSingleCreatureFromStorage(NPC_MOGRAINE))
+        switch (id)
         {
-            if (m_creature->IsAlive() && !pMograine->IsAlive())
-                pMograine->Respawn();
+            case WHITEMANE_ACTION_HEAL: return 13000u;
+            case WHITEMANE_ACTION_POWERWORD_SHIELD: return urand(22000, 45000);
+            case WHITEMANE_ACTION_HOLY_SMITE: return urand(3500, 5000);
+            case WHITEMANE_ACTION_DOMINATE_MIND: return urand(5000, 10000);
+            default: return 0; // never occurs but for compiler
+        }
+    }
+    instance_scarlet_monastery* m_instance;
+
+    void EnterEvadeMode() override
+    {
+        SetCombatScriptStatus(false);
+        SetCombatMovement(true);
+        SetMeleeEnabled(true);
+        if (m_instance)
+        {
+            if (m_instance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) == NOT_STARTED)
+                CombatAI::EnterEvadeMode();
+            if (m_instance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) != NOT_STARTED && m_instance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) != FAIL)
+                m_instance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, FAIL);
         }
     }
 
-    void JustReachedHome() override
+    void EnterCombat(Unit* /*enemy*/) override
     {
-        if (m_pInstance)
+        SetCombatScriptStatus(false);
+        ResetCombatAction(WHITEMANE_ACTION_HEAL, 10000u);
+        ResetCombatAction(WHITEMANE_ACTION_POWERWORD_SHIELD, 15000u);
+        ResetCombatAction(WHITEMANE_ACTION_HOLY_SMITE, 100u);
+        SetMeleeEnabled(true);
+        SetReactState(REACT_AGGRESSIVE);
+    }
+
+    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    {
+        if (uiMotionType == POINT_MOTION_TYPE && uiPointId == 2)
         {
-            if (!(m_pInstance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) == NOT_STARTED) || !(m_pInstance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) == FAIL))
-                m_pInstance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, FAIL);
+            if (m_instance)
+            {
+                if (Creature* pMograine = m_instance->GetSingleCreatureFromStorage(NPC_MOGRAINE))
+                {
+                    m_creature->SetFacingToObject(pMograine);
+                    ResetTimer(WHITEMANE_ACTION_SCARLET_RESURRECTION, 3000u);
+                }
+            }
         }
-    }
-
-    void MoveInLineOfSight(Unit* /*pWho*/) override
-    {
-        // This needs to be empty because Whitemane should NOT aggro while fighting Mograine. Mograine will give us a target.
-    }
-
-    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
-    {
-        if (damage < m_creature->GetHealth())
-            return;
-
-        if (!m_bCanResurrectCheck || m_bCanResurrect)
+        if (uiMotionType == POINT_MOTION_TYPE && uiPointId == 1)
         {
-            // prevent killing blow before rezzing commander
-            damage = std::min(damage, m_creature->GetHealth() - 1);
+            m_creature->SetInCombatWithZone();
+            AttackClosestEnemy();
         }
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_pInstance && (m_pInstance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) == NOT_STARTED || m_pInstance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) == FAIL))
-            return;
-
-        ScriptedAI::AttackStart(pWho);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_WH_INTRO, m_creature);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -314,91 +402,100 @@ struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
         DoScriptText(SAY_WH_KILL, m_creature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleResurrection()
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
+        // spell has script target on Mograine
+        DoCastSpellIfCan(nullptr, SPELL_SCARLETRESURRECTION);
+        DoScriptText(SAY_WH_RESSURECT, m_creature);
+        ResetTimer(WHITEMANE_ACTION_SALUTE, 3400u);
+        m_creature->GetMotionMaster()->Clear();
+        ResetTimer(WHITEMANE_ACTION_SCARLET_RESURRECTION_ENTER_COMBAT, 5700u);
+    }
 
-        if (m_bCanResurrect)
+    void HandleResurrectionCombat()
+    {
+        ResetCombatAction(WHITEMANE_ACTION_HEAL, GetSubsequentActionTimer(WHITEMANE_ACTION_HEAL));
+        ResetCombatAction(WHITEMANE_ACTION_POWERWORD_SHIELD, GetSubsequentActionTimer(WHITEMANE_ACTION_POWERWORD_SHIELD));
+        ResetCombatAction(WHITEMANE_ACTION_HOLY_SMITE, GetSubsequentActionTimer(WHITEMANE_ACTION_HOLY_SMITE));
+        ResetCombatAction(WHITEMANE_ACTION_DOMINATE_MIND, GetSubsequentActionTimer(WHITEMANE_ACTION_DOMINATE_MIND));
+        SetCombatScriptStatus(false);
+        SetCombatMovement(true, true);
+        SetMeleeEnabled(true);
+    }
+
+    void HandleSalute()
+    {
+        m_creature->HandleEmote(EMOTE_ONESHOT_SALUTE);
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            // When casting resuruction make sure to delay so on rez when reinstate battle deepsleep runs out
-            if (m_uiWait_Timer < uiDiff)
+            case WHITEMANE_ACTION_HEAL:
             {
-                // spell has script target on Mograine
-                DoCastSpellIfCan(m_creature, SPELL_SCARLETRESURRECTION);
-                DoScriptText(SAY_WH_RESSURECT, m_creature);
-                m_bCanResurrect = false;
+                if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_HEAL) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
+                }
+                return;
             }
-            else
-                m_uiWait_Timer -= uiDiff;
-        }
-
-        // Cast Deep sleep when health is less than 50%
-        if (!m_bCanResurrectCheck && m_creature->GetHealthPercent() <= 50.0f)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_DEEPSLEEP, CAST_INTERRUPT_PREVIOUS);
-            m_bCanResurrectCheck = true;
-            m_bCanResurrect = true;
-            return;
-        }
-
-        // while in "resurrect-mode", don't do anything
-        if (m_bCanResurrect)
-            return;
-
-        // If we are <75% hp cast healing spells at self or Mograine
-        if (m_uiHeal_Timer < uiDiff)
-        {
-            if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
+            case WHITEMANE_ACTION_HOLY_SMITE:
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_HEAL) == CAST_OK)
-                    m_uiHeal_Timer = 13000;
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HOLYSMITE) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case WHITEMANE_ACTION_POWERWORD_SHIELD:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_POWERWORDSHIELD) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case WHITEMANE_ACTION_DEEP_SLEEP:
+            {
+                if (m_creature->GetHealthPercent() <= 50.0f)
+                {
+                    DoCastSpellIfCan(nullptr, SPELL_DEEPSLEEP, CAST_INTERRUPT_PREVIOUS);
+                    SetCombatMovement(false);
+                    SetMeleeEnabled(false);
+                    SetCombatScriptStatus(true);
+                    m_creature->SetTarget(nullptr);
+                    if (Creature* mograine = m_instance->GetSingleCreatureFromStorage(NPC_MOGRAINE))
+                    {
+                        SetCombatMovement(false);
+                        m_creature->AttackStop(true);
+                        float fX, fY, fZ;
+                        mograine->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE / 2.f);
+                        m_creature->GetMotionMaster()->Clear();
+                        m_creature->GetMotionMaster()->MovePoint(2, fX, fY, fZ, FORCED_MOVEMENT_RUN);
+                    }
+                    DisableCombatAction(action);
+                }
+                return;
+            }
+            case WHITEMANE_ACTION_DOMINATE_MIND:
+            {
+                if (!urand(0, 10))
+                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DOMINATEMIND, SELECT_FLAG_PLAYER))
+                        if (DoCastSpellIfCan(target, SPELL_DOMINATEMIND))
+                            ResetCombatAction(action, urand(20000, 30000));
+                return;
             }
         }
-        else
-            m_uiHeal_Timer -= uiDiff;
-
-        // m_uiPowerWordShield_Timer
-        if (m_uiPowerWordShield_Timer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_POWERWORDSHIELD) == CAST_OK)
-                m_uiPowerWordShield_Timer = urand(22000, 45000);
-        }
-        else
-            m_uiPowerWordShield_Timer -= uiDiff;
-
-        // m_uiHolySmite_Timer
-        if (m_uiHolySmite_Timer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HOLYSMITE) == CAST_OK)
-                m_uiHolySmite_Timer = urand(3500, 5000);
-        }
-        else
-            m_uiHolySmite_Timer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_scarlet_commander_mograine(Creature* pCreature)
-{
-    return new boss_scarlet_commander_mograineAI(pCreature);
-}
-
-UnitAI* GetAI_boss_high_inquisitor_whitemane(Creature* pCreature)
-{
-    return new boss_high_inquisitor_whitemaneAI(pCreature);
-}
 
 void AddSC_boss_mograine_and_whitemane()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_scarlet_commander_mograine";
-    pNewScript->GetAI = &GetAI_boss_scarlet_commander_mograine;
+    pNewScript->GetAI = &GetNewAIInstance<boss_scarlet_commander_mograineAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_high_inquisitor_whitemane";
-    pNewScript->GetAI = &GetAI_boss_high_inquisitor_whitemane;
+    pNewScript->GetAI = &GetNewAIInstance<boss_high_inquisitor_whitemaneAI>;
     pNewScript->RegisterSelf();
 }

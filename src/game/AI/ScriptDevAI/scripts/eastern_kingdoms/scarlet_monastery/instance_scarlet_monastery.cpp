@@ -24,6 +24,7 @@ EndScriptData
 */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/include/sc_instance.h"
 #include "scarlet_monastery.h"
 
 instance_scarlet_monastery::instance_scarlet_monastery(Map* pMap) : ScriptedInstance(pMap)
@@ -81,7 +82,38 @@ void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
         if (uiData == IN_PROGRESS)
             DoUseDoorOrButton(GO_WHITEMANE_DOOR);
         if (uiData == FAIL)
-            DoUseDoorOrButton(GO_WHITEMANE_DOOR);
+            {
+                Creature* pWhitemane = GetSingleCreatureFromStorage(NPC_WHITEMANE);
+                if(!pWhitemane)
+                    return;
+                Creature* pMograine = GetSingleCreatureFromStorage(NPC_MOGRAINE);
+                if(!pMograine)
+                    return;
+                if(pWhitemane->IsAlive() && pMograine->IsAlive())
+                {
+                    pWhitemane->SetRespawnDelay(30, true);
+                    pWhitemane->ForcedDespawn();
+                    pMograine->SetRespawnDelay(30, true);
+                    pMograine->ForcedDespawn();
+                    DoUseDoorOrButton(GO_WHITEMANE_DOOR);
+                    m_auiEncounter[0] = NOT_STARTED;
+                    return;
+                }
+                if(!pMograine->IsAlive() && pWhitemane->IsAlive())
+                {
+                    pWhitemane->SetRespawnDelay(30, true);
+                    pWhitemane->ForcedDespawn();
+                    DoUseDoorOrButton(GO_WHITEMANE_DOOR);
+                    m_auiEncounter[0] = uiData;
+                    return;
+                }
+                if(!pWhitemane->IsAlive() && pMograine->IsAlive())
+                {
+                    pMograine->ForcedDespawn();
+                    m_auiEncounter[0] = uiData;
+                    return;
+                }
+            }
 
         m_auiEncounter[0] = uiData;
     }
