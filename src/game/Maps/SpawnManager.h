@@ -22,6 +22,8 @@
 #include "Common.h"
 #include "Entities/ObjectGuid.h"
 
+#include <string>
+
 class Map;
 
 class SpawnInfo
@@ -49,6 +51,8 @@ class SpawnManager
         void RespawnCreature(uint32 dbguid);
 
         void Update();
+
+        std::string GetRespawnList();
     private:
         Map& m_map;
 

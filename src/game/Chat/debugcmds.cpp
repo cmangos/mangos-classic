@@ -1603,3 +1603,13 @@ bool ChatHandler::HandleDebugTransports(char* args)
         PSendSysMessage("Name %s Entry %u Position %s", transport->GetName(), transport->GetEntry(), transport->GetPosition().to_string().data());
     return true;
 }
+
+bool ChatHandler::HandleDebugSpawnsList(char* args)
+{
+    Player* player = GetSession()->GetPlayer();
+    if (!player->IsInWorld())
+        return true;
+
+    PSendSysMessage("%s", player->GetMap()->GetSpawnManager().GetRespawnList().c_str());
+    return true;
+}

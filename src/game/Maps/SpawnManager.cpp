@@ -56,3 +56,29 @@ void SpawnManager::Update()
             break;
     }
 }
+
+std::string SpawnManager::GetRespawnList()
+{
+    std::string output = "";
+    for (auto& data : m_spawns)
+    {
+        output += "DBGuid: " + std::to_string(data.GetDbGuid()) + "HighGuid: " + (data.GetHighGuid() == HIGHGUID_UNIT ? "Creature" : "GameObject") + "Respawn Time ";
+        auto diff = (data.GetRespawnTime() - m_map.GetCurrentClockTime()).count();
+        if (auto hours = diff / (HOUR * IN_MILLISECONDS))
+        {
+            output += std::to_string(hours) + "h ";
+            diff -= hours * HOUR * IN_MILLISECONDS;
+        }
+        if (auto minutes = diff / (MINUTE * IN_MILLISECONDS))
+        {
+            output += std::to_string(minutes) + "m ";
+            diff -= minutes * MINUTE * IN_MILLISECONDS;
+        }
+        if (auto seconds = diff / (IN_MILLISECONDS))
+        {
+            output += std::to_string(seconds) + "s ";
+            diff -= seconds * IN_MILLISECONDS;
+        }
+    }
+    return output;
+}
