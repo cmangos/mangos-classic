@@ -17,15 +17,15 @@
 /* ScriptData
 SDName: Boss_Cthun
 SD%Complete: 95
-SDComment: Transform spell has some minor core issues. Digestive Acid should be handled in core.
+SDComment: Transform spell has some minor core issues. Digestive Acid should be handled in core. Spell to kill players in stomach on reset needs implementation.
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData
 
 */
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "temple_of_ahnqiraj.h"
-#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -89,19 +89,12 @@ enum
     MAX_FLESH_TENTACLES             = 2,
 };
 
-static const float afCthunLocations[4][4] =
+static const float cthunLocations[4][4] =
 {
     { -8571.0f,  1990.0f,    -98.0f,  1.22f},       // Flesh Tentacles locations
     { -8525.0f,  1994.0f,    -98.0f,  2.12f},
     { -8563.56f, 2040.69f,   -97.0f,  4.9426f},     // Stomach teleport location (in)
     { -8576.06f, 1985.8359f, 100.23f, 6.10865f},    // Stomach eject location (out)
-};
-
-enum CThunPhase
-{
-    PHASE_TRANSITION            = 0,
-    PHASE_CTHUN                 = 1,
-    PHASE_CTHUN_WEAKENED        = 2,
 };
 
 /*######
@@ -253,77 +246,67 @@ struct boss_eye_of_cthunAI : public CombatAI
 ## boss_cthun
 ######*/
 
-struct boss_cthunAI : public Scripted_NoMovementAI
+enum CthunActions
 {
-    boss_cthunAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    CTHUN_CLAWTENTACLEDELAY,
+    CTHUN_EYETENTACLEDELAY,
+    CTHUN_ACTION_MAX,
+    CTHUN_EMERGE,
+    CTHUN_WEAKENED_END,
+};
+
+struct boss_cthunAI : public CombatAI
+{
+    boss_cthunAI(Creature* creature) : CombatAI(creature, CTHUN_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        // There are 30 seconds offset between Giant Eye and Giant Claw Tentacles which are both on a 60 seconds period handled by periodic spells
+        AddCombatAction(CTHUN_CLAWTENTACLEDELAY, 10000u);
+        AddCombatAction(CTHUN_EYETENTACLEDELAY, 40000u);
+        AddCustomAction(CTHUN_EMERGE, true, [&]() { HandleEmerge(); });
+        AddCustomAction(CTHUN_WEAKENED_END, true, [&]() { HandleEndWeaken(); });
         // Set active in order to be used during the instance progress
         m_creature->SetActiveObjectState(true);
-        Reset();
     }
 
-    ScriptedInstance* m_pInstance;
-
-    CThunPhase m_Phase;
+    ScriptedInstance* m_instance;
 
     // Global variables
-    uint32 m_uiPhaseTimer;
-    uint8 m_uiFleshTentaclesKilled;
-    uint32 m_uiDigestiveAcidTimer;
-    uint32 m_giantClawTentaclesDelay;
-    uint32 m_giantEyeTentaclesDelay;
+    uint8 m_fleshTentaclesKilled;
 
     // Body Phase
-    uint32 m_uiStomachEnterTimer;
 
-    GuidList m_lEyeTentaclesList;
-    GuidList m_lPlayersInStomachList;
+    GuidList m_playersInStomachList;
 
     ObjectGuid m_stomachEnterTargetGuid;
 
     void Reset() override
     {
-        // Phase information
-        m_Phase                     = PHASE_TRANSITION;
+        CombatAI::Reset();
 
-        m_uiPhaseTimer              = 0;
-        m_uiFleshTentaclesKilled    = 0;
-        m_uiDigestiveAcidTimer      = 4000;
-        m_giantClawTentaclesDelay   = 0;
-        m_giantEyeTentaclesDelay    = 0;
-
-        // Body Phase
-        m_uiStomachEnterTimer       = 0;
+        m_fleshTentaclesKilled    = 0;
 
         // Clear players in stomach
-        m_lPlayersInStomachList.clear();
+        m_playersInStomachList.clear();
 
         // Reset flags
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
         SetReactState(REACT_PASSIVE);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
-            m_uiPhaseTimer = 5 * IN_MILLISECONDS;
-    }
-
-    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
-    {
-        // Ignore damage reduction when vulnerable
-        if (m_Phase == PHASE_CTHUN_WEAKENED)
-            return;
-
-        // Prevent death in non-weakened state
-        if (damage >= m_creature->GetHealth())
-            damage = std::min(damage, m_creature->GetHealth() - 1);
+            ResetTimer(CTHUN_EMERGE, 5 * IN_MILLISECONDS);
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        // Start periodically summoning Eye, Giant Eye Tentacles
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
+
+        // Start periodically summoning Eye, Giant Eye and Mouth Tentacles
         DoSpawnTentacles();
         DoCastSpellIfCan(m_creature, SPELL_CHECK_RESET_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
@@ -331,92 +314,58 @@ struct boss_cthunAI : public Scripted_NoMovementAI
     void EnterEvadeMode() override
     {
         // Kill any player from the stomach on evade - this is becuase C'thun cannot be soloed.
-        for (GuidList::const_iterator itr = m_lPlayersInStomachList.begin(); itr != m_lPlayersInStomachList.end(); ++itr)
+        for (GuidList::const_iterator itr = m_playersInStomachList.begin(); itr != m_playersInStomachList.end(); ++itr)
         {
-            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(*itr))
-                pPlayer->CastSpell(pPlayer, SPELL_PORT_OUT_STOMACH_EFFECT, TRIGGERED_OLD_TRIGGERED);
+            if (Player* player = m_creature->GetMap()->GetPlayer(*itr))
+                player->CastSpell(player, SPELL_PORT_OUT_STOMACH_EFFECT, TRIGGERED_OLD_TRIGGERED);
         }
 
         m_creature->RemoveAurasDueToSpell(SPELL_CHECK_RESET_AURA);
         StopSpawningTentacles();
 
-        Scripted_NoMovementAI::EnterEvadeMode();
+        CombatAI::EnterEvadeMode();
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_CTHUN, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_CTHUN, FAIL);
     }
 
-    void SummonedCreatureDespawn(Creature* pSummoned) override
+    void SummonedCreatureDespawn(Creature* /*summoned*/) override
     {
         m_creature->AI()->EnterEvadeMode();
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         m_creature->SetActiveObjectState(false);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_CTHUN, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_CTHUN, DONE);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        switch (pSummoned->GetEntry())
+        switch (summoned->GetEntry())
         {
-            case NPC_EYE_TENTACLE:
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    pSummoned->AI()->AttackStart(pTarget);
-
-                m_lEyeTentaclesList.push_back(pSummoned->GetObjectGuid());
-                break;
             case NPC_GIANT_EYE_TENTACLE:
             case NPC_GIANT_CLAW_TENTACLE:
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    pSummoned->AI()->AttackStart(pTarget);
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    summoned->AI()->AttackStart(target);
                 break;
         }
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
+    void SummonedCreatureJustDied(Creature* summoned) override
     {
-        switch (pSummoned->GetEntry())
+        // Handle Flesh Tentacle kill in stomach
+        if (summoned->GetEntry() == NPC_FLESH_TENTACLE)
         {
-            // Handle the stomach tentacles kill
-            case NPC_FLESH_TENTACLE:
-                ++m_uiFleshTentaclesKilled;
-                if (m_uiFleshTentaclesKilled == MAX_FLESH_TENTACLES)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_CTHUN_VULNERABLE, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                    {
-                        m_creature->RemoveAurasDueToSpell(SPELL_CHECK_RESET_AURA);
-                        DoScriptText(EMOTE_WEAKENED, m_creature);
-                        StopSpawningTentacles();
-                        m_uiPhaseTimer = 45000;
-                        m_Phase        = PHASE_CTHUN_WEAKENED;
-                    }
-                }
-                break;
+            ++m_fleshTentaclesKilled;
+            if (m_fleshTentaclesKilled == MAX_FLESH_TENTACLES)
+                HandleWeaken();
         }
-    }
-
-    // Wrapper to handle the Flesh Tentacles spawn
-    void DoSpawnFleshTentacles()
-    {
-        m_uiFleshTentaclesKilled = 0;
-
-        // Spawn 2 flesh tentacles
-        for (uint8 i = 0; i < MAX_FLESH_TENTACLES; ++i)
-            m_creature->SummonCreature(NPC_FLESH_TENTACLE, afCthunLocations[i][0], afCthunLocations[i][1], afCthunLocations[i][2], afCthunLocations[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
-    }
-
-    // Wrapper to remove a stored player from the stomach
-    void DoRemovePlayerFromStomach(Player* pPlayer)
-    {
-        if (pPlayer)
-            m_lPlayersInStomachList.remove(pPlayer->GetObjectGuid());
     }
 
     void DoSpawnTentacles()
@@ -424,8 +373,13 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         // Tentacles Party... Pleasure !
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_EYE_TENTACLES_P2, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_MOUTH_TENTACLES_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
-        m_giantClawTentaclesDelay = 10 * IN_MILLISECONDS;
-        m_giantEyeTentaclesDelay = 40 * IN_MILLISECONDS;    // There are 30 seconds offset between Giant Eye and Giant Claw Tentacles which are both on a 60 seconds period
+        ResetCombatAction(CTHUN_CLAWTENTACLEDELAY, 10 * IN_MILLISECONDS);
+        ResetCombatAction(CTHUN_EYETENTACLEDELAY, 40 * IN_MILLISECONDS);
+
+        // Flesh Tentacles inside stomach, two of them
+        m_fleshTentaclesKilled = 0;
+        for (uint8 i = 0; i < MAX_FLESH_TENTACLES; ++i)
+            m_creature->SummonCreature(NPC_FLESH_TENTACLE, cthunLocations[i][0], cthunLocations[i][1], cthunLocations[i][2], cthunLocations[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 
     void StopSpawningTentacles()
@@ -437,127 +391,79 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_MOUTH_TENTACLES_1);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleEmerge()
     {
-        if (m_Phase == PHASE_TRANSITION && m_uiPhaseTimer)
+        // Note: we need to set the display id before casting the transform spell, in order to get the proper animation
+        m_creature->SetDisplayId(DISPLAY_ID_CTHUN_BODY);
+
+        // Transform and start C'Thun phase
+        if (DoCastSpellIfCan(m_creature, SPELL_TRANSFORM) == CAST_OK)
         {
-            if (m_uiPhaseTimer < uiDiff)
-            {
-                // Note: we need to set the display id before casting the transform spell, in order to get the proper animation
-                m_creature->SetDisplayId(DISPLAY_ID_CTHUN_BODY);
-
-                // Transform and start C'thun phase
-                if (DoCastSpellIfCan(m_creature, SPELL_TRANSFORM) == CAST_OK)
-                {
-                    m_creature->CastSpell(nullptr, SPELL_CARAPACE_CTHUN, TRIGGERED_OLD_TRIGGERED);
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    SetReactState(REACT_AGGRESSIVE);
-                    m_creature->SetInCombatWithZone();
-                    DoSpawnFleshTentacles();
-
-                    m_Phase        = PHASE_CTHUN;
-                    m_uiPhaseTimer = 0;
-                }
-            }
-            else
-                m_uiPhaseTimer -= uiDiff;
+            // Make ready for fight
+            SetReactState(REACT_AGGRESSIVE);
+            DoCastSpellIfCan(m_creature, SPELL_CARAPACE_CTHUN, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetInCombatWithZone();
         }
+    }
 
-        // No check reset aura and not weakened: do nothing more as we are not in combat
-        if (!m_creature->HasAura(SPELL_CHECK_RESET_AURA) && m_Phase != PHASE_CTHUN_WEAKENED)
-            return;
-
-        switch (m_Phase)
+    void HandleWeaken()
+    {
+        if (DoCastSpellIfCan(m_creature, SPELL_CTHUN_VULNERABLE, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
         {
-            case PHASE_CTHUN:
-                // Teleport the target to the stomach after a few seconds
-                if (m_uiStomachEnterTimer)
+            m_creature->RemoveAurasDueToSpell(SPELL_CHECK_RESET_AURA);
+            m_creature->RemoveAurasDueToSpell(SPELL_CARAPACE_CTHUN);
+            DoScriptText(EMOTE_WEAKENED, m_creature);
+            StopSpawningTentacles();
+            ResetTimer(CTHUN_WEAKENED_END, 45 * IN_MILLISECONDS);
+        }
+    }
+
+    void HandleEndWeaken()
+    {
+        // Handle carapace and tentacles respawn when the vulnerability spell expires
+        DoCastSpellIfCan(m_creature, SPELL_CARAPACE_CTHUN, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, SPELL_CHECK_RESET_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoSpawnTentacles();
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case CTHUN_CLAWTENTACLEDELAY:
+                // The first Giant Claw Tentacle (at phase 2 start of after weakened state) is a single isolated cast,
+                // all after are on periodic timer through dedicated spell
+                // Check for valid player
+                if (Unit* player = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_LOS | SELECT_FLAG_PLAYER))
                 {
-                    if (m_uiStomachEnterTimer <= uiDiff)
-                    {
-                        // Check for valid player
-                        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_stomachEnterTargetGuid))
-                        {
-                            pPlayer->CastSpell(pPlayer, SPELL_DIGESTIVE_ACID_TELEPORT, TRIGGERED_OLD_TRIGGERED);
-                            m_lPlayersInStomachList.push_back(pPlayer->GetObjectGuid());
-                        }
-
-                        m_stomachEnterTargetGuid.Clear();
-                        m_uiStomachEnterTimer = 0;
-                    }
+                    player->CastSpell(player, SPELL_SUMMON_GIANT_HOOK_TENTACLE, TRIGGERED_OLD_TRIGGERED);
+                    // All further summons are handled in periodic spell SPELL_SUMMON_GIANT_HOOKS_1
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_HOOKS_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT ) == CAST_OK)
+                        DisableCombatAction(action);
+                    // In case of failure, try another single cast
                     else
-                        m_uiStomachEnterTimer -= uiDiff;
+                        ResetCombatAction(action, 30 * IN_MILLISECONDS);
                 }
-
-                // The first Giant Claw Tentacle (at phase 2 start of after weakened state) is a single isolated cast, all after are on periodic timer through dedicated spell
-                if (m_giantClawTentaclesDelay)
-                {
-                    if (m_giantClawTentaclesDelay <= uiDiff)
-                    {
-                        // Check for valid player
-                        if (Unit* player = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_LOS | SELECT_FLAG_PLAYER))
-                        {
-                            player->CastSpell(player, SPELL_SUMMON_GIANT_HOOK_TENTACLE, TRIGGERED_OLD_TRIGGERED);
-                            DoCastSpellIfCan(m_creature, SPELL_SUMMON_GIANT_HOOKS_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
-                            m_giantClawTentaclesDelay = 0;   // All further summons are handled in periodic spell SPELL_SUMMON_GIANT_HOOKS_1
-                        }
-                    }
-                    else
-                        m_giantClawTentaclesDelay -= uiDiff;
-                }
-
+                break;
+            case CTHUN_EYETENTACLEDELAY:
                 // The first Giant Eye Tentacle (at phase 2 start of after weakened state, 30 after first Giant Claw Tentacle) is a single isolated cast,
                 // all after are on periodic timer through dedicated spell
-                if (m_giantEyeTentaclesDelay)
+                // Check for valid player
+                if (Unit* player = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_LOS | SELECT_FLAG_PLAYER))
                 {
-                    if (m_giantEyeTentaclesDelay <= uiDiff)
-                    {
-                        // Check for valid player
-                        if (Unit* player = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_LOS | SELECT_FLAG_PLAYER))
-                        {
-                            player->CastSpell(player, SPELL_SUMMON_GIANT_EYE_TENTACLE, TRIGGERED_OLD_TRIGGERED);
-                            DoCastSpellIfCan(m_creature, SPELL_GIANT_EYE_TENTACLES_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT );
-                            m_giantEyeTentaclesDelay = 0;   // All further summons are handled in periodic spell SPELL_GIANT_EYE_TENTACLES_1
-                        }
-                    }
+                    player->CastSpell(player, SPELL_SUMMON_GIANT_EYE_TENTACLE, TRIGGERED_OLD_TRIGGERED);
+                    // All further summons are handled in periodic spell SPELL_GIANT_EYE_TENTACLES_1
+                    if (DoCastSpellIfCan(m_creature, SPELL_GIANT_EYE_TENTACLES_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT ) == CAST_OK)
+                        DisableCombatAction(action);
+                    // In case of failure, try another single cast
                     else
-                        m_giantEyeTentaclesDelay -= uiDiff;
+                        ResetCombatAction(action, 30 * IN_MILLISECONDS);
                 }
-
-                break;
-            case PHASE_CTHUN_WEAKENED:
-
-                // Handle Flesh Tentacles respawn when the vulnerability spell expires
-                if (m_uiPhaseTimer < uiDiff)
-                {
-                    DoSpawnFleshTentacles();
-
-                    m_uiPhaseTimer = 0;
-                    m_Phase        = PHASE_CTHUN;
-                    DoCastSpellIfCan(m_creature, SPELL_CHECK_RESET_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-                    DoSpawnTentacles();
-                }
-                else
-                    m_uiPhaseTimer -= uiDiff;
-
                 break;
             default:
                 break;
         }
-
-        // Note: this should be applied by the teleport spell
-        if (m_uiDigestiveAcidTimer < uiDiff)
-        {
-            // Iterate the Stomach players list and apply the Digesti acid debuff on them every 4 sec
-            for (GuidList::const_iterator itr = m_lPlayersInStomachList.begin(); itr != m_lPlayersInStomachList.end(); ++itr)
-            {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(*itr))
-                    pPlayer->CastSpell(pPlayer, SPELL_DIGESTIVE_ACID, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-            }
-            m_uiDigestiveAcidTimer = 4000;
-        }
-        else
-            m_uiDigestiveAcidTimer -= uiDiff;
     }
 };
 
@@ -592,7 +498,6 @@ struct npc_giant_claw_tentacleAI : public CombatAI
         AddCombatAction(GIANTCLAW_CHECKTARGET, 5000u);
 
         m_instance = (ScriptedInstance*)creature->GetInstanceData();
-        Reset();
     }
 
     ScriptedInstance* m_instance;
@@ -673,7 +578,7 @@ bool AreaTrigger_at_stomach_cthun(Player* player, AreaTriggerEntry const* at)
             return false;
 
         // Teleport player near the third area trigger
-        player->NearTeleportTo(afCthunLocations[3][0], afCthunLocations[3][1], afCthunLocations[3][2], afCthunLocations[3][3]);
+        player->NearTeleportTo(cthunLocations[3][0], cthunLocations[3][1], cthunLocations[3][2], cthunLocations[3][3]);
         return true;
     }
 
@@ -692,11 +597,6 @@ bool AreaTrigger_at_stomach_cthun(Player* player, AreaTriggerEntry const* at)
         return true;
     }
     return false;
-}
-
-UnitAI* GetAI_boss_cthun(Creature* pCreature)
-{
-    return new boss_cthunAI(pCreature);
 }
 
 struct PeriodicSummonEyeTrigger : public AuraScript
@@ -873,7 +773,7 @@ void AddSC_boss_cthun()
 
     pNewScript = new Script;
     pNewScript->Name = "boss_cthun";
-    pNewScript->GetAI = &GetAI_boss_cthun;
+    pNewScript->GetAI = &GetNewAIInstance<boss_cthunAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
