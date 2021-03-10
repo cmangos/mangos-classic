@@ -2761,8 +2761,7 @@ void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*
     else if (uint32 cooldown = sObjectMgr.GetCreatureCooldown(GetCreatureInfo()->Entry, spellEntry.Id))
     {
         m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, cooldown, 0, 0);
-        Player const* player = GetClientControlling();
-        if (player)
+        if (Player const* player = dynamic_cast<Player const*>(GetCharmer()))
         {
             // send to client
             WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4);
