@@ -4566,11 +4566,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         unitTarget->CastSpell(nullptr, 29108, TRIGGERED_OLD_TRIGGERED);  // Kill Web Wrap
                     return;
                 }
-                case 28732:                                 // Widow Embrace
-                {
-                    m_caster->CastSpell(nullptr, 28748, TRIGGERED_OLD_TRIGGERED);       // Self suicide
-                    return;
-                }
                 case 29336:                                 // Despawn Buffet
                 case 29379:                                 // Despawn Crypt Guards
                 case 30134:                                 // Despawn Boss Adds

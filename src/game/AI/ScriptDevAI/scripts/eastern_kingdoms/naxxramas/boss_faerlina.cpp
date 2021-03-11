@@ -46,6 +46,7 @@ enum
     SPELL_RAIN_OF_FIRE          = 28794,
     SPELL_WIDOWS_EMBRACE_1      = 28732,                    // Cast onto Faerlina by Mind Controlled adds
     SPELL_WIDOWS_EMBRACE_2      = 28797,                    // Cast onto herself by Faerlina and handle all the cooldown and enrage debuff
+    SPELL_INSTAKILL_SELF        = 28748,
 };
 
 static const float resetZ = 266.0f;                         // Above this altitude, Faerlina is outside her room and should reset (leashing)
@@ -160,10 +161,24 @@ struct boss_faerlinaAI : public CombatAI
     }
 };
 
+struct WidowEmbrace : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_1)
+        {
+            if (Unit* caster = spell->GetCaster())
+                caster->CastSpell(nullptr, SPELL_INSTAKILL_SELF, TRIGGERED_OLD_TRIGGERED);       // Self suicide
+        }
+    }
+};
+
 void AddSC_boss_faerlina()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_faerlina";
     newScript->GetAI = &GetNewAIInstance<boss_faerlinaAI>;
     newScript->RegisterSelf();
+
+    RegisterSpellScript<WidowEmbrace>("spell_faerlina_widow_embrace");
 }
