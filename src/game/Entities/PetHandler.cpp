@@ -317,8 +317,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     return;
             }
 
-            petUnit->clearUnitState(UNIT_STAT_MOVING);
-
             uint32 flags = TRIGGERED_NONE;
             if (!petUnit->hasUnitState(UNIT_STAT_POSSESSED))
                 flags |= TRIGGERED_PET_CAST;
@@ -805,8 +803,6 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     SpellCastTargets targets;
 
     recvPacket >> targets.ReadForCaster(petUnit);
-
-    petUnit->clearUnitState(UNIT_STAT_MOVING);
 
     if (HasMissingTargetFromClient(spellInfo))
         targets.setUnitTarget(petUnit->GetTarget());
