@@ -18,6 +18,7 @@
 
 #include "Maps/SpawnManager.h"
 #include "Maps/Map.h"
+#include "Maps/MapPersistentStateMgr.h"
 
 bool operator<(SpawnInfo const& lhs, SpawnInfo const& rhs)
 {
@@ -41,7 +42,20 @@ void SpawnManager::AddCreature(uint32 respawnDelay, uint32 dbguid)
 
 void SpawnManager::RespawnCreature(uint32 dbguid)
 {
-
+    for (auto itr = m_spawns.begin(); itr != m_spawns.end(); )
+    {
+        auto& spawnInfo = *itr;
+        if (spawnInfo.GetDbGuid() == dbguid && spawnInfo.GetHighGuid() == HIGHGUID_UNIT)
+        {
+            m_map.GetPersistentState()->SaveCreatureRespawnTime(dbguid, 0);
+            if (spawnInfo.ConstructForMap(m_map))
+            {
+                itr = m_spawns.erase(itr);
+                continue;
+            }
+        }
+        ++itr;
+    }
 }
 
 void SpawnManager::Update()

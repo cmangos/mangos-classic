@@ -225,6 +225,7 @@ ChatCommand* ChatHandler::getCommandTable()
     static ChatCommand debugSpawnsCommandtable[] =
     {
         { "list",           SEC_GAMEMASTER,     false, &ChatHandler::HandleDebugSpawnsList,                 "", nullptr },
+        { "respawn",        SEC_GAMEMASTER,     false, &ChatHandler::HandleDebugRespawnDynguid,             "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 

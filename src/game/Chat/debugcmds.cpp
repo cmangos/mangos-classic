@@ -1613,3 +1613,17 @@ bool ChatHandler::HandleDebugSpawnsList(char* args)
     PSendSysMessage("%s", player->GetMap()->GetSpawnManager().GetRespawnList().c_str());
     return true;
 }
+
+bool ChatHandler::HandleDebugRespawnDynguid(char* args)
+{
+    Creature* target = getSelectedCreature();
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        return true;
+    }
+
+    if (uint32 dbguid = target->GetDbGuid())
+        target->GetMap()->GetSpawnManager().RespawnCreature(dbguid);
+    return true;
+}
