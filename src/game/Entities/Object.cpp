@@ -2711,9 +2711,6 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
         bool damage = false;
         if (uint32 aura = spellProto->EffectApplyAuraName[effect_index])
         {
-            // TODO: to be incorporated into the main per level calculation after research
-            value += int32(std::max(0, int32(unitCaster->getLevel() - spellProto->maxLevel)) * basePointsPerLevel);
-
             switch (aura)
             {
                 case SPELL_AURA_PERIODIC_DAMAGE:
