@@ -80,6 +80,8 @@ struct boss_hakkarAI : public ScriptedAI
         m_uiAspectOfMarliTimer     = 12000;
         m_uiAspectOfThekalTimer    = 8000;
         m_uiAspectOfArlokkTimer    = 18000;
+
+        InitiateHakkarPowerStacks();
     }
 
     void Aggro(Unit* /*who*/) override
@@ -99,6 +101,17 @@ struct boss_hakkarAI : public ScriptedAI
                 m_uiAspectOfThekalTimer = 0;
             if (m_pInstance->GetData(TYPE_ARLOKK) == DONE)
                 m_uiAspectOfArlokkTimer = 0;
+        }
+    }
+
+    // For each of the High Priests that is alive, update Hakkar's Power Stacks (updating Hakkar's HP)
+    void InitiateHakkarPowerStacks()
+    {
+        m_creature->RemoveAurasDueToSpell(SPELL_HAKKAR_POWER);
+        for (uint8 i = 0; i < MAX_PRIESTS; i++)
+        {
+            if (m_pInstance->GetData(i) != DONE)
+                m_creature->CastSpell(m_creature, SPELL_HAKKAR_POWER, TRIGGERED_NONE);
         }
     }
 
@@ -235,10 +248,27 @@ UnitAI* GetAI_boss_hakkar(Creature* pCreature)
     return new boss_hakkarAI(pCreature);
 }
 
+struct HakkarPowerDown : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* target = spell->GetUnitTarget())
+            {
+                if (target->HasAura(SPELL_HAKKAR_POWER))
+                    target->RemoveAuraStack(SPELL_HAKKAR_POWER);
+            }
+        }
+    }
+};
+
 void AddSC_boss_hakkar()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_hakkar";
     pNewScript->GetAI = &GetAI_boss_hakkar;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<HakkarPowerDown>("spell_hakkar_power_down");
 }

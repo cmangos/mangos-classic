@@ -35,10 +35,11 @@ enum
     SAY_MINION_DESTROY      = -1309022,
     SAY_HAKKAR_PROTECT      = -1309023,
 
-    HP_LOSS_PER_PRIEST      = 60000,
-
     AREATRIGGER_ENTER       = 3958,
     AREATRIGGER_ALTAR       = 3960,
+
+    SPELL_HAKKAR_POWER      = 24692,
+    SPELL_HAKKAR_POWER_DOWN = 24693,
 };
 
 static const float aMandokirDownstairsPos[3] = { -12196.30f, -1948.37f, 130.31f};
@@ -67,7 +68,7 @@ class instance_zulgurub : public ScriptedInstance
         Creature* SelectRandomPantherTrigger(bool bIsLeft);
 
     protected:
-        void DoLowerHakkarHitPoints();
+        void RemoveHakkarPowerStack();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
