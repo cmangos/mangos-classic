@@ -1867,6 +1867,8 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         case SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK: // Mounted Speed effects
             return false; // Never stacking auras
             break;
+        case SPELL_AURA_MOD_DETECT_RANGE: // Never stack
+            return false;
     }
     if (nonmui && instance && !IsChanneledSpell(entry) && !IsChanneledSpell(entry2))
         return false; // Forbids multi-ranking and multi-application on rule, exclude channeled spells (like Mind Flay)
