@@ -435,6 +435,9 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
 
     SetDetectionRange(cinfo->Detection);
 
+    if (cinfo->CorpseDelay)
+        SetCorpseDelay(cinfo->CorpseDelay);
+
     return true;
 }
 
@@ -1491,6 +1494,9 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransp
         sLog.outErrorDb("Creature (Entry: %u) not found in table `creature_template`, can't load. ", entry);
         return false;
     }
+
+    if ((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_DYNGUID) != 0 && dbGuid == newGuid)
+        newGuid = map->GenerateLocalLowGuid(cinfo->GetHighGuid());
 
     GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(dbGuid);
 

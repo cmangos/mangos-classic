@@ -60,7 +60,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_CIVILIAN               = 0x00010000,       // 65536 CreatureInfo->civilian substitute (for new expansions)
     CREATURE_EXTRA_FLAG_NO_MELEE               = 0x00020000,       // 131072 creature can't melee
     CREATURE_EXTRA_FLAG_FORCE_ATTACKING_CAPABILITY = 0x00080000,   // 524288 SetForceAttackingCapability(true); for nonattackable, nontargetable creatures that should be able to attack nontheless
-    // CREATURE_EXTRA_FLAG_REUSE               = 0x00100000,       // 1048576 - reuse
+    CREATURE_EXTRA_FLAG_DYNGUID                = 0x00100000,       // 1048576 Temporary transition flag - spawns of this entry use dynguid system
     CREATURE_EXTRA_FLAG_COUNT_SPAWNS           = 0x00200000,       // 2097152 count creature spawns in Map*
     // CREATURE_EXTRA_FLAG_REUSE               = 0x00400000,       // 4194304 - reuse
     CREATURE_EXTRA_FLAG_DUAL_WIELD_FORCED      = 0x00800000,       // 8388606 creature is alwyas dual wielding (even if unarmed)
@@ -154,7 +154,8 @@ struct CreatureInfo
     uint32  GossipMenuId;
     VisibilityDistanceType visibilityDistanceType;
     uint32  EquipmentTemplateId;
-    uint32  civilian;
+    uint32  Civilian;
+    uint32  CorpseDelay;
     char const* AIName;
     uint32  ScriptID;
 
@@ -596,7 +597,7 @@ class Creature : public Unit
         bool CanRestockPickpocketLoot() const;
         void StartPickpocketRestockTimer();
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
-        bool IsCivilian() const { return GetCreatureInfo()->civilian != 0; }
+        bool IsCivilian() const { return GetCreatureInfo()->Civilian != 0; }
         bool IsNoAggroOnSight() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO_ON_SIGHT) != 0; }
         bool IsGuard() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_GUARD) != 0; }
 

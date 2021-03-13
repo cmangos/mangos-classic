@@ -180,7 +180,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         else
             data << uint32(Creature::ChooseDisplayId(ci));  // workaround, way to manage models must be fixed
 
-        data << uint16(ci->civilian);                       // wdbFeild14
+        data << uint16(ci->Civilian);                       // wdbFeild14
         SendPacket(data);
         DEBUG_LOG("WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
     }
