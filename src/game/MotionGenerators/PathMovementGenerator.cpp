@@ -71,7 +71,7 @@ void AbstractPathMovementGenerator::Initialize(Unit& unit)
 
     if (m_path.empty())
     {
-        sLog.outError("AbstractPathMovementGenerator::Initialize Path empty for unit name %s entry %u counter %u.", unit.GetName(), unit.GetEntry(), unit.GetGUIDLow());
+        sLog.outError("AbstractPathMovementGenerator::Initialize Path empty for unit name %s entry %u dbguid %u.", unit.GetName(), unit.GetEntry(), unit.GetDbGuid());
         return;
     }
 
@@ -221,14 +221,14 @@ void AbstractPathMovementGenerator::MovementInform(Unit& unit)
 }
 
 FixedPathMovementGenerator::FixedPathMovementGenerator(Unit& creature, int32 pathId, WaypointPathOrigin wpOrigin, ForcedMovement forcedMovement, bool flying, float speed, int32 offset, bool cyclic) :
-    AbstractPathMovementGenerator((pathId || wpOrigin != PATH_NO_PATH ? sWaypointMgr.GetPathFromOrigin(creature.GetEntry(), creature.GetGUIDLow(), pathId, (wpOrigin == PATH_NO_PATH && pathId ? PATH_FROM_ENTRY : wpOrigin))
-        : sWaypointMgr.GetDefaultPath(creature.GetEntry(), creature.GetGUIDLow())), offset, cyclic), m_flying(flying), m_speed(speed), m_forcedMovement(forcedMovement)
+    AbstractPathMovementGenerator((pathId || wpOrigin != PATH_NO_PATH ? sWaypointMgr.GetPathFromOrigin(creature.GetEntry(), creature.GetDbGuid(), pathId, (wpOrigin == PATH_NO_PATH && pathId ? PATH_FROM_ENTRY : wpOrigin))
+        : sWaypointMgr.GetDefaultPath(creature.GetEntry(), creature.GetDbGuid())), offset, cyclic), m_flying(flying), m_speed(speed), m_forcedMovement(forcedMovement)
 {
 }
 
 FixedPathMovementGenerator::FixedPathMovementGenerator(Creature& creature) :
-    AbstractPathMovementGenerator((creature.GetMotionMaster()->GetPathId() ? sWaypointMgr.GetPathFromOrigin(creature.GetEntry(), creature.GetGUIDLow(), creature.GetMotionMaster()->GetPathId(), PATH_FROM_ENTRY)
-        : sWaypointMgr.GetDefaultPath(creature.GetEntry(), creature.GetGUIDLow())), 0, true), m_flying(true), m_speed(0.f), m_forcedMovement(FORCED_MOVEMENT_NONE)
+    AbstractPathMovementGenerator((creature.GetMotionMaster()->GetPathId() ? sWaypointMgr.GetPathFromOrigin(creature.GetEntry(), creature.GetDbGuid(), creature.GetMotionMaster()->GetPathId(), PATH_FROM_ENTRY)
+        : sWaypointMgr.GetDefaultPath(creature.GetEntry(), creature.GetDbGuid())), 0, true), m_flying(true), m_speed(0.f), m_forcedMovement(FORCED_MOVEMENT_NONE)
 {
 }
 
