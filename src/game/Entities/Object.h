@@ -1112,6 +1112,9 @@ class WorldObject : public Object
 
         virtual uint32 GetDbGuid() const { return 0; }
         virtual HighGuid GetParentHigh() const { return HighGuid(0); }
+
+        bool IsUsingNewSpawningSystem() const;
+
     protected:
         explicit WorldObject();
 

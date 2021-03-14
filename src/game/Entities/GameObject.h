@@ -624,6 +624,7 @@ enum CapturePointSliderValue
 enum GameobjectExtraFlags
 {
     GAMEOBJECT_EXTRA_FLAG_CUSTOM_ANIM_ON_USE = 0x00000001,    // GO that plays custom animation on usage
+    GAMEOBJECT_EXTRA_FLAG_DYNGUID            = 0x00000002,    // Temporary - Uses new dynguid system
     GAMEOBJECT_EXTRA_FLAG_ACTIVE             = 0x00001000,    // Always active
 };
 

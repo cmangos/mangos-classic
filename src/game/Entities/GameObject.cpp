@@ -668,6 +668,14 @@ void GameObject::Update(const uint32 diff)
             if (IsInWorld())
                 UpdateObjectVisibility();
 
+            if (IsUsingNewSpawningSystem()) // does not work nicely with pooling right now
+            {
+                m_respawnTime = std::numeric_limits<time_t>::max();
+                if (m_respawnDelay)
+                    GetMap()->GetSpawnManager().AddGameObject(m_respawnDelay, GetDbGuid());
+                AddObjectToRemoveList();
+            }
+
             break;
         }
     }

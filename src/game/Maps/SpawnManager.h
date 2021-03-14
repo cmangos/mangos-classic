@@ -47,8 +47,10 @@ class SpawnManager
     public:
         SpawnManager(Map& map) : m_map(map) {}
         void AddCreature(uint32 respawnDelay, uint32 dbguid);
+        void AddGameObject(uint32 respawnDelay, uint32 dbguid);
 
         void RespawnCreature(uint32 dbguid);
+        void RespawnGameObject(uint32 dbguid);
 
         void Update();
 
