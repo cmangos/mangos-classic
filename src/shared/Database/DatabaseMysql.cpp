@@ -417,7 +417,7 @@ void MySqlPreparedStatement::addParam(unsigned int nIndex, const SqlStmtFieldDat
 
     MYSQL_BIND& pData = m_pInputArgs[nIndex];
 
-    my_bool bUnsigned = 0;
+    bool bUnsigned = 0;
     enum_field_types dataType = ToMySQLType(data, bUnsigned);
 
     // setup MYSQL_BIND structure
@@ -462,7 +462,7 @@ bool MySqlPreparedStatement::execute()
     return true;
 }
 
-enum_field_types MySqlPreparedStatement::ToMySQLType(const SqlStmtFieldData& data, my_bool& bUnsigned)
+enum_field_types MySqlPreparedStatement::ToMySQLType(const SqlStmtFieldData& data, bool& bUnsigned)
 {
     bUnsigned = 0;
     enum_field_types dataType = MYSQL_TYPE_NULL;
