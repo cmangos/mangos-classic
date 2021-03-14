@@ -23,6 +23,7 @@ EndScriptData
 
 */
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
@@ -42,32 +43,26 @@ enum
     SPELL_SLIMEBOLT             = 32309
 };
 
-struct boss_patchwerkAI : public ScriptedAI
+enum PatchwerkActions
 {
-    boss_patchwerkAI(Creature* creature) : ScriptedAI(creature)
+    PATCHWERK_HATEFUL_STRIKE,
+    PATCHWERK_BERSERK_HP_CHECK,
+    PATCHWERK_BERSERK,
+    PATCHWERK_BERSERK_SILMEBOLT,
+    PATCHWER_ACTIONS_MAX,
+};
+
+struct boss_patchwerkAI : public CombatAI
+{
+    boss_patchwerkAI(Creature* creature) : CombatAI(creature, PATCHWER_ACTIONS_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_instance = (instance_naxxramas*)creature->GetInstanceData();
-        Reset();
+        AddTimerlessCombatAction(PATCHWERK_BERSERK_HP_CHECK, true);         // Soft enrage à 5%
+        AddCombatAction(PATCHWERK_HATEFUL_STRIKE, 1200u);
+        AddCombatAction(PATCHWERK_BERSERK, 7u * MINUTE * IN_MILLISECONDS);  // Basic berserk
+        AddCombatAction(PATCHWERK_BERSERK_SILMEBOLT, true);                 // Slimebolt - casted only 30 seconds after berserking to prevent kiting
     }
 
-    instance_naxxramas* m_instance;
-
-    uint32 m_hatefulStrikeTimer;
-    uint32 m_berserkTimer;
-    uint32 m_berserkSlimeBoltTimer;
-    uint32 m_slimeboltTimer;
-    bool   m_isEnraged;
-    bool   m_isBerserk;
-
-    void Reset() override
-    {
-        m_hatefulStrikeTimer = 1.2 * IN_MILLISECONDS;
-        m_berserkTimer = 7 * MINUTE * IN_MILLISECONDS;                        // Basic berserk
-        m_berserkSlimeBoltTimer = m_berserkTimer + 30 * IN_MILLISECONDS;    // Slime Bolt berserk
-        m_slimeboltTimer = 10* IN_MILLISECONDS;
-        m_isEnraged = false;
-        m_isBerserk = false;
-    }
+    ScriptedInstance* m_instance;
 
     void KilledUnit(Unit* /*victim*/) override
     {
@@ -93,78 +88,62 @@ struct boss_patchwerkAI : public ScriptedAI
             m_instance->SetData(TYPE_PATCHWERK, IN_PROGRESS);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
+        CombatAI::EnterEvadeMode();
+
         if (m_instance)
             m_instance->SetData(TYPE_PATCHWERK, FAIL);
     }
 
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Hateful Strike
-        if (m_hatefulStrikeTimer < diff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_HATEFULSTRIKE_PRIMER) == CAST_OK)
-                m_hatefulStrikeTimer = 1.2 * IN_MILLISECONDS;
-        }
-        else
-            m_hatefulStrikeTimer -= diff;
-
-        // Soft Enrage at 5%
-        if (!m_isEnraged)
-        {
-            if (m_creature->GetHealthPercent() < 5.0f)
+            case PATCHWERK_BERSERK_HP_CHECK:
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                if (m_creature->GetHealthPercent() < 5.0f)
                 {
-                    DoScriptText(EMOTE_GENERIC_ENRAGED, m_creature);
-                    m_isEnraged = true;
+                    if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_GENERIC_ENRAGED, m_creature);
+                        DisableCombatAction(action);
+                    }
                 }
+                break;
             }
-        }
-
-        // Berserk after 7 minutes
-        if (!m_isBerserk)
-        {
-            if (m_berserkTimer < diff)
+            case PATCHWERK_HATEFUL_STRIKE:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_HATEFULSTRIKE_PRIMER) == CAST_OK)
+                    ResetCombatAction(action, 1.2 * IN_MILLISECONDS);
+                break;
+            }
+            case PATCHWERK_BERSERK:
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
                     DoScriptText(EMOTE_GENERIC_BERSERK, m_creature);
-                    m_isBerserk = true;
+                    DisableCombatAction(action);
+                    ResetCombatAction(PATCHWERK_BERSERK_SILMEBOLT, 30 * IN_MILLISECONDS);
                 }
+                break;
             }
-            else
-                m_berserkTimer -= diff;
-        }
-        else if (m_berserkSlimeBoltTimer < diff)
-        {
-            // Slimebolt - casted only 30 seconds after Berserking to prevent kiting
-            if (m_slimeboltTimer < diff)
+            case PATCHWERK_BERSERK_SILMEBOLT:
             {
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SLIMEBOLT);
-                m_slimeboltTimer = 1 * IN_MILLISECONDS;
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SLIMEBOLT) == CAST_OK)
+                    ResetCombatAction(PATCHWERK_BERSERK_SILMEBOLT, 1 * IN_MILLISECONDS);
+                break;
             }
-            else
-                m_slimeboltTimer -= diff;
+            default:
+                break;
         }
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_patchwerk(Creature* creature)
-{
-    return new boss_patchwerkAI(creature);
-}
 
 void AddSC_boss_patchwerk()
 {
     Script* newScript = new Script;
     newScript->Name = "boss_patchwerk";
-    newScript->GetAI = &GetAI_boss_patchwerk;
+    newScript->GetAI = &GetNewAIInstance<boss_patchwerkAI>;
     newScript->RegisterSelf();
 }

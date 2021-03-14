@@ -97,7 +97,7 @@ struct boss_faerlinaAI : public CombatAI
 
     void EnterEvadeMode() override
     {
-        ScriptedAI::EnterEvadeMode();
+        CombatAI::EnterEvadeMode();
 
         if (m_instance)
             m_instance->SetData(TYPE_FAERLINA, FAIL);
